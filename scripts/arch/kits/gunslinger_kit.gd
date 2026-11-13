@@ -605,7 +605,7 @@ func combo_marks(out: Array) -> void:
 		if left <= 0.0:
 			daze_for.erase(key)
 		elif not f.dead:
-			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), "DAZED", true))
+			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), true))
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data) and is slowed.
 func daze(foe: Ent, seconds: float) -> void:

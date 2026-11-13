@@ -118,15 +118,16 @@ no kit draws its own recast HUD.
 
 - **Reporting (pull).** `ArchKit.recast_window()` returns `RecastCue.window(slot, left, total, at, armed, auto)`
   while a recast is open: `slot` is `e`, `x`, `dash` or `lmb`; `at` is what the recast triggers (the seed, the
-  knife, the hammer, the landing spot); `armed` false shows WAIT (a minimum hold); `auto` means the window fires by
-  itself at the end (no EXPIRED). `ArchKit.combo_marks(out)` appends `RecastCue.mark(foe, n, left, total, label,
+  knife, the hammer, the landing spot); `armed` false is dim (a minimum hold; the slot says WAIT); `auto` means the window fires by
+  itself at the end (no EXPIRED). `ArchKit.combo_marks(out)` appends `RecastCue.mark(foe, n, left, total,
   ready)` for every foe carrying the kit's mark, stack or Daze. `_tick_recast` runs `RecastCue.track` for the
   local hunter only.
 - **Slot.** The slot pulses in the ability colour (`slot_col`), a timer ring empties (red under `WARN` = 0.6 s),
   and a big "<KEY> AGAIN" sits over it on a dark pill; the key is `Settings.key_cap` of the live InputMap action.
   A window that ran out (not used, not `auto`) shows EXPIRED for 0.9 s.
-- **World.** A marker with the key and a ring over `at`. A badge over each marked foe (count, ring for the time
-  left, name and seconds, gold when the payoff is ready), and a white burst on the foe when the payoff lands
+- **World.** No key letter and no word on world objects (DECISIONS 2026-11-11, replacing the 11-08 key on the
+  marker): over `at` a plain ring that empties with the window and pulses hot under `WARN` (dim while `armed` is
+  false). A badge over each marked foe (its count, a ring for the time left, gold when the payoff is ready), and a white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
 - **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`

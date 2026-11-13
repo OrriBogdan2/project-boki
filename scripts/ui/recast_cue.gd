@@ -4,8 +4,9 @@ extends RefCounted
 ## and in your face"). A kit reports its open recast through ArchKit.recast_window() and the foes carrying its
 ## mark/stack/Daze through ArchKit.combo_marks(); this module turns them into one visual language:
 ##   the ability slot pulses, shows a big "<KEY> AGAIN" and a shrinking timer ring, and "EXPIRED" if it ran out;
-##   a world marker with the same key sits on the thing the recast triggers (the seed, the knife, the hammer);
-##   a foe you marked shows a badge (what it is, a ring for the time left) that flashes when the payoff lands;
+##   a world marker, a plain ring that empties with the window and pulses hot at the end, sits on the thing the
+##   recast triggers (the seed, the knife, the hammer): no key or word on world objects (DECISIONS 2026-11-11);
+##   a foe you marked shows a badge (its count, a ring for the time left) that flashes when the payoff lands;
 ##   sounds: a chime as the window opens, ticks before it closes, a low click when it runs out.
 ## Only the local player's own cues show (track runs for the local hunter); key names come from the live InputMap.
 
@@ -67,8 +68,8 @@ static func window(slot_id: String, left: float, total: float, at: Vector3, arme
 	return {"slot": slot_id, "left": left, "total": total, "at": at, "armed": armed, "auto": auto}
 
 ## A foe's badge entry as kits report it (ArchKit.combo_marks): n = the count shown (0: none), ready = gold.
-static func mark(e: Ent, n: int, left: float, total: float, label: String, ready: bool) -> Dictionary:
-	return {"e": e, "n": n, "left": left, "total": total, "label": label, "ready": ready}
+static func mark(e: Ent, n: int, left: float, total: float, ready: bool) -> Dictionary:
+	return {"e": e, "n": n, "left": left, "total": total, "ready": ready}
 
 static func slot_col(k: ArchKit, slot: String) -> Color:
 	match slot:
@@ -143,22 +144,24 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 		H.c.draw_circle(sp, 30.0 + 50.0 * k, Color(1, 1, 1, 0.55 * (1.0 - k)))
 		H.c.draw_arc(sp, 34.0 + 90.0 * k, 0, TAU, 48, Color(p.ak.res_col().lerp(Color.WHITE, 0.4), 1.0 - k), 6.0, true)
 
-## The key in a ring that empties with the window, over the seed / knife / hammer / landing spot.
+## A plain ring that empties with the window, over the seed / knife / hammer / landing spot: no text. It beats
+## faster and turns red for the last WARN seconds; dim while the recast isn't armed yet.
 static func _marker(H: Node, sp: Vector2, w: Dictionary, col: Color) -> void:
 	var c: Control = H.c
 	var hot := float(w["left"]) <= WARN
-	var beat := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) * 0.012)
+	var armed := bool(w.get("armed", true))
+	var beat := 0.5 + 0.5 * sin(float(Time.get_ticks_msec()) * (0.024 if hot else 0.012))
 	var frac := clampf(float(w["left"]) / maxf(0.05, float(w["total"])), 0.0, 1.0)
-	c.draw_circle(sp, 21.0 + 3.0 * beat, Color(col, 0.25))
-	c.draw_circle(sp, 17.0, Color(0.03, 0.03, 0.05, 0.92))
-	H._arc(sp, 19.0, frac, HOT if hot else col, 4.0)
-	var key := key_of(String(w["slot"]))
-	H._ctext(sp + Vector2(0, 6.0), key, 17 if key.length() <= 2 else 11, Color.WHITE, H.big)
-	var word := "AGAIN" if bool(w.get("armed", true)) else "WAIT"
-	_label(H, sp + Vector2(0, 36.0), word, 12, col.lerp(Color.WHITE, 0.4))
+	var tint := HOT if hot else col
+	if not armed:
+		tint = DIM
+	c.draw_circle(sp, 21.0 + 5.0 * beat, Color(tint, 0.18 + 0.2 * beat))
+	c.draw_circle(sp, 14.0, Color(0.03, 0.03, 0.05, 0.85))
+	c.draw_arc(sp, 19.0, 0, TAU, 40, Color(0, 0, 0, 0.55), 6.0, true)
+	H._arc(sp, 19.0, frac, tint.lerp(Color.WHITE, 0.25 * beat), 5.0)
 
-## A foe's combo badge: the count (or a dot) in the kit's colour, a ring for the time left, the name and seconds
-## over it; gold and pulsing once the payoff is ready.
+## A foe's combo badge: the count (or a plain dot) in the kit's colour and a ring for the time left, no text;
+## gold and pulsing once the payoff is ready.
 static func _badge(H: Node, sp: Vector2, mk: Dictionary, col: Color) -> void:
 	var c: Control = H.c
 	var ready := bool(mk.get("ready", false))
@@ -170,5 +173,3 @@ static func _badge(H: Node, sp: Vector2, mk: Dictionary, col: Color) -> void:
 	var n := int(mk.get("n", 0))
 	if n > 0:
 		H._ctext(sp + Vector2(0, 6.0), str(n), 17, Color(0.05, 0.05, 0.08), H.big)
-	var txt := "%s %.1f" % [String(mk["label"]), float(mk["left"])]
-	_label(H, sp + Vector2(0, -r - 8.0), txt, 13, tint.lerp(Color.WHITE, 0.3))

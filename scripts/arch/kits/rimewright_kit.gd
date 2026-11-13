@@ -795,13 +795,13 @@ func combo_marks(out: Array) -> void:
 	for key in chill:
 		var c: Dictionary = chill[key]
 		if is_instance_valid(c["t"]):
-			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), "CHILL", true))
+			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), true))
 	for key in fan_hits:
 		var f: Dictionary = fan_hits[key]
 		if is_instance_valid(f["t"]):
 			var n := int(f["n"])
 			var full := n >= int(pd.get("fan_hits", 8)) - 1
-			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, "FAN", full))
+			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, full))
 
 func e_recast() -> bool:
 	if not wall_cast.is_empty():

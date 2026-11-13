@@ -978,7 +978,7 @@ func combo_marks(out: Array) -> void:
 		var f := instance_from_id(key) as Ent
 		var left: float = reset_t - (m.time - float(slam_hit[key]))
 		if f != null and not f.dead and left > 0.0:
-			out.append(RecastCue.mark(f, 0, left, reset_t, "SLAMMED", true))
+			out.append(RecastCue.mark(f, 0, left, reset_t, true))
 
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":

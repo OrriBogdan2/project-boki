@@ -142,7 +142,7 @@ func recast_window() -> Dictionary:
 		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())
 	return {}
 func e_recast_at() -> Vector3: return h.pos           # where E's recast acts (the knife, the seed, the ring)
-## The foes carrying this kit's mark/stack/Daze, for RecastCue's badge: appends {e, n, left, total, label, ready}.
+## The foes carrying this kit's mark/stack/Daze, for RecastCue's badge: appends {e, n, left, total, ready}.
 ## The base reports the Boki combo setups (Combos) this hunter or its Boki put on a foe.
 func combo_marks(out: Array) -> void:
 	for f in m.foes_of(h.team):
@@ -150,7 +150,7 @@ func combo_marks(out: Array) -> void:
 			var mk: Dictionary = f.marks[id]
 			var left := float(mk["until"]) - float(m.time)
 			if mk["owner"] == h and left > 0.0:
-				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), "COMBO", true))
+				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), true))
 ## A recast press from the buffer (RecastCue's ~0.15s): the slot's own press again.
 func recast_now(slot_id: String) -> void:
 	match slot_id:

@@ -787,7 +787,7 @@ func combo_marks(out: Array) -> void:
 		var e: Array = mk.get(h.nid, [0, 0.0])
 		if int(e[0]) > 0 and float(e[1]) > 0.0:
 			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "MARKS", primed_t > 0.0))
+			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
 
 func cast_e() -> bool:
 	play("thf_knife")

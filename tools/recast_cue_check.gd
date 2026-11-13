@@ -2,8 +2,19 @@ extends "res://tools/archetype_check.gd"
 ## --recast-cue-check: every two-step ability reports its open recast to RecastCue (DECISIONS 2026-11-08 "two-step
 ## abilities must be obvious and in your face"): after the first step the kit's recast_window() names the slot,
 ## a time left and a total, the world spot for the marker, and the local hunter's cue state carries it (so the slot
-## pulse, "<KEY> AGAIN", the ring and the marker draw). Then: a timed window that runs out leaves "EXPIRED", an early
+## pulse, "<KEY> AGAIN" and the ring draw; the world marker and foe badge are rings, no text: DECISIONS
+## 2026-11-11). Then: a timed window that runs out leaves "EXPIRED", an early
 ## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foe badges.
+
+## A stand-in for the HUD: its canvas, and every text a cue draws is recorded.
+class StubHud extends Node:
+	var c := Control.new()
+	var big: Font = null
+	var texts: Array[String] = []
+	func _arc(at: Vector2, rad: float, frac: float, col: Color, w: float) -> void:
+		c.draw_arc(at, rad, 0.0, TAU * frac, 24, col, w, true)
+	func _ctext(_at: Vector2, text: String, _size: int, _col: Color, _font: Font) -> void:
+		texts.append(text)
 
 const WAIT := 4.0              # s the first step gets to open its window (Rimelock's late crack comes last)
 
@@ -30,6 +41,7 @@ func run(main_node: Node) -> void:
 	await _expired()
 	await _buffered()
 	await _badges()
+	await _world_plain()
 	print("RECASTCUE DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -129,3 +141,23 @@ func _badges() -> void:
 		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
 		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
 		await done(m)
+
+## The world marker and the foe badge draw no key and no word: only a count may show (DECISIONS 2026-11-11).
+func _world_plain() -> void:
+	var H := StubHud.new()
+	main.add_child(H)
+	H.add_child(H.c)
+	var open := RecastCue.window("e", 2.0, 3.0, Vector3.ZERO)
+	var late := RecastCue.window("e", 0.3, 3.0, Vector3.ZERO, false)
+	var mk := RecastCue.mark(null, 0, 2.0, 3.0, false)
+	var counted := RecastCue.mark(null, 3, 2.0, 3.0, true)
+	H.c.draw.connect(func():
+		RecastCue._marker(H, Vector2(50, 50), open, Color.WHITE)
+		RecastCue._marker(H, Vector2(50, 50), late, Color.WHITE)
+		RecastCue._badge(H, Vector2(100, 50), mk, Color.WHITE)
+		RecastCue._badge(H, Vector2(100, 50), counted, Color.WHITE))
+	H.c.queue_redraw()
+	for i in 3:
+		await main.get_tree().process_frame
+	ok("world marker and badge: no key letter, no word (only the count 3)", H.texts == ["3"], str(H.texts))
+	H.queue_free()
