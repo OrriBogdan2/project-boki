@@ -128,6 +128,7 @@ uniform float emit_flicker = 0.0;
 uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
+#include "res://shaders/canopy_heat.gdshaderinc"
 // The distance at which the match camera's 32 degree lens sees things this size on screen: the far_* terms' measure
 // (abs: the projection's y is flipped when drawing into a texture; an orthographic camera: its view height / 0.57)
 float match_d(vec3 v, mat4 proj) {
@@ -234,6 +235,8 @@ void fragment() {
 		float lum = dot(c, vec3(0.3, 0.59, 0.11));
 		c = max(mix(vec3(lum), c, 1.0 + far_k * 0.6), vec3(0.0)) * (1.0 + far_k);
 	}
+	float ember = canopy_ember(lpos.xz);
+	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
@@ -256,7 +259,7 @@ void fragment() {
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow * heat + c * own_ambient * (1.0 - fog)
+	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow * heat + c * own_ambient * (1.0 - fog)
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
 		+ rim_far_color.rgb * fr * rim_far * far_k;

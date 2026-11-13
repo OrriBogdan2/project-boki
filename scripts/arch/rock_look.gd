@@ -25,6 +25,7 @@ const COLS := [
 ]
 
 static var _rumble_at := -9.0
+static var _hush_until := -9.0       # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
 static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
 
 static func make() -> Node3D:
@@ -129,9 +130,13 @@ static func cool(n: Node3D) -> void:
 		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
+## For the next `secs` rocks rising make no rumble of their own (the caster plays one for all of them).
+static func hush(m: Node, secs: float) -> void:
+	_hush_until = float(m.time) + secs
+
 ## A rock coming up: one short rumble (the debris and dust are its kit's HeroVfx move, content/vfx/dolm.json).
 static func rumble(m: Node, at: Vector3) -> void:
-	if absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
+	if float(m.time) >= _hush_until and absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
 		_rumble_at = float(m.time)
 		m.sfx("br_rumble", at, -3.0, 1.0)
 

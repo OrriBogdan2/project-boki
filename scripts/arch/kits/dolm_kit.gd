@@ -25,6 +25,7 @@ var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
 var sight_t := 0.0
+var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
 var shield_at := -99.0
@@ -273,11 +274,9 @@ func _tick_sight(dt: float) -> void:
 	if h.crouch and not h.downed:
 		sneak_t += dt
 		if h.is_local():
-			var pd: Dictionary = d["passive"]
-			AimKit.cone(
-				h, "sight",
-				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
-			)
+			_sight_p["len"] = sight_len()
+			_sight_p["deg"] = sight_deg()
+			AimKit.cone(h, "sight", _sight_p)
 			sight_t -= dt
 			if sight_t <= 0.0:
 				sight_t = 0.5
@@ -286,9 +285,17 @@ func _tick_sight(dt: float) -> void:
 		sight_t = 0.0
 		sneak_t = 0.0
 
+func sight_grow() -> float:
+	return clampf(sneak_t / float(d["passive"]["grow"]), 0.0, 1.0)
+
 func sight_deg() -> float:
 	var pd: Dictionary = d["passive"]
-	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
+	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), sight_grow())
+
+## The cone's reach: passive.len at the start of a sneak, passive.len_max after `grow` seconds of it.
+func sight_len() -> float:
+	var pd: Dictionary = d["passive"]
+	return lerpf(float(pd["len"]), float(pd["len_max"]), sight_grow())
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
 ## Rock Hop (AimKit's telegraphs go with them through drop_holds).
@@ -307,11 +314,11 @@ func _drop_holds() -> void:
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0
-	var pd: Dictionary = d["passive"]
+	var reach := sight_len()
 	for o in m.hunters:
 		if o.team == h.team or not is_instance_valid(o) or o.dead or o.downed: continue
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
-		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
+		if to.length() > reach or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
 		vfx("sense", o.pos)
 		n += 1
@@ -418,11 +425,13 @@ func _boulder() -> void:
 	vfx("boulder_throw", start, dir)
 	Juice.shot(h, start, dir)
 
-## The boulder bursts where it ends: stone chips and dust over a small cracked patch, splashing the foes
-## beside the one it hit.
+## The boulder bursts where it ends: a blue flash and short debris over a ring at the splash radius, splashing the
+## foes beside the one it hit.
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
-	vfx("boulder_hit", AimMode.ground(m, at), (s["vel"] as Vector2).normalized())
+	var g := AimMode.ground(m, at)
+	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
+	vfx("boulder_hit", at, null, {"r": float(bd["splash"])})
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -444,11 +453,13 @@ func _punch(k: float) -> void:
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one), the speed
 	# that slides "step" metres ([footage] half a body height) under the ground brake
 	var stepv := HunterMove.slide_speed(float(pd["step"]))
+	var hv := dir * stepv
 	if not h.grounded:
-		# no ground brake up there: a short push, but never slower than she flies (item 51, out of an air dash)
-		stepv = maxf(stepv * float(pd["air_k"]), Vector2(h.vel.x, h.vel.z).length())
-	h.vel.x = dir.x * stepv
-	h.vel.z = dir.y * stepv
+		# no ground brake up there: a short push added to what she carries, never slower (item 51, out of an air
+		# dash) and never overwriting it, so the keys still steer (DECISIONS 11-08)
+		hv = HunterMove.push(Vector2(h.vel.x, h.vel.z), dir, stepv * float(pd["air_k"]))
+	h.vel.x = hv.x
+	h.vel.z = hv.y
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
 	vfx("punch", h.pos, dir, {"len": float(pd["len"]), "k": k})
@@ -477,7 +488,7 @@ func _punch(k: float) -> void:
 		f.hurt(dmg, h, o)
 		landed += 1
 		_punch_impact(f.pos, dir, k)
-		if terrain_behind(f, dir, 1.6):
+		if KnockWall.hit(m, f, dir, 1.6, h):
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
@@ -485,10 +496,10 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a hot flash, stone
-## chunks thrown on along the punch and dust, bigger the longer she held.
+## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a blue flash and a
+## short spray of stone and sparks thrown on along the punch, sized by the lane's half width and the hold.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
-	vfx("punch_hit", at, dir, {"k": k})
+	vfx("punch_hit", at, dir, {"r": float(lmb_def()["punch"]["width"]) * 0.5, "k": k})
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).

@@ -39,13 +39,9 @@
 		"rock_trail": {"fx": [
 			{"p": "ribbon", "size": 0.5, "life": 1.5, "tail": 0.18, "c": "main", "c2": "hot", "c3": "char"}
 		]},
-		"boulder_hit": {"fx": [
-			{"p": "scorch", "shape": "disc", "size": 1.0, "life": 1.4, "c": "main", "c2": "hot", "c3": "char"},
-			{"p": "chunk", "y": 0.3, "n": 6, "speed": 4.0, "spread": 0.8, "grav": 14.0, "life": 0.6, "size": 0.12,
-				"c": "stone", "c3": "basalt"},
-			{"p": "smoke", "y": 0.15, "n": 2, "speed": 1.2, "spread": 1.0, "life": 0.48, "size": 0.42, "c": "dust", "gain": 0.4,
-				"c3": "smoke", "near": true}
-		]},
+		"boulder_hit": {"fx": [{"p": "flare", "y": 0.0, "size": "r", "size_x": 3.4, "life": 0.18, "c": "main", "c2": "hot"},
+				{"p": "ember", "n": 16, "speed": 7.0, "spread": 0.9, "grav": 9.0, "life": 0.35, "size": 0.06, "stretch": 0.06, "c": "eye", "c2": "hot"},
+				{"p": "chunk", "n": 8, "speed": 5.0, "spread": 0.8, "grav": 20.0, "drag": 0.2, "life": 0.4, "size": 0.1, "radius": "r", "c": "stone", "c3": "char"}]},
 		"punch_charge": {"fx": [
 			{"p": "shard", "at": "fist_r", "shape": "gather", "radius": 0.8, "n": 10, "speed": 2.6, "spread": 0.0,
 				"life": 0.35, "size": 0.08, "c": "stone", "c2": "main"},
@@ -60,13 +56,9 @@
 			{"p": "smoke", "fwd": 1.3, "y": 0.2, "n": 2, "speed": 2.0, "spread": 0.8, "life": 0.42, "size": 0.42,
 				"c": "dust", "gain": 0.4, "c3": "smoke", "near": true}
 		]},
-		"punch_hit": {"fx": [
-			{"p": "flare", "y": 0.8, "size": 1.0, "size_k": 0.5, "life": 0.16, "c": "main", "c2": "hot", "c3": "char"},
-			{"p": "chunk", "y": 0.6, "n": 6, "n_k": 1.0, "way": "fwd", "lift": 0.4, "speed": 6.0, "spread": 0.5,
-				"grav": 13.0, "life": 0.55, "size": 0.13, "c": "stone", "c3": "basalt"},
-			{"p": "smoke", "y": 0.15, "n": 2, "speed": 1.6, "spread": 1.0, "life": 0.48, "size": 0.42, "c": "dust", "gain": 0.4,
-				"c3": "smoke", "near": true}
-		]},
+		"punch_hit": {"fx": [{"p": "flare", "y": 0.7, "size": "r", "size_x": 2.9, "size_k": 0.5, "life": 0.2, "c": "main", "c2": "hot"},
+				{"p": "ember", "y": 0.6, "way": "fwd", "n": 18, "speed": 10.0, "spread": 0.4, "grav": 9.0, "life": 0.3, "size": 0.06, "stretch": 0.07, "c": "eye", "c2": "hot"},
+				{"p": "chunk", "y": 0.4, "way": "fwd", "n": 8, "speed": 6.0, "spread": 0.6, "grav": 20.0, "drag": 0.2, "life": 0.45, "size": 0.1, "size_k": 0.4, "radius": "r", "c": "stone", "c3": "char"}]},
 		"rock_launch": {"fx": [
 			{"p": "chunk", "y": 0.5, "n": 8, "speed": 5.0, "spread": 0.7, "grav": 14.0, "life": 0.6, "size": 0.14,
 				"c": "stone", "c3": "basalt"},
