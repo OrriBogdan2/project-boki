@@ -56,7 +56,7 @@ static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
 		return
 	if h.remote:
 		return                       # (their own game drops it and the snapshot tells us)
-	var on_you: bool = k.state in ["shoulder", "bench", "away"] or k.with_owner()
+	var on_you: bool = k.state in ["shoulder", "bench", "away", "wisp"] or k.with_owner()
 	var at := k.pos
 	if on_you:
 		at = box_pos if box_pos != Vector3.INF else h.pos
