@@ -4,7 +4,7 @@ Internal design note. This file may name the source hero for traceability; nothi
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
 sheet: briefs/hero-ref/vireo.md, from gameplay footage; owner playtest notes override the footage).
 Our hero is an original character, the storm-kite runner: flight goggles, a cropped jacket, copper
-coils at both wrists and a copper rod mast flying a pennant. Palette: teal and hot pink lightning, copper rod (the lightning, orbs and Static marks are teal + pink; not yellow). Payoff word: BLOWOUT.
+coils at both wrists and a copper rod mast flying a pennant. Palette: teal and hot pink lightning, copper rod (the lightning, orbs and Static marks are teal + pink; not yellow). Payoff: the Blowout (no word).
 
 ## Kit card (L picker)
 - Role: Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.
@@ -71,7 +71,7 @@ so any edit here would conflict. Suggestions for after they merge are in the las
 | 10 | E delay, stacks, Grounded | closed, one owner call | delay 0.8, Grounded 1.5 s in `mage.json` `e`; 1 Static follows the game data, the footage info panel says 2 (audit; ext/sparkle-e-verify notes it). Owner call: keep 1 |
 | 11 | Cooldown ratios | closed | spear 8 : Surge 8 : E 10.5 (data, scaling section); ext/sparkle-e-verify asserts E : rod = 9.2 : 7 |
 | 12 | E telegraph: dark disc, rim, descending pillar | closed on main, in flight (look) | `MageSky._commit()`: violet disc with copper rim plus a pillar that narrows over the 0.8 s (`fx.pillar`, `mage_sky.gd:85`), ticked rim with chevron, committed arrow. ext/vfx-mage re-builds the look as HeroVfx data. No check asserts the pillar: add one after that merge |
-| 13 | Static display, sky bolt at 4 | closed | `add_spark()` drops a bolt from 9 m onto them with a LIVE word on the 4th stack |
+| 13 | Static display, sky bolt at 4 | closed | `add_spark()` drops a bolt from 9 m onto them with the bolt on the 4th stack |
 | 14 | LMB alternating hands | closed | `mage_lmb_l` / `mage_lmb_r` (parity f99f03c7); check "alternating hands, each a quick fling" |
 | 15 | Spear knockback size | closed | `rmb.coil.push` is [4.4, 6.6] (was [6, 9]); a standard-mass foe is knocked 1.77 m on open ground through the shared `Ent.impulse` path (no special case), the source is about 1 bh = 1.8 m (vireo.md item 15). Check "Storm Rod: a standard-mass foe is knocked about 1.8 m" asserts 1.5 to 2.1 m |
 | 16 | Sfx | nothing to copy | no audio in the footage |
@@ -91,7 +91,7 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Wirerun arrival ring (HIGH) | (a) | 6d054633 (and the press flash) |
 | Blowout ground ring (MED) | (b) | removed (the shared payoff ring too: `payoff_fx(..., rings := false)`); the copper pillars stay |
 | Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its 1.5 m radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
-| Kit VFX pass: bursts that are not gameplay (MED) | (b) | out: the per-shot ground sparks, the Static pop's second bolt and flash, the Wirerun pass burst (a crackle instead), the rod's end and hit bursts, the SLAMMED ring, Skycall's strike spray, Kitefall's take-off spray (dust). Kept: the source's rod shock ring, the strike rings at the hit size, the copper refund pillars |
+| Kit VFX pass: bursts that are not gameplay (MED) | (b) | out: the per-shot ground sparks, the Static pop's second bolt and flash, the Wirerun pass burst (a crackle instead), the rod's end and hit bursts, the slam ring, Skycall's strike spray, Kitefall's take-off spray (dust). Kept: the source's rod shock ring, the strike rings at the hit size, the copper refund pillars |
 | E Static 2 vs 1 (MED) | (b) | 1 (data); asserted |
 | E numbers (-) | (a) | already per items 9/9b |
 | Shift pass damage 10 vs ~20 (MED) | (b) | 20 (1.7 bolts, the data's ratio); asserted |
