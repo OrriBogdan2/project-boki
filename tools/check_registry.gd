@@ -109,6 +109,8 @@ const CHECKS := {
 	# first press after a panel closes
 	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],
 	"--move-drills-check": ["res://tools/move_drills_check.gd", "move_drills_check", null],
+	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
+	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],      # its child process
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
@@ -506,6 +508,9 @@ const CHECKS := {
 	"--garden-visitor-check": ["res://tools/garden_visitor_check.gd", "garden_visitor_check", null],
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],  # Spark Volley, GARDEN.md 5.4
 	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],  # the Dash's showcase wall
+	"--board-check": ["res://tools/board_check.gd", "board_check", null],      # the Games board, GARDEN.md 5
+	"--garden-rivals-check": ["res://tools/rivals_check.gd", "rivals_check", null],      # rivals, GARDEN.md 4-5
+	"--garden-tag-check": ["res://tools/tag_check.gd", "tag_check", null],      # tag, GARDEN.md 4
 	# --glint-fishing-check also takes --glint-fishing-shots=<dir>
 	"--glint-fishing-check": ["res://tools/glint_fishing_check.gd", "glint_fishing_check", null],  # 4.2 game 4
 	"--garden-sfx-check": ["res://tools/garden_sfx_check.gd", "garden_sfx_check", null],  # garden minigame sounds

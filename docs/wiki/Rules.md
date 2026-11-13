@@ -146,10 +146,13 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 |---|---|
 | think | [2.0, 5.0] |
 | think_doc | s between a roaming Boki's choices (random in the range). |
-| max | {"roam": 45.0, "eat": 40.0, "play": 30.0, "play_with": 40.0, "watch": 12.0, "react": 12.0, "chore": 45.0} |
+| max | {"roam": 45.0, "eat": 40.0, "play": 30.0, "play_with": 20.0, "watch": 12.0, "react": 12.0, "chore": 45.0} |
 | max_doc | s a Boki stays in each state before it moves on (Play is HomeToys' time at a toy, toys.json play_secs; eat also caps the walk for a snack, BaseFeed); a Boki that roamed this long picks something to do. Nap has no cap: night naps last till morning. |
 | play | [10.0, 22.0] |
-| play_with | [14.0, 26.0] |
+| play_with | [10.0, 20.0] |
+| play_with_doc | s one game of tag lasts (BaseTag), random in the range; max.play_with is the cap. |
+| tag | {"grace": 1.2, "speed": 1, "rival_gap": 3.0, "sulk_joy": 6.0, "sulk_s": 6.0, "rest": 12.0, "flee_s": 3.0, "stand_s": 1.5} |
+| tag_doc | grace: s the new it can't tag back; speed: Speed points a finished game gives each player (Care.add_stat); rival_gap: m a rival of either player breaks the game up from; sulk_joy: joy each loses; sulk_s: s they stand about; flee_s/stand_s: s the runner flees, then stands to be caught; rest: s the pair roams before either picks again. |
 | watch | [4.0, 9.0] |
 | chore_chance | 0.3 |
 | chore_chance_doc | chance a roaming Boki whose knack has a chore to do right now (scripts/home/base_chore.gd) does it. |
@@ -273,6 +276,35 @@ Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd
 | gems_win | 8 |
 | gems_ran | 2 |
 | gems_doc | Gems to you when your team wins, or for any other relay. |
+
+## base_rival (`content/rules/base_rival.json`)
+
+Rivalries from garden minigames (GARDEN.md sections 4 and 5, scripts/home/base_rival.gd). A Boki that loses to the same Boki lose_to_mark times marks it a rival: the pair's bond (rec['bonds'], base_life.json) drops to bond_mark so the usual stares apply, and rec['grudge'] = {uid: {lost, rival, good, game}} keeps the tally. Times are seconds, distances metres.
+
+| Setting | Value |
+|---|---|
+| lose_to_mark | 2 |
+| lose_to_mark_doc | games lost to the same Boki in a row (a win over it clears the tally) before it counts as a rival. |
+| bond_mark | -0.6 |
+| bond_mark_doc | the bond a new rivalry drops to (at or under base_life.json rival_at, so the existing rival stares apply). |
+| bond_end | 0 |
+| bond_end_doc | the bond a settled rivalry returns to: strangers again, not friends. |
+| good_joy | 60 |
+| good_joy_doc | joy need both rivals must have at the day's end for it to be a shared good day. |
+| good_days | 3 |
+| good_days_doc | shared good days that end a rivalry without a rematch. |
+| gap | 6 |
+| gap_doc | m a rival keeps from the other when it picks a nap spot or a toy. |
+| glare_at | 2.5 |
+| glare_at_doc | m within which two rivals passing show a glare bubble. |
+| glare_cd | 8 |
+| glare_cd_doc | s before the same Boki glares again. |
+| ask_chance | 0.25 |
+| ask_chance_doc | chance a roaming loser that holds a grudge walks to the Games board to ask for a rematch. |
+| ask_secs | 50 |
+| ask_secs_doc | s a rematch ask lasts, walk included, before the loser gives up. |
+| ask_cd | 120 |
+| ask_cd_doc | s before the same loser may ask again. |
 
 ## base_seek (`content/rules/base_seek.json`)
 

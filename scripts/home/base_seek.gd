@@ -139,6 +139,7 @@ static func settle(hunt: Hunt) -> Dictionary:
 	MinigameHub.record("seek", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "seek", "lost the Seek to %s" % win["name"])
+	BaseRival.result("seek", win, lose)
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
 	BaseRace.nudge_bond(win, lose, step)
 	Save.d["gems"] = int(Save.d["gems"]) + int(R["gems"])
@@ -208,6 +209,10 @@ func find(p2: Vector2) -> Dictionary:
 		S.CARRY:
 			return {"kind": "seek"}
 	return {}
+
+## True from the start until the game is over (the Games board starts none on top of it).
+func running() -> bool:
+	return state != S.IDLE
 
 func label() -> String:
 	if state == S.CARRY:

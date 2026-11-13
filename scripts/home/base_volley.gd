@@ -171,6 +171,7 @@ static func settle(run: Run) -> Dictionary:
 	MinigameHub.record("volley", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "volley", "beat %s %d to %d at Spark Volley" % [lose["name"], wp, lp], float(R["win_trust"]))
 	Save.remember(lose, "volley", "lost Spark Volley to %s, %d to %d" % [win["name"], lp, wp])
+	BaseRival.result("volley", win, lose)
 	var backed_won: bool = run.recs[run.backed] == win
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
@@ -242,6 +243,10 @@ func find(p2: Vector2) -> Dictionary:
 	if p2.distance_to(Vector2(log_node.position.x, log_node.position.z)) > REACH:
 		return {}
 	return {"kind": "volley"}
+
+## True from the start until the game is over (the Games board starts none on top of it).
+func running() -> bool:
+	return run != null
 
 func label() -> String:
 	return "Play Spark Volley (back %s)" % Save.active_kin().get("name", "your partner")

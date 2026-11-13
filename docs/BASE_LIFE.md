@@ -96,3 +96,20 @@ check: `--base-life-check`.
 ## Zone air (ambient layer per zone)
 
 Each garden zone has one ambient layer so arriving through the Waystone reads as a new place: pollen in Bramblebank, glints in Glasswater, embers in Cinderstep, fireflies in Hushwood, wind streaks on Kitewind Ridge (`scripts/home/zone_air.gd`, `content/rules/zone_air.json`). It is one `GPUParticles3D` named `ZoneAir` over the island round `HomeLayout.LANDING`, a small fixed count, unshaded billboards with a fade ramp, no light, no burst, added once by Home's build in base_mode (never in the hub). Off at the lowest quality preset (`off_at`, Low), the count times `Settings` `fx` above it; a quality change shows on the next zone load. `--zone-air-check` asserts all of that and one layer per zone in a real Home; `--garden-zone-shots --zone=<id>` shows it by day and night.
+- Tag (GARDEN.md section 4; `scripts/home/base_tag.gd`, `base_life.json` "tag", check `--garden-tag-check`): the PlayWith
+  state. Only friends (bond >= `friend_at`) start a game, 10-20 s; "it" chases, the runner flees `flee_s` then stands
+  `stand_s`, a touch swaps it (new "it" has `grace`) and adds `bond_tag`. A finished game gives each player `speed`
+  Speed (Care.add_stat) and a journal line, then a `rest` breather. A rival of either within `rival_gap` m ends the
+  game as a squabble: both huff, sulk (`sulk_joy`) and stand about `sulk_s`; no new state, existing clips only.
+- Rivals from the games (GARDEN.md sections 4 and 5; `scripts/home/base_rival.gd`, `content/rules/base_rival.json`,
+  check `--garden-rivals-check`): extends the bonds, no second system. `BaseBoard.record(game, win, lose)` (every
+  game's settle) calls `BaseRival.result`: a Boki that loses to the same Boki `lose_to_mark` (2) times in a row, in
+  any game, marks it a rival (a win over it clears the count). The bond drops to `bond_mark`, so the usual stares
+  apply; `rec["grudge"] = {uid: {lost, rival, good, game}}` keeps the tally, the game last lost and the shared good
+  days. Rivals pick a nap spot (`life_spot`) and toys (`HomeToys.pick`) at least `gap` m from each other and show a
+  `#` bubble when they pass. A roaming loser holding a grudge sometimes enters the Ask state (`BaseLife.S.ASK`),
+  walks to the Games board and waits `ask_secs`; with it there, the interact key accepts
+  (`BaseBoard.use`): the game it lost starts with the pair (`BaseRace.pair_force`, read by `entrants`). The marker
+  winning any game over its rival, or three days (`BaseLife` day wrap) with both at joy `good_joy` or more, settles
+  it: bond back to 0. One journal line each way (CareJournal, on the marker). The grudge key is optional (read
+  with `.get`, made on first use), so older saves load as they are and Save.VERSION stays 12.

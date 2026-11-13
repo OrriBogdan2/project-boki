@@ -108,6 +108,7 @@ static func settle(run: Run) -> Dictionary:
 	MinigameHub.record("shove", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "shove", "lost the Stump Shove to %s" % win["name"])
+	BaseRival.result("shove", win, lose)
 	var backed_won: bool = run.recs[run.backed] == win
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
@@ -169,6 +170,10 @@ func find(p2: Vector2) -> Dictionary:
 	if p2.distance_to(Vector2(stump.position.x, stump.position.z)) > REACH:
 		return {}
 	return {"kind": "shove"}
+
+## True from the start until the game is over (the Games board starts none on top of it).
+func running() -> bool:
+	return run != null
 
 func label() -> String:
 	return "Start a Stump Shove (back %s)" % Save.active_kin().get("name", "your partner")
