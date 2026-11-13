@@ -154,6 +154,7 @@ func _race(home) -> void:
 	ok(race != null, "bot: the base has the Dash")
 	if race == null:
 		return
+	Save.d["tutorial"]["first_race"] = true      # the real race, not the one-time practice lap (race_check)
 	race.use()
 	var t := 0.0
 	while race.run != null and t < RACE_MAX_S:
