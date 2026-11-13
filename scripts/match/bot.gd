@@ -332,6 +332,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var dd: Vector2 = a["detour_dir"]
 		if _safe(m, h, dd, 1.2):
 			move = dd
+	move = BotDodge.step(m, h, move, df, dt)       # out of a foe's telegraph, after a reaction time
 	move = _brake_at_lip(m, h, move)
 	inp["move"] = move
 	if StoneStand.hop_ahead(h, move):
