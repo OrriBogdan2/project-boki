@@ -83,7 +83,7 @@ static func _see_through(mi: MeshInstance3D) -> bool:
 	if not mi.is_visible_in_tree():
 		return true
 	var mat := mi.material_override as ShaderMaterial
-	return mat != null and mat.shader in [Models.GLOW, Models.RING, Models.AURA]
+	return mat != null and mat.shader in [Models.GLOW, Models.RING, SideRings.RING, Models.AURA]
 
 static func _rim_on(h: Hunter, col: Color) -> void:
 	if h.has_meta(META):
