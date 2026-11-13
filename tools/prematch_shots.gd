@@ -1,17 +1,21 @@
 extends RefCounted
-## --prematch-shots --size=WxH --shots-dir=<dir>: the pre-match lobby at the window's size, three moments
-## (full 30 s, after the first chat line, locked in), as <dir>/<W>x<H>_<moment>.png, and the controls that
-## stick out of the screen. Run once per size with a real renderer:
+## --prematch-shots --size=WxH --shots-dir=<dir>: the pre-match lobby at the window's size, four moments
+## (full 30 s, after the first chat line, 4 s left in the red pulse, locked in), as <dir>/<W>x<H>_<moment>.png,
+## and the controls outside the safe margin. Run once per size with a real renderer:
 ## godot -- --prematch-shots --size=1280x720 --shots-dir=out (--size resizes the window).
 
-const MOMENTS := [["full", 30.0], ["chat", 30.0], ["locked", 0.0]]
+const MOMENTS := [["full", 10.0], ["chat", 10.0], ["red", 2.0], ["locked", 0.0]]      # [name, s left on your turn]
 
-## The visible controls under `node` (not its frame) that stick out of `area`, as "Class at rect".
+## The visible controls under `node` (not its frame) that stick out of `area` less the view's title-safe
+## margin, as "Class at rect".
 func outside(node: Node, area: Rect2) -> Array:
+	var pv = load("res://scripts/ui/prematch_view.gd")
+	var margin := float(maxi(pv.SAFE_MIN, int(area.size.y * pv.SAFE_FRAC)))
+	var safe := area.grow(-margin + 1.0)
 	var bad: Array = []
 	for c in node.find_children("*", "Control", true, false):
-		var shown: bool = c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0
-		if shown and not area.encloses(c.get_global_rect()):
+		var inside := safe.encloses(c.get_global_rect())
+		if c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0 and not inside:
 			bad.append("%s at %s" % [c.get_class(), c.get_global_rect()])
 	return bad
 
@@ -41,7 +45,10 @@ func run(main: Node) -> void:
 	await main.fade.reveal(0.01)      # the boot splash stays up when a tool opens a screen by hand
 	await tree.create_timer(0.5).timeout      # let the window settle at its size
 	for m in MOMENTS:
-		view.pm.left = m[1]
+		if m[0] == "locked":
+			view.pm.tick(Prematch.TURN + 0.01)      # your turn runs out, the bots pick, the picks lock
+		else:
+			view.pm.turn_left = m[1]
 		if m[0] == "chat":
 			view._add_chat("Ember", "push north, I hold the ridge", UI.INK)
 		for i in 20:
@@ -50,5 +57,5 @@ func run(main: Node) -> void:
 		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, m[0]])
 		main.get_viewport().get_texture().get_image().save_png(path)
 		var bad := outside(view, Rect2(Vector2.ZERO, Vector2(win)))
-		print("PREMATCHSHOT %s outside the screen: %d %s" % [path, bad.size(), bad.slice(0, 3)])
+		print("PREMATCHSHOT %s outside the safe area: %d %s" % [path, bad.size(), bad.slice(0, 3)])
 	tree.quit()
