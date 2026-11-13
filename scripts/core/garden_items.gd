@@ -348,8 +348,6 @@ static func _loose(rec: Dictionary, n: int) -> Dictionary:
 	var take := mini(n, now)
 	if take <= 0:
 		return _no("no trained points to loosen")
-	var loose: Dictionary = rec["loose"]
-	var after := loose.duplicate()
-	after[best] = int(after.get(best, 0)) + take      # StatBudget lets them back in at loose_rate a play
+	var loose := int(rec["loose"])     # one pool (StatBudget): back into any stat at loose_rate a play
 	return _yes("%d %s points come out as loose points" % [take, Care.STATS[best]["name"]],
-			{"stats." + best: [now, now - take], "loose": [loose.duplicate(), after]})
+			{"stats." + best: [now, now - take], "loose": [loose, loose + take]})
