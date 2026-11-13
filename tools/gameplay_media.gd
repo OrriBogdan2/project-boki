@@ -13,6 +13,8 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
+##  10 skilled fight (capture-only, ext/footage-hl-1113) expert bots playing their own kits (no scripted rota),
+##                   no Merge, --media-take=<1-5> picks the matchup; MEDIA_MARK down/out lines name each fall
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
@@ -38,6 +40,8 @@ var frame := 0
 var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
 var squad_a: Array = []
 var squad_b: Array = []
+var take := 1
+var diff := ""                # a bot difficulty for the match (Data.BOT_DIFF), "" keeps the setting
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 
 func run(main_node: Node) -> void:
@@ -54,6 +58,8 @@ func run(main_node: Node) -> void:
 			dir = arg.substr(12)
 		if arg.begins_with("--media-clip="):
 			clip = int(arg.substr(13))
+		if arg.begins_with("--media-take="):
+			take = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
 	if dir.is_relative_path():
@@ -75,6 +81,7 @@ func run(main_node: Node) -> void:
 		7: await _show(secs)
 		8: await _relay(secs)
 		9: await _duo(secs)
+		10: await _skilled(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -110,6 +117,8 @@ func _start(arch: String, kin: String, mobs := false) -> void:
 	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": SEED, "length": 1e9, "no_drop": true,
 		"raid": "clear", "blight": false, "sim_keep": true, "demo_kin": kin, "demo_kin_lv": "8:95"}
 	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
+	if diff != "":
+		o["bot_diff"] = diff
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)
@@ -227,6 +236,66 @@ func _fight(secs: float) -> void:
 		_assist(t, squad_a, squad_b)
 		_assist(t, squad_b, squad_a),
 		func(_t: float): return _centre(squad_a + squad_b))
+
+# ------------------------------------------------------------------ 10: skilled fight
+## Each take: [squad A as [arch, boki]..., squad B ..., camera zoom, gap]. The player's Hunter is A's first.
+const TAKES := {
+	1: [[["gunslinger", "zapple"], ["juggernaut", "pebbit"], ["tender", "cindle"]],
+		[["mage", "puddlet"], ["dolm", "burrlet"], ["bulwark", "wisplet"]], 0.62, 8.0],
+	2: [[["gunslinger", "zapple"], ["juggernaut", "pebbit"]], [["thief", "wisplet"], ["dolm", "burrlet"]], 0.5, 7.5],
+	3: [[["juggernaut", "pebbit"]], [["gunslinger", "zapple"]], 0.42, 7.0],
+	4: [[["ashwick", "cindle"], ["mage", "puddlet"], ["dolm", "burrlet"]],
+		[["archer", "wisplet"], ["thief", "zapple"], ["rimewright", "pebbit"]], 0.62, 8.0],
+	5: [[["tender", "cindle"], ["mage", "puddlet"]], [["juggernaut", "pebbit"], ["gunslinger", "zapple"]], 0.5, 7.5],
+}
+
+func _skilled(secs: float) -> void:
+	diff = "expert"
+	var tk: Array = TAKES.get(take, TAKES[1])
+	var sa: Array = tk[0]
+	var sb: Array = tk[1]
+	await _start(String(sa[0][0]), String(sa[0][1]))
+	var cfg: Dictionary = Data.BOT_DIFF["expert"]
+	var P := m.player
+	P.ctrl = "bot"
+	P.ai = m.bot_brain.new_mind(m.rng, 0.95, cfg)
+	var base := _ground(P.pos)
+	var foe_at := _ground(base + Vector3(float(tk[3]), 0, 0))
+	squad_a = [P]
+	squad_b = []
+	var side := [Vector3(-1.2, 0, 1.8), Vector3(-1.2, 0, -1.8)]
+	for i in range(1, sa.size()):
+		squad_a.append(_hunter("a%d" % i, 0, String(sa[i][0]), String(sa[i][1]), _ground(base + side[i - 1])))
+	for i in sb.size():
+		var at := foe_at if i == 0 else _ground(foe_at + Vector3(-side[i - 1].x, 0, side[i - 1].z))
+		squad_b.append(_hunter("b%d" % i, 1, String(sb[i][0]), String(sb[i][1]), at))
+	for h in squad_a + squad_b:
+		(h as Hunter).ai = m.bot_brain.new_mind(m.rng, 0.95, cfg)
+		(h as Hunter).teleport((h as Hunter).pos)
+	_zoom(float(tk[2]))
+	still_at = 6.0
+	_mark("start")
+	var seen := {}
+	await _go(secs, func(_t: float):
+		for h in squad_a + squad_b:
+			var hh := h as Hunter
+			hh.merge_cd = 999.0       # no Merge in these takes (owner 11-13: the soul-link look is not for the pitch)
+			var st := "out" if hh.out else ("down" if hh.downed else "up")
+			if seen.get(hh, "up") != st:
+				seen[hh] = st
+				_mark("%s %s %s team=%d" % [st, hh.name, HeroTitle.base_name(hh.arch), hh.team]),
+		func(_t: float): return _centre(_alive(squad_a + squad_b)))
+	for h in squad_a + squad_b:
+		var hh := h as Hunter
+		print("MEDIA_END %s team=%d hp=%.0f/%.0f %s" % [HeroTitle.base_name(hh.arch), hh.team, hh.hp, hh.max_hp,
+			"out" if hh.out else ("down" if hh.downed else "up")])
+
+func _alive(hs: Array) -> Array:
+	var r: Array = []
+	for h in hs:
+		if not (h as Hunter).out:
+			r.append(h)
+	return r if not r.is_empty() else hs
 
 # ------------------------------------------------------------------ 2: Boki combat
 func _boki_combat(secs: float) -> void:
