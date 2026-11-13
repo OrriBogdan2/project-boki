@@ -55,7 +55,6 @@ const STAND_OPEN := {
 ## the crossfade, so the right hand drops most of its way in the first frame; a fix holds the loose weight under a fade.
 const CANCEL_OPEN := {
 	"bulwark bul_throw@0.10>bul_recall": "hammer from the throw's overhead swing (hand 2.3 m up) to the reach, 1.0 m",
-	"ashwick as_lance@0.60>lw_jet": "lance hold to the jet's arms-down, mid-arc 0.30 m in a frame (limit 0.29)",
 	"dredge dr_throw@0.20>dr_shot": "the free arm swaps sides on the cut, its ease over the crossfade, 0.47 m",
 	"thief thf_vault_f@0.20>thf_encore": "cartwheel cut upside down into the Encore pose, 0.46 m in a frame",
 }
