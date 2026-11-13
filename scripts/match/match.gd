@@ -5611,6 +5611,8 @@ func _tips() -> void:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+	var ex := ExpeditionTips.next(self)
+	if ex: _tip(ex[0], ex[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
