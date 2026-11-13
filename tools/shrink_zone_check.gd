@@ -65,7 +65,8 @@ func _shape(main: Node) -> void:
 		var open_in := m.exits.of_kind("outpost").any(func(x): return _in_final(z, x["pos"]))
 		ok(open_in, "seed %d: an exit that stays open is in the final area" % s)
 		m.free()
-	ok(finals.size() >= outposts, "the final area varies between matches (%d of %d outposts)" % [finals.size(), outposts])
+	ok(finals.size() >= outposts,
+			"the final area varies between matches (%d of %d outposts)" % [finals.size(), outposts])
 
 ## Outside hurts (by the close's share, through armor), inside doesn't; the outer islands fall.
 func _hurt(main: Node) -> void:
