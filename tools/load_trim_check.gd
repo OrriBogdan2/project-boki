@@ -1,10 +1,11 @@
 extends RefCounted
-## --load-trim-check: what build.hunters no longer does on the main thread. A glider canopy is built once per
-## shape, one mesh for every Hunter, and a Hunter's material carries its skin's colours. A duel reads only
-## your Warden's .glb; a match with rival squads reads every Warden's and every common Boki's on loader
-## threads from its start. Hunters on skins of one shape share its glider's meshes, each with its own
-## canopy material. A Warden drawn from its .glb keeps the rig nodes that drive its bones but none of the
-## hidden procedural body's loose parts; set to procedural, the same Warden still merges its body.
+## --load-trim-check: what build.hunters no longer does on the main thread. A glider canopy is built once per shape,
+## one mesh for every Hunter, and a Hunter's material carries its skin's colours. A duel reads only your Warden's
+## .glb; a match with rival squads reads every Warden's and every common Boki's on loader threads from its start, on
+## the Compatibility renderer only (BackgroundWork.can_read_ahead; elsewhere none). Hunters on skins of one shape
+## share its glider's meshes, each with its own canopy material. A Warden drawn from its .glb keeps the rig nodes
+## that drive its bones but none of the hidden procedural body's loose parts; set to procedural, the same Warden
+## still merges its body.
 
 const RIG := ["Rig/Torso", "Rig/Torso/HeadPivot", "Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Legs/LegR/Knee"]
 
@@ -57,6 +58,13 @@ func _asked(p: String) -> bool:
 
 func _fetches() -> void:
 	var own := "gunslinger"
+	if not BackgroundWork.can_read_ahead():
+		WardenGlb.fetch_for({"teams": 4, "arch": own})
+		BokiRig.fetch_common()
+		var read := Arch.ids().filter(func(a): return WardenGlb.uses_model(a) and _asked(WardenGlb.path(a)))
+		read += Data.common_kin().filter(func(k): return BokiRig.has(k) and _asked(BokiRig.PATH % [k, k]))
+		_ok("%s: no .glb is read on a loader thread (read %s)" % [DisplayServer.get_name(), str(read)], read.is_empty())
+		return
 	var other := "juggernaut" if WardenGlb.has_model("juggernaut") else ""
 	WardenGlb.fetch_for({"duel": true, "arch": own})
 	_ok("a duel reads your Warden's .glb", _asked(WardenGlb.path(own)))
