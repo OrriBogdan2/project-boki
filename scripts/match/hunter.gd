@@ -2325,8 +2325,7 @@ func _physics(dt: float) -> void:
 				grounded = false
 	else:
 		if g > pos.y and not m.world.on_stairs(pos.x, pos.z):
-			step_vis -= g - pos.y      # a lip under the step height: the model eases up it like a terrace step
-			prev.y = g                 # (no render lead on the rise, or the model would overshoot it)
+			prev.y = g      # a lip under the step height: StepSmooth eases the drawn body up it, no render lead
 		pos.y = g
 	if grounded:
 		last_gy = pos.y
