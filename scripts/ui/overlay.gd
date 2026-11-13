@@ -245,6 +245,10 @@ func open_pause(where: String) -> void:
 			close()
 			Game.goto("hatch", {"create": true})))
 	var scr = Game.main.screen_node() if Game.main else null
+	if where == "home" and scr:
+		minor.add_child(UI.ghost("Photo mode", func():
+			close()
+			scr.photo.enter()))
 	if scr and scr.has_method("unstick"):
 		minor.add_child(UI.ghost("I'm stuck", func():
 			close()
