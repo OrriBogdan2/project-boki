@@ -581,6 +581,7 @@ const CHECKS := {
 	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
 	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # drop and landing frames
 	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # the loading screen; =home|training
+	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
