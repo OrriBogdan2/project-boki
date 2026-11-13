@@ -132,8 +132,8 @@ static func floors_apply(m: Node, team: int) -> bool:
 	return p != null and int(p.team) != team
 
 # ---- §5.4 hitstop ----
-## Tier -> [attacker (melee), target] seconds. Projectiles never freeze the attacker.
-const HITSTOP := [[0.0, 0.0], [0.0, 0.025], [0.035, 0.045], [0.05, 0.065], [0.07, 0.09], [0.10, 0.0]]
+## Tier -> [attacker (melee), target] seconds (content/rules/hitstop.json). Projectiles never freeze the attacker.
+static var HITSTOP: Array = rules()["tiers"]
 const HS_CAP := 0.11           # at most this much freeze in any 0.5s per player
 const HS_WINDOW := 0.5
 const HS_MULTI := 0.25         # further hits on the same pair inside this get a third of their tier
@@ -192,16 +192,22 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 		var want := tt if target == p else (ta if melee else 0.0)
 		# a payoff you land (Cash In, a wall slam, a spike) freezes you too, even from range
 		if t >= 4 and by == p: want = maxf(want, float(HITSTOP[t][0]) * k)
-		want = _spend(p, want, now)
 		if want > 0.0: m.freeze_frame(want)
-		# your ranged hits never freeze you (Capcom), but the body you hit still holds for its tier
-		if by == p and target: target.freeze_t = maxf(target.freeze_t, tt)
+		# your ranged hits never freeze you (Capcom), but the body you (or your Boki) hit still holds for its tier
+		if target and target != p: target.freeze_t = maxf(target.freeze_t, tt)
 	else:
 		if target: target.freeze_t = maxf(target.freeze_t, tt)
 		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)
 	return t
 
-static func _spend(p: Ent, want: float, now: float) -> float:
+## content/rules/hitstop.json (the tier table and the source's bounds), parsed on each call: HITSTOP keeps the tiers.
+static func rules() -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hitstop.json"))
+
+## How much of a `want` s freeze the player may still take: at most HS_CAP in any HS_WINDOW, whatever asked for it.
+static func spend(p: Ent, want: float, now: float) -> float:
+	if p == null or want <= 0.0:
+		return maxf(want, 0.0)
 	var b: Array = _budget.get(p.get_instance_id(), [now, 0.0])
 	if now - float(b[0]) > HS_WINDOW:
 		b = [now, 0.0]

@@ -1021,6 +1021,8 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
+		if clips and bool((root.get_meta(WardenClips.STATE, {}) as Dictionary).get("frozen", false)):
+			return     # a hit-stop: every bone holds the frame it was struck on, hair and cloth too (WardenClips catches up)
 		if int(root.get_meta(POSE_HELD, -1)) == Engine.get_process_frames():
 			pace.held += dt        # SimLod.pose_every held this Hunter's pose: the next step catches the time up
 			return

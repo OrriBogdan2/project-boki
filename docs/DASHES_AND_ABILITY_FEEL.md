@@ -501,7 +501,7 @@ involved, plus a softer 50% version for the kin owner.
 | Tier | Trigger (derived from the parts) | Attacker | Target | ≈ frames @60 |
 |---|---|---|---|---|
 | T0 | damage ticks, zone ticks, slow-only, reveal, buffs | 0 | 0 (a 40ms hit flash only) | 0 |
-| T1 | a single hit under 8% of target max HP, no CC | 0 | 25ms (melee: both) | 1-2 |
+| T1 | a single hit under 8% of target max HP, no CC | 0 | 0 (the flash only: source parity, below) | 0 |
 | T2 | a hit ≥ 8%, or push/pull ≥ 8 m/s, or a reflect returning | 35ms melee / 0 ranged | 45ms | 3 |
 | T3 | CC landing (stun, root, hook yank, swap, lift), or ≥ 15% | 50ms melee / 0 ranged | 65ms | 4 |
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
@@ -518,6 +518,28 @@ Rules:
   Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
 - The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
+- **One owner (impact pass, 2026-11-09).** `Feel.hitstop` alone sets a body's hold (`Ent.freeze_t`); Ent.hurt and
+  Oomph no longer write it. Offline, every whole-game freeze (`Match.freeze_frame`: a tier hit, an armor break, a
+  parry, a Boki strike) charges the same cap (`Feel.spend`).
+- **The strike frame holds.** While a body is frozen every bone holds (clips, hair, cloth: `WardenGlb` skips the
+  frame), and `WardenClips` plays the held time back 50% faster so a move stays on the kit's clock (`Ent.held_s`).
+- **Reactions.** The hit clip (`hit_f`/`hit_b`, all 12) plays only for a staggering hit (Oomph's "big": >= 12% of
+  max health, heavy, payoff or a stun); chip hits flash and shiver. A knockback holds the hit pose while the body
+  slides; a stun shows the stun clip over any move. The source's own hit-stop, flash and reaction timings are
+  unpublished [?] (docs/SUPERVIVE_DATA.md), so these tiers stay ours. `--impact-check` asserts all of it per Hunter.
+- **Source parity (2026-11-09, briefs/hero-ref sheets).** The numbers are in `content/rules/hitstop.json`.
+  - *Hit-stop.* No sheet shows a held frame on any hit, light or heavy (Kael's 771/1066, Albert's 976 wall bash,
+    Lace's 505 Supercharged). The sheets are 4-10 fps, so they only bound a freeze: under one 10 fps frame (0.1 s).
+    The owner asks for a few frames of hit-stop on impacts (OWNER_REVIEW_1103 item 50), so T2-T4 stay, all under
+    that bound. T1 holds nothing: the source's light hits (Vex's rifle string, Sable's darts) show only a flash and
+    a small number.
+  - *Hit flash.* A solid flash on the body, the same on light and heavy hits. Sable's 0.45 s LMB string at 5 fps
+    caught it on 3 of 8 hits (about 0.075 s), and Vex's rifle string flashed in every frame (0.1 s or more at its
+    rate), so the band is 0.08-0.13 s. Ours (`Ent.hurt`, 0.12 s) sits in it, unchanged.
+  - *Heavy against light.* In the source a heavy hit reads through the number (big yellow, or magenta on an
+    execute), a burst on the target (Kael's white star and slash, Lace's teal X-star, Albert's white dust), the
+    knockback, and stun stars or a STUNNED label. It does not read through a longer flash or a visible freeze.
+  - `--polish-check` row 5 asserts the four named hits, the tier bound and the flash band.
 
 **Knock moment (parity, 11-11, docs/FUN_AUDIT_1111.md gap 5).** The source confirms a knock with a
 sound, the kill feed and an icon, not slow motion. `_slow` already skipped online (`net_on`), so bot

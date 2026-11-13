@@ -46,6 +46,8 @@ const RECOIL_DECAY := 3.0    # e-folds over the data's "settle" (the kick is dow
 const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.55, "pauldron.L": 0.55}
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
+const CATCH_UP := 0.5        # after a hit-stop the clips run this much faster until they are back on the kit's clock
+const KNOCK_HOLD := 0.5      # share of the hit clip's "dur" a knockback plays to and holds while the body slides
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -74,6 +76,7 @@ var loco_pos := Vector2.ZERO
 var still_t := 0.0
 var stance_w := 0.0
 var was_air := false
+var caught := 0.0            # s of the body's hit-stop (STATE "held") the clips have played back
 var air_t := 0.0
 var land_t := 99.0
 var hit_seen := 99.0
@@ -409,6 +412,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	if bool(s.get("stun", false)) and st.has("stun"):
+		# (over any move: a stunned body can't be mid-cast; the sway lets go as quickly as it takes hold)
+		return {"clip": st["stun"], "t": -1.0, "out": FADE}
 	var xt := float(s.get("extract_t", -1.0))
 	if xt >= 0.0:
 		return _extract_pick(xt)
@@ -456,8 +462,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": clip, "t": minf(float(s.get("act_t", 0.0)), lib.get_animation(clip).length - 0.001)}
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
-	if bool(s.get("stun", false)) and st.has("stun"):
-		return {"clip": st["stun"], "t": -1.0, "out": FADE}     # (the sway lets go as quickly as it takes hold)
 	var lock := float(s.get("lockin_t", -1.0))
 	if lock >= 0.0 and d.has("lockin"):
 		return _lockin_at(lock)
@@ -475,10 +479,14 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var ld: Dictionary = d.get("land", {})
 	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
 		return {"clip": ld["clip"], "t": land_t}
-	var hit := float(s.get("hit_t", 99.0))
+	# the hit clip: a staggering hit plays it (chip hits only flash and shiver), a knockback holds it while it slides
 	var hd: Dictionary = st.get("hit", {})
-	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
-	if hit < float(hd.get("dur", 0.0)) and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH:
+	var dur := float(hd.get("dur", 0.0))
+	var hit := float(s.get("react_t", 99.0))      # (only a staggering hit sets it: a chip hit is WardenFlinch's lean)
+	var knock := float(s.get("knock_t", -1.0))
+	if knock >= 0.0:
+		hit = minf(knock, dur * KNOCK_HOLD)
+	if hit < dur:
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		var hk := float(s.get("hit_k", 1.0))
@@ -504,9 +512,19 @@ static func lockin_dur(art_name: String) -> float:
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
+	# hit-stop: the pose holds on the frame it was struck, then the clips catch the held time back up
+	var frozen := bool(s.get("frozen", false))
+	var held := float(s.get("held", 0.0))
+	caught = minf(caught, held)
+	if not frozen:
+		caught = move_toward(caught, held, dt * CATCH_UP)
+	if frozen:
+		dt = 0.0
 	var want := force
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
+		if float(want.get("t", -1.0)) >= 0.0:
+			want["t"] = maxf(0.0, float(want["t"]) - (held - caught))
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	var flinching := not proc and bool(want.get("flinch", false))

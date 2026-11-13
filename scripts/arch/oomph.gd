@@ -2,7 +2,7 @@ class_name Oomph
 extends RefCounted
 ## Combat weight (the gameplay side of "oomph"): what a shot does to the shooter (a push
 ## back on heavy weapons; never a camera kick), what a hit does to the body it lands on (a flinch scaled by the hit, a
-## short stagger on big hits, a hit-shake while it's frozen), and how visible a shot is (a glowing
+## short stagger slow and the hit clip on big hits), and how visible a shot is (a glowing
 ## bolt with a halo and a tracer that stretches with speed). How hits look and sound beyond that
 ## (impact sparks, sound design) belongs to Juice; the numbers and these reactions live here, in
 ## separate functions, so the two never step on each other.
@@ -36,21 +36,18 @@ static func on_fire(h: Hunter, _melee := false) -> void:
 
 # ------------------------------------------------------------------ being hit
 ## What a landed hit does to the body (called from Match.on_damage for every hit). Only the game that
-## owns the body changes its state (stagger); the flinch and freeze are visual, everyone shows them.
+## owns the body changes its state (stagger); the flinch and the hit clip are visual, everyone shows them.
 static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == null or d <= 0.0 or String(o.get("src", "")) in ["burn", "fall", "heat"] or o.get("tick", false):
 		return
 	var mh := maxf(1.0, target.max_hp)
 	var frac := d / mh
 	var big: bool = frac >= STAGGER_FRAC or o.get("payoff", false) or o.get("heavy", false) or float(o.get("stun", 0.0)) > 0.0
-	# a visual hold scaled by the hit (the Feel tier sets it too; take the larger)
-	target.freeze_t = maxf(target.freeze_t, clampf(0.03 + frac * 0.35, 0.03, 0.09))
+	# (the hit-stop itself is Feel's, by tier: Feel.hitstop)
 	if target is Hunter:
 		var h := target as Hunter
 		h.hit_k = HEAVY_FLINCH if big else hit_strength(frac, (o.get("kb", Vector2.ZERO) as Vector2).length())
-		h.hit_shake = maxf(h.hit_shake, clampf(frac * 1.6, 0.06, 0.22))
-		if by and is_instance_valid(by):
-			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()
+		if big: h.react_at = m.time       # only a staggering hit plays the hit clip; chip hits flash and shiver
 		# (hunters and their Boki stagger you; monsters' hits never do, so PvE lethality is unchanged)
 		var pvp: bool = by != null and is_instance_valid(by) and not (by is Mob) and String(o.get("src", "")) != "mob"
 		if big and pvp and not h.remote and not h.downed and h.fortify_t <= 0.0:
@@ -58,7 +55,6 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 			# states, fortify_t, shrug it off)
 			h.slow_k = maxf(h.slow_k, STAGGER_SLOW) if h.slow_t > 0.0 else STAGGER_SLOW
 			h.slow_t = maxf(h.slow_t, STAGGER_T)
-			h.stagger_t = STAGGER_T
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
 	elif target is Kin and target.model:
@@ -82,12 +78,6 @@ static func rules() -> Dictionary:
 	if _rules.is_empty():
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES))
 	return _rules
-
-## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
-## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
-static func render_hit(h: Hunter, delta: float) -> void:
-	h.hit_shake = maxf(0.0, h.hit_shake - delta * 1.4)
-	h.stagger_t = maxf(0.0, h.stagger_t - delta)
 
 # ------------------------------------------------------------------ how a shot looks
 ## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the

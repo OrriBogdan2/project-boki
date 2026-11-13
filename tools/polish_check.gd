@@ -3,6 +3,9 @@ extends RefCounted
 ##   1. every stair tile belongs to a full-width flight (PolishTools.stair_flights), on the default map
 ##   2. a chest reads as a different, chunkier thing than the crates, pots and barrels
 ##   3. building a chest draws nothing from the match's seeded global random stream
+##   5. hit-stop and hit flash match the source (content/rules/hitstop.json): a light hit (Vex's rifle round) only
+##      flashes; a heavy one (Kael's slam, Albert's wall bash, Lace's Supercharged arrow) also holds a few frames,
+##      under one footage frame; the body flash sits in the footage band, the same for light and heavy
 
 var bad := 0
 
@@ -53,6 +56,50 @@ func run(main: Node) -> void:
 	seed(31337)
 	for t in 3: Models.chest().free()
 	ok(randi() == r0, "building chests leaves the seeded global random stream alone")
+	_hitstop(m)
 	m.queue_free()
 	print("POLISH DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## 5. One hit of each kind between two bodies, with nobody as the player (the per-body freeze every online hit takes).
+func _hitstop(m: Match) -> void:
+	var r: Dictionary = Feel.rules()
+	var frame := float(r["footage_frame_s"])
+	var band: Array = r["flash_s"]
+	var A: Hunter = m.player
+	var V: Hunter = m.hunters[1] if m.hunters[0] == A else m.hunters[0]
+	var rifle := float(Data.weapon_stats("quill_rifle")["dmg"])
+	var supercharged := float(Data.weapon_stats("longbow")["draw"][1][1])
+	var hits := [
+		["Vex's rifle round", rifle, {"src": "primary"}],
+		["Lace's Supercharged arrow", supercharged, {"src": "primary"}],
+		["Kael's slam", 30.0, {"melee": true, "heavy": true, "payoff": false}],
+		["Albert's wall bash", 10.0, {"src": "wall"}],
+	]
+	m.player = null
+	for row in hits:
+		m.time += 1.0          # (past Feel.HS_MULTI: each row is a first hit)
+		A.freeze_t = 0.0
+		V.freeze_t = 0.0
+		V.hp = V.max_hp
+		var t := Feel.hitstop(m, A, V, float(row[1]), row[2])
+		var light: bool = row == hits[0]
+		var held := V.freeze_t > 0.0 and (A.freeze_t > 0.0) == bool(row[2].get("melee", false))
+		var none := V.freeze_t <= 0.0 and A.freeze_t <= 0.0
+		var how := "a light hit only flashes" if light else "a few frames"
+		ok(V.freeze_t < frame and A.freeze_t < frame and (none if light else held),
+				"hit-stop: %s is tier %d, holds the target %.3f s and the attacker %.3f s (%s; footage frame %.2f s)"
+						% [row[0], t, V.freeze_t, A.freeze_t, how, frame])
+	m.player = A
+	for i in range(1, 5):
+		var tier: Array = Feel.HITSTOP[i]
+		ok(float(tier.max()) < frame, "hit-stop: tier %d %s stays under one footage frame" % [i, str(tier)])
+	var flashes := []
+	for d in [rifle, 30.0]:
+		V.hp = V.max_hp
+		V.flash_t = 0.0
+		V.hurt(d, A, {"src": "primary"})
+		flashes.append(V.flash_t)
+	ok(flashes[0] >= float(band[0]) and flashes[0] <= float(band[1]) and is_equal_approx(flashes[0], flashes[1]),
+			"hit flash: light %.2f s, heavy %.2f s, the same and in the footage band %s"
+					% [flashes[0], flashes[1], str(band)])

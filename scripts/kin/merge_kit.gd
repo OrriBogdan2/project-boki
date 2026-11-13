@@ -156,7 +156,7 @@ func _strike_all(b: Dictionary) -> void:
 		f.hurt(float(b.get("dmg", 40.0)) * m.dmg_mult(h), h, {"src": "abil", "ab": "ult", "tags": ["ult", "strike"], "stun": float(b.get("stun", 0.0)), "dr": true})
 	m.sfx("boom", h.pos, -1.0, 0.8)
 	m.sfx("zap", h.pos, 0.0, 0.7)
-	m.shake(0.6, h.pos)
+	m.shake(0.6, h.pos, h)
 	if h.is_local() and m.cam:
 		m.cam.punch(0.1)
 
