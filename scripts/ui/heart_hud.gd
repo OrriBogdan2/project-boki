@@ -75,13 +75,13 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 	if on_map.call(hv, 4.0):
 		heart_glyph(hud.c, hv, 5.0, ht, m.time)
 	else:
-		hud._edge_arrow(inner, inner.get_center(), hv, Heart.COL)
+		hud.edge_mini.add(hv - inner.get_center(), Heart.COL, EdgeMarker.PRIO_GOAL)
 	if ht.carrier:
 		var cv: Vector2 = to_map.call(ht.carrier.pos)
 		if on_map.call(cv, 4.0):
 			spark_glyph(hud.c, cv, 4.0, m.time)
 		else:
-			hud._edge_arrow(inner, inner.get_center(), cv, Heart.COL)
+			hud.edge_mini.add(cv - inner.get_center(), Heart.COL, EdgeMarker.PRIO_GOAL)
 
 static func full_map(fm) -> void:
 	var m: Match = fm.m

@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, 
+	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9,
 		"seed": 7401, "no_drop": true, "heart": true, "god": true})
 	for o in m.hunters:
 		o.ctrl = "idle"
@@ -243,6 +243,11 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	ok(gate_pin == Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) != Vector2.ZERO,
 		"the Gate used: its pin goes, the ring's (locked, counting down) shows")
 	# the Blight's wall
+	var rim := Heart.r("tide_r1") * H.ways_scale + 20.0      # (a big map: the ring stays wider)
+	if m.player.flat_dist(H.site) < rim:
+		var fp := _stand(m, H.site, rim)
+		if fp != Vector3.INF:
+			_put(m, fp)
 	var R := Heart.tide_r(m)
 	var inside := m.player.flat_dist(H.site)
 	var gap := WaysOutPins.wall_gap(m)
