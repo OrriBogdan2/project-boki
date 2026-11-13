@@ -4,7 +4,7 @@ Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quie
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick, a broken cast
-= a snap and a flat sag.
+= a snap and a flat sag, your ultimate back = a low fifth and one bell over it (UltReadyCue).
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
@@ -127,6 +127,13 @@ def ping(i):
                            0.4 * pluck(NOTE['A5'] * 1.5, 0.4, 0.1, 0.3)), 0.7), 4800)
 
 
+def ult_ready(i):
+    """Your ultimate is back: a low fifth struck together, then one bell an octave up rings over it."""
+    fifth = mix(pluck(NOTE['G4'], 0.5, 0.14), pluck(NOTE['D5'], 0.5, 0.14) * 0.7)
+    bell = at(S.chime(NOTE['G5'], 0.7, 0.28, ((1.0, 0.7), (2.76, 0.18), (5.4, 0.05))) * 0.6, 0.06)
+    return finish(room(mix(fifth, bell), 0.7), 5200)
+
+
 def charge(i):
     """A held-button swell that rises in pitch, soft; the caller pitch-scales it as the hold grows."""
     d = 0.5; n = N(d); u = np.arange(n) / n
@@ -160,6 +167,7 @@ def main():
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
     S.save_cat('cast_broken', broken(0), 'ui')
+    S.save_cat('ui_ult_ready', ult_ready(0), 'ui')
 
 
 if __name__ == '__main__':
