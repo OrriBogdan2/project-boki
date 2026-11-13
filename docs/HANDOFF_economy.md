@@ -65,4 +65,4 @@ Check gaps added to `--economy-floor-check`:
 | Loaner run keeps treat, armory, loadout and found tonics | `_loaner_match`, `_loaner_result` |
 | Extract minimum doesn't top up at >= 45 gems | `_loaner_result` (45, 46, 200, and through `apply_result`) |
 
-Known and left alone: items with a 3-gem base price (wood) have a walk smaller than their spread, so a resting offer never fills offline; they trade on the book at once. Players who change the system clock can pick cheap and dear days on the local Exchange (DEBT.md); the server backend ends that.
+Known and left alone: items with a 3-gem base price (wood) have a walk smaller than their spread, so a resting offer never fills offline; they trade on the book at once. The local Exchange's day never goes back and moves at most one day forward per run of the game (`Exchange._day_turn`), so changing the system clock can't pick a cheap or dear day.
