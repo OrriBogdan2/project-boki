@@ -1712,6 +1712,7 @@ func _grammar_runtime_check() -> void:
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
 	_ac_run(m, 3.5)
 	_grt_reset(T)
+	T.teleport(home + Vector3(6, 0, 0))        # (the slam knocked it close: the shot must start past the wall)
 	k = _grt_kin(m, P, "puddlet")
 	_grt_out(k, home + Vector3(0.5, 0, 1.0))
 	k.use_ability("k1", home + Vector3(2.5, 0, 0))
@@ -1934,8 +1935,8 @@ func _grammar_runtime_check() -> void:
 	_grt("shoulder: shots poison (carry rider)", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	_grt_reset(T)
 	# ---- 7. owner bonuses
-	var base_hp := float(Data.CLASSES[P.cls]["hp"])
-	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (class %.0f)" % [P.max_hp, base_hp])
+	var base_hp := float(Data.CLASSES[P.cls]["hp"]) + float(P.get_meta("growth_hp", 0.0))        # (+ LevelGrowth)
+	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (base %.0f)" % [P.max_hp, base_hp])
 	k = _grt_kin(m, P, "puddlet")
 	_grt("owner bonus: Prismander shield + regen", is_equal_approx(P.kin_shield, 16.0) and absf(P.kin_pt("owner_regen") - 0.75) < 0.01 and is_equal_approx(P.max_hp, base_hp), "shield %.0f regen %.2f" % [P.kin_shield, P.kin_pt("owner_regen")])
 	var hp0 := P.hp
@@ -1957,7 +1958,7 @@ func _grammar_runtime_check() -> void:
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
 	P.ult = 1.0
 	var blocked := not KinMerge.can_cast(P)
-	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
+	_ac_run(m, P.merge_cd + 0.1)        # (a timed-out merge rests the Boki timeout_rest_s, past the spent window)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
 	KinCommand.tap(P)
