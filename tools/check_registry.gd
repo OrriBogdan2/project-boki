@@ -11,6 +11,7 @@ const CHECKS := {
 	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],      # PvE pacing: 12 hunters vs 3 camps at level 1 and 5
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],      # no lair "you fell"
+	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],      # real-paced bot expedition clock
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
