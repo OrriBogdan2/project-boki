@@ -134,6 +134,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) |
 | Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape |
 | Anim | Full set | 20 moves, all on `kael.glb` clips (49), map `warden_anim/kael.json` | match on coverage (gap 1 closed) |
+| Anim | Full set | 49 clips on `kael.glb` (v1 retargeted, 3419a661a), 21 moves in `warden_anim/kael.json` | match on coverage (gap 1 closed); clips retargeted, not authored for this body |
 
 ## Hem (`archer`, source Myth) · slice Warden
 
@@ -141,11 +142,13 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 |---|---|---|---|
 | LMB | Hold to charge, release; perfect speeds next draw [D,F] | PinDraw two stages, reticle, stops at cursor, cadence .5, perfect → quick draw | match |
 | RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Hold .5 dead zone (ours), wall_dmg 12, `wall_mult` 4.94, stun 1.2, cd 16 | match: wall payoff ~5x (gap 6 closed) |
+| RMB | Hold, release, knock, wall stun up to 173 extra on 35 [D] | Hold .15 tap guard, `pin.wall_mult` 4.94, stun 1.2, cd 16 | match on payoff (gap 6 closed, 4aa011a49); draw start vs footage open (gap 7) |
 | Q | none | glove | ours |
 | E | Cone of arrows, slow, anti-heal, 15 s [D] | Tell .35, 4.4 s, slow 35%, curved wall, cd 15 | match |
 | R | 3 empowered shots, no charge, 60 s [D] | 3 shots, window 6 s, nock .3, cd 60 | match |
 | Dash | Roll to cursor, then Phase Walk through terrain incl. raised walls, 9.5 s [D] | Roll 3 m/.27 s (F), off the dash feel; walks rocks and barriers, **not ledges** | differ (gap 8) |
 | Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m only; the invented Focus/Deadeye is gone (gap 5 closed) | differ: tall-ledge climb not built |
+| Passive | Fog vision of injured; tall-ledge climb [D] | Hawk Sense 22 m; Focus/Deadeye cut (ffa20b0f7) | match (gap 5 closed) |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB `fire`; 8 of 17 rows unsourced | gap 9 closed here |
 
@@ -187,6 +190,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | RMB | Hold slam, centre stun, jump to leap, 11 s [D] | hold .2, cd 11, glide slam built and checked per glide state | match |
 | Q | none | glove | ours |
 | E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; allies hop it by jumping (owner 23:55, `StoneStand`) | match (gap 14 closed) |
+| E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; allies hop by jumping (eb93c5b62), bots too (618098895) | match (gap 14 closed) |
 | R | Tap wall, hold drag angle, Slows, 45 s [D] | 9 rocks, drag, cd 45, slow data present | differ (owner item 15 said rocks only) |
 | Dash | Landslide: dash, launches rock, ~12 s [D] | Rock Hop: 3 hops of 2.8 m/.26 s raw ×.85/×1.15 = 2.4 m/.3 s, cd 12 | differ (owner item 111) |
 | Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match |
@@ -210,7 +214,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | R | Two waves, 36 s [D]; [F] 6-7 orbs, ~120 degrees, ~756 a close volley against 193 for the gun | Charge 1.1, 2 waves of 6, 105 degrees, 4 a slug (3.4x a gun volley, burst cap), no falloff, cd 21 | match; **0.58x cd**; damage ratio 3.4x vs 3.9x is held by the burst cap |
 | E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7 | match; **0.58x cd** |
 | R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
-| Dash | One every 7 s; own air slot 12.5 s [D] | 3 chained, 3.2 m/.16 s raw (owner 23:40; F 4.6 m/.12 s) ×.85/×1.15 = 2.7 m/.18 s, air ×1.35 = 3.7 m (scaled once), cd 10, air shares slot | differ (owner); air slot missing (gap 13) |
+| Dash | One every 7 s; own air slot 12.5 s [D] | 3 chained, 3.2 m/.16 s raw (owner 23:40; F 4.6 m/.12 s) ×.85/×1.15 = 2.7 m/.18 s, air ×1.35 = 3.7 m (scaled once), cd 10, air on its own 12.5 s slot (0a5b33f48) | differ (owner); gap 13 closed |
 | Passive | Stacks of max HP [D] | Salvage 10, +2.5%, lose 1 on down | match |
 | Anim | Footage poses | 13 moves, all on `dredge.glb` (40) | match on coverage |
 
@@ -262,6 +266,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 |---|---|---|---|
 | LMB | Throw + recall; hold charged swing [D] | Tap throws and recalls (cadence **.45**), hold is the source's wind-up, swing 36 to 66. Owner-kept: walks 55% while charging (#59), 1.5 to 1.8 m step + 4 m perfect launch (#30, #49) | match; riders differ (owner). Cadence `1eecee8c3`, hold `e625aa8e0`, hold-walk assert `9c336682d` |
 | RMB | Hold shield, front block, Shift = bash, 6 s [D] | Aegis hold .1, 160 HP, Shield Charge on Shift, cd 6 | match; routing `[?]` |
+| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .45 (1eecee8c3), walks 55% vs stands | differ (owner); cadence matches (gap 12 closed) |
+| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | Mending Ground: r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | Faultline: 4 cells, stun .5, cd 40 | match; 0.8x cd |
@@ -445,10 +451,14 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 |---|---|---|---|---|
 | 1 | Done: Zedran's animation (`kael.glb` 49 clips, `warden_anim/kael.json`) | none | art/wardens/kael | done |
 | 2 | Stopping is a hard stop for all 12: brake 110 vs 22.2 m/s² | Move brake to source, retune | content/rules/hunter_move.json, scripts/match/hunter.gd | M |
+| 1 | **Closed** 3419a661a (2026-11-07): `kael.glb` carries the 49 v1 clips retargeted onto the v2 rig by bone name, `warden_anim/kael.json` maps his moves (21 `kmoves`), clip-check covers him; kept through the appeal3 body swap d38cbfaa3. Still differs: the clips are retargeted v1 clips, not authored for this body | none | art/wardens/kael, content/rules/warden_anim/kael.json | done |
+| 2 | **Closed** bc1a70608 (2026-11-07): brake 22.2 m/s² plus ground_friction 2/s (source), a let-go from a run slides ~0.3 m; 5a2831b2b retired the last ours number (`GROUND_SHED` 110), over-run speed now sheds under the same brake. Still differs: nothing in the stop; asserted in --move-feel-check | none | content/rules/hunter_move.json, scripts/match/hunter.gd | done |
 | 3 | Air control 0.3 vs 0.015, 20x source | Lower it; keep owner-asked steer rows | hunter_move.json, hunter_move.gd | M |
 | 4 | Dashes stop dead: keep 15%/30% vs carry | Raise carry. **Scale part done:** the ×.85/×1.15 layer runs only on kits with no source dash (table below) | hunter.gd | M |
 | 5 | Done: Hem's Focus/Deadeye is removed (Hawk Sense only) | none | archer_kit.gd | done |
 | 6 | Done: Hem's Heavy Shot wall payoff is `wall_mult` 4.94 | none | archer.json | done |
+| 5 | **Closed** ffa20b0f7 (2026-11-08, owner decision 2026-11-07): Focus meter, its +20% range and the Deadeye crit cut; Hawk Sense kept. Still differs: nothing; checks assert no meter and a plain arrow into a pinned foe | none | archer_kit.gd, archer.json | done |
+| 6 | **Closed** 4aa011a49 (2026-11-07): `wall_dmg` 12 and the .4 floor replaced by `pin.wall_mult` 4.94, the source's 173 extra on 35. Still differs: nothing in the payoff | none | archer.json | done |
 | 7 | Hem's RMB .5 s dead zone before the draw reads | Match the footage start | archer.json, pin_needle.gd | S |
 | 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
 | 9 | Dash→LMB still `buffer` on Zedran and Bjorn (Hem, Vex, Cinder, Ryzz, Tarek are `fire`); Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
@@ -457,10 +467,16 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 12 | Bjorn's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
 | 13 | Grimble's air dash lacks its own 12.5 s slot | Add slot | dredge_kit.gd, dredge.json | M |
 | 14 | Done: Tarek's allies hop his rocks (owner 23:55, `StoneStand`) | none | stone_stand.gd | done |
+| 12 | **Closed** 1eecee8c3 (2026-11-07): `throw_rate` .48 → .45, the source card's; bjorn_launch_check asserts it. Still differs: the hold walks at 55% where the footage only shows him standing; no source number, owner note keeps it | none | bulwark.json | done |
+| 13 | **Closed** 0a5b33f48 (2026-11-07): the air pounce is its own 12.5 s slot, 2 s less per rank (source Brute Dash (Air)), asserted in the combo check. Still differs: the ground charges recharge in 10 s against the source's 7 s (owner dash row, Grimble table) | none | dredge_kit.gd, dredge.json | done |
+| 14 | **Closed** eb93c5b62 (2026-11-03, owner 23:55): an ally's jump against a friendly rock lifts them over, walking stops them, foes stay blocked; 618098895 (2026-11-08) makes bots hop a teammate's rock and the check asserts the ally clears it. Still differs: nothing known | none | dolm_kit.gd | done |
 | 15 | Bjorn's Guard meter and Shield Slam are invented | Remove, or owner keeps | bulwark_kit.gd, bulwark.json | M, owner |
 | 16 | Done: Claire's skating beams home late like her darts (owner: semi-homing, 2x damage) | none | asserted in --rimewright-combo-check | done |
 | 17 | Ostra's bomb peaks 3x vs 3.5x | Set 3.5 | ostra.json | S |
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
+| 16 | Claire's darts fly straight while skating | Owner answer, then home | rimewright_kit.gd | S, owner |
+| 17 | **Closed** 5b9a528d2 (2026-11-07): `dmg_max_k` 3.5; the old 3.0 already peaked at 3.5x through its formula, so damage is unchanged and the field now reads true; the check asserts a full pop = 3.5 × 12.5. Still differs: whether the cooldown starts on the plant is `[?]` | none | ostra.json | done |
+| 18 | **Closed** 280404102 (2026-11-08): hold Ctrl under the glider to plunge at 32.5 m/s, all dive tunables from the data (`dive_*` in hunter_move.json); b512c864c (2026-11-09) put the glide steer and start fall on the source too (decision 0027). Still differs: the key is ours (the source names none) and the swoop out of a dive is capped at the glide's max | none | hunter.gd, hunter_move.json | done |
 | 19 | Ours-only riders: Chill slow, Shred, Pip's shield | Remove, or owner keeps | kit JSON, kits | S, owner |
 | 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 19 dash-flow rows had no source `[?]` (Hem 8, Ryzz 5, Tarek 6): 1 settled by Breah's footage, 14 now cite what was checked as "Not determinable", the 4 Q rows stay ours | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
 | 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 55 dash-flow rows are `[?]` (no source, or "Not determinable"), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
