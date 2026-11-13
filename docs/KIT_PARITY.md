@@ -322,6 +322,16 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 
 On a ×1 kit every Shift move runs its raw numbers, including the moves with no source figure: Bjorn's Shield Charge (4.2 m at 18 m/s), his short dash during the wind-up and his lumber, Vex's long dash and Hem's flick are now about 18% longer and 13% quicker than before.
 
+Those five, measured against the footage (`origin/ext/hero-ref-footage`, 5 fps; 1 bh = 1.8 m) and `briefs/supervive-data` on 2026-11-12: none shows the move, so none has a measure, no number moved and no `felt dash` row was added. DECISIONS has no owner line on any of them.
+
+| Move | Raw (ours) | Source | Looked at | Row |
+|---|---|---|---|---|
+| Bjorn Shield Charge | 4.2 m / .23 s (18 m/s) | Oath Shield Bash: knock-back and brief invulnerability, no travel figure (supervive_kits.md) | bjorn 0180-0362 every 6th, 0296-0311 and 0343-0362 every frame: the shield is held planted; the bash flares (0300, 0352-0353) move his body under 5 px (0.2 m), the second one at point blank on the dummy, so no travel can be read | [?] |
+| Bjorn short dash in the wind-up | 2.6 m / .13 s (20.5 m/s) | none: Spin Dash is a plain Shift | bjorn 0100-0172 every 3rd (the charged swings: he walks the hold, no Shift in it); 0363-0371 (the 360 Smash starts with no charge glint) | [?] |
+| Bjorn lumber (long dash) | 4.2 m / .3 s (14 m/s) | none: the source has no long dash; Oath never leaves the ground (bjorn.md 5) | same frames as above; 0512-0518 is Earthshatter, not a dash | [?] |
+| Vex long dash (air slide) | 4.7 m / .33 s (2/3 of the 7 m / .55 s hold) | patch notes only; Combat Slide card has no figure | venator_ghost 0114-0153 every 3rd: the three slides (0117, 0135, 0150) are all on the ground, no hold told apart, none in the air | [?] |
+| Hem flick (long dash) | 5.0 m / .22 s (light class) | none: Phase Walk has no long dash, an air Shift is the same roll (item 183) | pin 0048-0056 (pin.md 5's 2.3 m push): it is her wall climb up the tower (Soul Hunter), not a dash; 0388-0389 is the ground roll | [?] |
+
 ## The 20 biggest feel gaps, ranked
 
 Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a few days, L a week or more. `owner` = needs an owner call before building.
