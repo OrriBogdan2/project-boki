@@ -295,4 +295,4 @@ Now all of them arrive through "tele".
 
 `--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-check` asserts,
 per shape kind, that every `all` telegraph up 0.15 s or more in each kit's casts shows on the other game;
-`--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few.
+`--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few (docs/shots/tele-net: Lace's Hail Wall arc, Tenzo's held slam and E tells, Albert's E zone, from a GPU worker).

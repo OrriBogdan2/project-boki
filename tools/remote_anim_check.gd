@@ -244,12 +244,12 @@ func _sample() -> void:
 		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
 
 ## The `all` telegraphs up under the watched hunter now (the host's own, the guest's copy's).
-func _tele_sample(H: Hunter) -> void:
+func _tele_sample(h: Hunter) -> void:
 	var d := AimKit.layer(m)
 	var now := int(Time.get_unix_time_from_system() * 1000.0)
 	for k in d.entries:
 		var e: Dictionary = d.entries[k]
-		if e["h"] == H and e["all"] and d.live(e):
+		if e["h"] == h and e["all"] and d.live(e):
 			var id := String(k).substr(String(k).find(":") + 1)
 			if not tele.has(id): tele[id] = [String(e["kind"]), now, now]
 			tele[id][2] = now
