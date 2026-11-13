@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-10> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -15,6 +15,8 @@ extends RefCounted
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
+##  10 creator       the Empty's creator: the bare void body, Female and Male frames, then dressing up
+##  11 sheet         six example Empties (the four presets and two random rolls), a still each: clip11_<n>.png
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -75,6 +77,8 @@ func run(main_node: Node) -> void:
 		7: await _show(secs)
 		8: await _relay(secs)
 		9: await _duo(secs)
+		10: await _creator(secs)
+		11: await _sheet()
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -291,6 +295,93 @@ func _hatch(secs: float) -> void:
 			_still()
 			still_at = -1.0
 		t += FRAME
+		frame += 1
+
+# ------------------------------------------------------------------ 9: creator
+const CREATOR_BEAT := 0.9        # s between the clip's creator steps
+
+## The real creator on the new-game card: the preview turns all the while, a step runs every CREATOR_BEAT seconds.
+func _creator(secs: float) -> void:
+	Save.d = Save.fresh()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	hx.edit_only = true
+	main.add_child(hx)
+	for _i in 4:
+		await main.get_tree().process_frame
+	await main.fade.reveal(0.01)
+	var panel: CreatorPanel = hx.create_box
+	var steps := _creator_steps(panel)
+	still_at = secs * 0.9
+	_mark("start")
+	var t := 0.0
+	while t < secs:
+		await main.get_tree().process_frame
+		if hx.preview:
+			hx.preview.rotation.y += 0.035
+		var k := int(t / CREATOR_BEAT)
+		if k < steps.size() and t - k * CREATOR_BEAT < FRAME:
+			steps[k].call()
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+## Bare body, the frame female then male then built different, then a layer at a time with colours.
+func _creator_steps(p: CreatorPanel) -> Array:
+	var frame_to := func(sex: int, shoulders: float, hips: float, height: float):
+		p.look["gender"] = sex
+		p.look["frame"].merge({"shoulders": shoulders, "hips": hips, "height": height}, true)
+		p._changed()
+	return [
+		func(): pass, func(): pass, func(): pass,
+		func(): frame_to.call(0, 0.5, 0.5, 0.5), func(): pass, func(): pass,
+		func(): frame_to.call(1, 0.5, 0.5, 0.5), func(): pass, func(): pass,
+		func(): frame_to.call(1, 0.9, 0.2, 0.9), func(): frame_to.call(0, 0.2, 0.9, 0.3),
+		func(): frame_to.call(0, 0.5, 0.5, 0.5),
+		func(): p.show_tab("Outfit"),
+		func(): p.pick_item("top", 2), func(): p.pick_colour("top", 0, 3),
+		func(): p.pick_item("bottom", 1), func(): p.pick_colour("bottom", 0, 1),
+		func(): p.pick_item("shoes", 2), func(): p.pick_item("gloves", 1),
+		func(): p.pick_item("head", 2), func(): p.pick_colour("head", 0, 5),
+		func(): p.pick_item("accessory", 5), func(): pass, func(): pass,
+	]
+
+const SHEET_RANDOM := [7, 11]      # seeds of the sheet's two random looks
+const SHEET_SETTLE := 2.5         # s for the camera to arrive before the first still
+const SHEET_HOLD := 0.8            # s a look stands in the creator before its still
+
+## Six looks, a still of the whole screen each (the panel hidden), turned a little to the side.
+func _sheet() -> void:
+	Save.d = Save.fresh()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	hx.edit_only = true
+	main.add_child(hx)
+	for _i in 4:
+		await main.get_tree().process_frame
+	await main.fade.reveal(0.01)
+	var panel: CreatorPanel = hx.create_box
+	panel.visible = false
+	hx.title.visible = false
+	hx.sub_lbl.visible = false
+	for _i in int(SHEET_SETTLE / FRAME):
+		await main.get_tree().process_frame
+	var looks: Array = []
+	for nm in EmptyFrame.rules()["presets"]:
+		looks.append(nm)
+	for sd in SHEET_RANDOM:
+		looks.append(sd)
+	for k in looks.size():
+		if looks[k] is String:
+			panel.use_preset(looks[k])
+		else:
+			seed(int(looks[k]))
+			panel.randomize_look()
+		hx.preview_yaw = PI - 0.4
+		hx.preview.rotation.y = PI - 0.4
+		for _i in int(SHEET_HOLD / FRAME):
+			await main.get_tree().process_frame
+		main.get_viewport().get_texture().get_image().save_png(dir.path_join("clip11_%d.png" % k))
 		frame += 1
 
 # ------------------------------------------------------------------ the Boki base

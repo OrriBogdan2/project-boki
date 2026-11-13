@@ -6,7 +6,8 @@ extends RefCounted
 ##
 ## The creator wires rows from this file alone. Each look key below is optional; a missing or bad value falls back
 ## to the style's default (Shrouds.settings), so old saves keep working:
-##   look["shroud"]     index into STYLES (0 Hooded Cloak, 1 Wrap and 2 Tatters are the old Cloak, Wrap and Tatters)
+##   look["shroud"]     index into STYLES (0 Hooded Cloak, 1 Wrap and 2 Tatters are the old Cloak, Wrap and Tatters),
+##                      or NONE: no cloak (the Empty's outfit layers, EmptyWear, may still carry an accessory)
 ##   look["hood"]       0 down, 1 up; only where has_hood(style)
 ##   look["trim"]       index into TRIMS
 ##   look["accent"]     -1 for a shade of the shroud colour, else index into Unmasked.COLOURS
@@ -33,7 +34,7 @@ const LABELS := ["Hooded Cloak", "Wrap", "Tatters", "Long Coat", "Poncho", "Robe
 	"Shawl & Scarf", "Cowl & Feathers", "Patchwork"]
 const HOODS := ["Down", "Up"]
 const TRIMS := ["Plain", "Stitched", "Runes", "Stripes", "Embroidered"]
-const ACCESSORIES := ["None", "Belt pouches", "Satchel strap", "Charm necklace", "Lantern hook", "Bandolier"]
+const ACCESSORIES := ["None", "Belt pouches", "Satchel strap", "Charm necklace", "Lantern hook", "Bandolier", "Scarf"]
 ## Extra creator rows, as Unmasked.ROWS has them: look key, label, choices, and a tooltip. Hood applies only where
 ## has_hood(look["shroud"]). The accent is -1 or a colour, so a row for it adds "Match shroud" before COLOURS.
 const ROWS := [
@@ -42,17 +43,18 @@ const ROWS := [
 	["accessory", "Accessory", ACCESSORIES],
 ]
 const NO_ACCENT := -1
+const NONE := -1
 
 static func has_hood(style: int) -> bool:
 	return int(_style(style)["hood"]) >= 0
 
 static func _style(style: int) -> Dictionary:
-	return STYLES[clampi(style, 0, STYLES.size() - 1)]
+	return STYLES[clampi(style, 0, STYLES.size() - 1)] if style != NONE else {"hood": -1}
 
 ## The shroud part of a look with every value in range and each missing one at its default.
 static func settings(lk: Dictionary) -> Dictionary:
-	var style := clampi(_i(lk.get("shroud"), 0), 0, STYLES.size() - 1)
-	var dflt := int(STYLES[style]["hood"])
+	var style := clampi(_i(lk.get("shroud"), 0), NONE, STYLES.size() - 1)
+	var dflt := int(_style(style)["hood"])
 	var hood := -1 if dflt < 0 else clampi(_i(lk.get("hood"), dflt), 0, 1)
 	var accent := clampi(_i(lk.get("accent"), NO_ACCENT), NO_ACCENT, Unmasked.COLOURS.size() - 1)
 	return {"style": style, "hood": hood, "trim": clampi(_i(lk.get("trim"), 0), 0, TRIMS.size() - 1), "accent": accent,
@@ -61,15 +63,21 @@ static func settings(lk: Dictionary) -> Dictionary:
 static func _i(v: Variant, fallback: int) -> int:
 	return int(v) if v is int or v is float or v is String else fallback
 
-## Puts the shroud on a body: Unmasked.dress calls it with Models.hunter's parts. The cloth is one skinned mesh per
-## tone under a ShroudSkin, the pieces that ride a single joint (wraps, hood, accessories) are parts of that joint.
-static func dress(c: Dictionary, lk: Dictionary) -> void:
+## Puts the shroud on a body: Unmasked.dress calls it with Models.hunter's parts, and where the accessory sits (fit,
+## as STYLES' "fit" plus "neck": the scarf's radius). The cloth is one skinned mesh per tone under a ShroudSkin, the
+## pieces that ride a single joint (wraps, hood, accessories) are parts of that joint. No cloak and no accessory:
+## nothing to put on.
+static func dress(c: Dictionary, lk: Dictionary, fit: Dictionary) -> void:
 	var set_ := settings(lk)
+	var style := int(set_["style"])
+	if style == NONE and int(set_["accessory"]) == 0:
+		return
 	var t := ShroudTailor.new(c, set_)
 	t.bulk = float(Unmasked.race(lk)["bulk"])
-	ShroudCuts.cut(t, int(set_["style"]), int(set_["hood"]) == 1)
-	ShroudExtras.trim(t, int(set_["trim"]))
-	ShroudExtras.accessory(t, int(set_["accessory"]), STYLES[set_["style"]]["fit"])
+	if style != NONE:
+		ShroudCuts.cut(t, style, int(set_["hood"]) == 1)
+		ShroudExtras.trim(t, int(set_["trim"]))
+	ShroudExtras.accessory(t, int(set_["accessory"]), fit)
 	t.finish()
 
 ## The finished model's rest pose, for the bones: Models.hunter calls it once the body is at its final proportions.

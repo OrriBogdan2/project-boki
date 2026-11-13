@@ -20,12 +20,6 @@
 		"eyes": {"pull": 0.5, "hue": 0.2, "sat": 0.3, "val": 0.3},
 		"outfit": {"pull": 0.2, "hue": 0.02, "sat": 0.08, "val": 0.08}
 	},
-	"presets": {
-		"Soft": {"face_w": 0.62, "jaw": 0.38, "eye_size": 0.7, "eye_shape": 0.7, "brow": 0.55, "nose": 0.35},
-		"Sharp": {"face_w": 0.35, "jaw": 0.62, "eye_size": 0.4, "eye_shape": 0.25, "brow": 0.35, "nose": 0.62},
-		"Strong": {"face_w": 0.72, "jaw": 0.75, "eye_size": 0.35, "eye_shape": 0.4, "brow": 0.25, "nose": 0.72},
-		"Bright": {"face_w": 0.5, "jaw": 0.3, "eye_size": 0.85, "eye_shape": 0.8, "brow": 0.7, "nose": 0.3}
-	},
 	"wardens": {
 		"gil": {"race": "scalefolk", "face": "Bright eyes", "hair": "Spines", "detail": "None",
 			"skin": "4aa8ff", "hair_col": "1a1a22", "eyes": "f4f4f4", "outfit": "1a1a22"},

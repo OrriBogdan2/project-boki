@@ -1,11 +1,11 @@
 class_name EmptySlim
 extends RefCounted
 ## Brings a built Empty inside the Hunter budget (15k triangles, 8 materials, LODs on). The procedural body is drawn
-## for a close camera and comes to about 33k triangles, most of it smooth limbs that lose nothing at a third of
+## for a close camera and comes to about 33k triangles, most of it smooth limbs that lose nothing at a sixth of
 ## that; this reduces each part's triangle list in place, with a further LOD for distance. The head under the void
 ## shell never shows, so it goes. Runs once a model is built (Shrouds.bind), before its materials are collected.
 
-const BODY_KEEP := 0.23             # of each body part's triangles
+const BODY_KEEP := 0.17             # of each body part's triangles
 const SHELL_KEEP := 0.5             # of the void shell's: it is the silhouette of the head
 const LOD_KEEP := 0.45              # of those again, at a distance
 const MIN_TRIS := 40                # a part this small is left alone
@@ -24,6 +24,8 @@ static func apply(model: Node3D) -> void:
 		if g.mesh == null or g.mesh.get_surface_count() == 0 or _skipped(g, model):
 			continue
 		g.material_override = swap.get(g.material_override, g.material_override)
+		if g.material_override.has_meta("wear"):
+			continue      # an outfit layer is drawn light already; reducing a thin shell folds it through the body
 		g.mesh = slim(g.mesh, SHELL_KEEP if g.name == "Hollow" else BODY_KEEP)
 
 static func _skipped(n: Node, top: Node) -> bool:
@@ -53,7 +55,7 @@ static func slim(mesh: Mesh, keep: float) -> Mesh:
 			return mesh
 		arrs[Mesh.ARRAY_INDEX] = idx
 		var far := reduce(arrs, LOD_KEEP)
-		var lods := {} if far.is_empty() else {0.05: far}
+		var lods := {} if far.is_empty() or far.size() >= idx.size() else {0.05: far}
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs, [], lods)
 	return out
 

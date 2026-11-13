@@ -8,9 +8,10 @@ extends RefCounted
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
-	"creator_male_short": {"height": 0}, "creator_male_tall": {"height": 2},
-	"creator_female_short": {"gender": 0, "height": 0}, "creator_female_tall": {"gender": 0, "height": 2},
-	"creator_slight": {"build": 0}, "creator_sturdy": {"build": 2},
+	"creator_male_short": {"frame": {"height": 0.0}}, "creator_male_tall": {"frame": {"height": 1.0}},
+	"creator_female_short": {"gender": 0, "frame": {"height": 0.0}},
+	"creator_female_tall": {"gender": 0, "frame": {"height": 1.0}},
+	"creator_slight": {"frame": {"build": 0.0}}, "creator_sturdy": {"frame": {"build": 1.0}},
 	"void_mask_ember": {"hollow": 1, "glow": 1, "ghost": 2, "aura": 2},
 	"void_torn_violet": {"gender": 0, "hollow": 2, "glow": 2, "ghost": 3, "colour": 5},
 	"void_crescent_gold": {"hollow": 3, "glow": 4, "ghost": 1, "colour": 7},
@@ -67,6 +68,7 @@ func _creator(tree: SceneTree) -> void:
 	for file in LOOKS:
 		hx.look = Unmasked.default_look()
 		hx.look.merge(LOOKS[file], true)
+		hx.look = Unmasked.clean(hx.look)
 		hx.preview_yaw = PI
 		hx._show_create()
 		await _shot(tree, file, 0.8)

@@ -1,20 +1,15 @@
 class_name Unmasked
 extends RefCounted
 ## The Empty (lore: the Wyrm stole everyone's essence, so people are born without faces): your own character.
-## A person whose whole head is a void (a starfield seen with parallax), with a glowing socket shaped for a
-## Relic floating on it and faint ghosts of the features that should be there, and whose body is wrapped in a
-## shroud (no skin shows). The body (sex, height, build) shapes the silhouette under the shroud; the hollow
-## (shape, glow, ghost features), the aura and the shroud (style, colour) are the rest.
+## A smooth, featureless body of void (stars seen through a clean outline, nothing anatomical) whose whole head is
+## the void too, with a glowing socket shaped for a Relic floating on it and faint ghosts of the features that should
+## be there. The frame (sex, and five sliders: EmptyFrame) shapes the silhouette; outfits go on as layers
+## (EmptyWear: top, bottom, shoes, gloves, headwear, a cloak from Shrouds, an accessory), each one optional.
 ## Relics fill you in: in a match you are the Hunter (mask_look); look["marks"] holds features a
 ## Relic left on you. Built by Models.hunter on the hunter rig, so every HunterAnim animation plays on it.
 # "mask" in code = "Relic" in game, owner 2026-11-07 (Unmasked = the Empty, you before a Relic)
 
 const SEXES := ["Female", "Male"]
-const HEIGHTS := ["Short", "Average", "Tall"]
-const HEIGHT_SCALE := [0.9, 1.0, 1.1]       # x the hunter's size: the whole body, its ring and the camera
-const BUILDS := ["Slight", "Average", "Sturdy"]
-const BUILD_WIDTH := [0.86, 1.0, 1.16]      # Models.hunter's body width for each build
-const BUILD_BULK := [0.9, 1.0, 1.14]        # and the race bulk on top: thicker limbs, a fuller torso
 const HOLLOWS := ["Oval", "Relic", "Torn", "Crescent"]
 const GLOWS := [Color("8ae8ff"), Color("ff9a5a"), Color("b48cff"), Color("ff7ab0"), Color("ffd36a"), Color("7affc4")]
 const GHOSTS := ["None", "Eyes", "Whole face", "Stitched"]
@@ -22,20 +17,30 @@ const AURA := ["None", "Faint", "Strong"]
 const AURA_COUNT := [0, 16, 40]       # specks drifting round the head, shoulders and shroud
 const SHROUDS := Shrouds.LABELS
 const OLD_SHROUDS := 3                  # the first three cuts: what an outfit from before the shroud maps onto
-## The shroud's colours (look["colour"]; an old save's skin colour keeps its index, so it becomes the shroud
-## colour in the same slot).
+## The outfit palette (every colour slot of every layer, the cloak's look["colour"] and look["accent"]; an old save's
+## skin colour keeps its index, so it became the shroud colour in the same slot). Append only.
 const COLOURS := [Color("6b6f7a"), Color("3f4a63"), Color("2d3561"), Color("4f6b4a"), Color("2f6f73"), Color("7a2f45"),
-	Color("a4552f"), Color("b58a3c"), Color("6a4a8c"), Color("d9cfbc"), Color("34343c"), Color("b8607a")]
-const VOID_SKIN := Color("0b0814")    # what the head, neck and hands are made of: nothing shows but the void
-## The creator's rows: look key, label, choices (colours show as a swatch), and a tooltip where the row needs
-## one. The body and shroud rows come first, then the hollow's from HOLLOW_ROW on.
+	Color("a4552f"), Color("b58a3c"), Color("6a4a8c"), Color("d9cfbc"), Color("34343c"), Color("b8607a"),
+	Color("ece6da"), Color("17161c"), Color("c4392f"), Color("4f8fd0"), Color("e0b23a"), Color("7ab87a")]
+const VOID_SKIN := Color("0b0814")    # what the head is made of under the void shell
+## The bare body's void fill (look["void"]) and its outline and lit edge (look["line"]).
+const VOID_TINTS := [Color("0b0814"), Color("060b18"), Color("16091a"), Color("06130f"), Color("111114"),
+	Color("1d1236")]
+const LINES := [Color("8ae8ff"), Color("f4f0ff"), Color("ffd36a"), Color("ff7ab0"), Color("b48cff"), Color("7affc4"),
+	Color("ff9a5a")]
+## Hair styles (look["hair"]): none, then HeroHair's human styles in order (Models.LOOK_HAIRS without Bald).
+const HAIRS := ["None", "Short", "Long", "Ponytail", "Bun", "Spiky", "Buzzed", "Bob", "Pigtails", "Braid", "Mohawk",
+	"Afro", "Curly", "Swoop"]
+const BALD := 13                      # HeroHair's style for no hair
+## The creator's pick rows (the frame sliders and the outfit layers are EmptyFrame's and EmptyWear's): look key,
+## label, choices (colours show as a swatch), and a tooltip where the row needs one.
 const ROWS := [
-	["gender", "Sex", SEXES], ["height", "Height", HEIGHTS], ["build", "Build", BUILDS],
-	["shroud", "Shroud", SHROUDS], ["colour", "Shroud colour", COLOURS],
-	["hollow", "Hollow", HOLLOWS], ["glow", "Glow", GLOWS], ["ghost", "Ghost", GHOSTS],
+	["gender", "Sex", SEXES], ["void", "Body", VOID_TINTS], ["line", "Outline", LINES],
+	["hair", "Hair", HAIRS], ["hair_col", "Hair colour", Models.LOOK_HAIR],
+	["hollow", "Eyes", HOLLOWS], ["glow", "Eye glow", GLOWS], ["ghost", "Face marks", GHOSTS],
 	["aura", "Aura", AURA, "Glowing specks that drift around you"],
 ]
-const HOLLOW_ROW := 5
+const FACE_ROW := 3                   # rows from here on are the head's (the Face tab)
 const VOID_SHADER := preload("res://shaders/void_face.gdshader")
 const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
 const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)
@@ -47,14 +52,21 @@ const GHOST_FROM_BROWS := [0, 1, 1, 2, 3]
 ## Old creator face (Models.LOOK_FACES) -> the closest old eyes.
 const EYES_FROM_FACE := [0, 1, 2, 3, 4, 3, 5, 4, 1]
 
+## A new Empty: the bare void body, nothing worn.
 static func default_look() -> Dictionary:
-	return {"unmasked": true, "gender": 1, "height": 1, "build": 1, "hollow": 0, "glow": 0, "ghost": 1, "aura": 1,
-		"shroud": 0, "colour": 1, "marks": [], "features": {}}
+	return {"unmasked": true, "gender": 1, "frame": EmptyFrame.clean({}), "void": 0, "line": 0, "hair": 0,
+		"hair_col": 0, "hollow": 0, "glow": 0, "ghost": 1, "aura": 1, "shroud": EmptyWear.NONE, "colour": 1,
+		"accent": Shrouds.NO_ACCENT, "trim": 0, "accessory": 0, "acc_col": EmptyWear.NONE, "wear": EmptyWear.bare(),
+		"marks": [], "features": {}}
 
+## A whole random person: every pick, every slider, and each outfit layer worn or not.
 static func random_look() -> Dictionary:
 	var out := default_look()
 	for row in ROWS:
 		out[row[0]] = randi() % (row[2] as Array).size()
+	for k in EmptyFrame.KEYS:
+		out["frame"][k] = snappedf(randf(), EmptyFrame.STEP)
+	EmptyWear.randomise(out)
 	return out
 
 static func is_look(lk: Dictionary) -> bool:
@@ -68,8 +80,10 @@ static func clean(lk: Dictionary) -> Dictionary:
 	out.merge(src, true)
 	_hollow_from_face(out, src)
 	_shroud_from_outfit(out, src)
+	_frame_from_steps(out, src)
 	for row in ROWS:
 		out[row[0]] = clampi(_i(out[row[0]], 0), 0, (row[2] as Array).size() - 1)
+	EmptyWear.clean_into(out)
 	if not out["marks"] is Array:
 		out["marks"] = []
 	out["features"] = out["features"].duplicate() if out["features"] is Dictionary else {}
@@ -94,6 +108,14 @@ static func _shroud_from_outfit(out: Dictionary, src: Dictionary) -> void:
 	out.erase("outfit")
 	out.erase("motes")
 
+## An Empty saved with Short / Average / Tall and Slight / Average / Sturdy: the frame sliders closest to them.
+static func _frame_from_steps(out: Dictionary, src: Dictionary) -> void:
+	if not src.has("frame") and (src.has("height") or src.has("build")):
+		out["frame"] = EmptyFrame.from_steps(_i(src.get("height"), 1), _i(src.get("build"), 1))
+	out["frame"] = EmptyFrame.clean(out["frame"])
+	out.erase("height")
+	out.erase("build")
+
 ## The closest Unmasked to an old detailed look (race, face, hair, skin...): race and hair are dropped.
 ## A whole number from whatever an old save held there (a string, nothing, a float), else `fallback`.
 static func _i(v: Variant, fallback: int) -> int:
@@ -114,8 +136,7 @@ static func from_old(old: Dictionary) -> Dictionary:
 	var outfit := clampi(_i(old.get("outfit"), 3), 0, Models.LOOK_OUTFITS.size() - 1)
 	var skin := clampi(_i(old.get("skin"), 1), 0, Models.LOOK_SKIN.size() - 1)
 	out["gender"] = gender
-	out["build"] = clampi(_i(old.get("body"), 1), 0, 2)
-	out["height"] = _height_for(reach)
+	out["frame"] = EmptyFrame.from_steps(_height_for(reach), clampi(_i(old.get("body"), 1), 0, 2))
 	out["hollow"] = HOLLOW_FROM_EYES[EYES_FROM_FACE[face]]
 	out["ghost"] = GHOST_FROM_BROWS[_brows_for(face, gender)]
 	out["glow"] = 3 if gender == 0 or face == 3 else 0
@@ -167,22 +188,22 @@ static func blend(model: Node3D) -> void:
 		var base: Variant = sm.get_shader_parameter("albedo")
 		if base is Color:
 			sm.set_shader_parameter("albedo", (base as Color).lerp(tint, SHOW))
-	var wide := lerpf(1.0, BUILD_WIDTH[u["build"]], SHOW)
-	model.scale *= Vector3(wide, lerpf(1.0, HEIGHT_SCALE[u["height"]], SHOW), wide)
+	var wide := lerpf(1.0, EmptyFrame.width(u), SHOW)
+	model.scale *= Vector3(wide, lerpf(1.0, EmptyFrame.factor(u, "height"), SHOW), wide)
 
 ## An Unmasked as the old look dictionary Models.hunter builds from: no race, no hair, no details.
 static func legacy(lk: Dictionary) -> Dictionary:
 	var u := clean(lk)
 	return {
-		"race": 0, "body": u["build"], "gender": u["gender"], "face": 1, "skin": 0, "hair": 13, "hair_v": 2,
+		"race": 0, "body": 1, "gender": u["gender"], "face": 1, "skin": 0, "hair": 13, "hair_v": 2,
 		"hair_col": 0, "detail": 0, "outfit": 0, "glider": u.get("glider", "classic"),
 	}
 
 ## The race entry Models.hunter reads: always human, sized by height.
 static func race(lk: Dictionary) -> Dictionary:
 	var u := clean(lk)
-	return {"id": "human", "name": "Human", "scale": HEIGHT_SCALE[u["height"]],
-		"head": 0.93 if int(u["gender"]) == 0 else 1.0, "bulk": BUILD_BULK[u["build"]], "skin": 1, "desc": ""}
+	return {"id": "human", "name": "Human", "scale": EmptyFrame.factor(u, "height"),
+		"head": EmptyFrame.factor(u, "head"), "bulk": EmptyFrame.bulk(u), "skin": 1, "desc": ""}
 
 static func colour(lk: Dictionary) -> Color:
 	return COLOURS[clean(lk)["colour"]]
@@ -262,51 +283,32 @@ static func _aura(torso: Node3D, count: int, glow: Color) -> void:
 	p.mesh = dot
 	torso.add_child(p)
 
-# ------------------------------------------------------------------------------------------ the shroud
-## The shroud over the body (the colourway comes from the shroud colour, via Models.hunter): see Shrouds, which has
-## the cuts. The body under it keeps its shape.
+# ------------------------------------------------------------------------------------------ the body
+## The body and what it wears (Models.hunter calls it with the hunter rig's parts): the frame first, then the void
+## body and the outfit layers, then the cloak and accessory (Shrouds), which go over everything.
 static func dress(c: Dictionary, lk: Dictionary) -> void:
-	_shape(c, c["fem"])
-	Shrouds.dress(c, clean(lk))
+	var u := clean(lk)
+	EmptyFrame.shape(c, u)
+	EmptyWear.dress(c, u)
+	Shrouds.dress(c, u, EmptyWear.accessory_fit(c, u))
 
-## Female and male read at a glance: a woman's narrower shoulders, fuller hips and a weight-on-one-hip
-## stance; a man's broad shoulders and squarer, even stance (content/rules/warden_stance.json "empty_f",
-## "empty_m", read by HunterAnim through the model's "stance" meta).
-static func _shape(c: Dictionary, fem: bool) -> void:
-	var torso: Node3D = c["torso"]
-	torso.get_parent().get_parent().set_meta("stance", "empty_f" if fem else "empty_m")
-	for ch in torso.get_children():
-		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh == HeroKit.torso(fem):
-			(ch as MeshInstance3D).mesh = figure(fem)
-	var shoulder := 0.88 if fem else 1.06
-	var limb := Vector3(0.8, 1.0, 0.8) if fem else Vector3.ONE
-	for sd in ["L", "R"]:
-		var piv := (c["arms"][sd] as Array)[0] as Node3D
-		piv.position.x *= shoulder
-		piv.scale = limb
-		(c["p" + sd.to_lower()] as Node3D).position.x *= shoulder
-	if not fem:
-		return
-	var legs := torso.get_parent().get_node("Legs")
-	for nm in ["LegL", "LegR"]:
-		var leg := legs.get_node(nm) as Node3D
-		leg.position.x *= 1.12
-		leg.scale = Vector3(0.9, 1.0, 0.9)
+## A point on the Empty's torso (HeroKit.torso_pt drawn into an hourglass for a woman: a slim waist, a fuller bust and
+## hips; a broad, square chest for a man), before the body's width scale.
+static func figure_pt(u: float, v: float, fem: bool) -> Vector3:
+	var p := HeroKit.torso_pt(u, v, fem)
+	var front := clampf(-sin(u * TAU), 0.0, 1.0)
+	var k := 1.0
+	if fem:
+		k -= 0.17 * exp(-pow((p.y + 0.07) / 0.1, 2.0))
+		k += 0.1 * smoothstep(-0.16, -0.3, p.y)
+		for sx in [-1.0, 1.0]:
+			var d := Vector2(p.x - 0.08 * sx, (p.y - 0.08) * 1.1)
+			p.z -= 0.04 * exp(-d.length_squared() / 0.004) * front
+	else:
+		k += 0.07 * smoothstep(-0.05, 0.22, p.y) - 0.03 * exp(-pow((p.y + 0.1) / 0.12, 2.0))
+	return Vector3(p.x * k, p.y, p.z * lerpf(1.0, k, 0.6))
 
-## The Empty's torso: the hunter torso drawn into an hourglass for a woman (a slim waist, a fuller bust
-## and hips) or a broad, square chest for a man.
+## The Empty's torso mesh (figure_pt all round).
 static func figure(fem: bool) -> ArrayMesh:
-	var fn := func(u: float, v: float) -> Vector3:
-		var p := HeroKit.torso_pt(u, v, fem)
-		var front := clampf(-sin(u * TAU), 0.0, 1.0)
-		var k := 1.0
-		if fem:
-			k -= 0.17 * exp(-pow((p.y + 0.07) / 0.1, 2.0))
-			k += 0.1 * smoothstep(-0.16, -0.3, p.y)
-			for sx in [-1.0, 1.0]:
-				var d := Vector2(p.x - 0.08 * sx, (p.y - 0.08) * 1.1)
-				p.z -= 0.04 * exp(-d.length_squared() / 0.004) * front
-		else:
-			k += 0.07 * smoothstep(-0.05, 0.22, p.y) - 0.03 * exp(-pow((p.y + 0.1) / 0.12, 2.0))
-		return Vector3(p.x * k, p.y, p.z * lerpf(1.0, k, 0.6))
+	var fn := func(u: float, v: float) -> Vector3: return figure_pt(u, v, fem)
 	return HeroKit.surf("empty_torso|%s" % fem, fn, 48, 26)

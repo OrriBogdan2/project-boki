@@ -1,0 +1,38 @@
+{
+	"_doc": "The Empty's creator (scripts/match/empty_frame.gd, empty_wear.gd, scripts/ui/creator_panel.gd; docs/CHARACTER_CREATOR.md). frame: each body slider 0..1 maps onto [lo, hi] for the body's sex (f / m), so no shape leaves the range the outfits are built for. slots: the outfit layers in creator order; every slot can be empty; items keep save order (append only); cols are the colour slots each item in the slot takes. presets: whole looks for the Start from row.",
+	"frame": {
+		"height": {"label": "Height", "f": [0.9, 1.0], "m": [0.97, 1.1]},
+		"build": {"label": "Build", "f": [0.84, 1.04], "m": [0.92, 1.18]},
+		"shoulders": {"label": "Shoulders", "f": [0.84, 0.95], "m": [1.03, 1.16]},
+		"hips": {"label": "Hips", "f": [1.12, 1.28], "m": [0.92, 1.02]},
+		"head": {"label": "Head size", "f": [0.88, 1.0], "m": [0.94, 1.06]}
+	},
+	"slots": [
+		{"id": "top", "label": "Top", "cols": ["Main", "Trim", "Detail"], "default": [1, 9, 7],
+			"items": ["Tank", "Tee", "Long sleeve", "Crop top", "Jerkin", "Hoodie", "Tunic"]},
+		{"id": "bottom", "label": "Bottom", "cols": ["Main", "Trim"], "default": [10, 7],
+			"items": ["Shorts", "Trousers", "Leggings", "Baggy trousers", "Skirt", "Long skirt"]},
+		{"id": "shoes", "label": "Shoes", "cols": ["Main", "Sole"], "default": [10, 9],
+			"items": ["Boots", "Shoes", "Tall boots", "Sandals", "Wraps", "Clogs"]},
+		{"id": "gloves", "label": "Gloves", "cols": ["Main", "Cuff"], "default": [10, 7],
+			"items": ["Mitts", "Gauntlets", "Fingerless", "Long gloves", "Bracers", "Hand wraps"]},
+		{"id": "head", "label": "Headwear", "cols": ["Main", "Band", "Detail"], "default": [2, 7, 9],
+			"items": ["Hood", "Helm", "Wide hat", "Cap", "Beanie", "Headband"]},
+		{"id": "back", "label": "Cloak", "cols": ["Cloth", "Accent"]},
+		{"id": "accessory", "label": "Accessory", "cols": ["Strap", "Accent"]}
+	],
+	"presets": {
+		"Wanderer": {"gender": 1, "frame": {"height": 0.6, "build": 0.5, "shoulders": 0.6, "hips": 0.5, "head": 0.5},
+			"wear": {"top": [2, 4, 9, 7], "bottom": [1, 10, 7], "shoes": [0, 10, 9], "gloves": [2, 10, 7]},
+			"shroud": 0, "colour": 1, "accessory": 2, "hollow": 0, "glow": 0, "ghost": 1, "aura": 1},
+		"Dancer": {"gender": 0, "frame": {"height": 0.5, "build": 0.3, "shoulders": 0.4, "hips": 0.6, "head": 0.5},
+			"wear": {"top": [3, 5, 7, 9], "bottom": [4, 5, 7], "shoes": [3, 7, 10], "head": [5, 7, 7, 9]},
+			"shroud": -1, "accessory": 3, "hollow": 3, "glow": 3, "ghost": 1, "aura": 2},
+		"Smith": {"gender": 1, "frame": {"height": 0.4, "build": 0.9, "shoulders": 0.9, "hips": 0.6, "head": 0.5},
+			"wear": {"top": [4, 6, 10, 7], "bottom": [1, 10, 6], "shoes": [5, 6, 10], "gloves": [1, 6, 7]},
+			"shroud": -1, "accessory": 1, "hollow": 1, "glow": 1, "ghost": 0, "aura": 0},
+		"Ranger": {"gender": 0, "frame": {"height": 0.8, "build": 0.5, "shoulders": 0.5, "hips": 0.4, "head": 0.5},
+			"wear": {"top": [5, 3, 7, 9], "bottom": [2, 10, 3], "shoes": [2, 10, 9], "gloves": [3, 3, 7], "head": [0, 3, 7, 9]},
+			"shroud": 6, "colour": 3, "accent": 7, "accessory": 5, "hollow": 2, "glow": 5, "ghost": 2, "aura": 1}
+	}
+}
