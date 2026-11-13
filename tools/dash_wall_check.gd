@@ -9,8 +9,8 @@ extends "res://tools/wall_slide_check.gd"
 ## A try fails when the distance it makes along the wall is off the reference's (its length times the table)
 ## by more than KEEP_TOL. A face shorter than that share (Ryzz's 7 m lane at 80 degrees past a 1.3 m Tenzo rock
 ## or a prop's 0.9 m) is left round its end, where the corner slip adds to it: a try that misses the table
-## there asserts instead that it got past the end and ended free of the wall ("round"). Tenzo's Rock Hop is a leap to a spot picked short of the wall (KIT_STOPS): it only must
-## never end up inside it.
+## there asserts instead that it got past the end and ended free of the wall ("round"). Tenzo's Rock Hop is a
+## leap to a spot picked short of the wall (KIT_STOPS): it only must never end up inside it.
 ## Counts fixed simulation steps; never touches the save. Prints one "DWALL ..." line per try and
 ## "DASH WALL CHECK DONE, failures: N".
 
