@@ -38,6 +38,8 @@ extends RefCounted
 ##      tools/sfx_world_cues.gd
 ##  18. falloff sized to the match view: a cue at the screen's side edge is heard (full-ish level, not muffled),
 ##      one 10 m past it is quieter, one past ~30 m is silent
+##  19. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist;
+##      every form file names its own cast, travel and hit sounds (MergeSfx), all on file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -85,6 +87,7 @@ func run(main: Node) -> void:
 	_breakables()
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	_falloff()
+	_fusion_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -322,6 +325,35 @@ func _nuke_fall() -> void:
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
+
+## 11. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
+func _fusion_cues() -> void:
+	var cues := {}
+	var files := DirAccess.get_files_at("res://content/merge_forms")
+	for t in (MergeForm.data()["types"] as Dictionary).values():
+		cues[String(t["cue"])] = true
+	for f in files:
+		cues[String(MergeForm.kit_form(f.get_basename())["cue"])] = true
+	var missing := []
+	for c in cues:
+		if not Sfx.ensure("boki_fuse_" + c):
+			missing.append(c)
+	for c in ["boki_fuse_end", "boki_fuse_tired", "boki_evolve"]:
+		if not Sfx.ensure(c):
+			missing.append(c)
+	ok(missing.is_empty() and cues.size() >= 16,
+		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
+	# every form names its own cast, travel and hit (MergeSfx), each on file and none shared with another form
+	var named := {}
+	var silent := []
+	for f in files:
+		for kind in ["cast", "travel", "hit"]:
+			var sname := MergeSfx.name_of(f.get_basename(), kind)
+			named[sname] = true
+			if sname == "" or not Sfx.ensure(sname):
+				silent.append("%s %s" % [f.get_basename(), kind])
+	ok(silent.is_empty() and named.size() == files.size() * 3,
+		"%d forms: own cast, travel and hit, %d sounds on file (silent %s)" % [files.size(), named.size(), silent])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 ## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
