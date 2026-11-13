@@ -115,6 +115,14 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 
 ## 5. For the declutter jobs (not done here)
 
+**2c. Recount on main 18402df5b (2026-11-13).** Main changed the tutorial after 2b (one-line objective strip instead of the tip card, real run
+levels, rank step gone), so the key screens were shot again (`--first15-shots --size=1280x720`, local xvfb + llvmpipe on rpc1; shots not committed;
+`layout.txt`: 0 CLIPPED). Landing 9 (the strip replaced the tip card), fight/ult 11, expedition panel 5, ship 11: as in 2b.
+Uplink step 12 (was 10-11): strip + "Hold F" bar prompt + the step's tip in the message lane, and that tip read **"x58"**, because
+`Tutorial._words()` runs every frame and pushed the same tip each time (571 pushes on the glove step). Fixed here: the tip goes once per new line
+(`--tutorial-hud-check` row). Landed 15 s: 11, plus the rival hover card when the cursor rests on a rival; it covers the strip and the Ways Out clocks.
+The ranked follow-ups below still hold.
+
 **Ranked follow-ups after the 2b re-shoot** (rank = groups removed per screen shown to every new player):
 1. **Tutorial HUD in steps (item 1 below):** 9 to 5 on the landing and on all 12 step screens. Biggest win, still not done.
 2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2.
