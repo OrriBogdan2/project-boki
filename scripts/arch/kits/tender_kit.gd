@@ -13,11 +13,13 @@ extends ArchKit
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
+const HEARTH_FILL := 0.9       # the same for the thrown Hearthlight's disc
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
 var burr_n := 0
+var field_look := {}           # the Burrseed field's look from content/vfx/tender.json "field", colours resolved
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
 var emp_until := 0.0           # the next ember left an idle gun (Empowered: look and sound only)
@@ -416,7 +418,7 @@ func burst_radius() -> float:
 
 func _stick(e: Ent) -> void:
 	burr_n += 1
-	burrs.append({"t": e, "build": 0.0, "id": burr_n})
+	burrs.append({"t": e, "build": 0.0, "id": burr_n, "motes": 0.0})
 	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
@@ -439,12 +441,7 @@ func _tick_burrs(dt: float) -> void:
 			_burr_off(b)
 			continue
 		var k := clampf(float(b["build"]) / need, 0.0, 1.0)
-		lk().keep(
-				key, "disc", t.pos,
-				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 2.2, "rim_w": 0.14,
-					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
-		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
+		_show_field(b, key, t.pos, k, dt)
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
@@ -453,6 +450,29 @@ func _tick_burrs(dt: float) -> void:
 		if k >= 1.0:
 			_burr_off(b)
 			_burst(t)
+
+## The root field under a stuck foe (VFX_QUALITY zone rule): a lit rim on the burst radius, a soft inside, a
+## front filling out toward the root and motes rising off the rim; its numbers are tender.json's "field".
+func _show_field(b: Dictionary, key: String, at: Vector3, k: float, dt: float) -> void:
+	var fd := field()
+	var r := burst_radius()
+	lk().keep(
+			key, "disc", at,
+			{"r": r, "col": fd["col"], "rim": fd["rim"], "fill": fd["fill"], "sweep": k, "a": fd["a"]})
+	AimKit.circle(h, key, {"at": at, "r": r, "band": fd["band"], "all": true, "col": fd["rim"]})
+	b["motes"] = float(b["motes"]) + dt
+	if float(b["motes"]) >= float(fd["motes_every"]):
+		b["motes"] = 0.0
+		vfx("seed_field", at, null, {"r": r})
+
+## tender.json's "field", its palette names turned into colours (read once).
+func field() -> Dictionary:
+	if field_look.is_empty():
+		var d := HeroVfx.data("tender")
+		field_look = (d["field"] as Dictionary).duplicate()
+		for key in ["col", "rim", "root"]:
+			field_look[key] = Color(String(d["palette"][field_look[key]]))
+	return field_look
 
 func _burr_off(b: Dictionary) -> void:
 	var key := "burr%d" % int(b["id"])
@@ -465,8 +485,8 @@ func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
 	var at := t.pos
 	var rr := burst_radius()
-	var col := col_of(rmb_def())
-	# the flare: a swirl of starlight snaps out over the area; each foe wears the root's body look (StatusLooks)
+	# the field's moment: a ring runs out to its rim; each foe it takes gets a snap of control violet and wears
+	# the root's body look (StatusLooks)
 	vfx("seed_burst", at, null, {"r": rr})
 	m.sfx("tend_root", at, 0.0, 1.0)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
@@ -476,6 +496,7 @@ func _burst(t: Ent) -> void:
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
+		vfx("seed_root", f.pos)
 	stats["flares"] += 1
 	play_soft("mm_tug")
 
@@ -573,7 +594,8 @@ func _tick_hearth(dt: float) -> void:
 		"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": HEARTH_FILL,
+			"a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])

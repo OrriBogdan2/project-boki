@@ -21,6 +21,7 @@ const ROCKET_CAP_S := 20.0     # s a ride may take at most
 const SETTLE_TOP_V := 5.0      # m/s: the landing dust is never faster than this (it settles, it does not blast)
 const STREAK_PILE := 40        # streaks asked for at once: the pool still caps them
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
+const ZONE_CORE_A := 0.25      # alpha at most at the centre of a zone (docs/VFX_QUALITY.md)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 const TRACER_FULL := 3         # steps (60/s) a round flies before its tracer must be drawn full length
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
@@ -79,6 +80,7 @@ func run(main: Node) -> void:
 	_statuses(m, P)
 	_boki_statuses(m, P)
 	_tier_up(m, V, P)
+	_zones(main)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _vex_core(main)
@@ -374,6 +376,48 @@ func _vex_tracer(main: Node) -> void:
 	ok(tracers >= born.size(), "a tracer for every round (%d of %d)" % [tracers, born.size()])
 	var spark: Array = (V._rec(P, "shot_hit").get("fx", []) as Array).map(func(l: Dictionary): return String(l["p"]))
 	ok(spark.has("flare") and spark.has("ember"), "a round that lands has a flash and sparks")
+
+## docs/VFX_QUALITY.md: a zone is a lit rim and a soft inside, 0.25 alpha at most at the centre. Vex's X discs, Motley's
+## well (floor and dome), Meeko's seed and Hearthlight discs and Sable's X ring, from the values the kits draw with.
+func _zones(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	var vex: Node3D = (m.player.ak as GunslingerKit).fx().disc(
+			Vector3.ZERO, 3.4, Color("2a1018"), Color("c43a2a"), 1.0, Color("ff9a5c"))
+	var vm := (vex as MeshInstance3D).material_override as ShaderMaterial
+	ok(float(vm.get_shader_parameter("fill_a")) <= ZONE_CORE_A and (vm.get_shader_parameter("color3") as Color).a > 0.0,
+			"Vex's scorch disc: centre alpha at most %.2f and a lit rim" % ZONE_CORE_A)
+	ok(is_equal_approx(vex.scale.x * VVFx.DISC_EDGE, 3.4), "Vex's scorch disc: its rim on the hitbox radius")
+	var looks := KitLooks.of(m)
+	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 4.5)
+	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
+	var floor_a := float(fm.get_shader_parameter("fill")) * (fm.get_shader_parameter("color") as Color).a
+	ok(floor_a <= ZONE_CORE_A and float(fm.get_shader_parameter("thickness")) > 0.0,
+			"Motley's well: no solid floor (centre alpha 0), a lit rim")
+	var dome := looks.hold_on("zone_dome", "well_dome", m, Vector3.ZERO, 4.5)
+	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
+	var dome_a := float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1)
+	ok(dome_a <= ZONE_CORE_A, "Motley's well dome: centre alpha at most %.2f, the rim carries it" % ZONE_CORE_A)
+	# care_disc: body * 1.6 at the centre, cel steps of 0.25
+	var hearth_a := TenderKit.HEARTH_FILL * 0.18 * 1.6 * 1.1
+	ok(roundf((hearth_a + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A,
+			"Meeko's Hearthlight disc: centre alpha at most %.2f" % ZONE_CORE_A)
+	_meeko_field()
+	var sable_a: float = AimShapes.FILL_A * 0.2 * 2.0     # the band's tint inside, at the ult's brightest beat
+	ok(sable_a <= ZONE_CORE_A and ThiefUlt.RING_W > 0.0, "Sable's X: a ring band with a faint tint inside")
+
+## Meeko's Burrseed root field (tender.json "field"): leaf green, the whole inside up to the rim (care_disc's body
+## grows as 0.18 + 0.22 r^2 to r 0.89, where its rim starts) at most 0.25, and the burst's ring lands on its rim
+## (the ring shader's band ends at 0.9 of its size).
+func _meeko_field() -> void:
+	var d := HeroVfx.data("tender")
+	var fd: Dictionary = d["field"]
+	var pal: Dictionary = d["palette"]
+	var inner_a := float(fd["fill"]) * (0.18 + 0.22 * 0.89 * 0.89) * 1.6 * float(fd["a"])
+	ok(inner_a <= ZONE_CORE_A and Color(String(pal[fd["col"]])).is_equal_approx(Arch.color("tender")),
+			"Meeko's root field: leaf green, inside alpha at most %.2f to the rim (%.2f)" % [ZONE_CORE_A, inner_a])
+	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
+			"Meeko's root field: the burst's ring lands on the burst radius")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
