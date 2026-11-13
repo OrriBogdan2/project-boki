@@ -48,8 +48,8 @@ grows with every knock.
 |---|---|
 | Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Shotgun (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The Scrap King. Hooks you in with his bone-hook arm, drops a hoard on you, and grows with every knock. |
-| Silhouette | the hunched grey frame, the purple bone-hook arm and the hoard of chests, barrels and bells on his back |
+| Fantasy | The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock. |
+| Silhouette | the round brass helm and the rope drum on one shoulder |
 | Resource | Salvage (max 10) |
 
 ### Kit card
@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
-| Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. |
+| Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
 | Dash: Barge | A short, low lunge the way you move, clawing the ground; a pounce, further, in the air. It works while you reel. |
 | RMB: Abyssal Hand | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
 | E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
@@ -68,7 +68,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more.
+**Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
 
 **Barge (dash, Shift, 10s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
@@ -76,7 +76,7 @@ What the in-game kit card (K) says.
 
 - *Tap:* Your abyssal arm coils back for 0.2s, then reaches 11.5m (slowly: a foe who sees it can sidestep) through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
-**Anchor Drop (E, 7s cooldown).** Raise your fist while the area fills on the ground in front of you (0.38s), then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
+**Anchor Drop (E, 7s cooldown).** Raise your fist while the area fills on the ground in front of you (0.38s), then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
 
 **Brass Broadside (hunter ultimate, from level 6, 21s cooldown).** Charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area, and it turns with your aim). You can walk slowly while it charges and fires. Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
 
@@ -86,9 +86,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 12s -> 10.3s. | cooldown 12s -> 8.7s; hitting a foe takes half of it off. |
-| Dash (Shift) | recharge 10s -> 8.2s per charge. | recharge 10s -> 6.4s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
-| E | cooldown 7s -> 5.5s, damage +20%, stun +0.1s. | cooldown 7s -> 4.1s, damage +40%, stun +0.4s in all (0.1s a rank, 0.2s more); double damage on a foe over the abyss. |
+| RMB | cooldown 12s -> 10.8s. | cooldown 12s -> 9.6s; hitting a foe takes half of it off. |
+| Dash (Shift) | recharge 10s -> 8.5s per charge; the air pounce 12.5s -> 10.5s. | recharge 10s -> 7s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
+| E | cooldown 7s -> 6.3s, damage +15%, stun +0.1s. | cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
 

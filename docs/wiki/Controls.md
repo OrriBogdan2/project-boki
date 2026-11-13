@@ -77,9 +77,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
 | Middle mouse / Mouse 4 | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
-| K | Boki order: attack my target | `kin_attack` | yes |
-| N | Boki quick key: Return | `kin_return` | yes |
-| L | Boki order: hold this position | `kin_hold` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift / Mouse 5 | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |

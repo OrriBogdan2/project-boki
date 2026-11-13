@@ -108,7 +108,8 @@ static func _mmb_to_ping(ks: Dictionary) -> void:
 ## player saved keeps what they saved; an unsaved one is pinned to its old default (or to none) instead.
 static func _new_defaults(ks: Dictionary) -> void:
 	var added := [["ping", "mouse:%d" % MOUSE_BUTTON_XBUTTON1, ["mouse:%d" % MOUSE_BUTTON_MIDDLE]],
-		["dash", "mouse:%d" % MOUSE_BUTTON_XBUTTON2, [_code(KEY_SHIFT)]]]     # (the Boki quick keys start unbound: KinKeys)
+		["dash", "mouse:%d" % MOUSE_BUTTON_XBUTTON2, [_code(KEY_SHIFT)]]]
+	# (the Boki quick keys start unbound: KinKeys)
 	for d in added:
 		if not ks.has(d[0]) and _used_elsewhere(ks, d[1], [d[0]]):
 			ks[d[0]] = d[2]
