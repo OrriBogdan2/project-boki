@@ -119,6 +119,9 @@ Result (the audit's "check by ear" item): **neither is an outlier, so no generat
 | median of the other ten | impact | | 0.87 | 0.87 | 16.0 |
 | median of the other ten | loop | | 1.87 | 1.67 | 15.6 |
 
+## Combo payoff sounds
+A mark or combo payoff (DECISIONS 2026-11-08) plays its own named sound once, never only a generic hit: Sable `pay_cashin`, Vex's rifle the shared `combo` chime (`ComboMark.SND_DB` +3 dB brings its file to the fire level), Sparkle `hero_blowout`, Neve `rime_splinter`, Motley `pay_collapse`, Lace `pay_called` (wall stun), Gil `pay_flashpoint` (Beach), Cinder `lw_blaze`, Meeko `tend_kindled`; Albert, Kael, Tenzo, Grimble and Lace's ult go through `ArchKit.payoff_fx`. Each must sit at the impact category's level less its tolerance (-19 dB RMS) once the call's `vol_db` is added. `--recast-cue-check` lands each one and asserts it starts once at that level, and that every sound `payoff_fx` names has a file at that level.
+
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
 
