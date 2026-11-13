@@ -81,6 +81,8 @@ const CHECKS := {
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],      # boots, charms vs source
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
+	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
+	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],      # its child process
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
 	"--wheel-zoom-check": ["res://tools/wheel_zoom_check.gd", "wheel_zoom_check", null],      # the wheel zooms
 	"--wheel-zoom-shots": ["res://tools/wheel_zoom_shots.gd", "wheel_zoom_shots", null],      # GPU: the wheel zooming
