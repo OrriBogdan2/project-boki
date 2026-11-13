@@ -93,6 +93,10 @@ static func _stand_dist(k: Dictionary) -> float:
 		"sniff": return SNIFF_DIST
 	return LOOK_DIST
 
+## True for a Boki at leisure (glint fishing's partner check): main's BUSY keys, awake.
+static func at_leisure(k: Dictionary) -> bool:
+	return _free(k)
+
 static func _trait(k: Dictionary, key: String) -> float:
 	return float(k["rec"]["traits"].get(key, 0.5))
 

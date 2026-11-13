@@ -15,6 +15,8 @@ extends RefCounted
 ##      each look hides itself when its life is spent
 ##   9. on the rock: Glasswater has the rock and a session started there runs to a result card; the Empty
 ##      holds the rod and casts through it (HunterRod poses via HomeVerbs) and puts it away at the end
+##   9. the partner: a sleeping one is left alone; an awake one walks over to sit side-on 1-3 m from you,
+##      faces the bobber, leans in on a bite, and hops on a catch (higher for a rare one)
 ## --glint-fishing-shots=<dir> makes a strip of one cast on the Empty instead (a real renderer).
 ## Never touches the real save.
 
@@ -292,8 +294,15 @@ func _on_rock() -> void:
 	for k in gw.kins:
 		k.erase("indoors")
 		k["busy"] = false
+	var pk: Dictionary = gw.kins.filter(func(k): return k["rec"] == Save.active_kin())[0]
+	pk["nap_t"] = 5.0
+	var spot: Vector3 = pk["pos"]
+	gf.use()
+	ok(gf.run == null and pk["pos"] == spot and not pk.has("called_t"), "a sleeping partner is left alone")
+	pk["nap_t"] = 0.0
 	gf.use()
 	ok(gf.run != null, "a session starts with your partner")
+	await _seated(gw, gf, pk)
 	var t := 0.0
 	var plopped := false
 	var posed := {}              # the Empty's rod poses seen (HomeVerbs: a one-shot over the held pose)
@@ -302,12 +311,48 @@ func _on_rock() -> void:
 		gf.tick(0.1)
 		plopped = plopped or (gf.run != null and gf.fx.node_of("plop").visible)
 		t += 0.1
-		posed[gw.verbs.act if gw.verbs.act != "" else gw.verbs.stance] = true
+		posed[gw.verbs.stance] = true     # the held pose and the one-shot are both seen (the one-shot masks the pose)
+		posed[gw.verbs.act] = true
 	ok(posed.has("wait") and posed.has("cast"), "the Empty holds the rod and casts (poses seen: %s)" % [posed.keys()])
 	ok(gw.verbs.stance == "" and gw.verbs.act == "", "the rod is put away when fishing ends")
 	ok(plopped, "a cast's plop showed on the water during the session")
 	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, pressing every second)" % t)
 	Content.rules("farm_build")["base_mode"] = false
+
+## The partner walks over, then a forced bite and catch: where it sits, where it looks, how it leans and hops.
+func _seated(gw, gf: GlintFishing, pk: Dictionary) -> void:
+	var w := 0.0
+	while w < WAIT_S and not pk.get("busy", false):
+		await main.get_tree().process_frame
+		w += main.get_process_delta_time()
+	var n: Node3D = pk["node"]
+	var run: GlintFishing.Run = gf.run
+	run.hooked = 0
+	run.bite_t = 3.0
+	run.go(GlintFishing.Run.S.WAIT)
+	for i in 29:
+		gf.tick(0.1)
+	var gap: float = n.position.distance_to(gw.ppos)
+	ok(gap > 1.0 and gap < 3.0, "the partner sits %.1f m from you (under 3 m) during the cast" % gap)
+	var to_bobber := (gf.bobber.global_position - n.position) * Vector3(1, 0, 1)
+	var ahead := (-n.global_transform.basis.z).normalized()
+	ok(ahead.dot(to_bobber.normalized()) > 0.95, "and faces the bobber (%.2f)" % ahead.dot(to_bobber.normalized()))
+	var side := absf(Vector3(gf._dir().x, 0, gf._dir().y).dot((n.position - gw.ppos).normalized()))
+	ok(side < 0.5, "side-on to the water (%.2f along the cast)" % side)
+	var body: Node3D = n.get_node("Body")
+	ok(run.ears() and body.rotation.x < -0.2, "it leans in on the bite (%.2f rad)" % body.rotation.x)
+	run.go(GlintFishing.Run.S.SHOW)
+	var peaks := []
+	for rare in [false, true]:
+		run.casts.append({"how": "caught", "catch": run.glints[0]["catch"], "rare": rare})
+		run.state_t = 0.0
+		gf._entered(GlintFishing.Run.S.SHOW)
+		var top := 0.0
+		for i in 30:
+			gf.tick(0.03)
+			top = maxf(top, body.position.y)
+		peaks.append(top)
+	ok(peaks[0] > 0.05 and peaks[1] > peaks[0], "it hops on a catch, higher if rare (%.2f m, %.2f m)" % peaks)
 
 func _arrived(was: Node):
 	var t := 0.0
