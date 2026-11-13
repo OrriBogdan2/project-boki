@@ -71,6 +71,7 @@ func _stack() -> void:
 	var foes: Array = m.hunters.filter(func(h: Hunter): return h.team != p.team and h.kin != null)
 	var f1: Hunter = foes[0]
 	var f2: Hunter = foes[1]
+	f2.teleport(f1.pos + Vector3(0, 0, 30))      # apart: a downed foe within reach of the grab would be stomped instead
 	var cap := float(KinParts.OWNER_STATS[STAT][2])
 	ok(int(KinSteal.rules()["carry_max"]) == 2 and is_equal_approx(float(KinSteal.rules()["passive_k"]), 0.5),
 		"rules: a thief holds 2 stolen wisps, each at half strength")
