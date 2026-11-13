@@ -107,6 +107,8 @@ Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unl
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
 
+In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets your own ranks to try them: Max all, Pick your max (one ability at its top rank with its rank-3 data bonus, shown as the button's tooltip; the rest at rank 1) and Reset to rank 1 ([shot, 1280x720](shots/ui-train-rank-port/practice_page.jpg)). Bots and dummies keep their own ranks and spend by their kit's `order`.
+
 ## Shift: class dashes
 
 Each class has its own dodge verb. Grounded with a charge, Shift does the class dodge; in the air or out of charges it does the class's long dash (its own cooldown). Both chain straight into a jump or the glider.
@@ -134,6 +136,8 @@ Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, land
 | Twin Blades | light | **Shadow Step** | blink-strike | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
 
 ## Q: active gloves
+
+Gloves fill in order: the first pickup goes on Q (glove 1), the second on glove 2 (V, or Mouse 4, the back side button, by default), and a freed slot takes the next pickup. Saved configs with one glove 2 key gain Mouse 4 unless it is bound elsewhere (`KeyMigrate` step 6).
 
 Gloves drop in runs. Rarer gloves keep the same verb with bigger numbers: damage, wall health, heals and shields x1 / x1.3 / x1.6 / x2 (common to legendary), durations and pull strength by half as much, cooldown 8% shorter per step. Rank (skill points into Q) stacks on top.
 

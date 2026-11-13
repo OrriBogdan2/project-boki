@@ -12,8 +12,6 @@
 	"mood_doc": "Strength multiplier at joy 0 and at joy 100 (linear in between).",
 	"trust_max": 1.05,
 	"trust_doc": "Strength multiplier at trust 100 (linear from 1.0 at trust 0).",
-	"edge": 1.08,
-	"edge_doc": "Strength multiplier for a Boki whose species theme beats the other's (the 'beats' table of content/rules/base_shove.json, so there is one element table).",
 	"spike": {"great": 0.3, "good": 0.6, "miss": 1.0},
 	"spike_doc": "Your one call: the backed Boki's next hit is a spike and the other side's chance to return it is multiplied by this.",
 	"serve_s": 0.8,

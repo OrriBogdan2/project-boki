@@ -8,18 +8,22 @@ const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
 	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird", "caecilith"]
+	"nettlynx", "thrumbird", "gibbelle", "caecilith"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin"]
+	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin",
+	"strut", "pose", "bow"]
 const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
 const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
 const T_FRAMES := 8            # frames sampled over a game clip
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
+## A Meshy body (docs/art/kin/MESHY_BOKI_RECIPE.md): 16k of body, the face, the props and the grown parts.
+const MESHY_TRIS := 20000
 ## Models merged from the single-species branches over that rule: a ratchet at their count today, to be cut down.
-const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636}
+const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636,
+	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS}
 const MAX_BONES := 64
 
 var bad := 0
@@ -46,6 +50,7 @@ func _species(main: Node) -> void:
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	_contents(rig)
 	await _states(main, k, rig)
+	await _stepping(main, rig)
 	await _own_look(main)
 	k.queue_free()
 
@@ -81,8 +86,44 @@ func _game_clips(rig: BokiRig) -> void:
 		ok(is_equal_approx(a.length, want), "%s lasts %.2f s, its game's beat data says %.2f" % [c, a.length, want])
 		ok(a.loop_mode == Animation.LOOP_NONE, "%s plays once" % c)
 		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	for c in BokiHomePoses.SHOW_CLIPS:
+		var a := rig.player.get_animation(c)
+		var want := ShowRing.BOW_S if c == "bow" else ShowRing.POSE_S
+		var walk_s := rig.player.get_animation("walk").length
+		if c == "strut":
+			ok(a.loop_mode == Animation.LOOP_LINEAR and is_equal_approx(a.length, walk_s), "strut loops over the walk")
+		else:
+			var once := a.loop_mode == Animation.LOOP_NONE
+			ok(is_equal_approx(a.length, want) and once, "%s plays once for %.1f s" % [c, want])
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
 	for m in BaseTumble.rules()["moves"].values():
 		ok(String(m["clip"]) in CLIPS, "Tumble's %s plays the rig clip %s" % [m["name"], m["clip"]])
+
+## How a rig moves (docs/PERF_PLAN_1111.md): only through BokiRig.advance, skeleton modifiers included, so a rig
+## that isn't stepped is not re-posed. Off GL over Metal it steps every frame; at RigPace.EVERY it moves every
+## few frames with the time it held back, so the clip keeps up.
+func _stepping(main: Node, rig: BokiRig) -> void:
+	var manual_mods := rig.skeleton().modifier_callback_mode_process == Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	ok(manual_mods, "the skeleton's modifiers (BokiDna) move only when the rig is stepped")
+	ok(rig.pace.every == 1 or RigPace.dear(), "the rig steps every frame here")
+	rig.manual = false
+	rig.set_process(false)       # stepped by hand below, one call per drawn frame
+	rig.set_clip("idle", 0.0)
+	rig.seek(0.0)
+	rig.pace.every = RigPace.EVERY
+	var frames := RigPace.EVERY * 2
+	var moved := 0
+	for i in frames:
+		await main.get_tree().process_frame
+		var before := rig.player.current_animation_position
+		rig._process(0.01)
+		if rig.player.current_animation_position != before:
+			moved += 1
+	ok(moved == 2, "every %d frames, the clip moved on %d of %d" % [RigPace.EVERY, moved, frames])
+	var clip_s := rig.player.current_animation_position + rig.pace.held      # (plus what waits for its next step)
+	ok(absf(clip_s - 0.01 * frames) < 0.0001, "and kept up with the time: %.3f s of clip" % clip_s)
+	rig.pace.every = 1
+	rig.set_process(true)
 
 ## True when some frame of the clip leaves every bone within T_POSE of its bind pose.
 func _t_pose(rig: BokiRig, clip: String) -> bool:
@@ -126,7 +167,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._shot_left = 0.0
 	ok(_clip_for(rig, "kstate", "sleep") == "nap", "then naps")
 	rig._asleep = false
-	for act in ["munch", "nudge", "climb", "splash"] + GAME_CLIPS:
+	for act in ["munch", "nudge", "climb", "splash"] + GAME_CLIPS + BokiHomePoses.SHOW_CLIPS:
 		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
@@ -151,8 +192,14 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(rig.clip == "idle", "and it goes back to idle")
 	k.set_meta("face", "sad")
 	rig._face_step(1.0)
+	var sad := rig.face.find_blend_shape_by_name("sad")
+	var w := rig.face.get_blend_shape_value(sad)
+	for i in 40:
+		rig._face_step(0.05)
+	var held := rig.face.get_blend_shape_value(sad)
+	var goal := float(rig._want.get("sad", 0.0))
+	ok(held == goal, "a held expression lands on its goal, so it stops being written: %.4f" % held)
 	k.remove_meta("face")
-	var w := rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("sad"))
 	ok(w > 0.9, "the face meta sets the expression: sad %.2f" % w)
 	k.set_meta("pose", "growl")
 	rig._face_step(1.0)

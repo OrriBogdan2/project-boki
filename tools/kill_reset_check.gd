@@ -6,7 +6,8 @@ extends RefCounted
 ## data opts out gets nothing; killing a mob changes nothing; a bot gets it too but only the local hunter
 ## gets the cue (the CombatBus.dash_reset_cue event, the Shift icon pop and the sound); a knock on a teammate counts for
 ## nothing; the hero-specific resets (DashReset.cue) fire the same event; the cue variants all exist and
-## the setting picks between them. Never touches the save.
+## the setting picks between them. A knock you land or take is a short freeze with no slow-mo and no
+## full-screen flash (docs/DASHES_AND_ABILITY_FEEL.md §5.4, knock moment). Never touches the save.
 
 var bad := 0
 var cues: Array = []
@@ -55,6 +56,7 @@ func run(main: Node) -> void:
 	ok(P.ex_cd == 0.0, "(a) the long-dash cooldown is cleared")
 	ok(absf(P.hp - (100.0 + 200.0 * DashReset.HEAL)) < 0.01, "(a) +5%% of max health (%.1f, want 110)" % P.hp)
 	ok(cues.size() == 1 and cues[0][0] == P and cues[0][1] == "takedown", "(a) the reset cue event fired once for the local hunter (%d)" % cues.size())
+	_knock_beat(m, "(a) a knock you land", true)
 
 	# (b) the heal never passes max health
 	P.hp = P.max_hp - 3.0
@@ -180,3 +182,19 @@ func _assists(m: Match, P: Hunter, mates: Array, foes: Array) -> void:
 	m.knock(foes[-4], P, {})
 	dd.erase("knock_refresh")
 	ok(P.dashes < 0.01 and P.ex_cd > 4.0, "(l) knock_refresh: false opts out (%.2f)" % P.dashes)
+
+	# (m) being knocked: no slow-mo, no full-screen flash either
+	if m.hud: m.hud.flash_t = 0.0      # (c)'s kill flash; that one stays, only knocks lost theirs
+	m.hitstop = 0.0
+	m.knock(P, foes[-5], {})
+	ok(P.downed, "(m) the local hunter is down")
+	_knock_beat(m, "(m) being knocked", false)
+
+## A knock is a short freeze and the confirm, never slow motion or a full-screen flash (one rhythm
+## offline and online); the knocker also gets the short freeze. Clears the freeze after.
+func _knock_beat(m: Match, what: String, freeze: bool) -> void:
+	if freeze:
+		ok(m.hitstop > 0.0, "%s: the short freeze (%.3f s)" % [what, m.hitstop])
+	ok(m.slowmo == 0.0 and (m.hud == null or m.hud.flash_t == 0.0),
+			"%s: no slow-mo (%.2f) and no screen flash" % [what, m.slowmo])
+	m.hitstop = 0.0

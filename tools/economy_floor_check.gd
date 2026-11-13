@@ -20,6 +20,7 @@ func run(host: Node) -> void:
 	_exchange()
 	_exchange_book()
 	_exchange_walk()
+	_exchange_clock()
 	_save_load()
 	print("FLOOR DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
@@ -221,6 +222,47 @@ func _exchange_book() -> void:
 	ok(Exchange.best("scrap", "sell") == ask0 and Exchange.best("scrap", "buy") < ask0, "the side refills at the same quotes (%d), not a ratcheted price" % ask0)
 	var sold_back := Exchange.post("sell", "scrap", total, Exchange.band("scrap").x)
 	ok(int(sold_back["filled"]) == total and int(Save.d["gems"]) < gs, "buying out the side and selling it straight back loses gems (%d -> %d)" % [gs, int(Save.d["gems"])])
+
+## The Exchange's day only follows the system clock forward, at most DAYS_AHEAD per run of the game.
+func _exchange_clock() -> void:
+	_started_save()
+	var t := Time.get_datetime_dict_from_system()
+	var today := int(Time.get_unix_time_from_datetime_dict(t) / 86400)
+	var ahead := Exchange.DAYS_AHEAD
+	ok(Exchange.anchored_day(100, 90, 100) == 100 and Exchange.anchored_day(100, 130, 100) == 100 + ahead
+		and Exchange.anchored_day(-1, 50, 50) == 50,
+		"anchored day: never back, forward capped per run, a new save takes the clock")
+	# the clock set back: the last day seen is 5 days after the clock's
+	Exchange.book("wood")
+	var st: Dictionary = Save.d["exchange"]
+	st["day"] = _date(today + 5)
+	st["book"] = {}
+	Exchange._run_day = -1
+	var quotes := Exchange.book("wood")
+	Exchange._run_day = -1
+	ok(st["day"] == _date(today + 5) and Exchange.book("wood") == quotes,
+		"setting the clock back keeps today's day (%s) and quotes" % st["day"])
+	# the clock jumped 30 days forward: one day per run of the game
+	st["day"] = _date(today - 30)
+	Exchange._run_day = -1
+	Exchange.book("wood")
+	Exchange.book("wood")
+	ok(st["day"] == _date(today - 30 + ahead),
+		"a 30-day jump forward moves the day %d, not 30 (%s)" % [ahead, st["day"]])
+	Exchange._run_day = -1
+	Exchange.book("wood")
+	ok(st["day"] == _date(today - 30 + 2 * ahead), "and %d more on the next run" % ahead)
+	# a save from before the anchor: today's date in its old form keeps today's quotes
+	var old_day := "%d-%02d-%02d" % [t["year"], t["month"], t["day"]]
+	st["day"] = old_day
+	st["book"] = {}
+	Exchange._run_day = -1
+	Exchange.book("wood")
+	ok(st["day"] == old_day, "an older save's day (%s) carries on unchanged" % old_day)
+	Exchange._run_day = -1
+
+func _date(day: int) -> String:
+	return Time.get_date_string_from_unix_time(day * 86400)
 
 ## The walk: offline fills reach only offers near the middle, at the traders' quote, and buying from the
 ## book and selling back by tick never profits, for any item.

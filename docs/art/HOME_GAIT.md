@@ -52,8 +52,14 @@ second apart at 5 m/s past floor posts every half metre).
 - **Data**: content/rules/warden_stance.json `empty_f` / `empty_m` gait keys `step`, `stance`, `strike`, `hip`,
   `swing` (metres at the rig's rest size; the body's scale is read from the legs' transform).
 
+- **Crouch**: HunterAnim hands the crouch to the gait, which lowers its hip heights by it (`CROUCH_DROP`, 5 cm at a
+  full crouch) before solving, so the planted legs bend for it and a crouched walk plants like the upright one
+  (`--home-gait-check` walks crouched: slide, sink, steps, hips lower than the walk's).
+- **Soles**: `FootPlant.SOLE`'s toe is the boot tip's real height (the mesh curves up 1.9 cm there; the old toe point
+  hung under the tip, so a toe-down foot floated 2 cm on the tall bodies). The landing foot stays `LAND_CLEAR` (3 cm)
+  up as it starts to brake and touches only as it stops, so the brake never slides along the floor.
+
 ## Left open
-- Crouch-walking adds HunterAnim's knee bend after the solve, so a crouched walk slides a little (DEBT).
 - The toe dips up to 2 cm into the floor just after toe-off on the sturdy body (gated at 3 cm).
 - Arm swing is HunterAnim's, following the gait's phase (left leg's cycle); not re-tuned here.
 
