@@ -596,8 +596,11 @@ func ride(
 	_pose(n, sd["pos"] + drawn, sd["vel"], trail, width)
 	return n
 
-## How far off its shot a rider is still drawn: its `drawn` start, eased away over DRAWN_FADE.
+## How far off its shot a rider is still drawn: its `drawn` start, eased away over DRAWN_FADE. None on a round
+## that leaves its weapon's Muzzle (Muzzle.drawn moves that look).
 func _drawn_off(r: Dictionary) -> Vector3:
+	if r["sd"].has("vis"):
+		return Vector3.ZERO
 	var k := 1.0 - smoothstep(0.0, DRAWN_FADE, float(m.time) - float(r["t0"]))
 	return (r.get("drawn", Vector3.ZERO) as Vector3) * k
 
@@ -732,7 +735,8 @@ func _process(_delta: float) -> void:
 			live.erase(e)
 	track()
 	for r in riders:
-		_pose(r["node"], r["sd"]["pos"] + _drawn_off(r), r["sd"]["vel"], float(r["trail"]), float(r["width"]))
+		var at := Muzzle.drawn(r["sd"], r["sd"]["pos"] + _drawn_off(r))
+		_pose(r["node"], at, r["sd"]["vel"], float(r["trail"]), float(r["width"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]
 		if m.time - float(e.get("t", 0.0)) > KEEP:

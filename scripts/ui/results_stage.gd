@@ -25,6 +25,7 @@ var built := 0               # Hunter models (or Wisps) standing on the island
 var _w3: Node3D
 var _cam: Camera3D
 var _t := 0.0
+var zoom := ViewZoom.new()   # the wheel or pad: the camera in and out along its line (Results forwards the wheel)
 var _todo: Array = []        # member indices still to build
 var _bodies: Array = []      # [member index, Node3D]
 var _kins: Array = []
@@ -90,6 +91,7 @@ func _spot(i: int) -> Vector3:
 
 func _process(dt: float) -> void:
 	_t += dt
+	zoom.tick(dt)
 	if not _todo.is_empty():
 		_build_next()
 	for a: HunterAnim in _anims:
@@ -106,8 +108,10 @@ func _drift() -> void:
 	var span := SPACING * maxi(members.size(), 1)
 	var dist := 5.0 + span * 0.75
 	var shift := LEFT_THIRD * 2.0 * dist * tan(deg_to_rad(_cam.fov * 0.5)) * size.x / maxf(size.y, 1.0)
-	_cam.position = Vector3(shift + sin(_t * TAU * DRIFT_HZ) * DRIFT_M, 2.2, dist)
-	_cam.look_at(Vector3(shift + sin(_t * TAU * DRIFT_HZ) * DRIFT_M * 0.5, 0.9, 0.0))
+	var at := Vector3(shift + sin(_t * TAU * DRIFT_HZ) * DRIFT_M * 0.5, 0.9, 0.0)
+	var from := Vector3(shift + sin(_t * TAU * DRIFT_HZ) * DRIFT_M, 2.2, dist)
+	_cam.position = at + (from - at) * zoom.k
+	_cam.look_at(at)
 
 func _build_next() -> void:
 	var i: int = _todo[0]

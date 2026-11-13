@@ -21,7 +21,7 @@ var shake_left := 0.0
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
-var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
+var user_zoom := 1.0           # the mouse wheel (CamWheel); multiplies the match's own zoom
 var lead := 1.0
 var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
@@ -59,18 +59,12 @@ var lead_off := Vector3.ZERO
 ## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
 ## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
 ## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
-const GLIDE_ZOOM := 1.25      # x the distance under the glider [spec] +15..25% boom in the air
-const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [Supervive]
 const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
 const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
 const ALT_ZOOM_MAX := 0.7     # ...up to +70%
 func air_zoom(h: Hunter, alt: float) -> float:
-	var z := 1.0
-	if h.gliding:
-		z = GLIDE_ZOOM
-	elif h.crouch and h.grounded:
-		z = SNEAK_ZOOM
-	z *= user_zoom * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX))
+	var z := CamWheel.final(CamWheel.widen(h), user_zoom, h)      # (gliding and sneaking widen, the wheel on top)
+	z *= (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX))
 	return maxf(z, zoom) if h.glide_dive.on else z
 
 ## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
@@ -89,6 +83,23 @@ var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
 var dist_mul := 1.0
+## Match Hunters are drawn this many times bigger (the style's "hunter_scale"; 1 but for the source_scale test
+## style, see Hunter.fit_scale).
+var hunter_scale := 1.0
+
+## How much more ground the view shows now than at the distance the draw, LOD and shadow distances were tuned for
+## (camera.json "reach_ref_m"), never under 1. Those distances scale by it, so nothing pops in at the view's edge.
+func reach() -> float:
+	return maxf(1.0, dist * dist_mul * zoom / float(RULES["reach_ref_m"]))
+
+## The same for a style's own framing, for the distances fixed when the match is built (draw ranges, shadows).
+static func style_reach(id: String) -> float:
+	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	return maxf(1.0, float(st["dist"]) / float(RULES["reach_ref_m"]))
+
+## Settings "draw" (how far small parts are drawn) grown with the style's view.
+static func draw_k() -> float:
+	return float(Settings.q("draw")) * style_reach(String(Settings.get_v("cam_style")))
 
 static func _load_rules() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/camera.json"))
@@ -103,6 +114,7 @@ func use_style(id: String) -> void:
 	dist = float(st["dist"])
 	fov = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
+	hunter_scale = float(st.get("hunter_scale", 1.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
 ## Training Grounds. Cheap enough to call every frame.
@@ -119,6 +131,7 @@ static func style_across(id: String) -> float:
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
 func _ready() -> void:
+	user_zoom = CamWheel.saved(get_parent())
 	fov = 28.0
 	near = 1.0
 	far = 120.0
@@ -259,6 +272,19 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	_apply(shake)
 	Sfx.listener = focus
 
+## The pitch now: the style's angle, tipped toward straight down for a bird's-eye view, or low behind the skyship
+## for the ride.
+func _pitch_now() -> float:
+	var k := top * top * (3.0 - 2.0 * top)
+	var c := chase * chase * (3.0 - 2.0 * chase)
+	return lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
+
+## The way the camera looks (a unit vector, down into the world), from its pitch and yaw alone, so it is the same
+## before the camera has moved. (Record.orbit_yaw: recording mode's slow orbit round the player, with the HUD hidden.)
+func view_dir() -> Vector3:
+	var p := _pitch_now()
+	return -Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)
+
 ## The view's ground point after a frame: it closes on `to` at min(follow_rate x gap, sqrt(2 x catch_decel x gap))
 ## m/s, at most max_gap behind, and cuts straight there when `to` moved faster than cut_speed (`step` this frame).
 func _trail_xz(at: Vector2, to: Vector2, step: Vector2, delta: float) -> Vector2:
@@ -274,12 +300,9 @@ func _apply(shake: Vector3) -> void:
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
-	# pitch: the style's angle, tipped toward straight down for a bird's-eye view, or low behind
-	# the skyship for the ride
-	var p := lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
+	var p := _pitch_now()
 	var d := dist * dist_mul * z * (1.0 + 0.15 * k)
-	# (Record.orbit_yaw: recording mode's slow orbit round the player, with the HUD hidden)
-	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)
+	var back := -view_dir()
 	# (camcal) aim at the body rather than the feet, so you sit a touch low on screen [footage];
 	# faded out toward the bird's-eye and ship views
 	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c), 0)
