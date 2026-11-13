@@ -36,8 +36,10 @@ static func must_run(m: Match, h: Hunter) -> bool:
 ## stands outside, else INF.
 static func clamp_goal(m: Match, h: Hunter, goal: Vector3) -> Vector3:
 	var sr := safe_r(m, h)
+	if sr == INF:
+		return goal      # no Heart site (or no tide): nothing to clamp to
 	var v := _from_site(m, goal if goal != Vector3.INF else h.pos)
-	if sr == INF or v.length() <= sr:
+	if v.length() <= sr:
 		return goal
 	var dir := v.normalized()
 	var bans: Dictionary = h.ai.get("banned", {})

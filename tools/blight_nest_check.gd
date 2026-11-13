@@ -129,8 +129,8 @@ func _none_outside(main: Node) -> void:
 	var m := _match(main, 8103, {"heart": true})
 	var bl: BlightDir = m.blight
 	for h in m.hunters:
-		h.ctrl = "bot"
-	m.player.ctrl = "bot"
+		_make_bot(h)
+	_make_bot(m.player)
 	var seen := {}
 	var c := {"stray": 0, "far": 0.0}  # (lambdas capture locals by value: count in a dictionary)
 	var watch := func():
@@ -241,16 +241,16 @@ func _cycle(main: Node) -> void:
 	_run(m, 3.0, func(): pl.teleport(stand))
 	ok(nst.released == sk1 and _skitters(m).is_empty(), "standing by an empty nest for %.0fs: quiet" % (left - 2.0))
 	# break it: gems, XP to the squad close by, the feed line
-	var gems0 := m.pickups.filter(func(p): return p["kind"] == "gem").size()
+	var gems0 := _gem_total(m)      # value, not piles: main merges a drop into a pile close by (DropMerge)
 	pl.lvl = 1  # (the 9999-damage kills above maxed the level; gain_xp stops at the top)
 	pl.xp = 0.0
 	var xp0 := pl.xp
 	nest.hurt(nest.hp + 1.0, pl, {})
 	m.step(Match.DT)
-	var gems1 := m.pickups.filter(func(p): return p["kind"] == "gem").size()
+	var gems1 := _gem_total(m)
 	print(
 		(
-			"NESTS broke a nest: +%d gem piles (%d gems), +%.0f XP, refill in %.0fs"
+			"NESTS broke a nest: +%d gems on the ground (%d gems), +%.0f XP, refill in %.0fs"
 			% [gems1 - gems0, int(Data.MOBS["bl_nest"]["gems"]), pl.xp - xp0, nst.refill_left(n)]
 		)
 	)
@@ -341,7 +341,7 @@ func _bots(main: Node) -> void:
 		ok(false, "found a bot and a nest")
 		m.queue_free()
 		return
-	bot.ctrl = "bot"
+	_make_bot(bot)
 	bot.max_hp = 400.0
 	bot.hp = 400.0
 	bot.teleport(stand)
@@ -416,3 +416,18 @@ func _net_and_boss(main: Node) -> void:
 func _standing(n: Dictionary) -> bool:
 	var b = n["mob"]
 	return b is Blight and not b.dead and b.flat_dist(n["pos"]) < 0.5
+
+
+## A Hunter driven by the bot brain: it needs a mind (main's Bot.think reads its timers) as well as the flag.
+func _make_bot(h: Hunter) -> void:
+	h.ctrl = "bot"
+	if not h.ai.has("think"):
+		h.ai = Bot.new().new_mind(RandomNumberGenerator.new(), 0.6)
+
+
+func _gem_total(m: Match) -> int:
+	var t := 0
+	for p: Dictionary in m.pickups:
+		if p["kind"] == "gem":
+			t += int(p["v"])
+	return t

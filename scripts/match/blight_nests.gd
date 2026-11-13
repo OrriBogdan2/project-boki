@@ -111,7 +111,7 @@ func nest_of(b: Ent) -> Dictionary:
 
 ## Ready to wake: standing (on the host), something in it, not cooling, not already stirring.
 func ready(n: Dictionary) -> bool:
-	if dir.host and (n["mob"] == null or (n["mob"] as Blight).dead):
+	if dir.host and (not is_instance_valid(n["mob"]) or (n["mob"] as Blight).dead):
 		return false
 	return int(n["stock"]) > 0 and n["refill_at"] == INF and n["stir_at"] == INF
 
@@ -182,14 +182,14 @@ func on_popped(b: Blight, by: Ent) -> void:
 ## An idle Skitter far from everyone goes home: back into its nest's stock unless that's cooling.
 func home(s: Blight) -> void:
 	var n := nest_of(s)
-	if not n.is_empty() and not cooling(n) and n["mob"] != null and not (n["mob"] as Blight).dead:
+	if not n.is_empty() and not cooling(n) and is_instance_valid(n["mob"]) and not (n["mob"] as Blight).dead:
 		n["stock"] = mini(int(n["full"]), int(n["stock"]) + 1)
 		_send(n)
 
 
 func tick(dt: float) -> void:
 	for n in list:
-		var b: Blight = n["mob"]
+		var b: Blight = n["mob"] if is_instance_valid(n["mob"]) else null      # a freed mob (the match let it go)
 		if b and not b.dead:
 			b.spot = (
 				0.0
@@ -248,7 +248,7 @@ func _tide() -> void:
 ## Out they come, on fixed spots round the nest: as many as it holds, within the area cap.
 func _release(n: Dictionary) -> void:
 	n["stir_at"] = INF
-	if n["mob"] == null or (n["mob"] as Blight).dead:
+	if not is_instance_valid(n["mob"]) or (n["mob"] as Blight).dead:
 		_send(n)
 		return
 	var p: Vector3 = n["pos"]
@@ -280,7 +280,7 @@ func _release(n: Dictionary) -> void:
 func _refill(n: Dictionary) -> void:
 	n["refill_at"] = INF
 	n["stock"] = int(n["full"])
-	if n["mob"] == null or (n["mob"] as Blight).dead:
+	if not is_instance_valid(n["mob"]) or (n["mob"] as Blight).dead:
 		_grow(n)
 	_send(n)
 
@@ -377,7 +377,7 @@ func _demo_setup(pl: Hunter) -> bool:
 	var stand := Vector3.INF
 	var bd := INF
 	for n in list:
-		if n["mob"] == null or (n["mob"] as Blight).dead:
+		if not is_instance_valid(n["mob"]) or (n["mob"] as Blight).dead:
 			continue
 		for k in 12:
 			var a := TAU * k / 12.0
