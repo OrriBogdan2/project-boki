@@ -54,7 +54,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
-- They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
+- They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**; ones behind terrain via **SFXMuffled**, a 700 Hz low-pass and -4 dB: `SfxOcclusion` runs one heightmap line test per positional sound, cached 100 ms, never within 3.5 m so your own Hunter and UI sounds stay clean; `--sfx-occlusion-check`). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
 ## Footsteps (`StepReach`, `scripts/match/step_reach.gd`)

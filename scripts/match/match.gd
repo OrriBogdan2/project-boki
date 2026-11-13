@@ -301,6 +301,7 @@ func _start(o: Dictionary) -> void:
 	world.biome = T["biome"].duplicate()
 	world.clouds = T["clouds"]
 	add_child(world)
+	Sfx.occlusion.world = world
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
 	var layout := {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
