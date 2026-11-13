@@ -4,7 +4,8 @@ extends RefCounted
 ## evolve level (a brighter chime) or a new form or part (docs/AUDIO.md). It watches each Boki's record rather
 ## than every place that raises them, so a new source needs no wiring. Events on one Boki that land within
 ## MERGE_S share one chime: the biggest one. A sleeping Boki makes no sound (the card and the evolution scene
-## still show it).
+## still show it). Watched the same way, a Boki dozing off (its nap starting, wherever it lies down) voices a
+## sleepy breath (BokiLifeSfx "nap").
 
 const KINDS := ["stat", "level", "ready", "evolve"]     # smallest first: a merged chime plays the last one here
 const MERGE_S := 0.5     # s: an event this soon after a Boki's chime joins it instead of playing again
@@ -16,6 +17,7 @@ var h                    # the Home screen
 var now := 0.0           # s since the home opened
 var _seen := {}          # uid -> [stat total, level, evolve due, forms and parts, joy] last seen: only rises fire
 var _last := {}          # uid -> now at its last chime
+var _napping := {}       # uid -> it was napping at the last look, so only dozing off sounds
 
 func _init(home) -> void:
 	h = home
@@ -24,6 +26,7 @@ func tick(dt: float) -> void:
 	now += dt
 	for k in h.kins:
 		_watch(k)
+		_doze(k)
 
 ## The first sight of a Boki only takes note.
 func _watch(k: Dictionary) -> void:
@@ -43,6 +46,14 @@ func _watch(k: Dictionary) -> void:
 		return
 	_last[uid] = now
 	GardenSfx.cue("garden_chime_" + KINDS[top], k["pos"], PITCH[GardenSfx.SIZE[Unique.size_tag(rec)]])
+
+## A Boki whose nap just started voices it; the first sight of one already asleep only takes note.
+func _doze(k: Dictionary) -> void:
+	var uid := String(k["rec"]["uid"])
+	var napping := float(k.get("nap_t", 0.0)) > 0.0
+	if napping and not bool(_napping.get(uid, true)):
+		BokiLifeSfx.at_home(k, "nap")
+	_napping[uid] = napping
 
 static func _values(rec: Dictionary) -> Array:
 	var stats := 0
