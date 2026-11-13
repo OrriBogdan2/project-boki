@@ -57,6 +57,21 @@ Air dashes of the starter Masks (checked Nov 11 2026): no hero-ref sheet holds a
 
 Settling clips: Ghost sliding off a ledge or a jump pad, Brall pressing Shift mid-jump, Myth rolling in the air onto a double ledge.
 
+### Dash tails against the over-run shed (Nov 11 2026)
+DEBT "Dash exit" asked whether the tracks give one shed rate for speed over the run. Each track's last ~30% (the samples still above run speed), converted with the row's own metres per pixel, against the over-run shed the game uses (the source's walking brake, `HunterMove.brake_rate`: 2/s x speed + 22.2 m/s², from content/rules/hunter_move.json) at the tail's mean speed, and against the old kit-tuned 110 m/s² (`GROUND_SHED`, deleted Nov 9 in decision 0026). Albert's 360 Smash (3 samples, the decay is only pinned by its total) and Meeko's glide (in the air: air drag, not the ground brake) have no measurable ground tail; Kingpin, Joule and Felix are from ext/dash-curves-c.
+
+| Track | Tail (m/s, 1/15 s) | Decel | Brake there | vs brake | vs 110 |
+|---|---|---|---|---|---|
+| Ghost Slipstep | 8.0 5.4 3.2 | 36 m/s² | 33 | +7% | -68% |
+| Brall Rampage | 10.0 7.1 4.2 | 43 m/s² | 36 | +19% | -61% |
+| Myth Spirit Walk roll | 9.7 4.7 | 75 m/s² | 37 | +105% | -32% |
+| Sable Cartwheel | 7.9 5.8 5.2 | 20 m/s² | 35 | -44% | -82% |
+| Kingpin Brute Dash | 7.8 7.7 6.7 6.2 4.6, then a dead stop in 1/30 s | 12 m/s² | 35 | -65% | -89% |
+| Joule Surge (0.58 s) | 27.8 24.6 12.3 | 116 m/s² | 62 | +87% | +6% |
+| Felix Soot Ram | 8.2 9.5 9.3 7.6, then a dead stop in 1/15 s | 3 m/s² | 38 | -92% | -97% |
+
+They do not agree within 20% (3 to 116 m/s²): a dash's tail is the dash's own curve (Kingpin and Felix hold their push, then stop dead; Myth's roll ends in a step), not a free slide, so the tracks set no single shed. The shed stays the source's brake, with no number of ours: the two clean free tails (Ghost, Brall) land within 20% of it, and all but Joule are 32-97% under the old 110. The dash exit does not use the shed: `HunterMove.dash_exit` caps the hand-over at run speed, so it only acts on knocks and on kit steps over the run (`HunterMove.slide`, `slide_speed`), which `--move-feel-check` (`ground_shed_*`) and `--archetype-check` measure.
+
 ## What's in it
 
 | File | What it does |
