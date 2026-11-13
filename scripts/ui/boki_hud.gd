@@ -273,10 +273,15 @@ static func downed_arrow(H, k: Kin, sz: Vector2) -> void:
 	H.c.draw_colored_polygon(PackedVector2Array([edge + dir * 14.0, edge - dir * 8.0 + side * 10.0, edge - dir * 8.0 - side * 10.0]), col)
 	H._ctext(edge - dir * 22.0 + Vector2(0, 4), "%ds" % int(ceil(k.down_t)), 11, Color(H.INK, 0.9), H.big)
 
+## Your Boki when the maps mark it: out and about (not tucked away or down), else null.
+static func mapped_kin(m: Match) -> Kin:
+	var k: Kin = m.player.kin if m.player else null
+	return k if k != null and k.state in ["active", "flying", "returning", "flying_home", "dazed"] else null
+
 ## Your Boki on the minimap once it is off your shoulder: a paw in its colour (the default minimap's "boki" kind).
 static func map_kin(c: Control, m: Match, to_map: Callable, on_map: Callable) -> void:
-	var k: Kin = m.player.kin if m.player else null
-	if k == null or not k.state in ["active", "flying", "returning", "flying_home", "dazed"]:
+	var k := mapped_kin(m)
+	if k == null:
 		return
 	var pv: Vector2 = to_map.call(k.position)
 	if on_map.call(pv, 3.0):

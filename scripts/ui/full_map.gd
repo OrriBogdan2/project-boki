@@ -200,6 +200,8 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
+	BokiHud.map_kin(c, m, to_screen, func(pv: Vector2, _pad: float) -> bool: return rect.has_point(pv))
+	MapKey.draw(self)
 	_legend(c, sz, team)
 	_side(c, sz)
 	if hot_line != "":
