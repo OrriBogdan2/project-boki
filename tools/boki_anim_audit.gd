@@ -17,7 +17,7 @@ const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not st
 const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
-	"gloamshell": "blob (snail foot)"}
+	"gloamshell": "blob (snail foot)", "gibbelle": "blob"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
