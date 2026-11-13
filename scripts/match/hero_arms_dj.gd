@@ -5,6 +5,7 @@ extends RefCounted
 ## bolt forms) and a wrapped grip bar across the back of the hoop. The left one sits at x < -0.04 so
 ## HunterAnim's twin hold hands it to the left hand.
 
+
 static func build(gun: Node3D, weapon: String, m_dark: Material, m_acc: Material) -> bool:
 	if weapon != "arc_bolts":
 		return false
@@ -31,8 +32,9 @@ static func build(gun: Node3D, weapon: String, m_dark: Material, m_acc: Material
 			var dir := Vector3(0, sin(a), -cos(a))
 			# swept spikes: each leans along the spin so the hoop reads as a thrown blade, not a bangle
 			Models.part(gun, Models.box(0.02, 0.03, 0.11), steel, c + dir * 0.15, Vector3.ONE, Vector3(a + 0.5, 0, 0))
-			Models.part(gun, Models.box(0.012, 0.012, 0.06), violet, c + dir * 0.19, Vector3.ONE,
-					Vector3(a + 0.5, 0, 0))
+			Models.part(
+				gun, Models.box(0.012, 0.012, 0.06), violet, c + dir * 0.19, Vector3.ONE, Vector3(a + 0.5, 0, 0)
+			)
 		Models.part(gun, Models.box(0.035, 0.035, 0.12), m_dark, Vector3(x, 0.0, -0.02))
 		Models.part(gun, Models.box(0.04, 0.04, 0.025), m_acc, Vector3(x, 0.0, 0.03))
 		Models.part(gun, Models.sphere(0.03, 8), gold, c)
