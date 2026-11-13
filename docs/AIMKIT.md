@@ -173,9 +173,11 @@ drag arrow.
 ```gdscript
 AimKit.charge(h, k)                  # every step while charging: a thin ring fills round the cursor
                                      # crossing k = 1 fires the flare once (pass "flare": false to skip)
+                                     # "at": "body" draws the same ring round the hunter instead (44 px),
+                                     # where the source shows its charge arc on the hero (Kael's blast)
 AimKit.flare(h)                      # the full-charge flare now: a ring snaps out, a glint (0.28 s)
 AimKit.perfect(h)                    # the perfect-window star: gold 4-point star and ring, 0.12 s
-AimKit.reticle(h)                    # {charge, flare, perfect}, for checks
+AimKit.reticle(h)                    # {charge, flare, perfect, at}, for checks
 ```
 Params: `col` (charge ring colour, default the hero colour), `col2` (flare colour), and `col` on
 `perfect` (gold by default). The states run on real time, so they show through hit stop. The ring sits
