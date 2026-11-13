@@ -58,8 +58,9 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 		m2.set_meta("fbui", "grid")
 		root.add_child(m2)
 
-## The reason a spot is refused, floating above the footprint. "" removes it.
-static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0")) -> void:
+## The reason a spot is refused (or what it gets), floating above the footprint. "" removes it.
+## drop: a little water drop sits over the words (placing by the water, FarmWater).
+static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0"), drop := false) -> void:
 	if not is_instance_valid(root):
 		return
 	for old in root.get_children():
@@ -80,6 +81,37 @@ static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0"
 	var c: Vector2i = cells[0]
 	l.position = Vector3(c.x + 0.5, 1.7, c.y + 0.5)
 	root.add_child(l)
+	if drop:
+		root.add_child(_drop(l.position + Vector3(0, DROP_LIFT, 0)))
+
+const DROP_R := 0.13        # m, the water drop's round bottom
+const DROP_LIFT := 0.42     # m it floats over the note's words
+
+## A water drop: a round bottom with a cone on it, unshaded blue, drawn over everything like the note.
+static func _drop(at: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.set_meta("fbui", "note")
+	n.position = at
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color("5cc4ff")
+	mat.no_depth_test = true
+	mat.render_priority = 3
+	var ball := SphereMesh.new()
+	ball.radius = DROP_R
+	ball.height = DROP_R * 2.0
+	var tip := CylinderMesh.new()
+	tip.top_radius = 0.0
+	tip.bottom_radius = DROP_R * 0.92
+	tip.height = DROP_R * 1.6
+	for part in [[ball, 0.0], [tip, DROP_R * 0.9]]:
+		var mi := MeshInstance3D.new()
+		mi.mesh = part[0]
+		mi.material_override = mat
+		mi.position.y = part[1]
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		n.add_child(mi)
+	return n
 
 ## A little squash and settle on a node that was just placed.
 static func pop(n: Node3D) -> void:
@@ -104,19 +136,44 @@ static func upgrade_entries(hb: HomeBuild) -> Array:
 		var nm := String(HomeLayout.CATALOG[id]["name"])
 		if FarmSites.is_upgrading(e):
 			out.append({"name": nm, "note": "Upgrading %d%%" % int(FarmSites.progress(e) * 100.0), "glyph": "hammer",
-				"cb": func(): pass, "off": true, "tip": "Boki are building the next tier"})
+				"cb": func(): pass, "off": true, "tip": "Boki are building the next tier", "uid": uid})
 			continue
 		var cost := FarmSites.upgrade_cost(id, t + 1)
 		if cost.is_empty():
 			out.append({"name": nm, "note": "Tier %d (best)" % t, "glyph": "hammer", "cb": func(): pass, "off": true,
-				"tip": "Fully upgraded"})
+				"tip": "Fully upgraded", "uid": uid})
 			continue
 		var lock := FarmUnlocks.gated() and FarmUnlocks.level() < int(cost.get("level", 1))
 		var note := "Tier %d to %d" % [t, t + 1]
 		if lock:
 			note = "Needs farm level %d" % int(cost.get("level", 1))
-		out.append({"name": nm, "note": note, "glyph": "hammer", "cb": func(): hb.upgrade(uid), "off": lock,
+		out.append({"name": nm, "note": note, "glyph": "hammer", "cb": func(): hb.upgrade(uid), "off": lock, "uid": uid,
 			"cost": {} if lock else cost,
 			"tip": "Upgrade the %s to tier %d: %s. Boki do the building; it keeps working meanwhile." % [
 				nm.to_lower(), t + 1, FarmSites.cost_text(cost)]})
 	return out
+
+# ------------------------------------------------------------------ the hover shortcut
+## What the cursor card says about a placed building (tag "d:<uid>"): its level and "Upgrade", "Upgrading" or "Max".
+## Empty for anything that has no tiers.
+static func hover_state(tag: String) -> Dictionary:
+	if not tag.begins_with("d:"):
+		return {}
+	var e := FarmSites.entry(int(tag.substr(2)))
+	if e.is_empty() or FarmSites.is_site(e) or not (FarmSites.rules()["upgradable"] as Array).has(String(e["id"])):
+		return {}
+	var left := "Upgrade"
+	if FarmSites.is_upgrading(e):
+		left = "Upgrading"
+	elif FarmSites.upgrade_cost(String(e["id"]), FarmSites.tier(e) + 1).is_empty():
+		left = "Max"
+	return {"level": FarmSites.tier(e), "upgrade": left}
+
+## The Upgrade key over a building: opens the Upgrades tab on its row. True if it did.
+static func show_upgrade(hb: HomeBuild, tag: String) -> bool:
+	if hover_state(tag).get("upgrade", "") != "Upgrade":
+		return false
+	hb.cat = "Upgrades"
+	hb._build_bar()
+	hb.bar.show_uid(int(tag.substr(2)))
+	return true

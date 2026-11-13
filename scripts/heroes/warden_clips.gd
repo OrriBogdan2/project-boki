@@ -19,9 +19,12 @@ extends RefCounted
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
+const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, then take-off), before the model hides
+const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
+const FALL_FADE := 0.05      # s: into the knocked-down beat (quick: it is the hit)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -68,6 +71,7 @@ var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
+var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -84,6 +88,9 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
+var stowed := false          # "carry_stow" bones are put away
+var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is in a "carry_drop" hand or surface
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -100,6 +107,16 @@ static func dying(h: Hunter) -> bool:
 		return false
 	return h.m.time - float(h.get_meta("died_at", -99.0)) < float(h.model.get_meta(DEATH_T, 0.0))
 
+## Seconds into the extract beat for an extracted Hunter whose Hero has clips (stamped the first frame it is seen,
+## so a local extract, the "ext" event and a snapshot flag all start it); -1 when there is no beat to show.
+static func leave_t(h: Hunter) -> float:
+	if not h.extracted or h.model == null or not h.model.has_meta(DEATH_T):
+		return -1.0
+	if not h.has_meta("extracted_at"):
+		h.set_meta("extracted_at", h.m.time)
+	var t: float = h.m.time - float(h.get_meta("extracted_at"))
+	return t if t < EXTRACT_T else -1.0
+
 static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenClips:
 	var dd := data(art_name)
 	var players: Array = glb.find_children("*", "AnimationPlayer", true, false)
@@ -113,6 +130,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
 	skel = sk
+	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	var names := player.get_animation_library_list()
 	if names.is_empty():
@@ -132,6 +150,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
+	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -317,15 +336,29 @@ func _node(nm: String) -> AnimationNodeAnimation:
 func _p(nm: String, v: Variant) -> void:
 	tree.set("parameters/" + nm, v)
 
+## The extract beat from the Hero's own clips: the crouch dip, then the jump's take-off (its rise clip).
+func _extract_pick(xt: float) -> Dictionary:
+	if xt < EXTRACT_DIP:
+		return {"clip": d["crouch"]["in"], "t": xt}
+	var clip := String(d["air"]["rise"])
+	return {"clip": clip, "t": minf(xt - EXTRACT_DIP, lib.get_animation(clip).length - 0.001)}
+
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
+	var fall := float(s.get("fall", -1.0))
+	if fall >= 0.0 and st.has("dead"):      # knocked down (HunterFall): the death clip, as far in as the beat is
+		var clip := String(st["dead"])
+		return {"clip": clip, "t": fall * lib.get_animation(clip).length, "fade": FALL_FADE}
 	for k in d.get("procedural", []):
 		var v = s.get(k, null)
 		if (v is bool and v) or (v is float and v >= 0.0):
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	var xt := float(s.get("extract_t", -1.0))
+	if xt >= 0.0:
+		return _extract_pick(xt)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
@@ -339,6 +372,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
+		if mv.has("fit"):
+			tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
 		# (a lead clip holds its last frame rather than ending before the move does)
 		if mv.has("lead"):
 			tt = minf(tt, length - 0.001)
@@ -352,13 +387,15 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
 		# ("upper": true, or "moving": the legs keep walking only while he walks)
 		var up = mv.get("upper", false)
-		if up is String:
+		if planted(s):
+			up = true      # rooted: the legs stay on the standing layer, only the body plays the move
+		elif up is String:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false)),
 				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
-	if km != "":
+	if km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
 	if act.has(String(s.get("act", ""))):
@@ -377,7 +414,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": ld["clip"], "t": land_t}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
-	if hit < float(hd.get("dur", 0.0)):
+	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
+	if hit < float(hd.get("dur", 0.0)) and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH:
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -452,8 +490,27 @@ func step(dt: float) -> void:
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
+	_air_tilt()
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
+
+## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
+func _carry(on: bool, dt: float) -> void:
+	carry_w = move_toward(carry_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
+	if carry_w <= 0.0:
+		root.remove_meta(WardenCarry.SOCKET)
+		if stowed:
+			stowed = false
+			WardenCarry.stow(skel, d.get("carry_stow", []), 0.0)
+			WardenCarry.hold(drop, false)
+			_out(0.0)       # (a weapon bone with a size of its own gets it back)
+		return
+	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
+	root.set_meta(WardenCarry.SOCKET, WardenCarry.apply(skel, root, carry_w, fwd))
+	stowed = true
+	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
+	WardenCarry.hold(drop, carry_w >= 0.5)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
@@ -462,7 +519,7 @@ func step(dt: float) -> void:
 ## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
 ## and the arm on the aim keep their pose.
 func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: float) -> void:
-	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var vel: Vector3 = _vel(s)
 	var goal := 0.0
 	if (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
 		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
@@ -480,13 +537,33 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
+## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
+## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
+func _air_tilt() -> void:
+	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+		return
+	var b := Basis(q)
+	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
+	var turn := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
+	skel.set_bone_global_pose(root_bi, turn * skel.get_bone_global_pose(root_bi))
+
 func _moving(s: Dictionary) -> bool:
-	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var vel: Vector3 = _vel(s)
 	return Vector2(vel.x, vel.z).length() >= STILL
+
+## Rooted (a Root or a stuck cast), the feet stay planted whatever the velocity still says; Rimelock's statue
+## (the "statue" state) is a full freeze and keeps its own clips.
+static func planted(s: Dictionary) -> bool:
+	return bool(s.get("rooted", false)) and not bool(s.get("statue", false))
+
+## His velocity as the legs see it: none while planted.
+static func _vel(s: Dictionary) -> Vector3:
+	return Vector3.ZERO if planted(s) else s.get("vel", Vector3.ZERO)
 
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]
-	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var vel: Vector3 = _vel(s)
 	var flat := Vector2(vel.x, vel.z)
 	var spd := flat.length()
 	var face := float(s.get("face", 0.0))
