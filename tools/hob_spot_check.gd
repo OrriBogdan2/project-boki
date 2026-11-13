@@ -137,6 +137,12 @@ func _interact() -> void:
 	var mid_kind := _pick(mid)
 	ok(range(10).all(func(i): return _pick(mid + Vector3(0.01 * i, 0, 0)) == mid_kind),
 			"halfway between them it does not flicker ('%s')" % mid_kind)
+	# rings that do overlap (Hob walking past, a crowded layout): the nearer one wins, no bias to the stall
+	var keep: Vector3 = hob.node.position
+	hob.node.position = stall - to_stall * 3.0
+	var near: Array = [_pick(stall - to_stall * 1.7), _pick(stall - to_stall * 1.3)]
+	hob.node.position = keep
+	ok(near == ["hob", "stall"], "Hob 3 m from the stall: the nearer of the two wins %s" % [near])
 
 
 func _pick(at: Vector3) -> String:
