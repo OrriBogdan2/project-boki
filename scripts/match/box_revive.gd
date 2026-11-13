@@ -39,6 +39,7 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	if h.get_meta("box_broke", false):
 		h.box_t = 0.0
 		return
+	var o: Hunter = b["owner"]
 	var need := time_for()
 	if h.box_t <= 0.0:
 		h.vuln_fx_t = 0.0

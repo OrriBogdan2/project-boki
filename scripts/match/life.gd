@@ -8,11 +8,13 @@ class_name Life
 ## Everything here runs on whichever game owns the hunter (local and bots); remote hunters only
 ## show what their owner sends.
 
+const STOMP_ROOT := 0.12   # s: the stomper's own hold on its feet, topped up every frame; a root above it is CC
+
 const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
 	"revive_radius": 1.6,       # [est] a teammate this close revives you (source silent)
 	"revive_time": 4.0,         # [wiki "a few seconds"] [est] one teammate (docs/decisions/0022)
-	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health (wiki: "X%")
+	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health (wiki: "X%"; a per-tick heal scaled to ours gives 12-35%)
 	# 1 to 4 on a wisp: 1, 1.5, 1.75, 1.875x in all, for teammates reviving and enemies stomping alike
 	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] each of n Hunters on one wisp works at crowd[n-1] (0022)
 	"stomp_mult": 2.5,          # [design] one enemy on a wisp drains it this much faster and blocks the revive [wiki]
@@ -56,6 +58,15 @@ static func box_color(b: Dictionary) -> Color:
 	for t in BOX_TIERS:
 		if box_value(b) >= int(t[0]): col = t[1]
 	return col
+
+## The rarity tier of the best piece of gear or valuable in a box (what its glow shows).
+static func box_rarity(b: Dictionary) -> int:
+	var best := 0
+	for g in b.get("gear", []):
+		best = maxi(best, int(g["rar"]))
+	for it in b.get("pack", []):
+		best = maxi(best, Loot.rar_of(it))
+	return best
 
 ## Is anyone on this team still in the fight (standing or a wisp)?
 static func team_alive(m: Match, team: int) -> bool:
@@ -106,8 +117,8 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			o.set_meta("crush_t", st)
 		var kin_on := false
 		for kk in [o.kin, o.kin2]:
-			if kk and not (kk as Kin).dead and (kk as Kin).state == "reviving" and (kk as Kin).flat_dist(o) < 1.4:
-				kin_on = true
+			if kk and not (kk as Kin).dead and KinWispForm.pulling(kk):
+				kin_on = true          # its Boki, riding as a wisp, is pulling it up: no bleed meanwhile
 		if foes > 0 and not o.get_meta("stomped", false) and o == m.player and m.hud:
 			m.hud.toast("%s is on you! Drift away" % stompers[0].pname, Color("ff5a4a"))
 		o.set_meta("stomped", foes > 0)
@@ -128,9 +139,18 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			trace(m, "%s %s" % [o.pname, "bled out" if foes == 0 else "stomped out"])
 			m.eliminate(o, o.last_hit_by, "bled out" if foes == 0 else "finished")
 
+## A hit on a wisp. A wisp can't be shot: it's lost to stomps, an execute, bleeding out, and the few
+## abilities the source lets reach it (opts "src": "wisp", e.g. Hail Wall), which drain `down_hp` by `dmg`.
+## Always 0: the wisp has no health to take. It runs on the wisp's own game (remote hits arrive by "hit").
+static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
+	if opts.get("src", "") == "wisp":
+		o.down_hp = maxf(0.0, o.down_hp - dmg)
+		o.last_hit_by = by
+	return 0.0
+
 # ------------------------------------------------------------------ the stomp
 ## Holding interact on an enemy wisp commits you to stomping it out: a fixed animation you can't
-## cancel or move out of. You can still be shot, and a stun or a knockback breaks it (the wisp
+## cancel or move out of. You can still be shot, and hard CC breaks it (cc_break; the wisp
 ## lives), and if the wisp drifts away (off a ledge, say) your stomps miss and it gets away.
 static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
@@ -149,19 +169,33 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
 		m.sfx("whoosh", h.pos, -6.0, 1.3)
 
+## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
+## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
+## (Nightwell, a reel, a drag). Slows and Daze never do; your own input never does. "" = still going.
+static func cc_break(m: Match, h: Hunter) -> String:
+	if h.downed or h.out: return "down"
+	if h.stun_t > 0.0: return "stun"
+	if m.time - h.kb_t < 0.08: return "knock"
+	if h.root_t > STOMP_ROOT + 0.001: return "root"
+	if KitStatus.grounded(h): return "ground"
+	for t in m.displace.tows:
+		if t["e"] == h: return "pulled"
+	return ""
+
 static func tick_stomps(m: Match, dt: float) -> void:
 	for h in m.hunters:
 		if h.stomp.is_empty() or h.remote:
 			continue
 		var o: Hunter = h.stomp["o"]
-		# a hit that stuns or knocks you breaks it; your own input never does
-		if h.downed or h.out or h.stun_t > 0.0 or m.time - h.kb_t < 0.08:
+		var why := cc_break(m, h)
+		if why != "":
+			trace(m, "stomp cc %s on %s" % [why, h.pname])
 			end_stomp(m, h, "broken")
 			continue
 		if o == null or o.out or not o.downed:
 			end_stomp(m, h, "gone")
 			continue
-		h.root_t = maxf(h.root_t, 0.12)
+		h.root_t = maxf(h.root_t, STOMP_ROOT)
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
 		var t0 := float(h.stomp["t"])
@@ -233,7 +267,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	return b
 
 static func _place_box(m: Match, b: Dictionary, at: Vector3) -> void:
-	var n := Models.deathbox(box_color(b))
+	var n := Models.deathbox(box_color(b), box_rarity(b))
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
@@ -310,8 +344,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var gd: Dictionary = Gear.ALL.get(String(g["id"]), {})
 		var r: Dictionary = Data.RARITY[clampi(int(g["rar"]), 0, Data.RARITY.size() - 1)]
 		var slot := Gear.slot_on(h, String(g["id"]))
-		var cur: Dictionary = h.gear[slot]
-		var up := cur.is_empty() or Loot.value(Loot.gear(String(g["id"]), int(g["rar"]))) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
+		var up := Pack.beats_worn(h, Loot.gear(String(g["id"]), int(g["rar"])))
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
 			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
 			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
@@ -322,7 +355,8 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 	for i in (b.get("pack", []) as Array).size():
 		var it: Dictionary = b["pack"][i]
 		out.append({"key": "pack", "i": i, "name": Loot.name_of(it), "sub": Loot.sub_of(it), "icon": Loot.icon_of(it), "col": Loot.col_of(it),
-			"upgrade": Pack.wants(h, it), "value": Loot.value(it), "el": String(it.get("el", "")), "full": not Pack.room(h)})
+			"upgrade": Pack.wants(h, it), "value": Loot.value(it), "el": String(it.get("el", "")), "full": not Pack.room(h),
+			"wear": Pack.wears(h, it)})
 	return out
 
 ## Takes one thing out of a box. Swapping gear leaves yours in the box in its place.

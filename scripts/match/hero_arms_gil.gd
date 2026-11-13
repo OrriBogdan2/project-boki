@@ -6,6 +6,7 @@ extends RefCounted
 
 const X_AXIS := Vector3(PI / 2, 0, 0)
 
+
 static func build(gun: Node3D, weapon: String, m_dark: Material, m_acc: Material) -> bool:
 	if weapon != "swordfish":
 		return false
