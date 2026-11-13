@@ -44,6 +44,7 @@ var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, pts}
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
+var rng := RandomNumberGenerator.new()   # the noise seeds' own stream: what is on screen must not shift the sim's dice
 var live_n := 0                # GPU particles alive (asked for) now
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
 var plays := {}                # (tests) move -> times played
@@ -472,7 +473,7 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
-	mt.set_shader_parameter("seed", randf() * SEED_MAX)
+	mt.set_shader_parameter("seed", rng.randf() * SEED_MAX)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
 
