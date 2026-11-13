@@ -283,6 +283,7 @@ func _archer_combos() -> void:
 		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
 		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
+	_impact_looks(float(K.rmb_def()["pin"]["stun"]))
 	var pd: Dictionary = K.rmb_def()["pin"]
 	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
 	ok(
@@ -345,7 +346,7 @@ func _archer_combos() -> void:
 	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
-		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
+		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and (K.fx.laces[0]["node"] as Node3D).visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
@@ -828,6 +829,38 @@ func _archer_combos() -> void:
 		"ghost %.2f" % P.spirit_t
 	)
 	await done(m)
+
+## The Heavy Shot's hit burst grows with its charge, the wall pin's is larger, both have a white core, and
+## neither leaves a ring on the ground (a flash only, not an explosion); the stunned foe wears a mark over its head
+## for the whole stun.
+func _impact_looks(stun_s: float) -> void:
+	var mv: Dictionary = HeroVfx.data("archer")["moves"]
+	var hit := _flare_reach(mv["heavy_hit"], 1.0)
+	var tap := _flare_reach(mv["heavy_hit"], 0.0)
+	var pin := _flare_reach(mv["heavy_pin"], 1.0)
+	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap], hit > 1.2 * tap)
+	ok("pin look: the wall pin burst %.1f m beats the plain hit %.1f m" % [pin, hit], pin > 1.3 * hit)
+	for move: String in ["heavy_hit", "heavy_pin"]:
+		var core := false
+		var ground := false
+		for layer: Dictionary in mv[move]["fx"]:
+			core = core or (layer["p"] == "flare" and layer["c"] == "white" and layer["c2"] == "white")
+			ground = ground or layer["p"] in ["ring", "vortex", "scorch", "skirt"]
+		ok("pin look: %s has a white-core flare and no ground ring" % move, core and not ground)
+	var stun_fx: Array = mv["heavy_stun"]["fx"]
+	var mark: Dictionary = stun_fx[1]
+	ok(
+		"pin look: the stun mark rides over the head for the whole stun",
+		mark["p"] == "star" and float(mark["y"]) >= 1.8 and float(mark["life"]) >= stun_s
+	)
+
+## The widest flare layer of a recipe at charge k (m across).
+func _flare_reach(rec: Dictionary, k: float) -> float:
+	var widest := 0.0
+	for layer: Dictionary in rec["fx"]:
+		if layer["p"] == "flare":
+			widest = maxf(widest, float(layer["size"]) * (1.0 + float(layer.get("size_k", 0.0)) * k))
+	return widest
 
 ## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
 func _spin(lvl: int) -> float:
