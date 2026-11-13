@@ -584,7 +584,7 @@ func _rime_move() -> void:
 	var still := Vector2(P.vel.x, P.vel.z).length()
 	var p1 := P.pos
 	P.inp["move"] = Vector2(0, 1)
-	step(m, 0.15)
+	step(m, float(K.x_def()["recover"]) + 0.15)      # the crash's recovery lock first (parity-neve-crash-recovery)
 	ok("tm X end: no momentum after the crash, and the next step is hers (she walks off)",
 			still < 0.01 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.25,
 			"%.2f m/s then %.2f m" % [still, Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length()])
@@ -1660,7 +1660,8 @@ func rimewright() -> void:
 			T.max_hp - T.hp >= thrown_dmg * 0.75,
 			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
-	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T and mk["label"] == "FAN")
+	# the badges carry no label (DECISIONS 11-11): the FAN badge is the mark on this foe
+	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T)
 	ok(
 			"tm passive: the stacks show on your FAN badge (the frost glow on the foe is for the others)",
 			(fan.size() == 1 and not K.lk().showing("frost%d" % T.get_instance_id())) or K.splinter_log > 0)
