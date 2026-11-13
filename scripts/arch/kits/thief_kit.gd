@@ -797,7 +797,7 @@ func cast_e() -> bool:
 
 func _throw_knife() -> void:
 	var ed := e_def()
-	var rng := AimMode.dist(h, float(ed["range"]))     # to the cursor, 14m at most
+	var rng := AimMode.dist(h, float(ed["range"]))     # to the cursor, e.range at most
 	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": rng, "size": 0.2},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])},
 				{"type": "slow", "duration": float(ed["slow_t"]), "strength": float(ed["slow"])}]})

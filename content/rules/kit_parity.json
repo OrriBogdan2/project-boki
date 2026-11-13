@@ -17,6 +17,14 @@
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.2, "tol": 0.22, "evidence": "F Obsidian Slam: purple disc about 1.2 bh radius at the cursor (1 bh = 1.8 m)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"},
 		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.lane_w", "value": 1.8, "tol": 0.18, "evidence": "F Trickshot lane about 1 bh wide = 1.8 m (hero-ref/dancer.md)"},
-		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"}
+		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"},
+		{"hero": "tender", "slot": "RMB", "field": "rmb.seed.burst_r", "value": 2.2, "tol": 0.22, "evidence": "F Bound by Fate: purple disc about 1.2 bh radius under the target = the burst area; the 1.8 bh flare is the trigger VFX (hero-ref/mooshmoosh.md)"},
+		{"hero": "dredge", "slot": "E", "field": "e.radius", "value": 2.7, "tol": 0.35, "evidence": "F Iron Smash hit box about 1.5 bh deep (2.7 m) in front (hero-ref/dredge.md)"},
+		{"hero": "rimewright", "slot": "RMB", "field": "rmb.lance.zone_r", "value": 2.2, "tol": 0.22, "evidence": "F Ice Spear slow-zone ring about 1.2 h radius at the landing (hero-ref/tamsin.md)"},
+		{"hero": "rimewright", "slot": "RMB", "field": "rmb.lance.burst_r", "value": 2.7, "tol": 0.27, "evidence": "F Ice Spear detonation dome about 1.5 h radius (hero-ref/tamsin.md)"},
+		{"hero": "rimewright", "slot": "E", "field": "e.slide", "value": 4.5, "tol": 0.45, "evidence": "F Ice Wall slides about 6 h in 2.4 s = 2.5 h/s (hero-ref/tamsin.md)"},
+		{"hero": "rimewright", "slot": "E", "field": "e.length", "value": 1.8, "tol": 0.18, "evidence": "F Ice Wall erupts about 1 h wide (hero-ref/tamsin.md)"},
+		{"hero": "rimewright", "slot": "E", "field": "e.length_max", "value": 4.5, "tol": 0.45, "evidence": "F Ice Wall widens to about 2.5 h (hero-ref/tamsin.md)"},
+		{"hero": "thief", "slot": "E", "field": "e.range", "value": 16.2, "tol": 0.9, "evidence": "F Phantom Dagger with no target landed about 9 bh out (hero-ref/dancer.md); 14 could not reach it"}
 	]
 }
