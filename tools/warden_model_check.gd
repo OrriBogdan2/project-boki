@@ -15,7 +15,8 @@ const EPS := 0.0005
 ## The heights follow the owner's final height chart (Nov 8, ext/hero-heights) where it moved a Warden off its sheet.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
-	"bulwark": {"hit_r": 0.46, "height": 1.5, "height_3d": 1.9, "width": [1.3, 5.2], "moves": "bul_"},
+	# (Albert appeal3, owner 11-10: the big helmet and masts stand 1.3x the old top, as wide)
+	"bulwark": {"hit_r": 0.46, "height": 1.03, "height_3d": 1.55, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
 	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
@@ -34,7 +35,7 @@ const WARDENS := {
 	# (Cinder v95 appeal3 b: short curled horns, lower than v2's; the chart's taller Cinder is wider by as much)
 	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
-	"juggernaut": {"hit_r": 0.428, "height": 1.31, "height_3d": 1.32, "width": [1.0, 2.0], "moves": "jug"},
+	"juggernaut": {"hit_r": 0.428, "height": 1.24, "height_3d": 1.28, "width": [1.0, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
 	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
@@ -229,7 +230,11 @@ func _glb_top(m: Node3D) -> float:
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
 			continue        # (floating props, Tarek's stones and Motley's halo: not the height)
-		for p in WARDEN_SKIN.points(nd as MeshInstance3D):
+		var mi := nd as MeshInstance3D
+		if mi.skin == null:      # a rigid piece (no skin): its box, where its bone or parent holds it
+			top = maxf(top, (mi.global_transform * mi.get_aabb()).end.y)
+			continue
+		for p in WARDEN_SKIN.points(mi):
 			top = maxf(top, p.y)
 	return top - m.global_position.y
 
