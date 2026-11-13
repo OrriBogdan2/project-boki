@@ -570,6 +570,7 @@
 			{"anchor": "anchor_eye", "color": [0.25, 1.0, 0.5], "strength": 2.4, "px": 3.2, "near_d": 7.0, "far_d": 14.0, "lift": 0.03},
 			{"anchor": "anchor_lamp_r", "color": [1.0, 0.78, 0.3], "strength": 1.6, "px": 2.6, "near_d": 7.0, "far_d": 14.0}
 		],
+		"closeup": {"fov": 36.0, "up": -0.3},
 		"no_ink": ["glass"]
 	},
 	"pip": {
