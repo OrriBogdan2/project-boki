@@ -143,6 +143,21 @@ carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows 
 - Burst: Flue Flight plus the cloak, then straight into a merge and its ultimate, leaves a full-health light hunter standing
   (`--ashwick-combo-check`, "burst").
 
+### Flue Flight movement, settled (Nov 10)
+Trust order: [O] owner > [D] data (briefs/supervive-data) > [W] wiki > [F] footage (hero-ref/linwick.md, ult frames at 10 fps).
+The data has no flight numbers (supervive_kits.md: "fly forward, leaving burning ground"), so the footage sets the motion.
+Asserted by the `ult move` / `ult end` / `ult ledge` / `ult abyss` rows of `--ashwick-combo-check`.
+
+| What | Ours | Source |
+|---|---|---|
+| Steering | the cursor only, capped at 120 deg/s; WASD never steers it | [F] f34-f38 bends about 45 deg in 0.4 s toward the cursor |
+| Speed curve | 12.6 m/s from the lift-off frame to the last, no ramp, no ease-out | [F] about 7 bh/s, lift-off immediate (f25) |
+| Length | 1.8 s, about 22.7 m | [O] item 20 (a bit longer than [F] 1.3-1.4 s) |
+| End (time out or X again) | the next step is free (Shift dashes, LMB lights); he runs on at run speed: the flight's speed goes through the shared dash exit (`HunterMove.dash_exit`, 4.65 m/s), **changed from 0.3 x 12.6 = 3.78 m/s** | [D] dash_exit_run 1.0 (hunter_move.json); [F] f39-f41 he "simply continues on foot" |
+| A jump in it | leaps off, a dash-jump share of the speed into the air and on to a glide (unchanged) | ours (item 51) |
+| Ledges | eases to 0.45 m over the ground below at 6 m/s both ways: up a rise and, **new**, back down off a terrace (it held its height before) | [F] "flies low and upright" f26-f39 |
+| Abyss | holds its height across (no carpet there); ending over it he falls and the glider takes the flight's burst | [F] silent (flights over ground only); ours |
+
 ## Small mechanics
 | Mechanic | Ours | Source | Footage |
 |---|---|---|---|
@@ -172,6 +187,21 @@ carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows 
 | The shield ability can be cast mid-flight | built (Furnace Cloak) | [wiki](https://supervive.wiki.gg/wiki/Felix) | yes (ult 0137) |
 | Knockback impulses greatly increase the flight's speed | built (up to +10 m/s, bent the way he was pushed) | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
 | A red-orange ember ring at lift-off, no big landing | built | footage | yes (ult 0025, 0039) |
+
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/linwick.md) | Verdict |
+|---|---|---|---|---|
+| LMB | held, the stream | 1.0 (the kit runs the lance; asserted "at his full walk") | walks while firing, no visible slow (0007-0019) | match |
+| LMB | 0.35 s after letting go | 0.6 (`lmb.slow_after`) | "subtle at 5 fps", not resolvable | [?] |
+| RMB | Cinder Shot, aim lane and release | 1.0 | "Felix does not stop moving" (0072-0137) | match |
+| Shift | Soot Ram | n/a (rank 3: 1.16 for 2 s after) | a dash | n/a |
+| E | Furnace Cloak, on press | 1.0 | the walk isn't stated | [?] |
+| X | Flue Flight | n/a | a steered flight | n/a |
 
 ## Assumptions
 Where the footage and the wiki are silent, we picked the most likely behaviour (the owner can correct these):
@@ -408,3 +438,13 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/ashwick.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![ashwick v2 strips](../art/anim_audit/v2_ashwick.jpg)
+
+- Gait: run slide 12 %, arms against the legs +0.80, bob 9.1 cm: unchanged from Nov 8. Both attacks still hold an arm out to the side 92-96 % of the clip (T-pose): not fixed (our own idea, see the report).
+- Palms: the muzzles are the palms (`weapon_muzzle` right, `weapon_muzzle_l` left); both sit within 0.06 m of the hand bones in `lance` and `shot`.
+- Idle to walk first-pose gap 0.38 body heights, unchanged (blend-covered).
+- Timing: Cinder's move timing table is on the unmerged `ext/anim-time-cinder*` branches (it conflicts with this one in `warden_clips.gd` and `cinder.json`, so it was not re-run here); `--ashwick-combo-check` on the v2 clips passes (119 checks, 0 failures).

@@ -4,7 +4,7 @@
 		"ground": {
 			"lmb": {
 				"mode": "buffer",
-				"source": "Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch. Ours: a 0.07s dip and a ~0.2s drive; a slash pressed in the dip or the drive swings as the drive ends."
+				"source": "Not determinable. Checked briefs/supervive-data/supervive_kits.md:26 (Flame Step is itself the attack, 'dash attack in facing direction'; no rule on a press inside it) and briefs/hero-ref/juggernaut.md:20, 86-90, 260-266 (card text 'Dash while attacking in your facing direction'; the footage 0372-0377 shows no slash pressed inside the dash, only the dash's own hit at 0401). So the source does not say whether an LMB press fires mid-dash; left `buffer`. Ours: a 0.07s dip and a ~0.2s drive (owner 113.8: much shorter than the footage crouch); a slash pressed in the dip or the drive swings as the drive ends."
 			},
 			"rmb": {
 				"mode": "fire",
@@ -27,7 +27,7 @@
 		"air": {
 			"lmb": {
 				"mode": "buffer",
-				"source": "No source: the footage shows no air dash (he uses the Air Slam in the air). Ours: as on the ground, the slash swings at the end."
+				"source": "Not determinable. No source: briefs/hero-ref/juggernaut.md:273-274 shows no air dash (he uses the Air Slam in the air) and :315 lists a mid-jump Shift as an open question. Left `buffer`. Ours: as on the ground, the slash swings at the end."
 			},
 			"rmb": {
 				"mode": "cancel",
