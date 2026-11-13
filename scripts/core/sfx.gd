@@ -8,7 +8,8 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
 	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "train_hit", "revive_hum", "revive_done", "scan_pop", "wisp_hum",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
-	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
+	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break",
+	"armor_up", "armor_up_own", "knock_confirm", "extract_ok",
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
 	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
@@ -23,7 +24,7 @@ const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", 
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200,
 	"boki_yawn": 400, "break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
-	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
+	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60, "armor_up": 120}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
 const STACK_MS := 90
