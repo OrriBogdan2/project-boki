@@ -3,8 +3,9 @@ extends "res://tools/hero_pair_check.gd"
 ## scripts/arch/kits/gil_kit.gd, docs/heroes/gil.md), on a training dummy through the real match code: the Fencer
 ## chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each vial's effect, hold range, the air drop), Fish
 ## Out of Water (three marks Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's
-## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Each cast plays its own move, and every move has his clip. Then
-## gil.md's tables: each slot's numbers, the cancels, the Riptide recast window, the clips, and the dash-flow rows
+## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Each
+## cast plays its own move, and every move has his clip. Then gil.md's tables: each slot's numbers, the
+## cancels, the Riptide recast window, the clips, and the dash-flow rows
 ## (tools/dash_flow_check.gd).
 
 var m: Match
