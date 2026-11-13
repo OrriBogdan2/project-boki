@@ -332,6 +332,8 @@ const CHECKS := {
 	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
 	"--tool-raise-shots": ["res://tools/tool_raise_shots.gd", "tool_raise_shots", null],      # --shots-dir=<dir>, GPU
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
+	"--pet-block-check": ["res://tools/pet_block_check.gd", "pet_block_check", "check"],      # a Boki never blocks work
+	"--pet-block-shots": ["res://tools/pet_block_check.gd", "pet_block_check", "shots"],      # with --write-movie
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-climb-check": ["res://tools/farm_climb_check.gd", "farm_climb_check", null],      # farm ridges climb
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],

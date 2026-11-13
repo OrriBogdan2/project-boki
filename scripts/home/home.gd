@@ -2062,6 +2062,9 @@ func _emote(k: Dictionary, s: String, force := false) -> void:
 	lbl.modulate = Color("ff8fb0") if s == "♥" else UI.INK
 	k["emote_t"] = 1.6
 
+## Interact targets a Boki standing closer never takes over: work, gathering and the nest (no petting by accident).
+const WORK_KINDS := ["plot", "wild", "station", "feeder", "place", "egg", "nook", "incubator"]
+
 func _find_interact() -> void:
 	var best := {}; var bd := 1.9
 	var p2 := Vector2(ppos.x, ppos.z)
@@ -2095,10 +2098,12 @@ func _find_interact() -> void:
 		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
 		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
+	var pet := {}      # a Boki only wins at the end, and never over work in reach
+	var pet_d := bd
 	for k in kins:
 		if k.has("indoors"): continue
 		var d := p2.distance_to(Vector2(k["pos"].x, k["pos"].z))
-		if d < bd: bd = d; best = {"kind": "kin", "k": k}
+		if d < pet_d: pet_d = d; pet = {"kind": "kin", "k": k}
 	if not _visiting() and is_instance_valid(burrow_node):
 		var bdoor := BURROW_AT + _turn(Vector3(0, 0, 1.55), burrow_r)
 		var bdd := p2.distance_to(Vector2(bdoor.x, bdoor.z))
@@ -2125,6 +2130,7 @@ func _find_interact() -> void:
 			var sc := HomeLayout.deco_center(s["e"])
 			var sd := p2.distance_to(Vector2(sc.x, sc.z))
 			if sd < 1.7 and (best.is_empty() or sd < bd): bd = sd; best = {"kind": "station", "id": s["id"], "e": s["e"]}
+	if not pet.is_empty() and (best.is_empty() or (pet_d < bd and not WORK_KINDS.has(best["kind"]))): best = pet
 	interact = best
 	if panel_open != "" or best.is_empty() or building_now or chat_open or not train.is_empty() or (hb and hb.active):
 		prompt_box.visible = false
@@ -5229,12 +5235,14 @@ func _kin_r(k: Dictionary) -> float:
 	var n: Node3D = k["node"]
 	return 0.42 * n.scale.x
 
+const WORK_CLEAR := 0.5         # m: room a Boki leaves round you and your swing while a tool is out
 ## Personal space: kin push gently apart (and step around you) instead of stacking in one spot.
 ## A kin that's being petted, napping or busy holds its ground and the others make room.
 func _separate_kin(d: float) -> void:
 	var act: Array = kins.filter(func(o): return not o.has("indoors") and not o.has("leap") and (o["node"] as Node3D).visible and not o.get("busy", false))
 	var fixed := KinAvoid.parked
 	var p2 := Vector2(ppos.x, ppos.z)
+	var lane := Vector2(tw.target.x, tw.target.z) if tw.active() else p2     # mid-swing: clear the way to the target
 	for i in act.size():
 		var a: Dictionary = act[i]
 		if fixed.call(a): continue
@@ -5249,8 +5257,8 @@ func _separate_kin(d: float) -> void:
 			if dl < need:
 				if dl < 0.001: diff = Vector2.from_angle(float(i) * 2.4); dl = 0.001
 				push += diff / dl * (need - dl) * (1.0 if fixed.call(b) else 0.5)
-		var dp := ap - p2
-		var need_p := _kin_r(a) + 0.38
+		var dp := ap - Geometry2D.get_closest_point_to_segment(ap, p2, lane)
+		var need_p := _kin_r(a) + (WORK_CLEAR if tw.active() else 0.38)
 		if dp.length() < need_p and not a.has("fetch"):
 			if dp.length() < 0.001: dp = Vector2.from_angle(float(i) * 2.4)
 			push += dp.normalized() * (need_p - dp.length())
