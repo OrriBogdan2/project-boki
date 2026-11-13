@@ -810,9 +810,10 @@ func _clawed_turf(dir: Vector2) -> void:
 	m.fx.burst(at, Color("6a5236"), 10, 4.0, 0.35, 12.0, 1.0, Vector3(-dir.x, 0.5, -dir.y), 35.0)
 
 # ------------------------------------------------------------------ X: Brass Broadside
-## Only from a free stance: not mid-reel, mid-Anchor or mid-dive.
+## Not mid-reel, mid-Anchor or mid-dive. While the arm flies out it goes, like E, and the arm flies on: the
+## source locks only the pull (wiki), not the throw (docs/heroes/dredge.md, Cancels).
 func cast_ult() -> bool:
-	if flying or not pull.is_empty() or wind > 0.0 or not dive.is_empty():
+	if not pull.is_empty() or wind > 0.0 or not dive.is_empty():
 		return false
 	return HeroUlt.press(self, broadside.start)
 

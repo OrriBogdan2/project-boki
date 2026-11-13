@@ -209,6 +209,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Abyssal Hand is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
+| While the arm flies out (before a catch): the gun, E, X, RMB again | the volley, the Anchor and the Broadside go at once and the arm flies on; a second RMB is denied | "arm out: the gun fires, the arm flies on"; "arm out: E winds the Anchor up at once, the arm flies on"; "arm out: X starts the Broadside at once, the arm flies on to its miss, both waves go"; "arm out: a second Abyssal Hand is refused, the first arm flies on" |
 | Reel, then Anchor Drop | the fist raised over the filling cone, the slam at ~0.38s: damage, a long stun with a spiral, Grounded | "anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast"; the timing rows below (`dredge_timing_check.gd`); "anchor tell: the hit cone is drawn for everyone, the slam's own radius, angle and direction"; "anchor tell: the slam hits inside the drawn cone and nothing outside it"; "combo: reel > Anchor Drop = damage, stun, Grounded"; "anchor: the stunned foe shows a stun spiral"; "anchor: E cooldown set" |
 | Anchor Drop, then barge within 0.8s | barge turns at most 35 degrees | "combo: Anchor > barge turns at most 35 degrees" |
 | Abyssal Hand at a cliff face | the hook pierces it and the foe is hauled up and over it | "cliff: the hook pierces a cliff face and hooks the foe behind it"; "cliff: a reel hauls the foe up and over a cliff face to your feet" |
@@ -239,6 +240,51 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | Reel, then X | the hauled foe takes every slug | "ult combo: reel the foe in, then the Broadside lands (10+ slugs)" |
 | RMB or E while it runs; Shift; a stun in the charge | denied; the barge goes at once and the Broadside runs on (its pose and fan follow him, both waves still go); stopped, back in 8s | "ult: RMB and E are locked while it runs; Shift barges at once and it runs on"; "ult: barged out of in the charge, both waves still go"; "ult: a stun in the charge stops it, back in 8s" |
 | X, then the merge and its ultimate | a full-health light hunter survives | "burst: Brass Broadside then the merge never one-shots a full-health light hunter" |
+
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours was read in
+the code and probed headless (cancel-matrix pass, 11-09, on d255acbee; the arm-out rows settled 11-11 on 0.24.4 and
+asserted by `tools/dredge_cancel_check.gd`, the `arm out:` lines of `--dredge-combo-check`). **Unsettled** means no frame, card line
+or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
+ability; the hero's ultimate is X. Rules that hold for every pair not in the table: ArchKit has no shared cast lock,
+so the second goes now (both); every press is ignored, not buffered, while stunned or downed; the attack key is a
+held key (`Hunter.trigger`), so a tap that lands while the gun is blocked is lost and a held one fires on the first
+free frame; the glider won't open while a keyed move runs (`AirLimits.glide_locked`); a Merge start drops every
+hold, wind-up and charge with nothing fired (the `merge hold` lines of the check).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| Abyssal Hand reel (to the arrival, up to 3 s) | LMB tap or hold | [W] only the dash and the air dash work while it pulls | gun locked (`can_shoot`); a held LMB fires the frame the reel ends, a tap is lost | match | `reel: the gun is locked`; [W]; [F] dredge.md:241 (open question) |
+| reel | RMB, E, X | as above | each refused (the deny buzz); the reel runs on | match | `reel: a second Abyssal Hand is denied`, `E is denied while reeling`; `ult` row below |
+| reel | jump, glide | [W] as above; [F] 0127 "GROUNDED" on the caster | Grounded for the whole reel: no jump, no glider | match | dash_flow `into_jump.rmb` lock; `KitStatus` "gnd"; item 31 |
+| Abyssal Hand, arm out (the coil-back and the flight to the miss, up to 11.5 m) | LMB | [W] the only lock is "while it pulls" (the reel); [D] no lock on the throw; owner item 31 limits only the walk and the height while it is out | both: a volley goes, the arm flies on | match | `arm out: the gun fires, the arm flies on`; [F] dredge.md:77 "the video doesn't test this" |
+| arm out | E | as above | both: the Anchor winds up at once, the arm flies on | match | `arm out: E winds the Anchor up at once, the arm flies on` |
+| arm out | X | as above | both: the Broadside charges at once, the arm flies on (a miss snaps it back mid-charge, a catch starts the reel under it), both waves go | match (fixed 11-11: was refused) | `arm out: X starts the Broadside at once, the arm flies on to its miss, both waves go` |
+| arm out | RMB again | [D] one arm, its cooldown (18 s; card 11.7 s) runs from the throw, and nothing in the source refunds it before the arm lands; rank 4's -50% comes on the hit, which ends the flight | refused (the deny buzz), the first arm flies on | match | `arm out: a second Abyssal Hand is refused, the first arm flies on`; the `flying` guard in `fire_rmb` also keeps a cooldown reset from throwing a second arm |
+| arm out | jump | owner item 31: height held from the throw | no jump from the throw to the miss or the end of the reel | match (owner) | dash_flow `into_jump.rmb` |
+| Anchor Drop wind-up (0.38 s, planted) and its recovery (to about 1.0 s) | LMB | not shown; [F] 0221-0236 is one beat, no second press | both: a volley goes (probed); he walks at 70% in the wind-up | unsettled | [F] dredge.md:111-124 |
+| Anchor wind-up | E again, RMB, X | not shown (no recast on the card) | each refused, the wind-up runs on (probed) | unsettled | `cast_e`, `fire_rmb`, `cast_ult` gate on `wind` |
+| Anchor wind-up | jump | not shown | goes (no `cast_locked`); the wind-up runs on | unsettled | item 51 row check: `every slot casts mid-jump and a jump or Shift moves him out of it` |
+| Air Anchor smash (a straight drop) | glide | owner bug-26 pattern: the glider wins; [W] has no slam-then-glide | a fresh glide press ends the smash with no hit; a key already held does not | match (owner) | `_glide_wins` (17eb00ec1) |
+| air smash | LMB, RMB, X | not shown | gun and X refused; RMB refused (`dive`) | unsettled | `can_shoot`, `fire_rmb` |
+| Brass Broadside (1.1 s charge, two waves, 0.6 s apart) | LMB, RMB, E | [F] ult f22-f43: planted, nothing else shown; owner item 36: a slow walk | all refused until both waves are out; he walks at 30% then 20% | match (owner and footage) | `ult: RMB and E are locked while it runs`; the gun is locked in `can_shoot` |
+| Broadside | X again | [F] one press fires both waves (not tap and recast) | ignored (no recast) | match | `HeroUlt.press`, `ult_recast` default false |
+| Broadside charge | stun | not shown | stops it, back in 8 s; a stun between the waves stops the second | unsettled (ours) | `ult: a stun in the charge stops it, back in 8s` |
+| any wind-up, reel or charge | R (Merge) | not in the source (our rule) | dropped, nothing fires, no landing | ours | `merge hold: dredge's reel ... Anchor wind-up ... Broadside` |
+
+Fixes made: the arm-out row (11-11). The source's one lock on the Abyssal Hand is the pull ([W] "only the dash and the air
+dash can be used while it pulls", the reel; [D] lists no lock on the throw; owner item 31 asks only for the slow walk and the
+held height while it is out), so X now goes through the flight like E and the gun (`cast_ult` lost its `flying` test), and a
+second RMB stays refused because the first one's cooldown is already running. No frame shows a press during the throw: if
+footage ever shows the throw refusing casts, the rows flip back. The other rows the source speaks to (the reel's lock, the
+ult's planted charge, the glider) already matched; the open rows have no source line. Suggestion only, not built: the Anchor's wind-up
+could refuse the gun if a clip shows him firing mid-slam (the sheet's frames 0221-0236 show no shot). In flight: ext/grimble-parity-verify
+(cooldowns), ext/grimble-hook-arm-v2-rebased and the stretch branches touch the arm's look, not these rules.
 
 ## Animation moves
 Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`, sampled through `HunterAnim.km_sample`).
