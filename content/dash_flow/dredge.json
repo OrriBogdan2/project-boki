@@ -31,7 +31,7 @@
 			"at": [0.05, 0.6],
 			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md)."}
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). Ours since main: X goes through the arm's flight (commit b8253ec76a: the wiki's only lock is while it pulls; the data card has none on the throw)."}
 		},
 		"lmb_hold": {
 			"at": [0.3, 0.95],

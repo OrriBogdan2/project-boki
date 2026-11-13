@@ -28,18 +28,18 @@
 			"at": [0.05, 0.6],
 			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."}
+			"x": {"windup": "fire", "recovery": "drop", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). Ours since main: X goes during the charge (DECISIONS 11-07 'every interaction is chainable', commit eb41d741a2); the held recovery refuses it. Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends."}
 		},
 		"lmb_hold": {
 			"at": [0.3, 0.95],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
+			"rmb": {"windup": "drop", "recovery": "queue", "recovery_wait": 0.15, "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends. Ours since main: the 0.76 s commit (GunslingerUlt.COMMIT, the into_dash x lock, footage R 4); a press in it is refused, one in its last 0.15 s (DashFlow.cc_left) or a held gun goes as it ends."},
+			"e": {"windup": "drop", "recovery": "queue", "recovery_wait": 0.15, "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). Ours since main: the 0.76 s commit (GunslingerUlt.COMMIT, the into_dash x lock, footage R 4); a press in it is refused, one in its last 0.15 s (DashFlow.cc_left) or a held gun goes as it ends."},
 			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."}
 		},
 		"rmb": {
 			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches."},
+			"lmb": {"windup": "drop", "recovery": "queue", "recovery_wait": 0.15, "source": "Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches. Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends. Ours since main: the 0.76 s commit (GunslingerUlt.COMMIT, the into_dash x lock, footage R 4); a press in it is refused, one in its last 0.15 s (DashFlow.cc_left) or a held gun goes as it ends."},
+			"lmb_hold": {"windup": "queue", "windup_wait": 0.7, "recovery": "queue", "recovery_wait": 0.15, "source": "Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches. Ours since main: after the beam she is held 0.6 s (GunslingerKit.E_RECOVER, the into_dash e row); a press in it is refused, a held gun goes as it ends. Ours since main: the 0.76 s commit (GunslingerUlt.COMMIT, the into_dash x lock, footage R 4); a press in it is refused, one in its last 0.15 s (DashFlow.cc_left) or a held gun goes as it ends."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it."},
 			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it."}
 		},
