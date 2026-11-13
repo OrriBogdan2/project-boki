@@ -5,7 +5,7 @@ extends RefCounted
 ## a moment), and the finish (the winning team cheers, the losers sulk). Duo friends (BaseDuo) tap in the same
 ## happy hop and their burst swells and eases instead of stepping, so their pass reads smoother.
 ## A rigged Boki plays a clip through BokiRig's "kact" meta, the burst through its "kburst" meta; a clip the
-## species does not have plays its "fallback" clip from the rules (win hops, sulk stands: no rig has either) if it
+## species does not have plays its "fallback" clip from the rules (win hops, sulk stands; no rig lacks sulk today) if it
 ## has that, else a hop (stonehop), and a sulk without a clip is a head drop (the node pitches).
 ## Tuning: content/rules/base_relay.json "beats". Never touches the save.
 
