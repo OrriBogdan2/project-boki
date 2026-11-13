@@ -373,6 +373,66 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | Gil (gil) | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | Gil (gil) | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | Gil (gil) | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+
+## Space and Shift together
+
+One row per hero and case, from `dash_jump` in the same files. "Ours" is measured headless by `--dash-jump-check`, which fails when the game stops doing it. Verdict: match (the source settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).
+
+| Hero | Case | Source | Ours | Verdict |
+|---|---|---|---|---|
+| archer | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Myth): jump and air dash not shown (pin.md:331-334, :359). | the jump goes at once and ends the dash, keeping 75% of its speed | [?] |
+| archer | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Myth): jump and air dash not shown (pin.md:331-334, :359). | the dash ends and the glider opens, no jump | [?] |
+| archer | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Myth): jump and air dash not shown (pin.md:331-334, :359). | the air dash goes at once and ends the rise | [?] |
+| archer | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Myth): jump and air dash not shown (pin.md:331-334, :359). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 5% of its speed | [?] |
+| juggernaut | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315). | the jump goes at once and ends the dash, keeping 73% of its speed | [?] |
+| juggernaut | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315). | the dash ends and the glider opens, no jump | [?] |
+| juggernaut | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315). | the air dash goes at once and ends the rise | [?] |
+| juggernaut | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Brall): the only jumps are Air Slams (juggernaut.md:276-283); a mid-jump Shift is listed as unsettled (:315). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 0% of its speed | [?] |
+| gunslinger | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Ghost): no jump shown (venator.md:314); the air dash not shown (:344). | the jump goes at once and ends the dash, keeping 73% of its speed | [?] |
+| gunslinger | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Ghost): no jump shown (venator.md:314); the air dash not shown (:344). | the dash ends and the glider opens, no jump | [?] |
+| gunslinger | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Ghost): no jump shown (venator.md:314); the air dash not shown (:344). | the air dash goes at once and ends the rise | [?] |
+| gunslinger | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Ghost): no jump shown (venator.md:314); the air dash not shown (:344). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 5% of its speed | [?] |
+| bulwark | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398). | the jump goes at once and ends the dash, keeping 73% of its speed | [?] |
+| bulwark | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398). | the dash ends and the glider opens, no jump | [?] |
+| bulwark | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398). | the air dash goes at once and ends the rise | [?] |
+| bulwark | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 3% of its speed | [?] |
+| rimewright | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Celeste): no jump shown (tamsin.md:298, :334). | the jump goes and the dash runs on, keeping 108% of its speed | [?] |
+| rimewright | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Celeste): no jump shown (tamsin.md:298, :334). | the dash ends and the glider opens, no jump | [?] |
+| rimewright | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Celeste): no jump shown (tamsin.md:298, :334). | the air dash goes at once and ends the rise | [?] |
+| rimewright | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Celeste): no jump shown (tamsin.md:298, :334). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes and the dash runs on, keeping 100% of its speed | [?] |
+| ashwick | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323). | the jump goes at once and ends the dash, keeping 74% of its speed | [?] |
+| ashwick | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323). | the dash ends and the glider opens, no jump | [?] |
+| ashwick | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323). | the air dash goes at once and ends the rise | [?] |
+| ashwick | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 5% of its speed | [?] |
+| dolm | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Tetra): the jumps are the Volcano Crusher hop and the dash-into-dunk (breah.md:445); no Space inside Landslide. | the dash runs on; the press is dropped | [?] |
+| dolm | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Tetra): the jumps are the Volcano Crusher hop and the dash-into-dunk (breah.md:445); no Space inside Landslide. | the dash ends and the glider opens, no jump | [?] |
+| dolm | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Tetra): the jumps are the Volcano Crusher hop and the dash-into-dunk (breah.md:445); no Space inside Landslide. | the air dash goes at once and arcs on as a hop, the rise kept | [?] |
+| dolm | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Tetra): the jumps are the Volcano Crusher hop and the dash-into-dunk (breah.md:445); no Space inside Landslide. The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes and the dash runs on, keeping 3% of its speed | [?] |
+| mage | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Joule): no jump shown (vireo.md:476). | the jump goes at once and ends the dash, keeping 75% of its speed | [?] |
+| mage | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Joule): no jump shown (vireo.md:476). | the dash ends and the glider opens, no jump | [?] |
+| mage | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Joule): no jump shown (vireo.md:476). | the air dash goes at once and ends the rise | [?] |
+| mage | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Joule): no jump shown (vireo.md:476). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the dash runs on; the press is dropped | [?] |
+| dredge | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358). | the jump goes at once and ends the dash, keeping 74% of its speed | [?] |
+| dredge | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358). | the dash ends and the glider opens, no jump | [?] |
+| dredge | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358). | the air dash goes at once and ends the rise | [?] |
+| dredge | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 4% of its speed | [?] |
+| tender | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Elluna): every dash comes 0.1-0.3 s after a jump (mooshmoosh.md:340); none has Space pressed inside it. | the jump goes at once and ends the dash, keeping 73% of its speed | [?] |
+| tender | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Elluna): every dash comes 0.1-0.3 s after a jump (mooshmoosh.md:340); none has Space pressed inside it. | the dash ends and the glider opens, no jump | [?] |
+| tender | Shift in a jump's rise | Footage f35, f157, f181, f227 (mooshmoosh.md:340-358): Shift 0.1-0.3 s into the jump air-dashes at once and flat ('already up from the jump and keeps her height through the burst'); frame 0157 shows the card 'goes further while airborne'. | the air dash goes at once and ends the rise | match |
+| tender | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Elluna): every dash comes 0.1-0.3 s after a jump (mooshmoosh.md:340); none has Space pressed inside it. The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 3% of its speed | [?] |
+| thief | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Shiv): the one jump is a jump into a Cartwheel (dancer.md:431-440); no Space inside a Cartwheel. | the jump goes at once and ends the dash, keeping 76% of its speed | [?] |
+| thief | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Shiv): the one jump is a jump into a Cartwheel (dancer.md:431-440); no Space inside a Cartwheel. | the dash ends and the glider opens, no jump | [?] |
+| thief | Shift in a jump's rise | Footage 0129-0134 (dancer.md:431-440): she jumps at 303.8 s and cartwheels from 304.0 s, still rising (0130 airborne, 0131 the Cartwheel card up): the flip goes at once off the jump, flat, 'no extra float or hang'. | the air dash goes at once and ends the rise | match |
+| thief | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Shiv): the one jump is a jump into a Cartwheel (dancer.md:431-440); no Space inside a Cartwheel. The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the jump goes at once and ends the dash, keeping 6% of its speed | [?] |
+| ostra | Space in a ground dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Void): no jump shown (ostra.md:285). | the dash runs on; the press is dropped | [?] |
+| ostra | Space in an air dash | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Void): no jump shown (ostra.md:285). | the dash runs on; the press is dropped | [?] |
+| ostra | Shift in a jump's rise | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Void): no jump shown (ostra.md:285). | the air dash goes at once and ends the rise | [?] |
+| ostra | Space and Shift on one step | Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Void): no jump shown (ostra.md:285). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen. | the dash runs on; the press is dropped | [?] |
+| gil | Space in a ground dash | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | the jump goes at once and ends the dash, keeping 74% of its speed | [?] |
+| gil | Space in an air dash | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | the dash ends and the glider opens, no jump | [?] |
+| gil | Shift in a jump's rise | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | the air dash goes at once and ends the rise | [?] |
+| gil | Space and Shift on one step | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | the jump goes at once and ends the dash, keeping 4% of its speed | [?] |
+
 ## Air dash against ground dash (owner item 183)
 
 Every Hunter's air dash is its ground dash or a special one the source has, never the generic long dash on a charged press. "same" = the same move, clip and charge; "special" = a sourced difference.
@@ -483,94 +543,6 @@ The second ability pressed during the first one's wind-up and its recovery (the 
 | LMB hold during ult (X) | queued, goes 0.57 s later (0.05 s in) | fires at once (0.75 s in) | [?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31). |
 | RMB during ult (X) | dropped (0.05 s in) | fires at once (0.75 s in) | [?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31). |
 | E during ult (X) | fires at once (0.05 s in) | fires at once (0.75 s in) | [?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31). |
-### ashwick
-
-| Pair | Ours, wind-up | Ours, recovery | Source |
-|---|---|---|---|
-| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
-| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
-| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
-| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
-| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
-| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
-| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
-| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
-| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
-| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
-| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
-| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
-| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
-| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
-| LMB tap during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
-| LMB hold during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
-| RMB during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
-| E during ult (X) | fires at once (0.3 s in) | fires at once (2.1 s in) | Mid-flight [?] (briefs/hero-ref/linwick.md:198). Recovery: Flame Shield fires the moment he lands (briefs/hero-ref/linwick.md:216, f137-f139). Matches. |
-### tender
-
-| Pair | Ours, wind-up | Ours, recovery | Source |
-|---|---|---|---|
-| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
-| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
-| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
-| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
-| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
-| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
-| LMB tap during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
-| LMB hold during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
-| E during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
-| ult (X) during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
-| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
-| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
-| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
-| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
-| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
-| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
-| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
-| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
-### dolm
-
-| Pair | Ours, wind-up | Ours, recovery | Source |
-|---|---|---|---|
-| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
-| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
-| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
-| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
-| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
-| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
-| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
-| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
-| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
-| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
-| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
-| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
-| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
-| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
-| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
-| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | Tetraform wall, then a held Quake Punch through its rocks is the source combo (briefs/hero-ref/breah.md:401): ours fires. Matches. |
-| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
-| E during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
-### dredge
-
-| Pair | Ours, wind-up | Ours, recovery | Source |
-|---|---|---|---|
-| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
-| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
-| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
-| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
-| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
-| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
-| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md). |
-| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md). |
-| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Grasp, then Iron Smash on the target stunned at your feet is the source combo (briefs/hero-ref/dredge.md:98,140): ours fires. Matches. |
-| ult (X) during RMB | dropped (0.05 s in) | dropped (0.6 s in) | [?] The source combo is Grasp, then Kaiju Blast once the pull lands (briefs/hero-ref/dredge.md:275); a press while the arm is still out is not shown. |
-| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
-| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
-| RMB during E | dropped (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
-| ult (X) during E | dropped (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
-| LMB tap during ult (X) | queued, goes 1.03 s later (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
-| LMB hold during ult (X) | queued, goes 1.03 s later (0.05 s in) | fires at once (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
-| RMB during ult (X) | dropped (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
-| E during ult (X) | dropped (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
 ### rimewright
 
 | Pair | Ours, wind-up | Ours, recovery | Source |
@@ -593,6 +565,50 @@ The second ability pressed during the first one's wind-up and its recovery (the 
 | LMB hold during ult (X) | dropped (0.05 s in) | dropped (1.0 s in) | Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches. |
 | RMB during ult (X) | dropped (0.05 s in) | dropped (1.0 s in) | Owner item 65: the statue takes only the recast and Shift out (footage: no other press in the crystal, briefs/hero-ref/tamsin.md:218-227). Fixed: ours spent an RMB charge and dropped the spear; now refused like LMB and E. |
 | E during ult (X) | dropped (0.05 s in) | dropped (1.0 s in) | Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches. |
+### ashwick
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| LMB tap during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| LMB hold during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| RMB during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| E during ult (X) | fires at once (0.3 s in) | fires at once (2.1 s in) | Mid-flight [?] (briefs/hero-ref/linwick.md:198). Recovery: Flame Shield fires the moment he lands (briefs/hero-ref/linwick.md:216, f137-f139). Matches. |
+### dolm
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md). |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | Tetraform wall, then a held Quake Punch through its rocks is the source combo (briefs/hero-ref/breah.md:401): ours fires. Matches. |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.8 s in) | [?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md). |
 ### mage
 
 | Pair | Ours, wind-up | Ours, recovery | Source |
@@ -615,6 +631,50 @@ The second ability pressed during the first one's wind-up and its recovery (the 
 | LMB hold during ult (X) | dropped (0.05 s in) | fires at once (2.6 s in) | [?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207). |
 | RMB during ult (X) | dropped (0.05 s in) | fires at once (2.6 s in) | [?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207). |
 | E during ult (X) | dropped (0.05 s in) | fires at once (2.6 s in) | [?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207). |
+### dredge
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside a shot in the clip (briefs/hero-ref/dredge.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Kingpin presses nothing else inside a held shot in the clip (briefs/hero-ref/dredge.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Kingpin presses nothing else inside its RMB in the clip (briefs/hero-ref/dredge.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Grasp, then Iron Smash on the target stunned at your feet is the source combo (briefs/hero-ref/dredge.md:98,140): ours fires. Matches. |
+| ult (X) during RMB | dropped (0.05 s in) | dropped (0.6 s in) | [?] The source combo is Grasp, then Kaiju Blast once the pull lands (briefs/hero-ref/dredge.md:275); a press while the arm is still out is not shown. |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| RMB during E | dropped (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| ult (X) during E | dropped (0.05 s in) | fires at once (0.6 s in) | [?] Iron Smash: about 0.4 s to impact, 0.8 s in all, with no other press inside it (briefs/hero-ref/dredge.md:129). |
+| LMB tap during ult (X) | queued, goes 1.03 s later (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+| LMB hold during ult (X) | queued, goes 1.03 s later (0.05 s in) | fires at once (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+| RMB during ult (X) | dropped (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+| E during ult (X) | dropped (0.05 s in) | dropped (1.9 s in) | [?] Kingpin stands planted through the 1.1 s charge and both waves; recovery f41-f43, about 2.1 s in all (ours 2.0 s); no other press inside it (briefs/hero-ref/dredge.md:257-266). |
+### tender
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside a shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Elluna presses nothing else inside a held shot in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| E during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (1.2 s in) | [?] Elluna presses nothing else inside its RMB in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Elluna presses nothing else inside its E in the clip (briefs/hero-ref/mooshmoosh.md). |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel. |
 ### thief
 
 | Pair | Ours, wind-up | Ours, recovery | Source |
@@ -659,3 +719,126 @@ The second ability pressed during the first one's wind-up and its recovery (the 
 | LMB hold during ult (X) | dropped (0.05 s in) | fires at once (1.2 s in) | Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches. |
 | RMB during ult (X) | dropped (0.05 s in) | fires at once (1.2 s in) | Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches. |
 | E during ult (X) | dropped (0.05 s in) | fires at once (1.2 s in) | Owner (DECISIONS: about a 1 s cast lock, then he moves freely) wins: presses in the 1.0 s tell drop, after it they go. Footage: Void shoots while the well runs (briefs/hero-ref/ostra.md:233, f50). Matches. |
+
+## Cast at the top of a jump
+
+One row per hero and slot, from `air_cast` in the same files: running, jumping and pressing the slot at the jump's top, keys held forward. "Ours" is what the next 0.4 s do to the horizontal and vertical speed against the same jump with no cast, measured headless by `--air-cast-check`, which fails when the game stops doing it. The source's falling physics (AirControl 0.015, briefs/supervive-data/supervive_physics.md:46) is what "steers as in any jump" copies. Verdict: match (the source settles it and ours does the same), owner (an owner call), or [?] (the source doesn't settle it; ours is kept until it does).
+
+| Hero | Slot | Source | Ours | Verdict |
+|---|---|---|---|---|
+| archer | LMB | Data silent on the air (supervive_kits.md:73); no cast from the air in the footage (hero-ref/pin.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| archer | RMB | Data silent on the air (supervive_kits.md:74); no cast from the air in the footage (hero-ref/pin.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| archer | E | Data silent on the air (supervive_kits.md:76); no cast from the air in the footage (hero-ref/pin.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| archer | R (ult) | Data silent on the air (supervive_kits.md:77); no cast from the air in the footage (hero-ref/pin.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| juggernaut | LMB | Data silent on the air (supervive_kits.md:18); no cast from the air in the footage (hero-ref/juggernaut.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| juggernaut | RMB | Data: Obsidian Slam is the RMB while airborne, 'strike down' (supervive_kits.md:22); footage 0261-0288: up to the top, about 0.2 s there, then a steep drive down onto the cursor disc (hero-ref/juggernaut.md:276-283) | horizontal: stops; vertical: drops faster (lands early) (the Meteor Drop: stops his drift, a hang of 0.08 s at most, then a fast drop straight down; owner playtest 11-10 replaced the slide to the cursor) | owner |
+| juggernaut | E | Data silent on the air (supervive_kits.md:27); no cast from the air in the footage (hero-ref/juggernaut.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| juggernaut | R (ult) | Data silent on the air (supervive_kits.md:28); no cast from the air in the footage (hero-ref/juggernaut.md) | horizontal: slows below the jump's speed; vertical: falls as from the jump | [?] |
+| gunslinger | LMB | Data silent on the air (supervive_kits.md:48); no cast from the air in the footage (hero-ref/venator.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| gunslinger | RMB | Data silent on the air (supervive_kits.md:49); no cast from the air in the footage (hero-ref/venator.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| gunslinger | E | Data silent on the air (supervive_kits.md:51); no cast from the air in the footage (hero-ref/venator.md) | horizontal: slows below the jump's speed; vertical: falls as from the jump | [?] |
+| gunslinger | R (ult) | Data silent on the air (supervive_kits.md:52); no cast from the air in the footage (hero-ref/venator.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| bulwark | LMB | Data silent on the air (supervive_kits.md:88); no cast from the air in the footage (hero-ref/bjorn.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| bulwark | RMB | Data silent on the air (supervive_kits.md:89); no cast from the air in the footage (hero-ref/bjorn.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| bulwark | E | Data silent on the air (supervive_kits.md:92); no cast from the air in the footage (hero-ref/bjorn.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| bulwark | R (ult) | Data: a fissure from where he stands (supervive_kits.md:93); footage f25-f31: planted, on the ground; the air not shown | horizontal: stops; vertical: falls as from the jump (planted for Faultline: stops and falls) | [?] |
+| rimewright | LMB | Data silent on the air (supervive_kits.md:32); no cast from the air in the footage (hero-ref/tamsin.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| rimewright | RMB | Data silent on the air (supervive_kits.md:33); no cast from the air in the footage (hero-ref/tamsin.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| rimewright | E | Data silent on the air (supervive_kits.md:35); no cast from the air in the footage (hero-ref/tamsin.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| rimewright | R (ult) | Footage f25-f55: rooted for the whole ult (rimewright.md, owner items 64/65); data: Invulnerable (supervive_kits.md:36); a cast from the air not shown | horizontal: stops; vertical: falls as from the jump (sealed in place (a standing cast roots; only a skate carries) and falls) | h match, v [?] |
+| ashwick | LMB | Data silent on the air (supervive_kits.md:40); no cast from the air in the footage (hero-ref/linwick.md) | horizontal: slows below the jump's speed; vertical: falls as from the jump (pouring fire slows him after 0.35 s, lmb.slow_after) | [?] |
+| ashwick | RMB | Data silent on the air (supervive_kits.md:41); no cast from the air in the footage (hero-ref/linwick.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| ashwick | E | Data silent on the air (supervive_kits.md:43); no cast from the air in the footage (hero-ref/linwick.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| ashwick | R (ult) | Data: fly forward (supervive_kits.md:44); footage: lift-off instant, a low flight over ground; a cast from the air not shown (hero-ref/linwick.md:206, 230, 281) | horizontal: driven faster than the jump; vertical: holds the height (the flight starts at once and holds the jump's height) | [?] |
+| dolm | LMB | Data silent on the air (supervive_kits.md:105); no cast from the air in the footage (hero-ref/breah.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| dolm | RMB | Data: hold and release to slam, 'jump while charging to leap forward' (supervive_kits.md:106); no press from the air shown (hero-ref/breah.md:259, 445) | horizontal: keeps the jump's speed (steers as in any jump); vertical: drops faster (lands early) (the air Quakefall: a dive onto the floor below) | [?] |
+| dolm | E | Data: 'only castable over ground' (supervive_kits.md:108), which reads as the terrain under the wall, not the caster's feet; a cast from the air not shown | not cast in the air (the press is dropped) | [?] |
+| dolm | R (ult) | Data silent on the air (supervive_kits.md:109); no cast from the air in the footage (hero-ref/breah.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| mage | LMB | Data silent on the air (supervive_kits.md:65); no cast from the air in the footage (hero-ref/vireo.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| mage | RMB | Data silent on the air (supervive_kits.md:66); no cast from the air in the footage (hero-ref/vireo.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| mage | E | Data silent on the air (supervive_kits.md:68); no cast from the air in the footage (hero-ref/vireo.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| mage | R (ult) | Data: PRESS to launch into the air (supervive_kits.md:69); footage f28-f32: a 0.3 s crouch, then straight up (hero-ref/vireo.md:397, 404); a cast from the air not shown | horizontal: stops; vertical: rises (Kitefall: the 0.3 s crouch, then straight up) | match |
+| dredge | LMB | Data silent on the air (supervive_kits.md:56); no cast from the air in the footage (hero-ref/dredge.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| dredge | RMB | Footage f121-123: keeps moving, body planted (dredge.md 'Reel parity'); the air not shown. Owner playtest 11-10 (ext/dredge-rmb f9b5d2002): a jump back with the hand keeps its speed | horizontal: keeps the jump's speed (steers as in any jump); vertical: holds the height (the hand flies while his height holds and the jump's speed carries (a standstill drifts at 20%)) | owner 11-10 |
+| dredge | E | Data: slam fist down (supervive_kits.md:60); whether it drives him down from the air is not shown (hero-ref/dredge.md:244) | horizontal: stops; vertical: drops faster (lands early) (the Anchor Drop drives him straight down) | [?] |
+| dredge | R (ult) | Data: two waves, no move speed (supervive_kits.md:61); footage: cast on the ground only | horizontal: slows below the jump's speed; vertical: falls as from the jump (the charge's 30% walk brakes the jump's speed (the kit steers as on the ground)) | [?] |
+| tender | LMB | Data silent on the air (supervive_kits.md:8); no cast from the air in the footage (hero-ref/mooshmoosh.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| tender | RMB | Data silent on the air (supervive_kits.md:9); no air cast in the footage. The wait is ours: owner items 118 and 118b (the 1 s wind-up outlasts the hop; dash_flow jump row) | waits for the landing; in the air the jump goes on | [?] |
+| tender | E | Data silent on the air (supervive_kits.md:12); no cast from the air in the footage (hero-ref/mooshmoosh.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| tender | R (ult) | Data silent on the air (supervive_kits.md:13); no cast from the air in the footage (hero-ref/mooshmoosh.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| thief | LMB | Data silent on the air (supervive_kits.md:97); no cast from the air in the footage (hero-ref/dancer.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| thief | RMB | Data silent on the air (supervive_kits.md:98); no cast from the air in the footage (hero-ref/dancer.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| thief | E | Data silent on the air (supervive_kits.md:100); no cast from the air in the footage (hero-ref/dancer.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| thief | R (ult) | Data silent on the air (supervive_kits.md:101); no cast from the air in the footage (hero-ref/dancer.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| ostra | LMB | Data silent on the air (supervive_kits.md:113); no cast from the air in the footage (hero-ref/ostra.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| ostra | RMB | Data silent on the air (supervive_kits.md:114); no cast from the air in the footage (hero-ref/ostra.md) | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| ostra | E | Data: plant a bomb (supervive_kits.md:116), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air | not cast in the air (the press is dropped) | [?] |
+| ostra | R (ult) | Data: a vortex (supervive_kits.md:117), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air | not cast in the air (the press is dropped) | [?] |
+| gil | LMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| gil | RMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
+| gil | E | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: slows below the jump's speed; vertical: falls as from the jump (Riptide is a planted spin) | [?] |
+| gil | R (ult) | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: driven faster than the jump; vertical: holds the height (Tidal Wave: he rides the wave down its line) | [?] |
+## Body turning during casts
+
+_Generated from the "turn" block in `content/archetypes/<hero>.json`._
+
+Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses each slot with the cursor east, swings it 90 degrees at 0.1 s and again at 0.53 s, and reads the body over the next 0.23 s: free (it follows), locked (it holds) or slow (it turns at the capped rate). A recast row a hero lacks is its first cast's.
+
+| Hero | Slot | 0.1-0.33 s (wind-up, channel) | 0.53-0.77 s (release, after) | Source |
+|---|---|---|---|---|
+| archer | LMB hold | free | free | briefs/hero-ref/pin.md:49 'the hunter turns to the cursor throughout' the draw; :313 she walks side-on to the cursor while drawing |
+| archer | RMB | free | free | briefs/hero-ref/pin.md:21 hold to charge toward the cursor; no turn limit shown |
+| archer | E | free | free | briefs/hero-ref/pin.md:23 a tap placed at the cursor distance; no turn limit shown |
+| archer | ult (X) | free | free | briefs/hero-ref/pin.md:254 'a self-buff with no cast lock' |
+| juggernaut | LMB hold | free | free | briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (briefs/supervive-data/supervive_physics.md:51) |
+| juggernaut | RMB | free | locked | briefs/hero-ref/juggernaut.md:155 the lane grows toward the aim while held, the release dash follows it: free while held, the drive faces its lane |
+| juggernaut | E | free | free | briefs/hero-ref/juggernaut.md:96 a hook thrown toward the cursor; no turn limit shown |
+| juggernaut | E recast | free | free | briefs/hero-ref/juggernaut.md:21 recast pulls him to the hook; no turn limit shown |
+| juggernaut | ult (X) | free | free | briefs/hero-ref/juggernaut.md:202-205 planted guard, the strike goes 'in the facing / cursor direction': feet planted, body free |
+| gunslinger | LMB hold | free | free | briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking' |
+| gunslinger | RMB | free | free | briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown |
+| gunslinger | E | slow (90 deg/s) | free | briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner item 144 (briefs/MAIN_TO_EXT.md 11-05): cap the charge's aim turn at ~90 deg/s; free after the shot |
+| gunslinger | ult (X) | free | free | briefs/hero-ref/venator.md:236 lands where the cursor was at the cast and does not track; the body is not held |
+| bulwark | LMB hold | free | free | briefs/hero-ref/bjorn.md:73 and :339 he turns freely to the cursor through the charged swing (1.5 turns in 1.2 s, 0102-0108), each release a crescent in front; fixed 11-10: the swing's step held the body on the step line |
+| bulwark | RMB | free | free | briefs/hero-ref/bjorn.md:109 the shield faces the cursor and sweeps round with it at once |
+| bulwark | E | free | free | briefs/hero-ref/bjorn.md:148 placed at the planted hammer; no turn limit shown |
+| bulwark | ult (X) | free | free | briefs/hero-ref/bjorn.md:287 planted (feet) for the wind-up and slam, a lane toward the cursor; no turn limit shown |
+| rimewright | LMB hold | free | free | briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s |
+| rimewright | RMB | free | free | briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown |
+| rimewright | E | free | free | briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown |
+| rimewright | E recast | free | free | data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown |
+| rimewright | ult (X) | locked | locked | briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65) |
+| rimewright | ult (X) recast | locked | free | briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out |
+| ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags like a hose (:15) |
+| ashwick | RMB | free | free | briefs/hero-ref/linwick.md:16 a lane shows, then the bolt; no turn limit shown |
+| ashwick | E | free | free | briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown |
+| ashwick | ult (X) | slow (90 deg/s) | slow (90 deg/s) | briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 120 deg/s) |
+| ashwick | ult (X) recast | slow (90 deg/s) | free | briefs/hero-ref/linwick.md:235 'X again lands early'; on the ground he turns freely again |
+| dolm | LMB hold | free | free | briefs/hero-ref/breah.md:79 the lane points at the cursor; :427 'she faces the cursor at once' |
+| dolm | RMB | free | free | briefs/hero-ref/breah.md:25 hold to charge, the slam area toward the cursor; no turn limit shown |
+| dolm | E | free | free | briefs/hero-ref/breah.md:27 a row placed in front, across the aim; no turn limit shown |
+| dolm | ult (X) | free | free | briefs/hero-ref/breah.md:379 'she can move while aiming', the cast is instant on release |
+| mage | LMB hold | free | free | briefs/hero-ref/vireo.md:72 'she faces the cursor' |
+| mage | RMB | free | free | briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown |
+| mage | E | free | free | briefs/hero-ref/vireo.md:167 placed at the cursor, then the cursor sets the pull direction |
+| mage | ult (X) | free | free | briefs/hero-ref/vireo.md:204 airborne, the landing spot follows the cursor |
+| mage | ult (X) recast | free | free | briefs/hero-ref/vireo.md:193 reactivate lands at the cursor; no turn limit shown |
+| dredge | LMB hold | free | free | briefs/hero-ref/dredge.md:54 'the hunter turns to the cursor' |
+| dredge | RMB | free | locked | briefs/hero-ref/dredge.md:78 and :90 the arm is thrown along the aim; through the pull he is braced side-on, 'turned toward the target', the cursor elsewhere (0147); fixed 11-10: the body followed the cursor |
+| dredge | E | locked | free | briefs/hero-ref/dredge.md:119-125 slam 'in the facing/cursor direction', the shoulder turned away in the wind-up; ours: the direction locks at the press for the 0.38 s wind-up (owner item 33, docs/heroes/dredge.md) |
+| dredge | ult (X) | free | free | briefs/hero-ref/dredge.md:256-257 the cone is 'locked at cast' and he stands planted; ours: kept turning to the cursor at a slow walk by owner item 36 (OWNER_REVIEW_1103.md:258-261) |
+| tender | LMB hold | free | free | briefs/hero-ref/mooshmoosh.md:45 'the hunter turns to the cursor'; :313 the torso keeps facing the cursor while she strafes |
+| tender | RMB | free | free | briefs/hero-ref/mooshmoosh.md:26 a tap with an aim telegraph while held; no turn limit shown |
+| tender | E | free | free | briefs/hero-ref/mooshmoosh.md:28 a zone on herself; no turn limit shown |
+| tender | E recast | free | free | briefs/hero-ref/mooshmoosh.md:28 recast throws it to the cursor; no turn limit shown |
+| tender | ult (X) | free | free | briefs/hero-ref/mooshmoosh.md:224-225 'Elluna can walk during the channel', the tether follows |
+| thief | LMB hold | free | free | briefs/hero-ref/dancer.md:72 'she faces the cursor while firing', :413 the torso snaps to the cursor |
+| thief | RMB | free | free | briefs/hero-ref/dancer.md:26 a lane shows 0.4-0.6 s toward the cursor, then the throw; no turn limit shown |
+| thief | E | free | free | briefs/hero-ref/dancer.md:22 Phantom Dagger, a skillshot toward the cursor; no turn limit shown |
+| thief | E recast | free | free | briefs/hero-ref/dancer.md:22 reactivate steps to the dagger; no turn limit shown (ours snaps to face the foe on arrival, then turns freely) |
+| thief | ult (X) | free | free | briefs/hero-ref/dancer.md:22 Death Blossom is a self-centred ring; no turn limit shown |
+| ostra | LMB hold | free | free | briefs/hero-ref/ostra.md:40 'she turns to the aim' |
+| ostra | RMB | free | free | briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown |
+| ostra | E | free | free | briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown |
+| ostra | E recast | free | free | briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown |
+| ostra | ult (X) | free | locked | briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248) |
