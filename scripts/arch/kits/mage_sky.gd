@@ -81,8 +81,8 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	kit.fx().disc(at, r, MageKit.deep_col, MageKit.hot_col, float(ed["delay"]) + 0.1, MageKit.rim_col)
-	kit.fx().pillar(at, Color(MageKit.hot_col, 0.45), MageKit.hot_col.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
+	kit.fx().disc(at, r, MageKit.deep_col, MageKit.hot_col, float(ed["delay"]) + 0.1, MageKit.rim_col, false, true)
+	kit.fx().pillar(at, Color(MageKit.hot_col, 0.7), MageKit.hot_col.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
 	AimKit.hide(kit.h, "e_drag")
 	kit.m.sfx("vv_sky_count", at, -4.0)
 	kit.net_ring(at, r, kit.col_of(ed))

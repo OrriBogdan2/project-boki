@@ -6,7 +6,7 @@ shader_type spatial;
 //   0 ARC     a ribbon along UV.x (0 head, 1 tail): a jagged lightning core that re-strikes, a tinted halo
 //   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
 //   2 RING    a flat quad: a cel shockwave ring with radial spark needles (arrival bursts, shock rings)
-//   3 DISC    a flat quad: a lit crackling rim, an inside that falls off to core_a at the centre, lightning veins (placed areas)
+//   3 DISC    a flat quad: a lit crackling rim, an inside that falls off to core_a at the centre, lightning veins (placed areas); hollow: a glowing centre instead
 //   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
 //   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the rifle rounds)
 //   6 FAN     a flat sector (UV.x across the sector, UV.y from the apex 0 to the rim 1): a blast front
@@ -21,6 +21,8 @@ uniform float life = 0.0;
 uniform float seed = 0.0;
 uniform float strength = 1.0;
 uniform float core_a = 0.1;       // DISC: the inside's alpha at the centre; it rises to 0.4 at the rim
+uniform float hollow = 0.0;   // DISC: 0 a thin inside, 1 only the rim and a glowing centre
+uniform float hold = 0.0;     // DISC: 1 stands at full strength and fades only over its last fifth
 uniform bool billboard = false;
 #include "res://shaders/cel.gdshaderinc"
 
@@ -86,8 +88,10 @@ void fragment() {
 		float veins = (1.0 - smoothstep(0.0, 0.05, abs(spoke - 0.5))) * inside * smoothstep(0.15, 0.6, r);
 		veins *= step(0.45, vnoise(ang * 3.0 + tick * 0.7));
 		body = mix(color.rgb, color3.rgb, rim * color3.a);
-		body_a = max(inside * mix(core_a, 0.4, smoothstep(0.2, edge_r, r)), rim) * k;
-		glow = color2.rgb * (rim * (0.3 + 0.5 * crackle) + veins * 0.7) * k;
+		float centre = (1.0 - smoothstep(0.0, 0.12, r)) + 0.3 * (1.0 - smoothstep(0.0, 0.3, r));
+		float kd = mix(k, 1.0 - smoothstep(0.8, 1.0, life), hold);
+		body_a = max(inside * mix(core_a, 0.4, smoothstep(0.2, edge_r, r)) * (1.0 - hollow), rim) * kd;
+		glow = color2.rgb * (rim * (0.3 + 0.5 * crackle) + veins * 0.7 * (1.0 - hollow) + centre * hollow) * kd;
 	} else if (mode == 4) {
 		vec2 p = uv * 2.0 - 1.0;
 		float r = length(p);
