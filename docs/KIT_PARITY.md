@@ -503,7 +503,6 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` |
 | LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .48 vs .45, walks 55% vs stands | differ (owner); cadence S fix (gap 12) · **owner**; cadence **done** `ext/parity-mossy-cadence` (main): `throw_rate` 0.45 |
 | RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` · **open** on the candidate (`ext/mossy-shield-bash`, `ext/parity-aegis-block` merged); closed on ext/combat-albert-aegis-input (branch ready) |
-| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6; every input case settled in [bulwark.md](heroes/bulwark.md#aegis-input-cases) | match |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | Mending Ground: r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | Faultline: 4 cells, stun .5, cd 40 | match; 0.8x cd |
