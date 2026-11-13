@@ -98,6 +98,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | X / Delete | Put a piece away (build mode) | `store` | yes |
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
+| L | Map legend and ways out (first 3 matches) | `map_info` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
 | Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
 | Shift | Hold to keep placing (build mode) | `keep_placing` | yes |

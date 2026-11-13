@@ -368,7 +368,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		] + KinKeys.ids()],
-		["Squad and map", ["ping", "map", "scores", "emote"] + MateLook.ACTIONS + ["pass_lead", "separate"]],
+		["Squad and map", ["ping", "map", "map_info", "scores", "emote"] + MateLook.ACTIONS + ["pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
 	for a in Settings.ACTIONS:

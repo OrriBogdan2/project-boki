@@ -4,6 +4,7 @@ extends RefCounted
 ##   2. steering ramps (no snapping), the dive is clearly faster than the glider, the flare slows the last metres
 ##   3. the reticle: projected landing matches where you land, sits on the ground, hides on landing; red over the void
 ##   4. no chests before the match proper: all hidden on the ship and the drop, all shown once you land
+##   5. the planning map is quiet for matches 1 to 3 (the L key brings the legend back), whole from match 4
 var bad := 0
 var m: Match
 var main: Node
@@ -150,6 +151,25 @@ func _chests_wait(what: String, hid: int) -> void:
 	ok(not m.chests.is_empty() and hid == m.chests.size() and landed and _hidden_chests() == 0,
 			"%s: no chest shows before you land, all once you have (%s)" % [what, info])
 
+## The planning map: quiet for a new player, whole from match 4; the key card fits 1280x720.
+func _quiet_map() -> void:
+	_start({})
+	var fm: FullMap = m.hud.full_map
+	for played in [0, 2, 3]:
+		Save.d["matches"] = played
+		fm.info = false
+		ok(PlanQuiet.on(fm) == (played < 3), "planning map, %d matches played: quiet is %s" % [played, played < 3])
+	Save.d["matches"] = 0
+	fm.info = true
+	ok(not PlanQuiet.on(fm), "the map-info key brings the legend back for a new player")
+	fm.info = false
+	var sz := Vector2(1280, 720)
+	fm._layout(sz)
+	var card := PlanQuiet.panel(fm, sz)
+	var safe := Rect2(Vector2.ZERO, sz).grow(-14.0)
+	ok(card.size.x > 0.0 and safe.encloses(card), "the key card sits inside 1280x720 (%s)" % str(card))
+	ok(InputMap.has_action("map_info") and Settings.key_cap("map_info") != "?", "the map-info key is bound")
+
 ## Tutorial: no chest shows before you land (however many the level has), and every one does once you have.
 func _tutorial_chests_wait() -> void:
 	var seen := m.chests.size() - _hidden_chests()
@@ -168,6 +188,7 @@ func _tutorial_chests_wait() -> void:
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
+	_quiet_map()
 	_steering()
 	_reticle()
 	for steer in [Vector2.ZERO, Vector2(1, 0)]:
