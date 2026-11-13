@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Vex's v95 master, appeal3 body variant b (owner pick 11-10: fuller bust, waist -3%) with the owner's round-2 face, ~/meshy/v95/Vex/r2/appeal3/cand_b.glb, onto vex.glb's skeleton, clips and anchors. The minigun is rigid on forearm.R with its barrels (no barrel spin: the master's barrels sit ~25 deg off the gatling bone's axis), the braid rigid on the head, the old coin kept. The gun hangs against her right thigh at rest, so bone heat and the forearm.R box also took the trouser's outer side, its cargo pocket and a hip flap: they swung up with the gun as a dark panel in the shoot clips. The hips and thigh.R regions give them back, and `detach` cuts the gun from the leg. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres).",
- "master": "~/meshy/v95/Vex/r2/appeal3/cand_b.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-12 (current.json prop1111/cand_A: body7/cand_A, ref-athletic, with the bust trimmed; same vertices and UVs as appeal3 cand_b, so the round-2 face is kept). Earlier: Vex's v95 master, appeal3 body variant b (owner pick 11-10: fuller bust, waist -3%) with the owner's round-2 face, ~/meshy/v95/Vex/r2/appeal3/cand_b.glb, onto vex.glb's skeleton, clips and anchors. The minigun is rigid on forearm.R with its barrels (no barrel spin: the master's barrels sit ~25 deg off the gatling bone's axis), the braid rigid on the head, the old coin kept. The gun hangs against her right thigh at rest, so bone heat and the forearm.R box also took the trouser's outer side, its cargo pocket and a hip flap: they swung up with the gun as a dark panel in the shoot clips. The hips and thigh.R regions give them back, and `detach` cuts the gun from the leg. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres).",
+ "master": "~/meshy/v95/Vex/r2/prop1111/cand_A.glb",
  "game": "art/wardens/vex/vex.glb",
  "tris": 13000,
  "head": {"centre": [0.02, -0.15, 1.80], "r": 0.16},
@@ -63,5 +63,6 @@
   "launcher_muzzle": [0.33, -0.17, 1.12],
   "launcher_fire": [0.33, -0.17, 1.12],
   "anchor_sleeve_mouth": [0.33, -0.15, 1.27]
- }
+ },
+ "anchor_bones": {"weapon_muzzle": "forearm.R", "gatling_muzzle": "forearm.R", "launcher_muzzle": "forearm.R"}
 }
