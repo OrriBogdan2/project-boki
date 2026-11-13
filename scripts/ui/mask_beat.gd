@@ -67,7 +67,6 @@ var _heart_i := 0
 var _heart_wait := 0.0
 var _anim: HunterAnim
 var _memory_i := -1
-var _amb_db := 0.0
 var _fov := 70.0
 
 static func play(relic: MaskRelic, who: Node3D, done: Callable, swap_body := true, quick := false) -> MaskBeat:
@@ -185,8 +184,8 @@ func _quiet() -> void:
 	Sfx.duck(total, float(_rules["music_duck_db"]))
 	var amb := AudioServer.get_bus_index("Ambience")
 	if amb >= 0:
-		_amb_db = AudioServer.get_bus_volume_db(amb)
-		create_tween().tween_method(func(v: float): AudioServer.set_bus_volume_db(amb, v), _amb_db, -40.0, 0.8)
+		var from := AudioServer.get_bus_volume_db(amb)
+		create_tween().tween_method(func(v: float): AudioServer.set_bus_volume_db(amb, v), from, -40.0, 0.8)
 
 func _player(sound: String, db: float) -> AudioStreamPlayer:
 	var p := AudioStreamPlayer.new()
@@ -379,11 +378,15 @@ func _ease_camera(k: float) -> void:
 	var eye := _from.origin.lerp(_close.origin, c)
 	cam.global_transform = Transform3D(Basis(), eye).looking_at(_look_from.lerp(_head, c), Vector3.UP)
 
+func _exit_tree() -> void:
+	Settings.apply("ambience")      # (a beat cut short mid-fade must not leave the ambience muted)
+
 func _restore_ambience() -> void:
 	var amb := AudioServer.get_bus_index("Ambience")
 	if amb >= 0:
 		var from := AudioServer.get_bus_volume_db(amb)
-		create_tween().tween_method(func(v: float): AudioServer.set_bus_volume_db(amb, v), from, _amb_db, 1.0)
+		var back := linear_to_db(maxf(float(Settings.get_v("ambience")), 0.0001))      # (the slider's level now)
+		create_tween().tween_method(func(v: float): AudioServer.set_bus_volume_db(amb, v), from, back, 1.0)
 
 func _unhandled_input(event: InputEvent) -> void:
 	var skip := event.is_action_pressed("interact") or event.is_action_pressed("ui_cancel")

@@ -56,8 +56,7 @@ func cast() -> bool:
 	window = float(x.get("window", 6.0))
 	nock_t = -1.0
 	recover = 0.0
-	h.draw_t = -1.0
-	k.draw.drop()
+	k.drop_draw()
 	k.vfx("ult_cast")
 	k.play("pin_ult_cast")
 	return true
