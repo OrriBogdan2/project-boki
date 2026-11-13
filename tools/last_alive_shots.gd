@@ -3,7 +3,8 @@ extends RefCounted
 ## 60 Hz match, so 30 fps) of the last-alive aura (LastAlive). The player's squad of three loses one hunter,
 ## then another: the aura comes on the last one up, whose speed is shown by a run past a rival squad that
 ## has also been cut to one (a red aura on them). Then a teammate is revived and the aura ends.
-## Run under jobq --needs gpu; cut with: ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -pix_fmt yuv420p out.mp4
+## Run under jobq --needs gpu; cut with:
+## ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -pix_fmt yuv420p out.mp4
 
 const DT := 1.0 / 60.0
 const FRAME_W := 960             # px wide, each saved frame
@@ -61,7 +62,9 @@ func _setup() -> void:
 	for h in m.hunters:
 		if h == P:
 			continue
-		var off := Vector3(3.0 + 2.0 * around, 0, -2.5) if h.team == P.team else Vector3(10.0 + 2.5 * around, 0, 1.0 - around)
+		var off := Vector3(3.0 + 2.0 * around, 0, -2.5)
+		if h.team != P.team:
+			off = Vector3(10.0 + 2.5 * around, 0, 1.0 - around)
 		h.teleport(m.world.free_spot_near(spot + off, [], 1.0, 0.4, 6.0))
 		around += 1
 
