@@ -21,7 +21,7 @@ a merge cannot one-shot a full-health Light even at level 10 (growth +35%). The 
 about 14, held lower for the same cap) and slows 30%. Its cooldown follows the source's 37.5 s at our pace,
 42 s. Ranges use
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Longneedle 18 m (10 bh),
-slide tap 4.6 m and hold 7 m.
+slide tap 4.6 m and hold 7 m (the whole hold from the press: the skid, then the slide covers the rest).
 
 ## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
 The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Vex: each slot reads
@@ -78,6 +78,7 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | E | recoil | a ~0.5 bh shove back on fire [footage] | the shove, and a screen shake on your own camera | the shove; no screen shake (owner rule 50) |
 | X | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
 | Shift | | a front-loaded 0.45s skid, firing through it [footage] | already the source's (kit data pass) | unchanged |
+| Shift held | length | no number in the source; the footage's slides (frames 0117-0121, 0134-0138, 0149-0153) run ~1.2x, ~1.6x and 1x the fitted 4.73 m tap, so its longest is ~7-8 m, none near 10 m [footage] | 9.7 m: the 0.18 s skid (2.7 m), then a 7 m slide on top | 7.1 m in 0.73 s from the press: the slide covers what the skid left of `slide` (7 m); felt-dash `hold` row in `--move-feel-check` |
 
 ## Timing pass (Nov 8)
 
@@ -183,7 +184,7 @@ level-9 hunter).
 | The push-out scales with the aim distance: none inside 5 m (`view_near_m`), a smooth ramp to the full 25% at the 18 m range, eased | Owner item 144b | not shown | yes: "an aim at 3 m leaves the camera alone" |
 | Aim stays free through a dash: the body and rifle stay on the cursor, only the legs follow the slide (owner item 109) | Owner | slides up-left while firing up-right | yes: "Vex item 109", `--dash-aim-check` |
 | Combat Slide: tapped in the air for 2/3 of the full-hold distance | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "an air tap slides 2/3 of the full hold" |
-| Hold = a longer dash on a longer cooldown, no refund | kit data (SERVER_UPDATE7) | not separable | yes: "a held slide is owed a longer cooldown and letting go early refunds nothing" |
+| Hold = a longer dash on a longer cooldown, no refund | kit data (SERVER_UPDATE7) | longest slide ~1.6 taps (frames 0134-0138) | yes, 7 m in all (`felt dash gunslinger hold`): "a held slide is owed a longer cooldown and letting go early refunds nothing" |
 | Knocks reset the slide | [wiki](https://supervive.wiki.gg/wiki/Ghost) | not shown | yes |
 | The omnivamp stacks wear off all at once | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once"; "one flat level of 6%" |
 | Railgun pierces terrain and every target | [wiki](https://supervive.wiki.gg/wiki/Ghost) | crosses a chasm | yes: through a wall, two targets |

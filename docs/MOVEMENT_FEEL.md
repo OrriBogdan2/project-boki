@@ -78,6 +78,7 @@ defaults aren't cited, since the data names no field for these windows.
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
 | dash_curve_<hero>_peak_u / _peak_k (gunslinger, juggernaut, archer: where the speed peaks, peak / mean) | flat | 0.11 / 1.86, 0.29 / 1.74, 0.44 / 1.86 | the fit ± ~0.08 / ± ~0.1 | [footage] docs/SUPERVIVE_FEEL.md "Dash speed curves" |
 | dash_curve_dist / dash_curve_exit_run (distance against the kit's, hand-over / run) | n/a | 1.00–1.01x / 0.31–1.0x | 0.95–1.05x / <= 1.05x | the curve's mean is 1; the skid falls through run speed |
+| felt dash gunslinger hold (Vex's Slipstep held from the press to its end; the tap row stays 4.8 m / 0.45 s) | 9.66 m / 0.725s | 7.14 m / 0.725s | 7 m ± 5% / 0.73 ± 0.035s | [footage] the longest of Ghost's three slides is ~1.6x the fitted tap; the source gives no hold length (docs/heroes/gunslinger.md) |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
