@@ -33,8 +33,10 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 	P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
 	run.call(m, 2.0, func(): P.inp["interact"] = true)
 	P.inp["interact"] = false
-	say(U.state == QuestSeat.S.LOCKED and String(x["state"]) == "idle" and not m.exits.startable(x),
-		"at %.0fs it's LOCKED and won't start" % m.sess_time())
+	var locked_lab := String(m.exits.interact_for(P).get("label", ""))
+	var refused := String(x["state"]) == "idle" and not m.exits.startable(x) and not locked_lab.contains("to start")
+	say(U.state == QuestSeat.S.LOCKED and refused,
+		"at %.0fs it's LOCKED and won't start: '%s'" % [m.sess_time(), locked_lab])
 	for d in outs:
 		if d.get("dark", false):
 			P.teleport(d["pos"] + Vector3(0.6, 0, 0.6))
@@ -84,6 +86,24 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 	var dark_now: bool = String(x["state"]) == "closed" and not m.exits.startable(x)
 	say(U.state == QuestSeat.S.SHUT and dark_now and not P.extracted and U.refused == 0,
 		"still charging at 8:00: SHUT, the outpost %s; trail %s" % [x["state"], str(U.trail)])
+	done.call(m)
+	await main.get_tree().process_frame
+	# "exits ready now" (the admin menu; the loop tour) before 6:00: the prompt offers the start and the
+	# hold starts it. (It used to move the outpost's open_at alone: "Hold F to start", then nothing.)
+	m = fresh.call(2)
+	P = m.player
+	x = m.exits.uplink_x()
+	U = m.exits.seats.uplink
+	m.time = 30.0
+	m.exits.admin_ready()
+	P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+	run.call(m, 0.1)
+	var ready_lab := String(m.exits.interact_for(P).get("label", ""))
+	run.call(m, 2.0, func(): P.inp["interact"] = true)
+	P.inp["interact"] = false
+	say(ready_lab.contains("to start") and String(x["state"]) == "charging" and U.state == QuestSeat.S.IN_USE,
+		"exits ready now at %.0fs: '%s', the hold starts it (%s, seat %s)"
+		% [m.sess_time(), ready_lab, x["state"], QuestSeat.S.keys()[U.state]])
 	done.call(m)
 	await main.get_tree().process_frame
 	return ok
