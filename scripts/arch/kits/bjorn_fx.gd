@@ -8,7 +8,7 @@ extends Node3D
 ## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a
 ##   gold-orange trail behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while the
 ##   perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the release
-## - the 360 Smash's red-orange-gold spiral ring at its hit radius, the dash's gold chevron wake (his own after-image)
+## - the dash's gold chevron wake (his own after-image); the 360 Smash's ring is HeroVfx's ("spin")
 ##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
@@ -21,8 +21,6 @@ const EMBER := Color("ff8a2a")
 const AEGIS := Color("ffcb4f")
 const GREEN := Color("7dffb0")
 const STAR_GOLD := Color("ffd25a")
-const SWIRL_T := 0.45
-const SWIRL_IN := 0.55         # the spin ring's inner edge as a share of the hit radius (its outer edge is the radius)
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
 const WAKE_T := 0.28
@@ -72,9 +70,6 @@ var hammer: Node3D            # the thrown hammer
 var beacon: MeshInstance3D
 var glint: MeshInstance3D
 var orbit_trail: MeshInstance3D
-var swirl: MeshInstance3D
-var swirl_t := 0.0
-var swirl_r := 1.0             # m, the hit radius the spin ring was drawn at
 var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
 var aegis_hit := 0.0
@@ -117,11 +112,6 @@ func _ready() -> void:
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
-	var swirl_mesh := KitMeshes.band(SWIRL_IN, 1.0, 0.0, TAU, 48)
-	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
-	KitShaders.param(swirl, "color2", Color("ffc93a"))
-	KitShaders.param(swirl, "twist", 2.2)
-	KitShaders.param(swirl, "spin", 5.0)
 	_build_aegis()
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
@@ -346,14 +336,6 @@ func _place_glint(pv: Node3D) -> void:
 	KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k) * (1.4 if hot else 1.0))
 	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
 
-# ------------------------------------------------------------------ the 360 Smash ring
-## The 360 Smash's spin ring: a red-gold band out to the spin's hit radius `r`, sweeping out to it with the hit.
-func smash_ring(at: Vector3, r: float) -> void:
-	swirl.visible = true
-	swirl.global_position = at + Vector3(0, 0.3, 0)
-	swirl_r = r
-	swirl_t = SWIRL_T
-
 ## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
 ## WAKE_EVERY s).
 func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
@@ -468,7 +450,6 @@ func _process(_delta: float) -> void:
 	_tick_hold(delta)
 	if not chain.is_empty():
 		_tick_chain()
-	_tick_slam(delta)
 	if aegis_hit > 0.0:
 		aegis_hit = maxf(0.0, aegis_hit - delta * 5.0)
 	push_flash = maxf(0.0, push_flash - delta)
@@ -504,15 +485,6 @@ func _tick_hold(delta: float) -> void:
 		_whirl(pv, delta)
 	elif pv.transform != Transform3D.IDENTITY:
 		pv.transform = Transform3D.IDENTITY
-
-func _tick_slam(delta: float) -> void:
-	if swirl_t > 0.0:
-		swirl_t -= delta
-		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)
-		swirl.rotation.y += delta * 12.0
-		KitShaders.param(swirl, "life", minf(1.0, life * 1.6))
-		swirl.scale = Vector3.ONE * swirl_r * lerpf(1.0, 0.8, life)
-		swirl.visible = swirl_t > 0.0
 
 ## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and
 ## pulses.
