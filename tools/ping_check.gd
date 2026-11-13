@@ -43,7 +43,7 @@ func _keys() -> void:
 func _migration() -> void:
 	var g := "key:%d" % KEY_G
 	var mmb := "mouse:%d" % MOUSE_BUTTON_MIDDLE
-	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys6_v": 1}
+	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys7_v": 1}
 	var both := {"keys": {"throw": [g, mmb]}}
 	both.merge(steps)
 	KeyMigrate.run(both)
@@ -51,7 +51,7 @@ func _migration() -> void:
 	var only := {"keys": {"throw": [mmb]}}
 	only.merge(steps)
 	KeyMigrate.run(only)
-	ok(not only["keys"].has("throw"), "saved MMB alone on throw: throw goes back to G")
+	ok(not only["keys"].has("throw"), "saved MMB alone on throw: throw goes back to its default")
 	var taken := {"keys": {"emote": [mmb]}}
 	taken.merge(steps)
 	KeyMigrate.run(taken)
