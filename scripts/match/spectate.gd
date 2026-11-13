@@ -51,7 +51,7 @@ func cycle(step: int) -> void:
 
 ## Fire / secondary while watching: switch teammate. Returns true when the press was used.
 func input(event: InputEvent) -> bool:
-	if m.paused or m.over or m.result.get("ending", false) or current() == null:
+	if m.paused or m.over or m.flow.ending() or current() == null:
 		return false
 	var fire := event.is_action_pressed("fire")
 	if not fire and not event.is_action_pressed("secondary"):

@@ -2022,7 +2022,7 @@ func _extract_check() -> void:
 			if h.has_meta("pin") and not h.extracted and not h.out:
 				h.teleport(h.get_meta("pin")); h.vel = Vector3.ZERO
 	var done := func(mm: Match):
-		mm.over = true       # the end-of-match timer must not take us to the results screen
+		mm.flow.finish("check done")       # the end-of-match timer must not take us to the results screen
 		mm.queue_free()
 	# ---- 1. the uplink
 	var m: Match = fresh.call(2)
@@ -2298,7 +2298,7 @@ func _truce_check() -> void:
 	print("TCHECK reversed: the beaten squad accepted=%s after %.1fs (events %s)" % [T.allied(0, 1), tt, str(T.events.slice(-3))])
 	if not T.allied(0, 1) and not T.events.has("fake 1"): ok = false; print("TCHECK FAIL beaten squad refused")
 	if not TruceCalmCheck.run(m, home): ok = false
-	m.over = true
+	m.flow.finish("check done")
 	print("TCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
 
@@ -3318,7 +3318,7 @@ func _drop_check() -> void:
 		for i in 30: m.step(Match.DT)
 		print("DCHECK scouting %s: %s -> %s" % [hc["id"], before, sp.state_for(hc, P.team)])
 		if before != "unknown" or sp.state_for(hc, P.team) != "empty": ok = false; print("DCHECK FAIL scouting")
-	m.over = true
+	m.flow.finish("check done")
 	print("DCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
 
@@ -3346,8 +3346,6 @@ func _simtest(opts: Dictionary) -> void:
 			m.player.lives = 1
 			m.eliminate(m.player, near, "knocked out", true)
 			kill_at = -1.0
-		if m.result.get("ending", false) and m.time > 0.0:
-			m._finish_now = true
 		log_t += Match.DT
 		if log_t >= 30.0:
 			log_t = 0.0
@@ -3367,7 +3365,7 @@ func _simtest(opts: Dictionary) -> void:
 						tiles.append("%d/%d%s" % [W.kind[ti], W.level[ti], "w" if W.walls.has(ti) else ""])
 				print("  STUCK? vel=%s pad=%s grap=%d stun=%.1f root=%.1f base=%.1f drop=%s ride=%s glide=%s roll=%.2f cross=%s tiles=%s hist=%s" % [P.vel.snapped(Vector3(0.1,0.1,0.1)), str(P.pad.keys()), P.grap.size(), P.stun_t, P.root_t, P.base_t, P.dropping, P.riding, P.gliding, P.roll_t, str(P.ai.get("cross", {}).get("take", "")), str(tiles), str(P.get_meta("hist", []).slice(-3))])
 			print("t=%d alive=%d down=%d mobs=%d shots=%d pickups=%d feed=%s" % [m.time, alive, down, m.mobs.filter(func(x): return not x.dead).size(), m.shots.size(), m.pickups.size(), str(m.feed.map(func(f): return f["text"]))])
-		if m.result.get("ending", false):
+		if m.flow.ending():
 			break
 	for line in m.feed_all:
 		print("   | ", line)

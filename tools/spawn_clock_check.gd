@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	_timed(m)
 	_waves(m)
 	_guards(m)
-	m.over = true
+	m.flow.finish("check done")
 	print("SPAWNCLOCK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

@@ -31,6 +31,7 @@ const CHECKS := {
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
+	"--match-flow-check": ["res://tools/match_flow_check.gd", "match_flow_check", null],      # 0061 phases
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
 	# the Ways Out strip and Gate prompt
 	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],      # EdgeMarker

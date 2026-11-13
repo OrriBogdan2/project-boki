@@ -115,7 +115,7 @@ func run(main_node: Node) -> void:
 	pins[P] = up["pos"] + Vector3(0.9, 0, 0.9)
 	_step(m, 0.3, pins)
 	ok(is_equal_approx(un.get_node("Signal").scale.x, ExitSignal.BEAM_R * 2.0), "the squad holds the yard: used")
-	m.over = true
+	m.flow.finish("check done")
 	m.queue_free()
 	await main.get_tree().process_frame
 	print("EXIT SIGNAL CHECK DONE, failures: ", bad)
