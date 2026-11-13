@@ -457,11 +457,11 @@ func _mage() -> void:
 	var disc := _pool(sky, sky_r)
 	var pillars := 0
 	for l: Dictionary in sky:
-		var gold := (l["col"] as Color).r > 0.9 and (l["col"] as Color).b < 0.4
-		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and gold:
+		var pink := (l["col"] as Color).r > 0.9 and (l["col"] as Color).b > 0.6     # pink-white, not the footage's gold
+		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and pink:
 			pillars += 1
 	ce = AimKit.entry(P, "e0")
-	ok("Skycall look (footage): a dark disc on its radius (full to the strike), a short gold pillar, the chevron",
+	ok("Skycall look (footage): a dark disc on its radius (full to the strike), a short pink-white pillar, the chevron",
 			not disc.is_empty() and absf(float(disc["dur"]) * HeroVfx.HELD_LIFE - delay) < 0.01
 			and pillars == 1 and (ce.get("pointer", Vector2.ZERO) as Vector2).x < -0.9,
 			"disc %s pillars %d" % [disc.get("dur", "none"), pillars])
@@ -476,9 +476,11 @@ func _mage() -> void:
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))
 	var e_d: Dictionary = K.e_def()
-	ok("Skycall: radius 1.5 m, slide 3.4 m over 1.1 s",
-			absf(float(e_d["radius"]) - 1.5) < 0.001 and absf(float(e_d["slide_dist"]) - 3.4) < 0.001
-			and absf(float(e_d["slide_t"]) - 1.1) < 0.001)
+	# radius: the footage circle about 2 bh across (vireo.md 0184, 0190); slide 3.4 m is owner item 9b (footage ~4 bh)
+	ok("Skycall: radius 1.8 m, the drawn ring at it; slide 3.4 m over 1.1 s",
+			absf(float(e_d["radius"]) - 1.8) < 0.001 and absf(float(ce["r"]) - float(e_d["radius"])) < 0.001
+			and absf(float(e_d["slide_dist"]) - 3.4) < 0.001 and absf(float(e_d["slide_t"]) - 1.1) < 0.001,
+			str(ce["r"]))
 	var sl_d := float(e_d["slide_dist"])
 	var sl_t := float(e_d["slide_t"])
 	ok("Skycall: the speed eases out (6.2 m/s peak, half at the midpoint, zero at the end)",
