@@ -56,8 +56,7 @@ func cast() -> bool:
 	left = int(x.get("shots", 3))
 	window = float(x.get("window", 6.0))
 	recover = 0.0
-	h.draw_t = -1.0
-	k.draw.drop()
+	k.drop_draw()
 	_loose()
 	k.vfx("ult_cast")
 	return true
