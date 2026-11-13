@@ -105,6 +105,37 @@ func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
 	P.inp["move"] = Vector2.ZERO
 	return out
 
+const AIR_STEER_T := 0.3        # s of keys after the move
+const AIR_STEER_MIN := 3.0      # m/s gained across the heading (Loco.air_step: 32 m/s2 up to the run cap)
+
+## DECISIONS 11-08 (docs/MOVEMENT_FEEL.md "Air velocity in the slice kits"): once a move cast in the air is over,
+## the keys steer again. `cast` runs on `P` 40 m over `home`; when its displacement ends, keys held across the
+## hunter's heading must win AIR_STEER_MIN m/s that way within AIR_STEER_T, still airborne. Returns the speed
+## carried out of the move. The match is left with the hunter back at home.
+func air_steers(m: Match, P: Hunter, home: Vector3, what: String, cast: Callable) -> float:
+	P.teleport(home + Vector3(0, 40.0, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.inp["move"] = Vector2.ZERO
+	cast.call()
+	var t := 0.0
+	while t < 1.5 and (t < 0.1 or P.roll_t > 0.0 or P.knock_t > 0.0):
+		step(m, DT)
+		t += DT
+	var hv0 := Vector2(P.vel.x, P.vel.z)
+	var keys := Vector2(-hv0.y, hv0.x).normalized() if hv0.length() > 0.5 else Vector2(0, 1)
+	P.inp["move"] = keys
+	step(m, AIR_STEER_T)
+	P.inp["move"] = Vector2.ZERO
+	var gain := Vector2(P.vel.x, P.vel.z).dot(keys) - hv0.dot(keys)
+	ok("air steer %s: %s, then the keys steer (+%.1f m/s across)" % [P.arch, what, gain],
+			gain >= AIR_STEER_MIN and not P.grounded, "carry %.1f m/s airborne %s" % [hv0.length(), not P.grounded])
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	step(m, 0.3)
+	return hv0.length()
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:

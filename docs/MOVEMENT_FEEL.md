@@ -419,6 +419,28 @@ Asked: what the source does when a Hunter is knocked off an island. Evidence rea
 | Motley's Trade | Swaps a foe and Motley. | Owner override: hover-swap over the abyss. Foes land at Motley's spot, so a swap from over the abyss drops them. | Matches. |
 
 Open for the owner, not built: a hit on a balloon (a glider under the lip) spikes it in the wiki notes, ours spikes only when the heat runs out (`Hunter.hurt`); and the 4 s credit window above.
+## Air velocity in the slice kits (DECISIONS 2026-11-08, `--*-combo-check` "air steer")
+SUPERVIVE's air control is the one model in a match: the keys add acceleration onto what you carry (`Loco.air_step`), counter-steer is strong, speed over the run cap bleeds under air drag, and nothing overwrites air velocity. Every place in the four slice Wardens' kits (scripts/arch/kits: gunslinger, juggernaut, archer = pin_*, ashwick) that writes a Hunter's horizontal velocity, classified. A **displacement** is a move that owns the velocity while it runs (a dash or pull in `roll_t`, a knock, a hold), so writing its start, exit or contact replaces only its own speed, never the keys': kept, with its KIT_PARITY row. An **overwrite** wipes air speed no source asks for: fixed.
+
+| Site | Write | Kind | Row (docs/KIT_PARITY.md) / fix |
+|---|---|---|---|
+| `gunslinger_kit._slide_end` | air slide ends: speed x0.25 | displacement exit (her own dash's speed; the keys steer next step) | Vex Dash: air tap at 2/3 of the hold (patch notes, gunslinger.md "Small mechanics") |
+| `gunslinger_kit._fire_needle` | `h.impulse(-aim * 6)` | recoil, already the shared impulse | Vex E: recoil 6 |
+| `juggernaut_chain._hold_taut` | removes the outward part at the chain's length | leash constraint (subtracts, keeps the rest) | Kael E: tether 24 m |
+| `juggernaut_chain._arrive` | pull's speed x carry | Warchain pull exit | Kael E: impulse 22 m/s, sling |
+| `juggernaut_chain._jump_out` | pull's speed x jump_carry | Warchain pull exit into a jump | Kael E: sling, steer |
+| `juggernaut_chain._stop("stopped")` | zeroed horizontal speed | **overwrite in the air** (a snap, stun, root or knock mid-pull left him hanging at 0 m/s, the knock wiped) | **fixed**: zeroed on the ground only; in the air the pull's speed carries under air drag (`--juggernaut-combo-check` "stopped mid-air", 17.6 m/s, was 0) |
+| `juggernaut_kit._tick_lunge` | zero on the foe | contact stop | Kael RMB: Lunge (context) |
+| `juggernaut_drop` start, hang, dive, impact | zero, held, then plunged | Meteor Drop owns the body | Kael Air RMB: cursor disc |
+| `pin_ult._loose` | `vel -= aim * 2.5` | recoil, additive | Hem R: 3 empowered shots |
+| `pin_spirit.end` | zero after the snap back | teleport to the walk's entry | Hem Dash: Phase Walk |
+| `ashwick_kit._keep_poof` | poof speed x air_keep | air dash exit | Cinder Dash: air poof 6.8 m/.28 s |
+| `ashwick_kit._bash_impact` | bounce back off the foe | recoil, contact stop | Cinder Dash: stops on first foe |
+| `ashwick_jet._leap` | flight speed x `Loco.dash_jump_keep` | flight exit into a jump | Cinder R: fly forward |
+| `ashwick_jet._land` | speed x0.3 | grounded (not air) | Cinder R |
+
+The other kept writes stay in the kit rather than moving to `Hunter.impulse`: that path is built for hits (fortify blocks it, knockback resist scales it, and above 2.5 m/s it starts a knock that swaps the keys for knock steering), and each of these writes replaces only the move's own speed. Each kit's combo check casts one of its air moves 40 m up and asserts the keys win 3 m/s across the heading within 0.3 s after it (`ArchetypeCheck.air_steers`): Vex air slide and Longneedle, Kael snapped pull, Hem air roll, Cinder air poof.
+
 ## Walking while attacking (fire-move parity, 2026-11-09)
 Share of the plain run while LMB is held, during each charge or hold, and just after release. Measured in the
 real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sources: `[data]` = the tooltips in

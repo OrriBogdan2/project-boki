@@ -478,7 +478,9 @@ func _stop(how: String, arrived: bool) -> void:
 	state = "ready"
 	if h.move_kind == "rush" and how != "dash":
 		h.roll_t = 0.0
-		if how == "stopped":
+		# a stopped pull halts him on the ground; in the air its speed carries under air drag and the keys
+		# steer (Loco.air_step, DECISIONS 11-08: never overwrite air velocity)
+		if how == "stopped" and h.grounded:
 			h.vel.x = 0.0
 			h.vel.z = 0.0
 	k.fx().unchain(_fx_id())

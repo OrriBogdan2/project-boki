@@ -954,6 +954,14 @@ func _gunslinger() -> void:
 			"%.1f m kind %s" % [P.pos.z - z0, K.last_dash_kind])
 	P.inp["move"] = Vector2.ZERO
 	ac.step(m, 0.8)
+	ac.air_steers(m, P, home, "an air tap slide", func():
+		P.dashes = P.max_dashes()
+		P.inp["move"] = Vector2(0, 1)
+		P.do_dash())
+	ac.air_steers(m, P, home, "Longneedle's recoil", func():
+		K.cd["e"] = 0.0
+		P.ak.use_e()
+		ac.step(m, 0.7))
 	ok("small: the rifle loses half its punch over a 10-round string",
 			is_equal_approx(float(P.wpn["sustain_loss"]), 0.5) and int(P.wpn["sustain_rounds"]) == 10)
 	K.res = 3.0

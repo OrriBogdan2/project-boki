@@ -970,6 +970,26 @@ func juggernaut(a) -> void:
 	var side_off := absf(P.pos.z - straight.z)
 	A.ok("juggernaut Warchain small mechanic: sideways input shifts the arrival by at least 1.5m",
 			side_off >= 1.5, "%.2f m aside" % side_off)
+	# a pull stopped in the air (the chain snaps) keeps its speed and the keys steer (docs/MOVEMENT_FEEL.md)
+	A.step(m, 0.5)
+	T.teleport(home + Vector3(6.0, 0, 0))
+	A.fresh(T)
+	var carry := A.air_steers(m, P, home, "a Warchain pull that snaps mid-air", func():
+		P.teleport(home)
+		P.grounded = true
+		A.aim_at(P, T.pos)
+		K.cd["e"] = 0.0
+		P.ak.use_e()
+		A.step(m, 0.3)
+		P.ak.use_e()
+		A.step(m, 0.05)
+		P.teleport(P.pos + Vector3(0, 40.0, 0))     # (the hook flies flat: lifted mid-pull, not hooked in the air)
+		P.grounded = false
+		A.step(m, 0.05)
+		K.warchain.snap())
+	A.ok("juggernaut Warchain stopped mid-air: the pull's speed carries (not zeroed)", carry > P.base_speed,
+			"%.1f m/s" % carry)
+	A.fresh(T)
 	# the source's Execution Slam: knock a foe within 2s of its sweet spot and the ultimate (X) is ready again
 	P.lvl = maxi(P.lvl, 6)
 	P.slot_lv["ult"] = 1

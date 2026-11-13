@@ -593,6 +593,11 @@ func _all() -> void:
 		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)
 	_dash_moves(K, ram_move, ram_t, poof_move, poof_t, int(rings["made"]))
+	ak.air_steers(m, P, home, "the air poof", func():
+		P.dashes = P.max_dashes()
+		P.ex_cd = 0.0
+		ak.aim_at(P, P.pos + Vector3(12.0, 0, 0))
+		P.ak.on_dash(true))
 	P.dashes = 0.0
 	K.on_knock(T, true)
 	ok("passive: the kit adds no ram charge on a knock (DashReset gives one back, --knock-reset-check)",

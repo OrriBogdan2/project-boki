@@ -681,6 +681,10 @@ func _archer_combos() -> void:
 	)
 	fresh(T)
 	fresh(T2)
+	air_steers(m, P, home, "an air dash roll", func():
+		P.dashes = P.max_dashes()
+		aim_at(P, P.pos + Vector3(8, 0, 0))
+		P.do_dash())
 	air_dash_is_ground(m, P, home)
 	await done(m)
 	var r2 := setup("archer", 7.0, "", true)
