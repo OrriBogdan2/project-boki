@@ -273,7 +273,7 @@ func _frames(part: String) -> void:
 		last = now
 		fl.append(frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
-	summary(part, fl)
+	_summary(part, fl)
 	_meshes()
 	if part != "farm" and part != "hub_bare":
 		await _budget(part, fl)
@@ -373,7 +373,7 @@ func _base() -> void:
 			slow.append("%.1fs %.0fms" % [t, fl[-1]["wall"]])      # (printed at the end: a print can stall a frame)
 		last = now
 		t += fl[-1]["wall"] / 1000.0
-	summary("base", fl)
+	_summary("base", fl)
 	print("BENCH base slow frames after warm-up: ", ", ".join(slow.slice(0, 24)))
 	await _sections(home)
 	_meshes()
@@ -429,7 +429,7 @@ func avg(fl: Array, key: String) -> float:
 	for f in fl: s += float(f[key])
 	return s / maxf(1.0, fl.size())
 
-func summary(part: String, fl: Array) -> void:
+func _summary(part: String, fl: Array) -> void:
 	var w: Array = fl.map(func(f): return float(f["wall"]))
 	w.sort()
 	var cut := maxi(1, w.size() / 100)

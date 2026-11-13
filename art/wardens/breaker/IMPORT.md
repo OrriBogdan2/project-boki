@@ -22,3 +22,8 @@ hatch shield kept on `x_shield` (`keep`).
   core, glossy teal glass) in its 5 moods. Mood data: warden_anim/breaker.json "mood".
 - **Old build:** the 11-08 scan-and-sculpt build (tools/art1/breaker_scan.py, breaker_art1.py, breaker_anims.py,
   `art/wardens/src/breaker_scan_joints.json`) made the skeleton and clips this swap keeps.
+- **Albert feel pass (ext/albert-size-boop):** the swap in git was not re-run for it: its `shield_boop`, `x_wind` and `x_slam`
+  clips (the boop, the Faultline hop) were copied from that branch's 11-08-build bake with no Blender
+  (`python3 tools/art1/glb_add_clips.py breaker.glb <branch breaker.glb> shield_boop,x_wind,x_slam`), and their
+  `spring_hangfish_0` translation set to this swap's constant (the fish moved to `x_fish`). breaker_anims.py holds the same
+  keys, so a re-swap from a re-baked 11-08 build gives the same clips.

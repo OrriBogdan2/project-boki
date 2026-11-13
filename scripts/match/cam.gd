@@ -62,6 +62,9 @@ var lead_off := Vector3.ZERO
 const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
 const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
 const ALT_ZOOM_MAX := 0.7     # ...up to +70%
+## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
+## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
+## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
 func air_zoom(h: Hunter, alt: float) -> float:
 	var z := CamWheel.final(CamWheel.widen(h), user_zoom, h)
 	z *= 1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX)

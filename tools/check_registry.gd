@@ -132,6 +132,7 @@ const CHECKS := {
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],  # item 94
 	"--music-combat-check": ["res://tools/music_combat_check.gd", "music_combat_check", null],
 	"--soundtrack-check": ["res://tools/soundtrack_check.gd", "soundtrack_check", null],      # Settings > Audio > Music
+	"--air-rings-check": ["res://tools/air_rings_check.gd", "air_rings_check", null],      # lanes, lifts, bots
 	"--match-repeat-check": ["res://tools/match_repeat_check.gd", "match_repeat_check", null],      # leaks
 	# merged props hold their draws; --shots-dir=<dir> saves a lineup
 	"--prop-draws-check": ["res://tools/prop_draws_check.gd", "prop_draws_check", null],
@@ -221,6 +222,8 @@ const CHECKS := {
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],  # dash -> ability rows
 	"--glide-trail-check": ["res://tools/glide_trail_check.gd", "glide_trail_check", null],
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
+	# --held-fire-resume-check: LMB held through a slot
+	"--held-fire-resume-check": ["res://tools/held_fire_resume_check.gd", "held_fire_resume_check", null],
 	# docs/decisions/0022
 	"--cc-exit-buffer-check": ["res://tools/cc_exit_buffer_check.gd", "cc_exit_buffer_check", null],
 	# a tap inside a hit-stop goes when it ends
@@ -232,11 +235,11 @@ const CHECKS := {
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],  # item 163
+	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
+	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--ttk-check": ["res://tools/ttk_check.gd", "ttk_check", null],  # time to knock vs the source (docs/TTK.md)
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
 	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],
-	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
-	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],      # the rocket drop
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
@@ -306,8 +309,9 @@ const CHECKS := {
 	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],      # every Hunter gliding: turns, dive
 	# Meeko's sun and cloud orbit her, bob, clear the wings
 	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],
-	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],  # frames of that orbit
-	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],  # every Hunter standing still (IDLE_AUDIT)
+	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],   # frames of that orbit
+	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
+	"--jump-land-shots": ["res://tools/jump_land_shots.gd", "jump_land_shots", null],  # the plain jump, match camera
 	"--rooted-shots": ["res://tools/rooted_shots.gd", "rooted_shots", null],      # rooted Hunters casting, legs planted
 	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],      # the lobby lock-in poses (GPU)
 	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
@@ -315,16 +319,17 @@ const CHECKS := {
 	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],      # colour vs .glb
 	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],      # gait gate
 	"--foot-slide-check": ["res://tools/foot_slide_check.gd", "foot_slide_check", null],      # slip sweep
-	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks
+	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks; --react
+	"--react-audit": ["res://tools/react_audit.gd", "react_audit", null],      # hit reaction gate (REACT_AUDIT)
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],      # the sight wedge and hiding plates
 	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],      # sight wedge shots (GPU)
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],      # draw cost of sets of rigged Bokis
-	# a Boki taking a hit, strips
-	"--boki-flinch-shots": ["res://tools/boki_flinch_shots.gd", "boki_flinch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],      # fliers hover, glide, flare
+	# a Boki taking a hit, strips
+	"--boki-flinch-shots": ["res://tools/boki_flinch_shots.gd", "boki_flinch_shots", null],
 	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
 	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],    
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
@@ -544,6 +549,8 @@ const CHECKS := {
 	"--dmg-number-check": ["res://tools/dmg_number_check.gd", "dmg_number_check", null],
 	"--dmg-number-shots": ["res://tools/dmg_number_shots.gd", "dmg_number_shots", null],      # --shots-dir=<dir>
 	"--dot-soft-shots": ["res://tools/dot_soft_shots.gd", "dot_soft_shots", null],      # --shots-dir=<dir> [--dot-hard]
+	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],      # --shots-dir=<dir>
+	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],  # death card, spectate
 	"--boki-hud-check": ["res://tools/boki_hud_check.gd", "boki_hud_check", null],      # the Boki box tags, bond %
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],  # every species' Boki wisp

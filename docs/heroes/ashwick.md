@@ -375,7 +375,7 @@ cadence override. Checked by `--ashwick-combo-check` (timing rows, the ram row) 
 | Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.03 (held to 0.07), done 0.24 | same |
 | Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same |
 | Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.13, done 0.24 | same |
-| Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same |
+| Flue Flight lift-off | ember ring, then he hangs 0.13-0.2 s before moving (15 fps: cast 1 ring +0.40, moving +0.5; cast 2 ring +0.47, moving +0.65) | ring on press, `lw_jet` crouch 0.08, flight pose 0.22, moving at once | hangs `lift_t` 0.15 s, risen to the 0.45 m hover (`--move-feel-check` `flue_lift_hold_s`, `flue_hover_m`) |
 | Flue Flight flight | 1.3-1.4 (owner item 20: 1.8) | 1.8 | same |
 | Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | `jet_land` 0.2, a soft knee give (hips -0.07), 3 small embers, no smoke |
 | Run cadence (footfall) | every 0.15-0.2 | every 0.35 (0.7 s cycle at 4.65 m/s) | every 0.19 (0.339 s clip, half on the ground, played at 0.88: 0.384 s cycle), feet planted |

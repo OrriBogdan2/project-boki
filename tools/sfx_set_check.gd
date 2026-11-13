@@ -238,8 +238,8 @@ func _nuke_fall() -> void:
 	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
 	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
-	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
-	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
+	var looks := FileAccess.get_file_as_string("res://content/vfx/gunslinger.json")
+	ok(looks.contains("\"n\": \"vn_nuke_fall\""), "the cast's HeroVfx look plays vn_nuke_fall (at the landing point)")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -375,13 +375,16 @@ func _strip_chime() -> void:
 	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
+
 ## 12. Every sound UiSfx plays by name has a file, so a typo never plays silence.
 func _ui_cues() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
 	var re := RegEx.create_from_string('"([a-z_]+)"')
 	var names := {}
 	for hit in re.search_all(src):
-		names[hit.get_string(1)] = true
+		var line_at := src.rfind("\n", hit.get_start()) + 1
+		if not src.substr(line_at, src.find("\n", line_at) - line_at).to_lower().contains("meta"):
+			names[hit.get_string(1)] = true
 	var missing := []
 	for n in names:
 		if _takes(String(n)).is_empty():

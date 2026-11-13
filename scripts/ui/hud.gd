@@ -1825,7 +1825,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.32 + 58), Vector2(280, 8)), p.revive, GOOD)
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%  ·  %.1fs" % [(revs[0] as Hunter).pname, int(p.revive * 100.0), Life.revive_secs(p)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
 		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + TipPick.for_downed(p, m.time, m.opts.get("blight", true)), HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 

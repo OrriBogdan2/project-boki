@@ -37,7 +37,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
 ## The camera-facing effect shaders that soften where they meet the ground (shaders/soft_fade.gdshaderinc).
-const SOFT_SHADERS := ["fx_dot", "ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
+const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()

@@ -304,29 +304,30 @@ func bjorn() -> void:
 	await _bjorn_more()
 	await _bjorn_burst()
 
-## One jump press 0.1 s into the wind-up: planted (hero sheet bjorn.md "Ultimate": f25-f31), he doesn't rise,
-## and the press isn't kept for the plant's end (content/dash_flow into_jump.x lock); once the fissure runs a
+## One jump press 0.1 s into the wind-up: the wind-up is the Faultline hop (`x.leap_h`), so the press adds
+## nothing to it and isn't kept for the plant's end (content/dash_flow into_jump.x lock); once the fissure runs a
 ## jump goes. Leaves him 0.7 s into the cast.
 func _jump_in_plant(m: Match, P: Hunter, K: BulwarkKit) -> void:
+	var gy: float = m.world.ground_at(P.pos.x, P.pos.z)
+	var hop := float(K.ult.xd().get("leap_h", 1.2))
 	step(m, 0.1)
-	var y0 := P.pos.y
 	P.inp["jump"] = true
 	m.step(DT)
 	P.inp["jump"] = false
-	var top := y0
+	var top := P.pos.y
 	while K.ult.planted():
 		m.step(DT)
 		top = maxf(top, P.pos.y)
 	step(m, 0.1)
-	top = maxf(top, P.pos.y)
-	ok("bjorn ult small: planted, a jump in the wind-up is ignored, not buffered (no rise to the plant's end)",
-		top < y0 + 0.02 and P.grounded, "rose %.2f m" % (top - y0))
+	ok("bjorn ult small: a jump in the wind-up adds nothing to the hop, and is not buffered (no rise past the plant)",
+		top < gy + hop + 0.05 and P.pos.y < gy + 0.02 and P.grounded,
+		"top %.2f m (hop %.2f) now %.2f" % [top - gy, hop, P.pos.y - gy])
 	P.inp["jump"] = true
 	m.step(DT)
 	P.inp["jump"] = false
 	step(m, 0.1)
-	ok("bjorn ult small: free once the fissure runs, a jump goes", P.pos.y > y0 + 0.3,
-		"%.2f m up, %s" % [P.pos.y - y0, K.ult.phase])
+	ok("bjorn ult small: free once the fissure runs, a jump goes", P.pos.y > gy + 0.3,
+		"%.2f m up, %s" % [P.pos.y - gy, K.ult.phase])
 
 ## A miss, the wall stop, an interrupt, a merge in the wind-up.
 func _bjorn_more() -> void:

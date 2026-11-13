@@ -18,21 +18,27 @@ const MAX_S := 20.0        # a row that has not knocked by then counts as never
 const DT_SRC := 0.01       # s step of the source model
 
 ## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), level the numbers were read at,
-## source LMB, abilities]. The source target is the mean Hunter at that level.
-## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit)]. Abilities map a slot to
+## source LMB, abilities, and optionally the Daze its combo puts on the target]. The source target is the mean
+## Hunter at that level. The Daze is {"from": slot that applies it, "t": s, "lmb": flat extra per round, slot:
+## extra share}.
+## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit), or + [front-load share, rounds]:
+## the first round deals that much extra, falling off by that round]. Abilities map a slot to
 ## [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges, extra charges at max rank].
 ## Every number is a supervive_kits.md tooltip (level 1, or level 15 where its section says so), except the LMB of
 ## Myth, Elluna, Tetra, Kingpin and Celeste: the tooltips have no damage there, so it is read from the floating
 ## damage numbers in the hero-ref footage (docs/TTK.md "Footage LMB"). Those five keep no abilities: their
 ## tooltips are level 1 (Tetra 15) and the footage is level 9 (Tetra about 18), so no combo row mixes the two.
 const HEROES := [
-	["gunslinger", "Ghost", "hold", 1, [51.0, 0.08, 0.0], {
-		"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]}],
+	# MK7: 51/round, the first 10 extra (supervive_kits.md:48), opening at 2x (wiki: "decays over your first 10
+	# rounds to 50%"); its Spike Grenade Dazes: +39 a round, Railgun +20% (:48-51), 1.2 s (docs/SUPERVIVE_DATA.md)
+	["gunslinger", "Ghost", "hold", 1, [51.0, 0.08, 0.0, 1.0, 10], {
+		"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]},
+		{"from": "rmb", "t": 1.2, "lmb": 39.0, "e": 0.2}],
 	["juggernaut", "Brall", "tap", 1, [43.0, 0.35, 0.0], {
 		"rmb": [130.0, 0.4, 2.5, 0.0, 1, 0], "dash": [49.0, 0.0, 13.0, 5.0, 2, 1],
 		"e": [30.0, 0.0, 16.0, 6.0, 1, 0]}],
 	["ashwick", "Felix", "hold", 1, [25.8, 0.1, 0.0], {
-		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [190.4, 0.0, 9.0, 1.5, 2, 0],
+		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [150.4, 0.266, 9.0, 1.5, 2, 0],
 		"e": [76.8, 0.5, 13.0, 4.0, 1, 0]}],
 	["mage", "Joule", "hold", 1, [90.0, 0.8, 0.0], {
 		"rmb": [133.0, 0.9, 10.0, 2.0, 1, 0], "dash": [153.0, 1.0, 9.0, 1.5, 1, 0],
@@ -75,7 +81,13 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 	var n := 0
 	while t <= MAX_S:
 		var dmg := float(lmb[0]) + float(lmb[2]) * n
-		shots.append([t, minf(dmg, float(lmb[3])) if lmb.size() > 3 else dmg])
+		if lmb.size() > 4:
+			dmg += float(lmb[0]) * float(lmb[3]) * maxf(0.0, 1.0 - float(n) / float(lmb[4]))
+		elif lmb.size() > 3:
+			dmg = minf(dmg, float(lmb[3]))
+		if _in_daze(dazed, daze, t):
+			dmg += float(daze["lmb"])
+		shots.append([t, dmg])
 		n += 1
 		t += float(lmb[1])
 	for slot in hero[5] if combo else {}:

@@ -17,7 +17,6 @@ import boki_meshy
 import boki_scan
 import boki_sdf
 import face
-import plant_gait
 import importlib
 
 import boki_rig

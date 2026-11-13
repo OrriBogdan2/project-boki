@@ -37,6 +37,10 @@ const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as
 ## A move whose item appears on the clip's key: Hero -> [clip, the hand that brings it out, the kit slot and the key
 ## of its spawn time in s]. The key is where that hand's yank tops out: its highest frame in the clip.
 const SPAWN_KEY := {"gil": ["toss", "hand.L", "rmb", "draw"]}
+const JL_READ_DEG := 15.0      # deg: a take-off or an apex turns some bone at least this far (it reads on screen)
+const JL_AGAIN_DEG := 3.0      # deg: the second jump's rise pose may differ from the first by this much
+const JL_DIP_M := 0.03         # m: the hips drop at least this far on touchdown
+const JL_BACK_MAX := 0.6       # s: the longest a plain landing may own the body (dur 0.4 + the loco fade)
 ## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
 ## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
 const END_OFF := DT / 2.0 + 0.001
@@ -188,6 +192,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_timings(id, dd, clips)
 	_upper(id, dd, clips)
 	_standing(id, dd, clips)
+	_jump_land(id, m, sync, clips, dd)
 	_emotes(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
@@ -308,6 +313,31 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+
+## The plain jump, running and standing (tools/jump_land_check.gd), printed as "JL" rows. Asserted: the take-off and the
+## apex read (the pose turns), every jump reads like the first (the rise clip starts over), the landing dips at once
+## (Motley's hips ride his spring: no dip to read), and the body is back on the run or the stand within the data's
+## promise: "moving" (or "dur") plus the loco fade, never longer than JL_BACK_MAX.
+func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var jl := preload("res://tools/jump_land_check.gd")
+	var ld: Dictionary = dd.get("land", {})
+	for running: bool in [true, false]:
+		var r: Dictionary = jl.measure(m, sync, clips, running)
+		var way := "run" if running else "still"
+		print("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f dip_t=%.2f legs=%.2f back=%.2f settle=%.2f" % [id,
+				way, r["off"], r["again"], r["apex"], r["dip"], r["dip_t"], r["legs"], r["back"], r["settle"]])
+		ok(r["off"] >= JL_READ_DEG and r["apex"] >= JL_READ_DEG, "%s %s: take-off (%.0f deg) and apex (%.0f deg) read"
+				% [id, way, r["off"], r["apex"]])
+		ok(r["again"] <= JL_AGAIN_DEG, "%s %s: the next jump takes off like the first (%.1f deg off)"
+				% [id, way, r["again"]])
+		if not dd.has("sway"):
+			ok(r["dip"] <= -JL_DIP_M and r["dip_t"] <= jl.DIP_WINDOW, "%s %s: the landing dips %.2f m, lowest at %.2f s"
+					% [id, way, -r["dip"], r["dip_t"]])
+		var hold := float(ld.get("moving", ld.get("dur", 0.0))) if running else float(ld.get("dur", 0.0))
+		var promise := hold + WardenClips.FADE_LOCO + jl.DT
+		ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
+				"%s %s: the body is back %.2f s after touchdown (data %.2f, max %.2f)"
+				% [id, way, r["back"], promise, JL_BACK_MAX])
 
 ## The emote wheel (Truce.EMOTES): every emote names a different clip of this Hunter that ends before its bubble does.
 ## A "g_" gesture keys only bones of the data's "upper" list and always plays on the upper layer; a .glb clip does when

@@ -663,6 +663,7 @@ Ours only: there is no source row to compare, so every verdict is `ours` and the
 | Health | none | 124 (light weight), 0.80 of the roster mean | ours |
 
 Measured outliers, not retuned: the swordfish chain reads one dummy at 0.8 m in `--hit-shape-check` against a 3.1 m content reach (as Kael and Tenzo read low too); his combo knocks in 5.0 to 7.7 s (the bag is shuffled, so it varies) against 1.3 to 4.2 s for the other combos with a source row, only Motley slower (docs/TTK.md); bots use Ground Swim about once per duel.
+
 ## Starter trio re-check: Vex, Kael, Lace (2026-11-10, ext/release-integ-0244-fix ec3c9dafb)
 
 DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player touches these three. The last column of the three hero tables above is the re-measure, run in the Training Area (`Match.start({"training": true})`, a 10000 HP dummy, a clean `XDG_DATA_HOME`). The base is the release integration branch, not main: main has no `--kit-parity-check` or parity bench yet.
@@ -688,7 +689,7 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 
 | Hunter | Effect (ours) | Source | Verdict |
 |---|---|---|---|
-| Vex | Burr Charge Daze 1.4 s (only +38% rifle, +20% Railgun, no slow); wall slam: stun 0.7 s and Daze +0.6 s; Cinderfall zone slow 30% (0.6 s refreshed) | Daze about 1.2 s [F]; wall: "Dazed longer and Stunned" and zone "Slow", no numbers [D] | match (1.4 vs 1.2 is one frame at 5 fps) |
+| Vex | Coin Blast Daze 1.4 s (only +38% rifle, +20% Railgun, no slow); wall slam: stun 0.7 s and Daze +0.6 s; Cinderfall zone slow 30% (0.6 s refreshed) | Daze about 1.2 s [F]; wall: "Dazed longer and Stunned" and zone "Slow", no numbers [D] | match (1.4 vs 1.2 is one frame at 5 fps) |
 | Zedran | Meteor Drop: core stun 0.8 s, ring slow 40% 1.5 s | "Slow + 88 dmg; center hits Stun" [D], no numbers | match in shape |
 | Zedran | Fireblast (full) slow 30% 1 s; Chain Lunge stun 0.35 s; Haul Slam stun 0.25 to 0.6 s | none: the tooltips list no slow on the blast and no stun on the chain | ours-only riders, see suggestions |
 | Hem | Heartpiercer wall stun 1.2 s (rank 3: dash charge); Rain of Arrows slow 35% 0.8 s refreshed | "enemies that collide with terrain are Stunned", "Slow + Anti-Heal", no numbers; wall stun not shown cleanly [F] | match; numbers unsourced |

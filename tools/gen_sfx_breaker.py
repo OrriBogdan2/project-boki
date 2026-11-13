@@ -401,6 +401,34 @@ def death():
     return pad(mix(fo(lpf(v, 4000), 0.4), sink, gurgle, bell), 2.6)
 
 
+# ------------------------------------------------------------------ added 11-09 (kept last: the older takes stay identical)
+def boop():
+    """The aegis thrust landing: a short hollow wooden knock, a quick iron tick and a puff of air. Small and punchy."""
+    d = 0.32
+    knock = mix(click(0.003, 1800, 6500) * 1.0, kick(170, 70, d, 0.01, 0.045, 2.6) * 0.8, timber(150, 0.25, 1.4, 0.05))
+    tick = at(iron(720, 0.2, 0.25, 0.06), 0.003)
+    puff = swoosh(0.16, 1800, 500, 1.6) * 0.3
+    return pad(lpf(mix(soft(knock, 0.9), tick, fo(puff)), 7500), d)
+
+
+def reel():
+    """The rope hauling the hammer home on its own: the line snapping taut, then a fast ratcheting whirr."""
+    d = 0.6; t = T(d)
+    snap = mix(click(0.003, 1200, 5000) * 0.9, crack(0.08, 600, 3200, 0.012) * 1.2)
+    ratchet = mix(*[at(click(0.002, 2000, 6000) * (0.5 - 0.02 * k), 0.06 + 0.035 * k) for k in range(14)])
+    whirr = swoosh(d, 300, 1600, 2.4, 1.0, 0.9) * (0.6 + 0.4 * np.sin(2 * np.pi * 18 * t)) * 0.7
+    return lpf(mix(snap, ratchet, fo(whirr, 0.2)), 7000)
+
+
+def ult_quake():
+    """Faultline's landing under the slam: a sub-heavy boom that drops the floor out, then the ground settling."""
+    d = 1.6
+    boom = mix(kick(80, 22, d, 0.06, 0.25, 4.0) * 1.0, sub(42, 22, d, 0.6) * 0.9)
+    thump = crack(0.5, 80, 900, 0.07) * 1.6
+    settle = at(lpf(grains(1.1, 60, 300, 1800, 0.004, 0.016, fall=0.5), 2200) * 0.7, 0.08)
+    return lpf(mix(soft(boom, 1.2), thump, settle), 3200)
+
+
 def build():
     S.takes_cat('bjorn_throw', throw, 3, 'fire')
     S.takes_cat('bulwark_hammer_clang', hammer_clang, 3, 'signature')
@@ -429,6 +457,9 @@ def build():
     S.takes_cat('bulwark_hurt', hurt, 3, 'grunt')
     S.save_cat('bulwark_down', down(), 'grunt')
     S.save_cat('bulwark_death', death(), 'grunt')
+    S.save_cat('bjorn_boop', boop(), 'impact')
+    S.save_cat('bjorn_reel', reel(), 'cast')
+    S.save_cat('bjorn_ult_quake', ult_quake(), 'impact')
 
 
 if __name__ == '__main__':

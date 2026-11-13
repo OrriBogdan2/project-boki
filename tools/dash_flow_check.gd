@@ -16,8 +16,9 @@ const WATCH := 120              # steps after the press that we watch for the ab
 const GLOVE := "barrier"        # Q: an active glove that stays where it's cast
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
-## the press goes mid-dash; Kael and Albert dash AS the attack (no slash or swing inside it:
-## buffer), and their ult plants them, as Cinder's flight takes over (cancel).
+## the press goes mid-dash; Vex's rifle fires in the air slide too (the card's rule plus the wiki's air tap);
+## Kael and Albert dash AS the attack (no slash or swing inside it: buffer), and their ult plants them, as
+## Cinder's flight takes over (cancel).
 const SOURCE_ROWS := [
 	["archer", "ground", "lmb", "fire"], ["archer", "air", "lmb", "fire"],
 	["gunslinger", "air", "lmb", "fire"],
