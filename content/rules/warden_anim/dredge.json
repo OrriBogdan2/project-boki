@@ -114,6 +114,7 @@
 			"clip": "fusion"
 		}
 	},
+	"lockin": {"clip": "emote", "dur": 1.45, "rate": 1.0},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",

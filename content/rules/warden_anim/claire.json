@@ -24,6 +24,7 @@
 		"tm_rime": {"clip": "rime"}, "tm_rime_carry": {"clip": "rime_carry"}, "tm_rime_hold": {"clip": "rime_hold", "hold_from": 0.0}, "tm_rime_crash": {"clip": "rime_crash", "upper": "moving"}, "tm_rime_break": {"clip": "rime_break"},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"lockin": {"clip": "emote", "from": 0.2, "dur": 1.45, "rate": 1.1},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["tm_dart_r", 0.16], ["tm_dart_l", 0.16], ["tm_dart_r", 0.16], ["tm_dart_heavy", 0.18], ["tm_skate_go", 0.16], ["tm_skate", 0.56], ["tm_beam", 0.22], ["tm_skate", 0.56], ["tm_skate_stop", 0.5], ["tm_spear_aim", 0.4], ["tm_spear", 0.55], ["tm_wall", 0.7], ["tm_freeze", 0.42], ["tm_rime", 0.2], ["tm_rime_hold", 0.8], ["tm_rime_crash", 0.4]],
 	"still": ["rime", "rime_hold"],

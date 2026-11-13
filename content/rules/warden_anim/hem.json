@@ -24,6 +24,7 @@
 		"pin_ult_loose": {"clip": "ult_loose", "upper": true}, "pin_ult_final": {"clip": "ult_final", "upper": true},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"lockin": {"clip": "draw", "dur": 1.25, "rate": 1.0},
 	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"carry_stow": ["bow"],

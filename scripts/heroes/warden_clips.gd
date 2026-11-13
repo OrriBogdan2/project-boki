@@ -25,6 +25,8 @@ const FADE := 0.1            # s: one clip into the next, and into or out of an 
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const FALL_FADE := 0.05      # s: into the knocked-down beat (quick: it is the hit)
+const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
+const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -55,6 +57,7 @@ var cur_u := ""              # the clip on the live upper-body channel
 var chan_u := 0              # which upper-body channel is live, 0 or 1
 var xf_u := 0.0              # the crossfade between the upper-body channels (0: channel ua)
 var act_w := 0.0             # how much the action owns the body
+var act_out := FADE_LOCO     # s the action takes to let go of the body (longer after a lock-in pose)
 var up_w := 0.0              # how much it owns the upper body only
 var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less its first frame) rides on the upper body
 var air_w := 0.0
@@ -420,6 +423,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
 		return {"clip": st["stun"], "t": -1.0}
+	var lock := float(s.get("lockin_t", -1.0))
+	if lock >= 0.0 and d.has("lockin"):
+		return _lockin_at(lock)
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))
@@ -446,6 +452,20 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
 	return {}
+
+## The lobby's lock-in pose (data "lockin": clip, from, dur, rate, fade, settle): `t` s into it, a window of an
+## existing clip.
+func _lockin_at(t: float) -> Dictionary:
+	var lk: Dictionary = d["lockin"]
+	var clip := String(lk["clip"])
+	var at := float(lk.get("from", 0.0)) + t * float(lk.get("rate", 1.0))
+	act_out = float(lk.get("settle", LOCKIN_SETTLE))
+	var fade := float(lk.get("fade", LOCKIN_FADE))
+	return {"clip": clip, "t": minf(at, lib.get_animation(clip).length - 0.001), "fade": fade}
+
+## How long a Hero's lock-in pose runs (s); 0 for one that has none.
+static func lockin_dur(art_name: String) -> float:
+	return float(data(art_name).get("lockin", {}).get("dur", 0.0))
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
@@ -493,10 +513,11 @@ func step(dt: float) -> void:
 		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
-		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
+		act_w = move_toward(act_w, 0.0, dt / act_out)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
+			act_out = FADE_LOCO
 	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
 	xf_u = move_toward(xf_u, float(chan_u), dt / float(want.get("fade", FADE)))
 	_p("act/blend_amount", xf)
