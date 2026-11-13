@@ -36,6 +36,43 @@ curve is halved, so a garden-only first form is 123 min and the runner's 76. The
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
 
+## Breeding pace (measured, nothing applied)
+
+Gap 2 of docs/GARDEN_PLAY_0246.md: the Nook wants two Grown (level 8) Boki who are friends. Printed by
+`--garden-pace-check` after the first-form line (same play model, same real Care, Game and NookRules.friends code,
+one seed, repeatable). Minutes of play. The wild visitor is the second Boki: its expected wait is
+`check_s / chance` (200 s) plus three favourite meals, counted in garden time only, so it comes in the first
+garden minutes of either player; it arrives at trust 50. The player works the starter to Grown, then the visitor.
+"With 1 run a session" = a 12 min expedition (half won, 1 knock) then 3 min of garden, over and over; the run's XP
+goes to whoever is being raised. "Friends" is the first time trust is 50 or more on both (the starter's trust
+climbs 1 a pet and 2 a meal, one of each per 12.5 s).
+
+| Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
+|---|---|---|---|---|
+| Garden-only | 5 min | 669 min (11 h) | 33 min | 1346 min (22 h) |
+| 1 expedition a session | 29 min | 320 min (5.3 h) | 108 min | 648 min (11 h) |
+
+The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
+games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
+halved curve: 50 x level); the first version of this table, on the old per-action XP and the 100 x level curve, was
+2230 and 1266 min.
+
+The 30 minute target is still missed (half a day to a day of play for the egg): a Grown Boki needs 1400 XP, and the
+Nook needs two. The second Boki and friends are not the bottleneck (minutes); only levels are. That is why no
+friend-threshold option is listed: the threshold would change nothing.
+
+Data-only options (`breed_options` in content/rules/garden_xp.json, read by the check, not applied anywhere;
+`xp_mult` scales care, drill and the game rewards):
+
+| Option | Grown | Garden-only: Grown / first egg | 1 run a session: Grown / first egg |
+|---|---|---|---|
+| xp_x3 (every XP times 3) | 8 | 213 / 439 min | 320 / 632 min |
+| grown_5 (the Nook asks level 5) | 5 | 229 / 467 min | 125 / 243 min |
+| xp_x2_grown_6 | 6 | 165 / 345 min | 174 / 340 min |
+
+Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg needs both a far larger XP rate and a
+Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
+
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.

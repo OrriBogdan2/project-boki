@@ -1022,6 +1022,8 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace and Balance). scripts/home/garden_xp.gd reads it, tools/garden_sim.py fits it. care: a kin's first feed, first pat and first game of fetch each day pay it once. drill_per_point: per training point. games: the garden games that pay (GardenPrizes.settle): play for a played game, win for a win, first_win for the day's first win in that game; the Boki you backed gets it. curve: XP from level n to n + 1 is per_level x n, flat from level flat_from on (Game.xp_need). An expedition gives 40 (+40 on a win, +10 a knock) to the lead Boki. The pace assumptions are what tools/garden_pace_check.gd models. |
 | care | 5 |
 | drill_per_point | 1 |
+| breed_options_doc | DATA ONLY, NOT APPLIED (docs/GARDEN.md Breeding pace): what tools/garden_pace_check.gd prints a second table for. xp_mult scales every XP above (care, drill, games), grown_lv is the level the Nook asks for (now Care.STAGES Grown, 8). Pick one by editing the real values. |
+| breed_options | [{"id": "xp_x3", "xp_mult": 3.0, "grown_lv": 8}, {"id": "grown_5", "xp_mult": 1.0, "grown_lv": 5}, {"id": "xp_x2_grown_6", "xp_mult": 2.0, "grown_lv": 6}] |
 | games | ["dash", "shove", "seek", "volley"] |
 | play | 3 |
 | win | 5 |
