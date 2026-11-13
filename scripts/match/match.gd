@@ -5170,6 +5170,8 @@ func _flags(h: Hunter) -> int:
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
+	if h.gliding: f |= GliderHeat.net_level(h) << 20      # the glider's heat, 4 bits (20-23), and whether it burns (24)
+	if GliderHeat.burning(h): f |= 1 << 24
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
@@ -5324,6 +5326,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.riding = f & 1024 != 0
 			h.diving = f & 16384 != 0
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
+			h.glide_fuel = GliderHeat.fuel_of((f >> 20) & 15) if h.gliding else 1.0
+			h.below_lip = f & (1 << 24) != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
 			if f & 2048 != 0:

@@ -248,6 +248,12 @@ func _ground_under(at: Vector3) -> float:
 func dust(at: Vector3, n := 8) -> void:
 	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
 
+## A thin smoke puff drifting behind `dir` (an overheated glider's trail). Like dust, not a burst: dark and grey
+## (no hot core), ~0.4 m soft dots that rise a little and fade over a second, so the puffs left every SMOKE_EVERY
+## behind a gliding Hunter read as one thin dark line at match zoom.
+func smoke(at: Vector3, dir: Vector3) -> void:
+	_emit(at, Color(0.16, 0.15, 0.15, 0.8), 4, 0.6, 1.1, -0.8, 2.6, dir, 20.0)
+
 ## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
 ## burst: those are kept for blasts that do something.
 func dash_trail(h) -> void:
