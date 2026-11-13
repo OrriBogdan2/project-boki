@@ -54,3 +54,7 @@ long can't be measured; the rule we already had stays and is now drawn:
   size: the reference camera is ~3.7x further out, and its 7-9 m would light half our screen.
 - **Net:** nothing new. A client gets the reveal with each rival's state (flag 4096, refreshed to 0.3 s), so the
   circle follows the same sight sync.
+- **A first-time line explains the dim side.** The first time a rival is hidden only by the wedge, or you swing
+  your aim 120 degrees within 0.6 s and the dim area sweeps, the hint lane says "You only see enemies in front of
+  you and near you" (`VisionHint`, through `Match._tips`): once per save, never with tips off or in the tutorial
+  course. `--first-time-hint-check`.

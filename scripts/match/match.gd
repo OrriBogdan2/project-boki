@@ -5631,6 +5631,7 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+var vision_hint := VisionHint.new()
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
@@ -5713,6 +5714,8 @@ func _tips() -> void:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
 		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
+		_tip(VisionHint.KEY, VisionHint.TEXT)
 	var k: Kin = player.kin
 	if k == null:
 		return
