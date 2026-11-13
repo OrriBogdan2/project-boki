@@ -9,6 +9,12 @@ extends RefCounted
 ##   5. a Boki that is down itself when its Hunter goes down stays down where it fell
 ##   6. an enemy on the Wisp (the stomp): no pull, and when they're finished the Boki leaves the wisp
 ##      form by the death rules (KinLoss)
+##   7. the Hunter Wisp itself: the rack's picker lists every skin and wears one; you, your
+##      bot teammate and a rival knocked swap the hero for a Wisp (bots the same code); your saved skin is
+##      on yours only; its outline and plume are the
+##      viewer's relation colour, read from three viewers (you, the teammate, the rival); the plate sits on
+##      the Wisp and says JUMP TO REVIVE to a teammate close by only; you jump onto the teammate's Wisp and
+##      that brings them back
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -102,6 +108,7 @@ func run(main_node: Node) -> void:
 	ok(k2.state == "downed", "a Boki down itself stays down where it fell (%s)" % k2.state)
 	m.revive_hunter(P, null)
 	_put(foe, spot + Vector3(-25, 0, 0))
+	await _hunter_wisp(P, bot, foe)
 	# ---------------------------------------------------------------- 6. stomped and finished
 	_out(k, bot.pos + Vector3(3.0, 0, 0))
 	m.knock(bot, foe, {})
@@ -138,3 +145,85 @@ func _until(cond: Callable, limit: float) -> float:
 		m.step(DT)
 		t += DT
 	return t
+
+## 7. The Hunter Wisp: form, skin, colour by relation for three viewers, the prompt, a jump revive.
+func _hunter_wisp(P: Hunter, bot: Hunter, foe: Hunter) -> void:
+	var panel := VBoxContainer.new()
+	WispPicker.add_to(panel, func(): pass)
+	var tiles := panel.get_child(1).get_child_count()
+	var every: bool = tiles == (WispLook.rules()["looks"] as Dictionary).size() and tiles >= 3
+	ok(every, "the rack's picker lists every Wisp skin (%d)" % tiles)
+	panel.free()
+	WispPicker._wear("glitch", func(): pass)
+	var spot := bot.pos
+	_put(P, spot + Vector3(0, 0, 3.0))
+	_put(foe, spot + Vector3(3.0, 0, 0))
+	for h in [P, bot, foe]:
+		m.knock(h, null, {})
+		h.down_hp = 1e6
+		h.reveal_t = 30.0          # seen however the headless camera faces
+	_show(0.4)
+	for h in [P, bot, foe]:
+		var swapped: bool = HunterWisp.mode_of(h) == HunterWisp.ON and not h.model.visible
+		ok(swapped, "%s knocked: the hero is gone, a Wisp sits in their place" % h.pname)
+	var styles := []
+	for h in [P, bot, foe]:
+		styles.append(_mat(h, "mat").get_shader_parameter("style"))
+	ok(styles == [1, 0, 0], "your saved skin (glitch) is on your Wisp only, the bots wear the default %s" % [styles])
+	for viewer in [P, bot, foe]:
+		m.player = viewer
+		_show(DT)
+		var cols := []
+		for h in [P, bot, foe]:
+			cols.append(_mat(h, "plume").get_shader_parameter("col"))
+		var want := []
+		for h in [P, bot, foe]:
+			want.append(SideColor.of_team(viewer.team, h.team, h == viewer))
+		var rim_ok: bool = _mat(foe, "mat").get_shader_parameter("rim_col") == want[2]
+		ok(cols == want and rim_ok,
+			"seen by %s: plumes and outlines are you/ally/rival by relation %s" % [viewer.pname, cols])
+	m.player = P
+	m.revive_hunter(P, null)
+	_put(P, spot + Vector3(0, 0, 3.0))
+	m.cam.snap(P.pos)
+	for i in 20:
+		_show(DT)
+		await main.get_tree().process_frame
+	var shown: Dictionary = m.hud.plates.shown
+	var mate_word := String(shown.get(bot.nid, {}).get("word", ""))
+	var foe_word := String(shown.get(foe.nid, {}).get("word", ""))
+	ok(mate_word == HudPlate.PROMPT, "a teammate near your Wisp sees '%s'" % mate_word)
+	ok(foe_word != HudPlate.PROMPT and foe_word != "", "a rival's Wisp shows its plate but no prompt ('%s')" % foe_word)
+	ok(not DownedMarks.cued(foe, bot), "...and a rival never gets the prompt")
+	ok(HudPlate.plate_offset(bot) == HudPlate.WISP_OFFSET, "the plate sits on the Wisp")
+	# jump onto the teammate's Wisp: the revive runs while you are in the air over it
+	_put(P, bot.pos)
+	P.do_jump()
+	var air_revive := 0.0
+	var t := 0.0
+	while t < 0.4:
+		_show(DT)
+		t += DT
+		if not P.grounded:
+			air_revive = bot.revive
+	ok(air_revive > 0.0, "jumping onto the Wisp starts the revive mid-air (%.2f)" % air_revive)
+	t = _until(func(): return not bot.downed, 6.0)
+	ok(not bot.downed, "...and standing over it brings them back (%.1fs more)" % t)
+	m.revive_hunter(foe, null)
+	WispLook.equip("default")
+	_show(0.5)
+	_put(P, spot + Vector3(25, 0, 0))
+	_put(foe, spot + Vector3(-25, 0, 0))
+
+## The Wisp's body ("mat") or plume ("plume") material on a downed hunter.
+func _mat(h: Hunter, key: String) -> ShaderMaterial:
+	return HunterWisp.node_of(h).get_meta(key)
+
+## Steps and draws the hunters (their Wisps live in render).
+func _show(secs: float) -> void:
+	var t := 0.0
+	while t < secs:
+		m.step(DT)
+		t += DT
+		for h in m.hunters:
+			h.render(DT, 1.0)
