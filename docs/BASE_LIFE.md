@@ -61,7 +61,7 @@ check: `--base-life-check`.
   recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
   `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge, Echo Steps' stonehop and spin, and the Dash's crouch, burst and sulk (`scripts/home/race_beats.gd`) play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
 - Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
   Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
@@ -75,6 +75,15 @@ check: `--base-life-check`.
   The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
   lane** (none exist yet; the walk just slows and the shake is a Body wobble): `wade` (a slow knee-high walk loop),
   `shake` (a shake-off, 0.6 s), `paddle` (a longer water-play loop; `splash` stands in).
+- Flying (`scripts/home/boki_fly.gd`, `content/rules/boki_fly.json`): a species whose look has wings (species JSON
+  `colors.wing`, the same mark The Dash uses to glide its gap) takes off while it roams (`BaseLife.roams`: Roam and no
+  farm driver) a zone in `zones` (Kitewind Ridge), and while it crosses a gap: a bridge over the void (`gap_lead` s
+  ahead), the leap to another isle (the leap keeps its own arc and time), The Dash's jump. Each flight holds a height
+  in `height` (0.5 to 1.5 m), rising at `climb` and sinking at `sink` m/s; it hovers standing and glides moving, and
+  flares for `flare_s` as it touches down, then walks. Anything that takes it (eating, a nap, a toy, a pet, a game,
+  a carry) brings it down first; a game sets it down at once. Up there it skips wading. Check: `--boki-rig-check`
+  (two fliers on Kitewind Ridge for 120 s: never over 3 s on foot while roaming, hovering in the band, every landing
+  flares, plus a bridge and a leap).
 - Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
   stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
   is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the
