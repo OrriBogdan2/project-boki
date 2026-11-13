@@ -148,6 +148,25 @@ func _wiring() -> void:
 	m.hud.tip("Hold left click to shoot")
 	ok(lane.count() == 1, "a hint lands in the same lane")
 	ok(lane.get_parent() == m.hud, "the lane is part of the HUD")
+	var hud = m.hud
+	hud.kit_fade = 1.0
+	hud.hitmarker(false)
+	ok(hud.in_fight(), "a hit you land starts the fight budget")
+	var t0: float = hud.kit_t0
+	for i in 10:
+		hud._hud_tick(0.1)
+	ok(hud.kit_fade == 0.0, "the kit panel fades out while the fight budget is on (%.2f)" % hud.kit_fade)
+	ok(is_equal_approx(hud.kit_t0 - t0, 1.0), "its show timer waits the fight out")
+	Input.action_press("scores")
+	for i in 10:
+		hud._hud_tick(0.1)
+	ok(hud.kit_fade == 1.0, "Tab brings the kit panel back mid-fight")
+	Input.action_release("scores")
+	hud.dealt_at = -9.0
+	m.player.hurt_at = -9.0
+	for i in 10:
+		hud._hud_tick(0.1)
+	ok(not hud.in_fight() and hud.kit_fade == 1.0, "the kit panel returns when the fight ends")
 	m.hud._place_msgs()
 	ok(not lane.fight, "no hits yet: the HUD's lane keeps its full budget")
 	m.hud.hitmarker(false)
