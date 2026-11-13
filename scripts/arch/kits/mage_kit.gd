@@ -19,6 +19,7 @@ const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the r
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
+const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
@@ -675,8 +676,12 @@ func fire_rmb(c: Dictionary) -> void:
 	var min_t := float(sd["min_t"])
 	var k := clampf((held_t - min_t) / (float(sd["hold"]) - min_t), 0.0, 1.0)
 	last_variant = "hold" if k > 0.5 else "tap"
-	play("mage_rmb")
 	var wait := maxf(0.0, min_t - held_t)
+	var lead := maxf(0.0, wait - RMB_KEY)         # a quick tap: the throw clip starts so its release key is the bolt
+	if lead > 0.0:
+		m.later(lead, func(): if is_instance_valid(h) and not h.downed and anim_id == "mage_rmb_hold": play("mage_rmb"))
+	else:
+		play("mage_rmb")
 	if wait > 0.0:
 		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _coil(k))
 	else:
