@@ -298,6 +298,7 @@ static func settle(run: Run) -> Dictionary:
 	for i in run.duo:
 		BaseDuo.note_first(run.recs[i], run.recs[run.duo[i]], "handed off cleanly with")
 	var backed_won: bool = order[0] == run.backed
+	if backed_won: ClanBoard.add("cup")       # the garden cup for the clan board (until cups land)
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var mine: Dictionary = run.recs[run.backed]

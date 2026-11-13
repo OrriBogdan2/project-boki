@@ -650,6 +650,22 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | keg | 0.0144 |
 | train_crate | 0.0288 |
 
+## clan_board (`content/rules/clan_board.json`)
+
+The clan's weekly goal on the showcase wall (scripts/social/clan_board.gd, docs/decisions/0087-clan-board.md). Each member's own row counts what they did this week; the board adds the rows up.
+
+| Setting | Value |
+|---|---|
+| points | {"cup": 3, "final": 5, "extract": 2} |
+| _points | board points for a garden cup won (the Dash won by the Boki you backed), a Boki raised to a final form, an extraction finished |
+| cap | {"cup": 5, "final": 3, "extract": 10} |
+| _cap | the most of each a member's row counts in one week (keeps the Dash from being farmed, and a forged row small) |
+| goal_per_member | 10 |
+| goal_min | 20 |
+| _goal | the week's goal in points: goal_per_member for each member, at least goal_min |
+| reward_gems | 25 |
+| _reward_gems | paid once a week to every member when the clan reaches the goal |
+
 ## class_unlock (`content/rules/class_unlock.json`)
 
 Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it. `looks` are features a Hunter leaves on your own character at home once its mastery reaches `level` (shape `eyes` or `scar`, colour `col`); the creator keeps or fades each (MasteryLook).

@@ -88,6 +88,7 @@ func fresh() -> Dictionary:
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
+		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
@@ -321,6 +322,13 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 ## second starts empty: a save that auto-picked or once chose a second no longer brings one until you pick.
 func _migrate_13_to_14(data: Dictionary) -> void:
 	data["active2"] = ""
+
+## v13 -> v14: clans grow out of guilds. A save already in a guild becomes a plain member of the clan
+## with the same id; everyone else gets the empty dict (Social.clan_for).
+func _migrate_13_to_14(data: Dictionary) -> void:
+	var gid := String(data.get("guild_id", ""))
+	var who := String(data.get("profile", {}).get("id", ""))
+	data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
