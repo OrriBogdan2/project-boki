@@ -429,6 +429,28 @@ I re-checked Cinder's and Grimble's `dash.ground.lmb`: nothing new. Cinder's LMB
 
 To settle any of these rows, a clip has to show the held ability running into the move: Felix aiming the bolt and then bashing, Brall charging and then Quick Dashing, Oath charging and then jumping, Elluna aiming and then dashing. For Celeste the spear is a tap, so the hold is ours and there is no source row to match.
 
+## Boots and charms (gear parity, `--gear-parity-check`)
+Loadout is 2 gloves, 2 charms, boots (DECISIONS). Searched briefs/supervive-data and briefs/hero-ref
+(origin/ext/agent-briefs, 2026-11-10) for boots actives, cooldowns and passive move speed: the source data
+has no boots or charm items at all (no item tables; PHYSICS_PARITY only says gear scales move speed at
+runtime, with no numbers). So no piece has a source match and nothing was changed; the list below goes to
+the owner. The check pins these values so any change goes through this list.
+
+| Kind | Piece | Cooldown | Stats (Common) | Source match |
+|---|---|---|---|---|
+| boots | Springheel Boots (`boots`) | none (passive) | +8% move speed | none |
+| boots | Quickstep Boots (`quickstep_boots`) | none | dash back 15% sooner, +3% move speed | none |
+| boots | Skylark Boots (`skylark_boots`) | none | +35% glider heat | none |
+| boots | Windstep Boots (`windstep_boots`) | none | +10% glide speed, +15% glider heat | none |
+| charm* | `booster` | none | +20% glide speed, +20% glider heat | none |
+| charm* | `focus` | none | 18% cooldown reduction | none |
+| charm* | `heat_sink` | none | +45% glider heat | none |
+| charm* | `power_core` | none | +12% damage | none |
+
+\* Charms are not built yet (note 0005): there is no charm gear kind, and these passive gloves are the
+pieces meant to become charms. No boots piece has an active, so none needs a key: the HUD boots cell
+(GearPanel) shows the icon and rarity with no key and no cooldown, and its hover reads "Boots" plus the
+stat line; the check asserts both for every boots piece.
 ## Health
 
 PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a smaller scale than the source's, so each Hunter is compared as a share of its own roster's average: ours = max health / 154 (mean of the 12), source = Base HP / 1285 (mean of the 12). Ratio = ours share / source share; 1.00 is parity, the bar is 1.25x either way.
