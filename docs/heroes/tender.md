@@ -55,8 +55,8 @@ The source's shots, root, aura and ult carry far more on screen than ours did. S
 | Slot | Source (by eye) | Ours now |
 |---|---|---|
 | LMB | a comet with a trail | head 0.7 m with a near-white core, a tail 0.8 m wide and 3.4 m long (was 0.52 m and 0.5 x 2 m); hand ribbon 0.4 m |
-| RMB | a bolt with a rune ring | a violet 0.9 m rune ring square to the flight round the burr; the root area under the foe is filled (fill 2.2) with a wide rim, so it reads while it fills, before the root |
-| E | a big bright disc | on her, a filled disc with a wide bright edge (fill 1.0, rim 16% of the radius; was a thin ring at 0.45 and 8%) |
+| RMB | a bolt with a rune ring | a violet 0.9 m rune ring square to the flight round the burr; the root area under the foe has a wide lit rim (14% of the radius) and its sweep front, so it reads while it fills, before the root; the inside stays soft (fill 0.8, centre alpha 0.23, the zone rule in docs/VFX_QUALITY.md; was fill 2.2) |
+| E | a big bright disc | on her, a filled disc with a wide bright edge (fill 1.0, rim 16% of the radius, centre alpha 0.25 at most; was a thin ring at 0.45 and 8%); thrown, fill 0.75 (centre 0.24; was 1.8) |
 | R | a long arc to the ally | the tether is ten segments bowed out to her right and up by 14% of the gap, a 0.16 m core in a 0.5 m halo; drawn for everyone, as before |
 
 GPU strips (match camera, `--hero-vfx-reel --reel-hero=tender`, `tender_{lmb,rmb,e,r}.png`): before jobq 20261109-152735-17087 (main d255acbee), after 20261109-162019-22501 (bab085d82; the R part uses the dummy as her teammate so the arc has an ally). The E edge reads only a little stronger on the gold ground. No bursts were added on dashes or landings. Asserted: `mm LMB: the comet has a trail ...`, `mm X: the tether is an arc ...`.

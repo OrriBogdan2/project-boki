@@ -13,6 +13,10 @@ extends ArchKit
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
+# Zone discs are a lit rim and a soft inside (docs/VFX_QUALITY.md): the disc shader's centre alpha is fill * a * 0.29
+# (1 step of its 4 cel bands = 0.25), so these keep a foe standing in the middle readable.
+const SEED_FILL := 0.8        # the seed's burst disc, drawn at a 1.0 (centre 0.23)
+const THROWN_FILL := 0.75     # the thrown Hearthlight, drawn at up to 1.1
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
@@ -431,9 +435,8 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 2.2, "rim_w": 0.14,
-					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
-		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
+					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": SEED_FILL,
+					"rim_w": 0.14, "sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
@@ -448,7 +451,6 @@ func _burr_off(b: Dictionary) -> void:
 	burrs.erase(b)
 	lk().drop(key)
 	ulk().drop(key)
-	AimKit.hide(h, key)
 
 func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
@@ -564,7 +566,7 @@ func _tick_hearth(dt: float) -> void:
 		"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"fill": THROWN_FILL, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])

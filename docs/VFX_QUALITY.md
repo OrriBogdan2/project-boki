@@ -78,9 +78,11 @@ Still open (shared, not done here):
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`; fixed on ext/vfx-vex-data), Motley's well dome, Meeko's seed and
 - Data-driven kits (`content/vfx/`): archer, ashwick, bulwark, gunslinger, juggernaut, rimewright, tender. The rest
   to `HeroVfx` data is how a kit reaches the bar.
-  ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
-  rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
-  is per kit (backlog).
+  with a near-opaque flat colour that hides the target. Rule: a zone is a lit rim plus a soft inner falloff (alpha 0.25
+  or less at the centre), never a solid fill. Each kit sets these, so the fix is per kit (backlog). Done: Meeko's seed
+  disc and thrown Hearthlight (disc fill and strength, the thorn ring half as strong, the vortex's dark core thinned; the
+  seed's second AimKit disc is gone) and Sable's R (Encore was already a thin ring since `5e9ea1d07`; `--dancer-combo-check`
+  now measures its centre at 0.10).
 - Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
   moves them to teal. The alternative (keep void violet) would clash with Sable.
 
