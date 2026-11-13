@@ -17,6 +17,7 @@ var stack: Array = []           # pages to go back to with Esc
 var tab := "Gameplay"
 var listening := ""             # an action waiting for its new key
 var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
+var bind_hot: Array = []        # [action, slot] pairs shown red while a clash waits for Swap or Keep both
 var listen_lbl: Label = null
 var delete_armed := -1
 
@@ -520,6 +521,11 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 	var r := _row(v, what)
 	r.custom_minimum_size.y = 34
 	var sl := Settings.slots(an)
+	var red: Array = [[an, 0] in bind_hot, [an, 1] in bind_hot]
+	for slot in 2:
+		if Settings.holders(sl[slot], an).any(func(h): return not Settings.can_share(h[0], an)): red[slot] = true
+	if red[0] or red[1]:
+		((r.get_child(0) as Control).get_child(0) as Label).add_theme_color_override("font_color", UI.BAD)
 	for slot in 2:
 		var cell := UI.hbox(2)
 		cell.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -531,6 +537,7 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		elif Settings.unbound(an):
 			for c in ["font_color", "font_hover_color", "font_pressed_color"]: b.add_theme_color_override(c, UI.BAD)
 			b.tooltip_text = "No key: this action can't be used until you set one"
+		if red[slot] and code != "": b.add_theme_color_override("font_color", UI.BAD)
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -612,24 +619,46 @@ func _finish_rebind(ev: InputEvent) -> void:
 	var an := listening; var slot := listening_slot
 	listening = ""
 	Sfx.play("click")
-	var cf: Array = Settings.conflicts(ev, an)
-	if cf.is_empty():
+	var code := Settings.ev_code(ev)
+	var held: Array = Settings.holders(code, an)
+	if held.is_empty():
 		Settings.rebind(an, ev, slot)
 		_show_settings()
 		return
-	# already someone else's key: say whose, and offer to swap (they take what this slot had) or cancel
+	# already someone else's key: both rows go red, and you pick: swap (every clashing action takes what
+	# this slot had), or keep both when none of them ever runs in the same place as this action (garden vs match)
 	var named := {}
 	for a in Settings.ACTIONS: named[String(a[0])] = "\"%s\"" % a[1]
-	var owners: Array = cf.map(func(c): return named.get(c[0], c[0]))
+	var cf: Array = Settings.conflicts(ev, an)
+	var may_share: bool = cf.is_empty()
+	var owners: Array = held if may_share else cf
+	var names: Array = []
+	for o in owners:
+		var nm: String = named.get(o[0], o[0])
+		if not names.has(nm): names.append(nm)
+	var who := " and ".join(names)
 	var mine: String = Settings.slots(an)[slot]
-	var txt := "%s is already the key for %s.\nSwap: they take %s, and this action gets %s." % [
-			Settings.code_text(Settings.ev_code(ev)), " and ".join(owners),
-			Settings.code_text(mine) if mine != "" else "no key (they are marked red until you set one)",
-			Settings.code_text(Settings.ev_code(ev))]
+	var gets: String = Settings.code_text(mine) if mine != "" else "no key (they are marked red until you set one)"
+	var txt := "%s is already the key for %s.\nSwap them (%s takes %s)" % [Settings.code_text(code), who, who, gets]
+	if may_share:
+		txt += ", or keep both: they never run in the same place."
+	else:
+		txt += ". They run in the same place, so pick another key or swap."
+	bind_hot = [[an, slot]] + owners
 	_show_settings()
-	set_meta("bind_conflict", UI.confirm(root, "Key already in use", txt, "Swap", func():
-		Settings.swap_bind(an, slot, ev, cf)
-		_show_settings(), false))
+	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
+		Settings.swap_bind(an, slot, ev, owners), false)
+	layer.tree_exited.connect(func():
+		bind_hot = []
+		if is_inside_tree(): _show_settings())
+	set_meta("bind_conflict", layer)
+	if not may_share: return
+	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
+	var both := UI.ghost("Keep both", func():
+		layer.queue_free()
+		Settings.rebind(an, ev, slot))
+	row.add_child(both)
+	row.move_child(both, 1)
 
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
