@@ -245,8 +245,13 @@ func _dolm_rocks(m: Match) -> void:
 			var mat: Material = (mi as MeshInstance3D).material_override
 			if mat is ShaderMaterial:
 				var sm := mat as ShaderMaterial
-				var hues: Array = [sm.get_shader_parameter("glow"), sm.get_shader_parameter("rim_col")]
-				if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r > c.b):
+				# the rock's own shader (glow, rim, heat) or a KitLooks.shade_mat haze (cel_tint's color)
+				var hot := false
+				for p: String in ["glow", "rim_col", "color"]:
+					var c: Variant = sm.get_shader_parameter(p)
+					hot = hot or (c is Color and (c as Color).r > (c as Color).b)
+				var heat: Variant = sm.get_shader_parameter("heat")
+				if hot or (heat != null and float(heat) > 0.0):
 					warm.append(kind)
 			elif mat is StandardMaterial3D:
 				var c := (mat as StandardMaterial3D).albedo_color
