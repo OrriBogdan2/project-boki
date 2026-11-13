@@ -99,7 +99,8 @@
 			"upper": "moving"
 		},
 		"breah_spine": {
-			"clip": "x_spine"
+			"clip": "x_spine",
+			"upper": "moving"
 		},
 		"mf_xform": {
 			"clip": "fuse"

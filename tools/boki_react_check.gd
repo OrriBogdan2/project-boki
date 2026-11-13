@@ -87,7 +87,7 @@ class Subject:
 	func step() -> void:
 		pup._process(STEP)
 		if rig:
-			rig.player.advance(STEP)
+			rig.advance(STEP)
 			rig._process(STEP)
 
 	## Flex-space spot of every part (primitive bodies) or bone (rigged).

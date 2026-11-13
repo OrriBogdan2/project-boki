@@ -6,6 +6,7 @@ extends RefCounted
 ## Never touches the save.
 
 const DOC := "res://docs/ANIM_COVERAGE.md"
+const Shots := preload("res://tools/boki_rig_shots.gd")
 const ANIM_DIR := "res://content/rules/warden_anim/"
 const BEGIN := "<!-- table:begin -->"
 const END := "<!-- table:end -->"
@@ -91,14 +92,29 @@ func _hunter_row(art: String) -> Array:
 
 ## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits and landings spring
 ## KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side (Kin.render).
+## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])
 	var flinch := func(file: String, call: String) -> String:
 		return "proc" if FileAccess.get_file_as_string(file).contains(call) else "missing"
+	var kin_src := FileAccess.get_file_as_string("res://scripts/match/kin.gd")
+	var jump := _cell(clips.has("hop") and kin_src.contains('set_meta("kact", "hop" if airborne'), false)
 	return [_cell(clips.has("idle")), _cell(clips.has("walk")), _cell(clips.has("run")), _cell(clips.has("attack")),
-		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("), "proc", _cell(clips.has("hop")),
+		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("), "proc", jump,
 		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing", "missing",
 		_cell(clips.has("ability")), "missing"]
+
+## The live rig: a Boki in the air (kact hop) plays its hop clip, and the run clip once the hop clip is gone.
+func _boki_air(main: Node, id: String) -> void:
+	var k: Node3D = Shots.rigged_kin(id)
+	main.add_child(k)
+	await main.get_tree().process_frame
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	k.set_meta("kact", "hop")
+	ok(rig._state_clip() == "hop", "%s plays hop in the air, not %s" % [id, rig._state_clip()])
+	rig.player.get_animation_library("").remove_animation("hop")
+	ok(rig._state_clip() == "run", "%s without a hop clip runs in the air, not %s" % [id, rig._state_clip()])
+	k.free()
 
 func _table(cols: Array, rows: Dictionary) -> String:
 	var s := "| | %s |\n|---|%s\n" % [" | ".join(cols), "---|".repeat(cols.size())]
@@ -125,6 +141,7 @@ func run(main: Node) -> void:
 	var bokis := {}
 	for id in ["burrlet", "cindle", "puddlet"]:
 		bokis[id] = _boki_row(id)
+		await _boki_air(main, id)
 	hunters.sort()
 	var block := "%s\n### Hunters\n\n%s\n### Starter Boki\n\n%s%s" % [
 		BEGIN, _table(HUNTER_COLS, hunters), _table(BOKI_COLS, bokis), END]
