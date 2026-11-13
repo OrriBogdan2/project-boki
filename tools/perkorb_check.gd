@@ -123,6 +123,7 @@ func _drops() -> void:
 	var w: Mob = m.spawn_mob("warden", P.pos + Vector3(10, 0, -6))
 	if w != null:
 		m.on_mob_dead(w, P, {})
+		for i in 60: m.step(Match.DT)      # (the fan spills once the body has dissolved)
 		ok("killing the Warden drops a fan of three", PerkOrbs.list(m).size() == k3 + 3, str(PerkOrbs.list(m).size() - k3))
 	else:
 		ok("killing the Warden drops a fan of three", false, "no warden")

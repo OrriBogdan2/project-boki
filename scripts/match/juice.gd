@@ -181,7 +181,6 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 	m.fx.flash(c, col.lerp(Color.WHITE, 0.5), 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.3), 12 if not big else 22, 8.0 if not big else 11.0, 80.0, 0.3, 14.0, 1.0 if not big else 1.4)
 	if big:
-		m.fx.ring(mb.pos, 3.0, Color(col, 0.85), 0.4)
 		m.fx.dust(mb.pos, 12)
 		if credit == p:
 			m.freeze_frame(0.05)

@@ -238,6 +238,7 @@ const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
 var wall_impact: WallImpact     # the crack decals where a wall stun landed
+var ash := 0                   # dissolve ash particles emitted so far (checks read it)
 var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
 
 ## A particle burst: an effect that marks a hit or a blast, never plain movement (dust is for that).
@@ -273,6 +274,12 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 func _ground_under(at: Vector3) -> float:
 	var m := get_parent() as Match
 	return m.world.ground_at(at.x, at.z) if m else NO_GROUND
+
+## Ash drifting up off something that is dissolving. Not a blast, so it is not counted in `radial`.
+func motes(at: Vector3, col: Color, amount: int) -> void:
+	if not own_look:
+		ash += maxi(3, int(round(amount * particles)))
+		_emit(at, col, amount, 1.6, 0.8, -2.0, 0.9, Vector3.UP, 70.0)
 
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8, col := Color(0.82, 0.8, 0.72, 0.9)) -> void:
