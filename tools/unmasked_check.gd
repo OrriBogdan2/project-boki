@@ -237,6 +237,7 @@ func _sole_y(m: Node3D) -> float:
 ## Item 81: at every height, build and sex the soles rest on the ground, standing and across a walk cycle.
 func _feet(main: Node) -> void:
 	var worst := 0.0
+	var worst_body := ""
 	var cases := 0
 	var per := {}
 	var tree := main.get_tree()
@@ -257,12 +258,14 @@ func _feet(main: Node) -> void:
 				for y in lows:
 					body_worst = maxf(body_worst, absf(y))
 				per[[g, h, b]] = body_worst
-				worst = maxf(worst, body_worst)
+				if body_worst > worst:
+					worst = body_worst
+					worst_body = "sex %d height %d build %d" % [g, h, b]
 				cases += 1
 				m.free()
 				await tree.process_frame
 	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
-		+ "walking (%d bodies, worst %.1f cm)") % [cases, worst * 100.0])
+		+ "walking (%d bodies, worst %.1f cm, %s)") % [cases, worst * 100.0, worst_body])
 	for body in WORST_FEET:
 		ok(float(per[body]) <= FOOT_TOLERANCE, "%s, %s, %s: feet on the ground (%.1f cm)" % [
 			Unmasked.SEXES[body[0]], Unmasked.HEIGHTS[body[1]], Unmasked.BUILDS[body[2]], float(per[body]) * 100.0])
