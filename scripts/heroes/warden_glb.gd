@@ -97,6 +97,7 @@ const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera 
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
+const POSE_HELD := "pose_held"   # root meta: the frame the Hunter skipped its pose in (SimLod.pose_every)
 const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
@@ -1020,10 +1021,12 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
-		if pace.every > 1:
-			dt = pace.step(dt, RigPace.is_lead(get_viewport(), root.global_position))
-			if dt == 0.0:
-				return
+		if int(root.get_meta(POSE_HELD, -1)) == Engine.get_process_frames():
+			pace.held += dt        # SimLod.pose_every held this Hunter's pose: the next step catches the time up
+			return
+		dt = pace.step(dt, pace.every == 1 or RigPace.is_lead(get_viewport(), root.global_position))
+		if dt == 0.0:
+			return
 		if clips:
 			_play(dt)
 			springs.still = clips.cur in clips.d.get("still", [])
@@ -1056,9 +1059,24 @@ class Sync extends Node:
 				return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
 		return nd.global_transform
 
+	## Every mapped bone onto its rig node's pose. Each local pose is worked out against its parent's pose as set (a
+	## pose keeps no shear, so that can differ from the rig's), kept here, not read back from the skeleton: a global
+	## pose read after a set recomputed the dirty bones and told every BoneAttachment3D, once per mapped bone.
 	func apply() -> void:
+		var real := {}
 		for l in links:
-			skel.set_bone_global_pose(int(l[0]), _rig_pose(l))
+			var bi := int(l[0])
+			var par := _real(skel.get_bone_parent(bi), real)
+			skel.set_bone_pose(bi, par.affine_inverse() * _rig_pose(l))
+			real[bi] = par * skel.get_bone_pose(bi)
+
+	## A bone's skeleton-space pose as set this frame: from real, else its parent's times its local pose (kept in real).
+	func _real(bi: int, real: Dictionary) -> Transform3D:
+		if bi < 0:
+			return Transform3D.IDENTITY
+		if not real.has(bi):
+			real[bi] = _real(skel.get_bone_parent(bi), real) * skel.get_bone_pose(bi)
+		return real[bi]
 
 	func _rig_pose(l: Array) -> Transform3D:
 		var now := WardenGlb.model_xf(root, l[1])
@@ -1274,7 +1292,9 @@ class Springs:
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
 				var q := Quaternion.IDENTITY
-				if c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
+				if from.is_zero_approx() or to.is_zero_approx():
+					pass      # two joints on one point (a teleport, a floor clamp): no turn, and no zero-vector error
+				elif c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
 					var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
 					q = Quaternion(from.cross(side).normalized(), PI)
 				elif c < 0.99999:

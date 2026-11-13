@@ -883,7 +883,7 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 	match e.type:
 		"shield":
 			if "shield" in t:
-				t.set("shield", maxf(float(t.get("shield")), float(pr["amount"]) * k * weak))
+				ShieldSrc.give(t, float(pr["amount"]) * k * weak, ShieldSrc.BOKI)
 				if "shield_t" in t: t.set("shield_t", maxf(float(t.get("shield_t")), float(pr["duration"])))
 			m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", t.pos, -3.0)
