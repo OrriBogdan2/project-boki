@@ -40,7 +40,7 @@ func _hunters() -> void:
 		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
 		ok(ld.tip != "" and ld.TIPS.has(ld.tip), "%s: a tip from the tip set" % ak)
-		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
+		ok(ld.title != "", "%s: the map's name (%s)" % [ak, ld.title])
 		ld.free()
 		var calm: Node = load(LOADING).new()
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})

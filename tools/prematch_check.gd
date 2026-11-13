@@ -4,8 +4,8 @@ extends RefCounted
 ## gets a random untaken one, then the lock; online picking waits for the whole lobby to load, teammates'
 ## picks only count on their turn, a lost or gone teammate is picked for. Also the admin toggle (Settings
 ## lobby_enabled) and which matches get a lobby, the squad the loading screen shows, the options the match
-## starts with, bot fill-ins never doubling a squadmate, chat lines, the voice hook, and the screen
-## (the turn banner, the declutter cards, the safe margin).
+## starts with, bot fill-ins never doubling a squadmate, chat lines, the voice hook, Lock in, and the screen
+## (the turn banner, the portrait roster, the hovered Hunter's big view, the safe margin).
 
 var bad := 0
 const EXPEDITION := {"teams": 10, "squad": 2, "tier": 0}
@@ -75,6 +75,12 @@ func _turns() -> void:
 	idle.tick(Prematch.TURN + 0.01)
 	var auto_ok := idle.locked and ClassUnlock.is_open(idle.pick)
 	ok(auto_ok, "a turn that runs out gives you a random open Hunter (%s)" % idle.pick)
+	var quick := Prematch.new({"teams": 10, "squad": 1, "tier": 0, "seed": 4})
+	quick.tick(0.01)
+	ok(not quick.lock_in(), "Lock in needs a pick first")
+	quick.choose("gunslinger")
+	var early := quick.lock_in() and quick.locked and quick.pick == "gunslinger"
+	ok(early and quick.turn_left > Prematch.TURN - 0.1, "Lock in ends your turn at once with your pick")
 
 ## A save's first lobby: on your turn the note says what 0:00 does, then that the squad sees the pick; once.
 func _first_lobby() -> void:
@@ -276,30 +282,38 @@ func _screen(main: Node) -> void:
 	view.pm.tick(Prematch.TURN + 0.01)
 	view._tick_label()
 	ok(view.pm.locked and view.caption.text == "PICKS LOCKED", "once the squad has picked the banner says so")
-	var note: String = view.note_label.text
-	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
+	ok(view.hero_name.text == HeroTitle.base_name("bulwark"), "once locked the big view shows your pick")
+	ok(view.lock_btn.disabled and view.lock_btn.text == "Locked in", "Lock in is spent once your pick is in")
 	view.set_process(false)
 	view.queue_free()
 
-## Cards are portrait + name + role word (stats and quests on hover); shut ones are dim with a padlock; the
-## voice button waits for a human squadmate.
+## Roster tiles are a portrait only (name, role, stats and quest on hover); shut ones are dim with a padlock;
+## hovering a tile shows that Hunter big with its ability icons; Lock in waits for a pick; the voice button
+## waits for a human squadmate.
 func _declutter(view: Control) -> void:
 	var padlock = view.get_script().Padlock
 	var open := 0
 	var shut_ok := true
 	for card in view.grid.get_children():
 		var ak: String = card.get_meta("arch")
-		var role := String(Arch.def(ak)["card"]["role_word"])
-		var texts: Array = card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+		var texts: Array = card.find_children("*", "Label", true, false)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)
 		open += 0 if shut else 1
 		var quest := "Locked: " + ClassUnlock.requirement(ak)
-		var plain: bool = texts.size() == 2 and texts[0] == HeroTitle.base_name(ak) and texts[1].begins_with(role)
 		var tip: String = card.tooltip_text
-		var tip_ok := tip.contains("health") and (not shut or tip.begins_with(quest))
-		shut_ok = shut_ok and plain and lock == shut and tip_ok
-	ok(open == 2 and shut_ok, "each card is name + role word, shut ones have a padlock, hover has stats and quest")
+		var named := tip.contains(HeroTitle.base_name(ak)) and tip.contains("health")
+		var tip_ok := named and (not shut or tip.begins_with(quest))
+		shut_ok = shut_ok and texts.is_empty() and lock == shut and tip_ok
+	ok(open == 2 and shut_ok, "roster tiles are portraits, shut ones padlocked, hover has name, stats, quest")
+	ok(view.lock_btn.disabled, "Lock in waits until you pick")
+	view._hover_on("mage")
+	var icons: int = view.ability_row.get_child_count()
+	var hover_ok: bool = view.shown_hunter() == "mage" and view.hero_name.text == HeroTitle.base_name("mage")
+	var one_each := icons == KitCard.slots_of("mage").size()
+	ok(hover_ok and one_each, "hovering a tile shows that Hunter big, one icon per ability")
+	ok(view.hero_role.text.begins_with("Locked: "), "a shut Hunter's line says how to open it")
+	view._hover_on("")
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])

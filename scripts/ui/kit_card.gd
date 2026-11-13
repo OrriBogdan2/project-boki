@@ -22,7 +22,7 @@ const ICON_FIX := {"quill_rifle": "rifle", "coilcaster": "burst_rifle", "longbow
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
 ## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
 ## ultimate on its "x" tile.
-static func _cap(slot: String) -> String:
+static func key_cap(slot: String) -> String:
 	if slot == "x":
 		return Settings.key_cap("hunter_ult")
 	if slot == "r":
@@ -124,7 +124,7 @@ func _row(slot: String) -> Control:
 	p.add_child(row)
 	var kc_box := CenterContainer.new()
 	kc_box.custom_minimum_size = Vector2(64, 0)
-	var cap := _cap(slot)
+	var cap := key_cap(slot)
 	kc_box.add_child(UI.keycap(cap, 14) if cap != "" else UI.label("PASSIVE", 12, UI.MUTED, UI.big))
 	row.add_child(kc_box)
 	var dot := UI.IconDot.new(String(info["icon"]), col, 40.0)
@@ -181,8 +181,8 @@ func _show_detail(slot: String) -> void:
 	top.add_theme_constant_override("separation", 10)
 	top.add_child(UI.IconDot.new(String(info["icon"]), col, 30.0))
 	top.add_child(UI.label(String(info["name"]), 24, UI.INK, UI.big))
-	if _cap(slot) != "":
-		var kc := UI.keycap(_cap(slot), 13)
+	if key_cap(slot) != "":
+		var kc := UI.keycap(key_cap(slot), 13)
 		kc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kc)
 	v.add_child(top)
@@ -378,7 +378,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var dot := UI.IconDot.new(String(info["icon"]), info["col"], 26.0)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		bv.add_child(dot)
-		var k := _cap(s) if _cap(s) != "" else "passive"
+		var k := key_cap(s) if key_cap(s) != "" else "passive"
 		var kl := UI.label(k, 10, UI.MUTED, UI.big)
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE

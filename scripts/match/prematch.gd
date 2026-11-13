@@ -200,6 +200,14 @@ func choose(ak: String) -> bool:
 	squad[turn]["arch"] = ak
 	return true
 
+## Lock in: ends your turn now with your pick (it goes out final, so teammates move on too). False off
+## your turn or before you picked.
+func lock_in() -> bool:
+	if not my_turn() or pick == "":
+		return false
+	_finish(pick)
+	return true
+
 ## A squadmate's pick from the lobby channel, only on their turn and only an untaken Hunter; `final`
 ## ends their turn. True when it changed something.
 func remote_pick(peer: String, ak: String, final: bool) -> bool:

@@ -1,7 +1,8 @@
 extends RefCounted
 ## --prematch-shots --size=WxH --shots-dir=<dir>: the pre-match lobby at the window's size, four moments
-## (full 30 s, after the first chat line, 4 s left in the red pulse, locked in), as <dir>/<W>x<H>_<moment>.png,
-## and the controls outside the safe margin. Run once per size with a real renderer:
+## (a fresh turn, after the first chat line, 2 s left in the red pulse, locked in), then the loading screen
+## that follows, as <dir>/<W>x<H>_<moment>.png, and the lobby's controls outside the safe margin.
+## Run once per size with a real renderer:
 ## godot -- --prematch-shots --size=1280x720 --shots-dir=out (--size resizes the window).
 
 const MOMENTS := [["full", 10.0], ["chat", 10.0], ["red", 2.0], ["locked", 0.0]]      # [name, s left on your turn]
@@ -56,6 +57,19 @@ func run(main: Node) -> void:
 		var win := main.get_window().size
 		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, m[0]])
 		main.get_viewport().get_texture().get_image().save_png(path)
-		var bad := outside(view, Rect2(Vector2.ZERO, Vector2(win)))
+		var bad := outside(view, view.get_viewport_rect())      # (UI scale: the logical rect, not the window)
 		print("PREMATCHSHOT %s outside the safe area: %d %s" % [path, bad.size(), bad.slice(0, 3)])
+	var lo: Dictionary = view.pm.launch_opts()
+	view.queue_free()
+	var ld: CanvasLayer = load("res://scripts/ui/loading.gd").new()
+	ld.setup(lo)
+	main.add_child(ld)
+	await ld.shown
+	ld.want = 0.6
+	ld.set_stage("spawn")
+	await tree.create_timer(1.0).timeout
+	var win := main.get_window().size
+	var path := dir.path_join("%dx%d_loading.png" % [win.x, win.y])
+	main.get_viewport().get_texture().get_image().save_png(path)
+	print("PREMATCHSHOT %s" % path)
 	tree.quit()
