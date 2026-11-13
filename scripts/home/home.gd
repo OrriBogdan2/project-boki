@@ -1033,7 +1033,7 @@ func _on_new_track(name: String) -> void:
 func _update_sky(d: float) -> void:
 	_update_music(d)
 	day_t = fmod(day_t + d / DAY_LEN, 1.0)
-	var sun_h := sin((day_t - 0.25) * TAU)            # 1 at noon, -1 at midnight
+	var sun_h := sin((HomeAmbience.clock_in(GardenZones.here, day_t) - 0.25) * TAU)  # 1 at noon, -1 at midnight
 	var light := clampf(sun_h * 1.6 + 0.6, 0.0, 1.0)   # how much daylight (night is short and moonlit)
 	var dusk := clampf(1.0 - absf(sun_h) * 3.0, 0.0, 1.0)
 	weather_t -= d

@@ -48,6 +48,11 @@ static func speed(rec: Dictionary) -> float:
 	return float(R["speed"]) * (1.0 + float(rec.get("stats", {}).get("focus", 0)) * float(R["speed_per_focus"]))
 
 
+## Does the hunt run by the night rules: it is night, or this zone's sky never leaves dusk?
+static func is_dark(day_t: float) -> bool:
+	return HomeWork.is_night(day_t) or rules()["night_zones"].has(GardenZones.here)
+
+
 ## The chance a sniff points the right way: Focus, curiosity, and the night for night types.
 static func right_p(rec: Dictionary, night: bool) -> float:
 	var R := rules()
@@ -258,7 +263,7 @@ func _hide(at: Vector2) -> void:
 	go(S.HUNT)
 	for k in pair:
 		k["busy"] = true
-	var night: bool = BaseRace.tweak("seek").get("night", HomeWork.is_night(h.day_t))
+	var night: bool = BaseRace.tweak("seek").get("night", is_dark(h.day_t))
 	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, night, RandomNumberGenerator.new(), _walkable)
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))

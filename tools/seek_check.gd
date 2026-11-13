@@ -3,6 +3,7 @@ extends RefCounted
 ##   1. 20 seeded hunts: a high-Focus Boki beats a no-Focus one in most of them (either side of the pair)
 ##   2. curiosity: a curious Boki beats an incurious one at equal Focus
 ##   3. night: a Spore Boki beats an identical plain Boki far more at night than by day
+##   3a. Hushwood (base_seek night_zones) hunts by the night rules at noon, a day zone does not
 ##   3b. the weekly 'night' format makes the hunt a night one by day too
 ##   4. friends and rivals: friends share a good sniff, rivals slow the slower one
 ##   5. a settled hunt: winner joy and trust up, loser sulks (less with a friend), both remember it, gems, bonds
@@ -120,6 +121,12 @@ func _night() -> void:
 		by_night >= by_day + NIGHT_GAP and by_night > 0.5,
 		"night favours Spore: %.0f%% of hunts by night, %.0f%% by day" % [by_night * 100.0, by_day * 100.0]
 	)
+	var was := GardenZones.here
+	GardenZones.here = "hushwood"
+	var dark_zone := BaseSeek.is_dark(DAY_T)
+	GardenZones.here = "bramblebank"
+	ok(dark_zone and not BaseSeek.is_dark(DAY_T), "Hushwood hunts by the night rules at noon, Bramblebank does not")
+	GardenZones.here = was
 
 
 ## The weekly format for Seek forces the night rule: the Spore Boki wins far more than by day, at any hour.
