@@ -14,7 +14,7 @@ const NEAR_R := 7.5      # m: tiles this close to the track know their nearest s
 static func _line(W: World, T: Dictionary) -> Array:
 	var out: Array = []
 	if not T.has("path"):
-		var c := W._v2(T.get("center", [W.w * 0.5, W.h * 0.5]))
+		var c := GroundShapes.v2(T.get("center", [W.w * 0.5, W.h * 0.5]))
 		var R := float(T.get("r", 30.0))
 		var n := int(ceil(TAU * R / W.TRAIN_STEP))
 		for k in n:
@@ -22,7 +22,7 @@ static func _line(W: World, T: Dictionary) -> Array:
 			out.append(c + Vector2(cos(ang), sin(ang)) * R)
 		return out
 	var P: Array = []
-	for q in T["path"]: P.append(W._v2(q))
+	for q in T["path"]: P.append(GroundShapes.v2(q))
 	var s := 0.0
 	var want := 0.0
 	for i in P.size():
@@ -39,7 +39,7 @@ static func _line(W: World, T: Dictionary) -> Array:
 static func _station_s(W: World, T: Dictionary, line: Array, st) -> float:
 	if not T.has("path"):
 		return fposmod(deg_to_rad(float(st)), TAU) * float(T.get("r", 30.0))
-	var p := W._v2(st)
+	var p := GroundShapes.v2(st)
 	var best := 0
 	var bd := INF
 	for k in line.size():
