@@ -285,6 +285,7 @@ func _data() -> void:
 	# ability of every archetype has a concrete rank 2: a cooldown "a -> b" or a damage "+N%" (the source's
 	# upgrade numbers, rank_cd / rank_dmg: many are damage only)
 	var rk_ok := true
+	var pct := RegEx.create_from_string("[+-]\\d+%")
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
 			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)

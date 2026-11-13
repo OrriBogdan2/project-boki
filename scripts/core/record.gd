@@ -1,11 +1,12 @@
 class_name Record
 extends RefCounted
 ## Recording mode, for filming the game (F10, rebindable in Settings > Controls; the switch is also in
-## Settings > Gameplay; `--record` starts in it). Purely visual: nothing in gameplay or networking
+## Settings > Demo; `--record` starts in it). Purely visual: nothing in gameplay or networking
 ## reads it, so a match plays the same with it on or off.
 ##   level 0  off
 ##   level 1  clean: debug, perf and test text, tips, hint banners and dev toasts hidden; the player
-##            HUD stays, and the camera follows more smoothly (gentle damping, no zoom pops, little shake)
+##            HUD stays, the camera follows more smoothly (gentle damping, no zoom pops, little shake), and
+##            frames are paced for capture: v-sync on and a 60 fps cap, whatever Settings > Video says
 ##   level 2  cinema: no HUD at all (a second press, or Shift+F10 straight from anywhere), and F9
 ##            turns a slow orbit of the camera on and off
 ## Built nodes register with hide_in_clean(node) or hide_in_cinema(node); the HUDs drawn every frame
@@ -20,6 +21,7 @@ const GROUP_CLEAN := "rec_hide_clean"
 const GROUP_CINEMA := "rec_hide_cinema"
 const ORBIT_SPEED := 0.14          # rad/s: a full turn in about 45 s
 const NAMES := ["Off", "Clean HUD", "No HUD"]
+const REC_FPS := 60                # frames/s cap while recording: an even 60 for the capture
 
 static func clean() -> bool:
 	return level >= 1
@@ -31,6 +33,16 @@ static func set_level(n: int) -> void:
 	level = clampi(n, 0, 2)
 	if level < 2:
 		orbit = false
+	Settings.apply("max_fps")
+	Settings.apply("vsync")
+
+## The frame cap in force: REC_FPS while recording, else the player's (0 = none).
+static func frame_cap(user: int) -> int:
+	return REC_FPS if clean() else user
+
+## V-sync in force: always on while recording, else the player's.
+static func vsync(user: bool) -> bool:
+	return user or clean()
 
 ## F10: off -> clean -> no HUD -> off.
 static func cycle() -> void:
