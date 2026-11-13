@@ -144,7 +144,7 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 | The pull lasts until arrival or 3s | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
 | It scoops up wisps along its path | built (downed hunters it passes are reeled in too) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 | Only the dash and the air dash can be used while pulling | built | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
-| He holds his height from the throw to the end of the reel; slow walk while the hook flies out | built (20%, `CastHold`) | owner item 31 | no |
+| He holds his height from the throw to the end of the reel; slow walk while the hook flies out | built (20%, `CastHold`); thrown mid-jump (owner playtest 11-10) the air steers and the speed he brought carries, up to his run (a dash's extra bleeds under the air drag as without the hand); from a standstill in the air the same 20% drift. Jump back + hand at the top: 3.84 m/s at the miss (a plain jump 3.84; was 0.93), 5.46 m to the landing (plain jump 3.86); asserted `hand mid-jump` | owner item 31 | no |
 | The caster is Grounded while reeling; the target is stunned for the pull | built | footage | yes (0127) |
 | Enemies are briefly Grounded on arrival | not built (the owner's tooltip data has no such rule; the Anchor still grounds) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | yes |
 | The dash goes further in the air and has its own cooldown there | built (class air dash x1.35) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
