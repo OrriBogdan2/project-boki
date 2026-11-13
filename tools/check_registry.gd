@@ -327,6 +327,10 @@ const CHECKS := {
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
+	# the same with one dummy moved around: reach, lane and arc to 0.1 m / 3 degrees
+	"--hit-shape-fine": ["res://tools/hit_shape_fine.gd", "hit_shape_fine", null],
+	# the same inputs fired at a field of dummies with their hit circles, at the gameplay camera
+	"--hit-shape-shots": ["res://tools/hit_shape_shots.gd", "hit_shape_shots", null],
 	# kit hits on Boki (BokiHit)
 	"--boki-hit-table-check": ["res://tools/boki_hit_table_check.gd", "boki_hit_table_check", null],
 	"--hitbox-size-shots": ["res://tools/hitbox_size_shots.gd", "hitbox_size_shots", null],

@@ -9,7 +9,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 **What was and was not verified.**
 - Numbers, modes and code paths were read from main. The Nov 3 audit (briefs/specs/kit-audit) is stale: many of its gaps are closed, and rows here were re-checked against main before use. `ext/online-displace` and `ext/no-shake` are merged, so the online pull bug and self-shake are closed.
 - All 12 `--<hero>-combo-check` runs pass: 1,560 PASS, 0 FAIL. They assert our spec, not the source, so a pass is not parity proof.
-- **Animation timing was not re-measured frame by frame.** Animation rows report clip coverage (computed from kit code, `warden_anim/*.json` and each GLB) plus timings already recorded in docs/heroes. Hitbox rows use content numbers; no in-game overlay run was done.
+- **Animation timing was not re-measured frame by frame.** Animation rows report clip coverage (computed from kit code, `warden_anim/*.json` and each GLB) plus timings already recorded in docs/heroes. Hitbox rows use content numbers; the in-game hit shapes of Vex, Kael, Lace and Cinder were then measured and shot with the hitbox circles (section "Hit shapes in game"), the other eight were not.
 - `[?]` marks a row carried from a hero doc that I could not settle from code here.
 
 **Every Hunter, shared:**
@@ -69,6 +69,42 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 Second pass (2026-11-11): the open Meeko, Grimble, Neve, Motley, Albert and Sable rows above are settled or marked not determinable from the hero-ref sheet measures (the frames behind them, 1 bh = 1.8 m); settled numbers are locked in `content/rules/kit_parity.json`.
 
 Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
+
+## Hit shapes in game: Vex, Kael, Lace, Cinder (main 88b06b9e7, 2026-11-12)
+
+How: `--hit-shape-fine` (tools/hit_shape_fine.gd) fires each input of the four hunters at ONE training dummy moved around, in a match stepped at the game's 60 Hz, level 6 (rank 3 numbers apply): a scan along the aim line gives the nearest and farthest foe centre that still takes damage, a scan across the middle gives the lane, a scan round it the arc; the numbers below have the foe's circle taken off. `--hit-shape-shots` (tools/hit_shape_shots.gd) fires the same inputs at a field of dummies, each wearing its ground circle (its hitbox), at the gameplay camera: strips in `docs/shots/verify-hitbox-slice/`. Ours = `content/archetypes/<id>.json`; source = `briefs/supervive-data/supervive_kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m).
+
+What the game does with a number (so a row reads straight): areas (cone, ring, strip, disc, lane of a beam) take a foe in when its body circle, 0.40 m, touches them, so measured = content to 0.15 m. Bullets, hooks and swing rays take it in at body circle + 0.08 m + their own radius; a bullet starts 0.6 m ahead of the hunter and lives to the end of the 1/60 s step in which its range runs out (74 m/s: +1.2 m, 90 m/s: +1.5 m); a swing is a fan of 7 or 9 such rays 0.22 m wide, so its arc reads about 30 degrees wider than the drawn one (175 reads 206).
+
+| Hero | Move | Ours | Measured in game | Source | Verdict |
+|---|---|---|---|---|---|
+| Vex | LMB rifle | range 11, bullet 0.13 | reach 11.9, lane 0.24 (11 + 0.13 + 0.6 start, then the step) | no number; tracers ~1.5 bh, reach not seen | match; source gap |
+| Vex | RMB Burr | range 10.5, lane 0.72, cone 6 at 100 deg | lane reach 11.1, cone flank 6.1 from the stick point; angle not isolated (a lone foe leaves the cone by its length first) | 5-6 bh (9-10.8), 0.4 bh (0.72), cone 3.5 bh at 100 | match |
+| Vex | E Longneedle | range 18, beam 1.8 wide (JSON `width` 0.9 is the half) | reach 18.0, lane 1.8 | 10+ bh (18+), 0.5 bh (0.9) thick | match; width 2x source (owner item 68) |
+| Vex | R Cinderfall | range 14, radius 3.4 | disc centre 14.0 (cursor clamped), radius 3.4 | clamp not seen, disc 1.8-2 bh (3.2-3.6) | match; clamp [?] |
+| Kael | LMB sword | reach 3.1, arc 175 | reach 3.7, arc of centres 206 (ray 0.22 + circle) | ~180 deg, radius 1.8 bh (3.2) | match (-4%, -3%) |
+| Kael | LMB hold, Searing Wave | range 7 to 14, size 0.3 to 0.6, 36 m/s | full charge: reach 14.4, lane 1.14 | flies 20 bh/s (36), reach no number | match; reach gap |
+| Kael | RMB tap, Smash | radius 4, 70 deg | reach 4.0, angle 70 | 2.4 bh (4.3), a lane not a cone | match; angle and lane width [?] |
+| Kael | RMB hold, Lunge | 4.5 to 7.5 | full charge: reaches 8.6 with the body (7.5 + circles) | 5 flat | differ (owner: release flings far) |
+| Kael | E Warchain | range 13 | reach 14.2 (13 + hook + step), lane 0.44 | 7 bh (12.6) | match |
+| Kael | R Riposte | strip 3.6 x 1.8 from where he planted | length 3.6, width 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match; the drawn lane and the hit read one field |
+| Lace | LMB, Empowered | range 12, arrow 0.18 | reach 13.7 (12 + 0.2 + 0.6 start + step) | lands at the cursor, ~6 bh (10.8) seen | match |
+| Lace | LMB, Supercharged | range 16 | reach 18.1 | no number | match; source gap |
+| Lace | RMB Heavy Shot | 14 (+3 at rank 3), size 0.3 | reach 18.5 at rank 3 (17 + 0.6 + step) | gold bar ~2 bh while held; range not seen | match; range [?] |
+| Lace | E Hail Wall | reach 9, 120 deg, 1.8 deep | wall centre 9.0, arc 125 | 120 deg, centre at the cursor (8-10.8) | match |
+| Lace | R Starpiercer | range 18, width 0.5 | reach 20.4 (18 + 0.6 + 1.5 step), lane 0.5 | ~1.5x normal range (1.5 x 12 = 18) | match |
+| Cinder | LMB flame | range 6.1, width 0.65 to 2.85 | reach 6.8, fan 1.8 wide at 4 m (2.8 in foe centres) | ~4 bh (7.2) whatever the cursor; 0.3 bh to 1-1.5 bh wide | match; reach -15% to source |
+| Cinder | RMB Cinder Shot | range 14, size 0.3 | reach 13.9 | flew 6-8 bh (10.8-14.4); a miss ended at the cursor (11.7) | match; always-full-range vs ends at cursor [?] |
+| Cinder | E Furnace Cloak | radius 4.5 | radius 4.5 | 2.5 bh (4.5) | match |
+| Cinder | R Flue Flight | 12.6 m/s for 1.8 s, carpet 1.8 | carpet along the whole 22 m, lane 1.8 | 7 bh/s (12.6) for 1.3-1.4 s (16-18), carpet 1 bh | match; flight 26-40% longer (owner item 20) |
+
+**Result:** 20 moves, no plain mismatch between what the game draws, what it hits and what the content says, so no kit was changed. The follow-ups are all source gaps:
+1. Kael's sword has two numbers: `greatsword.json` says range 3.4, arc 160, the kit draws and hits `lmb` reach 3.1, arc 175 (the first is what `--hit-shape-check` and HITBOX_SIZE.md read; it also feeds bot range). One of them should go.
+2. Cinder's flame is 6.1 m against the footage's 4 bh (7.2); the far end is 2.85 wide against 1.8-2.7.
+3. Cinder Shot always flies 14 m; the footage shows a miss ending at the cursor (11.7 m) once, with no clamp read. The card says "long-range".
+4. Open source numbers, nothing to compare yet: Vex R range clamp, Kael slam lane width and wave range, Lace Supercharged and Heavy Shot max range, the Hail Wall depth.
+5. Already filed above for the owner: Kael lunge, Vex needle width, Cinder flight.
+6. The coarse `--hit-shape-check` reads swings and cones short (a ray stops at the first dummy of the grid, 20 Hz steps): Kael LMB there is 1.6 m / 113 deg against 3.7 / 206 here. Use `--hit-shape-fine` for those four heroes' areas.
 
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
