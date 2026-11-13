@@ -63,7 +63,7 @@ static func tip(p: Hunter, i: int) -> Array:
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
 		out.append([Gear.WORN_NAMES[i] + " (empty)", Color("a2a8bb")])
 		var what: String = "a glove" if i < 2 else Gear.SLOT_NAMES[i].to_lower()
-		var where := "Find %s in chests, vaults, on guards and bosses, or bring it from your armory." % what
+		var where := "Find %s in chests, vaults, on guards and bosses, or bring it from your gear shed." % what
 		out.append([where, Color("a2a8bb"), 13])
 		return out
 	var it := Loot.gear(String(g["id"]), int(g["rar"]))

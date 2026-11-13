@@ -738,7 +738,7 @@ func open_shrine() -> void:
 const ARM_TABS := {"Gloves": [0, 1], "Boots": [3]}
 
 func open_armory() -> void:
-	var v: VBoxContainer = h._new_panel("Armory", 960, true)
+	var v: VBoxContainer = h._new_panel("Gear Shed", 960, true)
 	var items: Array = Econ.armory().duplicate()
 	items.sort_custom(func(a, b): return Loot.value(a) > Loot.value(b))
 	var counts := {"Treasure": _treasure_n(), "Utility": _utility_n(), "Backpacks": HomeBackpacks.count()}
@@ -807,7 +807,7 @@ func _upgrade_btn(which: String, what: String, now: int, caps: Array) -> Control
 		h._refresh_top()
 		open_armory(), 0, "plus")
 	b.disabled = int(Save.d["gems"]) < int(c[0]) or int(Save.d.get("scrap", 0)) < int(c[1])
-	b.tooltip_text = "More room in the armory: %d gems and %d scrap" % [int(c[0]), int(c[1])]
+	b.tooltip_text = "More room in the gear shed: %d gems and %d scrap" % [int(c[0]), int(c[1])]
 	return b
 
 func _loadout_line() -> String:
@@ -815,7 +815,7 @@ func _loadout_line() -> String:
 	for sl in Econ.LOADOUT_SLOTS:
 		var g := Econ.loadout(sl)
 		if not g.is_empty(): bits.append(Loot.name_of(g))
-	return ", ".join(bits) if not bits.is_empty() else "nothing from the armory"
+	return ", ".join(bits) if not bits.is_empty() else "nothing from the gear shed"
 
 func _in_loadout(it: Dictionary) -> String:
 	for s in Econ.LOADOUT_SLOTS:
@@ -958,13 +958,13 @@ func _treasure(v: VBoxContainer) -> void:
 			Sfx.play("unlock"); h._toast("+%d gems" % g); Save.save_game(); h._refresh_top(); open_armory(), 380))
 
 # ------------------------------------------------------------------ the expedition panel
-## "From your armory" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
+## "From your gear shed" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.
 func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 	HomeBelt.rows(parent, reopen, h.exp_tier)
 	HomeBackpacks.row(parent, reopen, h.exp_tier)
 	if not Save.has_building("armory") and Econ.armory().is_empty():
 		return
-	parent.add_child(UI.section("From your armory  (gloves and boots)"))
+	parent.add_child(UI.section("From your gear shed  (gloves and boots)"))
 	var held := 0
 	for slot in Econ.LOADOUT_SLOTS:
 		var si := int(String(slot).substr(4))
