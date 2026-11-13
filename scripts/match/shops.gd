@@ -1,14 +1,16 @@
 class_name Shops
 extends RefCounted
-## In-match shops: vendors at the fixed spots a hand-made map lists (islands[].shops), each with a
-## stock theme (content/rules/shops.json, ShopStock). Walk up and press the use key to open the
-## panel (ShopPanel). Vendors sell for the gems a hunter picked up this run.
+## In-match shops: vendors at the fixed spots each region of a hand-made map lists (regions[].shops:
+## [x, z, stock theme]), each with a fixed stock that fits its region (content/rules/shops.json,
+## ShopStock). A spot that is not on the region's open ground (a re-drawn layout) moves to the
+## nearest open tile of that region (spot). Walk up and press the use key to open the panel
+## (ShopPanel). Vendors sell for the gems a hunter picked up this run.
 ##
 ## Online, the host keeps each row's `left`: a buyer sends "sbuy" [shop, row, buyer], the host
 ## answers every game with "sgot" [shop, row, buyer, left] (or "sno" when it was gone), and the buyer's
 ## own game hands over the item and takes the gems when it sees its own "sgot".
 ##
-## For other parts: Shops.list(m) -> vendors {idx, pos, theme, rows, node, island}; Shops.buy(m, h, v, i)
+## For other parts: Shops.list(m) -> vendors {idx, pos, theme, rows, node, region}; Shops.buy(m, h, v, i)
 ## -> "" or the reason it failed; Shops.legend_rows(m) -> what the full map shows.
 
 const BOB_HEIGHT := 0.12      # m: the lantern's bob
@@ -23,21 +25,49 @@ static func _st(m) -> Dictionary:
 		m.set_meta("shops", {"list": [], "pending": {}, "panel": null, "vendor": null})
 	return m.get_meta("shops")
 
-## Stands every vendor the map lists and stocks them (not in the arena, duels or training).
+## Stands every vendor the map's regions list and stocks them (not in the arena, duels or training).
 static func build(m) -> void:
 	var s := _st(m)
 	(s["list"] as Array).clear()
 	if m.opts.get("arena", false) or m.opts.get("duel", false) or m.opts.get("training", false):
 		return
-	for ii in m.world.islands.size():
-		for sp in m.world.islands[ii].get("shops", []):
-			var v := {"idx": (s["list"] as Array).size(), "pos": sp["pos"], "theme": String(sp["theme"]), "island": ii}
+	for reg in m.world.regions:
+		for sp in reg.get("shops", []):
+			var at := spot(m.world, reg, sp)
+			if at == Vector3.INF:
+				push_warning("Shops: no open ground for %s's shop near %s" % [reg["id"], sp])
+				continue
+			var v := {"idx": (s["list"] as Array).size(), "pos": at, "theme": String(sp[2]),
+				"region": String(reg["id"])}
 			v["rows"] = ShopStock.stock_of(String(v["theme"]))
 			var n := ShopModels.stall(String(v["theme"]))
-			n.position = v["pos"]
+			n.position = at
 			m.add_child(n)
 			v["node"] = n
 			(s["list"] as Array).append(v)
+
+## Where a region's shop stands: its listed [x, z] tile, or the nearest open tile of the region's own
+## islands within snap_tiles (rings outward, the same order every game). INF when there is none.
+static func spot(w: World, reg: Dictionary, sp: Array) -> Vector3:
+	var isles := {}
+	for ii in w.islands.size():
+		if (reg.get("islands", []) as Array).has(String(w.islands[ii].get("id", ""))):
+			isles[ii] = true
+	var x0 := int(sp[0])
+	var z0 := int(sp[1])
+	for r in int(ShopStock.rules().get("snap_tiles", 10)) + 1:
+		for dz in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dz)) == r and _open(w, x0 + dx, z0 + dz, isles):
+					return Vector3(x0 + dx + 0.5, w.ground_at(x0 + dx + 0.5, z0 + dz + 0.5), z0 + dz + 0.5)
+	return Vector3.INF
+
+## Plain ground of one of these islands: no wall, rock or stair on it.
+static func _open(w: World, x: int, z: int, isles: Dictionary) -> bool:
+	if not w.inb(x, z):
+		return false
+	var i := w.idx(x, z)
+	return w.kind[i] == World.T_GROUND and isles.has(w.island[i]) and not w.authored_stairs.has(i)
 
 static func update(m, dt: float) -> void:
 	var s := _st(m)

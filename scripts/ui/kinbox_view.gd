@@ -66,7 +66,7 @@ func _build() -> void:
 	ph.add_child(tabs)
 	ph.add_child(UI.button("›", func(): page = (page + 1) % KinBox.PAGES; renaming = false; refresh(), 34))
 	bc.add_child(ph)
-	var gc := UI.card(Color(0.07, 0.07, 0.12, 0.9), 8, 12)
+	var gc := UI.card(Color(UI.NIGHT, 0.9), 8, 12)
 	UI.set_card_border(gc, Color(Color("bfa6ff"), 0.25), 1)
 	grid = GridContainer.new()
 	grid.columns = COLS
@@ -394,10 +394,8 @@ func _build_detail() -> void:
 	var rec := Save.kin(sel)
 	if rec.is_empty():
 		detail.add_child(UI.section("The Boki Burrow"))
-		for t in ["Your farm has room for %d Boki. Everyone else sleeps here, safe and warm: Boki in the burrow don't get hungry, don't need looking after and don't wander." % KinBox.farm_cap(),
-				"Click a Boki to see it. Drag it to the farm, into a box, or onto another Boki to swap them. Right click sends it straight across.",
-				"New Boki go to the farm when there's room. Repeats of a kind you already have out go to the burrow, unless they shimmer or carry a rare mutation.",
-				"Your partner and your first Boki always stay out. Pick a sleeping Boki for an expedition and it comes out to go with you."]:
+		for t in ["Room for %d on the farm. The rest sleep here, safe, fed and warm." % KinBox.farm_cap(),
+				"Click a Boki to see it. Drag it between the farm and the boxes, or onto another to swap."]:
 			var l := UI.label(t, 13, UI.MUTED); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			l.custom_minimum_size.x = 270
 			detail.add_child(l)
@@ -430,6 +428,13 @@ func _build_detail() -> void:
 		var dt := Time.get_datetime_dict_from_unix_time(int(rec["got_t"]))
 		joined = "  ·  joined %d-%02d-%02d" % [dt["year"], dt["month"], dt["day"]]
 	detail.add_child(UI.label("Trust %d  ·  %s bond%s" % [int(rec.get("trust", 0)), bd[1], joined], 12, Color("ffb3c6")))
+	var duo := BaseDuo.best_friend(rec)
+	if not duo.is_empty():
+		var dr := UI.hbox(2)
+		dr.add_child(UI.IconDot.new("heart", Color("ff8fbf"), 14.0))
+		dr.add_child(UI.IconDot.new("heart", Color("ff8fbf"), 14.0))
+		dr.add_child(UI.label("  Duo with %s" % duo["name"], 12, Color("ffb3c6")))
+		detail.add_child(dr)
 	detail.add_child(WorkView.chips(rec, 18.0))
 	detail.add_child(IvView.mini(rec, 18.0))      # its IVs, with the numbers on hover
 	AboutView.block(rec, detail, true)            # its size, coat, eyes, habit, serial and origin

@@ -173,11 +173,11 @@ func draw(sz: Vector2) -> void:
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
 	if m.skytrain:
-		hud._draw_map_train(rect, v, kk)
+		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
 	if m.exits:
 		var ek := clampf(0.9 + kk * 0.12, 1.0, 1.8)
 		for x in m.exits.list:
-			var pv := to_screen(x.get("berth", x["pos"]))
+			var pv := to_screen(x["pos"])
 			if rect.grow(-4.0).has_point(pv):
 				hud._draw_exit_icon(pv, x, ek)
 				var st := _exit_word(x)
@@ -187,6 +187,10 @@ func draw(sz: Vector2) -> void:
 	ShopLegend.markers(self, c)
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
+	if m.biomes:
+		m.biomes.hot.full_map(self, kk)
+	HeartHud.full_map(self)
+	WaysOutMap.full_map(self)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)
@@ -221,11 +225,8 @@ func _map_title() -> String:
 
 func _exit_word(x: Dictionary) -> String:
 	match String(x["state"]):
-		"called": return "Skiff %s" % hud._fmt(float(x["t"]))
-		"boarding": return "BOARDING"
 		"charging": return "Uplink %d%%" % int(float(x["prog"]) * 100.0)
 		"open": return "OPEN"
-		"closed": return "Closed"
 	return ""
 
 ## A faint grid with letters and numbers along the edges, for callouts ("dropping C4").
@@ -268,6 +269,9 @@ func _labels(c: Control, kk: float) -> void:
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
 			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
+			var camp_line := _region_line(nm)
+			if camp_line != "":
+				_name(camp_line, pv + Vector2(0, 5 + sz * 0.8), int(11 * big_k), Color(CampMap.FLAME, 0.95), taken, true)
 		else:
 			later.append([lb, pv])
 	for e in later:
@@ -282,10 +286,7 @@ func _labels(c: Control, kk: float) -> void:
 				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
 					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
 			"rail":
-				c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-				c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-				if zoomed:
-					_name(nm, pv + Vector2(0, 15), 10, Color("ffe2b0"), taken)
+				pass      # (the halts are TrainMap's)
 			"choke":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
@@ -299,6 +300,17 @@ func _labels(c: Control, kk: float) -> void:
 			var pv2 := to_screen(Vector3(cc.x, 0, cc.y))
 			if rect.has_point(pv2):
 				hud._ctext(pv2, String(isl["role"]).capitalize(), 11, Color(INK, 0.6), hud.big)
+
+## The drop map's line under a region's name ("3 camps: to level 4"); "" outside the planning phase.
+func _region_line(label: String) -> String:
+	if not (m.skydrop and m.skydrop.planning) or m.camps == null or m.biomes == null:
+		return ""
+	var ri := -1
+	for ii in m.world.islands.size():
+		if String(m.world.islands[ii].get("name", "")) == label:
+			ri = m.biomes.hot.region_of[ii]
+	var n := m.camps.list().filter(func(e): return e["region"] == ri).size()
+	return CampMap.region_line(n, m.camps.region_xp(ri)) if ri >= 0 and n > 0 else ""
 
 ## Draws a centred name unless it would overlap one already drawn (force draws it anyway).
 ## Returns whether it drew.
@@ -324,10 +336,9 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var pv := to_screen(cnd["pos"])
 		if not rect.grow(-6.0).has_point(pv):
 			continue
-		var def: Dictionary = sp.cats.get(cnd["cat"], {})
-		var st := sp.state_for(cnd, team)
-		var col: Color = def.get("col", Color.WHITE)
-		marker(c, String(def.get("shape", "star")), pv, s, col, st)
+		spawn_marker(c, cnd, pv, s, team)
+		if m.guide and m.guide.target == cnd["pos"]:
+			CampMap.pulse(c, pv, s)
 		if pv.distance_to(mp) < s + 4.0:
 			_hover = cnd
 	if not _hover.is_empty():
@@ -335,7 +346,10 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var st := sp.state_for(_hover, team)
 		var line := String(def.get("name", "?"))
 		if String(_hover["name"]) != "": line += "  ·  " + String(_hover["name"])
-		var what: String = {"unknown": "Might be here: scout it to find out", "active": "Here this match", "empty": "Nothing here this match", "taken": "Already taken"}[st]
+		var what: String = {
+			"unknown": "Might be here: scout it to find out", "active": "Here this match",
+			"empty": "Nothing here this match", "taken": "Already taken",
+			"cleared": "Cleared", "returning": "Cleared: it comes back bigger"}[st]
 		var pv := to_screen(_hover["pos"])
 		var wv := maxf(hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x, hud.body.get_string_size(what, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) + 20.0
 		var r := Rect2(pv + Vector2(14, -42), Vector2(wv, 44))
@@ -344,15 +358,37 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		hud._text(r.position + Vector2(10, 19), line, 14, def.get("col", Color.WHITE), hud.big)
 		hud._text(r.position + Vector2(10, 36), what, 12, INK)
 
+## One of the match's spawns as this squad sees it, in its category's shape and colour.
+func spawn_marker(c: Control, cnd: Dictionary, pv: Vector2, s: float, team: int) -> void:
+	var sp: SpawnPlan = m.spawn_plan
+	var st := sp.state_for(cnd, team)
+	var col: Color = sp.cats.get(cnd["cat"], {}).get("col", Color.WHITE)
+	marker(c, sp.shape_of(cnd), pv, s, col, st, sp.comeback_frac(cnd) if st == "returning" else 0.0)
+
+## The spawns the minimap shows: what the squad knows is there (vaults from the start, the rest once
+## scouted) and every camp in whatever state the squad sees, inside the minimap (on_map, as HUD's).
+func minimap_spawns(team: int, hold: bool, to_map: Callable, on_map: Callable) -> Array:
+	var sp: SpawnPlan = m.spawn_plan
+	return sp.cands.filter(func(cnd):
+		var camp: bool = cnd["cat"] == "camp"
+		if not camp and sp.state_for(cnd, team) != "active":
+			return false
+		var known: bool = camp or (cnd["known"] as Dictionary).has(team)
+		return MapDetail.shows("cache", hold, known) and on_map.call(to_map.call(cnd["pos"]), 5.0))
+
 ## A spawn marker in one of its states: "unknown" (faint, with a ?), "active", "empty" (a cross),
-## "taken" (a tick). Shared with the legend.
-func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: String) -> void:
+## "taken" (a tick), "cleared" (a camp, dim) or "returning" (dim, a ring that fills to its comeback,
+## fill 0..1). Shared with the legend and the minimap.
+func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: String, fill := 0.0) -> void:
 	var a := 1.0
 	var ic := col
 	match st:
 		"unknown": a = 0.5; ic = Color(col, 0.55)
 		"empty": a = 0.4; ic = Color(0.6, 0.62, 0.68, 0.5)
 		"taken": a = 0.55; ic = Color(0.7, 0.72, 0.78, 0.7)
+		"cleared", "returning":
+			a = 0.45
+			ic = Color(col, 0.4)
 	if st == "active":
 		var ph := fmod(Time.get_ticks_msec() / 1000.0 * 0.8, 1.0)
 		c.draw_arc(pv, s * (1.5 + ph * 0.9), 0, TAU, 28, Color(col, 0.6 * (1.0 - ph)), 2.0, true)
@@ -360,6 +396,8 @@ func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: St
 	c.draw_arc(pv, s * 1.35, 0, TAU, 24, Color(ic, 0.9 if st == "active" else 0.45), 1.5, true)
 	icon(c, shape, pv, s * 0.78, ic)
 	match st:
+		"returning":
+			CampMap.comeback_ring(c, pv, s, fill)
 		"unknown":
 			hud._ctext(pv + Vector2(s * 1.15, -s * 0.55), "?", int(s * 1.5), Color(1, 1, 1, 0.85), hud.big)
 		"empty":
@@ -368,8 +406,11 @@ func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: St
 		"taken":
 			c.draw_polyline(PackedVector2Array([pv + Vector2(-s * 0.7, 0), pv + Vector2(-s * 0.15, s * 0.6), pv + Vector2(s * 0.85, -s * 0.7)]), Color("8fe0a0"), 2.5, true)
 
-## Category icons: a paw (rare kin), a chest (vault), a crate (cache), a skull (boss lair), else a star.
+## Category icons: a paw (rare kin), a chest (vault), a crate (cache), a skull (boss lair), a campfire (camps).
 func icon(c: Control, shape: String, p: Vector2, s: float, col: Color) -> void:
+	if CampMap.is_shape(shape):
+		CampMap.icon(c, shape, p, s, col)
+		return
 	match shape:
 		"paw":
 			Icons.draw(c, "paw", p, s, col)
@@ -511,7 +552,7 @@ func _enemies(c: Control, team: int) -> void:
 			continue
 		var allied: bool = m.truce != null and m.truce.allied(team, h.team)
 		c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else BAD)
+		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else SideColor.foe())
 
 func _squad(c: Control, team: int) -> void:
 	for h in m.hunters:
@@ -593,6 +634,10 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			elif st == "taken": gone += 1
 		var announce: bool = def.get("announce", false)
 		marker(c, String(def.get("shape", "star")), Vector2(r.position.x + 26, y), 8.0, col, "active" if announce or found > 0 else "unknown")
+		if cat == "camp":
+			hud._text(Vector2(r.position.x + 48, y + 5), CampMap.LEGEND_ROW, 13, col, hud.big)
+			y += 46.0
+			continue
 		hud._text(Vector2(r.position.x + 48, y - 2), String(def.get("name", cat)), 15, col, hud.big)
 		var line := ("%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""]) if announce else ("%d possible spots  ·  %d found" % [all.size(), found + gone])
 		hud._text(Vector2(r.position.x + 48, y + 15), line, 11, INK)
@@ -608,18 +653,14 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
 	# exits, under the spawns
-	var exit_rows := 3 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
+	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
 	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
-		var ex := [["dock", "Skiff dock (loud)"], ["outpost", "Uplink outpost"], ["hatch", "Rift hatch (needs a key)"]]
-		for i in ex.size():
-			var fake := {"kind": ex[i][0], "state": "idle", "prog": 0.0}
-			var col := Exits.color_of(fake)
-			_exit_glyph(c, String(ex[i][0]), Vector2(r2.position.x + 26, r2.position.y + 42 + i * 22), col)
-			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + i * 22), String(ex[i][1]), 12, INK)
-		var row_y := r2.position.y + 42 + 3 * 22
+		OutpostGlyph.draw(c, Vector2(r2.position.x + 26, r2.position.y + 42), 1.0, ExitModels.UPLINK, Color(0.55, 0.58, 0.64, 0.9), 0.0)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Uplink outpost", 12, INK)
+		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
@@ -627,16 +668,6 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		if not m.beacons.is_empty():
 			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
-
-func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
-	match kind:
-		"dock":
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-6, 1), pv + Vector2(6, 1), pv + Vector2(4, 5), pv + Vector2(-4, 5)]), col)
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 0), pv + Vector2(0, 0)]), col)
-		"hatch":
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), col)
-		"outpost":
-			OutpostGlyph.draw(c, pv, 1.0, col, Color(0.55, 0.58, 0.64, 0.9), 0.0)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
@@ -651,7 +682,7 @@ func _side(c: Control, sz: Vector2) -> void:
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
-	var lr := ShopLegend.place(m, x0, wv, r.end.y)
+	var lr := ShopLegend.place(m, x0, wv, r.end.y, sz.y - 10)
 	if lr.end.y < sz.y - 10:
 		ShopLegend.draw(self, c, lr)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)

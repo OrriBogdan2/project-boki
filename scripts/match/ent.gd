@@ -31,21 +31,24 @@ var stun_t := 0.0
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
 var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
 var guard_k := 0.0
-var slow_k := 0.0           # how much speed the current slow takes away (0 = the body's usual slow)
+var slow_k := 0.0           # how much speed the strongest running slow takes away (0 = usual_slow())
+var slows: Array[Vector2] = []   # the running slows (add_slow): x = share of speed taken, y = seconds left
 var blight_k := 0.6         # how much healing the current blight cuts
 var vuln_t := 0.0           # a vulnerable mark: takes vuln_k more damage (never above KinRules.VULN_MAX)
 var vuln_k := 0.0
 var dr := {}                # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false        # the running stun counts toward the immunity that follows it
 var cc_immune_t := 0.0      # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
-var marks := {}             # combo setups on this body: status -> {by, owner, until}
+var marks := {}             # combo setups on this body: combo id -> {team, owner, until, window}
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
+var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
@@ -143,8 +146,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
-	flash_t = 0.12
-	freeze_t = 0.05 if d >= 10.0 else 0.03
+	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
+	freeze_t = maxf(freeze_t, 0.05 if d >= 10.0 else 0.03)      # (a small hit never cuts a heavy one's hold short)
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
@@ -168,15 +171,13 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if opts.get("burn", 0.0) > 0.0:
 		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
-		var sk := float(opts.get("slow_k", 0.0))
-		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
-		slow_t = maxf(slow_t, float(opts["slow"]))
+		add_slow(float(opts["slow"]), float(opts.get("slow_k", 0.0)))
 	if opts.get("root", 0.0) > 0.0:
-		root_t = maxf(root_t, float(opts["root"]))
+		add_root(float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
 		blight_t = maxf(blight_t, float(opts["blight"]))
 	if opts.get("stun", 0.0) > 0.0:
-		stun_t = maxf(stun_t, float(opts["stun"]))
+		add_stun(float(opts["stun"]))
 		if use_dr: dr_stun = true
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
@@ -217,11 +218,60 @@ func cc_dr(kind: String, dur: float) -> float:
 	dr[kind] = st
 	return dur * float(steps[mini(n, steps.size() - 1)])
 
-## Speed multiplier from a slow: its own strength if it has one, else this body's usual slow.
-func slow_mult(usual: float) -> float:
+## Share of speed a slow without its own strength takes off this body.
+func usual_slow() -> float:
+	return 0.45
+
+## The one rule for overlapping crowd control (docs/decisions/0022-cc-stacking.md): the strongest
+## running slow sets the speed, and every slow keeps its own clock, so a weaker, longer one takes
+## over when a stronger, shorter one runs out. A slow no stronger and no longer than one already
+## running changes nothing: overlaps never add strength or time, they refresh.
+## `k` is the share of speed taken (0 = usual_slow()).
+func add_slow(secs: float, k := 0.0) -> void:
+	if secs <= 0.0:
+		return
+	if slow_t <= 0.0:
+		slows.clear()
+	var n := Vector2(k if k > 0.0 else usual_slow(), secs)      # Vector2 first: compare at its precision
+	var i := 0
+	while i < slows.size():
+		var o: Vector2 = slows[i]
+		if o.x >= n.x and o.y >= n.y:
+			return
+		if o.x <= n.x and o.y <= n.y:
+			slows.remove_at(i)
+		else:
+			i += 1
+	slows.append(n)
+	_slow_sync()
+
+## Stuns and roots: the longest wins and a new one refreshes, never adds. They run side by side, so
+## a stun during a root locks everything and the root goes on holding the legs once the stun ends.
+func add_stun(secs: float) -> void:
+	stun_t = maxf(stun_t, secs)
+
+func add_root(secs: float) -> void:
+	root_t = maxf(root_t, secs)
+
+func _slow_sync() -> void:
+	slow_k = 0.0
+	slow_t = 0.0
+	for o in slows:
+		slow_k = maxf(slow_k, o.x)
+		slow_t = maxf(slow_t, o.y)
+
+## Speed multiplier from the strongest running slow.
+func slow_mult() -> float:
 	if slow_t <= 0.0:
 		return 1.0
-	return 1.0 - slow_k if slow_k > 0.0 else usual
+	return 1.0 - (slow_k if slow_k > 0.0 else usual_slow())
+
+func _tick_slows(dt: float) -> void:
+	for i in range(slows.size() - 1, -1, -1):
+		slows[i].y -= dt
+		if slows[i].y <= 0.0:
+			slows.remove_at(i)
+	_slow_sync()
 
 func _on_zero(_by: Ent, _opts: Dictionary) -> void:
 	die()
@@ -301,6 +351,8 @@ func tick_status(dt: float) -> void:
 	if freeze_t > 0.0: freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
+		if not slows.is_empty():
+			_tick_slows(dt)
 		if slow_t <= 0.0: slow_k = 0.0
 	if root_t > 0.0: root_t -= dt
 	if cc_immune_t > 0.0: cc_immune_t -= dt
@@ -318,7 +370,7 @@ func tick_status(dt: float) -> void:
 		if not remote:
 			hp -= burn_dps * dt
 			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
+				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), Fx.NUM_PLAIN)
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
@@ -326,6 +378,9 @@ func tick_status(dt: float) -> void:
 func net_follow(dt: float) -> void:
 	prev = pos
 	if net_t < 0.0:
+		return
+	if net_buf:
+		net_buf.follow(self, m.time)
 		return
 	var age := clampf(m.time - net_t, 0.0, 0.25)
 	var tgt := net_pos + net_vel * age
@@ -338,7 +393,10 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
+var _flash_col := Color.WHITE
 var _flash_n := -1
+var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash_col := Color.WHITE
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -356,9 +414,15 @@ func render(delta: float, alpha: float) -> void:
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
+	var fc := Color.WHITE
+	if f <= 0.0 and wash > 0.0:
+		f = wash
+		fc = wash_col
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n:
+	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
 		_flash_set = f
+		_flash_col = fc
 		_flash_n = mats.size()
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", fc)

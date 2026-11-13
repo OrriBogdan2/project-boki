@@ -1,6 +1,6 @@
 class_name HudRefDemo
 extends RefCounted
-## --hudref-demo=<plates|fight> (screenshots only): sets up the overhead plates and bottom HUD in
+## --hudref-demo=<plates|fight|busy|callout> (screenshots only): sets up the overhead plates and bottom HUD in
 ## known states so before/after pictures line up. Match calls tick() every step while the option is on.
 ##   plates: five rivals in a row in front of you, one per plate state (full; just hit, showing the
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
@@ -8,10 +8,13 @@ extends RefCounted
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 ##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
 ##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
+##   callout: the plates row; at CALLOUT_AT you knock two rivals and eliminate a third (the KnockCallout
+##           stack): shoot it at --shot-time 2.3.
 
 const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
 const HIT_AT := 2.35      # s of match time: close enough to a 2.5s shot that the chip still holds on slow frames
 const BUSY_AT := 2.0      # s of match time: the busy burst
+const CALLOUT_AT := 2.0   # s of match time: two knocks and an elimination by you
 
 ## The match options for `--hudref-demo=<mode>` (Main reads the command line).
 static func opts(arg: String) -> Dictionary:
@@ -32,14 +35,14 @@ static func tick(m) -> void:
 		P.lvl = 7
 		P.skill_pts = 0
 		for s in P.slot_lv: P.slot_lv[s] = 1
-		if mode == "plates": _plates(m, P)
+		if mode in ["plates", "callout"]: _plates(m, P)
 		else: _fight(m, P)
 	# (the pointer rests at the bottom edge so you face the row, below everyone; the camera doesn't lead)
 	var vp: Viewport = m.get_viewport()
 	if vp: vp.warp_mouse(Vector2(vp.get_visible_rect().size.x * 0.5, vp.get_visible_rect().size.y - 6.0))
 	for h in m.hunters:
 		if h == P: continue
-		if mode == "plates" or m.time < 4.0:
+		if mode in ["plates", "callout"] or m.time < 4.0:
 			h.ctrl = "idle"
 			for k in h.inp: if h.inp[k] is bool: h.inp[k] = false
 			h.inp["move"] = Vector2.ZERO
@@ -59,6 +62,12 @@ static func tick(m) -> void:
 	if mode == "busy" and m.time >= BUSY_AT and not m.has_meta("hudref_busy"):
 		m.set_meta("hudref_busy", true)
 		_busy(m, P)
+	if mode == "callout" and m.time >= CALLOUT_AT and not m.has_meta("hudref_callout"):
+		m.set_meta("hudref_callout", true)
+		var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
+		m.knock(foes[0], P, {})
+		m.knock(foes[1], P, {})
+		m.eliminate(foes[2], P, "shot", true)
 	if mode == "plates":
 		var hit: Hunter = m.get_meta("hudref_hit", null)
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
@@ -69,13 +78,20 @@ static func tick(m) -> void:
 			m.set_meta("hudref_up_done", true)
 			up.lvl += 1                            # someone levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
-		if st: st.slow_t = maxf(st.slow_t, 1.0)
+		if st:
+			st.add_stun(3.0)             # the whole CC row, timers held at a readable length
+			st.add_root(2.5)
+			st.add_slow(2.0)
+			KitStatus.apply(st, "gnd", 1.5, 0.0, false, "demo")
+			KitStatus.apply(st, "rat", 2.2, 0.0, false)
 
 static func _stand(m, h: Hunter, at: Vector3) -> void:
 	var g: Vector3 = m.world.free_spot_near(at, [], 0.6, 0.5, 3.0)
 	for i in 8:
 		if not m.world.in_bush(g.x, g.z): break       # (in grass they'd be hidden, plate and all)
 		g = m.world.free_spot_near(at + Vector3(0, 0, 1.2 * float(i + 1)), [], 0.6, 0.5, 3.0)
+	if m.world.is_void(g.x, g.z):                         # (near an edge: look further out, not into the void)
+		g = m.world.free_spot_near(at, [], 0.6, 0.5, 12.0)
 	h.teleport(Vector3(g.x, m.world.ground_at(g.x, g.z), g.z))
 	h.ctrl = "idle"
 	h.vel = Vector3.ZERO

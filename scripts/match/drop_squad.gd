@@ -2,7 +2,7 @@ class_name DropSquad
 extends RefCounted
 ## How a squad comes down together, after SUPERVIVE's drop.
 ##
-## A match on the big map opens with a short planning phase (PLAN_T seconds) while the skyship waits at
+## A match on the big map opens with a short planning phase (DropFeel.plan_s seconds) while the skyship waits at
 ## the edge of the map: the full map is up, and everyone can ping where they want to land. Bots ping
 ## too. Then the ship sets off.
 ##
@@ -13,7 +13,6 @@ extends RefCounted
 ## leader can separate (Z) to jump or steer on their own. Bots follow the leader by default and some
 ## break off near the ground to land a little apart.
 
-const PLAN_T := 8.0
 const FOLLOW_GAIN := 5.0      # 1/s: how hard a follower closes the gap to its slot
 ## Formation slots behind the leader: (to the side, behind), in metres, turned with the leader's heading.
 const SLOTS := [Vector2(-2.6, 2.2), Vector2(2.6, 2.2), Vector2(0.0, 4.6), Vector2(-5.0, 4.4), Vector2(5.0, 4.4)]
@@ -21,13 +20,14 @@ const SLOTS := [Vector2(-2.6, 2.2), Vector2(2.6, 2.2), Vector2(0.0, 4.6), Vector
 var m: Match
 var planning := false
 var plan_t := 0.0
-var plan_len := PLAN_T
+var plan_len := DropFeel.plan_s
 var leads := {}               # team -> Hunter
 var heading := {}             # team -> Vector2, the leader's smoothed heading on the drop
 var _bot_ping := {}           # hunter nid -> plan time left when it pings
 var _ack := []                # bot acknowledgements due {h, at, id}
 var clock := 0.0              # runs through the planning phase too (the match clock waits)
 var events: Array = []        # what happened, for tests
+var chests_hidden := false    # no chests show while you ride the ship and drop in (KeyChest.show_all)
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -48,10 +48,13 @@ func setup() -> void:
 		elif mem.has(m.player):
 			lead = m.player
 		leads[t] = lead
+	if m.player and (m.player.riding or m.player.dropping):
+		chests_hidden = true
+		KeyChest.show_all(m, false)      # until you're down (tick)
 	var o: Dictionary = m.opts
 	if m.big and not m.ship.is_empty() and not o.get("no_plan", false) and not o.get("tutorial", false) and not o.get("training", false) and not o.get("duel", false):
 		planning = true
-		plan_len = float(o.get("plan_t", PLAN_T))
+		plan_len = float(o.get("plan_t", DropFeel.plan_s))
 		plan_t = plan_len
 		for h in m.hunters:
 			if h.ctrl == "bot" and not h.remote and (h.riding or m.rolling == null):
@@ -109,6 +112,8 @@ func _bot_plan_ping(h: Hunter) -> void:
 		var human := _human_ping(h.team)
 		if human != Vector3.INF:
 			at = human
+		elif m.biomes and randf() < HotZone.BOT_PICK and _hot_free(h):
+			at = m.biomes.hot.landing()
 		elif m.spawn_plan and randf() < 0.3:
 			var bd := 60.0
 			for c in m.spawn_plan.active_of("vault"):
@@ -123,6 +128,11 @@ func _bot_plan_ping(h: Hunter) -> void:
 	m.squad_ping(h, at)
 	if is_lead(h):
 		_set_land(h, at)
+
+## The hot zone has a landing and no other squad is already heading there.
+func _hot_free(h: Hunter) -> bool:
+	var at: Vector3 = m.biomes.hot.landing()
+	return at != Vector3.INF and Bot.crowd_at(m, h, at, HotZone.CROWD_R) == 0
 
 func _depart() -> void:
 	events.append("depart")
@@ -293,6 +303,9 @@ func follow_vy(f: Hunter) -> float:
 func tick(dt: float) -> void:
 	clock += dt
 	_tick_acks()
+	if chests_hidden and not (m.player.riding or m.player.dropping):
+		chests_hidden = false      # landed, or fell short and came back on foot
+		KeyChest.show_all(m, true)
 	for t in leads:
 		var l := leader(int(t))
 		if l == null or not l.dropping:
@@ -318,6 +331,22 @@ func tick(dt: float) -> void:
 				f.ai["land"] = _near_land(f.pos, f)
 				f.ai["retarget"] = true
 				separate(f)
+
+## A bot's dive key this step, `to` being the flat way to its landing spot: held while the spot is close
+## enough below to reach in the dive (DropFeel.tick_canopy), let go where the canopy opens. A bot that has
+## chosen a Hard Landing holds it to the ground instead. It chooses once, hint_h above its spot: bot_chance
+## of the time when a live camp is within bot_camp_m of the spot.
+static func bot_dive(m: Match, h: Hunter, to: Vector2) -> bool:
+	var hard: Dictionary = HardLanding.rules
+	var spot: Vector3 = h.ai.get("land", h.pos)
+	var above := h.pos.y - m.world.ground_at(spot.x, spot.z)
+	if not h.ai.has("hard") and above < float(hard["hint_h"]):
+		var camp := m.camps != null and not m.camps.nearest_live(spot, hard["bot_camp_m"]).is_empty()
+		h.ai["hard"] = camp and randf() < float(hard["bot_chance"])
+	var flat_per_m := DropFeel.dive_speed / DropFeel.dive_fall      # flat metres a dive covers per metre it falls
+	if h.ai.get("hard", false):
+		return to.length() < above * flat_per_m + HardLanding.radius * 0.5
+	return not DropFeel.low(m.world, h.pos) and to.length() < (h.pos.y - DropFeel.open_h) * flat_per_m
 
 func _near_land(around: Vector3, f: Hunter) -> Vector3:
 	var a := randf() * TAU

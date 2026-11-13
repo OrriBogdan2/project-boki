@@ -28,7 +28,7 @@ const EDGE_W := 1.2        # px: the outline's width on each side of a stroke
 const EDGE_A := 0.6        # the outline's opacity (times the reticle's own)
 const ARC_GAP := 0.32      # rad: each of the default ring's four breaks
 ## The HUD's aim states round the reticle (px from the cursor), kept tight so the whole reads small:
-const CHARGE_R := 13.0     # a charge, warm-up, spin-up or reload arc
+const CHARGE_R := 13.0     # a charge, warm-up or spin-up arc
 const AMMO_R := 16.0       # the ammo left, a thin arc below
 const RES_R := 22.0        # the archetype resource, an arc above
 

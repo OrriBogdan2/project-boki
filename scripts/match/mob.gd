@@ -12,6 +12,7 @@ var atk_dir := Vector2.ZERO
 var atk_at := Vector3.ZERO
 var tele: Node3D = null
 var cd := 0.0
+var damage_by := {}          # team -> damage dealt to it, for credit (a lair boss's XP, StealCall)
 var wander := Vector3.INF
 var lunge_hit := {}
 var anim := 0.0
@@ -83,7 +84,11 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
 	var dealt := super.hurt(d, by, opts)
-	if dealt > 0.0: calm_t = 0.0
+	if dealt > 0.0:
+		calm_t = 0.0
+		var from: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
+		if from is Hunter:
+			damage_by[from.team] = float(damage_by.get(from.team, 0.0)) + dealt
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:
@@ -98,7 +103,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 
 func _stagger(by: Ent, opts: Dictionary) -> void:
 	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
-	stun_t = maxf(stun_t, stagger_t)
+	add_stun(stagger_t)
 	stag_open = 0.0
 	stag_next = randf_range(10.0, 14.0)
 	_cancel_tele()
@@ -166,6 +171,9 @@ func sim(dt: float) -> void:
 		net_follow(dt)
 		_net_telegraph()
 		return
+	dt = _far_step(dt)
+	if dt <= 0.0:
+		return
 	if _napping(dt):
 		return
 	cd -= dt
@@ -177,7 +185,7 @@ func sim(dt: float) -> void:
 		if calm_t > 30.0:
 			m.on_mob_escaped(self)
 			return
-	var spd: float = md["speed"] * slow_mult(0.55)
+	var spd: float = md["speed"] * slow_mult()
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
 		if stun_t > 0.0 and st == "windup":
@@ -263,7 +271,7 @@ func sim(dt: float) -> void:
 	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
-		stun_t = maxf(stun_t, 1.0)
+		add_stun(1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})
@@ -274,24 +282,54 @@ func sim(dt: float) -> void:
 
 ## An idle monster with no Hunter or Boki within NAP_M stops simulating (no wandering, no physics) and
 ## looks again every NAP_CHECK seconds: most camps sit far from every fight, and nobody sees them wander.
+## The distance is in 3D, so the sky ship and the gliders passing high overhead don't wake the camps under
+## them, and an awake one looks again only every NAP_CHECK seconds too (80 Hunters and Boki each step was
+## most of a 40-hunter match's monster time).
 const NAP_M := 36.0          # m: anyone this close keeps it awake (beyond the match camera's view)
-const NAP_CHECK := 0.5       # s between its looks around while asleep
-var _nap := 0.0
+const NAP_CHECK := 0.5       # s between its looks around, asleep or awake
+var _nap := 0.0              # s to its next look around
+var _asleep := false
 func _napping(dt: float) -> bool:
 	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
 		_nap = 0.0
+		_asleep = false
 		return false
-	if _nap > 0.0:
-		_nap -= dt
-		return true
+	_nap -= dt
+	if _nap <= 0.0:
+		_nap = NAP_CHECK
+		_asleep = not _anyone_near()
+	return _asleep
+
+## An awake monster more than FAR_M from the local player, fighting nobody within FAR_M of them, steps
+## every FAR_EVERY sim steps with the skipped time added in, as SimLod steps far bots: a camp a
+## far squad woke fights at 20 Hz and nobody sees it. Mid-air it keeps every step (a lunge or a fall in
+## 50 ms hops could miss the ground). Offline only: a server has no local player, so it steps them all.
+const FAR_M := 45.0          # m (3D) from the local player before an awake monster slows down
+const FAR_EVERY := 3         # sim steps per monster step when far (60 Hz -> 20 Hz)
+var _far_dt := 0.0           # s banked while skipping
+func _far_step(dt: float) -> float:
+	var me: Hunter = m.player
+	if me == null or me.out or me.extracted or not grounded:
+		_far_dt = 0.0
+		return dt
+	_far_dt += dt
+	var near_me := pos.distance_squared_to(me.pos) <= FAR_M * FAR_M
+	near_me = near_me or (tgt != null and tgt.flat_dist(me) <= FAR_M)
+	if not near_me and (int(m.time / Match.DT) + get_instance_id()) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
+		return 0.0
+	var out := _far_dt
+	_far_dt = 0.0
+	return out
+
+func _anyone_near() -> bool:
+	var r2 := NAP_M * NAP_M
 	for e in m.hunters:
-		if not e.out and flat_dist(e) < NAP_M:
-			return false
+		if not e.out and pos.distance_squared_to(e.pos) < r2:
+			return true
 	for k in m.kins:
-		if not k.dead and flat_dist(k) < NAP_M:
-			return false
-	_nap = NAP_CHECK
-	return true
+		if not k.dead and pos.distance_squared_to(k.pos) < r2:
+			return true
+	return false
 
 func _begin_attack() -> void:
 	st = "windup"

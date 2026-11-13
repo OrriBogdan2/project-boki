@@ -15,7 +15,6 @@ var nums: Array = []          # {node, t, vel}
 var num_pool: Array[Label3D] = []
 var rings: Array = []         # {node, t, dur, r}
 var teles: Array = []
-var lines: Array = []         # {node, t}
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
 var rng := RandomNumberGenerator.new()
@@ -244,6 +243,8 @@ func dash_trail(h) -> void:
 	dust(h.pos, 7)
 
 var ghosts: Array = []
+const GLOW_DUR := 0.5      # s: a body glow's life
+const GLOW_RISE := 1.4     # m/s: how fast it drifts up
 var _ghost_mesh: Mesh
 
 ## A fading after-image of a dashing hunter.
@@ -258,9 +259,17 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	mi.global_position = at + Vector3(0, 0.7 * scl, 0)
 	mi.rotation.y = yaw
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
-	ghosts.append({"node": mi, "t": 0.0, "col": col})
+	ghosts.append({"node": mi, "t": 0.0, "col": col, "dur": 0.26, "rise": 0.0})
 
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
+## The one world cue for a level-up or an ability coming ready: a short upward glow over the body
+## in `col`. No ground ring, no burst (a ground ring means gameplay).
+func body_glow(at: Vector3, col: Color) -> void:
+	ghost(at, 0.0, col, 1.15)
+	var g: Dictionary = ghosts[ghosts.size() - 1]
+	g["dur"] = GLOW_DUR
+	g["rise"] = GLOW_RISE
+
+func number(at: Vector3, v: float, col: Color, look: int, prefix := "") -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
 	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
@@ -273,15 +282,13 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			n["hits"] = int(n["hits"]) + 1
 			var ln: Label3D = n["node"]
 			ln.text = prefix + str(int(round(float(n["val"]))))
-			if crit:
-				n["crit"] = true
+			if look >= int(n["look"]):
+				n["look"] = look
 				ln.modulate = col
-			elif not n.get("crit", false):
-				ln.modulate = col
-			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			_num_look(ln, int(n["look"]))
+			ln.font_size = _num_size(float(n["val"]), int(n["look"]))
 			ln.modulate.a = 1.0
-			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
+			ln.scale = Vector3.ONE * NUM_POP[look]
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -290,34 +297,42 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			nums.erase(n); break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
-	_num_look(l, crit)
-	l.font_size = _num_size(v, crit)
+	_num_look(l, look)
+	l.font_size = _num_size(v, look)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
-	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+	l.scale = Vector3.ONE * NUM_POP[look]
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "look": look})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
 const STICK_T := 0.3
 
-const CRIT_POP := 1.7          # a crit lands this many times its size and settles
-const HIT_POP := 1.25          # ... and a normal hit this many
+## A damage number's look, quietest to loudest (Juice.number picks it): the hits you take and your Boki's,
+## your own, an empowered hit (o.heavy or a payoff: its own colour, a size up, a deep red outline), a crit.
+const NUM_SMALL := 0
+const NUM_PLAIN := 1
+const NUM_HEAVY := 2
+const NUM_CRIT := 3
+const NUM_POP := [1.15, 1.25, 1.5, 1.7]     # per look: it lands this many times its size and settles
+const NUM_STEP := [-6, 0, 5, 8]             # per look: font size added to the size by amount
+const NUM_EDGE := [14, 14, 18, 20]          # per look: outline width
 const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
-const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
+const HEAVY_OUTLINE := Color(0.34, 0.03, 0.02, 0.95)  # ... an empowered hit's a deep red, thicker
+const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's a hot ember brown, thickest
 
-## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
-## a yellower number (pooled labels are reused, so every number sets this).
-func _num_look(l: Label3D, crit: bool) -> void:
-	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
-	l.outline_size = 20 if crit else 14
+## Outline per look: crits and empowered hits get a thicker, warm outline so they read as a different
+## thing, not just another colour (pooled labels are reused, so every number sets this).
+func _num_look(l: Label3D, look: int) -> void:
+	l.outline_modulate = [NUM_OUTLINE, NUM_OUTLINE, HEAVY_OUTLINE, CRIT_OUTLINE][look]
+	l.outline_size = NUM_EDGE[look]
 
-## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
-func _num_size(v: float, crit: bool) -> int:
+## Bigger totals and louder looks read bigger, within a small range so numbers never cover the fight.
+func _num_size(v: float, look: int) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
+	return int(lerpf(36.0, 46.0, k)) + NUM_STEP[look]
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -328,7 +343,7 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 			nums.erase(n); break
 	l.text = txt
 	l.modulate = col
-	_num_look(l, false)
+	_num_look(l, NUM_PLAIN)
 	l.font_size = 46 if big else 34
 	l.global_position = _clear_spot(at)
 	l.visible = true
@@ -365,6 +380,8 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
 	mi.material_override = Models.ring_mat(col, 0.12)
+	mi.material_override.set_shader_parameter("wash", 1.0)
+	mi.material_override.set_shader_parameter("halo", 1.0)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	mi.global_position = at + Vector3(0, 0.08, 0)
@@ -405,6 +422,7 @@ func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy :
 	tw.chain().tween_callback(mi.queue_free)
 
 static var _impact_quad: QuadMesh
+const FLASH_MIN := 0.1         # s an impact flash holds at least: ~6 frames, so the hit frame reads
 func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	# a star of rays round a white-hot core (shaders/impact.gdshader), from a pool so a firefight
 	# doesn't make and free a mesh for every shot
@@ -421,11 +439,12 @@ func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	m.set_shader_parameter("rays", float([4, 5, 6][rng.randi_range(0, 2)]))
 	m.set_shader_parameter("life", 0.0)
 	mi.scale = Vector3.ONE * size * 1.6
-	dur = maxf(dur, 0.07)
+	dur = maxf(dur, FLASH_MIN)
 	mi.visible = true
 	mi.global_position = at
 	flashes.append({"node": mi, "t": 0.0, "dur": dur, "s0": size * 1.6})
 
+## A jagged bolt of lightning from a to b: soft glowing segments that flare and fade.
 func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 	var pts := [a]
 	for i in range(1, 5):
@@ -433,15 +452,7 @@ func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 		pts.append(a.lerp(b, k) + Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.2, 0.2), rng.randf_range(-0.3, 0.3)))
 	pts.append(b)
 	for i in pts.size() - 1:
-		var p0: Vector3 = pts[i]; var p1: Vector3 = pts[i + 1]
-		var mi := MeshInstance3D.new()
-		mi.mesh = Models.box(0.07, 0.07, 1.0)
-		mi.material_override = Models.glow_mat(col)
-		add_child(mi)
-		mi.global_position = (p0 + p1) * 0.5
-		mi.look_at(p1, Vector3.UP if absf((p1 - p0).normalized().y) < 0.95 else Vector3.RIGHT)
-		mi.scale = Vector3(1, 1, p0.distance_to(p1))
-		lines.append({"node": mi, "t": 0.0, "dur": 0.18})
+		beam(pts[i], pts[i + 1], col, 0.22, 0.22)
 	burst(b, col, 10, 3.0, 0.3, 4.0)
 
 func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
@@ -524,7 +535,7 @@ func _process(delta: float) -> void:
 		var k: float = rg["t"] / rg["dur"]
 		var mi: MeshInstance3D = rg["node"]
 		mi.scale = Vector3.ONE * lerpf(0.2, rg["r"], 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
-		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k, 0.0, 1.0)))
+		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
 		if k >= 1.0:
 			mi.queue_free(); rings.erase(rg)
 	for f in flashes.duplicate():
@@ -537,13 +548,10 @@ func _process(delta: float) -> void:
 			mi.visible = false; flashes.erase(f)
 	for g in ghosts.duplicate():
 		g["t"] += delta
-		var k: float = g["t"] / 0.26
+		var k: float = g["t"] / float(g["dur"])
 		var gm: MeshInstance3D = g["node"]
+		gm.global_position.y += float(g["rise"]) * delta
 		gm.material_override.set_shader_parameter("color", Color(g["col"], 0.55 * (1.0 - k)))
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
 			gm.queue_free(); ghosts.erase(g)
-	for ln in lines.duplicate():
-		ln["t"] += delta
-		if ln["t"] >= ln["dur"]:
-			ln["node"].queue_free(); lines.erase(ln)

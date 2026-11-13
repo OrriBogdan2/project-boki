@@ -1,6 +1,6 @@
 # 0018: Box revive and loud revive beacons
 
-- **Status:** accepted
+- **Status:** accepted (the repeat-revive curve: superseded by 0022)
 - **Date:** 2026-11-05
 - **Area:** match flow / networking / UI
 
@@ -18,8 +18,7 @@ dead squad back, loudly, with every player told where it is going off. Nobody ca
    beacons, rings and the alarm on the world, the minimap and the full map.
 
 ## Decision
-Option 2. Timings live in `content/rules/revive.json` (box channel, the source's diminishing curve
-per box revive of the same Hunter, beacon channel, how far the beacon is heard). The beacon alarm is
+Option 2. Timings live in `content/rules/revive.json` (box channel, beacon channel, how far the beacon is heard). The beacon alarm is
 one match-wide state per beacon, so every player's HUD reads the same thing; online it travels as a
 new `"bcn"` event on the existing `"ev"` topic (lit / out / used).
 
@@ -28,4 +27,20 @@ new `"bcn"` event on the existing `"ev"` topic (lit / out / used).
 - Net.VERSION bumps (new `"bcn"` event). No save change.
 - `--box-revive-check` (tools/box_revive_check.gd) and `--box-revive-shots` (tools/box_revive_shots.gd) added; the
   box-revive part of main.gd's inline `--life-check` moves into the new check.
-- Known limit kept: a box or beacon revive brings back only Hunters the reviving game owns (as before).
+
+## Online (added 2026-11-09)
+Each game owns its own Hunters, so a death, a box and a revive each run on the owner's game and the others
+mirror them over four events on the existing `"ev"` topic (Net.VERSION 0.24.4):
+- `["box", nid, x, y, z]`: sent when a death drops a box. Other games stand a soul marker there (`Life.mirror_box`):
+  empty (the owner's game keeps the gear, pack, belt and keys), so a teammate can revive at it but nobody loots it.
+- `["brev", nid, reviver]`: the channel finished at a marker; the owner's game runs `Life.box_revive` on its real box.
+- `["back", nid]`: sent by `Life.bring_back` (box or beacon): every other game stands its copy of them up.
+- `["lost", nid]`: sent by `Life.make_gone`: the soul is gone everywhere, so markers stop taking revives.
+An online death with a teammate still in it now waits like offline (no match end, no `gone`); gems, seeds and
+capsules still spill on the ground for anyone as before. The `"bcn"` beacon event is unchanged and names a
+beacon by its index in `Match.beacons`, which assumes every game places the same beacons from the match seed
+(`--revive-net-check` asserts it).
+- Known limits: the diminishing box-revive curve counts per reviving game; a box revive gives back the box's gear,
+  pack, belt and keys but not the spilled gems; the Boki left behind online stay where `KinLoss` put them.
+- `--revive-net-check` (tools/revive_net_check.gd): two real games over an in-process relay (death, box revive
+  with a carried key, beacon revive, gone for good).

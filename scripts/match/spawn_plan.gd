@@ -16,6 +16,7 @@ extends RefCounted
 ##
 ## Categories are a registry (CATS, plus register() for systems that bring their own): each has a
 ## name, an icon shape, a colour, how many candidates go live, and an optional spawner callback.
+## Camps (scripts/match/camps.gd) are the "camp" category: one marker per camp, all live from 0:00, no roll.
 ## Candidates come from the layout's "spawn_points" (tools/make_skyreach.py), or, on generated maps,
 ## are derived from the islands. To plug in boss lairs: list points under spawn_points.boss in the
 ## layout (or call add_candidate), and register a spawner with set_spawner("boss", fn) before
@@ -27,7 +28,9 @@ const CATS := {
 	"vault": {"name": "Vault", "shape": "vault", "col": Color("f2c84a"), "announce": true, "pick": [2, 2], "order": 1},
 	"rare_kin": {"name": "Rare Boki", "shape": "paw", "col": Color("ff9be8"), "announce": false, "pick": [3, 3], "order": 2},
 	"cache": {"name": "Item cache", "shape": "crate", "col": Color("8fd8ff"), "announce": false, "pick": [4, 4], "order": 3},
+	"camp": {"name": "Camp", "shape": "camp2", "col": Color("ffb24a"), "announce": true, "pick": [0, 0], "order": 4},
 }
+const NEAR_R := 60.0           # m: a squad this close to a camp since its clear sees it cleared (else it looks live)
 const REVEAL_R := 9.0          # flat distance at which a hunter on the ground just knows what's there
 const DROP_REVEAL_R := 14.0    # ... and from the glider on the way down
 
@@ -37,6 +40,9 @@ var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, t
 var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
+var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
+var legend := ""               # the legendary species this match rolled, or "" (Legendary.roll)
+var legend_kin: Kin = null     # it, once it has turned up (Legendary.due)
 var _t := 0.0
 
 func _init(match_node: Match) -> void:
@@ -84,6 +90,7 @@ func shown_cats() -> Array:
 ## Where the candidates are: the layout's own lists on an authored map, else derived from the islands.
 func build(layout: Dictionary) -> void:
 	cands.clear()
+	legend_cfg = Legendary.config(layout)
 	var sp: Dictionary = layout.get("spawn_points", {})
 	if not sp.is_empty():
 		for cat in sp:
@@ -95,8 +102,20 @@ func build(layout: Dictionary) -> void:
 				var q := _ground_near(Vector2(float(pt[0]) + 0.5, float(pt[1]) + 0.5))
 				if q != Vector3.INF:
 					add_candidate(String(cat), q, String(pt[2]) if (pt as Array).size() > 2 else "")
+	else:
+		_derive()
+	_add_camps()
+
+## One marker per camp, live for everyone from the start; _sync_camps keeps its size and state.
+func _add_camps() -> void:
+	if m.camps == null:
 		return
-	_derive()
+	for e in m.camps.list():
+		var c := add_candidate("camp", e["pos"], "")
+		c["active"] = true
+		c["camp"] = e["id"]
+		c["near"] = {}
+	_sync_camps(m.camps.list())
 
 ## A generated map: candidates picked from the islands themselves, the same way for the same map.
 func _derive() -> void:
@@ -171,15 +190,20 @@ func roll(seed_val: int) -> void:
 	var r := RandomNumberGenerator.new()
 	r.seed = seed_val * 92821 + 4099
 	for cat in shown_cats():
+		if cat == "camp":
+			continue
 		var pool: Array = of(cat)
 		var pk: Array = cats[cat].get("pick", [1, 1])
 		var n := clampi(r.randi_range(int(pk[0]), int(pk[1])), 0, pool.size())
+		if cat == "cache":
+			n = KeyChest.kept(n)      # caches are chests too: the same share as the map's
 		# shuffle with our own generator (Array.shuffle uses the global one)
 		for i in range(pool.size() - 1, 0, -1):
 			var j := r.randi_range(0, i)
 			var t = pool[i]; pool[i] = pool[j]; pool[j] = t
 		for i in n:
 			pool[i]["active"] = true
+	legend = Legendary.roll(seed_val, legend_cfg)
 	rolled = true
 
 ## Spawns what's live: vault chests, item caches, rare kin (host only, like all wild kin), and
@@ -187,7 +211,7 @@ func roll(seed_val: int) -> void:
 func spawn_all() -> void:
 	var wr := RandomNumberGenerator.new(); wr.seed = m.seed_val * 53 + 11
 	for c in cands:
-		if not c["active"]:
+		if not c["active"] or c["cat"] == "camp":
 			continue
 		await m._slice()       # under the loading screen, a frame now and then
 		var p: Vector3 = c["pos"]
@@ -229,33 +253,77 @@ func tick(dt: float) -> void:
 	if _t > 0.0:
 		return
 	_t = 0.25
+	if Legendary.due(self):
+		legend_kin = Legendary.arrive(m, legend, of("rare_kin"))
 	for c in cands:
 		if not c["taken"] and c["active"]:
 			c["taken"] = _is_taken(c)
-	var teams := {}
+	var teams := {}                  # team -> its hunters on the ground (one pass, not one per spot)
 	for h in m.hunters:
 		if h.out or h.extracted or h.riding:
 			continue
-		teams[h.team] = true
+		if not teams.has(h.team): teams[h.team] = []
+		teams[h.team].append(h)
+	if m.camps:
+		_sync_camps(m.camps.list(), teams)
 	for c in cands:
 		var known: Dictionary = c["known"]
 		for t in teams:
 			if known.has(t):
 				continue
-			if _team_sees(int(t), c["pos"]):
+			if _team_sees(int(t), teams[t], c["pos"]):
 				known[t] = true
 				if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
 					var def: Dictionary = cats.get(c["cat"], {})
 					if not def.get("announce", false):
 						m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
 
-func _team_sees(team: int, p: Vector3) -> bool:
-	for h in m.hunters:
-		if h.team != team or h.out or h.extracted or h.riding:
+## Copies the camps' size and state onto their markers, and notes which squads have been within
+## NEAR_R of a camp since it was cleared (teams: team -> its hunters on the ground).
+func _sync_camps(list: Array, teams := {}) -> void:
+	for c in of("camp"):
+		var e: Dictionary = list[int(c["camp"])]
+		c["shape"] = CampMap.shape_of(String(e["size"]))
+		c["name"] = String(Camps.rules()["sizes"][Camps.size_index(String(e["size"]))]["name"])
+		c["cs"] = e["state"]
+		c["back_t"] = e["back_t"]
+		c["region"] = e["region"]
+		if e["state"] in [Camps.State.LIVE, Camps.State.RETURNING]:
+			c["near"].clear()
 			continue
+		for t in teams:
+			for h: Hunter in teams[t]:
+				if Vector2(h.pos.x - c["pos"].x, h.pos.z - c["pos"].z).length() <= NEAR_R:
+					c["near"][t] = true
+					break
+
+## A camp as this squad sees it: "active" (live), "cleared" or "returning" (cleared, coming back).
+## Only a squad that has been near it since the clear sees the change.
+func camp_state_for(c: Dictionary, team: int) -> String:
+	if c["cs"] in [Camps.State.LIVE, Camps.State.RETURNING] or not (team < -1 or (c["near"] as Dictionary).has(team)):
+		return "active"
+	return "returning" if c["cs"] == Camps.State.CLEARED else "cleared"
+
+## How far a "returning" camp is on its way back (0..1).
+func comeback_frac(c: Dictionary) -> float:
+	return 1.0 - clampf((float(c["back_t"]) - m.time) / float(Camps.rules()["back_s"]), 0.0, 1.0)
+
+func shape_of(c: Dictionary) -> String:
+	return String(c.get("shape", cats.get(c["cat"], {}).get("shape", "star")))
+
+## Past this flat distance from every member a squad can't see a spot (Match.sees: view range, the
+## sneak bonus and generous sight gear), so the line-of-sight test is skipped. 40 solos on the 2x map
+## made spots x squads x hunters the biggest step spike.
+const SIGHT_BOUND_K := 1.25 * 1.5    # sneak range bonus x headroom for sight gear
+func _team_sees(team: int, members: Array, p: Vector3) -> bool:
+	var dmin := INF
+	for h: Hunter in members:
 		var d := Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 		if d < (DROP_REVEAL_R if h.dropping else REVEAL_R):
 			return true
+		dmin = minf(dmin, d)
+	if dmin > (Match.VIEW_RANGE + 2.0) * maxf(m.sight_k, 1.0) * SIGHT_BOUND_K:
+		return false
 	return m.sees(team, p + Vector3(0, 0.4, 0))
 
 func _is_taken(c: Dictionary) -> bool:
@@ -276,6 +344,8 @@ func _is_taken(c: Dictionary) -> bool:
 
 ## How a candidate looks to a squad: "unknown" (a faint ?), "active", "empty" or "taken".
 func state_for(c: Dictionary, team: int) -> String:
+	if c["cat"] == "camp":
+		return camp_state_for(c, team)
 	var def: Dictionary = cats.get(c["cat"], {})
 	var knows: bool = def.get("announce", false) or (c["known"] as Dictionary).has(team) or team < -1
 	if not knows:

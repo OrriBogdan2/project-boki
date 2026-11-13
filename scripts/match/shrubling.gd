@@ -123,7 +123,7 @@ func sim(dt: float) -> void:
 			if ss_t <= 0.0:
 				_rehide(sr)
 	_held_last = held_now
-	var spd: float = float(sr["flee_speed"]) * slow_mult(0.55)
+	var spd: float = float(sr["flee_speed"]) * slow_mult()
 	if KitStatus.grounded(self):
 		spd *= float(sr["grounded_speed"])
 	if root_t > 0.0 or stun_t > 0.0:
@@ -212,7 +212,8 @@ func _flee(dt: float, sr: Dictionary) -> Vector2:
 			_dive(sr)
 			return Vector2.ZERO
 	repath -= dt
-	if repath <= 0.0 or hide_at == Vector3.INF:
+	# (nobody chasing: it keeps its plan rather than dithering between two patches each repath)
+	if hide_at == Vector3.INF or (repath <= 0.0 and (threat != null or path.size() <= 1)):
 		repath = float(sr["repath_s"])
 		_pick_hide()
 	var dir := _follow_path()
@@ -247,19 +248,25 @@ func _pick_hide() -> void:
 	var from := Vector2(pos.x, pos.z)
 	var tp := Vector2(threat.pos.x, threat.pos.z) if threat != null else from + Vector2(1, 0)
 	var scored: Array = []
+	var W: World = m.world
+	var my_lv: int = W.level[W.idx(int(floor(pos.x)), int(floor(pos.z)))]
 	for pt in run.patches:
 		var c: Vector2 = pt["c"]
 		var dme := c.distance_to(from)
 		if dme > 34.0 or dme < 1.5 or int(pt["island"]) < 0:
 			continue
-		# the patch tile farthest from the hunter
+		# the patch tile farthest from the hunter, on its own terrace (it walks flat: no stairs)
 		var bt := Vector2i.ZERO
 		var bd := -1.0
 		for t in pt["tiles"]:
+			if W.level[W.idx(t.x, t.y)] != my_lv:
+				continue
 			var dd := Vector2(t.x + 0.5, t.y + 0.5).distance_to(tp)
 			if dd > bd:
 				bd = dd
 				bt = t
+		if bd < 0.0:
+			continue
 		var tile := Vector3(bt.x + 0.5, m.world.ground_at(bt.x + 0.5, bt.y + 0.5), bt.y + 0.5)
 		var away := (c - from).normalized().dot((from - tp).normalized())
 		var hidden_from_threat: bool = threat != null and not m.world.los(threat.pos, tile, tile.y + 0.8)
@@ -272,7 +279,7 @@ func _pick_hide() -> void:
 	scored.sort_custom(func(a, b): return float(a[0]) > float(b[0]))
 	for i in mini(3, scored.size()):
 		var tile: Vector3 = scored[i][1]
-		var p := KinPath.find(m.world, pos, tile, 12)
+		var p := KinPath.find(m.world, pos, tile, 12, true)
 		if not p.is_empty():
 			hide_at = tile
 			path = p
@@ -286,7 +293,7 @@ func _follow_path() -> Vector2:
 		path.pop_front()
 	var pick: Vector2 = path[0]
 	for i in range(mini(path.size() - 1, 3), 0, -1):
-		if KinPath.clear_line(m.world, from, path[i]):
+		if KinPath.clear_line(m.world, from, path[i], r, true):
 			pick = path[i]
 			break
 	var d := pick - from

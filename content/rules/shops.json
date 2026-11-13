@@ -1,5 +1,5 @@
 {
- "_doc": "In-match shops (scripts/match/shops.gd, shop_stock.gd; the stock plan is docs/SOURCE_UTILITIES.md section 3). Vendors stand at the spots a hand-made map lists under islands[].shops ([x, z, theme]). Every vendor sells its theme's whole `sells` list, the same in every match: tonic and armor_kit everywhere, everything else in exactly one shop. The gems are the ones a hunter picked up this run, so spending means less to extract. Entries: a utility item id (content/utility), repair (armor back to full), armor_up (the next armor tier), backpack (the next pack tier, priced by Equal backpack_shop), boots:<gear id> (worn at boots_rar), perk:<perk id> (Data.PERKS). left = how many of one entry a vendor has (the host keeps count online). Never sold: keys, shards, the Revive Ember and anything found only in matches; the never list is what --shops-check scans for. The first time a vendor is in reach, 30 s or more after landing, a one-time hint names the use key (Shops.first_hint, Match._tip key shop; --first-shop-hint-check). Prices are run gems: utility items use their content price times util_k.",
+ "_doc": "In-match shops (scripts/match/shops.gd, shop_stock.gd; the stock plan is docs/SOURCE_UTILITIES.md section 3, the places docs/MAP_REGIONS.md). Vendors stand at the spots each region of a hand-made map lists (regions[].shops: [x, z, stock theme]); a spot off the region's open ground moves to the nearest open tile within snap_tiles. Every vendor sells its theme's whole `sells` list, the same in every match: tonic and armor_kit everywhere, everything else in exactly one shop. Each theme fits its region (Frostgate armor, Cinder gloves and weapon tunings, a hazard ward perk in each hazard biome). The gems are the ones a hunter picked up this run, so spending means less to extract. Entries: a utility item id (content/utility), repair (armor back to full), armor_up (the next armor tier), backpack (the next pack tier, priced by Equal backpack_shop), gear:<gear id> (gloves, armor or boots, worn at the theme's gear_rar or the default; replaces what that slot holds), perk:<perk id> (Data.PERKS; a perk with a `ward` keeps that biome hazard off you). price_k: a theme's price multiplier (the Crown's premium stall). left = how many of one entry a vendor has (the host keeps count online). Never sold: keys, shards, the Revive Ember and anything found only in matches; the never list is what --shops-check scans for. The first time a vendor is in reach, 30 s or more after landing, a one-time hint names the use key (Shops.first_hint, Match._tip key shop; --first-shop-hint-check). Prices are run gems: utility items use their content price times util_k. bot (BotShop): the gems a bot keeps (reserve) when it buys belt items and repairs, and (upgrade_reserve) when it buys armor tiers, gear and perks.",
  "use_radius": 2.8,
  "util_k": 1.0,
  "repair_price": 20,
@@ -10,18 +10,19 @@
   150,
   240
  ],
- "boots_price": [
+ "gear_price": [
   30,
   50,
   80,
   130,
   200
  ],
- "boots_rar": 2,
+ "gear_rar": 2,
  "perk_price": {
   "weapon": 70,
   "kit": 55,
-  "flat": 45
+  "flat": 45,
+  "ward": 40
  },
  "perk_stack_extra": 15,
  "left": {
@@ -29,8 +30,8 @@
   "repair": 3,
   "armor_up": 2,
   "backpack": 2,
-  "boots": 1,
-  "perk": 2
+  "perk": 2,
+  "gear": 1
  },
  "never": [
   "rift_key",
@@ -50,11 +51,31 @@
    "shield_cell"
   ],
   "repair_below": 0.5,
-  "belt_below": 2
+  "belt_below": 2,
+  "upgrade_reserve": 60
  },
  "themes": {
-  "armor": {
-   "name": "Plate and Patch",
+  "crown_exchange": {
+   "name": "Crown Exchange",
+   "tag": "Rare gear and brands, at a price",
+   "icon": "brightshield",
+   "col": "ffe27a",
+   "gear_rar": 3,
+   "price_k": 1.5,
+   "sells": [
+    "tonic",
+    "armor_kit",
+    "gear:bubble",
+    "gear:shock",
+    "gear:skyhook",
+    "gear:gale_mantle",
+    "perk:brand_void",
+    "perk:brand_storm",
+    "perk:keen"
+   ]
+  },
+  "frost_armory": {
+   "name": "Frostgate Armory",
    "tag": "Armor and repairs",
    "icon": "anvil",
    "col": "dfe9f7",
@@ -63,50 +84,34 @@
     "armor_kit",
     "armor_up",
     "repair",
+    "gear:bastion_plate",
+    "gear:vest",
+    "gear:quilted_coat",
     "shield_cell",
-    "medkit",
-    "deep_draught",
-    "hearth_lamp"
+    "perk:plating",
+    "perk:sure_foot"
    ]
   },
-  "move": {
-   "name": "Swift Stall",
-   "tag": "Boots and backpacks",
-   "icon": "dash",
-   "col": "8fe3c8",
+  "kiln_forge": {
+   "name": "Kiln Forge",
+   "tag": "Gloves, hot from the kiln",
+   "icon": "fireball",
+   "col": "ff8a3a",
    "sells": [
     "tonic",
     "armor_kit",
-    "backpack",
-    "boots:quickstep_boots",
-    "jump_pad",
-    "stim",
-    "cloud_raft",
-    "gust_fan",
-    "twin_gate",
-    "warp_seed",
-    "lostway_scroll"
-   ]
-  },
-  "gear": {
-   "name": "Gadget Cart",
-   "tag": "Siege and control tools",
-   "icon": "satchel",
-   "col": "ffd27a",
-   "sells": [
-    "tonic",
-    "armor_kit",
-    "smoke",
+    "gear:power_core",
+    "gear:rocket",
+    "gear:blink",
+    "gear:quake",
+    "gear:grapple",
     "shatter_charge",
-    "thorn_wall",
-    "blight_flask",
-    "skyfall_charge",
-    "pilfer_pouch"
+    "perk:ember_walk"
    ]
   },
-  "perks": {
-   "name": "Perk Peddler",
-   "tag": "Weapon perks and scouting",
+  "tuning_bench": {
+   "name": "Tuning Bench",
+   "tag": "Weapon tunings",
    "icon": "burst",
    "col": "ff9a5a",
    "sells": [
@@ -114,14 +119,115 @@
     "armor_kit",
     "perk:hotload",
     "perk:deepmag",
+    "perk:quickfeed",
+    "perk:longreach",
     "perk:brand_fire",
+    "perk:tinker_roll",
+    "perk:quickhands"
+   ]
+  },
+  "storm_outfitter": {
+   "name": "Stormbreak Outfitters",
+   "tag": "Boots, packs and movers",
+   "icon": "dash",
+   "col": "8fe3c8",
+   "sells": [
+    "tonic",
+    "armor_kit",
+    "backpack",
+    "gear:quickstep_boots",
+    "gear:windstep_boots",
+    "jump_pad",
+    "stim",
+    "cloud_raft",
+    "gust_fan",
+    "perk:grounded"
+   ]
+  },
+  "thorn_snares": {
+   "name": "Thornwood Snares",
+   "tag": "Traps and ambush tools",
+   "icon": "satchel",
+   "col": "9aff6a",
+   "sells": [
+    "tonic",
+    "armor_kit",
+    "smoke",
+    "thorn_wall",
+    "blight_flask",
+    "pilfer_pouch",
+    "perk:brand_venom",
+    "perk:spore_mask"
+   ]
+  },
+  "lark_provisions": {
+   "name": "Larkhollow Provisions",
+   "tag": "Healing and supplies",
+   "icon": "tonic",
+   "col": "8fe0a0",
+   "sells": [
+    "tonic",
+    "armor_kit",
+    "medkit",
+    "deep_draught",
+    "hearth_lamp",
+    "toss_satchel",
+    "perk:field_kit",
+    "perk:toughskin",
+    "perk:remedy"
+   ]
+  },
+  "lookout_post": {
+   "name": "Lookout Post",
+   "tag": "Scouting and sight",
+   "icon": "scanner",
+   "col": "ffe08a",
+   "sells": [
+    "tonic",
+    "armor_kit",
     "scanner",
     "lookout_lantern",
     "hawk_whistle",
     "omen_draught",
+    "gear:skylark_boots",
+    "perk:spyglass",
+    "perk:featherfall"
+   ]
+  },
+  "chapel_relics": {
+   "name": "Chapel Relics",
+   "tag": "Passive gloves and focus",
+   "icon": "pulse",
+   "col": "d07aff",
+   "sells": [
+    "tonic",
+    "armor_kit",
+    "gear:focus",
+    "gear:heat_sink",
+    "gear:booster",
+    "gear:hover",
+    "twin_gate",
+    "warp_seed",
+    "perk:focus",
+    "perk:overcharge"
+   ]
+  },
+  "salt_market": {
+   "name": "Salt Market",
+   "tag": "Travel and bounty goods",
+   "icon": "gem",
+   "col": "f2c84a",
+   "sells": [
+    "tonic",
+    "armor_kit",
+    "lostway_scroll",
     "bounty_banner",
-    "toss_satchel"
+    "skyfall_charge",
+    "perk:magpie",
+    "perk:satchel",
+    "perk:secondwind"
    ]
   }
- }
+ },
+ "snap_tiles": 10
 }

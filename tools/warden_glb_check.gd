@@ -37,6 +37,9 @@ const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles diff
 const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
 ## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
 const TRIS_OVER := {"juggernaut": 24000}
+## Wardens whose approved hair is white (Sable: her v2 turnaround, owner 11-11 "pink hair"): the hair slot's paint,
+## as drawn (after its look's desat), stays under this HSV saturation, and no hair or eye pick moves her colours.
+const WHITE_HAIR := {"thief": 0.08}
 
 var bad := 0
 var n := 0
@@ -97,6 +100,7 @@ func run(main: Node) -> void:
 		_springs(a)
 		_orbits(a)
 		_own_look(a)
+		_white_hair(a)
 		await _halo(main, a)
 	_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
@@ -124,8 +128,10 @@ func _contract(a: String) -> void:
 	var unskinned := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
-		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them)
-		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
+		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them; so do companions WardenCompanions
+		# cut out of the body, Meeko's sun and cloud)
+		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) \
+				or String(mi.name).begins_with(WardenCompanions.PREFIX)
 		if (mi as MeshInstance3D).skin == null and not orbit:
 			unskinned += 1
 		for si in mesh.get_surface_count():
@@ -270,8 +276,8 @@ func _shading(a: String) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			if sm and sm.shader == WardenMood.FACE_SHADER:
-				continue        # (a face drawn on glass: no atlas, no toon)
+			if sm and sm.shader in [WardenMood.FACE_SHADER, WardenMood.ATLAS_SHADER]:
+				continue        # (a face drawn on glass or from the mood atlas: no toon surface)
 			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
@@ -287,7 +293,7 @@ func _shading(a: String) -> void:
 			if sm and sm.shader == WardenGlb.FLAME:
 				shows = true      # (fire: no paint of its own)
 			elif sm and atlas:
-				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
+				shows = sm.get_shader_parameter("use_tex") == true and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")
@@ -434,6 +440,47 @@ func _own_look(a: String) -> void:
 			% [a, seen, str(wrong)])
 	m.free()
 
+func _white_hair(a: String) -> void:
+	if not WHITE_HAIR.has(a):
+		return
+	var m := _model(a)
+	var sum := Vector3.ZERO
+	var texels := 0
+	var desat := 0.0
+	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in mesh.get_surface_count():
+			var src := mesh.surface_get_material(si) as BaseMaterial3D
+			if src == null or String(src.resource_name).get_slice("-", 0) != "hair" or src.albedo_texture == null:
+				continue
+			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+			desat = float(sm.get_shader_parameter("desat")) if sm.get_shader_parameter("desat") != null else 0.0
+			var img := src.albedo_texture.get_image()
+			if img.is_compressed():
+				img.decompress()
+			for uv in mesh.surface_get_arrays(si)[Mesh.ARRAY_TEX_UV] as PackedVector2Array:
+				var c := img.get_pixel(clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1),
+						clampi(int(uv.y * img.get_height()), 0, img.get_height() - 1))
+				sum += Vector3(c.r, c.g, c.b)
+				texels += 1
+	m.free()
+	var paint := Vector3.ZERO if texels == 0 else sum / texels
+	var drawn := paint.lerp(Vector3.ONE * paint.dot(Vector3(0.3, 0.59, 0.11)), desat)
+	var sat := Color(drawn.x, drawn.y, drawn.z).s
+	ok(texels > 0 and sat <= float(WHITE_HAIR[a]), "%s: the hair reads white, paint saturation %.3f as drawn (max %.2f)"
+			% [a, sat, WHITE_HAIR[a]])
+	var base := MantleLook.params(a, PlayerLook.neutral())
+	var moved: Array = []
+	for pick in Models.LOOK_HAIR.size():
+		var lk := PlayerLook.neutral()
+		lk["hair_col"] = pick
+		lk["eyes"] = pick % PlayerLook.pick_list("eyes").size()
+		var got := MantleLook.params(a, lk)
+		if not (got["hair_col"] as Color).is_equal_approx(base["hair_col"]) \
+				or not (got["eye_col"] as Color).is_equal_approx(base["eye_col"]):
+			moved.append(pick)
+	ok(moved.is_empty(), "%s: no hair or eye pick tints her hair or eyes (moved by %s)" % [a, str(moved)])
+
 func _within_tint(got: Color, want: Color) -> bool:
 	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001
 	var hi := 1.0 + WardenGlb.TINT_MAX + 0.001
@@ -538,7 +585,7 @@ func _weapon(a: String) -> void:
 			func(mi): return (mi as Node3D).is_visible_in_tree() and not own.call(mi))
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	var own_mag := mag != null and mag.has_meta("glb")      # (the loader moved the .glb's weapon_mag here)
-	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty (the reload moves nothing)
+	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty
 	var mag_ok := mag != null and (mag.mesh != null and mag in shown if own_mag else mag.mesh == null)
 	var stray := shown.filter(func(mi): return mi != mag)
 	var left := str(stray.map(func(mi): return mi.name))

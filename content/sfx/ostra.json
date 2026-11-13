@@ -3,6 +3,7 @@
 	"name": "Motley",
 	"script": "tools/gen_sfx_motley.py",
 	"sounds": {
+		"ostra_hit": "impact",
 		"os_orb": "fire",
 		"os_orb_hot": "fire",
 		"os_prime": "cast",
@@ -11,7 +12,7 @@
 		"os_snap_wind": "cast",
 		"os_snap": "cast",
 		"os_snap_hit": "impact",
-		"os_swap_lob": "cast",
+		"os_swap_lob": "dash",
 		"os_swap": "impact",
 		"os_seed": "cast",
 		"os_pop": "impact",

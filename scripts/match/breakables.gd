@@ -13,6 +13,7 @@ const SAFE_MARGIN := 1.2         # metres outside a lit keg's blast a bot still 
 const CHAIN_SLACK := 0.4         # metres past the blast radius that still light a neighbour
 const BLAST_SPEED := 1.6         # debris power per metre of blast radius
 const SCORCH_SCALE := 0.9        # scorch radius as a share of the blast radius
+const HIT_R := 0.36              # metres from a prop's centre a shot or swing has to pass to hit it
 
 static var _rules: Dictionary = {}
 
@@ -24,6 +25,10 @@ func _init(match_node: Match) -> void:
 	_m = match_node
 	_fx = BreakFx.new(rules()["debris"])
 	_m.add_child(_fx)
+
+## Loose chunks of `mat_name` thrown up at `at` with nothing broken (a Hard Landing), from the debris pool.
+func debris(at: Vector3, mat_name: String, chunks: int) -> void:
+	_fx.shatter(at, mat_name, chunks)
 
 ## The rules, read once.
 static func rules() -> Dictionary:
@@ -68,6 +73,15 @@ func hit(b: Dictionary, by: Ent, chain := false) -> void:
 	_m.sfx("fuse_hiss", b["pos"], -2.0, 1.0)
 	_m.sfx("break_metal", b["pos"], -10.0, 1.6)
 
+## The live props within `reach` (flat) of `p`: what one shot can touch this step. A shot walked its
+## path in 0.25 m hops against every prop on the map, and the 2x map doubled them.
+static func near(breaks: Array, p: Vector3, reach: float) -> Array:
+	var out: Array = []
+	for b in breaks:
+		if not b["dead"] and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < reach:
+			out.append(b)
+	return out
+
 ## Runs the fuses of lit kegs.
 func tick(dt: float) -> void:
 	for b in lit.duplicate():
@@ -106,12 +120,13 @@ func smash(b: Dictionary, by: Ent, from_net := false) -> void:
 	if sp.has("explosive"):
 		_explode(at, sp["explosive"], by, from_net)
 
-## Lights every unbroken prop a blast at `c` reaches.
-func _chain(c: Vector3, radius: float, by: Ent) -> void:
+## Hits every unbroken prop a blast at `c` reaches (Explosive hits: a keg's blast, Ostra's Empowered
+## Nightwell ticks). `chain`: the blast is a keg's, so kegs it lights burn the short chain fuse.
+func hit_around(c: Vector3, radius: float, by: Ent, chain := false) -> void:
 	for b in _m.breaks:
 		var reach := Vector2(b["pos"].x - c.x, b["pos"].z - c.z).length() < radius + CHAIN_SLACK
 		if not b["dead"] and reach and absf(b["pos"].y - c.y) < 2.0:
-			hit(b, by, true)
+			hit(b, by, chain)
 
 func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	var radius := float(ex["radius"])
@@ -128,7 +143,7 @@ func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	if from_net:
 		return
 	_hurt_around(c, ex, by)
-	_chain(c, radius, by)
+	hit_around(c, radius, by, true)
 
 func _hurt_around(c: Vector3, ex: Dictionary, by: Ent) -> void:
 	var radius := float(ex["radius"])
@@ -166,8 +181,8 @@ func _drop_loot(at: Vector3, loot: Dictionary, by: Ent, from_net: bool) -> void:
 	var up := at + Vector3(0, 0.5, 0)
 	var scale_by := float(_m.T["loot"])
 	var gems: Array = loot["gems"]
-	for i in randi_range(int(gems[0]), int(gems[1])):
-		_m.drop("gem", up, maxi(1, int(round(float(loot["gem_base"]) * scale_by))))
+	var each := maxi(1, int(round(float(loot["gem_base"]) * scale_by)))
+	DropMerge.gems(_m, up, randi_range(int(gems[0]), int(gems[1])), each)
 	if loot.has("seed") and randf() < float(loot["seed"]):
 		_m.drop("seed", up, 1, Data.pick_seed())
 	if loot.has("tonic") and randf() < float(loot["tonic"]):

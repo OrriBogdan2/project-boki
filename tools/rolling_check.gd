@@ -3,7 +3,7 @@ extends RefCounted
 ## The wave schedule and the join cut-off, joining part-way through (the clock, who's already out
 ## there, the wide map), drop waves arriving on schedule over the quiet side, the level floor on
 ## landing, catch-up XP, bounties (posted, shown, claimed), the soft landing (fresh-lander grace and
-## the Blight's per-squad ramp), cleared camps coming back, the session ending for everyone at 30:00,
+## the Blight's per-squad ramp), camps up (their comeback is --camps-check), the session ending for everyone at 30:00,
 ## and the default fixed-length match being untouched. Never touches the save.
 
 var bad := 0
@@ -233,20 +233,7 @@ func _session(main: Node) -> void:
 		R._update_bounties()
 		ok(not rival.has_meta("bounty"), "no new bounty right after one is claimed (%.0f s cooldown)" % Rolling.BOUNTY_CD)
 		m.revive_hunter(rival, rival)
-	# ---- cleared camps come back
-	var cp_i := -1
-	for i in R.camps.size():
-		var cp: Dictionary = R.camps[i]
-		var near := m.hunters.any(func(h): return not h.out and not h.extracted and Vector2(h.pos.x - cp["pos"].x, h.pos.z - cp["pos"].z).length() < 24.0)
-		if not near: cp_i = i; break
-	ok(R.camps.size() > 0 and cp_i >= 0, "monster camps are tracked (%d)" % R.camps.size())
-	if cp_i >= 0:
-		var cp2: Dictionary = R.camps[cp_i]
-		for mb in cp2["mobs"]: mb.dead = true; mb.hp = 0.0
-		cp2["cleared_at"] = m.time - Rolling.CAMP_RESPAWN - 1.0
-		var n0 := int(R.stats["camp_respawns"])
-		R._camp_respawns()
-		ok(int(R.stats["camp_respawns"]) >= n0 + 1 and (cp2["mobs"] as Array).all(func(mb): return not mb.dead), "a cleared camp comes back after %d s with nobody near" % int(Rolling.CAMP_RESPAWN))
+	ok(m.camps != null and not m.camps.list().is_empty(), "the camps are up in a rolling session (their comeback: --camps-check)")
 	ok(R.next_meteor(0.0) < m.length and R.next_meteor(0.0) > 0.0, "meteor showers keep coming through the session (next at %s)" % Rolling.fmt(m.sess_t0 + R.next_meteor(0.0)))
 	# ---- no new squads in the last 8 minutes
 	var flying0 := m.ships.size()
@@ -262,7 +249,7 @@ func _session(main: Node) -> void:
 	var ext: Hunter = null
 	for h in m.hunters:
 		if h != P and not h.out and not h.extracted and not h.riding and not h.dropping: ext = h; break
-	if ext: m._extract(ext, "skiff", "test")
+	if ext: m._extract(ext, "uplink", "test")
 	m.time = m.length - 0.5
 	_run(m, 1.0)
 	var still := m.hunters.filter(func(h): return not h.out and not h.extracted)
@@ -280,11 +267,13 @@ func _default_match(main: Node) -> void:
 	m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 31, "autoplay": true, "plan_t": 0.5})
 	m.set_process(false)
 	ok(m.rolling == null and m.ships.is_empty() and m.sess_t0 == 0.0, "without the option it's the fixed match")
-	ok(absf(m.length - Data.MATCH["length"] * 1.7) < 0.01 and m.world.w == World.BIG_SIZE and m.world.layout_id == World.layout_for_tier(0), "same length (%.0f s) and map (%d tiles)" % [m.length, m.world.w])
-	var dock: Dictionary = {}
+	var map_size := int(World.load_layout(World.layout_for_tier(0)).get("size", World.BIG_SIZE))
+	ok(absf(m.length - Heart.r("match_s")) < 0.01 and m.world.w == map_size and m.world.layout_id == World.layout_for_tier(0),
+			"same length (%.0f s) and map (%d tiles)" % [m.length, m.world.w])
+	var up: Dictionary = {}
 	for x in m.exits.list:
-		if x["kind"] == "dock": dock = x; break
-	ok(dock.is_empty() or absf(float(dock["open_at"]) - m.length * 0.18) < 0.01, "exits open when they always did")
+		if x["kind"] == "outpost": up = x; break
+	ok(up.is_empty() or absf(float(up["open_at"]) - m.length * 0.22) < 0.01, "exits open when they always did")
 	ok(m.hunters.all(func(h): return h.riding), "everyone boards the one skyship")
 	_run(m, 2.0)
 	ok(absf(m.sess_time() - m.time) < 0.001, "the session clock is the match clock")

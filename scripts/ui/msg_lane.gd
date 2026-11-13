@@ -4,8 +4,8 @@ extends Control
 ## tutorial holds back. Every screen has one (the match HUD, the farm, the town, a house; UI.toast finds
 ## or makes it). Messages stack down a fixed column under `top`, so two never sit on top of each other;
 ## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once
-## (fewer while the host's own cards take rows, see `reserved`) and the rest wait, the most important
-## first; each lives a short while. A low-priority line that waits too long is dropped as old news.
+## (FIGHT_SHOWN in a fight, see `fight`) and the rest wait, the most important first; each lives a
+## short while (FIGHT_LIFE at most in a fight). A low-priority line that waits too long is dropped.
 
 enum { LOW, NORMAL, HIGH }
 const MAX_SHOWN := 3
@@ -15,13 +15,16 @@ const STALE := 3.0              # s a LOW line may wait before it's dropped
 const WAIT_CAP := 6             # lines waiting at most: past it the oldest of the lowest priority goes
 const FADE_IN := 0.15           # s
 const FADE_OUT := 0.35          # s
+const ICON_GAP := 26.0         # px left of the text for a card's icon
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
+const FIGHT_SHOWN := 2          # lines on show at most while the player is in a fight
+const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint's own life aside)
 
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
-var reserved := 0               ## rows the host's own cards take at the top (the ally alerts)
+var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
 var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
@@ -42,8 +45,9 @@ static func of(host: Control) -> MsgLane:
 	host.add_child(lane)
 	return lane
 
-## Puts a line in the lane. `life` 0 uses the priority's own; a hint passes a longer one.
-func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
+## Puts a line in the lane. `life` 0 uses the priority's own; a hint passes a longer one; `icon`
+## (an Icons id) draws a small mark at the card's left.
+func push(text: String, col: Color, prio := NORMAL, life := 0.0, icon := "") -> void:
 	if text == "":
 		return
 	for e in _shown:
@@ -56,7 +60,8 @@ func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
 			_bump(e)
 			return
 	var life_s := life if life > 0.0 else float(LIFE[prio])
-	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "n": 1, "t": 0.0, "wait": 0.0})
+	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "own_life": life > 0.0, "n": 1, "t": 0.0,
+		"wait": 0.0, "icon": icon})
 	Sfx.play("ui_toast", null, -4.0, 0.03)
 	if _waiting.size() > WAIT_CAP:
 		_waiting.remove_at(_lowest())
@@ -129,7 +134,7 @@ func _process(delta: float) -> void:
 	for i in range(_shown.size() - 1, -1, -1):
 		var e: Dictionary = _shown[i]
 		e["t"] = float(e["t"]) + delta
-		if float(e["t"]) >= float(e["life"]):
+		if float(e["t"]) >= _life(e):
 			(e["box"] as Control).queue_free()
 			_shown.remove_at(i)
 	for i in range(_waiting.size() - 1, -1, -1):
@@ -142,7 +147,7 @@ func _process(delta: float) -> void:
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority).
 func _promote() -> void:
-	while not hold and not _waiting.is_empty() and _shown.size() < maxi(1, MAX_SHOWN - reserved):
+	while not hold and not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
 		var best := 0
 		for i in _waiting.size():
 			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
@@ -169,9 +174,15 @@ func _layout(delta: float) -> void:
 		above = y + box.size.y
 		want += box.size.y + GAP
 		var t := float(e["t"])
-		box.modulate.a = clampf(t / FADE_IN, 0.0, 1.0) * clampf((float(e["life"]) - t) / FADE_OUT, 0.0, 1.0)
+		box.modulate.a = clampf(t / FADE_IN, 0.0, 1.0) * clampf((_life(e) - t) / FADE_OUT, 0.0, 1.0)
 
 ## One card: the menu's glass with a line in the message's colour.
+## How long line `e` lives now: its own life, cut to FIGHT_LIFE in a fight unless it asked for its own.
+func _life(e: Dictionary) -> float:
+	if fight and not bool(e["own_life"]):
+		return minf(float(e["life"]), FIGHT_LIFE)
+	return float(e["life"])
+
 func _card(e: Dictionary) -> PanelContainer:
 	var px: int = PX[int(e["prio"])]
 	var c := UI.glass(8, UI.R_CARD)
@@ -182,10 +193,23 @@ func _card(e: Dictionary) -> PanelContainer:
 	l.add_theme_constant_override("outline_size", 4)
 	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long line wraps at a sane width, never word by word
+	if e["icon"] != "":
+		l.add_theme_stylebox_override("normal", _icon_gap())
 	_fit(l, px)
 	c.add_child(l)
+	if e["icon"] != "":
+		var mark := Control.new()
+		mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		mark.draw.connect(func(): Icons.draw(mark, e["icon"], Vector2(14.0, mark.size.y * 0.5), px * 0.55, e["col"]))
+		c.add_child(mark)
 	c.modulate.a = 0.0
 	return c
+
+## Room at a label's left for the icon.
+func _icon_gap() -> StyleBoxEmpty:
+	var gap := StyleBoxEmpty.new()
+	gap.content_margin_left = ICON_GAP
+	return gap
 
 func _bump(e: Dictionary) -> void:
 	e["n"] = int(e["n"]) + 1
@@ -197,6 +221,8 @@ func _bump(e: Dictionary) -> void:
 ## The label as wide as its line, up to WIDE of the screen (past that it wraps).
 func _fit(l: Label, px: int) -> void:
 	var natural := UI.big.get_string_size(l.text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	if l.has_theme_stylebox_override("normal"):
+		natural += ICON_GAP
 	var widest := get_viewport_rect().size.x * WIDE if is_inside_tree() else 600.0
 	l.custom_minimum_size.x = minf(natural + 2.0, widest)
 

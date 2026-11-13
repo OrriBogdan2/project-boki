@@ -1,5 +1,5 @@
 {
- "_doc": "Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan.",
+ "_doc": "Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones, a cleared camp 1 (Camps). sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan. A weight of 0 keeps a perk out of orbs: the hazard wards (kind ward) are sold in shops only.",
  "take_radius": 1.2,
  "bot_radius": 16.0,
  "fan_radius": 2.4,
@@ -8,16 +8,19 @@
   "chest": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 1.5}},
   "shrine": {"n": [1, 2], "lean": {"flat": 3.0, "weapon": 0.6, "kit": 1.5}},
   "boss": {"n": [3, 3], "fan": true, "lean": {"flat": 1.0, "weapon": 4.0, "kit": 0.5}},
-  "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}}
+  "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}},
+  "camp": {"n": [1, 1], "lean": {"flat": 1.5, "weapon": 3.0, "kit": 1.0}}
  },
  "kinds": {
   "flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"],
   "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"],
-  "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]
+  "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"],
+  "ward": ["ember_walk", "sure_foot", "grounded", "spore_mask"]
  },
  "weights": {
   "brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7,
-  "overcharge": 0.6, "remedy": 0.8
+  "overcharge": 0.6, "remedy": 0.8,
+  "ember_walk": 0, "sure_foot": 0, "grounded": 0, "spore_mask": 0
  },
  "bot_want": {
   "default": 1.5,

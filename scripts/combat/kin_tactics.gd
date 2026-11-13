@@ -40,6 +40,8 @@ func chase_range() -> float:
 
 ## How far from you it will wander before coming back.
 func leash() -> float:
+	if k.summon and k.summon.out():
+		return k.summon.leash(aggression)
 	return maxf(5.0, _r("leash_base", 9.0) + aggression * _r("leash_per_aggression", 8.0) + loyalty * _r("leash_per_loyalty", -4.0))
 
 ## Below this share of its health it runs back to you.
@@ -59,7 +61,7 @@ func pick_target() -> Ent:
 	var attacker: Ent = own.last_hit_by if own else null
 	if attacker is Kin and (attacker as Kin).owner_h:
 		attacker = attacker
-	for f in k.m.foes_of(k.team):
+	for f in k.m.foes_of(k.team, false):
 		if f is Hunter and (f.downed or f.cloak_t > 0.0):
 			continue
 		if not f.hittable() or Shrubling.hidden(f):
@@ -140,7 +142,7 @@ func cue_aim(cue: PartSpec) -> Vector3:
 		"foes_clumped":
 			if k.target and k.flat_dist(k.target) < float(p["range"]):
 				var n := 0
-				for f in k.m.foes_of(k.team):
+				for f in k.m.foes_of(k.team, false):
 					if f.flat_dist(k.target) < float(p["radius"]): n += 1
 				if n >= int(p["count"]) and randf() < offensive_rate:
 					return k.target.pos
@@ -159,6 +161,6 @@ func cue_aim(cue: PartSpec) -> Vector3:
 			if (own.below_lip or (own.over_void() and own.vel.y < -4.0 and not own.grounded)) and randf() < 0.35 + loyalty * 0.65:
 				return own.pos
 		"owner_fighting":
-			if own.idle_fire < 1.5 and k.m.foes_of(k.team).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(p["chance"]) * (0.5 + aggression):
+			if own.idle_fire < 1.5 and k.m.foes_of(k.team, false).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(p["chance"]) * (0.5 + aggression):
 				return own.inp.get("aim", own.pos)
 	return Vector3.INF

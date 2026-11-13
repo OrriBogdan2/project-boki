@@ -99,11 +99,68 @@ func run(main: Node) -> void:
 	ok(lh != null and is_instance_valid(lh) and lh.visible, "clicking a thing that doesn't fit opens the hold window")
 	print("LOOTFULL hold pos=%s size=%s modulate=%s scale=%s" % [lh.position, lh.size, lh.modulate, lh.scale])
 	var noop := func(_i: int): pass
+	var noop2 := func(): pass
 	var hold := LootHold.build(P, bw["pack"][0], noop, noop, func(): pass)
 	var buttons := hold.find_children("*", "Button", true, false).filter(
 		func(b): return (b as Button).text in ["Swap", "Drop"])
 	ok(buttons.size() == 2 * P.pack.size(), "hold window: Swap and Drop for each of your %d things" % P.pack.size())
 	hold.free()
 	m.hud.close_loot()
+	_merged_drops(m, P)
+	var gb := make_box(Q, P.pos, [])
+	gb["gear"] = [{"id": "windstep_boots", "rar": 3}]
+	P.gear[Gear.slot_on(P, "windstep_boots")] = {}
+	var grow: Dictionary = Life.box_items(m, P, gb)[0]
+	var gcard := LootHold.box_row(grow, true, noop2)
+	var labels := gcard.find_children("*", "Label", true, false)
+	var arrows := labels.filter(func(l): return (l as Label).text.begins_with("▲"))
+	ok(arrows.size() == 1 and String(grow["vs"]).contains("Nothing"), "box gear row: better arrow, empty-slot tip")
+	var names := labels.filter(func(l): return (l as Label).get_theme_color("font_color") == grow["col"])
+	ok(names.size() >= 1, "box gear row: the name is in its rarity colour")
+	gcard.free()
 	print("LOOT FULL CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## Most loose pickups one monster kill, one chest or one prop may leave (one per kind: gem, seed, tonic, armor, key).
+const MAX_PER_KILL := 5
+
+## Ground drops are merged: each kind comes as one pickup holding the total. Counts what a whole map's
+## monsters, chests and props leave on the ground (the numbers are printed for the perf notes).
+func _merged_drops(m: Match, P: Hunter) -> void:
+	P.gems = 0
+	m.pickups.clear()
+	var worst := 0
+	var gems_by_kill := 0
+	for mb in m.mobs.duplicate():
+		var before: int = m.pickups.size()
+		m.on_mob_dead(mb, P, {})
+		var made: Array = m.pickups.slice(before)
+		worst = maxi(worst, made.size())
+		var kinds := {}
+		for p in made:
+			kinds[p["kind"]] = int(kinds.get(p["kind"], 0)) + 1
+		gems_by_kill = maxi(gems_by_kill, int(kinds.get("gem", 0)))
+	var from_mobs: int = m.pickups.size()
+	ok(worst <= MAX_PER_KILL and gems_by_kill <= 1,
+		"one kill makes at most %d pickups, one gem pile (worst %d, %d piles)" % [MAX_PER_KILL, worst, gems_by_kill])
+	var chest_n := 0
+	for c in m.chests:
+		var before: int = m.pickups.size()
+		ChestLoot.drop(m, P, c, true)
+		chest_n += m.pickups.size() - before
+		worst = maxi(worst, m.pickups.size() - before)
+	var prop_n: int = m.pickups.size()
+	for b in m.breaks.duplicate():
+		var before: int = m.pickups.size()
+		m.brk.smash(b, P)
+		worst = maxi(worst, m.pickups.size() - before)
+	prop_n = m.pickups.size() - prop_n
+	ok(worst <= MAX_PER_KILL, "a chest or a prop leaves at most %d pickups (worst %d)" % [MAX_PER_KILL, worst])
+	var total := 0
+	for p in m.pickups:
+		if p["kind"] == "gem":
+			total += int(p["v"])
+	print("LOOTFULL drops on this map: %d monsters -> %d pickups, %d chests -> %d, %d props -> %d" % [
+		m.mobs.size(), from_mobs, m.chests.size(), chest_n, m.breaks.size(), prop_n])
+	print("LOOTFULL gem value on the ground %d, gear/treasure on the ground %d" % [total, m.wpicks.size()])

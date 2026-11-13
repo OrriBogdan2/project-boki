@@ -1,16 +1,17 @@
 class_name HomeBelt
 extends RefCounted
-## The utility belt on the farm: choosing what goes on keys 1, 2 and 3 for the next expedition (rows in
-## the expedition panel), and the armory's Utility tab that lists your stash. What you pick leaves the
+## The utility belt on the farm: choosing what goes on keys 3 to 6 for the next expedition (rows in
+## the expedition panel; 1 and 2 are always the tonic and the armor kit), and the armory's Utility
+## tab that lists your stash. What you pick leaves the
 ## stash when you set out (Equal.take_belt), up to the cap for the difficulty tier; everyone also gets
 ## the everyday issue (two tonics, two armor kits). Gloves and boots are chosen in HomeEcon.
 
-## Items you could put in a slot: the issued ones and anything you have in the stash.
+## Items you could put in an open slot: anything you have in the stash that has no slot of its own.
 static func choices() -> Array:
 	var out: Array = [""]
 	var iss: Dictionary = Equal.rules().get("issue", {})
 	for id in UtilityBelt.stock_ids():
-		if int(iss.get(id, 0)) > 0 or Equal.stash_of(id) > 0:
+		if UtilityBelt.fixed_slot(id) < 0 and (int(iss.get(id, 0)) > 0 or Equal.stash_of(id) > 0):
 			out.append(id)
 	return out
 
@@ -19,6 +20,8 @@ static func _pick_at(i: int) -> String:
 
 static func _set_pick(i: int, id: String) -> void:
 	var p: Array = Equal.picks()
+	if UtilityBelt.reserved_id(i) != "":
+		return
 	for k in p.size():
 		if k != i and String(p[k]) == id and id != "":
 			p[k] = ""          # an item sits in one slot only
@@ -54,6 +57,10 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 				"")) if id != "" else "Leave this slot for something you find"
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(nm)
+		if UtilityBelt.reserved_id(i) != "":
+			row.add_child(UI.label("always", 12, UI.FAINT))
+			parent.add_child(card)
+			continue
 		var at := maxi(0, ch.find(id))
 		for dir in [-1, 1]:
 			var dd: int = dir

@@ -42,16 +42,20 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null
 		return false
 	if bodies:
 		for e in m.hunters:
-			if is_instance_valid(e) and e != skip and not e.dead and Vector2(
-				e.pos.x - p.x, e.pos.z - p.z
-			).length() < ROCK_R + e.r + 0.15 and absf(e.pos.y - g) < 2.0:
+			if is_instance_valid(e) and e != skip and not e.dead and _under(e, p, g):
 				return false
 		for mb in m.mobs:
-			if is_instance_valid(mb) and not mb.dead and Vector2(
-				mb.pos.x - p.x, mb.pos.z - p.z
-			).length() < ROCK_R + mb.r + 0.15 and absf(mb.pos.y - g) < 2.0:
+			if is_instance_valid(mb) and not mb.dead and _under(mb, p, g):
+				return false
+		for kn in m.kins:
+			# a Boki out in the world is a body too (BokiHit)
+			if is_instance_valid(kn) and kn.hittable() and _under(kn, p, g):
 				return false
 	return true
+
+static func _under(e: Ent, p: Vector3, g: float) -> bool:
+	var near := Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < ROCK_R + e.r + 0.15
+	return near and absf(e.pos.y - g) < 2.0
 
 ## Walk from `from` toward `aim` up to `reach` and return the last legal spot:
 ## {ok, pos, stopped: "" | "reach" | "wall" | "abyss", over_abyss: the aim itself is over the abyss}.
@@ -145,44 +149,59 @@ static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 		tx(m, ["zone", "rockgo", String(w.get("rid", ""))])
 
 ## A temporary rock bridge over the abyss from `from` along `dir`. Returns the tiles turned to ground.
+## warn, rise: Verbs.add_bridge's crumble warning and heave-up (s; 0 = none).
 static func bridge(
 	m: Node, by: Ent, from: Vector3, dir: Vector2, len_: float, width: float, time_: float, send := true,
-	color := "#d9b27a"
+	color := "#d9b27a", warn := 0.0, rise := 0.0
 ) -> int:
-	var n: int = m.verbs.add_bridge(by, from, dir, {"length": len_, "width": width, "time": time_, "color": color})
+	var e := {"length": len_, "width": width, "time": time_, "color": color, "warn": warn, "rise": rise}
+	var n: int = m.verbs.add_bridge(by, from, dir, e)
 	if n > 0 and send and by != null and (m.net_on or capture) and not by.remote:
 		tx(
 			m,
 			[
 				"zone", "bridge", by.nid, m._r(from.x), m._r(from.y), m._r(from.z), snappedf(dir.x, 0.001),
-				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color
+				snappedf(dir.y, 0.001), snappedf(len_, 0.1), snappedf(width, 0.1), snappedf(time_, 0.1), color,
+				snappedf(warn, 0.01), snappedf(rise, 0.01)
 			]
 		)
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
 ## The seed: a dark indigo glass drum on the ground with a slow violet swirl (shaders/void_glass),
-## growing to its full width, with a teal rim ring. Ostra's own shape; no other zone looks like it.
-static func seed_visual(m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color) -> Node3D:
+## growing to its full width, with a thin teal rim at its edge. Ostra's own shape; no other zone looks like it.
+const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
+
+## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
+static func seed_r(rmax: float, grow: float, t: float) -> float:
+	return rmax * clampf(t / grow, SEED_R0, 1.0)
+
+## Sets the globe to the seed's radius. The owner calls it every tick with the kit's own radius;
+## a remote seed has no kit here, so `seed_visual(remote)` runs the same growth on a tween.
+static func seed_size(n: Node3D, r: float) -> void:
+	n.scale = Vector3.ONE * r
+
+static func seed_visual(
+	m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color, remote := false
+) -> Node3D:
 	var n := Node3D.new()
 	var core := MeshInstance3D.new()
 	core.name = "Core"
-	core.mesh = Models.cyl(1.0, 1.0, 1.0, 28)
+	core.mesh = Models.sphere(1.0, 32)
 	core.material_override = KitLooks.glass_mat(Color("1a0636"), Color("7a5cff"), 0.8, 0.55)
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	core.position = Vector3(0, 0.5, 0)
 	n.add_child(core)
 	var ring := MeshInstance3D.new()
 	ring.name = "Ring"
-	ring.mesh = Models.cyl(1.0, 1.0, 0.04, 28)
-	ring.material_override = KitLooks.shade_mat(Color(col, 0.75))
+	ring.mesh = Models.flat_quad(2.0)                  # a thin rim at the hit edge, so the violet globe reads
+	ring.material_override = Models.ring_mat(Color(col, 0.9), 0.06)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	n.add_child(ring)
 	m.add_child(n)
 	n.global_position = at + Vector3(0, 0.02, 0)
-	n.scale = Vector3(0.45, 0.9, 0.45)
-	var tw := n.create_tween()
-	tw.tween_property(n, "scale", Vector3(rmax, 1.4, rmax), grow).set_trans(Tween.TRANS_SINE)
+	seed_size(n, seed_r(rmax, grow, 0.0))
+	if remote:
+		n.create_tween().tween_method(func(t: float): seed_size(n, seed_r(rmax, grow, t)), 0.0, grow, grow)
 	var seeds: Dictionary = m.get_meta("zone_seeds", {})
 	seeds[sid] = n
 	m.set_meta("zone_seeds", seeds)
@@ -218,14 +237,16 @@ static func net_in(m: Node, x: Array) -> void:
 			var by2: Ent = m.ents_by_id.get(String(x[2]), null)
 			if by2 != null:
 				var tint := String(x[11]) if x.size() > 11 else "#d9b27a"
+				var warn := float(x[12]) if x.size() > 13 else 0.0
+				var rise := float(x[13]) if x.size() > 13 else 0.0
 				bridge(
 					m, by2, Vector3(x[3], x[4], x[5]), Vector2(x[6], x[7]), float(x[8]), float(x[9]), float(x[10]),
-					false, tint
+					false, tint, warn, rise
 				)
 		"seed":
 			if x.size() < 9: return
 			var sid := String(x[3])
 			if not (m.get_meta("zone_seeds", {}) as Dictionary).has(sid):
-				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), Color("6fd0c6"))
+				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), Color("6fd0c6"), true)
 		"pop":
 			seed_pop(m, String(x[2]), Color("6fd0c6"))

@@ -3,11 +3,16 @@ extends Node3D
 ## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
 ## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
-## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
-## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
+## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
+## Names, tempers and blurbs come from each species' "egg" block in content/kin/<id>.json, so every
+## egg is named for its element (Venom Egg, ...).
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const MYSTERY := {"species": "mystery", "name": "Mystery Egg", "temper": "???", "desc": "Speckled, and strangely quiet. Nobody knows what's inside.",
-	"play": "Something that isn't any of the other three. You'll find out when it hatches."}
+const MYSTERY := {
+	"species": "mystery", "name": "Mystery Egg", "temper": "???",
+	"desc": "Black as a moonless night, tucked in an old basket at the back. Nobody knows what's inside.",
+	"play": "Almost anything from the wilds could be in there, even a rare one,"
+		+ " and it's more likely than most to hatch a little strange.",
+}
 
 static func starter_eggs() -> Array:
 	var out: Array = []
@@ -22,8 +27,7 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
-const CREATE_CAM := Vector3(0.05, 1.2, 4.75)     # m: the creator's fixed camera, the whole body in frame
-const CREATE_LOOK := Vector3(0.2, 0.98, 1.6)
+const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
 var fx: Fx
@@ -44,7 +48,8 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
-var egg_defs: Array = []      # EGGS with the mystery egg's species decided
+var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
+var mystery_found := false    # its card shows once you've hovered or picked the black egg
 var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
@@ -73,26 +78,25 @@ func _ready() -> void:
 	cam.look_at(Vector3(0, 0.6, 0))
 	_build_set()
 	egg_defs = starter_eggs()
-	var others: Array = Data.common_kin().filter(func(k): return not k in ["cindle", "puddlet", "burrlet"])
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
 	for d in egg_defs:
 		if d["species"] == "mystery":
-			d["species"] = others[randi() % others.size()] if others.size() > 0 else "cindle"
+			d["species"] = MysteryEgg.roll_species(rng)
+			d["rec"] = {"mutations": MysteryEgg.roll_mutations(rng)}
 			d["mystery"] = true
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
-		var sp: Dictionary = Data.KIN[d["species"]]
 		var holder := Node3D.new()
-		var x := -2.55 + i * 1.7
-		holder.position = Vector3(x, 0, 0.2)
+		holder.position = MYSTERY_AT if d.get("mystery", false) else Vector3(-1.7 + i * 1.7, 0, 0.2)
 		add_child(holder)
-		var nest := Models.nest(); nest.scale = Vector3.ONE * 0.8
-		for ch in nest.get_children():
-			if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
-				ch.visible = false
-		holder.add_child(nest)
-		var egg := EggHatch.new(d["species"], fx, 0.32, 0.42, 1.1)
+		var egg := EggHatch.new(d["species"], fx, 0.32, 0.42, 1.1, d.get("rec", {}))
 		if d.get("mystery", false):
-			egg.shell_col = Color("c4bcd6"); egg.spot_col = Color("6a5a8a")
+			holder.add_child(MysteryEgg.new())
+			MysteryEgg.hideout(self, MYSTERY_AT)
+			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS
+		else:
+			holder.add_child(_nest())
 		egg.hop_out = 0.35
 		egg.position = Vector3(0, 0.12, 0)
 		holder.add_child(egg)
@@ -118,6 +122,14 @@ func _ready() -> void:
 			_end_intro()
 			_pick(i); _pick(i)
 			auto_warm = true
+
+## A starter egg's nest, without the eggs it comes with.
+func _nest() -> Node3D:
+	var nest := Models.nest(); nest.scale = Vector3.ONE * 0.8
+	for ch in nest.get_children():
+		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
+			ch.visible = false
+	return nest
 
 ## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
 ## feet, a broken arch behind with the old world's heart-crystal turning inside it, lanterns and
@@ -339,9 +351,11 @@ func _end_intro() -> void:
 		_after_create()
 
 var turning := false
+var zoom := 0.0               # the creator's camera: 0 the whole body, 1 the face
 func _unhandled_input(event: InputEvent) -> void:
 	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn yourself round
+		# drag with the mouse (or hold A / D) to turn yourself round; the wheel zooms to your face
+		zoom = CreatorCam.wheel(zoom, event)
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			turning = event.pressed
 		elif event is InputEventMouseMotion and turning:
@@ -389,58 +403,21 @@ func _show_create() -> void:
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
+	if sub_lbl: sub_lbl.text = "This is you. Drag (or hold A / D) to turn round."
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
-	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
-	look_at_t = CREATE_LOOK
-	var card := UI.card(UI.CARD, 14, 16)
-	card.custom_minimum_size = Vector2(500, 0)
+	zoom = 0.0          # the whole body first, so a change of height or build shows as one
+	var card := CreatorCard.make(look, edit_only)
 	create_box = card
-	var v := UI.vbox(8); card.add_child(v)
-	for r in Unmasked.ROWS.size():
-		var row: Array = Unmasked.ROWS[r]
-		if r == 0 or r == Unmasked.HOLLOW_ROW:
-			v.add_child(UI.label("Body" if r == 0 else "The hollow", 12, UI.ACCENT, UI.caps))
-		var key: String = row[0]
-		var opts: Array = row[2]
-		var hr := UI.hbox(8)
-		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
-		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		if row.size() > 3:
-			l.tooltip_text = row[3]
-			l.mouse_filter = Control.MOUSE_FILTER_STOP
-		hr.add_child(l)
-		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
-		var i := int(look[key])
-		if opts[0] is Color:
-			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
-			sw.add_theme_stylebox_override("panel", UI.frame(opts[i], 13, Color(1, 1, 1, 0.25)))
-			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			hr.add_child(sw)
-		else:
-			var val := UI.label(String(opts[i]), UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
-			val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			hr.add_child(val)
-		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
-		v.add_child(hr)
-	var nr := UI.hbox(8)
-	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
-	nr.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
-	nr.add_child(ne)
-	v.add_child(nr)
-	var br := UI.hbox(10)
-	br.alignment = BoxContainer.ALIGNMENT_END
-	br.add_child(UI.ghost("Random", func():
-		look = Unmasked.random_look()
-		_show_create(), 120, "swap"))
-	br.add_child(UI.primary("Looks good", _looks_good, 200))
-	v.add_child(br)
+	card.changed.connect(func(lk: Dictionary):
+		look = lk
+		_rebuild_preview())
+	card.done.connect(func():
+		look = card.look
+		_looks_good())
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+	card.offset_top += 30; card.offset_bottom += 30       # clear of the title
+	card.grow_vertical = Control.GROW_DIRECTION_BOTH      # More looks... grows it up and down, not off the bottom
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()
@@ -464,11 +441,6 @@ func _top_over(x_frac: float) -> void:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
 
-func _step_look(key: String, d: int, n: int) -> void:
-	look[key] = posmod(int(look[key]) + d, n)
-	Sfx.play("hover", null, -6.0)
-	_show_create()
-
 var preview_yaw := PI
 var preview_anim: HunterAnim
 func _rebuild_preview() -> void:
@@ -488,6 +460,8 @@ func _show_pick() -> void:
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var mystery: bool = d.get("mystery", false)
+		if mystery and not mystery_found:
+			continue
 		var card := UI.card(UI.CARD, 12, 14)
 		card.custom_minimum_size = Vector2(228, 0)
 		# every egg card the same size, with its button on the same line at the bottom
@@ -505,6 +479,7 @@ func _show_pick() -> void:
 		hr.add_child(tt)
 		hr.add_child(UI.section(d["temper"], ecol))
 		v.add_child(hr)
+		v.add_child(EggPreview.build(d["species"], mystery, get_tree()))
 		var dl := UI.label(d["desc"], 14, UI.MUTED)
 		dl.custom_minimum_size.x = 200
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -531,6 +506,7 @@ func _pick(i: int) -> void:
 		_start_hatch()
 		return
 	chosen = i
+	mystery_found = mystery_found or egg_defs[i].get("mystery", false)
 	Sfx.play("click")
 	_show_pick()
 
@@ -613,6 +589,9 @@ func _process(delta: float) -> void:
 	if stage == "mask":
 		pass       # (MaskMoment moves the camera)
 	elif stage == "create":
+		var hs: float = Unmasked.HEIGHT_SCALE[int(look.get("height", 1))]
+		cam_to = CreatorCam.cam_pos(zoom, hs)
+		look_at_t = look_at_t.lerp(CreatorCam.focus(zoom, hs), minf(1.0, delta * 3.0))
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
@@ -627,6 +606,9 @@ func _process(delta: float) -> void:
 		if hv != hover:
 			hover = hv
 			if hover >= 0: Sfx.play("hover", null, -12.0)
+			if hover >= 0 and egg_defs[hover].get("mystery", false) and not mystery_found:
+				mystery_found = true
+				_show_pick()
 		for i in eggs.size():
 			var hs := 1.12 if i == hover else 1.0
 			var hn: Node3D = eggs[i]["holder"]
@@ -653,7 +635,7 @@ func _process(delta: float) -> void:
 				stage = "reveal"
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
-				var rv := KinReveal.new(egg_defs[chosen]["species"])
+				var rv := KinReveal.new(egg_defs[chosen]["species"], egg_defs[chosen].get("rec", {}))
 				add_child(rv)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
@@ -728,6 +710,8 @@ func _show_name() -> void:
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
 	rec["trust"] = 55.0
+	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
+	if not muts.is_empty(): rec["mutations"] = muts
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
 	rec["starter"] = true          # your first kin: it always stays on the farm with you
 	rec["got_t"] = Time.get_unix_time_from_system()
@@ -743,13 +727,27 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 		return
 	_head_out(tutorial)
 
-## Your first Relic, in the world: Vex drifts to you and you put her on (MaskMoment), then `then`.
+## Your first Relic: pick one of the three starters (Lace, Kael or Vex; HobOffer), then it drifts to you and you
+## put it on in the world (MaskMoment), then `then`.
 func _mask_moment(then: Callable) -> void:
 	stage = "mask"
 	_clear_bottom()
 	top_box.visible = false
-	var first := String(ClassUnlock.starters()[0])
-	ClassUnlock.choose_starters([first])
+	var holder := ColorRect.new()      # (the island dimmed behind the cards)
+	holder.color = Color(0.02, 0.01, 0.05, 0.55)
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.add_child(centre)
+	var picked := func(id: String):
+		holder.queue_free()
+		_put_on_first(id, then)
+	var offer := HobOffer.new(ClassUnlock.starters(), FarmBuilder.rules()["talk"], "starter_title",
+			func(id): return ClassUnlock.choose_starters([id]), picked)
+	centre.add_child(offer.build())
+	ui.add_child(holder)
+
+func _put_on_first(first: String, then: Callable) -> void:
 	Save.d["arch"] = first
 	Save.d["cls"] = Arch.weight(first)
 	Save.d["weapon"] = Arch.signature(first)
