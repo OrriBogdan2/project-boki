@@ -9,8 +9,9 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
-## m/s: a stroll, a home wander, a home fetch (home.gd); the match speed is added per species.
-const HOME_SPEEDS := [1.5, 2.4, 4.4]
+## m/s: a stroll, a home wander, a home fetch (home.gd), a led Boki at its catch-up top (home_lead.json), and the
+## match speed per species.
+const HOME_SPEEDS := [1.5, 2.4, 4.4, 5.4]
 const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
 const MAX_SLIDE := 0.25       # of the move speed: how fast a planted foot may slip against the ground
 const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
@@ -26,7 +27,7 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 const OVER := {
 	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
 	"glintmole walk": 0.35, "glintmole run": 0.70, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.75,
+	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.68,
 	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
 	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
 	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
@@ -178,7 +179,7 @@ static func contact_steps(rig: BokiRig, clip: String) -> Array:
 		paths.append([])
 	for i in SAMPLES:
 		rig.player.seek(anim.length * i / SAMPLES, true)
-		rig.player.advance(0.0)
+		rig.advance(0.0)
 		for f in feet.size():
 			var at := skel.get_bone_global_pose(feet[f]).origin
 			paths[f].append(rig.model.to_local(skel.to_global(at)))
@@ -237,7 +238,7 @@ static func seam(rig: BokiRig, clip: String) -> float:
 	var poses: Array = []
 	for i in SAMPLES:
 		rig.player.seek(anim.length * i / SAMPLES, true)
-		rig.player.advance(0.0)
+		rig.advance(0.0)
 		poses.append(_bones(rig.skeleton()))
 	var jumps: Array = []
 	for i in SAMPLES - 1:
@@ -262,7 +263,7 @@ static func pop(k: Node3D, rig: BokiRig) -> float:
 			k.position.z -= HOME_SPEEDS[0] * DT
 		rig._track_speed(DT)
 		rig._pick_clip(DT)
-		rig.player.advance(DT)
+		rig.advance(DT)
 		var now := _bones(rig.skeleton())
 		var jump := _jump(prev, now)
 		prev = now
@@ -270,7 +271,7 @@ static func pop(k: Node3D, rig: BokiRig) -> float:
 			start = f
 		if start < 0:
 			continue
-		if f - start <= int((BokiRig.FADE + 0.1) / DT):
+		if f - start <= int((rig.gait_fade() + 0.1) / DT):
 			hand = maxf(hand, jump)
 		else:
 			steady = maxf(steady, jump)
