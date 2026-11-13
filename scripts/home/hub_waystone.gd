@@ -57,6 +57,8 @@ func place() -> void:
 	node.name = "Waystone"
 	h.add_child(node)
 	pad = {"pos": node.position}
+	if h.zone != "" and here() != GardenZones.HUB:
+		Sfx.play("garden_arrive_" + here())     # the landing chime, tuned to the zone's bed
 
 ## Wakes a locked zone with both keys: the Boki plants the Wayseed, the stone lights up (toast, sound, burst).
 func attune(id: String) -> void:
@@ -107,6 +109,7 @@ func hop(id: String) -> bool:
 	if hopping != "" or id == here():
 		return false
 	if id != GardenZones.HUB and not is_open(id):
+		Sfx.play("garden_locked")
 		h._toast("%s is still asleep: it needs both keys" % GardenZones.info(id).get("name", id))
 		return false
 	hopping = id
@@ -121,6 +124,7 @@ func _go() -> void:
 	var opts := {"zone": hopping}
 	if VisitZones.has(h.visit):
 		opts.merge({"visit": h.visit["all"], "visit_id": h.visit_id})      # a friend's garden: still theirs
+	Sfx.play("garden_depart")     # the whoosh as the screen goes
 	Game.goto("home", opts)
 
 # ------------------------------------------------------------------ moving a Boki to another zone
