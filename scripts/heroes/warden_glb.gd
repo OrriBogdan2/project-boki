@@ -1,7 +1,7 @@
 class_name WardenGlb
 extends RefCounted
 ## A Warden's 3D model (docs/art/wardens/RIG_CONTRACT.md): when art/wardens/<name>/<name>.glb exists and the
-## player hasn't set that Warden to procedural (Settings > Video > Warden models), the procedural hunter
+## the Warden has a model, the procedural hunter
 ## Models.hunter built keeps its rig, weapon, glider and hit ring but hides its body, and the .glb's armature
 ## (WardenSkeleton) follows the rig nodes HunterAnim poses, one bone per node (BONES), so every kit move
 ## plays on it. Otherwise the procedural model stays as it is: the fallback.
@@ -70,16 +70,19 @@ const INK_TAGS := ["braid", "mane", "mane_dk"]
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
 ## the match camera, so the model reads as bright as the art. (A procedural hero's shadow floor is 0.37.)
-## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
-## blue fill), which turned a painted atlas's skin lilac and its blacks muddy: ambient_cut and own_ambient swap the
-## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
-## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm. At the match
-## camera far_smooth takes the atlas's fine detail out (no speckle) and the ink thins (INK_FAR_THIN); a Hunter's
-## signature rim there is rim_far / rim_far_color in its warden_look.json "painted".
-const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.95, 0.91), "shadow_sat": 0.0, "sss": 0.0,
-	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
-	"top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0, "own_ambient": Vector3(0.58, 0.54, 0.5),
-	"light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7, "far_smooth_bias": 1.0}
+## The scene's light is split: a cool violet ambient and blue fill (Look: about half the light on a painted model)
+## against a low amber sun (RaidLook "clear": ffb27a). The cool half turned a painted atlas's skin lilac, so
+## ambient_cut and own_ambient swap the scene's ambient for a neutral one a step brighter and light_neutral takes the
+## hue out of the cool fill; the sun's amber then had nothing left to balance it and every Hunter read red (owner
+## 11-11), so light_neutral_warm takes most of its hue out too and the toon tints stay near white. dark_lift raises
+## near-black paint one step. At the match camera far_smooth takes the atlas's fine detail out (no speckle) and the
+## ink thins (INK_FAR_THIN); a Hunter's signature rim there is rim_far / rim_far_color in its warden_look.json
+## "painted".
+const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.98, 0.96), "light_tint": Color.WHITE,
+	"shadow_sat": 0.0, "sss": 0.0, "sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3,
+	"fres_tint": 0.95, "rim_amount": 0.5, "top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0,
+	"own_ambient": Vector3(0.56, 0.55, 0.54), "light_neutral": 0.9, "light_neutral_warm": 0.8, "dark_lift": 0.07,
+	"far_smooth": 0.7, "far_smooth_bias": 1.0}
 ## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
 ## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
 const ICE := {"fres": 2.6, "fres_color": Color(0.72, 0.9, 1.0), "fres_tint": 0.25, "gloss": 0.45, "rim_amount": 0.8}
@@ -93,9 +96,6 @@ const INK_WIDTH := 0.0006
 const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
-## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
-## variant's name, art()).
-const SETTING := "warden_models"
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
 const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
@@ -140,14 +140,11 @@ static func path(arch: String) -> String:
 ## The folder and file name of a Warden's model: its art name, or a design variant picked for it. A variant is
 ## another design of the same Warden, built on the same rig and kept beside the shipped model so the two can be
 ## compared in game (art/wardens/<art>_<tag>/<art>_<tag>.glb, e.g. vex_r3b): `--warden-variant=vex_r3b`
-## (comma-separated for several) picks it for the session, and a Settings warden_models value of "vex_r3b"
-## for that Warden picks it in the save. A variant whose file is missing falls back to the shipped model.
+## (comma-separated for several) picks it for the session. A variant whose file is missing falls back to the
+## shipped model.
 static func art(arch: String) -> String:
 	var nm := String(ART.get(arch, arch))
 	var v := variant(nm)
-	if v == "":
-		var pick := String((Settings.get_v(SETTING) as Dictionary).get(arch, ""))
-		v = pick if pick.begins_with(nm + "_") else ""
 	return v if v != "" and ResourceLoader.exists("%s/%s/%s.glb" % [DIR, v, v]) else nm
 
 ## The variant `--warden-variant=` picks for an art name ("" for none).
@@ -163,18 +160,16 @@ static func variant(nm: String) -> String:
 static func has_model(arch: String) -> bool:
 	return arch != "" and ResourceLoader.exists(path(arch))
 
-## A Warden is drawn from its .glb when it has one, unless the player set it to procedural.
+## A Warden is drawn from its .glb whenever it has one.
 static func uses_model(arch: String) -> bool:
-	return has_model(arch) and String((Settings.get_v(SETTING) as Dictionary).get(arch, "3d")) != "procedural"
+	return has_model(arch)
 
-## The player's pick for one Warden: true for its 3D model, false for the procedural one.
-static func set_model(arch: String, on: bool) -> void:
-	var picks: Dictionary = (Settings.get_v(SETTING) as Dictionary).duplicate()
-	if on:
-		picks.erase(arch)
-	else:
-		picks[arch] = "procedural"
-	Settings.set_v(SETTING, picks)
+## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
+## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+static func shown_torso(model: Node3D) -> Transform3D:
+	var torso := model.get_node(^"Rig/Torso") as Node3D
+	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
+	return sync.shown(torso) if sync and sync.clips else torso.global_transform
 
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
@@ -211,6 +206,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.add_child(glb)
 	var sync := Sync.new()
 	sync.name = "Sync"
+	# (before the toon pass and the moods)
+	sync.companions = WardenCompanions.detach(glb, skel, WardenClips.data(art(arch)))
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
@@ -229,6 +226,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
 	sync.mood = WardenMood.make(root, glb, skel, art(arch))
+	WardenBlink.make(glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
@@ -927,6 +925,7 @@ class Sync extends Node:
 	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
+	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
@@ -938,14 +937,17 @@ class Sync extends Node:
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
+	var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
+	var pace: RigPace             # how often the bones are posed (every frame but on GL over Metal)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
 		skel = skeleton
+		pace = RigPace.new(get_instance_id())
 		process_priority = 10       # after Match renders the hunters (HunterAnim.update)
 		for b in BONES:
 			var bi := WardenSkeleton.find(skel, b)
@@ -980,6 +982,7 @@ class Sync extends Node:
 		clips = WardenClips.make(root, glb, skel, art_name)
 		opener = WardenOpen.make(clips) if clips else null
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
+		flinch = WardenFlinch.make(root, skel) if clips else null
 		if clips:
 			_look_pose()
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
@@ -1007,6 +1010,10 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
+		if pace.every > 1:
+			dt = pace.step(dt, RigPace.is_lead(get_viewport(), root.global_position))
+			if dt == 0.0:
+				return
 		if clips:
 			_play(dt)
 			springs.still = clips.cur in clips.d.get("still", [])
@@ -1015,6 +1022,8 @@ class Sync extends Node:
 			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
+		if companions:
+			companions.step(dt)     # (before the blade: the sun's FX points ride it)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
 		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
@@ -1025,6 +1034,14 @@ class Sync extends Node:
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
+
+	## A rig node's place on the body you see (world): its bone's pose back through the retarget.
+	func shown(nd: Node3D) -> Transform3D:
+		for l in links:
+			if l[1] == nd:
+				var to_rest := (l[3] as Transform3D).affine_inverse() * (l[2] as Transform3D).affine_inverse()
+				return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
+		return nd.global_transform
 
 	func apply() -> void:
 		for l in links:
@@ -1075,6 +1092,8 @@ class Sync extends Node:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if opener:
 			opener.step(dt, 1.0 - w)
+		if flinch:
+			flinch.step(dt)
 		if sway:
 			sway.step(dt)
 		if w < 1.0:

@@ -9,8 +9,8 @@ extends Node3D
 ## jump on top of that (Hunter._occ keeps you on the deck and lets you step off onto a pier or jump
 ## off). The train itself is deadly while it's moving: its front, or any car that hits you while you
 ## aren't on top of it, takes you straight out (Match.train_hit). It warns you: a headlight, a horn
-## about two seconds before it reaches you (and before it pulls out of a stop), and the rails ahead
-## of it pulsing.
+## about two seconds before it reaches you, and the rails ahead of it pulsing (also from the whistle
+## before it pulls out of a stop). Its halt and ride sounds are TrainSfx.
 
 const CAR_LEN := 4.6
 const CAR_GAP := 5.3          # centre to centre
@@ -22,6 +22,7 @@ const REACH_PAD := CAR_LEN + 1.0   # m: past the train's half-length nothing tou
                                    # is 2.6, the engine's front sweep reaches 3.6)
 const GAP_PAD := (CAR_GAP - CAR_LEN) * 0.5 + 0.05
 const HORN_LEAD := 2.2        # seconds of warning before the engine reaches someone in its path
+const DEPART_LEAD := 4.0      # s: the whistle before it pulls out of a stop, time to run for it (under the 6 s dwell)
 
 var m: Node = null
 var world: World = null
@@ -41,9 +42,8 @@ var glows: Array = []
 var light: SpotLight3D = null
 var halts: TrainHalts = null  # the beacons and pier glow
 var lamp: TrainLamp = null    # the headlight halo, beam and trail
+var sounds: TrainSfx = null   # brakes, bell, doors, whistle, ride and rumble
 var horn_cd := 0.0
-var rail_cd := 0.0
-var was_moving := false
 var ride_t := {}              # hunter -> match time they last stood on a car
 var carried := {}             # hunter -> how far the train carried them last step (world units)
 var depart_warned := false
@@ -77,8 +77,11 @@ func setup(match_node: Node) -> void:
 	halts.setup(self, Settings.quality() == "low")
 	lamp = TrainLamp.new()
 	lamp.setup(self, car_nodes[0], light.position)
+	sounds = TrainSfx.new()
+	sounds.setup(self)
 	for i in cars_n:
-		cur.append(Transform3D()); old.append(Transform3D())
+		cur.append(Transform3D())
+		old.append(Transform3D())
 	_place(0.0)
 	old = cur.duplicate()
 	# the cars stand at their first stop from the start (not at the origin until the first tick), so
@@ -105,6 +108,10 @@ func halt_eta(station_s: float) -> float:
 			return fposmod(leg_start - now, period)
 		leg_start += dwell + float(L["t"])
 	return INF
+
+## m/s: how fast the train goes along the loop at match time t (0 while it stands at a stop).
+func speed_at(t: float) -> float:
+	return _schedule(t).y
 
 ## Where the engine is at a given match time, and how fast it's going.
 func _schedule(t: float) -> Vector2:
@@ -261,15 +268,13 @@ func tick(dt: float) -> void:
 			n.rotation.y = (cur[k5] as Transform3D).basis.get_euler().y + PI * 0.5
 	_kill_zone()
 	_visuals(dt, moving)
-	# all aboard: the horn goes a couple of seconds before it pulls out of a stop, so anyone on the
-	# rails ahead has time to step off
-	if not moving and not depart_warned and _schedule(float(m.time) + HORN_LEAD).y > 0.3:
+	# all aboard: DEPART_LEAD before it pulls out of a stop the whistle goes and the rails pulse, so
+	# you can run for it, and anyone on the rails ahead has time to step off
+	if not moving and not depart_warned and speed_at(float(m.time) + DEPART_LEAD) > 0.3:
 		depart_warned = true
-		horn_cd = HORN_LEAD + 0.5
-		m.sfx("horn", (cur[0] as Transform3D).origin, -1.0, 0.95)
 	if moving:
 		depart_warned = false
-	was_moving = moving
+	sounds.tick(moving)
 
 ## The train hits for good while it's moving: anything in front of the engine, or caught by the
 ## engine or a car while not standing on top of it (Match.train_hit: no wisp, straight out).
@@ -473,21 +478,11 @@ func _visuals(dt: float, moving: bool) -> void:
 		light.light_energy = 1.4 + heat * 2.6
 	halts.tick(dt)
 	lamp.tick(heat, moving)
-	# sound: the horn about two seconds before it reaches anyone in its path, the rails singing when
-	# it's close
-	horn_cd -= dt; rail_cd -= dt
+	# the horn about two seconds before it reaches anyone in its path
+	horn_cd -= dt
 	if moving and horn_cd <= 0.0 and in_path(HORN_LEAD) != null:
 		m.sfx("horn", (cur[0] as Transform3D).origin, 1.0)
 		horn_cd = 4.0
-	var pl = m.player
-	if pl and not pl.out and moving:
-		var t: Transform3D = cur[0]
-		var near := 1e9
-		for k in cars_n:
-			near = minf(near, ((cur[k] as Transform3D).origin - pl.pos).length())
-		if near < 16.0 and rail_cd <= 0.0:
-			m.sfx("rail", t.origin, -12.0 + (16.0 - near) * 0.5, 0.9 + heat * 0.2)
-			rail_cd = 0.8
 
 ## The first hunter (not riding it) the engine will reach within `secs` at its current speed, or
 ## null. Measured along the loop, so it works round the bends.

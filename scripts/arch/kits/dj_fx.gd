@@ -9,6 +9,7 @@ extends Node3D
 
 const SHADER: Shader = preload("res://shaders/dj_fx.gdshader")
 const SHADER_MIX: Shader = preload("res://shaders/dj_fx_mix.gdshader")
+const CRESCENT_CHORD := 1.4          # m: the Searing Wave crescent across, at scale 1
 const M_STAR := 0
 const M_PILLAR := 1
 const M_COMET := 2
@@ -449,6 +450,7 @@ func _pose(n: Node3D, kind: String, at: Vector3, vel: Vector2, trail: float, wid
 		match kind:
 			"chakram", "chakram_big", "blade", "bola": head.rotation.y = spin * (2.0 if kind == "bola" else 3.0)
 			"dagger": head.rotation.z = sin(spin) * 0.15
+			"crescent_bolt": head.scale = Vector3.ONE * (width / CRESCENT_CHORD)
 	var tr := n.get_node_or_null("Trail") as Node3D
 	if tr: tr.scale = Vector3(width, width, trail)
 	var core := n.get_node_or_null("Core") as Node3D
@@ -490,7 +492,7 @@ func chain(id: String, a: Vector3, b: Vector3, wavy: float, col: Color, col2: Co
 	if side.length() < 0.01: side = Vector3.RIGHT
 	side = side.normalized()
 	var n := maxi(8, int(length / 0.08))
-	var links := length / 0.2        # a bright and a dark link every 20 cm
+	var links := length / maxf(0.2, width * 1.2)     # a bright and a dark link per ~1.2 widths (thick rope, not dots)
 	im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in n + 1:
 		var k := float(i) / n

@@ -13,6 +13,8 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import boki_meshy
+import boki_scan
 import boki_sdf
 import face
 import importlib
@@ -35,6 +37,7 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "zapple": ("echolop", "echolop", "echolop_anim"),
          "hivara": ("hivara", "hivara", "hivara_anim"),
          "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
+         "gibbelle": ("glomwort", "glomwort", "glomwort_anim"),     # a scan (boki_scan) on the simplest rig there is
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),
@@ -49,10 +52,13 @@ GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide
 SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
 
 
-def use_species(species):
+def use_species(species, scan=False):
+    """`scan`: a species with a Meshy scan (boki_scan.SCANS) gets it as its body; a fusion keeps the primitives."""
     global SPECIES, creature, paint, anim, SCALE
     SPECIES = species
     creature, paint, anim = [importlib.import_module(m) for m in SPECS[species]]
+    if scan and species in boki_scan.SCANS:
+        creature = paint = anim = boki_scan.Scan(species, creature, paint, anim)
     SCALE = getattr(creature, "SCALE", SCALE)
 
 
@@ -225,7 +231,8 @@ def paint_texels(pieces, piece_id, p, n, vao):
     return col * (tint + (1 - tint) * shadow)
 
 
-def bake_atlas(pieces, verts, tris, piece_of, uv, px):
+def bake_atlas(pieces, verts, tris, piece_of, uv, px, me):
+    """The colour atlas, and for a scanned body (its mesh `me` unwrapped) the normal atlas beside it, else None."""
     nrm = vertex_normals(verts, tris)
     ao = occlusion(pieces, verts, nrm)
     tri_uv = np.arange(len(tris) * 3).reshape(-1, 3)
@@ -240,7 +247,13 @@ def bake_atlas(pieces, verts, tris, piece_of, uv, px):
     mask = np.zeros((px, px), dtype=bool)
     img[ys, xs] = col
     mask[ys, xs] = True
-    return dilate(img, mask)
+    body = next(i for i, pc in enumerate(pieces) if pc.name == "body")
+    if not hasattr(pieces[body].shape, "model"):
+        return dilate(img, mask), None
+    bump = np.tile(boki_meshy.FLAT, (px, px, 1))
+    m = piece_of[tv[:, 0]] == body
+    bump[ys[m], xs[m]] = boki_meshy.normal_texels(me, pieces[body].shape.model, pos[m], tid[m], bary[m])
+    return dilate(img, mask), dilate(bump, mask)
 
 
 def image_from(name, rgb, path=None):
@@ -256,7 +269,7 @@ def image_from(name, rgb, path=None):
     return im
 
 
-def material(name, image=None, color=None):
+def material(name, image=None, color=None, bump=None):
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     b = m.node_tree.nodes["Principled BSDF"]
@@ -265,6 +278,13 @@ def material(name, image=None, color=None):
         t = m.node_tree.nodes.new("ShaderNodeTexImage")
         t.image = image
         m.node_tree.links.new(t.outputs[0], b.inputs[0])
+    if bump:
+        t = m.node_tree.nodes.new("ShaderNodeTexImage")
+        t.image = bump
+        bump.colorspace_settings.name = "Non-Color"
+        n = m.node_tree.nodes.new("ShaderNodeNormalMap")
+        m.node_tree.links.new(t.outputs[0], n.inputs["Color"])
+        m.node_tree.links.new(n.outputs[0], b.inputs["Normal"])
     if color:
         b.inputs[0].default_value = color
     return m
@@ -319,9 +339,10 @@ def build_geometry():
     obj = mesh_object("Body", verts, tris)
     uv = uv_unwrap(obj)
     print("uv done", time.time())
-    atlas = bake_atlas(pieces, verts, tris, piece_of, uv, ATLAS_PX)
+    atlas, bump = bake_atlas(pieces, verts, tris, piece_of, uv, ATLAS_PX, obj.data)
     img = image_from(SPECIES + "_atlas", atlas)
-    obj.data.materials.append(material("boki_coat", img))
+    bump_img = None if bump is None else image_from(SPECIES + "_normal", bump)
+    obj.data.materials.append(material("boki_coat", img, bump=bump_img))
     obj.data.materials.append(material("boki_glow", color=(0.45, 1.0, 0.1, 1.0)))
     obj.data.materials.append(material("boki_lit", img))
     rest_colors(obj, verts, pieces, piece_of)
@@ -397,7 +418,12 @@ def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     t0 = time.time()
     species = next((a[10:] for a in argv if a.startswith("--species=")), "cindle")
-    use_species(species)
+    use_species(species, scan=True)
+    for a in argv:
+        if a.startswith("--fit-sheet="):     # a scanned species' landmarks (boki_scan.fit_sheet), and nothing else
+            image_from("fit", boki_scan.fit_sheet(creature.model, creature.BONES, creature.EYE_C), a[12:])
+            print("FRAME row through the fit:\n" + boki_scan.frame_row(species, creature.fit, SCALE))
+            return
     boki_rig.HIDE_AT.clear()
     boki_rig.HIDE_AT.update(anim.HIDE_AT)
     boki_rig.SCALED = set(getattr(anim, "SCALED", ()))
@@ -405,13 +431,15 @@ def main():
     print("geometry", time.time() - t0)
     arm = boki_rig.armature(anim.BONES, bl)
     boki_rig.skin(body_obj, face_obj, arm, pieces, piece_of, bl)
+    if getattr(creature, "REST_POSE", None):
+        boki_rig.rest_pose(body_obj, arm, creature.REST_POSE)
     boki_rig.make_clips(arm, anim.CLIPS)
     print("rig", time.time() - t0)
     for a in argv:
         if a.startswith("--blend="):
             bpy.ops.wm.save_as_mainfile(filepath=a[8:], compress=True)
     if "--no-export" not in argv:
-        boki_rig.export(os.path.join(REPO, "art/kin", SPECIES, SPECIES + ".glb"))
+        boki_rig.export(os.path.join(REPO, "art/kin", SPECIES, SPECIES + ".glb"), tangents=hasattr(creature, "model"))
     for a in argv:
         if a.startswith("--preview="):
             preview(a[10:])

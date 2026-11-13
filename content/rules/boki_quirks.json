@@ -71,7 +71,7 @@
 		"lodestick": "Loose nails and coins drift toward it overnight; check it before you search.",
 		"marchleaf": "Trims the farm's leaves in neat half-moons; a ragged hedge means it is unhappy.",
 		"scythant": "Cuts a clean path through tall grass ahead of you on every walk.",
-		"reapant": "Never leaves its nest; its workers carry every meal to it.",
+		"reapant": "Stands guard at the mouth of its nest and lifts on its wings to meet anything that comes too close.",
 		"lanterloris": "Floats up to the ceiling when startled; coax it down with warm milk.",
 		"mossgrade": "Dries to a pebble in a drought; one splash and it is back and hungry.",
 		"spirevark": "Its termites repair the spire overnight; a missing turret means it is sick.",
@@ -126,7 +126,7 @@
 		"hivara": "Only female; the swarm is her daughters",
 		"marchleaf": "Nearly all female workers",
 		"scythant": "Nearly all female",
-		"reapant": "Only female; every one is a queen",
+		"reapant": "Only male; every one is a winged drone-knight that guards the nest",
 		"glomwort": "No sexes; it splits and spreads",
 		"mossgrade": "Only female; eggs need no mate",
 		"lodestick": "Nearly all female; males are rare",
@@ -165,5 +165,14 @@
 		"_doc": "seconds before rain starts that it starts warning about it",
 		"kestrike": 25.0,
 		"barokat": 25.0
+	},
+	"rare_trait": {
+		"_doc": "a rare trait a kind can hatch with, rolled once per Boki from its seed (BokiQuirks.rare_trait_for): id, name, chance (0..1) and a card note. Evo branches can need it ('trait' in evolve.json)",
+		"marchleaf": {
+			"id": "nightmark",
+			"name": "Nightmark",
+			"chance": 0.04,
+			"note": "A dusk-dark stripe along its back. About 1 in 25 Marchleaf carry it, and it decides what they grow into."
+		}
 	}
 }

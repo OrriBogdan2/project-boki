@@ -18,11 +18,11 @@ swap rule, kept as is).
 | Chest hold broken by dash / knock | leaving 1.6 m drops the prompt; progress is kept | `match.gd` `_update_interact` | [-] |
 | Deathbox open (you) | **tap interact = instant** loot window; tap again = smart loot | `match.gd` "loot" case (player) | [-] |
 | Deathbox hold (bots, remote) | hold **1.0 s** takes everything; a hit restarts it | `life.gd` loot_time, `match.gd` | [-] |
-| Take one item | click = **instant**, no timer | `hud.gd` `_build_loot`, `LootFull.click` | [-] |
+| Take one item | click = **instant**, no timer; gear that beats yours goes on (yours into the box) | `LootWindow`, `LootFull.click` | [-] |
 | Swap (gear / full pack) | **instant** click | `loot_full.gd` | [-] |
-| Item that doesn't fit | nothing moves; your pack opens beside the box to swap (owner rule, kept) | `LootHold`, `LootFull.swap_held` | owner |
+| Item that doesn't fit | nothing moves; it is held and your backpack rows (same window) get Swap (owner rule, kept) | `LootWindow`, `LootFull.swap_held` | owner |
 | Damage while panel open | panel stays open | `hud.gd` `_loot_tick` | [-] |
-| Close conditions | walk beyond 2.4 m, go down, box emptied, or the X button | `hud.gd` `_loot_tick` | [-] |
+| Close conditions | walk beyond 2.4 m, go down, box emptied, the X button or Esc | `hud.gd` `_loot_tick`, `LootWindow` | [-] |
 | Move / look with panel open | **yes**, both stay live (only a pause zeroes them); the mouse over the panel just doesn't fire | `match.gd` input poll | [-] |
 | Box revive hold | hit breaks it until you let go and hold again | `box_revive.gd` | [-] |
 
