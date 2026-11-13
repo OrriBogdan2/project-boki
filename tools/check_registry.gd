@@ -93,6 +93,7 @@ const CHECKS := {
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],
+	"--boss-sfx-check": ["res://tools/boss_sfx_check.gd", "boss_sfx_check", null],      # boss wake, phase and defeat cues
 	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],      # graphics presets
 	"--clutter-check": ["res://tools/clutter_check.gd", "clutter_check", null],
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],      # item 103
