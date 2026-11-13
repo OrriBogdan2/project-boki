@@ -9,7 +9,7 @@ extends ArchKit
 
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
-var flying: Array = []              # thrown potions in the air: {at, from, t, left, v}
+var flying: Array = []              # thrown potions in the air: {at, from, t, left, v, id}
 var puddles: Array = []             # slime puddles: {at, r, left, k, tick}
 var marks := {}                     # foe instance id -> {mark: time it landed}
 var beach_at := {}                  # foe instance id -> time it can be Beached again
@@ -19,11 +19,14 @@ var third_until := -9.0             # the third thrust's hits slow until then
 var swim_t := 0.0                   # Ground Swim under way
 var spin_t := -1.0                  # Riptide spin time (-1: not spinning)
 var spin_tick := 0.0
-var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, spd, hit}
+var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, spd, hit, id, from, len}
 var wave := {}                      # the Tidal Wave under way
 var untarget_t := 0.0
 var glow_t := 0.0
 var aim_t := 0.0
+const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
+const TELE_LW := 0.1                 # m, their rim
+var tele_n := 0                     # each potion and line has its own AimKit telegraph id
 
 func _setup() -> void:
 	rng.seed = hash("gil_bag_%d" % h.get_instance_id())
@@ -101,7 +104,6 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	var rd := rmb_def()
 	var v := _draw_vial()
-	var vd := vial_def(v)
 	var at: Vector3
 	var ft: float
 	if c.get("air", false):
@@ -111,8 +113,7 @@ func fire_rmb(c: Dictionary) -> void:
 		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
-	tele_circle(at, float(vd["radius"]), col_of(vd), ft)
-	flying.append({"at": at, "from": h.pos + Vector3(0, 1.3, 0), "t": ft, "left": ft, "v": v})
+	flying.append({"at": at, "from": h.pos + Vector3(0, 1.3, 0), "t": ft, "left": ft, "v": v, "id": _tele_id()})
 	m.sfx("throw", h.pos, -4.0, 1.15)
 
 func rmb_hold_tick(t: float) -> void:
@@ -274,15 +275,23 @@ func _release_spout() -> void:
 	var length := lerpf(float(ed["range"][0]), float(ed["range"][1]), k)
 	var w := lerpf(float(ed["width"][0]), float(ed["width"][1]), k)
 	var spd := lerpf(float(ed["speed"][0]), float(ed["speed"][1]), k)
-	tele_lane(h.pos, dir, length, w, col_of(ed), length / spd)
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
+		"id": _tele_id(), "from": h.pos, "len": length,
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
 		"col": col_of(ed), "ab": "k1"})
 	m.sfx("whoosh", h.pos, -2.0, 0.7)
 
-## Moves spouts and the wave down their lines; each foe is hit once.
+func _tele_id() -> String:
+	tele_n += 1
+	return "gil%d" % tele_n
+
+## Moves spouts and the wave down their lines; each foe is hit once. Everyone sees the lane: a spout's
+## fills with its front, the wave's stays an outline.
 func _tick_lines(list: Array, dt: float) -> void:
 	for s in list.duplicate():
+		var fill := 1.0 - float(s["left"]) / float(s["len"]) if s["ab"] != "ult" else -1.0
+		AimKit.lane(h, s["id"], {"from": s["from"], "dir": s["dir"], "len": s["len"], "width": s["w"], "col": s["col"],
+			"fill": fill, "all": true, "alpha": TELE_A, "lw": TELE_LW})
 		var step := float(s["spd"]) * dt
 		s["p"] = (s["p"] as Vector2) + (s["dir"] as Vector2) * step
 		s["left"] = float(s["left"]) - step
@@ -319,8 +328,8 @@ func _start_wave() -> bool:
 	var t := float(xd["time"])
 	var length := float(xd["range"])
 	untarget_t = t
-	tele_lane(h.pos, dir, length, float(xd["width"]), col_of(xd), 0.0)
 	wave = {"p": Vector2(h.pos.x, h.pos.z) - dir * 0.5, "y": h.pos.y, "dir": dir, "left": length + 0.5,
+		"id": "x", "from": h.pos, "len": length,
 		"w": float(xd["width"]), "spd": length / t, "hit": {}, "lift": float(xd["lift"]), "stun": float(xd["knockup"]),
 		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
 		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
@@ -347,7 +356,11 @@ func _tick(dt: float) -> void:
 		it["left"] = float(it["left"]) - dt
 		var k := 1.0 - clampf(float(it["left"]) / maxf(0.01, float(it["t"])), 0.0, 1.0)
 		var p: Vector3 = (it["from"] as Vector3).lerp(it["at"], k) + Vector3(0, sin(k * PI) * 2.0, 0)
-		m.fx.burst(p, col_of(vial_def(String(it["v"]))), 1, 0.3, 0.25, 0.0)
+		var vd := vial_def(String(it["v"]))
+		m.fx.burst(p, col_of(vd), 1, 0.3, 0.25, 0.0)
+		# the landing circle everyone sees, filling until the potion lands
+		AimKit.circle(h, it["id"], {"at": it["at"], "r": float(vd["radius"]), "col": col_of(vd), "fill": k,
+			"all": true, "alpha": TELE_A, "lw": TELE_LW})
 		if float(it["left"]) <= 0.0:
 			flying.erase(it)
 			_shatter(it)

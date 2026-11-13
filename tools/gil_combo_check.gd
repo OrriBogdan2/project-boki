@@ -5,7 +5,7 @@ extends "res://tools/hero_pair_check.gd"
 ## Out of Water (three marks Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's
 ## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Then
 ## gil.md's tables: each slot's numbers, the cancels, the Riptide recast window, the clips, and the dash-flow rows
-## (tools/dash_flow_check.gd).
+## (tools/dash_flow_check.gd), and its telegraphs (AimKit, seen by everyone, no Fx node of their own).
 
 var m: Match
 var P: Hunter
@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	_swim()
 	_riptide()
 	_wave()
+	_telegraphs()
 	_numbers()
 	_cancels()
 	_recast()
@@ -555,3 +556,60 @@ func _clips() -> void:
 	K.bag.append("fire")
 	ok("colour: the RMB slot wears the next potion's colour, not Gil's blue (finding F3)",
 		K.slot_info("sec")["col"] == Color("#ff5a3a"))
+
+## Every telegraph Gil makes goes through AimKit (docs/AIMKIT.md), where everyone sees it, and none makes a
+## tweened Fx telegraph node (the old ArchKit.tele_circle/tele_lane path is gone). The R fuse ring is ArchKit's.
+func _telegraphs() -> void:
+	var nodes: int = m.fx.teles.size()
+	_reset(6.0)
+	K.bag.append("slime")
+	tap(m, P)
+	m.step(DT)
+	var pot := String(K.flying[0]["id"]) if not K.flying.is_empty() else ""
+	var c0 := AimKit.entry(P, pot)
+	var slime_r := float(K.vial_def("slime")["radius"])
+	ok("telegraph: a thrown potion's landing circle (its radius) is up for everyone",
+		c0.get("kind", "") == "circle" and bool(c0["all"]) and absf(float(c0["r"]) - slime_r) < 0.01,
+		str(c0.get("r", -1.0)))
+	var f0 := float(c0.get("fill", -1.0))
+	step(m, 0.15)
+	var f1 := float(AimKit.entry(P, pot).get("fill", -1.0))
+	ok("telegraph: it fills while the potion flies", f0 >= 0.0 and f1 > f0, "%.2f -> %.2f" % [f0, f1])
+	_land()
+	step(m, 0.15)
+	ok("telegraph: and is gone once it lands", not AimKit.shown(P, pot))
+	_reset(7.0)
+	K.use_e()
+	step(m, 0.3)
+	K.e_recast()
+	m.step(DT)
+	var sp: Dictionary = K.spouts[0] if not K.spouts.is_empty() else {}
+	var l0 := AimKit.entry(P, String(sp.get("id", "")))
+	ok("telegraph: the spout's lane, its length and width, for everyone",
+		l0.get("kind", "") == "lane" and bool(l0["all"]) and absf(float(l0["len"]) - float(sp["len"])) < 0.01
+		and absf(float(l0["width"]) - float(sp["w"])) < 0.01)
+	step(m, 0.1)
+	var l1 := AimKit.entry(P, String(sp.get("id", "")))
+	ok("telegraph: the spout's lane fills with its front",
+		float(l1.get("fill", -1.0)) > float(l0.get("fill", -1.0)) and float(l0.get("fill", -1.0)) >= 0.0)
+	_reset(6.0)
+	P.lvl = 6
+	K.cast_ult()
+	m.step(DT)
+	var w0 := AimKit.entry(P, "x")
+	ok("telegraph: Tidal Wave's lane (an outline, the full range) for everyone while he surfs",
+		w0.get("kind", "") == "lane" and bool(w0["all"]) and float(w0["fill"]) < 0.0
+		and absf(float(w0["len"]) - float(K.x_def()["range"])) < 0.01)
+	step(m, float(K.x_def()["time"]) + 0.3)
+	ok("telegraph: and is gone when he lands", not AimKit.shown(P, "x"))
+	_reset(6.0)
+	K.fuse = {"t": 1.0, "T": 1.0, "bond": false, "guard": "none", "fx": 1.0, "at": P.pos}
+	step(m, 0.25)
+	var r0 := AimKit.entry(P, "r_fuse")
+	ok("telegraph: an R fuse's 2.4 m ring fills on the ground for everyone",
+		r0.get("kind", "") == "circle" and bool(r0["all"]) and absf(float(r0["r"]) - 2.4) < 0.01
+		and float(r0["fill"]) > 0.15)
+	K.fuse = {}
+	step(m, 0.15)
+	ok("telegraph: none of it made an Fx telegraph node", m.fx.teles.size() == nodes,
+		"%d -> %d" % [nodes, m.fx.teles.size()])
