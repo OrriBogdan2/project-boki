@@ -66,18 +66,18 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Ice controller: homing darts, a freezing spear and a sliding ice wall. |
 | Passive: Hoarfrost | Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them. |
-| Dash: Skate | Skate: hold the dash key to skate where you move; your darts fly straight and thick. |
-| LMB | Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one. |
+| Dash: Skate | Skate: hold the dash key to skate where you move; your darts fly as fast, thick beams that still curve onto your target, and hit twice as hard. |
+| LMB | Ice Dart: hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones. |
 | RMB: Ice Spear | Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later. |
 | E: Rink Wall | Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it. |
 | Hunter ultimate: Rimelock | Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun. |
-| Weapon: Hoar Fan | Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones. |
+| Weapon: Hoar Fan | Hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones, then a short pause. |
 
 ### Abilities in full
 
 **Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
 
-**Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
+**Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 10.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
 
 **Ice Spear (RMB, 10.2s cooldown, 2 charges).**
 
@@ -85,7 +85,7 @@ What the in-game kit card (K) says.
 
 **Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots (200 HP) and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
 
-**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
+**Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 5.9m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 
 ### Ranks
 
