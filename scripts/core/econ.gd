@@ -78,6 +78,12 @@ static func _store(it: Dictionary) -> void:
 		# a boss's egg goes onto the Incubator's shelf by the Nesting Nook (and into its cradle if that's empty)
 		Incubator.add(String(it.get("sp", "")), String(it.get("boss", "")))
 		return
+	if Loot.is_ink(it):
+		Goods.give(Loot.ink_key(it))      # an Ink is a good: it goes to the farm's goods, where Boki use it
+		return
+	if Loot.is_wayseed(it):
+		Save.add_item(String(it["id"]), 1)      # a bag item: the Waystone looks for it there (GardenZones)
+		return
 	if String(it.get("t", "")) == "val":
 		var vd: Dictionary = Save.d["valuables"]
 		vd[String(it["id"])] = int(vd.get(String(it["id"]), 0)) + 1
@@ -261,9 +267,13 @@ static func _auto_food() -> String:
 		if pantry(key) > bn: bn = pantry(key); best = key
 	return best
 
+## Does this feeder top itself up: a hopper or banquet, or any trough set down by water (FarmWater)?
+static func self_fills(f: Dictionary) -> bool:
+	return bool(fdef(f)["auto"]) or FarmWater.near_feeder(Save.d, f)
+
 ## A self-filling feeder below half tops itself up from the pantry. Returns how many it took.
 static func auto_refill(f: Dictionary) -> int:
-	if not fdef(f)["auto"] or not f.get("auto", true) or fill(f) > int(fdef(f)["cap"]) / 2:
+	if not self_fills(f) or not f.get("auto", true) or fill(f) > int(fdef(f)["cap"]) / 2:
 		return 0
 	var got := 0
 	while room_in(f) > 0:
@@ -311,9 +321,11 @@ static func serve_any(rec: Dictionary) -> Dictionary:
 ## The time you were away, for every kin at once: the usual catch-up (Care.catch_up) for up to half
 ## a day, then for longer absences food runs down slowly, hour by hour, and hungry kin eat from the
 ## feeders in turn. Kin with nothing left to eat start to starve (Care's starve clock).
-## Returns what happened: [{kind: "died"|"starving", rec, ...}].
-static func catch_up_all() -> Array:
-	var roster: Array = Save.d["roster"]
+## Only `zone`'s Boki (and your partner and the Burrow's) when given: the others catch up when you
+## arrive there (GARDEN.md 10.4). Returns what happened: [{kind: "died"|"starving", rec, ...}].
+static func catch_up_all(zone := "") -> Array:
+	var roster: Array = Save.d["roster"].filter(
+		func(r): return zone == "" or KinBox.is_boxed(r) or GardenZones.walks_in(r, zone))
 	var extra := {}
 	for rec in roster:
 		if KinBox.is_boxed(rec):

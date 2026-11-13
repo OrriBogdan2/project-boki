@@ -4,6 +4,7 @@ extends Node3D
 ## tests/mob_gallery.tscn and press F6). --mob-close: a closer camera on the common monsters;
 ## --mob-dress: a row per biome, each monster wearing that biome's back dressing;
 ## --mob-far: from the match camera's height. Use with --shot / --frames. --art1 shows the old ones.
+## --mob-yaw=DEG: turn every monster to DEG (0 = facing the camera, 90 = its left side) for turnaround sheets.
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
@@ -44,6 +45,9 @@ func _ready() -> void:
 			var k := Models.mob(kind)
 			k.position = Vector3((i - (ids.size() - 1) * 0.5) * 2.6, 0, ri * 3.6)
 			k.rotation.y = PI + 0.5
+			for a in args:
+				if a.begins_with("--mob-yaw="):
+					k.rotation.y = PI + deg_to_rad(float(a.substr(10)))
 			add_child(k)
 			if rows[ri] != "" and k.has_meta("sculpted"):
 				MobModels.dress(k, rows[ri])
