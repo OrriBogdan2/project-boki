@@ -5,6 +5,8 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const EXIT := preload("res://tools/ult_exit.gd")
+
 var A
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
@@ -386,6 +388,9 @@ func zedran(a) -> void:
 	await _recovery_exits()
 	_recovery(m, P, T, home)
 	await A.done(m)
+	var got: Dictionary = await EXIT.run(A, "juggernaut")
+	A.ok("juggernaut X exit: Shift, LMB and jump pressed 0.1s before the cleave lands go on its first free step",
+			EXIT.on_time(got), EXIT.said(got))
 
 ## The recovery plays its own clip (jug_ult_recover) for exactly the 0.35 s at half speed, then he is free; a jump or
 ## Shift cuts it on the press frame. Timing and speed are the ult's own (recover 0.35, move_k 0.5), unchanged.

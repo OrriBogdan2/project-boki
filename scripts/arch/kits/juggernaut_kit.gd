@@ -254,6 +254,9 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
+func lock_left() -> float:
+	return riposte.lock_left()
+
 ## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits BUFFER for the
 ## cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:

@@ -70,6 +70,15 @@ func xd() -> Dictionary:
 func planted() -> bool:
 	return phase == "wind" or (phase == "erupt" and t < float(xd().get("plant", 0.2)))
 
+## Seconds of the plant left (0: free): the wind-up's rest and the slam's beat.
+func lock_left() -> float:
+	if not planted():
+		return 0.0
+	var plant := float(xd().get("plant", 0.2))
+	if phase == "wind":
+		return float(xd().get("windup", 0.4)) - t + plant
+	return plant - t
+
 ## X pressed: plant, raise the hammer, lock the lane toward the cursor.
 func cast() -> bool:
 	dir = h.aim_dir().normalized()
