@@ -669,6 +669,32 @@ func juggernaut(a) -> void:
 	moved = maxf(moved, T.flat_dist(home + Vector3(7.0, 0, 0)))
 	A.ok("juggernaut LMB: no knockback (slash, tip, Searing Wave)", moved < 0.01, "moved %.3fm" % moved)
 	K.res = 0.0
+	# hold walk (footage juggernaut 0062-0067, 0076-0120, 5 fps): he stands through every Searing Wave charge, and
+	# walks again once the wave is away (docs/MOVEMENT_FEEL.md, fire-move table)
+	P.teleport(home)
+	A.aim_at(P, home + Vector3(0, 0, -8))
+	P.fire_cd = 0.0
+	var wave_run_v := _walk_v(m, P, func(): pass)
+	P.teleport(home)
+	P.fire_cd = 0.0
+	var charge_v := _walk_v(m, P, func(): P.inp["fire"] = true)      # the tap window ends in the run-up
+	var charge_k := K.move_k()
+	P.inp["fire"] = false
+	A.step(m, 0.6)
+	var after_v := _walk_v(m, P, func(): pass)
+	A.ok("juggernaut LMB hold: he stands through the Searing Wave charge with a move key down (lmb.walk_k 0)",
+			is_zero_approx(charge_k) and absf(charge_v) < 0.05 and wave_run_v > 2.0,
+			"move_k %.2f, %.2f of %.2f m/s" % [charge_k, charge_v, wave_run_v])
+	A.ok("juggernaut LMB hold: once the wave is away he walks again", after_v > wave_run_v * 0.9,
+			"%.2f of %.2f m/s" % [after_v, wave_run_v])
+	P.fire_cd = 0.0
+	A.step(m, 0.35, func(): P.inp["fire"] = true)      # the lane up, then a jump with it held
+	P.do_jump()
+	A.step(m, 0.15, func(): P.inp["fire"] = true)
+	A.ok("juggernaut LMB hold: in the air the hold does not brake him (planted on the ground only)",
+			not P.grounded and is_equal_approx(K.move_k(), 1.0), "grounded %s move_k %.2f" % [P.grounded, K.move_k()])
+	P.inp["fire"] = false
+	A.step(m, 1.0)
 	# RMB tap: the Finishing Slam winds up (aim it), then hits; +50% under 35%; its sweet spot is the payoff
 	P.teleport(home)
 	A.fresh(T)
