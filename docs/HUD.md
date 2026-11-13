@@ -45,6 +45,23 @@ Rules of the look:
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
 drawn, the downed plate and status words show, cooldown text appears).
 
+## Boki HUD: decision, state, gaps
+
+DECISIONS (Boki HUD, Nov 3; wisps, 11-09): your Boki lives in the right-side box (portrait, health bar, bond ring with %,
+FUSE and the short tags TOO FAR, RESCUE, RESTING) with its per-species summon duration as a ring timer; each teammate row on
+the left has a small Boki icon with its health. Check: `--boki-hud-check` (a trio match at 1280x720; also `--hudref-check`
+for the squad rows). Verified 11-11:
+
+| Piece | State |
+|---|---|
+| Box on the right (`GripHud.boki`, left of the weapon card) | there: the Boki's portrait (type badge in the corner), health bar along the bottom, bond ring with the percent while no tag shows |
+| Tags (`BokiHud.tag`, over the box) | RESCUE (Boki down), RESTING (after a Fusion ran out or was released), TOO FAR (bond full, Boki past `merge_leap_range`), FUSE (bond full, Merge can go). Before this check the box had only a "DOWN" word and no other tag; the old "TOO FAR" was a toast on R |
+| Merged | `BokiHud.r_slot`: time ring, form chip, ENDS warning (unchanged) |
+| Teammate row icon (`TeamBoki`) | there: icon, thin health bar, tints down / resting / owner is a wisp |
+| Summon ring | **missing, large.** No per-species summon duration exists in `Data.KIN` or content; the summon is not built (docs/specs/TUTORIAL_WISP.md Q1). It needs a design note (it changes Boki combat), a data field, `Kin` timer, net sync and the ring in `GripHud.boki`. The check prints a GAP line until it exists |
+| Box shows RESTING only after a Fusion | a Boki that rests for another reason shows the same tag (`Kin.resting`); fine today, one source |
+| Not seen on screen | headless run reads what was drawn, not pixels: the portrait / bar / tag layout in the 54 px box wants one GPU shot (`--inv-shots` style) before the owner sees it |
+
 ## The inventory window (I)
 
 - `LoadoutPanel` (in `Hud._build_pack`): what you wear (two gloves with their keys Q and V, armor, boots), the four

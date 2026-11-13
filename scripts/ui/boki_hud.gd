@@ -75,7 +75,7 @@ static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 		var fl := 0.5 + 0.5 * sin(H.m.time * (10.0 + (3.0 - minf(wl, 3.0)) * 4.0))
 		H._rounded(ur.grow(RING_GROW + 2.0 + fl * 3.0), Color(col, 0.18 * fl), 14, Color(1.0, 0.4, 0.3, 0.5 + 0.5 * fl), 3)
 		chip = "ENDS %.1fs" % wl
-	_chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
+	chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
 
 ## A slot the Merge makes stronger: a ring and a small badge (the Boki's first letter) in the form's colour.
 ## slot: "lmb" | "rmb" | "e" | "dash". Nothing outside a live Merge.
@@ -133,11 +133,26 @@ static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 		H.c.draw_polyline(out, col, width, true)
 
 ## The one line of text over the Merge box while merged (the ultimate's name, its unlock seconds, the form), centred above it.
-static func _chip(H, ur: Rect2, text: String, col: Color) -> void:
+static func chip(H, ur: Rect2, text: String, col: Color) -> void:
 	var tw: float = H.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
 	var btr := Rect2(Vector2(ur.get_center().x - tw * 0.5, ur.position.y - CHIP_LIFT), Vector2(tw, 14))
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)
 	H._ctext(btr.get_center() + Vector2(0, 4), text, 10, col, H.big)
+
+## The short word over the Boki box (GripHud.boki): RESCUE (it is down), RESTING (after a Fusion), TOO FAR (the bond
+## is full but it is out of leap range), FUSE (the Merge can go now), else "".
+static func tag(p: Hunter) -> String:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k):
+		return ""
+	if k.state in ["downed", "reviving"]:
+		return "RESCUE"
+	if k.resting():
+		return "RESTING"
+	match KinMerge.plan(p):
+		"far": return "TOO FAR"
+		"merge", "leap", "surge": return "FUSE"
+	return ""
 
 ## The Boki ability and G badges, after the ultimate tiles. Returns the x where the next badge starts.
 static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
