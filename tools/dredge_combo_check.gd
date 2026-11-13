@@ -1,9 +1,9 @@
 extends RefCounted
 ## --dredge-combo-check: Grimble's abilities and their interactions, scripted one by one in the
 ## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Abyssal Hand
-## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
-## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
-## Brass Broadside (tools/dredge_ult_check.gd).
+## reel (its parity rows: tools/dredge_reel_check.gd), only the barge during it, reel into the Anchor Drop,
+## terrain the hook pierces, the abyss, the Salvage passive, the back hit, the barge's turn lock after the
+## Anchor, the rank-3 specials, and the X ult, Brass Broadside (tools/dredge_ult_check.gd).
 
 ## s from Brute Dash's arrival to aiming and walking (briefs/hero-ref/dredge.md:306, 493.32 -> 493.6 s)
 const SRC_RECOVER_S := 0.28
@@ -32,6 +32,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_gun_range_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
