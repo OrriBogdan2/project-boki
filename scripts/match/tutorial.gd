@@ -263,6 +263,7 @@ func _enter() -> void:
 	var sid := id()
 	t = 0.0
 	card_t = 0.0
+	TutorialStrip.chime(m)
 	m.bubbles.clear()       # one voice at a time: the old step's lines go, the banner has the floor
 	if m.hud:
 		m.hud.msgs.clear()

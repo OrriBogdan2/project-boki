@@ -49,6 +49,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	_strip_chime()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -317,6 +318,16 @@ func _build_cues() -> void:
 			if not src.contains(needle):
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
+
+## 11. The tutorial strip's new-objective chime: a sound of the UI set, with its two levels in the table.
+func _strip_chime() -> void:
+	var ui: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/ui.json"))["sounds"]
+	var has_it: bool = ui.has(TutorialStrip.CHIME) and Sfx.ensure(TutorialStrip.CHIME)
+	ok(has_it, "strip chime: %s is in the UI set and has its file" % TutorialStrip.CHIME)
+	var cue: Dictionary = levels.get("cue_db", {})
+	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
+			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
+	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
 
 func _takes(sname: String) -> Array:
 	var out := []
