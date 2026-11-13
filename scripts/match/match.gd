@@ -1777,6 +1777,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
 	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
+	if credit is Hunter and (credit as Hunter).ak and target != player:
+		col = (credit as Hunter).ak.number_col(target, col, o)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)

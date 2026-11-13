@@ -88,6 +88,13 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		return dmg + float(res_def().get("per_stack", 1.0)) * float(kindle_on(t))
 	return dmg
 
+## Footage: the numbers go white to yellow and stay yellow at the plateau (64 -> 93):
+## an ember into a foe at full Kindle shows yellow.
+func number_col(t: Ent, col: Color, o: Dictionary) -> Color:
+	if String(o.get("src", "")) == "shot" and kindle_on(t) >= int(res_def().get("max", 5)):
+		return HudStyle.CRIT
+	return col
+
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
 		return

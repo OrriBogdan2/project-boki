@@ -839,11 +839,22 @@ func tender() -> void:
 	ok(
 			"mm LMB: looks are pooled (no new nodes per ember)", K.lk().made - made0 <= 3,
 			"made %d -> %d" % [made0, K.lk().made])
-	# the ramp: about +45% over 5 hits (sheet: 64 -> 93)
-	var ramp := float(Arch.def("tender")["resource"]["per_stack"]) * 5.0 / float(P.wpn["dmg"])
+	# the ramp, footage 64 -> 93 (the data has no number): +45.3% at the plateau, its numbers white then yellow
+	var res: Dictionary = Arch.def("tender")["resource"]
+	var ramp := float(res["per_stack"]) * float(res["max"]) / float(P.wpn["dmg"])
 	ok(
-			"mm passive: Kindle ramps embers about +45% at 5 stacks", ramp > 0.38 and ramp < 0.52,
-			"+%.0f%%" % (ramp * 100.0))
+			"mm passive: Kindle ramps embers +45% at 5 stacks (footage 64 -> 93)",
+			absf(ramp - (93.0 / 64.0 - 1.0)) < 0.03, "+%.1f%%" % (ramp * 100.0))
+	var shot := {"src": "shot"}
+	K.kind.clear()
+	K.add_kindle(T, int(res["max"]) - 1)
+	var white: bool = K.number_col(T, HudStyle.HIT, shot) == HudStyle.HIT
+	K.add_kindle(T, 1)
+	ok(
+			"mm passive: the damage number is yellow at the plateau, white before it (footage)",
+			white and K.number_col(T, HudStyle.HIT, shot) == HudStyle.CRIT
+			and K.number_col(T, HudStyle.HIT, {"src": "abil"}) == HudStyle.HIT)
+	K.kind.clear()
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
 	var e0: int = K.stats["emp"]

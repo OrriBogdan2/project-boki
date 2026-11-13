@@ -165,6 +165,8 @@ func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
+## The colour of the floating damage number this hit shows (a kit tints its own ramp).
+func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
