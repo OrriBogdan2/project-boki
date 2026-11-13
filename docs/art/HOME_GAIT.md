@@ -59,6 +59,37 @@ second apart at 5 m/s past floor posts every half metre).
   hung under the tip, so a toe-down foot floated 2 cm on the tall bodies). The landing foot stays `LAND_CLEAR` (3 cm)
   up as it starts to brake and touches only as it stops, so the brake never slides along the floor.
 
+## Garden moves on planted feet (ext/anim-empty-garden)
+The Empty pats, feeds and cheers with its feet where they stand (HunterVerbs, `scripts/match/hunter_verbs.gd`):
+- **Squat**: each move asks for a hip depth (`HunterVerbs.squat`), handed to EmptyGait as `squat`, which lowers the
+  standing hip height the planted legs are solved for; the body sinks over its feet and rises again, no slide. The
+  deepest is 0.17 m at the rig's size: deeper, the folded leg cannot keep a splayed foot under it (the solve's
+  leg-out angle runs out), so a Boki lower than that gets more lean instead (`LEAN_OVER`).
+- **Reach**: petting and feeding pass the Boki node to `HomeVerbs.play`; its mesh bounds give the hand's spot
+  (`HunterVerbs.aim`): the top of its head on the near side, or its mouth (45 % up its front). The squat is what
+  takes the hand down to it from the shoulder (70 % of the arm's reach first); a head above reach is patted on the
+  front. The Boki comes up to arm's length first (`HomeVerbs.hold_spot`: its near side 0.3 m off).
+- **Timing** (lengths kept with the Hunters' pet/give/cheer clips): pat 1.3 s: the hand lifts, arcs over and lands
+  (overshoot and settle), two strokes with a press and a give in the knees, lifts off, the body rises a beat later;
+  the free hand braces over the knee. Feed 1.0 s: a small rise, hands gather the snack at the belly, go out past
+  the mouth and settle, one nudge in, open and come back. Cheer 0.8 s: a dip to load with the arms swung back,
+  sprung up past straight, two alternating pumps with a give in the knees, down.
+- **Pick-up** (ext/anim-empty-care): holding interact on a Boki (`HomeCarry.press_hold`) plays `lift`, 0.8 s on the
+  match pickup's beat (hands down by 0.28 s, up by 0.55, settled by 0.8). The Boki comes to your hands; both hands
+  close on its flanks (`HunterVerbs.aim`: 40 % up it, each hand 0.13 m to a side, on the round of its body) with the
+  squat and a fold over it, hold a beat, then it rides them up (`HunterVerbs.lifted`) and the lift ends on the carry
+  hold. A Boki for the back is then swung over the shoulder (0.25 s). You stand still for the lift. HunterAnim eases
+  one hold into the next over 0.2 s (`SWAP_S`), so lift to carry or pack has no pop.
+- **Check**: `--home-verbs-check` plays pat and feed at a 0.5 m and a 1.25 m Boki stand-in: the hand on its surface
+  (worst 6.9 cm), hips 13 cm lower feeding the small one, the pat hand 50 cm higher on the big one, sole points on
+  the floor slide 0.07 cm (cheer too). The lift at both: each hand 1.9 cm from its grip, 0.9-1.3 cm off the Boki,
+  feet 0.13 cm; the pick-up path keeps the Boki on the ground until the grip and hands over to the carry hold.
+  `--clip-check` repeats the reach (shared `reach()`): the Empty's hand within 0.15 m of its target at the peak of
+  pet, feed and lift, small and big. The strip: `--home-verbs-check --home-verbs-shots=<dir>` (glomwort, zapple;
+  columns pat, feed, lift, cheer, toss), shot from the Boki's side (camera yaw -90°) so the fold over it faces the
+  camera, not the cloak's back or Hob. [`home_gait/verbs_sw.jpg`](home_gait/verbs_sw.jpg) is the software-GL take
+  (llvmpipe under Xvfb; the GPU take is jobq 20261112-011142-01599, queued behind the GPU backlog).
+
 ## Left open
 - The toe dips up to 2 cm into the floor just after toe-off on the sturdy body (gated at 3 cm).
 - Arm swing is HunterAnim's, following the gait's phase (left leg's cycle); not re-tuned here.

@@ -126,6 +126,7 @@ func _lift_walk_drop(k: Dictionary) -> void:
 	var scale0: Vector3 = (k["node"] as Node3D).scale
 	ok(c.speed_mul() == 1.0, "no change to your speed before you lift")
 	await _hold_lifts(k)
+	_lifted(c)
 	ok(c.k == k and c.mode == "carry" and k["busy"], "holding interact lifts a small Boki into your arms")
 	ok(is_equal_approx(c.speed_mul(), 0.9) and c.anim_state()["act"] == "carry", "you walk at 90% with the carry pose")
 	var far := _walk(k, 3.0)
@@ -183,6 +184,7 @@ func _traits(timid: Dictionary, grumpy: Dictionary, brave: Dictionary) -> void:
 	c.drop()
 	var b := _put(brave)
 	c.press_hold(b)
+	_lifted(c)
 	var swing := 0.0
 	for i in 30:
 		c.tick(STEP, {}, true)
@@ -227,3 +229,8 @@ func _pose() -> void:
 		for i in 40:
 			a.update(1.0 / 60.0, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true, "act": mode})
 		ok(a.act_kind == mode and a.act_k > 0.9, "the hunter holds the %s pose while running" % mode)
+
+## Plays out the pick-up (HunterVerbs "lift"): you stand still for it, then walk and carry.
+func _lifted(c: HomeCarry) -> void:
+	if c.lifting():
+		c.h.verbs.act = ""

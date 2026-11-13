@@ -313,7 +313,9 @@ func _ways_out(m: Match) -> void:
 	var fall_t := 0.0
 	ok(P.riding, "you start on the skyship")
 	while (P.riding or P.dropping or not P.grounded) and fall_t < DROP_S:
-		P.inp["jump"] = P.riding and fall_t > float(P.ai.get("jump_at", 0.0)) and int(fall_t * 20.0) % 2 == 0
+		# jump launches the rocket (DropRocket); aboard it, no keys: a press would jump out of it
+		P.inp["jump"] = (P.riding and P.rocket == null and fall_t > float(P.ai.get("jump_at", 0.0))
+				and int(fall_t * 20.0) % 2 == 0)
 		P.inp["move"] = _toward(P, P.ai.get("land", P.pos)) if not P.riding else Vector2.ZERO
 		m.step(Match.DT)
 		fall_t += Match.DT

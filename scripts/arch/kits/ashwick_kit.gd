@@ -7,7 +7,7 @@ extends ArchKit
 ##   health). Stoking a foe that already burns Flashes it over (fiercer). One flame pip over a foe
 ##   Ablaze, three and a glow over one that Flashed over. Char falls off after 5s. A knock heals, and resets the cloak.
 ##   A burning foe takes more from the stream and the cinder (ignite_bonus), and the stream chips its health.
-## - LMB, Torch Lance: hold for a stream of fire from her hand (a cyan pilot flame first); the stream keeps its own
+## - LMB, Torch Lance: hold for a stream of fire from her hand (a gold pilot flame first); the stream keeps its own
 ##   velocity so a sweep bends it, narrow at the palm and billowing at the end.
 ## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that always flies its full 14m;
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
@@ -18,11 +18,11 @@ extends ArchKit
 ## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet). No lance
 ##   in it.
 
-const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool spark in her palm against warm fire
+const PILOT_COL := Color("ffd23a")     # the pilot flame: a hot gold spark in her palm, only while the lance spools up
 const BOLT_CORE := Color("fff4c8")     # Cinder Shot's white-hot core (its body is the RMB slot's flame orange)
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
-const PILOT_CORE := Color("c8f8ff")
+const PILOT_CORE := Color("fff4c8")
 const SHIELD_RINGS := 3               # most swirls shown on her body: one per foe the cloak caught, up to this
 const SHIELD_RING_STEP := 0.4         # m between the swirls up her body
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
@@ -239,12 +239,14 @@ func _shield_swirls() -> void:
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
-	if jet.running():
-		fx.unplace("pilot%d" % h.get_instance_id())      # the lance is out, its pilot flame too
-	elif vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
+	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Flue Flight
+	# never spools (the lance is out), so the pilot is out with it
+	var spooling := was_held and spool < float(lmbd()["spool"])
+	if vis and spooling and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
-		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
-		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
+		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), PILOT_COL, PILOT_CORE, 0.88 * fl)
+	else:
+		fx.unplace("pilot%d" % h.get_instance_id())
 	ember_t -= dt
 	if ember_t <= 0.0:
 		ember_t = 0.35
@@ -350,7 +352,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		play("as_lance")        # out of the dash, hand already on the aim: back at once
 	if not was_held:
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
-		vfx("lance_pilot")              # the pilot flares cyan before the roar
+		vfx("lance_pilot")              # the pilot flares gold before the roar
 	was_held = true
 	h.idle_fire = 0.0
 	spool += dt

@@ -212,6 +212,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
 	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
+	if sync.wall:
+		sync.wall.heavy = Arch.weight(arch) == "heavy"
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
@@ -924,8 +926,10 @@ class Sync extends Node:
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
+	var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
+	var wall: WardenWall          # the plant and push of a wall kick or bounce over the clips, or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
@@ -942,6 +946,8 @@ class Sync extends Node:
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 	var pace: RigPace             # how often the bones are posed (every frame but on GL over Metal)
+	var leg_bones := PackedInt32Array()     # LEG_BONES' indices, for FootPlant.bones
+	var drop_pose: WardenDropPose  # the drop's shared ride and skydive poses over the clips or the rig, or null
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -955,8 +961,11 @@ class Sync extends Node:
 				continue
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
+		for b in LEG_BONES:
+			leg_bones.append(WardenSkeleton.find(skel, b))
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
+		drop_pose = WardenDropPose.make(root, skel)
 
 	## Plays the Hero's clips when its art has them; and finds a skinned weapon's FX points.
 	func use_clips(glb: Node3D, art_name: String) -> void:
@@ -981,11 +990,14 @@ class Sync extends Node:
 		clips = WardenClips.make(root, glb, skel, art_name)
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		flinch = WardenFlinch.make(root, skel) if clips else null
+		aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
+		wall = WardenWall.make(root, skel) if clips else null
 		if clips:
 			_look_pose()
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
 		if clips and bool(dd.get("rig_root", false)):
 			rig_root = links.filter(func(l): return int(l[0]) == WardenSkeleton.find(skel, "root"))
+			leg_bones.clear()       # a hover (Motley): no feet on the ground to plant
 		if clips:
 			for sd in ["L", "R"]:
 				var nd := root.get_node_or_null(String(BONES["hand." + sd])) as Node3D
@@ -1017,7 +1029,10 @@ class Sync extends Node:
 			springs.still = clips.cur in clips.d.get("still", [])
 		else:
 			apply()
+			if drop_pose:
+				drop_pose.step(dt)
 			apply_blade()
+		FootPlant.bones(root, skel, leg_bones, dt)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		if companions:
@@ -1090,8 +1105,13 @@ class Sync extends Node:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if flinch:
 			flinch.step(dt)
+		if drop_pose:
+			drop_pose.step(dt)
 		if sway:
 			sway.step(dt)
+		aim.step(1.0 - w)
+		if wall:
+			wall.step(dt)
 		if w < 1.0:
 			var inv := skel.global_transform
 			for h in hand_nodes:

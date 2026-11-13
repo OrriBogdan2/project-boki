@@ -6,6 +6,7 @@ extends RefCounted
 
 const DB := -6.0                      # dB: the garden sounds sit under the Boki voices
 const BEAT_S := 0.45                  # s between the three countdown beats
+const GO_S := BEAT_S * 2.0            # s from the first beat to "go"
 const SULK_DELAY := 0.7               # s after the win fanfare until the loser huffs
 const SNIFF_NEAR := 12.0              # m from the scent where the sniffing loop is at its highest
 const PUSH_DELAY := 0.25              # s after a Tumble clash until the loser's paws scuff back
@@ -24,7 +25,7 @@ static func countdown(home, pos) -> void:
 	cue("garden_count", pos)
 	var beat := func(sname: String): cue(sname, pos)
 	home.get_tree().create_timer(BEAT_S).timeout.connect(beat.bind("garden_count"))
-	home.get_tree().create_timer(BEAT_S * 2.0).timeout.connect(beat.bind("garden_go"))
+	home.get_tree().create_timer(GO_S).timeout.connect(beat.bind("garden_go"))
 
 ## The crowd of Boki answering a timing press: "great", "good" or "miss".
 static func crowd(grade: String, pos) -> void:

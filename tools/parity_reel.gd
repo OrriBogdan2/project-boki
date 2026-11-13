@@ -5,7 +5,8 @@ extends "res://tools/hero_vfx_reel.gd"
 ## row of key caps along the bottom lights up with the keys being pressed. Frames go to <dir>/frames/NNNNN.jpg at
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
-## REEL_MARK lines give the frame each part starts on. Never writes the save.
+## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
+## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups). Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -53,10 +54,9 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in SEQUENCE:
-		if only == "" or part == only:
-			print("REEL_MARK %d %s" % [frames, part])
-			await Callable(self, "_p_" + part).call()
+	for part: String in (SEQUENCE if only == "" else Array(only.split(","))):
+		print("REEL_MARK %d %s" % [frames, part])
+		await Callable(self, "_p_" + part).call()
 	print("REEL_DONE %d frames in %s" % [frames, frame_dir])
 	main.get_tree().quit(0)
 
@@ -142,6 +142,19 @@ func _p_rmb() -> void:
 	await _seg("RMB, then again", 4.0, func(t: float) -> void:
 		P.inp["sec"] = _in(t, 0.2) or _in(t, 2.0)
 		P.inp["sec_hold"] = _in(t, 0.2, 0.7) or _in(t, 2.0, 0.7))
+
+## Standing still, no keys: what the Hunter carries at rest.
+func _p_idle() -> void:
+	await _seg("Idle", 3.0, func(_t: float) -> void: pass)
+
+## RMB held walking into the dummy (4 m off) and leaning on it, then LMB with RMB still held (Albert: no push,
+## then the boop).
+func _p_rmb_walk_lmb() -> void:
+	await _seg("RMB held, walk into the dummy; then LMB", 6.0, func(t: float) -> void:
+		P.inp["sec"] = _in(t, 0.2)
+		P.inp["sec_hold"] = _in(t, 0.2, 5.6)
+		P.inp["move"] = Vector2(1, 0) if _in(t, 0.5, 3.5) else Vector2.ZERO
+		P.inp["fire"] = _in(t, 4.4), 4.0)
 
 func _p_e() -> void:
 	if who == "ostra":
