@@ -23,9 +23,12 @@ var head := 0.0
 var face_prev := NAN
 
 ## 1 when the layer may show: not under a full-body clip (act_w; an upper-body move passes 0), not on the rig's own
-## pose (mantle, ledge: proc_w), not dead or downed.
+## pose (mantle, ledge: proc_w), not dead or downed, not under the glider or in a dive (HunterAnim's AIR_TILT rolls
+## and pitches the root there: a yaw on top would swing that tilt off the way it flies, --glide-bank-check).
 static func allowed(s: Dictionary, act_w: float, proc_w: float) -> float:
 	if bool(s.get("dead", false)) or bool(s.get("downed", false)):
+		return 0.0
+	if bool(s.get("gliding", false)) or bool(s.get("diving", false)):
 		return 0.0
 	return (1.0 - act_w) * (1.0 - proc_w)
 

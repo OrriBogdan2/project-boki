@@ -50,9 +50,7 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "pounce",
-		"dive_at": 0.36,
-		"dive_tilt": 90.0
+		"dive": "pounce"
 	},
 	"land": {
 		"clip": "land",
@@ -182,7 +180,7 @@
 		]
 	],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "flex", "refuse": "g_cross"},
-	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
+	"procedural": ["ledge", "base", "wade", "swim"],
 	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [
 		"hips",
@@ -216,5 +214,6 @@
 			}
 		}
 	},
-	"summon_call": "g_call_fling_r"
+	"summon_call": "g_call_fling_r",
+	"mantle": {"clip": "mantle", "rise": 0.382}
 }

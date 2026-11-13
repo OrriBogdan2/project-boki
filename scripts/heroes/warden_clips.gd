@@ -11,8 +11,8 @@ extends RefCounted
 ## portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a Blend2 of fall
-## and rise, or the glide, or the dive: a plunge's own clip, data "air.dive", held at "dive_at" s when the clip is a
-## one-shot) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
+## and rise, or the glide: a dive plays the glide too, pitched by HunterAnim's AIR_TILT) > upper (Blend2 filtered to
+## the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
 ## so one move hands to the next without a pop (item 32).
 ##
@@ -77,8 +77,6 @@ var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less 
 var run_land_w := 0.0        # how much of a running landing's absorb (the land clip less the idle) rides the run
 var air_w := 0.0
 var glide_w := 0.0
-var dive_w := 0.0
-var tilt: WardenAirTilt      # the whole body pitched and banked in the air
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
@@ -97,6 +95,7 @@ var upper_move := false      # the move is an upper-body one (keyed "upper"), ev
 var beats := {}              # "beats": the win, lose and board beats the .glb can play (WardenBeats)
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
+var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -160,6 +159,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
 	skel = sk
+	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	var names := player.get_animation_library_list()
 	if names.is_empty():
@@ -190,7 +190,6 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	if d.has("land"):
 		_p("land_delta/sub_amount", 1.0)     # (a Sub2 subtracts nothing until told to)
-	tilt = WardenAirTilt.new(glb, sk, d["air"])
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
@@ -286,15 +285,9 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("air_pose", 0, "fall")
 	t.connect_node("air_pose", 1, "rise_seek")
 	t.add_node("glide", _anim(String(ai["glide"])))
-	t.add_node("dive", _anim(String(ai.get("dive", ai["glide"]))))
-	t.add_node("dive_at", AnimationNodeTimeSeek.new())
-	t.connect_node("dive_at", 0, "dive")
-	t.add_node("dive_w", AnimationNodeBlend2.new())
-	t.connect_node("dive_w", 0, "glide")
-	t.connect_node("dive_w", 1, "dive_at")
 	t.add_node("glide_w", AnimationNodeBlend2.new())
 	t.connect_node("glide_w", 0, "air_pose")
-	t.connect_node("glide_w", 1, "dive_w")
+	t.connect_node("glide_w", 1, "glide")
 	t.add_node("air", AnimationNodeBlend2.new())
 	t.connect_node("air", 0, _build_crouch(t) if d.has("crouch") else "stance_w")
 	t.connect_node("air", 1, "glide_w")
@@ -664,12 +657,12 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
-	tilt.step(s, dt)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	stride.step(dt, s, self)
+	_air_tilt()
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
@@ -752,6 +745,17 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
+## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
+## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
+func _air_tilt() -> void:
+	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+		return
+	var b := Basis(q)
+	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
+	var turn := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
+	skel.set_bone_global_pose(root_bi, turn * skel.get_bone_global_pose(root_bi))
+
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	return Vector2(vel.x, vel.z).length() >= STILL
@@ -791,13 +795,9 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var gliding := bool(s.get("gliding", false)) or diving
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
 	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
-	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
-	_p("dive_w/blend_amount", dive_w)
-	if d["air"].has("dive_at"):
-		_p("dive_at/seek_request", float(d["air"]["dive_at"]))
 	_p("air_pose/blend_amount", rise_w)
 	if not grounded:
 		if not was_air:
