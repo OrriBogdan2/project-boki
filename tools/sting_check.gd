@@ -17,6 +17,7 @@ func ok(label: String, cond: bool, info := "") -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	Settings.set_v("soundtrack", Soundtrack.OWN_STYLE, false)      # stems falling away: the first score's layered score
 	Sfx.stung.connect(func(which: String): heard.append(which))
 	await _extract()
 	await _taken_out()
