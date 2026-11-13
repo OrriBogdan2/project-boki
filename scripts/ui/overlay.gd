@@ -234,6 +234,7 @@ func open_pause(where: String) -> void:
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
 		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+		item.call("Practice", "plus", open_practice.bind(practice.m.player))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
@@ -302,6 +303,10 @@ func open_controls() -> void:
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
 
 # ------------------------------------------------------------------ settings
+## The Training Grounds' Practice page: your ability ranks (PracticeRanks).
+func open_practice(h: Hunter) -> void:
+	PracticeRanks.fill(_page("practice", "Practice", 440), h, open_practice.bind(h))
+
 func open_settings() -> void:
 	_show_settings()
 
