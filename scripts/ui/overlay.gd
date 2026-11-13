@@ -139,8 +139,8 @@ func shot_demo(which: PackedStringArray) -> void:
 				PracticeHero.open(Practice.of(psc))      # the Hunters picker (class titles)
 		"confirm":
 			open_pause(ctx)
-			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
-				"Leave", close)
+			var lw := LeaveMatch.warning(LeaveMatch.Kind.get(arg.to_upper(), LeaveMatch.Kind.DEEP), true)
+			UI.confirm(root, lw["head"], lw["body"], "Leave", close, arg != "practice")
 		"tooltip":
 			tab = "Controls"
 			open_settings()
@@ -246,6 +246,7 @@ func open_pause(where: String) -> void:
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
 	item.call("Controls", "dash", open_controls)
+	item.call("Help", "info", open_words)
 	if where != "match":
 		item.call("Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
@@ -276,11 +277,11 @@ func open_pause(where: String) -> void:
 		var leave := func():
 			close()
 			Practice.leave(m, tut)
+		var ask := func(): LeaveMatch.ask(root, m, leave)
 		if tut:
-			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", ask)
 		else:
-			var lb: Button = item.call("Leave match", "back", func():
-				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
+			var lb: Button = item.call("Leave match", "back", ask, "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
 		item.call("Save and go to the main menu", "home", func():
@@ -302,6 +303,10 @@ func open_controls() -> void:
 	ControlsCard.fill(v, hero)
 	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
+
+## Help: the Words page (WordsView): what the game's terms mean, for the ones you have met.
+func open_words() -> void:
+	WordsView.fill(_page("words", "Help: words", 560, true))
 
 # ------------------------------------------------------------------ settings
 ## The Training Grounds' Practice page: your ability ranks (PracticeRanks).

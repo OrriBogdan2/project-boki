@@ -17,6 +17,8 @@ func ok(cond: bool, what: String) -> void:
 func _frame(m: Match, h: Hunter) -> void:
 	m.step(DT)
 	h.render(DT, 1.0)
+	if h.ak is MageKit:
+		(h.ak as MageKit).fx()._process(DT)       # (the headless loop never reaches the effects' own frame)
 	if h.model and h.model.has_node("Warden/Sync"):
 		var sync: Node = h.model.get_node("Warden/Sync")
 		sync.set_process(false)
@@ -31,6 +33,13 @@ func _flare(h: Hunter) -> float:
 	var sk := WardenGlb.skeleton(h.model.get_node("Warden"))
 	var bi := sk.find_bone("rodlit.1")
 	return sk.get_bone_pose_scale(bi).x if bi >= 0 else 0.0
+
+## Where a shot's look first left her (the round's own start is gameplay and stays put): Vector3.INF if none.
+func _drawn_start(K: MageKit, sd: Dictionary) -> Vector3:
+	for r in K.fx().riders:
+		if r["sd"] == sd and r.has("born"):
+			return r["born"]
+	return Vector3.INF
 
 func _run(m: Match, P: Hunter, frames: int, seen: Dictionary) -> float:
 	var top := 0.0
@@ -89,8 +98,8 @@ func run(main: Node) -> void:
 		var left := K.lmb_n % 2 == 1
 		sides.append("L" if left else "R")
 		var sd: Dictionary = m.get("shots")[-1] if not (m.get("shots") as Array).is_empty() else {}
-		var from: Vector3 = sd.get("start", Vector3.ZERO)
 		_run(m, P, 5, seen)         # (the release key: the arm is out)
+		var from := _drawn_start(K, sd)
 		var tip := WardenGlb.anchor(P.model, "anchor_finger_L" if left else "weapon_muzzle")
 		if fired and tip != null:
 			var off := Vector2(from.x - tip.global_position.x, from.z - tip.global_position.z).length()
@@ -99,7 +108,7 @@ func run(main: Node) -> void:
 		else:
 			worst = 99.0
 	ok(sides == ["L", "R", "L", "R"] or sides == ["R", "L", "R", "L"], "the bolts alternate hands: %s" % str(sides))
-	ok(worst < 0.2, "each bolt leaves its firing fingertip (worst %.3f m)" % worst)
+	ok(worst < 0.2, "each bolt is drawn leaving its firing fingertip (worst %.3f m)" % worst)
 	var calm := _flare(P)
 	P.grounded = true          # (in the air the rod goes on the press, with no hold)
 	P.gliding = false

@@ -718,6 +718,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		_draw_map_lairs(inner, to_map, on_map, hold)
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
+	AirMap.minimap(self, to_map, on_map, hold)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
@@ -1201,7 +1202,10 @@ func r_lock_text(p: Hunter) -> String:
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
+func _skill_slot(
+	slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool,
+	ch := -1.0, mx := 0
+) -> void:
 	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
@@ -1804,6 +1808,7 @@ func _draw_crosshair(p: Hunter) -> void:
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
+	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
 	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
@@ -1821,6 +1826,8 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
+	if Settings.get_v("tips") and not Record.clean():
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + TipPick.for_downed(p, m.time, m.opts.get("blight", true)), HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
@@ -1841,6 +1848,7 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
+	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
 	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
@@ -1882,7 +1890,7 @@ func _head(h: Node3D, up: float) -> Vector3:
 ## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := _head(p, 2.7 * float(p.cdat["scale"]))
+	var at := _head(p, 2.7 * float(p.cdat["scale"]) * cam.hunter_scale)
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)

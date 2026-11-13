@@ -5,7 +5,7 @@ extends Node3D
 
 const VOID := -1.0e9
 const LEVEL := 0.8      # height of one terrace
-const STEP := 0.32      # how high you can walk up without jumping
+static var STEP: float = HunterMove.step_height      # m: the tallest lip you walk up without jumping (hunter_move.json)
 const BLOCK_H := 3.0
 
 enum { T_VOID, T_GROUND, T_BLOCK }
@@ -20,7 +20,7 @@ var rng := RandomNumberGenerator.new()
 var islands: Array = []      # {cx, cz, r, base, cells:Array[Vector2i]}
 var pads: Array = []         # {pos:Vector3, land:Vector3, from:int, to:int, cd:float, node}
 var links: Array = []        # glide routes between close islands {from, to, take: Vector3, land: Vector3}
-var rings: Array = []        # air rings {pos: Vector3, dir: Vector2}
+var rings: Array = []        # air rings (AirRings) {pos, dir: Vector2, lift?, a/b: a lane's ring line}
 var winds: Array = []        # wind roads across long gaps {a: Vector3, b: Vector3} (either way)
 var updrafts: Array = []     # rising air off island edges {pos: Vector3, r: float, top: float}
 const BIG_SIZE := 216            # an expedition map's side, in tiles (about 3x the area it used to be)
@@ -65,6 +65,10 @@ func idx(x: int, z: int) -> int:
 
 func inb(x: int, z: int) -> bool:
 	return x >= 0 and z >= 0 and x < w and z < h
+
+## True on a flight of stairs, where the ground rises smoothly instead of in lips.
+func on_stairs(x: float, z: float) -> bool:
+	return stairs.has(idx(int(floor(x)), int(floor(z))))
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
@@ -1189,7 +1193,9 @@ func build_meshes() -> void:
 	if tm == null:
 		tm = TerrainMesh.new(self)
 		tm._fill_grid()
-	mat.set_shader_parameter("height_tex", tm.height_texture())
+	var heights: ImageTexture = tm.height_texture()
+	mat.set_shader_parameter("height_tex", heights)
+	add_child(FxGround.new(heights, Vector2(w, h)))     # compat soft effect edges (soft_fade.gdshaderinc)
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
 	mat.set_shader_parameter("depth_k", DepthCues.k())
@@ -2417,6 +2423,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		var pa := Vector3(ca.x + 0.5, level[idx(ca.x, ca.y)] * LEVEL, ca.y + 0.5)
 		var pb := Vector3(cb.x + 0.5, level[idx(cb.x, cb.y)] * LEVEL, cb.y + 0.5)
 		links.append({"from": a, "to": b, "take": pa, "land": _inward(b, pb, pa), "glide": true})
+	AirRings.lay(self, L, ids)
 	await _slice()
 	for ap in L.get("portals", []):
 		await _slice()

@@ -28,6 +28,7 @@ const HEAVY := {
 	"archer": ["lmb", 20, 5.0],
 	"tender": ["lmb", 1, 4.0],
 	"thief": ["lmb", 1, 2.0],
+	"gil": ["lmb", 1, 4.0],              # Tide Lunge, tapped (row added when Gil landed)
 }
 const KEYS := {"dash": "dash", "lmb": "fire", "e": "signature", "jump": "jump"}      # tapped -> its input action
 const FWD := Vector3(0, 0, -1)       # the dummy stands where ready-up aims the hunter

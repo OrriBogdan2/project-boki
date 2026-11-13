@@ -21,6 +21,9 @@ and cooldown numbers that already follow the ratios below. Numbers follow the so
 ## Per-slot table
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
+| Passive, Salvage | none | Knocks and assists stack Salvage (+2.5% health each, max 10); being downed costs one; hits on a hunter's back +50%; a knock heals 16% | stacks of max health per knock/assist, lose one on death, +50% backstab; the data has no heal | the 16% knock heal is ours-only (listed on the owner card); it stacks on purpose with the shared 5% takedown reset (21% in all), asserted |
+| LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
+| RMB, Abyssal Hand | tap | a reaching abyssal arm 11.5m to the first foe: it pierces terrain (rocks, props and cliff faces) and drags the foe over it (only a placed wall stops it); the foe is stunned and reeled to your feet (11 m/s, up to 3s) with weight; he stands braced while he reels, shuffling at 20% of his walk, which still swings them round him; you are Grounded while you reel (no jump or glide, the barge still works). From the throw until the miss or the end of the reel he holds his height (no fall mid-air or over the abyss; `CastHold.hover_slow`), and while the hook flies out he can only walk at 20% speed (`rmb.fly_slow`). Rank 3: a foe it hits takes half the cooldown off. It also catches an ally (reeled in to safety) and scoops up wisps on the way. 12s | the arm pierces terrain, grabs the first target (enemy or ally), physics pull that swings, scoops wisps, only dash castable; rank 4: -50% cooldown on an enemy hit | heavy bodies (wardens) can't be pulled; a placed wall stops it |
 | Passive, Salvage | none | Knocks and assists stack Salvage (+2.5% health each, max 10); being downed costs one; hits on a hunter's back +50%; a knock heals 16% | stacks of max health per knock/assist, lose one on death, +50% backstab, heal on knock | heal as a share of health |
 | LMB, scattergun | hold/tap | the first volley of a burst goes straight down the aim line (all 7 slugs, no fan); the next ones fan 20 degrees + 4 a shot (bloom to +10, 30 at most); 0.7s off the trigger (the 0.5s rate + 0.2) and the bloom snaps back, so the next volley is aimed again (owner 11-10: starts centred, goes back); the slugs stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
 | LMB, scattergun | hold/tap | 7 slugs in a 30 degree fan (bloom to +15) that stop at 6.3m and hang there as violet dots for 0.3s; a shot every 0.5s; while firing the spread's two edge lines lie on the ground, idle one aim line to the cursor; the body rocks back each shot; the barge resets the bloom only at dash rank 3 | 7 slugs, sharp bloom, a fixed stop range, cone edge lines and an idle aim line (footage), 0.5s | the no-spread armour bonus is not reproduced |
@@ -275,7 +278,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Barge into a foe; barge at rank 3 with spread built up | it touches nobody (no shove, no damage); the spread resets (rank 3 only) | "barge: it shoves and hurts nobody (the source's Brute Dash), and rank 1 keeps the gun's spread"; "barge rank 3: a dash resets the gun's spread" |
 | Barge in the air | the same quick time, 35% further | "barge: in the air the same quick time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
-| Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
+| Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: the knock heal is 16% of max health (ours-only...)"; "passive: with the takedown reset's 5% a knock heals 21% in all, no more"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
 | Downed | -1 Salvage | "passive: being downed costs a stack" |
 | Rank 3 Abyssal Hand hit / pellet hit | half the cooldown off / barge recharge trimmed | "abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)"; "barge rank 3: a pellet hit trims the recharge" |
 | Reel over a gap in the island | the body is carried over the void and falls | "abyss: a foe reeled over the void falls (knock rules)" |
@@ -435,3 +438,30 @@ Holds dropped on a merge (`_drop_holds`): `wind`, `dive`, `flying`, `hook_sd`, `
 and `broadside.blast` (Brass Broadside's charge and waves).
 Dash flow (item 32): `content/dash_flow/dredge.json`; LMB waits for the lunge's end, the rest fire from it; Shift barges at once out of everything (item 51): out of the slam's wind-up the raised fist rides the barge and slams where it arrives, out of the air smash the pounce goes and the smash drops from where it ends, out of the Broadside the charge and waves follow him. Only a jump is refused from the hook's throw to the end of the reel (owner item 31, the source's Grounded while reeling: `into_jump.rmb`).
 The slugs are ordinary shots (`Match.spawn_shot` with a `kx` callback for the hit). No new sync shape.
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| RMB hook in flight | any | [?] | flies on (already thrown) | [?] |
+| RMB reel | stun | [?] [F] "whether the reel can be cancelled... the video only shows standing still" | reel ends, foe let go, cooldown spent | [?] |
+| RMB reel | knockback, root | [?] | no check: the reel goes on | [?] |
+| RMB reel | Grounded | [F] he is GROUNDED himself while reeling (`0127`) | KitStatus `gnd` on him for the reel | match |
+| RMB reel | knocked | ends | ends (`_tick_pull`) | match (cooldown [?]) |
+| E Anchor Drop wind-up | stun | [?] | cancelled, no slam, cooldown spent | [?] |
+| E wind-up | knockback, root, Grounded | [?] | no check: the slam lands | [?] |
+| E wind-up | knocked | ends | cancelled | match |
+| E air smash (falling) | stun | [?] | the dive ends, he falls plain | [?] |
+| E air smash | knocked | ends | ends | match |
+| X Brass Broadside charge and waves | stun | [?] | stops; before the first wave the cooldown is cut to `x.stop_cd` (ours), after it the waves left are lost | [?] |
+| X charge and waves | knockback, root | [?] | no check: goes on | [?] |
+| X charge and waves | knocked | ends | stops | match (cooldown [?]) |

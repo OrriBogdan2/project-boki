@@ -268,6 +268,10 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	p.restart()
 	p.emitting = true
 
+## A few slow soft dots that drift up and settle: a quiet moment (a Boki growing). Not a burst: `radial` stays.
+func sparkles(at: Vector3, col: Color, amount := 6) -> void:
+	_emit(at, col, amount, 0.9, 1.1, -0.3, 0.8, Vector3.UP, 180.0)
+
 ## The ground height under a burst, for the dots' fade where there is no depth read (see FxDot); the burst's own
 ## no fade off a match (home, interiors).
 func _ground_under(at: Vector3) -> float:

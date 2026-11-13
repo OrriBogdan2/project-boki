@@ -183,7 +183,7 @@ def clips():
     # Skycall: left finger stabs the spot, then points straight up through the 0.8 s countdown
     PT = {"LP": (-0.14, 0.55, 1.32), "LBE": aim(10, -12), "gunL": 1.0, "tor": (0.05, 0.3, 0), "hed": (0.05, -0.3, 0), **OPEN}
     SK = {"LP": (-0.2, 0.1, 1.78), "LBE": ((0, 0.05, 1), (0, -1, 0.05)), "gunL": 1.0, "G": (0.26, 0.03, 1.02), "tor": (-0.18, 0.1, 0.06), "hed": (-0.42, 0.0, 0.05), "pel": (0.02, 0, 0.0), "lidR": 0.25, "lidL": 0.12, "smile": 1.0}
-    out.append(C("sky", 1.4, [(0.0, {}), (0.07, {"tor": (0.1, 0.5, 0), "LP": (-0.3, -0.05, 1.2), "gunL": 1.0}), (0.14, PT, "out"), (0.3, SK, "out"), (0.5, dict(SK, LP=(-0.2, 0.1, 1.74))), (1.15, SK), (1.4, END)]))
+    out.append(C("sky", 2.15, [(0.0, {}), (0.07, {"tor": (0.1, 0.5, 0), "LP": (-0.3, -0.05, 1.2), "gunL": 1.0}), (0.14, PT, "out"), (0.3, SK, "out"), (0.5, dict(SK, LP=(-0.2, 0.1, 1.74))), (1.15, SK), (1.9, SK), (2.15, END)]))   # (raised through the longest drag + countdown, 1.8 s)
     out.append(C("sky_snap", 0.55, [(0.0, SK), (0.06, {"LP": (-0.18, 0.5, 0.98), "LBE": aim(6, -48), "tor": (0.42, 0.1, 0), "hed": (-0.1, -0.1, 0), "pel": (0, 0, -0.1), "prt": (0.2, 0, 0), "smile": 1.0, "lidR": 0.9}, "out"), (0.3, {"LP": (-0.22, 0.42, 1.08), "tor": (0.2, 0.1, 0), "pel": (0, 0, -0.04), "prt": (0.08, 0, 0)}), (0.55, END)]))
     out.append(C("live", 0.55, [(0.0, {}), (0.07, {"LP": (-0.2, 0.1, 1.76), "LBE": ((0, 0.05, 1), (0, -1, 0.05)), "gunL": 1.0, "tor": (-0.12, 0, 0), "hed": (-0.3, 0, 0), "smile": 1.0}, "out"), (0.3, {"LP": (-0.2, 0.1, 1.7)}), (0.55, END)]))
     # Kitefall: the crouch, the launch and hang with the rods blazing, the dive down the bolt, the landing on one knee

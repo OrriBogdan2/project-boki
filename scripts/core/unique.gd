@@ -212,6 +212,20 @@ static func inherit(a: Dictionary, b: Dictionary, child_seed: int) -> Dictionary
 	d["from"] = [int(da.get("seed", 0)), int(db.get("seed", 0))]
 	return d
 
+## The look inherit() rolls around for these two: their size, build, proportions and colour shifts
+## averaged the same way, with no noise and a plain coat ({} when either has no rolls).
+static func blend_center(a: Dictionary, b: Dictionary) -> Dictionary:
+	var da := of(a)
+	var db := of(b)
+	if da.is_empty() or db.is_empty():
+		return {}
+	var d := da.duplicate()
+	d["size"] = _r4(clampf(0.4 * (float(da["size"]) + float(db["size"])), -SIZE_Z_MAX, SIZE_Z_MAX))
+	for k in ["girth", "hue", "sat", "val", "voice"] + PROPS:
+		d[k] = _r4((float(da.get(k, 1.0)) + float(db.get(k, 1.0))) * 0.5)
+	d["mark"] = "plain"
+	return d
+
 # ------------------------------------------------------------------ size
 static func base_size(species: String) -> Dictionary:
 	if _sizes.has(species):

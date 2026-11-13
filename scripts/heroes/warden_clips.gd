@@ -185,7 +185,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.active = true
 	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
-	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	free_arm = WardenFreeArm.new(sk, lib, String(d.get("free_pose", d["loco"]["idle"])), d.get("free_arm", {}))
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	_setup_out()
 	if not bool(d.get("rig_root", false)):
@@ -433,6 +433,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+		elif mv.has("hold_at") and tt >= float(mv["hold_at"]) and tt < float(mv["hold_until"]):
+			tt = float(mv["hold_at"])          # (a pose held while the kit waits: Skycall's raised arm to its snap)
 		elif tt >= length:
 			if not mv.has("hold_from"):
 				return {}
@@ -577,7 +579,7 @@ func step(dt: float) -> void:
 	if turn:
 		turn.step(dt)
 	_out(dt)
-	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
 	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 

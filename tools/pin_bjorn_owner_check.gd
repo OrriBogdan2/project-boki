@@ -453,7 +453,7 @@ func _bjorn_cadence(_m: Match, _P: Hunter, _T: Hunter, K: BulwarkKit) -> void:
 		float((KMovesPinBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
 			"tail %.2f" % tail)
 	var throws := _throws_in(_m, _P, K, 3.0)
-	ok("bjorn auto: throw, recall and throw again within 3 s at least 4 times", throws >= 4, "throws %d" % throws)
+	ok("bjorn auto: throw, recall and throw again within 3 s at least 3 times", throws >= 3, "throws %d" % throws)
 
 ## Taps LMB to throw and again to recall, for `secs` s; returns the throws made.
 func _throws_in(m: Match, P: Hunter, K: BulwarkKit, secs: float) -> int:

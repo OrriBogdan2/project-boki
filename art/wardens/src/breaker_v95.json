@@ -1,6 +1,6 @@
 {
  "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Albert's (Mossy, the Breaker) v95 master with the owner-approved appeal3 face (~/meshy/v95/Albert/r2/appeal3/cand.glb, its copies of the game's hammer, shield and lure ball left out: albert_v95_body.glb) onto breaker.glb's skeleton, clips and anchors; breaker.glb's own hammer mesh and shield (kept on x_shield) stay. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The pelvis sits at the rig's hips height so the girth keeps the master's (k 1: the rig is as wide as he is, much shorter); the neck is where the helmet's pivot goes. The masts and sails ride the hips, the helmet the head, the fish hangs from his left mast on x_fish (its spring chain moved there), the porthole glass is the mood face's screen (eyes-mood) and the cracks glow from the master's emission map.",
- "master": "~/meshy/v95/Albert/r2/clean1/albert_clean1_body.glb",
+ "master": "~/meshy/v95/Albert/r2/appeal3/albert_v95_body.glb",
  "game": "art/wardens/breaker/breaker.glb",
  "tris": 13000,
  "max_tris": 13000,

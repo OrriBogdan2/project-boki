@@ -28,7 +28,6 @@ const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his 
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
-const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
@@ -45,7 +44,7 @@ var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the 
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
-var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (BUFFER)
+var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (Loco.press_buffer)
 var e_held := false            # E pressed on a hooked chain while a Smash owned the body: the pull goes as it ends
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
@@ -168,7 +167,7 @@ func _tick(dt: float) -> void:
 			h.dashes = minf(h.max_dashes(), h.dashes + dt / h.dash_regen() * float(rd.get("dash_haste", 0.12)))
 	elif res_wait <= 0.0:
 		add_res(-float(rd.get("decay", 9.0)) * dt)
-	if lmb_buf > 0.0: lmb_buf -= dt
+	if lmb_buf > 0.0 and m.hitstop <= 0.0: lmb_buf -= dt      # (a hitstop freeze does not eat a kept press)
 	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	warchain.tick(dt)
@@ -254,10 +253,13 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
-## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits BUFFER for the
-## cleave to land; E on a held chain pulls, use_e).
+## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits
+## Loco.press_buffer for the cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
+
+func lock_refuses(slot: String) -> bool:
+	return super.lock_refuses(slot) and not (slot == "e" and warchain.hooked())
 
 ## Owner 113.2: a held Smash never opens the glider on a jump, nor do the Riposte's guard and cleave. Its last
 ## beat, the recovery, is open: a glide there ends the rest of it.
@@ -316,15 +318,15 @@ func lmb_override(held: bool, dt: float) -> bool:
 		lmb_was = false         # merged, the form owns the attack key (a charge from before must not go off)
 		return true
 	if riposte.move_k() <= 0.0:
-		# planted in the guard or the cleave: a slash press is kept for BUFFER and swings as the cleave lands
-		if held and not lmb_was: lmb_buf = BUFFER
+		# planted in the guard or the cleave: a slash press is kept for Loco.press_buffer and swings as the cleave lands
+		if held and not lmb_was: lmb_buf = Loco.press_buffer
 		lmb_was = held
 		return true
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
 	lmb_was = held
 	# (a merge ends the charge: letting go of it must not swing a wave mid-transformation); a press while a
-	# pull, a dash or a Meteor Drop holds the blade is kept for BUFFER and swings when it's free
+	# pull, a dash or a Meteor Drop holds the blade is kept for Loco.press_buffer and swings when it's free
 	if not h.can_fire() or KinMerge.transforming(h) or meteor.running():
 		if lmb_t >= 0.0 and _hold_waits():
 			return true         # a dash whose hold row keeps the Searing Wave charge: it waits for the dash's end
@@ -332,7 +334,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
 		# (a press in a dash is DashFlow's to hold)
-		if pressed and not KinMerge.transforming(h) and not in_dash(): lmb_buf = BUFFER
+		if pressed and not KinMerge.transforming(h) and not in_dash(): lmb_buf = Loco.press_buffer
 		return true
 	if h.ctrl != "local":
 		# a bot: slashes up close, sometimes a Searing Wave from mid range
@@ -641,7 +643,7 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
-## Riposte's guard and cleave) is kept for BUFFER and goes off when it ends; in the Warchain's pull (and just
+## Riposte's guard and cleave) is kept for Loco.press_buffer and goes off when it ends; in the Warchain's pull (and just
 ## after) it spins at once.
 func press_rmb() -> void:
 	if _rmb_waits():
@@ -651,7 +653,7 @@ func press_rmb() -> void:
 	if rmb_down and rmb_ctx.get("e", false):
 		_release_rmb()
 
-## A heavy move owns the body: Smash and slash presses wait (BUFFER).
+## A heavy move owns the body: Smash and slash presses wait (Loco.press_buffer).
 func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
@@ -667,7 +669,7 @@ func _pull_waits() -> bool:
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
 	if not _rmb_waits() and rmb_queued_at > -9.0:
-		var fresh: bool = m.time - rmb_queued_at <= BUFFER
+		var fresh: bool = m.time - rmb_queued_at <= Loco.press_buffer
 		rmb_queued_at = -9.0
 		if fresh and not rmb_down: press_rmb()
 	if e_held and not _pull_waits():
@@ -814,6 +816,7 @@ func _lunge(k: float, perfect: bool) -> void:
 	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "w": lunge_w(), "perfect": perfect})
 	if perfect:
 		perfects += 1
+		CombatBus.tech.emit(h, "juggernaut")
 		AimKit.perfect(h, {"col": LUNGE_FULL})
 
 func _tick_lunge() -> void:

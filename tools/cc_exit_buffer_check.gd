@@ -4,10 +4,10 @@ extends RefCounted
 ## first step the CC allows it: as many steps after that one as the same press with no CC takes (a slot's own
 ## wind-up), and never while the CC still forbids it. The CCs: a stun (every slot), a root (Shift), Grounded (Shift
 ## and jump). Also: a stun running into a longer root lets LMB go at the stun's end but never Shift, and an E
-## pressed EARLY_S before a stun's end (outside DashFlow.BUFFER_S) is not held. Reuses the dash-flow check's
+## pressed EARLY_S before a stun's end (outside Loco.press_buffer) is not held. Reuses the dash-flow check's
 ## training match and slot presses. Never touches the save.
 
-const PRESS_S := 0.1            # s of CC left when the press is made (inside DashFlow.BUFFER_S)
+const PRESS_S := 0.1            # s of CC left when the press is made (inside Loco.press_buffer)
 const EARLY_S := 0.3            # s of stun left for the press that comes too early to be held
 const ROOT_PAST := 0.4          # s the root runs past the stun in the stun-into-root trial
 const WATCH := 90               # steps after the press we watch

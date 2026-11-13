@@ -160,7 +160,7 @@ func _tick(dt: float) -> void:
 	boop.tick(dt)
 	if dash_after_plant and not ult.planted():
 		dash_after_plant = false
-		h.dash_buf = Hunter.DASH_BUFFER
+		h.dash_buf = Loco.press_buffer
 	if not mend.is_empty():
 		_tick_mend(dt)
 	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed
@@ -456,6 +456,7 @@ func _smash() -> void:
 		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
 	var dv := h.aim_dir()
 	if perfect:
+		CombatBus.tech.emit(h, "bulwark")
 		launch.start(dv)
 	else:
 		_carry(dv, k)
@@ -547,6 +548,7 @@ func recast_now(slot_id: String) -> void:
 
 func _recall() -> void:
 	play("bul_recall")
+	h.fire_cd = float(lmb_def()["throw_rate"])      # a recall is a press: 0.45 s to the next
 	mace["st"] = "back"
 	mace["hit"] = {}
 	mace["t"] = 0.0
@@ -656,10 +658,15 @@ func press_rmb() -> void:
 	rmb_t = 0.0
 	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "full": full_ready()}
 	cancel_hold()
+	if _can_raise():
+		play("bul_guard")           # the arm comes up on the press, the aegis 0.1 s into the hold
 
 func rmb_hold_tick(t: float) -> void:
-	if t >= float(rmb_def()["hold"]) and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0:
+	if t >= float(rmb_def()["hold"]) and _can_raise():
 		_raise()
+
+func _can_raise() -> bool:
+	return wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0
 
 func _raise() -> void:
 	var sd: Dictionary = rmb_def()["shield"]
@@ -667,7 +674,8 @@ func _raise() -> void:
 	wall = m.verbs.add_wall(h, h.pos + Vector3(d.x, 0, d.y) * 1.0, d, {"length": float(sd["len"]), "hp": shield_hp, "time": 99.0, "follow": true, "dist": 0.95, "block": "enemy", "color": rmb_def().get("col", "#9ad8ff")}, 1.0)
 	h.mel_hold = 0.0
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
-	play("bul_guard")
+	if anim_id != "bul_guard":
+		play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
@@ -704,6 +712,8 @@ func _lower() -> void:
 func fire_rmb(c: Dictionary) -> void:
 	var was_up := not wall.is_empty()
 	_lower()
+	if anim_id == "bul_guard":
+		anim_id = ""                # a tap: the arm goes back down with no aegis
 	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
 
 ## Guard at 50: the Shield Charge ends in a Shield Slam, a short cone that knocks back hard and stuns.
@@ -875,8 +885,7 @@ func _mend_tick() -> void:
 		if o.downed:
 			continue
 		ticks_healed += 1
-		o.heal(heal)
-		m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 4, 1.5, 0.35, -3.0)
+		o.heal(heal, Feel.cat_color("sustain"))
 
 func _mend_burst() -> void:
 	var ed := e_def()
@@ -891,8 +900,7 @@ func _mend_burst() -> void:
 			kickstarts += 1
 			m.fx.burst(o.pos + Vector3(0, 0.8, 0), BjornFx.GREEN, 14, 3.0, 0.5, -3.0)
 		elif not o.downed:
-			o.heal(heal)
-			m.fx.burst(o.pos + Vector3(0, 1.0, 0), Feel.cat_color("sustain"), 12, 2.5, 0.5, -3.0)
+			o.heal(heal, Feel.cat_color("sustain"))
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall): wall["max_hp"] = shield_max(); wall["hp"] = minf(shield_max(), float(wall["hp"]) + float(ed["shield"]))

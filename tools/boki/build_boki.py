@@ -17,6 +17,7 @@ import boki_meshy
 import boki_scan
 import boki_sdf
 import face
+import plant_gait
 import importlib
 
 import boki_rig
@@ -439,7 +440,10 @@ def main():
         if a.startswith("--blend="):
             bpy.ops.wm.save_as_mainfile(filepath=a[8:], compress=True)
     if "--no-export" not in argv:
-        boki_rig.export(os.path.join(REPO, "art/kin", SPECIES, SPECIES + ".glb"), tangents=hasattr(creature, "model"))
+        glb = os.path.join(REPO, "art/kin", SPECIES, SPECIES + ".glb")
+        boki_rig.export(glb, tangents=hasattr(creature, "model"))
+        if getattr(anim, "PLANT", None):
+            plant_gait.plant_file(glb, anim.PLANT)
     for a in argv:
         if a.startswith("--preview="):
             preview(a[10:])

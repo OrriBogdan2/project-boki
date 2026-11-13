@@ -595,6 +595,63 @@ const CHECKS := {
 	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
 	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # drop and landing frames
 	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # the loading screen; =home|training
+	# from the integration branch (ext/stuck-integ-606e9a98): checks main does not have yet
+	"--check": ["res://tools/script_check.gd", "script_check", null],
+	"--biome-check": ["res://tools/biome_check.gd", "biome_check", null],
+	"--hair-check": ["res://tools/hair_check.gd", "hair_check", null],
+	"--kinbox-check": ["res://tools/kinbox_check.gd", "kinbox_check", null],
+	"--revive-check": ["res://tools/revive_check.gd", "revive_check", null],
+	"--weapon-clip-check": ["res://tools/weapon_clip_check.gd", "weapon_clip_check", null],
+	"--farm-start-check": ["res://tools/farm_start_check.gd", "farm_start_check", null],
+	"--work-check": ["res://tools/work_check.gd", "work_check", null],
+	"--polish-check": ["res://tools/polish_check.gd", "polish_check", null],
+	"--boki-system-check": ["res://tools/boki_system_check.gd", "boki_system_check", null],
+	"--merge-form-check": ["res://tools/merge_form_check.gd", "merge_form_check", null],
+	"--boki-follow-check": ["res://tools/boki_follow_check.gd", "boki_follow_check", null],
+	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
+	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
+	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
+	"--mood-icon-check": ["res://tools/mood_icon_check.gd", "mood_icon_check", null],
+	"--level-pace-sim": ["res://tools/level_pace_sim.gd", "level_pace_sim", null],      # docs/LEVEL_PACE.md
+	# a walk off the lip vs the source
+	"--abyss-fall-check": ["res://tools/abyss_fall_check.gd", "abyss_fall_check", null],
+	"--abyss-fall-clip": ["res://tools/abyss_fall_clip.gd", "abyss_fall_clip", null],      # --shots-dir=<dir> (GPU)
+	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
+	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],      # its child process
+	"--wheel-zoom-check": ["res://tools/wheel_zoom_check.gd", "wheel_zoom_check", null],      # the wheel zooms
+	"--wheel-zoom-shots": ["res://tools/wheel_zoom_shots.gd", "wheel_zoom_shots", null],      # GPU: the wheel zooming
+	"--match-cam-wide-shots": ["res://tools/match_cam_wide_shots.gd", "match_cam_wide_shots", null],      # GPU
+	"--tenzo-feel-check": ["res://tools/tenzo_feel_check.gd", "tenzo_feel_check", null],      # owner 11-08 items 21, 22
+	"--air-rings-check": ["res://tools/air_rings_check.gd", "air_rings_check", null],      # lanes, lifts, bots
+	# SFX audit row 3
+	"--weapon-fire-sfx-check": ["res://tools/weapon_fire_sfx_check.gd", "weapon_fire_sfx_check", null],
+	"--levelup-check": ["res://tools/levelup_check.gd", "levelup_check", null],
+	"--leave-match-check": ["res://tools/leave_match_check.gd", "leave_match_check", null],
+	"--cast-lock-buffer-check": ["res://tools/cast_lock_buffer_check.gd", "cast_lock_buffer_check", null],
+	"--low-fps-input-check": ["res://tools/low_fps_input_check.gd", "low_fps_input_check", null],
+	"--tips-check": ["res://tools/tips_check.gd", "tips_check", null],      # context tips
+	"--gil-tele-shots": ["res://tools/gil_tele_shots.gd", "gil_tele_shots", null],      # --shots-dir=<dir>
+	"--evolve-moment-check": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "check"],
+	"--evolve-moment-shots": ["res://tools/evolve_moment_check.gd", "evolve_moment_check", "shots"],
+	"--nook-moment-check": ["res://tools/nook_moment_check.gd", "nook_moment_check", "check"],
+	"--nook-moment-shots": ["res://tools/nook_moment_check.gd", "nook_moment_check", "shots"],
+	# Help: the Words page, its text budget, what a fresh save shows
+	"--words-check": ["res://tools/words_check.gd", "words_check", null],
+	"--miss-fx-check": ["res://tools/miss_fx_check.gd", "miss_fx_check", null],      # missed shots end in a puff
+	"--miss-shots": ["res://tools/miss_shots.gd", "miss_shots", null],      # --shots-dir=<dir>
+	# 2 games, 100 ms, 2% loss
+	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],
+	# spring chains settle (secondary_motion)
+	"--spring-settle-check": ["res://tools/spring_settle_check.gd", "spring_settle_check", null],
+	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],      # --shots-dir=<dir>
+	# down/death card, spectate cycle
+	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],
+	"--receiver-cue-check": ["res://tools/receiver_cue_check.gd", "receiver_cue_check", null],  # heal, shield cue
+	# terrace steps never jolt the view
+	"--step-smooth-check": ["res://tools/step_smooth_check.gd", "step_smooth_check", "check"],
+	"--step-smooth-shots": ["res://tools/step_smooth_check.gd", "step_smooth_check", "shots"],      # --shots-dir=<dir>
+	# press -> first motion or shot
+	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],
 	"--breed-sim-check": ["res://tools/breed_sim_check.gd", "breed_sim_check", null],      # 500 random pairs bred
 	"--camera-follow-check": ["res://tools/camera_follow_check.gd", "camera_follow_check", "check"],      # dash trail

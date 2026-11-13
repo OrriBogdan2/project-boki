@@ -17,6 +17,12 @@ func run(main: Node) -> void:
 	var tree := main.get_tree()
 	_text()
 	_steps()
+	await _area(main, tree, false)
+	await _area(main, tree, true)
+	var sig = load("res://tools/signature_drill_check.gd").new()
+	await sig.drills(main)
+	bad += sig.fails
+	print("KITDRILL signature drills: %d checks, %d failed" % [sig.n, sig.fails])
 	await _area(main, tree, false, "gunslinger")
 	await _area(main, tree, true, "gunslinger")
 	await _area(main, tree, false, "archer")
@@ -26,7 +32,7 @@ func run(main: Node) -> void:
 func _text() -> void:
 	for id in Arch.ids():
 		var plan := KitDrill.steps(id)
-		var every := plan.size() == KitDrill.SLOTS.size()
+		var every := plan.size() == KitDrill.SLOTS.size() + 1      # the five slots and the tech
 		for st in plan:
 			every = every and String(st["line"]).length() > 3 and String(st["key"]) != "?"
 		ok(every, "%s: a line and a key for every slot" % id)
@@ -48,6 +54,12 @@ func _text() -> void:
 	ok(KitDrill.callout(jug, 1) == "%s AGAIN" % jug["key"], "after the first press the call-out is '<KEY> AGAIN'")
 	ok(not KitDrill.line("juggernaut", "e").begins_with("Try "), "a slice Hunter's line is its own text")
 	ok(KitDrill.line("tender", "e").begins_with("Try "), "a Hunter outside the slice gets the generic line")
+	for slot in ["rmb", "e", "x", "dash"]:
+		var gil_line := KitDrill.line("gil", slot)
+		var gil_name := String(Arch.def("gil")[slot]["name"])
+		ok(gil_line.contains(gil_name), "gil %s: the drill line names his own move (%s)" % [slot, gil_line])
+	ok(KitDrill.how("gil", "e") == "again", "gil E is a recast (Riptide: press E again to send the spout)")
+	ok(KitDrill.how("gil", "rmb") == "hold", "gil RMB has a hold (Grab Bag: hold to aim further)")
 
 func _steps() -> void:
 	var k := KitDrill.new()
@@ -69,7 +81,11 @@ func _walk(k: KitDrill, hunter: String) -> void:
 		var n := 2 if st["how"] == "again" else 1
 		for i in n:
 			ok(k.step < k.plan.size() and k.plan[k.step]["slot"] == st["slot"], "step %s is open" % st["slot"])
-			if st["how"] == "hold":
+			if st["how"] == "tech":
+				k.tech_done("archer")
+				ok(k.step == k.plan.size() - 1, "another Hunter's tech does not finish the step")
+				k.tech_done("juggernaut")
+			elif st["how"] == "hold":
 				k.on_held(st["action"], KitDrill.HOLD_S)
 			else:
 				k.on_press(st["action"])
@@ -92,13 +108,21 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	for i in 3: await tree.process_frame
 	var kd := Practice.of(m).get_node_or_null(KitDrill.NAME) as KitDrill
 	var tag := "%s %s" % [hunter, "skip" if skip else "finish"]
-	ok(kd != null and kd.plan.size() == KitDrill.SLOTS.size(), "%s: the first visit gets the drill" % tag)
+	var want := KitDrill.SLOTS.size() + (0 if SignatureDrill.step(hunter).is_empty() else 1)
+	ok(kd != null and kd.plan.size() == want, "%s: the first visit gets the drill" % tag)
 	if kd != null:
 		if skip:
 			kd.finish()
 		else:
 			for st in kd.plan:
-				if st["how"] == "hold": kd.on_held(st["action"], KitDrill.HOLD_S)
+				if st["how"] == "tech":
+					SignatureDrill.rig(m, kd.arch)
+					var dummy: Hunter = m.arena.dummies[0]["h"]
+					var rigged := dummy.has_meta(SignatureDrill.META) and dummy.hp <= 20.0
+					ok(rigged, "%s: Vex's dummy is rigged weak and left alone" % tag)
+					kd.tech_done(st["id"])
+					ok(not dummy.has_meta(SignatureDrill.META), "%s: the drill gives the dummy back" % tag)
+				elif st["how"] == "hold": kd.on_held(st["action"], KitDrill.HOLD_S)
 				else:
 					kd.on_press(st["action"])
 					kd.on_press(st["action"])

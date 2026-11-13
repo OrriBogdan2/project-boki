@@ -138,7 +138,7 @@ func _camp() -> Array:
 		var t0 := Time.get_ticks_usec()
 		await _step(1)
 		var now := Time.get_ticks_usec()
-		fl.append(bench._frame("fight", f, (now - last) / 1000.0, (now - t0) / 1000.0))
+		fl.append(bench.frame("fight", f, (now - last) / 1000.0, (now - t0) / 1000.0))
 		last = now
 		if f % SAMPLE == 0:
 			_sample(f / 60.0)

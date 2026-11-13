@@ -23,25 +23,6 @@ DEFAULT_TRIS = 14000   # the Hunter budget: 10-15k triangles
 MIN_RATIO = 0.25       # below this a body's face and hands fall apart
 
 
-def _ink_back():
-    """The ink room lives in COLOR_0's alpha (fit_warden.ink_room, outline.gdshader ink_mask). The importer wires
-    COLOR_0 into each material (texture x Color Attribute), and the exporter then writes it back without alpha
-    (every line at full width: Kael's mane drowned in ink). Unwired, as fit_warden leaves it, the active colour
-    goes out whole."""
-    for mat in bpy.data.materials:
-        nt = mat.node_tree
-        if nt is None:
-            continue
-        for vc in [n for n in nt.nodes if n.type == "VERTEX_COLOR"]:
-            for mix in [lk.to_node for lk in vc.outputs[0].links if lk.to_node.type == "MIX"]:
-                tex = next((lk.from_socket for i in mix.inputs if i.name == "A" for lk in i.links), None)
-                for lk in [lk for o in mix.outputs for lk in o.links]:
-                    if tex is not None:
-                        nt.links.new(tex, lk.to_socket)
-                nt.nodes.remove(mix)
-            nt.nodes.remove(vc)
-
-
 def main():
     a = sys.argv[sys.argv.index("--") + 1:]
     src = a[0]
@@ -80,7 +61,7 @@ def main():
         print("DECIMATE   %-28s %6d -> %6d" % (o.name, before[o.name], K.tris([o])))
     print("DECIMATE total %d -> %d" % (total, K.tris(meshes)))
     # the toon shader's ink room rides on COLOR_0 (fit_warden): it goes back out when the model has it
-    _ink_back()
+    K.ink_back()
     K.export(out, objs, colors=any(len(o.data.color_attributes) > 0 for o in meshes))
 
 

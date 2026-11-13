@@ -23,12 +23,12 @@ onto its side (`Kin.render`).
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp | strafe | crouch | upper |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
-| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
+| cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
-| gil | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
-| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
+| gil | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
+| hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | ostra | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
@@ -48,13 +48,13 @@ onto its side (`Kin.render`).
 
 ## Gaps, worst first
 
-1. **Gil has no authored clips** (empty `gil.glb` animation list): every state is `proc`, and the Hunter has no
-   crouch, strafe or kit-move clips. Needs a Blender rig pass (days), same as the others got.
+1. **Gil's dash is `proc`**: his `gil.glb` now has clips for every other state in the table.
 2. **Boki glide, dash and stomp are `missing`**: the Boki is carried curled up through a glide, dashes as the run clip
    and has no stomp (the Wisp stomp is the Hunter's). A dash lean needs `KinFlinch`-style spring on `kact`: next after
    the landing (done here).
-3. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
-   phase and charge poses stand in; only claire, kael, ryzz, sable, tarek and vex key a dash clip.
+3. **Hunter dash is `proc` for 5 Hunters** (breaker, dredge, ostra, pip, and gil): the procedural roll,
+   phase and charge poses stand in; Cinder's ram and poof and Lace's roll and flick are clips re-keyed to their felt
+   dashes (KIT_PARITY 'Felt dash per kit'), as are claire, kael, ryzz, sable, tarek and vex.
 4. **Tarek has no upper-body kit move**, so his attacks stop the legs.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
 # Animation coverage
@@ -105,8 +105,7 @@ onto its side (`Kin.render`).
 
 ## Gaps, worst first
 
-1. **Gil has no authored clips** (empty `gil.glb` animation list): every state is `proc`, and the Hunter has no
-   crouch, strafe or kit-move clips. Needs a Blender rig pass (days), same as the others got.
+1. **Gil's dash is `proc`**: his `gil.glb` now has clips for every other state in the table.
 2. **Boki glide, dash and stomp are `missing`**: the Boki is carried curled up through a glide, dashes as the run clip
    and has no stomp (the Wisp stomp is the Hunter's). A dash lean needs `KinFlinch`-style spring on `kact`: next after
    the landing (done here).
@@ -115,6 +114,7 @@ onto its side (`Kin.render`).
    the move and the landing squash settles it.
 3. **Boki jump** is the `hop` clip only for a cheer; a leap or throw plays the run clip in the air. A `kact` of
    `hop` while `fly` is set would use the existing clip.
-4. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
-   phase and charge poses stand in; only claire, kael, ryzz, sable, tarek and vex key a dash clip.
+4. **Hunter dash is `proc` for 5 Hunters** (breaker, dredge, ostra, pip, and gil): the procedural roll,
+   phase and charge poses stand in; Cinder's ram and poof and Lace's roll and flick are clips re-keyed to their felt
+   dashes (KIT_PARITY 'Felt dash per kit'), as are claire, kael, ryzz, sable, tarek and vex.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).

@@ -37,6 +37,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--balloon-check` | The hit marker is the real hitbox, for every class, below a lip, gliding and mid-hop |
 | `--hold-check` | Hold animations keep their pose while refreshed, let go cleanly, and survive the network snapshot |
 | `--move-feel-check` | Movement, jump, glide, feathering, drop and camera timings match `docs/MOVEMENT_FEEL.md` |
+| `--step-smooth-check` | Vex, Albert and Sable on the Hollow Crown: up and down three terrace steps and a stair flight, the drawn body's y never jumps over 0.08 m a frame and the camera's never over 0.05 m (`--step-smooth-shots` takes the strips) |
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
@@ -69,6 +70,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent |
 | `--breed-sim-check` | Breeding sim: 500 random pairs bred, sex split half and half (documented shares aside), traits from the parents' mean, IVs, habits and looks from one parent, no mutation outside the base-odds roll |
 | `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
+| `--nook-moment-check` | The pairing beat at the Nook: both Boki walk to the nest, face, nuzzle, circle, settle; the egg fades in; unstable mixes wobble it; any key skips; the save is untouched (`--nook-moment-shots` for the day and night sheets) |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |
 | `--economy-check` | Full backpack swaps, smart loot, extracting fills the armory, feeders feed (also while away), starving to a grave, the Soul Shrine |
@@ -79,6 +81,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--mask-moment-check` | The put-on Mask moment (item 83, `MaskBeat`): every Hunter has a whisper and a sting key, the sounds exist, 4-6 s with 0.6-0.8 s of black; build-up camera, the Mask rising with the ghost face, black and silence on contact with the Hunter swapped in behind it, a memory frame and the whisper, the snap back with a ripple, the name and title, the scene camera back; skippable once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |
+| `--cast-predict-check` | Online casts start the frame you press them: a listen server and a client over the relay at 100 ms round trip and 2% loss; every slot of Vex, Kael, Lace and Cinder, press to first animation and first VFX on the client, never later than offline |
 | `--home-build-check` | Build mode: placing, turning, moving, storing, refusing bad spots, save and reload, migration, expanding |
 | `--pack-ui-check` | The backpack windows take real mouse clicks |
 | `--title-check` | The title screen builds with the right menu, tagline, key art and frame budget |

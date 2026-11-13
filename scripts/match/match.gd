@@ -11,6 +11,7 @@ var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
 var hud: Node = null
+var recap: DeathRecap = null    # the down/death card (scripts/ui/death_recap.gd)
 var spectate := Spectate.new(self)     # who you watch once you're out
 var env: WorldEnvironment
 var hunters: Array = []
@@ -28,9 +29,8 @@ var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (ho
 var shrines: Array = []     # {pos, used, prog, node}
 var breaks: Array = []      # {i, pos, kind, node, dead}
 var brk: Breakables
-var ring_n := 0
 var pellet_hits := {}        # shotgun volley + target -> slugs landed
-var air_rings: Array = []   # {pos, dir, node, cd: {hunter nid: time}}
+var air_rings: AirRings
 var wpicks: Array = []      # pickups on the ground: gear {gear}, tunings {tune}, treasure {val}, each with id, pos, rar, node
 var wdrop_n := 0
 var timed: TimedSpawns      # the Glimmerkin and the Watcher, on a clock (made on the first event tick)
@@ -245,7 +245,7 @@ func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 const RANGE_SMALL := 80.0
 const RANGE_BIG := 125.0
 static func _draw_range(root: Node) -> void:
-	var k := float(Settings.q("draw"))
+	var k := CamRig.draw_k()
 	var stack: Array = [root]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
@@ -348,6 +348,8 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
+	recap = DeathRecap.new(self)         # the down/death card and the spectate cycle
+	add_child(recap)
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -385,12 +387,7 @@ func _start(o: Dictionary) -> void:
 	if not opts.get("arena", false):
 		await _spawn_breakables()
 	await _slice()
-	for rg in world.rings:
-		var rn := Models.air_ring()
-		rn.position = rg["pos"]
-		rn.rotation.y = atan2(float(rg["dir"].x), float(rg["dir"].y))
-		add_child(rn)
-		air_rings.append({"pos": rg["pos"], "dir": rg["dir"], "node": rn, "cd": {}})
+	air_rings = AirRings.new(self)
 	if o.get("break_demo", false) and player and not breaks.is_empty():
 		# test: stand by some breakables with two found weapons on the ground
 		var b0: Vector3 = breaks[0]["pos"]
@@ -469,7 +466,7 @@ func _start(o: Dictionary) -> void:
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
 		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
-	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
+	Practice.attach(self)      # the practice areas' bottom bar and J hero picker
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -490,7 +487,7 @@ func _build_env() -> void:
 	env.environment = Look.environment({"top": sky.darkened(0.2), "mid": sky.lerp(amb, 0.35), "horizon": (cl[1] as Color).lerp(T["sun"], 0.5).lightened(0.15),
 		"below": cl[0], "ambient": amb, "ambient_energy": 0.5, "fog": (cl[1] as Color).lightened(0.12).lerp(Color("4a5aa8"), 0.35), "sun_col": T["sun"]})
 	add_child(env)
-	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
+	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0 * CamRig.style_reach(cam_style))
 	sun.shadow_opacity = 0.8
 	# the raid condition: rolled from the seed on real expeditions, clear otherwise (scripts/match/raid_look.gd)
 	raid = RaidLook.pick(opts, seed_val)
@@ -1418,44 +1415,6 @@ func _pickup_label(h: Hunter, wp: Dictionary) -> String:
 		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
 	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
 
-## Air rings: anyone flying through one gets thrown forward along their own heading, the glider
-## pops open and gets a little fuel back, so a chain of rings carries you across a long gap.
-func _update_rings(dt: float) -> void:
-	if player and not player.out and int(time * 4.0) % 4 == 0:
-		for rg in air_rings:
-			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
-				break
-	for rg in air_rings:
-		# rings stand straight up facing along the route; they don't spin
-		for h in hunters:
-			if h.remote or h.grounded or h.out or h.downed or h.riding or not h.pad.is_empty():
-				continue
-			var c: Vector3 = rg["pos"]
-			var body: Vector3 = h.pos + Vector3(0, 0.8, 0)
-			if body.distance_to(c) > 1.6:
-				continue
-			if float(rg["cd"].get(h.nid, -9.0)) > time:
-				continue
-			rg["cd"][h.nid] = time + 3.0
-			ring_n += 1
-			h.add_stat("rings")
-			var hv := Vector2(h.vel.x, h.vel.z)
-			var rd: Vector2 = rg["dir"]
-			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
-			if absf(d.dot(rd)) > 0.5:
-				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
-			h.vel.x = d.x * spd; h.vel.z = d.y * spd
-			h.vel.y = maxf(h.vel.y, 2.0)
-			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
-			if not h.gliding and not h.dropping:
-				h.glide_cd = 0.0
-				h.gliding = true
-			fx.ring(c, 1.6, Color("8fe3ff"), 0.3)
-			fx.burst(c, Color("cff6ff"), 14, 4.0, 0.35, 0.0)
-			sfx("whoosh", c, -2.0 if h == player else -10.0, 1.3)
-
 ## Breakables are solid: push bodies out, and dashing straight through one smashes it.
 var _break_grid := {}
 var _break_grid_n := -1
@@ -1791,7 +1750,9 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.downed = true
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
-	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+	if by is Blight:
+		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
 	h.revive = 0.0
@@ -1812,7 +1773,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
-			credit.gain_xp(90.0)
+			credit.gain_xp(LevelGrowth.xp("knock"))
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
@@ -1920,7 +1881,9 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if h.out:
 		return
 	h.deaths += 1
-	if by is Blight: kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+	if by is Blight:
+		kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+		h.add_stat("blight_out")      # (TipPick)
 	if h.lives > 1 and not h.remote and not over and not final:
 		_lose_life(h, by, why)
 		return
@@ -2384,6 +2347,7 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	if player == null:
 		return
 	player.chase = thief
+	player.add_stat("wisp_stolen")      # (TipPick)
 	ping(thief.pos, Color("ffd23f"))
 	if hud:
 		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
@@ -2919,6 +2883,8 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if e == null:
+		MissFx.shot_ended(self, s, at, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -3152,6 +3118,7 @@ func _process(delta: float) -> void:
 		acc -= DT
 		steps += 1
 		step(DT)
+		FireTap.stepped(player)
 	var alpha := acc / DT
 	_vprof("pre")
 	if opts.has("boki_demo"):
@@ -3172,7 +3139,7 @@ func _process(delta: float) -> void:
 	# the time it skipped); near ones every frame
 	_render_n += 1
 	var cf := cam.focus
-	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	var near2 := pow(34.0 * cam.reach(), 2.0)
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
@@ -3212,6 +3179,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
+	cam.abyss_depth = 0.0            # only a live fall under a lip pulls the view out (set below)
 	if player and player.riding and player.rocket == null:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3235,9 +3203,10 @@ func _process(delta: float) -> void:
 		cam.zoom_to = cam.air_zoom(player, player_altitude())
 		if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 		if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
+		cam.abyss_depth = player.lip_y - player.pos.y if player.below_lip else 0.0
 		cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
-		var peek := mate_look.focus(player.render_pos(alpha), alpha)
+		var peek := mate_look.focus(StepSmooth.view(player, alpha), alpha)
 		cam.follow(peek, delta, mate_look.looking == null)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
@@ -3304,7 +3273,7 @@ func _gather_input() -> void:
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = (hud != null and hud.mouse_on_ui() or PanelInput.panel_up(hud)) and player.draw_t < 0.0
-	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
+	player.inp["fire"] = FireTap.down(player, not paused and not over_ui)
 	if paused and player.draw_t >= 0.0:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
@@ -3386,6 +3355,9 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if CamWheel.input(self, event):
+		get_viewport().set_input_as_handled()
+		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
 		get_viewport().set_input_as_handled()
@@ -3760,15 +3732,7 @@ func step(dt: float) -> void:
 				if h.team != player.team:
 					h.teleport(rival_spot if rival_spot != Vector3.INF else spot + Vector3(4, 0, 0))
 					break
-	if opts.get("ring_demo", false) and player and time < 0.05 and not air_rings.is_empty():
-		var rg: Dictionary = air_rings[0]
-		var rd: Vector2 = rg["dir"]
-		player.teleport(rg["pos"] - Vector3(rd.x, 0, rd.y) * 5.0 + Vector3(0, -0.6, 0))
-		player.grounded = false; player.gliding = true
-		player.vel = Vector3(rd.x, 0, rd.y) * 9.6
-	if opts.get("ring_demo", false) and player and player.gliding:
-		player.inp["glide"] = true
-		player.inp["move"] = Vector2(player.vel.x, player.vel.z).normalized()
+	if opts.get("ring_demo", false) and air_rings: air_rings.demo()
 	if String(opts.get("map_demo", "")) == "mid" and player and hud and time > 0.6 and not has_meta("map_demo_done"):
 		# test: the map mid-match, with a few spawns scouted (found, empty and taken) and squad pings
 		set_meta("map_demo_done", true)
@@ -3891,7 +3855,7 @@ func step(dt: float) -> void:
 	_collide_breaks()
 	brk.tick(dt)
 	_prof("separate")
-	_update_rings(dt)
+	if air_rings: air_rings.tick(dt)
 	_update_shots(dt)
 	flyby.tick(self)
 	_prof("shots")
@@ -4754,9 +4718,9 @@ func _update_zones(dt: float) -> void:
 					if amt > 0.0:
 						for h in hunters:
 							if h.team == z["team"] and not h.remote and not h.downed and not h.out and h.flat_dist(c) < z["r"]:
-								h.hp = minf(h.max_hp, h.hp + amt)
+								h.heal(amt)
 								if h.kin and h.kin.state == "active" and h.kin.flat_dist(c) < z["r"]:
-									h.kin.hp = minf(h.kin.max_hp, h.kin.hp + amt)
+									Effects._heal(h.kin, amt)
 						if z["kind"] == "sanctuary":
 							fx.burst(c + Vector3(randf_range(-2, 2), 0.3, randf_range(-2, 2)), Color("9ee2a0"), 3, 1.5, 0.6, -2.0, 0.8)
 				"well":
@@ -4985,6 +4949,7 @@ func _finish() -> void:
 		r["belt"] = Equal.belt_home(player, result.get("extracted", false))
 		r["backpack"] = Backpacks.home_tier(player, result.get("extracted", false))
 		r["stats"] = player.stats.duplicate()
+		r["used"] = player.used.duplicate()      # (TipPick: was E used)
 		r["squad"] = ResultsStage.roster(hunters, player)
 		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind

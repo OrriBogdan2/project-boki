@@ -9,6 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const MTIME := preload("res://tools/mage_anim_time_check.gd")        # Sparkle's move timing against the footage frames
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -25,8 +26,10 @@ func run(main_node: Node, who: String) -> void:
 	if who == "mage":
 		await _mage()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
+		await _knocked_holds()
 		await _growth()
 		await ults.mage()
+		MTIME.new(self).run()
 		var before: Array = [ac.n, ac.fails]
 		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Skycall drag ends
 		n += ac.n - before[0]
@@ -497,7 +500,7 @@ func _mage() -> void:
 	m.step(DT)
 	ok("dash table: Wirerun is rolling and DashFlow says LMB fires (the source is silent), E fires",
 			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
-			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
+			and absf(Loco.press_buffer - 0.15) < 0.001)
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
@@ -631,6 +634,38 @@ func _mage() -> void:
 			"took %.0f -> %.0f dashes %.1f" % [took0, ac.dmg(T), P.dashes])
 	await ac.done(m)
 	fails += ac.fails
+
+## Interrupts (docs/heroes/mage.md): knocked mid Storm Rod hold she throws nothing; knocked in the Kitefall crouch
+## she never takes off. (The check sets `downed` itself: a real knock of the lone player ends the training team.)
+func _knocked_holds() -> void:
+	var r: Array = ac.setup("mage", 5.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var K: MageKit = P.ak
+	ac.aim_at(P, T.pos)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	ac.step(m, 0.6, func(): P.inp["sec_hold"] = true)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 1.2)
+	ok("knocked mid Storm Rod hold: no throw, no damage, the charge kept",
+			not K.rmb_down and ac.dmg(T) == 0.0 and K.ch_rmb == 1.0, "took %.0f charges %.0f" % [ac.dmg(T), K.ch_rmb])
+	P.downed = false
+	P.inp["sec_hold"] = false
+	P.lvl = int(Hunter.ULT_AT[0])
+	var y0 := P.pos.y
+	var pressed := HunterKeys.ult_pressed(P)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 0.8)
+	ok("knocked in the Kitefall crouch: no take-off", pressed and not K.ult.running() and P.pos.y < y0 + 0.5,
+			"pressed %s running %s y +%.1f" % [pressed, K.ult.running(), P.pos.y - y0])
+	P.downed = false
+	await ac.done(m)
 
 # ------------------------------------------------------------------ Vex
 ## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the

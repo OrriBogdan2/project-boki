@@ -57,10 +57,10 @@ func drop() -> void:
 
 ## A re-press, from the first rock's crouch to the window's end: the next hop, as soon as he is on a rock. On the
 ## skid, Hunter.do_dash has cut its roll as it cuts any rush: the skid runs on. With no hop left, a press in the
-## last flight's final BUFFER_S is held for the landing (_crash).
+## last flight's final Loco.press_buffer is held for the landing (_crash).
 func press() -> void:
 	if int(st["n"]) >= int(dd()["hops"]):
-		st["again"] = bool(st.get("again", false)) or left() <= DashFlow.BUFFER_S
+		st["again"] = bool(st.get("again", false)) or left() <= Loco.press_buffer
 		return
 	st["press"] = true
 	if String(st["phase"]) == "skid" and h.roll_t <= 0.0:
@@ -351,7 +351,7 @@ func _crash() -> void:
 	KitLooks.of(m).release(FOOT_KEY)
 	AimKit.hide(h, "leap")
 	if bool(st.get("again", false)):
-		h.dash_buf = DashFlow.BUFFER_S
+		h.dash_buf = Loco.press_buffer
 	st = {"phase": "roll", "t": 0.0, "at": at, "dir": st["dir"]}
 
 func _roll_on() -> void:

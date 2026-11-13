@@ -101,7 +101,7 @@ func _steps() -> void:
 ## returning one), until `stop` returns true (at most WALK_T), and asserts the weight-bearing foot's gap over the
 ## surface it stands on. A foot out over a drop (past FootPlant's reach) stands on nothing and is not scored.
 ## step: also asserts the step is smooth: the drawn body never pops up or down and FootPlant plants every grounded
-## frame he is not landing (Hunter.step_vis, StoneStand.stand). Prints the crown mesh's gap too.
+## frame he is not landing (Hunter.drawn_y, StoneStand.stand). Prints the crown mesh's gap too.
 func _score(what: String, how: Variant, settle: int, stop := Callable(), step := false) -> void:
 	for f in settle:
 		_frame(Vector2.ZERO)

@@ -15,6 +15,8 @@ const PREVIEW_COL := Color("d8ecff")
 const PUSH_PAD := 0.15                  # m past the rock's half thickness a body on the line is moved to
 const CRACK_LW := 0.16                  # m: the cracks are a heavy line, wider than an aim reticle
 const PUFF_GAP := 0.02                  # s between fire puffs walking along the cracks
+const FLOOR_SLACK := 0.05               # m: feet this far under a terrace's height still raise the floor at it
+const FLOOR_LEAD := 0.6                 # m: Verbs.add_bridge lays its first slab this far along from its start
 const HUSH_PAD := 0.1                  # s past the last rock the rocks make no rumble of their own
 const TELL_DB := -3.0                   # the cracks opening (the cast level of Stone Row's tell)
 const ROLL_DB := -4.0                   # each half of the rolling rumble (two voices sum to about -1)
@@ -39,6 +41,7 @@ var shoved := 0
 var rolling := false                    # the rumble is travelling out (the eruption's 0.4 s)
 var first_rise_t := -1.0
 var last_rise_t := -1.0
+var floors := 0                         # rock floors raised under him on the press
 
 func _init(kit: DolmKit) -> void:
 	k = kit
@@ -58,7 +61,33 @@ func start() -> bool:
 	axis = _across_aim()
 	phase = "aim"
 	phase_t = 0.0
+	floor_under()       # (the aim pose comes through the hold-clip rule, HOLD_POSE_T into the hold)
 	return true
+
+## Owner 11-08: the press raises a slab of rock ground under him on the same frame, so R saves him over the
+## abyss. The abyss tiles round him turn to ground for everyone (Verbs.add_bridge, sent through Net: over_void,
+## landings, mantles and paths all read it) at the level just under his feet, falling he stands on it at once;
+## it cracks and shakes for its last seconds, then crumbles. Over solid ground nothing changes.
+func floor_under() -> void:
+	var h := k.h
+	var fd: Dictionary = Loco.T["tenzo"]["r_floor"]
+	var g := maxi(0, floori((h.pos.y + FLOOR_SLACK) / World.LEVEL)) * World.LEVEL
+	var r := float(fd["r"])
+	var dir := h.aim_dir()
+	var from := Vector3(h.pos.x - dir.x * (r + FLOOR_LEAD), g, h.pos.z - dir.y * (r + FLOOR_LEAD))
+	var laid := HeroZones.bridge(
+		k.m, h, from, dir, 2.0 * r + FLOOR_LEAD, r, float(fd["time"]), true, String(fd["col"]), float(fd["warn"]),
+		float(fd["rise"])
+	)
+	if laid == 0:
+		return
+	floors += 1
+	k.m.fx.dust(Vector3(h.pos.x, g, h.pos.z), 10)
+	k.m.sfx("br_raise", h.pos, -2.0, 0.9)
+	if not h.grounded and h.vel.y <= 0.0 and k.m.world.ground_at(h.pos.x, h.pos.z) == g:
+		h.pos.y = g
+		h.vel.y = 0.0
+		h.gliding = false            # (his move step lands him on it this tick: the landing's own feel)
 
 ## A Boki merge (or a stun or knock) ends the aim before anything was cast: the ult is not spent.
 func drop() -> void:

@@ -9,7 +9,9 @@ extends RefCounted
 ## Stuns, knock-ups and knockbacks don't spike by themselves: their damage heats the glider like any hit.
 ## Numbers: content/rules/hunter_move.json "glide_spike".
 
-static var _r: Dictionary = HunterMove.rules()["glide_spike"]
+## Read straight from the file, not HunterMove.rules(): World.STEP reads HunterMove at static init, and
+## through that cycle HunterMove._rules can still be empty when this class initialises.
+static var _r: Dictionary = HunterMove._load()["glide_spike"]
 static var land_stun: float = _r["land_stun"]
 static var land_dmg: float = _r["land_dmg"]
 static var air_stun: float = _r["air_stun"]

@@ -1,5 +1,5 @@
 extends RefCounted
-## --kit-parity-check: content/archetypes/<hero>.json against the sourced numbers in
+## --kit-parity-check: content/archetypes/<hero>.json (or another content file) against the sourced numbers in
 ## content/rules/kit_parity.json (docs/ARCHETYPES.md, "Kit parity lock"). Pure data, no match.
 ## Prints PARITY ok/FAIL lines and "PARITY DONE, failures: N".
 
@@ -17,15 +17,22 @@ func _num(hero: Dictionary, path: String) -> float:
 			return NAN
 	return float(cur) if (cur is float or cur is int) else NAN
 
+## A row path: "rmb.cooldown" reads the hero's archetype, "weapons/quill_rifle:primary.mag" reads content/<file>.json.
+func _read(hero: Dictionary, spec: String) -> float:
+	if not spec.contains(":"):
+		return _num(hero, spec)
+	var parts := spec.split(":")
+	return _num(JSON.parse_string(FileAccess.get_file_as_string("res://content/%s.json" % parts[0])), parts[1])
+
 func run(host: Node) -> void:
 	var table: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/kit_parity.json"))
 	var rows: Array = table.get("rows", [])
 	for r in rows:
 		var hero := Arch.def(String(r["hero"]))
-		var got := _num(hero, String(r["field"]))
+		var got := _read(hero, String(r["field"]))
 		var label := "%s %s %s" % [r["hero"], r["slot"], r["field"]]
 		if r.has("per"):
-			got /= _num(hero, String(r["per"]))
+			got /= _read(hero, String(r["per"]))
 			label += "/" + String(r["per"])
 		var good := not is_nan(got) and absf(got - float(r["value"])) <= float(r["tol"]) + 1e-6
 		var verdict := "ok  " if good else "FAIL"

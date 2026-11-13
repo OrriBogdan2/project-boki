@@ -12,11 +12,12 @@ extends RefCounted
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
-	"ostra": "ostra", "juggernaut": "kael"}
+	"ostra": "ostra", "juggernaut": "kael", "gil": "gil"}
 ## Tetra's moves the source plays while moving (briefs/hero-ref/breah.md: the tap hurl, the fist recovering as she
 ## walks off, the X aim) ride the upper body over the walk. Every other dolm move owns the body.
 const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim"]
 const DT := 1.0 / 30.0
+const KEY_FRAME := 1.0 / 30.0  # s: one frame of a baked clip (tools/art1 bakes at 30 fps)
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const CC_ON := 0.2             # s: the crowd control lands this far into the run
@@ -33,6 +34,9 @@ const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this
 const SEAM_M := 0.01           # and move it this far
 const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+## A move whose item appears on the clip's key: Hero -> [clip, the hand that brings it out, the kit slot and the key
+## of its spawn time in s]. The key is where that hand's yank tops out: its highest frame in the clip.
+const SPAWN_KEY := {"gil": ["toss", "hand.L", "rmb", "draw"]}
 ## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
 ## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
 const END_OFF := DT / 2.0 + 0.001
@@ -69,7 +73,7 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if not WardenClips.data(art_name).has("loco"):      # (no clips yet, as Gil: the rig's poses drive it)
+		if not WardenClips.data(art_name).has("loco"):      # (no clips yet: the rig's poses drive it)
 			continue
 		n += 1
 		await _hero(main, String(id), art_name)
@@ -199,6 +203,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_sliders(id, sync)
 	_sway(id, m, sync, dd)
 	await _on_blade(id, m, sync, clips)
+	if SPAWN_KEY.has(id):
+		await _spawn_key(id, m, sync, clips)
 	# "bone_scale" (item 137): the size holds over every clip that keys the bone
 	for nm in dd.get("bone_scale", {}):
 		var sk := WardenGlb.skeleton(m.get_node("Warden"))
@@ -433,6 +439,27 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
 	ok(drift <= 0.02, "%s: the blade never leaves the hand (worst drift %.3f m)" % [id, drift])
+
+## The item appears on the frame the clip's key lands (within one frame): the top of the hand's yank, sampled at the
+## clips' 30 frames a second.
+func _spawn_key(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
+	var row: Array = SPAWN_KEY[id]
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var bone := WardenSkeleton.find(sk, String(row[1]))
+	var anim := clips.lib.get_animation(String(row[0]))
+	var ys: Array = []
+	for f in int(round(anim.length / KEY_FRAME)) + 1:
+		clips.force = {"clip": String(row[0]), "t": minf(f * KEY_FRAME, anim.length - 0.001)}
+		for k in 3:
+			sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		ys.append((sk.global_transform * sk.get_bone_global_pose(bone)).origin.y)
+	clips.force = {}
+	var key_t := ys.find(ys.max()) * KEY_FRAME
+	var spawn := float(Arch.def(id)[row[2]][row[3]])
+	ok(absf(key_t - spawn) <= KEY_FRAME + 0.001,
+			"%s: the %s clip's key lands on the item's spawn (key %.3f s, spawn %.3f s, within a frame)" % [
+			id, row[0], key_t, spawn])
 
 ## The clips keep rotations only on the contract bones, so MantleLook's sliders (bone offsets) stay on under them; and
 ## the death state has its time on screen.

@@ -1181,8 +1181,8 @@ func tender() -> void:
 			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
 			"mm body: small (a 0.65 model) with the 0.34 m hitbox",
-			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
-			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
+			absf(P.r - 0.34) < 0.001 and P.model.scale.y / P.vis_k < 0.9,
+			"r %.2f scale %.2f" % [P.r, P.model.scale.y / P.vis_k])
 	step(m, 1.0)
 	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
 	sc.down(m, A)
@@ -1895,8 +1895,27 @@ func rimewright() -> void:
 		since += 1.0 / 60.0
 	ok(
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
-			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp >= float(ld["burst_dmg"]) * 0.9
+			and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
+	await _free(m)
+	# --- Interrupts (rimewright.md): knocked in the Rink Wall's tell, no wall rises
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	sc.aim_at(P, P.pos + Vector3(7.0, 0, 0))
+	step(m, 0.05)
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	var telling := not K.wall_cast.is_empty()
+	P.downed = true            # set directly: a real knock of the lone player ends the training team
+	P.down_hp = 60.0           # a wisp with no down health is finished at once
+	step(m, 0.4)
+	ok("tm E: knocked in the tell, no wall rises", telling and K.wall_cast.is_empty() and K.wall.is_empty(),
+			"tell %s cast %s wall %s" % [telling, K.wall_cast.is_empty(), K.wall.is_empty()])
+	P.downed = false
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
 	r = sc.setup("rimewright", 30.0)

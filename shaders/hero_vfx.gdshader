@@ -7,6 +7,7 @@ render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shado
 
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/cel.gdshaderinc"
+#include "res://shaders/soft_fade.gdshaderinc"
 
 const int M_SWEEP = 0;      // an arc of flame: UV.x along the swing, UV.y outer edge (0) to inner (1)
 const int M_SCORCH = 1;     // the ground burning: UV across the quad
@@ -211,9 +212,10 @@ vec4 swirl_rim(float d, float ang) {
 	float turn = ang / 6.2832 + TIME * spin + d * 0.4;
 	float arm = fract(turn * 3.0);                               // 0 at the tail, 1 at the head
 	float w = mix(0.012, 0.045, arm);
-	float band = (1.0 - smoothstep(w * 0.5, w, abs(d - 0.93))) * (1.0 - smoothstep(0.93, 1.0, arm)) * smoothstep(0.0, 0.1, arm);
-	band *= smoothstep(0.2, 0.45, fbm3(vec2(turn * 9.0 + seed, d * 4.0)));
-	float a = band * smoothstep(0.0, 0.1, life) * (1.0 - smoothstep(0.6, 1.0, life));
+	// (arm_band, not band: that is the M_SWEEP uniform, and a local of the same name fails the whole shader)
+	float arm_band = (1.0 - smoothstep(w * 0.5, w, abs(d - 0.93))) * (1.0 - smoothstep(0.93, 1.0, arm)) * smoothstep(0.0, 0.1, arm);
+	arm_band *= smoothstep(0.2, 0.45, fbm3(vec2(turn * 9.0 + seed, d * 4.0)));
+	float a = arm_band * smoothstep(0.0, 0.1, life) * (1.0 - smoothstep(0.6, 1.0, life));
 	return vec4(mix(col.rgb, col2.rgb, arm * arm) * a, a);
 }
 
@@ -258,6 +260,8 @@ void fragment() {
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
 	else { v = thread(UV); }
-	ALBEDO = v.rgb * gain;
-	ALPHA = v.a * gain;
+	// upright looks soften into the ground; flat ones (scorch, rings) lie on it
+	float g = gain * (billboard ? soft_fade(SCREEN_UV, VERTEX, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX) : 1.0);
+	ALBEDO = v.rgb * g;
+	ALPHA = v.a * g;
 }

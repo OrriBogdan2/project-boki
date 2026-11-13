@@ -22,6 +22,7 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  12. every sound named in UiSfx (menus, pickup, capture, extraction, the lobby) has its file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -55,6 +56,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	_ui_cues()
 	_strip_chime()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -258,9 +260,7 @@ func _dash_air() -> void:
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
 	h.free()
-	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
-	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
+	var wrong := Arch.ids().filter(func(a): return picked[a] != "%s_dash_air %s_dash" % [a, a])
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
@@ -375,6 +375,18 @@ func _strip_chime() -> void:
 	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
+## 12. Every sound UiSfx plays by name has a file, so a typo never plays silence.
+func _ui_cues() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
+	var re := RegEx.create_from_string('"([a-z_]+)"')
+	var names := {}
+	for hit in re.search_all(src):
+		names[hit.get_string(1)] = true
+	var missing := []
+	for n in names:
+		if _takes(String(n)).is_empty():
+			missing.append(n)
+	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
 
 func _takes(sname: String) -> Array:
 	var out := []
