@@ -142,6 +142,114 @@ func dancer(a) -> void:
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)
 
+## One cast of Encore against dummies that stand still while Sable stands or walks (`walk` m/s along +x).
+## Returns each foe's landings: {foe id: [[seconds since the cast, hp lost], ...]}; `rings` is the ring's radius
+## and the foe's distance at every beat, so a check can say which volleys a foe was in reach of.
+func _cast_log(m: Match, P: Hunter, foes: Dictionary, walk: float, rings: Array) -> Dictionary:
+	var U: ThiefUlt = (P.ak as ThiefKit).encore
+	var log := {}
+	var hp := {}
+	for id in foes:
+		log[id] = []
+		hp[id] = (foes[id] as Hunter).hp
+	P.ak.cd["x"] = 0.0
+	var t0: float = m.time
+	HunterKeys.ult_pressed(P)
+	var beats := U.beat
+	while U.running() or m.time - t0 < 2.7:
+		P.inp["move"] = Vector2(1, 0) if walk > 0.0 else Vector2.ZERO
+		A.step(m, A.DT)
+		if U.beat > beats:
+			beats = U.beat
+			var row := {"t": m.time - t0, "r": U.radius()}
+			for id in foes:
+				row[id] = P.pos.distance_to((foes[id] as Hunter).pos)
+			rings.append(row)
+		for id in foes:
+			var f: Hunter = foes[id]
+			if f.hp < float(hp[id]) - 0.001:
+				(log[id] as Array).append([m.time - t0, float(hp[id]) - f.hp])
+				hp[id] = f.hp
+	P.inp["move"] = Vector2.ZERO
+	return log
+
+## The ring against the source's Death Blossom rows (docs/heroes/thief.md "Death Blossom: source vs ours"):
+## a dummy standing still in the band, in the middle and just out of reach, then one the ring passes over
+## while she walks past it.
+func dancer_ring(a) -> void:
+	A = a
+	var r = A.setup("thief", 4.6, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	var d := (P.ak as ThiefKit).x_def()
+	var reach := float(d["reach"])
+	_open(P)
+	T.teleport(home + Vector3(reach * float(d["rim"]) + 0.3, 0, 0))   # in the outer band
+	T2.teleport(home + Vector3(0, 0, 2.0))                            # in the middle
+	var out_at := home + Vector3(0, 0, -(reach + T.r + 0.3))
+	var far: Hunter = m.make_hunter("T3", 5, "medium", "Target3", "idle", {}, out_at, {"arch": "none"})
+	far.max_hp = 10000.0
+	far.hp = far.max_hp
+	far.armor = 0.0
+	far.max_armor = 0.0
+	var rings := []
+	var still := _cast_log(m, P, {"rim": T, "mid": T2, "far": far}, 0.0, rings)
+	var rim_hits: Array = still["rim"]
+	var mid_hits: Array = still["mid"]
+	var gap_max := 0.0
+	var gap_min := 9.0
+	for i in range(1, rim_hits.size()):
+		var gap: float = float(rim_hits[i][0]) - float(rim_hits[i - 1][0])
+		gap_max = maxf(gap_max, gap)
+		gap_min = minf(gap_min, gap)
+	var power: float = (P.ak as ThiefKit).power("x")
+	A.ok("dancer ring: a standing dummy takes a blade every 0.2s for 2s (10, the first at 0.4s plus the flight)",
+			rim_hits.size() == 10 and mid_hits.size() == 10 and absf(float(rim_hits[0][0]) - 0.4) < 0.2
+			and gap_max < 0.25 and gap_min > 0.15, "%d hits, first %.2fs, gaps %.2f..%.2f" % [
+			rim_hits.size(), float(rim_hits[0][0]), gap_min, gap_max])
+	var grow_bh := float(d["r0"]) / AimKit.BH
+	var reach_bh := reach / AimKit.BH
+	var cadence := float(d["time"]) / float(d["shots"])
+	A.ok("dancer ring: 1.3 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band +50%, a 6s blight",
+			absf(grow_bh - 1.3) < 0.05 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
+			and float(d["time"]) == 2.0 and absf(cadence - 0.2) < 0.001
+			and float(d["rim_dmg"]) == float(d["dmg"]) * 0.5 and float(d["rim_blight"]) == 6.0,
+			"%.2f bh -> %.2f bh" % [grow_bh, reach_bh])
+	A.ok("dancer ring: 4 a blade in the middle, 6 from the band (x power); none past the radius",
+			absf(float(mid_hits[0][1]) - float(d["dmg"]) * power) < 0.01
+			and absf(float(rim_hits[0][1]) - (float(d["dmg"]) + float(d["rim_dmg"])) * power) < 0.01
+			and (still["far"] as Array).is_empty(), "mid %.2f rim %.2f power %.2f" % [
+			float(mid_hits[0][1]), float(rim_hits[0][1]), power])
+	# the ring passes over a dummy while she walks: every beat's blade follows where the foe is then
+	T2.teleport(home + Vector3(0, 0, 9.0))
+	far.teleport(home + Vector3(0, 0, -9.0))
+	P.teleport(home)
+	T.teleport(home + Vector3(8.0, 0, 0))
+	T.hp = T.max_hp
+	rings.clear()
+	var walked := _cast_log(m, P, {"foe": T}, 1.0, rings)
+	var hits: Array = walked["foe"]
+	var in_reach := 0
+	var in_band := 0
+	var want := 0.0
+	for row in rings:
+		if float(row["foe"]) < float(row["r"]) + T.r:
+			in_reach += 1
+			var band: bool = float(row["foe"]) > float(row["r"]) * float(d["rim"])
+			in_band += 1 if band else 0
+			want += (float(d["dmg"]) + (float(d["rim_dmg"]) if band else 0.0)) * power
+	var got := 0.0
+	for h in hits:
+		got += float(h[1])
+	A.ok("dancer ring: walking, a blade lands for every beat the foe is inside, 6 in the band, 4 inside it",
+			hits.size() == in_reach and in_band > 0 and in_band < in_reach and absf(got - want) < 0.01,
+			"%d of %d beats (%d in the band), %.0f damage (%.0f by the beats), she walked %.1fm" % [
+			hits.size(), rings.size(), in_band, got, want, P.pos.x - home.x])
+	await A.done(m)
+
 # ------------------------------------------------------------------ Kael: Gilded Riposte
 func zedran(a) -> void:
 	A = a
