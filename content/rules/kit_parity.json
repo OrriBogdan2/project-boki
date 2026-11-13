@@ -46,6 +46,11 @@
 		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.dmg", "per": "e.dmg", "value": 0.759, "tol": 0.02, "evidence": "D Void Snap 277 vs Unstable Anomaly 365 (the orb is --ttk-check's, item 117)"},
 		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.swollen_k", "value": 0.44, "tol": 0.01, "evidence": "D Void Snap Empowered 399 vs 277 = +44%"},
 		{"hero": "ostra", "slot": "E", "field": "e.dmg_max_k", "value": 3.5, "tol": 0.0, "evidence": "D Unstable Anomaly: up to 3.5x based on held time"},
-		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"}
+		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"},
+		{"hero": "thief", "slot": "Shift", "field": "dash.cd", "value": 5.0, "tol": 0.0, "evidence": "D Quickflip 5s @IV, no cooldown upgrade (F card says 4.2: data wins)"},
+		{"hero": "thief", "slot": "Shift", "field": "dash.dist", "value": 4.5, "tol": 0.0, "evidence": "F Cartwheel 105-144 px, about 4.5m (hero-ref/dancer.md section 4)"},
+		{"hero": "thief", "slot": "Shift", "field": "dash.time", "value": 0.48, "tol": 0.0, "evidence": "F Cartwheel start to upright 0.45-0.5s (section 4)"},
+		{"hero": "thief", "slot": "Shift", "field": "dash.haste", "value": 0.18, "tol": 0.03, "evidence": "F 127-136 px/s after a Cartwheel, +15-20% (section 2)"},
+		{"hero": "thief", "slot": "Shift", "field": "dash.prime_bonus", "value": 1.34, "tol": 0.005, "evidence": "D Quickflip: Empower next Arcslinger for +214 dmg on a 160 bolt"}
 	]
 }

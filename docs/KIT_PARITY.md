@@ -570,7 +570,7 @@ A re-read of `briefs/hero-ref/juggernaut.md` frames 0301-0366 (the tether) and 0
 | Anim | Footage poses | 17 moves plus the fusion move, all on `sable.glb` (47 clips); v2 model `1c5d44fac` | match on coverage |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, cd 15 | match; 0.75x of @IV |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** |
-| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, the same in the air (item 183), off the dash feel, prime 2.34x, cd 4.5 | match |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, the same in the air (item 183), off the dash feel, prime 2.34x, cd 5 | match; i-frames 0.12 s and the 3 s empowered window are ours-only (docs/heroes/thief.md, Vault riders) |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, cd 15 | match; 0.75x of @IV · cd **open** (gap 10; level 1 is 28 s) |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** · cd **open** (gap 10) |
