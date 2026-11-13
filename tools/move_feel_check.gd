@@ -273,7 +273,6 @@ func run(main: Node) -> void:
 	_face_turn()
 	_jump()
 	_glide()
-	_overheat()
 	_glide_dive()
 	_dash_glide()
 	_airdash_fall()
@@ -291,7 +290,8 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
-	_aim_rel()          # last: its ~11 s of match time would move the abyss rows
+	_aim_rel()          # last but one: its ~11 s of match time would move the abyss rows
+	_overheat()         # after every timed row: its ~9 s of level glide would move _aim_rel's and the abyss rows
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
