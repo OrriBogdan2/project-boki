@@ -7,22 +7,24 @@ extends RefCounted
 ## only those heroes. Reuses --dash-flow-check's arena, ready-up and "went off" probes. Never touches the save.
 
 const PHASES := ["windup", "recovery"]
-const ACT_S := 0.1              # s: a press that goes this soon went at once
-const WAIT_TOL := 0.05          # s: a queued press goes within this of its row's wait
-const WATCH_S := 2.5            # s: a press that hasn't gone by then was dropped
-const HOLD_S := 0.75            # s an LMB hold is held down
-const AIM := Vector3(0, 0.9, -6)        # where the hunter aims, from its feet
-const FOE_AT := Vector3(0, 0, -40)      # the other hunter, out of every reach (a foe in reach fights back)
+const ACT_S := 0.1  # s: a press that goes this soon went at once
+const WAIT_TOL := 0.05  # s: a queued press goes within this of its row's wait
+const WATCH_S := 2.5  # s: a press that hasn't gone by then was dropped
+const HOLD_S := 0.75  # s an LMB hold is held down
+const AIM := Vector3(0, 0.9, -6)  # where the hunter aims, from its feet
+const FOE_AT := Vector3(0, 0, -40)  # the other hunter, out of every reach (a foe in reach fights back)
 
 var flow_check = preload("res://tools/dash_flow_check.gd").new()
 var bad := 0
-var first_cut := false      # the last trial's first move never went off (pressed second, it ended it)
+var first_cut := false  # the last trial's first move never went off (pressed second, it ended it)
 var trials := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("CASTCAST %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -37,6 +39,7 @@ func run(main: Node) -> void:
 	print("CASTCAST DONE, trials: %d, failures: %d" % [trials, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _heroes() -> Array:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--cast-into-cast-check=") and arg.length() > 23:
@@ -46,6 +49,7 @@ func _heroes() -> Array:
 		if DashFlow.file_of(hero).has("into_cast"):
 			out.append(hero)
 	return out
+
 
 func _row(main: Node, hero: String, first: String, second: String, moves: Dictionary) -> void:
 	var row: Dictionary = moves[second]
@@ -64,6 +68,7 @@ func _row(main: Node, hero: String, first: String, second: String, moves: Dictio
 		else:
 			ok(got == want, what + ")")
 
+
 ## A trial's wait (see _wait) as "fire", "queue <s it waited>", "cancel" (it went at once and the first move never
 ## came), "drop", or "no first" (neither went off). It is counted past the second's own time to go off when pressed
 ## alone (`base`: a hold goes off at its tap threshold).
@@ -75,6 +80,7 @@ func _verdict(wait: float, base: float) -> String:
 		return "cancel" if first_cut else "fire"
 	return "queue %.2f" % wait
 
+
 ## Seconds from the press of `second` until it went off (-1: never), `at` s into `first` ("": pressed alone). A
 ## fresh arena per trial: no trial leaves a charge, a buff or a roused foe to the next.
 func _wait(main: Node, hero: String, first: String, second: String, at: float) -> float:
@@ -83,6 +89,7 @@ func _wait(main: Node, hero: String, first: String, second: String, at: float) -
 	m.queue_free()
 	await main.get_tree().process_frame
 	return wait
+
 
 func _timed(m: Match, first: String, second: String, at: float) -> float:
 	var h: Hunter = flow_check.hunter
@@ -116,14 +123,17 @@ func _timed(m: Match, first: String, second: String, at: float) -> float:
 	first_cut = not first_went
 	return wait
 
+
 func _step(m: Match, fire_down: bool) -> void:
 	m.step(Match.DT)
 	var h: Hunter = flow_check.hunter
 	h.inp["fire"] = fire_down
 	h.inp["aim"] = flow_check.get_meta("home") + AIM
 
+
 func _press(slot: String) -> void:
 	flow_check._press(_key(slot))
+
 
 func _key(slot: String) -> String:
 	return "lmb" if slot == "lmb_hold" else slot

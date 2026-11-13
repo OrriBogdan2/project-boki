@@ -3,9 +3,9 @@ extends RefCounted
 ## No data, frame or wiki line shows these pairs, so each follows DECISIONS 11-07 "every interaction is chainable"
 ## and DashFlow's default (a missing row combines): the second press goes now and the first runs on. Run inside
 ## --archer-combo-check (tools/archer_bulwark_combo_check.gd).
-const LIFT := 4.0            # m she is lifted before opening a glider, so it stays open through a row
-const DRAW_S := 0.4          # s of draw before the second press (past the tap, short of Empowered)
-var C                        # the combo check (ok, step, aim_at)
+const LIFT := 4.0  # m she is lifted before opening a glider, so it stays open through a row
+const DRAW_S := 0.4  # s of draw before the second press (past the tap, short of Empowered)
+var C  # the combo check (ok, step, aim_at)
 var m: Match
 var P: Hunter
 var K: ArcherKit
@@ -71,8 +71,11 @@ func _draw_then_e() -> void:
 	K.use_e()
 	var wall := K.in_e()
 	_hold_fire(0.2)
-	C.ok("Lace cancel LMB draw + E: both (rule), the wall goes up and the draw keeps charging",
-			d0 > 0.0 and wall and P.draw_t > d0 + 0.1, "draw %.2f -> %.2f wall %s" % [d0, P.draw_t, wall])
+	C.ok(
+		"Lace cancel LMB draw + E: both (rule), the wall goes up and the draw keeps charging",
+		d0 > 0.0 and wall and P.draw_t > d0 + 0.1,
+		"draw %.2f -> %.2f wall %s" % [d0, P.draw_t, wall]
+	)
 	P.inp["fire"] = false
 	C.step(m, 0.1)
 
@@ -87,21 +90,27 @@ func _ult_then() -> void:
 	K.rmb_down = false
 	K.use_e()
 	var e := K.in_e()
-	C.ok("Lace cancel X window + RMB, E: both (rule), each goes and the three shots stay",
-			window and rmb and e and K.ult.left == 3, "window %s RMB %s E %s left %d" % [window, rmb, e, K.ult.left])
+	C.ok(
+		"Lace cancel X window + RMB, E: both (rule), each goes and the three shots stay",
+		window and rmb and e and K.ult.left == 3,
+		"window %s RMB %s E %s left %d" % [window, rmb, e, K.ult.left]
+	)
 
 
 func _glide_lmb() -> void:
 	_open_glide()
 	var gliding := P.gliding
 	_hold_fire(DRAW_S)
-	C.ok("Lace cancel glide + LMB: both (rule), the bow draws from the open glider, which stays open",
-			gliding and P.gliding and P.draw_t > 0.2, "gliding %s -> %s draw %.2f" % [gliding, P.gliding, P.draw_t])
+	C.ok(
+		"Lace cancel glide + LMB: both (rule), the bow draws from the open glider, which stays open",
+		gliding and P.gliding and P.draw_t > 0.2,
+		"gliding %s -> %s draw %.2f" % [gliding, P.gliding, P.draw_t]
+	)
 	P.inp["fire"] = false
 
 
 func _glide_then() -> void:
-	var g := []                # the glider before the press and 0.1 s after it, per slot
+	var g := []  # the glider before the press and 0.1 s after it, per slot
 	_open_glide()
 	g.append(P.gliding)
 	K.press_rmb()
@@ -121,5 +130,8 @@ func _glide_then() -> void:
 	var x := K.ult.active()
 	C.step(m, 0.1)
 	g.append(P.gliding)
-	C.ok("Lace cancel glide + RMB, E, X: both (rule), each goes and the glider stays open",
-			not g.has(false) and rmb and e and x, "gliding %s RMB %s E %s X %s" % [g, rmb, e, x])
+	C.ok(
+		"Lace cancel glide + RMB, E, X: both (rule), each goes and the glider stays open",
+		not g.has(false) and rmb and e and x,
+		"gliding %s RMB %s E %s X %s" % [g, rmb, e, x]
+	)
