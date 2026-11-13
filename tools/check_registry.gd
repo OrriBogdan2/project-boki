@@ -79,6 +79,8 @@ const CHECKS := {
 	"--glider-canopy-check": ["res://tools/glider_canopy_check.gd", "glider_canopy_check", null],
 	"--glider-canopy-shots": ["res://tools/glider_canopy_shots.gd", "glider_canopy_shots", null],
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],      # boots, charms vs source
+	"--abyss-fall-check": ["res://tools/abyss_fall_check.gd", "abyss_fall_check", null],      # a walk off the lip vs the source
+	"--abyss-fall-clip": ["res://tools/abyss_fall_clip.gd", "abyss_fall_clip", null],      # --shots-dir=<dir> (GPU)
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
