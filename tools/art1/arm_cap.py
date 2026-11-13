@@ -4,6 +4,7 @@ apart the shorter way flips from one frame to the next, so a start or stop pops 
 the swing at CAP degrees from a centre keeps every pair under 180.
 Run: python3 tools/art1/arm_cap.py SRC.glb OUT.glb "[(['run'], 'forearm.L', (x, y, z, w), CAP_DEG), ...]"
 A swing past KNEE x CAP degrees is squeezed (tanh) toward CAP, so no key meets a hard corner."""
+
 import sys
 
 import numpy as np
@@ -37,11 +38,15 @@ if __name__ == "__main__":
         c = np.array(centre, float) / np.linalg.norm(centre)
         for an in j["animations"]:
             for ch in an["channels"]:
-                if not an["name"].startswith(tuple(clips)) or ch["target"]["path"] != "rotation" or names[ch["target"]["node"]] != bone:
+                if (
+                    not an["name"].startswith(tuple(clips))
+                    or ch["target"]["path"] != "rotation"
+                    or names[ch["target"]["node"]] != bone
+                ):
                     continue
                 ac = j["accessors"][an["samplers"][ch["sampler"]]["output"]]
                 bv = j["bufferViews"][ac["bufferView"]]
                 at = bv.get("byteOffset", 0) + ac.get("byteOffset", 0)
-                q = np.frombuffer(bytes(b[at:at + ac["count"] * 16]), dtype="<f4").reshape(-1, 4).astype(float)
-                b[at:at + ac["count"] * 16] = cap_track(q, c, cap).astype("<f4").tobytes()
+                q = np.frombuffer(bytes(b[at : at + ac["count"] * 16]), dtype="<f4").reshape(-1, 4).astype(float)
+                b[at : at + ac["count"] * 16] = cap_track(q, c, cap).astype("<f4").tobytes()
     write(out, j, b)
