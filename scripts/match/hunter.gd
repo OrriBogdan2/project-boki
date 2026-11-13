@@ -181,6 +181,7 @@ var crouch_k := 0.0
 var reveal_t := 0.0           # seen through bushes and around walls for a moment after firing or getting hit
 var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
 var wall_n := Vector2.ZERO
+var slide_n := Vector2.ZERO   # out of the wall the last step's walk pressed into (HunterMove.along_wall)
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
@@ -806,6 +807,7 @@ func do_jump() -> void:
 		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
 		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
 		roll_t = 0.0
+		glide_cd = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
@@ -830,7 +832,8 @@ func do_jump() -> void:
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
-		return
+		if gliding:
+			return          # (refused by the locomotion state, e.g. a wire's knocked tail: the press stays armed below)
 	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
 	jump_buf = JUMP_BUFFER
 
@@ -877,11 +880,13 @@ func can_glide() -> bool:
 
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
-## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled.
+## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled. The
+## dash's own wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 func _dash_into_glide() -> bool:
-	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or glide_cd > 0.0 or downed or shot_down:
+	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or downed or shot_down:
 		return false
 	roll_t = 0.0
+	glide_cd = 0.0
 	shove = {}
 	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
 		_glide_boost_fx()
@@ -2063,6 +2068,7 @@ func _physics(dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
+	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
@@ -2113,7 +2119,9 @@ func _physics(dt: float) -> void:
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
+				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
+				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
+				hv = Loco.accel_to(bv, wv, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif not lfloat.is_empty():
@@ -2177,12 +2185,15 @@ func _physics(dt: float) -> void:
 		pos.z = out_of.y
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
 	dash_rest = Vector2.ZERO
-	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var pw := Vector3(tgt.x, tgt.y, 0.0)
+	if spirit_t <= 0.0:
+		pw = HunterMove.push_out_walls(self, m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y))
+	var po := Vector2(pw.x, pw.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
 	if po.distance_squared_to(tgt) > 1e-10:
 		block_n = (po - tgt).normalized()
-		rock_b = m.world.ground_at(tgt.x - block_n.x * r * 0.7, tgt.y - block_n.y * r * 0.7) + World.BLOCK_H
+		rock_b = pw.z if pw.z > 0.0 else m.world.ground_at(tgt.x - block_n.x * r * 0.7, tgt.y - block_n.y * r * 0.7) + World.BLOCK_H
 		var hvb := Vector2(vel.x, vel.z)
 		var into := hvb.dot(block_n)
 		if into < 0.0:
@@ -2207,7 +2218,7 @@ func _physics(dt: float) -> void:
 		var fw := mv.normalized() * spd * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
-	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and (hv.length() > 1.0 or mv.length() > 0.3):
+	elif step_up == 0.0 and HunterMove.caught(in_dash, b1, b2) and (hv.length() > 1.0 or mv.length() > 0.3):
 		# caught on a corner: slip sideways around it rather than sticking (the keys' own pull counts
 		# when the corner has already eaten the speed: running at a wall corner used to crawl past it)
 		var moved := Vector2(pos.x - x0, pos.z - z0).length()
@@ -2253,11 +2264,13 @@ func _physics(dt: float) -> void:
 		wall_hit_v = Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
 	elif rock_v.length() > 0.01:
 		wall_hit_v = rock_v
+	var hit_n := Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
+	slide_n = hit_n if grounded and step_up == 0.0 else Vector2.ZERO
 	if (b1 > 0.0 or b2 > 0.0 or rock_v.length() > 0.01) and blk > pos.y + 0.6:
 		# against a wall: in the air you can kick off it; knocked into it hard, you're stunned
 		if not grounded:
 			wall_touch_t = 0.2
-			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
+			wall_n = hit_n
 			wall_moves.hit(self, pre_v, blk)
 		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote \
 				and KnockWall.tall(m, self, blk):
@@ -2274,7 +2287,7 @@ func _physics(dt: float) -> void:
 	wslam_t = maxf(0.0, wslam_t - dt)
 	# rocks, trees and walls are walls: no hop onto them (item 151; their tops were never ground, so a hop left
 	# you inside the clump). Terrain ledges are the ledge rise's (_ledge_rise).
-	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
+	StoneStand.climb(self, maxf(maxf(b1, b2), pw.z))      # the caster walking into her own rock rises onto it
 	StoneStand.mover = null
 	var g := ground()
 	if spirit_t > 0.0 and g > pos.y + World.STEP:
@@ -2704,6 +2717,7 @@ func _face_near(lip: float) -> bool:
 func teleport(p: Vector3) -> void:
 	super(p)
 	MantleCarry.forget(self)
+	slide_n = Vector2.ZERO      # (the wall the last step pressed is not here)
 
 ## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
 ## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).

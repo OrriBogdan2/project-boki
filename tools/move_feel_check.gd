@@ -54,7 +54,7 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
-	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],,,
+	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
 	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
 	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
@@ -285,7 +285,8 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
-	_aim_rel()          # last: its ~11 s of match time would move the abyss rows
+	_standing_dash()          # late: it swaps the kit and model the framing rows measure
+	_aim_rel()          # last: its ~11 s of match time would move the abyss rows (and Rimewright's standing dash)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -1077,6 +1078,37 @@ func _dolm_hop() -> Array:
 	var dd := P.ak.dash_def()
 	var feel: Dictionary = P.ak.dash_feel()
 	return [float(dd["dist"]) * float(feel["dist"]), float(dd["time"]) * float(feel["time"])]
+
+
+## A dash pressed standing still (no move keys) goes toward the cursor for every Hunter, never the way the
+## body faces: the cursor-aimed sources (Oath, Tetra, Kingpin, Brall, Felix, Void, Joule; Myth tested in
+## supervive_kits.md) do; the move-direction ones (Shiv, Elluna, Celeste, Ghost) were never filmed standing
+## (briefs/hero-ref, rows marked [?]), so they keep the shared rule (ArchKit.dash_dir). Shift is held
+## STAND_HOLD so the hold kits (Swap, Wirerun, Skate, Slide) release too.
+const STAND_HOLD := 18           # frames (0.3 s) Shift is held down
+const STAND_AIM := Vector2(0.6, -0.8)   # the cursor's direction from the hunter
+const STAND_DEG := 20.0          # widest allowed miss of the cursor, degrees
+func _standing_dash() -> void:
+	var cls_was := P.cls
+	var arch_was := P.arch
+	var wid_was := P.wid
+	for a in Arch.ids():
+		P.reclass(Arch.weight(a), a)
+		_reset(flat)
+		P.face = PI / 2.0         # the body faces -x, away from the cursor
+		P.inp["aim"] = flat + Vector3(STAND_AIM.x, 0, STAND_AIM.y) * 5.0
+		P.inp["dash"] = true
+		P.inp["dash_down"] = true
+		for i in 150:             # 2.5 s: Lantern Trade's 1.8 s lob lands after the hold
+			m.step(DT)
+			P.inp["dash"] = false
+			P.inp["dash_down"] = i < STAND_HOLD
+		var moved := Vector2(P.pos.x - flat.x, P.pos.z - flat.z)
+		var miss := rad_to_deg(absf(moved.angle_to(STAND_AIM)))
+		var msg := "%s standing dash goes to the cursor (%.2f m, %.0f deg off)" % [a, moved.length(), miss]
+		ok(moved.length() > 0.5 and miss < STAND_DEG, msg)
+		P.inp["dash_down"] = false
+	P.reclass(cls_was, arch_was, wid_was)
 
 func _find_rim() -> Dictionary:
 	if not _rim.is_empty(): return _rim
