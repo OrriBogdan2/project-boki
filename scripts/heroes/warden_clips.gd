@@ -88,6 +88,8 @@ var root_bi := -1            # the root bone: the heading and HunterAnim's air t
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
+var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
+var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -99,6 +101,7 @@ var crouch_from := 0.0       # crouch_w when it last turned
 var crouch_t := 99.0         # s since it turned
 var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, the layer just eases)
 var crouch_seek := 0.0       # s into it
+var crouch_gnd := false      # Grounded turned it: no dip, the layer drops and lets go in FADE
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
 var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
@@ -182,6 +185,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	cc = WardenCc.new(sk, d.get("cc", {}))
 	_setup_out()
 	if not bool(d.get("rig_root", false)):
 		turn = WardenTurn.make(model, sk)
@@ -452,7 +456,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
-		return {"clip": st["stun"], "t": -1.0}
+		return {"clip": st["stun"], "t": -1.0, "out": FADE}     # (the sway lets go as quickly as it takes hold)
 	var lock := float(s.get("lockin_t", -1.0))
 	if lock >= 0.0 and d.has("lockin"):
 		return _lockin_at(lock)
@@ -542,8 +546,9 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 1.0)
 		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
+		out_fade = float(want.get("out", FADE_LOCO))
 	else:
-		act_w = move_toward(act_w, 0.0, dt / act_out)
+		act_w = move_toward(act_w, 0.0, dt / (act_out if act_out != FADE_LOCO else out_fade))   # (a lock-in settles slower)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
@@ -563,6 +568,7 @@ func step(dt: float) -> void:
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	if d.has("recoil"):
 		_recoil(s, dt)
+	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_air_tilt()
@@ -728,9 +734,11 @@ func _loco(s: Dictionary, dt: float) -> void:
 	was_air = not grounded
 
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
+## Grounded ("gnd") holds it low for as long as the cords do.
 func _crouch(s: Dictionary, dt: float) -> void:
 	var cr: Dictionary = d["crouch"]
-	var k := float(s.get("crouch", 0.0))
+	var gnd := bool(s.get("gnd", false))
+	var k := 1.0 if gnd else float(s.get("crouch", 0.0))
 	var on := crouch_on
 	if k > crouch_k or k >= 1.0:
 		on = true
@@ -742,15 +750,17 @@ func _crouch(s: Dictionary, dt: float) -> void:
 		crouch_from = crouch_w
 		crouch_t = 0.0
 		crouch_clip = ""
-		if one_w <= 0.0:      # (turned round mid-dip: the clip showing can't be swapped, so no second dip)
+		crouch_gnd = gnd or (crouch_gnd and not on)
+		# (turned round mid-dip: the clip showing can't be swapped, so no second dip)
+		if one_w <= 0.0 and not crouch_gnd:
 			crouch_clip = String(cr["in" if on else "out"])
 			crouch_seek = 0.0
 			_node("crouch_anim").animation = crouch_clip
 			one_w = 1.0       # (from its first frame: under the fade the hold would drop him early)
 	crouch_t += dt
 	var length := lib.get_animation(crouch_clip).length if crouch_clip != "" else 0.0
-	var fade := CROUCH_IN      # (with a dip: quick going down, under the clip; coming up, the clip's whole length)
-	if length > 0.0:
+	var fade := FADE if crouch_gnd else CROUCH_IN
+	if length > 0.0:      # (with a dip: quick going down, under the clip; coming up, the clip's whole length)
 		fade = CROUCH_ONE if on else length
 	crouch_w = lerpf(crouch_from, 1.0 if on else 0.0, smoothstep(0.0, fade, crouch_t))
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)

@@ -3072,6 +3072,8 @@ func _anim_state(stretch: float) -> void:
 	if ak:     # (every frame: a move ended by play("") must not stay frozen in the state)
 		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES), "" for none
 		s["kmove_t"] = m.time - ak.anim_at
+	else:
+		s.erase("kmove")      # (the dictionary is kept: a move the kit cleared must not stay on the body)
 	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
 	wall_moves.anim_state(self, s)
 	MergeKit.anim_state(self, s)
@@ -3082,6 +3084,8 @@ func _anim_state(stretch: float) -> void:
 		s["hit_dir"] = Vector2(pos.x - last_hit_by.pos.x, pos.z - last_hit_by.pos.z)
 	s["stun"] = stun_t > 0.0
 	s["rooted"] = root_t > 0.0
+	s["rooted"] = root_t > 0.0          # (a Hero's clips show both: WardenCc)
+	s["gnd"] = KitStatus.grounded(self)
 	s["base"] = (1.0 - base_t / BASE_TIME) if base_t > 0.0 else -1.0
 	s["squash"] = squash
 	s["stretch"] = stretch

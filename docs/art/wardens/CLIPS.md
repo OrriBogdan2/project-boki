@@ -58,6 +58,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   of the turn steps round, pivoting on the other (planted by aiming its thigh), then the other follows. Moving, a shot
   (0.25 s), a cast (0.6 s), a kit move or an emote cancels it (`TurnStep.busy`). Heavy Heroes take a slower, lower
   step. No key: 0.26 s, 0.5 rad. No feet (`rig_root`): no step.
+- `cc` (scripts/heroes/warden_cc.gd): how the Hero fights crowd control, laid over the clips and in and out in 0.1 s. A stun plays the `stun` state (its sway loop); a root keeps the legs planted on the idle while the torso pulls (`pull` rad of lean, `tug_hz` tugs a second, `twist` rad of wring); Grounded drops into the `crouch` layer (no dip) and bows the head `bow` rad at the cords. `--clip-check` asserts all three for every Hero.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 - `blink`: the lids' closed pose off their rest, `turn` {bone: axis x angle, rad} or `move` {bone: m}, in the bone's own frame. WardenBlink closes them over the clip every 2-6 s in close-ups only ([BLINK.md](BLINK.md)).
 - No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants

@@ -18,6 +18,11 @@ const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim"]
 const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
+const CC_ON := 0.2             # s: the crowd control lands this far into the run
+const CC_OFF := 0.8            # s: and wears off here
+const CC_LATE := 1.5 * DT      # s: a frame's grace on WardenClips.FADE for the blend in and out
+const ROOT_LEAN_M := 0.04      # m: a rooted pull takes the head at least this far forward
+const GND_DROP_M := 0.1        # m: Grounded drops the head at least this far
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const NO_STRIDE_M := 0.05      # m: a shin swinging less than this does not step (Motley hovers: his legs hang, 0.024 m)
 const HAND_PIECE_M := 0.25     # m: carrying, a shown piece on one hand alone may reach this far (a hand, not a weapon)
@@ -140,6 +145,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	m.free()
 	await _flinch(id)
 	_turn(id)
+	await _cc(id, dd)
 
 ## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
 ## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
@@ -605,6 +611,72 @@ func _flinch(id: String) -> void:
 	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
 	ok(float(stagger_still[mid]["act"]) > 0.5, "%s: a stagger standing still takes the whole body" % id)
 	ok(float(hit[mid]["act"]) <= 0.0, "%s: a chip hit on the run leaves the body to the legs" % id)
+
+## Stun, a root and Grounded, each on from CC_ON to CC_OFF over a standing Hero: each plays its state while it runs
+## (the stun clip; the rooted torso's pull with the legs left on the idle; the Grounded crouch) and blends in and out
+## in WardenClips.FADE.
+func _cc(id: String, dd: Dictionary) -> void:
+	var calm := await _cc_run(id, "")
+	var on_i := int(ceilf((CC_ON + WardenClips.FADE + CC_LATE) / DT))
+	var off_i := int(ceilf((CC_OFF + WardenClips.FADE + CC_LATE) / DT))
+	var stun := await _cc_run(id, "stun")
+	ok(String(stun[on_i]["cur"]) == String(dd["states"]["stun"]) and float(stun[on_i]["act"]) >= 1.0,
+			"%s: a stun plays its sway clip in %.1f s (clip %s, %.2f)" % [id, WardenClips.FADE, stun[on_i]["cur"],
+			stun[on_i]["act"]])
+	ok(float(stun[off_i]["act"]) <= 0.0, "%s: the stun blends out in %.1f s (%.2f left)"
+			% [id, WardenClips.FADE, stun[off_i]["act"]])
+	var root := await _cc_run(id, "rooted")
+	var lean := 0.0
+	var legs := 0.0
+	# (two model builds can settle at different constant leg offsets: measure the root's run against its own calm
+	# first frame, as the hit rows do)
+	var off := float(root[0]["legs"]) - float(calm[0]["legs"])
+	for i in calm.size():
+		lean = maxf(lean, float(calm[i]["head"].z) - float(root[i]["head"].z))
+		legs = maxf(legs, absf(float(root[i]["legs"]) - float(calm[i]["legs"]) - off))
+	ok(float(root[on_i]["root"]) >= 1.0 and lean >= ROOT_LEAN_M,
+			"%s: a root strains the torso forward (%.2f, head %.3f m, min %.2f)"
+			% [id, root[on_i]["root"], lean, ROOT_LEAN_M])
+	ok(legs <= FLINCH_LEGS_M, "%s: a root leaves the legs planted (off by %.4f m)" % [id, legs])
+	ok(float(root[off_i]["root"]) <= 0.0, "%s: the root's strain blends out in %.1f s" % [id, WardenClips.FADE])
+	var gnd := await _cc_run(id, "gnd")
+	var drop := float(calm[on_i]["head"].y) - float(gnd[on_i]["head"].y)
+	ok(float(gnd[on_i]["crouch"]) >= 1.0 and drop >= GND_DROP_M,
+			"%s: Grounded drops into the crouch (%.2f, head %.2f m lower)" % [id, gnd[on_i]["crouch"], drop])
+	ok(float(gnd[off_i]["crouch"]) <= 0.0, "%s: Grounded blends out in %.1f s (%.2f left)"
+			% [id, WardenClips.FADE, gnd[off_i]["crouch"]])
+
+## 1.2 s standing, state `key` ("" none) on from CC_ON to CC_OFF; per frame: head, leg bone sum, the layers' weights.
+func _cc_run(id: String, key: String) -> Array:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)
+	var clips: WardenClips = sync.get("clips")
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	for k in 30:
+		sync.call("_process", DT)
+	var head := WardenSkeleton.find(sk, "head")
+	var out: Array = []
+	var t := 0.0
+	while t < 1.2:
+		if key != "":
+			s[key] = t >= CC_ON and t < CC_OFF
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		var legs := 0.0
+		for b in ["thigh.L", "thigh.R", "shin.L", "shin.R"]:
+			var o := sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
+			legs += o.x * 1.0 + o.y * 3.0 + o.z * 7.0
+		var at := sk.global_transform * sk.get_bone_global_pose(head).origin
+		out.append({"head": at, "legs": legs, "act": clips.act_w, "cur": clips.cur, "root": clips.cc.root_w,
+				"crouch": clips.crouch_w})
+		t += DT
+	m.free()
+	return out
 
 ## 1 s of play at `speed` m/s, hit at the start (hit_t 99: none); per frame: leg bone sum, right hand, act_w.
 func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
