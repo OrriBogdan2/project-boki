@@ -54,7 +54,7 @@ static func part(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO,
 	parent.add_child(mi)
 	return mi
 
-static var _spheres := {}
+static var _spheres := MeshCache.new()
 
 ## A smooth sphere. The segment count scales with size (so big shapes stay round in close-ups and
 ## tiny dots stay cheap); `seg` is a floor. Cached, so every eye of every hunter shares one mesh.
@@ -65,22 +65,22 @@ static func sphere(r: float, seg := 16) -> SphereMesh:
 	sg += sg % 2
 	var key := "%.4f|%d" % [r, sg]
 	if _spheres.has(key):
-		return _spheres[key]
+		return _spheres.mesh(key)
 	var s := SphereMesh.new()
 	s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(8, sg / 2)
-	_spheres[key] = s
+	_spheres.put(key, s)
 	return s
 
 static func capsule(r: float, h: float) -> CapsuleMesh:
 	var key := "cap|%.4f|%.4f" % [r, h]
 	if _spheres.has(key):
-		return _spheres[key]
+		return _spheres.mesh(key)
 	var c := CapsuleMesh.new()
 	c.radius = r; c.height = h; c.radial_segments = int(clampf(r * 380.0, 20.0, 48.0)); c.rings = 16
-	_spheres[key] = c
+	_spheres.put(key, c)
 	return c
 
-static var _rbox := {}
+static var _rbox := MeshCache.new()
 
 ## A box with softly rounded edges and corners (a real fillet with several steps, so it shades and
 ## outlines cleanly instead of reading as a cube). Cached by size, so it costs nothing after the first.
@@ -93,9 +93,9 @@ static func box(x: float, y: float, z: float) -> Mesh:
 		return b
 	var key := "%.4f|%.4f|%.4f" % [x, y, z]
 	if _rbox.has(key):
-		return _rbox[key]
+		return _rbox.mesh(key)
 	var am := rounded_box(Vector3(x, y, z), r, 4 if mn > 0.1 else (3 if mn > 0.03 else 2))
-	_rbox[key] = am
+	_rbox.put(key, am)
 	return am
 
 ## A rounded box: every face is a grid whose outer rows are bent around the edges and corners on a
@@ -167,14 +167,14 @@ static func _commit(verts: PackedVector3Array, norms: PackedVector3Array, uvs: P
 	arrs[Mesh.ARRAY_INDEX] = PackedInt32Array(idx)
 	return MeshArrays.build([arrs])
 
-static var _lathes := {}
+static var _lathes := MeshCache.new()
 
 ## A smooth solid of revolution around Y: `profile` is (radius, height) from the bottom up. Points
 ## with radius 0 close the shape on the axis. Normals come from the profile's own curve, so it
 ## shades as one soft surface. Cached by `key` when one is given.
 static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMesh:
 	if key != "" and _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var n := profile.size()
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var idx: Array = []
 	var total := 0.0
@@ -202,7 +202,7 @@ static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMes
 			var b0 := (i + 1) * (seg + 1) + j
 			_quad(verts, norms, idx, a0, a0 + 1, b0 + 1, b0)
 	var am := _commit(verts, norms, uvs, idx)
-	if key != "": _lathes[key] = am
+	if key != "": _lathes.put(key, am)
 	return am
 
 ## A smooth curve through the given points (Catmull-Rom), `sub` steps per span. The ends are kept.
@@ -248,7 +248,7 @@ static func _fillet(poly: Array, r: float, steps: int) -> Array:
 			out.append(c + Vector2(cos(ang), sin(ang)) * rr)
 	return out
 
-static var _cyls := {}
+static var _cyls := MeshCache.new()
 
 ## A plain cylinder (open ends possible), for beams and columns of light.
 static func plain_cyl(top: float, bottom: float, h: float, seg := 14) -> CylinderMesh:
@@ -267,7 +267,7 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 		return c
 	var key := "%.4f|%.4f|%.4f|%d" % [top, bottom, h, radial]
 	if _cyls.has(key):
-		return _cyls[key]
+		return _cyls.mesh(key)
 	var hh := h * 0.5
 	var poly: Array = []
 	poly.append(Vector2(bottom, -hh) if bottom > 0.0005 else Vector2(0.0, -hh))
@@ -278,7 +278,7 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 	var loop := _fillet(poly, bev, 5)
 	var prof := _right_half(loop)
 	var am := lathe(prof, radial)
-	_cyls[key] = am
+	_cyls.put(key, am)
 	return am
 
 ## The x >= 0 half of a closed, counter-clockwise outline that is mirror-symmetric about x = 0,
@@ -316,7 +316,7 @@ static func _right_half(loop: Array) -> PackedVector2Array:
 static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var key := "limb|%.4f|%.4f|%.4f|%.3f" % [r0, r1, h, bulge]
 	if _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var hh := h * 0.5
 	var pts := PackedVector2Array()
 	# bottom cap
@@ -332,10 +332,10 @@ static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var prof := smooth_curve(pts, 3)
 	prof[0] = Vector2(0, -hh); prof[prof.size() - 1] = Vector2(0, hh)
 	var am := lathe(prof, int(clampf(maxf(r0, r1) * 380.0, 24.0, 40.0)))
-	_lathes[key] = am
+	_lathes.put(key, am)
 	return am
 
-static var _eyes := {}
+static var _eyes := MeshCache.new()
 
 ## A glossy creature eye in one mesh: a dark eyeball with a big coloured iris (lighter toward the
 ## bottom, like a painted anime eye) and a pupil, all facing -Z. Coloured by vertex, so it squashes
@@ -343,7 +343,7 @@ static var _eyes := {}
 static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMesh:
 	var key := "%.4f|%s" % [r, iris.to_html()]
 	if _eyes.has(key):
-		return _eyes[key]
+		return _eyes.mesh(key)
 	var sm := SphereMesh.new()
 	sm.radius = r; sm.height = r * 2.0; sm.radial_segments = 40; sm.rings = 24
 	var arrs := sm.get_mesh_arrays()
@@ -366,7 +366,7 @@ static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMes
 	arrs[Mesh.ARRAY_TANGENT] = null
 	var am := ArrayMesh.new()
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	_eyes[key] = am
+	_eyes.put(key, am)
 	return am
 
 ## A coat skirt or tunic: flares from r_top down to r_bot over h, with soft cloth folds that deepen
@@ -374,7 +374,7 @@ static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMes
 static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07) -> ArrayMesh:
 	var key := "skirt|%.4f|%.4f|%.4f|%d|%.3f" % [r_top, r_bot, h, folds, amp]
 	if _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var seg := 72
 	var rows := 12
 	var hh := h * 0.5
@@ -413,16 +413,16 @@ static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07)
 		if fn.dot(Vector3.DOWN) > 0.0: idx.append_array([tri[0], tri[2], tri[1]])
 		else: idx.append_array(tri)
 	var am := _commit(verts, norms, uvs, idx)
-	_lathes[key] = am
+	_lathes.put(key, am)
 	return am
 
-static var _crystals := {}
+static var _crystals := MeshCache.new()
 
 ## A cut crystal: a faceted prism with a pointed top, flat-shaded on purpose so it glints.
 static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 	var key := "%.4f|%.4f|%d" % [r, h, sides]
 	if _crystals.has(key):
-		return _crystals[key]
+		return _crystals.mesh(key)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var y0 := -h * 0.5; var y1 := h * 0.18; var y2 := h * 0.5
@@ -450,7 +450,7 @@ static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 			st.set_normal(-fn)
 			st.add_vertex(p)
 	var am := st.commit()
-	_crystals[key] = am
+	_crystals.put(key, am)
 	return am
 
 ## A glossy material: metal, gems, polished things catch a crisp highlight.
@@ -607,11 +607,11 @@ static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material,
 static func torso_mesh() -> ArrayMesh:
 	var key := "torso"
 	if _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var pts := PackedVector2Array([Vector2(0.0, -0.31), Vector2(0.13, -0.305), Vector2(0.2, -0.27), Vector2(0.218, -0.17), Vector2(0.205, -0.05),
 		Vector2(0.212, 0.05), Vector2(0.236, 0.14), Vector2(0.248, 0.205), Vector2(0.236, 0.255), Vector2(0.19, 0.293), Vector2(0.11, 0.312), Vector2(0.0, 0.318)])
 	var am := lathe(smooth_curve(pts, 4), 56)
-	_lathes[key] = am
+	_lathes.put(key, am)
 	return am
 
 ## A hunter: the class sets the size and hit radius, the archetype (HeroKit.ARCHES; by default the
@@ -1344,7 +1344,7 @@ static func _part_y_surfaces(mesh: Mesh, xf: Transform3D) -> Array:
 		out.append(arrs)
 	return out
 
-static var _part_y_cache := {}
+static var _part_y_cache := MeshCache.new()
 ## Gives every toon-shaded part under `n` that isn't merged its own part range (in its own space).
 static func bake_part_y(n: Node) -> void:
 	var stack: Array = [n]
@@ -1357,8 +1357,8 @@ static func bake_part_y(n: Node) -> void:
 					and not (mi.mesh is ArrayMesh and ((mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_TEX_UV2)):
 				var id := mi.mesh.get_instance_id()
 				if not _part_y_cache.has(id):
-					_part_y_cache[id] = _with_part_y(mi.mesh)
-				mi.mesh = _part_y_cache[id]
+					_part_y_cache.put(id, _with_part_y(mi.mesh))
+				mi.mesh = _part_y_cache.mesh(id)
 		for ch in c.get_children(): stack.append(ch)
 
 ## Sets a toon material's painted structure: its brushwork (see toon.gdshader's `surface`), the

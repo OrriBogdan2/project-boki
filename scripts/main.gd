@@ -767,6 +767,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		await fade.cover()
 		if gen != _gen:
 			return
+	if screen == "match": MeshCache.sweep()     # one-off meshes the last two matches never asked for go
 	if current:
 		current.queue_free()
 		current = null

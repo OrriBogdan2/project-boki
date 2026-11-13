@@ -32,6 +32,7 @@ Use this list whenever a request is planned or reviewed. For each feature, ask w
 - [ ] **Overdraw:** limit stacked transparent layers (fog, tints, glows) and render heavy effects at lower resolution.
 - [ ] **Frustum and distance culling:** skip animation and FX updates for things off screen or far away. Use LOD with hysteresis for far models.
 - [ ] **Atlases and shared materials** for UI icons and sprites.
+- [ ] **Session memory:** a cache keyed by a rolled size or look grows every match. Make shape-keyed mesh caches a `MeshCache` (swept as a match starts), keep one painted map, and run `--match-repeat-check` after touching one.
 - [ ] **Streaming:** when the map grows (rolling sessions), keep only nearby chunks active, with separate load and unload radii.
 
 ## 3D and rendering
