@@ -36,7 +36,7 @@ static func entry_key(species: String) -> String:
 ## branch pair is one.
 static func entries() -> Array:
 	var ids: Array = Data.KIN.keys().filter(func(s): return entry_key(s) == s)
-	var legend := func(k): return Legendary.is_legendary(k) or DexView.tier_of(k) != ""
+	var legend := func(k): return Data.is_rare(k) or Legendary.is_legendary(k) or DexView.tier_of(k) != ""
 	var legends: Array = ids.filter(legend)
 	var rank := func(k): return DexView.TIERS.find(DexView.tier_of(k))
 	legends.sort_custom(func(a, b): return rank.call(a) < rank.call(b))
