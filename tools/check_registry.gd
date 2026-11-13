@@ -309,6 +309,7 @@ const CHECKS := {
 	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
+	"--relics-tab-check": ["res://tools/relics_tab_check.gd", "relics_tab_check", null],      # the Market's Relics tab
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--hero-grid-check": ["res://tools/hero_grid_check.gd", "hero_grid_check", null],      # Relics tile grid
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],      # bots wear gamer tags
