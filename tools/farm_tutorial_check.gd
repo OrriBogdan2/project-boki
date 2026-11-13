@@ -58,12 +58,15 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	FarmUnlocks.rules()["base_mode"] = false      # sections 1-4 are the old farm's Hob and twelve steps
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
 	await _world()
 	await _spotlight()
 	await _farm2()
+	FarmUnlocks.rules()["base_mode"] = true
 	await _base_mode()
 	await _base_tutorial()
 	await _hub_first_visit()
@@ -74,7 +77,7 @@ func run(m: Node, mode := "") -> void:
 func _base_mode() -> void:
 	var home = await _home(1)
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(rules["base_mode"] == false and not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	rules["base_mode"] = false
 	home.hb.toggle()
 	var off: Array = home.hb._tabs()
 	var kept: bool = off.has("Work") and off.has("Upgrades") and home.hmk.tabs().has("Exchange")
@@ -93,7 +96,7 @@ func _base_mode() -> void:
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
 	ok(not home.hw.jobs.any(func(j): return econ_kinds.has(String(j["kind"]))), "on: no wild, station or haul jobs")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -101,6 +104,7 @@ func _base_mode() -> void:
 # ------------------------------------------------------------------ 6. the base tutorial (GARDEN.md section 8)
 func _base_tutorial() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = false
 	Save.d = _new_save()
 	HomeLayout.ensure(Save.d)
 	_stats()
@@ -145,7 +149,6 @@ func _base_tutorial() -> void:
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
 	await _base_world()
-	rules["base_mode"] = false
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).
 func _skip_shown(guide: FarmGuide) -> bool:

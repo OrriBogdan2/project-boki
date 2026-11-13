@@ -32,6 +32,7 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			shots = String(a).substr(12)

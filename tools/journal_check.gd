@@ -58,7 +58,7 @@ func run(m: Node) -> void:
 	var crops := int(Save.d["crops"].get("emberberry", 0))
 	var card := CareJournal.arrival()      # coming back
 	print("JOURNAL card: ", card)
-	ok(card.has("Pip: ate 3 × Emberberry: Fierce lean up"), "the card lists the 3 snacks and the lean change")
+	ok(card.has("Pip: ate 3 × Emberberry: Fire lean up"), "the card lists the 3 snacks and the lean change")
 	ok(card.has("Pip saved you a snack: Emberberry"), "a long absence brings saved snacks")
 	ok(int(Save.d["crops"]["emberberry"]) == crops + 2, "the saved snacks are in the pantry")
 	ok(CareJournal.arrival().is_empty(), "the next arrival has nothing new (one card, once)")

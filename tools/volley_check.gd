@@ -194,6 +194,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+	rules["base_mode"] = false
 	var off = await main._hb_home()
 	ok(off.hvolley == null, "off: no volley log on the farm")
 	off.queue_free()
@@ -219,6 +220,6 @@ func _on_base() -> void:
 			vb.tick(0.1)
 			t += 0.1
 		ok(vb.run == null and is_instance_valid(vb.card), "on: the match ends with a result card (%.1f s)" % t)
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame

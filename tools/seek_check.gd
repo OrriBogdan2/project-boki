@@ -183,6 +183,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+	rules["base_mode"] = false
 	var off = await main._hb_home()
 	ok(off.hseek == null, "off: no scent basket on the farm")
 	off.queue_free()
@@ -219,6 +220,6 @@ func _on_base() -> void:
 		ok(carded, "on: the hunt ends with a result card (%.1f s)" % t)
 		sk.tick(float(BaseSeek.rules()["card_s"]) + 1.0)
 		ok(sk.state == BaseSeek.S.IDLE, "on: the card goes and Seek is ready again")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame

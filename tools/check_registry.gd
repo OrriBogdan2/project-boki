@@ -102,6 +102,8 @@ const CHECKS := {
 	"--glider-canopy-shots": ["res://tools/glider_canopy_shots.gd", "glider_canopy_shots", null],
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
+	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
+	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],  # its child process
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
 	# first press after a panel closes
 	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],

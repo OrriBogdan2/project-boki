@@ -17,6 +17,7 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm
 	await _stall_on_every_save()
 	_levels()
 	_shelter()
