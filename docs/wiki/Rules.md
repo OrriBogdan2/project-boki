@@ -1954,6 +1954,24 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | empty_m | {"gait": {"knee": 0.18, "lean": 0.04, "width": 0.12, "step": [0.36, 0.18], "stance": 0.37, "strike": -0.08, "hip": [0.43, 0.445, 0.485], "swing": 0.1}, "leg": "l", "pose": {"spine": 0.04, "tilt": 0.02, "twist": 0.04, "hip": 0.02, "knee": 0.04, "spread": 0.05, "free_leg": [0.06, 0.08], "head": [0.02, 0.0, 0.0], "arm_l": [0.0, 0.0, 0.0]}, "idle": {"breath": 2.0, "breath_amp": 1.0, "shift": 10.0, "fidget": {"every": 8.0, "dur": 1.4, "wave": 1, "head": [0.0, -0.3, 0.0], "body": [0.04, 0.0, 0.0]}}} |
 | gil | {"gait": {"knee": 0.16, "lean": 0.05, "width": 0.11, "bounce": 1.9, "arm": 1.1}, "leg": "r", "pose": {"spine": 0.02, "tilt": 0.08, "twist": 0.16, "hip": 0.04, "back": 0.0, "knee": 0.06, "spread": 0.24, "free_leg": [0.34, 0.24], "head": [0.1, 0.18, 0.12], "arm_l": [-0.1, 0.0, 0.12]}, "idle": {"breath": 2.2, "breath_amp": 1.3, "shift": 5.0, "fidget": {"every": 6.0, "dur": 1.0, "wave": 0, "head": [-0.1, -0.35, 0.2], "body": [-0.05, 0.0, 0.0]}}} |
 
+## warden_stride (`content/rules/warden_stride.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Run start and stop poses per Hero art (WardenStride). lean_deg: the forward lean of a start from standing, gone once the speed is built. settle_deg: the weight shifted back over the stop slide. step_s: seconds the second foot takes to step in after the slide. arc_m: how high a stepping foot lifts. Heavier Heroes (Kael, Albert, Tenzo) lean less, settle deeper and step slower. |
+| default | {"lean_deg": 9.0, "settle_deg": 5.0, "step_s": 0.2, "arc_m": 0.1} |
+| kael | {"lean_deg": 6.0, "settle_deg": 9.0, "step_s": 0.28, "arc_m": 0.07} |
+| breaker | {"lean_deg": 5.0, "settle_deg": 10.0, "step_s": 0.3, "arc_m": 0.06} |
+| tarek | {"lean_deg": 6.0, "settle_deg": 9.0, "step_s": 0.28, "arc_m": 0.07} |
+| dredge | {"lean_deg": 7.0, "settle_deg": 7.0, "step_s": 0.24, "arc_m": 0.08} |
+| ostra | {"lean_deg": 8.0, "settle_deg": 6.0, "step_s": 0.22, "arc_m": 0.09} |
+| vex | {"lean_deg": 11.0, "settle_deg": 4.0, "step_s": 0.17, "arc_m": 0.12} |
+| claire | {"lean_deg": 12.0, "settle_deg": 3.5, "step_s": 0.16, "arc_m": 0.13} |
+| sable | {"lean_deg": 12.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.12} |
+| pip | {"lean_deg": 10.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.11} |
+
 ## weapon_path (`content/rules/weapon_path.json`)
 
 

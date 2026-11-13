@@ -111,6 +111,7 @@ var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is
 var fired_prev := 99.0       # the state's s since the last shot, last frame
 var recoil_deg := 0.0        # the arms' kick now
 var turn: WardenTurn         # turning on the spot (null: no legs, or the root bone rides the rig)
+var stride: WardenStride
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -145,6 +146,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	var c := WardenClips.new()
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
+	c.stride = WardenStride.make(model, sk, art_name)
 	return c
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
@@ -573,6 +575,7 @@ func step(dt: float) -> void:
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
+	stride.step(dt, s, self)
 	_air_tilt()
 	if turn:
 		turn.step(dt)
