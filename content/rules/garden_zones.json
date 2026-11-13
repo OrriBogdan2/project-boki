@@ -1,5 +1,5 @@
 {
-	"desc": "The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), loves (two favoured types and a nature, see affinity), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel).",
+	"desc": "The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), loves (two favoured types and a nature, see affinity), trait (Care trait it matches), game (what its card says is played there), play (its minigames.json id, for your best on the card) and wayseed_from (where the card says the Wayseed comes from). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel).",
 	"start": "bramblebank",
 	"start_doc": "The zone open from the start and the home of every Boki in an older save.",
 	"wayseed_chance": 0.05,
@@ -52,21 +52,21 @@
 		"list_doc": "First-time hints, in order, each once per save (Save.d tutorial hub_hints): id, at (waystone or nest), needs (a hint seen first), locked (only while a zone sleeps), text."
 	},
 	"zones": {
-		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "loves": {"types": ["normal", "grass"], "nature": "Protective"}, "trait": "loyalty", "game": "The Dash"},
-		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "loves": {"types": ["water", "ice"], "nature": "Gentle"}, "trait": "temper", "trait_low": true, "game": "Spark Volley", "lair_biomes": ["frost"],
+		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "loves": {"types": ["normal", "grass"], "nature": "Protective"}, "trait": "loyalty", "game": "The Dash", "play": "race"},
+		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "loves": {"types": ["water", "ice"], "nature": "Gentle"}, "trait": "temper", "trait_low": true, "game": "Spark Volley", "play": "volley", "lair_biomes": ["frost"],
 			"build": {"theme": "glasswater", "seed": 3307, "sk": 0.9,
 				"deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]],
 				"shallow": [31, 30, 46, 32],
 				"clear": [20, 22, 58, 48],
 				"scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}},
-		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "loves": {"types": ["fire", "rock"], "nature": "Fiery"}, "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"],
+		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "loves": {"types": ["fire", "rock"], "nature": "Fiery"}, "trait": "temper", "game": "Stump Shove", "play": "shove", "lair_biomes": ["ember"],
 			"build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85,
 				"deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]],
 				"clear": [12, 14, 66, 58],
 				"scatter": {"seed": 23, "terrace": 16, "crack": 44}}},
-		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "loves": {"types": ["dark", "psychic"], "nature": "Mischievous"}, "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"],
+		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "loves": {"types": ["dark", "psychic"], "nature": "Mischievous"}, "trait": "curiosity", "game": "Seek", "play": "seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"],
 			"build": {"theme": "hushwood", "seed": 7731, "sk": 0.9, "deco": [["training_post", 38, 32, 0], ["toy_dig", 42, 37, 0], ["snack_patch", 33, 37, 0]], "clear": [16, 16, 62, 56], "scatter": {"seed": 31, "mushroom": 40, "fern": 50, "pebble": 30}}},
-		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "loves": {"types": ["flying", "electric"], "nature": "Daring"}, "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"],
+		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "loves": {"types": ["flying", "electric"], "nature": "Daring"}, "trait": "bravery", "game": "The Dash, ridge track", "play": "race", "lair_biomes": ["storm"],
 			"build": {"theme": "ridge", "seed": 5519, "sk": 0.95, "deco": [["toy_post", 34, 33, 0], ["toy_ball", 42, 38, 0], ["snack_patch", 43, 33, 0]], "clear": [14, 16, 64, 56], "scatter": {"seed": 41, "flower": 50, "fern": 30, "pebble": 30}}}
 	},
 	"lair_biomes_doc": "A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists).",

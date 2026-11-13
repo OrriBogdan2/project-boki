@@ -22,6 +22,7 @@ var empty_t := 0.0
 var enraged := false
 var atk := ""
 var atk_t := 0.0
+var atk_began := 0.0         # match time the attack under way began (BossNet tells a new attack from the last by it)
 var atk_end := 0.0
 var steps: Array = []        # {t, f: Callable, done} for the attack under way
 var next_cd := 2.0
@@ -70,7 +71,7 @@ func cd_k() -> float:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if dead or buried:
 		return 0.0
-	if dormant:
+	if dormant and not remote:
 		if String(lair.get("state", "")) in ["open", "awake"] and m.lairs:
 			m.lairs.wake(lair, by)
 		else:
@@ -194,6 +195,7 @@ func sim(dt: float) -> void:
 	if remote:
 		net_follow(dt)
 		return
+	BossNet.watch(self)
 	if dormant:
 		# asleep: breathing, healing back to full, waiting
 		hp = minf(max_hp, hp + max_hp * 0.08 * dt)
@@ -297,7 +299,7 @@ func _attack_move(spd: float) -> Vector2:
 
 # ------------------------------------------------------------------ attacks
 func _begin(name: String, length: float, anim := "") -> void:
-	atk = name; atk_t = 0.0; atk_end = length; steps = []
+	atk = name; atk_t = 0.0; atk_began = m.time; atk_end = length; steps = []
 	anim_kind = anim
 	m.sfx("v_warden", pos, -2.0, {"colossus": 0.6, "serpent": 1.35, "brood": 0.9}.get(mkind, 1.0))
 
@@ -732,8 +734,7 @@ func render(delta: float, alpha: float) -> void:
 		position = prev.lerp(pos, alpha)
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	for mt in mats:
-		if mt is ShaderMaterial: mt.set_shader_parameter("flash", f)
+	show_flash(f)
 	if stag_ring:
 		stag_ring.visible = stag_open > 0.0 and stagger_t <= 0.0 and not dead
 		if stag_ring.visible:
@@ -755,6 +756,8 @@ func render(delta: float, alpha: float) -> void:
 		return
 	model.visible = not buried
 	model.rotation.y = face
+	if remote:
+		BossNet.advance(self, delta)
 	anim += delta * (1.5 + minf(Vector2(vel.x, vel.z).length(), 6.0) * 1.2)
 	BossAnim.pose(self, delta)
 	if enraged:
