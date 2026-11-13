@@ -651,7 +651,15 @@ func juggernaut(a) -> void:
 	var midk := K.wave_k()
 	A.step(m, 0.6, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
-	A.step(m, 0.6)
+	A.step(m, 0.1)
+	var chord := 0.0
+	for rider in DJFx.of(m).riders:
+		if rider["kind"] == "crescent_bolt":
+			chord = DJFx.CRESCENT_CHORD * ((rider["node"] as Node3D).get_node("Head") as Node3D).scale.x
+	var wave_w := 2.0 * float(K.lmb_def()["wave_size"][1])        # held to full
+	A.step(m, 0.5)
+	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
+			chord > 0.3 and absf(chord - wave_w) < 0.35, "crescent %.2f wave %.2f" % [chord, wave_w])
 	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
 			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
 			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
@@ -669,7 +677,8 @@ func juggernaut(a) -> void:
 	A.step(m, 0.3)
 	var lane: Dictionary = AimKit.entry(P, "slam")
 	var sl: Dictionary = K.rmb_def()["slam"]
-	var mv: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))["moves"]
+	var vd: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))
+	var mv: Dictionary = vd["moves"]
 	var lm: Dictionary = K.d["lmb"]
 	A.ok("juggernaut move art: slash arc %.0f, slam cone %.0f, true sizes" % [lm["arc"], sl["angle"]],
 			is_equal_approx(float(mv["slash"]["fx"][0]["arc"]), float(lm["arc"]))
@@ -679,6 +688,19 @@ func juggernaut(a) -> void:
 			and not mv["drop_hit"]["fx"][1].has("size_x")
 			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
 			"")
+	var bursts: Array = []
+	for id in ["dash_wind", "dash_go", "dash_drive", "dash_tip", "enrage"]:
+		for l in mv[id].get("fx", []):
+			if l["p"] in ["flare", "ring"] or String(l.get("shape", "")) == "disc":
+				bursts.append("%s:%s" % [id, l["p"]])
+	A.ok("juggernaut VFX: no burst, ring or disc on his dashes or the Enrage (DECISIONS)",
+			bursts.is_empty(), str(bursts))
+	var cols: Array = vd["palette"].values()
+	cols.append_array([JuggernautDrop.AREA, JuggernautDrop.CORE, JuggernautKit.SLASH_OUT, JuggernautKit.LUNGE_FULL,
+			JuggernautKit.WAVE_RED, JuggernautKit.WAVE_EDGE, JuggernautKit.WAVE_FULL])
+	var foreign := _foreign_cols(K, cols)
+	A.ok("juggernaut VFX: every colour is his signature, a slot colour, pale/dark, or far from other Hunters'",
+			foreign.is_empty(), str(foreign))
 	A.ok("juggernaut RMB tap: strike cone drawn = hit (%.1f m, %.0f deg)" % [sl["radius"], sl["angle"]],
 			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "cone"
 			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
@@ -1386,6 +1408,29 @@ func _fx(move: Dictionary, p: String) -> Dictionary:
 		if fx["p"] == p:
 			return fx
 	return {}
+
+const FOREIGN_D := 0.15     # RGB distance under which a colour reads as another Hunter's signature
+const PALE_S := 0.35        # saturation under this is white-hot or a pale tint (free); pale signatures are not fenced
+const DARK_V := 0.4         # value under this is char or smoke (free)
+
+## Colours (hex strings or Color) a kit draws that read as another Hunter's: not Kael's signature or a slot col,
+## not pale or dark, and within FOREIGN_D of another archetype's saturated signature colour.
+func _foreign_cols(K: ArchKit, cols: Array) -> Array:
+	var own: Array = [Arch.color("juggernaut"), K.res_col()]
+	for sd in [K.lmb_def(), K.rmb_def(), K.dash_def(), K.e_def(), K.x_def()]:
+		if sd.has("col"):
+			own.append(K.col_of(sd))
+	var out: Array = []
+	for v in cols:
+		var c := v as Color if v is Color else Color(String(v))
+		if own.any(func(o): return (o as Color).is_equal_approx(c)) or c.s < PALE_S or c.v < DARK_V:
+			continue
+		for id in Arch.ids():
+			var sig := Arch.color(id)
+			var d := Vector3(c.r - sig.r, c.g - sig.g, c.b - sig.b).length()
+			if id != "juggernaut" and sig.s >= PALE_S and d < FOREIGN_D:
+				out.append("%s ~ %s" % [c.to_html(false), id])
+	return out
 
 ## A Smash telegraph in Kael's crimson (his archetype colour, owner 11-08) with a lit rim and a faint inside.
 func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
