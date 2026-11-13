@@ -1,7 +1,8 @@
 extends RefCounted
-## --expedition-shots=<dir> [--size=WxH]: the expedition panel (Hunter pick) on a fresh save (one Hunter
-## open, the rest locked) and on a save with every Hunter open. Run with a real renderer; --size resizes the
-## window. Writes <H>_fresh.png and <H>_all.png (H = window height), prints "ESHOT <name>". Never touches the real save.
+## --expedition-shots=<dir> [--size=WxH]: the expedition panel on a fresh save (first visit: your Relic, Where
+## and Start, the rest behind More) and for a returning player with every Hunter open (the full panel). Run with a real
+## renderer; --size resizes the window. Writes <H>_fresh.png and <H>_all.png (H = window height), prints "ESHOT <name>".
+## Never touches the real save.
 
 var main: Node
 var dir := ""
@@ -42,6 +43,7 @@ func run(m: Node) -> void:
 	var h := m.get_window().size.y
 	await _shot("%d_fresh" % h)
 	Save.d["classes"]["open"] = Arch.ids()
+	Save.d["matches"] = 3
 	home._open_expedition()
 	await _shot("%d_all" % h)
 	print("ESHOT DONE")
