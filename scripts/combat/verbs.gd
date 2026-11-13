@@ -16,7 +16,6 @@ var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, co
 var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
 var drags: Array = []     # {ent, from, to, t, dur, h}
 var decoys: Array = []    # {pos, team, t, node, owner}
-var ripple: BarrierRipple = null     # the hit ripple every barrier shares
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
@@ -25,7 +24,6 @@ const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bea
 func _init(match_node: Node) -> void:
 	m = match_node
 	m.world.dyn_walls = walls
-	ripple = BarrierRipple.new(m)
 
 # ------------------------------------------------------------------ barrier walls
 ## A wall segment centred at `at`, running across `d` (the aim), `length` long.
@@ -39,13 +37,12 @@ func add_wall(by: Node, at: Vector3, d: Vector2, e: Dictionary, pw: float) -> Di
 		"block": String(e.get("block", "enemy")), "move": bool(e.get("move", false)), "reflect": bool(e.get("reflect", false)),
 		"col": col, "touch": e.get("touch", {}), "follow": bool(e.get("follow", false)), "dist": float(e.get("dist", 1.4)),
 		"len": length, "th": WALL_TH, "touched": {}, "hit_t": 0.0, "nid": by.get("nid") if by else "",
-		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null),
-		"hit_sfx": String(e.get("hit_sfx", "ab_shield_hit"))}
+		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null)}
 	# don't seal anyone inside it: a movement-blocking wall skips the bits that would trap someone
 	w["node"] = _wall_node(w)
 	walls.append(w)
 	m.fx.burst(Vector3(c2.x, at.y + 0.4, c2.y), col, 20, 4.0, 0.45, 2.0, 1.2)
-	Effects.snd(m, e, "shield", at, -2.0, 0.7)
+	m.sfx("shield", at, -2.0, 0.7)
 	return w
 
 func _wall_node(w: Dictionary) -> Node3D:
@@ -134,8 +131,8 @@ func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 		n.set_meta("pool_key", key)
 		m.add_child(n)
 	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
-		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "hit_sfx": String(e.get("hit_sfx", "")), "node": n, "col": col, "caught": 0})
-	Effects.snd(m, e, "shield", ent.pos, -3.0, 1.4)
+		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
+	m.sfx("shield", ent.pos, -3.0, 1.4)
 	return mirrors[-1]
 
 func _release_mirror(mr: Dictionary) -> void:
@@ -260,7 +257,7 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 		return 0
 	m.add_child(n)
 	terrain.append({"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0), "team": int(by.team)})
-	Effects.snd(m, e, "shield", from, -2.0, 1.6)
+	m.sfx("shield", from, -2.0, 1.6)
 	return tiles.size()
 
 # ------------------------------------------------------------------ forced movement
@@ -341,10 +338,12 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			if v.dot(nrm) > 0.0: nrm = -nrm
 			_take_shot(s, v - 2.0 * v.dot(nrm) * nrm, w["by"] if is_instance_valid(w["by"]) else null, int(w["team"]), float(w.get("rk", 1.0)))
 			s["pos"] = Vector3(c.x, p.y, c.y) + Vector3(nrm.x, 0, nrm.y) * (float(w["th"]) + float(s["r"]) + 0.12)
-			_hit_wall(w, float(s["dmg"]) * 0.5, p)
+			_hit_wall(w, float(s["dmg"]) * 0.5, s["col"])
 			return "bounce"
-		_hit_wall(w, float(s["dmg"]), p)
-		m.sfx(String(w["hit_sfx"]), p, -8.0)
+		_hit_wall(w, float(s["dmg"]), s["col"])
+		m.fx.burst(p, w["col"], 6, 3.0, 0.25, 4.0, 0.8)
+		m.fx.flash(p, Color(w["col"]).lerp(Color.WHITE, 0.4), 0.35, 0.07)
+		m.sfx("ab_shield_hit", p, -8.0)
 		return "end"
 	for mr in mirrors:
 		if int(mr["team"]) == int(s["team"]) or s["by"] == mr["ent"]:
@@ -381,11 +380,8 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		_take_shot(s, back * 1.1, ent, int(mr["team"]), float(mr["k"]))
 		m.fx.flash(p, mr["col"], 0.4, 0.06)
 		m.fx.burst(p, mr["col"], 8, 4.0, 0.3, 2.0)
-		if mr["hit_sfx"] != "":
-			m.sfx(String(mr["hit_sfx"]), p)
-		else:
-			m.sfx("shield", p, -4.0, 1.9)
-			m.sfx("ab_parry", p, -5.0, 1.25)
+		m.sfx("shield", p, -4.0, 1.9)
+		m.sfx("ab_parry", p, -5.0, 1.25)
 		m.fx.spark(p, Vector3(back.x, 0.3, back.y), Color(mr["col"]).lerp(Color.WHITE, 0.4), 10, 9.0, 30.0, 0.2, 4.0, 1.0)
 		if ent == m.player and m.hud: m.hud.toast_small("REFLECTED", mr["col"])
 		return "bounce"
@@ -412,27 +408,22 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
 ## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
-## `from` is where the blow came from.
-func absorb(w: Dictionary, dmg: float, from: Vector3) -> void:
+func absorb(w: Dictionary, dmg: float) -> void:
 	if walls.has(w):
-		_hit_wall(w, dmg, from)
+		_hit_wall(w, dmg, Color.WHITE)
 
-## `from`: the shot's position, or where the blow came from; the ripple lands on the face that side.
-func _hit_wall(w: Dictionary, dmg: float, from: Vector3) -> void:
+func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
 	var by = w.get("by")
 	if by != null and is_instance_valid(by) and by is Hunter and (by as Hunter).ak:
 		(by as Hunter).ak.on_block(minf(dmg, float(w["hp"])), null)
 	w["hp"] = float(w["hp"]) - dmg
 	w["hit_t"] = 0.12
-	var broke := float(w["hp"]) <= 0.0
-	ripple.on_wall(w, from, broke)
-	if broke:
+	if float(w["hp"]) <= 0.0:
 		_break_wall(w)
 
 # ------------------------------------------------------------------ simulation
 func tick(dt: float) -> void:
-	ripple.tick(dt)
 	for w in walls.duplicate():
 		w["t"] = float(w["t"]) - dt
 		w["hit_t"] = maxf(0.0, float(w["hit_t"]) - dt)

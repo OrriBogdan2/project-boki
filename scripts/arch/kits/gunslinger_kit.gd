@@ -225,7 +225,6 @@ func _on_knock(t: Ent) -> void:
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
 	m.sfx("vn_stim", h.pos, -3.0)
 	play("gunslinger_knock")
 
@@ -636,13 +635,12 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 		o["lift"] = 2.0
 		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
 		daze(f, float(bd["cone_rattle"]))         # the training dummy too
-		if f is Hunter and KnockWall.hit(m, f, away, 2.4, h):
+		if f is Hunter and terrain_behind(f, away, 2.4):
 			wall_slams += 1
 			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}
 			slam["dr"] = true
 			f.hurt(0.1, h, slam)
 			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))     # the data: walled, "Dazed longer"
-			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", EMBER, false)   # over DAZED
 
 # ------------------------------------------------------------------ E: Longneedle
 func cast_e() -> bool:
@@ -771,9 +769,7 @@ func _fire_needle() -> void:
 			hits += 1
 			if rat:
 				skewers += 1
-				# the word rides up the screen, clear of the damage number on the body
-				payoff_fx(f.pos, "", EMBER, "", h.dir_to(f), f)
-				m.fx.word(f.pos + Vector3(0, 2.7, 0) + fx().screen_up() * 1.3, "SKEWERED", EMBER, true)
+				payoff_fx(f.pos, EMBER, "", h.dir_to(f), f)
 				m.sfx("hero_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
@@ -790,7 +786,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not needle.is_empty() or rmb_down:
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist > 2.5 and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist > 2.5:
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return

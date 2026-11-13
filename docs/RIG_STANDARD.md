@@ -35,7 +35,7 @@ at the rig's `Hand` nodes. Apply all transforms before export.
 | offhand | child `weapon_offhand` | a twin weapon's second piece, left of x = -0.04, handed to the left hand |
 | shield | mesh `shield` | modelled in the Shield node's space on `Hand.L` (Mossy) |
 | anchors | empties `anchor_head_top`, `anchor_chest`, plus a Hunter's own (`anchor_*`) | children of their bone; kits find them with `WardenGlb.anchor` |
-| FX anchors | optional empties a Hero's looks read (`content/vfx/<arch>.json` "anchors"; Kael: `anchor_blade_tip`, `anchor_blade_mid`, under `weapon`; `anchor_chain_hand`, `anchor_feet`, on their bones; Lace: `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`) | looks fall back to the Gun's space, then the body, without them (docs/HERO_VFX.md) |
+| FX anchors | optional empties a Hero's looks read (`content/vfx/<arch>.json` "anchors"; Kael: `anchor_blade_tip`, `anchor_blade_mid`, under `weapon`; `anchor_chain` (hand.R), `anchor_feet`, on their bones; Lace: `anchor_nock` (bow_s), `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`) | looks fall back to the Gun's space, then the body, without them (docs/HERO_VFX.md) |
 
 The weapon is part of the Hunter's design: it stays seated in the hand (its bounds hold the grip within 6 cm) and
 follows the hand in every state. `HunterAnim._weapon_to_hand` pulls a weapon whose grip the arm cannot reach (a flip,
@@ -46,12 +46,6 @@ Item 76b (ART-1): a Hero rebuilt with `skinned_weapon` (docs/art/wardens/CLIPS.m
 skinned to its bones in the .glb, its FX points are empties on them (`weapon_muzzle`, the blade's root), and the Gun is
 an invisible reference kept on the blade. `body.shoulder` in the archetype moves the arm pivots in or out (keep the
 Hero's own width there, never by `body.chest`). A Hero's variant bones can sit in its data file (`extra_bones`).
-
-## Draw calls
-Budget: at most 4 draws per model (surfaces plus ink passes); `--model-draws` lists surfaces, materials, bones and
-tris per Hunter and Boki .glb. When a Hunter is dressed, `WardenMerge.merge_equal` joins the surfaces whose toon
-materials come out identical. `WardenMerge.join_inks` then gives each skinned body one ink shell instead of one ink
-pass per surface. Eyes, glow, cards, void and flame stay apart. `--warden-glb-check` asserts the shells.
 
 ## The check
 `--rig-standard-check` (all 12): the armature matches the standard; the attachment points exist; the rest pose has

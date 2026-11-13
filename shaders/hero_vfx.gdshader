@@ -15,10 +15,8 @@ const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
-const int M_SHEEN = 9;      // a band of light climbing a body-shaped capsule, facing the camera: UV.y top (0) to foot (1)
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
-const int M_CHAIN = 10;     // a held chain: UV.x counts links from the hand, UV.y across; life is its tension 0..1
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -162,17 +160,6 @@ vec4 skirt(vec2 uv) {
 	return vec4(ramp(heat) * a * 0.8, a * 0.8);
 }
 
-vec4 sheen(vec2 uv) {
-	vec2 p = uv * 2.0 - 1.0;
-	float body = 1.0 - smoothstep(0.7, 1.0, length(vec2(p.x / 0.5, p.y)));   // the capsule the band is seen through
-	float d = (1.0 - uv.y) - (life * 1.25 - 0.1);                // the band climbs from below the feet to above the head
-	float band = exp(-d * d / 0.012);
-	float trail = (d < 0.0 ? exp(d * 7.0) : 0.0) * 0.3;          // a faint wash left behind it
-	float fade = 1.0 - smoothstep(0.75, 1.0, life);
-	float a = clamp(band + trail, 0.0, 1.0) * body * fade;
-	return vec4(mix(col.rgb, col2.rgb, band) * a, a);
-}
-
 vec4 flare(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
@@ -217,21 +204,6 @@ vec4 bolt(vec2 uv) {
 	return vec4(c * flick, clamp(core + halo * 0.5, 0.0, 1.0) * flick);
 }
 
-vec4 chain(vec2 uv) {
-	// links face on (an oval ring) and edge on (a bar) in turn, each with a dark rim so it reads on bright grass
-	vec2 p = vec2(fract(uv.x) * 2.0 - 1.0, uv.y * 2.0 - 1.0);
-	float ring = abs(length(p * vec2(0.95, 1.35)) - 0.68);
-	float bar = length(vec2(max(abs(p.x) - 0.95, 0.0), p.y * 2.2));
-	float d = mod(floor(uv.x), 2.0) < 0.5 ? ring : bar;
-	float metal = 1.0 - smoothstep(0.13, 0.19, d);
-	float rim = 1.0 - smoothstep(0.19, 0.3, d);
-	// pulled taut it heats, and glints run down it toward the hand (the yank)
-	float glint = smoothstep(0.82, 1.0, sin(uv.x * 0.7 + TIME * 22.0)) * life;
-	float shine = smoothstep(0.1, -0.6, p.y) * 0.5 + 0.35 * life + glint;
-	vec3 c = mix(col3.rgb, mix(col.rgb, mix(col2.rgb, vec3(1.0), glint * 0.6), clamp(shine, 0.0, 1.0)), metal);
-	return vec4(c * rim, rim);
-}
-
 vec4 vortex(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
@@ -266,13 +238,11 @@ void fragment() {
 	if (mode == M_SWEEP) { v = sweep(UV); }
 	else if (mode == M_SCORCH) { v = scorch(UV); }
 	else if (mode == M_SKIRT) { v = skirt(UV); }
-	else if (mode == M_SHEEN) { v = sheen(UV); }
 	else if (mode == M_FLARE) { v = flare(UV); }
 	else if (mode == M_BOLT) { v = bolt(UV); }
 	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
-	else if (mode == M_CHAIN) { v = chain(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;

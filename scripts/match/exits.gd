@@ -215,8 +215,6 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	if not x.get("tut", false):
 		m.ping(x["pos"], ExitModels.UPLINK)
 		var mine: bool = m.player != null and h.team == m.player.team
-		if mine:
-			UiSfx.extract_start()
 		m.add_feed(("%s started the uplink at %s" % [h.pname, x["name"]]) if mine else ("An uplink came on at %s" % x["name"]))
 		if m.hud and m.player and not m.player.out:
 			m.hud.toast("Uplink started: hold the yard until it's charged" if mine else "An uplink is charging %s at %s" % [m.direction_word(m.player.pos, x["pos"]), x["name"]], ExitModels.UPLINK)
@@ -329,7 +327,6 @@ func _fizzle(x: Dictionary) -> void:
 	if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
 		m.add_feed("The uplink at %s lost its charge and shut off" % x["name"])
 		if m.hud and was == m.player.team:
-			UiSfx.extract_fail()
 			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
 
 ## The outpost's look for its state (OutpostLook): lit with the charge, the banner in the holder's colour,

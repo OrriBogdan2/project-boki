@@ -1061,10 +1061,6 @@ def cover_report(C, lv, owner):
         rows.append((b, share, T[b]))
     return rows
 
-# reverb zones (Sfx.set_room_zones): tile centre, radius in metres, preset "room" (small stone) or "arch" (big)
-sound_zones = [dict(at=[108, 108], r=13, preset="arch"), dict(at=[157, 79], r=7, preset="room"),
-               dict(at=[56, 162], r=7, preset="room")]
-
 def main():
     lv, owner, stairs = rasterize()
     C = place_cover(lv, owner, stairs)
@@ -1091,7 +1087,7 @@ def main():
                      "plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice "
                      "except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
                regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
-               winds=[], sound_zones=sound_zones, train=train, heart=heart, ways_scale=round(K, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
+               winds=[], train=train, heart=heart, ways_scale=round(K, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)

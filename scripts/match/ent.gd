@@ -21,12 +21,10 @@ var face := 0.0             # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
-var shell_t := 0.0            # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
-var dot_tick_at := -1.0     # Match time of the last burn tick (the body pulses on it, DotLook)
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
@@ -119,7 +117,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
-			StatusLooks.of(m).from_hit(self, opts)
 			flash_t = 0.12
 			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
@@ -148,7 +145,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
-	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
@@ -181,7 +177,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		root_t = maxf(root_t, float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
 		blight_t = maxf(blight_t, float(opts["blight"]))
-		StatusSfx.cue(self, "antiheal", by, blight_t)
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true
@@ -198,9 +193,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if hp <= 0.0:
 		_on_zero(by, opts)
 	return d
-
-func _took(_d: float, _by: Ent) -> void:
-	pass
 
 func _mitigate(dmg: float, _by: Ent, _opts: Dictionary) -> float:
 	return dmg
@@ -278,12 +270,9 @@ func body_vertical(dt: float) -> void:
 func fall_out() -> void:
 	m.on_fell(self)
 
-var bump_top := 0.0          # top of what the last slide() ran into (KnockWall.tall: a wall, or just a step)
-
 ## Horizontal move with walls and rocks; returns true if it bumped something.
 func slide(dt: float, guard := false) -> bool:
 	var bumped := false
-	bump_top = 0.0
 	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
 	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
@@ -295,26 +284,22 @@ func slide(dt: float, guard := false) -> bool:
 			vel.x = hv.x; vel.z = hv.y
 		tgt = po
 		bumped = true
-		bump_top = pos.y + World.BLOCK_H
 	var nx := tgt.x
 	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
-		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
 	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:
 		vel.z *= -0.1; bumped = true
-		bump_top = maxf(bump_top, b2)
 	return bumped
 
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
-	if shell_t > 0.0: shell_t -= dt
 	if freeze_t > 0.0: freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
@@ -332,13 +317,10 @@ func tick_status(dt: float) -> void:
 	if blight_t > 0.0: blight_t -= dt
 	if burn_t > 0.0 and not dead:
 		burn_t -= dt
-		var ticked := int(burn_t * 4.0) != int((burn_t + dt) * 4.0)
-		if ticked:
-			dot_tick_at = m.time
 		if not remote:
 			hp -= burn_dps * dt
-			if ticked:
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, DotLook.COL, false)
+			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
+				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
@@ -361,29 +343,10 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
-var _flash_shell := false
-const SHELL_FLASH := Color(0.62, 0.86, 1.0)     # the armour's flash on the body: the HUD's cyan strip
+var _flash_col := Color.WHITE
 var _flash_n := -1
-var _flash_hot := false
-## Puts the body's tint on its materials: the hit flash (white) or, when nothing hit it, the DoT tint (DotLook).
-func show_flash(hit: float) -> void:
-	var dot := DotLook.amount(self, Settings.quality() == "low")
-	var hot := hit <= 0.0 and dot > 0.0
-	var f := maxf(hit, dot)
-	var shell := shell_t > 0.0
-	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n or hot != _flash_hot or shell != _flash_shell:
-		_flash_set = f
-		_flash_n = mats.size()
-		_flash_hot = hot
-		_flash_shell = shell
-		var tint := SHELL_FLASH if shell else Color.WHITE
-		if hot:
-			tint = DotLook.COL
-		for mt in mats:
-			mt.set_shader_parameter("flash", f)
-			mt.set_shader_parameter("flash_color", tint)
-
+var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash_col := Color.WHITE
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -400,4 +363,16 @@ func render(delta: float, alpha: float) -> void:
 		flinch = Vector3.ZERO
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
-	show_flash(clampf(flash_t / 0.12, 0.0, 1.0))
+	var f := clampf(flash_t / 0.12, 0.0, 1.0)
+	var fc := Color.WHITE
+	if f <= 0.0 and wash > 0.0:
+		f = wash
+		fc = wash_col
+	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
+	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
+		_flash_set = f
+		_flash_col = fc
+		_flash_n = mats.size()
+		for mt in mats:
+			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", fc)

@@ -155,12 +155,10 @@ func add_spark(f: Ent, n := 1) -> void:
 		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, PINK, 0.9, 0.28)
 		m.sfx("vv_static_full", f.pos, -2.0)
 		# the word goes above the marker so the two never print over each other
-		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", PINK, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
 	elif int(s["n"]) > was:
-		StatusSfx.cue(f, "static", h, float(rd["dur"]), int(s["n"]), true)     # the zap climbs with each stack
-	StatusSfx.loop_static(f, h, func() -> int: return spark_n(f))
+		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
 
 func combo_read(f: Ent) -> Dictionary:
 	var s = sparks.get(f.get_instance_id())
@@ -189,7 +187,6 @@ func _tick_sparks(dt: float) -> void:
 			continue
 		var n := int(s["n"])
 		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT)
-		StatusLooks.of(m).keep(f, "static")
 		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
 			# Live: arcs crawl down the body from the marker to the ground
 			var foot := ground(f.pos) + Vector3(fx().rng.randf_range(-0.5, 0.5), 0.05, fx().rng.randf_range(-0.5, 0.5))
@@ -482,7 +479,6 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	fx().arc(a + Vector3(0, 0.3, 0), b + Vector3(0, 0.2, 0), PINK, PINK.lightened(0.5), 0.5, time + 0.15)
 	net_bolt(a, b, col_of(dd))
 	m.sfx("vv_surge_go", h.pos, -1.0)
-	m.fx.word(h.pos + Vector3(0, 2.2, 0), "INVULNERABLE", PINK, false)   # the source labels the streak
 	if h.model: h.model.visible = false
 	m.later(time, _arrive)
 
@@ -536,7 +532,7 @@ func _blowout(f: Ent) -> void:
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
-	payoff_fx(f.pos, "BLOWOUT", PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
+	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
 	# the refund tell on her: copper coil columns and a starburst (our own look)
 	var me := ground(h.pos)
@@ -691,12 +687,11 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		if o != f:
 			other = o
 			break
-	if other != null or KnockWall.hit(m, f, dir, reach, h):
+	if other != null or terrain_behind(f, dir, reach):
 		slams += 1
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
-		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", PINK, false)   # over STUNNED
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
@@ -836,7 +831,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not wire.is_empty() or rmb_down or ult.busy():
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]):
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return

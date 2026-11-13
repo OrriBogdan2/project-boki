@@ -9,7 +9,6 @@ var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
-var lowhp := LowHpCue.new()      # the low-health heartbeat and edge glow
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
@@ -96,7 +95,6 @@ func _process(delta: float) -> void:
 	hit_t = maxf(0.0, hit_t - delta)
 	_hud_tick(delta)
 	plates.tick(delta)
-	lowhp.tick(m.player, delta)
 	panels.tick(delta)
 	flash_t = maxf(0.0, flash_t - delta * 4.0)
 	hurt_t = maxf(0.0, hurt_t - delta)
@@ -284,7 +282,11 @@ func _draw_all() -> void:
 			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
-	lowhp.draw_edge(c, sz)
+	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
+		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
+		for i in 5:
+			var inset := i * 16.0
+			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.75, 0.05, 0.05, (0.09 - i * 0.016) * (0.6 + pulse * 0.4)), false, 16.0)
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
@@ -1240,9 +1242,9 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
-		"reviving": st = "reviving you!"
+		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
 		"fused": st = "merged"
-	if k.state in ["active", "downed", "reviving", "fused", "returning"] or not k.giant.is_empty():
+	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
 		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
@@ -1514,7 +1516,7 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var side := Vector2(-d.y, d.x)
 		c.draw_colored_polygon(PackedVector2Array([e + d * 16.0, e - d * 6.0 + side * 11.0, e - d * 6.0 - side * 11.0]), col)
 		var lbl := "%s %dm" % [h.pname.substr(0, 10), dist]
-		if String(st[0]) == "WISP": lbl = "%s DOWN %dm" % [h.pname.substr(0, 10), dist]
+		if String(st[0]) == "WISP": DownedMarks.badge(c, e - d * 26.0 - Vector2(0, 18), h, SideColor.ALLY, m.time, 10.0)
 		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
 		_ctext(e - d * 26.0 + Vector2(0, 5), lbl, 13, col, big)
 

@@ -2211,7 +2211,6 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	hand = bool(L.get("hand", false))
 	authored_stairs.clear(); warden_posts.clear(); trap_spots.clear()
 	regions = L.get("regions", [])
-	Sfx.set_room_zones(L.get("sound_zones", []))
 	# the ground is the same every match: its noise and depths come from the layout, not the match
 	var lr := RandomNumberGenerator.new(); lr.seed = int(L.get("seed", 1))
 	var nz := FastNoiseLite.new(); nz.seed = int(L.get("seed", 1)); nz.frequency = 0.055   # broad, gentle coastlines

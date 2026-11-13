@@ -2,7 +2,6 @@
 import unittest
 
 from helpers import VERSION, Clock, make_core, ready_all
-from mm.config import Config
 
 
 class LifecycleTest(unittest.TestCase):
@@ -11,7 +10,7 @@ class LifecycleTest(unittest.TestCase):
         self.core = make_core(self.clock)
 
     def queue(self, mode: str, name: str, **extra) -> str:
-        out = self.core.enqueue(mode, name, extra.pop("version", VERSION))
+        out = self.core.enqueue(mode, name, extra.pop("version", VERSION), extra.pop("party", []))
         self.assertIn("ticket", out, out)
         return out["ticket"]
 
@@ -68,19 +67,23 @@ class LifecycleTest(unittest.TestCase):
         self.core.tick()
         self.assertEqual(self.core.health()["matches"], 1)
 
-    def test_trio_fills_with_bots_in_trios(self):
-        a, b = self.queue("trio", "Ana"), self.queue("trio", "Ben")
+    def test_trio_fills_with_bots_and_parties_share_a_team(self):
+        a = self.queue("trio", "Ana", party=["Ben"])
+        b = self.queue("trio", "Ben", party=["Ana"])
+        c = self.queue("trio", "Cid")
         self.clock.advance(20.1)
         self.core.tick()
         ready_all(self.core)
-        proc = self.core.launcher.started[0]
-        self.assertEqual((proc.extra["slots"], proc.extra["team_size"]), (Config().trio_slots, 3))
-        self.assertEqual({self.core.status(t)["state"] for t in (a, b)}, {"ready"})
+        tokens = self.core.launcher.started[0].tokens
+        team_of = {v["name"]: v["team"] for v in tokens.values()}
+        self.assertEqual(team_of["Ana"], team_of["Ben"])
+        self.assertNotEqual(team_of["Ana"], team_of["Cid"])
+        self.assertEqual({self.core.status(t)["state"] for t in (a, b, c)}, {"ready"})
 
     def test_version_mismatch_is_rejected(self):
-        out = self.core.enqueue("duel", "Old", "0.1.0")
+        out = self.core.enqueue("duel", "Old", "0.1.0", [])
         self.assertEqual(out, {"error": "version", "server_version": VERSION})
-        self.assertEqual(self.core.enqueue("coop", "X", VERSION).get("error"), "mode")
+        self.assertEqual(self.core.enqueue("coop", "X", VERSION, []).get("error"), "mode")
         self.assertEqual(self.core.status("nope"), {"state": "gone"})
 
     def test_cancel(self):

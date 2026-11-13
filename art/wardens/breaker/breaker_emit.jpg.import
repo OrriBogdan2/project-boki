@@ -3,11 +3,9 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c0u2q35bj2w53"
-path.s3tc="res://.godot/imported/breaker_emit.jpg-abe1b5bc2613a7373987bef9a9915e90.s3tc.ctex"
-path.etc2="res://.godot/imported/breaker_emit.jpg-abe1b5bc2613a7373987bef9a9915e90.etc2.ctex"
+path="res://.godot/imported/breaker_emit.jpg-abe1b5bc2613a7373987bef9a9915e90.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "f9e88b6f721a5da71d50a455b4d0bf1d"
@@ -16,11 +14,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/breaker/breaker_emit.jpg"
-dest_files=["res://.godot/imported/breaker_emit.jpg-abe1b5bc2613a7373987bef9a9915e90.s3tc.ctex", "res://.godot/imported/breaker_emit.jpg-abe1b5bc2613a7373987bef9a9915e90.etc2.ctex"]
+dest_files=["res://.godot/imported/breaker_emit.jpg-abe1b5bc2613a7373987bef9a9915e90.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
