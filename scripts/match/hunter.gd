@@ -1281,8 +1281,8 @@ func _draw_step(dt: float) -> void:
 func _loose() -> void:
 	var t := draw_t
 	draw_t = -1.0
-	if not can_fire() or ammo <= 0:
-		return
+	if not can_fire() or ammo <= 0 or t < float(wpn.get("draw_min", 0.0)):
+		return          # (let go inside draw_min it is a mashed click: no arrow, the next press draws afresh)
 	var stages: Array = wpn.get("draw", [])
 	var dmg := float(wpn.get("draw_early", 15.0)); var rng := float(wpn["range"]); var spd := float(wpn["speed"])
 	for stg in stages:

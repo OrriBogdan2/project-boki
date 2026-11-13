@@ -503,6 +503,7 @@ const GPU_HOST := {
 	"--breed-sim-check": ["res://tools/breed_sim_check.gd", "breed_sim_check", null],      # 500 random pairs bred
 	"--camera-follow-check": ["res://tools/camera_follow_check.gd", "camera_follow_check", "check"],      # dash trail
 	"--camera-follow-shots": ["res://tools/camera_follow_check.gd", "camera_follow_check", "shots"],  # GPU
+	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],      # mashing LMB never beats holding
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

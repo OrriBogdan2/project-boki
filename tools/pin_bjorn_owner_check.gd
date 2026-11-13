@@ -680,7 +680,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var loosed0 := K.draw.loosed_at
 	P.do_dash()
 	var rolling := P.roll_t > 0.0
-	for i in 3:
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
 	step(m, 0.8, _let_go.bind(P))
