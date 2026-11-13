@@ -73,14 +73,13 @@ func _mutations() -> void:
 func _thousand_eggs() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1112
-	var tiers: Dictionary = MysteryEgg.rules()["pool"]
 	var species := {}
 	var rares := 0
 	var mutated := 0
 	for i in EGGS:
 		var sp := MysteryEgg.roll_species(rng)
 		species[sp] = true
-		if tiers.get(sp, "") == "rare": rares += 1
+		if BokiModes.of(sp)["rarity"] == "very_rare": rares += 1
 		if not MysteryEgg.roll_mutations(rng).is_empty(): mutated += 1
 	var starter_mutated := 0
 	rng.seed = 1113
