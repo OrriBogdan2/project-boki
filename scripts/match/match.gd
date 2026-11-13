@@ -2582,7 +2582,7 @@ func _exit_tree() -> void:
 func on_perfect_dodge(h: Hunter) -> void:
 	fx.ring(h.pos, 1.3, Color("9af0ff"), 0.3)
 	fx.burst(h.pos + Vector3(0, 0.9, 0), Color("cff6ff"), 12, 3.5, 0.4)
-	sfx("dash", h.pos, -2.0, 1.4)
+	sfx("dodge", h.pos)
 	if h == player:
 		_slow(0.25, 0.4)
 		hud.toast("Perfect dodge!  Next shots crit", Color("9af0ff"))
