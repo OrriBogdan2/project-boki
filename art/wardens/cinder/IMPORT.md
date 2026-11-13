@@ -1,5 +1,9 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+the facekeep body `~/meshy/v95/Cinder/r2/ingame1112/cinder_v95_facekeep_body.glb`: body6 cand_B's shape on the cut `cinder_v95_body6_body` (every vertex matched) with the cand_A face3 face image. Was appeal4 cand_5 below. 13.7k tris, 2048 atlas + 2048 emit, 44 clips (pet/give/cheer gain sampled channels, same timing).
+Spec `art/wardens/src/cinder_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
+
 `cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads
@@ -70,3 +74,14 @@ the soles land at 2.2 and 4.6 m/s), then `glb_add_clips.py cinder.glb B.glb run_
 `glb_add_clips.py cinder.glb DIAG.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl` after (prefix match: run_b
 would replace run_bl). Her foot jets are scaled down in every loco clip; the recipe keys bone scale since this pass
 (the first pass's fl/br showed them full size). Judge: docs/art/wardens/dirloops/JUDGE.md.
+
+Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with cinder_clips.py on
+~/meshy/cinder_v2/stage_p2/cinder.blend (a control bake of `walk_f` matched this glb's to 4e-7) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
+On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
+command (rest poses equal to 2e-6); on the dir-all merge (ext/anim-dir-all-1112, 11-13) the re-key's run_f/b/l/r win over the
+second pass's run_b and run_fl/fr/bl (old-run diagonals, dropped from her run ring); the walk and crouch diagonals and
+the crouch b/l/r stay from dir-all. Every other clip, the garden set and `x_breath` are main's.
+
+v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
+texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
