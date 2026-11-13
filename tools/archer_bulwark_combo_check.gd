@@ -21,6 +21,8 @@ func run(main_node: Node) -> void:
 	launch.main = main_node
 	var bow = load("res://tools/pin_one_bow_check.gd").new()
 	bow.main = main_node
+	var aegis = load("res://tools/bjorn_aegis_input_check.gd").new()
+	aegis.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await HOLD.lace(self)
@@ -35,8 +37,9 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n + bow.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails
+		await aegis.bjorn()
+	n += ult.n + own.n + launch.n + tall.n + bow.n + aegis.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails + aegis.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
