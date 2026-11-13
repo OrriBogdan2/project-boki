@@ -54,6 +54,7 @@ const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood
 
 var m: Match
 var list: Array = []
+var wayseed_given := false     # a lair's pile holds a Wayseed at most once a run (GARDEN.md 10.3)
 var egg_pings: Array = []      # {pos, until, follow: Hunter or null, text}
 var _prev := {}                # hunter nid -> was interact held last tick
 var _told := {}
@@ -326,6 +327,11 @@ func interact_for(h: Hunter) -> Dictionary:
 	for L in list:
 		if L["state"] != "sealed":
 			continue
+		var wait := seat_wait(L)
+		var near: bool = h.flat_dist(L["dial"]) < DIAL_R \
+			or (L["runes"] as Array).any(func(rn): return h.flat_dist(rn["pos"]) < 1.7)
+		if wait != "" and near:
+			return {"kind": "lair", "what": "wait", "lair": L, "col": color_of(L), "label": wait}
 		if h.flat_dist(L["dial"]) < DIAL_R and absf(h.pos.y - float(L["dial"].y)) < 1.5 and (L["entry"] as Array).has("dial"):
 			var u = L["user"]
 			if is_same(u, h):
@@ -478,6 +484,8 @@ func _tick_dial(L: Dictionary, dt: float) -> void:
 			press(L, h)
 		return
 	# nobody on it: the first press from someone standing at the dial starts it
+	if seat_wait(L) != "":
+		return
 	for h in m.hunters:
 		if h.out or h.downed or h.extracted or h.dropping:
 			continue
@@ -491,6 +499,8 @@ func _pressed(h: Hunter) -> bool:
 # ------------------------------------------------------------------ opening, waking, clearing
 func open(L: Dictionary, by: Hunter, how: String) -> void:
 	if L["state"] != "sealed":
+		return
+	if m.exits and m.exits.seats and not m.exits.seats.lair_may_open(L, by, how):
 		return
 	L["state"] = "open"
 	L["user"] = null
@@ -511,6 +521,17 @@ func open(L: Dictionary, by: Hunter, how: String) -> void:
 		m.ping(L["gate_c"], color_of(L))
 		if m.player.flat_dist(L["c"]) < 60.0 and m.hud:
 			m.hud.toast("%s IS OPEN" % String(L["name"]).to_upper(), color_of(L))
+
+
+## Why the Sealed Lair's gate can't be worked now ("" for any other lair, or when it can): QuestSeats.
+func seat_wait(L: Dictionary) -> String:
+	return m.exits.seats.lair_wait(L) if m.exits and m.exits.seats else ""
+
+
+## A lair's alert holds while its seal does, and a few seconds after.
+func alert_on(L: Dictionary) -> bool:
+	return String(L.get("alert", "")) != "" and (L.get("locked", false) or m.time - float(L.get("unlock_at", -99.0)) < 8.0)
+
 
 # ------------------------------------------------------------------ every tick
 func tick(dt: float) -> void:

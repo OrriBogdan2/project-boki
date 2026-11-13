@@ -42,182 +42,79 @@ Meeko's R (Hearth Call) is exempt: it needs a downed or under-35% squadmate, whi
 - **Lace's wall pin:** needs a wall within 3 m behind the foe along the shot; the flat island has none. Waiting for a wall behind the foe cut the shots without raising the pins, so it was dropped.
 - Hit tags: the check asserts LMB hits and the all-hits count; RMB, E and R hits are shown but not asserted, because kits tag them with their own words.
 
-## Counts per Hunter (default seed 7)
+- **Kael** (`juggernaut_kit.gd`): the Lunge hold is `full_t + 0.07 s`, inside the 0.15 s perfect window, instead of a charge that never reached it (1 perfect of 14 holds became 5 of 6); a hooked Warchain is reeled in from 2 m (was 3.5 m, and only 80% of the time).
+- **Mossy** (`bulwark_kit.gd`): the thrown hammer is recalled from the ground after 0.8 s (it used to stay out and block every other LMB); throws at a foe 3.6 m or more away; holds the Aegis 1.2 s up close so the Shift press is a Shield Charge (80% when the aegis is up); presses the ultimate at 4 to 13 m.
+- **Neve** (`rimewright_kit.gd`): the bot schedules the freeze 0.15 to 0.45 s into the wall's slide (its decision tick, 0.9 to 2.2 s, never landed inside the slide of 1 s or less).
+- **Lace** (`archer_kit.gd`): presses the ultimate at 4 to 14 m.
+- Unchanged and already fine: Tenzo's Rock Hop recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
 
-### Vex (`gunslinger`)
+## Ultimate and Boki in a match
 
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 36 s | 202 |
-| RMB | 7 presses, 0 held to the kit's hold threshold | 1 |
-| E | 6 casts | 5 |
-| R | 2 casts | |
-| Dash | 1 presses | |
-| Glide | 33 opened | |
-| Fuse | 5 merges | |
+The duels above count presses; they don't say whether a bot fires its ultimate when it matters or brings its Boki to a fight. `--bot-kit-use --kit-use-match` (tools/bot_ult_use.gd) plays **one seeded 10-trio match per seed (3 and 5, 300 s each, bot difficulty "medium", every Hunter a bot)** with every Hunter raised to level 6 at the start, so the ultimate is open from the first fight. It takes about 3.5 minutes a seed.
 
-All hits landed: 221.
+Run: `godot --headless --path . -- --bot-kit-use --kit-use-match [--kit-use-t=300] [--kit-use-seeds=3,5] [--kit-use-diff=medium]` (with a temp `XDG_DATA_HOME`).
 
-### Kael (`juggernaut`)
+**What counts.** A *fight* is a bot targeting a rival Hunter within 12 m; it ends 3 s after that stops, and it is *real* once the two traded 2 hits. The ult is *ready and useful* while it is off cooldown, the rival is in sight and inside the ult's own reach (its data's range, reach, length or radius, 4 to 10 m). A *wait* is one stretch of ready-and-useful time; it is *on time* when it ends in a cast within 3 s, *late* when it runs past 3 s (cast or not); a wait the fight closes sooner is neither. A cast in a fight *lands* when the caster hits a rival Hunter while the ult runs or 3 s after (a trail or a well keeps hurting; any hit in that span: a long ult such as Lace's arrows counts its own shots). A cast *into nothing* has no foe or rival Hunter within 15 m. *Boki sends* are throws off the shoulder (`kin_thrown`); the Boki is *out* in a fight when it is ever off the shoulder in it (beside the bot, flying in, or merged), counted over the fights where it could be (not downed, reviving, resting, benched or dead).
 
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 81 s | 163 |
-| RMB | 55 presses, 4 held to the kit's hold threshold | 55 |
-| E | 9 casts | 7 |
-| R | 9 casts | |
-| Dash | 19 presses | |
-| Glide | 14 opened | |
-| Fuse | 8 merges | |
-| Special | lunge perfect 4, chain reel 3 | |
+**Targets** (the check fails a Hunter that misses one; Hunters with under 20 s of ready time are listed, not judged):
 
-All hits landed: 274.
+| Target | Value |
+|---|---|
+| Ready useful ult cast within 3 s | 60% or more of on-time + late waits |
+| Casts in a fight that land | 50% or more (from 4 casts) |
+| Casts into nothing | none |
+| Real fights with the Boki out | 80% or more (from 5 fights) |
 
-### Lace (`archer`)
+Meeko's Hearth Call heals a teammate below 35% (or downed), so its ready time against a rival is not judged; its row is shown.
 
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 51 s | 46 |
-| RMB | 11 presses, 7 held to the kit's hold threshold | 4 |
-| E | 8 casts | 28 |
-| R | 3 casts | |
-| Dash | 10 presses | |
-| Glide | 34 opened | |
-| Fuse | 8 merges | |
-| Special | full draw 6 | |
+Columns: fights (real), casts, casts in a fight, casts per minute of ready-and-useful time, landed (share of casts in a fight), into nothing, mean wait (s), on time, fights the ult sat ready 3 s or more with no cast, Boki sends, fights with the Boki out / fights it could be.
 
-All hits landed: 87.
+### Before (origin/main 53e2fe7f3)
 
-### Cinder (`ashwick`)
+| Hunter | Fights | Casts | In a fight | Per ready min | Landed | Into nothing | Mean wait s | On time | Ult left | Boki sends | Boki out |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Lace (`archer`) | 5 | 5 | 2 | 7.3 | 1 (50%) | 0 | 4.1 | 50% | 0 | 0 | 5/5 (100%) |
+| Kael (`juggernaut`) | 12 | 15 | 9 | 38.0 | 5 (55%) | 0 | 0.6 | 100% | 0 | 8 | 10/10 (100%) |
+| Vex (`gunslinger`) | 11 | 5 | 4 | 6.8 | 4 (100%) | 0 | 2.4 | 57% | 4 | 2 | 10/11 (90%) |
+| Albert (`bulwark`) | 24 | 17 | 8 | 3.6 | 7 (87%) | 0 | 2.6 | 23% | 6 | 13 | 22/22 (100%) |
+| Cinder (`ashwick`) | 8 | 11 | 5 | 50.4 | 3 (60%) | 0 | 0.7 | 100% | 0 | 7 | 7/7 (100%) |
+| Meeko (`tender`) | 8 | 1 | 1 | 0.7 | 0 (0%) | 0 | 1.9 | 8% | 5 | 2 | 7/7 (100%) |
+| Tenzo (`dolm`) | 9 | 2 | 2 | 1.4 | 2 (100%) | 0 | 2.4 | 10% | 6 | 5 | 8/8 (100%) |
+| Grimble (`dredge`) | 10 | 14 | 6 | 9.2 | 5 (83%) | 0 | 1.3 | 60% | 2 | 5 | 9/10 (90%) |
+| Neve (`rimewright`) | 3 | 2 | 2 | 18.4 | 1 (50%) | 0 | 1.1 | 100% | 1 | 3 | 3/3 (100%) |
+| Sparkle (`mage`) | 6 | 4 | 3 | 12.5 | 2 (66%) | 0 | 2.4 | 66% | 0 | 1 | 5/5 (100%) |
+| Sable (`thief`) | 5 | 6 | 5 | 18.3 | 5 (100%) | 0 | 0.8 | 80% | 0 | 6 | 5/5 (100%) |
+| Motley (`ostra`) | 14 | 5 | 4 | 1.9 | 3 (75%) | 0 | 2.8 | 23% | 5 | 12 | 11/11 (100%) |
+| Gil (`gil`) | 10 | 5 | 2 | 19.1 | 1 (50%) | 0 | 0.9 | 50% | 0 | 1 | 8/9 (88%) |
 
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 89 s | 166 |
-| RMB | 21 presses, 11 held to the kit's hold threshold | 10 |
-| E | 9 casts | 0 |
-| R | 6 casts | |
-| Dash | 3 presses | |
-| Glide | 10 opened | |
-| Fuse | 7 merges | |
-| Special | cloak pull 11 | |
+Misses: below gunslinger: 57% of ready ults cast within 3 s (target 60%); FAIL bulwark: 23% of ready ults cast within 3 s; FAIL dolm: 10% of ready ults cast within 3 s; FAIL ostra: 23% of ready ults cast within 3 s. Tenzo cast 2 ults in 9 fights and left a ready one unused in 6; Motley and Albert sat on a ready ult for 2.6 to 2.8 s on average. The Boki was already out in nearly every real fight (90 to 100%), so the Boki brain is unchanged.
 
-All hits landed: 195.
+### After
 
-### Meeko (`tender`)
+| Hunter | Fights | Casts | In a fight | Per ready min | Landed | Into nothing | Mean wait s | On time | Ult left | Boki sends | Boki out |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Lace (`archer`) | 6 | 2 | 1 | 10.3 | 1 (100%) | 0 | 1.0 | 50% | 1 | 1 | 5/5 (100%) |
+| Kael (`juggernaut`) | 10 | 10 | 8 | 75.0 | 7 (87%) | 0 | 0.5 | 100% | 0 | 2 | 8/8 (100%) |
+| Vex (`gunslinger`) | 14 | 12 | 12 | 26.8 | 10 (83%) | 0 | 1.2 | 83% | 1 | 8 | 12/12 (100%) |
+| Albert (`bulwark`) | 24 | 32 | 19 | 40.3 | 14 (73%) | 0 | 0.9 | 94% | 1 | 21 | 23/23 (100%) |
+| Cinder (`ashwick`) | 9 | 10 | 6 | 37.6 | 5 (83%) | 0 | 1.0 | 100% | 0 | 4 | 8/8 (100%) |
+| Meeko (`tender`) | 7 | 1 | 1 | 1.2 | 0 (0%) | 0 | 2.1 | 0% | 5 | 5 | 6/6 (100%) |
+| Tenzo (`dolm`) | 25 | 18 | 14 | 33.8 | 14 (100%) | 0 | 0.7 | 100% | 0 | 5 | 18/18 (100%) |
+| Grimble (`dredge`) | 10 | 9 | 7 | 22.1 | 4 (57%) | 0 | 0.7 | 100% | 0 | 1 | 9/9 (100%) |
+| Neve (`rimewright`) | 3 | 2 | 2 | 19.5 | 2 (100%) | 0 | 0.7 | 100% | 0 | 3 | 2/2 (100%) |
+| Sparkle (`mage`) | 7 | 4 | 4 | 36.0 | 2 (50%) | 0 | 1.1 | 100% | 0 | 5 | 6/6 (100%) |
+| Sable (`thief`) | 6 | 6 | 4 | 15.2 | 4 (100%) | 0 | 0.8 | 80% | 0 | 6 | 5/5 (100%) |
+| Motley (`ostra`) | 16 | 13 | 4 | 58.8 | 4 (100%) | 0 | 0.7 | 100% | 0 | 7 | 14/14 (100%) |
+| Gil (`gil`) | 5 | 4 | 1 | 67.9 | 1 (100%) | 0 | 0.9 | 100% | 0 | 1 | 5/5 (100%) |
 
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 75 s | 130 |
-| RMB | 22 presses, 0 held to the kit's hold threshold | 11 |
-| E | 12 casts | 0 |
-| R | 1 casts | |
-| Dash | 4 presses | |
-| Glide | 17 opened | |
-| Fuse | 6 merges | |
-| Special | hearth toss 3 | |
+No failures. Runs differ (the bots roll unseeded random numbers), so a row can move 20 points between runs; across five runs while tuning, every Hunter stayed above the floors except one 42% landed row (Neve, 3 of 7) and one 66% Boki row (Kael, 6 of 9), which is why the check fails only under the floor (on time 50%, landed 35%, Boki 70%) and marks "below" between floor and target.
 
-All hits landed: 155.
+### What changed (bot code only; no kit numbers, no Net or save change)
 
-### Neve (`rimewright`)
-
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 67 s | 254 |
-| RMB | 21 presses, 11 held to the kit's hold threshold | 9 |
-| E | 8 casts | 0 |
-| R | 2 casts | |
-| Dash | 8 presses | |
-| Glide | 16 opened | |
-| Fuse | 12 merges | |
-| Special | skate 5, rink freeze 3 | |
-
-All hits landed: 312.
-
-### Tenzo (`dolm`)
-
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 59 s | 55 |
-| RMB | 12 presses, 3 held to the kit's hold threshold | 0 |
-| E | 3 casts | 0 |
-| R | 4 casts | |
-| Dash | 15 presses | |
-| Glide | 28 opened | |
-| Fuse | 6 merges | |
-| Special | hop recast 4 | |
-
-All hits landed: 124.
-
-### Motley (`ostra`)
-
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 101 s | 180 |
-| RMB | 16 presses, 0 held to the kit's hold threshold | 0 |
-| E | 10 casts | 0 |
-| R | 1 casts | |
-| Dash | 8 presses | |
-| Glide | 7 opened | |
-| Fuse | 8 merges | |
-| Special | brimseed pop 9, lantern swap 2 | |
-
-All hits landed: 234.
-
-### Sparkle (`mage`)
-
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 75 s | 104 |
-| RMB | 13 presses, 2 held to the kit's hold threshold | 9 |
-| E | 11 casts | 2 |
-| R | 4 casts | |
-| Dash | 22 presses | |
-| Glide | 27 opened | |
-| Fuse | 8 merges | |
-| Special | kitefall foes 5 | |
-
-All hits landed: 155.
-
-### Grimble (`dredge`)
-
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 45 s | 371 |
-| RMB | 7 presses, 0 held to the kit's hold threshold | 6 |
-| E | 8 casts | 3 |
-| R | 3 casts | |
-| Dash | 4 presses | |
-| Glide | 35 opened | |
-| Fuse | 5 merges | |
-
-All hits landed: 400.
-
-### Sable (`thief`)
-
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 61 s | 78 |
-| RMB | 19 presses, 0 held to the kit's hold threshold | 6 |
-| E | 7 casts | 3 |
-| R | 4 casts | |
-| Dash | 23 presses | |
-| Glide | 28 opened | |
-| Fuse | 8 merges | |
-| Special | knife blink 6 | |
-
-All hits landed: 108.
-
-### Mossy (`bulwark`)
-
-| Slot | Bot did (90 s, two bots) | Hits |
-|---|---|---|
-| LMB | fired 53 s | 16 |
-| RMB | 46 presses, 42 held to the kit's hold threshold | 0 |
-| E | 7 casts | 0 |
-| R | 4 casts | |
-| Dash | 23 presses | |
-| Glide | 35 opened | |
-| Fuse | 6 merges | |
-| Special | hammer throw 8, hammer recall 3, shield charge 5, shield slam 0 | |
-
-All hits landed: 26.
+- **Every bot** (`bot.gd`): after an ability look, a bot whose ult is ready while it fights a Hunter looks again in 0.3 s instead of 0.4 to 2.8 s. Only bots with `abil` 0.5 or more (medium and up): **easy bots, the tutorial's, keep their pace**, and `Data.BOT_DIFF` is untouched.
+- **Tenzo** (`dolm_kit.gd`) and **Motley** (`ostra_kit.gd`): no 10% dice on top of the conditions (a ready ult waited about 10 looks); Motley aims the Nightwell half a tell ahead of where the rival walks.
+- **Vex** (`gunslinger_kit.gd`) and **Sparkle** (`mage_kit.gd`): no 35% dice on top of the conditions.
+- **Gil** (`gil_kit.gd`): aims the Tidal Wave at the rival (it rolled along whatever the bot was facing).
+- **Albert** (`bulwark_kit.gd`): the Faultline before the E and from 1.5 m (its lane starts at his feet; a rival closer than 4 m never got one).
+- **Grimble** (`dredge_kit.gd`): the Broadside from 0.8 of its range (4.7 m) instead of 3.5 m.
+- Meeko's Hearth Call is unchanged (it waits for a hurt teammate); Lace, Kael, Cinder, Neve, Sable were already on time.

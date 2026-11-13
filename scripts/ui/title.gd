@@ -44,7 +44,7 @@ const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
-const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
+const WEAPONS := {"thief": "arc_bolts", "gil": "swordfish", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
 	DemoQuick.restore()                 # back from a quick start: the real save again
@@ -493,6 +493,8 @@ func _build_ui() -> void:
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if OnlineSession.configured():
 		items.append(["Play online", func(): Game.goto("online", {}), "bond"])
+	if has:
+		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])

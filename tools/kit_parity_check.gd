@@ -5,13 +5,16 @@ extends RefCounted
 
 var bad := 0
 
-## The number at a dotted path ("rmb.slam.dmg", "smash_dmg.1") in a dictionary, or NAN when it is missing.
-func _num(root: Variant, path: String) -> float:
-	var cur: Variant = root
-	for key in path.split("."):
-		if cur is Dictionary and (cur as Dictionary).has(key): cur = cur[key]
-		elif cur is Array and key.is_valid_int() and int(key) < (cur as Array).size(): cur = cur[int(key)]
-		else: return NAN
+## The number at a dotted path ("rmb.slam.dmg") in a hero's JSON, or NAN when it is missing.
+func _num(hero: Dictionary, path: String) -> float:
+	var cur: Variant = hero
+	for key in path.split("."):         # a number key indexes an array (rank_dmg.sec.2: rank 3)
+		if cur is Array and key.is_valid_int() and int(key) < (cur as Array).size():
+			cur = cur[int(key)]
+		elif cur is Dictionary and (cur as Dictionary).has(key):
+			cur = cur[key]
+		else:
+			return NAN
 	if cur is bool: return 1.0 if cur else 0.0
 	return float(cur) if (cur is float or cur is int) else NAN
 

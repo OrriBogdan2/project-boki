@@ -8,15 +8,15 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 13
+const VERSION := 14
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11", 11: "_migrate_11_to_12",
-		12: "_migrate_12_to_13"}
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -74,17 +74,18 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
-		"tools": ["axe", "pickaxe"],   # a new farm starts with both (HomeGather); the Market sells them to older saves
+		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
+		"game_board": {},     # garden minigame results (MinigameHub); older saves start empty
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {},
+		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -140,6 +141,7 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"traits": tr,
 		"trust": 35.0,
 		"memory": [],
+		"bonds": {},          # uid -> -1..1, friends and rivals on the base (BaseLife)
 		"matches": 0, "wins": 0, "kos": 0,
 		"born": int(Time.get_unix_time_from_system()),
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
@@ -294,13 +296,30 @@ func _migrate_9_to_10(data: Dictionary) -> void:
 func _migrate_10_to_11(data: Dictionary) -> void:
 	HouseSave.migrate(data)
 
-## v11 -> v12: evolution by species (Evo, docs/decisions/0024). Levels and forms are kept, levels
-## stop at the cap, and each Boki keeps its old form name.
+## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
+## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
+## rec["bonds"] = {}). One chain for both lines (docs/decisions/0060-garden-save-chain.md): each step only
+## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load.
 func _migrate_11_to_12(data: Dictionary) -> void:
 	Evo.migrate(data)
+	for r in data.get("roster", []):
+		if not r.has("bonds"):
+			r["bonds"] = {}
 
-## v12 -> v13: the cut tutorials' steps are one-time hints; a save past a tutorial has had them (FirstTimeHint).
+## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
+## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
+## other half of v12 first (every step only adds what is missing).
 func _migrate_12_to_13(data: Dictionary) -> void:
+	_migrate_11_to_12(data)
+	GardenZones.migrate(data)
+	for r in data.get("roster", []):
+		Care.ensure(r)
+
+## v13 -> v14: one chain for both v13s (docs/decisions/0060): the garden line's v13 above and the
+## 0.28 integ line's v13 (the cut tutorials' steps are one-time hints; a save past a tutorial has had them,
+## FirstTimeHint). Each half only adds what is missing, so either v13 gets the other half.
+func _migrate_13_to_14(data: Dictionary) -> void:
+	_migrate_12_to_13(data)
 	FirstTimeHint.migrate(data)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
@@ -450,6 +469,8 @@ func load_from(p: String) -> void:
 			return
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
+	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
+	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]

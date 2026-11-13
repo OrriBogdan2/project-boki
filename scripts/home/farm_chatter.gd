@@ -2,9 +2,9 @@ class_name FarmChatter
 extends RefCounted
 ## Boki at home talk about what's going on around them (BokiLines triggers): a crop ready or just
 ## watered beside them, the job they're doing or the building going up, rain (or rain coming, for a
-## kind that senses it), night, what they need, a friend close by (the friend answers), and news (a new
-## Boki, you back with loot: ComeLook). Every few seconds one Boki near you may speak up; Home._say keeps
-## it to one voice at a time and BokiLines to a cooldown each.
+## kind that senses it), night, what they need, a friend close by (the friend answers), and news (a
+## new Boki, you back with loot: ComeLook). Every few seconds one Boki near you may speak up; Home._say
+## keeps it to one voice at a time and BokiLines to a cooldown each.
 
 const LOOK_S := 2.5          # s between looks for something to talk about
 const SPEAK_CHANCE := 0.4    # share of looks where a Boki speaks up

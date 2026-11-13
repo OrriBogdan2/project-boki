@@ -145,22 +145,22 @@ func _hit(e: Ent, arrow: Dictionary) -> void:
 		k.m.later(0.05, func(): if is_instance_valid(foe): HeroUlt.landed(k, foe))
 	var big := bool(arrow["last"])
 	k.vfx("ult_hit", e.pos, h.dir_to(e), {"last": big})
-	if big and e is Hunter:
-		var foe := e as Hunter
-		k.m.later(0.03, func(): _execute(foe))
+	if big and (e is Hunter or (e is Kin and BokiHit.executes())):
+		k.m.later(0.03, func(): _execute(e))
 
-## The last arrow finishes a hunter it left under the execute share of their health.
-func _execute(foe: Hunter) -> void:
-	if not is_instance_valid(foe) or foe.dead or foe.downed or foe.out:
+## The last arrow finishes a hunter (or a Boki, BokiHit) it left under the execute share of their health.
+func _execute(foe: Ent) -> void:
+	if not is_instance_valid(foe) or not foe.hittable() or (foe is Hunter and (foe as Hunter).downed):
 		return
 	if foe.hp > foe.max_hp * float(xd().get("execute", 0.12)):
 		return
 	executes += 1
 	var opts := {"src": "abil", "ab": "ultimate", "tags": ["ultimate", "execute"], "payoff": true}
-	foe.hurt(foe.hp * 4.0 + foe.armor * 4.0, h, opts)
+	var armor := (foe as Hunter).armor if foe is Hunter else 0.0
+	foe.hurt(foe.hp * 4.0 + armor * 4.0, h, opts)
 	HeroUlt.landed(k, foe)
 	k.m.fx.own_look = true
-	k.payoff_fx(foe.pos, "EXECUTED", GOLD, "pay_deadeye", h.dir_to(foe), foe)
+	k.payoff_fx(foe.pos, GOLD, "pay_deadeye", h.dir_to(foe), foe)
 	k.m.fx.own_look = false
 
 ## The tells everyone sees: three pips over her head (one per shot left) and a glow on the bow.

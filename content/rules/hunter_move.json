@@ -40,6 +40,7 @@
 	"bulwark": {"speed": 4.85, "accel": 47.0},
 	"dredge": {"speed": 4.65, "accel": 47.0},
 	"thief": {"speed": 4.65, "accel": 54.0},
+	"gil": {"speed": 4.6, "accel": 52.0},
 	"mage": {"speed": 4.65, "accel": 54.0},
 	"dolm": {"speed": 4.65, "accel": 50.0},
 	"ostra": {"speed": 4.65, "accel": 54.0},

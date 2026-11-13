@@ -28,10 +28,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--ability-check` | Gloves, weapon utilities, Boki abilities and dashes do what they say (drags, walls, reflects, parries, knock-ups, tethers, roots, swaps, pierces...), every ability runs without errors, and rank 3 is stronger and faster than rank 1 |
 | `--archetype-check` | Every class kit in a flat arena: each dash, passive and resource, RMB variants, E, R (locked until level 6), the bonded R, controls, weapon locks, Boki infusion, feel |
 | `--kit-combo-check` | The cross-ability interactions (E + RMB chains, resets, refunds); also runs inside `--archetype-check` |
-| `--arena-check` | The Training Grounds boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the Practice Wing works |
-| `--hunter-parity-check` | Every Hunter in the Training Grounds (started as them, or swapped in place from another, with no save, a fresh one, and after the title screen) is the one a real match builds: model file, kit script, node tree, bone scales, and every mesh surface's shader, uniforms, visibility range and shadow setting |
-| `--training-area-shots [--shots-dir=<dir>]` (GPU, not in the suite) | Screenshots of every Hunter in the Training Grounds, front and back, as the title screen opens it (default `user://training_area_shots`) |
-| `--dummy-move-shots [--shots-dir=<dir>]` (GPU, not in the suite) | Frames of the Training Grounds station dummy strafing, then dodging, for a clip (default `user://dummy_move_shots`) |
+| `--arena-check` | The Arena boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the training area works |
 | `--hunter-unlock-check` (alias `--class-unlock-check`) | Hunter unlocks and mastery: Vex as the one starter and the second Relic (Kael, Cinder or Meeko) after the first expedition (offered by Hob: `--hob-check`), no Relic pick before the egg, challenge-only Hunters never offered, each Hunter's challenge (tier, target, measurable stat) making it ready and hold to unlock opening it (a partial hold cancels, the reveal plays), mastery goals counted per Hunter with cosmetic-only rewards (no stat or ability anywhere in the progression data), glider skins changing no handling, the feats HunterFeats records, save migration keeping every Hunter a save had unlocked or played, the viewer showing every ability as a clip of it working (keys from the bindings, one short line each, no story or gender text), the glider pick, locked Hunters playable in the Arena (its Training dummy) and practice picker |
 | `--recast-cue-check` | Every two-step ability reports its open recast (slot, time left, world spot) to the shared RecastCue; an unused window shows EXPIRED, an early press is buffered, foe marks/stacks/Daze reach the badges |
 | `--weapon-check[=<id>]` | Every weapon against a standing target at a few ranges (taps and charges), printing the DPS it really lands |
@@ -40,20 +37,19 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--balloon-check` | The hit marker is the real hitbox, for every class, below a lip, gliding and mid-hop |
 | `--hold-check` | Hold animations keep their pose while refreshed, let go cleanly, and survive the network snapshot |
 | `--move-feel-check` | Movement, jump, glide, feathering, drop and camera timings match `docs/MOVEMENT_FEEL.md` |
-| `--fsm-check` | Every explicit state machine (`Fsm`) built from its table: names match the enum, every target a state, no self-edges, all reachable; guards, reasons and the log work |
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
-| `--train-check` | Riding the sky train (moving with the car, walking off its side) and being hit by its front |
-| `--train-ride-check` | Leaving a moving car (jump, dash off the back, walk off the side, glider) keeps its speed with normal air drag; a glide landing on one has no jolt |
+| `--train-map-check` | The sky train on the maps: one halt icon per stop, the marker at the engine's arc position, the countdown to a halt, the minimap's range rule |
+| `--train-check` | Riding the sky train (moving with the car, its edges hold you) and being hit by its front; a beacon at every halt, the pier glow following the stop state (off on Low), the headlight trail only while it moves |
 | `--perch-check` | Each perch can be reached from its updraft chain |
 | `--mapcheck` | Generated maps: every island reachable from every other (200 small, 40 big) |
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
 | `--biome-check` | An expedition on the authored map: what each biome spawned, rarities and hazards, then a minute of play |
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
-| `--extract-check` | Every way out: skiff (waves, rival boarding), rift hatch (keys, losing and looting a key), uplink (stalls, completes, the lift), and the extraction widget's states and safe area |
+| `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
@@ -79,7 +75,6 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--mask-moment-check` | The put-on Mask moment (item 83, `MaskBeat`): every Hunter has a whisper and a sting key, the sounds exist, 4-6 s with 0.6-0.8 s of black; build-up camera, the Mask rising with the ghost face, black and silence on contact with the Hunter swapped in behind it, a memory frame and the whisper, the snap back with a ripple, the name and title, the scene camera back; skippable once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |
-| `--input-latency-check` | Press to first motion or shot: LMB, RMB, E, dash and jump for every Hunter through the real input path; the first tick the velocity, the animation state or a projectile changes must be the press's own tick or the next, unless a sourced wind-up applies. Table in docs/MOVEMENT_FEEL.md (`=<id>,<id>` for some Hunters) |
 | `--home-build-check` | Build mode: placing, turning, moving, storing, refusing bad spots, save and reload, migration, expanding |
 | `--pack-ui-check` | The backpack windows take real mouse clicks |
 | `--title-check` | The title screen builds with the right menu, tagline, key art and frame budget |

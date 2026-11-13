@@ -18,7 +18,7 @@ const NO_SEAT := ["palm"]
 ## Each Hunter's keyed-move name prefix.
 const PREFIX := {"bulwark": "bul_", "archer": "arc_", "gunslinger": "gunslinger_", "mage": "mage_", "thief": "thf_",
 	"dolm": "breah_", "ostra": "ostra_", "rimewright": "tm_", "ashwick": "as_", "juggernaut": "jug", "dredge": "dr_",
-	"tender": "mm_"}
+	"tender": "mm_", "gil": ""}      # (Gil has no keyed moves yet: his rig plays the generic poses)
 const MOVE_TABLES := [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
 	KMovesCare.MOVES, KMovesPair.MOVES]
 
@@ -39,7 +39,7 @@ func run(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
 	var ids := Arch.ids()
-	ok(ids.size() == 12, "12 Hunters (%d)" % ids.size())
+	ok(ids.size() == 13, "13 Hunters (%d)" % ids.size())
 	for id in ids:
 		_hunter(String(id))
 	print("RIG_STANDARD_DONE, failures: ", bad)
@@ -135,6 +135,8 @@ func _states(id: String, m: Node3D) -> void:
 
 func _moves(id: String) -> Array:
 	var out: Array = []
+	if PREFIX[id] == "":
+		return out
 	for t in MOVE_TABLES:
 		for mv in t:
 			if String(mv).begins_with(PREFIX[id]):

@@ -14,12 +14,12 @@ const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"dome": 8}
+	"ring": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7, "petal": 8}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"dome": 2, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6, "petal": 4}
+	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6, "petal": 4}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32,
 	"petal": 24}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
@@ -324,7 +324,7 @@ func _surface_node(kind: String) -> Node3D:
 			strip.size = Vector2.ONE
 			strip.center_offset = Vector3(0.5, 0, 0)          # from the origin along +X: A at 0, B at 1
 			mi.mesh = strip
-		"vortex":
+		"vortex", "ring":
 			var disc := PlaneMesh.new()
 			disc.size = Vector2.ONE
 			mi.mesh = disc
@@ -480,7 +480,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 		"flare":
 			s0 = Vector3.ONE * extent
 			s1 = s0 * float(layer.get("grow", 1.2))
-		"vortex":
+		"vortex", "ring":
 			s0 = Vector3(extent * 2.0, 1.0, extent * 2.0)
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT

@@ -1,18 +1,22 @@
 class_name HobOffer
 extends RefCounted
-## Hob's second-Mask offer (HobTalk shows it over the talk box): exactly the three Masks of the second pick
-## (ClassUnlock.second_picks: Kael, Meeko, Cinder) side by side, each with its portrait, name and title and a
-## plain one-line role, and under them a loop of the Mask in focus on the training dummy: its attack, its
-## signature ability ("signature" in the rules) and its dash, one clip after the other (only one plays: the
-## cards are painted portraits, so the pick never stalls). Hover or click a card to look at it; "Take" picks it,
-## ClassUnlock.choose_second opens it, and HobTalk plays the short Mask moment. "Try" on a card goes to the
-## Training Grounds as that Hunter for a minute and comes back to this card (TryRelic). "Not now" lets it wait.
+## A pick of Relics: Hob's second-Relic offer (HobTalk shows it over the talk box: the second pick still to make,
+## Kael, Cinder and Meeko minus one already taken) and the first-Relic pick (Hatch: Lace, Kael or Vex), side by
+## side, each with its portrait, name and title and a one-line role, and under them a loop of the Mask in focus
+## (its attack, its preview ability and its dash, one clip after the other; only one plays: the cards are
+## painted portraits, so the pick never stalls). Hover or click a card to look at it; "Take" picks it,
+## `choose` opens it (ClassUnlock.choose_second or choose_starters) and `done` carries on (HobTalk plays the short
+## Mask moment). "Not now" lets it wait, when there is a `later` to call (the first pick has none).
 
 const CARD_W := 230.0          # px
 const FACE_PX := 110.0
 const CLIP := Vector2(300, 130)      # px: the focused Mask's ability clip
 
-var chat: HobTalk
+var rules: Dictionary          # the farm builder's "talk" lines (title, roles, button text)
+var title_key: String
+var choose: Callable           # (id) -> bool: makes the pick
+var done: Callable             # (id): the pick was made
+var later: Callable            # () : "Not now" (invalid: no such button)
 var ids: Array = []
 var focus_i := 0
 var cards: Array = []          # PanelContainer per id
@@ -23,15 +27,20 @@ var turn: Timer                # one loop long: moves the reel on
 var take_button: Button
 var root: Control
 
-func _init(talk: HobTalk) -> void:
-	chat = talk
-	ids = ClassUnlock.second_picks()
+func _init(offer_ids: Array, talk_rules: Dictionary, title: String, make_pick: Callable, on_done: Callable,
+		on_later := Callable()) -> void:
+	ids = offer_ids
+	rules = talk_rules
+	title_key = title
+	choose = make_pick
+	done = on_done
+	later = on_later
 
 ## The pick: the three cards, the focused Mask's clip, Take and Not now.
 func build() -> Control:
 	var v := UI.vbox(12)
 	v.set_meta("mask_offer", true)
-	var head := UI.title(String(chat.rules()["offer_title"]), 26, UI.INK)
+	var head := UI.title(String(rules[title_key]), 26, UI.INK)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)
 	var row := UI.hbox(14)
@@ -46,7 +55,8 @@ func build() -> Control:
 	v.add_child(preview)
 	var btns := UI.hbox(12)
 	btns.alignment = BoxContainer.ALIGNMENT_CENTER
-	btns.add_child(UI.ghost(String(chat.rules()["offer_later"]), chat.later, 160))
+	if later.is_valid():
+		btns.add_child(UI.ghost(String(rules["offer_later"]), later, 160))
 	take_button = UI.primary("", func(): pick(String(ids[focus_i])), 260)
 	btns.add_child(take_button)
 	v.add_child(btns)
@@ -79,12 +89,12 @@ func _card(id: String, i: int) -> PanelContainer:
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nm.custom_minimum_size.x = CARD_W - 24.0
 	v.add_child(nm)
-	var role := UI.para(String((chat.rules()["roles"] as Dictionary).get(id, "")), UI.T_SMALL, UI.MUTED)
+	var role := UI.para(String((rules["roles"] as Dictionary).get(id, "")), UI.T_SMALL, UI.MUTED)
 	role.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	role.custom_minimum_size.x = CARD_W - 24.0
 	role.set_meta("mask_role", id)
 	v.add_child(role)
-	var try_button := UI.ghost(String(chat.rules()["offer_try"]), func(): TryRelic.start(id), 110)
+	var try_button := UI.ghost(String(rules["offer_try"]), func(): TryRelic.start(id), 110)
 	try_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	try_button.set_meta("mask_try", id)
 	v.add_child(try_button)
@@ -103,7 +113,7 @@ func focus(i: int) -> void:
 	for c in preview.get_children():
 		c.queue_free()
 	reel.clear()
-	for slot in ["lmb", String((chat.rules()["signature"] as Dictionary).get(id, "rmb")), "dash"]:
+	for slot in ["lmb", preview_slot(id), "dash"]:
 		var clip := AbilityClip.make(id, slot, CLIP)
 		preview.add_child(clip)
 		reel.append(clip)
@@ -113,7 +123,7 @@ func focus(i: int) -> void:
 	turn.timeout.connect(func(): show_clip(reel_i + 1))
 	preview.add_child(turn)
 	show_clip(0)
-	take_button.text = String(chat.rules()["offer_take"]).replace("{name}", HeroTitle.base_name(id))
+	take_button.text = String(rules["offer_take"]).replace("{name}", HeroTitle.base_name(id))
 
 ## Shows the k-th clip of the reel from its start; the others wait (a clip not built yet keeps building).
 func show_clip(k: int) -> void:
@@ -127,9 +137,14 @@ func show_clip(k: int) -> void:
 	if turn.is_inside_tree():
 		turn.start()
 
-## Takes this Mask (once; anything not on offer is refused).
+## The ability a Mask's preview shows: the first of its "clip" block's "preview", else its attack.
+static func preview_slot(hunter_id: String) -> String:
+	var own: Array = (Arch.def(hunter_id).get("clip", {}) as Dictionary).get("preview", [])
+	return String(own[0]) if not own.is_empty() else "lmb"
+
+## Takes this Relic (once; anything not on offer is refused).
 func pick(id: String) -> void:
-	if not ClassUnlock.choose_second(id):
+	if not choose.call(id):
 		return
 	Sfx.play("unlock", null, -6.0)
-	chat.taken(id)
+	done.call(id)

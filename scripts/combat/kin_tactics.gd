@@ -63,7 +63,7 @@ func pick_target() -> Ent:
 		attacker = attacker
 	var guard_bonus := 2.0 + loyalty * _r("guard_owner_per_loyalty", 4.0)
 	# (cheapest tests first: range, then the score, and the walk test only for a foe that would win)
-	for f in k.m.foes_of(k.team):
+	for f in k.m.foes_of(k.team, false):
 		var d := k.flat_dist(f)
 		if d > reach:
 			continue
@@ -142,7 +142,7 @@ func cue_aim(cue: PartSpec) -> Vector3:
 		"foes_clumped":
 			if k.target and k.flat_dist(k.target) < float(p["range"]):
 				var n := 0
-				for f in k.m.foes_of(k.team):
+				for f in k.m.foes_of(k.team, false):
 					if f.flat_dist(k.target) < float(p["radius"]): n += 1
 				if n >= int(p["count"]) and randf() < offensive_rate:
 					return k.target.pos
@@ -161,6 +161,6 @@ func cue_aim(cue: PartSpec) -> Vector3:
 			if (own.below_lip or (own.over_void() and own.vel.y < -4.0 and not own.grounded)) and randf() < 0.35 + loyalty * 0.65:
 				return own.pos
 		"owner_fighting":
-			if own.idle_fire < 1.5 and k.m.foes_of(k.team).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(p["chance"]) * (0.5 + aggression):
+			if own.idle_fire < 1.5 and k.m.foes_of(k.team, false).any(func(f): return f.flat_dist(own) < 10.0) and randf() < float(p["chance"]) * (0.5 + aggression):
 				return own.inp.get("aim", own.pos)
 	return Vector3.INF

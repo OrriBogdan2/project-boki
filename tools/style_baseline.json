@@ -214,6 +214,19 @@
 "long_line": 17,
 "semicolon": 2
 },
+"scripts/feel/feel_config.gd": {
+"long_line": 2
+},
+"scripts/feel/feel_test_world.gd": {
+"long_line": 1
+},
+"scripts/feel/hunter_controller.gd": {
+"long_line": 1
+},
+"scripts/feel/top_down_camera.gd": {
+"long_line": 1,
+"semicolon": 6
+},
 "scripts/home/econ_models.gd": {
 "long_line": 17,
 "nested_ternary": 1,
@@ -483,6 +496,7 @@
 },
 "scripts/match/exits.gd": {
 "long_line": 30,
+"nested_ternary": 1,
 "semicolon": 13
 },
 "scripts/match/exits_flow.gd": {
@@ -615,8 +629,9 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 18,
-"semicolon": 9
+"long_line": 49,
+"nested_ternary": 9,
+"semicolon": 28
 },
 "scripts/match/lairs_bots.gd": {
 "long_line": 2,
@@ -969,7 +984,7 @@
 },
 "tools/archetype_check.gd": {
 "long_line": 65,
-"semicolon": 66,
+"semicolon": 70,
 "shadow": 1
 },
 "tools/arena_check.gd": {

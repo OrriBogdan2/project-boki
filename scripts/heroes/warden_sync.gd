@@ -118,6 +118,14 @@ func _process(dt: float) -> void:
 		for bi in hide_out:
 			skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
+## A rig node's place on the body you see (world): its bone's pose back through the retarget.
+func shown(nd: Node3D) -> Transform3D:
+	for l in links:
+		if l[1] == nd:
+			var to_rest := (l[3] as Transform3D).affine_inverse() * (l[2] as Transform3D).affine_inverse()
+			return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
+	return nd.global_transform
+
 func apply() -> void:
 	for l in links:
 		skel.set_bone_global_pose(int(l[0]), _rig_pose(l))

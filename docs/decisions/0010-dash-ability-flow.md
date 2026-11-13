@@ -17,4 +17,5 @@ Option 2. Per ground or air dash and slot (LMB, RMB, E, X, Q) a row says `fire` 
 ## Consequences
 - "In a dash" is `ArchKit.in_dash()` (the shared Effects dash). A kit that runs its dash in its own state overrides `in_dash()` and `dash_left()` (the seconds left, which `--dash-flow-check` uses to press on the dash's last step): Motley's Trade flight and Tenzo's Rock Hop do. Until it does, it lists that dash in `kit_owns` and DashFlow doesn't route it (Neve's Rink Run, on the ground). Zedran's crouch before the drive and Vireo's charge before the Wirerun (`wire`) are outside it too.
 - Kit-side cases for the per-hero rows to absorb: Vex's and Neve's `fires_in_dash`, Cinder's jet ending the dash.
+- A press at the end of a stun, root or Grounded goes through the same held slots (0022, `--cc-exit-buffer-check`).
 - Check `--dash-flow-check`; table `docs/heroes/dash_interactions.md` (gen_wiki). No Net or save change.

@@ -5,7 +5,8 @@ extends Node3D
 ##   1. Solmere whole  2. Malgrave's mask over the Wyrmheart  3. Kael's uprising, the Wyrm wakes
 ##   4. Sable drops the Heart  5. the Hollowing  6. you drop in, toward the Heart
 ## then the PROJECT BOKI title card. Each shot is one or two eased camera moves (a new move is a cut), its own
-## light (MOODS) and its own action. Space or a click moves on; holding Esc skips it all.
+## light (MOODS) and its own action. Any key, click or pad button skips it all at once, and once it has been
+## seen (or skipped) a new game goes straight past it.
 
 signal finished
 
@@ -36,6 +37,8 @@ const KNIGHTS := 4              # Auburn Knights behind him (a squad reads as an
 const AUBURN := Color("b02030") # the Auburn Knights' red (Solmere's colour)
 const QUAKE_LEAD := 0.8         # s before the Heart slips that THE THIEF's floor starts to shake
 const DROP_HEART_R := 2.6       # m: the Wyrmheart's lobe radius on its isle far below in THE DESCENT
+const SKIP_FADE_T := 0.2       # s of wipe to black when it ends or is skipped
+const MANTLES_AT := 2.6        # s into THE HOLLOWING: the Hunters' selves burst out of the Crown as Relics
 
 var cam: Camera3D
 var env: Environment
@@ -80,6 +83,11 @@ var pips: HBoxContainer
 
 func _ready() -> void:
 	CursorMode.menu()
+	if then_go == "hatch" and Save.d["tutorial"].get("prologue", false):
+		set_process(false)
+		set_process_unhandled_input(false)
+		Game.goto.call_deferred(then_go)      # (seen it already: repeat runs skip it by default)
+		return
 	Sfx.play_music("title")
 	Sfx.play_ambience("home")
 	rng.seed = 77
@@ -464,20 +472,15 @@ func _build_ui() -> void:
 	fade.material = wm          # scenes change with a ragged ink wipe, not a plain fade
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(fade)
-	# top bar: how far through the story you are, and a hold-to-skip so a stray key never skips it
-	var skip := HoldSkip.new()
-	skip.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	skip.offset_left = -196; skip.offset_right = -24; skip.offset_top = 17; skip.offset_bottom = 61
-	skip.skipped.connect(_finish)
-	root.add_child(skip)
+	# top bar: how far through the story you are
 	pips = HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 8)
 	pips.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	pips.position = Vector2(30, 33)
 	pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(pips)
-	# bottom corner: how to move on
-	var hint := UI.key_hints([["Space", "next"]], 12, Color(1, 1, 1, 0.5))
+	# bottom corner: how to skip
+	var hint := UI.key_hints([["Any key", "skip"]], 12, Color(1, 1, 1, 0.5))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	hint.offset_right = -24; hint.offset_top = -40; hint.offset_bottom = -16
@@ -587,7 +590,7 @@ func _finish() -> void:
 		return
 	done = true
 	var tw := create_tween()
-	tw.tween_property(fade, "color:a", 1.0, 0.5)
+	tw.tween_property(fade, "color:a", 1.0, SKIP_FADE_T)
 	tw.tween_callback(func():
 		finished.emit()
 		Save.d["tutorial"]["prologue"] = true
@@ -597,11 +600,11 @@ func _finish() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if done:
 		return
-	# Esc is held to skip (see HoldSkip); Space or a click moves on to the next scene
-	var click: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
-	if event.is_action_pressed("jump") or click:
-		if shot < shots.size() and shot_t > 0.8 and not advancing:
-			_advance()
+	# the first press of anything skips (playtest 11-09: holding to skip, or a scene at a time, was too slow)
+	var pressed := event.is_pressed() and not event.is_echo()
+	if pressed and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
+		get_viewport().set_input_as_handled()
+		_finish()
 
 # ---------------------------------------------------------------- the show
 func _process(delta: float) -> void:

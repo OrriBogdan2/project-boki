@@ -7,7 +7,7 @@
 		{"hero": "gunslinger", "slot": "E", "field": "e.shave_rank3", "value": 0.3, "tol": 0.0, "evidence": "D Arcane Railgun upg IV: -30% CD per target hit"},
 		{"hero": "gunslinger", "slot": "E", "field": "e.rattle_k", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: +20% dmg vs Dazed"},
 		{"hero": "gunslinger", "slot": "X", "field": "x.zone_t", "value": 3.0, "tol": 0.0, "evidence": "D Summon Napalm: 3s fire zone"},
-		{"hero": "mage", "slot": "RMB", "field": "rmb.rank3_mult", "value": 1.5, "tol": 0.0, "evidence": "D Voltaic Spear upg IV: +50% dmg"},
+		{"hero": "mage", "slot": "RMB", "field": "rank_dmg.sec.2", "value": 1.9, "tol": 0.001, "evidence": "D Voltaic Spear upgs: +20% dmg x2, upg IV +50% dmg, added (docs/heroes/mage.md)"},
 		{"hero": "thief", "slot": "E", "field": "e.time", "value": 6.0, "tol": 0.0, "evidence": "D Farstep Dagger: after 6s Shiv MUST teleport back"},
 		{"hero": "thief", "slot": "E", "field": "e.refund_wall", "value": 0.25, "tol": 0.0, "evidence": "D Farstep Dagger upg: refund 25% CD on hitting terrain"},
 		{"hero": "thief", "slot": "E", "field": "e.refund_foe", "value": 0.5, "tol": 0.0, "evidence": "D Farstep Dagger upg: doubled (50%) on enemies"},
@@ -158,6 +158,9 @@
 		{"hero": "ostra", "slot": "E", "field": "e.dmg", "per": "weapon.primary.dmg", "value": 1.3878, "tol": 0.01, "evidence": "D Unstable Anomaly 365 vs Gravity Orb 263 (supervive_kits.md:113,116)"},
 		{"hero": "ostra", "slot": "E", "field": "e.dmg_max_k", "value": 3.5, "tol": 0.0, "evidence": "D Unstable Anomaly: up to 3.5x by held time (supervive_kits.md:116)"},
 		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.04, "evidence": "D Unstable Anomaly upg IV: 250 dmg/s on a 365 bomb (supervive_kits.md:116)"},
-		{"hero": "ostra", "slot": "X", "field": "x.cooldown", "value": 70.0, "tol": 0.0, "evidence": "D Singularity (70s) (supervive_kits.md:117)"}
+		{"hero": "ostra", "slot": "X", "field": "x.cooldown", "value": 70.0, "tol": 0.0, "evidence": "D Singularity (70s) (supervive_kits.md:117)"},
+		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.2, "tol": 0.22, "evidence": "F Obsidian Slam: purple disc about 1.2 bh radius at the cursor (1 bh = 1.8 m)"},
+		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"},
+		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"}
 	]
 }

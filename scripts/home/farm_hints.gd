@@ -28,7 +28,7 @@ func due(id: String) -> bool:
 		"hammer":
 			return site and not FarmSites.stalled(house)
 		"task":
-			return FarmTutorial.house_built() and not FarmTaskGuide.any_job()
+			return FarmTutorial.house_built() and not (Save.d["roster"] as Array).any(func(r): return Work.pin(r) != "")
 		"buy":
 			return _total(Save.d["seeds"]) == 0
 		"sell":

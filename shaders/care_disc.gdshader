@@ -10,6 +10,7 @@ uniform vec4 rim : source_color = vec4(1.0);
 uniform float fill = 1.0;        // 0..1 inner body strength
 uniform float sweep = -1.0;      // 0..1 a front growing out from the centre (-1: none)
 uniform float pattern = 0.0;
+#include "res://shaders/cel.gdshaderinc"
 uniform float spin = 0.0;        // radians: the sigil turns with it
 uniform float rim_w = 0.08;
 uniform float crack = 0.0;       // pattern 4: how bright the cracks glow (0..1)
@@ -33,9 +34,9 @@ float sigil(vec2 uv, float r, float a) {
 	if (pattern > 3.5) {
 		// cracks: jagged spokes that fork, and broken rings between them
 		float jag = sin(r * 23.0 + a * 3.0) * 0.06 + sin(r * 41.0) * 0.03;
-		float spokes = smoothstep(0.93, 1.0, abs(cos((a + jag) * 5.5)));
+		float spokes = smoothstep(0.985, 1.0, abs(cos((a + jag) * 5.5)));
 		float forks = smoothstep(0.95, 1.0, abs(cos((a - jag * 2.0) * 11.0))) * step(0.45, r);
-		float rings = smoothstep(0.035, 0.0, abs(fract(r * 3.2 + jag) - 0.5) - 0.47) * step(0.4, abs(sin(a * 7.0 + r * 9.0)));
+		float rings = smoothstep(0.03, 0.0, abs(fract(r * 3.2 + jag) - 0.5)) * step(0.4, abs(sin(a * 7.0 + r * 9.0)));
 		return (spokes + forks * 0.7 + rings * 0.6) * (0.25 + 1.6 * crack) * step(0.12, r);
 	}
 	// thorns: little triangles on an inner ring
@@ -71,5 +72,5 @@ void fragment() {
 	float outer = edge + sw * 1.2 + halo;
 	vec3 body_col = pattern > 4.5 ? mix(color.rgb, rim.rgb, r * r * r) : color.rgb;
 	ALBEDO = (body_col * inner + rim.rgb * outer) / max(inner + outer, 0.001);
-	ALPHA = clamp((body * 1.6 + sg + edge * 1.2 + sw + halo) * color.a, 0.0, 1.0);
+	ALPHA = cel_cover(clamp((body * 1.6 + sg + edge * 1.2 + sw) * color.a, 0.0, 1.0), UV * 0.5);     // cel steps
 }

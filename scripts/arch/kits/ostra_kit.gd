@@ -11,7 +11,6 @@ extends ArchKit
 ## The seed is a ground zone placed through HeroZones (legal ground, short of walls, never in the
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
 
-const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
@@ -101,7 +100,7 @@ func add_swell(v: float) -> void:
 	if res >= res_max():
 		swollen_t = float(res_def()["swollen_t"])
 		swells += 1
-		armed_fx("SWOLLEN", "")
+		armed_fx("")
 		play("ostra_empower")
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
@@ -573,7 +572,7 @@ func cast_e() -> bool:
 
 func seed_radius() -> float:
 	if seed.is_empty(): return 0.0
-	return float(seed["rmax"]) * clampf(float(seed["t"]) / float(seed["grow"]), 0.08, 1.0)
+	return HeroZones.seed_r(float(seed["rmax"]), float(seed["grow"]), float(seed["t"]))
 
 func seed_k() -> float:
 	return clampf(float(seed["t"]) / float(seed["grow"]), 0.0, 1.0) if not seed.is_empty() else 0.0
@@ -582,6 +581,7 @@ func _tick_seed(dt: float) -> void:
 	var ed := e_def()
 	seed["t"] = float(seed["t"]) + dt
 	var p: Vector3 = seed["pos"]
+	HeroZones.seed_size(seed["vis"], seed_radius())
 	# the cast: a small orb drops from his hand onto the spot
 	var drop := float(ed["drop"])
 	if float(seed["t"]) < drop:
@@ -652,14 +652,15 @@ func _pop(hit: bool) -> void:
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
-		payoff_fx(caught_hunter.pos, PAY, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
+		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist < 9.0 and los and randf() < 0.1:
-		h.inp["aim"] = tgt.pos
+	if HeroUlt.ready(self) and dist < 9.0 and los:
+		# (aimed where they walk to in the tell)
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * float(x_def()["tell"]) * 0.5
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():

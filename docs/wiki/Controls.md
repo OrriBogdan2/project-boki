@@ -14,7 +14,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | Left click | Weapon attack (some weapons charge when held) |
 | Right click | Your class's RMB ability: tap, hold, in the air and other variants (see your class page) |
 | Shift | Your class's dash |
-| Space | Jump; press it again in the air and hold to glide |
+| Space | Jump; hold it in the air to glide |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
 | Q | Your active glove |
 | E | Your class's utility |
@@ -75,14 +75,11 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
-| C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
-| Middle mouse / Mouse 4 | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
-| K | Boki order: attack my target | `kin_attack` | yes |
-| N | Boki order: come back to me | `kin_return` | yes |
-| L | Boki order: hold this position | `kin_hold` | yes |
+| Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
-| Shift / Mouse 5 | Hunter dash | `dash` | yes |
-| Space | Jump (again in the air: glide) | `jump` | yes |
+| Shift | Hunter dash | `dash` | yes |
+| Space | Jump (hold to glide) | `jump` | yes |
+| Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
@@ -91,7 +88,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Play fetch with a Boki | `play` | yes |
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
-| H | Whistle for your Boki (at home) | `whistle` | yes |
+| H | Whistle at home: your partner comes, hold for the nearest Boki | `whistle` | yes |
 | J | Relics: change your Relic (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
@@ -100,12 +97,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
-| Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
-| Shift | Hold to keep placing (build mode) | `keep_placing` | yes |
-| Alt | Hold with a slot key to level it | `level_mod` | yes |
-| K | Hunter kit card (hover a hunter) | `kit_card` | yes |
-| Enter / Kp | Press the open panel's main button | `confirm` | yes |
-| V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
 | F7 | Movement readout (tuning) | `move_readout` | yes |

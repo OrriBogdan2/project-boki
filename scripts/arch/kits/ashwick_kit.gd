@@ -165,7 +165,6 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "ABLAZE", res_col(), false)
 		vfx("ablaze", f.pos)
 		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 
@@ -173,7 +172,6 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 ## flash; the shared payoff's rings stay out of Cinder's fire.
 func _flashover_fx(f: Ent) -> void:
 	var col := Color("ffe0a0")
-	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
 	m.sfx("crit", f.pos, -7.0, 0.85)
@@ -198,8 +196,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
+		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
@@ -535,7 +532,6 @@ func _cinder_hit(f: Ent) -> void:
 			if o != f and is_instance_valid(o) and not o.dead and sees_from(f.pos, o):
 				_ignite(o, cur, burning(o))
 				vfx("shot_spread", f.pos, null, {"to": o.pos + Vector3(0, 1.0, 0)})
-		m.fx.word(f.pos + Vector3(0, 2.5, 0), "SPREAD", col_of(rdf), true)
 	else:
 		stoke(f)
 
@@ -675,7 +671,6 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare

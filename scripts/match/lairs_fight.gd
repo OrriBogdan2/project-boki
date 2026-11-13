@@ -119,6 +119,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var killer: Hunter = (credit as Kin).owner_h if credit is Kin and (credit as Kin).owner_h else (credit as Hunter if credit is Hunter else null)
 	L["state"] = "cleared"
 	L["cleared_by"] = killer.pname if killer else ""
+	L["won_by"] = killer.team if killer else -1      # (the Sealed Lair seat goes to this squad: QuestSeats)
 	# everyone's Boki who fought it cheers (and remembers it)
 	for hh in m.hunters:
 		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "downed":
@@ -129,14 +130,17 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	else:
 		ls.lock.unlock(L)
 	# a small pile, all of it worth having (one Epic or Legendary piece of gear, a Brand upgrade for
-	# its killer's weapon, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
+	# its killer's weapon, one treasure), and the Rare Egg on its own spot a few steps away,
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
 	# (1.6 m out: at 0.9 their names ran into each other)
 	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
-	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
-		m.exits.drop_key(at + Vector3(0, 0, 1.1))
+	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
+	if zone != "" and not ls.wayseed_given:
+		ls.wayseed_given = true
+		if m.rng.randf() < float(GardenZones.rules()["wayseed_chance"]):
+			m.spawn_val(Loot.valuable(GardenZones.wayseed(zone)), at + Vector3(1.1, 0, 0.2))
 	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
 	var pile_at: Array = [at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
 	for wp in m.wpicks:      # (the gear just dropped, and anything already lying on the lair's floor)

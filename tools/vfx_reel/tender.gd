@@ -45,8 +45,8 @@ func _part_rmb() -> void:
 		P.inp["sec"] = _at(t, 0.1)
 		P.inp["sec_hold"] = t > 0.1 and t < 0.6
 		_aim(T.pos)
-	await _go(2.6, cast, _sheet("rmb", "RMB: starlight gathers at the lantern, the cast, the seed's trail, the root",
-		[0.3, 0.62, 0.7, 0.8, 1.0, 1.4, 1.8, 2.1, 2.5], func(): return (P.pos + T.pos) * 0.5), 2.5)
+	await _go(3.8, cast, _sheet("rmb", "RMB: the lantern starlight, the cast, the seed's vine building, the root",
+		[0.3, 0.7, 1.0, 1.2, 1.7, 2.3, 2.9, 3.3, 3.7], func(): return (P.pos + T.pos) * 0.5), 2.5)
 	await _go(GAP)
 
 func _part_e() -> void:

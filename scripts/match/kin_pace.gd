@@ -1,11 +1,12 @@
 class_name KinPace
 ## Companion Boki out of a fight think at 10 Hz. Near you, a calm Boki re-plans the way to its spot beside its
-## Hunter every THINK_S and walks every step; far from you (Bot.FAR_M) its whole sim runs every FAR_EVERY steps
+## Hunter every THINK_S and walks every step; far from you (FAR_M) its whole sim runs every FAR_EVERY steps
 ## with the skipped time added in, as Bot.tick does for far bots. A Boki with a foe, or whose Hunter was just
 ## hit or is fighting, runs every step. Off-line only: a client would see its Boki step at 10 Hz.
 
 const THINK_S := 0.1           # s between a calm Boki's walk plans (10 Hz)
 const FAR_EVERY := 6           # sim steps per update for a calm Boki far from you (10 Hz at 60 steps a second)
+const FAR_M := 45.0            # m from your hunter past which a calm Boki counts as far (the bots' old Bot.FAR_M)
 const HURT_S := 3.0            # s after its Hunter is hit that a Boki counts as in a fight (KinFollow.in_combat)
 
 ## The time for this step's sim (with what it skipped), or 0.0 on a step a far, calm Boki skips.
@@ -34,4 +35,4 @@ static func _calm_far(k: Kin) -> bool:
 		return false
 	if not (k.state == "active" or k.state == "shoulder") or k.m.time - o.hurt_at < HURT_S:
 		return false
-	return o.ai.get("tgt") == null and o.flat_dist(me) > Bot.FAR_M
+	return o.ai.get("tgt") == null and o.flat_dist(me) > FAR_M

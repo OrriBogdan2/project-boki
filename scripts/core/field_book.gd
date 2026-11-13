@@ -32,10 +32,13 @@ static func forms_of(species: String) -> Array:
 static func entry_key(species: String) -> String:
 	return forms_of(species)[0]
 
-## Every Field Book entry, in species order with the legendaries last: a branch pair is one.
+## Every Field Book entry, in species order: a branch pair is one. The boss-egg Boki come after
+## the rest, the legendaries last.
 static func entries() -> Array:
 	var ids: Array = Data.KIN.keys().filter(func(s): return entry_key(s) == s)
-	return ids.filter(func(k): return not Legendary.is_legendary(k)) + ids.filter(Legendary.is_legendary)
+	var plain := ids.filter(func(k): return not Legendary.is_legendary(k) and not Data.is_rare(k))
+	var rare := ids.filter(func(k): return not Legendary.is_legendary(k) and Data.is_rare(k))
+	return plain + rare + ids.filter(Legendary.is_legendary)
 
 ## One species on its own (caught ones count as seen).
 static func form_seen(species: String) -> bool:

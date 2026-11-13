@@ -272,7 +272,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = pos
 			e["t"] = float(e["t"]) - d
 			var body: Node3D = (k["node"] as Node3D).get_node_or_null("Body")
-			if body:
+			if body and not body.has_node("Flex/BokiRig"):
 				var q := absf(sin(float(e["t"]) * 9.0))
 				body.scale = Vector3(1.0 + q * 0.08, 1.0 - q * 0.1, 1.0 + q * 0.08)
 			if randf() < d * 3.0 and Econ.fill(f) > 0:
@@ -576,16 +576,12 @@ func show_away() -> void:
 		_notice("Your Boki are starving", lines)
 
 func _notice(title: String, lines: Array) -> void:
-	if not h.is_inside_tree():
-		return
-	if h.panel_open != "" or h.building_now or not Save.d["tutorial"].get("home", false):
-		h.get_tree().create_timer(1.0).timeout.connect(_notice.bind(title, lines))
-		return
-	var v: VBoxContainer = h._new_panel(title, 560)
-	for l in lines:
-		var lb := UI.label(String(l), 15, UI.INK)
-		lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(lb)
+	h.arrivals.add(func():
+		var v: VBoxContainer = h._new_panel(title, 560)
+		for l in lines:
+			var lb := UI.label(String(l), 15, UI.INK)
+			lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(lb))
 
 ## Is your partner too weak from hunger to come out? (HungerGate says how many meals it needs.)
 func partner_too_weak() -> bool:

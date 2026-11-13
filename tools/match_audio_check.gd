@@ -6,6 +6,8 @@ extends RefCounted
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel),
 ## and movement sounds (MoveSfx): a remote Hunter's footstep plays placed at it (panned), quieter than
 ## yours, out to the step reach and silent past it or while crouched; landings are placed and weighted.
+## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
+## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
 
 var main: Node
 var fails := 0
@@ -71,6 +73,12 @@ func run(main_node: Node) -> void:
 		"revived: the muffle is off again (%s)" % clear)
 	await _muffle_step(m, true)
 	ok(Sfx.muffle_state().fx and bus >= 0, "downed again: muffled")
+	await _glider(P, "yours")
+	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
+	other.remote = true
+	other.pos = P.pos + Vector3(8, 0, 0)
+	await _glider(other, "another player's")
+	other.remote = false
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -85,7 +93,12 @@ func run(main_node: Node) -> void:
 	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
 	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
 	await main.get_tree().create_timer(SETTLE).timeout
-	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
+	var farm_beds := 0      # HomeAmbience's own beds, still up on the farm
+	for n in Sfx.amb_layers:
+		if not n in ["abyss", "ruins"] and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).playing:
+			farm_beds += 1
+	var left := Sfx.match_voices() - farm_beds
+	ok(left == 0, "after the fades nothing the match started is playing (%d, %d farm beds)" % [left, farm_beds])
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -206,6 +219,76 @@ func _muffle_step(m: Match, down: bool) -> void:
 	m.player.downed = down
 	m.music_dir.tick(m, 0.0)
 	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
+## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
+## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on
+## the change of state and stays clear while the state just goes on.
+func _glider(h: Hunter, who: String) -> void:
+	var g := h.glider_snd
+	var wind := "glider_wind%d" % h.get_instance_id()
+	var burn := "glider_burn%d" % h.get_instance_id()
+	h.gliding = false
+	h.dropping = false
+	h.glide_fuel = 1.0
+	_set_speed(h, 0.0, 0.0)
+	g.tick(h)
+	for cue in ["glider_snap", "glider_dive", "glider_crackle", "glider_fold", "glider_hiss"]:
+		ok(Sfx.ensure(cue), "%s: %s is a sound on file" % [who, cue])
+	h.gliding = true
+	_once(g, h, "glider_snap", who + " glider: opening plays the snap once")
+	ok(Sfx.loop_on(wind), "%s glider: the wind loop runs" % who)
+	var slow_pitch := _pitch(wind)
+	var slow_vol := float(Sfx.loops[wind]["vol"])
+	_set_speed(h, 24.0, -5.0)
+	g.tick(h)
+	var swells := _pitch(wind) > slow_pitch and float(Sfx.loops[wind]["vol"]) > slow_vol
+	ok(swells, "%s glider: the wind pitches and swells with speed" % who)
+	if h.remote:
+		ok(Sfx.loops[wind]["pos"] != null, "another player's glider: the wind is positional")
+	_set_speed(h, 6.0, -HunterMove.dive_vy)
+	h.glide_dive.on = true
+	_once(g, h, "glider_dive", who + " glider: the dive plays its whoosh once")
+	h.glide_dive.on = false
+	_set_speed(h, 6.0, -5.0)
+	g.tick(h)
+	var hiss := "glider_hiss%d" % h.get_instance_id()
+	h.glide_fuel = 0.3
+	g.tick(h)
+	var faint := float(Sfx.loops[hiss]["vol"]) if Sfx.loop_on(hiss) else 0.0
+	h.glide_fuel = 0.05
+	g.tick(h)
+	var near := float(Sfx.loops[hiss]["vol"]) if Sfx.loop_on(hiss) else 0.0
+	var swelled := faint != 0.0 and near > faint
+	ok(h.remote or swelled, "%s glider: the heat hiss swells toward overheat (%.1f -> %.1f dB)" % [who, faint, near])
+	ok(not h.remote or not Sfx.loop_on(hiss), "another player's glider: no heat hiss (the heat is not synced)")
+	h.glide_fuel = 0.0
+	g.net_hot = true
+	_once(g, h, "glider_crackle", who + " glider: overheating plays the crackle once")
+	ok(Sfx.loop_on(burn), "%s glider: the burn loop runs while overheated" % who)
+	h.glide_fuel = 1.0
+	g.net_hot = false
+	g.tick(h)
+	ok(not g.hot, "%s glider: cooled, no longer burning" % who)
+	h.gliding = false
+	_once(g, h, "glider_fold", who + " glider: folding plays the fold once")
+	await main.get_tree().create_timer(0.5).timeout
+	var running := Sfx.loop_on(wind) or Sfx.loop_on(burn) or Sfx.loop_on(hiss)
+	ok(not running, "%s glider: all loops stop once the glider is folded" % who)
+
+func _set_speed(h: Hunter, flat: float, vy: float) -> void:
+	h.vel = Vector3(flat, vy, 0)
+	h.net_vel = h.vel
+
+func _pitch(key: String) -> float:
+	return (Sfx.loops[key]["p"] as AudioStreamPlayer).pitch_scale
+
+## The state just changed: one tick plays `cue`; a second tick in the same state does not play it again.
+func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
+	Sfx.last_played.erase(cue)
+	g.tick(h)
+	var first := Sfx.last_played.has(cue)
+	Sfx.last_played.erase(cue)
+	g.tick(h)
+	ok(first and not Sfx.last_played.has(cue), what)
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0
