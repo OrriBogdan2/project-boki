@@ -6,7 +6,8 @@ extends "res://tools/aimkit_shots.gd"
 
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer"]
 const STEPS := [0.25, 0.6, 1.0]
-const CROP := Vector2i(900, 560)        # px of each frame kept, round the monster
+const CROP := Vector2i(900, 560)  # px of each frame kept, round the monster
+
 
 func take(main_node: Node, out: String) -> void:
 	main = main_node
@@ -19,23 +20,28 @@ func take(main_node: Node, out: String) -> void:
 	await m.start(o)
 	m.set_process(false)
 	P = m.player
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
 	home = _spot(P.pos)
 	for x in m.hunters:
-		if x != P: x.teleport(home + Vector3(-30, 0, 30))
-	if m.hud: m.hud.visible = false
+		if x != P:
+			x.teleport(home + Vector3(-30, 0, 30))
+	if m.hud:
+		m.hud.visible = false
 	for k in KINDS:
 		await _strip(k)
 	var f := FileAccess.open(dir.path_join("MANIFEST.txt"), FileAccess.WRITE)
-	for l in lines: f.store_line(l)
+	for l in lines:
+		f.store_line(l)
 	f.close()
 	print("MOBTELL shots: %d in %s" % [lines.size(), dir])
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 func _strip(kind: String) -> void:
 	var at := home + Vector3(2, 0, 0)
@@ -48,7 +54,7 @@ func _strip(kind: String) -> void:
 	if attacks:
 		mb._begin_attack()
 	var frames: Array = []
-	for f in (STEPS if attacks else [0.0]):
+	for f in STEPS if attacks else [0.0]:
 		mb.st_t = float(mb.md["windup"]) * (1.0 - float(f))
 		for i in 6:
 			if attacks:

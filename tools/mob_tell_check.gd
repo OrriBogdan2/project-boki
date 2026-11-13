@@ -9,23 +9,27 @@ extends RefCounted
 ## the glimmerkin never attacks and must show no tell.
 ## With --shots-dir=<dir>: one strip per monster at wind-up 25 / 60 / 100 % (mob_tell_<kind>.png).
 
+const DT := 1.0 / 60.0
+const NEAR := 0.95  # probe just inside an edge
+const FAR := 1.05  # probe just outside it
+const EDGE := 0.02  # m past the drawn edge: a hunter standing there is never hit
+const WALK := 4.4  # m/s, a hunter on foot (Data.CLASSES)
+
 var main: Node
 var ak = null
 var m: Match
-var T: Hunter
+var tgt: Hunter
 var home := Vector3.ZERO
 var fails := 0
 var n := 0
-const DT := 1.0 / 60.0
-const NEAR := 0.95          # probe just inside an edge
-const FAR := 1.05           # probe just outside it
-const EDGE := 0.02          # m past the drawn edge: a hunter standing there is never hit
-const WALK := 4.4           # m/s, a hunter on foot (Data.CLASSES)
+
 
 func ok(what: String, cond: bool, info := "") -> void:
 	n += 1
 	print("MOBTELL %-62s %s  %s" % [what, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -33,20 +37,22 @@ func run(main_node: Node) -> void:
 	ak.main = main
 	var r: Array = ak.setup("gunslinger", 12.0, "", false)
 	m = r[0]
-	T = r[2]
+	tgt = r[2]
 	home = r[4]
-	var P: Hunter = r[1]
-	P.teleport(home + Vector3(-6, 0, 9))        # off every lane
+	var pal: Hunter = r[1]
+	pal.teleport(home + Vector3(-6, 0, 9))  # off every lane
 	var kinds: Array = []
 	for k in Data.MOBS:
-		if not Data.MOBS[k]["attack"] in ["none", "boss"]: kinds.append(k)    # lair bosses: boss.gd wind-ups
+		if not Data.MOBS[k]["attack"] in ["none", "boss"]:
+			kinds.append(k)  # lair bosses: boss.gd wind-ups
 	_coverage(kinds)
 	for k in kinds:
 		_mob(k)
 	_glimmer()
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): shots = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			shots = String(a).substr(12)
 	if shots != "":
 		m.queue_free()
 		await main.get_tree().process_frame
@@ -54,21 +60,24 @@ func run(main_node: Node) -> void:
 	print("MOBTELL DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 ## A fresh monster winding up at the origin of the strip, aimed east at the stand-in, which then goes to `at`.
 func _wind(kind: String, at: Vector3) -> Mob:
-	for old in m.mobs: old.queue_free()
+	for old in m.mobs:
+		old.queue_free()
 	m.mobs.clear()
-	ak.fresh(T)
+	ak.fresh(tgt)
 	var mb := m.spawn_mob(kind, home + Vector3(2, 0, 0))
 	mb.teleport(home + Vector3(2, 0, 0))
-	T.teleport(mb.pos + Vector3(3, 0, 0))
-	T.vel = Vector3.ZERO
-	mb.tgt = T
+	tgt.teleport(mb.pos + Vector3(3, 0, 0))
+	tgt.vel = Vector3.ZERO
+	mb.tgt = tgt
 	mb._begin_attack()
-	T.teleport(at)
-	T.vel = Vector3.ZERO
-	mb.tgt = null                       # the aim stays east: the test moves the stand-in, not the mob
+	tgt.teleport(at)
+	tgt.vel = Vector3.ZERO
+	mb.tgt = null  # the aim stays east: the test moves the stand-in, not the mob
 	return mb
+
 
 ## Only `mb` fights: the map's own camps (a wandering skitter) would push the stand-in off its probe.
 func _alone(mb: Mob) -> void:
@@ -76,6 +85,7 @@ func _alone(mb: Mob) -> void:
 		if o != mb:
 			m.mobs.erase(o)
 			o.queue_free()
+
 
 ## What the player sees: the lanes and circles on the ground, read back off the telegraph nodes.
 func _seen(mb: Mob) -> Array:
@@ -93,6 +103,7 @@ func _seen(mb: Mob) -> Array:
 			out.append({"lane": false, "at": node.global_position, "r": sz.x * 0.5})
 	return out
 
+
 ## Run the attack to its end with the stand-in at `at`; did it hurt?
 func _hurts(kind: String, at: Vector3) -> bool:
 	var mb := _wind(kind, at)
@@ -102,7 +113,8 @@ func _hurts(kind: String, at: Vector3) -> bool:
 		m.step(DT)
 		_alone(mb)
 		t += DT
-	return ak.dmg(T) > 0.0
+	return ak.dmg(tgt) > 0.0
+
 
 func _probes(sh: Dictionary) -> Array:
 	## [point, should it hit?, label]
@@ -111,13 +123,13 @@ func _probes(sh: Dictionary) -> Array:
 		var d: Vector2 = sh["dir"]
 		var nv := Vector2(-d.y, d.x)
 		var s: Vector3 = sh["from"]
-		var L: float = sh["len"]
+		var blen: float = sh["len"]
 		var hw: float = sh["width"] * 0.5
 		for sd in [-1.0, 1.0]:
 			for f in [[hw * NEAR, true], [hw * FAR, false], [hw + EDGE, false]]:
-				var q: Vector2 = Vector2(s.x, s.z) + d * L * 0.9 + nv * float(f[0]) * sd
+				var q: Vector2 = Vector2(s.x, s.z) + d * blen * 0.9 + nv * float(f[0]) * sd
 				out.append([Vector3(q.x, s.y, q.y), f[1], "side"])
-		for f in [[L * NEAR, true], [L * FAR, false], [L + EDGE, false]]:
+		for f in [[blen * NEAR, true], [blen * FAR, false], [blen + EDGE, false]]:
 			var q2: Vector2 = Vector2(s.x, s.z) + d * float(f[0])
 			out.append([Vector3(q2.x, s.y, q2.y), f[1], "end"])
 	else:
@@ -127,6 +139,7 @@ func _probes(sh: Dictionary) -> Array:
 			for f in [[r * NEAR, true], [r * FAR, false], [r + EDGE, false]]:
 				out.append([c + Vector3(cos(a), 0, sin(a)) * float(f[0]), f[1], "edge"])
 	return out
+
 
 func _mob(kind: String) -> void:
 	var mb := _wind(kind, home + Vector3(2, 0, 9))
@@ -161,10 +174,10 @@ func _mob(kind: String) -> void:
 	var glows: Array = []
 	var struck := false
 	var kept := true
-	m.step(DT)                            # (the tell is made on the first step of the wind-up)
-	var lead := mb.st_t + DT if not mb.tele.is_empty() else 0.0     # s from the tell showing to the hit
+	m.step(DT)  # (the tell is made on the first step of the wind-up)
+	var lead := mb.st_t + DT if not mb.tele.is_empty() else 0.0  # s from the tell showing to the hit
 	for i in int(windup / DT) + 8:
-		var nodes := mb.tele.duplicate()      # (a bomber clears its own on the hit frame)
+		var nodes := mb.tele.duplicate()  # (a bomber clears its own on the hit frame)
 		m.step(DT)
 		_alone(mb)
 		mb.render(DT, 1.0)
@@ -184,7 +197,8 @@ func _mob(kind: String) -> void:
 	ok("%s: the tell shows for its whole wind-up" % kind, lead >= windup - 1e-4, span)
 	var rising := true
 	for i in range(1, glows.size() - 1):
-		if glows[i] < glows[i - 1]: rising = false
+		if glows[i] < glows[i - 1]:
+			rising = false
 	var peak: float = glows[glows.size() - 2] if glows.size() > 1 else -1.0
 	var bright: bool = rising and glows.size() > 3 and glows[0] < 0.1 and peak >= MobTell.GLOW_MAX * 0.9
 	ok("%s: the body glow brightens to its peak on the hit frame" % kind, bright, "%.2f -> %.2f" % [glows[0], peak])
@@ -197,11 +211,14 @@ func _mob(kind: String) -> void:
 		var info := "%.2f m in %.2f s, needs %.2f" % [locked * WALK, locked, out_m]
 		ok("%s: a hunter on foot steps out before it lands" % kind, locked * WALK >= out_m, info)
 
+
 func _gap(a: Color, b: Color) -> float:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
 
+
 func _glow(mb: Mob) -> float:
 	return float(mb.mats[0].get_shader_parameter("flash")) if not mb.mats.is_empty() else -1.0
+
 
 ## Every mob that attacks is covered: its attack id has a tell (the shape checks then run per mob).
 func _coverage(kinds: Array) -> void:
@@ -211,6 +228,7 @@ func _coverage(kinds: Array) -> void:
 		if not MobTell.TELL_COL.has(atk):
 			missing.append("%s/%s" % [k, atk])
 	ok("every mob attack id has a telegraph (%d mobs)" % kinds.size(), missing.is_empty(), ", ".join(missing))
+
 
 func _glimmer() -> void:
 	var mb := m.spawn_mob("glimmer", home + Vector3(2, 0, 0))
