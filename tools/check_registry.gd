@@ -608,6 +608,7 @@ const CHECKS := {
 	"--camera-follow-shots": ["res://tools/camera_follow_check.gd", "camera_follow_check", "shots"],  # GPU
 	# mashing LMB never beats holding
 	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],
+	"--tut-first-breed-check": ["res://tools/tut_first_breed_check.gd", "tut_first_breed_check", null],  # first-breed
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
