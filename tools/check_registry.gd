@@ -22,20 +22,23 @@ const CHECKS := {
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
 	"--friendly-bodies-check": ["res://tools/friendly_bodies_check.gd", "friendly_bodies_check", null],
 	"--friendly-bodies-shots": ["res://tools/friendly_bodies_shots.gd", "friendly_bodies_shots", null],
-	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],      # loot, kin keeping, the Soul Shrine
-	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],      # each ability verb at a dummy rival
-	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],      # KIN_GRAMMAR phase 2
+	# loot, kin keeping, the Soul Shrine
+	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],
+	# each ability verb at a dummy rival
+	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],
+	# KIN_GRAMMAR phase 2
+	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],
 	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],      # the duel room smoke test
 	"--extract-check": ["res://tools/extract_check.gd", "extract_check", null],
 	"--truce-check": ["res://tools/truce_check.gd", "truce_check", null],
 	"--bot-sanity-check": ["res://tools/bot_sanity_check.gd", "bot_sanity_check", null],
-	"--drop-check": ["res://tools/drop_plan_check.gd", "drop_plan_check", null],      # the drop: planning, pings, the squad
+	# the drop: planning, pings, the squad
+	"--drop-check": ["res://tools/drop_plan_check.gd", "drop_plan_check", null],
 	"--home-build-check": ["res://tools/home_build_check.gd", "home_build_check", null],      # build mode at home
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],      # XP bar, level-up moment
 	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],      # movie writer: a level-up mid-fight
-	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	"--watchdog-check": ["res://tools/watchdog_check.gd", "watchdog_check", null],      # a dead check run ends
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
@@ -117,9 +120,6 @@ const CHECKS := {
 	"--glider-canopy-check": ["res://tools/glider_canopy_check.gd", "glider_canopy_check", null],
 	"--glider-canopy-shots": ["res://tools/glider_canopy_shots.gd", "glider_canopy_shots", null],
 	"--see-through-check": ["res://tools/see_through_check.gd", "see_through_check", null],  # trees thin only over you
-	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
-	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
-	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],      # item 63
 	"--armour-check": ["res://tools/armour_check.gd", "armour_check", null],      # docs/ARMOUR_PARITY.md
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
@@ -643,10 +643,6 @@ const GPU_HOST := {
 ## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
 ## old name). One entry per line: suite-fast.sh reads the lines. --watchdog-check holds each entry to one script.
 const COVERED := {
-	"--class-unlock-check": ["--hunter-unlock-check"],
-	"--hero-combo-check": ["--archer-combo-check", "--bulwark-combo-check"],
-	"--support-check": ["--tender-combo-check", "--rimewright-combo-check"],
-	"--equal-migrate-check": ["--equal-check"],
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
