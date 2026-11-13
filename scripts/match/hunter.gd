@@ -796,8 +796,11 @@ func do_jump() -> void:
 			_open_glider()
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
-		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
+		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed, at most the run
+		# (a held glider takes it whole, as at an air dash's end)
 		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
+		if not inp.get("glide", false):
+			keep = HunterMove.dash_exit(keep, run_speed)
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
@@ -1052,6 +1055,7 @@ func kin_element() -> String:
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
 
 var roll_speed := DASH_SPEED
+var run_speed := 0.0            # m/s: the last step's run speed, the most a jump out of a dash carries
 var dash_rest := Vector2.ZERO  # metres: the dash's own last moment, riding on the step that hands it over
 var wedged_t := 0.0
 
@@ -2054,6 +2058,7 @@ func _physics(dt: float) -> void:
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
 	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
+	run_speed = spd
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
@@ -2064,8 +2069,9 @@ func _physics(dt: float) -> void:
 			_shove_along()
 		if not dash_pass.is_empty():
 			_pass_along()
-		if roll_t <= 0.0 and grounded:
-			var run_v := HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
+		if roll_t <= 0.0 and (grounded or not inp.get("glide", false)):
+			# no hard stop, and in the air no carry past the run speed (a held glider takes the dash's speed, item 4)
+			var run_v := HunterMove.dash_exit(hv, spd)
 			dash_rest = HunterMove.dash_rest(hv, run_v, roll_t + dt)
 			hv = run_v
 	elif fly_t > 0.0:

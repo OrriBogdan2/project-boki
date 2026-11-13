@@ -594,9 +594,10 @@ func _poof_cloud(dir: Vector2) -> void:
 	m.sfx("lw_hop", h.pos, -3.0, 1.0)
 	vfx("poof", null, dir)
 
-## Out of the poof he sails on with a share of its speed (momentum kept), not the class's small carry.
+## Out of the poof he sails on with a share of its speed, never faster than his run (HunterMove.dash_exit).
 func _keep_poof(b: Dictionary) -> void:
-	var keep := (b["dir"] as Vector2) * float(b["speed"]) * float(dash_def()["air_keep"])
+	var kept := (b["dir"] as Vector2) * float(b["speed"]) * float(dash_def()["air_keep"])
+	var keep := HunterMove.dash_exit(kept, h.run_speed)
 	h.vel.x = keep.x
 	h.vel.z = keep.y
 

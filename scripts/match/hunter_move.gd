@@ -74,9 +74,8 @@ static func cut_air_dash(h: Hunter) -> void:
 	h.roll_t = 0.0
 	h.shove = {}
 
-## The step a ground dash ends in runs the dash for the `left` seconds it still had, then the hand-over: the
-## metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate. (An
-## air dash needs none: it carries its own speed through the step, under air drag after.)
+## The step a dash ends in (ground or air) runs the dash for the `left` seconds it still had, then the hand-over:
+## the metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate.
 static func dash_rest(dash_v: Vector2, run_v: Vector2, left: float) -> Vector2:
 	return (dash_v - run_v) * maxf(0.0, left)
 

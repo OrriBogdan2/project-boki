@@ -218,6 +218,8 @@ const CHECKS := {
 	"--reticle-latency": ["res://tools/reticle_latency.gd", "reticle_latency", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
 	"--hold-pose-check": ["res://tools/hold_pose_check.gd", "hold_pose_check", null],  # hold poses need the key
+	"--dash-momentum-check": ["res://tools/dash_momentum_check.gd", "dash_momentum_check", null],  # air = ground
+	"--dash-momentum-shots": ["res://tools/dash_momentum_shots.gd", "dash_momentum_shots", null],  # (GPU)
 	# bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],
 	"--bot-human-check": ["res://tools/bot_human_check.gd", "bot_human_check", null],      # squad, heals, assists
