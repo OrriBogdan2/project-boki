@@ -31,3 +31,14 @@ build; every other name keeps the call in that doc (in main or an mc batch, carr
 `input-latency-check`, `parity-no-riders-meeko`, `snag-audit`, `tenzo-playtest-1108`.
 
 Not merged here: `ext/stuck-integ-fb4b4275` and `ext/stuck-integ-d2f36c16` themselves (each is its own READY).
+
+**Re-merge 2026-11-13 (job 20261113-213012-a5, rpc7):** origin/main ca96e707c5, then 67e31b4542, merged into this
+branch (it had 106 conflicts). Main's newer code won where both re-did a thing: rolling damage numbers (the three
+number looks and `--number-looks-check` are gone), Spectate (DeathRecap's card stays), ResultsStage (no wheel zoom on
+the results page), Hollow Crown 2.0 (no air/lift ring lanes on it yet), the NPC bake and Hob/Pell glbs, Albert's
+BjornBoop (plus the branch's boop/guard clips), the flinch layer, fx_dot's own soft edge, the Boki back-sweep (the
+branch's plant_gait.py and its zapple/mossgrade glbs removed). Kept from the branch: one press window
+(`Loco.press_buffer` replaces `DashFlow.BUFFER_S` and the Juggernaut BUFFER), held LMB as an input (Albert's latch
+gone), Albert's hop, lunge and rope reel, Vex's Coin Blast and Palm Lance names and looks with main's numbers (Dazed
++76%), the glider/heat/shield cues (`ReceiverCue.shield` now names main's `ShieldSrc` icon). glbs: main's claire, hem,
+ryzz, sable with the REACT_AUDIT op lines run again; vex = main's glb plus the branch's `rmb` and `e` clips.
