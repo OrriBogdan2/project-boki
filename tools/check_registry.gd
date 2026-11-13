@@ -399,6 +399,7 @@ const CHECKS := {
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--dex-sort-check": ["res://tools/dex_sort_check.gd", "dex_sort_check", null],      # type filter + sort
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
+	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],      # shots at point blank
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

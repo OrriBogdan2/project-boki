@@ -39,7 +39,8 @@ func thief(a) -> void:
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
 	var K: ThiefKit = P.ak
-	T2.teleport(home + Vector3(0, 0, 5.5))
+	# parked clear of the Vault landing (~4.9 m): a shot now hits a body touching her
+	T2.teleport(home + Vector3(0, 0, 8.0))
 	A.ok("dancer: kit, model, Arc Bolts",
 			K != null and P.model.get_meta("arch") == "thief" and P.wid == "arc_bolts"
 			and Arch.name_of("thief") == "The Silver Thief",
