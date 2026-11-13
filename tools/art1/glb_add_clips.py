@@ -1,5 +1,6 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
-with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
+with no Blender (tracks match the target's nodes by name; both builds must share the rig: a translation track is moved by the difference of the two nodes' rest translations, so a source with
+only the bones, their directions right and a face bone parked elsewhere, works). A clip of the same name in the target is replaced.
 Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]"""
 import json
 import struct
@@ -34,21 +35,26 @@ def add(tj, tb, sj, sb, wanted):
     tj["animations"] = [a for a in tj.get("animations", []) if not wanted(a["name"])]
     copied = {}
 
-    def accessor(i):
-        if i in copied:
-            return copied[i]
+    def accessor(i, shift=(0.0, 0.0, 0.0)):
+        if (i, shift) in copied:
+            return copied[(i, shift)]
         ac = dict(sj["accessors"][i])
         bv = dict(sj["bufferViews"][ac["bufferView"]])
         off0, ln = bv.get("byteOffset", 0), bv["byteLength"]
         tb.extend(b"\0" * (-len(tb) % 4))
         bv["byteOffset"] = len(tb)
         tb.extend(sb[off0:off0 + ln])
+        if any(shift):
+            v = list(struct.unpack_from("<%df" % (3 * ac["count"]), tb, bv["byteOffset"]))
+            struct.pack_into("<%df" % len(v), tb, bv["byteOffset"], *[x + shift[k % 3] for k, x in enumerate(v)])
+            ac.pop("min", None)
+            ac.pop("max", None)
         bv["buffer"] = 0
         tj["bufferViews"].append(bv)
         ac["bufferView"] = len(tj["bufferViews"]) - 1
         tj["accessors"].append(ac)
-        copied[i] = len(tj["accessors"]) - 1
-        return copied[i]
+        copied[(i, shift)] = len(tj["accessors"]) - 1
+        return copied[(i, shift)]
 
     done = []
     for a in sj["animations"]:
@@ -60,7 +66,9 @@ def add(tj, tb, sj, sb, wanted):
             if nm not in names:
                 raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
             sm = a["samplers"][ch["sampler"]]
-            new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"]), "interpolation": sm.get("interpolation", "LINEAR")})
+            rest = [t - s for t, s in zip(tj["nodes"][names[nm]].get("translation", (0, 0, 0)), sj["nodes"][ch["target"]["node"]].get("translation", (0, 0, 0)))]
+            shift = tuple(rest) if ch["target"]["path"] == "translation" and max(map(abs, rest)) > 1e-6 else (0.0, 0.0, 0.0)
+            new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"], shift), "interpolation": sm.get("interpolation", "LINEAR")})
             new["channels"].append({"sampler": len(new["samplers"]) - 1, "target": {"node": names[nm], "path": ch["target"]["path"]}})
         tj["animations"].append(new)
         done.append(a["name"])
