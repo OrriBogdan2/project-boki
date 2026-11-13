@@ -1007,8 +1007,8 @@ func _hud_tick(delta: float) -> void:
 	mates.track(self, m.player, delta)
 	_loot_tick(delta)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
-	# H folds the training guide (G is send / recall your kin) and the kit panel away (and back)
-	var hd := Input.is_physical_key_pressed(KEY_H)
+	# the fold_guide key (H) folds the training guide (G is send / recall your kin) and the kit panel away (and back)
+	var hd := Input.is_action_pressed("fold_guide")
 	if hd and not _h_down and (m.opts.get("training", false) or m.opts.get("duel", false)):
 		guide_hidden = not guide_hidden
 	_h_down = hd
