@@ -37,7 +37,7 @@ var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 const COLUMNS := 4          # Hunter cards per row
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
-const STAGE_PX := Vector2(240, 320)   # px, your pick's 3D stage beside the grid (4 cards + it fit 1240 px)
+const STAGE_PX := Vector2(240, 288)   # px, your pick's 3D stage beside the grid (4 cards + it fit 1240 px)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
 class Padlock extends Control:
