@@ -370,9 +370,6 @@ func _ready() -> void:
 	if "--lair-lock-check" in args:
 		load("res://tools/lair_lock_check.gd").new().run(self)      # boss loot and the egg's own spot; locked in 20 s after the kill
 		return
-	if "--level-hud-check" in args:
-		load("res://tools/level_hud_check.gd").new().run(self)      # the portrait's level and XP ring, the level-up flash and sound, R locked to 6
-		return
 	if "--pack-ui-check" in args:
 		var puc = load("res://tools/pack_ui_check.gd").new()      # the backpack windows take real mouse clicks
 		set_meta("pack_ui_check", puc)

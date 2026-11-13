@@ -142,8 +142,8 @@ func _wiring() -> void:
 	m.hud.toast("Bramble Isle", Color.GOLD)
 	m.hud.toast_small("Chest key found", Color.WHITE)
 	m.hud.level_up(3)
-	ok(lane.count() == 3 and lane.texts().has("LEVEL 3  ·  +1 skill point"),
-		"Hud.toast, toast_small and level_up all land in the HUD's lane (%s)" % str(lane.texts()))
+	ok(lane.count() == 2 and m.hud.lvl_cue.lines[0] == "LEVEL 3",
+		"Hud.toast and toast_small land in the HUD's lane, level_up has its own card (%s)" % str(lane.texts()))
 	lane.clear()
 	m.hud.tip("Hold left click to shoot")
 	ok(lane.count() == 1, "a hint lands in the same lane")
