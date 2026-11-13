@@ -1777,7 +1777,7 @@ func _kin_riders(extra: Dictionary) -> void:
 		if float(os.get("splash", 0.0)) > 0.0 and not extra.has("boom"):
 			extra["boom"] = float(os["splash"]); extra["boom_kb"] = 4.0; extra["boom_small"] = true
 		if int(os.get("chain", 0)) > 0 and not extra.has("kx"):
-			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": KinRules.cat_color("damage").to_html(false), "skip_here": true}]
+			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": Color(wpn["color"]).to_html(false), "skip_here": true}]
 			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
 func heal(n: float) -> void:
