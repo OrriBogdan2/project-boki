@@ -44,11 +44,14 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
   `tools/art1/pip_feet_weights.py` moves the 200 paw verts below the ankle onto foot.L/R (blending into the shin across
   the ankle). `tools/art1/pip_gait.py` (ext/anim-pilot-loops-cm-v2) then rebuilds the eight walk/run loops (f, b, l, r)
   on her old upper body with each stance sole pinned to a floor at loco speed, all on one 0.34 s period (16 keys at 48/s:
-  0.333 s), so WardenClips' synced BlendSpace2D keeps them in step at a diagonal and from the walk ring into the run ring.
-  Her legs reach less behind and to the side, so those soles are down for less of the period (duty x0.8 back, x0.62
-  sideways: a longer float). Walk and run 5.9 steps/s, steps 0.37 and 0.77 m; soles 2.2 and 4.55 m/s in Blender in
-  every direction, ankle miss 0; the run's back and side swings straighten the leg for 1 to 4 keys in the air (at most
-  9 mm short of the path). In the game the rig's body reshape slows the run's soles to 4.28 m/s at rate 1, hence
-  warden_anim/pip.json `foot_mps` [2.2, 4.28] (from --anim-audit; no `stride` gain). At Godot's default 30 fps import the
+  0.333 s); warden_anim/pip.json `loco.cycle_s` 0.34 makes WardenClips' BlendSpace2D run them synced, so they stay in
+  step at a diagonal and from the walk ring into the run ring. Her legs reach less behind and to the side, so those soles
+  are down for less of the period (duty x0.8 back, x0.62 sideways: a longer float). Walk and run 5.9 steps/s, steps 0.37
+  and 0.77 m; soles 2.2 and 4.55 m/s in Blender in every direction, ankle miss 0, hence `foot_mps` [2.2, 4.55] (no
+  `stride` gain). Re-baked on main's v95 model (2026-11-13, ext/anim-meeko-loops-length): walk and run share one duty
+  (0.25) and one heel-to-toe roll, each swing leaves and meets the floor at its speed, and the old clips' forward lean
+  sits on the hips instead of the root (walk_f 7 deg, run_f 12 deg: the thighs hang from the root, so two leans put the
+  hips in two places). All three keep the walk-run blend planted: --foot-slide-check worst 1.80 m/s (main's loops 2.46),
+  --anim-audit run 13 % (main 12 %). At Godot's default 30 fps import the
   run's 80 ms stance kept 2 or 3 keys and the soles wobbled. Run `pip_feet_weights.py`, `pip_gait.py`, then
   `glb_add_clips.py` with the eight names (the lines at the top of pip_gait.py).

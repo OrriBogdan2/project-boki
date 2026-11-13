@@ -14,25 +14,32 @@ import sys
 
 import bpy
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Quaternion, Vector
 
 SRC, OUT = sys.argv[sys.argv.index("--") + 1:][:2]
 SIZE = 0.68         # game metres per model metre (content/archetypes/tender.json body size)
 FPS = 48            # keys per second (pip.glb.import bakes at this rate too): a run stance is 0.08 s
 CONTACT = 0.006     # model m: a sole vert this close to the floor is planted
 TAU = math.tau
-# s for a left + right pair, every loop: WardenClips' BlendSpace2D (synced) blends a ring's loops at a diagonal and the
-# walk ring into the run ring between their speeds, and only loops of one length stay in step
+# s for a left + right pair, every loop: WardenClips' BlendSpace2D (synced by pip.json loco.cycle_s) blends a
+# ring's loops at a diagonal and the walk ring into the run ring between their speeds, and only loops of one length
+# stay in step
 PERIOD = 0.34
 # Per gait. speed: game m/s (warden_anim/pip.json loco). duty: the part of the period a foot is planted (under 0.5: a
 # float between steps). ahead: the share of the stance sweep in front of the hip. lift: swing foot's peak, model m.
 # sink: the root's mean drop, bob: its rise in the float, model m. toe_up at the strike, heel_up at the push, degrees.
+# Walk and run share duty and roll: between their speeds WardenClips blends the two at one phase (loco.cycle_s), and
+# only feet that strike, roll and lift together stay down in the blend (--foot-slide-check: unequal duties put one
+# foot in the air while the other is planted, 3.5 m/s slips at 3.5 m/s).
 GAITS = {
-    "walk": dict(speed=2.2, duty=0.34, ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=6.0,
-                   heel_up=30.0, push=0.6),
-    "run": dict(speed=4.55, duty=0.24, ahead=0.55, lift=0.085, sink=-0.075, bob=0.02, toe_up=4.0,
-                  heel_up=40.0, push=0.55),
+    "walk": dict(speed=2.2, duty=0.25, ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=5.0,
+                   heel_up=35.0, push=0.55),
+    "run": dict(speed=4.55, duty=0.25, ahead=0.55, lift=0.085, sink=-0.075, bob=0.02, toe_up=5.0,
+                  heel_up=35.0, push=0.55),
 }
+# A swing leaves and meets the floor at the floor's speed (x the move speed at its ends): a slower foot near the floor
+# reads as a slide in the audits' 30 % band
+SWING_ENDS = 1.0
 # heading in degrees (as pip_clips.py's gait(): l is her left, -x) and the duty's share: her legs reach less behind
 # and to the side than ahead, so those soles sweep less floor: down for less of the same period, a longer float
 HEADINGS = {"f": (0.0, 1.0), "b": (180.0, 0.8), "l": (90.0, 0.62), "r": (-90.0, 0.62)}
@@ -147,7 +154,7 @@ def foot_path(g, side, ph, off):
         pitch = g["toe_up"] * (1 - smooth(0.0, 0.2, u)) - g["heel_up"] * smooth(g["push"], 1.0, u) ** 1.4
         return Vector((ankle.x, ankle.y, 0.0)) + d * (front - travel * u) + off, pitch * d.y, True
     s = (ph - duty) / (1 - duty)
-    m0, m1 = -0.3 * v * (1 - duty) * period, -0.6 * v * (1 - duty) * period
+    m0 = m1 = -SWING_ENDS * v * (1 - duty) * period
     h = (2 * s ** 3 - 3 * s * s + 1, s ** 3 - 2 * s * s + s, -2 * s ** 3 + 3 * s * s, s ** 3 - s * s)
     y = h[0] * (front - travel) + h[1] * m0 + h[2] * front + h[3] * m1
     pitch = -g["heel_up"] + (g["heel_up"] + g["toe_up"]) * smooth(0.1, 0.9, s)
@@ -163,6 +170,21 @@ def place_foot(side, flat, pitch):
     return pivot + turn.to_3x3() @ (Vector((flat.x, flat.y, flat.z + ankle.z)) - pivot), turn
 
 
+def level_root():
+    """The old clip's forward lean (pitch about x) off the root, onto the hips: the thighs hang from the root, so walk_f
+    (7 deg) and run_f (12 deg) with their own lean put the hips in two places, and the walk-run blend slid the feet
+    (2.7 m/s at 3.5-4 m/s). The upper body keeps its pose: the hips' armature matrix is put back."""
+    hips = PB["hips"].matrix.copy()
+    m = PB["root"].matrix.copy()
+    rest = REST["root"].to_quaternion()
+    d = m.to_quaternion() @ rest.inverted()
+    pitch = Quaternion((d.w, d.x, 0.0, 0.0)).normalized()
+    PB["root"].matrix = Matrix.Translation(m.translation) @ ((d @ pitch.inverted()) @ rest).to_matrix().to_4x4()
+    layer.update()
+    PB["hips"].matrix = hips
+    layer.update()
+
+
 def pose(g, key, ph, feet):
     """The whole body at phase ph (0 = the right foot strikes, 0.5 = the left): the old clip's key `key` above the root,
     the root's old turn on a new bob (lowest mid stance, highest in the float), and the legs locked to the floor."""
@@ -173,6 +195,7 @@ def pose(g, key, ph, feet):
     mid = ph - g["duty"] / 2
     PB["root"].location = (key["root"][0].x, key["root"][0].y, 0.0)
     layer.update()
+    level_root()
     z = g["sink"] - g["bob"] * math.cos(mid * 2 * TAU)
     PB["root"].matrix = Matrix.Translation((0, 0, z)) @ PB["root"].matrix
     layer.update()
