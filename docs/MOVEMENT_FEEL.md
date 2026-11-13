@@ -233,14 +233,38 @@ Other checks:
   | Ground across 16:9 | ~37 m: Void's 3.5 m Black Hole [D] reads ~2 bh (90 px) and run pans of 205–250 px/s at the data's 4.4–4.8 m/s [D] both give ~51 px/m | 23.5 m | 23.5 m (narrower) |
   | Hunter height on screen | mediums 90–100 px of 1080 (8.3–9.3%), Oath 107 px, Elluna 67 px [F] | 3.8–11.1% by Hunter (gunslinger 6.0, bulwark 11.1, tender 3.8), median ~1.3x smaller than the source's | same |
   | Feet below the centre | ~3–4% [F camcal] | 3.0% on level ground | 3.5% (`rise` 1.0 -> 1.2 m) |
-  | Cursor lean, how far | not measurable in the sheets: the view sits still through 1–2 bh moves and pans with the aim (venator) | 42% past 1.4 m, cap 7.5 m; at sneak zoom a full lean up-screen put you at the bottom edge | same share and cap, also held to the screen's room (perspective-correct), you stay >= 1.5 m inside |
-  | Cursor lean, how fast | not measurable [F]; a blink dash takes ~0.5 s to catch up (dredge) | eased 6/s; follow 15/s | unchanged |
+  | Cursor lean, how far | not measurable in the sheets: the view sits still through 1–2 bh moves and pans with the aim (venator) | 42% past 1.4 m, cap 7.5 m; at sneak zoom a full lean up-screen put you at the bottom edge | none: centred on you (the parity pass kept the lean, the later "Camera lead" measure below removed it; the Standard/Dynamic presets keep theirs, held to the screen's room, you stay >= 1.5 m inside) |
+  | Cursor lean, how fast | not measurable [F]; a blink dash takes ~0.5 s to catch up (dredge) | eased 6/s; follow 15/s | unchanged (nothing to ease at the Supervive follow) |
   | Glide / drop zoom | only ability zoom-outs (Vireo's R, Oath's ult) [F]; data names an abyss zoom, no value [D]; abyss zoom not determinable (below) | glide 1.25x, drop 1.05–1.7x, sneak 1.45x | unchanged |
   | `CameraDistance` 5500 uu [D] | 55 m, meaning unproven (the ADS row is a fog-of-war radius); as an arm length it would need a ~21° lens, against the footage's ~32° | not used | not used |
 
   - Not matched: the distance. The source shows ~1.6x more ground across and draws its Hunters ~1.3x bigger: its Hunters are about twice the size of the world ours are, which no camera can match. 36 m back would show the source's ground but shrink tender to ~2.5% of the screen (the owner wants silhouettes that read at gameplay zoom); 18 m would match the Hunters' size on half the source's view. 23 m sits between the two, so it stays. Matching both means drawing Hunters larger (`Hunter.VIS_SCALE`), a model call for the owner (docs/DEBT.md).
   - Abyss zoom: **not determinable** (2026-11-12). The data names a camera zoom for the abyss next to the slow fall, with no value [D]. No reference frame shows the player's own Hunter below an island's lip: the cliff demo cuts to the Hunter standing on the pillar while the target falls, and the walkway demo stays at lip height [F]. So there is no distance or rate to measure, and `CamRig` gets no abyss state. Below the lip the view still sinks with you at the same size (`CamRig.follow`, `p.y < 0`), with the glide's 1.25x when the glider is open. To settle it, use a clip of the player stepping off a lip and falling for 2 s or more before a glide or a mantle brings them back.
   - GPU pair (`--cam-framing-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
+- **Camera lead (measured, Nov 2026):** the Supervive follow used to lean toward the cursor (42% of its distance from you after a
+  1.4 m deadzone, capped at 7.5 m). Nobody had checked that against the source, so it was measured from the reference clips in
+  `/home/boki/refs/supervive-mantle/` (hetzner): the cursor ring and the player's own health bar were tracked per frame, and the
+  ground's shift between frames read by phase correlation of the HUD-free centre of the picture.
+  - `sv_every_ability.mp4` (training ground, 1080p60): a cursor flick with the hunter standing moves the view by nothing. At
+    252.27 s (frame 15136) the cursor jumps 116 px of 480 (a quarter of the screen) and the ground shifts under 1 px over the next
+    4 s; at 293.53 s a 108 px flick gives 5 px; the flicks at 218.2, 220.3, 221.8, 247.6, 248.4, 249.1, 284.0, 285.2, 288.4 and
+    301.0 s all give 0-2 px. The hunter sits a fixed ~5% of the height below the centre whatever the cursor does.
+  - `sv_joule_1v4.mp4` (a fight, 1080p60): over the 1173 frames where both the bar and the cursor read, the hunter's screen offset
+    against the cursor's has a slope of -0.03 px/px (r = -0.1): no lean. From 2.0 to 4.25 s the cursor flips between (-240, +50)
+    and (+296, -130) px of 960x540 while the hunter stays at (-100 +-10, -30).
+  - `owner_mantle_clip.mp4` (a streamer's clip, webcam overlays): too noisy to read (weak slopes of -0.1 and -0.24), not used.
+  - So **the view stays on the hunter wherever the cursor is**: `CamRig.SUPERVIVE_LEAD_M` is 0 and there is no ease to time.
+    The lean survives as the Standard and Fully dynamic follow presets, which model the source's own camera options (deadzone,
+    maxzone, pan distance, quadratic easing; a Supervive guide recommends 0.5 / 0.8 / 100% on Fully dynamic).
+  - Dashes: the view trails and eases, never cuts. In the 1v4 clip at 4.37-4.80 s the hunter crosses 105 px (11% of the width)
+    while the ground moves at most 8.5 px per frame; the dredge sheet (frames 0187-0188, 493.2-493.8 s) saw ~0.5 s to catch up
+    on a blink dash. Ours trails a dash by ~0.55 m and is back to the running lag 0.5 s in (`--cam-lead-check`); a slower,
+    dash-only catch-up like the source's 0.4-0.5 s is not built (the tight 15/s follow is what keeps `cam_lag_m` under 0.4 m).
+  - Knocks and glides: no clean sample in these clips. With no cursor lean there is nothing to hold or recentre.
+  - `--cam-lead-check` asserts it in an expedition and in the Training Grounds: the lean with the cursor at the screen's edge is
+    under 0.35 m (the footage's noise floor, 1.5% of the view), the view drifts under 5 cm in the second after a flick, and a dash
+    moves it under 0.5 m in any frame, trails, and is back within 0.5 s. `--cam-lead-shots` holds the cursor at the right edge for
+    a review frame (GPU).
 - **Settings:**
   - "Expedition camera" is now "Camera".
   - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`).

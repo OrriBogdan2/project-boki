@@ -128,10 +128,10 @@ Notes on the table:
 
 ## Camera and aim (Oct 2026)
 
-- Default follow is **Supervive**: the view leans toward the cursor in proportion to how far the
-  cursor is from your character (1.4m deadzone, 42% of the distance, capped at 7.5m), eased at 6/s,
-  so you see more where you aim and you never leave the screen. The old presets stay in Settings.
-- Sneaking (Ctrl) zooms the camera out to 1.45x, eased; the cursor lean works the same.
+- Default follow is **Supervive**: centred on you, the cursor never moves the view (measured from the
+  footage: docs/MOVEMENT_FEEL.md "Camera lead"). The Standard and Fully dynamic presets in Settings
+  slide toward the cursor the way the source's own options do.
+- Sneaking (Ctrl) zooms the camera out to 1.45x, eased.
 - Ground-targeted effects land at the cursor, clamped to 10m for hunters (gloves) or the ability's
   reach for kin. When your kin is out with its ability ready, a faint ring shows where it would land.
 - Weapon autos fire toward the cursor; the aim line shows the weapon's range.
