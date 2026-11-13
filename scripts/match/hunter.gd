@@ -2051,6 +2051,7 @@ func mantle_k() -> float:
 func _physics(dt: float) -> void:
 	if pad.size() > 0:
 		_pad_fly(dt)
+		loco.go(_loco_state())      # airborne on the pad's arc, so a jump mid-flight may open the glider
 		return
 	if grap.size() > 0:
 		_grapple(dt)

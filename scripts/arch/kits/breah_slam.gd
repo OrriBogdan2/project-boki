@@ -9,30 +9,41 @@ extends RefCounted
 ## adds a Molten Guard shield stack (DolmKit.guard_stack).
 
 var k: DolmKit
-var leapt := false             # jumped during this charge (the leap forward)
-var lunges := 0                # punches during this charge
+var leapt := false  # jumped during this charge (the leap forward)
+var lunges := 0  # punches during this charge
 var was_ground := true
-var leaps := 0                 # (checks)
+var leaps := 0  # (checks)
 var extends_n := 0
 var hops := 0
 var taps := 0
-var hop_on := false            # the hold's hop is in the air (the move keys nudge it)
-var hop_v := Vector2.ZERO      # ...its speed along the ground before the nudge
+var hop_on := false  # the hold's hop is in the air (the move keys nudge it)
+var hop_v := Vector2.ZERO  # ...its speed along the ground before the nudge
+
 
 func _init(kit: DolmKit) -> void:
 	k = kit
 
-func sd() -> Dictionary: return k.slam_def()
+
+func sd() -> Dictionary:
+	return k.slam_def()
+
 
 ## The charge so far, 0..1 (the press's first `hold` seconds are the tap window).
 func charge_k(t: float) -> float:
 	return clampf((t - float(k.rmb_def()["hold"])) / float(sd()["time"]), 0.0, 1.0)
 
+
 func charging() -> bool:
 	return k.rmb_down and k.rmb_t > float(k.rmb_def()["hold"]) * 0.5
 
-func radius(c: float) -> float: return lerpf(float(sd()["radius"][0]), float(sd()["radius"][1]), c)
-func core(c: float) -> float: return lerpf(float(sd()["core"][0]), float(sd()["core"][1]), c)
+
+func radius(c: float) -> float:
+	return lerpf(float(sd()["radius"][0]), float(sd()["radius"][1]), c)
+
+
+func core(c: float) -> float:
+	return lerpf(float(sd()["core"][0]), float(sd()["core"][1]), c)
+
 
 ## Where the slam will land: a hop ahead of him toward the aim, plus what the hop keeps of his run.
 func center() -> Vector3:
@@ -43,20 +54,26 @@ func center() -> Vector3:
 		c += Vector3(h.vel.x, 0, h.vel.z) * float(sd()["carry"]) * _flight(float(sd()["hop_up"]))
 	return c
 
+
 ## The tap's spot: just in front of him.
 func tap_spot() -> Vector3:
 	var d := k.h.aim_dir()
 	return k.h.pos + Vector3(d.x, 0, d.y) * float(sd()["reach"])
 
-func _flight(up: float) -> float: return 2.0 * up / Hunter.H_GRAV
+
+func _flight(up: float) -> float:
+	return 2.0 * up / Hunter.H_GRAV
+
 
 func move_k() -> float:
 	return float(sd()["walk_k"]) if charging() else 1.0
+
 
 func drop() -> void:
 	leapt = false
 	lunges = 0
 	hop_on = false
+
 
 func tick(_dt: float) -> void:
 	if not k.rmb_down:
@@ -64,6 +81,7 @@ func tick(_dt: float) -> void:
 		lunges = 0
 	was_ground = k.h.grounded
 	_tick_hop()
+
 
 ## The hop's steering: the move keys bend its ground speed by up to `nudge` m/s, no more.
 func _tick_hop() -> void:
@@ -77,17 +95,27 @@ func _tick_hop() -> void:
 	h.vel.x = v.x
 	h.vel.z = v.y
 
+
 func hold_tick(t: float) -> void:
 	var h := k.h
 	if t <= float(k.rmb_def()["hold"]):
 		return
 	var c := charge_k(t)
-	if k.anim_id != "breah_crouch" and not leapt: k.play("breah_crouch")
+	if k.anim_id != "breah_crouch" and not leapt:
+		k.play("breah_crouch")
 	AimKit.sweet(
-		h, "rmb",
+		h,
+		"rmb",
 		{
-			"at": center(), "r": radius(c), "k": c, "fill": c, "core0": float(sd()["core"][0]),
-			"core1": float(sd()["core"][1]), "all": true, "col": Color("3a7cff"), "col2": Color("d8ecff")
+			"at": center(),
+			"r": radius(c),
+			"k": c,
+			"fill": c,
+			"core0": float(sd()["core"][0]),
+			"core1": float(sd()["core"][1]),
+			"all": true,
+			"col": Color("3a7cff"),
+			"col2": Color("d8ecff")
 		}
 	)
 	AimKit.charge(h, c, {"col": DolmKit.COBALT, "col2": Color("d8ecff")})
@@ -110,6 +138,7 @@ func hold_tick(t: float) -> void:
 		k.m.sfx("br_leap", h.pos, -3.0, 1.0)
 		k.m.fx.dust(h.pos, 8)
 
+
 ## A punch pressed during the charge: a lunge forward (the source's "punch to extend").
 func extend() -> void:
 	if lunges >= int(sd()["lunges"]):
@@ -120,6 +149,7 @@ func extend() -> void:
 	k.play("breah_lunge")
 	k.m.sfx("br_shove", k.h.pos, -5.0, 1.2)
 	k.m.fx.dust(k.h.pos, 6)
+
 
 func fire(c: Dictionary) -> void:
 	var h := k.h
@@ -132,6 +162,7 @@ func fire(c: Dictionary) -> void:
 	if h.gliding:
 		# the source's slam out of a glide: the glider folds at once and she plunges at its dive speed
 		h.gliding = false
+		h.auto_glide = false  # an updraft's auto-glide folds with it
 		h.fly_t = 0.0
 		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
 		k.m.sfx("glide", h.pos, -6.0, 0.7)
@@ -155,12 +186,13 @@ func fire(c: Dictionary) -> void:
 	hops += 1
 	k.dive_fall = false
 	k.play("breah_slam")
-	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground he leaves
+	k.m.fx.dust(h.pos, 8)  # the push-off kicks up the ground he leaves
 	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
 	var run := Vector2(h.vel.x, h.vel.z) * float(sd()["carry"])
 	arc(float(sd()["hop"]), float(sd()["hop_up"]), h.aim_dir(), run)
 	hop_v = Vector2(h.vel.x, h.vel.z)
 	hop_on = true
+
 
 ## A real jump arc (not a dash, which holds your height): `dist` along `dir`, leaving the ground at
 ## `up` m/s, so the glider can still open from it (DolmKit._tick hands the arc over when glide is held).
@@ -173,11 +205,13 @@ func arc(dist: float, up: float, dir: Vector2, carry := Vector2.ZERO) -> void:
 	h.grounded = false
 	h.fly_t = flight
 
+
 ## The air dive's landing.
 func land(ck: float) -> void:
 	if k.anim_id != "breah_slam":
 		k.play("breah_slam_land")
 	slam(ck, true)
+
 
 func slam(c: float, at_feet: bool) -> void:
 	var h := k.h
@@ -213,17 +247,20 @@ func slam(c: float, at_feet: bool) -> void:
 			o["dr"] = true
 		if air:
 			d2 *= 1.0 + float(s["dunk_k"])
-			if m.world.is_void(f.pos.x, f.pos.z): d2 += float(s["dunk_void"])
+			if m.world.is_void(f.pos.x, f.pos.z):
+				d2 += float(s["dunk_void"])
 			o.erase("lift")
 			k.dunks += 1
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 		f.hurt(d2, h, o)
-		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
+		if in_core:
+			KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
-			m.displace.spike(f, -22.0, h)      # spiked down (after the hit, which would lift it)
+			m.displace.spike(f, -22.0, h)  # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
-		if not k.launchable(w): continue
+		if not k.launchable(w):
+			continue
 		var mid := k.rock_mid(w)
 		var rel := Vector2(mid.x - at.x, mid.z - at.z)
 		if rel.length() <= r + 1.1 and HeroZones.rock_in_reach(mid.y, at.y):

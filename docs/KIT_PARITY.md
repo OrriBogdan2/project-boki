@@ -139,7 +139,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Tap boulder; hold punch launches rocks, .6 s [D] | Boulder .6, punch .7/.6 | match |
-| RMB | Hold slam, centre stun, jump to leap, 11 s [D] | hold .2, cd 11, glide slam built | match |
+| RMB | Hold slam, centre stun, jump to leap, 11 s [D] | hold .2, cd 11, glide slam built and checked per glide state | match |
 | Q | none | glove | ours |
 | E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; **no ally hop** | missing: ally hop (gap 14) |
 | R | Tap wall, hold drag angle, Slows, 45 s [D] | 9 rocks, drag, cd 45, slow data present | differ (owner item 15 said rocks only) |
