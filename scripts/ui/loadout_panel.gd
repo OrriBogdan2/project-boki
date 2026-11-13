@@ -11,7 +11,9 @@ const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const TILE_H := 48.0
 const BADGE := 30.0
-const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or hold and drag it onto a slot"
+const HEAD_H := 20.0       # the key-pill row of a tile: as tall with or without a key, so the names line up
+const ROW_H := 30.0        # one backpack line: a full pack fits a 720p window without scrolling
+const ROW_BTN := 62.0
 
 var _m: Match
 var _p: Hunter
@@ -45,8 +47,14 @@ func _fill(v: VBoxContainer) -> Array:
 		belt.add_child(_belt_tile(k))
 	v.add_child(belt)
 	if not _p.perks.is_empty():
-		v.add_child(UI.label("Perks this run", 12, MUTED, UI.caps))
-		v.add_child(_perk_badges())
+		var perks := UI.hbox(8)
+		var cap := UI.label("Perks", 12, MUTED, UI.caps)
+		cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		perks.add_child(cap)
+		var badges := _perk_badges()
+		badges.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		perks.add_child(badges)
+		v.add_child(perks)
 	v.add_child(UI.label("Carrying home  ·  %d of %d" % [_p.pack.size(), _p.pack_cap], 12, MUTED, UI.caps))
 	return _pack_list(v)
 
@@ -83,14 +91,14 @@ func _belt_tile(k: int) -> PanelContainer:
 		_drag.add(t, {"inv": "belt", "i": k})
 	else:
 		var id := String(s["id"])
-		t = _tile(key, "", UtilityBelt.icon_of(id), UtilityBelt.col_of(id),
-			"%s x%d" % [UtilityBelt.name_of(id), int(s["n"])])
+		t = _tile(key, "", UtilityBelt.icon_of(id), UtilityBelt.col_of(id), UtilityBelt.name_of(id), int(s["n"]))
 		_drag.add(t, {"inv": "belt", "i": k}, UtilityBelt.name_of(id), UtilityBelt.col_of(id))
 	_tip.attach(t, func(): return BeltHud.tip(_p, k))
 	return t
 
-## A slot: the key it answers to and what it is, then the icon and the name of what is in it.
-func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: String) -> PanelContainer:
+## A slot: the key it answers to and what it is, then the icon and the name of what is in it, and how
+## many for a stack (`count` > 0), kept apart from the name so a long name never hides it.
+func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: String, count := 0) -> PanelContainer:
 	var t := PanelContainer.new()
 	var filled := icon != ""
 	t.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.1 if filled else 0.04), 9,
@@ -101,6 +109,7 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 	var v := UI.vbox(2)
 	t.add_child(v)
 	var head := UI.hbox(4)
+	head.custom_minimum_size.y = HEAD_H
 	if key != "":
 		head.add_child(_key_pill(key))
 	var caption := UI.label(slot_name, 11, MUTED, UI.caps)
@@ -112,7 +121,12 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 	var nm := UI.label(item_name, 12, col if icon != "" else Color(MUTED, 0.7), UI.semi)
 	nm.clip_text = true
 	nm.custom_minimum_size.x = 10.0
-	v.add_child(nm)
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var line := UI.hbox(4)
+	line.add_child(nm)
+	if count > 0:
+		line.add_child(UI.label("x%d" % count, 12, INK, UI.big))
+	v.add_child(line)
 	return t
 
 func _key_pill(key: String) -> Control:
@@ -146,7 +160,7 @@ func _perk_badges() -> HFlowContainer:
 func _pack_list(v: VBoxContainer) -> Array:
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	var rows := UI.vbox(6)
+	var rows := UI.vbox(4)
 	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(rows)
 	v.add_child(sc)
@@ -154,25 +168,55 @@ func _pack_list(v: VBoxContainer) -> Array:
 		rows.add_child(UI.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
 	for i in _p.pack.size():
 		rows.add_child(_pack_row(i))
-	for k in mini(_p.pack_cap - _p.pack.size(), 3):
+	var room := _p.pack_cap - _p.pack.size()
+	if room > 0:
 		var empty := UI.card(Color(1, 1, 1, 0.03), 6, 9)
-		empty.custom_minimum_size.y = 30
-		empty.add_child(UI.label("empty slot", 12, Color(MUTED, 0.6)))
+		empty.custom_minimum_size.y = ROW_H - 4.0
+		empty.add_child(UI.label("%d empty slot%s" % [room, "" if room == 1 else "s"], 12, Color(MUTED, 0.6)))
 		_drag.add(empty, {"inv": "pack", "i": -1})
 		rows.add_child(empty)
 	return [sc, rows]
 
+## One line: icon, plain name, worth, Wear (gear only) and Drop. What it does is on the hover card.
 func _pack_row(i: int) -> PanelContainer:
 	var it: Dictionary = _p.pack[i]
-	var buttons: Array = []
+	var col := Loot.col_of(it)
+	var row := PanelContainer.new()
+	row.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.09), 7, Color(col, 0.5), 1, 8, 2))
+	row.custom_minimum_size.y = ROW_H
+	row.mouse_filter = Control.MOUSE_FILTER_STOP
+	var line := UI.hbox(6)
+	row.add_child(line)
+	line.add_child(Icons.Glyph.new(Loot.icon_of(it), col, 18.0))
+	var nm := UI.label(Loot.name_of(it), 13, col, UI.semi)
+	nm.clip_text = true
+	nm.custom_minimum_size.x = 10.0
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	line.add_child(nm)
+	line.add_child(Icons.Glyph.new("gem", Color(LootHold.GOLD, 0.8), 11.0))
+	var worth := UI.label("%d" % Loot.value(it), 12, LootHold.GOLD, UI.big)
+	worth.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	line.add_child(worth)
 	if String(it.get("t", "")) == "gear":
-		buttons.append(["Wear", func(): _act(func(): Pack.use_from_pack(_m, _p, i)), true])
-	buttons.append(["Drop", func(): _act(func(): Pack.drop_from_pack(_m, _p, i))])
-	var row := LootHold.item_row(it, buttons)
+		line.add_child(_row_button("Wear", func(): _act(func(): Pack.use_from_pack(_m, _p, i))))
+	line.add_child(_row_button("Drop", func(): _act(func(): Pack.drop_from_pack(_m, _p, i))))
 	_drag.add(row, {"inv": "pack", "i": i}, Loot.name_of(it), Loot.col_of(it))
 	_tip.attach(row, func(): return _lines("pack", i), func(): _hover = {"kind": "pack", "i": i}, func(): _hover = {})
 	_pack_rows.append(row)
 	return row
+
+func _row_button(text: String, cb: Callable) -> Button:
+	var b := UI.button(text, cb, ROW_BTN)
+	b.add_theme_font_size_override("font_size", 12)
+	b.custom_minimum_size.y = ROW_H - 6.0
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	for state in ["normal", "hover", "pressed", "disabled", "focus"]:      # theme padding is for full-size buttons
+		var box := b.get_theme_stylebox(state).duplicate() as StyleBox
+		box.content_margin_top = 1.0
+		box.content_margin_bottom = 1.0
+		b.add_theme_stylebox_override(state, box)
+	return b
 
 # ------------------------------------------------------------------ hover cards and keys
 func _lines(kind: String, i: int) -> Array:
@@ -181,7 +225,7 @@ func _lines(kind: String, i: int) -> Array:
 	var it: Dictionary = _p.pack[i]
 	if String(it.get("t", "")) == "gear":
 		var lines := InvText.compare(_p, it)
-		lines.append(["Enter wears it  ·  Delete drops it", MUTED, InvText.SMALL])
+		lines.append(["Enter or drag onto a slot wears it  ·  Delete drops it", MUTED, InvText.SMALL])
 		return lines
 	return [[Loot.name_of(it), Loot.col_of(it)], [Loot.sub_of(it), InvText.INK],
 		["Delete drops it", MUTED, InvText.SMALL]]

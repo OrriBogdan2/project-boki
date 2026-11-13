@@ -77,7 +77,9 @@ for the squad rows). Verified 11-11:
 ## The inventory window (I)
 
 - `LoadoutPanel` (in `Hud._build_pack`): what you wear (two gloves with their keys Q and V, armor, boots), the four
-  utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key.
+  utility slots with keys 1 to 4, your perks, then the backpack list. Every slot names its key; a belt stack shows
+  its count apart from its name. Each backpack thing is one line (icon, plain name, worth, Wear/Drop) so a full
+  6-slot pack shows whole at 1280x720; what it does is on its hover card, which also names the keys.
 - Point at a thing for a hover card (`InvTip`, words in `InvText`). A piece of gear is compared with what you wear
   in its slot (`GearCompare`): only the numbers that change, green when better and red when worse.
 - Press, hold and move a thing onto another slot (`SlotDrag`, `scripts/ui/slot_drag.gd`): a backpack piece onto
@@ -90,10 +92,9 @@ for the squad rows). Verified 11-11:
   row to wear it there (the one you wear: the two swap). Check: `--lpage-drag-check`.
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
-- Swap by dragging a backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to
-  wear it (a worn piece: take it off) and Delete to drop it on the ground. The Wear and Drop buttons stay.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
+  3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 
