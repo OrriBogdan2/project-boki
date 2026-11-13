@@ -904,3 +904,22 @@ func _knock_in_flight(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	P.teleport(home)
 	P.grounded = true
 	step(m, 0.3)
+	_fixed_landing(m, P, home, K)
+
+## Footage (briefs/hero-ref/ostra.md, Swap 0158-0168): the landing ring is placed at the cast, the sigil fills
+## there and the lob lands exactly on it, so the cursor moving in flight does not steer the landing.
+func _fixed_landing(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	P.dashes = P.max_dashes()
+	var spot := home + Vector3(6.0, 0, 0)
+	aim_at(P, spot)
+	K.on_dash(false)
+	step(m, 0.1)
+	step(m, float(K.dash_def()["time"]) + 0.1, func(): aim_at(P, home + Vector3(0, 0, -6.0)))
+	var off := Vector2(P.pos.x - spot.x, P.pos.z - spot.z).length()
+	ok(
+		"footage: the landing is set at the cast; the cursor moving in flight does not steer it",
+		off < 0.3, "%.2f m" % off
+	)
+	P.teleport(home)
+	P.grounded = true
+	step(m, 0.3)
