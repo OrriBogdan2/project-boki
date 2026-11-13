@@ -180,10 +180,6 @@ func _match() -> void:
 	P.add_perk("brand_frost")
 	ok("the latest Brand wins", P.welem == "frost", P.welem)
 	ok("the upgrade line names them", WeaponUps.summary(P).contains("Hotload") and WeaponUps.summary(P).contains("Brand"), WeaponUps.summary(P))
-	# a level-up takes the hero's fixed weapon path (no choice); the full per-hero check is --perkorb-check
-	var lv_before := P.perks.size()
-	var step := WeaponPath.on_level(P, 2)
-	ok("a level-up applies a weapon upgrade by itself", not step.is_empty() and P.perks.size() == lv_before + 1 and Data.PERKS[step["perk"]].has("wup"), str(step.get("perk", "")))
 	# 4. drop tables: gear and tunings, never a weapon
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 9

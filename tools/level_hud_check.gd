@@ -2,7 +2,9 @@ extends RefCounted
 ## --level-hud-check: the run level reads at a glance. The portrait carries a big level number with
 ## an XP ring that fills toward the next level; a level-up pops the badge, washes the screen gold and
 ## plays its own sound (audio/level_up.wav, made by tools/gen_sfx_ui.py); R shows locked (a
-## padlock and "6") until level 6, and can't be cast or ranked before then. Never touches the save.
+## padlock and "6") until level 6, and can't be cast or ranked before then. Each level also grows max
+## health and ability power quietly (LevelGrowth, as the source does) and nothing else: no weapon
+## bonuses. Never touches the save.
 
 var bad := 0
 
@@ -61,5 +63,45 @@ func run(main: Node) -> void:
 	ok(P.lvl == 6 and P.can_level("ult") and hud.r_lock_text(P) == "UNLOCK", "level 6: R is ready to unlock ('%s')" % hud.r_lock_text(P))
 	P.level_slot("ult")
 	ok(int(P.slot_lv["ult"]) == 1 and hud.r_lock_text(P) == "", "unlocked: no lock on R any more")
+	m.queue_free()
+	await _growth(main, "thief")
+	await _growth(main, "juggernaut")
 	print("LEVEL HUD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## ---------------------------------------------------------------- 5. what each level gives
+## Level by level: +6% of the class's health and +5% ability power (levels 2-6), half that from 7;
+## the weapon and its upgrades never change; the tooltip and a class change agree with the totals.
+func _growth(main: Node, arch: String) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 13, "no_drop": true,
+		"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)})
+	m.set_process(false)
+	var P: Hunter = m.player
+	var base_hp := float(P.cdat["hp"])
+	var dmg0 := float(P.wpn["dmg"])
+	var step_ok := true
+	var info := ""
+	for lvl in range(2, Hunter.XP_TO.size() + 1):
+		var hp0 := P.max_hp
+		var ap0 := LevelGrowth.ap(P)
+		P.gain_xp(float(Hunter.XP_TO[lvl - 1]) - P.xp + 0.5)
+		var k := 1.0 if lvl < 7 else 0.5
+		if absf((P.max_hp - hp0) - base_hp * 0.06 * k) > 0.05 or absf((LevelGrowth.ap(P) - ap0) - 0.05 * k) > 0.0001:
+			step_ok = false
+			info += "L%d hp+%.2f ap+%.3f " % [lvl, P.max_hp - hp0, LevelGrowth.ap(P) - ap0]
+	var hp_up := P.max_hp / base_hp - 1.0
+	var tip := LevelGrowth.tip(P)
+	ok(step_ok and P.lvl == 10, "%s: levels 2-6 add 6%% health, 5%% ability power; 7-10 half %s" % [arch, info])
+	ok(absf(hp_up - 0.42) < 0.001 and absf(LevelGrowth.ap(P) - 1.35) < 0.0001,
+		"%s: by level 10: +%.0f%% health, ability power x%.2f" % [arch, hp_up * 100.0, LevelGrowth.ap(P)])
+	ok(P.perks.is_empty() and is_equal_approx(float(P.wpn["dmg"]), dmg0),
+		"%s: levels give no weapon bonus (no perks, damage unchanged)" % arch)
+	ok(P.skill_pts == 10, "%s: one skill point a level (%d)" % [arch, P.skill_pts])
+	ok(tip.contains("+42% max health") and tip.contains("+35% ability power"),
+		"%s: the level badge tooltip shows the totals (%s)" % [arch, tip])
+	P.reclass(P.cls, P.arch)
+	ok(absf(P.max_hp - (base_hp * 1.42 + P.kin_hp_added)) < 0.5,
+		"%s: a class change keeps the levels' health (%.1f)" % [arch, P.max_hp])
+	m.queue_free()
