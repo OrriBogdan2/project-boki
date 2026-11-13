@@ -78,6 +78,15 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 `MAX_CADENCE` cycles/s. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
 `STRIDE`.
 
+## Attack contact
+
+A Boki's bite lands `Kin.STRIKE_WINDUP` (0.3 s) after it starts (decision 0061). `BokiRig.CONTACT` holds where the
+attack clip connects, per starter line (cindle 0.333 s, puddlet and burrlet 0.367 s at speed 1): the first frame the
+front-most bone is 90% of the way to its farthest reach. The rig plays the attack at `CONTACT / STRIKE_WINDUP`, so
+the snap lands on the hit; a species without a row plays at speed 1. `--boki-anim-audit` reads the contact off each
+clip (must match `CONTACT` to a frame) and drives the bite live (must connect within a frame of the hit). A re-keyed
+attack clip: copy the measured time into `CONTACT`.
+
 ## Gait audit
 
 `--boki-anim-audit` drives every rigged Boki through the live `BokiRig` hand-off (clip and rate from its speed) at
