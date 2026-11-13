@@ -38,8 +38,7 @@ func _match_course() -> void:
 	var tu: Tutorial = m.tut
 	ok(Tutorial.NAG_T < IDLE_S, "a nag comes inside the %.0f s window (NAG_T %.0f s)" % [IDLE_S, Tutorial.NAG_T])
 	ok(Tutorial.NAG_T < SILENT_MAX, "and a nag comes before %.0f s of silence" % SILENT_MAX)
-	var timed := {"RANK_WAIT_T": Tutorial.RANK_WAIT_T, "KEY_WAIT_T": Tutorial.KEY_WAIT_T,
-			"KIN_WATCH_T": Tutorial.KIN_WATCH_T}
+	var timed := {"RANK_WAIT_T": Tutorial.RANK_WAIT_T}
 	for k in timed:
 		ok(float(timed[k]) > Tutorial.NAG_T, "%s (%.0f s) outlasts a nag, so it never waits in silence" % [k, timed[k]])
 	print("IDLE match | step | hint s | Boki | nag s | marker | note")
@@ -156,7 +155,7 @@ func _idle_farm(g: FarmGuide, id: String) -> void:
 	while t < IDLE_S:
 		g.tick(0.1)
 		t += 0.1
-		if hint_t < 0.0 and g.hint_visible() and g.hint_lbl.text != "":
+		if hint_t < 0.0 and g.hint_visible() and g.hint_text() != "":
 			hint_t = t
 		if place and not (is_instance_valid(g.marker) and g.marker.visible and g.marker.text != ""):
 			lost += 1

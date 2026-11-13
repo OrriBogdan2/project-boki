@@ -3,6 +3,7 @@ class_name Loot
 ##   gear    {t:"gear", id, rar, uid}              a piece of gear for one of the five slots (Gear)
 ##   valuable{t:"val", id, uid}                    sold at home; a Soul Ember revives a kin
 ##   rare egg{t:"val", id:"rare_egg", sp, boss, uid}  a lair boss's egg: takes a pack slot, hatches at home
+##   ink     {t:"val", id:"ink", ink:"ember", uid}    a vial of Ink (InkDrops): goes to your goods at home (Goods)
 ## Weapons are not loot any more: every hunter carries one fixed signature weapon and grows it with
 ## upgrades (WeaponUps). Their worth drives smart loot and what the backpack keeps. The element
 ## riders of a Brand upgrade run on the weapon's own hits (Hunter._emit_shot / _strike call rider()).
@@ -28,7 +29,19 @@ const VALUABLES := {
 	"kin_idol": {"name": "Boki Idol", "col": Color("ffb0d0"), "value": 58, "rar": 3, "desc": "A little carved Boki. Collectors pay a lot."},
 	"crown_shard": {"name": "Crown Shard", "col": Color("ffd23f"), "value": 105, "rar": 4, "desc": "A piece of an old crown. Worth a fortune."},
 	"soul_ember": {"name": "Soul Ember", "col": Color("9ff0e0"), "value": 140, "rar": 4, "desc": "A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back."},
+	# a locked garden zone's first key (GardenZones.wayseed): banked as a bag item at home, never sold
+	"wayseed_glasswater": {"name": "Glasswater Wayseed", "col": Color("6fd0e8"), "value": 150, "rar": 4,
+		"desc": "A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal."},
+	"wayseed_cinderstep": {"name": "Cinderstep Wayseed", "col": Color("e07a3a"), "value": 150, "rar": 4,
+		"desc": "A seed warm to hold. Carry it to the Waystone with a Boki leaning Fire, Rock, Steel or Dragon."},
+	"wayseed_hushwood": {"name": "Hushwood Wayseed", "col": Color("9a7ae0"), "value": 150, "rar": 4,
+		"desc": "A seed that hums at dusk. Carry it to the Waystone with a Boki leaning Dark, Psychic or Poison."},
+	"wayseed_ridge": {"name": "Kitewind Wayseed", "col": Color("f2d45a"), "value": 150, "rar": 4,
+		"desc": "A seed that tugs at the wind. Carry it to the Waystone with a Boki leaning Flying or Electric."},
 	# worth more than anything else you can carry, so smart loot and a full pack always keep it
+	# a vial of Ink: the item's "ink" names the type; name and colour come from its goods entry (market.json)
+	"ink": {"name": "Ink", "col": Color("ff6a3a"), "value": 60, "rar": 3,
+		"desc": "A vial of Ink for Boki that evolve by it."},
 	"rare_egg": {"name": "Rare Egg", "col": Color("ffcf4a"), "value": 400, "rar": 4, "desc": "A boss's egg, big and glowing gold. Carry it home and it hatches into a rare Boki."},
 }
 
@@ -36,8 +49,22 @@ const VALUABLES := {
 static func rare_egg(sp: String, boss := "") -> Dictionary:
 	return {"t": "val", "id": "rare_egg", "sp": sp, "boss": boss, "uid": _uid()}
 
+## A vial of one Ink as a backpack item (ink = "ember", "tide", ...; see content/rules/market.json goods "ink_<type>").
+static func ink(ink_id: String) -> Dictionary:
+	return {"t": "val", "id": "ink", "ink": ink_id, "uid": _uid()}
+
+static func is_ink(it: Dictionary) -> bool:
+	return String(it.get("t", "")) == "val" and String(it.get("id", "")) == "ink"
+
+## Its goods key ("good:ink_ember"), for Goods.
+static func ink_key(it: Dictionary) -> String:
+	return "good:ink_" + String(it.get("ink", ""))
+
 static func is_rare_egg(it: Dictionary) -> bool:
 	return String(it.get("t", "")) == "val" and String(it.get("id", "")) == "rare_egg"
+
+static func is_wayseed(it: Dictionary) -> bool:
+	return String(it.get("t", "")) == "val" and String(it.get("id", "")).begins_with("wayseed_")
 
 ## What a piece of gear is worth by rarity (Common..Legendary).
 const GEAR_VALUE := [3, 8, 18, 36, 70]
@@ -75,6 +102,7 @@ static func name_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
 		if is_rare_egg(it) and Data.KIN.has(String(it.get("sp", ""))):
 			return "Rare " + Data.egg_name(String(it["sp"]))
+		if is_ink(it): return Goods.name_of(ink_key(it))
 		return String(VALUABLES.get(String(it.get("id", "")), {}).get("name", "Trinket"))
 	var gd: Dictionary = Gear.ALL.get(String(it.get("id", "")), {})
 	var r := rar_of(it)
@@ -83,11 +111,13 @@ static func name_of(it: Dictionary) -> String:
 ## The colour that marks it.
 static func col_of(it: Dictionary) -> Color:
 	if String(it.get("t", "")) == "val":
+		if is_ink(it): return Color(String(Goods.good("ink_" + String(it.get("ink", ""))).get("col", "ffffff")))
 		return VALUABLES.get(String(it.get("id", "")), {}).get("col", Color("ffd36a"))
 	return Data.RARITY[rar_of(it)]["color"]
 
 static func icon_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
+		if is_wayseed(it): return "seed"
 		return "bond" if String(it.get("id", "")) == "soul_ember" else ("egg" if is_rare_egg(it) else "gem")
 	return Gear.icon_of(String(it.get("id", "")))
 
@@ -95,6 +125,8 @@ static func icon_of(it: Dictionary) -> String:
 static func sub_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
 		if is_rare_egg(it): return "Rare Egg  ·  carry it home and it hatches a rare Boki"
+		if is_ink(it): return "Ink  ·  carry it home; some Boki evolve when it is used on them"
+		if is_wayseed(it): return "Wayseed  ·  carry it home: it wakes a garden zone"
 		return "Treasure  ·  sells for %d gems" % sell_price(it) if String(it.get("id", "")) != "soul_ember" else "Revives a Boki at the Soul Shrine"
 	var id := String(it.get("id", ""))
 	if not Gear.ALL.has(id): return "Gear"

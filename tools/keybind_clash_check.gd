@@ -36,16 +36,18 @@ func rules(S) -> int:
 	ok(S.can_share("play", "gear2") and not S.can_share("dash", "play") and not S.can_share("fire", "gear2"),
 			"only a home action and a match action may share a key")
 	var f := _key(KEY_F)
-	var cx: Array = S.conflicts(f, "dash")
-	ok(cx.size() == 1 and cx[0][0] == "interact", "binding dash to F clashes with Interact (%s)" % str(cx))
+	var cx: Array = S.conflicts(f, "jump")
+	ok(cx.size() == 1 and cx[0][0] == "interact", "binding jump to F clashes with Interact (%s)" % str(cx))
 	var vu: Array = S.conflicts(_key(KEY_V), "ultimate")
-	ok(vu.size() == 1 and vu[0][0] == "gear2" and S.holders("key:%d" % KEY_V, "ultimate").size() == 2,
-			"V for fuse clashes with glove 2 (a match) but not with play (home) (%s)" % str(vu))
-	var dash0: String = S.slots("dash")[0]
-	S.swap_bind("dash", 0, f, "interact", 0)
-	var swapped: bool = S.slots("dash")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == dash0
-	ok(swapped and not _clashing(S, "dash", 0) and not _clashing(S, "interact", 0),
-			"Swap leaves both rows clear (dash %s, interact %s)" % [S.binding_text("dash"), S.binding_text("interact")])
+	var vnames: Array = vu.map(func(h): return h[0])
+	var v_held: int = S.holders("key:%d" % KEY_V, "ultimate").size()
+	ok(vu.size() == 2 and vnames.has("gear2") and vnames.has("push_to_talk") and v_held == 3,
+			"V for fuse clashes with glove 2 and push to talk, not with play (home) (%s)" % str(vu))
+	var jump0: String = S.slots("jump")[0]
+	S.swap_bind("jump", 0, f, cx)
+	var swapped: bool = S.slots("jump")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == jump0
+	ok(swapped and not _clashing(S, "jump", 0) and not _clashing(S, "interact", 0),
+			"Swap leaves both rows clear (jump %s, interact %s)" % [S.binding_text("jump"), S.binding_text("interact")])
 	S.reset_all()
 	# an old save: dash on F next to Interact on F, from before clashes were shown
 	S.v["keys"] = {"dash": ["key:%d" % KEY_F]}

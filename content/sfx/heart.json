@@ -1,0 +1,30 @@
+{
+ "group": "heart",
+ "name": "Heartspark",
+ "script": "tools/gen_sfx_heart.py",
+ "sounds": {
+  "heart_charge": "loop",
+  "heart_beat": "loop",
+  "heart_take": "signature",
+  "heart_reveal": "cast",
+  "heart_gate_open": "cast",
+  "heart_extract": "cast",
+  "ways_open": "ui",
+  "ways_start": "ui",
+  "ways_taken_own": "ui",
+  "ways_taken_other": "ui",
+  "ways_warn": "ui",
+  "ways_last": "ui"
+ },
+ "reach": {
+  "heart_charge": 70,
+  "heart_gate_open": 45,
+  "heart_extract": 45
+ },
+ "loops": [
+  "heart_charge",
+  "heart_beat"
+ ],
+ "signature": [],
+ "replaces": []
+}
