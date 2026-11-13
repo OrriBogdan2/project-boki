@@ -97,11 +97,11 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) · **open** [?] (ext/kael-chain-length re-checked, no data) |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
 | Lace | RMB range | 14 | grows with the charge, max not seen | [?] |
-| Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] |
+| Lace | E arc, reach | 120, **10.8** (was 9) | 120, wall centred on the cursor at 4.5 bh (0457) and 6 bh (10.8, 0498) | arc match; **fixed** to the 0498 floor (9 m could not place that wall; the cap itself is not seen); locked in kit_parity.json |
 | Lace | R range, width | 18, 0.5 | not in the footage | [?] |
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | **Not determinable**: the only miss (frame 0133) ended at 6.5 bh (11.7 m), short of 14 m, so a cursor clamp and a 14 m cap both fit; 14 stays |
 | Lace | RMB range | 14 | grows with the charge, max not seen | [?] · **open** |
-| Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] · **open** |
+| Lace | E arc, reach | 120, 10.8 | 120, cursor seen to 6 bh (10.8) | **fixed** (see above) |
 | Lace | R range, width | 18, 0.5 | not in the footage | [?] · **open** |
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] · **open** |
 | Cinder | E radius | 4.5 | 2.5 bh (4.5) | match |
@@ -121,7 +121,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) | still (13, 24) |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match | still match (3.6 x 1.8) |
 | Lace | RMB range | 14 | grows with the charge, max not seen | [?] | still open `[?]` (14) |
-| Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] | still arc match; reach open (120, 9) |
+| Lace | E arc, reach | 120, 10.8 | 120, cursor seen to 6 bh (10.8) | arc match; reach **fixed** to 10.8 |
 | Lace | R range, width | 18, 0.5 | not in the footage | [?] | still open `[?]` (18, .5) |
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] | still open `[?]` (14) |
 | Cinder | E radius | 4.5 | 2.5 bh (4.5) | match | still match (4.5) |
@@ -185,7 +185,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Lace | LMB, Empowered | range 12, arrow 0.18 | reach 13.7 (12 + 0.2 + 0.6 start + step) | lands at the cursor, ~6 bh (10.8) seen | match |
 | Lace | LMB, Supercharged | range 16 | reach 18.1 | no number | match; source gap |
 | Lace | RMB Heavy Shot | 14 (+3 at rank 3), size 0.3 | reach 18.5 at rank 3 (17 + 0.6 + step) | gold bar ~2 bh while held; range not seen | match; range [?] |
-| Lace | E Hail Wall | reach 9, 120 deg, 1.8 deep | wall centre 9.0, arc 125 | 120 deg, centre at the cursor (8-10.8) | match |
+| Lace | E Hail Wall | reach 10.8 (was 9), 120 deg, 1.8 deep | wall centre 9.0 (measured at 9; not re-run), arc 125 | 120 deg, centre at the cursor (8-10.8) | match |
 | Lace | R Starpiercer | range 18, width 0.5 | reach 20.4 (18 + 0.6 + 1.5 step), lane 0.5 | ~1.5x normal range (1.5 x 12 = 18) | match |
 | Cinder | LMB flame | range 6.1, width 0.65 to 2.85 | reach 6.8, fan 1.8 wide at 4 m (2.8 in foe centres) | ~4 bh (7.2) whatever the cursor; 0.3 bh to 1-1.5 bh wide | match; reach -15% to source |
 | Cinder | RMB Cinder Shot | range 14, size 0.3 | reach 13.9 | flew 6-8 bh (10.8-14.4); a miss ended at the cursor (11.7) | match; always-full-range vs ends at cursor [?] |
