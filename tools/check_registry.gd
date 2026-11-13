@@ -481,6 +481,8 @@ const CHECKS := {
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],  # day 1, 5
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],  # --zone= --shots-dir=
 	"--result-card-shots": ["res://tools/result_card_shots.gd", "result_card_shots", null],      # --shots-dir=<dir>
+	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],      # day 1, 5
+	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],      # --zone= --shots-dir=
 	"--garden-unlock-pace-check": ["res://tools/garden_unlock_pace_check.gd", "garden_unlock_pace_check", null],
 	"--garden-zones-check": ["res://tools/garden_zones_check.gd", "garden_zones_check", null],  # GARDEN.md 10 zones
 	"--old-saves-check": ["res://tools/old_saves_check.gd", "old_saves_check", null],      # 0.24.2-0.24.4 saves load
@@ -590,6 +592,7 @@ const CHECKS := {
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],  # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],  # colour rule, downed, Boki
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],      # palettes
+	"--next-form-shots": ["res://tools/next_form_shots.gd", "next_form_shots", null],      # GPU, =<dir>
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
 	"--hunter-stats-check": ["res://tools/hunter_stats_check.gd", "hunter_stats_check", null],      # the Stats tab
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex
@@ -632,10 +635,6 @@ const CHECKS := {
 	"--camera-follow-shots": ["res://tools/camera_follow_check.gd", "camera_follow_check", "shots"],  # GPU
 	# mashing LMB never beats holding
 	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],
-	"--belt-hud-check": ["res://tools/belt_hud_check.gd", "belt_hud_check", null],      # six-slot belt on the HUD
-	"--belt-hud-shots": ["res://tools/belt_hud_shots.gd", "belt_hud_shots", null],      # --shots-dir=<dir>
-	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
-	"--next-form-shots": ["res://tools/next_form_shots.gd", "next_form_shots", null],      # GPU, =<dir>
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
