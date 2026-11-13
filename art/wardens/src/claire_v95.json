@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Claire's v95 master (appeal3 face + body variant a, owner-approved 11-10, ~/meshy/v95/claire/r2/appeal3/cand_a.glb, its separate spear left out: claire_v95_a_body.glb) onto claire.glb's skeleton, clips and anchors. claire.glb's own spear (the cloth and ice faces on hand.R) stays. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. Ears, hair and bow ride the head; the sheer cape behind her rides the hips.",
- "master": "~/meshy/v95/claire/r2/appeal3/claire_v95_a_body.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Claire's v95 master: the live head (appeal3 face, owner-approved 11-10, ~/meshy/v95/claire/r2/appeal3/cand_a.glb, kept down to the fur collar at y 0.33) grafted by tools/meshy/head_graft.py onto the approved chiffon skirt body (r3/meshy1112/redo_skirt/cand/u1_rm), spear left out: graft/u1rm_livehead.glb onto claire.glb's skeleton, clips and anchors. claire.glb's own spear (the cloth and ice faces on hand.R) stays. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. Ears, hair and bow ride the head; the sheer cape behind her rides the hips.",
+ "master": "~/meshy/v95/claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb",
  "game": "art/wardens/claire/claire.glb",
  "tris": 13000,
  "head": {
@@ -164,6 +164,35 @@
    ]
   },
   {
+   "bone": "hips",
+   "box": [
+    -0.245,
+    0.245,
+    -0.07,
+    0.3,
+    0.72,
+    1.06
+   ],
+   "except_segs": [
+    [
+     "thigh.R",
+     0.085
+    ],
+    [
+     "thigh.L",
+     0.085
+    ],
+    [
+     "forearm.R",
+     0.06
+    ],
+    [
+     "forearm.L",
+     0.06
+    ]
+   ]
+  },
+  {
    "bone": "head",
    "box": [
     -0.26,
@@ -298,5 +327,15 @@
    -0.16,
    1.0
   ]
- }
+ },
+ "detach": [
+  [
+   "hand.L",
+   "hips"
+  ],
+  [
+   "hand.R",
+   "hips"
+  ]
+ ]
 }

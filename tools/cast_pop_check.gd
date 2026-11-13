@@ -18,6 +18,11 @@ const WALK_FRAMES := 40         # frames of walk sampled (over a stride cycle)
 const STAND_FRAMES := 60        # frames of idle sampled (a breath), and of the rest stance
 const STANCE_WAIT := 210        # frames standing still before the rest stance is fully on (loco stance_after + fade)
 const SETTLE := 14              # frames a forced clip takes to own the body (longest fade and crossfade)
+## The Hunters slice this pass tuned; --cast-pop-check=<ids> checks others.
+const SLICE := ["archer", "juggernaut", "gunslinger", "ashwick"]
+## Moves whose clip hands back to the legs as the kit's movement hold lifts (tools/vex_anim_time_check.gd E and R rows):
+## a longer blend-out would keep the legs in the clip after she may walk, so theirs stays at FADE_LOCO.
+const HOLD_BOUND := ["gunslinger_e", "gunslinger_x"]
 const WARM := 45                # frames before sampling: the gait and sway settled
 
 var bad := 0
@@ -32,7 +37,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
-	var only: Array = []
+	var only: Array = SLICE
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--cast-pop-check="):
 			only = Array(a.substr(17).split(",", false))
@@ -76,7 +81,8 @@ func _hero(id: String, dd: Dictionary) -> void:
 			gaps.append(_gap(last, mode[0], mode[1]))
 		var in_cap := minf(IN_MAX, _first_key(String(km), length))
 		var need_in := minf(maxf(gaps[0][0], gaps[2][0]) / RATE, in_cap)
-		var need_out := minf(maxf(gaps[1][0], gaps[3][0]) / RATE, OUT_MAX)
+		var out_cap := WardenClips.FADE_LOCO if km in HOLD_BOUND else OUT_MAX
+		var need_out := minf(maxf(gaps[1][0], gaps[3][0]) / RATE, out_cap)
 		print("POP %s %s | %.3f %s / %.3f %s | %.3f %s / %.3f %s | %.2f / %.2f -> %.2f / %.2f" % [id, km,
 				gaps[0][0], gaps[0][1], gaps[1][0], gaps[1][1], gaps[2][0], gaps[2][1], gaps[3][0], gaps[3][1],
 				fade_in, fade_out, need_in, need_out])

@@ -1,9 +1,9 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
-## [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1
-## approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch a hit
-## mid-run in <dir>/flinch/ (--heavy: stagger), with --cast a move pressed on the run (or standing, --cast-speed=0) in
-## <dir>/cast_<kmove>/. Needs a renderer. ffmpeg makes the GIFs and sheets.
+## [--carry] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the game's renderer
+## (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch
+## a hit mid-run in <dir>/flinch/ (--heavy: stagger), with --cast a move pressed on the run (or standing,
+## --cast-speed=0) in <dir>/cast_<kmove>/. Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -109,6 +109,8 @@ func run(main: Node) -> void:
 			await _cast(model, sync, fps, out, a.substr(7), cast_speed)
 	if OS.get_cmdline_user_args().has("--moods"):
 		await _moods(model, sync, clips, out)
+	if OS.get_cmdline_user_args().has("--carry"):
+		await _carry(model, sync, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
 
@@ -189,3 +191,22 @@ func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
 		sync.call("_process", 1.0 / 30.0)
 	await _grab(dir.path_join("flare.png"))
 	model.set_meta(WardenMood.FLARE, false)
+
+## --carry: the rescue carry on the walk (<dir>/carry/fNN.png, 8 frames), a ball at the socket for the Boki.
+func _carry(model: Node3D, sync: Node, out: String) -> void:
+	var dir := out.path_join("carry")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var ball := MeshInstance3D.new()
+	ball.mesh = SphereMesh.new()
+	ball.scale = Vector3.ONE * 0.3
+	holder.add_child(ball)
+	var state := {"vel": Vector3(0, 0, -3.6), "face": 0.0, "grounded": true, "kmove": WardenCarry.MOVE, "kmove_t": 1.0}
+	model.set_meta(WardenClips.STATE, state)
+	for k in 30:
+		sync.call("_process", 1.0 / 30.0)
+	for i in 8:
+		for k in 4:
+			sync.call("_process", 1.0 / 30.0)
+		ball.global_position = model.get_meta(WardenCarry.SOCKET, Vector3.ZERO)
+		await _grab(dir.path_join("f%02d.png" % i))
+	ball.queue_free()
