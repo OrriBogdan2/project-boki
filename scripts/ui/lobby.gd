@@ -14,7 +14,7 @@ func setup(o: Dictionary) -> void:
 	opts = o
 
 func _ready() -> void:
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)

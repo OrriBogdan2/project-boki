@@ -8,6 +8,7 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+##   [--bench-hunters=30]  hunters in the expedition (squads of 2; the default 6 is the fixed load)
 ##   [--bench-shots=<dir>]  saves each zone part's default-camera frame (screen UI hidden) as <part>.jpg
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
@@ -34,6 +35,7 @@ var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
 var zone := ""
+var hunters := 6
 var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false      # a budget line said FAIL: the exit code carries it
 var rows := PackedStringArray()
@@ -66,6 +68,7 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
+		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
@@ -87,8 +90,8 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": hunters / 2, "squad": 2, "total": hunters, "raid": "ash", "blight": true, "no_drop": true,
+		"god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -111,6 +114,7 @@ func _match() -> Array:
 		added[k] = int(added.get(k, 0)) + 1)
 	Match.prof_on = true
 	Match.prof.clear()
+	Match.vprof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var fought := false
@@ -140,6 +144,10 @@ func _match() -> Array:
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
 	print("BENCH match step sections (ms per frame): " + ", ".join(per))
+	var vk := Match.vprof.keys()
+	vk.sort_custom(func(a, b): return Match.vprof[a] > Match.vprof[b])
+	var vper := vk.map(func(k): return "%s %.2f" % [k, Match.vprof[k] / 1000.0 / fl.size()])
+	print("BENCH match visual sections (ms per frame): " + ", ".join(vper))
 	_meshes()
 	Match.prof_on = false
 	return fl
