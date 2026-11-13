@@ -109,7 +109,8 @@ func _knock(src: String, m: Match, P: Hunter, T: Hunter) -> Dictionary:
 			K.crushed_at = {}
 			T.hurt(5.0, P, {"src": "abil", "ab": "lmb", "kb": dir * 8.0, "lift": 2.0})
 		"gunslinger":
-			K._cone(T.pos - Vector3(1.0, 0, 0), dir, K.rmb_def()["burr"])      # (a cone is a wall cone now: vex-rmb-1111)
+			# a Burr cone is a wall cone now (vex-rmb-1111): no wall flag
+			K._cone(T.pos - Vector3(1.0, 0, 0), dir, K.rmb_def()["burr"])
 		"dolm":
 			K._punch(1.0)
 		"mage":
