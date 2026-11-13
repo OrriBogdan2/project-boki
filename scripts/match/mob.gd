@@ -30,9 +30,9 @@ const TABLE := {
 ## Each state as the snapshot (Match.MOB_STATES) and the looks name it: NOTICE shows as the chase, ATTACK as the
 ## lunge, STUNNED as a recovery (as a cut wind-up always did), RETURN as idle. The Net shape does not change.
 const LOOKS: PackedStringArray = ["idle", "chase", "chase", "windup", "lunge", "recover", "recover", "idle"]
-const LUNGE_S := 0.2          # s a lunge dashes
-const LUNGE_REC := 0.45       # s it stands after a lunge
-const RECOVER_S := {"spit": 0.5, "volley": 0.6, "slam": 0.8}      # s it stands after the other blows
+const LUNGE_S := MobAnim.LUNGE_S          # s a lunge dashes
+const LUNGE_REC := MobAnim.LUNGE_REC       # s it stands after a lunge
+const RECOVER_S := MobAnim.RECOVER_S      # s it stands after the other blows
 const CUT_HOLD := 0.4         # s a stun that cuts a wind-up holds it, at the least
 const WALL_HOLD := 1.0        # s stunned by a knock into a wall or rock
 const AMBLE_M := 3.0          # m from its camp it ambles while calm; a RETURN is home inside this
@@ -65,6 +65,7 @@ var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
+var noticed_at := -INF     # match time of this monster's last notice cue (MobNotice)
 var death_t := 0.0
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
@@ -141,7 +142,9 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		if by is Kin and by.state != "active" and by.owner_h:
 			real = by.owner_h
 		if tgt == null or randf() < 0.4:
+			var was_calm := is_calm()
 			aggro(real, "hit")
+			if was_calm and fsm.is_in(S.NOTICE): MobNotice.woke(self)      # idle -> chase: the notice cue
 		if real == m.player and not remote:
 			watched = weakref(self)
 	return dealt
@@ -220,6 +223,7 @@ func _look() -> String:
 ## A proxy takes the host's state (a Match.MOB_STATES index) and the time left in it from a snapshot.
 func follow(look_i: int, left: float) -> void:
 	if look_i >= 0 and look_i < Match.MOB_STATES.size():
+		if _net_st == "idle" and look_i == 1: MobNotice.woke(self)      # the host's mob woke: the notice cue
 		_net_st = Match.MOB_STATES[look_i]
 	_net_left = left
 
@@ -316,6 +320,7 @@ func sim(dt: float) -> void:
 				tgt = _find_target()
 				if tgt:
 					_go(S.NOTICE, "saw")
+					MobNotice.woke(self)
 			if fsm.is_in(S.RETURN) and flat_dist(camp) <= AMBLE_M:
 				_go(S.IDLE, "home")
 			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
@@ -365,7 +370,7 @@ func sim(dt: float) -> void:
 					if tele:
 						m.fx.aim_telegraph(tele, pos, atk_dir)
 			if tele:
-				m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
+				m.fx.telegraph_progress(tele, MobAnim.windup_k(st_t, float(md["windup"])))
 			if st_t <= 0.0:
 				_strike()
 		S.ATTACK:      # only a lunge stays past the step it struck in
@@ -391,13 +396,14 @@ func sim(dt: float) -> void:
 		if grounded and hv.length() <= spd * 1.3 and m.world.is_void(ahead.x, ahead.y):
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
-	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
+	var pre_dir := Vector2(vel.x, vel.z)
+	var pre_v := pre_dir.length()
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
 		stun_t = maxf(stun_t, WALL_HOLD)
 		_stun("wall", WALL_HOLD)
-		m.on_wall_slam(self)
+		m.on_wall_slam(self, pre_dir / pre_v)
 		hurt(10.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
 	var look := atk_dir if fsm.is_in(S.WINDUP) or fsm.is_in(S.ATTACK) else Vector2(vel.x, vel.z)
@@ -439,7 +445,7 @@ func _far_step(dt: float) -> float:
 	_far_dt += dt
 	var near_me := pos.distance_squared_to(me.pos) <= FAR_M * FAR_M
 	near_me = near_me or (tgt != null and tgt.flat_dist(me) <= FAR_M)
-	if not near_me and (int(m.time / Match.DT) + get_instance_id()) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
+	if not near_me and (int(m.time / Match.DT) + hash(nid)) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
 		return 0.0
 	var out := _far_dt
 	_far_dt = 0.0
@@ -537,10 +543,11 @@ func render(delta: float, alpha: float) -> void:
 	if dead:
 		# a death pop: swell, flatten and blink out
 		death_t += delta
-		visible = death_t < 0.32
+		visible = death_t < MobAnim.DEATH_S
 		if visible:
-			var dk := death_t / 0.32
+			var dk := death_t / MobAnim.DEATH_S
 			var bd: Node3D = model.get_node("Body")
+			MobAnim.pose(self, delta)
 			var w := 1.0 + sin(minf(dk * 1.6, 1.0) * PI) * 0.35
 			bd.scale = Vector3(w + dk * 0.3, maxf(0.05, 1.0 - dk * dk), w + dk * 0.3)
 			for mt in mats:
@@ -551,9 +558,7 @@ func render(delta: float, alpha: float) -> void:
 	var moving := spd > 0.3
 	anim += delta * (2.0 + minf(spd, 6.0) * 1.8 if moving else 2.0)
 	var body: Node3D = model.get_node("Body")
-	var wind := 0.0
-	if st == "windup":
-		wind = 1.0 - st_t / float(md["windup"])
+	var wind := MobAnim.windup_k(st_t, float(md["windup"])) if st == "windup" else 0.0
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
 	# throw the weight forward on the attack, recoil when hit
 	var shiver := sin(m.time * 60.0) * 0.03 * maxf(0.0, wind - 0.6) * 2.5
@@ -570,81 +575,7 @@ func render(delta: float, alpha: float) -> void:
 		var sq0 := squash
 		body.scale = Vector3(1.0 + sq0 * 0.3 + gather * 0.5, 1.0 - sq0 * 0.35 - gather * 0.5, 1.0 + sq0 * 0.3 + gather * 0.5)
 		return
-	match mkind:
-		"skitter":
-			body.position.y = absf(sin(anim)) * 0.05 * float(moving) - gather * 0.3 + (0.0 if moving else sin(m.time * 3.0) * 0.012)
-			for i in 3:
-				for sx in [-1, 1]:
-					var lg := body.get_node_or_null("Leg%d%d" % [i, sx]) as Node3D
-					if lg == null: continue
-					# tripod gait: legs 0 and 2 on one side move with leg 1 on the other
-					var ph := anim * 1.6 + (PI if (i % 2 == 0) == (sx > 0) else 0.0)
-					var mv := 1.0 if moving else 0.15
-					lg.rotation.y = sin(ph) * 0.45 * mv
-					lg.rotation.z = maxf(0.0, cos(ph)) * 0.35 * sx * mv - wind * 0.3 * sx
-			var jaw := 0.25 + wind * 0.5 + (0.6 if st == "lunge" else 0.0) + sin(m.time * 7.0) * 0.06
-			for jn in ["JawL", "JawR"]:
-				var j := body.get_node_or_null(jn) as Node3D
-				if j: j.rotation.y = jaw * (1.0 if jn == "JawL" else -1.0)
-		"spitter":
-			var bulb: Node3D = body.get_node("Bulb")
-			bulb.scale = Vector3(1.0 - wind * 0.15, 0.9 + wind * 0.4, 1.0 - wind * 0.15) * (1.0 + sin(anim) * 0.03)
-			bulb.rotation.x = -wind * 0.5 + (0.5 if st == "recover" else 0.0) * 0.5
-			body.rotation.y = sin(m.time * 1.3) * 0.05
-			for i in 4:
-				var lf := body.get_node_or_null("Leaf%d" % i) as Node3D
-				if lf: lf.rotation.z = sin(m.time * 1.7 + i * 1.3) * 0.08 + wind * 0.45 + hurt_k * 0.3
-		"bomber":
-			var sw := 1.0 + wind * 0.45 + sin(anim * (1.0 + wind * 6.0)) * 0.04 * (1.0 + wind * 3.0)
-			body.get_node("Puff").scale = Vector3.ONE * sw
-			body.position.y = absf(sin(anim)) * 0.1
-			var puff := body.get_node("Puff")
-			for fn in ["FinL", "FinR"]:
-				var fin := puff.get_node_or_null(fn) as Node3D
-				if fin: fin.rotation.z = sin(anim * 2.6) * (0.5 + wind * 0.5) * (1.0 if fn == "FinL" else -1.0)
-			var spk := puff.get_node_or_null("Spark") as Node3D
-			if spk: spk.scale = Vector3.ONE * (0.85 + absf(sin(m.time * 23.0)) * 0.35 + wind * 0.9)
-		"glimmer":
-			body.position.y = absf(sin(anim * 1.3)) * 0.16
-			if model.has_meta("sculpted"):
-				for en in ["EarL", "EarR"]:
-					var ear := body.get_node_or_null(en) as Node3D
-					if ear: ear.rotation.x = 0.25 + sin(anim * 1.3 + 0.6) * 0.25
-			else:
-				body.rotation.y += delta * 2.0
-		"sentinel":
-			var cr: Node3D = body.get_node("Crystal")
-			cr.rotation.y += delta * (1.5 + wind * 10.0)
-			cr.position.y = 1.25 + sin(anim * 0.6) * 0.08 + wind * 0.25
-			var shd := cr.get_node_or_null("Shards") as Node3D
-			if shd: shd.rotation.y -= delta * (2.5 + wind * 12.0)
-		"brute", "warden":
-			var tor := body.get_node_or_null("Torso") as Node3D
-			var ll := body.get_node_or_null("LegL") as Node3D
-			var lr := body.get_node_or_null("LegR") as Node3D
-			var al := tor.get_node_or_null("ArmL") as Node3D if tor else null
-			var ar := tor.get_node_or_null("ArmR") as Node3D if tor else null
-			var ph2 := anim * 0.9
-			var mv := 1.0 if moving else 0.0
-			var stride := sin(ph2) * 0.5 * mv
-			if ll: ll.rotation.x = stride - wind * 0.3
-			if lr: lr.rotation.x = -stride + wind * 0.2
-			body.position.y = absf(cos(ph2)) * 0.06 * mv - wind * 0.1
-			var arm_x := 0.0
-			if st == "windup": arm_x = wind * 2.7                    # both fists up overhead
-			elif st == "recover" and stagger_t <= 0.0 and st_t > 0.35: arm_x = 0.9   # slammed down in front
-			if al: al.rotation.x = lerpf(al.rotation.x, arm_x - stride * 0.6, 1.0 - exp(-(30.0 if st == "recover" else 12.0) * delta))
-			if ar: ar.rotation.x = lerpf(ar.rotation.x, arm_x + stride * 0.6, 1.0 - exp(-(30.0 if st == "recover" else 12.0) * delta))
-			if al: al.rotation.z = -0.15 - wind * 0.2
-			if ar: ar.rotation.z = 0.15 + wind * 0.2
-			if tor:
-				tor.rotation.y = sin(ph2) * 0.12 * mv
-				tor.rotation.x = -0.12 * mv + wind * 0.15
-				# heavy breathing while it stands about
-				var br := sin(m.time * 2.2) * 0.025 * (1.0 - mv)
-				tor.scale = Vector3(1.0 + br, 1.0 + br * 0.6, 1.0 + br)
-				var hd := tor.get_node_or_null("Head") as Node3D
-				if hd and model.has_meta("sculpted"): hd.rotation.y = sin(m.time * 0.7) * 0.25 * (1.0 - mv)
+	MobAnim.pose(self, delta)
 	if model.has_meta("pulse"):
 		# glowing parts (a maw, a fuse, runes) flare as an attack winds up
 		for pm in model.get_meta("pulse"):
@@ -697,6 +628,6 @@ func _net_telegraph() -> void:
 		elif md["attack"] in ["lunge", "spit", "volley"]:
 			m.fx.aim_telegraph(tele, pos, atk_dir)
 		if tele:
-			m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
+			m.fx.telegraph_progress(tele, MobAnim.windup_k(st_t, float(md["windup"])))
 	elif tele:
 		_cancel_tele()
