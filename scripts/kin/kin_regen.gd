@@ -27,7 +27,7 @@ static func rate(k: Kin) -> float:
 
 ## One step. A Boki in combat (InCombat) waits; one that just came round starts its wait again.
 static func tick(k: Kin, dt: float) -> void:
-	if k.state in ["downed", "reviving", "dazed", "fused", "shoulder"]:
+	if k.state in ["downed", "wisp", "dazed", "fused", "shoulder"]:
 		k.combat_at = k.m.time
 	var pct := rate(k)
 	if pct > 0.0:

@@ -14,6 +14,10 @@ func run(main_node: Node) -> void:
 	await orb_check.orbs(main)
 	n += orb_check.n
 	fails += orb_check.fails
+	var globe_check = load("res://tools/ostra_globe_check.gd").new()
+	await globe_check.globe(main)
+	n += globe_check.n
+	fails += globe_check.fails
 	var arena_check = load("res://tools/ostra_arena_check.gd").new()
 	await arena_check.arena(main)
 	n += arena_check.n
