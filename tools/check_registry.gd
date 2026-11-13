@@ -263,7 +263,8 @@ const CHECKS := {
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
-	"--impact-check": ["res://tools/impact_check.gd", "impact_check", null],      # hit-stop, flash, hit and knock poses (12 Hunters)
+	# hit-stop, flash, hit and knock poses (12 Hunters)
+	"--impact-check": ["res://tools/impact_check.gd", "impact_check", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],

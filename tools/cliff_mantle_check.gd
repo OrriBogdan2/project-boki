@@ -9,8 +9,8 @@ extends RefCounted
 ##   glide                       gliding in below the lip
 ##   abyss                       falling below an island's rim, heading back in
 ## Asserts each kind of approach tops at least TOP_RATE of its tries, that over the lip you still have
-## mantle_launch_keep (0.6) of the speed you came in with (up to MantleCarry.exit_cap: no launch off a fast dash) in KEEP_RATE
-## of them, and that no face is topped by nobody.
+## mantle_launch_keep (0.6) of the speed you came in with (up to MantleCarry.exit_cap: no launch off a fast
+## dash) in KEEP_RATE of them, and that no face is topped by nobody.
 ## Double-high ground (4 terraces, 3.2m: LAYOUT_RULES' wall tier) is never reached by jumping alone, a
 ## dash included: only a glide (or a launch, an ability, the abyss) gets you up it.
 ## With --verbose prints every try. Never touches the save.

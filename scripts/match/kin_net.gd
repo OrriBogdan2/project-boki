@@ -3,8 +3,8 @@ extends RefCounted
 ## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.11.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
 ##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate), 1 when it rides as a wisp (KinWisp; Net 0.27.0),
-##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.28.0), 1 if it is its owner's lead Boki (Net 0.29.0,
-##     docs/decisions/0091; the second is in the satchel: "bench")]
+##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.28.0),
+##     1 if it is its owner's lead Boki (Net 0.29.0, docs/decisions/0091; the second is in the satchel: "bench")]
 ##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
 ##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
@@ -15,7 +15,7 @@ const KIN_AT := 19
 const HUNTER_AT := 26
 
 static func kin_extra(k: Kin) -> Array:
-	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0, snappedf(k.rest_t, 0.1), int(k.wisp)] + _summon_extra(k) + [1 if k.owner_h and k.owner_h.kin == k else 0]
+	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0, snappedf(k.rest_t, 0.1), int(k.wisp)] + _summon_extra(k) + [_lead(k)]
 
 static func apply_kin(k: Kin, it: Array) -> void:
 	if it.size() <= KIN_AT + 4:
@@ -35,6 +35,10 @@ static func apply_kin(k: Kin, it: Array) -> void:
 	if it.size() > KIN_AT + 9 and int(it[KIN_AT + 9]) == 1 and h and h.kin != k:
 		h.kin2 = h.kin           # its owner swapped: this one leads now
 		h.kin = k
+
+## 1 when `k` is its owner's lead Boki (the second rides in the satchel: "bench").
+static func _lead(k: Kin) -> int:
+	return int(k.owner_h != null and k.owner_h.kin == k)
 
 static func _summon_extra(k: Kin) -> Array:
 	var s := k.summon
