@@ -151,7 +151,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
 | Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
-| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | **26** | was 25: the E / X wedges now have a lit front on the hit (ext/vfx-grimble-wedges, below); 26 again after ext/vfx-grimble-data (all looks on data, non-gameplay chain rings gone). Left: LMB / X slugs still barely read at match zoom in the GPU reel (trail 0.34 m is not enough) |
+| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | **26** | was 25: the E / X wedges now have a lit front on the hit (ext/vfx-grimble-wedges, below); 26 again after ext/vfx-grimble-data (all looks on data, non-gameplay chain rings gone). Slugs now draw 1.6x (LMB) / 1.25x (X), hit radius unchanged; at the reel's 3 m dummy range the LMB slug still sits inside its muzzle burst, so Scale stays 3. Left: LMB slug read at range |
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
@@ -184,7 +184,17 @@ sheet the long pale lines are the aim lines, and the slugs and their 0.34 m trai
 weapon's slug look comes from the shared shot look (Oomph.shot_look), so it is backlog item 9, not this branch. Scored from the Forward+ GPU reel (jobq `20261111-211018-30595`, `--hero-vfx-reel
 --reel-hero=dredge`, rc=0): sheets in `/home/boki/gens/vfx-grimble-wedges/gpu_after/` (`dredge_e.png`: the white front
 runs out over the wind-up and lands on the slam; `dredge_r.png`: the charge front sweeps to the rim, then the waves).
-The before reel (base `origin/ext/w0246-audio-vfx`) goes to `gpu_before/` (jobq `20261111-215953-21551`).
+The before reel (base `origin/ext/w0246-audio-vfx`) failed (rc=97, its worktree was gone) and was re-run, see below.
+
+Slugs (2026-11-12): `HeroVfx.shot` scales the drawn slug and its streak by the move's `"draw"` (`s["vr"]`; the hit
+radius `s["r"]` is not touched, --hero-vfx-check asserts both). LMB `slug` draw 1.6, trail 0.5 m / 0.2 s; X gets its
+own `broadside_slug` (draw 1.25, trail 0.7 m / 0.16 s). The X muzzle burst is smaller (flare 2.6 -> 1.6 m, smoke
+6 x 0.7 -> 3 x 0.4 m) so it no longer hides the slugs in their 0.17 s flight. Re-scored from Forward+ GPU reels of
+the final branch (jobq `20261112-044411-09139`) and the base (`335955c3a`, the train merge before any wedge work,
+jobq `20261112-054219-29999`), both rc=0, no shader errors: `docs/shots/vfx-grimble-wedges/{e,r,lmb}_before_after_gpu.jpg`
+(left base, right after). E and X: the flat pale cones become a lit gold rim over a faint inside with a white front
+that sweeps out and lands on the hit. X waves: big gold slugs reach the dummy with the front. LMB: the slug is a
+little larger, but at the reel's 3 m range it is still inside the muzzle burst. Score stays **26** (Scale 3).
 
 ### Grimble on data (ext/vfx-grimble-data, 2026-11-12)
 Everything his LMB, RMB, E, X and air smash show is now `content/vfx/dredge.json` on HeroVfx; no Grimble look is
@@ -215,5 +225,5 @@ differ between the two runs because the cards roll on their own. They are not pa
 6. Kael: crimson Smash telegraph instead of the flat magenta box.
 7. Cinder: flame-coloured Ignite orb.
 8. Meeko, Sable: zones as a lit rim over a faint inside (X root field, Encore/E). Grimble's wedges done (below).
-9. Lace tap shots, Sparkle LMB and Grimble's slugs (LMB and X): thicker trails / a bigger drawn slug (hit size unchanged).
+9. Lace tap shots, Sparkle LMB: thicker trails / a bigger drawn slug (hit size unchanged). Grimble's slugs draw 1.6x / 1.25x now; his LMB still needs a read at range (a smaller LMB muzzle, or a reel shot at 8 m).
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.

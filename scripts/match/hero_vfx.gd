@@ -568,6 +568,12 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
 
+## A kit's shot: the move's "draw" scales the drawn slug and its streak (s["vr"], what Match.render draws), never
+## the hit radius s["r"]; then the move's trail follows it.
+func shot(h: Hunter, move: String, s: Dictionary) -> void:
+	s["vr"] = float(s["vr"]) * float(_rec(h, move).get("draw", 1.0))
+	trail(h, move, s["node"])
+
 func _mote_node(kind: String) -> Node3D:
 	var p := GPUParticles3D.new()
 	p.amount = AMOUNT[kind]

@@ -6,14 +6,15 @@ extends RefCounted
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it; a held wedge lies on its
 ## locked direction with its front at the charge, and Grimble's wedges are his hit cones to the content numbers.
-## Claire's scarf tails hang from their anchor, follow it, stream behind a run and are off at Low. And the status looks
+## Claire's scarf tails hang from their anchor, follow it, stream behind a run and are off at Low. Each ability's
+## emitter on the swapped models stays on its bone (tools/hero_vfx_emit.gd). And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
-## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
-## data must answer.
+## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / shot(h, "move", ...) / play(h, "move")
+## calls each Hero's data must answer.
 const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
 	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
@@ -54,6 +55,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -111,11 +113,23 @@ func _wedges(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var wave: Dictionary = (moves["broadside_wave"]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
 	var fly := (float(x["range"]) - DredgeBlast.MUZZLE) / float(x["speed"])
 	ok(absf(float(wave["lead"]) - fly) < 0.02, "the Broadside's front reaches the rim with the slugs (%.2f s)" % fly)
+	_slug_draw(V, P, moves)
+
+## Grimble's slugs (LMB and X) draw larger than they hit: the move's "draw" scales the drawn slug only.
+func _slug_draw(V: HeroVfx, P: Hunter, moves: Dictionary) -> void:
+	HeroVfx.set_data(P.arch, {"moves": moves})
+	for mv in ["slug", "broadside_slug"]:
+		var s := {"vr": 0.5, "r": 0.45, "node": null}
+		V.shot(P, mv, s)
+		var k := float(moves[mv]["draw"])
+		ok(k > 1.0 and is_equal_approx(float(s["vr"]), 0.5 * k) and float(s["r"]) == 0.45,
+				"dredge %s: drawn %.2fx, hit radius unchanged" % [mv, k])
+	HeroVfx.set_data(P.arch, {})
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
 	var called := {}
-	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail|shot)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
 		if f.ends_with(".gd") and (KIT_FILES.get(arch, []) as Array).any(func(pre): return f.begins_with(pre)):
 			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
