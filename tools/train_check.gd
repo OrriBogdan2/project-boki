@@ -66,7 +66,8 @@ func run(main: Node) -> void:
 	var P: Hunter = m.player
 	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	# ---- 1. riding: stand on a car of a moving train, out over the abyss (open air both sides for
-	# the next stretch)
+	# the next stretch, and no bridge ahead for as far as the train runs during the tests below: under
+	# one the deck dives 4.6 m and drops the rider)
 	var K := 2
 	var found := false
 	for li in st.legs.size():
@@ -81,6 +82,8 @@ func run(main: Node) -> void:
 				for xx in [-(SkyTrain.HALF_W + 0.8), SkyTrain.HALF_W + 0.8]:
 					var q: Vector3 = a + sd * xx
 					if not m.world.is_void(q.x, q.z): clear = false
+			for ds in range(0, 50, 2):
+				if absf(m.world.train_at(s0 + ds).y - m.world.train_at(s0).y) > 0.05: clear = false
 			if clear:
 				found = true
 				break
@@ -116,9 +119,12 @@ func run(main: Node) -> void:
 	ok(l3.x - l2.x > 0.4, "strafing moves you across the car: %.2fm" % (l3.x - l2.x))
 	var side := (st.cur[K] as Transform3D) * Vector3(SkyTrain.HALF_W + 1.0, 0, 0)
 	var over_void := m.world.is_void(side.x, side.z)
+	var ctrl0 := P.ctrl
+	if over_void: P.ctrl = "bot"        # (only a bot keeps the edge guard: a player walks off, as on any island)
 	for i in (60 if over_void else 0):      # (ground beside the car: pushing would walk off it, as it should)
 		P.inp["move"] = _right2(st, K)
 		m.step(Match.DT)
+	P.ctrl = ctrl0
 	P.inp["move"] = Vector2.ZERO
 	var kk: int = st._car_under(P.pos, st.cur, 0.3)
 	var l4 := _local(st, maxi(kk, 1), P.pos)
