@@ -19,6 +19,7 @@ const LIME := Color("b8f03c")        # palette "main", her signature (Arch.color
 const HOT := Color("eaffa8")         # palette "hot"
 const DEEP := Color("4f8a12")        # palette "deep"
 const BRONZE := Color("b9732f")      # the Burr Charge's metal shell (a material, not an effect)
+const DUD_DUST := Color("6b4a2e")    # a dud Burr Charge's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")   # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
@@ -564,7 +565,7 @@ func _stick(b: Dictionary, at: Vector3) -> void:
 	b["fuse"] = float(bd["fuse"])
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
-	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), EMBER)
+	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), LIME)
 	vfx("rmb_stick", at, b["out"])       # the miss: a small flare and a dull dust puff, nothing on a foe
 
 ## The lane's end with no foe and no wall, wherever the charge is (ground or air): a miss is a miss. A small
@@ -575,7 +576,7 @@ func _dud(b: Dictionary, at: Vector3) -> void:
 	var n: Node3D = b["node"]
 	if is_instance_valid(n):
 		n.visible = false
-	m.fx.burst(at, SCRAPE, 5, 1.5, 0.35, 2.0, 0.6)
+	m.fx.burst(at, DUD_DUST, 5, 1.5, 0.35, 2.0, 0.6)
 	m.sfx("gunslinger_grenade_thunk", at, -9.0, 0.6)
 
 func _detonate(b: Dictionary) -> void:
