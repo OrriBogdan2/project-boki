@@ -250,6 +250,7 @@ const CHECKS := {
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
 	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],      # the eggs' 3D shells
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
+	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],      # every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],      # far rocks and trees batched
 	"--item-art-check": ["res://tools/item_art_check.gd", "item_art_check", null],      # sculpted item models
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
