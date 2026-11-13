@@ -7,57 +7,33 @@ extends CanvasLayer
 ## Sits just under the HUD layer, so the HUD stays readable. (No class_name: load it by path, so a
 ## fresh checkout needs no class-cache rescan.)
 
-const SHADER := """
-shader_type canvas_item;
-uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
-uniform float k = 0.0;       // danger 0..1 (1 = the point of no return)
-uniform float pulse = 0.0;   // heartbeat 0..1
-void fragment() {
-	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
-	float l = dot(c, vec3(0.299, 0.587, 0.114));
-	// [reference footage] under island level the whole view goes a saturated magenta / rose at once,
-	// deepening toward crimson-magenta lower down; the picture keeps its shapes (shading, clouds)
-	vec3 rose = vec3(0.98, 0.30, 0.66);
-	vec3 deep = vec3(0.70, 0.05, 0.30);
-	vec3 tint = mix(rose, deep, smoothstep(0.55, 1.0, k));
-	// [reference] strong as soon as it's in (k ~0.55 just under the lip), redder and darker deeper
-	float s = 0.9 * smoothstep(0.0, 0.6, k);
-	vec3 g = mix(c, tint * (0.3 + 1.05 * l), s);
-	// right at the end: darker, and the edges close in with the heartbeat
-	float e = smoothstep(0.8, 1.0, k);
-	g *= 1.0 - 0.3 * e;
-	float aspect = SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
-	float r = length((SCREEN_UV - 0.5) * vec2(aspect, 1.0));
-	float v = smoothstep(0.75 - pulse * 0.05, 1.05, r);
-	g = mix(g, vec3(0.16, 0.0, 0.06), v * e * 0.8);
-	COLOR = vec4(g, 1.0);
-}
-"""
+const SHADER: Shader = preload("res://shaders/abyss_tint.gdshader")
 
 var rect: ColorRect
 var mat: ShaderMaterial
 var k := 0.0
+
 
 func _init() -> void:
 	layer = 4
 	rect = ColorRect.new()
 	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sh := Shader.new()
-	sh.code = SHADER
 	mat = ShaderMaterial.new()
-	mat.shader = sh
+	mat.shader = SHADER
 	rect.material = mat
 	rect.visible = false
 	add_child(rect)
 
+
 ## Sets the effect's strength (0..1) and the heartbeat phase (0..1) for this frame.
-func show_danger(danger: float, beat: float) -> void:
-	k = danger
-	rect.visible = danger > 0.004
+func show_danger(amount: float, beat: float) -> void:
+	k = amount
+	rect.visible = amount > 0.004
 	if rect.visible:
-		mat.set_shader_parameter("k", danger)
+		mat.set_shader_parameter("k", amount)
 		mat.set_shader_parameter("pulse", beat)
+
 
 ## How deep into the abyss p is, as the tint's strength: 0 (at or above the balloon line, 0.5m under
 ## the lowest lip around) to 1 (the point of no return, Hunter.abyss_kill_y). An overheated glider
@@ -72,10 +48,11 @@ static func danger(p: Hunter) -> float:
 	if p == null or p.out or p.grounded or not p.over_void():
 		return 0.0
 	if p.vel.y > RISE_OFF:
-		return 0.0          # lifting back up (glider lift, a jump, an updraft): the tint lets go
+		return 0.0  # lifting back up (glider lift, a jump, an updraft): the tint lets go
 	# the lip it's measured from: the lowest island ground around (or where you left), as the kill line is
 	var top: float = p.m.world.abyss_floor(p.pos.x, p.pos.z, p.last_gy) + World.ABYSS_DEPTH - 0.5
 	return danger_depth(top - p.pos.y, top - p.abyss_kill_y(), p.glide_fuel <= 0.001)
+
 
 ## The same from a depth under the balloon line and the span down to the point of no return.
 static func danger_depth(depth: float, span: float, no_heat := false) -> float:
@@ -91,7 +68,8 @@ static func danger_depth(depth: float, span: float, no_heat := false) -> float:
 		x = minf(1.0, x * 1.25 + 0.08)
 	return x
 
-const ONSET := 0.12       # share of the drop (balloon line to point of no return) the tint takes to come in
-const ONSET_K := 0.55     # ...and how strong it is by then (unmistakable, still rose rather than crimson)
-const FULL_AT := 0.95     # full strength (crimson, dark edges) from here to the point of no return
-const RISE_OFF := 1.0     # rising faster than this (m/s): no tint
+
+const ONSET := 0.12  # share of the drop (balloon line to point of no return) the tint takes to come in
+const ONSET_K := 0.55  # ...and how strong it is by then (unmistakable, still rose rather than crimson)
+const FULL_AT := 0.95  # full strength (crimson, dark edges) from here to the point of no return
+const RISE_OFF := 1.0  # rising faster than this (m/s): no tint

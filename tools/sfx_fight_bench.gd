@@ -13,7 +13,7 @@ const TICK_HZ := 100.0                  # Linux clock ticks per second in /proc/
 
 var main: Node
 var secs := 30.0
-var voices := {"SFX": [], "SFXFar": []}      # per frame voice counts per bus
+var voices := {"SFX": [], "SFXFar": [], "SFXMuffled": []}      # per frame voice counts per bus
 
 func run(main_node: Node) -> void:
 	main = main_node
