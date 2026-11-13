@@ -278,11 +278,10 @@ func _ledge_and_void(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> vo
 	while J.running():
 		y0 = P.pos.y
 		ak.step(m, 1.0 / 60.0, func(): ak.aim_at(P, home + Vector3(30, 0, 0)))
-	var handed := not P._handoff.is_empty()
 	ak.step(m, 0.3)
 	ok(
-		"ult abyss: ending over the void he falls (no hold), the flight's burst handed to the glider",
-		W.is_void(P.pos.x, P.pos.z) and P.pos.y < y0 - 0.2 and handed, "fell %.2f handoff %s" % [y0 - P.pos.y, handed]
+		"ult abyss: ending over the void he falls (no hold)",
+		W.is_void(P.pos.x, P.pos.z) and P.pos.y < y0 - 0.2, "fell %.2f" % (y0 - P.pos.y)
 	)
 	for dz in range(-4, 5):
 		for dx in range(12, 30):

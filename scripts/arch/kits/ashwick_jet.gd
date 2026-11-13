@@ -197,7 +197,7 @@ func _hover(hover: float, dt: float) -> void:
 	h.grounded = false
 
 ## A jump in the flight (Hunter.do_jump took off from it): he leaps off the jet, the flight over (no landing, the
-## carpet laid stays), keeping a jump out of a dash's share of its speed, handed on to a glide.
+## carpet laid stays), keeping a jump out of a dash's share of its speed.
 func _leap() -> void:
 	var dir: Vector2 = flight["dir"]
 	var speed := float(flight["speed"])
