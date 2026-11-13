@@ -5,7 +5,7 @@
 "semicolon": 8
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 28,
+"long_line": 26,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -212,9 +212,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 202,
+"long_line": 209,
 "nested_ternary": 27,
-"semicolon": 240,
+"semicolon": 247,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -324,9 +324,9 @@
 "semicolon": 2
 },
 "scripts/main.gd": {
-"long_line": 365,
+"long_line": 387,
 "nested_ternary": 7,
-"semicolon": 380
+"semicolon": 405
 },
 "scripts/match/abilities.gd": {
 "long_line": 1
@@ -426,11 +426,11 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 7,
-"semicolon": 9
+"long_line": 23,
+"semicolon": 43
 },
 "scripts/match/exits.gd": {
-"long_line": 10,
+"long_line": 30,
 "nested_ternary": 1,
 "semicolon": 13
 },
@@ -474,10 +474,10 @@
 "semicolon": 26
 },
 "scripts/match/hunter.gd": {
-"history_comment": 27,
+"history_comment": 33,
 "long_line": 92,
-"nested_ternary": 15,
-"semicolon": 47
+"nested_ternary": 18,
+"semicolon": 49
 },
 "scripts/match/hunter_anim.gd": {
 "long_line": 40,
@@ -574,7 +574,7 @@
 "semicolon": 39
 },
 "scripts/match/models.gd": {
-"long_line": 280,
+"long_line": 281,
 "nested_ternary": 12,
 "semicolon": 276
 },
@@ -722,7 +722,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 174,
+"long_line": 190,
 "nested_ternary": 33,
 "semicolon": 43
 },
@@ -774,7 +774,7 @@
 "scripts/ui/prologue.gd": {
 "long_line": 23,
 "nested_ternary": 1,
-"semicolon": 33
+"semicolon": 34
 },
 "scripts/ui/reset_pop.gd": {
 "long_line": 1
@@ -794,9 +794,9 @@
 "semicolon": 1
 },
 "scripts/ui/title.gd": {
-"long_line": 2,
+"long_line": 21,
 "nested_ternary": 1,
-"semicolon": 16
+"semicolon": 39
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -835,7 +835,7 @@
 "semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 65,
+"long_line": 64,
 "semicolon": 70
 },
 "tools/arena_check.gd": {
