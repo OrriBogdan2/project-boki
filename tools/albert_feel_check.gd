@@ -26,7 +26,7 @@ func _size() -> void:
 	ok("albert size: the hitbox keeps its 0.46 m (fairness, the hit radius is not the look)",
 		absf(P.r - 0.46) < 0.001, "r %.2f" % P.r)
 	ok("albert size: the nameplate comes down with him (about 0.9 of 2.6 m)",
-		absf(HudPlate.plate_offset(P) - 2.6 * 0.9) < 0.06, "plate %.2f" % HudPlate.plate_offset(P))
+		absf(HudPlate.plate_offset(P) / m.cam.hunter_scale - 2.6 * 0.9) < 0.06, "plate %.2f" % HudPlate.plate_offset(P))
 	ok("albert size: the hand height (throw, FX) scales with him", absf(K.hand_at().y - P.pos.y - 0.9) < 0.001,
 		"hand %.2f" % (K.hand_at().y - P.pos.y))
 	await done(m)
