@@ -1,7 +1,7 @@
 class_name BaseTumble
 extends RefCounted
 ## Tumble (briefs/design/GARDEN_MODERN.md 4.2 game 1), a duel in a ring beside the Stump Shove's stump; only with
-## farm_build.json base_mode on. Your partner meets your next rested Boki, or a garden visitor when it is alone.
+## farm_build.json base_mode on. Your partner meets your next rested Boki; with fewer than two it refuses.
 ## Each exchange the rival shows a tell ("probably Rush"), your Boki shows what it wants, and you pick Rush (Power),
 ## Brace (Guard) or Dodge (Speed) with 1, 2, 3 or a click; Rush beats Dodge beats Brace beats Rush. Then one press
 ## on the drill bar as they meet. The winner pushes the loser back a step, two on a big lead; out of the ring, or
@@ -258,34 +258,23 @@ func label() -> String:
 	return "Start a Tumble (%s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
-	var ks: Array = h.hrace.entrants()
-	if ks.is_empty():
-		h._toast("Tumble needs a rested Boki out on the base")
+	if run != null or not is_instance_valid(ring):
 		return
-	pair = [ks[0], ks[1] if ks.size() >= 2 else _visitor(ks[0]["rec"])]
+	var ks: Array = h.hrace.entrants()
+	if ks.size() < 2:
+		h._toast("Tumble needs two rested Boki out on the base")
+		return
+	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], rng)
-	run.visitor = ks.size() < 2
 	seen = ""
 	shown_pos = 0.0
 	_open_panel()
 	_place_pair(0.0)
 	GardenSfx.countdown(h, ring.position)
-
-## A garden visitor of a random species, its stats near yours; a temporary entry, never saved.
-func _visitor(mine: Dictionary) -> Dictionary:
-	var kinds: Array = Data.common_kin()
-	var rec := Save.new_kin(kinds[randi() % kinds.size()])
-	rec["level"] = int(mine.get("level", 1))
-	var spread := int(rules()["visitor_spread"])
-	for s in rec["stats"]:
-		rec["stats"][s] = clampi(int(stat(mine, s)) + randi_range(-spread, spread), 0, 100)
-	var n := Models.kin(rec["species"], rec)
-	h.add_child(n)
-	return {"rec": rec, "node": n, "pos": ring.position, "visitor": true}
 
 ## A key or press: true when the bout took it.
 func input(event: InputEvent) -> bool:
