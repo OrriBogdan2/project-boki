@@ -35,6 +35,7 @@ var dash_v := Vector2.ZERO
 var dash_t := 0.0
 var dash_hit := {}
 var buried := false
+var heard_windup := false   # a client's last seen windup state, so the tell plays once as it starts
 var anim_kind := ""          # what the model is doing: slam, throw, roar, spit, dash, burrow
 var damage_by := {}          # team -> damage dealt, for credit
 var orbit := 1.0
@@ -190,6 +191,9 @@ func sim(dt: float) -> void:
 	_tick_waves(dt)
 	if remote:
 		net_follow(dt)
+		if (st == "windup") != heard_windup:
+			heard_windup = st == "windup"
+			if heard_windup: _tell()
 		return
 	BossNet.watch(self)
 	if dormant:
@@ -296,7 +300,11 @@ func _attack_move(spd: float) -> Vector2:
 func _begin(name: String, length: float, anim := "") -> void:
 	atk = name; atk_t = 0.0; atk_began = m.time; atk_end = length; steps = []
 	anim_kind = anim
-	m.sfx("v_warden", pos, -2.0, {"colossus": 0.6, "serpent": 1.35, "brood": 0.9}.get(mkind, 1.0))
+	_tell()
+
+## This boss's own wind-up, swelling with the telegraph so it can be dodged by ear (clients: on the windup state).
+func _tell() -> void:
+	m.sfx("boss_%s_tell" % mkind, pos)
 
 func _at(t: float, f: Callable) -> void:
 	steps.append({"t": t, "f": f, "done": false})
@@ -359,7 +367,7 @@ func _atk_slam() -> void:
 		stag_open = maxf(stag_open, w + 0.15)
 	_at(w, func():
 		blast(at, float(md["slam_r"]), float(md["dmg"]), 9.0, 5.0)
-		m.sfx("k_rock", at, 2.0, 0.6)
+		m.sfx("boss_slam", at)
 		_wave(at, 9.5, 7.5)
 		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at, 10.5, 8.5))
 		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at, 11.0, 9.5)))
@@ -418,7 +426,7 @@ func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: St
 	m.add_child(n)
 	var from := pos + Vector3(0, 3.6 if mkind == "colossus" else 2.0, 0)
 	n.global_position = from
-	m.sfx("throw", pos, 0.0, 0.6)
+	m.sfx("boss_throw", pos)
 	flying.append({"from": from, "to": to, "t": 0.0, "dur": dur, "n": n, "r": rad, "dmg": base, "what": what})
 
 func _tick_flying(dt: float) -> void:
@@ -435,10 +443,10 @@ func _tick_flying(dt: float) -> void:
 			flying.erase(f)
 			if f["what"] == "boulder":
 				blast(b, float(f["r"]), float(f["dmg"]), 6.0, 4.0, {"stun": 0.3})
-				m.sfx("boom", b, -2.0, 0.7)
+				m.sfx("boss_boulder", b)
 			else:
 				m.fx.burst(b + Vector3(0, 0.3, 0), col(), 20, 4.0, 0.5, 5.0)
-				m.sfx("k_spore", b, -2.0, 0.7)
+				m.sfx("boss_glob", b)
 				_puddle(b, float(f["r"]), 5.0)
 
 func _atk_fissure() -> void:
@@ -455,7 +463,7 @@ func _atk_fissure() -> void:
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
 			m.fx.dust(q, 6)
 		Shake.incoming_big(m, a, 0.5)
-		m.sfx("k_rock", a, 0.0, 0.5))
+		m.sfx("boss_slam", a, -2.0, 0.9))
 
 # ---- Stormcoil
 func _atk_dash() -> void:
@@ -548,7 +556,7 @@ func _atk_spit() -> void:
 		for i in n:
 			var dd := d2.rotated(0.22 * (i - (n - 1) * 0.5))
 			m.spawn_shot(self, pos + Vector3(dd.x * 1.4, 0.9, dd.y * 1.4), dd * 10.0, dmg(14.0), 1.0, 0.36, Color("b6ff6a"), {"mob": true, "kb": 2.5, "slow": 1.0})
-		m.sfx("k_spore", pos, 0.0, 0.8))
+		m.sfx("boss_spit", pos))
 
 func _atk_lob() -> void:
 	var w := 0.7
@@ -625,7 +633,7 @@ func _atk_burrow() -> void:
 	_at(0.4, func():
 		buried = true
 		m.fx.dust(pos, 20)
-		m.sfx("k_rock", pos, 0.0, 0.7))
+		m.sfx("boss_slam", pos, -3.0, 0.8))
 	var mark := {"at": pos}
 	_at(0.5, func():
 		var to := clamp_in(tgt.pos if tgt else centre(), 1.0)
@@ -637,7 +645,7 @@ func _atk_burrow() -> void:
 		pos = Vector3(at.x, pos.y, at.z); prev = pos
 		_surface()
 		blast(at, 3.0, 24.0, 8.0, 8.0)
-		m.sfx("boom", at, 2.0, 0.6))
+		m.sfx("boss_boulder", at))
 
 func _surface() -> void:
 	buried = false
@@ -653,8 +661,7 @@ func _phase_up(p: int) -> void:
 	m.fx.ring(pos, 6.0, col(), 0.5)
 	m.fx.burst(pos + Vector3(0, 1.5, 0), col(), 40, 8.0, 0.7, 2.0, 1.6)
 	Shake.incoming_big(m, pos, 0.7)
-	m.sfx("v_warden", pos, 4.0, 0.5)
-	m.sfx("boom", pos, 0.0, 0.5)
+	m.sfx("boss_slam", pos, 0.0, 0.8)      # the shove; _begin's tell is the roar
 	for f in foes_inside():
 		if flat_dist(f) < 5.5:
 			f.hurt(dmg(6.0), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"})
