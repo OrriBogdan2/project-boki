@@ -6,7 +6,8 @@ extends RefCounted
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each emote of the wheel
 ## has its own clip (a gesture or a .glb clip) that ends within the bubble and plays on the right layer; standing, a
 ## 180° swing of the aim at the body's turn rate steps the feet round on the spot and no planted foot slides (TurnStep,
-## WardenTurn). Never touches the save.
+## WardenTurn). The Empty (no clips: its garden moves are HunterVerbs keys) puts its hand on the target at the peak of
+## each care move (pet, feed, lift) for a small and a big Boki (--home-verbs-check's reach()). Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -42,6 +43,7 @@ const TURN_LIFT := 0.02        # m: a stepping foot leaves the ground at least t
 ## What keeps the feet out of a turn step: a row's name and the state laid over standing still.
 const TURN_BUSY := {"moving": {"vel": Vector3(0, 0, -3.0)}, "casting": {"cast": 0.1}, "shooting": {"fired": 0.05},
 	"in a kit move": {"kmove": "x", "kmove_t": 0.1}}
+const CARE_TARGET_M := 0.15    # m: the Empty's hand (each hand, lifting) this near its target at a care move's peak
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -72,8 +74,21 @@ func run(main: Node) -> void:
 		n += 1
 		await _hero(main, String(id), art_name)
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
+	await _empty_care(main)
 	print("CLIP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The Empty's pet, feed and lift at a small and a big Boki: the hand on its target (the head, the mouth, both
+## flanks) at the peak of the move.
+func _empty_care(main: Node) -> void:
+	var hv = load("res://tools/home_verbs_check.gd").new()
+	hv.main = main
+	var got: Dictionary = await hv.reach()
+	for size in hv.BOKI:
+		for verb in hv.CARE:
+			var off := float(got["%s.%s" % [verb, size]]["aim_m"])
+			var what := "the Empty: %s, %s Boki, hand %.3f m from its target at the peak" % [verb, size, off]
+			ok(off <= CARE_TARGET_M, what)
 
 ## A Hero's own .glb, wearing its clips: a bad merge of WardenGlb falls back to the procedural body in silence.
 func _own_model(id: String, art_name: String) -> void:

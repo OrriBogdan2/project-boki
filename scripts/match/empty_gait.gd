@@ -54,6 +54,7 @@ var left := Leg.new()
 var right := Leg.new()
 var gait_k := 0.0            # 1: these legs; 0: HunterAnim's own legs
 var crouch := 0.0            # 0..1: HunterAnim's crouch, set each frame before step: it lowers the hip heights
+var squat := 0.0             # m: a garden move lowers the hips this far over the planted feet (HunterVerbs.squat)
 var ph := 0.0                # the walk phase HunterAnim's arms and torso follow: the left leg's cycle
 var landed := false          # a foot came down this frame
 var hl := 0.0
@@ -188,7 +189,7 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 	var a := inv * leg.anchor
 	leg.u = (a.z - _strike) / _stance
 	var target := Vector3(a.x, 0.0, a.z)
-	var hip_h := lerpf(float(_hip[1]) - crouch * CROUCH_DROP, _hip_h(leg.u), _move_k)      # standing: flat-footed
+	var hip_h := lerpf(float(_hip[1]) - crouch * CROUCH_DROP, _hip_h(leg.u), _move_k) - squat      # standing: flat-footed
 	while _too_far(leg, a, hip_h) and leg.contact < SOLE.size() - 1:
 		leg.contact += 1      # the heel comes up: the boot rolls on to the next sole point
 	var done := (dir > 0.0 and leg.u >= 1.0) or (dir < 0.0 and leg.u <= 0.0)
