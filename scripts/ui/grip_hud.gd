@@ -7,6 +7,8 @@ extends RefCounted
 ##   Merge  your Boki: its type badge in the type colour and a ring for the bond meter (full = the
 ##          Merge is ready; it brightens a moment when an ultimate fills it), grey with a "down" mark while it's
 ##          knocked out. Until the Merge unlocks and while merged it is BokiHud.r_slot (the lock, the time left).
+##          The lead Boki's summon ring runs round it and the second Boki is a small badge on its top-left
+##          corner (BokiHud.second_badge: its passive icon, the swap key, the swap cooldown).
 ##          Its key is the Merge action's ("ultimate"); the Boki's own ability and orders sit on the Boki button.
 ## Gloves never rank, so there are no pips. Reads the hunter and Boki through their own getters
 ## (Hunter.gear / gear_cd, Kin.runner, Kin.state, KinMerge.ready); draws on the HUD's canvas.
@@ -23,7 +25,10 @@ static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
 	var x0 := wr.position.x - EDGE - 3.0 * BOX - 2.0 * GAP
 	for i in Gloves.SLOTS:
 		_glove(hud, p, i, Rect2(Vector2(x0 + i * (BOX + GAP), y), Vector2(BOX, BOX)))
-	boki(hud, p, Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX)))
+	var br := Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX))
+	boki(hud, p, br)
+	BokiHud.lead_ring(hud, p, br)
+	BokiHud.second_badge(hud, p, br)
 	return Rect2(Vector2(x0, y), Vector2(3.0 * BOX + 2.0 * GAP, BOX))
 
 static func rar_col(g: Dictionary) -> Color:

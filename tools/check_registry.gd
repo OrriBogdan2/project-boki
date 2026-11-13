@@ -15,6 +15,7 @@ const CHECKS := {
 	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],      # a second launch, for benches
 	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],      # quick Boki command keys
 	"--carry-two-check": ["res://tools/carry_two_check.gd", "carry_two_check", null],      # 2 Boki in, 1 carry-out
+	"--carry-two-shots": ["res://tools/carry_two_check.gd", "carry_two_check", "shots"],      # --shots-dir=<dir>, GPU
 	"--carry-two-clip": ["res://tools/carry_two_check.gd", "carry_two_check", "clip"],      # --shots-dir=<dir>
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart early seat (0023, 0051)
 	# the Ways Out strip and Gate prompt
