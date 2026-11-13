@@ -280,8 +280,15 @@ func motes(at: Vector3, col: Color, amount: int) -> void:
 	if not own_look:
 		ash += maxi(3, int(round(amount * particles)))
 		_emit(at, col, amount, 1.6, 0.8, -2.0, 0.9, Vector3.UP, 70.0)
+
+const DUST := Color(0.82, 0.8, 0.72, 0.9)      # kicked-up dust (fx_dot draws it in two flat tones)
+const HEAVY_DUST := Color(0.6, 0.55, 0.47, 0.95)   # a heavy landing's: darker than a step's, so it reads on snow
+const AIR := Color(0.95, 0.97, 1.0, 0.95)      # a puff of air in the sky
+const PUFF_N := 10             # dots in a jump-out puff, before the quality thinning
+const SETTLE_N := 36           # dots in the dust round a drop rocket's landing, before the thinning
+
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
-func dust(at: Vector3, n := 8, col := Color(0.82, 0.8, 0.72, 0.9)) -> void:
+func dust(at: Vector3, n := 8, col := DUST) -> void:
 	_emit(at + Vector3(0, 0.1, 0), col, n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
 
 ## A thin smoke puff drifting behind `dir` (an overheated glider's trail). Like dust, not a burst: dark and grey
@@ -289,6 +296,16 @@ func dust(at: Vector3, n := 8, col := Color(0.82, 0.8, 0.72, 0.9)) -> void:
 ## behind a gliding Hunter read as one thin dark line at match zoom.
 func smoke(at: Vector3, dir: Vector3) -> void:
 	_emit(at, Color(0.16, 0.15, 0.15, 0.8), 4, 0.6, 1.1, -0.8, 2.6, dir, 20.0)
+
+## A small puff of air where a Hunter jumps out of the drop rocket: slow, every way, hanging where it was left (no
+## fall) for a moment. Not a ring or a burst.
+func puff(at: Vector3) -> void:
+	_emit(at, AIR, PUFF_N, 1.6, 0.6, 0.0, 3.0, Vector3.UP, 180.0)
+
+## Dust rolling out low round the drop rocket's landing and sinking back over a second: it is not a bomb, so
+## nothing fast, no flash, no ring.
+func settle(at: Vector3) -> void:
+	_emit(at + Vector3(0, 0.2, 0), HEAVY_DUST, SETTLE_N, 3.6, 1.2, 1.0, 3.6, Vector3.UP, 88.0)
 
 ## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
 ## burst: those are kept for blasts that do something.

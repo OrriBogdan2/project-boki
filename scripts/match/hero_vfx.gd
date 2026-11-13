@@ -18,7 +18,8 @@ const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "t
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
-const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
+## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10)
+const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 20, "thread": 18, "bolt": 12, "vortex": 4,
 	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
@@ -29,6 +30,10 @@ const LOD_MID_K := 0.5         # share of the particles between the two
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
 const HOLD_LINGER := 0.15      # s a hold outlives its last ask
 const RIBBON_SAMPLES := 18     # points a mesh trail keeps
+const STREAK_STEP := 1.0 / 30.0  # s between a streak's points, so it is as long at any frame rate
+const STREAK_MAX := 30.0       # s a streak may follow its node (it ends with the node; this is a safety net)
+const STREAK_HOT := 0.6        # share of white in a streak's hot core
+const STREAK_CHAR := 0.45      # how much darker than its colour a streak's spent tail gets
 const RIBBON_WAVES := 11.0     # rad along a trail's "wave" (a thread trailing in the air)
 const ARC_SEGS := 24           # segments of a sweep's arc mesh
 const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
@@ -533,6 +538,22 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
 
+## A trail in one colour behind something that is not a Hero's (the drop rocket's exhaust): a ribbon from the same
+## pool, `width` m at its head, each point lasting `tail` s, following `follow` until it is hidden or freed.
+func streak(follow: Node3D, col: Color, width: float, tail: float) -> void:
+	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
+	var mt: ShaderMaterial = mi.material_override
+	mt.set_shader_parameter("col", col)
+	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, STREAK_HOT))
+	mt.set_shader_parameter("col3", col.darkened(STREAK_CHAR))
+	mt.set_shader_parameter("seed", randf() * SEED_MAX)
+	mt.set_shader_parameter("life", 0.0)
+	mt.set_shader_parameter("gain", 1.0)
+	mi.global_transform = Transform3D.IDENTITY
+	(mi.mesh as ImmediateMesh).clear_surfaces()
+	ribbons.append({"node": mi, "mat": mt, "h": null, "anchor": "", "t": 0.0, "dur": STREAK_MAX, "tail": tail,
+			"width": width, "wave": 0.0, "follow": follow, "step": STREAK_STEP, "pts": []})
+
 func _mote_node(kind: String) -> Node3D:
 	var p := GPUParticles3D.new()
 	p.amount = AMOUNT[kind]
@@ -772,12 +793,19 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 	var now := float(e["t"])
 	var pts: Array = e["pts"]
 	var follow: Variant = e["follow"]
-	if follow != null and (not is_instance_valid(follow) or not (follow as Node3D).visible):
+	var follows := typeof(follow) == TYPE_OBJECT       # (a freed node still is one, though it == null)
+	if follows and (not is_instance_valid(follow) or not (follow as Node3D).visible):
 		e["dur"] = minf(float(e["dur"]), now)      # what it follows is gone: the tail runs out
-	elif now <= float(e["dur"]) and is_instance_valid(h):
+	elif now <= float(e["dur"]) and (follows or is_instance_valid(h)):
 		var followed: Node3D = follow
-		pts.push_front([followed.global_position if followed else anchor_pos(h, String(e["anchor"])), now])
-		if pts.size() > RIBBON_SAMPLES:
+		var head: Vector3 = followed.global_position if followed else anchor_pos(h, String(e["anchor"]))
+		var step := float(e.get("step", 0.0))
+		if pts.size() > 1 and now - float(pts[1][1]) < step:
+			pts[0][0] = head      # a streak keeps a point a step at any frame rate: only its head moves on
+			pts[0][1] = now
+		else:
+			pts.push_front([head, now])
+		if step == 0.0 and pts.size() > RIBBON_SAMPLES:
 			pts.pop_back()
 	var tail := float(e["tail"])
 	while not pts.is_empty() and now - float(pts[-1][1]) > tail:

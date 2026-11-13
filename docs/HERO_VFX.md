@@ -17,6 +17,9 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   ended. Particle layers only, and local.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
+- `HeroVfx.of(m).streak(node, col, width, tail)`: not a Hero's look but on the same ribbon pool: one colour (hot core
+  and spent tail derived from it) behind any node until it is hidden or freed, a point every `STREAK_STEP` so it is as
+  long at any frame rate. The drop rocket's exhaust trail (`DropRocket`, squad colour, none at Very Low).
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
   cones and delivery sounds) stays out, so only the Hero's own look shows.
 
