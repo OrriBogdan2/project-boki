@@ -438,9 +438,10 @@ func _hand_dash(spot: Vector3, who: String) -> void:
 	ok(reopen == 1,
 		"hand-over dash (%s): the ring-opened glider is back the step the dash ends (%d frames)" % [who, reopen])
 	if who == "class":
-		ok(absf(open_v - P.roll_speed) < 0.1,
-			"hand-over dash (%s): reopens at the dash's own velocity %.1f m/s (dash %.1f)"
-			% [who, open_v, P.roll_speed])
+		# (decision 0061: a dash hands over at run speed, in the air too, so the glider reopens there)
+		ok(open_v <= maxf(P.run_speed, P.base_speed) + 0.1,
+			"hand-over dash (%s): reopens at the dash's run-speed hand-over %.1f m/s (run %.1f, dash %.1f)"
+			% [who, open_v, maxf(P.run_speed, P.base_speed), P.roll_speed])
 	ok(v1 > 0.0 and v1 <= HAND_1S_SPEED,
 		"hand-over dash (%s): a second on, glide drag has it at %.1f m/s (bound %.1f), no hold re-applied"
 		% [who, v1, HAND_1S_SPEED])

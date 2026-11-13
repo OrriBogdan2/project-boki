@@ -252,14 +252,14 @@ const LOCK_LATE := 0.1          # s before the lock's end: inside Loco.buf_abili
 func _lock(main: Node, hero: String) -> void:
 	var m := _match(main, hero)
 	var k := hunter.ak
-	var lock_n := _lock_steps(m)
+	var lock_n := _ult_lock_steps(m)
 	if lock_n <= 0:
 		print("DASHFLOW skip %s: its ult holds no cast lock" % hero)
 	for slot in ["e", "rmb"]:
 		if lock_n <= 0 or not _goes_idle(m, slot, false):
 			continue
 		for late in [true, false]:
-			_lock_steps(m, 0)
+			_ult_lock_steps(m, 0)
 			var at := lock_n - int(LOCK_LATE / Match.DT) if late else 2
 			_steps(m, at - 1)
 			var before := _snap()
@@ -284,7 +284,7 @@ func _lock(main: Node, hero: String) -> void:
 	await main.get_tree().process_frame
 
 ## Casts the ult and counts the steps its lock holds the kit (0: no lock). With `count` 0 it only starts the lock.
-func _lock_steps(m: Match, count := 1) -> int:
+func _ult_lock_steps(m: Match, count := 1) -> int:
 	_ready_up(m)
 	var k := hunter.ak
 	HunterKeys.ult_pressed(hunter)
