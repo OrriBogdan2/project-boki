@@ -11,7 +11,6 @@ extends ArchKit
 ## The RMB charge and slam live in BreahSlam (breah_slam.gd), the dash in BreahHop (breah_hop.gd); the looks in
 ## KitLooks.
 
-const ROCK_PAY := "ROCKFALL"
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
@@ -171,7 +170,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String) -> void:
 			_ult_rock_landed(e, ult_cast)
 		if e is Hunter:
 			launch_pay += 1
-			payoff_fx(e.pos, ROCK_PAY, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
+			payoff_fx(e.pos, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
 	for f in foes_in(at, blast):
 		if f == e: continue
 		var f_dmg := splash_dmg * _repeat_k(f)
@@ -485,7 +484,7 @@ func _punch(k: float) -> void:
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
-			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("9ad0ff"), false)
+			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 

@@ -378,6 +378,7 @@ func _all() -> void:
 		K.flying = false
 		K.coil = 0.0
 		K.wind = 0.0
+		K.lock_until = -9.0      # no Anchor turn lock carried over from an earlier step
 		K.dive = {}
 		K.scoop = []
 		P.set_meta("gnd_until", 0.0)
