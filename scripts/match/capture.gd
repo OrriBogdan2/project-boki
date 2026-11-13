@@ -324,6 +324,8 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 	var tier := rarity_tier(k)
 	m.sfx(rules()["pop_sounds"][tier], k.pos, 0.0)
 	m.sfx("scan_call", k.pos, -2.0)
+	if h == m.player:
+		RaritySting.claim(m, k)
 	if Sfx.listener.distance_to(k.pos) < Sfx.hear_range:
 		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
