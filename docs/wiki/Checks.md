@@ -75,6 +75,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--work-check` | Boki at work: knacks, mutation bonuses, old saves, jobs from the farm's state, priorities and pins, real output |
 | `--farm-start-check` | A new save's farm start: placing the essentials, chopping and mining, materials paying for buildings, assigned Boki working, old saves |
 | `--demo-check` | The recording presets (docs/DEMO_PRESETS.md): each `--demo=` name boots and runs a few seconds, the farm and care presets at home with six grown Boki, the match presets in a full bot lobby with the `--hunter` pick, the demo save never written and the player's save file untouched |
+| `--pitch-check` | The pitch reel's scripted shots (docs/PITCH_REEL.md) play through without the movie writer: the hatch reaches its reveal, the evolution plays or says why it cannot, the Hunter select lands on and saves the chosen Hunter with its screen up, the kit rota runs, the escape Hunter rides out; the save file is untouched |
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--relic-puton-check` | The put-on beat (`MaskBeat`): reach, three flickers of the ghost face and the Hunter fading in from the feet up, in order and about 5 s, the name up 3 s or more; its sounds on the beats (chimes, swell, settle); the farm's cut keeps your body; any key skips it once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |
@@ -95,7 +96,8 @@ line (the gate's GPU-host run). See [CHECKS_TIMING](../CHECKS_TIMING.md).
 ## Tooling flags
 
 Not checks, but useful: `--loop-tour[=<class>]` (the core loop with a screenshot per step),
-`--perf-probe`, `--meshtime`, `--gentime`, `--map-bake=<png>`, `--grammar-vocab` (prints the grammar
+`--perf-probe`, `--match-profile` (a 30-hunter expedition timed per phase on a GPU worker, see
+`docs/MATCH_PERF.md`), `--meshtime`, `--gentime`, `--map-bake=<png>`, `--grammar-vocab` (prints the grammar
 vocabulary as Markdown), the galleries (`--arch-lineup`, `--mob-gallery`, `--prop-gallery`,
 `--flora-gallery`, `--pack-gallery`, `--hair-gallery`, `--map-overview`), and many `--*-demo` flags for
 screenshots. Start-up shortcuts: `--match`, `--arena`, `--training`, `--duel`, `--tutorial`,

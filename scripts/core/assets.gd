@@ -368,7 +368,7 @@ const MOBS := {
 	# the Stone Colossus (BossModels turns it to stone): a giant warrior with a stone axe
 	"colossus": {"m": "skeletons/Skeleton_Warrior", "h": 4.3, "wide": 1.4, "r": "Skeleton_Axe",
 		"idle": "2H_Melee_Idle", "walk": "Walking_D_Skeletons", "run": "Walking_D_Skeletons", "attack": "2H_Melee_Attack_Chop", "hit": 0.5,
-		"throw": "Spellcast_Shoot", "throw_hit": 0.45, "roar": "Spawn_Ground_Skeletons"},
+		"throw": "Spellcast_Shoot", "throw_hit": 0.45, "roar": "Spawn_Ground_Skeletons", "die": "Death_C_Skeletons"},
 }
 const CLOTH_PARTS := ["Cloak", "Hat", "Hood", "Cape", "Body"]
 

@@ -49,6 +49,7 @@ func run(main_node: Node) -> void:
 
 func _aim(P: Hunter, d: float) -> void:
 	P.inp["aim"] = P.pos + Vector3(d, 0.9, 0); P.inp["aim_y"] = P.pos.y
+	P.aim_dir()      # as a frame would: a cursor past the body sets the last good aim (feel-aim-near-body)
 
 ## Fire one round and read back how far it will fly (life x speed).
 func _shot_dist(m: Match, P: Hunter) -> float:
@@ -57,7 +58,13 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 	if m.shots.size() <= before:
 		return -1.0
 	var s: Dictionary = m.shots.back()
-	return float(s["life0"]) * (s["vel"] as Vector2).length()
+	# the sweep starts at the body (ShotOrigin), so the muzzle lead is off: flight past the muzzle
+	var lead := 0.0
+	if s.has("muzzle"):
+		var mz: Vector3 = s["muzzle"]
+		var st: Vector3 = s["start"]
+		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+	return float(s["life0"]) * (s["vel"] as Vector2).length() - lead
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	var rng := float(P.wpn["range"])

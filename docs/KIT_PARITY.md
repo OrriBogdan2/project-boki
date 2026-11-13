@@ -131,9 +131,8 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Meeko | R range | 12.6 | tether ring 7 bh (12.6) | match |
 | Tenzo | RMB radius, core | 4.5 (3.82 tap), 0.9-1.8 | 2.5 bh (4.5), 0.5-1 bh | match |
 | Tenzo | E ahead, span | 3.4, 5 | 2 bh (3.6), 3 bh (5.4) | match |
-| Tenzo | R ridge length, cast range | 12, 11 | 10-12 bh (18-21.6), - | differ ~40%, kept: f2b60dc70 narrowed it 19.8 to 12 on purpose, no DECISIONS line either way; [?] |
+| Tenzo | R ridge length, cast range | **21** (was 12), 11 | 12 bh (21.6): reticle 359 px at ~30 px/bh (f0579), raised ridge 388 px (f0590), cast range not seen | **fixed** (PARITY FIRST: f2b60dc70's narrowing had no DECISIONS line); 15 rocks keep the 1.5 m spacing; locked in kit_parity.json |
 | Tenzo | Passive cone length (Tremor Sense, sneaking) | 18 growing to 25 over the 2 s `grow` that widens it 25 to 40 deg (`passive.len`, `len_max`) | 10-14 bh (18-25), lengthens with the hold (breah.md 0693-0725); closes dolm.md row 9 | match |
-| Tenzo | R ridge length, cast range | 12, 11 | 10-12 bh (18-21.6), - | differ ~40%, kept: f2b60dc70 narrowed it 19.8 to 12 on purpose, no DECISIONS line either way; [?] · **owner** |
 | Grimble | RMB range | 11.5 | 6-7 bh (10.8-12.6) | match |
 | Grimble | E depth, angle | 3.0, 110 | 1.5 bh deep x 2 bh wide (2.7 x 3.6), a box | depth match, locked; angle not determinable: the source hit box is a rectangle, not a sector (ours 8.6 m², the box 9.7 m²) |
 | Grimble | E depth, angle | 3.0, 110 | 1.5 bh deep x 2 bh wide (2.7 x 3.6) | within footage error [?] · **open** |
@@ -163,7 +162,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 
 Second pass (2026-11-11): the open Meeko, Grimble, Neve, Motley, Albert and Sable rows above are settled or marked not determinable from the hero-ref sheet measures (the frames behind them, 1 bh = 1.8 m); settled numbers are locked in `content/rules/kit_parity.json`.
 
-Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
+Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
 
 ## Hit shapes in game: Vex, Kael, Lace, Cinder (main 88b06b9e7, 2026-11-12)
 
@@ -392,11 +391,11 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Q | none | glove | ours |
 | E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; allies hop it by jumping (owner 23:55, `StoneStand`) | match (gap 14 closed) |
 | E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; allies hop by jumping (eb93c5b62), bots too (618098895) | match (gap 14 closed) |
-| R | Tap wall, hold drag angle, Slows, 45 s [D] | 9 rocks, drag, cd 45, slow data present | differ (owner item 15 said rocks only) |
+| R | Tap wall, hold drag angle, Slows, 45 s [D] | 15 rocks over 21 m, drag, cd 45, slow data present | differ (owner item 15 said rocks only) |
 | Dash | Landslide: dash, launches rock, ~12 s [D] | Rock Hop: 3 hops of 2.8 m/.26 s raw ×.85/×1.15 = 2.4 m/.3 s, cd 12 | differ (owner item 111) |
 | Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match |
 | E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; **no ally hop** | missing: ally hop (gap 14) · **done** `ext/tenzo-ally-hop`: an ally clears a teammate's rock (bots hop at once), asserted |
-| R | Tap wall, hold drag angle, Slows, 45 s [D] | 9 rocks, drag, cd 45, slow data present | differ (owner item 15 said rocks only) · **owner** |
+| R | Tap wall, hold drag angle, Slows, 45 s [D] | 15 rocks over 21 m, drag, cd 45, slow data present | differ (owner item 15 said rocks only) · **owner** |
 | Dash | Landslide: dash, launches rock, ~12 s [D] | Rock Hop: 3 hops of 2.8 m/.26 s raw ×.85/×1.15 = 2.4 m/.3 s, cd 12 | differ (owner item 111) · **owner** |
 | Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match · charge scaling **open** (branch ready: ext/parity-no-riders-grimble-tenzo) |
 | Anim | Footage poses | 17 moves, all on `tarek.glb` (48) | match on coverage |
@@ -413,6 +412,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | RMB | Arm pierces terrain, pulls first target (enemy or ally), scoops Wisps, 18 s [D] | Abyssal Hand: 11.5 m through rocks and cliffs (a placed wall stops it), reel, braced shuffle at 1/5 walk, ally and Wisps caught, cd 12 | match; 0.67x cd (gap 10) |
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
 | RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd · cd **open** (gap 10) |
+| LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
+| RMB | Arm pierces terrain, pulls first target, 18 s [D]; reel 9 m/s to adjacent [F]; arm 17 m/s after a 0.2 s coil [O] | 11.5 m at 17 m/s through terrain, reel 9 m/s to adjacent, 20% braced shuffle, cd 12 (heroes/dredge.md, reel parity) | match; 0.67x cd |
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Anchor Drop: windup .38, r 3, 25 dmg, stun 1.1, air dive ring 3.2 m, rank 3 double over the abyss, cd 7, Grounded (ours) | match; **0.58x cd** (gap 10) |
 | R | Two waves, 36 s [D] | Brass Broadside: charge 1.1, 2 waves of 6 slugs, 4 dmg + Anti-Heal 3 s, cd 21 | match; **0.58x cd** (gap 10) |
@@ -695,6 +696,50 @@ Those five, measured against the footage (`origin/ext/hero-ref-footage`, 5 fps; 
 | Bjorn lumber (long dash) | 4.2 m / .3 s (14 m/s) | none: the source has no long dash; Oath never leaves the ground (bjorn.md 5) | same frames as above; 0512-0518 is Earthshatter, not a dash | [?] |
 | Vex long dash (air slide) | 4.7 m / .33 s (2/3 of the 7 m / .55 s hold) | patch notes only; Combat Slide card has no figure | venator_ghost 0114-0153 every 3rd: the three slides (0117, 0135, 0150) are all on the ground, no hold told apart, none in the air | [?] |
 | Hem flick (long dash) | 5.0 m / .22 s (light class) | none: Phase Walk has no long dash, an air Shift is the same roll (item 183) | pin 0048-0056 (pin.md 5's 2.3 m push): it is her wall climb up the tower (Soul Hunter), not a dash; 0388-0389 is the ground roll | [?] |
+## Moving while casting: the eight non-slice Hunters (main 88b06b9e7, 2026-11-11)
+
+The slice pass (Vex, Zedran, Hem, Cinder: docs/heroes) applied to Albert, Neve, Tenzo, Sparkle, Grimble, Meeko, Sable and Motley, for every held or cast ability. **Source** is the walk speed inside the ability's frame window in the hero sheet (briefs/hero-ref), in px/s read off that sheet, shared by the same sheet's steady run, so the ratio is in body heights per second against the run whatever the zoom. **Ours** is the share of the run kept: the kit's `move_k()` (a `CastHold`'s `slow_k`) times the weapon's `fire_slow` for the LMB (`Hunter._fire_slow`, 0.8 if a ranged weapon sets none). The frames are not on this worker, so only the sheets' own px/s notes were used. "Not seen" means the hero stood in front of a dummy for that window: it shows no walk speed, so it is not a mismatch and nothing was changed. A row is fixed when a measured share is more than 15% off ours and no owner item covers it.
+
+| Hunter (sheet, run) | Ability, phase | Source | Ours | Verdict |
+|---|---|---|---|---|
+| Albert `bulwark` (bjorn.md, 117 px/s) | LMB tap throw / recall | 104 px/s in the LMB window (0110-0115): 0.89 | 1.0 (melee) | match (11%) |
+| | LMB hold (charge) | not seen (stands in 0102-0108) | 0.55 | owner #59 (hold walk) |
+| | RMB shield held | "mostly stands still", not measured | 0.6 on the ground, 1.0 in the air | not seen; kept |
+| | E Purify Zone | 117 and 115 px/s (0450-0454, 0487-0491): 1.0 | 1.0 | match |
+| | R Faultline | a 0.4 s planted wind-up; 139 px/s after it (0558-0562) | 0 for the wind-up and 0.2 s of the eruption, then 1.0 | match |
+| Neve `rimewright` (tamsin.md, 240 px/s) | LMB darts held | thrown "while walking or skating", no number | 0.9 | not measured |
+| | RMB Ice Spear aim | not seen | 1.0 | not seen |
+| | Dash Skate held | 450-600 px/s: 1.9-2.5 | 11.5 m/s on a 5.0 run: 2.3 | match |
+| | E Rink Wall | not seen | 1.0 | not seen |
+| | R Rimelock | rooted, invulnerable at the centre | rooted | match |
+| Tenzo `dolm` (breah.md, run not measurable) | LMB punch hold (0.75 s) | not seen in the hold; walks while the fist recovers | 0.85 held, 1.0 after | not seen |
+| | RMB Quakefall charge | "stood still except for jumps and punches" | 0.55 (`rmb.slam.walk_k`) | owner item 61 |
+| | E Stone Row | not seen | 1.0 | not seen |
+| | R Basalt Spine hold and drag | "she can move while aiming", no number | 1.0 | match (no slow shown) |
+| Sparkle `mage` (vireo.md, 110 px/s) | LMB | stood still in every LMB shot | 0.9 | not seen |
+| | RMB Storm Rod hold | did not walk in the hold | 1.0 | not seen |
+| | E Skycall hold and drag | never walked during a cast | 1.0 | not seen |
+| | Dash Wirerun hold | a crouch while held, the lane does not grow | no steering while held | match (no walk speed to compare) |
+| Grimble `dredge` (dredge.md, 220-250 px/s) | LMB Buckshot | "walks between shots", no number while firing | 0.8 (shared default) | not measured |
+| | RMB Kaiju Grasp, out and reel | planted while it reels | 0.2 (`rmb.fly_slow`) | owner item 31 |
+| | E Iron Smash | 0.2 / 0.2 / 0.4 s beats, walk not seen | 0.7 in the wind-up | not seen |
+| | R Brass Broadside | planted through the charge (f22-f41) | 0.3 charging, 0.2 firing | owner item 36 |
+| Meeko `tender` (mooshmoosh.md, 250 px/s) | LMB | "keeps walking while firing", no number | 1.0 | match (no slow shown) |
+| | RMB Burrseed wind-up | aim lane while held, walk not measured | 0.5 (`rmb.wind_move`) | owner item 118 |
+| | E Hearthlight | instant | 1.0 | match |
+| | R Hearth Call channel | walks normally, several bh in f41-f72 | 1.0 | match |
+| Sable `thief` (dancer.md, 113 px/s) | **LMB firing** | **77-86 px/s in 3 stretches (0006-0015, 0230-0233, 0323-0326): 0.68-0.76** | **0.72 (was 0.9)** | **fixed**: `arc_bolts.fire_slow`, asserted in `--dancer-combo-check` |
+| | RMB Bola wind-up (0.4 s) | no stop shown | 1.0 | match |
+| | E dagger, throw and blink | no stop shown | 1.0 | match |
+| | R Death Blossom | walks and fires freely (f41-f47) | 1.0, firing 0.72 | match |
+| | After the Vault | 127-136 px/s for 1-1.5 s: 1.12-1.2 | 1.18 for up to 2 s | match |
+| Motley `ostra` (ostra.md, 205 px/s) | LMB Gravity Orb | the LMB-window plateaus (0082-0087, 0102-0106) are not tied to a shot | 0.9 (`tether_lantern`) | not measured |
+| | RMB Void Snap aim | not seen | 0.75 (`rmb.snap.cast_slow`) | not seen |
+| | Dash Swap lob (1.8 s) | stays roughly in place (985.0-987.2 s) | 0.675 (`dash.fly_slow`) | owner item 17 |
+| | E Unstable Anomaly | not seen | 1.0 | not seen |
+| | R Nightwell | a 0.8 s dome tell, then free to act | locked for the 1.0 s tell, then free | match after the tell; the lock in the tell is not seen |
+
+**Checks:** the eight combo checks and `--move-feel-check`. **Footage to get:** a straight walk with and without LMB held for Sable (it would settle "attack slow or the player's choice", dancer.md section 9), and a walk through each "not seen" row.
 
 ## The 20 biggest feel gaps, ranked
 
@@ -739,6 +784,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 7 | Hem's RMB .5 s dead zone before the draw reads | Match the footage start | archer.json, pin_needle.gd | S |
 | 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
 | 9 | Dash→LMB still `buffer` on Zedran and Bjorn (Hem, Vex, Cinder, Ryzz, Tarek are `fire`); Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
+| 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine. Lace and Cinder are `fire` now. Kael's and Albert's ground and air rows stay `buffer`: the source (juggernaut.md, bjorn.md, supervive_kits.md) never shows an LMB press inside the dash, so they say "Not determinable" (11-12) | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
 | 10 | Cooldown pace is uneven: 0.48x to 1.0x of data | One rule per kit | content/archetypes/*.json | S, owner |
 | 11 | Done: Cinder is off the dash feel (3.4 m/.33 s, poof 6.8 m/.28 s); Grimble's air barge is scaled once (measured 3.7 m/.2 s) | none | asserted in --move-feel-check | done |
 | 12 | Bjorn's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
@@ -914,7 +960,7 @@ Albert (`bulwark`, section "Bjorn"), Neve (`rimewright`, "Claire"), Tenzo (`dolm
 | Neve | Passive, Body | open (owner, gap 19): Chill slow is ours-only. Body size is **1.014**, not 1.15: the owner's height chart (4538174a85, Neve 1.56 m) set it; the "Body ... match" row is stale and is an owner call |
 | Tenzo | LMB, RMB, Passive | done: boulder 0.6, punch 0.7, slam hold 0.2 cd 11 |
 | Tenzo | E | **fixed since** (gap 14): allies hop the rocks (`hop rocks` in `--dolm-combo-check`, owner 23:55); cd 12.5, 3.4 ahead, span 5 done |
-| Tenzo | R, Dash | open (owner): ridge 12 m (source 18-21.6, kept), 9 rocks cd 45 range 11; Rock Hop 3 x 2.8 m/0.26 s cd 12 (owner item 111) |
+| Tenzo | R, Dash | ridge fixed to 21 m, 15 rocks (source 12 bh = 21.6, ext/parity-tenzo-ridge), cd 45 range 11; open (owner): Rock Hop 3 x 2.8 m/0.26 s cd 12 (owner item 111) |
 | Tenzo | Dash-flow, CC | gap 9 **fixed since** (`dash.*.lmb` is `fire`); open: 6 `[?]` hold rows, ours-only rock and hop slows (CC suggestions) |
 | Sparkle | LMB, RMB, E, R | done: bolt 0.648 s range 13 (`coilcaster.json`, owner); RMB hold 1.0 cd 8; E delay 0.8, stacks 1, cd 10.5, r 1.5 reach 11 slide 3.4; R hover 1.7 cd 42 r 2.7 range 14.4 |
 | Sparkle | Dash | open (owner): lane **5.6-9.75 m** at 40 m/s, dmg 20, cd 8 (the section row's "7.5-13 m" is stale; the felt-dash table is right) |

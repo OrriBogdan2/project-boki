@@ -202,7 +202,10 @@ def bake():
     tex = int(SPEC.get("tex", 2048))
     layers = [("atlas", "Base Color", None)]
     if SPEC.get("emit"):        # the master's emission map (Cinder's lava seams) on a second image, the game's emissive texture
-        layers.append(("emit", "Emission Color", BW.base_image(high, "Emission Color")))
+        src = BW.base_image(high, "Emission Color")
+        if src is None:         # (bake_colour would bake the base colour instead: the whole body glows)
+            sys.exit("v95_swap: `emit` is set but the master has no emission map")
+        layers.append(("emit", "Emission Color", src))
     for name, socket, src in layers:
         low.data.materials.clear()
         img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
@@ -667,7 +670,7 @@ def main():
     a[3::4] = vals
     me.color_attributes["Col"].data.foreach_set("color", a)
     names = sorted(set(slots))
-    emit = bpy.data.images.get("emit")
+    emit = bpy.data.images.get("emit") if SPEC.get("emit") else None     # (not the game glb's own "emit")
     for s in names:
         if s in bpy.data.materials:     # (the game glb's own, a kept part's: "flame-jet")
             bpy.data.materials[s].name = s + "-game"

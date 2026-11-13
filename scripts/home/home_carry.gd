@@ -3,8 +3,10 @@ extends RefCounted
 ## Raising and bonding at home: hold interact on a Boki to pick it up and put it somewhere, press interact to set it
 ## down. A small Boki rides in both arms, a middling one on your back, and a big one stays on the ground and follows
 ## beside you (hold again to let go). You walk at SPEED_K while you carry or lead. It reacts to its traits: a brave one
-## wriggles happily, a timid one clings, a grumpy one squirms free after SQUIRM_S. Carrying a Close-or-better bond
-## for TRUST_S adds a little trust, once a day. Home only (never in a match). A tap on a Boki is still a pat.
+## wriggles happily, a timid one clings, a grumpy one squirms free after SQUIRM_S. Picking one up plays the lift
+## (HunterVerbs): it comes to your hands, you bend and close them on its flanks, and it rides them up to the hold.
+## Carrying a Close-or-better bond for TRUST_S adds a little trust, once a day. Home only (never in a match).
+## A tap on a Boki is still a pat.
 ## home.gd calls tick() each frame, speed_mul() in its walk speed and anim_state() for the hunter's pose.
 
 const HOLD_S := 0.45          # s the interact key is held on a Boki to pick it up (a shorter press pats)
@@ -22,6 +24,7 @@ const CARRY_SCALE := 0.7      # a carried Boki is shown this share of its size, 
 const DROP_DIST := 0.9        # m in front of you where it is set down
 const LEAD_SLOT := 0.9        # m to your right where a led Boki walks (how it paces: content/rules/home_lead.json)
 const LEAD_MAX := 10.0        # m away at which a led Boki is let go
+const PACK_SWING_S := 0.25    # s a Boki for the back takes from the chest, once lifted, over the shoulder
 
 var h                         # the Home screen
 var k := {}                   # the Boki in your arms, on your back or on its lead
@@ -32,6 +35,7 @@ var pending := {}             # the Boki the key is held on, waiting to pass HOL
 var held := 0.0               # s the key has been held on it
 var base_scale := Vector3.ONE
 var _p0 := Vector3.ZERO       # where you stood last frame, to read your own speed while leading
+var lift_from := Vector3.ZERO      # where it stood when the lift began
 
 func _init(home) -> void:
 	h = home
@@ -56,11 +60,18 @@ static func temper_of(rec: Dictionary) -> String:
 func carrying() -> bool:
 	return mode == "carry" or mode == "pack"
 
+func lifting() -> bool:
+	return carrying() and h.verbs.act == "lift"
+
+## You stand still for the lift, then walk at SPEED_K.
 func speed_mul() -> float:
+	if lifting():
+		return 0.0
 	return SPEED_K if not k.is_empty() else 1.0
 
+## The carry hold once the lift (a garden verb, timed by HomeVerbs) has played.
 func anim_state() -> Dictionary:
-	return {"act": mode} if carrying() else {}
+	return {"act": mode} if carrying() and not lifting() else {}
 
 ## Called every frame from home.gd; true when it used the interact key press.
 func tick(d: float, interact: Dictionary, can: bool) -> bool:
@@ -115,6 +126,9 @@ func press_hold(who: Dictionary) -> void:
 	who["busy"] = true
 	var n: Node3D = who["node"]
 	base_scale = n.scale
+	lift_from = HomeVerbs.hold_spot(h.ppos, h.ppos + _forward(), n) + Vector3(0.0, n.position.y, 0.0)
+	n.position = lift_from
+	h.verbs.play("lift", n)
 	h._emote(who, "★" if temper_of(who["rec"]) == "brave" else "♥", true)
 	Sfx.play(KinVoice.cue(who["rec"]["species"], "happy"), null, -6.0, 0.12, Unique.voice(who["rec"]))
 
@@ -136,6 +150,8 @@ func _forward() -> Vector3:
 ## It is on the ground again at `at` and goes back to being itself.
 func _let_go(who: Dictionary, at: Vector3) -> void:
 	var n: Node3D = who["node"]
+	if lifting():
+		h.verbs.act = ""
 	if mode != "lead":
 		who["pos"] = Vector3(at.x, who["pos"].y, at.z)
 		n.position = who["pos"]
@@ -164,8 +180,9 @@ func _step(d: float) -> void:
 	var s: float = h.player.scale.x
 	var fwd := _forward()
 	var off := fwd * 0.42 + Vector3(0, 0.85, 0)
-	if mode == "pack":
-		off = fwd * -0.34 + Vector3(0, 1.05, 0)
+	# for the back: lifted to the chest, then swung up over the shoulder
+	var over := smoothstep(0.0, PACK_SWING_S, t - float(HunterVerbs.LENGTH["lift"])) if mode == "pack" else 0.0
+	off = off.lerp(fwd * -0.34 + Vector3(0, 1.05, 0), over) + Vector3(0, sin(PI * over) * 0.45, 0)
 	var wob := 0.0
 	match feel:
 		"brave":
@@ -179,10 +196,12 @@ func _step(d: float) -> void:
 		_:
 			wob = sin(t * 2.0) * 0.05
 	var at: Vector3 = h.player.position + off * s
+	var up := HunterVerbs.lifted(h.verbs.t) if lifting() else 1.0
+	at = lift_from.lerp(at, up)
 	k["pos"] = Vector3(at.x, k["pos"].y, at.z)
 	n.position = at
-	n.scale = base_scale * CARRY_SCALE
-	n.rotation = Vector3(0.0, h.pface + (PI if mode == "pack" else 0.0), wob)
+	n.scale = base_scale.lerp(base_scale * CARRY_SCALE, up)
+	n.rotation = Vector3(0.0, h.pface + PI * over, wob * up)
 
 ## The first carry of the day, held long enough, brings a bonded Boki a little closer.
 func _pay(rec: Dictionary) -> void:

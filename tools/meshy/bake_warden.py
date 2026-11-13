@@ -52,13 +52,13 @@ def import_dense(path):
     for m in meshes:
         m.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
+    rest = [o for o in new if o.type != "MESH"]     # (the joined meshes are freed by the join itself)
     if len(meshes) > 1:
         bpy.ops.object.join()
     ob = bpy.context.view_layer.objects.active
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    for o in new:
-        if o.name in bpy.data.objects and o is not ob:
-            bpy.data.objects.remove(o)
+    for o in rest:
+        bpy.data.objects.remove(o)
     ob.name = "High"
     return ob
 
@@ -66,7 +66,12 @@ def import_dense(path):
 def base_image(ob, socket="Base Color"):
     """The image feeding the first material's `socket` ("Emission Color": a Meshy master's emission map), through
     any mix or factor nodes the glTF importer put between, or None."""
-    bsdf = next(n for n in ob.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    return mat_image(ob.data.materials[0], socket)
+
+
+def mat_image(m, socket="Base Color"):
+    """base_image for one material."""
+    bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
     todo = [l.from_node for l in bsdf.inputs[socket].links]
     while todo:
         n = todo.pop(0)
@@ -302,10 +307,12 @@ def _islands(bm, lay):
 
 def bake_colour(high, low, size, cage, ray, margin_px, src=None):
     """The dense mesh's base colour, or its `src` image, (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
+    own = src is None       # the base colour: each material its own image (a Meshy part joined in, Meeko's wings)
     src = src or base_image(high)
     for m in high.data.materials:
         nt = m.node_tree
-        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src), None)
+        img = (mat_image(m) or src) if own else src
+        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == img), None)
         em = nt.nodes.new("ShaderNodeEmission")
         if tex:
             tex.interpolation = "Cubic"
