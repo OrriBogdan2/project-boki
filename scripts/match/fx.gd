@@ -209,8 +209,6 @@ func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, 
 		spark(at, (-dd + Vector3(0, 0.9, 0)).normalized(), fcol, int(2 + 2 * power), 4.0 + 1.5 * power, 70.0, 0.18, 14.0, 0.8)
 	if armor:
 		burst(at, Color("9ad8ff"), int(4 + 3 * power), 4.5, 0.35, 14.0, 0.8, dd, 70.0)
-	if crit:
-		ring(at + Vector3(0, -0.6, 0), 1.1 + 0.25 * power, Color(1.0, 0.85, 0.3, 0.85), 0.2)
 
 ## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
 ## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.

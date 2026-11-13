@@ -89,8 +89,6 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			_look(e, "daze", secs)
 		"dsr":
 			_look(e, "slow", secs)
-		"vul":
-			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
 ## The body look for what this game can't read off the body's own timers: a body another game owns, or one
 ## that isn't a Hunter (StatusLooks reads a local Hunter's timers itself, so a status cut short ends there).

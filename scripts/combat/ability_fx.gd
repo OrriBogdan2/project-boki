@@ -102,16 +102,12 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 	var d3 := Vector3(dir2.x, 0, dir2.y)
 	var hand: Vector3 = at + Vector3(0, 1.0, 0) + d3 * 0.6
 	var hot := col.lerp(Color.WHITE, 0.35)
-	# every cast: a ring at the caster's feet in the ability's colour, so you see who cast it
-	if not delivery in ["leap", "launch", "dash", "trap", "wall"]:
-		fx.ring((caster as Ent).pos if caster is Ent else at, 1.25, Color(col, 0.85), 0.22)
 	match delivery:
 		"rail", "beam":
 			var rng := float(o.get("range", 14.0))
 			fx.beam(hand, hand + d3 * rng, col, 0.55, 0.32)
 			fx.flash(hand, hot, 0.9, 0.12)
 			fx.spark(hand, d3, hot, 14, 16.0, 14.0, 0.2, 0.0, 1.4)
-			fx.ring(at, 1.6, Color(col, 0.9), 0.25)
 		"cone", "burst":
 			fx.flash(hand, hot, 1.2, 0.12)
 			fx.spark(hand, d3 if delivery == "cone" else Vector3.UP, hot, 26, 15.0, 32.0 if delivery == "cone" else 150.0, 0.24, 2.0, 1.5)
@@ -126,7 +122,6 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 		"wall", "summon":
 			fx.flash(at + Vector3(0, 1.0, 0), hot, 1.0, 0.14)
 			fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, 16, 8.0, 70.0, 0.3, 8.0, 1.2)
-			fx.ring(at, 2.0, Color(col, 0.85), 0.3)
 			fx.dust(at, 10)
 		"reflect", "aura":
 			fx.flash(hand, hot, 0.9, 0.14)
@@ -144,7 +139,6 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 		"blink":
 			fx.flash(at + Vector3(0, 0.9, 0), hot, 1.0, 0.14)
 			fx.spark(at + Vector3(0, 0.9, 0), Vector3.UP, hot, 14, 8.0, 180.0, 0.25, 0.0, 1.0)
-			fx.ring(at, 1.4, Color(col, 0.85), 0.22)
 
 ## An area landing (a slam, a mine going off, an ability's burst): a shockwave the size of what it
 ## covers, rubble and dust, and a shake that fades with distance (§5.5 leap landing / big area).
@@ -179,7 +173,6 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void
 	var head := target.pos + Vector3(0, 1.9 if target is Hunter else 1.3, 0)
 	var stun := float(o.get("stun", 0.0)); var root := float(o.get("root", 0.0)); var slow := float(o.get("slow", 0.0))
 	if stun > 0.0:
-		fx.ring(head, 0.7, Color("fff27a"), 0.35)
 		fx.spark(head, Vector3.UP, Color("fff6b0"), 10, 4.0, 180.0, 0.35, 0.0, 0.8)
 		fx.word(head + Vector3(0, 0.3, 0), "STUNNED", Color("fff27a"), false)
 	elif root > 0.0:
@@ -210,7 +203,6 @@ static func charging(m: Match, h: Hunter, k: float, col: Color, was: float) -> v
 		m.fx.spark(hand + Vector3(0, 0.6, 0), Vector3.DOWN, hot, 3, 3.0 + 3.0 * k, 160.0, 0.14, 0.0, 0.7)
 	if was < 1.0 and k >= 1.0:
 		m.fx.flash(hand, Color.WHITE.lerp(col, 0.3), 1.0, 0.12)
-		m.fx.ring(h.pos, 1.5, Color(col, 0.95), 0.22)
 		m.sfx("ab_ready", h.pos, -4.0 if h == m.player else -10.0)
 
 ## A trail behind an ability's projectile in flight (Match render), so a right click reads from
@@ -235,11 +227,10 @@ static func fizzle(m: Match, at: Vector3, col: Color) -> void:
 	m.fx.spark(at, Vector3.UP, col.lerp(Color.WHITE, 0.3), 6, 4.0, 160.0, 0.18, 6.0, 0.8)
 	m.sfx("ab_shield_hit", at, -14.0, 0.7)
 
-## A boomerang caught back in the hand: a bright snap and a little ring.
+## A boomerang caught back in the hand: a bright snap.
 static func caught(m: Match, by: Node, col: Color) -> void:
 	if m == null or m.fx == null or not (by is Ent) or _far(m, (by as Ent).pos):
 		return
 	var at := (by as Ent).pos + Vector3(0, 1.0, 0)
 	m.fx.flash(at, col.lerp(Color.WHITE, 0.5), 0.5, 0.08)
-	m.fx.ring((by as Ent).pos, 1.0, Color(col, 0.85), 0.18)
 	m.sfx("ab_guard", at, -10.0 if by == m.player else -16.0, 1.3)

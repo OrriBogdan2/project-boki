@@ -985,12 +985,12 @@ func _tick_base(dt: float) -> void:
 			var q := o.pos + Vector3(cos(a) * 1.3, 0, sin(a) * 1.3)
 			if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z) and absf(m.world.ground_at(q.x, q.z) - o.pos.y) < 0.6:
 				at = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
-		m.fx.ring(pos, 1.6, Color("8fe3c8"), 0.4)
+		m.fx.flash(pos + Vector3(0, 1.0, 0), Color("8fe3c8"), 1.2, 0.1)
 		teleport(at)
 		vel = Vector3.ZERO
 		weak_t = WEAK_TIME
 		base_cd = BASE_CD
-		m.fx.ring(at, 1.8, Color("8fe3c8"), 0.45)
+		m.fx.flash(at + Vector3(0, 1.0, 0), Color("8fe3c8"), 1.4, 0.12)
 		m.sfx("portal", at, -2.0, 1.5)
 		if is_local() and m.hud: m.hud.toast_small("Weakened 3s", Color("ffb36a"))
 var air_peak := 0.0              # the highest point of this time in the air (for skyfall landings)
@@ -1693,7 +1693,6 @@ func use_kin_ability(slot: String) -> void:
 			var kc := KinText.color(k.runner.def_of(slot))
 			if k.flat_dist(self) > 2.5 and k.state != "shoulder":
 				m.fx.bolt(pos + Vector3(0, 1.2, 0), k.pos + Vector3(0, 0.6, 0), Color(kc, 0.8))
-			m.fx.ring(k.pos, 1.3, kc, 0.3)
 	else:
 		_ab_feedback(slot, "deny")
 
@@ -3261,5 +3260,4 @@ func render(delta: float, alpha: float) -> void:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22
-			m.fx.ring(pos + Vector3(0, 0.05, 0), 1.05, Color(1.0, 0.33, 0.22, 0.85), 0.24)
 			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)

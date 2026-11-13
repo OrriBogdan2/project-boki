@@ -572,7 +572,7 @@ func _blowout(f: Ent) -> void:
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
-	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
+	payoff_fx(f.pos, PINK, "", h.dir_to(f), f)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
 	# the refund tell on her: copper coil columns and a starburst (our own look)
 	var me := ground(h.pos)

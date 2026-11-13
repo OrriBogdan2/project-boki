@@ -113,7 +113,6 @@ static func _addon(h: Hunter, key: String) -> void:
 			h.runner.slots["utility"]["cd"] = float(h.runner.slots["utility"]["cd"]) * k
 	var col: Color = form["glow"]
 	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(a.get("name", "")).to_upper(), col)
-	h.m.fx.ring(h.pos, 1.4, Color(col, 0.8), 0.3)
 	_announce(h, key, 1.4)
 
 static func _announce(h: Hunter, slot: String, radius: float, secs := 0.0) -> void:
@@ -207,7 +206,7 @@ static func warn_left(h: Hunter) -> float:
 		left = float(h.get_meta("mf_left"))
 	return left if left > 0.0 and left <= float(MergeForm.data()["warn_s"]) else -1.0
 
-## A rising tick each second, a ring in the form's colour. The local hunter hears it loudest; rivals hear it too.
+## A rising tick each second. The local hunter hears it loudest; rivals hear it too.
 static func _warn_tick(h: Hunter, sec: int) -> void:
 	var m := h.m
 	var warn_s := float(MergeForm.data()["warn_s"])
@@ -215,7 +214,6 @@ static func _warn_tick(h: Hunter, sec: int) -> void:
 	var rise := 1.0 + (warn_s - float(sec)) * 0.3
 	m.sfx("click", h.pos, -2.0 if h.is_local() else -12.0, rise)
 	m.sfx("warn", h.pos, -6.0 if h.is_local() else -16.0, rise * 0.9)
-	m.fx.ring(h.pos, 1.8 + (warn_s - float(sec)) * 0.4, Color(col, 0.9), 0.35)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 

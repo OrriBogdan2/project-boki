@@ -3773,7 +3773,6 @@ func _construct(b: String) -> void:
 	get_tree().create_timer(1.55).timeout.connect(func():
 		Sfx.play("unlock")
 		fx.burst(l["at"] + Vector3(0, 2.6, 0), UI.GOLD, 26, 6.0, 0.8, 8.0, 1.2)
-		fx.ring(l["at"], 4.0, Color(UI.GOLD, 0.9), 0.5)
 		l["built"] = true
 		building_now = false
 		if b == "greenhouse": _build_plots()
