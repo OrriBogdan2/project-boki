@@ -2208,7 +2208,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	KeyCarry.on_mob_dead(self, mb)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
-	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
+	MobSfx.death(self, mb, big_mob)
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
@@ -2438,7 +2438,7 @@ func on_wild_dazed(k: Kin) -> void:
 ## A monster's stagger window opened.
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
-		sfx("warn", mb.pos, -10.0, 1.5)
+		MobSfx.stagger_open(self, mb)
 		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
@@ -2451,8 +2451,7 @@ func on_stagger(mb: Mob, by: Ent, ab: String) -> void:
 	fx.ring(mb.pos, mb.r + 1.8, Color("c47aff"), 0.4)
 	fx.burst(mb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 30, 6.0, 0.6, 2.0, 1.2)
 	fx.flash(mb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 1.4, 0.1)
-	sfx("crit", mb.pos, 2.0, 0.7)
-	sfx("boom", mb.pos, -4.0, 1.6)
+	MobSfx.stagger_hit(self, mb)
 	freeze_frame(0.08)
 	var hunter: Hunter = by as Hunter if by is Hunter else (by.owner_h if by is Kin else null)
 	if net_on:
@@ -5521,7 +5520,7 @@ func _net_ev(x, from: String) -> void:
 				who.dead = true
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
-				sfx("kill", who.pos, -6.0, 1.3)
+				MobSfx.death(self, who as Mob, false)
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
@@ -5542,7 +5541,7 @@ func _net_ev(x, from: String) -> void:
 				(smb as Mob).stag_open = 0.0
 				fx.ring(smb.pos, smb.r + 1.8, Color("c47aff"), 0.4)
 				fx.burst(smb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 30, 6.0, 0.6, 2.0, 1.2)
-				sfx("crit", smb.pos, 2.0, 0.7)
+				MobSfx.stagger_hit(self, smb as Mob)
 				_stagger_reward(smb, ents_by_id.get(String(x[2]), null) as Hunter, String(x[3]))
 		"anc":
 			if String(x[1]) == "meteor":
