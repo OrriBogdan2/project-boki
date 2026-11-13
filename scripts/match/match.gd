@@ -49,6 +49,7 @@ var skydrop: DropSquad = null  # the planning phase before the ship sets off, dr
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
+var flyby := Flyby.new()     # rival shots passing close sound (see Flyby)
 var player: Hunter = null
 var over := false
 var result := {}
@@ -3935,6 +3936,7 @@ func step(dt: float) -> void:
 	_prof("separate")
 	_update_rings(dt)
 	_update_shots(dt)
+	flyby.tick(self)
 	_prof("shots")
 	_update_pickups(dt)
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
