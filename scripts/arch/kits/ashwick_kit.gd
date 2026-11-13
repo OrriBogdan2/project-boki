@@ -643,7 +643,7 @@ func _bash_impact(f: Ent) -> void:
 func _ram_reward() -> void:
 	var dd := dash_def()
 	boost_until = m.time + float(dd["rank3_boost_t"])
-	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
+	ShieldSrc.give(h, h.max_hp * float(dd["rank3_shield"]), ShieldSrc.HEAT)
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
 
 # ------------------------------------------------------------------ E: Furnace Cloak
@@ -685,7 +685,8 @@ func _cloak_blast() -> void:
 			m.displace.tow(f, h, drag)
 			pulled += 1
 	if hit > 0:
-		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
+		var amount: float = h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k
+		ShieldSrc.give(h, amount, ShieldSrc.HEAT)
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
 		st["shield_foes"] = hit

@@ -107,6 +107,7 @@ var haste_t := 0.0
 var fortify_t := 0.0
 var shield := 0.0
 var shield_t := 0.0
+var shield_src := ""          # an Icons id: who gave the shield (ShieldSrc), for your vitals' strip
 var recoil := 0.0
 var walk_ph := 0.0
 var anim: HunterAnim = null     # the procedural animation for the model
