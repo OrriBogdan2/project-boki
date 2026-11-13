@@ -104,12 +104,29 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Self shake on the empowered bolt, blink, Tangle (MED) | (a) / (c) | The empowered bolt's own `add_trauma` went in c7453578. `Feel.shake` and the punches belong to ext/no-shake (item 50); nothing added here |
 | Empowered extras: Shred, Marks, haste end (LOW) | (a) / (b) / (c) | Shred is gone (f6bb27c3). Marks: back to 2 on the empowered hit, the owner's spec (MAIN_TO_EXT 03:20, "keep 2 Marks"; the feel pass had made it 1). The speed boost ending on the empowered shot is the wiki's Quickflip rule (Small mechanics), kept. Assert `dancer empowered bolt: a big hit, 2 Marks ...` |
 | Bola's slow on Grounded (LOW) | (b) | Removed by the audit: the data's Ground is no dash or jump, no slow. Back by the owner's override (item 53): 30% for the Ground's 1.5s. Assert `dancer Bola: one foe caught is Grounded and slowed 30%` |
-| Bola cooldown 0.54x the data, pair stun 0.9s (LOW) | (c) | 7s follows the footage card (6.7s); the 1.8s is how long the STUNNED word showed, not a measured stun. Owner pacing call |
+| Bola cooldown 0.54x the data, pair stun 0.9s (LOW) | (c) | 7s follows the footage card (6.7s); the 1.8s is how long the STUNNED word showed, not a measured stun. The stun stays 0.9s: see "Pair stun length" below. Owner pacing call |
 | Knife cooldown (LOW) | (c) | 15s is the footage card; the data's 28s base is level 1. Owner pacing call |
 | LMB range 12m vs "850 uu" (LOW) | (b) | Parity pass (ext/sable-lmb-range): set to 8.5m, 9.5m empowered, 37.5 m/s. See "LMB range, speed" below |
 | Other Vault resets: Encore, knife at rank 3 (LOW) | (c) | Both are in the data (Fusillade, Farstep IV). DECISIONS' "reset only on an empowered hit" is about the empowered bolt hitting vs missing |
 | Encore edge bonus: ring rim vs platform edge (LOW) | (c) | Follows the footage's fine print (the ring's outer band) |
 | Shift, passive, dash-flow rows (-) | (c) | Match (Shift per the feel pass) |
+
+## Pair stun length (ext/parity-sable-pair-stun, 2026-11-11)
+
+The task: time a Bola pair stun in the Shiv footage, from the tie to the first frame either foe acts (5 fps,
++-0.2 s), and set `rmb.bola.pair_stun` to it if it lands outside 0.9 +- 0.2 s.
+
+- Sources read: `briefs/hero-ref/dancer.md` (Trickshot, frames 0076-0128) and the Chain Bolas card in
+  `briefs/supervive-data/supervive_kits.md` (origin/ext/agent-briefs). The card gives no stun length.
+- The only stun clip is frames 0115-0125 (`0117.jpg`): ONE training dummy, GROUNDED, then STUNNED with 199, the word
+  shown about 9 frames (about 1.8 s +- 0.2 s). The second "target" was the tree beside it (owner item 121: a
+  person then a tree or wall also stuns), so no clip has two foes tied together.
+- A training dummy never acts, so "first frame a foe acts" has no frame to land on, and the 1.8 s is label time,
+  not a measured stun. The frames are not on rpc3 either (`/home/claude/svvid` lives on the footage host).
+- Verdict: NOT MEASURABLE from this footage; no measure lands outside 0.9 +- 0.2 s, so `pair_stun` stays **0.9**.
+  The alternative, 1.8 s (label time), is left for the owner; it needs a match clip where two tied foes move or
+  cast again.
+- Assert: `dancer RMB: the pair stun is 0.9s in data and neither foe is held longer` (--dancer-combo-check).
 
 ## Parity pass (LMB first)
 

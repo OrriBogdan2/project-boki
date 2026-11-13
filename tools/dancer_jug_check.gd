@@ -260,6 +260,12 @@ func thief(a) -> void:
 			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
 		"pairs %d grounded %s/%s stun %.2f/%.2f dmg %.0f" % [K.bola_pairs, KitStatus.grounded(T),
 				KitStatus.grounded(T2), T.stun_t, T2.stun_t, A.dmg(T)])
+	# pair stun 0.9 s (docs/heroes/thief.md "Pair stun length"): the footage has no two-foe tie to time
+	var pst := float(K.rmb_def()["bola"]["pair_stun"])
+	A.ok("dancer RMB: the pair stun is 0.9s in data and neither foe is held longer",
+			absf(pst - 0.9) < 1e-6 and T.stun_t > 0.0 and T.stun_t <= pst + 1e-3
+			and T2.stun_t > 0.0 and T2.stun_t <= pst + 1e-3,
+			"pair_stun %.2f stun %.2f/%.2f" % [pst, T.stun_t, T2.stun_t])
 	A.ok("dancer RMB: yellow binding rings on the Grounded (everyone sees them)",
 			AimKit.shown(P, "gnd%d" % T.get_instance_id())
 			and bool(AimKit.entry(P, "gnd%d" % T.get_instance_id()).get("all", false)))
