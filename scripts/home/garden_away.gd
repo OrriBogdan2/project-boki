@@ -48,8 +48,8 @@ static func _toys(gone_s: float, now: float) -> Array:
 	if points <= 0 or owned.is_empty():
 		return out
 	for rec in Save.d["roster"]:
-		if KinBox.is_boxed(rec):
-			continue
+		if KinBox.is_boxed(rec) or not GardenZones.walks_in(rec, GardenZones.current()):
+			continue      # a Boki living in another zone plays at that zone's toys, not these
 		Care.ensure(rec)
 		owned.sort_custom(func(a, b): return HomeToys.weight(rec, a) > HomeToys.weight(rec, b))
 		var stat := String(defs[owned[0]]["stat"])
