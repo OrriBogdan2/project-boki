@@ -31,7 +31,8 @@ const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 var bad := 0
 var holder: Node3D
 var rows := {}
-static var soles := {}              # "L"/"R" -> [heel, toe] in the foot bone's frame (the skinned sole's back and front ends)
+## "L"/"R" -> [heel, toe] in the foot bone's frame (the skinned sole's back and front ends); static: points() reads it
+static var soles := {}
 
 func run(main: Node) -> void:
 	Save.no_write = true
