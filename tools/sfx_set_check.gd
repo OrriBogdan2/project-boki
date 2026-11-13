@@ -395,7 +395,8 @@ func _boki_life() -> void:
 			prev = st
 		if used.size() != (takes as Array).size():
 			repeats.append(event + " (a take never played)")
-	ok(rotating == 3 and repeats.is_empty(), "boki life: eat, nap and down rotate their takes (%s)" % [repeats])
+	ok(rotating == 2 and repeats.is_empty(),
+			"boki life: eat and down rotate their takes; the nap is one loop (%s)" % [repeats])
 	_boki_life_cap()
 	_life_cue(_boki("home"), "down")
 	var home_db := _last_voice().volume_db

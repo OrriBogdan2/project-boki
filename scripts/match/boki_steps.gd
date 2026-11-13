@@ -20,12 +20,13 @@ const TOUCH := {
 	"cairnback": {"walk": [4, 12, 27, 36], "run": [5, 12, 28, 36]},
 	"zapple": {"walk": [1, 15, 20, 38, 42], "run": [1, 30, 39]},
 	"hivara": {"walk": [0, 13, 26, 35], "run": [0, 5, 14, 27, 35]},
-	"kestrike": {"walk": [1, 21, 44], "run": [0]},
-	"kindlewren": {"walk": [2, 20, 43], "run": [3, 21, 44]},
-	"lodestick": {"walk": [1, 15, 23, 35], "run": [2, 15, 19, 35]},
+	"kestrike": {"walk": [2, 21, 44], "run": [3]},
+	"kindlewren": {"walk": [2, 25], "run": [3, 21, 44]},
+	"lodestick": {"walk": [1, 13, 17, 23, 35], "run": [1, 15, 35]},
 	"marchleaf": {"walk": [2, 18, 41], "run": [4, 11, 19, 40]},
 	"mossgrade": {"walk": [1, 12, 16, 25, 35, 39], "run": [2, 8, 15, 19, 23, 30, 34, 42, 46]},
 	"nettlynx": {"walk": [1, 5, 13, 28, 35], "run": [0, 11, 16]},
+	"gibbelle": {"walk": [12], "run": [16]},
 	"caecilith": {"walk": [1, 12, 36], "run": [2, 14, 36]},
 }
 ## Weight (kg, base weight times the size roll cubed) below which a Boki steps as that family; heavier is "heavy".
