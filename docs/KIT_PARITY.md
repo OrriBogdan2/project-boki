@@ -147,7 +147,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Motley | RMB range | 13 | bundle seen over 6 h (10.8), max not seen | [?] · **open** |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), cast 2-3 bh away | radius match; range not determinable: cast only on a near dummy, the clamp is never reached |
-| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), no slam in the kit | aegis match; slam not determinable: the source has no slam (its only knock is the Empower Shield Bash augment, unmeasured), and DECISIONS 2026-11-07 cuts the Shield Slam (left to the owner) |
+| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), no slam in the kit | aegis match; slam not determinable: the source has no slam (its only knock is the Empower Shield Bash augment, unmeasured), and DECISIONS 2026-11-07 cuts the Shield Slam (left to the owner). Clips: oath (bjorn) 0282-0361, one augmented hit at 0309 with no reach or cone recorded |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), - | match; range [?] · **open** |
 | Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), bash not seen | aegis match; slam [?] · **open** |
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
