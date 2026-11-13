@@ -8,7 +8,7 @@ const LINE_MAX := 70           # chars: a panel line under a heading
 const LEGEND_MAX := 34         # chars: the drop map's legend is about this wide at 11 px
 ## Words the glossary pass replaced with plain words, and the file each one was shown from.
 const REPLACED := {
-	"scripts/ui/full_map.gd": ["\"Leads the drop\"", "\"Let a squadmate lead\""],
+	"scripts/ui/full_map.gd": ["\"Drop leader\"", "\"Pass the lead\""],
 	"scripts/home/home.gd": ["\"Boki at risk\""],
 }
 
