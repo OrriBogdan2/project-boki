@@ -156,8 +156,8 @@ func _race(home) -> void:
 		return
 	race.use()
 	var t := 0.0
-	while race.run != null and t < RACE_MAX_S:
-		race.tick(0.1)
+	while (race.run != null or race.beats.playing()) and t < RACE_MAX_S:     # the runners are let go after
+		race.tick(0.1)                                                       # their finish clips
 		t += 0.1
 	ok(GardenFirstDay.did("race"), "bot: a finished race ticks 'race' (%.0f s)" % t)
 

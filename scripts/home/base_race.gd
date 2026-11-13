@@ -8,6 +8,7 @@ extends RefCounted
 ## back your partner and cheer at three marks with the Training post's timing bar (TimingBar). Pace comes
 ## from trained Speed, joy, and a lean on its own stretch (the Tide knack swims, wings glide the gap);
 ## friends run side by side, rivals bump.
+## The runners crouch on the line through the countdown, burst off it, and celebrate or sulk at the line (RaceBeats).
 ## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
@@ -334,6 +335,7 @@ var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
 var card_t := 0.0
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
+var beats: RaceBeats = null    # the runners' crouch, burst and finish clips (kept on after the race until played)
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
 
 func _init(home) -> void:
@@ -467,6 +469,9 @@ func _begin(ks: Array) -> void:
 	for k in ks:
 		k["busy"] = true
 		recs.append(k["rec"])
+	if beats != null:
+		beats.stop()                 # last race's finish clips still playing
+	beats = RaceBeats.new(ks)
 	var back := maxi(0, recs.find(Save.active_kin()))
 	run = Run.new(recs, back, RandomNumberGenerator.new(), tweak("dash"))
 	run.rng.randomize()
@@ -511,9 +516,10 @@ func tick(d: float) -> void:
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
 	relay.tick(d)
+	if beats != null:
+		beats.step(run, d)
 	if run == null:
 		return
-	run.step(d)
 	bar.step(d)
 	_place_runners()
 	_hear_laps()
@@ -571,9 +577,10 @@ func _end(finished: bool) -> void:
 	var res := {}
 	if finished and solo_rec.is_empty():
 		res = settle(run)
-	for k in runners:
-		k["busy"] = false
-		k["t"] = 1.5
+	if finished:
+		beats.end()
+	else:
+		beats.stop()
 	bar.close()
 	if finished:
 		GardenFirstDay.mark("race", h)

@@ -16,6 +16,9 @@ extends RefCounted
 ##  10. courses: every garden zone has its own, closed, no sharper than max_turn, and every rigged body plan
 ##      runs it to the line in a lap time inside lap_band; the zone's own Home puts the loop on land,
 ##      clear of its toys, with no step in the ground a runner could not take
+##  10. the runners' beats (RaceBeats) never change a result: 20 seeded races finish in the same order at the same
+##      times with and without them; on the base they crouch through the countdown (the race holds), burst off the
+##      line, the first two home celebrate by temper, the rest sulk, and each is let go once its clips are played
 ## Never touches the real save.
 
 const RACES := 20
@@ -47,6 +50,7 @@ func run(m: Node) -> void:
 	_formats()
 	_courses()
 	await _zone_tracks()
+	_beats_keep_order()
 	await _on_base()
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -254,11 +258,32 @@ func _on_base() -> void:
 			press.pressed = true
 			race.input(press)
 			ok(home.verbs.act == "cheer", "on: a good race cheer plays your Hunter's cheer (%s)" % home.verbs.act)
+		var nodes: Array = race.runners.map(func(k: Dictionary) -> Node3D: return k["node"])
+		ok(nodes.all(func(n: Node3D) -> bool: return n.get_meta("kact", "") == "crouch"),
+				"on: the runners crouch on the line for the countdown")
+		var played: Array = nodes.map(func(_n: Node3D) -> Dictionary: return {})
 		var t := 0.0
+		var held_still := true
 		while race.run != null and t < MAX_S:
 			race.tick(0.1)
 			t += 0.1
+			if race.run != null and t < GardenSfx.GO_S - 0.05 and race.run.t > 0.0:
+				held_still = false
+			for i in nodes.size():
+				played[i][String(nodes[i].get_meta("kact", ""))] = true
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
+		ok(held_still, "on: the race does not start until 'go'")
+		ok(played.all(func(p: Dictionary) -> bool: return p.has("burst")), "on: every runner bursts off the line")
+		ok(played.any(func(p: Dictionary) -> bool: return p.has("hop") or p.has("spin")) \
+				and played.any(func(p: Dictionary) -> bool: return p.has("sulk")),
+				"on: the winner celebrates, the last sulks")
+		var left := 0.0
+		while race.beats.playing() and left < MAX_S:
+			race.tick(0.1)
+			left += 0.1
+		ok(nodes.all(func(n: Node3D) -> bool: return not n.has_meta("kact")) \
+				and race.beats.kins.all(func(k: Dictionary) -> bool: return not k["busy"]),
+				"on: each runner is let go once its finish clips are played (%.1f s after)" % left)
 		await _solo(home)
 		var wall: Array = Save.d.get("showcase", [])
 		var game := String(BaseRace.twist()["game"])
@@ -271,6 +296,58 @@ func _on_base() -> void:
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## The same seeded race stepped bare and through RaceBeats (countdown hold, clips) finishes identically.
+func _beats_keep_order() -> void:
+	var same := 0
+	var ran := 0
+	for n in RACES:
+		var seed_rng := RandomNumberGenerator.new()
+		seed_rng.seed = 7000 + n
+		var recs: Array = []
+		for i in 2 + n % 3:
+			var sp: String = ["zapple", "cindle", "puddlet", "kestrike"][seed_rng.randi() % 4]
+			recs.append(_kin(sp, "B%d" % i, seed_rng.randi_range(0, 40), seed_rng.randf_range(20.0, 100.0)))
+		var bare := BaseRace.Run.new(recs, 0, _seeded(n))
+		while not bare.over() and bare.t < MAX_S:
+			bare.step(DT)
+		var kins: Array = recs.map(func(rec: Dictionary) -> Dictionary: return {"rec": rec, "node": Node3D.new()})
+		var beats := RaceBeats.new(kins)
+		var run := BaseRace.Run.new(recs, 0, _seeded(n))
+		var frames := 0
+		while not run.over() and run.t < MAX_S:
+			beats.step(run, DT)
+			frames += 1
+		ran += 1
+		if run.order() == bare.order() and run.done_t == bare.done_t:
+			same += 1
+		for k in kins:
+			(k["node"] as Node3D).free()
+		if n == 0:
+			var held := frames - roundi(run.t / DT)
+			ok(absi(held - roundi(GardenSfx.GO_S / DT)) <= 1,
+					"beats: the race holds %d frames for the %.2f s countdown" % [held, GardenSfx.GO_S])
+	ok(same == ran, "beats: %d of %d seeded races finish in the same order at the same times with the beats"
+			% [same, ran])
+	var calm := _kin("zapple", "Calm", 0, 50.0)
+	calm["traits"] = {"temper": 0.5, "bravery": 0.5}
+	var timid := _kin("zapple", "Shy", 0, 50.0)
+	timid["traits"] = {"temper": 0.5, "bravery": 0.1}
+	var grumpy := _kin("zapple", "Huff", 0, 50.0)
+	grumpy["traits"] = {"temper": 0.9, "bravery": 0.5}
+	ok(RaceBeats.finish(calm, 0, 4) == ["hop", "spin"] and RaceBeats.finish(calm, 1, 4) == ["hop", "spin"],
+			"beats: the first two of four home hop then spin")
+	ok(RaceBeats.finish(calm, 2, 4) == ["sulk"] and RaceBeats.finish(calm, 1, 2) == ["sulk"],
+			"beats: the rest sulk, and the last one home always does")
+	ok(RaceBeats.finish(timid, 0, 3) == ["hop"] and RaceBeats.finish(calm, 0, 1) == ["hop", "spin"],
+			"beats: a timid winner only hops; a solo lap celebrates")
+	ok(String(HomeCarry.temper_of(grumpy)) == "grumpy" and RaceBeats.rules()["sulk_face"]["grumpy"] == "angry",
+			"beats: a grumpy loser huffs (angry face)")
+
+func _seeded(n: int) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = 9000 + n
+	return r
 
 ## One solo training lap: presses on every mark (perfect: the marker sits in the gold) or none.
 func _lap(home, perfect: bool) -> void:

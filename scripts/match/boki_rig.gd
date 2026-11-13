@@ -190,6 +190,7 @@ const CLIP_FACE := {
 	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 	"strut": "cheer", "pose": "cheer", "bow": "cheer",
+	"crouch": "focus", "burst": "cheer", "sulk": "sad",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}

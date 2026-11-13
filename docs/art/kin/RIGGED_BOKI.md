@@ -30,7 +30,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
-Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
@@ -40,6 +40,10 @@ asserts every rigged species has all twelve, with the five game clips timed to t
 The Show Ring (`ShowRing`) sets `kact` strut (the walk clip's cycle with chin up, knees lifted, steps `STRUT_CADENCE` quicker) over
 the Bond walk, pose (`POSE_S` 1.0 s: a quad plants and lifts its head, a bird flares its wings, a legless body rises) when the
 judges look, then hop for the winner and bow (`BOW_S`) for the other when the placing is read; the same check covers all three.
+`impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). The Dash
+(`RaceBeats`) plays crouch on the line through the countdown, burst (the species' run, stretched long and low, easing
+out over `burst_s`), then hop and spin for the first two home or sulk (huff, head hung) for the rest. `--boki-rig-check`
+asserts every rigged species has all fifteen, with the eight game clips timed to those beats and no T-pose frame.
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.

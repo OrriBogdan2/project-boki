@@ -61,7 +61,7 @@ check: `--base-life-check`.
   recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
   `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge, Echo Steps' stonehop and spin, and the Dash's crouch, burst and sulk (`scripts/home/race_beats.gd`) play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
 - Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
   Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`

@@ -12,7 +12,7 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin",
-	"strut", "pose", "bow"]
+	"strut", "pose", "bow", "crouch", "burst", "sulk"]
 const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
 const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
 const T_FRAMES := 8            # frames sampled over a game clip
@@ -74,15 +74,16 @@ func _contents(rig: BokiRig) -> void:
 	var skel := rig.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	ok(skel.get_bone_count() <= MAX_BONES, "%d bones, budget %d" % [skel.get_bone_count(), MAX_BONES])
 
-## Tumble's and Echo Steps' clips last as long as their beat data says, play once, and never show the bind pose.
+## Tumble's, Echo Steps' and the Dash's clips last as long as their beat data says, play once, and never show the
+## bind pose.
 func _game_clips(rig: BokiRig) -> void:
 	var impact := float(BaseTumble.rules()["impact_s"])
 	var hop := float(EchoSteps.rules()["hop_s"])
 	for c in GAME_CLIPS:
 		var a := rig.player.get_animation(c)
-		var want := EchoSteps.spin_s()
-		if c in ["rush", "brace", "dodge"]: want = impact
-		elif c == "stonehop": want = hop
+		var want := impact
+		if c == "stonehop": want = hop
+		elif c not in ["rush", "brace", "dodge"]: want = RaceBeats.clip_s(c)
 		ok(is_equal_approx(a.length, want), "%s lasts %.2f s, its game's beat data says %.2f" % [c, a.length, want])
 		ok(a.loop_mode == Animation.LOOP_NONE, "%s plays once" % c)
 		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)

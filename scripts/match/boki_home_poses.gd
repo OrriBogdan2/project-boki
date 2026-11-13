@@ -22,10 +22,11 @@ const TWEAK := {
 	"mossgrade": {"climb": {"amp": 0.7}, "nudge": {"amp": 0.8}},
 	"nettlynx": {"nudge": {"amp": 1.2}, "climb": {"amp": 1.15}},
 }
-## The stiff and stocky bodies move less in the games' clips (rush, dodge, stonehop and spin).
+## The stiff and stocky bodies move less in the games' clips (rush, dodge, stonehop, spin and the Dash's).
 const STIFF := {"cairnback": 0.6, "glomwort": 0.7, "lodestick": 0.7, "mossgrade": 0.7, "gloamshell": 0.75}
-## Tumble's and Echo Steps' clips (BaseTumble, EchoSteps): one shot each, timed by the games' beat data.
-const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin"]
+## Tumble's, Echo Steps' and the Dash's clips (BaseTumble, EchoSteps, RaceBeats): one shot each, timed by the games'
+## beat data.
+const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin", "crouch", "burst", "sulk"]
 ## The Show Ring's clips (ShowRing): a strut that loops over the walk, a pose at the mark and a bow (one shot each).
 const SHOW_CLIPS := ["strut", "pose", "bow"]
 const WING_JOINTS := ["wing1", "wing", "fwing"]
@@ -397,3 +398,71 @@ func _bow(u: float) -> void:
 		_:
 			add("spine", -0.5 * k * amp)
 	tail(0.0, -0.2 * k * amp)
+
+## Crouch, on the Dash's line through the countdown: drops low onto its haunches with the head up to the track by
+## 0.35, then holds it with a quiver.
+func _crouch(u: float) -> void:
+	var s := smoothstep(0.0, 0.35, u)
+	var quiver := sin(TAU * u * 6.0) * 0.02 * s
+	move.y = -0.05 * s * amp
+	move.z = 0.03 * s * amp
+	squash = Vector3(1.0 + 0.04 * s * amp, 1.0 - 0.08 * s * amp, 1.0 + 0.04 * s * amp)
+	add("head", 0.2 * s * amp + quiver)
+	add("neck", 0.1 * s * amp)
+	both("ear1", 0.0, 0.0, -0.25 * s * amp)
+	match plan:
+		"quad":
+			add("root", -0.12 * s * amp)
+			add("spine", -0.08 * s * amp)
+			both("fleg1", 0.3 * s * amp)
+			both("hleg1", -0.4 * s * amp)
+		"bird":
+			add("root", -0.2 * s * amp)
+			both("hleg1", 0.35 * s * amp)
+			wings(0.25 * s * amp, -0.2 * s * amp)
+		_:
+			add("root", -0.15 * s * amp)
+			add("spine", -0.25 * s * amp)
+	tail(quiver * 3.0, 0.3 * s * amp)
+
+## Burst, off the line over the species' own run: stretched long and low with the nose down at "go", easing back
+## to the plain run by the end.
+func _burst(u: float) -> void:
+	var k := (1.0 - smoothstep(0.0, 1.0, u)) * amp
+	squash = Vector3(1.0 - 0.06 * k, 1.0 - 0.06 * k, 1.0 + 0.16 * k)
+	add("head", 0.15 * k)
+	both("ear1", 0.0, 0.0, -0.35 * k)
+	match plan:
+		"quad":
+			add("root", -0.15 * k)
+			both("fleg1", 0.4 * k)
+			both("hleg1", -0.4 * k)
+		"bird":
+			add("root", -0.25 * k)
+			wings(-0.3 * k, -0.4 * k)
+		_:
+			add("root", -0.15 * k)
+			add("spine", 0.25 * k)
+	tail(0.0, 0.35 * k)
+
+## Sulk, home behind the first ones: a huff (squashed by 0.2), then the head hangs and turns away, ears flat, sat
+## back, the tail low; back to its idle over the last 0.15.
+func _sulk(u: float) -> void:
+	var huff := sin(PI * clampf(u / 0.2, 0.0, 1.0)) * amp
+	var s := smoothstep(0.1, 0.4, u) * (1.0 - smoothstep(0.85, 1.0, u)) * amp
+	squash = Vector3(1.0 + 0.05 * huff, 1.0 - 0.07 * huff, 1.0 + 0.05 * huff)
+	move.y = -0.03 * s
+	add("head", -0.45 * s, 0.25 * s)
+	add("neck", -0.2 * s)
+	both("ear1", 0.0, 0.0, -0.5 * s)
+	match plan:
+		"quad":
+			add("root", 0.15 * s)
+			both("fleg1", -0.1 * s)
+			both("hleg1", 0.45 * s)
+		"bird":
+			add("root", -0.1 * s)
+			wings(-0.3 * s)
+		_:
+			add("spine", -0.35 * s)
+	tail(0.0, -0.4 * s)
