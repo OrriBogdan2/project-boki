@@ -65,7 +65,7 @@ func _lanes() -> void:
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
 		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
-		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0, 240.0)
 		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
 		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
 		var gb := TutorialStrip.rect(sz, wo_b)
@@ -156,8 +156,8 @@ func _course() -> void:
 	ok(ducked, "the chime is quiet (%.0f dB), ducked in a fight (%.0f dB)" % [calm_db, fight_db])
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
-	var once := "(%d frames over %d steps)" % [words_seen, last + 1]
-	ok(words_seen > 0 and words_seen <= last + 1, "the step's plain words come to the lane once a step " + once)
+	var frames := "(%d frames over %d steps)" % [words_seen, last + 1]
+	ok(words_seen > 0 and words_seen <= last + 1, "the step's plain words come to the lane once a step " + frames)
 	ok(prompt_in_card == 0, "no world prompt shows while a banner is up (%d frames)" % prompt_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
