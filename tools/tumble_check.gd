@@ -1,7 +1,7 @@
 extends RefCounted
 ## --tumble-check: Tumble (scripts/home/base_tumble.gd, briefs/design/GARDEN_MODERN.md 4.2 game 1).
 ##   1. the rules: Rush beats Dodge beats Brace beats Rush, one step or two on a 20+ lead, a clash moves the
-##      lower push half a step, the 10% type edge and the 10% follow bonus, an untouched pick goes with the want
+##      lower push half a step, the 10% follow bonus, an untouched pick goes with the want
 ##   2. the read: the higher Focus sees the honest tell about 7 in 10, the other about 5 in 10
 ##   3. 200 seeded bouts with a simulated player (reads the tell, follows its Boki, or picks at random):
 ##      60 to 75 s on average; 30 more points of Power, Guard, Speed or Focus each end bouts further forward
@@ -102,7 +102,7 @@ func _rules() -> void:
 	var d := _kin(th["frost"], "D", [10, 10, 10, 10])
 	r = _exchange(c, d, "rush", "dodge")
 	var p := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
-	ok(absf(p - 1.1) < 0.001, "the type edge is 10%% of push (x%.3f)" % p)
+	ok(absf(p - 1.0) < 0.001, "species themes change no push (x%.3f)" % p)
 	r = _exchange(a, b, "rush", "dodge", "rush")
 	var f := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
 	ok(absf(f - 1.1) < 0.001 and r.follows == 1, "following the want is 10%% more push (x%.3f)" % f)
