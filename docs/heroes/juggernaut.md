@@ -21,14 +21,19 @@ docs/wiki/Inspirations.md.
 - **Not reproduced:** mana, climbing double-height walls, dodges building Rage, Volcanic Rebuke sending a
   knocked hunter straight to the deathbox, the turn lock after RMB into the dash.
 
-## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Brall, `Upg:` lines. Slots the source gives no cooldown or damage upgrade read 1.0 from `rank_cd` / `rank_dmg`.
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
+bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
+no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
 
-| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
-|---|---|---|---|
-| RMB Smash | +20% damage x2; Meteor Drop rests 2.4s less at IV | cooldown 1.8s / 1.6s, damage +15% / +30% on top of Smash +20% / +40%; drop 7.2s / 4.8s | cooldown 2s flat, Smash damage +20% / +40%; drop 7.2s / 4.8s |
-| Space Rampage | -1.6s recharge x2 (a 3rd charge), tier IV: a dodged shot feeds Rage | 8.8s / 7.3s (the old text said 9s -> 7.6s) | 8.8s / 6.4s; 3rd charge at 2, dodge feeds Rage at 3 |
-| E Warchain | -1.6s cooldown x2, tier IV: -3.2s more | 11.2s / 8.0s in play (the text said 9.5s -> 8.3s / 5.9s), damage +15% / +30% | 11.2s / 8.0s, damage unchanged (source has none) |
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in |
+|---|---|---|---|---|
+| LMB greatsword | none [D] | - | - | - |
+| RMB Smash | +20% damage / +20% damage / Air Slam -3 s [D] (Air Slam 9 s) | Smash damage +20%, cooldown 2 s flat | +40%; Meteor Drop 7.2 -> 4.8 s | `--juggernaut-combo-check` juggernaut ranks, upgrade parity |
+| Space Rampage | +1 charge -2 s / -2 s / dodging shots builds empowerment, -1 s [D] (13 s) | recharge 10.4 -> 8.8 s, a 3rd charge | 6.4 s; a dodged shot feeds Rage | same, `juggernaut dash rank 3` |
+| E Warchain | -2 s / -2 s / -2 s [D] (16 s) | cooldown 12.8 -> 11.2 s | 8.0 s (III + IV); no damage step | same |
+| Passive Rage | none [D] | - | - | - |
 
 ## Scaling
 
