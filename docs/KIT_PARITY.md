@@ -461,7 +461,7 @@ A re-read of `briefs/hero-ref/juggernaut.md` frames 0301-0366 (the tether) and 0
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
 | Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd |
-| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Hold 3.5, carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80 | match; +15% radius, +5% slide (owner 11-08) |
+| R | Invulnerable Slowing zone 3.5 s with periodic Shatter stacks, explode, stun, cancel, 80 s [D] | Hold 3.5, flat 35% slow (no ramp), carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80 | match; +15% radius, +5% slide (owner 11-08); the periodic Shatter stacks are not built (no period in [D]) |
 | Dash | Hold, release stops, 13 s [D] | 10.5 m/s (F 10-11, the mean), 1.6 s, early-release refund .6 (owner) | match; refund owner |
 | Passive | Chill 4 s, shatter on knock [D] | Chill + 15% slow (ours) | differ: slow ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd · cd **open** (gap 10) |

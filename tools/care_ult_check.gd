@@ -290,8 +290,9 @@ func rimewright() -> void:
 	var slow1 := T.slow_k
 	var hot1 := float(AimKit.entry(P, "x").get("hot", 0.0))
 	step(m, 1.6)
-	ok("tm X: the slow on a foe in the rink stacks the longer they stay (small mechanic)", T.slow_k > slow1 + 0.15
-		and T.slow_k <= float(xd["slow_max"]) + 0.001 and K.chilled(T), "%.2f -> %.2f" % [slow1, T.slow_k])
+	ok("tm X: a foe in the rink is Chilled and slowed a flat 35%, the same at 0.75 s and 2.35 s (source: no ramp)",
+		absf(slow1 - 0.35) < 0.001 and absf(T.slow_k - 0.35) < 0.001 and K.chilled(T),
+		"%.2f -> %.2f" % [slow1, T.slow_k])
 	ok(
 			"tm X: the ring (and the cracks) brighten as it builds: the countdown",
 			float(AimKit.entry(P, "x").get("hot", 0.0)) > hot1 + 0.3)
