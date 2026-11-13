@@ -1813,6 +1813,22 @@ The mid-match spawns on a clock (scripts/match/timed_spawns.gd, docs/SPAWNS.md):
 | warden | {"at": 0.4, "warn_s": 30.0} |
 | _warden | the Watcher, at the Heart on the center island |
 
+## status_looks (`content/rules/status_looks.json`)
+
+The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STATUS_LOOKS.md). Each status names its look (a builder in the script), its colours (the owning Hunter's ability colours where one Hunter owns the status), `y` (m, where the look sits on a 2 m body; scaled with the Hunter), `size` (scale) and `pace` (animation speed). Every look has its own shape, place and motion, so two statuses never read alike even in grey; none lies flat on the ground (a ground ring means gameplay). Every source (a kit, a Boki, a monster) shows the one look, sized to the body's hitbox.
+
+| Setting | Value |
+|---|---|
+| statuses | {"stun": {"look": "stars", "col": "#fff27a", "dark": "#6a5410", "y": 2.25, "size": 1.0, "pace": 1.0, "why": "any stun: bright stars spinning fast round the head"}, "daze": {"look": "halo", "col": "#ffb36a", "dark": "#6a3410", "y": 2.55, "size": 1.0, "pace": 1.0, "why": "Vex's Daze: a tilted ring of crystals wobbling high over the head"}, "root": {"look": "stakes", "col": "#9a6aff", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "any root (Meeko's violet): thorns driven in round the feet, leaning over them, straining; no ring on the ground"}, "gnd": {"look": "cords", "col": "#e0a03a", "dark": "#5a3a10", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Grounded (the Bola, Warchain reel): cords wound round the legs and a down arrow stamping over the head"}, "slow": {"look": "anklets", "col": "#b8a8ff", "dark": "#2a2460", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "any slow: weighted rings sliding down the legs to the ankles (never onto the ground: a ground ring means gameplay)"}, "chill": {"look": "frost", "col": "#7fd0ff", "dark": "#2f6ac0", "hot": "#effcff", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Neve's Chill: an ice shell round the body with crystals jutting from it"}, "burn": {"look": "flames", "col": "#ff6a1a", "dark": "#2a100a", "hot": "#ffd23a", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "burning (Cinder's Ignite and Ablaze, any burn): flame tongues licking up the body"}, "static": {"look": "arcs", "col": "#1fc6dc", "dark": "#0a3a44", "hot": "#ff3fb4", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Sparkle's Static: teal bolts with a pink core jumping across the body"}, "antiheal": {"look": "streaks", "col": "#ff3df0", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Anti-Heal (Kael's Warchain, Sable's Encore): magenta streaks draining up out of the body"}, "sick": {"look": "wisps", "col": "#f0ecff", "dark": "#4a4458", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "resurrection sickness: pale wisps sinking round the body"}} |
+
+## summon_cc (`content/rules/summon_cc.json`)
+
+What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind lands exactly as on a Hunter (Ent.hurt, KitStatus, Displace, Verbs) except the kinds listed here, which a summon shrugs off.
+
+| Setting | Value |
+|---|---|
+| immune | ["gnd"] |
+
 ## toys (`content/rules/toys.json`)
 
 The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.
