@@ -16,6 +16,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import hem_pieces as H
 import crouchkit
+import gardenkit
 from posekit import Clip, FnClip, Solver, ang_dir as D, frame_of, two_bone
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -230,9 +231,26 @@ def crouch_set():
     return crouchkit.quick(C, READY, STALK, STILL, hands=("G", "RF"), scan=0.22)
 
 
+# ---- the garden (DECISIONS 2026-11-09): cold and economical. She crouches to the Boki's height with the bow still low in her left hand; the right does the work, once and precisely
+# (flat palm on the head, a held-out snack with the fingers together), and the cheer is a short tight lift of the bow, the right fist at her chest, the chin up. No hop.
+TEND = dict(STALK, pel=(0.02, 0.06, -0.30), prt=(0.30, 0.16, -0.05), tor=(0.28, 0.08, 0.06), hed=(-0.52, -0.06, -0.02), G=(-0.27, 0.40, 0.56), brow=0.3, lid=0.1)
+PET_A = dict(TEND, RF=(0.06, 0.66, 0.66), RD=n3((0.0, 1.0, -0.25)), RP=n3((0.0, 0.25, -1.0)), Rpole=(1.0, -0.2, 0.2), Rw=0.0, fing=0.2)
+GIVE = dict(TEND, pel=(0.02, 0.06, -0.34), RF=(0.08, 0.64, 0.56), RD=n3((0.0, 1.0, 0.1)), RP=n3((0.0, 0.1, 1.0)), Rpole=(1.0, -0.2, 0.2), fing=0.05)
+PEAK = dict(READY, G=(-0.30, 0.30, 1.52), BA=n3((-0.1, 0.2, 1.0)), RF=(0.12, 0.2, 1.12), RD=n3((0.1, 0.4, 0.9)), RP=n3((-0.6, 0.6, 0.0)), fing=0.9, brow=0.6, lid=0.05, hed=(-0.40, -0.1, -0.04))
+
+
+def garden_set():
+    P = {"kneel": TEND, "pet_a": PET_A, "pet_b": dict(PET_A, RF=(0.06, 0.52, 0.68), tor=(0.26, 0.08, 0.06)),
+         "give": GIVE, "give_in": dict(GIVE, RF=(0.08, 0.54, 0.56)),
+         "dip": dict(READY, pel=(0.02, 0.0, -0.12), tor=(0.22, 0.10, 0.11)), "up": dict(PEAK, G=(-0.28, 0.4, 1.30), RF=(0.12, 0.3, 1.0)),
+         "peak": PEAK, "pump": dict(PEAK, G=(-0.3, 0.32, 1.44), RF=(0.12, 0.22, 1.06))}
+    return gardenkit.clips(C, READY, P, {"lead": 0.04, "snap": 0.25})
+
+
 def clips():
     out = [F("idle", 3.6, idle), F("stance", 4.6, stance)]
     out += crouch_set()
+    out += garden_set()
     wk, rn = 1.04, 0.66
     for n, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(F("walk_" + n, wk, gait(0.45, h)))
