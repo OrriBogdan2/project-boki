@@ -140,6 +140,22 @@ nothing else on screen:
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
+## Steal window (StealTell)
+
+DECISIONS 2026-11-10 "XP follows the source": kill XP and a lair boss's rewards go to the last hit (`KillXp`), so a
+rival can steal a boss. The counterplay needs a readable line, drawn by `scripts/ui/steal_tell.gd`:
+
+- **Line.** `content/rules/steal_window.json` `at` (0.25 of max health), the one number; the prize cry
+  (`StealSfx`, ext/sfx-steals) marks the same quarter.
+- **Bar.** At or under it a lair boss's health fill pulses gold (`StealTell.COL`, 2 Hz toward white) on the world bar
+  over its head and on the top boss bar the squad in its lair sees. Gold is apart from the bar's red, the stagger's
+  lilac and the chip's white; it wins over stagger and enrage colours while the window is open.
+- **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
+  end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
+  enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
+- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
+  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+
 ## Two-step abilities (RecastCue)
 
 DECISIONS 2026-11-08 "two-step abilities must be obvious and in your face". Kits report and `RecastCue` draws;

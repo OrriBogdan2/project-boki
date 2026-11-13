@@ -577,6 +577,8 @@ const CHECKS := {
 	"--level-growth-check": ["res://tools/level_growth_check.gd", "level_growth_check", null],
 	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],      # last-hit XP, 30 m share
 	"--boss-parity-check": ["res://tools/boss_parity_check.gd", "boss_parity_check", null],  # boss phase, leash, kill
+	"--steal-tell-check": ["res://tools/steal_tell_check.gd", "steal_tell_check", null],      # boss low-HP tell
+	"--steal-tell-shots": ["res://tools/steal_tell_shots.gd", "steal_tell_shots", null],      # GPU, --shots-dir=
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

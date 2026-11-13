@@ -1718,6 +1718,14 @@ The mid-match spawns on a clock (scripts/match/timed_spawns.gd, docs/SPAWNS.md):
 | _glimmer | the Glimmerkin, at one outer-island wild Boki spot picked from the match seed; at: share of the session, warn_s: seconds of warning |
 | warden | {"at": 0.4, "warn_s": 30.0} |
 | _warden | the Watcher, at the Heart on the center island |
+## steal_window (`content/rules/steal_window.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
+| at | 0.25 |
 
 ## toys (`content/rules/toys.json`)
 
