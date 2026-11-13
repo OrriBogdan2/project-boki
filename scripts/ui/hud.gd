@@ -1027,6 +1027,9 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
+var xp_seen := -1.0      # the last XP the tracker saw (HudVitals.xp_step)
+var xp_shown := -1.0     # the XP the bar has filled to
+var xp_pop := 0.0        # s left of the pop after XP landed
 ## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
 ## weapon's step on even levels, which also get a gold wash).
 func level_up(lv: int, info := {}) -> void:
