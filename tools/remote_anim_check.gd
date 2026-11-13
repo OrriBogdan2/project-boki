@@ -19,7 +19,7 @@ const NET_SNAP_TOL := 0.08   # s: a re-time on the copy is the host's to within 
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
 const ACK_S := 30.0          # s of real time to wait for the guest's step before giving up
-const SNAP_S := 3.0          # s of real time the guest waits for a snapshot the unreliable channel may have dropped
+const SNAP_WAIT_S := 3.0     # s of real time the guest waits for a snapshot the unreliable channel may have dropped
 const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15        # the body tint (Ent.wash) counts as showing above this
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
@@ -84,7 +84,7 @@ func _run(secs: float) -> void:
 			if stop: return
 			owed -= 1
 			var t1 := Time.get_ticks_msec()
-			while not stop and not _snap_in() and Time.get_ticks_msec() - t1 < SNAP_S * 1000.0:
+			while not stop and not _snap_in() and Time.get_ticks_msec() - t1 < SNAP_WAIT_S * 1000.0:
 				await main.get_tree().process_frame
 			await super._run(DT)
 			steps += 1
