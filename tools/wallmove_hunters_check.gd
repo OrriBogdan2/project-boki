@@ -16,15 +16,12 @@ const DASH_START := 2.5             # m from the wall for the dash cases (a jump
 const BOUNCE_V := Vector2(6.9, 4.0) # m/s: 30 degrees off the wall's normal, into it at 6.9
 const RUN_ANGLE := 25.0             # degrees off the normal for the run bounce (a run is 4.4-4.9 m/s)
 ## Cases a kit move is allowed to own (the move commits), per Hunter: case-name prefixes, with the cite.
-const COMMITS := {
-	# Claire's rink skate steers itself: her heading at the wall is head-on (hit within 16 degrees of the normal,
-	# which never bounces), so there is no angled hit to rebound. Open: see docs/MOVEMENT_FEEL.md.
-	"rimewright": ["bounce:sig/hold", "bounce:skill@"],
-}
-## Placed casts (not moves), tapped, per Hunter: the bounce sweep aims them back the way she came (at a chaser),
-## not at the wall. Neve's Rink Wall (E) rises at her height `reach` ahead and its blocks stand as columns: aimed
-## at the wall it stood just in front of it, and she met her own ice side-on instead of the wall at an angle.
-const CAST_BACK := {"rimewright": ["sig"]}
+const COMMITS := {}
+## Placed casts (not moves), tapped or held, per Hunter: the bounce sweep aims them back the way she came (at a
+## chaser), not at the wall. Neve's Rink Wall (E) rises at her height `reach` ahead and its blocks stand as
+## columns: aimed at the wall it stood just in front of it, and she met her own ice head-on (within 16 degrees
+## of its face) instead of the wall at an angle.
+const CAST_BACK := {"rimewright": ["sig", "sig/hold"]}
 const SETTLE := 2                   # steps a kick or bounce is given to show
 
 var main: Node
@@ -107,6 +104,7 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 	P.inp["aim"] = Vector3(face, low + 1.0, z0)
+	m.verbs.clear()     # the last case's placed walls (Neve's ice lasts 6 s) would stand in this one's path
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
