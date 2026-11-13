@@ -5331,6 +5331,8 @@ func _net_ev(x, from: String) -> void:
 			BossNet.net_in(self, x)
 		"zone":
 			HeroZones.net_in(self, x)
+		"tele":
+			AimNet.net_in(self, x)       # an AimKit "all" telegraph shown in another game
 		"disp":
 			displace.net_in(x)
 		"kcmd":
