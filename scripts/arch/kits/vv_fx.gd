@@ -441,9 +441,10 @@ func _alive(sd: Dictionary) -> bool:
 
 # ------------------------------------------------------------------ marker (immediate style)
 ## Sparkle's Static marker at height `top` over `target`: `max_n` pips round a bold count on a dark
-## backing (lit pips in col, all of them in col2 when full), and sparks on the body, 2 per stack.
+## backing (lit pips in col, all of them in col2 when full), and sparks on the body, 2 per stack. `readout` false
+## leaves only the sparks (the owner reads the count off RecastCue's badge).
 ## Call every step while it should show; it goes KEEP s after the last call.
-func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color, top: float) -> void:
+func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color, top: float, readout := true) -> void:
 	var e: Dictionary = markers.get(id, {})
 	if e.is_empty() or not is_instance_valid(e.get("node")):
 		var node := _take("marker", _build_marker.bind(max_n))
@@ -452,12 +453,14 @@ func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color
 	e["t"] = 0.0
 	var nd: Node3D = e["node"]
 	nd.visible = target.visible
+	(nd.get_node("Back") as Node3D).visible = readout
 	var up := screen_up()
 	nd.global_position = target.position + Vector3(0, top, 0) + up * MARK_RAISE
 	var full := n >= max_n
 	var lit_col := col2 if full else col
 	var tm := float(Time.get_ticks_msec()) / 1000.0
 	var pips: Node3D = nd.get_node("Pips")
+	pips.visible = readout
 	for i in pips.get_child_count():
 		var p := pips.get_child(i) as MeshInstance3D
 		var on := i < n
@@ -467,6 +470,7 @@ func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color
 		var pm := p.material_override as StandardMaterial3D
 		pm.albedo_color = lit_col if on else Color(0.12, 0.1, 0.2, 0.9)
 	var lbl: Label3D = nd.get_node("Count")
+	lbl.visible = readout
 	lbl.text = "%d" % n
 	lbl.modulate = lit_col
 	lbl.scale = Vector3.ONE * (1.3 if full else 1.0)
