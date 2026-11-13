@@ -11819,26 +11819,14 @@
    "a": "crown",
    "b": "cinder",
    "take": [
-    358,
+    360,
     214
    ],
    "land": [
-    402,
-    214
+    394,
+    212
    ],
-   "gap": 51.4
-  },
-  {
-   "a": "cinder",
-   "b": "crown",
-   "take": [
-    398,
-    252
-   ],
-   "land": [
-    354,
-    240
-   ],
+   "rings": true,
    "gap": 51.4
   },
   {
@@ -11846,26 +11834,14 @@
    "a": "storm_e",
    "b": "cinder",
    "take": [
-    386,
-    360
-   ],
-   "land": [
-    404,
-    340
-   ],
-   "gap": 27.2
-  },
-  {
-   "a": "cinder",
-   "b": "storm_e",
-   "take": [
-    402,
-    344
-   ],
-   "land": [
     384,
-    362
+    361
    ],
+   "land": [
+    402,
+    320
+   ],
+   "rings": true,
    "gap": 27.2
   },
   {
@@ -11873,31 +11849,119 @@
    "a": "lark",
    "b": "storm_w",
    "take": [
-    204,
-    300
+    202,
+    298
    ],
    "land": [
-    244,
-    330
+    252,
+    324
    ],
+   "rings": true,
    "gap": 43.3
   },
   {
-   "a": "storm_w",
-   "b": "lark",
+   "name": "Moor Line",
+   "a": "duskmoor",
+   "b": "storm",
    "take": [
-    240,
-    330
+    362,
+    420
    ],
    "land": [
-    200,
-    304
+    320,
+    380
    ],
-   "gap": 43.3
+   "rings": true,
+   "gap": 48.9
+  },
+  {
+   "name": "Salt Line",
+   "a": "saltmere",
+   "b": "storm",
+   "take": [
+    300,
+    456
+   ],
+   "land": [
+    300,
+    392
+   ],
+   "rings": true,
+   "gap": 59.8
+  },
+  {
+   "name": "Lantern Line",
+   "a": "highwatch",
+   "b": "crown",
+   "take": [
+    146,
+    128
+   ],
+   "land": [
+    228,
+    158
+   ],
+   "rings": true,
+   "gap": 82.0
   }
  ],
  "pads": [],
- "updrafts": [],
+ "updrafts": [
+  {
+   "region": "crown",
+   "at": [
+    288,
+    162
+   ],
+   "top": 8,
+   "ring": true
+  },
+  {
+   "region": "frostgate",
+   "at": [
+    296,
+    86
+   ],
+   "top": 10,
+   "ring": true
+  },
+  {
+   "region": "cinder",
+   "at": [
+    426,
+    222
+   ],
+   "top": 6,
+   "ring": true
+  },
+  {
+   "region": "storm",
+   "at": [
+    300,
+    354
+   ],
+   "top": 6,
+   "ring": true
+  },
+  {
+   "region": "thorn",
+   "at": [
+    170,
+    366
+   ],
+   "top": 6,
+   "ring": true
+  },
+  {
+   "region": "highwatch",
+   "at": [
+    102,
+    126
+   ],
+   "top": 8,
+   "ring": true
+  }
+ ],
  "winds": [],
  "train": {
   "cars": 4,
