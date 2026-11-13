@@ -1,7 +1,8 @@
 extends RefCounted
 ## --mesh-arrays-check (item 33): MeshArrays.merge builds the same mesh SurfaceTool.append_from did
 ## (vertices, normals, indices, part heights) without reading parts back from the renderer; a kept
-## primitive's arrays follow it when it changes.
+## primitive's arrays follow it when it changes; an imported model merged by Assets.mesh matches
+## SurfaceTool's merge and keeps its arrays.
 
 var fails := 0
 
@@ -45,5 +46,27 @@ func run(main: Node) -> void:
 	var top := 0.0
 	for v in (MeshArrays.of(sphere, 0)[Mesh.ARRAY_VERTEX] as PackedVector3Array): top = maxf(top, v.y)
 	ok(absf(top - 0.5) < 0.01, "a primitive that changed is read again (top %.2f)" % top)
+	_check_asset("dungeon/chest")
 	print("MESHARRAYS DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+func _check_asset(id: String) -> void:
+	var ps := Assets.scene(id)
+	if ps == null:
+		print("MESHARRAYS SKIP %s (asset packs off)" % id)
+		return
+	var root := ps.instantiate() as Node3D
+	var st := SurfaceTool.new()
+	for mi in Assets._mesh_nodes(root):
+		for s in (mi as MeshInstance3D).mesh.get_surface_count():
+			st.append_from((mi as MeshInstance3D).mesh, s, Assets._rel(mi, root))
+	root.free()
+	var want: PackedVector3Array = st.commit().surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var am := Assets.mesh(id)
+	var got: PackedVector3Array = MeshArrays.of(am, 0)[Mesh.ARRAY_VERTEX]
+	var gap := 0.0
+	for k in mini(want.size(), got.size()):
+		gap = maxf(gap, want[k].distance_to(got[k]))
+	var what := "%s merges like SurfaceTool (%d vertices, worst gap %.5f)" % [id, got.size(), gap]
+	ok(want.size() == got.size() and gap < 0.001, what)
+	ok(am.has_meta(MeshArrays.KEPT), "%s keeps its merged arrays" % id)
