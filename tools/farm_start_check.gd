@@ -3,7 +3,7 @@ extends RefCounted
 ## empty, gems for a house and the essentials, the first trough in storage); you place the house,
 ## crop patch and pot yourself (a ghost that tints green or red, turning, one house only); every
 ## seed gives its own island with about the same room; chopping and mining with tools from the
-## market (wood and stone, things grow back, cliffs stay); wood and stone paying for buildings;
+## market (wood and stone, things grow back, ridges only go by the brush); wood and stone paying for buildings;
 ## assigned Boki working stations in session and while you're away (capped); crouching on the
 ## farm; and old saves keeping the farm they had. Never touches the real save.
 
@@ -228,7 +228,11 @@ func run(m: Node) -> void:
 	for i in hb.wild_t:
 		if hb.wild_t[i] == "cliff": cl = i; break
 	if cl >= 0:
-		ok(not hb.clear_wild(Vector2i(cl % w.w, cl / w.w)) and w.level[cl] > 0, "cliffs can't be chopped or mined (raised rock, level %d)" % w.level[cl])
+		var lv: int = w.level[cl]
+		var chop: Dictionary = home.hg.find(Vector2(cl % w.w + 0.5, cl / w.w + 1.6))
+		var tools_skip := int(chop.get("i", -1)) != cl
+		ok(lv > 0 and w.kind[cl] == World.T_GROUND and tools_skip and hb._brush_ok(Vector2i(cl % w.w, cl / w.w), "wild"),
+			"a ridge is ground to stand on (level %d): tools leave it, the Clear the wild brush levels it" % lv)
 	else:
 		print("FARMSTART  (this island has no cliff)")
 	# ---------------------------------------------------------------- 5. Boki at work stations

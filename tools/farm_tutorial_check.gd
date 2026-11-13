@@ -9,6 +9,10 @@ extends RefCounted
 ##      Done (not Feed) is the page's filled button until the trough step
 ##   5. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
+##   5. base_mode: the four-step base tutorial (meet, feed and the lean, toy, head out or stay), your Boki
+##      leading each step, a Skip on screen at every step, resume after save and load, the farm guides retired
+##   6. the hub's first visit (HubFirstVisit): the Waystone marker, the one line on the first locked zone's
+##      card, each once per save, and neither on a skipped save
 ## Never touches the real save.
 
 var bad := 0
@@ -29,7 +33,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "hob_intro": true}      # (Hob's look is done)
 	return d
 
 func _stats(extracts := 0, bosses := 0, caught := 0, harvested := 0) -> void:
@@ -61,6 +65,8 @@ func run(m: Node, mode := "") -> void:
 	await _spotlight()
 	await _farm2()
 	await _base_mode()
+	await _base_tutorial()
+	await _hub_first_visit()
 	print("FTUT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -89,6 +95,163 @@ func _base_mode() -> void:
 	ok(not home.hw.jobs.any(func(j): return econ_kinds.has(String(j["kind"]))), "on: no wild, station or haul jobs")
 	rules["base_mode"] = false
 	home.hb.toggle()
+	home.queue_free()
+	await main.get_tree().process_frame
+
+# ------------------------------------------------------------------ 6. the base tutorial (GARDEN.md section 8)
+func _base_tutorial() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	Save.d = _new_save()
+	HomeLayout.ensure(Save.d)
+	_stats()
+	ok(FarmTutorial.steps().size() == 12 and FarmTutorial.skippable() and FarmTutorial.current() == "hob",
+			"base_mode off: the twelve old steps, Skip visible, Hob first")
+	rules["base_mode"] = true
+	var ids: Array = FarmTutorial.steps().map(func(st): return String(st["id"]))
+	ok(ids == ["meet", "eat", "toy", "out"] and FarmTutorial.skippable(),
+			"base_mode on: four steps and a Skip: %s" % str(ids))
+	var one_line := true
+	for st in FarmTutorial.steps():
+		for t in (st["hints"] as Dictionary).values():
+			one_line = one_line and not String(t).contains("\n")
+		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
+	ok(one_line, "one banner line per step, no leftover tokens")
+	var last := FarmTutorial.hint_text("out")
+	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
+	ok(last.contains("Waystone") and path_said and not last.contains("\n"),
+			"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line")
+	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
+	FarmTutorial.event("play")
+	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
+	FarmTutorial.event("meet")
+	var eat_hint := FarmTutorial.hint_text("eat")
+	ok(FarmTutorial.current() == "eat" and eat_hint.contains(Care.food_name("emberberry")),
+			"met: feed it, the hint names the food")
+	var rec: Dictionary = Save.d["roster"][0]
+	Evo.eat(rec, "kibble")
+	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "eat", "a plain meal leans nothing, so the step waits")
+	ok(Evo.eat(rec, "emberberry") == "fire", "the starter food leans the Boki fire")
+	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "toy" and FarmTutorial.stage("toy") == "place", "its colour leaned, the toy is next")
+	var lay := HomeLayout.of(Save.d)
+	(lay["deco"] as Array).append({"u": HomeLayout._next_uid(lay), "id": "toy_ball", "x": 40, "z": 30, "r": 0})
+	ok(FarmTutorial.stage("toy") == "watch" and FarmTutorial.world_text("toy") != "",
+			"a toy down: watch it play, marked")
+	FarmTutorial.event("play")
+	ok(FarmTutorial.current() == "out" and FarmTutorial.done_count() == 3, "a Boki at play finishes the toy step")
+	var g := int(Save.d["gems"])
+	FarmTutorial.event("stay")
+	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
+	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
+	await _base_world()
+	rules["base_mode"] = false
+
+## The hint line's Skip button is up (and not hidden behind a quiet guide).
+func _skip_shown(guide: FarmGuide) -> bool:
+	if not guide.hint_visible() or not guide.hint_box.visible:
+		return false
+	var label := String(FarmTutorial.rules()["skip_label"])
+	for c in guide.skip_row.get_children():
+		if c is Button and not c.is_queued_for_deletion() and c.text == label:
+			return true
+	return false
+
+## None of the points is on a bridged side isle (Data.ISLES, retired by the garden zones).
+func _on_no_isle(pts: Array) -> bool:
+	for p in pts:
+		for isle in Data.ISLES.values():
+			var c: Vector2 = isle["c"]
+			var r: Vector2 = isle["r"]
+			if pow((p.x - c.x) / r.x, 2) + pow((p.z - c.y) / r.y, 2) < 1.0:
+				return false
+	return true
+
+## Two of BaseLife's 10 Hz ticks for this Boki (Roam to Lead, then one Lead tick).
+func _lead_tick(home, k: Dictionary) -> void:
+	k.erase("busy")
+	for i in 2:
+		home.life._tick(k, BaseLife.STEP)
+
+func _berries() -> int:
+	return int(Save.d["items"].get("emberberry", 0))
+
+## In a real Home: meeting, feeding through the home's own path, and Skip.
+func _base_world() -> void:
+	var home = await _home(1)
+	var guide: FarmGuide = home.guide
+	var k: Dictionary = home.kins[0]
+	home.ppos = k["node"].position + Vector3(8, 0, 0)
+	ok(FarmTutorial.current() == "meet" and not guide._near_boki(), "in the base: far from your Boki is not meeting it")
+	home.hob.call_t = 0.0
+	home.hob._call_out(0.1)
+	ok(home.hob.call_t < 0.0, "in the base Hob does not call you over: your Boki leads")
+	_lead_tick(home, k)
+	ok(home.life.machine(k).is_in(BaseLife.S.LEAD) and String(k.get("lead_said", "")) == "meet",
+			"your Boki leads the meet step and says its line")
+	ok(Vector2(k["goal"].x - home.ppos.x, k["goal"].z - home.ppos.z).length() < 8.0, "it comes toward you")
+	guide._poll()
+	ok(_skip_shown(guide), "step 1: Skip is on screen")
+	var me: Vector3 = k["node"].position
+	ok(guide.target("meet") == me and guide.target("eat") == me and _on_no_isle([me]),
+			"meet and feed: the marker is on your Boki, not a side isle")
+	home.ppos = k["node"].position + Vector3(1, 0, 0)
+	guide._poll()
+	ok(FarmTutorial.current() == "eat" and _berries() == 3, "walking up meets it and hands over the food")
+	ok(_skip_shown(guide), "step 2: Skip is on screen")
+	home._after_feed(k, "emberberry", Care.feed(k["rec"], "emberberry"))      # Care.feed leans, the home shows it
+	guide._poll()
+	ok(Evo.lean(k["rec"])[0] == "fire" and FarmTutorial.current() == "toy", "feeding it through the home leans it")
+	ok(_skip_shown(guide) and FarmCropGuide.stage_time(30.0) == 30.0 and guide.crop_lbl == null
+			and not FarmTutorial.hint_text("toy").contains("{"), "step 3: Skip on screen, crop and task guides retired")
+	# resume: save and load after two steps, the tutorial carries on at the toy
+	var js := JSON.stringify(Save.d)
+	home.queue_free()
+	await main.get_tree().process_frame
+	Save.d = JSON.parse_string(js)
+	home = await _ready_home()
+	guide = home.guide
+	k = home.kins[0]
+	ok(FarmTutorial.did("meet") and FarmTutorial.did("eat") and FarmTutorial.current() == "toy"
+			and FarmTutorial.done_count() == 2, "after save and load it resumes at the toy step")
+	guide._poll()
+	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "3/4", "resumed: 3/4 on the line, Skip still there")
+	var resumed_gift := _berries()
+	FarmTutorial.give_food()
+	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
+	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
+	guide.place_toy()
+	ok(guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
+			"toy: the marker is on the toy you put down, not a side isle")
+	_lead_tick(home, k)
+	var leading: bool = home.life.machine(k).is_in(BaseLife.S.LEAD)
+	ok(k.has("play") and not leading, "a toy down: it leaves the lead to go and play")
+	FarmTutorial.event("play")
+	k.erase("play")
+	home.life.machine(k).go(BaseLife.S.ROAM, "check")
+	home.ppos = k["node"].position + Vector3(1, 0, 0)
+	_lead_tick(home, k)
+	var portal: Vector3 = home.spots["portal"]
+	ok(guide.target("out") == portal and _on_no_isle([portal]), "head out: the marker is on the portal, no side isle")
+	var gap := Vector2(portal.x - k["pos"].x, portal.z - k["pos"].z).length()
+	var ahead := Vector2(portal.x - k["goal"].x, portal.z - k["goal"].z).length()
+	ok(FarmTutorial.current() == "out" and String(k["lead_said"]) == "out" and ahead < gap,
+			"head out or stay: it leads off toward the portal")
+	home.ppos = k["node"].position + Vector3(20, 0, 0)
+	_lead_tick(home, k)
+	ok(k["goal"] == k["pos"] and _skip_shown(guide), "you fall behind: it waits and looks back; step 4 Skip on screen")
+	var gems0 := int(Save.d["gems"])
+	home.guide.skip()
+	var toys: Array = home.toys.toys()
+	ok(toys.size() == 1 and not FarmTutorial.active(), "Skip puts a toy down and ends it")
+	ok(_berries() == 3 and int(Save.d["gems"]) == gems0, "Skip leaves the food in hand and costs nothing")
+	home.queue_free()
+	await main.get_tree().process_frame
+	# skip from the very start of a base farm: toy and food both appear
+	home = await _home(1)
+	home.guide.skip()
+	ok(home.toys.toys().size() == 1 and _berries() == 3 and FarmHob.house_entry().is_empty(),
+			"Skip at the start: a toy placed, food in hand, no house site")
 	home.queue_free()
 	await main.get_tree().process_frame
 
@@ -262,23 +425,29 @@ func _tutorial_rules() -> void:
 			"the portal ends it with one reward of %d gems" % reward)
 	FarmTutorial.event("hob")
 	ok(int(Save.d["gems"]) == g_end + reward, "nothing is granted twice")
-	# skipping grants and takes nothing
+	# skipping takes nothing and hands over the tools and the starter food at once
 	Save.d = _new_save()
 	L = HomeLayout.ensure(Save.d)
 	_stats()
 	var g1 := int(Save.d["gems"])
-	var inv1 := JSON.stringify(Save.d["items"])
 	FarmTutorial.skip()
-	var untouched: bool = int(Save.d["gems"]) == g1 and JSON.stringify(Save.d["items"]) == inv1
-	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"] and untouched,
-		"skipping ends the prompts and grants or takes nothing")
+	var kept: bool = int(Save.d["gems"]) == g1 and HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")
+	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"] and kept
+			and int(Save.d["items"].get("kibble", 0)) == int(FarmTutorial.rules()["start_food"]["kibble"]),
+		"skipping ends the prompts, takes nothing, and hands over the axe, the pickaxe and the food")
 	var steps_ok := FarmTutorial.steps().size() == 12
 	steps_ok = steps_ok and FarmTutorial.steps().all(func(s): return not (s["hints"] as Dictionary).is_empty())
 	ok(steps_ok, "twelve steps, each with its hints")
-	ok(not bool(FarmTutorial.option("skippable")),
-			"the owner's decision: the farm tutorial is not skippable (a data option)")
+	ok(bool(FarmTutorial.option("skippable")),
+			"the owner's decision (Nov 8): the farm tutorial always has a Skip (a data option)")
 	for key in ["tracker_replaces_day1", "player_swing", "end_gems", "free_order", "skippable"]:
 		ok(FarmTutorial.rules()["options"].has(key), "option '%s' is data" % key)
+	# the first construction site says once that Boki build it while you are home
+	Save.d = _new_save()
+	var first := FarmTutorial.site_hint()
+	ok(first.begins_with("Boki build it while you are home"), "the first site gets the home-only line")
+	ok(FarmTutorial.site_hint() == "", "the second site gets none")
+	ok(bool(Save.d["tutorial"]["site_hint"]), "the line is seen once per profile")
 	# a test save that says the first day is done never sees it
 	Save.d = _new_save()
 	Save.d["tutorial"]["day1_done"] = true
@@ -399,7 +568,7 @@ func _spotlight() -> void:
 	home.guide.tick(0.6)
 	ok(not FarmSpotlight.showing() or FarmSpotlight._node.spec != {"world": true},
 			"the job step done: its spotlight is gone")
-	ok(home.guide.hint_box.get_child(0).get_child(0).text.contains("Done"), "a tick says Done! on the goal line")
+	ok(home.guide.hint_text().contains("Done"), "a tick says Done! on the strip line")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
@@ -486,8 +655,8 @@ func _world() -> void:
 	ok(home.guide != null and home.hob != null and is_instance_valid(home.hob.node)
 			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 4.0,
 			"Hob waits by the market stall from the start")
-	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_lbl.text.contains("Hob"),
-			"the first prompt is on screen: %s" % home.guide.hint_lbl.text)
+	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_text().contains("Hob"),
+			"the first prompt is on screen: %s" % home.guide.hint_text())
 	FarmTutorial.event("hob")
 	ok(home.get("day1_box") == null, "the old first-day card is gone")
 	var g0 := int(Save.d["gems"])
@@ -526,8 +695,18 @@ func _world() -> void:
 	home.tw.test_hold = false
 	ok(int(e["site"]["got"]) == beats, "holding the key hammers beat after beat (%d)" % int(e["site"]["got"]))
 	# the tracker card sits in the old first-day slot, and the Hob step
-	ok(is_instance_valid(home.guide.tracker) and home.guide.tracker.get_parent() == home.root_ui,
-			"the Goals card is on screen")
+	ok(not is_instance_valid(home.guide.tracker), "no Goals card while the tutorial runs")
+	FarmTutorial.state()["done"] = true      # ... then one line on screen, and G opens the list
+	home.guide.refresh()
+	var line: PanelContainer = home.guide.tracker
+	var n_rows := GoalTracker.lines().size()
+	ok(is_instance_valid(line) and line.get_parent() == home.root_ui and line.get_child(0).get_child_count() == 1,
+			"after it the Goals card is one \"Next:\" line")
+	ok(home.guide.toggle_goals() and home.guide.tracker.get_child(0).get_child_count() == n_rows + 1,
+			"G opens the whole list (%d rows and the title)" % n_rows)
+	ok(home.guide.toggle_goals() and home.guide.tracker.get_child(0).get_child_count() == 1, "and closes it again")
+	FarmTutorial.state()["done"] = false
+	home.guide.refresh()
 	home.hob.talk()
 	ok(home.panel_open == HobTalk.TALK and home.hob.chat.talking() and FarmTutorial.did("hob"),
 			"talking opens the talk box face to face")
@@ -544,7 +723,7 @@ func _world() -> void:
 	var shown: bool = ["Buildings", "Fences", "Paths", "Garden", "Work"].all(func(t): return tabs.has(t))
 	var hidden: bool = ["Lights", "Furniture", "Statues"].all(func(t): return not tabs.has(t))
 	ok(shown and hidden,
-			
+
 		"tabs with something to build stay, empty ones are hidden (%s)" % ", ".join(tabs))
 	home.hb.toggle()
 	# the one Boki builds it alone, and it is finished by the work
@@ -624,19 +803,14 @@ func _farm2() -> void:
 	ok(_item_texts(home).any(func(t): return t.begins_with("Challenge House") and t.contains("wood")),
 			"once Hob has drawn it up it is in the Buildings tab with its price")
 	var keep := JSON.stringify(Save.d["buildings"])
-	home._open_lot("board")
-	var build_btn: Button = null
-	for b in home.panel_host.find_children("*", "Button", true, false):
-		if String(b.text) == "Build it": build_btn = b
-	ok(build_btn != null and build_btn.disabled, "with no wood and stone the Build button is greyed")
+	home._open_lot("board")      # a lot goes up as a construction site (FarmLots); nothing is spent yet
+	var e := FarmLots.entry("board")
+	ok(FarmSites.is_site(e) and not Save.has_building("board") and FarmSites.stalled(e),
+			"marking it out leaves a site that waits while there is no wood and stone")
 	Work.add_mat("wood", int(lc["wood"])); Work.add_mat("stone", int(lc["stone"]))
-	home._close_panel()
-	home._open_lot("board")
-	build_btn = null
-	for b in home.panel_host.find_children("*", "Button", true, false):
-		if String(b.text) == "Build it": build_btn = b
 	var gems_before := int(Save.d["gems"])
-	if build_btn: build_btn.pressed.emit()
+	for i in 40:
+		if FarmSites.has_site(e): FarmSites.land(home.hw, e, home.lots["board"]["at"], "You")
 	ok(Save.has_building("board") and Work.mat("wood") == 0 and Work.mat("stone") == 0 and int(Save.d["gems"]) == gems_before,
 			"building it spends the wood and stone and no gems (was %s)" % keep)
 	home.queue_free()
@@ -672,6 +846,8 @@ func _farm2() -> void:
 	ok(lbl.contains("water nearby"), "the prompt says why: '%s'" % lbl)
 	ok(String(HomeLayout.CATALOG["crop_patch"]["desc"]).contains("2 tiles of water"), "and the build menu says it in the patch's tooltip")
 	ok(home._dry_plot().is_empty(), "the farmhand has nothing to water there")
+	_grows_faster(home, L)
+	_trough_by_water(L)
 	# the preview in build mode
 	L["water"].clear()
 	Save.d["plot_cap"] = 8
@@ -683,12 +859,22 @@ func _farm2() -> void:
 	home.hb.debug_m = Vector2(cs[0].x + psz.x * 0.5, cs[0].y + psz.y * 0.5)
 	home.hb.tick(0.0)
 	var note := _note_text(home.hb)
-	ok(note.contains("No water"), "the preview of a patch away from water says so: '%s'" % note)
+	ok(note == "" and not _has_drop(home.hb), "the preview of a patch away from water stays clear (no note): '%s'" % note)
 	L["water"][HomeLayout.key(cs[0].x + psz.x + 1, cs[0].y)] = 1
 	home.hb.ghost_cells.set_meta("sig", "")
 	home.hb.tick(0.0)
 	note = _note_text(home.hb)
-	ok(note.to_lower().contains("near water") and _note_col(home.hb).g > 0.8 and _note_col(home.hb).r < 0.5, "by the water it says 'near water' in green: '%s'" % note)
+	ok(note == "+growth" and _has_drop(home.hb) and _note_col(home.hb).b > 0.8,
+		"by the water it shows a water drop and '+growth' in blue: '%s'" % note)
+	Save.d["feeder_inv"]["trough"] = 1
+	home.hb.take_feeder("trough")
+	home.hb.debug_m = Vector2(cs[0].x + psz.x - 0.5, cs[0].y + 0.5)      # (in the open ground found for the patch)
+	home.hb.ghost_cells.set_meta("sig", "")
+	home.hb.tick(0.0)
+	note = _note_text(home.hb)
+	ok(note == "fills itself" and _has_drop(home.hb),
+		"a trough held by the water shows the drop and 'fills itself': '%s'" % note)
+	home.hb.take("crop_patch")
 	# a river brush: cheap, and it counts as water
 	ok(HomeLayout.CATALOG.has("river") and int(HomeLayout.CATALOG["river"]["gems"]) < int(HomeLayout.CATALOG["water"]["gems"]),
 			"a River brush costs less than a pond tile")
@@ -713,6 +899,43 @@ func _note_label(hb) -> Label3D:
 	for c in hb.ghost_cells.get_children():
 		if c is Label3D and c.get_meta("fbui", "") == "note" and not c.is_queued_for_deletion(): return c
 	return null
+
+func _has_drop(hb) -> bool:
+	for c in hb.ghost_cells.get_children():
+		if not c is Label3D and c.get_meta("fbui", "") == "note" and not c.is_queued_for_deletion(): return true
+	return false
+
+## The same stretch of growing time: a watered plot away from water stays at its stage, the same plot
+## with water beside the patch moves on one (FarmWater.grow_mul, 1.25: 72 s a stage instead of 90 s).
+func _grows_faster(home, L: Dictionary) -> void:
+	var day1 := bool(Save.d["tutorial"].get("day1_done", false))
+	Save.d["tutorial"]["day1_done"] = true      # (the tutorial's quick first crop would hide the difference)
+	L["water"].clear()
+	var away_s := FarmWater.stage_s(Save.d, "plots", 0)
+	var into := Data.WATER_TIME / FarmWater.grow_mul() + 4.0      # past the by-water stage, short of the dry one
+	var planted := {"crop": "tidebloom", "stage": 0, "care": 0, "wt": Time.get_unix_time_from_system() - into, "wet": 2}
+	Save.d["plots"][0] = planted.duplicate()
+	home._farm_tick()
+	var dry_stage := int(Save.d["plots"][0]["stage"])
+	L["water"][HomeLayout.key(49, 31)] = 1
+	var near_s := FarmWater.stage_s(Save.d, "plots", 0)
+	Save.d["plots"][0] = planted.duplicate()
+	home._farm_tick()
+	var wet_stage := int(Save.d["plots"][0]["stage"])
+	ok(is_equal_approx(away_s / near_s, FarmWater.grow_mul()) and dry_stage == 0 and wet_stage == 1,
+		"a crop by the water grows faster: a stage in %.0f s, not %.0f s (after %.0f s: dry stage %d, by water %d)"
+			% [near_s, away_s, into, dry_stage, wet_stage])
+	ok(FarmWater.plot_note().contains("25% faster"), "the plot panel says so: '%s'" % FarmWater.plot_note())
+	Save.d["tutorial"]["day1_done"] = day1
+
+## A plain trough fills itself from the pantry only by the water; away from it you fill it yourself.
+func _trough_by_water(L: Dictionary) -> void:
+	Save.d["items"]["kibble"] = 10
+	var f := {"id": "fw", "kind": "trough", "x": 49.5, "z": 33.5, "food": [], "auto": true}
+	ok(Econ.auto_refill(f) > 0, "a trough two tiles from water tops itself up from the pantry")
+	var far := {"id": "fd", "kind": "trough", "x": 49.5, "z": 40.5, "food": [], "auto": true}
+	ok(Econ.auto_refill(far) == 0 and not Econ.self_fills(far), "a trough away from water waits for you to fill it")
+	L["water"].erase(HomeLayout.key(49, 31))
 
 func _note_text(hb) -> String:
 	var l := _note_label(hb)
@@ -744,3 +967,59 @@ func _free_cells(hb, sz: Vector2i) -> Array:
 			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
 			if hb.fits(hb.held, cs): return cs
 	return []
+
+# ------------------------------------------------------------------ 7. the hub's first visit
+func _labels(n: Node) -> Array:
+	var out: Array = [n.text] if n is Label and not n.is_queued_for_deletion() else []
+	for c in n.get_children().filter(func(c): return not c.is_queued_for_deletion()):
+		out.append_array(_labels(c))
+	return out
+
+func _hub_first_visit() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = _new_save()
+	Save.d["tutorial"]["ft"] = {"did": {}, "done": false, "skipped": false, "gift": false}
+	HomeLayout.ensure(Save.d)
+	Game.goto("home", {"zone": GardenZones.HUB})
+	var hub = null
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 60000:
+		await main.get_tree().process_frame
+		var cur = Game.main.current
+		var built: bool = is_instance_valid(cur) and cur.get("hhints") != null and cur.get("building") != true
+		if built and cur.get("root_ui") != null:
+			hub = cur
+			break
+	ok(hub != null, "hub first visit: the hub loads")
+	if hub == null:
+		return
+	var first: HubFirstVisit = hub.hhints.first
+	var at: Vector3 = hub.hway.node.position
+	ok(first.marker != null and first.marker.text == "Step in to travel" and first.marker.position.y > at.y + 1.0,
+			"beat 1: a marker floats over the Waystone saying 'Step in to travel'")
+	hub.ppos = at + Vector3(6, 0, 6)
+	first.tick(0.5)
+	ok(first.marker != null and hub.panel_open == "", "far from the ring it stays, and nothing is blocked")
+	hub.ppos = at + Vector3(1, 0, 0)
+	first.tick(0.1)
+	ok(first.marker == null and Save.d["tutorial"]["hub_first"].has("marker"), "stepping on the ring retires it")
+	ok(HubFirstVisit.new(hub).marker == null, "and it never shows again")
+	ZoneCards.open(hub, GardenZones.HUB)
+	var line := String(HubFirstVisit.rules()["line_text"])
+	var texts := _labels(hub.panel_host)
+	ok(texts.count(line) == 1 and Save.d["tutorial"]["hub_first"].has("line"),
+			"beat 2: the first time the list opens, exactly one locked card carries the line")
+	hub._close_panel()
+	ZoneCards.open(hub, GardenZones.HUB)
+	ok(_labels(hub.panel_host).count(line) == 0, "the next time the list opens, the line is gone")
+	hub._close_panel()
+	Save.d["tutorial"]["hub_first"].clear()
+	FarmTutorial.state()["skipped"] = true
+	var seen_any := HubFirstVisit.wanted("marker") or HubFirstVisit.wanted("line")
+	ok(HubFirstVisit.new(hub).marker == null and not seen_any,
+			"a skipped save sees neither beat")
+	ZoneCards.open(hub, GardenZones.HUB)
+	ok(_labels(hub.panel_host).count(line) == 0 and Save.d["tutorial"]["hub_first"].is_empty(),
+			"and its list has no line and records nothing")
+	hub._close_panel()
+	Content.rules("farm_build")["base_mode"] = false

@@ -2,8 +2,8 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, hop while it leaps or is thrown) and "kburst"
+## (a factor on the gait's cadence), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -41,10 +41,10 @@ const FRAME := {
 		"ear_tip": Vector3(0.125, 0.45, -0.28), "tail_tip": Vector3(0, 0.057, 0.48), "tip_bone": "tail4", "hip": 0.15,
 		"marks": {"left flank": Vector3(-0.245, 0.28, 0.03), "right flank": Vector3(0.245, 0.28, 0.03),
 			"back": Vector3(0, 0.49, 0.05), "chest": Vector3(0, 0.18, -0.21)}},
-	"cairnback": {"head": Vector3(0, 0.30, -0.39), "top": 0.56, "carry": Vector3(0, 0.47, 0.23),
-		"ear_tip": Vector3(0.24, 0.345, -0.25), "tail_tip": Vector3(0, 0.095, 0.375), "tip_bone": "tail2", "hip": 0.15,
-		"marks": {"left flank": Vector3(-0.235, 0.26, 0.05), "right flank": Vector3(0.235, 0.26, 0.05),
-			"back": Vector3(0, 0.45, 0.22), "chest": Vector3(0, 0.19, -0.2)}},
+	"cairnback": {"head": Vector3(0, 0.234, -0.244), "top": 0.72, "carry": Vector3(0, 0.73, 0.05),
+		"ear_tip": Vector3(0.221, 0.257, -0.21), "tail_tip": Vector3(0, 0.091, 0.28), "tip_bone": "tail2", "hip": 0.146,
+		"marks": {"left flank": Vector3(-0.216, 0.221, -0.041), "right flank": Vector3(0.216, 0.221, -0.041),
+			"back": Vector3(0, 0.483, 0.095), "chest": Vector3(0, 0.182, -0.191)}},
 	"wisplet": {"head": Vector3(0, 0.44, -0.24), "top": 0.64, "carry": Vector3(0, 0.68, -0.02), "hip": 0.14,
 		"ear_tip": Vector3(0.204, 0.665, -0.038), "tail_tip": Vector3(0, 0.114, 0.257), "tip_bone": "tail1",
 		"marks": {"left flank": Vector3(-0.18, 0.22, 0.03), "right flank": Vector3(0.18, 0.22, 0.03),
@@ -71,14 +71,18 @@ const FRAME := {
 		"coat": {"fres": 0.15, "rim_amount": 0.1, "top_light": 0.1, "sheen": 0.0},
 		"marks": {"left flank": Vector3(-0.09, 0.225, -0.126), "right flank": Vector3(0.09, 0.225, -0.126),
 			"back": Vector3(0, 0.27, -0.03), "chest": Vector3(0, 0.225, -0.22)}},
+	"gibbelle": {"head": Vector3(0, 0.37, -0.15), "top": 0.52, "carry": Vector3(0, 0.6, 0.03),
+		"ear_tip": Vector3(0.155, 0.365, -0.05), "tail_tip": Vector3(0, 0.1, 0.17), "tip_bone": "hips", "hip": 0.0,
+		"marks": {"left flank": Vector3(-0.16, 0.15, 0.02), "right flank": Vector3(0.16, 0.15, 0.02),
+			"back": Vector3(0, 0.25, 0.16), "chest": Vector3(0, 0.24, -0.12)}},
 	"glomwort": {"head": Vector3(0, 0.26, -0.22), "top": 0.42, "carry": Vector3(0, 0.5, 0.08),
 		"ear_tip": Vector3(0.085, 0.42, 0.07), "tail_tip": Vector3(0, 0.12, 0.28), "tip_bone": "hips", "hip": 0.0,
 		"marks": {"left flank": Vector3(-0.21, 0.13, 0.04), "right flank": Vector3(0.21, 0.13, 0.04),
 			"back": Vector3(0, 0.28, 0.14), "chest": Vector3(0, 0.1, -0.2)}},
-	"kestrike": {"head": Vector3(0, 0.46, -0.22), "top": 0.59, "carry": Vector3(0, 0.5, 0.16), "hip": 0.11,
-		"ear_tip": Vector3(0.147, 0.57, 0.124), "tail_tip": Vector3(0, 0.057, 0.342), "tip_bone": "tail2",
-		"marks": {"left flank": Vector3(-0.135, 0.15, 0.03), "right flank": Vector3(0.135, 0.15, 0.03),
-			"back": Vector3(0, 0.3, 0.125), "chest": Vector3(0, 0.275, -0.152)}},
+	"kestrike": {"head": Vector3(0, 0.4, -0.246), "top": 0.5, "carry": Vector3(0, 0.435, 0.07), "hip": 0.084,
+		"ear_tip": Vector3(0.09, 0.47, -0.04), "tail_tip": Vector3(0, 0.07, 0.24), "tip_bone": "tail2",
+		"marks": {"left flank": Vector3(-0.174, 0.151, -0.083), "right flank": Vector3(0.174, 0.151, -0.083),
+			"back": Vector3(0, 0.253, 0.025), "chest": Vector3(0, 0.238, -0.197)}},
 	"kindlewren": {"head": Vector3(0, 0.4, -0.22), "top": 0.6, "carry": Vector3(0, 0.64, -0.04), "hip": 0.12,
 		"ear_tip": Vector3(0.027, 0.616, -0.067), "tail_tip": Vector3(0, 0.49, 0.255), "tip_bone": "tail2",
 		"marks": {"left flank": Vector3(-0.165, 0.15, -0.02), "right flank": Vector3(0.165, 0.15, -0.02),
@@ -122,7 +126,8 @@ const STRIDE := {
 	"hivara": [0.63, 1.42],
 	"caecilith": [0.14, 0.35],
 	"glomwort": [1.50, 2.90],
-	"kestrike": [0.30, 1.69],
+	"gibbelle": [1.50, 2.90],
+	"kestrike": [0.19, 1.04],
 	"kindlewren": [0.39, 1.79],
 	"lodestick": [0.22, 2.67],
 	"marchleaf": [0.51, 2.02],
@@ -131,7 +136,13 @@ const STRIDE := {
 	"thrumbird": [1.50, 2.90],
 }
 const FADE := 0.14            # s between body clips
+## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
+## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
+const GAIT_FADE := {"thrumbird": 0.45}
+const GAITS := ["idle", "walk", "run"]
 const FACE_RATE := 14.0       # 1/s the expression eases at
+const FACE_SNAP := 0.002      # blend weight: this close to its goal, a face shape stops easing (and being written)
+const LOOK_SNAP := 0.0005     # eye UV offset: this close, the eyes stop drifting and their uniform stops being set
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
 const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
@@ -147,8 +158,11 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
+## The strut takes steps this much quicker than a walk at the same ground speed (a high, proud step).
+const STRUT_CADENCE := 1.25
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
 ## Blend shapes each expression pushes.
@@ -169,11 +183,18 @@ const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
+	"strut": "cheer", "pose": "cheer", "bow": "cheer",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
 
 static var enabled := true
+## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
+static var normal_k := 1.0
 
 var species := ""
 var manual := false            # tools pose it by hand: set_clip, seek and set_face, nothing automatic
@@ -181,6 +202,8 @@ var root: Node3D
 var flex: Node3D
 var model: Node3D
 var player: AnimationPlayer
+var _skel: Skeleton3D
+var pace: RigPace              # how often the seen rig (clip, skeleton, face) steps
 var face: MeshInstance3D
 var eye_mat: ShaderMaterial
 var clip := ""
@@ -194,6 +217,7 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -263,12 +287,23 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	_skel = skeleton()
+	# BokiDna's modifier would otherwise re-pose (and re-skin) the rig every frame, stepped or not
+	_skel.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	pace = RigPace.new(get_instance_id())
+	BokiHomeClips.install(species, player, _skel)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
 	set_clip("idle")
+
+## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
+func advance(dt: float) -> void:
+	player.advance(dt)
+	_skel.advance(dt)
 
 ## The model's skeleton.
 func skeleton() -> Skeleton3D:
@@ -289,22 +324,27 @@ func set_clip(which: String, fade := FADE) -> void:
 ## Tools: holds the body at `at` (s) of the current clip and the face fully on its expression.
 func seek(at: float) -> void:
 	player.seek(at, true)
+	_skel.advance(0.0)
 	for s in _shapes:
 		_now[s] = float(_want.get(s, 0.0))
 		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
 
 func _process(dt: float) -> void:
-	if manual or dt <= 0.0:
+	if dt <= 0.0:
 		return
-	var seen := root.is_visible_in_tree()
-	player.active = seen
-	if not seen:
+	if manual:
+		advance(dt)
+		return
+	if not root.is_visible_in_tree():
 		return
 	_flinch.update(root, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
-	_face_step(dt)
+	var t := pace.step(dt)
+	if t > 0.0:
+		_face_step(t)
+		advance(t)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
 ## the jolt of a hit (KinFlinch) stay.
@@ -341,15 +381,26 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	if asleep != _asleep:
+		_asleep = asleep
+		if _speed < WALK_SPEED:
+			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
-	set_clip(want)
+	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = 1.0
-	if want != "run" and want != "walk" and want != "carry":
+	if want not in ["run", "walk", "carry", "strut"]:
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
 	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
 			* model.global_basis.z.length())
-	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	var quick := STRUT_CADENCE if want == "strut" else 1.0
+	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
+	player.speed_scale = clampf(quick * _speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
+
+## s the rig takes to hand one gait over to another.
+func gait_fade() -> float:
+	return GAIT_FADE.get(species, FADE)
 
 func _start_shot(which: String) -> void:
 	_shot = which
@@ -357,11 +408,13 @@ func _start_shot(which: String) -> void:
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
-		return "sleep"
+		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work
 	var act := String(root.get_meta("kact", ""))
+	if act == "hop" and not player.has_animation("hop"):
+		return "run"          # a Boki in the air (Kin.render) without a hop clip runs through it
 	if act != "":
 		return act
 	if _shot_left > 0.0:
@@ -404,15 +457,22 @@ func _face_step(dt: float) -> void:
 		var goal := float(_want.get(s, 0.0))
 		if s == "blink" and not shut_already:
 			goal = sin(_blink * PI)
-		var w := lerpf(float(_now[s]), goal, k if s != "blink" else 1.0)
-		_now[s] = w
-		face.set_blend_shape_value(int(_shapes[s]), w)
+		var was := float(_now[s])
+		var w := lerpf(was, goal, k if s != "blink" else 1.0)
+		if absf(w - goal) < FACE_SNAP:
+			w = goal
+		if w != was:       # an unchanged weight isn't written: the face mesh is only re-deformed while it moves
+			_now[s] = w
+			face.set_blend_shape_value(int(_shapes[s]), w)
 	_look_t -= dt
 	if _look_t <= 0.0:
 		_look_t = _rng.randf_range(1.2, 3.8)
 		_look_to = Vector2(_rng.randf_range(-0.09, 0.09), _rng.randf_range(-0.05, 0.05))
-	_look = _look.lerp(_look_to, 1.0 - exp(-12.0 * dt))
-	eye_mat.set_shader_parameter("look", _look)
+	if _look != _look_to:
+		_look = _look.lerp(_look_to, 1.0 - exp(-12.0 * dt))
+		if _look.distance_to(_look_to) < LOOK_SNAP:
+			_look = _look_to
+		eye_mat.set_shader_parameter("look", _look)
 
 ## Wears the game's materials: the painted atlas under the Boki toon light, the glow and the eye in its own colours.
 func _dress(c: Dictionary, mats: Array) -> void:
@@ -451,6 +511,11 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	for k in look:
 		m.set_shader_parameter(k, look[k])
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
+	var relief := (src as BaseMaterial3D).normal_texture
+	if relief and normal_k > 0.0:
+		m.set_shader_parameter("normal_tex", relief)
+		m.set_shader_parameter("use_nrm", true)
+		m.set_shader_parameter("normal_k", normal_k)
 	if id == "boki_coat":
 		_coat = m
 		m.next_pass = _ink()

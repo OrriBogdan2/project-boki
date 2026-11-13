@@ -8,13 +8,14 @@ const PATH := "user://settings.cfg"
 const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
+	# music (Soundtrack): the style, Shuffle, and a hand-picked track id per place ("" = the style's)
+	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
+	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
 	# video
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
-	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
-	"warden_models": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
@@ -23,17 +24,17 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a",
+	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
-const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
 ## detail for speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the
@@ -47,32 +48,33 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   ·  occ: the outline on your side where cover hides it (OcclusionOutline)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "occ": false},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "occ": false},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "occ": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occ": true},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -149,6 +151,8 @@ const ACTIONS := [
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
+	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
+	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
@@ -156,8 +160,12 @@ const ACTIONS := [
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
+	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
+	["undo", "Undo the last piece (build mode, with Ctrl)"], ["keep_placing", "Hold to keep placing (build mode)"],
+	["level_mod", "Hold with a slot key to level it"], ["kit_card", "Hunter kit card (hover a hunter)"],
+	["confirm", "Press the open panel's main button"], ["push_to_talk", "Push to talk (before a match)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
 	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
@@ -498,9 +506,13 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	sl[slot] = s
-	if sl[1 - slot] == s: sl[1 - slot] = ""
+	_put(sl, slot, s)
 	_set_slots(action, sl)
+
+## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
+func _put(sl: Array, slot: int, code: String) -> void:
+	sl[slot] = code
+	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -522,21 +534,29 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
+		["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
+		["goals", "throw"], ["fold_guide", "whistle"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
-## `action` had there.
-func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
+## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
+## what `action` had there instead, so none of them loses a key.
+func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
 	var mine := slots(action)
-	var theirs := slots(other)
-	theirs[other_slot] = mine[slot]
-	mine[slot] = ev_code(ev)
-	_set_slots(other, theirs)
+	var old: String = mine[slot]
+	_put(mine, slot, ev_code(ev))
+	for o in owners:
+		var theirs := slots(o[0])
+		_put(theirs, o[1], old)
+		_set_slots(o[0], theirs)
 	_set_slots(action, mine)
+
+## True when an action has no key at all (the Controls page marks it red).
+func unbound(action: String) -> bool:
+	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")
