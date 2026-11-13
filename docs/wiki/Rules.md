@@ -221,7 +221,7 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | win_joy | 15 |
 | win_trust | 3 |
 | lose_joy | -10 |
-| gems_win | 6 |
+| gems_win | 14 |
 | gems_ran | 2 |
 | gems_doc | Gems to you when your backed Boki wins, or for any other race. |
 | rival_step | 0.15 |
@@ -841,14 +841,12 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | first_evo_level | 8 |
 | first_evo_level_doc | The first real form swap: Echolop's final (evo_paths.json zapple level 8). Also reported: level 4 (today's Evo.on_level form step) and 16 (the other branching finals). |
 | report_levels | [4, 8, 16] |
-| grind_days | 14 |
-| grind_doc | Flag: a 5-minute player needs more than this many days to the first evolution. |
-| trivial_days | 3 |
-| trivial_doc | Flag: the 240 budget is full inside this many days. |
-| xp_curve | {"per_level": 100, "flat_from": null} |
-| xp_curve_doc | XP from level n to n + 1: per_level x n, and per_level x flat_from from level flat_from on (null: never). Today game.gd _after_match: 100 x n, no flat part. |
-| garden_xp | {"play": 8, "win": 15, "first_win": 45, "care_first": 3, "care_kinds": 3, "wish": 3, "sunsap": 40} |
-| garden_xp_doc | GARDEN_MODERN 2.5, not built: a played minigame 8, a win 15 (instead of 8), the first win of the day in a game 45 (three times a win); first care of each of care_kinds kinds a day 3; a granted wish 3 (section 5 rank 1); Sunsap 40. |
+| bands | {"form_lv4_day": [1, 10], "evolution_day": [3, 14], "budget_full_day": [7, 30], "stat_total": [216, 240], "gems_day": [43, 300], "joy": [50, 90]} |
+| bands_doc | Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above sulky, below always full so toys and cares still matter). |
+| joy_model | {"away": 30.0, "care": 6.0, "decay_per_min": 0.6} |
+| joy_model_doc | assume, copies of scripts/core/care.gd: a Boki away a day sits at the offline joy floor 30; each first care gives about 6 joy (Care.feed base); joy falls DECAY['joy'] 0.6 a minute. Toy joy_gain and joy_below are read from toys.json. |
+| garden_xp_unbuilt | {"care_kinds": 3, "wish": 3, "sunsap": 40} |
+| garden_xp_unbuilt_doc | Garden XP rules that are not live yet or are sim-only: the care kinds that pay a first care a day (feed, pat, fetch), a granted wish 3 (GARDEN_MODERN section 5 rank 1), Sunsap 40. The built numbers (a played game, a win, the first win of the day, a first care, the level curve) are read from garden_xp.json. |
 | expedition | {"xp_base": 40, "xp_win": 40, "xp_knock": 10, "win_p": 0.5, "knocks": 1.0, "run_min": 10, "wayseed_p": 0.25, "gems": 40} |
 | expedition_doc | game.gd _after_match for the lead Boki: 40 + 40 on a win + 10 a knock. assume: half the runs won, one knock a run, 10 minutes a run, a Wayseed for a locked zone in a quarter of the runs (garden-wayseed: once a run, matching lair only), 40 gems a run. |
 | time | {"arrive": 1.0, "care": 1.0, "wish": 0.5, "game": 1.5, "cup_round": 1.5} |
@@ -875,7 +873,7 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | wayseed_price | 300 |
 | home_gems_day | 30 |
 | gems_win | 6 |
-| trader_doc | market.json black_market wayseed_price 300 every wayseed_days 7; otherwise the weekly shaping item. assume: 30 gems a day from home selling; base_race gems_win 6 a minigame win. |
+| trader_doc | market.json black_market wayseed_price 300 every wayseed_days 7; otherwise the weekly shaping item. assume: 30 gems a day from home selling; gems_win here is only the fallback when base_race.json is missing; the live gems_win is read. |
 | toy_per_min | 0.4 |
 | toy_doc | assume: one toy play (toys.json stat_gain 1, play_secs 8-12 plus the walk and the joy_below wait) every 2.5 minutes you are there. |
 | toys | ["speed", "power", "focus", "guard", "focus"] |
@@ -886,8 +884,6 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | families_extra_doc | Families of catalogue items not yet in garden_items.json (brief 1.2). |
 | players | {"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false}, "keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true}, "home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true}, "home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}} |
 | players_doc | minutes = garden minutes a day; runs = expeditions a day (the tracked Boki leads); plan = wears only tokens toward its chosen end and feeds that end's bites. home5 is the worst case of the 5-minute flag. All shaping items go to one tracked Boki (an upper bound: a real player spreads them). |
-| proposal | {"xp_curve.per_level": 50, "xp_curve.flat_from": 20, "garden_xp.play": 3, "garden_xp.win": 5, "garden_xp.first_win": 60, "garden_xp.care_first": 5} |
-| proposal_doc | The changed numbers the balance brief proposes (dotted keys into this file); --write reports the sim with and without them. |
 | fallback | {"stat_budget": {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]]}, "cup": [0.9, 1.0, 1.1], "games": {"dash": {"first": "zipseed", "cup_prize": "galeribbon", "table": {"zipseed": 40, "snack": 35, "sunsap": 15, "shellbark_chew": 10}}, "shove": {"first": "thumpnut", "cup_prize": "keepstone", "table": {"thumpnut": 35, "shellbark_chew": 25, "snack": 20, "sunsap": 10, "zipseed": 10}}, "seek": {"first": "hushpearl", "cup_prize": "puzzlenut", "table": {"hushpearl": 40, "snack": 35, "sunsap": 15, "thumpnut": 10}}, "volley": {"first": "hushpearl", "cup_prize": "galeribbon", "table": {"hushpearl": 30, "zipseed": 25, "snack": 25, "sunsap": 10, "shellbark_chew": 10}}}, "items": {"thumpnut": ["stat", "power", 3], "shellbark_chew": ["stat", "guard", 3], "zipseed": ["stat", "speed", 3], "hushpearl": ["stat", "focus", 3], "sunsap": ["stat", "xp", 40], "bristlethorn": ["path", "fierce", 0], "keepstone": ["path", "steadfast", 0], "puzzlenut": ["path", "curious", 0], "galeribbon": ["path", "swift", 0], "stayleaf": ["path", "stay", 0], "rinse_melon": ["lean", "rinse", 0], "unwind_tea": ["respec", "loose", 20]}, "line": {"level": 16, "ends": [{"name": "Amanitusk", "path": "fierce", "stat": "power", "sports": ["tumble"]}, {"name": "Ringrove", "path": "steadfast", "stat": "guard", "sports": ["shove"]}], "pips": {"stat_lead": 3, "tokens_max": 3, "ribbons_max": 2, "care_toy": 1}}} |
 
 ## garden_trust (`content/rules/garden_trust.json`)
@@ -931,14 +927,14 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 
 | Setting | Value |
 |---|---|
-| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.gain_xp). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models. |
-| feed | 2 |
-| feed_love | 5 |
-| pet | 1 |
-| pet_love | 2 |
-| fetch | 3 |
-| fetch_love | 6 |
+| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace and Balance). scripts/home/garden_xp.gd reads it, tools/garden_sim.py fits it. care: a kin's first feed, first pat and first game of fetch each day pay it once. drill_per_point: per training point. games: the garden games that pay (GardenPrizes.settle): play for a played game, win for a win, first_win for the day's first win in that game; the Boki you backed gets it. curve: XP from level n to n + 1 is per_level x n, flat from level flat_from on (Game.xp_need). An expedition gives 40 (+40 on a win, +10 a knock) to the lead Boki. The pace assumptions are what tools/garden_pace_check.gd models. |
+| care | 5 |
 | drill_per_point | 1 |
+| games | ["dash", "shove", "seek", "volley"] |
+| play | 3 |
+| win | 5 |
+| first_win | 60 |
+| curve | {"per_level": 50, "flat_from": 20} |
 | pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0} |
 
 ## garden_zones (`content/rules/garden_zones.json`)
@@ -1494,7 +1490,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | pick_chance | 0.5 |
 | play_secs | [8.0, 12.0] |
 | go_timeout | 20 |
-| joy_gain | 10 |
+| joy_gain | 14 |
 | stat_gain | 1 |
 | max_players | 2 |
 | fav_after | 3 |

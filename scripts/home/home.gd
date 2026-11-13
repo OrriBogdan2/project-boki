@@ -2930,8 +2930,8 @@ func _kin_act(k: Dictionary) -> void:
 		_: _pet_kin(k)
 
 ## Farm XP for a kin (GardenXp); a form or mutation it earns plays out as soon as nothing is open.
-func _garden_xp(rec: Dictionary, action: String, love: bool, points := 0) -> void:
-	GardenXp.give(rec, action, love, points)
+func _garden_xp(rec: Dictionary, action: String, points := 0) -> void:
+	GardenXp.give(rec, action, points)
 	_play_evolutions.call_deferred()
 
 func _pet_kin(k: Dictionary) -> void:
@@ -2944,7 +2944,7 @@ func _pet_kin(k: Dictionary) -> void:
 	if now_s >= float(k.get("pet_ok", 0.0)):
 		k["pet_ok"] = now_s + 20.0
 		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
-		_garden_xp(rec, "pet", loves_pet)
+		_garden_xp(rec, "pet")
 	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
 	_care_trust(rec, "pet")
 	k["hold_t"] = 1.0
@@ -3017,7 +3017,7 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 					_toast("+1 Speed  (%d of %d)" % [int(rec["stats"]["speed"]), Care.stat_cap(rec)])
 				Care.change(rec, "energy", -6.0)
 				Care.change(rec, "clean", -4.0)
-				_garden_xp(rec, "fetch", loves_fetch)
+				_garden_xp(rec, "fetch")
 				if loves_fetch and Care.discover(rec, "play"): _toast("%s loves playing fetch" % rec["name"])
 				if Care.care_day(rec, "played"):
 					Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
@@ -4368,7 +4368,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
 		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Lean.face(leaned)["name"], pct])
 	if f == String(rec["habit"]["food"]): _care_trust(rec, "food", f)
-	_garden_xp(rec, "feed", res["love"])
+	_garden_xp(rec, "feed")
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
@@ -4569,7 +4569,7 @@ func _finish_training() -> void:
 	Care.change(rec, "joy", 4.0 if (train["results"] as Array).has("great") else -2.0)
 	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
 	Evo.add(rec, aff, 2.0)
-	_garden_xp(rec, "drill", false, pts)
+	_garden_xp(rec, "drill", pts)
 	if gained > 0: CareJournal.note(rec, "trained %s at the yard: +%d" % [String(Care.STATS[stat]["name"]).to_lower(), gained])
 	if Care.care_day(rec, "trained"):
 		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
