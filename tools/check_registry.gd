@@ -344,6 +344,7 @@ const CHECKS := {
 	"--hero-vfx-reel": ["res://tools/hero_vfx_reel.gd", "hero_vfx_reel", null],
 	# the per-Hunter parity reels (docs/parity_reel)
 	"--parity-reel": ["res://tools/parity_reel.gd", "parity_reel", null],
+	"--motley-reel": ["res://tools/motley_reel.gd", "motley_reel", null],      # owner review: E, Trade, ledge
 	"--hero-vfx-gallery": ["res://tools/hero_vfx_gallery.gd", "hero_vfx_gallery", null],      # every look, side by side
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--menu-focus-check": ["res://tools/menu_focus_check.gd", "menu_focus_check", null],   # hover stays in panel
@@ -363,6 +364,7 @@ const CHECKS := {
 	"--tutorial-strip-shots": ["res://tools/tutorial_strip_shots.gd", "tutorial_strip_shots", null],
 	# walking off a ledge is never gated
 	"--ledge-walk-check": ["res://tools/ledge_walk_check.gd", "ledge_walk_check", null],
+	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],      # Trade onto ledges
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide

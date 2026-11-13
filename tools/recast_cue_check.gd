@@ -114,7 +114,9 @@ func _buffered() -> void:
 	var K := P.ak as OstraKit
 	aim_at(P, s[2].pos)
 	P.ak.use_e()
-	_open(m, P, "e")
+	var w := _open(m, P, "e")
+	ok("ostra e: no world marker on the seed, the slot still pulses",
+			not bool(w.get("marker", true)) and String(w.get("slot", "")) == "e", str(w))
 	var min_t := float(K.e_def()["min_recast"])
 	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - ArchKit.RECAST_BUFFER * 0.6:
 		m.step(DT)

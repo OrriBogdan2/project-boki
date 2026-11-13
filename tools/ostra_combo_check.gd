@@ -264,9 +264,10 @@ func _ostra() -> void:
 	m.step(DT)
 	var lantern: Dictionary = KitLooks.of(m).held.get("os_star", {})
 	ok(
-		"owner 11-08: the Trade's lantern is drawn 1.3x (TRADE_LOOK_K), the catch circle stays dash.radius",
+		"owner: the Trade's lantern is drawn 1.65x (TRADE_LOOK_K), the catch circle 1.9m (dash.radius)",
 		not lantern.is_empty() and absf((lantern["n"] as Node3D).scale.x - OstraKit.TRADE_LOOK_K) < 0.001
 			and absf(float(AimKit.entry(P, "swap_fly").get("r", 0.0)) - float(K.dash_def()["radius"])) < 0.001
+			and OstraKit.TRADE_LOOK_K >= 1.6 and float(K.dash_def()["radius"]) >= 1.85
 	)
 	var t_cast := m.time
 	var done_at := [0.0]
