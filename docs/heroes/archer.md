@@ -24,7 +24,7 @@ Source vs ours per slot; [data] = the game data (supervive-data), [footage] = he
 | RMB Heartpiercer | hold to charge, release; 16 s, 1 charge [data]; the newer footage also fires a tap uncharged | hold only, 16 s, 1 charge, gold bar | data wins over footage |
 | E Rain of Arrows | an arc at the cursor distance, about 120 degrees, 4.4 s [footage] | the same | matches |
 | X Primal Forces | 3 empowered no-draw shots, the 3rd executes [data] | Starpiercer: the same rules | matches |
-| Shift Spirit Walk | a dodge roll of about 3 m in 0.27 s (peak 17 m/s at 0.13 s), straight into the crouched walk [footage 655.55-655.65] | **was 2.55 m in 0.18 s** (the owner found Lace's Shift fast): now 3.0 m in 0.28 s (`roll` 3.5, `roll_t` 0.24, with the dash feel); `pin_roll` retimed to match; the start burst and ring are gone (owner: no rings or bursts on dashes), a dust puff instead | fixed |
+| Shift Spirit Walk | a dodge roll of about 3 m in 0.27 s (peak 17 m/s at 0.13 s), straight into the crouched walk [footage 655.55-655.65] | **was 2.55 m in 0.18 s** (the owner found Lace's Shift fast): now 3.0 m in 0.27 s (`roll` 3.0, `roll_t` 0.27, the footage's numbers, off the dash feel); `pin_roll` retimed to match; the start burst and ring are gone (owner: no rings or bursts on dashes), a dust puff instead | fixed |
 
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (a) done on this branch, (b) fixed now,
@@ -80,10 +80,10 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | LMB | overdraw | Held 0.5 s past Supercharged: the line dims to a thin pale one, the arm shakes (`arc_over`); the arrow does half | About 50% (263 vs 505) | Matches the ratio |
 | RMB | tap | Nothing: a tap before the draw starts looses no arrow and costs nothing (no snare, no Tripwire, no air Plunge) | Heartpiercer is hold only | Data: hold only |
 | RMB | hold | Heavy Shot (one charge, 16 s cooldown): a great silver needle nocked on the bow (PinNeedle, seen by everyone), drawn back and glowing red with the charge, its red thread trailing; she moves at 38% speed while she holds it (`pin.hold_move`); a red bar from the bow that grows to 2 body heights with the charge; full at 1.1 s; pierces, knocks back; into a wall within 3 m: a wall hit and a 1.2 s stun (PINNED). The bow's arrow made much bigger and red, 6 times a normal one (a bright core, a 6 m trail); a release burst on the aim line at the bow, a screen kick and a deeper thump; a hit flash, a red-white burst, dust and a white ring on impact, and a wall pin leaves a stake in the wall for 7 s; a pink crescent at the feet on release | Same telegraph, arrow and impact | The 1.2 s wall stun stays from the earlier pass. Data: 16 s, 1 charge |
-| Shift | tap | Spirit Walk (2 charges, owner item 146): a 3.4 m dodge roll (data 4.0 x the shared dash feel) (0.24 s, invulnerable; the footage's 0.27 s) that flows straight into the crouched spirit run, then 2.8 s walking 10% faster through rocks, trees, pillars, ability barriers and raised terrain; rank 3: 0.5 s longer, 33% faster inside something (fading over the walk), allies within 6 m walk too. Damage ends it; ending inside something puts her back where she went in. Her screen tints dark blue while inside; a green shell over her | Spirit Walk: dodge roll, 2.8 s through walls and objects; damage ends it; ending inside a wall costs 30 mana and teleports back | Mana is Focus here. Cooldown 6 s on our charge system instead of the source's mana gate |
+| Shift | tap | Spirit Walk: a 3 m dodge roll (0.27 s, invulnerable; the footage's, off the dash feel) that flows straight into the crouched spirit run, then 2.8 s walking 10% faster through rocks, trees, pillars, ability barriers and raised terrain; rank 3: 0.5 s longer, 33% faster inside something (fading over the walk), allies within 6 m walk too. Damage ends it; ending inside something puts her back where she went in. Her screen tints dark blue while inside; a green shell over her | Spirit Walk: dodge roll, 2.8 s through walls and objects; damage ends it; ending inside a wall costs 30 mana and teleports back | Mana is Focus here. Cooldown 6 s on our charge system instead of the source's mana gate |
 | Shift | long dash | In the air or out of charges: a 4.2 m flick with a sideways tumble (`pin_flick`) and a green streak | (base dash) | Our per-hero base dash variant |
 | E | tap | Hail Wall: lobbed up (0.35 s, everyone sees the arc), then 4.4 s of rain on an arc round her, 120 degrees, at the cursor distance (2-9 m), 1.8 m deep: 5 per 0.5 s, slow 35%, blight (healing barely takes) with blue burn flames. Seven translucent green panels with fletch posts, a ground glow, arrows streaking down | Rain of Arrows: an arc concentric to the hunter, about 120 degrees, at the cursor distance, about 4.4 s | Cooldown 15 s: the game data wins over the footage's 8.3 s (audit row "E cooldown 9 vs 15", `e.cooldown`) |
-| X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.5 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane (no ring at her feet, the lane is the hit); three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
+| X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.5 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
 | R | - | the Boki Merge | - | R is the Merge for every hero |
 
 ## Assumptions (the footage is silent; the owner can correct these)
@@ -124,7 +124,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
 | Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
 | Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
-| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
+| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
 | Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
 | Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
 | Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
@@ -133,7 +133,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | built: rival Wisps in the wall lose `down_hp` each tick, 5 x 2.5 = 12.5 of 100 [est: the source drain is unknown]; no slow or burn on a Wisp; allies' Wisps untouched (docs/specs/DOWNED_ABILITIES.md row 2) | `pin E: a rival Wisp in the wall loses down_hp each tick...`, `... does not slow, burn or damage a Wisp` |
+| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -221,7 +221,7 @@ source resolves it is not shown, so it waits for the owner or a frame (see the s
 | LMB perfect | `arc_perfect` | a flourish of the string hand, overshoot and settle |
 | LMB overdraw | `arc_over` (held), `arc_over_loose` | the draw arm shakes and sags; a drooping release |
 | RMB hold (Heavy Shot) | `arc_heavy_wind` (held), `arc_heavy` | sunk low; thrown back by the shot |
-| Shift (Spirit Walk) | `pin_roll`, then `pin_walk` (held) | one forward roll in 0.28 s (footage 655.55-655.65), then light-footed, arms trailing |
+| Shift (Spirit Walk) | `pin_roll`, then `pin_walk` (held) | one forward roll in 0.27 s (footage 655.55-655.65), then light-footed, arms trailing |
 | Long dash | `pin_flick` | a sideways tumble |
 | E (Hail Wall) | `arc_hail` | bow raised high, the volley lobbed up |
 | Payoffs / procs | `pin_rundown` | locked low with the bow thrust out; a pumped fist and skip |
@@ -270,25 +270,3 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
-
-## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
-Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/archer.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
-
-![archer v2 strips](../art/anim_audit/v2_archer.jpg)
-
-- Gait: run slide 13 %, arms against the legs +0.61, bob 5.3 cm: unchanged. The bow arm hangs static in a gait by design (reach 0.05 body heights); the free arm stands out for 21 % of the loose and perfect clips: unchanged.
-- Bow on the hand: the bow rides the closed bow hand (`anchor_bow_root`, `anchor_nock`); the string hand reaches the nock at draw length in `draw`, `loose` and `heavy`.
-- Timing table above: re-run through `--archer-combo-check` on the v2 clips: 159 checks, 0 failures; no row moved.
-
-## Telegraph audit (owner rules: a ring, disc or burst on the ground means gameplay; a telegraph shows the true hit area)
-Branch `ext/telegraph-audit-b-rebased`. Drawn = what AimKit/fx draws; Hit = the number the kit tests; Enemy sees = other players see the tell (`all`, hostile-tinted, local; a remote machine only gets the `net_ring` echo, see Engine notes). The `telegraph == hit` asserts are in `tools/archer_bulwark_combo_check.gd` (`--archer-combo-check`), `tools/pin_bjorn_ult_check.gd`.
-
-| Ability | Shape | Drawn | Hit | Timing | Enemy sees | Source read | Action |
-|---|---|---|---|---|---|---|---|
-| LMB draw | line | thin line to the cursor, `draw_tgt` 0.85 ring on the target, `draw_mark` 0.22 | arrow is a projectile; the rings mark the target/draw stage only | the draw | owner only | thin line | kept (reticle, not a ground area); the 1.3 m `net_ring` on reaching Supercharged is removed |
-| RMB Heavy Shot | lane | `rmb_bar` lane, length grows with the draw | the needle's flight | the draw | owner only | red needle path | kept |
-| Shift Spirit Walk | none | no area | no hit | | | | nothing drawn |
-| E Hail Wall | arc wall | radius = cursor distance (2-9 m), 120 deg, 1.8 m deep, 7 panels | `AimMode.in_arc(radius, 120 deg, width 1.8)` (+ body r) | 0.35 s tell, then 4.4 s of rain | yes (`all`) | arc of arrows | matched; assert drawn radius/deg/thick == the rain's |
-| X Starpiercer | lane | 18 m x 0.5 m, fills with the 0.5 s nock | pierce beam 18 m, width 0.5 | the 0.5 s nock | owner only | beam line | kept; the 0.9 m `x_ring` crosshair ring at her feet is removed (cosmetic) and the check asserts the lane width == data |
-
-Suggestion (not built): the beam lane could be `all` so a foe sees the nock; the source shows no enemy tell for the empowered window, so it stays owner-only.

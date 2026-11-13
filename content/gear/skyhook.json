@@ -9,9 +9,5 @@
   "speed": 0.03
  },
  "icon": "hook",
- "desc": "Hook a point toward the cursor and swing up to it: onto a ledge above you, or high into the air.",
- "launch": {
-  "reach_m": 9.0,
-  "rise_m": 8.0
- }
+ "desc": "Hook a point toward the cursor and swing up to it: onto a ledge above you, or high into the air."
 }

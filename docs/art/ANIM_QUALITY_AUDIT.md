@@ -49,9 +49,6 @@ body (not in the air, a crouch, or a move that owns the body):
   too. It is off while an upper-body move owns the arm.
 - The numbers are per Hunter in content/rules/warden_anim/*.json, measured by `--anim-audit`, with the sweep that chose
   the `stride` gains. `ostra` and `rimewright` keep their clips (no leg motion to stretch).
-- **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble and Kael: 1.0, 0.55).
-  The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso, arms,
-  head) are held back; the feet stay planted and slide is unchanged.
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
@@ -75,13 +72,13 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `ashwick` | 6 → 5 | 18 → 12 | 5.1 → 4.6 | -0.93 → +0.80 | 9 | 2.5 |
 | `bulwark` | 22 → 16 | 25 → 11 | 4.0 → 4.6 | +0.17 → +0.68 | 4 | 3.5 |
 | `dolm` | 54 → 25 | 38 → 18 | 3.1 → 5.5 | -0.86 → +0.72 | 4 | 3.3 |
-| `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 → 10 | 2.5 |
+| `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 | 2.5 |
 | `gunslinger` | 50 → 21 | 25 → 13 | 3.6 → 4.5 | +0.90 → +0.90 | 7 | 3.3 |
-| `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 → 9 | 3.3 |
+| `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 | 3.3 |
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
 | `rimewright` | 93 → 93 | 90 → 90 | 0.4 → 0.4 | -0.39 → -0.39 | 1 | 1.7 |
-| `tender` | 76 → 29 | 62 → 12 | 1.8 → 4.3 | -0.82 → +0.76 | 5 | 6.7 |
+| `tender` | 76 → 39 | 62 → 17 | 1.8 → 3.9 | -0.82 → +0.39 | 5 | 6.7 |
 | `thief` | 73 → 39 | 60 → 17 | 1.8 → 4.3 | -0.96 → +0.82 | 5 | 4.2 |
 
 Strips under each Hunter: rows are walk before, walk after, run before, run after (8 frames at 10 fps, side view, floor
@@ -125,8 +122,7 @@ posts scroll at the move speed).
 ![dolm walk and run, before and after](anim_audit/dolm.jpg)
 
 **Grimble (`dredge`)**
-1. Hip bob 17 cm at a run (12 % of his height); damped by `loco.bob` to 10 cm (7 %).
-   Rows: walk before, walk after, run before, run after: ![dredge hip bob](anim_audit/bob_dredge.jpg)
+1. Hip bob 17 cm at a run (12 % of his height); not changed.
 2. Idle to walk first-pose gap 0.45 body heights, the largest of the roster.
 3. The throw held the free arm sideways for most of the clip (fixed: the free arm is loose; the thrower's own arm still reaches out, 62 %) and the free hand still travels 1.4 body heights, because the torso spins under it; slide 28 % to 12 % (fixed).
 
@@ -141,8 +137,7 @@ posts scroll at the move speed).
 
 **Kael (`juggernaut`)**
 1. Feet slid 27 % at a run, 53 % at a walk (fixed: 12 %, 25 %); the left arm paced with its leg (counter -0.65, fixed to +0.84).
-2. Hip bob 16 cm at a run (10 % of his height); damped by `loco.bob` to 9 cm (6 %).
-   Rows as above: ![juggernaut hip bob](anim_audit/bob_juggernaut.jpg)
+2. Hip bob 16 cm at a run (10 % of his height); not changed.
 3. The slam flings the free arm 1.7 body heights and holds an arm out for 29 to 46 %.
 
 ![juggernaut walk and run, before and after](anim_audit/juggernaut.jpg)
@@ -171,8 +166,8 @@ posts scroll at the move speed).
 ![rimewright walk and run, before and after](anim_audit/rimewright.jpg)
 
 **Meeko (`tender`)**
-1. Feet slid 62 % of the run speed, 76 % at a walk (now 12 %, 29 %: stride 2.0 walk and 1.9 run, up from 1.5). A 0.65 m body takes 6.7 steps/s (cadence not changed; the clip rate cap stays 1.4).
-2. The arms paced their legs (counter -0.82, now +0.76: both arms get a swing, gain 0.7).
+1. Feet slid 62 % of the run speed, 76 % at a walk (now 17 %, 39 %). A 0.65 m body takes 6.7 steps/s.
+2. The left arm paced its leg (counter -0.82, now +0.39, still weakest).
 3. seed and shot_r held the free arm sideways for 71 to 88 % (fixed: 0 to 4 %; the free arm's travel fell 1.0-1.2 to 0.7-0.8 body heights; shot_r's remaining 71 % is the aiming arm itself). Foot speed stays at 3.9 of 4.65 m/s (gain cap 1.5, rate cap 1.4).
 
 ![tender walk and run, before and after](anim_audit/tender.jpg)
@@ -190,27 +185,9 @@ Split into backlog items per Hunter (role build):
 
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
+- `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
-- `gunslinger`: slides 23 % at a run, near the gate's 25 %.
+- `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
-
-## Idle to walk start (Nov 9)
-
-The gap is the feet: the walk's first pose is a stride contact (feet 0.3 body heights apart on every Hunter that had a
-gap over 0.25), the idle stands with the feet together, so no idle edit closes it without a wide-legged idle. What the
-player sees is how much of it one frame shows, set by the loco blend rate. `loco.blend_rate` (1/s, default 12,
-`WardenClips.LOCO_RATE`) slows it per Hunter, and `--anim-audit` now reports `pop.idle_walk_step` = gap x (1 - e^(-rate/60))
-and fails a Hunter above 0.045 body heights. Rates: `dredge` 5.5, `ashwick` 6.5, `juggernaut` 7.5, `archer` 9,
-`gunslinger` 9, `mage` 10 (one frame 0.082 to 0.039 on `dredge`, the worst). The slower blend is about 0.2 s longer to
-settle on the worst two. Slide at a run and the counter-swing stayed inside the gate.
-
-Strips: `--anim-shots` has a `start` strip (idle to a run, first 0.27 s at 30 fps). Rows are before, after
-(`anim_audit/start_<id>.jpg`).
-
-![dredge start, before and after](anim_audit/start_dredge.jpg)
-![ashwick start, before and after](anim_audit/start_ashwick.jpg)
-![juggernaut start, before and after](anim_audit/start_juggernaut.jpg)
-![archer start, before and after](anim_audit/start_archer.jpg)
-![gunslinger start, before and after](anim_audit/start_gunslinger.jpg)
-![mage start, before and after](anim_audit/start_mage.jpg)
+- Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).

@@ -12,7 +12,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import cinder_pieces as K
 from meshkit import smooth, norm, frames
-from paintkit import hexc, clean_normal
+from paintkit import hexc
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
@@ -212,24 +212,6 @@ else:
     if bake_tmp:
         np.save(bake_tmp, COL)
 print("baked")
-
-# ---- the normal map: the scan's surface (its dense mesh under Meshy's normal texture) on the shipped mesh; the built pieces stay flat
-NRM_CAGE, NRM_RAY = 0.003, 0.008      # m: the cage's extrusion, the ray's reach (wider, rays meet the next layer)
-for mt in src.data.materials:
-    nt = mt.node_tree
-    surface = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL").inputs["Surface"]
-    nt.links.new(next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED").outputs[0], surface)
-nrm = bpy.data.images.new("bake_normal", ATLAS, ATLAS)
-nrm.colorspace_settings.name = "Non-Color"
-for mt in me.materials:
-    mt.node_tree.nodes.active.image = nrm
-sc.cycles.samples = 16
-sc.render.bake.cage_extrusion, sc.render.bake.max_ray_distance = NRM_CAGE, NRM_RAY
-sc.render.bake.normal_space = "TANGENT"
-bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=12)
-NRM = np.array(nrm.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
-NRM[:, int(UNIQ_W * ATLAS):] = (0.5, 0.5, 1.0)
-print("normal baked, wrong hits flattened %.4f" % clean_normal(NRM))
 
 def box(a_, r):
     """Box blur of radius r over the first two axes."""
@@ -524,8 +506,6 @@ def save(img_name, arr, path, fmt="JPEG"):
 
 atlas_i = save("atlas", COL, os.path.join(WORK, "atlas.jpg"))
 emit_i = save("emit", EMIT, os.path.join(WORK, "emit.jpg"))
-normal_i = save("normal", NRM, os.path.join(WORK, "normal.png"), "PNG")      # lossless (JPEG bends a normal by 4 degrees on average); the engine compresses it (RG)
-normal_i.colorspace_settings.name = "Non-Color"
 
 
 # ---- the alpha cards: the long hair below the scan's
@@ -649,11 +629,6 @@ def dress(m_):
             e.image = emit_i
             nt.links.new(e.outputs[0], pb.inputs["Emission Color"])
             pb.inputs["Emission Strength"].default_value = 1.0
-            n_ = nt.nodes.new("ShaderNodeTexImage")
-            n_.image = normal_i
-            bump = nt.nodes.new("ShaderNodeNormalMap")
-            nt.links.new(n_.outputs[0], bump.inputs["Color"])
-            nt.links.new(bump.outputs[0], pb.inputs["Normal"])
 
 
 def ink(m_, room):

@@ -5,23 +5,24 @@ extends RefCounted
 ## silhouette, one you've never met is a "?". Each tile carries a small type badge, and a soft
 ## sparkle when you've found its shimmer form. Clicking a tile opens its page: the Boki turning on a
 ## stand, its number, name and type, a field note, its size range, where it lives, its quirk and how
-## its sexes work (BokiQuirks), the forms you've found and the ones you're raising.
+## its sexes work (BokiQuirks), where it's found and how rare it is (DexFound), the forms you've found
+## and the ones you're raising.
 ##
 ## Reads Save "dex" exactly as Care keeps it ({species: {seen, caught, forms, shimmer, mutations}});
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
-## percentage, no rarity colours.
+## percentage, no rarity colours (a rarity pip is filled, not coloured).
 
 ## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
 const TYPES := {
 	"spore": {"name": "Spore", "col": Color("9ccf6a")},
-	"steel": {"name": "Steel", "col": Color("cbb48a")},
-	"poison": {"name": "Poison", "col": Color("b98cff")},
-	"bug": {"name": "Bug", "col": Color("f2c24a")},
-	"psychic": {"name": "Psychic", "col": Color("8f8cff")},
-	"crystal": {"name": "Crystal", "col": Color("ff9fd0")},
-	"fairy": {"name": "Fairy", "col": Color("cfdcff")},
-	"sound": {"name": "Sound", "col": Color("6fb6ff")},
-	"flying": {"name": "Flying", "col": Color("6fe0cf")},
+	"titan": {"name": "Titan", "col": Color("cbb48a")},
+	"venom": {"name": "Venom", "col": Color("b98cff")},
+	"swarm": {"name": "Swarm", "col": Color("f2c24a")},
+	"gravity": {"name": "Gravity", "col": Color("8f8cff")},
+	"prism": {"name": "Prism", "col": Color("ff9fd0")},
+	"lunar": {"name": "Lunar", "col": Color("cfdcff")},
+	"echo": {"name": "Echo", "col": Color("6fb6ff")},
+	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
@@ -92,6 +93,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 	var nl := UI.label(num_text(key), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
+	top.add_child(DexFound.Pip.new(spk, is_seen))
 	if is_seen:
 		top.add_child(TypeIcon.new(type_of(spk), 16.0))
 	col.add_child(top)
@@ -198,6 +200,8 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
 	_fact(info, "pin", "Lives", _habitat(spk))
+	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
+	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
 	if BokiQuirks.quirk(spk) != "":
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":
@@ -258,7 +262,7 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	var r := UI.hbox(8)
 	r.add_child(UI.IconDot.new(icon, UI.MUTED, 15.0))
 	var kl := UI.label(k, UI.T_SMALL, UI.MUTED, UI.semi)
-	kl.custom_minimum_size.x = 48
+	kl.custom_minimum_size.x = 64
 	r.add_child(kl)
 	var vl := UI.label(val, UI.T_SMALL, UI.INK)
 	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -341,34 +345,34 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 		"spore":       # a toadstool
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.9, 0.0), P.call(-0.6, -0.6), P.call(0.0, -0.85), P.call(0.6, -0.6), P.call(0.9, 0.0)]), ink)
 			ci.draw_rect(Rect2(P.call(-0.22, 0.0), Vector2(0.44, 0.8) * s), ink)
-		"steel":       # a peak
+		"titan":       # a peak
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.95, 0.75), P.call(-0.15, -0.8), P.call(0.25, -0.1), P.call(0.45, -0.4), P.call(0.95, 0.75)]), ink)
-		"poison":       # a drop
+		"venom":       # a drop
 			var pts := PackedVector2Array()
 			for i in 16:
 				var a := PI * i / 15.0
 				pts.append(P.call(cos(a) * 0.6, 0.25 + sin(a) * 0.6))
 			pts.append(P.call(0.0, -0.9))
 			ci.draw_colored_polygon(pts, ink)
-		"bug":       # a honeycomb cell
+		"swarm":       # a honeycomb cell
 			var hx := PackedVector2Array()
 			for i in 6:
 				var a := TAU * i / 6.0 + PI / 6.0
 				hx.append(P.call(cos(a) * 0.82, sin(a) * 0.82))
 			ci.draw_colored_polygon(hx, ink)
-		"psychic":     # a weight pressing down
+		"gravity":     # a weight pressing down
 			ci.draw_line(P.call(0.0, -0.9), P.call(0.0, 0.2), ink, w, true)
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.45, 0.0), P.call(0.45, 0.0), P.call(0.0, 0.55)]), ink)
 			ci.draw_line(P.call(-0.8, 0.8), P.call(0.8, 0.8), ink, w, true)
-		"crystal":       # a cut gem
+		"prism":       # a cut gem
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95), P.call(-0.75, 0.0)]), ink)
-		"fairy":       # a crescent
+		"lunar":       # a crescent
 			ci.draw_circle(P.call(0.0, 0.0), s * 0.82, ink)
 			ci.draw_circle(P.call(0.35, -0.25), s * 0.68, Color(col.darkened(0.15), alpha))
-		"sound":        # rings of sound
+		"echo":        # rings of sound
 			for k in 3:
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
-		"flying":     # a bolt
+		"tempest":     # a bolt
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
 		_:
 			ci.draw_circle(c, s * 0.45, ink)

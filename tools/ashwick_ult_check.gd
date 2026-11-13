@@ -154,11 +154,6 @@ func _carpet() -> void:
 		J.trail.size() >= 14 and absf(linger - 5.2) < 0.01 and left > linger - 0.5 and left <= linger,
 		"pieces %d left %.1f" % [J.trail.size(), left]
 	)
-	var look_w := 0.0
-	for e in K.fx.live:
-		if e["kind"] == "lava": look_w = (e["s0"] as Vector3).z * 2.0
-	ok("ult look: the carpet is drawn as wide as it burns (trail_w)", absf(look_w - float(K.x_def()["trail_w"])) < 0.01,
-		"look %.2f m, burns %.2f m" % [look_w, float(K.x_def()["trail_w"])])
 	ak.step(m, 0.7)
 	var char_t := K.char_of(T) + 31.0 * float(K.burning(T))
 	ok(
@@ -396,6 +391,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 	K.lmb_override(false, ak.DT)
 	P.wid = wid0
 	m.hud.slot_fx.erase("base")
+	PressDeny.last.clear()      # the press above was denied too, well inside the mash throttle (PressDeny.THROTTLE_S)
 	K.lmb_override(true, ak.DT)
 	ok("ult 66: a press answers on the LMB slot with the deny cue",
 			String((m.hud.slot_fx.get("base", {}) as Dictionary).get("kind", "")) == "deny")

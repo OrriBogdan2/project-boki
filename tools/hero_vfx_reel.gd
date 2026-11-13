@@ -10,8 +10,7 @@ extends "res://tools/combo51_shots.gd"
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
-const HERO_PARTS := {
-	"juggernaut": ["lmb", "chain", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
+const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
@@ -175,21 +174,6 @@ func _juggernaut_lmb() -> void:
 			[0.04, 0.09, 0.15, 0.22, 0.3, 0.54, 0.6, 0.68, 0.8]), 1.5)
 	await _go(GAP)
 
-## The slash chain at the footage's own taps (hero-ref 0023-0034 at 5 fps: swings on 0026, 0029, 0033), a frame
-## every 0.2 s to lay beside those frames.
-func _juggernaut_chain() -> void:
-	await _reset(3.3)
-	var taps := func(t: float):
-		P.inp["fire"] = [0.5, 1.1, 1.9].any(func(at: float) -> bool:
-			return t >= at and t < at + DT * 2.0)
-		_aim(T.pos)
-	var times: Array = []
-	for i in 12:
-		times.append(i * 0.2)
-	await _go(2.4, taps, _sheet("chain", "LMB chain at the footage's taps (0023-0034 at 5 fps, swings on 0026, 0029, "
-			+ "0033): no step into a swing, the sides alternate, the blade back between swings", times), 1.5)
-	await _go(GAP)
-
 func _juggernaut_wave() -> void:
 	await _reset(8.5)
 	var hold := func(t: float):
@@ -231,7 +215,7 @@ func _juggernaut_lunge() -> void:
 	await _go(GAP)
 
 func _juggernaut_drop() -> void:
-	await _reset(5.0)
+	await _reset(2.4)
 	var K: JuggernautKit = P.ak
 	var drop := func(t: float):
 		P.inp["jump"] = t < DT
@@ -239,9 +223,9 @@ func _juggernaut_drop() -> void:
 			K.press_rmb()
 		_aim(T.pos)
 	await _go(3.0, drop, _sheet("drop",
-			"RMB in the air, Meteor Drop: the gather over the marker, the comet dive, the ground "
-			+ "breaking open, the wall of flame at the stun's edge, debris, cooling fissures",
-			[0.34, 0.45, 0.55, 0.64, 0.7, 0.8, 1.0, 1.6, 2.6]), 2.0)
+			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
+			+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust",
+			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]), 2.0)
 	await _go(GAP)
 
 func _juggernaut_dash() -> void:
@@ -371,18 +355,6 @@ func _archer_lmb() -> void:
 	await _go(2.6, shots, _sheet("lmb",
 			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
 			+ "orchid thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
-	await _go(GAP)
-
-## Grimble's gun at the dummy: fire held for four volleys (the spread lines kick wide on each and breathe back
-## between), let go so they close and fold to the aim line, then one tap fired tight.
-func _dredge_lmb() -> void:
-	await _reset(5.5)
-	var shots := func(t: float):
-		P.inp["fire"] = t < 1.75 or (t >= 3.0 and t < 3.05)
-		_aim(T.pos)
-	await _go(4.0, shots, _sheet("lmb",
-			"LMB: four held volleys (the spread lines kick wide, breathe in between), let go (they close and fold), "
-			+ "a tight tap", [0.05, 0.3, 0.55, 0.8, 1.3, 1.9, 2.3, 2.8, 3.1]), 3.0)
 	await _go(GAP)
 
 ## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
