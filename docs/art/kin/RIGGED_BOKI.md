@@ -31,7 +31,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
-Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
@@ -41,6 +41,18 @@ asserts every rigged species has all twelve, with the five game clips timed to t
 The Show Ring (`ShowRing`) sets `kact` strut (the walk clip's cycle with chin up, knees lifted, steps `STRUT_CADENCE` quicker) over
 the Bond walk, pose (`POSE_S` 1.0 s: a quad plants and lifts its head, a bird flares its wings, a legless body rises) when the
 judges look, then hop for the winner and bow (`BOW_S`) for the other when the placing is read; the same check covers all three.
+`impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). The Dash
+(`RaceBeats`) plays crouch on the line through the countdown, burst (the species' run, stretched long and low, easing
+out over `burst_s`), then hop and spin for the first two home or sulk (huff, head hung) for the rest. `--boki-rig-check`
+asserts every rigged species has all fifteen, with the eight game clips timed to those beats and no T-pose frame.
+A flier (its species JSON `colors.wing`: `BokiFly.flier`; rigged today: hivara, kestrike, kindlewren, thrumbird,
+wisplet, zapple, zephyrak) also gets hover (a wingbeat every 0.4 s, KinPuppet's flyer rate: tipped up, legs hanging,
+the body rising on each downstroke), glide (wings held wide with a slow rock, nose down, legs tucked, a 1.2 s bank)
+and flare (once, `boki_fly.json` `flare_s`: pitched up, wings forward to brake, feet reaching, a squash as they land
+halfway). No rig has them baked, so they reuse its wing, leg and tail bones the same way. The rig plays them from
+BokiFly's metas: `aloft` picks hover (standing) or glide (moving, horizontal speed only); `aloft` turning false
+starts the flare, which comes before whatever it landed for; `lift` (m up) keeps a ground shadow, made the first
+time a flier lifts, on the ground under it. Strip: `--boki-fly-shots` (docs/shots/boki-fly/fly.png).
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
@@ -78,6 +90,15 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 `speed_scale = speed / (stride x the model's world scale)`, so a size roll's bigger Boki steps longer, kept under
 `MAX_CADENCE` cycles/s. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
 `STRIDE`.
+
+## Attack contact
+
+A Boki's bite lands `Kin.STRIKE_WINDUP` (0.3 s) after it starts (decision 0061). `BokiRig.CONTACT` holds where the
+attack clip connects, per starter line (cindle 0.333 s, puddlet and burrlet 0.367 s at speed 1): the first frame the
+front-most bone is 90% of the way to its farthest reach. The rig plays the attack at `CONTACT / STRIKE_WINDUP`, so
+the snap lands on the hit; a species without a row plays at speed 1. `--boki-anim-audit` reads the contact off each
+clip (must match `CONTACT` to a frame) and drives the bite live (must connect within a frame of the hit). A re-keyed
+attack clip: copy the measured time into `CONTACT`.
 
 ## Gait audit
 
@@ -123,7 +144,7 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | kindlewren | 77% → 33% 6.0 steps/s | 77% → 43% 6.0 steps/s | 84% → 69% 6.0 steps/s | 90% → 81% 6.0 steps/s (7.4) | 0.6 / 2.1 → 0.8 / 1.4 | 0.9 |
 | lodestick | 99% → 62% 6.0 steps/s | 99% → 48% 6.0 steps/s | 90% → 70% 6.0 steps/s | 94% → 82% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 0.9 |
 | kindlewren | 77% → 30% 6.0 steps/s | 77% → 43% 6.0 steps/s | 84% → 69% 6.0 steps/s | 90% → 81% 6.0 steps/s (7.4) | 0.6 / 2.1 / 1.4 | 0.9 |
-| lodestick | 99% → 17% 4.3 steps/s | 99% → 48% 6.0 steps/s | 90% → 70% 6.0 steps/s | 94% → 82% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 0.9 |
+| lodestick | 99% → 44% 6.0 steps/s | 99% → 53% 6.0 steps/s | 90% → 74% 6.0 steps/s | 94% → 85% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 1.0 |
 | marchleaf | ?% → 48% 4.0 steps/s | ?% → 41% 3.0 steps/s | ?% → 41% 5.4 steps/s | ?% → 46% 6.0 steps/s (6.6) | 0.5 / 1.0 / 0.9 | 0.9 |
 | mossgrade | 96% → 21% 4.7 steps/s | 96% → 35% 4.4 steps/s | 77% → 41% 6.0 steps/s | 82% → 57% 6.0 steps/s (6.0) | 1.5 / 1.0 / 1.2 | 0.8 |
 | nettlynx | 80% → 26% 3.8 steps/s | 80% → 33% 4.8 steps/s | 82% → 51% 6.0 steps/s | 87% → 67% 6.0 steps/s (6.6) | 1.3 / 1.1 / 1.3 | 0.9 |

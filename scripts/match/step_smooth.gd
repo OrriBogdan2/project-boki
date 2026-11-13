@@ -19,7 +19,7 @@ static func ease(h: Hunter, dt: float) -> void:
 		var cap := cfg.step_max_speed * dt
 		var eased := h.drawn_y + clampf(gap * (1.0 - exp(-cfg.step_ease_rate * dt)), -cap, cap)
 		eased = clampf(eased, want - cfg.step_lag_up, want + cfg.step_lag_down)
-		var air: float = h.pos.y - h.m.world.ground_at(h.pos.x, h.pos.z)
+		var air: float = h.pos.y - h.ground()      # (a rock or a car under him is ground too)
 		h.drawn_y = lerpf(eased, want, smoothstep(cfg.step_free_from, cfg.step_free_to, air))
 	h.position.y = h.drawn_y
 

@@ -102,6 +102,22 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.5 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
 | R | - | the Boki Merge | - | R is the Merge for every hero |
 
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/pin.md) | Verdict |
+|---|---|---|---|---|
+| LMB | drawing | 0.7 (longbow `draw_slow`) | walks slowly while drawing (0111-0116); the factor isn't measured | [?] |
+| LMB | quick draw after a perfect release | 0.8 (`perfect_slow`) | not resolvable at 5 fps | [?] |
+| LMB | 0.5 s after a shot | 0.8 (default ranged `fire_slow`) | "she can walk between shots"; not measured | [?] |
+| RMB | Heavy Shot held | 0.38 (`rmb.pin.hold_move`) | the charge pose of the LMB draw; the walk isn't measured | [?] |
+| Shift | Spirit Walk | 1.1 (`dash.walk_k`) | 117-126 px/s against a 113 median (0349-0356) | match |
+| E | Hail Wall, tap | 1.0 | a tap | match |
+| X | Starpiercer nock (0.5 s per arrow) | 1.0 | Primal Forces is a tap buff; the empowered shots' walk isn't measured | [?] |
+
 ## Assumptions (the footage is silent; the owner can correct these)
 - Spirit Walk passes rocks, trees, pillars, ability barriers and raised terrain: the data's Phase Walk rolls "through a pillar and the raised-platform wall" (supervive_kits.md:78, KIT_PARITY gap 8). She climbs a ledge face at 14 m/s and drops off the far side; if the walk ends in a ledge she is set on top of it, never inside terrain; the edge of the abyss still holds her.
 - A Supercharged shot with no target flies its full 16 m (not a longer clamp past the cursor).
@@ -153,6 +169,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
 | Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built, waits on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098) | - |
+| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | built: rival Wisps in the wall lose `down_hp` each tick, 5 x 2.5 = 12.5 of 100 [est: the source drain is unknown]; no slow or burn on a Wisp; allies' Wisps untouched (docs/specs/DOWNED_ABILITIES.md row 2) | `pin E: a rival Wisp in the wall loses down_hp each tick...`, `... does not slow, burn or damage a Wisp` |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -259,8 +276,8 @@ key, "end" when the hand settles. Source times from briefs/hero-ref/pin.md (one 
 | Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
 |---|---|---|---|---|
 | `arc_draw` | pose up within one frame, held [f102-107] | 0.05 nock / stages 0.6, 1.15 / held from 1.15 (clip FULL 1.25) | same | matches (the hold loops the last 0.1 s) |
-| `arc_tap` `arc_loose` | release a 1-frame snap, little recoil [f69] | snap 0.04-0.05 / settled 0.36-0.43 | same | matches (the snap sits inside the 0.1 s blend) |
-| `arc_super` | body flash and a harder kick [f167-169] | kick 0.05, hip back 0.3 / 0.6 | same | matches |
+| `arc_tap` `arc_loose` | release a 1-frame snap, little recoil [f69] | snap 0.04-0.05 / settled 0.36-0.43 | same; the move's own blend-in is 0.04 s (`fade` in hem.json), so the snap shows in full | fixed; asserted (`--clip-check`: blend over within 0.05 s of the spawn) |
+| `arc_super` | body flash and a harder kick [f167-169] | kick 0.05, hip back 0.3 / 0.6 | same; blend-in 0.04 s | fixed; asserted |
 | `arc_perfect` `arc_over_loose` | one-frame star / a drooping release | 0.06 / 0.55 (overshoot to 0.6) | same | matches |
 | `arc_over` | held 0.4-0.6 s past Supercharged | from 1.65 s of draw, shakes every 0.08 s | same | matches (0.5 s past) |
 | `arc_heavy_wind` | charge pose from the hold start [f264] | pose at 0.15 s of hold, clip full-draw at 1.25 (charge full 1.1) | clip on the hold's clock: full-draw and full charge both at 1.1 | fixed; asserted |
@@ -280,8 +297,7 @@ Clip re-keys for the model (tools/art1/hem_clips.py, on the unmerged ravel-v2 re
 - `roll`: its last key (0.36 standing READY) could end in the crouched walk pose; the kit now hides it either way.
 - `heavy_wind`: HW at 1.1 is right once the clip runs on the hold's clock (done kit-side, no re-key).
 
-Suggestions (ours, not built): the release snap keys (0.04-0.06 s) land inside the 0.1 s blend-in, so the string hand
-snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`arc_super` would show the full snap.
+Release snap (anim-lace-release-snap): the three release moves blend in over 0.04 s (`fade` per move, `warden_clips.gd` applies it to the upper-body channel), the arrow still spawns at `kmove_t` 0. Before/after strips at the match camera, one frame per 1/30 s from the spawn: `docs/heroes/media/archer_release_before_after.jpg` (`--anim-shots --release`; top row before, bottom row after; rendered with xvfb software GL because every GPU worker was lost, cropped to the archer). Frame 0, the spawn, already shows the snapped hand; before it still showed the draw.
 
 ## In the air
 
@@ -307,3 +323,12 @@ What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: t
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/archer.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![archer v2 strips](../art/anim_audit/v2_archer.jpg)
+
+- Gait: run slide 13 %, arms against the legs +0.61, bob 5.3 cm: unchanged. The bow arm hangs static in a gait by design (reach 0.05 body heights); the free arm stands out for 21 % of the loose and perfect clips: unchanged.
+- Bow on the hand: the bow rides the closed bow hand (`anchor_bow_root`, `anchor_nock`); the string hand reaches the nock at draw length in `draw`, `loose` and `heavy`.
+- Timing table above: re-run through `--archer-combo-check` on the v2 clips: 159 checks, 0 failures; no row moved.

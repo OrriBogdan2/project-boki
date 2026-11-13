@@ -480,7 +480,8 @@ func _throws_in(m: Match, P: Hunter, K: BulwarkKit, secs: float) -> int:
 		step(m, 0.5)
 	return K.throws - t0 if prev or true else 0
 
-## #29: the raised aegis pushes foes back and shows it, is bigger and plated.
+## #29: the raised aegis is bigger and plated. Touching it pushes nobody; only LMB with it up (the boop) shoves
+## the foes in front of it.
 func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -489,34 +490,53 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	K.lock_t = 0.0
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	T.teleport(home + Vector3(2.0, 0, 0))
+	T.teleport(home + Vector3(2.0, 0, 0))      # pressed against the aegis (the old contact push's reach)
 	aim_at(P, T.pos)
-	var sd: Dictionary = K.rmb_def()["shield"]
-	ok("bjorn shield: the wall is 40% longer (4.2 m)", absf(float(sd["len"]) - 4.2) < 0.01,
-		"len %.2f" % float(sd["len"]))
+	var bd: Dictionary = K.rmb_def()["shield"]["boop"]
+	ok("bjorn shield: the wall is 40% longer (4.2 m)", absf(float(K.rmb_def()["shield"]["len"]) - 4.2) < 0.01)
 	var x0 := T.pos.x
+	var throws0 := K.throws
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.35, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
-	var hint := AimKit.entry(P, "aegis_push")
-	ok("bjorn shield: a forward double chevron shows in front of the raised wall, to everyone, as long as the push",
-		AimKit.shown(P, "aegis_push") and int(hint.get("chevrons", 0)) == 2 and bool(hint.get("all", false))
-		and absf(float(hint.get("len", 0.0)) - float(sd["push"])) < 0.01,
-		str(hint.keys()))
-	var d := P.aim_dir()
-	ok("bjorn shield: the chevron points the way the wall faces", (hint.get("dir",
-		Vector2.ZERO) as Vector2).distance_to(d) < 0.01)
-	step(m, 0.6, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
-	var moved := T.pos.x - x0
-	ok("bjorn shield: a foe walking into the raised wall is pushed back at least its push distance",
-		K.pushes >= 1 and moved >= float(sd["push"]) - 0.05, "pushed %d moved %.2f" % [K.pushes, moved])
-	ok("bjorn shield: a push flashes the wall", K.fx.aegis_hit > 0.0 or K.fx.push_flash > 0.0 or K.pushes >= 1)
+	step(m, 0.95, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	ok("bjorn shield: a foe touching the raised wall is not pushed",
+		not K.wall.is_empty() and absf(T.pos.x - x0) < 0.05 and K.boop.boops == 0,
+		"moved %.2f boops %d" % [T.pos.x - x0, K.boop.boops])
+	ok("bjorn shield: no push chevron in front of the raised wall", not AimKit.shown(P, "aegis_push"))
 	ok("bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger",
 		K.fx.aegis.get_child_count() >= 30 and K.fx.AEGIS_H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
 		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), K.fx.AEGIS_H])
+	# LMB with the aegis held: the boop
+	var dist0 := float(K.wall["dist"])
+	var out := [0.0]             # (an array: the step callback writes into it)
+	P.inp["fire"] = true
+	step(m, 0.05, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	P.inp["fire"] = false
+	step(m, 0.45, func():
+		rmb_at(P, home + Vector3(5.0, 0, 0))
+		out[0] = maxf(out[0], float(K.wall["dist"]) - dist0))
+	var moved := T.pos.x - x0
+	ok("bjorn boop: LMB with the aegis up thrusts the wall out and back",
+		K.boop.boops == 1 and float(out[0]) >= float(bd["thrust"]) * 0.8 and absf(float(K.wall["dist"]) - dist0) < 0.01,
+		"boops %d out %.2f" % [K.boop.boops, out[0]])
+	ok("bjorn boop: it shoves the foe in front back its push distance, no damage",
+		K.boop.booped >= 1 and moved >= float(bd["push"]) - 0.1 and T.hp == T.max_hp,
+		"booped %d moved %.2f hp %.0f/%.0f" % [K.boop.booped, moved, T.hp, T.max_hp])
+	ok("bjorn boop: behind the aegis LMB never throws or swings",
+		K.throws == throws0 and K.lmb_t < 0.0 and not K.wall.is_empty())
+	# walked into: a foe pressed between him and the aegis face is booped too
+	T.teleport(home + Vector3(0.8, 0, 0))
+	K.boop.ready_at = 0.0
+	var x1 := T.pos.x
+	P.inp["fire"] = true
+	step(m, 0.05, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	P.inp["fire"] = false
+	step(m, 0.45, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	ok("bjorn boop: a foe he walked into (inside the aegis face) is shoved too",
+		K.boop.boops == 2 and T.pos.x - x1 >= float(bd["push"]) - 0.1, "moved %.2f" % (T.pos.x - x1))
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
-	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
+	ok("bjorn shield: lowered, the wall is gone", not K.fx.aegis.visible)
 
 ## #30: the held swing ends on a mantle and other actions, lunges him forward and knocks back.
 func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:

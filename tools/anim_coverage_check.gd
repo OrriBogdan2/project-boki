@@ -91,8 +91,9 @@ func _hunter_row(art: String) -> Array:
 		_cell(clips.has(air.get("glide", ""))), _cell(_move(d, clips, DASH_RE)), _cell(_move(d, clips, CAST_RE)),
 		"proc", _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))), _cell(upper)]
 
-## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits and landings spring
-## KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side (Kin.render).
+## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
+## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side
+## (Kin.render).
 ## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])
@@ -102,7 +103,8 @@ func _boki_row(id: String) -> Array:
 	var jump := _cell(clips.has("hop") and kin_src.contains('set_meta("kact", "hop" if airborne'), false)
 	return [_cell(clips.has("idle")), _cell(clips.has("walk")), _cell(clips.has("run")), _cell(clips.has("attack")),
 		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("), "proc", jump,
-		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing", "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.dash("),
 		_cell(clips.has("ability")), "missing"]
 
 ## The live rig: a Boki in the air (kact hop) plays its hop clip, and the run clip once the hop clip is gone.

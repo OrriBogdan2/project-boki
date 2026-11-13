@@ -5,7 +5,7 @@ extends RefCounted
 ## second headless game, the guest (--displace-net-check=guest), through the queue wrapper. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
-## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
+## Sparkle's Skycall drag, Mossy's shield boop; Kael's Warchain pulls Kael to the player (not the player).
 ## A Boki's pull and spike (KinExec) move the player on their own game the same way, there by the next snapshot.
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
@@ -221,7 +221,10 @@ func _bjorn(t: Hunter) -> void:
 	P.ak.press_rmb()
 	for i in 30:
 		P.inp["sec_hold"] = true
+		# owner 11-11: touching the aegis pushes nobody; LMB with it up is the boop (BjornBoop)
+		P.inp["fire"] = i >= 10 and i < 13
 		await _run(DT)
+	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	await _run(DT)
 
@@ -531,7 +534,8 @@ func _fresh(T: Hunter) -> void:
 	T.set_meta("marks", {})
 	T.set_meta("gnd_until", 0.0)
 
-## Runs the match `secs` of its own time with no monsters about, stepped by the wall clock as Match._process
+## Runs the match `secs` of its own time with no monsters about (a check's lair boss stays), stepped by the wall clock
+## as Match._process
 ## steps a game: as many DT steps a frame as real time asks, never more than CATCH_UP behind. (One step a
 ## frame ran a host drawing ~35 fps under xvfb at ~0.6x the headless guest's clock, so the guest's copy of
 ## a pull ran on past its end and its body shoved the guest's own hunter away: not something two games do.)
@@ -543,8 +547,10 @@ func _run(secs: float) -> void:
 		while paced_us + STEP_US <= now and t < secs - 0.0001:
 			paced_us += STEP_US
 			t += DT
-			for mb in m.mobs: mb.queue_free()
-			m.mobs.clear()
+			for mb in m.mobs.duplicate():
+				if not mb is Boss:
+					mb.queue_free()
+					m.mobs.erase(mb)
 			m.step(DT)
 			if watch and seen.is_empty(): seen = m.displace.towing(watch)
 			var sb: Ent = stun_on if stun_on else m.player

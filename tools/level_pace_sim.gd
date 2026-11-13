@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	var marks: Array = MARKS + [top]
 	var reached := {}          # hunter -> {level: match seconds}
 	var last := {}             # hunter -> [xp, knocks] at the previous step
-	var src := {"trickle": 0.0, "knocks": 0.0, "damage and bosses": 0.0}
+	var src := {"knocks": 0.0, "bosses and bounties": 0.0}
 	var n_step := 0
 	var next_log := 60.0
 	var t_wall := Time.get_ticks_msec()
@@ -51,11 +51,9 @@ func run(main: Node) -> void:
 			var was: Array = last.get(h, [0.0, 0])
 			var d: float = h.xp - float(was[0])
 			if d > 0.0:
-				var tr := Match.DT * LevelGrowth.xp("trickle_per_s") if not (h.downed or h.dropping or h.out) else 0.0
 				var kn := float(h.knocks - int(was[1])) * LevelGrowth.xp("knock")
-				src["trickle"] += minf(tr, d)
-				src["knocks"] += minf(kn, d - minf(tr, d))
-				src["damage and bosses"] += maxf(0.0, d - tr - kn)
+				src["knocks"] += minf(kn, d)
+				src["bosses and bounties"] += maxf(0.0, d - kn)
 			last[h] = [h.xp, h.knocks]
 	var nh := m.hunters.size()
 	print("LEVELPACE seed %d: %d hunters, match %.0f s, ended at %.0f s" % [sd, nh, m.length, m.time])

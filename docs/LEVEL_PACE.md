@@ -54,15 +54,16 @@ XP per hunter by source (after; the mean over all 30, dead ones included), seeds
 163 / 209 / 127, knocks 99 / 96 / 102, damage and lair bosses 288 / 270 / 275. Damage is the biggest
 source and knocks are the biggest single gains.
 
+Superseded in part (integration with main): main removed the XP trickle and the XP for damage (owner decision
+2026-11-10, docs/PACING_1111.md). The numbers above for those sources are history; only `knock` and `lair_boss`
+remain in `xp`, and `--level-pace-sim` now counts knocks and the rest (bosses, rolling bounties).
+
 ## The numbers (`content/rules/level_growth.json` `xp`)
 
 | Key | Before | After | Why |
 |---|---|---|---|
-| `trickle_per_s` | 1.2 | 1.0 | with no fights at all, R takes 650 s (was 540 s), just past the end: R is earned by fighting |
-| `per_dmg_monster` | 0.35 | 0.2 | farming monsters was the fastest road to max |
-| `per_dmg_hunter` | 0.6 | 0.45 | fighting hunters still pays more than twice monster damage |
 | `knock` | 90 | 90 | the knock stays the biggest single reward (the source has a knock callout on screen too) |
-| `lair_boss` | 260 | 200 | a boss still gives about a level, scaled down with damage XP |
+| `lair_boss` | 260 | 260 | unchanged: the tuned 200 assumed damage XP, which main removed (docs/PACING_1111.md) |
 
 **Recommendation:** keep these. Two follow-ups are not part of this change: bots die early (fewer than
 half reach R in any match: a bot-survival or match-flow pass), and the source goes past level 10

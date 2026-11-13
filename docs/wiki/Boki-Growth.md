@@ -125,8 +125,8 @@ Each species evolves into the next at its own level, with an Ink used on it, or 
 | Tootle | Gramofrill | level 16 |  |
 | Gramofrill | Phonodrake | level 36 |  |
 | Gravigrub | Orbitle | level 16 |  |
-| Orbitle | Scarabit | level 36 | Curious / Steadfast |
-| Orbitle | Meteorab | level 36 | Fierce / Swift |
+| Orbitle | Scarabit | level 36 | Curious Or Steadfast |
+| Orbitle | Meteorab | level 36 | Fierce Or Swift |
 | Proofhop | Loafhopper | level 30 |  |
 | Lurklet | Snapler | level 16 |  |
 | Snapler | Maulangler | level 36 |  |

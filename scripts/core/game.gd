@@ -17,6 +17,7 @@ func _ready() -> void:
 			ff.fallbacks = ff.fallbacks + [sym]
 	_setup_input()
 	UI.install()
+	UiSfx.hook(get_tree())
 	RenderingServer.set_default_clear_color(Color("10131f"))
 	Settings.apply_all()
 	Settings.changed.connect(func(k: String):

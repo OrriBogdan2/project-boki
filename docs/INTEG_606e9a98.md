@@ -135,6 +135,33 @@ branch and, for every red, on a pristine origin/main worktree (`main-tree`, same
   the line's 100 ms each way (budget 60) for Vex, Kael and Neve's dash, LMB, E and recast.
 - `tools/check.sh` not run: no gdformat, gdlint or ruff on w2.
 
+## Merged origin/main ca96e707c5 (PRs 50-54) on 2026-11-13, job 20261113-214017-a5 on rpc4
+31 files conflicted; main won where both re-did one thing:
+- XP: main's owner decision (no trickle, no XP for damage, docs/PACING_1111.md) replaces the level-pace tuning of those
+  sources: `trickle_per_s`, `per_dmg_*` are gone from level_growth.json, `lair_boss` is main's 260 again,
+  `--level-pace-sim` counts knocks and the rest; `--level-hud-check` has main's "no XP for time or damage" section.
+- Camera: `Cam.air_zoom` (main) now takes its widening and wheel factor from CamWheel (this branch), keeps main's
+  glide-dive hold; Match sets `abyss_depth` (abyss-fall) and follows `StepSmooth.view`.
+- Steps: main's `StoneStand.stand` stays (Tenzo's rocks, `--rock-feet-check`) but eases through `StepSmooth`
+  (`step_vis` is gone); `StepSmooth.ease` counts a rock or a car under him as ground.
+- Boki gait: main's lodestick glb, STRIDE and OVER row win (plant_gait.py stays for zapple, mossgrade, echolop;
+  lodestick's `PLANT` row is dropped, or a rebuild would re-plant over main's linear sweep).
+- `UiSfx` is one class: this branch's cues plus main's slider/toggle/dropdown hook; `prematch_view._choose` plays the
+  refusal and pick cues and sets the stage pose; `--prematch-check` runs `_cues` and `_lockin`.
+- main's `tools/perch_check.gd` (derived chains) replaces the branch's; `bulwark.json` is main's file (the branch had
+  only reformatted it); warden_anim cinder/kael keep main's file plus the branch's `springs`; Gil gets a `lockin`
+  (emote, 1.4 s) because his clips exist here.
+- DESIGN CALL left to the owner: ext/anim-aim-lead (`WardenAimLead`: head, chest and legs follow the cursor) is
+  taken out of this branch again. Main's own `WardenTurn`/`TurnStep` (feet step round on the spot, an upper-body lead
+  from `spot.lag`) does the same job, and with both on every Hero's 180-degree turn slid its planted feet 10-44 cm
+  (`--clip-check` "180° on the spot", main 0.1 cm). The branch ext/anim-aim-lead still has the head-leads-first
+  layer; if the owner wants it, it goes on top of `WardenTurn` as a head-only layer.
+- Fixed on the way: `tools/move_feel_check.gd` had `,,,` (parse error since the first integration).
+Checks run on rpc4 with a clean `XDG_DATA_HOME` (the shared Kinfall settings.cfg has `demo_all_masks` and a latched
+crouch that fail prematch, wheel-zoom and dolm-combo on any worker). Red the same on main: `--rock-feet-check` (step
+down), `--prematch-check` (3 safe-margin and card rows), `--boki-anim-audit` (kestrike, gibbelle: 6). Red on the
+branch before this merge: `--step-smooth-check` (gunslinger tiers, camera y 0.124).
+
 ## Left out: real conflicts in code or assets (resolve by rebuilding on this branch or main)
 
 Count is the number of conflicting code/asset files at this branch head.

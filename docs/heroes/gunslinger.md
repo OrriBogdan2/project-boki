@@ -229,6 +229,22 @@ rifle fires from an open glider (`GunslingerKit.fires_in_glide`). Timing note (n
 | Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
 | The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Vex moves and can shoot while it falls" |
 
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/venator.md) | Verdict |
+|---|---|---|---|---|
+| LMB | held, firing | 1.0 (quill_rifle `fire_slow` 1.0) | walks while firing, no visible slow (0007-0023) | match |
+| LMB | after a shot | 1.0 | strafes and backpedals between bursts | match |
+| RMB | Burr Charge, press to throw | 1.0 | ~0.2 s commit, "he can walk" | match |
+| Shift | Slipstep (tap, held) | n/a | a slide | n/a |
+| E | Longneedle, 0.6 s charge | 0.0 (`e.self_slow` 1.0) | stands still through the 0.6 s cast bar | match |
+| E | after the beam | 1.0 | a 0.5 bh recoil shove, then the walk isn't measured | [?] |
+| X | Cinderfall, tap | 1.0 | free to move, takes a jump pad as it falls (f103) | match |
+
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
 - **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 38% and Longneedle by 20% (the source's +39 a round and +20%).
 - **Owner rule (11-10 playtest): the Burr Charge climbs terrain, only strict walls stop it.** In flight it reads the ground every 0.25 m (`BURR_SAMPLE`) and never flies lower than 0.25 m over it (`BURR_RIDE`), so it rides up ramps, stairs and ledges below it to a foe on high ground. A strict wall is a blocker tile (rock, tree, wall) standing above it, or ground that rises more than a walkable step (`World.STEP`, 0.32 m) at steeper than 50 deg (`BURR_WALL_DEG`; stairs are 39 deg) with its top above the charge: a terrace face. It sticks just in front, never past. (Before, any ground 0.6 m over her feet stopped it, so the top of a ramp did.) Assert `venator RMB: rides a ramp up to a foe on high ground`, `... a vertical wall stops it`, `... a rock stops it too`. Training Area: stand below a stair flight, aim RMB at a dummy on the terrace above. Other ground lanes keep their own rule, no shared code: Bjorn's ult lane (`bjorn_ult.gd` `_reach`, any ground 1.2 m over his feet ends it).
@@ -319,3 +335,14 @@ Suggestion (not built): carry the burr cone length over the network so remote pl
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/gunslinger.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![gunslinger v2 strips](../art/anim_audit/v2_gunslinger.jpg)
+
+- Gait: run slide 23 % of speed (gate 25 %), arms against the legs +0.89, bob 6.9 cm: the Nov 8 numbers survive the retarget. T-pose share 0 % in both attacks; free-arm travel 0.10 / 0.14 body heights.
+- Gun on the hand: the pistol is skinned to `forearm.R`, so it moves rigidly with the arm (nothing to align in the clip map).
+- Idle to walk first-pose gap 0.29 body heights, unchanged (blend-covered).
+- Result: no regression; no clip or map edits needed.
+- Timing: the "Timing pass" frames (`tools/vex_anim_time_check.gd`, on `ext/anim-time-vex`) were re-run on the v2 clips in `--gunslinger-combo-check`: 109 checks, 0 failures; every move blends in within 0.12 s and hits on the press's frame.
