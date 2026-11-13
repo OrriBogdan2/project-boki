@@ -162,6 +162,25 @@ crouch that fail prematch, wheel-zoom and dolm-combo on any worker). Red the sam
 down), `--prematch-check` (3 safe-margin and card rows), `--boki-anim-audit` (kestrike, gibbelle: 6). Red on the
 branch before this merge: `--step-smooth-check` (gunslinger tiers, camera y 0.124).
 
+## Merged origin/main 96d778d036 (PRs 55-56) on 2026-11-13, job 20261113-224514-a5 on rpc4
+21 files conflicted:
+- Shields: main's `ShieldSrc.give` (the vitals' shield strip names the giver) and this branch's `ReceiverCue.shield`
+  (the receiver's shell flash and "+ N") are one call now: `ReceiverCue.shield(e, amount, tint, icon)` sets the pool
+  through `ShieldSrc.give`. Cinder, Tenzo, Gil, Motley, Effects shield/heal-area, Boki shields and the Fuse afterglow
+  pass main's icons; `--receiver-cue-check` lets `shield_src.gd` raise a shield by hand.
+- Quakefall (`breah_slam.gd`): this branch's planted wind-up and eased hop stay; main's circle that stays up through
+  the hop (`--telegraph-lead-check`) is drawn through the wind-up too, at the eased curve's real landing spot.
+- Basalt Spine: main's 15 rocks over 21 m in dolm.json, KIT_PARITY and heroes/dolm.md, with this branch's abyss slab
+  line in front; kit_parity.json is this branch's rows plus main's `x.len`; bulwark.json takes main's rank text.
+- camera.json: this branch's zoom block and `reach_ref_m` plus main's `pose_far_m` (40 m; at this branch's wide
+  default, 37 m across, that is still past the play view at zoom 1).
+- perf_bench: this branch's public `summary`/`frame`/`avg`/`bring_fight` plus main's pose sampling; main's
+  `perf_fight.gd` calls `bench.frame`, `perf_throttle_check` resets `drawn_y` (step_vis is gone here).
+- DEBT: main dropped the fixed Pip crouch row; the two .uid files and the wiki pages are main's (wiki regenerated).
+The aim-lead head layer stays out (owner call, see the section above).
+Checks on rpc4, each with its own clean `XDG_DATA_HOME` (one shared dir leaks Settings between checks: receiver-cue
+and wheel-zoom go red after other checks, green alone).
+
 ## Left out: real conflicts in code or assets (resolve by rebuilding on this branch or main)
 
 Count is the number of conflicting code/asset files at this branch head.
