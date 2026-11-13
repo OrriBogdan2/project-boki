@@ -3,11 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ba8m5x1ry1e86"
-valid=false
+path="res://.godot/imported/caecilith_caecilith_face.webp-fbc5924bc4232a0d3fddc120206e8ea7.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://art/kin/caecilith/caecilith_caecilith_face.webp"
+dest_files=["res://.godot/imported/caecilith_caecilith_face.webp-fbc5924bc4232a0d3fddc120206e8ea7.ctex"]
 
 [params]
 
