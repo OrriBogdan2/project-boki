@@ -148,6 +148,7 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"edition": null,      # reserved for limited editions (see docs/BOKI_IDENTITY.md)
 	}
 	BokiQuirks.set_sex(rec)
+	BokiQuirks.set_rare_trait(rec)
 	Care.ensure(rec)
 	return rec
 
@@ -470,6 +471,7 @@ func load_from(p: String) -> void:
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
+	BokiQuirks.migrate(parsed)      # a rare-trait kind with no trait roll yet rolls once
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
