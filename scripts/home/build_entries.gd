@@ -78,7 +78,7 @@ func tab(tab_name: String) -> Array:
 					if nf > 0: out.append(feeder_entry(kind, nf))
 			if hb.fs():
 				for id in HomeLayout.CATALOG:
-					if String(HomeLayout.CATALOG[id]["cat"]) == "Buildings":
+					if String(HomeLayout.CATALOG[id]["cat"]) == "Buildings" and not HubLayout.holds(lay, id):
 						add_fixture_entry(out, id)
 			for b in hb.h.lots:
 				add_lot_entry(out, b)
