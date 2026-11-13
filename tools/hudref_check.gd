@@ -204,7 +204,46 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	await _check_top_row(m, hud, P)
 	_done()
+
+## 9. The top row never overlaps itself: the squad counters (top right) and the clock bar's timer, exit line
+## and level chip, with a four-digit timer, big counts and the longest exit lines, in the window the
+## match runs in. Reads HudTopRow.rects, the cells the HUD drew last frame.
+func _check_top_row(m: Match, hud, P: Hunter) -> void:
+	P.kills = 99999
+	P.knocks = 99999
+	P.gems = 99999
+	P.lvl = 18
+	var cases := {"a long match": [99999.0, 3.0], "the last seconds": [300.0, 285.0], "the start": [900.0, 1.0]}
+	for what in cases:
+		m.length = cases[what][0]
+		m.time = cases[what][1]
+		for i in 3:
+			await main.get_tree().process_frame
+		_row_clear(what, hud.c.size)
+	var cells := HudTopRow.clock_cells(hud.big, Rect2(18, 226, 196, 30), "1666:36", "SKIFF BOARDING 10:00", "LV 18")
+	_cells_clear("the longest exit line", cells)
+
+func _row_clear(what: String, win: Vector2) -> void:
+	var r: Dictionary = HudTopRow.rects
+	_cells_clear(what, r)
+	ok(r.has("counter3"), "%s: the four counters were drawn" % what)
+	ok(r["clock"].end.x < r["counters"].position.x and r["counters"].end.x <= win.x and r["counters"].position.x >= 0.0,
+		"%s: the clock and the counters stay apart, inside the window %s" % [what, str(win)])
+
+func _cells_clear(what: String, r: Dictionary) -> void:
+	var names: Array = ["timer", "exit", "level", "counter0", "counter1", "counter2", "counter3"]
+	names = names.filter(func(n): return r.has(n))
+	var hit := ""
+	var half := HudTopRow.GAP * 0.5 - 0.01      # (cells keep GAP between them)
+	for i in names.size():
+		var a: Rect2 = r[names[i]].grow(half)
+		for j in range(i + 1, names.size()):
+			if a.intersects(r[names[j]].grow(half)):
+				hit += " %s/%s" % [names[i], names[j]]
+	ok(r.has("timer") and r.has("exit"), "%s: the clock cells were laid out (%s)" % [what, str(r.keys())])
+	ok(hit == "", "%s: no top-row cells overlap (%s)" % [what, hit])
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
 ## right-side Boki box); every hunter has an X tile with a lock until level 6 and a cooldown after a cast.
