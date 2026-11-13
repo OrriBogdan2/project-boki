@@ -855,7 +855,13 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
 | stay_label | Stay |
+<<<<<<< HEAD
 | first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true}]} |
+||||||| 449fcaf48f
+| first_day | {"reward_gems": 15, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile"}, {"id": "pair", "text": "Pair two Boki in the Nook"}]} |
+=======
+| first_day | {"reward_gems": 15, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile"}, {"id": "pair", "text": "Pair two Boki in the hub's Nook"}]} |
+>>>>>>> origin/ext/farm-incubator-verify
 | tracker | {"title": "Goals", "max": 5, "per_source": {"first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
@@ -1313,6 +1319,7 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 | turn_rate_desc | rad/s the viewer's turntable spins |
 | moves | {"thief": {"dash": ["thf_vault_r"], "lmb": ["thf_lmb_r", "thf_lmb_l"], "passive": ["thf_primed"], "rmb": ["thf_bola"], "e": ["thf_knife", "thf_arrive"], "x": ["thf_encore"]}, "archer": {"dash": ["pin_walk"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_perfect"], "x": ["pin_ult_cast", "pin_ult_loose"]}, "mage": {"dash": ["mage_dash", "mage_dash_go"], "lmb": ["mage_lmb_r", "mage_lmb_l"], "rmb": ["mage_rmb_hold", "mage_rmb"], "e": ["mage_e"], "x": ["mage_x", "mage_x_land"]}, "gunslinger": {"dash": ["gunslinger_dash"], "lmb": ["gunslinger_lmb"], "rmb": ["gunslinger_rmb"], "e": ["gunslinger_e"], "x": ["gunslinger_x"]}, "juggernaut": {"dash": ["jug_dash"], "lmb": ["jug_slash_r", "jug_slash_l"], "rmb": ["jug_lunge_wind", "jug_lunge"], "e": ["jug_chain", "jug_reel"], "passive": ["jug_roar"], "x": ["jug_guard", "jug_riposte"]}, "bulwark": {"dash": ["bul_charge"], "lmb": ["bul_smash_wind", "bul_smash"], "rmb": ["bul_guard", "bul_slamshield"], "e": ["bul_mend"], "passive": ["bul_whirl"], "x": ["bul_ult_wind", "bul_ult_slam"]}, "dredge": {"dash": ["dr_lunge", "dr_pounce"], "lmb": ["dr_shot"], "rmb": ["dr_throw", "dr_reel", "dr_pullend"], "e": ["dr_anchor", "dr_quake"], "x": ["dr_blast"]}, "ashwick": {"dash": ["as_leap", "lw_hop"], "lmb": ["as_lance", "as_lance_end"], "rmb": ["as_aim", "as_shot"], "e": ["as_cloak"], "x": ["lw_jet"]}, "tender": {"dash": ["mm_skip", "mm_float"], "lmb": ["mm_shot_r", "mm_shot_l"], "rmb": ["mm_seed_aim", "mm_seed"], "e": ["mm_hearth"], "x": ["mm_call", "mm_call_end"]}, "rimewright": {"dash": ["tm_skate", "tm_skate_go", "tm_skate_air"], "lmb": ["tm_dart_r", "tm_dart_l"], "rmb": ["tm_spear_aim", "tm_spear"], "e": ["tm_wall"], "x": ["tm_rime", "tm_rime_crash"]}, "dolm": {"dash": ["breah_hop", "breah_skate"], "lmb": ["breah_throw"], "rmb": ["breah_crouch", "breah_slam"], "e": ["breah_raise"], "x": ["breah_spine_aim", "breah_spine"]}, "ostra": {"dash": ["ostra_swap_aim", "ostra_swap"], "lmb": ["ostra_orb"], "rmb": ["ostra_snap_wind", "ostra_snap"], "e": ["ostra_seed"], "x": ["ostra_well"]}} |
 
+<<<<<<< HEAD
 ## ink_drops (`content/rules/ink_drops.json`)
 
 
@@ -1326,6 +1333,18 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 | chance_doc | Chance a kill drops one Ink, by drop table (a mob's kind, or 'boss' for a lair boss). Absent = never. A boss always drops its own. The rest are rare on purpose: an Ink is a 60-gem good and a match has about 40 small kills, so the small ones add up to roughly one Ink in ten matches; guards and the Glimmerkin are the few worth hunting for. |
 | chance | {"boss": 1.0, "warden": 0.1, "glimmer": 0.1, "brute": 0.03, "sentinel": 0.01, "spitter": 0.003, "bomber": 0.003, "skitter": 0.003} |
 
+||||||| 449fcaf48f
+=======
+## incubator (`content/rules/incubator.json`)
+
+The Incubator (scripts/core/incubator.gd, decision 0080). An egg in a cradle hatches after hatch_secs of play time: time in the garden and time in a match both count, time with the game closed does not. An Ember kin at the brazier and Ember Coals add to the pace.
+
+| Setting | Value |
+|---|---|
+| hatch_secs | 1200 |
+| hatch_secs_doc | Seconds of play an egg needs at the plain pace (20 minutes). |
+
+>>>>>>> origin/ext/farm-incubator-verify
 ## keys (`content/rules/keys.json`)
 
 

@@ -112,7 +112,7 @@ func _add_young_and_old(d: Dictionary) -> void:
 		if spec[2] == 16:
 			Mentor.retire(rec)
 
-## The three toys and the snack patch near the landing; the demo's Nook and egg are left out.
+## The three toys and the snack patch near the landing; the demo's egg waits in the hub.
 func _stage() -> void:
 	var land := HomeLayout.LANDING
 	for id in BaseDemo.TOYS:

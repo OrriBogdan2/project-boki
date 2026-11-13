@@ -35,6 +35,7 @@ const CHECKS := {
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
 	"--alive-counter-check": ["res://tools/alive_counter_check.gd", "alive_counter_check", null],
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
+<<<<<<< HEAD
 	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],  # GPU
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],  # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],  # 0051 seat looks
@@ -42,6 +43,22 @@ const CHECKS := {
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
 	"--feed-bowl-check": ["res://tools/feed_bowl_check.gd", "feed_bowl_check", null],
+||||||| 449fcaf48f
+	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],      # GPU
+	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],      # GPU
+	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],      # 0051 seat looks
+	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
+	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
+	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
+=======
+	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],      # GPU
+	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],      # GPU
+	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],      # 0051 seat looks
+	"--incubator-shots": ["res://tools/incubator_shots.gd", "incubator_shots", null],      # GPU
+	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
+	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
+	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
+>>>>>>> origin/ext/farm-incubator-verify
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],  # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],  # GARDEN_MODERN.md 5

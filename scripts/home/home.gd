@@ -239,7 +239,20 @@ func _ready() -> void:
 func _classic_layout(path_col: Color) -> void:
 	if fs:
 		return
+<<<<<<< HEAD
 	ClassicSet.place(self)      # the house, stall, Nook and Burrow (at FAR if the hub holds them)
+||||||| 449fcaf48f
+	spots["house"] = Vector3(38.0, 0, 26.5)
+	world.set_block_rect(36, 25, 40, 27)
+=======
+	var own := not HubLayout.vacant(self)      # the garden: the house, stall, Nook and Burrow are the hub's
+	if not own:
+		NEST_AT = FAR
+		INCUB_AT = FAR
+		BURROW_AT = FAR
+	spots["house"] = Vector3(38.0, 0, 26.5) if own else FAR
+	if own: world.set_block_rect(36, 25, 40, 27)
+>>>>>>> origin/ext/farm-incubator-verify
 	world.paint_path(Vector2i(37, 28), Vector2i(37, 38), path_col)
 	world.paint_path(Vector2i(39, 31), Vector2i(42, 31), path_col, false)
 	world.paint_path(Vector2i(24, 30), Vector2i(36, 30), path_col, false)
@@ -250,6 +263,14 @@ func _classic_layout(path_col: Color) -> void:
 	world.paint_path(Vector2i(48, 28), Vector2i(61, 28), path_col, false)
 	world.paint_path(Vector2i(29, 25), Vector2i(29, 29), path_col, false)
 	world.paint_path(Vector2i(34, 42), Vector2i(34, 46), path_col, false)
+<<<<<<< HEAD
+||||||| 449fcaf48f
+	spots["stall"] = Vector3(30.5, 0, 33.0)
+	world.set_block_rect(29, 32, 31, 33)
+=======
+	spots["stall"] = Vector3(30.5, 0, 33.0) if own else FAR
+	if own: world.set_block_rect(29, 32, 31, 33)
+>>>>>>> origin/ext/farm-incubator-verify
 	spots["pot"] = Vector3(42.5, 0, 27.5)
 	world.set_block_rect(42, 27, 42, 27)
 	for z in range(30, 38):
@@ -335,6 +356,7 @@ func _sync_fixtures() -> void:
 		hecon.move_graveyard()
 	for g in games: g.place()
 	if is_instance_valid(nest): nest.position = NEST_AT
+	elif NEST_AT != FAR and not Save.d.get("egg", {}).is_empty(): _refresh_nest()      # a Nook put down under the egg
 	var cap: int = int(Save.d["plot_cap"]) if visit.is_empty() else (_d()["plots"] as Array).size()
 	if str(_plot_spots(cap)) != _fx_sig:
 		_build_plots()
@@ -402,7 +424,7 @@ func _ready_rest() -> void:
 	if fs and visit.is_empty(): HomeStall.ensure(self)       # every save has a market stall
 	if fs and visit.is_empty() and _fs_arrivals():
 		hb._apply_blockers()
-	if visit.is_empty() and not fs:
+	if visit.is_empty() and not fs and BURROW_AT != FAR:
 		world.set_block_rect(BURROW_RECT[0], BURROW_RECT[1], BURROW_RECT[2], BURROW_RECT[3])
 	if "--print-home" in OS.get_cmdline_user_args():
 		for z in range(0, world.h):
@@ -423,8 +445,21 @@ func _ready_rest() -> void:
 	if "--home-wide" in OS.get_cmdline_user_args():
 		cam.zoom_to = 2.6; cam.zoom = 2.6     # test: the whole farm in one shot
 	if not fs:
+<<<<<<< HEAD
 		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
 		ClassicSet.build(self)
+||||||| 449fcaf48f
+		var house := Models.house(); house.position = spots["house"]; add_child(house)
+		house_node = house
+		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
+		var stall := StallModels.build(Stalls.level()); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
+=======
+		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
+	if not fs and spots["house"] != FAR:
+		var house := Models.house(); house.position = spots["house"]; add_child(house)
+		house_node = house
+		var stall := StallModels.build(Stalls.level()); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
+>>>>>>> origin/ext/farm-incubator-verify
 	var portal := Models.portal(UI.TEAL); portal.position = spots["portal"]; add_child(portal)
 	if VisitZones.has(visit) or (FarmUnlocks.base_mode() and not _visiting()):
 		hway = HubWaystone.new(self)
@@ -452,6 +487,14 @@ func _ready_rest() -> void:
 		add_child(bed)
 	await _slice()
 	_build_lots()
+<<<<<<< HEAD
+||||||| 449fcaf48f
+	if visit.is_empty() and not fs:
+		_build_burrow()
+=======
+	if visit.is_empty() and not fs and BURROW_AT != FAR:
+		_build_burrow()
+>>>>>>> origin/ext/farm-incubator-verify
 	await _slice()
 	_build_bridges()
 	ZoneDress.place(self)
@@ -1092,6 +1135,7 @@ func _process(delta: float) -> void:
 	GardenWishes.tick(self, d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
+	else: Incubator.tick(d)      # visiting a friend, your eggs still warm at the plain pace
 	_apply_cam_settings()
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
@@ -4061,6 +4105,29 @@ func _setup_care() -> void:
 		yard = Models.training_yard()
 		yard.position = YARD_AT
 		add_child(yard)
+<<<<<<< HEAD
+||||||| 449fcaf48f
+		# the Nesting Nook: where two close kin leave an egg
+		var nook := Models.nesting_nook()
+		nook.position = NEST_AT
+		add_child(nook)
+		var nl := Label3D.new()
+		nl.text = "Nesting Nook"; nl.font = UI.big; nl.font_size = 40; nl.pixel_size = 0.008; nl.outline_size = 10
+		nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		nl.position = NEST_AT + Vector3(0, 2.95, -0.7)
+		add_child(nl)
+=======
+	if not fs and NEST_AT != FAR:
+		# the Nesting Nook: where two close kin leave an egg
+		var nook := Models.nesting_nook()
+		nook.position = NEST_AT
+		add_child(nook)
+		var nl := Label3D.new()
+		nl.text = "Nesting Nook"; nl.font = UI.big; nl.font_size = 40; nl.pixel_size = 0.008; nl.outline_size = 10
+		nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		nl.position = NEST_AT + Vector3(0, 2.95, -0.7)
+		add_child(nl)
+>>>>>>> origin/ext/farm-incubator-verify
 	if not _visiting():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
@@ -4096,7 +4163,7 @@ func _refresh_nest() -> void:
 			Save.save_game()
 			if hinc: hinc.refresh()
 	var egg: Dictionary = Save.d.get("egg", {})
-	if egg.is_empty() or _visiting():
+	if egg.is_empty() or _visiting() or NEST_AT == FAR:      # no Nook here (the garden's is the hub's)
 		return
 	if egg.get("rare", false):
 		# a boss's egg: the gold Rare Egg, glowing, its seam ring in the rare kin's glow
@@ -4887,7 +4954,7 @@ func _nest_demo(which: String) -> void:
 			var bk: String = bosses[i % bosses.size()] if not bosses.is_empty() else ""
 			Incubator.add(String(Data.MOBS[bk]["egg"]) if bk != "" else String(Data.common_kin()[0]), bk)
 		var heats := [1.0, 0.7, 0.5, 0.3, 0.1]
-		for e in Incubator.eggs(): e["heat"] = Incubator.HEAT_NEED * float(heats[int(e["slot"]) % heats.size()])
+		for e in Incubator.eggs(): e["heat"] = Incubator.need() * float(heats[int(e["slot"]) % heats.size()])
 		Save.d["incubator"]["coal"] = 120.0
 		Save.d["items"]["coals"] = 2
 		if hinc:

@@ -32,6 +32,8 @@ extends RefCounted
 ## opens its cards. Visits (step 10): your profile doc carries the hub and each open zone's layout and
 ## each Boki's zone; a visitor lands in the friend's hub and hops to their zones, seeing only that zone's
 ## Boki; an older doc stays one island; a hostile layout is cut down to what the island needs.
+## Hub fixtures (docs/decisions/0078): with the garden on, Bramblebank's own house, Nook, stall and Burrow go to its
+## storage (an old save file too, and it round-trips), it builds none and build mode there does not offer them.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 const SHOT_ZOOM := 1.5    # camera zoom for the hub shot (0.8 close .. 1.6 wide)
@@ -47,6 +49,7 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	Save.no_write = true
 	_save_part()
+	_claim_part()
 	_keys_part()
 	_landing_part()
 	await _travel_part(m)
@@ -73,6 +76,73 @@ func _save_part() -> void:
 	ok(zones.keys() == [start] and bool(zones[start]["open"]), "only %s is open" % start)
 	ok(old["roster"].all(func(r): return r.get("zone") == start), "every Boki lives in %s" % start)
 	ok(Save.fresh()["zones"] == GardenZones.fresh(), "a new save starts with only %s open" % start)
+
+## The hub owns the house, Nook, stall and Burrow (docs/decisions/0078-hub-owns-fixtures.md): with the garden on, an
+## older save's own copies go to Bramblebank's storage, a Sturdy Nook stays Sturdy in the hub, a house still going
+## up pays back what went in, the egg is left as it is, and a second load changes nothing. Garden off: all kept.
+func _claim_part() -> void:
+	_new_save()
+	var L: Dictionary = Save.d["layout"]
+	var house_site := {"need": 9, "got": 2, "to": 1, "paid": {"gems": 20}}
+	var mine := [{"u": 9001, "id": "nesting_nook", "x": 20, "z": 20, "r": 0, "t": 2},
+		{"u": 9002, "id": "market_stall", "x": 26, "z": 20, "r": 0},
+		{"u": 9003, "id": "boki_burrow", "x": 30, "z": 20, "r": 0},
+		{"u": 9004, "id": "house", "x": 20, "z": 26, "r": 0, "site": house_site}]
+	(L["deco"] as Array).append_array(mine.map(func(e): return e.duplicate(true)))
+	HomeLayout.ensure(Save.d)
+	ok(HubLayout.OWN.all(func(id): return (L["deco"] as Array).any(func(e): return e["id"] == id)),
+		"garden off: Bramblebank keeps its own house, Nook, stall and Burrow")
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d["egg"] = {"a": "o1", "b": "o2", "m": 3, "t": 1.0}
+	var egg: Dictionary = Save.d["egg"].duplicate()
+	var gems0 := int(Save.d["gems"])
+	HomeLayout.ensure(Save.d)
+	var left: Array = (L["deco"] as Array).filter(func(e): return HubLayout.OWN.has(String(e["id"])))
+	ok(left.is_empty(), "garden on: none of them is left in Bramblebank")
+	var stored := func() -> Array: return HubLayout.OWN.map(func(id): return int(L["inv"].get(id, 0)))
+	ok(stored.call() == [0, 1, 1, 1],
+		"the built ones wait in its storage, the unfinished house does not (%s)" % str(L["inv"]))
+	ok(int(Save.d["gems"]) == gems0 + 20, "the house site paid back its 20 gems")
+	var hub_nook: Array = (Save.d["hub_layout"]["deco"] as Array).filter(func(e): return e["id"] == "nesting_nook")
+	ok(hub_nook.size() == 1 and FarmSites.tier(hub_nook[0]) == 2, "the Sturdy Nook is Sturdy in the hub")
+	ok(Save.d["egg"] == egg, "the egg is the save's: the hub's Nook shows it as it was")
+	HomeLayout.ensure(Save.d)
+	ok(stored.call() == [0, 1, 1, 1] and int(Save.d["gems"]) == gems0 + 20, "a second load changes nothing")
+	_claim_file_part(mine, egg)
+	Content.rules("farm_build")["base_mode"] = false
+
+## An old save file (v12, its own house, Nook, stall and Burrow, an egg in the Nook) loads with the garden on,
+## gives them to the hub, is written back and loads again the same.
+func _claim_file_part(mine: Array, egg: Dictionary) -> void:
+	var old := Save.fresh()
+	old["v"] = 12
+	old.erase("zones")
+	old["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
+	HomeLayout.ensure(old)
+	(old["layout"]["deco"] as Array).append_array(mine.map(func(e): return e.duplicate(true)))
+	old["egg"] = egg
+	var p := "user://hub_claim_old_save.json"
+	var f := FileAccess.open(p, FileAccess.WRITE)
+	f.store_string(JSON.stringify(old))
+	f.close()
+	Save.load_from(p)
+	HomeLayout.ensure(Save.d)
+	var claimed := JSON.stringify(Save.d)
+	f = FileAccess.open(p, FileAccess.WRITE)
+	f.store_string(claimed)
+	f.close()
+	Save.load_from(p)
+	HomeLayout.ensure(Save.d)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+	var own: Array = (Save.d["layout"]["deco"] as Array).filter(func(e): return HubLayout.OWN.has(String(e["id"])))
+	var egg_kept := _json(Save.d["egg"]) == _json(egg)
+	ok(int(Save.d["v"]) == Save.VERSION and own.is_empty() and egg_kept and Save.d.has("hub_layout"),
+		"an old save file loads with its fixtures given to the hub and the egg as it was")
+	ok(_json(Save.d) == _json(JSON.parse_string(claimed)), "written back and loaded again, it is the same")
+
+## A value as the save file holds it (JSON: every number a float).
+func _json(v) -> String:
+	return JSON.stringify(JSON.parse_string(JSON.stringify(v)))
 
 func _keys_part() -> void:
 	Save.d = Save.fresh()
@@ -218,6 +288,11 @@ func _travel_part(m: Node) -> void:
 	ok(_uids(bb) == home_uids and home_uids.has(partner),
 		"Bramblebank has its %d Boki, your partner among them" % home_uids.size())
 	ok(bb.player.position.distance_to(bb.hway.node.position) < 0.5, "you arrive on its return pad")
+	ok([bb.spots["house"], bb.spots["stall"], bb.NEST_AT, bb.INCUB_AT, bb.BURROW_AT].all(func(p): return p == bb.FAR)
+		and bb.house_node == null and bb.burrow_node == null and bb.nest == null,
+		"Bramblebank has no house, Nook, Incubator, stall or Burrow of its own: the hub's are the only ones")
+	var offered: Array = bb.hb.entries.tab("Buildings").map(func(e): return String(e.get("id", "")))
+	ok(not HubLayout.OWN.any(func(id): return offered.has(id)), "and its build mode does not offer them")
 	var minder := _lay_egg(partner)
 	ok(bb.hway.hop(GardenZones.HUB), "the return pad takes you to the hub")
 	var back = await _arrived(m, bb)
@@ -723,4 +798,8 @@ func _visit_part(m: Node) -> void:
 	var zone = await _arrived(m, hub)
 	ok(zone != null and zone._visiting() and zone.zone == "glasswater" and _uids(zone) == [String(ash["uid"])],
 		"and finds only Ash there, still a visit")
+	var egg := Incubator.add(String(Data.common_kin()[0]))
+	for _f in 20: await m.get_tree().process_frame
+	ok(zone != null and zone.hinc == null and float(Incubator.find(String(egg["id"])).get("heat", 0.0)) > 0.0,
+		"your own Rare Egg keeps warming while you visit (play time; decision 0080)")
 	Content.rules("farm_build")["base_mode"] = false
