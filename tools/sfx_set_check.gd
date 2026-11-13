@@ -25,7 +25,9 @@ extends RefCounted
 ##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
 ##  11. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
 ##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
-## Reads the files only; never touches the save.
+##  11. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
+##      even when X is pressed again, and it is gone within one frame of every way the channel can end
+## Reads the files (and, for the Hearth Call loop, one short training match); never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -61,6 +63,7 @@ func run(main: Node) -> void:
 	_strip_chime()
 	_chop_mine()
 	_rarity_stings()
+	await _call_loop(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -340,6 +343,52 @@ func _plays(sname: String, act: Callable) -> bool:
 	Sfx.last_played.erase(sname)
 	act.call()
 	return Sfx.last_played.has(sname)
+
+## 11. Meeko's channel loop, one training match per end path.
+const END_PATHS := ["time", "ally out of reach", "stun", "knock", "dead", "ally dead", "merge"]
+const FRAME := 1.0 / 60.0
+
+func _call_loop(main: Node) -> void:
+	for path in END_PATHS:
+		var m := Match.new()
+		main.add_child(m)
+		m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+			"cls": Arch.weight("tender"), "arch": "tender", "weapon": Arch.signature("tender")})
+		m.set_process(false)
+		var P: Hunter = m.player
+		P.set_arch("tender")
+		P.lvl = 6
+		var mate_at := P.pos + Vector3(-2.5, 0, 1.5)
+		var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, mate_at, {"arch": "none"})
+		var K: TenderKit = P.ak
+		P.inp["aim"] = A.pos
+		HunterKeys.ult_pressed(P)
+		m.step(FRAME)
+		var key := "call%d" % P.get_instance_id()
+		var up := not K.hearth_call.is_empty() and Sfx.loop_on(key) and Sfx.loop_on(key + "_ally")
+		ok(up, "channel loop (%s): it sounds on her and the ally once the call starts" % path)
+		if up:
+			var quieter := float(Sfx.loops[key]["vol"]) > float(Sfx.loops[key + "_ally"]["vol"])
+			ok(quieter, "channel loop (%s): the ally's is quieter" % path)
+			HunterKeys.ult_pressed(P)
+			m.step(FRAME)
+			var n := Sfx.loops.keys().filter(func(k): return String(k).begins_with(key)).size()
+			ok(n == 2, "channel loop (%s): X again does not stack a second loop (%d)" % [path, n])
+		match path:
+			"ally out of reach": A.teleport(P.pos + Vector3(-30.0, 0, 0))
+			"stun": P.stun_t = 0.5
+			"knock": m.knock(P, null, {})
+			"dead": m.eliminate(P, null, "test", true)
+			"ally dead": A.out = true
+			"merge": K.drop_holds()
+		var frames := 0
+		while not K.hearth_call.is_empty() and frames < 600:
+			m.step(FRAME)
+			frames += 1
+		ok(frames < 600 and not Sfx.loop_on(key) and not Sfx.loop_on(key + "_ally"),
+			"channel loop (%s): both loops are gone the frame the channel ends (%d frames in)" % [path, frames])
+		m.queue_free()
+		await main.get_tree().process_frame
 
 ## 10. The build and decorate cues.
 func _build_cues() -> void:
