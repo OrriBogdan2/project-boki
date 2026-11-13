@@ -1,21 +1,23 @@
 class_name LoadoutPanel
 extends Node
-## The body of the in-match inventory window (I, and beside an open deathbox): what you wear, the
+## The body of the in-match inventory window (I): what you wear, the
 ## utility belt, your perks and the backpack, every slot labelled with its key. Point at a thing for a
-## hover card (InvText: gear is compared with what you wear). Swap with the mouse by dragging a
-## backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to wear or take
-## off and Delete to drop it on the ground. The logic is Pack; Hud only places the window.
+## hover card (InvText: gear is compared with what you wear). Press, hold and move a thing onto another slot
+## (SlotDrag: mouse, or hold A on the pad) to wear it, swap the gloves or two belt slots, or take it off into
+## the pack; or point and press Enter to wear or take off and Delete to drop it on the ground. The logic is
+## Pack; Hud only places the window.
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const TILE_H := 48.0
 const BADGE := 30.0
-const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or drag it onto a slot"
+const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or hold and drag it onto a slot"
 
 var _m: Match
 var _p: Hunter
 var _on_change: Callable
 var _tip: InvTip
+var _drag: SlotDrag
 var _hover := {}           # {kind: "pack" or "worn", i: index} of the thing pointed at, for the keys
 var _worn_tiles: Array = []
 var _pack_rows: Array = []
@@ -30,6 +32,7 @@ static func fill(m: Match, pc: PanelContainer, v: VBoxContainer, on_change: Call
 	lp._tip = InvTip.new(pc)
 	pc.add_child(lp)
 	lp.add_child(lp._tip)
+	lp._drag = SlotDrag.attach(lp, lp._move)
 	return lp._fill(v)
 
 func _fill(v: VBoxContainer) -> Array:
@@ -61,10 +64,11 @@ func _worn_tile(slot: int) -> PanelContainer:
 	var t: PanelContainer
 	if g.is_empty():
 		t = _tile(caption, title, "", MUTED, "empty")
+		_drag.add(t, {"inv": "worn", "i": slot})
 	else:
 		var it := Loot.gear(String(g["id"]), int(g["rar"]))
 		t = _tile(caption, title, Loot.icon_of(it), Loot.col_of(it), String(Gear.ALL[it["id"]]["name"]))
-	t.set_drag_forwarding(_drag_worn.bind(slot, t), _can_drop_worn.bind(slot), _drop_worn.bind(slot))
+		_drag.add(t, {"inv": "worn", "i": slot}, Loot.name_of(it), Loot.col_of(it))
 	_tip.attach(t, func(): return _lines("worn", slot), func(): _hover = {"kind": "worn", "i": slot},
 		func(): _hover = {})
 	_worn_tiles.append(t)
@@ -76,10 +80,12 @@ func _belt_tile(k: int) -> PanelContainer:
 	var t: PanelContainer
 	if s.is_empty():
 		t = _tile(key, "", "", MUTED, "empty")
+		_drag.add(t, {"inv": "belt", "i": k})
 	else:
 		var id := String(s["id"])
 		t = _tile(key, "", UtilityBelt.icon_of(id), UtilityBelt.col_of(id),
 			"%s x%d" % [UtilityBelt.name_of(id), int(s["n"])])
+		_drag.add(t, {"inv": "belt", "i": k}, UtilityBelt.name_of(id), UtilityBelt.col_of(id))
 	_tip.attach(t, func(): return BeltHud.tip(_p, k))
 	return t
 
@@ -111,7 +117,7 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 
 func _key_pill(key: String) -> Control:
 	var pill := UI.card(Color(1, 1, 1, 0.16), 3, 5)
-	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE      # a drag that starts on the key still drags the slot
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pill.add_child(UI.label(key, 11, INK, UI.big))
 	return pill
 
@@ -144,7 +150,6 @@ func _pack_list(v: VBoxContainer) -> Array:
 	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(rows)
 	v.add_child(sc)
-	sc.set_drag_forwarding(Callable(), _can_take_off, _take_off)
 	if _p.pack.is_empty():
 		rows.add_child(UI.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
 	for i in _p.pack.size():
@@ -153,7 +158,7 @@ func _pack_list(v: VBoxContainer) -> Array:
 		var empty := UI.card(Color(1, 1, 1, 0.03), 6, 9)
 		empty.custom_minimum_size.y = 30
 		empty.add_child(UI.label("empty slot", 12, Color(MUTED, 0.6)))
-		empty.set_drag_forwarding(Callable(), _can_take_off, _take_off)
+		_drag.add(empty, {"inv": "pack", "i": -1})
 		rows.add_child(empty)
 	return [sc, rows]
 
@@ -164,7 +169,7 @@ func _pack_row(i: int) -> PanelContainer:
 		buttons.append(["Wear", func(): _act(func(): Pack.use_from_pack(_m, _p, i)), true])
 	buttons.append(["Drop", func(): _act(func(): Pack.drop_from_pack(_m, _p, i))])
 	var row := LootHold.item_row(it, buttons)
-	row.set_drag_forwarding(_drag_pack.bind(i, row), _can_take_off, _take_off)
+	_drag.add(row, {"inv": "pack", "i": i}, Loot.name_of(it), Loot.col_of(it))
 	_tip.attach(row, func(): return _lines("pack", i), func(): _hover = {"kind": "pack", "i": i}, func(): _hover = {})
 	_pack_rows.append(row)
 	return row
@@ -213,38 +218,33 @@ func _act(change: Callable) -> void:
 	_on_change.call()
 
 # ------------------------------------------------------------------ dragging
-func _drag_pack(_at: Vector2, i: int, row: Control) -> Variant:
-	if String((_p.pack[i] as Dictionary).get("t", "")) != "gear":
-		return null
-	row.set_drag_preview(UI.label(Loot.name_of(_p.pack[i]), 15, Loot.col_of(_p.pack[i]), UI.semi))
-	return {"inv": "pack", "i": i}
-
-func _drag_worn(_at: Vector2, slot: int, tile: Control) -> Variant:
-	var g: Dictionary = _p.gear[slot]
-	if g.is_empty():
-		return null
-	var it := Loot.gear(String(g["id"]), int(g["rar"]))
-	tile.set_drag_preview(UI.label(Loot.name_of(it), 15, Loot.col_of(it), UI.semi))
-	return {"inv": "worn", "i": slot}
-
-func _can_drop_worn(_at: Vector2, data: Variant, slot: int) -> bool:
-	if not (data is Dictionary) or not data.has("inv"):
-		return false
-	var from := int(data["i"])
-	if data["inv"] == "pack":
-		return from < _p.pack.size() and Pack.fits_slot(String(_p.pack[from].get("id", "")), slot)
-	return from != slot and from < 2 and slot < 2
-
-func _drop_worn(_at: Vector2, data: Variant, slot: int) -> void:
-	var from := int(data["i"])
-	if data["inv"] == "pack":
-		_act(func(): Pack.use_from_pack(_m, _p, from, slot))
-	else:
-		_act(func(): Pack.swap_gloves(_p))
-
-func _can_take_off(_at: Vector2, data: Variant) -> bool:
-	return data is Dictionary and data.get("inv", "") == "worn" and Pack.room(_p) \
-		and not (_p.gear[int(data["i"])] as Dictionary).is_empty()
-
-func _take_off(_at: Vector2, data: Variant) -> void:
-	_act(func(): Pack.take_off(_m, _p, int(data["i"])))
+## A dropped thing (SlotDrag): makes the move and rebuilds, or says why it can't go there.
+func _move(from: Dictionary, to: Dictionary) -> String:
+	var a := int(from["i"])
+	var b := int(to["i"])
+	match [from["inv"], to["inv"]]:
+		["pack", "worn"]:
+			var it: Dictionary = _p.pack[a]
+			if String(it.get("t", "")) != "gear":
+				return "Only gear is worn"
+			var id := String(it["id"])
+			if not Pack.fits_slot(id, b):
+				return "That goes in the %s slot" % ("Glove" if Gear.is_glove(id) else Gear.slot_name(id))
+			_act(func(): Pack.use_from_pack(_m, _p, a, b))
+		["worn", "worn"]:
+			if a > 1 or b > 1:
+				return "Only the gloves swap"
+			_act(func(): Pack.swap_gloves(_p))
+		["worn", "pack"]:
+			if not Pack.room(_p):
+				return "Your pack is full"
+			_act(func(): Pack.take_off(_m, _p, a))
+		["belt", "belt"]:
+			_act(func(): UtilityBelt.swap_slots(_p, a, b))
+		["pack", "pack"]:
+			return ""
+		["belt", _]:
+			return "Belt items stay on the belt"
+		_:
+			return "The belt holds only belt items"
+	return ""

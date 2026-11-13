@@ -7,6 +7,9 @@ extends RefCounted
 ##     kit's move runs to the landing, as Tarek's Quakefall does).
 ##  3. A free fall with Shift mashed: no chain of dashes, never more than the hero's ground charges in FALL_S
 ##     (a kit's own air version, like Vex's air taps, spends those charges; item 183 audits each air dash).
+##  4. The "In the air" tables of Vex, Kael, Lace, Cinder, Meeko and Tenzo (docs/heroes/*.md): LMB, RMB tap, RMB
+##     hold and E cast mid-jump and mid-fall as on the ground (Kael's RMB goes to his own Air Slam slot), none
+##     fire out of a glide on LMB (the glider shuts the weapon), and Tenzo's RMB folds the glider and slams.
 
 const HEIGHT := 60.0
 const HOLD_S := 0.35            # s a hold is charged on the ground before it's carried off the ledge
@@ -14,6 +17,11 @@ const GLIDE_HELD_S := 0.4       # s glide is held while the ability is still hel
 const OPEN_WAIT_S := 3.0        # s after the release the glider has to open in
 const FALL_S := 1.5
 const KEEP := 0.7                # of the speed on the step before the glider opens (as --airdash-glide-check)
+## Vex, Kael, Lace, Cinder, Meeko, Tenzo
+const SIX := ["gunslinger", "juggernaut", "archer", "ashwick", "tender", "dolm"]
+const CAST_KEYS := ["fire", "sec", "sec_hold", "sig"]      # LMB, RMB tap, RMB hold, E
+const CAST_S := 1.6              # s a cast is watched for (Meeko's Burrseed winds up for 1 s)
+const CAST_HEIGHT := 40.0        # m above the pad: a fall or a glide that lasts the whole cast
 const DROP_KEYS := ["dash", "sec", "sig", "ult", "jump", "throw", "fire"]
 
 var bad := 0
@@ -192,6 +200,78 @@ func _fall(m: Match, home: Vector3, arch: String) -> void:
 	h.vel = Vector3.ZERO
 	_steps(m, 30)
 
+## 4. One cast (key: "fire", "sec" tap, "sec_hold" held 0.3 s, "sig") from the ground, a jump's rise, a fall or a
+## glide: {acted, cd (the cooldowns it spent), closed (a glider that was open shut)}.
+func _cast(m: Match, home: Vector3, state: String, key: String) -> Dictionary:
+	var h: Hunter = m.player
+	_clear(h)
+	h.teleport(home)
+	h.vel = Vector3.ZERO
+	h.gliding = false
+	_steps(m, 40)
+	_ready_all(h)
+	h.inp["aim"] = home + Vector3(7, 0.0, 0)
+	if state == "rise":
+		h.inp["jump"] = true
+		_steps(m, 4)
+		h.inp["jump"] = false
+	elif state != "ground":
+		h.teleport(home + Vector3(0, CAST_HEIGHT, 0))
+		h.grounded = false
+		if state == "glide":
+			h.vel = Vector3(3, 0, 0)
+			h.inp["glide"] = true
+			h.inp["glide_btn"] = true
+			_steps(m, 20)
+			h.inp["glide_btn"] = false
+		_steps(m, 3)
+	h.ak.anim_id = ""
+	var cd0: Dictionary = h.ak.cd.duplicate()
+	var was_glide := h.gliding
+	var out := {"acted": false, "cd": [], "closed": false}
+	var pad := "sec" if key.begins_with("sec") else key
+	h.inp[pad] = true
+	h.inp["sec_hold"] = key.begins_with("sec")
+	for i in int(CAST_S / Match.DT):
+		if i == (int(0.3 / Match.DT) if key == "sec_hold" else 8):
+			h.inp[pad] = false
+			h.inp["sec_hold"] = false
+		m.step(Match.DT)
+		out["acted"] = out["acted"] or h.ak.anim_id != ""
+		out["closed"] = out["closed"] or (was_glide and not h.gliding)
+	for c in h.ak.cd:
+		if h.ak.cd[c] > cd0[c] + 0.05:
+			out["cd"].append(c)
+	out["acted"] = out["acted"] or not out["cd"].is_empty()
+	_clear(h)
+	return out
+
+func _cast_table(m: Match, home: Vector3, arch: String) -> void:
+	for key in CAST_KEYS:
+		var ground: Dictionary = _cast(m, home, "ground", key)
+		for state in ["rise", "fall", "glide"]:
+			var got: Dictionary = _cast(m, home, state, key)
+			var what := "%s %s %s" % [arch, key, state]
+			var want: bool = ground["acted"]
+			if key == "fire" and state == "glide":
+				want = false                  # the glider shuts the weapon
+			elif arch == "dolm" and key == "sig":
+				if state == "rise":
+					continue              # ground-only rocks: a jump's first inch fits, its apex may not
+				want = false
+			elif arch == "tender" and key.begins_with("sec") and state != "rise":
+				continue                      # Burrseed's press is held for the landing (--dash-flow-check)
+			ok(got["acted"] == want, "%s: %s as on the ground (ground %s, here %s %s)" % [
+				what, "acts" if want else "does nothing", ground["acted"], got["acted"], got["cd"]])
+			if arch == "juggernaut" and key.begins_with("sec") and want:
+				ok("air" in got["cd"] and not "rmb" in got["cd"],
+					"%s: the Air Slam's own slot, not the ground slam's (%s)" % [what, got["cd"]])
+			if arch == "dolm" and key.begins_with("sec") and state == "glide":
+				ok(got["closed"], "%s: the glider folds and the slam goes (decision: it never blocks it)" % what)
+	_clear(m.player)
+	m.player.teleport(home)
+	_steps(m, 40)
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	for arch in Arch.ORDER:
@@ -201,6 +281,8 @@ func run(main: Node) -> void:
 		_hold(m, home, arch, "rmb")
 		_hold(m, home, arch, "lmb")
 		_fall(m, home, arch)
+		if arch in SIX:
+			_cast_table(m, home, arch)
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("AIRLIM DONE, failures: %d" % bad)
