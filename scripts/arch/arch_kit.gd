@@ -570,7 +570,6 @@ func travel(dist: float, t: float, extra := {}) -> void:
 	var curve: Array = feel.get("curve", [])
 	var on_curve := bool(extra.get("curved", false)) and not curve.is_empty() and h.roll_t > 0.0
 	curved = {"t0": h.roll_t, "speed": h.roll_speed, "curve": curve, "at": h.dash_at} if on_curve else {}
-	Feel.dash_sound(m, id, h.pos, h)
 	CombatBus.ability_used.emit(h, String(dash_def().get("id", "dash")), "dodge")
 
 ## The curved dash this step: the dash's mean speed times its curve at the middle of the step. A new

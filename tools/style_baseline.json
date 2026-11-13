@@ -10,9 +10,9 @@
 "semicolon": 6
 },
 "scripts/arch/feel.gd": {
-"long_line": 10,
+"long_line": 8,
 "nested_ternary": 2,
-"semicolon": 5
+"semicolon": 4
 },
 "scripts/arch/hero_demo.gd": {
 "long_line": 1,

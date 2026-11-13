@@ -849,7 +849,7 @@ Subsets and gaps:
   silent knife only drops its sound (the streak still shows), Shield Surf heats the glider but doesn't stop
   spikes from the front specifically, Last Round lock lines are drawn as flickering bolts (no thickening mesh).
 - Sounds are placeholders layered from the existing Sfx set (`Feel.DELIVERY_TELL`, `CATEGORY_IMPACT`,
-  `SWEETENER`, `DASH_SOUND`); the level-up chime is a three-note layer of existing sounds.
+  `SWEETENER`); the level-up chime is a three-note layer of existing sounds.
 
 ## Ult fuse and cooldowns (owner, Oct 31)
 
