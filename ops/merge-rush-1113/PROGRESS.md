@@ -40,3 +40,7 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
     [revive]"; bisected to this merge
 - Batch C final: 31 merges (gated as C3). Flaky on main and branch alike, not counted: race, tutorial-idle,
   perf-budget, cc-exit-buffer (one abort under load), garden-whistle.
+- Batch C gate (C3, 31 merges on main 55533bf67c): full suite 356+13 checks vs main side by side, 12 at a time;
+  every red only on the branch was rerun 3 at a time on both trees: all green. Fixed vs main: 4. Import: 0 parse
+  errors. health --strict OK. Export dry run: every preset packs, 652.4 MB (main 641.3 MB; baseline 471.5 MB is
+  stale on main, not bumped here).
