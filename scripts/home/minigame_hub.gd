@@ -25,18 +25,22 @@ static func record(game: String, who: String) -> void:
 	rec["last"] = who
 	rec["wins"][who] = int(rec["wins"].get(who, 0)) + 1
 
+## The Boki with the most wins at a game and its count, or {} before any game is played.
+static func best(game: String) -> Dictionary:
+	var wins: Dictionary = Save.d.get("game_board", {}).get(game, {}).get("wins", {})
+	var top := {}
+	for n in wins:
+		if top.is_empty() or int(wins[n]) > int(top["wins"]):
+			top = {"name": String(n), "wins": int(wins[n])}
+	return top
+
 ## "No games yet", or "Best Pip, 3 wins · last Rue".
 static func summary(game: String) -> String:
-	var rec: Dictionary = Save.d.get("game_board", {}).get(game, {})
-	var wins: Dictionary = rec.get("wins", {})
-	if wins.is_empty():
+	var top := best(game)
+	if top.is_empty():
 		return "No games yet"
-	var best := ""
-	for n in wins:
-		if best == "" or int(wins[n]) > int(wins[best]):
-			best = String(n)
-	var count := int(wins[best])
-	return "Best %s, %d %s · last %s" % [best, count, "win" if count == 1 else "wins", rec["last"]]
+	var last: String = Save.d["game_board"][game]["last"]
+	return "Best %s, %d %s · last %s" % [top["name"], top["wins"], "win" if top["wins"] == 1 else "wins", last]
 
 ## Every game, in the file's order: {id, name, rule, game, open}; game is the live object and open
 ## is true only when this base has it with its post placed (else game is null and the card is locked).
