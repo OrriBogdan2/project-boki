@@ -10,18 +10,19 @@ extends RefCounted
 const STUN_COL := Color("fff27a")
 const ROOT_COL := Color("8fe0a0")
 const SLOW_COL := Color("9ae8ff")
-const STUN_HZ := 4.0           # body pulses a second while stunned
-const ROOT_HZ := 2.0           # ... rooted
-const CC_K := 0.55             # the body tint's strength under crowd control
-const SLOW_K := 0.35           # ... slowed (it's the mildest)
-const GLINT_T := 0.3           # s a cast's glint takes to fade
-const GLINT_K := 0.7           # the glint's strength at the cast
-const CAST_RING_R := 1.3       # m, the ring under a caster
-const CAST_RING_T := 0.3       # s it lasts
-const STUN_Y := 2.15           # m over the feet (x the Hunter's scale) the stars spin
-const STUN_SPIN := 9.0         # rad/s
-const ROOT_GROW := 0.15        # s the tendrils take to rise
-const DRIP_T := 0.7            # s a frost drip takes to run down the legs
+const STUN_HZ := 4.0  # body pulses a second while stunned
+const ROOT_HZ := 2.0  # ... rooted
+const CC_K := 0.55  # the body tint's strength under crowd control
+const SLOW_K := 0.35  # ... slowed (it's the mildest)
+const GLINT_T := 0.3  # s a cast's glint takes to fade
+const GLINT_K := 0.7  # the glint's strength at the cast
+const CAST_RING_R := 1.3  # m, the ring under a caster
+const CAST_RING_T := 0.3  # s it lasts
+const STUN_Y := 2.15  # m over the feet (x the Hunter's scale) the stars spin
+const STUN_SPIN := 9.0  # rad/s
+const ROOT_GROW := 0.15  # s the tendrils take to rise
+const DRIP_T := 0.7  # s a frost drip takes to run down the legs
+
 
 ## Every frame, on every Hunter (Hunter.render).
 static func tick(h: Hunter, delta: float) -> void:
@@ -29,12 +30,12 @@ static func tick(h: Hunter, delta: float) -> void:
 		return
 	var stun := h.stun_t > 0.0 and not h.downed
 	var root := h.root_t > 0.0 and not h.downed
-	var slow := h.slow_t > 0.0 and h.stagger_t <= 0.0 and not h.downed     # (a big hit's stagger is a slow too)
+	var slow := h.slow_t > 0.0 and h.stagger_t <= 0.0 and not h.downed  # (a big hit's stagger is a slow too)
 	var props := h.get_node_or_null("BodyTell") as Node3D
 	if props == null and (stun or root or slow):
 		props = _props(h)
 	if props:
-		props.visible = h.model.visible        # (a cloak or a stand-in hides them with the body)
+		props.visible = h.model.visible  # (a cloak or a stand-in hides them with the body)
 		_show(props, stun, root, slow, h, delta)
 	var t := Color.TRANSPARENT
 	var hz := 0.0
@@ -55,9 +56,11 @@ static func tick(h: Hunter, delta: float) -> void:
 		h.set_meta("tell_cast", h.cast_at)
 		h.m.fx.ring(h.pos + Vector3(0, 0.05, 0), CAST_RING_R, SideColor.fx(h.m, h, Arch.color(h.arch)), CAST_RING_T)
 
+
 ## The body's tint now (transparent when none), for checks.
 static func tint_of(h: Hunter) -> Color:
 	return h.get_meta("tell_tint", Color.TRANSPARENT)
+
 
 static func _tint(h: Hunter, t: Color, hz: float) -> void:
 	if h.get_meta("tell_tint", Color.TRANSPARENT) == t and h.get_meta("tell_n", -1) == h.mats.size():
@@ -67,6 +70,7 @@ static func _tint(h: Hunter, t: Color, hz: float) -> void:
 		mt.set_shader_parameter("tell_hz", hz)
 	h.set_meta("tell_tint", t)
 	h.set_meta("tell_n", h.mats.size())
+
 
 static func _show(props: Node3D, stun: bool, root: bool, slow: bool, h: Hunter, delta: float) -> void:
 	var s := props.get_node("Stun") as Node3D
@@ -89,6 +93,7 @@ static func _show(props: Node3D, stun: bool, root: bool, slow: bool, h: Hunter, 
 			d.position.y = lerpf(1.1, 0.1, k)
 			d.scale = Vector3.ONE * (1.0 - k * 0.6)
 
+
 ## The stars, the tendrils and the frost, built the first time this body is held by any of them.
 static func _props(h: Hunter) -> Node3D:
 	var sc := float(h.cdat.get("scale", 1.0))
@@ -110,8 +115,14 @@ static func _props(h: Hunter) -> Node3D:
 	for i in 5:
 		var a := TAU * i / 5.0
 		# a tendril out from the feet, leaning in over them
-		Models.part(root, Models.cyl(0.012, 0.05, 0.6, 5), vine, Vector3(cos(a) * 0.42, 0.28, sin(a) * 0.42),
-				Vector3.ONE, Vector3(0.0, -a, 0.55))
+		Models.part(
+			root,
+			Models.cyl(0.012, 0.05, 0.6, 5),
+			vine,
+			Vector3(cos(a) * 0.42, 0.28, sin(a) * 0.42),
+			Vector3.ONE,
+			Vector3(0.0, -a, 0.55)
+		)
 	Models.part(root, Models.flat_quad(1.2), Models.ring_mat(Color(ROOT_COL, 0.95), 0.14), Vector3(0, 0.05, 0))
 	n.add_child(root)
 	var slow := Node3D.new()
@@ -122,8 +133,14 @@ static func _props(h: Hunter) -> Node3D:
 	var ice := Models.glow_mat(Color(SLOW_COL, 0.9))
 	for i in 4:
 		var a := TAU * i / 4.0 + 0.4
-		Models.part(drips, Models.crystal(0.04, 0.1, 4), ice, Vector3(cos(a) * 0.3, 1.0, sin(a) * 0.3), Vector3.ONE,
-				Vector3(PI, 0, 0))
+		Models.part(
+			drips,
+			Models.crystal(0.04, 0.1, 4),
+			ice,
+			Vector3(cos(a) * 0.3, 1.0, sin(a) * 0.3),
+			Vector3.ONE,
+			Vector3(PI, 0, 0)
+		)
 	slow.add_child(drips)
 	n.add_child(slow)
 	for mi in n.find_children("*", "MeshInstance3D", true, false):
