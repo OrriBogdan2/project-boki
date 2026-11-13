@@ -1240,7 +1240,7 @@ func start_dash(dir: Vector2, speed: float, time: float) -> void:
 	dash_t = time / Loco.dash_speed(String(Save.d.get("arch", "")))      # a slowed dash keeps its distance
 	gliding = false
 	Sfx.play("whoosh", null, -6.0, 0.1, 1.2)
-	if fx: fx.dust(ppos, 6)
+	if fx and water.was == 0: fx.dust(ppos, 6)      # (in water the spray is the cue: WaterFx)
 
 ## The ground under a point: its terrace height, or World.VOID over the sky.
 func _ground_h(x: float, z: float) -> float:
