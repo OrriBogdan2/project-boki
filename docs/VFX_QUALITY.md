@@ -81,6 +81,11 @@ Still open (shared, not done here):
   is per kit (backlog).
 - Motley's well, seed and orbs are teal since ext/vfx-motley-data (content/vfx/ostra.json). The alternative (keep
   void violet) would clash with Sable.
+  is per kit (backlog). Done for `VVFx.disc` (Vex's Cinderfall countdown and scorch, Sparkle's Skycall share it): the
+  rim sits on the hit radius, the falloff runs from 0.45 by the rim to `DISC_FILL_A` 0.2 at the centre
+  (`--gunslinger-combo-check` asserts both). Only Vex's X uses it; Vex's E (Longneedle beam) draws no disc.
+- Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
+  moves them to teal. The alternative (keep void violet) would clash with Sable.
 
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
