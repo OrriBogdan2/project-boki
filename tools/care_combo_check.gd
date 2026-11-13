@@ -996,7 +996,6 @@ func tender() -> void:
 	K.kind.clear()
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
-	var res: Dictionary = Arch.def("tender")["resource"]
 	ok(
 			"mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider)",
 			P.shot_range_k == 1.0 and not res.has("emp_range") and not res.has("emp_refund"),

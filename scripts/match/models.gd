@@ -833,7 +833,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		ShadowPolicy.judge(gmi)
 		glider.add_child(gmi)
 	var ring := MeshInstance3D.new(); ring.name = "TeamRing"; ring.mesh = flat_quad(1.0)
-	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
+	ring.material_override = SideRings.mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
 	# the head and everything on it turn and nod together from the neck
 	var head := Node3D.new(); head.name = "HeadPivot"
@@ -1869,7 +1869,7 @@ static func kin_shell(c: Color) -> Node3D:
 	var root := Node3D.new()
 	var mi := part(root, capsule(0.62, 2.0), aura_mat(c, 0.75), Vector3(0, 1.0, 0))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := part(root, flat_quad(2.6), ring_mat(Color(c, 0.9), 0.1), Vector3(0, 0.06, 0))
+	var ring := part(root, flat_quad(2.6), SideRings.mat(Color(c, 0.9), 0.1), Vector3(0, 0.06, 0))
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 

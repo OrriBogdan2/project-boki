@@ -879,7 +879,7 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 	match e.type:
 		"shield":
 			if "shield" in t:
-				ReceiverCue.shield(t, float(pr["amount"]) * k * weak, col)
+				ReceiverCue.shield(t, float(pr["amount"]) * k * weak, col, ShieldSrc.BOKI)
 				if "shield_t" in t: t.set("shield_t", maxf(float(t.get("shield_t")), float(pr["duration"])))
 			m.sfx("shield", t.pos, -3.0)
 		"heal":

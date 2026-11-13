@@ -24,7 +24,7 @@ static func afterglow(h: Hunter) -> void:
 	var secs := float(r.get("secs", 3.0))
 	h.add_buff("move_speed", float(r.get("move_speed", 0.15)), secs)
 	var col := Color("ffd84a")
-	ReceiverCue.shield(h, h.max_hp * float(r.get("shield_frac", 0.08)), col)
+	ReceiverCue.shield(h, h.max_hp * float(r.get("shield_frac", 0.08)), col, ShieldSrc.FUSE)
 	h.shield_t = maxf(h.shield_t, secs)
 	h.set_meta("afterglow_t", secs)
 	if h.is_local():

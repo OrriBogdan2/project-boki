@@ -641,7 +641,7 @@ func guard_stack() -> void:
 	var gd: Dictionary = d["passive"]["guard"]
 	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)
 	shield_at = m.time
-	ReceiverCue.shield(h, float(gd["shield"]) * shield_stacks)
+	ReceiverCue.shield(h, float(gd["shield"]) * shield_stacks, Color.TRANSPARENT, ShieldSrc.MOLTEN)
 	h.shield_t = float(gd["t"])
 	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
 

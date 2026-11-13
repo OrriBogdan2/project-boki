@@ -64,17 +64,17 @@ static func heal(e: Ent, n: float, tint := Color.TRANSPARENT) -> void:
 		e.m.fx.number(e.pos + Vector3(0, 1.6, 0), n, HEAL_COLOR, false, "+")
 	c._start(e, "heal", tint, RISE_S, true, 1.0)
 
-## Raise `e`'s shield to at least `amount` (a Hunter or a Boki); a real gain flashes the shell.
-static func shield(e: Ent, amount: float, tint := Color.TRANSPARENT) -> void:
+## Raise `e`'s shield to at least `amount` (a Hunter or a Boki) through ShieldSrc.give, naming the giver
+## `icon` (a ShieldSrc id; "" is ShieldSrc.ITEM) for the vitals' shield strip; a real gain flashes the shell.
+static func shield(e: Ent, amount: float, tint := Color.TRANSPARENT, icon := "") -> void:
 	var before := 0.0
 	if e is Hunter:
 		before = (e as Hunter).shield
-		(e as Hunter).shield = maxf(before, amount)
 	elif e is Kin:
 		before = (e as Kin).shield
-		(e as Kin).shield = maxf(before, amount)
 	else:
 		return
+	ShieldSrc.give(e, amount, icon if icon != "" else ShieldSrc.ITEM)
 	var gained := amount - before
 	if gained <= 0.0 or not e.is_inside_tree():
 		return

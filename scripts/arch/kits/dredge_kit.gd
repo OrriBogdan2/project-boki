@@ -429,9 +429,9 @@ func _grab(f: Ent, ally := false) -> void:
 		hook_hold = null
 		return
 	var rdf := rmb_def()
-	if f.mass() >= 6.0:
+	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
-		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul: a dull warning, no word
+		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul, or blocked (Blockers): a dull warning, no word
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
@@ -440,7 +440,8 @@ func _grab(f: Ent, ally := false) -> void:
 	ally = ally or wisp           # a wisp caught head-on is reeled in like an ally: no stun, no Grounded
 	# the reel (Displace: a player online is hauled on their own game, the same way); wisps it scooped on the
 	# way come along without the swing
-	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": float(rdf["gap"])}
+	# the body stops adjacent, in front of him (footage 0130): `stop_gap` m of air left between the two bodies
+	var drag := {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": h.r + f.r + float(rdf["stop_gap"])}
 	drag["dur"] = float(rdf["pull_max"])
 	var tow := drag.duplicate()
 	tow["swing"] = SWING

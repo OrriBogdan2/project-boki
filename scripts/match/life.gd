@@ -306,7 +306,7 @@ static func _mark_owner(m: Match, b: Dictionary) -> void:
 	var ring := MeshInstance3D.new()
 	ring.name = "OwnerRing"
 	ring.mesh = Models.flat_quad(OWNER_RING_M)
-	ring.material_override = Models.ring_mat(col, 0.12)
+	ring.material_override = SideRings.mat(col, 0.12)
 	ring.position.y = 0.05
 	n.add_child(ring)
 

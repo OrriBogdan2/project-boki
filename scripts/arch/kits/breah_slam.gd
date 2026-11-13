@@ -15,10 +15,10 @@ extends RefCounted
 const SWEEP_PAD := 1.2         # m past the step's length a foe's centre may lie and still be tested (body radii)
 
 var k: DolmKit
-var leapt := false             # jumped during this charge (the leap forward)
-var lunges := 0                # punches during this charge
+var leapt := false  # jumped during this charge (the leap forward)
+var lunges := 0  # punches during this charge
 var was_ground := true
-var leaps := 0                 # (checks)
+var leaps := 0  # (checks)
 var extends_n := 0
 var hops := 0
 var taps := 0
@@ -41,11 +41,18 @@ func feel() -> Dictionary: return Loco.T["tenzo"]["rmb"]
 func charge_k(t: float) -> float:
 	return clampf((t - float(k.rmb_def()["hold"])) / float(sd()["time"]), 0.0, 1.0)
 
+
 func charging() -> bool:
 	return k.rmb_down and k.rmb_t > float(k.rmb_def()["hold"]) * 0.5
 
-func radius(c: float) -> float: return lerpf(float(sd()["radius"][0]), float(sd()["radius"][1]), c)
-func core(c: float) -> float: return lerpf(float(sd()["core"][0]), float(sd()["core"][1]), c)
+
+func radius(c: float) -> float:
+	return lerpf(float(sd()["radius"][0]), float(sd()["radius"][1]), c)
+
+
+func core(c: float) -> float:
+	return lerpf(float(sd()["core"][0]), float(sd()["core"][1]), c)
+
 
 ## Where the slam will land: a hop ahead of him toward the aim, plus what the hop keeps of his run.
 func center() -> Vector3:
@@ -56,12 +63,16 @@ func center() -> Vector3:
 		c += Vector3(h.vel.x, 0, h.vel.z) * float(feel()["carry"]) * flight()
 	return c
 
+
 ## The tap's spot: just in front of him.
 func tap_spot() -> Vector3:
 	var d := k.h.aim_dir()
 	return k.h.pos + Vector3(d.x, 0, d.y) * float(sd()["reach"])
 
-func _flight(up: float) -> float: return 2.0 * up / Hunter.H_GRAV
+
+func _flight(up: float) -> float:
+	return 2.0 * up / Hunter.H_GRAV
+
 
 ## The held hop's time in the air: up at hop_up, down under fall_k times the gravity.
 func flight() -> float:
@@ -72,6 +83,7 @@ func move_k() -> float:
 	if wind_t >= 0.0:
 		return 0.0
 	return float(sd()["walk_k"]) if charging() else 1.0
+
 
 func drop() -> void:
 	leapt = false
@@ -98,6 +110,9 @@ func _tick_wind(dt: float) -> void:
 	wind_t += dt
 	h.vel.x = 0.0
 	h.vel.z = 0.0
+	# planted, the circle stays where the hop will land
+	var to := wind_dir.normalized() * float(sd()["hop"]) + wind_run * flight()
+	_circle(h.pos + Vector3(to.x, 0, to.y), wind_k)
 	if wind_t >= float(feel()["windup"]):
 		wind_t = -1.0
 		_take_off()
@@ -125,6 +140,12 @@ func _tick_hop(dt: float) -> void:
 	h.vel.z = v.y
 	if h.vel.y < 0.0:
 		h.vel.y -= Hunter.H_GRAV * (float(feel()["fall_k"]) - 1.0) * dt
+	# the circle stays on the ground to the landing, where the hop will come down (it moves with the nudge):
+	# what is left of the eased speed curve's path, plus the nudge held for the time left
+	var q := ease / (ease - 1.0)
+	var ahead := hop_v * ease * flight() * ((1.0 - u) - (1.0 - pow(u, q)) / q)
+	ahead += (h.inp["move"] as Vector2).limit_length(1.0) * float(feel()["nudge"]) * maxf(0.0, flight() - hop_t)
+	_circle(h.pos + Vector3(ahead.x, 0, ahead.y), k.dive_k)
 
 ## Swept test: does this step's move along the ground run into a foe's body (circle against circle, so no
 ## speed passes through one)? A body already touching only stops a move toward it.
@@ -138,19 +159,21 @@ func _blocked(step: Vector2) -> bool:
 			return true
 	return false
 
+## The circle everyone sees: the slam's outer ring and its sweet spot growing with the charge `c`.
+func _circle(at: Vector3, c: float) -> void:
+	var cores: Array = sd()["core"]
+	var ring := {"at": at, "r": radius(c), "k": c, "fill": c, "core0": cores[0], "core1": cores[1]}
+	ring.merge({"all": true, "col": Color("3a7cff"), "col2": Color("d8ecff")})
+	AimKit.sweet(k.h, "rmb", ring)
+
 func hold_tick(t: float) -> void:
 	var h := k.h
 	if t <= float(k.rmb_def()["hold"]):
 		return
 	var c := charge_k(t)
-	if k.anim_id != "breah_crouch" and not leapt: k.play("breah_crouch")
-	AimKit.sweet(
-		h, "rmb",
-		{
-			"at": center(), "r": radius(c), "k": c, "fill": c, "core0": float(sd()["core"][0]),
-			"core1": float(sd()["core"][1]), "all": true, "col": Color("3a7cff"), "col2": Color("d8ecff")
-		}
-	)
+	if k.anim_id != "breah_crouch" and not leapt:
+		k.play("breah_crouch")
+	_circle(center(), c)
 	AimKit.charge(h, c, {"col": DolmKit.COBALT, "col2": Color("d8ecff")})
 	var looks := KitLooks.of(k.m)
 	var dd := h.aim_dir()
@@ -171,6 +194,7 @@ func hold_tick(t: float) -> void:
 		k.m.sfx("br_leap", h.pos, -3.0, 1.0)
 		k.m.fx.dust(h.pos, 8)
 
+
 ## A punch pressed during the charge: a lunge forward (the source's "punch to extend").
 func extend() -> void:
 	if lunges >= int(sd()["lunges"]):
@@ -181,6 +205,7 @@ func extend() -> void:
 	k.play("breah_lunge")
 	k.m.sfx("br_shove", k.h.pos, -5.0, 1.2)
 	k.m.fx.dust(k.h.pos, 6)
+
 
 func fire(c: Dictionary) -> void:
 	var h := k.h
@@ -236,7 +261,7 @@ func _take_off() -> void:
 	k.dive_k = wind_k
 	k.dive_fall = false
 	k.play("breah_slam")
-	k.m.fx.dust(h.pos, 8)                # the push-off kicks up the ground he leaves
+	k.m.fx.dust(h.pos, 8)  # the push-off kicks up the ground he leaves
 	k.m.sfx("br_leap", h.pos, -6.0, 1.15)
 	var up := float(feel()["hop_up"])
 	var t := flight()
@@ -258,16 +283,19 @@ func arc(dist: float, up: float, dir: Vector2) -> void:
 	h.grounded = false
 	h.fly_t = flight
 
+
 ## The air dive's landing.
 func land(ck: float) -> void:
 	if k.anim_id != "breah_slam":
 		k.play("breah_slam_land")
 	slam(ck, true)
 
+
 func slam(c: float, at_feet: bool) -> void:
 	var h := k.h
 	var m := k.m
 	var s := sd()
+	AimKit.hide(h, "rmb")
 	var at := h.pos
 	if not at_feet:
 		var pw := HeroZones.walk(m, h.pos, tap_spot(), float(s["reach"]))
@@ -298,17 +326,20 @@ func slam(c: float, at_feet: bool) -> void:
 			o["dr"] = true
 		if air:
 			d2 *= 1.0 + float(s["dunk_k"])
-			if m.world.is_void(f.pos.x, f.pos.z): d2 += float(s["dunk_void"])
+			if m.world.is_void(f.pos.x, f.pos.z):
+				d2 += float(s["dunk_void"])
 			o.erase("lift")
 			k.dunks += 1
 			m.fx.beam(f.pos, f.pos + Vector3(0, 6.0, 0), Color("d8ecff"), 0.5, 0.3)
 		f.hurt(d2, h, o)
-		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
+		if in_core:
+			KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
-			m.displace.spike(f, -22.0, h)      # spiked down (after the hit, which would lift it)
+			m.displace.spike(f, -22.0, h)  # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
-		if not k.launchable(w): continue
+		if not k.launchable(w):
+			continue
 		var mid := k.rock_mid(w)
 		var rel := Vector2(mid.x - at.x, mid.z - at.z)
 		if rel.length() <= r + 1.1 and HeroZones.rock_in_reach(mid.y, at.y):
