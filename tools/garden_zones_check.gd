@@ -18,7 +18,8 @@ extends RefCounted
 ## Cinderstep (step 7b): its theme, a warm stone and a climbing post, a Fire/Rock/Steel/Dragon patch,
 ## the Stump Shove stump on its own spot with no Training post, terraces and glowing cracks in batches.
 ## With --shots-dir=<dir> (needs a renderer) it also saves hub.png, the whole hub, and
-## hub_horizon_day.png and _night.png: the hub at arrival zoom with its five zone islands, three lit, two in mist.
+## cards.png, the Waystone's cards, and hub_horizon_day.png and _night.png: the hub at arrival zoom with its
+## five zone islands, three lit, two in mist.
 ## opens its cards. Thrive (step 8): a Boki leaning toward the zone's types (or with its trait over 0.6)
 ## loses joy at half speed and trains +25% at the zone's toys; one that doesn't loses joy as before;
 ## the zone's daily trait pull stops at 0.8 (calm Glasswater pulls temper down to 0.2).
@@ -82,13 +83,17 @@ func _keys_part() -> void:
 	ok(GardenZones.keys_for("glasswater") == {"seed": false, "lean": false}, "no keys yet")
 	rec["lean"] = {"ice": float(GardenZones.rules()["lean_key"]) - 1.0}
 	ok(not GardenZones.keys_for("glasswater")["lean"], "a Boki just under the lean key is not enough")
+	var both := "Find its Wayseed in a run's lair or at the trader, and feed a Boki Water, Ice or Crystal meals."
+	ok(ZoneCards.lock_line("glasswater") == both,
+		"with no key the locked card's one line names both: %s" % ZoneCards.lock_line("glasswater"))
 	rec["lean"]["ice"] = float(GardenZones.rules()["lean_key"])
 	Save.d["items"][GardenZones.wayseed("glasswater")] = 1
 	ok(GardenZones.keys_for("glasswater") == {"seed": true, "lean": true},
 		"a Wayseed and a Boki leaning Ice tick both keys")
-	var lines := ZoneCards.key_lines("glasswater")
-	ok(lines.size() == 2 and "[x] A Wayseed" in lines[0] and "[x] A Boki leaning Water, Ice or Crystal" in lines[1],
-		"the card lists both keys: %s" % " / ".join(lines))
+	ok(ZoneCards.lock_line("glasswater") == "Ready to wake.", "with both keys its line says it is ready")
+	Save.d["items"].erase(GardenZones.wayseed("glasswater"))
+	ok(ZoneCards.lock_line("glasswater") == "Find its Wayseed in a run's lair or at the trader.",
+		"with the lean but no Wayseed it asks only for the Wayseed")
 
 ## The first day's tutorial runs in the start zone; once it is done or skipped, a plain goto lands in the hub.
 func _landing_part() -> void:
@@ -202,8 +207,7 @@ func _travel_part(m: Node) -> void:
 	hub.hway.use()
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
-	var lines := ZoneCards.key_lines("glasswater")
-	ok(lines.size() == 2 and "Wayseed" in lines[0] and "leaning" in lines[1], "its card lists both keys")
+	await _cards_part(m, hub)
 	var home_uids: Array = GardenZones.residents("bramblebank").map(func(r): return String(r["uid"]))
 	home_uids.sort()
 	ok(hub.hway.hop("bramblebank"), "a hop to open Bramblebank starts")
@@ -229,6 +233,32 @@ func _travel_part(m: Node) -> void:
 	ok(GardenZones.residents("bramblebank").size() == home_uids.size() + 1 and (Save.d["roster"] as Array).size() == 4,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
+
+## The Waystone's cards (open in the hub): Bramblebank shows its colour band, a picture with a mood face
+## for each of its Boki (six at most), its game and your best at it; locked Glasswater is grey with one line.
+func _cards_part(m: Node, hub) -> void:
+	var row: Node = hub.panel_host.find_child("Cards", true, false)
+	var bb: Node = row.get_child(0)
+	var faces := bb.find_children("Mood", "", true, false)
+	var band: ColorRect = bb.find_child("Band", true, false)
+	var colour := Color(String(GardenZones.info("bramblebank")["colour"]))
+	ok(band != null and band.color == colour, "Bramblebank's card has its colour band")
+	ok(faces.size() == mini(GardenZones.residents("bramblebank").size(), ZoneCards.FACES) and faces.size() > 0,
+		"Bramblebank's card shows %d Boki, each with a mood face" % faces.size())
+	ok(faces.all(func(f): return ["happy", "content", "sulky"].has(f.id)), "each face is happy, content or sulky")
+	var text := _texts(bb)
+	ok("Today: The Dash" in text and "Not played yet" in text, "it names its game and that you have no best yet")
+	MinigameHub.record("race", "Pip")
+	ok(_card_texts("bramblebank").has("Your best: Pip"), "after a win it names your best Boki")
+	var gw: Node = row.get_child(1)
+	var gw_lines: Array = gw.find_children("*", "Label", true, false)
+	ok(gw_lines.size() == 2 and "Wayseed" in gw_lines[1].text,
+		"locked Glasswater: its name and one line (%s)" % gw_lines[-1].text)
+	await _hub_shot(m, hub, "cards.png", SHOT_ZOOM)
+
+## The text lines on an open zone's card.
+func _card_texts(id: String) -> Array:
+	return ZoneCards._open_lines(id, null).filter(func(l): return l is Label).map(func(l): return l.text)
 
 ## The hub's fixtures: each one is there and E works at it; build mode there offers only the Garden tab.
 func _fixtures_part(hub) -> void:
@@ -584,8 +614,7 @@ func _unlock_part(m: Node) -> void:
 	ok(hub.hway.node.get_node("Stone2").get_meta("open") and hub.hway.node.has_node("Cap2"), "its stone is lit")
 	await _reveal_part(m, hub)
 	ok(not GardenZones.attune("cinderstep")["ok"], "an open zone cannot be woken again")
-	var lines: Array = ZoneCards._open_lines("cinderstep").map(func(l): return (l as Label).text)
-	ok(lines.has("Woken by Ash"), "its card names the founder")
+	ok(_card_texts("cinderstep").has("Woken by Ash"), "its card names the founder")
 	_lair_and_trader_part()
 	Content.rules("farm_build")["base_mode"] = false
 
