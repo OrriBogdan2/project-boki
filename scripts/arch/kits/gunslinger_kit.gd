@@ -122,8 +122,8 @@ func shows_charge_ball() -> bool:
 
 ## Moves whose hand leaves an ember swoosh: [hand, from s, to s].
 const TRAILS := {"gunslinger_knock": ["r", 0.0, 0.25]}
-const SLIDE_KEY := 0.45              # s: the dash clip's last slide key (vex.json "dash", low from 0.08): a held slide
-                                     # keeps the clip there, so she stands up as the skid ends, not mid-skid
+const SLIDE_LOOP_FROM := 0.367       # s: the dash clip's slide loop (three keys): a held slide replays it from here,
+const SLIDE_LOOP_T := 0.133          # s: one period at a time, so she stands up as the skid ends
 const WALK_OFF := {"gunslinger_dash": 0.0, "gunslinger_e": 0.8}   # s into the move its hit is past: the dash's
                                      # from the skid's end, the Longneedle's once its shove has played
 const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
@@ -387,7 +387,9 @@ func _tick_slide(dt: float) -> void:
 	var k := 1.0 - st_t / dur
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
 	if anim_id == "gunslinger_dash":
-		anim_at = maxf(anim_at, float(m.time) - SLIDE_KEY)   # the clip stays low on its slide key while she slides
+		var into := float(m.time) - anim_at           # the clip's clock: past the loop's end it goes round again
+		if into > SLIDE_LOOP_FROM + SLIDE_LOOP_T:
+			anim_at = float(m.time) - SLIDE_LOOP_FROM - fposmod(into - SLIDE_LOOP_FROM, SLIDE_LOOP_T)
 	h.roll_speed = float(dd["slide"]) / dur * (0.5 + k)
 	h.inv_t = 0.0
 

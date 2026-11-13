@@ -119,7 +119,7 @@ func _lmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			and float(r["in"]) <= BLEND_IN, "hit %.2f play %.2f in %.2f" % [r["hit"], r["play"], r["in"]])
 	_settle(m, P, home, 0.8)
 
-## RMB (item 112, a launcher tap): the Burr leaves on the press; the launcher swings over 0.5 s and the legs
+## RMB (item 112, a launcher tap): the Burr leaves on the press; the launcher swings home by 0.3 s and the legs
 ## keep walking under it ("upper": "moving").
 func _rmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
@@ -129,13 +129,13 @@ func _rmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	var walk := {}
 	K.press_rmb()
 	var r := _time(m, P, K, "gunslinger_rmb", 1.0, func() -> bool: return K.burrs.size() > n0,
-			_walk_probe(P, 0.1, 0.35, walk))
-	C.ok("Vex timing RMB: fired on the press, the swing on within a frame, the arm back by 0.5 s + the fade",
-			float(r["hit"]) <= DT and float(r["in"]) <= BLEND_IN and absf(float(r["len"]) - 0.5) < CLIP_TOL
-			and float(r["out"]) < 0.5 + HAND_BACK, "in %.2f len %.2f out %.2f" % [r["in"], r["len"], r["out"]])
+			_walk_probe(P, 0.1, 0.29, walk))
+	C.ok("Vex timing RMB: fired on the press, the swing on within a frame, the arm back by 0.3 s + the fade",
+			float(r["hit"]) <= DT and float(r["in"]) <= BLEND_IN and absf(float(r["len"]) - 0.3) < CLIP_TOL
+			and float(r["out"]) < 0.3 + HAND_BACK, "in %.2f len %.2f out %.2f" % [r["in"], r["len"], r["out"]])
 	C.ok("Vex timing RMB: walking through it, the legs walk (the swing is upper body)",
 			_legs_walk(walk),
-			_walk_line("at 0.35", walk))
+			_walk_line("at 0.29", walk))
 	_settle(m, P, home, 0.8)
 
 ## Shift tap: the skid is the roll (0.45 s x the dash feel), the clip has her up by 0.62 and ready by 0.85: the
@@ -160,21 +160,29 @@ func _dash(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			float(walk.get("speed", 0.0)) > 1.0 and float(walk.get("full", 1.0)) <= 0.01, _walk_line("at 0.75", walk))
 	_settle(m, P, home, 0.8)
 
-## Shift held: the clip stays on its slide key while the skid lasts (0.18 + 0.55 s), so she stands up as it
-## ends, not a quarter second into it.
+## Shift held: the clip loops its slide window (0.367-0.5 s, three keys) while the skid lasts (0.18 + 0.55 s), so
+## she stands up as it ends, not a quarter second into it.
 func _slide(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
 	P.inp["dash_down"] = true
 	P.do_dash()
+	var clock: Array[float] = []
 	var hold := func(t: float) -> void:
 		P.inp["dash_down"] = t < 1.5
 		P.inp["move"] = Vector2(0, 1) if t < 0.1 else Vector2.ZERO
+		if K.anim_id == "gunslinger_dash" and not K.slide.is_empty():
+			clock.append(m.time - K.anim_at)
 	var r := _time(m, P, K, "gunslinger_dash", 1.8, func() -> bool: return K.slide.is_empty(), hold)
-	C.ok("Vex timing Shift held: she slides 0.73 s low (the clip held on its slide key) and stands up as it ends",
-			float(r["hit"]) > 0.7 and float(r["hit"]) < 0.8 and float(r["at"]) <= 0.45 + DT * 2
-			and float(r["out"]) > float(r["hit"]) + 0.4 - DT and float(r["out"]) < float(r["hit"]) + 0.4 + HAND_BACK,
-			"skid %.2f clip at %.2f out %.2f" % [r["hit"], r["at"], r["out"]])
+	var wraps := 0
+	for i in range(1, clock.size()):
+		wraps += 1 if clock[i] < clock[i - 1] - 0.05 else 0
+	var end := GunslingerKit.SLIDE_LOOP_FROM + GunslingerKit.SLIDE_LOOP_T
+	C.ok("Vex timing Shift held: she slides 0.73 s low (the clip loops its slide window) and stands up as it ends",
+			float(r["hit"]) > 0.7 and float(r["hit"]) < 0.8 and wraps >= 1 and clock.max() <= end + DT * 2
+			and float(r["at"]) >= GunslingerKit.SLIDE_LOOP_FROM - DT and float(r["at"]) <= end + DT * 2
+			and float(r["out"]) > float(r["hit"]) + 0.3 and float(r["out"]) < float(r["hit"]) + 0.4 + HAND_BACK,
+			"skid %.2f clip at %.2f (peak %.2f, %d wraps) out %.2f" % [r["hit"], r["at"], clock.max(), wraps, r["out"]])
 	_settle(m, P, home, 0.8)
 
 ## E: the charge is 0.6 s (the source's cast bar), the beam at 0.63 lands on the clip's fire key (0.65), the

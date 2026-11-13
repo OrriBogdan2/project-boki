@@ -164,9 +164,8 @@ const MOVES := {
 		[0.00, SHOULDER],
 		[0.04, {"p": 0.1, "y": 0.1, "lift": -0.06, "sq": 0.1, "gp": 0.55, "wo": Vector3(0.0, 0.05, 0.18),
 			"legs": AIM_CROUCH, "lw": 0.7}],
-		[0.18, SHOULDER],
-		[0.3, SHOULDER],
-		[0.5, {}]]},
+		[0.12, SHOULDER],
+		[0.3, {}]]},
 	# Combat Slide: dropped feet-first, leaning back (no further than 0.45, so she stays upright enough to
 	# aim), both hands left on the rifle so it stays up and aimed; a scrape squash, then the stand-up
 	"gunslinger_dash": {"keys": [
