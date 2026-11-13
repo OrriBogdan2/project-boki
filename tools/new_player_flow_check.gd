@@ -413,6 +413,6 @@ func _portal_relic(home) -> void:
 			func(c): return c.has_meta("mask_card"))
 	ok(cards.size() == 3, "three Relics to pick from")
 	cards[2].mouse_entered.emit()
-	_press(home.panel_host, "Take Vex")
+	await _press(home.panel_host, "Take Vex")
 	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
 	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")
