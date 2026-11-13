@@ -831,6 +831,7 @@ Each cell is distance vs flat, pop m, air s: main d255acbee / this branch.
 | ostra (trade) | 13.18 | -2% 0 0.37 / -1% 0 0 | +0% 0 0.37 / -2% 0 0 | -2% 0 0.30 / -3% 0.80 0.33 | -6% 0.79 1.00 / -3% 0.13 0.18 |
 
 How to read the before numbers: a distance far over flat means the dash took off and flew on. The step's 0.03 s of air after the fix is the lip lift before your centre is over the upper tier, the same as walking. The pass bar is distance within 10% of flat, and pop and air no more than flat plus 0.15 m and 0.1 s. A hop to higher ground may peak higher by that rise. Rock Hop down a slope may stay up as long as the extra drop takes to fall. Sable's Lantern Trade hovers him in place and then swaps him to the lantern, so it is not a ground dash and only its distance is held. Controls still pass: a dash and a walk off a one-tier ledge leave the ground (0.70 s and 0.33 s of air, the same as main), and a walk still goes up the step.
+
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
 Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held

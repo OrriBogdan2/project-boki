@@ -39,7 +39,7 @@ const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its sid
 const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
-const GLIDER_HIT_HEAT := 3.0 * 0.30 / 34.5   # [sync64] glider heat per point of damage: hits heat it 3x (34.5 burns 90%)
+const GLIDER_HIT_HEAT := 3.0 * 0.30 / 34.5   # [sync64] glider heat per damage point: hits heat 3x (34.5 burns 90%)
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
 const DASH_TIME := 0.19       # s
 const DASH_REGEN := 2.2
@@ -779,8 +779,8 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	vel.x = hv.x; vel.z = hv.y
 	if s >= Displace.KNOCK_MIN:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
-		if m is Match: (m as Match).displace.knocked(self)
 		HunterMove.cut_air_dash(self)
+		if m is Match: (m as Match).displace.knocked(self)
 	if lift >= 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false

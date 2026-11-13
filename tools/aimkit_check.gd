@@ -230,6 +230,7 @@ func _tiers(m: Match, P: Hunter) -> void:
 	ok("tier: a ground cast there lands on that top", at.distance_to(tall) < 0.05, str(at - tall))
 	_terrace(m, P, z0, lv)
 	ok("tier: over the abyss: none", AimMode.ray_ground(W, _ray(Vector3(-50, 0, -50)), P.pos.y) == Vector3.INF)
+
 ## "soft" lanes and cones: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
 func _soft(P: Hunter) -> void:
 	AimKit.lane(P, "soft_lane", {"len": 7.0, "width": 2.2, "k": 1.0, "fill": 1.0, "soft": true, "tip": true})
