@@ -216,7 +216,8 @@ func _match() -> void:
 	ok("a boss drops few items", float(bossn) / 200.0 <= 4.0, "%.2f a boss" % (float(bossn) / 200.0))
 	ok("boss gear is Rare or better, with a Brand and sometimes Legendary", not low and brand and legend > 0, "legend %d/200" % legend)
 	var per_chest := float(total["chest"]) / 40.0
-	ok("a boss drops fewer than a rich chest has junk, but better", float(bossn) / 200.0 <= maxf(per_chest, 3.0))
+	# (3 sure items now: its gear, a Brand and its Ink; the floor is the "few items" cap above)
+	ok("a boss drops fewer than a rich chest has junk, but better", float(bossn) / 200.0 <= maxf(per_chest, 4.0))
 	# 5. walking over a tuning applies it; gear goes into its slot and the old piece drops
 	for wp in m.wpicks.duplicate():
 		if is_instance_valid(wp["node"]): wp["node"].queue_free()
@@ -308,6 +309,18 @@ func _glove_combos() -> void:
 		var up: float = Gear.ALL[gid]["launch"]["up_mps"]
 		var fired: bool = P.gear_cd[0] > 0.0 and absf(P.vel.y - up) < 0.01
 		ok("%s launches at its content speed (%.1f m/s up)" % [gid, up], fired)
+	# pickups fill Q first, then V; a freed slot is the next one filled
+	P.gear = Gear.empty_slots()
+	var order: Array = []
+	for step in [["grapple", -1], ["quake", -1], ["", 0], ["blink", -1], ["", 1], ["frost", -1]]:
+		if step[1] >= 0:
+			P.gear[step[1]] = {}
+		else:
+			m.spawn_gear(step[0], 1, P.pos, "", false)
+			m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
+		order.append("%s/%s" % [P.gear[0].get("id", "-"), P.gear[1].get("id", "-")])
+	ok("pickups fill glove 1 (Q) first, then glove 2; a freed slot gets the next pickup",
+			order == ["grapple/-", "grapple/quake", "-/quake", "blink/quake", "blink/-", "blink/frost"], str(order))
 	m.queue_free()
 
 func _glove_run(m: Match, secs: float, each := Callable()) -> void:
