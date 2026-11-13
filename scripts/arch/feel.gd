@@ -14,8 +14,7 @@ const CAT := {
 	"utility": Color("5fd8ff"),
 }
 const CAT_ORDER := ["control", "damage", "sustain", "utility"]
-## §5.2 allegiance: rim says whose it is.
-const RIM_ENEMY := Color("ff2d55")
+## §5.2 allegiance: rim says whose it is (the hostile tint is SideColor.rim()).
 const RIM_OWN := Color(1, 1, 1, 0.9)
 
 static func cat_color(cat: String) -> Color:

@@ -913,8 +913,8 @@ func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var st := String(x["state"])
 	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
 	var held := OutpostLook.held(x)
-	var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
-	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
+	var flag: Color = SideColor.of_team(SideColor.viewer(m), int(x["team"])) if held else Color(0.55, 0.58, 0.64, 0.9)
+	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x), held and int(x["team"]) != SideColor.viewer(m))
 	if st == "charging":
 		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
 	if st in ["charging", "open"]:
@@ -1421,7 +1421,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 		match lbl:
 			"ALIVE":
 				var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
-				HudStyle.seg_bar(c, Rect2(Vector2(tx, r.position.y + 29), Vector2(tw, 8)), h.hp, h.max_hp, HudStyle.hp_fill(HudStyle.ALLY, frac, m.time), _chip_of(h, frac), HudPlate.shield_frac(h), plates.flash_of(h))
+				HudStyle.seg_bar(c, Rect2(Vector2(tx, r.position.y + 29), Vector2(tw, 8)), h.hp, h.max_hp, HudStyle.hp_fill(SideColor.ally(), frac, m.time), _chip_of(h, frac), HudPlate.shield_frac(h), plates.flash_of(h))
 				if h.max_armor > 0.5:
 					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
 				if _has_status(h):

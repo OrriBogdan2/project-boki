@@ -90,6 +90,17 @@ outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shot
 message lane, the shortened tutorials' hint pattern (Match._tip: once per save in Save.d["tutorial"] as
 "ways_<id>", tips setting, no tutorial step, nothing blocks): the Blight's tide first closes, a quest seat first
 opens, the Heart wakes. Texts: heart.json "hints". No save-format or Net change. Check: --ways-hints-check.
+**Colour vision (ext/ui-ways-out-colourblind).** Every Ways Out colour goes through `SideColor`: a squad's or a rival's seat
+is `SideColor.of_team(viewer, team)`, the neutral ones (Heart, Gate, calls, tide, seat states, beams) are `SideColor.tone(key)`
+rows of the palette table, the default row full and the others only where it would sit on their rival colour (tritan: magenta
+Heart and Gate). Squad and rival never read by hue alone: the beacon's text (`OURS` / `RIVAL`), the strip's word and pip
+(disc / diamond), the map badge's centre mark and the minimap banner (plain / swallow-tailed). Check: --colour-vision-check
+(rows 4a, 4b); shots per palette: --ways-out-palette-shots (GPU).
+
+Quest-race pips: under the Sealed Lair and Uplink badges (strip and full map) two rows of five pips, your squad's progress on
+top (discs) and the best rival's below (diamonds), in `SideColor` squad colours. Lair progress is its boss's damage, Uplink its
+charge, a taken seat is full for its squad; locked and shut seats show nothing. It reads the mirrored seat states and the
+boss and outpost the clients already have, so it needs no new Net message. No words or key letters. Check: --quest-race-check.
 ## Heart reward gap (ext/combat-heart-reward-gap)
 Owner 2026-11-10: the early seat pays MINOR, the final seat MAJOR. Code pays exactly heart.json "reward" (`Heart.pay`: gems, seeds,
 materials and Boki trust at the exit; the Rare Egg and materials home through `Game.apply_result`). Loot kept and the Boki

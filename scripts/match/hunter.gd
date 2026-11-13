@@ -608,10 +608,7 @@ func update_lip() -> void:
 ## it. The balloon glows purple once your glider is overheated, when the next hit spikes you.
 const MARKER_BALL_Y := 0.95       # balloon centre above the stance: where a level shot flies
 const MARKER_FLASH := 0.3
-const MARKER_FOE := Color("ff4a3a")
-# always cool blue, so an ally never reads like a foe (team 0 is orange); half see-through, since you
-# never shoot at it (at full strength it lit a bright blue hoop under every squadmate's hop)
-const MARKER_ALLY := Color(0.31, 0.85, 1.0, 0.5)
+const MARKER_ALLY_A := 0.5      # an ally's marker is half see-through, since you never shoot at it
 var balloon: Node3D               # the hit marker: Ring, Ball, Knot, Aura, String
 var _mk_ring: MeshInstance3D
 var _mk_ball: MeshInstance3D
@@ -667,14 +664,13 @@ static func _marker_mats(c: Color) -> Dictionary:
 ## The marker's colour as the local player sees it.
 func _marker_col() -> Color:
 	var lp: Ent = m.local_player()
-	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if lp == self:
-		return Color(tc.lerp(Color.WHITE, 0.45), 0.45)       # your own: faint
+		return Color(SideColor.you().lerp(Color.WHITE, 0.45), 0.45)       # your own: faint
 	if lp and lp.team != team:
-		return MARKER_FOE                                    # an enemy
+		return SideColor.foe()                       # an enemy
 	if lp:
-		return MARKER_ALLY                                   # an ally
-	return tc                                            # watching: team colours
+		return Color(SideColor.ally(), MARKER_ALLY_A)       # an ally
+	return Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]      # watching: team colours
 
 func _build_marker() -> void:
 	if _mk_quad == null:

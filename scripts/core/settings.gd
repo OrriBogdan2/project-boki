@@ -27,6 +27,7 @@ const DEFAULTS := {
 	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false,
+	"colour_vision": "default",      # SideColor.ORDER
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
@@ -214,6 +215,8 @@ func _ready() -> void:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
+		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")

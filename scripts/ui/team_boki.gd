@@ -59,7 +59,7 @@ static func _icon(hud, at: Vector2, h: Hunter, k: Kin) -> void:
 		var body: Color = sp["color"]
 		hud.c.draw_circle(r.get_center(), ICON * 0.5, Color(sp.get("glow", body), 0.6))
 		hud.c.draw_circle(r.get_center(), ICON * 0.5 - 2.0, body)
-	var fill: Color = HudStyle.hp_fill(HudStyle.ALLY, frac, hud.m.time)
+	var fill: Color = HudStyle.hp_fill(SideColor.ally(), frac, hud.m.time)
 	if st != "":
 		fill = {"down": TINT_DOWN, "rest": TINT_REST, "wisp": TINT_WISP}[st]
 		hud._rounded(r, Color(fill, TINT_ALPHA), 6)

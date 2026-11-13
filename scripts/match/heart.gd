@@ -32,9 +32,7 @@ const NEXT := {
 const HOW_EARLY := "heart_early"    # the `how` of a Hunter who left by the Heart Gate
 const HOW_FINAL := "heart_final"    # ...and by the Heart ring
 const RULES_PATH := "res://content/rules/heart.json"
-const COL := Color("ff5d78")        # the Heart's soft pink-red light
 const GLASS := Color("b8203f")      # smooth crimson glass: no crack, no gold
-const GATE_COL := Color("ff9aa8")
 const SYNC_S := 3.0
 const BEAM_H := 46.0
 const NEAR_LABEL := 7.0
@@ -50,6 +48,13 @@ static func rules() -> Dictionary:
 
 static func r(k: String) -> float:
 	return float(rules()[k])
+
+## The Heart's soft pink-red light, and its Gate's: the colour-vision palette's `heart` and `gate` tones.
+static func col() -> Color:
+	return SideColor.tone("heart")
+
+static func gate_col() -> Color:
+	return SideColor.tone("gate")
 
 ## A Heart in this match? Real matches only; tests with an endless clock opt in with opts["heart"].
 static func enabled(opts: Dictionary) -> bool:
@@ -212,11 +217,11 @@ func _force(to: S, why: String) -> void:
 			if carrier == null and spark_pos == site and why == "charged":
 				m.add_feed("The Heartspark is charged")
 				m.sfx("portal", site, 2.0, 0.7)
-				m.fx.ring(site + Vector3(0, 0.3, 0), 6.0, COL, 0.8)
+				m.fx.ring(site + Vector3(0, 0.3, 0), 6.0, col(), 0.8)
 		S.FINAL:
 			m.add_feed("The Heart opens: hold its ring to leave")
 			m.sfx("portal", site, 3.0, 0.5)
-			m.fx.ring(site + Vector3(0, 0.3, 0), r("final_r"), COL, 1.0)
+			m.fx.ring(site + Vector3(0, 0.3, 0), r("final_r"), col(), 1.0)
 	_broadcast()
 
 ## Is the early seat's Heartspark charged, unused and out there (lying or carried)?
@@ -380,7 +385,7 @@ func _pick(h: Hunter) -> void:
 	else:
 		_broadcast()
 	m.add_feed("%s took the Heartspark" % h.pname)
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), COL, 24, 4.0, 0.7, -3.0)
+	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col(), 24, 4.0, 0.7, -3.0)
 
 func _drop(at: Vector3) -> void:
 	if carrier == null:
@@ -421,15 +426,15 @@ func interact_for(h: Hunter) -> Dictionary:
 	if spark_live() and carrier == null and at_spark:
 		var need := r("pickup_hold_s")
 		var slow := int(r("carrier_slow") * 100.0)
-		return {"kind": "heart", "act": "pick", "need": need, "col": COL, "prog": float(_hold.get(h.nid, 0.0)) / need,
+		return {"kind": "heart", "act": "pick", "need": need, "col": col(), "prog": float(_hold.get(h.nid, 0.0)) / need,
 			"label": "Hold %s to take the Heartspark  ·  %d%% slower and everyone sees you" % [key, slow]}
 	if spark_live() and carrier != null and h.flat_dist(gate) <= r("gate_r") + 1.0:
 		if h == carrier:
 			var gneed := r("gate_hold_s")
-			return {"kind": "heart", "act": "leave", "need": gneed, "col": GATE_COL,
+			return {"kind": "heart", "act": "leave", "need": gneed, "col": gate_col(),
 				"prog": float(_hold.get(h.nid, 0.0)) / gneed,
 				"label": "Hold %s: leave now, small reward" % key}
-		return {"kind": "heart", "col": GATE_COL, "label": "The Heart Gate only opens for the Heartspark's bearer"}
+		return {"kind": "heart", "col": gate_col(), "label": "The Heart Gate only opens for the Heartspark's bearer"}
 	if h.flat_dist(site) > NEAR_LABEL:
 		return {}
 	var say := ""
@@ -442,7 +447,7 @@ func interact_for(h: Hunter) -> Dictionary:
 			say = "The Heart opens in %ds" % int(ceil(r("final_s") - m.sess_time()))
 		S.FINAL:
 			say = "Hold the Heart ring to leave  ·  %d%%" % int(final_prog * 100.0)
-	return {} if say == "" else {"kind": "heart", "col": COL, "label": say}
+	return {} if say == "" else {"kind": "heart", "col": col(), "label": say}
 
 func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 	if not it.has("act"):
@@ -560,21 +565,21 @@ func _build() -> void:
 		var glass := Models.toon(GLASS, false, 0.45)
 		Models.part(h, Models.sphere(0.8, 20), glass, Vector3(0, 1.6, 0), Vector3(0.95, 1.25, 0.95))
 		Models.part(h, Models.sphere(0.5, 14), Models.toon(Color("e04a68"), false, 0.8), Vector3(0, 1.8, 0.0))
-	_halo = Models.part(h, Models.sphere(1.5, 16), Models.glow_mat(Color(COL, 0.1)), Vector3(0, 1.6, 0))
+	_halo = Models.part(h, Models.sphere(1.5, 16), Models.glow_mat(Color(col(), 0.1)), Vector3(0, 1.6, 0))
 	_halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var ring := MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(7.0)
-	ring.material_override = Models.ring_mat(COL, 0.04)
+	ring.material_override = Models.ring_mat(col(), 0.04)
 	ring.position = Vector3(0, 0.35, 0)
 	h.add_child(ring)
 	# the Heartspark: a small bright mote that grows as it charges
 	_spark = Node3D.new()
 	_root.add_child(_spark)
 	Models.part(_spark, Models.sphere(0.32, 12), Models.toon(Color("ffd0d8"), false, 1.0))
-	var sh := Models.part(_spark, Models.sphere(0.62, 12), Models.glow_mat(Color(COL, 0.35)))
+	var sh := Models.part(_spark, Models.sphere(0.62, 12), Models.glow_mat(Color(col(), 0.35)))
 	sh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# the world beam
-	_beam_mat = Models.glow_mat(Color(COL, 0.2))
+	_beam_mat = Models.glow_mat(Color(col(), 0.2))
 	_beam = MeshInstance3D.new()
 	_beam.mesh = Models.cyl(0.25, 0.6, BEAM_H, 12)
 	_beam.material_override = _beam_mat
@@ -612,7 +617,7 @@ func _update_nodes() -> void:
 	var a := 0.3 + 0.1 * pulse
 	if state == S.CHARGING:
 		a = 0.07 + 0.2 * f
-	_beam_mat.set_shader_parameter("color", Color(COL, a))
+	_beam_mat.set_shader_parameter("color", Color(col(), a))
 	var hs := 1.0 if lying or state == S.FINAL else 0.0
 	if state == S.CHARGING:
 		hs = f

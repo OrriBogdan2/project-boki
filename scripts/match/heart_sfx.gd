@@ -26,7 +26,6 @@ const HUM_DB := -4.0
 const BEAT_DB := -3.0
 const GATE_DB := 0.0
 const CALL_DB := -2.0
-const CALL_COL := Color("ffb4c0")      # the toast colour of a call
 const START_GAP_S := 10.0              # s before the same squad starting the same seat sounds again
 const LAST_DELAY_S := 1.5              # s the "last way out" sting waits behind the taken sting
 const SEATS := {"lair": "the Sealed Lair", "early": "the Heart Gate", "uplink": "the Uplink", "final": "the Heart"}
@@ -128,7 +127,7 @@ func call_out(ev: String, seat: String, team := -1) -> void:
 	_cue(cue, null, CALL_DB)
 	m.add_feed(text)
 	if m.hud:
-		m.hud.toast_small(text, CALL_COL)
+		m.hud.toast_small(text, SideColor.tone("call"))
 
 func _left_words() -> String:
 	var n := ways_left().size()

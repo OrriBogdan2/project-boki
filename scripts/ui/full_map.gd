@@ -281,7 +281,7 @@ func _labels(c: Control, kk: float) -> void:
 		var nm := String(lb["name"])
 		var kind := String(lb["kind"])
 		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
-			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
+			var col := Heart.gate_col().lightened(0.3) if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
 			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
 		else:
@@ -524,7 +524,7 @@ func _enemies(c: Control, team: int) -> void:
 			continue
 		var allied: bool = m.truce != null and m.truce.allied(team, h.team)
 		c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else BAD)
+		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else SideColor.foe())
 
 func _squad(c: Control, team: int) -> void:
 	for h in m.hunters:

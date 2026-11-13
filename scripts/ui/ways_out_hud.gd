@@ -11,10 +11,10 @@ const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
 const CELL := Vector2(86.0, 40.0)
 const TOP_Y := 8.0
 const PIP_R := 7.0
-const LOST_COL := Color("8a3a4a")    # a seat the Blight took: the tide's crimson, dimmed
 const STATE_WORD := ["", "OPEN", "IN USE", "TAKEN", "LOST"]
 
-static var _seats: Array = [{}, {}, {}, {}]    # reused every frame: name, st, t (seconds to open/shut or -1), team
+## Reused every frame: name, st, t (seconds to open/shut or -1), team, viewer (the local squad).
+static var _seats: Array = [{}, {}, {}, {}]
 
 ## The four seats as they stand now (the same dictionaries every call).
 static func seats(m: Match) -> Array:
@@ -25,7 +25,20 @@ static func seats(m: Match) -> Array:
 	var live := _uplink_team(m, "charging", "open")
 	_quest(2, now, q["uplink_open_s"], q["uplink_shut_s"], _uplink_team(m, "spent"), live)
 	_heart_final(m, now)
+	var viewer := SideColor.viewer(m)
+	for d in _seats:
+		d["viewer"] = viewer
 	return _seats
+
+## A squad other than the viewer's holds the seat (taking or having taken it).
+static func rival(s: Dictionary) -> bool:
+	return int(s["team"]) >= 0 and int(s["team"]) != int(s["viewer"])
+
+## The seat's state word; a seat a squad uses or took says whose it is, so squad and rival never read by hue alone.
+static func state_word(s: Dictionary) -> String:
+	if int(s["team"]) >= 0 and int(s["st"]) in [St.USE, St.TAKEN]:
+		return WaysOutLook.WORD_RIVAL if rival(s) else WaysOutLook.WORD_MINE
+	return STATE_WORD[int(s["st"])]
 
 static func _seat(i: int, st: int, t: float, team: int) -> void:
 	var d: Dictionary = _seats[i]
@@ -114,14 +127,17 @@ static func draw(hud) -> void:
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
 	for i in 4:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
-	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
+	for i in [0, 2]:
+		QuestRace.draw(m, c, Vector2(r.position.x + CELL.x * i + 17.0, r.end.y + 7.0), QuestRace.read(m, i))
+	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 32.0))
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
 	var team: int = s["team"]
-	var squad: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else HudStyle.INK
+	var squad: Color = SideColor.of_team(s["viewer"], team) if team >= 0 else HudStyle.INK
+	var foe := rival(s)
 	var pv := r.position + Vector2(17, r.size.y * 0.5)
-	var word: String = STATE_WORD[st]
+	var word := state_word(s)
 	var col := HudStyle.MUTED
 	match st:
 		St.LOCKED:
@@ -135,15 +151,15 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 			c.draw_circle(pv, PIP_R, col)
 		St.USE:
 			col = squad
-			c.draw_circle(pv, PIP_R + 2.0, Color(col, 0.35))
-			c.draw_circle(pv, PIP_R, col)
+			pip(c, pv, PIP_R + 2.0, Color(col, 0.35), foe, true)
+			pip(c, pv, PIP_R, col, foe, true)
 		St.TAKEN:
 			col = squad.darkened(0.25)
-			c.draw_arc(pv, PIP_R, 0, TAU, 20, Color(col, 0.8), 2.0, true)
+			pip(c, pv, PIP_R, Color(col, 0.8), foe, false)
 			var e := PIP_R + 2.0
 			c.draw_line(pv + Vector2(-e, e), pv + Vector2(e, -e), col, 2.5, true)
 		St.LOST:
-			col = LOST_COL
+			col = SideColor.tone("seat_lost")
 			c.draw_circle(pv, PIP_R, Color(col, 0.55))
 			c.draw_line(pv + Vector2(-3, -3), pv + Vector2(3, 3), Color(0, 0, 0, 0.7), 2.0, true)
 			c.draw_line(pv + Vector2(-3, 3), pv + Vector2(3, -3), Color(0, 0, 0, 0.7), 2.0, true)
@@ -154,6 +170,22 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	if st == St.TAKEN:
 		var nw := TextCache.width(HudStyle.BIG, s["name"], 11)
 		c.draw_line(Vector2(tx - 1, r.position.y + 12), Vector2(tx + nw + 1, r.position.y + 12), col, 1.5)
+
+## A pip: a disc for your squad or nobody, a diamond for a rival's seat; filled or an outline.
+static func pip(c: Control, pv: Vector2, r: float, col: Color, diamond: bool, fill: bool) -> void:
+	if not diamond:
+		if fill:
+			c.draw_circle(pv, r, col)
+		else:
+			c.draw_arc(pv, r, 0, TAU, 20, col, 2.0, true)
+		return
+	var k := r * 1.25
+	var pts := PackedVector2Array([pv + Vector2(0, -k), pv + Vector2(k, 0), pv + Vector2(0, k), pv + Vector2(-k, 0)])
+	if fill:
+		c.draw_colored_polygon(pts, col)
+	else:
+		pts.append(pts[0])
+		c.draw_polyline(pts, col, 2.0, true)
 
 # ------------------------------------------------------------------ the Heart Gate prompt
 ## What the carrier sees at the Gate: the live key, "Leave now: small reward", the hold bar (rules gate_hold_s),
@@ -168,11 +200,11 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var kw := TextCache.width(HudStyle.BIG, key, HudStyle.KEY_FS) + 12.0
 	var w := kw + 10.0 + mw + 26.0
 	var x := sz.x * 0.5 - w * 0.5
-	var edge := Color(Heart.GATE_COL, 0.7)
+	var edge := Color(Heart.gate_col(), 0.7)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, edge, 1), Rect2(Vector2(x, y - 22), Vector2(w, 34)))
-	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.GATE_COL)
+	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.gate_col())
 	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
-	HudStyle.strip(c, Rect2(Vector2(x + 6, y + 14), Vector2(w - 12, 4)), float(it["prog"]), Heart.GATE_COL)
+	HudStyle.strip(c, Rect2(Vector2(x + 6, y + 14), Vector2(w - 12, 4)), float(it["prog"]), Heart.gate_col())
 	var mid := sz.x * 0.5
 	var stay := stay_line(hud.m)
 	var sw := TextCache.width(HudStyle.BODY, stay, 13) + 20.0

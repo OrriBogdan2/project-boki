@@ -203,14 +203,14 @@ func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var frac := clampf(p.hp / maxf(1.0, p.max_hp), 0.0, 1.0)
 	var ch := chip_of(p, frac, dt)
 	var fl := flash_of(p)
-	HudStyle.plate_frame(c, frame, Color(HudStyle.SELF, 0.5), fl)
+	HudStyle.plate_frame(c, frame, Color(SideColor.you(), 0.5), fl)
 	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
-	var fill := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
+	var fill := HudStyle.hp_fill(SideColor.you(), frac, H.m.time)
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
 	var has_ar := _armor(c, p, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, HudStyle.SELF, pop)
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, SideColor.you(), pop)
 	var sts := statuses(p)
 	var word := ""
 	if not sts.is_empty():
