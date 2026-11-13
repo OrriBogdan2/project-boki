@@ -25,6 +25,8 @@ func _run(sec: float) -> void:
 		for h in keep:
 			h.hp = h.max_hp
 			if h.downed: m.revive_hunter(h, h)
+			if h.kin and h.kin.state == "downed":     # (a bot's rescue run would stall the timing)
+				KinDowned.come_round(h.kin, true)
 		m.step(Match.DT)
 		t += Match.DT
 
