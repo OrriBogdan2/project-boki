@@ -52,6 +52,9 @@ extends RefCounted
 ##      fallback such as "revive" fails), the stations and the duel ring play them, the count-in plays 3-2-1 and
 ##      one horn, the expanse has the full wind and a sky island less of it under its own bed, the beds sit on
 ##      the Ambience bus, and the grounds never play the match's beds
+##  24. the garden's moments (SFX_AUDIT row 22) each play their own cue, never the stock unlock: an egg laid or
+##      ready, two Boki becoming friends (once, as the bond reaches friend_at), a lean's new fleck or a part, a
+##      Crown cup on the result card, an evolution; the evolution scene, the Nook egg and the incubator name theirs
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -111,6 +114,7 @@ func run(main: Node) -> void:
 	_unwalked()
 	await _steps(main)
 	_training()
+	_garden_moments()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -689,6 +693,62 @@ func _training() -> void:
 	h.free()
 	w.free()
 	Sfx.clear_amb_layers(0.0)
+
+## 24. The garden's moments: own cues, counted through GardenSfx.heard, and no "unlock" where they play.
+func _garden_moments() -> void:
+	var cues := ["garden_egg", "garden_friends", "garden_chime_part", "garden_cup", "garden_evolve"]
+	ok(cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty()), "moments: all five cues have files")
+	var a := {"uid": "moment_a"}
+	var b := {"uid": "moment_b"}
+	BaseLife.befriended.clear()
+	var step := float(Content.rules("base_life")["friend_at"]) * 0.6
+	for i in 3:
+		BaseLife.add_bond(a, b, step)
+	ok(BaseLife.befriended == [["moment_a", "moment_b"]], "moments: friends once, as the bond reaches friend_at %s"
+			% [BaseLife.befriended])
+	BaseLife.befriended.clear()
+	var build: Dictionary = FarmUnlocks.rules()
+	var was_base: bool = build["base_mode"]
+	build["base_mode"] = true                   # leans only show on the Boki base
+	var rec := Save.new_kin("zapple", "Moment")
+	var tinted: Array = Lean.rules()["types"].keys().filter(func(t): return Lean.rules()["types"][t].has("tint"))
+	rec["lean"] = {tinted[0]: Evo.LEAN_FULL * 0.2}
+	var one := Lean.flecks(rec)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL
+	ok((one == 1 and Lean.flecks(rec) == int(Lean.rules()["marks"])),
+			"moments: a lean shows one fleck from its first meal, all at full (%d)" % one)
+	var home := {"kins": [{"rec": rec, "pos": Vector3.ZERO}]}
+	var chimes := HomeChimes.new(home)
+	chimes.tick(1.0)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL * 0.2
+	chimes.tick(1.0)
+	rec["lean"][tinted[0]] = Evo.LEAN_FULL
+	var before := int(GardenSfx.heard.get("garden_chime_part", 0))
+	chimes.tick(1.0)
+	ok(int(GardenSfx.heard.get("garden_chime_part", 0)) == before + 1,
+			"moments: a lean that shows more flecks chimes garden_chime_part once")
+	build["base_mode"] = was_base
+	var res := {"game": GardenPrizes.ids()[0], "items": [], "first": false, "round": "", "ribbon": false,
+			"reset": false}
+	var cups := int(GardenSfx.heard.get("garden_cup", 0))
+	GardenPrizes.rows(res.merged({"round": "Sprout"}, true))
+	GardenPrizes.rows(res.merged({"round": "Crown", "ribbon": true}, true))
+	ok(int(GardenSfx.heard.get("garden_cup", 0)) == cups + 1, "moments: the Crown card plays garden_cup, a round not")
+	var sites := {"base_life.gd": "garden_friends", "home_incubator.gd": "garden_egg", "garden_prizes.gd": "garden_cup",
+			"kin_bond_moment.gd": "garden_friends", "home.gd": "garden_evolve"}
+	var off := []
+	for f in sites:
+		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
+		if not src.contains("\"%s\"" % sites[f]):
+			off.append(f)
+		elif f != "home.gd" and src.contains("Sfx.play(\"unlock\""):
+			off.append(f + " unlock")
+	for fn in ["func _make_egg(", "func _play_evolutions("]:
+		var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
+		var body := src.substr(src.find(fn), src.find("\nfunc ", src.find(fn) + 1) - src.find(fn))
+		if body.contains("\"unlock\""):
+			off.append(fn)
+	ok(off.is_empty(), "moments: every site names its cue and none plays unlock %s" % [off])
 
 func _takes(sname: String) -> Array:
 	var out := []

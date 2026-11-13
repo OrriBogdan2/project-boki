@@ -46,6 +46,7 @@ var _day_t := -1.0         # the farm's day clock at the last tick (a drop means
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
 var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
+static var befriended: Array = []   # [uid, uid] pairs whose bond just reached friend_at; step() cheers them
 
 func _init(home) -> void:
 	h = home
@@ -69,14 +70,18 @@ static func note_parent(k: Dictionary, o: Dictionary, what: String) -> void:
 		if m["kind"] == "parent": return
 	Save.remember(k["rec"], "parent", "%s %s, its parent" % [what, o["rec"]["name"]], 0.5)
 
-## Moves both Boki's bond with each other by `by`, kept in -1..1.
+## Moves both Boki's bond with each other by `by`, kept in -1..1. Reaching friend_at queues the pair in befriended.
 static func add_bond(a: Dictionary, b: Dictionary, by: float) -> void:
+	var was := bond(a, b)
 	for pair in [[a, b], [b, a]]:
 		var rec: Dictionary = pair[0]
 		if not rec.has("bonds"):
 			rec["bonds"] = {}
 		var uid := String(pair[1]["uid"])
 		rec["bonds"][uid] = clampf(float(rec["bonds"].get(uid, 0.0)) + by, -1.0, 1.0)
+	var friend_at := float(Content.rules("base_life")["friend_at"])
+	if was < friend_at and bond(a, b) >= friend_at:
+		befriended.append([String(a["uid"]), String(b["uid"])])
 
 ## Where the base's toys stand (HomeToys, toys.json), for the chores that borrow one (BaseChore fetch).
 func toy_spots() -> Array:
@@ -130,6 +135,7 @@ func step(d: float) -> void:
 	for k in h.kins:
 		BaseShy.tick(h, k, dt)
 		_tick(k, dt)
+	_cheer_friends()
 	GardenVisitor.step(h, dt)
 	if h.hway:
 		h.hway.step(dt)
@@ -474,6 +480,14 @@ func _squabble(a: Dictionary, b: Dictionary) -> void:
 	add_bond(a["rec"], b["rec"], float(R["bond_squabble"]))
 	_huff(a)
 	_huff(b)
+
+## Two Boki that just became friends chime together between them, unless one of them is asleep.
+func _cheer_friends() -> void:
+	for pair in befriended:
+		var two: Array = h.kins.filter(func(k): return pair.has(String(k["rec"]["uid"])))
+		if two.size() == 2 and not (HomeChimes.asleep(two[0]) or HomeChimes.asleep(two[1])):
+			GardenSfx.cue("garden_friends", (two[0]["pos"] + two[1]["pos"]) * 0.5)
+	befriended.clear()
 
 func _huff(k: Dictionary) -> void:
 	h._emote(k, "!", true)
