@@ -1,9 +1,9 @@
 extends RefCounted
-## --garden-play-shots --hatch-auto=0 --shots-dir=<dir>: a garden-only player's first 30 minutes on a fresh save, played through the
-## real screens (docs/GARDEN_PLAY_0246.md): hatch, name, skip the combat tutorial, pet, feed, two garden games, breed,
-## hatch the egg, visit a second zone. Game time runs at TIME_SCALE; a shot every SHOT_EVERY_S of it, and one `PLAY`
-## line per step with what the player would see. Needs a renderer for the shots (jobq --needs gpu).
-## Never writes the save.
+## --garden-play-shots --hatch-auto=0 --shots-dir=<dir>: a garden-only player's first 30 minutes on a fresh save, played
+## through the real screens (docs/GARDEN_PLAY_0246.md): hatch, name, skip the combat tutorial, pet, feed, two garden
+## games, breed, hatch the egg, visit a second zone. Game time runs at TIME_SCALE; a shot every SHOT_EVERY_S of it, and
+## one `PLAY` line per step with what the player would see. Needs a renderer for the shots (jobq --needs gpu). Never
+## writes the save.
 
 const TIME_SCALE := 6.0       # game seconds per real second
 const SHOT_EVERY_S := 300.0   # game s between shots (5 min)

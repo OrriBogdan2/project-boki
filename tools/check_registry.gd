@@ -272,7 +272,7 @@ const CHECKS := {
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],      # trust from care
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],
 	"--garden-hud-groups": ["res://tools/garden_hud_groups.gd", "garden_hud_groups", null],      # day 1, 5
-	"--garden-play-shots": ["res://tools/garden_play_shots.gd", "garden_play_shots", null],      # --hatch-auto=0 --shots-dir=<dir>
+	"--garden-play-shots": ["res://tools/garden_play_shots.gd", "garden_play_shots", null],  # needs --hatch-auto=0
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],      # --zone= --shots-dir=
 	"--garden-unlock-pace-check": ["res://tools/garden_unlock_pace_check.gd", "garden_unlock_pace_check", null],
 	"--garden-zones-check": ["res://tools/garden_zones_check.gd", "garden_zones_check", null],      # GARDEN.md 10 zones
