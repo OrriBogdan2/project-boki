@@ -8,7 +8,7 @@ extends Node3D
 ## first egg and for eggs from the nest.
 ##
 ## The shell is the egg family's 3D model (EggModels: the kin's type, or rare, or mystery). Quiet on
-## purpose otherwise (docs/POSITIONING.md): no light beams, bursts, flashes or rarity badges. What makes
+## purpose otherwise: no light beams, bursts, flashes or rarity badges. What makes
 ## a Boki rare shows on the Boki itself (its colours, markings, how it moves).
 
 signal popped(kin: Node3D)     # the kin has just appeared

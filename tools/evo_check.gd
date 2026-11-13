@@ -210,13 +210,13 @@ func _migrate() -> void:
 	ok(int(a["level"]) == 18 and a["forms"] == four and int(b["level"]) == 100,
 		"migrate: levels and forms kept, 130 comes down to the cap (%d, %d)" % [int(a["level"]), int(b["level"])])
 	var names := [Evo.form_name(a), Evo.form_name(b), Evo.form_name(lost)]
-	ok(names == ["Cindrend", "Prismander", "Burrward"] and a["was"] == [],
+	ok(names == ["Vesrend", "Prismander", "Mycward"] and a["was"] == [],
 		"migrate: old form names kept %s" % str(names))
 	ok(Save.VERSION >= 12 and Save.MIGRATIONS.get(11, "") == "_migrate_11_to_12",
 		"migrate: the save is version 12 or later with an 11 -> 12 step")
 	_line("cindle", {"level": 16, "into": [{"id": "pebbit"}]})
 	var ev := Evo.on_level(a)
-	var on: bool = Evo.form_name(a) == String(Data.KIN["pebbit"]["name"]) and String(ev.get("from", "")) == "Cindrend"
+	var on: bool = Evo.form_name(a) == String(Data.KIN["pebbit"]["name"]) and String(ev.get("from", "")) == "Vesrend"
 	ok(a["species"] == "pebbit" and on,
 		"migrate: an old form evolves on, from %s to %s" % [ev.get("from", ""), Evo.form_name(a)])
 

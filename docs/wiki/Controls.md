@@ -1,9 +1,9 @@
 # Controls
 
 Every key can be rebound in **Settings > Controls**. Some keys mean different things at home and in a
-match: **B** is build mode at home and "base to a teammate" in a squad; **T** talks to a Boki at home
-is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
-ability in a match; **R** turns a piece in build mode and reloads in a match.
+match: **B** is build mode at home and "base to a teammate" in a squad; **V** plays fetch at home and is
+your second glove in a match; **C** opens a Boki's details at home; **R** turns a piece in build mode and
+is your hunter's ultimate in a match (the emote wheel is **Y**).
 
 ## In a match
 
@@ -16,12 +16,10 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | Shift | Your class's dash |
 | Space | Jump; hold it in the air to glide |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
-| Q | Your active glove |
+| Q / V | Your two gloves |
 | E | Your class's utility |
-| R | Reload (it also reloads on its own after a short idle) |
-| X | Your hunter's own ultimate (from level 6; no hero has one yet) |
-| T | Fuse with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
-| C | Your Boki's own ability: it hops off, casts and hops back |
+| R | Your hunter's own ultimate (from level 6; no hero has one yet) |
+| X | Fuse with your Boki (level 6, full bond meter). Press X again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
 | G | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | Middle mouse | Ping for your squad: on an enemy hunter a red "Enemy" ping, on loot "Loot", anywhere else the spot. With the map open, or while dropping in, it pings the point under the cursor |
 | F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
@@ -49,7 +47,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | I | Inventory |
 | Ctrl | Crouch |
 
-The Arena has its own practice keys (reset, cooldowns off, class swap...): see [Arena and training](Arena-and-Training.md).
+The Training Grounds have their own practice keys (reset, cooldowns off, class swap...): see [Training Grounds](Arena-and-Training.md).
 
 ## Every default binding
 

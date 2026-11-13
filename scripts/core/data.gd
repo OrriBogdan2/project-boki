@@ -119,7 +119,7 @@ const PERKS := {
 	"featherfall": {"name": "Featherfall", "desc": "Your glider lasts 60% longer.", "icon": "updraft", "col": Color("cfeaff"), "max": 1},
 	"scavenger": {"name": "Scavenger", "desc": "Gems you pick up are worth 25% more.", "icon": "gem", "col": Color("f2c84a"), "max": 2},
 	"toughskin": {"name": "Tough Skin", "desc": "+15 max health, healed right away.", "icon": "heart", "col": Color("8fe0a0"), "max": 3},
-	"overcharge": {"name": "Overcharge", "desc": "Your bond ultimate charges 30% faster.", "icon": "bond", "col": Color("ffd23f"), "max": 1},
+	"overcharge": {"name": "Overcharge", "desc": "Your bond meter fills 30% faster.", "icon": "bond", "col": Color("ffd23f"), "max": 1},
 	"keen": {"name": "Keen Edge", "desc": "8% more damage.", "icon": "burst", "col": Color("ff8a6a"), "max": 3, "stats": {"dmg": 0.08}},
 	"fleet": {"name": "Fleet Foot", "desc": "6% faster on foot.", "icon": "jump", "col": Color("8fd16a"), "max": 2, "stats": {"speed": 0.06}},
 	"plating": {"name": "Plating", "desc": "+20 max armor.", "icon": "fortify", "col": Color("dfe9f7"), "max": 2, "stats": {"armor": 20.0}},
@@ -420,9 +420,5 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"extract_time": 4.0,   # seconds standing in an exit's circle to leave; a hit from another hunter resets it
-	"revive_time": 3.0,
-	"kin_revive_time": 5.0,
-	"bleed": 2.5,          # downed health lost per second
-	"down_hp": 100.0,      # so about 40 seconds downed before you bleed out
+	"down_hp": 100.0,      # the pool a downed hunter bleeds out of (it drains over 15 seconds)
 }
