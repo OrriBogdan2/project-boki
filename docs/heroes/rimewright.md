@@ -224,6 +224,9 @@ Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), meas
 | Rink snap | 0.2 (f25 -> f27) | 0.2 s | unchanged |
 | Auto-crash | 3.2-3.5 | 3.52 s | unchanged |
 | Crash to recovery | 0.4 (f57 -> f61) | clip 0.4 s | unchanged |
+| Run gait (`run_*`) | a wide split every ~0.17 s (cycle 0.34 s), 4.8 m/s | cycle 1.0 s: a split every 0.5 s | cycle 0.34 s on the v95 loops: done, asserted (`--clip-check`) |
+
+The run re-time is data: `loco.run_cycle` in `content/rules/warden_anim/claire.json` scales the key times of the four v95 `run_*` loops at load (`WardenClips._retime_run`), the poses stay ours (parity is timing and weight). Her legs are not gated by `--anim-audit` (`NO_LEGS`); its foot-slide line for her at 4.65 m/s reads 4.21 m/s (90%) before and 3.86 m/s (83%) after, the clip's own foot speed 0.44 -> 0.79 m/s (a skater's stroke, not gated; `--gait-speed-check` is on the unmerged ext/anim-gait-speed, so the audit line is the measure on 0.24.5).
 
 Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%, the ult holds 3.5 s.
 
