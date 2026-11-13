@@ -6,10 +6,10 @@ extends "res://tools/hero_vfx_reel.gd"
 ## row of key caps along the bottom lights up with the keys being pressed. Frames go to <dir>/frames/NNNNN.jpg at
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
-## REEL_MARK lines give the frame each part starts on. Never writes the save.
+## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
+## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups). Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
-const EXTRA := ["dash_lmb"]             # parts played only by --reel-only (not in the shared reel's timeline)
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
 const KEYS := ["W", "A", "S", "D", "LMB", "RMB", "E", "R", "Shift", "Space"]
 const FAR := 12.0                       # m to the dummy for the moves that travel
@@ -21,6 +21,7 @@ const KEY_OFF := Color(0.1, 0.1, 0.14, 0.7)
 const RIPOSTE_TD := 3.0                 # m to the dummy in Kael's R part (inside the 3.6 m cleave strip)
 const RIPOSTE_HIT_T := 0.4              # s into the part the dummy swings: in the 0.65 s guard after the 0.2 s press
 const RIPOSTE_HP_K := 0.6               # Kael's hp share at the start of his R part, so the heal shows
+const CLOAK_TD := 3.6                   # m to the dummy in Cinder's E part: inside her 4.5 m pull
 const DUMMY_HIT := 10.0                 # the dummy's blow, when its own weapon does not land in time
 const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Hearth Call's 12.6 m reach)
 
@@ -54,10 +55,9 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in SEQUENCE + EXTRA:
-		if (only == "" and part in SEQUENCE) or part == only:
-			print("REEL_MARK %d %s" % [frames, part])
-			await Callable(self, "_p_" + part).call()
+	for part: String in (SEQUENCE if only == "" else Array(only.split(","))):
+		print("REEL_MARK %d %s" % [frames, part])
+		await Callable(self, "_p_" + part).call()
 	print("REEL_DONE %d frames in %s" % [frames, frame_dir])
 	main.get_tree().quit(0)
 
@@ -144,12 +144,26 @@ func _p_rmb() -> void:
 		P.inp["sec"] = _in(t, 0.2) or _in(t, 2.0)
 		P.inp["sec_hold"] = _in(t, 0.2, 0.7) or _in(t, 2.0, 0.7))
 
+## Standing still, no keys: what the Hunter carries at rest.
+func _p_idle() -> void:
+	await _seg("Idle", 3.0, func(_t: float) -> void: pass)
+
+## RMB held walking into the dummy (4 m off) and leaning on it, then LMB with RMB still held (Albert: no push,
+## then the boop).
+func _p_rmb_walk_lmb() -> void:
+	await _seg("RMB held, walk into the dummy; then LMB", 6.0, func(t: float) -> void:
+		P.inp["sec"] = _in(t, 0.2)
+		P.inp["sec_hold"] = _in(t, 0.2, 5.6)
+		P.inp["move"] = Vector2(1, 0) if _in(t, 0.5, 3.5) else Vector2.ZERO
+		P.inp["fire"] = _in(t, 4.4), 4.0)
+
 func _p_e() -> void:
 	if who == "ostra":
 		await _e_brimseed()
 		return
 	await _seg("E, then the recast", 4.0, func(t: float) -> void:
-		P.inp["sig"] = _in(t, 0.2) or _in(t, 1.8))
+		P.inp["sig"] = _in(t, 0.2) or _in(t, 1.8)
+	, CLOAK_TD if who == "ashwick" else 7.0)
 
 ## Motley's Brimseed grows for its `grow` s: the recast waits until it is full size, so the whole growth shows.
 func _e_brimseed() -> void:
