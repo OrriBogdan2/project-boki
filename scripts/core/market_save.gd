@@ -71,13 +71,13 @@ static func cut(price: int, rate: float) -> int:
 ## One expedition's worth of time at the market (offline): NPC buyers at your stall, bids and
 ## endings at the auction house, NPC adopters at the shelter. After a run you made it out of, also
 ## the trophies and rare materials you found. Returns lines for the results screen.
-static func tick(won: bool, bosses: int, rng: RandomNumberGenerator = null, stats := {}) -> Array:
+static func tick(won: bool, bosses: int, rng: RandomNumberGenerator = null) -> Array:
 	if rng == null:
 		rng = RandomNumberGenerator.new()
 		rng.randomize()
 	var news: Array = []
 	if won:
-		for key in Goods.on_result(bosses, rng, stats):
+		for key in Goods.on_result(bosses, rng):
 			news.append("Found: %s (%s)." % [Goods.name_of(key), Goods.rarity_name(key)])
 	for s in Stalls.tick(rng):
 		var what := Goods.name_of(s["key"], s["payload"])

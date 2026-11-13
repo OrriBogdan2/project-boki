@@ -20,6 +20,8 @@ Run: `godot --headless --path . -- --bot-kit-use[=<arch>] [--kit-use-t=120] [--k
 | Tenzo | Shift recast | Rock Hop hops after the first of a chain (`hop recast`) |
 | Cinder | E | Furnace Cloak drags foes in (`cloak pull`) |
 
+**Cinder and Gil rows.** Cinder's stream hits are tagged `flame`, so they count as LMB hits (before, the column read 1 while the bots held the stream all duel: about 900 hits a 3-seed run). Gil's bot used to press and release RMB inside one step, so no kit step saw the key down; it now holds the key `BOT_TAP` (0.1 s, still a tap) through `bot_hold` like the other kits.
+
 ## Before (origin/main d255acbee)
 
 | Hunter | LMB hits | RMB presses | RMB holds | RMB hits | E casts | E hits | R casts | Dashes | Glides | Hold / recast specials |
@@ -46,8 +48,8 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 | Vex (`gunslinger`) | 1429 | 50 | 0 | 11 | 26 | 22 | 8 | 14 | 77 |  |
 | Kael (`juggernaut`) | 506 | 106 | 6 | 160 | 20 | 10 | 14 | 45 | 66 | lunge perfect 5, chain reel 9 |
 | Lace (`archer`) | 202 | 45 | 43 | 33 | 31 | 113 | 6 | 30 | 94 |  |
-| Cinder (`ashwick`) | 1 | 55 | 0 | 50 | 33 | 0 | 6 | 23 | 84 | cloak pull 34 |
-| Meeko (`tender`) | 551 | 53 | 0 | 40 | 49 | 0 | 0 | 11 | 50 |  |
+| Cinder (`ashwick`) | 1216 | 52 | 0 | 42 | 56 | 0 | 8 | 18 | 43 | cloak pull 55 |
+| Meeko (`tender`) | 528 | 50 | 0 | 34 | 35 | 0 | 5 | 6 | 38 |  |
 | Neve (`rimewright`) | 712 | 52 | 0 | 32 | 35 | 0 | 6 | 42 | 104 | rink freeze 30, skate 20 |
 | Tenzo (`dolm`) | 150 | 17 | 16 | 0 | 5 | 0 | 1 | 51 | 173 | hop recast 21 |
 | Motley (`ostra`) | 615 | 42 | 0 | 0 | 28 | 0 | 3 | 21 | 59 |  |
@@ -62,6 +64,10 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 - **Mossy** (`bulwark_kit.gd`): the thrown hammer is recalled from the ground after 0.8 s (it used to stay out and block every other LMB); throws at a foe 3.6 m or more away; holds the Aegis 1.2 s up close so the Shift press is a Shield Charge (80% when the aegis is up); presses the ultimate at 4 to 13 m.
 - **Neve** (`rimewright_kit.gd`): the bot schedules the freeze 0.15 to 0.45 s into the wall's slide (its decision tick, 0.9 to 2.2 s, never landed inside the slide of 1 s or less).
 - **Lace** (`archer_kit.gd`): presses the ultimate at 4 to 14 m.
+- Unchanged and already fine: Tenzo's Rock Hop recasts (21), every Hunter's dash and glide.
+- **Cinder** (`ashwick_kit.gd`, `bot.gd`): the "1 LMB hit" in the Before table was mostly a counting gap: the hose's hits are tagged `flame`, which the check never counted as LMB, so it now reads the kit's `hose_hits` counter (887 ticks with the old bot). The bot also stood at 5.5 to 7 m against a 6.1 m stream, so many held ticks fell short. A kit hook `ArchKit.bot_reach()` (0 = the weapon's range) lets Cinder say her stream ends at 5.7 m: the shared bot brain closes in until the foe is inside it (preferred gap 4.2 m) and holds LMB only within it. Standing closer also puts foes in the 4.5 m Furnace Cloak more often (the existing E rule: cast when a foe is under 4 m; cloak pull 49 to 55). LMB 991 to 1216 over the same seeds.
+- **Meeko** (`tender_kit.gd`): `_bot_call` casts Hearth Call (R) on a downed teammate, or one under 35% HP, in the 11.6 m reach once no rival Hunter is within 3 m of her; with no teammate in the match (a duel) it lights the tether on herself below 70% HP, as the player's key does in solo play (R 0 to 5). The check no longer skips Meeko's ultimate. The teammate path has no duel to exercise it; `--tender-combo-check` covers the tether.
+- Open: Gil (`gil`) is new in this table's check and fails `rmb press` (0 presses; its Grab Bag is never raised by the bot). Not in this pass.
 - Unchanged and already fine: Tenzo's Rock Hop recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
 
 ## Ultimate and Boki in a match

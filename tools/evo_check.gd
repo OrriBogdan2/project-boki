@@ -12,6 +12,7 @@ const INK_RUNS := 4000            # expeditions rolled for the wild Ink rate
 const INK_SLACK := 0.015          # how far from the data's rate the rolled one may land
 
 var bad := 0
+var _main: Node
 var _added: Array = []
 
 ## Prints an EVO ok or FAIL line and counts failures.
@@ -34,6 +35,7 @@ func _kin(sp: String, lv: int) -> Dictionary:
 
 ## Runs the check and quits with 1 on any failure.
 func run(main: Node) -> void:
+	_main = main
 	Save.no_write = true
 	var old := Save.d
 	Save.d = Save.fresh()
@@ -223,22 +225,12 @@ func _inks() -> void:
 	var types := ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"]
 	var missing: Array = []
 	for t in types:
-		var named := Goods.name_of("good:ink_" + t) == String(t).capitalize() + " Ink"
+		var named := Goods.name_of("good:ink_" + t) == ("Fairy" if t == "lunar" else String(t).capitalize()) + " Ink"
 		if String(Goods.good("ink_" + t).get("kind", "")) != "ink" or not named: missing.append(t)
 	ok(missing.is_empty(), "inks: all nine Inks are market goods named '<Type> Ink' (missing: %s)" % str(missing))
-	var boss_inks: Array = []
-	for bid in Data.BOSSES:
-		if Data.MOBS[bid].has("ink"):
-			boss_inks.append(bid)
-			var ink := String(Data.MOBS[bid]["ink"])
-			ok(types.has(ink), "inks: %s drops a real Ink (%s)" % [bid, ink])
-	ok(boss_inks.has("serpent"),
-		"inks: the Sky Serpent (Wyrm) drops the Wyrm Ink (bosses with an Ink: %s)" % str(boss_inks))
+	_ink_drops(types)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
-	var got := Goods.on_result(1, rng, {"ink_wyrm": 1, "bosses": 1})
-	ok(got.has("good:ink_wyrm") and Goods.have("good:ink_wyrm") >= 1,
-		"inks: the killer's ink_wyrm stat comes home as a Wyrm Ink (%s)" % str(got))
 	var wild := 0
 	for i in INK_RUNS:
 		for key in Goods.on_result(0, rng):
@@ -247,6 +239,47 @@ func _inks() -> void:
 	var want := float(Goods.rules()["finds"]["ink"])
 	ok(absf(rate - want) < INK_SLACK and want <= 0.1,
 		"inks: wild Inks are rare, %.3f per expedition (data %.2f)" % [rate, want])
+
+## Boss and camp Inks (InkDrops): all 18 types map to a real Ink, every boss gives its kin's, a boss kill puts that
+## Ink on the ground (a backpack item that comes home as a good), camp kills rarely do.
+func _ink_drops(types: Array) -> void:
+	var map: Dictionary = InkDrops.rules()["type_ink"]
+	var themes: Array = []
+	for sp in Data.KIN.values():
+		if not themes.has(String(sp.get("theme", ""))): themes.append(String(sp.get("theme", "")))
+	var unmapped: Array = themes.filter(func(t): return not map.has(t))
+	var used: Array = map.values()
+	var all_inks: bool = used.all(func(i): return types.has(i)) and types.all(func(i): return used.has(i))
+	ok(map.size() == 18 and unmapped.is_empty() and all_inks,
+		"ink drops: the 18 types map onto all nine Inks (unmapped themes: %s)" % str(unmapped))
+	var m := Match.new()
+	_main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
+	m.set_process(false)
+	for bid in Data.BOSSES:
+		var ink := InkDrops.ink_of_boss(bid)
+		var n0 := m.wpicks.size()
+		GearDrops.run_table(m, "boss", Vector3(3, 1, 3), m.rng, {"boss": bid})
+		var item: Dictionary = Pack.ground_item(m.wpicks[-1]) if m.wpicks.size() > n0 else {}
+		ok(types.has(ink) and Loot.is_ink(item) and item["ink"] == ink,
+			"ink drops: %s's boss pile holds a %s Ink (%s)" % [bid, ink, Loot.name_of(item)])
+		var col := Color(String(Goods.good("ink_" + ink)["col"]))
+		ok(Loot.keepable(item) and Loot.sub_of(item).begins_with("Ink") and Loot.col_of(item) == col,
+			"ink drops: %s's Ink is named, coloured and carried like loot" % bid)
+	ok(InkDrops.ink_of_boss("serpent") == "wyrm", "ink drops: the Sky Serpent (Flying) gives the Wyrm Ink")
+	Save.d["goods"] = {}
+	Econ._store(Loot.ink("tide"))
+	ok(Goods.have("good:ink_tide") == 1 and Save.d["valuables"].is_empty(),
+		"ink drops: carried home, an Ink becomes a good")
+	var camp := 0
+	var wild_rate := 0.0
+	for k in (InkDrops.rules()["chance"] as Dictionary):
+		if k != "boss": wild_rate = maxf(wild_rate, float(InkDrops.rules()["chance"][k]))
+	for i in 2000:
+		camp += InkDrops.roll(m, "skitter", Vector3(i * 2, 1, 0), {}).size()
+	ok(camp > 0 and camp < 2000 * 0.02 and wild_rate <= 0.1,
+		"ink drops: camp kills drop one rarely (%d of 2000 skitters)" % camp)
+	m.queue_free()
 
 ## Bred babies roll their own sex, 50/50, whatever their parents' sexes.
 func _sex() -> void:

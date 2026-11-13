@@ -37,3 +37,6 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
 - **Expressions:** 8 faces drawn into one atlas, a decal patch on each companion's front: the sun happy / laugh / grumpy / sleep, the cloud shy / happy / sleep / cry. The game swaps cells (shaders/warden_mood_atlas.gdshader, WardenMood `faces`), driven by warden_anim/pip.json "mood": calm (sun happy, cloud shy), happy on emotes and Meeko's own moves, grumpy / cry on a hit, asleep when downed, a blink to the sleep cell.
   FX points are empties: weapon_muzzle, anchor_hang_lantern, anchor_lantern_top, anchor_palm_L, anchor_flower, anchor_tail_tip, anchor_chest, anchor_head_top.
 - **Imports:** pip.glb.import `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures VRAM compressed high quality, mipmapped, at most 2048. Normal maps through hero_toon `use_nrm` (from ext/art1-hem).
+- **Burrseed `seed` clip (ext/meeko-lane-picks, from ext/meeko-rmb-verify):** the release-hop `seed` (tools/art1/pip_clips.py)
+  went onto this appeal3 glb Blender-free with `glb_add_clips.add`, exact name `seed` (the CLI matches by prefix and would
+  also take `seed_aim`); the other 44 clips, meshes, skins and nodes are byte-identical.
