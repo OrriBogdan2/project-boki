@@ -53,6 +53,31 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | R Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
 | Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rock Hop (owner item 111), dust only (no ring or blast) | owner design |
 
+## Animation timing (Nov 10: parity pass against the footage; the ult at 10 fps)
+Measured offline: tarek.glb clips (tools/art1/tarek_clips.py) seeked to the kit's own move clock (`kmove_t`, as `WardenClips`
+does), blend in 0.1 s, out to locomotion 0.16 s. "Hit" is the release or contact key, "end" when the pose settles. Source times
+from briefs/hero-ref/breah.md. The sheet's main footage is 4 fps (one frame 0.25 s, so +-0.12 s), not the 5 fps of the brief;
+the ult is 10 fps (0.1 s). Every move below is within that resolution (or an owner override), so nothing was retimed; the numbers are pinned by `anim tarek: ...` in `--dolm-combo-check` (tools/parity_pvb.gd `_tarek_timing`).
+
+| Move | Source | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| Boulder tap `breah_throw` | side hurl, no long wind-up; 1 a 2-3 frames (0.6 s) [0108] | shot leaves 0.0, cock 0.07, fling 0.13, settled 0.24 / 0.55 | same | matches (the fling sits inside the 0.1 s blend, half a frame) |
+| Held punch `breah_wind` | gauntlet drawn back at the hold start; release about 0.75 s later [0118-0121] | pose from the tap time (0.28 s), full by 0.38; held from 0.24 of the clip; full charge 0.9 | same | matches (one frame) |
+| Punch release `breah_punch` | straight drive, a step of about 0.5 bh [0121] | drives at 0.05 / 0.12 over / 0.6; step 0.6 m, rate 0.7 s | same | matches |
+| Held slam `breah_crouch` | crouch, fists glowing; charge about 1.0-1.5 s | crouch at 0.08, held from 0.16; full charge 0.45 s | same | owner item 61 (shorter charge) |
+| Slam hop `breah_slam` | a quick hop and smash | smash key 0.6 = the hop's flight (2 x 4.4 / 14.7 = 0.60) / 1.36 | same | owner item 61 (a longer, readable hop); asserted |
+| Leap `breah_leap` (jump while charging) | leap forward with the circle [card] | leap pose at 0.1, held from 0.3 | same | matches |
+| Slam out of a glide `breah_dive` | not in the footage | dive pose at 0.12, held from 0.3; plunge at 32.5 m/s | same | no source (owner) |
+| Stone Row `breah_raise` | a stomp, a red flash first [footage] | tell 0.2; clip smash 0.18 / 0.95 | same | matches; asserted |
+| Basalt Spine tap / drag `breah_spine`, `breah_spine_aim` (10 fps) | cracks, then the rocks rise | aim pose 0.12 (held); cracks 0.2 (clip 0.1), rise 0.4 / 1.0 | same | matches (within 0.1 s) |
+| Rock Hop `breah_hop`, `breah_skate`, `breah_exdash` | one dash, 0.42-0.45 s, rock spawned by 0.05 [footage] | hop 0.26 s (clip 0.28), skid 0.3 s (clip 0.3), 3 hops; air dash 0.23 | same | owner item 111 (three hops); hop and skid clips asserted |
+| Run cadence | cadence 1.0, a medium's | clip 0.533 s a cycle at any speed in 2.2-5.0 m/s; a medium at 4.7 m/s takes 0.628 s (2.15 rad a metre), so 16% quick | main's WardenGait (`loco.stride`, `loco.foot_mps`, 0.539 s a cycle at 4.7 m/s) replaced this branch's `loco.cadence` 0.85 (0.627 s) | open: planted feet over the footage's step rate; 14% quick of a medium's, asserted as a range |
+
+Suggestions (ours, not built): the throw's fling key (0.13 s) is half-blended by the 0.1 s fade; starting `breah_throw`
+0.08 s in would show the full fling on the release. The run: if the footage's step rate matters more than the planted foot,
+a `cadence` multiplier on `WardenGait.plan` (0.85 gave 0.627 s, a medium's) is the one-line alternative; the cleaner fix is
+re-keying `RUN_T` in tarek_clips.py (needs Blender, not on this box).
+
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/tarek_ostra_claire.md. (a) done on this branch, (b) fixed now, (c) not applied, with
 the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glide slam: ...`, `small: ...`).
