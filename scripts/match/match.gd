@@ -4457,7 +4457,8 @@ const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide
 	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
 	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
 	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
-	["ledge", "Dash off an edge and float back up", ""]]
+	["ledge", "Dash off an edge and float back up", ""],
+	["dodge", "Dodge the Strafer's red shot 3 times: dash (%s) through it or out of it", "dash"]]
 var train := {}
 var train_t := 0.0
 
@@ -4532,6 +4533,7 @@ func _update_training(dt: float) -> void:
 		"smash": train.get("_smash", false),
 		"stagger": train.get("_stagger", false),
 		"weapon": train.get("_weapon", false),
+		"dodge": arena != null and arena.drill.done,
 	}
 	train["_ult_full"] = player.ult >= 0.99
 	train["_tonics"] = player.tonics
