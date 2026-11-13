@@ -5,6 +5,8 @@ extends RefCounted
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
+## teammate's quieter than a rival's, your own one level wherever the camera is.
 
 var main: Node
 var fails := 0
@@ -51,6 +53,7 @@ func run(main_node: Node) -> void:
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
 	_ult_cues(m, P)
+	_steps(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
@@ -97,6 +100,49 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(P.ak)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+
+## Footsteps by distance, both the foot's contact step and the surface step (Juice.footstep).
+func _steps(m: Match, P: Hunter) -> void:
+	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team)[0]
+	var far := StepReach.RIVAL_M + 5.0
+	Sfx.listener = P.pos
+	ok(not is_nan(_step_db(R, P, 15.0, true)) and not is_nan(_step_db(R, P, 15.0, false)),
+			"a rival's footsteps (contact and surface) are heard 15 m away, seen or not (unseen %s)" % R.unseen)
+	ok(is_nan(_step_db(R, P, far, true)) and is_nan(_step_db(R, P, far, false)),
+			"...and not at their reach + 5 m (%.0f m)" % far)
+	R.crouch = true
+	var sneak := StepReach.reach(R)
+	ok(sneak < StepReach.RIVAL_M and is_nan(_step_db(R, P, 15.0, true)) and is_nan(_step_db(R, P, 15.0, false)),
+			"a sneaking rival's steps carry %.0f m, not %.0f m: not heard 15 m away" % [sneak, StepReach.RIVAL_M])
+	ok(not is_nan(_step_db(R, P, sneak - 2.0, true)), "...but heard %.0f m away" % (sneak - 2.0))
+	R.crouch = false
+	var rival := _step_db(R, P, 10.0, true)
+	var team := R.team
+	R.team = P.team
+	var mate := _step_db(R, P, 10.0, true)
+	R.team = team
+	ok(mate < rival - 3.0, "a teammate's step 10 m away is quieter than a rival's (%.1f vs %.1f dB)" % [mate, rival])
+	var own_near := _step_db(P, P, 0.0, true)
+	Sfx.listener = P.pos + Vector3(15, 0, 0)
+	var own_far := _step_db(P, P, 0.0, true)
+	Sfx.listener = P.pos
+	ok(not is_nan(own_near) and is_equal_approx(own_near, own_far),
+			"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far])
+
+## The level (dB) of one step of h placed `d` m from P along x (h == P: where P stands), NAN when nothing played.
+## contact: the foot's plain step (StepReach.contact), else the surface step (Juice.footstep).
+func _step_db(h: Hunter, P: Hunter, d: float, contact: bool) -> float:
+	if h != P:
+		h.pos = P.pos + Vector3(d, 0, 0)
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	if contact:
+		StepReach.contact(h)
+	else:
+		Juice.footstep(h)
+	if not Sfx.last_played.keys().any(func(k): return String(k).contains("step")):
+		return NAN
+	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].volume_db
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on
