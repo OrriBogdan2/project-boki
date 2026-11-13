@@ -3013,6 +3013,7 @@ var cast_slot := ""
 func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
 	if caster == self:
 		MergeAugment.on_used(self, slot)          # a merge form's add-ons on RMB, E and Shift
+		if m: HostileCue.on_used(self, slot)      # a rival's E or R sounds like a threat
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot
