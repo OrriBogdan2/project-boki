@@ -2,7 +2,8 @@ extends RefCounted
 ## --family-tree-check (GARDEN_MODERN.md section 5 rank 8): the Family tab reads the saved lineage. A bred
 ## grandchild shows both generations (parents, grandparents, with name and type), wild-caught Boki show "wild",
 ## a parent you no longer have shows by name, the mentor's gift and the nest items used at the egg are listed,
-## clicking an ancestor you own opens its card, and all of it survives a save round trip.
+## clicking an ancestor you own opens its card, a wild visitor's egg shows the visitor as a
+## parent, and all of it survives a save round trip.
 ## Never touches the real save.
 
 var bad := 0
@@ -105,6 +106,26 @@ func run(m: Node) -> void:
 	ok(opened == [kid["uid"]], "clicking an owned ancestor opens its card")
 	left.free()
 	right.free()
+	# ---- a wild visitor's egg: the wild parent shows with its species, zone and day; an old egg shows wild only
+	var from := {"sp": "cindle", "zone": "hushwood", "day": 12}
+	var vegg := Incubator.add("cindle", "", from)
+	ok(Incubator.find(String(vegg["id"])).get("visitor") == from, "a cradled egg keeps who left it")
+	Incubator.find(String(vegg["id"]))["heat"] = Incubator.HEAT_NEED
+	var vbaby := Incubator.hatch(rng)
+	var vp: Array = FamilyView.parents(vbaby)
+	var states: Array = vp.map(func(s): return s["state"])
+	ok(states == [FamilyView.VISITOR, FamilyView.WILD], "the visitor's baby: the visitor and a wild parent")
+	var shown: bool = vp[0]["note"] == "wild visitor, Hushwood, day 12" and vp[0]["rec"]["species"] == "cindle"
+	ok(shown, "its species, zone and day")
+	var line := "hatched from the egg a wild Vespyx left in Hushwood on day 12"
+	ok(Incubator.born_line(vbaby, "") == line, "one memory line tells the day")
+	var oegg := Incubator.add("cindle", "")
+	Incubator.find(String(oegg["id"]))["heat"] = Incubator.HEAT_NEED
+	var obaby := Incubator.hatch(rng)
+	var old_wild: bool = FamilyView.parents(obaby).all(func(s): return s["state"] == FamilyView.WILD)
+	ok(old_wild, "an egg without the data shows wild only")
+	ok(Incubator.born_line(obaby, "").begins_with("hatched from a Rare Egg"), "and keeps the boss-egg line")
+	Save.d["roster"].append(vbaby)
 	# ---- save round trip
 	var back: Dictionary = JSON.parse_string(JSON.stringify(Save.d))
 	Save.migrate(back)
@@ -116,6 +137,8 @@ func run(m: Node) -> void:
 	var g2s: Array = FamilyView.grandparents(g2)
 	var same: bool = _names(g2s[0]) == ["Ash", "Bri"] and g2s[1][0]["state"] == FamilyView.WILD
 	ok(same, "round trip: both generations, wild parents")
+	var vback: Dictionary = FamilyView.parents(Save.kin(String(vbaby["uid"])))[0]
+	ok(vback["note"] == "wild visitor, Hushwood, day 12", "round trip: the visitor parent")
 	Save.d = keep
 	print("FAMILYTREE done, %d failed" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)

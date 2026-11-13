@@ -7,8 +7,8 @@ extends RefCounted
 ## meshes whose names say weapon, prop or similar are left out), plus the head-top anchor when the model has one.
 ## --list-meshes prints every mesh with its own skinned top. Needs a renderer.
 
-const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright",
-	"mage", "thief", "ostra", "gil"]
+const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage",
+	"dredge", "tender", "thief", "ostra", "gil"]
 const GAP := 2.0              # m between Hunters (centre to centre)
 const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
 const CAM_DIST := 23.0

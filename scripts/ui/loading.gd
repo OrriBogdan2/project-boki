@@ -1,7 +1,8 @@
 extends CanvasLayer
 ## The screen between home and an expedition: your Hunter's splash, the map name over one mode line,
-## your squad, a spinner with the stage being worked on over one progress bar, and one tip. The match
-## builds in short slices between frames (see Match._slice and World._slice), so the spinner keeps
+## your squad, a spinner with the stage being worked on over one progress bar, and one tip. The bar
+## follows the real load stages (the build, then the shader warm-up) and only ever moves forward. The
+## match builds in short slices between frames (see Match._slice and World._slice), so the spinner keeps
 ## turning the whole way.
 
 signal shown
@@ -51,6 +52,10 @@ const FACE_FRAC := 0.09     # a squad portrait's side as a fraction of the scree
 const TIP_W := 900.0        # px, the widest the tip runs before it wraps
 const SHADE := Color(0.05, 0.035, 0.08)    # the dark the splash fades into under the text
 
+const SKY_TINT := 0.45     # how much of the tier's sky gradient lies over the splash (0..1)
+const BAR_MIN_SPEED := 0.9  # bar share per second, at least, so it never sits still while the load works
+const BAR_CATCH_UP := 6.0   # the bar closes this many times its gap per second (eases out into each stage)
+
 var c: Control
 var t := 0.0
 var prog := 0.0          # what the bar shows
@@ -61,6 +66,8 @@ var title := ""          # the map's name (the tutorial's and training's own nam
 var mode_line := ""      # tier, squad size, count and raid condition ("" off expeditions)
 var tip := ""
 var party: Array = []    # your squad, [{name, arch, you}] (Prematch.squad_of)
+var arch := ""           # the Hunter whose splash fills the screen
+var splash_path := ""    # that splash's file ("" when the Hunter has none)
 var splash: Texture2D    # your Hunter's splash art (null if it has none)
 var shade_tex: GradientTexture2D
 var stage_label := "Building the map"
@@ -81,8 +88,9 @@ func setup(opts: Dictionary) -> void:
 		party = Prematch.squad_of(opts, mine)
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
 	tip = tips[randi() % tips.size()]
-	var path := Portraits.art_path(mine, true)
-	splash = load(path) if path != "" else null
+	arch = mine
+	splash_path = Portraits.art_path(mine, true)
+	splash = load(splash_path) if splash_path != "" else null
 	var g := Gradient.new()
 	g.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
 	g.colors = PackedColorArray([Color(SHADE, 0.0), Color(SHADE, 0.7), Color(SHADE, 0.92)])
@@ -122,8 +130,19 @@ func _process(delta: float) -> void:
 		fade = minf(1.0, fade + delta / FADE_IN_T)
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
-	prog = move_toward(prog, want, delta * maxf(0.9, (want - prog) * 6.0))
+	prog = move_toward(prog, want, delta * maxf(BAR_MIN_SPEED, (want - prog) * BAR_CATCH_UP))
 	c.queue_redraw()
+
+## A real load stage reached (0..1 of the whole load): the bar's target only ever moves forward, so a
+## stage reporting less than an earlier one changes nothing.
+func advance(frac: float) -> void:
+	want = maxf(want, clampf(frac, 0.0, 1.0))
+
+## Move the bar to a stage (0..1) and wait until it gets there.
+func step(frac: float) -> void:
+	advance(frac)
+	while prog < want - 0.01 and is_inside_tree():
+		await get_tree().process_frame
 
 ## The match is built and drawn: the bar fills at once and the screen goes, with nothing to wait out
 ## (playtest 11-09: players were held on a full bar). The ink covers it, then sweeps off the match.
@@ -151,7 +170,7 @@ func _draw() -> void:
 	var a := fade
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(UI.BG, a))
 	if splash:
-		c.draw_texture_rect(splash, _covered(splash.get_size(), sz), false, Color(1, 1, 1, a))
+		c.draw_texture_rect_region(splash, Rect2(Vector2.ZERO, sz), Portraits.region(arch, splash_path, splash.get_size(), sz), Color(1, 1, 1, a))
 	c.draw_texture_rect(shade_tex, Rect2(0, sz.y * 0.35, sz.x, sz.y * 0.65), false, Color(1, 1, 1, a))
 	var m := maxf(24.0, sz.y * MARGIN_FRAC)
 	var tw := minf(TIP_W, sz.x - 2.0 * m)
@@ -172,11 +191,6 @@ func _draw() -> void:
 		base -= 30.0
 	_text(Vector2(m, base), title, UI.big, maxi(36, int(sz.y * TITLE_FRAC)), Color(UI.INK, a), HORIZONTAL_ALIGNMENT_LEFT)
 	_squad_row(Vector2(sz.x - m, br.position.y - 62.0), clampf(sz.y * FACE_FRAC, 64.0, 100.0), a)
-
-## The rect that covers `area` with a picture of size `pic`, centred (the picture keeps its aspect).
-func _covered(pic: Vector2, area: Vector2) -> Rect2:
-	var k := maxf(area.x / pic.x, area.y / pic.y)
-	return Rect2((area - pic * k) * 0.5, pic * k)
 
 ## Your squad's portraits with their names under them, right-aligned to `p` (the names' baseline).
 func _squad_row(p: Vector2, px: float, a: float) -> void:

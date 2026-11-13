@@ -29,6 +29,7 @@ const DIM := Color(0.55, 0.55, 0.6, 0.8)        # a roster tile you can't pick (
 var pm: Prematch
 var voice := VoiceChat.new()
 var caption: Label            # over the countdown: whose turn it is
+var note_label: Label         # under the countdown: the first-lobby teach (empty otherwise)
 var timer_label: Label
 var hero_art: TextureRect     # the shown Hunter's splash, behind everything
 var hero_name: Label
@@ -65,7 +66,7 @@ func setup(opts: Dictionary) -> void:
 ## The layout: the shown Hunter's splash fills the screen; the squad and the countdown on top, the
 ## Hunter's name, role and ability icons low on the left, the roster on the right, chat and Lock in under it.
 func _ready() -> void:
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.color = UI.BG
@@ -108,6 +109,8 @@ func _ready() -> void:
 	right.add_child(lock_btn)
 	_talk(false)
 	_fit_safe_area()
+	if pm.first:
+		Prematch.mark_first_seen()
 	pm.turn_done.connect(_on_turn_done)
 	_tick_label()
 	Net.message.connect(_on_msg)
@@ -142,6 +145,9 @@ func _top_bar() -> Control:
 	timer_label = _outlined(UI.label("", TIMER_SIZE, UI.INK, UI.big))
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.add_child(timer_label)
+	note_label = _outlined(UI.label("", 18, UI.GOOD, UI.semi))
+	note_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	banner.add_child(note_label)
 	var right := Control.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -228,6 +234,7 @@ func _tick_label() -> void:
 		caption.text = "YOUR TURN"
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
+	note_label.text = pm.teach_line()
 	var mine := pm.my_turn() and not pm.locked
 	if s != _last_sec:
 		_last_sec = s
@@ -261,16 +268,16 @@ func _fit_safe_area() -> void:
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not e is InputEventKey or e.echo or chat_in.has_focus() or pm.locked:
 		return
-	if e.pressed and e.physical_keycode in [KEY_ENTER, KEY_KP_ENTER]:
+	if e.pressed and e.is_action("confirm"):
 		_show_chat_line(true)
 		get_viewport().set_input_as_handled()
-	elif e.physical_keycode == KEY_V and talk_btn.visible:
+	elif e.is_action("push_to_talk") and talk_btn.visible:
 		_talk(e.pressed)
 
-## Push-to-talk: the button (hold) or V. The transport is VoiceChat's; none ships yet.
+## Push-to-talk: the button (hold) or the push_to_talk key. The transport is VoiceChat's; none ships yet.
 func _talk(on: bool) -> void:
 	voice.set_talking(on)
-	talk_btn.text = "Speaking..." if on else "Hold to talk (V)"
+	talk_btn.text = "Speaking..." if on else "Hold to talk (%s)" % Settings.key_cap("push_to_talk")
 
 # ------------------------------------------------------------------ hero, roster and squad
 func _refresh() -> void:
@@ -348,8 +355,8 @@ func _tile(ak: String, px: float) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 4, Arch.color(ak))
 	card.add_child(ClassCard.portrait(ak, px))
-	card.tooltip_text = "%s  ·  %s\n%s\n%s" % [HeroTitle.base_name(ak), Arch.def(ak)["card"]["role_word"],
-		HunterViewer.stat_line(ak), ClassCard.kit_tip(ak)]
+	card.tooltip_text = "%s  ·  %s\n%s\n%s\n%s" % [HeroTitle.base_name(ak), Arch.def(ak)["card"]["role_word"],
+		HunterViewer.stat_line(ak), "\n".join(ClassCard.howto_lines(ak)), ClassCard.kit_tip(ak)]
 	if not open:
 		card.add_child(Padlock.new())
 		card.tooltip_text = "Locked: %s\n%s" % [ClassUnlock.requirement(ak), card.tooltip_text]
@@ -395,12 +402,28 @@ func _fill_squad() -> void:
 		var state := "Picking..." if m == now else "Waiting"
 		var shown := Arch.label(ak) if Arch.exists(ak) else state
 		v.add_child(UI.label(shown, UI.T_SMALL, UI.GOLD if m == now else UI.MUTED))
+		if not you and not bool(m["bot"]):
+			h.add_child(_mute_button(String(m["name"])))
 		squad_box.add_child(chip)
 	talk_btn.visible = voice.available() and pm.squad.any(func(m): return not m["you"] and m.get("peer", "") != "")
 
 # ------------------------------------------------------------------ chat and picks
+## The squad row's Mute button: silences that teammate's chat and voice for you, this session.
+func _mute_button(who: String) -> Button:
+	var b := UI.button("", Callable())
+	var refresh := func() -> void: b.text = "Muted" if MuteList.has(who) else "Mute"
+	refresh.call()
+	b.pressed.connect(func():
+		MuteList.toggle(who)
+		refresh.call()
+		for l in chat_log.get_children():
+			if l.get_meta("who", "") == who:
+				l.visible = not MuteList.has(who))
+	return b
+
 func _add_chat(who: String, text: String, col: Color) -> void:
 	var l := UI.para("%s: %s" % [who, text], UI.T_BODY, col)
+	l.set_meta("who", who)
 	chat_log.add_child(l)
 	chat_scroll.visible = true
 	await get_tree().process_frame
@@ -443,7 +466,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 	if not _teammate(from):
 		return
 	if topic == "chat":
-		_add_chat(String(data.get("name", "Hunter")), Prematch.clean_chat(String(data.get("t", ""))), UI.INK)
+		var who := String(data.get("name", "Hunter"))
+		if not MuteList.has(who):
+			_add_chat(who, Prematch.clean_chat(String(data.get("t", ""))), UI.INK)
 	elif topic == "pick" and pm.remote_pick(from, String(data.get("arch", "")), bool(data.get("final", false))):
 		_refresh()
 

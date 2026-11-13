@@ -188,15 +188,13 @@ static func mesh(id: String) -> ArrayMesh:
 	var ps := scene(id)
 	if ps:
 		var root := ps.instantiate() as Node3D
-		var st := SurfaceTool.new()
-		var any := false
+		var parts: Array = []
 		for mi in _mesh_nodes(root):
 			var tr := _rel(mi, root)
 			for s in mi.mesh.get_surface_count():
-				st.append_from(mi.mesh, s, tr)
-				any = true
-		if any:
-			am = _smooth_tangents(st.commit())
+				parts.append([MeshArrays.of(mi.mesh, s), tr])
+		if not parts.is_empty():
+			am = _smooth_tangents(MeshArrays.merged(parts))
 		root.free()
 	_meshes[id] = am
 	return am
@@ -214,18 +212,19 @@ static func part(id: String, node_name: String) -> Array:
 		var root := ps.instantiate() as Node3D
 		var n := root.find_child(node_name, true, false)
 		if n is MeshInstance3D and (n as MeshInstance3D).mesh:
-			var st := SurfaceTool.new()
-			for s in (n as MeshInstance3D).mesh.get_surface_count():
-				st.append_from((n as MeshInstance3D).mesh, s, Transform3D.IDENTITY)
-			out = [_smooth_tangents(st.commit()), _rel(n, root)]
+			var m := (n as MeshInstance3D).mesh
+			var parts: Array = []
+			for s in m.get_surface_count():
+				parts.append([MeshArrays.of(m, s), Transform3D.IDENTITY])
+			out = [_smooth_tangents(MeshArrays.merged(parts)), _rel(n, root)]
 		root.free()
 	_meshes[key] = out
 	return out
 
 ## Stores, in each vertex's tangent, the average normal of every face meeting at its position, for
-## the outline shell (shaders/outline_smooth.gdshader). The shading still uses the flat normals.
-static func _smooth_tangents(src: ArrayMesh) -> ArrayMesh:
-	var arrs := src.surface_get_arrays(0)
+## the outline shell (shaders/outline_smooth.gdshader), and builds the mesh from those arrays (kept,
+## so nothing reads it back). The shading still uses the flat normals.
+static func _smooth_tangents(arrs: Array) -> ArrayMesh:
 	var verts: PackedVector3Array = arrs[Mesh.ARRAY_VERTEX]
 	var norms: PackedVector3Array = arrs[Mesh.ARRAY_NORMAL]
 	var acc := {}
@@ -238,9 +237,7 @@ static func _smooth_tangents(src: ArrayMesh) -> ArrayMesh:
 		n = n.normalized() if n.length() > 0.0001 else norms[k]
 		tan[k * 4] = n.x; tan[k * 4 + 1] = n.y; tan[k * 4 + 2] = n.z; tan[k * 4 + 3] = 1.0
 	arrs[Mesh.ARRAY_TANGENT] = tan
-	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+	return MeshArrays.build([arrs])
 
 static func _mesh_nodes(n: Node) -> Array:
 	var out: Array = []
