@@ -4815,10 +4815,10 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 			h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			top.add_child(h)
 	dv.add_child(top)
+	dv.add_child(NookPreview.card(a, b, get_tree()))
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
-	NookRules.preview(dv, a, b)
 	NestItemRows.add(dv, a, b, _open_nook)
 	var br := UI.hbox(8)
 	br.add_child(UI.ghost("Clear picks", func(): nook_pick = []; _open_nook()))
@@ -4921,7 +4921,9 @@ func _nest_demo(which: String) -> void:
 	match which:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
-		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"pair":
+			pa["lean"] = {"ember": 6.0, "storm": 2.0}
+			nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"egg":
 			ppos = NEST_AT + Vector3(0, 0, 2.2)
 			player.position = ppos
