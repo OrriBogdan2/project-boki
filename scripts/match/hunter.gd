@@ -81,7 +81,6 @@ var ammo := 12
 var reload_t := 0.0
 var fire_cd := 0.0
 var dashes := 2.0
-var roll_t := 0.0
 var roll_dir := Vector2.ZERO
 var inv_t := 0.0
 var coyote := 0.0
@@ -91,9 +90,6 @@ var mantle_cd := 0.0
 var carry_v := 0.0             # m/s: how fast you were just going (MantleCarry, item 185b)
 var carry_dir := Vector2.ZERO
 var carry_mini := {}           # a mantle's held speed just after the lip (MantleCarry)
-## The ledge rise (SUPERVIVE's ledge float): {lip, n (into the wall), t, max_t, at, face (start
-## point), g0 (glide held when it began), downed, win (timing window opened)}. See _ledge_rise.
-var lfloat := {}
 var grap_cd := 0.0
 var grap: Dictionary = {}       # floating back up a ledge
 var push_t := 0.0
@@ -188,8 +184,23 @@ var wallstun := 0.0           # how long the next wall slam stuns (Haymaker make
 var land_t := 0.0
 var ghost_t := 0.0
 var step_t := 0.0
-var gliding := false
-var loco := Loco.machine()       # the locomotion state (Loco.S): opening the glider asks it
+var moves := HunterLoco.new(self)    # owns the locomotion state (Loco.S) and the data of the move it is in
+var loco: Fsm = moves.fsm
+## Views of the locomotion state; a write asks moves for the transition (HunterLoco).
+var gliding: bool:
+	get: return loco.state == Loco.S.GLIDING
+	set(v): moves.set_glide(v)
+var roll_t: float:              # s left of the dash or kit rush (negative: its overrun)
+	get: return moves.dash_left
+	set(v): moves.set_dash(v)
+var knock_t: float:
+	get: return moves.knock_left
+	set(v): moves.knock_left = v
+## The ledge rise (SUPERVIVE's ledge float): {lip, n (into the wall), t, max_t, at, face (start
+## point), g0 (glide held when it began), downed, win (timing window opened)}. See _ledge_rise.
+var lfloat: Dictionary:
+	get: return moves.ledge
+	set(v): moves.set_ledge(v)
 var glide_fuel := 1.0          # shown as glider heat: 1 = cool, 0 = overheated
 var shot_down := false         # knocked out of an overheated glide: stunned when you land
 var below_lip := false         # dropped below the nearest island's edge, over the abyss
@@ -739,8 +750,7 @@ func _render_balloon(delta: float) -> void:
 
 ## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
-## pops you into the air unless the attack says so.
-var knock_t := 0.0
+## pops you into the air unless the attack says so. knock_t (HunterLoco.knock_left) is how long it lasts.
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
 func impulse(kbv: Vector2, lift := -1.0) -> void:
@@ -875,28 +885,12 @@ func _dash_into_glide() -> bool:
 		_glide_boost_fx()
 	return true
 
-## The locomotion state this step (Loco.S), from the timers and flags the moves set. loco.go() records it each
-## step; opening the glider asks it first, so a glide from the ground, a knock or a stun is refused.
-func _loco_state() -> int:
-	if stun_t > 0.0:
-		return Loco.S.STUNNED
-	if knock_t > 0.0:
-		return Loco.S.KNOCKED
-	if roll_t > 0.0:
-		return Loco.S.DASHING
-	if gliding:
-		return Loco.S.GLIDING
-	if not lfloat.is_empty() or mantling():
-		return Loco.S.MANTLING
-	return Loco.S.GROUNDED if grounded else Loco.S.AIRBORNE
-
 func _open_glider() -> void:
-	if not loco.go(Loco.S.GLIDING):
+	if not moves.open_glider():
 		return
-	gliding = true
 	_glide_armed = false
 	grounded = false
-	_glider_sfx("open")
+	glider_sfx("open")
 	vel.y = Loco.glide_start(vel.y)
 	glide_lift.open_kick(self)
 
@@ -912,7 +906,7 @@ func _glide_boost_fx() -> void:
 		m.cam.pull_back(0.12)
 
 ## The glider's open/close sound for this hunter's glider skin (quieter, and positional, for everyone else).
-func _glider_sfx(which: String) -> void:
+func glider_sfx(which: String) -> void:
 	var skin := "classic"
 	if model and model.has_node("Rig/Torso/Glider"):
 		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
@@ -2329,8 +2323,7 @@ func _physics(dt: float) -> void:
 				safe_pos = pos
 	_unclip()
 	_try_ledge_grab(dt)
-	loco.go(_loco_state())
-	loco.tick(dt)
+	moves.settle(dt)
 	if is_local():
 		Loco.report(loco, Vector2(vel.x, vel.z), vel.y, GLIDE_SPEED if gliding else spd)
 	if _in_abyss():
@@ -2396,7 +2389,7 @@ func _deploy() -> void:
 	# (movefeel) the canopy bites: your fall checks hard (DEPLOY_POP), then settles to the drop's sink
 	vel.y = maxf(vel.y, DEPLOY_POP)
 	m.sfx("glide", pos, -2.0)
-	_glider_sfx("open")
+	glider_sfx("open")
 
 ## Using a heal in the air: the glider folds (it can't be held while you drink; a fresh glide press
 ## opens it after a beat and spills what's left). The opening drop never gets here (AirLimits).
@@ -2404,7 +2397,7 @@ func _fold_for_action() -> void:
 	if gliding and not dropping:
 		gliding = false
 		glide_cd = maxf(glide_cd, 0.4)
-		_glider_sfx("close")
+		glider_sfx("close")
 
 ## Knocked out of a drink, a repair or a box revive: it spills (nothing is used up) and everyone sees it.
 func _interrupt_consume() -> void:
@@ -2470,7 +2463,7 @@ func _update_glide(dt: float) -> void:
 		if not want or not can:
 			gliding = false
 			glide_off_t = 0.0 if want == false and can else 9.0     # (feathering) a let-go, not a knock
-			_glider_sfx("close")
+			glider_sfx("close")
 		elif not in_current:
 			# heat builds faster while the glider is lifting you out of the abyss
 			# [footage] ~1s of lift burns a quarter; (feathering) a short tap's impulse costs less
@@ -2486,12 +2479,12 @@ func _update_glide(dt: float) -> void:
 			and jump_at != m.time and not AirLimits.glide_locked(self):      # (the press that jumped is not also a glide press)
 		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
 		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
-		gliding = true
+		moves.open_glider()
 		_glide_armed = false
 		if below_lip:
 			m.sfx("glide", pos, -2.0, 1.4)
 			add_stat("feathers")
-		_glider_sfx("open")
+		glider_sfx("open")
 		vel.y = Loco.glide_start(vel.y)
 		glide_lift.open_kick(self)
 
