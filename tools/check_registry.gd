@@ -530,6 +530,7 @@ const CHECKS := {
 	"--sfx-remote-check": ["res://tools/sfx_remote_check.gd", "sfx_remote_check", null],     # 2 games, relay
 	# + a server, delay
 	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],
+	"--online-rocket-check": ["res://tools/online_rocket_check.gd", "online_rocket_check", null],      # drop, 2 games
 	# 2 games, laggy relay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],
 	"--blocker-check": ["res://tools/blocker_check.gd", "hero_pair_check", null],      # docs/ABILITIES.md blockers

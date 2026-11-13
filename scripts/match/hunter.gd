@@ -1847,6 +1847,7 @@ func sim(dt: float) -> void:
 				vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
+			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
 			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
 		return
@@ -2432,10 +2433,12 @@ func _update_glide(dt: float) -> void:
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
+		var pull: bool = DropFeel.pulls(inp, _glide_btn_held) and ctrl != "bot"
+		_glide_btn_held = inp.get("glide_btn", false)
 		if diving:
 			var void_below: bool = m.world.is_void(pos.x, pos.z)
 			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (inp.get("glide", false) and ctrl != "bot"):
+			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or pull:
 				_deploy()
 		if pos.y < -1.5:
 			dropping = false
