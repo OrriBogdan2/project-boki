@@ -6,8 +6,8 @@ extends RefCounted
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
 ## Every Hero's "air_legs" moves, played in the air, keep the fall's legs (no planted stance), and a landing before the
 ## move ends keeps them on the legs' own layer (no snap into the stance).
-## Every Hero with clips (WardenAirTilt): its dive clip is in the .glb, a plunge turns it head-down, a glider turn leans
-## it into the turn, and on the ground the .glb is back in its own place.
+## Every Hero with clips (HunterAnim's AIR_TILT, WardenClips._air_tilt): its dive clip is in the .glb, a plunge
+## turns it head-down, a glider turn leans it into the turn, and on the ground the tilt is gone.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -473,7 +473,8 @@ func _air(id: String) -> void:
 	ok(lean.x < up.x - 0.15, "%s: a glider turn leans it into the turn (spine x %.2f, straight %.2f)" % [art_name,
 			lean.x, up.x])
 	_play(m, an, sync, {"vel": Vector3.ZERO, "face": float(turn["face"]), "grounded": true}, 60)
-	ok(w.transform.is_equal_approx(sync.clips.tilt.rest), "%s: on the ground the body is upright again" % art_name)
+	var q: Quaternion = m.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	ok(q.is_equal_approx(Quaternion.IDENTITY), "%s: on the ground the body is upright again" % art_name)
 	m.free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:

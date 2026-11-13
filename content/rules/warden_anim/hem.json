@@ -11,7 +11,7 @@
 		"walk_speed": 2.2, "run_speed": 4.6, "stride": [1.5, 1.5], "foot_mps": [1.18, 3.72], "arm_swing": {"L": 0.2, "R": 0.5}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.27},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive", "dive_tilt": 35.0, "glide_tilt": -30.0},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12}},
 	"kmoves": {
 		"arc_draw": {"clip": "draw", "hold_from": 1.15, "upper": true, "fade": 0.05}, "arc_tap": {"clip": "tap", "upper": true, "fade": 0.05}, "arc_loose": {"clip": "loose", "upper": true, "fade": 0.03},
