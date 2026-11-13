@@ -1431,6 +1431,18 @@ Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6,
 | gems_doc | Gems to you when a game ends (win or not). |
 | card_s | 6 |
 
+## knock_tip (`content/rules/knock_tip.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The first-knock card (scripts/match/knock_tip.gd): the first time a new player is knocked down in each of their first two real Extractions, one two-line card in the message lane: what hurt them most, and one tip for it. showings: how many cards a save ever gets. gap: seconds without a hit after which the damage count starts over. far_m: metres; a hunter hitting from further than this is 'far'. sources: what hurt (blight, monster, rival, far, other) -> [name, tip]. In a tip {dash}, {throw} and {glide} are the player's keys. |
+| showings | 2 |
+| gap | 10 |
+| far_m | 22 |
+| sources | {"blight": ["the Blight", "Dash out of the red: tap {dash}."], "monster": ["monsters", "Send your Boki at them: tap {throw}."], "rival": ["another hunter", "Fight near your squad: two beat one."], "far": ["a hunter far away", "Glide away: jump, then hold {glide}."], "other": ["something else", "Glide away: jump, then hold {glide}."]} |
+
 ## lean (`content/rules/lean.json`)
 
 Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: the 18 Boki types (DECISIONS 2026-11-08 22:29): name, tint (the colour its meals lean a Boki to) and part (the grown part its lean earns at the next form, one of KinParts.EVO_PARTS; some types share a part, the tint tells them apart). Normal has no tint: plain food never leans. foods: every food (Data.CROPS and Care.FOODS) and its type.
