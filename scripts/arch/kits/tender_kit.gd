@@ -593,8 +593,9 @@ func _tick_hearth(dt: float) -> void:
 func throw_boost() -> float:
 	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
 
+## Hearthlight's healing: +15% a rank past the first, grown by the level's ability power (LevelGrowth.ap).
 func heal_k() -> float:
-	return 1.0 + 0.15 * float(maxi(0, rank("kin") - 1))
+	return (1.0 + 0.15 * float(maxi(0, rank("kin") - 1))) * LevelGrowth.ap(h)
 
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()

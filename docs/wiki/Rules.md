@@ -1408,11 +1408,9 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 
 | Setting | Value |
 |---|---|
-| _doc | Quiet growth on every level-up (scripts/match/level_growth.gd). Each level a hunter reaches adds hp (a share of the class's base health) and ap (ability power: a multiplier on ability damage, and on healing and shields from abilities). Levels 2-6 use the full rate; levels 7-10 use half_from's half rate. Nothing pops up for it: the level badge flashes and its tooltip shows the totals. |
+| _doc | Quiet growth on every level-up (scripts/match/level_growth.gd), straight lines as in the source (docs/ABILITIES.md 'Level growth'). Each level a hunter reaches adds hp (a share of the class's base health: the source's ~6% of base per level, docs/SUPERVIVE_DATA.md section 6) and ap (ability power: a multiplier on ability damage, and on healing and shields from abilities; the source's +5 Power a level comes to ~3.9% of an ability's level-1 number, from Myth's level-1 and level-15 tooltips in briefs/supervive-data/supervive_kits.md). Nothing pops up for it: the level badge flashes and its tooltip shows the totals. |
 | hp | 0.06 |
-| ap | 0.05 |
-| half_from | 7 |
-| half_k | 0.5 |
+| ap | 0.039 |
 
 ## mantle_look (`content/rules/mantle_look.json`)
 
