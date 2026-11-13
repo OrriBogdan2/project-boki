@@ -24,6 +24,7 @@ var _pad: MarginContainer
 var _last_sec := -1
 var grid: GridContainer
 var squad_box: HBoxContainer
+var howto_slot: VBoxContainer   # the how-to lines of your pick, or of the card under the mouse
 var chat_log: VBoxContainer
 var chat_scroll: ScrollContainer
 var chat_in: LineEdit
@@ -35,6 +36,7 @@ var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 const COLUMNS := 5          # Hunter cards per row (13 Hunters = 3 rows, which fit at 1280x720)
 const PORTRAIT_PX := 48.0   # px, a card's portrait (the lobby's smaller one)
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
+const HOWTO_W := 600.0      # px, the how-to block beside the title (one Hunter's three lines)
 const LOG_H := 64.0         # px, the most the chat log grows to (it scrolls past that)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
@@ -81,6 +83,9 @@ func _ready() -> void:
 	title_label = UI.title("Before the drop: pick your Hunter", 34)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title_label)
+	howto_slot = UI.vbox(0)        # one Hunter's how-to, not one per card: 13 cards still fit 3 rows at 720
+	howto_slot.alignment = BoxContainer.ALIGNMENT_CENTER
+	head.add_child(howto_slot)
 	var strip := UI.hbox(14)
 	root.add_child(strip)
 	strip.add_child(UI.section("Squad"))
@@ -225,6 +230,14 @@ func _fill_hunters() -> void:
 		c.queue_free()
 	for ak in Arch.ids():
 		grid.add_child(_tile(String(ak)))
+	_show_howto(pm.pick)
+
+## The how-to block beside the title shows one Hunter's three lines (none before a pick or hover).
+func _show_howto(ak: String) -> void:
+	for c in howto_slot.get_children():
+		c.queue_free()
+	if Arch.exists(ak):
+		howto_slot.add_child(ClassCard.howto_box(ak, HOWTO_W, 12))
 
 ## One card: portrait, name, role word. Stats and the unlock quest are the tooltip. A shut Hunter is dim
 ## with a padlock.
@@ -234,11 +247,10 @@ func _tile(ak: String) -> PanelContainer:
 	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 8, Arch.color(ak))
 	card.custom_minimum_size = Vector2(CARD_MIN_W, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var stack := UI.vbox(6)
-	card.add_child(stack)
 	var row := UI.hbox(10)
-	stack.add_child(row)
-	stack.add_child(ClassCard.howto_box(ak, CARD_MIN_W - 28.0, 12))
+	card.add_child(row)
+	card.mouse_entered.connect(_show_howto.bind(ak))
+	card.mouse_exited.connect(func(): _show_howto(pm.pick))
 	row.add_child(ClassCard.portrait(ak, PORTRAIT_PX))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE

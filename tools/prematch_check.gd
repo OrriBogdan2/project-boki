@@ -238,6 +238,7 @@ func _screen(main: Node) -> void:
 	ok(view.note_label.text.contains("before 0:00"), "first lobby: the note teaches the countdown")
 	ok(not Prematch.first_lobby(), "opening the first lobby marks it seen in the save")
 	_declutter(view)
+	await _howto(view)
 	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
 	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
 	view._show_chat_line(true)
@@ -278,6 +279,26 @@ func _screen(main: Node) -> void:
 	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
 	view.set_process(false)
 	view.queue_free()
+
+## One how-to block beside the title, not one per card (13 cards keep 3 rows at 720): it shows your pick's
+## three lines, the hovered card's while the mouse is on it, and your pick's again after.
+func _howto(view: Control) -> void:
+	var shown := func() -> String:
+		var kids: Array = view.howto_slot.get_children().filter(func(c): return not c.is_queued_for_deletion())
+		return String(kids[0].get_meta("howto")) if kids.size() == 1 else ""
+	var per_card: bool = view.grid.get_children().any(
+			func(c): return c.find_children("*", "VBoxContainer", true, false).any(func(v): return v.has_meta("howto")))
+	var pick: String = view.pm.pick
+	var other := String(Arch.ids()[0]) if String(Arch.ids()[0]) != pick else String(Arch.ids()[1])
+	var start: String = shown.call()
+	var card: Control = view.grid.get_children().filter(func(c): return c.get_meta("arch") == other)[0]
+	card.mouse_entered.emit()
+	var hovered: String = shown.call()
+	card.mouse_exited.emit()
+	var back: String = shown.call()
+	ok(not per_card and start == pick and hovered == other and back == pick,
+			"one how-to block: your pick's lines, the hovered card's on hover (%s, %s, %s)" % [start, hovered, back])
+	await view.get_tree().process_frame
 
 ## Cards are portrait + name + role word (stats and quests on hover); shut ones are dim with a padlock; the
 ## voice button waits for a human squadmate.
