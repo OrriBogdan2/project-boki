@@ -59,7 +59,7 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
 	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
 	if WaysHints.arrow_due(m):
-		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.COL)
+		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.col())
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
 	hud._ctext(Vector2(sz.x * 0.5, sz.y * 0.8), line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 
