@@ -215,7 +215,10 @@ func _swim() -> void:
 	step(m, 0.8, func():
 		top["stun"] = maxf(top["stun"], T.stun_t)
 		top["y"] = maxf(top["y"], T.pos.y - y0))
-	ok("Ground Swim: swims about 6 m", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5, "%.2f m" % (P.pos.x - x0))
+	ok("Ground Swim: swims about 4.5 m", P.pos.x - x0 > 3.5 and P.pos.x - x0 < 5.8, "%.2f m" % (P.pos.x - x0))
+	var dd := K.dash_def()
+	ok("Ground Swim: under 9 m/s, a swim under the ground, not a dash",
+		float(dd["dist"]) / float(dd["time"]) < 9.0, "%.1f m/s" % (float(dd["dist"]) / float(dd["time"])))
 	ok("Ground Swim: he stays hittable underground", under and hit_on)
 	ok("Ground Swim: surfacing knocks nearby foes up 0.5 s", top["stun"] >= 0.4 and top["y"] > 0.2,
 		"stun %.2f lift %.2f" % [top["stun"], top["y"]])

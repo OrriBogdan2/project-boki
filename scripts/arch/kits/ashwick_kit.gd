@@ -597,6 +597,7 @@ func _poof_cloud(dir: Vector2) -> void:
 ## Out of the poof he sails on with a share of its speed (momentum kept), not the class's small carry.
 func _keep_poof(b: Dictionary) -> void:
 	var keep := (b["dir"] as Vector2) * float(b["speed"]) * float(dash_def()["air_keep"])
+	keep = h.turn_cost.hand_over(keep, keep.limit_length(h.base_speed))     # straight back: no more than a run
 	h.vel.x = keep.x
 	h.vel.z = keep.y
 
