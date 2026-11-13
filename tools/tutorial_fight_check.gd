@@ -33,7 +33,7 @@ func _play(main: Node, id: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
-		"tutorial": true, "tut_test": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
+		"tutorial": true, "tut_test": true, "seed": 11, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
 		"demo_kin": "cindle", "arch": id, "cls": Arch.weight(id),
 	})
 	m.set_process(false)

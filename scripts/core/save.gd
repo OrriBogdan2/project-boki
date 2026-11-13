@@ -144,6 +144,10 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
 		"edition": null,      # reserved for limited editions (see docs/BOKI_IDENTITY.md)
 	}
+	if seed >= 0:       # seeded: IVs from the seed, not the clock-based uid, so every run matches
+		var ivr := RandomNumberGenerator.new()
+		ivr.seed = hash("%d|ivs" % seed)
+		rec["ivs"] = Care.roll_ivs(ivr)
 	BokiQuirks.set_sex(rec)
 	Care.ensure(rec)
 	return rec
