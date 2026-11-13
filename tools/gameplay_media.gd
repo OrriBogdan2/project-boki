@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-10> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -15,6 +15,7 @@ extends RefCounted
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
+##  10 stairs        a Hunter runs up the map's tallest flight of stairs and back down, then a bot (decision 0060)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -75,6 +76,7 @@ func run(main_node: Node) -> void:
 		7: await _show(secs)
 		8: await _relay(secs)
 		9: await _duo(secs)
+		10: await _stairs()
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -441,3 +443,40 @@ func _duo(secs: float) -> void:
 		await fade.reveal(0.01)
 	var tu := m.duo
 	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)
+
+# ------------------------------------------------------------------ 10: stairs
+const STAIR_PAUSE := 0.5         # s standing at each end of the flight before turning round
+
+func _stairs() -> void:
+	await _start("archer", "cindle")
+	var P := m.player
+	if P.kin:
+		P.kin.stow()
+	var runs: Array = preload("res://tools/stairs_check.gd").new().flights(m.world)
+	var fl: Dictionary = runs[0]
+	for r in runs:
+		if absf(r["b"].y - r["a"].y) > absf(fl["b"].y - fl["a"].y):
+			fl = r
+	var park := P.pos
+	var bot := m.make_hunter("w", 0, "heavy", "Walker", "idle", {}, park + Vector3(0, 0, 1.5), {"arch": "juggernaut"})
+	_zoom(0.45)
+	_mark("start")
+	still_at = 1.0
+	for h in [P, bot]:
+		for leg in [[fl["a"], fl["b"]], [fl["b"], fl["a"]]]:
+			await _stair_leg(h, leg[0], leg[1])
+		h.teleport(park)
+
+## One walk from `a` to `b` at a run, the camera on the walker, then a short stand.
+func _stair_leg(h: Hunter, a: Vector3, b: Vector3) -> void:
+	h.teleport(a)
+	h.vel = Vector3.ZERO
+	h.grounded = true
+	m.cam.snap(a)
+	var to := Vector2(b.x - a.x, b.z - a.z)
+	var walk := func(_t: float) -> void:
+		var left := Vector2(b.x - h.pos.x, b.z - h.pos.z)
+		h.inp["move"] = to.normalized() if left.dot(to) > 0.3 else Vector2.ZERO
+		h.inp["aim"] = b + Vector3(to.x, 0, to.y)
+	await _go(to.length() / (h.base_speed * 0.8) + STAIR_PAUSE, walk, func(_t: float) -> Vector3: return h.pos)
+	h.inp["move"] = Vector2.ZERO

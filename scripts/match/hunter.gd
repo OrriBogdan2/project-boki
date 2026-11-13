@@ -2283,7 +2283,8 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	if grounded and g < pos.y - 0.05:
+	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
+	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = 0.12
@@ -2521,7 +2522,8 @@ func _try_ledge_grab(dt: float) -> void:
 			return
 		var probe := Vector2(pos.x, pos.z) + mv.normalized() * (r + 0.35)
 		var g2 := w.ground_at(probe.x, probe.y)
-		if w.is_block(probe.x, probe.y) or g2 <= pos.y + World.STEP or g2 - pos.y > World.LEVEL * 2.0 + 0.05:
+		var walkable := g2 <= pos.y + World.STEP + w.stair_slope(pos.x, pos.z, probe.x, probe.y)     # (stairs: walked)
+		if w.is_block(probe.x, probe.y) or walkable or g2 - pos.y > World.LEVEL * 2.0 + 0.05:
 			push_t = 0.0
 			return
 		push_t += dt
