@@ -722,6 +722,26 @@ def _dash_ours(row, modes):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
 
+AIR_CAST_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)")]
+AIR_CAST_H = {"keep": "keeps the jump's speed (steers as in any jump)", "slow": "slows below the jump's speed",
+              "zero": "stops", "push": "driven faster than the jump"}
+AIR_CAST_V = {"fall": "falls as from the jump", "hover": "holds the height", "rise": "rises",
+              "slow": "falls slower than the jump", "drop": "drops faster (lands early)"}
+AIR_CAST_WHEN = {"landing": "waits for the landing; in the air the jump goes on", "no": "not cast in the air (the press is dropped)"}
+
+def _air_cast_rows(hero, f):
+    """LMB, RMB, E and R cast at the top of a running jump (air_cast rows, --air-cast-check)."""
+    rows = []
+    for slot, label in AIR_CAST_SLOTS:
+        row = f.get("air_cast", {}).get(slot, {})
+        cast = row.get("cast", "air")
+        h = AIR_CAST_H.get(row.get("h"), "no row")
+        v = AIR_CAST_V.get(row.get("v"), "no row")
+        ours = AIR_CAST_WHEN[cast] if cast in AIR_CAST_WHEN else "horizontal: %s; vertical: %s" % (h, v)
+        if row.get("ours"):
+            ours += " (%s)" % row["ours"]
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
 # Owner item 183: each Hunter's air dash against its ground dash. [verdict, air dash (distance, time, carry, slot, clip), source]
 AIR_AUDIT = {
     "thief": ["special", "8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`)",
@@ -828,6 +848,15 @@ def gen_dash_flow():
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
              "\"special\" = a sourced difference.\n\n") + _air_audit_table()
     body += _cast_tables(flows)
+    body += ("\n\n## Cast at the top of a jump\n\nOne row per hero and slot, from `air_cast` in the same files: running, "
+             "jumping and pressing the slot at the jump's top, keys held forward. \"Ours\" is what the next 0.4 s do to the "
+             "horizontal and vertical speed against the same jump with no cast, measured headless by `--air-cast-check`, "
+             "which fails when the game stops doing it. The source's falling physics (AirControl 0.015, "
+             "briefs/supervive-data/supervive_physics.md:46) is what \"steers as in any jump\" copies. Verdict: match "
+             "(the source settles it and ours does the same), owner (an owner call), or [?] (the source doesn't settle "
+             "it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Slot", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _air_cast_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

@@ -57,5 +57,11 @@
 			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Shiv presses nothing else inside its ult in the clip (briefs/hero-ref/dancer.md)."}
 		}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:97); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:98); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:100); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:101); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"}
 	}
 }

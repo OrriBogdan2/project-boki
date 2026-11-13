@@ -215,6 +215,8 @@ const CHECKS := {
 	# a press in another ability's wind-up or recovery (the Cast into cast tables)
 	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
+	# cast at a jump's top: momentum per slot
+	"--air-cast-check": ["res://tools/air_cast_check.gd", "air_cast_check", null],
 	# docs/decisions/0022
 	"--cc-exit-buffer-check": ["res://tools/cc_exit_buffer_check.gd", "cc_exit_buffer_check", null],
 	# a tap inside a hit-stop goes when it ends
