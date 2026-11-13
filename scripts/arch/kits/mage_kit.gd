@@ -189,7 +189,7 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT)
+		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT, not h.is_local())     # yours: the badge
 		if f.visible and int(m.time / STATIC_GAP) != int((m.time - dt) / STATIC_GAP):
 			# sparks on the body, 2 a stack, livelier with each
 			var o := {"n": 2 * n, "v": 1.4 + 0.9 * n, "rad": 0.25 + 0.08 * n, "s": 0.065 * (0.8 + 0.3 * n)}
