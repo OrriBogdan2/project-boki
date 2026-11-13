@@ -7,15 +7,11 @@ extends "res://tools/displace_net_check.gd"
 ## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her Burr Charge shows
 ## stuck on a wall (a row of rock tiles 4 m out on the host only; the "cone" fx, Net 0.24.5): the guest's copy must
 ## draw it as long as the host's.
-## id and HunterAnim's), compared per cast. Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
+## Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
 ## Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a Boss fed
 ## by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
-## Once both games are up they run in lockstep, not on the wall clock: the host steps one DT, tells the guest,
-## and goes on when the guest has stepped too; the guest also holds a step until the host's latest snapshot is in,
-## so a cast takes as many frames as it needs and no real time, and times in the log are step counts (the same
-## on a slow box). --remote-anim-check=archer,mage runs only those kits.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -23,8 +19,6 @@ const SKEW := 0.05           # s: clocks of two processes on one machine
 const NET_SNAP_TOL := 0.08   # s: a re-time on the copy is the host's to within the age snap plus a frame
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
-const ACK_S := 30.0          # s of real time to wait for the guest's step before giving up
-const SNAP_WAIT_S := 3.0     # s of real time the guest waits for a snapshot the unreliable channel may have dropped
 const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15        # the body tint (Ent.wash) counts as showing above this
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
@@ -46,15 +40,8 @@ var last_row := ["?", "?"]
 var last_prev_t := 0.0
 var unlike := {}             # arch -> casts whose copy differs
 var played := {}             # arch -> casts that played any move
-var cone_len := 0.0          # m: the longest ground cone the watched hunter showed since the mark
-var locked := false          # both games step together, one DT per "step" message
-var steps := 0               # locked steps taken on this game: the log's clock
-var owed := 0                # guest: steps the host asked for and this game has not taken
-var acks := 0                # host: steps the guest has taken
-var snap_t := 0.0            # host: its match time at its last snapshot; guest: the same, from the step message
-var sampled := -1            # the step _sample last looked at
-var kits: Array = ARCHS
 var boss_nid := ""           # the boss both games log (the guest's copy of it)
+var cone_len := 0.0          # m: the longest ground cone the watched hunter showed since the mark
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
@@ -67,43 +54,7 @@ func _init() -> void:
 
 func run(main_node: Node) -> void:
 	main_node.get_tree().process_frame.connect(_sample)
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--remote-anim-check=") and a != guest_flag:
-			kits = a.substr(20).split(",")
 	await super.run(main_node)
-
-## Free-running (60 fps) while the games come up, then one step per call pair: the host steps, the guest follows.
-func _run(secs: float) -> void:
-	if not locked:
-		await super._run(secs)
-		return
-	var t := 0.0
-	while t < secs - 0.0001:
-		t += DT
-		if Net.is_host():
-			await super._run(DT)
-			steps += 1
-			if Net.send_t > 0.09: snap_t = m.time      # (Net.tick just sent a snapshot: send_t restarts at 0.1)
-			Net.lobby_emit("ra", {"c": "step", "t": snap_t})
-			var t0 := Time.get_ticks_msec()
-			while acks < steps and Time.get_ticks_msec() - t0 < ACK_S * 1000.0:
-				await main.get_tree().process_frame
-		else:
-			while owed == 0 and not stop:
-				await main.get_tree().process_frame
-			if stop: return
-			owed -= 1
-			var t1 := Time.get_ticks_msec()
-			while not stop and not _snap_in() and Time.get_ticks_msec() - t1 < SNAP_WAIT_S * 1000.0:
-				await main.get_tree().process_frame
-			await super._run(DT)
-			steps += 1
-			Net.lobby_emit("ra", {"c": "ack"})
-
-## Guest: the host's hunter has the snapshot the host sent at `snap_t` (or a later one).
-func _snap_in() -> bool:
-	var buf := _copy().net_buf
-	return buf == null or buf.ts.is_empty() or buf.ts[buf.ts.size() - 1] >= snap_t - 1.5 * DT
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
@@ -113,18 +64,13 @@ func _host() -> void:
 	ok(Net.VERSION != "0.24.5", "the Net version moved on with the boss event (%s)" % Net.VERSION)
 	for kind in BOSSES:
 		await _boss(kind, String(BOSSES[kind]))
-	Engine.max_fps = 0
-	Net.lobby_emit("ra", {"c": "lock"})
-	locked = true
-	await _run(0.2)     # (the guest locks on the message; both free-run until then)
-	for arch in kits:
+	for arch in ARCHS:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
-	if "archer" in kits:
-		_wash_rows_ok()
+	_wash_rows_ok()
 	await _ram_retime()
-	for arch in kits:
+	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))
@@ -361,13 +307,6 @@ func _on_msg(topic: String, data, from: String) -> void:
 			"kit":
 				if R: R.reclass(Arch.weight(String(data["arch"])), String(data["arch"]))
 				Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
-			"lock":
-				locked = true
-				Engine.max_fps = 0
-			"step":
-				owed += 1
-				snap_t = float(data.get("t", 0.0))
-			"ack": acks += 1
 			"mark":
 				log_rows.clear()
 				retimes.clear()
@@ -390,9 +329,8 @@ func _copy() -> Hunter:
 # ------------------------------------------------------------------ both
 ## Every frame: note a change of the watched hunter's move (the kit's id, HunterAnim's id, or a restart).
 func _sample() -> void:
-	if m == null or m.player == null or (locked and steps == sampled):
+	if m == null or m.player == null:
 		return
-	sampled = steps
 	var B := m.ents_by_id.get(boss_nid, null) as Boss if boss_nid != "" else null
 	if B != null:
 		_sample_boss(B)
@@ -405,20 +343,19 @@ func _sample() -> void:
 			cone_len = maxf(cone_len, float(e["len"]))
 	if H.ak == null or H.anim == null:
 		return
-	var ms := int(float(steps) * DT * 1000.0) if locked else int(Time.get_unix_time_from_system() * 1000.0)
 	var shown := H.wash > WASH_ON
 	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
-		wash_rows.append([ms, shown])
+		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
 	var jump: float = H.ak.anim_at - float(last_at[1])
 	if H.ak.anim_id == last_at[0] and jump < -0.02 and jump > -0.6:
-		retimes.append([ms, snappedf(jump, 0.01)])
+		retimes.append([int(Time.get_unix_time_from_system() * 1000.0), snappedf(jump, 0.01)])
 	last_at = [H.ak.anim_id, H.ak.anim_at]
 	var row := [H.ak.anim_id, H.anim.km_id]
 	var restart: bool = H.anim.km_prev_t < last_prev_t - 0.001
 	last_prev_t = H.anim.km_prev_t
 	if row != last_row or restart:
 		last_row = row
-		log_rows.append([ms, row[0], row[1]])
+		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
 
 ## A boss's frame: note a change of the BossAnim move it plays (the loops count as none).
 func _sample_boss(B: Boss) -> void:
