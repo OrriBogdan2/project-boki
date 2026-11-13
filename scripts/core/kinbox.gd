@@ -307,23 +307,30 @@ static func went_text(rec: Dictionary) -> String:
 	return "On the farm"
 
 # ------------------------------------------------------------------ sorting
-const SORTS := [["slot", "Box order"], ["species", "Species"], ["level", "Level"], ["rarity", "Rarity"], ["got", "Date joined"], ["name", "Name"], ["trust", "Trust"]]
+const SORTS := [["slot", "Box order"], ["number", "Number"], ["level", "Level"], ["trust", "Trust"], ["newest", "Newest"], ["species", "Species"], ["rarity", "Rarity"], ["name", "Name"]]
 
 static func sort_key(r: Dictionary, key: String):
 	match key:
 		"species": return String(Data.KIN.get(String(r["species"]), {}).get("name", r["species"])) + "%04d" % (999 - int(r.get("level", 1)))
 		"level": return -int(r.get("level", 1))
 		"rarity": return -Mutations.rarity_score(r)
-		"got": return float(r.get("got_t", 0.0))
+		"number": return FieldBook.number(String(r["species"]))
+		"newest": return -float(r.get("got_t", 0.0))
 		"name": return String(r.get("name", "")).to_lower()
 		"trust": return -float(r.get("trust", 0.0))
 	return int(r.get("box_slot", 0))
 
+## In this order, the legendaries (rare kin) last whatever the sort; ties go by Field Book number, then roster order.
 static func sorted(list: Array, key: String) -> Array:
 	var roster: Array = Save.d["roster"]
 	var out := list.duplicate()
 	out.sort_custom(func(a, b):
+		var la := Data.is_rare(String(a["species"]))
+		if la != Data.is_rare(String(b["species"])): return not la
 		var ka = sort_key(a, key); var kb = sort_key(b, key)
+		if ka == kb:
+			ka = sort_key(a, "number")
+			kb = sort_key(b, "number")
 		if ka == kb: return roster.find(a) < roster.find(b)
 		return ka < kb)
 	return out

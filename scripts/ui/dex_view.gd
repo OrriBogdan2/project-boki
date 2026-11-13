@@ -39,7 +39,7 @@ static func type_col(t: String) -> Color:
 ## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
 ## forms of a branching line share one.
 static func number(spk: String) -> int:
-	return FieldBook.entries().find(FieldBook.entry_key(spk)) + 1
+	return FieldBook.number(spk)
 
 static func num_text(spk: String) -> String:
 	return "#%03d" % number(spk)
@@ -69,9 +69,28 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	var g := GridContainer.new()
 	g.columns = 6
 	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
+	var fill := func():
+		for ch in g.get_children():
+			ch.queue_free()
+		for key in listed():
+			g.add_child(tile(key, tree, on_open))
+	v.add_child(KinFilter.new(fill))
 	v.add_child(g)
+	fill.call()
+
+## The entries the filter shows, in the picked order (legendaries last). Entries you have not met pass
+## only under "All" (their type is not yours to know yet); one you own sorts by its best Boki, the rest by number.
+static func listed() -> Array:
+	var recs: Dictionary = {}
 	for key in FieldBook.entries():
-		g.add_child(tile(key, tree, on_open))
+		if KinFilter.type != "" and not (FieldBook.entry_seen(key) and KinFilter.type_ok(FieldBook.face(key))):
+			continue
+		recs[key] = {"species": key, "name": String(Data.KIN[key]["name"])}
+	for r in Save.d.get("roster", []):
+		var key := FieldBook.entry_key(String(r["species"]))
+		if recs.has(key) and (not recs[key].has("uid") or KinBox.sorted([recs[key], r], KinFilter.sort)[0] == r):
+			recs[key] = r
+	return KinBox.sorted(recs.values(), KinFilter.sort).map(func(r): return FieldBook.entry_key(String(r["species"])))
 
 ## One numbered tile, for an entry: it shows the form you own (or have seen) and opens that form's page.
 static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
