@@ -809,8 +809,8 @@ func on_dash(use_ex: bool) -> bool:
 ## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)
 const SPIN_GLIDE := 6.0
 
-## The 360 Smash's spin on arrival: one hit all round him, a red-gold swirl ring, still sliding on along
-## `wd`.
+## The 360 Smash's spin on arrival: one hit all round him, still sliding on along `wd`; its ring (HeroVfx "spin")
+## lies on the hit radius and runs round once with the turn.
 func _spin_hit(wd: Vector2) -> void:
 	if h.grounded:
 		h.vel.x += wd.x * SPIN_GLIDE
@@ -827,10 +827,9 @@ func _spin_hit(wd: Vector2) -> void:
 	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
-	fx.smash_ring(h.pos, r)
+	vfx("spin", h.pos, null, {"r": r})
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
-	net_ring(h.pos, r, Color("ff7a3a"))
 
 # ------------------------------------------------------------------ E: Mending Ground
 ## Where the zone sits: round the hammer wherever it is (planted, flying out or back), else round him.

@@ -129,7 +129,8 @@ Still differs:
 
 Seen in the reel: the throw's dotted line, the flame-arc swing and the green zone match the footage's beats; the
 Faultline telegraph is an amber rectangle with rubble where the footage's is a cyan one with a gold eruption
-[F]; the 360 Smash leaves an orange ring, the footage a red spin ring with a damage number.
+[F]; the 360 Smash's ring is a red spin ring (ivory rim) on its 2.2 m hit radius, running round with the hammer, and its
+damage number, as in the footage (it was an orange swirl inside the radius).
 
 ## Sable the Silver Thief (`thief`, source Shiv)
 [thief.mp4](thief.mp4)

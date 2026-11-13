@@ -25,7 +25,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 
 | layer `p` | what | key fields |
 |---|---|---|
-| `sweep` | an arc of flame, burning away | `size`, `arc` deg, `tilt`, `yaw`, `flip` |
+| `sweep` | an arc of flame, burning away; its head runs the arc in `turn` s (default 0.28 of the life); `band` (0..1 of its depth) draws an even blade, not tapered (a 360 ring) | `size` outer radius, `arc` deg, `tilt`, `yaw`, `flip`, `turn`, `band` |
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |

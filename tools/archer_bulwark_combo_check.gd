@@ -936,6 +936,8 @@ func _bulwark_combos() -> void:
 	T.teleport(home + Vector3(5.2, 0, 0))
 	aim_at(P, T.pos)
 	var sp0 := K.spins
+	var spin_plays := int(hv.plays.get("spin", 0))
+	Sfx.listener = P.pos          # (the looks are drawn near the camera focus only)
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	step(m, 0.12, func(): P.inp["move"] = Vector2(1, 0))
@@ -947,8 +949,11 @@ func _bulwark_combos() -> void:
 		"mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)]
 	)
 	var spin_r := float(K.dash_def().get("spin_r", 2.2))
-	ok("combo bjorn: the spin ring is drawn out to the hit radius",
-		absf(K.fx.swirl_r - spin_r) < 0.01, "%.2f" % K.fx.swirl_r)
+	var rings := hv.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh == hv._arc(360.0))
+	var ring_r: float = absf((rings[0]["s0"] as Vector3).x) if rings.size() == 1 else -1.0
+	ok("combo bjorn: one spin ring, a full circle whose outer edge is the hit radius",
+		int(hv.plays.get("spin", 0)) == spin_plays + 1 and absf(ring_r - spin_r) < 0.01, "plays %d rings %d r %.2f" % [
+			int(hv.plays.get("spin", 0)) - spin_plays, rings.size(), ring_r])
 	# the aegis: his own curved slab over the wall while raised
 	reset.call()
 	P.inp["sec_hold"] = true

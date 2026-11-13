@@ -29,6 +29,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
+		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
@@ -267,6 +268,16 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
+	_clear(V)
+	V.play(P, "ring", P.pos, Vector2.RIGHT)
+	V.play(P, "all", P.pos, Vector2.RIGHT)
+	var arcs := [V._arc(360.0), V._arc(120.0)]
+	var sweeps := V.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh in arcs)
+	var got := sweeps.map(func(e): return [(e["mat"] as ShaderMaterial).get_shader_parameter("head_t"),
+		(e["mat"] as ShaderMaterial).get_shader_parameter("band")])
+	ok(sweeps.size() == 2 and is_equal_approx(got[0][0], 0.32) and is_equal_approx(got[0][1], 0.3)
+		and is_equal_approx(got[1][0], 0.28) and got[1][1] == 0.0,
+		"a sweep's even band runs round in its own turn (0.16 of 0.5 s); a plain one keeps the taper %s" % [got])
 	_clear(V)
 	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
 	var palm := V.anchor_pos(P, "palm")
