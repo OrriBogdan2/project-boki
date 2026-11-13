@@ -14,7 +14,7 @@ var sp: Dictionary = {}
 var rec: Dictionary = {}          # the saved record (player kin) or a generated one (bots, wild)
 var owner_h: Hunter = null
 var unseen := false             # a rival's kin out of the local player's sight
-var state := "shoulder"           # shoulder | flying | active | returning | flying_home | downed | reviving | wild | dazed | bench | fused | away
+var state := "shoulder"           # shoulder | flying | active | returning | flying_home | downed | wisp | wild | dazed | bench | fused | away
 var settle := 1.0                 # 0..1 while settling onto the shoulder
 var traits := {}
 var trust := 50.0
@@ -184,7 +184,7 @@ func usual_slow() -> float:
 	return 0.4
 
 func hittable() -> bool:
-	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
+	return not dead and state in ["active", "flying", "returning", "wild"] and not (state == "flying" and fly.get("leap", false))
 
 func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
@@ -229,8 +229,8 @@ func slot_open(_slot: String) -> bool:
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
 	if wisp:
-		return false          # (a wisp casts nothing: KinWisp)
-	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
+		return false          # (a shoulder wisp casts nothing: KinWisp)
+	return not dead and rest_t <= 0.0 and state not in ["downed", "wisp", "bench", "wild", "dazed", "away"]
 
 ## Resting after the merge ultimate (docs/decisions/0004)?
 func resting() -> bool:
@@ -641,6 +641,8 @@ func sim(dt: float) -> void:
 			elif state == "active":
 				recall()
 	KinFollow.ride_the_drop(self)      # on the ship or in the drop it rides on your shoulder
+	if KinWispForm.wants(self):
+		KinWispForm.join(self)         # your hunter is down: it comes back and rides as a wisp
 	think_t -= dt
 	match state:
 		"shoulder": _sim_shoulder(dt)
@@ -649,7 +651,7 @@ func sim(dt: float) -> void:
 		"active": _sim_active(dt)
 		"returning": _sim_return(dt)
 		"downed": KinDowned.tick(self, dt)
-		"reviving": _sim_revive(dt)
+		"wisp": KinWispForm.tick(self, dt)
 		"wild": _sim_wild(dt)
 		"dazed": _sim_dazed(dt)
 		"fused": _sim_fused(dt)
@@ -684,9 +686,7 @@ func _sim_shoulder(dt: float) -> void:
 		pos = owner_h.pos + Vector3(0, 1.5, 0)
 		prev = pos
 	settle = minf(1.0, settle + dt / 1.0)
-	if owner_h.downed:
-		_consider_revive(dt)
-	elif cmd != "return":
+	if cmd != "return":
 		KinFollow.carry_tick(self, dt)       # carried over a glide or a drop: down again once you are steady
 
 func _sim_fly(dt: float) -> void:
@@ -819,14 +819,6 @@ func _sim_active(dt: float) -> void:
 	if cmd == "return" and owner_h != null:
 		KinFollow.set_cmd(self, "return", null)       # Return was ordered while it was in the air: it lands, then goes onto you
 		return
-	var guard: Ent = _wisp_threat() if owner_h and owner_h.downed else null
-	if guard:
-		# someone's come to stomp or execute your hunter: the kin goes for them first
-		target = guard
-	elif owner_h and owner_h.downed:
-		_consider_revive(dt)
-		if state != "active":
-			return
 	# a hurt, cautious Boki stays at your side and sits the fight out
 	var hang_back: bool = owner_h != null and hp < max_hp * brain.retreat_frac()
 	if hang_back:
@@ -839,7 +831,7 @@ func _sim_active(dt: float) -> void:
 	if owner_h and flat_dist(owner_h) > (brain.leash() if cmd == "follow" else KinFollow.leash(self)):
 		state = "returning"      # wandered off after a fight: run back (a hop when it cannot walk)
 		return
-	if guard == null and not hang_back:
+	if not hang_back:
 		if KinFollow.is_disengaged(self):
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
@@ -953,57 +945,6 @@ func fall_out() -> void:
 		return
 	go_down(true)
 
-func _consider_revive(dt: float) -> void:
-	if state == "downed" or hp <= 0.0:
-		return
-	if revive_wait <= 0.0:
-		# loyal kin rush in; a kin that doesn't trust you takes a moment
-		revive_wait = 0.1 + (1.0 - t("loyalty")) * 1.2 + (1.0 - trust / 100.0) * 1.8
-		bark("revive")
-	revive_wait -= dt
-	if revive_wait > 0.0:
-		return
-	if state == "shoulder":
-		pos = owner_h.pos + Vector3(0.6, 0, 0.3)
-		pos.y = owner_h.pos.y
-		grounded = true
-	state = "reviving"
-
-## An enemy standing over your downed hunter (to stomp or execute them).
-func _wisp_threat() -> Ent:
-	if owner_h == null or not owner_h.downed or hp <= 0.0:
-		return null
-	for f in m.hunters:
-		if f.team != owner_h.team and not f.downed and not f.out and f.hittable() and f.flat_dist(owner_h) < 3.0:
-			return f
-	return null
-
-func _sim_revive(dt: float) -> void:
-	var threat := _wisp_threat()
-	if threat:
-		state = "active"
-		target = threat
-		bark("owner_down")
-		return
-	if owner_h == null or not owner_h.downed or owner_h.out:
-		state = "active"
-		revive_wait = 0.0
-		return
-	var to := Vector2(owner_h.pos.x - pos.x, owner_h.pos.z - pos.z)
-	if to.length() > 1.3:
-		if not walkable_to(owner_h.pos):
-			pos = owner_h.pos + Vector3(0.6, 0, 0); prev = pos
-		_ground_move(to.normalized() * speed * 1.3, dt)
-		return
-	_ground_move(Vector2.ZERO, dt)
-	var speedup := 0.8 + trust / 100.0 * 0.4
-	owner_h.revive += dt / Life.R["kin_revive_time"] * speedup
-	if owner_h.revive >= 1.0:
-		m.revive_hunter(owner_h, self)
-		note("revived", "pulled you back up when you were down", 4.0)
-		revive_wait = 0.0
-		_hop_on()
-
 # ---- wild kin
 func _sim_wild(dt: float) -> void:
 	var wish := Vector2.ZERO
@@ -1081,12 +1022,12 @@ func render(delta: float, alpha: float) -> void:
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	visible = visible or (loose_t > 0.0 and not dead)       # (a loose wisp of a hunter who died)
 	KinDowned.render(self, delta)
-	if not model or KinWisp.render(self):
+	if not model or KinWisp.render(self) or KinWispForm.render(self, model):
 		return
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")
 	hop_ph += delta * (9.0 if Vector2(vel.x, vel.z).length() > 0.5 else 3.0)
-	var out_now := state in ["active", "flying", "returning", "reviving", "flying_home", "downed"]
+	var out_now := state in ["active", "flying", "returning", "flying_home", "downed"]
 	if ring:
 		ring.visible = visible and (out_now or has_meta("lineup")) and not unseen
 		if ring.visible:
@@ -1123,8 +1064,6 @@ func render(delta: float, alpha: float) -> void:
 	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 else ""))
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
-	if state == "reviving" and comp and pose_now == "":
-		pose_now = "nudge"
 	model.set_meta("pose", pose_now)
 	model.set_meta("happy", pose_now in ["cheer", "beckon"])
 	if on_you and owner_h and owner_h.model and not giant.is_empty() and not owner_h.gliding:
@@ -1132,18 +1071,18 @@ func render(delta: float, alpha: float) -> void:
 		return
 	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
 		# perched on the pack (or a mount curled up into a ball on your back while you glide)
-		var torso: Node3D = owner_h.model.get_node("Rig/Torso")
 		var ball := carry_style() == "mount"
-		global_position = torso.global_transform * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
-		model.rotation.y = owner_h.face
+		var torso := WardenGlb.shown_torso(owner_h.model)
+		global_position = torso * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
+		model.basis = _ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.62 if not ball else 0.42, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05) if not ball else Vector3(0.9, 0.0, 0.0)
 		return
 	if on_you and owner_h and owner_h.model:
 		var sh: Node3D = owner_h.model.get_node("Rig/Torso/Shoulder")
-		global_position = sh.global_position
-		model.rotation.y = owner_h.face
+		global_position = WardenGlb.shown_torso(owner_h.model) * sh.position
+		model.basis = _ride_basis()
 		model.scale = Vector3.ONE * lerpf(0.75, 0.55, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		# now and then it peeks out past its hunter's head, or nuzzles in against it
@@ -1178,11 +1117,17 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = -0.4 if lunge_t > 0.0 else 0.0
 	if state == "flying" and not fly.get("rush", false):
 		body.rotation.x += delta * 14.0
-	if state in ["active", "reviving"]:
+	if state == "active":
 		_render_attention(delta, body)
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
+
+## Riding on you, it faces your way and leans with your body in the air (HunterAnim.AIR_TILT: the glider's bank, the
+## dive's pitch); its seat is on the body you see (WardenGlb.shown_torso).
+func _ride_basis() -> Basis:
+	var tilt: Quaternion = owner_h.model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	return Basis(Vector3.UP, owner_h.face) * Basis(tilt)
 
 ## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
 func _render_demo() -> void:

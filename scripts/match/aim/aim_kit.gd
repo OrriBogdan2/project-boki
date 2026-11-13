@@ -19,6 +19,8 @@ extends RefCounted
 ##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
+##   soft    bool    lanes and cones: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
+##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
 ##                   the hunter (Hem's draw), this big
@@ -251,7 +253,7 @@ static func reticle(h: Hunter) -> Dictionary:
 static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
 	return {"kind": kind, "col": p.get("col", hero_col(h)), "col2": p.get("col2", accent_col(h)),
 		"alpha": float(p.get("alpha", 1.0)), "hot": clampf(float(p.get("hot", 0.0)), 0.0, 1.0),
-		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)),
+		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)), "soft": bool(p.get("soft", false)),
 		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y,
 		"fletch": float(p.get("fletch", 0.0))}
 
