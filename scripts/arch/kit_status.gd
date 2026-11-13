@@ -33,7 +33,7 @@ static func grounded_left(e: Ent) -> float:
 ## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
 ## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
 static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
-	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
+	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0 or SummonCc.immune(e, kind):
 		return
 	var m: Node = e.m
 	if m == null:
@@ -97,8 +97,6 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				n.add_child(c)
 			e.add_child(n)
 			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
-			if toast == "":
-				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
 			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
@@ -118,13 +116,10 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				rn.add_child(st)
 			e.add_child(rn)
 			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
-			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
 			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"dsr":
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
 ## A Net "kst" event: the body's own game runs the rule.

@@ -131,7 +131,7 @@ Takeaways for Kinfall:
 | Smash Ultimate hitlag = (damage×0.65 + 6)×multipliers frames, capped at 30 (a 15% hit freezes 15 frames); Melee capped at 20 | SmashWiki "Hitlag" |
 | A Godot reference hitstop of 0.08s (time scale 0.05, not 0), flash recovery 0.15s, trauma 0.7 decaying 3/s; one owner for time scale; a call token so a short stop can't end a long one | uhiyama-lab Godot hitstop note |
 | Trauma-based camera shake (shake = trauma² or trauma³, noise-driven) is the standard approach | Eiserloh GDC 2016 (session summary) |
-| Kinfall today: `freeze_frame()` 0.03-0.075s on heavy hits you deal or take (disabled online), `cam.add_trauma()` 0.08-0.6 across systems, `cam.punch()`, HUD flash, `_reward_moment` (0.07s freeze + 0.22s slow-mo) | scripts/match/match.gd |
+| Kinfall today: `freeze_frame()` 0.03-0.075s on heavy hits you deal or take (disabled online), `cam.add_trauma()` 0.08-0.6 across systems, `cam.punch()`, HUD flash, `_reward_moment` (0.07s freeze, ring, burst, kill sound; its 0.22s slow-mo and white flash were removed 11-11, §5.4 knock moment) | scripts/match/match.gd |
 
 ### 2.3 Colour, shape and sound language
 
@@ -505,7 +505,7 @@ involved, plus a softer 50% version for the kin owner.
 | T2 | a hit ≥ 8%, or push/pull ≥ 8 m/s, or a reflect returning | 35ms melee / 0 ranged | 45ms | 3 |
 | T3 | CC landing (stun, root, hook yank, swap, lift), or ≥ 15% | 50ms melee / 0 ranged | 65ms | 4 |
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
-| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms + 0.2s slow-mo at ×0.35 (offline only, existing `_reward_moment`) | — | 6 |
+| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms (no slow-mo: see the knock moment below) | — | 6 |
 
 Rules:
 
@@ -514,8 +514,25 @@ Rules:
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
 - Cap: 110ms in any 0.5s per player.
+- A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
+  Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
 - The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
+
+**Knock moment (parity, 11-11, docs/FUN_AUDIT_1111.md gap 5).** The source confirms a knock with a
+sound, the kill feed and an icon, not slow motion. `_slow` already skipped online (`net_on`), so bot
+practice and online play ran on two rhythms, and in a 3v3 two quick knocks blinded the next target pick.
+
+| Knock | Before | After |
+|---|---|---|
+| You land it (`Match._reward_moment`, offline and the online `knock` event) | 0.07 s freeze, **0.22 s at ×0.35 slow-mo (offline only)**, **full-screen white flash 0.25**, ring 3 m, gold burst, duck 0.25, `kill` sound | 0.07 s freeze, ring 3 m, gold burst, duck 0.25, `kill` sound |
+| You take it (`Match.knock`, `h == player`) | **0.3 s at ×0.55 slow-mo (offline only)**, **full-screen red flash 0.3**, duck 0.6, killcam line | duck 0.6, killcam line |
+
+Both stay on the `knock` / `knock_confirm` sounds, the feed line and the knock callout. Still slow-mo
+(not knocks, left for the owner): you taken out 0.8 s ×0.3, the last rival squad 1.0 s ×0.22 + gold
+flash, losing a life 0.6 s ×0.35 + red flash, a perfect dodge 0.25 s ×0.4, a boss kill near you
+0.55 s ×0.3 (`Juice.boss_dead`). The tutorial's scripted beat-7 slow-mo (ext/tutorial-beats-7-8, `TutorialRival` calls `_slow` itself) is untouched.
+`--kill-reset-check` (a)/(m) asserts a knock leaves `slowmo` at 0 and no screen flash.
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 

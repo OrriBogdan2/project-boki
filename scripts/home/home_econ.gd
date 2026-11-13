@@ -271,7 +271,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			k["goal"] = pos
 			e["t"] = float(e["t"]) - d
 			var body: Node3D = (k["node"] as Node3D).get_node_or_null("Body")
-			if body:
+			if body and not body.has_node("Flex/BokiRig"):
 				var q := absf(sin(float(e["t"]) * 9.0))
 				body.scale = Vector3(1.0 + q * 0.08, 1.0 - q * 0.1, 1.0 + q * 0.08)
 			if randf() < d * 3.0 and Econ.fill(f) > 0:
@@ -470,7 +470,7 @@ func open_feeder(f: Dictionary) -> void:
 	UI.footer(v).add_child(fill_b)
 	UI.with_key(fill_b, "Enter")
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
-	if fd["auto"]:
+	if Econ.self_fills(f):
 		var on: bool = f.get("auto", true)
 		var ab := CheckButton.new()
 		ab.text = "Refills itself from your pantry"
@@ -567,16 +567,12 @@ func show_away() -> void:
 		_notice("Your Boki are starving", lines)
 
 func _notice(title: String, lines: Array) -> void:
-	if not h.is_inside_tree():
-		return
-	if h.panel_open != "" or h.building_now or not Save.d["tutorial"].get("home", false):
-		h.get_tree().create_timer(1.0).timeout.connect(_notice.bind(title, lines))
-		return
-	var v: VBoxContainer = h._new_panel(title, 560)
-	for l in lines:
-		var lb := UI.label(String(l), 15, UI.INK)
-		lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(lb)
+	h.arrivals.add(func():
+		var v: VBoxContainer = h._new_panel(title, 560)
+		for l in lines:
+			var lb := UI.label(String(l), 15, UI.INK)
+			lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(lb))
 
 ## Why your partner can't come out (starving too long), or "".
 func refuse_reason() -> String:
@@ -735,36 +731,6 @@ func open_shrine() -> void:
 				r.add_child(wl)
 		cv.add_child(r)
 		v.add_child(card)
-
-## The empty lot: what the shrine needs before you can build it.
-func open_shrine_lot() -> void:
-	var bd: Dictionary = Data.BUILDINGS["shrine"]
-	var v: VBoxContainer = h._new_panel("Build the Soul Shrine", 520)
-	UI.subtitle(v, String(bd["desc"]))
-	var ex := int(Save.d.get("extracts", 0))
-	v.add_child(UI.section("What it needs"))
-	var need := func(ok: bool, txt: String) -> void:
-		var r := UI.hbox(10)
-		r.add_child(UI.IconDot.new("check" if ok else "lock", UI.GOOD if ok else UI.FAINT, 16.0))
-		r.add_child(UI.label(txt, UI.T_BODY, UI.INK if ok else UI.MUTED))
-		v.add_child(r)
-	need.call(ex >= 3, "3 successful expeditions  (%d)" % ex)
-	need.call(Econ.embers() > 0, "A Soul Ember to light it  (%d)" % Econ.embers())
-	need.call(int(Save.d["gems"]) >= int(bd["cost"]), "%d gems  (you have %d)" % [int(bd["cost"]), int(Save.d["gems"])])
-	var why := Econ.shrine_why()
-	var btn := UI.primary("Build it", func():
-		if Econ.shrine_why() != "" or Save.has_building("shrine"): return
-		Econ.use_ember()
-		Save.d["gems"] = int(Save.d["gems"]) - int(bd["cost"])
-		Save.d["buildings"].append("shrine")
-		Save.save_game()
-		h._close_panel()
-		h._construct("shrine"), 200)
-	btn.disabled = why != ""
-	btn.tooltip_text = why
-	v.add_child(btn)
-	if why != "":
-		v.add_child(UI.label(why, 13, Color("ffb0a0")))
 
 # ------------------------------------------------------------------ the Armory
 ## The armory's tabs: gear by slot (Gear.SLOTS indexes), gloves covering both glove slots, then the
