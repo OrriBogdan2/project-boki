@@ -61,7 +61,7 @@ func _hero(id: String) -> bool:
 	var head := (sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin).y
 	var line := "OPEN %-11s head %.2f m" % [id, head]
 	for k in ["chest", "loot"]:
-		var box := Models.chest() if k == "chest" else Models.deathbox(Color.GOLD)
+		var box := Models.chest() if k == "chest" else Models.deathbox(Color.GOLD, 0)
 		box.position = CHEST_AT if k == "chest" else BOX_AT
 		box.rotation.y = 0.6
 		holder.add_child(box)
