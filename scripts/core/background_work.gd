@@ -7,10 +7,14 @@ static var _reads := {}       # path -> true while a threaded read is requested 
 static var _tasks := {}       # worker task id -> true while it is added and not yet joined
 static var _hooked := false
 
-## False headless: the dummy renderer's texture store is not thread-safe, so a .glb read on a loader thread races the
-## main thread's textures and crashes the engine now and then. Callers that only read ahead then load on first use.
+## Whether a model (.glb) may be read on a loader thread: only on the Compatibility renderer, which queues a loader
+## thread's material setup for the render thread. Headless, the dummy texture store is not thread-safe. On a
+## RenderingDevice renderer (Vulkan, D3D12, Metal) Godot 4.6 sets a new material's shader right on the loader thread
+## (material_create_from_shader), racing the main thread's materials: a heap crash as a match builds, or an endless
+## material_set_shader loop at quit (docs/DEBT.md, model read-ahead). Callers that only read ahead then load on
+## first use.
 static func can_read_ahead() -> bool:
-	return DisplayServer.get_name() != "headless"
+	return DisplayServer.get_name() != "headless" and RenderingServer.get_rendering_device() == null
 
 ## Starts reading `path` on a loader thread (take() collects it).
 static func request(path: String) -> void:
