@@ -25,7 +25,6 @@ varying vec3 wpos;
 varying flat float mat_id;
 varying float glow_k;
 varying float wy;
-varying float see_k;           // thinned out: this prop hides your hunter or your Boki (see.gdshaderinc)
 
 void vertex() {
 	vec3 org = MODEL_MATRIX[3].xyz;
@@ -46,11 +45,10 @@ void vertex() {
 	wy = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz).y;
 	mat_id = UV.x;
 	glow_k = 1.0 - COLOR.a;
-	see_k = see_fade(MODEL_MATRIX);
 }
 
 void fragment() {
-	if (see_cut(see_k, FRAGCOORD.xy)) { discard; }
+	if (see_cut(wpos, mat_id, FRAGCOORD.xy)) { discard; }   // over your hunter or Boki (see.gdshaderinc)
 	vec3 c = COLOR.rgb;
 	int id = int(mat_id + 0.5);
 	float fw = fwidth(lpos.y) * 40.0;
