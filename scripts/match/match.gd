@@ -5167,7 +5167,8 @@ const MOB_STATES := ["idle", "chase", "windup", "lunge", "recover"]
 func _ser(e: Ent) -> Array:
 	if e is Hunter:
 		var h: Hunter = e
-		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(h.vel.x), _r(h.vel.y), _r(h.vel.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
+		var v := ArchKit.net_vel(h)
+		return ["h", h.nid, _r(h.pos.x), _r(h.pos.y), _r(h.pos.z), _r(v.x), _r(v.y), _r(v.z), _r(h.face), _r(h.hp), h.max_hp, _flags(h),
 			_r(h.down_hp), _r(h.revive), h.team, h.cls, h.pname, _r(h.shield), _r(h.extract_prog), h.kills, h.knocks, int(h.dmg_done), _r(h.armor), h.max_armor, h.arch, h.wid] + KinNet.hunter_extra(h) + ArchKit.net_move(h) + GripNet.hunter_extra(h) + HunterNet.extra(h)
 	if e is Kin:
 		var k: Kin = e

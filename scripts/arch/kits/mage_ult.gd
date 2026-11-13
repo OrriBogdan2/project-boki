@@ -291,11 +291,16 @@ func _fall_tick(u: float) -> void:
 	h.vel = Vector3.ZERO
 	h.inp["move"] = Vector2.ZERO
 	h.pos = a.lerp(b, u * u)
+	leap["vel"] = (b - a) * (2.0 * u / float(data()["drop"]))     # d/dt of the lerp, for the snapshot
 	_untouchable(0.1)
 	if h.model:
 		h.model.visible = u < 0.3
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL)
+
+## The snapshot's velocity: the fall's own while she comes down (vel is held at zero), else the body's.
+func move_vel() -> Vector3:
+	return leap.get("vel", Vector3.ZERO) if phase() == FALL else kit.h.vel
 
 func _strike() -> void:
 	var h := kit.h

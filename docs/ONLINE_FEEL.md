@@ -153,5 +153,18 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   40/0 in 3 runs at 100 ms and Kael's ends 0.03 to 0.27 m from offline.
 - Under xvfb run the check with `--rendering-driver opengl3`, as the suite does. On Vulkan (llvmpipe) on a
   loaded box the guest's answers never reached the host (every row red from the first, the same in 3 runs).
+- **Sparkle's Kitefall crash is a drop on the other game too** (ext/feel-kitefall-net; it stepped 4 to 5.7 m
+  in one frame there in 4 of 5 runs before, while the own game's largest step is 1.06 m). The crash is a
+  scripted 0.2 s lerp (`MageUlt._fall_tick` holds `h.vel` at zero so the hunter step does not move her twice),
+  and the owner sends about 10 snapshots a second, so the other game saw one or two snapshots of the fall with
+  no velocity and drew it as a teleport. Now the snapshot's velocity field carries the fall's own velocity
+  (`ArchKit.net_vel` -> `MageUlt.move_vel`, the derivative of the lerp; no new field, so no `Net.VERSION`
+  bump), and `NetSmooth` only takes a move faster than `SNAP_SPEED` for a teleport when the two snapshots'
+  velocities along the move don't account for it (up to twice the faster of them). A teleport reports the
+  speed it goes on with, not one along the jump, so it still snaps. `--remote-smooth-check`'s "fall" row casts
+  Kitefall on the host 12 m out and asserts the guest's biggest step in a frame stays under 4 m (1.6 to 1.8 m
+  measured). Left: the cubic between the last snapshot of the fall (full speed) and the first after the
+  landing (still) can carry the drawn body up to about 0.15 of the fall past the landing for a few frames
+  when that snapshot falls in the fall's last 0.03 s (not seen in the check's runs).
 - Not measured: a mover owned by the host with the caster on the guest (every row has the host casting, so
   the guest is the one moved); Kael's Warchain on a bot (that is the offline reference).

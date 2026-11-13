@@ -89,6 +89,9 @@ func ult_recast() -> bool:
 
 func recast_window() -> Dictionary: return ult.window()
 
+func move_vel() -> Vector3:
+	return ult.move_vel()
+
 ## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
 func combo_marks(out: Array) -> void:
 	super(out)
