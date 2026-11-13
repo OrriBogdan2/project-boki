@@ -135,6 +135,20 @@ func _data() -> void:
 	ok(not FileAccess.file_exists("res://scripts/kin/merge_holds.gd"), "MergeHolds (boulder, hover, prism) is gone")
 	var rules := MergeForm.data()
 	ok(not rules.has("tiers") and not rules.has("forms_bonus"), "no tiers or forms_bonus in the merge rules")
+	var no_style: Array = []
+	for id in Data.KIN:
+		if not (rules["types"] as Dictionary).has(DexView.type_of(id)):
+			no_style.append(id)
+	ok(no_style.is_empty(), "every Boki's type has a merge style: %s" % [no_style])
+	var split_ok := true
+	for id in ["duskapi", "umbrathere"]:
+		split_ok = split_ok and DexView.type_of(id) == "ghost"
+	for id in ["gloamshell", "caecilith"]:
+		split_ok = split_ok and DexView.type_of(id) == "dark"
+	ok(split_ok, "Shadow is split: Snuffapi, Umbrathere Ghost; Gloamshell, Zippelith Dark")
+	var named: bool = DexView.type_name("ghost") == "Ghost" and DexView.type_name("dark") == "Dark"
+	var tints: bool = DexView.type_col("ghost") != DexView.type_col("dark")
+	ok(named and tints, "Ghost and Dark each have a name and a colour")
 	var tiered := false
 	for f in DirAccess.get_files_at("res://content/merges_v2"):
 		var txt := FileAccess.get_file_as_string("res://content/merges_v2/" + f)
