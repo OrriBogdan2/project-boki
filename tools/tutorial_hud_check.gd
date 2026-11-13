@@ -1,21 +1,22 @@
 extends RefCounted
 ## --tutorial-hud-check: the tutorial shows one voice at a time, in its own lanes.
-##   1. the lanes at 1280x720 and 1920x1080: the step panel is at most 35% of the width and 10% of the
-##      height and, even with its second line, stays in the top fifth; no two lanes (panel, check,
+##   1. the lanes at 1280x720, 1920x1080 and 3440x1440: the step strip is one line, at most 42% of the width
+##      and 6% of the height, at the top-centre inside the safe margin; no two lanes (strip, check,
 ##      toasts, intro) intersect, none sits in the middle
-##   2. a scripted run of the whole course (the driver, with a Boki): while a card is on screen no toast
-##      shows (one fired at each step start is held) and while it is fresh no Boki bubble is up; every
-##      frame at most one tip card and one prompt (toast or world label) is visible; a new step's card
-##      starts invisible and fades in; the hunter and the Boki are never under the banner
+##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
+##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
+##      hunter and the Boki are never under the banner; on a step whose card carries the interact key the
+##      world prompt label is held (the card says it)
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
-##   4. the panel counter, the right click taught from its kit data, the Boki step by its state
-##   5. the lookout: every course stop is climbable from the one before it with plain movement
+##   4. the panel counter, the right click taught from its kit data, the Boki step's words
+##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
+##      wall kick (taller than a jump, within a jump and a kick's climb)
 
 var bad := 0
 var m: Match
 var main: Node
 
-const SIZES := [Vector2(1280, 720), Vector2(1920, 1080)]
+const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -36,11 +37,14 @@ func _lanes() -> void:
 		var ln := TutorialHud.lanes(sz)
 		var b: Rect2 = ln["banner"]
 		var tag := "%dx%d" % [sz.x, sz.y]
-		var small: bool = b.size.x <= sz.x * 0.35 + 0.5 and b.size.y <= sz.y * 0.10 + 0.5
-		ok(small, "%s: the banner is at most 35%% x 10%% of the screen (%s)" % [tag, str(b.size)])
-		var tall_end := b.position.y + b.size.y * TutorialHud.DETAIL_K
-		var top_fifth := "%s: the panel with its second line stays in the top fifth (%.0f)" % [tag, tall_end]
-		ok(tall_end <= sz.y * 0.2 + 0.5, top_fifth)
+		var small: bool = b.size.x <= sz.x * TutorialStrip.WIDTH_FRAC + 0.5 and b.size.y <= sz.y * 0.06 + 0.5
+		ok(small, "%s: the strip is at most 42%% x 6%% of the screen (%s)" % [tag, str(b.size)])
+		var margin := maxf(24.0, sz.y * 0.04)
+		var in_safe := b.position.y >= margin - 0.5 and b.position.x >= margin
+		ok(in_safe, "%s: the strip is inside the safe margin (%.0f)" % [tag, b.position.y])
+		ok(absf(b.get_center().x - sz.x * 0.5) < 1.0, "%s: the strip is at the top-centre" % tag)
+		var pulse_ok := TutorialStrip.glow(0.0) == 1.0 and TutorialStrip.glow(TutorialStrip.PULSE_T) == 0.0
+		ok(pulse_ok, "%s: the glow starts full on a new objective and is calm after PULSE_T" % tag)
 		var centre := Rect2(sz * Vector2(0.3, 0.25), sz * Vector2(0.4, 0.45))
 		var names: Array = ln.keys()
 		var clash := ""
@@ -53,6 +57,13 @@ func _lanes() -> void:
 					clash += " %s/%s" % [names[i], names[j]]
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
+		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
+		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
+		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
+		var gb := TutorialStrip.rect(sz, wo_b)
+		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
+		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])
 
 # ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:
@@ -81,10 +92,8 @@ func _course() -> void:
 	var shown_after := 0
 	var asked := 0
 	var under := 0
-	var cards_max := 0
-	var prompts_max := 0
-	var fade_start := 1.0
-	var held_world := 0
+	var key_label := 0      # frames an interact step's card and a world prompt were both up
+	var key_loud := 0       # ... of those, frames the world label would still have drawn
 	var texts := {}
 	var counters := {}
 	while t < 600.0 and not m.player.extracted:
@@ -96,7 +105,6 @@ func _course() -> void:
 				worst = maxf(worst, step_t)
 			last = tu.step
 			step_t = 0.0
-			fade_start = minf(fade_start, TutorialHud.fade(tu))
 			if m.hud and not m.player.extracted:
 				m.hud.toast("check %d" % last, Color.WHITE)
 				asked += 1
@@ -105,42 +113,38 @@ func _course() -> void:
 		step_t += Match.DT
 		if m.hud == null:
 			continue
-		var label := not m.interact.is_empty()      # (Hud draws the world label only with no card up)
-		var cards := int(tu.card_shown()) + int(m.guide != null and m.guide.line != "")
-		cards_max = maxi(cards_max, cards)
-		prompts_max = maxi(prompts_max, m.hud.msgs.texts().size() + int(label and not tu.card_shown()))
-		held_world += int(label and tu.card_shown())
-		if tu.card_shown():
-			toast_in_card += m.hud.msgs.texts().size()
+		if not m.interact.is_empty() and Tutorial.KEYS.get(tu.id(), "") == "interact":
+			key_label += 1
+			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
+			toast_in_card += m.hud.msgs.texts().size()
 			bubble_in_card += m.bubbles.size()
 			under += _under_banner()
 		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
-	ok(toast_in_card == 0, "no toast shows while a card is on screen (%d seen)" % toast_in_card)
-	ok(cards_max == 1, "one tip card on screen at a time, through the whole course (most in one frame: %d)" % cards_max)
-	ok(prompts_max <= 1, "at most one prompt (toast or world label) in any frame (most: %d)" % prompts_max)
-	ok(fade_start == 0.0, "a new step's card starts invisible and fades in on the same spot (%.2f)" % fade_start)
+	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
-	var waited := "(%d asked, %d shown, %d frames with a world prompt held)" % [asked, shown_after, held_world]
-	ok(asked > 0 and shown_after == 0, "a toast fired during a card is held, not shown late " + waited)
+	var waited := "(%d asked, %d shown)" % [asked, shown_after]
+	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
+	var held := "(%d of %d frames drawn)" % [key_loud, key_label]
+	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
-	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
+	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
 	var ak: ArchKit = m.player.ak
 	if ak != null:
 		var hold := float(ak.rmb_def().get("hold", 0.0)) > 0.0
 		var why := "(%s hold %s)" % [ak.id, str(hold)]
 		ok(tu.rmb_has_hold() == hold, "the right click step follows the kit's hold variant " + why)
-		var line := String(texts.get("utility", ""))
+		var line := String(texts.get("sec", ""))
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
-	var tl := String(texts.get("throw", ""))
-	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
+	var tl := String(texts.get("gkey", "")).to_lower()
+	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
 
 ## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:
@@ -185,7 +189,7 @@ func _under_banner() -> int:
 func _reach() -> void:
 	var tu: Tutorial = m.tut
 	var jump_apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
-	var order := ["land", "move", "dash", "exdash", "glide", "crouch", "pickup", "yard", "chest"]
+	var order := ["land", "dash", "exdash", "glide", "crouch", "pickup", "yard"]
 	var worst := 0.0
 	var worst_at := ""
 	for i in range(1, order.size()):
@@ -195,6 +199,8 @@ func _reach() -> void:
 			continue
 		if m.world.island_of(a.x, a.z) != m.world.island_of(b.x, b.z):
 			continue      # (a gap: the dash, jump and glide steps and the bridges, which the run above plays)
+		if order[i] == "crouch":
+			continue      # (the lookout: climbed with a wall kick, checked below)
 		var prev := a.y
 		var n := int(a.distance_to(b) / 0.4) + 1
 		for k in range(1, n + 1):
@@ -207,4 +213,5 @@ func _reach() -> void:
 	var msg := "every walk between stops climbs at most 60%% of a jump (%.2fm of %.2fm, %s)"
 	ok(worst <= jump_apex * 0.6, msg % [worst, jump_apex, worst_at])
 	var cr := tu.stop("crouch")
-	ok(cr.y <= jump_apex * 0.6, "the lookout top is %.2fm up, under 60%% of a jump (%.2fm)" % [cr.y, jump_apex])
+	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
+	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
