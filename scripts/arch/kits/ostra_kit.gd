@@ -411,16 +411,17 @@ func _swap_end(go: bool) -> void:
 		return
 	swaps += 1
 	_fold_in(from, TRADE_COL)
+	if rank("dash") >= 3:
+		_shield_allies(from, dd)
 	_trade_bodies(land, from, float(dd["radius"]))
 	_arrive(land, from, from_void)
-	if rank("dash") >= 3:
-		# allies who were by his side when he left share in it: a shield
-		for o2 in m.hunters:
-			if o2 != h and o2.team == h.team and not o2.downed and (
-				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
-			):
-				o2.shield = maxf(o2.shield, float(dd["ally_shield"]))
-				o2.shield_t = 3.0
+
+## Rank 3 (the source's tier IV): allies in his ring as he leaves get a shield, a share of his health.
+func _shield_allies(from: Vector3, dd: Dictionary) -> void:
+	for o2 in m.hunters:
+		if o2 != h and o2.team == h.team and not o2.downed and o2.flat_dist(from) < float(dd["radius"]):
+			o2.shield = maxf(o2.shield, h.max_hp * float(dd["ally_shield"]))
+			o2.shield_t = maxf(o2.shield_t, float(dd["ally_shield_t"]))
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
 ## its place in the circle. Bodies another game owns are moved there over Net.
