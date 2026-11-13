@@ -60,13 +60,16 @@ func _stream() -> void:
 	var spawn := _event(m, K, "tm_dart_r", func(): return K.stats["darts"] >= 1)
 	var spawn_l := _into(m, K, "tm_dart_l")
 	_line("tm_dart_r" if spawn >= 0.0 else "tm_dart_l", maxf(spawn, spawn_l), "the first dart leaves")
-	_event(m, K, "tm_dart_heavy", func(): return K.stats["heavies"] >= 1)
-	_line("tm_dart_heavy", _into(m, K, "tm_dart_heavy"), "a large dart leaves")
 	var n0: int = K.stats["darts"]
 	step(m, 3.0)
 	var gap := 3.0 / float(K.stats["darts"] - n0)
-	ok("anim darts: a dart every 0.15-0.2 s (footage 0005-0090)", gap >= 0.15 and gap <= 0.2, "%.3f s" % gap)
+	ok("anim darts: a dart every 0.15-0.2 s through the hold (footage 0009-0090)",
+			gap >= 0.15 and gap <= 0.2, "%.3f s" % gap)
 	P.inp["fire"] = false
+	# the let-go ends the burst on the large darts (supervive_kits Celeste LMB)
+	_event(m, K, "tm_dart_heavy", func(): return K.stats["heavies"] >= 1)
+	_line("tm_dart_heavy", _into(m, K, "tm_dart_heavy"), "a large dart leaves")
+	step(m, 1.0)
 
 func _spear() -> void:
 	var r: Array = sc.setup("rimewright", 30.0)

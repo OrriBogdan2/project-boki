@@ -33,25 +33,34 @@ than 25 s at ring speed, or puts a ring over land or within 5 m of the sky train
 region's ground at the foot (within 4 m) of its level, or sits on stairs. It prints each lane's length, rings
 and time.
 
-## Current routes (the 0.24.5 Hollow Crown; the v2 layout re-places them)
+## Current routes (Hollow Crown 2.0, the 540 m map; re-placed 11-13)
 | Lane | Regions | Length | Rings |
 |---|---|---|---|
-| Kestrel Line | Larkhollow -> the Crown | 93 m | 6 |
-| Moor Line | Duskmoor -> the Crown | 97 m | 6 |
-| Salt Line | Saltmere -> Cinder Steps | 75 m | 4 |
-| Kiln Leap | Cinder Steps <-> the Crown | 28 m | 1 |
-| Storm Leap | Stormbreak <-> the Crown | 31 m | 2 |
-| (unnamed) | Highwatch <-> Stormcrown Gaol | 33 m | 2 |
-| (unnamed) | Duskmoor <-> Thornwood | 40 m | 2 |
+| Eyrie Line | Stormcrown Gaol -> the Crown | 121 m | 7 |
+| Lantern Line | Highwatch -> the Crown | 80 m | 5 |
+| Salt Line | Saltmere -> Stormbreak (Shrine Table shard) | 63 m | 4 |
+| Moor Line | Duskmoor -> Stormbreak (Shrine Table shard) | 51 m | 3 |
+| Bramble Leap | Larkhollow <-> Thorn Shard | 48 m | 3 |
+| Ember Leap | the Crown <-> Cinder Steps | 32 m | 2 |
+| Slag Leap | Ember Shard <-> Cinder Steps | 34 m | 2 |
 
-Lift rings: the Throne (Crown, north side), the Frostgate plateau (west foot), the Kilns' plateau (Cinder, east
-foot), the Shrine Table (Stormbreak, north foot), the Thornhive rise (Thornwood, north foot), the Highwatch crest
-(south foot). Every region has at least one ring.
+Ember, Slag and Bramble Leap were the v2 map's plain bot glides (a pair each way); they are lanes now (one
+entry runs both ways). The four Lines are new. The v2 sky train runs close round most rims, so every lane
+was searched for take-offs and landings that keep each ring 5 m off the track (`check_air`); take-offs and
+lift rings keep a tenth of a metre (`sc_air`), the rest of the map rounds to whole metres.
+Design note: Salt and Moor Line give Stormbreak an air way in beside its chokepoint bridges (MAP_V2: "every
+route across it a chokepoint bridge"); a lane is a readable, shootable route, so it was kept. Alternative not
+taken: land them on Salt Shard / Ember Shard instead (drop the lines if the Hollow should stay bridges only).
+
+Lift rings: the Throne (Crown, from the keep on its north side, lv 8 -> 12), the Frostgate ice shelf (from the
+Rimefield, 4 -> 10), Highwatch's lv 11 tower (east foot, 2 -> 11), the Kilns' crest (Cinder, from the lv 10
+tier, 10 -> 14), the Shrine Table (Stormbreak, north foot, 2 -> 6), Bramble Rise (Thornwood, south foot,
+2 -> 6). Every region has at least one ring.
 
 Measured by `--air-rings-check` (keys held like a player: run off the rim, jump, glide toward the landing):
-every lane both ways goes through all its rings and lands in 3-9.5 s, never more than 2.7 s between rings; a
-bot crosses the 97 m Moor Line on its own crossing logic in 8 s; every lift ring puts you on its high ground
-in about 4.5 s.
+every lane both ways goes through all its rings and lands in 3-10 s, never more than 1.7 s between rings; a
+bot crosses the 121 m Eyrie Line on its own crossing logic in 10 s (7 of 7 rings); a bot below each lift ring
+stands on its high ground in 1.7-5 s (v2 map, 11-13).
 
 ## Source (SUPERVIVE's hoops)
 docs/SUPERVIVE_FEEL.md lists the hoop boost among the values still unknown. Searched Nov 12 2026: the game data
@@ -111,4 +120,4 @@ chevron). The minimap shows them as the DETAIL kind "air" (hold Tab or the map k
 
 `--air-rings-check` also checks that the plan from each lane's take-off is that lane, and that a bot 3 m
 off each lift ring's foot sent up to its high ground stands on top within 7 s (four of the six rings by the
-ring, two by stairs that are quicker there).
+ring, two (the Throne, Bramble Rise) by stairs that are quicker there).

@@ -25,6 +25,7 @@ var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var _hover: Dictionary = {}    # the spawn candidate under the cursor
+var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
 
 func _init(h, match_node: Match) -> void:
 	hud = h
@@ -38,18 +39,20 @@ func open(by_plan := false) -> void:
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
+	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
+	hot_line = ""
 	_press = Vector2.INF
 
 
 # ------------------------------------------------------------------ coordinates
 func _layout(sz: Vector2) -> void:
 	var top := 76.0
-	var s := minf(sz.y - top - 22.0, sz.x - SIDE_W * 2.0 - 56.0)
+	var s := minf(sz.y - top - (44.0 if hot_line != "" else 22.0), sz.x - SIDE_W * 2.0 - 56.0)
 	s = maxf(s, 300.0)
 	rect = Rect2(Vector2(roundf(sz.x * 0.5 - s * 0.5), top), Vector2(s, s))
 
@@ -198,8 +201,12 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
+	BokiHud.map_kin(c, m, to_screen, func(pv: Vector2, _pad: float) -> bool: return rect.has_point(pv))
+	MapKey.draw(self)
 	_legend(c, sz, team)
 	_side(c, sz)
+	if hot_line != "":
+		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
 	_cursor(c)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
