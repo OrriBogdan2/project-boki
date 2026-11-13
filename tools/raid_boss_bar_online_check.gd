@@ -1,9 +1,10 @@
 extends "res://tools/displace_net_check.gd"
 ## --raid-boss-bar-online-check: a Heart Raid client gets the host's boss top bar (PVE_HEART_RAID.md, Risks).
 ## Two real games over the desktop relay (the --displace-net-check harness this extends), a raid squad of two.
-## The host raises the boss; the guest's copy is a plain Mob fed by the snapshots (hp, max_hp). The guest's
-## Lairs.boss_for must find it inside the boss square, and the HUD bar (name from the raid rules, phase from
-## the synced hp, Boss.phase_at) must match the host's real Boss at full, 60%, 30% health, show nothing
+## The host raises the boss; the guest's copy is a Boss (BossNet, Net 0.24.6: phase, enraged and wake by the "bat"
+## event; hp and max_hp by the snapshots; an older plain Mob copy still gets the bar). The guest's
+## Lairs.boss_for must find it inside the boss square, and the HUD bar (name, phase: the Boss's synced phase, or
+## Boss.phase_at of a plain copy's hp) must match the host's real Boss at full, 60%, 30% health, show nothing
 ## outside the square, and nothing once it is dead. No Net field: Net.VERSION is unchanged.
 ## Lines: RBAR ok|FAIL <what>.
 
@@ -13,6 +14,24 @@ var home_at := Vector3.ZERO
 func _init() -> void:
 	tag = "RBAR"
 	guest_flag = "--raid-boss-bar-online-check=guest"
+
+## A raid match takes seconds to build and blocks its game meanwhile (the host's relay with it): on a busy box
+## that outlasts ENet's 5 s minimum timeout and the guest is dropped before it hears "start". Both ends of each
+## line get a long timeout instead (seen on rpc6, load 20: the host's build alone took 8 s).
+func _connect() -> bool:
+	var relay: RelayServer = main.get_node_or_null("Relay")
+	if relay and relay.api and not relay.api.peer_connected.is_connected(_patient):
+		relay.api.peer_connected.connect(_patient.bind(relay))
+	var up := await super._connect()
+	if up and Net.enet and Net.enet.peer:
+		_patient(1, null)
+	return up
+
+func _patient(id: int, relay: RelayServer) -> void:
+	var p: ENetMultiplayerPeer = relay.peer if relay else Net.enet.peer
+	var pp := p.get_peer(id)
+	if pp:
+		pp.set_timeout(32, 60000, 120000)
 
 ## Both games build the raid (the lobby's start: one team of two, the raid's options), not the training strip.
 func _build(d: Dictionary) -> void:
@@ -49,12 +68,13 @@ func _on_msg(topic: String, data, from: String) -> void:
 func _say_bar() -> void:
 	var P := m.player
 	var b: Mob = m.lairs.boss_for(P)
+	var nm := String((b as Boss).md["name"]) if b is Boss else String(HeartRaid.rules()["boss"]["name"])
 	var rep := {"pos": [P.pos.x, P.pos.y, P.pos.z], "has": b != null, "plain": b != null and not (b is Boss),
-		"name": String(HeartRaid.rules()["boss"]["name"]), "hud": m.hud != null}
+		"name": nm, "hud": m.hud != null}
 	if b != null:
 		rep["hp"] = b.hp
 		rep["max"] = b.max_hp
-		rep["phase"] = Boss.phase_at(b.hp, b.max_hp)
+		rep["phase"] = (b as Boss).phase if b is Boss else Boss.phase_at(b.hp, b.max_hp)      # as the bar prints it
 	Net.lobby_emit("dn_r", rep)
 
 # ------------------------------------------------------------------ the host
@@ -73,7 +93,7 @@ func _host() -> void:
 	ok(b != null and not b.dormant, "the host raises the boss")
 	await _run(1.5)
 	var r := await _bar()
-	ok(bool(r["has"]) and bool(r["plain"]), "guest: in the square its boss is a plain Mob that boss_for finds", str(r))
+	ok(bool(r["has"]), "guest: in the square boss_for finds its copy of the boss", str(r))
 	ok(String(r["name"]) == String(b.md["name"]), "guest: the bar's name is the host boss's name", String(r["name"]))
 	ok(bool(r.get("hud", false)), "guest: it has a HUD to draw the bar on")
 	for f in [1.0, 0.6, 0.3]:
