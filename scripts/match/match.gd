@@ -1769,11 +1769,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 			credit.heal(d * float(o["leech"]))     # a Void weapon drains what it deals
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
-		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
-			if lv >= 0:
-				_armor_up(credit)
-				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
+		for h in ArmorXp.on_damage(credit, target, d):     # armour progress, dealt and taken (no level XP)
+			_armor_up(h)
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
 	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
@@ -1837,7 +1834,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
-			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
+			if credit.armor_gain(ArmorXp.knock) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
