@@ -102,7 +102,8 @@ func _match_mode(mode: String, rules: Dictionary) -> Dictionary:
 		if h != P:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
-	P.team = -7      # the teammates parked above would make the player the last one up (LastAlive's +8%: a squad rule, not the profile)
+	# parked teammates would make the player the last one up (LastAlive +8%: a squad rule, not the profile)
+	P.team = -7
 	if P.kin: (P.kin as Kin).stow()
 	P.ctrl = "local"
 	P.unlock_all()
