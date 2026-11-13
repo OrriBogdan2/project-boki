@@ -143,7 +143,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
-	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	free_arm = WardenFreeArm.new(sk, lib, String(d.get("free_pose", d["loco"]["idle"])), d.get("free_arm", {}))
 	_setup_out()
 	return true
 
@@ -461,7 +461,7 @@ func step(dt: float) -> void:
 	_turn_to_heading(s, want, legs, dt)
 	_air_tilt()
 	_out(dt)
-	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
