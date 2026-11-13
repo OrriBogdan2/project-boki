@@ -93,8 +93,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) · **owner** |
 | Kael | RMB air slam disc, reach | 2.4, 0.8 m ahead (straight drop; was 2.2 at the cursor) | 1.2 bh (2.16), cursor to ~5 | differ · **owner** (11-10 down slam, ext/jugg-downslam); the check still pins 2.2 ±0.22 (see the re-audit) |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
-| Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not determinable (no clip pays out past the throw) | range match; tether max **not determinable**, 24 m ours (clips: docs/heroes/juggernaut.md "Tether length") |
-| Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) · **open** [?] (ext/kael-chain-length re-checked, no data) |
+| Kael | E range, tether max | 13, 24 | 7 bh (12.6) a floor; max not seen (0305-0320: at most 5-6 bh, let go before a limit) | range match; tether [?] Not determinable, 24 m kept (owner Warchain note; see "Warchain states") |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
 | Lace | RMB range | 14 | grows with the charge, max not seen | [?] |
 | Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] |
@@ -201,6 +200,20 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 5. Already filed above for the owner: Kael lunge, Vex needle width, Cinder flight.
 6. The coarse `--hit-shape-check` reads swings and cones short (a ray stops at the first dummy of the grid, 20 Hz steps): Kael LMB there is 1.6 m / 113 deg against 3.7 / 206 here. Use `--hit-shape-fine` for those four heroes' areas.
 
+## Warchain states: Kael E against the source footage (main 88b06b9e7e, 2026-11-12)
+
+A re-read of `briefs/hero-ref/juggernaut.md` frames 0301-0366 (the tether) and 0251-0300 (the Air Slam) for the states the owner's Warchain note names (briefs/DECISIONS.md:73: not super long, stays attached as he moves back up to a max, the pull depends on facing and movement). The frames themselves are not on this box, so the brief's frame-by-frame notes are the read. Each state's source string is `e.sources` in `content/archetypes/juggernaut.json`; the assert runs in `--juggernaut-combo-check` unless the row says `--kit-parity-check`.
+
+| State | Source frames | Verdict | Ours, asserted |
+|---|---|---|---|
+| Hooked, backing away: max tether length | 0305-0320: attached while he walks (about 2.5 s), never over about 5-6 bh (10 m), let go by 0320 before any limit; the bite at 7 bh (0305) is a 12.6 m floor | Not determinable; 24 m kept `[?]` | pays out to 24 m, taut, holds, no break: "jug chain: backing away it pays out to its full 24m ..." |
+| Pulling, facing away | 0333-0336: the one pull is straight, facing the dummy; no recast facing away or aside | Not determinable | straight in at the reel speed, no swing, no sling: "jug chain pull: facing straight away from the anchor ..." (new) |
+| Pulling, moving back | 0333: he stands at the recast (the start puff); no pull while backing away | Not determinable | slingshot +0.8 of his speed away, up to +10 m/s: "jug chain pull: pulled while backing away it slingshots in faster" |
+| Pulling, airborne | 0301-0366 is all on the ground; 0251-0300 (Air Slam) shows no chain | Not determinable | a pull from the air holds its height to the anchor: "jug pull: a pull started in the air ..." (new); a jump in the pull exits at 70%: "jug pull: a jump exits ..." |
+| Pulling, speed | 0333: about 5 bh in about 0.4 s = 22.5 m/s (coarse: 2 frames at 5 fps) | settled; ours 22 match | `--kit-parity-check` e.reel_speed 22.5 +-7.5 (new) |
+| Throwing, speed and range | 0303-0305: about 7 bh in about 0.4 s to the wall = 31.5 m/s; 12.6 m is a floor, no cap shown | speed settled, ours 32 match; range 13 over the floor | `--kit-parity-check` e.speed 31.5 +-6 (new); range 13 in "jug chain: Ready > E > Throwing > Hooked ... 7 bh" |
+
+
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
 | Slot | Source | Ours | Verdict |
@@ -240,7 +253,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2; now a straight down slam, 2.4 m hit 0.8 m ahead | differ · **owner** (11-10, `ext/jugg-downslam`); cd 0.8x **open** (gap 10) |
 | Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, straight down slam r 2.4 hit 0.8 m ahead (owner 11-10) | match; 0.8x cd; radius pinned at the owner 2.4 in kit_parity.json |
 | Q | none | glove | ours |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash **not determinable** (no data; no clip pays the chain out past its throw, 11-11; 24 m kept) |
+| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` Not determinable (0305-0320 shows none; 24 m kept); pull 22 m/s = F 22.5 (parity row); the states per frame: see "Warchain states" |
 | R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` |
 | E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) |
 | R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match; kill reset settled: a hunter taken down by the cleave (docs/KNOCK_RESETS.md) |
