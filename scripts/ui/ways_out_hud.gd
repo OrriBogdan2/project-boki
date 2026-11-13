@@ -175,15 +175,18 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var kw := TextCache.width(HudStyle.BIG, key, HudStyle.KEY_FS) + 12.0
 	var w := kw + 10.0 + mw + 26.0
 	var x := sz.x * 0.5 - w * 0.5
+	var sw := TextCache.width(HudStyle.BODY, stay_line(hud.m), 13) + 20.0
+	var shift := maxf(HudScale.nudge_right(Rect2(Vector2(x, y - 22), Vector2(w, 40)), sz),
+			HudScale.nudge_right(Rect2(Vector2(sz.x * 0.5 - sw * 0.5, y + 22), Vector2(sw, 20)), sz))
+	x += shift      # (the grown bottom-left block reaches the prompt at 130%: it steps right)
 	var edge := Color(Heart.GATE_COL, 0.7)
 	SafeArea.note_as("gate_prompt", Rect2(Vector2(x, y - 22), Vector2(w, 40)))      # (the box and its hold bar)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, edge, 1), Rect2(Vector2(x, y - 22), Vector2(w, 34)))
 	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.GATE_COL)
 	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
 	HudStyle.strip(c, Rect2(Vector2(x + 6, y + 14), Vector2(w - 12, 4)), float(it["prog"]), Heart.GATE_COL)
-	var mid := sz.x * 0.5
+	var mid := sz.x * 0.5 + shift
 	var stay := stay_line(hud.m)
-	var sw := TextCache.width(HudStyle.BODY, stay, 13) + 20.0
 	var back := Rect2(Vector2(mid - sw * 0.5, y + 22), Vector2(sw, 20))
 	SafeArea.note_as("gate_stay", back)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)

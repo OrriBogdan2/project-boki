@@ -130,7 +130,8 @@ func _ways_out() -> void:
 			await _hud_at(win, sz, "ways_" + st)
 			var g: String = WAYS_GROUP[st]
 			var drew := SafeArea.seen.has(g) or (g == "waypoint" and SafeArea.seen.has("waypoint_faded"))
-			ok(drew, "%dx%d ways_%s: draws its %s" % [win.x, win.y, st, WAYS_GROUP[st]])
+			var want := HudGroups.ways_out_shown(m) or st != "locked"      # (the strip waits for a seat)
+			ok(drew == want, "%dx%d ways_%s: draws its %s" % [win.x, win.y, st, WAYS_GROUP[st]])
 			if st == "gate_prompt":
 				prompt = SafeArea.seen["gate_prompt"] + SafeArea.seen["gate_stay"]
 		_ways_set("locked")

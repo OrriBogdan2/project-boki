@@ -126,7 +126,8 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
   pass's extents leave room for, never below 100% (on 720p the left column, minimap + squad over the kin card
   and bars, tops out near 125%, and the big drop map holds it at 100%).
 - What sits clear of the panels gives way by the growth (`HudScale.from_edge`): the message lane's top, the edge
-  markers' left limit and bottom reach, the Blight line.
+  markers' left limit and bottom reach, the Blight line (also lifted off the grown vitals block, `HudScale.lift`);
+  the Gate prompt steps right of it (`HudScale.nudge_right`).
 - `--hudref-check` section 9 and `--safe-area-check --hud-scale=<0.8..1.3>`: no group off screen or overlapping at 80%,
   100% and 130% (the former at 1280x720 and 2560x1080, dropping and on the ground).
 
