@@ -210,7 +210,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Input | Ours (content) | In game | Source | Verdict |
 |---|---|---|---|---|
 | LMB tap, hammer throw | throw_range 9.0, pierces, sweep 0.9 | reach 10.4 (9.0 + 0.9 + 0.4), lane 2.6 (2 x (0.9 + 0.4)); asserted | lands at the cursor, clamped; max not shown, 7 h (12.6 m) or more used | match content; ours 9.0 against 12.6 or more [source gap] |
-| LMB hold, Crushing Blow | smash_reach 2.8, arc 180 | reach 3.6 (2.8 + ray 0.3 + 0.4), arc of centres 220; asserted | one crescent, about 180 deg in front | match |
+| LMB hold, Crushing Blow | smash_reach 2.8, arc 180 | reach 4.0 (2.8 + ray ~0.8 + 0.4; was 3.6 before ShotOrigin put the swing rays at the body centre), arc of centres 215; asserted | one crescent, about 180 deg in front | match |
 | RMB Aegis, Shield Slam | wall 4.2 wide at 140 deg; slam r 2.6, 100 deg (only from the Shield Charge at Guard 50) | no foe hurt (a wall); the slam is not reached by a plain RMB | slab 2.2 h wide (4.0); the bash is not seen | content match; slam not measured |
 | E Mending Ground | radius 2.3 | heals only: not measured | green disc 1.3 h (2.34) | content match |
 | R Faultline | 4 cells x 4.0 = 16 m, width 4.5 | far 16.4, lane 5.2 (16.0 and 4.4 net); asserted | 9 bh x 2.5 bh (16.2 x 4.5) | match |

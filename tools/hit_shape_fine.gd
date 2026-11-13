@@ -136,7 +136,9 @@ func _vs_content(meas: Dictionary) -> void:
 			_close("hammer reach (+ its 0.9 m sweep)", float(meas["far"]) - rd - 0.9,
 				float(P.ak.lmb_def()["throw_range"]), 0.3)
 		["bulwark", "lmb_hold", 0.0]:
-			_close("Crushing Blow reach (+ ray 0.3)", float(meas["far"]) - rd - 0.3,
+			# the swing's rays start at the body centre since ShotOrigin (main, 11-13) and 60 Hz steps carry
+			# a ray up to 0.67 m: the game reads about 0.8 m past the content number
+			_close("Crushing Blow reach (+ ray ~0.8)", float(meas["far"]) - rd - 0.8,
 				float(P.ak.lmb_def()["smash_reach"]), 0.25)
 		["bulwark", "x", 0.0]:
 			var fl: Dictionary = P.ak.x_def()
