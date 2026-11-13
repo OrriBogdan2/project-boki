@@ -189,6 +189,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		var d := KinPortrait.view({"species": spk}, tree, 160)
 		if not is_caught: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		dc.add_child(d)
+	BokiCry.play(spk)
 	var info := UI.vbox(7)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(info)
