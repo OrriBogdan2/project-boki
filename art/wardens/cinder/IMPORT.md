@@ -1,5 +1,9 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+the facekeep body `~/meshy/v95/Cinder/r2/ingame1112/cinder_v95_facekeep_body.glb`: body6 cand_B's shape on the cut `cinder_v95_body6_body` (every vertex matched) with the cand_A face3 face image. Was appeal4 cand_5 below. 13.7k tris, 2048 atlas + 2048 emit, 44 clips (pet/give/cheer gain sampled channels, same timing).
+Spec `art/wardens/src/cinder_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
+
 `cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads
@@ -79,3 +83,6 @@ command (rest poses equal to 2e-6); every other clip, the garden set and `x_brea
 On the merge of main into ext/anim-loco-slip (11-12) the re-keyed run_f/b/l/r and jet_land stayed main's and
 the directional loops' run_b, run_fl, run_fr and run_bl were left off (baked from the old run, they did not match the
 scurry): her run ring is f, b, l, r again. Walk diagonals and the crouch ring were copied onto main's glb by name.
+
+v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
+texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
