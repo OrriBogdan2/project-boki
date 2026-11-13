@@ -314,7 +314,8 @@ func _report(truth: Array, drawn, lost: int) -> void:
 		var r: Dictionary = tot[ph]
 		var head := "RSMOOTH %-5s frames %4d  snaps %2d  jerks %3d" % [ph, r["n"], r["snaps"], r["jerks"]]
 		var err: float = r["err"] / maxf(1.0, r["n"])
-		print(head + "  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m  top %.0f m/s (true %.0f)  max step %.2f m" % [
+		print(head + ("  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m  top %.0f m/s (true %.0f)"
+			+ "  max step %.2f m") % [
 			r["backsteps"], r["overshoot"], r["max_off"], err, r["top"], r["true_top"], r["max_step"]])
 	var a: Dictionary = tot["all"]
 	var fps: float = a["n"] / maxf(0.001, w1 - w0 - 0.2)

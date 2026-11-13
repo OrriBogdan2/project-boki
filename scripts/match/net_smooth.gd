@@ -1,10 +1,11 @@
 class_name NetSmooth
 extends RefCounted
-## A remote Hunter's snapshot buffer. The body is drawn GAP + a margin (0.15 s on a steady line) behind its owner's clock, on a smooth
-## curve between the two snapshots around that moment (cubic Hermite through their positions and
-## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
-## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump, unless the
-## velocities the two snapshots report account for it (a kit's scripted dive, like Kitefall's fall).
+## A remote Hunter's snapshot buffer. The body is drawn GAP + a margin (0.15 s on a steady line) behind its
+## owner's clock, on a smooth curve between the two snapshots around that moment (cubic Hermite through
+## their positions and velocities), so late, jittered or lost snapshots don't make it stutter
+## or overshoot. A move between two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is
+## drawn as one jump, unless the velocities the two snapshots report account for it (a kit's scripted
+## dive, like Kitefall's fall).
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
 ## line's delay, taken from the quickest arrival of the last OFF_KEEP (so an owner whose clock fell behind,
 ## a hitch past its 0.1 s step cap, is caught up with within a second). The drawn moment `rt` runs on our
