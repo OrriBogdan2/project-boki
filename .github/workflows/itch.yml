@@ -36,6 +36,16 @@ jobs:
           unzip -q butler.zip -d butler && chmod +x butler/butler
           rm -rf tpl tpl.tpz godot.zip butler.zip
 
+      # Crash and error reporting (docs/SENTRY.md): the pinned Sentry addon, and the DSN secret written into
+      # project.godot for this export only (no secret: the build keeps Sentry off).
+      - name: Sentry addon and DSN
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          set -e
+          tools/sentry_addon.sh
+          python3 -I tools/sentry_dsn.py
+
       - name: Export Windows and macOS
         run: |
           godot --headless --path . --import || true

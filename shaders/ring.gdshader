@@ -1,5 +1,5 @@
 shader_type spatial;
-// A flat soft ring on the ground: zones, revive progress and exit rings (team markers use marker_ring.gdshader, Fx.ring bursts hero_vfx.gdshader).
+// A flat ring on the ground: zones, telegraphs, revive progress, exit rings (team markers use marker_ring.gdshader, bursts fx_ring.gdshader).
 render_mode unshaded, cull_disabled, depth_draw_never, shadows_disabled, blend_mix;
 uniform vec4 color : source_color = vec4(1.0);
 uniform float thickness = 0.12;
