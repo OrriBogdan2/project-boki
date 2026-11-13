@@ -7,7 +7,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 - (a) LMB only, held (taps for Kael and Albert, a 1.1 s draw for Lace). (b) Combo: every direct-damage non-ult ability the source has a number for, cast once at the start and again whenever its cooldown or charge is back, LMB between. Conditional bonuses (Dazed, Static, Ignite, Quickflip's empowered shot, sweet spots, stacks) are left out of the source side; ours runs live, so its passives count.
 - Rank 0 is the unspent rank (slot_lv 1); max is rank 3 for ours and every listed upgrade for the source (a "x2" upgrade counts for both tiers it covers, charges included). LMB has no ranks, so (a) is the same at both.
 - Source shots land at 0.00 s and every interval after; ours includes wind-ups, flight time and recoveries.
-- Bar: ours / source time to knock inside 0.8 to 1.25. Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES` (none yet: line 162, Motley "loses ~15% held-fire DPS, no compensation buff", explains 15% of a 1.9x gap, so it does not cover Motley).
+- Bar: ours / source time to knock inside 0.8 to 1.25. Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES`, which names the damage share the owner gave up; a row then passes as override up to 1.25 / (1 - share). One today: Motley, DECISIONS 2026-11-06 (item 117, briefs/archive/OWNER_REVIEW_1103-2026-11-06.md) "loses ~15% held-fire DPS, no compensation buff", so up to 1.47.
 
 **Footage LMB (Lace, Meeko, Tenzo, Grimble, Neve).** `supervive_kits.md` has no LMB damage for these five, so their LMB row is read from the floating damage numbers in the hero-ref footage (origin/ext/hero-ref-footage, frames named below; trust order puts it under the tooltips, which have no number to beat it). The damage is the source's own number at the level the clip shows, against the mean Hunter at that level, the same conversion as the level 15 tooltips. Interval is the card cooldown where the hits agree with it, else the hit spacing in the footage.
 
@@ -48,10 +48,10 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
 | thief (Shiv) | combo rank max | 4.22 | 4.95 | 0.85 | ok |
-| ostra (Void) | LMB rank 0 | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | LMB rank max | 12.62 | 6.60 | 1.91 | FAIL |
-| ostra (Void) | combo rank 0 | 10.33 | 4.80 | 2.15 | FAIL |
-| ostra (Void) | combo rank max | 8.37 | 4.80 | 1.74 | FAIL |
+| ostra (Void) | LMB rank 0 | 7.22 | 6.60 | 1.09 | ok |
+| ostra (Void) | LMB rank max | 7.22 | 6.60 | 1.09 | ok |
+| ostra (Void) | combo rank 0 | 5.42 | 4.80 | 1.13 | ok |
+| ostra (Void) | combo rank max | 4.82 | 4.80 | 1.00 | ok |
 | archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | ok |
 | archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | ok |
 | tender (Elluna) | LMB rank 0 | 7.10 | 10.40 | 0.68 | FAIL |
@@ -78,8 +78,8 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | mage (Joule) | e | 0.130 | 0.126 | 1.03 |
 | bulwark (Oath) | dash | 0.156 | 0.154 | 1.01 |
 | thief (Shiv) | rmb | 0.032 | 0.019 | 1.67 |
-| ostra (Void) | rmb | 0.062 | 0.117 | 0.53 |
-| ostra (Void) | e | 0.091 | 0.154 | 0.59 |
+| ostra (Void) | rmb | 0.117 | 0.117 | 1.00 |
+| ostra (Void) | e | 0.172 | 0.154 | 1.11 |
 <!-- ttk:table -->
 
 **11-11 slice (ext/ttk-slice-1111, run 2026-11-11 on worker rpc1).** The owner-direct 11-11 kit branches were run one by one and merged together (scratch: origin/main 88b06b9e7 + ext/kael-owner-1111 4cb48148d + ext/lace-1111 cf1adae16 + ext/vex-rmb-1111 a796f3a38 + ext/albert-hold-cinder-orb 4cf2f22b4; the first two carry ext/release-integ-0245 272368589, also run on its own). All seven runs print the same 54 lines: **none of the four branches moves a TTK row.** They change shapes, timing and visuals but no damage, cooldown or cadence the idle-target fight reads (Kael: slam lane 4.3 x 0.72 m instead of the 70 deg cone, the Chain Lunge and its 1.25x chain Smash removed; Lace: Heavy Shot from the bow mouth, roll 3.0 -> 3.375; Vex: Burr Charge no longer procs in the air; Cinder: the pilot flame only while the lance spools up). The table above is therefore what origin/main writes today; the rows that differ from 11-09 are main drift (Kael, Sparkle and Albert combos, Cinder LMB max), not these branches.
@@ -122,5 +122,6 @@ Out of the bar after the slice, each with the number that puts it there: **Kael*
 
 Within the bar: Sable at both ranks (0.85 to 0.95), Vex combo rank 0 (0.92), Oath combo rank max (0.84), Lace (1.15) and Tenzo (1.17; at level 19 instead of 18 the source is about 0.6 s slower, still inside). The ours side of Kael, Cinder, Sparkle and Oath combo rows moved with main since the last write (Sparkle combo rank 0 0.81 -> 0.17, Kael combo 0.45 -> 0.55); the causes above were written against the older numbers.
 Within the bar: Sable at both ranks (0.85 to 0.95), Vex combo rank 0 (0.92), Albert combo rank max (0.84).
+| Motley (Void) | was LMB 1.91; combo 2.15, 1.74; now 1.09; 1.13, 1.00 | Orb 9 was 5.8% of the target against 263 of 2365 = 11.1%; Snap and seed about half the source. | Done (ext/parity-ttk-motley): orb 9 -> 14.5 (the source's 17.1 share less the owner's ~15%, item 117), Snap 9.5 -> 18 and seed 12.5 -> 23.7 (source shares, hit 1.00x and 1.11x), seed burn 8.2 -> 16.2 (250 vs 365). The 0.6 s cadence, the charge to 1.4 s, the +34% full orb, Swollen +44% and the 3.5x peak are unchanged. |
 
 **Not done here:** no tuning; Lace, Meeko, Tenzo, Grimble and Neve have footage LMB rows only, no combo rows (their ability tooltips are a different level from the footage).

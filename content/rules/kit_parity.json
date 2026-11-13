@@ -40,6 +40,12 @@
 		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.72, "evidence": "F Rain of Arrows: pin clip frame 0498, wall centred on the cursor 6.0 +-0.4 bh from the hunter (1 bh = 1.8 m); a frame lower bound, the clamp was not reached (frame 0457: 4.9 bh)"},
 		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.5, "evidence": "F Rain of Arrows wall centred on the cursor 252 px out over a 42 px body = 6.0 bh = 10.8 m (hero-ref-footage pin 0493-0498); the cap is not seen, so this is the floor"},
 		{"hero": "archer", "slot": "R", "field": "x.width", "value": 0.5, "tol": 0.1, "evidence": "F Primal Forces beam 10-13 px wide over a 42 px body = 0.43-0.56 m (hero-ref-footage pin 0559, 0566, 0573)"},
-		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.54, "evidence": "F Rain of Arrows wall centred on the cursor at about 6 bh = 10.8 m (hero-ref/pin.md 0498; 0457 at 4.5 bh); a floor, the cap is not seen; tol 0.3 bh read error"}
+		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.54, "evidence": "F Rain of Arrows wall centred on the cursor at about 6 bh = 10.8 m (hero-ref/pin.md 0498; 0457 at 4.5 bh); a floor, the cap is not seen; tol 0.3 bh read error"},
+		{"hero": "ostra", "slot": "LMB", "field": "lmb.prime_dmg", "value": 0.34, "tol": 0.01, "evidence": "D Gravity Orb: after not firing 353 vs 263 = +34%"},
+		{"hero": "ostra", "slot": "LMB", "field": "lmb.idle", "value": 1.4, "tol": 0.0, "evidence": "O item 60: the wait charges the next orb to full over 1.4 s"},
+		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.dmg", "per": "e.dmg", "value": 0.759, "tol": 0.02, "evidence": "D Void Snap 277 vs Unstable Anomaly 365 (the orb is --ttk-check's, item 117)"},
+		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.swollen_k", "value": 0.44, "tol": 0.01, "evidence": "D Void Snap Empowered 399 vs 277 = +44%"},
+		{"hero": "ostra", "slot": "E", "field": "e.dmg_max_k", "value": 3.5, "tol": 0.0, "evidence": "D Unstable Anomaly: up to 3.5x based on held time"},
+		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"}
 	]
 }
