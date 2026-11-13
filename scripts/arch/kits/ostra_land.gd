@@ -8,18 +8,20 @@ extends RefCounted
 ## same ledge is taken, else the nearest free one stepping back along the throw, else where he threw from.
 ## Over the abyss the lantern keeps the height it was thrown at (the Trade's float, unchanged).
 
-const LIP := 1.0           # m: a cursor this close in front of a higher terrace counts as aimed at its top
-const LIP_STEP := 0.1      # m between the samples looking for that terrace
-const EDGE_IN := 0.15      # m past his radius he lands in from the terrace's edge
-const RING_STEP := 0.25    # m between the rings searched round a blocked spot...
-const RING_MAX := 1.5      # ...out to this far
-const RING_N := 12         # spots on each ring
-const BACK_STEP := 0.25    # m between the spots tried stepping back along the throw
-const HIGH := 1.0e6        # a height above everything (StoneStand's "the top under a falling body")
+const LIP := 1.0  # m: a cursor this close in front of a higher terrace counts as aimed at its top
+const LIP_STEP := 0.1  # m between the samples looking for that terrace
+const EDGE_IN := 0.15  # m past his radius he lands in from the terrace's edge
+const RING_STEP := 0.25  # m between the rings searched round a blocked spot...
+const RING_MAX := 1.5  # ...out to this far
+const RING_N := 12  # spots on each ring
+const BACK_STEP := 0.25  # m between the spots tried stepping back along the throw
+const HIGH := 1.0e6  # a height above everything (StoneStand's "the top under a falling body")
+
 
 ## The landing for a throw from `from` at the target `to` (xz already clamped to reach) by a body of radius r.
 static func spot(m: Match, from: Vector3, to: Vector3, r: float) -> Vector3:
 	return settle(m, onto_ledge(m, from, top(m, to, r, from.y), r), from, r)
+
 
 ## The surface at (p.x, p.z): the terrace, or a standable stone on it; over the abyss, height `void_y`.
 static func top(m: Match, p: Vector3, r: float, void_y: float) -> Vector3:
@@ -27,6 +29,7 @@ static func top(m: Match, p: Vector3, r: float, void_y: float) -> Vector3:
 	if g <= World.VOID + 1.0:
 		return Vector3(p.x, void_y, p.z)
 	return Vector3(p.x, StoneStand.top_under(m.world.dyn_walls, Vector3(p.x, HIGH, p.z), r, g), p.z)
+
 
 ## A target on low ground just short of a higher terrace (the cursor on its face) moves up onto that terrace,
 ## EDGE_IN past his radius from the edge, so throwing at a cliff lands on its top.
@@ -47,9 +50,11 @@ static func onto_ledge(m: Match, from: Vector3, p: Vector3, r: float) -> Vector3
 		s += LIP_STEP
 	return p
 
+
 ## Can a body of radius r stand at p (feet at p.y) without overlapping a rock, tree, wall or cliff?
 static func fits(m: Match, p: Vector3, r: float) -> bool:
 	return m.world.occupy(p.x, p.z, r, p.y, false) == 0.0
+
 
 ## The nearest free spot to `want`: there; else round it on ground at least as high (it stays on the ledge);
 ## else back along the throw toward `from`; else `from` itself.

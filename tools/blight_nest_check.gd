@@ -241,7 +241,7 @@ func _cycle(main: Node) -> void:
 	_run(m, 3.0, func(): pl.teleport(stand))
 	ok(nst.released == sk1 and _skitters(m).is_empty(), "standing by an empty nest for %.0fs: quiet" % (left - 2.0))
 	# break it: gems, XP to the squad close by, the feed line
-	var gems0 := _gem_total(m)      # value, not piles: main merges a drop into a pile close by (DropMerge)
+	var gems0 := _gem_total(m)  # value, not piles: main merges a drop into a pile close by (DropMerge)
 	pl.lvl = 1  # (the 9999-damage kills above maxed the level; gain_xp stops at the top)
 	pl.xp = 0.0
 	var xp0 := pl.xp

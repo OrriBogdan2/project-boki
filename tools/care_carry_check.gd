@@ -4,7 +4,7 @@ extends RefCounted
 ## drops the carried Wisps and locks re-pick for 4 s; nothing else. Each way a carrier can be hit is
 ## asserted: shot damage, a DoT tick, a knock-back, a stun, a root, a slow and a teammate's heal.
 
-var sc        # the SupportCheck running us (setup, step, ok, aim_at)
+var sc  # the SupportCheck running us (setup, step, ok, aim_at)
 
 
 func ok(what: String, cond: bool, info := "") -> void:
@@ -36,19 +36,26 @@ func tender() -> void:
 	var held := _pick(m, P, A, K)
 	P.hurt(10.0, T, {"src": "primary"})
 	sc.step(m, 0.1)
-	ok("mm carry: a rival's shot drops them, 4 s lock, no stun on her",
+	ok(
+		"mm carry: a rival's shot drops them, 4 s lock, no stun on her",
 		held and not CareUtil.is_carried(A) and K.lock_t > 3.8 and P.stun_t <= 0.0,
-		"lock %.2f stun %.2f" % [K.lock_t, P.stun_t])
+		"lock %.2f stun %.2f" % [K.lock_t, P.stun_t]
+	)
 	held = _pick(m, P, A, K)
 	P.hurt(1.0, T, {"src": "burn"})
 	sc.step(m, 0.1)
-	ok("mm carry: a burn tick drops them (any damage, no figure in source)",
-		held and not CareUtil.is_carried(A) and K.lock_t > 3.8)
+	ok(
+		"mm carry: a burn tick drops them (any damage, no figure in source)",
+		held and not CareUtil.is_carried(A) and K.lock_t > 3.8
+	)
 	held = _pick(m, P, A, K)
 	P.stun_t = 0.5
 	sc.step(m, 0.1)
-	ok("mm carry: a stun drops them, 4 s lock",
-		held and not CareUtil.is_carried(A) and K.lock_t > 3.8, "lock %.2f" % K.lock_t)
+	ok(
+		"mm carry: a stun drops them, 4 s lock",
+		held and not CareUtil.is_carried(A) and K.lock_t > 3.8,
+		"lock %.2f" % K.lock_t
+	)
 	# --- holds: knock-back with no damage, a root, a slow, a teammate's heal
 	held = _pick(m, P, A, K)
 	m.displace.knock(P, Vector2(6, 0))

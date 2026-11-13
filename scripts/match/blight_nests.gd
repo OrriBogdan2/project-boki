@@ -189,7 +189,7 @@ func home(s: Blight) -> void:
 
 func tick(dt: float) -> void:
 	for n in list:
-		var b: Blight = n["mob"] if is_instance_valid(n["mob"]) else null      # a freed mob (the match let it go)
+		var b: Blight = n["mob"] if is_instance_valid(n["mob"]) else null  # a freed mob (the match let it go)
 		if b and not b.dead:
 			b.spot = (
 				0.0

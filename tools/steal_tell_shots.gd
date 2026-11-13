@@ -18,8 +18,12 @@ func _grab(file: String, hp_frac: float) -> void:
 			h.render(Match.DT, 1.0)
 		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s.png" % file))
-	print("STEALTELL-SHOT %s boss %.0f%% near=%s top=%s" % [file, hp_frac * 100.0,
-		StealTell.near(m, b, m.player.team), m.lairs.boss_for(m.player) == b])
+	print(
+		(
+			"STEALTELL-SHOT %s boss %.0f%% near=%s top=%s"
+			% [file, hp_frac * 100.0, StealTell.near(m, b, m.player.team), m.lairs.boss_for(m.player) == b]
+		)
+	)
 
 
 func _spot(h: Hunter, at: Vector3) -> void:

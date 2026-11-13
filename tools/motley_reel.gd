@@ -6,10 +6,12 @@ extends "res://tools/parity_reel.gd"
 ## first frame. Never writes the save.
 
 const MOTLEY_PARTS := ["e", "trade", "ledge"]
-const LEDGE_RISE := 2          # terraces the ledge stands over the ground he throws from (at least)
+const LEDGE_RISE := 2  # terraces the ledge stands over the ground he throws from (at least)
+
 
 func parts() -> Array:
 	return MOTLEY_PARTS
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -17,8 +19,10 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
 		var arg := String(a)
-		if arg.begins_with("--shots-dir="): dir = arg.substr(12)
-		if arg.begins_with("--reel-only="): only = arg.substr(12)
+		if arg.begins_with("--shots-dir="):
+			dir = arg.substr(12)
+		if arg.begins_with("--reel-only="):
+			only = arg.substr(12)
 	hero_name = who
 	await _setup()
 	_build_keys()
@@ -34,9 +38,21 @@ func run(main_node: Node) -> void:
 	print("REEL_DONE %d frames in %s" % [frames, frame_dir])
 	main.get_tree().quit(0)
 
+
 func _setup() -> void:
-	var o := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "god": true,
-		"map": "hollowcrown", "arch": who, "cls": Arch.weight(who), "weapon": Arch.signature(who)}
+	var o := {
+		"teams": 1,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4242,
+		"no_drop": true,
+		"god": true,
+		"map": "hollowcrown",
+		"arch": who,
+		"cls": Arch.weight(who),
+		"weapon": Arch.signature(who)
+	}
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)
@@ -56,13 +72,23 @@ func _setup() -> void:
 			x.teleport(home + Vector3(-30, 0, 30))
 	await _reset(7.0)
 
+
 func _m_e() -> void:
-	await _seg("E: the seed grows, no prompt on the ground; the E slot says E AGAIN", 5.0, func(t: float) -> void:
-		P.inp["sig"] = _in(t, 0.2) or _in(t, 4.0))
+	await _seg(
+		"E: the seed grows, no prompt on the ground; the E slot says E AGAIN",
+		5.0,
+		func(t: float) -> void: P.inp["sig"] = _in(t, 0.2) or _in(t, 4.0)
+	)
+
 
 func _m_trade() -> void:
-	await _seg("Shift: a bigger lantern and circle (1.9 m), the dummy trades places", 3.2, func(t: float) -> void:
-		P.inp["dash"] = _in(t, 0.3), 8.0)
+	await _seg(
+		"Shift: a bigger lantern and circle (1.9 m), the dummy trades places",
+		3.2,
+		func(t: float) -> void: P.inp["dash"] = _in(t, 0.3),
+		8.0
+	)
+
 
 ## A cliff 4 m ahead: the cursor on its face, Shift, and he lands standing on top.
 func _m_ledge() -> void:
@@ -77,12 +103,16 @@ func _m_ledge() -> void:
 	P.dashes = P.max_dashes()
 	cam_at = (c["start"] + c["aim"]) * 0.5
 	_aim(c["aim"])
-	await _go(4.0, func(t: float) -> void:
-		_aim(c["aim"])
-		P.inp["dash"] = _in(t, 0.6))
+	await _go(
+		4.0,
+		func(t: float) -> void:
+			_aim(c["aim"])
+			P.inp["dash"] = _in(t, 0.6)
+	)
 	print("REEL_LEDGE from y %.2f to %s" % [float(c["start"].y), str(P.pos)])
 	P.inp["move"] = Vector2.ZERO
 	cam_at = Vector3.ZERO
+
 
 ## A terrace edge facing +x, LEDGE_RISE+ terraces up, with 4 m of flat ground before it and room on top.
 func _ledge() -> Dictionary:

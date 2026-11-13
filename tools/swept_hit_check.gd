@@ -4,10 +4,10 @@ extends RefCounted
 ## 144 fps: it must hit 100% of the time at both rates. Then the same casts with one thin block between
 ## the two at both rates: nothing gets through (Swept, scripts/combat/swept.gd).
 
-const RANGES := [4.0, 8.0, 12.0]      # m to the dummy unless a case lists its own (a weapon or lane that is shorter)
+const RANGES := [4.0, 8.0, 12.0]  # m to the dummy unless a case lists its own (a weapon or lane that is shorter)
 const RATES := [30.0, 144.0]
-const SECS := 2.2          # how long each cast is stepped
-const WARM := 0.5          # s of idle stepping before a cast (animations settle at the new rate)
+const SECS := 2.2  # how long each cast is stepped
+const WARM := 0.5  # s of idle stepping before a cast (animations settle at the new rate)
 
 var main: Node
 var n := 0
@@ -38,10 +38,13 @@ const CASES := [
 	{"arch": "ashwick", "name": "Cinder bolt", "rmb": 0.0},
 ]
 
+
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	print("SWEPT %-58s %s  %s" % [label, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -51,25 +54,28 @@ func run(main_node: Node) -> void:
 	ak.main = main
 	var archs: Array = []
 	for c in CASES:
-		if not archs.has(c["arch"]): archs.append(c["arch"])
+		if not archs.has(c["arch"]):
+			archs.append(c["arch"])
 	_segments()
 	for arch in archs:
 		await _arch(String(arch))
 	print("SWEPT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 ## Swept itself: a body between two far-apart steps is touched, one beside the path is not.
 func _segments() -> void:
 	var a := Vector3(0, 0, 0)
-	var b := Vector3(1.4, 0, 0)       # a 40 m/s step at 30 fps
+	var b := Vector3(1.4, 0, 0)  # a 40 m/s step at 30 fps
 	ok("Swept.dist: a body between two steps is on the segment", Swept.dist(Vector3(0.7, 0, 0.3), a, b) < 0.31)
 	ok("Swept.dist: a body beside the path is not", Swept.dist(Vector3(0.7, 0, 1.0), a, b) > 0.99)
 	ok("Swept.dist: past the end it measures to the end", is_equal_approx(Swept.dist(Vector3(2.4, 0, 0), a, b), 1.0))
 
+
 func _arch(arch: String) -> void:
 	var cases: Array = CASES.filter(func(c): return c["arch"] == arch)
 	for c in cases:
-		for cover in ([false] if c.get("no_cover", false) else [false, true]):
+		for cover in [false] if c.get("no_cover", false) else [false, true]:
 			var hits := 0
 			var total := 0
 			var line := ""
@@ -88,6 +94,7 @@ func _arch(arch: String) -> void:
 			var label := "%s %s" % [c["name"], "blocked by thin cover" if cover else "hits a still dummy"]
 			ok(label, (hits == 0) if cover else (hits == total), line)
 
+
 ## One thin block tile on the lane, half way to the dummy, and the lane's neighbours so nothing slips round it.
 func _block_between(m: Match, home: Vector3, dist: float) -> void:
 	var w: World = m.world
@@ -95,6 +102,7 @@ func _block_between(m: Match, home: Vector3, dist: float) -> void:
 	for dz in range(-2, 3):
 		var i: int = w.idx(bx, int(floor(home.z)) + dz)
 		w.kind[i] = World.T_BLOCK
+
 
 ## Resets the pair, casts once and steps `secs` at `dt`. True when the dummy took damage.
 func _cast(m: Match, P: Hunter, T: Hunter, home: Vector3, dist: float, dt: float, c: Dictionary) -> bool:
@@ -105,7 +113,8 @@ func _cast(m: Match, P: Hunter, T: Hunter, home: Vector3, dist: float, dt: float
 	ak.fresh(T)
 	T.hp = T.max_hp
 	var K: ArchKit = P.ak
-	for k in K.cd: K.cd[k] = 0.0
+	for k in K.cd:
+		K.cd[k] = 0.0
 	K.ch_rmb = 1.0
 	P.dashes = P.max_dashes()
 	P.ammo = 99
@@ -128,7 +137,8 @@ func _cast(m: Match, P: Hunter, T: Hunter, home: Vector3, dist: float, dt: float
 		P.inp["fire"] = t < hold_f
 		P.inp["sec_hold"] = hold_r > 0.0 and t < hold_r
 		P.inp["dash_down"] = c.get("dash", false)
-		for mb in m.mobs: mb.queue_free()
+		for mb in m.mobs:
+			mb.queue_free()
 		m.mobs.clear()
 		m.step(dt)
 		T.vel = Vector3.ZERO
@@ -136,6 +146,7 @@ func _cast(m: Match, P: Hunter, T: Hunter, home: Vector3, dist: float, dt: float
 	for k in ["fire", "sec_hold", "dash_down"]:
 		P.inp[k] = false
 	return T.hp < T.max_hp
+
 
 func _idle(m: Match, secs: float, dt: float) -> void:
 	var t := 0.0

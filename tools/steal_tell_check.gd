@@ -32,8 +32,10 @@ func run(main: Node) -> void:
 	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	var rules = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/steal_window.json"))
 	var at := StealTell.at()
-	ok(rules is Dictionary and is_equal_approx(at, float(rules["at"])) and is_equal_approx(at, 0.25),
-		"the window opens at %.2f of max health, read from content/rules/steal_window.json" % StealTell.at())
+	ok(
+		rules is Dictionary and is_equal_approx(at, float(rules["at"])) and is_equal_approx(at, 0.25),
+		"the window opens at %.2f of max health, read from content/rules/steal_window.json" % StealTell.at()
+	)
 	var F: Dictionary = m.lairs.list[0]
 	m.lairs.activate(F)
 	for g in F["guards"]:
@@ -48,17 +50,23 @@ func run(main: Node) -> void:
 	var red := Color("ff6a5a")
 	# 1. the line: above it shut, on it open, dead shut
 	b.hp = b.max_hp
-	ok(not StealTell.open(b) and StealTell.fill(b, red, 1.0) == red,
-		"a full-health boss: no window, the bar keeps its red")
+	ok(
+		not StealTell.open(b) and StealTell.fill(b, red, 1.0) == red,
+		"a full-health boss: no window, the bar keeps its red"
+	)
 	b.hp = b.max_hp * (StealTell.at() + 0.01)
 	ok(not StealTell.open(b), "just over the line (%.0f of %.0f): still shut" % [b.hp, b.max_hp])
 	b.hp = b.max_hp * StealTell.at()
 	var lo := StealTell.fill(b, red, 0.0)
 	var hi := StealTell.fill(b, red, 0.125)
 	ok(StealTell.open(b), "on the line: open")
-	ok(lo != red and absf(lo.h - red.h) > 0.08 and absf(lo.h - Color("e0b0ff").h) > 0.2 and hi != lo,
-		"open, the fill is gold (hue %.2f, red %.2f) and pulses (%s -> %s)"
-		% [lo.h, red.h, lo.to_html(false), hi.to_html(false)])
+	ok(
+		lo != red and absf(lo.h - red.h) > 0.08 and absf(lo.h - Color("e0b0ff").h) > 0.2 and hi != lo,
+		(
+			"open, the fill is gold (hue %.2f, red %.2f) and pulses (%s -> %s)"
+			% [lo.h, red.h, lo.to_html(false), hi.to_html(false)]
+		)
+	)
 	b.dead = true
 	ok(not StealTell.open(b), "a dead boss: shut")
 	b.dead = false
@@ -73,12 +81,18 @@ func run(main: Node) -> void:
 	var far: Vector3 = b.pos + out * (KillXp.SHARE_R + 30.0)
 	for i in m.hunters.size():
 		_spot(m.hunters[i], far + Vector3(i * 1.5, 0, 0))
-	ok(not StealTell.near(m, b, P.team) and not StealTell.near(m, b, Q.team),
-		"nobody within %.0f m: no squad sees the mark" % KillXp.SHARE_R)
+	ok(
+		not StealTell.near(m, b, P.team) and not StealTell.near(m, b, Q.team),
+		"nobody within %.0f m: no squad sees the mark" % KillXp.SHARE_R
+	)
 	_spot(C, b.pos + out * (KillXp.SHARE_R - 2.0))
-	ok(StealTell.near(m, b, P.team) and not StealTell.near(m, b, Q.team),
-		"a squadmate at %.1f m: our squad sees it, the rival squad (%.0f m off) doesn't"
-		% [C.flat_dist(b), Q.flat_dist(b)])
+	ok(
+		StealTell.near(m, b, P.team) and not StealTell.near(m, b, Q.team),
+		(
+			"a squadmate at %.1f m: our squad sees it, the rival squad (%.0f m off) doesn't"
+			% [C.flat_dist(b), Q.flat_dist(b)]
+		)
+	)
 	_spot(C, b.pos + out * (KillXp.SHARE_R + 2.0))
 	ok(not StealTell.near(m, b, P.team), "the squadmate steps to %.1f m: gone" % C.flat_dist(b))
 	_spot(Q, b.pos - out * 10.0)
@@ -93,7 +107,9 @@ func run(main: Node) -> void:
 	b.stagger_t = 0.0
 	b.hp = b.max_hp * StealTell.at() * 0.8
 	var inside := b.hurt(50.0, P, {"src": "shot"})
-	ok(above > 0.0 and is_equal_approx(above, inside) and b.stagger_t <= 0.0,
-		"the same 50 hit deals %.1f above the line and %.1f in the window, no reel" % [above, inside])
+	ok(
+		above > 0.0 and is_equal_approx(above, inside) and b.stagger_t <= 0.0,
+		"the same 50 hit deals %.1f above the line and %.1f in the window, no reel" % [above, inside]
+	)
 	print("STEALTELL done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

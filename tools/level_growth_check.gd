@@ -8,12 +8,22 @@ extends RefCounted
 
 var bad := 0
 const LEVELS := [1, 5, 10]
-const AP := {1: 1.0, 5: 1.156, 10: 1.351}      # ability power: 1 + 0.039 x (level - 1)
-const HP := {1: 1.0, 5: 1.24, 10: 1.54}        # max health: 1 + 0.06 x (level - 1)
+const AP := {1: 1.0, 5: 1.156, 10: 1.351}  # ability power: 1 + 0.039 x (level - 1)
+const HP := {1: 1.0, 5: 1.24, 10: 1.54}  # max health: 1 + 0.06 x (level - 1)
 ## The slot whose damage each Hunter's check reads (an ability that deals damage in its kit).
 const DMG_SLOT := {
-	"gunslinger": "kin", "juggernaut": "sec", "ashwick": "dash", "tender": "sec", "dolm": "dash", "archer": "sec",
-	"dredge": "sec", "rimewright": "sec", "mage": "dash", "bulwark": "dash", "thief": "kin", "ostra": "sec",
+	"gunslinger": "kin",
+	"juggernaut": "sec",
+	"ashwick": "dash",
+	"tender": "sec",
+	"dolm": "dash",
+	"archer": "sec",
+	"dredge": "sec",
+	"rimewright": "sec",
+	"mage": "dash",
+	"bulwark": "dash",
+	"thief": "kin",
+	"ostra": "sec",
 	"gil": "dash",
 }
 ## Hunters whose heal or shield is the kit's own (others heal and shield through Effects' ability path).
@@ -21,12 +31,14 @@ const KIT_HEAL := ["tender", "bulwark"]
 const MAXHP_SHIELD := ["bulwark", "ashwick"]
 const SHIELD_NAME := {"bulwark": "aegis shield_max", "ashwick": "cloak shield (max health)"}
 
+
 func ok(what: String, cond: bool, info := "") -> void:
 	if cond:
 		print("LEVELGROWTH ok   " + what)
 		return
 	print("LEVELGROWTH FAIL %s  (%s)" % [what, info])
 	bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -49,7 +61,8 @@ func run(main: Node) -> void:
 			P.lvl = lvl
 			LevelGrowth.apply(P)
 			var got := _read(P, String(a))
-			if lvl == 1: base = got
+			if lvl == 1:
+				base = got
 			var shield_k: float = HP[lvl] if MAXHP_SHIELD.has(a) else AP[lvl]
 			var want := {"dmg": AP[lvl], "heal": AP[lvl], "shield": shield_k, "hp": HP[lvl]}
 			for k in want:
@@ -60,20 +73,29 @@ func run(main: Node) -> void:
 	print("LEVELGROWTH %s (%d failed)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+
 ## The numbers the slots read at the hunter's current level.
 func _read(P: Hunter, a: String) -> Dictionary:
 	var k := P.ak
 	var heal: float = Effects._heal_k(P)
-	if a == "tender": heal = (k as TenderKit).heal_k()
-	elif a == "bulwark": heal = (k as BulwarkKit).heal_k()
+	if a == "tender":
+		heal = (k as TenderKit).heal_k()
+	elif a == "bulwark":
+		heal = (k as BulwarkKit).heal_k()
 	var shield: float = Effects._heal_k(P)
-	if a == "bulwark": shield = (k as BulwarkKit).shield_max()
-	elif a == "ashwick": shield = P.max_hp      # Furnace Cloak, rank-3 Soot Ram: a share of max health
+	if a == "bulwark":
+		shield = (k as BulwarkKit).shield_max()
+	elif a == "ashwick":
+		shield = P.max_hp  # Furnace Cloak, rank-3 Soot Ram: a share of max health
 	return {"dmg": k.power(String(DMG_SLOT[a])), "heal": heal, "shield": shield, "hp": P.max_hp - P.kin_hp_added}
+
 
 func _what(a: String, k: String) -> String:
 	match k:
-		"dmg": return "%s damage" % DMG_SLOT[a]
-		"heal": return "kit heal (heal_k)" if KIT_HEAL.has(a) else "ability heal (Effects)"
-		"shield": return SHIELD_NAME.get(a, "ability shield (Effects)")
+		"dmg":
+			return "%s damage" % DMG_SLOT[a]
+		"heal":
+			return "kit heal (heal_k)" if KIT_HEAL.has(a) else "ability heal (Effects)"
+		"shield":
+			return SHIELD_NAME.get(a, "ability shield (Effects)")
 	return "max health"

@@ -8,9 +8,12 @@ extends RefCounted
 var bad := 0
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("BOSSPARITY %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _run(sec: float) -> void:
 	var t := 0.0
@@ -20,9 +23,11 @@ func _run(sec: float) -> void:
 		m.step(Match.DT)
 		t += Match.DT
 
+
 func _spot(h: Hunter, at: Vector3) -> void:
 	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	h.vel = Vector3.ZERO
+
 
 ## Opens the lair, stands P at `at` and wakes the boss with a hit from there.
 func _wake(L: Dictionary, P: Hunter, at: Vector3) -> Boss:
@@ -38,6 +43,7 @@ func _wake(L: Dictionary, P: Hunter, at: Vector3) -> Boss:
 	_run(0.3)
 	return b
 
+
 ## A spot on solid ground just outside the lair's gate.
 func _outside(L: Dictionary) -> Vector3:
 	var out := Vector3(L["out"].x, 0, L["out"].y)
@@ -47,10 +53,12 @@ func _outside(L: Dictionary) -> Vector3:
 			return p
 	return L["c"] + out * (float(L["half"]) + 3.0)
 
+
 func _phase_at(b: Boss, frac: float) -> int:
 	b.hp = b.max_hp * frac
 	_run(0.2)
 	return b.phase
+
 
 func run(main: Node) -> void:
 	main.set_meta("boss_parity_check", self)
@@ -69,7 +77,8 @@ func run(main: Node) -> void:
 	var Q2: Hunter = rivals[1]
 	for h in m.hunters:
 		h.ctrl = "idle" if h != P else "local"
-	for L in m.lairs.list: m.lairs.activate(L)
+	for L in m.lairs.list:
+		m.lairs.activate(L)
 	var F: Dictionary = m.lairs.list[0]
 	for L in m.lairs.list:
 		if String(L["boss"]) == "colossus":
@@ -79,15 +88,19 @@ func run(main: Node) -> void:
 	var side := Vector3(-out.z, 0, out.x)
 	# 1. woken from outside the gate, nobody inside: no seal, and after Boss.LEASH_T it resets
 	var b := _wake(F, P, _outside(F))
-	ok(not b.dormant and not F.get("locked", false) and not m.lairs.inside(F, P.pos, 0.25),
-		"woken by a hit from outside: awake, no seal, P stays out")
+	ok(
+		not b.dormant and not F.get("locked", false) and not m.lairs.inside(F, P.pos, 0.25),
+		"woken by a hit from outside: awake, no seal, P stays out"
+	)
 	b.hp = b.max_hp * 0.5
 	_run(Boss.LEASH_T - 1.5)
 	ok(not b.dormant and b.phase == 1, "still awake (phase %d) %.0f s after waking" % [b.phase, Boss.LEASH_T - 1.2])
 	_run(2.0)
 	var home: float = Vector2(b.pos.x - c.x, b.pos.z - c.z).length()
-	ok(b.dormant and b.phase == 0 and is_equal_approx(b.hp, b.max_hp) and home < 0.1,
-		"empty for %.0f s: asleep, phase 0, full health, home (%.1f m off)" % [Boss.LEASH_T, home])
+	ok(
+		b.dormant and b.phase == 0 and is_equal_approx(b.hp, b.max_hp) and home < 0.1,
+		"empty for %.0f s: asleep, phase 0, full health, home (%.1f m off)" % [Boss.LEASH_T, home]
+	)
 	# 2. inside, sealed in: the phases start at Boss.PHASE_HP
 	b = _wake(F, P, c + out * 3.0)
 	ok(not b.dormant and b.phase == 0 and F.get("locked", false), "woken from inside: sealed, phase 0")
@@ -97,8 +110,10 @@ func run(main: Node) -> void:
 	# 3. a reset during the phase roar (a wipe, the seal running out) leaves a clean boss
 	ok(b.invul_t > 0.0, "the phase roar armours it (%.1f s)" % b.invul_t)
 	m.lairs.reset_boss(b)
-	ok(b.dormant and b.phase == 0 and b.invul_t == 0.0 and b.empty_t == 0.0 and not F.get("locked", false),
-		"reset mid-roar: asleep, unsealed, no armour or empty-lair time left over")
+	ok(
+		b.dormant and b.phase == 0 and b.invul_t == 0.0 and b.empty_t == 0.0 and not F.get("locked", false),
+		"reset mid-roar: asleep, unsealed, no armour or empty-lair time left over"
+	)
 	# 4. the last hit's squad takes the kill; the squad that dealt the damage gets nothing
 	b = _wake(F, P, c + out * 3.0)
 	_spot(C, c + side * 3.0)
@@ -110,16 +125,20 @@ func run(main: Node) -> void:
 	var dealt := float(b.damage_by.get(P.team, 0.0)) / b.max_hp
 	ok(not b.dead and dealt > 0.9, "P's squad has dealt %d%% and it stands" % int(dealt * 100))
 	for h in m.hunters:
-		h.xp = 0.0      # (nothing steps between here and the kill)
+		h.xp = 0.0  # (nothing steps between here and the kill)
 	var orbs0 := PerkOrbs.list(m).size()
 	b.hurt(b.hp + b.max_hp, Q, {"src": "shot"})
 	var by := String(F.get("cleared_by", ""))
 	ok(b.dead and by == Q.pname, "the last hitter (%s) is credited the kill" % by)
-	ok(is_equal_approx(Q.xp, KillXp.BOSS_XP) and is_equal_approx(Q2.xp, KillXp.BOSS_XP),
-		"the last hitter and a squadmate get the %d kill XP (%.1f, %.1f)" % [int(KillXp.BOSS_XP), Q.xp, Q2.xp])
+	ok(
+		is_equal_approx(Q.xp, KillXp.BOSS_XP) and is_equal_approx(Q2.xp, KillXp.BOSS_XP),
+		"the last hitter and a squadmate get the %d kill XP (%.1f, %.1f)" % [int(KillXp.BOSS_XP), Q.xp, Q2.xp]
+	)
 	ok(P.xp == 0.0 and C.xp == 0.0, "the squad that did the damage gets none (%.1f, %.1f)" % [P.xp, C.xp])
-	ok(int(Q.stats.get("bosses", 0)) == 1 and int(P.stats.get("bosses", 0)) == 0,
-		"the boss kill stat goes to the last hitter")
+	ok(
+		int(Q.stats.get("bosses", 0)) == 1 and int(P.stats.get("bosses", 0)) == 0,
+		"the boss kill stat goes to the last hitter"
+	)
 	ok(PerkOrbs.list(m).size() > orbs0, "the perk-orb fan dropped (%d orbs)" % (PerkOrbs.list(m).size() - orbs0))
 	print("BOSSPARITY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
