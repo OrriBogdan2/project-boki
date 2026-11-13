@@ -52,6 +52,11 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	var gold: Array = []
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if f.ends_with(".gd") and FileAccess.get_file_as_string("res://scripts/arch/kits/" + f).contains("ffd25a"):
+			gold.append(f)
+	ok(gold.is_empty(), "no kit holds the shared gold ffd25a: a Hunter's flashes follow its colour %s" % [gold])
 	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame

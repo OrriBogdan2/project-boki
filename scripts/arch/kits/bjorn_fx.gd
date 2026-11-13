@@ -20,7 +20,6 @@ extends Node3D
 const GOLD := Color("ffc94a")
 const EMBER := Color("ff8a2a")
 const GREEN := Color("7dffb0")
-const STAR_GOLD := Color("ffd25a")
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
 const WAKE_T := 0.28
@@ -105,7 +104,7 @@ func _ready() -> void:
 	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
-	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
+	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", AimKit.hero_col(h), true))
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", Arch.color(h.arch), true))
@@ -382,7 +381,7 @@ func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
 	WardenMood.poke(h.model)
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
-	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
+	h.m.fx.spark(at, out, AimKit.hero_col(h), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
 	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
 
 ## Broken: the shared shield break (ShieldBreak) across the wall, like every other shield.
