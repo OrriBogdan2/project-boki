@@ -528,8 +528,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		d *= 0.35
 	d *= 1.0 - owner_stat("damage_reduction")
 	if downed:
-		# a wisp can't be shot: it's lost to stomps, an execute, or bleeding out
-		return 0.0
+		return Life.wisp_hit(self, by, dmg, opts)
 	var d_in := d
 	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
 	var shelled := false
@@ -1924,8 +1923,6 @@ func sim(dt: float) -> void:
 	# gloves need no point: Gloves
 	for gk in SLOT_GATES:
 		_gate(gk[0], gk[1], gk[2])
-	if not downed and not dropping and not out:
-		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
 	_tick_base(dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
@@ -2773,7 +2770,7 @@ var gear: Array = Gear.empty_slots()     # four slots of found gear (Gear.SLOTS)
 var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
-# ability locked. XP comes from fighting (damage, knocks) and a slow trickle; each level gives a
+# ability locked. XP comes from knocks and lair bosses, never from time or from damage; each level gives a
 # point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9).
 const XP_TO := [0.0, 70.0, 170.0, 300.0, 460.0, 650.0, 870.0, 1120.0, 1400.0, 1710.0]   # total XP to reach level i+1
 const SLOTS := ["sec", "dash", "kin", "ult"]                  # the hero's own abilities; gloves never rank (Gloves)

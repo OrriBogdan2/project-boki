@@ -91,12 +91,12 @@ var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
 var displace: Displace = null     # abilities moving someone else's body (online too: its owner's game moves it)
-var _later: Array = []     # [due time, Callable]: delayed ability steps, on match time (not wall-clock timers)
+var _later: Array = []     # [due time, Callable, its owner for SfxCast]: delayed ability steps, on match time
 
 ## Run cb after `delay` seconds of match time: delayed effects, echoes, landing blasts. Unlike a
 ## SceneTree timer it pauses with the match, keeps step with headless sims and dies with the match.
 func later(delay: float, cb: Callable) -> void:
-	_later.append([time + maxf(0.0, delay), cb])
+	_later.append([time + maxf(0.0, delay), cb, SfxCast.current()])
 
 func _run_later() -> void:
 	if _later.is_empty():
@@ -106,7 +106,9 @@ func _run_later() -> void:
 		if float(it[0]) <= time: due.append(it)
 	for it in due:
 		_later.erase(it)
+		SfxCast.scope(it[2])
 		(it[1] as Callable).call()
+	SfxCast.scope(null)
 var _bond_cb: Callable
 var _combo_cb: Callable
 var player_lost: Array = []  # your kin left behind when you went down: {uid, kin, holder}
@@ -1767,7 +1769,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
 			if lv >= 0:
 				_armor_up(credit)
@@ -2593,17 +2594,20 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 	if net_on and not is_host and pid == "":
 		return
 	if pid == "":
+		if DropMerge.stack(self, kind_s, at, v, key):
+			return
 		drop_n += 1
 		pid = "d%d" % drop_n
 	var n: Node3D
 	match kind_s:
-		"gem": n = Models.gem()
+		"gem": n = DropMerge.gem_node(self, v)
 		"seed": n = Models.seed_bag(Data.CROPS[key]["color"])
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"ckey": n = KeyModels.pickup()
 		_: n = UtilityBelt.pickup_model(kind_s) if UtilityBelt.is_item(kind_s) else Models.gem()
-	add_child(n)
+	if n.get_parent() == null:
+		add_child(n)
 	n.position = at
 	var a := randf() * TAU
 	var v0: Vector3 = vel0 if vel0 != null else Vector3(cos(a) * randf_range(1.5, 3.5), randf_range(4.0, 7.0), sin(a) * randf_range(1.5, 3.5))
@@ -2648,10 +2652,10 @@ func _update_pickups(dt: float) -> void:
 		n.position = pos + Vector3(0, sin(time * 3.0 + p["v"]) * 0.06, 0)
 		n.rotation.y += dt * 2.0
 		if pos.y < -12.0:
-			n.queue_free(); pickups.erase(p)
+			DropMerge.release(self, p); pickups.erase(p)
 
 func _collect(h: Hunter, p: Dictionary) -> void:
-	p["node"].queue_free()
+	DropMerge.release(self, p)
 	pickups.erase(p)
 	if net_on:
 		net_event(["take", p["id"]])
@@ -2694,6 +2698,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.global_position = at
 	var from := ShotOrigin.hit_from(by, at, v2, extra)      # the hit sweep starts at the body; `at` is the muzzle
 	life += ShotOrigin.extra_life(at, from, v2)
+	v2 = ShotOrigin.keep_reach(at, from, v2, extra)
 	if not extra.has("dy") and not extra.get("mob", false) and not extra.get("cos", false) and not extra.get("melee", false):
 		var src: Hunter = by as Hunter if by is Hunter else ((by as Kin).owner_h as Hunter if by is Kin and (by as Kin).owner_h else null)
 		if src and src.inp.has("aim_y"):
@@ -2724,6 +2729,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 
 func _update_shots(dt: float) -> void:
 	for s in shots.duplicate():
+		SfxCast.scope(s["by"])
 		s["life"] -= dt
 		var p: Vector3 = s["pos"]
 		s["prev"] = p
@@ -2836,6 +2842,7 @@ func _update_shots(dt: float) -> void:
 				continue
 		if s["life"] <= 0.0:
 			_shot_end(s, p, null, "expire")
+	SfxCast.scope(null)
 
 ## Shots fly level, so a target one terrace above or below still gets hit. Two terraces up and the
 ## shot goes under them into the cliff; two down and it sails over their head.
@@ -3263,17 +3270,9 @@ func _process(delta: float) -> void:
 			cam.zoom_to = lerpf(1.05, 1.7, hk)
 			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
 		else:
-			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
-			# the camera only eases back while gliding, so jumps and falls never change the framing
-			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
-			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
+			cam.zoom_to = cam.air_zoom(player, player_altitude())
 			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
-			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
-			# high up, the camera pulls back with your altitude so you can still read the ground
-			var alt := player_altitude()
-			if alt > 4.0:
-				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
 			cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
 		var peek := mate_look.focus(player.render_pos(alpha), alpha)
@@ -3914,7 +3913,7 @@ func step(dt: float) -> void:
 		arena.tick(dt)
 	if duo: duo.tick(dt)
 	_prof("train")
-	for h in hunters: h.sim(SimLod.step_dt(h, dt))
+	for h in hunters: SfxCast.sim(h, SimLod.step_dt(h, dt))
 	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
@@ -5411,6 +5410,7 @@ func _net_ev(x, from: String) -> void:
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"hcast": HostileCue.net_in(self, x)   # a rival's E or R went off in another game
+				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
@@ -5521,7 +5521,7 @@ func _net_ev(x, from: String) -> void:
 		"take", "gone":
 			for p in pickups:
 				if p["id"] == String(x[1]):
-					p["node"].queue_free()
+					DropMerge.release(self, p)
 					pickups.erase(p)
 					break
 			if String(x[0]) == "take" and is_host:

@@ -9,7 +9,7 @@ extends RefCounted
 const DB := -2.0       # dB: the same for ally and rival; the colour of the tag tells them apart, never the level
 
 static func cast(k: ArchKit) -> void:
-	_play(k.m, k.h)
+	SfxCast.hold_back(func(): _play(k.m, k.h))
 	if k.m.net_on and not k.h.remote:
 		k.m.net_fx(["ucast", k.h.nid])
 
