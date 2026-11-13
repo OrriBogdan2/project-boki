@@ -92,8 +92,26 @@ func spawn(sid: String) -> void:
 			tu.tank(mb, float(c.get("hp", camp_hp)))
 			ledger.append({"mb": mb, "to": int(c.get("to", 0)), "paid": false})
 
+## A monster that fell or was knocked off the player's island is out of every kit's reach: it goes, and if that
+## empties the camp a new one comes.
+func _cull_strays() -> void:
+	var p := tu.m.player
+	if not p.grounded:
+		return
+	var isl := tu.m.world.island_of(p.pos.x, p.pos.z)
+	var culled := false
+	for e: Dictionary in ledger:
+		var mb: Mob = e["mb"]
+		if is_instance_valid(mb) and not mb.dead and tu.m.world.island_of(mb.pos.x, mb.pos.z) != isl:
+			mb.dead = true
+			mb.visible = false
+			culled = true
+	if culled and alive() == 0:
+		spawn(tu.id())
+
 ## Each kill pays its share of what is left to the camp's level; the last one tips it over.
 func update() -> void:
+	_cull_strays()
 	for e: Dictionary in ledger:
 		if e["paid"] or (is_instance_valid(e["mb"]) and not (e["mb"] as Mob).dead):
 			continue
