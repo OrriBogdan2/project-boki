@@ -492,6 +492,8 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 ## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
 ## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
 const THROW_WIND := 0.08
+## m round the flying hammer, out and back, that it hits (its sides stay inside it: --warden-clips-check)
+const MACE_HIT_R := 0.9
 
 ## How far a tap throws the hammer: to the cursor, clamped to its range (m).
 func throw_dist() -> float:
@@ -583,7 +585,7 @@ func _tick_mace(dt: float) -> void:
 			var g: float = m.world.ground_at(q.x, q.z)
 			var blocked: bool = m.world.is_block(q.x, q.z) or g > p.y - 0.2
 			if not blocked: p = q
-			for f in foes_in(p, 0.9, 1.8):
+			for f in foes_in(p, MACE_HIT_R, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
 					_mace_hit(f, float(md["throw_dmg"]), dir)
@@ -623,7 +625,7 @@ func _tick_mace(dt: float) -> void:
 			var to := h.pos + Vector3(0, 1.0, 0) - p
 			var dir2 := Vector2(to.x, to.z).normalized()
 			p += to * minf(1.0, dt / left)
-			for f in foes_in(p, 0.9, 1.8):
+			for f in foes_in(p, MACE_HIT_R, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
 					_mace_hit(f, float(md["recall_dmg"]), dir2)
