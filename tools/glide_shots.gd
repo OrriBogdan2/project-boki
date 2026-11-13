@@ -1,21 +1,20 @@
 extends RefCounted
 ## --glide-shots --shots-dir=<dir> [--wardens=a,b] [--size=360]: every Hunter (Arch.ORDER) in a live training match,
-## high up, through one glide: a fall, the glider opening, a straight hold, a turn, the Ctrl dive, the glide catching
-## again, the glider closing into a fall, then a re-open and an air dash handed back to the glider.
-## <dir>/<arch>/{match,side}/f000.png... at 15 fps: the match camera's angle (zoomed on the Hunter) and a side view.
-## Prints one GLIDE_SHOT line a frame (phase, glide weight, fall speed, the body's numbers) so a strip reads with them.
+## high up, through one glide: a fall, the glider opening, a straight hold, a hard turn left and one right (the keys
+## kept 60 degrees off the heading: the glider turns as fast as it can), the dive (crouch held) and the glide catching
+## again. <dir>/<arch>/{back,side}/f000.png... at 15 fps: from behind (the bank reads) and from the left (the dive's
+## pitch reads), the body's lean toward the match camera (CamRig.char_lean) left out, as it would read as a roll from
+## here. Prints one GLIDE_SHOT line a frame with the rig's tilt and the body's, so a strip reads with them.
 ## Needs a renderer.
 
-const CAM_PITCH := 66.0    # degrees: the default match camera (CamRig STYLES "supervive")
-const CAM_DIST := 23.0     # m: the match camera's distance
-const MATCH_FOV := 9.0     # degrees: the match angle, cropped to the Hunter
-const SIDE_FOV := 26.0
-const SIDE_DIST := 7.5     # m
 const HEIGHT := 60.0       # m above the ground: room for the dive
 const EVERY := 4           # sim steps (60 Hz) per frame: 15 fps
+const STEER := 60.0        # degrees the keys sit off the heading in a hard turn
+const DIST := 7.5          # m from the Hunter
+const FOV := 30.0
 ## s: the phases, each to the next one's start
-const PHASES := [["fall", 0.0], ["open", 0.3], ["hold", 0.7], ["turn", 1.4], ["dive", 2.2], ["catch", 3.0],
-	["close", 3.6], ["reopen", 4.2], ["dash", 4.8], ["end", 5.6]]
+const PHASES := [["fall", 0.0], ["open", 0.3], ["hold", 0.7], ["left", 1.2], ["level", 2.0], ["right", 2.4],
+	["level", 3.2], ["dive", 3.7], ["catch", 4.5], ["end", 5.1]]
 
 var tree: SceneTree
 var cam: Camera3D
@@ -69,80 +68,68 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 	cam = Camera3D.new()
 	m.add_child(cam)
 	cam.make_current()
-	var sync := h.model.get_node_or_null("Warden/Sync")
+	cam.fov = FOV
+	var sync := h.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	if sync:
 		sync.set_process(false)
-	for v in ["match", "side"]:
+	for v in ["back", "side"]:
 		DirAccess.make_dir_recursive_absolute(dir.path_join(v))
-	var dashed := false
+	var heading := Vector2(1, 0)
 	var step := 0
 	var t := 0.0
-	var end := float(PHASES[-1][1])
-	while t < end:
+	while t < float(PHASES[-1][1]):
 		var ph := _phase(t)
-		var turn_k := clampf((t - 1.4) / 0.4, 0.0, 1.0)
-		var mv := Vector2(1, 0).rotated(turn_k * PI * 0.5)      # east, then a quarter turn to the south
-		h.inp["move"] = mv
-		h.inp["aim"] = h.pos + Vector3(mv.x, 0, mv.y) * 8.0 + Vector3(0, 0.9, 0)
-		var glide: bool = ph in ["open", "hold", "turn", "dive", "catch", "reopen", "dash"]
+		if Vector2(h.vel.x, h.vel.z).length() > 1.0:
+			heading = Vector2(h.vel.x, h.vel.z).normalized()
+		var steer := 0.0       # (a Vector2 of x, z turns right for a positive angle)
+		if ph == "left": steer = -STEER
+		elif ph == "right": steer = STEER
+		h.inp["move"] = heading.rotated(deg_to_rad(steer))
+		h.inp["aim"] = h.pos + Vector3(heading.x, 0, heading.y) * 8.0 + Vector3(0, 0.9, 0)
+		var glide: bool = ph not in ["fall", "end"]
 		h.inp["glide"] = glide
 		h.inp["glide_btn"] = glide
 		h.inp["crouch"] = ph == "dive"
-		if ph == "dash" and not dashed:
-			dashed = true
-			h.dashes = h.max_dashes()
-			h.ex_cd = 0.0
-			h.do_dash()
 		m.step(Match.DT)
 		h.render(Match.DT, 1.0)
+		h.model.basis = Basis(Vector3.UP, h.face).scaled_local(h.model.scale)
 		if sync:
-			sync.call("_process", Match.DT)
+			sync._process(Match.DT)
 		if step % EVERY == 0:
 			var i := step / EVERY
-			var cl: WardenClips = sync.get("clips") if sync else null
-			print("GLIDE_SHOT %s f%03d %-6s gl=%d dv=%d roll=%.2f vy=%6.1f glide_w=%.2f %s" % [arch, i, ph,
-				int(h.gliding), int(h.plunging()), h.roll_t, h.vel.y, cl.glide_w if cl else -1.0, _body(h, cl)])
-			_aim_match(h)
-			await _grab(dir.path_join("match/f%03d.png" % i))
-			_aim_side(h)
+			var on := "gl=%d dv=%d" % [int(h.gliding), int(h.plunging())]
+			print("GLIDE_SHOT %s f%03d %-5s %s %s" % [arch, i, ph, on, _body(h)])
+			_aim(h, 180.0, 0.25)
+			await _grab(dir.path_join("back/f%03d.png" % i))
+			_aim(h, 90.0, 0.1)
 			await _grab(dir.path_join("side/f%03d.png" % i))
 		step += 1
 		t = step * Match.DT
 	m.queue_free()
 	await tree.process_frame
 
-## The body in the model's own frame (-Z ahead), in degrees and body heights: tilt is the hips-to-head line off
-## upright (+ forward, past 90 the head is below the hips), bank its sideways lean, hands how far both hands sit over
-## the head, feet how far the feet trail behind the hips.
-func _body(h: Hunter, cl: WardenClips) -> String:
-	if cl == null:
-		return "proc"
-	var inv := h.model.global_transform.affine_inverse() * cl.skel.global_transform
-	var sk := cl.skel
-	var at := func(b: String) -> Vector3: return inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
-	var hips: Vector3 = at.call("hips")
-	var head: Vector3 = at.call("head")
-	var up := head - hips
-	var tall := maxf(up.length(), 0.01)
-	var hands := minf((at.call("hand.L") as Vector3).y, (at.call("hand.R") as Vector3).y) - head.y
-	var feet := ((at.call("shin.L") as Vector3).z + (at.call("shin.R") as Vector3).z) * 0.5 - hips.z
-	var bank := rad_to_deg(asin(clampf(up.x / tall, -1.0, 1.0)))
-	var tilt := rad_to_deg(atan2(-up.z, up.y))
-	return "tilt=%4.0f bank=%4.0f hands=%5.2f feet=%5.2f" % [tilt, bank, hands / tall, feet / tall]
+## The rig's and the shown body's tilt off upright, in degrees: roll (+ leaning left) and pitch (+ nose-down), from
+## the Rig node, and from the .glb's hips-to-head line when it wears one.
+func _body(h: Hunter) -> String:
+	var rig := h.model.get_node("Rig") as Node3D
+	var up := h.model.global_basis.inverse() * rig.global_basis.y
+	var out := "rig roll=%4.0f pitch=%4.0f" % [rad_to_deg(asin(clampf(-up.normalized().x, -1.0, 1.0))),
+		rad_to_deg(atan2(-up.z, up.y))]
+	var glb := h.model.get_node_or_null("Warden")
+	var sk := WardenGlb.skeleton(glb) if glb else null
+	if sk:
+		var inv := h.model.global_transform.affine_inverse() * sk.global_transform
+		var hips := inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hips")).origin
+		var line := inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin - hips
+		out += " body roll=%4.0f pitch=%4.0f" % [rad_to_deg(asin(clampf(-line.normalized().x, -1.0, 1.0))),
+			rad_to_deg(atan2(-line.z, line.y))]
+	return out
 
-func _aim_match(h: Hunter) -> void:
-	var at := h.model.global_position + Vector3(0, 0.8, 0)
-	var p := deg_to_rad(CAM_PITCH)
-	cam.fov = MATCH_FOV * h.model.scale.y
-	cam.global_position = at + Vector3(0, sin(p), cos(p)) * CAM_DIST
-	cam.look_at(at)
-
-## From the Hunter's left, a little in front, level with the chest.
-func _aim_side(h: Hunter) -> void:
-	var at := h.model.global_position + Vector3(0, 0.8, 0) * h.model.scale.y
-	var yaw := h.model.global_rotation.y + deg_to_rad(65.0)
-	cam.fov = SIDE_FOV
-	cam.global_position = at + Vector3(-sin(yaw), 0.15, -cos(yaw)) * SIDE_DIST * h.model.scale.y
+## The camera `yaw` degrees round from the Hunter's front (180: behind it, 90: its left), `rise` of the way up.
+func _aim(h: Hunter, yaw: float, rise: float) -> void:
+	var at := h.model.global_position + Vector3(0, 1.0, 0) * h.model.scale.y
+	var y := h.model.global_rotation.y + deg_to_rad(yaw)
+	cam.global_position = at + Vector3(-sin(y), rise, -cos(y)) * DIST * h.model.scale.y
 	cam.look_at(at)
 
 func _grab(path: String) -> void:

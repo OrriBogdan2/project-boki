@@ -412,13 +412,21 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		var dur := clips.lib.get_animation(String(st[k])).length
 		ok(absf(dur - want) <= 0.034, "%s: its %s clip lasts the game's %.2f s" % [id, k, want])
 
-## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand.
+## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand. A blade tip
+## that a floating companion carries (Meeko's sun circles her, off its bone) keeps its place on that companion instead.
 func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var tip := sync.get("blade_tip") as Node3D
 	var muzzle := sync.get("muzzle") as Node3D
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var hb := int(sync.get("blade_bone"))
 	var rest := tip.position.length()
+	var carrier: WardenCompanions.Part = null
+	var floating := sync.get("companions") as WardenCompanions
+	for part: WardenCompanions.Part in (floating.parts if floating else []):
+		for an in part.anchors:
+			if an[0] == tip:
+				carrier = part
+				rest = (an[1] as Vector3).length()
 	var far := 0.0
 	var drift := 0.0
 	var n := 0
@@ -434,6 +442,9 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			# (a weapon that grows and shrinks on its bone, Motley's orb, keeps its point)
 			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
+			if carrier:
+				hand = carrier.node.global_position
+				body_k = absf(sk.global_transform.basis.get_scale().x)
 			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
 			n += 1
 	clips.force = {}
