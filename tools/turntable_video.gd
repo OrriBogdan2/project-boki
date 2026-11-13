@@ -13,6 +13,7 @@ const W := 1920
 const H := 1080
 const FPS := 30.0
 const HIDE := ["TeamRing", "Glider", "Halo", "Focus"]
+const BACK := Color("575a66")   # the studio backdrop: sky horizon, fog and far floor all meet in it
 
 var tree: SceneTree
 var holder: Node3D
@@ -20,6 +21,8 @@ var cam: Camera3D
 var disc: MeshInstance3D
 var out := "user://turntable"
 var secs := 6.0
+var env_res: Environment
+var zoom := {"bulwark": 1.15}   # --tt-zoom=id:f,...: camera distance factor where skinned bounds miss a raised weapon
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -33,6 +36,9 @@ func run(main: Node) -> void:
 			ids = Array(s.substr(9).split(","))
 		if s.begins_with("--tt-secs="):
 			secs = float(s.substr(10))
+		if s.begins_with("--tt-zoom="):
+			for kv in s.substr(10).split(","):
+				zoom[kv.get_slice(":", 0)] = float(kv.get_slice(":", 1))
 		if s == "--tt-no-lineup":
 			lineup = false
 	if out.is_relative_path():
@@ -117,8 +123,10 @@ func _turn(id: String) -> void:
 	var wide := maxf(hi.x - lo.x, hi.z - lo.z)
 	cam.fov = 26.0
 	var half_v := deg_to_rad(cam.fov * 0.5)
-	var dist := maxf(tall * 0.5 / (tan(half_v) * 0.80), wide * 0.5 / (tan(half_v) * W / H * 0.55))
-	var c := Vector3(0, tall * 0.47, 0)
+	var dist := maxf(tall * 0.5 / (tan(half_v) * 0.74), wide * 0.5 / (tan(half_v) * W / H * 0.5))
+	dist *= float(zoom.get(id, 1.0))
+	_fog(dist)
+	var c := Vector3(0, tall * 0.5, 0)
 	var pitch := deg_to_rad(9.0)
 	cam.position = c + Vector3(0, sin(pitch), cos(pitch)) * dist
 	cam.look_at(c)
@@ -136,7 +144,7 @@ func _turn(id: String) -> void:
 
 func _lineup() -> void:
 	disc.visible = false
-	var gap := 1.9
+	var gap := 1.5
 	var hs: Array = []
 	var syncs: Array = []
 	for i in LINE.size():
@@ -154,20 +162,45 @@ func _lineup() -> void:
 	var half_h := atan(tan(deg_to_rad(cam.fov * 0.5)) * float(W) / H)
 	var dist := span * 0.5 / tan(half_h)
 	var c := Vector3(0, 1.1, 0)
+	_fog(dist)
 	var dir := out.path_join("lineup")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var n := int(round(secs * FPS))
+	var pitch := deg_to_rad(9.0)
 	for f in n:
 		var u := float(f) / maxf(n - 1, 1)
-		var yaw := deg_to_rad(lerpf(-9.0, 9.0, u))
-		var pitch := deg_to_rad(10.0)
-		cam.position = c + Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) * dist * lerpf(1.04, 0.98, u)
+		var yaw := deg_to_rad(lerpf(-8.0, 8.0, u))
+		cam.position = c + Vector3(sin(yaw) * cos(pitch), sin(pitch), cos(yaw) * cos(pitch)) * dist * lerpf(1.03, 0.95, u)
 		cam.look_at(c)
 		_idle(syncs, (20 + f) / FPS)
 		await _grab(dir.path_join("%04d.jpg" % f))
 		if f == n / 2:
 			await _grab(out.path_join("lineup.png"))
 	print("TT_LINEUP %d" % n)
+	# a closer dolly along the row, end to end (about five in frame at a time)
+	dir = out.path_join("lineup_pan")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var near := 7.5
+	var half_x := (LINE.size() - 1) * gap * 0.5 - 2.6
+	_fog(near)
+	n = int(round(secs * 1.5 * FPS))
+	for f in n:
+		var u := float(f) / maxf(n - 1, 1)
+		var x := lerpf(-half_x, half_x, smoothstep(0.0, 1.0, u))
+		var at := Vector3(x, 1.0, 0)
+		cam.fov = 30.0
+		cam.position = at + Vector3(-1.2, sin(pitch) * near, cos(pitch) * near)
+		cam.look_at(at)
+		_idle(syncs, (20 + n + f) / FPS)
+		await _grab(dir.path_join("%04d.jpg" % f))
+	print("TT_LINEUP_PAN %d" % n)
+
+## The floor fades into the backdrop from a little behind the subject (no horizon line in frame).
+func _fog(subject_dist: float) -> void:
+	env_res.fog_density = 1.0
+	env_res.fog_depth_begin = subject_dist + 2.5
+	env_res.fog_depth_end = subject_dist + 22.0
+	env_res.fog_depth_curve = 1.0
 
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
@@ -181,8 +214,15 @@ func _stage(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("262b3a"), "mid": Color("454c62"), "horizon": Color("8a8fa3"),
-		"below": Color("5d6275"), "stars": 0.0})
+	env_res = Look.environment({"top": Color("1d2029"), "mid": Color("3a3e4a"), "horizon": BACK,
+		"below": BACK, "stars": 0.0})
+	env_res.fog_enabled = true
+	env_res.fog_mode = Environment.FOG_MODE_DEPTH
+	env_res.fog_light_color = BACK
+	env_res.fog_light_energy = 1.0
+	env_res.fog_sun_scatter = 0.0
+	env_res.fog_sky_affect = 0.0
+	env.environment = env_res
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-42, -35, 0), 30.0)
 	var rim := DirectionalLight3D.new()
@@ -194,7 +234,7 @@ func _stage(main: Node) -> void:
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(120, 120)
 	floor_mi.mesh = pm
-	floor_mi.material_override = Models.toon(Color("6e7388"), false)
+	floor_mi.material_override = Models.toon(Color("6d6f78"), false)
 	holder.add_child(floor_mi)
 	disc = MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -204,7 +244,7 @@ func _stage(main: Node) -> void:
 	cm.radial_segments = 96
 	disc.mesh = cm
 	disc.position.y = 0.0
-	disc.material_override = Models.toon(Color("7d8298"), false)
+	disc.material_override = Models.toon(Color("80838e"), false)
 	holder.add_child(disc)
 	cam = Camera3D.new()
 	holder.add_child(cam)
