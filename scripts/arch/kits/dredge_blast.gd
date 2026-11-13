@@ -96,7 +96,6 @@ func _stop() -> void:
 	blast = {}
 	AimKit.hide(h, "x_fan")
 	k.play("")
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "STOPPED", Color("ff8a7a"), true)
 	m.sfx("warn", h.pos, -4.0, 0.8)
 
 ## The charge: the fan grows out from his front over 1.1s, brass sparks crackle between his fists.

@@ -116,6 +116,7 @@ func take(id: String) -> void:
 		room._toast("You need %d gems for that" % int(Data.FURN[id]["price"]))
 		return
 	held = {"id": id, "r": 0, "from": -1}
+	BuildSfx.picked()
 	_make_ghost()
 	refresh()
 
@@ -159,7 +160,7 @@ func rotate_held() -> void:
 	if held.is_empty():
 		return
 	held["r"] = (int(held["r"]) + 1) % 4
-	Sfx.play("click", null, -6.0, 0.1, 1.3)
+	BuildSfx.rotated()
 
 func _mouse_cell() -> Vector2:
 	if debug_m != Vector2.INF:
@@ -230,7 +231,7 @@ func place() -> bool:
 	if held.is_empty():
 		return false
 	if not ghost_ok:
-		UiSfx.error(-12.0)
+		BuildSfx.blocked("%s %d" % [ghost_cell, int(held["r"])])
 		room._toast(String(room.why))
 		return false
 	var id := String(held["id"])
@@ -248,7 +249,7 @@ func place() -> bool:
 	held = {}
 	_clear_ghost()
 	room._rebuild_decor()
-	Sfx.play("build", null, -6.0)
+	BuildSfx.placed(id, from >= 0)
 	room.fx.dust(room.nodes[-1].position, 6)
 	Save.save_game()
 	refresh()
@@ -281,7 +282,7 @@ func store_placed(index: int) -> void:
 	room.decor.remove_at(index)
 	Save.d["furniture"][id] = stored(id) + 1
 	room._rebuild_decor()
-	Sfx.play("pickup", null, -6.0)
+	BuildSfx.stored()
 	room._toast("%s put in storage" % Data.FURN[id]["name"])
 	Save.save_game()
 	refresh()
@@ -292,7 +293,7 @@ func pick_up(index: int) -> void:
 	var e: Dictionary = room.decor[index]
 	held = {"id": e["id"], "r": int(e.get("r", 0)), "from": index}
 	room.nodes[index].visible = false
-	Sfx.play("click")
+	BuildSfx.picked()
 	_make_ghost()
 	refresh()
 
@@ -306,6 +307,7 @@ func rotate_placed(index: int) -> void:
 	var nx := int(round(float(e["x"]) + old_fp.x * 0.5 - new_fp.x * 0.5))
 	var nz := int(round(float(e["z"]) + old_fp.y * 0.5 - new_fp.y * 0.5))
 	if not room._fits(id, nx, nz, turn, index):
+		BuildSfx.blocked("%d %d %d" % [index, nx, nz])
 		room._toast(String(room.why))
 		return
 	_snap()
@@ -313,7 +315,7 @@ func rotate_placed(index: int) -> void:
 	room.decor[index] = {"id": id, "x": nx, "z": nz, "r": turn}
 	room._rebuild_decor()
 	Placement.spin_from(room.nodes[index], old_yaw)
-	Sfx.play("click", null, -6.0, 0.1, 1.3)
+	BuildSfx.rotated()
 	Save.save_game()
 
 # ------------------------------------------------------------------ the piece menu
