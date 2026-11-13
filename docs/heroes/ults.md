@@ -26,3 +26,19 @@ Parity audit of 2026-11-09 (job ext/ult-lock-parity). "Lock" is the time the cas
 
 ## Suggestions (ours, not built)
 - Grimble: a short full-stop in the first part of the charge would match the footage, if the owner wants the source over item 36.
+
+## R pose against the lock (job ext/anim-ult-lock-poses, 2026-11-11)
+`--ult-pose-check` casts every Hunter's R with the walk key held and reads the clips (`content/rules/warden_anim/<art>.json`): the lock it measures must match the table above; while it lasts the R move owns the body (or the upper body, for Grimble's slowed walk) with no bare walk cycle; once it is over, a walking Hunter's legs are on the walk within 0.2 s. All twelve commit for the whole lock. Seven held a full-body clip over a free walk; they now take `"upper": "moving"` (the full clip while standing, the legs back on the walk the moment he moves):
+
+| Hunter | Move | Lock ends | Full-body pose held to (before) |
+|---|---|---|---|
+| Albert | `bul_ult_slam` | 0.6 s | 1.1 s |
+| Neve | `tm_rime_crash` | 3.5 s | 4.0 s |
+| Sparkle | `mage_x_land` | 2.5 s | 3.1 s |
+| Motley | `ostra_well_snap` | 1.0 s | 1.6 s |
+| Cinder | `lw_land` | no lock | 0.45 s after the landing |
+| Tenzo | `breah_spine` | no lock | 1.1 s |
+| Sable | `thf_encore` | no lock | 0.4 s |
+
+Also fixed: a kit move the kit ended early (`play("")`: Sable's dance, Grimble's blast, Kael's recovery left by a jump, Cinder's flight dropped by a merge) stayed in the hunter's anim state at its last time, freezing the pose until the next move; `Hunter._anim_state` now writes the move every frame.
+Kael's riposte is full-body through the half-speed recovery and lets go with it at 1.1 s, as the footage recovers by about 1.1 s.

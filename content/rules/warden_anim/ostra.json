@@ -24,7 +24,7 @@
 		"ostra_swap_aim": {"clip": "swap_aim", "hold_from": 0.16}, "ostra_swap": {"clip": "swap"},
 		"ostra_swap_air": {"clip": "swap_air", "hold_from": 0.47}, "ostra_arrive": {"clip": "arrive"},
 		"ostra_seed": {"clip": "seed"}, "ostra_pop": {"clip": "pop", "upper": true},
-		"ostra_well": {"clip": "well", "hold_from": 0.27}, "ostra_well_snap": {"clip": "well_snap"}, "ostra_well_end": {"clip": "well_end"},
+		"ostra_well": {"clip": "well", "hold_from": 0.27}, "ostra_well_snap": {"clip": "well_snap", "upper": "moving"}, "ostra_well_end": {"clip": "well_end"},
 		"ostra_empower": {"clip": "empower"},
 		"mf_xform": {"clip": "fuse"}
 	},
