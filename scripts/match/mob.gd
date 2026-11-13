@@ -3,6 +3,7 @@ extends Ent
 ## Monsters. Each attack is telegraphed on the ground before it lands.
 
 var mkind := "skitter"
+var damage_by := {}          # Hunter team -> damage dealt to it: who did the most (lair XP shares, KillCues steals)
 var md: Dictionary = {}
 var st := "idle"            # idle | chase | windup | lunge | recover
 var st_t := 0.0
@@ -97,6 +98,12 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 				st = "chase"
 				MobNotice.woke(self)
 	return dealt
+
+## Every point that lands counts for the dealer's team, the killing blow too (Ent.hurt calls this before _on_zero).
+func _took(d: float, by: Ent) -> void:
+	var dealer: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
+	if dealer is Hunter:
+		damage_by[dealer.team] = float(damage_by.get(dealer.team, 0.0)) + d
 
 func _stagger(by: Ent, opts: Dictionary) -> void:
 	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0

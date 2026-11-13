@@ -7,6 +7,9 @@ muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a
 ultimate back = a low fifth and one bell over it (UltReadyCue).
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
+The kill-XP cues come last, so every older take is unchanged: xp_tick (a tiny high tine when kill XP lands
+for you), steal_won (a quick bright rise, you took a monster another squad fought hardest) and
+steal_lost (a dull falling pair over a low bump: you were robbed of it).
 """
 import numpy as np
 import sfx_lib as S
@@ -235,6 +238,22 @@ def wobble(i):
                            at(tine(NOTE['D5'] * 0.97, 0.5, 0.14), 0.17), at(tine(NOTE['A4'], 0.7, 0.2), 0.36)), 0.6), 3200)
 
 
+def xp_tick(i):
+    return finish(room(pluck(NOTE['G6'], 0.16, 0.035, 0.5), 0.25), 5200)
+
+
+def steal_won(i):
+    rise = [at(pluck(NOTE[n], 0.3, 0.07), 0.055 * k) for k, n in enumerate(['D5', 'G5', 'D6'])]
+    flick = at(S.chime(NOTE['G6'], 0.4, 0.12, ((1.0, 0.5), (2.76, 0.2))) * 0.3, 0.17)
+    return finish(room(mix(*rise, flick), 0.5), 5400)
+
+
+def steal_lost(i):
+    fall = [at(pluck(NOTE[n], 0.35, 0.09, 0.4), 0.09 * k) for k, n in enumerate(['E5', 'C5'])]
+    bump = at(pluck(NOTE['C4'] / 2, 0.3, 0.1, 0.1) * 1.2, 0.09)
+    return finish(room(mix(*fall, bump), 0.4), 2600)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -264,6 +283,9 @@ def main():
     S.takes_cat('nook_nuzzle', nuzzle, 2, 'ui')
     S.save_cat('nook_settle', settle(0), 'ui')
     S.save_cat('nook_wobble', wobble(0), 'ui')
+    S.save_cat('xp_tick', xp_tick(0), 'ui')
+    S.save_cat('steal_won', steal_won(0), 'ui')
+    S.save_cat('steal_lost', steal_lost(0), 'ui')
 
 
 if __name__ == '__main__':

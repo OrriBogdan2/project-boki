@@ -145,6 +145,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
+	_took(d, by)
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
@@ -193,6 +194,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if hp <= 0.0:
 		_on_zero(by, opts)
 	return d
+
+func _took(_d: float, _by: Ent) -> void:
+	pass
 
 func _mitigate(dmg: float, _by: Ent, _opts: Dictionary) -> float:
 	return dmg

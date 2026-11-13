@@ -8,7 +8,8 @@
   "rank_up": "ui", "rank_max": "ui",
   "ping": "ui", "ui_charge": "ui", "ui_ult_ready": "ui",
   "garden_feed": "ui", "garden_pet": "ui", "garden_friend": "ui", "garden_trait": "ui", "garden_egg": "ui", "garden_toy": "ui",
-  "nook_note": "ui", "nook_nuzzle": "ui", "nook_settle": "ui", "nook_wobble": "ui"
+  "nook_note": "ui", "nook_nuzzle": "ui", "nook_settle": "ui", "nook_wobble": "ui",
+  "xp_tick": "ui", "steal_won": "ui", "steal_lost": "ui"
  },
  "signature": [],
  "replaces": ["click", "hover", "pickup", "unlock", "level_up", "ping"]
