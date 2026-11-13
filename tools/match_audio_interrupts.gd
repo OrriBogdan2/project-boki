@@ -18,6 +18,11 @@ func run(check: RefCounted, m: Match, P: Hunter, mate: Hunter) -> void:
 	team0 = mate.team
 	var was := [P.cls, P.arch, P.ctrl]
 	P.ctrl = "local"               # the caster is you (the tick is yours), and no bot brain presses keys
+	var kin: Kin = P.kin           # (the check's downed Boki would start a rescue, which blocks firing: send it off)
+	if kin != null:
+		if kin.rescue_on:
+			KinDowned.stop(kin, P, "drop")
+		kin.pos = P.pos + Vector3(90, 0, 0)
 	for arch: String in SLOTS:
 		await _case(m, P, mate, arch, String(SLOTS[arch]))
 	P.reclass(was[0], was[1])
