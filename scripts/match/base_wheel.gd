@@ -7,7 +7,7 @@ extends RefCounted
 ## pop and size it shares) it is a plain overlay: the game keeps running. State lives on h.inp["bwheel"]
 ## (local UI); the pick waits in h.inp["base_pick"] until apply_pick runs on the fixed step.
 
-const STICK_DEAD := 0.5       # right-stick tilt (0..1) that counts as pointing at a slice
+const STICK_DEAD := 0.5  # right-stick tilt (0..1) that counts as pointing at a slice
 
 
 static func is_open(h: Hunter) -> bool:
@@ -26,14 +26,14 @@ static func poll(h: Hunter, dt: float, blocked: bool) -> void:
 		var mates := BaseRecall.mates(h.m, h)
 		if mates.is_empty():
 			if Input.is_action_just_pressed("base"):
-				BaseRecall.start(h, null)       # solo: the "no teammate" toast
+				BaseRecall.start(h, null)  # solo: the "no teammate" toast
 			return
 		open(h, h.get_viewport().get_mouse_position(), mates)
 	if not is_open(h):
 		return
 	if down:
 		update(h, h.get_viewport().get_mouse_position() + _stick(), dt)
-		h.inp["fire"] = false       # a pick is not a shot
+		h.inp["fire"] = false  # a pick is not a shot
 	else:
 		var to := close(h)
 		if to != null:

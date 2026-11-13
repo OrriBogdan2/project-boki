@@ -6,38 +6,38 @@ extends RefCounted
 ##   - the B wheel: a slice per teammate round where you started holding B, each with their framed portrait
 ##     and name, greyed when they can't take you, the one you point at lit in mint. One teammate: one ring.
 
-const RIN := 30.0             # px: the dead zone's drawn edge (inside it, letting go cancels)
-const PORTRAIT := 40.0        # px: a slice's portrait
+const RIN := 30.0  # px: the dead zone's drawn edge (inside it, letting go cancels)
+const PORTRAIT := 40.0  # px: a slice's portrait
 
 
-static func draw(H) -> void:
-	var m: Match = H.m
+static func draw(hud) -> void:
+	var m: Match = hud.m
 	for h: Hunter in m.hunters:
 		if h.base_t > 0.0 and not h.out and not (h.unseen and h != m.player):
-			_channel(H, h)
+			_channel(hud, h)
 	if m.player and BaseWheel.is_open(m.player):
-		_wheel(H, m.player)
+		_wheel(hud, m.player)
 
 
-static func _channel(H, h: Hunter) -> void:
-	var cam: Camera3D = H.m.cam
+static func _channel(hud, h: Hunter) -> void:
+	var cam: Camera3D = hud.m.cam
 	var mint := BaseRecall.MINT
 	var f := BaseRecall.progress(h)
 	if not cam.is_position_behind(h.position):
 		var sp: Vector2 = cam.unproject_position(h.position + Vector3(0, 0.2, 0))
-		H.c.draw_arc(sp, 26.0, 0, TAU, 40, Color(mint, 0.25), 3.0, true)
-		H._arc(sp, 26.0, f, mint, 4.0)
-		H._ctext(sp + Vector2(0, 44), "BASING  %.1f" % h.base_t, 12, mint, H.big)
+		hud.c.draw_arc(sp, 26.0, 0, TAU, 40, Color(mint, 0.25), 3.0, true)
+		hud._arc(sp, 26.0, f, mint, 4.0)
+		hud._ctext(sp + Vector2(0, 44), "BASING  %.1f" % h.base_t, 12, mint, hud.big)
 	var to: Hunter = h.base_to
 	if to and is_instance_valid(to) and not cam.is_position_behind(to.position):
 		var tsp: Vector2 = cam.unproject_position(to.position + Vector3(0, 3.0, 0))
-		H._ctext(tsp, "%s incoming  %.1f" % [h.pname.substr(0, 14), h.base_t], 12, mint, H.big)
+		hud._ctext(tsp, "%s incoming  %.1f" % [h.pname.substr(0, 14), h.base_t], 12, mint, hud.big)
 		var gsp: Vector2 = cam.unproject_position(to.position + Vector3(0, 0.1, 0))
-		H.c.draw_arc(gsp, 22.0, 0, TAU, 32, Color(mint, 0.3), 2.0, true)
-		H._arc(gsp, 22.0, f, mint, 3.0)
+		hud.c.draw_arc(gsp, 22.0, 0, TAU, 32, Color(mint, 0.3), 2.0, true)
+		hud._arc(gsp, 22.0, f, mint, 3.0)
 
 
-static func _wheel(H, p: Hunter) -> void:
+static func _wheel(hud, p: Hunter) -> void:
 	var w: Dictionary = p.inp["bwheel"]
 	var mates: Array = w["mates"]
 	var n := mates.size()
@@ -56,25 +56,25 @@ static func _wheel(H, p: Hunter) -> void:
 		if lit and not ok:
 			fill = Color(0.35, 0.36, 0.4, 0.75)
 		if n == 1:
-			H.c.draw_arc(o, (rin + rout) * 0.5, 0.0, TAU, 48, fill, rout - rin, true)
+			hud.c.draw_arc(o, (rin + rout) * 0.5, 0.0, TAU, 48, fill, rout - rin, true)
 		else:
-			H.c.draw_colored_polygon(_wedge(o, a, PI / float(n) - 0.04, rin, rout), fill)
+			hud.c.draw_colored_polygon(_wedge(o, a, PI / float(n) - 0.04, rin, rout), fill)
 		var mid := o + BaseWheel.dir(i, n) * (rin + rout) * 0.5
 		var r := Rect2(mid - Vector2(PORTRAIT, PORTRAIT + 14.0) * 0.5, Vector2(PORTRAIT, PORTRAIT))
-		var edge := mint if lit and ok else Color(H.INK, 0.3)
-		H._draw_portrait(r, mate, "down" if mate.downed else "", edge)
+		var edge := mint if lit and ok else Color(hud.INK, 0.3)
+		hud._draw_portrait(r, mate, "down" if mate.downed else "", edge)
 		if not ok:
-			H.c.draw_rect(r, Color(0.08, 0.08, 0.1, 0.6))
-		var name_col := Color(H.INK, 0.9 if ok else 0.45)
+			hud.c.draw_rect(r, Color(0.08, 0.08, 0.1, 0.6))
+		var name_col := Color(hud.INK, 0.9 if ok else 0.45)
 		if lit:
 			name_col = Color.WHITE
-		H._ctext(mid + Vector2(0, PORTRAIT * 0.5 + 6.0), mate.pname.substr(0, 12), 13, name_col, H.big)
+		hud._ctext(mid + Vector2(0, PORTRAIT * 0.5 + 6.0), mate.pname.substr(0, 12), 13, name_col, hud.big)
 		if not ok:
-			H._ctext(mid + Vector2(0, PORTRAIT * 0.5 + 19.0), "can't take you", 10, Color(H.INK, 0.5), H.big)
-	H.c.draw_circle(o, rin - 4.0, Color(0.03, 0.04, 0.07, 0.85))
-	H._ctext(o + Vector2(0, 4), Settings.key_cap("base"), 13, Color(H.INK, 0.6), H.big)
+			hud._ctext(mid + Vector2(0, PORTRAIT * 0.5 + 19.0), "can't take you", 10, Color(hud.INK, 0.5), hud.big)
+	hud.c.draw_circle(o, rin - 4.0, Color(0.03, 0.04, 0.07, 0.85))
+	hud._ctext(o + Vector2(0, 4), Settings.key_cap("base"), 13, Color(hud.INK, 0.6), hud.big)
 	if sel >= 0:
-		H.c.draw_line(o, o + BaseWheel.dir(sel, n) * (rin - 6.0), mint, 3.0, true)
+		hud.c.draw_line(o, o + BaseWheel.dir(sel, n) * (rin - 6.0), mint, 3.0, true)
 
 
 ## A ring slice round `o`, centred on angle `a`, `half` radians to each side.

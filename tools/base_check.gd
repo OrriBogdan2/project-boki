@@ -30,8 +30,11 @@ func _still(m: Match, p: Hunter, secs: float) -> void:
 func _solid_near(m: Match, at: Vector3, r: float) -> Vector3:
 	for k in 16:
 		var q := at + Vector3(cos(TAU * k / 16.0), 0, sin(TAU * k / 16.0)) * r
-		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z) \
-				and absf(m.world.ground_at(q.x, q.z) - at.y) < 1.5:
+		if (
+			not m.world.is_void(q.x, q.z)
+			and not m.world.is_block(q.x, q.z)
+			and absf(m.world.ground_at(q.x, q.z) - at.y) < 1.5
+		):
 			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 	return at + Vector3(3, 0, 0)
 
@@ -42,7 +45,7 @@ func _wheel_pick(m: Match, p: Hunter, delta: Vector2) -> void:
 	BaseWheel.poll(p, 0.016, false)
 	var w: Dictionary = p.inp.get("bwheel", {})
 	if not w.is_empty():
-		w["o"] = p.get_viewport().get_mouse_position() - delta     # the cursor ends up `delta` from the centre
+		w["o"] = p.get_viewport().get_mouse_position() - delta  # the cursor ends up `delta` from the centre
 	BaseWheel.poll(p, 0.016, false)
 	Input.action_release("base")
 	BaseWheel.poll(p, 0.016, false)
@@ -63,7 +66,7 @@ func run(main: Node) -> void:
 	if mate == null:
 		main.get_tree().quit(1)
 		return
-	mate.ctrl = "idle"      # the landing is measured beside the mate, not where a wandering mate strolls off to
+	mate.ctrl = "idle"  # the landing is measured beside the mate, not where a wandering mate strolls off to
 	_still(m, p, 0.5)
 	# 1-2: the wheel opens on hold; the dead zone cancels
 	Input.action_press("base")
