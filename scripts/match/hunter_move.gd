@@ -33,7 +33,11 @@ static func _load() -> Dictionary:
 	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
 	return parsed
 
+## Loads on first call too: a script whose static vars read rules() can be initialised while this one
+## is still loading (a class cycle, e.g. Home -> LedgeRise -> HunterMove -> Hunter -> GlideSpike).
 static func rules() -> Dictionary:
+	if _rules.is_empty():
+		_rules = _load()
 	return _rules
 
 ## This archetype's movement row (the default row for none or an unknown id).
