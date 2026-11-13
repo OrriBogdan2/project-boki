@@ -2,6 +2,7 @@
 as they are: their primitives become the proxy the skin weights read, their bones, props and grown parts move to the
 scan through a Fit (landmark pairs measured off the fit sheet), and the scan's own surface, colour and normals become
 the body. SCANS holds what a species needs; docs/art/kin/MESHY_BOKI_RECIPE.md is how to fill a row."""
+
 import math
 import os
 import re
@@ -11,9 +12,9 @@ import numpy as np
 from boki_meshy import Meshy, MeshShape
 from boki_sdf import Cone, Shape, frame, v3
 
-ROOT = os.path.expanduser("~/meshy/boki")       # <ROOT>/<id>/run1: the raw Meshy files, never in git
+ROOT = os.path.expanduser("~/meshy/boki")  # <ROOT>/<id>/run1: the raw Meshy files, never in git
 LUM = np.array([0.3, 0.59, 0.11])
-BROW_DARK = 0.55         # a brow is its patch of coat, darker
+BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # id: "height" (game m, before SCALE) and "tris" of the body; "x", "y", "z": (proxy, scan) landmark pairs, x for the
 # right side only; "merge": proxy bones whose part the scan has fused into another bone's; "drop": proxy pieces the
 # scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain": the
@@ -26,46 +27,108 @@ BROW_DARK = 0.55         # a brow is its patch of coat, darker
 # "at": {grown part: where its attach point goes on the scan}, when the fit puts it wrong (tools and grown parts move
 # whole, never squashed).
 SCANS = {
-    "kestrike": {"height": 0.725, "sink": 0.105, "tris": 16000, "x": [(0.07, 0.09)],
-                 "y": [(0.0, 0.0), (0.12, 0.076), (0.2, 0.21), (0.43, 0.35), (0.6, 0.527), (0.74, 0.62)],
-                 "z": [(-0.27, -0.304), (-0.06, -0.152), (0.045, -0.10), (0.15, 0.023), (0.36, 0.29)],
-                 "merge": {"wing1.L": "spine", "wing1.R": "spine", "wing2.L": "spine", "wing2.R": "spine",
-                           "ear1.L": "head", "ear1.R": "head", "tfan": "tail2"},
-                 "drop": ("spark",), "pose": {"tail1": (-0.6, 0.0, 0.0)},
-                 "limbs": [("tail1", (0, 0.11, 0.03), (0, 0.03, 0.13), 0.04, 0.07),
-                           ("tail2", (0, 0.03, 0.13), (0, -0.06, 0.24), 0.07, 0.09)],
-                 "eye_c": (0.068, 0.433, -0.225), "eye_r": (0.037, 0.037, 0.02), "eye_yaw": 0.35, "face": {},
-                 "sat": 0.6},
-    "cairnback": {"height": 0.85, "tris": 16000, "x": [(0.165, 0.152)],
-                  "y": [(0.0, 0.0), (0.09, 0.085), (0.21, 0.206), (0.31, 0.262), (0.40, 0.29), (0.66, 0.85)],
-                  "z": [(-0.45, -0.285), (-0.28, -0.243), (-0.12, -0.176), (0.22, 0.067), (0.3, 0.158),
-                        (0.395, 0.273)],
-                  "merge": {"horn.L": "head", "horn.R": "head", "ear1.L": "head", "ear1.R": "head"},
-                  "eye_c": (0.045, 0.282, -0.24), "eye_r": (0.02, 0.02, 0.012), "eye_yaw": 0.6, "face": {},
-                  "sat": 0.8, "gain": 1.15},
-    "gibbelle": {"height": 0.55, "tris": 16000, "x": [(0.2, 0.2)],
-                 "y": [(0.0, 0.0), (0.19, 0.31), (0.255, 0.38), (0.44, 0.55)],
-                 "z": [(-0.24, -0.17), (0.0, 0.0), (0.25, 0.178)], "drop": ("puffs",),
-                 "merge": {"lobe%d" % i: "root" for i in range(7)},
-                 "eye_c": (0.057, 0.38, -0.135), "eye_r": (0.041, 0.042, 0.022), "eye_yaw": 0.3, "face": {},
-                 "sat": 0.8, "cover": 1.2},
-    "goliathite": {"height": 0.7, "tris": 16000, "x": [(0.2, 0.2)],
-                   "y": [(0.0, 0.0), (0.44, 0.7)], "z": [(-0.25, -0.46), (0.25, 0.46)], "drop": ("puffs",),
-                   "merge": {"lobe%d" % i: "root" for i in range(7)},
-                   "eye_c": (0.081, 0.505, -0.4), "eye_r": (0.04, 0.052, 0.024), "eye_yaw": 0.3, "face": {},
-                   "sat": 0.8, "cover": 1.15},
-    "hoarheron": {"height": 0.65, "tris": 16000, "x": [(0.2, 0.17)],
-                  "y": [(0.0, 0.0), (0.44, 0.65)], "z": [(-0.25, -0.5), (0.25, 0.5)], "drop": ("puffs",),
-                  "merge": {"lobe%d" % i: "root" for i in range(7)},
-                  "eye_c": (0.05, 0.357, -0.372), "eye_r": (0.022, 0.022, 0.011), "eye_yaw": 0.9, "face": {},
-                  "sat": 0.8, "cover": 1.2},
-    "floenatee": {"height": 0.7, "tris": 16000, "x": [(0.2, 0.2)],
-                  "y": [(0.0, 0.0), (0.26, 0.58), (0.44, 0.7)], "z": [(-0.22, -0.42), (0.0, 0.0), (0.28, 0.5)],
-                  "drop": ("puffs",),
-                  "merge": {"lobe%d" % i: "root" for i in range(7)},
-                  "eye_c": (0.05, 0.635, -0.455), "eye_r": (0.022, 0.022, 0.011), "eye_yaw": 0.35,
-                  "face": {"mouth_y": 0.585, "mouth_z": -0.515},
-                  "sat": 0.8, "cover": 1.6},
+    "kestrike": {
+        "height": 0.725,
+        "sink": 0.105,
+        "tris": 16000,
+        "x": [(0.07, 0.09)],
+        "y": [(0.0, 0.0), (0.12, 0.076), (0.2, 0.21), (0.43, 0.35), (0.6, 0.527), (0.74, 0.62)],
+        "z": [(-0.27, -0.304), (-0.06, -0.152), (0.045, -0.10), (0.15, 0.023), (0.36, 0.29)],
+        "merge": {
+            "wing1.L": "spine",
+            "wing1.R": "spine",
+            "wing2.L": "spine",
+            "wing2.R": "spine",
+            "ear1.L": "head",
+            "ear1.R": "head",
+            "tfan": "tail2",
+        },
+        "drop": ("spark",),
+        "pose": {"tail1": (-0.6, 0.0, 0.0)},
+        "limbs": [
+            ("tail1", (0, 0.11, 0.03), (0, 0.03, 0.13), 0.04, 0.07),
+            ("tail2", (0, 0.03, 0.13), (0, -0.06, 0.24), 0.07, 0.09),
+        ],
+        "eye_c": (0.068, 0.433, -0.225),
+        "eye_r": (0.037, 0.037, 0.02),
+        "eye_yaw": 0.35,
+        "face": {},
+        "sat": 0.6,
+    },
+    "cairnback": {
+        "height": 0.85,
+        "tris": 16000,
+        "x": [(0.165, 0.152)],
+        "y": [(0.0, 0.0), (0.09, 0.085), (0.21, 0.206), (0.31, 0.262), (0.40, 0.29), (0.66, 0.85)],
+        "z": [(-0.45, -0.285), (-0.28, -0.243), (-0.12, -0.176), (0.22, 0.067), (0.3, 0.158), (0.395, 0.273)],
+        "merge": {"horn.L": "head", "horn.R": "head", "ear1.L": "head", "ear1.R": "head"},
+        "eye_c": (0.045, 0.282, -0.24),
+        "eye_r": (0.02, 0.02, 0.012),
+        "eye_yaw": 0.6,
+        "face": {},
+        "sat": 0.8,
+        "gain": 1.15,
+    },
+    "gibbelle": {
+        "height": 0.55,
+        "tris": 16000,
+        "x": [(0.2, 0.2)],
+        "y": [(0.0, 0.0), (0.19, 0.31), (0.255, 0.38), (0.44, 0.55)],
+        "z": [(-0.24, -0.17), (0.0, 0.0), (0.25, 0.178)],
+        "drop": ("puffs",),
+        "merge": {"lobe%d" % i: "root" for i in range(7)},
+        "eye_c": (0.057, 0.38, -0.135),
+        "eye_r": (0.041, 0.042, 0.022),
+        "eye_yaw": 0.3,
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.2,
+    },
+    "goliathite": {
+        "height": 0.7,
+        "tris": 16000,
+        "x": [(0.2, 0.2)],
+        "y": [(0.0, 0.0), (0.44, 0.7)],
+        "z": [(-0.25, -0.46), (0.25, 0.46)],
+        "drop": ("puffs",),
+        "merge": {"lobe%d" % i: "root" for i in range(7)},
+        "eye_c": (0.081, 0.505, -0.4),
+        "eye_r": (0.04, 0.052, 0.024),
+        "eye_yaw": 0.3,
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.15,
+    },
+    "hoarheron": {
+        "height": 0.65,
+        "tris": 16000,
+        "x": [(0.2, 0.17)],
+        "y": [(0.0, 0.0), (0.44, 0.65)],
+        "z": [(-0.25, -0.5), (0.25, 0.5)],
+        "drop": ("puffs",),
+        "merge": {"lobe%d" % i: "root" for i in range(7)},
+        "eye_c": (0.05, 0.357, -0.372),
+        "eye_r": (0.022, 0.022, 0.011),
+        "eye_yaw": 0.9,
+        "face": {},
+        "sat": 0.8,
+        "cover": 1.2,
+    },
+    "floenatee": {
+        "height": 0.7,
+        "tris": 16000,
+        "x": [(0.2, 0.2)],
+        "y": [(0.0, 0.0), (0.26, 0.58), (0.44, 0.7)],
+        "z": [(-0.22, -0.42), (0.0, 0.0), (0.28, 0.5)],
+        "drop": ("puffs",),
+        "merge": {"lobe%d" % i: "root" for i in range(7)},
+        "eye_c": (0.05, 0.635, -0.455),
+        "eye_r": (0.022, 0.022, 0.011),
+        "eye_yaw": 0.35,
+        "face": {"mouth_y": 0.585, "mouth_z": -0.515},
+        "sat": 0.8,
+        "cover": 1.6,
+    },
 }
 
 
@@ -140,12 +203,13 @@ class Scan:
         self.EYE_C, self.EYE_R = v3(*s["eye_c"]), v3(*s["eye_r"])
         face = creature.FACE
         mouth = self.fit.fwd(v3(face["brow_x"], face["mouth_y"], face["mouth_z"]))
-        self.FACE = {**face, "brow_x": mouth[0], "mouth_y": mouth[1], "mouth_z": mouth[2], **s["face"]}   # the row wins
-        self.BONES = {name: (self.fit.fwd(head), self.fit.fwd(tail), parent)
-                      for name, (head, tail, parent) in anim.BONES.items()}
+        self.FACE = {**face, "brow_x": mouth[0], "mouth_y": mouth[1], "mouth_z": mouth[2], **s["face"]}  # the row wins
+        self.BONES = {
+            name: (self.fit.fwd(head), self.fit.fwd(tail), parent) for name, (head, tail, parent) in anim.BONES.items()
+        }
         self._limbs = []
         for bone, a, b, ra, rb in s.get("limbs", ()):
-            for name, sx in ((bone, 1.0), (bone[:-1] + "R", -1.0))[:2 if bone.endswith(".L") else 1]:
+            for name, sx in ((bone, 1.0), (bone[:-1] + "R", -1.0))[: 2 if bone.endswith(".L") else 1]:
                 cone = Cone("limb_" + name, name, v3(*a) * (sx, 1, 1), v3(*b) * (sx, 1, 1), ra, rb)
                 self.BONES[name] = (cone.a, cone.b, self.BONES[name][2])
                 self._limbs.append(cone)
@@ -168,8 +232,10 @@ class Scan:
         for sx in (1.0, -1.0):
             right, up, _ = self.eye_frame(sx)
             centre = self.EYE_C * (sx, 1, 1) + up * self.EYE_R[1] * lift
-            pts += [centre + (right * math.cos(a) * self.EYE_R[0] + up * math.sin(a) * self.EYE_R[1]) * ring
-                    for a in np.linspace(0, math.tau, 12, endpoint=False)]
+            pts += [
+                centre + (right * math.cos(a) * self.EYE_R[0] + up * math.sin(a) * self.EYE_R[1]) * ring
+                for a in np.linspace(0, math.tau, 12, endpoint=False)
+            ]
         col = grade(self.model.colour(np.array(pts)), self._s.get("sat", 1.0), self._s.get("gain", 1.0))
         return np.median(col, 0)
 
@@ -195,8 +261,9 @@ class Scan:
 
     def parts(self):
         drop = self._s.get("drop", ())
-        prims = [p for name, part in self._mods[0].parts().items() if name not in drop
-                 for p in part[0].prims if not p.sub]
+        prims = [
+            p for name, part in self._mods[0].parts().items() if name not in drop for p in part[0].prims if not p.sub
+        ]
         own = {cone.bone for cone in self._limbs}
         prims = [p for p in self._fitted(prims) if p.bone not in own] + self._limbs
         return {"body": (MeshShape(prims, self.model), 0.0035, self._s["tris"])}
@@ -210,8 +277,10 @@ class Scan:
         return [Moved(p, offset) for p in prims], offset
 
     def prop_parts(self):
-        return {name: (Shape(self._moved(shape.prims)[0]), h, tris)
-                for name, (shape, h, tris) in self._mods[0].prop_parts().items()}
+        return {
+            name: (Shape(self._moved(shape.prims)[0]), h, tris)
+            for name, (shape, h, tris) in self._mods[0].prop_parts().items()
+        }
 
     def grown_parts(self):
         out = {}
@@ -272,7 +341,7 @@ def fit_sheet(model, bones, eye_c, px=900, span=0.9):
     uv = model.tuv[pick].mean(1)
     texel = np.clip((uv % 1) * (len(model.tex) - 1), 0, len(model.tex) - 1).astype(int)
     col = model.tex[texel[:, 1], texel[:, 0]]
-    views = (((2, 1), 0, 1.0), ((0, 1), 2, 1.0), ((0, 2), 1, 1.0))        # (across, up) axes, depth axis, its sign
+    views = (((2, 1), 0, 1.0), ((0, 1), 2, 1.0), ((0, 2), 1, 1.0))  # (across, up) axes, depth axis, its sign
     lo = {0: -span / 2, 1: -0.05, 2: -span / 2}
     sheet = np.full((px, px * len(views), 3), 0.82)
 
@@ -291,7 +360,7 @@ def fit_sheet(model, bones, eye_c, px=900, span=0.9):
                     if across:
                         sheet[:, view * px + at] = shade
                     else:
-                        sheet[at, view * px:(view + 1) * px] = shade
+                        sheet[at, view * px : (view + 1) * px] = shade
         order = np.argsort(pos[:, depth] * sign)
         x, y = cell(view, pos[order])
         for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
