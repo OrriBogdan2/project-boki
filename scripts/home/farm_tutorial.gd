@@ -6,7 +6,7 @@ extends RefCounted
 ## rules()["base"] run instead: meet your Boki, feed it, place a toy and watch it play, head out or stay.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
-##   done / skipped   finished, or skipped (no gems or items change hands; the tools are still handed over)
+##   done / skipped   finished, or skipped (the tools and food come at once, nothing is taken away)
 ##   gift     the starter food was handed out
 ## Old saves never see it: the v8 migration marks them done, and so does tutorial.day1_done (the flag
 ## every test save and the new-game shortcuts already set).
@@ -192,6 +192,15 @@ static func detect() -> void:
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():
 		mark("crop")
 
+## The line for the first construction site a profile places ("" after that): sites only progress while you
+## are on the farm. Shown once through the placement toast; the seen flag is Save.d.tutorial.site_hint.
+static func site_hint() -> String:
+	var tut: Dictionary = Save.d["tutorial"]
+	if bool(tut.get("site_hint", false)):
+		return ""
+	tut["site_hint"] = true
+	return String(rules()["site_hint"])
+
 static func mark(id: String) -> void:
 	var st := state()
 	if bool((st["did"] as Dictionary).get(id, false)) or step_def(id).is_empty():
@@ -215,9 +224,10 @@ static func finish() -> int:
 ## (a skipper must not be worse off than a player who walked it). FarmGuide puts the house down as a site when
 ## none is; in the base it puts a toy down and the starter food is handed over.
 static func skip() -> void:
+	var st := state()
 	for s in steps():
 		give_step_tool(String(s["id"]))
-	var st := state()
+	give_food()
 	st["done"] = true
 	st["skipped"] = true
 	Save.save_game()
