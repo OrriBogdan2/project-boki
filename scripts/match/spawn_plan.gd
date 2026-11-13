@@ -213,7 +213,7 @@ func spawn_all() -> void:
 
 func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 	# (the boss-egg species never turn up in the wild: Data.common_kin)
-	var sp := ModeBoki.draw(Data.common_kin(), "expedition", m.tier, r)
+	var sp := ModeBoki.draw(Data.wild_pool(m.tier), "expedition", m.tier, r)
 	var rec := Save.new_kin(sp, "", m.kin_seed("rare"))
 	var lv: Array = m.T.get("kin_lvl", [1, 3])
 	rec["level"] = int(lv[1]) + r.randi_range(2, 4)

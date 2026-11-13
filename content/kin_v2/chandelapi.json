@@ -1,0 +1,114 @@
+{
+	"grammar": 1,
+	"id": "chandelapi",
+	"name": "Chandelapi",
+	"animals": [
+		"Tall okapi crowned"
+	],
+	"theme": "shadow",
+	"flavor": "Tall okapi crowned with a great candle chandelier.",
+	"colors": {
+		"body": "#ab92a1",
+		"belly": "#f1ddd3",
+		"glow": "#edd3b9"
+	},
+	"look": {
+		"ears": "none",
+		"body": "drop",
+		"tail": "zig",
+		"feet": "none",
+		"aura": "none"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 5.95,
+			"hop_height": 0.04,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 3,
+		"kin_damage": 2,
+		"kin_speed": 13,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.65,
+		"loyalty": 0.51,
+		"temper": 0.46,
+		"curiosity": 0.84
+	},
+	"ai": {
+		"aggression": 0.45,
+		"loyalty": 0.55,
+		"caution": 0.65,
+		"role": "trickster"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Burrow",
+		"passives": [
+			{
+				"stat": "dodge_regen",
+				"amount": 0.25
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "mark",
+				"mode": "reveal",
+				"duration": 3
+			}
+		]
+	},
+	"active": "moon_mark",
+	"auto": "echolocate",
+	"merge": "tempest",
+	"evolution": {
+		"root": "Chan",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "sly, giggles",
+		"syllables": [
+			"Chand",
+			"elapi"
+		]
+	},
+	"egg": {
+		"name": "Chandelapi Egg",
+		"temper": "Sly",
+		"desc": "Something sly is in here.",
+		"play": "Slippery and full of tricks."
+	}
+}
