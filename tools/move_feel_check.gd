@@ -285,8 +285,8 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
-	_aim_rel()          # late: its ~11 s of match time would move the abyss rows
-	_standing_dash()          # last: it swaps the kit and model the framing rows measure
+	_standing_dash()          # late: it swaps the kit and model the framing rows measure
+	_aim_rel()          # last: its ~11 s of match time would move the abyss rows (and Rimewright's standing dash)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
