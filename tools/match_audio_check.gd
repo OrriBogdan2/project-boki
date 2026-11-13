@@ -58,6 +58,7 @@ func run(main_node: Node) -> void:
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
 	_steps(m, P)
+	_shields(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
@@ -127,6 +128,36 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
 	P.ctrl = "bot"
+
+## A hit on a shield plays that material's thunk, the hit that takes the last of it plays its crack and clears the
+## material; a rival's shield is heard only near, yours always; the shield running out clears the material too.
+func _shields(m: Match, P: Hunter) -> void:
+	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team)[0]
+	P.inv_t = 0.0
+	for kind in ["ward", "cloak", "molten"]:
+		P.shield = 30.0
+		P.shield_kind = "" if kind == "ward" else kind
+		for part in ["hit", "break"]:
+			var cue := "shield_%s_%s" % [kind, part]
+			ok(Sfx.ensure(cue), "%s is a sound on file" % cue)
+			Sfx.last_played.clear()
+			P.hurt(10.0 if part == "hit" else 40.0, R, {})
+			var shield_cues := Sfx.last_played.keys().filter(func(k): return k.begins_with("shield_"))
+			ok(shield_cues == [cue], "your %s shield: a hit plays %s (%s)" % [kind, cue, shield_cues])
+		ok(P.shield_kind == "" and P.shield <= 0.0, "...and the break clears the material")
+	Sfx.listener = P.pos
+	R.shield = 30.0
+	R.shield_kind = "molten"
+	R.pos = P.pos + Vector3(70, 0, 0)
+	Sfx.last_played.clear()
+	R.hurt(10.0, P, {})
+	ok(Sfx.last_played.is_empty(), "a rival's shield 70 m away is out of earshot")
+	R.pos = P.pos + Vector3(5, 0, 0)
+	R.hurt(10.0, P, {})
+	ok(Sfx.last_played.has("shield_molten_hit"), "...and 5 m away its thunk is heard")
+	R.shield_t = 0.01
+	R.sim(0.1)
+	ok(R.shield <= 0.0 and R.shield_kind == "", "a shield that runs out clears the material")
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).

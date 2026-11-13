@@ -107,6 +107,7 @@ var haste_t := 0.0
 var fortify_t := 0.0
 var shield := 0.0
 var shield_t := 0.0
+var shield_kind := ""          # the material the shield sounds as (ShieldSfx); "" = the plain ward
 var recoil := 0.0
 var walk_ph := 0.0
 var anim: HunterAnim = null     # the procedural animation for the model
@@ -540,6 +541,8 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if shield > 0.0 and not shelled:
 		var a := minf(shield, d)
 		shield -= a; d -= a
+		ShieldSfx.hit(self, a)
+		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
@@ -1858,7 +1861,9 @@ func sim(dt: float) -> void:
 	HunterCooldowns.tick(self, dt)
 	if shield_t > 0.0:
 		shield_t -= dt
-		if shield_t <= 0.0: shield = 0.0
+		if shield_t <= 0.0:
+			shield = 0.0
+			shield_kind = ""
 	if reload_t > 0.0:
 		reload_t -= dt
 		if reload_t <= 0.0:

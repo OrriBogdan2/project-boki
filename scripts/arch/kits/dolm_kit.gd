@@ -635,6 +635,7 @@ func guard_stack() -> void:
 	shield_at = m.time
 	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
 	h.shield_t = float(gd["t"])
+	h.shield_kind = "molten"
 	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
 
 # ------------------------------------------------------------------ E: Stone Row
