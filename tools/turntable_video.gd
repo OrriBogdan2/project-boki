@@ -221,7 +221,7 @@ func _stage(main: Node) -> void:
 	env_res.fog_light_color = BACK
 	env_res.fog_light_energy = 1.0
 	env_res.fog_sun_scatter = 0.0
-	env_res.fog_sky_affect = 0.0
+	env_res.fog_sky_affect = 1.0
 	env.environment = env_res
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-42, -35, 0), 30.0)
