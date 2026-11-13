@@ -416,7 +416,9 @@ func _draw_world_labels() -> void:
 		if mb is Boss:
 			if not (mb as Boss).dormant and m.lairs.boss_for(m.player) != mb:
 				_ctext(sp + Vector2(0, -26), String(mb.md["name"]), 15, Lairs.color_of((mb as Boss).lair), big)
-				_bar(Rect2(sp + Vector2(-50, -18), Vector2(100, 7)), clampf(mb.hp / mb.max_hp, 0.0, 1.0), Color("ff6a5a"))
+				var lr := Rect2(sp + Vector2(-50, -18), Vector2(100, 7))
+				_bar(lr, clampf(mb.hp / mb.max_hp, 0.0, 1.0), StealTell.fill(mb, Color("ff6a5a"), m.time))
+				StealTell.mark(self, Vector2(lr.end.x + 14, lr.get_center().y), mb)
 			continue
 		if mb.hp < mb.max_hp or rare:
 			var bw := 64.0 if mb.mkind in ["brute", "warden"] else 48.0
@@ -719,6 +721,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
+	NestMap.minimap(self, to_map, on_map, hold)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
@@ -2875,7 +2878,8 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	if ct > frac:
 		c.draw_rect(Rect2(r.position + Vector2(w * frac, 0), Vector2(w * (ct - frac), r.size.y)), Color(1.0, 0.95, 0.88, 0.8))
 	var hc := Color("ff5a4a") if b.enraged else (Color("e0b0ff") if b.stagger_t > 0.0 else Color("ff8a5a"))
-	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), hc)
+	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), StealTell.fill(b, hc, m.time))
+	StealTell.mark(self, Vector2(r.position.x + 9, r.end.y + 16), b)
 	for mk in [0.66, 0.33]:
 		c.draw_line(r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0)
 	_ctext(r.get_center() + Vector2(0, 5), "%d / %d" % [int(ceil(b.hp)), int(b.max_hp)], 12, INK, big)

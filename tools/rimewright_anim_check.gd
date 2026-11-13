@@ -167,3 +167,67 @@ func _rime() -> void:
 		t >= 3.2 and t <= 3.55, "%.2f s" % t)
 	ok("anim rime: the crash clip is the footage's 0.4 s from the burst to her recovery (f57 -> f61)",
 		K.anim_id == "tm_rime_crash" and absf(KMovesCare.length("tm_rime_crash") - 0.4) < 0.001)
+	var rec := float(xd["recover"])
+	ok("anim rime: she is locked from the burst for the crash clip's length, 0.4 s (control and body agree)",
+		K.recovering() and absf(rec - 0.4) < 0.001 and absf(KMovesCare.length("tm_rime_crash") - rec) < 0.001
+		and absf(K.recover_until - m.time - rec) <= DT)
+	_recover(m, P, K)
+	_recover_dash()
+
+## In the recovery she walks and casts nothing; an E pressed in its last DashFlow.BUFFER_S goes as it ends.
+func _recover(m: Match, P: Hunter, K: RimewrightKit) -> void:
+	var end: float = K.recover_until
+	var at := P.pos
+	P.inp["move"] = Vector2(1, 0)
+	var darts := int(K.stats["darts"])
+	P.inp["sig"] = true
+	_step_firing(m, P)
+	P.inp["sig"] = false
+	var early_e := float(K.cd["e"]) > 0.0
+	while m.time < end - DashFlow.BUFFER_S + DT:
+		_step_firing(m, P)
+	P.inp["sig"] = true
+	_step_firing(m, P)
+	P.inp["sig"] = false
+	var cast_in := float(K.cd["e"]) > 0.0
+	while m.time < end - DT:
+		_step_firing(m, P)
+	var moved := Vector2(P.pos.x - at.x, P.pos.z - at.z).length()
+	var locked_darts := int(K.stats["darts"]) - darts
+	var e_at := -1.0
+	while m.time < end + 0.3:
+		_step_firing(m, P)
+		if e_at < 0.0 and float(K.cd["e"]) > 0.0:
+			e_at = m.time
+	P.inp["move"] = Vector2.ZERO
+	P.inp["fire"] = false
+	ok("anim rime: no walking, darts or E in the recovery", moved < 0.05 and locked_darts == 0 and not early_e
+		and not cast_in, "%.2f m, %d darts" % [moved, locked_darts])
+	ok("anim rime: an E pressed in its last 0.15 s goes as it ends; she walks and fires again",
+		e_at >= end and e_at <= end + 2.0 * DT and Vector2(P.pos.x - at.x, P.pos.z - at.z).length() > 0.3
+		and int(K.stats["darts"]) > darts, "E at %+.3f s, %.2f m, %d darts" % [e_at - end,
+		Vector2(P.pos.x - at.x, P.pos.z - at.z).length(), int(K.stats["darts"]) - darts])
+
+## One step with LMB held (the kit's lock clears the key each step, as a fresh read of the mouse would set it).
+func _step_firing(m: Match, P: Hunter) -> void:
+	P.inp["fire"] = true
+	step(m, DT)
+
+## Shift in the recovery skates out at once (her into_dash.x row: cancel, carry).
+func _recover_dash() -> void:
+	var r: Array = sc.setup("rimewright", 4.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	HunterKeys.ult_pressed(P)
+	var t := 0.0
+	while K.stats["crashes"] < 1 and t < 5.0:
+		step(m, DT)
+		t += DT
+	step(m, 0.1)
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	step(m, DT)
+	P.inp["dash"] = false
+	ok("anim rime: Shift in the recovery skates out of it at once", K.rinkrunning() and not K.recovering())
+	P.inp["move"] = Vector2.ZERO

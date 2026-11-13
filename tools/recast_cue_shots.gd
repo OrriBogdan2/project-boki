@@ -1,8 +1,11 @@
 extends "res://tools/archetype_check.gd"
 ## --recast-cue-shots --shots-dir=<dir>: RecastCue's review screenshots (run under a renderer, jobq --needs gpu).
-## Hunters mid-recast (Sparkle's knife, Motley's hang, Mossy's hammer, Sable's seed), a Dazed foe, EXPIRED and
-## the payoff flash; full frames as recast_<name>.png. The match is paused (set_process off) so each frame holds
-## the moment.
+## Every two-step kit with its recast open (the check's CASES), foe state on the target where the kit has one, and
+## each frame twice: recast_<hero>_<slot>_own.png as the owner sees it (the cue's slot, marker and badges) and
+## recast_<hero>_<slot>_foe.png as the target sees the same moment (the kit's world art only). Then EXPIRED and the
+## payoff flash. The match is paused (set_process off) so each frame holds the moment.
+
+const RecastCheck := preload("res://tools/recast_cue_check.gd")
 
 var dir := ""
 
@@ -30,6 +33,27 @@ func _until(m: Match, P: Hunter, slot: String, extra: float) -> void:
 		t += DT
 	step(m, extra)
 
+## The kit's own state on the target, so its world art (pips, marker, glow) shows beside the cue's badge.
+func _foe_state(P: Hunter, T: Hunter) -> void:
+	var key := T.get_instance_id()
+	match P.arch:
+		"thief": (P.ak as ThiefKit).add_mark(T, 3, true)
+		"mage": (P.ak as MageKit).sparks[key] = {"e": T, "n": int(P.ak.res_def()["max"]), "t": 3.0}
+		"rimewright":
+			(P.ak as RimewrightKit).add_chill(T)
+			(P.ak as RimewrightKit).fan_hits[key] = {"t": T, "n": 5, "left": 3.0}
+		"ashwick": (P.ak as AshwickKit).add_char(T, 20.0)
+		"juggernaut": (P.ak as JuggernautKit).slam_hit[key] = P.m.time
+
+## The same frame from the target's side: it becomes the viewer (the HUD and AimKit follow Match.player) and the
+## kit stops being the local one, then one step lets the kit's art follow.
+func _as_foe(m: Match, P: Hunter, T: Hunter, file: String) -> void:
+	P.ctrl = "idle"
+	T.ctrl = "local"
+	m.player = T
+	m.step(DT)
+	await _grab(file)
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -37,65 +61,39 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
-	# Sparkle (thief): the knife stuck by the foe, "E AGAIN" on the slot, a plain ring on the knife; Marks on the foe
-	var s := await _scene("thief")
+	for c in RecastCheck.CASES:
+		var hero := String(c[0])
+		var slot := String(c[1])
+		var s := await _scene(hero)
+		var m: Match = s[0]
+		var P: Hunter = s[1]
+		var T: Hunter = s[2]
+		_foe_state(P, T)
+		aim_at(P, T.pos + (Vector3(-1.5, 0, 1.5) if hero == "thief" else Vector3.ZERO))
+		RecastCheck.first(m, P, slot)
+		await _until(m, P, slot, 0.3)
+		await _grab("%s_%s_own" % [hero, slot])
+		await _as_foe(m, P, T, "%s_%s_foe" % [hero, slot])
+		await done(m)
+	# Motley's seed left alone runs out: EXPIRED on the E slot
+	var s := await _scene("ostra")
 	var m: Match = s[0]
 	var P: Hunter = s[1]
-	var T: Hunter = s[2]
-	(P.ak as ThiefKit).add_mark(T, 3, true)
-	aim_at(P, T.pos + Vector3(-1.5, 0, 1.5))
-	P.ak.use_e()
-	await _until(m, P, "e", 0.3)
-	await _grab("thief_knife")
-	RecastCue.payoff(P.ak, T)
-	(P.ak as ThiefKit)._reset_fx(T)
-	step(m, 0.08)
-	await _grab("thief_payoff_flash")
-	await done(m)
-	# Motley (mage): Kitefall's hang, "X AGAIN" on the ult tile, a plain ring on the landing spot; Sparks
-	s = await _scene("mage")
-	m = s[0]
-	P = s[1]
-	T = s[2]
-	(P.ak as MageKit).sparks[T.get_instance_id()] = {"e": T, "n": int(P.ak.res_def()["max"]), "t": 3.0}
-	aim_at(P, T.pos)
-	P.ak.cast_ult()
-	await _until(m, P, "x", 0.6)
-	await _grab("mage_hang")
-	await done(m)
-	# Mossy (bulwark): the hammer out, "LMB AGAIN" on the weapon card, a plain ring on the hammer
-	s = await _scene("bulwark")
-	m = s[0]
-	P = s[1]
-	T = s[2]
-	aim_at(P, T.pos)
-	P.inp["fire"] = true
-	m.step(DT)
-	P.inp["fire"] = false
-	await _until(m, P, "lmb", 0.5)
-	await _grab("bulwark_hammer")
-	await done(m)
-	# Sable (ostra): the seed's 0.3s WAIT, then the late window (hot ring, ticks), then EXPIRED
-	s = await _scene("ostra")
-	m = s[0]
-	P = s[1]
-	T = s[2]
-	aim_at(P, T.pos)
+	aim_at(P, (s[2] as Hunter).pos)
 	P.ak.use_e()
 	await _until(m, P, "e", 0.0)
-	await _grab("ostra_wait")
-	step(m, P.ak.e_t - 0.4)
-	await _grab("ostra_closing")
-	step(m, 0.6)
+	step(m, P.ak.e_t + 0.2)
 	await _grab("ostra_expired")
 	await done(m)
-	# Vex (gunslinger): a Dazed foe's badge (what it is, the ring of time left)
-	s = await _scene("gunslinger")
+	# Sable's payoff on a Marked foe: the white burst on the badge
+	s = await _scene("thief")
 	m = s[0]
 	P = s[1]
-	T = s[2]
-	(P.ak as GunslingerKit).daze(T, 3.0)
-	step(m, 0.8)
-	await _grab("gunslinger_dazed")
+	(P.ak as ThiefKit).add_mark(s[2], 3, true)
+	m.step(DT)
+	RecastCue.payoff(P.ak, s[2])
+	(P.ak as ThiefKit)._reset_fx(s[2])
+	step(m, 0.08)
+	await _grab("thief_payoff_flash")
 	await done(m)
 	main.get_tree().quit(0)
