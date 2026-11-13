@@ -6,12 +6,16 @@ extends RefCounted
 ## Matching is by place and time, so "shared" can include a neighbour's cue; "none" is solid. A cue that is
 ## culled by distance still counts as played here: this audit is about wiring, not hearing range.
 ## "MUTED name": a cue Sfx.skip held back (a Hero's own replaces it) or with no file; MISSING lines are the latter.
-## Options: --audit-secs=<match seconds> (default 150), --audit-seed=<n> (default 31), --audit-out=<tsv path>.
+## Options: --audit-secs=<match seconds> (default 150), --audit-seed=<n> (default 31), --audit-out=<tsv path>,
+## --audit-arch=<id> (the autoplay player is that archetype; default the save's) and --audit-throw (the player's own
+## Boki is thrown at the nearest rival every few seconds and called back: its [you] rows get real samples).
 
 const SECS := 150.0
 const SEED := 31
 const NEAR := 6.0       # m: a cue this close to an event's place belongs to it
 const WINDOW := 2       # steps an event waits for its cue (its own step and the next)
+const THROW_EVERY := 5.0    # s between the player's throws (--audit-throw)
+const THROW_REACH := 10.0   # m: how far toward the nearest rival the Boki is thrown
 const SHOW := 40        # rows printed
 const NOISE := ["step", "wisp_hum", "glider_wind"]     # constant background cues, never an event's own
 
@@ -159,10 +163,18 @@ func run(main: Node) -> void:
 	_load_shared()
 	ok(Sfx.cue_log == null, "the cue log is off by default")
 	var secs := float(_arg("--audit-secs", str(SECS)))
+	var opts := {"teams": 10, "squad": 3, "tier": 0, "length": 1e9, "seed": int(_arg("--audit-seed", str(SEED))),
+		"no_drop": true, "autoplay": true}
+	var arch := _arg("--audit-arch", "")
+	ok(arch == "" or Arch.exists(arch), "the player's archetype '%s' exists" % arch)
+	if Arch.exists(arch):
+		opts.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
+	var throw := OS.get_cmdline_user_args().has("--audit-throw")
+	if throw:
+		opts["demo_kin"] = "cindle"         # (a fresh save has no Boki for the player)
 	_m = Match.new()
 	main.add_child(_m)
-	_m.start({"teams": 10, "squad": 3, "tier": 0, "length": 1e9, "seed": int(_arg("--audit-seed", str(SEED))),
-		"no_drop": true, "autoplay": true})
+	_m.start(opts)
 	_m.set_process(false)
 	ok(_m.hunters.size() == 30, "10 trios: %d hunters" % _m.hunters.size())
 	CombatBus.hit_landed.connect(_on_hit)
@@ -174,6 +186,8 @@ func run(main: Node) -> void:
 	var steps := int(secs / Match.DT)
 	for i in steps:
 		_m.step(Match.DT)
+		if throw and i % int(THROW_EVERY / Match.DT) == 0:
+			_throw_own()
 		_poll()
 		pending.append_array(step_events)
 		step_events = []
@@ -186,10 +200,33 @@ func run(main: Node) -> void:
 	for ev in pending:
 		_tally(ev)
 	Sfx.cue_log = null
+	print("SILENCE player %s, archetypes in the match: %s" % [_who(_m.player), _arch_counts()])
 	_fixes()
 	_report()
 	print("SILENCE CHECK DONE, failures: ", fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## --audit-throw: the player's Boki leaves the shoulder toward the nearest rival; once out, it is called back.
+func _throw_own() -> void:
+	var p: Hunter = _m.player
+	var k: Kin = p.kin
+	if p.out or p.downed or k == null:
+		return
+	if k.state == "active" and KinCommand.can_recall(p):
+		KinCommand.call_back(p)
+	elif k.state == "shoulder":
+		var rivals: Array = _m.hunters.filter(func(x: Hunter): return x.team != p.team and not x.out)
+		rivals.sort_custom(func(a: Hunter, b: Hunter): return _flat(a.pos, p.pos) < _flat(b.pos, p.pos))
+		var to: Vector3 = (rivals[0].pos - p.pos) if not rivals.is_empty() else Vector3.FORWARD
+		to.y = 0.0
+		k.throw_to(p.pos + to.normalized() * THROW_REACH)
+
+## Hunters per archetype, to pick the one a seed covers least ("ashwick 0" is absent from the list).
+func _arch_counts() -> String:
+	var n := {}
+	for h: Hunter in _m.hunters:
+		n[_who(h)] = int(n.get(_who(h), 0)) + 1
+	return ", ".join(n.keys().map(func(a): return "%s %d" % [a, n[a]]))
 
 ## The cues the audit's first fixes added, each probed on its own (docs/AUDIO.md, Silence audit).
 func _cues_of(probe: Callable) -> Array:
