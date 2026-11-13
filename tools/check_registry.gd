@@ -8,6 +8,7 @@ extends RefCounted
 const CHECKS := {
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],      # out: watch and switch teammates
 	"--spectate-shots": ["res://tools/spectate_check.gd", "spectate_check", "shots"],      # --shots-dir=<dir>
+	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],      # PvE pacing: 12 hunters vs 3 camps at level 1 and 5
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],

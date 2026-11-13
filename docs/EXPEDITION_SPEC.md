@@ -274,3 +274,40 @@ one. Rescaling an unrelated attack to fit it would be a design call, not parity.
 boss number was changed.** When a camp capture or a pull of the creature curve tables (the same install
 route as the Hunter pull) gives creature damage, fill the Source column, change `Data.MOBS` to match,
 and rerun `--mob-damage-check`.
+
+## 12. Camp clear pacing (PvE, measured)
+
+`--camp-clear-check` puts each of the 12 Hunters (bot-driven, normal kit use, no Boki summon) against a fresh camp at level 1 and level 5. Skitter camp = 2 Skitters, spitter camp = Spitter + Skitter, brute camp = Brute + Skitter + Puffbomb (the game's own comps). Each trial puts the hunter back on its landing spot and lets it rest 3 s. The camp spawns alerted, 6 m away on the same level and in line of sight, so the time is the fight, not the bot's walk. A cell is the median of 5 trials: time to clear / damage taken (hp). Seed 4242:
+
+| Hunter | ski L1 | spi L1 | bru L1 | ski L5 | spi L5 | bru L5 |
+|---|---|---|---|---|---|---|
+| gunslinger | 3.2s / 0 | 4.4s / 0 | 9.0s / 0 | 3.5s / 0 | 4.9s / 0 | 10.2s / 0 |
+| juggernaut | 2.4s / 7 | 2.2s / 0 | 3.8s / 19 | 2.0s / 7 | 2.7s / 7 | 1.9s / 7 |
+| ashwick | 9.9s / 7 | 10.3s / 0 | 11.4s / 0 | 8.1s / 0 | 6.2s / 0 | 10.8s / 0 |
+| tender | 5.4s / 0 | 6.4s / 7 | 13.1s / 12 | 4.9s / 0 | 8.3s / 0 | 10.3s / 0 |
+| dolm | 1.5s / 0 | 3.8s / 0 | 3.7s / 0 | 1.8s / 7 | 3.3s / 0 | 3.4s / 0 |
+| archer | 5.3s / 7 | 6.3s / 0 | 9.3s / 0 | 4.6s / 0 | 3.4s / 0 | 7.9s / 7 |
+| dredge | 3.2s / 0 | 5.0s / 0 | 6.8s / 26 | 2.2s / 0 | 3.1s / 0 | 6.4s / 19 |
+| rimewright | 4.8s / 0 | 6.8s / 0 | 7.3s / 0 | 5.4s / 0 | 3.9s / 0 | 3.6s / 0 |
+| mage | 4.0s / 0 | 4.5s / 0 | 6.6s / 0 | 3.7s / 0 | 3.8s / 8 | 5.1s / 0 |
+| bulwark | 11.1s / 35 | 19.6s / 39 | 15.9s / 57 | 3.2s / 14 | 19.4s / 16 | 22.6s / 70 |
+| thief | 3.7s / 0 | 4.1s / 0 | 6.8s / 19 | 2.9s / 0 | 2.3s / 0 | 5.6s / 0 |
+| ostra | 5.0s / 0 | 5.6s / 8 | 10.9s / 0 | 4.3s / 0 | 5.2s / 8 | 8.2s / 0 |
+
+Spread per camp and level, slowest median vs fastest:
+
+```
+skitter@1: slowest 11.1s vs fastest 1.5s (7.39x)
+spitter@1: slowest 19.6s vs fastest 2.2s (8.96x)
+brute@1:   slowest 15.9s vs fastest 3.7s (4.35x)
+skitter@5: slowest 8.1s vs fastest 1.8s (4.47x)
+spitter@5: slowest 19.4s vs fastest 2.3s (8.37x)
+brute@5:   slowest 22.6s vs fastest 1.9s (12.00x)
+```
+
+**Findings.** `briefs/supervive-data` has no creature hp or damage, so there is nothing to compare against. The proposed band is slowest no more than 1.6x the fastest. It is **not met**, and mob numbers can't meet it: with Skitter, Spitter, Brute and Puffbomb hp all doubled, the spread is still 4.7x to 7.2x. The gap is how the bots use the slow kits:
+- Bulwark's tap throws the hammer, which has to come back.
+- Ashwick's hose (27 dps, 7 m) is fired in the bot's on/off bursts for fast guns, from a heavy's 5.5 m, so it lands about half its damage.
+- Juggernaut and Dolm close in and cleave whole camps.
+
+Fixing this is bot-brain work (`scripts/match/bot.gd`: per-kit fire duty and preferred range), not mob or kit numbers. The check asserts that every Hunter clears every camp (median under 30 s) and a spread ratchet (`SPREAD_MAX` 14x). It prints the 1.6x target beside the ratchet. Lower `SPREAD_MAX` as the bots improve. Runs are deterministic per seed. The full check takes about 3 minutes; `--arch=<id>` runs one Hunter.
