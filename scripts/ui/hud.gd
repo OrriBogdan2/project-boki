@@ -28,6 +28,7 @@ func map_region(tiles: Rect2) -> Rect2:
 	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
 	return Rect2(tiles.position * k, tiles.size * k)
 var kit_t0 := 0.0
+var kit_fade := 1.0       # 0 while the fight budget hides the kit panel, 1 when it shows
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
@@ -107,7 +108,7 @@ func _process(delta: float) -> void:
 	cursor.queue_redraw()
 
 var hit_armor := false
-var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the message lane's fight budget
+var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the HUD fight budget (message lane, kit panel)
 
 func hitmarker(crit: bool, armor := false) -> void:
 	hit_t = 0.14
@@ -129,7 +130,7 @@ func hurt_flash(d: float) -> void:
 ## holds it while its banner is up). In a fight (hit, or landing hits) it shows fewer, shorter lines (MsgLane.fight).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-	msgs.fight = m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
+	msgs.fight = in_fight()
 	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
@@ -156,7 +157,12 @@ func tip(text: String) -> void:
 		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
-const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the message lane keeps to its fight budget
+const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
+const KIT_FADE_S := 0.35   # s the kit panel takes to fade out or back
+
+## The fight budget is on (you took or landed a hit lately): the message lane shrinks, the kit panel hides.
+func in_fight() -> bool:
+	return m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
 
 func _build_minimap() -> void:
 	var w := m.world
@@ -1010,6 +1016,11 @@ func _hud_tick(delta: float) -> void:
 		guide_hidden = not guide_hidden
 	_h_down = hd
 	HudSlot.decay(self, delta)
+	# the kit panel fades out in a fight (Tab holds it up) and its show timer waits the fight out
+	var fight := in_fight()
+	if fight: kit_t0 += delta
+	var hide_kit := fight and not Input.is_action_pressed("scores")
+	kit_fade = move_toward(kit_fade, 0.0 if hide_kit else 1.0, delta / KIT_FADE_S)
 	dmg_dir.tick(delta)
 
 ## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
@@ -1610,7 +1621,9 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		return
 	if t > show_t:
 		return
-	var a := clampf(show_t - t, 0.0, 1.0)
+	var a := clampf(show_t - t, 0.0, 1.0) * kit_fade
+	if a <= 0.0:
+		return
 	var lines: Array = []
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner and p.ak == null else null
 	if util:

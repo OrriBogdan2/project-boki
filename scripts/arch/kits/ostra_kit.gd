@@ -420,7 +420,7 @@ func _swap_end(go: bool) -> void:
 func _shield_allies(from: Vector3, dd: Dictionary) -> void:
 	for o2 in m.hunters:
 		if o2 != h and o2.team == h.team and not o2.downed and o2.flat_dist(from) < float(dd["radius"]):
-			o2.shield = maxf(o2.shield, h.max_hp * float(dd["ally_shield"]))
+			ShieldSrc.give(o2, h.max_hp * float(dd["ally_shield"]), ShieldSrc.SWAP)
 			o2.shield_t = maxf(o2.shield_t, float(dd["ally_shield_t"]))
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
