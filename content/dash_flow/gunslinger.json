@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. into_cast.<first>.<second> (the Cast into cast table): <second> pressed at <first>'s at[0] s (windup) and at[1] s (recovery) after <first>'s press: fire (at once) | queue (goes <phase>_wait s later) | drop (never goes); lmb_hold is LMB held 0.75 s; asserted by --cast-into-cast-check.",
 	"dash": {
 		"ground": {
 			"lmb": {"mode": "fire", "source": "Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide')."},
@@ -25,5 +25,40 @@
 	},
 	"into_jump": {
 		"x": {"mode": "lock", "reason": "The source's commit, as into_dash x: held 0.76s from the tap; a jump in its last 0.15s goes as it ends.", "source": "Footage briefs/hero-ref/venator.md R 4: 'About 0.8 s committed, with no move seen'."}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it."}
+		},
+		"e": {
+			"at": [0.3, 0.85],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either."},
+			"x": {"windup": "drop", "recovery": "fire", "source": "[?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either."}
+		},
+		"x": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235)."}
+		}
 	}
 }
