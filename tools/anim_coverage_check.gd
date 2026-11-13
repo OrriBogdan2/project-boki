@@ -255,15 +255,16 @@ func _hunter_row(art: String) -> Array:
 		_cell(clips.has(air.get("glide", ""))), _cell(_move(d, clips, DASH_RE)), _cell(_move(d, clips, CAST_RE)),
 		"proc", _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))), _cell(upper)]
 
-## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits and landings spring
-## KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side (Kin.render).
+## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
+## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples (Kin.render).
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])
 	var flinch := func(file: String, call: String) -> String:
 		return "proc" if FileAccess.get_file_as_string(file).contains(call) else "missing"
 	return [_cell(clips.has("idle")), _cell(clips.has("walk")), _cell(clips.has("run")), _cell(clips.has("attack")),
 		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("), "proc", _cell(clips.has("hop")),
-		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing", "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("), "missing",
+		flinch.call("res://scripts/match/kin.gd", "KinFlinch.dash("),
 		_cell(clips.has("ability")), "missing"]
 
 func _table(cols: Array, rows: Dictionary) -> String:
