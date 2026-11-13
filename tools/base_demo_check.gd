@@ -50,8 +50,7 @@ func run(m: Node) -> void:
 	var snacks: Dictionary = d["crops"]
 	ok(snacks.size() >= 3 and snacks.keys().all(func(c): return Lean.key_of(c) != ""),
 		"element snacks in the bag (%s)" % str(snacks))
-	ok(Incubator.ready_eggs().size() == 1 and not home.hinc.node.visible,
-		"an egg is ready to hatch in the Incubator, the hub's: the base has no Nook or Incubator of its own")
+	ok(Incubator.ready_eggs().size() == 1 and home.hinc.node.visible, "an egg is ready to hatch in the incubator")
 	var shown := -1.0
 	var t := 0.0
 	while t < SHOW_SECS and shown < 0.0:

@@ -113,14 +113,8 @@ func tick(d: float) -> void:
 	Incubator.tick(d, warm)
 	_hear(d)
 	acc += d
-<<<<<<< HEAD
 	VisitorArrive.glint(self, d)
-	var tt := Time.get_ticks_msec() / 1000.0
-||||||| 449fcaf48f
-	var tt := Time.get_ticks_msec() / 1000.0
-=======
 	var tt := film_t if film_t >= 0.0 else Time.get_ticks_msec() / 1000.0
->>>>>>> origin/ext/farm-incubator-verify
 	var hot := Incubator.rate(warm)
 	var gl: OmniLight3D = node.get_node("Glow")
 	gl.light_energy = (0.0 if Incubator.eggs().is_empty() else 0.4 + 0.5 * hot) + sin(tt * 3.1) * 0.12

@@ -1,7 +1,7 @@
 class_name GardenFirstDay
 extends RefCounted
 ## The first-day list in the Goals tracker for a new save: feed your Boki, play with a toy, run your
-## first race, see a nap pile, pair two Boki in the hub's Nook. One line each, ticked when it happens, one small
+## first race, see a nap pile, pair two Boki in the Nook. One line each, ticked when it happens, one small
 ## gem reward at the end, then gone (content/rules/farm_tutorial.json "first_day"). Not tutorial steps.
 ## State is Save.d.tutorial.gfd = {did: id -> true, paid}. Only Save.fresh makes it, so older saves never see it.
 

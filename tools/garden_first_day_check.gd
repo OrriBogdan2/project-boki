@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. the tracker shows its five lines first, in order, ticked ones last; the card is hidden when done
 ##   3. ticks are once-only, an unknown id does nothing, the reward is paid once, then the list is gone
 ##   4. a bot plays a fresh base: feeds a Boki, plays at a toy, runs a race, naps in a pile and pairs two
-##      Boki in the hub's Nook (the base has none of its own), and the list finishes by itself
+##      Boki in the Nook, and the list finishes by itself
 ##   5. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
 ##      arrival card; day 5 (a journal, today's wishes) shows one arrival card, the wishes riding on the away card
 ## Never touches the real save.
@@ -144,27 +144,10 @@ func _bot() -> void:
 	ok(GardenFirstDay.did("toy"), "bot: a Boki playing at the toy ticks 'toy'")
 	await _race(home)
 	_nap(home, a, b)
-	ok(home.NEST_AT == home.FAR and HomeLayout.count_of("market_stall", Save.d) == 0,
-		"bot: the base has no Nook or stall of its own (the hub's are the ones)")
-	home.queue_free()
-	var hub = await _hub()
-	ok(hub.NEST_AT != hub.FAR, "bot: the hub has the Nook")
-	hub._make_egg(a["rec"], b["rec"])
-	ok(GardenFirstDay.did("pair") and is_instance_valid(hub.nest),
-		"bot: pairing two Boki in the hub's Nook ticks 'pair'")
+	home._make_egg(a["rec"], b["rec"])
+	ok(GardenFirstDay.did("pair"), "bot: pairing two Boki ticks 'pair'")
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "bot: all five done, the list is gone")
 	ok(int(Save.d["gems"]) >= int(GardenFirstDay.rules()["reward_gems"]), "bot: the reward is in the purse")
-
-## The hub, built the way a hop there builds it (Home's zone param).
-func _hub():
-	var hub = load("res://scripts/home/home.gd").new()
-	hub.zone = GardenZones.HUB
-	main.add_child(hub)
-	main.current = hub
-	await main.get_tree().process_frame
-	while hub.building:
-		await main.get_tree().process_frame
-	return hub
 
 func _race(home) -> void:
 	var race: BaseRace = home.hrace

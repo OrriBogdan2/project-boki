@@ -22,11 +22,19 @@ const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
-	"weak": ["Weak from hunger", "Slow, and weaker on expeditions. Losing trust in you."],
-	"refuse": ["Too weak to go out", "Won't come on expeditions until it's eaten."],
-	"sick": ["Sick from hunger", "Ill and miserable. Feed it and it will slowly get better."],
+	"weak": ["Weak from hunger", "Slow and weak. Feed it, let it nap or keep a friend close."],
+	"refuse": ["Too weak to go out", "Too weak for expeditions. Feed it, let it nap; a Puffcorn snack works fastest."],
+	"sick": ["Sick from hunger", "Sick and drooping. Feed it, nap, keep a friend close; one Puffcorn snack cures it."],
 }
-
+## Getting better, in starve-seconds undone per second while it is fed (food over 20): a meal's worth,
+## plus a nap (asleep, indoors or in bed) and a friend close by. A snack crop (Data.CROPS use "snack")
+## given to a weak or sick kin cures it at once.
+const RECOVER_FED := 6.0
+const RECOVER_NAP := 4.0
+const RECOVER_FRIEND := 2.0
+## How fast a weak, and a sick, kin gets about (1.0 is well).
+const PACE_WEAK := 0.7
+const PACE_SICK := 0.5
 const STATS := {
 	"power": {"name": "Power", "col": Color("ff7a5a"), "desc": "+0.4% damage a point", "drill": "Dummy strikes",
 		"means": "Power: your Boki hits harder in a match and pushes harder at the stump"},
@@ -153,6 +161,13 @@ static func ensure(rec: Dictionary) -> void:
 static func sulky() -> Dictionary:
 	return Content.rules("care").get("sulky", {}) if FarmUnlocks.base_mode() else {}
 
+## Joy lost each awake minute: base_mode's own pace (care.json base_joy_decay) so a Boki left alone at the base
+## grows glum enough to seek its toys; DECAY's joy off base_mode and for time you were away.
+static func joy_decay(away := false) -> float:
+	if away or not FarmUnlocks.base_mode():
+		return float(DECAY["joy"])
+	return float(Content.rules("care")["base_joy_decay"])
+
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
 	return float(rec["needs"].get(n, 50.0))
@@ -164,8 +179,12 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 	return float(rec["needs"][n]) - before
 
 ## Time passing at home. sleeping: curled up in bed or napping (or indoors); raining: rain on the
-## farm, which some kinds love and some hate (BokiQuirks.rain_joy).
-static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false) -> void:
+## farm, which some kinds love and some hate (BokiQuirks.rain_joy); friend: a friend close by (it recovers faster);
+## away: time you were gone (catch_up), when joy wears at Care.DECAY's slow pace because nobody models the toys
+## it played with meanwhile.
+static func tick(
+		rec: Dictionary, secs: float, sleeping := false, raining := false, friend := false, away := false
+) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -180,7 +199,12 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 	var floors := sulky()
 	if floors.is_empty():
 		# the part of this stretch spent with nothing in it counts toward starving
-		starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0)
+		var help := 0.0      # extra recovery a second while fed
+		if sleeping:
+			help += RECOVER_NAP
+		if friend:
+			help += RECOVER_FRIEND
+		starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0, help)
 	nd["clean"] = clampf(float(nd["clean"]) - DECAY["clean"] * mins * (0.2 if sleeping else 1.0), 0.0, 100.0)
 	if sleeping:
 		nd["energy"] = clampf(float(nd["energy"]) + 9.0 * mins, 0.0, 100.0)
@@ -188,7 +212,7 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 		nd["energy"] = clampf(float(nd["energy"]) - DECAY["energy"] * mins, 0.0, 100.0)
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
-	var joy_loss: float = DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
+	var joy_loss: float = joy_decay(away) * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
 	nd["joy"] = clampf(float(nd["joy"]) - joy_loss + ZoneAffinity.joy_per_min(rec) * mins, 0.0, 100.0)
 	if raining and not sleeping:
 		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
@@ -217,8 +241,8 @@ static func catch_up(rec: Dictionary) -> float:
 		var before := {}
 		for k in floors: before[k] = float(nd[k])
 		var st0 := float(rec.get("starve", 0.0))
-		tick(rec, gone * 0.5, true)
-		tick(rec, minf(gone * 0.5, 1800.0), false)
+		tick(rec, gone * 0.5, true, false, false, true)
+		tick(rec, minf(gone * 0.5, 1800.0), false, false, false, true)
 		for k in floors:
 			nd[k] = maxf(float(nd[k]), minf(float(before[k]), floors[k]))
 		# the floor means it found enough to get by; one that was already empty starved the whole time
@@ -238,15 +262,16 @@ static func starve_stage(rec: Dictionary) -> String:
 	if FarmUnlocks.base_mode():
 		return ""      # the base never starves a Boki (sulky at worst)
 	var h := starve_h(rec)
-	if h >= STARVE["dead"] and bool(Content.rules("care")["natural_death"]): return "dead"
+	if h >= STARVE["dead"] and natural_death(): return "dead"
 	if h >= STARVE["sick"]: return "sick"
 	if h >= STARVE["refuse"]: return "refuse"
 	if h >= STARVE["weak"]: return "weak"
 	if float(rec.get("starve", 0.0)) > 0.0 and need(rec, "food") <= 0.5: return "starving"
 	return ""
 
-## secs of time passing; zero_secs of it with an empty belly (defaults to all of it if food is 0).
-static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void:
+## secs of time passing; zero_secs of it with an empty belly (defaults to all of it if food is 0);
+## help: extra recovery a second while fed (a nap, a friend).
+static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0, help := 0.0) -> void:
 	if rec.get("boxed", false) or FarmUnlocks.base_mode():
 		return
 	var z := zero_secs if zero_secs >= 0.0 else (secs if need(rec, "food") <= 0.5 else 0.0)
@@ -257,17 +282,31 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void
 			rec["trust"] = clampf(float(rec.get("trust", 0.0)) - z / 10800.0, 0.0, 100.0)
 		st = minf(st + z, starve_cap())
 	elif need(rec, "food") > 20.0 and st > 0.0:
-		st = maxf(0.0, st - secs * 3.0)
+		st = maxf(0.0, st - secs * (RECOVER_FED + help))
 	if st > 0.0: rec["starve"] = st
 	else: rec.erase("starve")
+
+## content/rules/care.json natural_death: false means the clock stops short of "dead" (starve_cap).
+static func natural_death() -> bool:
+	return bool(Content.rules("care")["natural_death"])
 
 ## The most the starve clock holds, in seconds. With natural_death off it stops at the "dead" mark, so
 ## a Boki left alone for weeks still recovers with a few meals and a day of care.
 static func starve_cap() -> float:
 	if FarmUnlocks.base_mode():
 		return 0.0
-	return INF if bool(Content.rules("care")["natural_death"]) else STARVE["dead"] * 3600.0
+	return INF if natural_death() else STARVE["dead"] * 3600.0
 
+
+## True while it is weak or sick from hunger (it walks slowly, droops, and has its card line).
+static func ailing(rec: Dictionary) -> bool:
+	return starve_h(rec) >= STARVE["weak"]
+
+## How fast it gets about: 1.0 well, PACE_WEAK weak, PACE_SICK sick.
+static func pace(rec: Dictionary) -> float:
+	var h := starve_h(rec)
+	if h >= STARVE["sick"]: return PACE_SICK
+	return PACE_WEAK if h >= STARVE["weak"] else 1.0
 ## It just ate: a meal takes four hours off the starve clock.
 static func fed(rec: Dictionary) -> void:
 	if rec.has("starve"):
@@ -316,7 +355,7 @@ static func match_mods(rec: Dictionary) -> Dictionary:
 	ensure(rec)
 	var c := condition(rec)
 	var cm := 1.1 if c >= 75.0 else (1.0 if c >= 50.0 else (0.92 if c >= 28.0 else 0.82))
-	if starve_h(rec) >= STARVE["weak"]:
+	if ailing(rec):
 		cm *= 0.85        # weak from hunger
 	var trust := float(rec.get("trust", 50.0))
 	var bond := 1.1 if trust >= 90.0 else 1.0
@@ -446,6 +485,9 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 	var was := need(rec, "food")
 	change(rec, "food", fill)
 	change(rec, "joy", joy)
+	out["cured"] = ailing(rec) and String(Data.CROPS.get(f, {}).get("use", "")) == "snack"
+	if out["cured"]:
+		rec.erase("starve")
 	fed(rec)
 	out["lean"] = Evo.eat(rec, f)      # the lean this meal built ("" for none), for the journal and the feeder
 	CareJournal.fed(rec, f, out["lean"])

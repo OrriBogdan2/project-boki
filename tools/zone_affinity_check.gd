@@ -6,7 +6,7 @@ extends RefCounted
 
 const DAYS := 3
 const PLAYS_A_DAY := 100     # toy sessions in one simulated day
-const TICK_S := 1200.0       # seconds of at-home time a day is ticked for the joy it keeps
+const DAY_WEAR := 12.0      # joy a day's at-home time wears off at the base pace (Care.joy_decay), clear of sulky
 
 var bad := 0
 
@@ -37,6 +37,10 @@ func _data_part() -> void:
 			and natures.has(loved.get("nature", ""))
 	ok(sound, "all %d zones love two types and one nature" % GardenZones.ids().size())
 
+## Seconds of at-home time a day is ticked for: long enough to wear off DAY_WEAR joy.
+func _day_s() -> float:
+	return 60.0 * DAY_WEAR / Care.joy_decay()
+
 ## A Water Boki (a nature neither zone favours), lived through three days in each zone.
 func _three_days_part() -> void:
 	var gain := {}
@@ -53,7 +57,7 @@ func _three_days_part() -> void:
 		joy[zone] = 0.0
 		for day in DAYS:
 			rec["needs"] = {"food": 90.0, "clean": 90.0, "energy": 90.0, "joy": 50.0}
-			Care.tick(rec, TICK_S)
+			Care.tick(rec, _day_s())
 			joy[zone] += Care.need(rec, "joy")
 			for i in PLAYS_A_DAY:
 				gain[zone] += GardenZones.train_gain(rec, 1)
@@ -63,7 +67,7 @@ func _three_days_part() -> void:
 			away["lean"] = rec["lean"]
 			away["zone"] = "glasswater"      # lives elsewhere: gets nothing in the zone you are in
 			away["needs"] = {"food": 90.0, "clean": 90.0, "energy": 90.0, "joy": 50.0}
-			Care.tick(away, TICK_S)
+			Care.tick(away, _day_s())
 			plain_joy = Care.need(away, "joy") * DAYS
 	var wet: Array = GardenZones.info("glasswater")["loves"]["types"]
 	var dark: Array = GardenZones.info("hushwood")["loves"]["types"]

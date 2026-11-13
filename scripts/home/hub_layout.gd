@@ -16,8 +16,6 @@ const WALL_OFF := Vector3(0, 0, -2.4)      # m from the board to the Dash's show
 ## [catalog id, tile x, tile z, turns]: the fixtures, with the tiles they stand on (south is turn 0).
 const DECO := [["house", 36, 28, 0], ["nesting_nook", 26, 30, 0], ["market_stall", 43, 32, 0],
 	["boki_burrow", 32, 35, 0]]
-## The catalog ids only the hub has with the garden on (the Incubator stands with the Nook): no zone builds them.
-const OWN := ["house", "nesting_nook", "market_stall", "boki_burrow"]
 const SHRINE := {"x": 31, "z": 30, "r": 0}        # the Soul Shrine's lot: you build it there
 ## Tile rects [x0, z0, x1, z1] kept free of wild trees and rocks: round the Waystone, the board and its wall.
 const CLEAR := [[36, 31, 41, 36], [45, 33, 47, 37]]
@@ -57,43 +55,11 @@ static func template() -> Dictionary:
 	L["b"]["shrine"] = SHRINE.duplicate()
 	return L
 
-<<<<<<< HEAD
 ## Does the hub hold catalog piece `id` instead of layout `L`? With the garden on, the hub's house, Nook (with
 ## its Incubator), stall and Burrow are the only ones: the save's own layout (the start zone's) builds none of
 ## them. An older layout may still list some; they stay on the save for the farm with the garden off.
 static func holds(L: Dictionary, id: String) -> bool:
 	return FarmUnlocks.base_mode() and is_same(L, Save.d.get("layout")) and DECO.any(func(f): return f[0] == id)
 
-||||||| 449fcaf48f
-=======
-## The save migration for the hub owning those (docs/decisions/0078-hub-owns-fixtures.md): with the garden on, the
-## start zone's own house, Nook, stall and Burrow go to its storage (base_mode off sets them down again) and a
-## higher tier carries over to the hub's; one still going up is taken down and pays back. The egg, the nest
-## items and the Incubator are the save's (Save.d egg, nest_set, incubator): they follow the one Nook as they are.
-static func claim(d: Dictionary) -> void:
-	if not FarmUnlocks.base_mode() or not is_same(d, Save.d) or typeof(d.get("layout")) != TYPE_DICTIONARY:
-		return
-	var L: Dictionary = d["layout"]
-	var mine: Array = (L["deco"] as Array).filter(func(e): return OWN.has(String(e["id"])))
-	if mine.is_empty():
-		return
-	if typeof(d.get("hub_layout")) != TYPE_DICTIONARY:
-		d["hub_layout"] = template()
-	for e in mine:
-		var id := String(e["id"])
-		var built := not FarmSites.is_site(e)
-		FarmSites.cancel(e)
-		if built:
-			L["inv"][id] = int(L["inv"].get(id, 0)) + 1
-			for hub_e in d["hub_layout"]["deco"]:
-				if String(hub_e["id"]) == id:
-					hub_e["t"] = maxi(FarmSites.tier(hub_e), FarmSites.tier(e))
-		(L["deco"] as Array).erase(e)
-
-## Does Home `h` stand on an island that leaves those to the hub (the garden on, your own zone, not the hub)?
-static func vacant(h) -> bool:
-	return FarmUnlocks.base_mode() and h.visit.is_empty()
-
->>>>>>> origin/ext/farm-incubator-verify
 static func is_hub(d: Dictionary) -> bool:
 	return bool(d.get("hub", false))

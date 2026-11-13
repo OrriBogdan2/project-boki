@@ -271,7 +271,6 @@ static func ensure(d: Dictionary) -> Dictionary:
 		FarmSites.clean(be)
 	FarmLots.migrate(d, L)
 	SnackPatch.grant(d)
-	HubLayout.claim(d)
 	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:

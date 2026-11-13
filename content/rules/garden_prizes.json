@@ -284,6 +284,25 @@
 					"w": 10
 				}
 			]
+		},
+		"kite": {
+			"name": "Kite Tow",
+			"first": "zipseed",
+			"ribbon": "Kite Tow Cup Ribbon",
+			"colour": "#8fd3f4",
+			"cup_prize": "galeribbon",
+			"table": [
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 55
+				},
+				{
+					"kind": "item",
+					"id": "windfloss",
+					"w": 45
+				}
+			]
 		}
 	}
 }

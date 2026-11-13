@@ -12,6 +12,7 @@ const THINK_SECS := 0.4          # s until each Boki's first choice, so a greeti
 const JOY := 60.0                # joy need: under toys.json joy_below, so a Boki goes to play on its own
 const SNACKS := {"emberberry": 3, "tidebloom": 3, "sunroot": 2, "puffcorn": 2}
 const TOYS := {"toy_ball": Vector3(-3.5, 0, -3.0), "toy_post": Vector3(4.0, 0, -4.0), "toy_tub": Vector3(-6.0, 0, 2.0)}
+const NOOK_AT := Vector3(8.0, 0, -8.0)
 const EGG_SPECIES := "burrlet"
 ## name -> [species, offset from the landing, temper]. Moss and Pip are friends, Ash and Rocky rivals.
 const CAST := {"Pip": ["zapple", Vector3(2.0, 0, 2.0), 0.1], "Moss": ["burrlet", Vector3(3.2, 0, 2.0), 0.1],
@@ -43,13 +44,15 @@ static func save() -> Dictionary:
 	Incubator.find(String(egg["id"]))["heat"] = Incubator.need()
 	return d
 
-## Puts the toys on the built farm, the Boki beside them, and sets the scene for the camera. The egg waits in
-## the hub's Incubator: the Nook is the hub's (HubLayout.OWN).
+## Puts the toys and the Nook on the built farm, the Boki beside them, and sets the scene for the camera.
 func stage(h) -> void:
 	var land := HomeLayout.LANDING
 	h.day_t = 0.42
 	for id in TOYS:
 		h.hg.demo_place(id, land + TOYS[id])
+	h.hg.demo_place("nesting_nook", land + NOOK_AT)
+	h._sync_fixtures()
+	h.hinc.refresh()
 	h.ppos = land + Vector3(0, 0, 1.0)
 	h.player.position = h.ppos
 	for k in h.kins:
