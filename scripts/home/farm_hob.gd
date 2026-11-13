@@ -154,7 +154,9 @@ func find(p2: Vector2) -> Dictionary:
 	if not h.visit.is_empty():
 		return {}
 	var reach := float(rules()["talk_reach"])
-	var d := p2.distance_to(Vector2(node.position.x, node.position.z)) if FarmUnlocks.gated() and is_instance_valid(node) else INF
+	var d := INF
+	if FarmUnlocks.gated() and is_instance_valid(node):
+		d = p2.distance_to(Vector2(node.position.x, node.position.z))
 	if d < reach:
 		return {"kind": "hob", "d": d}
 	if not swing_on():
