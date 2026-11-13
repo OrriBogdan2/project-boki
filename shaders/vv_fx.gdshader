@@ -6,7 +6,9 @@ shader_type spatial;
 //   0 ARC     a ribbon along UV.x (0 head, 1 tail): a jagged lightning core that re-strikes, a tinted halo
 //   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
 //   2 RING    a flat quad: a cel shockwave ring with radial spark needles (arrival bursts, shock rings)
-//   3 DISC    a flat quad: a dark filled disc (hollow: a glowing centre), a jagged crackling rim and lightning veins
+//   3 DISC    a flat quad: a lit jagged crackling rim at 0.9, a soft dark falloff in from it down to `fill_a` at
+//             the centre (never a solid fill: the target reads through) and lightning veins (placed areas);
+//             hollow: no falloff or veins, a glowing centre
 //   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
 //   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the smear)
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_premul_alpha, cull_disabled, fog_disabled;
@@ -17,7 +19,8 @@ uniform vec4 color3 : source_color = vec4(0.0, 0.0, 0.0, 0.0);
 uniform float life = 0.0;
 uniform float seed = 0.0;
 uniform float strength = 1.0;
-uniform float hollow = 0.0;   // DISC: 0 a dark fill, 1 only the rim and a glowing centre
+uniform float fill_a = 0.2;
+uniform float hollow = 0.0;   // DISC: 0 a falloff fill, 1 only the rim and a glowing centre
 uniform float hold = 0.0;     // DISC: 1 stands at full strength and fades only over its last fifth
 uniform bool billboard = false;
 #include "res://shaders/cel.gdshaderinc"
@@ -71,7 +74,7 @@ void fragment() {
 		body_a = ring_v.x * 0.6 * k;     // a half-cover cel band: the arena reads through a full-screen ring
 		glow = color2.rgb * (needles * 1.4 + ring_v.y * 0.35) * k;
 	} else if (mode == 3) {
-		// a placed area: a dark fill, veins of lightning inside, and a jagged rim that crawls
+		// a placed area: a jagged lit rim that crawls, a dark falloff in from it, veins of lightning inside
 		vec2 p = uv * 2.0 - 1.0;
 		float r = length(p);
 		float ang = atan(p.y, p.x);
@@ -80,14 +83,15 @@ void fragment() {
 		float edge_r = 0.9 + (crackle - 0.5) * 0.08;
 		float rim = 1.0 - smoothstep(0.0, 0.035 + 0.04 * crackle, abs(r - edge_r));
 		float inside = 1.0 - smoothstep(edge_r - 0.02, edge_r, r);
+		float falloff = mix(fill_a, 0.45, smoothstep(0.55, 1.0, r / edge_r));
 		float spoke = fract((ang + vnoise(r * 6.0 + tick) * 0.5) * 6.0 / 6.2832);
 		float veins = (1.0 - smoothstep(0.0, 0.05, abs(spoke - 0.5))) * inside * smoothstep(0.15, 0.6, r);
 		veins *= step(0.45, vnoise(ang * 3.0 + tick * 0.7));
 		body = mix(color.rgb, color3.rgb, rim * color3.a);
 		float centre = (1.0 - smoothstep(0.0, 0.12, r)) + 0.3 * (1.0 - smoothstep(0.0, 0.3, r));
 		float kd = mix(k, 1.0 - smoothstep(0.8, 1.0, life), hold);
-		body_a = max(inside * 0.7 * (1.0 - hollow), rim) * kd;
-		glow = color2.rgb * (rim * (0.3 + 0.5 * crackle) + veins * 0.7 * (1.0 - hollow) + centre * hollow) * kd;
+		body_a = max(inside * falloff * (1.0 - hollow), rim) * kd;
+		glow = color2.rgb * (rim * (0.5 + 0.5 * crackle) + veins * 0.5 * (1.0 - hollow) + centre * hollow) * kd;
 	} else if (mode == 4) {
 		vec2 p = uv * 2.0 - 1.0;
 		float r = length(p);
