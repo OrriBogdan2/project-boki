@@ -1387,36 +1387,63 @@ func rimewright() -> void:
 	ok(
 			"tm: the thin aim line to the cursor is always up, the shared one hidden",
 			AimKit.shown(P, "aim") and K.own_aim_line())
-	# --- a steady stream (no pause) of slow darts that bow out and home, 4 plain then 3 large
+	# --- the source's burst (docs/heroes/rimewright.md LMB): a hold is one steady stream of plain darts, the
+	# let-go ends it on 3 large ones at the same cadence, then the 0.5 s barrage pause before the next burst
 	var times: Array = []
 	var dmgs: Array = []
 	var bows: Array = []
 	var seen := {}
+	var clock := {"t": 0.0}
+	var grab := func(secs: float) -> void:
+		var end: float = float(clock["t"]) + secs
+		while float(clock["t"]) < end:
+			step(m, 1.0 / 60.0)
+			clock["t"] = float(clock["t"]) + 1.0 / 60.0
+			for s in _mine(m, P):
+				if not seen.has(s["sid"]):
+					seen[s["sid"]] = true
+					times.append(float(clock["t"]))
+					dmgs.append(float(s["dmg"]))
+					bows.append(absf(rad_to_deg((s["vel"] as Vector2).angle_to(P.aim_dir()))))
 	P.inp["fire"] = true
-	var t := 0.0
-	while t < 1.4:
-		step(m, 1.0 / 60.0)
-		t += 1.0 / 60.0
-		for s in _mine(m, P):
-			if not seen.has(s["sid"]):
-				seen[s["sid"]] = true
-				times.append(t)
-				dmgs.append(float(s["dmg"]))
-				bows.append(absf(rad_to_deg((s["vel"] as Vector2).angle_to(P.aim_dir()))))
+	await grab.call(1.4)
+	var held_n := times.size()
 	P.inp["fire"] = false
+	await grab.call(0.9)
 	var gaps: Array = []
-	for i in range(1, times.size()): gaps.append(float(times[i]) - float(times[i - 1]))
+	for i in range(1, held_n): gaps.append(float(times[i]) - float(times[i - 1]))
 	var maxgap: float = gaps.max() if not gaps.is_empty() else 9.0
-	ok(
-			"tm LMB: a steady stream, one dart every 0.18 s with no pause", times.size() >= 7 and maxgap < 0.22,
-			"%d darts, longest gap %.2f" % [times.size(), maxgap])
 	var base_dmg := float(P.wpn["dmg"]) * float(m.dmg_mult(P))
-	var pattern := dmgs.slice(0, 7).map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p")
+	var pattern := "".join(dmgs.map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p"))
 	ok(
-			"tm LMB: the source's barrage: 4 darts, then 3 larger ones at double damage (game data), then round again",
-			"".join(pattern) == "ppppHHH" and dmgs.size() >= 8 and float(dmgs[7]) < base_dmg * 1.5
-				and K.stats["heavies"] >= 3,
-			"".join(pattern))
+			"tm LMB: a held burst is one steady stream, a plain dart every 0.18 s, no pause, no large one",
+			held_n >= 7 and maxgap < 0.22 and pattern.left(held_n) == "p".repeat(held_n),
+			"%d darts, longest gap %.2f, %s" % [held_n, maxgap, pattern.left(held_n)])
+	var tail_gap := float(times[held_n + 2]) - float(times[held_n]) if times.size() >= held_n + 3 else 9.0
+	ok(
+			"tm LMB: the let-go ends the burst on exactly 3 large darts at double damage (game data), 0.18 s apart",
+			pattern.substr(held_n) == "HHH" and K.stats["heavies"] == 3 and tail_gap < 0.4,
+			"%s after the let-go, %.2f s across" % [pattern.substr(held_n), tail_gap])
+	# a fresh press inside the pause waits for it; then a new burst starts plain
+	var last_heavy: float = float(times[times.size() - 1])
+	var n_before := times.size()
+	P.inp["fire"] = true
+	await grab.call(0.7)
+	var restart: float = float(times[n_before]) - last_heavy if times.size() > n_before else 9.0
+	ok(
+			"tm LMB: the next burst starts only after the 0.5 s barrage pause, plain again",
+			restart >= 0.5 and restart < 0.62 and pattern.length() == n_before
+				and float(dmgs[n_before]) < base_dmg * 1.5,
+			"%.2f s after the last large dart" % restart)
+	P.inp["fire"] = false
+	await grab.call(1.2)
+	var tap_n := times.size()
+	P.inp["fire"] = true
+	await grab.call(1.0 / 60.0)
+	P.inp["fire"] = false
+	await grab.call(0.75)
+	var tap := "".join(dmgs.slice(tap_n).map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p"))
+	ok("tm LMB: a tap is a burst too: one plain dart, then the 3 large ones", tap == "pHHH", tap)
 	ok(
 			"tm LMB: darts come out slowly (16 m/s), a little off the aim to alternating sides",
 			float(P.wpn["speed"]) <= 18.0 and not bows.is_empty() and float(bows[0]) > 5.0 and float(bows[0]) < 15.0,
@@ -1455,7 +1482,7 @@ func rimewright() -> void:
 			"tm passive: 8 darts on one foe Shatter them (about 15 darts' damage, ice spikes)",
 			K.splinter_log > s0 and T2.max_hp - T2.hp > float(P.wpn["dmg"]) * 12.0 and spikes,
 			"neighbour -%.0f" % (T2.max_hp - T2.hp))
-	step(m, 0.5)
+	step(m, 1.0)          # the let-go's 3 large darts land, then the 0.5 s pause
 	# --- Shatter on a knock (Chilled foe)
 	T.hp = 8.0
 	T.slow_t = 0.0
@@ -1537,7 +1564,7 @@ func rimewright() -> void:
 	P.inp["fire"] = false
 	var plain_shots: Array = _mine(m, P)
 	var plain_d := float(plain_shots[-1]["dmg"]) if not plain_shots.is_empty() else 0.0
-	step(m, 0.3)
+	step(m, 1.0)          # the tap's burst ends on its 3 large darts, then the 0.5 s pause
 	P.inp["move"] = Vector2(-1, 0)
 	P.inp["dash"] = true
 	P.inp["dash_down"] = true
