@@ -33,9 +33,8 @@ float sigil(vec2 uv, float r, float a) {
 	if (pattern > 3.5) {
 		// cracks: jagged spokes that fork, and broken rings between them
 		float jag = sin(r * 23.0 + a * 3.0) * 0.06 + sin(r * 41.0) * 0.03;
-		// lines, not wedges: each one's width is a share of the radius, so it stays thin out to the rim
-		float spokes = smoothstep(0.012, 0.0, r * abs(sin((a + jag) * 5.5)) / 5.5);
-		float forks = smoothstep(0.008, 0.0, r * abs(sin((a - jag * 2.0) * 11.0)) / 11.0) * step(0.45, r);
+		float spokes = smoothstep(0.985, 1.0, abs(cos((a + jag) * 5.5)));
+		float forks = smoothstep(0.95, 1.0, abs(cos((a - jag * 2.0) * 11.0))) * step(0.45, r);
 		float rings = smoothstep(0.03, 0.0, abs(fract(r * 3.2 + jag) - 0.5)) * step(0.4, abs(sin(a * 7.0 + r * 9.0)));
 		return (spokes + forks * 0.7 + rings * 0.6) * (0.25 + 1.6 * crack) * step(0.12, r);
 	}

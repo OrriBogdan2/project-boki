@@ -3,29 +3,27 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b53c8mpsue667"
-path.bptc="res://.godot/imported/palette.png-0902a52fd0ea53519f8e0b045e065a2a.bptc.ctex"
-path.astc="res://.godot/imported/palette.png-0902a52fd0ea53519f8e0b045e065a2a.astc.ctex"
+path="res://.godot/imported/palette.png-0902a52fd0ea53519f8e0b045e065a2a.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://art/vendor/hexagon/palette.png"
-dest_files=["res://.godot/imported/palette.png-0902a52fd0ea53519f8e0b045e065a2a.bptc.ctex", "res://.godot/imported/palette.png-0902a52fd0ea53519f8e0b045e065a2a.astc.ctex"]
+dest_files=["res://.godot/imported/palette.png-0902a52fd0ea53519f8e0b045e065a2a.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

@@ -182,7 +182,7 @@ func _breah() -> void:
 	step(m, 0.5)
 	ok(
 		"combo: punch into a wall = stun, with stars over the head",
-		K.wall_stuns >= 1 and T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
+		K.wall_stuns >= 1 and T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
@@ -310,12 +310,6 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	m.step(DT)
 	var first := K.launches - l0
-	var recovery := P.fire_cd
-	ok(
-		"cancel: the punch's recovery is the card's 0.6 s, the boulder's",
-		recovery > 0.5 and recovery <= 0.6 and float(ld["punch"]["rate"]) == float(ld["boulder"]["rate"]),
-		"fire_cd %.2f punch %.2f boulder %.2f" % [recovery, float(ld["punch"]["rate"]), float(ld["boulder"]["rate"])]
-	)
 	step(m, 0.3)
 	ok(
 		"combo: a punch along a row launches every rock in a stream",
@@ -419,7 +413,7 @@ func _breah() -> void:
 		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
-		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
+		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
 		"stun %.2f" % T.stun_t
 	)
 	ok(
@@ -634,7 +628,6 @@ func _breah() -> void:
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
 	_air_dash_hold(m, P, K, reset)
-	_impact_weight(m, P, T, home, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -903,57 +896,6 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	ok("glide slam: she slams where she lands (about 0.3s down from 8m)", K.slams == s0 + 1 and P.grounded
 		and fall < 0.6, "slams +%d, %.2f s down" % [K.slams - s0, fall])
 	step(m, 0.8)
-
-## The widest blue (ability colour) ring `act` throws inside `secs` of play: the weight of the hit it lands.
-func _blue_ring(m: Match, secs: float, act: Callable) -> float:
-	var seen: Array = m.fx.rings.duplicate()
-	var widest := [0.0]
-	act.call()
-	step(m, secs, func():
-		for e in m.fx.rings:
-			if e["col"] == DolmImpact.BLUE and not seen.any(func(o): return is_same(o, e)):
-				seen.append(e)
-				widest[0] = maxf(widest[0], float(e["r"])))
-	return widest[0]
-
-## A boulder thrown at the foe: the tap of the attack key.
-func _throw_boulder(m: Match, P: Hunter) -> void:
-	P.inp["fire"] = true
-	step(m, 0.1)
-	P.inp["fire"] = false
-
-## The punch held to full and let go.
-func _full_punch(m: Match, P: Hunter, K: DolmKit) -> void:
-	P.inp["fire"] = true
-	step(m, float(K.lmb_def()["full"]) + 0.1)
-	P.inp["fire"] = false
-
-## Each hit of his lands with a blue ring sized by its damage: the boulder is the smallest, the full punch and
-## the tap slam each throw a wider one.
-func _impact_weight(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
-	reset.call()
-	var boulder := _blue_ring(m, 0.8, func(): _throw_boulder(m, P))
-	reset.call()
-	T.teleport(home + Vector3(2.5, 0, 0))
-	aim_at(P, T.pos)
-	var punch := _blue_ring(m, 0.4, func(): _full_punch(m, P, K))
-	reset.call()
-	T.teleport(home + Vector3(2.0, 0, 0))
-	aim_at(P, T.pos)
-	var slam := _blue_ring(m, 0.4, func(): tap(m, P))
-	var info := "boulder %.1f punch %.1f slam %.1f" % [boulder, punch, slam]
-	ok(
-		"impact: the boulder, the full punch and the slam each land with a blue ring",
-		minf(boulder, minf(punch, slam)) > 0.0, info
-	)
-	ok(
-		"impact: the ring is wider for the heavier hit (boulder 9 dmg < punch 24, tap slam 14)",
-		boulder < punch and boulder < slam, info
-	)
-	reset.call()
-	var rise := _blue_ring(m, 0.9, func(): K.cast_e())
-	ok("impact: each rock of the Stone Row breaks the ground in a blue ring", rise > 0.0, "ring %.1f" % rise)
-	step(m, 0.5)
 
 ## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a
 ## release in it punches as the dash ends, in the air, keeping most of her speed.

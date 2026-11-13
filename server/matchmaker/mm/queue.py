@@ -13,7 +13,7 @@ class Ticket:
     mode: str
     name: str
     version: str
-    party: str                  # the party code, "" for a solo player
+    party: frozenset            # this player's name plus the friends named in the request
     created_at: float
     state: str = "waiting"      # waiting | starting | ready | gone
     why: str = ""               # for gone tickets: joined | expired | cancelled | crashed | match_over
@@ -26,9 +26,10 @@ class Ticket:
     gone_at: float = 0.0
 
 
-def new_ticket(mode: str, name: str, version: str, party: str, now: float) -> Ticket:
-    """A fresh waiting ticket with a random id; `party` is the party code or ""."""
-    return Ticket(secrets.token_urlsafe(12), mode, name, version, party, now)
+def new_ticket(mode: str, name: str, version: str, party: list, now: float) -> Ticket:
+    """A fresh waiting ticket with a random id."""
+    names = frozenset([name] + [str(p) for p in party])
+    return Ticket(secrets.token_urlsafe(12), mode, name, version, names, now)
 
 
 @dataclass
@@ -68,53 +69,47 @@ class TicketQueue:
         """The tickets that make the next match in this mode, or [] when none can start yet.
 
         A match starts when the line holds a full match of humans, or when the oldest ticket has waited
-        the fill timeout (bots fill the rest; at least one human is always in). Whole units are taken,
-        oldest first: a party's tickets together or one solo ticket. A unit that does not fit (no seats
-        left, or every team already holds a party) is skipped and keeps its place for the next batch.
+        the fill timeout (bots fill the rest; at least one human is always in).
         """
         line = self.waiting.get(mode, [])
-        shape = self.modes[mode]
+        slots = self.modes[mode].slots
         if not line:
             return []
-        if len(line) < shape.slots and now - line[0].created_at < self.fill_timeout[mode]:
+        if len(line) < slots and now - line[0].created_at < self.fill_timeout[mode]:
             return []
-        picked, parties = [], 0
-        for unit in _units(line):
-            is_party = bool(unit[0].party)
-            if len(picked) + len(unit) > shape.slots or (is_party and parties >= shape.slots // shape.team_size):
-                continue
-            picked.extend(unit)
-            parties += is_party
-        for ticket in picked:
-            line.remove(ticket)
+        picked = line[:slots]
+        del line[:slots]
         return picked
 
 
-def _units(line: list) -> list:
-    """The line as units in order of their oldest ticket: each party's tickets together, solos on their own."""
-    by_party, units = {}, []
-    for ticket in line:
-        if ticket.party and ticket.party in by_party:
-            by_party[ticket.party].append(ticket)
-            continue
-        unit = [ticket]
-        units.append(unit)
-        if ticket.party:
-            by_party[ticket.party] = unit
-    return units
-
-
 def assign_slots(tickets: list, mode: Mode) -> dict:
-    """Ticket -> slot, team-major. A party never splits: parties go first, largest first, each onto an empty
-    team. Solos then fill the fullest team with room, so a duo gets a stranger before a new team is opened."""
-    teams = [[] for _ in range(mode.slots // mode.team_size)]
-    parties = {}
+    """Ticket -> slot, team-major. Tickets that name each other as a party share a team when it fits."""
+    n_teams = mode.slots // mode.team_size
+    teams = [[] for _ in range(n_teams)]
+    for group in _party_groups(tickets):
+        rest = list(group)
+        while rest:
+            team = _team_with_room(teams, mode.team_size, len(rest))
+            room = mode.team_size - len(team)
+            team.extend(rest[:room])
+            rest = rest[room:]
+    out = {}
+    for team_index, team in enumerate(teams):
+        for seat, ticket in enumerate(team):
+            out[ticket] = team_index * mode.team_size + seat
+    return out
+
+
+def _party_groups(tickets: list) -> list:
+    groups = {}
     for ticket in tickets:
-        if ticket.party:
-            parties.setdefault(ticket.party, []).append(ticket)
-    for group in sorted(parties.values(), key=lambda g: (-len(g), g[0].created_at)):
-        min(teams, key=len).extend(group)
-    for ticket in sorted((t for t in tickets if not t.party), key=lambda t: t.created_at):
-        max((t for t in teams if len(t) < mode.team_size), key=len).append(ticket)
-    return {ticket: team_index * mode.team_size + seat
-            for team_index, team in enumerate(teams) for seat, ticket in enumerate(team)}
+        groups.setdefault(ticket.party, []).append(ticket)
+    return sorted(groups.values(), key=lambda g: g[0].created_at)
+
+
+def _team_with_room(teams: list, team_size: int, wanted: int) -> list:
+    """The emptiest team that fits `wanted` players, else just the emptiest team (a big party gets split)."""
+    open_teams = [t for t in teams if len(t) < team_size]
+    fitting = [t for t in open_teams if team_size - len(t) >= wanted]
+    pool = fitting or open_teams
+    return min(pool, key=len)

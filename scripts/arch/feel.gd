@@ -14,7 +14,9 @@ const CAT := {
 	"utility": Color("5fd8ff"),
 }
 const CAT_ORDER := ["control", "damage", "sustain", "utility"]
-## §5.2 allegiance: the rim says whose it is, in the side colour (SideColor); the fill keeps the caster's.
+## §5.2 allegiance: rim says whose it is.
+const RIM_ENEMY := Color("ff2d55")
+const RIM_OWN := Color(1, 1, 1, 0.9)
 
 static func cat_color(cat: String) -> Color:
 	return CAT.get(cat, Color("e8f4ff"))
@@ -226,7 +228,7 @@ static func impact_row(cat: String) -> Array:
 ## Layer 3, the impact, by effect category: [sound, pitch]. Control is a hard hit then a held tone.
 const CATEGORY_IMPACT := {"damage": ["thump", 1.0], "control": ["zap", 0.8], "sustain": ["heal", 1.1], "shield": ["shield", 1.2], "utility": ["ping", 1.3]}
 ## Layer 4, the kin theme's sweetener.
-const SWEETENER := {"venom": "k_poison", "spore": "k_spore", "gravity": "k_psychic", "prism": "k_crystal", "lunar": "k_fairy", "echo": "k_sound"}
+const SWEETENER := {"venom": "k_venom", "spore": "k_spore", "gravity": "k_gravity", "prism": "k_prism", "lunar": "k_lunar", "echo": "k_echo"}
 ## Each archetype's dash sound: [[sound, pitch, delay]...].
 const DASH_SOUND := {
 	"thief": [["swipe", 1.7, 0.0]], "archer": [["throw", 1.4, 0.0], ["whoosh", 1.3, 0.12]], "mage": [["portal", 1.7, 0.0]],

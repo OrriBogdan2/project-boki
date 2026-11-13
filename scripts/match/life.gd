@@ -56,15 +56,6 @@ static func box_color(b: Dictionary) -> Color:
 		if box_value(b) >= int(t[0]): col = t[1]
 	return col
 
-## The rarity tier of the best piece of gear or valuable in a box (what its glow shows).
-static func box_rarity(b: Dictionary) -> int:
-	var best := 0
-	for g in b.get("gear", []):
-		best = maxi(best, int(g["rar"]))
-	for it in b.get("pack", []):
-		best = maxi(best, Loot.rar_of(it))
-	return best
-
 ## Is anyone on this team still in the fight (standing or a wisp)?
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
@@ -109,8 +100,8 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			o.set_meta("crush_t", st)
 		var kin_on := false
 		for kk in [o.kin, o.kin2]:
-			if kk and not (kk as Kin).dead and (kk as Kin).state == "reviving" and (kk as Kin).flat_dist(o) < 1.4:
-				kin_on = true
+			if kk and not (kk as Kin).dead and KinWispForm.pulling(kk):
+				kin_on = true          # its Boki, riding as a wisp, is pulling it up: no bleed meanwhile
 		if foes > 0 and not o.get_meta("stomped", false) and o == m.player and m.hud:
 			m.hud.toast("%s is on you! Drift away" % stompers[0].pname, Color("ff5a4a"))
 		o.set_meta("stomped", foes > 0)
@@ -236,7 +227,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	return b
 
 static func _place_box(m: Match, b: Dictionary, at: Vector3) -> void:
-	var n := Models.deathbox(box_color(b), box_rarity(b))
+	var n := Models.deathbox(box_color(b))
 	n.position = at
 	m.add_child(n)
 	b["node"] = n

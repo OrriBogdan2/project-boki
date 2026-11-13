@@ -181,7 +181,6 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
-		m.fx.word(f.pos + Vector3(0, 2.4, 0), "BEACHED!", res_col(), true)
 		m.fx.burst(f.pos + Vector3(0, 0.6, 0), res_col(), 20, 4.0, 0.6, 8.0)
 		m.sfx("unlock", f.pos, -4.0, 0.7)
 	else:
@@ -332,7 +331,7 @@ func _start_wave() -> bool:
 
 func _land_wave() -> void:
 	var xd := x_def()
-	ReceiverCue.shield(h, float(xd["shield"]), col_of(xd))
+	h.shield = maxf(h.shield, float(xd["shield"]))
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
 	m.fx.ring(h.pos, 2.0, col_of(xd), 0.4)
 	m.fx.burst(h.pos + Vector3(0, 0.4, 0), col_of(xd), 24, 5.0, 0.5, 10.0)
@@ -395,6 +394,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	if HeroUlt.ready(self) and los and dist < float(x_def()["range"]) * 0.6:
+		h.inp["aim"] = tgt.pos          # the wave rolls along the aim
 		HunterKeys.ult_pressed(h)
 		return
 	if spin_t >= 0.0:

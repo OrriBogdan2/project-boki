@@ -12,14 +12,7 @@ extends RefCounted
 
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
-const TARGET_DB := -9.0                 # dB: the target layer sits quietly under the weapon's own hit sound
-const SHELL_FLASH_T := 0.12             # s a hit on armour keeps the body flash shell-coloured
-const BREAK_FLASH_T := 0.3              # s the body holds then fades its flash when the armour breaks
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
-const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
-const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
-const ARMOR_TICK_DB := -4.0             # dB: the attacker's "push now" tick (a high, short click, not the crack)
-const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click's menu use
 
 ## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
 ## sparks fly (on through it).
@@ -45,8 +38,8 @@ static func _credit(by: Ent) -> Ent:
 		return (by as Kin).owner_h
 	return by
 
-## Every hit that lands (Match.on_damage): the look for what it struck (HitClass: armour chips, a body
-## flash, a Boki puff, monster sparks), more of it the harder it hit; crits flash gold. Hits
+## Every hit that lands (Match.on_damage): an impact flash at the point it struck, sparks out the
+## far side, more of everything the harder it hit; crits flash gold, armor sheds blue shards. Hits
 ## that involve you are full size, other fights nearby are smaller, far ones draw nothing.
 static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: bool, armor: bool) -> void:
 	if m == null or m.fx == null or target == null:
@@ -70,37 +63,23 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var col := HURT_COL if target == p else HIT_COL
 	var ability := o.has("ab") and src != "kin"
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
-	var cls := HitClass.of(target, armor)
-	HitClass.draw(m.fx, cls, at, dir, HitClass.tint(target, cls, col), power, crit)
-	# the body tells which it was: an armour hit flashes the shell's colour, a health hit white (a break keeps its own)
-	if armor:
-		target.shell_t = maxf(target.shell_t, SHELL_FLASH_T)
-	elif target.shell_t < SHELL_FLASH_T:
-		target.shell_t = 0.0
+	m.fx.impact(at, dir, col, power, crit, armor)
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	# sound layers on top of the hit tick Match plays: the target answers, heavy hits thud, blades bite
+	# sound layers on top of the hit tick Match plays: armor rings, heavy hits thud, blades bite
 	if credit == p and target != p:
 		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
 		if melee:
 			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0)
-		m.sfx(HitClass.SOUND[HitClass.of(target, armor)], target.pos, TARGET_DB)
+		if armor:
+			m.sfx("armor_hit", target.pos, -9.0)
 		if d >= 28.0 and not melee:
 			m.sfx("hit_heavy", target.pos, -7.0)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
-
-## A shot stopped by a wall or terrain (Match._shot_end): a puff of dust where it struck, and the
-## dull thud of it if you fired.
-static func wall(m: Match, at: Vector3, by: Ent) -> void:
-	var p: Hunter = m.player
-	if m.fx != null and (p == null or p.pos.distance_to(at) <= FAR):
-		HitClass.draw(m.fx, HitClass.WALL, at, Vector3.UP, Color.WHITE, 1.0, false)
-	if _credit(by) == p:
-		m.sfx(HitClass.SOUND[HitClass.WALL], at, TARGET_DB)
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
@@ -130,9 +109,8 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
-	_squad_cue(m, h, credit, "knock_confirm", -6.0)
-	if h != m.player:
-		Sfx.duck_for("knock", h.pos)         # (your own knock ducks in Match.knock)
+	if credit == m.player and h != m.player:
+		m.sfx("knock_confirm", null, -6.0)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -143,55 +121,21 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
 	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
 	m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
-	if _squad_cue(m, h, credit, "elim_confirm", -3.0) and credit == m.player and m.hud:
-		m.hud.flash(Color(tc, 1.0), 0.14)
+	if credit == m.player and h != m.player:
+		m.sfx("kill", null, -3.0)
+		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)
 
-## The knock / finish cue, heard only by the attacker's squad (their team, so the local player hears it
-## whenever a squadmate downs or finishes a rival). Returns whether it played.
-static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: float) -> bool:
-	if m.player == null or not credit is Hunter or credit.team != m.player.team or h.team == credit.team:
-		return false
-	Sfx.play(cue, null, vol_db, 0.0)
-	return true
-
-## Armor broken (Match.on_armor_break): the body cracks (it holds the shell's flash for BREAK_FLASH_T, then fades)
-## and the shell falls off it in shards, with a glassy sound; no ring, no burst. A short freeze for whoever broke it
-## (Feel tier 3: 0.045s).
+## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
+## freeze for whoever broke it (Feel tier 3: 0.045s).
 static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	h.shell_t = BREAK_FLASH_T
-	h.flash_t = maxf(h.flash_t, BREAK_FLASH_T)
 	var c := Vector3(h.pos.x, h.hit_y() + 1.0, h.pos.z)
 	m.fx.flash(c, Color("9ad8ff"), 0.8, 0.14)
 	m.fx.spark(c, Vector3.UP, Color("b8e6ff"), 20, 9.0, 100.0, 0.35, 16.0, 1.2)
-	m.sfx("armor_break", h.pos, ARMOR_BREAK_DB_VICTIM if h == m.player else ARMOR_BREAK_DB)
+	m.sfx("armor_break", h.pos, -1.0)
 	if credit == m.player and h != m.player:
-		m.sfx("click", null, ARMOR_TICK_DB, ARMOR_TICK_PITCH)     # the "push now" tick, only for whoever broke it
 		m.freeze_frame(0.045)
-
-const ARMOR_UP_PITCH := 0.1     # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)
-const ARMOR_UP_OWN_DB := -4.0   # dB: your own Hunter's tier-up (the fuller cue, no position)
-const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
-
-## The pitch of a tier's rise: higher tier, brighter.
-static func armor_up_pitch(tier: int) -> float:
-	return 0.8 + ARMOR_UP_PITCH * float(tier)
-
-## Armor went up a tier (Match._armor_up, never on a repair): a ring and sparks in the tier's colour and a
-## metallic rise pitched by tier. You hear the fuller cue; everyone nearby hears the short positional one,
-## so a rival knows this Hunter just got tougher.
-static func armor_up(m: Match, h: Hunter) -> void:
-	if m == null or m.fx == null:
-		return
-	var col := h.armor_col()
-	m.fx.ring(h.pos, 2.4, Color(col, 0.9), 0.45)
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 14, 3.5, 0.5)
-	var pitch := armor_up_pitch(h.armor_tier)
-	if h == m.player:
-		Sfx.play("armor_up_own", null, ARMOR_UP_OWN_DB, 0.0, pitch)
-	else:
-		Sfx.play("armor_up", h.pos, ARMOR_UP_NEAR_DB, 0.0, pitch)
 
 ## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
@@ -258,7 +202,7 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 	m.fx.flash(c + Vector3(0, 0.8, 0), col.lerp(Color.WHITE, 0.6), 1.6, 0.3)
 	m.fx.ring(h.pos, 3.2, Color(col, 0.9), 0.5)
 	if h == m.player:
-		UiSfx.extract_success()
+		m.sfx("extract_ok", null, -3.0)
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 

@@ -3,24 +3,22 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kpvwmlqkt2b1"
-path.s3tc="res://.godot/imported/hem_atlas_1.jpg-722e00d8f268137ec1ad82dd76220aa2.s3tc.ctex"
-path.etc2="res://.godot/imported/hem_atlas_1.jpg-722e00d8f268137ec1ad82dd76220aa2.etc2.ctex"
+path="res://.godot/imported/hem_atlas_1.jpg-722e00d8f268137ec1ad82dd76220aa2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "e6f8e52724a2256ce1a6f9e3c65a5463"
+"md5": "0923d4f37923bc740e9cc494bae9d9bb"
 }
 
 [deps]
 
 source_file="res://art/wardens/hem/hem_atlas_1.jpg"
-dest_files=["res://.godot/imported/hem_atlas_1.jpg-722e00d8f268137ec1ad82dd76220aa2.s3tc.ctex", "res://.godot/imported/hem_atlas_1.jpg-722e00d8f268137ec1ad82dd76220aa2.etc2.ctex"]
+dest_files=["res://.godot/imported/hem_atlas_1.jpg-722e00d8f268137ec1ad82dd76220aa2.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

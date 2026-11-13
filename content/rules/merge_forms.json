@@ -50,15 +50,14 @@
 		"flavor": "No Boki at your side: a weak burst of resolve. 3s of 10% more damage, speed and faster abilities."
 	},
 	"types": {
-		"poison": {
-			"cue": "poison",
+		"venom": {
 			"style": "nova",
 			"parts": [
 				"fangs",
 				"tail",
 				"crest"
 			],
-			"word": "POISON",
+			"word": "VENOM",
 			"rider": {
 				"burn": 5.0,
 				"burn_for": 3.0
@@ -70,7 +69,6 @@
 			}
 		},
 		"spore": {
-			"cue": "spore",
 			"style": "bloom",
 			"parts": [
 				"crest",
@@ -88,15 +86,14 @@
 				"slow_s": 1.4
 			}
 		},
-		"psychic": {
-			"cue": "psychic",
+		"gravity": {
 			"style": "quake",
 			"parts": [
 				"plates",
 				"spikes",
 				"halo"
 			],
-			"word": "PSYCHIC",
+			"word": "GRAVITY",
 			"rider": {
 				"kb": -3.5
 			},
@@ -105,15 +102,14 @@
 				"kb": -4.0
 			}
 		},
-		"crystal": {
-			"cue": "crystal",
+		"prism": {
 			"style": "prism",
 			"parts": [
 				"crest",
 				"halo",
 				"wings"
 			],
-			"word": "CRYSTAL",
+			"word": "PRISM",
 			"rider": {
 				"chain": 0.35
 			},
@@ -122,15 +118,14 @@
 				"chain": 0.35
 			}
 		},
-		"fairy": {
-			"cue": "fairy",
+		"lunar": {
 			"style": "spiral",
 			"parts": [
 				"halo",
 				"wings",
 				"crest"
 			],
-			"word": "FAIRY",
+			"word": "LUNAR",
 			"rider": {
 				"leech": 0.06
 			},
@@ -139,15 +134,14 @@
 				"leech": 0.06
 			}
 		},
-		"sound": {
-			"cue": "sound",
+		"echo": {
 			"style": "storm",
 			"parts": [
 				"antennae",
 				"crest",
 				"wings"
 			],
-			"word": "SOUND",
+			"word": "ECHO",
 			"rider": {
 				"chain": 0.3
 			},
@@ -156,15 +150,14 @@
 				"chain": 0.3
 			}
 		},
-		"fire": {
-			"cue": "fire",
+		"ember": {
 			"style": "pillar",
 			"parts": [
 				"horns",
 				"crest",
 				"tail"
 			],
-			"word": "FIRE",
+			"word": "EMBER",
 			"rider": {
 				"burn": 7.0,
 				"burn_for": 2.5
@@ -175,15 +168,14 @@
 				"burn_for": 2.5
 			}
 		},
-		"ice": {
-			"cue": "ice",
+		"frost": {
 			"style": "bloom",
 			"parts": [
 				"spikes",
 				"crest",
 				"halo"
 			],
-			"word": "ICE",
+			"word": "FROST",
 			"rider": {
 				"slow_k": 0.35,
 				"slow_s": 1.8
@@ -194,15 +186,14 @@
 				"slow_s": 1.6
 			}
 		},
-		"electric": {
-			"cue": "electric",
+		"storm": {
 			"style": "storm",
 			"parts": [
 				"wings",
 				"crest",
 				"antennae"
 			],
-			"word": "ELECTRIC",
+			"word": "STORM",
 			"rider": {
 				"chain": 0.4
 			},
@@ -211,15 +202,14 @@
 				"chain": 0.4
 			}
 		},
-		"rock": {
-			"cue": "rock",
+		"stone": {
 			"style": "quake",
 			"parts": [
 				"plates",
 				"horns",
 				"spikes"
 			],
-			"word": "ROCK",
+			"word": "STONE",
 			"rider": {
 				"kb": 4.5
 			},
@@ -228,15 +218,14 @@
 				"kb": 5.0
 			}
 		},
-		"grass": {
-			"cue": "grass",
+		"bloom": {
 			"style": "bloom",
 			"parts": [
 				"crest",
 				"wings",
 				"halo"
 			],
-			"word": "GRASS",
+			"word": "BLOOM",
 			"rider": {
 				"leech": 0.07
 			},
@@ -245,15 +234,14 @@
 				"leech": 0.07
 			}
 		},
-		"dark": {
-			"cue": "dark",
+		"shadow": {
 			"style": "spiral",
 			"parts": [
 				"horns",
 				"wings",
 				"tail"
 			],
-			"word": "DARK",
+			"word": "SHADOW",
 			"rider": {
 				"slow_k": 0.2,
 				"slow_s": 1.2,
@@ -265,15 +253,14 @@
 				"slow_s": 1.2
 			}
 		},
-		"steel": {
-			"cue": "steel",
+		"titan": {
 			"style": "quake",
 			"parts": [
 				"horns",
 				"plates",
 				"spikes"
 			],
-			"word": "STEEL",
+			"word": "TITAN",
 			"rider": {
 				"kb": 5.5
 			},
@@ -282,15 +269,14 @@
 				"kb": 6.0
 			}
 		},
-		"bug": {
-			"cue": "bug",
+		"swarm": {
 			"style": "storm",
 			"parts": [
 				"antennae",
 				"wings",
 				"spikes"
 			],
-			"word": "BUG",
+			"word": "SWARM",
 			"rider": {
 				"burn": 3.5,
 				"burn_for": 2.0,
@@ -302,15 +288,14 @@
 				"burn_for": 2.0
 			}
 		},
-		"flying": {
-			"cue": "flying",
+		"tempest": {
 			"style": "storm",
 			"parts": [
 				"wings",
 				"crest",
 				"halo"
 			],
-			"word": "FLYING",
+			"word": "TEMPEST",
 			"rider": {
 				"chain": 0.45
 			},
@@ -320,7 +305,6 @@
 			}
 		},
 		"none": {
-			"cue": "normal",
 			"style": "nova",
 			"parts": [
 				"crest",
