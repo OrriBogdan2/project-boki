@@ -219,7 +219,7 @@ func _first_mask(tree: SceneTree) -> void:
 func _nest_reveal(sp: String) -> void:
 	var spy := FxSpy.new()
 	main.add_child(spy)
-	var nest := Models.nest_egg(Data.KIN[sp]["color"], Color("fff6c0"))
+	var nest := Models.nest_egg(EggModels.kind_of(sp))
 	main.add_child(nest)
 	NestReveal.play(spy, nest, sp)
 	var col := DexView.type_col(DexView.type_of(sp))

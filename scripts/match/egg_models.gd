@@ -24,11 +24,15 @@ const RARE_SEAM_WIDTH := 0.07  # half-width of that hue band (the gold sits far 
 const IDLE_SPIN := 0.35        # rad/s: an egg sitting out turns slowly, so its emblem comes round
 const IDLE_BOB := 0.015        # m per metre of egg: its gentle float
 
+## Kin types with no egg of their own hatch from the closest family.
+const THEME_EGG := {"dark": "shadow", "ghost": "shadow"}
+
 static var _halves := {}       # kind -> {"Cap": Mesh, "Cup": Mesh, "tex": Texture2D}
 
 ## The egg family a kin hatches from: its type (an old save's egg with no kin known: stone).
 static func kind_of(species: String) -> String:
-	return String(Data.KIN.get(species, {}).get("theme", "stone"))
+	var theme := String(Data.KIN.get(species, {}).get("theme", "stone"))
+	return String(THEME_EGG.get(theme, theme))
 
 ## A new toon material for one egg (its own, so warming one egg does not warm the rest).
 static func material(kind: String) -> ShaderMaterial:
