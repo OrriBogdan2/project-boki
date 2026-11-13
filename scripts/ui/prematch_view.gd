@@ -97,6 +97,8 @@ func _ready() -> void:
 	_build_chat(root)
 	_talk(false)
 	_fit_safe_area()
+	if pm.first:
+		Prematch.mark_first_seen()
 	pm.turn_done.connect(_on_turn_done)
 	_tick_label()
 	Net.message.connect(_on_msg)
@@ -167,7 +169,8 @@ func _tick_label() -> void:
 		note_label.text = "%s locked in. Loading in..." % HunterViewer.display_name(pm.pick)
 	elif pm.my_turn():
 		caption.text = "YOUR TURN"
-		note_label.text = "Pick a Hunter. No two on a squad can be the same one."
+		var teach := pm.teach_line()
+		note_label.text = teach if teach != "" else "Pick a Hunter. No two on a squad can be the same one."
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
