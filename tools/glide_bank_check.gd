@@ -187,15 +187,10 @@ func _report(arch: String, _h: Hunter, r: Dictionary) -> void:
 		float(r["follow"]) <= FOLLOW_DEG,
 		"%s: the whole body you see turns with the rig (off by %.1f deg at most)" % [arch, r["follow"]]
 	)
+	var seat_msg := "%s: the Boki riding on it keeps its seat (%d frames, moved %.3f m on the torso you see)"
 	ok(
 		int(r["rode"]) > 0 and float(r["seat"]) <= SEAT_M and float(r["lean"]) <= LEAN_DEG,
-		(
-			(
-				"%s: the Boki riding on it keeps its seat (%d frames, moved %.3f m on the torso you see) and leans with it"
-				% [arch, r["rode"], r["seat"]]
-			)
-			+ " (%.1f deg off)" % r["lean"]
-		)
+		seat_msg % [arch, r["rode"], r["seat"]] + " and leans with it (%.1f deg off)" % r["lean"]
 	)
 
 
