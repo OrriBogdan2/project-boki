@@ -4,7 +4,7 @@ extends ArchKit
 ## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
 ## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
 ## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
-## Molten Guard: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
+## Shardskin: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
 ## legality and the abyss edge; they are synced over Net as ["zone", ...] events.
@@ -25,7 +25,7 @@ var dive_glide := false        # ...pressed in a glide: the glider folded and st
 var sight_t := 0.0
 var _sight_p := {"len": 0.0, "deg": 0.0, "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}   # reused each frame
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
-var shield_stacks := 0         # Molten Guard stacks
+var shield_stacks := 0         # Shardskin stacks
 var shield_at := -99.0
 var launch_pay := 0            # launched rocks that hit a hunter (payoff counter)
 var rock_hits := {}            # foe instance id -> last time a rock burst on it (repeat bursts deal less)
@@ -39,7 +39,7 @@ var launches := 0
 var slams := 0
 var dunks := 0
 var wall_stuns := 0
-var guard_punches := 0         # punches that launched a rock of ours and gave a Molten Guard stack
+var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
 var rocks_made := 0
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
@@ -213,7 +213,7 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
 	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
-		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("d8ecff"), 0.28)      # the Molten Guard ring
+		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("d8ecff"), 0.28)      # the Shardskin ring
 	if dive:
 		_tick_dive()
 	hop.tick(dt)
@@ -628,7 +628,7 @@ func fire_rmb(c: Dictionary) -> void:
 func _slam(k: float, at_feet: bool) -> void:
 	slam.slam(k, at_feet)
 
-## Molten Guard: one more stack (each is a shield, up to the cap, all expiring together).
+## Shardskin: one more stack (each is a shield, up to the cap, all expiring together).
 func guard_stack() -> void:
 	var gd: Dictionary = d["passive"]["guard"]
 	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)

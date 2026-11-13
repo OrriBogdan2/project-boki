@@ -231,7 +231,7 @@ func breah() -> void:
 	_tarek_audit(m, P, K, home)
 	await done(m)
 
-## The audit (Nov 3 23:40): cooldowns from the data, the hunter viewer's moves, and Molten Guard only from a
+## The audit (Nov 3 23:40): cooldowns from the data, the hunter viewer's moves, and Shardskin only from a
 ## punch into your OWN rocks (an ally Tarek's rocks still fly, no shield).
 func _tarek_audit(m: Match, P: Hunter, K: DolmKit, home: Vector3) -> void:
 	var view: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_viewer.json"))
@@ -258,7 +258,7 @@ func _tarek_audit(m: Match, P: Hunter, K: DolmKit, home: Vector3) -> void:
 	step(m, 0.6, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	step(m, 0.2)
-	ok("audit tarek: a punch into an ally's rocks launches them but gives no Molten Guard (data: your Rocks)",
+	ok("audit tarek: a punch into an ally's rocks launches them but gives no Shardskin (data: your Rocks)",
 		K.last_sweep >= 1 and K.shield_stacks == 0, "swept %d stacks %d" % [K.last_sweep, K.shield_stacks])
 	ally.queue_free()
 	m.hunters.erase(ally)

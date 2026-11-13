@@ -573,7 +573,7 @@ func _breah() -> void:
 	)
 	await _hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
-	# ---- data pass: Landslide is 12s with one charge; Molten Guard is the base passive
+	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
 	ok(
 		"data: the dash rests 12s per charge and starts with one charge (a second at rank 3)",
 		absf(float(K.dash_def()["cd"]) - 12.0) < 0.01 and P.max_dashes() == 1.0 and absf(P.dash_regen() - 12.0) < 0.01,
@@ -598,7 +598,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"data: punching your own rocks gives a Molten Guard shield (one stack of 18 per punch, rank 1)",
+		"data: punching your own rocks gives a Shardskin shield (one stack of 18 per punch, rank 1)",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
 		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
 	)
@@ -623,7 +623,7 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"PARITY: Molten Guard is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
+		"PARITY: Shardskin is flat per punch: a tap-charge punch gives the same 18 as a full-charge one",
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - full_shield) < 0.01
 		and absf(P.shield - float(K.d["passive"]["guard"]["shield"])) < 0.01,
 		"tap %.1f full %.1f stacks %d" % [P.shield, full_shield, K.shield_stacks]
@@ -679,7 +679,7 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"rank 3: slamming a foe gives a Molten Guard shield", P.shield >= 17.0 and K.shield_stacks >= 1,
+		"rank 3: slamming a foe gives a Shardskin shield", P.shield >= 17.0 and K.shield_stacks >= 1,
 		"shield %.0f" % P.shield
 	)
 	ok(

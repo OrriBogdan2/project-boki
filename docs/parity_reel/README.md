@@ -61,7 +61,7 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 [dredge.mp4](dredge.mp4)
 
 Still differs:
-- Cooldowns: Abyssal Hand 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
+- Cooldowns: Deep Reach 12 s vs 18, Anchor Drop 7 vs 12, Brass Broadside 21 vs 36 [D].
 - Barge: three chained shoves with a 10 s recharge; the source has one dash per 7 s (owner, Nov 3 23:40: several
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
@@ -326,7 +326,7 @@ Still differs:
 - Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
 - Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
   only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
-- Molten Guard: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
+- Shardskin: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
   a full-charge punch are asserted equal in `--dolm-combo-check`). The charge scaling that is ours is the punch's
   damage and knockback only.
 

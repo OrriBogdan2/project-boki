@@ -63,14 +63,14 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 | RMB cooldown 9 vs 11 (LOW) | (b) | 11 s (data) |
 | RMB reset on knock (LOW) | (c) | the owner removed it (item 14); the in-game card (frame 0240) does show it, if he wants it back |
 | RMB air press (LOW) | (a) | kept and reused for the glide slam |
-| Molten Guard from any team rock (LOW) | (b) | only his own rocks give a stack (ally rocks still fly); asserted |
+| Shardskin from any team rock (LOW) | (b) | only his own rocks give a stack (ally rocks still fly); asserted |
 | E: allies hop the rocks (MED) | (b), code removed | SUPERSEDED by owner item 25: allies no longer climb (see Rock ownership). Was: owner 23:55 (the data): an ally jumping against his rock is lifted onto it and over; walking, allies are stopped; foes are stopped either way; he still climbs his own by walking (item 25). Asserted |
 | E: allies hop the rocks (MED) | (b) | owner 23:55 (the data): an ally jumping against his rock is lifted onto it and over; walking, allies are stopped; foes are stopped either way; he still climbs his own by walking (item 25). Bots: an ally bot walking into his rock jumps it at once (StoneStand.hop_ahead), a foe bot goes round, a Tenzo bot walks up. Asserted |
 | E cooldown 13 vs 12.5 (LOW) | (b) | 12.5 s |
 | Shift ground (n/a), Shift air shove (LOW) | (c) | the owner's leap stays; the air dash has no source (owner question if wanted) |
 | Dash -> LMB air buffer (LOW) | (c) | the source-buffering finding keeps modes (coordinator) |
 | LMB punch auto-release (LOW) | (b) | held as long as you like, full stays full, one punch on release; asserted |
-| LMB damage ratios (LOW) | (c) | the charge scaling of damage and knockback is ours (noted); the Molten Guard shield is not scaled by it |
+| LMB damage ratios (LOW) | (c) | the charge scaling of damage and knockback is ours (noted); the Shardskin shield is not scaled by it |
 | X Basalt Spine, X auto-cast after 3 s (LOW) | (c) | documented; the 3 s cap keeps a forgotten hold from blocking the ult |
 | Hunter viewer moves (MED) | (b) | RMB `breah_crouch`, `breah_slam`; X `breah_spine_aim`, `breah_spine`; asserted |
 | LMB damage ratios (LOW) | (c) | the charge scaling is ours (noted) |
@@ -83,10 +83,10 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 ## Per-slot table
 | Slot | Input | Aim and telegraph | What it does (ours) | Anim (KMovesStone) | Sound |
 |---|---|---|---|---|---|
-| Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks | none | none |
+| Passive Shardskin | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks | none | none |
 | Passive Tremor Sense | sneak (crouch) | a pale cone toward the cursor, 25 deg widening to 40 and 18m lengthening to 25m, both over 2s of sneaking (`passive.len`, `len_max`, `deg`, `grow`) | foes in the cone show through walls and fog as a molten ring, refreshed every 0.5s | `breah_sense` on a find | `br_sense` |
-| Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks or the charge (a tap-charge punch gives the same 18 as a full one; asserted) | none | none |
-| Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks (rank 3: a slam on a foe or a rock gives one too) | none | none |
+| Passive Shardskin | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks or the charge (a tap-charge punch gives the same 18 as a full one; asserted) | none | none |
+| Passive Shardskin | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks (rank 3: a slam on a foe or a rock gives one too) | none | none |
 | Passive Tremor Sense | sneak (crouch) | a pale cone toward the cursor, 16m, 25 deg widening to 40 over 2s | foes in the cone show through walls and fog as a molten ring, refreshed every 0.5s | `breah_sense` on a find | `br_sense` |
 | LMB tap: boulder | tap (under 0.28s) | the shared aim line; flies its full 11m (AimMode.MAX) | 9 dmg, a molten tumbling boulder with an ember trail; bursts with a red ground ring, splashing foes within 0.9m for half | `breah_throw` | `br_throw`, `br_boulder_hit` |
 | LMB hold: punch | hold, release | from the hold: a pale lane 4.2m by 1.8m with 3 chevrons toward the cursor, filling; the cursor charge ring; the fist glows molten orange, hotter with the charge | 12-24 dmg to foes in the lane, knockback 6-11, a 0.6m step, a dust ring and molten spray at the lane's end on the hit; into a wall = 0.9s stun (stars); every rock of the team in the lane flies, and rocks lined up further along the aim (gaps up to 2.8m, to 12m) follow one after another, 0.08s apart. Held as long as you like (no timeout): full stays full until you let go | `breah_wind` (hold), `breah_punch` | `br_wind`, `br_punch`, `br_launch`, `br_burst` |
@@ -102,7 +102,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 | R Basalt Spine (level 6, 45s) | tap, or hold and drag, release | while R is held (yours only): a pale line 12m long, bent in a shallow arc (25 degrees end to end, the middle bowing away from her), with inward chevrons and a centre ring, at the cursor (up to 11m), across the aim; dragging the cursor 0.8m+ from the centre swings it round the centre toward the cursor. On release everyone sees molten cracks along it for 0.2s | 9 rocks of hers erupt from the centre outward over 0.4s with flame bursts: foes within 1.6m are slowed 35% for 1s (1 damage), bodies on the line are moved to their side of it. The rocks stand 7s, block foes and their shots, carry and climb like hers, and fly when punched, slammed or dashed into (a punch along the ridge sweeps it); one cast's rocks deal at most 40 to any one hunter. They are Stone Row's own rocks (same length, top and thickness), lying along the arc, one rock deep. Over the abyss the rocks are ground (Ent.over_void reads StoneStand.top_under): she and any hunter can land on the ridge and walk along it with no fall or abyss sink while the rocks stand, and fall as normal when they crumble. A rock on a different level of ground than the ridge is left out; it never calls HeroZones.bridge (no tiles change). A stun, knock or merge while aiming cancels it unspent | `breah_spine_aim` (hold), `breah_spine` | `br_spine` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
-Rank 3: Quakefall gives a Molten Guard stack (18, the same stacks the punch gives, up to 4, a gold ring) per slam that catches
+Rank 3: Quakefall gives a Shardskin stack (18, the same stacks the punch gives, up to 4, a gold ring) per slam that catches
 something; Rock Hop takes a second charge and each hop goes a third further; Stone Row raises an extra row of three behind the first (the source's "extra Rock Wall").
 
 **Unfolded:** the kit pass had folded the source's Tetraform into Stone Row rank 3 (a centre-out second row that slowed, and a
@@ -126,7 +126,7 @@ The 14 ranked gaps of briefs/hero-ref/breah.md section 5 (written at main 4f8297
 | 9 | Passive cone | closed | cone drawn while sneaking, 25 -> 40 degrees and 18 -> 25 m (about 10 -> 14 bh, breah.md 0693-0725, 0697.jpg) over the same 2s: `passive: sneaking shows a pale cone ahead`, `passive: the cone widens 25 -> 40 degrees over 2s of sneaking`, `passive: the cone lengthens 18 -> 25 m over the same 2s`, `passive: Tremor Sense reaches 25 m grown, not 27`. The kit reuses one cone dictionary each frame (no allocation); foes are picked by the same grown length |
 | 10 | RMB charge length, cooldown | owner override | charge capped at 0.45s (owner item 61, Quakefall review above); cooldown 11s is the owner's tooltip data (Audit row "RMB cooldown 9 vs 11") |
 | 11 | Slam animation, scorch | closed | item 14: `breah_crouch` while held, `breah_slam` re-keyed, `scorch_t` 1.0. `anim: the charge is a crouch (breah_crouch)`, `rmb: ... the dark red crater lingering about 1s`. In flight: ext/anim-time-tenzo (timing only) |
-| 12 | Shield ring | closed | a gold ring on every Molten Guard stack (`dolm_kit.gd` guard ring) |
+| 12 | Shield ring | closed | a gold ring on every Shardskin stack (`dolm_kit.gd` guard ring) |
 | 13 | Tetraform | owner override | X is Basalt Spine (owner item 15): rocks erupt centre-out over 0.4s, slow 35% for 1s, hold-drag sets the angle. E rank 3 stays the plain extra row |
 | 14 | Sfx | n/a | the footage was not transcribed |
 
@@ -146,7 +146,7 @@ Tenzo branch.
   push-off; the slam lands as she does (`breah_slam` re-timed: push-off 0.05, fists high behind the head at the top
   0.16, swung down 0.28, the smash on landing 0.35, low in the crater to 0.7, up by 1.2). The charge leap is a real
   jump (about 3.2m, 1.2m up). Nothing in Quakefall makes a rock. Sweet spot 0.9-1.8m by charge, only it stuns.
-- **Game data items:** Molten Guard as the base passive and no slam reset were already done by the data pass
+- **Game data items:** Shardskin as the base passive and no slam reset were already done by the data pass
   (asserted there); the charge leap is now a real leap.
 - Asserted (`--dolm-combo-check`): `rmb (item 14): let go = a short hop...`, `anim (item 14): breah_slam smashes down...`,
   `rmb (item 14): no rock comes from Quakefall`, `rmb (item 14): the tap's slam raises no rock either`,
@@ -260,11 +260,11 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Punched Tetraform rocks launch like any rock (Rocksweeping) | card, guide | yes | built (the punch sweep takes ult rocks); asserted |
 | Tetraform terrain lasts longer per rank (+2.5s at levels 2 and 3) | wiki | no | not built: our R has no ranks |
 | Landslide rock shoves enemies toward the abyss (dunk setup) | footage tip "Dash -> RMB Dunk Combo" | yes (0965-1010) | built as the leap's landing crash (a shove with a lift) and the rock rolling on |
-| Rock Molten Guard shield per rock fired (2.00 passive) / hitting your rocks with the punch gives a shield | patch 2.00 notes, owner's tooltip data | no | built (data pass) as the base passive: one stack per punch |
+| Rock Shardskin shield per rock fired (2.00 passive) / hitting your rocks with the punch gives a shield | patch 2.00 notes, owner's tooltip data | no | built (data pass) as the base passive: one stack per punch |
 | Landslide: 12s, -2s / +1 charge / dash 33% longer | owner's tooltip data | no | built: 12s (10s at rank 2 and 3 by `rank_cd.dash` in dolm.json), a second charge and the third further at rank 3 |
 
 ## Data pass (SERVER_UPDATE7, owner's tooltip data)
-- Molten Guard is the base passive (above); the slam's rank-3 stacks are the data's "slamming enemies or rocks grants a stack".
+- Shardskin is the base passive (above); the slam's rank-3 stacks are the data's "slamming enemies or rocks grants a stack".
 - The slam reset on a knock or kill is removed (Volcano Crusher has none).
 - The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10s (`rank_cd.dash` [1, 0.8333, 0.8333]: the data's -2s), rank 3
   adds the second charge (the data's +1 charge) and the third-further reach (its +33%), still 10s per charge.
