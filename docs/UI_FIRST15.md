@@ -115,6 +115,19 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
 
+## 8. Match HUD groups at the 0.24.5 moments (`--hud-groups-check`)
+
+Counted by `HudGroups.on_screen` (rules: `content/rules/hud_groups.json`), pinned in `tools/hud_groups_check.gd`, pictured by `--hud-groups-shots` (1280x720, 2560x1080).
+The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and the Final share it; the Gate prompt is the one prompt). It waits until a seat is within 30 s of opening, so the landing and the first fight stay as before.
+
+| Moment | Groups | Strip | Note |
+|---|---|---|---|
+| First landing | 10 | waits | nine always-on blocks + the button card |
+| First fight | 11 | waits | nine + toasts + loot prompt |
+| Heart unlock | 12 | shows | nine + toasts + Gate prompt + strip |
+| Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
+
+All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
