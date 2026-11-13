@@ -49,3 +49,16 @@ The appeal3 swap above was made on a pre-IDLE_AUDIT tarek.glb, whose clips had n
 `--warden-glb-check` rejected it ("variant bone x_breath missing") and Tarek fell back to the procedural model. Re-swapped
 with the same spec (`art/wardens/src/tarek_v95.json`) onto main's tarek.glb as the rig input (fresh WORK): same master,
 12999 tris, 48 clips, `x_breath` kept.
+
+## Stone arm A look (2026-11-13, job 20261113-153317-a4)
+Owner-approved A look for the stone arm, shoulder plates and bracer: V1 blue slate with teal runes. The colour was graded from
+Meshy retexture gen 1 (the only gen used) onto the original UVs. Lab LUT: L is quantile-matched and the median is recentred
+on the A swatch [62,78,85]. Runes are masked out and keep their emission.
+- The game glb splits the `metal-atlas` primitive in two. 141 tris keep `metal-atlas` (tarek_atlas.jpg, byte-identical).
+  The 1359 arm tris move to the new material `metal-slate`, a copy of metal-atlas whose albedo is `tarek_slate.jpg`
+  (the graded 2048 atlas). `warden_glb.gd` reads the slot as the slice before "-", so `metal-slate` is set up exactly
+  like metal. A separate image is needed because a JPEG edit of the shared atlas spills chroma into the hair, skin and cloth islands.
+- Proof: Blender Workbench flat-texture renders, old vs new, 4 views. 0-3 px changed outside the slate prim.
+  Face, skin, sash, beads, hair and trousers are unchanged. On the site master, head_diff is [].
+- Re-running `v95_swap` on this rig drops the split. The recolour scripts (grade.py, gamesplit.py, armprim.py) and their
+  inputs are in /home/boki/meshy/tenzo-arm-3d-1113/ (NOTES.md, work/).
