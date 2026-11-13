@@ -763,6 +763,39 @@ def _air_audit_table():
         rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
 
+CAST_SLOTS = [("lmb", "LMB tap"), ("lmb_hold", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)")]
+
+def _cast_ours(row, phase):
+    mode = row.get(phase, "?")
+    return "queued, goes %.2f s later" % row.get(phase + "_wait", 0) if mode == "queue" else {
+        "fire": "fires at once", "cancel": "fires at once, ends it", "drop": "dropped"}.get(mode, mode)
+
+def _cast_tables(flows):
+    """One "Cast into cast" table per hero with into_cast rows: a press in another ability's wind-up and recovery."""
+    out = ""
+    names = dict(CAST_SLOTS)
+    for aid in ARCH_ORDER:
+        firsts = flows.get(aid, {}).get("into_cast")
+        if not firsts:
+            continue
+        rows = []
+        for first, label in CAST_SLOTS:
+            moves = firsts.get(first, {})
+            at = moves.get("at", ["?", "?"])
+            for second, row in ((k, v) for k, v in moves.items() if k != "at"):
+                rows.append(["%s during %s" % (names.get(second, second), label),
+                             "%s (%s s in)" % (_cast_ours(row, "windup"), at[0]),
+                             "%s (%s s in)" % (_cast_ours(row, "recovery"), at[1]), row.get("source", "")])
+        out += "\n### %s\n\n" % ARCH.get(aid, {}).get("name", aid) + table(
+            ["Pair", "Ours, wind-up", "Ours, recovery", "Source"], rows)
+    if not out:
+        return ""
+    return ("\n## Cast into cast\n\nThe second ability pressed during the first one's wind-up and its recovery (the times "
+            "are seconds after the first press), read from `into_cast` in `content/dash_flow/<hero>.json` and asserted by "
+            "`--cast-into-cast-check`, which also asserts the first move still comes (a press that ends it reads "
+            "\"ends it\"; none did in the measuring runs). \"Source\" is what the footage shows; "
+            "`[?]` marks a pair it cannot settle.\n") + out
+
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
@@ -795,6 +828,7 @@ def gen_dash_flow():
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
              "\"special\" = a sourced difference.\n\n") + _air_audit_table()
+    body += _cast_tables(flows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
