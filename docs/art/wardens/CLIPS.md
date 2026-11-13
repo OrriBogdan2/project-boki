@@ -53,3 +53,10 @@ timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoo
 8. Both are close crops on the hero: the footage's centre half, and ours a few metres round him toward the dummy.
 9. Compare by eye: wind-up, contact frame, recovery. Note the frame where ours is early or late and fix the clip's key times.
 10. Demos: `docs/art/parity_strip/` (`vex_lmb.jpg` frames 7-18 of venator_ghost, `kael_rmb.jpg` the RMB tap, frames 152-161). Owner notes in briefs/DECISIONS.md win over the footage.
+## The aim lead
+`WardenAimLead` (scripts/heroes/warden_aim_lead.gd) runs in `WardenGlb.Sync` after the clips. The model already faces
+the cursor, so the layer turns the parts back: the leg line (bone `root`) lags the cursor, the chest (`hips`) leads it
+by up to 30 degrees and the head (`head`) by up to 60, each a damped follower (rates are consts in the file). It is
+off under a full-body clip (`act_w`), a procedural pose (mantle, ledge: `proc_w`), dead and downed; a move keyed
+`"upper"` (even standing: Vex's LMB) keeps it on. `--aim-lead-check` measures the splits and checks clamp, jitter at
+30 fps and the off cases; `--shots-dir=<dir>` draws the sweep strips (GPU).

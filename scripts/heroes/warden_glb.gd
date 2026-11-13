@@ -941,6 +941,7 @@ class Sync extends Node:
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
+	var lead := WardenAimLead.new()   # head, chest and legs turning to the cursor in turn, over the clips
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
 	var blade_bone := -1
@@ -1094,6 +1095,8 @@ class Sync extends Node:
 				var pose: Transform3D = poses[i]
 				skel.set_bone_global_pose(int(l[0]), pose.interpolate_with(
 						_rig_pose(l), w))
+		var body_w := 0.0 if clips.upper_move else clips.act_w
+		lead.apply(skel, root.get_meta(WardenClips.STATE, {}), body_w, clips.proc_w, dt)
 		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if flinch:

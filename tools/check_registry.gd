@@ -209,6 +209,7 @@ const CHECKS := {
 	"--flinch-layer-check": ["res://tools/flinch_layer_check.gd", "flinch_layer_check", null],      # hit flinch over clips
 	"--flinch-layer-shots": ["res://tools/flinch_layer_shots.gd", "flinch_layer_shots", null],      # the strip (GPU)
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
+	"--aim-lead-check": ["res://tools/aim_lead_check.gd", "aim_lead_check", null],      # head and chest lead the cursor
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match

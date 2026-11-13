@@ -66,6 +66,7 @@ var air_t := 0.0
 var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
+var upper_move := false      # the move is an upper-body one (keyed "upper"), even standing: the aim lead stays on
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
@@ -358,12 +359,14 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
 		# ("upper": true, or "moving": the legs keep walking only while he walks)
 		var up = mv.get("upper", false)
+		var keeps_lead: bool = up is String or bool(up)
 		if up is String:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false)),
-				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
+				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0)),
+				"lead": keeps_lead}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
@@ -400,6 +403,7 @@ func step(dt: float) -> void:
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
+	upper_move = bool(want.get("lead", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	var flinching := not proc and bool(want.get("flinch", false))
 	if flinching:
