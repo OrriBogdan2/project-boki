@@ -7,10 +7,10 @@ extends "res://tools/new_player_flow_check.gd"
 ## A real renderer also gets a shot per step (<dir>/NN_<what>.png). Reads like --new-player-flow-check,
 ## which it extends; it asserts nothing itself.
 
-const HOLD_S := 10.0      # s a screen or farm step is looked at before acting
-const GAP_S := 8.0      # s: the longest a player may go with no prompt on show
-const WALL_CHARS := 110      # a prompt text longer than this is a wall of words
-const SHOW_CHARS := 140      # characters of a prompt the log prints (a longer one shows its length)
+const HOLD_S := 10.0  # s a screen or farm step is looked at before acting
+const GAP_S := 8.0  # s: the longest a player may go with no prompt on show
+const WALL_CHARS := 110  # a prompt text longer than this is a wall of words
+const SHOW_CHARS := 140  # characters of a prompt the log prints (a longer one shows its length)
 const GAP_LOG := "FRESH GAPS"
 
 var shots_dir := ""
@@ -18,6 +18,8 @@ var shot_n := 0
 var gaps: Array = []
 var walls := {}
 var hidden: Array = []
+var _last_step := ""
+
 
 func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
@@ -27,18 +29,22 @@ func run(m: Node) -> void:
 		DirAccess.make_dir_recursive_absolute(shots_dir)
 	await super.run(m)
 
+
 # the parts of the flow past the farm tutorial are not part of this log
 func _second_relic(_home) -> void:
 	pass
 
+
 func _first_expedition(_home) -> void:
 	pass
+
 
 func _skip_paths() -> void:
 	print(GAP_LOG + " " + str(gaps))
 	print("FRESH HIDDEN MARKER seconds: " + str(hidden))
 	print("FRESH WALLS: " + str(walls))
 	_end()
+
 
 func _shot(what: String) -> void:
 	if shots_dir == "" or DisplayServer.get_name() == "headless":
@@ -50,6 +56,7 @@ func _shot(what: String) -> void:
 	var file := "%02d_%s.png" % [shot_n, what.replace(" ", "_")]
 	main.get_viewport().get_texture().get_image().save_png(shots_dir.path_join(file))
 
+
 func _fresh_log(where: String, sec: int, prompt: String, marker: String, idle: float) -> void:
 	var shown := prompt.replace("\n", " / ")
 	if shown.length() > SHOW_CHARS:
@@ -57,6 +64,7 @@ func _fresh_log(where: String, sec: int, prompt: String, marker: String, idle: f
 	print("FRESH %s | %3ds | prompt: %s | marker: %s | idle %.0fs" % [where, sec, shown, marker, idle])
 	if prompt.length() > WALL_CHARS:
 		walls[where] = prompt.length()
+
 
 ## The screen's own words: every visible label and button, joined.
 func _screen_text(root: Node) -> String:
@@ -67,6 +75,7 @@ func _screen_text(root: Node) -> String:
 		elif c is Button and (c as Button).is_visible_in_tree() and (c as Button).text.strip_edges() != "":
 			parts.append("[%s]" % (c as Button).text)
 	return " ".join(parts)
+
 
 ## A screen before the player acts: HOLD_S seconds of looking, a line each second.
 func _before_act(what: String) -> void:
@@ -85,6 +94,7 @@ func _before_act(what: String) -> void:
 		await tree.create_timer(1.0).timeout
 	if worst >= GAP_S:
 		gaps.append("%s: %.0f s with no text" % [where, worst])
+
 
 ## One sim second of the tutorial match: the step's line, the marker and the edge arrow.
 func _sim_tick(m: Match, t: float) -> void:
@@ -114,7 +124,6 @@ func _sim_tick(m: Match, t: float) -> void:
 		gaps.append("match %s at %.0f s: no text or %.0f s stalled with no nag" % [tu.id(), t, tu.stall_t])
 	_fresh_log("match/" + tu.id(), int(tu.t), line, marker, tu.stall_t)
 
-var _last_step := ""
 
 ## A farm step before it is done: HOLD_S s of looking at the hint line and the world marker.
 func _farm_step(home, id: String) -> void:
