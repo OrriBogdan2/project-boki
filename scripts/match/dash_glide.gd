@@ -9,17 +9,19 @@ extends RefCounted
 ##   glider opens that step at the speed you have (Hunter._dash_into_glide), past the kit's wind-down.
 ## Measured by --airdash-glide-check. Numbers in content/rules/tuning.json "dash_glide".
 
-const WINDOW := 0.3          # s after an air dash the carry is watched (a few ease_t: by then nothing is left)
-const KNOCK_RECENT := 0.4    # s: a real knockback (Hunter.kb_t) this recent ends the watch
-const CUT_MIN := 0.5         # m/s: a smaller drop between steps is the air step's own drag, not a kit's cut
+const WINDOW := 0.3  # s after an air dash the carry is watched (a few ease_t: by then nothing is left)
+const KNOCK_RECENT := 0.4  # s: a real knockback (Hunter.kb_t) this recent ends the watch
+const CUT_MIN := 0.5  # m/s: a smaller drop between steps is the air step's own drag, not a kit's cut
 
-var since := 9.0             # s since the last air dash step (9 = long ago, on the ground, or knocked)
-var last := Vector2.ZERO     # m/s, the horizontal velocity the last step ended with while watching
-var carry := Vector2.ZERO    # m/s of the dash's speed still easing out
+var since := 9.0  # s since the last air dash step (9 = long ago, on the ground, or knocked)
+var last := Vector2.ZERO  # m/s, the horizontal velocity the last step ended with while watching
+var carry := Vector2.ZERO  # m/s of the dash's speed still easing out
+
 
 ## True while a glide press still counts as a press in the dash that just ended.
 func fresh(h: Hunter) -> bool:
 	return since < Loco.dash_glide_grace(h.arch)
+
 
 ## The horizontal velocity after one move step. `v0` is the step's starting velocity (after the kit's tick, which
 ## may have cut it), `hv` the move's result.
@@ -38,15 +40,16 @@ func step(h: Hunter, v0: Vector2, hv: Vector2, dt: float) -> Vector2:
 		return hv
 	since += dt
 	var cut := last - v0
-	if v0.length() < last.length() - CUT_MIN and h.wall_hit_v == Vector2.ZERO:      # (a wall's stop stays a stop)
+	if v0.length() < last.length() - CUT_MIN and h.wall_hit_v == Vector2.ZERO:  # (a wall's stop stays a stop)
 		hv += cut
 		carry += cut
 	if h.gliding:
-		carry = Vector2.ZERO          # the glider has it all now (its drag takes it from here)
+		carry = Vector2.ZERO  # the glider has it all now (its drag takes it from here)
 	elif carry.length_squared() > 0.0:
 		hv = _ease(hv, dt)
 	last = hv
 	return hv
+
 
 ## Lets `carry` go at the ease rate. A wall (or keys turning the hunter) that already took some of it off
 ## shrinks it first, so the ease never pushes back the other way.
