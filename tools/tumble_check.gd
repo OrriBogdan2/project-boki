@@ -1,7 +1,7 @@
 extends RefCounted
 ## --tumble-check: Tumble (scripts/home/base_tumble.gd, briefs/design/GARDEN_MODERN.md 4.2 game 1).
 ##   1. the rules: Rush beats Dodge beats Brace beats Rush, one step or two on a 20+ lead, a clash moves the
-##      lower push half a step, the 10% type edge and the 10% follow bonus, an untouched pick goes with the want
+##      lower push half a step, the 10% follow bonus, an untouched pick goes with the want
 ##   2. the read: the higher Focus sees the honest tell about 7 in 10, the other about 5 in 10
 ##   3. 200 seeded bouts with a simulated player (reads the tell, follows its Boki, or picks at random):
 ##      60 to 75 s on average; 30 more points of Power, Guard, Speed or Focus each end bouts further forward
@@ -9,7 +9,7 @@ extends RefCounted
 ##   4. no dominant move: always Rush, always Brace and always Dodge win within a few points of each other's
 ##      share of exchanges (about 900 each, so the test is not noise) and none wins most bouts
 ##   5. a settled bout: joy, trust (plus what following earned) and memories for your Boki, a visitor untouched
-##   6. on the base: a ring by the stump with base_mode on; one rested Boki meets a visitor, the bout ends in a card
+##   6. on the base: a ring by the stump; one rested Boki refuses, two start a bout that ends in a card
 ## Never touches the real save.
 
 const BOUTS := 200
@@ -102,7 +102,7 @@ func _rules() -> void:
 	var d := _kin(th["frost"], "D", [10, 10, 10, 10])
 	r = _exchange(c, d, "rush", "dodge")
 	var p := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
-	ok(absf(p - 1.1) < 0.001, "the type edge is 10%% of push (x%.3f)" % p)
+	ok(absf(p - 1.0) < 0.001, "species themes change no push (x%.3f)" % p)
 	r = _exchange(a, b, "rush", "dodge", "rush")
 	var f := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
 	ok(absf(f - 1.1) < 0.001 and r.follows == 1, "following the want is 10%% more push (x%.3f)" % f)
@@ -261,6 +261,7 @@ func _on_base() -> void:
 	k["starter"] = true
 	d["roster"].append(k)
 	d["active"] = k["uid"]
+	d["roster"].append(_kin("cindle", "Ash", [10, 10, 10, 10]))
 	d["tutorial"] = {"hatched": true, "intro": true}
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
@@ -283,9 +284,21 @@ func _on_base() -> void:
 		ok(tb.find(at) == {"kind": "tumble"}, "on: the ring offers a Tumble")
 		for e in home.kins:
 			e.erase("indoors")
+		# one rested Boki out: refuses cleanly, no bout, nobody left busy
+		var lone: Dictionary = home.kins[1]
+		lone["indoors"] = true
 		tb.use()
-		ok(tb.run != null and tb.run.visitor and tb.pair.size() == 2, "on: alone, your Boki meets a garden visitor")
-		var visitor: Node3D = tb.pair[1]["node"] if tb.pair.size() == 2 else null
+		ok(tb.run == null and tb.pair.is_empty(), "on: one rested Boki refuses (needs two), no bout")
+		ok(not home.kins[0].get("busy", false), "on: the refused Tumble leaves your Boki free")
+		# no ring built: use() and find() stay quiet instead of touching a nil ring
+		var kept: MeshInstance3D = tb.ring
+		tb.ring = null
+		tb.use()
+		ok(tb.run == null and tb.find(at) == {}, "no ring: use() and find() do nothing, no script error")
+		tb.ring = kept
+		lone.erase("indoors")
+		tb.use()
+		ok(tb.run != null and not tb.run.visitor and tb.pair.size() == 2, "on: two rested Boki start a bout")
 		var t := 0.0
 		while tb.run != null and tb.run.state != "resolve" and t < 200.0:
 			tb.tick(0.1)
@@ -298,8 +311,7 @@ func _on_base() -> void:
 			tb.tick(0.1)
 			t += 0.1
 		await main.get_tree().process_frame
-		ok(tb.run == null and is_instance_valid(tb.card) and not is_instance_valid(visitor),
-				"on: the bout ends in a result card and the visitor leaves (%.1f s)" % t)
+		ok(tb.run == null and is_instance_valid(tb.card), "on: the bout ends in a result card (%.1f s)" % t)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

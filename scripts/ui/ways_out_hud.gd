@@ -2,14 +2,13 @@ class_name WaysOutHud
 extends RefCounted
 ## The Ways Out strip (briefs/specs/LIMITED_WAY_OUTS.md section 9), top centre: four pips (Lair, Heart, Uplink,
 ## Final), each locked with a countdown, open, in use (the squad's colour), taken (struck through) or lost to
-## the Blight, and "Squads left" beside them. Plus the carrier's Heart Gate prompt.
+## the Blight (squads and players left are the top-right AliveCounter). Plus the carrier's Heart Gate prompt.
 ## Reads the match only: the Heart's state for the two Heart seats, the lairs and outposts for the quest seats
 ## (their schedule is content/rules/heart.json "quest"). Drawn with HudStyle on the Hud's canvas.
 
 enum St {LOCKED, OPEN, USE, TAKEN, LOST}
 const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
 const CELL := Vector2(86.0, 40.0)
-const SQUADS_W := 112.0
 const TOP_Y := 8.0
 const PIP_R := 7.0
 const LOST_COL := Color("8a3a4a")    # a seat the Blight took: the tide's crimson, dimmed
@@ -91,18 +90,6 @@ static func _uplink_team(m: Match, a: String, b := "") -> int:
 			return int(x.get("team", -1))
 	return -1
 
-## Squads with at least one Hunter still in the match.
-static func squads_left(m: Match) -> int:
-	var mask := 0
-	for h in m.hunters:
-		if not h.out and not h.extracted:
-			mask |= 1 << h.team
-	var n := 0
-	while mask != 0:
-		n += mask & 1
-		mask >>= 1
-	return n
-
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
 
@@ -122,15 +109,11 @@ static func draw(hud) -> void:
 		return
 	var c: Control = hud.c
 	var sd := seats(m)
-	var w := CELL.x * 4.0 + SQUADS_W
+	var w := CELL.x * 4.0
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
 	for i in 4:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
-	var sx := r.end.x - SQUADS_W
-	c.draw_line(Vector2(sx, r.position.y + 7), Vector2(sx, r.end.y - 7), Color(1, 1, 1, 0.14), 1.0)
-	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
-	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
