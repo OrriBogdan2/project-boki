@@ -1,5 +1,6 @@
 extends "res://tools/hero_pair_check.gd"
-## The placed-barrier rule (docs/heroes/barriers.md; on main's KnockWall and Blockers), run from --dolm-combo-check with Stone Row's rocks and from
+## The placed-barrier rule (docs/heroes/barriers.md; KnockWall and Blockers), run from --dolm-combo-check with
+## Stone Row's rocks and from
 ## --rimewright-combo-check with a Rink Wall's flags: a barrier of the other team is a wall to everything that
 ## would stop on terrain. Pins and knocks into it count as terrain, a burr sticks to it, a thrown mace stops at
 ## it, and a beam that goes through terrain (the Longneedle) is cut by it. Its own team passes it.

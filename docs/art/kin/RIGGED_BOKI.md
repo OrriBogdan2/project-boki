@@ -92,7 +92,7 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 
 ## Attack contact
 
-A Boki's bite lands `Kin.STRIKE_WINDUP` (0.3 s) after it starts (decision 0061). `BokiRig.CONTACT` holds where the
+A Boki's bite lands `Kin.STRIKE_WINDUP` (0.3 s) after it starts (decision 0091). `BokiRig.CONTACT` holds where the
 attack clip connects, per starter line (cindle 0.333 s, puddlet and burrlet 0.367 s at speed 1): the first frame the
 front-most bone is 90% of the way to its farthest reach. The rig plays the attack at `CONTACT / STRIKE_WINDUP`, so
 the snap lands on the hit; a species without a row plays at speed 1. `--boki-anim-audit` reads the contact off each

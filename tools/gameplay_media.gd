@@ -15,7 +15,7 @@ extends RefCounted
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
-##  10 stairs        a Hunter runs up the map's tallest flight of stairs and back down, then a bot (decision 0060)
+##  10 stairs        a Hunter runs up the map's tallest flight of stairs and back down, then a bot (decision 0087)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame

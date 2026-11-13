@@ -13,10 +13,10 @@ const STOMP_ROOT := 0.12   # s: the stomper's own hold on its feet, topped up ev
 const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
 	"revive_radius": 1.6,       # [est] a teammate this close revives you (source silent)
-	"revive_time": 4.0,         # [wiki "a few seconds"] [est] one teammate (docs/decisions/0022)
+	"revive_time": 4.0,         # [wiki "a few seconds"] [est] one teammate (docs/decisions/0081)
 	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health (wiki: "X%"; a per-tick heal scaled to ours gives 12-35%)
 	# 1 to 4 on a wisp: 1, 1.5, 1.75, 1.875x in all, for teammates reviving and enemies stomping alike
-	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] each of n Hunters on one wisp works at crowd[n-1] (0022)
+	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] each of n Hunters on one wisp works at crowd[n-1] (0081)
 	"stomp_mult": 2.5,          # [design] one enemy on a wisp drains it this much faster and blocks the revive [wiki]
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
 	"execute_time": 3.0,        # [footage] (old: hold interact on an enemy wisp; now the stomp below)

@@ -1,6 +1,6 @@
 class_name CarryPick
 extends RefCounted
-## Home side of the carry rule (docs/decisions/0061-carry-pick.md): at the expedition portal you pick
+## Home side of the carry rule (docs/decisions/0090-carry-pick.md): at the expedition portal you pick
 ## a lead Boki (Save "active") and an optional second (Save "active2", empty unless you pick one).
 ## One selectable Boki means you go with one. Cards show the carry passive in one plain line, and say
 ## so when both Boki give the same passive, because it counts once.

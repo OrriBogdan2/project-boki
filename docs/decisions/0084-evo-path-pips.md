@@ -1,4 +1,4 @@
-# 0022: Branching finals count pips (path meter)
+# 0084: Branching finals count pips (path meter)
 
 - **Status:** accepted
 - **Date:** 2026-11-10

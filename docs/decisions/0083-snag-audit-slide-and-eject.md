@@ -1,4 +1,4 @@
-# 0022: Snag audit: slip past corners on the keys' pull, eject a body from inside a wall
+# 0083: Snag audit: slip past corners on the keys' pull, eject a body from inside a wall
 
 - **Status:** accepted
 - **Date:** 2026-11-09

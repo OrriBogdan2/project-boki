@@ -1,4 +1,4 @@
-# 0023: A worn aura on each Boki (rec.aura)
+# 0086: A worn aura on each Boki (rec.aura)
 
 - **Status:** accepted
 - **Date:** 2026-11-11

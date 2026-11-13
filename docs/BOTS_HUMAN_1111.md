@@ -1,7 +1,7 @@
 # Bots that play like people (2026-11-11)
 
 Branch `ext/bots-human-1111`, base `origin/ext/release-integ-0245` (92df78ce4). Decision note:
-docs/decisions/0061-bots-play-as-a-squad.md.
+docs/decisions/0088-bots-play-as-a-squad.md.
 
 An expedition is 10 squads of 3 and most of them are bots, so the bots are most of what a player meets. This
 pass watched full bot expeditions headless, ranked what gives a bot away, and fixed the top of the list.

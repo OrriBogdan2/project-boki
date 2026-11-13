@@ -1,4 +1,4 @@
-# 0061: The drop is a squad mini rocket
+# 0089: The drop is a squad mini rocket
 
 - **Status:** accepted
 - **Date:** 2026-11-11

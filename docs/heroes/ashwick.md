@@ -380,7 +380,7 @@ Suggestions (not built, parity first): the 0.4 s lane in the footage may be a ca
 a per-hero stop blend (loco_pos 12/s is shared by
 every warden) would give the source's instant stop.
 
-Done (ext/anim-remote-retime, decision 0098): the ram hit re-times `as_leap` through `ArchKit.retime`, so remote
+Done (ext/anim-remote-retime, decision 0093): the ram hit re-times `as_leap` through `ArchKit.retime`, so remote
 views move the squash onto the hit frame too (it is 0.19-0.23 s earlier, under the 0.3 s resync a plain resend
 needs); `--remote-anim-check` "ashwick ram hit".
 

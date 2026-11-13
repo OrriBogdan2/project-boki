@@ -1,4 +1,4 @@
-# 0061: A Boki's bite lands on the clip's contact frame
+# 0091: A Boki's bite lands on the clip's contact frame
 
 - **Status:** accepted
 - **Date:** 2026-11-12

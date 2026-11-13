@@ -1,4 +1,4 @@
-# 0061: Pick the lead and the second at the portal
+# 0090: Pick the lead and the second at the portal
 
 - **Status:** accepted
 - **Date:** 2026-11-11

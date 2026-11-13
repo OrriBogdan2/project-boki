@@ -1,6 +1,6 @@
 class_name DropRocket
 extends RefCounted
-## Owner 2026-11-11: the drop is a squad mini rocket (docs/decisions/0061-rocket-drop.md). When the drop leader
+## Owner 2026-11-11: the drop is a squad mini rocket (docs/decisions/0089-rocket-drop.md). When the drop leader
 ## launches, the whole squad still aboard the skyship rides one rocket down (a solo rides a one-seat one).
 ## The leader steers it and everyone else sees where it will hit (DropReticle). Doing nothing lands the squad
 ## together where it hits. Anyone can jump out early (detach): they free-fall slower than the rocket and can open

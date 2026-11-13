@@ -1,4 +1,4 @@
-# 0061: A rare trait on the Boki, rolled once at hatch
+# 0092: A rare trait on the Boki, rolled once at hatch
 
 - **Status:** accepted
 - **Date:** 2026-11-13

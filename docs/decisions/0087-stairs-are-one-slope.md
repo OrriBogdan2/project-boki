@@ -1,4 +1,4 @@
-# 0060: Stairs are one walkable slope
+# 0087: Stairs are one walkable slope
 
 - **Status:** accepted
 - **Date:** 2026-11-11

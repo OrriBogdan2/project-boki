@@ -1,5 +1,5 @@
 extends RefCounted
-## --evo-path-check (GARDEN_MODERN.md section 3, docs/decisions/0022): the path meter in EvoPath. Replays the
+## --evo-path-check (GARDEN_MODERN.md section 3, docs/decisions/0084): the path meter in EvoPath. Replays the
 ## four worked examples of section 3.3 with exact pip sources, then ties, caps, the Evolve prompt (level,
 ## Stayleaf, missing art), the Ink preview, the toy habit tally, the card block, and the table itself.
 ## Never touches the real save.

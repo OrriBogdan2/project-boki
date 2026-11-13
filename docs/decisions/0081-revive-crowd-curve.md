@@ -1,4 +1,4 @@
-# 0022: Revive and stomp numbers from the source
+# 0081: Revive and stomp numbers from the source
 
 - **Status:** accepted
 - **Date:** 2026-11-09

@@ -1,6 +1,6 @@
 class_name WardenDropPose
 extends RefCounted
-## The drop's two shared body poses (docs/decisions/0061-rocket-drop.md), worn by every Hero over
+## The drop's two shared body poses (docs/decisions/0089-rocket-drop.md), worn by every Hero over
 ## its clips or its rig: "ride", braced and holding on aboard the squad rocket (DropRocket.seat), and "skydive",
 ## belly to the ground with the arms and legs spread, banking with the steer, which eases off into the glider-open
 ## clip when the canopy opens. One pose set for all, content/rules/drop_poses.json: the body line and each limb are

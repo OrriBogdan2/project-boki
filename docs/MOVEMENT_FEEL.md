@@ -322,7 +322,7 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
-## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
+## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0085)
 
 The source has no ramp time: a Slow or a speed boost moves the speed cap at once, and the body follows it under the ordinary movement, down at the walking brake (BrakingDecelerationWalking 22.2 m/s² plus GroundFriction 1 × 2 per second of speed) and up at MaxAcceleration (47-54 m/s²). A 30% Slow on a run settles in about 0.05 s either way. Ours: every Slow (`slow_t`/`slow_k`, from kits, hazards, Boki and merges) and every haste (`haste_t`, the kits' `pace()`, a `move_speed` buff) multiplies into the one cap in `Hunter._physics`, and the ground step follows it with `ground_accel` up and `HunterMove.brake_rate` down (decision 0020). The check runs one kit per weight class (thief, gunslinger, juggernaut) and the haste on the medium kit.
 
@@ -410,7 +410,7 @@ Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
 ## Air velocity: kit casts add to it, never overwrite it (DECISIONS 11-08; the eight kits outside the slice)
-## Snag audit (`--snag-check`, decision 0022)
+## Snag audit (`--snag-check`, decision 0083)
 
 Rule (briefs/DECISIONS.md 2026-11-08): in the air WASD accelerates toward the keys, counter-steers hard and drag
 bleeds speed above the cap (`Loco.air_step`); nothing overwrites the air velocity. A kit move may still own it when
@@ -809,7 +809,7 @@ Source: `origin/ext/hero-ref-footage`, folders `venator_ghost` (Ghost), `juggern
 - Tenzo's LMB and RMB (not in this slice) show nothing until the release (first sign 2 frames at 60 Hz, 7 at 144: the tap plus the tick hop). If the source shows a wind-up on the press for his fists or his RMB hold, that pose is the fix; if not, this is parity.
 
 Found by the check and fixed on the side: `VVFx.echo` (Vex's dash after-image) read mesh instances the model had since freed (a muzzle flash, an old weapon) and spammed "previously freed instance" errors on every echo frame; the pair is now skipped and its ghost hidden.
-## Snag audit (`--snag-check`, decision 0022)
+## Snag audit (`--snag-check`, decision 0083)
 
 12 Hunters x 50 seeded paths (run, dash, glide, on The Hollow Crown); a stall is horizontal speed under half the wanted speed for over 0.15 s with the keys held, grounded for runs, gliding for glides, in a dash for dashes, and no wall straight on that a perfect slide could not pass at half speed (a prop whose top is over the feet by `World.STEP`, or terrain over mantle reach). Slowed by design (stun, ledge rise, a kit pace under 1, e.g. Motley's Trade in flight) is not counted. Before: 32 stalls (top spots: prop row at (116.8, 5.6, 90.4), a glide into a terrace face at (50.0, 3.7, 61.7), a run at a wall corner at (167.7, 1.6, 128.3), a glide that sank into a prop row at (123.9, 4.0, 165.6), a drop past a lip into the cliff column at (97.1, 3.2, 100.0)). After: 2 (a Tenzo and a Meeko glide, (41.7, 3.4, 62.0) terrace face 1.4 m up and (116.2, 5.6, 125.8) prop corner).
 
@@ -877,7 +877,7 @@ rest of the dash and resume it on top (more than the source's 0.6x would come ov
 
 The check asserts: a rim in reach is topped with at most 0.1 s stood at the face; a rim beyond reach never is.
 
-## Stairs: one smooth walk up and down (`--stairs-check`, decision 0060; owner 11-11)
+## Stairs: one smooth walk up and down (`--stairs-check`, decision 0087; owner 11-11)
 A flight's ground is a straight ramp, one terrace per tile. Walls (`World.occupy`), the non-local ledge lean
 (`Hunter._try_ledge_grab`) and the "left the ground" test now allow the rise or fall the slope gives over the
 distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight on the ground the whole way: no hop,

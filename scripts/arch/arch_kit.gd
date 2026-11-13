@@ -822,7 +822,7 @@ var anim_rt := 0               # counts explicit re-times (retime()), so other g
 
 ## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
 ## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
-## The age is snapped to 0.05 s; its hundredths carry the re-time count (anim_rt mod NET_RETIMES, decision 0098).
+## The age is snapped to 0.05 s; its hundredths carry the re-time count (anim_rt mod NET_RETIMES, decision 0093).
 const NET_MOVE_AT := 31
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
 const NET_AGE_SNAP := 0.05

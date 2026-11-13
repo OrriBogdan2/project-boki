@@ -1,4 +1,4 @@
-# 0061: Bots play as a squad and back out of lost fights
+# 0088: Bots play as a squad and back out of lost fights
 
 - **Status:** proposed (ext/bots-human-1111; evidence in docs/BOTS_HUMAN_1111.md)
 - **Date:** 2026-11-11

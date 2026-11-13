@@ -1,4 +1,4 @@
-# 0022: Hits and events leave at once; a dash or cast sends its snapshot early
+# 0082: Hits and events leave at once; a dash or cast sends its snapshot early
 
 - **Status:** accepted
 - **Date:** 2026-11-09

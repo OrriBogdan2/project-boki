@@ -1,5 +1,5 @@
 class_name EvoPath
-## The path meter of a branching final (briefs/design/GARDEN_MODERN.md section 3, docs/decisions/0022).
+## The path meter of a branching final (briefs/design/GARDEN_MODERN.md section 3, docs/decisions/0084).
 ## Each final of a line is one end; pips come from five sources (stat lead, element lean, worn path tokens,
 ## care, Cup Ribbons), all tuned in content/rules/evo_paths.json. The end with more pips is the form; a tie
 ## goes to the stat lead, and with that tied too the Boki waits. Ink lines have no pips, only a preview.

@@ -1,4 +1,4 @@
-# 0098: An explicit kit-move re-time reaches the other games
+# 0093: An explicit kit-move re-time reaches the other games
 
 - **Status:** accepted
 - **Date:** 2026-11-12
