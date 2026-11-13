@@ -205,7 +205,8 @@ const CHECKS := {
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # all 12 Hunters in a row, true scale
 	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],      # colour vs .glb
 	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],      # gait gate
-	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks
+	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks; --react
+	"--react-audit": ["res://tools/react_audit.gd", "react_audit", null],      # hit reaction gate (REACT_AUDIT)
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],      # the sight wedge and hiding plates
 	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],      # sight wedge shots (GPU)
