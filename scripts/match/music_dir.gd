@@ -5,7 +5,9 @@ extends RefCounted
 ## or got hit lately, or a rival is close and in sight), the boss stem inside a woken boss's arena,
 ## and the clock stem while extracting or when the islands are about to fall. Three stingers mark the
 ## run: the last squad standing (you are in it), and the run's end (out, or taken out), each with the
-## stems falling away under it. Reads the match, never changes it.
+## stems falling away under it. A soundtrack style other than the first score (Soundtrack) has one track
+## per moment instead of stems: the same reading picks calm, fight, last moments or boss, and the track
+## crossfades when the moment changes. Reads the match, never changes it.
 
 const FIGHT_HOLD := 8.0       # seconds of calm (no hit dealt or taken) before the fight music fades out
 const MIN_DWELL := 2.0        # seconds the drive goal stays put once it changed (a fade-out can't flicker)
@@ -23,13 +25,31 @@ var last_done := 0.0
 var started := false
 var ended := false            # the run-end sting has played
 var last_said := false        # the last-squad sting has played
+var single := false           # one track per moment (a picked soundtrack) instead of the layered stems
+var place := "calm"           # single: the Soundtrack place whose track is playing
+var pick_t := 0.0
+const PICK_EVERY := 0.5       # seconds between single-track picks
+const STING_DUCK := 2.0       # seconds a single track ducks under the last-squad sting
+
+## The music id an expedition of this tier opens on (main prefetches it behind the loading screen): the
+## Hollow's own track deep down, else the calm one (the first stem of the layered score).
+static func opening(tier: int) -> String:
+	return Soundtrack.track("boss", "hollow") if tier >= 2 else Soundtrack.track("calm", "match_calm")
 
 func start(m: Match) -> void:
 	if m.tier >= 2:
-		Sfx.play_music("hollow")
+		Sfx.play_music(opening(m.tier))
 		return
 	started = true
-	Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
+	if m.opts.get("training", false) or m.opts.get("tutorial", false):
+		place = "training"
+		single = Soundtrack.track(place, "") != ""
+	else:
+		single = not Soundtrack.layered()
+	if single:
+		Sfx.play_music(Soundtrack.picked(place))
+	else:
+		Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 
 ## Ambience by place, every quarter second: wind howling up from the abyss as you near an edge (or
 ## glide over it), the creak and grit of the old ruins among their walls, and now and then a
@@ -81,6 +101,8 @@ func last_squad() -> void:
 	if not last_said and not ended:
 		last_said = true
 		Sfx.sting("last")
+		if single:
+			Sfx.duck(STING_DUCK)
 
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
@@ -90,6 +112,8 @@ func tick(m: Match, dt: float) -> void:
 		if not ended:
 			ended = true
 			Sfx.sting("extract" if m.result.get("extracted", false) else "out")
+			if single:
+				Sfx.play_music("", Sfx.LAYER_UNDER)
 		Sfx.set_layers({"calm": 0.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 		return
 	if not p.out and not p.extracted:
@@ -119,5 +143,23 @@ func tick(m: Match, dt: float) -> void:
 			extract = 1.0; calm = minf(calm, 0.8)
 		if p.downed:
 			calm = 0.5; drive *= 0.4; boss *= 0.5
+	if single:
+		_pick_track(dt, drive, boss, extract)
+		return
 	var under := UNDER if Sfx.sting_on() else 1.0
 	Sfx.set_layers({"calm": calm * under, "drive": drive * under, "boss": boss * under, "extract": extract * under})
+
+## Single-track soundtracks: the moment picks the place (a woken boss, the last moments, a fight, else
+## calm; training keeps its own), twice a second. Sfx.play_music crossfades only when the track changes,
+## and a new pick in the settings is heard on the next check.
+func _pick_track(dt: float, drive: float, boss: float, extract: float) -> void:
+	pick_t -= dt
+	if pick_t > 0.0:
+		return
+	pick_t = PICK_EVERY
+	if place != "training":
+		place = "calm"
+		if boss > 0.5: place = "boss"
+		elif extract > 0.5: place = "final"
+		elif drive > 0.5: place = "tense"
+	Sfx.play_music(Soundtrack.picked(place))

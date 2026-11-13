@@ -74,7 +74,7 @@ func _ready() -> void:
 		set_process_unhandled_input(false)
 		Game.goto.call_deferred(then_go)      # (seen it already: repeat runs skip it by default)
 		return
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	rng.seed = 77
 	var we := WorldEnvironment.new()

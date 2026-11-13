@@ -402,6 +402,13 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_slider(v, "Music", "music", 0.0, 1.0)
 	_slider(v, "Sound effects", "sfx", 0.0, 1.0)
 	_slider(v, "Ambience", "ambience", 0.0, 1.0, 0.05, "Wind, rain and the sea")
+	_group(v, "Music")
+	var styles: Array = Soundtrack.styles().keys().map(func(k): return [k, Soundtrack.styles()[k]["name"]])
+	_choice(v, "Soundtrack", "soundtrack", styles, Soundtrack.replay, "The music everywhere; a track picked below wins")
+	_toggle(v, "Shuffle soundtracks", "music_shuffle", "Each screen and expedition rolls a soundtrack")
+	for pl in Soundtrack.places():
+		var id := String(pl["id"])
+		_choice(v, String(pl["name"]), Soundtrack.HAND_PICK[id], Soundtrack.options(id), Soundtrack.replay)
 	_group(v, "Sounds")
 	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
 	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a kill resets your cooldowns")

@@ -195,8 +195,8 @@ func play_music(name: String, fade := 1.5) -> void:
 	if not layers.is_empty():
 		_stop_layers(fade)
 	music_name = name
-	if name != "" and not Save.d.get("music", []).has(name):
-		# first time hearing this one: it joins the music list
+	if Data.MUSIC.has(name) and not Save.d.get("music", []).has(name):
+		# first time hearing one of the house's records: it joins the music list
 		if not Save.d.has("music"): Save.d["music"] = []
 		Save.d["music"].append(name)
 		Save.save_game()

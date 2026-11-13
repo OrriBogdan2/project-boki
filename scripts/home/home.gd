@@ -1013,6 +1013,7 @@ func _update_music(d: float) -> void:
 	var want := "home_night" if night else "home_day"
 	if isle in ["orchard", "meadow", "summit"]:
 		want = isle
+	want = Soundtrack.track("base", want)
 	if Sfx.music_lock != "":
 		want = Sfx.music_lock
 	Sfx.play_music(want, 2.5)

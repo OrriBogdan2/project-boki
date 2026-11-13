@@ -50,7 +50,7 @@ func setup(opts: Dictionary) -> void:
 	pm = Prematch.new(opts)
 
 func _ready() -> void:
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.color = UI.BG

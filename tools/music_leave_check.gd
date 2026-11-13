@@ -51,6 +51,8 @@ func step(m: Match, secs: float) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	# the layered stems and the "title" track are the first score's (Soundtrack); --soundtrack-check covers the rest
+	Settings.set_v("soundtrack", Soundtrack.OWN_STYLE, false)
 	Save.d["music"] = Save.d.get("music", [])
 	await _training_duel_leave()
 	await _match_to_title()
