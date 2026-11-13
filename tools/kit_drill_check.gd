@@ -20,6 +20,7 @@ func run(main: Node) -> void:
 	await _area(main, tree, false, "gunslinger")
 	await _area(main, tree, true, "gunslinger")
 	await _area(main, tree, false, "archer")
+	await _area(main, tree, false, "juggernaut")
 	print("KITDRILL %s" % ("FAIL %d" % bad if bad > 0 else "OK"))
 	tree.quit(1 if bad > 0 else 0)
 
@@ -35,7 +36,8 @@ func _text() -> void:
 				print("KITDRILL   [%s] %s  %s" % [st["key"], st["line"], KitDrill.callout(st, 0)])
 	ok(KitDrill.how("juggernaut", "e") == "again", "juggernaut E is a recast (its chain: press E again)")
 	ok(KitDrill.how("gunslinger", "dash") == "hold", "gunslinger dash has a hold")
-	ok(KitDrill.how("gunslinger", "lmb") == "", "LMB is a plain press")
+	ok(KitDrill.how("juggernaut", "lmb") == "", "LMB is a plain press unless the JSON says hold")
+	_vex_lines()
 	var holds := KitDrill.how("archer", "lmb") == "hold" and KitDrill.how("archer", "rmb") == "hold"
 	ok(holds, "Lace: the draw and the Heavy Shot are holds")
 	var draw: String = KitDrill.line("archer", "lmb").to_lower()
@@ -49,6 +51,19 @@ func _text() -> void:
 	ok(not KitDrill.line("juggernaut", "e").begins_with("Try "), "a slice Hunter's line is its own text")
 	ok(KitDrill.line("tender", "e").begins_with("Try "), "a Hunter outside the slice gets the generic line")
 
+## Vex's drill (DECISIONS 'Starter masks'): held fire with no reload, the launcher's knock, the still
+## charge and recoil of the beam, the target zone, tap vs hold on the dash with fire through it.
+func _vex_lines() -> void:
+	var want := {"lmb": ["hold", "no reload", "refills"], "rmb": ["launcher", "knocks"],
+			"e": ["stand still", "0.6s", "recoil"], "x": ["zone", "cursor"], "dash": ["tap", "hold", "firing"]}
+	for slot in want:
+		var text := KitDrill.line("gunslinger", slot).to_lower()
+		var miss: Array = want[slot].filter(func(w): return not text.contains(w))
+		ok(miss.is_empty(), "Vex's %s line names %s (missing %s)" % [slot, want[slot], miss])
+	ok(KitDrill.how("gunslinger", "lmb") == "hold", "Vex: LMB is a hold step (full-auto)")
+	var cue := KitDrill.callout(KitDrill.steps("gunslinger")[0], 0)
+	ok(cue == "HOLD %s, not just a tap" % Settings.key_cap("fire"), "Vex's fire call-out names the key")
+
 func _steps() -> void:
 	var k := KitDrill.new()
 	k.m = Match.new()
@@ -57,14 +72,15 @@ func _steps() -> void:
 	ok(k.step == 0, "the wrong key does not advance")
 	_walk(k, "juggernaut")
 	_walk(k, "archer")      # Lace: a tap on her draw does not count, a hold does
+	_walk(k, "gunslinger")      # Vex: a tap of fire does not count, holding the trigger does
 	k.m.free()
 	k.free()
 
 func _walk(k: KitDrill, hunter: String) -> void:
 	k.start(hunter)
-	if hunter == "archer":
+	if KitDrill.how(hunter, "lmb") == "hold":
 		k.on_press("fire")
-		ok(k.step == 0, "archer: a tap on the draw does not finish it")
+		ok(k.step == 0, "%s: a tap on LMB does not finish its hold" % hunter)
 	for st in k.plan:
 		var n := 2 if st["how"] == "again" else 1
 		for i in n:
@@ -81,7 +97,7 @@ func _walk(k: KitDrill, hunter: String) -> void:
 func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	var d := Save.fresh()
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
-	d["cls"] = "medium"
+	d["cls"] = Arch.weight(hunter)
 	d["arch"] = hunter
 	d["classes"] = ClassUnlock.legacy()
 	Save.d = d
