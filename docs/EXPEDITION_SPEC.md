@@ -207,3 +207,107 @@ their contents):
 
 Swap the estimates above for those values and re-flag this doc as
 measured. Until then: estimates.
+
+---
+
+## 13. Monster damage to Hunters (PvE, measured)
+
+Measured with `--mob-damage-check`. A Medium Hunter (145 health, classic kit, no Boki, full starting
+armour) stands still and never fights back. First they stand alone with each monster, then in each
+fixed camp mix Match spawns (light, normal, heavy), then in each lair with its boss awake. Health
+doesn't change what monsters do, so a single run gives both levels: the time the damage taken reaches
+level-1 health (145) and level-5 health (180, +6% a level, `content/rules/level_growth.json`). Each
+monster is the base kind: tier 0, no region, rarity or mutation. A knock that carries the Hunter more
+than 3 m is undone, as a Hunter holding the camp would walk back in. The match seed is fixed, so the
+rows repeat exactly from run to run. Each row is one run, so a small change in timing can shift a row
+by a few seconds.
+
+Our numbers per hit are the raw values in `Data.MOBS` (`scripts/core/data.gd`). Measured hits land
+20% lower while armour holds (`Hunter.ARMOR_DR`). Boss attacks scale their base value (`Boss.dmg`).
+
+| Monster / camp | Ours per hit (data) | Measured per hit | Measured per s | Falls, level 1 | Falls, level 5 | Source |
+|---|---|---|---|---|---|---|
+| Skitter | 9 | 7.2 | 3.7 | 40.2 s | 48.2 s | — |
+| Spitter | 11 | 8.4 | 2.8 | 54.4 s | 66.9 s | — |
+| Brute | 24 | 18.3 | 5.3 | 30.8 s | 34.8 s | — |
+| The Watcher (warden) | 30 | 24.0 | 8.2 | 20.5 s | 23.5 s | — |
+| Puffbomb (bomber) | 16, once (blows up) | 12.8 | one blast | never | never | — |
+| Sentinel | 8 | 8.4 | 3.6 | 37.5 s | 51.6 s | — |
+| Glimmerkin | 0 (flees) | 0 | 0 | never | never | — |
+| Light: 2 Skitter | | 7.2 | 5.6 | 26.4 s | 32.1 s | — |
+| Light: Spitter + Skitter | | 7.5 | 5.0 | 30.5 s | 35.9 s | — |
+| Light: Puffbomb + Skitter | | 7.4 | 4.1 | 35.5 s | 45.2 s | — |
+| Normal: Brute + Skitter + Puffbomb | | 12.6 | 7.7 | 20.7 s | 24.6 s | — |
+| Normal: Skitter + Puffbomb + Spitter | | 7.6 | 5.5 | 29.3 s | 33.4 s | — |
+| Normal: Sentinel + 2 Skitter | | 8.0 | 7.6 | 20.2 s | 24.3 s | — |
+| Heavy: Brute + Spitter + Skitter + Sentinel | | 13.7 | 9.7 | 16.2 s | 19.7 s | — |
+| The Stone Colossus | 26 base | 15.3 | 6.1 | 22.3 s | 30.3 s | ≈700 a hit, one attack (Soul Boss) [W] |
+| Stormcoil | 22 base | 16.0 | 4.9 | 29.4 s | 39.1 s | ≈700 a hit, one attack (Soul Boss) [W] |
+| The Brood Mother (and her adds) | 18 base | 5.7 | 10.3 | 13.2 s | 17.7 s | ≈700 a hit, one attack (Soul Boss) [W] |
+
+A camp never has more than two monsters on one Hunter at once (`Mob.MAX_ENGAGED`), so a 4-monster
+heavy camp hits about as hard as a 3-monster normal one.
+
+**Source column (2026-11-11).** — means the source publishes nothing on this. [W] is the wiki. The
+measured rows above are origin/main at 88b06b9e7. Where we looked:
+- `briefs/supervive-data`: the game-file pull covers Hunter attributes only, with no creature tables.
+- The wiki: Creeps, Normal Camps, Biome Leaders, Soul Bosses and Major Monsters (supervive.wiki.gg).
+  None gives a creature's health, damage or attack rate. They give only the camp makeup (3 small creeps
+  and 1 elite, back each day) and that a stagger takes 3x damage. There is one damage number: the Soul
+  Boss's phase-3 laser, charged and fired four ways, deals "roughly around 700" (Soul Bosses page,
+  edited 26 Jul 2024).
+- Patch notes (wiki Patch Open Beta; Steam): loot and XP for creeps were retuned, but no damage change.
+- The footage in briefs: training-range kit footage against dummies (docs/CAMP_PARITY.md on
+  ext/camp-parity says the same). The walkthroughs in docs/SUPERVIVE_DATA.md can't be fetched from the
+  workers (YouTube asks them to sign in).
+
+The source's base Hunter health is 1,290 for most Hunters, plus 77.4 a level (6%)
+(`briefs/supervive-data/supervive_physics.md`). Ours is 145 for a Medium plus 6% a level, so the
+curve matches, and so does the level-5 gain over level 1 (+24%). Source numbers run about 9x ours
+(1,290 / 145), so read source damage as a share of base health.
+
+The one boss number, at that scale: 700 / 1,290 is 54% of a Hunter's health in one telegraphed hit, or
+about 79 for our 145. Our heaviest boss hit is the Colossus slam: 26 base (18%), up to 47 (32%) when it
+is enraged in its last third (`Boss.dmg`: x1.5 enraged, +10% a phase). The source attack is a different
+move on a different boss, a jumpable four-way laser after a crystal phase, and none of our bosses has
+one. Rescaling an unrelated attack to fit it would be a design call, not parity. **So no monster or
+boss number was changed.** When a camp capture or a pull of the creature curve tables (the same install
+route as the Hunter pull) gives creature damage, fill the Source column, change `Data.MOBS` to match,
+and rerun `--mob-damage-check`.
+
+## 12. Camp clear pacing (PvE, measured)
+
+`--camp-clear-check` puts each of the 12 Hunters (bot-driven, normal kit use, no Boki summon) against a fresh camp at level 1 and level 5. Skitter camp = 2 Skitters, spitter camp = Spitter + Skitter, brute camp = Brute + Skitter + Puffbomb (the game's own comps). Each trial puts the hunter back on its landing spot and lets it rest 3 s. The camp spawns alerted, 6 m away on the same level and in line of sight, so the time is the fight, not the bot's walk. A cell is the median of 5 trials: time to clear / damage taken (hp). Seed 4242:
+
+| Hunter | ski L1 | spi L1 | bru L1 | ski L5 | spi L5 | bru L5 |
+|---|---|---|---|---|---|---|
+| gunslinger | 3.2s / 0 | 4.4s / 0 | 9.0s / 0 | 3.5s / 0 | 4.9s / 0 | 10.2s / 0 |
+| juggernaut | 2.4s / 7 | 2.2s / 0 | 3.8s / 19 | 2.0s / 7 | 2.7s / 7 | 1.9s / 7 |
+| ashwick | 9.9s / 7 | 10.3s / 0 | 11.4s / 0 | 8.1s / 0 | 6.2s / 0 | 10.8s / 0 |
+| tender | 5.4s / 0 | 6.4s / 7 | 13.1s / 12 | 4.9s / 0 | 8.3s / 0 | 10.3s / 0 |
+| dolm | 1.5s / 0 | 3.8s / 0 | 3.7s / 0 | 1.8s / 7 | 3.3s / 0 | 3.4s / 0 |
+| archer | 5.3s / 7 | 6.3s / 0 | 9.3s / 0 | 4.6s / 0 | 3.4s / 0 | 7.9s / 7 |
+| dredge | 3.2s / 0 | 5.0s / 0 | 6.8s / 26 | 2.2s / 0 | 3.1s / 0 | 6.4s / 19 |
+| rimewright | 4.8s / 0 | 6.8s / 0 | 7.3s / 0 | 5.4s / 0 | 3.9s / 0 | 3.6s / 0 |
+| mage | 4.0s / 0 | 4.5s / 0 | 6.6s / 0 | 3.7s / 0 | 3.8s / 8 | 5.1s / 0 |
+| bulwark | 11.1s / 35 | 19.6s / 39 | 15.9s / 57 | 3.2s / 14 | 19.4s / 16 | 22.6s / 70 |
+| thief | 3.7s / 0 | 4.1s / 0 | 6.8s / 19 | 2.9s / 0 | 2.3s / 0 | 5.6s / 0 |
+| ostra | 5.0s / 0 | 5.6s / 8 | 10.9s / 0 | 4.3s / 0 | 5.2s / 8 | 8.2s / 0 |
+
+Spread per camp and level, slowest median vs fastest:
+
+```
+skitter@1: slowest 11.1s vs fastest 1.5s (7.39x)
+spitter@1: slowest 19.6s vs fastest 2.2s (8.96x)
+brute@1:   slowest 15.9s vs fastest 3.7s (4.35x)
+skitter@5: slowest 8.1s vs fastest 1.8s (4.47x)
+spitter@5: slowest 19.4s vs fastest 2.3s (8.37x)
+brute@5:   slowest 22.6s vs fastest 1.9s (12.00x)
+```
+
+**Findings.** `briefs/supervive-data` has no creature hp or damage, so there is nothing to compare against. The proposed band is slowest no more than 1.6x the fastest. It is **not met**, and mob numbers can't meet it: with Skitter, Spitter, Brute and Puffbomb hp all doubled, the spread is still 4.7x to 7.2x. The gap is how the bots use the slow kits:
+- Bulwark's tap throws the hammer, which has to come back.
+- Ashwick's hose (27 dps, 7 m) is fired in the bot's on/off bursts for fast guns, from a heavy's 5.5 m, so it lands about half its damage.
+- Juggernaut and Dolm close in and cleave whole camps.
+
+Fixing this is bot-brain work (`scripts/match/bot.gd`: per-kit fire duty and preferred range), not mob or kit numbers. The check asserts that every Hunter clears every camp (median under 30 s) and a spread ratchet (`SPREAD_MAX` 14x). It prints the 1.6x target beside the ratchet. Lower `SPREAD_MAX` as the bots improve. Runs are deterministic per seed. The full check takes about 3 minutes; `--arch=<id>` runs one Hunter.
