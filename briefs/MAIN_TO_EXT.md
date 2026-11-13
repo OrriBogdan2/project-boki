@@ -1345,3 +1345,28 @@ Owner 11-11 "go integration": ext/release-integ-0245@2723685892 merged to main. 
 - **Player gets:** Limited Ways Out (Heart site + two Uplinks a map, quest seats, HUD strip, map badges, results; open extraction gone), the Chao-style garden core (26 branches), tutorial abilities course, Meeko orbit, Albert appeal, Cinder appeal4 bust, StatBudget + ZoneDress crash fixes.
 - **Gate:** docs/GATE_0245.md (NEW-REDs fixed or explained, in docs/DEBT.md); health --strict OK; export-pack rc 0. Net.VERSION 0.24.5.
 - **Checks to fix (owners):** teammate, new-player-flow, drop-feel, box-revive, revive-net, capture, kin-loss, carry-boki, minigame-hub, raising, lean, unmasked, warden-clips (see the gate's NEW-RED table).
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED fb360f614 (PR #39, no tag)
+Batch 1112 (ext/mc-integ-1112a + b2 + c2, 36 members) merged to main. Do NOT re-merge its members (list: PR #39, docs/GATE_1112c2.md). Branches stacked on any 1112 batch now only need main.
+- **Player gets:** capture bots, glide bank / relay handoff / whistle react anims, build UI sfx, show ring ribbon, Motley globe, visitor egg parent, garden clarity and declutter, teammate course, drop-feel row, raising arrive rank, Glint fishing anim, dex "found in", Statglint card, Lace spirit tint, Neve skate dart dmg and Rimelock bud, zone affinity, place clearance, Kael smash tell, dash into mantle, kit words cut, Heart reward gap, air knock, Boki table, ability dash rows, banner strip, Cinder rekey, Sable hair, parity reel tool, glider mesh once, bot ult Boki use, emit anchors.
+- **Dropped:** ext/meeko-call-noself: --dash-flow-check NEW-RED (`tender jump -> x: lost (row: fire)`; the trial casts Hearth Call alone and the new rule refuses it). Owner: give the dash_flow trial an ally (or a refused row), then re-post READY for Friday. ext/vfx-breakables is still parked (--ashwick-combo-check).
+- **Gate:** suite of all 257 flags vs main; every branch-only red was fixed, re-run green, or is red on main too. health --strict OK; export dry-run passed; real-GPU perf vs main shows no regression.
+- **Checks to fix (owners):** chore (wall-clock flake: base_chore egg and journal timers, fails on main 1 of 3), kin-indoors (load flake), hitch (shader compile during land, red on main).
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED 537fec145 (PR #40, ext/health-lint-1112, no tag)
+- **Devs get:** gdlint follows the official GDScript style guide (snake_case, class-definitions-order; old code grandfathered). `check.sh --changed` wants every .gd a new branch changes gdformat clean. gdformat batch 1 (50 files) and 9 shadowing renames landed. **Rebase/merge main before touching those files.** tools/format_batch.py picks the next batch.
+- **Gate: one stack (main fb360f614 + health-lint + health-py + wisp-clarity) vs main, full suite; every branch-only red re-run side by side with main (flaky or red on main too). Export dry-run passed; health --strict OK. Not run: --displace-net, --remote-anim, --remote-smooth, --revive-net, --online-displace (box Godot queue jammed by stale slot holders, see coord LOG 13:47Z).**
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED 0fa1778ed (PR #41, ext/health-py-1112, no tag)
+- **Devs get:** every argparse tool answers --help with no work at import; py_help_check runs in the CI unittest job (new tools need argparse + --help). tools/README.md: lint section, then Python scripts grouped by area; docs/CODE_HEALTH.md has the Python removal list.
+- **Gate:** same stack as PR #40 (tree byte-identical to the gated step).
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) SHIPPED 449fcaf48 (PR #42, ext/wisp-clarity-1112, no tag)
+- **Player gets:** downed Hunters show a compact wisp mark and their Boki ride them as wisps; ally and enemy views read apart. Tools: --wisp-clarity-shots.
+- **Gate:** main now equals the gated stack tree byte for byte; --check and --kin-wisp-form-check green after merge. --revive-net-check not run (Godot queue jam); rerun it once the queue is cleared.
+- **Held for Friday:** ext/pve-raid-1111 (see the next note). Branches stacked on it (combat-raid-balance, sfx-raid-cues) wait with it.
+
+## 2026-11-12 UTC integration lane (job 20261112-072413-a6) HELD ext/pve-raid-1111 (5cd2aef05) for Friday, not merged
+- **NEW-RED --feel-golden-check:** `gil crouch_walk: max drift 0.8-1.1 m` (main: 0.000 m). Bisected: pve-raid alone shows it, health-lint and wisp-clarity alone don't; the stack without pve-raid matches main (84/84). If the Series Boki modes change what gil runs with on purpose, re-record the golden row in the branch and say so in the READY.
+- **--heart-raid-check is too slow for the suite:** it passes alone (rc 0) but takes 3370 s on this box; suite-fast stops every check at 1200 s, so it is a timeout in every suite. Cut it under ~10 min (fewer or shorter SIMS by default, the long ones behind a flag like --sweep).
+- To re-offer: merge main in (DEBT.md conflicts again: keep both sides' rows), fix both, READY again. ext/combat-raid-balance and ext/sfx-raid-cues are stacked on it and wait with it.
