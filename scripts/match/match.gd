@@ -5272,6 +5272,8 @@ func _net_make(it: Array) -> Ent:
 				var bl := Blight.new()
 				bl.init_blight(self, nid, mk, Vector3(it[2], it[3], it[4]), float(it[19]) if it.size() > 19 else 0.1, blight)
 				mb = bl
+			elif mk in Data.BOSSES:
+				mb = BossNet.make(self, nid, mk, Vector3(it[2], it[3], it[4]))
 			elif mk == "shrubling":
 				mb = Shrubling.new()
 				(mb as Shrubling).init_shrub(self, nid, Vector3(it[2], it[3], it[4]))
@@ -5383,6 +5385,8 @@ func _net_ev(x, from: String) -> void:
 		return
 	var who: Ent = null
 	match String(x[0]):
+		"bat":
+			BossNet.net_in(self, x)
 		"zone":
 			HeroZones.net_in(self, x)
 		"disp":
