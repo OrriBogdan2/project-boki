@@ -8,8 +8,8 @@ var bad := 0
 const BAND := Vector2(0.85, 1.15)
 # Kael and Albert: body size stays under SIZE_MAX (a smaller cast member), and the nameplate keeps its
 # height per unit of size (PLATE_PER_SIZE m) so it rides over the model.
-const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.87}
-const PLATE_PER_SIZE := {"juggernaut": 2.74, "bulwark": 1.3}
+const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.40}
+const PLATE_PER_SIZE := {"juggernaut": 2.74, "bulwark": 1.87}
 
 func ok(cond: bool, what: String) -> void:
 	print("HBCHECK %s %s" % ["ok  " if cond else "FAIL", what])
