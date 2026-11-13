@@ -1,11 +1,11 @@
 shader_type canvas_item;
-// Behind a modal menu: the screen softly blurred, pulled toward night-blue, darker at the edges.
+// Behind a modal menu: the screen softly blurred, pulled toward void violet, painted dark at the edges.
 // Fade it with the node's modulate alpha (UI.show_backdrop does).
 
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear;
 uniform float radius = 2.6;                          // blur reach, in pixels per tap
-uniform vec4 tint : source_color = vec4(0.035, 0.04, 0.075, 0.58);
-uniform float vignette = 0.35;
+uniform vec4 tint : source_color = vec4(0.06, 0.025, 0.1, 0.62);     // pulled toward the void's violet
+uniform float vignette = 0.6;
 
 void fragment() {
 	float a = COLOR.a;

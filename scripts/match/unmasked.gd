@@ -36,6 +36,8 @@ const ROWS := [
 	["aura", "Aura", AURA, "Glowing specks that drift around you"],
 ]
 const HOLLOW_ROW := 5
+# ROWS a new player sees first (Sex, Shroud colour, Glow); "More looks..." opens the rest
+const FIRST_ROWS := [0, 4, 6]
 const VOID_SHADER := preload("res://shaders/void_face.gdshader")
 const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
 const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)

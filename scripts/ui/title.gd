@@ -44,7 +44,7 @@ const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
-const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
+const WEAPONS := {"thief": "arc_bolts", "gil": "swordfish", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -52,7 +52,7 @@ func _ready() -> void:
 	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("match")          # the wind
 	rng.seed = 2026
-	low = Settings.quality() == "low"
+	low = Settings.lite()
 	fx_k = float(Settings.q("fx"))
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--title-cam="):
@@ -431,6 +431,7 @@ func _build_ui() -> void:
 	root.name = "TitleUI"
 	ui.add_child(root)
 	root.add_child(TitleBackdrop.new())
+	root.add_child(VoidSpecks.new())       # void specks drifting over the key art
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom
 	var shade := TextureRect.new()
@@ -482,11 +483,12 @@ func _build_ui() -> void:
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
-	if has:
-		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
-		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
+	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	if has and Overlay.admin_allowed():
+		# the owner's filming match (Match.demo_opts): not a player's menu item
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+	if has:
+		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
@@ -500,13 +502,7 @@ func _build_ui() -> void:
 		if ch == logo: continue
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
-	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
-	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
-	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
-	root.add_child(ver)
-	# a small playtest chip low in the corner, clear of the splash's hero: the build and the Discord link
+	# bottom right: the build and the Discord link on a small chip, and how to drive the menu without a mouse
 	var news := UI.glass(8, 6)
 	news.name = "News"
 	news.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -528,6 +524,14 @@ func _build_ui() -> void:
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
+	var try_card := TryCard.build()
+	if try_card:
+		try_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		try_card.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		try_card.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		try_card.offset_right = -28; try_card.offset_bottom = -112
+		root.add_child(try_card)
+		UI.pop_in(try_card, 1.6)
 	b1.grab_focus()
 
 ## The menu's item labels in order (the main button first): read by --title-check.

@@ -342,7 +342,7 @@ const SHOTS := [
 		"bjorn_ult",
 		0.55,
 		6.0,
-		"Faultline wind-up: four cells to 16 m shown to everyone, the hammer overhead"
+		"Faultline wind-up: one outlined 16 m lane with a glowing crack, shown to everyone, the hammer overhead"
 	],
 	[
 		"ult_bjorn_slam",
@@ -352,14 +352,29 @@ const SHOTS := [
 		6.0,
 		"Key frame: the slam, gold light flooding the near cell, the streak setting off"
 	],
-	["ult_bjorn_impact", "bulwark", "bjorn_ult", 1.25, 6.0, "Impact: slabs heaving up cell by cell, the target thrown"],
+	[
+		"ult_bjorn_stun",
+		"bulwark",
+		"bjorn_ult",
+		0.95,
+		3.0,
+		"The racing fissure stuns the target: stun stars over its head"
+	],
+	[
+		"ult_bjorn_impact",
+		"bulwark",
+		"bjorn_ult",
+		1.25,
+		6.0,
+		"Impact: a column of light erupting cell by cell, the target thrown"
+	],
 	[
 		"ult_bjorn_scar",
 		"bulwark",
 		"bjorn_ult",
 		2.4,
 		6.0,
-		"After: the ember scar along the lane (10 s, slows foes on it)"
+		"After: the crack left as an ember scar along the lane (10 s, slows foes on it)"
 	],
 ]
 ## The owner playtest items of 2026-11-03 (--owner1103): captions open with the item number.
@@ -769,7 +784,6 @@ func _reset(hero: String) -> void:
 	P.dashes = P.max_dashes()
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO

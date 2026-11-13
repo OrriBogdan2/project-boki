@@ -1,8 +1,8 @@
 extends RefCounted
-## --loot-full-shots --shots-dir=<dir>: screenshots of looting with a full backpack (run under xvfb with a
+## --loot-full-shots --shots-dir=<dir> [--size=WxH]: screenshots of looting with a full backpack (run under xvfb with a
 ## renderer). 1: a deathbox beside the hold window (your backpack, the clicked thing held in red, Swap and
 ## Drop). 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
-## <dir>/captions.txt gets "file: caption" per file.
+## 4: a deathbox with gear (rarity names, better/worse arrows). <dir>/captions.txt gets "file: caption" per file.
 
 var main: Node
 var m: Match
@@ -15,6 +15,9 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--size="):
+			var wh := String(a).substr(7).split("x")
+			main.get_tree().root.size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
@@ -48,6 +51,17 @@ func run(main_node: Node) -> void:
 	m.hud.open_swap(m.wpicks[m.wpicks.size() - 1])
 	await _frames(8)
 	await _shot("ground_full", "A ground item with a full backpack: the incoming item outlined red above your things")
+	p.pack_cap = 8
+	p.gear[Gear.slot_on(p, "windstep_boots")] = {"id": "windstep_boots", "rar": 1}
+	var gb: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos, [Loot.valuable("sky_pearl")])
+	gb["gems"] = 40
+	gb["gear"] = [{"id": "windstep_boots", "rar": 4}, {"id": "windstep_boots", "rar": 0}]
+	m.boxes.append(gb)
+	m.hud.open_loot(gb)
+	await _frames(8)
+	await _shot("box_compare", "Deathbox with gear: names in rarity colour, slot and effect on one line, "
+		+ "a green better or red worse arrow against what you wear (tip shows it), Take best key from Settings")
+	m.hud.close_loot()
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for c in captions:
 		f.store_line(c)

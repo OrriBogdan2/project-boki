@@ -5,7 +5,7 @@ extends CanvasLayer
 
 signal closed
 
-const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+const SETTINGS_TABS := ["Gameplay", "Controls", "Audio", "Video", "Accessibility"]      # (+ Demo for the owner: settings_tabs)
 
 var root: Control
 var dim: ColorRect              # the blurred backdrop (UI.backdrop)
@@ -29,6 +29,7 @@ func _ready() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	root.add_child(MoveReadout.new())
 	# behind every overlay menu: the screen blurred and darkened, fading in and out
 	dim = UI.backdrop()
 	root.add_child(dim)
@@ -168,7 +169,7 @@ func _page(name: String, title_txt: String, width := 620.0, scroll := false) -> 
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if not was_open and Game.main:
 		var s = Game.main.screen_node()
-		if s and s.has_method("on_menu_opened"):
+		if s is Match:
 			s.on_menu_opened()
 	var pb := UI.scroll_panel(title_txt, width, back, "Back" if stack.size() > 0 else "Close", scroll)
 	host.add_child(pb[0])
@@ -186,6 +187,7 @@ func back() -> void:
 			"saves": open_saves()
 			"inventory": open_inventory()
 			"dex": open_dex(dex_open)
+			"bowl": open_bowl()
 			_: close()
 	else:
 		close()
@@ -209,41 +211,29 @@ func open_pause(where: String) -> void:
 	stack.clear()
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
-	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
-	var bw := 388.0
-	var item := func(txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
-		var b := UI.button(txt, cb, bw, icon)
-		if tier != "": b.theme_type_variation = tier
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		if key != "": UI.with_key(b, key)
-		v.add_child(b)
-		return b
-	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
+	var res: Button = _pause_item(v, "Resume", "next", close, "Esc", "Primary")
 	var psc = Game.main.screen_node() if where == "match" and Game.main else null
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
-		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+		_pause_item(v, "Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
 	if where != "match":
-		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
+		_pause_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
-		item.call("Training area", "jump", func():
+		_pause_item(v, "Training Grounds", "jump", func():
 			close()
 			Game.main.screen_node()._start_training())
-	item.call("Settings", "gear", func():
-		if tab == "Controls": tab = "Gameplay"
-		open_settings())
-	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
-	if where != "match":
-		item.call("Save files", "satchel", open_saves)
+	_pause_item(v, "Settings", "gear", open_settings)
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
+	if where != "match":
+		minor.add_child(UI.ghost("Save files", open_saves))
 	if where == "home":
 		minor.add_child(UI.ghost("Change your look", func():
 			close()
 			Game.goto("hatch", {"create": true})))
 	var scr = Game.main.screen_node() if Game.main else null
-	if scr and scr.has_method("unstick"):
+	if scr is Match or (scr and scr.has_method("unstick")):  # Home/Interior: no class_name
 		minor.add_child(UI.ghost("I'm stuck", func():
 			close()
 			scr.unstick()
@@ -260,18 +250,18 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			_pause_item(v, "Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
-			var lb: Button = item.call("Leave match", "back", func():
+			var lb: Button = _pause_item(v, "Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
-		item.call("Save and go to the main menu", "home", func():
+		_pause_item(v, "Save and go to the main menu", "home", func():
 			Save.save_game()
 			close()
 			RateCard.gate(root, func(): Game.goto("title")))
 	if not OS.has_feature("web"):
-		var q: Button = item.call("Save and quit the game", "close", func():
+		var q: Button = _pause_item(v, "Save and quit the game", "close", func():
 			Save.save_game()
 			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
@@ -281,15 +271,19 @@ func open_pause(where: String) -> void:
 func open_settings() -> void:
 	_show_settings()
 
+## The tabs: the player's five, and Demo (filming) for the owner.
+func settings_tabs() -> Array:
+	return SETTINGS_TABS + (["Demo"] if admin_allowed() else [])
+
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
-	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
+	if not settings_tabs().has(tab): tab = "Gameplay"
+	UI.shell_tabs(v, settings_tabs(), tab, func(t):
 		tab = t
 		_show_settings())
 	match tab:
 		"Gameplay": _tab_gameplay(v)
 		"Controls": _tab_controls(v)
-		"Camera": _tab_camera(v)
 		"Audio": _tab_audio(v)
 		"Video": _tab_video(v)
 		"Accessibility": _tab_access(v)
@@ -318,12 +312,21 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_toggle(v, "Damage numbers", "damage_numbers", "Numbers pop up where your hits land")
 	_toggle(v, "Tips during expeditions", "tips", "Short hints about what's around you")
 	_reticle_rows(v)
+	_group(v, "Camera")
+	var styles: Array = CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]])
+	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
+	var follow := [["supervive", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
+	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
+	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
+	var wisp_hint := "In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. " \
+		+ "Off: it walks beside you"
+	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
-		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 90 s lobby before each expedition. Off: plain loading")
+		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
 func _tab_controls(v: VBoxContainer) -> void:
@@ -331,12 +334,14 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
+	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
+	_toggle(v, "Movement readout", "move_readout", readout_tip)
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
-			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
-			"util1", "util2", "util3", "util4", "base",
-		]],
+			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
+			"util1", "util2", "util3", "util4", "util5", "util6", "base",
+		] + KinKeys.ids()],
 		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
@@ -355,15 +360,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 		_group(v, "Other")
 		for a in rest:
 			_bind_row(v, String(a[0]), String(a[1]))
-	_note(v, "Esc always opens the menu. Your gun also reloads by itself when you stop shooting.")
-
-func _tab_camera(v: VBoxContainer) -> void:
-	_group(v, "View")
-	var styles: Array = CamRig.STYLES.keys().map(func(k): return [k, CamRig.STYLES[k]["name"]])
-	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
-	var follow := [["supervive", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
-	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
-	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
+	_note(v, "Esc always opens the menu.")
 
 func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Volume")
@@ -411,7 +408,11 @@ func _tab_video(v: VBoxContainer) -> void:
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
+	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
+	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
+	_choice(v, "Colour vision", SideColor.KEY, palettes, Callable(),
+		"Swaps the colours that tell you, your squad and rivals apart. Ability colours stay")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")
@@ -473,7 +474,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 func _group(v: VBoxContainer, txt: String) -> void:
 	if v.get_child_count() > 0:
 		v.add_child(UI.spacer(4))
-	v.add_child(UI.section(txt, UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section(txt))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
 func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
@@ -501,6 +502,9 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
 		if code == "" and slot == 1:
 			b.modulate = Color(1, 1, 1, 0.55)
+		elif Settings.unbound(an):
+			for c in ["font_color", "font_hover_color", "font_pressed_color"]: b.add_theme_color_override(c, UI.BAD)
+			b.tooltip_text = "No key: this action can't be used until you set one"
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -587,109 +591,94 @@ func _finish_rebind(ev: InputEvent) -> void:
 		Settings.rebind(an, ev, slot)
 		_show_settings()
 		return
-	# already someone else's key: say whose, and offer to swap (they get what this slot had)
+	# already someone else's key: say whose, and offer to swap (they take what this slot had) or cancel
 	var named := {}
-	for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
-	var other: String = cf[0][0]; var oslot: int = cf[0][1]
+	for a in Settings.ACTIONS: named[String(a[0])] = "\"%s\"" % a[1]
+	var owners: Array = cf.map(func(c): return named.get(c[0], c[0]))
 	var mine: String = Settings.slots(an)[slot]
-	var key_txt := Settings.code_text(Settings.ev_code(ev))
-	var oname := "\"%s\"" % named.get(other, other)
-	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
+	var txt := "%s is already the key for %s.\nSwap: they take %s, and this action gets %s." % [
+			Settings.code_text(Settings.ev_code(ev)), " and ".join(owners),
+			Settings.code_text(mine) if mine != "" else "no key (they are marked red until you set one)",
+			Settings.code_text(Settings.ev_code(ev))]
 	_show_settings()
-	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
-		Settings.swap_bind(an, slot, ev, other, oslot)
-		_show_settings(), false)
-	set_meta("bind_conflict", layer)
-	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
-	var both := UI.ghost("Use for both", func():
-		layer.queue_free()
-		Settings.rebind(an, ev, slot)
-		_show_settings())
-	row.add_child(both)
-	row.move_child(both, 1)
+	set_meta("bind_conflict", UI.confirm(root, "Key already in use", txt, "Swap", func():
+		Settings.swap_bind(an, slot, ev, cf)
+		_show_settings(), false))
 
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
 const INV_H := 404.0          # the inventory's body height on every tab (fits a 720p window)
-var dex_open := ""            # the species whose Field Book page is open
+var dex_open := ""            # the species (or shaping item) whose Field Book page is open
 
-## A Boki's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
+## A Boki's or shaping item's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
 func open_dex(spk: String) -> void:
 	dex_open = spk
 	var v := _page("dex", "Field Book", 760)
 	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
-	DexView.detail(v, spk, get_tree())
+	if GardenItems.has(spk):
+		ItemPages.detail(v, spk)
+	else:
+		DexView.detail(v, spk, get_tree(), open_dex)
+
+## The Mixing Bowl, from the Items tab (a sub-page of the inventory).
+func open_bowl() -> void:
+	var v := _page("bowl", "Mixing Bowl", 760, true)
+	MixingBowl.fill(v, open_bowl)
 
 func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
 	if inv_tab == "Items":      # one currency, and only where it matters
 		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
-	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
-	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Field Book"], inv_tab, func(t):
+	UI.shell_tabs(v, ["Items", "Farm", "Kin", "Field Book"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())
 	var grid := GridContainer.new(); grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
 	v.add_child(grid)
-	var cell := func(title_txt: String, count_txt: String, desc: String, col: Color, action_txt := "", action := Callable(), icon := "") -> void:
-		var c := UI.card(UI.CARD, 12, 12)
-		c.custom_minimum_size = Vector2(222, 0)
-		var cv := UI.vbox(6); c.add_child(cv)
-		var top := UI.hbox(10)
-		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
-		top.add_child(dot)
-		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
-		tc.add_child(tl)
-		if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
-		top.add_child(tc)
-		cv.add_child(top)
-		if desc != "":
-			var dl := UI.para(desc, 12, UI.MUTED)
-			cv.add_child(dl)
-		if action.is_valid():
-			cv.add_child(UI.button(action_txt, action))
-		grid.add_child(c)
 	var empty := true
 	match inv_tab:
 		"Items":
 			empty = false
-			cell.call("Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
-			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
+			_inv_cell(grid, "Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
+			_inv_cell(grid, "Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
-				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+				if fn > 0: _inv_cell(grid, Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+			for id in GardenItems.ids():
+				var held := int(Save.d["items"].get(id, 0))
+				if held > 0:
+					_inv_cell(grid, GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
+			if FarmUnlocks.base_mode():
+				_inv_cell(grid, "Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
+						"Open", open_bowl)
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
-				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
-		"Seeds":
+				_inv_cell(grid, "Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
+		"Farm":      # seeds, crops and furniture on one page: they are few and all come from the farm
 			for k in Data.CROPS:
 				var n := int(Save.d["seeds"].get(k, 0))
 				if n <= 0: continue
 				empty = false
-				cell.call(Data.CROPS[k]["name"] + " seed", "×%d" % n, "Plant it in a farm plot.", Data.CROPS[k]["color"])
-		"Crops":
+				_inv_cell(grid, Data.CROPS[k]["name"] + " seed", "×%d" % n, "Plant it in a farm plot.", Data.CROPS[k]["color"])
 			for k in Data.CROPS:
 				var n := int(Save.d["crops"].get(k, 0))
 				if n <= 0: continue
 				empty = false
 				var ck: String = k
-				cell.call(Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
+				_inv_cell(grid, Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
-					for af in Evo.AFF:
-						if Evo.AFF[af]["food"] == ck: Evo.add(ak, af, 6.0)
+					CareJournal.fed(ak, ck, Evo.eat(ak, ck))
 					Save.remember(ak, "fed", "was fed a %s" % Data.CROPS[ck]["name"].to_lower(), 4.0)
 					Sfx.play("kin_happy")
 					Save.save_game()
 					open_inventory())
-		"Furniture":
 			for k in Data.FURN:
 				var n := int(Save.d.get("furniture", {}).get(k, 0))
 				if n <= 0: continue
 				empty = false
-				cell.call(Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press B.", Color("c99a6a"))
+				_inv_cell(grid, Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press B.", Color("c99a6a"))
 		"Kin":
 			for rec in Save.d["roster"]:
 				empty = false
@@ -699,10 +688,11 @@ func open_inventory() -> void:
 			empty = false
 			grid.queue_free()
 			DexView.grid(v, get_tree(), func(spk: String): open_dex(spk))
+			ItemPages.grid(v, func(id: String): open_dex(id))
 	if empty:
-		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
-			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
-		v.add_child(UI.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
+		var es: Array = {"Farm": ["Nothing from the farm yet", "Seeds come from expeditions and the stall; crops from your plots; furniture you put away lands here."],
+			"Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
+		v.add_child(UI.empty_state(String(INV_ICON.get(inv_tab, "gem")), es[0], es[1]))
 
 ## A Boki in the inventory's Boki tab: its portrait, name with its sex, level, form and bond.
 func _boki_card(rec: Dictionary) -> Control:
@@ -724,7 +714,6 @@ func _boki_card(rec: Dictionary) -> Control:
 # ------------------------------------------------------------------ save files
 func open_saves() -> void:
 	var v := _page("saves", "Save files", 640, true)
-	UI.subtitle(v, "Each save has its own island, Boki and gems. Settings are shared.")
 	var first: Button = null
 	for n in range(1, Save.SLOTS + 1):
 		var info := Save.slot_info(n)
@@ -763,8 +752,7 @@ func open_saves() -> void:
 			del.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			h.add_child(del)
 		else:
-			col.add_child(UI.label("Empty slot", UI.T_HEAD, UI.MUTED, UI.big))
-			col.add_child(UI.label("Start a new story here", UI.T_SMALL, UI.FAINT))
+			col.add_child(UI.label("Empty", UI.T_HEAD, UI.MUTED, UI.big))
 			var nb := UI.button("New game", func(): _play_slot(sn), 120, "plus")
 			nb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			h.add_child(nb)
@@ -810,64 +798,57 @@ func open_admin() -> void:
 	var grid := GridContainer.new(); grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
 	v.add_child(grid)
-	var add := func(txt: String, f: Callable):
-		var b := UI.button(txt, func():
-			f.call()
-			Sfx.play("pickup")
-			Save.save_game()
-			_admin_refresh(), 290)
-		grid.add_child(b)
-	add.call("+1000 gems", func(): Save.d["gems"] = int(Save.d["gems"]) + 1000)
-	add.call("+10 of every seed", func():
+	_admin_add(grid, "+1000 gems", func(): Save.d["gems"] = int(Save.d["gems"]) + 1000)
+	_admin_add(grid, "+10 of every seed", func():
 		for s in Data.CROPS: Save.add_seed(s, 10))
-	add.call("+5 of every crop", func():
+	_admin_add(grid, "+5 of every crop", func():
 		for s in Data.CROPS: Save.d["crops"][s] = int(Save.d["crops"].get(s, 0)) + 5)
-	add.call("+5 tonics", func(): Save.add_item("tonic", 5))
-	add.call("Partner +1 level", func():
+	_admin_add(grid, "+5 tonics", func(): Save.add_item("tonic", 5))
+	_admin_add(grid, "Partner +1 level", func():
 		var k := Save.active_kin()
 		if not k.is_empty():
-			k["level"] = int(k["level"]) + 1
+			Evo.level_up(k)
 			Game._evolve(k, {}))
-	add.call("Partner full trust", func():
+	_admin_add(grid, "Partner full trust", func():
 		var k := Save.active_kin()
 		if not k.is_empty(): k["trust"] = 100.0)
-	add.call("Grow every crop now", func():
+	_admin_add(grid, "Grow every crop now", func():
 		for arr in ["plots", "gh_plots"]:
 			for p in Save.d.get(arr, []):
 				if p["crop"] != "":
 					p["stage"] = int(Data.CROPS[p["crop"]]["grow"])
 					p["care"] = p["stage"]
 		if c == "home": _reload_home())
-	add.call("Unlock every building and bridge", func():
+	_admin_add(grid, "Unlock every building and bridge", func():
 		for b in Data.BUILDINGS:
 			if not Save.d["buildings"].has(b): Save.d["buildings"].append(b)
 		for i in Data.ISLES:
 			if not Save.d["bridges"].has(i): Save.d["bridges"].append(i)
 		Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10)
 		if c == "home": _reload_home())
-	add.call("Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
-	add.call("Replay the tutorials", func(): Save.d["tutorial"] = {})
+	_admin_add(grid, "Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
+	_admin_add(grid, "Replay the tutorials", func(): Save.d["tutorial"] = {})
 	var spawn := UI.button("Spawn a Boki…", open_spawn_kin, 290)
 	grid.add_child(spawn)
 	if c == "home":
 		var h = Game.main.screen_node()
-		add.call("Morning", func(): h.day_t = 0.27)
-		add.call("Night", func(): h.day_t = 0.95)
-		add.call("Rain on / off", func():
+		_admin_add(grid, "Morning", func(): h.day_t = 0.27)
+		_admin_add(grid, "Night", func(): h.day_t = 0.95)
+		_admin_add(grid, "Rain on / off", func():
 			h.raining = not h.raining
 			h.weather_t = 999.0 if h.raining else 60.0
 			h.rain.emitting = h.raining)
 	if c == "match":
 		var m = Game.main.screen_node()
-		add.call("Ultimate and ability ready", func():
+		_admin_add(grid, "Ultimate and ability ready", func():
 			if m.player:
 				m.player.ult = 1.0; m.player.sig_cd = 0.0)
-		add.call("Defeat every monster", func():
+		_admin_add(grid, "Defeat every monster", func():
 			for mb in m.mobs:
 				if not mb.dead: mb.hurt(99999.0, m.player, {}))
-		add.call("Exits ready now", func():
+		_admin_add(grid, "Exits ready now", func():
 			if m.exits: m.exits.admin_ready())
-		add.call("Extract now", func():
+		_admin_add(grid, "Extract now", func():
 			if m.player and not m.player.out:
 				close()
 				m._extract(m.player))
@@ -910,7 +891,7 @@ func open_spawn_kin() -> void:
 			Save.save_game()
 			Sfx.play("unlock")
 			var s = Game.main.screen_node() if Game.main else null
-			if s and s.has_method("_spawn_kin"):
+			if s and s.has_method("_spawn_kin"):  # Home/Interior, see unstick
 				s._spawn_kin()
 			_admin_refresh(), 196)
 		b.add_theme_color_override("font_color", Data.KIN[sid]["color"])
@@ -926,9 +907,48 @@ func _admin_refresh() -> void:
 		var k := Save.active_kin()
 		(st as Label).text = "%d gems · partner %s level %d, trust %d" % [int(Save.d["gems"]), k.get("name", "none"), int(k.get("level", 0)), int(k.get("trust", 0))]
 	var s = Game.main.screen_node() if Game.main else null
-	if s and s.has_method("_refresh_top"):
+	if s and s.has_method("_refresh_top"):  # Home only
 		s._refresh_top()
 
 func _reload_home() -> void:
 	close()
 	Game.goto("home")
+
+const INV_ICON := {"Items": "tonic", "Farm": "seed", "Kin": "paw", "Field Book": "egg"}
+
+func _pause_item(v: Control, txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
+	var b := UI.button(txt, cb, 388.0, icon)
+	if tier != "": b.theme_type_variation = tier
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	if key != "": UI.with_key(b, key)
+	v.add_child(b)
+	return b
+
+func _inv_cell(grid: GridContainer, title_txt: String, count_txt: String, desc: String, col: Color,
+		action_txt := "", action := Callable(), icon := "") -> void:
+	var c := UI.card(UI.CARD, 12, 12)
+	c.custom_minimum_size = Vector2(222, 0)
+	var cv := UI.vbox(6); c.add_child(cv)
+	var top := UI.hbox(10)
+	var dot := UI.badge(icon if icon != "" else String(INV_ICON.get(inv_tab, "gem")), col, 36.0)
+	top.add_child(dot)
+	var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
+	tc.add_child(tl)
+	if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
+	top.add_child(tc)
+	cv.add_child(top)
+	if desc != "":
+		var dl := UI.para(desc, 12, UI.MUTED)
+		cv.add_child(dl)
+	if action.is_valid():
+		cv.add_child(UI.button(action_txt, action))
+	grid.add_child(c)
+
+func _admin_add(grid: GridContainer, txt: String, f: Callable) -> void:
+	var b := UI.button(txt, func():
+		f.call()
+		Sfx.play("pickup")
+		Save.save_game()
+		_admin_refresh(), 290)
+	grid.add_child(b)

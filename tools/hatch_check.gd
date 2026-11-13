@@ -4,8 +4,9 @@ extends RefCounted
 ## around, turns to look at you and bounces, all inside 2.5 s after the pop, and the shell throws no bursts, rings or flashes. The closer look after
 ## it (KinReveal) has no flash, rays, fanfare or rarity colours: the Boki finds you and calls to you,
 ## and only then can it be named. A shimmer shows as a faint sparkle on the Boki itself, a rare one
-## gets a plain provenance line. Then the first Relic (MaskMoment): after naming the Boki, with no pick, Vex's
-## Relic drifts to you, "Put on the Relic" (the interact key) puts it on and you become her; a short look at her
+## gets a plain provenance line. Then the first Relic: after naming the
+## Boki, a pick of Lace, Kael or Vex (HobOffer), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
+## Relic" (the interact key) puts it on and you become that Hunter; a short look at their
 ## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). Never touches the real save.
 
 var bad := 0
@@ -113,11 +114,138 @@ func run(m: Node) -> void:
 	while not named["go"] and Time.get_ticks_msec() - t0 < 3000:
 		await tree.process_frame
 	ok(named["go"], "Name it hands over to naming")
+	await _creator_rows(tree)
+	await _egg_cards(tree)
 	await _first_mask(tree)
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
-# ---------------------------------------------------------------- 3. the first Relic
+# ---------------------------------------------------------------- 3. the creator
+## A new player sees Sex, Shroud colour and Glow; "More looks..." opens the other rows; the menu's creator has them all.
+func _creator_rows(tree: SceneTree) -> void:
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	ok(hx.stage == "create", "a new game opens the creator (stage %s)" % hx.stage)
+	var shown := func(): return Unmasked.ROWS.filter(func(r): return _texts(hx.create_box).has(r[1]))
+	var first: Array = Unmasked.FIRST_ROWS.map(func(r): return Unmasked.ROWS[r])
+	ok(shown.call() == first and first.size() == 3, "first it shows 3 rows: body, colour, glow")
+	var more := _find_button(hx.create_box, "More looks...")
+	ok(more != null, "with a More looks... button")
+	if more == null:
+		hx.queue_free()
+		return
+	more.pressed.emit()
+	for i in 4: await tree.process_frame
+	ok(shown.call() == Unmasked.ROWS and _find_button(hx.create_box, "More looks...") == null,
+		"it opens all %d rows and the button goes" % Unmasked.ROWS.size())
+	await _polish(tree, hx)
+	hx.queue_free()
+	await tree.process_frame
+	var menu = load("res://scripts/ui/hatch.gd").new()
+	menu.edit_only = true
+	main.add_child(menu)
+	for i in 4: await tree.process_frame
+	ok(Unmasked.ROWS.all(func(r): return _texts(menu.create_box).has(r[1])), "the menu's creator has every row")
+	menu.queue_free()
+	await tree.process_frame
+
+## Dice, undo and redo, starter presets, and the wheel zoom.
+func _polish(tree: SceneTree, hx) -> void:
+	var card: CreatorCard = hx.create_box
+	var dice := _all(card, func(n): return n is Button and n.has_meta("die"))
+	ok(dice.size() == Unmasked.ROWS.size(), "every row has its own die (%d)" % dice.size())
+	var before: Dictionary = card.look.duplicate(true)
+	(dice[3] as Button).pressed.emit()
+	var key: String = Unmasked.ROWS[3][0]
+	var moved := Unmasked.ROWS.filter(func(r): return card.look[r[0]] != before[r[0]])
+	ok(moved.size() == 1 and moved[0][0] == key, "a die changes only its own row")
+	ok(hx.look[key] == card.look[key], "and the preview follows")
+	card.undo()
+	ok(card.look == before, "Undo puts the row back")
+	card.redo()
+	ok(card.look[key] != before[key], "Redo takes it forward again")
+	card.undo()
+	card.undo()
+	ok(card.look == before, "undo is one step: a second Undo does nothing")
+	var names: Array = CreatorCard.PRESETS.keys()
+	ok(names.size() == 6 and names.all(func(nm): return _find_button(card, nm) != null), "6 starter presets in More")
+	var sex: int = card.look["gender"]
+	_find_button(card, names[2]).pressed.emit()
+	var want: Dictionary = CreatorCard.PRESETS[names[2]]
+	var same := want.keys().all(func(k): return card.look[k] == want[k])
+	ok(same and card.look["gender"] == sex, "a preset sets the look and keeps Sex")
+	ok(card.look == Unmasked.clean(card.look), "every preset value is in its list")
+	await tree.process_frame
+	var vis: Rect2 = card.get_viewport_rect()
+	ok(vis.encloses(card.get_global_rect()) and card.size.y <= 660.0,
+		"with every row open the card fits a 1280x720 screen (%d tall)" % card.size.y)
+	hx.zoom = 0.0
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
+	wheel.pressed = true
+	for i in 8: hx._unhandled_input(wheel)
+	for i in 30: await tree.process_frame
+	ok(hx.zoom == 1.0 and hx.cam_to.z < CreatorCam.FAR_CAM.z - 1.0, "the wheel zooms in to the face")
+
+func _all(n: Node, pred: Callable) -> Array:
+	var out: Array = [n] if pred.call(n) else []
+	for ch in n.get_children():
+		out.append_array(_all(ch, pred))
+	return out
+
+func _find_button(n: Node, text: String) -> Button:
+	for b in n.find_children("*", "Button", true, false):
+		if (b as Button).text == text:
+			return b
+	return null
+
+# ---------------------------------------------------------------- 4. the egg pick: who is in each egg
+func _card_text(card: Node, node_name: String) -> String:
+	var n: Node = card.find_child(node_name, true, false)
+	if n is Label: return (n as Label).text
+	return " ".join(n.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)) if n else ""
+
+func _egg_cards(tree: SceneTree) -> void:
+	tree.root.size = Vector2i(1280, 720)
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	Save.d["look"] = Unmasked.default_look()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	hx._looks_good()
+	var secret: String = hx.egg_defs[3]["species"]
+	ok(hx.stage == "pick" and secret != "mystery" and Data.KIN.has(secret),
+		"the mystery egg's species is rolled when the pick opens (%s)" % secret)
+	var cards: Array = hx.bottom.get_child(0).get_children()
+	ok(cards.size() == 4, "four egg cards, each with its Boki's name line (%d)" % cards.size())
+	for i in mini(cards.size(), 4):
+		var sp: String = hx.egg_defs[i]["species"]
+		var type_line := "%s type" % DexView.type_name(DexView.type_of(sp))
+		var card: Node = cards[i]
+		var pic: CanvasItem = card.find_child("Picture", true, false)
+		var all_text := " ".join(card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text))
+		ok(_card_text(card, "TypeChip") == type_line, "card %d shows its type '%s'" % [i, type_line])
+		if i < 3:
+			var boki_name := String(Data.KIN[sp]["name"])
+			ok(_card_text(card, "BokiName") == boki_name, "starter card %d shows its Boki's name (%s)" % [i, sp])
+			ok(pic != null and pic.modulate.get_luminance() > 0.5, "starter card %d's picture is in full colour" % i)
+		else:
+			var secret_name := String(Data.KIN[sp]["name"])
+			var shown_name := _card_text(card, "BokiName")
+			ok(shown_name == "???" and not all_text.contains(secret_name), "the mystery card has no name")
+			ok(pic != null and pic.modulate.is_equal_approx(DexView.SILHOUETTE), "the mystery card shows a silhouette")
+	hx._pick(3)
+	hx._pick(3)
+	ok(hx.stage == "warm" and hx.egg_defs[3]["species"] == secret and (hx.eggs[3]["egg"] as EggHatch).species == secret,
+		"the egg that hatches is the species the card showed (%s)" % secret)
+	hx.queue_free()
+	await tree.process_frame
+
+# ---------------------------------------------------------------- 5. the first Relic
 func _first_mask(tree: SceneTree) -> void:
 	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
 	Save.d = Save.fresh()
@@ -133,8 +261,31 @@ func _first_mask(tree: SceneTree) -> void:
 	hx.kin_node = kin
 	hx.chosen = 0
 	hx._finish("cindle", "Ember", "Orri", true)
+	await tree.process_frame
+	var cards: Array = hx.ui.find_children("*", "PanelContainer", true, false).filter(
+			func(c): return c.has_meta("mask_card"))
+	var offered: Array = cards.map(func(c): return String(c.get_meta("mask_card")))
+	ok(hx.stage == "mask" and offered == ["archer", "juggernaut", "gunslinger"] and ClassUnlock.needs_starters(),
+		"naming the Boki leads to the pick of Lace, Kael and Vex (%s)" % str(offered))
+	var worn: Array = hx.get_children().filter(func(c): return c is MaskMoment)
+	ok(worn.is_empty() and not ClassUnlock.choose_starters(["thief"]),
+		"nothing is worn before the pick, and no one else can be picked")
+	cards[2].mouse_entered.emit()      # (Vex's card in focus: the Take button takes him)
+	for arg in OS.get_cmdline_user_args():      # --shots-dir=<dir>: the pick screen as hatch_pick.png
+		if String(arg).begins_with("--shots-dir="):
+			cards[0].mouse_entered.emit()
+			if main.fade:
+				main.fade.reveal(0.05)
+			await tree.create_timer(1.5).timeout
+			var dir := String(arg).substr(12)
+			DirAccess.make_dir_recursive_absolute(dir)
+			tree.root.get_texture().get_image().save_png(dir.path_join("hatch_pick.png"))
+			cards[2].mouse_entered.emit()
+	var picker: Array = hx.ui.find_children("*", "Button", true, false).filter(
+			func(b): return (b as Button).text == "Take Vex")
+	picker[0].emit_signal("pressed")
 	var moments: Array = hx.get_children().filter(func(c): return c is MaskMoment)
-	ok(hx.stage == "mask" and moments.size() == 1, "naming the Boki leads into the Relic moment, not the match")
+	ok(moments.size() == 1, "taking one leads into the Relic moment, not the match")
 	if moments.is_empty():
 		hx.queue_free()
 		return

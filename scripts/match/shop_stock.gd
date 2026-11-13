@@ -1,14 +1,15 @@
 class_name ShopStock
 extends RefCounted
 ## What a vendor sells and how a sale works (content/rules/shops.json). A stock is a list of rows
-## {id, rar, left}: id is a utility item id, "repair", "armor_up", "backpack", "boots:<gear id>" or
-## "perk:<perk id>". The stock is fixed per shop theme, the same in every match and in every game;
-## only `left` changes, and online the host keeps that count (Shops).
+## {id, rar, k, left}: id is a utility item id, "repair", "armor_up", "backpack", "gear:<gear id>" (gloves,
+## armor or boots) or "perk:<perk id>"; k is the theme's price multiplier. The stock is fixed per shop
+## theme, the same in every match and in every game; only `left` changes, and online the host keeps
+## that count (Shops).
 ##
 ## For other parts: ShopStock.price(h, row), can_buy(h, row) (a reason, "" when fine), owned(h, row)
 ## and sell(h, row) (takes the gems, hands over the item; true on success).
 
-const BROKE := "Not enough gems"      # can_buy's reason when the price is more than the hunter's gems
+const NO_GEMS := "Not enough gems"      # can_buy's reason when the price is more than the hunter's gems
 
 static var _rules: Dictionary = {}
 
@@ -36,17 +37,19 @@ static func all_entries() -> Array:
 ## The stock a vendor of this theme starts every match with: its whole `sells` list.
 static func stock_of(theme_id: String) -> Array:
 	var rows: Array = []
-	for e in theme(theme_id).get("sells", []):
-		rows.append(_row(String(e)))
+	var th := theme(theme_id)
+	for e in th.get("sells", []):
+		rows.append(_row(String(e), th))
 	return rows
 
-static func _row(entry: String) -> Dictionary:
+static func _row(entry: String, th: Dictionary) -> Dictionary:
 	var rs := rules()
 	var kind := kind_of(entry)
-	var rar: int = int(rs.get("boots_rar", 1)) if kind == "boots" else 0
-	return {"id": entry, "rar": rar, "left": int((rs.get("left", {}) as Dictionary).get(kind, 1))}
+	var rar: int = int(th.get("gear_rar", rs.get("gear_rar", 1))) if kind == "gear" else 0
+	return {"id": entry, "rar": rar, "k": float(th.get("price_k", 1.0)),
+		"left": int((rs.get("left", {}) as Dictionary).get(kind, 1))}
 
-## "util", "repair", "armor_up", "backpack", "boots" or "perk".
+## "util", "repair", "armor_up", "backpack", "gear" or "perk".
 static func kind_of(entry: String) -> String:
 	if entry.contains(":"):
 		return entry.get_slice(":", 0)
@@ -64,18 +67,30 @@ static func name_of(row: Dictionary) -> String:
 		"repair": return "Field repair"
 		"armor_up": return "Armor upgrade"
 		"backpack": return "Backpack upgrade"
-		"boots": return "%s  (%s)" % [String(Gear.ALL[r]["name"]), String(Data.RARITY[int(row["rar"])]["name"])]
+		"gear": return "%s  (%s)" % [String(Gear.ALL[r]["name"]), String(Data.RARITY[int(row["rar"])]["name"])]
 		_: return String(Data.PERKS[r]["name"])
 
-static func desc_of(row: Dictionary) -> String:
+## The row's one plain line, from live data: where the hunter stands now for upgrades, what it does
+## (and how many they carry) for everything else.
+static func line_of(h, row: Dictionary) -> String:
 	var r := ref(String(row["id"]))
+	var n := owned(h, row)
 	match kind_of(String(row["id"])):
-		"util": return String(UtilityBelt.def(r).get("desc", ""))
-		"repair": return "Armor back to full, on the spot."
-		"armor_up": return "Raises your armor to its next tier (more plates)."
-		"backpack": return "A bigger pack: more room for what you carry home."
-		"boots": return Gear.desc_of(r, int(row["rar"]))
-		_: return String(Data.PERKS[r]["desc"])
+		"repair": return "Armor %d/%d. Back to full on the spot." % [int(h.armor), int(h.max_armor)]
+		"armor_up":
+			var top := Hunter.ARMOR_TIERS.size() - 1
+			var next := String(Hunter.ARMOR_TIERS[mini(n + 1, top)][0])
+			return _next_line(String(Hunter.ARMOR_TIERS[n][0]), n < top, "%s armor" % next)
+		"backpack": return _next_line(Backpacks.name_of(n), n < Backpacks.top(), Backpacks.label(n + 1))
+		"gear": return ("Worn. " if n > 0 else "") + Gear.desc_of(r, int(row["rar"]))
+		"util": return _carried(n, String(UtilityBelt.def(r).get("desc", "")))
+		_: return _carried(n, String(Data.PERKS[r]["desc"]))
+
+static func _next_line(now: String, more: bool, next: String) -> String:
+	return "Now %s. Next: %s." % [now, next] if more else "Now %s, the top tier." % now
+
+static func _carried(n: int, desc: String) -> String:
+	return desc if n == 0 else "You have %d. %s" % [n, desc]
 
 static func icon_of(row: Dictionary) -> String:
 	var r := ref(String(row["id"]))
@@ -84,22 +99,26 @@ static func icon_of(row: Dictionary) -> String:
 		"repair": return "anvil"
 		"armor_up": return "brightshield"
 		"backpack": return "satchel"
-		"boots": return Gear.icon_of(r)
+		"gear": return Gear.icon_of(r)
 		_: return String(Data.PERKS[r]["icon"])
 
 static func col_of(row: Dictionary) -> Color:
 	var r := ref(String(row["id"]))
 	match kind_of(String(row["id"])):
 		"util": return UtilityBelt.col_of(r)
-		"boots": return Gear.ALL[r].get("col", Color.WHITE)
+		"gear": return Gear.ALL[r].get("col", Color.WHITE)
 		"perk": return Data.PERKS[r]["col"]
 		"backpack": return Color("ffb0a0")
 		_: return Color("dfe9f7")
 
 # ------------------------------------------------------------------ prices and owning
 
-## Gems this costs this hunter now (-1: not for sale to them any more).
+## Gems this costs this hunter now (-1: not for sale to them any more), with the theme's multiplier.
 static func price(h, row: Dictionary) -> int:
+	var base := _base_price(h, row)
+	return base if base < 0 else int(round(base * float(row.get("k", 1.0))))
+
+static func _base_price(h, row: Dictionary) -> int:
 	var rs := rules()
 	var r := ref(String(row["id"]))
 	match kind_of(String(row["id"])):
@@ -110,36 +129,29 @@ static func price(h, row: Dictionary) -> int:
 			var next: int = h.armor_tier + 1
 			return int(ladder[next]) if next < mini(ladder.size(), Hunter.ARMOR_TIERS.size()) else -1
 		"backpack": return Backpacks.shop_price(h)
-		"boots": return int((rs.get("boots_price", []) as Array)[int(row["rar"])])
+		"gear": return int((rs.get("gear_price", []) as Array)[int(row["rar"])])
 		_:
 			var kind := PerkOrbs.kind_of(r)
 			var base := int((rs.get("perk_price", {}) as Dictionary).get(kind, 60))
 			return base + int(rs.get("perk_stack_extra", 0)) * h.perk_n(r)
 
-## How many the hunter holds (belt charges, perk stacks), for the shop's "owned" column.
+## How many the hunter holds (belt charges, perk stacks; the tier for upgrades), for line_of and bots.
 static func owned(h, row: Dictionary) -> int:
 	var r := ref(String(row["id"]))
 	match kind_of(String(row["id"])):
 		"util": return UtilityBelt.count(h, r)
 		"armor_up": return h.armor_tier
 		"backpack": return h.backpack
-		"boots": return 1 if _worn_boots(h, r, int(row["rar"])) else 0
+		"gear": return 1 if _worn(h, r, int(row["rar"])) else 0
 		"perk": return h.perk_n(r)
 		_: return int(h.armor)
 
-## The owned column as words: a count for stackable things, the current level for upgrades.
-static func owned_text(h, row: Dictionary) -> String:
-	var n := owned(h, row)
-	match kind_of(String(row["id"])):
-		"repair": return "Armor %d/%d" % [int(h.armor), int(h.max_armor)]
-		"armor_up": return "Tier: %s" % String(Hunter.ARMOR_TIERS[n][0])
-		"backpack": return "Pack: %s" % Backpacks.name_of(n)
-		"boots": return "Worn" if n > 0 else "Owned 0"
-		_: return "Owned %d" % n
-
-static func _worn_boots(h, gid: String, rar: int) -> bool:
-	var cur: Dictionary = h.gear[3]
-	return not cur.is_empty() and String(cur["id"]) == gid and int(cur.get("rar", 0)) >= rar
+## Is this piece (at this rarity or better) on the hunter already, in whichever slot it fits?
+static func _worn(h, gid: String, rar: int) -> bool:
+	for cur in h.gear:
+		if not (cur as Dictionary).is_empty() and String(cur["id"]) == gid and int(cur.get("rar", 0)) >= rar:
+			return true
+	return false
 
 ## Why this hunter can't buy the row right now ("" when they can). Stock left is the vendor's business (Shops.why_not).
 static func can_buy(h, row: Dictionary) -> String:
@@ -148,11 +160,11 @@ static func can_buy(h, row: Dictionary) -> String:
 	if cost < 0:
 		return "Maxed"
 	if int(h.gems) < cost:
-		return BROKE
+		return NO_GEMS
 	match kind_of(String(row["id"])):
 		"util": return "" if UtilityBelt.has_room(h, r) else "Belt full"
 		"repair": return "" if h.armor < h.max_armor else "Armor is full"
-		"boots": return "Already worn" if _worn_boots(h, r, int(row["rar"])) else ""
+		"gear": return "Already worn" if _worn(h, r, int(row["rar"])) else ""
 		"perk": return "" if h.perk_open(r) else "Maxed"
 	return ""
 
@@ -169,8 +181,8 @@ static func sell(h, row: Dictionary) -> bool:
 		"repair": h.armor = h.max_armor
 		"armor_up": h.armor_gain(float(Hunter.ARMOR_TIERS[h.armor_tier + 1][2]) - h.armor_xp)
 		"backpack": return Backpacks.shop_upgrade(h)      # takes its own gems and trades the old pack in
-		"boots":
-			h.gear[3] = {"id": r, "rar": int(row["rar"])}
+		"gear":
+			h.gear[Gear.slot_on(h, r)] = {"id": r, "rar": int(row["rar"])}
 			h.refresh_gear()
 		_: PerkOrbs.grant(h, r)
 	h.gems -= cost

@@ -8,7 +8,6 @@ extends RefCounted
 ## cursor: where you mean to land.
 
 const PICK_PX := 40.0                # px on screen: how near the cursor an enemy or loot counts as pointed at
-const ENEMY_COL := Color("ff4a3d")   # an enemy ping, whoever placed it
 ## Kind -> the one word its marker shows (a plain spot shows who placed it).
 const WORDS := {"enemy": "Enemy", "loot": "Loot"}
 
@@ -46,7 +45,7 @@ static func place_world(m: Match, sp: Vector2) -> String:
 
 ## A ping's colour: red on an enemy, else the pinger's squad colour.
 static func color(m: Match, h: Hunter, kind: String) -> Color:
-	return ENEMY_COL if kind == "enemy" else m.mate_col(h)
+	return SideColor.foe() if kind == "enemy" else m.mate_col(h)
 
 ## The word over a squad ping in the world, as seen by `me`.
 static func label(pg: Dictionary, me: Hunter) -> String:
@@ -80,7 +79,7 @@ static func _loot_at(m: Match, sp: Vector2) -> Vector3:
 		if not bool(b.get("empty", false)) and b.get("node") != null:
 			spots.append(b["pos"])
 	for c in m.chests:
-		if not bool(c["open"]):
+		if not bool(c["open"]) and (c["node"] as Node3D).visible:      # (hidden on the drop: KeyChest.show_all)
 			spots.append(c["pos"])
 	for br in m.breaks:
 		if not bool(br["dead"]):

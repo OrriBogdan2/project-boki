@@ -251,32 +251,42 @@ func _breah() -> void:
 			and not bool(cross["jumped"]),
 		"cross %.2fs peak %.2f top %.2f" % [float(cross["t"]), float(cross["peak"]), top - home.y]
 	)
-	var tgt := Vector3(mid0.x, home.y, mid0.z)
+	var into := Vector2(mid0.x - home.x, mid0.z - home.z).normalized()
 	P.teleport(home + Vector3(0, 0, -6.0))
 	for team in [P.team, 5]:
 		var B: Hunter = m.make_hunter("B", team, "medium", "Other", "idle", {}, home, {"arch": "none"})
 		var walk := _walk_over(m, B, home, w0)
+		# the bot rule at the face: jump a teammate's rock at once; the caster walks up his own; a foe goes round
+		var bot_hops := StoneStand.hop_ahead(B, into)
+		var at_face := B.pos
+		P.teleport(at_face)
+		P.grounded = true
+		var caster_hops := StoneStand.hop_ahead(P, into)
+		P.teleport(home + Vector3(0, 0, -6.0))
 		B.teleport(home)
 		B.vel = Vector3.ZERO
 		var jump_peak := [0.0]
-		step(m, 0.3, func(): B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized())
+		step(m, 0.3, func(): B.inp["move"] = into)
 		B.inp["jump"] = true
-		step(m, 0.9, func():
-			B.inp["move"] = Vector2(tgt.x - B.pos.x, tgt.z - B.pos.z).normalized()
+		step(m, 1.4, func():
+			B.inp["move"] = into
 			jump_peak[0] = maxf(jump_peak[0], B.pos.y - home.y))
-		var near_side := (B.pos - mid0).dot((mid0 - home).normalized()) < 0.0
+		var past := (B.pos - mid0).dot(Vector3(into.x, 0, into.y))
 		var walk_stopped := float(walk["t"]) < 0.0 and float(walk["peak"]) < 0.1
 		if team == P.team:
-			var over := not near_side or B.pos.y >= top - 0.1
-			ok("rock (the data, the owner's 23:55 answer): an ally walking into his rock is stopped, jumping hops on",
-				walk_stopped and over, "walk cross %.2f peak %.2f, jump peak %.2f, y %.2f top %.2f" % [
-					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y, top
+			ok("rock (the data, DECISIONS): an ally walking into his rock is stopped, jumping carries him up and over",
+				walk_stopped and past > float(w0["th"]) + B.r and jump_peak[0] >= top - home.y - 0.1,
+				"walk cross %.2f peak %.2f, jump peak %.2f top %.2f, past %.2f" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], top - home.y, past
 				])
+			ok("rock (bots): an ally bot at his rock jumps it at once; a Tenzo bot walks up his own (no jump)",
+				bot_hops and not caster_hops,
+				"ally %s caster %s at %s" % [str(bot_hops), str(caster_hops), str(at_face)])
 		else:
-			ok("rock (item 25): a foe walking or jumping into his rock is stopped",
-				walk_stopped and jump_peak[0] > 0.8 and near_side and B.pos.y < top - 0.5,
-				"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f" % [
-					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y
+			ok("rock (DECISIONS): a foe walking or jumping into his rock is stopped, and a foe bot does not jump it",
+				walk_stopped and jump_peak[0] > 0.8 and past < 0.0 and B.pos.y < top - 0.5 and not bot_hops,
+				"walk cross %.2f peak %.2f, jump peak %.2f, y %.2f, bot hops %s" % [
+					float(walk["t"]), float(walk["peak"]), jump_peak[0], B.pos.y - home.y, str(bot_hops)
 				])
 		B.queue_free()
 		m.hunters.erase(B)
@@ -368,8 +378,11 @@ func _breah() -> void:
 		longest[0] = maxf(longest[0], K.rmb_t))
 	ok(
 		"item 61: the charge never passes the cap (0.4-0.5s); at the cap it goes by itself, still held",
-		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down and K.slam.hops == 1,
-		"cap %.2f longest %.2f down %s hops %d" % [cap_t, longest[0], str(K.rmb_down), K.slam.hops]
+		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down
+			and (K.slam.hops == 1 or K.slam.wind_t >= 0.0),
+		"cap %.2f longest %.2f down %s hops %d winding %s" % [
+			cap_t, longest[0], str(K.rmb_down), K.slam.hops, str(K.slam.wind_t >= 0.0)
+		]
 	)
 	ok(
 		"item 61: a slam at the cap is the full circle and centre",
@@ -395,8 +408,8 @@ func _breah() -> void:
 			hit_key = float(key[0])
 	ok(
 		"anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame",
-		absf(hit_key - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.05,
-		"key %.2f landing %.2f" % [hit_key, K.slam._flight(float(K.slam_def()["hop_up"]))]
+		absf(hit_key - K.slam.flight()) < 0.05,
+		"key %.2f landing %.2f" % [hit_key, K.slam.flight()]
 	)
 	ok(
 		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
@@ -501,7 +514,7 @@ func _breah() -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	hold(m, P, 0.5)
-	step(m, 0.6)
+	step(m, 1.0)
 	ok("combo: Stone Row > slam launches the rocks", K.launches > l1, "launches %d -> %d" % [l1, K.launches])
 	# quiet level growth: ability damage scales with LevelGrowth.ap (through power())
 	var lv0 := P.lvl
@@ -596,13 +609,25 @@ func _breah() -> void:
 	)
 	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
 	await _leap(m, P, T, home, K, reset)
-	# the base dash (in the air): her own heavy shove move
+	# item 183: a charge in the air is the same Rock Hop as on the ground (its clip, its charge, its reach)
+	reset.call()
+	var hop_x := _first_hop_reach(m, P, false)
+	reset.call()
+	var charges := P.dashes
+	var air_x := _first_hop_reach(m, P, true)
+	ok("item 183: her air dash is the Rock Hop: breah_hop, a charge spent, ex_cd untouched, reach %.2f vs %.2f"
+			% [air_x, hop_x],
+		K.anim_id == "breah_hop" and P.dashes < charges and P.ex_cd == 0.0 and absf(air_x - hop_x) <= 0.05 * hop_x,
+		"anim %s charges %.1f -> %.1f ex_cd %.1f" % [K.anim_id, charges, P.dashes, P.ex_cd])
+	step(m, 0.8)
+	# out of charges the long dash is hers alone: the heavy shove move
 	reset.call()
 	P.ex_cd = 0.0
+	P.dashes = 0.0
 	P.pos.y += 1.5
 	P.grounded = false
 	P.do_dash()
-	ok("anim: her long air dash plays breah_exdash", K.anim_id == "breah_exdash")
+	ok("anim: her long dash (no charge left) plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
 	_air_dash_hold(m, P, K, reset)
@@ -778,9 +803,9 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 	aim_at(P, home + Vector3(10, 0, 0))
 	var plain := _hop_run(m, P, K, Vector2.ZERO, Vector2.ZERO)
 	ok(
-		"item 61: the hold carries him at least 2m forward with a rise, then slams on landing",
-		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.0
-			and absf(float(plain["t"]) - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.07,
+		"item 61: after its wind-up the hold carries him at least 2m forward with a rise, then slams on landing",
+		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.3
+			and absf(float(plain["t"]) - float(K.slam.feel()["windup"]) - K.slam.flight()) < 0.07,
 		"forward %.2f up %.2f in %.2fs" % [float(plain["x"]), float(plain["up"]), float(plain["t"])]
 	)
 	reset.call()
@@ -807,6 +832,7 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		var z0 := P.pos.y
 		if mode == "hop":
 			hold(m, P, 0.25)
+			step(m, float(K.slam.feel()["windup"]))       # (the wind-up: the hop leaves after it)
 		elif mode == "leap":
 			P.inp["sec_hold"] = true
 			P.ak.press_rmb()
@@ -906,6 +932,20 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 
+## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
+func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
+	if air:
+		P.pos.y += 1.5
+		P.grounded = false
+	var from := P.pos
+	P.inp["move"] = Vector2(1, 0)
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.do_dash()
+	var flight := BreahHop.CROUCH + float(P.ak.dash_def()["time"]) * float(P.ak.dash_feel()["time"])
+	step(m, flight)
+	P.inp["move"] = Vector2.ZERO
+	return Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+
 ## Item 35: her own ground (Rock Hop) and air (the long dash) moves, ids no other hero's table has, each one
 ## keyed to end with its dash (a hop's flight; the air dash's time with the dash feel), and
 ## neither dash draws a ground ring or a blast (the hit area is the landing circle, shown in flight).
@@ -935,6 +975,7 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 			P.pos.y += 1.5
 			P.grounded = false
 			P.ex_cd = 0.0
+			P.dashes = 0.0
 			P.do_dash()
 		else:
 			P.ak.on_dash(false)
@@ -942,7 +983,7 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 			m.step(DT)
 			P.render(DT, 1.0)
 			ok(
-				"item 35: her air dash plays breah_exdash as the whole pose (no shared roll under it)",
+				"item 35: her long dash plays breah_exdash as the whole pose (no shared roll under it)",
 				K.anim_id == "breah_exdash" and String(P.anim_s.get("dash_kind", "")) == "kit",
 				"anim %s kind %s roll %.2f" % [K.anim_id, str(P.anim_s.get("dash_kind")), P.roll_t]
 			)

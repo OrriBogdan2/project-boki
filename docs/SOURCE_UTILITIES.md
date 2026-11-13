@@ -78,6 +78,7 @@ This replaces the random `pool`/`stock` roll in content/rules/shops.json (ext/sh
 - Prices in brackets are proposals (gems = 30 + gold/100). For world-only source items I used the price of their closest sold item.
 - **Alternative (not chosen):** no shared staples, each item in exactly one shop. I didn't choose it because it forces every squad to one shop for heals.
 - If more shops are added later, split the longest list (Swift Stall) first.
+- **The panel** (`ShopPanel`): the shop's name with its set under it ("Armor and repairs, the same every match"), then one row per item: icon, name, one plain line from live data (`ShopStock.line_of`: your current tier for upgrades, what it does and how many you carry otherwise) and the price as the Buy button. A row you can't buy is greyed and shows the missing gems ("Need 35") or the reason. It scrolls when long and stays inside the 12 px safe margin and above the belt at every window size (`--shops-check`).
 - **Owner's word wins over the source:** Lostway Scroll, Omen Draught, Thorn Wall, Shatter Charge, Blight Flask and Toss Satchel were world-only in the source. The owner said to sell them, so they're in shops. They can also stay in chest loot.
 
 ## 4. What each source region was for
@@ -121,6 +122,26 @@ deviations:
 - Revive Ember is never sold: a rare chest find only (no boss drop is wired).
 - Online, gates, seeds and pilfer move only the bodies this game owns, like the spring pads.
 - Each shop sells a fixed list (`sells` in content/rules/shops.json), the same every match.
+
+## Built Nov 9 (ext/utility-parity)
+
+Behaviour brought in line with the source, each number in the item's JSON `src` field:
+
+- Six belt slots: 1 and 2 pinned to the tonic and the armor kit (`slot` in their JSON), 3 to 6 open.
+  Pinned items stack to 8. The home belt picks the open slots only (`UtilityBelt.free_slot`).
+- Tonic: 1.0 s drink, no slow, a flat 42 health (`heal_hp`; the source's 300 over our HP ratio).
+- Armor kit: 1.6 s at 45% speed, repairs 80 / 40 / 30% of the armor bar by armor tier (`repair`).
+- Deep Draught slows you to 40% for its 5 s. Thorn Wall stacks to 10.
+- Skyfall Charge: 5 s fuse, a lethal blast (690) then a 3 s fire patch on the spot.
+- Bounty Banner: knocked under it you are out at once (no wisp, no spare life) and the knocker
+  pockets the reward.
+- Blight Flask: a 40 s patch that blights (healing in it barely takes) besides burning and slowing.
+- Checked by `--utility-parity-check` (banner, skyfall, blight) and `--equal-check` (slots, tonic, kit).
+
+Still ours, on purpose or for lack of a system: Twin Gate auto-swaps (no second press), Lostway has
+no circle to aim for, Thorn Wall does not root, Lantern cannot be picked back up, the fan has no HP,
+Pilfer has no 1.5 s channel and no vault loot, smoke does not cloak the team, Skyfall never hurts
+allies or beacons, prices and bring caps follow our economy.
 
 ## Sources
 

@@ -3,6 +3,7 @@
  "name": "Grimble",
  "script": "tools/gen_sfx_grimble.py",
  "sounds": {
+  "dredge_hit": "heavy_impact",
   "dr_shot": "fire",
   "dr_throw": "cast",
   "dr_grab": "impact",

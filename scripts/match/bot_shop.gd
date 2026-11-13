@@ -1,7 +1,9 @@
 class_name BotShop
 extends RefCounted
 ## What a bot does about shops: with gems to spare and a vendor close, walk there and buy a belt
-## item it is short of, or a repair when its armor is worn. It keeps a reserve of gems to take home.
+## item it is short of, or a repair when its armor is worn. Richer, it also buys upgrades: the next
+## armor tier, a piece of gear rarer than the one it wears, a perk. It keeps a reserve of gems to take
+## home (reserve; upgrade_reserve for the upgrades).
 
 const BUY_REACH := 1.8      # m: a bot buys from a little further out than a player uses the stall
 
@@ -33,17 +35,25 @@ static func _bot() -> Dictionary:
 static func _want(h: Hunter, v: Dictionary) -> Dictionary:
 	var cfg := _bot()
 	var spare: int = h.gems - int(cfg.get("reserve", 25))
+	var rich: int = h.gems - int(cfg.get("upgrade_reserve", 60))
 	var rows: Array = v["rows"]
 	for i in rows.size():
 		var row: Dictionary = rows[i]
 		if int(row["left"]) <= 0 or ShopStock.can_buy(h, row) != "" or ShopStock.price(h, row) > spare:
 			continue
 		var id := ShopStock.ref(String(row["id"]))
+		var upgrade := ShopStock.price(h, row) <= rich
 		match ShopStock.kind_of(String(row["id"])):
 			"repair":
 				if h.armor < h.max_armor * float(cfg.get("repair_below", 0.5)):
 					return {"i": i}
 			"util":
 				if (cfg.get("wants", []) as Array).has(id) and ShopStock.owned(h, row) < int(cfg.get("belt_below", 2)):
+					return {"i": i}
+			"armor_up", "perk":
+				if upgrade:
+					return {"i": i}
+			"gear":
+				if upgrade and GearDrops.bot_wants(h, id, int(row["rar"])):
 					return {"i": i}
 	return {}

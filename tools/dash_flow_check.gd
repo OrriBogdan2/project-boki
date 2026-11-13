@@ -116,9 +116,7 @@ func _match(main: Node, hero: String) -> Match:
 		"cls": Arch.weight(hero), "arch": hero, "weapon": Arch.signature(hero),
 	})
 	m.set_process(false)
-	for mob in m.mobs:
-		mob.queue_free()
-	m.mobs.clear()
+	_clear_mobs(m)
 	hunter = m.player
 	var world: World = m.world
 	var cx := int(floor(hunter.pos.x))
@@ -149,6 +147,11 @@ func _match(main: Node, hero: String) -> Match:
 	_steps(m, 20)
 	return m
 
+func _clear_mobs(m: Match) -> void:
+	for mob in m.mobs:
+		mob.queue_free()
+	m.mobs.clear()
+
 func _steps(m: Match, n: int) -> void:
 	for i in n:
 		m.step(Match.DT)
@@ -158,7 +161,9 @@ func _steps(m: Match, n: int) -> void:
 func _ready_up(m: Match) -> void:
 	var k := hunter.ak
 	for i in QUIET_MAX:
-		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running()
+		# (a shot still out counts: a slow one, like Grimble's hook, would deny the next press)
+		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running() \
+				or _last_shot() >= 0
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
@@ -167,6 +172,7 @@ func _ready_up(m: Match) -> void:
 		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():
 		m.verbs._break_wall(wall)          # (the last trial's rocks and barriers would block this one's)
+	_clear_mobs(m)          # (mobs keep spawning: one in the dash lane stops a ram like Ashwick's on it)
 	hunter.teleport(get_meta("home"))
 	hunter.vel = Vector3.ZERO
 	hunter.hp = hunter.max_hp
@@ -178,7 +184,6 @@ func _ready_up(m: Match) -> void:
 	hunter.dashes = hunter.max_dashes()
 	hunter.ex_cd = 0.0
 	hunter.fire_cd = 0.0
-	hunter.reload_t = 0.0
 	hunter.ammo = maxi(hunter.ammo, int(hunter.wpn.get("mag", 0)))
 	hunter.inp["move"] = Vector2.ZERO
 	hunter.inp["fire"] = false
@@ -443,6 +448,9 @@ func _hold(m: Match, slot: String, move: String) -> String:
 		return "n/a: it went off by itself before the release"
 	var in_air := not hunter.grounded
 	var speed := Vector2(hunter.vel.x, hunter.vel.z).length()
+	# aim ahead again: the move carried the hunter past the first aim point, and a release that steps toward the aim
+	# (a punch) would then throw them backward, which W's counter-steer brakes (Loco.air_step), not a "stop"
+	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -6)
 	_hold_key(slot, false)
 	for i in 12:
 		m.step(Match.DT)
@@ -453,7 +461,8 @@ func _hold(m: Match, slot: String, move: String) -> String:
 			var where := " in the air" if in_air else ""
 			print("DASHFLOW note %s %s let go after %s%s: speed %.1f -> %.1f m/s" % [hunter.arch, slot, after, where,
 					speed, kept])
-			return "keep" if not in_air or kept >= speed * KEEP_SPEED else "keep, stops"
+			# speed over the run cap bleeds in the air by design (Loco.air_step), so "keeps" counts up to the cap
+			return "keep" if not in_air or kept >= minf(speed, hunter.base_speed) * KEEP_SPEED else "keep, stops"
 	return "cancel"
 
 ## The move made with a hold down: a dash to its end, or a jump JUMP_RELEASE into its rise.

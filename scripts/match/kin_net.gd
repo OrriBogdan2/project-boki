@@ -2,7 +2,9 @@ class_name KinNet
 extends RefCounted
 ## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.11.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
-##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate)]
+##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate), 1 when it rides as a wisp (KinWisp; Net 0.27.0),
+##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.28.0),
+##     loose seconds / carrier id / stolen summon used (KinSteal; Net 0.30.0)]
 ##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
 ##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
@@ -13,7 +15,8 @@ const KIN_AT := 19
 const HUNTER_AT := 26
 
 static func kin_extra(k: Kin) -> Array:
-	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0, snappedf(k.rest_t, 0.1)]
+	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05),
+		1 if k.down_void else 0, snappedf(k.rest_t, 0.1), int(k.wisp)] + _summon_extra(k) + KinSteal.net_extra(k)
 
 static func apply_kin(k: Kin, it: Array) -> void:
 	if it.size() <= KIN_AT + 4:
@@ -24,6 +27,17 @@ static func apply_kin(k: Kin, it: Array) -> void:
 	k.rescue_t = float(it[KIN_AT + 2]) * float(KinDowned.rules()["rescue_s"])
 	k.down_void = int(it[KIN_AT + 3]) == 1
 	k.rest_t = float(it[KIN_AT + 4])
+	KinWisp.set_wisp(k, it.size() > KIN_AT + 5 and int(it[KIN_AT + 5]) == 1)
+	if k.summon and it.size() > KIN_AT + 8:
+		k.summon.left = float(it[KIN_AT + 6])
+		k.summon.shrink = float(it[KIN_AT + 7])
+		k.summon.cd = float(it[KIN_AT + 8])
+	if it.size() > KIN_AT + 11:
+		KinSteal.apply_net(k, float(it[KIN_AT + 9]), String(it[KIN_AT + 10]), int(it[KIN_AT + 11]) == 1)
+
+static func _summon_extra(k: Kin) -> Array:
+	var s := k.summon
+	return [snappedf(s.left, 0.1), snappedf(s.shrink, 0.05), snappedf(s.cd, 0.1)] if s else [0, 0, 0]
 
 static func hunter_extra(h: Hunter) -> Array:
 	var f := MergeForm.of(h)
@@ -112,6 +126,11 @@ static func on_event(m: Match, x: Array) -> void:
 		"scan_start", "scan_stop", "scan_done":
 			if e is Hunter:
 				Capture.on_net(m, e, String(x[1]), String(x[6]))
+		"wkill":
+			KinSummon.show_reveal(m, at, int(String(x[6])))
+		"wgrab", "wsum":
+			if e is Hunter:
+				KinSteal.on_net(m, e as Hunter, String(x[1]), String(x[6]))
 		"unbond":
 			if e is Hunter:
 				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))

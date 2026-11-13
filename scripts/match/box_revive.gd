@@ -10,7 +10,7 @@ extends RefCounted
 
 const RULES_PATH := "res://content/rules/revive.json"
 const MOVE_DEADZONE := 0.1        # stick length that counts as moving (a resting stick drifts below it)
-const NO_ATTACK := ["sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
+const NO_ATTACK := ["sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4", "util5", "util6",
 	"gear1", "gear2", "fire", "throw", "kin_ab"]
 const DONE_COL := Color("bff5c0")
 
@@ -22,18 +22,16 @@ static func rules() -> Dictionary:
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 	return _rules
 
-## Seconds to bring this Hunter back from their box: slower each time it has been done this match.
-static func time_for(o: Hunter) -> float:
-	var curve: Array = rules()["box_diminish"]
-	var n := mini(int(o.get_meta("box_revived_n", 0)), curve.size() - 1)
-	return float(rules()["box_revive_s"]) / float(curve[n])
+## Seconds to bring a Hunter back from their box.
+static func time_for() -> float:
+	return float(rules()["box_revive_s"])
 
 ## The prompt at a teammate's box.
 static func prompt(h: Hunter, o: Hunter) -> String:
 	if h.box_reviving():
 		return "Bringing %s back  ·  moving or a hit stops it" % o.pname
 	var key := Settings.key_cap("interact")
-	return "Hold %s to bring %s back  ·  %.1fs, you take more damage" % [key, o.pname, time_for(o)]
+	return "Hold %s to bring %s back  ·  %.1fs, you take more damage" % [key, o.pname, time_for()]
 
 ## One step of holding interact at a teammate's box (Match._update_interact).
 static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
@@ -42,7 +40,7 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 		h.box_t = 0.0
 		return
 	var o: Hunter = b["owner"]
-	var need := time_for(o)
+	var need := time_for()
 	if h.box_t <= 0.0:
 		h.vuln_fx_t = 0.0
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
@@ -57,11 +55,13 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	h.box_t = 0.0
 	b["rev_at"] = -9.0
 	h.box_rev_at = -9.0
-	o.set_meta("box_revived_n", int(o.get_meta("box_revived_n", 0)) + 1)
 	m.sfx("revive_done", b["pos"], 3.0)
 	m.fx.ring(b["pos"] + Vector3(0, 0.1, 0), 2.6, DONE_COL, 0.5)
 	m.fx.burst(b["pos"] + Vector3(0, 1.0, 0), DONE_COL, 26, 4.5, 0.7, -2.0, 1.2)
-	Life.box_revive(m, b, h)
+	if o.remote:
+		m.net_event(["brev", o.nid, h.nid])      # their own game brings them back (net_in)
+	else:
+		Life.box_revive(m, b, h)
 
 ## Every step while channelling (Hunter's input step): no attacks; moving, dashing, jumping,
 ## gliding or a stun breaks the channel instead.
@@ -83,3 +83,25 @@ static func cancel(h: Hunter) -> void:
 	h.box_t = 0.0
 	h.box_rev_at = -9.0
 	h.set_meta("box_broke", true)
+
+## Another game's deathbox events. "box": a Hunter there died, here is their soul marker; "brev":
+## a teammate finished the channel at the box of a Hunter this game owns (every game's copy of
+## them is told by Life.bring_back's "back"); "back" / "lost": that Hunter is up again / gone for good.
+static func net_in(m: Match, x: Array) -> void:
+	var o: Hunter = m.ents_by_id.get(String(x[1]), null) as Hunter
+	if o == null:
+		return
+	match String(x[0]):
+		"box":
+			Life.mirror_box(m, o, Vector3(x[2], x[3], x[4]))
+		"brev":
+			var b := Life.box_of(m, o)
+			if not o.remote and not b.is_empty() and Life.soul_here(m, b):
+				Life.box_revive(m, b, m.ents_by_id.get(String(x[2]), o) as Hunter)
+		"back":
+			if o.remote:
+				o.out = false
+				o.gone = false
+				o.downed = false
+		"lost":
+			o.gone = true

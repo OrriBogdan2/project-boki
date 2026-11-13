@@ -13,8 +13,9 @@
   1
  ],
  "price": 60,
- "desc": "Show yourself to every rival for 2 minutes. Live through it: your dead squadmates return and you get 150 gems. One per squad at a time.",
+ "desc": "Show yourself to every rival for 2 minutes. Live through it: your dead squadmates return and you get 150 gems. Knocked, you go straight out and the knocker takes the gems. One per squad at a time.",
  "field": "banner",
  "time": 120.0,
- "reward": 150
+ "reward": 150,
+ "src": "docs/SOURCE_UTILITIES.md: 2 min reveal, a knock sends you to the deathbox and the knocker's side gets the bounty, survive for the squad revive"
 }

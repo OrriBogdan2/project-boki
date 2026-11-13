@@ -1,0 +1,60 @@
+{
+	"doc": "What tools/clip_cadence_check.gd holds each warden_anim clip to. Per art name, per move: 'cadence' = the shortest time before the move is played again or another one replaces it, and 'hit' = when the kit's hit/release lands after the move starts (omitted: the kit has no timed hit, only the cadence is checked), 'hand' = the bone whose fastest frame is the strike (default hand.R). Each is seconds, or 'file:path' into content/ (a list is summed), so a kit number that changes is read from its own json. Moves that loop (hold_from), or whose cooldown is longer than any clip, are not listed.",
+	"tolerance": 0.02,
+	"strike_slack": 0.05,
+	"breaker": {
+		"bul_throw": {"cadence": "archetypes/bulwark.json:lmb.throw_rate", "hit": 0.12},
+		"bul_smash": {"cadence": "archetypes/bulwark.json:lmb.smash_rate"}
+	},
+	"claire": {
+		"tm_dart_r": {"cadence": "weapons/hoar_fan.json:primary.rate"},
+		"tm_dart_l": {"cadence": "weapons/hoar_fan.json:primary.rate"},
+		"tm_dart_heavy": {"cadence": "weapons/hoar_fan.json:primary.rate"}
+	},
+	"dredge": {
+		"dr_shot": {"cadence": "weapons/shotgun.json:primary.rate"}
+	},
+	"hem": {
+		"arc_tap": {"cadence": "weapons/longbow.json:primary.rate"},
+		"arc_loose": {"cadence": "weapons/longbow.json:primary.rate"},
+		"arc_perfect": {"cadence": "weapons/longbow.json:primary.rate"},
+		"arc_super": {"cadence": "weapons/longbow.json:primary.rate"},
+		"arc_over_loose": {"cadence": "weapons/longbow.json:primary.rate"},
+		"pin_ult_loose": {"cadence": "archetypes/archer.json:x.nock"},
+		"pin_ult_final": {"cadence": "archetypes/archer.json:x.recover"}
+	},
+	"kael": {
+		"jug_slash_r": {"cadence": "archetypes/juggernaut.json:lmb.rate"},
+		"jug_slash_l": {"cadence": "archetypes/juggernaut.json:lmb.rate"},
+		"jug_dash": {"cadence": ["archetypes/juggernaut.json:dash.windup", "archetypes/juggernaut.json:dash.time"]}
+	},
+	"ostra": {
+		"ostra_orb": {"cadence": "weapons/tether_lantern.json:primary.rate"},
+		"ostra_orb_hot": {"cadence": "weapons/tether_lantern.json:primary.rate"}
+	},
+	"pip": {
+		"mm_shot_r": {"cadence": "weapons/lantern_crook.json:primary.rate"},
+		"mm_shot_l": {"cadence": "weapons/lantern_crook.json:primary.rate", "hand": "hand.L"},
+		"mm_shot_emp": {"cadence": "weapons/lantern_crook.json:primary.rate"}
+	},
+	"ryzz": {
+		"mage_lmb_l": {"cadence": "weapons/coilcaster.json:primary.rate", "hit": 0.06, "hand": "hand.L"},
+		"mage_lmb_r": {"cadence": "weapons/coilcaster.json:primary.rate", "hit": 0.06}
+	},
+	"sable": {
+		"thf_lmb_r": {"cadence": "weapons/arc_bolts.json:primary.rate"},
+		"thf_lmb_l": {"cadence": "weapons/arc_bolts.json:primary.rate", "hand": "hand.L"},
+		"thf_vault_r": {"cadence": "archetypes/thief.json:dash.time"},
+		"thf_vault_l": {"cadence": "archetypes/thief.json:dash.time"},
+		"thf_vault_f": {"cadence": "archetypes/thief.json:dash.time"},
+		"thf_vault_b": {"cadence": "archetypes/thief.json:dash.time"}
+	},
+	"tarek": {
+		"breah_throw": {"cadence": "archetypes/dolm.json:lmb.boulder.rate"},
+		"breah_punch": {"cadence": "archetypes/dolm.json:lmb.punch.rate"}
+	},
+	"vex": {
+		"gunslinger_lmb": {"cadence": "weapons/quill_rifle.json:primary.rate", "hit": 0.0},
+		"gunslinger_dash": {"cadence": "archetypes/gunslinger.json:dash.roll_t"}
+	}
+}

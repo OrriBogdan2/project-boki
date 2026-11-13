@@ -62,6 +62,26 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 				var r := 0.75 if i % 2 == 0 else 0.32
 				st.append([cos(a) * r, sin(a) * r])
 			F.call(st)
+		# ---- the base's playthings (FavToy, the Boki card's favourite)
+		"toy_ball":
+			O.call(0.0, 0.0, 0.62)
+			A.call(0.0, 0.0, 0.62, PI * 1.1, PI * 1.9, maxf(1.5, s * 0.08))
+			F.call([[-0.3, -0.25], [0.3, -0.25], [0.0, 0.15]], Color(0, 0, 0, 0.18 * col.a))
+		"toy_post":
+			L.call([[0.0, -0.8], [0.0, 0.8]], maxf(2.0, s * 0.2))
+			L.call([[-0.55, -0.35], [0.55, -0.35]])
+			L.call([[-0.55, 0.15], [0.55, 0.15]])
+		"toy_tub":
+			F.call([[-0.7, -0.1], [0.7, -0.1], [0.45, 0.6], [-0.45, 0.6]])
+			A.call(-0.25, -0.5, 0.2, PI, TAU)
+			A.call(0.25, -0.5, 0.2, PI, TAU)
+		"toy_stone":
+			F.call([[-0.75, 0.5], [-0.55, -0.1], [-0.1, -0.5], [0.4, -0.4], [0.75, 0.1], [0.7, 0.5]])
+			A.call(0.0, 0.5, 0.5, PI * 1.2, PI * 1.8, maxf(1.5, s * 0.08))
+		"toy_dig":
+			F.call([[-0.8, 0.55], [-0.45, 0.0], [0.0, -0.2], [0.45, 0.0], [0.8, 0.55]])
+			L.call([[0.2, -0.8], [0.55, -0.35]])
+			L.call([[0.5, -0.85], [0.7, -0.45]])
 		"heart":
 			F.call([[0.0, 0.7], [-0.65, 0.0], [-0.6, -0.45], [-0.3, -0.62], [0.0, -0.38], [0.3, -0.62], [0.6, -0.45],
 					[0.65, 0.0]])
@@ -356,6 +376,11 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			A.call(0.0, 0.0, 0.65, 0.0, TAU)
 			A.call(0.0, 0.0, 0.3, 0.0, TAU)
 			L.call([[0.0, 0.0], [0.5, -0.45]])
+		"frost":
+			for i in 3:
+				var a := TAU * i / 6.0
+				L.call([[cos(a) * 0.8, sin(a) * 0.8], [-cos(a) * 0.8, -sin(a) * 0.8]])
+			O.call(0.0, 0.0, 0.16)
 		"shock":
 			O.call(0.0, 0.0, 0.2)
 			for i in 6:

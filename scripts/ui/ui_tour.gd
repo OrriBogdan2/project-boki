@@ -15,7 +15,7 @@ static func run(home: Node, prefix: String) -> void:
 		home.call("_close_panel")
 		home.call("_toast", "Bramble Isle is open")])
 	steps.append(["pause", func(): Overlay.shot_demo(PackedStringArray(["pause"]))])
-	for tab_name in Overlay.SETTINGS_TABS:
+	for tab_name in Overlay.settings_tabs():
 		var open_tab := func(): Overlay.shot_demo(PackedStringArray(["settings", tab_name]))
 		steps.append(["settings_" + tab_name.to_lower(), open_tab])
 	steps.append(["tooltip", func(): Overlay.shot_demo(PackedStringArray(["tooltip"]))])
