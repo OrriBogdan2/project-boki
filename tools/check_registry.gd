@@ -328,6 +328,7 @@ const CHECKS := {
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
+	"--anim-coverage-check": ["res://tools/anim_coverage_check.gd", "anim_coverage_check", null],
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],
