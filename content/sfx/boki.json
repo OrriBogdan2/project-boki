@@ -11,7 +11,11 @@
   "k_poison": "boki", "k_bug": "boki", "k_steel": "boki", "k_fairy": "boki",
   "k_crystal": "boki", "k_sound": "boki",
   "boki_downed": "boki", "boki_revive": "boki", "boki_eat": "boki", "boki_sleep": "loop", "boki_work": "boki",
-  "boki_fuse": "boki", "boki_unfuse": "boki", "boki_yawn": "boki"
+  "boki_fuse": "boki", "boki_unfuse": "boki", "boki_yawn": "boki",
+  "boki_step_tiny_grass": "step", "boki_step_tiny_stone": "step", "boki_step_tiny_wood": "step", "boki_step_tiny_snow": "step",
+  "boki_step_small_grass": "step", "boki_step_small_stone": "step", "boki_step_small_wood": "step", "boki_step_small_snow": "step",
+  "boki_step_medium_grass": "step", "boki_step_medium_stone": "step", "boki_step_medium_wood": "step", "boki_step_medium_snow": "step",
+  "boki_step_heavy_grass": "step", "boki_step_heavy_stone": "step", "boki_step_heavy_wood": "step", "boki_step_heavy_snow": "step"
  },
  "reach": {"boki_sleep": 7, "boki_yawn": 9},
  "loops": ["boki_sleep"],

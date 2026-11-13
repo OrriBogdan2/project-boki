@@ -230,6 +230,20 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 
+## What a foot at `pos` lands on: planks, paved paths and stairs, snow, or grass and earth.
+static func ground_surface(w: World, pos: Vector3) -> String:
+	if w == null:
+		return "grass"
+	var ix := int(floorf(pos.x)); var iz := int(floorf(pos.z))
+	if not w.inb(ix, iz):
+		return "grass"
+	var i := w.idx(ix, iz)
+	if w.bridge.has(i):
+		return "wood"
+	if w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
+		return "stone"
+	return "snow" if w.style_at(i) == "frost" else "grass"
+
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
 ## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). It carries as far
 ## as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
@@ -237,13 +251,5 @@ static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
-	var w: World = m.world
-	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
-	if not w.inb(ix, iz):
-		return
-	var i := w.idx(ix, iz)
-	var surf := "grass"
-	if w.bridge.has(i): surf = "wood"
-	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
-	elif w.style_at(i) == "frost": surf = "snow"
+	var surf := ground_surface(m.world, h.pos)
 	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)
