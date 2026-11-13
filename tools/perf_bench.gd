@@ -9,6 +9,8 @@ extends RefCounted
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ##   [--bench-hunters=30]  hunters in the expedition (squads of 2; the default 6 is the fixed load)
+##   [--bench-trios=10]  the expedition as that many bot trios (3 per squad), and every POSE_SAMPLE frames one extra
+##   timed pose of each Hunter and rigged Boki, printed as "BENCH pose" lines by distance from the camera focus
 ##   [--bench-shots=<dir>]  saves each zone part's default-camera frame (screen UI hidden) as <part>.jpg
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
@@ -23,6 +25,8 @@ const BASE_RACE_AT := 10.0          # s into the base part: the Dash starts
 const SLOW_MS := 50.0               # ms: the DECISIONS 2026-11-08 ceiling for a frame after warm-up
 const WARM_S := 3.0                 # s of the base part treated as warm-up
 const SECTION_FRAMES := 120         # frames the base part's step timing samples
+const POSE_SAMPLE := 30            # frames between the timed poses of --bench-trios
+const POSE_BANDS := [20.0, 40.0, 80.0]   # m (flat) from the camera focus: the bands of the "BENCH pose" lines
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
 const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
@@ -37,6 +41,9 @@ var base_secs := 60.0
 var out_path := ""
 var zone := ""
 var hunters := 6
+var trios := 0           # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
+var pose_us := {}        # "kind band on|off" -> [us, poses] (--bench-trios)
+var rigs_posed := Vector2i.ZERO   # Hero rigs posed, Hero rigs there, summed over the frames (--bench-trios)
 var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false      # a budget line said FAIL: the exit code carries it
 var rows := PackedStringArray()
@@ -74,6 +81,7 @@ func setup(main_node: Node) -> void:
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
 		if a.begins_with("--bench-hunters="): hunters = int(a.substr(16))
+		if a.begins_with("--bench-trios="): trios = int(a.substr(14))
 		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
@@ -97,6 +105,8 @@ func _match() -> Array:
 	var o := Match.demo_opts()
 	o.merge({"teams": hunters / 2, "squad": 2, "total": hunters, "raid": "ash", "blight": true, "no_drop": true,
 		"god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	if trios > 0:
+		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -134,6 +144,8 @@ func _match() -> Array:
 		m.step(DT)
 		m._process(DT)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
+		if trios > 0:
+			_count_rigs(m)
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
 		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
@@ -143,7 +155,11 @@ func _match() -> Array:
 				added])
 		added.clear()
 		last = now
+		if trios > 0 and fl.size() % POSE_SAMPLE == 0:
+			_pose_sample(m)
+			last = Time.get_ticks_usec()      # (the timed poses stay out of the frame times)
 	_summary("match", fl)
+	_pose_lines(m, fl.size())
 	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
@@ -156,6 +172,67 @@ func _match() -> Array:
 	_meshes()
 	Match.prof_on = false
 	return fl
+
+## One extra pose of every Hunter and rigged Boki, timed and filed by distance band and on or off screen: HunterAnim,
+## the Hero clips and springs (WardenGlb.Sync) or the Boki clip, and the skeleton they write.
+func _pose_sample(m: Match) -> void:
+	for h in m.hunters:
+		if h.anim == null or h.out or h.model == null or not h.model.is_inside_tree():
+			continue
+		var held: int = h.model.get_meta(WardenGlb.POSE_HELD, -1)
+		h.model.set_meta(WardenGlb.POSE_HELD, -1)
+		var t0 := Time.get_ticks_usec()
+		h.anim.update(DT, h.anim_s)
+		var sync := h.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+		if sync:
+			sync._process(DT)
+			sync.skel.force_update_all_bone_transforms()
+		h.model.set_meta(WardenGlb.POSE_HELD, held)
+		_pose_file(m, "hunter", h.pos, t0)
+	for k in m.kins:
+		var rig := k.find_child("BokiRig", true, false) as BokiRig
+		if rig == null or not k.is_visible_in_tree():
+			continue
+		var t0 := Time.get_ticks_usec()
+		rig._process(DT)
+		rig.player.advance(DT)
+		for sk in rig.model.find_children("*", "Skeleton3D", true, false):
+			(sk as Skeleton3D).force_update_all_bone_transforms()
+		_pose_file(m, "boki", k.pos, t0)
+
+## Hero rigs (WardenGlb.Sync) that pose this frame: those whose Hunter did not hold theirs (WardenGlb.POSE_HELD).
+func _count_rigs(m: Match) -> void:
+	for h in m.hunters:
+		if h.model and h.model.get_node_or_null("Warden/Sync"):
+			rigs_posed.y += 1
+			if int(h.model.get_meta(WardenGlb.POSE_HELD, -1)) != Engine.get_process_frames():
+				rigs_posed.x += 1
+
+func _pose_file(m: Match, kind: String, at: Vector3, t0: int) -> void:
+	var us := Time.get_ticks_usec() - t0
+	var d := Vector2(at.x - m.cam.focus.x, at.z - m.cam.focus.z).length()
+	var band := "%.0f+" % POSE_BANDS[-1]
+	for i in POSE_BANDS.size():
+		if d < POSE_BANDS[i]:
+			band = "%.0f-%.0f" % [0.0 if i == 0 else POSE_BANDS[i - 1], POSE_BANDS[i]]
+			break
+	var key := "%s %s m %s" % [kind, band, "on" if m.cam.on_screen(at) else "off"]
+	var acc: Array = pose_us.get(key, [0, 0])
+	pose_us[key] = [int(acc[0]) + us, int(acc[1]) + 1]
+
+## "BENCH pose" lines: us per pose by band, the poses filed, and the share of characters in it.
+func _pose_lines(m: Match, frames: int) -> void:
+	var ks := pose_us.keys()
+	ks.sort()
+	var all := 0
+	for k in ks: all += int(pose_us[k][1])
+	for k in ks:
+		var acc: Array = pose_us[k]
+		print("BENCH pose %s: %.0f us per pose, %d poses (%.0f%%)" % [k, float(acc[0]) / acc[1], acc[1],
+			100.0 * acc[1] / maxf(1.0, all)])
+	print("BENCH pose hunters %d, boki %d, camera zoom %.2f" % [m.hunters.size(), m.kins.size(), m.cam.zoom])
+	var n := maxf(1.0, frames)
+	print("BENCH pose Hero rigs posed per frame: %.1f of %.1f" % [rigs_posed.x / n, rigs_posed.y / n])
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:

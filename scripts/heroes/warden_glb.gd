@@ -97,6 +97,7 @@ const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera 
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
+const POSE_HELD := "pose_held"   # root meta: the frame the Hunter skipped its pose in (SimLod.pose_every)
 const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
 const WEAPON_MAG := "weapon_mag"  # its magazine, a child of it
@@ -1029,10 +1030,12 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
-		if pace.every > 1:
-			dt = pace.step(dt, RigPace.is_lead(get_viewport(), root.global_position))
-			if dt == 0.0:
-				return
+		if int(root.get_meta(POSE_HELD, -1)) == Engine.get_process_frames():
+			pace.held += dt        # SimLod.pose_every held this Hunter's pose: the next step catches the time up
+			return
+		dt = pace.step(dt, pace.every == 1 or RigPace.is_lead(get_viewport(), root.global_position))
+		if dt == 0.0:
+			return
 		if clips:
 			_play(dt)
 			springs.still = clips.cur in clips.d.get("still", [])
