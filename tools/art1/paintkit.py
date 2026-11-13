@@ -68,3 +68,12 @@ CLOTH = [hexc("#1c070d"), hexc("#340d16"), hexc("#4e1520"), hexc("#68202b"), hex
 GOLD = [hexc("#5c360c"), hexc("#99621a"), hexc("#c98a2a"), hexc("#e8b24c"), hexc("#ffe08c")]
 IRON = [hexc("#1e1b1f"), hexc("#3a363a"), hexc("#5b5659"), hexc("#7f7a7b"), hexc("#b0abaa")]
 RUST = hexc("#6a3a24")
+
+
+def clean_normal(nrm, max_tilt=65.0):
+    """Flattens a baked tangent normal map's wrong hits in place: (H, W, 3) in 0..1. A ray that met a back face or
+    another layer tilts past max_tilt degrees; flat, the texel shades by the mesh's own normal. Returns their share."""
+    v = nrm * 2.0 - 1.0
+    bad = v[..., 2] < np.cos(np.radians(max_tilt)) * np.linalg.norm(v, axis=-1)
+    nrm[bad] = (0.5, 0.5, 1.0)
+    return float(bad.mean())
