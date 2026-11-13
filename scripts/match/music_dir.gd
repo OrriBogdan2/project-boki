@@ -97,6 +97,12 @@ func _steer(now: float) -> void:
 	goal = want
 	goal_at = now
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> Sfx.Muffle:
+	if p.downed or p.out:
+		return Sfx.Muffle.DOWN
+	return Sfx.Muffle.LOW_HP if LowHpCue.under_line(p) else Sfx.Muffle.OFF
+
 ## The last squad standing is yours (Exits.on_last_team): one sting, once.
 func last_squad() -> void:
 	if not last_said and not ended:
@@ -109,6 +115,7 @@ func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
+	Sfx.set_muffle(_muffle_for(p))
 	if m.flow.ending():
 		if not ended:
 			ended = true

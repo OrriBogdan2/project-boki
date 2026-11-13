@@ -24,7 +24,7 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a", "ult_ready_cue": true,
+	"reset_cue": "a", "ult_ready_cue": true, "low_hp_pulse": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false,
 	"colour_vision": "default",      # SideColor.ORDER

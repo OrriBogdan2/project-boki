@@ -39,6 +39,8 @@ extends RefCounted
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
 ##  11. the carry cues (CarrySfx): every name it plays exists and has a MIN_GAP (the voice cap), the thief's
 ##      take carries past hearing range to nearby squads, and the swap, claim, steal and deathbox paths call it
+##  11. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
+##      drops, and stops on a heal, a down or out
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -80,6 +82,7 @@ func run(main: Node) -> void:
 	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
 	_hit_ticks()
 	_carry()
+	_low_hp()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -625,3 +628,30 @@ func _hit_ticks() -> void:
 	var bare := [HeroSfx.hit_tick(h, {"src": "shot"}), HeroSfx.hit_tick(null, {})]
 	ok(bare == ["hit", "hit"], "hit ticks: no weapon tick or no Hunter, the shared one %s" % [bare])
 	h.free()
+
+## 7. The heartbeat: silent at the line, beating just under it (the first beat at once), faster the lower the
+## share, and silent again on a heal over the line, a down or out. Beats counted over 10 s of 60 fps frames.
+func _low_hp() -> void:
+	var cue := LowHpCue.new()
+	var line := float(Content.rules(LowHpCue.RULES)["start_share"])
+	var at_line := _beats(cue, line, 10.0)
+	ok(at_line == 0 and not cue.active, "heartbeat: silent at the line (%.2f of max health and armour)" % line)
+	var just := _beats(cue, line - 0.01, 10.0)
+	var want := int(ceil(10.0 * cue.bpm(line - 0.01) / 60.0))
+	ok(cue.active and just == want, "heartbeat: starts just under the line, %d beats in 10 s" % just)
+	var low := _beats(cue, line * 0.2, 10.0)
+	ok(low > just, "heartbeat: faster as health drops (%d beats in 10 s near empty)" % low)
+	ok(_beats(cue, line + 0.01, 10.0) == 0 and not cue.active, "heartbeat: stops when you heal back over the line")
+	_beats(cue, 0.1, 1.0)
+	var was := cue.active
+	ok(was and _beats(cue, 1.0, 1.0) == 0 and not cue.active, "heartbeat: stops when downed or out (a full share)")
+	var wav := "res://audio/%s.wav" % LowHpCue.SOUND
+	var on: bool = Settings.DEFAULTS["low_hp_pulse"]
+	ok(on and FileAccess.file_exists(wav), "heartbeat: on by default, sound on file")
+
+func _beats(cue: LowHpCue, s: float, secs: float) -> int:
+	var n := 0
+	for i in int(secs * 60.0):
+		if cue.step(s, 1.0 / 60.0):
+			n += 1
+	return n

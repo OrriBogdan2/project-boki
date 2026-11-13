@@ -45,6 +45,15 @@ const FAR := 9.0
 const OCCLUDED_HZ := 700.0
 const OCCLUDED_DB := -4.0
 var occlusion := SfxOcclusion.new()
+## While you are downed or out the world goes dull: the SFXWorld bus (everything but CLEAR) is low-passed and
+## ducked, ramped in and out. Sounds in CLEAR (pings, the Wisp hum, Boki voices) skip it and stay as they are.
+const CLEAR := ["heartbeat", "ping", "wisp_hum", "kin_happy", "kin_unsure", "kin_alert"]
+const MUFFLE_HZ := 1200.0      # Hz: the low-pass cutoff while muffled
+const LOW_HP_HZ := 3500.0      # Hz: the milder low-pass while under the low-health line (the heartbeat sits in CLEAR)
+const LOW_HP_DB := -2.0        # dB: the duck on the world bus under the low-health line
+const MUFFLE_OPEN_HZ := 20000.0 # Hz: the cutoff the ramp starts from, above hearing
+const MUFFLE_DB := -6.0        # dB: the duck on the world bus while muffled
+const MUFFLE_S := 0.3          # s: ramp in / out
 var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
@@ -71,14 +80,18 @@ var amb_name := ""
 var music_bus := 0
 var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
 var _duck_tw: Tween
+enum Muffle { OFF, LOW_HP, DOWN }   # how dull the world bus is: clear, under the low-health line, downed or out
+var _muffle_tw: Tween
+var _muffle := Muffle.OFF
+var _muffle_fx: AudioEffectLowPassFilter
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for bn in ["Music", "SFX", "Ambience", "SFXFar", "SFXMuffled"]:
+	for bn in ["Music", "SFX", "Ambience", "SFXWorld", "SFXFar", "SFXMuffled"]:
 		AudioServer.add_bus()
 		var bi := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(bi, bn)
-		AudioServer.set_bus_send(bi, "SFX" if bn in ["SFXFar", "SFXMuffled"] else "Master")
+		AudioServer.set_bus_send(bi, {"SFXWorld": "SFX", "SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld"}.get(bn, "Master"))
 	music_bus = AudioServer.get_bus_index("Music")
 	_setup_mix()
 	for i in 2:
@@ -148,6 +161,10 @@ func _setup_mix() -> void:
 	mlp.cutoff_hz = OCCLUDED_HZ
 	AudioServer.add_bus_effect(muf, mlp)
 	AudioServer.set_bus_volume_db(muf, OCCLUDED_DB)
+	_muffle_fx = AudioEffectLowPassFilter.new()
+	_muffle_fx.cutoff_hz = MUFFLE_OPEN_HZ
+	AudioServer.add_bus_effect(AudioServer.get_bus_index("SFXWorld"), _muffle_fx)
+	AudioServer.set_bus_effect_enabled(AudioServer.get_bus_index("SFXWorld"), 0, false)
 	var mlim := AudioEffectHardLimiter.new()
 	mlim.ceiling_db = -0.5
 	AudioServer.add_bus_effect(0, mlim)
@@ -252,6 +269,33 @@ func duck(seconds: float, depth_db := -8.0) -> void:
 	tw.tween_interval(seconds)
 	tw.tween_property(_duck_fx, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
 
+## Sets how dull the world bus is (one low-pass effect plus a duck), eased over MUFFLE_S: DOWN while downed or
+## out, the milder LOW_HP under the low-health line. OFF is also what a match leaving does (reset_scene_audio).
+func set_muffle(level: Muffle) -> void:
+	if level == _muffle:
+		return
+	_muffle = level
+	var hz: float = [MUFFLE_OPEN_HZ, LOW_HP_HZ, MUFFLE_HZ][level]
+	var db: float = [0.0, LOW_HP_DB, MUFFLE_DB][level]
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	if _muffle_tw and _muffle_tw.is_valid():
+		_muffle_tw.kill()
+	if level != Muffle.OFF:
+		AudioServer.set_bus_effect_enabled(bus, 0, true)
+	var tw := create_tween().set_parallel(true)
+	_muffle_tw = tw
+	tw.tween_property(_muffle_fx, "cutoff_hz", hz, MUFFLE_S)
+	tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(bus, v), AudioServer.get_bus_volume_db(bus), db,
+		MUFFLE_S)
+	if level == Muffle.OFF:
+		tw.chain().tween_callback(AudioServer.set_bus_effect_enabled.bind(bus, 0, false))
+
+## Tooling (--match-audio-check): the muffle as the bus has it right now.
+func muffle_state() -> Dictionary:
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	return {"fx": AudioServer.is_bus_effect_enabled(bus, 0), "db": AudioServer.get_bus_volume_db(bus),
+		"hz": _muffle_fx.cutoff_hz}
+
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
 ## what's happening decides how loud each is (scripts/match/music_dir.gd sets the levels).
@@ -329,6 +373,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 		music_name = ""
 	if not amb_layers.is_empty():
 		clear_amb_layers(fade)
+	set_muffle(Muffle.OFF)
 	for key in loops.keys():
 		loop_stop(key)
 	for p in players:
@@ -434,8 +479,16 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
+## How many pool voices are playing right now: a fight is many at once (the low-health heartbeat ducks under it).
+func busy_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing:
+			n += 1
+	return n
+
 ## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
-func _voice(pos) -> AudioStreamPlayer:
+func _voice(pos, clear := false) -> AudioStreamPlayer:
 	var p: AudioStreamPlayer = null
 	for k in POOL:
 		var c := players[(next + k) % POOL]
@@ -446,16 +499,17 @@ func _voice(pos) -> AudioStreamPlayer:
 	if p == null:
 		p = players[next]
 		next = (next + 1) % POOL
-	p.bus = _bus_for(pos)
+	p.bus = _bus_for(pos, clear)
 	return p
 
-## Which bus a sound at pos plays on: muffled behind terrain, low-passed when far, else the plain SFX bus.
-func _bus_for(pos) -> String:
-	if pos == null:
-		return "SFX"
-	if occlusion.blocked(pos, listener):
+## The bus a sound goes through: behind terrain the muffled SFXMuffled, far ones the low-passed SFXFar, clear
+## ones straight to SFX, the rest SFXWorld (dulled while you are down).
+func _bus_for(pos, clear: bool) -> String:
+	if pos != null and occlusion.blocked(pos, listener):
 		return "SFXMuffled"
-	return "SFXFar" if Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR else "SFX"
+	if pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR:
+		return "SFXFar"
+	return "SFX" if clear else "SFXWorld"
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the
@@ -482,7 +536,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
-	var p := _voice(pos)
+	var p := _voice(pos, sname in CLEAR)
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
@@ -534,10 +588,11 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	var st = streams.get(sname)
 	if st is Array: st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()
-	p.bus = "SFX"
+	p.bus = _bus_for(pos, sname in CLEAR)
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db + float(sound_gain.get(sname, 0.0)), "reach": carry}
+	var vol := vol_db + float(sound_gain.get(sname, 0.0))
+	loops[key] = {"p": p, "pos": pos, "vol": vol, "reach": carry, "clear": sname in CLEAR}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
@@ -590,7 +645,7 @@ func _loop_level(L: Dictionary) -> void:
 	var p: AudioStreamPlayer = L["p"]
 	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
 	p.volume_db = -80.0 if is_nan(v) else v
-	p.bus = _bus_for(L["pos"])
+	p.bus = _bus_for(L["pos"], L["clear"])
 
 ## Plays a ready-made stream (a glider skin's sound, say) with the same distance falloff as play().
 func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) -> void:
