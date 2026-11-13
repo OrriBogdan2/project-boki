@@ -956,10 +956,12 @@ class Sync extends Node:
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
+	var pace: RigPace             # how often the bones are posed (every frame but on GL over Metal)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
 		skel = skeleton
+		pace = RigPace.new(get_instance_id())
 		process_priority = 10       # after Match renders the hunters (HunterAnim.update)
 		for b in BONES:
 			var bi := WardenSkeleton.find(skel, b)
@@ -1021,6 +1023,10 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
+		if pace.every > 1:
+			dt = pace.step(dt, RigPace.is_lead(get_viewport(), root.global_position))
+			if dt == 0.0:
+				return
 		if clips:
 			_play(dt)
 			springs.still = clips.cur in clips.d.get("still", [])

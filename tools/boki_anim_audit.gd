@@ -117,7 +117,7 @@ static func contact_steps(rig: BokiRig, clip: String) -> Array:
 		paths.append([])
 	for i in SAMPLES:
 		rig.player.seek(anim.length * i / SAMPLES, true)
-		rig.player.advance(0.0)
+		rig.advance(0.0)
 		for f in feet.size():
 			var at := skel.get_bone_global_pose(feet[f]).origin
 			paths[f].append(rig.model.to_local(skel.to_global(at)))
@@ -176,7 +176,7 @@ static func seam(rig: BokiRig, clip: String) -> float:
 	var poses: Array = []
 	for i in SAMPLES:
 		rig.player.seek(anim.length * i / SAMPLES, true)
-		rig.player.advance(0.0)
+		rig.advance(0.0)
 		poses.append(_bones(rig.skeleton()))
 	var jumps: Array = []
 	for i in SAMPLES - 1:
@@ -201,7 +201,7 @@ static func pop(k: Node3D, rig: BokiRig) -> float:
 			k.position.z -= HOME_SPEEDS[0] * DT
 		rig._track_speed(DT)
 		rig._pick_clip(DT)
-		rig.player.advance(DT)
+		rig.advance(DT)
 		var now := _bones(rig.skeleton())
 		var jump := _jump(prev, now)
 		prev = now

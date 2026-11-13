@@ -9,7 +9,8 @@ extends RefCounted
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
-## once and reused until it changes.
+## once and reused until it changes. Skinned rigs (RigPace): every frame off GL over Metal; at RigPace.EVERY a
+## Warden away from the camera's focus is posed every few frames with the held time, the one at the focus every frame.
 
 var main: Node
 var fails := 0
@@ -32,6 +33,7 @@ func run(main_node: Node) -> void:
 	_bot_los()
 	_shadows()
 	await _plates()
+	await _rig_pace()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -342,3 +344,33 @@ func _plates() -> void:
 	ok(is_same(a, b) and TextCache.shaped == n0, "the same label reuses its layout")
 	TextCache.line(f, "Wild Pebblit 2", 16)
 	ok(TextCache.shaped == n0 + 1, "changed text is laid out once")
+
+func _rig_pace() -> void:
+	var syncs := m.find_children("Sync", "Node", true, false).filter(func(n): return n is WardenGlb.Sync)
+	ok(not syncs.is_empty(), "the match has Warden rigs (%d)" % syncs.size())
+	if syncs.is_empty():
+		return
+	var want := RigPace.EVERY if RigPace.dear() else 1
+	ok(syncs.all(func(sy): return sy.pace.every == want), "each rig's pace fits the driver")
+	var sy: WardenGlb.Sync = syncs[0]
+	sy.set_process(false)
+	sy.pace.every = RigPace.EVERY
+	sy.pace.held = 0.0
+	m.cam.focus = sy.root.global_position + Vector3(RigPace.LEAD_M * 4.0, 0, 0)
+	var posed := 0
+	for i in RigPace.EVERY * 2:
+		await main.get_tree().process_frame
+		sy._process(0.01)
+		if sy.pace.held == 0.0:
+			posed += 1
+	ok(posed == 2, "a Warden away from the focus is posed on %d of %d frames" % [posed, RigPace.EVERY * 2])
+	m.cam.focus = sy.root.global_position
+	posed = 0
+	for i in RigPace.EVERY * 2:
+		await main.get_tree().process_frame
+		sy._process(0.01)
+		if sy.pace.held == 0.0:
+			posed += 1
+	ok(posed == RigPace.EVERY * 2, "the one at the camera's focus every frame (%d)" % posed)
+	sy.pace.every = want
+	sy.set_process(true)

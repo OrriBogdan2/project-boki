@@ -50,6 +50,7 @@ func _species(main: Node) -> void:
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	_contents(rig)
 	await _states(main, k, rig)
+	await _stepping(main, rig)
 	await _own_look(main)
 	k.queue_free()
 
@@ -97,6 +98,32 @@ func _game_clips(rig: BokiRig) -> void:
 		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
 	for m in BaseTumble.rules()["moves"].values():
 		ok(String(m["clip"]) in CLIPS, "Tumble's %s plays the rig clip %s" % [m["name"], m["clip"]])
+
+## How a rig moves (docs/PERF_PLAN_1111.md): only through BokiRig.advance, skeleton modifiers included, so a rig
+## that isn't stepped is not re-posed. Off GL over Metal it steps every frame; at RigPace.EVERY it moves every
+## few frames with the time it held back, so the clip keeps up.
+func _stepping(main: Node, rig: BokiRig) -> void:
+	var manual_mods := rig.skeleton().modifier_callback_mode_process == Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	ok(manual_mods, "the skeleton's modifiers (BokiDna) move only when the rig is stepped")
+	ok(rig.pace.every == 1 or RigPace.dear(), "the rig steps every frame here")
+	rig.manual = false
+	rig.set_process(false)       # stepped by hand below, one call per drawn frame
+	rig.set_clip("idle", 0.0)
+	rig.seek(0.0)
+	rig.pace.every = RigPace.EVERY
+	var frames := RigPace.EVERY * 2
+	var moved := 0
+	for i in frames:
+		await main.get_tree().process_frame
+		var before := rig.player.current_animation_position
+		rig._process(0.01)
+		if rig.player.current_animation_position != before:
+			moved += 1
+	ok(moved == 2, "every %d frames, the clip moved on %d of %d" % [RigPace.EVERY, moved, frames])
+	var clip_s := rig.player.current_animation_position + rig.pace.held      # (plus what waits for its next step)
+	ok(absf(clip_s - 0.01 * frames) < 0.0001, "and kept up with the time: %.3f s of clip" % clip_s)
+	rig.pace.every = 1
+	rig.set_process(true)
 
 ## True when some frame of the clip leaves every bone within T_POSE of its bind pose.
 func _t_pose(rig: BokiRig, clip: String) -> bool:
@@ -165,8 +192,14 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(rig.clip == "idle", "and it goes back to idle")
 	k.set_meta("face", "sad")
 	rig._face_step(1.0)
+	var sad := rig.face.find_blend_shape_by_name("sad")
+	var w := rig.face.get_blend_shape_value(sad)
+	for i in 40:
+		rig._face_step(0.05)
+	var held := rig.face.get_blend_shape_value(sad)
+	var goal := float(rig._want.get("sad", 0.0))
+	ok(held == goal, "a held expression lands on its goal, so it stops being written: %.4f" % held)
 	k.remove_meta("face")
-	var w := rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("sad"))
 	ok(w > 0.9, "the face meta sets the expression: sad %.2f" % w)
 	k.set_meta("pose", "growl")
 	rig._face_step(1.0)

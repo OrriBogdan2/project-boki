@@ -140,6 +140,8 @@ const FADE := 0.14            # s between body clips
 const GAIT_FADE := {"thrumbird": 0.45}
 const GAITS := ["idle", "walk", "run"]
 const FACE_RATE := 14.0       # 1/s the expression eases at
+const FACE_SNAP := 0.002      # blend weight: this close to its goal, a face shape stops easing (and being written)
+const LOOK_SNAP := 0.0005     # eye UV offset: this close, the eyes stop drifting and their uniform stops being set
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
 const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
@@ -199,6 +201,8 @@ var root: Node3D
 var flex: Node3D
 var model: Node3D
 var player: AnimationPlayer
+var _skel: Skeleton3D
+var pace: RigPace              # how often the seen rig (clip, skeleton, face) steps
 var face: MeshInstance3D
 var eye_mat: ShaderMaterial
 var clip := ""
@@ -282,13 +286,23 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	BokiHomeClips.install(species, player, skeleton())
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	_skel = skeleton()
+	# BokiDna's modifier would otherwise re-pose (and re-skin) the rig every frame, stepped or not
+	_skel.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	pace = RigPace.new(get_instance_id())
+	BokiHomeClips.install(species, player, _skel)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
 	set_clip("idle")
+
+## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
+func advance(dt: float) -> void:
+	player.advance(dt)
+	_skel.advance(dt)
 
 ## The model's skeleton.
 func skeleton() -> Skeleton3D:
@@ -309,22 +323,27 @@ func set_clip(which: String, fade := FADE) -> void:
 ## Tools: holds the body at `at` (s) of the current clip and the face fully on its expression.
 func seek(at: float) -> void:
 	player.seek(at, true)
+	_skel.advance(0.0)
 	for s in _shapes:
 		_now[s] = float(_want.get(s, 0.0))
 		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
 
 func _process(dt: float) -> void:
-	if manual or dt <= 0.0:
+	if dt <= 0.0:
 		return
-	var seen := root.is_visible_in_tree()
-	player.active = seen
-	if not seen:
+	if manual:
+		advance(dt)
+		return
+	if not root.is_visible_in_tree():
 		return
 	_flinch.update(root, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
-	_face_step(dt)
+	var t := pace.step(dt)
+	if t > 0.0:
+		_face_step(t)
+		advance(t)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
 ## the jolt of a hit (KinFlinch) stay.
@@ -437,15 +456,22 @@ func _face_step(dt: float) -> void:
 		var goal := float(_want.get(s, 0.0))
 		if s == "blink" and not shut_already:
 			goal = sin(_blink * PI)
-		var w := lerpf(float(_now[s]), goal, k if s != "blink" else 1.0)
-		_now[s] = w
-		face.set_blend_shape_value(int(_shapes[s]), w)
+		var was := float(_now[s])
+		var w := lerpf(was, goal, k if s != "blink" else 1.0)
+		if absf(w - goal) < FACE_SNAP:
+			w = goal
+		if w != was:       # an unchanged weight isn't written: the face mesh is only re-deformed while it moves
+			_now[s] = w
+			face.set_blend_shape_value(int(_shapes[s]), w)
 	_look_t -= dt
 	if _look_t <= 0.0:
 		_look_t = _rng.randf_range(1.2, 3.8)
 		_look_to = Vector2(_rng.randf_range(-0.09, 0.09), _rng.randf_range(-0.05, 0.05))
-	_look = _look.lerp(_look_to, 1.0 - exp(-12.0 * dt))
-	eye_mat.set_shader_parameter("look", _look)
+	if _look != _look_to:
+		_look = _look.lerp(_look_to, 1.0 - exp(-12.0 * dt))
+		if _look.distance_to(_look_to) < LOOK_SNAP:
+			_look = _look_to
+		eye_mat.set_shader_parameter("look", _look)
 
 ## Wears the game's materials: the painted atlas under the Boki toon light, the glow and the eye in its own colours.
 func _dress(c: Dictionary, mats: Array) -> void:
