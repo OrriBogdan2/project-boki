@@ -7,14 +7,17 @@ extends RefCounted
 ## call taken() in every game when their seat fires, and each game handles only the Hunters it plays.
 
 var m: Match
-var used := {}      # squad -> the `how` of the seat it used
-var late := {}      # Hunter -> {how, where, col, at, until, reach}: told to get to the seat before `until`
+var used := {}  # squad -> the `how` of the seat it used
+var late := {}  # Hunter -> {how, where, col, at, until, reach}: told to get to the seat before `until`
+
 
 func _init(match_node: Match) -> void:
 	m = match_node
 
+
 func spent(h: Hunter) -> bool:
 	return used.has(h.team)
+
 
 ## The seat `how` (called `where`, at `at`) just took `team`; `reach` says whether a Hunter is in the seat.
 func taken(how: String, team: int, where: String, col: Color, at: Vector3, reach: Callable) -> void:
@@ -28,6 +31,7 @@ func taken(how: String, team: int, where: String, col: Color, at: Vector3, reach
 			var msg := "Your squad took a seat out (%s)  ·  get there in %d s or go home without your loot"
 			m.hud.toast(msg % [where, int(left)], col)
 
+
 func tick(_dt: float) -> void:
 	for h: Hunter in late.keys():
 		var e: Dictionary = late[h]
@@ -39,6 +43,7 @@ func tick(_dt: float) -> void:
 		elif m.time >= float(e["until"]):
 			late.erase(h)
 			_send_home(h)
+
 
 ## Out of the match with nothing: what they carried is dropped where they stand, and the Boki goes home with them.
 func _send_home(h: Hunter) -> void:
@@ -66,20 +71,21 @@ func _send_home(h: Hunter) -> void:
 		m._end_soon(1.6)
 	m._check_last()
 
+
 ## The local Hunter's countdown, a pin at the seat and a line to it (HeartHud.world_labels calls this).
 static func draw(hud) -> void:
-	var m: Match = hud.m
-	var os: OneSeat = m.exits.one_seat if m.exits else null
-	var e: Dictionary = os.late.get(m.player, {}) if os and m.player else {}
+	var mt: Match = hud.m
+	var os: OneSeat = mt.exits.one_seat if mt.exits else null
+	var e: Dictionary = os.late.get(mt.player, {}) if os and mt.player else {}
 	if e.is_empty():
 		return
-	var left := ceili(float(e["until"]) - m.time)
+	var left := ceili(float(e["until"]) - mt.time)
 	var at: Vector3 = e["at"]
 	var col: Color = e["col"]
 	hud._draw_waypoint(at + Vector3(0, 1.0, 0), "%s  %d s" % [e["where"], left], col)
-	if not m.cam.is_position_behind(at):
-		var a: Vector2 = m.cam.unproject_position(m.player.pos + Vector3(0, 1.0, 0))
-		var b: Vector2 = m.cam.unproject_position(at + Vector3(0, 1.0, 0))
+	if not mt.cam.is_position_behind(at):
+		var a: Vector2 = mt.cam.unproject_position(mt.player.pos + Vector3(0, 1.0, 0))
+		var b: Vector2 = mt.cam.unproject_position(at + Vector3(0, 1.0, 0))
 		hud.c.draw_line(a, b, Color(col, 0.55), 4.0)
 	var txt := "Reach %s in %d s  ·  or go home without your loot" % [e["where"], left]
 	hud._ctext(Vector2(hud.c.size.x * 0.5, hud.c.size.y * 0.2), txt, 18, col, hud.big)

@@ -5,9 +5,12 @@ extends RefCounted
 
 var ok := true
 
+
 func say(cond: bool, what: String) -> void:
 	print("EXCHECK %s one seat: %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: ok = false
+	if not cond:
+		ok = false
+
 
 ## Squad of three: P and one mate at the Heart Gate, the third far away with some loot. The Gate fires.
 func _gate_taken(m: Match) -> Hunter:
@@ -22,6 +25,7 @@ func _gate_taken(m: Match) -> Hunter:
 	m.heart._take(Heart.HOW_EARLY, P.team)
 	return far
 
+
 ## A spot on solid ground 40 m from the Gate (the island's edge moves with the map; the void would kill them).
 func _far_ground(m: Match) -> Vector3:
 	for d in [Vector3(0, 0, 40.0), Vector3(0, 0, -40.0), Vector3(40.0, 0, 0), Vector3(-40.0, 0, 0)]:
@@ -29,6 +33,7 @@ func _far_ground(m: Match) -> Vector3:
 		if m.world.ground_at(q.x, q.z) > World.VOID:
 			return q
 	return m.heart.gate + Vector3(0, 0, 40.0)
+
 
 ## fresh(squad) -> Match, run(m, sec, every), done(m): the extract check's own helpers.
 func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
@@ -54,8 +59,10 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 	m.time = m.exits.seats.uplink.open_s - m.sess_t0 + 1.0
 	far.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
 	m.exits.act(x, "start", far)
-	say(String(x["state"]) == "idle" and String(m.exits.interact_for(far).get("label", "")).contains("already used"),
-		"nor can they start the Uplink: '%s'" % m.exits.interact_for(far).get("label", ""))
+	say(
+		String(x["state"]) == "idle" and String(m.exits.interact_for(far).get("label", "")).contains("already used"),
+		"nor can they start the Uplink: '%s'" % m.exits.interact_for(far).get("label", "")
+	)
 	done.call(m)
 	await main.get_tree().process_frame
 	# they run for it: in the Gate before the time is up, they leave by it with the seat's reward
@@ -75,8 +82,7 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 	say(not far.out, "%.0f s in, one second left" % (late_s - 1.0))
 	run.call(m, 2.0)
 	var sent: bool = far.out and far.gone and not far.extracted and not m.exits.one_seat.late.has(far)
-	say(sent and far.gems == 0 and far.seeds.is_empty(),
-		"time up: sent home with no gems or seeds")
+	say(sent and far.gems == 0 and far.seeds.is_empty(), "time up: sent home with no gems or seeds")
 	say(m.player_lost.is_empty(), "their Boki is not on the lost list")
 	done.call(m)
 	await main.get_tree().process_frame
@@ -121,8 +127,10 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 	lair_mates[0].teleport(L["up"])
 	far.teleport(L["up"] + Vector3(40.0, 0, 0))
 	m.exits.seats._apply(K)
-	say(P.extracted and lair_mates[0].extracted and not far.extracted and m.exits.one_seat.late.has(far),
-		"the Lair takes the two in it; the third is on the clock")
+	say(
+		P.extracted and lair_mates[0].extracted and not far.extracted and m.exits.one_seat.late.has(far),
+		"the Lair takes the two in it; the third is on the clock"
+	)
 	far.teleport(L["up"])
 	run.call(m, 0.3)
 	var used := String(m.exits.one_seat.used.get(P.team, ""))

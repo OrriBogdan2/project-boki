@@ -7,19 +7,21 @@ extends RefCounted
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
 const MINT := Color("8fe3c8")
-const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
-const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
+const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]  # what to say first when two lines are due
+const EXIT_NEAR := 8.0  # m: this close to an exit, the exit line has done its job
 
 var m: Match
-var line := ""                # the one line on screen ("" for none)
-var id := ""                  # which line
-var shown := {}               # ids already shown this match
-var _t := 0.0                 # s the line has been up
-var _gap := 0.0               # s of quiet left before the next line
-var _throws0 := 0             # the Boki's sends when its line came up
+var line := ""  # the one line on screen ("" for none)
+var id := ""  # which line
+var shown := {}  # ids already shown this match
+var _t := 0.0  # s the line has been up
+var _gap := 0.0  # s of quiet left before the next line
+var _throws0 := 0  # the Boki's sends when its line came up
+
 
 static func rules() -> Dictionary:
 	return Content.rules("first_match_guide")
+
 
 ## The guide for a match that is a real Extraction and a save that still needs it, else null. Counts the match.
 static func for_match(mt: Match, opts: Dictionary) -> FirstMatchGuide:
@@ -34,10 +36,12 @@ static func for_match(mt: Match, opts: Dictionary) -> FirstMatchGuide:
 	g.m = mt
 	return g
 
+
 ## Old saves: one that has played already has had its first matches (keyed by its own field, like FarmBuilder).
 static func migrate(data: Dictionary) -> void:
 	if not data.has("first_guide"):
 		data["first_guide"] = mini(int(data.get("matches", 0)), int(rules()["matches"]))
+
 
 func tick(dt: float) -> void:
 	var p := m.player
@@ -46,7 +50,7 @@ func tick(dt: float) -> void:
 		id = ""
 		return
 	_gap = maxf(_gap - dt, 0.0)
-	if not shown.has("seat") and _due("seat", p):      # a seat's countdown does not wait for the line on screen
+	if not shown.has("seat") and _due("seat", p):  # a seat's countdown does not wait for the line on screen
 		_start("seat", p)
 		return
 	if id != "":
@@ -61,11 +65,13 @@ func tick(dt: float) -> void:
 				_start(cand, p)
 				return
 
+
 func _life(lid: String) -> float:
 	for row: Array in rules()["lines"]:
 		if row[0] == lid:
 			return float(row[2])
 	return 0.0
+
 
 func _start(lid: String, p: Hunter) -> void:
 	id = lid
@@ -79,25 +85,36 @@ func _start(lid: String, p: Hunter) -> void:
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who)
 
+
 func _left() -> float:
 	return (m.length - m.time) / m.length
 
+
 func _enemy_near(p: Hunter) -> bool:
 	for h in m.hunters:
-		if h.team != p.team and not h.out and not h.extracted and not h.downed \
-				and h.pos.distance_to(p.pos) <= float(rules()["squad_range"]):
+		if (
+			h.team != p.team
+			and not h.out
+			and not h.extracted
+			and not h.downed
+			and h.pos.distance_to(p.pos) <= float(rules()["squad_range"])
+		):
 			return true
 	return false
 
+
 func _exit_near(p: Hunter) -> bool:
 	return m.exits != null and m.exits.spots().any(func(s: Vector3): return s.distance_to(p.pos) <= EXIT_NEAR)
+
 
 ## Did the squad take a seat with this player outside it (OneSeat's late_s clock running)?
 func _left_behind(p: Hunter) -> bool:
 	return m.exits != null and m.exits.one_seat != null and m.exits.one_seat.late.has(p)
 
+
 func _kin_ready(p: Hunter) -> bool:
 	return p.kin != null and p.kin.state != "downed"
+
 
 ## Is it time for this line?
 func _due(lid: String, p: Hunter) -> bool:
@@ -106,26 +123,42 @@ func _due(lid: String, p: Hunter) -> bool:
 	if p.dropping:
 		return false
 	match lid:
-		"squad": return _enemy_near(p)
-		"blight": return _left() <= float(rules()["close_at"])
-		"exit": return shown.has("blight")
-		"rank": return p.ak != null and p.skill_pts > 0
-		"send": return _kin_ready(p)
-		"chest": return m.chests.any(func(c: Dictionary): return not c["open"])
-		"seat": return _left_behind(p)
+		"squad":
+			return _enemy_near(p)
+		"blight":
+			return _left() <= float(rules()["close_at"])
+		"exit":
+			return shown.has("blight")
+		"rank":
+			return p.ak != null and p.skill_pts > 0
+		"send":
+			return _kin_ready(p)
+		"chest":
+			return m.chests.any(func(c: Dictionary): return not c["open"])
+		"seat":
+			return _left_behind(p)
 	return false
+
 
 ## Has the player done what this line says (or is it no longer true)?
 func _done(lid: String, p: Hunter) -> bool:
 	match lid:
-		"land": return not p.dropping
-		"squad": return not _enemy_near(p)
-		"exit": return _exit_near(p)
-		"rank": return p.skill_pts == 0
-		"send": return not _kin_ready(p) or p.kin.st_throws > _throws0
-		"chest": return int(p.stats.get("chests", 0)) > 0
-		"seat": return not _left_behind(p)
+		"land":
+			return not p.dropping
+		"squad":
+			return not _enemy_near(p)
+		"exit":
+			return _exit_near(p)
+		"rank":
+			return p.skill_pts == 0
+		"send":
+			return not _kin_ready(p) or p.kin.st_throws > _throws0
+		"chest":
+			return int(p.stats.get("chests", 0)) > 0
+		"seat":
+			return not _left_behind(p)
 	return false
+
 
 ## The line in the tutorial's strip at the top-centre (the two never show together), under the Ways Out strip.
 func draw(h, sz: Vector2) -> void:
@@ -133,5 +166,5 @@ func draw(h, sz: Vector2) -> void:
 		return
 	var below := WaysOutHud.bottom(h.m)
 	if h.m.skydrop and h.m.skydrop.planning:
-		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
+		below = maxf(below, 48.0)  # the ship's countdown line (Hud, y 40, 18 px)
 	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, _t, below), {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))

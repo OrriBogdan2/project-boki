@@ -10,9 +10,12 @@ var m: Match
 var main: Node
 var g: FirstMatchGuide
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FMGUIDE %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -21,6 +24,7 @@ func run(mn: Node) -> void:
 	_walk()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _save_flag() -> void:
 	Save.d["first_guide"] = 0
@@ -42,14 +46,17 @@ func _save_flag() -> void:
 	ok(int(kept["first_guide"]) == 0, "the field is never overwritten")
 	ok(int(Save.fresh()["first_guide"]) == 0, "a new save starts at 0")
 
+
 func _skips(key: String) -> bool:
 	return FirstMatchGuide.for_match(null, {key: true}) == null
+
 
 func _tick(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		g.tick(0.1)
 		t += 0.1
+
 
 func _walk() -> void:
 	Save.d["first_guide"] = 0
@@ -124,11 +131,12 @@ func _walk() -> void:
 	ok(g.line == "", "after extracting nothing shows")
 	p.extracted = false
 	if m.skydrop:
-		m.skydrop.planning = false      # (the ship waits for you to plan the drop, and the match with it)
+		m.skydrop.planning = false  # (the ship waits for you to plan the drop, and the match with it)
 	g._gap = 0.0
 	m.step(Match.DT)
 	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
 	_fit()
+
 
 ## The squad takes a seat without you: the late_s line shows at once (the quiet gap does not hold it), clears
 ## when you are no longer on the clock, and never comes back.
@@ -147,6 +155,7 @@ func _seat(p: Hunter) -> void:
 	_tick(2.0)
 	ok(g.id != "seat", "the seat line shows once a match")
 	os.late.erase(p)
+
 
 func _fit() -> void:
 	var strip := TutorialStrip.rect(Vector2(1280, 720))

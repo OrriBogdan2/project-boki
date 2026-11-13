@@ -213,9 +213,9 @@ func _leave_lair(s: QuestSeat) -> void:
 	m.exits.one_seat.taken(HOW_LAIR, s.team, String(L["name"]), Lairs.color_of(L), L["up"], at_lair.bind(L))
 
 ## In the lair, on its updraft or just thrown out over the wall by it.
-func at_lair(h: Hunter, L: Dictionary) -> bool:
-	var gone: bool = (L.get("flown", []) as Array).has(h) or (L.get("escaped", []) as Array).has(h)
-	return gone or m.lairs.inside(L, h.pos, 0.5)
+func at_lair(h: Hunter, lair_d: Dictionary) -> bool:
+	var gone: bool = (lair_d.get("flown", []) as Array).has(h) or (lair_d.get("escaped", []) as Array).has(h)
+	return gone or m.lairs.inside(lair_d, h.pos, 0.5)
 
 ## The Sealed Lair shut unused: its gate closes again (Lairs._tick_seal walks anyone inside out).
 func _reseal(L: Dictionary) -> void:
