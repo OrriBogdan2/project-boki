@@ -80,6 +80,7 @@ func air_zoom(h: Hunter, alt: float) -> float:
 const CAST_EASE := 16.0       # 1/s
 const CAST_HOLD := 0.04       # s a request lasts, so the view lets go as soon as the kit stops asking
 const CAST_STEP := 1.0 / 60.0 # s a frame can take off that at most
+static var POSE_FAR_M: float = RULES["pose_far_m"]   # m (flat) from the focus: on screen past it is far (SimLod)
 static var EDGE: float = RULES["lean_edge_m"]      # m the cursor lean and a cast keep between you and the screen's edge
 var cast_k := 0.0             # 0 = the usual view, 1 = fully pushed out
 var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
