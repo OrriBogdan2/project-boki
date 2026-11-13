@@ -4,12 +4,10 @@ extends Control
 ## squad has picked, the picks lock and the match loads.
 
 const TIMER_SIZE := 88        # px, the countdown digits
-const SAFE_FRAC := 0.04       # fraction of the window height kept clear on every side (title-safe)
 const DIGITS_FRAC := 0.1       # countdown digit size as a fraction of the window height
 const DIGITS_MIN := 48         # px, the smallest countdown digits
 const PULSE_RATE := 0.012      # radians per ms of the last-seconds throb (about 2 beats a second)
 const PULSE_GROW := 0.12       # the digits swell by this much at the top of a beat
-const SAFE_MIN := 24          # px, the least margin at any window size
 const TICK_FROM := 5.0        # s left on your turn when the countdown ticks each second
 const PULSE_FROM := 3.0       # s left on your turn when the countdown throbs red
 
@@ -193,14 +191,16 @@ func _pulse(left: float) -> void:
 	timer_label.pivot_offset = timer_label.size * 0.5
 	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
 
-## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size;
+## Keeps the whole screen inside the HUD safe margin (HudStyle.safe_pad), so the countdown shows at every window size;
 ## smaller windows get smaller digits. The declutter layout has no side column, so the Hunter grid
 ## keeps COLUMNS at every size (4 x CARD_MIN_W fits the 1240 logical px UI).
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
-	var m := maxi(SAFE_MIN, int(win.y * SAFE_FRAC))
-	for side in ["left", "right", "top", "bottom"]:
-		_pad.add_theme_constant_override("margin_" + side, m)
+	var pad := HudStyle.safe_pad(win)
+	for side in ["left", "right"]:
+		_pad.add_theme_constant_override("margin_" + side, int(pad.x))
+	for side in ["top", "bottom"]:
+		_pad.add_theme_constant_override("margin_" + side, int(pad.y))
 	timer_label.add_theme_font_size_override("font_size", clampi(int(win.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
 
 func _unhandled_key_input(e: InputEvent) -> void:

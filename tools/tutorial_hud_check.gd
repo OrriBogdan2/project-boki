@@ -44,8 +44,8 @@ func _lanes() -> void:
 		var tag := "%dx%d" % [sz.x, sz.y]
 		var small: bool = b.size.x <= sz.x * TutorialStrip.WIDTH_FRAC + 0.5 and b.size.y <= sz.y * 0.06 + 0.5
 		ok(small, "%s: the strip is at most 42%% x 6%% of the screen (%s)" % [tag, str(b.size)])
-		var margin := maxf(24.0, sz.y * 0.04)
-		var in_safe := b.position.y >= margin - 0.5 and b.position.x >= margin
+		var margin := HudStyle.safe_pad(sz).y
+		var in_safe := HudStyle.safe_rect(sz).grow(0.5).encloses(b)
 		ok(in_safe, "%s: the strip is inside the safe margin (%.0f)" % [tag, b.position.y])
 		ok(absf(b.get_center().x - sz.x * 0.5) < 1.0, "%s: the strip is at the top-centre" % tag)
 		var pulse_ok := TutorialStrip.glow(0.0) == 1.0 and TutorialStrip.glow(TutorialStrip.PULSE_T) == 0.0
@@ -64,8 +64,9 @@ func _lanes() -> void:
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
 		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
 		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
-		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
-		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
+		var wo_top := WaysOutHud.top_y(sz)
+		var wo_b := wo_top + WaysOutHud.CELL.y + 31.0
+		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, wo_top), Vector2(wo_w, wo_b - wo_top))
 		var gb := TutorialStrip.rect(sz, wo_b)
 		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
 		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])

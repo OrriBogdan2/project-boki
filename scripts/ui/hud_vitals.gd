@@ -90,7 +90,7 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 		fg = Color("8fe0a0") if grass else Color("c9d2e0")
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
+	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, H._hud_origin(sz).y + 46.0), Vector2(tw + 24, 20))
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 

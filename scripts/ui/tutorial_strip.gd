@@ -11,8 +11,6 @@ const GOLD := Color("f2c84a")
 const PANEL := Color(0.03, 0.04, 0.07, 0.94)
 const HEIGHT_FRAC := 0.06       # of the screen height: the tallest the strip gets
 const WIDTH_FRAC := 0.42        # of the screen width: the widest it gets (the message lane starts at 0.72)
-const SAFE_FRAC := 0.04         # the title-safe margin (PrematchView.SAFE_FRAC), of the height
-const SAFE_MIN := 24.0          # px, the least margin at any size
 const PULSE_T := 1.6            # s the glow and the pulse take to calm after the objective changes
 const PULSE_HZ := 2.5           # beats a second while it pulses
 const POP_T := 0.25             # s the strip takes to drop in on a new objective
@@ -26,7 +24,7 @@ const FIGHT_S := 3.0            # s after your last hurt that still counts as a 
 ## Ways Out strip in a real match, WaysOutHud.bottom) when that is lower, so it never covers the zone clocks.
 static func rect(sz: Vector2, below := 0.0) -> Rect2:
 	var w := sz.x * WIDTH_FRAC
-	var top := maxf(maxf(SAFE_MIN, sz.y * SAFE_FRAC), below + GAP if below > 0.0 else 0.0)
+	var top := maxf(HudStyle.safe_pad(sz).y, below + GAP if below > 0.0 else 0.0)
 	return Rect2(Vector2((sz.x - w) * 0.5, top), Vector2(w, sz.y * HEIGHT_FRAC))
 
 ## The one quiet chime of a new objective, on the first frame of its pulse (never a nag's re-pulse or an

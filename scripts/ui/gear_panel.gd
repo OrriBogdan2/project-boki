@@ -14,8 +14,10 @@ static var _ups_w := 0.0
 ## Rect of slot i for a screen size (right-aligned, above the weapon card and its row of tonic / kit / throw slots).
 static func cell_rect(sz: Vector2, i: int) -> Rect2:
 	var total := Gear.SLOTS.size() * CELL + (Gear.SLOTS.size() - 1) * GAP
-	var x := sz.x - 18.0 - 270.0 + (270.0 - total)
-	return Rect2(Vector2(x + i * (CELL + GAP), sz.y - 18.0 - 62.0 - 66.0 - 22.0 - CELL), Vector2(CELL, CELL))
+	var pad := HudStyle.safe_pad(sz)
+	var x := sz.x - pad.x - total
+	var y := sz.y - pad.y - HudStyle.KEY_REACH - 62.0 - 66.0 - 22.0 - CELL
+	return Rect2(Vector2(x + i * (CELL + GAP), y), Vector2(CELL, CELL))
 
 static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	for i in Gear.SLOTS.size():

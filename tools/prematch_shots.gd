@@ -6,18 +6,28 @@ extends RefCounted
 
 const MOMENTS := [["full", 10.0], ["chat", 10.0], ["red", 2.0], ["locked", 0.0]]      # [name, s left on your turn]
 
-## The visible controls under `node` (not its frame) that stick out of `area` less the view's title-safe
-## margin, as "Class at rect".
+## The visible controls under `node` (not its frame) that stick out of `area` less the HUD safe margin
+## (HudStyle.safe_pad), as "Class at rect". A control inside a ScrollContainer counts as far as the
+## scroller shows it: the rest scrolls into view.
 func outside(node: Node, area: Rect2) -> Array:
-	var pv = load("res://scripts/ui/prematch_view.gd")
-	var margin := float(maxi(pv.SAFE_MIN, int(area.size.y * pv.SAFE_FRAC)))
-	var safe := area.grow(-margin + 1.0)
+	var safe := HudStyle.safe_rect(area.size).grow(1.0)
 	var bad: Array = []
 	for c in node.find_children("*", "Control", true, false):
-		var inside := safe.encloses(c.get_global_rect())
+		var inside := safe.encloses(_shown_rect(c))
 		if c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0 and not inside:
 			bad.append("%s at %s" % [c.get_class(), c.get_global_rect()])
 	return bad
+
+## `c`'s rect cut to what its nearest ScrollContainer shows.
+func _shown_rect(c: Control) -> Rect2:
+	var r := c.get_global_rect()
+	var up := c.get_parent()
+	while up != null and not up is ScrollContainer:
+		up = up.get_parent()
+	if up == null:
+		return r
+	var view := (up as Control).get_global_rect()
+	return r.intersection(view) if r.intersects(view) else Rect2(view.get_center(), Vector2.ZERO)
 
 func run(main: Node) -> void:
 	Save.no_write = true

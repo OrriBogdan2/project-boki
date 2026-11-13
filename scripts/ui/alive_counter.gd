@@ -3,7 +3,6 @@ class_name AliveCounter
 ## icon and a number, a person icon and a number; solos show players only), and under it your own
 ## kills, knocks and gems in a quieter row. Never who is left. Drawn by Hud; the kill feed hangs under it.
 
-const PAD := 18.0            # px from the screen edge
 const BIG_CELL := Vector2(78.0, 44.0)    # px, one big counter (icon + number)
 const BIG_PX := 26           # px, the big numbers
 const SMALL_CELL := Vector2(54.0, 26.0)  # px, one of your own numbers
@@ -42,7 +41,8 @@ static func draw(c: Control, m: Match) -> float:
 		cells.append(["squad", str(squads_left(m))])
 	cells.append(["person", str(players_left(m))])
 	var bw := BIG_CELL.x * cells.size()
-	var r := Rect2(Vector2(c.size.x - PAD - bw, PAD), Vector2(bw, BIG_CELL.y))
+	var pad := HudStyle.safe_pad(c.size)
+	var r := Rect2(Vector2(c.size.x - pad.x - bw, pad.y), Vector2(bw, BIG_CELL.y))
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 10, Color(1, 1, 1, 0.16), 1), r)
 	for i in cells.size():
 		var x := r.position.x + BIG_CELL.x * i
@@ -56,7 +56,7 @@ static func draw(c: Control, m: Match) -> float:
 	var gems := p.gems if p else 0
 	var mine := [["knock", kills, Color("ff9a8a")], ["burst", knocks, Color("ffd27a")], ["gem", gems, HudStyle.GOLD]]
 	var sw := SMALL_CELL.x * mine.size()
-	var sr := Rect2(Vector2(c.size.x - PAD - sw, r.end.y + GAP), Vector2(sw, SMALL_CELL.y))
+	var sr := Rect2(Vector2(c.size.x - pad.x - sw, r.end.y + GAP), Vector2(sw, SMALL_CELL.y))
 	c.draw_style_box(HudStyle.box(Color(0.05, 0.03, 0.08, 0.7), 8, Color(0, 0, 0, 0), 0), sr)
 	for i in mine.size():
 		var x := sr.position.x + SMALL_CELL.x * i

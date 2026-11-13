@@ -10,6 +10,7 @@ extends RefCounted
 ##   8. knock banners (KnockBanner): a rival you knock shows KNOCK in the red ring (a second one at once
 ##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
 ##   9. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
+##   9. every drawn HUD block, the tip card and the top strips sit inside the HudStyle safe margin
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -206,7 +207,33 @@ func run(main_node: Node) -> void:
 	await _check_keys(P)
 	_check_deny(P)
 	await _check_ult(P)
+	_check_safe(hud)
 	_done()
+
+## 9. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap
+## and the tip card sit inside HudStyle.safe_rect, at the window size the run has and at 1280x720 / 1920x1080.
+func _check_safe(hud) -> void:
+	var sz: Vector2 = hud.c.size
+	var pad := HudStyle.safe_pad(sz)
+	var safe := HudStyle.safe_rect(sz).grow(0.5)
+	var out: Array = []
+	for spot in hud.hover_spots:
+		if not safe.encloses(spot[0]):
+			out.append("%s %s" % [spot[1], spot[0]])
+	ok(out.is_empty(), "every drawn HUD block is inside the %.0f x %.0f margin (%s)" % [pad.x, pad.y, out.slice(0, 3)])
+	ok(hud.mm_bottom - 196.0 >= pad.y - 0.5, "the minimap starts under the top margin")
+	for size: Vector2 in [Vector2(1280, 720), Vector2(1920, 1080)]:
+		var tag := "%dx%d" % [size.x, size.y]
+		var s := HudStyle.safe_rect(size)
+		var slot := Rect2(s.end - Vector2(20, 20), Vector2(20, 20))      # a slot in the safe corner
+		var tip := Rect2(HudTip.place(slot, Vector2(300, 120), size), Vector2(300, 120))
+		ok(s.encloses(tip), "%s: the tip card by a corner slot stays in the safe area" % tag)
+		var reach: float = hud.HUD_REACH
+		var origin: Vector2 = hud._hud_origin(size)
+		var vitals := Rect2(origin - Vector2(reach, 0.0), Vector2(HudVitals.BAR_W + 144.0 + reach, 132.0 + reach))
+		ok(s.encloses(vitals), "%s: the vitals block sits in the safe area" % tag)
+		var strips := minf(WaysOutHud.top_y(size), TutorialStrip.rect(size).position.y)
+		ok(strips >= s.position.y, "%s: the top strips start under it" % tag)
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
 ## right-side Boki box); every hunter has an X tile with a lock until level 6 and a cooldown after a cast.
