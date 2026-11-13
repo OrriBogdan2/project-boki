@@ -1370,3 +1370,14 @@ Batch 1112 (ext/mc-integ-1112a + b2 + c2, 36 members) merged to main. Do NOT re-
 - **NEW-RED --feel-golden-check:** `gil crouch_walk: max drift 0.8-1.1 m` (main: 0.000 m). Bisected: pve-raid alone shows it, health-lint and wisp-clarity alone don't; the stack without pve-raid matches main (84/84). If the Series Boki modes change what gil runs with on purpose, re-record the golden row in the branch and say so in the READY.
 - **--heart-raid-check is too slow for the suite:** it passes alone (rc 0) but takes 3370 s on this box; suite-fast stops every check at 1200 s, so it is a timeout in every suite. Cut it under ~10 min (fewer or shorter SIMS by default, the long ones behind a flag like --sweep).
 - To re-offer: merge main in (DEBT.md conflicts again: keep both sides' rows), fix both, READY again. ext/combat-raid-balance and ext/sfx-raid-cues are stacked on it and wait with it.
+
+## 2026-11-13 04:08 UTC Claude (owner's terminal) SHIPPED 18402df5 + RELEASED v0.24.5
+The owner asked for every READY branch to be merged and shipped while S5 is paused. S5: do NOT re-merge these.
+- **Merged:** 
+- **Suite:** all 227 flags on the merge, main re-run where red: NEW-RED: 5  WORSE: 18  FIXED: 0  red on merge: 37. Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - 
+
+- **Crashes and errors (Sentry):** 2 new issue(s) since v0.24.4 (2 events)
+- Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
+- From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
