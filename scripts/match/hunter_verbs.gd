@@ -6,7 +6,8 @@ extends RefCounted
 ## (left shoulder is -x, forward is -z). HomeVerbs times them; HunterAnim asks for legs, pitch, hands.
 
 const ACTS := ["feed", "pat", "toss", "cheer"]
-const LENGTH := {"feed": 1.6, "pat": 1.3, "toss": 0.8, "cheer": 1.5}      # s each move plays at home
+# s each move plays at home (a Hero's pet, give and cheer clips run as long)
+const LENGTH := {"feed": 1.0, "pat": 1.3, "toss": 0.8, "cheer": 0.8}
 const TOSS_RELEASE := 0.5            # s into the toss when the ball leaves the hand
 const STAND := Vector4(0.12, -0.22, 0.12, -0.22)      # legs at rest
 const HANG := Vector3(0.0, -0.42, -0.04)      # a relaxed free hand, from its shoulder
