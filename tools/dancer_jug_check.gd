@@ -380,7 +380,7 @@ func thief(a) -> void:
 	DTIMING.new().run(A, m, K)
 	DLOOP.new().run(A, m, P, K, T, T2, home)
 	STRIKES.new().run(A, A.main, "thief", {"thf_lmb_r": 0.0, "thf_lmb_l": 0.0, "thf_primed": 0.0,
-			"thf_bola": float(K.rmb_def()["bola"]["cast"]), "thf_knife": ThiefKit.KNIFE_OUT},
+			"thf_bola": float(K.rmb_def()["bola"]["cast"]), "thf_knife": ThiefKit.KNIFE_RELEASE_S},
 			{"thf_bola": 0.2})        # (the bolas are raised overhead in the first frames; the sling is the throw)
 	await A.done(m)
 	await _growth()
