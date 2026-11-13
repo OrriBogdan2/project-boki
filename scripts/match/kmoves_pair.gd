@@ -343,25 +343,26 @@ const MOVES := {
 		}],
 		[0.22, {"p": 0.2, "sq": 0.2, "lift": -0.05, "fl": Vector3(-0.05, 0.95, -0.05), "hw": 1.0, "gp": 0.9}],
 		[0.5, {}]]},
-	# Flue Flight (X, held for the 1.4s flight): a quick crouch as the ember ring bursts (0.08s), then he springs
-	# up and leans into the jet, the free arm swept back to the bellows strap, the nozzle held low, legs trailing
-	"lw_jet": {"hold": true, "keys": [
+	# Flue Flight (X, held for the 1.8s flight): a quick crouch as the ember ring bursts (0.08s), then she springs
+	# up into the hover, both palms out and down where the fire builds (0.22s), and holds that lean into the jet,
+	# legs trailing; "bank": the whole body rolls into the flight's turns, as under the glider
+	"lw_jet": {"hold": true, "bank": true, "keys": [
 		[0.0, {"sq": 0.35, "lift": -0.12, "p": 0.12, "lw": 1.0, "legs": [0.9, -1.4, 0.8, -1.3]}],
 		[0.08, {
 			"p": -0.3, "gp": -0.45, "sq": -0.38, "lift": 0.42, "lw": 1.0, "legs": [0.15, -0.5, 0.35, -0.7],
-			"fl": Vector3(-0.35, -0.2, 0.45), "hw": 1.0
+			"fl": Vector3(-0.35, -0.2, 0.45), "hw": 1.0, "fr": Vector3(0.35, -0.2, 0.45), "rw": 1.0
 		}],
 		[0.22, {
 			"p": -0.2, "gp": -0.4, "sq": -0.12, "lift": 0.22, "lw": 1.0, "legs": [0.25, -0.6, 0.4, -0.8],
-			"fl": Vector3(-0.3, -0.15, 0.4), "hw": 1.0
+			"fl": Vector3(-0.3, -0.15, 0.4), "hw": 1.0, "fr": Vector3(0.3, -0.15, 0.4), "rw": 1.0
 		}],
 		[0.6, {
 			"p": -0.24, "gp": -0.4, "sq": -0.06, "lift": 0.28, "lw": 1.0, "legs": [0.35, -0.7, 0.3, -0.6],
-			"fl": Vector3(-0.32, -0.1, 0.42), "hw": 1.0
+			"fl": Vector3(-0.32, -0.1, 0.42), "hw": 1.0, "fr": Vector3(0.32, -0.1, 0.42), "rw": 1.0
 		}],
 		[1.0, {
 			"p": -0.2, "gp": -0.4, "sq": -0.1, "lift": 0.22, "lw": 1.0, "legs": [0.25, -0.6, 0.4, -0.8],
-			"fl": Vector3(-0.3, -0.15, 0.4), "hw": 1.0
+			"fl": Vector3(-0.3, -0.15, 0.4), "hw": 1.0, "fr": Vector3(0.3, -0.15, 0.4), "rw": 1.0
 		}]]},
 	# the landing: light, as the source (no visible squash): a soft give in the knees and he walks on (0.2s)
 	"lw_land": {"keys": [
