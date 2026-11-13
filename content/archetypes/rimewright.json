@@ -27,7 +27,7 @@
 		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
 		"rmb": "Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
 		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; {key:signature} again freezes it.",
-		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
+		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick, and hit twice as hard.",
 		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
 		"weapons": {
 			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
@@ -64,8 +64,9 @@
 		"refund": 0.6,
 		"min_t": 0.2,
 		"rink_t": 0.0,
-		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
 		"steer": 3.6,
+		"skate_dart_dmg_k": 2.0,
 		"ice_gap": 0.2,
 		"ice_look": 2.0,
 		"ice_len": 3.6,

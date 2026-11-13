@@ -73,6 +73,7 @@ var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var lean := 0.0              # rad the root is tipped forward (FEEL)
+var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -118,6 +119,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
 	root = model
 	skel = sk
+	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	var names := player.get_animation_library_list()
 	if names.is_empty():
@@ -480,9 +482,10 @@ func step(dt: float) -> void:
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
-	var bi := WardenSkeleton.find(skel, "root")
-	if bi >= 0:
-		skel.set_bone_pose_scale(bi, skel.get_bone_rest(bi).basis.get_scale())    # (unkeyed: feel can't build up)
+	if root_bi >= 0:
+		# (unkeyed: feel can't build up)
+		skel.set_bone_pose_scale(root_bi, skel.get_bone_rest(root_bi).basis.get_scale())
+	_air_tilt()
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 
@@ -529,6 +532,17 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 	if legs_only or legs_was:
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
+
+## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
+## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
+func _air_tilt() -> void:
+	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+		return
+	var b := Basis(q)
+	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
+	var turn := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
+	skel.set_bone_global_pose(root_bi, turn * skel.get_bone_global_pose(root_bi))
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)

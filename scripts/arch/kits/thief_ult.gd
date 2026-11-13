@@ -56,7 +56,6 @@ func start() -> void:
 	beat = 0
 	var h := k.h
 	k.play("thf_encore")
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), AbilityText.short_name(k.id, "x").to_upper(), RING_COL, false)
 	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
