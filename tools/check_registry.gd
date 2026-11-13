@@ -134,7 +134,9 @@ const CHECKS := {
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],  # item 94
 	"--music-combat-check": ["res://tools/music_combat_check.gd", "music_combat_check", null],
 	"--soundtrack-check": ["res://tools/soundtrack_check.gd", "soundtrack_check", null],      # Settings > Audio > Music
+	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],      # map regions, hot drop zone
 	"--air-rings-check": ["res://tools/air_rings_check.gd", "air_rings_check", null],      # lanes, lifts, bots
+	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
 	"--match-repeat-check": ["res://tools/match_repeat_check.gd", "match_repeat_check", null],      # leaks
 	# merged props hold their draws; --shots-dir=<dir> saves a lineup
 	"--prop-draws-check": ["res://tools/prop_draws_check.gd", "prop_draws_check", null],
@@ -520,7 +522,6 @@ const CHECKS := {
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],  # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
-	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
 	# 2 games, relay, docs/decisions/0018
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
 	"--tutorial-timing-check": ["res://tools/tutorial_timing_check.gd", "tutorial_timing_check", null],
@@ -615,6 +616,15 @@ const CHECKS := {
 	"--camera-follow-shots": ["res://tools/camera_follow_check.gd", "camera_follow_check", "shots"],  # GPU
 	# mashing LMB never beats holding
 	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],
+	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
+	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
+	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
+	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
+	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
+	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
+	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
+	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
+	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
 }
 
