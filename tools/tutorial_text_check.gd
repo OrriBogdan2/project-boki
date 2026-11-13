@@ -22,9 +22,9 @@ func _lint(where: String, text: String, seen_intro: Dictionary) -> void:
 	ok(words.size() <= MAX_WORDS, "%s: %d words (max %d): %s" % [where, words.size(), MAX_WORDS, text])
 	var re := RegEx.create_from_string("[.!?](\\s|$)")
 	ok(re.search_all(text.strip_edges().rstrip(".!?")).size() == 0, "%s: more than one sentence: %s" % [where, text])
-	var raw := RegEx.create_from_string("(?i)\\b(press|hold|tap|click)\\s+(?:the\\s+)?([a-z0-9])\\b(?!\\w)")
+	var raw := RegEx.create_from_string("\\b(?i:press|hold|tap|click)\\s+(?:the\\s+)?([A-Z0-9])\\b(?!\\w)")
 	for m in raw.search_all(text):
-		var w := m.get_string(2)
+		var w := m.get_string(1)
 		ok(false, "%s: raw key '%s' (use a key_cap token): %s" % [where, w, text])
 	var low := text.to_lower()
 	for term in JARGON:
