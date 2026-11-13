@@ -116,7 +116,10 @@ func _base_tutorial() -> void:
 			one_line = one_line and not String(t).contains("\n")
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
-	ok(FarmTutorial.hint_text("out").contains("Waystone"), "the last hint points at the Waystone")
+	var last := FarmTutorial.hint_text("out")
+	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
+	ok(last.contains("Waystone") and path_said and not last.contains("\n"),
+			"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line")
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
@@ -154,6 +157,16 @@ func _skip_shown(guide: FarmGuide) -> bool:
 			return true
 	return false
 
+## None of the points is on a bridged side isle (Data.ISLES, retired by the garden zones).
+func _on_no_isle(pts: Array) -> bool:
+	for p in pts:
+		for isle in Data.ISLES.values():
+			var c: Vector2 = isle["c"]
+			var r: Vector2 = isle["r"]
+			if pow((p.x - c.x) / r.x, 2) + pow((p.z - c.y) / r.y, 2) < 1.0:
+				return false
+	return true
+
 ## Two of BaseLife's 10 Hz ticks for this Boki (Roam to Lead, then one Lead tick).
 func _lead_tick(home, k: Dictionary) -> void:
 	k.erase("busy")
@@ -179,6 +192,9 @@ func _base_world() -> void:
 	ok(Vector2(k["goal"].x - home.ppos.x, k["goal"].z - home.ppos.z).length() < 8.0, "it comes toward you")
 	guide._poll()
 	ok(_skip_shown(guide), "step 1: Skip is on screen")
+	var me: Vector3 = k["node"].position
+	ok(guide.target("meet") == me and guide.target("eat") == me and _on_no_isle([me]),
+			"meet and feed: the marker is on your Boki, not a side isle")
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	guide._poll()
 	ok(FarmTutorial.current() == "eat" and _berries() == 3, "walking up meets it and hands over the food")
@@ -203,7 +219,10 @@ func _base_world() -> void:
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
+	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
 	guide.place_toy()
+	ok(guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
+			"toy: the marker is on the toy you put down, not a side isle")
 	_lead_tick(home, k)
 	var leading: bool = home.life.machine(k).is_in(BaseLife.S.LEAD)
 	ok(k.has("play") and not leading, "a toy down: it leaves the lead to go and play")
@@ -213,6 +232,7 @@ func _base_world() -> void:
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	_lead_tick(home, k)
 	var portal: Vector3 = home.spots["portal"]
+	ok(guide.target("out") == portal and _on_no_isle([portal]), "head out: the marker is on the portal, no side isle")
 	var gap := Vector2(portal.x - k["pos"].x, portal.z - k["pos"].z).length()
 	var ahead := Vector2(portal.x - k["goal"].x, portal.z - k["goal"].z).length()
 	ok(FarmTutorial.current() == "out" and String(k["lead_said"]) == "out" and ahead < gap,
