@@ -225,7 +225,7 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
 
 - Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
-- Runs pitched far forward (about 0.57 rad at a run).
+- Runs pitched far forward (about 0.57 rad at a run), the stride at the sheet's ~2.3 Hz (Animation timing).
 - Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve (off the global dash feel). In the air it is the same
   Cartwheel on the same curve (item 183), out of charges the class's long dash, and the shared air drag carries her
   on to the landing (owner 11-09: the sheet's 8.4 m held flat over 0.95 s flew far past the cast). From a jump it
@@ -426,6 +426,40 @@ clips are keyed on KMovesDJ's beats, so no row needed a fix.
 
 Suggestions (ours, not built): the release snaps (0.02-0.03 s) land inside the 0.1 s blend in, so a lone tap shows
 about half the whip; a per-move `"fade"` near 0.04 would show it whole (ext/anim-time-sable measured this on v1).
+
+## Animation timing, start / hit / end on the move clock (Nov 10, ext/anim-timing-thief)
+Measured through `WardenClips` (sable.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, out to
+locomotion 0.16 s) in `--thief-combo-check` (tools/thief_anim_time_check.gd, its `TIME` lines). "Hit" is the release
+key, "end" when the blend out is done. Source times from briefs/hero-ref/dancer.md (one frame = 0.2 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `thf_lmb_r` `thf_lmb_l` | one arm whip a shot, a hit every 2-3 frames against the 0.45 card | 0.02 / shot key 0 / settled 0.26; held: a bolt every 0.467 (frame steps of 0.45), hands alternating | same | matches |
+| `thf_primed` | one frame of the glint, nothing to time | V 0.04 / recoil 0.24 / 0.55 | same | no source |
+| `thf_bola` | lane 0.4-0.6 s, then a whirl overhead and a sling with a lunge | 0.00 / thrown 0.42 on the clip's sling key 0.42 / 0.90 | same | matches |
+| `thf_knife` | thrown within a frame (0222 -> 0223) | 0.00 / release 0.13 on the clip key / 0.63 | same | matches |
+| `thf_arrive` (recast) | blink inside one frame (< 0.2 s) | there after 0.02 s | same | matches |
+| `thf_arrive` (forced return) | no auto-teleport seen in 5 s | on the window's end, a cartwheel in flight cut | same | no source (asserted as built) |
+| `thf_vault_*` | crouch 0.05, over the top 0.25-0.3, landing crouch, up by 0.45-0.5; 3.9-5.4 m | dash 0.48, clip 0.48 on it (push-off 0.1, turn 0.3, land 0.36) / out 0.63; 4.5 m | same | matches |
+| `thf_exdash` (flip) | 304.0-304.25 (0.25 s) | tuck 0.05, flip 0.08 -> 0.34 (0.26 s), then held flat | same | matches |
+| Air Cartwheel (carry) | lands ~0.5 s after the jump; 8.4 m over ~0.95 s, no float | dashed 0.1 s after a jump: 5.8 m, touchdown 0.75 s after the press (the same Cartwheel on the ground curve, then the shared air drag; owner 11-09 chose this over the sheet's flat 8.4 m) | same | differs by decision (below) |
+| `thf_land` | crouch ~0.1, up in ~0.05 | on the touchdown frame (1.23 vs 1.22), crouch 0.1, up by 0.18 | same | matches |
+| `thf_encore` `thf_encore_dance` | ring grows ~0.4 s, a blade about every 0.2 s for 2 s | cast on the press; beats 10 from 0.42 every 0.200; dance from 0.42 on the beat's clock; over 2.42 | same | matches |
+| `mf_xform` | - | - | same | no source |
+| Run cadence | ~2.3 Hz (4.5 steps/s) | 1.63 Hz at 4.65 m/s (the 0.62 s run clip at rate 1, before WardenGait) | 2.21 Hz at 4.79 m/s (WardenGait: rate = speed / `loco.foot_mps` run 3.18, capped at 1.4) | fixed on main by the gait layer; asserted |
+
+The run cadence came with main's WardenGait (content/rules/warden_anim/sable.json `loco.foot_mps` and `stride`), so
+`loco.run_speed` stays 4.6 (it also sets the walk-run blend); this pass only asserts the cadence. The harness reads
+the rate from `WardenGait.plan`, so a later change to the gait data that moves the stride off ~2.3 Hz fails it.
+
+The air carry: main (owner 11-09) flies the air Cartwheel on the ground curve and lets the shared air drag carry her
+on, so she lands 0.75 s after the press and 5.8 m on, not the sheet's 8.4 m over 0.95 s. That is a decision, so the
+check asserts only the landing hand-off (the crouch on the touchdown frame) and prints the carry.
+
+Clip re-keys (tools/art1/sable_clips.py): none needed.
+
+Suggestions (ours, not built): the forced return is skipped when she is stunned or downed as the window ends, and the
+dagger is lost; holding the step until she is free would read better.
 
 ## Look and sound (all ours)
 
