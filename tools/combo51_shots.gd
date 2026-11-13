@@ -395,10 +395,12 @@ func _ashwick_queen() -> void:
 ## Cinder's Furnace Cloak (--combo51-part=cloak): E pressed at 0.1 s, then the frames 0, 0.03, 0.07, 0.13, 0.2 and 0.3 s
 ## after it; the arms-wide peak should stand on the blast (0.0-0.05 s), not at 0.13 s.
 func _ashwick_cloak() -> void:
+	var K: AshwickKit = P.ak
 	P.lvl = 6
 	await _reset(6.0)
 	var press := func(t: float):
-		P.inp["sig"] = _at(t, 0.1)
+		if _at(t, 0.1):
+			K.use_e()
 		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	var marks := _strip(
 		"cloak_peak_strip",

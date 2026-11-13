@@ -75,3 +75,8 @@ command (rest poses equal to 2e-6); every other clip, the garden set and `x_brea
 
 v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
 texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
+
+Cloak peak (ext/anim-cinder-cloak-peak, 11-13): `cloak` rebaked with cinder_clips.py (arms-wide peak 0.13 -> 0.03 s) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> cloak`. Bake source: the stage_p2 rig (a worker without
+stage_p2/cinder.blend used a prior bake's `*_anim.blend` of it with every action removed; the unchanged cloak baked from it matched this
+glb's to 1.5e-6, bone rests equal up to quaternion sign). All 43 other clips, nodes, meshes and images byte-equal.

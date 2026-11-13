@@ -288,7 +288,7 @@ cadence override. Checked by `--ashwick-combo-check` (timing rows, the ram row) 
 | Soot Ram travel | 3.4 m in 0.33, front-loaded, no wind-up | 2.9 m in 0.32 (dash_feel 0.85/1.15 of 3.4/0.28), `as_leap` coil 0.0 while already moving, stretched 0.06 | same |
 | Soot Ram into a foe (3 m) | reaches in ~0.12, knocked back and upright within ~0.1 | hit at 0.20 (the 2.9 m / 0.32 s dash_feel ram, under half a frame off), but the clip stayed stretched to 0.36, upright 0.42, done 0.55 (+0.35 after the hit) | squash on the hit frame, upright +0.06, done +0.19 |
 | Soot Ram, no foe | upright at once after the slide | squash 0.36, upright 0.42, done 0.55 | same |
-| Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.13, done 0.24 | same |
+| Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.03 (held to 0.07), done 0.24 | same |
 | Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same |
 | Flue Flight flight | 1.3-1.4 (owner item 20: 1.8) | 1.8 | same |
 | Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | `jet_land` 0.2, a soft knee give (hips -0.07), 3 small embers, no smoke |
@@ -302,7 +302,13 @@ Clip re-keys (tools/art1/cinder_clips.py):
   A 0.37 share at this cycle left a stance of ~4 frames at 30 fps and read 28-37% slide. Baked on the stage_p2 rig and copied
   onto cinder.glb by glb_add_clips.py (art/wardens/cinder/IMPORT.md).
 - Done (ext/anim-cinder-rekey): `jet_land` 0.2 s, light (the kit's `lw_land` keys 0.36 -> 0.2 to match); it is also the jump landing.
-- `cloak`: put the arms-wide peak on the blast frame (0.0-0.05) rather than 0.13, so the pose and the blast land together.
+- Done (ext/anim-cinder-cloak-peak): `cloak` peaks arms-wide at 0.03 s (was held until 0.13), so the pose lands with the blast on the press:
+  keys tuck 0.0, wide 0.03 (a snap), hold to 0.07, standing 0.24 (clip length unchanged). Baked on the stage_p2 rig and copied onto
+  cinder.glb by glb_add_clips.py (art/wardens/cinder/IMPORT.md); every other clip, node and buffer is byte-equal. Strip before/after:
+  docs/shots/anim-cinder-cloak-peak/ (`--combo51-shots --combo51-hero=ashwick --combo51-part=cloak`, same worker, gameplay camera: the
+  two rows differ by little because `WardenClips.FADE` (0.1 s) crossfades every action in from the idle, so the pose is only fully in
+  by ~0.1 s either way. The clip's own peak is now on the blast frame; a per-move `lead` (WardenClips._pick) would pull the shown
+  pose earlier. Suggestion, not built.)
 
 Suggestions (not built, parity first): the 0.4 s lane in the footage may be a cast time rather than the player's hold;
 a per-hero stop blend (loco_pos 12/s is shared by
