@@ -151,6 +151,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
 	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
+	if (d["loco"] as Dictionary).has("run_cycle"):
+		_retime_run(float(d["loco"]["run_cycle"]))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -163,6 +165,17 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
 	return true
+
+## "loco.run_cycle" (s): the four run loops are re-timed to this cycle, their keys' times scaled and the poses kept
+## (the clips are cached, so a second Warden of the Hero scales by 1).
+func _retime_run(cycle: float) -> void:
+	for clip in (d["loco"]["run"] as Dictionary).values():
+		var a := lib.get_animation(String(clip))
+		var k := cycle / a.length
+		for i in a.get_track_count():
+			for j in a.track_get_key_count(i):
+				a.track_set_key_time(i, j, a.track_get_key_time(i, j) * k)
+		a.length = cycle
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
 ## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
