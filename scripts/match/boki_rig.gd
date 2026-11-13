@@ -250,16 +250,14 @@ static func fetch_common() -> void:
 		return
 	for sp in Data.common_kin():
 		var p := PATH % [sp, sp]
-		if has(String(sp)) and not _scenes.has(p) \
-				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-			BackgroundWork.request(p)
+		if has(String(sp)) and not _scenes.has(p):
+			BackgroundWork.read_ahead(p)
 
 static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
 static func _scene(kin_id: String) -> PackedScene:
 	var p := PATH % [kin_id, kin_id]
 	if not _scenes.has(p):
-		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+		_scenes[p] = BackgroundWork.take(p)
 	return _scenes[p] as PackedScene
 
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.

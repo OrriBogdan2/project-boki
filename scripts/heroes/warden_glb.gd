@@ -535,10 +535,8 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
-		return
-	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-		BackgroundWork.request(p)
+	if uses_model(arch) and not _scenes.has(p) and BackgroundWork.can_read_ahead():
+		BackgroundWork.read_ahead(p)
 
 ## Starts reading the .glb files a match's build dresses (your Warden and your dealt squadmates', opts "mates"),
 ## so they load on a loader thread while the world builds instead of in build.hunters. A match with rival
@@ -557,8 +555,7 @@ static func fetch_for(opts: Dictionary) -> void:
 static func fetched(arch: String) -> bool:
 	fetch(arch)
 	var p := path(arch)
-	return not uses_model(arch) or _scenes.has(p) \
-			or ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS
+	return not uses_model(arch) or _scenes.has(p) or BackgroundWork.done(p)
 
 ## Whether the Warden's neutral rig rest is known yet (else the next build measures it first: a build of its own).
 static func has_rest(arch: String) -> bool:
@@ -567,8 +564,7 @@ static func has_rest(arch: String) -> bool:
 static func _scene(arch: String) -> PackedScene:
 	var p := path(arch)
 	if not _scenes.has(p):
-		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+		_scenes[p] = BackgroundWork.take(p)
 	return _scenes[p] as PackedScene
 
 ## A Warden's variant bones: the code table above, plus its art's data file (content/rules/warden_anim/<art>.json).
