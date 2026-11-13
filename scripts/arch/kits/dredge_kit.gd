@@ -242,7 +242,7 @@ func _drop_holds() -> void:
 ## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
 ## ground out to the slug range; idle, they fold into one aim line to the cursor (sheet gap 4).
 func _tick_gun() -> void:
-	if h.wid != "shotgun" or KinMerge.active(h):
+	if h.wid != "shotgun" or KinMerge.transforming(h):
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
@@ -357,7 +357,7 @@ func _launch_hook() -> void:
 	run(stg, cx("rmb", "abyssal_hand", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
-		"on_shot_end": func(at: Vector3, why: String, e: Ent):
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
 			if pull.is_empty():
