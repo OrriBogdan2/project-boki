@@ -13,7 +13,8 @@ mapped kit move whose key names a dash/skate/vault or an ability (words in the c
 procedural: a downed Hunter is a Wisp, docs/decisions/0019, so a death clip is rarely seen); stomp is always `proc`
 (`HunterAnim.stomp_k`, no clip anywhere). strafe, crouch and upper are the blends: the 4-way walk and run rings, the
 crouch layer, and kit moves that play on the upper body over the legs. Boki: the .glb clips idle, walk, run, attack,
-ability (cast) and hop (jump, played only when happy); a hit and a landing spring `KinFlinch`; a downed Boki topples
+ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `kact` hop from `Kin.render`; a
+species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
 onto its side (`Kin.render`).
 
 <!-- table:begin -->
@@ -32,7 +33,7 @@ onto its side (`Kin.render`).
 | pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | proc |
+| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 
 ### Starter Boki
@@ -51,9 +52,7 @@ onto its side (`Kin.render`).
 2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
    and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
    the move and the landing squash settles it.
-3. **Boki jump** is the `hop` clip only for a cheer; a leap or throw plays the run clip in the air. A `kact` of
-   `hop` while `fly` is set would use the existing clip.
-4. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
+3. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
    phase and charge poses stand in; only claire, kael, ryzz, sable, tarek and vex key a dash clip.
-5. **Tarek has no upper-body kit move**, so his attacks stop the legs.
-6. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
+4. **Tarek has no upper-body kit move**, so his attacks stop the legs.
+5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).

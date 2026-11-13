@@ -202,12 +202,27 @@ func _on_base() -> void:
 		sr.use()
 		ok(sr.run != null and sr.pair.size() == 2, "on: a show starts with two Boki")
 		var t := 0.0
+		var beats := {}
 		while sr.run != null and t < LONG_HIGH + 30.0:
 			sr.tick(0.1)
 			t += 0.1
+			if sr.run != null:
+				var n := sr.pair[sr.run.backed]["node"] as Node3D
+				beats[String(n.get_meta("kact", "")) + "@" + str(sr.run.phase)] = true
+		ok(beats.has("strut@" + str(ShowRing.Run.Phase.BOND)), "on: it struts on the walk-in")
+		ok(beats.has("pose@" + str(ShowRing.Run.Phase.JUDGE)), "on: it holds a pose when the judges look")
+		ok(not beats.has("pose@" + str(ShowRing.Run.Phase.LOOK)), "on: no pose before the judges' round")
 		ok(sr.run == null and is_instance_valid(sr.card), "on: the show ends with a result card (%.1f s)" % t)
 		var shown: bool = is_instance_valid(sr.marks) and sr.marks.get_parent() == home.root_ui
 		ok(shown, "on: the result shows its marks and ribbon")
+		var clips: Array = []
+		for k in home.kins:
+			clips.append(String((k["node"] as Node3D).get_meta("kact", "")))
+		ok("hop" in clips and "bow" in clips, "on: the placing is read with a hop and a bow (%s)" % str(clips))
+		for i in int(ceil(float(ShowRing.rules()["card_s"]) * 10.0)) + 2:
+			sr.tick(0.1)
+		ok(sr.acts.is_empty() and home.kins.all(func(k): return not (k["node"] as Node3D).has_meta("kact")),
+				"on: and nobody keeps a show clip")
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
