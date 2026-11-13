@@ -24,15 +24,19 @@ about 14, held lower for the same cap) and slows 30%. Its cooldown follows the s
 slide tap 4.6 m and hold 7 m (the whole hold from the press: the skid, then the slide covers the rest).
 slide tap 4.8 m and hold 7 m.
 
-## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Vex: each slot reads
-`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Ghost, `Upg:` lines.
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
+bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
+no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
 
-| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
-|---|---|---|---|
-| RMB Burr Charge | -1.5s cooldown x2, tier IV: resets on a knock | 5.85s / 5.2s, reset on a knock | 5.4s / 4.3s, reset on a knock at 3 |
-| Space Slipstep | -1.5s recharge x2, tier IV: +25% speed 2s after a slide | 7.65s / 6.0s, speed burst at 3 | 7.4s / 6.3s, +25% speed 2s at 3 |
-| E Longneedle | +20% damage x2, tier IV: 30% shave per hunter | cooldown 10.35s / 9.2s, damage +15% / +30%, shave at 3 | cooldown 11.5s flat, damage +20% / +40%, 30% shave per hunter at 3 |
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in |
+|---|---|---|---|---|
+| LMB Fever | none [D] | - | - | - |
+| RMB Burr Charge | -1.5 s / -1.5 s / resets on a knock [D] (9 s) | cooldown 6.5 -> 5.4 s | 4.3 s; a knock resets it | `--gunslinger-combo-check` upgrade parity, `Knock at rank 3` |
+| Shift Slipstep | -1.5 s / -1.5 s / speed when a slide ends [D] (11.5 s) | recharge 8.5 -> 7.4 s | 6.3 s; +25% speed for 2 s when a slide ends (`dash.rank3_speed`) | same, `rank 3 (tier IV) a slide's end` |
+| E Longneedle | +20% / +20% damage / -30% cooldown per hunter hit [D] | damage +20% | +40%; 30% off per hunter hit (20% once below) | same, `Longneedle at rank 3` |
+| Passive Hot Streak | none [D] | - | - | - |
 
 ## Audit (Nov 3 23:40)
 
@@ -131,6 +135,7 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 | E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain; the line locks to the press direction and turns toward the cursor at most `turn_deg_s` 90 deg/s (so a flick cannot drag it), and the beam goes exactly along it | a 1.8 m wide beam (0.9 m either side, was 0.5: item 68) through everything in line: 24, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step, then she recovers 0.6 s from the beam, held still | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
 | Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
 | X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she stands 0.76 s for the shot, then moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
+| X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red 1.2 m centre ring filling with it (the +50% core) and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | R / T | | | the Boki Merge (the Boki system's key) | | | |
 | R Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | X | | | Fuse with your Boki (the Boki system's key) | | | |
@@ -219,6 +224,22 @@ rifle fires from an open glider (`GunslingerKit.fires_in_glide`). Timing note (n
 | Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
 | The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Vex moves and can shoot while it falls" |
 
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/venator.md) | Verdict |
+|---|---|---|---|---|
+| LMB | held, firing | 1.0 (quill_rifle `fire_slow` 1.0) | walks while firing, no visible slow (0007-0023) | match |
+| LMB | after a shot | 1.0 | strafes and backpedals between bursts | match |
+| RMB | Burr Charge, press to throw | 1.0 | ~0.2 s commit, "he can walk" | match |
+| Shift | Slipstep (tap, held) | n/a | a slide | n/a |
+| E | Longneedle, 0.6 s charge | 0.0 (`e.self_slow` 1.0) | stands still through the 0.6 s cast bar | match |
+| E | after the beam | 1.0 | a 0.5 bh recoil shove, then the walk isn't measured | [?] |
+| X | Cinderfall, tap | 1.0 | free to move, takes a jump pad as it falls (f103) | match |
+
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
 - **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).
 - **Owner rule (11-10 playtest): the Burr Charge climbs terrain, only strict walls stop it.** In flight it reads the ground every 0.25 m (`BURR_SAMPLE`) and never flies lower than 0.25 m over it (`BURR_RIDE`), so it rides up ramps, stairs and ledges below it to a foe on high ground. A strict wall is a blocker tile (rock, tree, wall) standing above it, or ground that rises more than a walkable step (`World.STEP`, 0.32 m) at steeper than 50 deg (`BURR_WALL_DEG`; stairs are 39 deg) with its top above the charge: a terrace face. It sticks just in front, never past. (Before, any ground 0.6 m over her feet stopped it, so the top of a ramp did.) Assert `venator RMB: rides a ramp up to a foe on high ground`, `... a vertical wall stops it`, `... a rock stops it too`. Training Area: stand below a stair flight, aim RMB at a dummy on the terrace above. Other ground lanes keep their own rule, no shared code: Bjorn's ult lane (`bjorn_ult.gd` `_reach`, any ground 1.2 m over his feet ends it).
@@ -293,7 +314,7 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 | Burr hit / stuck / detonation | none (was a 1.0, 1.6 and 1.8 m ring) | the cone above | - | no ring on the burr | removed: cosmetic rings that matched no hit |
 | Longneedle (E) charge | line 18 m long, 1.8 m wide narrowing to a core over 0.6 s | beam 18 m, 1.8 m wide, at 0.6 s | everyone locally | wide line narrowing to a core | ok, asserted |
 | Slipstep (dash) | none | none | - | none | ok |
-| Cinderfall (X) fall | disc r 3.4 m filling over 1.6 s, hot core 1.2 m, rivet ring closing onto r | 3.4 m, core 1.2 m, at 1.6 s | everyone locally | disc fills to the impact | ok, asserted |
+| Cinderfall (X) fall | disc r 3.4 m filling over 1.6 s, hot core 1.2 m, rivet ring closing onto r | 3.4 m, core 1.2 m, at 1.6 s | everyone locally (rivals in the hostile tint) | disc and core ring fill to the impact together | ok, asserted (core = data at every rank: --hero-vfx-check) |
 | Cinderfall impact | one ring at r 3.4 m | the disc | everyone | impact ring | fixed: was two rings at 1.3x and 0.7x r |
 | Cinderfall burn, 3 s | rim r 3.4 m fading | ticks inside 3.4 m | everyone locally | burning patch | ok |
 
@@ -309,3 +330,14 @@ Suggestion (not built): carry the burr cone length over the network so remote pl
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/gunslinger.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![gunslinger v2 strips](../art/anim_audit/v2_gunslinger.jpg)
+
+- Gait: run slide 23 % of speed (gate 25 %), arms against the legs +0.89, bob 6.9 cm: the Nov 8 numbers survive the retarget. T-pose share 0 % in both attacks; free-arm travel 0.10 / 0.14 body heights.
+- Gun on the hand: the pistol is skinned to `forearm.R`, so it moves rigidly with the arm (nothing to align in the clip map).
+- Idle to walk first-pose gap 0.29 body heights, unchanged (blend-covered).
+- Result: no regression; no clip or map edits needed.
+- Timing: the "Timing pass" frames (`tools/vex_anim_time_check.gd`, on `ext/anim-time-vex`) were re-run on the v2 clips in `--gunslinger-combo-check`: 109 checks, 0 failures; every move blends in within 0.12 s and hits on the press's frame.
