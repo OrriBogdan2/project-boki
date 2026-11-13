@@ -35,8 +35,12 @@ static func _forget(ref: WeakRef) -> void:
 		mesh.remove_meta(KEPT)
 
 ## One triangle mesh from parts [arrays, transform], like SurfaceTool.append_from without the read-backs.
-## Every part needs vertices and normals; missing UVs, colours and tangents are filled in.
 static func merge(parts: Array) -> ArrayMesh:
+	return build([merged(parts)])
+
+## The arrays of merge(parts), for a caller that changes them before building the mesh.
+## Every part needs vertices and normals; missing UVs, colours and tangents are filled in.
+static func merged(parts: Array) -> Array:
 	var verts := PackedVector3Array()
 	var norms := PackedVector3Array()
 	var uvs := PackedVector2Array()
@@ -74,7 +78,7 @@ static func merge(parts: Array) -> ArrayMesh:
 	if with_tan:
 		arrs[Mesh.ARRAY_TANGENT] = tans
 	arrs[Mesh.ARRAY_INDEX] = idx
-	return build([arrs])
+	return arrs
 
 ## `src` when the part has it, else `n` copies of `fill` (PackedVector2Array or PackedColorArray).
 static func _or_filled(src: Variant, n: int, fill: Variant) -> Variant:

@@ -152,7 +152,7 @@ func _lifesteal_and_rules() -> void:
 	var at := A.pos + Vector3(0, Fx.HEAL_NUM_Y, 0)
 	fx.number(at, 20.0, HudStyle.HIT, false)
 	fx.number(at, 9.0, DAZE_PINK, true, "+")
-	fx.number(at, 12.0, HudStyle.HEAL, false, "+", Fx.Num.HEAL)
+	fx.number(at, 12.0, HudStyle.HEAL, false, "+", "", Fx.Num.HEAL)
 	var hit := _num_at(fx, at, Fx.Num.HIT, "")
 	var daze := _num_at(fx, at, Fx.Num.HIT, "+")
 	var heal := _num_at(fx, at, Fx.Num.HEAL, "+")
