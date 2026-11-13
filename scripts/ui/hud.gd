@@ -1751,6 +1751,8 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	if not st.is_empty():
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
+		if st.has("hint"):
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.2 + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()

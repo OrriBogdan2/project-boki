@@ -120,6 +120,8 @@ const CHECKS := {
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
+	"--charge-hint-check": ["res://tools/charge_hint_check.gd", "charge_hint_check", null],
+	"--charge-hint-shots": ["res://tools/charge_hint_shots.gd", "charge_hint_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],

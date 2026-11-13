@@ -28,6 +28,7 @@ var m: Match
 var list: Array = []          # every exit, see _add_*
 var rush := false             # the last squad standing: uplinks charge faster
 var seats: QuestSeats = null  # Limited Ways Out: the Sealed Lair and the Uplink seats (null outside the mode)
+var hints := ZoneHint.new()   # the fading "more teammates fuel it faster" tip
 
 func setup(match_node: Match) -> void:
 	m = match_node
@@ -153,7 +154,7 @@ func interact_for(h: Hunter) -> Dictionary:
 					best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 				else:
 					best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
-			"charging": best = {"label": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
+			"charging": best = {"label": "Uplink %d%%  ·  hold the yard%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
 			"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
 			"open": best = {"label": "The lift is open! Step into the light"}
 			"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
@@ -482,8 +483,13 @@ func status_for(p: Hunter) -> Dictionary:
 			if x["contested"]: t += "  ·  CONTESTED: clear the yard"
 			elif not mine: t += "  ·  a rival's uplink: hold the yard to take it"
 			elif int(x.get("crew", 0)) > 1: t += crew_text(int(x["crew"]))
-			else: t += "  ·  bring your squad: more of you charge it faster"
-			return {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
+			var st := {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
+			if mine and not x["contested"] and int(x.get("crew", 0)) <= 1:
+				var a := hints.alpha("outpost", m.time)
+				if a > 0.0:
+					st["hint"] = "More teammates in the %s fuel it faster!" % x["name"]
+					st["hint_a"] = a
+			return st
 		if x["state"] == "charging" and int(x["team"]) == p.team and x.get("draining", false) and p.flat_dist(x["pos"]) < 80.0:
 			# our uplink with nobody in its yard: the charge running out, and how long it has
 			return {"text": "Uplink draining  ·  %d%%  ·  back to the yard: %s" % [int(x["prog"] * 100.0), _cap(drain_left(x))], "prog": float(x["prog"]),
