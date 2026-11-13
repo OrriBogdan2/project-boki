@@ -78,6 +78,7 @@ const CHECKS := {
 	"--glide-hit-check": ["res://tools/glide_hit_check.gd", "glide_hit_check", null],
 	"--glider-canopy-check": ["res://tools/glider_canopy_check.gd", "glider_canopy_check", null],
 	"--glider-canopy-shots": ["res://tools/glider_canopy_shots.gd", "glider_canopy_shots", null],
+	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],      # boots, charms vs source
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk

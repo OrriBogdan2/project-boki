@@ -480,3 +480,25 @@ PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a 
 **Result.** `--friendly-fire-check` casts each of the 12 kits' LMB, RMB tap and hold, E (and a second press), R, X and dash, plus the four damaging gloves (blink, grapple, quake, shock; Bubble only reflects), with a foe, a teammate and the caster all inside: 707 checks, 0 failures. It counts hits through `CombatBus.hit_landed`. A powder keg hurts the caster, a teammate and a foe. Control run: with `foes_of` changed to include the caster's team, 127 checks fail across all 12 kits and the gloves, so the check does bite.
 
 **Not reached by the check (no foe damage in that case):** `archer` and `bulwark` RMB taps, `bulwark`, `dolm` and `tender` E (shields, heals), the dashes of `archer`, `dredge`, `gunslinger`, `ostra`, `rimewright`, `tender` and `thief`. Utility belt items (`content/utility`) carry no damage. Boki species abilities (G, ~40 species through `Effects`/`KinExec`) go through the same `foes_of` but are not cast per species here.
+## Boots and charms (gear parity, `--gear-parity-check`)
+Loadout is 2 gloves, 2 charms, boots (DECISIONS). Searched briefs/supervive-data and briefs/hero-ref
+(origin/ext/agent-briefs, 2026-11-10) for boots actives, cooldowns and passive move speed: the source data
+has no boots or charm items at all (no item tables; PHYSICS_PARITY only says gear scales move speed at
+runtime, with no numbers). So no piece has a source match and nothing was changed; the list below goes to
+the owner. The check pins these values so any change goes through this list.
+
+| Kind | Piece | Cooldown | Stats (Common) | Source match |
+|---|---|---|---|---|
+| boots | Springheel Boots (`boots`) | none (passive) | +8% move speed | none |
+| boots | Quickstep Boots (`quickstep_boots`) | none | dash back 15% sooner, +3% move speed | none |
+| boots | Skylark Boots (`skylark_boots`) | none | +35% glider heat | none |
+| boots | Windstep Boots (`windstep_boots`) | none | +10% glide speed, +15% glider heat | none |
+| charm* | `booster` | none | +20% glide speed, +20% glider heat | none |
+| charm* | `focus` | none | 18% cooldown reduction | none |
+| charm* | `heat_sink` | none | +45% glider heat | none |
+| charm* | `power_core` | none | +12% damage | none |
+
+\* Charms are not built yet (note 0005): there is no charm gear kind, and these passive gloves are the
+pieces meant to become charms. No boots piece has an active, so none needs a key: the HUD boots cell
+(GearPanel) shows the icon and rarity with no key and no cooldown, and its hover reads "Boots" plus the
+stat line; the check asserts both for every boots piece.
