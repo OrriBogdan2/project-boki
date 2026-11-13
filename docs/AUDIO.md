@@ -139,6 +139,12 @@ The check opens screens the way the game does (`Game.goto`). With a display (xvf
 ## Soundtracks (Settings > Audio > Music)
 `content/music/soundtracks.json` names one track per place (main menu, garden, an expedition's calm / fight / last moments, boss, a run that got out, training) for each style: **Classic Adventure** (the default: warm MIDI orchestra, flute, lute, harp, light drums), **Isles Folk** (the first score) and **Lantern Lo-fi**. Classic and Lo-fi are our own tunes, rendered by `tools/compose_soundtracks.py` through the same General MIDI bank as `compose.py`, each a whole number of bars with its tail wrapped onto the start, stretched by a few samples to end on a Vorbis block (no gap at the loop) and set to -14 LUFS with ffmpeg loudnorm (one linear gain). `Soundtrack` resolves the track: a hand pick for that place (`track_<place>`), else the style (`soundtrack`), else with `music_shuffle` a style rolled once per scene. The first score's tracks hand each place its own music back: the garden's islands and nights, and the expedition's layered stems. Any other pick makes `MusicDir` play one track per moment (boss, last moments, fight, calm) and crossfade when the moment changes. Soundtrack tracks don't join the house's record list (`Data.MUSIC`). `--soundtrack-check` covers it.
 
+## Chop and mine sounds (`content/sfx/chop.json`, `tools/gen_sfx_chop.py`)
+Played by `HomeGather._hit_sound` (each hit) and `finish` (the last), the same places the leaves, chips and crack marks react:
+- **Tree**: `axe_bite` (3 takes) on every hit; `trunk_creak` from the second hit, pitched higher and louder as the hits add up; `tree_down` (whoosh, then the thud) when it falls.
+- **Boulder**: `pick_strike` (3 takes) on every hit; `rock_crack`, pitched lower and louder as it weakens; `rock_break` on the last.
+`--sfx-set-check` row 9 checks the files, their levels and that HomeGather plays only sounds that exist.
+
 ## Capture sounds (`content/sfx/capture.json`, `tools/gen_sfx_capture.py`)
 All wired in `scripts/match/capture.gd`, so a rival's game plays them from the same net events (`scan_start`, `scan_stop`, `scan_done`) as the local one:
 - **Scan hum**: the looping `revive_hum` on `Sfx.loop_start`, pitch rising from `rise_pitch[0]` to `[1]` with the scan fill, heard `hear_range` (26 m).

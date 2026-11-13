@@ -26,6 +26,7 @@ const REACH := 1.55
 const CHIP_COL := {"tree": Color("c8955a"), "rock": Color("b8b4ae")}
 const LEAF_COL := Color("6fb35a")
 const TREE_TOP_Y := 2.2          # m: where the leaves shake loose
+const CREAK_FROM := 0.5          # share of the hits taken after which a trunk starts to creak
 const CRACK_COL := Color("2a2622")
 
 var h                                    # the Home screen
@@ -143,8 +144,7 @@ func _hit() -> bool:
 			h.fx.burst(at + Vector3(0, TREE_TOP_Y, 0), LEAF_COL, 6, 1.0, 0.9, 2.0)
 		else:
 			h.fx.spark(at + Vector3(0, 0.6, 0), Vector3.UP, Color("ffe2a0"), 6, 5.0, 70.0)
-	Sfx.play("break_wood" if tree else "armor_hit", at, -6.0, 0.1)
-	Sfx.play("rustle" if tree else "thump", at, -10.0, 0.1, 0.8)
+	_hit_sound(at, tree, hits)
 	if not tree:
 		_crack(at, hits)
 	if hits >= HITS and demo_loop:
@@ -153,6 +153,20 @@ func _hit() -> bool:
 		finish()
 		return false
 	return true
+
+## The strike, and what the target answers with: a trunk that creaks higher and louder on the last hits, a
+## boulder whose crack gets lower and louder as it weakens (the last hit's sound is in finish).
+func _hit_sound(at: Vector3, tree: bool, hits: int) -> void:
+	var worn := float(hits) / float(HITS)
+	Sfx.play("axe_bite" if tree else "pick_strike", at, -6.0, 0.1)
+	if tree:
+		Sfx.play("rustle", at, -10.0, 0.1, 0.8)
+	if hits >= HITS:
+		return
+	if tree and worn > CREAK_FROM:
+		Sfx.play("trunk_creak", at, -12.0 + 6.0 * worn, 0.05, 0.8 + 0.5 * worn)
+	elif not tree:
+		Sfx.play("rock_crack", at, -14.0 + 6.0 * worn, 0.05, 1.3 - 0.5 * worn)
 
 ## Dark cracks on the boulder, one more for every hit.
 func _crack(at: Vector3, hits: int) -> void:
@@ -192,6 +206,7 @@ func finish() -> int:
 	if h.fx:
 		h.fx.dust(at, 14)
 		h.fx.word(at + Vector3(0, 1.4, 0), "+%d %s" % [n, td["mat"]], Color(td["col"]).lightened(0.3))
+	Sfx.play("tree_down" if what == "tree" else "rock_break", at, -4.0, 0.08)
 	Sfx.play("pickup", at, -8.0, 0.1, 1.1)
 	h._refresh_top()
 	Save.save_game()

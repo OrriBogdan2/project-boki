@@ -22,6 +22,7 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -56,6 +57,7 @@ func run(main: Node) -> void:
 	_garden()
 	_build_cues()
 	_strip_chime()
+	_chop_mine()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -414,3 +416,20 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 11. The farm's chop and mine: the set has the axe and pick in several takes, and every sound HomeGather
+## plays by literal name exists (the old stand-ins, break_wood / armor_hit / thump, are not used there).
+func _chop_mine() -> void:
+	ok(_takes("axe_bite").size() >= 3 and _takes("pick_strike").size() >= 3,
+			"chop: the axe bite and pick strike come in 3 takes")
+	var re := RegEx.create_from_string("Sfx\\.play\\(\"([a-z0-9_]+)\"")
+	var src := FileAccess.get_file_as_string("res://scripts/home/home_gather.gd")
+	var played := []
+	for hit in re.search_all(src):
+		played.append(hit.get_string(1))
+	var silent := played.filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "chop: every sound HomeGather plays exists (silent: %s)" % [silent])
+	var own := ["axe_bite", "trunk_creak", "tree_down", "pick_strike", "rock_crack", "rock_break"]
+	var wired: bool = own.all(func(n): return src.contains('"%s"' % n))
+	ok(wired and not src.contains("break_wood") and not src.contains("armor_hit"),
+			"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins")
