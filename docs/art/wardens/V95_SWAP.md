@@ -38,6 +38,14 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Judge framing gotcha (2026-11-13, ext/low4-hunters)
+v95-promote's renderer (`_tools/r95_render.py`) turns the model about its glTF origin, not its bbox centre, and
+the side frame is only ~0.62 m either side of the origin (Grimble's height, 1.9 m). A hunched pose that pushes the head
+forward (Grimble hunch E: head at z 0.64) puts the face out of frame. The judge then reports "too upright, head tucked
+in". Moving the whole mesh 10 cm back (-Z, `_low4-1112/tools/shift_z.py`) gave 85/80/84/83 vs the live 79/79 with the
+same scorer. The face is unchanged, but the pose moves it, so promote such a pass with `--face`. The candidate and the
+command are in `/home/boki/meshy/v95/_low4-1112/PROMOTE_GRIMBLE.txt`. The swap then needs the feet re-centred.
+
 ## Status (2026-11-12 evening, ext/hunters-best-1112): the 11-12 evening promotions
 In game on top of the table below: Neve's chiffon skirt body under the live head (`claire_v95.json`, from
 ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
