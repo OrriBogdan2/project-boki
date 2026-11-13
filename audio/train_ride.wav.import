@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://ckshaoat8oqys"
-path="res://.godot/imported/rail.wav-90ecc1745ef33995546b504d6c70887e.sample"
+uid="uid://dthvlgnc3mltx"
+path="res://.godot/imported/train_ride.wav-e93148277c343a20e1f27e77c7358e90.sample"
 
 [deps]
 
-source_file="res://audio/rail.wav"
-dest_files=["res://.godot/imported/rail.wav-90ecc1745ef33995546b504d6c70887e.sample"]
+source_file="res://audio/train_ride.wav"
+dest_files=["res://.godot/imported/train_ride.wav-e93148277c343a20e1f27e77c7358e90.sample"]
 
 [params]
 

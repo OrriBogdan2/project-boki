@@ -633,7 +633,7 @@
 },
 "scripts/match/sky_train.gd": {
 "long_line": 11,
-"semicolon": 10
+"semicolon": 8
 },
 "scripts/match/spawn_plan.gd": {
 "long_line": 8,
