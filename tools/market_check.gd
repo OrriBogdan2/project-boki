@@ -21,6 +21,7 @@ func run(m: Node) -> void:
 	_levels()
 	_shelter()
 	_always_adopt()
+	_adopt_edges()
 	_transfer()
 	_stalls()
 	_search()
@@ -245,6 +246,87 @@ func _always_adopt() -> void:
 	Save.d["roster"].clear()
 	ok(Shelter.cards().size() == 3 and Lifeline.stuck(), "0 gems, 0 Boki: 3 strays shown, but none affordable")
 	ok(Lifeline.check().size() == 1 and Save.d["roster"].size() == 1, "and the floor hands over a stray")
+
+## Fills a zone with launch-species Boki (a stray is never one of those, so none is a repeat) up to `cap` out.
+func _fill(zone: String, cap: int) -> void:
+	while GardenZones.residents(zone).size() < cap:
+		var sp: String = Data.LAUNCH_KIN[GardenZones.residents(zone).size() % Data.LAUNCH_KIN.size()]
+		var f := Save.new_kin(sp)
+		f["zone"] = zone
+		Save.d["roster"].append(f)
+
+## The edges of "always adoptable": a full zone, no gems, a reload, and a Boki you gave up.
+func _adopt_edges() -> void:
+	var cap := KinBox.farm_cap()
+	var fee := int(Goods.rules()["shelter"]["stray_fee"])
+	# the zone you are in holds the cap: the newcomer sleeps in the Burrow and a line says why
+	_save()
+	Save.d["zones"]["glasswater"] = {"open": true}
+	GardenZones.here = "glasswater"
+	_fill("glasswater", cap)
+	var r := Shelter.adopt(String(Shelter.cards()[0]["id"]))
+	var rec: Dictionary = r.get("rec", {})
+	ok(r["ok"] and KinBox.is_boxed(rec) and GardenZones.zone_of(rec) == "glasswater"
+		and GardenZones.residents("glasswater").size() == cap,
+		"a full zone: the adopted Boki sleeps in the Burrow, the zone keeps its %d" % cap)
+	var line := Shelter.arrival_line(rec)
+	ok(line.contains("Burrow") and line.contains("full (%d out)" % cap) and line.contains(String(rec["name"])),
+		"and the player reads why: %s" % line)
+	ok(Shelter.cards().size() == 3, "the shelter restocked to 3 anyway")
+	# the start zone is full but the zone you are in has room: it comes out here, not into the full one
+	GardenZones.here = "glasswater"
+	_save()
+	Save.d["zones"]["glasswater"] = {"open": true}
+	_fill(GardenZones.start(), cap)
+	r = Shelter.adopt(String(Shelter.cards()[0]["id"]))
+	rec = r.get("rec", {})
+	ok(r["ok"] and not KinBox.is_boxed(rec) and GardenZones.zone_of(rec) == "glasswater"
+		and GardenZones.residents(GardenZones.start()).size() == cap and GardenZones.out_here().has(rec),
+		"it lives in the zone you are in (Glasswater), not the full start zone")
+	ok(Shelter.arrival_line(rec).contains("coming home"), "and the line says it is coming home")
+	GardenZones.here = ""
+	# no Boki and no gems: the shelter says what is missing, and the floor stray comes instead
+	_save(0)
+	Save.d["roster"].clear()
+	var cs := Shelter.cards()
+	r = Shelter.adopt(String(cs[0]["id"]))
+	ok(not r["ok"] and String(r["why"]).contains("%d more gems" % fee) and Save.d["roster"].is_empty()
+		and cs.size() == 3,
+		"0 gems, 0 Boki: adopting says '%s' and takes nothing" % r["why"])
+	var floor_ev := Lifeline.check()
+	ok(floor_ev.size() == 1 and Save.d["roster"].size() == 1 and Save.d["active"] == Save.d["roster"][0]["uid"],
+		"and the floor brings a stray, set as your partner")
+	# the stock survives a reload: same strays, the adopted one gone, still 3
+	_save(fee * 3)
+	cs = Shelter.cards()
+	var gone := String(cs[0]["id"])
+	var keep := [String(cs[1]["id"]), String(cs[2]["id"])]
+	r = Shelter.adopt(gone)
+	var path := "user://market_adopt_save.json"
+	var fh := FileAccess.open(path, FileAccess.WRITE)
+	fh.store_string(JSON.stringify(Save.d))
+	fh.close()
+	Save.load_from(path)
+	DirAccess.remove_absolute(path)
+	var ids: Array = Shelter.cards().map(func(c): return String(c["id"]))
+	ok(r["ok"] and ids.size() == 3 and not ids.has(gone) and ids.has(keep[0]) and ids.has(keep[1])
+		and Shelter.cards().all(func(c): return String(c["from"]) == "" and int(c["price"]) == fee),
+		"after save and reload the strays are the same 3 (one restocked), the adopted one is not back")
+	ok(Save.d["roster"].size() == 4 and int(Save.d["gems"]) == fee * 2, "and the adoptee and the gems are kept")
+	# giving a Boki up, then adopting it back: refused with a line, nothing paid, the stock still 3 strays
+	_save()
+	var mine: Dictionary = Save.d["roster"][1]
+	var uid := String(mine["uid"])
+	ok(Shelter.give_up(uid)["ok"], "gave a Boki up")
+	var card := _card_of(uid)
+	var gems := int(Save.d["gems"])
+	r = Shelter.adopt(String(card["id"]))
+	ok(not r["ok"] and String(r["why"]).contains("gave") and int(Save.d["gems"]) == gems and Save.kin(uid).is_empty(),
+		"adopting it back is refused (%s), no gems taken" % r["why"])
+	var strays := Shelter.cards().filter(func(c): return String(c["from"]) == "")
+	ok(strays.size() == 3, "the shelter still holds its 3 strays")
+	r = Shelter.adopt(String(Shelter.cards()[0]["id"]))
+	ok(r["ok"] and Save.kin(uid).is_empty(), "a stray can be adopted in its place")
 
 func _card_of(uid: String) -> Dictionary:
 	for c in Shelter.cards():

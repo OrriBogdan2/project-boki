@@ -38,6 +38,8 @@
 	"mentor_radius_doc": "m from the Soul Shrine a mentor strolls.",
 	"clash": 0.55,
 	"clash_doc": "the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more.",
+	"shy": {"secs": 300.0, "edge_picks": 6},
+	"shy_doc": "a Boki adopted from the Shelter is shy for secs of farm time (one farm day, home.gd DAY_LEN; scripts/home/base_shy.gd): it keeps to the island's edge (the farthest from the middle of edge_picks open spots) and takes no part in tag or toys.",
 	"whistle": {
 		"hold_s": 0.5,
 		"sulky_joy": 25.0,

@@ -103,6 +103,7 @@ static func adopt(id: String) -> Dictionary:
 	else:
 		Save.remember(rec, "adopted", "was raised by %s, then found a new home with you" % giver, 1.0)
 	Care.ensure(rec)
+	BaseShy.start(rec)
 	Save.d["roster"].append(rec)
 	if Save.kin(str(Save.d.get("active", ""))).is_empty():
 		Save.d["active"] = rec["uid"]
@@ -111,6 +112,17 @@ static func adopt(id: String) -> Dictionary:
 	Care.dex_got(rec)
 	Save.save_game()
 	return {"ok": true, "why": "", "rec": rec}
+
+## What the player reads when `rec` has just come home: on the farm, or asleep in the Burrow and why.
+static func arrival_line(rec: Dictionary) -> String:
+	var nm := String(rec.get("name", "It"))
+	if not KinBox.is_boxed(rec):
+		return "%s is coming home with you" % nm
+	var z := GardenZones.zone_of(rec)
+	var why := "you have one like it out already"
+	if GardenZones.room(z) <= 0:
+		why = "%s is full (%d out)" % [GardenZones.info(z).get("name", z), KinBox.farm_cap()]
+	return "%s is asleep in the Burrow (%s): %s" % [nm, KinBox.page_name(KinBox.page_of(rec)), why]
 
 # ------------------------------------------------------------------ giving one up
 ## Why this Boki can't be put up ("" if it can).

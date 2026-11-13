@@ -108,3 +108,14 @@ Fixed here (text only): the zone card names Old Pell's Black Market first and no
 week" (it is every 3 days); the egg toast says "hatches in about N min" (it said "after your next
 expedition"; an egg hatches by the clock at home); the empty seed list says to buy at the stall first;
 the empty Hunter row in Goals is gone.
+
+## A new Boki from the Shelter (base_mode)
+
+DECISIONS 2026-11-11: the Shelter always has strays, so adopting is a moment at home, built from what
+exists. The new Boki steps out at the zone's pad (the stone, `HubWaystone.pad`); the Boki near by come to
+look (`BaseLife._arrived` and `ComeLook`) and the first to reach it keeps "was there the day <name> arrived".
+It is shy for its first farm day (`BaseShy`, `base_life.json` "shy": 300 s of farm time, the length of one day):
+it keeps to the island's edge, joins no tag and no toy and is nobody's play mate, then cheers up and goes to
+join in. `rec["shy_s"]` holds the time left; a Boki without it is settled, so old saves need no migration.
+Default taken: the shy day runs only while its zone is loaded. The alternative is real time, which would let a
+closed game cure it. Checked by `--base-stray-check`.
