@@ -215,6 +215,9 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 		r.add_child(kl)
 		r.add_child(UI.label(Unique.sex_name(rec), UI.T_SMALL, UI.SEX_COL[sx], UI.semi))
 		parent.add_child(r)
+	var rare := BokiQuirks.rare_of(rec)
+	if not rare.is_empty():
+		_row(parent, "Rare", "%s: a rare trait" % rare["name"], Color("c9a6ff"), null, "gem")
 	_row(parent, "Size", size_short(rec), UI.INK, null, "ruler")
 	var ms := Mutations.of(rec).filter(func(m): return String(Mutations.info(m).get("group", "")) == "size")
 	if not ms.is_empty():
