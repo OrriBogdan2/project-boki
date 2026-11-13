@@ -255,9 +255,8 @@ func los(a: Vector3, b: Vector3, y: float) -> bool:
 	for i in range(1, n):
 		var t := float(i) / n
 		var px := a.x + d.x * t; var pz := a.z + d.y * t
-		if is_block(px, pz) and ground_at(px, pz) + BLOCK_H > y:
-			return false
-		if ground_at(px, pz) > y + 0.2:
+		var gy := ground_at(px, pz)      # (once a sample: bots' sight tests march this every think)
+		if gy > y + 0.2 or (gy + BLOCK_H > y and is_block(px, pz)):
 			return false
 	for wl in dyn_walls:
 		if not Verbs.blocks_sight(wl): continue
