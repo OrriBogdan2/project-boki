@@ -369,9 +369,7 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 ## Boki never moves you (DECISIONS 2026-11-06). A from:owner ability always works on its hunter.
 ## Locked slots (run levels) never cast, by the player, a bot or the kin's own AI.
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
-	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot):
-		return false
-	if wind_do.is_valid():
+	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot) or wind_do.is_valid():
 		return false
 	var def := runner.def_of(slot)
 	if def.bond_cost > 0.0 and owner_h and owner_h.ult < def.bond_cost:
@@ -1074,8 +1072,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = 0.0
 		return
 	var on_you := state == "shoulder" and not beside
-	var striking := lunge_t > 0.0 or wind_do.is_valid()
-	var kstate := "perch" if on_you else ("attack" if striking else "")
+	var kstate := "perch" if on_you else ("attack" if lunge_t > 0.0 else "")
 	model.set_meta("kstate", "faint" if state == "downed" else kstate)
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
 	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
