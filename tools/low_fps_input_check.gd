@@ -10,9 +10,10 @@ extends "res://tools/dash_flow_check.gd"
 
 const MFC := preload("res://tools/move_feel_check.gd")
 const ACTION_OF := {"dash": "dash", "jump": "jump", "lmb": "fire", "e": "signature", "x": "hunter_ult"}
-## Hunters whose LMB is a held stream: a one-step tap is only the pilot flicker (Cinder's spool, content/archetypes/
-## ashwick.json lmb.spool), no shot to count, so the LMB tap row skips them.
-const HELD_LMB := ["ashwick"]
+## Hunters whose LMB is a held stream or a draw: a one-step tap is only the pilot flicker (Cinder's spool, content/
+## archetypes/ashwick.json lmb.spool) or draws the bow and puts it away (Lace's one bow, a tap looses nothing), no
+## shot to count, so the LMB tap row skips them.
+const HELD_LMB := ["ashwick", "archer"]
 const TAPS := 6                 # taps per key and round
 const CAP_FPS := 30             # the low-end target
 const CAP_FRAMES := 15          # frames timed to see the cap holds
@@ -44,7 +45,7 @@ func run(main: Node) -> void:
 		for stall in [false, true]:
 			for key in ACTION_OF:
 				if key == "lmb" and hero in HELD_LMB:
-					print("LOWFPS skip %s lmb tap: a held stream (spool, no shot from one step)" % hero)
+					print("LOWFPS skip %s lmb tap: a held stream or a draw (no shot from one step)" % hero)
 					continue
 				var lost := 0
 				for i in TAPS:
