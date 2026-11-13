@@ -24,6 +24,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
   to the way he goes and the hips taking the turn back, so the torso stays on the aim, up to `WardenClips.TWIST_MAX`
   (~96 deg). Past 90 deg the legs turn round and play the backward run (they hold it 0.1 rad either side of 90, so a
   run near it does not flicker). While he runs, the legs hold their way when the aim swings. Off: the f, b, l, r ring.
+  Setting off after 0.3 s standing: `start_phase` (0..1, default 0) is where every walk and run clip starts;
+  `start_blend` {s, bones} keeps those bones in the pose he stood in and eases them into the clips over s seconds
+  (docs/art/ANIM_QUALITY_AUDIT.md, Setting off from a stand).
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne. Over the glide clip (and the dive, which
   plays it too) the whole body takes HunterAnim's air tilt (root meta `AIR_TILT`, WardenClips._air_tilt): the roll into

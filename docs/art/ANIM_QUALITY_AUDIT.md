@@ -84,6 +84,10 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   stepping legs and is exempt, and is listed below as open; `tender` is exempt at the jog only (its stride cap, open
   below). Each row also prints the slide at the sole (`sole`: the lower of the heel and toe, from the skinned foot
   verts), which a heel-to-toe pinned gait reads truer than the ankle; it is not gated.
+- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
+  counter under 0.3 on a Hunter with legs, fails; so does a start gap over 0.25 for the Hunters of
+  [Setting off from a stand](#setting-off-from-a-stand), or a set-off that does not land on the walk's `start_phase`. `ostra` and `rimewright` have no stepping legs and are exempt, and
+  are listed below as open.
 
 ## What is wrong with all of them
 
@@ -229,6 +233,9 @@ posts scroll at the move speed).
 **Grimble (`dredge`)**
 1. Hip bob 17.0 cm at a run (12 % of his height, v95 master); damped by `loco.bob` to 10.1 cm (7 %).
 2. Idle to walk first-pose gap 0.45 body heights, the largest of the roster.
+1. Hip bob 17 cm at a run (12 % of his height); not changed.
+2. Idle to walk first-pose gap 0.45 body heights, the largest of the roster (fixed: 0.21, `start_phase` 0.70; see
+   [Setting off from a stand](#setting-off-from-a-stand)).
 3. The throw held the free arm sideways for most of the clip (fixed: the free arm is loose; the thrower's own arm still reaches out, 62 %) and the free hand still travels 1.4 body heights, because the torso spins under it; slide 28 % to 12 % (fixed).
 
 ![dredge walk and run, before and after](anim_audit/dredge.jpg)
@@ -251,7 +258,7 @@ posts scroll at the move speed).
 **Sparkle (`mage`)**
 1. Feet slid 42 % at a run, 59 % at a walk (fixed: 9 %, 19 %).
 2. rmb (cast) holds an arm sideways for 62 % of the clip (fixed for the left arm: 46 % to 0 %, its travel 0.76 to 0.38 body heights; the remaining 50 % is the throwing right arm winding up over the shoulder and releasing, the move itself). lmb_l (free arm sideways 21 %, not flagged) is left as keyed.
-3. Cadence 4.2 steps/s with a 0.27 first-pose gap into the walk.
+3. Cadence 4.2 steps/s with a 0.27 first-pose gap into the walk (gap fixed: 0.12, `start_phase` 0.72).
 
 ![mage walk and run, before and after](anim_audit/mage.jpg)
 
@@ -296,6 +303,57 @@ posts scroll at the move speed).
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
 
+## Setting off from a stand
+
+The first walk frame popped away from the idle: the walk ring started at its frame 0 (legs apart in a stride) and
+the loco blend reaches it in 3 to 5 frames. Measured as `pop.idle_walk`: the idle's first pose against the first walk
+pose played, worst of hips, head, hands, feet, in body heights. The fix is data, in `loco` of
+content/rules/warden_anim/<art>.json (docs/art/wardens/CLIPS.md), read by WardenClips:
+
+- `start_phase` (0..1): after 0.3 s standing, setting off seeks every walk and run clip there (a seek in front of each
+  ring clip). `--anim-audit` prints the phase nearest the idle as `pop.idle_walk_best`, in 24ths of the cycle.
+- `start_blend` {s, bones}: those bones keep the pose they stood in and ease into the clips over s. Kael's walk trails
+  the greatsword low behind him and Cinder's free hand rides higher than her idle all cycle long (by design in
+  tools/art1/kael_clips.py and cinder_clips.py), so no phase reaches the idle; the arm now eases over 0.3 s, and the
+  keys stay as authored.
+
+| Hunter | start gap before → after | `start_phase` | `start_blend` |
+|---|---|---|---|
+| `gunslinger` (Vex) | 0.29 → 0.20 | 0.83 | |
+| `juggernaut` (Kael) | 0.35 → 0.18 | 0.75 | right arm, 0.3 s |
+| `archer` (Hem) | 0.26 → 0.10 | 0.375 | |
+| `ashwick` (Cinder) | 0.28 → 0.16 | 0.875 | left arm, 0.3 s |
+| `dredge` (Grimble) | 0.45 → 0.21 | 0.70 | |
+| `mage` (Sparkle) | 0.27 → 0.12 | 0.72 | |
+
+Strips (docs/art/anim_audit/start/<id>.jpg, `--anim-shots` strips `start_raw` and `start`): the idle, then the first
+8 frames of setting off at the walk speed (30 fps); top before (no start data), bottom after. Rendered under xvfb
+(opengl3); GPU job 20261111-193514-25954 renders the same strips.
+
+![juggernaut setting off, before and after](anim_audit/start/juggernaut.jpg)
+
+Grimble and Sparkle (ext/anim-start-gap-rest): both Hunters' eight walk and run loops share one contact timing, so one
+phase fits all eight; it was picked from a scan of all of them against the idle's first pose (body heights):
+
+| Hunter | idle to walk b / l / r | idle to run_f |
+|---|---|---|
+| `dredge` | 0.24 / 0.18 / 0.22 | 0.55 → 0.35 |
+| `mage` | 0.15 / 0.13 / 0.15 | 0.40 → 0.21 |
+
+Sparkle's walk_f alone is nearest at 0.33 (0.11, `idle_walk_best`), but there walk_b and run_b sit at 0.19 and 0.33;
+0.72 keeps every loop at 0.21 or under. Grimble's run_f is never nearer his idle than 0.33 (he runs hunched), so at
+full stick a third of a body height is left to the blend; no re-key, no `start_blend` (no carried arm is off).
+In the strips (columns 1 to 9: the idle, then set-off frames 0 to 7): Grimble's raw walk snaps his wide stance shut
+into mid-stride over frames 0 to 2; with the phase he holds the stance through frame 2 and steps from frame 3.
+Sparkle's raw walk crosses her legs by frame 1; with the phase the stance opens into the stride over frames 2 to 4.
+
+![dredge setting off, before and after](anim_audit/start/dredge.jpg)
+
+![mage setting off, before and after](anim_audit/start/mage.jpg)
+
+The `walk_run` number is now read at the start phase on both clips (ashwick 0.22 → 0.32, gunslinger 0.16 → 0.20); a
+walk to run hand-off happens mid-cycle, so that number stays a proxy and is not gated.
+
 ## What is left
 
 Split into backlog items per Hunter (role build):
@@ -312,3 +370,6 @@ Split into backlog items per Hunter (role build):
   exempts it), and a stronger counter-swing (+0.39).
 - Mid-blend slide (walk into run, every direction) and Tenzo's strafe run: docs/art/FOOT_SLIDE.md.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
+- `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
+- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
+- Start gaps not on the gate: `rimewright` measures 0.33 now (0.06 when this page was written), `dolm` 0.25.

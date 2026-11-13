@@ -46,6 +46,7 @@ const RECOIL_DECAY := 3.0    # e-folds over the data's "settle" (the kick is dow
 const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.55, "pauldron.L": 0.55}
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
+const SET_OFF_STILL := 0.3   # s standing before a start counts as setting off: the walk ring has faded out by then
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -111,6 +112,10 @@ var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is
 var fired_prev := 99.0       # the state's s since the last shot, last frame
 var recoil_deg := 0.0        # the arms' kick now
 var turn: WardenTurn         # turning on the spot (null: no legs, or the root bone rides the rig)
+var ring_starts: Array = []  # [seek path, s]: where each walk and run clip starts when he sets off (loco "start_phase")
+var start_bones: Array = []  # [bone index, rotation]: loco "start_blend" bones, and their pose when he set off
+var start_s := 0.0           # s those bones take to ease from that pose into the clips
+var start_t := 0.0           # s since he set off
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -194,6 +199,11 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	_setup_out()
 	if not bool(d.get("rig_root", false)):
 		turn = WardenTurn.make(model, sk)
+	var sb: Dictionary = d["loco"].get("start_blend", {})
+	start_s = float(sb.get("s", 0.0))
+	start_t = start_s
+	for nm in sb.get("bones", []):
+		start_bones.append([WardenSkeleton.find(sk, String(nm)), Quaternion.IDENTITY])
 	return true
 
 ## "loco.run_cycle" (s): the four run loops are re-timed to this cycle, their keys' times scaled and the poses kept
@@ -280,6 +290,14 @@ func _gait_loop(nm: String, cycle: float) -> AnimationNodeAnimation:
 		n.loop_mode = Animation.LOOP_LINEAR
 	return n
 
+## A loop with a seek in front, so setting off can start it at its "start_phase".
+func _seekable(clip: AnimationNodeAnimation) -> AnimationNodeBlendTree:
+	var t := AnimationNodeBlendTree.new()
+	t.add_node("clip", clip)
+	t.add_node("seek", AnimationNodeTimeSeek.new())
+	t.connect_node("seek", 0, "clip")
+	t.connect_node("output", 0, "seek")
+	return t
 func _build() -> AnimationNodeBlendTree:
 	var lc: Dictionary = d["loco"]
 	var bs := AnimationNodeBlendSpace2D.new()
@@ -290,11 +308,15 @@ func _build() -> AnimationNodeBlendTree:
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	var cycle := float(lc.get("cycle_s", 0.0))
+	var phase := float(lc.get("start_phase", 0.0))
 	for k in dirs:
 		var run := String(lc["run"][k])
-		bs.add_blend_point(_gait_loop(String(lc["walk"][k]), cycle if cycle > 0.0 else lib.get_animation(run).length),
-				dirs[k] * _walk_ring())
-		bs.add_blend_point(_gait_loop(run, cycle), dirs[k])
+		var walk_len := cycle if cycle > 0.0 else lib.get_animation(run).length
+		for ring in [[String(lc["walk"][k]), walk_len, _walk_ring()], [run, cycle, 1.0]]:
+			var len_s: float = ring[1] if float(ring[1]) > 0.0 else lib.get_animation(String(ring[0])).length
+			bs.add_blend_point(_seekable(_gait_loop(String(ring[0]), float(ring[1]))), dirs[k] * float(ring[2]))
+			ring_starts.append([StringName("parameters/loco/%d/seek/seek_request" % (bs.get_blend_point_count() - 1)),
+					phase * len_s])
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
@@ -582,6 +604,7 @@ func step(dt: float) -> void:
 	if d.has("crouch"):
 		_crouch(s, dt)
 	tree.advance(dt)
+	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	if d.has("recoil"):
@@ -744,6 +767,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var ring := _walk_ring()
 	var rate := gait.plan(spd, lc, loco_pos, clampf((loco_pos.length() - ring) / (1.0 - ring), 0.0, 1.0))
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
+	if spd >= STILL and still_t >= SET_OFF_STILL:
+		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
@@ -762,6 +787,25 @@ func _loco(s: Dictionary, dt: float) -> void:
 			land_t = 0.0
 		air_t = 0.0
 	was_air = not grounded
+
+## Setting off from a stand (docs/art/ANIM_QUALITY_AUDIT.md, first-pose gaps): the walk and run start at the phase
+## nearest the idle, and the "start_blend" bones keep the pose they stood in, to ease into the clips after the advance.
+func _set_off() -> void:
+	for r in ring_starts:
+		tree.set(r[0], r[1])
+	for b in start_bones:
+		b[1] = skel.get_bone_pose_rotation(b[0])
+	start_t = 0.0
+
+func _ease_start(dt: float) -> void:
+	if act_w > 0.0 or up_w > 0.0:
+		start_t = start_s      # (a move owns the arm: no ease under it)
+	if start_t >= start_s:
+		return
+	start_t += dt
+	var k := smoothstep(0.0, start_s, start_t)
+	for b in start_bones:
+		skel.set_bone_pose_rotation(b[0], (b[1] as Quaternion).slerp(skel.get_bone_pose_rotation(b[0]), k))
 
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 ## Grounded ("gnd") holds it low for as long as the cords do.
