@@ -68,6 +68,52 @@ claude-job is not on this worker, so running *-integ jobs could not be listed; n
 
 Integration fixes on top: feel-step-up walk-over uses StepSmooth (step_vis gone on base); GlideSpike reads hunter_move.json directly (static-init cycle via World.STEP); duplicate --level-vfx-check key; style ratchet repaired.
 
+## Merged origin/main ce8bb5edd0 (PRs 45-49) on 2026-11-13, job 20261113-160528-a5 on w2
+
+Main moved 5864 commits past this branch's base after the READY above was posted, so merge-candidate kept skipping it
+for conflicts: 107 files. Resolved keeping both intents; where both sides re-did one thing, main (the owner's merged
+truth, and the newer tuning) wins and the branch's version is listed here.
+
+Main won (the branch's version is gone from this branch):
+- Damage numbers: main's rolling numbers (`Fx.roll_key`, `HudStyle.dmg_col(crit, armour, ...)`, `ak.number_col`) over
+  the three looks by source of ext/vfx-number-sources (3e92993c8c, part of the mc-demo-1112 base): `--number-looks-check`
+  and docs/HUD.md's section are gone. A re-port of the Boki / tick looks onto `roll_key` is open (docs/DEBT.md).
+- Hollow Crown: main's 540 m 2.0 map, its generator and glides. The base's air routes (ext/air-rings-1111 489ef26cac:
+  7 ringed lanes, 6 lift rings on the 305 m map) have no rows on 2.0; `BotRoute.lift_aim` and the glide `rings` flag
+  are in and read nothing until they are re-laid.
+- Gunslinger: Dazed +76% everywhere (main 73f3c02ee8), not the branch's data-derived 38%; the kit_parity row says so.
+  Descs follow the live numbers: Longneedle 24 (main's desc said 36), Napalm tick 3.5, Rimelock 18.
+- Title and results: main's painted title (`title.gd`, 193 lines) and `ResultsStage`; the branch's Help menu item is
+  back on the title. The branch's results-island wheel zoom (`ViewZoom`) has no home in ResultsStage: dropped.
+- Spectating: main's `Spectate` picks and cycles the watched teammate (fire / secondary); the branch's `DeathRecap` keeps
+  the down/death card and asks Spectate who is watched (its own cycle and `_watch` are gone).
+- dash_flow source notes (`hold/*/source`): main's footage-cited text, same verdicts.
+- Kael's loco bob 0.6 (branch 0.55), shotgun `dr_shot` and tower shield `bjorn_spin` sounds, NPC hob/pell re-baked
+  meshes with the bake-side 0.01 armature scale (the branch's runtime fix goes), nook friends at base_life friend_at,
+  TTK table and check, Hollow Crown builder, archetype / combo / dancer-jug thresholds.
+
+Both kept:
+- One press buffer: `Loco.press_buffer` (the branch) replaces main's new `DashFlow.BUFFER_S`, the Juggernaut's `BUFFER`
+  and `ArchKit.RECAST_BUFFER` in kits, checks and docs.
+- hunter.gd: `StepSmooth.ease` (the branch) with main's visible rule (`WardenClips.leave_t`); `BodySlip.eject` (main).
+- bot.gd: `BotRoute` hops and lifts (the branch) with main's take-off rules (`TAKE_ON`, `_take_stall`).
+- home.gd: `NookMoment` with `NestReveal` as its fallback, photo mode, `HomeKinFrame` framing under the evolve / nest
+  framing, the "egg" debug jump, body glow + species voice at an evolution's end.
+- warden_clips.gd: the aim lead (`keeps_lead`) with main's rooted legs and rescue carry layers; `free_arm.apply` keeps
+  its time argument.
+- match.gd: `FireTap.down` inside main's `PanelInput.panel_up` guard; `mate_look.focus(StepSmooth.view(...))`;
+  results carry both `used` and `squad`.
+- Ostra rank-3 ally shield: main's numbers (a share of his health, `ally_shield_t`) through `ReceiverCue.shield`.
+- Checks keep both sides' tests (anim_audit, cam_framing, clip, hero_combo, hero_vfx, kit_drill with
+  `SignatureDrill.step`, revive, sfx_set rows 11 and 12, recast_cue's HeroSfx open chime with main's tick skip).
+- Registry: main's plus this branch's 58 entries; kit_parity rows combined (80); docs union-merged (adjacent duplicates
+  removed); style baseline merged (worst count where both changed), ratchet green; wiki regenerated (gen_wiki.py now
+  takes list branch paths; main's evolve.json has one).
+
+Fixes found by the checks after the merge:
+- hero_vfx.gdshader: `swirl_rim`'s local `band` shadowed the `band` uniform, so the whole hero VFX shader failed to
+  compile (pre-existing on main; every check log said "Redefinition of 'band'"). Renamed.
+
 ## Left out: real conflicts in code or assets (resolve by rebuilding on this branch or main)
 
 Count is the number of conflicting code/asset files at this branch head.
