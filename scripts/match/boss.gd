@@ -13,6 +13,9 @@ extends Mob
 ##   Brood Mother    spits fans of acid, lobs acid that leaves burning puddles, lays egg sacs that
 ##                   hatch into adds, burrows and bursts up under you; a brood of adds on each phase
 
+const PHASE_HP := [0.66, 0.33]   # health fractions where phases 1 and 2 start ([?] no source value)
+const LEASH_T := 12.0            # s with no foe inside the lair before it resets ([?] no source value)
+
 var lair: Dictionary = {}
 var dormant := true
 var phase := 0
@@ -38,6 +41,8 @@ var buried := false
 var anim_kind := ""          # what the model is doing: slam, throw, roar, spit, dash, burrow
 var damage_by := {}          # team -> damage dealt, for credit
 var orbit := 1.0
+var add_k := 0               # egg-sac adds hatched so far: the next one's kind cycles BROOD_ADDS, no dice
+const BROOD_ADDS := ["skitter", "skitter", "bomber", "spitter"]   # phase 0 cycles the first two, then +1 a phase
 
 const DEATH_FADE_S := 1.4      # s the fallen body stays before it is gone
 const COL := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
@@ -56,7 +61,7 @@ func mass() -> float:
 
 ## The phase a boss with this health is in (0, 1 at 66%, 2 at 33%); a client works it out from the synced hp.
 static func phase_at(hp_now: float, hp_max: float) -> int:
-	return 0 if hp_now > hp_max * 0.66 else (1 if hp_now > hp_max * 0.33 else 2)
+	return 0 if hp_now > hp_max * PHASE_HP[0] else (1 if hp_now > hp_max * PHASE_HP[1] else 2)
 
 func col() -> Color:
 	return COL.get(mkind, Color("ff6a4a"))
@@ -207,7 +212,6 @@ func sim(dt: float) -> void:
 	if invul_t > 0.0: invul_t -= dt
 	if md.get("stag", false):
 		_tick_stagger(dt)
-	# phases at 66% and 33%
 	var want := phase_at(hp, max_hp)
 	if want > phase:
 		_phase_up(want)
@@ -219,7 +223,7 @@ func sim(dt: float) -> void:
 	if inside.is_empty():
 		empty_t += dt
 		# (the Heart Raid's boss holds the Heart: it never sleeps)
-		if empty_t > 12.0 and not lair.get("heart_raid", false):
+		if empty_t > LEASH_T and not lair.get("heart_raid", false):
 			m.lairs.reset_boss(self)
 			return
 	else:
@@ -253,7 +257,7 @@ func sim(dt: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= dt
 		vel.x = dash_v.x; vel.z = dash_v.y
-		_dash_hits()
+		_dash_hits(dt)
 	else:
 		var hv := Vector2(vel.x, vel.z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * dt))
@@ -510,11 +514,12 @@ func _atk_dash() -> void:
 			dash_hit = {}
 			m.sfx("whoosh", pos, 2.0, 0.7))
 
-func _dash_hits() -> void:
+func _dash_hits(dt: float) -> void:
 	m.fx.burst(pos + Vector3(0, 1.0, 0), Color("bff8ff"), 3, 2.0, 0.3, 0.0, 0.8)
+	var end := pos + Vector3(dash_v.x, 0, dash_v.y) * dt
 	for f in m.foes_of(team):
 		if f is Mob or dash_hit.has(f.nid): continue
-		if flat_dist(f) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
+		if Swept.dist(f.pos, pos, end) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
 			dash_hit[f.nid] = true
 			var d := dash_v.normalized()
 			var rel := Vector2(f.pos.x - pos.x, f.pos.z - pos.z)
@@ -633,8 +638,10 @@ func _atk_brood() -> void:
 	_begin("brood", w + 2.4, "roar")
 	var n := 2 + phase
 	for i in n:
-		var a := TAU * i / n + randf() * 0.6
+		var a := TAU * i / n + 0.3 * float(add_k % 3)      # fixed spots round it (they turn a little each brood)
 		var at := clamp_in(pos + Vector3(cos(a), 0, sin(a)) * 3.0, 0.8)
+		var add_kind: String = BROOD_ADDS[add_k % (2 + mini(phase, 2))]
+		add_k += 1
 		at.y = centre().y
 		# egg sacs: glowing eggs that wobble, then burst into adds
 		var egg := Node3D.new()
@@ -648,7 +655,7 @@ func _atk_brood() -> void:
 		_at(w + 2.2, func():
 			m.fx.burst(at + Vector3(0, 0.4, 0), Color("e0b040"), 16, 4.0, 0.5, 6.0)
 			m.sfx("die_small", at, -2.0, 1.3)
-			m.lairs.spawn_add(lair, ["skitter", "skitter", "bomber", "spitter"][randi() % (2 + mini(phase, 2))], at))
+			m.lairs.spawn_add(lair, add_kind, at))
 
 func _atk_burrow() -> void:
 	_begin("burrow", 3.6, "burrow")
