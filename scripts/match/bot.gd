@@ -157,6 +157,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if h.wid == "sniper": pref = 11.0
 		if h.wpn.get("melee", false): pref = 1.2
 		elif h.wpn.has("pellets"): pref = 3.5
+		var reach: float = float(h.wpn["range"]) + 0.5
+		if h.ak and h.ak.bot_reach() > 0.0:
+			reach = h.ak.bot_reach()       # a short stream: close in until the foe stands well inside it
+			pref = minf(pref, reach - 1.5)
 		if d > pref + 1.5:
 			move = to
 		elif d < pref - 2.0:
@@ -190,7 +194,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# (0.5: after the Oct 31 weapon retune a burst rifle or greatsword still counts as a fast weapon
 		# and keeps its pauses, so bots don't hit harder than before)
 		var trig_ok: bool = float(a["react_t"]) <= 0.0 and (a["burst"] > 0.0 or ((float(h.wpn["rate"]) > 0.5 or h.wpn.has("spin_up")) and randf() < duty * dt * 8.0 + (0.0 if duty < 0.99 else 1.0)))
-		if los and d < float(h.wpn["range"]) + 0.5 and trig_ok:
+		if los and d < reach and trig_ok:
 			inp["fire"] = true
 			a["nolos_t"] = 0.0
 		elif not los:

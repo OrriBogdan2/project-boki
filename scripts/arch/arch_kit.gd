@@ -177,6 +177,8 @@ func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
 func res_text() -> String: return "%d" % int(round(res))
 func res_frac() -> float: return clampf(res / maxf(1.0, res_max()), 0.0, 1.0)
 func bot_use(_tgt: Ent, _dist: float, _los: bool) -> void: pass
+## m a bot must close to before it holds the attack key (a short stream); 0: the weapon's own range.
+func bot_reach() -> float: return 0.0
 ## The nearest foe a bot can hit within 12 m (the bot paths of the kits that run their own attack key).
 func _bot_target() -> Ent:
 	var best: Ent = null; var bd := 12.0

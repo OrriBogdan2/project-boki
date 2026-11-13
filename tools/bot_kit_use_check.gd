@@ -15,7 +15,6 @@ const MUST := {
 	"ashwick": ["cloak pull"],
 }
 const ALWAYS := ["lmb hit", "rmb press", "e", "ultimate", "dash", "glide"]       # every Hunter, every duel
-const NO_ULT := ["tender"]       # (its ultimate heals a teammate: a duel has none)
 const COLS := ["lmb hit", "rmb press", "rmb hold", "rmb hit", "e", "e hit", "ultimate", "dash", "glide"]
 
 var bad := 0
@@ -123,6 +122,7 @@ func _totals(n: Dictionary, k: ArchKit) -> void:
 		_add(n, "hops", k.hop.hops)
 	elif k is AshwickKit:
 		_add(n, "cloak pull", k.pulled)
+		_add(n, "lmb hit", k.hose_hits)     # (the stream's hits are tagged "flame", not "primary")
 
 func _report(arch: String, n: Dictionary) -> void:
 	n["hop recast"] = int(n.get("hops", 0)) - int(n.get("hop chain", 0))
@@ -135,7 +135,6 @@ func _report(arch: String, n: Dictionary) -> void:
 	print("KITUSE | %s | %s | %s |" % [arch, " | ".join(cells), ", ".join(extras)])
 	var want: Array = ALWAYS + MUST.get(arch, [])
 	for key in want:
-		if key == "ultimate" and arch in NO_ULT: continue
 		if int(n.get(key, 0)) <= 0:
 			print("KITUSE FAIL %s never uses '%s'" % [arch, key])
 			bad += 1

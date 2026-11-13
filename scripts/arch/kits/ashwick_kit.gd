@@ -69,6 +69,7 @@ var cloaks := 0
 var blasts := 0
 var pulled := 0
 var flame_ticks := 0
+var hose_hits := 0              # (tests) foe-ticks the stream landed on
 var bash_hits := 0
 var fizzles := 0
 var bolt_ends: Array = []       # (tests) where each Cinder Shot ended: [at, expired]
@@ -407,6 +408,7 @@ func _flame_tick(tick: float) -> void:
 			continue
 		var dmg: float = float(ld["dps"]) * tick * ignite_k(f) + f.max_hp * ignite_pct(f) * tick
 		f.hurt(dmg, h, {"src": "flame", "ab": "primary", "tags": ["flame"], "melee": false})
+		hose_hits += 1
 		add_char(f, float(ld["char_tick"]))
 		if flame_ticks % 2 == 0 and tells_visible():
 			vfx("lance_hit", f.pos)
@@ -715,6 +717,10 @@ func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
 func gate_inputs() -> void: jet.lock_inputs()
 
 # ------------------------------------------------------------------ bots
+## The Torch Lance only reaches its stream's length: a bot walks in to it before holding LMB.
+func bot_reach() -> float: return float(lmbd()["range"]) - 0.4
+
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
