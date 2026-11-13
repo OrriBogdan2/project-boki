@@ -132,7 +132,7 @@ func _full_pack(main: Node, m: Match, p: Hunter) -> void:
 		Loot.valuable("sky_pearl"), Loot.valuable("old_coin")]
 	var was := main.get_window().size
 	var scale_was = Settings.v.get("ui_scale", 1.0)
-	Settings.v["ui_scale"] = 1.0         # the layout is made for 720p at its own size; the host's own setting must not change the answer
+	Settings.v["ui_scale"] = 1.0         # the host's own size setting must not change the answer
 	main.get_window().size = Vector2i(1280, 720)
 	var lp := await _reopen(main, m)
 	await _frames(main, 3)
