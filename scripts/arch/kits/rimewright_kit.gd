@@ -83,6 +83,7 @@ func add_chill(t: Ent) -> void:
 	chill[key] = {"t": t, "left": float(d["passive"].get("chill_t", 4.0))}
 	if fresh:
 		vfx("chill", t.pos)
+		StatusSfx.cue(t, "chill", h, float(d["passive"].get("chill_t", 4.0)))
 
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0

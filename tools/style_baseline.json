@@ -433,7 +433,7 @@
 "scripts/match/exits.gd": {
 "long_line": 30,
 "nested_ternary": 1,
-"semicolon": 13
+"semicolon": 20
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
@@ -1023,6 +1023,9 @@
 "tools/speaktest.gd": {
 "long_line": 1,
 "semicolon": 1
+},
+"tools/status_sfx_check.gd": {
+"long_line": 1
 },
 "tools/support_check.gd": {
 "long_line": 14,

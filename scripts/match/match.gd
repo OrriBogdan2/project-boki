@@ -349,6 +349,7 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
+	add_child(StatusSfx.new(self))        # status cues and loops
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
