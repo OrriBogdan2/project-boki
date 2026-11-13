@@ -16,11 +16,19 @@ func _gate_taken(m: Match) -> Hunter:
 	var far: Hunter = mates[1]
 	P.teleport(m.heart.gate + Vector3(1.0, 0, 0))
 	mates[0].teleport(m.heart.gate + Vector3(-1.0, 0, 0))
-	far.teleport(m.heart.gate + Vector3(0, 0, 40.0))
+	far.teleport(_far_ground(m))
 	far.gems = 30
 	far.seeds = {"sunroot": 2}
 	m.heart._take(Heart.HOW_EARLY, P.team)
 	return far
+
+## A spot on solid ground 40 m from the Gate (the island's edge moves with the map; the void would kill them).
+func _far_ground(m: Match) -> Vector3:
+	for d in [Vector3(0, 0, 40.0), Vector3(0, 0, -40.0), Vector3(40.0, 0, 0), Vector3(-40.0, 0, 0)]:
+		var q: Vector3 = m.heart.gate + d
+		if m.world.ground_at(q.x, q.z) > World.VOID:
+			return q
+	return m.heart.gate + Vector3(0, 0, 40.0)
 
 ## fresh(squad) -> Match, run(m, sec, every), done(m): the extract check's own helpers.
 func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
