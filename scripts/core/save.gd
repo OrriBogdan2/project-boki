@@ -72,6 +72,7 @@ func fresh() -> Dictionary:
 		"active": "",
 		"roster": [],
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
+		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t} (Sleepover)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),   # plus the first-day kibble
@@ -329,6 +330,11 @@ func _migrate_13_to_14(data: Dictionary) -> void:
 	var gid := String(data.get("guild_id", ""))
 	var who := String(data.get("profile", {}).get("id", ""))
 	data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
+
+## v13 -> v14: sleepovers. No Boki is away: d["sleepovers"] = [] (Sleepover).
+func _migrate_13_to_14(data: Dictionary) -> void:
+	if not data.has("sleepovers"):
+		data["sleepovers"] = []
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,

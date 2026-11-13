@@ -731,6 +731,9 @@ func _ready_rest() -> void:
 		Social.collect_gifts(func(lines: Array):
 			if lines.size() > 0 and is_inside_tree():
 				_show_when_free(lines))
+		Sleepover.collect(func(lines: Array):
+			if lines.size() > 0 and is_inside_tree():
+				_show_when_free(lines))
 		Social.collect_payouts(func(total: int):
 			if total > 0 and is_inside_tree():
 				_toast("The market paid you %d gems" % total)
@@ -3913,6 +3916,9 @@ func _open_gift_panel(owner_name: String) -> void:
 	var v := _new_panel("Leave a gift for %s" % owner_name, 520)
 	v.add_child(UI.primary("Go inside %s's house" % owner_name, func(): Game.goto("interior", {"room": "house", "visit": visit, "visit_id": visit_id}), 300))
 	v.add_child(UI.label("They'll find it next time they're home.", 14, UI.MUTED))
+	SleepoverPanel.fill(v, visit_id, owner_name, func(text: String):
+		_close_panel()
+		_toast(text))
 	var any := false
 	for kind in ["seed", "crop"]:
 		var store: Dictionary = Save.d["seeds"] if kind == "seed" else Save.d["crops"]
