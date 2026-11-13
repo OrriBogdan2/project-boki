@@ -30,11 +30,6 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
   `moving` s (default `dur`) while he runs on, played at `rate` times its speed (default 1). `--clip-check` measures the
   plain jump through the clips (take-off, apex, dip, recovery: the JL rows); `--jump-land-shots` films it at the match camera.
-- `air`, `land`: rise, fall, glide, dive (a plunge: the glider's Ctrl dive and the opening skydive; `dive_at` s holds a
-  one-shot clip on one frame); a landing clip after `min_fall` s airborne. WardenAirTilt turns the whole .glb about the
-  hips on top: `dive_tilt` (deg forward in a plunge, default 105: head-down), `glide_tilt` (deg forward under the
-  glider, default 12: the legs trail), `glide_bank` (deg into a glider turn, default 28). A clip that already leans
-  sets less (Tarek's and Breaker's dive 50, Hem's 35, Ostra's 12 on top of the rig's own tip). Strips: `--glide-shots`.
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
   the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body

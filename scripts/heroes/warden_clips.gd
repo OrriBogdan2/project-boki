@@ -11,8 +11,8 @@ extends RefCounted
 ## portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a Blend2 of fall
-## and rise, or the glide, or the dive: a plunge's own clip, data "air.dive", held at "dive_at" s when the clip is a
-## one-shot) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
+## and rise, or the glide: a dive plays the glide too, pitched by HunterAnim's AIR_TILT) > upper (Blend2 filtered to
+## the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
 ## so one move hands to the next without a pop (item 32).
 ##
@@ -74,8 +74,6 @@ var up_w := 0.0              # how much it owns the upper body only
 var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less its first frame) rides on the upper body
 var air_w := 0.0
 var glide_w := 0.0
-var dive_w := 0.0
-var tilt: WardenAirTilt      # the whole body pitched and banked in the air
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
@@ -187,7 +185,6 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.root_node = tree.get_path_to(glb)
 	tree.add_animation_library("", lib)
 	tree.tree_root = _build()
-	tilt = WardenAirTilt.new(glb, sk, d["air"])
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
@@ -283,15 +280,9 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("air_pose", 0, "fall")
 	t.connect_node("air_pose", 1, "rise_seek")
 	t.add_node("glide", _anim(String(ai["glide"])))
-	t.add_node("dive", _anim(String(ai.get("dive", ai["glide"]))))
-	t.add_node("dive_at", AnimationNodeTimeSeek.new())
-	t.connect_node("dive_at", 0, "dive")
-	t.add_node("dive_w", AnimationNodeBlend2.new())
-	t.connect_node("dive_w", 0, "glide")
-	t.connect_node("dive_w", 1, "dive_at")
 	t.add_node("glide_w", AnimationNodeBlend2.new())
 	t.connect_node("glide_w", 0, "air_pose")
-	t.connect_node("glide_w", 1, "dive_w")
+	t.connect_node("glide_w", 1, "glide")
 	t.add_node("air", AnimationNodeBlend2.new())
 	t.connect_node("air", 0, _build_crouch(t) if d.has("crouch") else "stance_w")
 	t.connect_node("air", 1, "glide_w")
@@ -636,7 +627,6 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
-	tilt.step(s, dt)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	var legs := bool(want.get("legs_heading", false))
@@ -775,13 +765,9 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var gliding := bool(s.get("gliding", false)) or diving
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
 	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
-	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
-	_p("dive_w/blend_amount", dive_w)
-	if d["air"].has("dive_at"):
-		_p("dive_at/seek_request", float(d["air"]["dive_at"]))
 	_p("air_pose/blend_amount", rise_w)
 	if not grounded:
 		if not was_air:
