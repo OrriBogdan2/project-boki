@@ -3182,6 +3182,7 @@ func _process(delta: float) -> void:
 	KeysDemo.frame(self)           # screenshot tooling: --keys-demo=thicket|chest|glint|shrub
 	_update_vision()
 	SeeThrough.for_match(self)     # trees and pillars over your hunter or Boki thin out
+	OcclusionOutline.for_match(self)     # your side's outline where cover hides it
 	_vprof("vision")
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)

@@ -442,6 +442,8 @@ const CHECKS := {
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
+	"--occlusion-outline-check": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "check"],
+	"--occlusion-outline-shots": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "shots"],
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],      # MapDetail: default vs hold
 	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],      # TrainMap
 	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],      # --shots-dir=<dir>
