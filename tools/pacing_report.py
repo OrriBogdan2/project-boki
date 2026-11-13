@@ -184,7 +184,6 @@ def main(paths):
     print("|---|---|---|---|---|---|---|---|---|---|")
     for d in rows:
         h = d["heart"]
-        awake = med(d["lair_awake"].values())
         cleared = sorted(d["lair_cleared"].values())
         print(
             "| %s | %s | %s | %s | %s | %s | %s | %s | %s / %s / %s | %s |"
