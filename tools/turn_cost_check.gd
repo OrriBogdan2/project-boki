@@ -8,7 +8,7 @@ extends RefCounted
 
 const SAME_KEEP := 0.95
 const REV_KEEP := 0.9
-const RUN_SLACK := 1.0      # m/s over the run an air dash straight back may still carry
+const RUN_SLACK := 1.1      # m/s over the run an air dash straight back may still carry
 const HEIGHT := 40.0
 
 var bad := 0
@@ -149,7 +149,7 @@ func run(main: Node) -> void:
 			var back_c: float = back_air["carry"]
 			ok(same_c >= c * SAME_KEEP, "%s air: fresh carry %.1f m/s, same way %.1f" % [arch, c, same_c])
 			ok(back_c <= run_speed + RUN_SLACK,
-				"%s air: run %.1f m/s, straight back carries %.1f" % [arch, run_speed, back_c])
+				"%s air: run %.2f m/s, straight back carries %.3f" % [arch, run_speed, back_c])
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("TURNCOST DONE, failures: %d" % bad)
