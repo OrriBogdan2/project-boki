@@ -167,7 +167,7 @@ pass above.
 | LMB | legs | wide low stance standing; running, "the torso snaps to the cursor while firing with either hand, and the legs keep running" [footage] | the throw's legs at full weight for 0.35s of every 0.45s, running or not (the feet froze mid-run) | the legs are a stance (`"stance": true`): full standing, none at a run, so the legs keep running |
 | LMB | tracking | the bolt flies to the cursor point; the body faces the cursor, yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted: a bolt swung behind her leaves on the new cursor, the body turns 180 degrees in 0.13s |
 | LMB | cadence | 0.45s [footage card] | 0.45s | unchanged; asserted held (a bolt every 0.45s, hands alternating) |
-| LMB | move while firing | 77-86 px/s firing against 113 (unconfirmed) [footage] | 90% of the run | unchanged (90%); asserted she keeps 85% or more |
+| LMB | move while firing | 77-86 px/s firing against 113 in three stretches: 68-76% [footage] | 90% of the run | 72% (`fire_slow`, cast-move pass 2026-11-11, docs/KIT_PARITY.md); asserted 66-78% |
 | LMB | the empowered bolt's own kick | a big streak and a blade flash at her hands [footage 0143] | a screen shake on your own camera | no screen shake (owner rule 50); the streak, the flash and the sound carry it |
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
 | Shift, E, R | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
