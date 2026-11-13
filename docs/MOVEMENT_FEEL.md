@@ -451,3 +451,130 @@ XDG_DATA_HOME=<scratch> godot --headless --path . -- --feel-golden-check --updat
 ```
 
 When it fails: if the change was not meant to alter movement, fix the change. If the feel change is intended (a tuning pass, a new kit move), run with `--update` and commit the new `feel_golden.json` in the same commit, with the reason in the commit message ("feel golden: dash 10% shorter for Cinder, owner 11-09"). Update the targets above too if a measured row moved. A golden diff with no reason in the message is a review reject.
+
+### Golden re-record for 0.24.4/0.24.5: every drifted row classified (ext/feel-golden-0244)
+
+The golden recorded at 4c76f338f failed 83 rows on main 88b06b9e7 (GATE_TRIAGE_0244 counted 84 with the older tool;
+the shove noise made the count vary). Every row was traced to the commit that moved it before the golden was
+re-recorded. Nothing was found to be a regression, so no code or data changed and no tolerance moved.
+
+How: the check now runs every script in a cleared space (no mobs, no Boki, the other Hunters parked; the tool half
+of ext/feel-golden-determinism 9841c4f97). The same cleared tool recorded a clean baseline at 4c76f338f itself
+(repeatable, 0 failures). The 4c76f338f golden then still failed 16 rows against that baseline. Those were shoves
+from a mob or bot that the old golden had recorded: the velocity matches and the position stalls (class A). Then I
+walked the 318 first-parent commits from d255acbee to 6421b711d (main's tree), recording traces at each commit. A
+binary search found each commit after which some row first differs from the last recording, and repeated the
+search from there. It found 10 change points. Inside the movement-unify and supervive-movement merges, the change
+was pinned to single commits.
+
+| Commit | What moved | Class | Source |
+|---|---|---|---|
+| 4143374c6 (void-jester-dash) | Motley's Trade drift slow 0.30 -> 0.35 | O | OWNER_REVIEW_1103 item 135 ("slowed too much during it"); owner 11-08 in the commit; KIT_PARITY Ostra Dash row |
+| 3fbe25fae (movement-unify) | strong air control (a jump keeps run speed), the glider adds no speed (dive cruise 11.2 -> 5 m/s), an air dash keeps its speed, wall kick | O | briefs/DECISIONS.md 2026-11-08 "Movement: air control as SUPERVIVE ...; glide start adds no speed" and "real matches HAVE air control"; decision 0022 |
+| d2adc51b8 (dash-curve-fit) | fitted dash curves for gunslinger, juggernaut, archer | S | decision 0025 (hero-ref footage at 1/15 s); KIT_PARITY "Felt dash per kit" |
+| 6503f4fa8 (supervive-movement) | archer: one dash shape, the source curve x 0.7 speed | S+O | decision 0026 "Dash shape (Myth)" row; KIT_PARITY felt-dash Hem row "speed x0.7 (owner item 9)" |
+| 5a2831b2b (supervive-movement) | over-run speed sheds under the source walking brake | S | decision 0026 "Over-run speed" row; KIT_PARITY gap 2 |
+| a0259d1c3 (supervive-movement) | ledge rise: the source mantle suction (2.5 m/s) instead of a 14 m/s yank | S | decision 0026 "Mantle rise" row |
+| b512c864c (glide-steer-parity) | the glider opens at a fall of at least 0.85 m/s and cuts a rising jump (GlideStartFallSpeedMin) | S+O | decision 0027; DECISIONS 11-08 "glide start adds no speed" |
+| bdb7703bd (glide-fixes) | Sable's Cartwheel is the same in the air; out of charges, the class long dash | S | OWNER_REVIEW_1103 item 183; KIT_PARITY felt-dash Sable row |
+| 754d177a0 (sparkle-dash) | Sparkle's Wirerun lane a quarter shorter, run-speed exit in the air | O | OWNER_REVIEW_1103 item 70 (lane length); owner playtest 11-10 in the commit; KIT_PARITY Ryzz (`mage`) Dash row |
+| 0f6711d51 (motley-tune) | Motley's Trade drift slow halved (speed 35% -> 67.5%) | O | OWNER_REVIEW_1103 item 135; owner playtest 11-10 in the commit |
+| 8280a6965 (feel-dash-scale-source) | the x.85/x1.15 felt-dash layer only on kits with no source dash | S | KIT_PARITY gap 4, "Felt dash per kit" |
+| dde1bb0e2 (move-dash-gaps-0244) | a dash's last step runs its remainder before the hand-over | S | decision 0053; KIT_PARITY felt-dash rows |
+| shove | the old golden recorded a mob or bot shove (velocity equal, position stalls) | A | re-record of 4c76f338f in the cleared space |
+
+Class: O owner-directed, S sourced parity fix, A recording artefact, R regression (none).
+
+One trace looks odd but is not a bug. After b512c864c, `glide_double` lands and then bounces: Space is
+still held, so the Hunter jumps again and the glider reopens about 0.1 s later. This happens because the golden
+check drives scripted input, which opens the glider on a hold by design (`hold_opens` in `Hunter`). Players get
+`glide_press_only`, and there "Space held from the jump never glides" (DECISIONS 11-08) holds; `--glide-hold-check`
+asserts it.
+
+Every failing row, with the drift `--feel-golden-check` printed on main before the re-record and the commits that moved it, oldest first:
+
+| Script | Hunter | Drift m, m/s | Moved by (in order) | Class |
+|---|---|---|---|---|
+| stop | ashwick | 0.112, 0.000 | shove | A |
+| jump | archer | 0.344, 0.643 | 3fbe25fae | O |
+| jump | ashwick | 0.533, 0.670 | shove, 3fbe25fae | A O |
+| jump | bulwark | 0.428, 0.799 | 3fbe25fae | O |
+| jump | dolm | 0.381, 0.713 | 3fbe25fae | O |
+| jump | dredge | 0.398, 0.745 | 3fbe25fae | O |
+| jump | gunslinger | 0.344, 0.643 | 3fbe25fae | O |
+| jump | juggernaut | 0.344, 0.643 | 3fbe25fae | O |
+| jump | mage | 0.358, 0.670 | 3fbe25fae | O |
+| jump | ostra | 0.358, 0.670 | 3fbe25fae | O |
+| jump | rimewright | 0.329, 0.616 | 3fbe25fae | O |
+| jump | tender | 0.344, 0.643 | 3fbe25fae | O |
+| jump | thief | 0.358, 0.670 | 3fbe25fae | O |
+| dash_tap | archer | 0.647, 7.521 | shove, 3fbe25fae, d2adc51b8, 6503f4fa8, 8280a6965 | A O S S+O |
+| dash_tap | ashwick | 7.329, 9.558 | shove, dde1bb0e2 | A S |
+| dash_tap | bulwark | 1.082, 5.348 | shove, 5a2831b2b, 8280a6965, dde1bb0e2 | A S |
+| dash_tap | dolm | 0.721, 0.253 | shove, 3fbe25fae | A O |
+| dash_tap | dredge | 0.601, 0.000 | shove | A |
+| dash_tap | gunslinger | 1.503, 6.690 | shove, d2adc51b8, 8280a6965 | A S |
+| dash_tap | juggernaut | 0.668, 13.948 | shove, d2adc51b8 | A S |
+| dash_tap | mage | 0.473, 0.000 | shove, 754d177a0, dde1bb0e2 | A O S |
+| dash_tap | ostra | 2.896, 1.744 | 4143374c6, 0f6711d51 | O |
+| dash_tap | rimewright | 0.625, 0.000 | shove | A |
+| dash_tap | tender | 0.502, 0.159 | shove, 8280a6965 | A S |
+| dash_tap | thief | 0.520, 0.000 | shove | A |
+| dash_hold | archer | 2.445, 20.263 | shove, 3fbe25fae, d2adc51b8, 6503f4fa8, 8280a6965 | A O S S+O |
+| dash_hold | ashwick | 5.772, 17.024 | shove, dde1bb0e2 | A S |
+| dash_hold | bulwark | 4.909, 5.348 | shove, 8280a6965, dde1bb0e2 | A S |
+| dash_hold | dolm | 0.047, 0.344 | 3fbe25fae, 5a2831b2b | O S |
+| dash_hold | dredge | 3.159, 0.000 | shove | A |
+| dash_hold | gunslinger | 4.393, 18.450 | shove, d2adc51b8, 8280a6965 | A S |
+| dash_hold | juggernaut | 3.620, 13.948 | shove, d2adc51b8 | A S |
+| dash_hold | mage | 1.852, 22.236 | shove, 754d177a0, dde1bb0e2 | A O S |
+| dash_hold | ostra | 3.297, 1.744 | shove, 4143374c6, 0f6711d51 | A O |
+| dash_hold | rimewright | 2.791, 0.000 | shove | A |
+| dash_hold | tender | 3.677, 0.159 | shove, 8280a6965 | A S |
+| dash_hold | thief | 10.906, 25.462 | shove, 5a2831b2b, bdb7703bd | A S |
+| wall_kick | archer | 0.783, 6.106 | 3fbe25fae, a0259d1c3, b512c864c | O S S+O |
+| wall_kick | ashwick | 0.117, 0.442 | 3fbe25fae | O |
+| wall_kick | bulwark | 0.122, 1.830 | 3fbe25fae | O |
+| wall_kick | dolm | 0.139, 0.452 | 3fbe25fae | O |
+| wall_kick | dredge | 0.143, 1.300 | 3fbe25fae | O |
+| wall_kick | gunslinger | 0.125, 0.448 | 3fbe25fae | O |
+| wall_kick | juggernaut | 0.783, 6.106 | 3fbe25fae, a0259d1c3, b512c864c | O S S+O |
+| wall_kick | mage | 0.117, 0.442 | 3fbe25fae | O |
+| wall_kick | ostra | 0.117, 0.442 | 3fbe25fae | O |
+| wall_kick | rimewright | 0.108, 0.387 | 3fbe25fae | O |
+| wall_kick | tender | 0.125, 0.448 | 3fbe25fae | O |
+| wall_kick | thief | 0.117, 0.442 | 3fbe25fae | O |
+| glide_double | archer | 4.744, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| glide_double | ashwick | 4.728, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| glide_double | bulwark | 3.965, 10.290 | shove, 3fbe25fae, b512c864c | A O S+O |
+| glide_double | dolm | 4.727, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| glide_double | dredge | 4.765, 10.290 | shove, 3fbe25fae, b512c864c | A O S+O |
+| glide_double | gunslinger | 3.759, 10.290 | shove, 3fbe25fae, b512c864c | A O S+O |
+| glide_double | juggernaut | 4.057, 10.290 | shove, 3fbe25fae, b512c864c | A O S+O |
+| glide_double | mage | 4.728, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| glide_double | ostra | 4.728, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| glide_double | rimewright | 4.758, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| glide_double | tender | 4.744, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| glide_double | thief | 4.728, 10.290 | 3fbe25fae, b512c864c | O S+O |
+| dive | archer | 13.576, 6.208 | 3fbe25fae | O |
+| dive | ashwick | 13.576, 6.208 | 3fbe25fae | O |
+| dive | bulwark | 13.576, 6.208 | 3fbe25fae | O |
+| dive | dolm | 13.576, 6.208 | 3fbe25fae | O |
+| dive | dredge | 13.576, 6.208 | 3fbe25fae | O |
+| dive | gunslinger | 13.576, 6.208 | 3fbe25fae | O |
+| dive | juggernaut | 13.576, 6.208 | 3fbe25fae | O |
+| dive | mage | 13.576, 6.208 | 3fbe25fae | O |
+| dive | ostra | 13.576, 6.208 | 3fbe25fae | O |
+| dive | rimewright | 13.576, 6.208 | 3fbe25fae | O |
+| dive | tender | 13.576, 6.208 | 3fbe25fae | O |
+| dive | thief | 13.576, 6.208 | 3fbe25fae | O |
+| crouch_walk | archer | 3.123, 0.000 | shove | A |
+| crouch_walk | ashwick | 1.400, 0.000 | shove | A |
+| crouch_walk | bulwark | 3.148, 0.000 | shove | A |
+| crouch_walk | dolm | 1.489, 0.000 | shove | A |
+| crouch_walk | dredge | 3.132, 0.000 | shove | A |
+| crouch_walk | gunslinger | 3.809, 0.000 | shove | A |
+| crouch_walk | juggernaut | 2.894, 0.000 | shove | A |
+| crouch_walk | ostra | 3.017, 0.000 | shove | A |
+| crouch_walk | tender | 1.089, 0.000 | shove | A |
+| crouch_walk | thief | 2.964, 0.000 | shove | A |
