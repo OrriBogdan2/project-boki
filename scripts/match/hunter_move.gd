@@ -111,6 +111,12 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 			hi = mid
 	return hi
 
+## `hv` pushed along unit `dir` up to at least `speed` there, everything across `dir` kept (a knock, a lunge, a
+## kit's air step): it adds to what you carry instead of overwriting it, so air steering lives on (DECISIONS 11-08).
+static func push(hv: Vector2, dir: Vector2, speed: float) -> Vector2:
+	var along := hv.dot(dir)
+	return hv + dir * (maxf(along, speed) - along)
+
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
 ## plunge (ArchKit.dive_speed, like Breah's air Quakefall) outruns it.
