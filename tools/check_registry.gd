@@ -109,6 +109,8 @@ const CHECKS := {
 	# boss wake, phase and defeat cues
 	"--boss-sfx-check": ["res://tools/boss_sfx_check.gd", "boss_sfx_check", null],
 	"--listener-check": ["res://tools/listener_check.gd", "listener_check", null],      # ears on the Hunter, pan sign
+	# Settings > Audio sliders reach the buses
+	"--audio-settings-check": ["res://tools/audio_settings_check.gd", "audio_settings_check", null],
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],      # item 103
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
