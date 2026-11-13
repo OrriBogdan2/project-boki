@@ -1671,7 +1671,7 @@ When two Boki are paired in the Nesting Nook the pair is an unstable mix if thei
 
 ## wade (`content/rules/wade.json`)
 
-Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_build.json base_mode is on). A Boki in pond or stream water walks at wade_speed (shallow edge) or deep_speed (the middle) of its dry speed, leaves a ripple every ripple_secs and a splash going in, and shakes off coming out. Water, Ice and Crystal leans paddle: with linger_chance a free roaming one stays linger_secs in the water playing (the splash clip) and gains joy_per_sec. Fire leans hurry out: at out_speed to the nearest dry ground, which takes under 2 s. Everyone else wades through. Units: multipliers of walk speed, seconds, joy points a second.
+Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_build.json base_mode is on). A Boki in pond or stream water walks at wade_speed (shallow edge) or deep_speed (the middle) of its dry speed, splashes going in, leaves a ripple ring round it (a wave every ripple_secs) and a V wake while it moves (scripts/home/boki_wake.gd), and shakes off coming out. Water, Ice and Crystal leans paddle: with linger_chance a free roaming one stays linger_secs in the water playing (the splash clip) and gains joy_per_sec. Fire leans hurry out: at out_speed to the nearest dry ground, which takes under 2 s. Everyone else wades through. Units: multipliers of walk speed, seconds, joy points a second.
 
 | Setting | Value |
 |---|---|
