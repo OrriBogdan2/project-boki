@@ -2,7 +2,8 @@
 
 A Hero's ability looks and sounds are data: `content/vfx/<arch>.json`, played by the shared `HeroVfx`
 (`scripts/match/hero_vfx.gd`, one pooled node per match). A Hero needs a data file, a line per
-moment in its kit, and sounds. Check: `--hero-vfx-check` (every data file against its kit, plus the shared runtime). Tuning a
+moment in its kit, and sounds. Check: `--hero-vfx-check` (every data file against its kit, plus the shared runtime; every Hunter's casts against the Boki damage colours in
+`tools/hero_cat_fence_check.gd`). Tuning a
 palette: `--hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>]` plays every move side by side (no Hero: one of every
 layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command); a Hero's
 scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays.
@@ -53,7 +54,9 @@ opaque, so a recipe needs fewer, smaller puffs than a soft smoke did.
 Who includes it: the data looks here (`hero_vfx.gdshader`, `hero_vfx_mote.gdshader`, ring layer `"p": "ring"`), the
 kit shaders (`ld_fx` Ashwick / Dredge, `dj_fx` Kael / Sable, `vv_fx` Sparkle / Vex, `KitShaders` Hem / Breaker,
 `care_disc` / `care_glow` Pip / Claire, `molten_rock` Tarek's hard cel cracks, `void_glass` Ostra's banded rim) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
-tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) and the shared `Fx.ring` burst (`fx_ring`) draw `cel_ring()`. A ground ring means gameplay (the area something hits or marks): no bursts on dashes, landings or resets. A new effect shader
+tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) and the shared `Fx.ring` burst (`fx_ring`) draw `cel_ring()`. A ground ring means gameplay (the area something hits or marks): no bursts on dashes, landings or resets. The team markers (the TeamRing under every Hunter, a Boki's ring, the hit-marker ring, the deathbox owner ring) draw
+`marker_ring.gdshader` (`SideRings.mat`): a hard band, edges ragged by the noise, a lighter outer rim; its `color` is the side
+colour (`SideColor`), so a palette change repaints it with no shader change. Shots: `docs/art/team_markers/`. A new effect shader
 includes the file and runs its cover and glow through `cel_cover()` / `cel_glow()` last.
 
 ## FX anchors
