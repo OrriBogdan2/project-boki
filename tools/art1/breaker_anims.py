@@ -14,7 +14,6 @@ from mathutils import Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import anim_kit as A
-import skin_relax
 
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
@@ -286,8 +285,6 @@ bpy.context.scene.render.fps = A.FPS
 # the rest shown on load
 arm.animation_data_create()
 arm.animation_data.action = bpy.data.actions["idle"]
-skin_relax.CAP_LAST = True     # the welds (forearms on the hull) are cut and capped closed; tools/stretch_check.gd holds the ceiling
-skin_relax.relax(arm)
 bpy.ops.wm.save_as_mainfile(filepath=OUT_BLEND)
 
 if OUT_GLB != "-":
