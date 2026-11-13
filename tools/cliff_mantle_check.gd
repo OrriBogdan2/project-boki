@@ -9,7 +9,8 @@ extends RefCounted
 ##   glide                       gliding in below the lip
 ##   abyss                       falling below an island's rim, heading back in
 ## Asserts each kind of approach tops at least TOP_RATE of its tries, that over the lip you still have
-## KEEP (0.6) of the speed you came in with in KEEP_RATE of them, and that no face is topped by nobody.
+## KEEP (0.6) of the speed you came in with (up to MantleCarry.exit_cap: no launch off a fast dash) in KEEP_RATE
+## of them, and that no face is topped by nobody.
 ## Double-high ground (4 terraces, 3.2m: LAYOUT_RULES' wall tier) is never reached by jumping alone, a
 ## dash included: only a glide (or a launch, an ability, the abyss) gets you up it.
 ## With --verbose prints every try. Never touches the save.
@@ -120,7 +121,7 @@ func _count(k: String, r: Dictionary, f: Dictionary, arch: String) -> void:
 		f["topped"] = true
 		for key in ["vin", "vmin", "vlip", "t"]:
 			s[key] += r[key]
-		if r["vlip"] >= KEEP * r["vin"] - 0.01:
+		if r["vlip"] >= minf(KEEP * r["vin"], MantleCarry.exit_cap(h)) - 0.01:
 			s["kept"] += 1
 	if verbose:
 		print("CLIFF try %s %s at %s dir %s: %s" % [k, arch, f["a"], f["d"], r])
