@@ -9,8 +9,9 @@ check: `--base-life-check`.
   React (a newcomer). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
   Nap ends only when its nap clock runs out. Every non-Nap state has a cap in `max`; a Boki that roamed `max.roam`
   seconds is bored and picks something (tag, a toy, else a nap).
-- home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed). While one has a
-  Boki its machine waits. home.gd asks `choose()` after its care and job picks, in place of the old wander/tag/nap
+- home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed, and ComeLook's
+  news: `k["look"]`). While one has a Boki its machine waits, so a Boki that went to look at a Rare Egg you brought
+  home carries on in the state it was in (`--homecoming-react-check`). home.gd asks `choose()` after its care and job picks, in place of the old wander/tag/nap
   choices; `step()` ticks every machine at 10 Hz; `pile()` lets napping friends lie close in `_separate_kin`.
 - Bonds: `rec["bonds"] = {uid: -1..1}`, the same both ways (`BaseLife.add_bond`). Tag catches and napping side by
   side raise it; a squabble (two hot tempers meeting at a toy or in tag, or a rival at the toy) lowers it. Friends
@@ -51,7 +52,8 @@ check: `--base-life-check`.
   are already `rec["lineage"]["parents"]`; old babies have no gifts: read with `.get`, no migration). A young (not
   yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
-  The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
+  The hatch card (home.gd `_name_baby`, every mode) shows both parents' portraits and marks each gift (kind and colour, lean, best inherited
+  stat, favourite food and play, mutations) with a dot for the parent it came from (`scripts/ui/hatch_parents.gd`); `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
 - Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
   grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
@@ -59,17 +61,31 @@ check: `--base-life-check`.
   recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
   `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge, Echo Steps' stonehop and spin, and the Dash's crouch, burst and sulk (`scripts/home/race_beats.gd`) play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
 - Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
   Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
-  (middle) of its dry pace, leaves a ripple and a splash going in and shakes off coming out. Water, Ice and Crystal
+  (middle) of its dry pace, splashes going in and shakes off coming out. While in, it leaves marks
+  (`scripts/home/boki_wake.gd`, `shaders/boki_wake.gdshader`): a ripple ring under it (a wave every `ripple_secs`)
+  and a short V wake while it moves, sized by its body and faded out at the bank by a water-tile mask; every Boki's
+  marks are one MultiMesh (one draw call), made when the first Boki steps in and never on Very Low. Water, Ice and
+  Crystal
   types (`HomeToys.lean_of`: lean, else species theme; wade.json `swim`) linger: a free roaming one stays 4 to 8 s playing the
   `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
   The rest wade through. A rigged Boki finds the deep middle `swim_depth` deep and floats there (BokiRig's swim
   state, docs/art/kin/RIGGED_BOKI.md): Water types swim level, the rest paddle head up. Check: `--wade-check`;
-  `--garden-nav-check` has a stream in the sweep. **Clips for the anim lane** (none exist yet; the walk just slows and
-  the shake is a Body wobble): `wade` (a slow knee-high walk loop), `shake` (a shake-off, 0.6 s).
+  `--garden-nav-check` has a stream in the sweep. **Clips for the anim
+  lane** (none exist yet; the walk just slows and the shake is a Body wobble): `wade` (a slow knee-high walk loop),
+  `shake` (a shake-off, 0.6 s), `paddle` (a longer water-play loop; `splash` stands in).
+- Flying (`scripts/home/boki_fly.gd`, `content/rules/boki_fly.json`): a species whose look has wings (species JSON
+  `colors.wing`, the same mark The Dash uses to glide its gap) takes off while it roams (`BaseLife.roams`: Roam and no
+  farm driver) a zone in `zones` (Kitewind Ridge), and while it crosses a gap: a bridge over the void (`gap_lead` s
+  ahead), the leap to another isle (the leap keeps its own arc and time), The Dash's jump. Each flight holds a height
+  in `height` (0.5 to 1.5 m), rising at `climb` and sinking at `sink` m/s; it hovers standing and glides moving, and
+  flares for `flare_s` as it touches down, then walks. Anything that takes it (eating, a nap, a toy, a pet, a game,
+  a carry) brings it down first; a game sets it down at once. Up there it skips wading. Check: `--boki-rig-check`
+  (two fliers on Kitewind Ridge for 120 s: never over 3 s on foot while roaming, hovering in the band, every landing
+  flares, plus a bridge and a leap).
 - Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
   stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
   is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the
@@ -78,3 +94,7 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+
+## Zone air (ambient layer per zone)
+
+Each garden zone has one ambient layer so arriving through the Waystone reads as a new place: pollen in Bramblebank, glints in Glasswater, embers in Cinderstep, fireflies in Hushwood, wind streaks on Kitewind Ridge (`scripts/home/zone_air.gd`, `content/rules/zone_air.json`). It is one `GPUParticles3D` named `ZoneAir` over the island round `HomeLayout.LANDING`, a small fixed count, unshaded billboards with a fade ramp, no light, no burst, added once by Home's build in base_mode (never in the hub). Off at the lowest quality preset (`off_at`, Low), the count times `Settings` `fx` above it; a quality change shows on the next zone load. `--zone-air-check` asserts all of that and one layer per zone in a real Home; `--garden-zone-shots --zone=<id>` shows it by day and night.

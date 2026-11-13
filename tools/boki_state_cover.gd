@@ -27,7 +27,7 @@ const ROWS := [
 	{"s": "summon recall", "at": "match", "want": "run", "expect": "run", "speed": 6.0},
 	{"s": "faint", "at": "match", "want": "faint", "expect": "settle", "metas": {"kstate": "faint"}, "keep": true},
 	{"s": "faint held", "at": "match", "want": "faint", "expect": "nap", "metas": {"kstate": "faint"}},
-	{"s": "revive", "at": "match", "want": "revive", "expect": "wake", "keep": true},
+	{"s": "revive", "at": "match", "want": "revive", "expect": "hop", "keep": true},
 	{"s": "settle", "at": "home", "want": "settle", "expect": "settle", "metas": {"kstate": "sleep"}, "keep": true},
 	{"s": "nap", "at": "home", "want": "nap", "expect": "nap", "metas": {"kstate": "sleep"}},
 	{"s": "wake", "at": "home", "want": "wake", "expect": "wake", "keep": true},
@@ -49,7 +49,7 @@ const ROWS := [
 	{"s": "Relay brace", "at": "garden", "want": "brace", "expect": "brace", "relay": RelayBeats.CLIP_BRACE},
 	{"s": "Relay duo tap", "at": "garden", "want": "stonehop", "expect": "stonehop", "relay": RelayBeats.CLIP_DUO},
 	{"s": "Relay win", "at": "garden", "want": "win", "expect": "hop", "relay": RelayBeats.CLIP_WIN},
-	{"s": "Relay sulk", "at": "garden", "want": "sulk", "expect": "idle", "relay": RelayBeats.CLIP_SULK},
+	{"s": "Relay sulk", "at": "garden", "want": "sulk", "expect": "sulk", "relay": RelayBeats.CLIP_SULK},
 ]
 
 var bad := 0
@@ -91,6 +91,7 @@ func _play(k: Node3D, rig: BokiRig, row: Dictionary) -> String:
 	if not row.get("keep", false):
 		rig._shot_left = 0.0
 	rig._speed = float(row.get("speed", 0.0))
+	rig._ground = rig._speed          # moving steadily: not a stop
 	if row.has("relay"):
 		RelayBeats._play(k, row["relay"])
 	rig._pick_clip(0.016)

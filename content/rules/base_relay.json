@@ -1,7 +1,7 @@
 {
-	"desc": "Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd): three of your Boki against a visiting team of three on the Dash loop (base_race.json stretches and pace). Each runs one leg and hands the baton on at a mark; your two hand-offs are the Dash's cheer press on the timing bar. Prizes and the cup: garden_prizes.json 'relay'. Units: seconds; joy is 0-100 points, bonds -1..1.",
+	"desc": "Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd): three of your Boki against a visiting team of three on the Dash loop (the zone's base_race.json course and pace). Each runs one leg and hands the baton on at a mark; your two hand-offs are the Dash's cheer press on the timing bar. Prizes and the cup: garden_prizes.json 'relay'. Units: seconds; joy is 0-100 points, bonds -1..1.",
 	"legs": [[0], [1], [2, 3]],
-	"legs_doc": "Which base_race.json stretches each leg runs, in order: the straight, the water, the climb (with the jump to the line). A Boki is put on the leg it runs best relative to its team.",
+	"legs_doc": "Which stretches of the zone's base_race.json course each leg runs, in order: the straight, the water, the climb (with the jump to the line). A Boki is put on the leg it runs best relative to its team.",
 	"handoff": {"great": 0.0, "good": 0.25, "miss": 0.6},
 	"handoff_doc": "s the next runner loses taking the baton, by your press's grade (no press before the mark is a miss).",
 	"fumble": 0.3,
