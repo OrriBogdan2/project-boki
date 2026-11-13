@@ -4615,7 +4615,7 @@ const NOOK_SIDE_W := 372.0   # the side panel's width, fixed so picking a Boki n
 ## A short word for why a kin can't pair yet ("" if it can), for the tiles.
 func _pair_short(why: String) -> String:
 	if why == "": return ""
-	if why.contains("level"): return "Lv 5 needed"
+	if why.contains("level"): return "Lv %d needed" % NookRules.GROWN_LV
 	if why.contains("bond"): return "Not close yet"
 	if why.contains("rest"): return "Resting"
 	if why.contains("egg"): return "Egg in nest"
