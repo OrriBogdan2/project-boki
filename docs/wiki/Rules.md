@@ -458,6 +458,15 @@ Second forms of a Boki (docs/boki/GEODEMOLE_FORMS.md). A Boki with an entry here
 |---|---|
 | damaged_below | 0.4 |
 | forms | {"geodemole": {"base": {"art": "geodemole-3-art", "model": ""}, "cracked": {"art": "geodemole-r-3-art", "model": ""}}} |
+## blockers (`content/rules/blockers.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | One rule for what stops what (docs/ABILITIES.md 'Blockers and crossers', scripts/combat/blockers.gd, --blocker-check). Each crosser has a class; the class row says stop, pass or na (can't meet) per blocker kind. arch: the kit the check fires it from. |
+| classes | {"solid": {"shield": "stop", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "stop"}, "body": {"shield": "na", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "na"}, "pierce": {"shield": "stop", "rock": "pass", "ice": "stop", "wall": "stop", "guard": "stop"}, "phase": {"shield": "na", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "na"}, "lob": {"shield": "pass", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "pass"}} |
+| crossers | {"shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"}, "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Abyssal Hand (pierces terrain)"}, "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"}, "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"}, "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"}, "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Faultline cells"}, "knock": {"class": "solid", "arch": "gunslinger", "what": "every knockback"}, "dash": {"class": "body", "arch": "gunslinger", "what": "every dash"}, "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls, objects and raised terrain; only the edge guard stops it)"}, "trade": {"class": "lob", "arch": "ostra", "what": "Motley's Trade (a high lob, then a swap)"}} |
 
 ## How kit hits land on a Boki (`content/rules/boki_hit.json`)
 

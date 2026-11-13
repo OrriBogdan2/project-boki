@@ -763,6 +763,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 				"touch": {"kb": float(ed["push"]), "dmg": 0.5, "slow": 1.0, "slow_k": 0.3}},
 			power("kin"))
 	w["y"] = at.y
+	w["ice"] = true          # (Blockers.kind_of)
 	# her own ice look instead (CareLook "wall")
 	if is_instance_valid(w["node"]): (w["node"] as Node3D).visible = false
 	wall = {

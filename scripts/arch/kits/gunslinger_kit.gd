@@ -760,6 +760,7 @@ func _fire_needle() -> void:
 	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var L := float(ed["range"])
+	L = minf(L, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce"))   # placed walls stop it
 	var b := a + Vector3(d.x, 0, d.y) * L
 	needle_dir = d
 	# an ember body, a hot core, a bronze shimmer down its edges; the ember muzzle orb and its flare
