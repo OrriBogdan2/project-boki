@@ -99,10 +99,18 @@ func _solid(it: Dictionary) -> Array:
 		var mi := m as MeshInstance3D
 		if mi.mesh == null or not mi.visible: continue
 		var wb: AABB = mi.global_transform * mi.mesh.get_aabb()
-		var g := w.ground_at(wb.get_center().x, wb.get_center().z)
+		var g := _ground(w, wb.get_center().x, wb.get_center().z)
 		if wb.position.y < g + LEG and wb.end.y > g + 0.5 and minf(wb.size.x, wb.size.z) > 0.12:
 			out.append(wb)
 	return out
+
+## The ground under a prop: a placed block is climbable now (World.block_top), so its own top is not the ground.
+func _ground(w: World, x: float, z: float) -> float:
+	var tops: Dictionary = w.block_top
+	w.block_top = {}
+	var g := w.ground_at(x, z)
+	w.block_top = tops
+	return g
 
 func _merged(parts: Array) -> AABB:
 	var box: AABB = parts[0]
@@ -125,7 +133,7 @@ func _own(items: Array) -> void:
 			if over > OUT_MAX:
 				note("OUT   %s: its body sticks %.2f m outside its footprint" % [_tag(it), over])
 				bad += 1
-		var g := w.ground_at(r.get_center().x, r.get_center().y)
+		var g := _ground(w, r.get_center().x, r.get_center().y)
 		if box.position.y - g > FLOAT_MAX:
 			note("FLOAT %s: lowest point %.2f m above ground" % [_tag(it), box.position.y - g])
 			bad += 1
@@ -161,7 +169,7 @@ func _walk(items: Array) -> void:
 				var z := sb.position.z
 				while z <= sb.end.z:
 					for R in [HUNTER_R, BOKI_R]:
-						if w.occupy(x, z, R, w.ground_at(x, z), true) == 0.0 and not w.is_void(x, z):
+						if w.occupy(x, z, R, _ground(w, x, z), true) == 0.0 and not w.is_void(x, z):
 							hits[R] = hits.get(R, 0) + 1
 					z += STEP
 				x += STEP
