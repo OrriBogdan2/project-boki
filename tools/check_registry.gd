@@ -41,6 +41,7 @@ const CHECKS := {
 	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
 	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
 	"--mood-icon-check": ["res://tools/mood_icon_check.gd", "mood_icon_check", null],
+	"--level-pace-sim": ["res://tools/level_pace_sim.gd", "level_pace_sim", null],      # docs/LEVEL_PACE.md
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5
