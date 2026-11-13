@@ -11,8 +11,8 @@ const HIGH := 14.0           # m above the strip: a fall long enough to press mi
 const FALL_S := 0.5          # s of falling before the press
 const HOLD_S := 0.8          # s the press is held
 const DROPS := 6             # drops per mode: the press lands at a different phase of the snapshot clock
-const SNAP_S := 0.1          # s between snapshots (Net.tick's send_t)
-const LAG_TOL := SNAP_S + DT + 0.02   # s: one snapshot, one frame, and the relay hop on one machine
+const NET_TICK_S := 0.1          # s between snapshots (Net.tick's send_t)
+const LAG_TOL := NET_TICK_S + DT + 0.02   # s: one snapshot, one frame, and the relay hop on one machine
 const MODES := ["btn", "space"]
 
 var host_open_ms := 0        # the host's copy opened (unix ms), 0 until then
