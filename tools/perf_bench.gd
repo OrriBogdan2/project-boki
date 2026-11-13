@@ -11,6 +11,7 @@ extends RefCounted
 ##   [--bench-hunters=30]  hunters in the expedition (squads of 2; the default 6 is the fixed load)
 ##   [--bench-trios=10]  the expedition as that many bot trios (3 per squad), and every POSE_SAMPLE frames one extra
 ##   timed pose of each Hunter and rigged Boki, printed as "BENCH pose" lines by distance from the camera focus
+##   [--bench-merge]  (every Hunter wears a Fusion from the first frame: Heavy Star, Stormwing, Prism Shell in turn)
 ##   [--bench-shots=<dir>]  saves each zone part's default-camera frame (screen UI hidden) as <part>.jpg
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
@@ -36,6 +37,7 @@ const NavCheck := preload("res://tools/garden_nav_check.gd")
 
 var main: Node
 var secs := 60.0
+var merge_all := false
 var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
@@ -76,6 +78,7 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-base="): base_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a == "--bench-merge": merge_all = true
 		if a.begins_with("--bench-view="):
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
@@ -134,6 +137,8 @@ func _match() -> Array:
 	var last := Time.get_ticks_usec()
 	var fought := false
 	var P: Hunter = m.player
+	if merge_all:
+		_merge_all(m)
 	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
 	while is_instance_valid(m) and m.time < secs:
 		P.hp = P.max_hp
@@ -234,6 +239,23 @@ func _pose_lines(m: Match, frames: int) -> void:
 	print("BENCH pose hunters %d, boki %d, camera zoom %.2f" % [m.hunters.size(), m.kins.size(), m.cam.zoom])
 	var n := maxf(1.0, frames)
 	print("BENCH pose Hero rigs posed per frame: %.1f of %.1f" % [rigs_posed.x / n, rigs_posed.y / n])
+
+## Every Hunter with a Boki fuses (the species picks the form); the transformations play out before the timed run.
+func _merge_all(m: Match) -> void:
+	var species := ["pebbit", "zephyrak", "puddlet"]
+	var n := 0
+	for h in m.hunters:
+		if h.kin == null:
+			continue
+		h.kin.species = species[n % species.size()]
+		h.kin.stow()
+		h.ult = 1.0
+		h.slot_lv["ult"] = 1
+		if KinMerge.press(h):
+			n += 1
+	for i in 60:
+		m.step(DT)
+	print("BENCH fusions live: %d of %d hunters" % [n, m.hunters.size()])
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:

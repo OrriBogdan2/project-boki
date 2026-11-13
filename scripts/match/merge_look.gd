@@ -117,19 +117,46 @@ func build() -> void:
 	mote.material_override = Models.glow_mat(glow)
 	mote.position = Vector3(0, 1.0 * sz, 0)
 	add_child(mote)
-	var torso: Node3D = h.model.get_node_or_null("Rig/Torso") if h.model else null
-	var parent: Node3D = self
-	if torso:
-		var old := torso.get_node_or_null(PARTS_NAME)
-		if old:
-			old.free()
-		parent = Node3D.new()
-		parent.name = PARTS_NAME
-		parent.scale = Vector3.ONE * float(form.get("part_k", 1.0))       # bigger and bolder than the hunter: the silhouette reads from above
-		torso.add_child(parent)
-		_box = parent
-	var base := Vector3.ZERO if torso else Vector3(0, -0.42, 0)       # the parts are placed relative to the torso origin
-	rec = MergeParts.build(parent, form, base)
+	var dressed := dress(h.model, form, self)
+	_box = dressed[0]
+	rec = dressed[1]
+
+## The silhouette parts on `model`'s torso, in a box scaled by the form's part_k (bigger and bolder than the hunter:
+## the silhouette reads from above), its origin part_top m from the hunter's own top when the form has one (the
+## hips sit anywhere from 0.2 to 1.5 m under a 3D rig's top, so a fixed offset buries the parts on one hero and floats
+## them on the next), or under `fallback` for a model without a rig. Returns [box or null, record].
+static func dress(model: Node3D, form: Dictionary, fallback: Node3D) -> Array:
+	var torso: Node3D = model.get_node_or_null("Rig/Torso") if model else null
+	if torso == null:
+		return [null, MergeParts.build(fallback, form, Vector3(0, -0.42, 0))]       # (the parts are placed relative to the torso origin)
+	var old := torso.get_node_or_null(PARTS_NAME)
+	if old:
+		old.free()
+	var box := Node3D.new()
+	box.name = PARTS_NAME
+	box.scale = Vector3.ONE * float(form.get("part_k", 1.0))
+	torso.add_child(box)
+	if form.has("part_top") and model.is_inside_tree():
+		var at := model.to_global(Vector3(0, top_of(model), 0))
+		at.y += float(form["part_top"])
+		box.position.y = torso.to_local(Vector3(torso.global_position.x, at.y, torso.global_position.z)).y
+	return [box, MergeParts.build(box, form, Vector3.ZERO)]
+
+## The top of `model`'s own meshes (no Merge parts, halos or hidden GLB pieces), in its local space; measured once
+## per model, so a pose or a weapon swing at the moment of a merge does not move the parts.
+static func top_of(model: Node3D) -> float:
+	if model.has_meta("own_top"):
+		return float(model.get_meta("own_top"))
+	var inv := model.global_transform.affine_inverse()
+	var top := 0.0
+	for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if mi.mesh == null or not mi.is_visible_in_tree() or mi.has_meta("halo") or mi.has_meta("glb_hidden"):
+			continue
+		if String(mi.get_parent().name).begins_with("Merge") or String(mi.name).begins_with("Merge"):
+			continue
+		top = maxf(top, (inv * mi.global_transform * mi.get_aabb()).end.y)
+	model.set_meta("own_top", top)
+	return top
 
 ## A colour wash and bright rim in the form's colour over every mesh of the hunter (one shared overlay material).
 func _wash_model(root: Node, glow: Color) -> void:
