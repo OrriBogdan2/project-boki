@@ -484,6 +484,95 @@ With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. 
 ## Glider trail: a side-coloured line behind every open glider (`GlideTrail`, `--glide-trail-check`)
 
 In a 30-Hunter match, squads gliding in from the sky were hard to pick out at range. Every open glider now draws one thin ribbon (0.3 m at the glider, narrowing to nothing) at canopy height, in the Hunter's team colour lightened a quarter toward white: the colour of their glider stripe and ground ring, so allies and each rival squad read apart. A point fades out in 1.2 s, so the line is about one glide-second long and is gone soon after the glider folds. No burst when it opens or closes (DECISIONS). It is one pooled `ImmediateMesh` per glider (one unshaded draw, turned to the camera), the same on every preset, and sits under a skin's own cosmetic trail (`Gliders.trail`). The trail is taken when a glider opens and goes back to the pool once its tail has faded. `--glide-trail-check` asserts both, and the colour. `--glide-trail-shots` renders two squads from 40 m and 80 m, with and without the trails.
+## Space in an ability's recovery (`--dash-flow-check`, 2026-11-12)
+
+Owner rule: every interaction is chainable. A Space press during an ability's recovery felt swallowed on several
+kits, so the dash-flow check now measures it for the 12 Hunters x LMB / RMB / E / R (the hero ultimate, DashFlow's
+`x` slot), on the ground and in the air (`tools/dash_flow_check.gd`, `_space_sweep`; the per-hero combo checks
+that call `combos_of` run the same rows). Method, in the real match step at 60 Hz: the ability is cast standing,
+or falling from 20 m; the **lock** is the window after it went off in which a Space press does not act within
+two steps, found by halving (a press later in the recovery is taken as never less free); then a press at 25, 50
+and 75 percent of that window records **now** (acted within two steps), **end +t** (acted, t seconds after the
+press) or **never** (not within 1.5 s). On the ground Space is a jump. In the air it is the glider: Space is held
+from the press, as a player holds it, and "acted" is the glider opening. `n/a`: the ability does not go off there
+without a target or the ground. The check fails a press in a window's last `DashFlow.BUFFER_S` (0.15 s) that never
+acts, unless the hero's `into_jump` row is a documented lock.
+
+Source tags as above; `[?]` marks rows the source does not settle (the footage shows no jump out of that
+ability; the movement data's jump fields are encrypted, SUPERVIVE_DATA.md). No buffer was added: the one dropped
+press on the ground was an ordering clash, not a lock (Tenzo below), and every other ground press jumps at once
+or sits inside a documented lock the source shares.
+
+| Hunter | Ability | Ground (a jump): lock, press at 25 / 50 / 75 % | Air (the glider, Space held): lock, 25 / 50 / 75 % | Source |
+|---|---|---|---|---|
+| Lace | LMB | free: at once | free: at once | Not shown in the footage `[?]`. |
+| Lace | RMB Heavy Shot | free: at once | lock 0.02s: end +0.10s, now, now | Not shown in the footage `[?]`. |
+| Lace | E Hail Wall | free: at once | lock 0.58s: end +0.47s, end +0.32s, end +0.18s | Not shown in the footage `[?]`. |
+| Lace | R (ult) Starpiercer | free: at once | lock 0.42s: end +0.35s, end +0.22s, end +0.12s | Not shown in the footage `[?]`. |
+| Kael | LMB | free: at once | lock 0.43s: end +0.35s, end +0.25s, end +0.13s | Not shown in the footage `[?]`. |
+| Kael | RMB Smash | free: at once | lock 0.07s: end +0.08s, end +0.07s, end +0.05s | Not shown in the footage `[?]`. |
+| Kael | E Warchain | free: at once | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Not shown in the footage `[?]`. |
+| Kael | R (ult) Gilded Riposte | lock 0.63s: never, never, never | lock 0.63s: end +0.57s, end +0.42s, end +0.25s | [W] hotfix 08.21.2024 'Brall can no longer jump while using Volcanic Rebuke'; footage ult f33-f38 planted. Holds through guard and cleave (`into_jump.x` lock); a jump in the recovery after goes at once. Match. |
+| Vex | LMB | free: at once | lock 0.55s: end +0.45s, end +0.30s, end +0.17s | Not shown in the footage `[?]`. |
+| Vex | RMB Burr Charge | free: at once | lock 0.48s: end +0.40s, end +0.27s, end +0.15s | Not shown in the footage `[?]`. |
+| Vex | E Longneedle | free: at once | lock 1.03s: end +0.80s, end +0.55s, end +0.28s | Not shown in the footage `[?]`. |
+| Vex | R (ult) Cinderfall | free: at once | lock 0.57s: end +0.45s, end +0.32s, end +0.17s | venator.md Ultimate 1: 'keeps walking or jumping after the cast' (f103 takes a jump pad). Ours jumps at once. Match. |
+| Albert | LMB | free: at once | free: at once | Not shown in the footage `[?]`. |
+| Albert | RMB Aegis | free: at once | lock 0.02s: end +0.10s, now, now | Not shown in the footage `[?]`. |
+| Albert | E Mending Ground | free: at once | lock 0.93s: end +0.73s, end +0.50s, end +0.27s | Not shown in the footage `[?]`. |
+| Albert | R (ult) Faultline | free: at once | free: at once | bjorn.md Ultimate 4: planted about 0.6-0.7 s for wind-up and slam, no jump shown `[?]`. Ours holds the walk (`move_k` 0) but lets a jump go at once. |
+| Cinder | LMB | free: at once | free: at once | Not shown in the footage `[?]`. |
+| Cinder | RMB Cinder Shot | free: at once | lock 0.45s: end +0.37s, end +0.25s, end +0.15s | Not shown in the footage `[?]`. |
+| Cinder | E Furnace Cloak | free: at once | lock 0.22s: end +0.20s, end +0.13s, end +0.08s | Not shown in the footage `[?]`. |
+| Cinder | R (ult) Flue Flight | free: at once | free: at once | Data: reactivating ends the flight early; a jump is not shown `[?]`. Ours leaps off at once (`into_jump.x` cancel). |
+| Meeko | LMB | free: at once | free: at once | Not shown in the footage `[?]`. |
+| Meeko | RMB Burrseed | n/a (does not go off here) | n/a (does not go off here) | Not shown in the footage `[?]`. |
+| Meeko | E Hearthlight | free: at once | lock 0.63s: end +0.50s, end +0.35s, end +0.18s | Not shown in the footage `[?]`. |
+| Meeko | R (ult) Hearth Call | free: at once | lock 0.32s: end +0.27s, end +0.18s, end +0.12s | Not shown in the footage `[?]`. |
+| Tenzo | LMB | free: at once | lock 0.53s: end +0.43s, end +0.30s, end +0.17s | Not shown in the footage `[?]`. |
+| Tenzo | RMB Quakefall | free: at once | lock > 0.75s: never, never, never | [wiki] Volcano Crusher 'jump while charging leaps forward', footage 0938-0958. Ours leaps in the charge; a jump on the release's own step was eaten by an air dive (fixed here, `BreahSlam.fire`). Match. Air: the Quakefall dive is a committed plunge to the slam `[?]`. |
+| Tenzo | E Stone Row | free: at once | n/a (does not go off here) | Not shown in the footage `[?]`. |
+| Tenzo | R (ult) Basalt Spine | free: at once | lock 0.97s: end +0.75s, end +0.52s, end +0.27s | Not shown in the footage `[?]`. |
+| Grimble | LMB | free: at once | lock 0.35s: end +0.30s, end +0.20s, end +0.12s | Not shown in the footage `[?]`. |
+| Grimble | RMB Abyssal Hand | lock 0.88s: never, never, never | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Footage card 0127 'GROUNDED while reeling'; owner item 31. Held from the throw to the end of the reel (`into_jump.rmb` lock). Match. |
+| Grimble | E Anchor Drop | free: at once | free: at once | Not shown in the footage `[?]`. |
+| Grimble | R (ult) Brass Broadside | free: at once | lock > 1.50s: never, never, never | ults.md: source planted 1.1 s charge; ours walks at 30% on purpose (owner item 36). No jump shown `[?]`. Air: the blast holds him, the glider never opens while it runs `[?]`. |
+| Neve | LMB | free: at once | lock 0.13s: end +0.13s, end +0.10s, end +0.07s | Not shown in the footage `[?]`. |
+| Neve | RMB Ice Spear | free: at once | lock 0.53s: end +0.43s, end +0.30s, end +0.17s | Not shown in the footage `[?]`. |
+| Neve | E Rink Wall | free: at once | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Not shown in the footage `[?]`. |
+| Neve | R (ult) Rimelock | lock > 3.00s: never, never, never | lock > 1.50s: never, never, never | Footage ult f25-f55 rooted in the crystal; owner item 65 (recast or Shift end it). `into_jump.x` lock. Match. |
+| Sparkle | LMB | free: at once | free: at once | Not shown in the footage `[?]`. |
+| Sparkle | RMB Storm Rod | free: at once | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Not shown in the footage `[?]`. |
+| Sparkle | E Skycall | free: at once | lock 1.35s: end +1.05s, end +0.70s, end +0.37s | Not shown in the footage `[?]`. |
+| Sparkle | R (ult) Kitefall | free: at once | free: at once | Not in the data or footage for the 0.3 s crouch `[?]` (`into_jump.x` fire: a jump in the crouch launches her from up there). |
+| Sable | LMB | free: at once | lock 0.68s: end +0.55s, end +0.37s, end +0.20s | Not shown in the footage `[?]`. |
+| Sable | RMB Bola | free: at once | lock 0.73s: end +0.58s, end +0.40s, end +0.22s | Not shown in the footage `[?]`. |
+| Sable | E Shadow Knife | free: at once | lock 0.43s: end +0.33s, end +0.23s, end +0.12s | Not shown in the footage `[?]`. |
+| Sable | R (ult) Encore | free: at once | lock 0.37s: end +0.30s, end +0.22s, end +0.12s | Not shown in the footage `[?]`. |
+| Motley | LMB | free: at once | lock 0.30s: end +0.25s, end +0.18s, end +0.10s | Not shown in the footage `[?]`. |
+| Motley | RMB Shard Snap | free: at once | free: at once | Not shown in the footage `[?]`. |
+| Motley | E Brimseed | free: at once | n/a (does not go off here) | Not shown in the footage `[?]`. |
+| Motley | R (ult) Nightwell | lock 0.98s: never, never, never | n/a (does not go off here) | Footage ult f23-f33 held in the 1.0 s dome, free at f50; owner 18:20. `into_jump.x` lock, 0.98 s measured. Match. |
+
+What the table says:
+- **Ground: free everywhere but the four documented locks.** Kael's Gilded Riposte guard and cleave, Grimble's
+  reel, Neve's Rimelock statue and Motley's Nightwell dome refuse the jump for their whole window and drop the
+  press; the source holds the hunter in each (the `into_jump` lock rows carry the evidence). Every other ability
+  lets a jump go the step it is pressed, in the wind-up, the active part and the recovery alike.
+- **Tenzo's Volcano Crusher** ate a jump pressed on the release's own step: the jump left the ground before the
+  release was read, so the tap counted as an air press and became a Quakefall dive, which took the jump's rise.
+  `BreahSlam.fire` now judges "in the air" from the step's start: a tap slams at the feet and the jump goes on;
+  a charge released that step hops into its circle as it always did. The source's rules (leap while charging,
+  slam on landing) say nothing else about that frame.
+- **Air: the glider waits for the animation, as item 162 asks.** Holding Space during an ability's keys opens
+  the glider the moment the move ends (the `end +t` cells are the clip's remainder); it never opens in Tenzo's
+  dive (a plunge to the slam), Grimble's Kaiju Blast (the blast holds him for its run) or Neve's statue. A tap
+  (Space let go before the move ends) is dropped there, by the owner's hold rule. The source shows no glider
+  during an ability, so these rows are `[?]` and unchanged.
+- **Suggestions, not built (PARITY FIRST):** Albert's Faultline is planted about 0.6 s in the source but our
+  jump goes at once in the wind-up; Grimble's Kaiju Blast charge is planted in the source and ours walks and
+  jumps (owner item 36 keeps the walk). If the owner wants the air tap chainable too, a 0.15 s hold of a Space
+  tap made in a move's last `BUFFER_S` would fit DashFlow's held slots.
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
 Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held

@@ -238,7 +238,7 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Mid-air LMB carries momentum, with a penalty (air impulse penalty 15% -> 50%) | patch 2.00 notes | no | built: the punch step in the air is half as long, added to what she carries (MOVEMENT_FEEL.md "Air velocity") |
 | Punch cooldown starts at cast, not on release | patch 2.01 / 2.04 notes | no | built (`fire_cd` set when the punch fires) |
 | A flick tech hit several enemies in an arc; removed | patch 1.03 notes | no | not built: the punch is a narrow lane |
-| Jump while charging leaps forward | wiki (Volcano Crusher) | yes (frames 0938-0958) | built |
+| Jump while charging leaps forward | wiki (Volcano Crusher) | yes (frames 0938-0958) | built; a jump pressed on the release's own step goes too (a tap slams at the feet, a charge hops; MOVEMENT_FEEL.md, Space in a recovery) |
 | Punch to extend the charge | footage tip title "Punch to Extend Dash/RMB" | yes | built (one lunge per charge) |
 | Slam resets on knock or kill | wiki | yes | removed in the data pass: the owner's tooltip data has no reset |
 | Allies hop over friendly rock walls by jumping against them | wiki (Rockwave), patch 1.01 | no | not built: the owner wants only the rock's own caster to climb it (review item 25 overrides the source and the data pass's ally climb); allies and foes are stopped, walking or jumping |

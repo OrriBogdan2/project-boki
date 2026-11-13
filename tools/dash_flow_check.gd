@@ -322,6 +322,9 @@ func _combos(m: Match, hero: String, slot: String) -> void:
 		var row := _mode(hero, "into", slot, move)
 		var right := (out == "act") == (row in INTO_ACTS) and (row != "lock" or out == "lost")
 		_judge(right, out, "%s %s -> %s out of it: %s (row: %s)" % [hero, slot, move, out, row])
+	if slot != "q" and hero != "gil":
+		for in_air in [false, true]:
+			_space_sweep(m, hero, slot, in_air)
 	if not HOLD_KEYS.has(slot) or not _is_hold(m, slot):
 		return
 	for move in DashFlow.MOVES:
@@ -520,3 +523,88 @@ func _released(b: Dictionary, now: Dictionary, slot: String) -> bool:
 
 func _more(b: Dictionary, now: Dictionary, dict: String, key: String) -> bool:
 	return float(now[dict].get(key, 0)) > float(b[dict].get(key, 0)) + 0.0001
+
+# ------------------------------------------------------------------ Space in a recovery (docs/MOVEMENT_FEEL.md)
+const LOCK_MAX_S := 3.0         # s: the longest window after a cast searched for a Space lock (an ult's hold)
+const AIR_LIFT := 20.0          # m: still falling at the end of a long recovery (about 2 s of fall)
+const NOW_STEPS := 2            # steps: a press read this soon acted at once (read, then the first moved step)
+const SPACE_FRACS := [0.25, 0.5, 0.75]
+
+## Space in `slot`'s recovery, on the ground (a jump) or in the air (the glider, Space held from the press): the
+## window after the cast in which a press does not act at once (its lock), and what a press at 25, 50 and 75
+## percent of it does: at once, at the end (how long after the press) or never. Unless the hero's into_jump row
+## is a lock, a press in the window's last DashFlow.BUFFER_S must act by its end (every interaction is chainable).
+func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
+	var where := "air" if in_air else "ground"
+	var first := _space_at(m, slot, in_air, 0)
+	if first.begins_with("n/a"):
+		skipped += 1
+		print("DASHFLOW skip %s %s %s Space: %s" % [hero, slot, where, first])
+		return
+	var lock := 0 if first == "now" else _lock_steps(m, slot, in_air)
+	var locked: bool = String(DashFlow.into_row_of(hero, slot, "jump")["mode"]) == "lock"
+	var cells := []
+	var right := true
+	for frac in SPACE_FRACS:
+		var at := int(round(absi(lock) * frac))
+		var got := first if lock == 0 else _space_at(m, slot, in_air, at)
+		cells.append(got)
+		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= DashFlow.BUFFER_S + 0.001
+		if not locked and in_buffer and got == "never":
+			right = false
+	var span := "lock %s%.2fs" % ["> " if lock < 0 else "", absi(lock) * Match.DT]
+	ok(right, "%s %s %s Space: %s, at 25/50/75%%: %s%s" % [hero, slot, where, span, ", ".join(cells),
+			" (row: lock)" if locked else ""])
+
+## The first step after the cast at which a Space press acts at once (the lock's end), by halving; the search
+## assumes a press later in the recovery is never less free. Minus the steps searched when none acted at once
+## (within LOCK_MAX_S, or in the air before the fall from AIR_LIFT lands).
+func _lock_steps(m: Match, slot: String, in_air: bool) -> int:
+	var lo := 0
+	var hi := int(LOCK_MAX_S / Match.DT)
+	var at_hi := _space_at(m, slot, in_air, hi)
+	while at_hi.begins_with("n/a") and hi > 1:
+		hi /= 2
+		at_hi = _space_at(m, slot, in_air, hi)
+	if at_hi != "now":
+		return -hi
+	while hi - lo > 1:
+		var mid := (lo + hi) / 2
+		if _space_at(m, slot, in_air, mid) == "now":
+			hi = mid
+		else:
+			lo = mid
+	return hi
+
+## `slot` cast (standing, or falling from AIR_LIFT), then Space pressed `at` steps after it went off: "now"
+## (acted within NOW_STEPS), "end %.2fs" (acted that long after the press), "never", or "n/a ...".
+func _space_at(m: Match, slot: String, in_air: bool, at: int) -> String:
+	_fresh(m)
+	if in_air:
+		hunter.pos += Vector3(0, AIR_LIFT, 0)
+		hunter.grounded = false
+	var before := _snap()
+	_press(slot)
+	var went := false
+	for i in 30:
+		m.step(Match.DT)
+		hunter.inp["fire"] = false
+		if _went_off(before, slot):
+			went = true
+			break
+	if not went:
+		return "n/a: it doesn't go off here"
+	_steps(m, at)
+	if in_air and hunter.grounded:
+		return "n/a: landed first"
+	var y0 := hunter.pos.y
+	hunter.inp["jump"] = true
+	hunter.inp["glide"] = in_air
+	var got := "never"
+	for i in WATCH:
+		m.step(Match.DT)
+		if (in_air and hunter.gliding) or (hunter.vel.y > 0.5 and hunter.pos.y > y0 + 0.01):
+			got = "now" if i < NOW_STEPS else "end %.2fs" % (float(i + 1) * Match.DT)
+			break
+	hunter.inp["glide"] = false
+	return got
