@@ -234,60 +234,6 @@ func _ready() -> void:
 				if o != sm.player:
 					o.teleport(sm.world.spawns[-1]); o.ctrl = "idle"
 			return
-	if "--perch-check" in args:
-		# tooling: for each perch, start on the island next to its updraft chain, jump, glide into the
-		# short column, then the tall one, then onto the perch. Reports who made it and how high.
-		var pm := Match.new()
-		add_child(pm)
-		pm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 31, "no_drop": true, "length": 1e9, "autoplay": true})
-		pm.set_process(false)
-		for mb in pm.mobs: mb.queue_free()
-		pm.mobs.clear()
-		var ph: Hunter = pm.hunters[0]
-		for o in pm.hunters:
-			o.ctrl = "idle"
-			if o != ph: o.teleport(pm.world.spawns[-1])
-		ph.ctrl = "local"
-		var chains := {"spire": [Vector2(127, 93), Vector2(130, 89)], "emberspire": [Vector2(72, 100), Vector2(78, 92)], "eye": [Vector2(124, 124), Vector2(130, 128)], "needle": [Vector2(146, 48), Vector2(139, 43)]}
-		var ok := 0
-		for pid in chains:
-			var pi := -1
-			for ii in pm.world.islands.size():
-				if String(pm.world.islands[ii].get("id", "")) == pid: pi = ii
-			var steps: Array = chains[pid]
-			var u1: Vector2 = steps[0]
-			# the nearest ground to the first column that isn't a perch
-			var start := Vector3.INF; var bd := 1e9
-			for z in range(int(u1.y) - 10, int(u1.y) + 11):
-				for x in range(int(u1.x) - 10, int(u1.x) + 11):
-					if not pm.world.inb(x, z) or pm.world.kind[pm.world.idx(x, z)] != World.T_GROUND: continue
-					var isl := pm.world.island_of(x, z)
-					if pm.world.islands[isl].get("perch", false): continue
-					var d := Vector2(x + 0.5, z + 0.5).distance_to(u1)
-					if d < bd: bd = d; start = Vector3(x + 0.5, pm.world.ground_at(x + 0.5, z + 0.5), z + 0.5)
-			ph.teleport(start); ph.vel = Vector3.ZERO; ph.grounded = true; ph.glide_fuel = 1.0; ph.pad = {}
-			var goal := pm.world._poi(pi)
-			var stage := 0; var t := 0.0; var top_y := 0.0; var made := false
-			while t < 14.0:
-				var tgt: Vector2 = steps[stage] if stage < steps.size() else Vector2(goal.x, goal.z)
-				var to := tgt - Vector2(ph.pos.x, ph.pos.z)
-				ph.inp["move"] = to.normalized() if to.length() > 0.4 else Vector2.ZERO
-				ph.inp["jump"] = t < 0.1 or (ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) != pi)
-				ph.inp["glide"] = t > 0.25
-				pm.step(Match.DT); t += Match.DT
-				top_y = maxf(top_y, ph.pos.y)
-				var up: Dictionary = pm.world.updraft_at(ph.pos)
-				if stage < steps.size() and not up.is_empty() and ph.pos.y > float(up["top"]) - 0.6:
-					stage += 1
-				if ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) == pi:
-					made = true; break
-				if ph.out: break
-			if made: ok += 1
-			print("PERCH %s: %s in %.1fs, highest %.1fm (perch top %.1fm)" % [pid, "made it" if made else "FAILED", t, top_y, goal.y])
-			ph.out = false; ph.hp = ph.max_hp
-		print("PERCHCHECK done, %d of %d reached" % [ok, chains.size()])
-		get_tree().quit()
-		return
 	if "--biome-check" in args:
 		# tooling: an expedition on the authored map; what each biome spawned, then a minute of play
 		var bm := Match.new()
@@ -468,6 +414,7 @@ func _ready() -> void:
 		return
 	if "--airheal-check" in args:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
+		return
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
@@ -510,16 +457,6 @@ func _ready() -> void:
 		return
 	if "--raid-check" in args:
 		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
-		return
-	if "--rolling-check" in args:
-		var rck = load("res://tools/rolling_check.gd").new()     # rolling sessions: waves, cut-off, level floor, catch-up XP, bounties, the end
-		set_meta("rolling_check", rck)      # (held, so nothing it waits on loses it)
-		rck.run(self)
-		return
-	if "--rolling-sim" in args:
-		var rsim = load("res://tools/rolling_sim.gd").new()      # a whole 30-minute rolling session, headless, with bots
-		set_meta("rolling_sim", rsim)       # (held: it yields frames so freed nodes really go, and must outlive its awaits)
-		rsim.run(self, opts)
 		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
@@ -574,11 +511,6 @@ func _ready() -> void:
 	if "--perf-probe" in args:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
-		return
-	if "--hitch-check" in args or _has_arg("--load-check"):
-		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd);
-		# --load-check stops at the reveal and judges the loading screen
-		add_child(load("res://tools/hitch_check.gd").new())
 		return
 	if OS.has_feature("web"):
 		_expose_test_hooks()
@@ -709,6 +641,8 @@ func _ready() -> void:
 		_open_arena("")
 	elif "--training" in args:
 		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
+	elif "--duo-tutorial" in args:
+		show_screen("match", DuoTutorial.opts("", "--duo-test" in args))
 	elif "--tutorial" in args or "--tut-test" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:
@@ -766,6 +700,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		await fade.cover()
 		if gen != _gen:
 			return
+	if screen == "match": MeshCache.sweep()     # one-off meshes the last two matches never asked for go
 	if current:
 		current.queue_free()
 		current = null
@@ -785,7 +720,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var ld = null
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
 				var tier_i := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
-				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
+				Sfx.prefetch(["music_" + MusicDir.opening(tier_i), "amb_match"])
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
@@ -796,7 +731,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
 				get_viewport().disable_3d = true
 				await ld.shown
-				ld.want = 0.04
+				ld.advance(0.04)
 				if gen != _gen:
 					get_viewport().disable_3d = false
 					ld.queue_free()
@@ -809,7 +744,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# build in short slices so the loading screen keeps moving, then draw everything once
 				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
 				await m.start_staged(opts, func(f: float, stage: String):
-					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.advance(0.04 + 0.66 * f)
 					ld.set_stage(stage))
 				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
@@ -817,7 +752,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 					return
 				if not opts.has("net"): m.set_process(false)
 				ld.set_stage("graphics")
-				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				await m.warm_up(func(f: float): ld.advance(0.7 + 0.28 * f))
 				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
@@ -835,6 +770,10 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = L.new()
 			scr.setup(opts)
 			current = _layer(scr)
+		"party":
+			var Pt = PartyView.new()
+			Pt.setup(opts)
+			current = _layer(Pt)
 		"prematch":
 			var Pv = load("res://scripts/ui/prematch_view.gd")
 			var pscr = Pv.new()
@@ -1712,6 +1651,7 @@ func _grammar_runtime_check() -> void:
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
 	_ac_run(m, 3.5)
 	_grt_reset(T)
+	T.teleport(home + Vector3(6, 0, 0))        # (the slam knocked it close: the shot must start past the wall)
 	k = _grt_kin(m, P, "puddlet")
 	_grt_out(k, home + Vector3(0.5, 0, 1.0))
 	k.use_ability("k1", home + Vector3(2.5, 0, 0))
@@ -1934,8 +1874,8 @@ func _grammar_runtime_check() -> void:
 	_grt("shoulder: shots poison (carry rider)", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	_grt_reset(T)
 	# ---- 7. owner bonuses
-	var base_hp := float(Data.CLASSES[P.cls]["hp"])
-	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (class %.0f)" % [P.max_hp, base_hp])
+	var base_hp := float(Data.CLASSES[P.cls]["hp"]) + float(P.get_meta("growth_hp", 0.0))        # (+ LevelGrowth)
+	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (base %.0f)" % [P.max_hp, base_hp])
 	k = _grt_kin(m, P, "puddlet")
 	_grt("owner bonus: Prismander shield + regen", is_equal_approx(P.kin_shield, 16.0) and absf(P.kin_pt("owner_regen") - 0.75) < 0.01 and is_equal_approx(P.max_hp, base_hp), "shield %.0f regen %.2f" % [P.kin_shield, P.kin_pt("owner_regen")])
 	var hp0 := P.hp
@@ -1957,7 +1897,7 @@ func _grammar_runtime_check() -> void:
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
 	P.ult = 1.0
 	var blocked := not KinMerge.can_cast(P)
-	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
+	_ac_run(m, P.merge_cd + 0.1)        # (a timed-out merge rests the Boki timeout_rest_s, past the spent window)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
 	KinCommand.tap(P)
@@ -2360,6 +2300,7 @@ func _truce_check() -> void:
 		if T.allied(0, 1): break
 	print("TCHECK reversed: the beaten squad accepted=%s after %.1fs (events %s)" % [T.allied(0, 1), tt, str(T.events.slice(-3))])
 	if not T.allied(0, 1) and not T.events.has("fake 1"): ok = false; print("TCHECK FAIL beaten squad refused")
+	if not TruceCalmCheck.run(m, home): ok = false
 	m.over = true
 	print("TCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
@@ -3228,8 +3169,8 @@ func _boss_ttk() -> void:
 				await get_tree().process_frame
 	get_tree().quit()
 
-## The drop: the planning phase, map pings, the squad following its leader in formation, passing the
-## lead, separating, and the randomised spawns (different between seeds, rare kin only where rolled).
+## The drop: the planning phase, map pings, the squad launching one rocket, passing the lead, jumping
+## out, and the randomised spawns (different between seeds, rare kin only where rolled).
 func _drop_check() -> void:
 	var ok := true
 	var m := Match.new()
@@ -3268,48 +3209,25 @@ func _drop_check() -> void:
 	while Vector2(m.ship_pos().x - mid.x, m.ship_pos().z - mid.z).length() > 26.0 and m.time < 60.0 and P.riding:
 		m.step(Match.DT)
 	m.ship_jump(P)
-	var fol := mates.filter(func(x): return x.drop_follow == P)
-	print("DCHECK leader jumped at t=%.1f: %d of %d squadmates jumped with them (%s)" % [m.time, fol.size(), mates.size(), str(mates.map(func(x): return [x.pname, x.riding, x.dropping]))])
-	if fol.size() != mates.size(): ok = false; print("DCHECK FAIL the squad didn't jump together")
-	var sep_plan: Array = fol.map(func(x): return snappedf(float(x.ai.get("sep_h", -1.0)), 0.1))
-	for f in fol: f.ai["sep_h"] = -1.0       # (bots that break off low down: checked below, not here)
-	# the leader steers; the squad follows in its slots
-	var worst := 0.0; var t := 0.0
-	# (the turn is relative to the ship's heading, so every map and ship route tests the same turn:
-	# veer 17 degrees right of the flight line, then swing a further 85 degrees right)
-	var sdir := Vector2((m.ship["dir"] as Vector3).x, (m.ship["dir"] as Vector3).z).normalized() if m.ship.has("dir") else Vector2(1, 0)
-	while t < 1.3 and P.dropping:
-		P.inp["move"] = sdir.rotated(0.29) if t < 0.7 else sdir.rotated(1.77)
-		m.step(Match.DT); t += Match.DT
-		if t > 0.5:
-			for f in fol:
-				if f.drop_follow == P:
-					worst = maxf(worst, D.target_of(f).distance_to(Vector2(f.pos.x, f.pos.z)))
-	var spread: Array = fol.map(func(x): return snappedf(Vector2(x.pos.x - P.pos.x, x.pos.z - P.pos.z).length(), 0.1))
-	var dy: Array = fol.map(func(x): return snappedf(x.pos.y - P.pos.y, 0.1))
-	print("DCHECK formation: worst slot error %.2fm, distance to leader %s, height difference %s (bots planning to break off at %s m)" % [worst, str(spread), str(dy), str(sep_plan)])
-	if worst > 1.6 or fol.any(func(x): return x.drop_follow != P): ok = false; print("DCHECK FAIL formation")
-	# pass the lead: the next squadmate leads, you follow them
+	var aboard := mates.filter(func(x): return x.rocket != null and x.rocket == P.rocket)
+	print("DCHECK leader launched at t=%.1f: %d of %d squadmates in the rocket" % [m.time, aboard.size(), mates.size()])
+	if P.rocket == null or aboard.size() != mates.size(): ok = false; print("DCHECK FAIL the squad didn't launch together")
+	for i in 30: m.step(Match.DT)
+	# pass the lead: the next squadmate steers the rocket
 	var passed := D.pass_lead(P)
 	var L2: Hunter = D.leader(P.team)
-	t = 0.0
-	while t < 0.8 and P.dropping:
-		m.step(Match.DT); t += Match.DT
-	var err2 := D.target_of(P).distance_to(Vector2(P.pos.x, P.pos.z)) if P.drop_follow else 99.0
-	print("DCHECK pass lead=%s: leader now %s, you follow %s (slot error %.2fm), others follow %s" % [passed, L2.pname, P.drop_follow.pname if P.drop_follow else "nobody", err2, str(fol.map(func(x): return x.drop_follow.pname if x.drop_follow else "-"))])
-	if not passed or L2 == P or P.drop_follow != L2 or err2 > 2.5 or fol.any(func(x): return x != L2 and x.drop_follow != L2): ok = false; print("DCHECK FAIL pass lead")
-	# separate: you steer yourself again
-	var sep := D.separate(P)
-	var v0 := Vector2(P.vel.x, P.vel.z)
-	var want := -Vector2(L2.vel.x, L2.vel.z).normalized() if Vector2(L2.vel.x, L2.vel.z).length() > 0.5 else Vector2(-1, 0)
-	var alt0 := m.player_altitude()
-	t = 0.0
+	print("DCHECK pass lead=%s: leader now %s" % [passed, L2.pname])
+	if not passed or L2 == P or not aboard.has(L2): ok = false; print("DCHECK FAIL pass lead")
+	# jump out: you free-fall and steer yourself
+	var det := D.detach(P)
+	var want := Vector2(-1, 0)
+	var t := 0.0
 	while t < 0.7 and P.dropping:
 		P.inp["move"] = want
 		m.step(Match.DT); t += Match.DT
 	var v1 := Vector2(P.vel.x, P.vel.z)
-	print("DCHECK separate=%s at %.1fm up: solo=%s follow=%s, velocity %s -> %s (steering %s)" % [sep, alt0, P.drop_solo, P.drop_follow, str(v0.snapped(Vector2(0.1, 0.1))), str(v1.snapped(Vector2(0.1, 0.1))), str(want.snapped(Vector2(0.01, 0.01)))])
-	if not sep or P.drop_follow != null or not P.drop_solo or v1.normalized().dot(want) < 0.7: ok = false; print("DCHECK FAIL separate")
+	print("DCHECK detach=%s: rocket=%s dropping=%s, velocity %s (steering %s)" % [det, P.rocket, P.dropping, str(v1.snapped(Vector2(0.1, 0.1))), str(want)])
+	if not det or P.rocket != null or not P.dropping or v1.normalized().dot(want) < 0.7: ok = false; print("DCHECK FAIL detach")
 	# everyone lands
 	t = 0.0
 	while t < 20.0 and m.hunters.any(func(x): return x.dropping or x.riding):

@@ -105,6 +105,9 @@ func _box_revive(B: Hunter, C: Hunter) -> void:
 	ok(B.out and not bx.is_empty() and Life.soul_here(m, bx), "a fallen teammate leaves a box with their soul in it")
 	ok(absf(float(BoxRevive.rules()["box_revive_s"]) - 7.5) < 0.01 and absf(BoxRevive.time_for(B) - 7.5) < 0.01,
 		"a box revive is a 7.5 s channel the first time (%.2fs)" % BoxRevive.time_for(B))
+	var stand := float(Life.R["box_revive_hp"])
+	ok(stand == float(Life.R["revive_hp"]) and stand >= 0.12 and stand <= 0.35,
+		"revived Hunters stand up with %d%% (same as a Wisp revive; per-tick heal band 12-35%%)" % int(stand * 100.0))
 	var ring: Node = (bx["node"] as Node).get_node_or_null("OwnerRing")
 	ok(ring != null and Life.owner_col(m, bx) == m.mate_col(B), "an ally box wears its owner's squad colour")
 	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
