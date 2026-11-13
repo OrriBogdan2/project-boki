@@ -19,6 +19,8 @@ const REPLY_S := 30.0        # s of real time for the guest to answer (a busy bo
 const TOL := 0.5             # m: the player's own game puts it within this of where the bot went
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
+const STEP_US := 16667       # µs of wall clock per DT step
+const CATCH_UP_US := 100000  # µs the match clock may lag before it skips ahead (Match._process: 0.1 s a frame)
 const PARK := Vector3(0, 0, -9.0)   # m from home: where the guest waits while the bot takes its turn
 const SNAP_S := 0.12         # s: one snapshot send (Net.tick, 0.1 s, which also flushes the "ev" moves) and a frame
 
@@ -36,6 +38,7 @@ var stun_max := 0.0          # the longest stun seen on the watched body since i
 var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
 var seen := {}
+var paced_us := 0            # the wall clock (µs) the match clock has been stepped up to
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
 var early := {}              # the guest's reply one snapshot after a Boki move on it
@@ -524,17 +527,24 @@ func _fresh(T: Hunter) -> void:
 	T.set_meta("marks", {})
 	T.set_meta("gnd_until", 0.0)
 
-## Runs the match `secs` in real time (one step a frame at 60 fps), with no monsters about.
+## Runs the match `secs` of its own time with no monsters about, stepped by the wall clock as Match._process
+## steps a game: as many DT steps a frame as real time asks, never more than CATCH_UP behind. (One step a
+## frame ran a host drawing ~35 fps under xvfb at ~0.6x the headless guest's clock, so the guest's copy of
+## a pull ran on past its end and its body shoved the guest's own hunter away: not something two games do.)
 func _run(secs: float) -> void:
 	var t := 0.0
 	while t < secs - 0.0001:
-		for mb in m.mobs: mb.queue_free()
-		m.mobs.clear()
-		m.step(DT)
-		t += DT
-		if watch and seen.is_empty(): seen = m.displace.towing(watch)
-		var sb: Ent = stun_on if stun_on else m.player
-		if sb: stun_max = maxf(stun_max, sb.stun_t)
+		var now := Time.get_ticks_usec()
+		paced_us = maxi(paced_us, now - CATCH_UP_US)
+		while paced_us + STEP_US <= now and t < secs - 0.0001:
+			paced_us += STEP_US
+			t += DT
+			for mb in m.mobs: mb.queue_free()
+			m.mobs.clear()
+			m.step(DT)
+			if watch and seen.is_empty(): seen = m.displace.towing(watch)
+			var sb: Ent = stun_on if stun_on else m.player
+			if sb: stun_max = maxf(stun_max, sb.stun_t)
 		await main.get_tree().process_frame
 
 ## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
