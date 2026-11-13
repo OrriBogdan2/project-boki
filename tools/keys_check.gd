@@ -12,6 +12,8 @@ extends RefCounted
 ##   6. bots go for a key, then open a chest; a carrier they gave up on is left alone for a while
 ##   7. fewer chests: a match places chest.keep of the map's chests (the most crowded go first, no dice)
 ##      and of the item caches; the vaults stay; the tutorial has exactly one, the chest step's
+##   8. the Esc menu's Controls card: every cap is Settings.key_cap (a rebind shows at once), no key
+##      is written in its script, and every Hunter's five slots have an icon and a name
 
 var main: Node
 var fails := 0
@@ -50,6 +52,7 @@ func run(main_node: Node) -> void:
 	if only in ["", "bots"]: await _bots()
 	if only in ["", "bonus"]: await _bonus()
 	if only in ["", "fewer"]: await _fewer()
+	if only in ["", "card"]: _controls_card()
 	print("KEYCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
@@ -604,3 +607,53 @@ func _never_sold() -> void:
 		if txt.contains("\"ckey\"") or txt.contains("chest_key"):
 			listed.append(f)
 	ok("keys are never sold in shops", listed.is_empty(), ", ".join(listed))
+
+# ------------------------------------------------------------------ 7. the Controls card
+## The key caps of a built card: [[actions, cap texts], ...] per row.
+func _card_caps(id: String) -> Array:
+	var v := VBoxContainer.new()
+	ControlsCard.fill(v, id)
+	var out: Array = []
+	var stack: Array = [v]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		if node.has_meta("actions"):
+			var caps: Array = []
+			for l in node.find_children("*", "Label", true, false):
+				if (l.get_parent() as Node).get_parent() == node.get_child(1):
+					caps.append((l as Label).text)
+			out.append([node.get_meta("actions"), caps])
+		stack.append_array(node.get_children())
+	v.free()
+	return out
+
+func _caps_match(rows: Array) -> bool:
+	for r in rows:
+		var want: Array = (r[0] as Array).map(func(a): return Settings.key_cap(String(a)))
+		if r[1] != want: return false
+	return true
+
+func _controls_card() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/controls_card.gd")
+	var lit := RegEx.create_from_string("\"(?:[A-Z0-9]|Space|Shift|Ctrl|[LRM]MB|Tab|Esc)\"")
+	ok("the card script writes no key cap itself", lit.search(src) == null)
+	var all_slots := true
+	var all_caps := true
+	for id in Arch.ids():
+		var rows := _card_caps(id)
+		all_caps = all_caps and rows.size() == 11 and _caps_match(rows)
+		for r in ControlsCard.hunter_rows(id):
+			all_slots = all_slots and String(r[0]) != "" and String(r[2]) != ""
+	ok("every Hunter: five slots with an icon and a name", all_slots)
+	ok("every Hunter: all 11 rows show Settings.key_cap", all_caps)
+	var ev := InputEventKey.new()
+	ev.physical_keycode = KEY_J
+	Settings.rebind("signature", ev)
+	ev = InputEventKey.new()
+	ev.physical_keycode = KEY_N
+	Settings.rebind("jump", ev)
+	var after := _card_caps("archer")
+	var flat: Array = after.map(func(r): return r[1]).reduce(func(a, b): return a + b, [])
+	var shown := _caps_match(after) and flat.has("J") and flat.has("N") and not flat.has("E")
+	ok("a rebind shows at once", shown, str(flat))
+	Settings.reset_all()

@@ -108,6 +108,14 @@ func shot_demo(which: PackedStringArray) -> void:
 	match which[0]:
 		"pause":
 			open_pause(ctx)
+		"controls":
+			if arg == "rebound":
+				var acts := ["fire", "signature", "dash", "jump", "throw", "crouch"]
+				for i in acts.size():
+					var ev := InputEventKey.new()
+					ev.physical_keycode = KEY_J + i as Key      # J K L M N O
+					Settings.rebind(acts[i], ev)
+			open_controls()
 		"settings":
 			if arg != "":
 				tab = arg
@@ -183,6 +191,7 @@ func back() -> void:
 		page = ""
 		match prev:
 			"pause": open_pause(ctx)
+			"controls": open_controls()
 			"settings": open_settings()
 			"saves": open_saves()
 			"inventory": open_inventory()
@@ -234,7 +243,7 @@ func open_pause(where: String) -> void:
 	item.call("Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
-	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
+	item.call("Controls", "dash", open_controls)
 	if where != "match":
 		item.call("Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
@@ -282,6 +291,15 @@ func open_pause(where: String) -> void:
 			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
+
+## The quick-reference card under Esc; "Change keys" goes on to the rebinding list.
+func open_controls() -> void:
+	var v := _page("controls", "Controls", 720)
+	var psc = Game.main.screen_node() if ctx == "match" and Game.main else null
+	var hero: String = (psc.player.arch if psc is Match and psc.player.arch != "" else Arch.of_save())
+	ControlsCard.fill(v, hero)
+	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
+	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
 
 # ------------------------------------------------------------------ settings
 func open_settings() -> void:
