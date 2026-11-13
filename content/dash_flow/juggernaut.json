@@ -78,18 +78,22 @@
 				"source": "As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air."
 			},
 			"jump": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:41): the hold-blast charge (white arc, frame 0087, 0.6-1.0 s) is only shown standing in the LMB window 0014-0120; no plain jump is shown (juggernaut.md:283), the only jumps are Air Slams (0251-0300). Data (briefs/supervive-data/supervive_kits.md:18: HOLD to charge a ranged fireblast) silent on jumping. Kept: the charge carries through, as on the ground and air rows (owner item 51)."
 			}
 		},
 		"rmb": {
 			"ground": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:57-65): the Charge Dash hold (frames 0121-0127, 0141-0146; the lane goes magenta at 0.6-0.8 s) is never broken by a Quick Dash, which is shown on its own (0371-0420, juggernaut.md:86-92, 259-266); the card 'Dash while attacking in your facing direction' (juggernaut.md:20) does not say whether a charge survives it. Data (briefs/supervive-data/supervive_kits.md:21, 26: Fiery Lunge HOLD, Flame Step) silent. Kept: the hold carries through (owner item 51)."
 			},
 			"air": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:57-65): the Charge Dash hold (frames 0121-0127, 0141-0146; the lane goes magenta at 0.6-0.8 s) is never broken by a Quick Dash, which is shown on its own (0371-0420, juggernaut.md:86-92, 259-266); the card 'Dash while attacking in your facing direction' (juggernaut.md:20) does not say whether a charge survives it. Data (briefs/supervive-data/supervive_kits.md:21, 26: Fiery Lunge HOLD, Flame Step) silent. Air dash not shown as a dash; in the air RMB is the Air Slam (juggernaut.md:273-274; briefs/supervive-data/supervive_kits.md:22). Kept: the hold carries through (owner item 51)."
 			},
 			"jump": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:57-65): the Charge Dash hold (frames 0121-0127, 0141-0146; the lane goes magenta at 0.6-0.8 s) is never broken by a Quick Dash, which is shown on its own (0371-0420, juggernaut.md:86-92, 259-266); the card 'Dash while attacking in your facing direction' (juggernaut.md:20) does not say whether a charge survives it. Data (briefs/supervive-data/supervive_kits.md:21, 26: Fiery Lunge HOLD, Flame Step) silent. No plain jump shown (juggernaut.md:283); every jump in the clip is an Air Slam (0251-0300, juggernaut.md:75-76, 276-283). Kept: the hold carries through (owner item 51)."
 			}
 		}
 	},

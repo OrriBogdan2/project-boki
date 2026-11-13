@@ -29,8 +29,13 @@ func _save_flag() -> void:
 	var first := FirstMatchGuide.for_match(null, o)
 	var second := FirstMatchGuide.for_match(null, o)
 	ok(first != null and second != null, "the first two Extractions get the guide")
+	Save.d["tutorial"]["glide_dive"] = true
 	var third := FirstMatchGuide.for_match(null, o)
-	ok(third == null and int(Save.d["first_guide"]) == 2, "the third does not; the flag stays at 2")
+	ok(third == null and int(Save.d["first_guide"]) == 2, "the third does not (the dive learnt); the flag stays at 2")
+	Save.d["tutorial"].erase("glide_dive")
+	var dive_only := FirstMatchGuide.for_match(null, o)
+	var dive_ok: bool = dive_only != null and dive_only.dive_only and int(Save.d["first_guide"]) == 2
+	ok(dive_ok, "the third keeps only the dive line, uncounted")
 	var old := {"matches": 5}
 	FirstMatchGuide.migrate(old)
 	var young := {"matches": 1}
@@ -129,9 +134,11 @@ func _walk() -> void:
 	_fit()
 
 func _fit() -> void:
-	var w: float = TutorialHud.lanes(Vector2(1280, 720))["banner"].size.x - 28.0
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var w := strip.size.x - strip.size.y
 	for row: Array in FirstMatchGuide.rules()["lines"]:
 		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle")
-		var fit := TutorialText.wrap(m.hud.big, txt, int(720 * 0.085 * 0.42), w, 2)
-		var n: int = fit["lines"].size()
-		ok(n <= 2 and int(fit["px"]) >= 12, "%s fits the banner lane (%d lines, %d px)" % [row[0], n, fit["px"]])
+		var px := int(strip.size.y * 0.5)
+		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+			px -= 1
+		ok(px >= 12, "%s fits the one-line strip (%d px)" % [row[0], px])

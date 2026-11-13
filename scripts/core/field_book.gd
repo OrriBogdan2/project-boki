@@ -32,9 +32,15 @@ static func forms_of(species: String) -> Array:
 static func entry_key(species: String) -> String:
 	return forms_of(species)[0]
 
-## Every Field Book entry, in species order: a branch pair is one.
+## Every Field Book entry, in species order: a branch pair is one. The legendaries (rare kin) close the
+## book, so they sit at the very end of the numbers and of every sort.
 static func entries() -> Array:
-	return Data.KIN.keys().filter(func(s): return entry_key(s) == s)
+	var all: Array = Data.KIN.keys().filter(func(s): return entry_key(s) == s)
+	return all.filter(func(s): return not Data.is_rare(s)) + all.filter(Data.is_rare)
+
+## A species' number in the Field Book (1 is the first entry; a branch pair shares one).
+static func number(species: String) -> int:
+	return entries().find(entry_key(species)) + 1
 
 ## One species on its own (caught ones count as seen).
 static func form_seen(species: String) -> bool:
