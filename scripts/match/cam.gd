@@ -56,6 +56,23 @@ const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of pop
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
 
+## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
+## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
+## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
+const GLIDE_ZOOM := 1.25      # x the distance under the glider [spec] +15..25% boom in the air
+const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [Supervive]
+const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
+const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
+const ALT_ZOOM_MAX := 0.7     # ...up to +70%
+func air_zoom(h: Hunter, alt: float) -> float:
+	var z := 1.0
+	if h.gliding:
+		z = GLIDE_ZOOM
+	elif h.crouch and h.grounded:
+		z = SNEAK_ZOOM
+	z *= user_zoom * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX))
+	return maxf(z, zoom) if h.glide_dive.on else z
+
 ## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
 ## about 0.2 s, no shake. Only the casting player's camera ever hears about it.
 const CAST_EASE := 16.0       # 1/s

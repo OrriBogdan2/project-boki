@@ -314,6 +314,7 @@ const CHECKS := {
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Sparkle / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
 	"--drop-merge-check": ["res://tools/drop_merge_check.gd", "drop_merge_check", null],      # merged ground drops
+	"--glide-cam-shots": ["res://tools/glide_cam_shots.gd", "glide_cam_shots", null],      # camera through a glide dive
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],      # full-inventory looting
 	"--pickup-reach-check": ["res://tools/pickup_reach_check.gd", "pickup_reach_check", null],
 	"--loot-window-check": ["res://tools/loot_window_check.gd", "loot_window_check", null],      # the deathbox window
