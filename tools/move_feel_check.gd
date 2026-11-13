@@ -207,6 +207,10 @@ func _clear_inp() -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
+func _clear_mobs() -> void:
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+
 ## A clean, standing hunter at p.
 func _reset(p: Vector3, grounded := true) -> void:
 	P.out = false; P.gone = false; P.downed = false
@@ -254,8 +258,7 @@ func run(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	m.set_process(false)
 	w = m.world
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
+	_clear_mobs()
 	P = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -383,6 +386,7 @@ func _aim_rel() -> void:
 			P.wpn["fire_slow"] = 0.8
 		for dir in [Vector2(1, 0), Vector2(0, 1), Vector2(-1, 0), Vector2(-1, 1).normalized()]:
 			_reset(flat - Vector3(dir.x, 0, dir.y) * 3.0)
+			_clear_mobs()                   # (mobs spawned in the match time so far would knock these rows)
 			P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
 			_steps(20)                      # face the aim first
 			P.inp["move"] = dir
