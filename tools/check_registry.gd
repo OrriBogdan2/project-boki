@@ -109,6 +109,8 @@ const CHECKS := {
 	"--mode-boki-check": ["res://tools/mode_boki_check.gd", "mode_boki_check", null],      # MODE_BOKI.md
 	"--boki-quirks-check": ["res://tools/boki_quirks_check.gd", "boki_quirks_check", null],
 	"--boki-react-check": ["res://tools/boki_react_check.gd", "boki_react_check", null],      # a Boki flinches when hit
+	"--last-alive-shots": ["res://tools/last_alive_shots.gd", "last_alive_shots", null],      # GPU, --shots-dir=<dir>
+	"--last-alive-check": ["res://tools/last_alive_check.gd", "last_alive_check", null],
 	"--hp-regen-check": ["res://tools/hp_regen_check.gd", "hp_regen_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
 	"--kin-form-check": ["res://tools/kin_form_check.gd", "kin_form_check", null],

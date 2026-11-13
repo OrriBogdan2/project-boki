@@ -3946,6 +3946,7 @@ func step(dt: float) -> void:
 		if hud: hud.ability_feedback("sec", "deny")
 	Life.tick_wisps(self, dt)
 	Life.tick_stomps(self, dt)
+	LastAlive.tick(self, dt)
 	_tick_chase()
 	Beacons.tick(self, dt)
 	if heart: heart.tick(dt)
