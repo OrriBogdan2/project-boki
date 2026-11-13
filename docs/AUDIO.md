@@ -245,6 +245,13 @@ Result (the audit's "check by ear" item): **neither is an outlier, so no generat
 ## Resource-full tells
 When a Hunter's meter comes full, `ArchKit._tells` plays its own `<arch>_tell` (a sub-half-second sting voiced to what fills it: Cinder's Char flares, Albert's Guard rings, Sable's Marks shimmer) with the body glow; it is 3 dB louder for others than for you, and carries 25 m (`reach` in `content/sfx/res_tells.json`) so a foe nearby hears you are loaded. Lace (Hawk Sense) has no meter and no tell. Sounds: `tools/gen_sfx_res_tells.py` (own seed). `--sfx-set-check` item 11 asserts a tell and reach per Hunter with a meter.
 
+## Hunter callouts
+Short wordless barks in a Hunter's own voice (`<arch>_call_ult|boki|low|knock`, four takes each, `grunt` level; `tools/gen_sfx_barks.py`, own seed, voice profiles copied from each Hunter's hurt line; set `content/sfx/barks.json`), played by `HunterBarks` (`scripts/match/hunter_barks.gd`) through `m.sfx`, so the pool's voice cap applies:
+- **ult**: your ultimate is back (not at match start); **low**: your health drops under 30% (again only after it is back over 50%); **knock**: you knocked a rival (`Match._reward_moment`, host and client); **boki**: your Boki went down (`Match.on_kin_down`, or the `kcmd down` event from another game).
+- Only you hear your own barks. The exception is **boki**: your teammates hear it too, at you, carrying 60 m (`reach`); a rival's Boki going down is silent.
+- One bark per Hunter per 6 s (`COOLDOWN_S`, match time); a bark inside it is dropped. No bark while downed or out. Settings > Audio > Sounds "Hunter callouts" (`hunter_barks`, on) turns them off.
+- `--sfx-set-check` asserts every one of the 12 voiced Hunters has all four (a Hunter with no voice, as Gil, has none), the reach and the wiring; `--match-audio-check` the cooldown, who hears what and the setting.
+
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
 

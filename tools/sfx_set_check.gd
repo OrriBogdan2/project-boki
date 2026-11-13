@@ -55,6 +55,8 @@ extends RefCounted
 ##  24. the garden's moments (SFX_AUDIT row 22) each play their own cue, never the stock unlock: an egg laid or
 ##      ready, two Boki becoming friends (once, as the bond reaches friend_at), a lean's new fleck or a part, a
 ##      Crown cup on the result card, an evolution; the evolution scene, the Nook egg and the incubator name theirs
+##  25. each of the 12 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
+##      HeroSfx picks them, the Boki-down call carries past hearing range, and the match and KinNet report to it
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -115,6 +117,7 @@ func run(main: Node) -> void:
 	await _steps(main)
 	_training()
 	_garden_moments()
+	_barks()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -446,6 +449,31 @@ func _unwalked() -> void:
 		if re.search(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)) != null:
 			loose.append(f)
 	ok(loose.is_empty(), "every kit file that plays a cue is walked (not walked: %s)" % [loose])
+
+## 11. Hunter callouts: every Hunter with its own voice has every bark, and the game reports what it barks on.
+func _barks() -> void:
+	var h := Hunter.new()
+	var voiced := []
+	var missing := []
+	for arch in Arch.ids():
+		h.arch = arch
+		if HeroSfx.of(h, "hurt", "") == "":
+			continue
+		voiced.append(arch)
+		for kind in HunterBarks.KINDS:
+			if HeroSfx.of(h, "call_" + kind, "") != "%s_call_%s" % [arch, kind]:
+				missing.append("%s_call_%s" % [arch, kind])
+	h.free()
+	ok(voiced.size() == 12 and missing.is_empty(), "%d Hunters with a voice have all %d callouts (missing %s)" % [
+			voiced.size(), HunterBarks.KINDS.size(), missing])
+	var far := voiced.filter(func(a): return float(Sfx.sound_reach.get("%s_call_boki" % a, 0.0)) <= Sfx.hear_range)
+	ok(far.is_empty(), "the squad's Boki-down call carries past %d m (short: %s)" % [int(Sfx.hear_range), far])
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var net_src := FileAccess.get_file_as_string("res://scripts/match/kin_net.gd")
+	var wired := match_src.contains("barks.tick(self)") and match_src.contains("barks.knock_landed(self)")
+	wired = wired and match_src.contains("barks.boki_down(self, k)")
+	wired = wired and net_src.contains("m.barks.boki_down(m, e as Kin)")
+	ok(wired, "the match ticks the callouts and reports knocks and Boki downs, here and from other games")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 ## 18. What you can see you can hear: the cue at the side edge of the wide match view (half of CamRig.style_across)

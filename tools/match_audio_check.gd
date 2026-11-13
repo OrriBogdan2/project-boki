@@ -7,6 +7,7 @@ extends RefCounted
 ## The ultimate-ready chime (UltReadyCue): once per R coming back, only for you (never a rival's or a
 ## teammate's R), never on a match's first look, held while you're down until you're up, and set lower
 ## under a kill callout.
+## Hunter callouts (HunterBarks): who hears which bark, the 6 s cooldown and the setting.
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
 ## And TellCue: a rival's ground telegraph plays tell_foe where it lands, sized by its area; not yours, an
 ## ally's, an ultimate's, an aim mark's or a telegraph that is only being refreshed.
@@ -67,6 +68,7 @@ func run(main_node: Node) -> void:
 	_tell_cues(m, P)
 	_steps(m, P)
 	await _region_beds(m, P)
+	_barks(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
@@ -425,6 +427,66 @@ func _bed_db(bed: String) -> float:
 
 func _beds_on() -> int:
 	return Sfx.ambs.filter(func(ap): return ap.playing).size()
+
+## Hunter callouts: yours (ult back, low health, a knock, your Boki down) only for you, a 6 s cooldown per Hunter,
+## a teammate's "Boki down" heard 40 m away at the teammate, a rival's never, nothing with the setting off.
+func _barks(m: Match, P: Hunter) -> void:
+	m.barks = HunterBarks.new()
+	var B := m.barks
+	var bark_of := func(h: Hunter, kind: String): return "%s_call_%s" % [h.arch, kind]
+	Sfx.listener = P.pos
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
+	P.ak.cd["x"] = 5.0
+	B.tick(m)
+	ok(B.plays.is_empty(), "no bark while your ultimate is cooling down (%s)" % [B.plays])
+	P.ak.cd["x"] = 0.0
+	Sfx.last_played.clear()
+	B.tick(m)
+	var heard := Sfx.last_played.has(bark_of.call(P, "ult"))
+	ok(B.plays == [["ult", P.nid]] and heard, "your ultimate back: one bark (%s)" % [B.plays])
+	B.knock_landed(m)
+	ok(B.plays.size() == 1, "a knock 0 s later stays quiet (the 6 s cooldown)")
+	m.time += HunterBarks.COOLDOWN_S + 0.1
+	B.knock_landed(m)
+	ok(B.plays.back() == ["knock", P.nid], "...and barks once the cooldown is over")
+	m.time += HunterBarks.COOLDOWN_S + 0.1
+	var hp := P.hp
+	P.hp = P.max_hp * 0.2
+	B.tick(m)
+	m.time += HunterBarks.COOLDOWN_S + 0.1
+	B.tick(m)
+	var low_pct := int(HunterBarks.LOW_SHARE * 100)
+	ok(B.plays.count(["low", P.nid]) == 1, "low health: one bark per drop under %d%%" % low_pct)
+	P.hp = hp
+	m.time += HunterBarks.COOLDOWN_S + 0.1
+	Sfx.last_played.clear()
+	KinNet.on_event(m, ["kcmd", "down", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
+	heard = Sfx.last_played.has(bark_of.call(P, "boki"))
+	ok(B.plays.back() == ["boki", P.nid] and heard, "your Boki down: you call it")
+	var voiced := func(x): return x != P and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
+	var other: Hunter = m.hunters.filter(voiced)[0]
+	var team := other.team
+	var theirs := Kin.new()
+	theirs.owner_h = other
+	other.pos = P.pos + Vector3(40, 0, 0)
+	var before := B.plays.size()
+	B.boki_down(m, theirs)
+	ok(B.plays.size() == before, "a rival's Boki down: no call (%s)" % [B.plays])
+	other.team = P.team
+	Sfx.last_played.clear()
+	B.boki_down(m, theirs)
+	ok(B.plays.back() == ["boki", other.nid] and Sfx.last_played.has(bark_of.call(other, "boki")),
+			"a teammate's Boki down 40 m away: the squad hears the teammate call it")
+	ok(B.plays.all(func(p): return p[0] == "boki" or p[1] == P.nid), "only \"Boki down\" is heard from another Hunter")
+	Settings.v["hunter_barks"] = false
+	m.time += HunterBarks.COOLDOWN_S + 0.1
+	before = B.plays.size()
+	B.knock_landed(m)
+	B.boki_down(m, theirs)
+	Settings.v.erase("hunter_barks")
+	ok(B.plays.size() == before, "Hunter callouts off: no bark (%s)" % [B.plays])
+	other.team = team
+	theirs.free()
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on

@@ -117,6 +117,7 @@ static func on_event(m: Match, x: Array) -> void:
 				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
+			if e is Kin: m.barks.boki_down(m, e as Kin)
 		"scoop", "round":
 			m.fx.ring(at, 1.2, Color.WHITE, 0.3)
 			m.sfx("recall", at, -4.0)
