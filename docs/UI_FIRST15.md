@@ -45,7 +45,7 @@ pictures.
 | 32 | **Plan your drop** ([32](ui_first15/1280x720/32_expedition_plan.jpg)) | **7+** | **yes, the worst** | title and timer, squad panel, full map, "This match" legend (4 kinds + 4 states), "Ways out" (5), bottom HUD, counters |
 | 33 | Ship ([33](ui_first15/1280x720/33_expedition_ship.jpg)) | 9 | **yes** | the match HUD, with locked ability slots reading "UNLOCK" |
 | 34-35 | Landed, 15 s ([35](ui_first15/1280x720/35_expedition_15s.jpg)) | **10** | **yes** | minimap, clock, status strip (Dusk / Sight), counters, vitals, abilities, glider strip, belt, Q/V/X, weapon, plus the Truce chip |
-| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (F1)", Leave match, Save and quit |
+| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (`)", Leave match, Save and quit |
 
 **Breaches (over about 5):** tutorial landing and every tutorial step (9-12), the first expedition HUD (9-10), Plan your drop (7+), the expedition panel
 and the Relics page (6 blocks each, plus 12 Relic tiles). The in-match HUD is the same 9 blocks from the first second; nothing is introduced a step at a time,
@@ -82,13 +82,73 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).
 - **Title:** "Arena", "Save files".
 
+### Plain words pass (branch ext/ui-plain-words-menus)
+
+Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery as a tooltip word, glider and armor-tier names). Each term gets plain words or a tooltip.
+
+| Screen | Term | Old | New |
+|---|---|---|---|
+| Results | Knocks | "Knocks" | "Hunters downed" |
+| Results | Armor "Uncommon" | "Armor" over "Uncommon" | tile removed on main (armor is no longer one of the three big numbers); nothing to reword |
+| Results | Tidebloom seeds | "5 Tidebloom seeds" | same chip, tooltip: plant these on the farm |
+| Results | Into your armory | "Into your armory" | "Gear you kept, in the armory" / "Gear you found (build the armory on the farm to keep it)" |
+| Expedition | BOKI AT RISK | "Boki at risk" | "Boki can be lost", tooltip on the tier: go down here and the Boki you bring are left behind |
+| Expedition | Solo / Duos / Trios | already gone | the Match line reads "Extraction: trios, 7 squads of three" (trios only); only the loading card still names squad size |
+| Expedition | Arena / Training area / Duel room | already gone | the panel's practice button reads "Training Grounds"; Arena stays reserved (title comment fixed) |
+| Expedition | ability names (Hot, Cinderfall, Burr) | unchanged | each sits next to its one-line description on the kit card; tile tooltips carry the line |
+| Relics page | Mastery | "Mastery" | "Goals: each earns a look", tooltip names Mastery |
+| Relics page | Colourway | "Colourway: Forge Red" | "Colours: Forge Red" |
+| Relics page | Glider / Field Wing | "Glider" | "Glider (looks only)"; the Field Wing line already says it is the starting wing |
+| Relics page | Hot Streak | unchanged | its line directly under it says what it does |
+| Relics page | Boki Fusion | unchanged | DECISIONS name; its line sits under it |
+| Title | Arena | already "Training Grounds" | only a code comment still said Arena (fixed) |
+| Title | Save files | unchanged | plain already; the page subtitle says what a save holds |
+
 ## 5. For the declutter jobs (not done here)
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
-2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
+2. **One prompt** (match tutorial: one strip, `TutorialStrip`; toasts wait while it is fresh, then carry the step's detail; the world prompt label waits while the card carries the interact key, `Tutorial.prompt_quiet`, `--tutorial-hud-check`). Still open outside the tutorial.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
-5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
+5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit. **Done in ext/ui-relics-names:** tiles read the name with `the <Title>` smaller under it, the tile column is 38% of the window width (460-600 px), an unlocked tile drops the 'Unlocked' line, all 13 Hunters show without scrolling at 1280x720 and 1920x1080 ([shots](shots/ui-relics-names), software render: the GPU worker was lost 3x), `--hero-grid-check` asserts it. The right column and Mastery still scroll.
 6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
+
+## 8. Match HUD groups at the 0.24.5 moments (`--hud-groups-check`)
+
+Counted by `HudGroups.on_screen` (rules: `content/rules/hud_groups.json`), pinned in `tools/hud_groups_check.gd`, pictured by `--hud-groups-shots` (1280x720, 2560x1080).
+The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and the Final share it; the Gate prompt is the one prompt). It waits until a seat is within 30 s of opening, so the landing and the first fight stay as before.
+
+| Moment | Groups | Strip | Note |
+|---|---|---|---|
+| First landing | 10 | waits | nine always-on blocks + the button card |
+| First fight | 11 | waits | nine + toasts + loot prompt |
+| Heart unlock | 12 | shows | nine + toasts + Gate prompt + strip |
+| Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
+
+All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
+## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
+
+DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
+opens the hub, Glasswater and Cinderstep at 1280x720 with a day-1 save (new, first-day list running) and a day-5 save (an upgraded
+farm save: four Boki, a journal, today's wishes), closes the arrival cards one by one, and lists the HUD groups left (a visible block of
+the home's UI, as in section 1). `--garden-first-day-check` asserts day 1 at <= 5 groups and every screen at <= 1 arrival card.
+
+| screen | groups before | groups after | arrival cards before | after |
+|---|---|---|---|---|
+| hub, day 1 | 6 | 5 | 1 (Welcome home) | 1 |
+| Glasswater, day 1 | 6 | 5 | 1 | 1 |
+| Cinderstep, day 1 | 6 | 5 | 1 | 1 |
+| hub, day 5 | 6 | 5 | 2 (While you were away, Today's wishes) | 1 |
+| Glasswater, day 5 | 6 | 5 | 2 | 1 |
+| Cinderstep, day 5 | 6 | 5 | 2 | 1 |
+
+What changed (all first-time rules, no settings; base_mode, the garden, only):
+- **Today's wishes** was its own card on every arrival and every zone hop, right after "While you were away". It is now the end of
+  that one card, once a garden day (`GardenWishes.card_lines`, `ZoneAway.card`); with nothing new it is the wishes alone. The reward tip shows on the first card only.
+- **The dash slot** (bottom centre, on top of the F prompt) waits for the first dash in the garden; nothing there needs it.
+- **Top counters** (tonic, crops, wood, stone, fibre, coals) show only above 0 in the garden. An upgraded farm save had seven chips at 631 px, now three at 258 px.
+
+GPU shots at 1280x720 (`--garden-hud-groups`, jobq gd-before4 20261112-013050-17843 on 0.24.5 272368589 plus the tool, gd-after4 20261112-013005-02702 on this branch; the counts above are their GARDENHUD lines). Before: [hub_day1](shots/ui-garden-declutter/before_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/before_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/before_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/before_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/before_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/before_cinderstep_day5.jpg). After: [hub_day1](shots/ui-garden-declutter/after_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/after_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/after_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/after_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/after_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/after_cinderstep_day5.jpg).
+Not changed (still on screen, each one group): the key row (folds after 3 uses of each key), the hub bar, the F prompt, the one Next line.
