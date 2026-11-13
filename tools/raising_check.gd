@@ -163,6 +163,7 @@ func run(m: Node) -> void:
 	ok(int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
 		"the rank it arrives with is where it starts, even under a panel (%s)" % Care.bond(rec)[1])
 	home._close_panel()
+	home._close_panel()      # an hour away opens the "While you were away" card; a rank moment waits for it
 	KinBondMoment.tick(home)
 	ok(home.panel_open == "", "and once the panel is gone it plays no moment for it")
 	var t0 := float(rec["trust"])
