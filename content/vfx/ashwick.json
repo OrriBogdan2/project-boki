@@ -13,9 +13,9 @@
 	},
 	"moves": {
 		"lance_pilot": {"net": false, "fx": [
-			{"p": "flare", "at": "nozzle", "size": 0.45, "grow": 1.3, "life": 0.2, "c": "pilot", "c2": "white", "c3": "halo"},
+			{"p": "flare", "at": "nozzle", "size": 0.45, "grow": 1.3, "life": 0.2, "c": "hot", "c2": "white", "c3": "main"},
 			{"p": "ember", "at": "nozzle", "n": 12, "shape": "gather", "radius": 0.5, "speed": 2.4, "life": 0.22,
-				"size": 0.06, "c": "pilot", "c2": "white", "c3": "halo"}
+				"size": 0.06, "c": "hot", "c2": "white", "c3": "main"}
 		]},
 		"lance": {"fx": [
 			{"p": "ember", "at": "nozzle", "n": 48, "way": "fwd", "lift": 0.02, "speed": 15.0, "spread": 0.07, "drag": 1.2,

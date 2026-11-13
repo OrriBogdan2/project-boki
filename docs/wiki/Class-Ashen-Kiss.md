@@ -17,7 +17,7 @@ head first, and hits back harder after every knock.
 ## How it plays
 
 1. Every hit builds **Char**; at 31 the foe is **Ablaze** (one flame over their head) and burns for 3s. Fed to 31 again they **Flash over** (three flames, a fiercer burn).
-2. **Torch Lance** (LMB, hold): a cyan pilot flickers, then a hose of fire 7m long. It trails behind a sweep, narrow at the nozzle and billowing at the end, and hits harder on a burning foe. It stops the moment you let go.
+2. **Torch Lance** (LMB, hold): a gold pilot flickers in her palm, then a hose of fire 7m long. It trails behind a sweep, narrow at the nozzle and billowing at the end, and hits harder on a burning foe. It stops the moment you let go.
 3. **Cinder Shot** (RMB, hold to aim, release): a lane to your cursor, then a fireball that lands there (14m at most). On a burning foe it upgrades the burn and spreads it.
 4. **Soot Ram** (Shift, 2 charges): head first toward the cursor; you stop on the first foe with a fiery hit. Rank 3 lays a lava carpet behind you.
 5. **Furnace Cloak** (E): a ring flashes for a moment, then the blast drags foes in and wraps you in a swirling fire shield. A knock resets it.

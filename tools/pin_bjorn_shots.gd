@@ -497,23 +497,23 @@ const OWNER := [
 		"aegis",
 		1.0,
 		3.0,
-		"owner1103 #29: the raised aegis, plated and bigger, the double chevron pulsing in front"
+		"owner1103 #29: the raised aegis, plated and bigger"
 	],
 	[
 		"o1103_bjorn_aegis_push",
 		"bulwark",
-		"aegis_push",
-		0.77,
+		"aegis_boop",
+		1.2,
 		3.0,
-		"owner1103 #29: a foe meets the aegis: the chevron flashes and the foe is pushed back"
+		"owner 11-11: a foe pressed against the raised aegis is not pushed"
 	],
 	[
 		"o1103_bjorn_aegis_push_b",
 		"bulwark",
-		"aegis_push",
-		1.05,
+		"aegis_boop",
+		1.75,
 		3.0,
-		"owner1103 #29: the foe has slid back 2 m off the aegis"
+		"owner 11-11: LMB with the aegis up, the boop: the foe has slid back 2.8 m"
 	],
 	[
 		"o1103_bjorn_aegis_break",
@@ -914,10 +914,11 @@ func _input(what: String, t: float) -> void:
 			K.res = 0.0
 			P.inp["sec_hold"] = t < 1.25
 			if at.call(0.05): K.press_rmb()
-		"aegis_push":
-			if t < 0.69: T.teleport(home + Vector3(1.9, 0, 0))
+		"aegis_boop":
+			if t < 1.3: T.teleport(home + Vector3(1.9, 0, 0))
 			_aim(home + Vector3(6.0, 0, 0))
 			P.inp["sec_hold"] = t > 0.45
+			P.inp["fire"] = t > 1.3 and t < 1.36
 			if at.call(0.5):
 				K.set("lock_t", 0.0)
 				K.press_rmb()

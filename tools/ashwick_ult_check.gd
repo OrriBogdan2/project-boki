@@ -355,7 +355,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 	P.teleport(home + Vector3(-5.0, 0, 0))      # the flight runs along the flat strip
 	P.vel = Vector3.ZERO
 	ak.step(m, 0.3)
-	ok("ult 66: the idle pilot flame shows on the ground", K.fx.shown(pilot))
+	ok("ult 66: idle on the ground, no pilot flame in her palm", not K.fx.shown(pilot))
 	ak.fresh(T)
 	K.chars = {}
 	K.ignites = {}
