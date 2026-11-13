@@ -100,7 +100,6 @@ func tick_plan(dt: float) -> void:
 			_bot_ping.erase(h.nid)
 			_bot_plan_ping(h)
 	_tick_acks()
-	if m.guide: m.guide.tick(dt)
 	if plan_t <= 0.0:
 		planning = false
 		plan_t = 0.0
