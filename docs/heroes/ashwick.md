@@ -306,8 +306,11 @@ Clip re-keys (tools/art1/cinder_clips.py):
 
 Suggestions (not built, parity first): the 0.4 s lane in the footage may be a cast time rather than the player's hold;
 a per-hero stop blend (loco_pos 12/s is shared by
-every warden) would give the source's instant stop; remote views keep the old ram timing when a hit re-times
-`anim_at` by less than ArchKit's 0.3 s re-time tolerance (the hit frame is 0.23 s earlier, under it).
+every warden) would give the source's instant stop.
+
+Done (ext/anim-remote-retime, decision 0098): the ram hit re-times `as_leap` through `ArchKit.retime`, so remote
+views move the squash onto the hit frame too (it is 0.19-0.23 s earlier, under the 0.3 s resync a plain resend
+needs); `--remote-anim-check` "ashwick ram hit".
 
 ## Look and sound
 - Effects: `scripts/arch/kits/ld_fx.gd` (pooled; `shaders/ld_fx.gdshader` draws each look's body alpha-blended so colour and

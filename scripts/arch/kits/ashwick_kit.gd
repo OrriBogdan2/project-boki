@@ -615,7 +615,7 @@ func _bash_impact(f: Ent) -> void:
 	bash_hits += 1
 	h.roll_t = 0.0                  # the dash stops on the foe
 	if anim_id == "as_leap":
-		anim_at = minf(anim_at, m.time - RAM_IMPACT_KEY)      # the squash on the hit frame, not at the full ram
+		retime(minf(anim_at, m.time - RAM_IMPACT_KEY))      # the squash on the hit frame, not at the full ram
 	var dir: Vector2 = bash["dir"]
 	# and he bounces back a little off them
 	h.vel.x = -dir.x * float(dd["recoil"])

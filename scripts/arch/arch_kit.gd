@@ -784,31 +784,46 @@ func e_recastable() -> bool: return false
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
+var anim_rt := 0               # counts explicit re-times (retime()), so other games apply each one at any size
 
 ## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
 ## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
+## The age is snapped to 0.05 s; its hundredths carry the re-time count (anim_rt mod NET_RETIMES, decision 0098).
 const NET_MOVE_AT := 31
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
+const NET_AGE_SNAP := 0.05
+const NET_RETIME_STEP := 0.01
+const NET_RETIMES := 5
+const NET_RESYNC := 0.3        # s: a resend whose age is off by more than this restarts the copy (latency, the snap)
 
 static func net_move(h: Hunter) -> Array:
 	var k: ArchKit = h.ak
 	if k == null or k.anim_id == "" or h.m.time - k.anim_at > NET_MOVE_LIFE:
 		return ["", 0.0]
-	return [k.anim_id, snappedf(h.m.time - k.anim_at, 0.05)]
+	return [k.anim_id, snappedf(h.m.time - k.anim_at, NET_AGE_SNAP) + NET_RETIME_STEP * (k.anim_rt % NET_RETIMES)]
 
-## A remote hunter's move starts when the id changes (or the sender's clock says it restarted), then plays
-## on locally like any kit move; old hosts send nothing and the hunter just keeps its weapon poses.
+## A remote hunter's move starts when the id changes, the sender re-timed it, or its clock says it restarted,
+## then plays on locally like any kit move; old hosts send nothing and the hunter just keeps its weapon poses.
 static func apply_net_move(h: Hunter, it: Array) -> void:
 	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
 		return
 	var id := String(it[NET_MOVE_AT])
 	if id == "":
 		return
-	var age := float(it[NET_MOVE_AT + 1])
+	var wire := float(it[NET_MOVE_AT + 1])
+	var rt := roundi(fposmod(wire, NET_AGE_SNAP) / NET_RETIME_STEP) % NET_RETIMES
+	var age := wire - NET_RETIME_STEP * rt
 	var k: ArchKit = h.ak
-	if k.anim_id != id or absf((h.m.time - k.anim_at) - age) > 0.3:
+	if k.anim_id != id or k.anim_rt != rt or absf((h.m.time - k.anim_at) - age) > NET_RESYNC:
 		k.anim_id = id
 		k.anim_at = h.m.time - age
+		k.anim_rt = rt
+
+## Moves the playing move's clock to `at` (a hit that jumps the move to its impact key); other games follow it
+## at any size, where a plain resend only resyncs past NET_RESYNC.
+func retime(at: float) -> void:
+	anim_at = at
+	anim_rt += 1
 
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 func play(move: String) -> void:
