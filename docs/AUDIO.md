@@ -66,6 +66,20 @@ You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.p
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
 
+## Leaving a place: `--music-leave-check`
+Music and ambience follow the screen: after each change only the new place's score is heard. The check walks Training Grounds -> duel room -> farm -> title, a match -> title, and the farm -> title, and reads every Sfx player on the Music / Ambience buses (playing and above -45 dB). What each row protects:
+- **training: the layered score plays** / **match: layers and ambience beds are up**: the setup is sane (stems and abyss / ruins beds really come up), so the leave rows below are not passing on silence.
+- **duel: a duel match is up** / **duel: the score is the Training Grounds's, one set of stems**: walking into the duel room keeps one set of layered stems, not a second set stacked on the first.
+- **leave duel: no stem of the match score is left**: `Sfx.reset_scene_audio` stops the layered score when a match ends.
+- **leave duel: only the farm's own music + ambience**: the farm starts its own track (`home*`, or a zone's) after a match.
+- **leave duel: no match ambience beds**: the abyss / ruins beds `MusicDir` sets are cleared on leave, not left looping.
+- **leave duel: nothing stray on the Music bus**: no player that Sfx no longer points at (an orphaned crossfade or sting) keeps playing.
+- **match -> title: the score fades out rather than cutting**: the leave is a fade; right after the change the old score is still ringing out.
+- **X -> title: music is the title track / no match layers, no amb layers / exactly one music player is audible** (after the duel, a match and the farm): the title never inherits a stem, a bed or a second music player from where you were.
+- **all 18 rows ran**: a step that errors out (a script error ends that coroutine) can't skip its rows and still exit 0.
+
+The check opens screens the way the game does (`Game.goto`). With a display (xvfb too) the old screen stays current until the 0.3 s ink fade has covered it, so it waits for a new current screen rather than a fixed frame count. Settles run at `Engine.time_scale` 4: the fades are game-time tweens.
+
 ## Capture sounds (`content/sfx/capture.json`, `tools/gen_sfx_capture.py`)
 All wired in `scripts/match/capture.gd`, so a rival's game plays them from the same net events (`scan_start`, `scan_stop`, `scan_done`) as the local one:
 - **Scan hum**: the looping `revive_hum` on `Sfx.loop_start`, pitch rising from `rise_pitch[0]` to `[1]` with the scan fill, heard `hear_range` (26 m).
