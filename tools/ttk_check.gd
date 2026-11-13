@@ -32,7 +32,7 @@ const HEROES := [
 		"rmb": [130.0, 0.4, 2.5, 0.0, 1, 0], "dash": [49.0, 0.0, 13.0, 5.0, 2, 1],
 		"e": [30.0, 0.0, 16.0, 6.0, 1, 0]}],
 	["ashwick", "Felix", "hold", 1, [25.8, 0.1, 0.0], {
-		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [190.4, 0.0, 9.0, 1.5, 2, 0],
+		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [150.4, 0.266, 9.0, 1.5, 2, 0],
 		"e": [76.8, 0.5, 13.0, 4.0, 1, 0]}],
 	["mage", "Joule", "hold", 1, [90.0, 0.8, 0.0], {
 		"rmb": [133.0, 0.9, 10.0, 2.0, 1, 0], "dash": [153.0, 1.0, 9.0, 1.5, 1, 0],
@@ -47,6 +47,12 @@ const HEROES := [
 	["dredge", "Kingpin", "hold", 9, [339.0, 0.5, 0.0], {}],
 	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0], {}],
 ]
+
+## Casts the share table lists that no combo row uses: hero -> slot -> source damage of one cast, a level 1
+## tooltip against the level 1 target (the footage LMB is level 9, so Celeste cannot join a combo). our_hit
+## casts the ult, then waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s).
+const SHARE_ONLY := {"rimewright": {"rmb": 346.0, "x": 155.0}}
+const ULT_WAIT := 4.5
 
 ## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
 const OVERRIDES := {}
@@ -152,9 +158,15 @@ func our_hit(arch: String, slot: String) -> float:
 	var m: Match = f[0]
 	var P: Hunter = f[1]
 	var T: Hunter = f[2]
-	_abilities(P, [slot])
+	var wait := 2.0
+	if slot == "x":
+		P.slot_lv["ult"] = 1
+		P.ak.cast_ult()
+		wait = ULT_WAIT
+	else:
+		_abilities(P, [slot])
 	var t := 0.0
-	while t < 2.0:
+	while t < wait:
 		if slot == "e":
 			_abilities(P, [slot])      # (the recast that sets a planted E off)
 		_tick(m, P, T, f[3])
@@ -219,13 +231,21 @@ func run(main_node: Node) -> void:
 		for slot in hero[5]:
 			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
 			var ours_share: float = await our_hit(hero[0], slot)
-			hits.append([hero[0], hero[1], slot, ours_share, src_share])
-			print("TTK hit %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
-				hero[0], slot, ours_share, src_share, ours_share / src_share])
+			_add_hit(hero, slot, ours_share, src_share)
+	for id in SHARE_ONLY:
+		var share_hero: Array = HEROES.filter(func(h): return h[0] == id)[0]
+		for slot in SHARE_ONLY[id]:
+			_add_hit(share_hero, slot, await our_hit(id, slot), float(SHARE_ONLY[id][slot]) / SRC_HP)
 	if "--write" in OS.get_cmdline_user_args():
 		_write()
 	print("TTK CHECK DONE, rows: %d, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## One share-of-target row: printed and kept for the table.
+func _add_hit(hero: Array, slot: String, ours_share: float, src_share: float) -> void:
+	hits.append([hero[0], hero[1], slot, ours_share, src_share])
+	print("TTK hit %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
+		hero[0], slot, ours_share, src_share, ours_share / src_share])
 
 const TABLE_MARK := "<!-- ttk:table -->"      # docs/TTK.md keeps its tables between two of these
 
