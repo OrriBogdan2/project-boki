@@ -45,6 +45,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | LMB tap cadence, speed, range | 0.6 s [data card; footage 1 per 2-3 frames]; a slow molten boulder, about 10-12 bh/s; a small burst with a red ground ring [footage] | 0.6 s, 20 m/s, 11 m, a red ring and a 0.9 m splash | matches; asserted |
 | LMB hold beats | the gauntlet drawn back in a deep crouch, a straight drive that steps her about 0.5 bh; about 0.75 s hold [footage 0118-0121] | `breah_wind` (held) then `breah_punch`, out at 0.05 s; a 0.6 m step (0.8 m measured) | matches; asserted |
 | LMB hold tracking | the lane points at the cursor, fixed length [footage] | the lane and her body follow a moved cursor during the hold; 4.2 m by 1.8 m | matches; asserted |
+| LMB hold walk | she stands through every punch hold (0118-0120, 0128-0150, 4 fps), and neither clip has a plain run to compare [footage] | 85% walk while held (`fire_slow`) | kept: not determinable (docs/MOVEMENT_FEEL.md) |
 | RMB Volcano Crusher | hold, crouch with glowing fists, hop forward and smash; jump while charging leaps forward [data, footage] | Quakefall: the same (Quakefall review, item 14) | matches |
 | E Rockwave | three rocks about 2 bh ahead, a slight curve, a red flash first [footage] | Stone Row: the same | matches |
 | R Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
