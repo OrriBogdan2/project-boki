@@ -95,7 +95,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var tol := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		a["cross_t"] = float(a.get("cross_t", 12.0)) - dt
 		if (h.grounded and m.world.island_of(h.pos.x, h.pos.z) == int(L["to"])) or float(a["cross_t"]) <= 0.0:
-			a.erase("cross"); a.erase("cross_t")
+			a.erase("cross"); a.erase("cross_t"); a.erase("take_stall")
 		# (gives up only well under the landing: dipping under the far lip is normal on a climb, the glider's
 		# lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
 		elif not h.grounded and a.get("cross_go", false) and not (m.world.is_void(h.pos.x, h.pos.z) and h.pos.y < land.y - 4.0 and h.vel.y < 0.0):
@@ -125,6 +125,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 		else:
 			a["cross_go"] = false
+			_take_stall(m, h, a, L, dt)
 	# a downed squadmate comes first: go and pick them up unless a rival is right on top of us
 	var rv := _revive_plan(m, h)
 	if not rv.is_empty() and rv.has("danger"):
@@ -867,11 +868,11 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal != a["goal"] and a["goal"] != Vector3.INF and not gk in URGENT_GOALS and goal.distance_to(a["goal"]) > 3.0 \
 			and goal.distance_to(a.get("prev_goal", Vector3.INF)) < 1.0 and m.time - float(a.get("goal_set_t", -99.0)) < GOAL_STICK:
 		goal = a["goal"]; gk = String(a["goal_kind"])
+	# give up on goals we can't seem to reach (a goal that only moved a little is the same one: a key
+	# carrier walking about restarted the clock every think, so the bot circled it and never gave up)
 	if goal != a["goal"] and (a["goal"] == Vector3.INF or goal.distance_to(a["goal"]) > 3.0):
 		a["prev_goal"] = a["goal"]
 		a["goal_set_t"] = m.time
-	# give up on goals we can't seem to reach
-	if goal != a["goal"]:
 		a["goal_best"] = 1e9
 		a["goal_since"] = m.time
 	elif goal != Vector3.INF:
@@ -882,9 +883,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			a["goal_best"] = d
 			a["goal_since"] = m.time
 		elif m.time - float(a.get("goal_since", m.time)) > 14.0:
-			var bans: Dictionary = a.get("banned", {})
-			bans[goal] = m.time + 20.0
-			a["banned"] = bans
+			_give_up(m, a, goal, gk)
 			a["goal_since"] = m.time
 			a["goal_best"] = 1e9
 	a["goal"] = goal
@@ -1002,13 +1001,42 @@ func _no_path(m: Match, h: Hunter) -> void:
 	if g == Vector3.INF or String(a.get("goal_kind", "")) in URGENT_GOALS:
 		return
 	var np: Array = a.get("nopath", [])
-	if np.is_empty() or np[0] != g:
-		a["nopath"] = [g, m.time]      # (per goal: a new one gets its own moment)
+	if np.is_empty() or (np[0] as Vector3).distance_to(g) > 3.0:
+		a["nopath"] = [g, m.time]      # (per goal: a new one gets its own moment; a carrier on a ledge walks about)
 	elif m.time - float(np[1]) > NO_PATH_GIVE_UP:
-		var bans: Dictionary = a.get("banned", {})
-		bans[g] = m.time + 20.0
-		a["banned"] = bans
+		_give_up(m, a, g, String(a["goal_kind"]))
 		a.erase("nopath")
+
+const TAKE_R := 2.5              # m: "at the take-off spot" for the stall clock
+const TAKE_STALL_S := 3.0      # s at the take-off spot without jumping before its goal is given up
+
+## A bot that hangs about a crossing's take-off spot without ever jumping (too little glide fuel, or
+## it keeps running past the spot away from the landing and back) gives the goal up after a few
+## seconds instead of circling there until the crossing's own timer ran out and was set again.
+func _take_stall(m: Match, h: Hunter, a: Dictionary, L: Dictionary, dt: float) -> void:
+	var t: float = float(a.get("take_stall", 0.0))
+	if h.grounded and h.flat_dist(L["take"]) < TAKE_R:
+		t += dt
+	else:
+		t = maxf(0.0, t - dt * 0.5)
+	a["take_stall"] = t
+	if t > TAKE_STALL_S and a["goal"] != Vector3.INF:
+		_give_up(m, a, a["goal"], String(a["goal_kind"]))
+		a.erase("cross")
+		a.erase("cross_t")
+		a.erase("take_stall")
+		a["goal_best"] = 1e9
+		a["goal_since"] = m.time
+
+const GIVE_UP_S := 20.0          # seconds a goal we gave up on stays off the list
+
+## Gives up on the goal at g for a while; for a key carrier that is the monster, wherever it walks.
+func _give_up(m: Match, a: Dictionary, g: Vector3, kind: String) -> void:
+	var bans: Dictionary = a.get("banned", {})
+	bans[g] = m.time + GIVE_UP_S
+	a["banned"] = bans
+	if kind == "keyhunt":
+		BotKeys.give_up(a, m.time + GIVE_UP_S)
 
 func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
