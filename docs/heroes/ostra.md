@@ -101,6 +101,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void
 | Shift steering | the landing ring is placed at the cast (0158), the sigil fills there (0159-0167) and it lands exactly on it: no steering in flight [footage captions] | the landing is fixed at the cast | `footage: the landing is set at the cast ...` |
 | Shift apex | "climbs well above the field" (0159-0167, key frame 0161); no height read off the frames [footage, not measured] | 4.5m over his hand (`dash.lob`), kept | `dash: a high lob ...` (4m+) |
 | Shift landing recovery | 0168 is the teleport; 0169-0182 are not captioned, so the time before he acts is not read [not measured] | none: he acts on arrival (nothing in the data or footage locks him) | (not asserted) |
+| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 67.5% (owner, item 75: 30%; 11-08: 35%; 11-10 playtest: 67.5%, the slow halved from 65% to 32.5%) | `item 17: ...`, `owner: ...` |
 | E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast, no timer (the data lists none; Unstable Anomaly: "reactivate to detonate", supervive_kits.md:116) | `combo: ...`, seed rows |
 | X | a 1.0s dome telegraph with his cast held, then a 3.5s pull while he acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
 
@@ -223,6 +224,8 @@ A full orb slows **6% for 1.5s** (`lmb.prime_slow` 0.06, `prime_slow_t` 1.5; was
 | Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 35% speed (item 75; was 20%, then 30%; owner 11-08 asked +15-25%, 35% keeps the earlier 25-35% band; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing; wisps wait on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 7) |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies in his 1.5m ring as he leaves (47, 3s), checked as he goes; none at the landing |
+| Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 67.5% speed (owner 11-10 playtest; item 75 had 30%, 11-08 35%, was 20%; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
+| Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
 | Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size; the knock heal is removed (the owner's tooltip data has none) |
 | Black Hole stuns and pulls enemies to its centre for 3.5s, small damage every 0.1s | card, wiki | yes (ult f33-f66) | built on R; asserted `ult open`, `drawn to the middle`, `small ticks` |
@@ -349,3 +352,31 @@ Suggestions, not built: a "firing faster lowers speed and damage" penalty (card 
   their own game) is drawn to the centre by a Displace "glide" tow.
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
   adds no hold field (nothing to drop on a merge).
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+
+Every slot measured three ways: the source from briefs/hero-ref/ostra.md (one frame = 0.2 s, the ult strip 0.1 s), the
+kit's own release (the code and content/archetypes/ostra.json, on the move clock `kmove_t`), and the v2 clip
+(art/wardens/ostra/ostra.glb, its clip map content/rules/warden_anim/ostra.json) swept at 60 Hz: "strike" is its
+fastest hand frame, "end" its length, the moment it hands back to the legs. `--ostra-combo-check` asserts each strike
+within 0.05 s of the kit's release (tools/clip_strike_check.gd, lines `ostra clip timing ...`). A `lead` starts the
+clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers untouched.
+
+| Slot | Source: wind-up / strike / active / recover | Ours before: release / clip strike / end | Ours after | Verdict |
+|---|---|---|---|---|
+| LMB tap (`ostra_orb`, `orb_l` hand after hand) | a one-hand flick inside one frame [0031] | 0.00 / 0.05 / 0.30 | same | matches; asserted |
+| LMB hold | an orb about every 0.6 s [0031-0034] | every 0.6 s, each with its flick | same | matches (`lmb parity` row) |
+| LMB full charge (`ostra_orb_hot`) | the same flick, a long bolt [0034] | 0.00 / 0.08 / 0.50 | lead 0.06: 0.02 / end 0.50 (last frame held 0.06) | fixed; asserted |
+| RMB wind-up (`ostra_snap_wind`) | a black orb at the hand for one frame (about 0.2 s) [0115, 0138] | 0.32 (owner item 40), held from 0.3 | same | owner note wins (item 40) |
+| RMB release (`ostra_snap`) | the spear the next frame [0116, 0139] | 0.00 / 0.02 / 0.50, slowed 0.15 s after | same | matches; asserted |
+| Shift ground (`ostra_swap`) | an underhand lob, the star leaves with the arm [0158, 0184], 1.8 s flight | 0.00 / 0.12 / 0.85 | lead 0.10: 0.02 / end 0.85 (last frame held 0.10) | fixed; asserted |
+| Shift held (`ostra_swap_aim`) | - (a tap in the source) | the lob's wind-up pose, held from 0.16 | same | no source; the held pose is the lead's skipped wind-up |
+| Air dash (`ostra_swap_air`) | not in the footage (the Swap is his only mobility) | 0.00 / 0.08 / 1.27, the drift loops | lead 0.06: 0.02 | fixed on our own release; asserted |
+| Arrival (`ostra_arrive`) | a jump-cut, under one frame [0168] | the pop 0.08-0.15 / 0.60 | same | matches |
+| E (`ostra_seed`) | a small orb drops onto the spot [0352] | 0.00 (at the cursor) / 0.08 / 0.80 | lead 0.06: 0.02 / end 0.80 (last frame held 0.06) | fixed; asserted |
+| E recast (`ostra_pop`) | the implosion, then shards [0385-0386] | rings close 0.00-0.08, shards 0.12 / 0.10 / 0.60 | same | matches; asserted |
+| X (`ostra_well`) | a hand thrust on the press, a 1.0 s dome [f23-f32] | arms out 0.13, held from 0.27, dome 1.0 s | same | matches |
+| X opens (`ostra_well_snap`) | the vortex opens, he is free [f33] | 0.00 / 0.03 / 0.57, free at the open | same | matches; asserted |
+| R | the Boki Merge (`mf_xform`, ours) | 0.80 | same | no source |
+
+Not in the slots: `ostra_flurry` is cut (no caller, `--dead-kmoves-check`); `ostra_empower` (Swollen, 0.9 s) has no source frame.

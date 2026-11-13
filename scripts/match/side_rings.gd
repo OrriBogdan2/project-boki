@@ -4,6 +4,7 @@ extends RefCounted
 ## everyone else. A Boki's ring takes its Hunter's colour, so a squad's Boki read as theirs in a crowd.
 ## The material only changes when the colour does (a new viewer, a team change), never per frame.
 
+const RING: Shader = preload("res://shaders/marker_ring.gdshader")
 const YOU_A := 0.95        # alpha of your own ring: the brightest thing under any body
 const OTHER_A := 0.75      # alpha of everyone else's
 const BOKI_A := 0.85       # alpha of a Boki's ring
@@ -18,6 +19,14 @@ static func tick(h: Hunter) -> void:
 	for k in [h.kin, h.kin2]:
 		if k != null and is_instance_valid(k):
 			_paint((k as Kin).ring, Color(col, BOKI_A))
+
+## The cel material of a team marker: `color` is its side colour (SideColor, whatever palette the viewer picked).
+static func mat(col: Color, thickness: float) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = RING
+	m.set_shader_parameter("color", col)
+	m.set_shader_parameter("thickness", thickness)
+	return m
 
 ## The colour a ring shows now (black when it has none), for checks.
 static func shown(ring: MeshInstance3D) -> Color:
