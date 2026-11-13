@@ -4,21 +4,24 @@ extends "res://tools/glide_shots.gd"
 ## early landing and the settle. <dir>/{back,side}/f000.png... at 15 fps (the glide shots' match and camera), one
 ## FLUE_SHOT line a frame with the move, the bank and the body's tilt. Needs a renderer.
 
-const FLY_AT := 0.6        # s: the cast (the title splash is gone)
-const LEFT_AT := 1.2       # s: the aim swings left of the heading
-const RIGHT_AT := 1.7      # s: and right of it
-const LAND_AT := 2.2       # s: X again
-const END_AT := 3.0        # s: the settle is long over
-const SWING := 1.5         # rad: how far the aim sits off the heading in a turn
-const REACH := 24.0        # m: the flight's ground she looks for (about 22.7 m flown), so the landing is on land
+const FLY_AT := 0.6  # s: the cast (the title splash is gone)
+const LEFT_AT := 1.2  # s: the aim swings left of the heading
+const RIGHT_AT := 1.7  # s: and right of it
+const LAND_AT := 2.2  # s: X again
+const END_AT := 3.0  # s: the settle is long over
+const SWING := 1.5  # rad: how far the aim sits off the heading in a turn
+const REACH := 24.0  # m: the flight's ground she looks for (about 22.7 m flown), so the landing is on land
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	Save.no_write = true
 	var out := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--size="): px = int(a.substr(7))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--size="):
+			px = int(a.substr(7))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(px, px)
@@ -26,6 +29,7 @@ func run(main: Node) -> void:
 	await _flight(main, out)
 	print("FLUE_FLIGHT_SHOTS_DONE")
 	tree.quit()
+
 
 func _flight(main: Node, dir: String) -> void:
 	var m := await _start(main, "ashwick", dir)
@@ -38,8 +42,10 @@ func _flight(main: Node, dir: String) -> void:
 	while step * Match.DT < END_AT:
 		var t := step * Match.DT
 		var turn := 0.0
-		if t >= LEFT_AT and t < RIGHT_AT: turn = -SWING
-		elif t >= RIGHT_AT and t < LAND_AT: turn = SWING
+		if t >= LEFT_AT and t < RIGHT_AT:
+			turn = -SWING
+		elif t >= RIGHT_AT and t < LAND_AT:
+			turn = SWING
 		h.inp["aim"] = h.pos + heading.rotated(Vector3.UP, turn) * 8.0 + Vector3(0, 0.9, 0)
 		if step == roundi(FLY_AT / Match.DT):
 			k.cd["x"] = 0.0
@@ -56,11 +62,12 @@ func _flight(main: Node, dir: String) -> void:
 			print("FLUE_SHOT f%03d %-8s bank=%5.1f %s" % [i, k.anim_id, rad_to_deg(h.anim.glide_bank), _body(h)])
 			_aim(h, 180.0, 0.25)
 			await _grab(dir.path_join("back/f%03d.png" % i))
-			_aim(h, 90.0, 0.35)     # (above the grass)
+			_aim(h, 90.0, 0.35)  # (above the grass)
 			await _grab(dir.path_join("side/f%03d.png" % i))
 		step += 1
 	m.queue_free()
 	await tree.process_frame
+
 
 ## Of 16 headings, the one with the most ground under the next REACH metres (no abyss under the flight).
 func _over_ground(m: Match, from: Vector3) -> Vector3:
