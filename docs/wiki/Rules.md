@@ -723,6 +723,8 @@ The farm building pass (docs/decisions/0004-farm-building.md). Farm level is poi
 | water | {"reach": 2, "tip": "Within 2 tiles of water, a crop patch waters itself.", "doc": "A crop patch whose footprint is within reach tiles of water (a pond, a painted river or the wild water) tends its own plots (FarmWater)."} |
 | lots | {"board": {"wood": 6, "stone": 4}} |
 | lots_doc | Wood and stone a building LOT costs on a farm under the building pass, instead of its gem price in Data.BUILDINGS (the Challenge House: Hob draws it up after the first expedition). |
+| lot_labour | 8 |
+| lot_labour_doc | Swings of labour a lot building takes (the Workshop, Cottage, Armory...); its cost is the 'lots' row or its gem price. A lot goes up as a construction site like every other building (FarmLots). |
 | starter | ["crop_patch", "cook_pot"] |
 | starter_doc | Placed at once, no site. The house is not here: it goes up as a site you and your Boki build (build.house): 10 wood and 6 stone, spent as it goes up. |
 | start_doc | What Hob offers from the first minute is every item with no entry in unlock: house, crop_patch, cook_pot, ranch_pen, fence, path_dirt, flowers (and the feeder in storage). Everything in unlock opens by farm level or milestone and is then drawn up when you talk to Hob (scripts/home/farm_builder.gd). |

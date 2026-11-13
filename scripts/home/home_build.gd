@@ -379,9 +379,9 @@ func _apply_blockers() -> void:
 				w.block_top[i] = w.level[i] * World.LEVEL + top      # every placed block is climbable
 	for b in Data.BUILDINGS:
 		if not HomeLayout.placed(b, h._d()): continue      # a farm-start lot you haven't put down yet
-		var built: bool = h._has_b(b)
+		var solid: bool = h._has_b(b) or FarmSites.has_site(FarmLots.entry(b, h._d()))
 		for c in HomeLayout.cells_of(HomeLayout.rect_of(b, h._d())):
-			mark.call(c, "b:" + b, built)
+			mark.call(c, "b:" + b, solid)
 	for e in lay["deco"]:
 		if HubLayout.holds(lay, String(e["id"])): continue
 		for c in HomeLayout.deco_cells(e):
@@ -1034,6 +1034,7 @@ func reset_layout() -> void:
 	for e in lay["deco"]:
 		inv[String(e["id"])] = int(inv.get(String(e["id"]), 0)) + 1
 	lay["deco"] = []
+	FarmLots.refund_sites()
 	lay["b"] = {}
 	lay["paths"] = {}
 	lay["water"] = {}
@@ -1809,13 +1810,21 @@ func place_held() -> bool:
 	if held["kind"] == "feeder":
 		return _place_feeder()
 	if held["kind"] == "b":
-		_snap()
 		var was := HomeLayout.placed(id, h._d())
+		var fresh: bool = not was and not h._has_b(id)       # a new lot goes down as a construction site
+		var refuse: String = FarmLots.why_not(id) if fresh else ""
+		if refuse != "":
+			h._toast(refuse)
+			return false
+		_snap()
+		var site = FarmLots.entry(id, h._d()).get("site")       # a site in progress moves with its lot
 		lay["b"][id] = {"x": cells[0].x, "z": cells[0].y, "r": int(held["r"])}
+		if site != null: lay["b"][id]["site"] = site
 		held = {}
 		_clear_ghost()
-		apply(false)
-		_done(HomeLayout.rect_center(HomeLayout.rect_of(id, h._d())), ("%s moved" if was else ("%s put up" if h._has_b(id) else "%s lot marked out: walk up to it to build")) % Data.BUILDINGS[id]["name"], id, was)
+		if fresh: FarmLots.start(h, id)
+		else: apply(false)
+		_done(HomeLayout.rect_center(HomeLayout.rect_of(id, h._d())), ("%s moved" if was else ("%s put up" if h._has_b(id) else "%s site marked out: hold interact to build it")) % Data.BUILDINGS[id]["name"], id, was)
 		return true
 	var c: Dictionary = HomeLayout.CATALOG[id]
 	if c.has("brush"):

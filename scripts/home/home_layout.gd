@@ -262,6 +262,8 @@ static func ensure(d: Dictionary) -> Dictionary:
 			(L["b"] as Dictionary).erase(b)
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
+		FarmSites.clean(be)
+	FarmLots.migrate(d, L)
 	SnackPatch.grant(d)
 	return of(d)
 
@@ -330,6 +332,8 @@ static func cells_of(rc: Array) -> Array:
 
 # ------------------------------------------------------------------ decorations
 static func size_of(id: String, r: int) -> Vector2i:
+	if Data.BUILDINGS.has(id):
+		return turned(base_size(id), r)
 	var s: Array = CATALOG.get(id, {}).get("size", [1, 1])
 	return turned(Vector2i(int(s[0]), int(s[1])), r)
 

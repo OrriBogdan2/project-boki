@@ -10,6 +10,8 @@ extends RefCounted
 ##   5. upgrades: tier 2 and 3 cost materials and labour, need farm level, show on the model and
 ##      speed the station up; a station keeps working while it is upgraded
 ##   6. save and load of sites and tiers (JSON round trip), and an old save with none of it
+##   7. lot buildings (Workshop, Cottage, Armory, Challenge House) place as sites, Boki complete them for
+##      the same cost and gates, the Soul Shrine keeps its own gate, and an old save's marked-out lot becomes a site
 ## Never touches the real save.
 
 var bad := 0
@@ -521,5 +523,92 @@ func run(m: Node) -> void:
 	ok(old_cost.is_empty(), "and its new buildings still go up at once")
 	home4.queue_free()
 	await main.get_tree().process_frame
+	await _lots()
 	print("FARMBUILD DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
+## 7. The lot buildings go up as construction sites (FarmLots); there is no walk-up build.
+func _lots() -> void:
+	Save.d = _new_save()
+	Save.d["gems"] = 600
+	Save.d["matches"] = 1
+	for nm in ["Wisp", "Ash"]:
+		var r := Save.new_kin("wisplet", nm)
+		r["level"] = 5
+		Care.ensure(r)
+		for nd in Care.NEEDS: r["needs"][nd] = 100.0
+		Save.d["roster"].append(r)
+	HomeLayout.ensure(Save.d)
+	_stats(1, 1, 3, 130, 3)       # farm level 5, the first extraction and boss
+	_mats(40, 40, 40, 2)
+	var home = await main._hb_home()
+	var hb: HomeBuild = home.hb
+	home._close_panel()
+	hb.toggle()
+	var lots := ["workshop", "cottage", "armory", "board"]
+	var shore := Vector3(HomeLayout.LANDING.x, 0, HomeLayout.LANDING.z)       # open ground near the portal
+	hb.take_building("shrine")
+	var shrine_put := _put(hb, _spot(hb, shore, 5.0))
+	ok(not shrine_put and not HomeLayout.placed("shrine", Save.d),
+			"the Soul Shrine keeps its own gate, no lot without the expeditions and an ember (%s)" % Econ.shrine_why())
+	hb._drop_held()
+	var gems0 := int(Save.d["gems"])
+	for b in lots:
+		hb.take_building(b)
+		var cs := _spot(hb, shore, 5.0)
+		ok(_put(hb, cs), "the %s lot is put down" % b)
+		var e := FarmLots.entry(b)
+		var need: Dictionary = FarmLots.cost(b)
+		var standing: bool = Save.has_building(b) or home.lots[b]["built"]
+		ok(FarmSites.is_site(e) and int(e["site"]["need"]) == int(need["labour"]) and not standing,
+				"a %s is a site of %d swings and not a building yet" % [b, int(e["site"]["need"])])
+		ok(_scaffold(home, b), "the %s is drawn as scaffolding with a bar" % b)
+	ok(int(Save.d["gems"]) == gems0 and Work.mat("wood") == 40, "marking them out spent nothing")
+	hb.toggle()
+	var js := JSON.stringify(Save.d)
+	home.queue_free()
+	await main.get_tree().process_frame
+	Save.d = JSON.parse_string(js)
+	home = await main._hb_home()
+	var back := FarmLots.entry("armory")
+	ok(FarmSites.is_site(back) and typeof(back["site"]["got"]) == TYPE_INT and _scaffold(home, "armory"),
+			"a saved and loaded lot site is still a site, drawn")
+	home.hw.scan_t = 0.0
+	home.hw.scan()
+	await _sim(home, home.hw, 900.0, func() -> bool: return FarmLots.sites().is_empty())
+	await main.get_tree().create_timer(2.0).timeout      # the building pops up (Home._construct)
+	var made := true
+	for b in lots:
+		made = made and Save.has_building(b) and home.lots[b]["built"] and not FarmSites.has_site(FarmLots.entry(b))
+	var spent_gems := 90 + 110 + 40
+	var mats_ok := Work.mat("wood") == 40 - 6 and Work.mat("stone") == 40 - 4
+	ok(made and int(Save.d["gems"]) == gems0 - spent_gems and mats_ok,
+			"Boki finished all four for the old prices (gems %d, the Challenge House 6 wood and 4 stone)" % spent_gems)
+	# an old save: a lot marked out under the building pass but never built (and a marked-out shrine)
+	var od := Save.fresh()
+	var drip := Save.new_kin("puddlet", "Drip")
+	od["roster"].append(drip)
+	od["active"] = drip["uid"]
+	od["tutorial"] = {"hatched": true, "intro": true}
+	Save.d = od
+	var ol := HomeLayout.ensure(Save.d)
+	ol["b"]["workshop"] = {"x": 28, "z": 26, "r": 0}
+	ol["b"]["shrine"] = {"x": 49, "z": 35, "r": 0}
+	Save.d = JSON.parse_string(JSON.stringify(Save.d))
+	HomeLayout.ensure(Save.d)
+	var old := FarmLots.entry("workshop")
+	var paid: Dictionary = old.get("site", {}).get("paid", {"x": 1})
+	var unpaid: bool = FarmSites.is_site(old) and int(old["site"]["got"]) == 0 and paid.is_empty()
+	ok(unpaid and not Save.has_building("workshop"),
+			"an old save's marked-out lot loads as a site with nothing paid")
+	ok(not HomeLayout.placed("shrine", Save.d), "and a marked-out Soul Shrine goes back to being unplaced")
+	home.queue_free()
+	await main.get_tree().process_frame
+	home = await main._hb_home()
+	ok(_scaffold(home, "workshop"), "and the loaded farm draws it as a site")
+	home.queue_free()
+	await main.get_tree().process_frame
+
+## Does the lot's model carry a scaffold's progress bar?
+func _scaffold(home, b: String) -> bool:
+	return home.lots[b]["node"].get_child(0).get_node_or_null("Bar") is Sprite3D

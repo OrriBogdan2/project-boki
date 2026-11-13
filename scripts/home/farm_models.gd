@@ -9,8 +9,8 @@ const BAR_W := 64
 const BAR_H := 9
 
 static func _size(id: String) -> Vector2:
-	var s: Array = HomeLayout.CATALOG.get(id, {}).get("size", [1, 1])
-	return Vector2(float(s[0]), float(s[1]))
+	var s := HomeLayout.size_of(id, 0)
+	return Vector2(float(s.x), float(s.y))
 
 ## The stages the scaffold's rising walls come in (a rebuild each time, so the bar moves in between).
 static func stage_of(e: Dictionary) -> int:
@@ -174,7 +174,7 @@ static func tick_bars(hw) -> void:
 			var J: Dictionary = k["job"]
 			live[int(J["u"])] = float(live.get(int(J["u"]), 0.0)) + 1.0 - float(J["left"]) / maxf(0.01, float(J["dur"]))
 	for e in FarmSites.sites():
-		var n: Node3D = hw.h.hb.nodes.get(int(e["u"]))
+		var n: Node3D = FarmLots.node_of(hw.h, e) if FarmLots.is_lot(e) else hw.h.hb.nodes.get(int(e["u"]))
 		if is_instance_valid(n):
 			set_bar(n, e, float(live.get(int(e["u"]), 0.0)))
 			set_need(n, e)
