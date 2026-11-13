@@ -66,6 +66,12 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   mid-blend) and 4.65 m/s and reads the bones.
   - **slide**: how far a foot in the lowest 30 % of its height range moves against the floor, |move speed - foot
     backward speed|, as a share of the move speed. 0 is a planted foot; 100 % is a foot that skates.
+  game's own locomotion hand-off (the state carries the speed; WardenClips blends and scales) at 2.2 and 4.65 m/s and
+  reads the bones.
+  - **slide**: how far a planted sole moves against the floor, |move speed - sole backward speed|, as a share of the
+    move speed. 0 is a planted foot; 100 % is a foot that skates. Since 11-11 it reads the skinned sole (see "Sole
+    reading" below); the tables before it read a point a thigh's length down the shin, planted in the lowest 30 % of
+    its height range.
   - **counter**: the reach-weighted negative correlation of each hand and the same side's foot (forward position).
     +1 is a natural counter-swing, -1 is pacing (arm and leg of one side go forward together).
   - **clip speed**: the feet's backward speed at rate 1 (`foot_mps`), against the move speed.
@@ -192,6 +198,16 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 Strips under each Hunter: rows are walk before, walk after, run before, run after (8 frames at 10 fps, side view, floor
 posts scroll at the move speed).
 
+## Meeko's one-length loops (2026-11-13, ext/anim-meeko-loops-length)
+
+Meeko's eight walk and run loops are re-baked by tools/art1/pip_gait.py on the v95 model: one 0.34 s period, each
+stance's sole verts pinned to the floor (2.2 and 4.55 m/s in Blender, ankle miss 0), and `loco.cycle_s` 0.34 runs the
+loco space synced. Walk and run share duty and heel-to-toe roll and the forward lean rides the hips, so the walk-run
+blend keeps the feet down. On main's readers, main's loops to these: run 12 -> 13 % (`--anim-audit`, sole 12 -> 21 %),
+worst blend slip 2.46 -> 1.80 m/s (`--foot-slide-check`, back at 3.5 m/s to forward at 3.0); below the walk ring
+the forward and back rows read higher than main's (forward 2.0 m/s 0.51 -> 1.21). The audits' points
+misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the floor of what they show, not the truth.
+
 ## Worst three, per Hunter
 
 **Lace (`archer`)**
@@ -282,10 +298,12 @@ posts scroll at the move speed).
 ![rimewright walk and run, before and after](anim_audit/rimewright.jpg)
 
 **Meeko (`tender`)**
-1. Feet slid 62 % of the run speed, 76 % at a walk (now 12 %, 29 %: stride 2.0 walk and 1.9 run, up from 1.5). A 0.65 m body takes 6.7 steps/s (cadence not changed; the clip rate cap stays 1.4).
+1. Feet slid 62 % of the run speed, 76 % at a walk (now 17 %, 39 %). A 0.65 m body takes 6.7 steps/s. Since 11-11
+   her eight walk/run loops are sole-locked on one 0.333 s length (tools/art1/pip_gait.py, art/wardens/pip/IMPORT.md):
+   on the sole reading 7 % at a run, 17 % at a jog, 20 % at a walk; 6.5 steps/s of 0.71 m at the run, 5.9 of 0.37 m
+   at the walk; her paws ride the foot bones; `foot_mps` [2.2, 4.28], no stride gain.
 2. The arms paced their legs (counter -0.82, now +0.76: both arms get a swing, gain 0.7).
 3. seed and shot_r hold an arm sideways for 71 to 88 % and fling the free arm 1.0 to 1.2 body heights. Foot speed is 4.3 of 4.65 m/s; a stride stretch above about 2.2 flips the thigh and the feet slide again, so that is the ceiling. (The strip below shows the earlier tuning.)
-1. Feet slid 62 % of the run speed, 76 % at a walk (now 17 %, 39 %). A 0.65 m body takes 6.7 steps/s.
 2. The left arm paced its leg (counter -0.82, now +0.39, still weakest).
 3. seed and shot_r held the free arm sideways for 71 to 88 % (fixed: 0 to 4 %; the free arm's travel fell 1.0-1.2 to 0.7-0.8 body heights; shot_r's remaining 71 % is the aiming arm itself). Foot speed stays at 3.9 of 4.65 m/s (gain cap 1.5, rate cap 1.4).
 
@@ -368,6 +386,12 @@ Split into backlog items per Hunter (role build):
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - `tender`: the stride cap (foot speed 3.9 of 4.65; at the jog the rate cap leaves 28 % slide, so the jog gate
   exempts it), and a stronger counter-swing (+0.39).
+- `tender`: the stride cap is gone (sole-locked loops, 11-11).
+- `juggernaut`, `dolm`, `bulwark`: soles 5.3 to 6.9 m/s at 4.65 on the sole reading (47, 36, 31 % slide); `foot_mps`
+  re-measured on the sole, or their pilot loops (ext/anim-pilot-*, on the 0.24.6 wave) read on it.
+- Walk and run rings of different lengths (only `archer` now, `RING_OPEN` in clip_check.gd): the jog's blend drifts; one length, as Meeko's, keeps
+  it in step now that the loco space is synced.
+- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
 - Mid-blend slide (walk into run, every direction) and Tenzo's strafe run: docs/art/FOOT_SLIDE.md.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).

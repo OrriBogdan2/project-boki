@@ -7,7 +7,8 @@ extends RefCounted
 ## has its own clip (a gesture or a .glb clip) that ends within the bubble and plays on the right layer; standing, a
 ## 180° swing of the aim at the body's turn rate steps the feet round on the spot and no planted foot slides (TurnStep,
 ## WardenTurn). The Empty (no clips: its garden moves are HunterVerbs keys) puts its hand on the target at the peak of
-## each care move (pet, feed, lift) for a small and a big Boki (--home-verbs-check's reach()). Never touches the save.
+## each care move (pet, feed, lift) for a small and a big Boki (--home-verbs-check's reach()).
+## Each walk and run ring's loops are one length, so the blended diagonals stay in step. Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -31,7 +32,13 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SNAP_BY := 0.05          # s: a release move's blend-in is over this long after the arrow's spawn
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
+const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
 const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
+## Rings open at this merge: "<id>:<gait>" -> what. Each rework of the ring's loops removes its entry.
+const RING_OPEN := {
+	"archer:walk": "b, l, r 1.033 s against f 0.667",
+	"archer:run": "b, l, r 0.667 s against f 0.583",
+}
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 ## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
 ## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
@@ -184,6 +191,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_timings(id, dd, clips)
 	_upper(id, dd, clips)
 	_standing(id, dd, clips)
+	_rings(id, dd, clips)
 	_emotes(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
@@ -302,6 +310,28 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+
+## A walk or run ring: the back and side loops last as long as the forward one, or a diagonal's two feet drift apart.
+func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	for gait in ["walk", "run"]:
+		var ring: Dictionary = dd.get("loco", {}).get(gait, {})
+		if not ring.has("f") or not clips.lib.has_animation(String(ring["f"])):
+			continue
+		var f_len := clips.lib.get_animation(String(ring["f"])).length
+		var off := ""
+		for k in ring:
+			var clip := String(ring[k])
+			var k_len := clips.lib.get_animation(clip).length if clips.lib.has_animation(clip) else f_len
+			if absf(k_len - f_len) > RING_DT:
+				off += " %s %.3f" % [k, k_len]
+		var seen := off if off != "" else " all match"
+		var what := "%s: the %s loops are one length (f %.3f s;%s)" % [id, gait, f_len, seen]
+		var key := "%s:%s" % [id, gait]
+		if RING_OPEN.has(key):
+			print("CLIP open %s [%s]" % [what, RING_OPEN[key]])
+			ok(off != "", "%s: RING_OPEN entry still needed (the ring now matches: drop it)" % key)
+		else:
+			ok(off == "", what)
 
 ## The emote wheel (Truce.EMOTES): every emote names a different clip of this Hunter that ends before its bubble does.
 ## A "g_" gesture keys only bones of the data's "upper" list and always plays on the upper layer; a .glb clip does when
