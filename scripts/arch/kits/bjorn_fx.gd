@@ -18,7 +18,6 @@ extends Node3D
 
 const GOLD := Color("ffc94a")
 const EMBER := Color("ff8a2a")
-const AEGIS := Color("ffcb4f")
 const GREEN := Color("7dffb0")
 const STAR_GOLD := Color("ffd25a")
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
@@ -118,10 +117,9 @@ func _ready() -> void:
 		KitShaders.param(wake, "twist", 0.0)
 		wakes.append(wake)
 		wake_life.append(0.0)
-	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GREEN))
+	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GOLD))
 	column.material_override.set_shader_parameter("speed", -1.2)
-	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
-	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GOLD))
 
 ## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
 func _own_hammer() -> bool:
@@ -397,6 +395,11 @@ func aegis_break(at: Vector3) -> void:
 # ------------------------------------------------------------------ Purify
 ## The column coming down over the delay (u 0 -> 1), then the disc's rings.
 func purify(at: Vector3, r: float, u: float) -> void:
+	if u <= 0.0:
+		var own := AimKit.hero_col(h)
+		KitShaders.param(column, "color", own)
+		KitShaders.param(disc, "color", own)
+		KitShaders.param(disc, "color2", own.lightened(0.5))
 	column.visible = u < 1.0
 	if column.visible:
 		var g := AimMode.ground(h.m, at)

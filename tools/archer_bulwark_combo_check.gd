@@ -947,6 +947,9 @@ func _bulwark_combos() -> void:
 		"bjorn E: the landing circle shows for everyone while it comes down",
 		AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false))
 	)
+	ok("bjorn E: the zone ring and the column are in his own colour, not a heal green",
+		AimKit.entry(P, "e").get("col") == AimKit.hero_col(P)
+		and (K.fx.disc.material_override as ShaderMaterial).get_shader_parameter("color") == AimKit.hero_col(P))
 	step(m, 5.0)
 	ok("bjorn E: the zone ends after the column (1s) and 4s of ticks", K.mend.is_empty())
 	P.fire_cd = 0.0

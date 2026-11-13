@@ -6,6 +6,7 @@ What a Boki says out loud, at home and in a match. All of it is data in `content
 
 - **Short.** At most `max_words` (6) words in a bubble, one sentence. Aim for 2-4. Punctuation and symbols (♥, ♪, ...) don't count as words.
 - **Quick.** A bubble stays up for `bubble_s` (2 s), at home (`Home._say`) and in a match (`Match.kin_bark`).
+- **Quiet over a fight.** While you are in a fight (`MusicDir.fight_on`: a shot traded in the last 7 s), only your own Boki's bubble is drawn; other Boki's lines are still said (and their callout sound plays) but not printed over the fight (`BokiChatter.heard`). A Boki's ability name floats only over your own Boki.
 - **Never the same line twice in a row.** Each Boki remembers its last `no_repeat` (10) lines and never says one of them again. If it has said every line it has for that moment, it says the one it said longest ago.
 - **Not all the time.** After a line, a Boki waits `cooldown_s` (6 s) before it speaks up again. A trigger marked `direct` (it's answering something you did, or a warning you need) skips the wait.
 - **The speech stages stay** (`Care.speech`). Below `grown_stage` (2), a Boki only says its name in a tone, plus a little action: "Cin-cin~ (purrs softly)". At stage 1 it sometimes adds the trigger's one word: "More! Cin-cin~ (purrs softly)". From stage 2 it says real lines.

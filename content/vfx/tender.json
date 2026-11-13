@@ -1,7 +1,7 @@
 {
 	"palette": {
 		"main": "#ffd27a", "hot": "#fff6dc", "char": "#5a4a7a", "pink": "#f6a6c8", "lilac": "#c8a8ff",
-		"mint": "#a8f0d0", "sky": "#a8d8ff", "smoke": "#f4e8ff"
+		"mint": "#a8f0d0", "sky": "#a8d8ff", "smoke": "#f4e8ff", "own": "#5fdc6a"
 	},
 	"anchors": {
 		"lantern": {"nodes": ["anchor_hang_lantern"], "bone": "hand.R", "off": [0.0, 0.25, 0.0], "body": [0.3, 0.55, 0.3]},
@@ -68,7 +68,6 @@
 				"curl": 1.2, "life": 1.1, "size": 0.14, "c": "main", "c2": "hot"}
 		]},
 		"hearth_land": {"fx": [
-			{"p": "vortex", "size": "r", "spin": 0.35, "grow": 1.05, "life": 1.4, "c": "main", "c2": "hot", "c3": "lilac"},
 			{"p": "star", "y": 0.3, "n": 12, "shape": "disc", "radius": 1.5, "speed": 1.2, "spread": 0.3, "grav": -0.6,
 				"life": 1.0, "size": 0.14, "c": "main", "c2": "hot"}
 		]},
@@ -79,7 +78,7 @@
 				"grav": -0.4, "life": 1.3, "size": 0.1, "c": "pink", "c2": "hot", "near": true}
 		]},
 		"bloom": {"fx": [
-			{"p": "vortex", "size": "r", "spin": 0.6, "grow": 1.1, "life": 1.2, "c": "main", "c2": "hot", "c3": "pink"},
+			{"p": "vortex", "size": "r", "spin": 0.6, "grow": 1.1, "life": 1.2, "c": "own", "c2": "hot", "c3": "mint"},
 			{"p": "flare", "y": 1.2, "size": 1.8, "grow": 1.3, "life": 0.35, "c": "main", "c2": "hot", "c3": "pink"},
 			{"p": "star", "y": 0.3, "n": 20, "shape": "disc", "radius": "r", "radius_x": 0.7, "speed": 2.0, "spread": 0.2,
 				"grav": -1.0, "curl": 1.0, "life": 1.3, "size": 0.16, "c": "main", "c2": "hot"},
@@ -92,13 +91,11 @@
 				"size": 0.14, "c": "main", "c2": "hot"}
 		]},
 		"call_land": {"fx": [
-			{"p": "vortex", "size": 1.2, "spin": 0.5, "life": 1.0, "c": "main", "c2": "hot", "c3": "pink"},
 			{"p": "star", "y": 0.5, "n": 12, "shape": "disc", "radius": 0.7, "speed": 1.6, "spread": 0.3, "grav": -0.8,
 				"life": 1.0, "size": 0.14, "c": "pink", "c2": "hot"}
 		]},
 		"mended": {"fx": [
 			{"p": "flare", "y": 1.1, "size": 2.0, "grow": 1.3, "life": 0.35, "c": "main", "c2": "hot", "c3": "pink"},
-			{"p": "vortex", "size": 1.6, "spin": 0.6, "grow": 1.1, "life": 1.2, "c": "main", "c2": "hot", "c3": "pink"},
 			{"p": "star", "y": 0.4, "n": 20, "shape": "disc", "radius": 0.8, "speed": 2.4, "spread": 0.3, "grav": -1.0,
 				"life": 1.2, "size": 0.16, "c": "main", "c2": "hot"}
 		]}

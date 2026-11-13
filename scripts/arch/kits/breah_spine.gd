@@ -124,10 +124,12 @@ func _erupt() -> void:
 	k.m.sfx("br_crack", center, TELL_DB, 1.0)
 	k.vfx("spine_crack", Vector3(center.x, _base_y(), center.z), axis, {"len": float(xd()["len"])})
 
-## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him.
+## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him, over the band the rise
+## slows (slow_r each side of the line).
 func _span_p(extra: Dictionary) -> Dictionary:
 	var side := _bow() if phase == "aim" else bow
 	extra.merge({"at": center, "dir": axis, "len": float(xd()["len"]), "bend": _bend(), "bow": side})
+	extra["width"] = float(xd()["slow_r"]) * 2.0
 	return extra
 
 func _bend() -> float: return deg_to_rad(float(xd()["bend"]))
