@@ -30,6 +30,10 @@ func _cases() -> Array:
 	var beside := func(P: Hunter, T: Hunter):
 		T.teleport(T.pos + Vector3(-1.0, 0, 1.5))
 		aim_at(P, P.pos + Vector3(9.0, 0, 0))
+		# a wall 10 m out on the cast line: the Burr only blasts where it sticks on one (vex-rmb-1111, else a dud)
+		var W: World = P.m.world
+		for dz in [-1, 0, 1]:
+			W.kind[W.idx(int(floor(P.pos.x + 10.0)), int(floor(P.pos.z)) + dz)] = World.T_BLOCK
 	var second_x := func(P: Hunter, t: float):
 		if t >= 0.9 and t < 0.95:
 			HunterKeys.ult_pressed(P)
