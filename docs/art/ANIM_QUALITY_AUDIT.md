@@ -155,37 +155,14 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 Strips under each Hunter: rows are walk before, walk after, run before, run after (8 frames at 10 fps, side view, floor
 posts scroll at the move speed).
 
-## Sole reading (2026-11-11, ext/anim-meeko-loops-length)
+## Meeko's one-length loops (2026-11-13, ext/anim-meeko-loops-length)
 
-The shin-end point is not the sole: on a heel-to-toe roll or a gait with a float the ankle swings over a planted sole,
-and the 30 % band takes in the ends of the swing. In the raw clips (Blender) the point runs 1.34 to 1.50 times slower
-than the sole (Kael, Meeko, Vex), so Meeko's sole-locked run read 26 % (FAIL) while its soles hold 4.62 +- 0.08 m/s.
-Now `--anim-audit` poses the vertices each lower leg carries (shin, foot or `x_foot`) and calls planted those within
-1 cm of the floor (a foot's lowest point in 10 % of the frames) in three samples running, every 1/120 s. WardenClips'
-loco space now runs synced (every loop at zero weight too), so a ring's loops of one length stay in step on a turn.
-
-Slide in % of 2.2 (walk), 3.4 (jog) and 4.65 m/s (run, the gate); clip m/s and steps/s at the run, step = 4.65 m/s
-over the cadence. The jog blends the walk ring into the run ring: where the two differ in length (all but Meeko) its
-reading depends on where their phases happen to sit.
-
-| Hunter | Walk % | Jog % | Run % | Run %, shin read (main) | Clip m/s | Steps/s | Step m |
-|---|---|---|---|---|---|---|---|
-| Lace (`archer`) | 30 | 52 | 10 | 13 | 4.4 | 3.8 | 1.24 |
-| Cinder (`ashwick`) | 19 | 145 | 7 | 12 | 4.9 | 2.6 | 1.82 |
-| Albert (`bulwark`) | 7 | 43 | **31** | 11 | 5.3 | 3.5 | 1.31 |
-| Tenzo (`dolm`) | 61 | 67 | **36** | 18 | 6.3 | 3.7 | 1.26 |
-| Grimble (`dredge`) | 37 | 42 | 11 | 12 | 5.0 | 2.9 | 1.59 |
-| Vex (`gunslinger`) | 22 | 50 | 5 | 13 | 4.8 | 3.3 | 1.42 |
-| Kael (`juggernaut`) | 50 | 48 | **47** | 12 | 6.9 | 3.2 | 1.45 |
-| Sparkle (`mage`) | 26 | 29 | 12 | 9 | 4.4 | 3.9 | 1.21 |
-| Motley (`ostra`) | 100 | 100 | 100 | 100 | 0.0 | 0.0 | - |
-| Neve (`rimewright`) | 98 | 95 | 88 | 90 | 0.6 | 2.0 | 2.30 |
-| Meeko (`tender`) | 20 | 17 | 7 | 17 | 4.3 | 6.5 | 0.71 |
-| Sable (`thief`) | 31 | 23 | 18 | 17 | 5.5 | 4.4 | 1.05 |
-
-Kael, Tenzo and Albert fail the gate on the sole: their soles run 5.3 to 6.9 m/s at 4.65 (their `foot_mps` was set on
-the shin point), so the planted foot slips backward. Meeko, main's loops to the new ones, same reading: walk 38 -> 20 %,
-jog 38 -> 17 %, run 12 -> 7 %, clip 4.28 -> 4.3 m/s (3.86 on the shin read).
+Meeko's eight walk and run loops are re-baked by tools/art1/pip_gait.py on the v95 model: one 0.34 s period, each
+stance's sole verts pinned to the floor (2.2 and 4.55 m/s in Blender, ankle miss 0), and `loco.cycle_s` 0.34 runs the
+loco space synced. Walk and run share duty and heel-to-toe roll and the forward lean rides the hips, so the walk-run
+blend keeps the feet down. On main's readers, main's loops to these: run 12 -> 13 % (`--anim-audit`, sole 12 -> 21 %),
+worst blend slip 2.46 -> 1.80 m/s (`--foot-slide-check`, back at 3.5 m/s to forward at 3.0). The audits' points
+misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the floor of what they show, not the truth.
 
 ## Worst three, per Hunter
 
