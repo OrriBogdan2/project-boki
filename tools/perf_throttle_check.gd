@@ -215,9 +215,12 @@ func _pose_rates() -> void:
 		b.render(Match.DT, 1.0)
 		held = held or _held(b.model)
 	ok(held, "off screen some frames are not posed")
+	for i in SimLod.POSE_UNSEEN:
+		b.render(Match.DT, 1.0)
+		if not _held(b.model):
+			break
 	b.render(Match.DT, 1.0)
-	if not _held(b.model):
-		b.render(Match.DT, 1.0)      # (now one frame into its wait)
+	b.render(Match.DT, 1.0)      # (two frames into its wait: more than a far pose's wait of backlog)
 	b.teleport(far_at)
 	b.render(Match.DT, 1.0)
 	ok(not _held(b.model), "coming on screen it is posed that frame")
