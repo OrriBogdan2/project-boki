@@ -33,6 +33,7 @@ var air := false            # the dash running now set off in the air
 var _was_dashing := false
 var _fire_was := false
 var _replaying := false
+var _frozen_tap := false    # an LMB tap made inside a hit-stop, due on the next step
 
 func _init(owner_kit: ArchKit) -> void:
 	kit = owner_kit
@@ -87,6 +88,9 @@ func row(slot: String) -> Dictionary:
 func route(dt: float) -> void:
 	var h := kit.h
 	var dashing := _sync()
+	if _frozen_tap:
+		h.inp["fire"] = true
+		_frozen_tap = false
 	var fire_down := bool(h.inp.get("fire", false))
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
@@ -111,6 +115,12 @@ func take_x() -> bool:
 	if not _sync():
 		return _hold_for_cc("x") or _press_mid_jump("x")
 	return _press("x") == "buffer"
+
+## An LMB tap made while the simulation is frozen (a hit-stop: no step runs to see it): replayed on the first
+## step after the freeze, where the dash and jump rows and the kit take it like any press made then, instead of
+## falling between two frames (the other keys latch in Match.pending_input; --hitstop-input-check).
+func press_frozen() -> void:
+	_frozen_tap = true
 
 ## The move the hunter is making now, for the hold rows: "mantle", a dash ("ground" or "air", by where it set
 ## off), "jump" (in the air off a jump or a ledge), or "" (none).
