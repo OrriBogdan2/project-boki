@@ -520,7 +520,7 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		legs_only = true
 		twisting = true
 		goal = twist_goal * (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w)
-		if twist_goal != 0.0:
+		if goal != 0.0:
 			# running: the legs hold their way while the aim swings, but never twist him past the limit
 			var held := head_turn - wrapf(face - twist_face, -PI, PI)
 			head_turn = clampf(held, minf(head_turn, -TWIST_MAX), maxf(head_turn, TWIST_MAX))
