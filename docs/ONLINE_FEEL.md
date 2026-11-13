@@ -95,6 +95,26 @@ and holds every datagram 100 ms each way, as netem on loopback would (200 ms of 
 use it. `--online-displace-check=0` goes straight to the relay for a no-delay baseline. `--od-jitter=<ms>` adds a
 uniform plus-or-minus that many ms to each datagram (netem's `delay D J`; datagrams can overtake each other).
 
+## Clock: every game steps on real time (2026-11-11)
+
+These checks and `--displace-net-check` (whose harness they share) step each game's match from `_run`. It used
+to be one step per drawn frame, so a game that draws slower runs its match clock slower. Under xvfb at load ~365
+on 32 cores, the host (drawn, opengl3) ran at 11 fps and the headless guest at 52, so the host's clock ran at a
+fifth of the guest's. The guest's timers ran out while the host was still waiting, and both checks went red (the
+0.24.4 gate's `online-displace` and `displace-net` reds, "same on both trees"):
+
+- **Meeko Hearth Call pull, guest**: the guest bled out on its own game during the host's 5.4 s channel and got up
+  at its respawn, 52 m in one frame and 37 m from the offline end (x5.6, "double move").
+- **Kael's Warchain** (displace-net): he lands 3.6 m from the player (bar 2.6).
+- **A hit's burn** (displace-net): 3.0 s left on the player's game when the host asked (bar 3.3).
+- The other game also drew Kael's pull with 5 to 11 m steps a frame (NetSmooth with the owner's clock at a fifth
+  of ours). Nothing asserted on it, and it is not a NetSmooth fault: the real game cannot run that slow above
+  10 fps.
+
+The game itself never does this. `Match._process` steps on real time (up to 6 steps a frame, each frame capped at
+0.1 s), so its clock only falls behind below 10 fps. The harness now does the same (`_steps` in
+tools/displace_net_check.gd). Net, NetSmooth and `Ent.net_follow` are unchanged, so Net.VERSION stays.
+
 ## Measured (100 ms each way, 10 Hz snapshots, 60 fps)
 
 Columns: the largest step in one frame on the mover's own game (offline in brackets) and on the other game; the
@@ -219,7 +239,8 @@ game went from about 418 to 427 ms with the bigger margin.
    0.34 to 0.53 s late. Only prediction on the caster's copy (draw the pull at once, hand back to the owner's
    snapshots) would cut it. That changes decision 0016 and needs a parity look at the source first.
 2. **Kael's Warchain sling steps 1.6 to 2.9 m in one frame on the other game** (0.57 at 100 ms, 0.43 on its own
-   game). Not traced. A lost or overtaken snapshot at the sling's speed probably clears the buffer.
+   game). Not traced. A lost or overtaken snapshot at the sling's speed probably clears the buffer. 0.47 m after
+   the eased clock below (one run).
 3. **Sparkle's Kitefall crash steps about 5.6 m on the other game**: the known gap above. The model is hidden from
    30% of the fall (`MageUlt._fall_tick`), so it reads as the streak. The fix is still a cast event or the fall's
    velocity in the snapshot (a Net shape change).
@@ -227,5 +248,16 @@ game went from about 418 to 427 ms with the bigger margin.
    second run). If the snapshot before it is lost or overtaken, 8 m over 0.2 s of owner time is right at
    `NetSmooth.SNAP_SPEED` (40 m/s), so the buffer sweeps it. A teleport flag on the hunter snapshot would make
    it exact (a Net shape change and a VERSION bump).
-5. **Dashes still run on 0.25 to 0.44 m** (Rampage, Barge) when a gap is over the 120 ms margin cap (owner
-   hitches). A higher cap trades that for more lag on every Hunter.
+5. **Dashes still run on 0.25 to 0.44 m** (Rampage, Barge) when a gap is over the margin cap (owner
+   hitches). A higher cap trades that for more lag on every Hunter. Now 0.29 / 0.25 m with the 100 ms cap below.
+
+### The margin eases in, capped at 100 ms (2026-11-11)
+
+The jitter buffer raised its margin the moment one snapshot came in late, so the drawn owner time went back by
+the rise (up to 70 ms) and the body stepped back along its path. That was the 1 to 2 new `--remote-smooth-check`
+reds against main (a backstep, the jerks). Under load, worker hitches read as lateness, the margin sat at the
+120 ms cap, and a 40 ms line drew 255 to 260 ms behind (the bar is 250). Now the drawn clock runs at most 10%
+fast or slow while the margin changes (`NetSmooth.SLEW`), so it never goes back, and the cap is 100 ms (240 ms
+behind on that line at worst). Side by side at load ~230 (two runs each), main / the jitter buffer / this:
+jerks 26, 11 / 35, 15 / 4, 4 (5, 2 with the 100 ms cap), drawn 175-185 / 235-255 / 205-235 ms. 150 ms each
+way with 20 ms of jitter still passes 52/0 (Rampage rubber band 0.29 m).
