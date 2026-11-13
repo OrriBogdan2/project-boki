@@ -277,13 +277,13 @@ func _sample() -> void:
 	if wisp and not Net.is_host(): wisp.render(DT, 1.0)
 	if H.ak == null or H.anim == null:
 		return
+	var ms := int(float(steps) * DT * 1000.0) if locked else int(Time.get_unix_time_from_system() * 1000.0)
 	var shown := H.wash > WASH_ON
 	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
-		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
+		wash_rows.append([ms, shown])
 	var row := [H.ak.anim_id, H.anim.km_id]
 	var restart: bool = H.anim.km_prev_t < last_prev_t - 0.001
 	last_prev_t = H.anim.km_prev_t
 	if row != last_row or restart:
 		last_row = row
-		var ms := int(float(steps) * DT * 1000.0) if locked else int(Time.get_unix_time_from_system() * 1000.0)
 		log_rows.append([ms, row[0], row[1]])
