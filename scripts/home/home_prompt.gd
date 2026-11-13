@@ -53,7 +53,9 @@ static func care(h: Node, k: Dictionary) -> Dictionary:
 	var pond: bool = h.POND_EDGE.x > -100.0
 	var soothes := KinWants.action(rec, pond) != "feed"
 	var hungry_empty := Care.want(rec) == "food" and KinWants.best_food(rec) == ""
-	var lift := "Hold: Let go" if h.carry.k == k else ("Hold: Lead" if HomeCarry.mode_for(rec) == "lead" else "Hold: Pick up")
+	var lift := "Hold: Lead" if HomeCarry.mode_for(rec) == "lead" else "Hold: Pick up"
+	if h.carry.k == k:
+		lift = "Hold: Let go"
 	return {"more": [
 		["interact", KinWants.prompt(rec, pond)["verb"] if soothes else "Pet", soothes],
 		["interact", "Feed (no food)" if hungry_empty else "Feed", not soothes],

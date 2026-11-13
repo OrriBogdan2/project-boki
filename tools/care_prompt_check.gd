@@ -2,7 +2,8 @@ extends RefCounted
 ## --care-prompt-check: standing next to a Boki on the farm shows one line over it (InteractPrompt) with the
 ## four care actions, pet, feed, play and pick up, each with its live key (Settings.key_cap). What a tap
 ## of the interact key would do now (pet or feed) is lit and the other greyed: Feed is greyed with no food.
-## Pick up (holding the key, HomeCarry) is lit while you could lift it, greyed with another in your arms. Nothing else is shown with it. Never touches the real save.
+## Pick up (holding the key, HomeCarry) is lit while you could lift it, greyed with another in your arms.
+## Nothing else is shown with it. Never touches the real save.
 
 var bad := 0
 
