@@ -759,6 +759,17 @@ Source: `origin/ext/hero-ref-footage`, folders `venator_ghost` (Ghost), `juggern
 - Tenzo's LMB and RMB (not in this slice) show nothing until the release (first sign 2 frames at 60 Hz, 7 at 144: the tap plus the tick hop). If the source shows a wind-up on the press for his fists or his RMB hold, that pose is the fix; if not, this is parity.
 
 Found by the check and fixed on the side: `VVFx.echo` (Vex's dash after-image) read mesh instances the model had since freed (a muzzle flash, an old weapon) and spammed "previously freed instance" errors on every echo frame; the pair is now skipped and its ghost hidden.
+## Snag audit (`--snag-check`, decision 0022)
+
+12 Hunters x 50 seeded paths (run, dash, glide, on The Hollow Crown); a stall is horizontal speed under half the wanted speed for over 0.15 s with the keys held, grounded for runs, gliding for glides, in a dash for dashes, and no wall straight on that a perfect slide could not pass at half speed (a prop whose top is over the feet by `World.STEP`, or terrain over mantle reach). Slowed by design (stun, ledge rise, a kit pace under 1, e.g. Motley's Trade in flight) is not counted. Before: 32 stalls (top spots: prop row at (116.8, 5.6, 90.4), a glide into a terrace face at (50.0, 3.7, 61.7), a run at a wall corner at (167.7, 1.6, 128.3), a glide that sank into a prop row at (123.9, 4.0, 165.6), a drop past a lip into the cliff column at (97.1, 3.2, 100.0)). After: 2 (a Tenzo and a Meeko glide, (41.7, 3.4, 62.0) terrace face 1.4 m up and (116.2, 5.6, 125.8) prop corner).
+
+
+The last ones (ext/feel-snag-last-two, 2026-11-11). The Hollow Crown was rebuilt after the audit, so its two leftover spots (a Tenzo run at a terrace face, a Meeko glide at a prop corner) no longer exist; on main's map the same seeds gave 34 stalls in 4 cells, all of the same two kinds:
+- **Corner slip (terrace corner), 32 of them (every Hunter):** a run or a low glide at a terrace corner two levels up, (33.3, 0.0, 252.0) and (257.0, 1.6, 175.3). The corner pokes in between the body's wall samples (`World.occupy` tests 9 points), so both axis moves are blocked, and both sideways slip tries land on the other face: the body sat on the corner. Fix: the slip's last try is `BodySlip.round_corner`: out of the corner first, then the step pushed out of the walls, kept only when it still goes the keys' way. It is the slide a round body (the source's capsule) makes round a corner. Walls, steps and the edge are untouched: it only runs on a step the axis moves and both slip tries already failed, and it is checked with the same `_occ` (edge guard included), so walking off a ledge is as before.
+- **Glide sink beside a prop, 2 (Tenzo):** a glider over a lair's prop wall (top 6.2 m) sank past its top while beside it, ending a step with the prop around its body; the next step's axis move along the face met the prop and lost its speed (0.13 m/s left, wanted 2.3). Fix: an airborne body is put out of a prop's side (`World.push_out_blocks`) before the axis moves.
+- **Not a snag:** the other Tenzo stall was a sealed lair's ward bouncing the glider back out (`Lairs._push_out`, 2 m/s away from it) while the keys held into it. That is the ward working; the check now treats a sealed or dormant lair within 2 m as a wall by design.
+
+After: 0 stalls on the same seeds (13 Hunters x 50 paths); `MAX_STALLS` is now 0.
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
 Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held

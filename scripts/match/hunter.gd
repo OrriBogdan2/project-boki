@@ -2174,6 +2174,12 @@ func _physics(dt: float) -> void:
 	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
 	# corner); the axis moves below then only meet terrain, edges and walls.
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
+	if not grounded and spirit_t <= 0.0:
+		# sunk past a prop's top while beside it (a glide coming down): out of its side first, or the axis
+		# moves below meet the prop around the body and stop the speed along its face too
+		var out_of: Vector2 = m.world.push_out_blocks(pos.x, pos.z, r, pos.y)
+		pos.x = out_of.x
+		pos.z = out_of.y
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
 	dash_rest = Vector2.ZERO
 	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
@@ -2206,22 +2212,32 @@ func _physics(dt: float) -> void:
 		var fw := mv.normalized() * spd * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
-	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and hv.length() > 1.0:
-		# caught on a corner: slip sideways around it rather than sticking
+	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and (hv.length() > 1.0 or mv.length() > 0.3):
+		# caught on a corner: slip sideways around it rather than sticking (the keys' own pull counts
+		# when the corner has already eaten the speed: running at a wall corner used to crawl past it)
 		var moved := Vector2(pos.x - x0, pos.z - z0).length()
-		var want := hv.length() * dt
+		var want := maxf(hv.length(), spd * mv.length()) * dt
 		if moved < want * 0.35:
-			var dn := hv.normalized()
+			var dn := (hv if hv.length() > 1.0 else mv).normalized()
 			# (try first the side that leads away from what stopped you, never round toward it)
 			var wn := -Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
 			var sides := [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]
 			if wn.dot(sides[1]) > wn.dot(sides[0]): sides.reverse()
-			for side in sides:
-				var tx: float = pos.x + (side.x * 0.8 + dn.x * 0.4) * want
-				var tz: float = pos.z + (side.y * 0.8 + dn.y * 0.4) * want
-				if _occ(tx, tz, guard) == 0.0:
-					pos.x = tx; pos.z = tz
+			var here := Vector2(pos.x, pos.z)
+			var tries := []
+			for side: Vector2 in sides:
+				tries.append(here + (side * 0.8 + dn * 0.4) * want)
+			# (last: round a terrace corner neither side clears, both its faces met at once)
+			tries.append(BodySlip.round_corner(m.world, here, dn * want, r, pos.y))
+			for to: Vector2 in tries:
+				if _occ(to.x, to.y, guard) == 0.0:
+					pos.x = to.x
+					pos.z = to.y
 					break
+	if (b1 > 0.0 or b2 > 0.0) and step_up == 0.0 and spirit_t <= 0.0 and _occ(pos.x, pos.z, false) > 0.0:
+		var out_to := BodySlip.eject(m.world, pos.x, pos.z, r, pos.y)     # inside a wall or prop: out of it
+		pos.x = out_to.x
+		pos.z = out_to.y
 	# a safety net: pushing to move for a second without going anywhere means something has us
 	# wedged, so step out to the nearest open ground
 	if grounded and mv.length() > 0.3 and stun_t <= 0.0 and root_t <= 0.0 and not remote and grap.is_empty():
