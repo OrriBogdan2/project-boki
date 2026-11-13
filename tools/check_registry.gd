@@ -493,6 +493,7 @@ const CHECKS := {
 const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
+	"--breed-sim-check": ["res://tools/breed_sim_check.gd", "breed_sim_check", null],      # 500 random pairs bred
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
