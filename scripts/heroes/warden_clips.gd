@@ -7,7 +7,7 @@ extends RefCounted
 ## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
-## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
+## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a Blend2 of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
 ## so one move hands to the next without a pop (item 32).
@@ -75,7 +75,9 @@ var loco_pos := Vector2.ZERO
 var still_t := 0.0
 var stance_w := 0.0
 var was_air := false
-var air_t := 0.0
+var was_glide := false
+var vy_prev := 0.0           # last step's vertical speed: the one he hits the ground with
+var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked at touchdown
 var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
@@ -326,10 +328,14 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("stance_w", 0, "loco_rate")
 	t.connect_node("stance_w", 1, "stance")
 	var ai: Dictionary = d["air"]
-	var space := AnimationNodeBlendSpace1D.new()
-	space.add_blend_point(_anim(String(ai["fall"])), 0.0)
-	space.add_blend_point(_anim(String(ai["rise"])), 1.0)
-	t.add_node("air_pose", space)
+	# (the rise plays once per jump: seeked to its start at take-off, else it stays frozen on its last frame)
+	t.add_node("rise", _anim(String(ai["rise"])))
+	t.add_node("rise_seek", AnimationNodeTimeSeek.new())
+	t.connect_node("rise_seek", 0, "rise")
+	t.add_node("fall", _anim(String(ai["fall"])))
+	t.add_node("air_pose", AnimationNodeBlend2.new())
+	t.connect_node("air_pose", 0, "fall")
+	t.connect_node("air_pose", 1, "rise_seek")
 	t.add_node("glide", _anim(String(ai["glide"])))
 	t.add_node("glide_w", AnimationNodeBlend2.new())
 	t.connect_node("glide_w", 0, "air_pose")
@@ -508,9 +514,14 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var moving := Vector2(vel.x, vel.z).length() >= STILL
 			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
 	land_t += dt
-	var ld: Dictionary = d.get("land", {})
-	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
-		return {"clip": ld["clip"], "t": land_t}
+	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
+	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
+	# absorb from the same keys; "w": how much of the land pose shows, the hop's small dip from the drop's full crouch)
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var moving := Vector2(vel.x, vel.z).length() >= STILL
+	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
+	if land_t < hold and bool(s.get("grounded", true)):
+		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
@@ -582,7 +593,7 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
+		act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 		out_fade = float(want.get("out", FADE_LOCO))
 	else:
@@ -779,14 +790,18 @@ func _loco(s: Dictionary, dt: float) -> void:
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
-	_p("air_pose/blend_position", rise_w)
+	_p("air_pose/blend_amount", rise_w)
 	if not grounded:
-		air_t += dt
+		if not was_air:
+			_p("rise_seek/seek_request", 0.0)
 	elif was_air:
-		if air_t >= float((d.get("land", {}) as Dictionary).get("min_fall", 0.0)):
+		var tier := HunterAnim.land_tier(-vy_prev, was_glide)
+		if tier > 0 and d.has("land"):
 			land_t = 0.0
-		air_t = 0.0
+			land = d["land"]["drop" if tier == 2 else "hop"]
 	was_air = not grounded
+	was_glide = gliding
+	vy_prev = vel.y
 
 ## Setting off from a stand (docs/art/ANIM_QUALITY_AUDIT.md, first-pose gaps): the walk and run start at the phase
 ## nearest the idle, and the "start_blend" bones keep the pose they stood in, to ease into the clips after the advance.

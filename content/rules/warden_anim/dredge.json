@@ -52,11 +52,7 @@
 		"glide": "glide",
 		"dive": "pounce"
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.4,
-		"min_fall": 0.25
-	},
+	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"dr_shot": {
 			"clip": "shot",

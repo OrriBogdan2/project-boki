@@ -13,6 +13,10 @@ hatch shield kept on `x_shield` (`keep`).
 
     blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/breaker_v95.json WORK OUT.glb
     cp OUT.glb art/wardens/breaker/breaker.glb
+    # a changed clip after the swap (no WORK/breaker_art1.blend; the swap keeps the 11-08 skeleton): re-bake the clips on the
+    # shipped .glb's armature and take back only the ones you changed (Albert's `land` was done this way on the v95 glb)
+    blender -b --factory-startup --python tools/art1/glb_rebake.py -- art/wardens/breaker/breaker.glb tools/art1/breaker_anims.py WORK/re.blend WORK/re.glb
+    python3 tools/art1/glb_add_clips.py art/wardens/breaker/breaker.glb WORK/re.glb land
     godot --headless --path . --import
 
 - **Fit:** the rig is as wide as the master and much shorter: the pelvis sits at the rig's hips (k 1, the girth stays), the
