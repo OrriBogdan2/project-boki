@@ -9,11 +9,20 @@ extends RefCounted
 
 const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]
-const TILE_W := 140.0          # px, one Hunter tile
 const TILE_COLS := 3
-const LEFT_W := TILE_W * TILE_COLS + 16.0      # px, the tiles with their gaps: mastery and the glider pick match it
+const TILE_GAP := 8.0          # px between tiles
+const LEFT_FRAC := 0.38        # of the window width: the tile column (mastery and the glider pick match it)
+const LEFT_MIN := 460.0        # px, narrowest tile column: a full "the Barnacle Knight" fits a tile at 1280x720
+const LEFT_MAX := 600.0        # px, widest, so the viewer keeps the room on a big window
 const STAGE := Vector2(180, 240)
 const CLIP := Vector2(150, 84)        # px: each ability clip beside the turntable
+
+## The tile column's width, from the real window: wider windows get wider tiles, so names fit on one line.
+static func left_w(home: Node) -> float:
+	return clampf(home.get_viewport().get_visible_rect().size.x * LEFT_FRAC, LEFT_MIN, LEFT_MAX)
+
+static func tile_w(home: Node) -> float:
+	return (left_w(home) - TILE_GAP * (TILE_COLS - 1)) / TILE_COLS
 
 static func open(home: Node, sel := "") -> void:
 	if sel == "" or not Arch.exists(sel):
@@ -33,8 +42,8 @@ static func open(home: Node, sel := "") -> void:
 	cols.add_child(left)
 	var grid := GridContainer.new()
 	grid.columns = TILE_COLS
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
+	grid.add_theme_constant_override("h_separation", int(TILE_GAP))
+	grid.add_theme_constant_override("v_separation", int(TILE_GAP))
 	grid.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	left.add_child(grid)
 	for id in ordered():
@@ -61,7 +70,7 @@ static func _fill(home: Node, id: String, viewer: HunterViewer) -> void:
 	var acts: Control = home.get_meta("hunters_parts")[1]
 	for c in details.get_children() + acts.get_children():
 		c.queue_free()
-	details.add_child(ClassCard.mastery_list(id, LEFT_W))
+	details.add_child(ClassCard.mastery_list(id, left_w(home)))
 	details.add_child(_glider_pick(home, id))
 	acts.add_child(_actions(home, id, viewer))
 
@@ -83,7 +92,7 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	var st := ClassUnlock.status(id)
 	var col := Arch.color(id)
 	var card := UI.tile_card(on, func(): _show.call_deferred(home, id), 6, col)      # (deferred: it swaps this tile)
-	card.custom_minimum_size = Vector2(TILE_W, 0)
+	card.custom_minimum_size = Vector2(tile_w(home), 0)
 	card.set_meta("arch", id)
 	card.set_meta("class_status", st)
 	var row := UI.hbox(8)
@@ -93,18 +102,23 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(c)
-	var name_label := UI.label(Arch.name_of(id), 14, col if st in ["open", "ready"] else UI.FAINT, UI.big)
-	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # ("The Barnacle Knight" wraps; it used to be cut)
-	c.add_child(name_label)
+	var base := HeroTitle.base_name(id)
+	var name_col := col if st in ["open", "ready"] else UI.FAINT
+	c.add_child(UI.label(base if base != "" else Arch.name_of(id), 14, name_col, UI.big))
+	if base != "":
+		var title_label := UI.label("the " + HeroTitle.title(id), 11, name_col.lerp(UI.MUTED, 0.6), UI.semi)
+		title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # (a long title wraps, never cut)
+		c.add_child(title_label)
 	var cur := id == Arch.of_save()
 	match st:
-		"open": c.add_child(UI.label("Playing" if cur else "Unlocked", 11, UI.GOOD, UI.semi))
+		"open":
+			if cur: c.add_child(UI.label("Playing", 11, UI.GOOD, UI.semi))      # (other open Hunters: just the name)
 		"ready": c.add_child(UI.label("Hold to unlock", 11, ClassCard.GOAL_COL, UI.semi))
 		_:
 			var gp := ClassUnlock.challenge_progress(id)
 			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11,
 					ClassCard.GOAL_COL if st == "progress" else UI.FAINT))
-			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, TILE_W - 56.0, 5.0)
+			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, tile_w(home) - 56.0, 5.0)
 			gb.set_meta("tile_bar", id)
 			c.add_child(gb)
 	card.tooltip_text = ClassCard.kit_tip(id)
@@ -183,7 +197,7 @@ static func _glider_pick(home: Node, id: String) -> Control:
 	v.set_meta("glider_pick", true)
 	v.add_child(UI.label("Glider (looks only)", 12, UI.MUTED, UI.caps))
 	var flow := HFlowContainer.new()
-	flow.custom_minimum_size.x = LEFT_W
+	flow.custom_minimum_size.x = left_w(home)
 	flow.add_theme_constant_override("h_separation", 6)
 	flow.add_theme_constant_override("v_separation", 6)
 	v.add_child(flow)
