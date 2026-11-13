@@ -280,10 +280,39 @@ The moves live in `scripts/match/kmoves_care.gd` (`KMovesCare.MOVES`, read by `H
 | R cast (f25) | `mm_call` | 0.05 coil, 0.1 thrust high, 0.2 overshoot, 0.35 into the channel | the hand pulled back low, then thrust up as the plus bursts on the teammate |
 | R channel (f26-f73) | `mm_call_hold` (hold) | 0 / 0.3 | one hand held high over the tether; the legs keep walking |
 | R end (f74-f77) | `mm_call_end` | 0.07 sweep down, 0.14 arms open, 0.3 | the raised hand swept down to her side (the pull home), open on the arrival burst |
+| X cast (f25) | `mm_call` | 0.05 coil, 0.1 thrust high, 0.2 overshoot, 0.33 into the channel | the hand pulled back low, then thrust up as the plus bursts on the teammate |
+| X channel (f26-f73) | `mm_call_hold` (hold) | 0 / 0.3 | one hand held high over the tether; the legs keep walking |
+| X end (f74-f77) | `mm_call_end` | 0.07 sweep down, 0.14 arms open, 0.3 | the raised hand swept down to her side (the pull home), open on the arrival burst |
 
 Her dashes leave a few soft ember motes (CareLook "mote") instead of the shared after-image pill, burst and ring (`own_dash_trail`), and her moves are the whole dash pose (`dodge_anim` "kit": no shared roll under them).
 
 Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer|carry|payoff|walk|pose|ultaim|ultkey|ult> --arena-shot=<dir>/x.png [--care-close]` (scripts/match/care_demo.gd) saves each key moment at its moment and a strip of 4-6 frames cropped round her, at the gameplay camera or (with `--care-close`) a low close-up.
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured through `WardenClips` (pip.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, out to
+locomotion 0.16 s, under one footage frame) by `tools/tender_anim_time_check.gd`, which runs inside
+`--tender-combo-check`, prints one `TIME` line a move and asserts each row below ("mm timing ..."). "In" is when the
+clip owns the body, "out" when the legs have it back. Source: briefs/hero-ref/mooshmoosh.md (one frame = 0.2 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `mm_shot_r` `mm_shot_l` `mm_shot_emp` | an ember every 0.4 s, hands alternating (card 0.4 s) | embers at 0.02, 0.43, 0.85, 1.27 (0.42 s apart), each move on its ember's frame, Empowered first, no gap | same | matches (0.42 = 0.4 + one 60 Hz tick of the shared fire timer, far under a frame) |
+| `mm_seed_aim` | 1.0 s wind-up | in 0.10 / throw 1.0 on the clip's last frame (seed_aim 1.0) | same | matches; asserted |
+| `mm_seed` | hop on the release, about 0.3 s in the air | in at once from the wind-up / air 0.0-0.27 / out 0.60 | same | matches on timing (the hop is about 0.08 m against her half height in the footage; the bigger hop is on the unmerged ext/meeko-rmb-verify) |
+| `mm_hearth` | arms up about 0.3 s after the press [f195] | in 0.10 / ring up 0.02 / arms up 0.18 / 0.67 | same | matches; asserted |
+| `mm_toss` | lands on the cursor within a frame | in 0.03 / tossed 0.02 / 0.5 | same | matches; asserted |
+| `mm_call` | burst f25, range ring f28 (0.3 s) | in 0.10 / kit hands to the channel at 0.35, its clip ends at 0.333: one frame fading to the legs | hands over at 0.33, on the clip's last frame | fixed; asserted |
+| `mm_call_hold` | channel f26-f73 (about 4.9 s; ours 5.0) | held from 0.33 | same | matches |
+| `mm_call_end` | f74-f77 (0.4 s) | in 0.02 / out 0.47 | same | matches; asserted |
+| `mm_skip` | not in the footage (the card says "short") | in 0.10 / 0.23 / out 0.40, dash 4.2 m in 0.174 s | same | no source |
+| `mm_float` | Elluna's glide: 0.1 ramp, 0.4-0.6 burst, 11-15 m over 0.8-1.1 s | in 0.10 / clip 1.07 / out 1.23, glide 13.3 m over 0.95 s | same | matches; asserted |
+| run (`run_f`) | about 0.57 s a stride, 3.5 steps/s (low confidence); the sheet's note: x1.25 cadence, about 4.1 steps/s, "tune until feet don't slide" | 4.55 m/s, 2.5 Hz cycle, 5.0 steps/s, 1.82 m a cycle | same | differs, kept: the stride is fitted so the feet don't slide at run speed (the sheet's own rule) |
+
+Clip re-keys for the model (tools/art1): none needed for parity. The run would need longer strides (about 2.2 m a
+cycle at 4.1 steps/s) to slow its cadence without sliding.
+
+Suggestions (ours, not built): a bigger RMB hop (taken up by ext/meeko-rmb-verify); a run re-key to the sheet's 4.1
+steps/s with longer strides; a quicker fade (0.05 s) on `mm_call` so the 0.1 s thrust lands at full weight.
 
 ## Look and sound
 - Pooled looks (`scripts/arch/kits/care_look.gd`, shaders `care_disc` and `care_glow`, both mixed rather than additive so the colours hold on bright grass): the 0.44 m amber ember comet with a 1.6 m tail and a violet-star impact, the burr orb, the saturated violet Burrseed root disc with thorns, the violet light column and root beams, the lantern plus and rising rays, the warm ring on her and the thrown disc (amber in the middle to teal at a bright rim, with a small caged lantern of light floating over it and drifting motes; no floor plus), the Kindle foot glow, and the dash's ember motes. Nothing is created per shot. Hearth Call's tether (a braid of warm light with two twisting strands) is pooled in `UltLook` (`ult_look.gd`, extends CareLook); its reach ring, pick ring and aim line are AimKit circles and a line.
