@@ -532,7 +532,7 @@ func _rime_skate_in() -> void:
 			K.ult_running() and face_dev < 0.001 and yaw_dev < 0.01 and K.face_locked(),
 			"face off by %.4f rad, model %.4f rad" % [face_dev, yaw_dev])
 	HunterKeys.ult_pressed(P)
-	step(m, 0.4)
+	step(m, float(K.x_def()["recover"]) + 0.4)      # a late recast cracks it open: free after the crash's recovery
 	ok(
 			"tm X: an early recast frees her: she walks off",
 			not K.ult_running() and P.root_t <= 0.0 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.5,

@@ -56,6 +56,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Cele
 | X | rooted and invulnerable 3.2-3.5s, then the crash [footage] | as the source, plus the owner's skate carry | unchanged | `tm X: ...` |
 | Shift | hold to skate, about 10-11 m/s, full speed in 0.2s, stop in 0.1-0.2s [footage] | 11.5 m/s, 0.2s ramp | unchanged (at parity) | `tm Shift: ...` |
 | R | rooted and invulnerable 3.2-3.5s, then the crash [footage] | as the source, plus the owner's skate carry | unchanged | `tm R: ...` |
+| X | rooted and invulnerable 3.2-3.5s, then the crash and 0.4s of recovery (f57 -> f61) [footage] | as the source, plus the owner's skate carry; free at the burst | the 0.4s recovery locked as the footage (Shift skates out) | `tm X: ...`, `anim rime: ...` |
 
 ## Footage gaps, Nov 9 re-check
 The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255acbee. `--rimewright-combo-check` 90/0 on main. The asked rows 3, 4, 5 and 10 were already closed on main and asserted by the existing `tm` rows; the one open row (6) is in rimewright_kit.gd/rimewright.json, which in-flight Neve branches change, so nothing was built.
@@ -206,6 +207,7 @@ card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `le
 | Her dash moves are her skate only (`tm_skate_go`, `tm_skate`), used by no other hero and fitting the skate's length (owner item 35) | "tm Shift: her dash moves are her own skate ..." |
 | Ice Spear throw: drawn back, leaves her hand at 18 m/s, lands on arrival, detonates 1.8s after landing; the wall's 16.2m travel | "tm RMB: let go, she draws back first ...", "tm RMB: the throw ...", "tm RMB: it travels to the target ...", "tm E: it travels 16.2 m at most ..." |
 | A merge start ends Rimelock with no crash (`rime`) | "tm merge: drop_holds ends Rimelock with no crash and frees her" |
+| After the crash, 0.4 s of recovery (footage f57 -> f61): locked, a press in its last 0.15 s goes as it ends, Shift skates out | "anim rime: she is locked from the burst ...", "anim rime: no walking, darts or E ...", "anim rime: an E pressed in its last 0.15 s ...", "anim rime: Shift in the recovery ..." |
 
 ## Animation moves
 In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`. The model plays hand-keyed clips on these timings (`content/rules/warden_anim/claire.json`, `tools/art1/claire_clips.py`): she carries the spear, so darts flick off its tip or her left palm, and the RMB push is both hands driving the shaft. Tone: gentle figure-skating, modest, never seductive.
@@ -250,11 +252,11 @@ Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), meas
 | Skate push-off / stop | full speed within 0.2; stop 0.1-0.2 | 0.18 s / 0.03 s | unchanged |
 | Rink snap | 0.2 (f25 -> f27) | 0.2 s | unchanged |
 | Auto-crash | 3.2-3.5 | 3.52 s | unchanged |
-| Crash to recovery | 0.4 (f57 -> f61) | clip 0.4 s | unchanged |
+| Crash to recovery | 0.4 (f57 -> f61) | clip 0.4 s; she is free at the burst (f57) | locked f57 -> f61 (`x.recover` 0.4 s = the clip's release key and the GLB clip's 0.4 s): no walking, darts, RMB, E, jump, glove or Boki C; a press in the last 0.15 s (f60 on) goes as it ends; Shift skates out at once (`into_dash.x` cancel) |
 
 Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%, the ult holds 3.5 s.
 
-Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption); `rime_crash` holds its recovery pose to 0.4 s though she is free from 0 s. Suggestion, not built: the footage frees her at f61, 0.4 s after the burst, ours at the burst.
+Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption).
 
 ## Look and sound
 - Pooled looks (`care_look.gd`, shaders `care_ice`, `care_disc`, `care_glow`, all mixed rather than additive so they keep their colour on bright ground): the ice dart (an ice-blue four-sided crystal with dark teal edges, tip first, with a frost streak), the 0.3 m skating beam with its cyan core, the star-headed spear (held in her hand while aiming, then thrown) with its long pale-cyan trail, the slow-zone flake disc with its spinning crystal, the detonation dome, the Shatter spikes, the ice shell, the frost glow, the skate's ice chips, and the Rink Wall's ice pillars and the ice slab between them (the shared wall node is hidden). Rimelock (`UltLook`, `ult_look.gd`): the rink (care_disc pattern 4: a ragged ice edge and a crack network whose glow is the countdown, a fringe of crystals), the light pillar and the ice block on each stunned foe; the shard burst reuses the Shatter spikes. Her frozen body is `IceBody` (`ice_body.gd`) with `shaders/hero_ice.gdshader`: her own colour and atlas under translucent ice (screen refraction, a fresnel rim, an inner glow, a Voronoi crack web, a sparkle), a bright frost front climbing feet to head on the cast and back down on the thaw; it works on the procedural model (its material_override a part) and on `claire.glb` (an override a surface).
