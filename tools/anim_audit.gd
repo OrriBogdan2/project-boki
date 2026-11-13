@@ -54,10 +54,10 @@ func _hero(main: Node, id: String) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)     # (only the fixed steps below move the clips: a real frame's dt would shift their phase)
 	for k in 5:
 		await main.get_tree().process_frame
-	var sync := m.get_node("Warden/Sync")
-	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
@@ -113,7 +113,7 @@ func _gate(id: String, top: Dictionary) -> void:
 		bad += 1
 
 ## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction and the hips' up axis.
-func _read(sk: Skeleton3D) -> Dictionary:
+static func points(sk: Skeleton3D) -> Dictionary:
 	var out := {}
 	var xf := sk.global_transform
 	var hips := WardenSkeleton.find(sk, "hips")
@@ -202,7 +202,7 @@ func _pose_at(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, t: f
 		sync.call("_process", DT)
 	clips.force = {"clip": clip, "t": t}
 	sync.call("_process", DT)
-	var p := _read(sk)
+	var p := points(sk)
 	clips.force = {}
 	return p
 
@@ -215,7 +215,7 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 	for i in n:
 		clips.force = {"clip": clip, "t": minf(length * i / (n - 1), length - 0.001)}
 		sync.call("_process", DT)
-		out.append(_read(sk))
+		out.append(points(sk))
 	clips.force = {}
 	return out
 
@@ -228,7 +228,7 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	var fr: Array = []
 	for k in int(SAMPLE_S / DT):
 		sync.call("_process", DT)
-		fr.append(_read(sk))
+		fr.append(points(sk))
 	m.set_meta(WardenClips.STATE, {})
 	var out := _slide(fr, s, false)
 	out["sole_slide"] = _slide(fr, s, true)["slide"]

@@ -174,8 +174,8 @@ posts scroll at the move speed).
    keeps its authored carry: a 0.2 sway (tried, counter +0.80) swung the chained head back past his heels at floor level,
    a dragged flail, so the hammer rides low in front as keyed.
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
-4. Open: at a jog (3.4 m/s, between the walk and run rings) the walk and run clips blend out of phase and the feet
-   slide 80 %; the gate reads the run only, and Albert's game speed sits at the run ring.
+4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
+   80 %; `loco.cycle_s` now keeps them in step (docs/art/FOOT_SLIDE.md: 2.86 to 1.27 m/s at worst).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
@@ -269,5 +269,5 @@ Split into backlog items per Hunter (role build):
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
-- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
+- Mid-blend slide (walk into run, every direction) and Tenzo's strafe run: docs/art/FOOT_SLIDE.md.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).

@@ -242,6 +242,18 @@ func _anim(nm: String) -> AnimationNodeAnimation:
 	n.animation = nm
 	return n
 
+## A walk or run loop of the loco space. "loco.cycle_s" (s, optional): every one is stretched to this one cycle and
+## the space keeps them all advancing, so walk and run stay in step where they blend (keyed at unequal lengths,
+## their planted feet drift out of phase and cancel: docs/art/FOOT_SLIDE.md). "foot_mps" is then at that cycle.
+func _gait_loop(nm: String, cycle: float) -> AnimationNodeAnimation:
+	var n := _anim(nm)
+	if cycle > 0.0:
+		n.use_custom_timeline = true
+		n.timeline_length = cycle
+		n.stretch_time_scale = true
+		n.loop_mode = Animation.LOOP_LINEAR
+	return n
+
 func _build() -> AnimationNodeBlendTree:
 	var lc: Dictionary = d["loco"]
 	var bs := AnimationNodeBlendSpace2D.new()
@@ -250,9 +262,11 @@ func _build() -> AnimationNodeBlendTree:
 	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
+	var cycle := float(lc.get("cycle_s", 0.0))
+	bs.sync = cycle > 0.0
 	for k in dirs:
-		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
-		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
+		bs.add_blend_point(_gait_loop(String(lc["walk"][k]), cycle), dirs[k] * 0.45)
+		bs.add_blend_point(_gait_loop(String(lc["run"][k]), cycle), dirs[k])
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
@@ -652,7 +666,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc)
+	var rate := gait.plan(spd, lc, loco_pos)
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
