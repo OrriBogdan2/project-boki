@@ -1,7 +1,8 @@
 class_name GoalTracker
 extends RefCounted
 ## The "Goals" card at the top right of the farm: what you are working towards, never the tutorial.
-## Rows come from six sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+## Rows come from seven sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+##   shelter   no Boki after the first hatch: where the Shelter is (leads; clears on adopting)
 ##   first_day the new-save list (GardenFirstDay), in its own order with the ticked lines last
 ##   garden    the garden's own long goal: your Boki's next level (base_mode), always there for a player who stays home
 ##   unlock    a Hunter's unlock challenge (ClassUnlock), for every Hunter not open yet
@@ -12,7 +13,7 @@ extends RefCounted
 ## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
 ## and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
 
-const SOURCE_ORDER := ["first_day", "garden", "unlock", "mastery", "milestone", "level"]
+const SOURCE_ORDER := ["shelter", "first_day", "garden", "unlock", "mastery", "milestone", "level"]
 
 static var all := false      # the full list is open
 
@@ -20,8 +21,8 @@ static func cfg() -> Dictionary:
 	return FarmTutorial.rules()["tracker"]
 
 static func lines() -> Array:
-	var by_source := {"first_day": _first_day(), "garden": _garden(), "unlock": _unlocks(), "mastery": _mastery(),
-			"milestone": _milestones(), "level": _level()}
+	var by_source := {"shelter": _shelter(), "first_day": _first_day(), "garden": _garden(), "unlock": _unlocks(),
+			"mastery": _mastery(), "milestone": _milestones(), "level": _level()}
 	var caps: Dictionary = cfg()["per_source"]
 	var picked: Array = []
 	for src in SOURCE_ORDER:
@@ -46,6 +47,12 @@ static func _closer(a: Dictionary, b: Dictionary) -> bool:
 static func _row(text: String, prog: Dictionary, source: String, ready := false) -> Dictionary:
 	return {"text": text, "have": int(prog["have"]), "need": int(prog["need"]), "frac": float(prog["frac"]),
 			"ready": ready, "source": source}
+
+static func _shelter() -> Array:
+	if not Lifeline.started() or Lifeline.boki_count() > 0:
+		return []
+	var key := "open" if Stalls.level() >= HomeMarket.tab_level("Shelter") else "locked"
+	return [_row(String(cfg()["shelter"][key]) % Shelter.price({}, true), _prog(0, 1), "shelter")]
 
 static func _first_day() -> Array:
 	var two: bool = Save.d["roster"].size() >= 2
