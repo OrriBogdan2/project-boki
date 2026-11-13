@@ -2355,6 +2355,7 @@ func _truce_check() -> void:
 		if T.allied(0, 1): break
 	print("TCHECK reversed: the beaten squad accepted=%s after %.1fs (events %s)" % [T.allied(0, 1), tt, str(T.events.slice(-3))])
 	if not T.allied(0, 1) and not T.events.has("fake 1"): ok = false; print("TCHECK FAIL beaten squad refused")
+	if not TruceCalmCheck.run(m, home): ok = false
 	m.over = true
 	print("TCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
