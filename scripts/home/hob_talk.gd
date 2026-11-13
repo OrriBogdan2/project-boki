@@ -8,20 +8,20 @@ extends RefCounted
 ##   - once the house is down and the second Mask is on offer (ClassUnlock.second_pending): "By the way..." and
 ##     the pick of three (HobOffer); taking one plays the short Mask moment (MaskBeat)
 ##   - otherwise: blueprints he drew up (FarmBuilder), then the build menu or goodbye
-## When a line is about something (a "show"), he points at it and the camera looks there for a moment. On the
-## first arrival the camera also swings over to him for a moment while he waves and calls you over.
+## When a line is about something (a "show"), he points at it and the camera looks there and stays (CamLook)
+## until you click on to the next line. On the first arrival the camera also swings over to him while he waves
+## and calls you over, and stays until you click.
 
 const TALK := "Hob"            # Home.panel_open while you talk: you stand still and no prompt shows
 const TALK_ZOOM := 0.8         # the home camera's zoom while you talk (Home.HOME_ZOOM after)
-const EASE_S := 0.6            # s the camera takes to swing over to him and back on the first arrival
 const FACE_K := 0.45           # how far the camera's focus moves from you toward him while you talk
 
 var hob: FarmHob
 var box: TalkBox = null
 var offer: HobOffer = null
-var intro_t := -1.0            # s into the first-arrival camera swing, -1 when none
-var show_t := -1.0             # s into a line's look at something, -1 when none
-var show_at := Vector3.INF
+var look: CamLook = null       # the camera's look-here beats (the first arrival, a line's "show")
+var intro_on := false          # the first-arrival look is under way
+var _locked := false           # Home.panel_open is held at TALK while the camera moves
 
 func _init(owner_hob: FarmHob) -> void:
 	hob = owner_hob
@@ -34,7 +34,7 @@ func talking() -> bool:
 
 ## Talking, or swinging the camera over on the first arrival (he holds his own pose then).
 func busy() -> bool:
-	return talking() or intro_t >= 0.0
+	return talking() or intro_on
 
 ## The second Mask is his to offer: it's on offer, and the house is down (or there is no tutorial).
 func offer_due() -> bool:
@@ -52,12 +52,12 @@ func start() -> void:
 	h.panel_open = TALK
 	h.cam.zoom_to = TALK_ZOOM
 	_screen_clear(false)
-	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
+	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.face(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
 	box.closed.connect(_closed)
 	if offer_due():
 		box.say(_offer_lines(), _show_offer)
-	elif first and FarmTutorial.active():
+	elif first and FarmTutorial.active() and not FarmTutorial.base():      # the base tutorial is the Boki's to lead
 		box.say(rules()["intro"], box.close)
 	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
@@ -131,8 +131,8 @@ func _after_beat(id: String) -> void:
 
 func _on_line(_i: int, line: Dictionary) -> void:
 	var at: Vector3 = line.get("at", _where(String(line.get("show", ""))))
-	show_at = at
-	show_t = 0.0 if at.x != INF else -1.0
+	if at.x == INF or not look.look(at):
+		look.release()
 	hob.node.point_at = at
 	hob.node.pose = "point" if at.x != INF else String(line.get("pose", "talk"))
 
@@ -155,7 +155,7 @@ func _closed() -> void:
 	var h = hob.h
 	box = null
 	offer = null
-	show_t = -1.0
+	look.release()
 	if h.panel_open == TALK:
 		h.panel_open = ""
 	h.cam.zoom_to = h.HOME_ZOOM
@@ -176,58 +176,62 @@ func _screen_clear(shown: bool) -> void:
 # ------------------------------------------------------------------ every frame
 func tick(dt: float) -> void:
 	var h = hob.h
+	if look == null:
+		look = CamLook.new()
+		h.add_child(look)
+	look.watching = busy()
+	_lock_while_moving(h)
 	if talking():
 		if h.panel_open != TALK:      # (Esc closed it)
 			box.close()
 			return
+		box.frozen = look.locked()
 		hob.node.face_to = h.ppos
 		var to: Vector3 = hob.node.position - h.ppos
 		h.pface = atan2(-to.x, -to.z)
-	if show_t >= 0.0:
-		show_t += dt
-		if show_t > float(rules()["show_s"]):
-			show_t = -1.0
-			if talking():
-				hob.node.pose = "talk"
-	_intro(dt)
+	_intro()
 
-## The first arrival: once the screen is clear, the camera swings over to him while he waves and calls you over.
-func _intro(dt: float) -> void:
+## On the first arrival you stand still only while the camera moves (a talk already holds you).
+func _lock_while_moving(h) -> void:
+	var want := intro_on and look.locked()
+	if want and h.panel_open == "":
+		h.panel_open = TALK
+		_locked = true
+	elif not want and _locked:
+		_locked = false
+		if h.panel_open == TALK and not talking():
+			h.panel_open = ""
+
+## The first arrival: once the screen is clear, the camera swings over to him while he waves and calls you over,
+## and stays until you click.
+func _intro() -> void:
 	var h = hob.h
-	if intro_t < 0.0:
-		var tut: Dictionary = Save.d["tutorial"]
-		var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))
-		var met := bool(FarmBuilder.state().get("met", false))
-		if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active():
-			return
-		tut["hob_intro"] = true
-		intro_t = 0.0
-		h.cam.zoom_to = TALK_ZOOM
-		hob.node.pose = "wave"
-		hob.node.face_to = h.ppos
-		hob.node.shout(String(rules()["call"]))
-		Sfx.play("ping", hob.node.position, -6.0)
+	if intro_on:
+		if not look.active():
+			intro_on = false
+			h.cam.zoom_to = h.HOME_ZOOM
 		return
-	intro_t += dt
-	if intro_t > float(rules()["intro_pan_s"]) + EASE_S * 2.0:
-		intro_t = -1.0
-		h.cam.zoom_to = h.HOME_ZOOM
+	var tut: Dictionary = Save.d["tutorial"]
+	var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))
+	var met := bool(FarmBuilder.state().get("met", false))
+	if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active() or FarmTutorial.base():
+		return
+	tut["hob_intro"] = true
+	if not look.look(hob.node.position, true):
+		return
+	intro_on = true
+	h.cam.zoom_to = TALK_ZOOM
+	hob.node.pose = "wave"
+	hob.node.face_to = h.ppos
+	hob.node.shout(String(rules()["call"]))
+	Sfx.play("ping", hob.node.position, -6.0)
 
-## The camera's focus: on you, drawn toward Hob while you talk (and toward what he points at), and over to him
-## on the first arrival.
+## The camera's focus: on you, drawn toward Hob while you talk, and over to what he points at (or to him on the
+## first arrival) while a look is on.
 func frame(focus: Vector3) -> Vector3:
-	if not is_instance_valid(hob.node):
+	if not is_instance_valid(hob.node) or look == null:
 		return focus
-	var him := Vector3(hob.node.position.x, focus.y, hob.node.position.z)
 	var at := focus
-	if intro_t >= 0.0:
-		var hold := float(rules()["intro_pan_s"])
-		var k := smoothstep(0.0, EASE_S, intro_t) * (1.0 - smoothstep(EASE_S + hold, EASE_S * 2.0 + hold, intro_t))
-		at = focus.lerp(him, k)
-	elif talking() or offer != null:
-		at = focus.lerp(him, FACE_K)
-	if show_t >= 0.0 and show_at.x != INF:
-		var span := float(rules()["show_s"])
-		var k := smoothstep(0.0, 0.4, show_t) * (1.0 - smoothstep(span - 0.4, span, show_t))
-		at = at.lerp(Vector3(show_at.x, focus.y, show_at.z), k)
-	return at
+	if talking() or offer != null:
+		at = focus.lerp(Vector3(hob.node.position.x, focus.y, hob.node.position.z), FACE_K)
+	return look.frame(at)
