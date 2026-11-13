@@ -170,8 +170,14 @@ func _skate_only() -> void:
 			not P.grounded and K.rinkrunning() and absf(P.roll_speed - float(dd["speed"])) < 0.01 and P.roll_t > 0.0,
 			"roll %.1f m/s of %.1f" % [P.roll_speed, float(dd["speed"])])
 	step(m, 0.7)
-	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
+	var slabs := K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time)
 	ok("tm Shift: ice plates form under her while she skates", slabs >= 5, "%d plates" % slabs)
+	step(m, 0.8)
+	var strip := K.lk().ice_strip(RimewrightKit.SLAB_CAP)
+	ok(
+			"tm Shift: the trail is 24 plates long while she skates (a new plate reuses the oldest)",
+			strip.laid > RimewrightKit.SLAB_CAP and strip.live_count(m.time) == 24,
+			"%d laid, %d showing" % [strip.laid, strip.live_count(m.time)])
 	P.inp["dash_down"] = false
 	await _free(m)
 
@@ -642,7 +648,7 @@ func _late_homing() -> void:
 			"%d beams, bent %.1f deg, %.0f damage" % [shot, beam_turn, hp0 - T.hp])
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.8)
-	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
+	var slabs := K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time)
 	ok(
 			"tm Shift: her ice trail lasts a few seconds (plates still down 2 s after the skate), skate cd 13 s (data)",
 			slabs >= 3 and absf(P.dash_regen() - 13.0) < 0.01, "%d plates, cd %.1f s" % [slabs, P.dash_regen()])
@@ -1661,7 +1667,7 @@ func rimewright() -> void:
 	ok(
 			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size() >= 4
+				and K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time) >= 4
 				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
