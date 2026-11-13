@@ -272,11 +272,26 @@ func _skilled(secs: float) -> void:
 	for h in squad_a + squad_b:
 		(h as Hunter).ai = m.bot_brain.new_mind(m.rng, 0.95, cfg)
 		(h as Hunter).teleport((h as Hunter).pos)
-	_zoom(float(tk[2]))
+	var z0 := float(tk[2])
+	_zoom(z0)
+	m.guide = null                # no first-match lines, toasts or hints over the fight (kill feed and bars stay)
+	if m.hud:
+		m.hud.msgs.clear()
+		m.hud.msgs.hold = true
 	still_at = 6.0
 	_mark("start")
 	var seen := {}
 	await _go(secs, func(_t: float):
+		if m.hud:
+			m.hud.msgs.clear()
+		# the camera widens as the fight spreads (a dash out, a retreat) so both sides stay in the shot
+		var live := _alive(squad_a + squad_b)
+		var c := _centre(live)
+		var spread := 0.0
+		for h in live:
+			spread = maxf(spread, (h as Hunter).pos.distance_to(c))
+		var zt := clampf(z0 + maxf(0.0, spread - 4.0) / 11.0, z0, 1.15)
+		_zoom(lerpf(m.cam.zoom, zt, 0.05))      # (eased here: _go snaps the camera, so its own follow never runs)
 		for h in squad_a + squad_b:
 			var hh := h as Hunter
 			hh.merge_cd = 999.0       # no Merge in these takes (owner 11-13: the soul-link look is not for the pitch)
