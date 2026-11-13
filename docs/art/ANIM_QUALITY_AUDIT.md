@@ -161,7 +161,8 @@ Meeko's eight walk and run loops are re-baked by tools/art1/pip_gait.py on the v
 stance's sole verts pinned to the floor (2.2 and 4.55 m/s in Blender, ankle miss 0), and `loco.cycle_s` 0.34 runs the
 loco space synced. Walk and run share duty and heel-to-toe roll and the forward lean rides the hips, so the walk-run
 blend keeps the feet down. On main's readers, main's loops to these: run 12 -> 13 % (`--anim-audit`, sole 12 -> 21 %),
-worst blend slip 2.46 -> 1.80 m/s (`--foot-slide-check`, back at 3.5 m/s to forward at 3.0). The audits' points
+worst blend slip 2.46 -> 1.80 m/s (`--foot-slide-check`, back at 3.5 m/s to forward at 3.0); below the walk ring
+the forward and back rows read higher than main's (forward 2.0 m/s 0.51 -> 1.21). The audits' points
 misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the floor of what they show, not the truth.
 
 ## Worst three, per Hunter
