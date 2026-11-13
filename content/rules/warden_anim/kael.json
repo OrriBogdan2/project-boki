@@ -36,7 +36,7 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 2.42, "foot_mps": 1.69
 	},
 	"air": {
 		"rise": "jump",

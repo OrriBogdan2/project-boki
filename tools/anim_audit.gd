@@ -173,6 +173,9 @@ func _fit(main: Node, id: String) -> void:
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:          # (a Hunter with no keyed clips yet: Gil)
+		m.free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
 	var cr: Dictionary = clips.d.get("crouch", {})
