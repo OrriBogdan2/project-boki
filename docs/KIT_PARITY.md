@@ -695,6 +695,50 @@ Those five, measured against the footage (`origin/ext/hero-ref-footage`, 5 fps; 
 | Bjorn lumber (long dash) | 4.2 m / .3 s (14 m/s) | none: the source has no long dash; Oath never leaves the ground (bjorn.md 5) | same frames as above; 0512-0518 is Earthshatter, not a dash | [?] |
 | Vex long dash (air slide) | 4.7 m / .33 s (2/3 of the 7 m / .55 s hold) | patch notes only; Combat Slide card has no figure | venator_ghost 0114-0153 every 3rd: the three slides (0117, 0135, 0150) are all on the ground, no hold told apart, none in the air | [?] |
 | Hem flick (long dash) | 5.0 m / .22 s (light class) | none: Phase Walk has no long dash, an air Shift is the same roll (item 183) | pin 0048-0056 (pin.md 5's 2.3 m push): it is her wall climb up the tower (Soul Hunter), not a dash; 0388-0389 is the ground roll | [?] |
+## Moving while casting: the eight non-slice Hunters (main 88b06b9e7, 2026-11-11)
+
+The slice pass (Vex, Zedran, Hem, Cinder: docs/heroes) applied to Albert, Neve, Tenzo, Sparkle, Grimble, Meeko, Sable and Motley, for every held or cast ability. **Source** is the walk speed inside the ability's frame window in the hero sheet (briefs/hero-ref), in px/s read off that sheet, shared by the same sheet's steady run, so the ratio is in body heights per second against the run whatever the zoom. **Ours** is the share of the run kept: the kit's `move_k()` (a `CastHold`'s `slow_k`) times the weapon's `fire_slow` for the LMB (`Hunter._fire_slow`, 0.8 if a ranged weapon sets none). The frames are not on this worker, so only the sheets' own px/s notes were used. "Not seen" means the hero stood in front of a dummy for that window: it shows no walk speed, so it is not a mismatch and nothing was changed. A row is fixed when a measured share is more than 15% off ours and no owner item covers it.
+
+| Hunter (sheet, run) | Ability, phase | Source | Ours | Verdict |
+|---|---|---|---|---|
+| Albert `bulwark` (bjorn.md, 117 px/s) | LMB tap throw / recall | 104 px/s in the LMB window (0110-0115): 0.89 | 1.0 (melee) | match (11%) |
+| | LMB hold (charge) | not seen (stands in 0102-0108) | 0.55 | owner #59 (hold walk) |
+| | RMB shield held | "mostly stands still", not measured | 0.6 on the ground, 1.0 in the air | not seen; kept |
+| | E Purify Zone | 117 and 115 px/s (0450-0454, 0487-0491): 1.0 | 1.0 | match |
+| | R Faultline | a 0.4 s planted wind-up; 139 px/s after it (0558-0562) | 0 for the wind-up and 0.2 s of the eruption, then 1.0 | match |
+| Neve `rimewright` (tamsin.md, 240 px/s) | LMB darts held | thrown "while walking or skating", no number | 0.9 | not measured |
+| | RMB Ice Spear aim | not seen | 1.0 | not seen |
+| | Dash Skate held | 450-600 px/s: 1.9-2.5 | 11.5 m/s on a 5.0 run: 2.3 | match |
+| | E Rink Wall | not seen | 1.0 | not seen |
+| | R Rimelock | rooted, invulnerable at the centre | rooted | match |
+| Tenzo `dolm` (breah.md, run not measurable) | LMB punch hold (0.75 s) | not seen in the hold; walks while the fist recovers | 0.85 held, 1.0 after | not seen |
+| | RMB Quakefall charge | "stood still except for jumps and punches" | 0.55 (`rmb.slam.walk_k`) | owner item 61 |
+| | E Stone Row | not seen | 1.0 | not seen |
+| | R Basalt Spine hold and drag | "she can move while aiming", no number | 1.0 | match (no slow shown) |
+| Sparkle `mage` (vireo.md, 110 px/s) | LMB | stood still in every LMB shot | 0.9 | not seen |
+| | RMB Storm Rod hold | did not walk in the hold | 1.0 | not seen |
+| | E Skycall hold and drag | never walked during a cast | 1.0 | not seen |
+| | Dash Wirerun hold | a crouch while held, the lane does not grow | no steering while held | match (no walk speed to compare) |
+| Grimble `dredge` (dredge.md, 220-250 px/s) | LMB Buckshot | "walks between shots", no number while firing | 0.8 (shared default) | not measured |
+| | RMB Kaiju Grasp, out and reel | planted while it reels | 0.2 (`rmb.fly_slow`) | owner item 31 |
+| | E Iron Smash | 0.2 / 0.2 / 0.4 s beats, walk not seen | 0.7 in the wind-up | not seen |
+| | R Brass Broadside | planted through the charge (f22-f41) | 0.3 charging, 0.2 firing | owner item 36 |
+| Meeko `tender` (mooshmoosh.md, 250 px/s) | LMB | "keeps walking while firing", no number | 1.0 | match (no slow shown) |
+| | RMB Burrseed wind-up | aim lane while held, walk not measured | 0.5 (`rmb.wind_move`) | owner item 118 |
+| | E Hearthlight | instant | 1.0 | match |
+| | R Hearth Call channel | walks normally, several bh in f41-f72 | 1.0 | match |
+| Sable `thief` (dancer.md, 113 px/s) | **LMB firing** | **77-86 px/s in 3 stretches (0006-0015, 0230-0233, 0323-0326): 0.68-0.76** | **0.72 (was 0.9)** | **fixed**: `arc_bolts.fire_slow`, asserted in `--dancer-combo-check` |
+| | RMB Bola wind-up (0.4 s) | no stop shown | 1.0 | match |
+| | E dagger, throw and blink | no stop shown | 1.0 | match |
+| | R Death Blossom | walks and fires freely (f41-f47) | 1.0, firing 0.72 | match |
+| | After the Vault | 127-136 px/s for 1-1.5 s: 1.12-1.2 | 1.18 for up to 2 s | match |
+| Motley `ostra` (ostra.md, 205 px/s) | LMB Gravity Orb | the LMB-window plateaus (0082-0087, 0102-0106) are not tied to a shot | 0.9 (`tether_lantern`) | not measured |
+| | RMB Void Snap aim | not seen | 0.75 (`rmb.snap.cast_slow`) | not seen |
+| | Dash Swap lob (1.8 s) | stays roughly in place (985.0-987.2 s) | 0.675 (`dash.fly_slow`) | owner item 17 |
+| | E Unstable Anomaly | not seen | 1.0 | not seen |
+| | R Nightwell | a 0.8 s dome tell, then free to act | locked for the 1.0 s tell, then free | match after the tell; the lock in the tell is not seen |
+
+**Checks:** the eight combo checks and `--move-feel-check`. **Footage to get:** a straight walk with and without LMB held for Sable (it would settle "attack slow or the player's choice", dancer.md section 9), and a walk through each "not seen" row.
 
 ## The 20 biggest feel gaps, ranked
 
