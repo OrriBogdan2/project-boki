@@ -11,7 +11,7 @@ const LINE_FS := 13
 
 static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]    # reused every frame
 
-## Where each seat stands (Vector3.INF where the map has none): Lair, Heart Gate, Uplink, Heart ring.
+## Where each seat stands (Vector3.INF where the map has none): Sealed Lair, Heart Gate, Uplink, Heart ring.
 static func sites(m: Match) -> Array[Vector3]:
 	_sites.fill(Vector3.INF)
 	if m.heart == null or m.heart.site == Vector3.INF:
@@ -25,6 +25,13 @@ static func sites(m: Match) -> Array[Vector3]:
 			_sites[2] = seats.uplink.ref["pos"]
 	_sites[1] = m.heart.gate
 	_sites[3] = m.heart.site
+	var qs: QuestSeats = m.exits.seats if m.exits else null
+	if qs:
+		qs.build()
+		if qs.lair:
+			_sites[0] = qs.lair.ref["c"]
+		if qs.uplink:
+			_sites[2] = qs.uplink.ref["pos"]
 	return _sites
 
 ## A badge's colour: a state tone (SideColor: locked cool blue-grey, open cream, lost dim crimson), or the using
