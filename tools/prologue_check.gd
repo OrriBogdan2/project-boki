@@ -1,9 +1,11 @@
 extends RefCounted
 ## --prologue-check [--shots-dir=<dir>]: plays the prologue frame by frame (add --fixed-fps 60 for even strips) and
 ## checks the five slides and the owner's lines for 3 and 4, that in THE RELICS every Boki and the hunter stay
-## inside the picture (between the letterbox bars) and never stand in each other, that the relic wakes,
-## and that it ends on the hatch. With --shots-dir (under xvfb with a renderer) it also saves a 5-frame strip
-## per slide (start, two key beats, middle, end) as <dir>/s<slide>_<n>.png with <dir>/captions.txt.
+## inside the picture (between the letterbox bars) and never stand in each other, that the relic wakes, that it
+## ends on the hatch, and that a click moves on one slide while a 1 s hold skips it all. With --shots-dir (under
+## xvfb with a renderer) it also saves a 5-frame strip per slide (start, two key beats, middle, end) as
+## <dir>/s<slide>_<n>.png with <dir>/captions.txt. --skips-only runs just the click and hold part (for a movie:
+## add --write-movie <file>.avi before the "--").
 
 const HOLLOWING := "The Wyrm broke the land and stole our essence.\n" \
 	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
@@ -35,6 +37,7 @@ const STRIP := [
 const FRAME := Vector2i(1280, 720)      # px: the game's window (project.godot), the smallest it frames for
 ## px: the game's window, a big one, a small one
 const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(800, 450)]
+const TYPING_AT := 1.2         # s into the first slide: its line is part typed (it starts at 0.6 s, takes 2.7 s)
 const BOKI_GAP := 0.75          # m: the least room between two Boki, or a Boki and the hunter's feet
 
 var bad := 0
@@ -57,6 +60,11 @@ func run(m: Node) -> void:
 		DirAccess.make_dir_recursive_absolute(dir)
 		RenderingServer.render_loop_enabled = false      # drawn only for the strip frames (a soft renderer is slow)
 	main.get_window().size = FRAME      # headless runs start on a square window; frame it as the game does
+	if "--skips-only" in OS.get_cmdline_user_args():
+		await _skips(main.get_tree())
+		print("PROLOGUE done, %d failed" % bad)
+		main.get_tree().quit(1 if bad else 0)
+		return
 	await main.show_screen("prologue", {"then": "hatch"})
 	var pr = main.current
 	var tree := main.get_tree()
@@ -88,27 +96,40 @@ func run(m: Node) -> void:
 	RenderingServer.render_loop_enabled = true
 	tree.quit(1 if bad else 0)
 
-## The first press of a key or a pad button skips it all in a blink, and once seen a new game goes past it.
+## Owner 11-11, "hold to skip, click for next": a click first finishes the line typing, then moves on exactly
+## one slide; a short hold of a key does nothing; a 1 s hold of a pad button skips to the hatch; once seen a
+## new game goes past it.
 func _skips(tree: SceneTree) -> void:
-	var key := InputEventKey.new()
-	key.keycode = KEY_X
-	key.pressed = true
-	var pad := InputEventJoypadButton.new()
-	pad.button_index = JOY_BUTTON_A
-	pad.pressed = true
-	for ev: InputEvent in [key, pad]:
-		Save.d["tutorial"]["prologue"] = false
-		await main.show_screen("prologue", {"then": "hatch"})
-		var pr = main.current
-		for i in 3:
-			await tree.process_frame
-		var took := 0.0
-		pr._unhandled_input(ev)
-		while main.current == pr and took < SKIP_MAX_S * 8.0:
-			await tree.process_frame
-			took += tree.root.get_process_delta_time()
-		var what := "one %s press skips to the hatch (%d ms of game time)" % [ev.get_class(), took * 1000.0]
-		ok(main.current != pr and took <= SKIP_MAX_S, what)
+	Save.d["tutorial"]["prologue"] = false
+	await main.show_screen("prologue", {"then": "hatch"})
+	var pr = main.current
+	if main.fade:
+		main.fade.reveal(0.05)
+	await _wait(tree, TYPING_AT)
+	_tap(pr, _click(true), _click(false))
+	var typed: bool = pr.caption.visible_ratio >= 1.0
+	ok(pr.shot == 0 and typed, "a click while the line types finishes it (slide %d)" % pr.shot)
+	await _wait(tree, 1.0)
+	_tap(pr, _click(true), _click(false))
+	await _wait(tree, 1.5)
+	ok(pr.shot == 1 and not pr.done, "one more click moves on exactly one slide (now %d)" % pr.shot)
+	pr._unhandled_input(_key(true))
+	await _wait(tree, 0.6)
+	pr._unhandled_input(_key(false))
+	await _wait(tree, 0.5)
+	ok(pr.shot == 1 and not pr.done and main.current == pr, "a 0.6 s hold of a key does not skip (slide %d)" % pr.shot)
+	pr._unhandled_input(_pad_a(true))
+	await _wait(tree, 0.8)
+	ok(not pr.done, "0.8 s into holding A it is still playing")
+	var held := 0.8
+	while not pr.done and held < 3.0:
+		await tree.process_frame
+		held += tree.root.get_process_delta_time()
+	for i in 300:
+		if main.current != pr:
+			break
+		await tree.process_frame
+	ok(main.current != pr and held >= 0.95 and held <= 1.1, "holding A 1 s skips to the hatch (%.2f s)" % held)
 	ok(bool(Save.d["tutorial"]["prologue"]), "a skip is remembered")
 	await main.show_screen("prologue", {"then": "hatch"})
 	var again = main.current
@@ -117,6 +138,33 @@ func _skips(tree: SceneTree) -> void:
 			break
 		await tree.process_frame
 	ok(main.current != again, "the next new game skips it by default")
+
+## A press then its release on the same frame.
+func _tap(pr, down: InputEvent, up: InputEvent) -> void:
+	pr._unhandled_input(down)
+	pr._unhandled_input(up)
+
+func _click(down: bool) -> InputEventMouseButton:
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = down
+	return e
+
+func _key(down: bool) -> InputEventKey:
+	var e := InputEventKey.new()
+	e.keycode = KEY_X
+	e.pressed = down
+	return e
+
+func _pad_a(down: bool) -> InputEventJoypadButton:
+	var e := InputEventJoypadButton.new()
+	e.button_index = JOY_BUTTON_A
+	e.pressed = down
+	return e
+
+## Game time (follows --fixed-fps), so the holds read the same on a slow machine.
+func _wait(tree: SceneTree, s: float) -> void:
+	await tree.create_timer(s).timeout
 
 ## Steps through the slides, taking the strip frames and watching THE RELICS's framing every frame.
 func _play(pr, tree: SceneTree) -> void:

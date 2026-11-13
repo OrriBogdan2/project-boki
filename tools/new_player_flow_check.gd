@@ -123,7 +123,7 @@ func _prologue() -> void:
 	for s in pr.shots:
 		watched += float(s["dur"])
 	print("NPF the prologue runs %.0f s if watched" % watched)
-	var key := InputEventKey.new()      # any key skips it (the prologue's first-press skip)
+	var key := InputEventKey.new()      # held (never let go) it skips it all after HoldSkip.HOLD_S
 	key.keycode = KEY_SPACE
 	key.pressed = true
 	pr._unhandled_input(key)
