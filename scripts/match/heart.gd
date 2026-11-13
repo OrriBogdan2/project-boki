@@ -79,11 +79,11 @@ static func tide_out(m: Match, p: Vector3) -> float:
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (the first ring before the
-## tide starts, so the drop map shows it; tide_r1 once the ring holds).
-static func next_r(m: Match) -> float:
+## tide starts, so the drop map shows it; tide_r1 once the ring holds). `ahead` 2: two such steps on (bots).
+static func next_r(m: Match, ahead := 1) -> float:
 	if m.heart == null:
 		return 0.0
-	return ring_at(m.sess_time() + r("tide_next_s"), m.heart.ways_scale)
+	return ring_at(m.sess_time() + r("tide_next_s") * ahead, m.heart.ways_scale)
 
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
