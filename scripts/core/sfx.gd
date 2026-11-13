@@ -685,7 +685,7 @@ func play(
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
-	_start(p, _take(sname), v, pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var)))
+	_start(p, _take(sname, take), v, pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var)))
 	played.emit(sname, pos, vol_db, pitch)
 
 ## Starts sname on a voice at pos (placed, so it pans) at exactly vol_db and returns the voice, or null when
@@ -699,12 +699,13 @@ func play_voice(sname: String, pos, vol_db: float, pitch := 1.0):
 		_start(p, _take(sname), vol_db, pitch)
 	return p
 
-## The stream to play for sname: a different take from last time when it has several.
-func _take(sname: String) -> AudioStream:
+## The stream to play for sname: take `take` of a sound that has several (FireSfx), else a different one
+## from last time.
+func _take(sname: String, take := -1) -> AudioStream:
 	var st = streams[sname]
 	if st is Array:
 		var arr: Array = st
-		var i := take % arr.size() if take >= 0 else rng.randi_range(0, arr.size() - 1)
+		var i: int = take % arr.size() if take >= 0 else rng.randi_range(0, arr.size() - 1)
 		if take < 0 and arr.size() > 1 and i == int(last_take.get(sname, -1)):
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
