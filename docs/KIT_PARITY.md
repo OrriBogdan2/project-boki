@@ -572,16 +572,16 @@ A re-read of `briefs/hero-ref/juggernaut.md` frames 0301-0366 (the tether) and 0
 | Q | none | glove | ours |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, wall refund .25, foe .5, cd 15 | match; 0.75x of @IV |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore: r 2.3 to 5.4, rim band blights, 10 blades in 2 s, gives the Vault back, cd 24 | match; **0.48x cd** (gap 10) |
-| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | Vault 4.5 m/.48 s (8.4 m from a jump), next shot 2.34x + 2 Marks, landing it resets, cd 4.5, off dash_feel | match |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | Vault 4.5 m/.48 s (8.4 m from a jump), next shot 2.34x + 2 Marks, landing it resets, cd 5 (`ext/sable-vault-riders`), off dash_feel | match |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks +10% each (16 of the 160 shot), no cap; knock heals 15% extra. **Shred gone** | match; closed `3bcb50eca` (stale text only) |
 | Anim | Footage poses | 17 moves plus the fusion move, all on `sable.glb` (47 clips); v2 model `1c5d44fac` | match on coverage |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, cd 15 | match; 0.75x of @IV |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** |
-| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, the same in the air (item 183), off the dash feel, prime 2.34x, cd 4.5 | match |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, the same in the air (item 183), off the dash feel, prime 2.34x, cd 5 (the data wins over the card 4.2; `ext/sable-vault-riders`); i-frames 0.12 s and the 3 s empowered window are ours-only | match |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | E | Dagger, 6 s forced return, 20 s @IV [D] | 14 m, 6 s, cd 15 | match; 0.75x of @IV · cd **open** (gap 10; level 1 is 28 s) |
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** · cd **open** (gap 10) |
-| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 4.5 | match |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 5 (the data wins over the card 4.2; ext/sable-vault-riders); i-frames 0.12 s and the 3 s empowered window are ours-only | match |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` · **done** `ext/parity-no-riders` (main): Shred was stale text, removed |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 
@@ -1000,7 +1000,7 @@ Albert (`bulwark`, section "Bjorn"), Neve (`rimewright`, "Claire"), Tenzo (`dolm
 | Grimble | Dash | **fixed since** (gap 13): the air pounce has its own 12.5 s slot (`dash.air.cd`, 10.5/8.5 at ranks 2/3; asserted in `--dredge-combo-check`); the row's "air slot missing" is stale. Open (owner): ground dash off the 0.85/1.15 feel; cooldowns 0.58x of the data |
 | Meeko | LMB, E, R, Dash, Anim | done: E 2.5 s r 2.6 cd 11, R 5 s range 12.6 cd 46, dash 3.6 m/0.2 s cd 7 and 13.3 m/0.95 s cd 14, carry 2 with 4 s lock |
 | Meeko | RMB, Passive | open: hop form root after 2 s (owner 11-10), motion `[?]`; Carrier shield is ours-only (gap 19) |
-| Sable | LMB, E, R, Dash | done: E 14 m 6 s cd 15; R r 2.3 to 5.4, 10 shots, cd 24; Vault 4.5 m/0.48 s cd 4.5, prime +1.34 (2.34x). The row's "air 8.4 m/0.95 s" is stale: the air dash is the ground cartwheel with a charge (item 183) |
+| Sable | LMB, E, R, Dash | done: E 14 m 6 s cd 15; R r 2.3 to 5.4, 10 shots, cd 24; Vault 4.5 m/0.48 s cd 5, prime +1.34 (2.34x). The row's "air 8.4 m/0.95 s" is stale: the air dash is the ground cartwheel with a charge (item 183) |
 | Sable | RMB, Passive | open (owner): bola cd 7 (0.54x of the data) and the 30% slow; R cd 24 is 0.48x; Shred is ours-only `[?]`; pair stun 0.9 vs ~1.8 s |
 | Motley | LMB, RMB, R, Dash | done / owner as before: charge from 0.6 s (owner 60), RMB cd 10 (owner 40), Nightwell tell 1.0, 3.5 s, pull 12, cd 70, lob 1.8 s cd 9.5. RMB wind-up 0.32 was not located by key in the JSON (combo check passes) |
 | Motley | E | **fixed since** (gap 17): `dmg_max_k` 3.5; grow 6.5 s and r 3.2 done; the fizzle stays ours |

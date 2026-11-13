@@ -389,7 +389,7 @@ Every Hunter's air dash is its ground dash or a special one the source has, neve
 | Vex (mage) | Wirerun (cd 8.0 s) | the same Wirerun (7.5 to 13 m by rank, one charge, same clip) | same | vireo.md: one Wirerun, no air variant |
 | Grimble (dredge) | Barge, 3.2 m in 0.16 s (cd 10.0 s) | `air_k` carry on the Barge | skipped | parity 13 (queued) |
 | Elluna (tender) | Relay Step, 3.15 m in 0.23 s (cd 7.0 s) | its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown | special | mooshmoosh.md and owner item 24 |
-| Sable (thief) | Vault, 4.5 m in 0.48 s (cd 4.5 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
+| Sable (thief) | Vault, 4.5 m in 0.48 s (cd 5.0 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
 | Void (ostra) | Lantern Trade (cd 9.5 s) | the same Lantern Trade (1.8 s), the same charge and clip | same | ostra.md: one Lantern Trade |
 ## Cast into cast
 
