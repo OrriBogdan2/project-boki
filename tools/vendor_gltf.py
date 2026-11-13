@@ -10,10 +10,10 @@ usage: vendor_gltf.py SRC DEST [--anims Name1,Name2,...]
   SRC  a .gltf (with its .bin next to it) or .glb
   DEST the .glb to write
 """
+import argparse
 import json
 import os
 import struct
-import sys
 
 
 def load(src):
@@ -137,13 +137,13 @@ def write_glb(dest, j, binblob):
 
 
 def main():
-    args = sys.argv[1:]
-    anims = None
-    if "--anims" in args:
-        k = args.index("--anims")
-        anims = args[k + 1].split(",")
-        del args[k:k + 2]
-    src, dest = args
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("src", help="a .gltf (with its .bin next to it) or .glb")
+    ap.add_argument("dest", help="the .glb to write")
+    ap.add_argument("--anims", help="comma list of animation names to keep (default: all)")
+    args = ap.parse_args()
+    src, dest = args.src, args.dest
+    anims = args.anims.split(",") if args.anims else None
     j, bufs = load(src)
     j, blob = compact(j, bufs, anims)
     os.makedirs(os.path.dirname(dest), exist_ok=True)
