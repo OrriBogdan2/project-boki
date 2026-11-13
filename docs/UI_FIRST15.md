@@ -45,7 +45,7 @@ pictures.
 | 32 | **Plan your drop** ([32](ui_first15/1280x720/32_expedition_plan.jpg)) | **7+** | **yes, the worst** | title and timer, squad panel, full map, "This match" legend (4 kinds + 4 states), "Ways out" (5), bottom HUD, counters |
 | 33 | Ship ([33](ui_first15/1280x720/33_expedition_ship.jpg)) | 9 | **yes** | the match HUD, with locked ability slots reading "UNLOCK" |
 | 34-35 | Landed, 15 s ([35](ui_first15/1280x720/35_expedition_15s.jpg)) | **10** | **yes** | minimap, clock, status strip (Dusk / Sight), counters, vitals, abilities, glider strip, belt, Q/V/X, weapon, plus the Truce chip |
-| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (F1)", Leave match, Save and quit |
+| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (`)", Leave match, Save and quit |
 
 **Breaches (over about 5):** tutorial landing and every tutorial step (9-12), the first expedition HUD (9-10), Plan your drop (7+), the expedition panel
 and the Relics page (6 blocks each, plus 12 Relic tiles). The in-match HUD is the same 9 blocks from the first second; nothing is introduced a step at a time,
@@ -87,41 +87,76 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 One shared first-time path: `Glossary.first_line(word)` / `Glossary.add_note(box, word)` (`scripts/ui/glossary.gd`, lines in
 `content/rules/glossary.json`). The line shows under the word for the whole session it is first seen in, then never again
 (seen words: `Save.d["tutorial"]["glossary"]`; nothing with hints off or in a clean recording). Canonical names stay.
-Check: `--glossary-check`. Expedition panel, Relics page, the drop and the title, term by term (as of origin/main fb360f614):
+Check: `--glossary-check`. Expedition panel, Relics page, the drop and the title, term by term (merged with origin/main ca96e707c5; the Plain words pass table below is the other branch's):
 
 | Term | Where | What we did |
 |---|---|---|
-| BOKI AT RISK | Expedition: tier tag | Plain words: the tag reads "Boki can be lost" (the picked tier's line still says what happens). |
+| BOKI AT RISK | Expedition: tier tag | Plain words, same as ui-plain-words-menus: the tag reads "Boki can be lost". |
 | Relic | Expedition / Relics | Already explained (prologue, first portal line); no longer on the expedition panel ("Hunter" section). |
 | The Meadow / Dusk Isles / The Hollow | Expedition | Place names; the picked one shows its own description line. Left as is. |
 | Solo / Duos / Trios; Arena / Training area / Duel room | Expedition | Gone: now "Extraction: trios, 7 squads of three" and the canonical "Training Grounds". |
 | Boki move names (Hot, Cinderfall, Burr) | Expedition: Boki row | Not done: per-move text, not a one-line term; each Boki's page explains them. |
 | Mastery | Relics | First-time line: "Goals played as this Hunter: each one done gives a new look." |
-| Colourway | Relics: mastery rewards | Plain words: "Colour" (class_unlock.json `reward_kinds`). |
+| Colourway | Relics: mastery rewards | Plain words: "Colours", set by ext/ui-plain-words-menus (class_unlock.json `reward_kinds`). |
 | Emote, Trail, Glider (as rewards) | Relics: mastery rewards | Covered by the Mastery line (rewards are looks). |
-| Glider, Field Wing | Relics: glider pick | First-time line under GLIDER: "What you glide on after a jump. Looks only: they all fly the same." |
+| Glider, Field Wing | Relics: glider pick | Label reads "Glider (looks only)" (ui-plain-words-menus); first-time line under it: "What you glide on after a jump: they all fly the same." |
 | Hot Streak, Boki Fusion | Relics: Hunter viewer | Already explained: the viewer lists each with its one line. |
 | Boss lair, Vault, Rare Boki, Item cache | The drop: legend | First-time line under each row (the row grows 14 px that session); `--glossary-check` fails if a spawn category has none. |
 | Uplink outpost | The drop: Ways out | Plain words: "Uplink outpost (hold it, fly out)", like the Shrine and Revive beacon rows. |
 | Revive beacon, Shrine | The drop: Ways out | Already explained in the row ("your squad back", "hold F: a power-up"). |
 | Skiff dock, Rift hatch | The drop | Gone from the map since the Ways Out rework. |
-| Drop leader | The drop: squad list | Plain words: "Leads the drop". |
+| Drop leader | The drop: squad list | Plain words: "Leads the drop" (main reworded the other drop states: rocket, aboard, gliding). |
 | Pass the lead | The drop: key row | Plain words: "Let a squadmate lead" (the key's name in Settings is unchanged). |
 | Truce | Emote wheel / offer toast | Plain words in the offer toast: "X offers a truce: no shooting each other. Hold <emote key>, pick Deal" (the accept toast already explains it). No Truce chip on the landing HUD now. |
 | Arena | Title | Gone: the canonical "Training Grounds"; its loading card explains it. |
 | Save files | Title | Already plain words. Left as is. |
 
+### Plain words pass (branch ext/ui-plain-words-menus)
+
+Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery as a tooltip word, glider and armor-tier names). Each term gets plain words or a tooltip.
+
+| Screen | Term | Old | New |
+|---|---|---|---|
+| Results | Knocks | "Knocks" | "Hunters downed" |
+| Results | Armor "Uncommon" | "Armor" over "Uncommon" | tile removed on main (armor is no longer one of the three big numbers); nothing to reword |
+| Results | Tidebloom seeds | "5 Tidebloom seeds" | same chip, tooltip: plant these on the farm |
+| Results | Into your armory | "Into your armory" | "Gear you kept, in the armory" / "Gear you found (build the armory on the farm to keep it)" |
+| Expedition | BOKI AT RISK | "Boki at risk" | "Boki can be lost", tooltip on the tier: go down here and the Boki you bring are left behind |
+| Expedition | Solo / Duos / Trios | already gone | the Match line reads "Extraction: trios, 7 squads of three" (trios only); only the loading card still names squad size |
+| Expedition | Arena / Training area / Duel room | already gone | the panel's practice button reads "Training Grounds"; Arena stays reserved (title comment fixed) |
+| Expedition | ability names (Hot, Cinderfall, Burr) | unchanged | each sits next to its one-line description on the kit card; tile tooltips carry the line |
+| Relics page | Mastery | "Mastery" | "Goals: each earns a look", tooltip names Mastery |
+| Relics page | Colourway | "Colourway: Forge Red" | "Colours: Forge Red" |
+| Relics page | Glider / Field Wing | "Glider" | "Glider (looks only)"; the Field Wing line already says it is the starting wing |
+| Relics page | Hot Streak | unchanged | its line directly under it says what it does |
+| Relics page | Boki Fusion | unchanged | DECISIONS name; its line sits under it |
+| Title | Arena | already "Training Grounds" | only a code comment still said Arena (fixed) |
+| Title | Save files | unchanged | plain already; the page subtitle says what a save holds |
+
 ## 5. For the declutter jobs (not done here)
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
-2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
+2. **One prompt** (match tutorial: one strip, `TutorialStrip`; toasts wait while it is fresh, then carry the step's detail; the world prompt label waits while the card carries the interact key, `Tutorial.prompt_quiet`, `--tutorial-hud-check`). Still open outside the tutorial.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
-5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
+5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit. **Done in ext/ui-relics-names:** tiles read the name with `the <Title>` smaller under it, the tile column is 38% of the window width (460-600 px), an unlocked tile drops the 'Unlocked' line, all 13 Hunters show without scrolling at 1280x720 and 1920x1080 ([shots](shots/ui-relics-names), software render: the GPU worker was lost 3x), `--hero-grid-check` asserts it. The right column and Mastery still scroll.
 6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words. Done for the expedition panel, Relics page, the drop and the title (section 4 table).
 
+## 8. Match HUD groups at the 0.24.5 moments (`--hud-groups-check`)
+
+Counted by `HudGroups.on_screen` (rules: `content/rules/hud_groups.json`), pinned in `tools/hud_groups_check.gd`, pictured by `--hud-groups-shots` (1280x720, 2560x1080).
+The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and the Final share it; the Gate prompt is the one prompt). It waits until a seat is within 30 s of opening, so the landing and the first fight stay as before.
+
+| Moment | Groups | Strip | Note |
+|---|---|---|---|
+| First landing | 10 | waits | nine always-on blocks + the button card |
+| First fight | 11 | waits | nine + toasts + loot prompt |
+| Heart unlock | 12 | shows | nine + toasts + Gate prompt + strip |
+| Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
+
+All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)

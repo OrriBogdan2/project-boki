@@ -1,0 +1,22 @@
+{
+ "_doc": "The knock banners top-centre (scripts/ui/knock_banner.gd): ALLY KNOCKED when a teammate goes down, KNOCK when your squad knocks a rival. Seconds, px at 1080p, fractions of the screen.",
+ "show_s": 1.25,
+ "_show_s": "how long a banner is on screen, pop and fade included (about 1-1.5 s, then gone)",
+ "pop_s": 0.12,
+ "_pop_s": "the pop in: the banner shrinks from pop_scale to just under full size this fast",
+ "pop_scale": 1.25,
+ "punch": 0.05,
+ "_punch": "how far under full size the pop lands before it settles back (the small punch)",
+ "settle_s": 0.08,
+ "fade_s": 0.3,
+ "_fade_s": "the last part of show_s, where the banner fades and rises away",
+ "rise_px": 18.0,
+ "combo_s": 0.3,
+ "_combo_s": "a second knock of the same kind this soon after the last one shows x2 (x3 ...) instead of a fresh banner",
+ "top_frac": 0.13,
+ "_top_frac": "where the banner's top sits, of the screen height (it drops below any toasts on show when it opens)",
+ "back_alpha": 0.5,
+ "_back_alpha": "how solid the ink slash and the name pill are, so the fight shows through (the ring, portrait and words stay solid)",
+ "max_top_frac": 0.2,
+ "_max_top_frac": "the lowest its top goes for toasts (past it, it sits over them): the name pill stays above ~37%, clear of your Hunter"
+}
