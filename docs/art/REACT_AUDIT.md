@@ -100,6 +100,13 @@ Scores after:
 
 `--react-audit`: 12 Hunters, FAIL 0 (29 lines before the fixes).
 
+**Neve and Tenzo (11-13, on the v95 glbs):** their `hit_f`/`hit_b` were baked on the old stance, so the first and last
+key sat off the idle (thigh 12-21 degrees) and the hit never settled back. `glb_react.py <glb> <clip> anchor idle`
+re-anchors both clips on the idle's first key (claire.glb after its retime, tarek.glb). Main's v95 glbs came without the
+fixes above, so they were re-run on them: `hem` hit_b `scale 1.8` then `glb_retime.py` `0:0,0.07:0.07,0.24:0.42` on
+hit_f and hit_b of hem, claire, sable and ryzz, then the anchor on claire and tarek. The clip scripts claire_clips and
+tarek_clips still carry the old anchor, so a re-bake must run the anchor op again.
+
 The clip scripts in tools/art1 (`breaker_anims.py`, `hem_clips.py`, `claire_clips.py`, `sable_clips.py`,
 `ryzz_clips.py`) hold the same five edits since ext/art1-clip-port, and the re-bake is checked (Blender 4.5.15,
 2026-11-09): `hit_f` and `hit_b` baked from each script, copied into the model with `glb_add_clips.py`, then
