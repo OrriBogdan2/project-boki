@@ -11,6 +11,7 @@ Subcommands (all stdlib; see README.md):
 
 import argparse
 import hashlib
+import heapq
 import json
 import os
 import re
@@ -21,7 +22,6 @@ import sys
 import tempfile
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 FAIL_RE = re.compile(r"failures:\s*(\d+)")
@@ -304,7 +304,8 @@ def run_flag(godot, tree, flag, timeout, extra):
 
 # ---------------------------------------------------------------- the main-side cache
 class Cache:
-    def __init__(self, root, tree, godot, extra):
+    def __init__(self, root, tree, godot, extra, strikes=2):
+        self.strikes = strikes
         args = hashlib.sha1(" ".join(extra).encode()).hexdigest()[:6]
         self.dir = Path(root) / tree_key(tree) / f"{godot_id(godot)}-{args}"
 
@@ -317,13 +318,28 @@ class Cache:
 
     def put(self, r):
         """Greens, and reds the check itself judged ('failures: N' > 0). A red with no verdict of its own (crash,
-        timeout, bad launch) may be the environment, so it is re-run next time instead of cached."""
+        timeout, bad launch) may be the environment, so it is re-run next time instead of cached. Exception: a
+        timeout (rc 124/137) seen in `strikes` finished gates in a row on this same key is cached as red."""
         if r.get("aborted") or r.get("mismatch"):
             return
-        if r["verdict"] == "red" and not any(int(x) > 0 for x in FAIL_RE.findall(r["log"])):
-            return
         self.dir.mkdir(parents=True, exist_ok=True)
-        rec = {k: r[k] for k in ("flag", "rc", "secs", "verdict", "mismatch")}
+        sp = self.dir / (r["flag"].lstrip("-") + ".strikes")
+        if r["verdict"] == "red" and not any(int(x) > 0 for x in FAIL_RE.findall(r["log"])):
+            if r["rc"] not in (124, 137) or self.strikes <= 0:
+                return
+            try:
+                n = int(sp.read_text()) + 1
+            except (OSError, ValueError):
+                n = 1
+            sp.write_text(f"{n}\n")
+            if n < self.strikes:
+                return
+            r = dict(r, timeout_strikes=n)
+        else:
+            sp.unlink(missing_ok=True)
+        rec = {k: r[k] for k in ("flag", "rc", "secs", "verdict", "mismatch") if k in r}
+        if r.get("timeout_strikes"):
+            rec["timeout_strikes"] = r["timeout_strikes"]
         rec["log_tail"] = r["log"][-4000:]
         rec["ts"] = int(time.time())
         p = self.dir / (r["flag"].lstrip("-") + ".json")
@@ -366,23 +382,65 @@ class Gate:
                 fh.write(f"{r['flag']}\t{r['secs']}\t{side}\t{r['verdict']}\n")
 
     def run_many(self, jobs, label):
-        """jobs: list of (side, tree, flag). Runs them on the pool; stops launching new ones on abort."""
-        with ThreadPoolExecutor(self.a.jobs) as pool:
-            futs = {}
-            for side, tree, flag in jobs:
-                futs[pool.submit(self._one, side, tree, flag)] = (side, flag)
-            for fut in as_completed(futs):
-                fut.result()
-                if label == "body":
-                    self.mass_red_check()
+        """jobs: list of (side, tree, flag), started in that order on a.jobs workers. With --main-lazy a merge red
+        queues its main run at the FRONT, so the pair finishes early and the tail stays short. Stops launching new
+        runs on abort."""
+        q = [(0, i, j) for i, j in enumerate(jobs)]
+        heapq.heapify(q)
+        cv = threading.Condition()
+        state = {"busy": 0, "seq": len(jobs), "err": None}
+
+        def worker():
+            while True:
+                with cv:
+                    while not q and state["busy"]:
+                        cv.wait()
+                    if not q or self.abort.is_set() or state["err"]:
+                        cv.notify_all()
+                        return
+                    side, tree, flag = heapq.heappop(q)[2]
+                    state["busy"] += 1
+                follow = None
+                try:
+                    r = self._one(side, tree, flag)
+                    if label == "body" and r:
+                        self.mass_red_check()
+                        follow = self.follow_up(side, r)
+                except Exception as e:  # noqa: BLE001 - re-raised after the pool drains
+                    state["err"] = e
+                with cv:
+                    if follow:
+                        heapq.heappush(q, (-1, state["seq"], follow))
+                        state["seq"] += 1
+                    state["busy"] -= 1
+                    cv.notify_all()
+
+        threads = [threading.Thread(target=worker, daemon=True) for _ in range(max(1, self.a.jobs))]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        if state["err"]:
+            raise state["err"]
+
+    def follow_up(self, side, r):
+        """--main-lazy: the main side only matters when the merge side is red (green merge = no NEW-RED)."""
+        f = r["flag"]
+        if not self.a.main_lazy or side != "merge" or r["verdict"] != "red" or f not in self.main_flags:
+            return None
+        with self.lock:
+            if f in self.res["main"]:
+                return None
+        return ("main", self.a.main, f)
 
     def _one(self, side, tree, flag):
         if self.abort.is_set():
-            return
+            return None
         r = run_flag(self.a.godot, tree, flag, self.a.timeout, self.extra)
         if self.abort.is_set():
             r["aborted"] = True
         self.record(side, r)
+        return r
 
     def red_both(self, f):
         return self.res["main"][f]["verdict"] == "red" and self.res["merge"][f]["verdict"] == "red"
@@ -395,6 +453,8 @@ class Gate:
             mg = list(self.res["merge"].values())
             mred = sum(1 for r in mg if r["verdict"] == "red")
         n, lo, frac = len(both), self.a.massred_min, self.a.massred_frac
+        if self.a.main_lazy:  # main only runs after a merge red, so pairs are mostly red: count against all merge runs
+            n = len(mg)
         if self.abort.is_set():
             return
         if n >= lo and len(red) / n >= frac:
@@ -439,9 +499,9 @@ class Gate:
         if a.flags:
             keep = set(Path(a.flags).read_text().split())
             flags = [f for f in flags if f in keep]
-        main_flags = set(suite_flags(a.main))
+        main_flags = self.main_flags = set(suite_flags(a.main))
         hist = load_history(a.history)
-        self.cache = None if a.no_cache else Cache(a.cache_dir, a.main, a.godot, self.extra)
+        self.cache = None if a.no_cache else Cache(a.cache_dir, a.main, a.godot, self.extra, a.timeout_strikes)
         scope = "full"
         if a.select_base:
             picked, why = select(a.merge, a.select_base)
@@ -467,7 +527,7 @@ class Gate:
         for f in flags:  # interleave so both sides of a flag land close together (mass-red sees pairs early)
             if f not in self.res["merge"]:
                 work.append(("merge", a.merge, f))
-            if f in main_flags and f not in self.res["main"]:
+            if f in main_flags and f not in self.res["main"] and not a.main_lazy:
                 work.append(("main", a.main, f))
         self.run_many(work, "body")
         return self.summary(flags, scope)
@@ -478,13 +538,16 @@ class Gate:
         new_red = [f for f in flags if g.get(f, {}).get("verdict") == "red" and m.get(f, {}).get("verdict") == "green"]
         fixed = [f for f in flags if g.get(f, {}).get("verdict") == "green" and m.get(f, {}).get("verdict") == "red"]
         both = [f for f in flags if g.get(f, {}).get("verdict") == "red" and m.get(f, {}).get("verdict") == "red"]
-        main_only = [f for f in flags if f not in m and g.get(f, {}).get("verdict") == "red"]
+        mf = getattr(self, "main_flags", set())
+        main_only = [f for f in flags if f not in mf and g.get(f, {}).get("verdict") == "red"]
         ran = sum(1 for s in m.values() if not s.get("cached")) + len(g)
         cached = sum(1 for s in m.values() if s.get("cached"))
+        lazy = sum(1 for f in flags if g.get(f, {}).get("verdict") == "green" and f not in m and f in mf)
         lines = [
             f"gate {'ABORTED' if self.abort.is_set() else 'done'}: {scope} suite, {len(flags)} flags,"
             f" wall {wall / 60:.1f} min,"
-            f" {ran} runs, {cached} main results from cache, jobs={self.a.jobs}, order={self.a.order}",
+            f" {ran} runs, {cached} main results from cache, jobs={self.a.jobs}, order={self.a.order}"
+            + (f", main skipped for {lazy} merge greens (--main-lazy)" if self.a.main_lazy else ""),
             f"merge red {sum(1 for r in g.values() if r['verdict'] == 'red')}/{len(g)},"
             f" main red {sum(1 for r in m.values() if r['verdict'] == 'red')}/{len(m)}",
             f"NEW-RED {len(new_red)}: {' '.join(new_red)}",
@@ -493,6 +556,9 @@ class Gate:
             f"fixed {len(fixed)}: {' '.join(fixed)}",
         ]
         mism = [f"{s}:{f}" for s in ("main", "merge") for f, r in self.res[s].items() if r.get("mismatch")]
+        tos = sorted(f for f, r in m.items() if r.get("cached") and r.get("timeout_strikes"))
+        if tos:
+            lines.append(f"main timeouts from cache (timed out in {self.a.timeout_strikes}+ gates) {len(tos)}: {' '.join(tos)}")
         if mism:
             lines.append(f"RC-MISMATCH {len(mism)}: {' '.join(mism)}")
         with open(self.out / "summary.txt", "a") as fh:
@@ -548,6 +614,11 @@ def main(argv=None):
     p.add_argument("--history", default=os.path.expanduser("~/.cache/boki-suite/history.tsv"))
     p.add_argument("--cache-dir", default=os.path.expanduser("~/.cache/boki-suite/main"))
     p.add_argument("--no-cache", action="store_true")
+    p.add_argument("--timeout-strikes", type=int, default=2,
+                   help="cache a main-side timeout as red after this many finished gates in a row timed out (0: never)")
+    p.add_argument("--main-lazy", action="store_true",
+                   help="run the main side only for flags red on merge (a merge green cannot be NEW-RED);"
+                   " 'fixed' then lists only flags whose main red is known (cache or run)")
     p.add_argument("--order", choices=("lpt", "registry"), default="lpt")
     p.add_argument("--canary", default="", help="comma list of known-stable flags (canary.txt)")
     p.add_argument("--canary-frac", type=float, default=0.5, help="ENV-BROKEN when this share is red on both")

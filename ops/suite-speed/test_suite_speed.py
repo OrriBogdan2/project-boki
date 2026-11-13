@@ -18,8 +18,10 @@ for a; do last=$a; done
 case "$FAKE_MODE" in
   broken) echo "ERROR: no display"; exit 1;;
   mismatch) echo "X DONE, failures: 0"; exit 1;;
+  hang) case " $FAKE_CRASH " in *" $last "*) echo "SCRIPT ERROR: slow"; exit 124;; esac;;
   crash) case " $FAKE_CRASH " in *" $last "*) echo "SCRIPT ERROR: boom"; exit 1;; esac;;
 esac
+case "$*" in *"/merge "*) case " $FAKE_RED_MERGE " in *" $last "*) echo "X DONE, failures: 1"; exit 1;; esac;; esac
 case " $FAKE_RED " in *" $last "*) echo "X DONE, failures: 2"; exit 1;; esac
 echo "X DONE, failures: 0"; exit 0
 """
@@ -86,7 +88,7 @@ def main():
         (tmp / "godot").chmod(0o755)
         make_tree(tmp / "main")
         make_tree(tmp / "merge")
-        base = {"FAKE_MODE": "", "FAKE_RED": "", "FAKE_CRASH": ""}
+        base = {"FAKE_MODE": "", "FAKE_RED": "", "FAKE_CRASH": "", "FAKE_RED_MERGE": ""}
 
         rc, summ, runs = gate(tmp, "broken", {**base, "FAKE_MODE": "broken"})
         expect(rc == 3 and "ENV-BROKEN: canary 4/4" in summ, "broken env stops at the canary with ENV-BROKEN")
@@ -113,6 +115,30 @@ def main():
         expect(runs == 8 + 9 + 1, f"second gate runs canary pairs + other merge flags + the uncached crash ({runs})")
         expect(rc == 1 and "NEW-RED 1: --c8-check" in summ, "a cached green still makes a merge red NEW-RED")
         expect("--c5-check" in summ.split("red on both")[1].split("\n")[0], "a cached red still counts as red")
+
+        lz = {**red, "FAKE_RED_MERGE": "--c9-check"}
+        rc, summ, runs = gate(tmp, "lazy", lz, "--no-cache", "--main-lazy")
+        main_runs = sum(1 for _ in (tmp / "lazy/main").glob("*.secs"))
+        expect(rc == 1 and "NEW-RED 1: --c9-check" in summ, "lazy: a merge red against a main green is NEW-RED")
+        expect("red on both 3" in summ, "lazy: reds on both trees still found")
+        expect(main_runs == 4 + 4, f"lazy: main runs = 4 canaries + 4 merge reds ({main_runs})")
+        rc, summ, runs = gate(tmp, "lazyb", {**base, "FAKE_MODE": "broken"}, "--no-canary", "--massred-min", "4",
+                              "--main-lazy", "--no-cache")
+        expect(rc == 3 and "mass red" in summ, "lazy: mass-red guard still stops a broken env")
+        ok_env = {**base, "FAKE_RED": " ".join(f"--c{i}-check" for i in range(5, 12))}
+        rc, summ, runs = gate(tmp, "lazyok", ok_env, "--no-canary", "--massred-min", "4", "--main-lazy", "--no-cache")
+        expect(rc == 0 and "ENV-BROKEN" not in summ, "lazy: 7/13 red on both (a sane red-heavy tree) is no ENV-BROKEN")
+
+        hang = {**base, "FAKE_MODE": "hang", "FAKE_CRASH": "--c10-check"}
+        args = ("--no-canary", "--cache-dir", str(tmp / "tcache"))
+        gate(tmp, "to1", hang, *args)
+        tc = tmp / "tcache"
+        expect(not list(tc.rglob("c10-check.json")), "a first main timeout is not cached")
+        rc, summ, _ = gate(tmp, "to2", hang, *args)
+        expect(list(tc.rglob("c10-check.json")), "a second timeout in a row is cached")
+        rc, summ, runs = gate(tmp, "to3", hang, *args)
+        expect("main timeouts from cache (timed out in 2+ gates) 1: --c10-check" in summ and "red on both 1" in summ
+               and runs == 13, f"third gate: cached timeout counts as red, main not re-run ({runs} runs)")
 
         hist = tmp / "h.tsv"
         hist.write_text("--c1-check\t5\n--c2-check\t50\n--c2-check\t60\n--c3-check\t20\n")
