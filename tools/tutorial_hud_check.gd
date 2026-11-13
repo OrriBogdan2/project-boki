@@ -1,7 +1,7 @@
 extends RefCounted
 ## --tutorial-hud-check: the tutorial shows one voice at a time, in its own lanes.
-##   1. the lanes at 1280x720 and 1920x1080: the step panel is at most 35% of the width and 10% of the
-##      height and, even with its second line, stays in the top fifth; no two lanes (panel, check,
+##   1. the lanes at 1280x720, 1920x1080 and 3440x1440: the step strip is one line, at most 42% of the width
+##      and 6% of the height, at the top-centre inside the safe margin; no two lanes (strip, check,
 ##      toasts, intro) intersect, none sits in the middle
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
@@ -15,7 +15,7 @@ var bad := 0
 var m: Match
 var main: Node
 
-const SIZES := [Vector2(1280, 720), Vector2(1920, 1080)]
+const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(3440, 1440)]
 
 func ok(cond: bool, what: String) -> void:
 	print("TUTHUD %s %s" % ["PASS" if cond else "FAIL", what])
@@ -36,11 +36,14 @@ func _lanes() -> void:
 		var ln := TutorialHud.lanes(sz)
 		var b: Rect2 = ln["banner"]
 		var tag := "%dx%d" % [sz.x, sz.y]
-		var small: bool = b.size.x <= sz.x * 0.35 + 0.5 and b.size.y <= sz.y * 0.10 + 0.5
-		ok(small, "%s: the banner is at most 35%% x 10%% of the screen (%s)" % [tag, str(b.size)])
-		var tall_end := b.position.y + b.size.y * TutorialHud.DETAIL_K
-		var top_fifth := "%s: the panel with its second line stays in the top fifth (%.0f)" % [tag, tall_end]
-		ok(tall_end <= sz.y * 0.2 + 0.5, top_fifth)
+		var small: bool = b.size.x <= sz.x * TutorialStrip.WIDTH_FRAC + 0.5 and b.size.y <= sz.y * 0.06 + 0.5
+		ok(small, "%s: the strip is at most 42%% x 6%% of the screen (%s)" % [tag, str(b.size)])
+		var margin := maxf(24.0, sz.y * 0.04)
+		var in_safe := b.position.y >= margin - 0.5 and b.position.x >= margin
+		ok(in_safe, "%s: the strip is inside the safe margin (%.0f)" % [tag, b.position.y])
+		ok(absf(b.get_center().x - sz.x * 0.5) < 1.0, "%s: the strip is at the top-centre" % tag)
+		var pulse_ok := TutorialStrip.glow(0.0) == 1.0 and TutorialStrip.glow(TutorialStrip.PULSE_T) == 0.0
+		ok(pulse_ok, "%s: the glow starts full on a new objective and is calm after PULSE_T" % tag)
 		var centre := Rect2(sz * Vector2(0.3, 0.25), sz * Vector2(0.4, 0.45))
 		var names: Array = ln.keys()
 		var clash := ""
@@ -53,6 +56,13 @@ func _lanes() -> void:
 					clash += " %s/%s" % [names[i], names[j]]
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
+		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
+		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
+		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
+		var gb := TutorialStrip.rect(sz, wo_b)
+		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
+		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])
 
 # ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:
