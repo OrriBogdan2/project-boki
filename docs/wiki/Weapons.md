@@ -40,11 +40,11 @@ No weapon is ever found or swapped: every hunter carries one signature weapon. I
 | Hotload | Your weapon hits 10% harder. | 4 |
 | Deep Magazine | 20% more rounds before a reload. | 3 |
 | Quick Feed | Your weapon fires 7% faster. | 3 |
-| Long Reach | 12% more range (and reach, for blades). | 2 |
+| Long Reach | 12% more range, or reach for blades. | 2 |
 | Ember Brand | Your hits burn: 5 damage a second for 3s. | 1 |
-| Rime Brand | Your hits chill, and every 5th freezes. | 1 |
-| Storm Brand | Every 4th hit arcs to 2 more foes. | 1 |
-| Venom Brand | Your hits poison and slow. | 1 |
+| Rime Brand | Your hits slow 35% for 1s, and every 5th roots for 0.6s. | 1 |
+| Storm Brand | Every 4th hit arcs to 2 more foes for half damage. | 1 |
+| Venom Brand | Your hits poison for 3 damage a second for 3s and slow 35% for 0.35s. | 1 |
 | Hollow Brand | Your hits heal you for 8% of the damage. | 1 |
 
 ## Weapon elements
@@ -80,30 +80,30 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Perk | Effect | Stacks |
 |---|---|---|
 | Quick Hands | Reload 30% faster. | 1 |
-| Second Wind | One extra dash charge. | 1 |
-| Featherfall | Your glider lasts 60% longer. | 1 |
+| Second Wind | Dashes recharge 5% faster. | 1 |
+| Featherfall | Your glider holds 60% more heat. | 1 |
 | Scavenger | Gems you pick up are worth 25% more. | 2 |
-| Tough Skin | +15 max health, healed right away. | 3 |
+| Tough Skin | +8 max health, healed right away. | 3 |
 | Overcharge | Your bond ultimate charges 30% faster. | 1 |
 | Keen Edge | 8% more damage. | 3 |
-| Fleet Foot | 6% faster on foot. | 2 |
+| Fleet Foot | 1% faster on foot. | 2 |
 | Plating | +20 max armor. | 2 |
-| Clear Mind | Abilities recharge 12% faster. | 2 |
+| Clear Mind | Abilities recharge 5% faster. | 2 |
 | Tailwind | Glide 15% faster. | 1 |
-| Remedy | Tonics heal 40% more. | 1 |
-| Field Surgeon | Needle and thread: tonics heal 35% more. | 1 |
-| Magpie Pouch | Shiny things stick: gems you pick up are worth 25% more. | 1 |
-| Wayfarer's Satchel | A deep bag: one more backpack slot. | 2 |
-| Brass Spyglass | See 12% further through grass and gloom. | 1 |
-| Tinker's Roll | A roll of small tools: reloads 15% faster. | 1 |
+| Remedy | Heals on you are 10% stronger. | 1 |
+| Field Surgeon | Tonics heal 35% more. | 1 |
+| Magpie Pouch | Gems you pick up are worth 25% more. | 1 |
+| Wayfarer's Satchel | One more backpack slot. | 2 |
+| Brass Spyglass | See 12% further while sneaking. | 1 |
+| Tinker's Roll | Reload 15% faster. | 1 |
 | Hotload | Your weapon hits 10% harder. | 4 |
 | Deep Magazine | 20% more rounds before a reload. | 3 |
 | Quick Feed | Your weapon fires 7% faster. | 3 |
-| Long Reach | 12% more range (and reach, for blades). | 2 |
+| Long Reach | 12% more range, or reach for blades. | 2 |
 | Ember Brand | Your hits burn: 5 damage a second for 3s. | 1 |
-| Rime Brand | Your hits chill, and every 5th freezes. | 1 |
-| Storm Brand | Every 4th hit arcs to 2 more foes. | 1 |
-| Venom Brand | Your hits poison and slow. | 1 |
+| Rime Brand | Your hits slow 35% for 1s, and every 5th roots for 0.6s. | 1 |
+| Storm Brand | Every 4th hit arcs to 2 more foes for half damage. | 1 |
+| Venom Brand | Your hits poison for 3 damage a second for 3s and slow 35% for 0.35s. | 1 |
 | Hollow Brand | Your hits heal you for 8% of the damage. | 1 |
 
 ## Without a class kit

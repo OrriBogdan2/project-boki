@@ -2517,7 +2517,8 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 		if d < near:
 			return true
 		# sneaking (Ctrl) slows you but lets you see further, as in Supervive
-		if d > rng * (1.25 if h.crouch else 1.0) * (1.0 + h.gear_stat("sight")) or (in_grass and not revealed):
+		var sight: float = 1.0 + h.gear_stat("sight") + (h.gear_stat("sneak_sight") if h.crouch else 0.0)
+		if d > rng * (1.25 if h.crouch else 1.0) * sight or (in_grass and not revealed):
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue

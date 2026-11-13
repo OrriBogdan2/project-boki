@@ -375,7 +375,7 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	return base + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
@@ -1790,6 +1790,7 @@ func heal(n: float) -> void:
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
+	n *= 1.0 + gear_stat("heal_in")     # Remedy: healing on you is stronger
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	if hp - before > 1.0:
@@ -2956,13 +2957,8 @@ func add_perk(id: String) -> void:
 	if not Data.PERKS.has(id) or not perk_open(id):
 		return
 	perks.append(id)
-	match id:
-		"toughskin":
-			max_hp += 15.0; hp = minf(max_hp, hp + 15.0)
-		"featherfall":
-			glide_max *= 1.6
-		"secondwind":
-			dashes = minf(max_dashes(), dashes + 1.0)
+	var add_hp := float(Data.PERKS[id].get("hp", 0.0))     # Tough Skin: max health, healed at once
+	max_hp += add_hp; hp = minf(max_hp, hp + add_hp)
 	if (Data.PERKS[id] as Dictionary).has("wup"):
 		WeaponUps.apply(self)
 	refresh_gear()
