@@ -7,6 +7,9 @@ extends RefCounted
 ## a match, and where the player left it is kept (Settings "cam_zoom"); if a player binds it to an action in
 ## Settings, that action wins and the wheel stops zooming.
 
+const HINT := "cam_zoom"      # Save.d["tutorial"] key: the wheel hint was shown or the wheel was used
+const HINT_AFTER_S := 8.0      # s into the match before the hint, after the move hint (6 s) has gone
+
 static func rules() -> Dictionary:
 	return CamRig.RULES["zoom"]
 
@@ -28,7 +31,15 @@ static func input(m: Match, event: InputEvent) -> bool:
 	var r: Dictionary = rules()["match"]
 	m.cam.user_zoom = clampf(m.cam.user_zoom + step * float(r["step"]), float(r["min"]), float(r["max"]))
 	Settings.set_v("cam_zoom", m.cam.user_zoom, false)
+	Save.d["tutorial"][HINT] = true      # zoomed: the hint has done its job
 	return true
+
+## The first-match hint for the wheel (Match._tips calls it once the player is on the ground): one line,
+## until the wheel has zoomed or the line has shown once. Skipped when the player bound the wheel to an action.
+static func hint(m: Match) -> void:
+	if _bound(MOUSE_BUTTON_WHEEL_UP) or _bound(MOUSE_BUTTON_WHEEL_DOWN):
+		return
+	m._tip(HINT, "Mouse wheel zooms the view  ·  hold %s to sneak and see wider" % Settings.key_cap("crouch"))
 
 ## The zoom a match starts at: where the player left the wheel (Settings "cam_zoom"), inside the range; until
 ## they first turn it, the widest for an expedition (`host` is its Match) and the style's own framing elsewhere.

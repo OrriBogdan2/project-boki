@@ -9,6 +9,9 @@ extends RefCounted
 static func target(h, k: Dictionary) -> Vector3:
 	if not FarmTutorial.base() or k["rec"] != Save.active_kin() or not h.visit.is_empty():
 		return Vector3.INF
+	var wild := VisitorIntro.lead_at(h, k)      # the first wild visitor on a save: your partner runs to it
+	if wild.x != INF:
+		return wild
 	var id := FarmTutorial.current()
 	if id == "toy" and FarmTutorial.stage(id) == "watch":
 		return FarmTutorial.toy_spot()
@@ -35,7 +38,7 @@ static func tick(h, k: Dictionary) -> bool:
 	else:
 		k["goal"] = at - Vector3(to.x, 0, to.y).normalized() * float(L["stop_m"]) * 0.8
 	var id := FarmTutorial.current()
-	if String(k.get("lead_said", "")) != id:
+	if id != "" and String(k.get("lead_said", "")) != id:
 		k["lead_said"] = id
 		h._say(k, String(FarmTutorial.step_def(id).get("boki", "")))
 	return true

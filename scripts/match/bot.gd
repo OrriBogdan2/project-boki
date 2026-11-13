@@ -753,10 +753,10 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
-	if best != a.get("tgt"):
-		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	if m.zone and m.zone.k > 0 and m.zone.outside(h.pos):
 		best = null      # outside the zone's edge: get inside before anything else
+	if best != a.get("tgt"):
+		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	a["tgt"] = best
 	if best:
 		return

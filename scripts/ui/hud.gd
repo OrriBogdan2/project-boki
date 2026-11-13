@@ -323,7 +323,7 @@ func _draw_all() -> void:
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
 		if not p.riding:
-			_draw_prompt(sz, p)
+			if TutorialHud.prompt_shows(m): _draw_prompt(sz, p)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
 			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
@@ -592,6 +592,7 @@ func _draw_top(sz: Vector2) -> void:
 		TutorialHud.draw(self, sz)
 		return
 	if m.guide: m.guide.draw(self, sz)
+	if m.crouch_hint: m.crouch_hint.draw(self, sz)
 	feed_top = AliveCounter.draw(c, m)       # top right: squads and players left, your own numbers
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
@@ -1740,7 +1741,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 		if not WaysOutHud.gate_prompt(self, sz, y, it):
 			var s: String = it["label"]
 			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-			if not (m.tut and m.tut.prompt_quiet()):      # (the tutorial card says it: only the bar stays)
+			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
 			if prog > 0.0:
@@ -1994,8 +1995,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			out.append(["%s  ·  tap: Sic %s at the cursor, or Call it back when it is away (it hits what it passes). Hold: Chase, Guard, Return or Follow. A downed Boki stays where it fell: run into it to bring it back." % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")], INK, 13])
 			return out
 	var si := p.slot_info(id)
-	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Ability", "k1": "Utility", "r": "Ultimate", "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
