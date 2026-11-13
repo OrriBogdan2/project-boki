@@ -269,7 +269,8 @@ Still differs:
 
 Seen in the reel: the cyan orb is in her palm from the first frame; the hose is a narrow-then-billowing orange stream
 like the footage [F 0024]; the RMB aim is a white lane with an arrow tip and the bolt hits with FLASHOVER and an
-orange sunburst [F 0077]; the Cloak is a crackle of yellow sparks round her and the dummy, not the footage's
+orange sunburst [F 0077]; the Cloak (re-rendered with the dummy inside the 4.5 m pull, `ext/vfx-cinder-cloak-swirl`) is a thin lit swirl
+running in from the 4.5 m edge with the pull, then a lit shield swirl on her per foe caught, like the footage's
 swirling shield ring [F 0186]; Flue Flight lays a thick orange fire carpet and carries the dummy with her to the
 island rim, close to the footage's wide magma band [F 0226].
 
