@@ -45,7 +45,7 @@ pictures.
 | 32 | **Plan your drop** ([32](ui_first15/1280x720/32_expedition_plan.jpg)) | **7+** | **yes, the worst** | title and timer, squad panel, full map, "This match" legend (4 kinds + 4 states), "Ways out" (5), bottom HUD, counters |
 | 33 | Ship ([33](ui_first15/1280x720/33_expedition_ship.jpg)) | 9 | **yes** | the match HUD, with locked ability slots reading "UNLOCK" |
 | 34-35 | Landed, 15 s ([35](ui_first15/1280x720/35_expedition_15s.jpg)) | **10** | **yes** | minimap, clock, status strip (Dusk / Sight), counters, vitals, abilities, glider strip, belt, Q/V/X, weapon, plus the Truce chip |
-| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (F1)", Leave match, Save and quit |
+| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (`)", Leave match, Save and quit |
 
 **Breaches (over about 5):** tutorial landing and every tutorial step (9-12), the first expedition HUD (9-10), Plan your drop (7+), the expedition panel
 and the Relics page (6 blocks each, plus 12 Relic tiles). The in-match HUD is the same 9 blocks from the first second; nothing is introduced a step at a time,

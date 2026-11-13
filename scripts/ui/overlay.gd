@@ -52,7 +52,7 @@ func is_open() -> bool:
 	return page != ""
 
 ## Admin tools are for the game's owner: always on desktop, and on the web for the artifact's owner. They are hidden
-## (no F1 / ` panel, no Admin or Mod mode entries in the menus) only when launched with `-- --showcase`, or while
+## (no ` panel, no Admin or Mod mode entries in the menus) only when launched with `-- --showcase`, or while
 ## recording mode (F10) is on, so filmed footage never shows them.
 func admin_allowed() -> bool:
 	if OS.get_cmdline_user_args().has("--showcase") or Record.clean():
@@ -92,7 +92,7 @@ func _input(event: InputEvent) -> void:
 			elif page == "": open_inventory()
 			get_viewport().set_input_as_handled()
 			return
-		if (k == KEY_F1 or (k == KEY_QUOTELEFT and not typing)) and admin_allowed() and Game.main and ctx_now() != "title":
+		if k == KEY_QUOTELEFT and not typing and admin_allowed() and Game.main and ctx_now() != "title":
 			if page == "admin": close()
 			else: open_admin()
 			get_viewport().set_input_as_handled()
@@ -255,7 +255,7 @@ func open_pause(where: String) -> void:
 			scr.unstick()
 			Sfx.play("whoosh")))
 	if admin_allowed():
-		minor.add_child(UI.ghost("Admin tools  (F1)", open_admin))
+		minor.add_child(UI.ghost("Admin tools  (`)", open_admin))
 	if minor.get_child_count() > 0:
 		v.add_child(minor)
 	v.add_child(UI.spacer(2))
@@ -330,7 +330,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
-		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
+		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (`)")
 
 func _tab_controls(v: VBoxContainer) -> void:
 	_group(v, "How keys behave")
@@ -345,7 +345,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		] + KinKeys.ids()],
-		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
+		["Squad and map", ["ping", "map", "scores", "emote"] + MateLook.ACTIONS + ["pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
 	for a in Settings.ACTIONS:
@@ -807,7 +807,7 @@ func open_admin() -> void:
 		stack.append(page)
 	var c := ctx_now()
 	var v := _page("admin", "Admin tools", 640)
-	v.add_child(UI.label("For testing. F1 or ` opens this anywhere.", 13, UI.MUTED))
+	v.add_child(UI.label("For testing. ` opens this anywhere.", 13, UI.MUTED))
 	var god := CheckButton.new()
 	god.text = "God mode: can't be hurt or fall, no cooldowns, endless ammo"
 	god.button_pressed = Game.god

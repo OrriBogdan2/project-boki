@@ -14,6 +14,8 @@ const CHECKS := {
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
 	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],      # a second launch, for benches
 	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],      # quick Boki command keys
+	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
+	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart early seat (0023, 0051)
 	# the Ways Out strip and Gate prompt
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
