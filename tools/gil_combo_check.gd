@@ -3,8 +3,9 @@ extends "res://tools/hero_pair_check.gd"
 ## scripts/arch/kits/gil_kit.gd, docs/heroes/gil.md), on a training dummy through the real match code: the Fencer
 ## chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each vial's effect, hold range, the air drop), Fish
 ## Out of Water (three marks Beach), Ground Swim (hittable, surfacing knocks up), Riptide (spin damage, the spout's
-## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Then
-## gil.md's tables: each slot's numbers, the cancels, the Riptide recast window, the clips, and the dash-flow rows
+## knockup, longer spin = wider spout) and Tidal Wave (untargetable, knockup then slow, lands with a shield). Each
+## cast plays its own move, and every move has his clip. Then gil.md's tables: each slot's numbers, the
+## cancels, the Riptide recast window, the clips, and the dash-flow rows
 ## (tools/dash_flow_check.gd).
 
 var m: Match
@@ -31,6 +32,7 @@ func run(main_node: Node) -> void:
 	_swim()
 	_riptide()
 	_wave()
+	_moves()
 	_numbers()
 	_cancels()
 	_recast()
@@ -283,6 +285,35 @@ func _wave() -> void:
 		P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
 	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
+
+## The moves each cast plays (KMovesDJ ids, content/rules/warden_anim/gil.json), in the order they play.
+func _moves() -> void:
+	var seen: Array = []
+	var watch := func():
+		if K.anim_id != "" and (seen.is_empty() or seen[-1] != K.anim_id):
+			seen.append(K.anim_id)
+	_reset(6.0)
+	tap(m, P)
+	watch.call()
+	K.on_dash(false)
+	step(m, 0.8, watch)
+	K.use_e()
+	step(m, 0.3, watch)
+	K.e_recast()
+	step(m, 0.1, watch)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	K.cast_ult()
+	step(m, 1.3, watch)
+	var want := ["gil_toss", "gil_swim", "gil_surface", "gil_spin", "gil_spout", "gil_surf", "gil_wave_land"]
+	ok("moves: the Grab Bag, Ground Swim, Riptide and Tidal Wave each play theirs", seen == want, str(seen))
+	var clips: Dictionary = WardenClips.data("gil").get("kmoves", {})
+	var bare := want.filter(func(mv: String) -> bool: return not clips.has(mv))
+	ok("moves: each has a clip in his map", bare.is_empty(), str(bare))
+	_reset(6.0)
+	K.use_e()
+	K.drop_holds()
+	ok("moves: a spin cut short (a stun) lets go of the twirl", K.anim_id == "", K.anim_id)
 
 # ------------------------------------------------------------------ gil.md: numbers per slot
 ## One press of a one-step key (Hunter.inp: "sig" E, "sec" RMB, "dash" Shift, "jump"), held for a single step.
