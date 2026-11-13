@@ -1,5 +1,6 @@
 extends RefCounted
-## --sfx-set-check: the sound sets in content/sfx/*.json (docs/AUDIO.md).
+## --sfx-set-check: the sound sets in content/sfx/*.json (docs/AUDIO.md), and every menu control's sound
+## (_menus: Settings, the inventory and the Field Book).
 ##   1. every listed sound has a file (audio/<name>.wav or its takes <name>_1..4.wav)
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
@@ -48,6 +49,7 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	await _menus(main)
 	_dash_air()
 	_fallback()
 	_ult_cues()
@@ -414,3 +416,110 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## The menus (UiSfx, Ui.button), walked tab by tab: Settings, the inventory and the Field Book. Every
+## tab plays the tab sound; a slider ticks once for a burst of steps; a toggle sounds higher turning on
+## than off; a dropdown sounds; a Field Book tile sounds when pointed at and when picked, and its page's
+## way back sounds. Each control is put back as it was and the save is never written.
+func _menus(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	var spk := String(FieldBook.entries()[0])
+	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
+	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
+	var off := []
+	Overlay.open_settings()
+	for t in Overlay.SETTINGS_TABS:
+		await _settle(main)
+		if not _press_tab(t):
+			off.append("tab %s silent" % t)
+		await _settle(main)
+		_walk("settings > " + t, seen, off)
+	var said := "settings: all %d tabs sound, %d sliders tick once a burst, %d toggles sound higher on than off," % [
+		Overlay.SETTINGS_TABS.size(), seen["slider"], seen["toggle"]]
+	var all_found: bool = seen.values().all(func(n): return n > 0)
+	ok(off.is_empty() and all_found, "%s %d dropdowns sound %s" % [said, seen["dropdown"], off])
+	Overlay.close()
+	off.clear()
+	Overlay.inv_tab = "Items"
+	await _settle(main)
+	Overlay.open_inventory()
+	var inv_tabs := Overlay.root.find_children("*", "Button", true, false).map(func(b): return b.get_meta("tab", ""))
+	inv_tabs = inv_tabs.filter(func(t): return t != "")
+	for t in inv_tabs:
+		await _settle(main)
+		if not _press_tab(t):
+			off.append("tab %s silent" % t)
+		await _settle(main)
+		_walk("inventory > " + t, seen, off)
+	ok(off.is_empty() and inv_tabs.has("Field Book"), "inventory: all %d tabs sound %s" % [inv_tabs.size(), off])
+	await _field_book(main)
+	Overlay.close()
+
+## The Field Book tab is open: its met Boki's tile, then that Boki's page and the way back.
+func _field_book(main: Node) -> void:
+	var tile: Control = null
+	for g in Overlay.root.find_children("*", "GridContainer", true, false):
+		for t in g.get_children():
+			if tile == null and t is PanelContainer and t.focus_mode == Control.FOCUS_ALL:
+				tile = t
+	var pointed := tile != null and _heard("hover", tile.mouse_entered.emit) > 0.0
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	var picked := tile != null and _heard("click", func(): tile.gui_input.emit(click)) > 0.0
+	await _settle(main)
+	var opened := Overlay.page == "dex"
+	var back: Button = Overlay.root.find_child("Close", true, false)
+	var went_back := back != null and _heard("click", back.pressed.emit) > 0.0 and Overlay.page == "inventory"
+	ok(pointed and picked and opened and went_back,
+		"field book: a tile sounds pointed at (%s) and picked (%s), its page opens (%s), Back sounds and returns (%s)"
+		% [pointed, picked, opened, went_back])
+
+## Presses the tab named `t` in the open menu; true when it played the tab sound.
+func _press_tab(t: String) -> bool:
+	for b in Overlay.root.find_children("*", "Button", true, false):
+		if b.get_meta("tab", "") == t:
+			return _heard("ui_tab", b.pressed.emit) > 0.0
+	return false
+
+## One frame, so the page a menu just replaced is gone before the next look.
+func _settle(main: Node) -> void:
+	await main.get_tree().process_frame
+
+## Moves every slider, toggle and dropdown in the open menu and back, counting each in `seen`; what
+## stayed silent (or ticked twice in a burst, or sounded no higher on than off) goes in `off`.
+func _walk(where: String, seen: Dictionary, off: Array) -> void:
+	for c in Overlay.root.find_children("*", "Control", true, false):
+		if c is Slider:
+			var s: Slider = c
+			var was := s.value
+			var ticked := _heard("hover", func(): s.value = s.max_value if was < s.max_value else s.min_value) > 0.0
+			var again := _heard("hover", func(): s.value = was) > 0.0       # inside SLIDER_GAP_MS
+			seen["slider"] += 1
+			if not ticked or again:
+				off.append("%s: slider %s" % [where, "silent" if not ticked else "ticks every step"])
+		elif c is CheckButton or c is CheckBox:
+			var b: BaseButton = c
+			var was_on := b.button_pressed
+			var first := _heard("click", func(): b.button_pressed = not was_on)
+			var second := _heard("click", func(): b.button_pressed = was_on)
+			var on_pitch := second if was_on else first
+			var off_pitch := first if was_on else second
+			seen["toggle"] += 1
+			if off_pitch <= 0.0 or on_pitch <= off_pitch:
+				off.append("%s: toggle %s on %.2f off %.2f" % [where, b.text, on_pitch, off_pitch])
+		elif c is OptionButton and (c as OptionButton).selected >= 0:
+			var ob: OptionButton = c
+			seen["dropdown"] += 1
+			if _heard("ui_tab", func(): ob.item_selected.emit(ob.selected)) <= 0.0:
+				off.append("%s: dropdown silent" % where)
+
+## Runs `act` with every sound's repeat gap cleared: the pitch `sname` played at, or 0 when it was silent.
+func _heard(sname: String, act: Callable) -> float:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	act.call()
+	if not Sfx.last_played.has(sname):
+		return 0.0
+	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
