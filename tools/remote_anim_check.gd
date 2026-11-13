@@ -303,7 +303,8 @@ func _on_msg(topic: String, data, from: String) -> void:
 				last_row = ["?", "?"]
 				cone_len = 0.0
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone_len})
+				var reply := {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone_len}
+				Net.lobby_emit("dn_r", reply)
 		return
 	super._on_msg(topic, data, from)
 

@@ -585,9 +585,8 @@ func render(delta: float, alpha: float) -> void:
 			hood.rotation.y = lerp_angle(hood.rotation.y, 0.0, delta * 4.0)
 	# the embers breathe; brighter as it winds up, flaring on a shriek
 	if model.has_meta("ember"):
-		var flare: float = (
-			1.0 + wind * 1.4 + (1.6 if m.time - shriek_t < 0.6 else 0.0) + spot * (3.0 if mkind == "bl_nest" else 0.8)
-		)
+		var spot_k := 3.0 if mkind == "bl_nest" else 0.8
+		var flare: float = 1.0 + wind * 1.4 + (1.6 if m.time - shriek_t < 0.6 else 0.0) + spot * spot_k
 		if mkind == "bl_nest":
 			flare *= 0.25 + 0.75 * clampf(cone_a * 3.0, 0.0, 1.0)
 		for em in model.get_meta("ember"):
