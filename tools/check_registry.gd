@@ -197,6 +197,7 @@ const CHECKS := {
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
 	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
+	"--shader-check": ["res://tools/shader_check.gd", "shader_check", null],      # compile + uniform names
 	"--cinder-art-check": ["res://tools/cinder_art_check.gd", "cinder_art_check", null],
 	"--ryzz-live-check": ["res://tools/ryzz_live_check.gd", "ryzz_live_check", null],
 	"--clip-live-claire-check": ["res://tools/clip_live_claire_check.gd", "clip_live_claire_check", null],
