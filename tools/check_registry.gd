@@ -153,6 +153,7 @@ const CHECKS := {
 	"--audio-settings-check": ["res://tools/audio_settings_check.gd", "audio_settings_check", null],
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],  # (the old name)
+	"--sfx-fight-bench": ["res://tools/sfx_fight_bench.gd", "sfx_fight_bench", null],  # voices, audio cpu
 	# sounds behind terrain
 	"--sfx-occlusion-check": ["res://tools/sfx_occlusion_check.gd", "sfx_occlusion_check", null],
 	"--flyby-check": ["res://tools/flyby_check.gd", "flyby_check", null],

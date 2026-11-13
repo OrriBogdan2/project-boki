@@ -1658,6 +1658,20 @@ Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each 
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## sfx_voices (`content/rules/sfx_voices.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Voice budget of the Sfx pool (docs/AUDIO.md, decision 2026-11-08: a 30-player expedition is ~60 animated characters). cap: most one-shot voices sounding at once on each bus (SFXMuffled: sounds behind terrain), a new sound past it steals the lowest-priority voice or is dropped. own_m: a sound this close to the listener is your own (your Hunter, your Boki, a hit on you) and is never stolen. keep: cues that are never stolen wherever they play (warnings, recasts, your hurt). cheap: name fragments of footsteps and Boki chatter, the first to go when they are far. |
+| cap | {"SFX": 12, "SFXFar": 4, "SFXMuffled": 4} |
+| cap_unit | voices per bus (pool size is Sfx.POOL = 24) |
+| own_m | 2 |
+| own_m_unit | metres from the listener |
+| keep | ["warn", "recall", "hurt", "reset_a", "reset_b", "reset_c", "ab_ready", "knock_confirm"] |
+| cheap | ["step", "kin_", "kinhit", "boki_"] |
+
 ## show_ring (`content/rules/show_ring.json`)
 
 Show Ring, a judged show on a small stage near the Training post (briefs/design/GARDEN_MODERN.md 4.2 game 3, scripts/home/show_ring.gd). Only with farm_build.json base_mode on. Two rested Boki show: the one you back and a rival. Three rounds of up to 10 points each: Look (how it has been raised), Trick (three timed presses, the trick picked by its best stat) and Bond (it walks to you past a snack, a toy and the rival; you call as it passes each). Three judges post a taste for the week; each judge whose taste the Boki fits adds taste_bonus. Every score is worked out from the records and the presses only, so the same Boki and presses always score the same. Units: seconds, points, needs and trust 0-100, traits 0-1.
