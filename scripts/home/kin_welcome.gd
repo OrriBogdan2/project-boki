@@ -3,7 +3,8 @@ extends RefCounted
 ## Coming home is a moment: after a real absence (an expedition, or the game closed a while) the
 ## Boki out on the farm notice you and run over, the ones that trust you most first, each with a
 ## "!" and then a hello when they reach you. It uses the whistle's come-to-you run (called_t in
-## home.gd _move_kin). Napping Boki sleep on; wary ones (trust under SHY) don't come.
+## home.gd _move_kin). Napping Boki sleep on; wary ones (trust under SHY) don't come. In base_mode
+## BaseGreet does it instead, as a BaseLife state.
 
 const AWAY_MIN := 120.0      # seconds away before they rush over (less is a trip to a menu)
 const START_S := 1.2         # beat after you arrive before the first one notices you
@@ -21,6 +22,9 @@ static func away_secs() -> float:
 
 static func start(home: Node, away: float) -> void:
 	if away < AWAY_MIN or not home.visit.is_empty():
+		return
+	if home.life:
+		home.life.arrival = true      # base_mode: the garden greets you through each Boki's machine (BaseGreet)
 		return
 	var keen: Array = home.kins.filter(func(k): return float(k["rec"].get("trust", 0.0)) >= SHY)
 	keen.sort_custom(func(a, b): return float(a["rec"]["trust"]) > float(b["rec"]["trust"]))

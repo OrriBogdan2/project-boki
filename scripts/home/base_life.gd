@@ -11,16 +11,17 @@ extends RefCounted
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
 ## nap in a pile; rivals stare and huff. A Boki that would thrive in another open zone sometimes goes
 ## and waits at the return pad with a bubble: it looks at the pad (HubWaystone.pad) the way it comes
-## to look at a newcomer, and E on it sends it (HubWaystone.answer); ignored, it wanders off.
+## to look at a newcomer, and E on it sends it (HubWaystone.answer); ignored, it wanders off. When you arrive in
+## the zone, the awake Boki near you greet you once each, by trust and mood (BaseGreet).
 ##
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, GREET }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead", "Greet"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.GREET],
 	S.LEAD: [S.ROAM, S.NAP],
 	S.MENTOR: [S.ROAM, S.EAT, S.NAP],
 	S.EAT: [S.ROAM, S.NAP],
@@ -30,6 +31,7 @@ const TABLE := {
 	S.WATCH: [S.ROAM, S.NAP, S.REACT],
 	S.REACT: [S.ROAM, S.NAP, S.WATCH],
 	S.CHORE: [S.ROAM, S.NAP, S.REACT],
+	S.GREET: [S.ROAM, S.NAP],
 }
 const STEP := 0.1          # s: the machines tick at 10 Hz, not every frame
 const CATCH := 0.8         # m: a tag lands this close
@@ -46,10 +48,12 @@ var _day_t := -1.0         # the farm's day clock at the last tick (a drop means
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
 var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
+var arrival := false       # you just arrived in this zone: the first tick greets you (BaseGreet)
 
 func _init(home) -> void:
 	h = home
 	R = Content.rules("base_life")
+	arrival = Game.match_opts.has("zone")      # the teleporter brought you (HubWaystone._go)
 	whistle = BaseWhistle.new(home, R)
 
 static func nocturnal(rec: Dictionary) -> bool:
@@ -97,6 +101,9 @@ func machine(k: Dictionary) -> Fsm:
 			BaseDuo.woke(k))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
+		m.on_exit(S.GREET, func(_to: int) -> void:
+			k.erase("life_greet")
+			k.erase("greet_run"))
 		k["life"] = m
 	return k["life"]
 
@@ -127,6 +134,9 @@ func step(d: float) -> void:
 			if not first_look:
 				_arrived(k)
 			_seen[uid] = true
+	if arrival:
+		arrival = false
+		BaseGreet.arrive(self)
 	for k in h.kins:
 		BaseShy.tick(h, k, dt)
 		_tick(k, dt)
@@ -242,6 +252,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 			_look_tick(k, m)
 		S.CHORE:
 			BaseChore.tick(self, k, m, dt)
+		S.GREET:
+			BaseGreet.tick(self, k, m)
 		S.LEAD:
 			if not BaseTutLead.tick(h, k):
 				m.go(S.ROAM, "led")
@@ -418,6 +430,10 @@ func _arrived(k: Dictionary) -> void:
 ## Not asleep time: night is for napping, except for nocturnal Boki.
 func _awake(k: Dictionary) -> bool:
 	return not night or nocturnal(k["rec"])
+
+## Awake, not napping and free of the farm's drivers: it can notice you (BaseGreet).
+func awake_free(k: Dictionary) -> bool:
+	return _awake(k) and not _taken(k) and float(k.get("nap_t", 0.0)) <= 0.0 and not machine(k).is_in(S.NAP)
 
 ## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors, leaping or looking at
 ## news with ComeLook).
