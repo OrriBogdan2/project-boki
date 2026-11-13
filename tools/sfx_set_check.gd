@@ -24,6 +24,9 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  12. held fire (docs/AUDIO.md): every weapon under FireSfx.HELD_RATE, and Neve's dart, fired every HELD_STEP_MS for
+##      HELD_S seconds through FireSfx keeps at most FireSfx.VOICES voices sounding, opens on its base take and goes
+##      round three or more others without repeating one
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -31,6 +34,8 @@ const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
+const HELD_S := 3.0            # s of held fire per sound
+const HELD_STEP_MS := 80       # ms a round: the source cadence of Vex's rifle (main has 0.12 s)
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 var bad := 0
@@ -58,6 +63,7 @@ func run(main: Node) -> void:
 	_garden()
 	_build_cues()
 	_strip_chime()
+	await _held_fire(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -421,3 +427,64 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## Held fire at the source cadence, by the plain one-shot path (before) and by FireSfx (after).
+func _held_fire(main: Node) -> void:
+	var sounds := {}       # shot sound -> weapon
+	for f in DirAccess.get_files_at("res://content/weapons"):
+		var w: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/weapons/" + f))
+		var p: Dictionary = w["primary"]
+		if float(p["rate"]) < FireSfx.HELD_RATE or w["id"] == "hoar_fan":      # (hoar_fan: Neve's darts go held)
+			sounds[String(p["sfx"])] = w["id"]
+	ok(sounds.size() >= 4, "held-fire weapons found: %s" % str(sounds.values()))
+	for sname in sounds:
+		var before: Dictionary = await _hold(main, sname, false)
+		await main.get_tree().create_timer(1.0).timeout
+		var after: Dictionary = await _hold(main, sname, true)
+		var takes: Array = after["takes"]
+		var run := takes.slice(1)
+		var repeats := 0
+		for i in range(1, run.size()):
+			repeats += 1 if run[i] == run[i - 1] else 0
+		var shown := "%s (%s) %.0f s at %d ms: voices %d plain -> %d held, cap %d" % [
+			sname, sounds[sname], HELD_S, HELD_STEP_MS, before["peak"], after["peak"], FireSfx.VOICES]
+		ok(int(after["peak"]) <= FireSfx.VOICES, "%s, %d of %d shots sound" % [shown, takes.size(), before["shots"]])
+		var opens: bool = not takes.is_empty() and takes[0] == 0 and not run.has(0)
+		var others := _distinct(run)
+		ok(opens and repeats == 0 and others >= 3,
+			"%s: first shot is the base take, the rest go round %d other takes without repeating (%s)" % [
+				sname, others, str(takes.slice(0, 8))])
+		await main.get_tree().create_timer(1.0).timeout
+
+func _distinct(a: Array) -> int:
+	var seen := {}
+	for t in a:
+		seen[t] = true
+	return seen.size()
+
+## Fires `sname` every HELD_STEP_MS for HELD_S s; {peak: most pool voices sounding at once, takes: the take of each
+## shot that sounded (FireSfx drops some), shots: rounds fired}.
+func _hold(main: Node, sname: String, held: bool) -> Dictionary:
+	var peak := 0
+	var shots := 0
+	var takes := []
+	var t0 := Time.get_ticks_msec()
+	var due := t0
+	while Time.get_ticks_msec() - t0 < int(HELD_S * 1000.0):
+		var now := Time.get_ticks_msec()
+		if now >= due:
+			due += HELD_STEP_MS
+			shots += 1
+			var seen: int = Sfx.last_played.get(sname, -1)
+			if held:
+				FireSfx.shot(7, sname, null, -2.0, 0.08)
+			else:
+				Sfx.play(sname, null, -2.0)
+			if int(Sfx.last_played.get(sname, -1)) != seen:
+				takes.append(int(Sfx.last_take.get(sname, 0)))
+		var live := 0
+		for pl in Sfx.players:
+			live += 1 if pl.playing else 0
+		peak = maxi(peak, live)
+		await main.get_tree().process_frame
+	return {"peak": peak, "takes": takes, "shots": shots}

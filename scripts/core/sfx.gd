@@ -452,8 +452,11 @@ func _bus_for(pos) -> String:
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the
-## sound's own "reach", else hear_range).
-func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0) -> void:
+## sound's own "reach", else hear_range). take: a given take of a sound that has several
+## (FireSfx round-robins them), else a random one that isn't the last.
+func play(
+	sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0, take := -1
+) -> void:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	var now := Time.get_ticks_msec()
@@ -479,8 +482,8 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if st is Array:
 		# a different take from last time
 		var arr: Array = st
-		var i := rng.randi_range(0, arr.size() - 1)
-		if arr.size() > 1 and i == int(last_take.get(sname, -1)):
+		var i := take % arr.size() if take >= 0 else rng.randi_range(0, arr.size() - 1)
+		if take < 0 and arr.size() > 1 and i == int(last_take.get(sname, -1)):
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
@@ -622,6 +625,20 @@ func _lazy(sname: String) -> bool:
 		return false
 	streams[sname] = takes[0] if takes.size() == 1 else takes
 	return true
+
+## How many takes a sound has (0 when it has no file).
+func take_count(sname: String) -> int:
+	if not ensure(sname):
+		return 0
+	var st = streams[sname]
+	return (st as Array).size() if st is Array else 1
+
+## Seconds one take of a sound sounds for.
+func take_len(sname: String, take: int) -> float:
+	var st = streams[sname]
+	if st is Array:
+		st = (st as Array)[take % (st as Array).size()]
+	return (st as AudioStream).get_length()
 
 ## Whether a sound exists (loading it on first ask, as play does).
 func ensure(sname: String) -> bool:
