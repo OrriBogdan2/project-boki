@@ -2,11 +2,12 @@ class_name HomeWater
 extends RefCounted
 ## (feelfix) The farm's ponds are water you can wade into and swim in. The edge tiles are shallow
 ## (you wade, slower); the middle is deep (you swim: sunk to the shoulders, slower still, tipped into
-## a stroke while you move, no dash, no tools; Space kicks you up out of the water). Going in splashes, swimming plays strokes
-## and ripples, climbing out drips; a Boki paddles low in it. Water is never void.
+## a stroke while you move, no dash, no tools; Space kicks you up out of the water). Going in splashes, a dash
+## through the shallows sprays and running leaves a wake (WaterFx), swimming plays strokes and ripples, climbing
+## out drips. Water is never void.
 ##
-## home.gd calls: depth(x, z) each step, step(...) with it, speed_mul(...), drop_y(), tilt(...) and
-## paddle(...) for a Boki; home_gather.gd asks swimming.
+## home.gd calls: depth(x, z) each step, step(...) with it, speed_mul(...), drop_y() and tilt(...) for a hunter;
+## home_gather.gd asks swimming. Boki in the water are BokiWade's.
 
 const WADE_SPEED := 0.68     # walk-speed multiplier in the shallow edge
 const SWIM_SPEED := 0.5      # walk-speed multiplier in the deep middle
@@ -22,6 +23,7 @@ var wade_k := 0.0            # eased 0 .. 1 wading
 var ph := 0.0                # the stroke's bob (rad)
 var was := 0                 # last step's depth
 var stroke_t := 0.0
+var wfx: WaterFx             # the splash, spray and wake (made the first time you step in)
 
 func _init(home) -> void:
 	h = home
@@ -62,12 +64,15 @@ func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 	var fx = h.fx
 	var at: Vector3 = h.ppos + Vector3(0, 0.08, 0)
 	if wdep > 0 and was == 0:
-		# in you go: a splash, louder from a jump or a fall
+		# in you go: a splash, bigger from a jump or a fall and for a bigger Hunter
 		var hard := clampf(-h.pvy / 8.0, 0.0, 1.0)
 		Sfx.play("splash", h.ppos, -8.0 + hard * 6.0, 0.08, 1.05 - hard * 0.1)
 		if fx:
-			fx.burst(at + Vector3(0, 0.2, 0), Color("dff3ff"), 14 + int(hard * 14), 3.0 + hard * 2.0, 0.5, 14.0, 1.0, Vector3.UP, 50.0)
-			fx.ring(at, 0.9 + hard * 0.6, Color(0.85, 0.95, 1.0, 0.8), 0.5)
+			if wfx == null:
+				wfx = WaterFx.new()
+				fx.add_child(wfx)
+			wfx.set_body(WaterFx.size_of(Arch.of_save(), Data.class_of_save()))
+			wfx.splash(at, hard)
 	elif wdep == 0 and was > 0:
 		Sfx.play("drip", h.ppos, -10.0)
 		if fx: fx.burst(at + Vector3(0, 0.4, 0), Color("cfeaff"), 6, 1.4, 0.4)
@@ -77,6 +82,8 @@ func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 	if wdep == 0:
 		stroke_t = 0.0
 		return
+	if wfx and wdep == 1 and not air:
+		wfx.move(at, Vector2(h.pvel.x, h.pvel.z), h.dash_t > 0.0, d)
 	var moving := mv.length() > 0.2
 	ph += d * (6.5 if moving and wdep == 2 else 2.4)
 	stroke_t -= d
@@ -84,7 +91,7 @@ func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 		stroke_t = 0.75 if wdep == 2 else 0.45
 		if wdep == 2 or moving:
 			Sfx.play("swim" if wdep == 2 else "step_grass", h.ppos, -15.0 if wdep == 2 else -20.0, 0.12)
-		if fx:
+		if fx and wdep == 2:      # (wading leaves its wake instead)
 			fx.ring(at, 0.55 if moving else 0.4, Color(0.85, 0.95, 1.0, 0.55), 0.6)
 			if moving: fx.burst(at + Vector3(0, 0.1, 0), Color("e8f7ff"), 4, 1.6, 0.35)
 
@@ -97,18 +104,3 @@ func breach(jump_v: float) -> float:
 		h.fx.burst(at + Vector3(0, 0.3, 0), Color("e8f7ff"), 18, 3.6, 0.55, 12.0, 1.0, Vector3.UP, 40.0)
 		h.fx.ring(at, 1.1, Color(0.85, 0.95, 1.0, 0.8), 0.45)
 	return jump_v * BREACH_V
-
-## A Boki in the pond: low in the water, bobbing, a ripple now and then; a splash going in.
-func paddle(kd: Dictionary, pos: Vector3, n: Node3D, d: float) -> void:
-	var kw := depth(pos.x, pos.z)
-	if kw > 0:
-		n.position.y -= (0.12 if kw == 1 else 0.3) - sin(float(kd["hop"]) * 0.7) * 0.03
-		kd["swim_t"] = float(kd.get("swim_t", 0.0)) - d
-		if float(kd["swim_t"]) <= 0.0 and h.fx:
-			kd["swim_t"] = 0.9
-			h.fx.ring(pos + Vector3(0, 0.08, 0), 0.4, Color(0.85, 0.95, 1.0, 0.45), 0.5)
-		if not kd.get("wet", false):
-			kd["wet"] = true
-			Sfx.play("splash", pos, -18.0, 0.1, 1.4)
-	elif kd.get("wet", false):
-		kd.erase("wet")
