@@ -2480,7 +2480,7 @@ const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc 
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or HawkSense.seen_by(target, team_i):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 
