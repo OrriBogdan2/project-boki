@@ -21,6 +21,8 @@ const LURE_SIDE := 0.9                        # m from the walk line to each lur
 const STRAY_S := 1.2                          # s either side of a lure over which it veers toward it
 const ROUND_MAX := 10.0                       # points a round gives at most
 const TRICK_PRESSES := 3
+const POSE_S := 1.0                           # s the pair hold their pose when the judges look (BokiHomeClips "pose")
+const BOW_S := 1.2                            # s of the bow the second place takes (BokiHomeClips "bow")
 
 static func rules() -> Dictionary:
 	return Content.rules("show_ring")
@@ -246,6 +248,15 @@ class Run:
 			return 0 if float(s[0]["look"]) >= float(s[1]["look"]) else 1
 		return 0 if float(s[0]["total"]) > float(s[1]["total"]) else 1
 
+## The ribbon your shown Boki takes: "gold" for the win, else "silver" or "bronze" by its total, else "part".
+static func placing(won: bool, total: float) -> String:
+	var at: Dictionary = rules()["ribbon_at"]
+	if won:
+		return "gold"
+	if total >= float(at["silver"]):
+		return "silver"
+	return "bronze" if total >= float(at["bronze"]) else "part"
+
 ## Pays out a finished show once: joy, trust, a memory each, energy, gems and the prize roll.
 ## Returns what the card shows, or {} when this show was already paid.
 static func settle(run: Run) -> Dictionary:
@@ -265,8 +276,10 @@ static func settle(run: Run) -> Dictionary:
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var prize := GardenPrizes.settle("show", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
+	var scores := run.scores()
+	var mine: Dictionary = scores[run.backed]
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize,
-			"scores": run.scores()}
+			"scores": scores, "mine": mine, "placing": placing(backed_won, float(mine["total"]))}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -280,6 +293,8 @@ var walk_to := Vector3.ZERO
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var acts: Array = []           # [node, s left] for each Boki playing a show clip (its kact meta)
+var marks: ShowMarks = null    # the result's judge marks and ribbon (show_marks.gd)
 
 func _init(home) -> void:
 	h = home
@@ -350,6 +365,8 @@ func use() -> void:
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
 	var week := GardenPrizes.week_of(Time.get_unix_time_from_system())
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, week)
+	if is_instance_valid(marks):
+		marks.queue_free()
 	board.text = board_text(week)
 	_enter()
 	GardenSfx.countdown(h, stage.position)
@@ -382,7 +399,28 @@ func _cheer(grade: String) -> void:
 	GardenSfx.crowd(grade, _shown()["pos"])
 	h._emote(_shown(), {"great": "★", "good": "♪", "miss": "?"}[grade], true)
 
+## The Boki plays a rig clip for `secs` (BokiHomeClips); _step_acts hands it back to its own motion.
+func _act(k: Dictionary, clip: String, secs: float) -> void:
+	if k.is_empty():
+		return
+	(k["node"] as Node3D).set_meta("kact", clip)
+	acts.append([k["node"], secs])
+
+func _step_acts(d: float) -> void:
+	for a in acts:
+		a[1] -= d
+		if a[1] <= 0.0 and is_instance_valid(a[0]):
+			(a[0] as Node3D).remove_meta("kact")
+	acts = acts.filter(func(a: Array) -> bool: return a[1] > 0.0)
+
+func _clear_acts() -> void:
+	for a in acts:
+		if is_instance_valid(a[0]):
+			(a[0] as Node3D).remove_meta("kact")
+	acts = []
+
 func tick(d: float) -> void:
+	_step_acts(d)
 	if card_t > 0.0 and run == null:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
@@ -410,6 +448,7 @@ func _enter() -> void:
 	if bar != null:
 		bar.close()
 	_clear_lures()
+	_clear_acts()
 	var shown: Dictionary = run.recs[run.backed]
 	var key := Settings.key_cap("interact")
 	match run.phase:
@@ -425,8 +464,11 @@ func _enter() -> void:
 			_round_card([["Bond: %s walks to you" % shown["name"], 18, UI.ACCENT_HI],
 					["Press %s as it passes a snack, a toy and its rival" % key, 14, UI.INK]])
 			_lay_walk()
+			_act(_shown(), "strut", float(rules()["walk_s"]))
 		Run.Phase.JUDGE:
 			_round_card(_judge_rows())
+			for k in pair:
+				_act(k, "pose", POSE_S)
 			GardenSfx.reveal(h, stage.position)
 	_place_pair(0.0)
 
@@ -542,17 +584,25 @@ func _walk_pos() -> Vector3:
 
 func _end(finished: bool) -> void:
 	var res := settle(run) if finished else {}
+	var shown := _shown()
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
 	if bar != null:
 		bar.close()
 	_clear_lures()
+	_clear_acts()
 	if is_instance_valid(card):
 		card.queue_free()
 	if finished:
 		_card(res)
+		_act(h._kin_entry(res["win"]), "hop", float(rules()["card_s"]))
+		_act(h._kin_entry(res["lose"]), "bow", BOW_S)
 		GardenSfx.result(h, res)
+		if is_instance_valid(marks):
+			marks.queue_free()
+		marks = ShowMarks.new(shown, stage.position, res["mine"], res["placing"])
+		h.root_ui.add_child(marks)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()

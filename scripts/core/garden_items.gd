@@ -4,8 +4,8 @@ extends RefCounted
 ## each one moves one thing on one Boki and says the exact change first. preview() is that change as numbers
 ## (after caps), apply() does exactly it and writes the journal line. They sit in the garden bag
 ## (Save.d items) and are fed from the feed menu (Care.feed hands them to feed()). Worn ones (path tokens,
-## Stayleaf) go in rec.path / rec.stay and come off again with take_off(). Sweets (a lean to pick) go through
-## use(), the Twinbun (two Boki) through share().
+## Stayleaf, auras) go in rec.path / rec.stay / rec.aura and come off again with take_off().
+## Sweets (a lean to pick) go through use(), the Twinbun (two Boki) through share().
 
 static func rules() -> Dictionary:
 	return Content.rules("garden_items")
@@ -49,9 +49,9 @@ static func preview(rec: Dictionary, id: String, pick := "") -> Dictionary:
 		"xp": return _xp(rec, int(e["n"]))
 		"token": return _token(rec, String(e["aff"]))
 		"stay": return _stay(rec)
+		"aura": return _aura(rec, id)
 		"rinse": return _rinse(rec)
 		"nest": return _no("goes in the Nesting Nook with a pair")
-		"ribbon": return _no("won in a Crown cup, never fed: it stays on")
 		"down": return _down(rec, int(e["trust"]))
 		"stat_all": return _stat_all(rec, int(e["n"]))
 		"sweet": return _sweet(rec, e, pick)
@@ -71,6 +71,8 @@ static func apply(rec: Dictionary, id: String, pick := "") -> Dictionary:
 		_write(rec, d)
 	if String(item(id)["effect"]["kind"]) == "down":
 		Save.remember(rec, "down", NestItems.take_memory())
+	if d.has("aura") and String(d["aura"][0]) != "":
+		Save.add_item(String(d["aura"][0]), 1)     # one aura at a time: the old one goes back in the bag
 	CareJournal.note(rec, "%s %s: %s" % [_verb(id), item_name(id), pv["text"]])
 	_remember(rec, id, String(pv["text"]))
 	return pv
@@ -97,7 +99,7 @@ static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	var pv := apply(rec, id, pick) if Save.d["items"].get(id, 0) > 0 else _no("none left")
 	if pv["ok"]:
 		Save.d["items"][id] = int(Save.d["items"][id]) - 1
-	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) == "sweet"
+	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) in ["sweet", "aura"]
 	pv["text"] = "%s: %s" % [item_name(id), pv["text"]] if pv["ok"] else pv["text"]
 	return pv
 
@@ -167,19 +169,8 @@ static func nudge(id: String) -> String:
 		"xp": return "+%d xp" % int(e["n"])
 		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
 		"stay": return "no new forms while worn"
-		"ribbon": return "1 step toward the final of its sport when a form is chosen"
 		"rinse": return "clears the lean; the grown parts stay"
 		_: return "%d points of the top stat become loose points" % int(e["n"])
-
-## A Crown cup's keepsake: the Cup Ribbon of `sport` (a GardenPrizes game id), one a sport for each Boki, worn
-## for good (rec.ribbons, sport -> {week} of its latest Crown). True the first time, when it is new.
-static func award_ribbon(rec: Dictionary, sport: String, week: int, why: String) -> bool:
-	var ribbons: Dictionary = rec.get_or_add("ribbons", {})
-	var fresh := not ribbons.has(sport)
-	ribbons[sport] = {"week": week}
-	if fresh:
-		_remember(rec, "cup_ribbon", why)
-	return fresh
 
 ## Takes a worn item off and puts it back in the bag. False if the Boki isn't wearing it.
 static func take_off(rec: Dictionary, id: String) -> bool:
@@ -188,6 +179,10 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 		if not rec["stay"]:
 			return false
 		rec["stay"] = false
+	elif String(item(id)["effect"]["kind"]) == "aura":
+		if String(rec["aura"]) != id:
+			return false
+		rec["aura"] = ""
 	elif rec["path"].has(id):
 		rec["path"].erase(id)
 	else:
@@ -199,8 +194,9 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 ## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it.
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
+	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "aura"]
 	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "",
-			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": item(id)["effect"]["kind"] in ["rinse", "sweet"]}
+			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw}
 
 static func _no(why: String) -> Dictionary:
 	return {"ok": false, "text": why, "deltas": {}, "look": false}
@@ -307,9 +303,9 @@ static func _token_id(aff: String) -> String:
 			return String(it["id"])
 	return ""
 
-## False for items that are not fed (nest items are placed in the Nook, ribbons are won).
+## False for items that are not fed (nest items are placed in the Nook).
 static func fed(id: String) -> bool:
-	return not String(item(id)["effect"]["kind"]) in ["nest", "ribbon"]
+	return String(item(id)["effect"]["kind"]) != "nest"
 
 ## The line the items list shows under an item in the bag.
 static func bag_hint(id: String) -> String:
@@ -325,6 +321,16 @@ static func _stay(rec: Dictionary) -> Dictionary:
 	if rec["stay"]:
 		return _no("already staying small")
 	return _yes("stays small: no new forms while worn", {"stay": [false, true]})
+
+## An aura (looks only, GardenAura draws it): one at a time, a new one swaps the old back into the bag.
+static func _aura(rec: Dictionary, id: String) -> Dictionary:
+	var was := String(rec["aura"])
+	if was == id:
+		return _no("already wearing it")
+	var text := String(item(id)["effect"].get("text", "a new look"))
+	if was != "":
+		text += " (%s back in the bag)" % item_name(was)
+	return _yes(text, {"aura": [was, id]})
 
 static func _rinse(rec: Dictionary) -> Dictionary:
 	if Care.lean_total(rec) <= 0.0:

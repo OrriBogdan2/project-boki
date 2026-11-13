@@ -70,24 +70,24 @@ func _examples() -> void:
 	pip["path"] = []
 	_expect(pip, "stat3 lean2|care1", 0, "Mycroll: Hush Truffle lean, stones off: Amanitusk")
 	var fox := _boki("vespox", 14, {"power": 50, "speed": 30},
-			{"lean": {"steel": Evo.LEAN_FULL}, "ribbons": {"tumble": {"week": 0}}})
+			{"lean": {"steel": Evo.LEAN_FULL}, "ribbons": {"tumble": {"n": 1, "week": 0}}})
 	_expect(fox, "stat3 lean2 ribbons1|", 0, "Vespyx: Cinderstep, Steel, Tumble cup: Glaivyx")
 	var lash := _boki("vespox", 14, {"power": 40, "speed": 50},
 			{"lean": {"dark": Evo.LEAN_FULL}, "path": ["galeribbon", "galeribbon"],
-			"ribbons": {"dash": {"week": 0}}})
+			"ribbons": {"dash": {"n": 1, "week": 0}}})
 	lash["traits"]["temper"] = 0.8
 	_expect(lash, "care1|stat3 lean2 tokens2 ribbons1", 1, "Vespyx: hot-headed fox, Dark, Galeribbons, Dash: Lashyx")
-	var tub := _boki("glassolotl", 14, {"focus": 40, "guard": 20}, {"toy_use": {"toy_tub": 5, "toy_ball": 2}})
+	var tub := _boki("glassolotl", 14, {"focus": 40, "guard": 20}, {"habit": {"toy": "toy_tub"}})
 	_expect(tub, "stat3 care1|", 0, "Prismander: a tub lover drifts to Chandelotl")
 	tub["lean"] = {"fairy": Evo.LEAN_FULL}
 	_expect(tub, "stat3 lean2 care1|", 0, "Prismander: Starfruit adds 2")
 	var geo := _boki("glassolotl", 14, {"focus": 20, "guard": 40},
-			{"lean": {"rock": Evo.LEAN_FULL}, "path": ["keepstone", "keepstone"], "toy_use": {"toy_stone": 4}})
+			{"lean": {"rock": Evo.LEAN_FULL}, "path": ["keepstone", "keepstone"], "habit": {"toy": "toy_stone"}})
 	_expect(geo, "|stat3 lean2 tokens2 care1", 1, "Prismander: Cinderstep stone, Rock, Keepstones: Geodelotl")
 	var chime := _boki("zapple", 6, {},
-			{"lean": {"fairy": Evo.LEAN_FULL}, "ribbons": {"echo_steps": {"week": 0}}})
+			{"lean": {"fairy": Evo.LEAN_FULL}, "ribbons": {"echo_steps": {"n": 1, "week": 0}}})
 	_expect(chime, "|lean2 ribbons1", 1, "Echolop: Echo Steps ribbon and Chimegrass: Chimelop")
-	var howl := _boki("zapple", 6, {}, {"lean": {"dark": Evo.LEAN_FULL}, "ribbons": {"tumble": {"week": 0}}})
+	var howl := _boki("zapple", 6, {}, {"lean": {"dark": Evo.LEAN_FULL}, "ribbons": {"tumble": {"n": 1, "week": 0}}})
 	_expect(howl, "lean2 ribbons1|", 0, "Echolop: Hushwood Dark and a Tumble ribbon: Howlop")
 
 func _ties_and_caps() -> void:
@@ -106,17 +106,13 @@ func _ties_and_caps() -> void:
 	r["traits"]["loyalty"] = 0.9
 	_expect(r, "stat3|lean2 care1", 0, "3 to 3: the stat lead decides")
 	r["stats"]["power"] = 30
-	r["ribbons"] = {"shove": {"week": 0}}
+	r["ribbons"] = {"shove": {"n": 4, "week": 0}}
 	r["lean"] = {}
 	r["traits"]["loyalty"] = 0.5
 	r["path"] = ["keepstone", "keepstone", "keepstone", "keepstone"]
-	_expect(r, "|tokens3 ribbons1", 1, "tokens cap at 3")
-	var owl := _boki("glassolotl", 20, {"focus": 40}, {})
-	for sport in ["seek", "volley", "echo_steps"]:
-		GardenItems.award_ribbon(owl, sport, 0, "won")
-	_expect(owl, "stat3 ribbons2|", 0, "one pip a sport's Cup Ribbon, two at most")
+	_expect(r, "|tokens3 ribbons2", 1, "tokens cap at 3, ribbons at 2")
 	r["path"] = []
-	r["ribbons"] = {"shove": {"week": 0}, "tumble": {"week": 0}}
+	r["ribbons"] = {"shove": {"n": 1, "week": 0}, "tumble": {"n": 1, "week": 0}}
 	_expect(r, "ribbons1|ribbons1", -1, "tied pips, tied stats: undecided")
 
 func _prompt() -> void:
