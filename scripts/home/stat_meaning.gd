@@ -25,5 +25,12 @@ static func rise(h, s: String) -> void:
 
 ## Is a garden game (the Dash and its relay, Shove, Seek, Spark Volley, Tumble, Echo Steps, the show, fishing) on?
 static func in_game(h) -> bool:
-	return h.games.any(func(g): return g.state != BaseSeek.S.IDLE if g is BaseSeek else g.run != null) \
-			or (h.hrace != null and h.hrace.relay.run != null)
+	return h.games.any(func(g): return _on(g)) or (h.hrace != null and h.hrace.relay.run != null)
+
+## One garden game running: by its state (BaseSeek, LanternMatch: no `run`) or its run.
+static func _on(g) -> bool:
+	if g is BaseSeek:
+		return g.state != BaseSeek.S.IDLE
+	if g is LanternMatch:
+		return g.state != LanternMatch.S.IDLE
+	return g.run != null
