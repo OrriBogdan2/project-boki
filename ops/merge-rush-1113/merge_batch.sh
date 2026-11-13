@@ -13,7 +13,8 @@ while read -r b s; do
 	git merge-base --is-ancestor "$s" HEAD 2>/dev/null && continue
 	git merge -q --no-ff -m "Merge $b ${s:0:9} (merge rush)" "$s" >/dev/null 2>&1 && continue
 	bad=()
-	while read -r f; do
+	mapfile -t unmerged < <(git diff --name-only --diff-filter=U)  # read first: git diff can hold index.lock
+	for f in "${unmerged[@]}"; do
 		if [[ $f =~ $UNION ]]; then
 			git show ":2:$f" > "$f.ours" 2>/dev/null; git show ":1:$f" > "$f.base" 2>/dev/null || : > "$f.base"
 			git show ":3:$f" > "$f.theirs" 2>/dev/null
@@ -24,9 +25,9 @@ while read -r b s; do
 		else
 			bad+=("$f")
 		fi
-	done < <(git diff --name-only --diff-filter=U)
+	done
 	if [ ${#bad[@]} -eq 0 ] && [ -z "$(git diff --name-only --diff-filter=U)" ]; then
-		git commit -q --no-edit && continue
+		GIT_EDITOR=true git commit -q --no-edit < /dev/null && continue
 	fi
 	git merge --abort; git clean -fdq  # an aborted merge can leave added files untracked
 	echo "$b $s conflict: ${bad[*]:0:6}" >> "$SKIPS"

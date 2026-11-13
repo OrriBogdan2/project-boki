@@ -21,3 +21,22 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
   conflict with main in code (skip list: `skip_pr45_pr43.txt`). Nothing of either PR merges cleanly any more;
   both PRs stay open as a record. Close them once the 77 are re-merged or archived.
 - Archived (tag only, branch kept): `archived.log` (4).
+- Batch C pass (merge_batch.sh over all 1110 gap tips not in the #45/#43 list, on main 55533bf67c): 41 merged
+  clean, 1069 skipped (real code conflicts). Full suite vs main: 9 branches caused new reds and were dropped
+  (skip list below); rebuilt as 32 merges (ext/merge-rush-1113, batch C) and re-gated.
+- Skip list (all, with conflicting files, sorted by conflict count): `skip_all.tsv` (1146 lines: 221 conflict in
+  one file only, 165 in two; those are the cheapest hand-resolve lanes).
+- Batch C drops (reason):
+  - ext/anim-elim-beat-wisp: --wisp-check red (wisp_check.gd:288 reads `.r` on a Dictionary)
+  - ext/ui-prematch-margin: --prematch-check parse error (prematch_check.gd:293 `labels` type)
+  - ext/stuck-integ-b6204ee2: its relay.gd adds `held`, which lagcomp_check's RelayServer subclass also declares
+  - ext/sfx-mask-puton: --mask-moment-check null instance
+  - ext/combat-level-growth: its own --level-growth-check times out (300 s)
+  - ext/friendly-bodies: its own --friendly-bodies-check, 6 script errors (`gap` on a Dictionary)
+  - ext/feel-camera-lead: its own --cam-lead-check fails (view 0.89 m behind 0.5 s into a dash; main has trail 0050)
+  - ext/farm-garden-soak: --garden-day-check script error (stat_meaning.gd:28, LanternMatch has no `run`)
+  - ext/creator-sex-distinct: --home-gait-check fishing feet creep 14.6 cm on empty_f (unmasked.gd/stance; likely)
+  - ext/combat-swept-hits: --duo-tutorial-check red 3/3 (main 0/3): "juggernaut: no beat passed by the stall skip
+    [revive]"; bisected to this merge
+- Batch C final: 31 merges (gated as C3). Flaky on main and branch alike, not counted: race, tutorial-idle,
+  perf-budget, cc-exit-buffer (one abort under load), garden-whistle.
