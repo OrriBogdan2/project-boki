@@ -8,8 +8,7 @@ the kits' effects can find their anchors, and gameplay stays per class. The load
 
 ## How the game uses it
 Models.hunter still builds the procedural hunter: the node rig HunterAnim poses, the weapon, the glider, the hit
-ring and the MantleLook sizes. When the Warden's .glb exists and the player hasn't set it to procedural
-(Settings > Video > Warden models, per Warden), `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
+ring and the MantleLook sizes. When the Warden's .glb exists, `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
 and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
 (`WardenGlb.BONES`, `WardenGlb.retarget`), so the kit moves retarget once for every Warden and MantleLook's
 sliders reshape the 3D model too. The .glb never needs to know about the animation code: it needs the bones
@@ -96,8 +95,8 @@ the `root` bone on `Rig` under them, so the hover and the kit's lifts carry on. 
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:
 `art/wardens/<art>_<tag>/<art>_<tag>.glb` (e.g. `vex_r3b`), built on the same rig. `--warden-variant=vex_r3b`
-picks it for the session (comma-separated for several), and a Settings `warden_models` value of `vex_r3b` for
-that Warden picks it in the save; with neither, or with the file missing, the Warden's own `<art>.glb` loads.
+picks it for the session (comma-separated for several); without it, or with the file missing, the Warden's
+own `<art>.glb` loads.
 Whichever design the owner picks ships as `<art>/<art>.glb`.
 
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
@@ -183,7 +182,8 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
 - **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
   bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
   triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
+  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses. What 25k and 40k would
+  look like and cost, measured on Vex and Cinder: [DETAIL_PILOT.md](DETAIL_PILOT.md).
 - Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
   BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
   A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with

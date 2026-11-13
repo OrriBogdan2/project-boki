@@ -7,6 +7,7 @@ extends RefCounted
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 const TICK_S := 0.25      # s per simulated ambience step
 const SETTLE_S := 6.0     # s of steps for a zone's bed to come up (ZONE_FADE_S is 3)
+const DEPART_MAX_S := 0.5  # s the departure whoosh may last: it plays as the ink wipe covers the screen
 
 var bad := 0
 
@@ -50,9 +51,14 @@ func _bed_part() -> void:
 		"Hushwood stays at dusk, Bramblebank keeps the clock")
 	GardenZones.here = ""
 
-## The hop and the wake sounds exist, the hop is as long as the light-up, and waking a zone plays once.
+## The travel and wake sounds exist, the hop is as long as the light-up, and waking a zone plays once.
 func _cue_part() -> void:
 	ok(Sfx.ensure("garden_hop") and Sfx.ensure("garden_wake"), "the hop and wake sounds exist")
+	var arrivals := GardenZones.ids().filter(func(z: String) -> bool: return not Sfx.ensure("garden_arrive_" + z))
+	ok(arrivals.is_empty() and Sfx.ensure("garden_locked") and Sfx.ensure("garden_depart"),
+		"the whoosh, a landing chime for every zone and the locked knock exist (missing: %s)" % [arrivals])
+	var whoosh_s := (load("res://audio/garden_depart.wav") as AudioStream).get_length()
+	ok(whoosh_s <= DEPART_MAX_S, "the departure whoosh is short (%.2f s)" % whoosh_s)
 	var len_s := (load("res://audio/garden_hop.wav") as AudioStream).get_length()
 	var fade := float(GardenZones.rules()["hop_fade_s"])
 	ok(len_s >= fade - 0.05 and len_s <= fade + 0.3,
@@ -78,9 +84,20 @@ func _travel_part(m: Node) -> void:
 	ok(hub != null and hub.ambience.levels.has(HomeAmbience.zone_bed(GardenZones.HUB)), "the hub plays its own bed")
 	if hub == null:
 		return
-	Sfx.last_played.erase("garden_hop")
+	ZoneCards.open(hub, GardenZones.HUB)
+	var buttons: Array = hub.find_children("*", "Button", true, false)
+	var shut := buttons.filter(func(b: Button) -> bool: return b.text == "Locked")
+	Sfx.last_played.erase("garden_locked")
+	if not shut.is_empty():
+		(shut[0] as Button).pressed.emit()
+	ok(not shut.is_empty() and not (shut[0] as Button).disabled and Sfx.last_played.has("garden_locked")
+		and hub.hway.hopping == "", "a locked zone's card can be picked and is refused with the knock")
+	for sname in ["garden_hop", "garden_depart", "garden_arrive_bramblebank"]:
+		Sfx.last_played.erase(sname)
 	ok(hub.hway.hop("bramblebank") and Sfx.last_played.has("garden_hop"), "the Waystone hop plays its sound")
 	var bb = await _arrived(m, hub)
+	ok(Sfx.last_played.has("garden_depart") and Sfx.last_played.has("garden_arrive_bramblebank"),
+		"the hop leaves with the whoosh and lands in Bramblebank with its chime")
 	var bed := HomeAmbience.zone_bed("bramblebank")
 	var hub_bed := HomeAmbience.zone_bed(GardenZones.HUB)
 	ok(bb != null and bb.ambience.levels.has(bed) and not bb.ambience.levels.has(hub_bed),

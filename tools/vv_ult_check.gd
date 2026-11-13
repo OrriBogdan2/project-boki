@@ -68,6 +68,8 @@ func mage() -> void:
 			"r %.1f" % float(ring.get("r", 0.0)))
 	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
+	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
+			- float(U.data()["radius"])) < 0.05)
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
 	ok("Kitefall: invulnerable in the air", P.hp == hp0)
@@ -415,14 +417,15 @@ func gunslinger() -> void:
 			AimKit.shown(P, "x1") and bool(disc.get("all", false)) and absf(disc_r - float(xd["radius"])) < 0.05
 			and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2,
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
-	# he is free the whole time: he walks and the rifle works
+	# past the shot's commit (GunslingerUlt.COMMIT) she is free while it falls: she walks and the rifle works
+	ac.step(m, 0.3)
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))
 	P.inp["move"] = Vector2.ZERO
 	ok("Cinderfall: Vex moves and can shoot while it falls",
 			hc._flat(P.pos, p0) > 1.0 and not K.busy() and K.can_shoot())
 	ok("Cinderfall: nothing lands before 1.6s", ac.dmg(T) == 0.0 and ac.dmg(T2) == 0.0)
-	ac.step(m, float(xd["delay"]) - 0.9 + 0.05)
+	ac.step(m, float(xd["delay"]) - 1.2 + 0.05)
 	var base := float(xd["dmg"]) * K.ult.power()
 	ok("Cinderfall: the impact, +50% in the centre",
 			absf(ac.dmg(T) - base * (1.0 + float(xd["core_k"]))) < 0.5 and absf(ac.dmg(T2) - base) < 0.5

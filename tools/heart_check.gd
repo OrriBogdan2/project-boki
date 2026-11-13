@@ -8,6 +8,9 @@ extends RefCounted
 ##   2. the Gate takes the carrier's squad within gate_take_r (a downed mate too), not a mate farther off.
 ##   3. the final seat: a squad alone fills the ring, a standing rival stalls it, an empty ring drains, full
 ##      takes that squad with major pay and the islands fall end_after_final_s later.
+##   3b. no stall to the end (spec LIMITED_WAY_OUTS risk 4): a Wisp (downed) or dead Hunter neither holds nor
+##      blocks the ring, a beaten squad's lone Hunter stalls it only while standing in it, and once no holder
+##      stands in it a squad alone in it takes it over at once.
 ##   4. the last squad standing: FINAL at once, filling rush_k faster.
 ##   5. the Heart opening over a spark still charging or carried (the carrier can still take the early seat).
 ##   6. Net: the host's "ht" events through JSON into a client game mirror the state and take its own Hunters.
@@ -103,6 +106,7 @@ func run(main: Node) -> void:
 	_early_seat(main)
 	_gate_squad(main)
 	_final(main)
+	_no_stall(main)
 	_rush(main)
 	_late(main)
 	_net(main)
@@ -280,6 +284,7 @@ func _early_seat(main: Node) -> void:
 	ok(int(Save.d["goods"].get("heartwood", 0)) >= 1 and int(Save.d["goods"].get("starstone", 0)) >= 1,
 		"the materials reach the stash")
 	ok(out.has("heart"), "and the results screen's data carries the bundle")
+	_reward_gap(H3, m3.hunters[1], hb, major)
 	# ---- online requests (offline game: this one is the host)
 	var m4 := _match(main, 7304)
 	var H4: Heart = m4.heart
@@ -297,6 +302,23 @@ func _early_seat(main: Node) -> void:
 		_free(mm)
 
 # ------------------------------------------------------------------ 2. the Gate takes the squad, and the state order
+## The early exit paid the minor set, the end exit pays the major set, and the gap between them is the rules'
+## (0051 names no ratio; heart.json: gems 40 vs 150, so the gap is the egg and a 3x-4x bundle).
+func _reward_gap(h: Heart, who: Hunter, early_paid: Dictionary, final_paid: Dictionary) -> void:
+	var rw: Dictionary = Heart.rules()["reward"]
+	var minor: Dictionary = rw["minor"]
+	var major: Dictionary = rw["major"]
+	ok(early_paid["goods"] == minor["goods"] and early_paid["seeds"] == minor["seeds"]
+		and int(early_paid["gems"]) == int(minor["gems"]), "an early Heart exit paid exactly the minor set")
+	ok(final_paid["goods"] == major["goods"] and final_paid["seeds"] == major["seeds"]
+		and int(final_paid["gems"]) == int(major["gems"]), "the end exit pays exactly the major set")
+	var ratio := float(major["gems"]) / float(minor["gems"])
+	ok(ratio >= 3.0 and ratio <= 5.0, "the gem gap is %.2fx (3x to 5x; 0051 leaves the ratio open)" % ratio)
+	ok(not bool(minor["egg"]) and bool(major["egg"]), "only the end exit carries the Rare Egg")
+	var g0 := who.gems
+	h.pay(who, Heart.HOW_FINAL)
+	ok(who.gems - g0 == int(major["gems"]), "the end exit's gems land on the Hunter")
+
 func _gate_squad(main: Node) -> void:
 	var m := _match(main, 8101, 2)
 	var H: Heart = m.heart
@@ -400,6 +422,58 @@ func _final(main: Node) -> void:
 	ok(String(m.result.get("how", "")) == Heart.HOW_FINAL or m.player.team != 0, "...by the Heart ring")
 	var after := float(rl["end_after_final_s"])
 	ok(m.length <= m.time + after + 0.01, "the islands fall %.0f s later" % after)
+	ok(H.refused == 0, "no refused edges")
+	_free(m)
+
+# ------------------------------------------------------------------ 3b. no stall by a beaten squad
+## Holds each Hunter at its ring spot (k = index) for secs (the other squads' Boki knock them about).
+func _stand(m: Match, spots: Dictionary, secs: float) -> void:
+	for i in int(secs / 0.25):
+		for h in spots:
+			_ring(m, h, spots[h])
+		_run(m, 0.25)
+
+func _no_stall(main: Node) -> void:
+	var m := _match(main, 8105, 2)
+	var H: Heart = m.heart
+	for h in m.hunters:
+		_far(m, h)
+	_to(m, float(rl["final_s"]) + 0.1)
+	var a: Array = _squad(m, 0)
+	var b: Array = _squad(m, 1)
+	var c: Array = _squad(m, 2)
+	m.knock(a[0], null, {})
+	_ring(m, a[0], 0)
+	_run(m, 1.0)
+	ok(a[0].downed and H.final_team < 0 and H.final_prog == 0.0, "a Wisp alone in the ring neither holds nor fills it")
+	_stand(m, {b[0]: 1}, 2.0)
+	ok(H.final_team == 1 and H.final_prog > 0.0, "a Wisp in the ring doesn't block a rival squad taking it")
+	c[1].out = true
+	_ring(m, c[1], 3)
+	ok(not H.in_ring(c[1]), "a dead Hunter is never in the ring")
+	var held := H.final_prog
+	_stand(m, {b[0]: 1, c[0]: 2}, 2.0)
+	ok(absf(H.final_prog - held) < 0.01, "a beaten squad's lone Hunter stalls it while standing in the ring")
+	var a2 := TAU * 2 / 6.0
+	var edge: Vector3 = H.site + Vector3(cos(a2), 0, sin(a2)) * (float(rl["final_r"]) + 1.5)
+	_put(m, c[0], edge)
+	_stand(m, {b[0]: 1}, 1.0)
+	ok(not H.in_ring(c[0]) and H.final_prog > held,
+		"...and not from just outside it (%.1f m out)" % c[0].flat_dist(H.site))
+	_far(m, b[0])
+	_stand(m, {c[0]: 2}, 1.0)
+	ok(H.final_team == 2 and H.final_prog > 0.0 and H.final_prog < held,
+		"no holder standing in the ring: the squad alone in it takes it over from nothing")
+	_far(m, c[0])
+	_stand(m, {b[0]: 1}, 1.0)
+	var rate := 1.0 / float(rl["final_hold_s"])
+	ok(H.final_team == 1 and absf(H.final_prog - rate) < 0.02,
+		"the lone Hunter steps out: the squad in the ring takes it over at once (%.2f), no drain to wait"
+		% H.final_prog)
+	m.knock(b[0], null, {})
+	_ring(m, b[0], 1)
+	_stand(m, {c[0]: 2}, 1.0)
+	ok(H.final_team == 2 and H.final_prog > 0.0, "a downed holder doesn't hold it against a standing rival")
 	ok(H.refused == 0, "no refused edges")
 	_free(m)
 
