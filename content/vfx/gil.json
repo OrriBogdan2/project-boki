@@ -1,0 +1,152 @@
+{
+	"palette": {
+		"main": "#4aa8ff", "hot": "#e8fbff", "char": "#0c3a66", "foam": "#f4fcff", "sea": "#2a88d8",
+		"aqua": "#5ee4f0", "mist": "#9fd6f2"
+	},
+	"anchors": {
+		"hand": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "body": [0.25, 1.0, 0.45]},
+		"bag": {"bone": "hand.L", "off": [0.0, 0.08, 0.0], "body": [-0.35, 1.0, 0.1]},
+		"feet": {"body": [0.0, 0.08, 0.0]}
+	},
+	"moves": {
+		"thrust": {"net": false, "fx": [
+			{"p": "bolt", "at": "hand", "len": "len", "size": 0.13, "life": 0.12, "c": "main", "c2": "hot", "c3": "sea"},
+			{"p": "drop", "y": 0.95, "fwd": "len", "n": 5, "way": "fwd", "speed": 2.5, "spread": 0.45, "grav": 6.0,
+				"life": 0.35, "size": 0.07, "c": "main", "c2": "hot"}
+		]},
+		"lunge": {"fx": [
+			{"p": "bolt", "at": "hand", "len": "len", "size": 0.24, "life": 0.16, "c": "aqua", "c2": "hot", "c3": "sea"},
+			{"p": "sweep", "y": 0.85, "size": "len", "arc": 34.0, "life": 0.18, "c": "main", "c2": "hot", "c3": "sea"},
+			{"p": "drop", "y": 0.95, "fwd": "len", "n": 12, "way": "fwd", "speed": 3.5, "spread": 0.5, "grav": 7.0,
+				"life": 0.45, "size": 0.09, "c": "main", "c2": "hot"},
+			{"p": "smoke", "y": 0.8, "fwd": "len", "n": 2, "speed": 0.6, "spread": 0.8, "grav": -0.3, "life": 0.6,
+				"size": 0.24, "c": "foam", "c3": "mist", "near": true}
+		]},
+		"bag_throw": {"sfx": [{"n": "throw", "db": -4.0, "pitch": 1.15}], "fx": [
+			{"p": "drop", "at": "bag", "n": 4, "way": "fwd", "speed": 1.5, "spread": 0.6, "grav": 5.0, "life": 0.3,
+				"size": 0.06, "c": "aqua", "c2": "hot"}
+		]},
+		"vial_fly": {"net": false, "fx": [
+			{"p": "ember", "n": 3, "speed": 0.3, "spread": 1.0, "life": 0.25, "size": 0.09, "c": "foam", "c2": "main"}
+		]},
+		"vial_glow": {"fx": [
+			{"p": "star", "at": "bag", "n": 4, "speed": 0.2, "spread": 1.0, "grav": -0.3, "life": 0.5, "size": 0.08,
+				"c": "hot", "c2": "aqua"}
+		]},
+		"pop_thunder": {"sfx": [{"n": "zap", "db": -3.0, "pitch": 1.1}], "fx": [
+			{"p": "shard", "y": 0.4, "n": 8, "speed": 3.0, "spread": 0.9, "grav": 8.0, "life": 0.4, "size": 0.07,
+				"c": "foam", "c2": "hot"},
+			{"p": "bolt", "y": 0.5, "fwd": "r", "fwd_x": -0.6, "len": "r", "len_x": 1.2, "size": 0.32, "jag": 0.6,
+				"life": 0.16, "c": "hot", "c2": "foam", "c3": "aqua"},
+			{"p": "bolt", "y": 0.7, "fwd": "r", "fwd_x": -0.4, "len": "r", "len_x": 0.8, "size": 0.2, "jag": 0.5,
+				"delay": 0.06, "life": 0.14, "c": "hot", "c2": "foam", "c3": "aqua"},
+			{"p": "star", "y": 0.5, "n": 12, "shape": "disc", "radius": "r", "radius_x": 0.6, "speed": 0.6,
+				"spread": 1.0, "life": 0.45, "size": 0.13, "c": "hot", "c2": "aqua"},
+			{"p": "ring", "size": "r", "life": 0.35, "c": "aqua", "c2": "hot", "c3": "sea"}
+		]},
+		"pop_slime": {"sfx": [{"n": "splash", "db": -3.0, "pitch": 0.9}], "fx": [
+			{"p": "shard", "y": 0.4, "n": 8, "speed": 3.0, "spread": 0.9, "grav": 8.0, "life": 0.4, "size": 0.07,
+				"c": "foam", "c2": "hot"},
+			{"p": "drop", "y": 0.3, "n": 18, "speed": 4.0, "spread": 0.7, "grav": 9.0, "life": 0.55, "size": 0.12,
+				"c": "aqua", "c2": "hot"},
+			{"p": "scorch", "size": "r", "life": 2.2, "c": "aqua", "c2": "hot", "c3": "sea"},
+			{"p": "smoke", "y": 0.3, "n": 3, "shape": "disc", "radius": 0.8, "speed": 0.5, "spread": 0.8,
+				"grav": -0.2, "life": 0.9, "size": 0.3, "c": "aqua", "c3": "sea", "near": true}
+		]},
+		"pop_air": {"sfx": [{"n": "whoosh", "db": -3.0, "pitch": 1.2}], "fx": [
+			{"p": "shard", "y": 0.4, "n": 8, "speed": 3.0, "spread": 0.9, "grav": 8.0, "life": 0.4, "size": 0.07,
+				"c": "foam", "c2": "hot"},
+			{"p": "vortex", "size": "r", "spin": -1.6, "grow": 1.2, "life": 0.5, "c": "foam", "c2": "hot", "c3": "mist"},
+			{"p": "smoke", "y": 0.5, "n": 8, "shape": "disc", "radius": "r", "radius_x": 0.5, "speed": 3.0,
+				"spread": 0.3, "drag": 3.0, "curl": 2.0, "life": 0.7, "size": 0.32, "c": "foam", "c3": "mist"}
+		]},
+		"pop_fire": {"sfx": [{"n": "whoosh", "db": -3.0, "pitch": 0.75}], "fx": [
+			{"p": "shard", "y": 0.4, "n": 8, "speed": 3.0, "spread": 0.9, "grav": 8.0, "life": 0.4, "size": 0.07,
+				"c": "foam", "c2": "hot"},
+			{"p": "skirt", "size": "r", "size_x": 0.8, "tall": 0.9, "arc": 1.0, "life": 0.5, "c": "aqua", "c2": "hot",
+				"c3": "sea"},
+			{"p": "ember", "y": 0.2, "n": 22, "shape": "disc", "radius": "r", "radius_x": 0.7, "way": "up",
+				"speed": 2.4, "spread": 0.3, "grav": -1.0, "life": 0.8, "size": 0.1, "c": "hot", "c2": "aqua"},
+			{"p": "scorch", "size": "r", "size_x": 0.8, "life": 1.6, "c": "main", "c2": "hot", "c3": "char"}
+		]},
+		"pop_zeep": {"sfx": [{"n": "boom", "db": -2.0, "pitch": 0.8}], "fx": [
+			{"p": "flare", "y": 0.8, "size": 3.0, "grow": 1.3, "life": 0.2, "c": "main", "c2": "hot", "c3": "char"},
+			{"p": "ring", "size": "r", "life": 0.45, "c": "aqua", "c2": "hot", "c3": "sea"},
+			{"p": "shard", "y": 0.5, "n": 14, "speed": 6.0, "spread": 0.9, "grav": 9.0, "life": 0.55, "size": 0.09,
+				"c": "foam", "c2": "hot"},
+			{"p": "drop", "y": 0.4, "n": 26, "speed": 7.0, "spread": 0.6, "grav": 10.0, "drag": 0.8, "life": 0.7,
+				"size": 0.13, "c": "main", "c2": "hot"},
+			{"p": "smoke", "y": 0.6, "n": 6, "shape": "disc", "radius": 1.4, "speed": 1.2, "spread": 0.8,
+				"grav": -0.4, "life": 1.3, "size": 0.5, "c": "foam", "c3": "mist", "near": true}
+		]},
+		"puddle": {"net": false, "fx": [
+			{"p": "scorch", "when": "goo", "size": "r", "life": 2.2, "c": "aqua", "c2": "hot", "c3": "sea"},
+			{"p": "drop", "y": 0.05, "n": 4, "shape": "disc", "radius": "r", "radius_x": 0.7, "way": "up",
+				"speed": 1.2, "spread": 0.2, "grav": 5.0, "life": 0.4, "size": 0.08, "c": "aqua", "c2": "hot"}
+		]},
+		"splash_mark": {"fx": [
+			{"p": "drop", "y": 1.9, "n": 6, "speed": 1.6, "spread": 0.8, "grav": 6.0, "life": 0.4, "size": 0.08,
+				"c": "main", "c2": "hot"}
+		]},
+		"beached": {"sfx": [{"n": "unlock", "db": -4.0, "pitch": 0.7}], "fx": [
+			{"p": "drop", "y": 0.6, "n": 20, "speed": 4.5, "spread": 0.5, "grav": 9.0, "life": 0.6, "size": 0.11,
+				"c": "main", "c2": "hot"},
+			{"p": "ring", "size": 1.3, "life": 0.4, "c": "aqua", "c2": "hot", "c3": "sea"},
+			{"p": "star", "y": 2.0, "n": 6, "shape": "disc", "radius": 0.45, "speed": 0.2, "curl": 3.0, "life": 0.8,
+				"size": 0.12, "c": "hot", "c2": "aqua"}
+		]},
+		"swim_dive": {"fx": [
+			{"p": "drop", "y": 0.15, "n": 14, "speed": 4.0, "spread": 0.6, "grav": 9.0, "life": 0.5, "size": 0.1,
+				"c": "main", "c2": "hot"},
+			{"p": "scorch", "size": 0.9, "life": 0.9, "c": "sea", "c2": "aqua", "c3": "char"}
+		]},
+		"swim": {"fx": [
+			{"p": "drop", "at": "feet", "n": 16, "way": "back", "lift": 0.8, "speed": 2.6, "spread": 0.4, "grav": 7.0,
+				"life": 0.4, "size": 0.08, "c": "main", "c2": "hot"},
+			{"p": "smoke", "at": "feet", "n": 5, "way": "back", "speed": 0.8, "spread": 0.5, "grav": -0.2,
+				"life": 0.6, "size": 0.22, "c": "foam", "c3": "mist", "near": true}
+		]},
+		"swim_surface": {"sfx": [{"n": "whoosh", "db": -3.0, "pitch": 0.8}], "fx": [
+			{"p": "ring", "size": "r", "life": 0.4, "c": "aqua", "c2": "hot", "c3": "sea"},
+			{"p": "drop", "y": 0.3, "n": 22, "speed": 5.0, "spread": 0.5, "grav": 10.0, "life": 0.6, "size": 0.11,
+				"c": "main", "c2": "hot"},
+			{"p": "smoke", "y": 0.2, "n": 4, "shape": "disc", "radius": 1.0, "speed": 0.8, "spread": 0.8,
+				"grav": -0.2, "life": 0.8, "size": 0.3, "c": "foam", "c3": "mist", "near": true}
+		]},
+		"riptide": {"fx": [
+			{"p": "drop", "y": 0.6, "n": 18, "shape": "disc", "radius": 1.6, "speed": 1.2, "spread": 0.5,
+				"curl": 6.0, "grav": 2.0, "life": 0.45, "size": 0.08, "c": "main", "c2": "hot"}
+		]},
+		"riptide_spin": {"sfx": [{"n": "swipe", "db": -6.0, "pitch": 0.9, "pitch_k": 0.7}], "fx": [
+			{"p": "sweep", "y": 0.8, "size": "r", "arc": 360.0, "life": 0.24, "c": "main", "c2": "hot", "c3": "sea"}
+		]},
+		"spout_go": {"sfx": [{"n": "whoosh", "db": -2.0, "pitch": 0.7}], "fx": [
+			{"p": "drop", "y": 0.3, "n": 12, "way": "fwd", "speed": 4.0, "spread": 0.4, "grav": 8.0, "life": 0.45,
+				"size": 0.1, "c": "main", "c2": "hot"}
+		]},
+		"spout": {"fx": [
+			{"p": "drop", "y": 0.2, "n": 8, "shape": "disc", "radius": 0.4, "way": "up", "speed": 5.0, "spread": 0.25,
+				"curl": 4.0, "grav": 9.0, "life": 0.45, "size": 0.11, "c": "main", "c2": "hot"},
+			{"p": "smoke", "y": 0.9, "n": 2, "speed": 0.8, "spread": 0.6, "grav": -0.4, "life": 0.5, "size": 0.3,
+				"c": "foam", "c3": "mist", "near": true}
+		]},
+		"wave_go": {"sfx": [{"n": "whoosh", "db": 0.0, "pitch": 0.6}], "fx": [
+			{"p": "scorch", "shape": "lane", "len": "len", "w": 3.6, "life": 1.4, "c": "sea", "c2": "aqua", "c3": "char"},
+			{"p": "drop", "y": 0.3, "n": 20, "way": "back", "lift": 0.6, "speed": 4.0, "spread": 0.6, "grav": 9.0,
+				"life": 0.6, "size": 0.12, "c": "main", "c2": "hot"}
+		]},
+		"wave": {"fx": [
+			{"p": "drop", "at": "feet", "n": 30, "shape": "line", "radius": 1.8, "way": "fwd", "lift": 1.2,
+				"speed": 3.5, "spread": 0.4, "grav": 8.0, "life": 0.5, "size": 0.13, "c": "main", "c2": "hot"},
+			{"p": "smoke", "at": "feet", "y": 0.5, "n": 8, "shape": "line", "radius": 1.8, "speed": 1.0,
+				"spread": 0.6, "grav": -0.3, "life": 0.6, "size": 0.42, "c": "foam", "c3": "mist"}
+		]},
+		"wave_land": {"fx": [
+			{"p": "ring", "size": 2.0, "life": 0.4, "c": "aqua", "c2": "hot", "c3": "sea"},
+			{"p": "drop", "y": 0.4, "n": 24, "speed": 5.0, "spread": 0.5, "grav": 10.0, "life": 0.6, "size": 0.12,
+				"c": "main", "c2": "hot"},
+			{"p": "star", "y": 1.0, "n": 6, "speed": 0.6, "spread": 1.0, "life": 0.6, "size": 0.12, "c": "hot",
+				"c2": "aqua"}
+		]}
+	}
+}

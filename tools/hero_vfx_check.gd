@@ -15,7 +15,7 @@ const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave
 ## data must answer.
 const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
-	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
+	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gil": ["gil_"], "gunslinger": ["gunslinger_"],
 	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_"],
 	"tender": ["tender_"], "thief": ["thief_"]}
 ## The synthetic recipes the runtime parts play: one layer of every kind.
@@ -94,7 +94,10 @@ func _recipes(arch: String) -> void:
 	var missing := called.keys().filter(func(k): return not (moves.has(k) or String(k).ends_with("_")))
 	ok(not called.is_empty() and missing.is_empty(),
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
+	# a call built from a prefix ("pop_" + kind) uses every recipe that starts with it
+	var prefixes := called.keys().filter(func(k): return String(k).ends_with("_"))
 	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
+	unused = unused.filter(func(k): return not prefixes.any(func(pre): return String(k).begins_with(pre)))
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
 	var pal: Dictionary = d["palette"]
 	var bad_sound: Array = []

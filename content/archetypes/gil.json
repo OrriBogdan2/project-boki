@@ -54,5 +54,5 @@
 	"rank2": {"sec": "Rank 2: cooldown 5s -> 4.5s per charge, damage +15%.", "dash": "Rank 2: cooldown 8s -> 7s, surfacing radius +0.3m.", "kin": "Rank 2: cooldown 12s -> 10.8s, damage +15%."},
 	"rank3": {"sec": "the next two potions in the bag show", "dash": "surfacing also slows 30% for 1s", "kin": "the spout pulls foes to its line"},
 	"rank_next": {"sec": "Rank 3: cooldown 5s -> 4s, damage +30%.", "dash": "Rank 3: cooldown 8s -> 6s.", "kin": "Rank 3: cooldown 12s -> 9.6s, damage +30%."},
-	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"}
+	"tells": {"half": "a SPLASH badge over the target counting the different effects, gold one short of a Beach", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"}
 }
