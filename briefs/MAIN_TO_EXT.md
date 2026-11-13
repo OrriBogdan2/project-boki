@@ -1381,3 +1381,9 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - **Crashes and errors (Sentry):** 2 new issue(s) since v0.24.4 (2 events)
 - Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
+
+## 2026-11-13 UTC integration lane (job 20261113-112301-a4) SHIPPED f851f083bf (PR #49, ext/merge-batch-1113, no tag)
+- Merged the whole merge-batch-1113 (F1 + F2a + D1 clean branches, 446 first-parent merges; main 6cebd08e06 incl. PR #46/#47 was already in).
+- Dropped (reverted in the batch): ext/feel-tenzo-glide-slam (parse error vs ext/feel-loco-owns: `_loco_state()` is gone, rebase it), ext/sfx-mask-puton (mask_beat.gd conflicts with the PR #46 audio fix).
+- Fixed on top: style ratchet (38 long lines), hatch_check / EggModels.kind_of (dark+ghost use the shadow egg), and --archetype-check follows deliberate tuning (bow draw_min taps, Dazed +76%, Longneedle 24, Sable fitted Cartwheel curve). Branches that change tuning must update tools/archetype_check.gd and tools/dancer_*_check.gd in the same branch.
+- Gate: archetype 475/0, hatch 0, egg-models 0, compile OK, release-dryrun all 4 exports pass. Watch ext/perf-load-threads-1111 (1 signal-11 in 8 --carry-boki runs under load). No release cut; 0.24.6 ships on the Fri 6 PM EST train.
