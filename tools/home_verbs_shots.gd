@@ -24,8 +24,8 @@ func run(main: Node, dir: String) -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	home.talk_cd = 1.0e9
-	home.cam.zoom_to = 3.0
-	home.cam.zoom = 3.0
+	home.cam.zoom_to = 0.55
+	home.cam.zoom = 0.55
 	if main.fade: main.fade.reveal(0.05)
 	await main.get_tree().create_timer(1.0).timeout
 	var strip := Image.create(CROP.x * PEAK.size(), CROP.y, false, Image.FORMAT_RGBA8)
@@ -36,6 +36,7 @@ func run(main: Node, dir: String) -> void:
 		var vp := main.get_viewport()
 		var at := vp.get_camera_3d().unproject_position(home.player.global_position + Vector3(0, 0.9, 0))
 		var img := vp.get_texture().get_image()
+		img.convert(Image.FORMAT_RGBA8)
 		var r := Rect2i(Vector2i(at) - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 		strip.blit_rect(img, r, Vector2i(i * CROP.x, 0) + (r.position - (Vector2i(at) - CROP / 2)))
 		print("HOMEVERBS strip %s" % verb)
