@@ -1387,3 +1387,10 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - Dropped (reverted in the batch): ext/feel-tenzo-glide-slam (parse error vs ext/feel-loco-owns: `_loco_state()` is gone, rebase it), ext/sfx-mask-puton (mask_beat.gd conflicts with the PR #46 audio fix).
 - Fixed on top: style ratchet (38 long lines), hatch_check / EggModels.kind_of (dark+ghost use the shadow egg), and --archetype-check follows deliberate tuning (bow draw_min taps, Dazed +76%, Longneedle 24, Sable fitted Cartwheel curve). Branches that change tuning must update tools/archetype_check.gd and tools/dancer_*_check.gd in the same branch.
 - Gate: archetype 475/0, hatch 0, egg-models 0, compile OK, release-dryrun all 4 exports pass. Watch ext/perf-load-threads-1111 (1 signal-11 in 8 --carry-boki runs under load). No release cut; 0.24.6 ships on the Fri 6 PM EST train.
+
+## 2026-11-13 UTC build lane (job 20261113-112506-a4) SHIPPED ce8bb5edd0 (PR #48, ext/hunters-best-1113, no tag)
+- v95 best models in game (v95_swap, rigs, clips, anchors and faces kept): Vex 84->86, Kael 79->78 (owner-promoted), Tarek 88->89, Meeko 86->90, Sparkle 81->86. Main's re-timed Vex `x` and Meeko `seed` clips are copied onto the new meshes.
+- Not swapped: Albert i1 (the porthole face blanks, the crack glow is lost, the fish stretches 15.99 vs 9.45), Sable (left hand stretches 21x, joints need a refit), Gil (no swap spec yet). Details are in docs/art/wardens/V95_SWAP.md.
+- Tools: bake_warden.py joins multi-mesh masters; v95_swap stops when `emit` is set on a master without an emission map.
+- Gate: suite-fast 214 checks vs 6cebd08e06. All 6 NEW-RED were rerun: carry_boki, demo and toy are load flakes, garden_whistle is green after merging main, clip is identical on main, work is a timeout. Art checks on the merged tree match new main, except Sparkle's stretch 14.34 over her 13.10 ceiling (documented). release-dryrun: all exports pass.
+- Watch: pr-checks "Wiki is current" (docs/wiki/Rules.md) is red on main since f851f083bf.
