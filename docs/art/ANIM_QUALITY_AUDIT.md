@@ -151,6 +151,11 @@ on main too), so 12 Hunters are measured:
 
 Run rows move up to 5 points either way and the run ring did not change (full stick is pure run): re-measured with the warm-up 0.1 and 0.2 s longer, main reads `archer` 13, 15, 16 and the branch 15, 12, 12, so it is the 2.4 s sample's phase. No Hunter's jog got worse (all 12 equal or better; `ostra` and `rimewright` have no stepping legs).
 
+Nov 13, merged with origin/main ca96e707c5 (its `loco.cycle_s` for Albert and Tenzo stays; every other Hunter's walk
+plays on its run's timeline): jog slide `ashwick` 10 %, `bulwark` 12 % (his `foot_mps` re-measured), `dolm` 17 %,
+`dredge` 12 %, `gunslinger` 11 %, `juggernaut` 12 %, `mage` 10 %, `tender` 18 %, `thief` 22 %. `archer` (120 %) and
+`rimewright` (29 %) fail the jog and the run on main as well: docs/art/FOOT_SLIDE.md.
+
 ## Free arm in attacks (`WardenFreeArm`)
 
 Data `"free_arm": {clip: "L"|"R"}` (content/rules/warden_anim/<art>.json) names the arm a move leaves unused. While that
@@ -209,7 +214,7 @@ posts scroll at the move speed).
    a dragged flail, so the hammer rides low in front as keyed.
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
 4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
-   2.71 m/s (80 %); now in step (see "The walk and run blend in step"; rows walk, jog, run, before then after, in
+   2.71 m/s (80 %); now 0.41 m/s (12 %, Nov 13) (see "The walk and run blend in step"; rows walk, jog, run, before then after, in
    the strip below). His loops share one `loco.cycle_s` (0.5 s); docs/art/FOOT_SLIDE.md has the whole blend sweep.
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
