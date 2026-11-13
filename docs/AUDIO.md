@@ -29,6 +29,79 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 
 ## Monsters
 `content/sfx/mobs.json` (`tools/gen_sfx_mobs.py`): `mdie_<kind>` is each voiced kind's death in its `v_<kind>` family (bosses use the Watcher's, pitched by body; a Shrubling keeps `die_small`), `mstag_open` ticks when a stagger window opens and `mstag_hit` lands the stagger. `MobSfx` (scripts/match/mob_sfx.gd) plays them at the monster and caps a pack dying at once to 3 death cues per 200 ms across kinds. `--mob-sfx-check` asserts the kind -> cue map and the cap.
+### Loudness audit (`tools/sfx_loudness.py`)
+Measures every sound the game names (the sets in `content/sfx/*.json` and the `Sfx.NAMES`, `Sfx.VOICES`, `SfxKits.NAMES`, `VVSfx.NAMES` tables) and groups them by category; a table sound with no set gets one from `table_cats` in `content/rules/sfx_levels.json`. Its level is the RMS above (averaged over takes) plus the gain the game adds in play (`gain_db` there, and `Sfx.BLAST_DB`). A sound more than 3 dB (`tolerance_db`) from its category's **median** is an outlier: fix it with `gain_db` (data, applied by `Sfx.play` and `loop_start`), never by editing the file, or list it in `outliers_ok` with the reason it stands out on purpose. A positive gain may not push the peak past -1 dBFS. `python3 tools/sfx_loudness.py --check` fails on any other outlier, and `tools/health.py` runs it, so `--strict` fails too. `python3 tools/sfx_loudness.py` prints this table and every outlier.
+
+| category | sounds | median level | target RMS | quietest | loudest | max peak | outliers (accepted) |
+|---|---|---|---|---|---|---|---|
+| impact | 98 | -16.2 | -16.0 | boom -22.9 | train_hit -13.2 | -0.9 | 5 (5) |
+| signature | 36 | -17.0 | -17.0 | archer_thread_twang -17.4 | heart_take -17.0 | -1.0 | 0 (0) |
+| fire | 30 | -17.0 | -17.0 | rail -20.9 | ab_rail -16.4 | -1.0 | 1 (1) |
+| grunt | 46 | -18.0 | -18.0 | v_spitter -21.5 | hurt -16.0 | -1.1 | 1 (1) |
+| cast | 126 | -18.0 | -18.0 | swap -21.8 | pay_rage -14.7 | -1.0 | 5 (5) |
+| boki | 54 | -19.0 | -19.0 | grab -22.6 | scan_pop -18.6 | -1.1 | 1 (1) |
+| dash | 36 | -20.0 | -20.0 | jump -23.7 | fall -18.9 | -1.2 | 1 (1) |
+| loop | 14 | -21.0 | -21.0 | heart_charge -21.0 | revive_hum -16.8 | -1.1 | 1 (1) |
+| ui | 38 | -22.0 | -22.0 | reload -24.2 | kill -15.0 | -1.1 | 4 (4) |
+| step | 59 | -23.0 | -23.0 | step0 -23.4 | swim -20.1 | -4.6 | 0 (0) |
+
+The set sounds all sit at their category (`--sfx-set-check` holds them there). The outliers were older table sounds made before the category standard: eight are brought to their median by `gain_db` (charge, cloak, v_glimmer, v_skitter, v_bomber, br_crumble, fuse_hiss, drip); the blast sounds (kept under on purpose), the kill/knock/extract confirm stings and 14 borderline ones (3-4.5 dB, mixed by ear at their call sites) are listed in `outliers_ok`. None of this has been listened to yet.
+
+
+### 0.24.5 sets, measured (11-12)
+The garden games, home chimes, Ways Out calls and Heartspark sets merged after the first audit were measured with `tools/sfx_loudness.py`: all 49 new cues are already at their category (each generator levels through `tools/sfx_lib.py`), so no `gain_db` was needed; their sets are enforced by the same `--check` (it reads every `content/sfx/*.json`; a cue pushed 3 dB off fails it). Before = RMS over the audible part, after = that plus `gain_db` (none). Peaks are all under -1 dBFS. The one edit: the `train_hit` accepted-outlier entry was dropped, since the new impact cues moved the median and it now sits 2.97 dB above it. The `amb_*` beds (`.ogg`, Ambience bus, levelled by layer in `HomeAmbience`) and `mask_*` are not part of this band: the garden beds read -17.9 to -28.3 LUFS (zone glasswater quietest) against -17 to -20.5 for the older beds, left as designed.
+
+| cue | set | category | takes | peak | level before | level after | from median |
+|---|---|---|---|---|---|---|---|
+| echo_hit | garden | ui | 3 | -10.0 | -22.0 | -22.0 | +0.0 |
+| echo_miss | garden | ui | 3 | -9.2 | -22.0 | -22.0 | -0.0 |
+| echo_streak | garden | ui | 2 | -8.0 | -22.0 | -22.0 | -0.0 |
+| garden_bat | garden | ui | 3 | -7.2 | -22.0 | -22.0 | -0.0 |
+| garden_cheer_good | garden | boki | 3 | -7.4 | -19.0 | -19.0 | +0.0 |
+| garden_cheer_miss | garden | boki | 3 | -7.6 | -19.0 | -19.0 | -0.0 |
+| garden_cheer_perfect | garden | boki | 3 | -6.6 | -19.0 | -19.0 | +0.0 |
+| garden_chime_evolve | garden | boki | 2 | -5.6 | -19.0 | -19.0 | -0.0 |
+| garden_chime_level | garden | boki | 3 | -6.2 | -19.0 | -19.0 | -0.0 |
+| garden_chime_stat | garden | boki | 3 | -7.0 | -19.0 | -19.0 | -0.0 |
+| garden_count | garden | boki | 2 | -5.5 | -19.0 | -19.0 | +0.0 |
+| garden_creak | garden | step | 3 | -10.1 | -23.0 | -23.0 | +0.0 |
+| garden_crowd | garden | boki | 3 | -6.6 | -19.0 | -19.0 | -0.0 |
+| garden_finish | garden | boki | 2 | -5.5 | -19.0 | -19.0 | +0.0 |
+| garden_go | garden | boki | 2 | -6.8 | -19.0 | -19.0 | -0.0 |
+| garden_hop | garden | boki | 2 | -6.8 | -19.0 | -19.0 | +0.0 |
+| garden_lap | garden | ui | 3 | -9.3 | -22.0 | -22.0 | -0.0 |
+| garden_sniff | garden | loop | 1 | -8.3 | -21.0 | -21.0 | -0.0 |
+| garden_strain | garden | loop | 1 | -6.6 | -21.0 | -21.0 | -0.0 |
+| garden_sulk_large | garden | boki | 3 | -5.8 | -19.0 | -19.0 | +0.0 |
+| garden_sulk_medium | garden | boki | 3 | -5.6 | -19.0 | -19.0 | +0.0 |
+| garden_sulk_small | garden | boki | 3 | -4.3 | -19.0 | -19.0 | +0.0 |
+| garden_thud | garden | impact | 2 | -4.2 | -16.0 | -16.0 | +0.2 |
+| garden_wake | garden | boki | 1 | -6.0 | -19.0 | -19.0 | -0.0 |
+| garden_win_large | garden | boki | 1 | -8.5 | -19.0 | -19.0 | -0.0 |
+| garden_win_medium | garden | boki | 1 | -8.1 | -19.0 | -19.0 | -0.0 |
+| garden_win_small | garden | boki | 1 | -8.0 | -19.0 | -19.0 | -0.0 |
+| relay_finish | garden | boki | 2 | -6.2 | -19.0 | -19.0 | +0.0 |
+| relay_fumble | garden | boki | 3 | -4.3 | -19.0 | -19.0 | -0.0 |
+| relay_handoff | garden | boki | 3 | -4.6 | -19.0 | -19.0 | -0.0 |
+| show_crowd | garden | boki | 2 | -4.2 | -19.0 | -19.0 | +0.0 |
+| show_reveal | garden | ui | 1 | -8.6 | -22.0 | -22.0 | -0.0 |
+| tumble_clash_brace | garden | impact | 3 | -2.8 | -16.0 | -16.0 | +0.2 |
+| tumble_clash_dodge | garden | boki | 3 | -4.1 | -19.0 | -19.0 | -0.0 |
+| tumble_clash_rush | garden | impact | 3 | -2.9 | -16.0 | -16.0 | +0.2 |
+| tumble_push | garden | step | 3 | -7.1 | -23.0 | -23.0 | -0.0 |
+| tumble_ringout | garden | impact | 2 | -4.5 | -16.0 | -16.0 | +0.2 |
+| heart_beat | heart | loop | 1 | -9.5 | -21.0 | -21.0 | +0.0 |
+| heart_charge | heart | loop | 1 | -12.1 | -21.0 | -21.0 | -0.0 |
+| heart_extract | heart | cast | 1 | -4.7 | -18.0 | -18.0 | -0.0 |
+| heart_gate_open | heart | cast | 1 | -4.6 | -18.0 | -18.0 | +0.0 |
+| heart_reveal | heart | cast | 1 | -6.0 | -18.0 | -18.0 | +0.0 |
+| heart_take | heart | signature | 1 | -5.9 | -17.0 | -17.0 | +0.0 |
+| ways_last | heart | ui | 1 | -6.1 | -22.0 | -22.0 | -0.0 |
+| ways_open | heart | ui | 1 | -10.5 | -22.0 | -22.0 | -0.0 |
+| ways_start | heart | ui | 1 | -9.7 | -22.0 | -22.0 | -0.0 |
+| ways_taken_other | heart | ui | 1 | -10.7 | -22.0 | -22.0 | -0.0 |
+| ways_taken_own | heart | ui | 1 | -10.3 | -22.0 | -22.0 | -0.0 |
+| ways_warn | heart | ui | 1 | -13.3 | -22.0 | -22.0 | +0.0 |
 
 ## Names
 - A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.

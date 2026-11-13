@@ -53,6 +53,8 @@ var next := 0
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
+## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
+var sound_gain := {}
 var last_played := {}
 var rng := RandomNumberGenerator.new()
 
@@ -93,6 +95,7 @@ func _ready() -> void:
 		elif takes.size() > 1:
 			streams[n] = takes
 	_load_reach()
+	sound_gain = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))["gain_db"]
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
@@ -462,7 +465,8 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
 	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	var v := vol_db + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
+	var v := vol_db + float(sound_gain.get(sname, 0.0)) + _distance_db(pos, r)
+	v += BLAST_DB if sname in BLAST else 0.0
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -528,7 +532,7 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	p.bus = "SFX"
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry}
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db + float(sound_gain.get(sname, 0.0)), "reach": carry}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
