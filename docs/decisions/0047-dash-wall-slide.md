@@ -25,5 +25,9 @@ untouched. Kits that stop on purpose keep it: Cinder's Soot Ram on the first foe
 picked short of what it would hop into (BreahHop.spot_for), and off Neve's wall it rebounds in the air (the bounce).
 
 ## Consequences
-- `--dash-wall-check`: 12 Hunters x 4 surfaces x 3 angles, the distance kept within 10% of the table.
+- `--dash-wall-check`: 12 Hunters x 4 surfaces x 3 angles, the distance kept within 10% of the table, measured where
+  the dash ends. The coast after it is the run's brake, a constant deceleration on the tangent speed, so it keeps
+  about cos^2 (2026-11-13: Bulwark's fitted 360 Smash hands over at 0.66 of its mean, 13% at 80 degrees over the
+  whole window, 17.4% at the dash's end). A face shorter than the dash's share (Ryzz at 80 degrees past a 1.3 m
+  Tenzo rock or a prop) is left round its end by the corner slip: those tries only assert it passed the end, free.
 - No Net or save change: each game steps its own hunter.

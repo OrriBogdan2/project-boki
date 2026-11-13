@@ -3,9 +3,14 @@ extends "res://tools/wall_slide_check.gd"
 ## runs along the face (docs/decisions/0047-dash-wall-slide.md: cos of the angle to the wall, 0.94 at 20
 ## degrees, 0.71 at 45, 0.17 at 80). All 12 Hunters dash from touching a straight cliff on The Hollow Crown,
 ## a placed Tenzo rock, a raised Neve wall and a Hollow Crown prop's face, at 20, 45 and 80 degrees to it;
-## the same dash on open ground is the reference. A try fails when the distance it makes along the wall is
-## off the reference's (its length times the table) by more than KEEP_TOL. Tenzo's Rock Hop is a leap to a spot
-## picked short of the wall (KIT_STOPS): it only must never end up inside it.
+## the same dash on open ground is the reference. Both are measured where the dash ends (roll_t runs out): the
+## coast after it is the run's brake, a constant deceleration on the tangent speed, so it keeps about cos^2,
+## not cos (Bulwark's 360 Smash hands over at 0.66 of its mean speed: 13% at 80 degrees over the whole window).
+## A try fails when the distance it makes along the wall is off the reference's (its length times the table)
+## by more than KEEP_TOL. A face shorter than that share (Ryzz's 7 m lane at 80 degrees past a 1.3 m Tenzo rock
+## or a prop's 0.9 m) is left round its end, where the corner slip adds to it: a try that misses the table
+## there asserts instead that it got past the end and ended free of the wall ("round"). Tenzo's Rock Hop is a leap to a spot picked short of the wall (KIT_STOPS): it only must
+## never end up inside it.
 ## Counts fixed simulation steps; never touches the save. Prints one "DWALL ..." line per try and
 ## "DASH WALL CHECK DONE, failures: N".
 
@@ -23,6 +28,7 @@ const HUNTERS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger"
 	"rimewright", "tender", "thief"]
 
 var own_walls: Array = []         # the Tenzo rock and the Neve wall the tries meet
+var dash_end := Vector2.ZERO      # where the last _dash's dash itself ended (roll_t ran out), from its start
 
 func run(main: Node) -> void:
 	await _setup(main)
@@ -65,10 +71,11 @@ func _dash_try(hero: String, s: Dictionary, ang: float) -> void:
 	var t: Vector2 = s["t"]
 	var n: Vector2 = s["n"]
 	var at := _touch(s) + n * START_GAP
-	var length := _dash(open_spot, REF_DIR).length()
+	_dash(open_spot, REF_DIR)
+	var length := dash_end.length()
 	var got := _dash(Vector3(at.x, float(s["y"]), at.y), _wish(s, ang))
 	var table := cos(deg_to_rad(ang))
-	var along := got.dot(t)
+	var along := dash_end.dot(t)
 	var out := got.dot(n)
 	var how := "slide"
 	if out > BOUNCED:
@@ -76,6 +83,9 @@ func _dash_try(hero: String, s: Dictionary, ang: float) -> void:
 	elif along < length * table * 0.5:
 		how = "stop"
 	var ok := length > 0.5 and absf(along - length * table) <= length * table * KEEP_TOL
+	if not ok and length * table > _room(s):
+		how = "round"      # the face ended first (a corner slip round it): past its end and free of it
+		ok = length > 0.5 and along >= _room(s) and w.occupy(P.pos.x, P.pos.z, P.r, P.pos.y, false) == 0.0
 	if KIT_STOPS.has(hero):
 		how = "kit"
 		StoneStand.mover = P      # (his own rocks count as he walks them, as BreahHop._lands asks)
@@ -87,18 +97,32 @@ func _dash_try(hero: String, s: Dictionary, ang: float) -> void:
 		out, how, "ok" if ok else "FAIL"])
 
 ## Dashes from `at` along `wish` (the key and the cursor that way on the press, nothing held after it) and
-## returns where the body got to over WINDOW steps.
+## returns where the body got to over WINDOW steps; dash_end is where the dash itself ended (a kit move that
+## never sets roll_t: the window's end).
 func _dash(at: Vector3, wish: Vector2) -> Vector2:
 	_rest()
 	_reset(at, wish)
 	var cursor := at + Vector3(wish.x, 0.9, wish.y) * 6.0
+	var rolled := false
+	dash_end = Vector2.INF
 	for i in WINDOW:
 		P.inp["move"] = wish if i == 0 else Vector2.ZERO
 		P.inp["aim"] = cursor
 		P.inp["dash"] = i == 0
 		P.inp["dash_down"] = i == 0      # a tap: held for the press's step only
 		_step()
-	return Vector2(P.pos.x - at.x, P.pos.z - at.z)
+		rolled = rolled or P.roll_t > 0.0
+		if rolled and P.roll_t <= 0.0 and dash_end == Vector2.INF:
+			dash_end = Vector2(P.pos.x - at.x, P.pos.z - at.z)
+	var got := Vector2(P.pos.x - at.x, P.pos.z - at.z)
+	if dash_end == Vector2.INF: dash_end = got
+	return got
+
+## Metres of face from the touch on to its end, along the slide (a long straight cliff or Neve wall: plenty).
+func _room(s: Dictionary) -> float:
+	if s.has("wall"):
+		return float(s["wall"]["len"]) - 0.3
+	return PROP_TOUCH if s["name"] != "cliff" else CLIFF_RUN
 
 ## A flat open spot at least two dashes' room from a and b (each try meets only its own wall), with level
 ## open ground along REF_DIR for PATH_LEN and a body's width either side (the reference dash's line).
