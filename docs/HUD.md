@@ -84,6 +84,9 @@ for the squad rows). Verified 11-11:
   row to wear it there (the one you wear: the two swap). Check: `--lpage-drag-check`.
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
+- Swap by dragging a backpack piece onto a slot (or a glove onto the other glove), or point and press Enter to
+  wear it (a worn piece: take it off) and Delete to drop it on the ground. The Wear and Drop buttons stay.
+- An open deathbox does not open this window: the loot window (below) shows what you carry itself.
 - Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
 
 ## Pop-up budget
@@ -110,10 +113,30 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 | Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
 | Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
 
+## The deathbox loot window (LootWindow)
+
+Owner playtest 11-11: "inventory is a bit chaotic when searching enemy chests ... showing bag + what you're
+using is doing the same thing twice, and perks don't need to be shown there". One centred window, two columns,
+nothing else on screen:
+
+- **In the box** (left): grouped Gear, Treasure, Supplies, Boki. One line per thing: icon, name in its rarity
+  colour, UPGRADE where gear beats what you wear, one button (Take, Wear for gear, Full when it can't fit).
+  Clicking the row does the same. Gear that beats yours goes on when taken, yours into the box.
+- **You** (right): what you wear, marked WORN, then your backpack, in one list; "Backpack 3/6" on the right.
+  No perks (they are on the loadout page and the HUD tooltip) and no belt (the belt bar is on screen).
+- Stats only on hover: the compare card (`InvTip`, `InvText.compare`).
+- Keys: interact takes everything worth having (smart loot), Enter takes the thing pointed at, Esc closes.
+  Buttons never take keyboard focus (Space jumps). There is no gamepad loot input yet.
+- It builds in one go and sits by anchors (no frame waits); lists scroll past the screen height minus 420 px.
+- Check: `--loot-window-check` (at the window's size, headless 1280x720; small and long box: on screen, nothing
+  out of the window, one button per thing and every thing takeable, WORN in place, no perks, upgrade goes on, Esc).
+- Shots (GPU, `--inv-shots --shots-size=1920x1080`): [before](shots/loot-simple/before_1920x1080.jpg),
+  [after](shots/loot-simple/after_1920x1080.jpg), [full backpack hold](shots/loot-simple/after_full_pack_1280x720.jpg).
+
 ## Looting with a full inventory
 
 - Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
-- A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) at the right edge, where your inventory was: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
+- A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, holds it (red outline, its button reads Cancel): the right column's title says "No room for X: swap one" and each of your backpack things gets Swap (yours goes into the box). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 

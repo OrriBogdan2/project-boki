@@ -1,6 +1,6 @@
 class_name LoadoutPanel
 extends Node
-## The body of the in-match inventory window (I, and beside an open deathbox): what you wear, the
+## The body of the in-match inventory window (I): what you wear, the
 ## utility belt, your perks and the backpack, every slot labelled with its key. Point at a thing for a
 ## hover card (InvText: gear is compared with what you wear). Press, hold and move a thing onto another slot
 ## (SlotDrag: mouse, or hold A on the pad) to wear it, swap the gloves or two belt slots, or take it off into

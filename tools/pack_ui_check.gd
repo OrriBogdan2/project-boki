@@ -189,14 +189,14 @@ func run(mn: Node) -> void:
 	m.boxes.append(bx)
 	hud.open_loot(bx)
 	await _frames(4)
-	var takes := _buttons(hud.loot_panel, "Swap")
+	var takes := _buttons(hud.loot_panel, "Take")
 	if takes.size() == 1:
 		var lrp: Control = (takes[0] as Button).get_parent().get_parent()
 		await _click(main.get_viewport().get_final_transform() * (lrp.get_global_transform_with_canvas() * Vector2(60.0, lrp.size.y * 0.5)))
 		await _frames(2)
 		ok(P.pack.any(func(it): return String(it.get("id", "")) == "crown_shard") and P.pack.size() == 4, "loot window: clicking the shard's row swaps it into the full pack")
 	else:
-		ok(false, "loot window: one Swap button for the shard (got %d)" % takes.size())
+		ok(false, "loot window: one Take button for the shard (got %d)" % takes.size())
 	hud.close_loot()
 	m.boxes.erase(bx)
 	# 4. the backpack window (I) on a full pack: Drop and Wear by click

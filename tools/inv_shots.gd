@@ -1,7 +1,7 @@
 extends RefCounted
 ## --inv-shots --shots-dir=<dir>: the in-match inventory at whatever resolution the window has (run
 ## under xvfb with a renderer, --resolution WxH). inv_pack: the backpack window with a full loadout;
-## inv_loot: a deathbox with gear beside it; inv_tip: the compare tooltip on a hovered backpack piece
+## inv_loot: the deathbox window (LootWindow); inv_tip: the compare tooltip on a hovered backpack piece
 ## (only when the window is a LoadoutPanel). --shots-size=WxH resizes the window first. Files carry the height.
 ## --inv-drag instead saves <dir>/drag/NNNNN.jpg, a frame each, of the press-and-hold drags (SlotDrag) played
 ## with real input: armor onto its slot, a glove refused by the armor slot, the gloves swapped, then the pad
@@ -56,7 +56,7 @@ func run(main_node: Node) -> void:
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
 	await _frames(10)
-	await _shot("inv_loot_" + tag, "A deathbox with your loadout beside it")
+	await _shot("inv_loot_" + tag, "The deathbox window: the box on the left, what you wear and carry on the right")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for c in captions:
 		f.store_line(c)

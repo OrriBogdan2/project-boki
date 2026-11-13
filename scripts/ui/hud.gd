@@ -2311,14 +2311,10 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			_ctext(pv + Vector2(0, 4), nm, 13 if overview else 11, col, big)
 
 # ------------------------------------------------------------------ the deathbox loot window
-## Pressing interact at a deathbox opens this: everything inside, each with its icon and rarity
-## colour, "upgrade" marked where it beats what you've got. Click one to take it (swapping a glove
-## or weapon leaves yours in the box); press interact again, or Smart loot, to grab everything
-## worth having. Walking away, going down or emptying the box closes it.
+## Pressing interact at a deathbox opens LootWindow (what is in it beside what you carry); press interact
+## again to take everything worth having. Walking away, going down or emptying the box closes it.
 var loot_open = null          # the box Dictionary, or null
-var loot_panel: PanelContainer
-var loot_hold: PanelContainer   # LootHold: your backpack beside the box while a clicked thing won't fit
-var loot_sig := ""
+var loot_panel: LootWindow
 
 func loot_is(b: Dictionary) -> bool:
 	return loot_open != null and is_same(loot_open, b)
@@ -2330,7 +2326,7 @@ var ui_extra: Array = []      # other panels that own the mouse (the practice ar
 
 ## The cursor is over one of the item windows (deathbox loot, swap, backpack) or a panel in ui_extra.
 func mouse_on_panel() -> bool:
-	for pn in [loot_panel, loot_hold, swap_panel, pack_panel] + ui_extra:
+	for pn in [loot_panel, swap_panel, pack_panel] + ui_extra:
 		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false
@@ -2350,29 +2346,17 @@ func _draw_pointer() -> void:
 	var ring := pts.duplicate(); ring.append(pts[0])
 	cursor.draw_polyline(ring, Color(0.06, 0.065, 0.1), 1.6, true)
 
-## Makes a whole item row clickable (as well as its buttons): hovering lights it up.
-func _row_click(rp: Control, cb: Callable) -> void:
-	rp.mouse_filter = Control.MOUSE_FILTER_STOP
-	rp.mouse_entered.connect(func(): rp.modulate = Color(1.12, 1.12, 1.12))
-	rp.mouse_exited.connect(func(): rp.modulate = Color.WHITE)
-	rp.gui_input.connect(func(ev: InputEvent):
-		if ev is InputEventMouseButton and (ev as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and not (ev as InputEventMouseButton).pressed:
-			rp.accept_event()
-			Sfx.play("click")
-			cb.call())
-
 func open_loot(b: Dictionary) -> void:
+	close_loot()
+	close_pack()
 	loot_open = b
-	loot_sig = ""
 	Sfx.play("ui_open", null, -10.0)
-	_build_loot()
-	if loot_panel: UI.pop_in(loot_panel)
-	if pack_panel: UI.pop_in(pack_panel)
+	loot_panel = LootWindow.make(m, b, close_loot)
+	add_child(loot_panel)
+	UI.pop_in(loot_panel)
 
 func close_loot() -> void:
 	loot_open = null
-	_close_hold()
-	close_pack()
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	loot_panel = null
@@ -2386,174 +2370,7 @@ func _loot_tick(_delta: float) -> void:
 	if p == null or p.out or p.downed or b.get("empty", true) or p.flat_dist(b["pos"]) > 2.4 or not m.boxes.has(b):
 		close_loot()
 		return
-	# rebuild only when what's in it (or what you're holding) changes
-	var sig := str(Life.box_items(m, p, b).map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.pack.size())
-	if sig != loot_sig:
-		_build_loot()
-
-## A clicked box thing that doesn't fit: nothing moves; your backpack opens beside the box with it held.
-## (Public so the screenshot tool can open it.)
-func open_hold(row: Dictionary) -> void:
-	_close_hold()
-	if not LootFull.holdable(row):
-		return
-	var b: Dictionary = loot_open
-	var hi := int(row["i"])
-	close_pack()
-	var swap := func(mi: int): if LootFull.swap_held(m, m.player, b, hi, mi): _hold_done()
-	var drop := func(mi: int): if LootFull.drop_for_held(m, m.player, b, hi, mi): _hold_done()
-	loot_hold = LootHold.build(m.player, (b["pack"] as Array)[hi], swap, drop, _dismiss_hold)
-	add_child(loot_hold)
-	UI.pop_in(loot_hold)
-	await get_tree().process_frame
-	if is_instance_valid(loot_hold) and loot_panel:
-		var vs := loot_hold.get_viewport_rect().size
-		loot_hold.position = Vector2(vs.x - loot_hold.size.x - 16.0, loot_panel.position.y)    # where your inventory was
-
-func _close_hold() -> void:
-	if loot_hold and is_instance_valid(loot_hold):
-		loot_hold.queue_free()
-	loot_hold = null
-
-## The hold window's own close: your inventory comes back beside the box.
-func _dismiss_hold() -> void:
-	_close_hold()
-	if loot_open != null:
-		_open_pack_beside()
-
-## Your inventory at the right edge with the deathbox to its left, so you can compare as you take.
-func _open_pack_beside() -> void:
-	pack_sig = ""
-	_build_pack()
-	if pack_panel: UI.pop_in(pack_panel)
-
-func _hold_done() -> void:
-	if (loot_open as Dictionary).get("empty", false):
-		close_loot()
-	else:
-		_build_loot()
-
-func _build_loot() -> void:
-	_close_hold()
-	var p: Hunter = m.player
-	var b: Dictionary = loot_open
-	if loot_panel and is_instance_valid(loot_panel):
-		loot_panel.queue_free()
-	var items: Array = Life.box_items(m, p, b)
-	loot_sig = str(items.map(func(it): return [it["name"], it["upgrade"]])) + str(p.gear) + p.wid + str(p.pack.size())
-	var pc := PanelContainer.new()
-	pc.theme = UI.theme()
-	pc.mouse_filter = Control.MOUSE_FILTER_STOP
-	var bc: Color = Life.box_color(b)
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.06, 0.065, 0.1, 0.95)
-	sb.set_corner_radius_all(14)
-	sb.border_color = Color(bc, 0.8); sb.set_border_width_all(2); sb.border_width_top = 4
-	sb.content_margin_left = 14; sb.content_margin_right = 14; sb.content_margin_top = 12; sb.content_margin_bottom = 12
-	sb.shadow_color = Color(0, 0, 0, 0.5); sb.shadow_size = 18
-	pc.add_theme_stylebox_override("panel", sb)
-	var v := UI.vbox(6); pc.add_child(v)
-	var tip := InvTip.new(pc)
-	pc.add_child(tip)
-	var o: Hunter = b["owner"]
-	var head := UI.hbox(8); v.add_child(head)
-	head.add_child(Icons.Glyph.new("gem", bc, 18.0))
-	var t := UI.title(("Your deathbox" if o == p else "%s's deathbox" % o.pname), 22, INK)
-	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(t)
-	head.add_child(_pack_chip(p))
-	var cl := UI.button("✕", func(): close_loot(), 36)
-	cl.flat = true
-	head.add_child(cl)
-	if items.is_empty():
-		v.add_child(UI.label("Empty.", 14, MUTED))
-	var list := UI.vbox(6)
-	if items.size() > 5:
-		var sc := ScrollContainer.new()
-		sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		sc.custom_minimum_size.y = 5 * 60.0
-		list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		sc.add_child(list)
-		v.add_child(sc)
-	else:
-		v.add_child(list)
-	for it in items:
-		var row := UI.hbox(8)
-		var rp := PanelContainer.new()
-		var rs := StyleBoxFlat.new()
-		rs.bg_color = Color(it["col"], 0.12 if it["upgrade"] else 0.06)
-		rs.set_corner_radius_all(9)
-		rs.border_color = Color(it["col"], 0.55 if it["upgrade"] else 0.2); rs.border_width_left = 3
-		var fit := LootFull.fits(p, it, b)
-		rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
-		rp.add_theme_stylebox_override("panel", rs)
-		rp.add_child(row)
-		row.add_child(Icons.Glyph.new(String(it["icon"]), it["col"], 24.0))
-		var col := UI.vbox(0); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var nm := UI.label(String(it["name"]), 15, INK, UI.semi)
-		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-		col.add_child(nm)
-		var sub := UI.label(String(it["sub"]), 12, MUTED)
-		sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-		sub.clip_text = true
-		sub.custom_minimum_size.x = 210
-		col.add_child(sub)
-		row.add_child(col)
-		if it["key"] == "gear":
-			var tag := UI.label("UPGRADE" if it["upgrade"] else "WORSE", 11, GOOD if it["upgrade"] else MUTED, UI.caps)
-			tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			row.add_child(tag)
-		elif it["key"] == "pack":
-			var vt := UI.label("%d" % int(it.get("value", 0)), 13, GOLD, UI.big)
-			vt.tooltip_text = "Worth"
-			vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
-			row.add_child(vt)
-		var itc: Dictionary = it
-		var gear_it := InvText.box_gear(b, it)
-		if not gear_it.is_empty():
-			tip.attach(rp, func(): return InvText.compare(p, gear_it))
-		var verb := "Take"
-		if it["key"] == "gear": verb = "Swap"
-		elif not fit: verb = "Full"
-		elif it["key"] == "pack" and it.get("full", false): verb = "Swap"
-		var take_it := func():
-			if loot_open == null or not m.player:
-				return
-			if not LootFull.click(m, m.player, loot_open, itc):
-				open_hold(itc)
-			elif (loot_open as Dictionary).get("empty", false): close_loot()
-			else: _build_loot()
-		var take := UI.button(verb, take_it, 76)
-		_row_click(rp, take_it)
-		take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		if not fit:
-			LootHold.mark_full(rp)
-			take.tooltip_text = "No room: swap it with something of yours"
-		elif it["key"] == "pack" and it.get("full", false):
-			take.tooltip_text = "Swaps out the least valuable thing in your backpack"
-		row.add_child(take)
-		list.add_child(rp)
-	var foot := UI.hbox(8); v.add_child(foot)
-	var sm := UI.primary("Smart loot  (%s)" % Settings.key_cap("interact"), func():
-		if loot_open != null and m.player:
-			var got := LootFull.smart(m, m.player, loot_open)
-			if got > 0 or (loot_open as Dictionary).get("empty", false):
-				close_loot(), 200)
-	foot.add_child(sm)
-	var hint := UI.label("Best first: hands, then your backpack", 12, MUTED)
-	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	foot.add_child(hint)
-	pc.custom_minimum_size.x = 430
-	add_child(pc)
-	loot_panel = pc
-	if not pack_open():
-		_open_pack_beside()
-	# left of your inventory, which sits at the right edge
-	await get_tree().process_frame
-	if is_instance_valid(pc):
-		var vs := pc.get_viewport_rect().size
-		pc.position = Vector2(vs.x - 16.0 - LootHold.WIDTH - 12.0 - pc.size.x, maxf(90.0, vs.y * 0.5 - pc.size.y * 0.5 - 40.0))
+	loot_panel.tick()
 
 # ------------------------------------------------------------------ the backpack and the swap window
 ## The backpack (I): what you're carrying home, each with Equip (weapons and gloves go in your hands,
@@ -2676,7 +2493,7 @@ func _build_swap() -> void:
 				Pack.swap(m, m.player, idx, swap_wp)
 			close_swap()
 		var srow := _item_row(it, [["Drop", drop_it, worse]], "least valuable" if i == low else "")
-		_row_click(srow, drop_it)
+		LootHold.row_click(srow, drop_it)
 		sl[1].add_child(srow)
 	var foot := UI.hbox(8); v.add_child(foot)
 	foot.add_child(UI.button("Leave it  (Esc)", func(): close_swap(), 150))
@@ -2691,7 +2508,7 @@ func toggle_pack() -> void:
 	if pack_open():
 		close_pack()
 	else:
-		close_swap()
+		close_swap(); close_loot()
 		pack_sig = ""
 		_build_pack()
 		if pack_panel: UI.pop_in(pack_panel)
@@ -2718,7 +2535,7 @@ func _build_pack() -> void:
 	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
-	if loot_open == null and not p.caught.is_empty():
+	if not p.caught.is_empty():
 		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
 	var hint := UI.para(LoadoutPanel.HINT, 12)
 	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
