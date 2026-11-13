@@ -17,5 +17,19 @@
 		"hushwood": ["shadow", "lunar", "venom"],
 		"ridge": ["storm", "tempest", "echo"]
 	},
+	"arrive": {
+		"prints": 8,
+		"step_m": 0.9,
+		"print_m": 0.16,
+		"alpha": 0.45,
+		"fade_in_s": 2.0,
+		"hold_s": 8.0,
+		"fade_out_s": 3.0,
+		"shimmer_s": 3.0,
+		"mote_s": 0.3,
+		"motes": 3,
+		"glint_s": 2.5
+	},
+	"arrive_doc": "How a visitor reads as a stranger (scripts/home/visitor_arrive.gd): prints footprints, step_m m apart (print_m m wide, up to alpha opaque), run from the island edge to where it stands, fade in over fade_in_s, hold hold_s and fade out over fade_out_s; a burst of motes sparks of its type colour on it every mote_s seconds for its first shimmer_s seconds; one glint every glint_s seconds on an egg it left, until the egg is hatched.",
 	"groups_doc": "Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json."
 }

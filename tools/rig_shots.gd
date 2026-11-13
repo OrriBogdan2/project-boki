@@ -21,8 +21,6 @@ func run(main: Node) -> void:
 		main.fade.reveal(0.01)
 	_stage(main)
 	for id in wardens:
-		WardenGlb.set_model(String(id), true)
-	for id in wardens:
 		await _sheet(String(id), out)
 	print("RIG_SHOTS_DONE")
 	tree.quit()

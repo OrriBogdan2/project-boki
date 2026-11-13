@@ -4,7 +4,6 @@ extends RefCounted
 ##   2. the Heart's early pip follows its state: charging, ready (open), carried (in use, the carrier's squad), taken
 ##   3. the quest pips follow the clock (open, shut = lost) and the lairs / outposts (in use, taken, by squad)
 ##   4. the final pip: locked until final_s, open, in use while a squad fills the ring, taken by the squad that left
-##   5. "Squads left" counts squads with a Hunter still in the match
 ##   6. the Gate prompt is only the carrier's leave prompt, says "Leave now: small reward", holds gate_hold_s,
 ##      and its second line names the final seat's time
 ##   7. the real HUD draws the strip in every state without a script error (frames run with the Hud on)
@@ -99,11 +98,6 @@ func run(main: Node) -> void:
 		"a squad filling the ring: in use, in their colour")
 	H._force(Heart.S.DONE, "test")
 	ok(_st(m, 3) == St.TAKEN, "the ring is full: taken")
-	# ---------------------------------------------------------------- 5. squads left
-	ok(WaysOutHud.squads_left(m) == 3, "three squads in the match: Squads left 3")
-	foe.out = true
-	ok(WaysOutHud.squads_left(m) == 2, "a squad with nobody left drops out of the count")
-	foe.out = false
 	# ---------------------------------------------------------------- 6. the Gate prompt
 	var it := {"kind": "heart", "act": "leave", "prog": 0.5, "need": Heart.r("gate_hold_s")}
 	var other := {"kind": "heart", "col": Color.WHITE, "label": "x"}

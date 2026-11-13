@@ -23,7 +23,11 @@ Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Bok
                    coming; two, three and four notes over its chirp, pitched by size at play time (home_chimes.gd)
   garden_hop      the Waystone lighting for a hop: a rising shimmer swelling for 0.5 s, then a soft close
   garden_wake     a zone waking: three slow rising bells and a held shimmer (once, when a zone opens)
-Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd and home_chimes.gd.
+  garden_depart   the hop itself: a short airy whoosh as the screen goes
+  garden_arrive_<zone>  the chime on landing in a zone, tuned to its bed: bramblebank birds, glasswater drops,
+                  cinderstep embers, hushwood a muted minor bell, ridge wind and a high fifth
+  garden_locked   a locked zone picked on the Waystone: a soft wooden thud and a lock click
+Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd, home_chimes.gd and hub_waystone.gd.
 """
 import numpy as np
 import sfx_lib as S
@@ -321,6 +325,59 @@ def hop(i):
     return B.soft(B.room(mix(0.6 * rise, shimmer, bell), 0.4), 5200)
 
 
+def depart(i):
+    """0.35 s as the screen goes: an airy whoosh, the low band swelling first and the high one trailing off."""
+    d = 0.35
+    low = bpf(noise(d), 350 * j(i), 1400) * S.shape(d, 0.12, 0.0, 0.2)
+    high = bpf(noise(d), 1800 * j(i), 5200) * S.shape(d, 0.2, 0.0, 0.15) * 0.5
+    return B.soft(B.room(mix(low, high, 0.15 * S.sweep(600, 300, d) * S.shape(d, 0.1, 0.0, 0.25)), 0.3), 4800)
+
+
+def arrive_bramblebank(i):
+    """Meadow birds: two bright plucks (a major third) and a chirp."""
+    return B.soft(B.room(mix(pluck(784 * j(i, 0.02), 0.35, 0.14), at(pluck(988 * j(i, 0.02), 0.4, 0.16), 0.12),
+                             at(0.5 * chirp(1250, 0.1, i), 0.26)), 0.35), 5500)
+
+
+def arrive_glasswater(i):
+    """Drops on water: three glassy bells falling in pitch, long in the room."""
+    bells = [at(S.chime(f * j(i, 0.015), 0.6, 0.25), t0) * g
+             for f, t0, g in ((1568, 0.0, 0.8), (1319, 0.14, 0.7), (988, 0.3, 0.8))]
+    return B.soft(B.room(mix(*bells), 0.8), 6500)
+
+
+def arrive_cinderstep(i):
+    """Warm embers: a low wooden tone (a fifth) with a few crackles."""
+    tone = mix(pluck(196 * j(i, 0.02), 0.5, 0.25), at(pluck(294 * j(i, 0.02), 0.5, 0.25), 0.1))
+    pops = [at(wood_tick(f, 0.03), t0) * 0.35 for f, t0 in ((1400, 0.18), (1100, 0.27), (1700, 0.38))]
+    return B.soft(B.room(mix(tone, *pops), 0.3), 3800)
+
+
+def arrive_hushwood(i):
+    """Dusk: a muted minor-third bell under a breath."""
+    breath = bpf(noise(0.7), 400, 1400) * S.shape(0.7, 0.3, 0.0, 0.4) * 0.25
+    bells = mix(S.chime(440 * j(i, 0.01), 0.9, 0.5) * 0.8, at(S.chime(523 * j(i, 0.01), 0.9, 0.5), 0.2) * 0.7)
+    return B.soft(B.room(mix(bells, breath), 0.6), 3000)
+
+
+def arrive_ridge(i):
+    """Open wind: an airy rising whistle and a bright fifth on top."""
+    d = 0.6
+    wind = bpf(noise(d), 1500, 4500) * S.shape(d, 0.35, 0.0, 0.25) * 0.3
+    whistle = S.sweep(880, 1320, d) * S.shape(d, 0.3, 0.0, 0.3) * 0.5
+    top = at(mix(S.chime(1760 * j(i, 0.015), 0.5, 0.3), at(S.chime(2637, 0.5, 0.3), 0.1)), 0.25)
+    return B.soft(B.room(mix(wind, whistle, top), 0.5), 6500)
+
+
+def locked(i):
+    """A knock on a shut door: a soft wooden thud, then a small metal click."""
+    thud = mix(S.sweep(160, 90, 0.16) * env(N(0.16), 0.004, 0.07),
+               0.4 * lpf(noise(0.08), 900) * env(N(0.08), 0.002, 0.03))
+    tick = 0.3 * hpf(noise(0.02), 3500) * env(N(0.02), 0.0005, 0.01)
+    click = at(mix(S.chime(2400 * j(i, 0.03), 0.06, 0.02), tick), 0.14)
+    return B.soft(mix(thud, click), 4200)
+
+
 def wake(i):
     notes = [(392, 0.0), (523, 0.28), (784, 0.56)]
     bells = [at(S.chime(f, 1.2 if k == 2 else 0.7, 0.4), t0) for k, (f, t0) in enumerate(notes)]
@@ -362,6 +419,11 @@ def main():
     S.takes_cat('garden_chime_evolve', chime_evolve, 1, 'boki')
     S.takes_cat('garden_hop', hop, 1, 'boki')
     S.takes_cat('garden_wake', wake, 0, 'boki')
+    S.takes_cat('garden_depart', depart, 1, 'boki')
+    for zone, fn in (('bramblebank', arrive_bramblebank), ('glasswater', arrive_glasswater),
+                     ('cinderstep', arrive_cinderstep), ('hushwood', arrive_hushwood), ('ridge', arrive_ridge)):
+        S.takes_cat('garden_arrive_' + zone, fn, 1, 'boki')
+    S.takes_cat('garden_locked', locked, 1, 'step')
 
 
 if __name__ == '__main__':

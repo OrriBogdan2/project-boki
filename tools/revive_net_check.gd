@@ -15,7 +15,7 @@ const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match
 const SEED := 4242
-const KEYS := 1              # rift keys the guest carries into its first death (the belt holds one)
+const KEYS := 1              # chest keys the guest carries into its first death (the belt holds one)
 
 var main: Node
 var bad := 0
@@ -56,7 +56,7 @@ func _host() -> void:
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- --revive-net-check=guest --rn-port=%d > '%s' 2>&1" % [
+	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- --revive-net-check=guest --rn-port=%d > '%s' 2>&1" % [
 		ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
@@ -220,7 +220,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		"done": stop = true
 		"die":
 			if m and m.player:
-				m.player.rift_keys = KEYS
+				m.player.chest_keys = KEYS
 				m.eliminate(m.player, null, "test")
 			_say()
 		"gone":
@@ -234,7 +234,7 @@ func _say() -> void:
 	var P := m.player
 	var b := Life.box_of(m, P)
 	Net.lobby_emit("rn_r", {
-		"out": P.out, "gone": P.gone, "hp": P.hp, "max": P.max_hp, "sick": P.sick_t, "keys": P.rift_keys,
+		"out": P.out, "gone": P.gone, "hp": P.hp, "max": P.max_hp, "sick": P.sick_t, "keys": P.chest_keys,
 		"pos": [P.pos.x, P.pos.y, P.pos.z], "boxes": m.boxes.size(), "ended": m.flow.ending(),
 		"box": [b["pos"].x, b["pos"].y, b["pos"].z] if not b.is_empty() else [0, 0, 0],
 		"beacons": m.beacons.size(), "b0": [m.beacons[0]["pos"].x, m.beacons[0]["pos"].y, m.beacons[0]["pos"].z],

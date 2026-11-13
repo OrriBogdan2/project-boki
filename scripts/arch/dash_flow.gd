@@ -31,6 +31,7 @@ var air := false            # the dash running now set off in the air
 var _was_dashing := false
 var _fire_was := false
 var _replaying := false
+var _frozen_tap := false    # an LMB tap made inside a hit-stop, due on the next step
 
 func _init(owner_kit: ArchKit) -> void:
 	kit = owner_kit
@@ -85,6 +86,9 @@ func row(slot: String) -> Dictionary:
 func route(dt: float) -> void:
 	var h := kit.h
 	var dashing := _sync()
+	if _frozen_tap:
+		h.inp["fire"] = true
+		_frozen_tap = false
 	var fire_down := bool(h.inp.get("fire", false))
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
@@ -108,6 +112,12 @@ func take_x() -> bool:
 	if not _sync():
 		return _hold_for_cc("x") or _press_mid_jump("x")
 	return _press("x") == "buffer"
+
+## An LMB tap made while the simulation is frozen (a hit-stop: no step runs to see it): replayed on the first
+## step after the freeze, where the dash and jump rows and the kit take it like any press made then, instead of
+## falling between two frames (the other keys latch in Match.pending_input; --hitstop-input-check).
+func press_frozen() -> void:
+	_frozen_tap = true
 
 ## The move the hunter is making now, for the hold rows: "mantle", a dash ("ground" or "air", by where it set
 ## off), "jump" (in the air off a jump or a ledge), or "" (none).
@@ -188,18 +198,20 @@ func _cancel(carry: bool) -> void:
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(h.base_speed)
 	h.vel = Vector3(flat.x, h.vel.y, flat.y)
 
-## Seconds until the hunter's crowd control allows `slot` (0: it does now). A stun stops every slot but Q's glove
-## and an ult's recast, a root the dash, Grounded the dash (not a reeling Dredge's) and the jump.
+## Seconds until the hunter's crowd control allows `slot` (0: it does now). A stun or the kit's committed recovery
+## (ArchKit.commit_left) stops every slot but Q's glove and an ult's recast, a root the dash, Grounded the dash (not
+## a reeling Dredge's) and the jump.
 func cc_left(slot: String) -> float:
 	var h := kit.h
 	if slot == "q" or (slot == "x" and kit.ult_running()):
 		return 0.0
+	var stop := maxf(h.stun_t, kit.commit_left())     # a stun, or the kit's own committed recovery: every slot
 	if slot == "dash":
 		var ground := 0.0 if DredgeKit.reeling(h) else KitStatus.grounded_left(h)
-		return maxf(h.stun_t, maxf(h.root_t, ground))
+		return maxf(stop, maxf(h.root_t, ground))
 	if slot == "jump":
-		return maxf(h.stun_t, KitStatus.grounded_left(h))
-	return maxf(h.stun_t, 0.0)
+		return maxf(stop, KitStatus.grounded_left(h))
+	return stop
 
 ## Presses the CC forbids now, in its last BUFFER_S: held for the first step it allows them. A held LMB is left
 ## alone (it fires on its own once allowed); a tap is replayed. A cast that holds the hunter still (Rimelock's

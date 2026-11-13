@@ -26,6 +26,12 @@ func run(ok: Callable, ac, arch: String) -> void:
 		ok.call("%s: pips match the stacks" % tag, pips_ok, str(d["n"]))
 	ac.step(m, float(d["total"]) + 0.3)
 	ok.call("%s: gone when the status ends" % tag, K.combo_read(T).is_empty())
+	if arch == "thief":     # Marks have no cap: past the row of pips the tag reads the count
+		(K as ThiefKit).add_mark(T, 11, true)
+		var d3 := K.combo_read(T)
+		ok.call("%s: 11 Marks read 11 past the %d pips" % [tag, int(d3["max"])],
+				int(d3["n"]) == 11 and int(d3["n"]) > int(d3["max"]), str(d3["n"]))
+		(K as ThiefKit).clear_marks(T)
 	apply(arch, K, T)
 	T.flash_t = 0.0
 	payoff(arch, P, K, T)

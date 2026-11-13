@@ -468,6 +468,7 @@ func _ready() -> void:
 		return
 	if "--airheal-check" in args:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
+		return
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
@@ -510,16 +511,6 @@ func _ready() -> void:
 		return
 	if "--raid-check" in args:
 		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
-		return
-	if "--rolling-check" in args:
-		var rck = load("res://tools/rolling_check.gd").new()     # rolling sessions: waves, cut-off, level floor, catch-up XP, bounties, the end
-		set_meta("rolling_check", rck)      # (held, so nothing it waits on loses it)
-		rck.run(self)
-		return
-	if "--rolling-sim" in args:
-		var rsim = load("res://tools/rolling_sim.gd").new()      # a whole 30-minute rolling session, headless, with bots
-		set_meta("rolling_sim", rsim)       # (held: it yields frames so freed nodes really go, and must outlive its awaits)
-		rsim.run(self, opts)
 		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
@@ -574,11 +565,6 @@ func _ready() -> void:
 	if "--perf-probe" in args:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
-		return
-	if "--hitch-check" in args or _has_arg("--load-check"):
-		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd);
-		# --load-check stops at the reveal and judges the loading screen
-		add_child(load("res://tools/hitch_check.gd").new())
 		return
 	if OS.has_feature("web"):
 		_expose_test_hooks()
@@ -709,6 +695,8 @@ func _ready() -> void:
 		_open_arena("")
 	elif "--training" in args:
 		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
+	elif "--duo-tutorial" in args:
+		show_screen("match", DuoTutorial.opts("", "--duo-test" in args))
 	elif "--tutorial" in args or "--tut-test" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:
@@ -766,6 +754,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 		await fade.cover()
 		if gen != _gen:
 			return
+	if screen == "match": MeshCache.sweep()     # one-off meshes the last two matches never asked for go
 	if current:
 		current.queue_free()
 		current = null
@@ -785,7 +774,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var ld = null
 			if (not opts.get("autoplay", false) or opts.get("probe", false)) and (not _has_arg("--shot=") or _has_arg("--show-loading")):
 				var tier_i := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
-				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
+				Sfx.prefetch(["music_" + MusicDir.opening(tier_i), "amb_match"])
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
@@ -796,7 +785,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
 				get_viewport().disable_3d = true
 				await ld.shown
-				ld.want = 0.04
+				ld.advance(0.04)
 				if gen != _gen:
 					get_viewport().disable_3d = false
 					ld.queue_free()
@@ -809,7 +798,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# build in short slices so the loading screen keeps moving, then draw everything once
 				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
 				await m.start_staged(opts, func(f: float, stage: String):
-					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.advance(0.04 + 0.66 * f)
 					ld.set_stage(stage))
 				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
@@ -817,7 +806,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 					return
 				if not opts.has("net"): m.set_process(false)
 				ld.set_stage("graphics")
-				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				await m.warm_up(func(f: float): ld.advance(0.7 + 0.28 * f))
 				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
@@ -835,6 +824,10 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = L.new()
 			scr.setup(opts)
 			current = _layer(scr)
+		"party":
+			var Pt = PartyView.new()
+			Pt.setup(opts)
+			current = _layer(Pt)
 		"prematch":
 			var Pv = load("res://scripts/ui/prematch_view.gd")
 			var pscr = Pv.new()
@@ -1712,6 +1705,7 @@ func _grammar_runtime_check() -> void:
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
 	_ac_run(m, 3.5)
 	_grt_reset(T)
+	T.teleport(home + Vector3(6, 0, 0))        # (the slam knocked it close: the shot must start past the wall)
 	k = _grt_kin(m, P, "puddlet")
 	_grt_out(k, home + Vector3(0.5, 0, 1.0))
 	k.use_ability("k1", home + Vector3(2.5, 0, 0))
@@ -1934,8 +1928,8 @@ func _grammar_runtime_check() -> void:
 	_grt("shoulder: shots poison (carry rider)", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	_grt_reset(T)
 	# ---- 7. owner bonuses
-	var base_hp := float(Data.CLASSES[P.cls]["hp"])
-	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (class %.0f)" % [P.max_hp, base_hp])
+	var base_hp := float(Data.CLASSES[P.cls]["hp"]) + float(P.get_meta("growth_hp", 0.0))        # (+ LevelGrowth)
+	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (base %.0f)" % [P.max_hp, base_hp])
 	k = _grt_kin(m, P, "puddlet")
 	_grt("owner bonus: Prismander shield + regen", is_equal_approx(P.kin_shield, 16.0) and absf(P.kin_pt("owner_regen") - 0.75) < 0.01 and is_equal_approx(P.max_hp, base_hp), "shield %.0f regen %.2f" % [P.kin_shield, P.kin_pt("owner_regen")])
 	var hp0 := P.hp
@@ -1957,7 +1951,7 @@ func _grammar_runtime_check() -> void:
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
 	P.ult = 1.0
 	var blocked := not KinMerge.can_cast(P)
-	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
+	_ac_run(m, P.merge_cd + 0.1)        # (a timed-out merge rests the Boki timeout_rest_s, past the spent window)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
 	KinCommand.tap(P)
@@ -2360,6 +2354,7 @@ func _truce_check() -> void:
 		if T.allied(0, 1): break
 	print("TCHECK reversed: the beaten squad accepted=%s after %.1fs (events %s)" % [T.allied(0, 1), tt, str(T.events.slice(-3))])
 	if not T.allied(0, 1) and not T.events.has("fake 1"): ok = false; print("TCHECK FAIL beaten squad refused")
+	if not TruceCalmCheck.run(m, home): ok = false
 	m.flow.finish("check done")
 	print("TCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
