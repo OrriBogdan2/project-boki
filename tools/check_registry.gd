@@ -575,6 +575,7 @@ const CHECKS := {
 	"--swept-hit-check": ["res://tools/swept_hit_check.gd", "swept_hit_check", null],
 	"--bot-ring-check": ["res://tools/bot_ring_check.gd", "bot_ring_check", null],      # BotRing
 	"--level-growth-check": ["res://tools/level_growth_check.gd", "level_growth_check", null],
+	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],      # last-hit XP, 30 m share
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
