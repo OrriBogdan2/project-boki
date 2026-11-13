@@ -7,7 +7,7 @@ extends RefCounted
 ## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
 ## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
-## squash on the hit frame, the jet lift-off, the run cadence).
+## squash on the hit frame, the jet lift-off, the run's footfalls).
 
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
@@ -123,7 +123,7 @@ func _ram(lvl: int) -> float:
 ## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
 ## The source's beats (briefs/hero-ref/linwick.md, a frame = 0.2 s; docs/heroes/ashwick.md, Animation timing):
 ## the lance's pilot is the kick key, the jet's crouch and flight pose land in its first frame, and the run clip's
-## footfalls at Cinder's cadence come every 0.15-0.21 s at his run speed.
+## footfalls, at the rate WardenGait plays it (foot_mps), come every 0.15-0.21 s at his run speed.
 func _timing() -> void:
 	var lance: Array = KMovesPair.MOVES["as_lance"]["keys"]
 	var spool := float((Arch.def("ashwick").get("lmb", {}) as Dictionary).get("spool", -1.0))
@@ -151,8 +151,7 @@ func _timing() -> void:
 	if clips and clips.lib and lc.has("run"):
 		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
 		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
-		var rate := clampf(spd / float(lc["run_speed"]), 0.6, 1.5) * float(lc.get("cadence", 1.0))
-		foot = cycle * 0.5 / rate
+		foot = cycle * 0.5 / clips.gait.plan(spd, lc)
 	ok(
 		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
 		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot
