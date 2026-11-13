@@ -147,6 +147,7 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **`scan_fail`**: a scan cancelled by Space, a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
 - **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 11 m.
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
+- A monster's notice cue (`MobNotice`, `scripts/match/mob_notice.gd`): when an idle monster turns to chase (it saw a Hunter or was hit) its kind's `v_<kind>` voice plays from it, pitched as a short alert (small kinds high, heavy kinds low). A camp waking is one cue: a monster stays quiet while a camp-mate (camp spots within 5 m) is awake or cued in the last 3 s of match time. Clients cue from the synced idle -> chase change. Checked in `--mob-notice-check`.
 ## The Heart and the Ways Out calls
 - `scripts/match/heart_sfx.gd` (`Heart.audio`) owns the Heartspark cues (`tools/gen_sfx_heart.py`, set `content/sfx/heart.json`) and the Ways Out calls: `call_out(event, seat, team)` with `open`, `start`, `taken`, `warn`, `last` plays one flat UI sting (`ways_*`) and writes the same line to the match feed and the toast lane, so sound and banner fire together. Each call plays once per seat (a squad's `start` again after 10 s); the quest seats call it the same way when they are built. `--ways-out-sfx-check` asserts it.
 ## The Blight tide (`scripts/match/tide_sfx.gd`, `tools/gen_sfx_tide.py`, set `content/sfx/tide.json`)

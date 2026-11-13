@@ -153,6 +153,7 @@ const CHECKS := {
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--mob-damage-check": ["res://tools/mob_damage_check.gd", "mob_damage_check", null],      # camp time-to-fall table
 	"--knock-reset-check": ["res://tools/knock_reset_check.gd", "knock_reset_check", null],      # docs/KNOCK_RESETS.md
+	"--mob-notice-check": ["res://tools/mob_notice_check.gd", "mob_notice_check", null],      # one cue per camp waking
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	# two-step abilities report their window
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],

@@ -5342,6 +5342,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
 			var st: int = int(it[8])
 			if st >= 0 and st < MOB_STATES.size():
+				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
 				mb.st = MOB_STATES[st]
 			mb.atk_dir = Vector2(it[10], it[11])
 			mb.st_t = it[12]
