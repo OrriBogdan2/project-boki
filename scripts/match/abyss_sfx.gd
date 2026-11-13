@@ -36,7 +36,7 @@ func tick(h: Hunter, dt: float) -> void:
 	elif _phase == Phase.FALLING and h.gliding and h.vel.y > CATCH_VY:
 		_phase = Phase.CAUGHT
 		_play(h, "abyss_catch", CATCH_DB)
-	if h.gliding and h.vel.y > 0.0 and h.glide_fuel <= 0.001:
+	if h.gliding and h.vel.y > 0.0 and h.glider_snd.hot:
 		Sfx.loop_hold("abyss_strain%d" % h.get_instance_id(), "abyss_strain", _at(h), STRAIN_DB)
 
 static func fall_out(h: Hunter) -> void:
