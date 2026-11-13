@@ -115,9 +115,14 @@ static func level_up(rec: Dictionary) -> void:
 static func has_art(id: String) -> bool:
 	return Data.KIN.has(id) and BokiRig.FRAME.has(id) and ResourceLoader.exists(BokiRig.PATH % [id, id])
 
-## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, or "trade"),
-## art or not; "" when that isn't a way it evolves.
+## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, "trade", or "path":
+## the path meter's winner when the player presses Evolve), art or not; "" when that isn't a way it evolves.
+## A branching final with a path meter (EvoPath) never evolves by "level" alone: the player presses Evolve.
 static func next_for(rec: Dictionary, how: String, item := "") -> String:
+	if how == "path":
+		return EvoPath.pick(rec)
+	if how == "level" and not EvoPath.line(rec).is_empty():
+		return ""
 	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
 	var fits: Array = []
 	for o in line.get("into", []):
@@ -141,15 +146,19 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	ensure(rec)
 	var to := next_for(rec, how, item)
-	if to == "" or not has_art(to):
+	if to == "" or not has_art(to) or rec.get("stay", false):      # a worn Stayleaf: no new forms
 		return {}
 	var before := form_name(rec)
-	var a := leading(rec)
+	var a := EvoPath.path_of(rec, to) if how == "path" else leading(rec)
 	rec["was"].append(String(rec["species"]))
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
 	rec.erase("form_name")
-	return {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	var part := Lean.grow_part(rec)      # its lean grows a part at the next form (GARDEN_MODERN 3.3)
+	if part != "":
+		ev["lean_part"] = part
+	return ev
 
 ## What an Ink would do to this Boki, before using it (its item card in the Feed menu shows this):
 ## {"state": "form" | "waits" | "none", "to": species id or "", "name": the form's name or "", "text"}.
@@ -182,9 +191,6 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))
 	var ev := try_evolve(rec, "level")
 	if not ev.is_empty():
-		var part := Lean.grow_part(rec)      # a level form also grows a part from what it leans toward eating
-		if part != "":
-			ev["lean_part"] = part
 		return ev
 	if lv >= 2 and lv % 4 == 2:
 		var a := leading(rec)

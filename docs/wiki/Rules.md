@@ -716,6 +716,18 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | backpack_shop | [0, 25, 50, 90] |
 | bot_backpack | {"easy": 0.0, "medium": 0.25, "hard": 0.4, "expert": 0.55} |
 
+## evo_paths (`content/rules/evo_paths.json`)
+
+Path meter for branching finals (scripts/core/evo_path.gd; briefs/design/GARDEN_MODERN.md section 3; docs/decisions/0022). Lines are keyed by the species that branches in content/rules/evolve.json; the swap, its level and the Ink lines are Evo's (decision 0024). Each end: form id (art at art/kin/<form>/<form>.glb, missing = the Boki waits), path (the affinity of its path tokens, garden_items.json), stat (its key stat, Care.STATS), type (its second type, lean.json), traits (any at trait_at or more gives a care pip), sports (games whose Cup Ribbons count, garden_prizes.json ids). The end with more pips wins; tie: the stat lead; still tied: undecided.
+
+| Setting | Value |
+|---|---|
+| pips | {"stat_lead": 3, "lean_half": 1, "lean_full": 2, "tokens_max": 3, "care_trait": 1, "care_toy": 1, "ribbons_max": 2} |
+| pips_doc | stat_lead: the end whose key stat is higher. lean_half / lean_full: the end's type lean at lean_half_at of full / full (Evo.LEAN_FULL). tokens_max: one per worn path token of the end's path. care_trait: an end trait at trait_at or more. care_toy: the most-used toy (rec.toy_use) trains the end's key stat. ribbons_max: one per Cup Ribbon in the end's sports. |
+| lean_half_at | 0.5 |
+| trait_at | 0.6 |
+| lines | {"sporcupine": {"ends": [{"form": "amanitusk", "name": "Amanitusk", "path": "fierce", "stat": "power", "type": "poison", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "ringrove", "name": "Ringrove", "path": "steadfast", "stat": "guard", "type": "grass", "traits": ["loyalty"], "sports": ["shove"]}]}, "vespox": {"ends": [{"form": "glaivyx", "name": "Glaivyx", "path": "fierce", "stat": "power", "type": "steel", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "lashyx", "name": "Lashyx", "path": "swift", "stat": "speed", "type": "dark", "traits": ["bravery"], "sports": ["dash", "relay"]}]}, "glassolotl": {"ends": [{"form": "chandelotl", "name": "Chandelotl", "path": "curious", "stat": "focus", "type": "fairy", "traits": ["curiosity"], "sports": ["seek", "volley", "echo_steps", "lantern_match"]}, {"form": "geodelotl", "name": "Geodelotl", "path": "steadfast", "stat": "guard", "type": "rock", "traits": ["loyalty"], "sports": ["shove"]}]}, "zapple": {"ends": [{"form": "howlop", "name": "Howlop", "path": "fierce", "stat": "power", "type": "dark", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "chimelop", "name": "Chimelop", "path": "curious", "stat": "focus", "type": "fairy", "traits": ["curiosity"], "sports": ["seek", "volley", "echo_steps", "lantern_match"]}]}} |
+
 ## evolve (`content/rules/evolve.json`)
 
 Evolution (scripts/core/evo.gd). Each entry is a Boki species id and what it evolves into. 'level': the level it evolves at (a level-up at or past it). 'into': the options; 'path' picks a branch by the Boki's leading affinity (fierce/steadfast/curious/swift), 'item' needs that Ink used on it (any level), 'trade' needs it traded to another player. Ids that have no data yet are the owner's roster names in lower case. A Boki never evolves into a species without data and a model (art/kin/<id>/<id>.glb and a BokiRig FRAME row); it waits, and evolves once the art exists.

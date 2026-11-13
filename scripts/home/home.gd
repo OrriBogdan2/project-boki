@@ -3230,6 +3230,7 @@ func _open_kin(rec: Dictionary) -> void:
 			if String(ln[0]) != "":
 				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
 				c1.add_child(UI.label(lean_t, UI.T_SMALL, Lean.face(ln[0])["tint"]))
+			EvoPathView.block(rec, c1, func(): _open_kin(rec))
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
 			c2.add_child(UI.section("Affinities"))

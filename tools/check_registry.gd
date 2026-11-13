@@ -40,6 +40,7 @@ const CHECKS := {
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5
 	"--garden-items-check": ["res://tools/garden_items_check.gd", "garden_items_check", null],      # GARDEN_MODERN.md 1
 	"--ink-preview-check": ["res://tools/ink_preview_check.gd", "ink_preview_check", null],      # Ink card
+	"--evo-path-check": ["res://tools/evo_path_check.gd", "evo_path_check", null],      # GARDEN_MODERN.md 3
 	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],      # GARDEN_MODERN 1.2
 	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
 	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
