@@ -104,15 +104,15 @@ last snapshot and the mover's own game (m); the net distance moved against the o
 
 | Move | Mover | Step/frame own (offline) | Step/frame other | Step/snapshot server | End: own vs offline | End: other vs own | End: server vs own | Moved vs offline | Note |
 |---|---|---|---|---|---|---|---|---|---|
-| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.56 | 0.22 | 0.00 | 0.00 | 5.0 vs 5.2 m (x0.96) |  |
-| Kael Warchain sling | caster | 0.43 (0.43) | 0.57 | 2.99 | 0.48 | 0.00 | 0.00 | 4.8 vs 5.3 m (x0.91) | speed away 4.6 m/s |
-| Grimble Abyssal Hand reel | moved Hunter | 0.18 (0.18) | 0.30 | 1.18 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.57 | 0.14 | 0.00 | 0.00 | 5.3 vs 5.4 m (x0.97) |  |
+| Kael Warchain sling | caster | 0.43 (0.43) | 0.43 | 2.99 | 0.01 | 0.00 | 0.00 | 5.6 vs 5.6 m (x1.00) | speed away 4.6 m/s |
+| Grimble Abyssal Hand reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
 | Motley swap dash | moved Hunter | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Motley swap dash | caster | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Meeko Hearth Call pull | moved Hunter | 8.05 (8.05) | 8.05 | 8.05 | 0.00 | 0.00 | 0.00 | 8.1 vs 8.1 m (x1.00) | a teleport |
-| Sparkle Kitefall launch and crash | caster | 1.08 (1.06) | 0.76 | 3.61 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
-| Sparkle Kitefall launch and crash | moved Hunter | 0.13 (0.13) | 0.19 | 0.81 | 0.00 | 0.00 | 0.00 | 2.3 vs 2.3 m (x1.00) |  |
-| Knock into a wall | moved Hunter | 0.26 (0.26) | 0.38 | 1.75 | 0.00 | 0.00 | 0.00 | 3.9 vs 3.7 m (x1.07) |  |
+| Sparkle Kitefall launch and crash | caster | 1.08 (1.09) | 4.97 | 4.97 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Sparkle Kitefall launch and crash | moved Hunter | 0.13 (0.13) | 0.13 | 0.88 | 0.00 | 0.00 | 0.00 | 2.5 vs 2.5 m (x1.00) |  |
+| Knock into a wall | moved Hunter | 0.26 (0.26) | 0.34 | 1.82 | 0.00 | 0.00 | 0.00 | 3.9 vs 3.7 m (x1.07) |  |
 
 The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows the same Sparkle crash step
 (4.98 m), so that step is not the delay's doing; with delay it was 0.76 to 5.71 m from run to run (see below).
@@ -123,8 +123,12 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   (`Displace`, docs/decisions/0016-displace.md); the other game and the server only follow its snapshots. The
   distances match offline (x0.90 to x1.07).
 - **Ends agree.** The other game and the server end exactly where the mover's own game ends (0.00 m). Against
-  offline: Kael's pull ends 0.2 to 0.5 m short of the offline run in some runs (the hooked player's body is
-  nudged by the arrival differently than the bot's; not traced), everything else 0.00 m.
+  offline: Kael's pull ends 0.0 to 0.3 m short, everything else 0.00 m. Kael's rows were red on main (0.77 to
+  0.84 m, 3 of 3 runs; the 0.24.4 gate triage put the 2 reds on Meeko's Hearth Call, which passes at 0.00 m) and
+  it was the check, not the game: the offline run leaves the bot right where the guest is placed next (Kael's
+  arrival shoves it to 48.75 m), and the guest's game still draws the bot's copy there for ~0.5 s (delay plus the
+  snapshot buffer), so the two bodies separate and the guest starts 0.55 m nearer Kael, who then stops 0.8 m
+  short. The check now waits SETTLE_VIEW after moving the bot away before placing the guest.
 - **Teleports are teleports, on every game.** Motley's swap and Meeko's Hearth Call pull are one 8 m jump by
   design (`Displace.teleport`, scripts/combat/displace.gd:44) and look the same on the other game and the server.
 - **Gap, not fixed: Sparkle's Kitefall crash steps 4 to 5.7 m in one frame on the other game** (4 of 5 runs,
