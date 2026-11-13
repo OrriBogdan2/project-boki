@@ -13,6 +13,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `team_boki.gd` (`TeamBoki`, drawn by `hud_panels.gd` right after `Hud._draw_squad`) | the squad rows' extras: a level chip on the portrait's lower-left (gold once the ultimate is open, the plate's own chip), and the teammate's small Boki icon with a thin health bar, tinted when it is down, resting or its owner is a wisp. The rest of a row (portrait, name, armour strip over segmented health, status icons, distance, KNOCKED / DEAD / EXTRACTED states) is `Hud._draw_squad`. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, the XP tracker on its top edge (level number, XP bar, gain pop, rank-ready pulse), big health number, thick segmented bar, armour strip, shell, resource bar |
 | `level_up_cue.gd` (`LevelUpCue`, one on `hud.lvl_cue`) | your level-up moment: a gold column with rising chevrons over your hero (0.8 s) and a card over the vitals saying what improved (health, ability power, the weapon step, the ultimate opening, points to spend), 2.6 s. Research and reasons: [LEVEL_UP.md](LEVEL_UP.md) |
+| `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
+| `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips (each fills as its charge recharges; a ready charge shows the next one's countdown small at the top), key pill, rank pips, lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
@@ -50,7 +52,7 @@ Rules of the look:
   A remote body keeps the Net `kst` time (`KitStatus._note_remote`). Check: `--clarity-check` section 4.
 
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
-drawn, the downed plate and status words show, cooldown text appears).
+drawn, your shield strip drains first and fades, the downed plate and status words show, cooldown text appears).
 
 ## Boki HUD: decision, state, gaps
 
@@ -94,7 +96,7 @@ for the squad rows). Verified 11-11:
 
 Owner playtest 11-09: "ally knocked is way too in your face". The rule now: nothing that pops up during
 a fight covers the middle of the screen or stays more than 2 s; edge-anchored, small, merged, few. "In a
-fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are owned elsewhere
+fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MSG_FIGHT_S` (4 s). The opening "Your kit" panel fades out while it is on (its 14 s timer waits) and returns when it ends; holding Tab (the scores key) shows it. Shots: `--kit-panel-fight-shots`, `docs/shots/ui-kit-panel-fight/`. Tutorial hints are owned elsewhere
 (`ext/tutorial-visibility`) and not covered here.
 
 | Pop-up | Where, size | How long | Now |
