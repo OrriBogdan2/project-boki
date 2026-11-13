@@ -1,5 +1,4 @@
 # Ability VFX quality: the bar, the rules, the scorecard (2026-11-08, re-scored 2026-11-09)
-# Ability VFX quality: the bar, the rules, the scorecard (2026-11-08)
 
 Owner playtest 11-08: abilities look janky; Cinder and Kael look decent. This doc sets the bar from those two kits
 (plus the source footage in `docs/KIT_PARITY.md`), lists the shared causes of jank and what the shared layer now does,
@@ -72,6 +71,10 @@ Still open (shared, not done here):
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
+- `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
+  for Boki; check that no Hunter path reaches them.
+- Only a few kits are data-driven (`content/vfx/`: archer, ashwick, bulwark, dolm, juggernaut, rimewright, tender). The rest
+  draw with `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`). Moving each to `HeroVfx` data is
 - Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
   `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
   how a kit reaches the bar.
@@ -141,7 +144,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem (from the strip) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Tenzo | dolm | 3 | 3 | 3 | 3 | 4 | 3 | 3 | 22 | re-scored 11-12 (was 14): cobalt lane, rings and Rockfall slam read at match zoom, layered crack + debris + blast. Under the bar: `scripts/arch/kits/kit_looks.gd` `_build_rock` still builds the thrown boulder/rock as a molten orange lump with an orange haze (heat 0.75-0.95, haze `Color(1.0, 0.42, 0.1, 0.28)`): give it basalt + cobalt rim (heat 0, haze `#3a7cff`); `content/vfx/dolm.json` palette `dust` `#c8b496` puffs land as opaque beige clouds that hide the foe in the quake, rocks and dash strips: lower the `smoke` layers' alpha / size or tint `stone` `#8f9cb8` |
+| 1 | Tenzo | dolm | 3 | 3 | 3 | 3 | 4 | 3 | 3 | 22 | re-scored 11-12 (was 14): cobalt lane, rings and Rockfall slam read at match zoom, layered crack + debris + blast. Under the bar: `scripts/arch/kits/kit_looks.gd` `_build_rock` still builds the thrown boulder/rock as a molten orange lump with an orange haze (heat 0.75-0.95, haze `Color(1.0, 0.42, 0.1, 0.28)`): give it basalt + cobalt rim (heat 0, haze `#3a7cff`); `content/vfx/dolm.json` palette `dust` `#c8b496` puffs land as opaque beige clouds that hide the foe in the quake, rocks and dash strips: lower the `smoke` layers' alpha / size or tint `stone` `#8f9cb8`; the dust puffs are thin (gain 0.4, half height, 0.6x life, fewer and smaller) so the crack and debris carry the read, ext/vfx-tenzo-dust-thin |
 | 2 | Motley | ostra | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | re-scored 11-12 (was 14): teal orb, Snap spear, seed circle and Nightwell read at once and the zones are lit rims, not solid fills. Under the bar: the Trade dash is a magenta pentagram circle with a violet mask (`scripts/arch/kits/ostra_kit.gd` `TRADE_EDGE` `#ff3fd0`, `content/vfx/ostra.json` palette `pink` `#ff4fd8`): move both to the sea-teal slots; LMB hit is still a small burst (`ostra.json` orb-hit recipe: size up, add a shard layer); the Nightwell's black orbs are the only dark mass left |
 | 3 | Vex | gunslinger | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | re-scored 11-12 (was 15): lime/green-fire throughout, the Longneedle beam and Cinderfall burst are the strongest frames, E/X are soft discs now. Under the bar: `content/vfx/gunslinger.json` `shot_trail` / `shot` (LMB) are still a short pale puff, the round is not in flight on most frames of the LMB strip (this tree lacks `ext/vfx-vex-tracer`, which conflicts with the data port): widen the tracer to ~0.34 m with a hot core as that branch does; `x_cast` pre-cast zone reads as a pale-yellow wash at 0.1 s: tint it `main` with a lit rim; the Burr dash slab (`slide`, `slide_air`) is a faint flat green rectangle: add a core streak |
 | 4 | Grimble | dredge | 4 | 3 | 3 | 3 | 4 | 3 | 3 | 23 | re-scored 11-12 (was 16): gold wedges with a lit rim for E and X, gold slugs and chain, the hook bite reads. Under the bar: E has no Anchor Drop fist (`ext/vfx-grimble-anchor`, conflicts with the wedge data in `content/vfx/dredge.json` + `scripts/match/hero_vfx.gd`): port the `fist` layer onto the wedge look; the dash has no recipe at all in `content/vfx/dredge.json` (no barge/dash key): its camo stone ball with an orange ring and orange glow comes from code, give it `main` `ffc832` + `hot`; the X hit throws pink flecks (`scripts/arch/kits/dredge_blast.gd` hit sparks): coin gold |
