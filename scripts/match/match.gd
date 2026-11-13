@@ -1721,6 +1721,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var tags: Array = o.get("tags", [])
 	if tags.is_empty():
 		tags = [String(o.get("src", "primary")) if o.get("src", "") != "" else "primary"]
+		if o.has("ab"): tags.append(String(o["ab"]))      # the kit slot it came from (tools/duel_sim.gd)
 	if o.get("stun", 0.0) > 0.0: tags = tags + ["stun"]
 	CombatBus.hit_landed.emit(by, target, d, tags)
 	KinFollow.on_damage(target, by, d)

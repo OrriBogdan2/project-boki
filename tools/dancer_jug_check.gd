@@ -909,8 +909,9 @@ func juggernaut(a) -> void:
 	K.cd["e"] = 0.0
 	P.ak.use_e()
 	A.step(m, 0.3)
+	var chain_dmg := float(K.e_def()["dmg"])
 	A.ok("juggernaut E: Warchain hooks (no blight: the data puts Anti-Heal on the spin), cooldown waits",
-			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= 7.0
+			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= chain_dmg * 0.85
 			and float(K.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [T.blight_t, float(K.cd["e"])])
 	var wid := "war%d" % P.get_instance_id()
