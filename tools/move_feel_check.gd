@@ -33,6 +33,10 @@ const T := {
 	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
+	"aim_side_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no strafe slow: across the aim / toward it"],
+	"aim_back_speed_k":        ["~", [0.99, 1.01], "x", "[game data] no backpedal slow: away from the aim / toward it"],
+	"aim_back_fire_speed_k":   ["~", [0.99, 1.01], "x", "[game data] the same, fire held: one fire slow either way"],
+	"aim_back_3m_frames":      ["<=", 0.0, "frames", "[game data] frames for 3 m away from the aim minus toward it"],
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
@@ -245,6 +249,7 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
+	_aim_rel()          # last: its ~11 s of match time would move the abyss rows
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -325,6 +330,42 @@ func _face_turn() -> void:
 			if t < 0.0 and absf(wrapf(P.face - a0, -PI, PI)) < deg_to_rad(1.0): t = (i + 1) * DT
 		rec(turn[0], t)
 	P.face = face0          # (the rows after read the body and the cursor as they were)
+	P.inp["aim"] = aim0
+
+## The source has no backpedal or strafe slow: one MoveSpeed per hunter, and UE's walk ignores where the body
+## faces. The aim is held 8 m along +x (the body turns to it); the keys point toward it, across it or away from it.
+func _aim_rel() -> void:
+	var aim0: Vector3 = P.inp["aim"]
+	var wpn0: Dictionary = P.wpn
+	var res := {}
+	for fire in [false, true]:
+		P.wpn = wpn0
+		if fire:                            # a gun that slows its shooter (the rifle doesn't), on a copy
+			P.wpn = wpn0.duplicate()
+			P.wpn["fire_slow"] = 0.8
+		for dir in [Vector2(1, 0), Vector2(0, 1), Vector2(-1, 0), Vector2(-1, 1).normalized()]:
+			_reset(flat - Vector3(dir.x, 0, dir.y) * 3.0)
+			P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
+			_steps(20)                      # face the aim first
+			P.inp["move"] = dir
+			P.inp["fire"] = fire
+			var p0 := P.pos
+			var f3 := -1
+			var top := 0.0
+			for i in 60:
+				P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
+				m.step(DT)
+				if f3 < 0 and Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() >= 3.0: f3 = i + 1
+				if i >= 30: top += _hv(P).length() / 30.0
+			res[[fire, dir]] = [top, f3]
+			print("MFEEL aim-relative %-6s fire=%-5s run %.3f m/s, 3 m in %d frames" % [str(dir), str(fire), top, f3])
+	var fwd: Array = res[[false, Vector2(1, 0)]]
+	rec("aim_side_speed_k", float(res[[false, Vector2(0, 1)]][0]) / float(fwd[0]))
+	rec("aim_back_speed_k", float(res[[false, Vector2(-1, 0)]][0]) / float(fwd[0]))
+	rec("aim_back_fire_speed_k", float(res[[true, Vector2(-1, 0)]][0]) / float(res[[true, Vector2(1, 0)]][0]))
+	rec("aim_back_3m_frames", float(res[[false, Vector2(-1, 0)]][1]) - float(fwd[1]))
+	_clear_inp()
+	P.wpn = wpn0
 	P.inp["aim"] = aim0
 
 # ---------------------------------------------------------------- jump
