@@ -181,6 +181,7 @@ const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "mu
 	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
 ## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
 const OWN_HEIGHT := ["hop", "hover", "glide", "flare"]
+const LAND_SQUASH := 0.16     # how far a hard landing flattens it (share of its height; widens by 0.6 of that)
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## The strut takes steps this much quicker than a walk at the same ground speed (a high, proud step).
 const STRUT_CADENCE := 1.25
@@ -237,6 +238,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _feel := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -374,7 +376,7 @@ func _process(dt: float) -> void:
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
 		root.remove_meta("kwater")        # set again by whatever moves it through water next frame
-	_keep_flex()
+	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
 	var t := pace.step(dt)
@@ -382,12 +384,15 @@ func _process(dt: float) -> void:
 		_face_step(t)
 		advance(t)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
-## the jolt of a hit (KinFlinch) stay.
-func _keep_flex() -> void:
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll, the jolt
+## of a hit (KinFlinch) and a landing's squash with a lean as it starts and stops (LandLean) stay.
+func _keep_flex(dt: float) -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot
-	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	_feel.step(dt, root.global_position)
+	var sq := _feel.squash * LAND_SQUASH
+	flex.rotation = _flinch.rot + Vector3(-_feel.lean, 0.0, 0.0)
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide) \
+		* Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
