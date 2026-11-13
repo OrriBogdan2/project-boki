@@ -303,6 +303,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 
 func _launch(p: Vector3) -> void:
 	st_throws += 1
+	owner_h.add_stat("summons")      # (TipPick: never summoned)
 	disengaged = false
 	var dive := carry_style() == "perch"
 	# a perched kin is thrown as a dive: up off your pack, then straight down onto the spot

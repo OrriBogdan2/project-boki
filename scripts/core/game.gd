@@ -132,6 +132,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
 	var won: bool = r.get("extracted", false)
+	TipPick.note_run(r)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
 	for k in ["mobs", "rings", "feathers", "staggers", "slams", "spikes", "bosses"]:
