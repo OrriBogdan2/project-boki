@@ -130,10 +130,9 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 - The Ways Out widgets are checked the same way (`SafeArea.note_as` tags the ones drawn outside the panel pass), in
   nine states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
   uplink far off (edge marker), your squad on a quest (the quest tracker under the strip), the last way out (alive,
-  and dead with the "Ways out left" line), the Gate prompt, and out past the Blight ring. The Gate prompt names the Gate, so it has no marker. Edge markers (`MarkerDir`)
-  sit right of the squad column and above the prompt row, their label kept inside the margin; the check sweeps 16
-  directions with the longest label. While a message in the lane covers a marker it fades to `MarkerDir.UNDER_MSG_A`
-  (like the lairs' name boards); the check lets a faded marker sit under the lane and nothing else.
+  and dead with the "Ways out left" line), the Gate prompt, and out past the Blight ring. The strip is expected only
+  once `HudGroups.ways_out_shown` lets it show. Edge markers are not in this check: `EdgeMarker` keeps them on its own
+  rim (`EdgeMarker.world_rim`), inside the margin, and `--edge-marker-check` holds that.
 
 ## The deathbox loot window (LootWindow)
 
