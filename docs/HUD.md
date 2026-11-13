@@ -93,7 +93,7 @@ for the squad rows). Verified 11-11:
 
 Owner playtest 11-09: "ally knocked is way too in your face". The rule now: nothing that pops up during
 a fight covers the middle of the screen or stays more than 2 s; edge-anchored, small, merged, few. "In a
-fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are owned elsewhere
+fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MSG_FIGHT_S` (4 s). The opening "Your kit" panel fades out while it is on (its 14 s timer waits) and returns when it ends; holding Tab (the scores key) shows it. Shots: `--kit-panel-fight-shots`, `docs/shots/ui-kit-panel-fight/`. Tutorial hints are owned elsewhere
 (`ext/tutorial-visibility`) and not covered here.
 
 | Pop-up | Where, size | How long | Now |
