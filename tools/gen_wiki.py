@@ -427,7 +427,8 @@ def gen_boki():
     for sid, ln in ev.get("lines", {}).items():
         for o in ln.get("into", []):
             how = (o["item"].replace("ink_", "").title() + " Ink") if o.get("item") else ("trade" if o.get("trade") else "level %s" % ln.get("level"))
-            rows.append([nm(sid), nm(o["id"]), how, o.get("path", "").title()])
+            pth = o.get("path", "")      # one affinity, or a list of them (evolve.json "orbitle")
+            rows.append([nm(sid), nm(o["id"]), how, " or ".join(pth).title() if isinstance(pth, list) else pth.title()])
     b += table(["Boki", "Evolves into", "When", "Branch"], rows)
     b += "\n\n## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
     rows = []

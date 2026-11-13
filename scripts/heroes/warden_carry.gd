@@ -11,6 +11,8 @@ extends RefCounted
 const MOVE := "rs_carry"           # HunterAnim pose id (KinDowned.rescue_pose) that carries; "rs_done" eases it out
 const MOVES := [MOVE, "rs_done"]   # the pose ids the clips leave to this layer, legs and torso stay on the loco clips
 const SOCKET := "carry_socket"     # model meta: world position the Boki rides at
+const MOTE := "heart_mote"         # model meta: world position of the Heartspark held in the off hand
+const MOTE_REACH := 0.12           # arm lengths: the mote floats this far above the held wrist
 const FADE := 0.25                 # s: the layer eases in and out
 const LEAN := 0.13                 # rad: the torso leans back about the hips
 const REACH_FWD := 0.55            # arm lengths: how far in front of the shoulders the cradle sits (data "carry_fwd")
@@ -40,10 +42,7 @@ static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD) ->
 	var up := to_skel * Vector3.UP
 	var hips := WardenSkeleton.find(skel, "hips")
 	var keep := {}      # bone index -> its local rotation before the layer
-	var idx := {}       # "upper_arm.L" -> bone index
-	for s in ["L", "R"]:
-		for b in ARMS:
-			idx["%s.%s" % [b, s]] = WardenSkeleton.find(skel, "%s.%s" % [b, s])
+	var idx := _arms(skel)
 	for bi in idx.values():
 		keep[bi] = skel.get_bone_pose_rotation(bi)
 	keep[hips] = skel.get_bone_pose_rotation(hips)
@@ -61,6 +60,35 @@ static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD) ->
 	for bi in keep:
 		skel.set_bone_pose_rotation(bi, (keep[bi] as Quaternion).slerp(skel.get_bone_pose_rotation(bi), w))
 	return skel.global_transform * (cradle + up * SOCKET_UP * reach)
+
+## The Heartspark carry: the off hand (side "L" or "R") lifts to the cradle's height and holds the mote at the chest,
+## the other arm and the legs stay on the clips so the main arm still fires and casts. Returns the mote in world space.
+static func hold_mote(skel: Skeleton3D, root: Node3D, w: float, side: String, fwd := REACH_FWD) -> Vector3:
+	var to_skel := (skel.global_transform.affine_inverse().basis * root.global_basis).orthonormalized()
+	var ahead := to_skel * Vector3.FORWARD
+	var up := to_skel * Vector3.UP
+	var idx := _arms(skel)
+	var keep := {}
+	for b in ARMS:
+		keep[idx["%s.%s" % [b, side]]] = skel.get_bone_pose_rotation(idx["%s.%s" % [b, side]])
+	var sh_l := skel.get_bone_global_pose(idx["upper_arm.L"]).origin
+	var sh_r := skel.get_bone_global_pose(idx["upper_arm.R"]).origin
+	var across := (sh_r - sh_l).normalized()
+	var out := across * (-1.0 if side == "L" else 1.0)
+	var reach := _reach(skel, idx)
+	var wrist := (sh_l + sh_r) * 0.5 + ahead * fwd * reach - up * REACH_DOWN * reach + out * HANDS_APART * 0.5 * reach
+	_arm(skel, idx, side, wrist, -up * POLE_DOWN + out * POLE_OUT)
+	for bi in keep:
+		skel.set_bone_pose_rotation(bi, (keep[bi] as Quaternion).slerp(skel.get_bone_pose_rotation(bi), w))
+	return skel.global_transform * (wrist + up * MOTE_REACH * reach)
+
+## Bone indices of both arms, keyed "upper_arm.L".
+static func _arms(skel: Skeleton3D) -> Dictionary:
+	var idx := {}
+	for s in ["L", "R"]:
+		for b in ARMS:
+			idx["%s.%s" % [b, s]] = WardenSkeleton.find(skel, "%s.%s" % [b, s])
+	return idx
 
 ## The torso tips back about the hips' own point (right is the model's right in skeleton space).
 static func _lean(skel: Skeleton3D, hips: int, right: Vector3) -> void:
