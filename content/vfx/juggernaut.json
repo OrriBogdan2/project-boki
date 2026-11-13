@@ -19,7 +19,7 @@
 
 		"wave_charge": {"fx": [{"p": "ember", "at": "blade_tip", "shape": "ball", "radius": 0.3, "way": "up", "n": 22, "speed": 1.4, "spread": 0.7, "grav": -1.5, "life": 0.5, "size": 0.05, "c": "red", "c2": "wave"},
 				{"p": "ember", "at": "blade_mid", "shape": "gather", "radius": 0.9, "n": 14, "speed": 2.2, "drag": 0.0, "curl": 0.3, "life": 0.4, "size": 0.04, "c": "wave", "near": true}]},
-		"wave_fire": {"sfx": [{"n": "jug_wave", "db": -2, "pitch": 1.0, "pitch_k": -0.15}, {"n": "cleave", "db": -1, "pitch": 0.7}, {"n": "ab_blast", "db": -5, "pitch": 1.2, "pitch_k": -0.3}],
+		"wave_fire": {"sfx": [{"n": "jug_wave", "db": -2, "pitch": 1.0, "pitch_k": -0.15}, {"n": "juggernaut_blade_hiss", "db": -1, "pitch": 0.7}, {"n": "ab_blast", "db": -5, "pitch": 1.2, "pitch_k": -0.3}],
 			"fx": [{"p": "sweep", "y": 0.7, "size": 2.8, "arc": 80, "life": 0.28, "c": "red", "c2": "wave"},
 				{"p": "scorch", "shape": "lane", "len": "len", "w": "w", "w_x": 0.8, "life": 1.3, "c": "red", "c2": "wave", "unless": "full"},
 				{"p": "scorch", "shape": "lane", "len": "len", "w": "w", "w_x": 0.9, "life": 1.7, "c": "wave", "c2": "gold_hot", "when": "full"},
