@@ -16,7 +16,10 @@ boxes cut off (islands under N triangles, joined through shared positions). `--h
 ellipse in x/y centred at (0, YC) instead (a face oval, no framed box corners where new hair meets the kept face).
 `--hair-zone YBOT` carries the head's hair down past the cut to YBOT: there, behind z HZ_ZMAX and inside |x| HZ_XH,
 the head's triangles whose texel is not skin (closed HZ_CLOSE rings) are kept and the body's own hair there (grown
-HZ_DILATE rings) is dropped, so the hair is one continuous fall with no ledge at the cut (Cinder B-A, 11-13).
+HZ_DILATE rings) is dropped, so the hair is one continuous fall with no ledge at the cut (Cinder B-A, 11-13). In front
+(z over HZ_ZMAX: the locks over the shoulders and chest) the head's hair is grown down from the cut through connected
+hair-dark triangles only (value under HZ_VHAIR, so not the lava or the lit skin), so the strands come and the chest
+stays; the body's hair-dark triangles within HZ_NEAR of those strands (grown HZ_DILATE rings) are dropped.
 `--interleave` deals the body into round-robin chunks, so a dense body's top chunk is not taken for a head part.
 Run: blender -b --factory-startup --python tools/meshy/head_graft.py -- HEAD_GLB BODY_GLB OUT_GLB --cut Y
      [--keep-node NAME]... [--compact] [--ramp M] [--body-fit S,TX,TY,TZ]
@@ -45,6 +48,10 @@ HZ_ZMAX = 0.06  # m: --hair-zone takes triangles behind this z (the back and the
 HZ_XH = 0.24  # m: ... and inside this |x| (not the arms)
 HZ_VSKIN = 0.32  # skin texel: a purple-to-pink hue (250-350 deg), value above this, saturation under 0.5
 HZ_CLOSE = 3  # rings: the head's hair zone is closed (grown, then shrunk back) to fill strand gaps
+HZ_XFRONT = 0.32  # m: ... inside this |x| (the locks hang just outside the shoulders' 0.24; the arms are skin)
+HZ_ZFRONT = 0.0  # m: ... and the front locks are followed down from this z (over the shoulder top, then the chest)
+HZ_VHAIR = 0.22  # hair texel: value under this (the lava and the lit skin are brighter)
+HZ_NEAR = 0.03  # m: the body's own front strands this close to the head's carried front hair are dropped
 HZ_DILATE = 2  # rings: the body's hair zone is grown, so no stray body strand tips stay under the head's hair
 
 
@@ -258,8 +265,8 @@ def _texels(j, bn, prim):
     return px.reshape(h, w, 4)[..., :3], acc(j, bn, prim["attributes"]["TEXCOORD_0"])
 
 
-def _not_skin(j, bn, prim, T):
-    """triangles of T whose texel at the UV centroid is not skin (hair, horn, lava)."""
+def _hsv(j, bn, prim, T):
+    """hue (deg), value and max-min chroma of the texel at each triangle's UV centroid."""
     px, uv = _texels(j, bn, prim)
     h, w = px.shape[:2]
     c = uv[T].mean(1)
@@ -270,7 +277,19 @@ def _not_skin(j, bn, prim, T):
     d = mx - mn + 1e-6
     r, g, b = rgb.T
     hue = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60
+    return hue, mx, d
+
+
+def _not_skin(j, bn, prim, T):
+    """triangles of T whose texel at the UV centroid is not skin (hair, horn, lava)."""
+    hue, mx, d = _hsv(j, bn, prim, T)
     return ~((hue > 250) & (hue < 350) & (mx > HZ_VSKIN) & (d / (mx + 1e-6) < 0.5))
+
+
+def _hair(j, bn, prim, T):
+    """triangles of T whose texel is hair: dark (value under HZ_VHAIR) and purple (not the lava, not lit skin)."""
+    hue, mx, _ = _hsv(j, bn, prim, T)
+    return (mx < HZ_VHAIR) & (hue > 250) & (hue < 350)
 
 
 def _grow(P, T, sel, geo, n, solid=None):
@@ -298,6 +317,45 @@ def hair_zone(j, bn, prim, P, T, cut, ybot, head):
     else:
         z = _grow(P, T, z, geo, HZ_DILATE)
     print("HAIRZONE %s %d of %d triangles in the box" % ("head" if head else "body", z.sum(), geo.sum()), flush=True)
+    return z
+
+
+def front_hair(j, bn, prim, P, T, cut, ybot):
+    """--hair-zone in front: the head's hair strands under the cut, grown from the hair just over it through connected
+    hair-dark triangles (z over HZ_ZFRONT, inside |x| HZ_XFRONT)."""
+    c = P[T].mean(1)
+    box = (c[:, 1] > ybot) & (np.abs(c[:, 0]) < HZ_XFRONT) & _hair(j, bn, prim, T)
+    seed = box & (c[:, 1] > cut) & (c[:, 1] < cut + 0.03) & (c[:, 2] >= HZ_ZMAX - 0.03)
+    geo = box & (c[:, 1] <= cut) & (c[:, 2] >= HZ_ZFRONT)
+    _, weld = np.unique(np.round(P / 1e-5).astype(np.int64), axis=0, return_inverse=True)
+    W = weld.ravel()[T]
+    z, n = seed.copy(), -1
+    while z.sum() != n:
+        n = z.sum()
+        mark = np.zeros(W.max() + 1, bool)
+        mark[W[z].ravel()] = True
+        z = z | (geo & mark[W].any(1))
+    z &= geo
+    print("HAIRZONE front head %d triangles" % z.sum(), flush=True)
+    return z
+
+
+def near_front(j, bn, prim, P, T, cut, ybot, pts):
+    """the body's hair-dark front triangles within HZ_NEAR of the head's carried front hair (pts), grown."""
+    from mathutils.kdtree import KDTree
+    c = P[T].mean(1)
+    geo = (c[:, 1] > ybot) & (c[:, 1] <= cut) & (c[:, 2] >= HZ_ZMAX - 0.03) & (np.abs(c[:, 0]) < HZ_XFRONT)
+    hair = _hair(j, bn, prim, T)
+    cand = np.flatnonzero(geo & hair)
+    kd = KDTree(len(pts))
+    for i, q in enumerate(pts):
+        kd.insert(q.tolist(), i)
+    kd.balance()
+    z = np.zeros(len(T), bool)
+    if len(pts):
+        z[cand[[kd.find(c[i].tolist())[2] < HZ_NEAR for i in cand]]] = True
+    z = _grow(P, T, z, geo & hair, HZ_DILATE)
+    print("HAIRZONE front body %d of %d triangles" % (z.sum(), geo.sum()), flush=True)
     return z
 
 
@@ -351,6 +409,9 @@ def graft(
     if zone_bot is not None:
         head_keep |= hair_zone(hj, hb, hp, HP, HT, cut, zone_bot, True)
         body_keep &= ~hair_zone(bj, bb, bp, BP, BT, cut, zone_bot, False)
+        fh = front_hair(hj, hb, hp, HP, HT, cut, zone_bot)
+        head_keep |= fh
+        body_keep &= ~near_front(bj, bb, bp, BP, BT, cut, zone_bot, HP[HT[fh]].mean(1))
     head_tris, body_tris = HT[head_keep], BT[body_keep]
     head_tris, body_tris = drop_islands(HP, head_tris, min_island), drop_islands(BP, body_tris, min_island)
 
