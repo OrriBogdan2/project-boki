@@ -50,13 +50,19 @@ func _part_e() -> void:
 	await _go(GAP)
 
 func _part_r() -> void:
-	await _reset(4.0)
+	await _reset(6.0, 1.5)
 	P.hp = P.max_hp * 0.5
+	# the dummy stands in as her teammate, so the tether has an ally to arc to
+	# (a hunter spawned here dropped off the stage on its first tick)
+	var foe_team := T.team
+	T.team = P.team
+	T.hp = T.max_hp * 0.5
 	var cast := func(t: float):
 		if _at(t, 0.1):
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
-		_aim(P.pos)
-	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the lantern's flare, the heals rising as stars",
-		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7]), 1.0)
+		_aim(T.pos)
+	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the arc of light to the ally, the heals rising as stars",
+		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7], func(): return (P.pos + T.pos) * 0.5), 1.0)
+	T.team = foe_team
 	await _go(GAP)

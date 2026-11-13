@@ -46,18 +46,24 @@ const LEAN_FULL := 24.0       # lean points for the full colour: four meals in a
 const LEAN_FADE := 3.0        # what every other lean loses at each such meal
 const LEAN_TINT := 0.3        # body colour moved toward the lean's tint at full (a form: 0.1 each, 0.35 at most)
 
-## It ate food f: the affinity that food grows ("" for food with none).
+## It ate food f: what it leans to now ("" for food with none). The food's affinity grows as it always did;
+## the lean is the food's type with base_mode on (Lean), that affinity otherwise.
 static func eat(rec: Dictionary, f: String) -> String:
+	var aff := ""
 	for af in AFF:
-		if AFF[af]["food"] != f:
-			continue
-		add(rec, af, FOOD_AFF)
-		var ln: Dictionary = rec.get_or_add("lean", {})
-		for other in ln:
+		if AFF[af]["food"] == f:
+			aff = af
+			add(rec, af, FOOD_AFF)
+	var key := Lean.key_of(f) if Lean.on() else aff
+	if key == "":
+		return ""
+	var ln: Dictionary = rec.get_or_add("lean", {})
+	var held: Dictionary = rec.get("hold", {})      # a sweet's lean: other meals don't fade it (GardenItems)
+	for other in ln:
+		if not held.has(other):
 			ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
-		ln[af] = minf(LEAN_FULL, float(ln.get(af, 0.0)) + FOOD_AFF + LEAN_FADE)
-		return af
-	return ""
+	ln[key] = minf(LEAN_FULL, float(ln.get(key, 0.0)) + FOOD_AFF + LEAN_FADE)
+	return key
 
 ## [affinity, 0..1]: the colour its meals lean it to and how strongly (["", 0.0] before any).
 static func lean(rec: Dictionary) -> Array:
@@ -81,6 +87,8 @@ static func leading(rec: Dictionary) -> String:
 		"curious": float(rec["aff"]["curious"]) + float(tr.get("curiosity", 0.5)) * 10.0,
 		"swift": float(rec["aff"]["swift"]) + float(sp.get("speed", 6.5)) / 8.0 * 6.0,
 	}
+	for t in rec.get("path", []):
+		score[GardenItems.aff_of(t)] += float(GardenItems.rules()["pip"])
 	var best := "fierce"; var bv := -1e9
 	for k in ["fierce", "steadfast", "curious", "swift"]:
 		if score[k] > bv: bv = score[k]; best = k
@@ -107,9 +115,14 @@ static func level_up(rec: Dictionary) -> void:
 static func has_art(id: String) -> bool:
 	return Data.KIN.has(id) and BokiRig.FRAME.has(id) and ResourceLoader.exists(BokiRig.PATH % [id, id])
 
-## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, or "trade"),
-## art or not; "" when that isn't a way it evolves.
+## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, "trade", or "path":
+## the path meter's winner when the player presses Evolve), art or not; "" when that isn't a way it evolves.
+## A branching final with a path meter (EvoPath) never evolves by "level" alone: the player presses Evolve.
 static func next_for(rec: Dictionary, how: String, item := "") -> String:
+	if how == "path":
+		return EvoPath.pick(rec)
+	if how == "level" and not EvoPath.line(rec).is_empty():
+		return ""
 	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
 	var fits: Array = []
 	for o in line.get("into", []):
@@ -122,26 +135,47 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 				if String(o.get("item", "")) == item: fits.append(o)
 			"trade":
 				if o.get("trade", false): fits.append(o)
+	fits = fits.filter(func(o): return not o.has("trait") or BokiQuirks.has_trait(rec, String(o["trait"])))
 	if fits.is_empty():
 		return ""
+	for o in fits:
+		if o.has("trait"):      # a rare trait it carries decides the branch
+			return String(o["id"])
 	var lead := leading(rec)
 	for o in fits:
-		if String(o.get("path", "")) == lead: return String(o["id"])
+		var path = o.get("path", "")        # one affinity, or a list of them
+		if lead in path if path is Array else String(path) == lead: return String(o["id"])
 	return String(fits[0]["id"])
 
 ## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
 static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	ensure(rec)
 	var to := next_for(rec, how, item)
-	if to == "" or not has_art(to):
+	if to == "" or not has_art(to) or rec.get("stay", false):      # a worn Stayleaf: no new forms
 		return {}
 	var before := form_name(rec)
-	var a := leading(rec)
+	var a := EvoPath.path_of(rec, to) if how == "path" else leading(rec)
 	rec["was"].append(String(rec["species"]))
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
 	rec.erase("form_name")
-	return {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	var part := Lean.grow_part(rec)      # its lean grows a part at the next form (GARDEN_MODERN 3.3)
+	if part != "":
+		ev["lean_part"] = part
+	return ev
+
+## What an Ink would do to this Boki, before using it (its item card in the Feed menu shows this):
+## {"state": "form" | "waits" | "none", "to": species id or "", "name": the form's name or "", "text"}.
+## "waits": its line has that Ink branch but the form has no model yet (has_art), so it would not change.
+static func ink_preview(rec: Dictionary, ink: String) -> Dictionary:
+	var to := next_for(rec, "item", ink)
+	if to == "":
+		return {"state": "none", "to": "", "name": "", "text": "No effect on this Boki."}
+	var nm := String(Data.KIN[to]["name"]) if Data.KIN.has(to) else to.capitalize()
+	if not has_art(to):
+		return {"state": "waits", "to": to, "name": nm, "text": "Would become %s, but %s waits for its art." % [nm, nm]}
+	return {"state": "form", "to": to, "name": nm, "text": "Becomes %s." % nm}
 
 ## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
 static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
@@ -155,6 +189,8 @@ static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
 ## Called each time a kin gains a level. Returns what changed, or {} if nothing did.
 static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dictionary:
 	ensure(rec)
+	if rec.get("stay", false):
+		return {}
 	var lv := int(rec.get("level", 1))
 	if rng == null:
 		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))
@@ -255,7 +291,11 @@ static func describe(ev: Dictionary, rec: Dictionary) -> String:
 			match String(ev.get("how", "level")):
 				"item": return "%s became a %s! The %s did it." % [kname, ev["to"], Goods.name_of("good:" + String(ev["item"]))]
 				"trade": return "%s became a %s on its way to a new keeper!" % [kname, ev["to"]]
-			return "%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
+			var out := "%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
+			if ev.has("lean_part"):
+				var lean_name := String(Lean.face(lean(rec)[0])["name"]).to_lower()
+				out += " Its %s meals grew %s." % [lean_name, PART_NAMES[ev["lean_part"]]]
+			return out
 		"mutate":
 			return "%s grew %s. (%s)" % [kname, PART_NAMES.get(ev["part"], ev["part"]), _perk(ev["aff"])]
 		"grow":
@@ -283,7 +323,9 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		base = base.lerp(AFF[last]["tint"], minf(0.1 * forms.size(), 0.35))
 		root.set_meta("evo_scale", 1.0 + minf(forms.size() * 0.1, 0.6))
 	if String(ln[0]) != "":
-		base = base.lerp(AFF[ln[0]]["tint"], LEAN_TINT * float(ln[1]))
+		base = base.lerp(Lean.face(ln[0])["tint"], LEAN_TINT * float(ln[1]))
+		if Lean.on():
+			Lean.mark(body, ln[0], float(ln[1]))
 	# recolour the body to the form's and the meals' tint
 	var mats: Array = root.get_meta("mats", [])
 	if mats.size() > 0 and (forms.size() > 0 or String(ln[0]) != ""):
@@ -292,9 +334,10 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		return         # its grown parts are on the rig (BokiDna)
 	var mats2: Array = root.get_meta("mats", [])
 	for m in muts:
-		var col: Color = base.lerp(AFF[m["aff"]]["tint"], 0.6)
+		var tint: Color = Lean.face(m["aff"])["tint"]
+		var col: Color = base.lerp(tint, 0.6)
 		var mat := Models.toon(col.darkened(0.1))
-		var glow := Models.toon(AFF[m["aff"]]["tint"].lightened(0.3), false, 0.9)
+		var glow := Models.toon(tint.lightened(0.3), false, 0.9)
 		mats2.append(mat)
 		var k := 1.0 + (int(m["lv"]) - 1) * 0.3
 		match String(m["id"]):
