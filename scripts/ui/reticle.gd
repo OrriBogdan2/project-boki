@@ -46,6 +46,7 @@ var m: Match
 var tick_t := 0.0          # s left on the tick showing
 var tick_knock := false
 var ticks := 0             # ticks raised (read by --hit-marker-check)
+var dealt_at := -9.0       # match time your last hit (or your Boki's) landed
 
 ## Listens on the shared damage path (CombatBus.hit_landed), so every weapon and ability raises it.
 func _init(match_node: Match = null) -> void:
@@ -53,12 +54,17 @@ func _init(match_node: Match = null) -> void:
 	if m:
 		CombatBus.hit_landed.connect(_on_hit)
 
-## Only hits you land yourself on a foe's Hunter, Boki or a monster. Misses never reach here; zone
-## (damage-over-time) ticks, your Boki's and teammates' hits and anything else raise nothing.
+## `dealt_at` notes any hit you or your Boki land on a foe (the message lane's fight budget); the tick
+## itself shows only for hits you land yourself. Misses never reach here; zone (damage-over-time) ticks,
+## teammates' hits and anything else raise nothing.
 func _on_hit(by: Node, target: Node, amount: float, tags: Array) -> void:
-	if by == null or by != m.player or tags.has("zone"):
+	var credit: Node = (by as Kin).owner_h if by is Kin else by
+	if credit == null or credit != m.player or tags.has("zone"):
 		return
 	if not (target is Hunter or target is Kin or target is Mob) or (target as Ent).team == m.player.team:
+		return
+	dealt_at = m.time
+	if by != m.player:
 		return
 	var e := target as Ent
 	# (a remote body's hp drops on its owner's game: this hit knocks it if it covers what's left)

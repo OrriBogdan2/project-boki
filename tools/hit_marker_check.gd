@@ -45,8 +45,10 @@ func run(main: Node) -> void:
 	if P.kin:
 		CombatBus.hit_landed.emit(P.kin, foe, 10.0, ["kin"])
 		ok(r.ticks == n, "your Boki's hit raises none")
+		ok(r.dealt_at == m.time, "(but it counts as a hit dealt for the message lane's fight budget)")
+	r.dealt_at = -9.0
 	CombatBus.hit_landed.emit(P, mate, 10.0, ["primary"])
-	ok(r.ticks == n, "a hit on your own side raises none")
+	ok(r.ticks == n and r.dealt_at < 0.0, "a hit on your own side raises none")
 	CombatBus.hit_landed.emit(foe, P, 10.0, ["primary"])
 	ok(r.ticks == n and r.tick_t == 0.0, "a hit on you raises none")
 	# ---------------------------------------------------------------- 3. the knock, and the cap
