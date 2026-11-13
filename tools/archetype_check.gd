@@ -269,7 +269,8 @@ func _data() -> void:
 		if bool(ws.get("ammo", true)) != wants or ws.has("reload"):
 			ammo_bad.append("%s:%s" % [a2, Arch.signature(a2)])
 	ok("weapons: no hero weapon has ammo or a reload but Vex's drum (no reload anywhere)", ammo_bad.is_empty(), str(ammo_bad))
-	ok("weapons: no weapon in the game has a reload time", Data.weapon_ids().all(func(w): return not Data.weapon_stats(w).has("reload")))
+	var reloads: bool = Data.weapon_ids().any(func(w): return Data.weapon_stats(w).has("reload"))
+	ok("weapons: no weapon in the game has a reload time", not reloads)
 	var sup_ok := true
 	for a in ["tender", "rimewright"]:
 		var sd2 := Arch.def(a)
