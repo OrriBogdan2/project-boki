@@ -419,7 +419,7 @@ func _draw_world_labels() -> void:
 				_bar(Rect2(sp + Vector2(-50, -18), Vector2(100, 7)), clampf(mb.hp / mb.max_hp, 0.0, 1.0), Color("ff6a5a"))
 			continue
 		if m.lairs.boss_for(m.player) == mb:
-			continue      # a client's raid boss (a plain Mob there): the top bar has it
+			continue      # the raid boss (a Boss or plain Mob copy on a client): the top bar has it
 		if mb.hp < mb.max_hp or rare:
 			var bw := 64.0 if mb.mkind in ["brute", "warden"] else 48.0
 			var br := Rect2(sp + Vector2(-bw * 0.5, 0), Vector2(bw, 6))
@@ -2857,8 +2857,8 @@ func _draw_lair_victory(sz: Vector2, p: Hunter) -> void:
 	feed_top = maxf(feed_top, r.end.y + 8.0)
 
 ## At the top of the screen while you're in a lair with its boss awake: name, phase, health with
-## marks at the phase lines, and the enrage clock. A client's Heart Raid boss is a plain Mob: name from the
-## raid rules, phase from its synced health, no enrage clock (that runs on the host).
+## marks at the phase lines, and the enrage clock. A client's boss is a Boss too (BossNet syncs phase, enraged
+## and the wake clock); a plain Mob copy gets name from the raid rules, phase from its health, no enrage clock.
 func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	var b: Mob = m.lairs.boss_for(p)
 	if b == null:

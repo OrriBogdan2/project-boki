@@ -80,7 +80,7 @@ var squad_n := 1               # Hunters in the squad (1-4): the scale row
 var difficulty := "normal"     # rules "difficulty" key
 var gates: HeartRaidGates      # where and when each wave comes out, and its marks
 var boss_nid := ""             # a client: the host's boss id, until its Mob arrives
-var boss: Mob = null           # the boss (a Boss on the host; a client mirrors a plain Mob)
+var boss: Mob = null           # the boss (a Boss; a client's is BossNet's copy, or a plain Mob)
 var lair := {}                 # the boss's fight square round the Heart, in Lairs' lair shape
 var foes: Array[Mob] = []      # wave monsters alive
 var sent := 0                  # wave monsters spawned
@@ -136,7 +136,7 @@ func tick(dt: float) -> void:
 		if _sync_t <= 0.0:
 			_broadcast()
 	elif boss == null and boss_nid != "":
-		boss = m.ents_by_id.get(boss_nid, null) as Mob      # its snapshot lands after the "hr" that names it
+		_find_boss()      # its snapshot lands after the "hr" that names it
 	_check_end()
 
 func _direct() -> void:
@@ -278,6 +278,15 @@ func _spawn_boss() -> void:
 	_note("boss %s, %d hp" % [bd["kind"], int(b.max_hp)])
 	_broadcast()
 
+## A client: the boss the host named. BossNet builds it from its lair kind, so it takes the raid's name and
+## enrage time as the host's did (_spawn_boss); hp and max_hp come with the snapshots.
+func _find_boss() -> void:
+	boss = m.ents_by_id.get(boss_nid, null) as Mob
+	var bb := boss as Boss
+	if bb and bb.md.get("name", "") != String(rules()["boss"]["name"]):
+		bb.md["name"] = String(rules()["boss"]["name"])
+		bb.md["enrage"] = float(rules()["boss"]["enrage"])
+
 func _boss_down() -> void:
 	phase = P.HOLD
 	boss_down = true
@@ -287,8 +296,8 @@ func _boss_down() -> void:
 		m.hud.toast("THE HEART OPENS  ·  HOLD ITS RING", Heart.COL)
 	_broadcast()
 
-## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for). A client's boss is a
-## plain Mob (hp and max_hp ride the snapshot), so the square comes from the rules, not from the host's lair.
+## The raid boss for the HUD's boss bar while `p` stands in its square (Lairs.boss_for). A client has no host
+## lair (its boss is BossNet's copy, hp and max_hp by the snapshot), so the square comes from the rules.
 func boss_for(p: Hunter) -> Mob:
 	if boss == null or not is_instance_valid(boss) or boss.dead or p == null:
 		return null
@@ -335,4 +344,4 @@ func net_in(x: Array) -> void:
 	next_wave_t = r("first_wave_s") + wave * r("wave_every_s")     # the host's wave clock (fixed timers)
 	boss_down = phase == P.HOLD or phase == P.WON
 	boss_nid = String(x[3])
-	boss = m.ents_by_id.get(boss_nid, null) as Mob
+	_find_boss()
