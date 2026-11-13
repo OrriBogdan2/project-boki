@@ -21,6 +21,9 @@ extends RefCounted
 ##  11. Glint Fishing (glint_sfx.gd): a scripted five-cast session; one whip and one plop per cast, one bite tick per
 ##      hook, the water bed once per wait on the Ambience bus and the reel loop on the SFX bus, both at the line,
 ##      and one catch sting per landing in the catch's size; nothing keeps sounding once the session is stopped
+##  12. the garden whistle (base_whistle.gd): a tap is the short two-note whistle, a hold adds the longer rising one;
+##      the called Boki answers once in its own voice: happy when trusting and glad, unsure when lukewarm, a huff
+##      when sulky, nothing while it sleeps
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -200,6 +203,8 @@ func _games() -> void:
 		await game.call(home)
 	GardenSfx.heard.clear()
 	_chimes(home)
+	GardenSfx.heard.clear()
+	_whistle(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -395,7 +400,7 @@ func _chimes(home) -> void:
 	var hc: HomeChimes = home.chimes
 	var k: Dictionary = {}
 	for kk in home.kins:
-		if not HomeChimes._asleep(kk):
+		if not HomeChimes.asleep(kk):
 			k = kk
 	var rec: Dictionary = k["rec"]
 	hc.tick(0.0)
@@ -427,3 +432,47 @@ func _chimes(home) -> void:
 	var p := HomeChimes.PITCH
 	ok(Sfx.ensure("garden_chime_stat") and Sfx.ensure("garden_chime_level") and Sfx.ensure("garden_chime_evolve")
 			and p["small"] > p["medium"] and p["medium"] > p["large"], "chimes: all three exist, small sings higher")
+
+## The partner stands in the open with this trust and joy, awake or asleep, and is called with a tap.
+func _answer(home, trust: float, joy: float, asleep: bool) -> Dictionary:
+	var k: Dictionary = home.kins[0]
+	for key in ["called_t", "call_slot", "call_pace", "hold_t", "indoors", "busy"]:
+		k.erase(key)
+	k["rec"]["trust"] = trust
+	for n in ["food", "energy", "clean"]:
+		k["rec"]["needs"][n] = 80.0
+	k["rec"]["needs"]["joy"] = joy
+	k["nap_t"] = 5.0 if asleep else 0.0
+	GardenSfx.heard.clear()
+	home.life.whistle.press()
+	home.life.whistle.release()
+	return k
+
+func _whistle(home) -> void:
+	var w: BaseWhistle = home.life.whistle
+	var tap: AudioStreamWAV = Sfx.streams[BaseWhistle.TAP]
+	var hold: AudioStreamWAV = Sfx.streams[BaseWhistle.HOLD]
+	ok(tap.data.size() < hold.data.size() and tap.data.size() > 0, "whistle: the hold whistle is longer than the tap")
+	_answer(home, 90.0, 80.0, false)
+	ok(_count(BaseWhistle.TAP) == 1 and _count(BaseWhistle.HOLD) == 0, "whistle: a tap is one short whistle (%s)"
+			% [GardenSfx.heard])
+	w.press()
+	w.step(float(w.R["hold_s"]) + 0.05)
+	w.release()
+	ok(_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1, "whistle: a hold adds one rising whistle (%s)"
+			% [GardenSfx.heard])
+	_answer(home, 90.0, 80.0, false)
+	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count("kin_happy") == 1
+			and _total("kin_") == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
+			% [GardenSfx.heard])
+	_answer(home, 25.0, 40.0, false)
+	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count("kin_unsure") == 1
+			and _total("kin_") == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
+	var rec: Dictionary = _answer(home, 90.0, 5.0, false)["rec"]
+	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _total("kin_") == 0,
+			"whistle: a sulky Boki grumbles (%s)" % [GardenSfx.heard])
+	for joy in [80.0, 5.0]:
+		_answer(home, 90.0, joy, true)
+		ok(_total("kin_") == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
+				% [joy, GardenSfx.heard])
+	home.kins[0]["nap_t"] = 0.0

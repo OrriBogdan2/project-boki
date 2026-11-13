@@ -38,7 +38,7 @@ func _watch(k: Dictionary) -> void:
 	for i in KINDS.size():
 		if int(vals[i]) > int(was[i]):
 			top = i
-	if top < 0 or _asleep(k) or now - float(_last.get(uid, -MERGE_S)) < MERGE_S:
+	if top < 0 or asleep(k) or now - float(_last.get(uid, -MERGE_S)) < MERGE_S:
 		return
 	_last[uid] = now
 	GardenSfx.cue("garden_chime_" + KINDS[top], k["pos"], PITCH[GardenSfx.SIZE[Unique.size_tag(rec)]])
@@ -52,5 +52,5 @@ static func _values(rec: Dictionary) -> Array:
 		change += int(m["lv"])
 	return [stats, int(rec.get("level", 1)), change, Care.need(rec, "joy")]
 
-static func _asleep(k: Dictionary) -> bool:
+static func asleep(k: Dictionary) -> bool:
 	return float(k.get("nap_t", 0.0)) > 0.0 or (k.has("life") and (k["life"] as Fsm).is_in(BaseLife.S.NAP))

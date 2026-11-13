@@ -16,9 +16,9 @@ const SIZE := {"XS": "small", "S": "small", "M": "medium", "L": "large", "XL": "
 
 static var heard := {}                # cue name -> times played, for the checks
 
-static func cue(sname: String, pos, pitch := 1.0) -> void:
+static func cue(sname: String, pos, pitch := 1.0, db := DB) -> void:
 	heard[sname] = int(heard.get(sname, 0)) + 1
-	Sfx.play(sname, pos, DB, 0.04, pitch)
+	Sfx.play(sname, pos, db, 0.04, pitch)
 
 ## Three beats as a game starts: tick, tick, go.
 static func countdown(home, pos) -> void:
@@ -37,8 +37,8 @@ static func result(home, res: Dictionary) -> void:
 
 ## result() for two entries that need not be yours ({rec, pos}: a visitor, a rival team's runner).
 static func fanfare(home, win: Dictionary, lose: Dictionary) -> void:
-	cue("garden_win_" + _size(win["rec"]), win["pos"])
-	var huff := func(): cue("garden_sulk_" + _size(lose["rec"]), lose["pos"])
+	cue("garden_win_" + size_word(win["rec"]), win["pos"])
+	var huff := func(): cue("garden_sulk_" + size_word(lose["rec"]), lose["pos"])
 	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
 
 ## Tumble: the exchange lands with the move that decided it, then the loser scuffs back unless it was dead level.
@@ -52,7 +52,7 @@ static func reveal(home, pos) -> void:
 	cue("show_reveal", pos)
 	home.get_tree().create_timer(REVEAL_S).timeout.connect(func(): cue("show_crowd", pos))
 
-static func _size(rec: Dictionary) -> String:
+static func size_word(rec: Dictionary) -> String:
 	return SIZE[Unique.size_tag(rec)]
 
 ## Seek: the sniffing loop at the hunter nearest the scent, higher as it closes in. Call every frame of the hunt.
