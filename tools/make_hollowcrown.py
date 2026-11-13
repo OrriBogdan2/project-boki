@@ -354,24 +354,24 @@ BRIDGES = [
 # rings=True makes a glide an AIR LANE (docs/AIR_RINGS.md): glide rings along take -> land throw you along
 # it at ring speed, so a lane may be far longer than one glider's heat; it runs both ways (one entry).
 glides = [
-    dict(name="Ember Leap", a="crown", b="cinder", take=[359.5, 214.5], land=[393.5, 211.5], rings=True),
-    dict(name="Slag Leap", a="storm_e", b="cinder", take=[384.5, 359.5], land=[401.5, 319.5], rings=True),
-    dict(name="Bramble Leap", a="lark", b="storm_w", take=[201.5, 298.5], land=[251.5, 323.5], rings=True),
+    dict(name="Ember Leap", a="crown", b="cinder", take=[360, 214], land=[394, 212], rings=True),
+    dict(name="Slag Leap", a="storm_e", b="cinder", take=[384, 361], land=[402, 320], rings=True),
+    dict(name="Bramble Leap", a="lark", b="storm_w", take=[202, 298], land=[252, 324], rings=True),
     # the long lanes: from three edge regions over the void to the middle (the Shrine shard, the Crown)
-    dict(name="Moor Line", a="duskmoor", b="storm", take=[362.5, 420.5], land=[320.5, 380.5], rings=True),
-    dict(name="Salt Line", a="saltmere", b="storm", take=[300.5, 456.5], land=[300.5, 391.5], rings=True),
-    dict(name="Lantern Line", a="highwatch", b="crown", take=[146.5, 127.5], land=[228.5, 158.5], rings=True),
+    dict(name="Moor Line", a="duskmoor", b="storm", take=[362, 420], land=[320, 380], rings=True),
+    dict(name="Salt Line", a="saltmere", b="storm", take=[300, 456], land=[300, 392], rings=True),
+    dict(name="Lantern Line", a="highwatch", b="crown", take=[146, 128], land=[228, 158], rings=True),
 ]
 
 # Lift rings: an updraft at the foot of a region's high ground (2.5-3.6 m from the plateau's rim, clear of
 # stairs) with a ring over it; hop in and it carries you up to `top` (a terrace level) to glide onto it.
 updrafts = [
-    dict(region="crown", at=[288.5, 161.5], top=8, ring=True),        # the keep, from the Gate Span side
-    dict(region="frostgate", at=[295.5, 85.5], top=10, ring=True),    # the ice shelf, from the Rimefield
-    dict(region="cinder", at=[425.5, 221.5], top=6, ring=True),       # the first cliff, by Ember Leap's landing
-    dict(region="storm", at=[300.5, 354.5], top=6, ring=True),        # the Shrine Table, north foot
-    dict(region="thorn", at=[170.5, 365.5], top=6, ring=True),        # Bramble Rise, east foot
-    dict(region="highwatch", at=[101.5, 126.5], top=8, ring=True),    # a tower in the yard's middle
+    dict(region="crown", at=[288, 162], top=8, ring=True),        # the keep, from the Gate Span side
+    dict(region="frostgate", at=[296, 86], top=10, ring=True),    # the ice shelf, from the Rimefield
+    dict(region="cinder", at=[426, 222], top=6, ring=True),       # the first cliff, by Ember Leap's landing
+    dict(region="storm", at=[300, 354], top=6, ring=True),        # the Shrine Table, north foot
+    dict(region="thorn", at=[170, 366], top=6, ring=True),        # Bramble Rise, east foot
+    dict(region="highwatch", at=[102, 126], top=8, ring=True),    # a tower in the yard's middle
 ]
 
 lairs = [
