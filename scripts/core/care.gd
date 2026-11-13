@@ -611,6 +611,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
 	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
 	BokiQuirks.set_sex(baby)
+	BokiQuirks.set_rare_trait(baby)
 	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
