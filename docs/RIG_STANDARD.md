@@ -35,7 +35,7 @@ at the rig's `Hand` nodes. Apply all transforms before export.
 | offhand | child `weapon_offhand` | a twin weapon's second piece, left of x = -0.04, handed to the left hand |
 | shield | mesh `shield` | modelled in the Shield node's space on `Hand.L` (Mossy) |
 | anchors | empties `anchor_head_top`, `anchor_chest`, plus a Hunter's own (`anchor_*`) | children of their bone; kits find them with `WardenGlb.anchor` |
-| FX anchors | optional empties a Hero's looks read (`content/vfx/<arch>.json` "anchors"; Kael: `anchor_blade_tip`, `anchor_blade_mid`, under `weapon`; `anchor_chain_hand`, `anchor_feet`, on their bones; Lace: `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`) | looks fall back to the Gun's space, then the body, without them (docs/HERO_VFX.md) |
+| FX anchors | optional empties a Hero's looks read (`content/vfx/<arch>.json` "anchors"; Kael: `anchor_blade_tip`, `anchor_blade_mid`, under `weapon`; `anchor_chain` (hand.R), `anchor_feet`, on their bones; Lace: `anchor_nock` (bow_s), `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`) | looks fall back to the Gun's space, then the body, without them (docs/HERO_VFX.md) |
 
 The weapon is part of the Hunter's design: it stays seated in the hand (its bounds hold the grip within 6 cm) and
 follows the hand in every state. `HunterAnim._weapon_to_hand` pulls a weapon whose grip the arm cannot reach (a flip,
