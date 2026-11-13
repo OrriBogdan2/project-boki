@@ -24,7 +24,9 @@ var hover_arch := ""           # the card under the mouse (K opens its kit)
 var _layer: CanvasLayer = null
 
 static func is_practice(opts: Dictionary) -> bool:
-	return opts.get("training", false) or opts.get("tutorial", false) or opts.get("arena", false) or opts.get("duel", false)
+	var any: bool = opts.get("training", false) or opts.get("tutorial", false) or opts.get("arena", false) \
+		or opts.get("duel", false)
+	return any and not opts.get("duo_tut", false)      # (the 2v2 tutorial is a match, not a practice area)
 
 static func of(match_node: Match) -> Practice:
 	return match_node.get_node_or_null(NAME) as Practice
@@ -56,7 +58,7 @@ func items() -> Array:
 		out.append(["bench", "Bench", "gear", func(): bench.toggle(), ""])
 	if recast:
 		out.append(["recast", "Two-step", "burst", func(): recast.toggle(), ""])
-	out.append(["leave", "Leave", "back", func(): leave(m, true), ""])
+	out.append(["leave", "Skip" if m.opts.get("tutorial", false) else "Leave", "back", func(): leave(m, true), ""])
 	return out
 
 func _build_bar() -> void:
@@ -97,7 +99,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if picker_page == "kit": PracticeHero.open(self)
 			else: PracticeHero.close(self)
 			get_viewport().set_input_as_handled()
-		elif event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and hover_arch != "":
+		elif event.is_action_pressed("kit_card") and hover_arch != "":
 			PracticeHero.kit(self, hover_arch)
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("hero"):

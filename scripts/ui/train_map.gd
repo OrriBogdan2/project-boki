@@ -82,6 +82,13 @@ func _draw_line(hud, inner: Rect2, to_screen: Callable) -> void:
 		if hud._mm_has(inner, a) and hud._mm_has(inner, b):
 			hud.c.draw_line(a, b, Color(GOLD, UNDER_ALPHA if _under[i] else LINE_ALPHA), LINE_W, true)
 
+## A halt's icon: a gold square on a dark halo (the map key draws it too).
+static func halt_glyph(c: Control, pv: Vector2) -> void:
+	var halo := Vector2.ONE * (HALT_R + 1.0)
+	c.draw_rect(Rect2(pv - halo, halo * 2.0), Color(0, 0, 0, 0.6))
+	var half := Vector2.ONE * HALT_R
+	c.draw_rect(Rect2(pv - half, half * 2.0), GOLD)
+
 func _draw_halts(hud, st: SkyTrain, inner: Rect2, to_screen: Callable, named: bool) -> void:
 	var me = hud.m.player
 	var mine := -1
@@ -91,10 +98,7 @@ func _draw_halts(hud, st: SkyTrain, inner: Rect2, to_screen: Callable, named: bo
 		var pv: Vector2 = to_screen.call(_halts[i]["pos"])
 		if not hud._mm_has(inner, pv, 6.0):
 			continue
-		var halo := Vector2.ONE * (HALT_R + 1.0)
-		hud.c.draw_rect(Rect2(pv - halo, halo * 2.0), Color(0, 0, 0, 0.6))
-		var half := Vector2.ONE * HALT_R
-		hud.c.draw_rect(Rect2(pv - half, half * 2.0), GOLD)
+		halt_glyph(hud.c, pv)
 		var y := 15.0
 		if named:
 			hud._ctext(pv + Vector2(0, y), _halts[i]["name"], 10, HALT_NAME, hud.big)
