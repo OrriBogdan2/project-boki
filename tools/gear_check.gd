@@ -301,6 +301,18 @@ func _glove_combos() -> void:
 	m.spawn_gear("quake", 1, P.pos, "", false)
 	m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
 	ok("a different glove goes in the free slot (V)", String(P.gear[1].get("id", "")) == "quake", str(P.gear))
+	# pickups fill Q first, then V; a freed slot is the next one filled
+	P.gear = Gear.empty_slots()
+	var order: Array = []
+	for step in [["grapple", -1], ["quake", -1], ["", 0], ["blink", -1], ["", 1], ["frost", -1]]:
+		if step[1] >= 0:
+			P.gear[step[1]] = {}
+		else:
+			m.spawn_gear(step[0], 1, P.pos, "", false)
+			m.take_pick(P, m.wpicks[m.wpicks.size() - 1])
+		order.append("%s/%s" % [P.gear[0].get("id", "-"), P.gear[1].get("id", "-")])
+	ok("pickups fill glove 1 (Q) first, then glove 2; a freed slot gets the next pickup",
+			order == ["grapple/-", "grapple/quake", "-/quake", "blink/quake", "blink/-", "blink/frost"], str(order))
 	m.queue_free()
 
 func _glove_run(m: Match, secs: float, each := Callable()) -> void:

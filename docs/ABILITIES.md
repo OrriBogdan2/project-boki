@@ -135,6 +135,8 @@ Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, land
 
 ## Q: active gloves
 
+Gloves fill in order: the first pickup goes on Q (glove 1), the second on glove 2 (V, or Mouse 4, the back side button, by default), and a freed slot takes the next pickup. Saved configs with one glove 2 key gain Mouse 4 unless it is bound elsewhere (`KeyMigrate` step 6).
+
 Gloves drop in runs. Rarer gloves keep the same verb with bigger numbers: damage, wall health, heals and shields x1 / x1.3 / x1.6 / x2 (common to legendary), durations and pull strength by half as much, cooldown 8% shorter per step. Rank (skill points into Q) stacks on top.
 
 | Glove | Verb | Cooldown | What it does |

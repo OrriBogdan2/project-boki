@@ -46,6 +46,30 @@ func run(main: Node) -> void:
 			"glove 2 (match) and play (home) are separate contexts: no clash between them (%s %s)" % [str(vg), str(vp)])
 	var vd: Array = S.conflicts(_key(KEY_V), "dash")
 	ok(vd.any(func(x): return x[0] == "gear2") and vd.any(func(x): return x[0] == "play"), "giving another action V still warns about both (%s)" % str(vd))
+	# glove 1 on Q, glove 2 on V or Mouse 4 (the back side button); nothing else holds Mouse 4
+	var m4 := "mouse:%d" % MOUSE_BUTTON_XBUTTON1
+	var c := "key:%d" % KEY_C
+	ok(S.slots("gear1") == ["key:%d" % KEY_Q, ""], "glove 1 ships on Q (%s)" % S.binding_text("gear1"))
+	ok(S.slots("gear2") == ["key:%d" % KEY_V, m4], "glove 2 ships on V, Mouse 4 its alt (%s)" % S.binding_text("gear2"))
+	var mb4 := InputEventMouseButton.new()
+	mb4.button_index = MOUSE_BUTTON_XBUTTON1
+	var glide_keys := InputMap.action_get_events("glide").size()
+	ok(S.conflicts(mb4, "gear2").is_empty() and glide_keys == 1, "no other action ships on Mouse 4")
+	S.rebind("gear2", mb4, 0)
+	ok(S.key_cap("gear2") == "M4" and S.code_text(m4) == "Mouse 4", "a glove slot on Mouse 4 reads M4 on its key cap")
+	S.reset_all()
+	var one := {"keys": {"gear2": [c]}, "keys6_v": 0}
+	KeyMigrate.run(one)
+	ok(one["keys"]["gear2"] == [c, m4], "a saved glove 2 with one key gains Mouse 4 as its alt")
+	var taken := {"keys": {"gear2": [c], "dash": [m4]}, "keys6_v": 0}
+	KeyMigrate.run(taken)
+	ok(taken["keys"]["gear2"] == [c], "Mouse 4 bound elsewhere in a saved config is left alone")
+	var fresh := {"keys": {}, "keys6_v": 0}
+	var two := {"keys": {"gear2": [c, "key:%d" % KEY_B]}, "keys6_v": 0}
+	KeyMigrate.run(fresh)
+	KeyMigrate.run(two)
+	var untouched: bool = not fresh["keys"].has("gear2") and two["keys"]["gear2"].size() == 2
+	ok(untouched, "an unsaved or two-key glove 2 is untouched")
 	# clashes: F is interact's
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))

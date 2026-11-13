@@ -74,7 +74,7 @@ func _setup_input() -> void:
 	_key("util3", [KEY_3])                    # utility belt slot 3
 	_key("util4", [KEY_4])                    # utility belt slot 4
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
-	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
+	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
 	for a in KinKeys.ids():
@@ -85,7 +85,6 @@ func _setup_input() -> void:
 	_key("dash", [KEY_SHIFT])
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
-	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
