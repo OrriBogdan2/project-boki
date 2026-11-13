@@ -114,10 +114,48 @@ func run(main: Node) -> void:
 	ok(deep_peak <= 26.0 * 0.7 + 0.3, cap_txt)
 	ok(deep_peak >= 12.0, "...and is still a real lift (%.1f m/s)" % deep_peak)
 	_spike_kinds()
+	_burn_hint(e)
 	m.queue_free()
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## The first overheat over the abyss says one plain line once per save (Match._tip): the live glide key,
+## no input block, one line in the lane; hot over solid ground, or a second time, says nothing.
+func _burn_hint(e: Dictionary) -> void:
+	var stub := GDScript.new()
+	stub.source_code = "extends Node\nvar lines: Array = []\nfunc tip(t): lines.append(t)\n"
+	stub.reload()
+	var hud: Node = stub.new()
+	m.hud = hud
+	m.opts["autoplay"] = false
+	Save.d["tutorial"].erase("overheat_lift")
+	Save.d["tutorial"]["move"] = true      # (the first hint would show on its own)
+	m._tip_t = 2.0
+	var top: float = e["top"]
+	_reset(Vector3(e["at"].x, top + 12.0, e["at"].z), Vector3.ZERO)
+	h.gliding = true
+	h.glide_fuel = 0.0
+	m._tips()
+	ok(hud.lines.is_empty(), "overheated over solid ground: no hint")
+	_reset(Vector3(e["ex"] + e["dir"].x * 4.0, top - 6.0, e["ez"] + e["dir"].y * 4.0), Vector3.ZERO)
+	h.gliding = true
+	h.glide_fuel = 0.5
+	m._tips()
+	ok(hud.lines.is_empty(), "gliding cool over the abyss: no hint")
+	h.glide_fuel = 0.0
+	m._tips()
+	var want := "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump")
+	ok(hud.lines == [want], "first overheat over the abyss: the one line, live key cap (%s)" % str(hud.lines))
+	ok(want.length() <= 70 and not want.contains("\n"), "the line is one short line (%d chars)" % want.length())
+	ok(Save.d["tutorial"].get("overheat_lift", false), "...and it is marked seen in the save")
+	h.glide_fuel = 1.0
+	m._tips()
+	h.glide_fuel = 0.0
+	m._tips()
+	ok(hud.lines.size() == 1, "a second overheat says nothing (%d lines)" % hud.lines.size())
+	m.hud = null
+	hud.free()
 
 ## A gliding dummy 12 m over the ground at this heat (1 = cool), the attacker gliding at 0.2 to see it cool.
 func _glider(o: Hunter, fuel: float) -> void:
