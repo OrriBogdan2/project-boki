@@ -72,7 +72,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
+		m.hud.toast("Training Grounds  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
