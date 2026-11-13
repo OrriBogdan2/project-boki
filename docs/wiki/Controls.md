@@ -72,14 +72,14 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | 3 | Utility belt slot 3 | `util3` | yes |
 | 4 | Utility belt slot 4 | `util4` | yes |
 | Q | Glove 1 | `gear1` | yes |
-| V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
+| V / Mouse 4 | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
-| Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
+| Mouse 5 | Glide (hold in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
@@ -107,6 +107,9 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
+| F1 | Look at teammate 1 (hold) | `mate_look_1` | yes |
+| F2 | Look at teammate 2 (hold) | `mate_look_2` | yes |
+| F3 | Look at teammate 3 (hold; 4-player squads) | `mate_look_3` | yes |
 | F7 | Movement readout (tuning) | `move_readout` | yes |
 | Z | Separate from the drop | `separate` | yes |
 
