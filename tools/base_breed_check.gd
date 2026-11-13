@@ -83,8 +83,6 @@ func _start() -> void:
 	d["active"] = pip["uid"]
 	moss = Save.new_kin("burrlet", "Moss")      # the second Boki is in place before the base is built
 	d["roster"].append(moss)
-	for rec in [pip, moss]:
-		rec["loose"] = {}      # docs/DEBT.md: Care.ensure writes the int GardenItems wants, StatBudget.add reads a dict
 	Save.d = d
 	Progress.add("hatched")
 	home = await main._hb_home()
@@ -142,7 +140,7 @@ func _raising_min() -> float:
 	print("BREED gate both Grown: %.0f min (%.0f each; a runner needs %.0f each)" % [one * 2.0, one, runner])
 	_over("both Grown", one * 2.0, _limit_min())
 	ok(one < GIVE_UP_MIN, "farm XP alone reaches Grown at all (%.0f min)" % one)
-	var max_ratio := float(GardenXp.rules()["pace"]["max_ratio"])
+	var max_ratio := float(GardenXp.rules()["pace"]["grown_max_ratio"])
 	var ratio := one / runner
 	ok(ratio <= max_ratio, "farm XP is at most %.1fx slower than runs to Grown (%.2fx)" % [max_ratio, ratio])
 	return one * 2.0

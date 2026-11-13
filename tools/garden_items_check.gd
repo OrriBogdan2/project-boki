@@ -55,7 +55,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 26 and fine, "26 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 29 and fine, "29 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -112,6 +112,99 @@ func _tokens_and_stay() -> void:
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
 	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
+	_aura(rec)
+	_more_auras()
+
+## Glowmoss Sprig: a worn aura, one at a time, looks only; the model grows a GardenAura that glows at night.
+func _aura(rec: Dictionary) -> void:
+	var stats: Dictionary = rec["stats"].duplicate()
+	var pv := GardenItems.preview(rec, "glowmoss_sprig")
+	ok(pv["ok"] and pv["deltas"].keys() == ["aura"], "Glowmoss Sprig previews one change: its aura")
+	Save.d["items"]["glowmoss_sprig"] = 1
+	var res := GardenItems.use(rec, "glowmoss_sprig")
+	ok(res["ok"] and res["look"] and rec["aura"] == "glowmoss_sprig" and rec["stats"] == stats,
+			"worn: rec.aura set, stats untouched, the model redraws")
+	ok(not GardenItems.preview(rec, "glowmoss_sprig")["ok"], "a second one on the same Boki is refused")
+	var look := Save.new_kin(String(rec["species"]), "Look")      # a plain body: only the aura differs
+	look["aura"] = rec["aura"]
+	var n := Models.kin(String(rec["species"]), look)
+	var pt: GardenAura = n.get_node_or_null("GardenAura")
+	ok(pt != null and pt.night_only and not pt.emitting, "the model wears its aura, dark until night")
+	var clock: bool = HomeWork.is_night(0.97) and not HomeWork.is_night(0.5)
+	ok(GardenAura.lit(null, true) and clock, "no day clock: it glows; Home lights it at night")
+	n.free()
+	var off := GardenItems.take_off(rec, "glowmoss_sprig")
+	ok(off and rec["aura"] == "" and int(Save.d["items"]["glowmoss_sprig"]) == 1,
+			"taken off, back in the bag")
+	look["aura"] = rec["aura"]
+	var bare := Models.kin(String(rec["species"]), look)
+	ok(bare.get_node_or_null("GardenAura") == null, "no aura worn, no aura node")
+	bare.free()
+
+class FakeHome:
+	var kins: Array = []
+
+## Mistbloom and Chimegrass: worn like the Sprig; one particle set each, none at Low quality.
+func _more_auras() -> void:
+	var rec := _boki("cindle", 3, "power")
+	var other := _boki("cindle", 3, "power")
+	rec["lean"] = {}
+	other["lean"] = {}
+	var q_was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	Save.d["items"]["mistbloom"] = 1
+	Save.d["items"]["chimegrass"] = 1
+	var previews: bool = GardenItems.preview(rec, "mistbloom")["ok"] and GardenItems.preview(rec, "chimegrass")["ok"]
+	ok(previews, "both new auras preview on hold")
+	ok(GardenItems.use(rec, "mistbloom")["ok"] and rec["aura"] == "mistbloom", "Mistbloom is worn")
+	ok(GardenItems.take_off(rec, "mistbloom") and GardenItems.use(other, "mistbloom")["ok"]
+			and other["aura"] == "mistbloom" and rec["aura"] == "", "taken off and given to another Boki")
+	other["lean"] = {"fire": Evo.LEAN_FULL}
+	var mist := _aura_node(other)
+	ok(mist != null and mist.color == Lean.face("fire")["tint"] and not mist.night_only and mist.emitting,
+			"Mistbloom: one set, in the lean colour, always on")
+	other["lean"] = {}
+	ok(_aura_node(other).color == Color(GardenAura.NO_LEAN), "no lean yet: pale mist")
+	GardenItems.use(rec, "chimegrass")
+	var bell := _aura_node(rec)
+	ok(bell != null and bell.chimes and bell.one_shot and not bell.emitting, "Chimegrass: sits still until it chimes")
+	var home := FakeHome.new()
+	var model := Models.kin(String(rec["species"]), rec)
+	home.kins = [{"rec": rec, "pos": Vector3.ZERO, "node": model}]
+	var chimes := HomeChimes.new(home)
+	chimes.tick(0.1)
+	var heard := int(GardenSfx.heard.get("garden_chime_level", 0))
+	Care.change(rec, "joy", HomeChimes.JOY_RISE - 1.0)
+	chimes.tick(0.1)
+	ok(int(GardenSfx.heard.get("garden_chime_level", 0)) == heard, "a small joy rise: no note")
+	Care.change(rec, "joy", HomeChimes.JOY_RISE + 1.0)
+	chimes.tick(0.1)
+	var puffed: bool = (model.get_node("GardenAura") as GardenAura).emitting
+	ok(int(GardenSfx.heard.get("garden_chime_level", 0)) == heard + 1 and puffed,
+			"a happy rise (a win): one note through the garden sound path and a puff of notes")
+	rec["aura"] = ""
+	Care.change(rec, "joy", -30.0)
+	chimes.tick(0.1)
+	Care.change(rec, "joy", 30.0)
+	chimes.tick(0.1)
+	ok(int(GardenSfx.heard.get("garden_chime_level", 0)) == heard + 1, "without Chimegrass the joy rise is silent")
+	model.free()
+	rec["aura"] = "chimegrass"
+	Settings.v["quality"] = "low"
+	ok(_aura_node(other) == null and _aura_node(rec) == null, "Low quality: no aura particles")
+	Settings.v["quality"] = q_was
+
+func _aura_node(rec: Dictionary) -> GardenAura:
+	var look := Save.new_kin(String(rec["species"]), "Look")
+	look["aura"] = rec["aura"]
+	look["lean"] = rec.get("lean", {})
+	var n := Models.kin(String(rec["species"]), look)
+	var pt := n.get_node_or_null("GardenAura") as GardenAura
+	if pt:
+		n.remove_child(pt)
+		pt.owner = null
+	n.free()
+	return pt
 
 func _feeding() -> void:
 	var rec := _boki("zapple", 3, "speed")
@@ -131,4 +224,8 @@ func _migration() -> void:
 		old.erase(f)
 	var data := {"v": 12, "roster": [old]}
 	var moved := Save.migrate(data) and int(data["v"]) == Save.VERSION
+	var no_aura := Save.new_kin("cindle", "Older")
+	no_aura.erase("aura")
+	Care.ensure(no_aura)
+	ok(no_aura["aura"] == "", "a Boki saved before auras loads wearing none")
 	ok(moved and old["path"] == [] and old["stay"] == false and old["loose"] == 0, "a v12 save gains path, stay, loose")
