@@ -19,6 +19,7 @@ var dmg_mult := 1.0
 var calm_t := 0.0
 var noticed_at := -INF     # match time of this monster's last notice cue (MobNotice)
 var player_hurt := false     # the local player or their Boki has damaged it (LastHitHint)
+var murmur_t := 0.0         # s until an idle monster's next murmur (MobAlert)
 var death_t := 0.0
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
@@ -99,6 +100,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			if st == "idle":
 				st = "chase"
 				MobNotice.woke(self)
+				MobAlert.aggro(self)
 	return dealt
 
 func _stagger(by: Ent, opts: Dictionary) -> void:
@@ -199,6 +201,9 @@ func sim(dt: float) -> void:
 				if tgt:
 					st = "chase"
 					MobNotice.woke(self)
+					MobAlert.aggro(self)
+			if st == "idle":
+				MobAlert.murmur(self, dt)
 			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
 				var a := randf() * TAU
 				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
