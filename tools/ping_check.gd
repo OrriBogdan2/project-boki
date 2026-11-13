@@ -7,6 +7,8 @@ extends RefCounted
 ##      itself (through Match._gather_input) places one; a ping from the net keeps its kind
 ##   3. the drop: on the planning map a ping lands on the map point; dropping, it lands on the ground
 ##      under the cursor, and the bot teammate takes it
+##   4. loot pings are gold, ground pings white; a player keeps PingInput.CAP pings; an enemy ping follows
+##      its hunter and is gone after ENEMY_T; Alt+click pings without shooting; "sping" through JSON on a peer
 ## Never touches the save.
 
 var bad := 0
@@ -132,6 +134,61 @@ func _world() -> void:
 	m.squad_ping(mate, P.pos, true, "loot")
 	var theirs: Array = m.pings.filter(func(q): return q.get("by") == mate)
 	ok(theirs.size() == 1 and theirs[0]["kind"] == "loot", "a ping from the net keeps its kind")
+	_kinds_and_life(P, mate, foe, spot)
+
+## 4. colours (foe on enemies, gold on loot, squad colour on the ground), the cap, the enemy ping following its hunter and expiring, Alt+click, the Net round trip.
+func _kinds_and_life(P: Hunter, mate: Hunter, foe: Hunter, spot: Vector3) -> void:
+	m.pings.clear()
+	foe.teleport(spot)
+	m.squad_ping(P, P.pos, false, "loot")
+	ok((_my_ping()["col"] as Color).is_equal_approx(PingInput.LOOT_COL), "a loot ping is gold")
+	m.squad_ping(P, P.pos)
+	ok((_my_ping()["col"] as Color).is_equal_approx(m.mate_col(P)), "a ground ping wears the pinger's squad colour")
+	m.squad_ping(P, foe.pos, false, "enemy", foe)
+	var mine: Array = m.pings.filter(func(q): return q.get("by") == P)
+	ok(mine.size() == PingInput.CAP and mine[0]["kind"] == "" and mine[1]["kind"] == "enemy",
+		"a third ping drops the oldest: %d kept" % mine.size())
+	foe.teleport(m.world.free_spot_near(spot + Vector3(0, 0, 4), [], 1.0, 0.5, 8.0))
+	PingInput.tick(m, 1.0)
+	var pg := _my_ping()
+	ok(Vector2(pg["pos"].x - foe.pos.x, pg["pos"].z - foe.pos.z).length() < 0.01, "the enemy ping follows its hunter")
+	PingInput.tick(m, PingInput.ENEMY_T - 0.9)
+	ok(pg not in m.pings and m.pings.filter(func(q): return q.get("by") == P).size() == 1,
+		"it is gone after %.0f s, the ground ping stays" % PingInput.ENEMY_T)
+	PingInput.tick(m, Match.SQUAD_PING_T)
+	var left := m.pings.filter(func(q): return q.get("by") == P)
+	ok(left.is_empty(), "the ground ping is gone after %.0f s" % Match.SQUAD_PING_T)
+	# Alt+click pings and does not shoot
+	var alt := InputEventKey.new()
+	alt.keycode = KEY_ALT
+	alt.physical_keycode = KEY_ALT
+	alt.pressed = true
+	Input.parse_input_event(alt)
+	Input.flush_buffered_events()
+	Input.action_press("fire")
+	m._gather_input()
+	ok(not _my_ping().is_empty() and not P.inp["fire"], "Alt+click pings and does not shoot")
+	Input.action_release("fire")
+	alt.pressed = false
+	Input.parse_input_event(alt)
+	Input.flush_buffered_events()
+	# the Net round trip: what the pinger sends, through JSON, played on a peer
+	m.pings.clear()
+	var saved: Array = Net.out_events.duplicate()
+	Net.out_events.clear()
+	m.net_on = true
+	m.squad_ping(P, foe.pos, false, "enemy", foe)
+	var sent: Array = JSON.parse_string(JSON.stringify(Net.out_events))
+	m.net_on = false
+	Net.out_events = saved
+	m.pings.clear()
+	for e in sent:
+		m._net_ev(e, "peer")
+	var got: Array = m.pings.filter(func(q): return q.get("by") == P)
+	var one: Dictionary = got[0] if got.size() == 1 else {}
+	ok(one.get("kind") == "enemy" and one.get("foe") == foe, "Net: the peer gets the enemy ping on the same hunter")
+	ok(float(one.get("life", 0.0)) == PingInput.ENEMY_T, "Net: it lasts %.0f s there too" % PingInput.ENEMY_T)
+	m.pings.clear()
 
 ## Wpicks, boxes, chests and crates near `at` move far off, so a plain ground ping is not taken for loot.
 func _clear_near(at: Vector3) -> void:

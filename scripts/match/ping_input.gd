@@ -1,19 +1,28 @@
 class_name PingInput
 extends RefCounted
-## The ping key (middle mouse by default): marks a spot for your squad through Match.squad_ping, which
+## The ping key (middle mouse by default, or Alt+click): marks a spot for your squad through Match.squad_ping, which
 ## shows it in the world, on the minimap and the full map, as an edge arrow off screen, and sends it to
 ## the bots and over the net. With the full map open it pings the map point. Otherwise it reads what the
 ## cursor is on: an enemy hunter gives an "enemy" ping, loot (a pickup, a deathbox, a chest or a crate) a
 ## "loot" ping, anything else the ground there. Riding in or dropping, it pings the ground under the
-## cursor: where you mean to land.
+## cursor: where you mean to land. An enemy ping follows its hunter for ENEMY_T; each player keeps CAP
+## pings (see docs/decisions/0094-world-ping-follow.md).
 
 const PICK_PX := 40.0                # px on screen: how near the cursor an enemy or loot counts as pointed at
+const LOOT_COL := Color("ffc94a")    # loot or a box
+const ENEMY_T := 4.0                 # s an enemy ping follows its hunter, then it is gone
+const CAP := 2                       # pings per player: one more drops their oldest
 ## Kind -> the one word its marker shows (a plain spot shows who placed it).
 const WORDS := {"enemy": "Enemy", "loot": "Loot"}
 
-## Per frame from Match._gather_input: on the ping key, places a ping where the cursor is.
+## Per frame from Match._gather_input: on the ping key or Alt+click, places a ping where the cursor is.
+## While Alt is held the left click pings instead of shooting.
 static func poll(m: Match, map_up: bool) -> void:
-	if m.paused or not Input.is_action_just_pressed("ping"):
+	var alt := Input.is_key_pressed(KEY_ALT)
+	if alt:
+		m.player.inp["fire"] = false
+	var pressed := Input.is_action_just_pressed("ping") or (alt and Input.is_action_just_pressed("fire"))
+	if m.paused or not pressed:
 		return
 	if map_up:
 		place_map(m, m.hud.c.get_local_mouse_position())
@@ -34,7 +43,7 @@ static func place_world(m: Match, sp: Vector2) -> String:
 	if not (h.riding or h.dropping):
 		var foe := _enemy_at(m, sp)
 		if foe:
-			m.squad_ping(h, foe.pos, false, "enemy")
+			m.squad_ping(h, foe.pos, false, "enemy", foe)
 			return "enemy"
 		var loot := _loot_at(m, sp)
 		if loot != Vector3.INF:
@@ -43,9 +52,32 @@ static func place_world(m: Match, sp: Vector2) -> String:
 	m.squad_ping(h, _ground_at(m, sp))
 	return "spot"
 
-## A ping's colour: red on an enemy, else the pinger's squad colour.
+## A ping's colour: the foe colour on an enemy, gold on loot, else the pinger's squad colour.
 static func color(m: Match, h: Hunter, kind: String) -> Color:
-	return SideColor.foe() if kind == "enemy" else m.mate_col(h)
+	if kind == "enemy":
+		return SideColor.foe()
+	return LOOT_COL if kind == "loot" else m.mate_col(h)
+
+## How long a ping of `kind` lasts.
+static func life(kind: String) -> float:
+	return ENEMY_T if kind == "enemy" else Match.SQUAD_PING_T
+
+## Before `h` places a ping: drops their oldest ones so the new one keeps them at CAP.
+static func make_room(m: Match, h: Hunter) -> void:
+	var theirs: Array = m.pings.filter(func(pg): return pg.get("by") == h)
+	for i in theirs.size() - CAP + 1:
+		m.pings.erase(theirs[i])
+
+## Per frame from Match: ages every ping, moves enemy pings onto their hunter while it is in sight,
+## drops the expired.
+static func tick(m: Match, dt: float) -> void:
+	for pg in m.pings.duplicate():
+		pg["t"] += dt
+		var foe = pg.get("foe")
+		if foe is Hunter and is_instance_valid(foe) and not (foe as Hunter).out and not (foe as Hunter).unseen:
+			pg["pos"] = (foe as Hunter).pos
+		if pg["t"] > float(pg.get("life", 4.0)):
+			m.pings.erase(pg)
 
 ## The word over a squad ping in the world, as seen by `me`.
 static func label(pg: Dictionary, me: Hunter) -> String:

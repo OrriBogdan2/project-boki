@@ -1637,22 +1637,22 @@ func mate_col(h: Hunter) -> Color:
 	return SideColor.mate(i)
 
 const SQUAD_PING_T := 45.0
-## A squad ping: one per hunter (a new one moves it), seen by their squad on the map, the minimap and
-## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" or "loot".
-func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
+## A squad ping: PingInput.CAP per hunter, seen by their squad on the map, the minimap and as a marker
+## in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" (following `foe`) or "loot".
+func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunter = null) -> void:
 	if h == null or (from_net and MuteList.has(h.pname)):
 		return
 	if not world.is_void(p.x, p.z):
 		p.y = world.ground_at(p.x, p.z)
 	else:
 		p.y = 0.0
-	unping(h, true)
+	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(self, h, kind), "t": 0.0, "by": h, "team": h.team,
-		"life": SQUAD_PING_T, "kind": kind})
+		"life": PingInput.life(kind), "kind": kind, "foe": foe})
 	if player and h.team == player.team:
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
-		net_event(["sping", h.nid, p.x, p.y, p.z, kind])
+		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
 	if skydrop:
 		skydrop.on_ping(h, p)
 	if not from_net:
@@ -1670,9 +1670,9 @@ func unping(h: Hunter, quiet := false, from_net := false) -> void:
 	if not quiet and net_on and not from_net:
 		net_event(["unping", h.nid])
 
-func my_ping() -> Dictionary:
-	for pg in pings:
-		if player and pg.get("by") == player: return pg
+func my_ping() -> Dictionary:     # (the newest)
+	for i in range(pings.size() - 1, -1, -1):
+		if player and pings[i].get("by") == player: return pings[i]
 	return {}
 
 func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
@@ -3258,9 +3258,7 @@ func _process(delta: float) -> void:
 	for b in bubbles.duplicate():
 		b["t"] += delta
 		if b["t"] > float(b.get("life", 2.6)): bubbles.erase(b)
-	for p in pings.duplicate():
-		p["t"] += delta
-		if p["t"] > float(p.get("life", 4.0)): pings.erase(p)
+	PingInput.tick(self, delta)
 	for f in feed.duplicate():
 		f["t"] += delta
 		if f["t"] > 6.0: feed.erase(f)
@@ -5416,7 +5414,8 @@ func _net_ev(x, from: String) -> void:
 		"sping":
 			var ph: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if ph:
-				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]) if x.size() > 5 else "")
+				var pfoe := ents_by_id.get(String(x[6]), null) as Hunter
+				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]), pfoe)
 		"unping":
 			var uh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if uh: unping(uh, true, true)
