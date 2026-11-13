@@ -94,6 +94,28 @@ static func kit_tip(id: String) -> String:
 	names.append(Settings.key_cap("ultimate"))
 	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Fusion" % names
 
+## How the Hunter plays, three short lines (what you do, the combo to learn first, what to avoid) from the
+## Hunter's "howto" data. `{action}` is that action's key cap (Settings.key_cap), so rebinds show.
+static func howto_lines(id: String) -> Array:
+	var out: Array = []
+	for line in Arch.def(id).get("howto", []):
+		var text := String(line)
+		for action in ["fire", "secondary", "dash", "signature", "hunter_ult"]:
+			text = text.replace("{%s}" % action, Settings.key_cap(action))
+		out.append(text)
+	return out
+
+## The three how-to lines as a small block, `width` px wide (tagged meta "howto").
+static func howto_box(id: String, width: float, font := UI.T_SMALL) -> VBoxContainer:
+	var v := UI.vbox(1)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.set_meta("howto", id)
+	for line in howto_lines(id):
+		var l := UI.para(String(line), font, UI.MUTED)
+		l.custom_minimum_size.x = width
+		v.add_child(l)
+	return v
+
 ## The results screen's Hunter line: mastery goals this expedition finished, and a Hunter unlock that
 ## became ready.
 static func results_strip(s: Dictionary) -> Control:
