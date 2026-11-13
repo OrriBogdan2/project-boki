@@ -28,6 +28,7 @@ var yaw := 0.0                 # the launch heading: the skydive camera sits beh
 var riders: Array = []         # Hunters aboard
 var safe := Vector3.INF        # where it flies with no keys held: a bot leader's spot, or an island off the abyss
 var node: Node3D
+var snd := RocketSfx.new()     # its ignition, thrust, jump-out and landing sounds
 var done := false
 
 static func launch(match_node: Match, l: Hunter) -> DropRocket:
@@ -48,6 +49,7 @@ static func launch(match_node: Match, l: Hunter) -> DropRocket:
 	r.node = _model(Data.TEAM_COLORS[l.team % Data.TEAM_COLORS.size()])
 	match_node.add_child(r.node)
 	r._place_node()
+	r.snd.start(r)
 	return r
 
 ## One step: the leader's machine flies it, everyone else follows the leader; it ends on the ground.
@@ -55,8 +57,13 @@ func tick(dt: float) -> void:
 	for h in riders.duplicate():
 		if not is_instance_valid(h) or h.out or (h.remote and not h.riding):
 			riders.erase(h)      # (left, or jumped out on their own machine: the flags say so)
-			if is_instance_valid(h): _unseat(h)
+			if not is_instance_valid(h):
+				continue
+			_unseat(h)
+			if h.dropping and not h.out:
+				snd.jump_out(self, h)
 	if riders.is_empty():
+		snd.ended(self)
 		_end()
 		return
 	var l: Hunter = m.skydrop.leader(team)
@@ -72,6 +79,7 @@ func tick(dt: float) -> void:
 	for h in riders:
 		if not h.remote:
 			h.vel = vel
+	snd.tick(self, dt)
 	_place_node()
 
 func _fly(dt: float) -> void:
@@ -145,15 +153,14 @@ func detach(h: Hunter, dive := true) -> bool:
 	h.vel = vel
 	if not dive:
 		h.vel.y = Hunter.DEPLOY_POP
-	if h == m.player:
-		m.sfx("whoosh", null, -4.0, 1.2)
+	snd.jump_out(self, h)
 	return true
 
 ## The rocket hits: a small, clean impact and the squad steps out around it, on open ground.
 func _impact(at: Vector3) -> void:
 	m.fx.dust(at, 26)
 	m.fx.ring(at, 2.6, Color(1, 1, 1, 0.6), 0.3)
-	m.sfx("land", at, 0.0, 0.6)
+	snd.land(self, at)
 	var taken: Array = []
 	for h in riders:
 		_unseat(h)

@@ -9,8 +9,8 @@ tail, reflections, ring, grains, mix, at, sat) and adds:
   - CATS: one loudness target per category, so every Hunter, Boki and UI sound sits at the same level
     for what it is (docs/AUDIO.md). save_cat / takes_cat level a sound to its category and write it.
   - voice(): a wordless voice (grunt, gasp, cry) from a glottal pulse train through vowel formants.
-  - chime(), creak(), fm(), sweep(), sweep_noise(), rattle(), hiss(): the textures several kits need;
-    shape() and soft_in(): click-free envelopes.
+  - chime(), creak(), fm(), sweep(), rattle(), hiss(), sweep_noise() and wobble() (rushing air, gusts):
+    the textures several kits need; shape() and soft_in(): click-free envelopes.
 
 44.1 kHz mono 16-bit, written to audio/. Original synthesis, no samples.
 """
@@ -23,7 +23,7 @@ from sfx_combat import (SR, N, T, noise, lpf, hpf, bpf, env, mix, at, sat, kick,
 __all__ = ['SR', 'N', 'T', 'noise', 'lpf', 'hpf', 'bpf', 'env', 'mix', 'at', 'sat', 'kick', 'click', 'crack',
            'sub', 'tail', 'reflections', 'ring', 'grains', 'level', 'CATS', 'reseed', 'rng', 'save_cat',
            'takes_cat', 'save_loop', 'shape', 'soft_in', 'voice', 'chime', 'creak', 'fm', 'sweep', 'sweep_noise', 'rattle',
-           'hiss', 'pad']
+           'hiss', 'pad', 'wobble']
 
 # Category loudness (content/rules/sfx_levels.json, the same table --sfx-set-check measures against):
 # RMS in dBFS over the audible part, and the peak ceiling. The game's volume_db at the call site then
@@ -160,6 +160,13 @@ def rattle(d, rate=40, lo=1800, hi=7000, jitter=0.4, decay=None):
         out[s0:s0 + g] += np.sin(2 * np.pi * f * tt) * np.exp(-tt / 0.003) * rng.uniform(1 - jitter, 1.0)
     e = env(n, 0.002, decay) if decay else np.ones(n)
     return out * e
+
+
+def wobble(d, rate, depth):
+    """A smooth random level around 1 (gusts), `rate` new values a second."""
+    pts = max(4, int(d * rate) + 3)
+    x = np.interp(np.arange(N(d)) / SR * rate, np.arange(pts), rng.standard_normal(pts))
+    return np.clip(1.0 + depth * lpf(x, 40) / (np.std(x) + 1e-9), 0.1, None)
 
 
 def hiss(d, lo=2000, hi=9000, a=0.02, decay=0.3):
