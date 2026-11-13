@@ -2,8 +2,6 @@ extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]:
 ## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
 ## and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--heavy: stagger).
-## --run-under=<m/s>: the loco runs forward at that speed and each
-## clip plays as the upper layer over it, as a move that keeps the legs running does (the layers' seam).
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
@@ -23,7 +21,6 @@ func run(main: Node) -> void:
 	var game_cam := false
 	var true_cam := false
 	var dist := 5.2
-	var under := 0.0
 	var at_y := 0.82
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
@@ -34,7 +31,6 @@ func run(main: Node) -> void:
 		if a.begins_with("--yaw="): yaw = float(a.substr(6))
 		if a.begins_with("--dist="): dist = float(a.substr(7))
 		if a.begins_with("--at="): at_y = float(a.substr(5))
-		if a.begins_with("--run-under="): under = float(a.substr(12))
 		if a == "--turn": turn = true
 		if a == "--match": game_cam = true
 		if a == "--true-cam": true_cam = true      # (the game's own camera: 23 m out at 66 degrees, fov 32)
@@ -92,15 +88,13 @@ func run(main: Node) -> void:
 		var dir := out.path_join(anim_name)
 		DirAccess.make_dir_recursive_absolute(dir)
 		var length := clips.lib.get_animation(anim_name).length
-		if under > 0.0:
-			model.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -under), "face": 0.0, "grounded": true})
-		clips.force = {"clip": anim_name, "t": 0.0, "upper": under > 0.0}
+		clips.force = {"clip": anim_name, "t": 0.0}
 		for k in 8:
 			sync.call("_process", 1.0 / 30.0)
 		var n := int(ceil(length * fps)) + 1
 		for i in n:
 			var t := minf(float(i) / fps, length - 0.001)
-			clips.force = {"clip": anim_name, "t": t, "upper": under > 0.0}
+			clips.force = {"clip": anim_name, "t": t}
 			sync.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 	if OS.get_cmdline_user_args().has("--flinch"):
