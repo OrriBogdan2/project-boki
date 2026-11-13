@@ -952,6 +952,8 @@ G is the single Boki button (DECISIONS Controls; the 11-10 design review, fix 6)
 
 - **No game change was needed.** Each game owns its own Boki, so nothing in the summon path waits for the host and `Net.VERSION` is unchanged.
 - **G alone (offline rows):** a tap on the wisp bursts it and letting go keeps it out; a tap again sends it back into the wisp (cooldown on); a hold on the wisp bursts it on the press and the hold opens the order wheel on the summoned Boki, letting go picks and keeps it out; a hold while out only opens the wheel; a wisp on cooldown stays a wisp (the press says so). The HUD ring shows the Boki key through `Settings.key_cap("throw")`; `--keybind-check` covers the dropped action and the old-settings migration.
+## One profile in every mode (`--move-feel-check`, `tools/move_one_profile_check.gd`; DECISIONS 11-11)
+The same hero (Oath/`bulwark`, a row of its own: 4.85 m/s, accel 47) runs the same scripted inputs in the Expedition solo and trio, the Arena, the Training Grounds, the duel ring and the garden avatar (Heart Raid: `ext/pve-raid-1111` is not on main, add it to `MODES` when it lands). Each mode must read `hunter_move.json` and `tuning.json`: the loaded tables equal the files, every hunter's run speed and accel are the file's row, and run, brake, air accel, jump, glide and dash measure the same as the Expedition solo (within 0.03). Run speed and the jump apex are also anchored to the file and to v^2/2g. Result: no mode overrides a number. The spots are flat open floor with biomes off (a map's ice is terrain, not a mode).
 
 ## Not touched
 

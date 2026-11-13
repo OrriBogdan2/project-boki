@@ -311,7 +311,8 @@ func run(main: Node) -> void:
 	_screen_scale()
 	_e2e()
 	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them
-	await _no_fall_carry(main)
+	await _no_fall_carry(main)      # (frees the match and its farm)
+	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
