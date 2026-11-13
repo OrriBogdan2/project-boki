@@ -33,12 +33,11 @@ var pellet_hits := {}        # shotgun volley + target -> slugs landed
 var air_rings: Array = []   # {pos, dir, node, cd: {hunter nid: time}}
 var wpicks: Array = []      # pickups on the ground: gear {gear}, tunings {tune}, treasure {val}, each with id, pos, rar, node
 var wdrop_n := 0
-var warden_done := false
+var timed: TimedSpawns      # the Glimmerkin and the Watcher, on a clock (made on the first event tick)
 var meteor_at := -1.0       # when the meteor shower starts
 var meteor_end := -1.0
 var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
-var glimmer_done := false
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
@@ -4822,23 +4821,9 @@ func _update_events() -> void:
 	if opts.get("tutorial", false) or opts.get("training", false):
 		return
 	_update_meteors()
-	if not glimmer_done and time > at_sess(0.5) and (not net_on or is_host):
-		glimmer_done = true
-		_spawn_glimmer()
-	if warden_done or time < at_sess(0.4) or world.heart_spot == Vector3.INF:
-		return
-	warden_done = true
-	if not net_on or is_host:
-		var w := spawn_mob("warden", world.heart_spot + Vector3(0, 0, 1.5))
-		w.st = "idle"
-		if opts.get("watch_heart", false) and player:
-			var wp := world.heart_spot + Vector3(0, 0, 5.0)
-			player.teleport(Vector3(wp.x, world.ground_at(wp.x, wp.z), wp.z))
-	sfx("warn", null, 0.0, 0.6)
-	ping(world.heart_spot, Color("c9a0ff"))
-	if player and not player.out:
-		add_feed("The Watcher has woken on the center island")
-		hud.toast("The Watcher wakes", Color("c9a0ff"))
+	if timed == null:
+		timed = TimedSpawns.new(self)
+	timed.tick()
 
 # ---- mid-match events
 ## A meteor shower partway through: falling stars hit the ground where hunters are, knock them
@@ -4914,18 +4899,6 @@ func _announce(text: String, col: Color) -> void:
 	add_feed(text)
 	if hud and player and not player.out:
 		hud.toast(text, col)
-
-## A treasure kin appears on a random outer island and runs. Bring it down for a pile of gems
-## and a good weapon before it slips away.
-func _spawn_glimmer() -> void:
-	if world.islands.size() < 2:
-		return
-	var ii := rng.randi_range(1, world.islands.size() - 1)
-	var at := world.random_ground(ii)
-	spawn_mob("glimmer", at)
-	ping(at, Color("ffd25a"))
-	_announce("A Glimmerkin appeared %s. Catch it before it escapes" % (direction_word(player.pos, at) if player else ""), Color("ffd25a"))
-	if net_on: net_event(["anc", "glimmer", _r(at.x), _r(at.y), _r(at.z)])
 
 func on_mob_escaped(mb: Mob) -> void:
 	mb.hp = 0.0

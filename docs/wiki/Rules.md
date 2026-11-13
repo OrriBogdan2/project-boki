@@ -1589,6 +1589,17 @@ Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in C
 | price | 16 |
 | foods | {"frostdrop": {"name": "Frost drop", "type": "ice", "desc": "A drop of cold that stays cold."}, "pebblenut": {"name": "Pebble nut", "type": "rock", "desc": "Hard shell, sweet middle."}, "scalepepper": {"name": "Scale pepper", "type": "dragon", "desc": "Hot enough to make a Boki roar."}, "duskplum": {"name": "Dusk plum", "type": "dark", "desc": "Ripens after the sun is gone."}, "pricklepear": {"name": "Prickle pear", "type": "poison", "desc": "Sharp outside, tangy in."}, "sapjelly": {"name": "Sap jelly", "type": "bug", "desc": "Sticky, sweet, buzzing."}, "ironcrisp": {"name": "Iron crisp", "type": "steel", "desc": "Snaps loud and shines."}, "geodecandy": {"name": "Geode candy", "type": "crystal", "desc": "Sparkles when it cracks."}} |
 
+## timed_spawns (`content/rules/timed_spawns.json`)
+
+The mid-match spawns on a clock (scripts/match/timed_spawns.gd, docs/SPAWNS.md): each comes at a fixed share of the session at a fixed place, and is called out (map ping and a feed line with the seconds left) warn_s before it appears and again 10 s before.
+
+| Setting | Value |
+|---|---|
+| glimmer | {"at": 0.5, "warn_s": 30.0} |
+| _glimmer | the Glimmerkin, at one outer-island wild Boki spot picked from the match seed; at: share of the session, warn_s: seconds of warning |
+| warden | {"at": 0.4, "warn_s": 30.0} |
+| _warden | the Watcher, at the Heart on the center island |
+
 ## toys (`content/rules/toys.json`)
 
 The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.

@@ -23,6 +23,10 @@ const LIFT_T := 15.0
 const UPLINK_CD := 30.0
 const STEAL_T := 5.0          # holding someone else's uplink alone this long makes it yours
 const WAVE_CAP := 7           # monsters a single exit's waves can have alive at once
+const WAVE_EVERY := 12.0      # seconds between an uplink's monster waves
+const WAVE_WARN := 2.5        # seconds the wave posts glow on the ground before monsters climb out of them
+const WAVE_POSTS := 6         # fixed posts round each outpost that its waves come from (docs/SPAWNS.md)
+const WAVE_R := [10.0, 8.0, 12.0, 6.0]   # metres from the outpost a post may sit, tried in this order
 
 var m: Match
 var list: Array = []          # every exit, see _add_*
@@ -206,7 +210,8 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	x["team"] = h.team
 	x["prog"] = 0.0
 	x["waves"] = 0
-	x["wave_t"] = 1.5
+	x["wave_t"] = WAVE_WARN
+	x["warned"] = false
 	x["steal"] = 0.0
 	x["started_at"] = m.time
 	x["draining"] = false
@@ -368,14 +373,20 @@ func _open_lift(x: Dictionary) -> void:
 		m.hud.toast("Uplink complete! The lift is open: step into the light", ExitModels.UPLINK)
 
 # ------------------------------------------------------------------ monster waves
-## While an uplink is charging, the local monsters keep coming at it.
+## While an uplink is charging, the local monsters keep coming at it: every WAVE_EVERY seconds, out of
+## the outpost's fixed posts, which glow on the ground WAVE_WARN seconds first (every peer sees it).
 func _waves(x: Dictionary, dt: float) -> void:
 	if x.get("tut", false) and int(x["waves"]) >= 1:
 		return
 	x["wave_t"] = float(x["wave_t"]) - dt
+	if not x.get("warned", false) and float(x["wave_t"]) <= WAVE_WARN:
+		x["warned"] = true
+		for at in wave_posts(x):
+			m.fx.ring(at, 1.2, Color("ff9a6a"), WAVE_WARN)
 	if float(x["wave_t"]) > 0.0:
 		return
-	x["wave_t"] = 12.0
+	x["wave_t"] = WAVE_EVERY
+	x["warned"] = false
 	if m.net_on and not m.is_host:
 		return
 	var focus: Vector3 = x["pos"]
@@ -384,21 +395,20 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if not mb.dead and int(mb.get_meta("exit", -1)) == int(x["i"]): alive += 1
 	var n := 2 if x.get("tut", false) else 2 + m.tier + (1 if int(x["waves"]) >= 2 else 0)
 	n = mini(n, WAVE_CAP - alive)
-	x["waves"] = int(x["waves"]) + 1
+	var wave := int(x["waves"])
+	x["waves"] = wave + 1
 	if n <= 0:
 		return
-	var ii := m.world.island_of(focus.x, focus.z)
+	var posts := wave_posts(x).filter(func(p): return not _hunter_near(p, 4.0))
 	var spawned := 0
-	for k in n:
-		var at := _wave_spot(focus, ii)
-		if at == Vector3.INF:
-			continue
+	for k in mini(n, posts.size()):
+		var at: Vector3 = posts[(wave + k) % posts.size()]
 		var kinds: Array = ["skitter"] if x.get("tut", false) else []
 		if kinds.is_empty() and m.biomes:
 			kinds = m.biomes.camp_comp({"pos": at, "kind": "normal" if int(x["waves"]) >= 3 else "light"})
 		if kinds.is_empty():
 			kinds = ["skitter", "spitter", "bomber", "skitter"] + (["brute"] if int(x["waves"]) >= 3 else [])
-		var mb: Mob = m.spawn_mob(String(kinds[m.rng.randi() % kinds.size()]), at)
+		var mb: Mob = m.spawn_mob(String(kinds[(wave + k) % kinds.size()]), at)
 		if m.biomes: m.biomes.dress(mb)
 		mb.set_meta("exit", int(x["i"]))
 		mb.camp = focus          # they press in on the outpost
@@ -416,23 +426,35 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if m.player and not m.player.out and m.player.flat_dist(focus) < 24.0 and m.hud:
 			m.hud.toast_small("Monsters incoming!", Color("ff9a6a"))
 
-func _wave_spot(focus: Vector3, ii: int) -> Vector3:
+## The outpost's wave posts: WAVE_POSTS evenly round it on open ground of its island, turned by the
+## exit's index so neighbouring outposts differ. Worked out once; the same on every peer.
+func wave_posts(x: Dictionary) -> Array:
+	if x.has("posts"):
+		return x["posts"]
 	var W := m.world
-	for k in 40:
-		var a := m.rng.randf() * TAU
-		var d := m.rng.randf_range(7.0, 13.0) if k < 30 else m.rng.randf_range(4.0, 8.0)
-		var x := focus.x + cos(a) * d; var z := focus.z + sin(a) * d
-		if W.is_void(x, z) or W.is_block(x, z) or (ii >= 0 and W.island_of(x, z) != ii):
-			continue
-		if W.edge_dist(int(x), int(z), 2) < 2:
-			continue
-		var near := false
-		for h in m.hunters:
-			if _live(h) and Vector2(h.pos.x - x, h.pos.z - z).length() < 4.0: near = true; break
-		if near:
-			continue
-		return Vector3(x, W.ground_at(x, z), z)
-	return Vector3.INF
+	var focus: Vector3 = x["pos"]
+	var ii := W.island_of(focus.x, focus.z)
+	var posts: Array = []
+	for k in WAVE_POSTS:
+		var a := int(x["i"]) * 2.4 + TAU * k / WAVE_POSTS
+		for d in WAVE_R:
+			var px: float = focus.x + cos(a) * d
+			var pz: float = focus.z + sin(a) * d
+			if W.is_void(px, pz) or W.is_block(px, pz) or (ii >= 0 and W.island_of(px, pz) != ii):
+				continue
+			if W.edge_dist(int(px), int(pz), 2) < 2:
+				continue
+			posts.append(Vector3(px, W.ground_at(px, pz), pz))
+			break
+	x["posts"] = posts
+	return posts
+
+
+func _hunter_near(p: Vector3, r: float) -> bool:
+	for h in m.hunters:
+		if _live(h) and Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < r:
+			return true
+	return false
 
 # ------------------------------------------------------------------ the match clock
 func tick(dt: float) -> void:

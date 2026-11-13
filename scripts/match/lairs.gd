@@ -41,6 +41,8 @@ const SLACK := 0.05            # a hair of forgiveness either side of an arc
 const JAM_T := 0.7             # after a miss the dial is jammed this long
 const GRACE_T := 0.3           # the press that starts the dial doesn't count as a stop
 const GUARD_CAP := 6           # guards a lair can have out at once
+const GUARD_R := 3.5           # metres from the dial, rune or ward that called guards climb out
+const GUARD_FAN := 0.5         # radians between their posts, fanned on the side away from the lair
 const RUNE_HOLD := 2.2
 const EGG_PING_T := 8.0        # the dropped egg shows on everyone's minimap this long
 const EGG_APART := 4.5         # a boss's Rare Egg lands this far from its loot pile, on a spot of its own
@@ -480,12 +482,16 @@ func _call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 		return
 	var room := GUARD_CAP - _guards_alive(L)
 	var pool: Array = ["skitter", "skitter", "spitter", "bomber"] + (["brute"] if m.tier >= 1 else [])
-	for i in mini(n, room):
-		var a := randf() * TAU
-		var p: Vector3 = at + Vector3(cos(a), 0, sin(a)) * randf_range(2.5, 4.5)
+	var c: Vector3 = L["c"]
+	var away := atan2(at.z - c.z, at.x - c.x)
+	for _i in mini(n, room):
+		# fixed posts fanned round the far side of the dial, rune or ward from the lair (docs/SPAWNS.md)
+		var k := (L["guards"] as Array).size()
+		var a := away + (k % GUARD_CAP - (GUARD_CAP - 1) * 0.5) * GUARD_FAN
+		var p: Vector3 = at + Vector3(cos(a), 0, sin(a)) * GUARD_R
 		if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z) or inside(L, p, 0.5):
 			p = at + Vector3(L["out"].x, 0, L["out"].y) * 2.5
-		var g := m.spawn_mob(String(pool[randi() % pool.size()]), Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
+		var g := m.spawn_mob(String(pool[k % pool.size()]), Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 		g.camp = at
 		g.st = "chase"
 		g.tgt = L["user"] if L["user"] != null else null
