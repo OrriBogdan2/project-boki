@@ -107,6 +107,9 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
+| F1 | Look at teammate 1 (hold) | `mate_look_1` | yes |
+| F2 | Look at teammate 2 (hold) | `mate_look_2` | yes |
+| F3 | Look at teammate 3 (hold; 4-player squads) | `mate_look_3` | yes |
 | F7 | Movement readout (tuning) | `move_readout` | yes |
 | Z | Separate from the drop | `separate` | yes |
 
