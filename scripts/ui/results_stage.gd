@@ -25,7 +25,7 @@ var built := 0               # Hunter models (or Wisps) standing on the island
 var _w3: Node3D
 var _cam: Camera3D
 var _t := 0.0
-var zoom := ViewZoom.new()   # the wheel (or the pad) moves the camera in and out along its line (Results forwards the wheel)
+var zoom := ViewZoom.new()   # the wheel or pad: the camera in and out along its line (Results forwards the wheel)
 var _todo: Array = []        # member indices still to build
 var _bodies: Array = []      # [member index, Node3D]
 var _kins: Array = []
