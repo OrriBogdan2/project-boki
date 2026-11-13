@@ -479,7 +479,7 @@ const CHECKS := {
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],      # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
-	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],      # 2 games, 100 ms, 2% loss
+	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],  # relay 100ms, 2% loss
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
 	# 2 games, relay, docs/decisions/0018
