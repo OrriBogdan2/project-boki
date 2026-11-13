@@ -163,11 +163,12 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers (Blockers "phase") and terrain don't block,
+## only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
-	if not dyn_walls.is_empty() and not ghost:
-		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y)
+	if not dyn_walls.is_empty():
+		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y, "phase" if ghost else "body")
 		if wb > 0.0:
 			return wb
 	# rocks, trees and walls use a slimmer body than the terrain does, so you slide past their
