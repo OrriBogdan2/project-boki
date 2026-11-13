@@ -49,6 +49,16 @@ SCANS = {
                  "merge": {"lobe%d" % i: "root" for i in range(7)},
                  "eye_c": (0.057, 0.38, -0.135), "eye_r": (0.041, 0.042, 0.022), "eye_yaw": 0.3, "face": {},
                  "sat": 0.8, "cover": 1.2},
+    "goliathite": {"height": 0.7, "tris": 16000, "x": [(0.2, 0.2)],
+                   "y": [(0.0, 0.0), (0.44, 0.7)], "z": [(-0.25, -0.46), (0.25, 0.46)], "drop": ("puffs",),
+                   "merge": {"lobe%d" % i: "root" for i in range(7)},
+                   "eye_c": (0.081, 0.505, -0.4), "eye_r": (0.04, 0.052, 0.024), "eye_yaw": 0.3, "face": {},
+                   "sat": 0.8, "cover": 1.15},
+    "hoarheron": {"height": 0.65, "tris": 16000, "x": [(0.2, 0.17)],
+                  "y": [(0.0, 0.0), (0.44, 0.65)], "z": [(-0.25, -0.5), (0.25, 0.5)], "drop": ("puffs",),
+                  "merge": {"lobe%d" % i: "root" for i in range(7)},
+                  "eye_c": (0.05, 0.357, -0.372), "eye_r": (0.022, 0.022, 0.011), "eye_yaw": 0.9, "face": {},
+                  "sat": 0.8, "cover": 1.2},
 }
 
 

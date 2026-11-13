@@ -5,6 +5,11 @@ Meshy model of the owner's turnaround sheet and keeps everything else the specie
 emoting face, tools, grown parts, marks. Pilot (11-09): Kestrike (`kestrike`), Cairnback (`cairnback`), Gongibbon
 (`gibbelle`). The rig contract is `RIGGED_BOKI.md`; this page is only what is new.
 
+Since then (11-13): Effigeetle (`goliathite`) and Skateron (`hoarheron`), both on Gongibbon's borrowed glomwort rig
+with every lobe merged to root, so the body rides the root's bob and turn. Tried and dropped: Knotwyrm (`threadwyrm`),
+whose scan's head sits off the midline and tilted, so the face (mirrored about x=0) lands one eye per view. Soakybara
+(`lilybara`) waits too: its Meshy model has 6 materials and only one carries a texture, and the loader reads one.
+
 What one species ends as: a body of 16,000 triangles (the whole model 18-19k with face, tools and grown parts), a
 2048 colour atlas and a 2048 normal atlas baked from the dense model, in `art/kin/<id>/` (about 2-3 MB).
 
