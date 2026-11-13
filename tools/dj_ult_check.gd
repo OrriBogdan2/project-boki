@@ -213,8 +213,8 @@ func dancer_ring(a) -> void:
 	var grow_bh := float(d["r0"]) / AimKit.BH
 	var reach_bh := reach / AimKit.BH
 	var cadence := float(d["time"]) / float(d["shots"])
-	A.ok("dancer ring: 1.3 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band +50%, a 6s blight",
-			absf(grow_bh - 1.3) < 0.05 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
+	A.ok("dancer ring: 0.17 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band +50%, a 6s blight",
+			absf(grow_bh - 0.17) < 0.03 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
 			and float(d["time"]) == 2.0 and absf(cadence - 0.2) < 0.001
 			and float(d["rim_dmg"]) == float(d["dmg"]) * 0.5 and float(d["rim_blight"]) == 6.0,
 			"%.2f bh -> %.2f bh" % [grow_bh, reach_bh])
@@ -384,7 +384,42 @@ func zedran(a) -> void:
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	_cleave_fits(U.data())
 	await _recovery_exits()
+	_recovery(m, P, T, home)
 	await A.done(m)
+
+## The recovery plays its own clip (jug_ult_recover) for exactly the 0.35 s at half speed, then he is free; a jump or
+## Shift cuts it on the press frame. Timing and speed are the ult's own (recover 0.35, move_k 0.5), unchanged.
+func _recovery(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
+	var K: JuggernautKit = P.ak
+	var U: JuggernautUlt = K.riposte
+	var recover := float(U.data()["recover"])
+	var rows := []
+	A.step(m, 0.5)           # (the scenario before this one is still recovering)
+	for cut in ["none", "jump", "dash"]:
+		A.fresh(T)
+		T.teleport(home + Vector3(2.6, 0, 0))
+		P.teleport(home)
+		A.aim_at(P, T.pos)
+		K.cd["x"] = 0.0
+		HunterKeys.ult_pressed(P)
+		A.step(m, 0.65 + float(U.data()["strike_t"]) + 0.03)     # (the guard, the cleave, a frame into the recovery)
+		var played: bool = String(U.st.get("phase", "")) == "recover" and K.anim_id == "jug_ult_recover" \
+				and K.move_k() == 0.5
+		A.step(m, 0.1)
+		var mid: bool = K.anim_id == "jug_ult_recover"
+		if cut == "jump":
+			P.do_jump()
+		elif cut == "dash":
+			P.do_dash()
+		m.step(A.DT)
+		var cut_now: bool = cut == "none" or (K.anim_id != "jug_ult_recover" and not U.running())
+		A.step(m, recover)
+		rows.append([cut, played, mid, cut_now, K.anim_id != "jug_ult_recover" and not U.running()])
+		A.step(m, 0.3)
+	A.ok("juggernaut X: the recovery plays its own clip at half speed (the 0.35 s unchanged)",
+			rows.all(func(r): return r[1] and r[2]), str(rows))
+	A.ok("juggernaut X: a jump or Shift cuts the recovery clip on the press frame, and it ends on time",
+			rows.all(func(r): return r[3] and r[4]), str(rows))
 
 ## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
 func _cleave_fits(d: Dictionary) -> void:
