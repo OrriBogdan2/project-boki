@@ -2,26 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmn26r684aolh"
-path.bptc="res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.bptc.ctex"
-path.astc="res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.astc.ctex"
+uid="uid://cfp6hryi2j6tv"
+path="res://.godot/imported/gil_Image_0.jpg-bcc447c45e5edea675648c9c486c3eb0.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "fde08f1fac7c586bcf64472072e83b41"
+"md5": "ba2c37ea349930aea636f6424e1256ea"
 }
 
 [deps]
 
-source_file="res://art/wardens/gil/gil_Image_0.png"
-dest_files=["res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.bptc.ctex", "res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.astc.ctex"]
+source_file="res://art/wardens/gil/gil_Image_0.jpg"
+dest_files=["res://.godot/imported/gil_Image_0.jpg-bcc447c45e5edea675648c9c486c3eb0.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

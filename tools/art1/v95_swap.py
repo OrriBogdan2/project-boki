@@ -660,6 +660,9 @@ def main():
         o.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
     old_name = old.name
     bpy.data.objects.remove(old)
+    for n in SPEC.get("drop_meshes", []):     # the game glb's own meshes the master replaces (Gil's scripted tail and fin)
+        if n in bpy.data.objects and bpy.data.objects[n].type == "MESH":
+            bpy.data.objects.remove(bpy.data.objects[n])
     select([low, kept], low)
     bpy.ops.object.join()
     me = low.data
@@ -701,7 +704,10 @@ def main():
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "fit.blend"))      # (before the relax: for looking at the weights)
     for k, v in SPEC.get("relax", {}).items():      # e.g. {"CUTS": 0}: relax only, no cut-and-cap holes
         setattr(skin_relax, k, v)
-    skin_relax.relax(arm)
+    if bpy.data.actions:
+        skin_relax.relax(arm)
+    else:       # (Gil: no clips in the glb, the game keys his moves in code; --stretch-check measures them there)
+        print("SWAP no clips in the game glb: skin_relax skipped", flush=True)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
     # an imported clip ends a hair under its last frame (2.1 s -> 62.999996), and the export dropped that frame
     for act in bpy.data.actions:

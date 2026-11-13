@@ -45,7 +45,10 @@ best, sun and cloud stripped: `best_nocomp.glb`, then pip_companions.py). Alread
 Grimble, Motley, Lace. Not swapped:
 - Sable (r5 low4 tilt A): the new body's left hand stretches 6.0 -> 21.1x and 10 clips go over her 18.5 ceiling. Her joint
   points need refitting to the new body first.
-- Sparkle, Albert i1 and Gil: still as in the 11-12 evening section above (memory/base colour, solid cyan glow, no spec).
+- Sparkle and Albert i1: still as in the 11-12 evening section above (memory/base colour, solid cyan glow).
+Gil (later the same day): swapped to current.json r2/v95a/cand_B (`gil_v95.json`, art/wardens/gil/IMPORT.md). Two
+new swap keys came with him: `drop_meshes` (the game glb's own meshes the master replaces: his scripted Tail and
+Dorsal) and, for a game glb with no clips, skin_relax is skipped (nothing to sample).
 bake_warden.py now joins a multi-mesh master safely and bakes each material's own colour image (Meeko's wings are a
 separate Meshy part on their own texture).
 
