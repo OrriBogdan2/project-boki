@@ -104,13 +104,34 @@ def tris(objs):
     return n
 
 
-def export(path, objs, image_format="AUTO", colors=False):
-    """colors: each mesh's active colour attribute goes out as COLOR_0 (fit_warden's ink room)."""
+def ink_back():
+    """The ink room lives in COLOR_0's alpha (fit_warden.ink_room, outline.gdshader ink_mask). The importer wires
+    COLOR_0 into each material (texture x Color Attribute), and the exporter then writes it back without alpha
+    (every line at full width: Kael's mane drowned in ink). Unwired, as fit_warden leaves it, the active colour
+    goes out whole."""
+    for mat in bpy.data.materials:
+        nt = mat.node_tree
+        if nt is None:
+            continue
+        for vc in [n for n in nt.nodes if n.type == "VERTEX_COLOR"]:
+            for mix in [lk.to_node for lk in vc.outputs[0].links if lk.to_node.type == "MIX"]:
+                tex = next((lk.from_socket for i in mix.inputs if i.name == "A" for lk in i.links), None)
+                for lk in [lk for o in mix.outputs for lk in o.links]:
+                    if tex is not None:
+                        nt.links.new(tex, lk.to_socket)
+                nt.nodes.remove(mix)
+            nt.nodes.remove(vc)
+
+
+def export(path, objs, image_format="AUTO", colors=False, anims=False):
+    """colors: each mesh's active colour attribute goes out as COLOR_0 (fit_warden's ink room); anims: every
+    action on its own NLA track goes out as a clip, as keyed (no resampling)."""
     bpy.ops.object.select_all(action="DESELECT")
     for ob in objs:
         ob.select_set(True)
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=False,
-                              export_animations=False, export_skins=True, export_yup=True,
+                              export_animations=anims, export_animation_mode="NLA_TRACKS", export_force_sampling=False,
+                              export_optimize_animation_size=False, export_bake_animation=False, export_skins=True, export_yup=True,
                               export_materials="EXPORT", export_image_format=image_format,
                               export_jpeg_quality=92, export_extras=False,
                               export_vertex_color="ACTIVE" if colors else "MATERIAL")

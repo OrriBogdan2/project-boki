@@ -19,6 +19,7 @@
 	"model_glow": {"core": "#1fe0cc", "edge": "#0f9a94", "compass": "#ffb347", "lure": "#8ff5e0", "strength": 1.5},
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
+	"howto": ["Play: front-line tank; block with {secondary}, heal with {signature}.", "Combo: plant the hammer, then {signature} heals the ground.", "Avoid: fighting with the aegis down; blocking builds Guard."],
 	"silhouette": "the frozen prow shield and the long ice-cased oar",
 	"card": {
 		"role_word": "Tank",
@@ -57,11 +58,11 @@
 		"tap": 0.2,
 		"full": 1.25,
 		"spin_turns": [2.5, 4.0],
-		"throw_dmg": 12.0,
+		"throw_dmg": 13.0,
 		"throw_range": 9.0,
 		"throw_speed": 24.0,
 		"throw_rate": 0.45,
-		"recall_dmg": 12.0,
+		"recall_dmg": 13.0,
 		"recall_speed": 34.0,
 		"lie_t": 0.0,
 		"vision_r": 4.5,
@@ -103,8 +104,8 @@
 		"charge": 4.2,
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
-		"charge_dmg": 10.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"charge_dmg": 12.4,
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12.4 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
@@ -196,9 +197,9 @@
 		"width": 4.5,
 		"lead": 0.2,
 		"cell_t": 0.15,
-		"strike_dmg": 4.0,
+		"strike_dmg": 1.9,
 		"strike_stun": 0.5,
-		"dmg": 18.0,
+		"dmg": 24.8,
 		"lift": 7.0,
 		"slow": 0.5,
 		"slow_t": 1.5,
@@ -206,7 +207,7 @@
 		"scar_w": 1.4,
 		"scar_slow": 0.2,
 		"refund": 8.0,
-		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
+		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (1.9, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (24.8, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
 	},
 	"order": [
 		"sec",

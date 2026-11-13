@@ -164,6 +164,7 @@ func _dress_ember(s: Dictionary) -> void:
 	stats["swirls"] += 1
 	if emp:
 		stats["emp"] += 1
+		CombatBus.tech.emit(h, "tender")
 		play("mm_shot_emp")
 		m.sfx("tend_ember_emp", h.pos, -3.0, 1.0)
 	elif not seed_aim:
@@ -328,11 +329,12 @@ func _tick_glide(dt: float) -> void:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
 
 # ------------------------------------------------------------------ RMB: Burrseed
-## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
-## (`wind_move`), a short dotted lane follows the aim and a ring glows round her. The seed then
+## Owner items 118 and 23 (11-08): a press starts a short fixed wind-up (`windup`, Darkside Binding's quick
+## cast) that nothing extends: she slows (`wind_move`) and a short dotted lane follows the aim. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
 ## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
+func rmb_winding() -> bool: return seed_aim
 
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
@@ -345,13 +347,12 @@ func fire_rmb(c: Dictionary) -> void:
 	seed_wind = float(rmb_def()["windup"])
 	play("mm_seed_aim")
 	m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
-	lk().burst("flare", h.pos,
-			{"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": seed_wind, "pattern": 3.0})
 	_seed_lane()
 
 func _seed_lane() -> void:
 	var sd := rmb_def()
-	var width := float(sd["seed"]["hit_r"]) * 2.0
+	# the seed's own width (its shot radius is half hit_r): the footage's lane is about 0.4 bh wide
+	var width := float(sd["seed"]["hit_r"])
 	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
 
 ## Her share of run speed during the wind-up.
@@ -397,7 +398,7 @@ func _throw_seed() -> void:
 	lk().skin(s, "burr")
 	if not s.is_empty():
 		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
-	vfx("seed_cast", null, dir)          # the cast flare from her lantern
+	vfx("seed_cast", null, dir)          # the cast flare from her lantern, riding her hop (footage: about 0.3 s up)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
@@ -434,8 +435,8 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
-					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
+					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 2.2, "rim_w": 0.14,
+					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
 		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
@@ -559,10 +560,11 @@ func _tick_hearth(dt: float) -> void:
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
 	var tossed := bool(hearth.get("tossed", false))
-	# on her: a soft warm ring with a faint inside; thrown: a filled disc, warm amber in the middle shading
-	# to teal, a bright rim, its lantern floating over the middle
+	# on her: a filled warm disc with a wide bright edge (source: a big bright disc); thrown: warm amber in the
+	# middle shading to teal, a brighter fill, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
+	var look_p := {
+		"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
 		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
@@ -602,7 +604,7 @@ func _pulse(c: Vector3, per: float) -> void:
 ## A heal from her light: CareUtil.heal, and twinkling stars rising off whoever it mends (content/vfx
 ## "heal_stars").
 func _mend(o: Hunter, amt: float, wisp_k := 5.0) -> void:
-	CareUtil.heal(m, o, amt, wisp_k)
+	CareUtil.heal(m, o, amt, wisp_k, h.accent())
 	vfx("heal_stars", o.pos)
 
 func _hearth_end(flare: bool) -> void:

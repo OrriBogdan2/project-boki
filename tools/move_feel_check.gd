@@ -123,6 +123,10 @@ const T := {
 	# range moved up by that 0.46; the camera did not change)
 	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
+	# the default Supervive camera (bands from camera.json "source")
+	"source_view_across_m":    ["~", [35.0, 39.0], "m", "ground across: the source's ~37 m"],
+	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "as hunter_screen_pct: the source's 90-100 px of 1080"],
+	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "as hunter_feet_below_pct"],
 }
 
 var results := {}
@@ -732,6 +736,7 @@ const KIT_DASH := {
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
 	# owner playtest 11-10 (754d177a0): the lane cut to 5.6-9.75 m, still at 40 m/s, so 5.6 / 40 x1.15
 	"mage": {"ground": [5.6, 0.161], "src": "owner 11-10: shortest lane 5.6 m at 40 m/s, time x1.15"},
+	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
@@ -835,7 +840,8 @@ func _abyss_updraft() -> void:
 		return
 	var u: Dictionary = w.updrafts[0]
 	var c: Vector3 = u["pos"]
-	_reset(Vector3(c.x, c.y + 1.0, c.z), false)
+	# (an authored updraft's pos.y is 0, not its ground; start over the ground, above any lift ring on it)
+	_reset(Vector3(c.x, w.ground_at(c.x, c.z) + 3.0, c.z), false)
 	P.inp["jump"] = true
 	for i in 2:
 		P.inp["glide"] = true; m.step(DT)
@@ -1159,7 +1165,7 @@ func _screen_scale() -> void:
 	var cam: CamRig = m.cam
 	if cam == null or P.model == null:
 		return
-	cam.use_style("supervive")
+	cam.use_style("supervive_close")      # the older 23 m view, these bands' own (the default view: _source_scale)
 	cam.zoom = 1.0; cam.zoom_to = 1.0; cam.top = 0.0; cam.top_to = 0.0; cam.chase = 0.0; cam.chase_to = 0.0
 	cam.yaw = 0.0; cam.yaw_to = 0.0;
 	if "lead_vel" in cam: cam.set("lead_vel", Vector3.ZERO)
@@ -1179,7 +1185,7 @@ func _screen_scale() -> void:
 	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
-	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
+	print("MFEEL framing: style supervive_close pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	rec("hunter_screen_pct", now[1] / vh * 100.0)
 	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
@@ -1202,6 +1208,35 @@ func _screen_scale() -> void:
 	ref.free()
 	cam.dist = d0
 	cam.snap(P.pos)
+	_source_scale(cam, vh, hfov)
+
+## The same measures under the default Supervive style (content/rules/camera.json): the source's ground
+## across and its Hunter size together, then it stays the style. The MFEEL source
+## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
+func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
+	cam.use_style("supervive")
+	P.render(DT, 1.0)      # Hunter.fit_scale picks the style's hunter_scale up
+	cam.snap(P.pos)
+	for i in 120:
+		cam.follow(P.position, DT, false)
+	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
+	var now := _model_span(cam, ref)
+	rec("source_view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
+	rec("source_hunter_screen_pct", now[1] / vh * 100.0)
+	rec("source_hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
+	var shot_from := 0.95 * float(P.cdat["scale"])
+	var hit_top := m.shot_band(P).y - m.shot_stance_y(P)
+	print("MFEEL source scale x%.2f (model %.2f): body %.2f m tall; kept: hit circle r %.2f m," % [cam.hunter_scale,
+			P.vis_k, float(now[2]), P.hit_radius()]
+			+ " shots leave %.2f m up and hit it below %.2f m, teammate tag 2.4 m up" % [shot_from, hit_top])
+	ref.free()
+	for id in FRAME_HEROES:
+		var hm := _stand_in(id, PlayerLook.neutral())
+		print("MFEEL source framing %s: %.2f%% of screen height" % [id, _model_span(cam, hm)[1] / vh * 100.0])
+		hm.free()
+	cam.use_style("supervive")
+	P.render(DT, 1.0)
+	cam.snap(P.pos)
 
 ## A model of Warden `id` ("" with an at-home look: the plain hunter) standing where the player does, at
 ## the match's size, leaned toward the camera as the player's model is (Hunter.render), standing at idle.
@@ -1210,7 +1245,7 @@ func _stand_in(id: String, look: Dictionary) -> Node3D:
 	var weapon := Arch.signature(id) if id != "" else REF_WEAPON
 	var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", look, id)
 	m.add_child(h)
-	var at_scale := h.scale * Hunter.VIS_SCALE
+	var at_scale := h.scale * Hunter.VIS_SCALE * m.cam.hunter_scale
 	var lean := P.model.global_basis.orthonormalized()
 	h.global_transform = Transform3D(lean * Basis.from_scale(at_scale), P.model.global_position)
 	h.set_meta("anim_seed", 1)      # one stance for every measure (HunterAnim seeds it per node otherwise)

@@ -87,9 +87,9 @@ Still differs:
 - Rimelock: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
   40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
   stacking slow ramp is ours.
-- Darts: four plain then three large, repeating; the footage shows a near-uniform stream and [D] puts the large
-  three at the end of the burst only. The skating beams home late like the darts; the bend assert is pending on
-  `ext/parity-neve-skate-home`.
+- Darts now match the source burst: a hold is one even stream of plain darts, the let-go ends it on the three
+  large ones, then a 0.5 s pause ([D] + [F], `ext/combat-neve-dart-burst`; the reel predates it). Skating beams
+  keep 2x damage (wiki, footage 1.6x) and home late like the darts (owner).
 - Body 1.014 vs the footage's 1.1 to 1.15 (owner height chart).
 
 Seen in the reel: the spear's burst ring and the wall's tall pale-blue slab match the footage in shape; the ground
@@ -260,7 +260,8 @@ Still differs:
 
 Seen in the reel: the cyan orb is in her palm from the first frame; the hose is a narrow-then-billowing orange stream
 like the footage [F 0024]; the RMB aim is a white lane with an arrow tip and the bolt hits with FLASHOVER and an
-orange sunburst [F 0077]; the Cloak is a crackle of yellow sparks round her and the dummy, not the footage's
+orange sunburst [F 0077]; the Cloak (re-rendered with the dummy inside the 4.5 m pull, `ext/vfx-cinder-cloak-swirl`) is a thin lit swirl
+running in from the 4.5 m edge with the pull, then a lit shield swirl on her per foe caught, like the footage's
 swirling shield ring [F 0186]; Flue Flight lays a thick orange fire carpet and carries the dummy with her to the
 island rim, close to the footage's wide magma band [F 0226].
 

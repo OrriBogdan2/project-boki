@@ -464,6 +464,7 @@ func _punch(k: float) -> void:
 	if swept.size() >= 2: sweeps += 1
 	if swept.any(func(w): return w.get("by") == h):      # (the data: hitting *your* rocks; an ally's still fly)
 		guard_punches += 1
+		CombatBus.tech.emit(h, "dolm")
 		guard_stack()
 	for i in swept.size():
 		var w: Dictionary = swept[i]
@@ -630,7 +631,7 @@ func guard_stack() -> void:
 	var gd: Dictionary = d["passive"]["guard"]
 	shield_stacks = mini(int(gd["cap"]), shield_stacks + 1)
 	shield_at = m.time
-	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
+	ReceiverCue.shield(h, float(gd["shield"]) * shield_stacks)
 	h.shield_t = float(gd["t"])
 	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
 

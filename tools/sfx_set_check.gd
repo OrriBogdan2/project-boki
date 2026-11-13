@@ -18,6 +18,7 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
+##  11. every sound named in UiSfx (menus, pickup, capture, extraction, the lobby) has its file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -49,6 +50,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	_ui_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -149,7 +151,7 @@ func _garden_names() -> void:
 	var seen := []
 	var silent := []
 	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "base_tumble.gd", "echo_steps.gd",
-			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd"]:
+			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd", "egg_sfx.gd"]:
 		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
 			var sname := hit.get_string(1) + hit.get_string(2)
 			if sname.ends_with("_"):          # a prefix, completed below
@@ -210,9 +212,7 @@ func _dash_air() -> void:
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
 	h.free()
-	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
-	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
+	var wrong := Arch.ids().filter(func(a): return picked[a] != "%s_dash_air %s_dash" % [a, a])
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 ## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
@@ -317,6 +317,19 @@ func _build_cues() -> void:
 			if not src.contains(needle):
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
+
+## 11. Every sound UiSfx plays by name has a file, so a typo never plays silence.
+func _ui_cues() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
+	var re := RegEx.create_from_string('"([a-z_]+)"')
+	var names := {}
+	for hit in re.search_all(src):
+		names[hit.get_string(1)] = true
+	var missing := []
+	for n in names:
+		if _takes(String(n)).is_empty():
+			missing.append(n)
+	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
 
 func _takes(sname: String) -> Array:
 	var out := []

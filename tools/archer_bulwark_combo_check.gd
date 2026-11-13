@@ -872,6 +872,8 @@ func _bulwark_combos() -> void:
 	m.step(DT)
 	P.inp["fire"] = false
 	step(m, 1.0)
+	K._recall()      # the planted hammer comes home first: a recall takes the 0.45 s cadence, the hold starts after it
+	step(m, 1.0)
 	# LMB held: the hammer whirling round him, the glint from 0.6 s, the flare at full; let go: the slam
 	# carries him forward with a flaming crescent
 	reset.call()

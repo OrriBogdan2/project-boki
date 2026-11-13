@@ -2,16 +2,13 @@ class_name Practice
 extends Node
 ## What every practice area shares (the Training Grounds, the tutorial, the Arena and the Duel room;
 ## never a real match): a bottom bar like the farm's hub (Hero, the area's own menu, Leave), J for
-## the hero picker (PracticeHero), the mouse wheel zooming the camera, and where there are dummies the parity bench
+## the hero picker (PracticeHero), and where there are dummies the parity bench
 ## (ParityBench). One node under the Match,
 ## attached by Match.start with a single call.
 
 const NAME := "Practice"
 const LEFT_PAD := 560          # px, the bar starts right of the HUD's portrait and ability row
 const BOTTOM_PAD := 8          # px, under the bar
-const ZOOM_STEP := 0.08        # per wheel notch (the farm's step)
-const ZOOM_MIN := 0.55         # closest (the farm's range)
-const ZOOM_MAX := 1.6          # furthest
 
 var m: Match
 var bar: PanelContainer = null
@@ -104,11 +101,4 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("hero"):
 		PracticeHero.open(self)
-		get_viewport().set_input_as_handled()
-	elif event is InputEventMouseButton and event.pressed and m.cam:
-		var z := m.cam.user_zoom
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP: z -= ZOOM_STEP
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN: z += ZOOM_STEP
-		else: return
-		m.cam.user_zoom = clampf(z, ZOOM_MIN, ZOOM_MAX)
 		get_viewport().set_input_as_handled()

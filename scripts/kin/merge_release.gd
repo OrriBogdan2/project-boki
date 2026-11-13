@@ -18,17 +18,15 @@ static func rest_s() -> float:
 static func timeout_rest_s() -> float:
 	return float(MergeForm.data().get("timeout_rest_s", 10.0))
 
-## The hunter's side of a release: the speed and the shield, with a flash and a sound.
+## The hunter's side of a release: the speed and the shield (ReceiverCue), with a word and a sound.
 static func afterglow(h: Hunter) -> void:
 	var r := rules()
 	var secs := float(r.get("secs", 3.0))
 	h.add_buff("move_speed", float(r.get("move_speed", 0.15)), secs)
-	h.shield = maxf(h.shield, h.max_hp * float(r.get("shield_frac", 0.08)))
+	var col := Color("ffd84a")
+	ReceiverCue.shield(h, h.max_hp * float(r.get("shield_frac", 0.08)), col)
 	h.shield_t = maxf(h.shield_t, secs)
 	h.set_meta("afterglow_t", secs)
-	var col := Color("ffd84a")
-	h.m.fx.ring(h.pos, 2.4, col, 0.45)
-	h.m.fx.burst(h.pos + Vector3(0, 1.1, 0), col, 20, 4.0)
 	if h.is_local():
 		h.m.fx.word(h.pos + Vector3(0, 2.6, 0), "AFTERGLOW", col, true)
 		h.m.sfx("unlock", h.pos, -3.0, 1.35)

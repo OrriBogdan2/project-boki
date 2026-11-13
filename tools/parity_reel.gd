@@ -19,6 +19,7 @@ const KEY_OFF := Color(0.1, 0.1, 0.14, 0.7)
 const RIPOSTE_TD := 3.0                 # m to the dummy in Kael's R part (inside the 3.6 m cleave strip)
 const RIPOSTE_HIT_T := 0.4              # s into the part the dummy swings: in the 0.65 s guard after the 0.2 s press
 const RIPOSTE_HP_K := 0.6               # Kael's hp share at the start of his R part, so the heal shows
+const CLOAK_TD := 3.6                   # m to the dummy in Cinder's E part: inside her 4.5 m pull
 const DUMMY_HIT := 10.0                 # the dummy's blow, when its own weapon does not land in time
 const ALLY_AT := Vector3(4.0, 0, -3.0)  # the downed ally dummy, from the spot (in Hearth Call's 12.6 m reach)
 
@@ -147,7 +148,8 @@ func _p_e() -> void:
 		await _e_brimseed()
 		return
 	await _seg("E, then the recast", 4.0, func(t: float) -> void:
-		P.inp["sig"] = _in(t, 0.2) or _in(t, 1.8))
+		P.inp["sig"] = _in(t, 0.2) or _in(t, 1.8)
+	, CLOAK_TD if who == "ashwick" else 7.0)
 
 ## Motley's Brimseed grows for its `grow` s: the recast waits until it is full size, so the whole growth shows.
 func _e_brimseed() -> void:

@@ -83,6 +83,7 @@ var rmb_t_prev := 0.0
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
+var pell: TutorialPell = null   # the guide, by each stop (TutorialPell)
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -104,6 +105,8 @@ func setup() -> void:
 	for id in GAP_STEPS:
 		_add_pad(id)
 	last_stop = stop("land")
+	if NpcModel.has("pell"):
+		pell = TutorialPell.new(self)
 
 func _add_pad(id: String) -> void:
 	var pad := stop(id, "pad")
@@ -187,6 +190,8 @@ func update(dt: float) -> void:
 	_point(sid)
 	_stall(dt)
 	_props()
+	if pell:
+		pell.tick(dt)
 	if p.kin and p.kin.comp:
 		p.kin.comp.tut(sid, _lead_goal(sid))
 	if wait > 0.0:

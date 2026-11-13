@@ -284,3 +284,5 @@ CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (0.5, True
          "attack": (0.8, False, attack), "ability": (1.6, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
 HIDE_AT = {"prop_berry": (0, 0.16, 0.62), "prop_lode": (0, -0.34, 0.5)}
+# plant_gait.py on export: the walk's plant sweeps 1.4x its own, so 6 steps/s keeps up with a 1.5 m/s stroll
+PLANT = {"walk": 1.4}

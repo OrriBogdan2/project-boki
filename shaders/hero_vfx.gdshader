@@ -7,6 +7,7 @@ render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shado
 
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/cel.gdshaderinc"
+#include "res://shaders/soft_fade.gdshaderinc"
 
 const int M_SWEEP = 0;      // an arc of flame: UV.x along the swing, UV.y outer edge (0) to inner (1)
 const int M_SCORCH = 1;     // the ground burning: UV across the quad
@@ -14,7 +15,7 @@ const int M_SKIRT = 2;      // a wall of flame: UV.x round it, UV.y foot (0) to 
 const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
-const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
+const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core (or, thin, only a spinning lit ring): UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
 
@@ -31,6 +32,7 @@ uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures ke
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
+uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
 
 void vertex() {
@@ -204,10 +206,21 @@ vec4 bolt(vec2 uv) {
 	return vec4(c * flick, clamp(core + halo * 0.5, 0.0, 1.0) * flick);
 }
 
+vec4 swirl_rim(float d, float ang) {
+	float turn = ang / 6.2832 + TIME * spin + d * 0.4;
+	float arm = fract(turn * 3.0);                               // 0 at the tail, 1 at the head
+	float w = mix(0.012, 0.045, arm);
+	float band = (1.0 - smoothstep(w * 0.5, w, abs(d - 0.93))) * (1.0 - smoothstep(0.93, 1.0, arm)) * smoothstep(0.0, 0.1, arm);
+	band *= smoothstep(0.2, 0.45, fbm3(vec2(turn * 9.0 + seed, d * 4.0)));
+	float a = band * smoothstep(0.0, 0.1, life) * (1.0 - smoothstep(0.6, 1.0, life));
+	return vec4(mix(col.rgb, col2.rgb, arm * arm) * a, a);
+}
+
 vec4 vortex(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float d = length(p);
 	float ang = atan(p.y, p.x);
+	if (rim_only) { return swirl_rim(d, ang); }
 	// spiral arms pulled inward: angle bent by distance, turning over time
 	float sw = ang + d * 5.0 - TIME * spin * 6.28;
 	float arms = fbm3(vec2(sw * 1.6 + seed, d * 3.0 - TIME * spin));
@@ -244,6 +257,8 @@ void fragment() {
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
 	else { v = thread(UV); }
-	ALBEDO = v.rgb * gain;
-	ALPHA = v.a * gain;
+	// upright looks soften into the ground; flat ones (scorch, rings) lie on it
+	float g = gain * (billboard ? soft_fade(SCREEN_UV, VERTEX, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX) : 1.0);
+	ALBEDO = v.rgb * g;
+	ALPHA = v.a * g;
 }

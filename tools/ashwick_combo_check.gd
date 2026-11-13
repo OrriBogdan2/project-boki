@@ -363,21 +363,24 @@ func _all() -> void:
 	t0 = K.flame_ticks
 	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {}; T.burn_t = 0.0)
 	var hot: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
-	var chip := T.max_hp * 0.015 * float(K.lmbd()["tick"])
+	var bonus: Dictionary = K.d["ignite_bonus"]
+	var k1 := float(bonus["dmg_k"][0])
+	var chip := T.max_hp * float(bonus["tick_pct"][0]) * float(K.lmbd()["tick"])
 	ok(
-		"lance: +25% and 1.5% of health a second on an Ablaze foe (per tick)",
-		cold > 1.5 and absf(hot - (cold * 1.25 + chip)) < cold * 0.12,
-		"cold %.2f burning %.2f expect %.2f" % [cold, hot, cold * 1.25 + chip]
+		"lance: ignite_bonus on an Ablaze foe, more damage and a health chip (per tick)",
+		cold > 1.5 and absf(hot - (cold * k1 + chip)) < cold * 0.12,
+		"cold %.2f burning %.2f expect %.2f" % [cold, hot, cold * k1 + chip]
 	)
 	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 2, "until": m.time + 99.0}
 	d0 = ak.dmg(T)
 	t0 = K.flame_ticks
 	ak.step(m, 1.0, func(): _hold_bare(P, T, K))
 	var flash: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
-	var chip2 := T.max_hp * 0.025 * float(K.lmbd()["tick"])
+	var k2 := float(bonus["dmg_k"][1])
+	var chip2 := T.max_hp * float(bonus["tick_pct"][1]) * float(K.lmbd()["tick"])
 	ok(
-		"lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)",
-		absf(flash - (cold * 1.4 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * 1.4 + chip2]
+		"lance: ignite_bonus on a Flashed-over foe, more again (per tick)",
+		absf(flash - (cold * k2 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * k2 + chip2]
 	)
 	# a burning foe builds Char as fast as a cold one (the old halving is gone)
 	reset.call()
@@ -473,7 +476,7 @@ func _all() -> void:
 	ak.tap(m, P)
 	ak.step(m, 0.8)
 	ok(
-		"cinder: 25% more on an Ablaze foe", ak.dmg(T) >= cinder_cold * 1.2,
+		"cinder: more on an Ablaze foe (ignite_bonus)", ak.dmg(T) >= cinder_cold * (k1 - 0.04),
 		"hot %.1f cold %.1f" % [ak.dmg(T), cinder_cold]
 	)
 	reset.call()
@@ -601,7 +604,7 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	ak.step(m, 0.5)
 	ok(
-		"ram rank 3: +4.3 damage (before the rank's own +30%)", ak.dmg(T) > ram1 * 1.2,
+		"ram rank 3: more damage (rank3_dmg, before the rank's own +30%)", ak.dmg(T) > ram1 * 1.2,
 		"rank 1 %.1f rank 3 %.1f" % [ram1, ak.dmg(T)]
 	)
 	ok(
@@ -649,6 +652,20 @@ func _all() -> void:
 		"dist %.1f" % P.flat_dist(T)
 	)
 	ok("cloak: the swirling fire shield shows while it holds", K.fx.shown("swirl%d" % P.get_instance_id()))
+	var swirl_id := "swirl%d" % P.get_instance_id()
+	ok("cloak: one foe caught, one shield swirl on her", not K.fx.shown(swirl_id + "_1"))
+	K.st["shield_foes"] = 3
+	ak.step(m, 1.0 / 60.0)
+	ok(
+		"cloak: a shield swirl per foe caught, three at most",
+		K.fx.shown(swirl_id + "_2") and not K.fx.shown(swirl_id + "_3")
+	)
+	var cloak_fx: Array = HeroVfx.data("ashwick")["moves"]["cloak"]["fx"]
+	ok(
+		"cloak look: thin lit swirls on the blast radius, no scorch disc or skirt fill",
+		cloak_fx.any(func(l: Dictionary) -> bool: return l["p"] == "vortex" and l.get("thin", false))
+			and not cloak_fx.any(func(l: Dictionary) -> bool: return l["p"] in ["scorch", "skirt"])
+	)
 	var pulled_far: float = P.flat_dist(T)
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))

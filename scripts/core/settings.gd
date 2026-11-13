@@ -22,6 +22,7 @@ const DEFAULTS := {
 	"reticle_outline": true,
 	# camera
 	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	"cam_zoom": 1.0,       # the match wheel zoom (CamWheel), kept between matches
 	# sounds
 	"reset_cue": "a",
 	# accessibility

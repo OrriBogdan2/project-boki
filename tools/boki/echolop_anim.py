@@ -354,3 +354,5 @@ CLIPS = {
 }
 # unused props tucked inside the right foreleg they ride (m from their rest place), so no pose shows their ink
 HIDE_AT = {"prop_axe": (0.079, 0.04, 0.05), "prop_pick": (0.079, 0.04, 0.05), "prop_berry": (0.079, 0.01, 0.08)}
+# plant_gait.py on export: clip -> how much quicker than its own the plant sweeps (docs/art/kin/RIGGED_BOKI.md)
+PLANT = {"walk": 1.0, "run": 1.0}

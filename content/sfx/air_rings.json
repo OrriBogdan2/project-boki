@@ -1,0 +1,9 @@
+{
+ "group": "air_rings",
+ "name": "Air rings",
+ "script": "tools/gen_sfx_air_rings.py",
+ "sounds": {"air_ring_pass": "cast", "air_ring_lift": "cast", "air_ring_hum": "loop"},
+ "signature": [],
+ "reach": {"air_ring_pass": 30, "air_ring_lift": 30, "air_ring_hum": 16},
+ "loops": ["air_ring_hum"]
+}

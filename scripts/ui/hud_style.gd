@@ -31,6 +31,7 @@ const CRIT := Color("ffd23f")             # critical hits
 const CRIT_ARMOR := Color("b0e4ff")
 const HURT := Color("ff6a5a")             # damage you take
 const HURT_KIN := Color("ffa08a")         # damage your Boki takes
+const TICK := Color("ff9a4a")             # burn and poison ticks
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
 const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
@@ -38,6 +39,7 @@ const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
 # ------------------------------------------------------------------ fonts
 const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
 const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
+const ITALIC_SLANT := 0.22     # glyph x shift per unit of height: BIG leaned into a bold italic
 
 # ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
 const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
@@ -161,12 +163,25 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 	var w := TextCache.width(font, s, font_size)
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
-## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
-static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:
+## Floating damage number colour: by its look (Fx.NumKind), who was hit and how. A tick keeps the burn's
+## orange; crits and armour keep their colours in the other looks, and a Boki's plain hits wear its type colour.
+static func dmg_col(kind: Fx.NumKind, crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool,
+		kin_type := "") -> Color:
+	if kind == Fx.NumKind.TICK: return TICK
 	if on_you: return HURT
 	if on_your_kin: return HURT_KIN
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
-	return HIT_ARMOR if armor_hit else HIT
+	if armor_hit: return HIT_ARMOR
+	return DexView.type_col(kin_type) if kind == Fx.NumKind.KIN else HIT
+
+static var _italic: FontVariation
+## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
+static func big_italic() -> Font:
+	if _italic == null:
+		_italic = FontVariation.new()
+		_italic.base_font = BIG
+		_italic.variation_transform = Transform2D(Vector2(1.0, ITALIC_SLANT), Vector2(0.0, 1.0), Vector2.ZERO)
+	return _italic
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}

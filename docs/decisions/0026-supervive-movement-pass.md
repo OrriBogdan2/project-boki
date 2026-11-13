@@ -18,7 +18,7 @@ measured with `--move-feel-check` and `--cliff-mantle-check` before and after:
 | Knockback vs mass | Mass 100 and Knockback 1.0 for all 12 | mass 1.0 for all (same ratio); 0.12-0.35 s of 6 m/s² no-control [?] | same, then the source brake |
 | Walk while firing | not in the data [?]; Shiv footage 0.68-0.76x, unsettled | weapon fire_slow 0.5-1.0 (default 0.8) | same |
 | Dash end lag | DashCurves not decoded | hand-over at run speed; 3 of 12 curves fitted | same |
-| Input buffer through dashes | no data field; one 5 fps frame | DashFlow.BUFFER_S 0.15 s | same (0.2 s waits on ext/dash-buffer-window) |
+| Input buffer through dashes | no data field; one 5 fps frame | Loco.press_buffer 0.15 s | same (0.2 s waits on ext/dash-buffer-window) |
 
 ## Choice
 Fix the four rows that differ from the data: the turn rate (`hunter_move.json` turn_rate), the over-run brake

@@ -8,6 +8,9 @@ free hands. Model space: facing +Y, right +X, up +Z. Pose channels, all optional
   fr, fl ankle targets in model space                  fra, fla foot pitch (deg, + toes up)         kr, kl knee poles
   jaw 0..1   lip -1 (grit) .. 0 (his grin) .. 1 (a bigger grin)     e ease into this key: io, in, out, lin, snap
   breath  the rib cage's swell on the leaf bone x_breath (a fraction: 0.02 rises it 2 %), when the rig has one
+  tail (x, y, z) deg: a tail bone's turn on the torso, when the rig has one
+  br  a blade held in the right fist (Clips(arm, blade=...)): where it points, in the torso's rest frame; the fist turns
+      the least from its forearm to point it there (wr is then ignored)
 """
 import math
 
@@ -40,8 +43,9 @@ def ease(u, kind):
 
 
 class Rig:
-    def __init__(self, arm):
+    def __init__(self, arm, blade=None):
         self.arm = arm
+        self.blade = blade        # the right fist's blade at rest, model space (hand head to tip), or None
         self.b = arm.data.bones
         self.rest = {b.name: b.matrix_local.copy() for b in self.b}
         self.R = {n: m.to_quaternion() for n, m in self.rest.items()}
@@ -78,6 +82,7 @@ class Rig:
         G["head"] = H @ qe(k.get("head", (0, 0, 0)))
         G["skirt"] = H
         G["x_breath"] = H
+        G["tail"] = H @ qe(k.get("tail", (0, 0, 0)))
         for s, sg in (("R", 1.0), ("L", -1.0)):
             lo = s.lower()
             G["pauldron." + s] = H
@@ -90,6 +95,9 @@ class Rig:
             G["forearm." + s] = q_between(down, end - E)
             # a twist of the whole arm comes through the wrist key: fist axes stay on the forearm
             G["hand." + s] = G["forearm." + s] @ qe(k.get("w" + lo, (0, 0, 0)))
+            if s == "R" and "br" in k and self.blade is not None:
+                fore = G["forearm.R"]
+                G["hand.R"] = q_between(fore @ self.blade, H @ Vector(k["br"])) @ fore
             cu = k.get("fing_" + lo, 0.0)
             th = k.get("thumb_" + lo, cu)
             # the fingers curl in toward the palm, which faces his body at rest (about the hand's front-back axis)
@@ -142,8 +150,8 @@ def evaluate(keys, t):
 
 
 class Clips:
-    def __init__(self, arm):
-        self.rig = Rig(arm)
+    def __init__(self, arm, blade=None):
+        self.rig = Rig(arm, blade)
         self.arm = arm
         self.lengths = {}
 
@@ -156,7 +164,7 @@ class Clips:
         n = int(round(dur * FPS)) + 1
         names = [b for b in rig.b.keys() if not b.startswith("spring_")]
         rot = {b: np.empty((n, 4), np.float32) for b in names}
-        lips = ("lip.L", "lip.R")
+        lips = tuple(b for b in ("lip.L", "lip.R") if b in rig.b)
         loc = {b: np.zeros((n, 3), np.float32) for b in ("root",) + lips}
         scl = {b: np.ones((n, 3), np.float32) for b in ("x_breath",) if b in rig.b}
         for f in range(n):
@@ -172,7 +180,7 @@ class Clips:
             # the mouth's corners slide on the face: up and out for the grin, down and in for a grit
             lp = pose.get("lip", 0.0)
             jw = pose.get("jaw", 0.0)
-            for b, sg in ((lips[0], -1.0), (lips[1], 1.0)):
+            for b, sg in zip(lips, (-1.0, 1.0)):
                 v = Vector((sg * (0.008 * lp + 0.006 * jw), 0.0, 0.01 * lp - 0.016 * jw))
                 loc[b][f] = tuple(rig.R[b].inverted() @ v)
             # (the swell runs up the bone, its local Y, and half as much out through the ribs)

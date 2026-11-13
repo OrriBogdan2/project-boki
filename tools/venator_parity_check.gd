@@ -4,7 +4,7 @@ extends RefCounted
 ## drum that refills whenever the trigger rests, the firing brackets, the shouldered recoil pose, and the Burr
 ## Charge fired from the cannon's launcher (item 112), a tap she walks through, and the Longneedle's wide beam,
 ## pushed-out view and aim (item 68).
-const ROUND_GAP := 0.12      # s between rounds held
+const ROUND_GAP := 0.08      # s between rounds held
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
 const REFILL_DRY := 1.3      # s from running dry to the next round, the trigger held (0.35s rest + 30 at 40/s)
 const REFILL_BY := 1.2       # s of rest that brings a drum back from 18 to full ("rapidly reloads when not firing")
@@ -48,7 +48,7 @@ func _rounds(m: Match, P: Hunter, home: Vector3) -> void:
 	var even := at.size() >= 7
 	for i in range(1, at.size()):
 		even = even and absf(float(at[i]) - float(at[i - 1]) - ROUND_GAP) <= C.DT * 1.5
-	C.ok("Vex parity LMB: held, a round every 0.12s", even, "%d rounds" % at.size())
+	C.ok("Vex parity LMB: held, a round every 0.08s", even, "%d rounds" % at.size())
 
 ## Walking while the cursor sweeps round her: every round leaves along the aim of its own step, and a cursor
 ## swung behind her turns her body round at the source's rate.

@@ -1012,7 +1012,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	m.fx.word(pos + Vector3(0, 2.2, 0), "SKYFALL", Color("ffd27a"), true)
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
-const DASH_BUFFER := 0.18
 
 func do_dash() -> void:
 	if downed or out:
@@ -1026,7 +1025,7 @@ func do_dash() -> void:
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
 		pad = {}                # break out of a jump pad's flight
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
-		dash_buf = DASH_BUFFER  # pressed a hair early: fire it as soon as this movement ends
+		dash_buf = Loco.press_buffer  # pressed a hair early: fire it as soon as this movement ends
 		return
 	var use_ex := not grounded or dashes < 1.0
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
@@ -1479,9 +1478,10 @@ func _strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> vo
 		var aa := a0 - arc * 0.5 + arc * float(i) / float(rays - 1)
 		var st := Vector3(pos.x + cos(aa) * 0.25, y, pos.z + sin(aa) * 0.25)
 		m.spawn_shot(self, st, Vector2(cos(aa), sin(aa)) * 40.0, dmg * m.dmg_mult(self), maxf(0.02, (reach - 0.25) / 40.0), 0.22, wpn["color"], extra)
-	m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
 	Oomph.on_fire(self, true)
-	m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
+	if not o.get("own_look", false):      # a kit with its own swing look and sound (Gil's thrusts: no arc)
+		m.fx.slash(Vector3(pos.x, y - 0.15, pos.z), a0, arc, reach, wpn["color"], heavy)
+		m.sfx(wpn["sfx"], pos, -4.0 if not o.get("charged", false) else 0.0, (0.8 if heavy else 1.15) + randf() * 0.1)
 
 func _emit_shot() -> void:
 	var dir := aim_dir()
@@ -1779,7 +1779,7 @@ func _kin_riders(extra: Dictionary) -> void:
 			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": KinRules.cat_color("damage").to_html(false), "skip_here": true}]
 			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
-func heal(n: float) -> void:
+func heal(n: float, tint := Color.TRANSPARENT) -> void:
 	if downed or out:
 		return
 	if remote:
@@ -1789,8 +1789,7 @@ func heal(n: float) -> void:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
-	if hp - before > 1.0:
-		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
+	ReceiverCue.heal(self, hp - before, tint)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
@@ -2711,9 +2710,7 @@ func _ledge_fling() -> void:
 	var hv := Vector2(vel.x, vel.z)
 	var timed: bool = lf.get("win", false)
 	var spd := FLING_SPEED if timed else base_speed
-	var along := hv.dot(d)
-	if along < spd:
-		hv += d * (spd - along)
+	hv = MantleCarry.fling(self, hv, d, spd)
 	vel.x = hv.x; vel.z = hv.y
 	# up speed to peak FLING_HEIGHT (or FLING_EARLY_HEIGHT) over the top from wherever you are on the face
 	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
@@ -3096,17 +3093,27 @@ func _anim_state(stretch: float) -> void:
 		s.erase("air_h")
 
 ## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"). Visual only: the hitbox (r), the TeamRing hit circle under your
-## feet, shot heights and the balloon marker are unchanged.
+## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
+## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
 const VIS_SCALE := 1.12
+var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
 	if n == null:
 		return
-	n.scale *= VIS_SCALE
-	var ring := n.get_node_or_null("TeamRing") as Node3D
+	vis_k = 1.0
+	fit_scale()
+
+## Puts VIS_SCALE x the camera's hunter_scale on the model (again when the Settings camera changes).
+func fit_scale() -> void:
+	var k: float = VIS_SCALE * (m.cam.hunter_scale if m and m.cam else 1.0)
+	if is_equal_approx(k, vis_k):
+		return
+	model.scale *= k / vis_k
+	var ring := model.get_node_or_null("TeamRing") as Node3D
 	if ring:
-		ring.scale /= VIS_SCALE
+		ring.scale /= k / vis_k
+	vis_k = k
 
 ## (movefeel) Where to draw this hunter between simulation steps. Everyone else is interpolated
 ## (drawn up to one step in the past, which is smooth); the local player is drawn at the present
@@ -3131,6 +3138,7 @@ func render(delta: float, alpha: float) -> void:
 	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
 	if not model:
 		return
+	fit_scale()
 	HunterWisp.tick(self, delta)
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
@@ -3179,8 +3187,8 @@ func render(delta: float, alpha: float) -> void:
 		_anim_state(stretch)
 		anim.update(_anim_dt, anim_s)
 		_anim_dt = 0.0
-	if posed and anim.stepped and not downed and not crouch:
-		Sfx.step(pos, -14.0 if is_local() else -20.0)
+	if posed and anim.stepped and not downed:
+		StepReach.contact(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
@@ -3217,6 +3225,7 @@ func render(delta: float, alpha: float) -> void:
 		var ek := 1.0 + 2.7 * gk * gk * gk + 1.7 * gk * gk      # pops open with a little overshoot
 		gl.scale = Vector3(ek * (1.0 + sin(m.time * 9.0) * 0.02), ek, ek)
 		gl.rotation.x = 0.35 * ek - 0.1
+		GliderHeat.tick(self, gl, delta)
 	var halo := torso.get_node_or_null("Halo")
 	if halo:
 		halo.rotation.y += delta * 2.0

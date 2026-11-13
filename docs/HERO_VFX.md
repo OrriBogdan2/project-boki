@@ -28,12 +28,12 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `sweep` | an arc of flame, burning away | `size`, `arc` deg, `tilt`, `yaw`, `flip` |
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
-| `flare` | a ragged burst facing the camera | `size`, `grow` |
+| `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
-| `vortex` | a ground disc spinning inward to a dark core (`c3`) | `size` radius, `spin` turns/s (negative: the other way), `grow` |
+| `vortex` | a ground disc spinning inward to a dark core (`c3`); with `"thin": true` only three lit comet arcs on its rim (no fill, no core), which `grow` < 1 draws in toward the centre | `size` radius, `spin` turns/s (negative: the other way), `grow`, `thin` |
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
@@ -53,7 +53,7 @@ opaque, so a recipe needs fewer, smaller puffs than a soft smoke did.
 Who includes it: the data looks here (`hero_vfx.gdshader`, `hero_vfx_mote.gdshader`, ring layer `"p": "ring"`), the
 kit shaders (`ld_fx` Ashwick / Dredge, `dj_fx` Kael / Sable, `vv_fx` Sparkle / Vex, `KitShaders` Hem / Breaker,
 `care_disc` / `care_glow` Pip / Claire, `molten_rock` Tarek's hard cel cracks, `void_glass` Ostra's banded rim) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
-tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) draw `cel_ring()`. A new effect shader
+tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) and the shared `Fx.ring` burst (`fx_ring`) draw `cel_ring()`. A ground ring means gameplay (the area something hits or marks): no bursts on dashes, landings or resets. A new effect shader
 includes the file and runs its cover and glow through `cel_cover()` / `cel_glow()` last.
 
 ## FX anchors
@@ -86,3 +86,9 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+- **Receiving a heal or a shield:** one shared cue on the body (`ReceiverCue`), whoever gives it: a soft rise of light
+  for a heal, a thin shell flash for a shield, tinted by the giver's ability colour, plus a `+N` in the heal or shield
+  colour through `Fx.number`. No particles, bursts or rings (a ground ring means gameplay): the cue is a pooled body-sized
+  shell (`POOL` of them, 0 particles; `shaders/receiver_cue.gdshader`, mix-blended so the tint reads on bright
+  ground, where an additive glow washes out), so it reads at every quality. Sources call `Hunter.heal`, `Effects._heal` or
+  `ReceiverCue.shield`; a zone ticking again inside `GAP_S` is one rise. Checked by `--receiver-cue-check`.

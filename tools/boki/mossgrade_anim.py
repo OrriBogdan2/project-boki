@@ -199,4 +199,6 @@ CLIPS.update({
     "mine": (1.1, True, eight(mine)),
 })
 HIDE_AT = {"prop_berry": (0, 0.14, 0.60)}
+# plant_gait.py on export: the walk's plant sweeps 2.2x its own, so 6 steps/s keeps up with a 1.5 m/s stroll
+PLANT = {"walk": 2.2}
 BONES = _bones()

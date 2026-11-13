@@ -172,6 +172,7 @@ func draw(sz: Vector2) -> void:
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
+	AirMap.full_map(self)
 	if m.skytrain:
 		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
 	if m.exits:

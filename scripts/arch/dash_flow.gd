@@ -5,16 +5,18 @@ extends RefCounted
 ## dash to end ("buffer", the default for a missing row) or cancels the dash. A press is never dropped.
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
-## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
-## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md).
+## A press that crowd control still forbids, made in its last Loco.press_buffer (tuning.json), is held the same way
+## and goes on the first step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is an RMB or E pressed
+## while the kit's own cast lock holds the body (Motley's Nightwell, Kael's Riposte, Vex's Kitefall).
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
 const KEY_OF := {"rmb": "sec", "e": "sig", "q": "gear1"}
 ## The one-step Hunter.inp press per slot a CC can forbid (LMB and X as above; Q's glove goes through a stun).
 const CC_KEY_OF := {"rmb": "sec", "e": "sig", "dash": "dash", "jump": "jump"}
+## The presses a kit's own cast lock refuses and DashFlow holds (X is the ult's own recast, Q's glove goes through).
+const LOCK_SLOTS := ["rmb", "e"]
 const DEFAULT_ROW := {"mode": "buffer", "carry": false, "variant": "", "source": ""}
 ## The moves an ability combines with (docs/decisions/0015-combo-flow.md): a ground dash, an air dash, a jump.
 const MOVES := ["ground", "air", "jump"]
@@ -88,6 +90,7 @@ func route(dt: float) -> void:
 	var fire_down := bool(h.inp.get("fire", false))
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
+	_route_lock()              # a locked move that dashes (Kael's cleave): the lock decides, not the dash rows
 	if not dashing:
 		_route_cc(fire_pressed)
 		_release(dt)
@@ -201,7 +204,7 @@ func cc_left(slot: String) -> float:
 		return maxf(h.stun_t, KitStatus.grounded_left(h))
 	return maxf(h.stun_t, 0.0)
 
-## Presses the CC forbids now, in its last BUFFER_S: held for the first step it allows them. A held LMB is left
+## Presses the CC forbids now, in its last Loco.press_buffer: held for the first step it allows them. A held LMB is left
 ## alone (it fires on its own once allowed); a tap is replayed. A cast that holds the hunter still (Rimelock's
 ## statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> void:
@@ -217,14 +220,26 @@ func _route_cc(fire_pressed: bool) -> void:
 
 func _hold_for_cc(slot: String) -> bool:
 	var left := cc_left(slot)
-	if left <= 0.0 or left > BUFFER_S:
+	if left <= 0.0 or left > Loco.press_buffer:
 		return false
 	held[slot] = 0.0
 	return true
 
+## Presses the kit's own cast lock refuses: held like a CC's and replayed on the first step the lock lets them,
+## at most Loco.press_buffer after the press (a lock that runs on past that answers with the slot's deny cue then). The
+## footage shows no such press dropped (hero-ref: Void acts through the Nightwell, Brall's guard and Ghost's
+## recoveries are silent), so every kit holds; a newer press replaces the held one.
+func _route_lock() -> void:
+	var h := kit.h
+	for slot in LOCK_SLOTS:
+		var key: String = KEY_OF[slot]
+		if h.inp.get(key, false) and kit.lock_refuses(slot):
+			held[slot] = 0.0
+			h.inp[key] = false
+
 func _release(dt: float) -> void:
 	for slot in held.keys():
-		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < BUFFER_S:
+		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < Loco.press_buffer:
 			held[slot] = float(held[slot]) + dt
 			continue
 		held.erase(slot)

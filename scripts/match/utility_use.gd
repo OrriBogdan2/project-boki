@@ -62,9 +62,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"mend":
-			h.heal(MEND_HP)
+			h.heal(MEND_HP, col)
 			h.armor = minf(h.max_armor, h.armor + MEND_ARMOR)
-			m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 16, 3.0, 0.6, -3.0)
 			m.sfx("heal", h.pos, -2.0, 1.1)
 		"smoke":
 			var n := Models.gear_smoke()
@@ -115,9 +114,9 @@ static func tick(h: Hunter, dt: float) -> void:
 			if h.drink_t <= 0.0:
 				h.drink_t = 0.0
 				if UtilityBelt.take(h, "tonic", 1) > 0:
-					h.heal(channel("tonic", "heal") * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
+					var boost := 1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")
+					h.heal(channel("tonic", "heal") * boost, Color("8ff0a0"))
 					h.m.sfx("heal", h.pos, -2.0)
-					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 	if h.kit_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.kit_t = 0.0

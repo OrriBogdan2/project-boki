@@ -828,6 +828,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
+		if pc[0] == gset[0]: gmi.name = "Canopy"      # GliderHeat sets its heat on this material
 		gmi.material_override = pc[1]
 		ShadowPolicy.judge(gmi)
 		glider.add_child(gmi)
@@ -2131,16 +2132,6 @@ static func accessory(body: Node3D, id: String, c: Color) -> void:
 		_:
 			BokiWear.build(body, id, c)
 
-## An air ring: fly through it for a burst of speed.
-static func air_ring() -> Node3D:
-	var root := Node3D.new()
-	var t := TorusMesh.new(); t.inner_radius = 1.2; t.outer_radius = 1.42; t.rings = 28; t.ring_segments = 8
-	var ring := part(root, t, toon(Color("5ad0f0"), true, 0.45), Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0), "Ring")
-	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var disc := part(root, cyl(1.2, 1.2, 0.02, 24), glow_mat(Color(0.55, 0.9, 1.0, 0.12)), Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0), "Disc")
-	disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	return root
-
 ## The training yard: a straw dummy on a post, a mat and a couple of hoops.
 static func training_yard() -> Node3D:
 	var root := Node3D.new()
@@ -2199,15 +2190,10 @@ static func nesting_nook() -> Node3D:
 	return root
 
 ## An egg in a straw nest, for kin you raise from an egg at home.
-static func nest_egg(c: Color, spot: Color) -> Node3D:
+static func nest_egg(kind: String, glow := 0.0, seam := Color(0, 0, 0, 0)) -> Node3D:
 	var root := Node3D.new()
 	part(root, cyl(0.42, 0.34, 0.16, 16), toon(Color("c9a46a")), Vector3(0, 0.08, 0))
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	part(shell, sphere(0.26, 16), toon(c.lightened(0.15)), Vector3(0, 0.36, 0), Vector3(0.92, 1.25, 0.92))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(c.r * 1000 + spot.g * 100)
-	for i in 6:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.2, 0.55)
-		part(shell, sphere(0.05, 8), toon(spot), Vector3(cos(a) * 0.22, y, sin(a) * 0.22), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell(kind, 0.65, 0.035, glow, seam))
 	return root
 
 ## The Incubator beside the Nesting Nook: a clay brazier with a copper hood on a round stone hearth,
@@ -2281,17 +2267,10 @@ static func incubator() -> Node3D:
 			shelf.add_child(mk)
 	return root
 
-## A small gold Rare Egg for the incubator's shelf and cradle, spotted in the colour of the kin inside.
-static func rare_egg_small(spot: Color, s := 1.0) -> Node3D:
+## A small Rare Egg for the incubator's shelf and cradle, its seam ring in the colour of the kin inside.
+static func rare_egg_small(seam: Color, s := 1.0) -> Node3D:
 	var root := Node3D.new()
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	var gold := toon(Color("ffd36a"), true, 0.35)
-	part(shell, sphere(0.26 * s, 16), gold, Vector3(0, 0.3 * s, 0), Vector3(0.9, 1.22, 0.9))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(spot.r * 991 + spot.g * 113 + spot.b * 7)
-	var sm := toon(spot, false, 1.0)
-	for i in 7:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.16, 0.5)
-		part(shell, sphere(0.045 * s, 8), sm, Vector3(cos(a) * 0.215 * s, y * s, sin(a) * 0.215 * s), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell("rare", 0.63 * s, 0.0, 0.2, seam))
 	return root
 
 # ---------------------------------------------------------------- monsters
@@ -2856,12 +2835,7 @@ static func jump_pad(c: Color) -> Node3D:
 	return root
 
 static func gem() -> Node3D:
-	var root := Node3D.new()
-	var p := PrismMesh.new(); p.size = Vector3(0.28, 0.3, 0.28)
-	var m := toon(Color("7ef0d0"), false, 0.7)
-	part(root, p, m, Vector3(0, 0.15, 0))
-	part(root, p, m, Vector3(0, -0.15, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	return root
+	return ItemArt.gem()
 
 static func armor_shard() -> Node3D:
 	var root := Node3D.new()
@@ -2872,11 +2846,7 @@ static func armor_shard() -> Node3D:
 	return root
 
 static func tonic() -> Node3D:
-	var root := Node3D.new()
-	part(root, sphere(0.16, 12), toon(Color("8ff0a0"), false, 0.6), Vector3(0, 0.16, 0))
-	part(root, cyl(0.05, 0.06, 0.14, 8), toon(Color("e6f2ea")), Vector3(0, 0.34, 0))
-	part(root, cyl(0.065, 0.065, 0.05, 8), toon(Color("8b6d52")), Vector3(0, 0.43, 0))
-	return root
+	return ItemArt.tonic()
 
 static func seed_bag(c: Color) -> Node3D:
 	var root := Node3D.new()

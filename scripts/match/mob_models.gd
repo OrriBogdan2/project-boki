@@ -66,6 +66,7 @@ static func build(kind: String) -> Node3D:
 	if not pulse.is_empty():
 		root.set_meta("pulse", pulse)
 	_finish(root)
+	MobGlb.dress(root, kind)
 	return root
 
 ## Merges each pivot's plain parts into a mesh per material (a handful of draw calls a monster),

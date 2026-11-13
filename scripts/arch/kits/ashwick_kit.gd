@@ -24,7 +24,8 @@ const BOLT_CORE := Color("ffe070")
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
-const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
+const SHIELD_RINGS := 3               # most swirls shown on her body: one per foe the cloak caught, up to this
+const SHIELD_RING_STEP := 0.4         # m between the swirls up her body
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
@@ -39,7 +40,7 @@ const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # where the rules start the fire, from the feet: fwd, up, right (m)
-const NOZZLE_REACH := 2.6                # m: a palm further off than this isn't posed yet: use NOZZLE
+const NOZZLE_REACH := 2.6                # m at the plain drawn size: a palm further off isn't posed yet: use NOZZLE
 # m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
 const PALM_AHEAD := 0.12
 
@@ -110,7 +111,8 @@ func tip() -> Vector3:
 		at = nozzle_at.global_position
 	elif h.anim != null and h.anim.hand_r != null and h.anim.hand_r.is_inside_tree():
 		at = h.anim.hand_r.global_position + _fwd() * PALM_AHEAD
-	return at if at.distance_to(h.pos) < NOZZLE_REACH else nozzle()
+	var reach := NOZZLE_REACH * h.vis_k / Hunter.VIS_SCALE      # (a match draws her up to 2.1x bigger)
+	return at if at.distance_to(h.pos) < reach else nozzle()
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
@@ -156,6 +158,7 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		f.burn_dps = dps
 		f.burn_by = h
 	if lvl == 2 and was < 2:
+		CombatBus.tech.emit(h, "ashwick")
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
@@ -215,15 +218,7 @@ func _tick(dt: float) -> void:
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
 		if tells_visible():
-			# the Furnace Cloak's shield: a swirling ring of fire hugging Cinder while it holds (about 0.8 bh)
-			fx.place(
-				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), SHIELD_COL, Color("ffc040"),
-				1.8, m.time * 2.0, 1.0
-			)
-			fx.place(
-				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("c8301a"),
-				Color("ff9a3a"), 1.45, -m.time * 2.6, 0.85
-			)
+			_shield_swirls()
 	else:
 		st["shield_on"] = false
 	tell = ""
@@ -232,6 +227,17 @@ func _tick(dt: float) -> void:
 	elif _best_char() >= 12.0:
 		tell = "half"
 	net_pulse(dt, not ignites.is_empty(), 1.3)
+
+## The cloak's shield on her body: a lit swirl round her per foe it caught (up to SHIELD_RINGS), in her colours.
+func _shield_swirls() -> void:
+	var vx := HeroVfx.of(m)
+	for i in mini(int(st.get("shield_foes", 1)), SHIELD_RINGS):
+		var lead: bool = i % 2 == 0
+		var id := "swirl%d" % h.get_instance_id() if i == 0 else "swirl%d_%d" % [h.get_instance_id(), i]
+		fx.place(
+			id, "swirl", h.pos + Vector3(0, 0.55 + SHIELD_RING_STEP * i, 0), vx.color(h, "main" if lead else "red"),
+			vx.color(h, "hot"), 1.8 - 0.2 * i, m.time * (2.0 if lead else -2.6), 1.0 - 0.1 * i
+		)
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
 ## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
@@ -637,7 +643,7 @@ func _bash_impact(f: Ent) -> void:
 func _ram_reward() -> void:
 	var dd := dash_def()
 	boost_until = m.time + float(dd["rank3_boost_t"])
-	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
+	ReceiverCue.shield(h, h.max_hp * float(dd["rank3_shield"]))
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
 
 # ------------------------------------------------------------------ E: Furnace Cloak
@@ -679,9 +685,10 @@ func _cloak_blast() -> void:
 			m.displace.tow(f, h, drag)
 			pulled += 1
 	if hit > 0:
-		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
+		ReceiverCue.shield(h, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
+		st["shield_foes"] = hit
 		m.sfx("shield", h.pos, -5.0, 0.9)
 
 # ------------------------------------------------------------------ X: Flue Flight

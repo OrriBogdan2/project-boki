@@ -97,8 +97,11 @@ static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	m.fx.muzzle(start + Vector3(dir2.x, 0, dir2.y) * 0.25, dir2, col, power)
 
 ## Someone knocked down (Match.knock): a burst of their team colour, a shockwave on the ground and a
-## white flash, so the moment reads from anywhere on screen.
+## white flash, so the moment reads from anywhere on screen; a teammate down or a rival your squad
+## knocked also gets the banner top-centre (KnockBanner, with its sound).
 static func knock(m: Match, h: Hunter, credit: Ent) -> void:
+	if m != null and m.hud:
+		m.hud.knocks.knocked(m.player, h, credit)
 	if m == null or m.fx == null:
 		return
 	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
@@ -109,8 +112,6 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
-	if credit == m.player and h != m.player:
-		m.sfx("knock_confirm", null, -6.0)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -202,19 +203,16 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 	m.fx.flash(c + Vector3(0, 0.8, 0), col.lerp(Color.WHITE, 0.6), 1.6, 0.3)
 	m.fx.ring(h.pos, 3.2, Color(col, 0.9), 0.5)
 	if h == m.player:
-		m.sfx("extract_ok", null, -3.0)
+		UiSfx.extract_success()
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
-## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). Only for people
-## close to you, quieter for everyone else, silent while sneaking.
+## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). It carries as far
+## as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
 static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
-	if m == null or m.world == null or h.unseen or h.crouch:
-		return
-	var p: Hunter = m.player
-	if p != null and h != p and p.flat_dist(h) > 14.0:
+	if m == null or m.world == null or not StepReach.heard(h):
 		return
 	var w: World = m.world
 	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
@@ -225,4 +223,4 @@ static func footstep(h: Hunter) -> void:
 	if w.bridge.has(i): surf = "wood"
 	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
 	elif w.style_at(i) == "frost": surf = "snow"
-	Sfx.play(HeroSfx.of(h, "step_" + surf, "step_" + surf), h.pos, -13.0 if h == p else -17.0, 0.08)
+	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)

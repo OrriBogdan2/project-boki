@@ -26,9 +26,8 @@ var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (ho
 var shrines: Array = []     # {pos, used, prog, node}
 var breaks: Array = []      # {i, pos, kind, node, dead}
 var brk: Breakables
-var ring_n := 0
 var pellet_hits := {}        # shotgun volley + target -> slugs landed
-var air_rings: Array = []   # {pos, dir, node, cd: {hunter nid: time}}
+var air_rings: AirRings
 var wpicks: Array = []      # pickups on the ground: gear {gear}, tunings {tune}, treasure {val}, each with id, pos, rar, node
 var wdrop_n := 0
 var warden_done := false
@@ -238,7 +237,7 @@ func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 const RANGE_SMALL := 80.0
 const RANGE_BIG := 125.0
 static func _draw_range(root: Node) -> void:
-	var k := float(Settings.q("draw"))
+	var k := CamRig.draw_k()
 	var stack: Array = [root]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
@@ -375,12 +374,7 @@ func _start(o: Dictionary) -> void:
 	if not opts.get("arena", false):
 		await _spawn_breakables()
 	await _slice()
-	for rg in world.rings:
-		var rn := Models.air_ring()
-		rn.position = rg["pos"]
-		rn.rotation.y = atan2(float(rg["dir"].x), float(rg["dir"].y))
-		add_child(rn)
-		air_rings.append({"pos": rg["pos"], "dir": rg["dir"], "node": rn, "cd": {}})
+	air_rings = AirRings.new(self)
 	if o.get("break_demo", false) and player and not breaks.is_empty():
 		# test: stand by some breakables with two found weapons on the ground
 		var b0: Vector3 = breaks[0]["pos"]
@@ -456,7 +450,7 @@ func _start(o: Dictionary) -> void:
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
 		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
-	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
+	Practice.attach(self)      # the practice areas' bottom bar and J hero picker
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -477,7 +471,7 @@ func _build_env() -> void:
 	env.environment = Look.environment({"top": sky.darkened(0.2), "mid": sky.lerp(amb, 0.35), "horizon": (cl[1] as Color).lerp(T["sun"], 0.5).lightened(0.15),
 		"below": cl[0], "ambient": amb, "ambient_energy": 0.5, "fog": (cl[1] as Color).lightened(0.12).lerp(Color("4a5aa8"), 0.35), "sun_col": T["sun"]})
 	add_child(env)
-	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
+	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0 * CamRig.style_reach(cam_style))
 	sun.shadow_opacity = 0.8
 	# the raid condition: rolled from the seed on real expeditions, clear otherwise (scripts/match/raid_look.gd)
 	raid = RaidLook.pick(opts, seed_val)
@@ -1439,44 +1433,6 @@ func _pickup_label(h: Hunter, wp: Dictionary) -> String:
 		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
 	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
 
-## Air rings: anyone flying through one gets thrown forward along their own heading, the glider
-## pops open and gets a little fuel back, so a chain of rings carries you across a long gap.
-func _update_rings(dt: float) -> void:
-	if player and not player.out and int(time * 4.0) % 4 == 0:
-		for rg in air_rings:
-			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
-				break
-	for rg in air_rings:
-		# rings stand straight up facing along the route; they don't spin
-		for h in hunters:
-			if h.remote or h.grounded or h.out or h.downed or h.riding or not h.pad.is_empty():
-				continue
-			var c: Vector3 = rg["pos"]
-			var body: Vector3 = h.pos + Vector3(0, 0.8, 0)
-			if body.distance_to(c) > 1.6:
-				continue
-			if float(rg["cd"].get(h.nid, -9.0)) > time:
-				continue
-			rg["cd"][h.nid] = time + 3.0
-			ring_n += 1
-			h.add_stat("rings")
-			var hv := Vector2(h.vel.x, h.vel.z)
-			var rd: Vector2 = rg["dir"]
-			var d: Vector2 = hv.normalized() if hv.length() > 1.0 else rd
-			if absf(d.dot(rd)) > 0.5:
-				d = rd if d.dot(rd) > 0.0 else -rd    # line up with the ring
-			var spd := minf(maxf(hv.length(), Hunter.GLIDE_SPEED) + 4.0, Loco.glide_max)
-			h.vel.x = d.x * spd; h.vel.z = d.y * spd
-			h.vel.y = maxf(h.vel.y, 2.0)
-			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
-			if not h.gliding and not h.dropping:
-				h.glide_cd = 0.0
-				h.gliding = true
-			fx.ring(c, 1.6, Color("8fe3ff"), 0.3)
-			fx.burst(c, Color("cff6ff"), 14, 4.0, 0.35, 0.0)
-			sfx("whoosh", c, -2.0 if h == player else -10.0, 1.3)
-
 ## Breakables are solid: push bodies out, and dashing straight through one smashes it.
 var _break_grid := {}
 var _break_grid_n := -1
@@ -1770,12 +1726,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 			if lv >= 0:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
-	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
-	# only numbers that involve you: other fights nearby don't spray digits over yours
-	if mine:
-		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
+	fx.damage_number(target, by, d, o, player, armor_hit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)
@@ -1821,9 +1773,8 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if h == player:
-		# getting knocked hits hard: slow time, flash red, pull the camera in
-		_slow(0.55, 0.3)
-		if hud: hud.flash(Color("ff3a2a"), 0.3)
+		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
+		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
 		Sfx.duck(0.6)
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
@@ -1868,10 +1819,10 @@ func _armor_up(h: Hunter) -> void:
 		sfx("revive", null, -6.0)
 		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
 
+## A knock you landed: the short freeze, ring, burst and confirm sound. No slow-mo, no full-screen
+## flash, so offline and online keep one rhythm (docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment).
 func _reward_moment(at: Vector3) -> void:
-	_slow(0.22, 0.35)
 	freeze_frame(0.07)
-	if hud: hud.flash(Color.WHITE, 0.25)
 	fx.ring(at, 3.0, Color(1, 0.95, 0.8, 0.9), 0.35)
 	fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
 	Sfx.duck(0.25)
@@ -2202,7 +2153,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	KeyCarry.on_mob_dead(self, mb)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
-	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
+	MobSfx.death(self, mb, big_mob)
 	if credit == player: sfx("kill", null, -12.0, 1.4)
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
@@ -2432,7 +2383,7 @@ func on_wild_dazed(k: Kin) -> void:
 ## A monster's stagger window opened.
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
-		sfx("warn", mb.pos, -10.0, 1.5)
+		MobSfx.stagger_open(self, mb)
 		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
@@ -2445,8 +2396,7 @@ func on_stagger(mb: Mob, by: Ent, ab: String) -> void:
 	fx.ring(mb.pos, mb.r + 1.8, Color("c47aff"), 0.4)
 	fx.burst(mb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 30, 6.0, 0.6, 2.0, 1.2)
 	fx.flash(mb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 1.4, 0.1)
-	sfx("crit", mb.pos, 2.0, 0.7)
-	sfx("boom", mb.pos, -4.0, 1.6)
+	MobSfx.stagger_hit(self, mb)
 	freeze_frame(0.08)
 	var hunter: Hunter = by as Hunter if by is Hunter else (by.owner_h if by is Kin else null)
 	if net_on:
@@ -2492,8 +2442,8 @@ func on_wall_slam(e: Ent) -> void:
 ## sight, tall grass hides you from anyone outside it, and crouching shrinks both distances.
 ## Firing or getting hit gives you away to anyone with a clear line, whichever way they face.
 const VIEW_RANGE := 24.0
-const VIEW_COS := 0.6          # about 106 degrees wide
-const NEAR_SENSE := 3.2
+const VIEW_COS := 0.087        # 170 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same wedge)
+const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
 	if target.team == team_i or target.downed:
@@ -2502,7 +2452,7 @@ func can_see(team_i: int, target: Hunter) -> bool:
 
 func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool:
 	var in_grass := world.in_bush(p.x, p.z) or in_smoke(p)
-	var near := 1.6 if crouched else NEAR_SENSE
+	var near := NEAR_SENSE * (0.5 if crouched else 1.0)
 	# (muzzle flashes and a Warden's light give you away at full range, whatever the raid condition)
 	var rng := VIEW_RANGE + 2.0 if revealed else view_range(crouched)
 	for h in hunters:
@@ -3164,6 +3114,7 @@ func _process(delta: float) -> void:
 		acc -= DT
 		steps += 1
 		step(DT)
+		FireTap.stepped(player)
 	var alpha := acc / DT
 	_vprof("pre")
 	if opts.has("boki_demo"):
@@ -3183,7 +3134,7 @@ func _process(delta: float) -> void:
 	# the time it skipped); near ones every frame
 	_render_n += 1
 	var cf := cam.focus
-	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	var near2 := pow(34.0 * cam.reach(), 2.0)
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
@@ -3259,10 +3210,10 @@ func _process(delta: float) -> void:
 			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
 			# the camera only eases back while gliding, so jumps and falls never change the framing
 			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
-			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
+			cam.zoom_to = CamWheel.widen(player)
 			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
-			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
+			cam.zoom_to = CamWheel.final(cam.zoom_to, cam.user_zoom, player)       # the wheel, and Ctrl past its range
 			# high up, the camera pulls back with your altitude so you can still read the ground
 			var alt := player_altitude()
 			if alt > 4.0:
@@ -3338,7 +3289,7 @@ func _gather_input() -> void:
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
-	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
+	player.inp["fire"] = FireTap.down(player, not paused and not over_ui)
 	if paused and player.draw_t >= 0.0:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
@@ -3414,6 +3365,9 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if CamWheel.input(self, event):
+		get_viewport().set_input_as_handled()
+		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
 		get_viewport().set_input_as_handled()
@@ -3785,15 +3739,7 @@ func step(dt: float) -> void:
 				if h.team != player.team:
 					h.teleport(rival_spot if rival_spot != Vector3.INF else spot + Vector3(4, 0, 0))
 					break
-	if opts.get("ring_demo", false) and player and time < 0.05 and not air_rings.is_empty():
-		var rg: Dictionary = air_rings[0]
-		var rd: Vector2 = rg["dir"]
-		player.teleport(rg["pos"] - Vector3(rd.x, 0, rd.y) * 5.0 + Vector3(0, -0.6, 0))
-		player.grounded = false; player.gliding = true
-		player.vel = Vector3(rd.x, 0, rd.y) * 9.6
-	if opts.get("ring_demo", false) and player and player.gliding:
-		player.inp["glide"] = true
-		player.inp["move"] = Vector2(player.vel.x, player.vel.z).normalized()
+	if opts.get("ring_demo", false) and air_rings: air_rings.demo()
 	if String(opts.get("map_demo", "")) == "mid" and player and hud and time > 0.6 and not has_meta("map_demo_done"):
 		# test: the map mid-match, with a few spawns scouted (found, empty and taken) and squad pings
 		set_meta("map_demo_done", true)
@@ -3915,7 +3861,7 @@ func step(dt: float) -> void:
 	_collide_breaks()
 	brk.tick(dt)
 	_prof("separate")
-	_update_rings(dt)
+	if air_rings: air_rings.tick(dt)
 	_update_shots(dt)
 	_prof("shots")
 	_update_pickups(dt)
@@ -4776,9 +4722,9 @@ func _update_zones(dt: float) -> void:
 					if amt > 0.0:
 						for h in hunters:
 							if h.team == z["team"] and not h.remote and not h.downed and not h.out and h.flat_dist(c) < z["r"]:
-								h.hp = minf(h.max_hp, h.hp + amt)
+								h.heal(amt)
 								if h.kin and h.kin.state == "active" and h.kin.flat_dist(c) < z["r"]:
-									h.kin.hp = minf(h.kin.max_hp, h.kin.hp + amt)
+									Effects._heal(h.kin, amt)
 						if z["kind"] == "sanctuary":
 							fx.burst(c + Vector3(randf_range(-2, 2), 0.3, randf_range(-2, 2)), Color("9ee2a0"), 3, 1.5, 0.6, -2.0, 0.8)
 				"well":
@@ -5161,6 +5107,8 @@ func _flags(h: Hunter) -> int:
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
+	if h.gliding: f |= GliderHeat.net_level(h) << 20      # the glider's heat, 4 bits (20-23), and whether it burns (24)
+	if GliderHeat.burning(h): f |= 1 << 24
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
@@ -5315,6 +5263,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.riding = f & 1024 != 0
 			h.diving = f & 16384 != 0
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
+			h.glide_fuel = GliderHeat.fuel_of((f >> 20) & 15) if h.gliding else 1.0
+			h.below_lip = f & (1 << 24) != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
 			if f & 2048 != 0:
@@ -5424,6 +5374,7 @@ func _net_ev(x, from: String) -> void:
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
+				if hud: hud.knocks.knocked(player, who, by)
 				if by == player:
 					player.knocks += 1
 					_reward_moment(who.pos)
@@ -5514,7 +5465,7 @@ func _net_ev(x, from: String) -> void:
 				who.dead = true
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
-				sfx("kill", who.pos, -6.0, 1.3)
+				MobSfx.death(self, who as Mob, false)
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
@@ -5535,7 +5486,7 @@ func _net_ev(x, from: String) -> void:
 				(smb as Mob).stag_open = 0.0
 				fx.ring(smb.pos, smb.r + 1.8, Color("c47aff"), 0.4)
 				fx.burst(smb.pos + Vector3(0, 1.0, 0), Color("e0b0ff"), 30, 6.0, 0.6, 2.0, 1.2)
-				sfx("crit", smb.pos, 2.0, 0.7)
+				MobSfx.stagger_hit(self, smb as Mob)
 				_stagger_reward(smb, ents_by_id.get(String(x[2]), null) as Hunter, String(x[3]))
 		"anc":
 			if String(x[1]) == "meteor":

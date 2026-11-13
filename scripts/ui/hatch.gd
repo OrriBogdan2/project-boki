@@ -96,7 +96,7 @@ func _ready() -> void:
 		if d.get("mystery", false):
 			holder.add_child(MysteryEgg.new())
 			MysteryEgg.hideout(self, MYSTERY_AT)
-			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS
+			egg.kind = "mystery"
 		else:
 			holder.add_child(_nest())
 		egg.hop_out = 0.35
@@ -353,7 +353,10 @@ func _end_intro() -> void:
 		_after_create()
 
 var turning := false
+var zoom := ViewZoom.new()      # the wheel (or the pad) while you make yourself
 func _unhandled_input(event: InputEvent) -> void:
+	if stage == "create" and zoom.wheel(event):
+		return
 	if stage == "create" and preview:
 		# drag with the mouse (or hold A / D) to turn yourself round
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -615,7 +618,8 @@ func _start_hatch() -> void:
 func _process(delta: float) -> void:
 	t += delta
 	if stage != "mask":
-		cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
+		var to := look_at_t + (cam_to - look_at_t) * zoom.k if stage == "create" else cam_to
+		cam.position = cam.position.lerp(to, minf(1.0, delta * 2.0))
 		# a slow breathing drift so the shot is never quite still
 		cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
 	for rn in runes:
@@ -630,6 +634,7 @@ func _process(delta: float) -> void:
 	if stage == "mask":
 		pass       # (MaskMoment moves the camera)
 	elif stage == "create":
+		zoom.tick(delta)
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5

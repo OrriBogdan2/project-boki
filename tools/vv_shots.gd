@@ -458,7 +458,7 @@ func _venator_lmb() -> void:
 	var burst := func(tt: float): P.inp["fire"] = tt < 0.45
 	await _go(0.75,
 			burst,
-			[[0.62, "full", "lmb_dazed", "LMB on a Dazed target: the big gold numbers (+90%) in frame", _on_target]])
+			[[0.62, "full", "lmb_dazed", "LMB on a Dazed target: the big gold numbers (+38%) in frame", _on_target]])
 	P.inp["fire"] = false
 
 ## The passive: a knock gives Slipstep back (last: the target stays down after it).

@@ -781,7 +781,12 @@ def gen_dash_flow():
             "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
             "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
-            "with no hold row keeps through every move.\n\n")
+            "with no hold row keeps through every move.\n\n"
+            "An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte "
+            "guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): "
+            "it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; "
+            "a lock that runs on past that answers with the deny cue. The footage shows no such press dropped "
+            "(`--cast-lock-buffer-check`).\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "

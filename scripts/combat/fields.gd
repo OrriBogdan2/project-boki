@@ -109,7 +109,7 @@ func tick(dt: float) -> void:
 			if float(e.get("heal", 0.0)) > 0.0:
 				for h in m.hunters:
 					if h.team == int(z["team"]) and not h.out and Vector2(h.pos.x - at.x, h.pos.z - at.z).length() < float(z["r"]):
-						h.heal(float(e["heal"]))
+						h.heal(float(e["heal"]), z["col"])
 			m.fx.burst(at + Vector3(randf_range(-0.5, 0.5) * float(z["r"]), 0.2, randf_range(-0.5, 0.5) * float(z["r"])), z["col"], 5, 2.0, 0.4, 3.0)
 		var n: Node3D = z["node"]
 		if float(z["t"]) < 0.5:

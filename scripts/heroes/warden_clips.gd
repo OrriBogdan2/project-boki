@@ -341,12 +341,16 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
+		if mv.has("fit"):
+			tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
 		# (a lead clip holds its last frame rather than ending before the move does)
 		if mv.has("lead"):
 			tt = minf(tt, length - 0.001)
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+		elif mv.has("hold_at") and tt >= float(mv["hold_at"]) and tt < float(mv["hold_until"]):
+			tt = float(mv["hold_at"])          # (a pose held while the kit waits: Skycall's raised arm to its snap)
 		elif tt >= length:
 			if not mv.has("hold_from"):
 				return {}

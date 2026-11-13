@@ -554,6 +554,7 @@ func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
 	if marks_on(t) > 0:
 		ComboMark.payoff(m, h, t)
+	CombatBus.tech.emit(h, "thief")
 	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0

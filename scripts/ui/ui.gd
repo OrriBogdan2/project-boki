@@ -159,11 +159,8 @@ static func title(text: String, size := 34, col := INK) -> Label:
 	return l
 
 # ---------------------------------------------------------------- buttons
-## Buttons whose label says "go back" play the falling pair instead of the tap.
 const STAMP_TILT := 2.5      # degrees a stamp leans
 const HOVER_GROW := 1.03     # a pointed-at button's scale
-const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
-	"Leave it  (Esc)": "ui_back"}
 
 ## The secondary button (an outline). icon: an Icons id drawn at its left. Hover lights the neon
 ## edge and grows it 3% (UI_STYLE.md: only things you can press glow and grow); pressing sinks it a
@@ -172,8 +169,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var b := Button.new()
 	b.text = text
 	if cb.is_valid():
-		var snd: String = BACK_WORDS.get(text, "click")
-		b.pressed.connect(func(): Sfx.play(String(b.get_meta("snd", snd))); cb.call())
+		b.pressed.connect(func(): UiSfx.press(text, String(b.get_meta("snd", ""))); cb.call())
 	if minw > 0.0:
 		b.custom_minimum_size.x = minw
 	if icon != "":
@@ -186,14 +182,14 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	b.mouse_entered.connect(func():
 		if b.disabled: return
 		to.call(HOVER_GROW, 0.09)
-		Sfx.play("hover", null, -12.0, 0.05))
+		UiSfx.hover())
 	b.mouse_exited.connect(func(): to.call(1.0, 0.11))
 	b.button_down.connect(func(): if not b.disabled: to.call(0.97, 0.07))
 	b.button_up.connect(func(): to.call(1.0, 0.1))
 	b.focus_entered.connect(func():
 		# keyboard and pad focus tick and lift like the mouse does
 		if not b.is_hovered() and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			Sfx.play("hover", null, -14.0, 0.05))
+			UiSfx.hover(true))
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
 
@@ -382,7 +378,8 @@ static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 
 ## A selectable card (a tier, a skin, an item): lights up on hover and focus, the picked one wears
 ## an accent edge. Add your content to the returned container. Click, Enter or the pad's A pick it.
 ## With no `cb` (a locked tile) it stays dark and silent on hover and takes no focus; its tooltip still shows.
-static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> PanelContainer:
+## press_snd: the sound of a press ("" for none, when the caller plays its own).
+static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT, press_snd := "click") -> PanelContainer:
 	var p := PanelContainer.new()
 	var n := _tile_face(on, false, col, pad)
 	var h := _tile_face(on, true, col, pad)
@@ -411,7 +408,8 @@ static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> Panel
 		var go: bool = (ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT) or ev.is_action_pressed("ui_accept")
 		if go:
 			p.accept_event()
-			Sfx.play("click")
+			if press_snd != "":
+				Sfx.play(press_snd)
 			cb.call())
 	return p
 

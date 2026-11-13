@@ -16,6 +16,21 @@ var sc        # the SupportCheck running us (setup, step, ok, aim_at)
 func ok(what: String, cond: bool, info := "") -> void:
 	sc.ok(what, cond, info)
 
+## The root bone's rise in a glb clip, from its first frame, up the skeleton's Y (rig units):
+## [its rise by t_up, its rise by t_down (negative: a squash below the start)]. [0, 0] when there is no clip.
+static func _root_lift(a: Animation, sk: Skeleton3D, t_up: float, t_down: float) -> Array:
+	if a == null or sk == null or sk.find_bone("root") < 0:
+		return [0.0, 0.0]
+	var up: Basis = sk.get_bone_rest(sk.find_bone("root")).basis
+	for i in a.get_track_count():
+		if a.track_get_type(i) != Animation.TYPE_POSITION_3D or not String(a.track_get_path(i)).ends_with(":root"):
+			continue
+		var p0: Vector3 = a.position_track_interpolate(i, 0.0)
+		var at_up: Vector3 = a.position_track_interpolate(i, t_up) - p0
+		var at_down: Vector3 = a.position_track_interpolate(i, t_down) - p0
+		return [(up * at_up).y, (up * at_down).y]
+	return [0.0, 0.0]
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	sc.step(m, secs, each)
 
@@ -151,8 +166,14 @@ func _skate_only() -> void:
 			not P.grounded and K.rinkrunning() and absf(P.roll_speed - float(dd["speed"])) < 0.01 and P.roll_t > 0.0,
 			"roll %.1f m/s of %.1f" % [P.roll_speed, float(dd["speed"])])
 	step(m, 0.7)
-	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
+	var slabs := K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time)
 	ok("tm Shift: ice plates form under her while she skates", slabs >= 5, "%d plates" % slabs)
+	step(m, 0.8)
+	var strip := K.lk().ice_strip(RimewrightKit.SLAB_CAP)
+	ok(
+			"tm Shift: the trail is 24 plates long while she skates (a new plate reuses the oldest)",
+			strip.laid > RimewrightKit.SLAB_CAP and strip.live_count(m.time) == 24,
+			"%d laid, %d showing" % [strip.laid, strip.live_count(m.time)])
 	P.inp["dash_down"] = false
 	await _free(m)
 
@@ -623,7 +644,7 @@ func _late_homing() -> void:
 			"%d beams, bent %.1f deg, %.0f damage" % [shot, beam_turn, hp0 - T.hp])
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.8)
-	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
+	var slabs := K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time)
 	ok(
 			"tm Shift: her ice trail lasts a few seconds (plates still down 2 s after the skate), skate cd 13 s (data)",
 			slabs >= 3 and absf(P.dash_regen() - 13.0) < 0.01, "%d plates, cd %.1f s" % [slabs, P.dash_regen()])
@@ -821,6 +842,11 @@ func tender() -> void:
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
 			"%s %d" % [K.anim_id, K.stats["swirls"]])
+	var comet := K.lk().skins[0]["n"] as Node3D
+	var tail_mesh := (comet.get_node("Tail").get_child(0) as MeshInstance3D).mesh as PlaneMesh
+	ok(
+			"mm LMB: the comet has a trail to follow at the match camera (0.8 m wide, 3.4 m long)",
+			absf(tail_mesh.size.x - 0.8) < 0.01 and absf(tail_mesh.size.y - 3.4) < 0.01, str(tail_mesh.size))
 	step(m, 0.6)
 	_moon_shot_parity(m, P, K)
 	# --- Kindle ramp and its foot glow; nodes stay pooled while firing
@@ -856,7 +882,7 @@ func tender() -> void:
 			"mm LMB: after a pause the next ember is Empowered (40% further, its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
-	# --- Burrseed (item 118): a press, a fixed wind-up, the throw by itself on the aim of that moment
+	# --- Burrseed (items 118 and 23): a press, a quick fixed wind-up, the throw by itself on the aim of that moment
 	K.kind.clear()
 	T.hp = T.max_hp
 	T.root_t = 0.0
@@ -866,31 +892,43 @@ func tender() -> void:
 	var n0: int = _mine(m, P).size()
 	var wind := float(K.rmb_def()["windup"])
 	ok(
-			"mm RMB: not a hold (no hold data), the wind-up is about 1 s, its clip as long",
-			not K.rmb_def().has("hold") and wind >= 0.9 and wind <= 1.0
+			"mm RMB: not a hold (no hold data), a quick wind-up (0.3-0.4 s, item 23), its clip as long",
+			not K.rmb_def().has("hold") and wind >= 0.3 and wind <= 0.4
 			and absf(KMovesCare.length("mm_seed_aim") - wind) < 0.01
 			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)))
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
-	step(m, 0.3)
+	step(m, 0.12)
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
 			"mm RMB: winding up, a short dotted lane, the coiled pose, half speed",
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
 			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["wind_lane"])) < 0.1
-			and is_equal_approx(float(lane.get("width", 0.0)), 2.0 * float(K.rmb_def()["seed"]["hit_r"]))
+			and absf(float(lane.get("width", 0.0)) - float(K.rmb_def()["seed"]["hit_r"])) < 0.01
 			and K.anim_id == "mm_seed_aim"
 			and absf(K.move_k() - float(K.rmb_def()["wind_move"])) < 0.01,
 			"%s len %.1f %s k %.2f" % [
 				String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id, K.move_k()])
 	ok("mm RMB: nothing leaves during the wind-up", _mine(m, P).size() == n0 and K.ch_rmb >= 1.0)
+	var sync: Node = P.model.get_node_or_null("Warden/Sync")
+	var clips: WardenClips = sync.get("clips") if sync else null
+	var lib: AnimationLibrary = clips.lib if clips else null
+	var aim_clip: Animation = lib.get_animation("seed_aim") if lib and lib.has_animation("seed_aim") else null
+	var fit = clips.d["kmoves"]["mm_seed_aim"].get("fit") if clips else null
+	ok(
+			"mm RMB: Pip's hand-keyed stretch-and-gather is played over exactly the wind-up (kmove fit)",
+			aim_clip != null and fit != null and absf(float(fit) - wind) <= 0.04,
+			"clip %.2f fit %s wind %.2f" % [aim_clip.length if aim_clip else -1.0, fit, wind])
+	ok(
+			"mm RMB: no circle under her during the wind-up (item 23)",
+			not K.lk().live.any(func(b): return String(b["fx"]) == "flare"))
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.3)
+	step(m, 0.12)
 	ok("mm RMB: letting go early does not throw or cancel", K.seed_aim and _mine(m, P).size() == n0)
-	var tt := 0.6
+	var tt := 0.24
 	while _mine(m, P).size() == n0 and tt < 1.5:
 		if tt >= wind - 0.1:
 			sc.aim_at(P, T.pos)
@@ -901,6 +939,16 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	ok(
+			"mm RMB: the seed leaves on the release clip's first frame (the snap, not after it)",
+			m.time - K.anim_at <= 1.5 / 60.0,
+			"clip at %.3f s" % (m.time - K.anim_at))
+	var seed_clip: Animation = lib.get_animation("seed") if lib and lib.has_animation("seed") else null
+	var hop := _root_lift(seed_clip, WardenGlb.skeleton(P.model.get_node("Warden")), 0.1, 0.32)
+	ok(
+			"mm RMB: the release clip hops (footage: a small hop, about 0.3 s in the air) and lands in a squash",
+			hop[0] >= 0.12 and hop[1] < -0.03,
+			"rise %.3f at 0.1 s, %.3f at 0.32 s" % [hop[0], hop[1]])
 	var t_stick := -1.0
 	var ts := 0.0
 	while ts < 0.5 and t_stick < 0.0:
@@ -997,8 +1045,8 @@ func tender() -> void:
 			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
 			"mm body: small (a 0.65 model) with the 0.34 m hitbox",
-			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
-			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
+			absf(P.r - 0.34) < 0.001 and P.model.scale.y / P.vis_k < 0.9,
+			"r %.2f scale %.2f" % [P.r, P.model.scale.y / P.vis_k])
 	step(m, 1.0)
 	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move
 	sc.down(m, A)
@@ -1387,36 +1435,63 @@ func rimewright() -> void:
 	ok(
 			"tm: the thin aim line to the cursor is always up, the shared one hidden",
 			AimKit.shown(P, "aim") and K.own_aim_line())
-	# --- a steady stream (no pause) of slow darts that bow out and home, 4 plain then 3 large
+	# --- the source's burst (docs/heroes/rimewright.md LMB): a hold is one steady stream of plain darts, the
+	# let-go ends it on 3 large ones at the same cadence, then the 0.5 s barrage pause before the next burst
 	var times: Array = []
 	var dmgs: Array = []
 	var bows: Array = []
 	var seen := {}
+	var clock := {"t": 0.0}
+	var grab := func(secs: float) -> void:
+		var end: float = float(clock["t"]) + secs
+		while float(clock["t"]) < end:
+			step(m, 1.0 / 60.0)
+			clock["t"] = float(clock["t"]) + 1.0 / 60.0
+			for s in _mine(m, P):
+				if not seen.has(s["sid"]):
+					seen[s["sid"]] = true
+					times.append(float(clock["t"]))
+					dmgs.append(float(s["dmg"]))
+					bows.append(absf(rad_to_deg((s["vel"] as Vector2).angle_to(P.aim_dir()))))
 	P.inp["fire"] = true
-	var t := 0.0
-	while t < 1.4:
-		step(m, 1.0 / 60.0)
-		t += 1.0 / 60.0
-		for s in _mine(m, P):
-			if not seen.has(s["sid"]):
-				seen[s["sid"]] = true
-				times.append(t)
-				dmgs.append(float(s["dmg"]))
-				bows.append(absf(rad_to_deg((s["vel"] as Vector2).angle_to(P.aim_dir()))))
+	await grab.call(1.4)
+	var held_n := times.size()
 	P.inp["fire"] = false
+	await grab.call(0.9)
 	var gaps: Array = []
-	for i in range(1, times.size()): gaps.append(float(times[i]) - float(times[i - 1]))
+	for i in range(1, held_n): gaps.append(float(times[i]) - float(times[i - 1]))
 	var maxgap: float = gaps.max() if not gaps.is_empty() else 9.0
-	ok(
-			"tm LMB: a steady stream, one dart every 0.18 s with no pause", times.size() >= 7 and maxgap < 0.22,
-			"%d darts, longest gap %.2f" % [times.size(), maxgap])
 	var base_dmg := float(P.wpn["dmg"]) * float(m.dmg_mult(P))
-	var pattern := dmgs.slice(0, 7).map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p")
+	var pattern := "".join(dmgs.map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p"))
 	ok(
-			"tm LMB: the source's barrage: 4 darts, then 3 larger ones at double damage (game data), then round again",
-			"".join(pattern) == "ppppHHH" and dmgs.size() >= 8 and float(dmgs[7]) < base_dmg * 1.5
-				and K.stats["heavies"] >= 3,
-			"".join(pattern))
+			"tm LMB: a held burst is one steady stream, a plain dart every 0.18 s, no pause, no large one",
+			held_n >= 7 and maxgap < 0.22 and pattern.left(held_n) == "p".repeat(held_n),
+			"%d darts, longest gap %.2f, %s" % [held_n, maxgap, pattern.left(held_n)])
+	var tail_gap := float(times[held_n + 2]) - float(times[held_n]) if times.size() >= held_n + 3 else 9.0
+	ok(
+			"tm LMB: the let-go ends the burst on exactly 3 large darts at double damage (game data), 0.18 s apart",
+			pattern.substr(held_n) == "HHH" and K.stats["heavies"] == 3 and tail_gap < 0.4,
+			"%s after the let-go, %.2f s across" % [pattern.substr(held_n), tail_gap])
+	# a fresh press inside the pause waits for it; then a new burst starts plain
+	var last_heavy: float = float(times[times.size() - 1])
+	var n_before := times.size()
+	P.inp["fire"] = true
+	await grab.call(0.7)
+	var restart: float = float(times[n_before]) - last_heavy if times.size() > n_before else 9.0
+	ok(
+			"tm LMB: the next burst starts only after the 0.5 s barrage pause, plain again",
+			restart >= 0.5 and restart < 0.62 and pattern.length() == n_before
+				and float(dmgs[n_before]) < base_dmg * 1.5,
+			"%.2f s after the last large dart" % restart)
+	P.inp["fire"] = false
+	await grab.call(1.2)
+	var tap_n := times.size()
+	P.inp["fire"] = true
+	await grab.call(1.0 / 60.0)
+	P.inp["fire"] = false
+	await grab.call(0.75)
+	var tap := "".join(dmgs.slice(tap_n).map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p"))
+	ok("tm LMB: a tap is a burst too: one plain dart, then the 3 large ones", tap == "pHHH", tap)
 	ok(
 			"tm LMB: darts come out slowly (16 m/s), a little off the aim to alternating sides",
 			float(P.wpn["speed"]) <= 18.0 and not bows.is_empty() and float(bows[0]) > 5.0 and float(bows[0]) < 15.0,
@@ -1455,7 +1530,7 @@ func rimewright() -> void:
 			"tm passive: 8 darts on one foe Shatter them (about 15 darts' damage, ice spikes)",
 			K.splinter_log > s0 and T2.max_hp - T2.hp > float(P.wpn["dmg"]) * 12.0 and spikes,
 			"neighbour -%.0f" % (T2.max_hp - T2.hp))
-	step(m, 0.5)
+	step(m, 1.0)          # the let-go's 3 large darts land, then the 0.5 s pause
 	# --- Shatter on a knock (Chilled foe)
 	T.hp = 8.0
 	T.slow_t = 0.0
@@ -1537,7 +1612,7 @@ func rimewright() -> void:
 	P.inp["fire"] = false
 	var plain_shots: Array = _mine(m, P)
 	var plain_d := float(plain_shots[-1]["dmg"]) if not plain_shots.is_empty() else 0.0
-	step(m, 0.3)
+	step(m, 1.0)          # the tap's burst ends on its 3 large darts, then the 0.5 s pause
 	P.inp["move"] = Vector2(-1, 0)
 	P.inp["dash"] = true
 	P.inp["dash_down"] = true
@@ -1564,7 +1639,7 @@ func rimewright() -> void:
 	ok(
 			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
-				and K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size() >= 4
+				and K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time) >= 4
 				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
@@ -1671,7 +1746,8 @@ func rimewright() -> void:
 		since += 1.0 / 60.0
 	ok(
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
-			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp >= float(ld["burst_dmg"]) * 0.9
+			and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor

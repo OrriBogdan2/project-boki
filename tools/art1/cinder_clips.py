@@ -298,7 +298,10 @@ def clips():
     ram = {"pel": (0, 0.2, -0.26), "prt": (0.95, 0, 0), "tor": (0.32, 0, 0), "hed": (-0.75, 0, 0), "G": (0.3, -0.42, 0.74), "LP": (-0.3, -0.42, 0.76), "jaw": 0.7, "brow": 0.9,
            "FL": (-0.1, 0.12, A_Z + 0.24), "FR": (0.12, -0.6, A_Z + 0.2), "FLp": 0.3, "FRp": 1.1, "FRy": -0.1, "skirt": -0.5}
     hit = dict(ram, pel=(0, 0.04, -0.2), prt=(0.34, 0, 0), tor=(-0.06, 0, 0), hed=(-0.36, 0.1, 0.1), G=(0.28, -0.05, 0.92), LP=(-0.3, 0.02, 1.0), jaw=1.0, FL=(-0.14, 0.2, A_Z), FR=(0.14, -0.2, A_Z + 0.02), FRp=0.2, skirt=0.3)
-    out.append(C("leap", 0.55, [(0.0, END), (0.06, cr, "out"), (0.3, ram, "lin"), (0.36, hit, "out"), (0.42, dict(hit, pel=(0, 0.0, -0.13))), (0.55, END)]))
+    # timed to the felt ram (3.4 m in 0.33 s, fastest at the start, AshwickKit.RAM_FRONT): a blink of coil, flat out by the
+    # burst (0.12), reaching on as it slows, the stop at 0.33-0.36 (RAM_IMPACT_KEY); then she lands upright (hero-ref 0160)
+    reach = dict(ram, pel=(0, 0.24, -0.28), hed=(-0.82, 0, 0), G=(0.3, -0.48, 0.72), LP=(-0.3, -0.48, 0.74), skirt=-0.65)
+    out.append(C("leap", 0.55, [(0.0, END), (0.04, cr, "out"), (0.12, ram, "out"), (0.3, reach, "lin"), (0.36, hit, "out"), (0.42, dict(hit, pel=(0, 0.0, -0.13))), (0.55, END)]))
     # Shift in the air: a ball, one forward roll on the poof, then spread out on the launch, whooping
     ball = {"pel": (0, 0, 0.02), "prt": (-0.5, 0, 0), "tor": (0.5, 0, 0), "hed": (0.3, 0, 0), "G": (0.2, 0.14, 0.92), "LP": (-0.2, 0.16, 0.86), "FL": (-0.1, 0.16, 0.42), "FR": (0.12, 0.14, 0.44), "FLp": 1.0, "FRp": 1.0, "jaw": 0.5, }
     roll = dict(ball, prt=(-3.0, 0, 0))

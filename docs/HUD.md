@@ -20,7 +20,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
-| `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
+| `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate's squad row while knocked (pink-red italic KNOCKED tag on the row's top edge, red X in a white arrow beside it) or dead (grey DEAD tag, grey X, greyed portrait); back up, eliminated or soul lost: one faint line beside the row (1.5 s) and a sound. Check: `--hudref-check` |
+| `knock_banner.gd` (`KnockBanner`, a Control on `hud.knocks`) | the knock banner top-centre (top at 13% of the screen, under any toasts): ALLY KNOCKED (cyan ring, white word with a blue edge, pink X) when a teammate goes down, KNOCK (pink-red ring and word, white edge and X) when your squad knocks a rival; round portrait over an ink slash, name pill. The slash and the pill are see-through (`back_alpha` 0.5, owner 11-12) and anti-aliased; the ring, portrait and words stay solid, the words drawn at their real pixel size through the pop and the banner placed on whole pixels, so nothing blurs at 1080p. Pops 1.25 -> 1.0 in 0.12 s, holds, fades and rises out at 1.25 s; a new knock replaces it, the same kind within 0.3 s counts x2. Sounds: `warn` low (teammate), `knock_confirm` (rival). Numbers: `content/rules/knock_banner.json`. Check: `--hudref-check`; film: `--knock-banner-clip` (GPU) |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:
@@ -45,6 +46,22 @@ Rules of the look:
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
 drawn, the downed plate and status words show, cooldown text appears).
 
+## Damage numbers
+
+Every hit's number goes through `Fx.damage_number`, which shows only damage that involves you (dealt by you
+or your Boki, or taken by you) and picks one of three looks from the hit itself (`Fx.num_kind`), never from
+the kit:
+
+| Look | Source | Size | Colour | Where, and what adds up |
+|---|---|---|---|---|
+| hit | your direct hits (and anyone's hits on you) | full | `HudStyle.HIT`, crit / armour / hurt colours | the hit spot; rapid hits add up |
+| Boki | a Boki's hits | 78% | its type colour (`DexView.type_col`, the HUD badge's); crit, armour and hurt colours as for a hit | beside yours; its own number |
+| tick | burn and poison ticks, or any hit flagged `tick` | 62% | `HudStyle.TICK` | lower on the body; one number per second |
+
+Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
+Numbers of different looks never add onto each other. All of them share one pool of `Fx.NUM_POOL` labels, so
+the draw cost doesn't grow with the sources. Check: `--number-looks-check`.
+
 ## The inventory window (I)
 
 - `LoadoutPanel` (in `Hud._build_pack`): what you wear (two gloves with their keys Q and V, armor, boots), the four
@@ -66,7 +83,8 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 
 | Pop-up | Where, size | How long | Now |
 |---|---|---|---|
-| Ally knocked | was a 300x70 card top centre, pulsing red, portrait, timer, arrow | was all the time they were down | **gone.** Knocked mark on their squad row (left, under the minimap), row outlined steadily (pulses only while stomped), one faint 13 px line beside the row ("down", 60% opacity), the edge arrow toward them (`_draw_squad_markers`, only while they're off screen), "Revive Nm" only within 9 m (`DownedMarks`) |
+| Ally knocked | was a 300x70 card top centre, pulsing red, portrait, timer, arrow, all the time they were down | 1.25 s | owner 11-12: a short banner is wanted (`KnockBanner`, ~96 px portrait + word + name, top 13-29% of the screen, never over the middle), then gone. The squad row keeps it: KNOCKED tag and X arrow (left, under the minimap), row outlined steadily (pulses only while stomped), the edge arrow toward them (`_draw_squad_markers`, only while they're off screen), "Revive Nm" only within 9 m (`DownedMarks`) |
+| Your squad knocked a rival | none (the knock burst and your flash) | 1.25 s | the KNOCK banner, same spot and timing |
 | Ally revived / eliminated / soul lost | was a 236x44 card top centre | was 2.6 s | **gone.** The same faint line by their row, 1.5 s |
 | "DOWN" knock burst over a downed hunter | 22-35 px word and rays over the plate | 1.1 s | rivals only now; a teammate's fall is the row's job |
 | Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
@@ -104,7 +122,7 @@ no kit draws its own recast HUD.
   left, name and seconds, gold when the payoff is ready), and a white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
-- **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
+- **Buffer.** A press up to `Loco.press_buffer` (tuning.json, 0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),

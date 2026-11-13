@@ -12,10 +12,11 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal and h
   (the ultimate's line is `card.x`; the kit card's last tile shows it on the hunter-ultimate key).
 
 ## Scaling
-Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
-bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
-source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
-bolts, ours 1.7); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
+Damage is the source's share of the standard target (1285 source HP, 154 ours; docs/TTK.md, pinned in
+content/rules/kit_parity.json): bolt 9 every 0.648s (the cadence is owner items 70 and 116; 90 every 0.8 s is
+8.75% of the target a second, 9 every 0.648 s is 9.0%); Storm Rod 16 to 26.7 (Voltaic Spear 133, read as the
+uncharged throw; the full hold keeps our 5:3); Skycall 19.4 (Lightning Strike 162); Wirerun pass 18.3 (Surge 153),
+doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
 source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
@@ -187,6 +188,37 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 X is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
 slot changes. R reloads and the Boki Merge is on its own key (T by default).
+
+## Animation timing (Nov 8)
+
+Every move in content/rules/warden_anim/ryzz.json measured in game (`--mage-combo-check`,
+tools/mage_anim_time_check.gd, lines `TIME ...` and `Sparkle timing ...`): when the kit plays the move, when the
+clip owns the body (blend in), the release or hit frame, and when the body is back with the legs (blend out),
+against the footage frames in briefs/hero-ref/vireo.md (one frame = 0.2 s, so anything under 0.2 s is inside its
+resolution) and the numbers above. Blend in is 0.1 s and blend out 0.16 s (WardenClips.FADE, FADE_LOCO): both
+under one footage frame. Seconds from the press.
+
+| Move | Source (s) | Ours before | Ours after |
+|---|---|---|---|
+| LMB | a bolt every 0.8 s (owner: 0.648) | bolt and beat on the press (0.02), clip 0.33, arm back 0.53 | unchanged |
+| RMB held | spear in hand, white flash, throw: ~1.2 s press to throw; recovery ~0.4 | flash 1.0, release throws at once, beat on the same frame, clip 0.70, arm back +0.85 | unchanged |
+| RMB tap (min_t 0.33) | not seen (the footage always held) | the beat played on the release (0.13) and the rod left at 0.35: the arm threw 0.22 s early | the beat plays as the rod leaves (0.35) |
+| Wirerun | charge ~0.6 to full length, travel ~0.6 (owner: speed 40), recover ~0.4 | crouch on at 0.10, streak and beat at the full charge 0.62, landing beat after the arrival | unchanged |
+| Skycall | disc to strike 0.8 s (4 frames), strike committed ~1 frame after the disc | arm up on the press (0.02); a drag released late (1.0 s, strike at 1.8) dropped the arm at 1.55 (clip 1.4), then the snap popped up from rest | the arm holds its raised pose until the snap: the `sky` clip keys it from 0.3 to 1.9 s and drops to rest by 2.15 |
+| Kitefall | crouch then leap ~0.4, up 1.2-1.8, streak down | windup 0.3, hover 1.7 (inside 1.2-1.8) | unchanged |
+| mage_live, gum, fusion, dash_ex | not in the footage | | unchanged |
+
+Owner overrides left as they are: the 0.648 s LMB cadence, Wirerun's travel speed, the Skycall pull.
+
+Clip re-keys (ext/anim-sparkle-sky-hold did the sky one):
+
+| Clip | Re-key |
+|---|---|
+| sky | done: a hold key at the end of the raised pose (SK 1.15 to 1.9 s, rest by 2.15), so the move's 1.8 s (1.0 s drag + 0.8 s) stays raised with no `hold_at`/`hold_until` in the data |
+| rmb | the throw's release key is 0.16; a tap now plays it at the launch (0.33) so it reads right as is |
+
+Suggestions (ours, not built): keep the rod in her hand until it leaves on a tap (the tick hides it on the release,
+0.2 s early); a Wirerun recovery lock of ~0.4 s like the source's re-form.
 
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;

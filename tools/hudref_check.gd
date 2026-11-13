@@ -7,8 +7,8 @@ extends RefCounted
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
-##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
-##      MateAlerts.LINE_S
+##   8. knock banners (KnockBanner): a rival you knock shows KNOCK in the red ring (a second one at once
+##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -126,7 +126,7 @@ func run(main_node: Node) -> void:
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
-	await _mate_down(m, hud, P)
+	await _knock_banners(m, hud, P)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -160,10 +160,13 @@ func run(main_node: Node) -> void:
 	var arch_was := P.arch
 	P.arch = "gunslinger"
 	var no_offset := not Arch.def(P.arch).has("plate_offset")
-	ok(no_offset and HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET and HudPlate.PLATE_OFFSET == 2.35,
-		"an archetype without plate_offset puts the plate at the 2.35 m fallback (%.2f)" % HudPlate.plate_offset(P))
+	var drawn: float = P.m.cam.hunter_scale      # (the plate clears a Hunter drawn bigger)
+	var fallback: float = HudPlate.PLATE_OFFSET * drawn
+	ok(no_offset and is_equal_approx(HudPlate.plate_offset(P), fallback) and HudPlate.PLATE_OFFSET == 2.35,
+		"an archetype without plate_offset puts the plate at the 2.35 m fallback x%.2f, the drawn size (%.2f)"
+		% [drawn, HudPlate.plate_offset(P)])
 	P.arch = ""
-	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
+	ok(is_equal_approx(HudPlate.plate_offset(P), fallback), "a hunter with no archetype falls back too")
 	P.arch = arch_was
 	# ---------------------------------------------------------------- 4d. each squad row wears its Boki's icon
 	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and x.kin != null)
@@ -243,7 +246,7 @@ func _check_keys(P: Hunter) -> void:
 
 ## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
 ## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
-## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
+## DashFlow and raises nothing, nor while it waits out Loco.press_buffer past the dash's end. Runs in one frame.
 func _check_deny(P: Hunter) -> void:
 	var hud = P.m.hud
 	PressDeny.last.clear()
@@ -272,7 +275,7 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
 	flow.route(Match.DT)
 	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
-		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
+		"E on cooldown pressed mid-dash stays buffered through Loco.press_buffer and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
 
@@ -284,26 +287,51 @@ func _shown(hud, h: Hunter) -> Dictionary:
 func _state(hud, h: Hunter) -> Dictionary:
 	return hud.plates.st.get(h.nid, {})
 
-## 7. A teammate knocked: a short faint line (MateAlerts), gone after LINE_S.
-func _mate_down(m: Match, hud, P: Hunter) -> void:
+## 8. The knock banners: the player knocks a rival, then a rival knocks a teammate.
+func _knock_banners(m: Match, hud, P: Hunter) -> void:
+	var kb: KnockBanner = hud.knocks
+	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team and not x.downed and not x.out)
+	ok(rivals.size() >= 2, "two rivals up to knock (%d)" % rivals.size())
+	if rivals.size() < 2:
+		return
+	var knocked: Hunter = rivals[0]
+	var other: Hunter = rivals[1]
+	m.knock(knocked, P, {})
+	await main.get_tree().process_frame
+	ok(kb.word() == KnockBanner.FOE_WORD and kb.ring_color() == KnockBanner.FOE_RING and kb.who == knocked,
+		"you knock a rival: KNOCK in the red ring, their face and name ('%s')" % kb.word())
+	kb.knocked(P, other, P)
+	ok(kb.count == 2 and kb.who == other, "a second knock within %.1fs: the newest, x%d" % [
+		float(KnockBanner.rules()["combo_s"]), kb.count])
+	var back := float(KnockBanner.rules()["back_alpha"])
+	ok(back >= 0.45 and back <= 0.6 and not Geometry2D.triangulate_polygon(kb._slash).is_empty()
+		and not Geometry2D.triangulate_polygon(kb._slash_dark).is_empty(),
+		"the slash and pill are see-through (alpha %.2f, 0.45-0.6) and the slash blades are clean shapes" % back)
+	await _banner_closes(kb)
 	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.downed)
-	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
-	ok(not mates.is_empty() and not rivals.is_empty(),
-		"a teammate and a rival to knock them (%d, %d)" % [mates.size(), rivals.size()])
-	if mates.is_empty() or rivals.is_empty():
+	ok(not mates.is_empty(), "a teammate to knock (%d)" % mates.size())
+	if mates.is_empty():
 		return
 	var mate: Hunter = mates[0]
-	m.knock(mate, rivals[0], {})
+	m.knock(mate, other, {})
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	var ln: Dictionary = hud.mates.lines.get(mate.nid, {})
-	ok(String(ln.get("text", "")) == "down",
-		"a teammate down: one line by their squad row ('%s')" % ln.get("text", ""))
-	ok(MateAlerts.LINE_S <= 1.5 and MateAlerts.LINE_A <= 0.6,
-		"the line is short and faint (%.1fs, %.1f)" % [MateAlerts.LINE_S, MateAlerts.LINE_A])
-	hud.mates.track(hud, P, MateAlerts.LINE_S)
-	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
-		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
+	ok(kb.word() == KnockBanner.ALLY_WORD and kb.ring_color() == KnockBanner.ALLY_RING and kb.who == mate
+		and kb.count == 1 and kb.modulate.a > 0.0,
+		"a teammate down: ALLY KNOCKED in the cyan ring, on screen ('%s', a %.2f)" % [kb.word(), kb.modulate.a])
+	ok(not hud.mates.lines.has(mate.nid), "... and no extra line by their squad row (its KNOCKED tag says it)")
+	await _banner_closes(kb)
+
+## Waits out the banner on show: it holds past 1 s and is gone by 1.5 s (its own clock, real frames).
+func _banner_closes(kb: KnockBanner) -> void:
+	var shown_for := 0.0
+	var guard := 0
+	while kb.word() != "" and guard < 100000:
+		shown_for = kb.t
+		await main.get_tree().process_frame
+		guard += 1
+	ok(kb.word() == "" and shown_for >= 1.0 and shown_for <= 1.5,
+		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

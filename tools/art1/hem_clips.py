@@ -293,10 +293,15 @@ def clips():
     out.append(C("hail", 0.6, [(0.0, dict(HIP)), (0.12, H0, "out"), (0.3, dict(H0, dr=1.0)), (0.36, H1, "out"), (0.42, H1), (0.6, dict(HIP))]))
     # --- Shift: the dodge roll, a low tuck through her left shoulder with the bow held out of the way, up onto her toes
     T = {"prt": (0.4, 0, 0), "tor": (0.5, 0, 0), "hed": (0.4, 0, 0), "pel": (0, 0.1, -0.28), "G": (-0.2, 0.12, 0.72), "BA": n3((0.0, 0.9, 0.4)), "BS": n3((0.0, -0.4, 0.9)), "RF": (0.2, 0.24, 0.72), "RD": n3((0, 0.3, -1)), "RP": (-1, 0, 0), "Rpole": (0.8, -0.5, 0.0)}
-    out.append(C("roll", 0.36, [(0.0, dict(READY)), (0.07, dict(T, prt=(1.4, 0.0, 0.2), pel=(0, 0.2, -0.36), FL=(-0.12, 0.3, 0.3), FR=(0.12, 0.05, 0.28), FLp=1.0, FRp=1.0), "out"),
-                                (0.17, dict(T, prt=(3.3, 0.0, 0.3), pel=(0, 0.26, -0.33), tor=(0.8, 0, 0), FL=(-0.12, 0.3, 0.6), FR=(0.12, 0.34, 0.66), FLp=2.0, FRp=2.0), "lin"),
-                                (0.24, dict(T, prt=(5.2, 0.0, 0.1), pel=(0, 0.28, -0.3), FL=(-0.12, 0.3, 0.2), FR=(0.12, -0.05, 0.3), FLp=0.7, FRp=1.0), "lin"),
-                                (0.36, dict(READY, prt=(6.283 + 0.08, 0.0, 0.0), pel=(0, 0.04, -0.09), brow=0.5, lid=0.1), "lin")]))
+    # timed to her felt roll (3.0 m in 0.386 s, KIT_PARITY gap 4): the turn follows the dash's speed curve (dash_feel
+    # archer: eases in, fastest at 44%, skids out), so she loads the shoulder, whips over and comes up low and crouched as
+    # the travel ends (0.386 s), where the walk takes over; the standing tail after it only closes the clip
+    out.append(C("roll", 0.52, [(0.0, dict(READY)), (0.08, dict(T, prt=(0.9, 0.0, 0.15), pel=(0, 0.14, -0.38), FL=(-0.12, 0.28, 0.24), FR=(0.12, 0.0, 0.26), FLp=1.0, FRp=1.0), "out"),
+                                (0.17, dict(T, prt=(2.6, 0.0, 0.3), pel=(0, 0.24, -0.34), tor=(0.8, 0, 0), FL=(-0.12, 0.3, 0.5), FR=(0.12, 0.2, 0.56), FLp=1.6, FRp=1.6), "lin"),
+                                (0.25, dict(T, prt=(4.6, 0.0, 0.25), pel=(0, 0.28, -0.31), tor=(0.8, 0, 0), FL=(-0.12, 0.34, 0.62), FR=(0.12, 0.3, 0.64), FLp=2.0, FRp=2.0), "lin"),
+                                (0.33, dict(T, prt=(5.9, 0.0, 0.1), pel=(0, 0.28, -0.3), FL=(-0.12, 0.3, 0.2), FR=(0.12, -0.05, 0.3), FLp=0.7, FRp=1.0), "out"),
+                                (0.39, dict(T, prt=(6.283 + 0.3, 0.0, 0.0), pel=(0, 0.12, -0.24), tor=(0.3, 0, 0), hed=(0.1, 0, 0), FL=(-0.12, 0.16, A_Z), FR=(0.12, -0.12, A_Z), brow=0.5, lid=0.1)),
+                                (0.52, dict(READY, prt=(6.283 + 0.08, 0.0, 0.0), pel=(0, 0.04, -0.09), brow=0.5, lid=0.1))]))
     # Spirit Walk: light on the toes, leaning in, the arms trailing like a ghost (upper body, the legs keep running)
     SW = {"tor": (0.26, 0.0, 0.0), "hed": (-0.24, 0.0, 0.0), "G": (-0.28, -0.20, 0.92), "BA": n3((0.05, 0.86, 0.5)), "BS": n3((0.0, -0.5, 0.86)), "RF": (0.28, -0.22, 0.92), "RD": n3((0.3, -0.75, -0.55)), "RP": (-0.7, -0.6, 0.3), "Rpole": (0.6, 0.2, -0.8), "Lpole": (-0.6, 0.2, -0.8), "brow": -0.3, "lid": 0.3, "fing": 0.1}
     out.append(C("spirit", 1.0, [(0.0, dict(HIP)), (0.2, SW), (0.6, dict(SW, tor=(0.3, 0.05, 0.03), G=(-0.28, -0.22, 0.90), RF=(0.28, -0.25, 0.95))), (1.0, SW)]))

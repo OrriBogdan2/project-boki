@@ -119,7 +119,7 @@ func _match() -> Array:
 	while is_instance_valid(m) and m.time < secs:
 		P.hp = P.max_hp
 		if not fought and m.time >= FIGHT_AT:
-			_bring_fight(m)
+			bring_fight(m)
 			fought = true
 		var t0 := Time.get_ticks_usec()
 		m.step(DT)
@@ -127,14 +127,14 @@ func _match() -> Array:
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
+		fl.append(frame("match", fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
-		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
+		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * avg(fl.slice(-31, -1), "wall"):
 			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
 				added])
 		added.clear()
 		last = now
-	_summary("match", fl)
+	summary("match", fl)
 	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
@@ -145,7 +145,7 @@ func _match() -> Array:
 	return fl
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
-func _bring_fight(m: Match) -> void:
+func bring_fight(m: Match) -> void:
 	var P: Hunter = m.player
 	var n := 0
 	for h in m.hunters:
@@ -180,9 +180,9 @@ func _frames(part: String) -> void:
 		var now := Time.get_ticks_usec()
 		var wall := (now - last) / 1000.0
 		last = now
-		fl.append(_frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
+		fl.append(frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
-	_summary(part, fl)
+	summary(part, fl)
 	_meshes()
 	if part != "farm" and part != "hub_bare":
 		await _budget(part, fl)
@@ -223,9 +223,9 @@ func _budget(part: String, fl: Array) -> void:
 		main.get_viewport().get_texture().get_image().save_jpg("%s/%s.jpg" % [shots_dir, part], 0.9)
 	var got := {"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
-		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall"), "base_life_ms": _life_ms(home)}
+		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": avg(fl, "wall"), "base_life_ms": _life_ms(home)}
 	if Settings.quality() == "low": B = B.merged({"frame_ms": B["frame_ms_low"]}, true)
-	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), _avg(fl, "draws")])
+	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), avg(fl, "draws")])
 	var held: Dictionary = GardenZones.rules()["ratchet"].get(Settings.quality(), {}).get(part, {})
 	var bad := false
 	for k in got:
@@ -277,12 +277,12 @@ func _base() -> void:
 			print("BENCH base race started: %s" % (home.hrace.run != null))
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		fl.append(_frame("base", fl.size(), (now - last) / 1000.0, 0.0))
+		fl.append(frame("base", fl.size(), (now - last) / 1000.0, 0.0))
 		if fl[-1]["wall"] > SLOW_MS and t > WARM_S:
 			slow.append("%.1fs %.0fms" % [t, fl[-1]["wall"]])      # (printed at the end: a print can stall a frame)
 		last = now
 		t += fl[-1]["wall"] / 1000.0
-	_summary("base", fl)
+	summary("base", fl)
 	print("BENCH base slow frames after warm-up: ", ", ".join(slow.slice(0, 24)))
 	await _sections(home)
 	_meshes()
@@ -308,7 +308,7 @@ func _sections(home) -> void:
 	var top := ks.slice(0, 8).map(func(k): return "%s %.2f" % [k, us[k] / 1000.0 / SECTION_FRAMES])
 	print("BENCH base steps (ms per frame): " + ", ".join(top))
 
-func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
+func frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"hud": hud_us / 1000.0,
 		"rcpu": RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu(),
@@ -333,12 +333,12 @@ func _hook_hud(m: Match) -> void:
 			hud_us = Time.get_ticks_usec() - t0 + h.panels.used_us      # (the panel canvas: HudPanels)
 			h.panels.used_us = 0)
 
-func _avg(fl: Array, key: String) -> float:
+func avg(fl: Array, key: String) -> float:
 	var s := 0.0
 	for f in fl: s += float(f[key])
 	return s / maxf(1.0, fl.size())
 
-func _summary(part: String, fl: Array) -> void:
+func summary(part: String, fl: Array) -> void:
 	var w: Array = fl.map(func(f): return float(f["wall"]))
 	w.sort()
 	var cut := maxi(1, w.size() / 100)
@@ -351,13 +351,13 @@ func _summary(part: String, fl: Array) -> void:
 	var sc99 := float(sc[int((sc.size() - 1) * 0.99)])
 	var slow := w.filter(func(x): return x > SLOW_MS).size()
 	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), max %.1f ms, over %.0f ms: %d" % [
-		part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
+		part, fl.size(), avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
 	var cpu_line := "BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, " + \
 		"render cpu %.2f ms, gpu %.2f ms"
 	print(cpu_line % [
-		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu"), _avg(fl, "gpu")])
+		part, avg(fl, "script"), sc99, avg(fl, "proc"), avg(fl, "hud"), avg(fl, "rcpu"), avg(fl, "gpu")])
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objs %.0f, nodes %.0f, fx %d, lights %d, shadowed %d, casters %d" % [
-		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
+		part, avg(fl, "draws"), avg(fl, "tris") / 1000.0, avg(fl, "objs"), avg(fl, "nodes"),
 		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights(), _casters()])
 	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,

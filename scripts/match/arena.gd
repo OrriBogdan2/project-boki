@@ -180,7 +180,7 @@ func tick(dt: float) -> void:
 		if not is_instance_valid(D):
 			continue
 		dm["quiet"] = float(dm["quiet"]) + dt
-		if D.downed or D.hp < DUMMY_HP * 0.25 or float(dm["quiet"]) > 3.0:
+		if not D.has_meta(SignatureDrill.META) and (D.downed or D.hp < DUMMY_HP * 0.25 or float(dm["quiet"]) > 3.0):
 			if D.downed:
 				m.revive_hunter(D, null)
 			D.hp = DUMMY_HP
@@ -261,7 +261,6 @@ func reset() -> void:
 		D.set_meta("marks", {})
 		dm["hits"] = []; dm["total"] = 0.0; dm["last"] = 0.0
 	hits_all.clear(); dealt = 0.0
-	m.fx.ring(home, 1.6, Color("8fe3c8"), 0.35)
 	m.sfx("revive", null, -8.0, 1.2)
 
 ## Become another archetype on the spot (its weight class comes with it); your Boki stays.

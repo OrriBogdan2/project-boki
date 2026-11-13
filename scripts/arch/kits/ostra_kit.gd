@@ -411,7 +411,7 @@ func _swap_end(go: bool) -> void:
 			if o2 != h and o2.team == h.team and not o2.downed and (
 				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
 			):
-				o2.shield = maxf(o2.shield, float(dd["ally_shield"]))
+				ReceiverCue.shield(o2, float(dd["ally_shield"]))
 				o2.shield_t = 3.0
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
@@ -651,6 +651,7 @@ func _pop(hit: bool) -> void:
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
+		CombatBus.tech.emit(h, "ostra")
 		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots

@@ -9,6 +9,8 @@ var world: World
 ## reveal until then.
 var building := false
 var cam: CamRig
+var evolving: EvolveMoment      # the form change in play, while it plays (the camera leans toward it)
+var nesting: NookMoment         # the pairing beat at the Nook, while it plays (any key skips it)
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
@@ -1095,6 +1097,10 @@ func _process(delta: float) -> void:
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
+	if evolving:
+		focus = evolving.frame(cam, focus, HOME_ZOOM)
+	elif nesting and nesting.running:
+		focus = nesting.frame(cam, focus, HOME_ZOOM)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
@@ -2320,6 +2326,10 @@ func open_job_board(tab := "") -> void:
 	WorkView.open(self)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if nesting and nesting.running and event is InputEventKey and event.pressed:
+		nesting.skip()
+		get_viewport().set_input_as_handled()
+		return
 	if hb and hb.active and panel_open == "" and not Overlay.is_open():
 		if hb.input(event):
 			get_viewport().set_input_as_handled()
@@ -3658,43 +3668,49 @@ func _play_evolutions() -> void:
 	rec["pending_evo"] = []
 	Save.save_game()
 	var n: Node3D = k["node"]
-	# bring it next to you
-	var at := ppos + Vector3(1.6, 0, 0.6)
-	if world.is_void(at.x, at.z) or world.is_block(at.x, at.z):
-		at = ppos + Vector3(0, 0, 1.4)
-	k["pos"] = at
+	var at: Vector3 = n.position
 	k["goal"] = Vector3.INF
 	k["busy"] = true
-	n.position = at
-	cam.zoom_to = 0.55
 	var big := false
 	for e in evs:
 		if e["kind"] == "form": big = true
-	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("skill")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
-	var tw := create_tween()
-	tw.tween_interval(0.4)
-	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tw.tween_callback(func():
-		# swap in the grown model
-		if not is_instance_valid(n):
-			building_now = false
-			return
-		_swap_kin_model(k)
+	# the grown model, with the label and bubble the old one carried
+	var nn := Models.kin(rec["species"], rec)
+	var lbl: Label3D = k["emote"]
+	n.remove_child(lbl)
+	nn.add_child(lbl)
+	if k.has("say") and is_instance_valid(k["say"]):
+		n.remove_child(k["say"])
+		nn.add_child(k["say"])
+	k.erase("bubble")
+	k["node"] = nn
+	var seen := EvolveMoment.on_screen(cam, at) and EvolveMoment.has_model(nn)
+	var watchers: Array = EvolveMoment.watchers_of(kins, k, at) if seen else []
+	for w in watchers: w["busy"] = true
+	var end := func() -> void:
+		for w in watchers: w["busy"] = false
 		k["busy"] = false
 		k["t"] = 3.0
-		fx.body_glow(at, tint)
-		Sfx.play("unlock")
+		building_now = false
+		evolving = null
+		cam.zoom_to = HOME_ZOOM
 		Sfx.play("kin_happy")
 		_emote(k, "★")
-		building_now = false
-		cam.zoom_to = HOME_ZOOM
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
-		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED)))
+		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED))
+	if seen:
+		evolving = EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
+	else:
+		nn.position = at
+		nn.rotation = n.rotation
+		add_child(nn)
+		n.queue_free()
+		end.call()
 
 ## Rebuilds a kin's model from its record in place (a new form, a meal's lean), keeping its labels.
 func _swap_kin_model(k: Dictionary) -> void:
@@ -4166,10 +4182,9 @@ func _refresh_nest() -> void:
 	var egg: Dictionary = Save.d.get("egg", {})
 	if egg.is_empty() or _visiting():
 		return
-	var col: Color = Data.KIN[_egg_species()]["color"] if _egg_species() != "" else Color("f2e6cf")
 	if egg.get("rare", false):
-		# a boss's egg: gold, glowing, with the rare kin's colour in its spots
-		nest = Models.nest_egg(Color("ffd36a"), Data.KIN[_egg_species()].get("glow", col) if _egg_species() != "" else col)
+		# a boss's egg: the gold Rare Egg, glowing, its seam ring in the rare kin's glow
+		nest = Models.nest_egg("rare", 0.35, Data.KIN[_egg_species()].get("glow", Color("6fe0d0")) if _egg_species() != "" else Color("6fe0d0"))
 		var sp2 := CPUParticles3D.new()
 		sp2.amount = 16; sp2.lifetime = 1.6; sp2.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; sp2.emission_sphere_radius = 0.35
 		sp2.direction = Vector3.UP; sp2.spread = 25.0; sp2.initial_velocity_min = 0.3; sp2.initial_velocity_max = 0.8; sp2.gravity = Vector3.ZERO
@@ -4177,7 +4192,7 @@ func _refresh_nest() -> void:
 		sp2.material_override = Models.glow_mat(Color(1.0, 0.88, 0.45, 0.9)); sp2.position.y = 0.4
 		nest.add_child(sp2)
 	else:
-		nest = Models.nest_egg(col, Color("fff6c0"))
+		nest = Models.nest_egg(EggModels.kind_of(_egg_species()))
 	nest.position = NEST_AT
 	add_child(nest)
 
@@ -4214,16 +4229,19 @@ func _care_tick(d: float) -> void:
 		for k in kins:
 			var rec: Dictionary = k["rec"]
 			var in_bed: bool = k.has("bed") and Vector2(k["pos"].x - k["bed"].x, k["pos"].z - k["bed"].z).length() < 0.6
-			Care.tick(rec, care_acc, float(k.get("nap_t", 0.0)) > 0.0 or (night and in_bed) or k.has("indoors"), raining)
+			var resting: bool = float(k.get("nap_t", 0.0)) > 0.0 or (night and in_bed) or k.has("indoors")
+			Care.tick(rec, care_acc, resting, raining)
 		care_acc = 0.0
 		KinBondMoment.tick(self)      # a bond rank it just reached: a heart, a line and a card
 	if care_save > 20.0:
 		care_save = 0.0
 		Save.save_game()
 	# a little life: an egg wobbles when it's close, dusty kin shed a little dust
+	if is_instance_valid(nest): EggSfx.hear("nest", 1.0 if _egg_ready() else 0.0, NEST_AT, d)
 	if is_instance_valid(nest) and _egg_ready():
 		var sh: Node3D = nest.get_node("Shell")
-		sh.rotation.z = sin(Time.get_ticks_msec() / 90.0) * 0.12 * (1.0 if fmod(Time.get_ticks_msec() / 1000.0, 3.0) < 0.6 else 0.0)
+		var rattling := fmod(Time.get_ticks_msec() / 1000.0, 3.0) < 0.6
+		sh.rotation.z = sin(Time.get_ticks_msec() / 90.0) * 0.12 * float(rattling)
 
 ## The thought bubble over each kin that wants something (KinWants), and the sleeping badge by the door.
 func _update_bubbles(d: float) -> void:
@@ -4910,7 +4928,9 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.save_game()
 	_close_panel()
 	_refresh_nest()
-	fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
+	nesting = NookMoment.play(self, fx, kins, [rec["uid"], ok["uid"]], nest, Data.KIN[esp]["color"], UnstableMix.unstable(rec, ok))
+	if nesting == null:
+		fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
 	Sfx.play("unlock")
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
@@ -4973,7 +4993,7 @@ func _nest_demo(which: String) -> void:
 	match which:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
-		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"pair": pa["lean"] = {"ember": 6.0, "storm": 2.0}; nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"card": kin_tab = "Growth"; _open_kin(kid)
 		"card-care": kin_tab = "Care"; _open_kin(kid)
 		"card-train": kin_tab = "Training"; _open_kin(kid)
@@ -5040,12 +5060,10 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	Save.save_game()
 	building_now = true
 	# the egg hatches in stages: wiggles, cracks, a peek, then the kin pops out
-	var shell_c: Color = Color("ffd36a") if rare else Color(Data.KIN[baby["species"]]["color"]).lightened(0.15)
 	if is_instance_valid(hide):
 		hide.visible = false
 	var eh := EggHatch.new(baby["species"], fx, 0.26, 0.36, 1.0, baby)
-	eh.shell_col = shell_c
-	eh.spot_col = Color("fff6c0")
+	eh.kind = "rare" if rare else ""
 	eh.position = at
 	eh.scale = Vector3.ONE * 1.2
 	add_child(eh)

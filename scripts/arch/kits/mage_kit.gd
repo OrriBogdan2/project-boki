@@ -305,23 +305,32 @@ func _tick_lmb() -> void:
 	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
 	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, TEAL, PINK, 0.3, 0.12)
 	m.later(0.06, _fingertip.bind(left))
-	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos))
+	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos), _finger_at.bind(left))
 
 ## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
 func _fingertip(left: bool) -> void:
-	if not is_instance_valid(h) or h.anim == null:
+	if not is_instance_valid(h):
 		return
-	var hand: Node3D = h.anim.hand_l if left else h.anim.hand_r
-	if hand == null:
+	var tip := _finger_at(left)
+	if tip == Vector3.INF:
 		return
-	var d := h.aim_dir()
-	var tip := hand.global_position + Vector3(d.x, 0, d.y) * 0.15
+	fx().crackle(tip, TEAL, PINK, 0.6, 4, 0.08)
+	fx().star(tip, TEAL, PINK, 0.75, 0.08)
+
+## The fingertip that fires, as drawn (the model's scale): its anchor, else a palm's reach past the hand.
+## Vector3.INF with no model or hand. Only the look starts here: the round's own start is gameplay.
+func _finger_at(left: bool) -> Vector3:
 	if h.model:
 		var at := WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle")
 		if at != null:
-			tip = at.global_position
-	fx().crackle(tip, TEAL, PINK, 0.6, 4, 0.08)
-	fx().star(tip, TEAL, PINK, 0.75, 0.08)
+			return at.global_position
+	if h.anim == null:
+		return Vector3.INF
+	var hand: Node3D = h.anim.hand_l if left else h.anim.hand_r
+	if hand == null:
+		return Vector3.INF
+	var d := h.aim_dir()
+	return hand.global_position + Vector3(d.x, 0, d.y) * 0.15
 
 ## Where a finger bolt ended: a fan of splinters sprays back toward the caster and a crackle.
 func _bolt_end(at: Vector3, vel: Vector2, from: Vector3) -> void:
@@ -528,6 +537,7 @@ func _blowout(f: Ent) -> void:
 	clear_sparks(f)
 	blowouts += 1
 	ComboMark.payoff(m, h, f)
+	CombatBus.tech.emit(h, "mage")
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
@@ -631,12 +641,16 @@ func fire_rmb(c: Dictionary) -> void:
 	var min_t := float(sd["min_t"])
 	var k := clampf((held_t - min_t) / (float(sd["hold"]) - min_t), 0.0, 1.0)
 	last_variant = "hold" if k > 0.5 else "tap"
-	play("mage_rmb")
 	var wait := maxf(0.0, min_t - held_t)
-	if wait > 0.0:
-		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _coil(k))
+	if wait > 0.0:         # (a tap: the rod leaves at min_t, and the throw beat plays with it)
+		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _throw(k))
 	else:
-		_coil(k)
+		_throw(k)
+
+## The Storm Rod leaves her hand: the throw beat plays as it goes.
+func _throw(k: float) -> void:
+	play("mage_rmb")
+	_coil(k)
 
 ## Rank 3 of Wirerun: the run's own hit hits harder; the Blowout is the passive's and does not grow (dash.rank3_mult).
 func run_rank_k() -> float:

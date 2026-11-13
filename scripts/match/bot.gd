@@ -87,6 +87,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if a["think"] <= 0.0:
 		a["think"] = randf_range(0.12, 0.3) / (0.6 + a["skill"]) * SimLod.think_k(m, h)
 		_choose(m, h)
+	if BotRoute.fly_lift(m, h, inp):
+		return
 	# crossing to another island on a glide route: run off the edge, jump, open the glider at the
 	# top of the jump and steer for the landing (through any rings on the way)
 	if a.has("cross"):
@@ -911,41 +913,29 @@ func _blight_flee(m: Match, h: Hunter) -> Vector3:
 			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 	return Vector3.INF
 
-## Direction to walk toward a goal, using jump pads to cross to other islands.
+## Direction to walk toward a goal: across to other islands by the quickest pads and links, and up to
+## high ground by a lift ring when that beats the walk (BotRoute).
 func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var here := m.world.island_of(h.pos.x, h.pos.z)
 	var there := m.world.island_of(goal.x, goal.z)
 	if here < 0 or there < 0 or here == there:
 		if here >= 0 and h.grounded: h.ai.erase("cross")
-		return _steer(m, h, goal)
-	# breadth-first search over the island graph
-	var prev := {here: -1}
-	var q := [here]
-	while q.size() > 0:
-		var cur: int = q.pop_front()
-		if cur == there:
-			break
-		for pd in m.world.pads + m.world.links:
-			if pd["from"] == cur and not prev.has(pd["to"]):
-				prev[pd["to"]] = cur
-				q.append(pd["to"])
-	if not prev.has(there):
+		var gt := Vector2i(floori(goal.x), floori(goal.z))
+		var walk := func(): return float(_grid_path(m, Vector2i(floori(h.pos.x), floori(h.pos.z)), gt).size())
+		var lift := BotRoute.lift_aim(m, h, goal, walk) if here >= 0 else Vector3.INF
+		return _steer(m, h, goal if lift == Vector3.INF else lift)
+	h.ai.erase("lift")
+	var hop := BotRoute.next_hop(m, h, here, there)
+	if hop.is_empty():
 		return h.dir_to(goal)
-	var nxt := there
-	while prev[nxt] != here and prev[nxt] != -1:
-		nxt = prev[nxt]
-	for pd in m.world.pads:
-		if pd["from"] == here and pd["to"] == nxt:
-			h.ai["pad_at"] = pd["pos"]
-			h.ai.erase("cross")
-			return _steer(m, h, pd["pos"])
-	for lk in m.world.links:
-		if lk["from"] == here and lk["to"] == nxt:
-			if not h.ai.has("cross") or h.ai["cross"] != lk:
-				h.ai["cross"] = lk
-				h.ai["cross_t"] = 14.0
-			return _steer(m, h, lk["take"])
-	return h.dir_to(goal)
+	if hop.has("pos"):
+		h.ai["pad_at"] = hop["pos"]
+		h.ai.erase("cross")
+		return _steer(m, h, hop["pos"])
+	if not h.ai.has("cross") or h.ai["cross"] != hop:
+		h.ai["cross"] = hop
+		h.ai["cross_t"] = 14.0
+	return _steer(m, h, hop["take"])
 
 ## Heads for a spot on this island, finding a way around walls when they're in the way.
 ## The plan (straight line or tile path) is cached per goal tile: walls don't move, so the
@@ -1010,10 +1000,13 @@ func _no_path(m: Match, h: Hunter) -> void:
 		a["banned"] = bans
 		a.erase("nopath")
 
+const STEP_MAX := 1.7     # m: the highest rise from one tile to the next a bot walks up (higher is a cliff)
+
 func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
+	var y := m.world.ground_at(a.x, a.y)
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		if m.world.is_block(p.x, p.y) or m.world.is_block(p.x + side.x, p.y + side.y) or m.world.is_block(p.x - side.x, p.y - side.y):
@@ -1022,6 +1015,11 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
 		if m.world.is_void(p.x, p.y):
 			return false
+		# and so does a cliff up: straight at high ground, a bot ran into its foot and never took the stairs
+		var py := m.world.ground_at(p.x, p.y)
+		if py - y > STEP_MAX:
+			return false
+		y = py
 	return true
 
 ## Breadth-first search over walkable tiles (a window around the trip), returning tile centres.
@@ -1047,7 +1045,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
 			var i := W.idx(nx.x, nx.y)
 			if W.kind[i] != World.T_GROUND:
 				continue
-			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
+			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > STEP_MAX:
 				continue
 			prev[nx] = cur
 			q.append(nx)

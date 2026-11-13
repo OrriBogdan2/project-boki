@@ -85,11 +85,11 @@ func _buffered() -> void:
 	P.ak.use_e()
 	_open(m, P, "e")
 	var min_t := float(K.e_def()["min_recast"])
-	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - ArchKit.RECAST_BUFFER * 0.6:
+	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - Loco.press_buffer * 0.6:
 		m.step(DT)
 	P.ak.use_e()
 	var held := not K.seed.is_empty()
-	step(m, ArchKit.RECAST_BUFFER)
+	step(m, Loco.press_buffer)
 	var popped := K.seed.is_empty()
 	ok("ostra e: an early press is buffered into the window", held and popped, "held %s popped %s" % [held, popped])
 	await done(m)
