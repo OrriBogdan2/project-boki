@@ -158,6 +158,18 @@ the stun's (charge spent, no hit) plus a normal glide; checked by `--mage-combo-
 Suggestions (not built): the LMB landing in Kitefall's hang is ours (the source names only the reactivate); if the
 owner wants strict parity, X would be the only landing key.
 
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+|---|---|---|---|
+| LMB | bolts fire as on the ground | no shot, glider stays open | gap (no air or glide rule) |
+| RMB Storm Rod | the same hold and throw | the same, glider stays open | [D] Joule: no air rule |
+| Shift Wirerun | the same Surge; with a charge it holds her height, with none it is the plain air dash (`mage_dash_ex`) | the glider folds for the dash; a held glide key reopens it as it ends | [D] Joule: no air rule; footage: air Surge not shown |
+| E Skycall | the same cast | the same cast, glider stays open | [D] Joule: no air rule |
+| X Kitefall | the same launch, from where she is; invulnerable in the air | the same, glider stays open | [D] "PRESS to launch into the air"; thebackdash list: invulnerable |
+
 ## Combinations
 | Combination | What fires | Check |
 |---|---|---|
