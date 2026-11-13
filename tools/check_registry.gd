@@ -40,6 +40,7 @@ const CHECKS := {
 	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
 	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
 	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
+	"--mood-icon-check": ["res://tools/mood_icon_check.gd", "mood_icon_check", null],
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5

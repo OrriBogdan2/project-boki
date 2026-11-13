@@ -3176,6 +3176,7 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.spacer(4))
 			var starving := Care.starve_stage(rec) != ""
 			c1.add_child(UI.section(Care.condition_name(rec), Color("ff9a7a") if starving else UI.PINK))
+			c1.add_child(UI.kv("Feeling", KinMood.words(self, rec)))
 			if starving:
 				c1.add_child(UI.para(String(Care.STARVE_INFO[Care.starve_stage(rec)][1]), 12, Color("ffb0a0")))
 			for n in Care.NEEDS:
