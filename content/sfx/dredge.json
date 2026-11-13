@@ -25,7 +25,8 @@
   "dredge_step_snow": "step",
   "dredge_hurt": "grunt",
   "dredge_down": "grunt",
-  "dredge_death": "grunt"
+  "dredge_death": "grunt",
+  "dredge_stop": "impact"
  },
  "signature": ["dredge_coin_jingle", "dredge_junk_clatter", "dredge_pickup"],
  "kit_files": ["dredge_blast.gd"],

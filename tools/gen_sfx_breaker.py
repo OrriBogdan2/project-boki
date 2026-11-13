@@ -401,6 +401,25 @@ def death():
     return pad(mix(fo(lpf(v, 4000), 0.4), sink, gurgle, bell), 2.6)
 
 
+# ------------------------------------------------------------------ ready tick and interrupt
+def ready_tick():
+    """Albert's Crushing Blow is fully charged: a small hard steel tick with a short ring."""
+    return mix(click(0.004, 3000, 9000) * 0.8, S.fm(2300, 1.41, 2.0, 0.22, 0.07) * 0.6)
+
+
+def interrupt():
+    """The charge broken: a dull clunk of the hull, then a falling groan."""
+    return mix(kick(300, 60, 0.45, 0.04, 0.14) * 1.1, crack(0.05, 500, 3500, 0.015) * 0.7,
+               at(lpf(S.sweep(420, 110, 0.4, 'saw'), 900) * S.shape(0.4, 0.01, 0.05, 0.3) * 0.5, 0.03))
+
+
+# ------------------------------------------------------------------ kit cues (the Slam payoff)
+def crush():
+    """The Slam landing on a guarded foe: a crack of plate, a low thump and a short ring of struck steel."""
+    return mix(crack(0.05, 1500, 8000, 0.015) * 0.9, kick(160, 50, 0.45, 0.04, 0.14) * 1.1,
+               ring([420, 880, 1310], 0.5, [0.15, 0.1, 0.07], [0.5, 0.3, 0.2]) * 0.6)
+
+
 def build():
     S.takes_cat('bjorn_throw', throw, 3, 'fire')
     S.takes_cat('bulwark_hammer_clang', hammer_clang, 3, 'signature')
@@ -429,6 +448,9 @@ def build():
     S.takes_cat('bulwark_hurt', hurt, 3, 'grunt')
     S.save_cat('bulwark_down', down(), 'grunt')
     S.save_cat('bulwark_death', death(), 'grunt')
+    S.save_cat('bulwark_ready', ready_tick(), 'cast')
+    S.save_cat('bulwark_interrupt', interrupt(), 'impact')
+    S.save_cat('bulwark_crush', crush(), 'impact')
 
 
 if __name__ == '__main__':

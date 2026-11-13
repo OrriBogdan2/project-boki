@@ -30,7 +30,12 @@
   "juggernaut_step_grass": "step",
   "juggernaut_step_stone": "step",
   "juggernaut_step_wood": "step",
-  "juggernaut_step_snow": "step"
+  "juggernaut_step_snow": "step",
+  "juggernaut_ready": "cast",
+  "juggernaut_sweet": "impact",
+  "jug_spin": "cast",
+  "jug_lunge_go": "cast",
+  "jug_haul_slam": "impact"
  },
  "kit_files": ["juggernaut_chain.gd", "juggernaut_drop.gd", "juggernaut_ult.gd"],
  "signature": ["juggernaut_chain_rattle", "juggernaut_blade_hiss", "juggernaut_enrage"],

@@ -5,7 +5,7 @@ extends RefCounted
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##      and its signature weapon's JSON names one of them (no stock sound)
-##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
+##   4. every cue that Hunter's kit emits (m.sfx, payoff and armed sounds, content/vfx moves) is one of its own
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
@@ -34,6 +34,8 @@ extends RefCounted
 ##      their cast cue, Sfx loads it, only a Kin's k1/k2/zone hits play it
 ##  16. every breakable material breaks with its own sound in 3 takes or more, a powder keg has its own fuse hiss
 ##      (as long as its fuse) and blast, and every chest tier opens with its own lid creak (content/sfx/breakables.json)
+##  17. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
+##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -43,6 +45,8 @@ const REACH_MAX := 80.0        # m: past this a sound would carry over most of t
 const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
 const HELD_S := 3.0            # s of held fire per sound
 const HELD_STEP_MS := 80       # ms a round: the source cadence of Vex's rifle (main has 0.12 s)
+# m.sfx("x"), armed_fx(word, slot, "x") and payoff_fx(at, word, col, "x"): the sound is group 1 (empty = shared)
+const CUE_CALLS := "(?:\\.sfx\\(|armed_fx\\([^,)]*,[^,)]*,\\s*|payoff_fx\\([^,]+,[^,]+,[^,]+,\\s*)\"([a-z0-9_]*)\""
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const UNDER_COMBAT_DB := 10.0  # dB: a rank cue as played sits at least this far under a weapon shot ("fire")
 const READY_SECS := 0.5        # s: the new-point chime's audible length at most
@@ -77,6 +81,7 @@ func run(main: Node) -> void:
 	_boki_cues()
 	_boki_impacts()
 	_breakables()
+	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -193,23 +198,34 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	h.free()
 	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
-	_kit_names(arch, d.get("kit_files", []))
+	_kit_names(arch, d.get("kit_files", []), sounds)
 
-## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
-## files the set lists under "kit_files" (paths under scripts/arch/kits/).
-func _kit_names(arch: String, extra: Array) -> void:
-	var re := RegEx.create_from_string("\\.sfx\\(\"([a-z0-9_]+)\"")
-	var silent := []
+## 4. Every sound a kit emits is the Hunter's own, never a shared fallback (a typo plays silence, a stock name
+## plays another game's sound). The cues are the literal names in <arch>_kit.gd plus the helper files the set
+## lists under "kit_files" (paths under scripts/arch/kits/): m.sfx("..."), the sound of payoff_fx and armed_fx
+## (an empty one falls back to the shared crit/ready), and the "sfx" of every move in content/vfx/<arch>.json.
+func _kit_names(arch: String, extra: Array, own: Dictionary) -> void:
+	var re := RegEx.create_from_string(CUE_CALLS)
+	var holes := []
 	for f in ["%s_kit.gd" % arch] + extra:
 		var path := "res://scripts/arch/kits/" + String(f)
 		if not FileAccess.file_exists(path):
 			ok(false, "%s: kit file %s exists" % [arch, f])
 			continue
 		for hit in re.search_all(FileAccess.get_file_as_string(path)):
-			var sname := hit.get_string(1)
-			if not Sfx.ensure(sname) and not silent.has(sname):
-				silent.append(sname)
-	ok(silent.is_empty(), "%s: every sound its kit plays exists (silent: %s)" % [arch, silent])
+			_cue(hit.get_string(1), "%s:%s" % [f, hit.get_string(1)], own, holes)
+	var vfx := "res://content/vfx/%s.json" % arch
+	var moves := {}
+	if FileAccess.file_exists(vfx):
+		moves = JSON.parse_string(FileAccess.get_file_as_string(vfx)).get("moves", {})
+	for mv in moves:
+		for e in moves[mv].get("sfx", []):
+			_cue(String(e["n"]), "move %s:%s" % [mv, e["n"]], own, holes)
+	ok(holes.is_empty(), "%s: every cue its kit emits is its own sound and exists (holes: %s)" % [arch, holes])
+
+func _cue(sname: String, what: String, own: Dictionary, holes: Array) -> void:
+	if (not own.has(sname) or not Sfx.ensure(sname)) and not holes.has(what):
+		holes.append(what)
 
 ## 6. Heavy sounds that carry, and held sounds that loop.
 func _reach_and_loops(group: String, d: Dictionary) -> void:

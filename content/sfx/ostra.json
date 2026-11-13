@@ -25,7 +25,9 @@
 		"ostra_step_snow": "step",
 		"ostra_hurt": "grunt",
 		"ostra_down": "grunt",
-		"ostra_death": "grunt"
+		"ostra_death": "grunt",
+		"ostra_swollen": "cast",
+		"ostra_collapse": "impact"
 	},
 	"signature": ["ostra_music_box", "ostra_spring_boing"],
 	"kit_files": ["ostra_well.gd"],

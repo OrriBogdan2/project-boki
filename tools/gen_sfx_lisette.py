@@ -382,6 +382,13 @@ def death():
     return pad(mix(fo(lpf(v, 5500), 0.4), exhale, snap), 1.6)
 
 
+# ------------------------------------------------------------------ kit cues (the Execute payoff)
+def deadeye():
+    """A shot going through a marked foe: a thin bright sweep, a tick as it lands and a small silver ring."""
+    return mix(S.sweep(900, 3200, 0.12, 'sin') * env(N(0.12), 0.003, 0.05) * 0.5, at(click(0.004, 3000, 9000) * 0.8, 0.1),
+               at(S.chime(2200, 0.4, 0.14, ((1.0, 1.0), (2.76, 0.4))), 0.1))
+
+
 def build():
     S.takes_cat('archer_thread_twang', twang, 3, 'signature')
     S.takes_cat('pin_loose', loose, 3, 'fire')
@@ -418,6 +425,7 @@ def build_vfx_pass():
     S.save_cat('pin_heavy_full', heavy_full(), 'cast')
     S.save_cat('pin_heavy_burst', heavy_burst(), 'fire')
     S.takes_cat('pin_arrow_hit', arrow_hit, 3, 'impact')
+    S.save_cat('archer_deadeye', deadeye(), 'impact')
 
 
 if __name__ == '__main__':

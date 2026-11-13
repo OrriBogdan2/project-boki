@@ -24,7 +24,8 @@ const POOL := 24
 ## the combat crowd never steal it, and no gap or stack cap thins it.
 const CUES := ["knock_confirm", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
-const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
+const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "v_bl_skitter", "v_bl_warden",
+	"die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200,

@@ -307,6 +307,19 @@ def death():
     return pad(mix(fo(lpf(v, 5500), 0.4), exhale, fo(wind), sputter), 1.8)
 
 
+# ------------------------------------------------------------------ ion needle end
+def skewer():
+    """The ion needle pinning a target: a thin hard crack, a short metallic ring and a low thud."""
+    return mix(crack(0.04, 3000, 10000, 0.012) * 0.8, S.fm(1500, 2.3, 5.0, 0.3, 0.12) * 0.6,
+               kick(220, 70, 0.3, 0.03, 0.09) * 0.8)
+
+
+# ------------------------------------------------------------------ kit cues (a Longneedle charge strikes a foe)
+def crit():
+    """The hit marker for a charge that found its foe: a hard tick and a short bright ring."""
+    return mix(click(0.005, 2500, 9000) * 0.9, at(S.chime(1800, 0.3, 0.1, ((1.0, 1.0), (2.76, 0.3))), 0.01))
+
+
 def build():
     S.takes_cat('vn_rifle', rifle, 3, 'fire')
     S.save_cat('gunslinger_spinup', spinup(), 'signature')
@@ -328,6 +341,8 @@ def build():
     S.takes_cat('gunslinger_hurt', hurt, 3, 'grunt')
     S.save_cat('gunslinger_down', down(), 'grunt')
     S.save_cat('gunslinger_death', death(), 'grunt')
+    S.save_cat('gunslinger_skewer', skewer(), 'impact')
+    S.save_cat('gunslinger_crit', crit(), 'impact')
 
 
 if __name__ == '__main__':

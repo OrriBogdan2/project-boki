@@ -24,7 +24,9 @@
   "gunslinger_step_snow": "step",
   "gunslinger_hurt": "grunt",
   "gunslinger_down": "grunt",
-  "gunslinger_death": "grunt"
+  "gunslinger_death": "grunt",
+  "gunslinger_skewer": "impact",
+  "gunslinger_crit": "impact"
  },
  "reach": {"vn_nuke_fall": 40},
  "signature": [

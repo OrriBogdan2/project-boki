@@ -430,7 +430,7 @@ func _grab(f: Ent, ally := false) -> void:
 	var rdf := rmb_def()
 	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
-		m.sfx("warn", f.pos, -6.0, 1.2)           # too heavy to haul, or blocked (Blockers): a dull warning, no word
+		m.sfx("dredge_stop", f.pos, -4.0, 1.0)           # too heavy to haul, or blocked (Blockers): a dull warning, no word
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:

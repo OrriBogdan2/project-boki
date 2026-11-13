@@ -99,7 +99,7 @@ func add_swell(v: float) -> void:
 	if res >= res_max():
 		swollen_t = float(res_def()["swollen_t"])
 		swells += 1
-		armed_fx("")
+		armed_fx("", "ostra_swollen")
 		play("ostra_empower")
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
@@ -667,7 +667,7 @@ func _pop(hit: bool) -> void:
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
-		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
+		payoff_fx(caught_hunter.pos, TEAL, "ostra_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

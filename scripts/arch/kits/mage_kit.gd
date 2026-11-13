@@ -572,8 +572,8 @@ func _blowout(f: Ent) -> void:
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
-	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
-	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
+	# no ground rings: the source shows a starburst
+	payoff_fx(f.pos, PINK, "mage_blowout", h.dir_to(f), f, false)
 	# the refund tell on her: copper coil columns and a starburst (our own look)
 	var me := ground(h.pos)
 	for i in 3:
@@ -732,7 +732,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
-		m.sfx("ab_wall", f.pos, -2.0, 1.3)
+		m.sfx("mage_rod_slam", f.pos, -2.0)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
 			add_spark(other)

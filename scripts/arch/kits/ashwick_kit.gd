@@ -169,7 +169,7 @@ func _flashover_fx(f: Ent) -> void:
 	var col := Color("ffe0a0")
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
-	m.sfx("crit", f.pos, -7.0, 0.85)
+	m.sfx("ashwick_flashover", f.pos, -4.0)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, f)
@@ -188,7 +188,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
+		m.sfx("ashwick_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
@@ -692,7 +692,7 @@ func _cloak_blast() -> void:
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
 		st["shield_foes"] = hit
-		m.sfx("shield", h.pos, -5.0, 0.9)
+		m.sfx("ashwick_cloak_shield", h.pos, -4.0)
 
 # ------------------------------------------------------------------ X: Flue Flight
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)

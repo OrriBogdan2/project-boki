@@ -290,6 +290,24 @@ def death():
     return mix(cry, at(dim, 0.5))
 
 
+# ------------------------------------------------------------------ dropped, snuffed and snapped
+def carrier_drop():
+    """A carried thing let fall: a dull wooden thump and a couple of loose rattles."""
+    return mix(kick(170, 60, 0.3, 0.04, 0.1) * 1.0, crack(0.04, 400, 2500, 0.012) * 0.6,
+               at(S.rattle(0.18, 50, 600, 2200, 0.5, 0.06) * 0.4, 0.04))
+
+
+def hearth_snuff():
+    """The hearth light going out: a soft hiss that falls away, with a low puff."""
+    return mix(S.hiss(0.55, 500, 3500, 0.01, 0.16) * 0.8, S.sweep(300, 110, 0.4) * shape(0.4, 0.01, 0.02, 0.35) * 0.5)
+
+
+def tether_snap():
+    """The tether breaking: a taut twang that drops in pitch, with a click at the break."""
+    tw = S.fm(900, 1.0, 3.0, 0.3, 0.1) * shape(0.3, 0.002, 0.02, 0.2)
+    return mix(click(0.004, 2500, 8000) * 0.8, tw * 0.7, S.sweep(700, 260, 0.2) * shape(0.2, 0.002, 0.0, 0.15) * 0.4)
+
+
 def build():
     S.takes_cat('tend_ember', ember, 3, 'fire')
     S.save_cat('tend_ember_emp', ember_emp(), 'fire')
@@ -315,6 +333,9 @@ def build():
     S.takes_cat('tender_hurt', hurt, 3, 'grunt')
     S.save_cat('tender_down', down(), 'grunt')
     S.save_cat('tender_death', death(), 'grunt')
+    S.save_cat('tender_drop', carrier_drop(), 'impact')
+    S.save_cat('tender_hearth_snuff', hearth_snuff(), 'cast')
+    S.save_cat('tender_tether_snap', tether_snap(), 'impact')
 
 
 if __name__ == '__main__':

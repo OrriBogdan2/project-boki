@@ -17,6 +17,13 @@ The Ways Out calls (HeartSfx.call_out), one flat UI sting each, heard by everyon
   ways_last         the last way out: a low swell under two bells a semitone apart
   ways_tick         the last 10 s before a seat you can still reach shuts: one soft wooden tock with a glassy top,
                     once a second (HeartSfx plays the last 3 louder and a little higher); your own game only
+The outpost uplinks (scripts/match/exits.gd), positional, the same crimson glass over an electric mast:
+  uplink_start      the uplink is started: a mast clank and a rising electric whine
+  uplink_steal      a rival squad takes the uplink over: a bright crackle on a glass ping
+  uplink_fizzle     the charge runs dry: a falling, sputtering whine
+  uplink_sputter    one flicker as it dies: a short dry crackle (pitched up flicker by flicker)
+  uplink_shut       the uplink goes dark: a heavy shutter clunk with a low hum dying under it
+  uplink_lift       the lift of light opens: a rising airy column and a bright chord
 """
 import numpy as np
 import sfx_lib as S
@@ -104,6 +111,42 @@ def ways_tick():
     return mix(tock * 0.8, body * 0.6)
 
 
+def crackle(d, rate=55):
+    return S.rattle(d, rate=rate, lo=2500, hi=9000, jitter=0.5, decay=d * 0.5)
+
+
+def uplink_start():
+    whine = S.sweep(180.0, 720.0, 0.9, curve=1.5) * S.shape(0.9, 0.6, 0.1, 0.2) * 0.4
+    return mix(thump(80.0, 0.3, 0.05), at(whine, 0.05), at(crackle(0.5) * 0.35, 0.1))
+
+
+def uplink_steal():
+    return mix(crackle(0.12, 90) * 0.6, S.chime(1175.0, 0.35, 0.12, ((1.0, 1.0), (2.0, 0.3))) * 0.7)
+
+
+def uplink_fizzle():
+    d = 0.9
+    whine = S.sweep(600.0, 140.0, d, curve=0.7) * S.shape(d, 0.0, 0.2, 0.7) * 0.5
+    sputter = crackle(d, 24) * (0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 9.0 * T(d))))
+    return mix(whine, sputter * 0.4)
+
+
+def uplink_sputter():
+    return crackle(0.18, 70) * S.shape(0.18, 0.0, 0.03, 0.15)
+
+
+def uplink_shut():
+    hum = lpf(S.sweep(110.0, 55.0, 0.8), 400) * S.shape(0.8, 0.0, 0.1, 0.7) * 0.5
+    return mix(thump(50.0, 0.45, 0.1) * 1.2, at(S.rattle(0.15, rate=60, lo=900, hi=4000) * 0.4, 0.02), hum)
+
+
+def uplink_lift():
+    d = 1.4
+    column = bpf(S.noise(d), 400, 4000) * S.shape(d, 0.9, 0.1, 0.4) * 0.45
+    chord = mix(*[at(S.chime(f, 1.0, 0.45), 0.25 + 0.06 * i) for i, f in enumerate((440.0, 554.0, 659.0, 880.0))])
+    return mix(column, chord * 0.7)
+
+
 def main():
     S.save_loop('heart_charge', charge(), 'loop')
     S.save_cat('heart_take', take(), 'signature')
@@ -115,6 +158,9 @@ def main():
             ("ways_taken_other", ways_taken_other), ("ways_warn", ways_warn), ("ways_last", ways_last),
             ("ways_tick", ways_tick)):
         S.save_cat(name, make(), 'ui')
+    for name, make in (("uplink_start", uplink_start), ("uplink_steal", uplink_steal), ("uplink_fizzle", uplink_fizzle),
+            ("uplink_sputter", uplink_sputter), ("uplink_shut", uplink_shut), ("uplink_lift", uplink_lift)):
+        S.save_cat(name, make(), 'cast')
 
 
 if __name__ == '__main__':

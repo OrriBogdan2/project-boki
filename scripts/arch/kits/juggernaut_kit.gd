@@ -236,7 +236,7 @@ func _reset_riposte() -> void:
 		return
 	HeroUlt.reset(self)
 	slam_resets += 1
-	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	m.sfx("juggernaut_ready", h.pos, -2.0, 0.8)
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
@@ -791,7 +791,7 @@ func _slam(pin := Vector2.ZERO) -> void:
 		if sweet and not paid.has("x"):
 			paid["x"] = true
 			sweet_spots += 1
-			payoff_fx(f.pos, res_col(), "pay_rage", dd, f)
+			payoff_fx(f.pos, res_col(), "juggernaut_sweet", dd, f)
 			vfx("slam_sweet", f.pos, dd)
 		slam_hit[f.get_instance_id()] = m.time}))
 	AimKit.hide(h, "slam")
