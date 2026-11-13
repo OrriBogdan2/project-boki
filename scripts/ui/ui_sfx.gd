@@ -2,7 +2,7 @@ class_name UiSfx
 extends Node
 ## Sounds for the controls Ui.button does not cover: sliders, toggles, dropdowns and drag and drop.
 ## Hooked once on the tree (Game), so any HSlider, CheckButton or OptionButton added anywhere gets
-## them for free, and so does every drag of one of our things (the inventory, the Boki box).
+## them for free, and so does every drag of one of our things (the Boki box).
 
 const SLIDER_GAP_MS := 55      # a drag over many steps ticks at most this often
 const META := "ui_sfx"         # marks a control already wired

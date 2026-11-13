@@ -37,7 +37,7 @@ room, which are the same class with different options).
 - **Entities.** `Ent` is the base for everything that moves and takes damage: `Hunter` (players and
   bots, `bot.gd` drives bots), `Kin` (a Boki in a match, with `KinCompanion` for its teammate
   behaviour), `Mob` (monsters), `Boss`, and the Blight (`blight.gd`, run by `BlightDir`).
-- **Systems.** `Life` (down, death, deathboxes, beacons), `Exits` (skiffs, hatches, uplinks),
+- **Systems.** `Life` (down, death, deathboxes, beacons), `Exits` (uplink outposts), `Heart` (its two seats),
   `Lairs` + `Boss`, `SpawnPlan` (what's live on a fixed map), `DropSquad` (the drop), `Truce`,
   `RaidLook` (weather and light), `SkyTrain`, `Pack` (backpack), `BiomeRun` (regional monsters and hazards).
 - **HUD** (`scripts/ui/hud.gd`) is drawn every frame in code; `full_map.gd` is the M map.
