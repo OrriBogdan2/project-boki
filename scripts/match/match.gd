@@ -1781,7 +1781,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		col = (credit as Hunter).ak.number_col(target, col, o)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
-		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
+		fx.hit_number(target, credit, d, col, crit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)

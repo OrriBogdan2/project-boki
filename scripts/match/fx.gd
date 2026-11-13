@@ -272,13 +272,16 @@ func body_glow(at: Vector3, col: Color) -> void:
 	g["dur"] = GLOW_DUR
 	g["rise"] = GLOW_RISE
 
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
+## One floating number. Hits with the same `key` (Fx.roll_key: one source on one target) roll into a
+## single label that counts up while they keep landing (a burn, a zone, a minigun), then floats off;
+## a crit never rolls into the count. Without a key, nearby numbers of the same kind merge.
+## Numbers stay out of the screen area round the reticle.
+func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "") -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
-	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
-	# number that sits on it and grows with each hit, then floats off once the hits stop
+	at = _off_reticle(at)
 	for n in nums:
-		if n.has("val") and float(n["last"]) < MERGE_T and String(n["pre"]) == prefix and (n["base"] as Vector3).distance_to(at) < 1.6:
+		if n.has("val") and _rolls_into(n, at, prefix, crit, key):
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -308,17 +311,64 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 	l.global_position = at + off
 	l.visible = true
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key})
+
+## Does a new hit join this number? Keyed hits join the same key's number (ticks, so a long window;
+## a crit only within MERGE_T and never into a number past ROLL_MAX_T); unkeyed ones join any nearby one.
+func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String) -> bool:
+	if String(n["pre"]) != prefix:
+		return false
+	if key == "":
+		return String(n["key"]) == "" and float(n["last"]) < MERGE_T and (n["base"] as Vector3).distance_to(at) < 1.6
+	if String(n["key"]) != key:
+		return false
+	if crit or n["crit"]:
+		return float(n["last"]) < MERGE_T
+	return float(n["last"]) < ROLL_T and float(n["t"]) < ROLL_MAX_T
+
+## A hit on `target` from `src`, over its head; one source's hits on one target roll together.
+func hit_number(target: Ent, src: Ent, v: float, col: Color, crit: bool) -> void:
+	number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), v, col, crit, "", roll_key(src, target))
+
+## The roll key for damage from `src` onto `target`.
+static func roll_key(src: Ent, target: Ent) -> String:
+	return "%d>%d" % [src.get_instance_id() if src else 0, target.get_instance_id()]
+
+## `at` moved (in the camera's plane, same depth) off the reticle's screen area, so a number
+## never prints over where you are aiming.
+func _off_reticle(at: Vector3) -> Vector3:
+	var cam := get_viewport().get_camera_3d() if get_viewport() else null
+	if cam == null or cam.is_position_behind(at):
+		return at
+	var ret := get_viewport().get_mouse_position()
+	var sp := cam.unproject_position(at)
+	var out := push_out(sp, ret, RETICLE_CLEAR_PX)
+	if out == sp:
+		return at
+	return cam.project_position(out, (at - cam.global_position).dot(-cam.global_basis.z))
+
+## `p` on screen, moved straight out of the circle of radius `r` round `centre` (unchanged when outside).
+static func push_out(p: Vector2, centre: Vector2, r: float) -> Vector2:
+	var d := p - centre
+	if d.length() >= r:
+		return p
+	return centre + (d.normalized() if d.length() > 0.5 else Vector2.UP) * r
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
 const STICK_T := 0.3
+const ROLL_T := 1.1            # s: a tick joins its number if the last one was this recent (slow ticks included)
+const ROLL_MAX_T := 5.0        # s: a number rolls this long, then the next tick starts a new one
+const RETICLE_CLEAR_PX := 70.0 # px round the reticle where no number spawns
 
 const CRIT_POP := 1.7          # a crit lands this many times its size and settles
 const HIT_POP := 1.25          # ... and a normal hit this many
 const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
+## Font size by damage tier: [from this value up, size]. A crit adds CRIT_SIZE on top.
+const SIZE_TIERS := [[0.0, 34], [20.0, 40], [50.0, 48], [100.0, 58], [200.0, 70]]
+const CRIT_SIZE := 10
 
 ## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
 ## a yellower number (pooled labels are reused, so every number sets this).
@@ -326,10 +376,13 @@ func _num_look(l: Label3D, crit: bool) -> void:
 	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
 	l.outline_size = 20 if crit else 14
 
-## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
-func _num_size(v: float, crit: bool) -> int:
-	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
+## Big hits read big: the size steps up with the damage tier, a crit is larger again.
+static func _num_size(v: float, crit: bool) -> int:
+	var px := 0
+	for t in SIZE_TIERS:
+		if v >= float(t[0]):
+			px = int(t[1])
+	return px + (CRIT_SIZE if crit else 0)
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
