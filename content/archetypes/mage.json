@@ -170,6 +170,13 @@
 	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
 	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
 	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:72 'she faces the cursor'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:167 placed at the cursor, then the cursor sets the pull direction"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:204 airborne, the landing spot follows the cursor"},
+		"x_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:193 reactivate lands at the cursor; no turn limit shown"}
+	},
 	"tells": {
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
 		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",

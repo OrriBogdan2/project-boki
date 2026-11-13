@@ -715,3 +715,67 @@ One row per hero and slot, from `air_cast` in the same files: running, jumping a
 | gil | RMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: keeps the jump's speed (steers as in any jump); vertical: falls as from the jump | [?] |
 | gil | E | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: slows below the jump's speed; vertical: falls as from the jump (Riptide is a planted spin) | [?] |
 | gil | R (ult) | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | horizontal: driven faster than the jump; vertical: holds the height (Tidal Wave: he rides the wave down its line) | [?] |
+## Body turning during casts
+
+_Generated from the "turn" block in `content/archetypes/<hero>.json`._
+
+Does the body follow the cursor while the slot runs? `--yaw-lock-check` presses each slot with the cursor east, swings it 90 degrees at 0.1 s and again at 0.53 s, and reads the body over the next 0.23 s: free (it follows), locked (it holds) or slow (it turns at the capped rate). A recast row a hero lacks is its first cast's.
+
+| Hero | Slot | 0.1-0.33 s (wind-up, channel) | 0.53-0.77 s (release, after) | Source |
+|---|---|---|---|---|
+| archer | LMB hold | free | free | briefs/hero-ref/pin.md:49 'the hunter turns to the cursor throughout' the draw; :313 she walks side-on to the cursor while drawing |
+| archer | RMB | free | free | briefs/hero-ref/pin.md:21 hold to charge toward the cursor; no turn limit shown |
+| archer | E | free | free | briefs/hero-ref/pin.md:23 a tap placed at the cursor distance; no turn limit shown |
+| archer | ult (X) | free | free | briefs/hero-ref/pin.md:254 'a self-buff with no cast lock' |
+| juggernaut | LMB hold | free | free | briefs/hero-ref/juggernaut.md:254 'the upper body follows the cursor with the blade'; data: yaw RotationRate 1280 deg/s (briefs/supervive-data/supervive_physics.md:51) |
+| juggernaut | RMB | free | locked | briefs/hero-ref/juggernaut.md:155 the lane grows toward the aim while held, the release dash follows it: free while held, the drive faces its lane |
+| juggernaut | E | free | free | briefs/hero-ref/juggernaut.md:96 a hook thrown toward the cursor; no turn limit shown |
+| juggernaut | E recast | free | free | briefs/hero-ref/juggernaut.md:21 recast pulls him to the hook; no turn limit shown |
+| juggernaut | ult (X) | free | free | briefs/hero-ref/juggernaut.md:202-205 planted guard, the strike goes 'in the facing / cursor direction': feet planted, body free |
+| gunslinger | LMB hold | free | free | briefs/hero-ref/venator.md:40 'the upper body turns to the cursor and the legs keep walking' |
+| gunslinger | RMB | free | free | briefs/hero-ref/venator.md:20 aimed with a lane while held, thrown on release; no turn limit shown |
+| gunslinger | E | slow (90 deg/s) | free | briefs/hero-ref/venator.md:101-109 the Ion Cannon is shouldered and braced through its 0.6 s bar, the line on the press aim; owner item 144 (briefs/MAIN_TO_EXT.md 11-05): cap the charge's aim turn at ~90 deg/s; free after the shot |
+| gunslinger | ult (X) | free | free | briefs/hero-ref/venator.md:236 lands where the cursor was at the cast and does not track; the body is not held |
+| bulwark | LMB hold | free | free | briefs/hero-ref/bjorn.md:73 and :339 he turns freely to the cursor through the charged swing (1.5 turns in 1.2 s, 0102-0108), each release a crescent in front; fixed 11-10: the swing's step held the body on the step line |
+| bulwark | RMB | free | free | briefs/hero-ref/bjorn.md:109 the shield faces the cursor and sweeps round with it at once |
+| bulwark | E | free | free | briefs/hero-ref/bjorn.md:148 placed at the planted hammer; no turn limit shown |
+| bulwark | ult (X) | free | free | briefs/hero-ref/bjorn.md:287 planted (feet) for the wind-up and slam, a lane toward the cursor; no turn limit shown |
+| ashwick | LMB hold | free | free | briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags like a hose (:15) |
+| ashwick | RMB | free | free | briefs/hero-ref/linwick.md:16 a lane shows, then the bolt; no turn limit shown |
+| ashwick | E | free | free | briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown |
+| ashwick | ult (X) | slow (120 deg/s) | slow (120 deg/s) | briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 120 deg/s) |
+| ashwick | ult (X) recast | slow (120 deg/s) | free | briefs/hero-ref/linwick.md:235 'X again lands early'; on the ground he turns freely again |
+| tender | LMB hold | free | free | briefs/hero-ref/mooshmoosh.md:45 'the hunter turns to the cursor'; :313 the torso keeps facing the cursor while she strafes |
+| tender | RMB | free | free | briefs/hero-ref/mooshmoosh.md:26 a tap with an aim telegraph while held; no turn limit shown |
+| tender | E | free | free | briefs/hero-ref/mooshmoosh.md:28 a zone on herself; no turn limit shown |
+| tender | E recast | free | free | briefs/hero-ref/mooshmoosh.md:28 recast throws it to the cursor; no turn limit shown |
+| tender | ult (X) | free | free | briefs/hero-ref/mooshmoosh.md:224-225 'Elluna can walk during the channel', the tether follows |
+| dolm | LMB hold | free | free | briefs/hero-ref/breah.md:79 the lane points at the cursor; :427 'she faces the cursor at once' |
+| dolm | RMB | free | free | briefs/hero-ref/breah.md:25 hold to charge, the slam area toward the cursor; no turn limit shown |
+| dolm | E | free | free | briefs/hero-ref/breah.md:27 a row placed in front, across the aim; no turn limit shown |
+| dolm | ult (X) | free | free | briefs/hero-ref/breah.md:379 'she can move while aiming', the cast is instant on release |
+| dredge | LMB hold | free | free | briefs/hero-ref/dredge.md:54 'the hunter turns to the cursor' |
+| dredge | RMB | free | locked | briefs/hero-ref/dredge.md:78 and :90 the arm is thrown along the aim; through the pull he is braced side-on, 'turned toward the target', the cursor elsewhere (0147); fixed 11-10: the body followed the cursor |
+| dredge | E | locked | free | briefs/hero-ref/dredge.md:119-125 slam 'in the facing/cursor direction', the shoulder turned away in the wind-up; ours: the direction locks at the press for the 0.38 s wind-up (owner item 33, docs/heroes/dredge.md) |
+| dredge | ult (X) | free | free | briefs/hero-ref/dredge.md:256-257 the cone is 'locked at cast' and he stands planted; ours: kept turning to the cursor at a slow walk by owner item 36 (OWNER_REVIEW_1103.md:258-261) |
+| rimewright | LMB hold | free | free | briefs/hero-ref/tamsin.md:286 'she turns to face the cursor and fires while skating'; :274 turns in about 0.1 s |
+| rimewright | RMB | free | free | briefs/hero-ref/tamsin.md:50 a tap that lands at the cursor; no turn limit shown |
+| rimewright | E | free | free | briefs/hero-ref/tamsin.md:20 a tap, the wall travels toward the cursor; no turn limit shown |
+| rimewright | E recast | free | free | data: recast freezes the wall (briefs/supervive-data/supervive_kits.md:35); no turn limit shown |
+| rimewright | ult (X) | locked | locked | briefs/hero-ref/tamsin.md:226 encased in an ice crystal and rooted for the duration (a statue: owner item 65) |
+| rimewright | ult (X) recast | locked | free | briefs/hero-ref/tamsin.md:254 recast any time to end it; free once she is out |
+| mage | LMB hold | free | free | briefs/hero-ref/vireo.md:72 'she faces the cursor' |
+| mage | RMB | free | free | briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown |
+| mage | E | free | free | briefs/hero-ref/vireo.md:167 placed at the cursor, then the cursor sets the pull direction |
+| mage | ult (X) | free | free | briefs/hero-ref/vireo.md:204 airborne, the landing spot follows the cursor |
+| mage | ult (X) recast | free | free | briefs/hero-ref/vireo.md:193 reactivate lands at the cursor; no turn limit shown |
+| thief | LMB hold | free | free | briefs/hero-ref/dancer.md:72 'she faces the cursor while firing', :413 the torso snaps to the cursor |
+| thief | RMB | free | free | briefs/hero-ref/dancer.md:26 a lane shows 0.4-0.6 s toward the cursor, then the throw; no turn limit shown |
+| thief | E | free | free | briefs/hero-ref/dancer.md:22 Phantom Dagger, a skillshot toward the cursor; no turn limit shown |
+| thief | E recast | free | free | briefs/hero-ref/dancer.md:22 reactivate steps to the dagger; no turn limit shown (ours snaps to face the foe on arrival, then turns freely) |
+| thief | ult (X) | free | free | briefs/hero-ref/dancer.md:22 Death Blossom is a self-centred ring; no turn limit shown |
+| ostra | LMB hold | free | free | briefs/hero-ref/ostra.md:40 'she turns to the aim' |
+| ostra | RMB | free | free | briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown |
+| ostra | E | free | free | briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown |
+| ostra | E recast | free | free | briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown |
+| ostra | ult (X) | free | locked | briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248) |

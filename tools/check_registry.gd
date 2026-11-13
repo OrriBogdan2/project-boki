@@ -199,6 +199,7 @@ const CHECKS := {
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
+	"--yaw-lock-check": ["res://tools/yaw_lock_check.gd", "yaw_lock_check", null],      # body turn per slot
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	# seconds left and charges on the bar

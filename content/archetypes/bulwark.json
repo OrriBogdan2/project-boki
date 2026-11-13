@@ -243,6 +243,12 @@
 		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
 		"dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
 	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:73 and :339 he turns freely to the cursor through the charged swing (1.5 turns in 1.2 s, 0102-0108), each release a crescent in front; fixed 11-10: the swing's step held the body on the step line"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:109 the shield faces the cursor and sweeps round with it at once"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:148 placed at the planted hammer; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:287 planted (feet) for the wind-up and slam, a lane toward the cursor; no turn limit shown"}
+	},
 	"tells": {
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
 		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",

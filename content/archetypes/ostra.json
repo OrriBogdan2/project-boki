@@ -171,6 +171,13 @@
 	"rank3": {"sec": "a burst of speed when you cast and when it hits", "dash": "allies within 1.5m of you when you leave get a shield", "kin": "the seed burns foes inside while it grows (8 a second)"},
 	"rank2": {"sec": "Rank 2: cooldown 10s -> 8.5s, damage +20%.", "dash": "Rank 2: recharge 9.5s -> 8s per charge.", "kin": "Rank 2: damage +10%."},
 	"rank_next": {"sec": "Rank 3: cooldown 10s -> 7s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s.", "kin": "Rank 3: cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 8 a second.", "dash": "Rank 3: recharge 9.5s -> 6.5s; allies within 1.5m of you when you leave get a shield of a third of your health for 3s."},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:40 'she turns to the aim'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown"},
+		"x": {"early": "free", "late": "locked", "source": "briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248)"}
+	},
 	"tells": {
 		"half": "a ring of teal motes closes around him",
 		"full": "the lantern burns white and his ribbons lift",

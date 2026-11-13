@@ -140,7 +140,7 @@ func _fly(dt: float) -> void:
 		flight["t"] = float(flight["t"]) - dt
 	_take_boost(x)
 	var dir: Vector2 = flight["dir"]
-	var turn := deg_to_rad(float(x["turn_deg"])) * dt
+	var turn := deg_to_rad(k.turn_deg_s("x", "late")) * dt
 	dir = dir.rotated(clampf(dir.angle_to(h.aim_dir()), -turn, turn))
 	flight["dir"] = dir
 	var speed := float(flight["speed"])

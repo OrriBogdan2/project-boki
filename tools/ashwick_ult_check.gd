@@ -175,9 +175,9 @@ func _steer(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	ak.step(m, 0.2, func(): ak.aim_at(P, P.pos + Vector3(0, 0, 12)))
 	var d1: Vector2 = J.flight["dir"]
 	var turned := rad_to_deg(absf(d0.angle_to(d1)))
-	var cap := float(K.x_def()["turn_deg"]) * 0.2
+	var cap := K.turn_deg_s("x", "late") * 0.2
 	ok(
-		"ult steer: the heading turns toward the cursor at its cap (turn_deg)",
+		"ult steer: the heading turns toward the cursor at its cap (turn.x)",
 		turned > cap * 0.75 and turned <= cap + 3.0, "%.0f deg in 0.2s, cap %.0f" % [turned, cap]
 	)
 	ak.step(m, 1.2, func(): ak.aim_at(P, P.pos + Vector3(0, 0, 12)))
