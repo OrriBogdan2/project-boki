@@ -1,7 +1,7 @@
 # Garden play, 0.24.6 (STACKED on ext/w0246-garden 73c831e62)
 
 A garden-only player's first 30 minutes on a fresh save, driven through the real screens by
-`--garden-play-shots` (tools/garden_play_shots.gd): hatch, name, pet, feed, the four games, breed, a second zone.
+`--garden-play-shots --hatch-auto=0` (tools/garden_play_shots.gd): hatch, name, pet, feed, the four games, breed, a second zone.
 Game time runs 6x; one `PLAY` line per step and a shot every 5 game minutes (GPU: `jobq submit --needs gpu`).
 The shots sat in the GPU queue (about 60 jobs ahead) when this was written: the job ids are in the READY line.
 Run headless, the whole 30 minutes goes through with no script error.
