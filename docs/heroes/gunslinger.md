@@ -250,6 +250,16 @@ X is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
 slot changes. The Boki Merge is on its own key.
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/gunslinger.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the rifle, as on the ground | blocked | stays open | air not shown (`venator.md` 5, 6) |
+| RMB | the grenade, as on the ground | the same | stays open | silent |
+| E | the railgun, as on the ground | the same | folds: the recoil shove (ours) knocks the glider shut; held glide reopens it | silent |
+| Shift | an air slide: spends a charge, 2/3 of the hold distance, stops short; the barrel roll `gunslinger_dash_ex` out of charges | the same slide | closes, reopens after the slide | wiki patch 05.03.25 (air tap slides 2/3); the roll is ours |
 ## Ground shapes (telegraph audit)
 
 Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/hero_combo_check.gd` and `tools/vv_ult_check.gd` assert drawn size = hit size.
