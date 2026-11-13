@@ -444,7 +444,7 @@ func _guest() -> void:
 	else:
 		print("%s guest: match up after %.1f s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0])
 	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
-		await _run(DT)
+		await _run(0.1)
 	main.get_tree().quit(0)
 
 func _on_msg(topic: String, data, _from: String) -> void:
@@ -563,10 +563,14 @@ func _run(secs: float) -> void:
 					mb.queue_free()
 					m.mobs.erase(mb)
 			m.step(DT)
-			if watch and seen.is_empty(): seen = m.displace.towing(watch)
-			var sb: Ent = stun_on if stun_on else m.player
-			if sb: stun_max = maxf(stun_max, sb.stun_t)
+			_stepped()
 		await main.get_tree().process_frame
+
+## After each match step: the host's mirror of the watched tow, and the longest stun seen.
+func _stepped() -> void:
+	if watch and seen.is_empty(): seen = m.displace.towing(watch)
+	var sb: Ent = stun_on if stun_on else m.player
+	if sb: stun_max = maxf(stun_max, sb.stun_t)
 
 ## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
 func _strike(at: Vector3) -> void:
