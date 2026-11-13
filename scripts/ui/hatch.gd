@@ -438,8 +438,8 @@ func _show_create() -> void:
 	var nr := UI.hbox(8)
 	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
 	nr.add_child(nl)
-	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
+	var ne := _your_name_edit()
+	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else Save.UNNAMED)
 	nr.add_child(ne)
 	v.add_child(nr)
 	var br := UI.hbox(10)
@@ -482,6 +482,16 @@ func _mastery_rows(v: VBoxContainer) -> void:
 		b.name = "Feature_%s" % id
 		hr.add_child(b)
 		v.add_child(hr)
+
+## The player's name box: empty (with a hint) until they type one; an unnamed player stays Save.UNNAMED.
+func _your_name_edit() -> LineEdit:
+	var le := LineEdit.new()
+	var cur := String(Save.d.get("name", Save.UNNAMED))
+	le.text = "" if cur == Save.UNNAMED else cur
+	le.placeholder_text = "Type your name"
+	le.max_length = 16
+	le.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return le
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()
@@ -769,7 +779,7 @@ func _show_name() -> void:
 	var you_row := UI.hbox(8)
 	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
-	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var ye := _your_name_edit()
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
@@ -804,7 +814,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	rec["got_t"] = Time.get_unix_time_from_system()
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
-	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
+	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else Save.UNNAMED
 	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()

@@ -1,10 +1,10 @@
 extends RefCounted
-## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels]: every screen of the first 15 minutes on a
+## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels|leftovers]: each screen of the first 15 min on a
 ## fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
 ## panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per shot:
 ## the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
 ## 5% margin. --part=match (first expedition and pause) or --part=panels (farm, expedition panel, Relics)
-## plays one part alone from a made-up save.
+## plays one part alone from a made-up save (leftovers: the unnamed player's results line, the level coin mid-pop).
 ## Needs a real renderer (jobq submit --needs gpu).
 ## Never writes the save. The write-up is docs/UI_FIRST15.md.
 
@@ -43,6 +43,9 @@ func run(main_node: Node) -> void:
 		"panels":
 			_made_up_save()
 			await _farm()
+		"leftovers":
+			_made_up_save()
+			await _leftovers()
 		_:
 			await _front()
 			await _tutorial()
@@ -168,6 +171,30 @@ func _farm() -> void:
 	await _wait(1.2)
 	await _shot("hunter_pick")
 	h._close_panel()
+
+## An unnamed player's results card, then the level coin at the middle of its pop in the bottom-left corner.
+func _leftovers() -> void:
+	Save.d["name"] = Save.UNNAMED
+	var won := {"extracted": true, "gems": 42, "knocks": 3, "damage": 512, "time": 201.0, "tutorial": true}
+	main.show_screen("results", won)
+	await _wait(3.0)
+	await _shot("results_unnamed")
+	main.current.queue_free()
+	await _frames(2)
+	m = Match.new()
+	main.add_child(m)
+	main.current = m
+	await m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": 7})
+	m.set_process(false)
+	await main.fade.reveal(0.01)
+	m.ship_jump(m.player, true)
+	m.player.teleport(m.world.spawns[0])
+	for i in 600:
+		m.step(Match.DT)
+	await _frames(2)
+	m.player.gain_xp(float(Hunter.XP_TO[1]) + 1.0)
+	m.hud.lvl_pop = HudVitals.LVL_POP * 0.55
+	await _shot("level_coin_pop")
 
 func _first_match() -> void:
 	if main.current:

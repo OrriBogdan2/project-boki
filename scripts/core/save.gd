@@ -9,6 +9,7 @@ extends Node
 ## See docs/BOKI_IDENTITY.md.
 
 const VERSION := 15
+const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
@@ -66,7 +67,7 @@ func fresh() -> Dictionary:
 	# a new save has no kin yet: the first thing you do is pick an egg and hatch it
 	return {
 		"v": VERSION,
-		"name": "Hunter",
+		"name": UNNAMED,
 		"gems": 60,
 		"cls": "medium",
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
