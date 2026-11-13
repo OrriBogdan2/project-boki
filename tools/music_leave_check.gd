@@ -19,13 +19,13 @@ func ok(name: String, cond: bool, info := "") -> void:
 	if not cond: fails += 1
 
 ## Every AudioStreamPlayer Sfx owns on the Music / Ambience buses that is playing above AUDIBLE_DB:
-## {label: volume_db}. Labels: "music[i]" (the two crossfading single tracks), "layer:stem", "amb",
-## "amb_layer:name", "stray" for anything else (a player no field points at).
+## {label: volume_db}. Labels: "music[i]" (the two crossfading single tracks), "layer:stem", "amb[i]" (the
+## two crossfading main beds), "amb_layer:name", "stray" for anything else (a player no field points at).
 func audible() -> Dictionary:
 	var out := {}
 	var known := {}
 	for i in Sfx.music.size(): known[Sfx.music[i]] = "music[%d]" % i
-	known[Sfx.amb] = "amb"
+	for i in Sfx.ambs.size(): known[Sfx.ambs[i]] = "amb[%d]" % i
 	for st in Sfx.layers: known[Sfx.layers[st]] = "layer:%s" % st
 	for nm in Sfx.amb_layers: known[Sfx.amb_layers[nm]["p"]] = "amb_layer:%s" % nm
 	for c in Sfx.get_children():

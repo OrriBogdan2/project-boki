@@ -12,6 +12,8 @@ extends RefCounted
 ## ally's, an ultimate's, an aim mark's or a telegraph that is only being refreshed.
 ## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
 ## teammate's quieter than a rival's, your own one level wherever the camera is.
+## And the region beds: each region of the map has its own bed, another region crossfades it in over
+## MusicDir.BED_FADE (never more than two beds), it holds over the void, and a fight sinks the Ambience bus.
 
 var main: Node
 var fails := 0
@@ -62,6 +64,7 @@ func run(main_node: Node) -> void:
 	_ult_cues(m, P)
 	_tell_cues(m, P)
 	_steps(m, P)
+	await _region_beds(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
@@ -79,6 +82,8 @@ func run(main_node: Node) -> void:
 			await main.get_tree().process_frame
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
+	var sunk := Sfx.amb_duck.volume_db
+	ok(sunk == 0.0, "the farm's ambience is not left sunk by the fight (%.1f dB)" % sunk)
 	await main.get_tree().create_timer(SETTLE).timeout
 	var left := Sfx.match_voices()      # the farm's own beds are not counted (Sfx.MATCH_BEDS)
 	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
@@ -303,6 +308,103 @@ func _step_db(h: Hunter, P: Hunter, d: float, contact: bool) -> float:
 	if not Sfx.last_played.keys().any(func(k): return String(k).contains("step")):
 		return NAN
 	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].volume_db
+
+## Each region's own bed, the crossfade between two of them, the two-bed cap and the fight ducking. The
+## match is held still: the case moves the player and ticks MusicDir itself (its clock with it), and puts
+## every Hunter back where it stood (the listener stays there for the glider's cues).
+func _region_beds(m: Match, P: Hunter) -> void:
+	var w: World = m.world
+	var stood := m.hunters.map(func(h): return h.pos)
+	ok(m.biomes != null and w.regions.size() >= 9, "setup: an authored map with its regions (%d)" % w.regions.size())
+	if m.biomes == null:
+		return
+	for R in w.regions:
+		var bed := String(R.get("bed", ""))
+		var on_file := ResourceLoader.exists("res://audio/amb_%s.ogg" % bed)
+		ok(on_file, "region %s has its own bed on file (%s)" % [R["id"], bed])
+	var spots := {}
+	for rid in ["crown", "thorn", "frostgate", "lark"]:
+		spots[rid] = _region_spot(m, rid)
+	P.dropping = false
+	_bed_at(m, P, spots["crown"])
+	ok(Sfx.amb_name == "heart", "the Crown plays the Heart's hum (%s)" % Sfx.amb_name)
+	await _wait(MusicDir.BED_FADE + 0.4)
+	ok(_beds_on() == 1 and _bed_db("heart") > Sfx.AMB_DB - 0.5,
+			"...alone and at full after the crossfade (%d beds)" % _beds_on())
+	_bed_at(m, P, spots["thorn"])
+	ok(Sfx.amb_name == "woods", "into Thornwood: the bed swaps to the wood's insects (%s)" % Sfx.amb_name)
+	await _wait(MusicDir.BED_FADE * 0.5)
+	var rising := _bed_db("woods")
+	var falling := _bed_db("heart")
+	ok(_beds_on() == 2 and rising < Sfx.AMB_DB - 2.0 and falling < Sfx.AMB_DB - 2.0 and minf(rising, falling) > -40.0,
+			"halfway through the crossfade both beds sound, neither at full (woods %.1f, heart %.1f dB)"
+			% [rising, falling])
+	await _wait(MusicDir.BED_FADE * 0.5 + 0.4)
+	ok(_beds_on() == 1 and _bed_db("woods") > Sfx.AMB_DB - 0.5,
+			"...and after %.0f s only the wood's bed is left" % MusicDir.BED_FADE)
+	var most := 0
+	for rid in ["frostgate", "lark", "crown"]:      # three regions in a second, as on a fast glide
+		_bed_at(m, P, spots[rid])
+		most = maxi(most, _beds_on())
+		await _wait(0.3)
+		most = maxi(most, _beds_on())
+	ok(most <= 2 and _bed_db("heart") > -80.0 and Sfx.amb_name == "heart",
+			"three regions in a second: at most two beds at once (%d), the last one rising" % most)
+	_bed_at(m, P, Vector3(-8, 0, -8))
+	ok(Sfx.amb_name == "heart", "off the islands the last bed holds (%s)" % Sfx.amb_name)
+	var bus := AudioServer.get_bus_index("Ambience")
+	var stages := range(AudioServer.get_bus_effect_count(bus)).map(func(i): return AudioServer.get_bus_effect(bus, i))
+	ok(Sfx.amb_duck in stages, "the fight ducking stage sits on the Ambience bus")
+	P.pos = spots["crown"]
+	for h in m.hunters:
+		if h != P:
+			h.pos = P.pos + Vector3(60, 0, 0)       # no rival in sight: only the fight moves the beds
+	P.hurt_at = m.time
+	_tick(m, 1.0)
+	ok(Sfx.amb_duck.volume_db <= Sfx.AMB_DUCK_DB + 0.5, "a fight sinks the beds (%.1f dB)" % Sfx.amb_duck.volume_db)
+	_tick(m, MusicDir.FIGHT_HOLD + 5.0)
+	ok(Sfx.amb_duck.volume_db > -0.5, "...and they come back once it is over (%.1f dB)" % Sfx.amb_duck.volume_db)
+	P.hurt_at = m.time
+	_tick(m, 1.0)      # left sunk on purpose: the match leaving must let go of it (checked on the farm)
+	for i in m.hunters.size():
+		m.hunters[i].pos = stood[i]
+
+## A standing spot in the region: its first island's point of interest.
+func _region_spot(m: Match, rid: String) -> Vector3:
+	var R: Dictionary = m.world.regions.filter(func(x): return x["id"] == rid)[0]
+	for I in m.world.islands:
+		if I["id"] in R["islands"]:
+			var at := Vector3(I["poi_at"].x + 0.5, 0, I["poi_at"].y + 0.5)
+			ok(m.biomes.hot.region_at(at) >= 0, "setup: a spot in %s" % rid)
+			return at
+	return Vector3.INF
+
+## Stands the player at `at` and lets MusicDir look round at once.
+func _bed_at(m: Match, P: Hunter, at: Vector3) -> void:
+	P.pos = at
+	m.music_dir.amb_t = 0.0
+	m.music_dir.tick(m, 0.05)
+
+## Moves the match clock and MusicDir on together, a twentieth of a second at a time.
+func _tick(m: Match, secs: float) -> void:
+	var t := 0.0
+	while t < secs:
+		m.time += 0.05
+		m.music_dir.tick(m, 0.05)
+		t += 0.05
+
+func _wait(secs: float) -> void:
+	await main.get_tree().create_timer(secs).timeout
+
+## The volume (dB) of the main bed player sounding audio/amb_<bed>.ogg; -80 if none is.
+func _bed_db(bed: String) -> float:
+	for ap in Sfx.ambs:
+		if ap.playing and ap.stream.resource_path.ends_with("/amb_%s.ogg" % bed):
+			return ap.volume_db
+	return -80.0
+
+func _beds_on() -> int:
+	return Sfx.ambs.filter(func(ap): return ap.playing).size()
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on

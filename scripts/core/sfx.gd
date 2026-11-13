@@ -72,8 +72,13 @@ signal played(sname: String, at: Variant, vol_db: float, pitch: float)
 var music: Array[AudioStreamPlayer] = []   # two players so tracks can crossfade
 var music_i := 0
 var music_name := ""
-var amb: AudioStreamPlayer
+var ambs: Array[AudioStreamPlayer] = []   # the main ambience bed: two players, so a new bed crossfades over the old
+var amb_i := 0                             # which of the two is the current bed
 var amb_name := ""
+var _amb_rate := 1.0                       # gain per second the beds move at, from the last play_ambience's fade
+var amb_duck: AudioEffectAmplify           # the Ambience bus's fight ducking stage (see duck_ambience)
+const AMB_DB := -14.0                      # dB: the main bed at full
+const AMB_DUCK_DB := -9.0                  # dB the Ambience bus sinks by at the height of a fight
 var music_bus := 0
 var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
 var _duck_tw: Tween
@@ -88,10 +93,8 @@ func _ready() -> void:
 	music_bus = AudioServer.get_bus_index("Music")
 	_setup_mix()
 	for i in 2:
-		var mp := AudioStreamPlayer.new(); mp.bus = "Music"; mp.volume_db = -80.0
-		add_child(mp); music.append(mp)
-	amb = AudioStreamPlayer.new(); amb.bus = "Ambience"; amb.volume_db = -80.0
-	add_child(amb)
+		music.append(_silent_player("Music"))
+		ambs.append(_silent_player("Ambience"))
 	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Sparkle and Vex)
 		var takes: Array = []
 		var s = load("res://audio/%s.wav" % n) if ResourceLoader.exists("res://audio/%s.wav" % n) else null
@@ -115,6 +118,14 @@ func _ready() -> void:
 	add_child(cue_voice)
 	prios.resize(POOL)
 	born.resize(POOL)
+
+## A player on `bus_name`, silent until something fades it up.
+func _silent_player(bus_name: String) -> AudioStreamPlayer:
+	var p := AudioStreamPlayer.new()
+	p.bus = bus_name
+	p.volume_db = -80.0
+	add_child(p)
+	return p
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -176,6 +187,9 @@ func _setup_mix() -> void:
 	var mlim2 := AudioEffectHardLimiter.new()
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music_bus, mlim2)
+	# the ambience beds sink under a fight (MusicDir passes its heat), so the combat stays clear over them
+	amb_duck = AudioEffectAmplify.new()
+	AudioServer.add_bus_effect(AudioServer.get_bus_index("Ambience"), amb_duck)
 
 func set_bus(bus_name: String, v: float) -> void:
 	var i := AudioServer.get_bus_index(bus_name)
@@ -236,19 +250,31 @@ func play_music(name: String, fade := 1.5) -> void:
 		nw.play()
 		tw.tween_property(nw, "volume_db", -9.0, fade).set_trans(Tween.TRANS_SINE)
 
-func play_ambience(name: String) -> void:
+## Crossfades the main ambience bed to audio/amb_<name>.ogg ("home", "match", a map region's bed), or to
+## silence with "", over `fade` seconds (_process moves both players). The new bed takes the quieter
+## player (a stopped one sits at -80 dB), so at most two beds ever sound, even when asked mid-fade.
+func play_ambience(name: String, fade := 2.0) -> void:
 	if name == amb_name:
 		return
-	if name != "match":
-		clear_amb_layers()
 	amb_name = name
+	_amb_rate = db_to_linear(AMB_DB) / fade
 	if name == "":
-		create_tween().tween_property(amb, "volume_db", -80.0, 1.0)
 		return
-	amb.stream = _loop_stream("res://audio/amb_%s.ogg" % name)
-	amb.volume_db = -40.0
-	amb.play()
-	create_tween().tween_property(amb, "volume_db", -14.0, 2.0)
+	var st := _loop_stream("res://audio/amb_%s.ogg" % name)
+	amb_i = 0 if ambs[0].volume_db <= ambs[1].volume_db else 1
+	for i in ambs.size():
+		if ambs[i].playing and ambs[i].stream == st:
+			amb_i = i          # back to a bed still fading out: it just turns round
+	var nw := ambs[amb_i]
+	if not nw.playing or nw.stream != st:
+		nw.stream = st
+		nw.volume_db = -80.0
+		nw.play()
+
+## Sinks the Ambience bus by k (0..1) of AMB_DUCK_DB; MusicDir passes how much of a fight is on.
+func duck_ambience(k: float) -> void:
+	if amb_duck:
+		amb_duck.volume_db = AMB_DUCK_DB * clampf(k, 0.0, 1.0)
 
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
 func duck(seconds: float, depth_db := -8.0) -> void:
@@ -328,10 +354,9 @@ func set_layers(want: Dictionary) -> void:
 		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
 
 ## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
-## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
-## is already the current ambience, an early return, so it would never clear them), every keyed loop
-## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
-## next screen's play_music / play_ambience, which crossfade them.
+## stops. The layered score and the abyss / ruins beds fade out (play_ambience never clears them), the
+## fight ducking lets go, every keyed loop stops, and a pool voice still ringing is cut. The single tracks
+## and the main ambience bed are left to the next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	_cut_sting()
 	if not layers.is_empty():
@@ -339,6 +364,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 		music_name = ""
 	if not amb_layers.is_empty():
 		clear_amb_layers(fade)
+	duck_ambience(0.0)
 	for key in loops.keys():
 		loop_stop(key)
 	for p in players:
@@ -358,7 +384,7 @@ func match_voices() -> int:
 	for nm in amb_layers:
 		if not nm in MATCH_BEDS: own.append(amb_layers[nm]["p"])
 	for c in get_children():
-		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb and not c in own:
+		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and not c in ambs and not c in own:
 			n += 1          # also a stem or bed or loop still fading out
 	return n
 
@@ -409,6 +435,8 @@ func _process(delta: float) -> void:
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
 			amb_layers.erase(n)
+	for i in ambs.size():
+		_amb_ramp(ambs[i], i == amb_i and amb_name != "", delta)
 	if layers.is_empty():
 		return
 	for st in layers:
@@ -421,6 +449,16 @@ func _process(delta: float) -> void:
 		var rate := db_to_linear(LAYER_DB) * delta / secs
 		cur = move_toward(cur, tgt, rate)
 		p.volume_db = linear_to_db(maxf(cur, 0.0001))
+
+## Moves a main-bed player toward full (the current bed) or silence at the last crossfade's rate, in
+## linear gain; one that reaches silence stops, so only the beds still heard are playing.
+func _amb_ramp(ap: AudioStreamPlayer, on: bool, delta: float) -> void:
+	if not ap.playing:
+		return
+	var g := move_toward(db_to_linear(ap.volume_db), db_to_linear(AMB_DB) if on else 0.0, _amb_rate * delta)
+	ap.volume_db = linear_to_db(maxf(g, 0.0001))
+	if g <= 0.0:
+		ap.stop()
 
 var _step_i := 0
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
