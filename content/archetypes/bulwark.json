@@ -1,5 +1,6 @@
 {
 	"id": "bulwark",
+	"recast_hint": {"lmb": "call the hammer back"},
 	"title": "Barnacle Knight",
 	"base_name": "Albert",
 	"gender": "male",
