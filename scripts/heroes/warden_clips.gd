@@ -19,6 +19,8 @@ extends RefCounted
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
+const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, then take-off), before the model hides
+const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
@@ -104,6 +106,16 @@ static func dying(h: Hunter) -> bool:
 	if not h.out or h.model == null or String(h.get_meta("died_why", "")) == "abyss":
 		return false
 	return h.m.time - float(h.get_meta("died_at", -99.0)) < float(h.model.get_meta(DEATH_T, 0.0))
+
+## Seconds into the extract beat for an extracted Hunter whose Hero has clips (stamped the first frame it is seen,
+## so a local extract, the "ext" event and a snapshot flag all start it); -1 when there is no beat to show.
+static func leave_t(h: Hunter) -> float:
+	if not h.extracted or h.model == null or not h.model.has_meta(DEATH_T):
+		return -1.0
+	if not h.has_meta("extracted_at"):
+		h.set_meta("extracted_at", h.m.time)
+	var t: float = h.m.time - float(h.get_meta("extracted_at"))
+	return t if t < EXTRACT_T else -1.0
 
 static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenClips:
 	var dd := data(art_name)
@@ -324,6 +336,13 @@ func _node(nm: String) -> AnimationNodeAnimation:
 func _p(nm: String, v: Variant) -> void:
 	tree.set("parameters/" + nm, v)
 
+## The extract beat from the Hero's own clips: the crouch dip, then the jump's take-off (its rise clip).
+func _extract_pick(xt: float) -> Dictionary:
+	if xt < EXTRACT_DIP:
+		return {"clip": d["crouch"]["in"], "t": xt}
+	var clip := String(d["air"]["rise"])
+	return {"clip": clip, "t": minf(xt - EXTRACT_DIP, lib.get_animation(clip).length - 0.001)}
+
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
@@ -337,6 +356,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	var xt := float(s.get("extract_t", -1.0))
+	if xt >= 0.0:
+		return _extract_pick(xt)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
