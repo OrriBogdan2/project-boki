@@ -19,6 +19,7 @@ var bar_btns := {}             # id -> Button
 var bench: ParityBench = null  # the parity bench panel (the areas with dummies)
 var picker: CanvasLayer = null # the hero picker, while open
 var picker_page := ""          # "heroes" | "kit"
+var drills: MoveDrills = null  # the Training Area's movement drills
 var hover_arch := ""           # the card under the mouse (K opens its kit)
 var _layer: CanvasLayer = null
 
@@ -40,6 +41,7 @@ static func attach(match_node: Match) -> Practice:
 	p.m = match_node
 	match_node.add_child(p)
 	p.bench = ParityBench.attach(match_node)
+	p.drills = MoveDrills.attach(p)
 	p._build_bar()
 	KitDrill.attach(p)
 	return p
@@ -48,6 +50,8 @@ static func attach(match_node: Match) -> Practice:
 ## menu (L), the Duel room has its setup menu (B).
 func items() -> Array:
 	var out: Array = [["hero", "Relics", "swap", func(): PracticeHero.toggle(self), Settings.key_cap("hero")]]
+	if drills:
+		out.append(["drills", "Drills", "pin", func(): if not m.paused: drills.press(), ""])
 	if m.arena:
 		out.append(["menu", "Loadout", "bag", func(): if not m.paused: m.arena.open_menu(), "L"])
 	elif m.duel:

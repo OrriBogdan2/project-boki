@@ -1020,3 +1020,7 @@ Every failing row, with the drift `--feel-golden-check` printed on main before t
 | crouch_walk | ostra | 3.017, 0.000 | shove | A |
 | crouch_walk | tender | 1.089, 0.000 | shove | A |
 | crouch_walk | thief | 2.964, 0.000 | shove | A |
+
+## Movement drills (Training Area)
+
+The Drills button on the Training Area's bar (`scripts/match/move_drills.gd`) runs five timed drills, one banner line each, pass or fail: dash through three hoops; tap jump, let go, press jump again and hold it to glide 4 m; glide and dive onto a mat; wall kick up a four-terrace wall; mantle a two-terrace ledge. The best pass time per drill is kept in `Save.d["drills"]` (save v15). Pressing the button again skips to the next drill. `--move-drills-check` passes each drill with a bot input script and fails the wrong plays.
