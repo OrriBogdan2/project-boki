@@ -287,7 +287,8 @@ func _on_base() -> void:
 		ok(not you.has_meta("kact"), "on: the spin lasts two beats")
 		es.run.step(LEN_HIGH * 2.0)
 		es.tick(0.1)
-		ok(es.run == null and is_instance_valid(es.card), "on: the dance ends with a result card")
+		ok(es.run == null and is_instance_valid(es.card) and es.card.name == "GameResultCard",
+				"on: the dance ends with the shared result card")
 		ok(not you.has_meta("kact"), "on: and nobody keeps a dance clip")
 	rules["base_mode"] = false
 	home.queue_free()
