@@ -214,7 +214,8 @@ func fire_rmb(c: Dictionary) -> void:
 		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
-	flying.append({"at": at, "from": HeroVfx.of(m).anchor_pos(h, "hand_l"), "t": ft, "left": ft, "v": v, "id": _tele_id()})
+	var hand := HeroVfx.of(m).anchor_pos(h, "hand_l")
+	flying.append({"at": at, "from": hand, "t": ft, "left": ft, "v": v, "id": _tele_id()})
 	play("gil_throw")
 	vfx("throw", h.pos)
 
