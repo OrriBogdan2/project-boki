@@ -1,0 +1,6 @@
+{
+ "_doc": "BuildSfx (scripts/home/build_sfx.gd): which pieces land with a stone thunk (everything else lands as wood), the level of the build cues, and how long a blocked spot stays quiet after its knock.",
+ "stone": ["stone_wall", "path_stone", "pillar", "kin_statue", "fountain", "toy_stone", "quarry", "kiln", "graveyard", "cold_store", "hearth_oven"],
+ "cue_db": -3.0,
+ "knock_quiet_s": 1.5
+}
