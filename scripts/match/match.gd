@@ -601,8 +601,8 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		h.apply_kin_bonus()        # its owner bonus points (max health, armor, shield, regen, speed)
 		if Mutations.owner_stat(kin_rec, "armor") > 0.0:
 			h.refresh_gear(); h.armor = h.max_armor      # a Crystal kin hardens its hunter's armor
-	if TWO_KIN and not kin_rec2.is_empty() and not kin_rec.is_empty():
-		# (retired) everyone brought two kin: the second waited on the bench until you swapped
+	if not kin_rec2.is_empty() and not kin_rec.is_empty():
+		# the second Boki: in the satchel, its carry passives on (KinSlots), swapped in with the swap key
 		var k2 := Kin.new()
 		k2.init_kin(self, id + "k2", kin_rec2["species"], kin_rec2, h)
 		add_child(k2)
@@ -634,9 +634,6 @@ func player_altitude() -> float:
 		return 0.0
 	var g := world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else player.last_gy
 	return maxf(0.0, player.pos.y - g)
-
-## One kin per expedition: a short, readable kit. Flip back on to bring a benched second kin again.
-const TWO_KIN := false
 
 func my_kit() -> Dictionary:
 	return {"weapon": String(opts.get("weapon", Save.d.get("weapon", ""))), "perk": "", "arch": String(opts.get("arch", Save.d.get("arch", "")))}
@@ -787,8 +784,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 		brec = (held["rec"] as Dictionary).duplicate(true)
 		names.erase(bname)
 	var cls := Arch.weight(String(bk.get("arch", "")))
-	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
-	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
+	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, bot_kin_record())      # bots bring two too
 	if not held.is_empty() and h.kin:
 		(h.kin as Kin).lost_uid = String(brec.get("uid", ""))
 		(h.kin as Kin).lost_from = "you"
@@ -2176,8 +2172,6 @@ func on_kin_down(k: Kin) -> void:
 		add_feed("%s is down" % k.rec.get("name", "Your Boki"))
 		if hud:
 			hud.toast("%s is down  ·  %s" % [k.rec.get("name", "Your Boki"), "run into it to pick it up" if not k.down_void else "it will come round on its own"], Color("ffb0a0"))
-	elif k.owner_h and k.owner_h.ctrl == "bot" and k.owner_h.kin == k and k.owner_h.kin2 and (k.owner_h.kin2 as Kin).hp > 0.0:
-		k.owner_h.get_tree().create_timer(0.6, false).timeout.connect(func(): if is_instance_valid(k.owner_h): k.owner_h.swap_kin())
 	KinNet.event(self, "down", k)
 	_check_team(k.team)
 
@@ -2208,7 +2202,7 @@ func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
 	sfx("swap", h.pos, -4.0)
 	if h == player:
 		train["_swapped"] = true
-		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
+		if hud: hud.toast("%s leads" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
 
 func on_bond_ready(h: Hunter) -> void:
 	if h.kin and is_instance_valid(h.kin) and not h.kin.dead:
@@ -3294,12 +3288,11 @@ func _gather_input() -> void:
 	else:
 		crouch_on = Input.is_action_pressed("crouch") and not paused
 	player.inp["crouch"] = crouch_on
-	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
-	# ability and kin swap are retired)
+	# the kit: Q glove, E the hunter's utility, G your Boki, X bond, C the Boki swap, 1-4 the utility belt
 	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"], ["swap_kin", "swap"]]:
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
@@ -5005,7 +4998,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 			krec = Save.new_kin("cindle")
 		if peer == Net.me:
 			var rec: Dictionary = Save.active_kin()
-			player = make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "local", rec, at, my_kit())
+			player = make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "local", rec, at, my_kit(), Save.second_kin())
 			Equal.start(self, player)
 			if player.kin:
 				_apply_treat(player.kin)
@@ -5027,7 +5020,7 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 			if world.is_void(at.x, at.z) or world.is_block(at.x, at.z):
 				at = base
 			at.y = world.ground_at(at.x, at.z)
-			var h := make_hunter(next_id("b"), t, "", names.pop_back() if names.size() > 0 else "Bot", "bot", bot_kin_record(), at, bot_kit())
+			var h := make_hunter(next_id("b"), t, "", names.pop_back() if names.size() > 0 else "Bot", "bot", bot_kin_record(), at, bot_kit(), bot_kin_record())
 			h.ai = bot_brain.new_mind(rng, float(opts.get("bot_skill", bot_cfg["skill"])), bot_cfg)
 			h.tonics = 3
 			_start_drop(h, at)
@@ -5067,7 +5060,7 @@ func _flags(h: Hunter) -> int:
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
-const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "wisp", "wild", "dazed", "fused"]
+const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "wisp", "wild", "dazed", "fused", "bench"]
 const MOB_STATES := ["idle", "chase", "windup", "lunge", "recover"]
 
 func _ser(e: Ent) -> Array:
@@ -5098,13 +5091,12 @@ func net_snapshot(mine: bool) -> Array:
 	if mine:
 		if player:
 			out.append(_ser(player))
-			if player.kin and not player.kin.dead:
-				out.append(_ser(player.kin))
+			for k in KinNet.carried(player): out.append(_ser(k))
 		return out
 	for h in hunters:
 		if not h.remote and h != player:
 			out.append(_ser(h))
-			if h.kin and not h.kin.dead: out.append(_ser(h.kin))
+			for k in KinNet.carried(h): out.append(_ser(k))
 	for k in kins:
 		if k.is_wild() and not k.dead: out.append(_ser(k))
 	for mb in mobs:
@@ -5165,8 +5157,7 @@ func _net_make(it: Array) -> Ent:
 				k.state = "wild"
 			kins.append(k)
 			ents_by_id[nid] = k
-			if owner and owner.kin == null:
-				owner.kin = k
+			KinNet.adopt(owner, k)
 			_net_seen_rec[nid] = rec
 			KinLoss.apply_pending(self, k)
 			return k

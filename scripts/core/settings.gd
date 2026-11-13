@@ -151,7 +151,14 @@ const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
+<<<<<<< HEAD
 	["throw", "Boki: tap to send out or call back (a wisp: out of it, again: back), hold for the order wheel"],
+||||||| 18402df5b3
+	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+=======
+	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+	["swap_kin", "Swap your lead and second Boki (in a match)"],
+>>>>>>> 33b5e21af762386e9e26560c767d9e7c2d1ba46d
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
 	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
@@ -534,6 +541,7 @@ func holders(code: String, except := "") -> Array:
 			if sl[i] == code: out.append([a[0], i])
 	return out
 
+<<<<<<< HEAD
 ## Actions that only run at home (the garden) and ones that only run in a match.
 const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
 const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
@@ -547,6 +555,16 @@ const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_t
 ## (or a pair listed in SHARED_OK).
 func can_share(a: String, b: String) -> bool:
 	if (a in HOME_ONLY and b in MATCH_ONLY) or (a in MATCH_ONLY and b in HOME_ONLY): return true
+||||||| 18402df5b3
+## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
+func _shared_ok(a: String, b: String) -> bool:
+=======
+## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
+	["details", "swap_kin"]]
+func _shared_ok(a: String, b: String) -> bool:
+>>>>>>> 33b5e21af762386e9e26560c767d9e7c2d1ba46d
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
