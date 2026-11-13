@@ -11,8 +11,9 @@ extends RefCounted
 ## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
 ## and the maps: HazardMap shows each area (minimap on a hold or once one is near, full map always) in its kind's
-## colours from the rules, and paints without error round and square. Steps the real match at Match.DT;
-## never touches the save. Prints "TERRAIN ..." lines and "TERRAIN CHECK DONE, N checks, failures: F".
+## colours from the rules, and paints without error round and square; the full map's key (MapKey) lists
+## the kinds. Steps the real match at Match.DT; never touches the save. Prints "TERRAIN ..." lines and
+## "TERRAIN CHECK DONE, N checks, failures: F".
 
 const COUNTER := {"lava": "cindowary", "deep_water": "lilybara", "ice": "floenatee", "static": "kestrike",
 	"bramble": "heatherhorn"}
@@ -246,6 +247,11 @@ func _map() -> void:
 		kinds[HazardMap.fill(a["kind"])] = true
 	ok("each hazard kind has its own tint", kinds.size() == COUNTER.size(), str(kinds.size()))
 	P = m.player
+	var keyed := MapKey.kinds(m, TrainMap.new())
+	ok("the full map's key has a row per hazard kind",
+		tz.areas.all(func(a): return ("hz:" + String(a["kind"])) in keyed), ", ".join(keyed))
+	var guarded := tz.areas.any(func(a): return tz.guards(P, String(a["kind"])))
+	ok("and the shield row only when your Boki counters one", ("safe" in keyed) == guarded)
 	var home := P.pos
 	_stand(0)
 	ok("the minimap shows hazards once one is close", HazardMap.matters(m))

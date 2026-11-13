@@ -2,7 +2,7 @@ class_name HazardMap
 extends RefCounted
 ## Terrain hazards (TerrainHazards) on the minimap and the full map, so a drop plan or a route can see
 ## them: each area's outline tinted by kind (colours from content/rules/terrain_hazards.json "look"),
-## a shield on every area your carried Boki counters, and on the full map a one-line key.
+## a shield on every area your carried Boki counters. The full map's key (MapKey) lists the kinds.
 
 const NEAR_M := 20.0       # m: the minimap shows the hazards once you are this close to one (else on a hold)
 const FILL_A := 0.5        # fill opacity over the painted map
@@ -11,8 +11,6 @@ const CASING := Color(0.02, 0.03, 0.06, 0.55)    # the dark line under an outlin
 const MM_SHIELD := 12.0    # px: the shield on the minimap
 const FULL_SHIELD := 16.0  # px: the shield on the full map
 const SAFE := Color("8fe3a0")
-const KEY_H := 22.0        # px: the key strip's height
-const KEY_GAP := 14.0      # px between key entries
 
 ## The minimap's own reason to show the hazards: one lies within NEAR_M of you.
 static func matters(m: Match) -> bool:
@@ -53,38 +51,6 @@ static func draw(c: Control, m: Match, to_screen: Callable, inner: Rect2, circ: 
 		if m.player and _inside(mid, inner, circ) and tz.guards(m.player, kind):
 			c.draw_circle(mid, shield_px * 0.75, Color(0.03, 0.05, 0.08, 0.7))
 			Icons.draw(c, "brightshield", mid, shield_px, SAFE)
-
-## The full map's key, one line along the bottom of the map: a swatch and a name per kind on this map,
-## then what the shield means when one of your Boki's counters is on it.
-static func key(hud, m: Match, map_rect: Rect2) -> void:
-	var tz := TerrainHazards.of(m)
-	if tz == null or tz.areas.is_empty():
-		return
-	var kinds: Array = []
-	for a in tz.areas:
-		if not a["kind"] in kinds:
-			kinds.append(a["kind"])
-	var shield: bool = m.player != null and kinds.any(func(k): return tz.guards(m.player, k))
-	var note := "your Boki is safe there"
-	var w := 16.0
-	for k in kinds:
-		w += 18.0 + TextCache.width(hud.body, String(TerrainHazards.kind_def(k)["name"]), 11) + KEY_GAP
-	if shield:
-		w += 20.0 + TextCache.width(hud.body, note, 11)
-	var bar := Rect2(map_rect.position + Vector2(8.0, map_rect.size.y - KEY_H - 8.0), Vector2(w, KEY_H))
-	hud._rounded(bar, Color(0.04, 0.05, 0.08, 0.85), 8)
-	var x := bar.position.x + 10.0
-	var y := bar.get_center().y
-	for k in kinds:
-		var sw := Rect2(Vector2(x, y - 6.0), Vector2(12.0, 12.0))
-		hud.c.draw_rect(sw, fill(k).lightened(0.15))
-		hud.c.draw_rect(sw, edge(k), false, 1.5)
-		var label := String(TerrainHazards.kind_def(k)["name"])
-		hud._text(Vector2(x + 18.0, y + 4.0), label, 11, Color("d8dcf0"))
-		x += 18.0 + TextCache.width(hud.body, label, 11) + KEY_GAP
-	if shield:
-		Icons.draw(hud.c, "brightshield", Vector2(x + 6.0, y), 13.0, SAFE)
-		hud._text(Vector2(x + 20.0, y + 4.0), note, 11, SAFE)
 
 static func _inside(p: Vector2, inner: Rect2, circ: Vector3) -> bool:
 	if circ.z > 0.0:
