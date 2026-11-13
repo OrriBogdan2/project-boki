@@ -363,6 +363,8 @@ const CHECKS := {
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
 	"--egg-models-check": ["res://tools/egg_models_check.gd", "egg_models_check", null],      # the eggs' 3D shells
+	"--ult-glow-check": ["res://tools/ult_glow_check.gd", "ult_glow_check", null],      # ready glow, cast flash
+	"--ult-glow-shots": ["res://tools/ult_glow_shots.gd", "ult_glow_shots", null],      # --shots-dir=<dir>
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
 	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
