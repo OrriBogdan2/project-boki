@@ -42,8 +42,13 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 `WardenGait` (scripts/heroes/warden_gait.gd) runs after the tree has advanced and fades with how much the legs run the
 body (not in the air, a crouch, or a move that owns the body):
 
-- **Stride and rate.** `loco.foot_mps` is the clips' measured foot speed, `loco.stride` the thigh stretch about its running
-  mean. The move speed over the foot speed sets the loco rate (0.6 to 1.4); the stretch carries the rest.
+- **Stride and rate.** `loco.foot_mps` (and `crouch.foot_mps`) is the speed the loops' planted soles run back at with
+  `loco.stride`, the thigh stretch about its running mean; `--anim-audit --fit-soles` fits each to the least slide of the
+  audit's own walk, run and crouch rows (prints FIT lines; the file is not written). The ground speed over it is the
+  loop's rate (0.3 to 3, `WardenGait.rate`: one rule for walk, run and sneak); a gliding loop (sole under 0.2 of its
+  ring's speed) plays at the ground over its ring's speed. The run ring shows from 1.3x `walk_speed`, back under 1.2x
+  (`WardenGait.ring`), so a jog is the run loop at its own rate, not an even blend of two loops (jog slide 25-79 % to
+  8-23 %). `--anim-audit` prints a SLIDE line per Hunter (walk, jog, run, crouch).
 - **Arm counter-swing.** `loco.arm_swing` {"L"|"R": gain} turns that upper arm about the side axis so the
   shoulder-to-hand pitch follows minus the same side's thigh, around the arm's running mean. A static arm gets a swing
   too. It is off while an upper-body move owns the arm.
