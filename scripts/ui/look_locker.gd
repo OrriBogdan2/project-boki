@@ -66,6 +66,7 @@ var _settle := 0.0
 static func open(host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: Dictionary) -> LookLocker:
 	var lk := LookLocker.new()
 	lk.look = start.duplicate(true)
+	MasteryLook.refresh(lk.look)      # a Relic's new mark shows up (kept) the first time you look
 	lk._cam = cam
 	lk._fx = fx
 	host.add_child(lk)
@@ -341,6 +342,29 @@ func _fill() -> void:
 			continue
 		_list.add_child(UI.section(String(row[1])))
 		_list.add_child(_grid(String(key), row[2], int(look.get(key, 0)), 1 if key == "accent" else 0))
+	if tab == "Body":
+		_mastery_rows()
+
+## What your Relics have left on you (MasteryLook): one row each, to keep or fade.
+func _mastery_rows() -> void:
+	var feats := MasteryLook.features().filter(func(f): return (look["features"] as Dictionary).has(String(f["id"])))
+	if feats.is_empty():
+		return
+	_list.add_child(UI.section("Left by your Relics"))
+	for f in feats:
+		var id := String(f["id"])
+		var hr := UI.hbox(8)
+		var l := UI.label("%s  (%s)" % [f["name"], HeroTitle.base_name(String(f["hunter"]))], UI.T_BODY, UI.MUTED)
+		l.custom_minimum_size.x = 250
+		hr.add_child(l)
+		var b := UI.ghost("Keep" if bool(look["features"][id]) else "Faded", func():
+			MasteryLook.toggle(look, id)
+			_trial = {}
+			_rebuild_model(look)
+			_fill(), 120)
+		b.name = "Feature_%s" % id
+		hr.add_child(b)
+		_list.add_child(hr)
 
 ## A look key's row ([key, label, choices, tip?]); {} for the hood on a cut that has none.
 func _row(key: String) -> Array:
@@ -437,6 +461,7 @@ func _glider_how(gid: String) -> String:
 func _random() -> void:
 	var lk := Unmasked.random_look()
 	lk["glider"] = look.get("glider", "classic")
+	lk["features"] = look.get("features", {})      # what your Relics left on you stays as you set it
 	set_look(lk)
 
 ## Tries a choice on the model while it's hovered (or focused).

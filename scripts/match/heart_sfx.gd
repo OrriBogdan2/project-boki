@@ -7,6 +7,7 @@ extends RefCounted
 ##   CARRIED    heart_take    the taker's sting; heart_reveal for everyone else (map-wide); the gate wakes
 ##              heart_beat    the carrier's own heartbeat loop
 ##   WAITING    heart_extract at the gate
+## The tide's sounds are TideSfx's, ticked from update.
 ## Held loops use Sfx.loop_hold, so they end on their own when the match stops ticking.
 ## The Ways Out calls (LIMITED_WAY_OUTS section 9): call_out(event, seat, team) plays one flat sting and puts the
 ## same words in the feed and the toast lane, so sound and banner fire together. The Heart makes the calls of its
@@ -32,6 +33,7 @@ const SEATS := {"lair": "the Sealed Lair", "early": "the Heart Gate", "uplink": 
 const SHUT_KEY := {"lair": "lair_shut_s", "uplink": "uplink_shut_s"}   # heart.json "quest": when a quest seat shuts
 
 var cues: Array = []                   # every one-shot cue in order, for the check
+var tide: TideSfx                      # the Blight tide's onset, front rumble and close sting
 var used := {}                         # seat -> true once a squad left by it
 var _h: Heart
 var _state := -1
@@ -41,6 +43,7 @@ var _spent_t := -1.0                   # match time of the latest seat taken (th
 
 func _init(heart: Heart) -> void:
 	_h = heart
+	tide = TideSfx.new(heart)
 
 func update() -> void:
 	var m := _h.m
@@ -54,6 +57,7 @@ func update() -> void:
 	if _state == Heart.S.CARRIED and _h.carrier == m.player:
 		Sfx.loop_hold(BEAT_KEY, "heart_beat", null, BEAT_DB)
 	_watch_shut()
+	tide.update()
 
 func _on_change(to: int) -> void:
 	match to:
