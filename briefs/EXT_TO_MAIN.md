@@ -9123,3 +9123,4 @@ READY ext/showcase-1113 a676376ba3 (v95 hunters Vex Kael Tarek Meeko Gil + Boki 
 READY ext/showcase-1113 a90bc5fc3c (supersedes a676376ba3, which was not pushed: v95 hunters Vex Kael Tarek Meeko Gil + Boki Effigeetle Skateron Frigatee in game; no new suite reds)
 READY ext/anim-cinder-cloak-peak c4259acd98 (bulk-rebase: origin/main merged in mechanically, was c3c4c141f1; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/vfx-telegraph-lead-rebased 836d831051 (bulk-rebase: origin/main merged in mechanically, was 76a80d9ba8; union 2 gen 0 files; the branch's own READY checks still apply)
+READY ext/cinder-ba-promote bf3c7b1f1d (Cinder B-A body live: bigger bust, live face, continuous hair, lava glow; glb/model checks pass; mix built in ~/meshy/cinder-body-1113, not promoted)
