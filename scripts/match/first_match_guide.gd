@@ -46,6 +46,9 @@ func tick(dt: float) -> void:
 		id = ""
 		return
 	_gap = maxf(_gap - dt, 0.0)
+	if not shown.has("seat") and _due("seat", p):      # a seat's countdown does not wait for the line on screen
+		_start("seat", p)
+		return
 	if id != "":
 		_t += dt
 		if _t >= _life(id) or _done(id, p):
@@ -89,6 +92,10 @@ func _enemy_near(p: Hunter) -> bool:
 func _exit_near(p: Hunter) -> bool:
 	return m.exits != null and m.exits.spots().any(func(s: Vector3): return s.distance_to(p.pos) <= EXIT_NEAR)
 
+## Did the squad take a seat with this player outside it (OneSeat's late_s clock running)?
+func _left_behind(p: Hunter) -> bool:
+	return m.exits != null and m.exits.one_seat != null and m.exits.one_seat.late.has(p)
+
 func _kin_ready(p: Hunter) -> bool:
 	return p.kin != null and p.kin.state != "downed"
 
@@ -105,6 +112,7 @@ func _due(lid: String, p: Hunter) -> bool:
 		"rank": return p.ak != null and p.skill_pts > 0
 		"send": return _kin_ready(p)
 		"chest": return m.chests.any(func(c: Dictionary): return not c["open"])
+		"seat": return _left_behind(p)
 	return false
 
 ## Has the player done what this line says (or is it no longer true)?
@@ -116,6 +124,7 @@ func _done(lid: String, p: Hunter) -> bool:
 		"rank": return p.skill_pts == 0
 		"send": return not _kin_ready(p) or p.kin.st_throws > _throws0
 		"chest": return int(p.stats.get("chests", 0)) > 0
+		"seat": return not _left_behind(p)
 	return false
 
 ## The line in the tutorial's strip at the top-centre (the two never show together), under the Ways Out strip.

@@ -103,3 +103,5 @@ used squad is refused every other seat (`spent`: Heartspark pick, ring crew, Upl
 `HeartHud.world_labels`. Not done: bots left behind are not steered to the seat; the lair race is not blocked while
 the grace runs (a boss fight cannot end in 20 s); the final ring's islands fall 15 s after it is taken, so the grace is
 15 s there in practice. Check: --extract-check section 3e (tools/one_seat_check.gd).
+In a save's first two Extractions, `FirstMatchGuide`'s `seat` line tells the one on the clock the rule,
+ahead of any other line (--first-match-guide-check).

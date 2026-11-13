@@ -3,7 +3,8 @@ extends RefCounted
 ##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
 ##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
-##   3. every line fits the banner lane in at most two lines at 1280x720
+##   3. the seat line: the squad took a Ways Out seat without you (OneSeat late_s)
+##   4. every line fits the banner lane in at most two lines at 1280x720
 var bad := 0
 var m: Match
 var main: Node
@@ -114,6 +115,7 @@ func _walk() -> void:
 	p.pos = spots[0]
 	_tick(0.2)
 	ok(g.line == "", "at an exit: it clears")
+	_seat(p)
 	ok(p.inp["move"] == move0, "the guide never touched the player's input")
 	p.extracted = true
 	g.shown.clear()
@@ -127,6 +129,24 @@ func _walk() -> void:
 	m.step(Match.DT)
 	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
 	_fit()
+
+## The squad takes a seat without you: the late_s line shows at once (the quiet gap does not hold it), clears
+## when you are no longer on the clock, and never comes back.
+func _seat(p: Hunter) -> void:
+	var os: OneSeat = m.exits.one_seat
+	ok(os != null, "a Ways Out match has the one-seat rule")
+	if os == null:
+		return
+	os.taken("uplink", p.team, "Uplink", Color.WHITE, p.pos + Vector3(60, 0, 0), func(_h: Hunter): return false)
+	_tick(0.1)
+	ok(g.id == "seat" and g.line.contains("seat"), "left out of the squad's seat: get there (%s)" % g.line)
+	os.late.erase(p)
+	_tick(0.1)
+	ok(g.line == "", "off the clock: it clears")
+	os.late[p] = {}
+	_tick(2.0)
+	ok(g.id != "seat", "the seat line shows once a match")
+	os.late.erase(p)
 
 func _fit() -> void:
 	var strip := TutorialStrip.rect(Vector2(1280, 720))
