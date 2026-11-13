@@ -524,7 +524,7 @@ func _loop_level(L: Dictionary) -> void:
 	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
 	p.volume_db = -80.0 if is_nan(v) else v
 	# A bed on another bus (LastAlive's on Music) stays there so it ducks with the score.
-	p.bus = _bus_for(L["pos"], L["sound"]) if String(L["bus"]) == "SFX" else String(L["bus"])
+	p.bus = _bus_for(L["pos"], L["sound"]) if String(L["bus"]) == "SFX" else StringName(L["bus"])
 
 ## Plays a ready-made stream (a glider skin's sound, say) with the same distance falloff as play().
 func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) -> void:
