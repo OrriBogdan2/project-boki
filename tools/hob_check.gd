@@ -3,9 +3,11 @@ extends RefCounted
 ## (item 87). FarmHob, HobModel, HobTalk, HobOffer, TalkBox; lines in content/rules/farm_builder.json "talk".
 ##   1. a new farm: Hob (the HobModel) waits by the market stall with his name over him; the first goal is to
 ##      meet him and the reminder line names him
-##   2. the first arrival: the camera swings over to him while he waves and calls out, then comes back
+##   2. the first arrival: the camera swings over to him while he waves and calls out, STAYS there for 5 s with
+##      no input (a "Click to continue" hint at the bottom, input free), and returns within 1 s of a click
 ##   3. talking: the talk box with his portrait and name, one line at a time; you stand still; he points at the
-##      stall and the camera looks there; after the last line he is met (no name tag) and the axe is next
+##      stall and the camera looks there and stays until the next line; after the last line he is met (no name
+##      tag) and the axe is next; a press held for a second skips every later look (CamLook)
 ##   4. the second Mask: no second Mask on a fresh save after the first expedition; not offered before the house
 ##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
@@ -41,6 +43,7 @@ func run(m: Node) -> void:
 	await _first_arrival()
 	await _offer()
 	await _later_and_legacy()
+	await _skip_check()
 	print("HOBCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -79,8 +82,9 @@ func _first_arrival() -> void:
 			"the first goal: meet him (%s)" % home.guide.hint_text())
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
 			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
-	# 2. the camera swing
-	await _wait(func(): return hob.chat.intro_t > 0.7, 8.0)
+	# 2. the camera swing: it holds until a click
+	var look: CamLook = hob.chat.look
+	await _wait(func(): return hob.chat.intro_on and look.phase == CamLook.Phase.HOLD, 12.0)
 	var focus: Vector3 = home.ppos
 	var framed: Vector3 = hob.chat.frame(focus)
 	var him: Vector3 = hob.node.position
@@ -89,9 +93,19 @@ func _first_arrival() -> void:
 			"first arrival: the camera swings over to him while he waves and calls '%s'" % hob.node.bubble.text)
 	await _shot("hob_1_calls_you_over", 0.3)
 	await _shot("hob_2_camera_intro", 0.4)
-	await _wait(func(): return hob.chat.intro_t < 0.0, 20.0)
-	ok(hob.chat.frame(focus) == focus and bool(Save.d["tutorial"].get("hob_intro", false)),
-			"then it comes back to you, once")
+	await main.get_tree().create_timer(5.0).timeout
+	framed = hob.chat.frame(focus)
+	ok(hob.chat.intro_on and look.phase == CamLook.Phase.HOLD
+			and Vector2(framed.x - him.x, framed.z - him.z).length() < 0.5,
+			"5 s with no input: the camera is still on him")
+	ok(look._text.text.contains("continue") and look._card.modulate.a > 0.9 and home.panel_open == ""
+			and not look.locked(),
+			"the hint shows ('%s') and you are not locked" % look._text.text)
+	_click()
+	var back_s := await _wait(func(): return not hob.chat.intro_on, 3.0)
+	ok(not hob.chat.intro_on and back_s < 1.0 and hob.chat.frame(focus) == focus
+			and bool(Save.d["tutorial"].get("hob_intro", false)),
+			"a click and the camera is back on you in %.2f s, once" % back_s)
 	# 3. talking
 	_stand_by(hob.node.position)
 	var it: Dictionary = hob.find(Vector2(home.ppos.x, home.ppos.z))
@@ -107,22 +121,27 @@ func _first_arrival() -> void:
 			and box.text.text == String(intro[0]["text"]), "his portrait, his name and his first line")
 	await _shot("hob_3_dialogue_box", 0.9)
 	for i in 4:      # (each line: one click finishes typing it, the next moves on)
-		box.advance()
+		await _advance(box)
 	await _frames(2)
 	ok(box.text.text == String(intro[2]["text"]) and hob.node.pose == "point"
-			and hob.node.point_at.distance_to(stall) < 0.5 and hob.chat.show_t >= 0.0,
+			and hob.node.point_at.distance_to(stall) < 0.5 and look.active(),
 			"line by line; on the stall line he points at it")
-	await main.get_tree().create_timer(0.5).timeout
+	await _wait(func(): return look.phase == CamLook.Phase.HOLD, 3.0)
 	await _shot("hob_4_points_at_stall", 0.1)
+	await main.get_tree().create_timer(5.0).timeout
 	var mid: Vector3 = hob.chat.frame(home.ppos)
-	ok(Vector2(mid.x - home.ppos.x, mid.z - home.ppos.z).length() > 1.0, "and the camera looks over there")
+	ok(look.phase == CamLook.Phase.HOLD and Vector2(mid.x - stall.x, mid.z - stall.z).length() < 0.5,
+			"and the camera stays on the stall for 5 s with no input")
 	for i in intro.size() * 2:
 		if hob.chat.talking():
-			box.advance()
+			await _advance(box)
 	await _frames(3)
 	ok(not hob.chat.talking() and home.panel_open == "" and FarmTutorial.did("hob") and not hob.node.tag.visible,
 			"after the last line: met, his name tag gone")
 	ok(FarmTutorial.current() == "axe", "the next goal is the axe")
+	back_s = await _wait(func(): return not look.active(), 3.0)
+	ok(not look.active() and back_s < 1.0 and hob.chat.frame(home.ppos) == home.ppos,
+			"after the last line the camera is back on you in %.2f s" % back_s)
 	await _frames(40)
 	hob.talk()
 	await _frames(2)
@@ -131,6 +150,20 @@ func _first_arrival() -> void:
 	home._close_panel()
 	await _frames(2)
 	ok(not hob.chat.talking(), "Esc ends the talk")
+
+## A press held for a second skips the pan and every later one.
+func _skip_check() -> void:
+	var l := CamLook.new()
+	main.add_child(l)
+	l.watching = true
+	var at := Vector3(5, 0, 5)
+	ok(l.look(at), "a look starts")
+	await _wait(func(): return l.phase == CamLook.Phase.HOLD, 3.0)
+	Input.action_press("interact")
+	await _wait(func(): return l.skip_rest, 3.0)
+	Input.action_release("interact")
+	ok(l.skip_rest and not l.look(at), "a press held for a second skips the rest: no later look starts")
+	l.queue_free()
 
 func _offer() -> void:
 	var hob: FarmHob = home.hob
@@ -149,13 +182,13 @@ func _offer() -> void:
 	await _frames(2)
 	var box: TalkBox = hob.chat.box
 	ok(box.text.text == "By the way... I see you found a Vex Relic.", "\"%s\"" % box.text.text)
-	box.advance()
-	box.advance()
+	await _advance(box)
+	await _advance(box)
 	await _frames(2)
 	ok(box.text.text == "Could I interest you in another?", "\"%s\"" % box.text.text)
 	await _shot("hob_5_offer_line", 0.8)
-	box.advance()
-	box.advance()
+	await _advance(box)
+	await _advance(box)
 	await _frames(3)
 	var offer: HobOffer = hob.chat.offer
 	var cards: Array = box.find_children("*", "PanelContainer", true, false).filter(
@@ -202,8 +235,8 @@ func _offer() -> void:
 	offer.pick("tender")
 	ok(ClassUnlock.open_ids() == ["archer", "gunslinger", "tender"] and not ClassUnlock.second_pending(),
 			"taking Meeko opens her and no one else (%s)" % str(ClassUnlock.open_ids()))
-	box.advance()
-	box.advance()
+	await _advance(box)
+	await _advance(box)
 	await _frames(3)
 	var beats: Array = home.find_children("*", "MaskBeat", true, false)
 	ok(beats.size() == 1 and (beats[0] as MaskBeat).short and home.panel_open == HobTalk.TALK,
@@ -244,6 +277,17 @@ func _later_and_legacy() -> void:
 			"a save that already has its second Mask keeps it and is not offered another")
 
 # ------------------------------------------------------------------ helpers
+## One press on the talk box: it waits out a camera move first.
+func _advance(box: TalkBox) -> void:
+	await _wait(func(): return not box.frozen, 3.0)
+	box.advance()
+
+func _click() -> void:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	main.get_viewport().push_input(ev)
+
 func _stand_by(at: Vector3) -> void:
 	home.ppos = at + Vector3(1.2, 0, 1.2)
 	home.player.position = home.ppos
@@ -252,10 +296,14 @@ func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
-func _wait(cond: Callable, secs: float) -> void:
+## Waits for `cond` (at most `secs` of wall time); returns the game seconds it took (the frames' own delta).
+func _wait(cond: Callable, secs: float) -> float:
 	var t0 := Time.get_ticks_msec()
+	var game_s := 0.0
 	while not cond.call() and Time.get_ticks_msec() - t0 < int(secs * 1000.0):
 		await main.get_tree().process_frame
+		game_s += main.get_process_delta_time()
+	return game_s
 
 func _shot(file: String, secs: float) -> void:
 	if shots == "":

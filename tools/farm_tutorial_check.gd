@@ -33,7 +33,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "hob_intro": true}      # (Hob's look is done)
 	return d
 
 func _stats(extracts := 0, bosses := 0, caught := 0, harvested := 0) -> void:

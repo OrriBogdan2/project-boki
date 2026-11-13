@@ -26,8 +26,6 @@
 		"call": "Hey! Over here!",
 		"call_offer": "Got a minute?",
 		"call_every_s": 9.0,
-		"intro_pan_s": 1.5,
-		"show_s": 1.6,
 		"intro": [
 			{"text": "There you are! I'm Hob Brackenridge. I build things.", "pose": "wave"},
 			{"text": "This is your farm now. A bit bare, but we'll fix that."},
@@ -55,6 +53,6 @@
 		"signature": {"tender": "e"},
 		"build_menu": "Open the build menu",
 		"bye": "Bye",
-		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it and the camera looks for show_s seconds, then comes back."
+		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it and the camera looks there (CamLook) and stays until you click on."
 	}
 }
