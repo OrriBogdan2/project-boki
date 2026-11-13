@@ -12,7 +12,7 @@
 			"lmb": {"mode": "buffer", "source": "footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends"},
 			"rmb": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
 			"e": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
-			"x": {"mode": "cancel", "source": "no air dash in the footage; as the ground dash, the slam plants him where he is; not determinable: no air dash or jump in the footage (briefs/hero-ref/bjorn.md sections 5 and 6; Smash 0365-0382, ult f25-f31 checked)"},
+			"x": {"mode": "cancel", "source": "no air dash in the footage; as the ground dash, the slam plants him where he is"},
 			"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 		}
 	},
@@ -23,11 +23,14 @@
 		"x": {"mode": "buffer", "reason": "planted for the wind-up and the slam (~0.6 s): a dash would move him off the plant", "source": "Owner item 48 (root only during the wind-up + slam, free after); footage f25-f31: Oath planted through the wind-up and slam. The data is silent on Shift in the cast. Shift pressed there goes the moment the plant ends; it is free while the lane erupts."},
 		"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 	},
+	"into_jump": {
+		"x": {"mode": "lock", "reason": "planted for the wind-up and the slam (~0.6 s): a jump would lift him off the plant; the press is dropped, not kept for the plant's end", "source": "Hero sheet bjorn.md Ultimate, aim: 'He is planted for the wind-up and slam (f25-f31)'; owner item 48 (root only during the wind-up + slam, free after). The data card and footage show no jump press in the cast. Ours: no rise in the plant (BjornUlt holds him down, as JuggernautUlt's guard); once the fissure runs a jump goes."}
+	},
 	"hold": {
 		"lmb": {
 			"ground": {"mode": "keep", "source": "Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it"},
 			"air": {"mode": "keep", "source": "Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is)"},
-			"jump": {"mode": "keep", "source": "Not determinable: no jump in the footage (briefs/hero-ref/bjorn.md section 6); in the holds (0101-0110, 0116-0128, 0132-0149, 0160-0172) he stays in place. Ours: the default, the charge carries through the jump."},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/bjorn.md:67-74): every charged-swing hold (frames 0101-0110, 0116-0128, 0132-0149, 0160-0172) is made standing; he never moves while charging (open question bjorn.md:271) and no jump is shown (bjorn.md:363-366). Data (briefs/supervive-data/supervive_kits.md:88: HOLD to charge a swing) silent on jumping. Kept: the charge carries through, as on the dash rows (owner item 51)."},
 			"mantle": {"mode": "cancel", "reason": "owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)", "source": "Owner item 30; the source has no mantle rule."}
 		}
 	}

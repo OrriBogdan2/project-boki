@@ -80,7 +80,9 @@ func _set_tag(state: Dictionary) -> void:
 	var reason := String(state.get("reason", "")) if held and not bool(state.get("ok", true)) else ""
 	var flags := "%s%s%s%s%s" % [held, state.get("tool", false), state.get("can_rotate", false),
 		state.get("can_store", false), state.get("sweep", false)]
-	var sig := "%s|%s|%s" % [item, reason, flags]
+	var level := int(state.get("level", 0)) if not held else 0
+	var upgrade := String(state.get("upgrade", "")) if level > 0 else ""
+	var sig := "%s|%s|%s|%d%s" % [item, reason, flags, level, upgrade]
 	if sig == _tag_sig:
 		return
 	_tag_sig = sig
@@ -90,6 +92,8 @@ func _set_tag(state: Dictionary) -> void:
 	var col := UI.vbox(4)
 	tag.add_child(col)
 	col.add_child(UI.label(item, 16, UI.INK, UI.semi))
+	if level > 0:
+		col.add_child(UI.label("Level %d" % level, 13, UI.MUTED))
 	if reason != "":
 		col.add_child(UI.label(reason, 14, Color("ff9a8a")))
 	var store_cap := Settings.key_cap("store")
@@ -98,6 +102,8 @@ func _set_tag(state: Dictionary) -> void:
 		pairs = [["LMB", "Options"], [store_cap, "Store"]]
 		if bool(state.get("sweep", false)):
 			pairs = [["LMB", "Store it"]]
+		elif upgrade == "Upgrade":
+			pairs.append([Settings.key_cap("interact"), "Upgrade"])
 	elif bool(state.get("tool", false)):
 		pairs = [["LMB", "Drag to paint"], [Settings.key_cap("menu"), "Cancel"]]
 	else:
@@ -106,6 +112,8 @@ func _set_tag(state: Dictionary) -> void:
 			pairs.insert(0, ["%s RMB" % Settings.key_cap("rotate"), "Rotate"])
 		if bool(state.get("can_store", false)):
 			pairs.insert(2, [store_cap, "Store"])
+	if upgrade in ["Max", "Upgrading"] and not bool(state.get("sweep", false)):
+		col.add_child(UI.label(upgrade, 13, UI.GOLD))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 18)

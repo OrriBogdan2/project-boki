@@ -17,7 +17,7 @@
 			},
 			"x": {
 				"mode": "cancel",
-				"source": "Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard. Frame 0437: a Quick Dash hit (161) lands beside the guard's strike (396), the dive then the guard; no frame shows the guard rising while the dash runs on, so not fire."
+				"source": "Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard."
 			},
 			"q": {
 				"mode": "fire",
@@ -31,7 +31,7 @@
 			},
 			"rmb": {
 				"mode": "cancel",
-				"source": "Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once. The air dash itself is not in the footage (sheet section 5; 0251-0300 checked): a slam mid-air-dash is not determinable."
+				"source": "Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once."
 			},
 			"e": {
 				"mode": "fire",
@@ -39,7 +39,7 @@
 			},
 			"x": {
 				"mode": "cancel",
-				"source": "Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up. No air dash in the footage (sheet section 5; 0251-0300 checked): not determinable beyond the planted guard."
+				"source": "Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up."
 			},
 			"q": {
 				"mode": "fire",
@@ -79,21 +79,21 @@
 			},
 			"jump": {
 				"mode": "keep",
-				"source": "Not determinable: no blast charge held through a jump. Sheet briefs/hero-ref/juggernaut.md, frames checked: LMB 0014-0120 (hold blast 0081-0087), the only jumps (Air Slam 0251-0300, rise 0261-0266, a slash at the top, no charge). Ours: the default, the charge carries through the jump."
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:41): the hold-blast charge (white arc, frame 0087, 0.6-1.0 s) is only shown standing in the LMB window 0014-0120; no plain jump is shown (juggernaut.md:283), the only jumps are Air Slams (0251-0300). Data (briefs/supervive-data/supervive_kits.md:18: HOLD to charge a ranged fireblast) silent on jumping. Kept: the charge carries through, as on the ground and air rows (owner item 51)."
 			}
 		},
 		"rmb": {
 			"ground": {
 				"mode": "keep",
-				"source": "Not determinable: his RMB hold is the Charge Dash, a dash of its own; no Quick Dash inside a held charge. Frames checked: RMB 0121-0250 (charge 0122-0127, 0141-0146), Quick Dash 0371-0420. Ours: the default, the charge waits through the Rampage."
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:57-65): the Charge Dash hold (frames 0121-0127, 0141-0146; the lane goes magenta at 0.6-0.8 s) is never broken by a Quick Dash, which is shown on its own (0371-0420, juggernaut.md:86-92, 259-266); the card 'Dash while attacking in your facing direction' (juggernaut.md:20) does not say whether a charge survives it. Data (briefs/supervive-data/supervive_kits.md:21, 26: Fiery Lunge HOLD, Flame Step) silent. Kept: the hold carries through (owner item 51)."
 			},
 			"air": {
 				"mode": "keep",
-				"source": "Not determinable: no air dash in the footage (in the air he uses the Air Slam). Frames checked: 0121-0250, 0251-0300, 0371-0420. Ours: the default, the charge waits through the air dash."
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:57-65): the Charge Dash hold (frames 0121-0127, 0141-0146; the lane goes magenta at 0.6-0.8 s) is never broken by a Quick Dash, which is shown on its own (0371-0420, juggernaut.md:86-92, 259-266); the card 'Dash while attacking in your facing direction' (juggernaut.md:20) does not say whether a charge survives it. Data (briefs/supervive-data/supervive_kits.md:21, 26: Fiery Lunge HOLD, Flame Step) silent. Air dash not shown as a dash; in the air RMB is the Air Slam (juggernaut.md:273-274; briefs/supervive-data/supervive_kits.md:22). Kept: the hold carries through (owner item 51)."
 			},
 			"jump": {
 				"mode": "keep",
-				"source": "Not determinable: an RMB in the air is the Air Slam; no jump with a held charge. Frames checked: 0121-0250, 0251-0300. Ours: the default, the charge carries through the jump."
+				"source": "Not determinable. Footage (briefs/hero-ref/juggernaut.md:57-65): the Charge Dash hold (frames 0121-0127, 0141-0146; the lane goes magenta at 0.6-0.8 s) is never broken by a Quick Dash, which is shown on its own (0371-0420, juggernaut.md:86-92, 259-266); the card 'Dash while attacking in your facing direction' (juggernaut.md:20) does not say whether a charge survives it. Data (briefs/supervive-data/supervive_kits.md:21, 26: Fiery Lunge HOLD, Flame Step) silent. No plain jump shown (juggernaut.md:283); every jump in the clip is an Air Slam (0251-0300, juggernaut.md:75-76, 276-283). Kept: the hold carries through (owner item 51)."
 			}
 		}
 	},
