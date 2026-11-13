@@ -79,7 +79,7 @@ class MatchmakerPickTest(unittest.TestCase):
     def test_a_ticket_picks_on_its_turn_after_joining(self):
         clock = Clock()
         core = make_core(clock, FILL_TIMEOUT_DUEL="1")
-        a = core.enqueue("duel", "Ana", VERSION, [])["ticket"]
+        a = core.enqueue("duel", "Ana", VERSION)["ticket"]
         self.assertEqual(core.pick(a, "mage"), {"error": "no_match"})
         clock.advance(2)
         core.tick()
