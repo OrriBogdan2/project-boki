@@ -29,6 +29,14 @@ static func strength(rec: Dictionary) -> int:
 		total += int(rec["stats"].get(s, 0))
 	return total
 
+## A rival built from `rec`: the same Boki with every stat scaled by `ratio` (Kite Tow's Gale Kite).
+static func rival(rec: Dictionary, ratio: float) -> Dictionary:
+	var r := rec.duplicate(true)
+	r["uid"] = "rival"
+	for s in Care.STATS:
+		r["stats"][s] = ceili(float(rec["stats"].get(s, 0)) * ratio)
+	return r
+
 ## The strongest of `recs` other than `mine`: the rival a race is judged against.
 static func strongest(recs: Array, mine: Dictionary) -> Dictionary:
 	var best: Dictionary = {}
