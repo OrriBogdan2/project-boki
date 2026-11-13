@@ -37,6 +37,8 @@ Sheets (not in git): `/home/boki/meshy/npc-hob-guide-1111/` `options.jpg` (3 fro
    recipe in `tools/meshy/npc_recipes.json` names the animate outputs (merged), clip -> pose, the albedo size
    (2048 px JPEG) and the props: each prop is skinned to its own bone, keyed in every clip to ride its carrier
    (Hob's mallet on his back, in his right hand for "hammer"; Pell's lantern hangs upright from Pell's left hand).
+   The bake applies Meshy's 0.01 Armature scale (bones in metres, before the props go on): left on, Godot drew the
+   skinned mesh 100x big (`--npc-check` measures the skeleton for it; `--npc-shots` ends on a close lineup of both).
    About 17k triangles and 2-2.4 MB each.
 5. A row in `content/rules/npcs.json`; `NpcModel.new("<id>")` (or a subclass, like `HobModel`).
 

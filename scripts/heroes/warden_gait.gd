@@ -8,6 +8,10 @@ extends RefCounted
 ##    mean), so a planted foot stays put on the floor without the cadence going frantic;
 ##  - "loco.arm_swing": {"L": gain, "R": gain} puts the arm on the opposite swing of its own side's leg: its pitch
 ##    about the side axis follows minus the leg's, around the arm's running mean (a static arm gets a swing too).
+##  - "loco.bob": [walk, run] the hips' up and down about their running mean is scaled by it (0..1) for a clip that
+##    bobs too far for the speed (Grimble 17 cm, Kael 16 cm at a run). The clip's bob is the root bone's, which the
+##    thighs hang from too, so only the hips and what hangs from them (torso, arms, head) are held back: the feet stay
+##    planted.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]
@@ -17,6 +21,10 @@ const RATE_MAX := 1.4        # x: fastest
 const FADE_RATE := 8.0       # 1/s: the gait layer in and out
 
 var skel: Skeleton3D
+var bob := 1.0               # x: the hips' vertical travel at this speed
+var hips := -1               # hips bone index
+var hips_rest_y := 0.0       # m: the hips' local height at rest (the clips key no hips position)
+var hips_y := NAN            # m: running mean of the hips' height (skeleton space)
 var gain := 1.0              # x: the thigh stretch at this speed
 var legs_w := 0.0
 var arm_w := 0.0
@@ -29,6 +37,9 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 		var bi := WardenSkeleton.find(sk, b)
 		if bi >= 0:
 			legs.append([bi, sk.get_bone_pose_rotation(bi)])
+	hips = WardenSkeleton.find(sk, "hips")
+	if hips >= 0:
+		hips_rest_y = sk.get_bone_pose_position(hips).y
 	for side in swing:
 		var ai := WardenSkeleton.find(sk, "upper_arm." + String(side))
 		var hi := WardenSkeleton.find(sk, "hand." + String(side))
@@ -38,15 +49,22 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 
 ## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
 ## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, tools/anim_audit.gd), between the
-## rings at "walk_speed" and "run_speed".
-func plan(spd: float, lc: Dictionary) -> float:
+## rings at "walk_speed" and "run_speed". "side_foot_mps" (optional, same shape) is the strafe loops' own, mixed in
+## by how far `pos` (the blend position, x right, y forward) points sideways.
+func plan(spd: float, lc: Dictionary, pos: Vector2) -> float:
 	var walk := float(lc.get("walk_speed", 2.2))
 	var run := float(lc.get("run_speed", 4.6))
 	var t := clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)
 	var stride: Array = lc.get("stride", [1.0, 1.0])
 	var foot: Array = lc.get("foot_mps", [walk, run])
+	var side: Array = lc.get("side_foot_mps", foot)
+	var side_k := absf(pos.x) / maxf(absf(pos.x) + absf(pos.y), 0.01)
+	var ahead := lerpf(float(foot[0]), float(foot[1]), t)
+	var foot_speed := lerpf(ahead, lerpf(float(side[0]), float(side[1]), t), side_k)
 	gain = lerpf(float(stride[0]), float(stride[1]), t)
-	return clampf(spd / maxf(lerpf(float(foot[0]), float(foot[1]), t), 0.1), RATE_MIN, RATE_MAX)
+	var b: Array = lc.get("bob", [1.0, 1.0])
+	bob = lerpf(float(b[0]), float(b[1]), t)
+	return clampf(spd / maxf(foot_speed, 0.1), RATE_MIN, RATE_MAX)
 
 ## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
 func apply(dt: float, legs_k: float, arm_k: float) -> void:
@@ -54,6 +72,12 @@ func apply(dt: float, legs_k: float, arm_k: float) -> void:
 	arm_w = move_toward(arm_w, arm_k, FADE_RATE * dt)
 	var a := 1.0 - exp(-dt / MEAN_TAU)
 	var k := 1.0 + (gain - 1.0) * legs_w
+	if hips >= 0:
+		var hp := skel.get_bone_pose_position(hips)
+		var gy := skel.get_bone_global_pose(hips).origin.y - (hp.y - hips_rest_y)   # (the clip's, without our offset)
+		hips_y = gy if is_nan(hips_y) else lerpf(hips_y, gy, a)
+		hp.y = hips_rest_y - (gy - hips_y) * (1.0 - bob) * legs_w
+		skel.set_bone_pose_position(hips, hp)
 	for l in legs:
 		var q := skel.get_bone_pose_rotation(l[0])
 		var m: Quaternion = l[1]

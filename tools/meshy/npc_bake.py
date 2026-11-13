@@ -21,6 +21,32 @@ RECIPES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "npc_recipes.
 PROP_TEX = 512      # px: a prop's albedo
 
 
+def _meters() -> None:
+    """Meshy's rig is an Armature object scaled 0.01 over a skeleton in cm: Godot skins the mesh in the skeleton's own
+    space and ignores that scale, so the mesh came out 100x big. Apply the scale (bones in metres, the clips' bone
+    moves scaled to match, the mesh's own scale applied) and drop the importer's stray bone-shape sphere."""
+    for o in list(bpy.data.objects):
+        if o.type == "MESH" and o.parent is None:
+            bpy.data.objects.remove(o)
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    mesh = next(o for o in bpy.data.objects if o.type == "MESH")
+    k = arm.scale[0]
+    for o in (arm, mesh):
+        for x in bpy.data.objects:
+            x.select_set(False)
+        bpy.context.view_layer.objects.active = o
+        o.select_set(True)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    for a in bpy.data.actions:
+        for fc in a.fcurves:
+            if fc.data_path.endswith(".location"):
+                for kp in fc.keyframe_points:
+                    kp.co.y *= k
+                    kp.handle_left.y *= k
+                    kp.handle_right.y *= k
+                fc.update()
+
+
 def main(src, out, nid):
     rec = json.load(open(RECIPES))[nid]
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -38,6 +64,7 @@ def main(src, out, nid):
     for m in [m for m in bpy.data.materials if not m.users]:
         bpy.data.materials.remove(m)
     _rename_clips(rec["clips"])
+    _meters()                           # (before the props: they are placed in metres)
     _flatten_materials(list(bpy.data.materials), "npc-" + nid, nid + "_albedo", rec.get("tex", 2048))
     for name, p in rec.get("props", {}).items():
         _prop(arm, nid, name, p, os.path.join(src, p["glb"]))
@@ -123,7 +150,7 @@ def _prop(arm, nid, name, p, path):
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="EDIT")
     eb = arm.data.edit_bones.new(bone)
-    eb.head, eb.tail, eb.roll = (0, 0, 0), (0, 10, 0), 0.0       # rest = identity in armature space
+    eb.head, eb.tail, eb.roll = (0, 0, 0), (0, 0.1, 0), 0.0       # rest = identity in armature space
     bpy.ops.object.mode_set(mode="OBJECT")
     mesh.parent = arm
     mesh.matrix_parent_inverse = arm.matrix_world.inverted()
