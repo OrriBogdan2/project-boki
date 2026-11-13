@@ -573,6 +573,7 @@ func _recall() -> void:
 	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}
+	mace["t"] = 0.0
 	HeroVfx.of(m).trail(h, "throw", fx.hammer)
 	m.sfx("bjorn_recall", mace["pos"], -4.0)
 	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
@@ -615,7 +616,10 @@ func _tick_mace(dt: float) -> void:
 			if blocked or float(mace["d"]) >= float(mace.get("to", md["throw_range"])):
 				var gy: float = m.world.ground_at(p.x, p.z)
 				if gy <= World.VOID + 1.0:
-					mace["st"] = "back"; mace["hit"] = {}       # over the abyss: it comes straight back
+					# over the abyss: it comes straight back
+					mace["st"] = "back"
+					mace["hit"] = {}
+					mace["t"] = 0.0
 				else:
 					p = Vector3(p.x, gy + 0.15, p.z)
 					mace["st"] = "ground"; mace["t"] = 0.0
@@ -634,13 +638,16 @@ func _tick_mace(dt: float) -> void:
 			if float(md.get("lie_t", 0.0)) > 0.0 and float(mace["t"]) >= float(md["lie_t"]):
 				_recall()
 		"back":
-			var to := h.pos + Vector3(0, 1.0, 0) - p
-			var step := float(md["recall_speed"]) * dt
-			var dir2 := Vector2(to.x, to.z).normalized()
-			if to.length() <= step + 0.6:
+			# it homes on the hand and lands on the recall clip's catch key "recall_t" s after the call, from any range
+			# (sheet: recall flight 0.2-0.4 s)
+			mace["t"] = float(mace["t"]) + dt
+			var left := float(md["recall_t"]) - float(mace["t"])
+			if left <= 0.5 * dt:
 				_catch()
 				return
-			p += to.normalized() * step
+			var to := h.pos + Vector3(0, 1.0, 0) - p
+			var dir2 := Vector2(to.x, to.z).normalized()
+			p += to * minf(1.0, dt / left)
 			for f in foes_in(p, 0.9, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true

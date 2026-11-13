@@ -61,6 +61,18 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
 
+## Seconds after a recall press until the hammer is back in his hand (gives up at 1 s).
+func _recall_caught(m: Match, K: BulwarkKit) -> float:
+	var t := 0.0
+	while not K.mace.is_empty() and t < 1.0:
+		m.step(DT)
+		t += DT
+	return t
+
+## Where the recall clip closes the hand (bul_recall's third key; breaker.glb lmb_recall has it at 0.3 s too).
+func _catch_key() -> float:
+	return float(KMovesPinBjorn.MOVES["bul_recall"]["keys"][2][0])
+
 ## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:
 	for i in range(m.shots.size() - 1, -1, -1):
@@ -825,8 +837,14 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
-	step(m, 1.2)
+	var caught := _recall_caught(m, K)
+	step(m, 1.2 - caught)
 	ok("bjorn: tap again calls it back", K.mace.is_empty())
+	ok(
+		"bjorn recall: from 5 m the hand closes on the hammer at the recall clip's catch key (%.2f s)" % _catch_key(),
+		absf(caught - _catch_key()) <= DT and K.anim_id == "bul_recall",
+		"caught %.3f %s" % [caught, K.anim_id]
+	)
 	K.cd["e"] = 0.0
 	aim_at(P, home + Vector3(-5.0, 0, 0))
 	P.ak.use_e()
@@ -855,7 +873,13 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
-	step(m, 1.0)
+	caught = _recall_caught(m, K)
+	step(m, 1.0 - caught)
+	ok(
+		"bjorn recall: from 9 m too, caught on the catch key (sheet: recall flight 0.2-0.4 s)",
+		absf(caught - _catch_key()) <= DT,
+		"caught %.3f" % caught
+	)
 	# small mechanics: it flies at least 2.5 m (a cursor at 2 m lands at 2.5 m), and can't be recalled in its
 	# first 0.25 s
 	P.fire_cd = 0.0
@@ -875,11 +899,7 @@ func _bulwark_combos() -> void:
 	)
 	step(m, 0.6)
 	ok("bjorn small: a close cursor still throws 2.5 m", absf(K.throw_d - 2.5) < 0.6, "d %.1f" % K.throw_d)
-	P.fire_cd = 0.0
-	P.inp["fire"] = true
-	m.step(DT)
-	P.inp["fire"] = false
-	step(m, 1.0)
+	# called home, so the hold below starts with the hammer in hand
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
 	m.step(DT)

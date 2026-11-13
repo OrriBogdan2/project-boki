@@ -471,6 +471,13 @@ func _throws_in(m: Match, P: Hunter, K: BulwarkKit, secs: float) -> int:
 		prev = press
 	P.inp["fire"] = false
 	step(m, 1.0)
+	if not K.mace.is_empty():
+		# called home: a planted hammer would turn the next hold's first press into a 0.3 s recall
+		P.fire_cd = 0.0
+		P.inp["fire"] = true
+		m.step(DT)
+		P.inp["fire"] = false
+		step(m, 0.5)
 	return K.throws - t0 if prev or true else 0
 
 ## #29: the raised aegis pushes foes back and shows it, is bigger and plated.
