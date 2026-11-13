@@ -686,6 +686,8 @@ def _combo_ours(row, modes, default):
         return modes[mode] + ("" if row else " (default)")
     return "**exception:** %s (%s)" % (modes[mode], row.get("reason", "no reason given"))
 
+HELD_FIRE_SLOTS = dict(DASH_SLOTS, dash="a dash", all="any slot")      # held_fire keys -> the pair's label
+
 def _combo_rows(hero, f):
     """The item 51 rows of one hero: jump -> slot, slot -> jump, slot -> air dash, holds through each move."""
     rows = []
@@ -704,6 +706,9 @@ def _combo_rows(hero, f):
             if move in held:
                 rows.append([hero, "hold %s through %s" % (label, name), held[move].get("source", ""),
                              _combo_ours(held[move], HOLD_MODE, "keep")])
+    for slot, row in f.get("held_fire", {}).items():
+        label = HELD_FIRE_SLOTS.get(slot, slot)
+        rows.append([hero, "hold LMB through %s" % label, row.get("source", ""), row.get("ours", "")])
     return rows
 
 def _dash_ours(row, modes):
@@ -786,7 +791,11 @@ def gen_dash_flow():
             "guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0022-cc-exit-buffer.md): "
             "it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; "
             "a lock that runs on past that answers with the deny cue. The footage shows no such press dropped "
-            "(`--cast-lock-buffer-check`).\n\n")
+            "(`--cast-lock-buffer-check`).\n\n"
+            "LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes "
+            "the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding "
+            "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
+            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
