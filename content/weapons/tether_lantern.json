@@ -15,6 +15,7 @@
 		"size": 0.28,
 		"color": "#c070ff",
 		"sfx": "os_orb",
+		"hit": "hit_magic",
 		"fire_slow": 0.9,
 		"desc": "A quick violet orb every 0.6s, flying its full 12.25m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows.",
 		"kick": 0.06,
