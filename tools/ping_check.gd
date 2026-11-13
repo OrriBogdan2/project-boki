@@ -136,7 +136,8 @@ func _world() -> void:
 	ok(theirs.size() == 1 and theirs[0]["kind"] == "loot", "a ping from the net keeps its kind")
 	_kinds_and_life(P, mate, foe, spot)
 
-## 4. colours (foe on enemies, gold on loot, squad colour on the ground), the cap, the enemy ping following its hunter and expiring, Alt+click, the Net round trip.
+## 4. colours (foe on enemies, gold on loot, squad colour on the ground), the cap, the enemy ping
+## following its hunter and expiring, Alt+click, the Net round trip.
 func _kinds_and_life(P: Hunter, mate: Hunter, foe: Hunter, spot: Vector3) -> void:
 	m.pings.clear()
 	foe.teleport(spot)

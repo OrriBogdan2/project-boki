@@ -597,5 +597,6 @@ func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
 		card.queue_free()
 	card = GameResultCard.open(h, {"game": "Echo Steps", "place": place, "before": before,
-			"prize": [["+%d gems, best streak %d" % [res["gems"], res["best"]], UI.GOLD]] + GardenPrizes.rows(res["prize"])})
+			"prize": [["+%d gems, best streak %d" % [res["gems"], res["best"]], UI.GOLD]]
+			+ GardenPrizes.rows(res["prize"])})
 	card_t = float(rules()["card_s"])
