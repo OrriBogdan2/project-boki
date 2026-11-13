@@ -106,7 +106,8 @@ func _on_msg(topic: String, data, from: String) -> void:
 
 # ------------------------------------------------------------------ the host
 func _spawn(cmd: String) -> int:
-	return OS.create_process("/bin/sh", ["-c", "cd '%s' && exec %s" % [ProjectSettings.globalize_path("res://"), cmd]])
+	var dir := ProjectSettings.globalize_path("res://")
+	return OS.create_process("/bin/sh", ["-c", "cd '%s' && exec timeout -k 5 300 %s" % [dir, cmd]])
 
 func _host() -> void:
 	relay_port = 7930 + OS.get_process_id() % 60

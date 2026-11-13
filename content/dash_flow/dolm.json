@@ -25,14 +25,14 @@
 	},
 	"hold": {
 		"lmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/breah.md:71-82): the Quake Punch is a hold-and-release wind-up (0117-0124, hold about 0.75 s), no Shift or jump pressed inside it; she walks afterwards while the fist recovers. The tip title 'Punch to Extend Dash/RMB' (breah.md:8-9) is a title only: there is no transcript (breah.md:361) and the frames shown (0938-0958) are a punch pressed during an RMB charge (breah.md:114-115), not a held punch through a dash. Ground dash on the bare Landslide shove (breah.md:433-441). Data: briefs/supervive-data/supervive_kits.md:105 has nothing on a wind-up through a dash. Kept: the hold carries through (owner item 51)."},
+			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/breah.md:71-82): the Quake Punch is a hold-and-release wind-up (0117-0124, hold about 0.75 s), no Shift or jump pressed inside it; she walks afterwards while the fist recovers. The tip title 'Punch to Extend Dash/RMB' (breah.md:8-9) is a title only: there is no transcript (breah.md:361) and the frames shown (0938-0958) are a punch pressed during an RMB charge (breah.md:114-115), not a held punch through a dash. Air dash 'not shown as a dash' (breah.md:443-445). Data: briefs/supervive-data/supervive_kits.md:105 has nothing on a wind-up through a dash. Kept: the hold carries through (owner item 51)."},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/breah.md:71-82): the Quake Punch is a hold-and-release wind-up (0117-0124, hold about 0.75 s), no Shift or jump pressed inside it; she walks afterwards while the fist recovers. The tip title 'Punch to Extend Dash/RMB' (breah.md:8-9) is a title only: there is no transcript (breah.md:361) and the frames shown (0938-0958) are a punch pressed during an RMB charge (breah.md:114-115), not a held punch through a dash. The only jump shown is the RMB leap (breah.md:447-449). Data: briefs/supervive-data/supervive_kits.md:105 has nothing on a wind-up through a dash. Kept: the hold carries through (owner item 51)."}
 		},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/breah.md:98-115): the Volcano Crusher is a hold-charge; she stood still through each charge except for jumps and punches (breah.md:357, open question 3); no Shift inside a charge, and the dash-into-dunk combo (0965-1010, breah.md:140-143) casts RMB after the dash, not before. Ground: the Landslide shove is a tap (breah.md:145-158). Data: briefs/supervive-data/supervive_kits.md:106 has nothing on a charge through a dash. Kept: the hold carries through (owner item 51)."},
+			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/breah.md:98-115): the Volcano Crusher is a hold-charge; she stood still through each charge except for jumps and punches (breah.md:357, open question 3); no Shift inside a charge, and the dash-into-dunk combo (0965-1010, breah.md:140-143) casts RMB after the dash, not before. Air dash 'not shown as a dash' (breah.md:443-445). Data: briefs/supervive-data/supervive_kits.md:106 has nothing on a charge through a dash. Kept: the hold carries through (owner item 51)."},
+			"jump": {"mode": "keep", "source": "Footage: 'When she jumps while charging, she leaps forward and the circle comes with her' (briefs/hero-ref/breah.md:114, key frame 0240, the card); data: 'Jump while charging to leap forward' (briefs/supervive-data/supervive_kits.md:106). The jump is the source's own move inside the charge, so the hold keeps through it."}
 		}
 	}
 }

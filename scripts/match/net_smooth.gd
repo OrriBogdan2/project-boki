@@ -3,7 +3,8 @@ extends RefCounted
 ## A remote Hunter's snapshot buffer. The body is drawn GAP plus a margin behind its owner's clock, on a smooth
 ## curve between the two snapshots around that moment (cubic Hermite through their positions and
 ## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
-## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump.
+## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump, unless the
+## velocities the two snapshots report account for it (a kit's scripted dive, like Kitefall's fall).
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
 ## line's delay, taken from the quickest recent arrival. The margin on top of one snapshot gap follows how
 ## late recent snapshots came against that quickest one (a jitter buffer), so a jittery long line (two hops
@@ -19,6 +20,7 @@ const SNAP_SPEED := 40.0    # m/s between two snapshots: anything faster is a te
 const RESYNC := 0.5         # s an arrival is off the usual: a clock was reset, start over
 const OFF_EASE := 0.05      # share of a slower-than-usual arrival the clock gap takes on per snapshot
 const KEEP := 6             # snapshots kept (0.6 s at 10 a second)
+const GUESS_M := 0.01       # m of run-on past the last snapshot that counts as a guess (a standing body never is)
 
 var ts := PackedFloat64Array()
 var ps := PackedVector3Array()
@@ -28,6 +30,7 @@ var late := JITTER_MIN      # s: the margin, the latest recent snapshot against 
 var jumped := false         # a teleport came in: the next follow snaps instead of sweeping
 var drawn := -INF           # s: the owner time the last follow drew
 var drawn_at := 0.0         # s: our match time then
+var guessing := false       # drawn running on past its last snapshot: a guess, so it shoves no body (Match._separate)
 
 func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 	var gap := now - t_owner
@@ -43,7 +46,7 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 	else:
 		late = maxf(late * JITTER_KEEP, gap - off)
 		off += (gap - off) * OFF_EASE
-	if n > 0 and p.distance_to(ps[n - 1]) > SNAP_SPEED * (t_owner - ts[n - 1]):
+	if n > 0 and p.distance_to(ps[n - 1]) > _reach(p - ps[n - 1], v, vs[n - 1]) * (t_owner - ts[n - 1]):
 		_clear()
 		jumped = true
 	ts.append(t_owner)
@@ -64,12 +67,15 @@ func follow(e: Ent, now: float) -> void:
 	drawn = rt
 	drawn_at = now
 	var n := ts.size()
+	guessing = false
 	if rt <= ts[0]:
 		e.pos = ps[0]
 		e.vel = vs[0]
 	elif rt >= ts[n - 1]:
-		e.pos = ps[n - 1] + vs[n - 1] * minf(rt - ts[n - 1], RUN_ON)
+		var run_on := vs[n - 1] * minf(rt - ts[n - 1], RUN_ON)
+		e.pos = ps[n - 1] + run_on
 		e.vel = vs[n - 1]
+		guessing = run_on.length_squared() > GUESS_M * GUESS_M
 	else:
 		var i := n - 2
 		while ts[i] > rt: i -= 1
@@ -83,6 +89,13 @@ func follow(e: Ent, now: float) -> void:
 	if jumped:
 		e.prev = e.pos
 		jumped = false
+
+## m/s along the move `d` between two snapshots that is still motion: SNAP_SPEED, or twice the faster speed
+## the two report along it (a move that speeds up from rest or lands hard between them covers up to that).
+## A teleport reports the speed it goes on with, not one along the jump, so it still snaps.
+static func _reach(d: Vector3, v: Vector3, v0: Vector3) -> float:
+	var along := d.normalized()
+	return maxf(SNAP_SPEED, 2.0 * maxf(v.dot(along), v0.dot(along)))
 
 func _clear() -> void:
 	ts.clear()

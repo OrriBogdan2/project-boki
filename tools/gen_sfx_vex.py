@@ -218,14 +218,17 @@ def nuke_fire():
     return mix(soft(thunk, 1.0), tube, climb)
 
 
+FALL_S = 1.6   # s: the shell's fall, content/archetypes/gunslinger.json x.delay (--sfx-set-check holds the cue to it)
+
+
 def nuke_fall():
-    """The shell coming down over 1.6 s: a whistle dropping in pitch, the air thickening under it."""
-    d = 1.62; n = N(d); t = T(d)
-    f = 1900 * (650 / 1900) ** (t / d) * (1 + 0.006 * np.sin(2 * np.pi * 7 * t))
+    """The shell coming down over exactly the 1.6 s fall: a whistle rising in pitch and level, cut at the impact."""
+    d = FALL_S; n = N(d); t = T(d)
+    f = 520 * (2600 / 520) ** (t / d) * (1 + 0.006 * np.sin(2 * np.pi * 7 * t))
     tone = np.sin(2 * np.pi * np.cumsum(f) / S.SR)
     air = bpf(noise(d), 600, 2600) * 0.35
-    shape = np.minimum(1, t / 0.4) ** 2 * (0.35 + 0.65 * (t / d) ** 1.5)
-    return (tone * 0.6 + air) * shape
+    shape = np.minimum(1, t / 0.4) ** 2 * (0.25 + 0.75 * (t / d) ** 1.5)
+    return (tone * 0.6 + air) * shape * np.minimum(1, (d - t) / 0.01)
 
 
 def nuke_boom():
