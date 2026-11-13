@@ -136,6 +136,7 @@ func _place_msgs() -> void:
 func _clear_under_toasts(delta: float) -> void:
 	if m == null or m.lairs == null or m.cam == null:
 		return
+	LabelClash.fade_orbs(m, delta)
 	var rects := msgs.rects()
 	for L in m.lairs.list:
 		var lnodes = L.get("nodes")
@@ -337,6 +338,8 @@ func _draw_all() -> void:
 func _draw_world_labels() -> void:
 	var cam := m.cam
 	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
+	LabelClash.begin()
+	if m.fx: LabelClash.claim_numbers(m.fx, cam)      # (damage numbers stay on top: no tag draws over one)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
 	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
@@ -357,6 +360,7 @@ func _draw_world_labels() -> void:
 		if not sp.is_finite():
 			continue
 		LabelCull.mark(h)
+		LabelClash.claim(sp, LabelClash.PLATE)
 		_nameplate(sp, h)
 		if not h.downed: GripOverhead.draw(self, sp, h)      # their two gloves and Boki type, under the plate
 		BokiHud.form_overhead(self, sp, h)
@@ -390,6 +394,7 @@ func _draw_world_labels() -> void:
 		if not sp.is_finite():
 			continue
 		LabelCull.mark(mb)
+		LabelClash.claim(sp, LabelClash.BAR)
 		if mb.stagger_t > 0.0:
 			_ctext(sp + Vector2(0, -12), "STAGGERED", 18, Color("fff27a"), big)
 		elif mb.stag_open > 0.0:
@@ -420,8 +425,30 @@ func _draw_world_labels() -> void:
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
 			_status_row(sp + Vector2(0, 16), mb)
-	# gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
-	# already drawn this frame step up above it, so a few drops side by side stay readable.
+	for k in m.kins:
+		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
+			continue
+		var sp := LabelCull.at(self, k.position + Vector3(0, 1.05, 0))
+		if not sp.is_finite():
+			continue
+		LabelCull.mark(k)
+		LabelClash.claim(sp, LabelClash.BAR)
+		if k.is_wild():
+			if k.state == "dazed":
+				CaptureHud.dazed_label(self, k, sp)       # knocked out: how to scan it, and the scan filling
+			else:
+				_ctext(sp + Vector2(0, -10), "Wild %s" % Data.KIN[k.species]["name"], 16, Color("bfe9ff"), big)
+				_bar(Rect2(sp + Vector2(-24, -2), Vector2(48, 5)), k.hp / k.max_hp, Color("bfe9ff"))
+		elif k.state == "downed" and k.owner_h and m.player and k.team == m.player.team:
+			BokiHud.downed_label(self, k, sp)
+		elif k.hp < k.max_hp:
+			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, SideColor.of(m, k))
+			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
+	_draw_ground_tags(cam)
+
+## Gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
+## already drawn this frame step up above it, so a few drops side by side stay readable.
+func _draw_ground_tags(cam: Camera3D) -> void:
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
 	var tags: Array = []
 	for wp in m.wpicks:
@@ -436,6 +463,8 @@ func _draw_world_labels() -> void:
 		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
 		var tw := TextCache.width(big, nm, 16) + 10.0
 		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
+		if LabelClash.blocked(tag):
+			continue      # (a nameplate, bar or damage number is there: the loot name waits)
 		for tries in 4:
 			var bumped := false
 			for o in tags:
@@ -456,24 +485,6 @@ func _draw_world_labels() -> void:
 			_ctext(sp + Vector2(0, 14), "weapon upgrade · walk over it", 11, Color(INK, 0.75))
 		else:
 			_ctext(sp, nm, 16, Loot.col_of(it), big)
-	for k in m.kins:
-		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
-			continue
-		var sp := LabelCull.at(self, k.position + Vector3(0, 1.05, 0))
-		if not sp.is_finite():
-			continue
-		LabelCull.mark(k)
-		if k.is_wild():
-			if k.state == "dazed":
-				CaptureHud.dazed_label(self, k, sp)       # knocked out: how to scan it, and the scan filling
-			else:
-				_ctext(sp + Vector2(0, -10), "Wild %s" % Data.KIN[k.species]["name"], 16, Color("bfe9ff"), big)
-				_bar(Rect2(sp + Vector2(-24, -2), Vector2(48, 5)), k.hp / k.max_hp, Color("bfe9ff"))
-		elif k.state == "downed" and k.owner_h and m.player and k.team == m.player.team:
-			BokiHud.downed_label(self, k, sp)
-		elif k.hp < k.max_hp:
-			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, SideColor.of(m, k))
-			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
 
 func _draw_bubbles() -> void:
 	if m.tut and m.tut.card_up():
