@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Tarek's v95 master, appeal3 candidate b (waist taper, new warm-brown face with the gentle smile; ~/meshy/v95/tarek/r2/appeal3/cand_b.glb, its three floating eye stones left out: tarek_v95_b_body.glb) onto tarek.glb's (dolm's) skeleton, clips and anchors. The game's own eye stones (stone_0-2), shards and ground rings stay as they are. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The stone arm is his LEFT, as in the v2 turnaround; the master carries it in the paint (no emission map).",
- "master": "~/meshy/v95/tarek/r2/appeal3/tarek_v95_b_body.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-13 (ext/showcase-1113): current.json n95/c01, a body pass with the live head (eye stones left out: tarek_c01_body.glb). Earlier: Tarek's v95 master, appeal3 candidate b (waist taper, new warm-brown face with the gentle smile; ~/meshy/v95/tarek/r2/appeal3/cand_b.glb, its three floating eye stones left out: tarek_v95_b_body.glb) onto tarek.glb's (dolm's) skeleton, clips and anchors. The game's own eye stones (stone_0-2), shards and ground rings stay as they are. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The stone arm is his LEFT, as in the v2 turnaround; the master carries it in the paint (no emission map).",
+ "master": "~/meshy/v95/tarek/r2/n95/c01/tarek_c01_body.glb",
  "game": "art/wardens/tarek/tarek.glb",
  "tris": 13000,
  "max_tris": 14500,
