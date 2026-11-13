@@ -4,3 +4,4 @@ One file per sound group (`<arch>.json` for a Hunter, `boki.json`, `ui.json`, `c
 Format and rules: docs/AUDIO.md.
 `garden.json` is the four garden minigames (scripts/home/garden_sfx.gd) and the home chimes (home_chimes.gd).
 `egg.json` is an egg nearing its hatch (scripts/home/egg_sfx.gd).
+`carry.json` is the lead swap, the carry-out claim and a stolen Boki (scripts/match/carry_sfx.gd).

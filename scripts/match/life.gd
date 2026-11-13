@@ -372,6 +372,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 				else:
 					h.caught.append(rec)
+					CarrySfx.from_box(m, h, b)
 					if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 						h.stolen_carry = true
 		"belt":
@@ -467,6 +468,7 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 			Capture.full_note(m, h, rec)
 			continue
 		h.caught.append(rec)
+		CarrySfx.from_box(m, h, b)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 			h.stolen_carry = true
 	b["caught"] = left

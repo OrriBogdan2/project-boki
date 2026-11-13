@@ -31,6 +31,7 @@ static func on_caught(m, h: Hunter, k: Kin, rec: Dictionary) -> void:
 static func register(h: Hunter, rec: Dictionary, o: Hunter) -> void:
 	if o.team == h.team:
 		return
+	CarrySfx.stolen(h.m, h, o)
 	var entry := {"uid": String(rec.get("uid", "")), "name": String(rec.get("name", "Boki")), "owner": o.nid}
 	entry["team"] = o.team
 	_add(h, entry)
