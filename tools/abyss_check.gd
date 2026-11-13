@@ -386,10 +386,16 @@ func _home(main: Node) -> void:
 	var pk := Save.new_kin("zapple", "Pip"); Save.d["roster"].append(pk); Save.d["active"] = pk["uid"]
 	Save.d["tutorial"]["home"] = true; Save.d["tutorial"]["day1_done"] = true
 	Econ.ensure()
+	var trap = load("res://tools/script_error_trap.gd").new()
+	OS.add_logger(trap)
+	main.fade.covered = true      # as in real play, the farm builds in slices under the ink
 	var hm = load("res://scripts/home/home.gd").new()
 	main.add_child(hm)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
+	while hm.building:
+		await main.get_tree().process_frame
+	main.fade.covered = false
 	hm.set_process(false)
 	var keep_w := w
 	w = hm.world
@@ -450,4 +456,11 @@ func _home(main: Node) -> void:
 		_press(Vector2.ZERO)
 	ok(hw == mini(4, edges.size()), "home: walking toward the edge goes over it and falls: %d of %d" % [hw, mini(4, edges.size())])
 	_home_lift(hm, edges[0])
+	hm.set_process(true)
+	await main.fade.cover(0.05)      # leaving the farm: the wipe closes over it, then it is freed
 	hm.queue_free()
+	for i in 3: await main.get_tree().process_frame
+	await main.fade.reveal(0.05)
+	OS.remove_logger(trap)
+	var seen := "%d %s" % [trap.count, trap.first]
+	ok(trap.count == 0, "home: building under the wipe, playing on and leaving it logs no script error (%s)" % seen)
