@@ -106,9 +106,10 @@ func run(m: Node) -> void:
 		var shared: bool = now.size() >= 2 and now[0]["play"]["u"] == now[1]["play"]["u"]
 		if first_t >= 0.0 and second_t < 0.0 and shared:
 			second_t = i * 0.05
-		if now.size() >= 1:      # a plain body tilts, a rigged one plays the clip; both name the pose
+		if now.size() >= 1:      # a plain body tilts, a rigged one plays the toy's clip (kact); some toys name a pose
 			var pn: Node3D = now[0]["node"]
-			posed = posed or pn.get_node("Body").rotation != Vector3.ZERO or String(pn.get_meta("pose", "")) != ""
+			var acting := String(pn.get_meta("kact", "")) != "" or String(pn.get_meta("pose", "")) != ""
+			posed = posed or pn.get_node("Body").rotation != Vector3.ZERO or acting
 		if i % 200 == 0: await main.get_tree().process_frame
 		if second_t >= 0.0 and i * 0.05 > second_t + 15.0: break
 	ok(first_t >= 0.0 and first_t <= 60.0, "a Boki walked to a toy and played within 60 s (%.1f s)" % first_t)
@@ -125,8 +126,11 @@ func run(m: Node) -> void:
 	# 5. squabble, cap, pose
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
-	for k in [a, b]:
-		k.erase("play")
+	for k in [a, b]:      # awake and free: a nap, chase or errand left from the soak above would stop the play
+		for busy in ["play", "bath", "chase", "job", "fetch", "eat", "called_t", "going_in", "busy"]:
+			k.erase(busy)
+		k["nap_t"] = 0.0
+		k["hold_t"] = 0.0
 		k["t"] = 30.0
 		k["rec"]["traits"]["temper"] = 0.95
 	var u := int(toys.toys()[0]["u"])
@@ -136,7 +140,7 @@ func run(m: Node) -> void:
 	a["pos"] = tp + Vector3(1.0, 0, 0)
 	b["pos"] = toys._spot(b, toys.toys()[0])
 	toys.step(b, 0.05)
-	ok(not b.has("play") and a.has("play") and float(b["huff_t"]) > 0.0,
+	ok(not b.has("play") and a.has("play") and float(b.get("huff_t", 0.0)) > 0.0,
 			"two hot tempers squabble: the newcomer huffs off, the first plays on")
 	var power_toy := String(toys.toys()[1]["id"])
 	var rec: Dictionary = a["rec"]
