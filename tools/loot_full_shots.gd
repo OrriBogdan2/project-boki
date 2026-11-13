@@ -1,7 +1,7 @@
 extends RefCounted
 ## --loot-full-shots --shots-dir=<dir>: screenshots of looting with a full backpack (run under xvfb with a
-## renderer). 1: a deathbox beside the hold window (your backpack, the clicked thing held in red, Swap and
-## Drop). 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
+## renderer). 1: a deathbox window holding a clicked thing in red, a Swap on each of your backpack things.
+## 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
 ## <dir>/captions.txt gets "file: caption" per file.
 
 var main: Node
@@ -33,11 +33,10 @@ func run(main_node: Node) -> void:
 	m.hud.open_loot(bx)
 	await _frames(4)
 	var row: Dictionary = Life.box_items(m, p, bx).filter(func(r): return r["key"] == "pack")[0]
-	LootFull.click(m, p, bx, row)
-	m.hud.open_hold(row)
+	m.hud.loot_panel.take(row)
 	await _frames(6)
-	await _shot("hold_window", "Deathbox with a full backpack: the box (things that do not fit outlined red), "
-		+ "your backpack beside it, the clicked old coin held in red, Swap and Drop on each of yours")
+	await _shot("hold_window", "Deathbox with a full backpack: the clicked old coin held in red, "
+		+ "a Swap on each of your backpack things in the right column")
 	LootFull.swap_held(m, p, bx, int(row["i"]), 0)
 	m.hud.close_loot()
 	m.hud.open_loot(bx)
