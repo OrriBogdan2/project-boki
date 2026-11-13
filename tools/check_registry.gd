@@ -497,6 +497,7 @@ const CHECKS := {
 	"--npc-shots": ["res://tools/npc_shots.gd", "npc_shots", null],      # --shots-dir=<dir> (a renderer, GPU)
 	"--mob-anim-check": ["res://tools/mob_anim_check.gd", "mob_anim_check", null],      # every monster kind has every state; wind-up = telegraph
 	"--fps-parity-check": ["res://tools/fps_parity_check.gd", "fps_parity_check", null],      # same input script at 30/60/144 fps
+	"--party-client-check": ["res://tools/party_client_check.gd", "party_client_check", null],      # docs/specs/PARTY.md, fake matchmaker
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--dex-sort-check": ["res://tools/dex_sort_check.gd", "dex_sort_check", null],      # type filter + sort
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
