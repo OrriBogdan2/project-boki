@@ -190,6 +190,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | LMB | Press combo; hold ranged fireblast [D] | Cadence .34, hold .22-.95, wave 36 m/s, arc 175, reach 3.1 | match; dash→LMB buffers (gap 9) · **done** `ext/parity-dashlmb` (main): `buffer` kept, sourced (Flame Step is itself the attack) |
 | RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) · **owner** |
 | Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2; now a straight down slam, 2.4 m hit 0.8 m ahead | differ · **owner** (11-10, `ext/jugg-downslam`); cd 0.8x **open** (gap 10) |
+| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, straight down slam r 2.4 hit 0.8 m ahead (owner 11-10) | match; 0.8x cd; radius pinned at the owner 2.4 in kit_parity.json |
 | Q | none | glove | ours |
 | E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash **not determinable** (no data; no clip pays the chain out past its throw, 11-11; 24 m kept) |
 | R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` |
@@ -379,6 +380,8 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | Anim | Footage poses | 17 moves plus the fusion move, all on `breaker.glb` (48 clips) | match on coverage |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd · cd **open** (gap 10) |
+| E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 2.3, delay 1, 4 s, burst, cd 12/8 | match |
+| R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
 | Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m/.17 s (F), off the dash feel, cd 8 | match |
 | Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open · **open**: Guard and `resource.slam` still in `bulwark.json`; branch ready: ext/parity-bulwark-guardcut (owner 11-07 said cut) |
 | Anim | Footage poses | 17 moves, all on `breaker.glb` (48) | match on coverage |
