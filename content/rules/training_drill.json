@@ -16,6 +16,7 @@
 		["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
 		["smash", "Break a crate or pot", "fire"],
 		["weapon", "Take a found weapon off the ground", "interact"],
-		["ledge", "Dash off an edge and float back up", ""]
+		["ledge", "Dash off an edge and float back up", ""],
+		["dodge", "Dodge the Strafer's red shot 3 times: dash through it or out of it", "dash"]
 	]
 }
