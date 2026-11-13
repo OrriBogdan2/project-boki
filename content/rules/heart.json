@@ -27,7 +27,7 @@
  "final_hold_s": 20.0,
  "_final_hold_s": "one Hunter alone fills the ring in this long; more of the squad fill it faster (Exits.UPLINK_CREW: 3 hold it in about 11 s)",
  "final_drain_s": 20.0,
- "_final_drain_s": "an empty ring drains from full to nothing in this long; a standing rival in it stalls it",
+ "_final_drain_s": "an empty ring drains from full to nothing in this long; a standing rival in it stalls it; with no holder standing in it, a squad alone in it takes it over from nothing",
  "rush_k": 2.0,
  "_rush_k": "the last squad standing: the final seat opens at once and fills this much faster",
  "end_after_final_s": 15.0,
@@ -113,6 +113,12 @@
   "early_seats_cap_per_bot_squads": 3,
   "early_seats_cap_max": 2,
   "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"
+ },
+ "hints": {
+  "_doc": "first-time one-line hints for a new player (scripts/match/ways_hints.gd), each once per save, in the message lane: tide when the Blight first closes, quest when a quest seat first opens, heart when the Heart wakes",
+  "tide": "The Blight is closing in on the Heart: stay inside its ring",
+  "quest": "A way out is open: the first squad to finish its quest leaves",
+  "heart": "The Heart is awake: carry its spark to the Gate and your squad leaves early"
  },
  "demo_charge": 1.0
 }

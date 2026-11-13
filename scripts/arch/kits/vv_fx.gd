@@ -253,10 +253,15 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	_play(n, "ring", dur)
 
 ## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
+## `hollow` drops the dark fill and the veins for a glowing centre: a big range ring, not a dome. `hold` keeps it
+## at full strength until the last fifth, for a countdown (it otherwise fades from the first frame).
 ## Returns the node, so a long one can be ended early with cut().
-func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
+func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE, hollow := false,
+		hold := false) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
-	_look(n, col, col2, rim)
+	var mt := _look(n, col, col2, rim)
+	mt.set_shader_parameter("hollow", 1.0 if hollow else 0.0)
+	mt.set_shader_parameter("hold", 1.0 if hold else 0.0)
 	n.global_position = at + Vector3(0, 0.08, 0)
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "disc", dur)
@@ -325,9 +330,12 @@ func echo(who: Hunter, col: Color, dur := 0.35, alpha := 0.75, back := 0.0) -> v
 	var soft := alpha < 0.5
 	var push := _push_back(who, shift) if soft else Transform3D.IDENTITY
 	for pair in n.get_meta("pairs") as Array:
-		var src: MeshInstance3D = pair[0]
 		var dst: MeshInstance3D = pair[1]
-		dst.visible = is_instance_valid(src) and _shown_under(src, model)
+		if not is_instance_valid(pair[0]):
+			dst.visible = false          # a mesh the model has since dropped (a muzzle flash, an old weapon)
+			continue
+		var src: MeshInstance3D = pair[0]
+		dst.visible = _shown_under(src, model)
 		if dst.visible:
 			dst.global_transform = push * src.global_transform.translated(shift)
 	var mat: StandardMaterial3D = n.get_meta("mat")

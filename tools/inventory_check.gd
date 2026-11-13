@@ -1,8 +1,9 @@
 extends RefCounted
 ## --inventory-check: the in-match inventory. Gear compares with what you wear (only the changed numbers,
 ## better or worse); equip into a chosen slot, take off, swap gloves and drop to the ground move the right
-## things and keep stats right; the window labels every slot with its key, shows the hover card, takes a drag
-## and the Enter and Delete keys, and sits beside an open deathbox. Never touches the save.
+## things and keep stats right; the window labels every slot with its key, shows the hover card, takes a
+## press-and-hold drag (mouse and pad), the Enter and Delete keys, and sits beside an open deathbox. Never
+## touches the save.
 
 var bad := 0
 
@@ -105,12 +106,7 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	await _frames(main, 2)
 	var tip: InvTip = pc.find_children("*", "InvTip", true, false)[0]
 	ok(_texts(tip).has("+28 armor") and _texts(tip).has("-22 health"), "pointing at the vest shows the compare card")
-	var armor_drag := {"inv": "pack", "i": 0}
-	ok(lp._can_drop_worn(Vector2.ZERO, armor_drag, 2) and not lp._can_drop_worn(Vector2.ZERO, armor_drag, 0),
-		"dragging armor: it can drop on the armor slot, not on a glove")
-	lp._drop_worn(Vector2.ZERO, {"inv": "pack", "i": 0}, 2)
-	ok(p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
-		"the drop wears it")
+	await _drags(main, m, p, lp)
 	lp = await _reopen(main, m)
 	lp._hover = {"kind": "worn", "i": 2}
 	lp._input(_key(KEY_DELETE))
@@ -130,12 +126,86 @@ func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
 	await _frames(main, 4)
-	var loot: PanelContainer = m.hud.loot_panel
-	var inv: PanelContainer = m.hud.pack_panel
-	ok(m.hud.pack_open() and loot.get_global_rect().end.x <= inv.get_global_rect().position.x + 1.0,
-		"looting: your inventory opens at the right, the box side by side to its left")
+	var texts := _texts(m.hud.loot_panel)
+	ok(not m.hud.pack_open() and texts.has("WORN") and texts.has(Loot.name_of(p.pack[0])),
+		"looting: one window, what you wear marked in place above your backpack (no second inventory window)")
 	m.hud.close_loot()
-	ok(not m.hud.pack_open(), "closing the box closes it again")
+
+## Press, hold and move (SlotDrag) with real input: the mouse drags armor on, a refused drop snaps back
+## with a hint, a still hold swaps the gloves, the pad holds A to swap two belt slots, a tap moves nothing.
+func _drags(main: Node, m: Match, p: Hunter, lp: LoadoutPanel) -> void:
+	var vp := main.get_viewport()
+	await _mouse_drag(main, _slot(lp, "pack", 0), _slot(lp, "worn", 2))
+	ok(p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
+		"mouse: press, move and release the vest on the armor slot wears it")
+	lp = await _reopen(main, m)
+	var idol := p.pack.find_custom(func(it): return it.get("id", "") == "kin_idol")
+	var before := str(p.pack) + str(p.gear)
+	await _mouse_drag(main, _slot(lp, "pack", idol), _slot(lp, "worn", 0))
+	var hints := lp.find_children("drag_hint", "", true, false)
+	ok(str(p.pack) + str(p.gear) == before and hints.size() == 1 and _texts(hints[0]).has("Only gear is worn"),
+		"treasure on a glove slot: nothing moves, it snaps back with a hint")
+	var row := _slot(lp, "pack", 0)
+	var list := row.get_parent().get_parent() as ScrollContainer
+	var below := Vector2(_mid(row).x, SlotDrag._rect(list).end.y + 4.0)
+	ok(SlotDrag._unclipped(row, _mid(row)) and not SlotDrag._unclipped(row, below),
+		"a point the pack list scrolls out of view picks up nothing")
+	var g0: Dictionary = p.gear[0]
+	var g1: Dictionary = p.gear[1]
+	_mouse(vp, true, _mid(_slot(lp, "worn", 0)))
+	await main.get_tree().create_timer(SlotDrag.HOLD_S + 0.1).timeout
+	ok(lp._drag.carrying(), "mouse: holding still picks it up")
+	_mouse(vp, false, _mid(_slot(lp, "worn", 1)))
+	ok(p.gear[0] == g1 and p.gear[1] == g0, "released on the other glove: the gloves swap")
+	lp = await _reopen(main, m)
+	var k := UtilityBelt.slot_of(p, "medkit")
+	var to := (k + 1) % UtilityBelt.SLOTS
+	var other: Dictionary = p.belt[to]
+	_slot(lp, "belt", k).grab_focus()
+	_pad(vp, true)
+	_pad(vp, false)
+	await _frames(main, 2)
+	ok(UtilityBelt.slot_of(p, "medkit") == k and not lp._drag.carrying(), "pad: a tap of A moves nothing")
+	_pad(vp, true)
+	await main.get_tree().create_timer(SlotDrag.HOLD_S + 0.1).timeout
+	_slot(lp, "belt", to).grab_focus()
+	_pad(vp, false)
+	ok(UtilityBelt.slot_of(p, "medkit") == to and p.belt[k] == other, "pad: hold A, move, release swaps two belt slots")
+
+## The control the drag knows as slot {inv, i}.
+func _slot(lp: LoadoutPanel, inv: String, i: int) -> Control:
+	for c in lp._drag._slots:
+		var key: Dictionary = lp._drag._slots[c]["key"]
+		if is_instance_valid(c) and key["inv"] == inv and int(key["i"]) == i:
+			return c
+	return null
+
+func _mid(c: Control) -> Vector2:
+	return SlotDrag._rect(c).get_center()
+
+func _mouse_drag(main: Node, from: Control, to: Control) -> void:
+	var vp := main.get_viewport()
+	_mouse(vp, true, _mid(from))
+	var mv := InputEventMouseMotion.new()
+	mv.position = _mid(to)
+	mv.button_mask = MOUSE_BUTTON_MASK_LEFT
+	vp.push_input(mv, true)
+	await _frames(main, 1)
+	_mouse(vp, false, _mid(to))
+	await _frames(main, 1)
+
+func _mouse(vp: Viewport, down: bool, at: Vector2) -> void:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = down
+	ev.position = at
+	vp.push_input(ev, true)
+
+func _pad(vp: Viewport, down: bool) -> void:
+	var ev := InputEventJoypadButton.new()
+	ev.button_index = JOY_BUTTON_A
+	ev.pressed = down
+	vp.push_input(ev, true)
 
 func _reopen(main: Node, m: Match) -> LoadoutPanel:
 	m.hud.close_pack()

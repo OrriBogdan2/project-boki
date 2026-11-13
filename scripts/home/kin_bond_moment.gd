@@ -38,7 +38,7 @@ static func play(home: Node, k: Dictionary) -> void:
 	home.fx.burst(at + Vector3(0, 0.9, 0), Color("ff8fb0"), 24, 2.6)
 	home.fx.ring(at, 2.2, Color(1.0, 0.56, 0.69, 0.9), 0.5)
 	Sfx.play("unlock")
-	Sfx.play("kin_happy", null, -2.0, 0.1, Unique.voice(rec))
+	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -2.0, 0.1, Unique.voice(rec))
 	home._say(k, BokiLines.say(rec, "bond_up"))
 	var v: VBoxContainer = home._new_panel("%s is now %s" % [rec["name"], rank[1]], 520)
 	v.add_child(UI.label(String(rank[2]), 16, Color("ffb3c6")))

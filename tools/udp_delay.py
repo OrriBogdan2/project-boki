@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """A UDP delay proxy for online-feel runs (tools/online_displace_check.gd), for machines where tc/netem is not allowed.
 
-usage: udp_delay.py LISTEN_PORT RELAY_PORT DELAY_MS
-Every datagram in either direction is held DELAY_MS before it is passed on, like `tc qdisc add dev lo root netem delay`
-on loopback: a client sees 2 x DELAY_MS of round trip. Order is kept. Stop it by killing its pid."""
+usage: udp_delay.py LISTEN_PORT RELAY_PORT DELAY_MS [JITTER_MS]
+Every datagram in either direction is held DELAY_MS (plus or minus up to JITTER_MS, uniform) before it is passed on,
+like `tc qdisc add dev lo root netem delay DELAY JITTER` on loopback: a client sees 2 x DELAY_MS of round trip. With
+jitter, datagrams can overtake each other, as with netem. Stop it by killing its pid."""
 import heapq
+import random
 import select
 import socket
 import sys
@@ -13,8 +15,9 @@ import time
 HOST = "127.0.0.1"
 
 
-def main(listen: int, relay: int, delay_ms: float) -> None:
+def main(listen: int, relay: int, delay_ms: float, jitter_ms: float) -> None:
     delay = delay_ms / 1000.0
+    jitter = jitter_ms / 1000.0
     front = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     front.bind((HOST, listen))
     ups = {}       # client address -> its socket to the relay
@@ -26,15 +29,16 @@ def main(listen: int, relay: int, delay_ms: float) -> None:
         ready, _, _ = select.select([front] + list(ups.values()), [], [], wait)
         now = time.monotonic()
         for s in ready:
+            due = now + delay + random.uniform(-jitter, jitter)
             data, addr = s.recvfrom(65535)
             if s is front:
                 if addr not in ups:
                     ups[addr] = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                     ups[addr].bind((HOST, 0))
                     clients[ups[addr]] = addr
-                heapq.heappush(held, (now + delay, seq, ups[addr], data, (HOST, relay)))
+                heapq.heappush(held, (due, seq, ups[addr], data, (HOST, relay)))
             else:
-                heapq.heappush(held, (now + delay, seq, front, data, clients[s]))
+                heapq.heappush(held, (due, seq, front, data, clients[s]))
             seq += 1
         now = time.monotonic()
         while held and held[0][0] <= now:
@@ -43,4 +47,4 @@ def main(listen: int, relay: int, delay_ms: float) -> None:
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]))
+    main(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]), float(sys.argv[4]) if len(sys.argv) > 4 else 0.0)

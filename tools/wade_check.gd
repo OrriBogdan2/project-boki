@@ -1,10 +1,12 @@
 extends RefCounted
 ## --wade-check: Boki wade (BokiWade, content/rules/wade.json). A stream three tiles wide is painted across a
 ## base_mode farm. A Boki crossing it walks at the wade speed in the shallow edge and the deep speed in the middle
-## (never stopped), leaves a ripple and shakes off coming out; a Water type that goes in lingers playing the splash
-## clip and gains joy; a Fire type dropped mid-stream is on dry ground within 2 s. Never touches the real save.
-## --shots-dir=<dir> adds a GPU strip (wade_strip.png): a Zapple wading across, a Puddlet paddling and a Kilnbadger
-## stepping out, six frames a second apart.
+## (never stopped) and shakes off coming out; a Water type that goes in lingers playing the splash clip and gains
+## joy; a Fire type dropped mid-stream is on dry ground within 2 s. Marks (BokiWake): a ripple ring under each Boki
+## in the water and a V behind each one moving, all in one MultiMesh, sized by body, kept off the bank, gone once
+## they are out and never made on Very Low. Never touches the real save.
+## --shots-dir=<dir> adds a GPU strip (wade_strip.png): a Zapple wading along the stream (its ripple ring and V wake),
+## a Puddlet paddling and a Kilnbadger stepping out, six frames a second apart.
 ## (The nav sweep, --garden-nav-check, covers getting stuck with the whole base running.)
 
 const DT := 1.0 / 30.0         # s per step
@@ -12,6 +14,8 @@ const OUT_SECS := 2.0          # s: a Fire Boki must be out by then
 const CAST := ["zapple", "kilnbadger", "puddlet"]
 const SEED := 11
 const FRAMES := 6              # frames in the GPU strip
+const MARK_STEPS := 20         # steps per stage of the marks test: longer than a mark takes to fade (BokiWake.FADE_S)
+const WALK := Vector3(0, 0, -1.2)      # m/s: a wading walk along the stream's crossing
 
 var bad := 0
 var main: Node
@@ -132,10 +136,76 @@ func _paddle(zc: int) -> void:
 	ok(lingered > 3.0 and played, "it lingered %.1f s in the water playing the splash clip" % lingered)
 	ok(Care.need(k["rec"], "joy") > joy0 + 2.0, "and its joy rose %.1f -> %.1f" % [joy0, Care.need(k["rec"], "joy")])
 
+## The ripple count follows the Boki in the water (0, 1, 3, then back to 1 and 0) and a V shows only behind
+## the ones moving; one MultiMesh draws them all and no ring node is made per ripple.
+func _marks(zc: int) -> void:
+	var keep: Variant = Settings.v.get("quality")
+	Settings.v["quality"] = "medium"      # (auto picks Very Low on a software renderer, and Very Low makes none)
+	var rings0: int = home.fx.rings.size()
+	ok(_mark_stage(zc, [], []) == [0, 0], "no marks while every Boki is on dry ground")
+	ok(_mark_stage(zc, [0], [0]) == [1, 1], "one Boki walking in the water: one ring, one V")
+	ok(_mark_stage(zc, [0, 1, 2], [0, 2]) == [3, 2], "three in, two of them walking: three rings, two Vs")
+	var marks: BokiWake = home.wade.marks
+	var drawn := marks.multimesh.visible_instance_count
+	var nodes: int = home.find_children("BokiWake", "MultiMeshInstance3D", false, false).size()
+	ok(drawn == 5 and nodes == 1 and home.fx.rings.size() == rings0,
+		"one MultiMesh draws all %d marks (%d nodes, %d Fx rings made)" % [drawn, nodes, home.fx.rings.size() - rings0])
+	var x := int(HomeLayout.LANDING.x)
+	var in_stream := marks.mask.get_pixelv(Vector2i(x, zc) - marks.mask_origin).r
+	var on_bank := marks.mask.get_pixelv(Vector2i(x, zc + 2) - marks.mask_origin).r
+	ok(in_stream > 0.5 and on_bank < 0.5, "the marks keep to the water: the stream is in their mask, its bank is not")
+	ok(_mark_stage(zc, [2], []) == [1, 0], "two step out: one ring left, and no V once it stands still")
+	ok(_mark_stage(zc, [], []) == [0, 0] and not marks.visible, "all out: the marks stop and nothing is drawn")
+	_body_sizes(zc)
+	marks.queue_free()
+	home.wade.marks = null
+	Settings.v["quality"] = "very_low"
+	_mark_stage(zc, [0], [0])
+	ok(home.wade.marks == null, "Very Low makes no marks")
+	if keep == null:
+		Settings.v.erase("quality")
+	else:
+		Settings.v["quality"] = keep
+
+## MARK_STEPS steps with the Boki listed in `wet` in the stream (the rest on its bank), those in `walking` moving;
+## returns [Boki with a ring showing, Boki with a V showing].
+func _mark_stage(zc: int, wet: Array, walking: Array) -> Array:
+	var x := HomeLayout.LANDING.x
+	for i in MARK_STEPS:
+		for j in home.kins.size():
+			var k := _kin(j)
+			var pos := Vector3(x - 2.0 + j * 2.0, 0, (zc + 0.5) if wet.has(j) else (zc + 4.5))
+			k["pos"] = pos
+			k["vel"] = WALK if walking.has(j) else Vector3.ZERO
+			(k["node"] as Node3D).position = pos
+			home.wade.step(k, pos, k["node"], DT)
+		if home.wade.marks:
+			home.wade.marks.tick(DT)
+	var shown := [0, 0]
+	if home.wade.marks:
+		for s in home.wade.marks.slots:
+			shown[0] += int(s.uid != "" and s.ring > 0.0)
+			shown[1] += int(s.uid != "" and s.wake > 0.0)
+	return shown
+
+## A Boki twice the size gets a ring twice as wide.
+func _body_sizes(zc: int) -> void:
+	var n := _kin(0)["node"] as Node3D
+	var scale0 := n.scale
+	var widths: Array = []
+	for body in [0.8, 1.6]:      # (both under BokiWake.BODY_MAX)
+		n.scale = Vector3.ONE * body
+		_mark_stage(zc, [0], [])
+		for s in home.wade.marks.slots:
+			if s.uid == _kin(0)["rec"]["uid"]:
+				widths.append(home.wade.marks.ring_place(s).basis.x.length())
+	n.scale = scale0
+	ok(is_equal_approx(widths[1] / widths[0], 2.0), "sized by body: %.2f m ring, %.2f m at twice the size" % widths)
+
 ## Six frames of the three Boki at the stream, one image across. Needs a rendering display (jobq --needs gpu).
 func _strip(dir: String, zc: int) -> void:
 	var x := HomeLayout.LANDING.x
-	_only(0, Vector3(x - 2.5, 0, zc + 3.0))
+	_only(0, Vector3(x - 5.0, 0, zc + 0.5))
 	_only(1, Vector3(x + 0.5, 0, zc + 0.5))
 	_only(2, Vector3(x + 2.5, 0, zc + 3.0))
 	for k in home.kins:
@@ -150,7 +220,7 @@ func _strip(dir: String, zc: int) -> void:
 	var frames: Array = []
 	var gap := 50
 	for i in gap * FRAMES:
-		home.kins[0]["goal"] = Vector3(x - 2.5, 0, zc - 5.0)
+		home.kins[0]["goal"] = Vector3(x + 6.0, 0, zc + 0.5)
 		home.kins[2]["goal"] = Vector3(x + 2.5, 0, zc - 5.0) if i < gap else home.kins[2]["goal"]
 		for k in home.kins:
 			k["t"] = 999.0
@@ -182,6 +252,7 @@ func run(m: Node) -> void:
 	_cross(zc)
 	_fire(zc)
 	_paddle(zc)
+	_marks(zc)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir=") and DisplayServer.get_name() != "headless":
 			await _strip(a.substr(12), zc)

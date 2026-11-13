@@ -11,10 +11,13 @@ Decimating that mesh with its UVs kept (r2) smears the texture across the crumbs
     the real surface; the head's islands scaled `head_uv` times (more texels on the face); packed.
  4. Bake the dense mesh's base colour onto them (Cycles, selected to active, as emission: no light baked
     in), each island's edge extended `margin_px` into the gaps.
- 5. Export the low mesh and its texture (atlas.png beside it) as a .glb in Meshy's frame and pose:
+ 5. With `normal` {size, cage, ray} (px, m, m): the dense mesh's sculpt as a tangent-space normal map on the same
+    UVs (normal.png beside the atlas; wrong hits flattened). It rides the UVs through the fit's posing, so the
+    low mesh should already be the shipped count (`tris` <= the fit's max_tris: no second decimation).
+ 6. Export the low mesh and its texture (atlas.png beside it) as a .glb in Meshy's frame and pose:
     fit_warden.py's `body_glb`.
 The spec (art/wardens/src/<name>_bake.json): high, out, tris, head {centre, r}, head_tris, head_uv, uv_smooth,
-uv_angle, uv_margin, tex, cage, ray, margin_px, floater_verts.
+uv_angle, uv_margin, tex, cage, ray, margin_px, floater_verts, normal.
 """
 import json
 import math
@@ -25,6 +28,11 @@ import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blender"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "art1"))
+import warden_kit as WK  # noqa: E402
+from paintkit import clean_normal  # noqa: E402
 
 
 def log(*a):
@@ -44,13 +52,13 @@ def import_dense(path):
     for m in meshes:
         m.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
+    rest = [o for o in new if o.type != "MESH"]     # (the joined meshes are freed by the join itself)
     if len(meshes) > 1:
         bpy.ops.object.join()
     ob = bpy.context.view_layer.objects.active
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    for o in new:
-        if o.name in bpy.data.objects and o is not ob:
-            bpy.data.objects.remove(o)
+    for o in rest:
+        bpy.data.objects.remove(o)
     ob.name = "High"
     return ob
 
@@ -58,7 +66,12 @@ def import_dense(path):
 def base_image(ob, socket="Base Color"):
     """The image feeding the first material's `socket` ("Emission Color": a Meshy master's emission map), through
     any mix or factor nodes the glTF importer put between, or None."""
-    bsdf = next(n for n in ob.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    return mat_image(ob.data.materials[0], socket)
+
+
+def mat_image(m, socket="Base Color"):
+    """base_image for one material."""
+    bsdf = next(n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
     todo = [l.from_node for l in bsdf.inputs[socket].links]
     while todo:
         n = todo.pop(0)
@@ -294,10 +307,12 @@ def _islands(bm, lay):
 
 def bake_colour(high, low, size, cage, ray, margin_px, src=None):
     """The dense mesh's base colour, or its `src` image, (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
+    own = src is None       # the base colour: each material its own image (a Meshy part joined in, Meeko's wings)
     src = src or base_image(high)
     for m in high.data.materials:
         nt = m.node_tree
-        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src), None)
+        img = (mat_image(m) or src) if own else src
+        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == img), None)
         em = nt.nodes.new("ShaderNodeEmission")
         if tex:
             tex.interpolation = "Cubic"
@@ -330,6 +345,22 @@ def bake_colour(high, low, size, cage, ray, margin_px, src=None):
     return img
 
 
+def bake_normal(high, low, nspec, path):
+    """The dense mesh's sculpt onto the low mesh's UVs: normal.png beside the .glb (lossless: a JPEG's blocks read as
+    dents under the toon ramp)."""
+    size = int(nspec.get("size", 2048))
+    px = np.ones((size, size, 4), np.float32)
+    px[..., :3] = WK.bake_normal(low, [high], size, float(nspec.get("cage", 0.005)), float(nspec.get("ray", 0.012)))
+    wrong = clean_normal(px[..., :3])
+    img = bpy.data.images.new("normal", size, size)
+    img.colorspace_settings.name = "Non-Color"
+    img.pixels.foreach_set(px.ravel())
+    img.filepath_raw = os.path.join(os.path.dirname(path), "normal.png")
+    img.file_format = "PNG"
+    img.save()
+    log("normal baked %dx%d, wrong hits flattened %.4f" % (size, size, wrong))
+
+
 def export(low, img, path):
     img.name = "atlas"          # (the fit's .glb then writes it as <name>_atlas.jpg)
     img.filepath_raw = os.path.join(os.path.dirname(path), "atlas.png")
@@ -359,6 +390,8 @@ def main():
            float(spec.get("uv_angle", 66.0)), int(spec.get("uv_smooth", 30)))
     img = bake_colour(high, low, int(spec.get("tex", 4096)), float(spec.get("cage", 0.008)),
                             float(spec.get("ray", 0.03)), int(spec.get("margin_px", 16)))
+    if spec.get("normal"):
+        bake_normal(high, low, spec["normal"], os.path.expanduser(spec["out"]))
     export(low, img, os.path.expanduser(spec["out"]))
     if spec.get("blend"):
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))

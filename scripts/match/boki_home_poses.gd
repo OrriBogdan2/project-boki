@@ -26,6 +26,8 @@ const TWEAK := {
 const STIFF := {"cairnback": 0.6, "glomwort": 0.7, "lodestick": 0.7, "mossgrade": 0.7, "gloamshell": 0.75}
 ## Tumble's and Echo Steps' clips (BaseTumble, EchoSteps): one shot each, timed by the games' beat data.
 const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin"]
+## The Show Ring's clips (ShowRing): a strut that loops over the walk, a pose at the mark and a bow (one shot each).
+const SHOW_CLIPS := ["strut", "pose", "bow"]
 const WING_JOINTS := ["wing1", "wing", "fwing"]
 const WING_TIPS := ["wing2", "hwing"]
 const TAIL := ["tail1", "tail2", "tail3", "tail4", "tail5", "tail6"]
@@ -58,7 +60,7 @@ func at(which: String, u: float, n := 1) -> void:
 	squash = Vector3.ONE
 	var tw: Dictionary = TWEAK.get(species, {}).get(which, {})
 	amp = float(tw.get("amp", 1.0))
-	if which in GAME_CLIPS:
+	if which in GAME_CLIPS or which in SHOW_CLIPS:
 		amp *= float(STIFF.get(species, 1.0))
 	call("_" + which, u)
 	for b in tw.get("bones", {}):
@@ -333,3 +335,65 @@ func _spin(u: float) -> void:
 		_:
 			add("spine", 0.3 * up * amp)
 	tail(0.7 * up * amp)
+
+## Strut, over the walk's own cycle (two bobs a cycle): chin up, chest out, knees lifted, tail high.
+func _strut(u: float) -> void:
+	var bob := absf(sin(TAU * u * float(_n) * 0.5))
+	move.y = 0.025 * bob * amp
+	add("head", 0.35 * amp)
+	add("neck", 0.18 * amp)
+	both("ear1", 0.0, 0.0, 0.15 * amp)
+	match plan:
+		"quad":
+			add("spine", 0.1 * amp)
+			both("fleg1", 0.3 * amp)
+			both("hleg1", 0.2 * amp)
+		"bird":
+			add("root", 0.15 * amp)
+			wings(0.25 * amp, -0.15 * amp)
+			both("hleg1", 0.25 * amp)
+		_:
+			add("spine", 0.3 * amp)
+	tail(0.0, 0.4 * amp)
+
+## Pose at the mark, over ShowRing.POSE_S: it eases in, holds a second's worth, eases out. A quad plants its feet
+## wide and lifts its head; a bird flares its wings and stands tall; a legless body rises up.
+func _pose(u: float) -> void:
+	var k := smoothstep(0.0, 0.25, u) * (1.0 - smoothstep(0.85, 1.0, u))
+	var breath := sin(TAU * u * 2.0) * 0.02 * k
+	add("head", 0.45 * k * amp + breath)
+	add("neck", 0.2 * k * amp)
+	both("ear1", 0.0, 0.0, 0.3 * k * amp)
+	match plan:
+		"quad":
+			move.y = -0.03 * k * amp
+			squash = Vector3(1.0 + 0.04 * k * amp, 1.0 - 0.05 * k * amp, 1.0)
+			both("fleg1", 0.15 * k * amp, 0.0, 0.35 * k * amp)
+			both("hleg1", -0.1 * k * amp, 0.0, 0.25 * k * amp)
+			add("spine", 0.15 * k * amp)
+		"bird":
+			add("root", 0.25 * k * amp)
+			move.y = 0.04 * k * amp
+			wings(0.9 * k * amp + breath * 4.0, 0.2 * k * amp)
+		_:
+			add("spine", 0.5 * k * amp + breath)
+			move.y = 0.06 * k * amp
+	tail(0.0, 0.5 * k * amp)
+
+## Bow, over ShowRing.BOW_S: dips forward, holds, comes up.
+func _bow(u: float) -> void:
+	var k := smoothstep(0.0, 0.35, u) * (1.0 - smoothstep(0.65, 1.0, u))
+	add("head", -0.55 * k * amp)
+	add("neck", -0.3 * k * amp)
+	both("ear1", 0.0, 0.0, -0.2 * k * amp)
+	match plan:
+		"quad":
+			add("root", -0.2 * k * amp)
+			both("fleg1", 0.5 * k * amp)
+			add("spine", -0.2 * k * amp)
+		"bird":
+			add("root", -0.55 * k * amp)
+			wings(-0.4 * k * amp, 0.3 * k * amp)
+		_:
+			add("spine", -0.5 * k * amp)
+	tail(0.0, -0.2 * k * amp)

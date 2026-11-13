@@ -37,7 +37,9 @@ the **cooking pot** (20). The **market stall** (30) is a good next step. Older s
 
 **Chopping and mining.** Buy an **Axe** or a **Pickaxe** at the market (Farm tab), walk up to a wild
 tree or boulder and press F: three swings and it comes down. Trees grow back in about 15 minutes and
-boulders in about 25, in real time, so the wild never runs out. Cliffs stay put.
+boulders in about 25, in real time, so the wild never runs out. Cliffs stay put. Work comes first: with a
+crop, a tree, a boulder, a station or a feeder in reach, F does that job even if a Boki is closer, and Boki
+step out of your swing. Step away from the work to pet them.
 
 ## Boki at work
 

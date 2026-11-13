@@ -14,6 +14,7 @@ uniform float pattern = 0.0;
 uniform float spin = 0.0;        // radians: the sigil turns with it
 uniform float rim_w = 0.08;
 uniform float crack = 0.0;       // pattern 4: how bright the cracks glow (0..1)
+uniform float flash = 0.0;       // 0..1 a short burst of light on the rim (the rink opening)
 
 float sigil(vec2 uv, float r, float a) {
 	if (pattern < 0.5 || pattern > 4.5) { return 0.0; }
@@ -55,7 +56,7 @@ void fragment() {
 	}
 	if (r > 1.0) { discard; }
 	vec2 ruv = vec2(cos(a), sin(a)) * r;
-	float edge = smoothstep(1.0 - rim_w - 0.03, 1.0 - rim_w, r) * (1.0 - smoothstep(0.97, 1.0, r));
+	float edge = smoothstep(1.0 - rim_w - 0.03, 1.0 - rim_w, r) * (1.0 - smoothstep(0.97, 1.0, r)) * (1.0 + 1.5 * flash);
 	float body = fill * (0.18 + 0.22 * r * r);
 	float sw = 0.0;
 	if (sweep >= 0.0) {

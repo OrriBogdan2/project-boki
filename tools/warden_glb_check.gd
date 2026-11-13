@@ -93,7 +93,6 @@ func run(main: Node) -> void:
 		await _anchors(main, a)
 		_shading(a)
 		_hitbox(a)
-		_setting(a)
 		_own_motion(a, "bulwark" if a != "bulwark" else "gunslinger")
 		_weapon(a)
 		_shield(a)
@@ -315,11 +314,11 @@ func _hitbox(a: String) -> void:
 	var shapes := with.get_node("Warden").find_children("*", "CollisionObject3D", true, false).size() \
 			+ with.get_node("Warden").find_children("*", "CollisionShape3D", true, false).size()
 	with.free()
-	WardenGlb.set_model(a, false)
+	WardenGlb._measuring = true
 	var without := _model(a)
 	var ring_p := (without.get_node("TeamRing") as Node3D).global_transform.basis.get_scale().x
 	without.free()
-	WardenGlb.set_model(a, true)
+	WardenGlb._measuring = false
 	ok(absf(ring_w - ring_p) < 0.0001 and shapes == 0,
 			"%s: hit ring %.3f with the .glb, %.3f without (hit radius %.2f m), no collision in the .glb"
 			% [a, ring_w, ring_p, Arch.hit_r(a, Data.CLASSES[Arch.weight(a)])])
@@ -643,17 +642,3 @@ func _own_motion(a: String, other: String) -> void:
 	o_sync.free()
 	m.free()
 	o.free()
-
-## Settings > Video > Warden models: off builds the procedural model, on the .glb again.
-func _setting(a: String) -> void:
-	WardenGlb.set_model(a, false)
-	var off := _model(a)
-	var proc := not off.has_node("Warden") and (off.get_node("Rig/Torso/HeadPivot/Head") as Node3D).visible \
-			and not WardenGlb.uses_model(a)
-	off.free()
-	WardenGlb.set_model(a, true)
-	var on := _model(a)
-	var back := on.has_node("Warden") and WardenGlb.uses_model(a)
-	on.free()
-	ok(proc and back, "%s: the Warden models setting turns it procedural (%s) and back to its 3D model (%s)"
-			% [a, str(proc), str(back)])

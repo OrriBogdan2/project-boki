@@ -29,9 +29,9 @@
 	},
 	"hold": {
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Kept: the hold carries through (owner item 51)."},
+			"air": {"mode": "keep", "source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Air dash not shown (tamsin.md:293-295). Kept: the hold carries through (owner item 51)."},
+			"jump": {"mode": "keep", "source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Jump not shown (tamsin.md:297-298). Kept: the hold carries through (owner item 51)."}
 		}
 	}
 }

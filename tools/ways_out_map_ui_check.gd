@@ -25,7 +25,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, 
+	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9,
 		"seed": 7401, "no_drop": true, "heart": true, "god": true})
 	for o in m.hunters:
 		o.ctrl = "idle"

@@ -316,7 +316,7 @@ func _use(it: Dictionary) -> void:
 ## Petting indoors counts just like outside: joy, likes, the memory and the first-day list.
 func _pet_kin(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
-	Sfx.play("kin_happy", null, -4.0)
+	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 10, 1.6)
 	k["t"] = 1.2; k["goal"] = k["pos"]
 	verbs.play("pat")

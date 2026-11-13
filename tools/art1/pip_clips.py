@@ -243,10 +243,13 @@ def clips():
     s_c = dict(s_t)
     s_c.update({"pel": (0.0, -0.035, 0.06), "tor": (-0.32, 0, 0), "hed": (-0.26, 0, 0), "G": (0.36, -0.08, 1.47), "LP": (-0.36, -0.08, 1.41), "fing": 0.5, "wing": 0.34})
     out.append(C("seed_aim", 1.0, [(0.0, END), (0.16, s_d), (0.5, s_m), (0.82, s_t), (1.0, s_c)]))
-    # ... the snap: the gathered light flung forward with both hands (the seed leaves on the first frame), a small hop down off the toes
-    h1 = {"pel": (0.0, 0.1, 0.06), "prt": (0.26, 0.05, 0), "tor": (0.2, 0.0, 0), "hed": (-0.28, -0.05, 0), "G": (0.14, 0.5, 1.04), "BE": be((0, 0.5, -0.87), (0, 0.87, 0.5)), "LP": (-0.10, 0.52, 1.03), "Lh": LHAND_PUSH,
-          "FL": (-0.12, 0.08, A + 0.06), "FR": (0.13, -0.06, A + 0.03), "FLy": 0.1, "FRy": -0.1, "FLp": -0.2, "FRp": 0.3, "fing": 0.0, "jaw": 0.5, "ear": 0.5, "wing": 0.26, "wfl": 0.05, "wfq": 2.0, "skirt": -0.3, "brow": 0.9, "lid": 0.0}
-    out.append(C("seed", 0.55, [(0.0, s_c), (0.07, h1, "out"), (0.32, dict(h1, pel=(0.0, 0.1, -0.02), FL=(-0.12, 0.1, A), FR=(0.13, -0.08, A), FLp=0, FRp=0, skirt=0.1)), (0.55, END)]))
+    # ... the snap (footage 720.9-722.4 s): the gathered light flung forward with both hands (the seed leaves on the first frame), and a
+    # small hop with the push held, about 0.26 s in the air (the sheet's lift 0.2), the wings catching her into a soft squash on landing
+    h1 = {"pel": (0.0, 0.1, 0.24), "prt": (0.26, 0.05, 0), "tor": (0.2, 0.0, 0), "hed": (-0.28, -0.05, 0), "G": (0.14, 0.5, 1.04), "BE": be((0, 0.5, -0.87), (0, 0.87, 0.5)), "LP": (-0.10, 0.52, 1.03), "Lh": LHAND_PUSH,
+          "FL": (-0.12, 0.08, A + 0.22), "FR": (0.13, -0.06, A + 0.19), "FLy": 0.1, "FRy": -0.1, "FLp": 0.5, "FRp": 0.5, "fing": 0.0, "jaw": 0.5, "ear": 0.5, "wing": 0.26, "wfl": 0.2, "wfq": 8.0, "skirt": -0.3, "brow": 0.9, "lid": 0.0}
+    h2 = dict(h1, pel=(0.0, 0.1, 0.17), FL=(-0.12, 0.1, A + 0.15), FR=(0.13, -0.08, A + 0.12), FLp=0.3, FRp=0.3)
+    h3 = dict(h1, pel=(0.0, 0.1, -0.06), prt=(0.3, 0.05, 0), tor=(0.16, 0.0, 0), FL=(-0.12, 0.1, A), FR=(0.13, -0.08, A), FLp=0, FRp=0, skirt=0.1, wing=0.1, wfl=0.08, wfq=4.0)
+    out.append(C("seed", 0.55, [(0.0, s_c), (0.06, h1, "out"), (0.2, h2, "lin"), (0.32, h3), (0.55, END)]))
     # Hearthlight: a deep gather, then both arms straight up, the lantern high over her head, wings flung open, eyes shut in the light
     g0 = {"pel": (0.0, 0.0, -0.13), "prt": (0.32, 0, 0), "tor": (0.3, 0, 0), "hed": (0.05, 0, 0), "G": (0.12, 0.26, 0.60), "BE": be(), "LP": (-0.12, 0.26, 0.60), "Lh": (-1.2, 0, 0), "FL": (-0.15, 0.04, A), "FR": (0.15, -0.04, A), "fing": 0.9, "ear": 0.4, "wing": -0.25, "lid": 0.5, "brow": -0.3}
     g1 = {"pel": (0.0, 0.0, 0.05), "prt": (-0.1, 0, 0), "tor": (-0.18, 0, 0), "hed": (-0.3, 0, 0), "G": (0.20, 0.13, 1.55), "BE": be((0.0, 0.0, -1.0), FRONT), "LP": (-0.16, 0.04, 1.47), "Lh": (0.0, 0.0, 3.0), "FL": (-0.13, 0.03, A + 0.03), "FR": (0.13, -0.03, A + 0.03), "FLp": 0.5, "FRp": 0.5,

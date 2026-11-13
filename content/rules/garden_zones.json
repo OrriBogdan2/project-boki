@@ -30,6 +30,13 @@
 		"zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]
 	},
 	"pace_doc": "The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1].",
+	"hub_first": {
+		"marker_text": "Step in to travel",
+		"marker_h": 2.6,
+		"marker_h_doc": "Metres above the Waystone's middle where the marker floats.",
+		"line_text": "Start here: tick both keys, then press Wake it.",
+		"line_text_doc": "The one line on the first locked zone's card, the first time the destination list opens."
+	},
 	"hub_hints": {
 		"start_s": 1.5,
 		"start_s_doc": "Seconds after you arrive in the hub before its first hint can show.",
@@ -70,5 +77,5 @@
 		"low": {"hub": {"draws": 370, "objects": 560}}},
 	"ratchet_doc": "Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one.",
 	"budget_doc": "What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column.",
-	"wayseed_from": "a lair of a matching type on a run, or the Drift Trader once a week"
+	"wayseed_from": "Old Pell's Black Market (a new Wayseed every few days), or a lair of a matching type on a run"
 }

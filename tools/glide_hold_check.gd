@@ -4,8 +4,13 @@ extends "res://tools/abyss_check.gd"
 ## held while LMB/RMB are used, never opens it; a folded glider stays shut while still held, until a new press.
 ## Every Hunter: a fresh Space press during and after its air Shift glides (by the move's end at the latest),
 ## except a Shift in SWALLOWS.
+## Every Hunter, DECISIONS 11-08 "glide start adds no speed": from a run-speed jump, an air dash's end and a fall,
+## the horizontal speed on the opening steps never passes the speed just before (SPEED_SLACK).
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
+const OPEN_STEPS := 8   # steps from the opening whose speed must not pass the speed just before it
+const RUN_MIN := 4.0    # m/s: the slowest speed that counts as the run in the jump rows
+const SPEED_SLACK := 0.15       # m/s: float noise in the per-step position delta
 const SECS := 2.0       # how long each scenario runs
 const HIGH := 12.0      # m: a start in the air, well above the ground, for the in-air presses
 const BUTTONS := {"juggernaut": "RMB", "archer": "LMB", "bulwark": "LMB"}      # Kael, Lace, Albert
@@ -34,7 +39,8 @@ func _start(main: Node, arch: String) -> void:
 	m.opts["god"] = true
 
 ## One scenario: stand on flat ground (or `lift` m above it), then step SECS with `script` (Callable(i) -> void)
-## setting inputs each step. Returns {t: seconds the glider was open, opens: how many times it opened}.
+## setting inputs each step. Returns {t: seconds the glider was open, opens: how many times it opened,
+## hs: horizontal m/s of each step, first: the step it first opened (-1 never)}.
 func _scenario(script: Callable, lift := 0.3) -> Dictionary:
 	_reset(w.random_ground() + Vector3(0, 0.3, 0), Vector3.ZERO)
 	for i in 60: m.step(Match.DT)        # 1s on the ground: the last scenario's attack animation ends
@@ -44,16 +50,20 @@ func _scenario(script: Callable, lift := 0.3) -> Dictionary:
 		for i in 2: m.step(Match.DT)      # the locomotion state leaves GROUNDED (a glide from it is refused)
 	h.inp["glide_press_only"] = true
 	h.inp["aim"] = h.pos + Vector3(8, 0.9, 0)
-	var out := {"t": 0.0, "opens": 0}
+	var out := {"t": 0.0, "opens": 0, "hs": [], "first": -1}
 	var was := false
 	for i in int(SECS / Match.DT):
 		for k in ["jump", "fire", "glide_btn", "sec", "sec_hold", "dash"]:
 			h.inp[k] = false
 		script.call(i)
+		var before := h.pos
 		m.step(Match.DT)
+		out["hs"].append(Vector2(h.pos.x - before.x, h.pos.z - before.z).length() / Match.DT)
 		if h.gliding:
 			out["t"] += Match.DT
-			if not was: out["opens"] += 1
+			if not was:
+				out["opens"] += 1
+				if out["first"] < 0: out["first"] = i
 		was = h.gliding
 	h.inp["fire"] = false
 	h.inp["sec_hold"] = false
@@ -156,6 +166,48 @@ func _shift_case(arch: String) -> void:
 	else:
 		ok(r["t"] > 0.3, line)
 
+## The fastest of the OPEN_STEPS steps from the opening, less the speed of the step before it: <= SPEED_SLACK.
+func _gain(r: Dictionary) -> float:
+	var at: int = r["first"]
+	if at < 1: return INF
+	var top := 0.0
+	for k in range(at, mini(at + OPEN_STEPS, r["hs"].size())):
+		top = maxf(top, r["hs"][k])
+	return top - r["hs"][at - 1]
+
+## Every Hunter opens the glider from a jump at run speed, right after an air Shift and in a fall: no gain.
+## The stick lets go at the press: the glide's own steering is not the opening.
+func _flat_case(arch: String) -> void:
+	var on_ground := {"seen": false}
+	var jump := func(i: int) -> void:
+		if i == 30: on_ground["seen"] = h.grounded
+		h.inp["move"] = Vector2(1, 0) if i < 42 else Vector2.ZERO
+		h.inp["jump"] = i == 30 or i == 42
+		h.inp["glide"] = i == 30 or i >= 42      # run, jump, let go, fresh press and hold
+	var dash_end := func(i: int) -> void:
+		h.inp["move"] = Vector2(1, 0) if i < 12 else Vector2.ZERO
+		h.inp["dash"] = i == 0
+		h.inp["jump"] = i == 12
+		h.inp["glide"] = i >= 12
+	var fall := func(i: int) -> void:
+		h.inp["move"] = Vector2(1, 0) if i < 20 else Vector2.ZERO
+		h.inp["jump"] = i == 20
+		h.inp["glide"] = i >= 20
+	var r := _scenario(jump)
+	for tries in 8:      # the run east may leave the ground early or meet a slope or wall: take another patch
+		if on_ground["seen"] and r["first"] > 0 and r["hs"][r["first"] - 1] >= RUN_MIN: break
+		r = _scenario(jump)
+	var at: int = maxi(r["first"], 1)
+	var run: float = r["hs"][at - 1]
+	var line := "%s: the glider opening from a run-speed jump (%.1f m/s) adds no speed (gain %.2f m/s)"
+	ok(on_ground["seen"] and run >= RUN_MIN and _gain(r) <= SPEED_SLACK, line % [arch, run, _gain(r)])
+	r = _scenario(dash_end, 30.0)
+	if not SWALLOWS.has(arch):       # the wire swallows the press: nothing opens, nothing to measure
+		var end_line := "%s: the glider opening at an air Shift's end adds no speed (gain %.2f m/s)"
+		ok(_gain(r) <= SPEED_SLACK, end_line % [arch, _gain(r)])
+	r = _scenario(fall, 30.0)
+	ok(_gain(r) <= SPEED_SLACK, "%s: the glider opening from a fall adds no speed (gain %.2f m/s)" % [arch, _gain(r)])
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	_start(main, "")
@@ -167,6 +219,7 @@ func run(main: Node) -> void:
 		if BUTTONS.has(arch):
 			_button_cases(arch)
 		_shift_case(arch)
+		_flat_case(arch)
 		m.queue_free()
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()

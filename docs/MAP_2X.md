@@ -1,5 +1,7 @@
 # The Hollow Crown at 2x: audit against the owner's order (Nov 7)
 
+> Superseded on ext/map-v2-1111 by the Hollow Crown 2.0 (540 m, one fight type per region): docs/MAP_V2.md.
+
 Branch ext/map-2x-0245 = ext/release-integ-0244 (with ext/map-regions) + ext/map-2x-flat2-rebased + ext/hot-zone.
 Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Shots: docs/map2x_shots/ (top-down, and slanted from the south, north-east and north-west: `--map-overview [--map-angle --map-yaw=<deg>]`; small cover is past its visibility range at that height).
 

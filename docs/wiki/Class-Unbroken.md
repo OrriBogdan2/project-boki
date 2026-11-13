@@ -76,7 +76,7 @@ What the in-game kit card (K) says.
 | RMB: Smash | Tap: a heavy slam, harder on the wounded; knock someone it hit and your ultimate is ready again. Hold as long as you like: charge, then fling yourself forward; let go as the levelled blade flashes to fling further. In the air: drive straight down and knock down everyone you land on. |
 | E: Warchain | Throw a chain at a foe or a wall. Press E again to be hauled to it; look aside to swing out that way. |
 | Hunter ultimate: Gilded Riposte | Guard for 0.65s, taking nothing, then lunge into a cleave that heals you; a knock with it resets it. |
-| Weapon: Greatsword | Wide slashes, harder at the tip. Hold to throw a Searing Wave: the longer you hold, the bigger, longer and harder it is. |
+| Weapon: Greatsword | Wide slashes, harder at the tip. Hold to throw a Searing Wave: the longer you hold, the bigger, longer and harder it is. Neither knocks foes back. |
 
 ### Abilities in full
 

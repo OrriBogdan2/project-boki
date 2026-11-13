@@ -126,6 +126,14 @@ func _match_items() -> void:
 	h.dash_with({"speed": 19.0, "time": 0.3, "dir": Vector2(1, 0)})
 	m.step(Match.DT)
 	ok(h.roll_t > 0.0 and not h.gliding and h.loco.is_in(Loco.S.DASHING), "FSM: a dash from a glide folds the glider")
+	h.knock_t = 0.2
+	m.step(Match.DT)
+	var under := h.loco.is_in(Loco.S.DASHING) and not h.loco.can(Loco.S.GLIDING)
+	while h.roll_t > 0.0:
+		m.step(Match.DT)
+	m.step(Match.DT)
+	ok(under and h.loco.is_in(Loco.S.KNOCKED) and h.knock_t > 0.0 and not h.loco.can(Loco.S.GLIDING),
+		"FSM owns it: a knock mid-dash waits under the dash, then KNOCKED (%s)" % " ".join(h.loco.history))
 	_air_at(8.0, Vector3(-4, 0, 0))
 	h.inp["move"] = Vector2(1, 0)
 	var t := 0.0

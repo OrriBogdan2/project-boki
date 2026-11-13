@@ -54,7 +54,7 @@ static func part(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO,
 	parent.add_child(mi)
 	return mi
 
-static var _spheres := {}
+static var _spheres := MeshCache.new()
 
 ## A smooth sphere. The segment count scales with size (so big shapes stay round in close-ups and
 ## tiny dots stay cheap); `seg` is a floor. Cached, so every eye of every hunter shares one mesh.
@@ -65,22 +65,22 @@ static func sphere(r: float, seg := 16) -> SphereMesh:
 	sg += sg % 2
 	var key := "%.4f|%d" % [r, sg]
 	if _spheres.has(key):
-		return _spheres[key]
+		return _spheres.mesh(key)
 	var s := SphereMesh.new()
 	s.radius = r; s.height = r * 2.0; s.radial_segments = sg; s.rings = maxi(8, sg / 2)
-	_spheres[key] = s
+	_spheres.put(key, s)
 	return s
 
 static func capsule(r: float, h: float) -> CapsuleMesh:
 	var key := "cap|%.4f|%.4f" % [r, h]
 	if _spheres.has(key):
-		return _spheres[key]
+		return _spheres.mesh(key)
 	var c := CapsuleMesh.new()
 	c.radius = r; c.height = h; c.radial_segments = int(clampf(r * 380.0, 20.0, 48.0)); c.rings = 16
-	_spheres[key] = c
+	_spheres.put(key, c)
 	return c
 
-static var _rbox := {}
+static var _rbox := MeshCache.new()
 
 ## A box with softly rounded edges and corners (a real fillet with several steps, so it shades and
 ## outlines cleanly instead of reading as a cube). Cached by size, so it costs nothing after the first.
@@ -93,9 +93,9 @@ static func box(x: float, y: float, z: float) -> Mesh:
 		return b
 	var key := "%.4f|%.4f|%.4f" % [x, y, z]
 	if _rbox.has(key):
-		return _rbox[key]
+		return _rbox.mesh(key)
 	var am := rounded_box(Vector3(x, y, z), r, 4 if mn > 0.1 else (3 if mn > 0.03 else 2))
-	_rbox[key] = am
+	_rbox.put(key, am)
 	return am
 
 ## A rounded box: every face is a grid whose outer rows are bent around the edges and corners on a
@@ -167,14 +167,14 @@ static func _commit(verts: PackedVector3Array, norms: PackedVector3Array, uvs: P
 	arrs[Mesh.ARRAY_INDEX] = PackedInt32Array(idx)
 	return MeshArrays.build([arrs])
 
-static var _lathes := {}
+static var _lathes := MeshCache.new()
 
 ## A smooth solid of revolution around Y: `profile` is (radius, height) from the bottom up. Points
 ## with radius 0 close the shape on the axis. Normals come from the profile's own curve, so it
 ## shades as one soft surface. Cached by `key` when one is given.
 static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMesh:
 	if key != "" and _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var n := profile.size()
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var idx: Array = []
 	var total := 0.0
@@ -202,7 +202,7 @@ static func lathe(profile: PackedVector2Array, seg := 24, key := "") -> ArrayMes
 			var b0 := (i + 1) * (seg + 1) + j
 			_quad(verts, norms, idx, a0, a0 + 1, b0 + 1, b0)
 	var am := _commit(verts, norms, uvs, idx)
-	if key != "": _lathes[key] = am
+	if key != "": _lathes.put(key, am)
 	return am
 
 ## A smooth curve through the given points (Catmull-Rom), `sub` steps per span. The ends are kept.
@@ -248,7 +248,7 @@ static func _fillet(poly: Array, r: float, steps: int) -> Array:
 			out.append(c + Vector2(cos(ang), sin(ang)) * rr)
 	return out
 
-static var _cyls := {}
+static var _cyls := MeshCache.new()
 
 ## A plain cylinder (open ends possible), for beams and columns of light.
 static func plain_cyl(top: float, bottom: float, h: float, seg := 14) -> CylinderMesh:
@@ -267,7 +267,7 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 		return c
 	var key := "%.4f|%.4f|%.4f|%d" % [top, bottom, h, radial]
 	if _cyls.has(key):
-		return _cyls[key]
+		return _cyls.mesh(key)
 	var hh := h * 0.5
 	var poly: Array = []
 	poly.append(Vector2(bottom, -hh) if bottom > 0.0005 else Vector2(0.0, -hh))
@@ -278,7 +278,7 @@ static func cyl(top: float, bottom: float, h: float, seg := 14) -> Mesh:
 	var loop := _fillet(poly, bev, 5)
 	var prof := _right_half(loop)
 	var am := lathe(prof, radial)
-	_cyls[key] = am
+	_cyls.put(key, am)
 	return am
 
 ## The x >= 0 half of a closed, counter-clockwise outline that is mirror-symmetric about x = 0,
@@ -316,7 +316,7 @@ static func _right_half(loop: Array) -> PackedVector2Array:
 static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var key := "limb|%.4f|%.4f|%.4f|%.3f" % [r0, r1, h, bulge]
 	if _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var hh := h * 0.5
 	var pts := PackedVector2Array()
 	# bottom cap
@@ -332,10 +332,10 @@ static func limb(r0: float, r1: float, h: float, bulge := 0.08) -> ArrayMesh:
 	var prof := smooth_curve(pts, 3)
 	prof[0] = Vector2(0, -hh); prof[prof.size() - 1] = Vector2(0, hh)
 	var am := lathe(prof, int(clampf(maxf(r0, r1) * 380.0, 24.0, 40.0)))
-	_lathes[key] = am
+	_lathes.put(key, am)
 	return am
 
-static var _eyes := {}
+static var _eyes := MeshCache.new()
 
 ## A glossy creature eye in one mesh: a dark eyeball with a big coloured iris (lighter toward the
 ## bottom, like a painted anime eye) and a pupil, all facing -Z. Coloured by vertex, so it squashes
@@ -343,7 +343,7 @@ static var _eyes := {}
 static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMesh:
 	var key := "%.4f|%s" % [r, iris.to_html()]
 	if _eyes.has(key):
-		return _eyes[key]
+		return _eyes.mesh(key)
 	var sm := SphereMesh.new()
 	sm.radius = r; sm.height = r * 2.0; sm.radial_segments = 40; sm.rings = 24
 	var arrs := sm.get_mesh_arrays()
@@ -366,7 +366,7 @@ static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMes
 	arrs[Mesh.ARRAY_TANGENT] = null
 	var am := ArrayMesh.new()
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	_eyes[key] = am
+	_eyes.put(key, am)
 	return am
 
 ## A coat skirt or tunic: flares from r_top down to r_bot over h, with soft cloth folds that deepen
@@ -374,7 +374,7 @@ static func eye_mesh(r: float, iris: Color, dark := Color("1a1620")) -> ArrayMes
 static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07) -> ArrayMesh:
 	var key := "skirt|%.4f|%.4f|%.4f|%d|%.3f" % [r_top, r_bot, h, folds, amp]
 	if _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var seg := 72
 	var rows := 12
 	var hh := h * 0.5
@@ -413,16 +413,16 @@ static func skirt(r_top: float, r_bot: float, h: float, folds := 9, amp := 0.07)
 		if fn.dot(Vector3.DOWN) > 0.0: idx.append_array([tri[0], tri[2], tri[1]])
 		else: idx.append_array(tri)
 	var am := _commit(verts, norms, uvs, idx)
-	_lathes[key] = am
+	_lathes.put(key, am)
 	return am
 
-static var _crystals := {}
+static var _crystals := MeshCache.new()
 
 ## A cut crystal: a faceted prism with a pointed top, flat-shaded on purpose so it glints.
 static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 	var key := "%.4f|%.4f|%d" % [r, h, sides]
 	if _crystals.has(key):
-		return _crystals[key]
+		return _crystals.mesh(key)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var y0 := -h * 0.5; var y1 := h * 0.18; var y2 := h * 0.5
@@ -450,7 +450,7 @@ static func crystal(r: float, h: float, sides := 6) -> ArrayMesh:
 			st.set_normal(-fn)
 			st.add_vertex(p)
 	var am := st.commit()
-	_crystals[key] = am
+	_crystals.put(key, am)
 	return am
 
 ## A glossy material: metal, gems, polished things catch a crisp highlight.
@@ -607,11 +607,11 @@ static func _class_marks(torso: Node3D, cls: String, bw: float, m_acc: Material,
 static func torso_mesh() -> ArrayMesh:
 	var key := "torso"
 	if _lathes.has(key):
-		return _lathes[key]
+		return _lathes.mesh(key)
 	var pts := PackedVector2Array([Vector2(0.0, -0.31), Vector2(0.13, -0.305), Vector2(0.2, -0.27), Vector2(0.218, -0.17), Vector2(0.205, -0.05),
 		Vector2(0.212, 0.05), Vector2(0.236, 0.14), Vector2(0.248, 0.205), Vector2(0.236, 0.255), Vector2(0.19, 0.293), Vector2(0.11, 0.312), Vector2(0.0, 0.318)])
 	var am := lathe(smooth_curve(pts, 4), 56)
-	_lathes[key] = am
+	_lathes.put(key, am)
 	return am
 
 ## A hunter: the class sets the size and hit radius, the archetype (HeroKit.ARCHES; by default the
@@ -828,6 +828,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
+		if pc[0] == gset[0]: gmi.name = "Canopy"      # GliderHeat sets its heat on this material
 		gmi.material_override = pc[1]
 		ShadowPolicy.judge(gmi)
 		glider.add_child(gmi)
@@ -1291,8 +1292,9 @@ static func _glider_set(gskin: String) -> Array:
 
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-## `discard`: those parts are only freed (a body nothing will draw).
-static func merge_static(node: Node3D, discard := false) -> void:
+## `discard`: those parts are only freed (a body nothing will draw). `keep_casts`: casters and
+## non-casters merge apart and keep their setting, so a merge changes no shadow (the farm's props).
+static func merge_static(node: Node3D, discard := false, keep_casts := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
@@ -1307,9 +1309,10 @@ static func merge_static(node: Node3D, discard := false) -> void:
 		if discard:
 			drop.append(mi)
 			continue
-		var key := _mat_key(mat)
+		var casts := mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var key := _mat_key(mat) + ("|%s" % casts if keep_casts else "")
 		if not groups.has(key):
-			groups[key] = {"mat": mat, "parts": []}
+			groups[key] = {"mat": mat, "parts": [], "casts": casts}
 		for arrs in _part_y_surfaces(mi.mesh, mi.transform):
 			(groups[key]["parts"] as Array).append([arrs, mi.transform])
 		drop.append(mi)
@@ -1318,11 +1321,24 @@ static func merge_static(node: Node3D, discard := false) -> void:
 		var mi := MeshInstance3D.new()
 		mi.mesh = MeshArrays.merge(g["parts"])     # (no SurfaceTool: it reads every part back from the GPU)
 		mi.material_override = g["mat"]
-		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
+		if not keep_casts:
+			ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
+		elif not g["casts"]:
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		node.add_child(mi)
 	for d in drop:
 		node.remove_child(d)
 		d.free()
+
+## merge_static on `root` and on every plain node under it (pivots, cradles, shelves).
+static func merge_tree(root: Node3D, keep_casts := false) -> void:
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Node3D and not (n is MeshInstance3D):
+			merge_static(n, false, keep_casts)
+		for ch in n.get_children():
+			stack.append(ch)
 
 ## A copy of a mesh whose UV2 holds the height range (bottom, top) the part spans once placed with
 ## xf, which the toon shader turns into the part's painted light-to-dark gradient and crease.
@@ -1344,7 +1360,7 @@ static func _part_y_surfaces(mesh: Mesh, xf: Transform3D) -> Array:
 		out.append(arrs)
 	return out
 
-static var _part_y_cache := {}
+static var _part_y_cache := MeshCache.new()
 ## Gives every toon-shaded part under `n` that isn't merged its own part range (in its own space).
 static func bake_part_y(n: Node) -> void:
 	var stack: Array = [n]
@@ -1357,8 +1373,8 @@ static func bake_part_y(n: Node) -> void:
 					and not (mi.mesh is ArrayMesh and ((mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_TEX_UV2)):
 				var id := mi.mesh.get_instance_id()
 				if not _part_y_cache.has(id):
-					_part_y_cache[id] = _with_part_y(mi.mesh)
-				mi.mesh = _part_y_cache[id]
+					_part_y_cache.put(id, _with_part_y(mi.mesh))
+				mi.mesh = _part_y_cache.mesh(id)
 		for ch in c.get_children(): stack.append(ch)
 
 ## Sets a toon material's painted structure: its brushwork (see toon.gdshader's `surface`), the
@@ -1764,7 +1780,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.15, 0.14, 0.1, 14), m_acc, Vector3(0, 0, -0.52), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.18)
 
-## A piece of gear lying on the ground: a glowing gem-like token with a light beam.
+## A piece of gear lying on the ground: a gem-like token in a rarity halo (LootGlow).
 static func gear_drop(col: Color, rar: int) -> Node3D:
 	var root := Node3D.new()
 	var rc: Color = Data.RARITY[clampi(rar, 0, Data.RARITY.size() - 1)]["color"]
@@ -1774,12 +1790,7 @@ static func gear_drop(col: Color, rar: int) -> Node3D:
 	part(spin, core, toon(col, true, 0.6), Vector3(0, -0.12, 0), Vector3.ONE, Vector3(PI, 0, 0))
 	var t := TorusMesh.new(); t.inner_radius = 0.28; t.outer_radius = 0.33
 	part(spin, t, toon(rc, false, 0.8), Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0))
-	var beam := part(root, cyl(0.12, 0.22, 4.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.0, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.2)
-	ring.material_override = ring_mat(rc, 0.12); ring.position.y = 0.05
-	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a ground ring: no shadow, item 94)
-	root.add_child(ring)
+	LootGlow.attach(root, rar)
 	return root
 
 static func gear_pad(col: Color) -> Node3D:
@@ -2070,6 +2081,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	painted(m_dark, 2, 0.2, 0.2, 0.2)
 	bake_part_y(body_root)
 	Evo.dress(root, rec)
+	GardenAura.dress(root, rec)          # a worn garden aura (Glowmoss Sprig), looks only
 	if shimmer:
 		# a shimmer sparkles a little, all the time
 		for i in 3:
@@ -2196,18 +2208,14 @@ static func nesting_nook() -> Node3D:
 	part(heart, sphere(0.13, 12), toon(Color("ff5a7a"), false, 0.35), Vector3(0.08, 0.04, 0))
 	part(heart, cyl(0.0, 0.19, 0.24, 4), toon(Color("ff5a7a"), false, 0.35), Vector3(0, -0.1, 0), Vector3(1.0, 1.0, 0.45), Vector3(PI, PI / 4, 0))
 	PropAnim.on(heart, 0.0, 0.05, 2.0)
+	merge_tree(root, true)      # 60 draws to 17: the stones, stalks and flowers share colours
 	return root
 
 ## An egg in a straw nest, for kin you raise from an egg at home.
-static func nest_egg(c: Color, spot: Color) -> Node3D:
+static func nest_egg(kind: String, glow := 0.0, seam := Color(0, 0, 0, 0)) -> Node3D:
 	var root := Node3D.new()
 	part(root, cyl(0.42, 0.34, 0.16, 16), toon(Color("c9a46a")), Vector3(0, 0.08, 0))
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	part(shell, sphere(0.26, 16), toon(c.lightened(0.15)), Vector3(0, 0.36, 0), Vector3(0.92, 1.25, 0.92))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(c.r * 1000 + spot.g * 100)
-	for i in 6:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.2, 0.55)
-		part(shell, sphere(0.05, 8), toon(spot), Vector3(cos(a) * 0.22, y, sin(a) * 0.22), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell(kind, 0.65, 0.035, glow, seam))
 	return root
 
 ## The Incubator beside the Nesting Nook: a clay brazier with a copper hood on a round stone hearth,
@@ -2279,19 +2287,13 @@ static func incubator() -> Node3D:
 			part(shelf, straw_ring, straw, Vector3(x, y + 0.04, 0), Vector3(1.0, 0.6, 1.0))
 			var mk := Marker3D.new(); mk.name = "S%d" % ((0 if y < 0.5 else 3) + j); mk.position = Vector3(x, y + 0.03, 0)
 			shelf.add_child(mk)
+	merge_tree(root, true)      # HomeIncubator finds the cradles, pebbles and grates by name only
 	return root
 
-## A small gold Rare Egg for the incubator's shelf and cradle, spotted in the colour of the kin inside.
-static func rare_egg_small(spot: Color, s := 1.0) -> Node3D:
+## A small Rare Egg for the incubator's shelf and cradle, its seam ring in the colour of the kin inside.
+static func rare_egg_small(seam: Color, s := 1.0) -> Node3D:
 	var root := Node3D.new()
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	var gold := toon(Color("ffd36a"), true, 0.35)
-	part(shell, sphere(0.26 * s, 16), gold, Vector3(0, 0.3 * s, 0), Vector3(0.9, 1.22, 0.9))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(spot.r * 991 + spot.g * 113 + spot.b * 7)
-	var sm := toon(spot, false, 1.0)
-	for i in 7:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.16, 0.5)
-		part(shell, sphere(0.045 * s, 8), sm, Vector3(cos(a) * 0.215 * s, y * s, sin(a) * 0.215 * s), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell("rare", 0.63 * s, 0.0, 0.2, seam))
 	return root
 
 # ---------------------------------------------------------------- monsters
@@ -2619,18 +2621,14 @@ static func chest_prim() -> Node3D:
 	root.set_meta("mats", [mw, mg])
 	return root
 
-## A dead hunter's deathbox: a squat crate with a glow in its value colour.
-static func deathbox(col: Color) -> Node3D:
+## A dead hunter's deathbox: a squat crate that glows in the rarity of the best thing in it.
+static func deathbox(col: Color, rar: int) -> Node3D:
 	var root := PropSculpt.chest() if Flora.v2() else chest_prim()
 	var own := root.get_node_or_null("Beacon")
 	if own:
-		root.remove_child(own); own.free()      # a deathbox glows in its value colour, not a chest's
+		root.remove_child(own); own.free()      # a deathbox glows in its loot's rarity, not a chest's
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
-	var beam := part(g, cyl(0.12, 0.24, 5.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.5, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.6)
-	ring.material_override = ring_mat(col, 0.1); ring.position.y = 0.04
-	g.add_child(ring)
+	LootGlow.attach(g, rar)
 	# the soul: a little wisp bobbing over the box while a teammate can still bring them back
 	var soul := Node3D.new(); soul.name = "Soul"; soul.position = Vector3(0, 1.3, 0); root.add_child(soul)
 	part(soul, sphere(0.16, 10), glow_mat(Color(0.85, 1.0, 0.95, 0.9)), Vector3.ZERO)
@@ -2856,12 +2854,7 @@ static func jump_pad(c: Color) -> Node3D:
 	return root
 
 static func gem() -> Node3D:
-	var root := Node3D.new()
-	var p := PrismMesh.new(); p.size = Vector3(0.28, 0.3, 0.28)
-	var m := toon(Color("7ef0d0"), false, 0.7)
-	part(root, p, m, Vector3(0, 0.15, 0))
-	part(root, p, m, Vector3(0, -0.15, 0), Vector3.ONE, Vector3(PI, 0, 0))
-	return root
+	return ItemArt.gem()
 
 static func armor_shard() -> Node3D:
 	var root := Node3D.new()
@@ -2872,11 +2865,7 @@ static func armor_shard() -> Node3D:
 	return root
 
 static func tonic() -> Node3D:
-	var root := Node3D.new()
-	part(root, sphere(0.16, 12), toon(Color("8ff0a0"), false, 0.6), Vector3(0, 0.16, 0))
-	part(root, cyl(0.05, 0.06, 0.14, 8), toon(Color("e6f2ea")), Vector3(0, 0.34, 0))
-	part(root, cyl(0.065, 0.065, 0.05, 8), toon(Color("8b6d52")), Vector3(0, 0.43, 0))
-	return root
+	return ItemArt.tonic()
 
 static func seed_bag(c: Color) -> Node3D:
 	var root := Node3D.new()

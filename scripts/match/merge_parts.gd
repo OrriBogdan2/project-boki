@@ -78,18 +78,20 @@ static func _gravity_ring(parent: Node3D, rec: Dictionary, col: Color, glow: Col
 		rec["orbit"].append({"node": mote, "r": 0.82, "y": 0.5, "w": 1.9, "ph": TAU * float(i) / 3.0, "bob": 0.12})
 
 # ------------------------------------------------------------------ Stormwing
+# m (torso space): where a wing joins, at the hat top so the top-down camera sees the whole fan
+const WING_ROOT := Vector3(0.24, 1.3, 0.2)
 static func _storm_wings(parent: Node3D, rec: Dictionary, col: Color, glow: Color, acc: Color, base: Vector3) -> void:
 	var feather := Models.toon(col.lerp(Color.WHITE, 0.15), true, 0.45)
 	var edge := Models.glow_mat(Color(acc, 0.95))
 	for s in [-1.0, 1.0]:
 		var w := Node3D.new()
-		w.position = base + Vector3(0.14 * s, 1.0, 0.2)
+		w.position = base + Vector3(WING_ROOT.x * s, WING_ROOT.y, WING_ROOT.z)
 		parent.add_child(w)
 		for i in 5:
 			var len_ := 1.25 - 0.15 * float(i)
-			var f := Models.part(w, Models.box(len_, 0.035, 0.15), feather, Vector3(0.5 * s * len_ + 0.08 * s, 0.12 * float(i) - 0.1, 0.05 * float(i)), Vector3.ONE, Vector3(0, 0.18 * s * float(i), (0.4 - 0.09 * float(i)) * s))
+			var f := Models.part(w, Models.box(len_, 0.035, 0.15), feather, Vector3(0.5 * s * len_ + 0.08 * s, 0.12 * float(i) - 0.1, 0.05 * float(i)), Vector3.ONE, Vector3(0, 0.18 * s * float(i), (0.55 - 0.09 * float(i)) * s))
 			f.name = "Feather"
-			Models.part(w, Models.box(len_ * 0.96, 0.02, 0.025), edge, Vector3(0.5 * s * len_ + 0.08 * s, 0.12 * float(i) - 0.08, 0.05 * float(i) - 0.08), Vector3.ONE, Vector3(0, 0.18 * s * float(i), (0.4 - 0.09 * float(i)) * s))
+			Models.part(w, Models.box(len_ * 0.96, 0.02, 0.025), edge, Vector3(0.5 * s * len_ + 0.08 * s, 0.12 * float(i) - 0.08, 0.05 * float(i) - 0.08), Vector3.ONE, Vector3(0, 0.18 * s * float(i), (0.55 - 0.09 * float(i)) * s))
 		w.set_meta("side", s)
 		rec["wings"].append(w)
 

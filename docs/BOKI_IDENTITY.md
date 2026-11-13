@@ -13,13 +13,14 @@ Code:
 | Inborn rolls, size, the model dressing, the match trade-off | `scripts/core/unique.gd` (`Unique`) |
 | Ids, provenance, the event log, save migrations | `scripts/core/save.gd` (`Save`) |
 | Breeding (lineage, inherited rolls), Rare Eggs (origin) | `scripts/core/care.gd` |
+| A pair's egg appearing in the Nook (glow ring, type-colour sparkles, one wobble) | `scripts/home/nest_reveal.gd` (`NestReveal`, `--hatch-check`, `--nest-demo=egg`) |
 | Coat marks | `shaders/toon.gdshader` (`mark_*` uniforms) |
 | Idle habits, girth | `scripts/match/kin_puppet.gd` |
 | Hitbox and stat trade-off | `scripts/match/kin.gd` `init_kin` |
 | Wild and bot seeds, where a Boki was caught | `scripts/match/match.gd` (`kin_seed`, `where_at`), `spawn_plan.gd` |
 | The About tab, Nesting Nook and Burrow lines | `scripts/ui/about_view.gd` (`AboutView`) |
 | Species base sizes | `content/kin/<id>.json` `"size": {"cm", "kg"}` |
-| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/save_fixtures/v1_save.json` |
+| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/fixtures/saves/save_v1.json` |
 
 ## The record
 

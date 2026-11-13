@@ -1,8 +1,7 @@
 class_name LootFull
-## Looting with no room: what fits, what smart loot really took, and the two ways out of a full
-## backpack from a box (swap one of yours into the box, or drop one of yours on the ground).
-## The held item is the box's clicked row; the hold window is LootHold. Ground items use the older
-## swap window (Hud.open_swap) and share the red "full" cue.
+## Looting with no room: what fits, what smart loot really took, and the way out of a full backpack
+## from a box (swap one of yours into the box). The held item is the box's clicked row; LootWindow shows
+## the hold. Ground items use the older swap window (Hud.open_swap) and share the red "full" cue.
 
 const FULL_COL := Color("ff6a5a")
 ## A box thing that can't go anywhere without a swap: kept in the box, never reported as taken.
@@ -16,7 +15,9 @@ static func fits(h: Hunter, row: Dictionary, b: Dictionary) -> bool:
 			return UtilityBelt.room_for(h, "chest_key") > 0
 		"caught":
 			return Capture.room(h) or _is_yours(h, row, b)
-		"pack", "belt":
+		"pack":
+			return bool(row.get("upgrade", true)) or bool(row.get("wear", false))
+		"belt":
 			return bool(row.get("upgrade", true))
 	return true
 
@@ -48,7 +49,7 @@ static func smart_text(got: int, left: int) -> String:
 		return "Inventory full, took nothing"
 	return "Took %d of %d, inventory full" % [got, got + left]
 
-## Hold window "Swap": your backpack thing i goes into the box, the held box thing takes its place.
+## Hold "Swap": your backpack thing i goes into the box, the held box thing takes its place.
 ## Returns false when either index is stale.
 static func swap_held(m: Match, h: Hunter, b: Dictionary, held_i: int, mine_i: int) -> bool:
 	if not _valid(h, b, held_i, mine_i):
@@ -62,22 +63,14 @@ static func swap_held(m: Match, h: Hunter, b: Dictionary, held_i: int, mine_i: i
 	m.sfx("pickup", h.pos, -2.0, 0.95)
 	return true
 
-## Hold window "Drop": your backpack thing i goes on the ground, the held box thing takes its slot.
-static func drop_for_held(m: Match, h: Hunter, b: Dictionary, held_i: int, mine_i: int) -> bool:
-	if not _valid(h, b, held_i, mine_i):
-		return false
-	var held: Dictionary = (b["pack"] as Array).pop_at(held_i)
-	var mine: Dictionary = h.pack[mine_i]
-	Pack.drop_from_pack(m, h, mine_i)
-	h.pack.append(held)
-	Life._settle_box(b)
-	_told(m, h, "Dropped %s for %s" % [Loot.name_of(mine), Loot.name_of(held)], Loot.col_of(held))
-	m.sfx("pickup", h.pos, -2.0, 0.9)
-	return true
-
-## A click on a box row. Fits: it is taken. Doesn't: nothing moves and you are told why. Returns
-## true only when something really moved.
+## A click on a box row. Fits: it is taken (gear that beats what you wear goes on, yours into the
+## box). Doesn't: nothing moves and you are told why. Returns true only when something really moved.
 static func click(m: Match, h: Hunter, b: Dictionary, row: Dictionary) -> bool:
+	if bool(row.get("wear", false)):
+		var i := int(row["i"])
+		Pack.wear_from_box(m, h, b, {"it": (b["pack"] as Array)[i], "where": "pack", "i": i})
+		Life._settle_box(b)
+		return true
 	if fits(h, row, b):
 		Life.take_item(m, h, b, row)
 		return true

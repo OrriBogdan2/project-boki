@@ -224,6 +224,10 @@ func _num(layer: Dictionary, key: String, o: Dictionary, fallback := 1.0) -> flo
 		n *= 1.0 + float(layer[key + "_k"]) * float(o.get("k", 0.0))
 	return n
 
+## A colour of the Hero's palette (its data file), for the looks a kit places itself.
+func color(h: Hunter, key: String) -> Color:
+	return _pal(h, key, key)
+
 func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
 	var pal: Dictionary = data(h.arch).get("palette", {})
 	var key := String(name_or_hex) if name_or_hex != null else fallback
@@ -417,6 +421,9 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			var flip: bool = o.get("flip", false) != bool(layer.get("flip", false))
 			s0 = Vector3(-extent if flip else extent, extent, extent)
 			s1 = s0
+			var dur := _num(layer, "life", o, 0.4)
+			mt.set_shader_parameter("head_t", clampf(_num(layer, "turn", o, 0.28 * dur) / dur, 0.05, 1.0))
+			mt.set_shader_parameter("band", float(layer.get("band", 0.0)))
 		"scorch":
 			var sh := String(layer.get("shape", "disc"))
 			mt.set_shader_parameter("shape", SCORCH_SHAPES[sh])
@@ -452,10 +459,14 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
+			mt.set_shader_parameter("rim_only", bool(layer.get("thin", false)))
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
-	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1})
+	var e := {"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1}
+	if layer.get("ride", false):      # it rides on the Hero (an anchor goes with the clip: a hop, a lunge)
+		e.merge({"ride": h, "layer": layer, "dir": dir, "off": p - _where(layer, h, h.pos, dir)})
+	live.append(e)
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
@@ -735,6 +746,9 @@ func _process(delta: float) -> void:
 			live.remove_at(i)
 			continue
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
+		if e.has("ride") and is_instance_valid(e["ride"]):
+			var r: Hunter = e["ride"]
+			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)

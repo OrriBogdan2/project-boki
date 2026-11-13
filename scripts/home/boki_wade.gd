@@ -1,10 +1,11 @@
 class_name BokiWade
 extends RefCounted
 ## Boki wading (briefs/design/GARDEN.md section 4, content/rules/wade.json): a Boki in pond or stream water
-## sinks into it, walks slower, leaves a ripple and a splash going in and shakes off coming out. With base_mode
-## on, Water, Ice and Crystal Boki paddle (a free roaming one lingers in the water playing the splash clip, and
-## gains joy), Fire Boki hurry out to the nearest dry ground, and everyone else wades through.
-## k["wade"] = {in, rip, stay, out, shake_t}. home.gd calls speed() for the walk and step() after each move.
+## sinks into it, walks slower, splashes going in, leaves ripples round it and a V wake while it moves (BokiWake)
+## and shakes off coming out. With base_mode on, Water, Ice and Crystal Boki paddle (a free roaming one lingers in
+## the water playing the splash clip, and gains joy), Fire Boki hurry out to the nearest dry ground, and everyone
+## else wades through.
+## k["wade"] = {in, stay, out, shake_t}. home.gd calls speed() for the walk and step() after each move.
 ## Missing clips (anim lane): "wade" (a slow knee-high walk loop) and "shake" (a shake-off); until then the walk
 ## simply slows and the shake is a quick wobble of the Body node.
 
@@ -13,6 +14,7 @@ const OUT_RINGS := 8              # directions tried round a Fire Boki when it l
 const WOBBLE := 0.3               # rad of side-to-side shake at its fullest
 
 var h
+var marks: BokiWake        # the ripples and wakes of every Boki in the water (made when the first steps in)
 
 func _init(home) -> void:
 	h = home
@@ -37,16 +39,16 @@ func speed(k: Dictionary, pos: Vector3) -> float:
 		return float(R["out_speed"])
 	return float(R["wade_speed"] if dep == 1 else R["deep_speed"])
 
-## One Boki in (or leaving) the water this frame: the sink, ripples, the splash, the shake, and what its kind does.
+## One Boki in (or leaving) the water this frame: the sink, its marks, the splash, the shake, and what its kind does.
 func step(k: Dictionary, pos: Vector3, n: Node3D, d: float) -> void:
-	var w: Dictionary = k.get("wade", {"in": false, "rip": 0.0, "stay": 0.0, "out": false, "shake_t": 0.0})
+	var w: Dictionary = k.get("wade", {"in": false, "stay": 0.0, "out": false, "shake_t": 0.0})
 	k["wade"] = w
 	var dep: int = h.water.depth(pos.x, pos.z)
 	if dep > 0:
 		n.position.y -= float(SINK[dep]) - sin(float(k["hop"]) * 0.7) * 0.03
 		if not w["in"]:
 			_enter(k, w, pos)
-		_ripple(k, w, pos, d)
+		_mark(k, pos, n)
 		_play(k, w, pos, d)
 	elif w["in"]:
 		_leave(k, w, pos)
@@ -79,13 +81,16 @@ func _leave(k: Dictionary, w: Dictionary, pos: Vector3) -> void:
 		Sfx.play("drip", pos, -10.0)
 		h.fx.burst(pos + Vector3(0, 0.5, 0), Color("cfeaff"), 8, 1.8, 0.4)
 
-## A ripple while it moves or plays in the water.
-func _ripple(k: Dictionary, w: Dictionary, pos: Vector3, d: float) -> void:
-	var moving: bool = Vector2(k["vel"].x, k["vel"].z).length() > 0.3
-	w["rip"] = float(w["rip"]) - d
-	if float(w["rip"]) <= 0.0 and (moving or float(w["stay"]) > 0.0):
-		w["rip"] = float(rules()["ripple_secs"])
-		h.fx.ring(pos + Vector3(0, 0.08, 0), 0.5 if moving else 0.4, Color(0.85, 0.95, 1.0, 0.45), 0.5)
+## Its ripple ring, and a V wake while it moves, sized by its body. Nothing on Very Low.
+func _mark(k: Dictionary, pos: Vector3, n: Node3D) -> void:
+	if marks == null:
+		if Settings.quality() == "very_low":
+			return
+		marks = BokiWake.new(float(rules()["ripple_secs"]))
+		h.add_child(marks)
+		if h.hb:
+			marks.clip_to(h.hb.L()["water"])
+	marks.mark(String(k["rec"]["uid"]), pos, k["vel"], n.scale.x)
 
 ## A lingering paddler stays put playing, gaining joy, until its time is up or something else claims it.
 func _play(k: Dictionary, w: Dictionary, pos: Vector3, d: float) -> void:

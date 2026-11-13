@@ -16,6 +16,10 @@ const BOX := 54.0             # px, each box
 const GAP := 8.0              # px between boxes
 const EDGE := 12.0            # px between the last box and the weapon card
 const BOND_FLASH_S := 0.8     # s: how long the bond ring brightens after an ultimate fills it (KinBond)
+const BAR_H := 4.0            # px: the Boki's health bar along the bottom inside its box
+
+## What the Boki box drew last: {"tag": short word, "bond": percent shown, "frac": health 0..1}
+static var shown := {}
 
 ## Draws the three boxes left of the weapon card `wr`, bottom-aligned with it. Returns their rect.
 static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
@@ -70,7 +74,12 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var down := k.state == "downed"
 	var ctr := r.get_center()
 	HudStyle.slot_frame(hud.c, r, tc, "off" if down else "ready")
-	DexView.draw_type(hud.c, t, ctr + Vector2(0, -2), BOX * 0.3, 0.35 if down else 1.0)
+	var tex := KinPortrait.tex(k.rec, hud.get_tree())
+	if tex != null:
+		hud.c.draw_texture_rect(tex, r.grow(-7.0), false)
+		DexView.draw_type(hud.c, t, r.position + Vector2(12, 12), BOX * 0.16, 0.35 if down else 1.0)
+	else:
+		DexView.draw_type(hud.c, t, ctr + Vector2(0, -2), BOX * 0.3, 0.35 if down else 1.0)
 	# the bond meter as a thin ring; bright and pulsing once the Merge is ready
 	var bond := clampf(p.ult, 0.0, 1.0)
 	hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)
@@ -84,7 +93,16 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 		hud.c.draw_arc(ctr, BOX * 0.5 + 5.0, 0, TAU, 36, Color(1.0, 0.85, 0.3, 0.9 * flash), 3.0, true)
 	if down:
 		hud.c.draw_style_box(HudStyle.box(Color(0.2, 0.2, 0.22, 0.55), HudStyle.SLOT_RAD, Color(0, 0, 0, 0), 0), r)
-		HudStyle.ctext(hud.c, ctr + Vector2(0, 5), "DOWN", 12, HudStyle.HURT)
+	var frac := clampf(k.hp / maxf(1.0, k.max_hp), 0.0, 1.0)
+	var bar := Rect2(r.position + Vector2(6, BOX - 6.0 - BAR_H), Vector2(BOX - 12.0, BAR_H))
+	hud._bar(bar, 0.0 if down else frac, HudStyle.ALLY)
+	var tag := BokiHud.tag(p)
+	shown = {"tag": tag, "bond": int(bond * 100.0), "frac": frac}
+	if tag == "":
+		var pct_at := Vector2(ctr.x + 7.0, r.position.y + 14.0)
+		HudStyle.ctext(hud.c, pct_at, "%d%%" % int(bond * 100.0), 10, Color(HudStyle.INK, 0.8))
+	else:
+		BokiHud.chip(hud, r, tag, HudStyle.HURT if tag in ["RESCUE", "TOO FAR"] else tc)
 	HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, HudStyle.MUTED if down else tc)
 
 ## The hover text for a glove box (hud ids "gear0", "gear1").

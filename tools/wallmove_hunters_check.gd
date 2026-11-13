@@ -1,13 +1,11 @@
 extends RefCounted
 ## Per-Hunter wall kick and wall bounce (part of --wallmove-check; DECISIONS 11-07: wall kick and wall
-## bounce for everyone, every interaction chainable). Each of the 12 Hunters, in the Training Area's strip
+## bounce for everyone, every interaction chainable). Every Hunter (Arch.ORDER), in the Training Area's strip
 ## beside a tall wall, tries both moves from a run, from a jump, out of the dash, and in the air `PRESS_AT`
 ## seconds after each ability button (LMB, RMB, E, X, Shift; tapped and held). Prints "WHUNT <hunter> ..."
 ## lines and counts the cases that are blocked. docs/MOVEMENT_FEEL.md lists what is allowed to commit.
 
 const DT := Match.DT
-const HUNTERS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage",
-		"ostra", "rimewright", "tender", "thief"]
 const KEYS := ["fire", "sec", "sig", "skill", "dash"]
 const PRESS_AT := [0.05, 0.2, 0.45, 0.8]   # s after the ability button
 const WALL_UPS := 20                # terraces: far taller than any hop or mantle
@@ -17,16 +15,17 @@ const DASH_JUMP_AT := 0.1           # s into the dash before the jump (the dash 
 const DASH_START := 2.5             # m from the wall for the dash cases (a jump out of a dash must still reach it)
 const BOUNCE_V := Vector2(6.9, 4.0) # m/s: 30 degrees off the wall's normal, into it at 6.9
 const RUN_ANGLE := 25.0             # degrees off the normal for the run bounce (a run is 4.4-4.9 m/s)
+## Walking-jump rows (docs/MOVEMENT_FEEL.md): a plain jump off the walk at these angles off the normal, for a slow
+## kit (Tenzo) and a fast one (Vex). It bounces exactly when it meets the wall at WallMoves.BOUNCE_MIN_INTO or more.
+const WALK_ROWS := ["dolm", "gunslinger"]
+const WALK_ANGLES := [25.0, 35.0]   # degrees off the wall's normal
 ## Cases a kit move is allowed to own (the move commits), per Hunter: case-name prefixes, with the cite.
-const COMMITS := {
-	# Claire's rink skate steers itself: her heading at the wall is head-on (hit within 16 degrees of the normal,
-	# which never bounces), so there is no angled hit to rebound. Open: see docs/MOVEMENT_FEEL.md.
-	"rimewright": ["bounce:sig/hold", "bounce:skill@"],
-}
-## Placed casts (not moves), tapped, per Hunter: the bounce sweep aims them back the way she came (at a chaser),
-## not at the wall. Neve's Rink Wall (E) rises at her height `reach` ahead and its blocks stand as columns: aimed
-## at the wall it stood just in front of it, and she met her own ice side-on instead of the wall at an angle.
-const CAST_BACK := {"rimewright": ["sig"]}
+const COMMITS := {}
+## Placed casts (not moves), tapped or held, per Hunter: the bounce sweep aims them back the way she came (at a
+## chaser), not at the wall. Neve's Rink Wall (E) rises at her height `reach` ahead and its blocks stand as
+## columns: aimed at the wall it stood just in front of it, and she met her own ice head-on (within 16 degrees
+## of its face) instead of the wall at an angle.
+const CAST_BACK := {"rimewright": ["sig", "sig/hold"]}
 const SETTLE := 2                   # steps a kick or bounce is given to show
 
 var main: Node
@@ -44,7 +43,7 @@ func run(main_node: Node, report: Callable) -> void:
 	main = main_node
 	ac = load("res://tools/archetype_check.gd").new()
 	ac.main = main
-	for a in HUNTERS:
+	for a in Arch.ORDER:
 		_hunter(a)
 		report.call(a, blocked.filter(func(c): return not _commits(a, c)))
 
@@ -73,6 +72,8 @@ func _hunter(a: String) -> void:
 	face = hx + 9.0
 	P.set_arch(arch)        # (so P.r is this Hunter's before the first placement)
 	_runs()
+	if arch in WALK_ROWS:
+		_walk_jumps()
 	_sweeps()
 	m.queue_free()
 
@@ -109,6 +110,7 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 	P.inp["aim"] = Vector3(face, low + 1.0, z0)
+	m.verbs.clear()     # the last case's placed walls (Neve's ice lasts 6 s) would stand in this one's path
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -254,6 +256,31 @@ func _runs() -> void:
 	P.inp["dash"] = false
 	_jump_out(ang)
 	_note("bounce:dash", _bounce_run(ang, 1.0))
+
+## Walk angled from a standstill, jump, and drift into the wall: prints "WHUNT <hunter> walkjump@<deg>" with the
+## speed into the wall, and blocks the case when the bounce disagrees with WallMoves.BOUNCE_MIN_INTO.
+func _walk_jumps() -> void:
+	for deg in WALK_ANGLES:
+		var keys := Vector2.from_angle(deg_to_rad(deg))
+		_fresh(Vector3(face - P.r - 0.02 - RUN_START + 3.0, low, z0 - 1.0), true)
+		_go(keys, 0.4)
+		var walk := Vector2(P.vel.x, P.vel.z).length()
+		P.inp["jump"] = true
+		_go(keys, DT)
+		P.inp["jump"] = false
+		var into := 0.0
+		var bounced := false
+		var t := 0.0
+		while t < 1.0 and not bounced:
+			_go(keys, DT)
+			t += DT
+			bounced = _bounced()
+			if P.wall_touch_t > 0.0 and not P.grounded:
+				into = maxf(into, P.wall_hit_v.x)
+		var case_ := "walkjump@%d" % deg
+		print("WHUNT %s %s walk %.2f into %.2f m/s %s" % [arch, case_, walk, into, "bounces" if bounced else "stops"])
+		if into <= 0.0 or bounced != (into >= WallMoves.BOUNCE_MIN_INTO):
+			blocked.append("%s {into %.2f, bounced %s}" % [case_, into, bounced])
 
 # ------------------------------------------------------------ out of each ability
 func _sweeps() -> void:

@@ -38,6 +38,80 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
+In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
+re-time: Vex's `x` and Meeko's `seed`/`seed_aim` (tools/art1/glb_add_clips.py). Sparkle is on her current master
+(`m4c_livehead`, the owner's chest fix under the live head): the bake_warden fix keeps her base colour in a server bake.
+Her stretch check is red on main too (worst 14.3 vs main's 13.1, 45 clips over on both). Not swapped:
+- Albert i1: without `emit` the master bakes no crack glow, the porthole `eyes-mood` disc shows blank glass with a dark
+  wedge, and the fish (no `move_bones`) stretches 16x (main 9.5). The porthole and fish need re-placing first.
+- Sable: as below. Gil: no swap spec yet.
+v95_swap.py now stops when `emit` is set but the master has no emission map (it used to bake the base colour as glow:
+Albert's solid cyan).
+
+## Status (2026-11-13, ext/showcase-1113): Vex, Kael, Tarek and Meeko on their current masters
+Swapped to each current.json master (face kept: the specs name the promoted master): Vex (tilt1112 cand_A2), Kael
+(tilt_A, sword stripped: `kael_tilt_A_body.glb`), Tarek (n95 c01, eye stones stripped: `tarek_c01_body.glb`), Meeko (n95
+best, sun and cloud stripped: `best_nocomp.glb`, then pip_companions.py). Already on their newest master: Cinder, Neve,
+Grimble, Motley, Lace. Not swapped:
+- Sable (r5 low4 tilt A): the new body's left hand stretches 6.0 -> 21.1x and 10 clips go over her 18.5 ceiling. Her joint
+  points need refitting to the new body first.
+- Sparkle, Albert i1 and Gil: still as in the 11-12 evening section above (memory/base colour, solid cyan glow, no spec).
+bake_warden.py now joins a multi-mesh master safely and bakes each material's own colour image (Meeko's wings are a
+separate Meshy part on their own texture).
+
+## Judge framing gotcha (2026-11-13, ext/low4-hunters)
+v95-promote's renderer (`_tools/r95_render.py`) turns the model about its glTF origin, not its bbox centre, and
+the side frame is only ~0.62 m either side of the origin (Grimble's height, 1.9 m). A hunched pose that pushes the head
+forward (Grimble hunch E: head at z 0.64) puts the face out of frame. The judge then reports "too upright, head tucked
+in". Moving the whole mesh 10 cm back (-Z, `_low4-1112/tools/shift_z.py`) gave 85/80/84/83 vs the live 79/79 with the
+same scorer. The face is unchanged, but the pose moves it, so promote such a pass with `--face`. The candidate and the
+command are in `/home/boki/meshy/v95/_low4-1112/PROMOTE_GRIMBLE.txt`. The swap then needs the feet re-centred.
+
+## Status (2026-11-12 evening, ext/hunters-best-1112): the 11-12 evening promotions
+In game on top of the table below: Neve's chiffon skirt body under the live head (`claire_v95.json`, from
+ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
+- Sparkle, the owner's chest fix (`Sparkle/r3/meshy1112/graft/m4c_livehead.glb`, live 19:59Z). The 160 MB master ran
+  out of memory twice in the server bake. On a remote Blender worker (mac, `jobq submit --app blender`, a minimal tree:
+  tools/, art/wardens/src, the master, WORK/game.glb = `95f0fef3e5^`'s ryzz.glb) it ran in 2 min, but the game showed
+  her white-grey with black specks: the base colour did not bake there. Re-run on a worker whose bake keeps colour.
+- Albert's i1 face pass (`Albert/r3/meshy1112/candidates/i1/glb.glb`, live 20:35Z): the same mac run (current
+  breaker.glb as WORK/game.glb, `move_bones` dropped, since v95_swap.py now takes offsets and his spec has `to`/`chain`)
+  rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
+- Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
+
+## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
+The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:
+Cinder (the facekeep body: body6 cand_B's shape with the cand_A face3 image), Sable (prop1111 cand_B), Vex (prop1111
+cand_A), Sparkle (prop1111 cand_A) and Lace (body6); Tarek's appeal3 cand_b and Grimble's appeal3 cand_b come in from
+their branches. Albert, Kael, Motley, Neve and Meeko already were live (Neve and Motley with the 11-12 owner fixes).
+
+| Hunter (id) | tris | textures | clips |
+|---|---|---|---|
+| Albert (breaker) | 14.8k | 3 x 2048 | 48 |
+| Lace (hem) | 13.9k | 2 x 2048 | 51 |
+| Kael (kael) | 13.9k | 2 x 2048 | 52 |
+| Vex (vex) | 13.1k | 2048 | 39 |
+| Motley (ostra) | 14.1k | 2 x 2048 + 512 | 45 |
+| Sparkle (ryzz) | 13.2k | 4096 | 45 |
+| Tarek (tarek) | 13.4k | 1024 + 2 x 2048 | 48 |
+| Sable (sable) | 13.0k | 2048 | 47 |
+| Neve (claire) | 13.4k | 2048 | 49 |
+| Cinder (cinder) | 13.7k | 2 x 2048 | 44 |
+| Meeko (pip) | 14.3k | 2 x 2048 | 45 |
+| Grimble (dredge) | 14.9k | 2048 | 40 |
+
+Re-swapping a model that is itself a swap: pre-place its current .glb as WORK/game.glb (no move_bones in the spec)
+or the file from before the first swap (Sparkle: `95f0fef3e5^`, its move_bones are deltas). The old mesh drops whole
+unless `keep` names bones. Proof: `tools/art1/ingame_face_sheet.py` (ffmpeg) from two `--warden-shots` runs, the
+engine's own close-up and match cameras; the older facekeep sheets framed the glb in Blender with guessed fractions
+of a bounding box, in rest pose, which is why their "game" column looked wrong.
+
+Bake misses: a triangle the decimation folds under catches no ray, and its texels bake exactly black (Sparkle's
+forehead, Cinder's arm in the first 11-12 swaps; a bigger cage or ray distance did not reach them). `fill_misses` in
+v95_swap.py fills exact-black base-colour texels from their neighbours (max(32, tex/64) texels in), not the glow map.
+Step 1 is skipped while WORK/bake.blend exists: delete it to re-bake.
+
 ## Status (2026-11-10): Ryzz and Vex swapped (ext/sparkle-underbust2, specs ryzz_v95.json, vex_v95.json); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
 the master has no extra hand and its slime arm and gauntlet are right (master_v95_grid_front.jpg), the skeleton,
@@ -73,3 +147,25 @@ be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's
 Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
+
+## Face lock (2026-11-12): a body pass never changes a hunter's face
+The /3d/v95 masters are promoted by `v95-promote` (boki-tools; model-room-sync runs `--auto`). It used to copy the
+whole GLB, so a body pass built on an older head put that head live: Cinder's body5/body6/prop1111 chain started from
+appeal4 cand_5 (rebuilt from appeal3 cand_b) and lost the owner's appeal4 cand_3 face. Now a promote keeps the head
+of the current v95.glb (top 13% of the Meshy body: positions, UVs, base-colour texture, plus the eye/head parts in
+that box) unless the pass is declared a face pass: `FACE: <what>` in its pick/applied file, the word `face` after
+the glb in CURRENT_OVERRIDES.txt, or `--face` by hand. An undeclared head change with the same topology and UVs is
+put back (`<stem>_keephead.glb`); anything else is refused. `v95-promote --check` fails if a lock-era promote changed
+a head without a face pass (`--selftest` covers the lock). Swap specs here should name the promoted master
+(`current.json` "glb"), not an r2 candidate, so the game gets the same face.
+
+## The hunters are counted from art/wardens (2026-11-12)
+v95-promote takes its hunters from `~/meshy/v95/_tools/v95_roster.py`: every `art/wardens/<id>/<id>.glb` on the
+game's origin/main (13 with Gil), not a fixed list. Its `KNOWN` table only maps an art id to its v95 folder and
+display name (owner room order 2026-11-08); a warden that is not in it still counts, named after its id. A hunter in
+art/wardens without a `v95.glb` yet shows in `--status` and is a WARN in `--check`. The Model Room's build3d.py on
+hetzner reads the same roster once `~/meshy/v95/_tools/model-room-roster-patch.py` has replaced its fixed 12-row
+list (it refuses unless that list is found exactly once).
+Gil's first v95 pass (no gil_v2 refs, so the approved 2D): `~/meshy/v95/Gil/r2/v95a/NOTES.txt` (cand_B, judge 85;
+the live 12 score 76-88), sheet `Gil/before_after.jpg`, `Gil/turntable.mp4`. Its promote is a face pass:
+`v95-promote Gil r2/v95a/cand_B.glb --face "first v95 face for Gil"`; his swap spec follows from the promoted master.

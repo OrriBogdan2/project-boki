@@ -291,6 +291,22 @@ func _dredge() -> void:
 	)
 	await _go(2.3, blast, bmarks)
 
+## Grimble's Barge run (--combo51-part=barge): three shoves 0.42 s apart (the 0.22 s gap and a frame), one burst.
+func _dredge_barge() -> void:
+	await _reset(9.0)
+	P.dashes = 3.0
+	var run := func(t: float):
+		for k in 3:
+			if _at(t, 0.1 + 0.42 * k):
+				P.do_dash()
+	var marks := _strip(
+		"barge_run_strip",
+		"Grimble's Barge, three chained shoves: the first, the ball rolling in the gap, the second, rolling, the third,"
+			+ " the ball still closed as it ends, opening, standing",
+		[0.14, 0.3, 0.48, 0.6, 0.74, 1.02, 1.16, 1.22, 1.45]
+	)
+	await _go(1.5, run, marks)
+
 ## Cinder: the lance held through a ram; Shift in the flight; a jump off the flight.
 func _ashwick() -> void:
 	P.lvl = 6

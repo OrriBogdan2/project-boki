@@ -409,6 +409,7 @@ func on_owner_hit(d: float, by: Ent) -> void:
 	if d >= o.max_hp * 0.12 and yelp_cd <= 0.0 and not o.downed:
 		yelp_cd = 7.0
 		history.append({"t": m.time, "cat": "yelp", "pri": 0})
+		m.sfx(KinVoice.cue(k.species, "hurt"), k.pos, -6.0, Unique.voice(k.rec))
 		var txt := BokiChatter.line(k, "yelp")
 		if txt != "":
 			m.kin_bark(k, txt, "yelp")
@@ -534,7 +535,7 @@ static func demo_tick(m, mode: String) -> void:
 				p.down_hp = 1e6
 			if p.downed:
 				p.revive = minf(p.revive, 0.35)
-				if k.state in ["reviving", "active"]:
+				if k.state in ["wisp", "active"]:
 					if not m.bubbles.any(func(b): return b["ent"] == k):
 						m.kin_bark(k, BokiChatter.line(k, "owner_down"), "owner_down")
 					_hold_bubble(m, k)

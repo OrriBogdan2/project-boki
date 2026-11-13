@@ -9,6 +9,7 @@ extends "res://tools/displace_net_check.gd"
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
 const SKEW := 0.05           # s: clocks of two processes on one machine
+const NET_SNAP_TOL := 0.08   # s: a re-time on the copy is the host's to within the age snap plus a frame
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
 const WALK := 3.6            # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
@@ -32,6 +33,8 @@ var played := {}             # arch -> casts that played any move
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
+var retimes: Array = []      # [unix ms, s]: the watched move's clock jumped earlier, same id (a re-time)
+var last_at := [ "", 0.0 ]   # the watched kit's move id and anim_at at the last frame
 
 func _init() -> void:
 	tag = "RANIM"
@@ -51,6 +54,7 @@ func _host() -> void:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
 	_wash_rows_ok()
+	await _ram_retime()
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
@@ -135,6 +139,37 @@ func _wash_rows_ok() -> void:
 	ok(g_on >= h_on - SKEW and g_on <= h_on + LAG_TOL, "archer: the guest's copy tints within %.1f s" % LAG_TOL, detail)
 	ok(g_off > g_on + 2.0 and g_off <= h_off + LAG_TOL, "archer: the copy's tint ends with the walk", detail)
 
+## Cinder's ram into a foe: the hit re-times as_leap onto its squash key (ArchKit.retime, about 0.23 s earlier,
+## under the 0.3 s resync), and the guest's copy must move its clock by the same within LAG_TOL of the host's.
+func _ram_retime() -> void:
+	var P := m.player
+	_kit("ashwick")
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "kit", "arch": "ashwick"})
+	await _reply()
+	var foe: Hunter = m.make_hunter("RT", 1, "medium", "Foe", "idle", {}, home + Vector3(3.0, 0, 0), {"arch": "none"})
+	_aim(foe.pos)
+	await _run(0.3)
+	retimes.clear()
+	Net.lobby_emit("ra", {"c": "mark"})
+	await _run(0.2)
+	P.do_dash()
+	await _run(SETTLE)
+	var mine := retimes.duplicate()
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "log"})
+	await _reply()
+	var theirs: Array = replies[0].get("rt", []) if not replies.is_empty() else []
+	var detail := "host %s guest %s" % [str(mine), str(theirs)]
+	ok(mine.size() == 1 and float(mine[0][1]) < -0.1,
+		"ashwick ram hit: the host's as_leap jumps to its squash key", detail)
+	var shown := false
+	for r in theirs:
+		if not mine.is_empty() and absf(float(r[1]) - float(mine[0][1])) <= NET_SNAP_TOL:
+			shown = shown or (float(r[0]) - float(mine[0][0])) / 1000.0 <= LAG_TOL
+	ok(shown, "ashwick ram hit: the guest's copy re-times as_leap by the same within %.1f s" % LAG_TOL, detail)
+	foe.teleport(home + Vector3(-6.0, 0, 9.0))
+
 ## The first time (s) the rows change to `on`; -99 when none.
 func _wash_at(rows: Array, on: bool) -> float:
 	for r in rows:
@@ -181,10 +216,11 @@ func _on_msg(topic: String, data, from: String) -> void:
 				Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
 			"mark":
 				log_rows.clear()
+				retimes.clear()
 				wash_rows.clear()
 				last_row = ["?", "?"]
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes})
 		return
 	super._on_msg(topic, data, from)
 
@@ -207,6 +243,10 @@ func _sample() -> void:
 	var shown := H.wash > WASH_ON
 	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
 		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
+	var jump: float = H.ak.anim_at - float(last_at[1])
+	if H.ak.anim_id == last_at[0] and jump < -0.02 and jump > -0.6:
+		retimes.append([int(Time.get_unix_time_from_system() * 1000.0), snappedf(jump, 0.01)])
+	last_at = [H.ak.anim_id, H.ak.anim_at]
 	var row := [H.ak.anim_id, H.anim.km_id]
 	var restart: bool = H.anim.km_prev_t < last_prev_t - 0.001
 	last_prev_t = H.anim.km_prev_t

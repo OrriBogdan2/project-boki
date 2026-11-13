@@ -6,9 +6,11 @@
   "kin_happy": "boki", "kin_unsure": "boki", "kin_alert": "boki", "kinhit": "boki", "recall": "boki",
   "throw": "boki", "catch": "boki", "bond": "boki", "skill": "boki",
   "k_venom": "boki", "k_spore": "boki", "k_gravity": "boki", "k_prism": "boki", "k_lunar": "boki", "k_echo": "boki",
-  "boki_downed": "boki", "boki_revive": "boki", "boki_eat": "boki", "boki_sleep": "boki", "boki_work": "boki",
-  "boki_fuse": "boki", "boki_unfuse": "boki"
+  "boki_downed": "boki", "boki_revive": "boki", "boki_eat": "boki", "boki_sleep": "loop", "boki_work": "boki",
+  "boki_fuse": "boki", "boki_unfuse": "boki", "boki_yawn": "boki"
  },
+ "reach": {"boki_sleep": 7, "boki_yawn": 9},
+ "loops": ["boki_sleep"],
  "signature": [],
  "replaces": ["kin_happy", "kin_unsure", "kin_alert", "kinhit", "recall", "throw", "catch", "bond", "skill",
   "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo"]

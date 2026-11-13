@@ -19,8 +19,11 @@
 	"into_dash": {
 		"lmb": {"mode": "fire", "source": "Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88)."},
 		"rmb": {"mode": "fire", "source": "Not shown in the data or footage. Ours: the Burr Charge is a tap (owner, sync89), already thrown, so Shift slides at once."},
-		"e": {"mode": "fire", "source": "Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is."},
-		"x": {"mode": "fire", "source": "Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once."},
+		"e": {"mode": "fire", "source": "Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. After the beam she is held 0.6s (GunslingerKit.E_RECOVER, briefs/hero-ref/venator.md E 4: shove then ~0.4s recovery): a Shift in its last 0.15s goes as it ends."},
+		"x": {"mode": "lock", "reason": "The source's commit: the rifle raised, fired and lowered with no move; she is held 0.76s from the tap (GunslingerUlt.COMMIT) and a Shift in its last 0.15s goes as it ends (DashFlow.cc_left).", "source": "Footage briefs/hero-ref/venator.md R 4: raised 561.8-562.0 s, fired 562.2-562.4 s, 'About 0.8 s committed, with no move seen'."},
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	},
+	"into_jump": {
+		"x": {"mode": "lock", "reason": "The source's commit, as into_dash x: held 0.76s from the tap; a jump in its last 0.15s goes as it ends.", "source": "Footage briefs/hero-ref/venator.md R 4: 'About 0.8 s committed, with no move seen'."}
 	}
 }

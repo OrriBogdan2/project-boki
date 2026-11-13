@@ -2,15 +2,18 @@ extends RefCounted
 ## --home-gait-check: the Empty (the player body at home, Models.hunter walked by HunterAnim + EmptyGait) at three
 ## body presets (short and slight, average, tall and sturdy) and the female average. Per body: at the farm's walk and
 ## full stick, every planted sole point stays within SLIDE_CM of where it came down (step by step, the worst one),
-## the steps a second, no sole point under the floor, the hip bob; a turn at a run holds the same bar; after a stop
-## the feet settle within SETTLE_S; turning on the spot pops no point more than POP_CM a frame and standing feet
-## creep under CREEP_CM. Never touches the save. Add --json=<file> for the rows.
+## the steps a second, no sole point under the floor, the hip bob; a turn at a run holds the same bar, and so does
+## a crouched walk (with the hips lower); after a stop the feet settle within SETTLE_S; turning on the spot pops no
+## point more than POP_CM a frame and standing feet creep under CREEP_CM. Never touches the save. Add --json=<file>
+## for the rows.
 
 const DT := 1.0 / 60.0
 const WARM_S := 1.2           # s: the run-up before a sample (the gait's first steps settle into step)
 const SAMPLE_S := 2.4
 const SPEEDS := [2.2, 5.0]    # m/s: a walk on a half stick, the farm's full stick (home.gd SPEED)
 const TURN_RUN := 1.5         # rad/s: a run bending round a corner
+const CROUCH_MPS := 1.5       # m/s: a crouched walk (the farm's is nearer 2)
+const CROUCH_SINK_CM := 2.0   # cm: a full crouch lowers the hips at least this much against the walk's
 const TURN_RATE := 6.0        # rad/s: a quick turn on the spot
 const TURN_S := 2.0
 const IDLE_S := 4.0
@@ -31,6 +34,7 @@ var bad := 0
 var rows := {}
 var json_path := ""
 var holder: Node3D
+var crouching := 0.0          # 0..1: the crouch the state asks of HunterAnim
 
 func ok(cond: bool, what: String) -> void:
 	print("GAIT %s %s" % ["ok  " if cond else "FAIL", what])
@@ -65,6 +69,9 @@ func _body(main: Node, sex: int, h: int, b: int) -> void:
 	for s in SPEEDS:
 		row["gait_%.1f" % s] = _gait(m, an, float(s), 0.0)
 	row["turn_run"] = _gait(m, an, float(SPEEDS[1]), TURN_RUN)
+	crouching = 1.0
+	row["crouch"] = _gait(m, an, CROUCH_MPS, 0.0)
+	crouching = 0.0
 	row["stop"] = _stop(m, an)
 	row["turn"] = _turn(m, an)
 	row["idle"] = _idle(m, an)
@@ -79,12 +86,15 @@ func _body(main: Node, sex: int, h: int, b: int) -> void:
 	m.free()
 
 func _gate(id: String, row: Dictionary) -> void:
-	for key in ["gait_2.2", "gait_5.0", "turn_run"]:
+	for key in ["gait_2.2", "gait_5.0", "turn_run", "crouch"]:
 		var g: Dictionary = row[key]
 		ok(g["slide_cm"] <= SLIDE_CM, "%s %s: planted feet stay within %.0f cm a step (worst %.1f cm, %d steps)"
 				% [id, key, SLIDE_CM, g["slide_cm"], g["steps"]])
 		ok(g["sink_cm"] <= SINK_CM, "%s %s: no sole point under the floor (worst %.1f cm)" % [id, key, g["sink_cm"]])
 		ok(g["steps"] >= 4, "%s %s: the legs step (%d steps in %.1f s)" % [id, key, g["steps"], SAMPLE_S])
+	var sunk: float = row["gait_2.2"]["hip_cm"] - row["crouch"]["hip_cm"]
+	ok(sunk >= CROUCH_SINK_CM, "%s: a crouched walk's hips are %.1f cm lower (at least %.0f)"
+			% [id, sunk, CROUCH_SINK_CM])
 	ok(row["stop"]["settle_s"] <= SETTLE_S, "%s: feet still %.2f s after a stop (limit %.1f)"
 			% [id, row["stop"]["settle_s"], SETTLE_S])
 	ok(row["turn"]["pop_cm"] <= POP_CM, "%s: turning on the spot jumps %.1f cm a frame at most (limit %.0f)"
@@ -104,7 +114,7 @@ func _gate(id: String, row: Dictionary) -> void:
 
 ## The state HunterAnim reads; the body faces `face` and the tool moves the model as the farm would.
 func _state(vel: Vector3, face: float) -> Dictionary:
-	return {"vel": vel, "face": face, "grounded": true, "fired": 99.0}
+	return {"vel": vel, "face": face, "grounded": true, "fired": 99.0, "crouch": crouching}
 
 ## World positions of the six sole points (three a boot), the hips and the head.
 func _read(m: Node3D) -> Dictionary:
@@ -148,6 +158,7 @@ func _gait(m: Node3D, an: HunterAnim, s: float, yaw_rate: float) -> Dictionary:
 			if String(key).begins_with("sole."):
 				sink = maxf(sink, -(f[key] as Vector3).y)
 	out["bob_cm"] = 100.0 * (hi - lo)
+	out["hip_cm"] = 50.0 * (hi + lo)
 	out["sink_cm"] = 100.0 * sink
 	return out
 

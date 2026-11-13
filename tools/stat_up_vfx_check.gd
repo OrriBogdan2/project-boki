@@ -7,9 +7,17 @@ extends RefCounted
 ##      doesn't replay it
 ##   5. clicking a glint's icon opens that Boki's Training tab with the risen stats marked old -> new for
 ##      StatGlint.LIT_S; with two glints up each opens its own Boki; a click away from the icons opens nothing
+## Also (StatMeaning): the first rise of each stat on a save puts its one line on the tip strip, once, at most
+## one a minute, never during a garden game; a line held back shows at that stat's next rise.
 ## --stat-up-vfx-shots --shots-dir=<dir>: two Boki at the Training post, one striking the dummy (+2 Power),
 ## one spinning beside it (+1 Speed and +1 Focus, merged), three frames as the glints rise. Never touches the
 ## real save.
+
+class FakeGame:
+	var run := 1      # a garden game under way
+
+	func tick(_dt: float) -> void:
+		pass
 
 var bad := 0
 var main: Node
@@ -53,6 +61,7 @@ func run(m: Node, mode: String = "check") -> void:
 			"+1 %s: one glint on that Boki, icon %s in %s" % [s, StatGlint.ICON.get(s, "?"), col.to_html(false)])
 		cols[col.to_html()] = true
 	ok(cols.size() == 4, "the four stats glint in four different colours")
+	await _tips(glint, rec)
 	# 3. merging
 	await _settle(glint)
 	Care.add_stat(rec, "power", 1)
@@ -90,6 +99,41 @@ func run(m: Node, mode: String = "check") -> void:
 	await _clicks(glint)
 	print("STATUP DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## StatMeaning: the tip strip says what a stat does at its first rise on the save, and only then.
+func _tips(glint: StatGlint, rec: Dictionary) -> void:
+	var lane := MsgLane.of(home.root_ui)
+	var seen: Dictionary = Save.d["tutorial"].get_or_add("stat_tips", {})
+	var want: Array = []
+	for s in Care.STATS:
+		ok(String(Care.STATS[s]["means"]).begins_with(String(Care.STATS[s]["name"]) + ":"), "%s has its line" % s)
+		want.append(Care.STATS[s]["means"])
+	ok(seen == {"power": true} and lane.texts() == [want[0]], "the first rise (Power) said its line, and only that one")
+	await _settle(glint)
+	Care.add_stat(rec, "power", 1)
+	await _frames(2)
+	ok(lane.texts() == [want[0]], "Power again: not told twice")
+	Care.add_stat(rec, "guard", 1)
+	await _frames(2)
+	ok(not seen.has("guard") and lane.texts() == [want[0]], "Guard within a minute of the last tip: held back")
+	await _settle(glint)
+	StatMeaning.last_s -= StatMeaning.GAP_S
+	home.games = [FakeGame.new()]
+	Care.add_stat(rec, "guard", 1)
+	await _frames(2)
+	ok(not seen.has("guard"), "a garden game under way: held back")
+	home.games = []
+	await _settle(glint)
+	Care.add_stat(rec, "guard", 1)
+	await _frames(2)
+	ok(seen.has("guard") and lane.texts().has(want[1]), "a minute on and no game: the Guard line shows")
+	for s in ["speed", "focus"]:
+		await _settle(glint)
+		StatMeaning.last_s -= StatMeaning.GAP_S
+		Care.add_stat(rec, s, 1)
+		await _frames(2)
+		ok(seen.has(s) and lane.texts().has(Care.STATS[s]["means"]), "%s: its line shows at its first rise" % s)
+	ok(seen.size() == 4, "each stat's line is marked seen: four in all")
 
 ## 5. a click on each Boki's glint icon opens its own card on the Training tab, the risen stat marked.
 func _clicks(glint: StatGlint) -> void:

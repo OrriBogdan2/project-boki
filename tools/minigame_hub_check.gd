@@ -8,8 +8,8 @@ extends RefCounted
 ##   6. the garden games for real (base_mode on, three Boki, the Training post): the picker lists all
 ##      four; each pick starts that game (and it is put back); a whole Stump Shove bout ends on its
 ##      card and the winner becomes the picker's best Boki
-##   5. every game this base lists has a card (name, rule, result line) and a pick closes the picker
-##      and starts it; a stand-in game proves the start path where the base has none
+##   5. every game has a card (name, rule, result line), locked when this base lacks it; a pick on an open
+##      one closes the picker and starts it; a stand-in game proves the start path where the base has none
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build and open the picker
@@ -107,12 +107,15 @@ func _picker() -> void:
 	if home == null:
 		return
 	var games := MinigameHub.listed(home)
-	print("MINIGAMEHUB listed on this base: %s" % [games.map(func(g): return g["id"])])
+	print("MINIGAMEHUB open on this base: %s" % [games.filter(func(g): return g["open"]).map(func(g): return g["id"])])
+	ok(games.size() == 4, "picker: every game has a card, open or locked (%d)" % games.size())
 	for g in games:
 		var card: Node = home.panel_host.find_child("Game_" + String(g["id"]), true, false)
 		ok(card != null, "%s: has a card" % g["id"])
 		var lines := [g["rule"], MinigameHub.summary(String(g["id"]))]
 		ok(lines.all(func(t): return t != ""), "%s: a rule line and a result line" % g["id"])
+		if not g["open"]:
+			continue
 		MinigameHub.start(home, g)
 		ok(home.panel_open == "", "%s: a pick closes the picker and opens the game" % g["id"])
 		MinigameHub.open(home)
@@ -121,11 +124,12 @@ func _picker() -> void:
 	stub.main_check = self
 	var fake := FakeHome.new()
 	fake.hrace = stub
-	ok(MinigameHub.listed(fake).is_empty(), "list: a game whose post isn't placed is not listed")
+	ok(MinigameHub.listed(fake).all(func(g): return not g["open"]), "list: a game whose post isn't placed is locked")
 	stub.post = Node3D.new()
 	var shown := MinigameHub.listed(fake)
-	var only: bool = shown.size() == 1 and shown[0]["id"] == "race" and shown[0]["game"] == stub
-	ok(only, "list: a game the home holds is listed, the rest are not")
+	var open_ids: Array = shown.filter(func(g): return g["open"]).map(func(g): return g["id"])
+	var only: bool = shown.size() == 4 and open_ids == ["race"] and shown[0]["game"] == stub
+	ok(only, "list: a game the home holds is open, the rest locked")
 	MinigameHub.open(home)
 	MinigameHub.start(home, shown[0])
 	ok(started and home.panel_open == "", "start: the picker closes and the game's use() runs")
@@ -145,7 +149,7 @@ func _garden() -> void:
 		d["roster"].append(k)
 		if i == 0:
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}     # a normal landing would be the hub
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
@@ -159,9 +163,10 @@ func _garden() -> void:
 		if home != old and home != null and home.get("panel_open") == MinigameHub.TITLE:
 			break
 	ok(home != old and home.get("panel_open") == MinigameHub.TITLE, "garden: the picker opens on the base")
+	ok(home.zone == "", "garden: the picker lands in the start zone, not the hub (the games stand there)")
 	var games := MinigameHub.listed(home)
-	var ids: Array = games.map(func(g): return g["id"])
-	ok(ids == ["race", "shove", "seek", "volley"], "garden: all four games are listed (%s)" % [ids])
+	var ids: Array = games.filter(func(g): return g["open"]).map(func(g): return g["id"])
+	ok(ids == ["race", "shove", "seek", "volley"], "garden: all four games are open (%s)" % [ids])
 	for g in games:
 		for k in home.kins:
 			k.erase("indoors")

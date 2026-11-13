@@ -12,7 +12,7 @@ extends RefCounted
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
 ## percentage, no rarity colours (a rarity pip is filled, not coloured).
 
-## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
+## Each type's badge colour and name (the glyphs are drawn by TypeIcon); "ink" tints the glyph (white if unset).
 const TYPES := {
 	"spore": {"name": "Spore", "col": Color("9ccf6a")},
 	"titan": {"name": "Titan", "col": Color("cbb48a")},
@@ -20,9 +20,11 @@ const TYPES := {
 	"swarm": {"name": "Swarm", "col": Color("f2c24a")},
 	"gravity": {"name": "Gravity", "col": Color("8f8cff")},
 	"prism": {"name": "Prism", "col": Color("ff9fd0")},
-	"lunar": {"name": "Lunar", "col": Color("cfdcff")},
+	"lunar": {"name": "Fairy", "col": Color("cfdcff")},
 	"echo": {"name": "Echo", "col": Color("6fb6ff")},
 	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
+	"ghost": {"name": "Ghost", "col": Color("bcebdf"), "ink": Color("5a4aa8")},
+	"dark": {"name": "Dark", "col": Color("4a4a9a"), "ink": Color("ffb454")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
@@ -39,7 +41,7 @@ static func type_col(t: String) -> Color:
 ## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
 ## forms of a branching line share one.
 static func number(spk: String) -> int:
-	return FieldBook.entries().find(FieldBook.entry_key(spk)) + 1
+	return FieldBook.number(spk)
 
 static func num_text(spk: String) -> String:
 	return "#%03d" % number(spk)
@@ -69,9 +71,28 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	var g := GridContainer.new()
 	g.columns = 6
 	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
+	var fill := func():
+		for ch in g.get_children():
+			ch.queue_free()
+		for key in listed():
+			g.add_child(tile(key, tree, on_open))
+	v.add_child(KinFilter.new(fill))
 	v.add_child(g)
+	fill.call()
+
+## The entries the filter shows, in the picked order (legendaries last). Entries you have not met pass
+## only under "All" (their type is not yours to know yet); one you own sorts by its best Boki, the rest by number.
+static func listed() -> Array:
+	var recs: Dictionary = {}
 	for key in FieldBook.entries():
-		g.add_child(tile(key, tree, on_open))
+		if KinFilter.type != "" and not (FieldBook.entry_seen(key) and KinFilter.type_ok(FieldBook.face(key))):
+			continue
+		recs[key] = {"species": key, "name": String(Data.KIN[key]["name"])}
+	for r in Save.d.get("roster", []):
+		var key := FieldBook.entry_key(String(r["species"]))
+		if recs.has(key) and (not recs[key].has("uid") or KinBox.sorted([recs[key], r], KinFilter.sort)[0] == r):
+			recs[key] = r
+	return KinBox.sorted(recs.values(), KinFilter.sort).map(func(r): return FieldBook.entry_key(String(r["species"])))
 
 ## One numbered tile, for an entry: it shows the form you own (or have seen) and opens that form's page.
 static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
@@ -168,6 +189,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		var d := KinPortrait.view({"species": spk}, tree, 160)
 		if not is_caught: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		dc.add_child(d)
+	BokiCry.play(spk)
 	var info := UI.vbox(7)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(info)
@@ -338,7 +360,8 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 	ci.draw_circle(c, r, Color(col.darkened(0.45), alpha))
 	ci.draw_circle(c, r - 1.2, Color(col.darkened(0.15), alpha))
 	var s := r * 0.62
-	var ink := Color(1, 1, 1, 0.95 * alpha)
+	var ink: Color = TYPES.get(t, {}).get("ink", Color.WHITE)
+	ink.a = 0.95 * alpha
 	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
 	var w := maxf(1.2, r * 0.16)
 	match t:
@@ -374,6 +397,26 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
 		"tempest":     # a bolt
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
+		"ghost":       # a sheet ghost: round head, wavy hem, two eyes
+			var body := PackedVector2Array()
+			for i in 13:
+				var a := PI + PI * i / 12.0
+				body.append(P.call(cos(a) * 0.7, -0.1 + sin(a) * 0.75))
+			for hem in [[0.7, 0.9], [0.35, 0.55], [0.0, 0.9], [-0.35, 0.55], [-0.7, 0.9]]:
+				body.append(P.call(hem[0], hem[1]))
+			ci.draw_colored_polygon(body, ink)
+			for ex in [-0.27, 0.27]:
+				ci.draw_circle(P.call(ex, -0.2), s * 0.13, Color(col.darkened(0.55), alpha))
+		"dark":        # a slit eye open in the night
+			var lid := PackedVector2Array()
+			for i in 15:
+				var x := -0.95 + 1.9 * i / 14.0
+				lid.append(P.call(x, -0.6 * (1.0 - x * x / 0.9025)))
+			for i in range(13, 0, -1):
+				var x := -0.95 + 1.9 * i / 14.0
+				lid.append(P.call(x, 0.6 * (1.0 - x * x / 0.9025)))
+			ci.draw_colored_polygon(lid, ink)
+			ci.draw_circle(P.call(0.0, 0.0), s * 0.3, Color(col.darkened(0.15), alpha))
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
 

@@ -59,14 +59,13 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 	vp.add_child(k)
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	rig.set_process(false)
-	rig.player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	k.position = Vector3.ZERO
 	rig._pos_prev = k.global_position
 	var steps := int(round(FRAME_S / DT))
 	for i in int(WARM_S / DT) + steps * FRAMES:
 		k.position.z -= v * DT
 		rig._process(DT)
-		rig.player.advance(DT)
+		rig.advance(DT)
 		cam.position = k.position + Vector3(3.0, 0.45, 0)
 		cam.look_at(k.position + Vector3(0, 0.3, 0))
 		var f := i - int(WARM_S / DT)

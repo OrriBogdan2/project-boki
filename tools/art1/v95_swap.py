@@ -116,6 +116,26 @@ def uv_density(ob):
     return np.abs(e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]).sum() / max(a3, 1e-9), uv
 
 
+def fill_misses(body, steps):
+    """Base-colour texels the bake missed take their neighbours' colour, up to `steps` texels in (in place). A miss is
+    exactly black: a ray that found no surface, as from a triangle the decimation folded under (Sparkle's forehead,
+    Cinder's arm in the 11-12 swaps; no cage size reached them). Painted black never bakes to exactly 0, and the empty
+    space between islands only gains padding."""
+    rgb = body[..., :3]
+    hole = rgb.max(-1) == 0
+    for _ in range(steps):
+        if not hole.any():
+            break
+        acc, cnt = np.zeros_like(rgb), np.zeros(hole.shape, F)
+        for ax, sh in ((0, 1), (0, -1), (1, 1), (1, -1)):
+            ok = np.roll(~hole, sh, ax)
+            acc += np.roll(rgb, sh, ax) * ok[..., None]
+            cnt += ok
+        new = hole & (cnt > 0)
+        rgb[new] = acc[new] / cnt[new][:, None]
+        hole &= ~new
+
+
 def lay_kept(old, kept, body, tex, socket="Base Color"):
     """The old atlas (or the image on its `socket`) baked onto the kept parts' new UVs, laid over the body's pixels (in place)."""
     old_img = BW.base_image(old, socket)
@@ -182,11 +202,16 @@ def bake():
     tex = int(SPEC.get("tex", 2048))
     layers = [("atlas", "Base Color", None)]
     if SPEC.get("emit"):        # the master's emission map (Cinder's lava seams) on a second image, the game's emissive texture
-        layers.append(("emit", "Emission Color", BW.base_image(high, "Emission Color")))
+        src = BW.base_image(high, "Emission Color")
+        if src is None:         # (bake_colour would bake the base colour instead: the whole body glows)
+            sys.exit("v95_swap: `emit` is set but the master has no emission map")
+        layers.append(("emit", "Emission Color", src))
     for name, socket, src in layers:
         low.data.materials.clear()
         img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
         body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
+        if name == "atlas":     # (not the emission map, where black is no glow)
+            fill_misses(body, max(32, tex // 64))
         if kept.data.polygons:  # the kept parts: the old image onto their new UVs, on an image of their own, laid over the body's
             lay_kept(old, kept, body, tex, socket)
         body[..., 3] = 1
@@ -493,40 +518,56 @@ def smooth_weights(low, W, passes):
     return W
 
 
-def move_bones(arm, kept):
+def move_bones(arm, kept, T, K):
     """`move_bones` {bone: offset}: the bone's rest (and the kept parts on it) moves by the offset; its translation keys lose
     the offset in proportion to how far each goes toward the largest one, so the clips still end where they did (the junk
-    ball hides in the new body at rest and still grows round him in a dash)."""
-    for name, d in SPEC.get("move_bones", {}).items():
-        d = Vector(d)
-        b = arm.data.bones[name]
-        dl = b.matrix_local.to_3x3().inverted() @ d
-        path = 'pose.bones["%s"].location' % name
-        curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
-        keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
-                for cs in curves if len(cs) == 3]
-        far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max())
-        top = far[np.linalg.norm(far, axis=1).argmax()]
-        for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
-            if len(cs) != 3:
-                continue
-            cs = sorted(cs, key=lambda c: c.array_index)
-            loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
-            frac = loc @ top / float(top @ top)
-            for i, fc in enumerate(cs):
-                for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
-                    kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    ball hides in the new body at rest and still grows round him in a dash). {bone: {"to": point, "chain": [bones]}}: the
+    bone's head onto a master point (through the fit) and its chain by the same offset, the keys as they were (Albert's fish
+    onto the master's mast)."""
+    for name, spec in SPEC.get("move_bones", {}).items():
+        bones, fix = [name], not isinstance(spec, dict)
+        if fix:
+            d = Vector(spec)
+        else:
+            p = np.array([spec["to"]], float)
+            d = Vector(fit(p, fit_weights(arm, p), T, K)[0]) - arm.data.bones[name].head_local
+            bones += spec.get("chain", [])
+        rest = {bn: (arm.data.bones[bn].head_local.copy(), arm.data.bones[bn].tail_local.copy()) for bn in bones}
+        for bn in bones:
+            move_bone(arm, kept, bn, d, fix)
         select([arm], arm)
         bpy.ops.object.mode_set(mode="EDIT")
-        eb = arm.data.edit_bones[name]
-        eb.head += d
-        eb.tail += d
+        for bn, (h, t) in rest.items():     # (from the rest as it was: a connected child follows its parent's tail)
+            arm.data.edit_bones[bn].head = h + d
+            arm.data.edit_bones[bn].tail = t + d
         bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def move_bone(arm, kept, name, d, fix):
+    """One bone's keys (corrected if `fix`) and kept parts."""
+    b = arm.data.bones[name]
+    dl = b.matrix_local.to_3x3().inverted() @ d
+    path = 'pose.bones["%s"].location' % name
+    curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
+    keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
+            for cs in curves if len(cs) == 3]
+    far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max()) if keys and fix else np.zeros((1, 3))
+    top = far[np.linalg.norm(far, axis=1).argmax()]
+    for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
+        if len(cs) != 3:
+            continue
+        cs = sorted(cs, key=lambda c: c.array_index)
+        loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
+        frac = loc @ top / float(top @ top)
+        for i, fc in enumerate(cs):
+            for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
+                kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    if name in kept.vertex_groups:
         gi = kept.vertex_groups[name].index
         for v in kept.data.vertices:
             if any(g.group == gi and g.weight > 0.5 for g in v.groups):
                 v.co += d
-        print("moved", name, tuple(d), "keys", len(keys), flush=True)
+    print("moved", name, tuple(round(x, 3) for x in d), "keys", len(keys), flush=True)
 
 
 # ----------------------------------------------------- step 4: slots, ink room, anchors
@@ -593,7 +634,8 @@ def main():
         bake()
     bpy.ops.wm.open_mainfile(filepath=os.path.join(WORK, "bake.blend"))
     bpy.context.scene.render.fps = FPS
-    low, kept = bpy.data.objects["Low"], bpy.data.objects["Kept"]
+    # a game .glb that is itself a swap's output brings a "Kept" of its own to the bake, so ours saves as "Kept.001"
+    low, kept = bpy.data.objects["Low"], next(o for o in bpy.data.objects if o.name.startswith("Kept"))
     img = bpy.data.images["atlas"] if "atlas" in bpy.data.images else bpy.data.images["baked"]
     img.name = "atlas"
     sole = bpy.context.scene["sole"]
@@ -608,7 +650,7 @@ def main():
     P = P[o]
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
-    move_bones(arm, kept)
+    move_bones(arm, kept, T, K)
     slots = [s + "-atlas" for s in tri_slots(low, img, top, P)] + (kept["slots"].split(",") if kept["slots"] else [])
     room = SPEC.get("room", {})
     vals = [room.get(b, room.get("*", 0.7)) for b in top]
@@ -628,7 +670,7 @@ def main():
     a[3::4] = vals
     me.color_attributes["Col"].data.foreach_set("color", a)
     names = sorted(set(slots))
-    emit = bpy.data.images.get("emit")
+    emit = bpy.data.images.get("emit") if SPEC.get("emit") else None     # (not the game glb's own "emit")
     for s in names:
         if s in bpy.data.materials:     # (the game glb's own, a kept part's: "flame-jet")
             bpy.data.materials[s].name = s + "-game"

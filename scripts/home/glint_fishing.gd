@@ -151,6 +151,16 @@ class Run:
 	func ears() -> bool:
 		return state == S.WAIT and state_t >= bite_t - warn
 
+	## True from the bite on (the moment to press), until the cast ends.
+	func bitten() -> bool:
+		return state == S.WAIT and state_t >= bite_t
+
+	## How far the waiting rings have closed: 0 until the ears go up, 1 at the bite.
+	func close_k() -> float:
+		if not ears():
+			return 0.0
+		return clampf((state_t - (bite_t - warn)) / warn, 0.0, 1.0)
+
 	func half_band() -> float:
 		return GlintFishing.band(rec)
 
@@ -279,6 +289,7 @@ var spot: Dictionary = {}      # this zone's rock (glint_fishing.json spots), {}
 var rock: Node3D = null
 var glint_nodes: Array = []    # MeshInstance3D, one per glint
 var bobber: MeshInstance3D = null
+var fx: GlintFx = null         # the looks on the water (glint_fx.gd)
 var line: MeshInstance3D = null
 var mats: Dictionary = {}      # common, rare: the glints' two shared materials
 var run: Run = null
@@ -340,6 +351,7 @@ func place() -> void:
 	line.material_override = BaseRace.mat(Color("eeeeee"))
 	line.visible = false
 	rock.add_child(line)
+	fx = GlintFx.new(rock)
 
 static func _glow(c: Color) -> StandardMaterial3D:
 	var m := BaseRace.mat(c)
@@ -401,6 +413,7 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	var was_ears := run.ears()
+	var was_bitten := run.bitten()
 	run.step(d, holding)
 	if run.ears() and not was_ears:
 		h._emote(who, "!", true)
@@ -410,12 +423,14 @@ func tick(d: float) -> void:
 	if run.state != last:
 		_entered(run.state)
 	_draw_water()
+	_draw_fx(d, was_bitten)
 	if run.over():
 		_end(true)
 
 func _entered(s: Run.S) -> void:
 	var from := last
 	last = s
+	fx.hide_wait()
 	bar.visible = s == Run.S.REEL
 	h.verbs.hold("reel" if s == Run.S.REEL else "wait")
 	if from == Run.S.AIM:
@@ -423,6 +438,7 @@ func _entered(s: Run.S) -> void:
 	match s:
 		Run.S.WAIT:
 			Sfx.play("splash", null, -10.0)
+			fx.play("plop", _water(float(run.glints[run.hooked]["d"]), 0.0) - rock.position)
 		Run.S.REEL:
 			Sfx.play("splash", null, -4.0)
 			h._toast("Hooked! Hold and let go to keep the line in the band")
@@ -436,6 +452,22 @@ func _entered(s: Run.S) -> void:
 				h.verbs.play("land")
 			h._toast("Cast %d of %d: %s" % [run.casts.size(), int(rules()["casts"]), got])
 			h._emote(who, "♥" if c["how"] == "caught" else "…", true)
+			_show_fx(c)
+
+## The cast's ending: a plop where it fell into empty water, a glint on a catch (sized by what came up).
+func _show_fx(c: Dictionary) -> void:
+	if c["how"] == "miss":
+		fx.play("plop", bobber.position)
+	elif c["how"] == "caught":
+		fx.play("catch", bobber.position, GlintFx.catch_size_key(c["catch"], c["rare"]))
+
+## Waiting: the rings close in as the ears go up; the bite splashes once.
+func _draw_fx(d: float, was_bitten: bool) -> void:
+	if run.state == Run.S.WAIT:
+		fx.wait_rings(bobber.position, run.close_k())
+		if run.bitten() and not was_bitten:
+			fx.play("bite", bobber.position)
+	fx.tick(d)
 
 ## m along the cast and m to its side, from the rock, as a point on the water.
 func _water(along: float, side: float) -> Vector3:
@@ -514,6 +546,7 @@ func _end(finished: bool) -> void:
 		g.visible = false
 	bobber.visible = false
 	line.visible = false
+	fx.hide_all()
 	if finished:
 		_card(res)
 		Save.save_game()

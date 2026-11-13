@@ -26,6 +26,10 @@ func run(main_node: Node) -> void:
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
+	var mark_check = load("res://tools/ostra_swap_mark_check.gd").new()
+	await mark_check.swap_mark(main)
+	n += mark_check.n
+	fails += mark_check.fails
 	print("PAIRCHECK ostra DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -226,6 +230,12 @@ func _ostra() -> void:
 		"data: a full orb is 34% harder (353 vs 263)",
 		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
+	var slow_k := float(K.lmb_def()["prime_slow"])
+	var slow_t := float(K.lmb_def()["prime_slow_t"])
+	ok(
+		"data: a full orb slows 6% for 1.5s (the in-game card; the wiki's 10% is outranked)",
+		absf(slow_k - 0.06) < 0.001 and absf(slow_t - 1.5) < 0.001, "%.3f for %.2fs" % [slow_k, slow_t]
+	)
 	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
 	reset.call()
@@ -311,6 +321,7 @@ func _ostra() -> void:
 	await _hover(m, P, T, home, K)
 	TIME.new(self).run(m, P, K, T, home)
 	_far_cast(m, P, home, K)
+	_air_cast(m, P, home, K)
 	reset.call()
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
@@ -511,24 +522,34 @@ func _ostra() -> void:
 	step(m, 2.2)
 	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	P.slot_lv["sec"] = 1
-	# ---- data pass, Trade rank 3: allies beside him get a 26 shield (375 of a 2074-hp hunter, on 145 hp)
+	# ---- data pass, Trade rank 3 (the source's tier IV): allies in his 1.5m ring as he leaves get 375 of Void's 1150
+	# health as a shield for 3s, so 32.6% of his 145 (docs/heroes/ostra.md); none at the landing or past the ring
 	P.slot_lv["dash"] = 3
 	reset.call()
-	var A: Hunter = m.make_hunter(
-		"Ally", P.team, "medium", "Ally", "idle", {}, home + Vector3(1.2, 0, 1.0), {"arch": "none"}
-	)
-	A.max_hp = 10000.0
-	A.hp = A.max_hp
+	var allies: Array[Hunter] = []
+	for at in [Vector3(0.8, 0, 0.6), Vector3(10.0, 0, 1.0), Vector3(-2.5, 0, 0)]:
+		var A: Hunter = m.make_hunter("Ally", P.team, "medium", "Ally", "idle", {}, home + at, {"arch": "none"})
+		A.max_hp = 10000.0
+		A.hp = A.max_hp
+		allies.append(A)
 	T.teleport(home + Vector3(10.0, 0, 0))
 	aim_at(P, T.pos)
 	P.ak.on_dash(false)
-	step(m, 2.2)
+	step(m, 2.0)
+	var want := P.max_hp * 375.0 / 1150.0
 	ok(
-		"data rank 3: an ally beside him gets a 26 shield for 3s", A.shield >= 25.5 and A.shield < 27.0,
-		"shield %.1f" % A.shield
+		"data rank 3: an ally in his ring as he leaves gets 32.6% of his health as a shield for 3s",
+		absf(allies[0].shield - want) < 1.0 and allies[0].shield_t > 2.5,
+		"shield %.1f want %.1f, %.1fs" % [allies[0].shield, want, allies[0].shield_t]
 	)
-	A.queue_free()
-	m.hunters.erase(A)
+	ok(
+		"data rank 3: no ally shield at the landing or past his 1.5m ring",
+		allies[1].shield <= 0.0 and allies[2].shield <= 0.0,
+		"landing %.1f, 2.5m away %.1f" % [allies[1].shield, allies[2].shield]
+	)
+	for ally in allies:
+		ally.queue_free()
+		m.hunters.erase(ally)
 	P.slot_lv["dash"] = 1
 	# ---- upgrade parity (docs/heroes/ostra.md): the source's tier II / III+IV numbers per slot
 	var op: Array = []
@@ -590,6 +611,7 @@ func _ostra() -> void:
 		"charge %.2f" % K.charge
 	)
 	_dash_moves(K)
+	_quiet_float(m, P, T, home)
 	# ---- every move, sound and look exists
 	var moves := [
 		"ostra_orb", "ostra_orb_hot", "ostra_snap_wind", "ostra_snap", "ostra_swap_aim", "ostra_swap", "ostra_swap_air",
@@ -606,6 +628,63 @@ func _ostra() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Source: Void's passive "floats: no footstep noise" (supervive_kits.md), the footage "no footsteps"
+## (briefs/hero-ref/ostra.md). 3 s of floating walk plays no step sound, for him and for a Motley another game
+## moves; a footed Hunter walking the same 3 s the same way does step (so the counter hears steps).
+func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
+	var steps := func() -> int:
+		var n := 0
+		for k in Sfx.last_played.keys():
+			if String(k).contains("step_"):
+				n += 1
+				Sfx.last_played.erase(k)
+				Sfx.recent.erase(k)
+		return n
+	var local_walk := func(arch: String) -> Array:
+		P.set_arch(arch)
+		P.teleport(home)
+		P.vel = Vector3.ZERO
+		P.grounded = true
+		P.inp["move"] = Vector2(0, -1)
+		steps.call()
+		var w := [0, 0]       # step sounds, ticks grounded and over the step speed (4 m/s, Hunter.render)
+		step(m, 3.0, func():
+			Sfx.listener = P.pos      # (the camera sets it each frame; headless it stays at the origin, out of hearing)
+			P.render(DT, 1.0)
+			w[0] += steps.call()
+			if P.grounded and Vector2(P.vel.x, P.vel.z).length() > 4.0: w[1] += 1)
+		P.inp["move"] = Vector2.ZERO
+		return w
+	var walk: Array = local_walk.call("ostra")
+	var foot: Array = local_walk.call("thief")
+	P.set_arch("ostra")
+	P.teleport(home)
+	ok(
+		"float: 3 s of his floating walk plays zero step sounds; a footed Hunter's same walk does step",
+		walk[0] == 0 and walk[1] >= 60 and foot[0] >= 3 and foot[1] >= 60,
+		"Motley %d steps (%d ticks walking), thief %d (%d)" % [walk[0], walk[1], foot[0], foot[1]]
+	)
+	var remote_steps := func(arch: String) -> int:
+		T.set_arch(arch)
+		T.remote = true
+		T.teleport(P.pos + Vector3(3.0, 0, 0))
+		var n := [0]
+		for i in int(3.0 / DT):
+			T.vel = Vector3(5.0, 0, 0)
+			T.grounded = true
+			Sfx.listener = P.pos
+			T.render(DT, 1.0)
+			n[0] += steps.call()
+		T.remote = false
+		T.vel = Vector3.ZERO
+		return n[0]
+	var other: int = remote_steps.call("ostra")
+	var footed: int = remote_steps.call("thief")
+	ok(
+		"float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step",
+		other == 0 and footed >= 5, "Motley %d, thief %d" % [other, footed]
+	)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
 ## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
@@ -882,6 +961,31 @@ func _far_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	step(m, 0.5)
 	_knock_in_flight(m, P, home, K)
 
+## docs/heroes/ostra.md "In the air": the seed and the well are cast from a jump, a fall or a glide, planted on the
+## floor under him (the source has no ground-only rule for Void's E and R, unlike Tetra's wall).
+func _air_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	var gy: float = m.world.ground_at(home.x + 5.0, home.z)
+	for gliding in [false, true]:
+		var how := "glide" if gliding else "jump"
+		K._drop_holds()
+		P.teleport(home + Vector3(0, 3.0, 0))
+		P.vel = Vector3.ZERO
+		P.grounded = false
+		P.gliding = gliding
+		P.lvl = 6
+		K.cd["e"] = 0.0
+		K.e_t = 0.0
+		aim_at(P, home + Vector3(5.0, 0, 0))
+		var planted := K.cast_e() and absf(K.seed["pos"].y - gy) < 0.1
+		ok("air %s: the seed is planted on the floor at the cursor" % how, planted)
+		K._pop(false)
+		K.cd["x"] = 0.0
+		ok("air %s: the well opens at the cursor on the floor" % how, K.cast_ult() and absf(K.well.center.y - gy) < 0.1)
+		K._drop_holds()
+		K.well._close()
+	P.gliding = false
+	step(m, 0.5)
+
 ## The hover holds his height, not his place: a knock while the lantern flies still shoves him.
 func _knock_in_flight(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	K._drop_holds()
@@ -901,6 +1005,25 @@ func _knock_in_flight(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 		not K.swap.is_empty() and moved > 1.0 and absf(P.pos.y - at.y) < 0.02, "moved %.2f" % moved
 	)
 	K._drop_holds()
+	P.teleport(home)
+	P.grounded = true
+	step(m, 0.3)
+	_fixed_landing(m, P, home, K)
+
+## Footage (briefs/hero-ref/ostra.md, Swap 0158-0168): the landing ring is placed at the cast, the sigil fills
+## there and the lob lands exactly on it, so the cursor moving in flight does not steer the landing.
+func _fixed_landing(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
+	P.dashes = P.max_dashes()
+	var spot := home + Vector3(6.0, 0, 0)
+	aim_at(P, spot)
+	K.on_dash(false)
+	step(m, 0.1)
+	step(m, float(K.dash_def()["time"]) + 0.1, func(): aim_at(P, home + Vector3(0, 0, -6.0)))
+	var off := Vector2(P.pos.x - spot.x, P.pos.z - spot.z).length()
+	ok(
+		"footage: the landing is set at the cast; the cursor moving in flight does not steer it",
+		off < 0.3, "%.2f m" % off
+	)
 	P.teleport(home)
 	P.grounded = true
 	step(m, 0.3)

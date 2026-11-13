@@ -92,7 +92,7 @@ static func on_damage(target: Ent, by: Ent, d: float) -> void:
 # ------------------------------------------------------------------ the order
 ## Give the order. Returns false (and says why) if it cannot be done. `target` is for chase.
 static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
-	if k.dead or k.state in ["downed", "bench", "away", "fused", "reviving"] or k.owner_h == null or k.rest_t > 0.0:
+	if k.dead or k.state in ["downed", "bench", "away", "fused", "wisp"] or k.owner_h == null or k.rest_t > 0.0:
 		return false
 	var o := k.owner_h
 	match cmd:
@@ -236,8 +236,7 @@ static func guard_spot(k: Kin) -> Vector3:
 		if W.is_void(p.x, p.z) or W.is_block(p.x, p.z) or absf(W.ground_at(p.x, p.z) - y0) > KinPath.STEP:
 			continue
 		k.guard_side = s
-		# it hops with your jumps: never below your feet
-		return Vector3(p.x, maxf(W.ground_at(p.x, p.z), o.pos.y), p.z)
+		return Vector3(p.x, W.ground_at(p.x, p.z), p.z)
 	return Vector3.INF
 
 ## One step of a big Boki on the Return order, beside you. False: it curls up on your back
@@ -255,7 +254,6 @@ static func guard_tick(k: Kin, dt: float) -> bool:
 			rel = Vector2(want.x - o.pos.x, want.z - o.pos.z)
 		rel = rel.normalized() * near
 		p = Vector3(o.pos.x + rel.x, p.y, o.pos.z + rel.y)
-	p.y = maxf(p.y, o.pos.y)
 	k.vel = (p - k.pos) / maxf(dt, 0.001)
 	k.pos = p
 	return true

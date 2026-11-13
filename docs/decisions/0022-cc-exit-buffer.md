@@ -26,3 +26,9 @@ and is never held. An earlier press is refused as before. A held press that is s
 `DashFlow.cc_left` / `_route_cc` and `KitStatus.grounded_left`. A kit's own refusal under a root or Grounded
 (the juggernaut's chain throw on E) is not held: only the slots above. Check `--cc-exit-buffer-check`. No Net
 or save change.
+
+Addendum (11-11, ext/parity-vex-recovery): a kit's committed recovery counts as a stun here.
+`ArchKit.commit_left()` (0 by default) is read by `cc_left` for every slot but Q and an ult's recast, so a press
+in a commit's last 0.15 s waits for its end; the kit drops earlier presses (busy() for the abilities, its
+`gate_inputs` for Shift and jump). First use: Vex's Longneedle recovery and Cinderfall commit
+(docs/heroes/gunslinger.md). No Net or save change: the commit is the local hunter's own input gate.

@@ -204,3 +204,8 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   instead of the partner's card. Hide the bar with `hub.visible = false` while a mode (build mode)
   owns the bottom of the screen.
 - New home panels: `var v := _new_panel("Kin Box", 900)` then fill `v` with the helpers above.
+- Fit: the interface lays out in a 1240x720 space that `Settings._apply_ui_scale` scales to the window, so
+  panels need no per-screen size rules. `--garden-fit-check` opens the garden's newer panels (zone cards,
+  games board, wishes, games picker, Nook preview, Boki card Family tab) at 720p, 1080p, 2560x1080, a
+  960x540 window and Interface size 1.5, and fails on anything clipped or outside the window's safe margin.
+  Add a new garden panel to its `screens`.

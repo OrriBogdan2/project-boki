@@ -1,6 +1,7 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
 with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
-Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]"""
+Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]
+A key is a prefix ("crouch" takes crouch_idle, crouch_f ...); "=swap" is that clip only (not swap_aim, swap_air)."""
 import json
 import struct
 import sys
@@ -74,6 +75,6 @@ if __name__ == "__main__":
     keys = keys.split(",")
     tj, tb = read(target)
     sj, sb = read(source)
-    done = add(tj, tb, sj, sb, lambda n: any(n == k or n.startswith(k) for k in keys))
+    done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys))
     write(out, tj, tb)
     print("added", len(done), done)

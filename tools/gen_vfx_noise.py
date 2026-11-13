@@ -6,6 +6,7 @@ G: smooth value-noise fbm: erosion thresholds and wobble.
 B: cell walls (F2 - F1): cracks and ice crackle.
 Stdlib only and seeded, so a rerun writes the same file: python3 tools/gen_vfx_noise.py
 """
+import argparse
 import math
 import random
 import struct
@@ -67,6 +68,7 @@ def png(path, w, h, rows):
 
 
 def main():
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     rng = random.Random(SEED)
     billow_lo, billow_hi = cell_points(6, rng), cell_points(13, rng)
     crack = cell_points(8, rng)

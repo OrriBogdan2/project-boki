@@ -17,7 +17,13 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
-- Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
+- Knocked-down beat (`HunterFall`, 0.4-0.5 s by weight) before the Wisp takes over: the hero staggers
+  along the hit (away from the knocker), plays its death clip on its weight's curve (no clip: kneels and
+  slumps in HunterAnim) where it went down and facing the way it fell, then fades out as the Wisp rises out
+  of it; heavies hold then drop with a dust thud, lights crumple at once. Visual only: the Wisp and the
+  downed rules are live from the first frame, a revive mid-beat ends it. Remote copies run it from their
+  `knock` event (the knocker id it already carries), so no Net change.
+- Pop-in (at the down): flash, ring (0.25 s), puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
   scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
   procedurally. The id is `Save.d["look"]["wisp"]`, the same pattern as glider skins; unknown ids give
@@ -51,3 +57,24 @@ species: its own palette (the shiny one when it shimmers), its ears and tail tip
 for the hand-built bodies), one baked mesh on one shared unlit material (`shaders/boki_wisp.gdshader`), a quick
 hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the wisp prototype wires it into
 matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
+
+## Clarity pass and Boki riding the downed Hunter (owner 2026-11-11)
+Owner: "very confusing when someone wisps ... a big circle and unclear. Copy how Supervive does this ... their
+pets always come back to them and go into wisp form when they're downed".
+- **Marks (`DownedMarks`):** the always-on ground ring the size of the revive range is gone. A downed Hunter shows
+  a compact ring hugging their Wisp in their side colour (ally or rival): the bleed-out drains round it, revive
+  progress fills inside it, it flashes over the last 5 s and turns red and pulses while stomped. Only a teammate
+  within 9 m sees the revive reach on the ground (thin, filling as they revive) and one HUD line, "Step onto
+  <name>'s wisp to revive" (screen space: no words on world objects, owner 11-11). The squad's offscreen arrows
+  carry the same ring. The plate, squad frame and own-screen "You're down" stay as they were.
+- **Boki (`KinWispForm`, Kin state `wisp`, which replaces `reviving`):** when its Hunter is knocked every Boki of
+  theirs that is up zips back (blinks from beyond 14 m or when it can't walk there) and circles the Hunter Wisp as
+  its Boki wisp (`BokiWispLook`, round = Hunter, critter = Boki). It does not fight, cast or take orders and
+  can't be hit. It still pulls its Hunter up as the old kin revive did (same wait and `kin_revive_time`, bleed
+  paused meanwhile); a stomp stops the pull (as Supervive's stomp blocks self-revives). Revived: back on the
+  shoulder with its old order. Dead: `KinLoss` as before. A Boki that is down itself stays down (KinDowned).
+  The old guard (attacking whoever stood on the Wisp) is removed.
+- **Net:** `wisp` takes `reviving`'s slot in `Match.KIN_STATES`, so the snapshot shape is unchanged.
+- **Open (DECISIONS 2026-11-09):** wisp stealing on a knock is not built yet; when it is, it starts from the
+  Boki already riding the Hunter in this form.
+- Checks: `--kin-wisp-form-check`, `--clarity-check`. Frames: `--wisp-clarity-shots --shots-dir=<dir>`.
