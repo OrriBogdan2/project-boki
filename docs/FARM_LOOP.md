@@ -26,3 +26,39 @@ Checks: `--raising-check` (new, all of the above but neglect), `--economy-check`
   gives no XP source at home [?]; needs an owner call.
 - Not verified: whether other players' clients see the meal tint (it rides on the kin record;
   nothing was added to the Net sync shape, so Net.VERSION is unchanged).
+
+## Water and ridges (owner notes 11-11, ext/farm-water-climb-1111)
+
+Placing by the water (`FarmWater`, numbers in `content/rules/farm_build.json` "water"). Water is any
+`layout.water` tile: a pond, a painted river, or the island's own wild pond or stream. The farm has no
+well item, so there is nothing to count as a well.
+
+| What | Away from water | Within `reach` of water | Why this number |
+|---|---|---|---|
+| Crop patch | you water each plot by hand (rain also wets it) | waters and tends itself | (unchanged) |
+| Growth while home | 90 s a stage (`Data.WATER_TIME`) | `grow` 1.25: 72 s a stage | +25% is clear on the patch's timer without making hand-watering pointless (tending still gives the bigger harvest) |
+| Trough (wooden, woven) | you fill it (Fill it up) | tops itself up from the pantry below half, like a hopper | a trough by the pond is the same trade as the crops: place it well, do less by hand |
+| `reach` | | 2 tiles (2 m) from the footprint | close enough that the water visibly sits by the patch; one 2-gem river tile bridges it |
+
+Growth after an expedition stays one stage per run for every patch (by water or not): a stage is
+the smallest step there, so +25% has no whole-stage meaning.
+Build mode: holding a patch or a plain trough in reach shows a blue water drop and "+growth" (patch) or
+"fills itself" (trough) over it. Out of reach it shows nothing (the tutorial's dry-patch line already
+says you water it yourself).
+
+**The green blocks.** They were the farm-start island's cliff ridge (`HomeLayout.fs_plan` "cliff", picked
+for about 2 in 7 islands for variety): 8 to 12 steps of a curved line two tiles thick, raised 2 terraces
+(1.6 m) with grass on top and no props. They were wall tiles (`T_BLOCK`), so the mantle skipped them,
+the tools skipped them and the Clear the wild brush refused them ("That's a cliff"). Where the
+pocket opener cut a gap, the ridge broke up into short pieces: the "mini walls".
+Now (`HomeBuild._apply_wild`): the ridge stays as 1.6 m ground. A running jump tops it: the jump
+peaks at 1.57 m and the mantle (`home.gd MANTLE` 1.5 m above your feet) carries you over, and the shared
+movement numbers are unchanged. You walk off the top. A Boki walks round it, because raised ground is
+solid on the kin grid (`HomeBuild._solid_tile`). A stub that is not part of any 2x2 of ridge is levelled (`_settle_ridge`), because it is too thin to stop on after the climb and was most of the stray bits. The pocket opener still runs with the ridge as a wall, so
+no meadow is shut in. The Clear the wild brush (Island tab, 3 gems a tile) levels it for good. Trees and
+boulders are unchanged: chopped or mined with the axe and pickaxe.
+
+Checks: `--farm-tutorial-check` (a crop by water grows a stage in 72 s, the same plot away from water
+does not; troughs; the preview), `--farm-climb-check` (4 seeded islands with a ridge: every tile is
+standable ground, a sample of faces is topped by a running jump, you walk off it, a Boki reaches every
+open tile, the brush levels it).

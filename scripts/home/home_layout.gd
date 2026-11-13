@@ -58,7 +58,7 @@ const CATALOG := {
 	"path_clear": {"name": "Grass (clear)", "cat": "Paths", "gems": 0, "brush": "clear"},
 	"clear_wild": {"name": "Clear the wild", "cat": "Island", "gems": 3, "brush": "wild"},
 	"river": {"name": "River", "cat": "Paths", "gems": 2, "brush": "water", "block": true,
-		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
+		"desc": "Drag a narrow channel of water across the ground. A crop patch or trough within 2 tiles of any water looks after itself, and the crops grow faster."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
 	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
 	"snack_patch": {"name": "Snack patch", "cat": "Garden", "gems": 0, "size": [2, 2], "max": 1,
@@ -119,7 +119,7 @@ const CATALOG := {
 	"house": {"name": "House", "cat": "Buildings", "gems": 90, "size": [5, 3], "block": true, "fixture": "house", "max": 1, "door": true,
 		"desc": "Your home. Go inside to rest and decorate; Boki nap here too. Its door needs open ground."},
 	"crop_patch": {"name": "Crop patch", "cat": "Buildings", "gems": 30, "size": [5, 4], "fixture": "farm", "max": 0,
-		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself."},
+		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself and grows 25% faster."},
 	"cook_pot": {"name": "Cooking pot", "cat": "Buildings", "gems": 20, "block": true, "fixture": "pot", "max": 1,
 		"desc": "Cook what you grow into treats for your Boki."},
 	"market_stall": {"name": "Market stall", "cat": "Buildings", "gems": 30, "size": [3, 2], "block": true, "fixture": "stall", "max": 1,
@@ -730,7 +730,8 @@ static func fs_plan(seed: int, sk: float) -> Array:
 					p += dir
 				f["what"] = "water"
 			"cliff":
-				# a curved ridge of bare rock, two tiles thick: it stays (you walk round it)
+				# a curved grassy ridge two terraces high (1.6 m), two tiles thick: variety in the meadow. You jump
+				# up onto it, a Boki walks round it, and Clear the wild levels it (HomeBuild._apply_wild)
 				var dir := Vector2.from_angle(r.randf() * TAU)
 				var p := at - dir * 4.0
 				var bend := r.randf_range(-0.16, 0.16)

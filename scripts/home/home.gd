@@ -2233,10 +2233,10 @@ func _label_for(it: Dictionary) -> String:
 			var cd: Dictionary = Data.CROPS[d["crop"]]
 			if int(d["stage"]) >= int(cd["grow"]): return "Harvest the %s" % cd["name"]
 			if it["arr"] == "plots" and FarmWater.plot_near(Save.d, it["i"]):
-				return "%s: the water nearby tends it (%s)" % [cd["name"], _grow_left(it["arr"], d)]
+				return "%s: the water nearby tends it (%s)" % [cd["name"], _grow_left(it["arr"], it["i"])]
 			if float(d.get("wt", 0.0)) <= 0.0: return "Water the %s" % cd["name"]
 			if int(d.get("wet", 2)) < 2: return "Water the %s (the rain only soaked it)" % cd["name"]
-			return "%s: watered, growing (%s)" % [cd["name"], _grow_left(it["arr"], d)]
+			return "%s: watered, growing (%s)" % [cd["name"], _grow_left(it["arr"], it["i"])]
 		"pot": return "Cook"
 		"rack": return "Glider skins"
 		"stall": return "Shop"
@@ -2634,10 +2634,10 @@ func _open_welcome() -> void:
 	b.grab_focus.call_deferred()
 
 # ---- farm
-## How long until the next stage, for a watered plant.
-func _grow_left(arr: String, d: Dictionary) -> String:
-	var need := Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)
-	var left := int(ceil(need - (Time.get_unix_time_from_system() - float(d.get("wt", 0.0)))))
+## How long until the next stage, for watered plant i of arr.
+func _grow_left(arr: String, i: int) -> String:
+	var need := FarmWater.stage_s(Save.d, arr, i)
+	var left := int(ceil(need - (Time.get_unix_time_from_system() - float(Save.d[arr][i].get("wt", 0.0)))))
 	return "%ds" % maxi(1, left)
 
 ## Watered plants grow while you're home; rain and a farmhand kin water for you.
@@ -2659,7 +2659,7 @@ func _farm_tick() -> void:
 			if (wt <= 0.0 or (by_water and int(d.get("wet", 2)) < 2)) and (raining or by_water):
 				_water(arr, i, "stream" if by_water else "rain")
 				continue
-			if wt > 0.0 and now - wt >= FarmCropGuide.stage_time(Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)):
+			if wt > 0.0 and now - wt >= FarmWater.stage_s(Save.d, arr, i):
 				d["stage"] = int(d["stage"]) + 1
 				# rain only makes it wet; watering it yourself (or a farmhand kin) is what counts as tending
 				if int(d.get("wet", 2)) >= 2:
@@ -2720,8 +2720,8 @@ func _open_plot(arr: String, i: int) -> void:
 			return
 		var v := _new_panel(cd["name"], 440)
 		if arr == "plots" and FarmWater.plot_near(Save.d, i):
-			v.add_child(UI.label("This patch is by the water, so it waters itself.", 14, UI.GOOD))
-		v.add_child(UI.label("Watered. It grows a stage in %s while you're home, or after your next expedition." % _grow_left(arr, d), 16))
+			v.add_child(UI.label(FarmWater.plot_note(), 14, UI.GOOD))
+		v.add_child(UI.label("Watered. It grows a stage in %s while you're home, or after your next expedition." % _grow_left(arr, i), 16))
 		v.add_child(UI.label("Stage %d of %d. Tended %d time%s: %s" % [int(d["stage"]), grow, int(d.get("care", 0)), "" if int(d.get("care", 0)) == 1 else "s",
 			"water it every stage for a bigger harvest, and maybe a seed back." if int(d.get("care", 0)) < grow else "it'll be a big harvest."], 14, UI.MUTED))
 		v.add_child(UI.label(cd["desc"], 14, UI.MUTED))

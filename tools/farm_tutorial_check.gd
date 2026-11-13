@@ -822,6 +822,8 @@ func _farm2() -> void:
 	ok(lbl.contains("water nearby"), "the prompt says why: '%s'" % lbl)
 	ok(String(HomeLayout.CATALOG["crop_patch"]["desc"]).contains("2 tiles of water"), "and the build menu says it in the patch's tooltip")
 	ok(home._dry_plot().is_empty(), "the farmhand has nothing to water there")
+	_grows_faster(home, L)
+	_trough_by_water(L)
 	# the preview in build mode
 	L["water"].clear()
 	Save.d["plot_cap"] = 8
@@ -833,12 +835,22 @@ func _farm2() -> void:
 	home.hb.debug_m = Vector2(cs[0].x + psz.x * 0.5, cs[0].y + psz.y * 0.5)
 	home.hb.tick(0.0)
 	var note := _note_text(home.hb)
-	ok(note.contains("No water"), "the preview of a patch away from water says so: '%s'" % note)
+	ok(note == "" and not _has_drop(home.hb), "the preview of a patch away from water stays clear (no note): '%s'" % note)
 	L["water"][HomeLayout.key(cs[0].x + psz.x + 1, cs[0].y)] = 1
 	home.hb.ghost_cells.set_meta("sig", "")
 	home.hb.tick(0.0)
 	note = _note_text(home.hb)
-	ok(note.to_lower().contains("near water") and _note_col(home.hb).g > 0.8 and _note_col(home.hb).r < 0.5, "by the water it says 'near water' in green: '%s'" % note)
+	ok(note == "+growth" and _has_drop(home.hb) and _note_col(home.hb).b > 0.8,
+		"by the water it shows a water drop and '+growth' in blue: '%s'" % note)
+	Save.d["feeder_inv"]["trough"] = 1
+	home.hb.take_feeder("trough")
+	home.hb.debug_m = Vector2(cs[0].x + psz.x - 0.5, cs[0].y + 0.5)      # (in the open ground found for the patch)
+	home.hb.ghost_cells.set_meta("sig", "")
+	home.hb.tick(0.0)
+	note = _note_text(home.hb)
+	ok(note == "fills itself" and _has_drop(home.hb),
+		"a trough held by the water shows the drop and 'fills itself': '%s'" % note)
+	home.hb.take("crop_patch")
 	# a river brush: cheap, and it counts as water
 	ok(HomeLayout.CATALOG.has("river") and int(HomeLayout.CATALOG["river"]["gems"]) < int(HomeLayout.CATALOG["water"]["gems"]),
 			"a River brush costs less than a pond tile")
@@ -863,6 +875,43 @@ func _note_label(hb) -> Label3D:
 	for c in hb.ghost_cells.get_children():
 		if c is Label3D and c.get_meta("fbui", "") == "note" and not c.is_queued_for_deletion(): return c
 	return null
+
+func _has_drop(hb) -> bool:
+	for c in hb.ghost_cells.get_children():
+		if not c is Label3D and c.get_meta("fbui", "") == "note" and not c.is_queued_for_deletion(): return true
+	return false
+
+## The same stretch of growing time: a watered plot away from water stays at its stage, the same plot
+## with water beside the patch moves on one (FarmWater.grow_mul, 1.25: 72 s a stage instead of 90 s).
+func _grows_faster(home, L: Dictionary) -> void:
+	var day1 := bool(Save.d["tutorial"].get("day1_done", false))
+	Save.d["tutorial"]["day1_done"] = true      # (the tutorial's quick first crop would hide the difference)
+	L["water"].clear()
+	var away_s := FarmWater.stage_s(Save.d, "plots", 0)
+	var into := Data.WATER_TIME / FarmWater.grow_mul() + 4.0      # past the by-water stage, short of the dry one
+	var planted := {"crop": "tidebloom", "stage": 0, "care": 0, "wt": Time.get_unix_time_from_system() - into, "wet": 2}
+	Save.d["plots"][0] = planted.duplicate()
+	home._farm_tick()
+	var dry_stage := int(Save.d["plots"][0]["stage"])
+	L["water"][HomeLayout.key(49, 31)] = 1
+	var near_s := FarmWater.stage_s(Save.d, "plots", 0)
+	Save.d["plots"][0] = planted.duplicate()
+	home._farm_tick()
+	var wet_stage := int(Save.d["plots"][0]["stage"])
+	ok(is_equal_approx(away_s / near_s, FarmWater.grow_mul()) and dry_stage == 0 and wet_stage == 1,
+		"a crop by the water grows faster: a stage in %.0f s, not %.0f s (after %.0f s: dry stage %d, by water %d)"
+			% [near_s, away_s, into, dry_stage, wet_stage])
+	ok(FarmWater.plot_note().contains("25% faster"), "the plot panel says so: '%s'" % FarmWater.plot_note())
+	Save.d["tutorial"]["day1_done"] = day1
+
+## A plain trough fills itself from the pantry only by the water; away from it you fill it yourself.
+func _trough_by_water(L: Dictionary) -> void:
+	Save.d["items"]["kibble"] = 10
+	var f := {"id": "fw", "kind": "trough", "x": 49.5, "z": 33.5, "food": [], "auto": true}
+	ok(Econ.auto_refill(f) > 0, "a trough two tiles from water tops itself up from the pantry")
+	var far := {"id": "fd", "kind": "trough", "x": 49.5, "z": 40.5, "food": [], "auto": true}
+	ok(Econ.auto_refill(far) == 0 and not Econ.self_fills(far), "a trough away from water waits for you to fill it")
+	L["water"].erase(HomeLayout.key(49, 31))
 
 func _note_text(hb) -> String:
 	var l := _note_label(hb)

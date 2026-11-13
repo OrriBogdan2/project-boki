@@ -58,8 +58,9 @@ static func outline(root: Node3D, cells: Array, ok: bool) -> void:
 		m2.set_meta("fbui", "grid")
 		root.add_child(m2)
 
-## The reason a spot is refused, floating above the footprint. "" removes it.
-static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0")) -> void:
+## The reason a spot is refused (or what it gets), floating above the footprint. "" removes it.
+## drop: a little water drop sits over the words (placing by the water, FarmWater).
+static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0"), drop := false) -> void:
 	if not is_instance_valid(root):
 		return
 	for old in root.get_children():
@@ -80,6 +81,37 @@ static func note(root: Node3D, cells: Array, text: String, col := Color("ffb0a0"
 	var c: Vector2i = cells[0]
 	l.position = Vector3(c.x + 0.5, 1.7, c.y + 0.5)
 	root.add_child(l)
+	if drop:
+		root.add_child(_drop(l.position + Vector3(0, DROP_LIFT, 0)))
+
+const DROP_R := 0.13        # m, the water drop's round bottom
+const DROP_LIFT := 0.42     # m it floats over the note's words
+
+## A water drop: a round bottom with a cone on it, unshaded blue, drawn over everything like the note.
+static func _drop(at: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.set_meta("fbui", "note")
+	n.position = at
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color("5cc4ff")
+	mat.no_depth_test = true
+	mat.render_priority = 3
+	var ball := SphereMesh.new()
+	ball.radius = DROP_R
+	ball.height = DROP_R * 2.0
+	var tip := CylinderMesh.new()
+	tip.top_radius = 0.0
+	tip.bottom_radius = DROP_R * 0.92
+	tip.height = DROP_R * 1.6
+	for part in [[ball, 0.0], [tip, DROP_R * 0.9]]:
+		var mi := MeshInstance3D.new()
+		mi.mesh = part[0]
+		mi.material_override = mat
+		mi.position.y = part[1]
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		n.add_child(mi)
+	return n
 
 ## A little squash and settle on a node that was just placed.
 static func pop(n: Node3D) -> void:
