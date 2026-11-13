@@ -12,7 +12,8 @@ extends ArchKit
 ## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
-##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
+##   keeps fast Shift presses (ThiefChain). A bolt soon after it starts a quick run of bolts (ThiefQuick). No ring
+##   or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
 ## - RMB, Bola: a 0.4s wind-up with the lane showing, then a kit-run Bola that grounds the first foe and
 ##   slows it (the owner's call, on top of the source's Ground) and flies on (bouncing once off a wall); a second
@@ -51,6 +52,7 @@ var bola := {}                 # the Bola in flight: {pos, dir, left, first, bou
 var encore: ThiefUlt           # X, the ultimate
 var spin: ThiefSpin            # the Vault flip's trail
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
+var quick: ThiefQuick          # the quick bolts after a Vault
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
 var glint: Node3D = null       # the empowered tell: a gold glint at the weapon hand
 var glint_pop := 0.0           # 1 as the empowered bolt forms (the landing), easing back to 0
@@ -77,6 +79,7 @@ func _setup() -> void:
 	encore = ThiefUlt.new(self)
 	spin = ThiefSpin.new(self)
 	chain = ThiefChain.new(self)
+	quick = ThiefQuick.new()
 
 func fx() -> DJFx:
 	return DJFx.of(m)
@@ -260,6 +263,7 @@ func _tick(dt: float) -> void:
 	encore.tick(dt)
 	_tick_vault(dt)
 	chain.tick(dt)
+	quick.tick(dt)
 	_tick_landing()
 	_tick_trail(dt)
 	_tick_wrapped(dt)
@@ -366,6 +370,7 @@ func _bolt() -> void:
 	if sd["by"] != h:
 		return
 	bolts += 1
+	var came_quick := quick.bolt(h, dash_def())
 	hand = 1 - hand
 	var d := h.aim_dir()
 	var right := Vector2(-d.y, d.x)
@@ -405,6 +410,9 @@ func _bolt() -> void:
 		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 3.4, 0.7)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
+	elif came_quick:            # the quick run after a Vault: the cartwheel's cyan in her hands and the tail
+		fx().ride(sd, "chakram", GHOST, BOLT_GOLD, 2.2, 0.42)
+		fx().star(muzzle, GHOST, 0.75, 0.1, Color("e0fbff"))
 	else:
 		fx().ride(sd, "chakram", BOLT_TAIL, BOLT_GOLD, 1.8, 0.42)
 		fx().star(muzzle, BOLT_GOLD, 0.6, 0.1, BOLT_CORE)        # the gold muzzle star at the throwing hand
@@ -515,6 +523,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])
+	quick.vaulted(h, dd)
 	var was := primed_t > 0.0
 	primed_t = float(dd["primed_t"])
 	m.later(t, func():

@@ -80,6 +80,23 @@ The 11 ranked rows of `briefs/hero-ref/dancer.md` section 5, marked on main d255
 Rows 12 and 13 (not in the top 11): knock feedback is closed (`KNOCK_STAR` crimson star on the knocked, green pillar on her, `on_knock`); no audio in the footage, n/a.
 
 Suggestions for the owner (not built): the pacing set in row 5 (4.5 / 7 / 15 s from the footage cards against 5 / 13 / 28 s from the data); and whether the Bola's bounce off a wall should be the second catch (row 8, in flight).
+## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
+
+Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
+supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
+owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
+
+| What | Ours |
+|---|---|
+| Window | a bolt thrown within 1.2s of an empowering Vault (`quick_window`; the footage's slowest dash -> shot is about 1.2s, 0137 -> 0143) starts the run |
+| Speed | 0.6x the interval (`quick_k`): 0.27s instead of 0.45s, +67% rate |
+| How many | 3 quick intervals (`quick_n`): the empowered bolt and the next three leave 0.27s apart (4 bolts in about 0.8s instead of 1.35s), then 0.45s again |
+| Ends early | a bolt that doesn't follow within its interval + 0.2s ends the run; a bolt cooling as she flips is cut to 0.27s |
+| Tell | no UI: the three quick bolts carry the cartwheel's cyan, a cyan tail on the gold chakram and a cyan star at the throwing hand; the faster throws themselves. Effects are local like her other bolt looks; online viewers see the faster cadence |
+
+Asserted in `--dancer-combo-check` (`dancer quick: ...`).
+
 ## LMB range, speed (parity pass, ext/sable-lmb-range)
 
 | What | Source | Ours before | Ours now |
