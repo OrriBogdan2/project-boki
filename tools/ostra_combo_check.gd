@@ -771,7 +771,7 @@ func _zone_looks(m: Match) -> void:
 	const CORE_A := 0.25
 	var seed := HeroZones.seed_visual(m, "zone_test", Vector3.ZERO, 3.2, 1.0, OstraKit.TEAL)
 	var sm := (seed.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
-	ok("zones: the seed drum is clear inside, lit at its teal rim",
+	ok("zones: the seed globe is clear inside, lit at its teal rim",
 		HeroZones.SEED_A * (HeroZones.SEED_BODY + 0.1) <= CORE_A and sm.get_shader_parameter("rim") == OstraKit.SEA)
 	HeroZones.seed_pop(m, "zone_test")
 	var looks := KitLooks.of(m)

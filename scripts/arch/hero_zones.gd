@@ -169,9 +169,6 @@ static func bridge(
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a teal glass globe on the ground, clear inside and lit at its rim (docs/VFX_QUALITY.md zone rule:
-## SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a thin teal rim at its edge.
-## Ostra's own shape; no other zone looks like it.
 const SEED_R0 := 0.08                 # share of full size a fresh seed starts at (a speck, never zero)
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
@@ -183,6 +180,9 @@ static func seed_r(rmax: float, grow: float, t: float) -> float:
 static func seed_size(n: Node3D, r: float) -> void:
 	n.scale = Vector3.ONE * r
 
+## The seed: a teal glass globe on the ground with a slow swirl (shaders/void_glass), clear inside and lit at its
+## rim (docs/VFX_QUALITY.md zone rule: SEED_A x (SEED_BODY + 0.1) at the centre), growing to its full width, with a
+## teal rim ring. Ostra's own shape; no other zone looks like it.
 static func seed_visual(
 	m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color, remote := false
 ) -> Node3D:
