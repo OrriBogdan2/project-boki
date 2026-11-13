@@ -29,6 +29,7 @@ const CHECKS := {
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
+	"--heart-raid-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", null],      # the PvE mode
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
 	# the Ways Out strip and Gate prompt
 	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],      # EdgeMarker
@@ -375,6 +376,7 @@ const CHECKS := {
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
+	"--boki-modes-check": ["res://tools/boki_modes_check.gd", "boki_modes_check", null],      # one mode per Boki
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],  # keys, bond hook, release
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],  # far rocks and trees batched
 	"--loot-glow-check": ["res://tools/loot_glow_check.gd", "loot_glow_check", null],      # loot rarity looks
