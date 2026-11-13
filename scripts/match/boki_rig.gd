@@ -2,8 +2,9 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, hop while it leaps or is thrown) and "kburst"
-## (a factor on the gait's cadence), and plays the face on top of whatever the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, hop while it leaps or is thrown), "kburst"
+## (a factor on the gait's cadence) and a flier's "aloft" and "lift" (BokiFly: hover or glide up there, a flare
+## coming down), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -155,13 +156,15 @@ const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amou
 const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read on a small face
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
-## The ground shadow of a Boki that hovers: its size (m, across and along it) and darkness, and how far off the
-## ground it lies (m) so it never fights the ground for depth.
+## The ground shadow of a Boki that hovers or has flown: its size (m, across and along it) and darkness, and how
+## far off the ground it lies (m) so it never fights the ground for depth.
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow"]
+	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
+## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
+const OWN_HEIGHT := ["hop", "hover", "glide", "flare"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## The strut takes steps this much quicker than a walk at the same ground speed (a high, proud step).
 const STRUT_CADENCE := 1.25
@@ -191,6 +194,7 @@ const CLIP_FACE := {
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 	"strut": "cheer", "pose": "cheer", "bow": "cheer",
 	"crouch": "focus", "burst": "cheer", "sulk": "sad",
+	"glide": "cheer", "flare": "focus",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -223,6 +227,7 @@ var _shot := ""
 var _shot_rate := 1.0          # the speed the shot plays at
 var _attacking := false
 var _asleep := false
+var _aloft := false             # a flier in the air (BokiFly's "aloft" meta)
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -365,16 +370,19 @@ func _keep_flex() -> void:
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
 			held.position = FRAME[species]["carry"]
-	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
+	model.position.y = -body.position.y if clip in OWN_HEIGHT else 0.0       # the clip does the hopping, not home
+	var lift := float(root.get_meta("lift", 0.0))
+	if lift > 0.0 and _shadow == null:
+		_shadow = _ground_shadow(flex)           # a flier's first time up: from now on its shadow marks the ground
 	if _shadow:
-		_shadow.global_position.y = root.global_position.y + SHADOW_LIFT
+		_shadow.global_position.y = root.global_position.y - lift + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
-	var v := (gp - _pos_prev).length() / dt
+	var v := Vector2(gp.x - _pos_prev.x, gp.z - _pos_prev.z).length() / dt      # rising or sinking is no stride
 	_pos_prev = gp
 	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
 
@@ -393,6 +401,13 @@ func _pick_clip(dt: float) -> void:
 		_asleep = asleep
 		if _speed < WALK_SPEED:
 			_start_shot("settle" if asleep else "wake")
+	var aloft := bool(root.get_meta("aloft", false))
+	if aloft != _aloft:
+		_aloft = aloft
+		if not aloft:
+			_start_shot("flare")
+		elif _shot == "flare":
+			_shot_left = 0.0          # up again before the flare is done
 	var want := _state_clip()
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
@@ -416,6 +431,10 @@ func _start_shot(which: String, rate := 1.0) -> void:
 	_shot_left = player.get_animation(which).length / rate
 
 func _state_clip() -> String:
+	if _aloft:
+		return "glide" if _speed >= WALK_SPEED else "hover"
+	if _shot == "flare" and _shot_left > 0.0:
+		return _shot          # it touches down before it does what it came down for
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))

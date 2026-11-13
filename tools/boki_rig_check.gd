@@ -1,10 +1,12 @@
 extends RefCounted
 ## --boki-rig-check: a rigged Boki (BokiRig, art/kin/<id>/<id>.glb) has its clips and faces, picks them from
 ## the same metas KinPuppet reads,
-## wears each Boki's own colours and marks, stays inside its budgets.
+## wears each Boki's own colours and marks, stays inside its budgets. A flier has its hover, glide and flare and
+## plays them in the air (BokiFly), and on Kitewind Ridge it stays up (tools/boki_rig_fly.gd).
 ## Prints PASS/FAIL lines.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
+const Fly := preload("res://tools/boki_rig_fly.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
 	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
@@ -38,6 +40,7 @@ func run(main: Node) -> void:
 	for id in SPECIES_LIST:
 		kin_id = id
 		await _species(main)
+	await Fly.new().run(main, self)
 	print("BOKIRIG DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -61,6 +64,7 @@ func _contents(rig: BokiRig) -> void:
 	for c in BokiRig.LOOPED:
 		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
 	_game_clips(rig)
+	_flight_clips(rig)
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0
@@ -125,6 +129,21 @@ func _stepping(main: Node, rig: BokiRig) -> void:
 	ok(absf(clip_s - 0.01 * frames) < 0.0001, "and kept up with the time: %.3f s of clip" % clip_s)
 	rig.pace.every = 1
 	rig.set_process(true)
+
+## A flier's hover and glide loop and its flare plays once over boki_fly.json flare_s; a walker gets none of them.
+func _flight_clips(rig: BokiRig) -> void:
+	if not BokiFly.flier(kin_id):
+		ok(not rig.player.has_animation("hover"), "a walker has no flight clips")
+		return
+	for c in ["hover", "glide"]:
+		var a := rig.player.get_animation(c)
+		ok(a != null and a.loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	var flare := rig.player.get_animation("flare")
+	var flare_s := float(BokiFly.rules()["flare_s"])
+	ok(flare != null and flare.loop_mode == Animation.LOOP_NONE and is_equal_approx(flare.length, flare_s),
+		"flare plays once over %.2f s" % flare_s)
+	ok(not _t_pose(rig, "flare"), "flare has no T-pose frame")
 
 ## True when some frame of the clip leaves every bone within T_POSE of its bind pose.
 func _t_pose(rig: BokiRig, clip: String) -> bool:
@@ -191,6 +210,8 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
+	if BokiFly.flier(kin_id):
+		_air(k, rig)
 	k.set_meta("face", "sad")
 	rig._face_step(1.0)
 	var sad := rig.face.find_blend_shape_by_name("sad")
@@ -276,3 +297,32 @@ func _own_look(main: Node) -> void:
 		ok(k.find_child(nm, true, false) != null, "%s is on the model" % nm)
 	ok(iris.b > iris.g * 0.8, "its own eye colour: %s" % iris.to_html())
 	k.queue_free()
+
+## In the air (BokiFly's metas) a flier hovers standing and glides moving, its shadow stays on the ground under it;
+## coming down it flares, then stands; going up again cuts the flare short.
+func _air(k: Node3D, rig: BokiRig) -> void:
+	k.set_meta("aloft", true)
+	k.set_meta("lift", 1.0)
+	rig._pick_clip(0.016)
+	ok(rig.clip == "hover", "aloft and still it hovers")
+	rig._speed = 2.4
+	rig._pick_clip(0.016)
+	ok(rig.clip == "glide", "aloft and moving it glides")
+	rig._keep_flex()
+	var gap := rig._shadow.global_position.y - (k.global_position.y - 1.0) if rig._shadow else -1.0
+	ok(is_equal_approx(gap, BokiRig.SHADOW_LIFT), "1 m up, its shadow lies on the ground under it")
+	k.set_meta("aloft", false)
+	rig._speed = 0.0
+	rig._pick_clip(0.016)
+	ok(rig.clip == "flare", "coming down it flares")
+	k.set_meta("aloft", true)
+	rig._pick_clip(0.016)
+	ok(rig.clip == "hover", "up again before the flare is done, it hovers")
+	k.set_meta("aloft", false)
+	rig._pick_clip(0.016)
+	rig._shot_left = 0.0
+	rig._pick_clip(0.016)
+	ok(rig.clip == "idle", "after the flare it stands")
+	k.remove_meta("aloft")
+	k.remove_meta("lift")
+	rig._keep_flex()

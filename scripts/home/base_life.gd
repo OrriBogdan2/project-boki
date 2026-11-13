@@ -426,6 +426,10 @@ static func _taken(k: Dictionary) -> bool:
 		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) or k.has("look") \
 		or float(k.get("hold_t", 0.0)) > 0.0
 
+## Free to roam: its machine is in Roam and none of the farm's drivers has it (a flier stays up: BokiFly).
+static func roams(k: Dictionary) -> bool:
+	return k.has("life") and (k["life"] as Fsm).is_in(S.ROAM) and not _taken(k)
+
 static func _dist(a: Dictionary, b: Dictionary) -> float:
 	return Vector2(a["pos"].x - b["pos"].x, a["pos"].z - b["pos"].z).length()
 

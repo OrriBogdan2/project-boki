@@ -117,7 +117,7 @@ static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
 		me["bonds"][uid] = clampf(float(me["bonds"].get(uid, 0.0)) + amt, -1.0, 1.0)
 
 static func winged(rec: Dictionary) -> bool:
-	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
+	return BokiFly.flier(String(rec.get("species", "")))
 
 ## The lap's stretches under a tweak: its 'swap' changes one stretch's kind and mult (a second water stretch).
 static func stretches(tw := {}) -> Array:
@@ -552,6 +552,9 @@ func _place_runners() -> void:
 		n.position = p
 		n.rotation.y = heading(s, clampf(into / float(st[s]["len"]), 0.0, 1.0))
 		runners[i]["pos"] = p
+		if winged(runners[i]["rec"]):
+			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
+			n.set_meta("aloft", String(st[s]["kind"]) == "jump" and BokiFly.glides(left))      # it glides the gap
 
 ## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
 func track_at(s: int, f: float, side: float) -> Vector3:

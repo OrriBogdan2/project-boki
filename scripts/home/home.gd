@@ -72,6 +72,7 @@ var water := HomeWater.new(self)      # the ponds you wade and swim in (home_wat
 var photo: HomePhoto = null         # photo mode (home_photo.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
 var wade := BokiWade.new(self)        # Boki in the water: slower, ripples, paddling (boki_wade.gd)
+var fly := BokiFly.new(self)          # fliers over Kitewind Ridge and the gaps (boki_fly.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
@@ -1408,6 +1409,7 @@ func _move_kin(d: float) -> void:
 	nap_sound.step(kins, d)
 	for k in kins:
 		if k.get("busy", false):
+			fly.land(k)
 			continue
 		if k.has("indoors"):
 			# inside the house: out of sight until it fancies coming out (or hears you whistle)
@@ -1416,6 +1418,7 @@ func _move_kin(d: float) -> void:
 			continue
 		if k.has("leap"):
 			_leap_step(k, d)
+			fly.leap(k)
 			continue
 		k["t"] -= d
 		if k.has("called_t"):
@@ -1541,7 +1544,8 @@ func _move_kin(d: float) -> void:
 		k["pos"] = pos
 		var n: Node3D = k["node"]
 		n.position = pos
-		wade.step(k, pos, n, d)
+		if not fly.step(k, pos, n, d):
+			wade.step(k, pos, n, d)
 		if k.get("going_in", false) and Vector2(pos.x - _house_door().x, pos.z - _house_door().z).length() < 0.6:
 			k.erase("going_in")
 			var night_now := sin((day_t - 0.25) * TAU) < -0.2

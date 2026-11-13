@@ -5,8 +5,9 @@ extends RefCounted
 ## A pose is a set of angle deltas (rx nose up, ry turn left, rz roll; rad) added on top of the baked idle or sleep,
 ## so every species keeps its own rest shape and mover. `TWEAK` is the per species part.
 
-## Cycles (and so beats) are whole numbers per clip, so each loop closes on itself.
-const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5}
+## Cycles (and so beats) are whole numbers per clip, so each loop closes on itself. A hover beats its wings every
+## 0.4 s, KinPuppet's flyer rate (16 rad/s); a glide rocks once every 1.2 s.
+const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5, "hover": 0.4, "glide": 1.2}
 ## species -> clip -> {"amp": factor on the whole motion, "bones": {bone: [rx, ry, rz] held through it}}.
 const TWEAK := {
 	"cairnback": {"nudge": {"amp": 0.6}, "climb": {"amp": 0.55}, "splash": {"amp": 0.6}},
@@ -466,3 +467,61 @@ func _sulk(u: float) -> void:
 		_:
 			add("spine", -0.35 * s)
 	tail(0.0, -0.4 * s)
+
+## Hover, a loop of wingbeats: hung under its wings, tail down and legs hanging, the body rising on each downstroke.
+func _hover(u: float) -> void:
+	var beat := TAU * u * float(_n)
+	var flap := sin(beat)
+	move.y = -0.025 * flap * amp
+	add("root", 0.18 * amp)
+	add("head", -0.12 * amp)
+	both("ear1", 0.0, 0.0, 0.1 * flap * amp)
+	match plan:
+		"quad":
+			both("fleg1", 0.35 * amp)
+			both("hleg1", -0.2 * amp)
+		"bird":
+			both("hleg1", 0.25 * amp)
+		_:
+			add("spine", 0.1 * flap * amp)
+	wings((0.35 + 0.75 * flap) * amp, 0.15 * amp)
+	tail(0.1 * cos(beat) * amp, (-0.2 - 0.06 * flap) * amp)
+
+## Glide, a loop: wings held wide with a slow rock, nose down into the air, ears back, legs tucked, a slow bank.
+func _glide(u: float) -> void:
+	var s := sin(TAU * u * float(_n))
+	move.y = 0.015 * s * amp
+	add("root", -0.22 * amp, 0.0, 0.08 * s * amp)
+	add("head", 0.16 * amp)
+	both("ear1", 0.0, 0.0, -0.25 * amp)
+	match plan:
+		"quad":
+			both("fleg1", 0.6 * amp)
+			both("hleg1", -0.6 * amp)
+		"bird":
+			both("hleg1", -0.7 * amp)
+		_:
+			add("spine", 0.0, 0.15 * s * amp)
+	wings((0.8 + 0.12 * s) * amp, -0.1 * amp)
+	tail(0.12 * s * amp, 0.15 * amp)
+
+## Flare, once as a flier touches down (boki_fly.json flare_s): pitched up, wings wide and swept forward to brake,
+## feet reaching for the ground. The feet land halfway (a small squash), then it eases back into its idle.
+func _flare(u: float) -> void:
+	var brake := smoothstep(0.0, 0.3, u) * (1.0 - smoothstep(0.55, 1.0, u))
+	var touch := sin(PI * clampf((u - 0.45) / 0.35, 0.0, 1.0)) * amp
+	squash = Vector3(1.0 + 0.06 * touch, 1.0 - 0.1 * touch, 1.0 + 0.06 * touch)
+	move.y = -0.02 * touch
+	add("root", 0.45 * brake * amp)
+	add("head", -0.25 * brake * amp)
+	both("ear1", 0.0, 0.0, 0.2 * brake * amp)
+	match plan:
+		"quad":
+			both("fleg1", 0.9 * brake * amp)
+			both("hleg1", 0.25 * brake * amp)
+		"bird":
+			both("hleg1", 0.8 * brake * amp)
+		_:
+			add("spine", 0.35 * brake * amp)
+	wings(brake * amp, 0.5 * brake * amp)
+	tail(0.0, -0.4 * brake * amp)
