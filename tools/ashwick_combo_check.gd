@@ -275,13 +275,19 @@ func _all() -> void:
 			K.flame_ticks > ft0 and P.reload_t == 0.0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
 	reset.call()
+	var pilot := "pilot%d" % P.get_instance_id()
+	ak.step(m, 0.3)
+	ok("lance: idle, no pilot flame in her palm", not K.fx.shown(pilot))
 	ak.step(m, 0.15, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
+	var pilot_col: Color = (K.fx.placed[pilot]["node"] as Node3D).material_override.get_shader_parameter("color") \
+		if K.fx.shown(pilot) else Color.BLACK
 	ok(
-		"lance: the cyan pilot shows, no fire for the first 0.2s",
-		K.fx.shown("pilot%d" % P.get_instance_id()) and K.hose.puffs.is_empty() and ak.dmg(T) == 0.0,
-		"puffs %d dmg %.1f" % [K.hose.puffs.size(), ak.dmg(T)]
+		"lance: the gold pilot shows (her fire, not blue), no fire for the first 0.2s",
+		K.fx.shown(pilot) and pilot_col.r > pilot_col.b + 0.5 and K.hose.puffs.is_empty() and ak.dmg(T) == 0.0,
+		"puffs %d dmg %.1f col %s" % [K.hose.puffs.size(), ak.dmg(T), pilot_col.to_html(false)]
 	)
 	ak.step(m, 0.6, func(): P.inp["fire"] = true; ak.aim_at(P, home + Vector3(1.5, 0, 0)))
+	ok("lance: roaring, the pilot is out", not K.fx.shown(pilot))
 	var reach: float = K.hose.reach_from(P.pos)
 	ok(
 		"lance: the stream runs its full ~6.1m past a close cursor", reach >= 5.6 and reach <= 7.6,
@@ -700,15 +706,21 @@ func _all() -> void:
 	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
+	var n1: int = K.foes_in(P.pos, float(K.e_def()["radius"])).size()     # a wandering third foe may stand in range
 	K._cloak_blast()
 	var shield1: float = P.shield
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	P.slot_lv["kin"] = 3
+	var n3: int = K.foes_in(P.pos, float(K.e_def()["radius"])).size()
 	K._cloak_blast()
+	var ed: Dictionary = K.e_def()
+	var per1 := float(ed["shield_base"]) + float(ed["shield_each"]) * n1     # the shield a hit count gives, per max hp
+	var per3 := float(ed["shield_base"]) + float(ed["shield_each"]) * n3
 	ok(
-		"cloak rank 3: shield +80% in all", shield1 > 5.0 and absf(P.shield / shield1 - 1.8) < 0.02,
-		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
+		"cloak rank 3: shield +80% in all (same foes in range)",
+		shield1 > 5.0 and absf((P.shield / per3) / (shield1 / per1) - 1.8) < 0.02,
+		"rank 1 %.1f (%d foes) rank 3 %.1f (%d foes)" % [shield1, n1, P.shield, n3]
 	)
 	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
 	ok("cinder: one charge at rank 1", K.rmb_charges() == 1)

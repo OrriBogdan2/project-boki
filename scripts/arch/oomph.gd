@@ -14,6 +14,8 @@ const STAGGER_FRAC := 0.12     # a hit of at least this share of max health stag
 const STAGGER_T := 0.28        # ... for this long
 const STAGGER_SLOW := 0.45     # ... slowed this much
 const HEAVY_FLINCH := 2.6      # the flinch of a stagger, relative to a chip hit
+const RULES := "res://content/rules/hit_flinch.json"
+static var _rules := {}
 static var legacy := false     # tooling (--legacy-shots): the old look, for before/after shots
 
 # ------------------------------------------------------------------ shooting
@@ -45,7 +47,7 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 	target.freeze_t = maxf(target.freeze_t, clampf(0.03 + frac * 0.35, 0.03, 0.09))
 	if target is Hunter:
 		var h := target as Hunter
-		h.hit_k = clampf(0.8 + frac * 9.0, 0.8, HEAVY_FLINCH) if not big else HEAVY_FLINCH
+		h.hit_k = HEAVY_FLINCH if big else hit_strength(frac, (o.get("kb", Vector2.ZERO) as Vector2).length())
 		h.hit_shake = maxf(h.hit_shake, clampf(frac * 1.6, 0.06, 0.22))
 		if by and is_instance_valid(by):
 			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()
@@ -62,6 +64,24 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 	elif target is Kin and target.model:
 		var away := target.pos - by.pos if by and is_instance_valid(by) else Vector3.ZERO
 		KinFlinch.hit(target.model, away, frac, (target as Kin).mass())
+
+## How hard a hit flinches (hit_k, chip = rules chip_k up to HEAVY_FLINCH): its share of max health and its
+## knock (m/s), weighted by content/rules/hit_flinch.json. The anim scales its flinch by it.
+static func hit_strength(frac: float, knock: float) -> float:
+	var r := rules()
+	var k := float(r["chip_k"]) + frac * float(r["frac_k"]) + knock * float(r["knock_k"])
+	return clampf(k, float(r["chip_k"]), HEAVY_FLINCH)
+
+## How much of the additive flinch layer a hit of strength `hit_k` plays: the rules' light share on a chip hit,
+## all of it by a stagger (the stagger itself takes the whole-body hit clip).
+static func flinch_weight(hit_k: float) -> float:
+	var r := rules()
+	return lerpf(float(r["light"]), 1.0, clampf(inverse_lerp(float(r["chip_k"]), HEAVY_FLINCH, hit_k), 0.0, 1.0))
+
+static func rules() -> Dictionary:
+	if _rules.is_empty():
+		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES))
+	return _rules
 
 ## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
 ## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
