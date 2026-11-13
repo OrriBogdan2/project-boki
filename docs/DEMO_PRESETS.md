@@ -35,3 +35,5 @@ From the editor build on Linux: `godot --path . -- --demo=match --hunter=mage`.
 ## Check
 
 `godot --headless --path . -- --demo-check` boots every preset for a few seconds and asserts the state above, that the demo save is never written and that your save file is byte for byte unchanged. Errors print as `SCRIPT ERROR`.
+
+For agent-played reel footage (1080p60, scripted shots on a GPU worker) see [PITCH_REEL.md](PITCH_REEL.md).
