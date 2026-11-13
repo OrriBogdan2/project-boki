@@ -39,6 +39,7 @@ static func opening(tier: int) -> String:
 	return Soundtrack.track("boss", "hollow") if tier >= 2 else Soundtrack.track("calm", "match_calm")
 
 func start(m: Match) -> void:
+	CombatBus.ability_used.connect(_ult_duck.bind(m))
 	if m.tier >= 2:
 		Sfx.play_music(opening(m.tier))
 		return
@@ -52,6 +53,12 @@ func start(m: Match) -> void:
 		Sfx.play_music(Soundtrack.picked(place))
 	else:
 		Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
+
+## A rival's ultimate going off (the wind-up, the cast, or an X ult) dips the score and the beds, so the cast reads.
+func _ult_duck(caster: Node, _ability: String, slot: String, m: Match) -> void:
+	var rival := caster as Hunter
+	if rival != null and slot in ["ult_fuse", "ult", "ultimate"] and m.player != null and rival.team != m.player.team:
+		Sfx.duck_for("ult", rival.pos)
 
 ## Ambience by place, every quarter second: the region's own bed, wind howling up from the abyss as
 ## you near an edge (or glide over it), the creak and grit of the old ruins among their walls, and now

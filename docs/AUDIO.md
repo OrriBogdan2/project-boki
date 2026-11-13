@@ -30,6 +30,28 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 ## Monsters
 `content/sfx/mobs.json` (`tools/gen_sfx_mobs.py`): `mdie_<kind>` is each voiced kind's death in its `v_<kind>` family (bosses use the Watcher's, pitched by body; a Shrubling keeps `die_small`), `mstag_open` ticks when a stagger window opens and `mstag_hit` lands the stagger. `MobSfx` (scripts/match/mob_sfx.gd) plays them at the monster and caps a pack dying at once to 3 death cues per 200 ms across kinds. `--mob-sfx-check` asserts the kind -> cue map and the cap.
 
+## Mix pass: loudness across all cues and ducking
+The files above are levelled by RMS at generation; cues added one branch at a time still drifted (a 12 dB spread inside "move"). `python3 tools/loudness_report.py` measures every cue in `audio/` (ITU-R BS.1770 integrated loudness, 400 ms gated blocks, K-weighted; sample peak; takes as one cue; standard library only, about 2 s) and groups them: weapon, ability, impact, boki, voice, move, ui, ambience. Targets, tolerance (+-2 LU) and the name patterns per category are in `content/rules/sfx_mix.json`. An outlier is brought in **through the cue table** `content/rules/sfx_cues.json` (dB added in `Sfx.play` and `loop_start`; files are untouched), at most 12 dB down / 3 dB up, boosts never past -1 dBFS peak. Ambience beds are measured but not trimmed (they play at -14 dB in `play_ambience`).
+- `--write` rebuilds the table, `--check` fails when it is stale (run after adding or regenerating a sound), `--outliers` lists the cues outside tolerance, `--md` prints the table below, `--tails NAME..` gives a cue's length, end level and decay time.
+- What is left outside tolerance after the table is peak-limited (a sound whose file peak is already -1 dBFS but whose body is quiet, e.g. `jug_meteor`, `vv_sky_strike`) or capped; fixing those means regenerating the sound with more body.
+
+Before and after (integrated LUFS; "outliers" = cues more than 2 LU from the target; 476 cues, 186 with a cue gain):
+
+| category | cues | target LUFS | median before | spread before (sd) | outliers before | median after | spread after (sd) | outliers after | trimmed | loudest peak dBFS |
+|---|---|---|---|---|---|---|---|---|---|---|
+| weapon | 23 | -19.5 | -20.3 | 3.2 | 12 | -19.7 | 2.3 | 7 | 9 | -1.0 |
+| ability | 186 | -19.5 | -19.4 | 2.2 | 70 | -19.5 | 1.3 | 15 | 64 | -0.9 |
+| impact | 55 | -20.0 | -21.3 | 1.9 | 24 | -20.8 | 1.2 | 10 | 20 | -1.0 |
+| boki | 25 | -20.0 | -20.2 | 1.6 | 4 | -20.0 | 0.9 | 0 | 4 | -1.1 |
+| voice | 66 | -21.0 | -21.4 | 2.1 | 23 | -21.1 | 0.8 | 0 | 23 | -1.1 |
+| move | 95 | -25.5 | -25.6 | 3.5 | 58 | -25.6 | 0.7 | 0 | 58 | -1.4 |
+| ui | 21 | -23.5 | -23.3 | 2.4 | 8 | -23.5 | 0.7 | 0 | 8 | -3.4 |
+| ambience | 5 | -20.5 | -20.5 | 1.7 | 2 | -20.5 | 1.7 | 2 | 0 | -4.4 |
+
+Ducking: `Sfx.duck` now dips the Music **and** Ambience buses (a bus effect, so it works for one track, the stems and the beds). A rival's ult (wind-up, cast, or an X ult; `MusicDir._ult_duck`) within 45 m dips them 9 dB, a knock call within 45 m (`Juice.knock`) 6 dB; both ease in in 0.12 s, hold 0.7 s / 0.35 s and come back in 1.0 s (`duck` in `sfx_mix.json`). Your own knock keeps its dip in `Match.knock`. `--match-audio-check` fires them and measures the buses.
+
+SFX_AUDIT row 18 (Tenzo's and Neve's ult tails): by ear is still not done. By measurement (`loudness_report.py --tails`, end level = the last 20 ms against the loudest 50 ms): Tenzo `br_spine` (1.6 s, -48 dB) and `br_crumble` decay cleanly; `br_rumble` was cut off at -23 dB after 0.42 s (an audible stop) and `br_crack` ended at -33 dB; Neve `rime_crash` (2.1 s), `rime_burst`, `rime_lock` and `rime_freeze` end under -45 dB, `rime_creak` takes at -28 to -36 dB. Mended with `tools/sfx_tail.py` (stdlib; `br_rumble` has no generator in tools/ and numpy-based generators do not run on every box): `br_rumble` --extend 0.3 --fade 0.4 (0.72 s, now ends -56 dB), `br_crack` --fade 0.1 (-57 dB), `rime_creak_1` --fade 0.06 (-43 dB). If `gen_sfx_tarek.py` / `gen_sfx_claire.py` regenerate these, give the fade in the generator instead.
+
 ## Names
 - A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_dash_air`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter` and the Thief, Neve and Tenzo kits via `HeroSfx.dash_name`: `_dash_air` when the Hunter has no floor under it, positional for rivals; `tools/gen_sfx_dash.py` makes the air variants from the ground ones, and `dash_empty`, the soft tick of a Shift press with no charge, played by `PressDeny` in place of `ui_deny`; a kit's dash plays it too, through `ArchKit.travel` and the Hunter's dash), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
