@@ -108,6 +108,8 @@ func _med(a: Array) -> float:
 func run(main: Node) -> void:
 	var kits: Array = []
 	for id in Arch.ids():
+		if String(id) == "gil":      # ours, not one of the twelve source kits the band is held to
+			continue
 		var k := _kit(String(id))
 		kits.append({"dmg_s": k["dmg"] / k["cd"], "cc": k["cc"], "travel": k["travel"]})
 	ok(kits.size() == 12, "twelve kits' E abilities read")
