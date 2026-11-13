@@ -447,6 +447,14 @@ func _upright(p: Dictionary) -> Dictionary:
 			out[k] = tilt * ((p[k] as Vector3) - (p["hips"] as Vector3))
 	return out
 
+## The arm bones as seen from the hips, so a cartwheel's whole-body turn is not counted as the arm flinging.
+func _turn_with_hips(p: Dictionary) -> void:
+	var inv: Basis = (p["turn"] as Basis).inverse()
+	for k in p:
+		if p[k] is Vector3 and k != "hips":
+			p[k] = inv * ((p[k] as Vector3) - (p["hips"] as Vector3))
+	p["hips"] = Vector3.ZERO
+
 func _t_posed(p: Dictionary, side: String) -> bool:
 	var d := _elbow(p, side)
 	return d.angle_to(Vector3.DOWN) > T_ELEV and absf(d.x) > SIDEWAYS * absf(d.z)

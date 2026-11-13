@@ -273,12 +273,7 @@ posts scroll at the move speed).
 
 **Sable (`thief`)**
 1. Feet slid 60 % of the run speed, 73 % at a walk (now 17 %, 39 %); both arms paced their legs (counter -0.96, fixed to +0.82).
-2. vault_r flung the free arm and held it sideways (fixed with `free_arm`, vault_l mirrored). `--anim-audit`, hips upright,
-   before -> after: vault_r free arm 1.44 -> 0.06 body heights, sideways 12 -> 0 %, any arm 21 -> 17 %; vault_l (mirror,
-   measured by adding it to the list for this run) 1.47 -> 0.04, 21 -> 0 %, 25 -> 17 %. The pistol arm (2.12 and 1.75 body
-   heights, jump 0.53 and 0.50) and the dash (4.5 m in 0.48 s) are unchanged. In the old model frame vault_r read free
-   2.62 -> 2.23, sideways 54 -> 29 %, any arm 58 -> 50 %: the whole-body roll of the cartwheel counted as the arm.
-   ![thief vault_r at the match camera, before (top) and after, 8 frames (GPU jobq 20261111-160007-08120, 20261111-155841-11263)](anim_audit/thief_vault.jpg)
+2. vault_r flung both arms up and into the chest tuck in one 30 fps key each (hand jump 0.53 body heights in one frame) and held an arm sideways for 58 % (world frame). Fixed by re-keying the arms only (`tools/art1/glb_bone_retime.py`, vault_r and vault_l, body beats untouched): the arms swing up by 0.08 s, cross to the chest by 0.16 s, the landing is unchanged; both pistols stay in hand and readable, no free arm. Hand jump 0.53 -> 0.28; from the hips the arms are sideways 25 % (was 21 %: the arc now passes the side over 3 frames instead of snapping). The attack rows now read the arms from the hips (a whole-body flip no longer counts as arm travel). Before/after (top/bottom, 8 frames, `--close`): ![sable vault_r](anim_audit/thief_vault.jpg)
 3. Idle to walk first-pose gap 0.20.
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
