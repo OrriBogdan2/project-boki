@@ -537,13 +537,14 @@ func _thrive_part() -> void:
 ## Toy training +25% for a thriver (never less), and the daily pull stops at the limit.
 func _train_pull_part(rec: Dictionary, other: Dictionary) -> void:
 	GardenZones.here = "cinderstep"
-	rec["zone"] = "cinderstep"
+	rec["zone"] = GardenZones.start()      # lives elsewhere: only thrive counts (--zone-affinity-check has the rest)
 	var gain := [0, 0]
 	for i in 400:
 		gain[0] += GardenZones.train_gain(rec, 1)
 		gain[1] += GardenZones.train_gain(other, 1)
 	ok(gain[1] == 400 and gain[0] > 440 and gain[0] < 560,
 		"a thriver's toys train about +25%% (%d vs %d per 400)" % [gain[0], gain[1]])
+	rec["zone"] = "cinderstep"
 	var P: Dictionary = GardenZones.rules()["trait_pull"]
 	rec["traits"]["temper"] = 0.5
 	BaseDrift.day([rec])
