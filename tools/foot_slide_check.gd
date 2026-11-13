@@ -16,7 +16,7 @@ const DIRS := {"f": Vector3(0, 0, -1), "b": Vector3(0, 0, 1), "l": Vector3(-1, 0
 ## archer (Lace, 4.4) and tender (Meeko, 2.5) are the measured worst on the v95 models and clips main took after
 ## the sweep was written (were 1.75 and 1.9): bars at today's value until their
 ## forward and strafe loops are refitted (DEBT.md).
-const BAR := {"archer": 4.4, "juggernaut": 2.0, "gunslinger": 1.7, "bulwark": 1.3, "ashwick": 2.4, "tender": 2.5,
+const BAR := {"archer": 4.4, "juggernaut": 1.9, "gunslinger": 1.7, "bulwark": 1.25, "ashwick": 2.15, "tender": 2.5,
 		"dolm": 2.7, "dredge": 1.75, "mage": 2.1, "thief": 1.85}
 
 var bad := 0
