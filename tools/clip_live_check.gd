@@ -2,7 +2,7 @@ extends RefCounted
 ## --clip-live-check: Kael's clips through the real match code: a Match, its Hunters, the kit's own keys and the render
 ## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play
 ## clips and the haul's lean goes where he is heading, not along the chain; a knock-out plays the death clip on screen,
-## then he is gone.
+## then he is gone; a stun, a root and Grounded each show on his clips.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -95,8 +95,32 @@ func run(main: Node) -> void:
 	ok(reel_frames > 0 and lean_worst <= LEAN_OFF, "the haul leans on his heading (worst %.2f rad, %d frames)"
 			% [lean_worst, reel_frames])
 	print("LIVE heading up to %.2f rad off the chain" % off_chain)
-	# a knock-out
+	# crowd control through the Hunter's own timers and KitStatus: each shows on his clips while it runs
+	K.warchain.snap()
 	K.warchain.state = "ready"
+	K.anim_id = ""
+	P.inp["move"] = Vector2.ZERO
+	for f in 60:
+		_frame(m, [P])
+	P.stun_t = 0.5
+	for f in 12:
+		_frame(m, [P])
+	ok(_clips(P).cur == "stun" and _clips(P).act_w >= 1.0, "a stun plays his stun clip (%s)" % _clips(P).cur)
+	P.stun_t = 0.0
+	P.root_t = 0.5
+	for f in 12:
+		_frame(m, [P])
+	ok(_clips(P).cc.root_w >= 1.0, "a root strains his torso (%.2f)" % _clips(P).cc.root_w)
+	P.root_t = 0.0
+	KitStatus.apply(P, "gnd", 0.5, 0.0, false)
+	for f in 12:
+		_frame(m, [P])
+	ok(_clips(P).crouch_w >= 1.0 and _clips(P).cc.gnd_w >= 1.0, "Grounded drops him into the crouch (%.2f)"
+			% _clips(P).crouch_w)
+	for f in 40:
+		_frame(m, [P])
+	ok(_clips(P).crouch_w <= 0.0 and _clips(P).cc.root_w <= 0.0 and _clips(P).act_w <= 0.0, "all three let go")
+	# a knock-out
 	P.lives = 1
 	for f in 30:
 		_frame(m, [P])
