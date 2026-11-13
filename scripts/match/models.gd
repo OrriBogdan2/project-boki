@@ -2199,15 +2199,10 @@ static func nesting_nook() -> Node3D:
 	return root
 
 ## An egg in a straw nest, for kin you raise from an egg at home.
-static func nest_egg(c: Color, spot: Color) -> Node3D:
+static func nest_egg(kind: String, glow := 0.0, seam := Color(0, 0, 0, 0)) -> Node3D:
 	var root := Node3D.new()
 	part(root, cyl(0.42, 0.34, 0.16, 16), toon(Color("c9a46a")), Vector3(0, 0.08, 0))
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	part(shell, sphere(0.26, 16), toon(c.lightened(0.15)), Vector3(0, 0.36, 0), Vector3(0.92, 1.25, 0.92))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(c.r * 1000 + spot.g * 100)
-	for i in 6:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.2, 0.55)
-		part(shell, sphere(0.05, 8), toon(spot), Vector3(cos(a) * 0.22, y, sin(a) * 0.22), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell(kind, 0.65, 0.035, glow, seam))
 	return root
 
 ## The Incubator beside the Nesting Nook: a clay brazier with a copper hood on a round stone hearth,
@@ -2281,17 +2276,10 @@ static func incubator() -> Node3D:
 			shelf.add_child(mk)
 	return root
 
-## A small gold Rare Egg for the incubator's shelf and cradle, spotted in the colour of the kin inside.
-static func rare_egg_small(spot: Color, s := 1.0) -> Node3D:
+## A small Rare Egg for the incubator's shelf and cradle, its seam ring in the colour of the kin inside.
+static func rare_egg_small(seam: Color, s := 1.0) -> Node3D:
 	var root := Node3D.new()
-	var shell := Node3D.new(); shell.name = "Shell"; root.add_child(shell)
-	var gold := toon(Color("ffd36a"), true, 0.35)
-	part(shell, sphere(0.26 * s, 16), gold, Vector3(0, 0.3 * s, 0), Vector3(0.9, 1.22, 0.9))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(spot.r * 991 + spot.g * 113 + spot.b * 7)
-	var sm := toon(spot, false, 1.0)
-	for i in 7:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.16, 0.5)
-		part(shell, sphere(0.045 * s, 8), sm, Vector3(cos(a) * 0.215 * s, y * s, sin(a) * 0.215 * s), Vector3(1, 1, 0.5))
+	root.add_child(EggModels.shell("rare", 0.63 * s, 0.0, 0.2, seam))
 	return root
 
 # ---------------------------------------------------------------- monsters

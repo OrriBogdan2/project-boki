@@ -4166,10 +4166,9 @@ func _refresh_nest() -> void:
 	var egg: Dictionary = Save.d.get("egg", {})
 	if egg.is_empty() or _visiting():
 		return
-	var col: Color = Data.KIN[_egg_species()]["color"] if _egg_species() != "" else Color("f2e6cf")
 	if egg.get("rare", false):
-		# a boss's egg: gold, glowing, with the rare kin's colour in its spots
-		nest = Models.nest_egg(Color("ffd36a"), Data.KIN[_egg_species()].get("glow", col) if _egg_species() != "" else col)
+		# a boss's egg: the gold Rare Egg, glowing, its seam ring in the rare kin's glow
+		nest = Models.nest_egg("rare", 0.35, Data.KIN[_egg_species()].get("glow", Color("6fe0d0")) if _egg_species() != "" else Color("6fe0d0"))
 		var sp2 := CPUParticles3D.new()
 		sp2.amount = 16; sp2.lifetime = 1.6; sp2.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; sp2.emission_sphere_radius = 0.35
 		sp2.direction = Vector3.UP; sp2.spread = 25.0; sp2.initial_velocity_min = 0.3; sp2.initial_velocity_max = 0.8; sp2.gravity = Vector3.ZERO
@@ -4177,7 +4176,7 @@ func _refresh_nest() -> void:
 		sp2.material_override = Models.glow_mat(Color(1.0, 0.88, 0.45, 0.9)); sp2.position.y = 0.4
 		nest.add_child(sp2)
 	else:
-		nest = Models.nest_egg(col, Color("fff6c0"))
+		nest = Models.nest_egg(EggModels.kind_of(_egg_species()))
 	nest.position = NEST_AT
 	add_child(nest)
 
@@ -5040,12 +5039,10 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	Save.save_game()
 	building_now = true
 	# the egg hatches in stages: wiggles, cracks, a peek, then the kin pops out
-	var shell_c: Color = Color("ffd36a") if rare else Color(Data.KIN[baby["species"]]["color"]).lightened(0.15)
 	if is_instance_valid(hide):
 		hide.visible = false
 	var eh := EggHatch.new(baby["species"], fx, 0.26, 0.36, 1.0, baby)
-	eh.shell_col = shell_c
-	eh.spot_col = Color("fff6c0")
+	eh.kind = "rare" if rare else ""
 	eh.position = at
 	eh.scale = Vector3.ONE * 1.2
 	add_child(eh)
