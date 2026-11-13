@@ -7,13 +7,15 @@ extends RefCounted
 ##      with a box from it (or UiFrame)
 ##   4. no stray hard-coded panel styles: no StyleBoxFlat.new(), UI._box() or per-screen theme
 ##      outside the style module (the in-match HUD and reserved files excepted, see ALLOWED)
+##   5. building the theme logs no engine error (every startup logged one, so it was the last line
+##      of each GPU bench crash and read as its cause)
 
 var main: Node
 var fails := 0
 var n := 0
 
-## Files that may still build their own boxes: the HUD (ext/hudref owns its look), its loot rows and
-## full-pack window (LootHold, split out of hud.gd) and reserved files.
+## Files that may still build their own boxes: the HUD (ext/hudref owns its look), its item rows
+## (LootHold, split out of hud.gd) and reserved files.
 const ALLOWED := ["scripts/ui/hud.gd", "scripts/ui/loot_hold.gd", "scripts/ui/kin_reveal.gd"]
 const STYLE_MODULE := [
 	"scripts/ui/ui.gd", "scripts/ui/ui_theme.gd", "scripts/ui/ui_frame.gd", "scripts/ui/hud_style.gd",
@@ -32,10 +34,27 @@ func run(main_node: Node) -> void:
 	_removed(src)
 	await _migration()
 	_static_styles(src)
-	_theme_types()
+	_theme_builds_clean()
 	await _screens()
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Counts the engine errors logged while it is added (OS.add_logger).
+class ErrorCount extends Logger:
+	var errors: Array[String] = []
+
+	func _log_error(_function: String, _file: String, _line: int, code: String, rationale: String,
+			_editor_notify: bool, _error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+		errors.append(rationale if rationale != "" else code)
+
+func _theme_builds_clean() -> void:
+	var count := ErrorCount.new()
+	OS.add_logger(count)
+	var t := UiTheme.build()
+	OS.remove_logger(count)
+	ok("theme builds without an engine error", count.errors.is_empty(), "; ".join(count.errors))
+	ok("OptionButton is styled as itself", t.has_stylebox("normal", "OptionButton"))
+	ok("custom button types still vary Button", t.get_type_variation_base("Primary") == &"Button")
 
 # ------------------------------------------------------------------ 1, 2: the settings
 ## path -> source text of every script under dir.
@@ -134,23 +153,6 @@ func _static_styles(src: Dictionary) -> void:
 				dim_heads.append(path)
 	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
 
-## Collects engine errors (the theme build logs one and carries on).
-class ErrLog extends Logger:
-	var errors: Array = []
-	func _log_error(_fn: String, _file: String, _line: int, _code: String, rationale: String, _editor: bool, _type: int, _bt: Array) -> void:
-		errors.append(rationale)
-
-## Sentry PROJECT-BOKI-1: building the theme must not log an engine error (a native class like
-## OptionButton can't be a type variation); native types are styled as themselves, custom ones vary Button.
-func _theme_types() -> void:
-	var errs := ErrLog.new()
-	OS.add_logger(errs)
-	var t := UiTheme.build()
-	OS.remove_logger(errs)
-	ok("UiTheme.build logs no engine error", errs.errors.is_empty(), str(errs.errors))
-	ok("OptionButton is styled as itself", t.has_stylebox("normal", "OptionButton"))
-	ok("custom button types still vary Button", t.get_type_variation_base("Primary") == &"Button")
-
 func _theme_boxes() -> Dictionary:
 	var out := {}
 	var t := UI.theme()
@@ -177,10 +179,16 @@ func _off_look(root: Node, ours: Dictionary) -> Array:
 		out.append(String(root.get_path_to(ctl)) + (" (%s)" % owner_script.resource_path if owner_script else ""))
 	return out
 
+## Opens `screen` and waits until it is the new, built, uncovered screen. Under the ink wipe
+## (xvfb, real play) `main.current` is still the outgoing screen, or gone, for the first second.
 func _go(screen: String) -> Node:
+	var old_id: int = main.current.get_instance_id() if main.current else 0
 	Game.goto(screen)
-	for i in 10:
+	for i in 600:
 		await main.get_tree().process_frame
+		var cur: Node = main.current
+		if i >= 9 and cur and cur.get_instance_id() != old_id and not main.fade.covered and not cur.get("building"):
+			break
 	return main.current
 
 func _screens() -> void:
@@ -199,6 +207,9 @@ func _screens() -> void:
 		await main.get_tree().process_frame
 		var off := _off_look(Overlay.root, ours)
 		ok("settings > %s: every box is the menu look" % t, off.is_empty(), str(off))
+		var switches := Overlay.root.find_children("*", "CheckButton", true, false)
+		var models := switches.filter(func(c): return c.text == "3D model")
+		ok("settings > %s: no per-Warden \"3D model\" switch" % t, models.is_empty())
 	Overlay.close()
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame
