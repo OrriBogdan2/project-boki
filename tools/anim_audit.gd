@@ -6,7 +6,8 @@ extends RefCounted
 ##    foot is planted (m/s and % of the speed), the clip's own speed, hip bob, arm swing against the legs, how far
 ##    the arms reach;
 ##  - the loop seam of walk_f, run_f and the idle, and the pop from the idle into the walk and the walk into the run;
-##  - the two attacks of anim_shots.gd: the weapon hand's travel and how long an arm stands out sideways.
+##  - the two attacks of anim_shots.gd, with the hips upright: the weapon hand's travel and how long an arm stands
+##    out sideways.
 ## Prints one line per Hunter and writes every number to --json.
 
 const DT := 1.0 / 30.0
@@ -14,21 +15,25 @@ const WARM_S := 1.0          # s of locomotion before a sample, so the blends ha
 const SAMPLE_S := 2.4        # s of locomotion sampled
 const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
+const SOLE_BAND := 0.02      # m: a foot vert this close to the foot's lowest at rest is on the sole
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
 const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## The gate (every Hunter whose clips move the legs): at the jog (mid-blend) and at full stick a planted foot slides at
-## most this share of the speed, and the arms swing against their legs at least this much at full stick (-1: with,
-## +1: against; reach-weighted).
+## most this share of the speed, and at full stick the arms swing against their legs at least this much (-1: with,
+## +1: against; reach-weighted), and the hips bob at most this far (lights 4 to 9 cm, heavies up to 10; 15 cm and more
+## reads bouncy at match zoom).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
-const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+const MAX_BOB_CM := 11.0
+const NO_LEGS := ["ostra"]     # ostra hovers: a backlog item
 const JOG_OPEN := ["tender"]     # the clips' stride caps the jog too (RATE_MAX): the "stride cap" backlog item
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
 var holder: Node3D
 var rows := {}
+var soles := {}              # "L"/"R" -> [heel, toe] in the foot bone's frame (the skinned sole's back and front ends)
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -51,13 +56,14 @@ func _hero(main: Node, id: String) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)     # (only the fixed steps below move the clips: a real frame's dt would shift their phase)
 	for k in 5:
 		await main.get_tree().process_frame
-	var sync := m.get_node("Warden/Sync")
-	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
+	soles = _soles(sk)
 	var row := {}
 	var rest := _pose_at(sync, clips, sk, String(lc["idle"]), 0.0)
 	row["same_side"] = {"hand_foot": signf((rest["hand.L"] as Vector3).x) == signf((rest["foot.L"] as Vector3).x),
@@ -88,10 +94,11 @@ func _hero(main: Node, id: String) -> void:
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	var jog: Dictionary = live[str(SPEEDS[1])]
-	var fmt := "AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d"
+	var fmt := "AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%, sole %d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d"
 	fmt += "; jog: slide %d%%"
-	print(fmt % [id, hgt, top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["clip_speed"], top["counter"],
-			top["bob_cm"], top["peaks"], round(100.0 * jog["slide"] / SPEEDS[1])])
+	print(fmt % [id, hgt, top["slide"], round(100.0 * top["slide"] / SPEEDS[2]),
+			round(100.0 * top["sole_slide"] / SPEEDS[2]), top["clip_speed"], top["counter"], top["bob_cm"],
+			top["peaks"], round(100.0 * jog["slide"] / SPEEDS[1])])
 	if not id in NO_LEGS:
 		_gate(id, live)
 	m.free()
@@ -107,11 +114,17 @@ func _gate(id: String, live: Dictionary) -> void:
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
 		bad += 1
+	if top["bob_cm"] > MAX_BOB_CM:
+		print("FAIL %s: hips bob %.1f cm at a run (limit %.0f)" % [id, top["bob_cm"], MAX_BOB_CM])
+		bad += 1
 
-## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction.
-func _read(sk: Skeleton3D) -> Dictionary:
+## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction and the hips' up axis.
+static func points(sk: Skeleton3D) -> Dictionary:
 	var out := {}
 	var xf := sk.global_transform
+	var hips := WardenSkeleton.find(sk, "hips")
+	out["hips_up"] = (xf.basis * sk.get_bone_global_pose(hips).basis * sk.get_bone_global_rest(hips).basis.inverse()
+			* Vector3.UP).normalized()
 	for b in ["hips", "head", "hand.L", "hand.R", "upper_arm.L", "upper_arm.R", "forearm.L", "forearm.R"]:
 		out[b] = xf * sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
 	for side in ["L", "R"]:
@@ -120,6 +133,69 @@ func _read(sk: Skeleton3D) -> Dictionary:
 		var gs := sk.get_bone_global_pose(shin)
 		var leg := (sk.get_bone_global_rest(shin).origin - sk.get_bone_global_rest(thigh).origin).length()
 		out["foot." + side] = xf * (gs.origin + gs.basis.y.normalized() * leg)
+		if soles.has(side):
+			var ft := sk.get_bone_global_pose(WardenSkeleton.find(sk, "foot." + side))
+			out["heel." + side] = xf * ft * (soles[side][0] as Vector3)
+			out["toe." + side] = xf * ft * (soles[side][1] as Vector3)
+	return out
+
+## Each foot's heel and toe: the back and front ends of the verts skinned mostly to it that sit on its sole at rest,
+## in the foot bone's frame. A pinned sole pivots on one of them, so the slide is read there, not at the ankle
+## (which rolls forward over a heel-to-toe stance). Empty for a side without a foot bone or verts (the ankle then).
+func _soles(sk: Skeleton3D) -> Dictionary:
+	var pts := {"L": [], "R": []}
+	for mi in sk.find_children("*", "MeshInstance3D", true, false):
+		var skin: Skin = (mi as MeshInstance3D).skin
+		var mesh: Mesh = (mi as MeshInstance3D).mesh
+		if skin == null or mesh == null:
+			continue
+		var bind := {}       # bind index -> side
+		for i in skin.get_bind_count():
+			var bi := skin.get_bind_bone(i)
+			if bi < 0:
+				bi = sk.find_bone(skin.get_bind_name(i))
+			for side in pts:
+				if bi >= 0 and bi == WardenSkeleton.find(sk, "foot." + side):
+					bind[i] = side
+		if bind.is_empty():
+			continue
+		for si in mesh.get_surface_count():
+			var arr := mesh.surface_get_arrays(si)
+			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bones = arr[Mesh.ARRAY_BONES]
+			var ws = arr[Mesh.ARRAY_WEIGHTS]
+			if bones == null or ws == null or vs.is_empty():
+				continue
+			var per: int = bones.size() / vs.size()
+			for v in vs.size():
+				for k in per:
+					var b := int(bones[v * per + k])
+					if bind.has(b) and float(ws[v * per + k]) >= 0.5:
+						pts[bind[b]].append(skin.get_bind_pose(b) * vs[v])
+	var out := {}
+	for side in pts:
+		var fi := WardenSkeleton.find(sk, "foot." + side)
+		if fi < 0 or (pts[side] as Array).is_empty():
+			continue
+		var rest := sk.get_bone_global_rest(fi)
+		var low := INF
+		for q in pts[side]:
+			low = minf(low, (rest * (q as Vector3)).y)
+		var heel := Vector3.ZERO
+		var toe := Vector3.ZERO
+		var back := -INF
+		var front := INF
+		for q in pts[side]:
+			var r: Vector3 = rest * (q as Vector3)
+			if r.y > low + SOLE_BAND:
+				continue
+			if r.z > back:
+				back = r.z
+				heel = q
+			if r.z < front:
+				front = r.z
+				toe = q
+		out[side] = [heel, toe]
 	return out
 
 func _height(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String) -> float:
@@ -132,7 +208,7 @@ func _pose_at(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, t: f
 		sync.call("_process", DT)
 	clips.force = {"clip": clip, "t": t}
 	sync.call("_process", DT)
-	var p := _read(sk)
+	var p := points(sk)
 	clips.force = {}
 	return p
 
@@ -145,7 +221,7 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 	for i in n:
 		clips.force = {"clip": clip, "t": minf(length * i / (n - 1), length - 0.001)}
 		sync.call("_process", DT)
-		out.append(_read(sk))
+		out.append(points(sk))
 	clips.force = {}
 	return out
 
@@ -158,25 +234,28 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	var fr: Array = []
 	for k in int(SAMPLE_S / DT):
 		sync.call("_process", DT)
-		fr.append(_read(sk))
+		fr.append(points(sk))
 	m.set_meta(WardenClips.STATE, {})
-	var out := _slide(fr, s)
+	var out := _slide(fr, s, false)
+	out["sole_slide"] = _slide(fr, s, true)["slide"]
 	out.merge(_swing(fr))
 	return out
 
 ## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
-func _slide(fr: Array, s: float) -> Dictionary:
+## `sole`: read it at the lower of the heel and toe (the point a pinned sole pivots on), not the ankle (the gate's).
+func _slide(fr: Array, s: float, sole: bool) -> Dictionary:
 	var slide := 0.0
 	var peak := 0.0
 	var back := 0.0
 	var n := 0
-	for f in ["foot.L", "foot.R"]:
+	for side in ["L", "R"]:
 		var lo := INF
 		var hi := -INF
 		for p in fr:
-			lo = minf(lo, (p[f] as Vector3).y)
-			hi = maxf(hi, (p[f] as Vector3).y)
+			lo = minf(lo, (p[_contact(p, side, sole)] as Vector3).y)
+			hi = maxf(hi, (p[_contact(p, side, sole)] as Vector3).y)
 		for i in range(1, fr.size() - 1):
+			var f := _contact(fr[i], side, sole)
 			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
 				continue
 			var v: float = ((fr[i + 1][f] as Vector3).z - (fr[i - 1][f] as Vector3).z) / (2.0 * DT)     # +Z: backward
@@ -185,6 +264,12 @@ func _slide(fr: Array, s: float) -> Dictionary:
 			back += v
 			n += 1
 	return {"slide": slide / maxi(n, 1), "slide_max": peak, "clip_speed": back / maxi(n, 1), "planted": n}
+
+## The point a foot stands on in frame p: the lower of its heel and toe, or the ankle (not `sole`, or no soles).
+func _contact(p: Dictionary, side: String, sole: bool) -> String:
+	if not sole or not p.has("heel." + side):
+		return "foot." + side
+	return "heel." + side if (p["heel." + side] as Vector3).y <= (p["toe." + side] as Vector3).y else "toe." + side
 
 ## Hip bob, arm swing against the legs (1: each arm swings against its own-side leg, 0: none) and how far they swing.
 func _swing(fr: Array) -> Dictionary:
@@ -273,7 +358,7 @@ func _touch(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> flo
 	return float(best) / (fr.size() - 1)
 
 func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
-	var fr := _clip_frames(sync, clips, sk, clip, 24)
+	var fr := _clip_frames(sync, clips, sk, clip, 24).map(_upright)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
 	var out_side := {"L": 0, "R": 0}
@@ -295,6 +380,16 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"t_free": float(out_side[loose]) / fr.size(),
 			"jump": jump / hgt}
+
+## The points about the hips with the hips' tilt taken out, so a whole-body roll or flip (Sable's cartwheel) does not
+## count as an arm flung or raised. A turn about the vertical (a twisted stance) is kept: the arm is read as before.
+func _upright(p: Dictionary) -> Dictionary:
+	var tilt := Basis(Quaternion(p["hips_up"] as Vector3, Vector3.UP))
+	var out := {}
+	for k in p:
+		if k != "hips_up":
+			out[k] = tilt * ((p[k] as Vector3) - (p["hips"] as Vector3))
+	return out
 
 func _t_posed(p: Dictionary, side: String) -> bool:
 	var d: Vector3 = (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
