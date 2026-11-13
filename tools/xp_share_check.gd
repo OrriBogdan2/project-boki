@@ -129,8 +129,10 @@ func _steal_boss(F: Dictionary, A: Array, B: Array, boss_xp: float) -> void:
 	if b.buried:
 		b._clear_attack()
 	b.stagger_t = 0.0
-	b.hurt(b.hp * 0.95, A[0], {"src": "shot"})
-	b.stagger_t = 0.0
+	# (small hits until A is past 90%: a kit bonus, e.g. the Juggernaut's rage, can turn one big hit into the kill)
+	while float(b.damage_by.get(A[0].team, 0.0)) <= b.max_hp * 0.92 and not b.dead:
+		b.hurt(b.max_hp * 0.02, A[0], {"src": "shot"})
+		b.stagger_t = 0.0
 	ok(float(b.damage_by.get(A[0].team, 0.0)) > b.max_hp * 0.9 and not b.dead,
 		"%s: squad A has dealt over 90%% of it and it still stands" % kind)
 	_zero_xp()      # (nothing steps between here and the kill)
