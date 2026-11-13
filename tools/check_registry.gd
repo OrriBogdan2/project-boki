@@ -193,6 +193,7 @@ const CHECKS := {
 	# the cursor on or under your own body
 	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],
 	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],  # key to picture
+	"--sfx-silence-audit": ["res://tools/sfx_silence_audit.gd", "sfx_silence_audit", null],
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
