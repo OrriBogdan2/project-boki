@@ -46,6 +46,12 @@ const T := {
 	"jump_airtime":            ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
 	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
 	"air_reverse_dv":          [">=", 5.0, "m/s", "[owner 11-08] strong WASD air control"],
+	# landing carry (_landing_carry): run speed at take-off, then a fall onto flat ground with the keys held;
+	# touchdown speed / run speed (UE ProcessLanded zeroes only Z, so you land with what you carried)
+	"land_carry_hop_held":     ["~", [0.98, 1.02], "x", "[game data] a 1 m hop, keys held: lands at run speed"],
+	"land_carry_drop4_held":   ["~", [0.98, 1.02], "x", "[game data] a 4-terrace (3.2 m) drop, keys held: run speed"],
+	# the glide's extra over run bleeds at tuning.json air.drag 2/s, the owner's 11-08 model (decision 0052)
+	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
 	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
@@ -393,6 +399,7 @@ func _jump() -> void:
 	rec("jump_speed_vs_source", v0 / SOURCE_JUMP_V)
 	rec("jump_airtime", air)
 	_air_control()
+	_landing_carry()
 	# coyote time: step off over open air (the walk-off path sets coyote), press jump k frames later
 	var best := 0
 	var rim := _find_rim()
@@ -480,6 +487,31 @@ func _air_control() -> void:
 			land_vx = P.vel.x
 		else:
 			rec("air_reverse_dv", land_vx - P.vel.x)
+
+## Ways down for the land_carry_* rows: a 1 m hop, a 4-terrace drop and a glide let go 2 m up (metres of fall).
+const CARRY_CASES := {"hop": 1.0, "drop4": 4.0 * World.LEVEL, "glide": 2.0}
+
+## How much of a run survives each way down with the keys held (land_carry_*).
+func _landing_carry() -> void:
+	for c in CARRY_CASES:
+		_reset(flat + Vector3(-4.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
+		var run := _hv(P).length()
+		P.pos.y = flat.y + float(CARRY_CASES[c])
+		P.grounded = false
+		P.vel.y = 0.0
+		if c == "glide":     # opened in the air at glide speed, then let go
+			P.air_t = 1.0
+			P.gliding = true
+			P.vel.x = Hunter.GLIDE_SPEED
+			P.inp["glide"] = true
+			m.step(DT)
+			P.inp["glide"] = false
+		for i in 180:
+			m.step(DT)
+			if P.grounded: break
+		rec("land_carry_%s_held" % c, _hv(P).length() / run)
 
 # ---------------------------------------------------------------- glide
 func _glide_at(h: float) -> void:
