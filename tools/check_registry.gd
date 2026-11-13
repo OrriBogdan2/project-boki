@@ -153,6 +153,7 @@ const CHECKS := {
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	"--cooldown-text-check": ["res://tools/cooldown_text_check.gd", "cooldown_text_check", null],      # seconds left and charges on the bar
+	"--ability-bar-check": ["res://tools/ability_bar_check.gd", "ability_bar_check", null],      # charges + slot timers on the bar
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--charge-hint-check": ["res://tools/charge_hint_check.gd", "charge_hint_check", null],
@@ -268,6 +269,7 @@ const CHECKS := {
 	"--inv-shots": ["res://tools/inv_shots.gd", "inv_shots", null],      # --shots-dir=<dir>, --resolution
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],      # --shots-dir=<dir>
 	"--xp-tracker-shots": ["res://tools/xp_tracker_shots.gd", "xp_tracker_shots", null],      # --shots-dir=<dir>
+	"--ability-bar-shots": ["res://tools/ability_bar_shots.gd", "ability_bar_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
 	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],      # --shots-dir=<dir> --res=WxH
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
