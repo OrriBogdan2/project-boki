@@ -1562,6 +1562,7 @@ func _update_keys() -> void:
 		var over := "" if is_instance_valid(menu) else _tag_under_mouse()
 		_light(_node_of(over) if over != "w" else null)
 		state["over"] = occ_name(over)
+		state.merge(FarmBuildUi.hover_state(over))
 		if over == "w":
 			text = "Pond water: paint over it with Grass (clear) to fill it in"
 		elif over != "":
@@ -1616,6 +1617,8 @@ func input(event: InputEvent) -> bool:
 		if event.is_action_pressed("store"):
 			_store_key()
 			return true
+	if event.is_action_pressed("interact") and held.is_empty() and FarmBuildUi.show_upgrade(self, _tag_under_mouse()):
+		return true
 	if event.is_action_pressed("rotate"):
 		if not held.is_empty(): rotate_held()
 		elif _tag_under_mouse() != "": rotate_placed(_tag_under_mouse())
