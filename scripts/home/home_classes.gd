@@ -36,6 +36,7 @@ static func open(home: Node, sel := "") -> void:
 	var v: VBoxContainer = home._new_panel(TITLE, 1210, true)
 	UI.subtitle(v, "Who you play. Every Hunter opens with its own challenge, then hold to unlock it. "
 			+ "K: the full kit card.")
+	v.add_child(HunterStats.tab_row(home, TITLE))
 	var cols := UI.hbox(16)
 	v.add_child(cols)
 	var left := UI.vbox(10)
