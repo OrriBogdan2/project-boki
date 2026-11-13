@@ -5,10 +5,16 @@ extends RefCounted
 ## One tap: the rifle snaps straight up and fires a shell into the sky. It comes down exactly where the cursor
 ## was (clamped to its range) after a fixed fall. Everyone sees the ground disc fill with its hot centre the whole
 ## time, a fair window to step out. The impact hits everyone on the disc, harder in the centre, and leaves a
-## burning patch that hurts and slows for a few seconds. Vex is free to move and shoot throughout.
+## burning patch that hurts and slows for a few seconds. Vex stands through the shot (COMMIT), then is free to move
+## and shoot while it falls.
 
 const FALL := "fall"
 const BURN := "burn"
+const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.14),
+                                 # the source's raise, then fire
+const COMMIT := 0.76             # s she is held from the tap: the source's ~0.8 s, rifle raised, fired and lowered
+                                 # (briefs/hero-ref/venator.md, R 4: 561.8-562.4 s); the x clip (0.6 s) hands the
+                                 # body back (+ WardenClips.FADE_LOCO) on the same frame, under one 0.2 s footage frame
 const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const CHAR := Color("2a1018")    # the disc's scorched inside
@@ -38,25 +44,19 @@ func running() -> bool:
 ## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
 func cast() -> bool:
 	var h := kit.h
-	if not kit.needle.is_empty():
-		return false
 	var xd := data()
-	var at := AimMode.point(h, float(xd["range"]))
+	var at := AimMode.place(h, float(xd["range"]))
 	casts += 1
-	var shell := {"at": at, "t": 0.0, "phase": FALL, "node": _take_node(), "tick": 0.0}
+	var shell := {"at": at, "t": 0.0, "phase": FALL, "node": _take_node(), "tick": 0.0, "fired": false}
 	shell["n"] = casts
 	shells.append(shell)
 	kit.play("gunslinger_x")
-	# the shot goes straight up off the raised barrel; the disc and the column show at once
-	var top := h.position + Vector3(0, 2.4, 0)
-	kit.fx().star(top, GunslingerKit.EMBER, GunslingerKit.HOT, 1.4, 0.14)
-	kit.fx().beam(top, top + Vector3(0, 14.0, 0), GunslingerKit.EMBER, GunslingerKit.HOT, 0.5, 0.3)
-	kit.m.fx.flash(top, GunslingerKit.HOT, 1.2, 0.08)
+	kit.commit_end = float(kit.m.time) + COMMIT
+	# the disc and the column show at once; the shot leaves the raised barrel on the clip's kick (_fire)
 	var r := float(xd["radius"])
 	var delay := float(xd["delay"])
 	kit.fx().disc(at, r, CHAR, GunslingerKit.DEEP, delay, GunslingerKit.EMBER)
 	kit.fx().pillar(at, Color(GunslingerKit.EMBER, 0.4), GunslingerKit.HOT, 12.0, r * 0.55, delay, false)
-	kit.m.sfx("vn_nuke_fire", h.pos, -1.0)
 	kit.m.sfx("vn_nuke_fall", at, -2.0)
 	kit.net_ring(at, r, GunslingerKit.EMBER)
 	return true
@@ -76,10 +76,21 @@ func _take_node() -> Node3D:
 func tick(dt: float) -> void:
 	for s in shells.duplicate():
 		s["t"] = float(s["t"]) + dt
+		if not bool(s["fired"]) and float(s["t"]) >= FIRE_T:
+			_fire(s)
 		if String(s["phase"]) == FALL:
 			_fall_tick(s)
 		else:
 			_burn_tick(s, dt)
+
+## The shot: straight up off the raised barrel, a star and a short column of ember, on the clip's kick key.
+func _fire(s: Dictionary) -> void:
+	s["fired"] = true
+	var top: Vector3 = kit.h.position + Vector3(0, 2.4, 0)
+	kit.fx().star(top, GunslingerKit.EMBER, GunslingerKit.HOT, 1.4, 0.14)
+	kit.fx().beam(top, top + Vector3(0, 14.0, 0), GunslingerKit.EMBER, GunslingerKit.HOT, 0.5, 0.3)
+	kit.m.fx.flash(top, GunslingerKit.HOT, 1.2, 0.08)
+	kit.m.sfx("vn_nuke_fire", kit.h.pos, -1.0)
 
 ## The disc fills toward the impact, its hot centre glows, a rivet ring closes in, and the shell drops through
 ## the column for the last part of the fall.
@@ -138,8 +149,6 @@ func _impact(s: Dictionary) -> void:
 		if core:
 			centre += 1
 	last = {"at": at, "hits": n, "centre": centre}
-	if centre > 0:
-		kit.m.fx.word(at + Vector3(0, 2.6, 0) + kit.fx().screen_up() * 1.2, "DEAD CENTRE", GunslingerKit.HOT, true)
 
 ## The impact: a white-hot flash column, an ember shock ring, a spray of embers, a boom, and the scorched
 ## patch with its burning rim that stays for the zone.
@@ -147,8 +156,7 @@ func _impact_fx(at: Vector3, r: float) -> void:
 	var xd := data()
 	var fx := kit.fx()
 	fx.pillar(at, Color(GunslingerKit.HOT, 0.95), Color.WHITE, 10.0, r * 0.6, 0.3, true)
-	fx.ring(at, r * 1.3, GunslingerKit.EMBER, GunslingerKit.HOT, 0.45)
-	fx.ring(at, r * 0.7, GunslingerKit.HOT, GunslingerKit.EMBER, 0.3)
+	fx.ring(at, r, GunslingerKit.EMBER, GunslingerKit.HOT, 0.45)
 	fx.disc(at, r, CHAR, GunslingerKit.EMBER, float(xd["zone_t"]), GunslingerKit.EMBER)
 	kit.m.fx.burst(at + Vector3(0, 0.5, 0), GunslingerKit.EMBER, 30, 9.0, 0.6, 6.0, 1.6)
 	kit.m.fx.flash(at + Vector3(0, 1.0, 0), GunslingerKit.HOT, 3.0, 0.14)

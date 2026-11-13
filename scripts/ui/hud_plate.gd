@@ -33,6 +33,13 @@ var shown := {}
 static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
+## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
+## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.
+static func hidden(m: Match, h: Hunter) -> bool:
+	if m.player == null or h.team == m.player.team or h.downed or h.reveal_t > 0.0:
+		return false
+	return h.crouch or m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos)
+
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:
 	now += dt
@@ -96,12 +103,15 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 	s["lvl_pop"] = maxf(0.0, float(s["lvl_pop"]) - dt)
 	return s
 
-## What's happening to someone, as [icon, colour, word, seconds left (or -1)], worst first.
+## What's happening to someone, as [icon, colour, word, seconds left (or -1)], worst first. The
+## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", -1.0])
-	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", -1.0])
-	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", -1.0])
+	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", e.stun_t])
+	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", e.root_t])
+	if KitStatus.grounded(e): out.append(["bolas", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
+	if KitStatus.rattled(e): out.append(["burst", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
+	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", e.slow_t])
 	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
 	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
@@ -109,7 +119,8 @@ static func statuses(e: Ent) -> Array:
 	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
 	return out
 
-## Status icons in a row of small tiles starting at `at` (left edge, vertical centre).
+## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with
+## time left shows it under its tile, shrinking.
 static func icon_row(c: CanvasItem, at: Vector2, icons: Array, tile := 14.0) -> void:
 	var x := at.x
 	for ic in icons:
@@ -117,6 +128,8 @@ static func icon_row(c: CanvasItem, at: Vector2, icons: Array, tile := 14.0) -> 
 		c.draw_rect(r, HudStyle.SHADE)
 		c.draw_rect(r, Color(ic[1], 0.8), false, 1.0)
 		Icons.draw(c, String(ic[0]), r.get_center(), tile * 0.36, ic[1])
+		if float(ic[3]) > 0.0:
+			HudStyle.ctext(c, Vector2(r.get_center().x, r.end.y + 9.0), "%.1f" % float(ic[3]), 10, ic[1])
 		x += tile + 2.0
 
 ## Shield as a fraction of max health (what the bar draws past the end of health).
@@ -161,13 +174,13 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, word_col)
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
-		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), HeroTitle.of_hunter(h), HudStyle.PLATE_NAME_FS, name_col)
+		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
 	if not sts.is_empty():
 		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"word": word, "word_col": word_col, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:
@@ -260,7 +273,7 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
 ## filling over it in green, a cross in place of the level, and what's happening under it. The
-## moment they go down a burst of rays and a "DOWN" word pop over them.
+## moment a rival goes down a burst of rays and a "DOWN" word pop over them.
 func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictionary, role: Color) -> void:
 	var stomped: bool = h.get_meta("stomped", false)
 	var pulse := 0.5 + 0.5 * sin(H.m.time * 14.0)
@@ -278,7 +291,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
 	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
-	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), HeroTitle.of_hunter(h), HudStyle.PLATE_NAME_FS, name_col)
+	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
 	var revs: Array = h.get_meta("revivers", [])
 	var line := "DOWN"
 	var lcol := bcol
@@ -289,7 +302,8 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 		line = "%s reviving  %d%%" % [(revs[0] as Hunter).pname, int(h.revive * 100.0)]
 		lcol = HudStyle.REVIVE
 	HudStyle.ctext(c, Vector2(sp.x, frame.end.y + 13.0), line, 11, lcol, 3)
-	_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)
+	if H.m.player == null or h.team != H.m.player.team:
+		_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)      # (a teammate's fall stays quiet: MateAlerts)
 	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true,
 		"word": line, "chip": 0.0, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 

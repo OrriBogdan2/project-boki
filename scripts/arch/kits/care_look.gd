@@ -5,8 +5,8 @@ extends RefCounted
 ##   Pip: the starlit comet, the burr orb, the Burrseed root disc, light column and root beam, the lantern
 ##   plus, the Hearthlight disc with its floating lantern and the Kindle foot glow.
 ##   Claire: the ice shard, the skate beam, the star-headed spear (thrown, and held while aiming), the
-##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, the skate's
-##   ice plates, her air dash's frost streaks and the Rink Wall's ice pillars.
+##   slow-zone flake with its crystal, the Shatter spikes, the frost shell, the frost glow, her air dash's
+##   frost streaks and the Rink Wall's ice pillars. The skate's ice plates are IceStrip (one MultiMesh).
 ## Three shaders of our own: shaders/care_disc.gdshader, care_ice.gdshader, care_glow.gdshader.
 ## Shots: skin(s, kind) hides the shared round (its drawn radius only; the hit radius is unchanged) and
 ## rides a pooled node on it; when the shot ends the node goes back and the kind's impact plays.
@@ -27,6 +27,7 @@ var skins: Array = []         # {s: shot, n: Node3D, kind}
 var live: Array = []          # {n, kind, t, dur, at, p}
 var held := {}                # key -> {n, kind, last, p}
 var made := 0                 # nodes built (tests: stays flat while firing)
+var strip: IceStrip = null    # the skate's ice plates, one MultiMesh (built on the first plate)
 
 func _init(match_node: Node, hunter: Hunter) -> void:
 	m = match_node
@@ -43,6 +44,7 @@ func teardown() -> void:
 	live.clear()
 	held.clear()
 	free_pool.clear()
+	strip = null
 
 # ------------------------------------------------------------------ materials
 static func ice_mat(c: Color, a := 0.75, glow := 0.0, edge := Color(0, 0, 0, 0)) -> ShaderMaterial:
@@ -97,13 +99,13 @@ func _build(kind: String) -> Node3D:
 	n.name = kind
 	match kind:
 		"ember":
-			# a mote of her lantern's star: a 0.52 m teardrop comet head of soft gold with a near-white core, a
-			# pastel pink halo and a wide 2 m gold tail, so it reads in flight at gameplay zoom (starlight, not fire)
-			var head := Models.sphere(0.26, 12)
-			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
-			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.08)))
-			_off(Models.part(n, Models.sphere(0.46, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
-			_tail(n, 0.5, 2.0, Color("ffe0a0", 1.0))
+			# a comet to follow at the match camera (source: Moon Shot, a bright head with a long trail): a 0.7 m
+			# gold teardrop with a near-white core, a pink halo and a 0.8 m wide, 3.4 m long gold tail
+			var head := Models.sphere(0.34, 12)
+			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.8)))
+			_off(Models.part(n, Models.sphere(0.2, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.1)))
+			_off(Models.part(n, Models.sphere(0.6, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
+			_tail(n, 0.8, 3.4, Color("ffe0a0", 1.0))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -118,6 +120,13 @@ func _build(kind: String) -> Node3D:
 						sp, Models.cyl(0.0, 0.035, 0.16, 5), Models.toon(Color("e6f2a0"), true, 0.9), dv * 0.18))
 				sm.basis = Basis(Quaternion(Vector3.UP, dv.normalized()))
 			_off(Models.part(n, Models.sphere(0.34, 10), orb_mat(Color("c8e07a", 0.3)), Vector3.ZERO))
+			# the rune ring (source: Bound by Fate): a violet hoop 0.9 m across, square to the flight
+			var ring_pm := PlaneMesh.new()
+			ring_pm.size = Vector2(0.9, 0.9)
+			var rune_mat := disc_mat(Color("a070ff", 0.9), Color("e0c8ff"), 0.0)
+			rune_mat.set_shader_parameter("fill", 0.35)
+			rune_mat.set_shader_parameter("rim_w", 0.16)
+			_off(Models.part(n, ring_pm, rune_mat, Vector3.ZERO)).rotation = Vector3(PI * 0.5, 0, 0)
 			_tail(n, 0.22, 1.4, Color("e8f6b8", 0.55))
 		"shard":
 			# an ice dart: a long ice-blue four-sided crystal with dark teal edges, tip first, and a short
@@ -208,11 +217,6 @@ func _build(kind: String) -> Node3D:
 				s2.basis = Basis(Quaternion(Vector3.UP, Vector3(cos(a6) * 0.35, 1.0, sin(a6) * 0.35).normalized()))
 		"frost":
 			_off(Models.part(n, Models.capsule(0.42, 1.5), orb_mat(Color("2fb0e0", 0.55)), Vector3(0, 0.8, 0)))
-		"slab":
-			# a plate of ice laid under her blades
-			_off(Models.part(
-					n, Models.box(1.0, 0.05, 0.7), ice_mat(Color("bff7ef"), 0.7, 0.35, Color("e8ffff")),
-					Vector3(0, 0.04, 0)))
 		"wall":
 			_build_wall(n)
 	root.add_child(n)
@@ -238,13 +242,17 @@ func _build_wall(n: Node3D) -> void:
 	for i in 9:
 		var hh := 1.6 + 0.7 * absf(sin(float(i) * 2.3)) + (0.4 if i == 4 else 0.0)
 		var p := _off(Models.part(
-				n, Models.crystal(0.34, hh, 5), ice_mat(Color("9fe9e4"), 0.62, 0.15), Vector3(0, hh * 0.5, 0)))
+				n, Models.crystal(0.27, hh, 5), ice_mat(Color("9fe9e4"), 0.62, 0.15), Vector3(0, hh * 0.5, 0)))
 		p.name = "P%d" % i
 		p.set_meta("h", hh)
 		p.rotation = Vector3(0.12 * sin(float(i) * 1.7), float(i) * 0.9, 0.16 * cos(float(i) * 1.3))
 	var foot := _off(Models.part(
 			n, Models.box(1.0, 0.35, 0.8), ice_mat(Color("dffcff"), 0.45, 0.1), Vector3(0, 0.17, 0)))
 	foot.name = "Foot"
+	# the solid sheet of ice between the pillars: the barricade itself, lit from inside, flashing on a block
+	var slab := _off(Models.part(
+			n, Models.box(1.0, 2.2, 0.5), ice_mat(Color("b4f1f6"), 0.58, 0.3, Color("f0ffff")), Vector3(0, 1.1, 0)))
+	slab.name = "Slab"
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(1.0, 1.6)
 	var mist := _off(Models.part(n, pm, disc_mat(Color("bff7ef", 0.5), Color("e8ffff", 0.6), 2.0), Vector3(0, 0.05, 0)))
@@ -427,12 +435,6 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3.ONE * lerpf(
 					0.4, 1.0, _out_back(clampf(k * 6.0, 0.0, 1.0))) * (1.0 - 0.3 * smoothstep(0.8, 1.0, k))
 			_tint(n, col, 1.0 - smoothstep(0.8, 1.0, k))
-		"slab":
-			var dv4: Vector2 = p.get("dir", Vector2(0, -1))
-			n.rotation = Vector3(0, atan2(-dv4.x, -dv4.y), 0)
-			var forms := lerpf(0.6, 1.0, clampf(k * 15.0, 0.0, 1.0))          # frozen in under the blade at once
-			n.scale = Vector3(r * forms, 1.0, r * forms)
-			_tint(n, Color.WHITE, 1.0 - smoothstep(0.3, 1.0, k))
 		_:
 			n.scale = Vector3.ONE * r
 			_tint(n, col, fade)
@@ -499,7 +501,10 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 					n, col, p.get("rim", col.lightened(0.4)), float(p.get("a", 1.0)), float(p.get("pattern", 0.0)),
 					float(p.get("sweep", -1.0)), float(p.get("spin", 0.0)))
 			var dm := n.get_node_or_null("Disc") as MeshInstance3D
-			if dm: (dm.material_override as ShaderMaterial).set_shader_parameter("fill", float(p.get("fill", 1.0)))
+			if dm:
+				var dsm := dm.material_override as ShaderMaterial
+				dsm.set_shader_parameter("fill", float(p.get("fill", 1.0)))
+				dsm.set_shader_parameter("rim_w", float(p.get("rim_w", 0.08)))
 			var lamp := n.get_node_or_null("Lamp") as Node3D
 			if lamp:
 				lamp.scale = Vector3(1.0 / maxf(0.1, r), 1.0, 1.0 / maxf(0.1, r))
@@ -545,6 +550,10 @@ func _place_wall(n: Node3D, p: Dictionary) -> void:
 		(pl.material_override as ShaderMaterial).set_shader_parameter("glow", 0.15 + 0.8 * hit + 0.25 * (1.0 - rise))
 	var ft := n.get_node_or_null("Foot") as MeshInstance3D
 	if ft: ft.scale = Vector3(ln, maxf(0.05, rise), 1.0)
+	var slab := n.get_node_or_null("Slab") as MeshInstance3D
+	if slab:
+		slab.scale = Vector3(maxf(0.1, ln - 0.2), maxf(0.05, rise), 1.0)
+		(slab.material_override as ShaderMaterial).set_shader_parameter("glow", 0.3 + 1.2 * hit)
 	var mist := n.get_node_or_null("Mist") as MeshInstance3D
 	if mist:
 		mist.scale = Vector3(ln + 0.8, 1.0, 1.0)
@@ -553,9 +562,17 @@ func _place_wall(n: Node3D, p: Dictionary) -> void:
 
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
+	if strip != null:
+		strip.tick(m.time)
 	_tick_skins(dt)
 	_tick_live(dt)
 	_tick_held()
+
+## The skate's ice strip, built the first time a plate is laid.
+func ice_strip(cap: int) -> IceStrip:
+	if strip == null:
+		strip = IceStrip.new(root, cap)
+	return strip
 
 ## Live nodes right now (tests: pooled, so this stays bounded).
 func node_count() -> int:

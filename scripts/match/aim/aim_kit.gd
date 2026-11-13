@@ -19,6 +19,8 @@ extends RefCounted
 ##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
+##   soft    bool    lanes and cones: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
+##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
 ##                   the hunter (Hem's draw), this big
@@ -99,7 +101,8 @@ static func cone(h: Hunter, id: String, p := {}) -> void:
 
 ## A landing or area circle. p: at (the cursor point, clamped to `range`), range (1e9), self (true:
 ## around the hunter), r (1.35), fill (0..1 radial), ticks (4 cardinal), star (centre glint),
-## dashed, core (inner ring radius, m), pointer (a Vector2: a chevron on the rim pointing that way)
+## dashed, band (m: a thin ring of that width, its outer edge on r, instead of the disc),
+## core (inner ring radius, m), pointer (a Vector2: a chevron on the rim pointing that way)
 static func circle(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "circle", p)
 	_disc(h, e, p)
@@ -136,7 +139,7 @@ static func arc_wall(h: Hunter, id: String, p := {}) -> void:
 static func swap(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "swap", p)
 	var a: Vector3 = p.get("a", h.pos)
-	var b: Vector3 = p.get("b", AimMode.point(h, float(p.get("range", 1e9))))
+	var b: Vector3 = p.get("b", AimMode.place(h, float(p.get("range", 1e9))))
 	e["a"] = Vector2(a.x, a.z); e["b"] = Vector2(b.x, b.z); e["y"] = AimMode.ground(h.m, a).y
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	_put(h, id, e)
@@ -166,7 +169,7 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 ## line turns end to end, 0 = straight) and bow (unit normal the middle bulges toward)
 static func span(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "span", p)
-	var at: Vector3 = p.get("at", AimMode.point(h, float(p.get("range", 1e9))))
+	var at: Vector3 = p.get("at", AimMode.place(h, float(p.get("range", 1e9))))
 	e["at"] = Vector2(at.x, at.z); e["y"] = AimMode.ground(h.m, at).y
 	var ad := h.aim_dir()
 	var d: Vector2 = p.get("dir", Vector2(-ad.y, ad.x))
@@ -207,7 +210,8 @@ static func entry(h: Hunter, id: String) -> Dictionary:
 
 # ------------------------------------------------------------------ cursor states
 ## The charge ring on the cursor, k 0..1, called each step while charging. Crossing 1 fires the flare.
-## p: col (hero colour), flare (true: flare on reaching full)
+## p: col (hero colour), flare (true: flare on reaching full), at ("cursor", or "body": round the hunter, where a
+## source kit shows its charge arc on the hero, e.g. Kael's blast)
 static func charge(h: Hunter, k: float, p := {}) -> void:
 	if blocked(h):
 		return
@@ -215,6 +219,7 @@ static func charge(h: Hunter, k: float, p := {}) -> void:
 	var was := float(r["k"]) if float(h.m.time) - float(r["t"]) <= AimDraw.KEEP else -1.0
 	r["k"] = k; r["t"] = float(h.m.time)
 	r["col"] = p.get("col", hero_col(h))
+	r["at"] = String(p.get("at", "cursor"))
 	if k >= 1.0 and was < 1.0 and bool(p.get("flare", true)):
 		flare(h, p)
 
@@ -234,20 +239,21 @@ static func perfect(h: Hunter, p := {}) -> void:
 	r["perfect"] = AimReticle.PERFECT_T
 	r["pcol"] = p.get("col", Color("ffd25a"))
 
-## This hunter's cursor states now: {charge (-1 = none), flare (s left), perfect (s left)}.
+## This hunter's cursor states now: {charge (-1 = none), flare (s left), perfect (s left), at (cursor | body)}.
 static func reticle(h: Hunter) -> Dictionary:
 	var d := layer(h.m)
 	if not d.ret.has(h.get_instance_id()):
-		return {"charge": -1.0, "flare": 0.0, "perfect": 0.0}
+		return {"charge": -1.0, "flare": 0.0, "perfect": 0.0, "at": "cursor"}
 	var r: Dictionary = d.ret[h.get_instance_id()]
 	var live := float(h.m.time) - float(r["t"]) <= AimDraw.KEEP
-	return {"charge": float(r["k"]) if live else -1.0, "flare": float(r["flare"]), "perfect": float(r["perfect"])}
+	return {"charge": float(r["k"]) if live else -1.0, "flare": float(r["flare"]), "perfect": float(r["perfect"]),
+		"at": String(r.get("at", "cursor"))}
 
 # ------------------------------------------------------------------ helpers
 static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
 	return {"kind": kind, "col": p.get("col", hero_col(h)), "col2": p.get("col2", accent_col(h)),
 		"alpha": float(p.get("alpha", 1.0)), "hot": clampf(float(p.get("hot", 0.0)), 0.0, 1.0),
-		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)),
+		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)), "soft": bool(p.get("soft", false)),
 		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y,
 		"fletch": float(p.get("fletch", 0.0))}
 
@@ -271,10 +277,11 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	var at: Vector3
 	if p.has("at"): at = p["at"]
 	elif bool(p.get("self", false)): at = h.pos
-	else: at = AimMode.point(h, float(p.get("range", 1e9)))
+	else: at = AimMode.place(h, float(p.get("range", 1e9)))
 	e["at"] = Vector2(at.x, at.z); e["y"] = AimMode.ground(h.m, at).y
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	e["ticks"] = bool(p.get("ticks", false)); e["star"] = bool(p.get("star", false)); e["dashed"] = bool(p.get("dashed", false))
+	e["band"] = float(p.get("band", 0.0))
 	var pd: Vector2 = p.get("pointer", Vector2.ZERO)
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 

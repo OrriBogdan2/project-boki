@@ -2,7 +2,8 @@ class_name Practice
 extends Node
 ## What every practice area shares (the Training Grounds, the tutorial, the Arena and the Duel room;
 ## never a real match): a bottom bar like the farm's hub (Hero, the area's own menu, Leave), J for
-## the hero picker (PracticeHero), and the mouse wheel zooming the camera. One node under the Match,
+## the hero picker (PracticeHero), the mouse wheel zooming the camera, and where there are dummies the parity bench
+## (ParityBench). One node under the Match,
 ## attached by Match.start with a single call.
 
 const NAME := "Practice"
@@ -15,13 +16,16 @@ const ZOOM_MAX := 1.6          # furthest
 var m: Match
 var bar: PanelContainer = null
 var bar_btns := {}             # id -> Button
+var bench: ParityBench = null  # the parity bench panel (the areas with dummies)
 var picker: CanvasLayer = null # the hero picker, while open
 var picker_page := ""          # "heroes" | "kit"
 var hover_arch := ""           # the card under the mouse (K opens its kit)
 var _layer: CanvasLayer = null
 
 static func is_practice(opts: Dictionary) -> bool:
-	return opts.get("training", false) or opts.get("tutorial", false) or opts.get("arena", false) or opts.get("duel", false)
+	var any: bool = opts.get("training", false) or opts.get("tutorial", false) or opts.get("arena", false) \
+		or opts.get("duel", false)
+	return any and not opts.get("duo_tut", false)      # (the 2v2 tutorial is a match, not a practice area)
 
 static func of(match_node: Match) -> Practice:
 	return match_node.get_node_or_null(NAME) as Practice
@@ -35,10 +39,12 @@ static func attach(match_node: Match) -> Practice:
 	p.process_mode = Node.PROCESS_MODE_ALWAYS      # J and Esc work while a menu has the game paused
 	p.m = match_node
 	match_node.add_child(p)
+	p.bench = ParityBench.attach(match_node)
 	p._build_bar()
+	KitDrill.attach(p)
 	return p
 
-## The bar's entries: [id, label, icon, open, key cap]. The Arena and the training area share a loadout
+## The bar's entries: [id, label, icon, open, key cap]. The Arena and the Training Grounds share a loadout
 ## menu (L), the Duel room has its setup menu (B).
 func items() -> Array:
 	var out: Array = [["hero", "Relics", "swap", func(): PracticeHero.toggle(self), Settings.key_cap("hero")]]
@@ -46,7 +52,9 @@ func items() -> Array:
 		out.append(["menu", "Loadout", "bag", func(): if not m.paused: m.arena.open_menu(), "L"])
 	elif m.duel:
 		out.append(["menu", "Duel", "gear", func(): if not m.paused: m.duel.open_menu(), "B"])
-	out.append(["leave", "Leave", "back", func(): leave(m, true), ""])
+	if bench:
+		out.append(["bench", "Bench", "gear", func(): bench.toggle(), ""])
+	out.append(["leave", "Skip" if m.opts.get("tutorial", false) else "Leave", "back", func(): leave(m, true), ""])
 	return out
 
 func _build_bar() -> void:
@@ -87,7 +95,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if picker_page == "kit": PracticeHero.open(self)
 			else: PracticeHero.close(self)
 			get_viewport().set_input_as_handled()
-		elif event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and hover_arch != "":
+		elif event.is_action_pressed("kit_card") and hover_arch != "":
 			PracticeHero.kit(self, hover_arch)
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("hero"):

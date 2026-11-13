@@ -1,0 +1,30 @@
+{
+ "id": "swordfish",
+ "name": "Swordfish",
+ "classes": [
+  "light"
+ ],
+ "primary": {
+  "melee": true,
+  "dmg": 7.0,
+  "combo_dmg": [
+   7.0,
+   7.0,
+   11.0
+  ],
+  "rate": 0.32,
+  "combo_reset": 0.75,
+  "speed": 40,
+  "kb": 1.2,
+  "spread": 0.0,
+  "range": 2.5,
+  "arc": 50.0,
+  "kb_influence": 0.4,
+  "size": 0.18,
+  "color": "#bfe6ff",
+  "sfx": "swipe",
+  "desc": "Two quick thrusts and a longer lunge. Every thrust steps you in; the third slows.",
+  "kick": 0.04
+ },
+ "utility": ""
+}

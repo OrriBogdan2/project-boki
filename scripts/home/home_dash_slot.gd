@@ -3,8 +3,10 @@ extends Control
 ## The dash slot at home (farm, town, house): the match bar's DashSlot, drawn by the same code from the
 ## same numbers (the home's mirror of the Hunter's dash state: Home.dash_charges, ex_cd, _dodge()).
 ## It plays the part of Hud for HudSlot: the per-slot animation state the slot code expects lives here.
+## In the garden nothing there needs a dash, so the slot stays away until the player's first dash.
 
 const SLOT := 50.0           # px, the same square as the bottom bar's slots
+const USED_KEY := "dash_used"   # tutorial flag: in the garden (base_mode) the slot shows from the first dash
 const BOTTOM := 132.0        # px from the screen bottom to the slot's top (clears the key hints)
 
 var home = null            # the Home (untyped: it has no class_name)
@@ -21,7 +23,11 @@ func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 
 func _process(delta: float) -> void:
-	visible = home.panel_open == "" and not Overlay.is_open()
+	var room: bool = home.panel_open == "" and not Overlay.is_open()
+	var tut: Dictionary = Save.d["tutorial"]
+	if room and Input.is_action_just_pressed("dash"):
+		tut[USED_KEY] = true
+	visible = room and (tut.get(USED_KEY, false) or not FarmUnlocks.base_mode())
 	HudSlot.decay(self, delta)
 	if visible:
 		queue_redraw()
@@ -37,9 +43,9 @@ func _draw() -> void:
 	var r := Rect2(Vector2((size.x - SLOT) * 0.5, size.y - BOTTOM), Vector2(SLOT, SLOT))
 	DashSlot.draw(self, r, s)
 
-## A dash pressed with nothing to spend: the red shake, as on the match bar.
+## A dash pressed with nothing to spend: the red pulse and tick, as on the match bar.
 func deny() -> void:
-	slot_fx["dash"] = {"kind": "deny", "t": 0.0}
+	PressDeny.raise(self, "dash")
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
 	c.draw_style_box(HudStyle.box(col, rad, border, bw), r)

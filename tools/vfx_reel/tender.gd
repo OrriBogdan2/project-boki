@@ -3,7 +3,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## Hearthlight on her and thrown (its heals rising as stars, the bloom), and Hearth Call's tether to its end.
 
 func parts() -> Array:
-	return ["lmb", "dash", "rmb", "e", "r"]
+	return ["lmb", "hold", "dash", "rmb", "e", "r"]
 
 func _part_lmb() -> void:
 	await _reset(6.0)
@@ -33,8 +33,8 @@ func _part_rmb() -> void:
 		P.inp["sec"] = _at(t, 0.1)
 		P.inp["sec_hold"] = t > 0.1 and t < 0.6
 		_aim(T.pos)
-	await _go(2.6, cast, _sheet("rmb", "RMB: starlight gathers at the lantern, the cast, the seed's trail, the root",
-		[0.3, 0.62, 0.7, 0.8, 1.0, 1.4, 1.8, 2.1, 2.5], func(): return (P.pos + T.pos) * 0.5), 2.5)
+	await _go(3.8, cast, _sheet("rmb", "RMB: the lantern starlight, the cast, the seed's vine building, the root",
+		[0.3, 0.7, 1.0, 1.2, 1.7, 2.3, 2.9, 3.3, 3.7], func(): return (P.pos + T.pos) * 0.5), 2.5)
 	await _go(GAP)
 
 func _part_e() -> void:
@@ -50,13 +50,19 @@ func _part_e() -> void:
 	await _go(GAP)
 
 func _part_r() -> void:
-	await _reset(4.0)
+	await _reset(6.0, 1.5)
 	P.hp = P.max_hp * 0.5
+	# the dummy stands in as her teammate, so the tether has an ally to arc to
+	# (a hunter spawned here dropped off the stage on its first tick)
+	var foe_team := T.team
+	T.team = P.team
+	T.hp = T.max_hp * 0.5
 	var cast := func(t: float):
 		if _at(t, 0.1):
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
-		_aim(P.pos)
-	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the lantern's flare, the heals rising as stars",
-		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7]), 1.0)
+		_aim(T.pos)
+	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the arc of light to the ally, the heals rising as stars",
+		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7], func(): return (P.pos + T.pos) * 0.5), 1.0)
+	T.team = foe_team
 	await _go(GAP)

@@ -1,11 +1,16 @@
 extends RefCounted
 ## --perf-throttle-check, item 94's script throttles: an idle monster with nobody within Mob.NAP_M stops
-## simulating and wakes when a Hunter comes close; a bot further than Bot.FAR_M from the local player decides
-## and roaming decides every Bot.FAR_EVERY steps (the skipped time added in), a near one every step.
+## simulating and wakes when a Hunter comes close; a bot further than SimLod.FAR_M from the local player, on
+## the ground, roaming or fighting something as far off, thinks and simulates every SimLod.EVERY steps (the
+## skipped time added in); a near one, one fighting near the player or just hit by them, every step; its
+## Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals SimLod.THINK_FAR_K times less often;
+## a bot aboard the sky ship picks nothing. A bot in a fight re-tests its line of sight to the same target
+## every Bot.LOS_RECHECK_S (a new target at once).
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
-## once and reused until it changes.
+## once and reused until it changes. Skinned rigs (RigPace): every frame off GL over Metal; at RigPace.EVERY a
+## Warden away from the camera's focus is posed every few frames with the held time, the one at the focus every frame.
 
 var main: Node
 var fails := 0
@@ -24,8 +29,11 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	_mob_naps()
 	_far_bots()
+	_far_mobs()
+	_bot_los()
 	_shadows()
 	await _plates()
+	await _rig_pace()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -59,6 +67,31 @@ func _mob_naps() -> void:
 	_step(1.5)
 	ok(mb.st != "idle" or mb.pos != at, "a Hunter walking up wakes it (%s)" % mb.st)
 
+func _bot_los() -> void:
+	var b: Hunter = null
+	for h in m.hunters:
+		if h.ctrl == "bot":
+			b = h
+	ok(b != null, "setup: a bot for the line-of-sight cache")
+	if b == null:
+		return
+	var brain: Bot = m.bot_brain
+	var first := brain.los_to(m, b, m.player, Match.DT)
+	var real := first == brain.can_hit(m, b, m.player)
+	ok(b.ai["los_tgt"] == m.player and real, "a bot's first look at a target is a real line-of-sight test")
+	b.ai["los"] = not first
+	var trusted := brain.los_to(m, b, m.player, Match.DT) == (not first)
+	ok(trusted, "within %.1f s it trusts its last look" % Bot.LOS_RECHECK_S)
+	var mb: Mob = m.mobs[0]
+	var fresh := brain.los_to(m, b, mb, Match.DT)
+	ok(b.ai["los_tgt"] == mb and fresh == brain.can_hit(m, b, mb), "a new target is looked at at once")
+	b.ai["los"] = not fresh
+	var again := fresh
+	for i in int(Bot.LOS_RECHECK_S / Match.DT) + 1:
+		again = brain.los_to(m, b, mb, Match.DT)
+	var looked := again == brain.can_hit(m, b, mb)
+	ok(looked, "after %.1f s on the same target it looks again" % Bot.LOS_RECHECK_S)
+
 func _far_bots() -> void:
 	var b: Hunter = null
 	for h in m.hunters:
@@ -67,25 +100,103 @@ func _far_bots() -> void:
 	ok(b != null, "setup: a bot")
 	if b == null:
 		return
-	var brain := Bot.new()
-	b.teleport(m.player.pos + Vector3(Bot.FAR_M + 15.0, 0, 0))
+	b.teleport(m.player.pos + Vector3(SimLod.FAR_M + 15.0, 0, 0))
+	b.grounded = true
 	b.ai["tgt"] = null
 	b.ai["goal_kind"] = "roam"
-	var thinks := 0
-	for i in Bot.FAR_EVERY * 4:
-		var before := float(b.ai["dash_cd"])
-		brain.tick(m, b, Match.DT)
-		if float(b.ai["dash_cd"]) != before:
-			thinks += 1
-	ok(thinks == 4, "far away it decides every %d steps (%d decisions)" % [Bot.FAR_EVERY, thinks])
+	var every := SimLod.EVERY
+	ok(_lod_steps(b, every * 4) == [4, every * 4], "far and calm it steps every %d sim steps, losing no time" % every)
+	var kin: Kin = null
+	for k in m.kins:
+		if k.owner_h == b:
+			kin = k
+	if kin:
+		kin.state = "active"
+		kin.cmd = "follow"
+		kin.target = null
+		ok(SimLod.kin_dt(kin, Match.DT) == SimLod.step_dt(b, Match.DT), "its Boki on follow steps with it")
+	var far_foe: Ent = null
+	for mb in m.mobs:
+		if mb.flat_dist(m.player) > SimLod.FAR_M:
+			far_foe = mb
+			break
+	b.ai["tgt"] = far_foe
+	var far_runs: int = _lod_steps(b, every * 2)[0] if far_foe else -1
+	ok(far_runs == 2, "fighting something far off it still steps every %d" % every)
+	b.ai["tgt"] = m.player
+	ok(_lod_steps(b, 6)[0] == 6, "fighting the player (or anything near them) it steps every step")
+	b.ai["tgt"] = null
+	b.last_hit_by = m.player
+	b.hurt_at = m.time
+	ok(_lod_steps(b, 6)[0] == 6, "just hit by the player it steps every step")
+	b.hurt_at = -9.0
+	b.ai["goal_kind"] = "box"
+	ok(_lod_steps(b, every * 2)[0] == 2, "walking to a box far off it still steps every %d" % every)
+	b.ai["goal_kind"] = "board"
+	ok(_lod_steps(b, 6)[0] == 6, "boarding something that moves it steps every step")
+	b.ai["goal_kind"] = "roam"
+	ok(SimLod.think_k(m, b) == 1.0, "inside %.0f m it chooses at the usual pace" % SimLod.THINK_FAR_M)
+	b.teleport(m.player.pos + Vector3(SimLod.THINK_FAR_M + 15.0, 0, 0))
+	b.grounded = true
+	var far_m := SimLod.THINK_FAR_M
+	var k := SimLod.THINK_FAR_K
+	ok(SimLod.think_k(m, b) == k, "past %.0f m and calm it chooses %.0fx less often" % [far_m, k])
+	b.ai["tgt"] = m.player
+	ok(SimLod.think_k(m, b) == 1.0, "past %.0f m but fighting the player it chooses at the usual pace" % far_m)
+	b.ai["tgt"] = null
+	b.riding = true
+	b.inp["move"] = Vector2(1, 0)
+	m.bot_brain.think(m, b, Match.DT)
+	ok(b.inp["move"] == Vector2.ZERO, "aboard the sky ship it holds still and picks nothing")
+	b.riding = false
 	b.teleport(m.player.pos + Vector3(5.0, 0, 0))
-	thinks = 0
+	b.grounded = true
+	ok(_lod_steps(b, 6)[0] == 6, "near the player it steps every step")
+
+## Plans n sim steps; returns [steps the bot ran, sim steps of time it was given].
+func _lod_steps(b: Hunter, n: int) -> Array:
+	var runs := 0
+	var got := -float(b.ai.get("lod_dt", 0.0))   # time banked before, and after, counts as given
+	for i in n:
+		SimLod.plan(m, Match.DT)
+		var sd := SimLod.step_dt(b, Match.DT)
+		if sd > 0.0:
+			runs += 1
+			got += sd
+	got += float(b.ai.get("lod_dt", 0.0))
+	return [runs, roundi(got / Match.DT)]
+
+func _far_mobs() -> void:
+	var mb: Mob = null
+	for x in m.mobs:
+		if not x.dead:
+			mb = x
+	ok(mb != null, "setup: a monster")
+	if mb == null:
+		return
+	mb.grounded = true
+	mb.tgt = null
+	mb.pos = m.player.pos + Vector3(Mob.FAR_M + 15.0, 0, 0)
+	mb._far_dt = 0.0
+	var steps := 0
+	var banked := 0.0
+	for i in Mob.FAR_EVERY * 4:
+		m.time += Match.DT
+		var dt := mb._far_step(Match.DT)
+		if dt > 0.0:
+			steps += 1
+			banked += dt
+	var all := Match.DT * Mob.FAR_EVERY * 4
+	ok(steps >= 4 and steps <= 5 and is_equal_approx(banked + mb._far_dt, all),
+		"far away a monster steps every %d sim steps, no time lost (%d steps)" % [Mob.FAR_EVERY, steps])
+	mb.pos = m.player.pos + Vector3(5.0, 0, 0)
+	mb._far_dt = 0.0
+	steps = 0
 	for i in 6:
-		var before := float(b.ai["dash_cd"])
-		brain.tick(m, b, Match.DT)
-		if float(b.ai["dash_cd"]) != before:
-			thinks += 1
-	ok(thinks == 6, "near the player it decides every step (%d of 6)" % thinks)
+		m.time += Match.DT
+		if mb._far_step(Match.DT) == Match.DT:
+			steps += 1
+	ok(steps == 6, "near the player it steps every sim step (%d of 6)" % steps)
 
 ## The world box of a mesh: its longest side in metres.
 func _world_size(gi: GeometryInstance3D) -> float:
@@ -131,7 +242,7 @@ func _shadows() -> void:
 		if _under(g, Hunter) or _under(g, Kin) or g is MultiMeshInstance3D:
 			continue
 		if _world_size(g) < lim:
-			var k := "%s/%s" % [_nm(g.get_parent()), _nm(g)]
+			var k := "%s/%s/%s" % [_nm(g.get_parent().get_parent()), _nm(g.get_parent()), _nm(g)]
 			bad[k] = int(bad.get(k, 0)) + 1
 	ok(bad.is_empty(), "no mesh under %.1f m casts outside Hunters and Boki bodies (%d casters; small ones: %s)"
 		% [lim, n_cast, str(bad).left(1500)])
@@ -233,3 +344,33 @@ func _plates() -> void:
 	ok(is_same(a, b) and TextCache.shaped == n0, "the same label reuses its layout")
 	TextCache.line(f, "Wild Pebblit 2", 16)
 	ok(TextCache.shaped == n0 + 1, "changed text is laid out once")
+
+func _rig_pace() -> void:
+	var syncs := m.find_children("Sync", "Node", true, false).filter(func(n): return n is WardenGlb.Sync)
+	ok(not syncs.is_empty(), "the match has Warden rigs (%d)" % syncs.size())
+	if syncs.is_empty():
+		return
+	var want := RigPace.EVERY if RigPace.dear() else 1
+	ok(syncs.all(func(sy): return sy.pace.every == want), "each rig's pace fits the driver")
+	var sy: WardenGlb.Sync = syncs[0]
+	sy.set_process(false)
+	sy.pace.every = RigPace.EVERY
+	sy.pace.held = 0.0
+	m.cam.focus = sy.root.global_position + Vector3(RigPace.LEAD_M * 4.0, 0, 0)
+	var posed := 0
+	for i in RigPace.EVERY * 2:
+		await main.get_tree().process_frame
+		sy._process(0.01)
+		if sy.pace.held == 0.0:
+			posed += 1
+	ok(posed == 2, "a Warden away from the focus is posed on %d of %d frames" % [posed, RigPace.EVERY * 2])
+	m.cam.focus = sy.root.global_position
+	posed = 0
+	for i in RigPace.EVERY * 2:
+		await main.get_tree().process_frame
+		sy._process(0.01)
+		if sy.pace.held == 0.0:
+			posed += 1
+	ok(posed == RigPace.EVERY * 2, "the one at the camera's focus every frame (%d)" % posed)
+	sy.pace.every = want
+	sy.set_process(true)

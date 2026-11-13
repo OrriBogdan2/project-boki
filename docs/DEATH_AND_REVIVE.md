@@ -19,14 +19,16 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 | Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |
 | Execute | Enemy holds E on the wisp: they're locked in place for the finisher, then you're dead | **3s** | [footage] |
-| Takedown reward | Knocking or killing an enemy hunter (not a mob) heals 5% of max health and brings every dash charge back at once (`DashReset`); the local hunter gets the reset cue and a pop on the Shift icon | +250 HP, +1 dash | [patch] |
+| Takedown reward | Knocking or killing an enemy hunter (not a mob): the knocker and every teammate whose damage or CC landed on the victim in the last 4 s get their dash back (a one-charge dash refills, a multi-charge dash gains one charge) and the long-dash cooldown clears; only the knocker heals 5% of max health (`DashReset`, docs/decisions/0022). The local hunter gets the reset cue (softer for an assist) and a pop on the Shift icon. A hero's `dash.knock_refresh: false` opts out (none do) | +250 HP, +1 dash; multi-charge +1 | [patch] / owner (159) |
+| Last one up | The last standing hunter of a squad of two or more (every teammate down or dead, none extracted) wears a glow in the viewer's side colour (`SideColor`: you, ally, foe), moves **+8%** faster and mends **1 hp/s** once 5 s have passed since a hit (`LastAlive`). It is derived from who is up, so it needs no Net message and ends the moment a teammate is revived or redeployed. Solos never get it. Our source refs give no last-alive numbers; these are small picks. The own HUD shows one small toast when it starts | +8% / 1 hp/s | [design] |
 | Last one standing | Knocking a team's last standing player wipes the team: no wisp, everyone left dies | — | [patch] |
 | Dead | Your **deathbox** drops with everything you carried. Abyss deaths drop it at the killer's last ground position, or at the edge you fell from | — | [patch] |
 | Box colour | Grey / blue / purple / gold by value | 500 / 2k / 5k | [patch] (colour by value) |
 | Deathbox revive | Teammate holds F at your box while your soul is there (`BoxRevive`, docs/decisions/0018). While channelling they can't attack and take **×1.2 damage** (the tonic's `Hunter.CONSUME_VULN`); a real hit, moving, dashing, jumping or a stun cancels it (let go of F and hold it again). A loud rising hum anyone within ~30m hears (rivals get a minimap sound ping; bots come to look); a progress ring on the box and round the reviver. You come back at the box with your Boki and **the box's loot back**. Each later box revive of the same Hunter in a match is slower (the source's curve 1.0 / 0.75 / 0.58 / 0.47) | **7.5s**, 25% HP, 90s soul window | owner (101b) / [data] |
+| Online | The same flow with two real games: a death drops a box on the dead Hunter's game, every other game stands a soul marker there, a teammate's channel at it tells the owner's game (`brev`), which brings them back with their gear, pack, belt and keys and tells everyone (`back`). Gems, seeds and capsules still spill as ground pickups. Never a loot box for rivals: only the owner's game holds the contents (docs/decisions/0018) | as offline | owner |
 | Whose box | A teammate's box wears their squad colour (body tint and a ring) with their face, name and soul timer over it; a rival's is red. Your squad's boxes always show on the minimap and the full map, a rival's while it's within your sight | — | owner (101) |
-| Looting | Press F at a box: a window lists everything in it (icon, rarity colour, "upgrade" where it beats yours). Click to take items one at a time (a glove or weapon swap leaves yours in the box); press F again or Smart loot to take everything useful and leave worse gear. Bots still hold F for 1s | instant | [design] |
-| Revive beacon | Several per map, shown on the minimap and full map. Teammate stands on it: brings back every dead or downed teammate at once, wherever they fell (`Beacons`). Single use. Two teams on it pauses (doesn't reset). **Loud:** while it's lit every player gets a horn, a toast with its direction, a pulsing marker on both maps and an arrow in the world, and its hum carries 120m. Online the `"bcn"` event carries lit / out / used | **4s** | owner (101b) |
+| Looting | Press F at a box: a window lists everything in it (icon, rarity colour, "upgrade" where it beats yours). Click to take items one at a time (a glove or weapon swap leaves yours in the box); press F again to smart loot (take everything useful, leave worse gear) and always close the window, even if nothing was taken; the Smart loot button closes it only when it took something. Bots still hold F for 1s | instant | [design] |
+| Revive beacon | Several per map, shown on the minimap and full map. Teammate stands on it: brings back every dead or downed teammate at once, wherever they fell (`Beacons`). Single use. Two teams on it pauses (doesn't reset). **Loud:** while it's lit every player gets a horn, a toast with its direction, a pulsing marker on both maps and an arrow in the world, and its hum carries 120m. Online the `"bcn"` event carries lit / out / used and each game brings back its own dead | **4s** | owner (101b) |
 | Everbeacon | Unlimited uses, can't be contested | **10s** | [patch] |
 | Beacon revive | Full HP but **no loot** (your box stays where it was, so go get it), plus resurrection sickness | −25% damage for **12s** | [patch] + [design] |
 
@@ -74,7 +76,7 @@ All names and multipliers are placeholders.
 
 **Other kin rules in every tier:**
 - **Knocked out while you're alive:** a kin comes back to you after `kin_recall_time` (25s).
-- **While you're downed:** your kin guards your wisp (`kin_guards_wisp`).
+- **While you're downed:** your kin rides round your wisp as a Boki wisp and pulls you up (`KinWispForm`).
 - **However you come back:** a kin that's still loose returns to you, so kin don't need beacons of their own.
 
 **Worth deciding before launch:**
@@ -127,9 +129,17 @@ All names and multipliers are placeholders.
 
 ## Revive readability
 
-- Every visible wisp has a ring on the ground the size of the revive range. Teammates see it green, enemies orange.
-- While a teammate revives, the ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
-- A teammate near your wisp but outside the range gets "Step in to revive · 1.3m".
+- Every visible wisp has a compact ring hugging it in its side colour (ally or rival): the bleed-out drains round it, revive progress fills inside it, it flashes over the last 5 s and goes red while stomped (`DownedMarks`, docs/decisions/0019). No big ground circle.
+- While a teammate revives, the inner ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
+- A teammate within 9 m sees the revive reach on the ground (thin, filling as they revive) and "Step onto <name>'s wisp to revive" on the HUD.
+- Your Boki come back to you and ride round your wisp as Boki wisps (no fighting, can't be hit); they pull you up after a short wait unless an enemy stands on you, and pop back onto your shoulder when you're up (`KinWispForm`).
 - The downed player sees "<name> is reviving you" under their revive bar.
 - Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes.
+- Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.
+- A committed stomp (holding interact on a wisp for `stomp_commit`) runs its 2.4 s animation and cannot be cancelled or moved out of; only the animation ending (the wisp dies) or the stomper being hard-CC'd ends it, and then the wisp lives (decision 2026-11-11, `Life.cc_break`). Hard CC: a stun (wall stuns, Snap, Rimelock, Bola pair, Anchor, Nightwell included), a knock, a root, Grounded, a tow (Nightwell draw, a reel, a drag). Slows and Daze do not break it. `--stomp-check` sweeps every row of KIT_PARITY's Crowd control table.
 - Checked by `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
+
+## Watching your squad while you're out
+- Out with a teammate still in it, the camera, minimap and Boki card follow one of them (`scripts/match/spectate.gd`). The fire and secondary keys (rebindable) step to the next or previous living teammate, wrapping and skipping the out and the extracted.
+- A strip at the bottom reads "Watching <name> (<Hunter>)" with their health, armour and ability tiles, and one Give up button that leaves the match. Cooldowns of a remote teammate show as the owner last sent them.
+- Checked by `--spectate-check`; `--spectate-shots --shots-dir=<dir> [--shot-size=2560x1440]` takes the screenshots.

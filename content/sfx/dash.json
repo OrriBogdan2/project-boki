@@ -1,0 +1,20 @@
+{
+  "group": "dash",
+  "name": "Dashes",
+  "script": "tools/gen_sfx_dash.py",
+  "sounds": {
+    "gunslinger_dash_air": "dash",
+    "archer_dash_air": "dash",
+    "juggernaut_dash_air": "dash",
+    "bulwark_dash_air": "dash",
+    "ostra_dash_air": "dash",
+    "ashwick_dash_air": "dash",
+    "dredge_dash_air": "dash",
+    "rimewright_dash_air": "dash",
+    "tender_dash_air": "dash",
+    "thief_dash_air": "dash",
+    "mage_dash_air": "dash",
+    "dolm_dash_air": "dash",
+    "dash_empty": "ui"
+  }
+}

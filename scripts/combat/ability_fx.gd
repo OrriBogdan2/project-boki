@@ -2,7 +2,7 @@ class_name AbilityFx
 extends RefCounted
 ## How abilities look and sound, keyed by how they're delivered (the tell) and by what they do (the
 ## impact category), so any ability gets the same language without its data naming a sound or an
-## effect: a gun's right click (content/abilities), a Boki's ability, and the archetype kits (their
+## effect: a gun's right click (content/hunter_abilities), a Boki's ability, and the archetype kits (their
 ## Feel module can take its tell and impact rows from tell_row / impact_row). Presentation only:
 ## nothing in the simulation reads anything here.
 ##
@@ -103,7 +103,7 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 	var hand: Vector3 = at + Vector3(0, 1.0, 0) + d3 * 0.6
 	var hot := col.lerp(Color.WHITE, 0.35)
 	# every cast: a ring at the caster's feet in the ability's colour, so you see who cast it
-	if not delivery in ["launch", "trap", "wall"]:
+	if not delivery in ["leap", "launch", "dash", "trap", "wall"]:
 		fx.ring((caster as Ent).pos if caster is Ent else at, 1.25, Color(col, 0.85), 0.22)
 	match delivery:
 		"rail", "beam":
@@ -122,7 +122,6 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 			fx.spark(hand, d3, hot, 9, 10.0, 18.0, 0.16, 0.0, 1.1)
 		"leap", "launch", "dash":
 			fx.dust(at, 12)
-			fx.ring(at, 1.8, Color(col, 0.8), 0.25)
 			fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, 10, 7.0, 60.0, 0.25, 10.0, 1.0)
 		"wall", "summon":
 			fx.flash(at + Vector3(0, 1.0, 0), hot, 1.0, 0.14)

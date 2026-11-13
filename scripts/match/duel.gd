@@ -115,8 +115,6 @@ func reset() -> void:
 		if h.kin and (h.kin as Kin).state != "shoulder":
 			(h.kin as Kin).recall()
 	_near.clear()
-	m.fx.ring(home_at, 1.6, Color("8fe3c8"), 0.35)
-	m.fx.ring(bot_at, 1.6, Color("ff8a7a"), 0.35)
 	m.sfx("revive", null, -8.0, 1.2)
 
 func heal_both() -> void:
@@ -307,7 +305,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	v.add_child(UI.label("B opens this menu  ·  Backspace resets the round  ·  Esc leaves the room", 13, UI.MUTED))
 
 ## Pick the Boki you duel with: the same list as the Arena menu (yours, or a loaner of any species
-## that never reaches your roster; the training area has no way out).
+## that never reaches your roster; the Training Grounds has no way out).
 func _kin_row(v: VBoxContainer) -> HBoxContainer:
 	var P: Hunter = m.player
 	var opts: Array = m.arena._kin_choices()

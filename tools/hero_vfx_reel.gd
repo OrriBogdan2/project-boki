@@ -10,10 +10,11 @@ extends "res://tools/combo51_shots.gd"
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
-const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
+const HERO_PARTS := {
+	"juggernaut": ["lmb", "chain", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["hook"]}
-const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
+	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
+const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -63,7 +64,8 @@ func run(main_node: Node) -> void:
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
 		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
 		P.ak.set("enraged_t", 0.0)
-		await Callable(self, "_%s_%s" % [who, part] if HERO_PARTS.has(who) else "_part_" + part).call()
+		var own_part := "_%s_%s" % [who, part]
+		await Callable(self, own_part if has_method(own_part) else "_part_" + part).call()
 	_write_captions()
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
@@ -112,6 +114,14 @@ func _part_lmb() -> void:
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
 	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]), 1.5)
+	await _go(GAP)
+
+func _part_hold() -> void:
+	await _reset(3.3)
+	var hold := func(t: float):
+		P.inp["fire"] = t > 0.1 and t < 1.5
+		_aim(T.pos)
+	await _go(2.2, hold, _sheet("hold", "LMB held at the dummy", [0.2, 0.4, 0.6, 0.8, 1.0, 1.3, 1.55, 1.7, 2.0]), 1.5)
 	await _go(GAP)
 
 func _part_rmb() -> void:
@@ -165,6 +175,21 @@ func _juggernaut_lmb() -> void:
 			[0.04, 0.09, 0.15, 0.22, 0.3, 0.54, 0.6, 0.68, 0.8]), 1.5)
 	await _go(GAP)
 
+## The slash chain at the footage's own taps (hero-ref 0023-0034 at 5 fps: swings on 0026, 0029, 0033), a frame
+## every 0.2 s to lay beside those frames.
+func _juggernaut_chain() -> void:
+	await _reset(3.3)
+	var taps := func(t: float):
+		P.inp["fire"] = [0.5, 1.1, 1.9].any(func(at: float) -> bool:
+			return t >= at and t < at + DT * 2.0)
+		_aim(T.pos)
+	var times: Array = []
+	for i in 12:
+		times.append(i * 0.2)
+	await _go(2.4, taps, _sheet("chain", "LMB chain at the footage's taps (0023-0034 at 5 fps, swings on 0026, 0029, "
+			+ "0033): no step into a swing, the sides alternate, the blade back between swings", times), 1.5)
+	await _go(GAP)
+
 func _juggernaut_wave() -> void:
 	await _reset(8.5)
 	var hold := func(t: float):
@@ -206,7 +231,7 @@ func _juggernaut_lunge() -> void:
 	await _go(GAP)
 
 func _juggernaut_drop() -> void:
-	await _reset(5.0)
+	await _reset(2.4)
 	var K: JuggernautKit = P.ak
 	var drop := func(t: float):
 		P.inp["jump"] = t < DT
@@ -214,9 +239,9 @@ func _juggernaut_drop() -> void:
 			K.press_rmb()
 		_aim(T.pos)
 	await _go(3.0, drop, _sheet("drop",
-			"RMB in the air, Meteor Drop: the gather over the marker, the comet dive, the ground "
-			+ "breaking open, the wall of flame at the stun's edge, debris, cooling fissures",
-			[0.34, 0.45, 0.55, 0.64, 0.7, 0.8, 1.0, 1.6, 2.6]), 2.0)
+			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
+			+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust",
+			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]), 2.0)
 	await _go(GAP)
 
 func _juggernaut_dash() -> void:
@@ -283,7 +308,7 @@ func _juggernaut_r() -> void:
 	await _go(2.7, ult, _sheet("r",
 			"X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the "
 			+ "gold scorch and embers",
-			[0.2, 0.42, 0.6, 0.77, 0.84, 0.92, 1.05, 1.5, 2.5]), 1.5)
+			[0.2, 0.42, 0.77, 0.86, 0.89, 0.93, 0.98, 1.1, 2.0]), 1.5)
 	await _go(GAP)
 
 func _juggernaut_rage() -> void:
@@ -345,7 +370,7 @@ func _archer_lmb() -> void:
 		_aim(T.pos)
 	await _go(2.6, shots, _sheet("lmb",
 			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
-			+ "red thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+			+ "orchid thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
 	await _go(GAP)
 
 ## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
@@ -368,7 +393,8 @@ func _archer_miss() -> void:
 		P.inp["fire"] = fmod(t, 0.9) < 0.04 and t < 1.9
 		_aim(off + Vector3(0, 0, 1.6 * floor(t / 0.9)))
 	await _go(4.6, shots, _sheet("miss",
-			"Missed needles stay stuck in the ground with their red threads attached, 4 s, swaying, then they run out",
+			"Missed needles stay stuck in the ground with their orchid threads attached, 4 s, swaying, "
+			+ "then they run out",
 			[0.1, 0.3, 0.6, 1.2, 2.0, 2.8, 3.6, 4.2, 4.5], func() -> Vector3: return off), 3.0)
 	await _go(GAP)
 
@@ -393,7 +419,7 @@ func _archer_heavy() -> void:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
 	await _go(3.0, heavy, _sheet("heavy",
-			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle (HEAVY_SCALE) with "
+			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big orchid needle (HEAVY_SCALE) with "
 			+ "its thick thread, the shove, the seam it leaves",
 			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
 	await _go(GAP)
@@ -421,7 +447,7 @@ func _archer_e() -> void:
 			K.cast_e()
 		_aim(T.pos)
 	await _go(5.4, hail, _sheet("e",
-			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, the red "
+			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, the orchid "
 			+ "thread stitched post to post", [0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2],
 			func() -> Vector3: return T.position + Vector3(0, 0.9, 0)), 3.0)
 	await _go(GAP)

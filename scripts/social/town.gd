@@ -428,7 +428,7 @@ func _build_ui() -> void:
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
-	var top := UI.card(Color(0.06, 0.07, 0.1, 0.78), 12, 12)
+	var top := UI.card(Color(UI.NIGHT, 0.78), 12, 12)
 	top.position = Vector2(16, 14)
 	var th := UI.hbox(14); top.add_child(th)
 	th.add_child(UI.title("Project Boki", 26, UI.ACCENT))
@@ -436,12 +436,12 @@ func _build_ui() -> void:
 	topbar.autowrap_mode = TextServer.AUTOWRAP_OFF
 	th.add_child(topbar)
 	root_ui.add_child(top)
-	prompt_box = UI.card(Color(0.06, 0.07, 0.1, 0.85), 12, 12)
+	prompt_box = UI.card(Color(UI.NIGHT, 0.85), 12, 12)
 	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
 	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	prompt_box.add_child(prompt_lbl)
 	root_ui.add_child(prompt_box)
-	var hint_box := UI.card(Color(0.06, 0.07, 0.1, 0.7), 8, 10)
+	var hint_box := UI.card(Color(UI.NIGHT, 0.7), 8, 10)
 	var hint := UI.label("WASD walk   ·   Space jump   ·   " + Settings.key_cap("interact") + " use   ·   Scroll to zoom   ·   Esc menu", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint_box.add_child(hint)

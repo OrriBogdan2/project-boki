@@ -19,7 +19,7 @@ var h                                   # the Home screen
 var jobs: Array = []                    # what needs doing right now (see _scan)
 var taken := {}                         # job key -> kin uid
 var scan_t := 0.0
-var spots := {}                         # deco uid -> [sig, Vector3]: where a kin stands to work a station
+var spots := {}                         # "uid:slot" -> [sig, Vector3]: where a kin stands to work (per crew slot)
 var pile_nodes := {}                    # pile id -> Node3D
 var feed_box: VBoxContainer = null
 var feed_lines: Array = []
@@ -89,9 +89,10 @@ func scan() -> void:
 	for r in Save.d["roster"]:
 		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
 	_plot_jobs()
-	_wild_jobs()
-	_station_jobs()
-	_haul_jobs()
+	if not FarmUnlocks.base_mode():
+		_wild_jobs()
+		_station_jobs()
+		_haul_jobs()
 	_mend_jobs()
 	_warm_jobs()
 	FarmSites.scan(self)
@@ -194,24 +195,26 @@ func stand(e: Dictionary, slot := 0) -> Vector3:
 		return c + side
 	var sig := "%d,%d,%d,%d" % [int(e["x"]), int(e["z"]), int(e.get("r", 0)), h.hb.ver if h.hb else 0]
 	var u := int(e["u"])
-	if spots.has(u) and spots[u][0] == sig:
-		return spots[u][1]
+	var key := "%d:%d" % [u, slot]
+	if spots.has(key) and spots[key][0] == sig:
+		return spots[key][1]
 	var cells := HomeLayout.deco_cells(e)
 	var x0 := 9999; var z0 := 9999; var x1 := -9999; var z1 := -9999
 	for t in cells:
 		x0 = mini(x0, t.x); z0 = mini(z0, t.y); x1 = maxi(x1, t.x); z1 = maxi(z1, t.y)
 	var face := HomeLayout.facing(int(e.get("r", 0)))
-	var best := Vector3.INF; var bs := -1e9
+	var open: Array = []
 	for z in range(z0 - 1, z1 + 2):
 		for x in range(x0 - 1, x1 + 2):
 			if x >= x0 and x <= x1 and z >= z0 and z <= z1: continue
 			if not _ground(x, z): continue
 			var p := Vector3(x + 0.5, 0, z + 0.5)
 			var dv := p - c
-			var sc := dv.normalized().dot(face) * 2.0 - dv.length()
-			if sc > bs: bs = sc; best = p
-	if best == Vector3.INF: best = c + face * 1.0
-	spots[u] = [sig, best]
+			open.append([dv.normalized().dot(face) * 2.0 - dv.length(), open.size(), p])
+	# the best open tile, then the next best for the next crew slot (two builders can't share one paw spot)
+	open.sort_custom(func(a, b): return a[0] > b[0] or (a[0] == b[0] and a[1] < b[1]))
+	var best: Vector3 = open[mini(slot, open.size() - 1)][2] if not open.is_empty() else c + face * 1.0
+	spots[key] = [sig, best]
 	return best
 
 func _st_ok(s: Dictionary) -> bool:
@@ -425,7 +428,11 @@ func _warm_jobs() -> void:
 
 # ------------------------------------------------------------------ choosing a job
 func _night() -> bool:
-	return sin((h.day_t - 0.25) * TAU) < -0.2
+	return is_night(h.day_t)
+
+## Is the day clock (0..1, 0.25 morning, 0.75 dusk) in the night?
+static func is_night(day_t: float) -> bool:
+	return sin((day_t - 0.25) * TAU) < -0.2
 
 ## A free kin looks for work. True if it took a job.
 func pick(k: Dictionary) -> bool:
