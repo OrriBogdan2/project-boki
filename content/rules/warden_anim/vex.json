@@ -32,5 +32,6 @@
 	"carry_stow": ["gatling", "launcher"],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_cross"},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"recoil": {"deg": 2.0, "settle": 0.07},
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"]
 }

@@ -128,6 +128,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	await _carry(id, m, sync, clips, dd)
 	if id == "archer":
 		_release_snap(id, sync, clips, m)
+	_recoil(id, m, sync, clips, dd)
 	m.free()
 	await _flinch(id)
 
@@ -520,6 +521,45 @@ func _release_snap(id: String, sync: Node, clips: WardenClips, m: Node3D) -> voi
 		ok(blended_t >= 0.0 and blended_t <= SNAP_BY, "%s: %s: the blend-in is over %.3f s after the spawn (limit %.2f)"
 				% [id, km, blended_t, SNAP_BY])
 	m.set_meta(WardenClips.STATE, {})
+
+## "recoil": a shot kicks the arms by the file's degrees and settles in its time; sustained fire stays under the cap;
+## the legs and the shot's own state do not move. The clip is held still so only the kick can move a bone.
+func _recoil(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	if not dd.has("recoil"):
+		return
+	var deg := float(dd["recoil"]["deg"])
+	var settle := float(dd["recoil"]["settle"])
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var arm := WardenSkeleton.find(sk, "upper_arm.R")
+	var leg := WardenSkeleton.find(sk, "thigh.R")
+	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "fired": 99.0}
+	m.set_meta(WardenClips.STATE, s)
+	clips.force = {"clip": String(dd["loco"]["idle"]), "t": 0.0}
+	for k in 12:
+		sync.call("_process", DT)
+	var arm0 := sk.get_bone_pose_rotation(arm)
+	var leg0 := sk.get_bone_pose_rotation(leg)
+	s["fired"] = 0.0
+	sync.call("_process", DT)
+	var kick := rad_to_deg(arm0.angle_to(sk.get_bone_pose_rotation(arm)))
+	ok(kick >= deg * 0.6 and kick <= deg * 1.05, "%s: a shot kicks the arm %.2f deg (file %.1f)" % [id, kick, deg])
+	ok(rad_to_deg(leg0.angle_to(sk.get_bone_pose_rotation(leg))) < 0.01, "%s: the legs do not kick" % id)
+	var peak := kick
+	for i in 8:       # (a burst: a shot every 0.12 s)
+		s["fired"] = 0.0
+		for k in 4:
+			sync.call("_process", 0.03)
+			peak = maxf(peak, rad_to_deg(arm0.angle_to(sk.get_bone_pose_rotation(arm))))
+			s["fired"] = 0.03 * (k + 1)
+	ok(peak <= deg * 1.5 + 0.2, "%s: sustained fire peaks %.2f deg (cap %.1f)" % [id, peak, deg * 1.5])
+	var t := 0.0
+	while t < settle * 1.5 + 0.3:
+		s["fired"] = 0.5 + t
+		sync.call("_process", DT)
+		t += DT
+	var rest := rad_to_deg(arm0.angle_to(sk.get_bone_pose_rotation(arm)))
+	ok(rest < deg * 0.1, "%s: the kick settles (%.3f deg left)" % [id, rest])
+	clips.force = {}
 
 ## A hit mid-run (item: additive flinch): the legs run exactly as they would unhit, the spine and arms flinch on top;
 ## standing still, or a stagger, takes the whole body. Two identical models run the same 1 s, one of them hit.

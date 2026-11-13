@@ -38,6 +38,10 @@ const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its re
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
+const RECOIL_MAX := 1.5      # of the data's "deg": sustained fire stacks its kicks up to this
+const RECOIL_DECAY := 3.0    # e-folds over the data's "settle" (the kick is down to 5% by then)
+## Bone -> its share of the kick: the gun arm, the support arm, the shoulder pieces (the HunterAnim PAD_FOLLOW)
+const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.55, "pauldron.L": 0.55}
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 static var _data := {}       # art name -> its parsed file ({} when it has none)
@@ -94,6 +98,8 @@ var crouch_pos := Vector2.ZERO
 var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
 var stowed := false          # "carry_stow" bones are put away
 var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is in a "carry_drop" hand or surface
+var fired_prev := 99.0       # the state's s since the last shot, last frame
+var recoil_deg := 0.0        # the arms' kick now
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -531,6 +537,8 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
+	if d.has("recoil"):
+		_recoil(s, dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_air_tilt()
@@ -554,6 +562,31 @@ func _carry(on: bool, dt: float) -> void:
 	stowed = true
 	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
 	WardenCarry.hold(drop, carry_w >= 0.5)
+
+## Data "recoil" {deg, settle}: each shot (the state's "fired" falling back to 0) kicks the arms and shoulder pieces up
+## by "deg" degrees over whatever the clips play, and the kick settles in "settle" s. Only those bones move, so the legs
+## keep their stride, and the shot's own timing is the kit's.
+func _recoil(s: Dictionary, dt: float) -> void:
+	var rc: Dictionary = d["recoil"]
+	var fired := float(s.get("fired", 99.0))
+	recoil_deg *= exp(-dt * RECOIL_DECAY / float(rc["settle"]))
+	if fired < fired_prev - 0.005 and fired < 0.1:
+		recoil_deg = minf(recoil_deg + float(rc["deg"]), float(rc["deg"]) * RECOIL_MAX)
+	fired_prev = fired
+	var k := recoil_deg * (1.0 - proc_w)     # (the retargeted rig kicks the gun itself)
+	if k < 0.01:
+		return
+	# (a turn about the model's right axis, so a forward arm tips up)
+	var right_world := root.global_basis.orthonormalized() * Vector3.RIGHT
+	var right := skel.global_basis.orthonormalized().inverse() * right_world
+	for bone in RECOIL_BONES:
+		var bi := WardenSkeleton.find(skel, bone)
+		if bi < 0:
+			continue
+		var frame := skel.get_bone_global_pose(skel.get_bone_parent(bi)).basis.get_rotation_quaternion() \
+				* skel.get_bone_rest(bi).basis.get_rotation_quaternion()
+		var tip := Quaternion(frame.inverse() * right, deg_to_rad(k * float(RECOIL_BONES[bone])))
+		skel.set_bone_pose_rotation(bi, tip * skel.get_bone_pose_rotation(bi))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
