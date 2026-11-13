@@ -195,6 +195,10 @@ shown. The rest of the "Seen in the reel" lines match the new renders.
   wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
   and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
   (gap 14 closed).
+**KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
+  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
+  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's and Albert's ground and air rows
+  stay `buffer`: the source never shows an LMB press inside the dash, so each row now says "Not determinable" with what was checked.
 
 ## Vex the Hired Gun (`gunslinger`, source Ghost)
 [gunslinger.mp4](gunslinger.mp4)
