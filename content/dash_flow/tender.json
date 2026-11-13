@@ -67,5 +67,11 @@
 			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Divine Intervention: tether, then walk away (briefs/hero-ref/mooshmoosh.md:248); no other cast is pressed in the channel."}
 		}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:8); no cast from the air in the footage (hero-ref/mooshmoosh.md)", "verdict": "[?]"},
+		"rmb": {"cast": "landing", "h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:9); no air cast in the footage. The wait is ours: owner items 118 and 118b (the 1 s wind-up outlasts the hop; dash_flow jump row)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:12); no cast from the air in the footage (hero-ref/mooshmoosh.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:13); no cast from the air in the footage (hero-ref/mooshmoosh.md)", "verdict": "[?]"}
 	}
 }
