@@ -77,9 +77,9 @@ func _first_arrival() -> void:
 	ok(hob.node is HobModel and Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length() < 4.0,
 			"Hob is a person standing by the market stall")
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
-	ok(FarmTutorial.current() == "hob" and home.guide.hint_lbl.text.contains("Hob")
-			and not home.guide.hint_lbl.text.contains("Hob:"),
-			"the first goal: meet him (%s)" % home.guide.hint_lbl.text)
+	ok(FarmTutorial.current() == "hob" and home.guide.hint_text().contains("Hob")
+			and not home.guide.hint_text().contains("Hob:"),
+			"the first goal: meet him (%s)" % home.guide.hint_text())
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
 			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
 	# 2. the camera swing
