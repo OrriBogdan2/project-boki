@@ -42,6 +42,7 @@ on main's tree (d255acbee) and `vfxq-after-<arch>` on this branch; the sheets li
 | Albert | bulwark | `#fff0b0` | radiant ivory | |
 | Sable | thief | `#9a5cff` | violet | |
 | Motley | ostra | `#2ee6c0` | sea teal | |
+| Gil | gil | `#4aa8ff` | sea blue | water looks: foam white core, deep blue shade; each potion keeps its own status colour |
 
 Rule: a kit draws its body in its signature colour (or a slot `col` in its archetype JSON derived from it). White,
 pale tints of the signature, and black/smoke are free. Status colours (purple for control, green for heal) stay readable on
@@ -66,7 +67,7 @@ Still open (shared, not done here):
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - `pin_draw.gd` defaults to `#e8483e`.
-- Only six kits are data-driven (`content/vfx/`: archer, ashwick, dredge, juggernaut, rimewright, tender). The rest draw with
+- Only seven kits are data-driven (`content/vfx/`: archer, ashwick, dredge, gil, juggernaut, rimewright, tender). The rest draw with
   `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
   how a kit reaches the bar.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
@@ -182,3 +183,9 @@ parity: none added. The remaining gap to the bar (Cinder 28) is 5-7 points each.
 Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
 linked from PR #14; Kael's X pair (`before_juggernaut_r.png`, `after_juggernaut_r.png`) is there too.
+
+Gil (owner playtest 11-11, branch ext/gil-rework-1111): moved from `Fx` dots and rings to `content/vfx/gil.json`
+and keyed poses (`scripts/match/kmoves_gil.gd`) on every move: thrust streaks and hit splashes, the Tide Lunge
+(held LMB), the dive under the ground with a wake and the surfacing burst, one break look per potion, the Riptide
+sweep and spout, the wave's wake and crest. Not yet scored here; the before/after game-camera reels are in the READY
+post. Left: his own sound set (the recipes reuse shared sounds).
