@@ -414,6 +414,14 @@ func burst_radius() -> float:
 	var r3_k := float(seed_def.get("r3_k", 2.0))
 	return float(seed_def["burst_r"]) * (r3_k if rank("sec") >= 3 else 1.0)
 
+## Rank 3 (the source's tier IV): the burst takes "burst_ap_r3" times the ability power bonus the
+## hunter's level gives (1.0 at level 1, where there is none).
+func burst_ap_k() -> float:
+	var ap := LevelGrowth.ap(h)
+	if rank("sec") < 3:
+		return 1.0
+	return (1.0 + (ap - 1.0) * float(rmb_def()["seed"]["burst_ap_r3"])) / ap
+
 func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "build": 0.0, "id": burr_n})
@@ -472,7 +480,7 @@ func _burst(t: Ent) -> void:
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
 		f.hurt(
-				float(sd["burst_dmg"]) * power("sec"), h,
+				float(sd["burst_dmg"]) * power("sec") * burst_ap_k(), h,
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
@@ -594,8 +602,9 @@ func throw_boost() -> float:
 	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
 
 ## Hearthlight's healing: +15% a rank past the first, grown by the level's ability power (LevelGrowth.ap).
+## Healing by rank: the E row of rank_dmg (+22.5%, then +50%, the source's).
 func heal_k() -> float:
-	return (1.0 + 0.15 * float(maxi(0, rank("kin") - 1))) * LevelGrowth.ap(h)
+	return rank_k("rank_dmg", "kin", 1.0) * LevelGrowth.ap(h)
 
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()

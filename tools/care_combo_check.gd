@@ -1567,6 +1567,15 @@ func burr_ranks() -> void:
 	var wide3 := K.burst_radius()
 	ok("mm RMB: the burst is 2.2 m wide, 4.4 m at rank 3", absf(wide1 - 2.2) < 0.01 and absf(wide3 - 4.4) < 0.01,
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
+	# rank 3 (the source's tier IV): the burst takes 1.5x the ability power bonus (none at level 1)
+	var ap3 := K.burst_ap_k()
+	P.set_meta("growth_lvl", 10)
+	var bonus := LevelGrowth.ap_pct(10)
+	var ap10 := K.burst_ap_k()
+	P.slot_lv["sec"] = 1
+	ok("mm RMB rank 3: the burst takes 1.5x the ability power bonus (x%.3f at level 10, x1 at level 1)" % ap10,
+			absf(ap3 - 1.0) < 0.001 and absf(ap10 - (1.0 + 1.5 * bonus) / (1.0 + bonus)) < 0.001
+			and bonus > 0.0 and K.burst_ap_k() == 1.0, "L1 %.3f L10 %.3f" % [ap3, ap10])
 	await _free(m)
 
 # ================================================================== Neve

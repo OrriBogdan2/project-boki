@@ -72,7 +72,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | No steering in the glide (owner: air control) | MED | (b) | 99f79210: the move keys bend the heading at 3 rad/s (`dash.air.steer`); `mm air dash: the move keys steer the glide ...` |
 | Ground dash numbers can't be found ("copy Elluna") | MED | (a) | 89edfb96: the measured hunter ground dash (2 bh in 0.2 s), flagged as an owner clip in the dash table |
 | Dash cooldowns | ok | (a) | b0106659: 7 s / 14 s (data) |
-| Burrseed cd 8 s vs about 10.5 s (data ratio to E) | MED | (b) | 99f79210: 10.5 s (ranks 9.5 / 8.4 s); `mm RMB: Burrseed 10.5 s ...` |
+| Burrseed cd 8 s vs about 10.5 s (data ratio to E) | MED | (b) | 99f79210: 10.5 s (ranks 10.5 / 7.8 s, see "Ranks: source tier table"); `mm RMB: Burrseed 10.5 s ...` |
 | Hearth Call heals her instead of the downed ally (data: an ally or Wisp) | MED | (b) | 99f79210: it heals the downed teammate's bleed-out pool (`wisp_k`); `mm X: the tether heals the downed teammate ...` (care ult check) |
 | Hearthlight self_k 0.33 (not in the data) | LOW | (b) | removed: the field and its three uses are gone; she is healed like any teammate in the ring (`Hearthlight: heals you in full`, `mm E: the ring heals her for the full tick`) |
 | Hearth Call heals her instead of the downed ally (data: an ally or Wisp) | MED | (b) | 99f79210: it heals the downed teammate's bleed-out pool (`wisp_k`); `mm R: the tether heals the downed teammate ...` (care ult check) |
@@ -84,6 +84,27 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | Dash -> ability rows | LOW | (c) | left as they are (a separate agent researches presses during a dash) |
 | RMB shape, E, R shape, Bearer, rank 3, dash VFX | ok | (a) | matched in the audit |
 | RMB shape, E, X shape, Carrier, rank 3, dash VFX | ok | (a) | matched in the audit |
+
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
+(briefs/supervive-data/supervive_kits.md, Elluna `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
+tender.json (`rank_dmg.kin` is her healing; `rank_cd.air` the long air glide); the shared -10% cooldown / +15% / -15%
+recharge steps no longer apply to her. Our Burrseed and Hearthlight cooldowns are a second under the source's, so their
+cuts keep the source's share (-3 of 11.5, -3 of 12); the dash cuts match directly. LMB and Soulpack (Bearer) have no tiers
+in the data and do not rank; R (Hearth Call on X) is decision 0022's.
+
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted |
+|---|---|---|---|---|
+| LMB embers | none [D] | - | - | - |
+| RMB Burrseed | +40% dmg / +0.3s root / 200% burst radius, -3s, +50% AP ratio on the delayed hit [D] | damage +40% | damage +40%, 10.5s -> 7.8s; root 1.1 -> 1.4s; burst 2.2 -> 4.4m; the burst takes 1.5x the ability power bonus | `--tender-combo-check`: `upgrade parity: Burrseed ...`, `mm RMB: the burst is 2.2 m wide ...`, `mm RMB rank 3: the burst takes 1.5x ...` |
+| Shift Relay Step | -0.75s (air -1.5s) / -0.75s (air -1.5s) / picking up a wisp refreshes the air dash [D] | recharge 7 -> 6.25s; air glide 14 -> 12.5s | 5.5s; air glide 11s; picking up a teammate refreshes the air glide | `upgrade parity: Relay Step ...`, `Relay Step rank 3: picking up ...` |
+| E Hearthlight | +22.5% healing / +27.5% healing / -3s, the throw's healing boost doubled for 1s [D] | healing +22.5% | healing +50%, 11s -> 8.25s; the throw's boost 50% -> 100% (1s) | `upgrade parity: Hearthlight ...`, the throw boost row |
+| Passive Bearer | none [D] | - | - | - |
+
+Fixed to the data in this pass: the Burrseed 9.5s / 8.4s and +15% / +30% (shared) -> 10.5s / 7.8s and +40% / +40%; the
+tier IV ability-power ratio on the burst was missing and is built (`rmb.seed.burst_ap_r3`, `TenderKit.burst_ap_k`; no
+effect at level 1); Relay Step 6s / 4.9s (shared -15%) -> 6.25s / 5.5s and the air glide now ranks too (14 / 12.5 / 11s);
+Hearthlight 9.9s / 8.8s and +15% / +30% healing (shared) -> 11s / 8.25s and +22.5% / +50%.
 
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |
