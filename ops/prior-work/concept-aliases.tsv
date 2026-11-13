@@ -1,0 +1,44 @@
+# concept-aliases.tsv: different words, same system (prior-work, 11-12). One line: <phrase|phrase|...> TAB <concept,concept,...>
+# Phrases match whole words in lowercased, singularised text (label, task, branch name, READY post). A concept's own name
+# (wisp-summon -> "wisp summon") always matches too. Add a line when a dupe slipped through under new words.
+# Optional third column 'broad': an area, not one system (boss, tutorial, hud...). It adds to the score and shows in the prompt
+# block, but never makes a match HIGH (only a specific system shared with an active item refuses a start).
+boki control|boki throw|boki button|kin control|kin throw|throw key|send your boki|send your kin|send out|recall|summon|summoned|summoning	wisp,wisp-summon
+wisp|wisps|kin wisp	wisp	broad
+chest|vault|keyed chest|key chest|keychest|chest key	chest
+spider|skitter|blight nest|nest	skitter
+downed|down state|going down|knocked down|bleedout|bleed out	wisp,downed
+revive|rez|resurrect|pick up teammate	downed,revive
+stomp|stomping|finisher|finish a wisp	stomp
+steal|stolen|stolen wisp|wisp steal	wisp,wisp-steal
+carry passive|carried boki|carry out|carryout|carry slot	wisp,wisp-carry
+guardian summon|guardian	wisp-guardian
+fuse|fusion|fused	fusion
+glide|glider|gliding	glide
+dash|dodge|blink	dash	broad
+ult|ultimate	ult	broad
+relic|relics	relic
+heart|wyrmheart	heart	broad
+shrinking zone|zone|blight closing|ring closing|storm	zone	broad
+extract|extraction|evac|extract point	extract	broad
+garden|farm|garden plot|crop|harvest|planting	farm	broad
+tutorial|tut|onboarding|first match	tutorial	broad
+soul link|soullink|bond ring|bond pull	soul-link
+hatch|egg|mystery egg	hatch
+bokidex|dex|field book	bokidex
+xp|level up|leveling|levelling	xp	broad
+hud|health bar|right side box	hud	broad
+hitbox|hurtbox|hit rule|hit size	hitbox	broad
+bot|bots|ai hunter	bot	broad
+camp|camps|mob camp|critter camp	camps	broad
+boss|lair boss|lair	boss	broad
+mob|mobs|critter|spitter|brute|bomber|sentinel|glimmer	mob	broad
+knockback|knock up|knockup|stun|rooted|crowd control	cc	broad
+black market|ransom|deathbox|death box	deathbox
+telegraph|windup|wind up	telegraph	broad
+camera|cam|camera lead	camera	broad
+online|rpc|netcode|multiplayer|peer	net	broad
+keybind|key bind|rebind|key cap|controls screen|key_cap	keybind	broad
+hunter select|class card|pick row|character select	hunter-select	broad
+mantle|mantlelook|mantle look	mantle	broad
+parity|source parity|supervive parity	parity	broad

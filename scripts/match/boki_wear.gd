@@ -2,6 +2,7 @@ class_name BokiWear
 ## Boki wear sold through the market (docs/decisions/0013-market.md) that Models.accessory doesn't
 ## draw itself: the studded collar and the star charm. Same body space as the other accessories.
 
+
 static func build(body: Node3D, id: String, c: Color) -> void:
 	match id:
 		"collar":
