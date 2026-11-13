@@ -251,7 +251,8 @@ func _cards_part(m: Node, hub) -> void:
 	MinigameHub.record("race", "Pip")
 	ok(_card_texts("bramblebank").has("Your best: Pip"), "after a win it names your best Boki")
 	var gw: Node = row.get_child(1)
-	var gw_lines: Array = gw.find_children("*", "Label", true, false)
+	var hint := String(HubFirstVisit.rules()["line_text"])      # main's first-visit hint rides on top of the one line
+	var gw_lines: Array = gw.find_children("*", "Label", true, false).filter(func(l): return l.text != hint)
 	ok(gw_lines.size() == 2 and "Wayseed" in gw_lines[1].text,
 		"locked Glasswater: its name and one line (%s)" % gw_lines[-1].text)
 	await _hub_shot(m, hub, "cards.png", SHOT_ZOOM)
