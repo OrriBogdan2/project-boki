@@ -474,15 +474,15 @@ static func migrate_habits(data: Dictionary) -> void:
 		if typeof(rec) == TYPE_DICTIONARY and not rec.is_empty():
 			ensure(rec)
 
-## Raises trust for kind "pet", "food" or "win" by its named amount, once per cooldown per kind.
+## Raises trust for kind "pet", "food" or "win" by its named amount (times `mul`), once per cooldown per kind.
 ## Returns the line to show, or "" when nothing changed (cooling down, or trust already full).
-static func trust_up(rec: Dictionary, kind: String, now_s: float, food := "") -> String:
+static func trust_up(rec: Dictionary, kind: String, now_s: float, food := "", mul := 1.0) -> String:
 	var r := Content.rules("garden_trust")
 	var last: Dictionary = rec.get("care_t", {})
 	if now_s < float(last.get(kind, -1.0e9)) + float(r["cooldown_h"]) * float(r["hour_s"]):
 		return ""
 	var was := float(rec.get("trust", 0.0))
-	rec["trust"] = clampf(was + float(r[kind]), 0.0, 100.0)
+	rec["trust"] = clampf(was + float(r[kind]) * mul, 0.0, 100.0)
 	if float(rec["trust"]) <= was:
 		return ""
 	last[kind] = now_s

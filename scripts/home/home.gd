@@ -2948,30 +2948,13 @@ func _garden_xp(rec: Dictionary, action: String, points := 0) -> void:
 	_play_evolutions.call_deferred()
 
 func _pet_kin(k: Dictionary) -> void:
-	var rec: Dictionary = k["rec"]
-	if float(k.get("nap_t", 0.0)) > 0.0:
-		# a gentle pat wakes it up
-		k["nap_t"] = 0.01
-	var loves_pet: bool = rec["likes"]["play"] == "pet"
-	var now_s := Time.get_ticks_msec() / 1000.0
-	if now_s >= float(k.get("pet_ok", 0.0)):
-		k["pet_ok"] = now_s + 20.0
-		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
-		_garden_xp(rec, "pet")
-	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
-	_care_trust(rec, "pet")
-	k["hold_t"] = 1.0
-	k["joy_t"] = 0.9
-	verbs.play("pat")
+	var r := PetReact.pet(self, k)
 	kin_frame.start(k, ppos)
 	_face(k["pos"])
-	_emote(k, "♥", true)
-	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
-	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0, 0.12, Unique.voice(rec))
-	if Care.care_day(rec, "petted"):
-		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
+	if r["paid"]: _garden_xp(k["rec"], "pet")
+	if r["memory"]:
 		Save.save_game()
-		_say(k, BokiLines.say(rec, "petted"))
+		_say(k, BokiLines.say(k["rec"], "petted"))
 
 ## Fetch: you toss a ball toward the cursor, the kin runs it down and brings it back.
 func _play_with_kin(k: Dictionary) -> void:

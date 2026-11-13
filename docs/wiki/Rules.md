@@ -1563,6 +1563,25 @@ The talking NPCs drawn from a rigged Meshy model (NpcModel, art/npcs/<id>/<id>.g
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
 
+## pet_react (`content/rules/pet_react.json`)
+
+How a Boki answers a pat by personality (scripts/home/pet_react.gd, used by home.gd and interior.gd). Four kinds, picked from its traits: shy (low bravery), proud (high temper), playful (curious), sleepy (the rest). Each plays a short beat from the existing clips plus one mood icon, pays joy and trust, and pays at most `cap` times a farm day (the window is care.json care_day_s); past the cap it only looks at you.
+
+| Setting | Value |
+|---|---|
+| shy_bravery | 0.4 |
+| proud_temper | 0.62 |
+| playful_curiosity | 0.5 |
+| again_s | 15 |
+| again_s_doc | s within which a shy Boki's second pat counts as the one it leans into; later it flinches again. |
+| love_joy | 7 |
+| love_joy_doc | extra joy when the Boki's favourite play is being petted (before this a pat gave 12 to those and 5 to the rest). |
+| hold_s | 1 |
+| away_m | 4 |
+| away_m_doc | m a proud Boki walks off after its one pat. |
+| kinds | {"playful": {"icon": "\u266a", "joy": 5.0, "trust": 1.0, "cap": 3, "hold_s": 1.4, "roll_s": 0.7}, "shy": {"icon": "\u2665", "first_icon": "!", "joy": 5.0, "trust": 1.5, "cap": 2, "hold_s": 1.2, "flinch_s": 0.6}, "proud": {"icon": "\u2605", "joy": 5.0, "trust": 1.0, "cap": 1, "hold_s": 0.8}, "sleepy": {"icon": "z", "joy": 5.0, "trust": 0.5, "cap": 2, "hold_s": 1.2, "nap_s": 8.0}} |
+| _units | joy: need points; trust: multiplies garden_trust.json pet (itself on its own cooldown); cap: paying pats per farm day; *_s: seconds. |
+
 ## pickup (`content/rules/pickup.json`)
 
 Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each rule is a flat radius and a height (m) a hunter must be within, and nothing may stand between them and the thing: a rock, higher ground or a kit wall blocks a pickup as it blocks sight. walk: consumables, armor shards, gems, seeds, Rift and chest keys fly to you as you pass (no key); pull_speed + (radius - distance) x pull_gain m/s, taken when within grab m of your chest, settle s after they land. tune: a weapon tuning taken by walking over it. bot: a bot walking over a tuning or a gear piece better than its own. interact: gear and treasure, taken with the interact key; of several in reach the key takes the one nearest the cursor.

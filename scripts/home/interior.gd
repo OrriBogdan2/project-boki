@@ -313,24 +313,11 @@ func _use(it: Dictionary) -> void:
 		"journal": _open_journal()
 		"gramophone": _open_music()
 
-## Petting indoors counts just like outside: joy, likes, the memory and the first-day list.
+## Petting indoors counts just like outside: its personality's beat, joy, trust, likes and the memory.
 func _pet_kin(k: Dictionary) -> void:
-	var rec: Dictionary = k["rec"]
-	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0)
-	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 10, 1.6)
-	k["t"] = 1.2; k["goal"] = k["pos"]
-	verbs.play("pat")
-	if not visit.is_empty():
-		return
-	var loves_pet: bool = rec.get("likes", {}).get("play", "") == "pet"
-	var now_s := Time.get_ticks_msec() / 1000.0
-	if now_s >= float(k.get("pet_ok", 0.0)):
-		k["pet_ok"] = now_s + 20.0
-		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
-	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
-	if Care.care_day(rec, "petted"):
-		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
-	Save.save_game()
+	PetReact.pet(self, k, visit.is_empty())
+	if visit.is_empty():
+		Save.save_game()
 
 func _leave() -> void:
 	if decorating: dec.toggle()
