@@ -1,19 +1,27 @@
 class_name ZoneCards
 extends RefCounted
 ## The Waystone's destination cards (briefs/design/GARDEN.md 10.5): one per zone, plus the hub when
-## you're in a zone. An open zone's card has its colour, who lives there and how they feel, and
-## today's game. A locked one is grey and lists its two keys as ticks, and where to get each; with both
-## in hand its button reads "Wake it" (HubWaystone.attune); "Locked" is refused with a knock (HubWaystone.hop).
+## you're in a zone, read at a glance. An open zone's card has a band of its colour, up to six of its
+## Boki as pictures with today's mood face (happy, content, sulky), and its game with your best Boki
+## at it (MinigameHub.best). A locked one is grey with one line on what it still needs; with both keys
+## in hand its button reads "Wake it" (HubWaystone.attune);
+## "Locked" is refused with a knock (HubWaystone.hop).
 ## The same cards answer "Move to..." for a Boki (move_to): Send, or why it can't go there.
 
 const CARD_W := 150.0       # px, one card's width
 const JOY_HAPPY := 60.0     # joy at or over this reads "happy" on the card
 const JOY_LOW := 30.0       # joy under this reads "sulky"
+const FACES := 6            # Boki pictures on an open card at most (3 a row); the rest read "+N more"
+const FACE_PX := 36.0       # px, one Boki picture
+const MOOD_PX := 14.0       # px, the mood face on its corner
+const BAND_H := 6.0         # px, the zone's colour band across the card's top
+const MOOD_COL := {"happy": UI.GOOD, "content": UI.GOLD, "sulky": UI.BAD}
 
 static func open(h, here: String) -> void:
 	var v: VBoxContainer = h._new_panel("The Waystone", 900.0)
 	v.add_child(UI.label("Where to?", 14, UI.MUTED))
 	var row := UI.hbox(8)
+	row.name = "Cards"
 	v.add_child(row)
 	if here != GardenZones.HUB:
 		var about := UI.para("The Waystone, the portal and the way to every zone.")
@@ -21,13 +29,13 @@ static func open(h, here: String) -> void:
 	for id in GardenZones.ids():
 		var z := GardenZones.info(id)
 		if GardenZones.is_open(id):
-			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), _open_lines(id), func(): h.hway.hop(id),
+			var lines := _open_lines(id, h.get_tree())
+			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), lines, func(): h.hway.hop(id),
 					"You are here" if id == here else "Go", id != here))
 		else:
-			var lines: Array = key_lines(id).map(func(t): return UI.para(t, 12, UI.MUTED))
+			var lines: Array = [UI.para(lock_line(id), 12, UI.MUTED)]
 			if here == GardenZones.HUB and h.hhints != null:
 				lines.append_array(HubFirstVisit.card_line(id))
-			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
 			var keys := GardenZones.keys_for(id)
 			var ready: bool = keys["seed"] and keys["lean"]
 			var pick := func(): h.hway.hop(id)     # refused: the knock and what it still needs
@@ -71,7 +79,7 @@ static func move_to(h, k: Dictionary) -> void:
 	for id in GardenZones.ids():
 		var z := GardenZones.info(id)
 		var why := GardenZones.why_not(rec, id)
-		var lines: Array = _open_lines(id) if GardenZones.is_open(id) else []
+		var lines: Array = _open_lines(id, h.get_tree()) if GardenZones.is_open(id) else []
 		if why != "":
 			lines.append(UI.para(why, 12, UI.MUTED))
 		var col := Color(String(z["colour"])) if GardenZones.is_open(id) else UI.FAINT
@@ -80,28 +88,53 @@ static func move_to(h, k: Dictionary) -> void:
 			h.hway.send(k, id)
 		row.add_child(_card(String(z["name"]), col, lines, go, "Send" if why == "" else "Can't", why == ""))
 
-## A locked zone's two keys, ticked when you have them.
-static func key_lines(id: String) -> Array:
+## A locked zone's one line: what it still needs, in plain words.
+static func lock_line(id: String) -> String:
 	var keys := GardenZones.keys_for(id)
 	var types: Array = GardenZones.info(id)["types"].map(func(t): return String(t).capitalize())
-	return ["%s A Wayseed of %s" % [_tick(keys["seed"]), GardenZones.info(id)["name"]],
-		"%s A Boki leaning %s" % [_tick(keys["lean"]), ", ".join(types.slice(0, -1)) + " or " + types[-1]]]
+	var food := "feed a Boki %s or %s meals" % [", ".join(types.slice(0, -1)), types[-1]]
+	if keys["seed"] and keys["lean"]:
+		return "Ready to wake."
+	if keys["seed"]:
+		return food[0].to_upper() + food.substr(1) + "."
+	var seed := "Find its Wayseed in a run's lair or at the trader"
+	return seed + "." if keys["lean"] else seed + ", and " + food + "."
 
-static func _tick(have: bool) -> String:
-	return "[x]" if have else "[ ]"
-
-static func _open_lines(id: String) -> Array:
+## An open zone's card body: its Boki with their moods, who woke it, today's game and your best at it.
+static func _open_lines(id: String, tree: SceneTree) -> Array:
 	var out: Array = []
 	var res := GardenZones.residents(id)
 	if res.is_empty():
 		out.append(UI.para("Nobody lives here yet.", 12, UI.MUTED))
-	for rec in res:
-		out.append(UI.para("%s, %s" % [rec["name"], _mood(rec)], 12, UI.MUTED))
+	var grid := GridContainer.new()
+	grid.columns = 3
+	for rec in res.slice(0, FACES):
+		grid.add_child(_face(rec, tree))
+	if not res.is_empty():
+		out.append(grid)
+	if res.size() > FACES:
+		out.append(UI.para("+%d more" % (res.size() - FACES), 12, UI.MUTED))
 	var founder := GardenZones.founder(id)
 	if not founder.is_empty():
 		out.append(UI.para("Woken by %s" % founder["name"], 12, UI.MUTED))
-	out.append(UI.para("Today: " + String(GardenZones.info(id)["game"]), 12, UI.INK))
+	var z := GardenZones.info(id)
+	out.append(UI.para("Today: " + String(z["game"]), 12, UI.INK))
+	var top := MinigameHub.best(String(z["play"]))
+	out.append(UI.para("Not played yet" if top.is_empty() else "Your best: %s" % top["name"], 12, UI.GOLD))
 	return out
+
+## One Boki on a card: its picture with today's mood face on the corner; its name and mood on hover.
+static func _face(rec: Dictionary, tree: SceneTree) -> Control:
+	var mood := _mood(rec)
+	var cell := Control.new()
+	cell.custom_minimum_size = Vector2(FACE_PX, FACE_PX)
+	cell.tooltip_text = "%s, %s" % [rec["name"], mood]
+	cell.add_child(KinPortrait.view(rec, tree, FACE_PX))
+	var icon := Icons.Glyph.new(mood, MOOD_COL[mood], MOOD_PX)
+	icon.name = "Mood"
+	icon.position = Vector2(FACE_PX - MOOD_PX, FACE_PX - MOOD_PX)
+	cell.add_child(icon)
+	return cell
 
 static func _mood(rec: Dictionary) -> String:
 	var joy := Care.need(rec, "joy")
@@ -114,9 +147,15 @@ static func _card(title: String, col: Color, lines: Array, go: Callable, btn: St
 	c.custom_minimum_size.x = CARD_W
 	var v := UI.vbox(6)
 	c.add_child(v)
+	var band := ColorRect.new()
+	band.name = "Band"
+	band.color = col
+	band.custom_minimum_size.y = BAND_H
+	v.add_child(band)
 	v.add_child(UI.label(title, 15, col))
 	for l in lines:
-		(l as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if l is Label:
+			(l as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(l)
 	var b := UI.button(btn, go, CARD_W - 28.0)
 	b.disabled = not can

@@ -141,6 +141,10 @@ defaults aren't cited, since the data names no field for these windows.
 | cam_lag_m (camera behind you at a run) | 0.65m | 0.29m | <= 0.40m | [footage] centred |
 | cam_settle_t (after a stop) | 0.35s | 0.15s | <= 0.35s | |
 | cam_glide_lead_m | -0.67m (trailing) | +0.92m | >= 0.4m | lead in glide |
+| cam_glide_zoom_05 (zoom 0.5 s after the glider opens / before) | 1.18x | 1.18x | 1.12–1.25x | [spec] +15..25% boom in the air |
+| cam_dive_zoom_hold (lowest zoom in a plunge / zoom at its start) | 0.85x (closed in) | 1.00x | >= 0.98x | the view stays open so you see where you'll land |
+| cam_dive_land_view (ground under a plunge, screens below centre) | 0.18 | 0.18 | <= 0.3 | |
+| cam_land_step / cam_land_left_05 (zoom-out lost in landing's first step / left at +0.5 s) | 0.04 / 0.29 | 0.04 / 0.29 | <= 0.1 / <= 0.35 | eases back, no pop; no lens change or shake (asserted) |
 | view_across_m (Supervive preset, 16:9) | 28.0m | 23.5m (movefeel 23.0m) | 22–25m | camcal: ~17 hunter silhouettes across, as in gameplay frames |
 | hunter_screen_pct (medium hunter, feet to head) | 5.4% | ~7% (movefeel 7.6%) | 6.4–7.6% | camcal: its silhouette ~10.5% of the height, as in gameplay frames |
 | hunter_feet_below_pct (feet below screen centre) | 0% | ~4% | 1.5–5% | camcal: the view aims at the body |
@@ -176,6 +180,7 @@ Other checks:
   - The glider opens falling at least 0.85 m/s ([game data] GlideStartFallSpeedMin, `Loco.glide_start`, match and farm): a rising jump is cut at the open, no float-up, and the jump pad's own 2 m/s cap went with it. The canopy then catches a fall at 60 m/s² (ours: the source's matching fastest-fall clamp is locked; [guide] it opens "instantly").
   - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only).
   - **Dive** (`GlideDive`, `HunterMove.dive_*`, all [game data]): hold crouch (Ctrl) under an open glider and the canopy folds into a plunge toward 32.5 m/s at 35 m/s², the keys steering at a quarter of their glide force. Let go, come within 3.5 m of the ground (or the island's lip over the abyss) or hold for 10 s and the glide catches you again; the drop you pull out of becomes speed, capped at the glide's 15 m/s max. The key is ours: the source names no dive input, and Space is the glider itself. The folded pose is local-only (the dive isn't in the net snapshot).
+  - **Dive camera** (`CamRig.air_zoom`): the plunge holds the view at least as open as it was, where height alone would close it in as you drop (1.82 → 1.70 mid-plunge before). Landing eases back as from any glide (2.5/s; 1.65 → 1.18 at +0.5 s → 1.01 at +1.5 s). Strip: `--glide-cam-shots`.
   - The abyss lift's brake zone rises at 3.5 m/s per metre left (was 2). Updrafts grab at 45 m/s² (was 30).
 - **Heat** (owner, Nov 2: "lasts too long, not punishing enough"): a level glide overheats after 9s (was 14). Hits heat it 3x (was 2x). An overheated glider burns ~3.5% of max health a second in 20-damage ticks, flies at 0.5x speed and sinks at 5 m/s.
 - **Feathering** [est] (tap the glider on and off instead of holding it). Constants: `FEATHER_*`, `lift_t`, `glide_off_t`.
@@ -311,7 +316,7 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Air control** (`Loco.air_step`, owner 11-08: the data's low AirControl is overruled): WASD adds 32 m/s^2 onto what you carry, 2.5x that against your drift (a 5 m/s backward drift turns forward in ~0.07 s), never past your run speed along the keys; speed above it (dash, knock) bleeds at 2/s. The farm uses the same step. Numbers in content/rules/tuning.json `air`.
 - **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s. The drop never becomes speed (owner 11-08 item 8).
 - **Mantle**: topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s). The no-jump pop is 2.6 m/s (was 3.2; lower gravity floated it twice as long).
-- **Holding Space never opens the glider** (owner 11-08, said twice). With a player's keys (`inp.glide_press_only`, set in `Match`) the glider opens only from a fresh press in the air: a second Space press (`Hunter.do_jump`) or the glide button's press, or a pad/updraft auto-glide. Opening the glider uses the press up (owner 11-09): once it folds (a heal, a dash, a knock, a kit's wind-down) it stays shut while Space is still held, until a new press. A press while a move or cast keeps the glider shut (`_glide_armed`) opens it as the move ends, if still held; letting go or landing clears it. Space held from the jump, or while LMB/RMB/abilities are held (Kael's RMB, Lace's and Albert's LMB; Albert's perfect launch no longer opens it by itself off a drop), never opens it. Every Hunter's air Shift takes a press during or after it, except Sparkle's wire (her keys do nothing while it holds). Scripted input (bots, checks, demos) keeps the old hold-to-open (`GLIDE_ENGAGE`). Home islands follow the same rule. Measured by `--glide-hold-check`. The earlier tap/hold split only added the second-press route next to the hold route and then shortened the hold wait (0.15 -> 0.1 s), so it never went away.
+- **Holding Space never opens the glider** (owner 11-08, said twice). With a player's keys (`inp.glide_press_only`, set in `Match`) the glider opens only from a fresh press in the air: a second Space press (`Hunter.do_jump`) or the glide button's press, or a pad/updraft auto-glide. Opening the glider uses the press up (owner 11-09): once it folds (a heal, a dash, a knock, a kit's wind-down) it stays shut while Space is still held, until a new press. A press while a move or cast keeps the glider shut (`_glide_armed`) opens it as the move ends, if still held; letting go or landing clears it. Space held from the jump, or while LMB/RMB/abilities are held (Kael's RMB, Lace's and Albert's LMB; Albert's perfect launch no longer opens it by itself off a drop), never opens it. Every Hunter's air Shift takes a press during or after it, except Sparkle's wire (her keys do nothing while it holds). Scripted input (bots, checks, demos) keeps the old hold-to-open (`GLIDE_ENGAGE`). Home islands follow the same rule. Measured by `--glide-hold-check`, which also holds every Hunter to "glide start adds no speed" (owner 11-08): opened from a run-speed jump, at an air Shift's end and in a fall, the horizontal speed over the next 8 steps never passes the step before it (0.15 m/s slack; the stick lets go at the press). All 13 pass; no engage-path or kit fix was needed. The earlier tap/hold split only added the second-press route next to the hold route and then shortened the hold wait (0.15 -> 0.1 s), so it never went away.
 - **Glider at any heat, softer deep lift** (owner item 63): the glide input opens the glider at every heat, overheated or not (no heat floor, no lockout after an overheated one closes); overheated it burns you and lifts at half strength. The deepest lift is 30% softer (climb cap 26 -> 18.2 m/s; speed per metre of depth 1.7 -> 1.1) at the same heat cost. Measured by `--glider-heat-check`.
 - **Heat on the canopy** (`GliderHeat`): the glider cloth warms toward ember with heat, an overheated glider trails a thin smoke, and one burning over the abyss at half strength flickers, so teammates and enemies read a gliding Hunter's heat from the world. Two toon-shader parameters (`canopy_heat`, `canopy_burn`) on the canopy's own material: no extra draw calls, no burst on open or close. The heat (4 bits, 15 = overheated) and the burn state ride the hunter flags (bits 19-23); no Net shape change. Measured by `--glider-canopy-check`; shots by `--glider-canopy-shots`.
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
@@ -328,6 +333,35 @@ The source has no ramp time: a Slow or a speed boost moves the speed cap at once
 | haste_land_0p1s (over the hasted run) | 1.00 | 0.99–1.01 | [game data] as a Slow ends |
 | haste_end_0p1s (over the plain run) | 1.00 | 0.99–1.01 | [game data] as a Slow lands |
 
+## Glide entry and brake: the undecoded source values (2026-11-11)
+
+The data names `GlideInitialMin/MaxXYSpeed`, `GlideInitialSpeedDuration` / `DecayDuration` and
+`GlideBrakingForceMin/Max`, `GlideBrakingForceDelay` / `RampDuration`, with no values
+(briefs/supervive-data/supervive_physics.md, "not decoded yet"). The footage was frame-stepped for them and
+settles none, so every row keeps ours, marked `[?]`. Nothing in `tuning.json` changed.
+
+| Source value | Ours (`tuning.json` / code) | Status |
+|---|---|---|
+| Initial XY speed (min) | the open keeps your speed exactly (the hunter's glide step skips the step it opens; `Loco.glide_start` only cuts the fall) | `[?]`; a floor that adds speed is out anyway: owner 11-08 "glide start adds no speed" |
+| Initial XY speed (max) | no cap at the open; above `glide_carry` (12 m/s, Lace 9) the excess bleeds at `carry_drag` 3/s more | `[?]` |
+| Initial speed hold (InitialSpeedDuration) | none: the bleed starts the step the glider opens | `[?]` |
+| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 1.4/s with keys, `glide.drag` 2/s without; a 10 m/s open is back to 5.5 m/s in 1.64 s / 1.15 s | `[?]` |
+| Brake delay (GlideBrakingForceDelay) | 0 s: the step the keys point more than `glide.brake_deg` 115° off your heading | `[?]` |
+| Brake ramp (GlideBrakingRampDuration) | 0 s: the full `glide.brake` 36 m/s² at once, only above cruise (at cruise the 16.25 m/s² glide force turns you, a reversal in ~0.6 s) | `[?]` |
+
+What was frame-stepped (both clips are 1080p at 60 fps, read from 480p full-rate proxies; every hero-ref folder on
+`ext/hero-ref-footage` is a slice of one of them):
+- **Tetra guide** (300 s, folder `breah`): every second at 1 fps, then 13-19, 40.5-48.5, 69-75, 120.5-124.5 and
+  243-249 s at 5 fps. The player never opens the glider: abilities on the ground, and at 121.7-124.3 s Tetra runs
+  on her own rock over the void. Enemy gliders cross the fights at 13.6-18.8, 72.4-74.8 and 245.6-246.8 s, already
+  open or being dunked, behind effects, with unknown keys and a camera that follows Tetra: no start, no brake.
+- **Ability showcase** (1174 s, the other folders): a 4 fps scan for open sky under the hunter flagged 207.5, 418,
+  508-512, 740, 1048 and 1127-1170 s. At 5 fps they are a camera pan over cliffs, a dunk at a cliff, a fight at
+  the edge, a heal disc, Void's ultimate and Celeste's blue ice ultimate: no glide. Elluna's air dashes (706.8,
+  731.1, 735.9, 745.1 s, mooshmoosh.md) are her kit's float; 706-712 and 729-747 s show no glider.
+
+Settling them needs a 60 fps clip of glides by the player: three opens (off a ledge at run speed, out of a dash,
+from a fall) and three back-key brakes from cruise and from a dash speed, on a view with ground at glider height.
 ## Hits on the glider (`--glide-hit-check`, decision 0055; PARITY FIRST)
 
 Asked: what happens to a Hunter under the glider who is shot, knocked, stunned or pulled, and when they can open it again. Evidence read: `docs/SUPERVIVE_DATA.md` sections 4 (crowd control) and 5 (glider rules at 1.0), the 1.0 rules in `docs/KINFALL_CLASSES.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, `supervive_physics.md` (only the names `GliderHeatInboundDamageCoefficient` and `GliderFullHeatInboundDamageCoefficient`, no values), sync64 in `docs/ROADMAP.md`, and the hero-ref footage sheets. None of the footage shows a glider being hit, so the rows below come from the data.
