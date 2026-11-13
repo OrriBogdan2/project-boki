@@ -506,6 +506,11 @@ func _carry(dv: Vector2, k: float) -> void:
 	h.dash_with({"type": "dash", "speed": carry / CARRY_T, "time": CARRY_T, "invuln": 0.0, "dir": dv, "trail": "dust"})
 	step_until = m.time + CARRY_T
 
+## The swing's step keeps his body on the cursor as the hold did (source: he turns freely through the swing, sheet
+## 0102-0108; the "turn" lmb row); the perfect launch and a dash face where they go.
+func aims_in_dash() -> bool:
+	return (m.time < step_until and not launch.running()) or super.aims_in_dash()
+
 ## A foe the slam caught: a white dust puff on them, then a debris trail as they fly back.
 func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 	vfx("hit", f.pos, dv)

@@ -224,6 +224,12 @@
 	"rank3": {"sec": "shield HP +50% in all and it repairs and regenerates faster", "dash": "the 360 Smash refunds the Shield Charge when it hits", "kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"},
 	"rank2": {"sec": "Rank 2: shield HP +25% (160 -> 200).", "dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.", "kin": "Rank 2: healing +25% (burst 18 -> 22)."},
 	"rank_next": {"sec": "Rank 3: shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken.", "kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.", "dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further."},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:73 and :339 he turns freely to the cursor through the charged swing (1.5 turns in 1.2 s, 0102-0108), each release a crescent in front; fixed 11-10: the swing's step held the body on the step line"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:109 the shield faces the cursor and sweeps round with it at once"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:148 placed at the planted hammer; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/bjorn.md:287 planted (feet) for the wind-up and slam, a lane toward the cursor; no turn limit shown"}
+	},
 	"tells": {
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
 		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",
