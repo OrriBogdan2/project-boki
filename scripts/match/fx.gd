@@ -10,6 +10,7 @@ const RING_REACH := 0.9
 ## many times
 const WORD_STEP := 0.62
 const WORD_STACK_MAX := 4
+const NO_GROUND := -1000.0       # m: a ground height far below everything, so a dot never fades
 var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 
 var bursts: Array[CPUParticles3D] = []
@@ -34,7 +35,7 @@ func _ready() -> void:
 	particle_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	# soft painted dots with a bright core, always facing the camera (shaders/fx_dot.gdshader)
 	var pm := QuadMesh.new(); pm.size = Vector2(0.17, 0.17)
-	var dot_mat := ShaderMaterial.new(); dot_mat.shader = load("res://shaders/fx_dot.gdshader")
+	var dot_mat := FxDot.material()
 	var ramp := Gradient.new()
 	ramp.set_color(0, Color(1, 1, 1, 1)); ramp.set_color(1, Color(1, 1, 1, 0))
 	for i in 28:
@@ -222,6 +223,7 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	var p := bursts[bi]
 	bi = (bi + 1) % bursts.size()
 	p.global_position = at
+	p.set_instance_shader_parameter("ground_y", _ground_under(at))
 	var na := maxi(3, int(round(amount * particles)))
 	if p.amount != na: p.amount = na      # (resizing reallocates its buffers: only when it changes)
 	p.color = col
@@ -235,6 +237,12 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	p.spread = spread
 	p.restart()
 	p.emitting = true
+
+## The ground height under a burst, for the dots' fade where there is no depth read (see FxDot); the burst's own
+## no fade off a match (home, interiors).
+func _ground_under(at: Vector3) -> float:
+	var m := get_parent() as Match
+	return m.world.ground_at(at.x, at.z) if m else NO_GROUND
 
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8) -> void:

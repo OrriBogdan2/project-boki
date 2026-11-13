@@ -64,6 +64,7 @@ func run(main: Node) -> void:
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
+	_dots(m)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -385,3 +386,21 @@ func _scarf(main: Node) -> void:
 	S.prewarm(P.pos)
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
+
+## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
+## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
+## tells the dots the ground under it.
+func _dots(m: Match) -> void:
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	var high := FxDot.material()
+	Settings.v["quality"] = "low"
+	var low := FxDot.material()
+	ok(low.shader != high.shader and low.shader.code.begins_with("#define DOT_HEIGHT_FADE"), "Low dots fade by height")
+	ok(not high.shader.code.begins_with("#define") and FxDot.material() == low, "one material per preset")
+	Settings.v["quality"] = was
+	var at := Vector3(m.player.pos.x, m.player.pos.y + 1.0, m.player.pos.z)
+	m.fx.burst(at, Color.WHITE)
+	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
+	var g: float = m.world.ground_at(at.x, at.z)
+	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)
