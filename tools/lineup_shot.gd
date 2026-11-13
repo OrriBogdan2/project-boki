@@ -10,7 +10,7 @@ extends RefCounted
 const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage",
 	"dredge", "tender", "thief", "ostra", "gil"]
 const GAP := 2.0              # m between Hunters (centre to centre)
-const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
+const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0
 const CAM_FOV := 32.0
 const SHOT_W := 2560
