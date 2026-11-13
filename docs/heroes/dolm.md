@@ -156,6 +156,12 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - **The chain:** press: a rock under him, 0.06s crouch, hop 1. `window` (0.6s) runs from each take-off, so it covers the flight
   (0.3s) and the skid: press any time in it, and the next hop goes `skid_min` (0.1s) after touchdown, at the cursor as it is
   then. No press: the skid (up to `skid` 0.55m in `skid_t` 0.3s) ends in the landing. Three hops at most; the third lands at once.
+- **Presses (ours; the source has one dash, no chain):** a press in the first rock's crouch counts as in the window (it is
+  inside DashFlow's `BUFFER_S` 0.15s of it), and a press on the skid leaves the skid running. With no hop left, a press in
+  the last flight's final `BUFFER_S` is held for the landing and goes through the shared dash buffer there; an earlier one
+  does nothing. After the window, a press is a fresh chain with a charge up, and the shared no-charge rule without one.
+  SHIFT AGAIN shows from the press to the window's end while a hop is left, its time left the chain's. Asserted:
+  `hop press ...`, `hop prompt: ...` (tools/breah_hop_press_check.gd, run by `--dolm-combo-check`).
 - **Distance:** 3 hops of about 2.4m plus 2 skids of 0.2-0.55m: 7.5-8.2m, against the 7.5m the item names. That is more than the
   old single leap's 4.25m (the item's "roughly equal" and its "3 x 2.5m" disagree; we built the number), but it takes 1.2-1.5s:
   about a run's speed plus a third, so it isn't a bigger escape than the old 0.58s leap. One hop is about 2.9m.
