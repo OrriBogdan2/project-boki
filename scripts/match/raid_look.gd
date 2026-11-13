@@ -25,8 +25,8 @@ const WEIGHTS := {"clear": 0.42, "dusk": 0.18, "night": 0.14, "ash": 0.12, "fog"
 const SIGHT := {"clear": 1.0, "day": 1.0, "dusk": 0.85, "night": 0.6, "ash": 0.72, "fog": 0.62}
 ## How much bolder and more numerous the Blight is (BlightDir).
 const BLIGHT := {"clear": 1.0, "day": 1.0, "dusk": 1.12, "night": 1.4, "ash": 1.25, "fog": 1.2}
-## Outside-of-sight darkening (the vis shader's "dark" multiplier; 0.7 is the usual, lightened from
-## 0.42 so scenes read on camera; the darker conditions keep the same ratios to it).
+## Outside-of-sight darkening (the vis shader's "dark" multiplier after its blue mix; 0.7 is the usual: about
+## 0.38 of the lit brightness on GPU, docs/specs/VISION_LOOK.md; the darker conditions keep the same ratios to it).
 const VIS_DARK := {"clear": 0.7, "day": 0.7, "dusk": 0.63, "night": 0.48, "ash": 0.6, "fog": 0.57}
 const NAMES := {"clear": "Clear evening", "day": "Overcast day", "dusk": "Dusk", "night": "Night", "ash": "Ash storm", "fog": "Fog"}
 const BLURBS := {

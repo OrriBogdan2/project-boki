@@ -17,12 +17,13 @@ static func did(id: String) -> bool:
 	var st = Save.d["tutorial"].get("gfd")
 	return typeof(st) == TYPE_DICTIONARY and bool(st["did"].get(id, false))
 
-## The rows for the tracker, in list order with the ticked ones last: {text, done}.
+## The rows for the tracker, in list order with the ticked ones last: {text, done, two}. "two" lines need a
+## second Boki, so they wait in the list until the roster has two.
 static func rows() -> Array:
 	if not active():
 		return []
 	var all: Array = (rules()["rows"] as Array).map(
-			func(r): return {"text": String(r["text"]), "done": did(String(r["id"]))})
+			func(r): return {"text": String(r["text"]), "done": did(String(r["id"])), "two": bool(r.get("two", false))})
 	return all.filter(func(r): return not r["done"]) + all.filter(func(r): return r["done"])
 
 ## Something on the list happened. The last tick pays the reward and says so on `h` (a Home, if given).

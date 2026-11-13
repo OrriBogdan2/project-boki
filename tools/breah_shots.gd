@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb", "rocks", "dash", "spine", "climb", "glide"]
+const PARTS := ["lmb", "rmb", "rocks", "dash", "spine", "climb", "glide", "ridge"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -73,6 +73,40 @@ func _save_strip(file: String) -> void:
 		var at := Vector2i((i % GRID_COLS) * (w + 4), (i / GRID_COLS) * (hh + 4))
 		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
 	out.save_png(dir.path_join(file))
+
+## The boulder's burst and the punch's blow, each shot on the frames after the dummy is first hurt.
+func _breah_lmb() -> void:
+	Sfx.listener = P.pos          # (the rig has no listening camera; HeroVfx draws nothing far from it)
+	await _reset(7.0)
+	_aim(T.pos)
+	var tap := func(t: float):
+		P.inp["fire"] = t < 0.06
+		_after_hit("lmb_boulder", "Boulder (LMB tap)")
+	await _go(0.8, tap)
+	await _reset(2.4)
+	_aim(T.pos)
+	var hold := func(t: float):
+		P.inp["fire"] = t < 0.95
+		_after_hit("lmb_punch", "Punch (LMB hold, release)")
+	await _go(1.5, hold)
+	P.inp["fire"] = false
+
+var _hit_frame := -1
+var _frames := 0
+
+## A close-up on the target 1, 3 and 6 frames after it is first hurt (the hit flash, then its debris).
+func _after_hit(file: String, what: String) -> void:
+	_frames += 1
+	if _hit_frame < 0 and T.hp < T.max_hp:
+		_hit_frame = _frames
+	if _hit_frame < 0:
+		return
+	for n in [1, 3, 6]:
+		if _frames - _hit_frame == n:
+			_take("full", "%s_%d" % [file, n], "%s, %d frames after the hit" % [what, n], _on_target)
+	if _frames - _hit_frame >= 6:
+		_hit_frame = -1
+		T.hp = T.max_hp
 
 ## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 func _breah_rmb() -> void:
@@ -205,6 +239,38 @@ func _breah_climb() -> void:
 		[0.3, 0.42, 0.5, 0.6, 0.72, 0.9]
 	)
 	await _go(1.1, walk, marks)
+	P.inp["move"] = Vector2.ZERO
+
+## Standing on the Basalt Spine, then walking along it (his feet on the rock tops: --rock-feet-check).
+func _breah_ridge() -> void:
+	await _reset(14.0)
+	P.lvl = 6
+	P.ak.cd["x"] = 0.0
+	_aim(home + Vector3(0, 0, -5.0))
+	P.inp["x_down"] = false
+	HunterKeys.ult_pressed(P)
+	await _go(1.0)
+	var ridge: Array = m.verbs.walls.filter(func(w): return w.has("top"))
+	ridge.sort_custom(func(a, b): return float((a["a"] as Vector2).x) < float((b["a"] as Vector2).x))
+	var start: Vector2 = ((ridge[2]["a"] as Vector2) + (ridge[2]["b"] as Vector2)) * 0.5
+	P.teleport(Vector3(start.x, float(ridge[2]["y"]) + float(ridge[2]["top"]), start.y))
+	var walk := func(t: float):
+		var ahead := P.pos + Vector3(3.0, 0, 0)
+		for w in ridge:
+			var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
+			if mid.x > P.pos.x + 0.6:
+				ahead = Vector3(mid.x, P.pos.y, mid.y)
+				break
+		_aim(ahead)
+		P.inp["move"] = Vector2(ahead.x - P.pos.x, ahead.z - P.pos.z).normalized() if t > 0.5 else Vector2.ZERO
+	var marks := _strip(
+		"ridge_strip",
+		"Tenzo on his Basalt Spine at gameplay zoom: standing on a rock (two frames), then walking along the ridge"
+			+ " from rock to rock; his feet on the rock tops (--rock-feet-check)",
+		[0.25, 0.45, 0.7, 0.85, 1.0, 1.15]
+	)
+	marks.append([0.4, "full", "ridge_stand", "Standing on the ridge, the match camera", Callable()])
+	await _go(1.3, walk, marks)
 	P.inp["move"] = Vector2.ZERO
 
 ## Quakefall out of a glide (the owner's 23:00 answer): gliding, the press folds the glider, the plunge, the

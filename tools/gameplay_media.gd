@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-10> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-11> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -13,9 +13,11 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
-##   9 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
-##   10 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
-##                   (9 and 10 follow with the game's own camera, as a player sees it)
+##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
+##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
+##   10 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
+##   11 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
+##                   (10 and 11 follow with the game's own camera, as a player sees it)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -29,6 +31,7 @@ const TUMBLE_ZOOM := 0.4         # the home camera's zoom for clip 5 (closer tha
 const GAME_ZOOM := 0.55          # the home camera's zoom for clips 6-8
 const LURE_LEAD := 1.5           # s of the Show Ring walk kept before each lure (clip 7 cuts the rest)
 const JUDGE_HOLD := 4.0          # s of the judges' cards clip 7 keeps before the result
+const DUO_TAIL := 3.0            # s of the 2v2 tutorial's end card clip 9 keeps
 
 var main: Node
 var m: Match
@@ -74,8 +77,9 @@ func run(main_node: Node) -> void:
 		6: await _echo(secs)
 		7: await _show(secs)
 		8: await _relay(secs)
-		9: await _shift_glide(secs)
-		10: await _dive_feather(secs)
+		9: await _duo(secs)
+		10: await _shift_glide(secs)
+		11: await _dive_feather(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -485,3 +489,15 @@ func _dive_feather(secs: float) -> void:
 		var c := fmod(t, 3.6)          # glide 1s, drop 1s, feather 1.6s
 		_keys(P, Vector2(1, 0), absf(c - 2.0) < FRAME * 0.5, c < 1.0 or c >= 2.0),
 		func(_t: float): return P.render_pos(1.0), true)
+
+
+func _duo(secs: float) -> void:
+	Save.d["name"] = HeroTitle.base_name("gunslinger")
+	m = Match.new()
+	main.add_child(m)
+	m.start(DuoTutorial.opts("gunslinger", true))
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	var tu := m.duo
+	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)

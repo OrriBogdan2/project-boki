@@ -10,6 +10,7 @@ extends RefCounted
 ## Measured by --airdash-glide-check. Numbers in content/rules/tuning.json "dash_glide".
 
 const WINDOW := 0.3          # s after an air dash the carry is watched (a few ease_t: by then nothing is left)
+const KNOCK_RECENT := 0.4    # s: a real knockback (Hunter.kb_t) this recent ends the watch
 const CUT_MIN := 0.5         # m/s: a smaller drop between steps is the air step's own drag, not a kit's cut
 
 var since := 9.0             # s since the last air dash step (9 = long ago, on the ground, or knocked)
@@ -23,7 +24,8 @@ func fresh(h: Hunter) -> bool:
 ## The horizontal velocity after one move step. `v0` is the step's starting velocity (after the kit's tick, which
 ## may have cut it), `hv` the move's result.
 func step(h: Hunter, v0: Vector2, hv: Vector2, dt: float) -> Vector2:
-	if h.grounded or h.knock_t > 0.0 or h.dropping or h.downed:
+	# (knock_t alone is not a knock: Sparkle's Wirerun holds it as its no-keys hold, through the streak and after)
+	if h.grounded or (h.knock_t > 0.0 and h.m.time - h.kb_t < KNOCK_RECENT) or h.dropping or h.downed:
 		since = 9.0
 		carry = Vector2.ZERO
 		return hv
