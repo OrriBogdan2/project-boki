@@ -30,7 +30,7 @@
 			],
 			"title": "Get an axe",
 			"hints": {
-				"go": "Here, take this axe. Trees give wood, and wood builds things."
+				"go": "Take this axe: trees give wood."
 			},
 			"world": {
 				"go": ""
@@ -44,7 +44,7 @@
 			],
 			"title": "Chop trees for the house",
 			"hints": {
-				"go": "Walk up to a tree and hold {interact} to chop. The house takes {house_cost}: keep chopping and mining until the bar at the top shows it."
+				"go": "Hold {interact} at a tree to chop wood for the house."
 			},
 			"world": {
 				"go": "Chop a tree"
@@ -57,7 +57,7 @@
 			],
 			"title": "Mine rocks for the house",
 			"hints": {
-				"go": "Rocks give stone. Take this pickaxe and hold {interact} at a rock."
+				"go": "Hold {interact} at a rock with this pickaxe to mine stone."
 			},
 			"world": {
 				"go": "Mine this rock"
@@ -73,8 +73,8 @@
 			],
 			"title": "Place your house",
 			"hints": {
-				"place": "Now for a house. Press {build}, choose House, then click the marked spot. Marking it out is free. The {house_cost} are spent while it goes up.",
-				"wait": "Hold {interact} at the house to hammer. Your Boki come to help, and it uses up the wood and stone as it goes."
+				"place": "Press {build}, choose House, then click the marked spot.",
+				"wait": "Hold {interact} at the house to hammer it up."
 			},
 			"world": {
 				"place": "Your house goes here",
@@ -93,7 +93,7 @@
 			],
 			"title": "Swing a hammer",
 			"hints": {
-				"go": "Hold {interact} at the house to take up a hammer and build."
+				"go": "Hold {interact} at the house to build."
 			},
 			"world": {
 				"go": "Help build"
@@ -106,8 +106,8 @@
 			],
 			"title": "Give your Boki a job",
 			"hints": {
-				"go": "Click {boki}, or press {details} next to it, to open its page. Or press 2 (Boki on the bar below) for all your Boki.",
-				"page": "Pick a job here: try '{job}'. Or assign it at a work station."
+				"go": "Click {boki}, or press {details} beside it, to open its page.",
+				"page": "Pick a job here: try '{job}'."
 			},
 			"world": {
 				"go": "Your Boki"
@@ -126,7 +126,7 @@
 			],
 			"title": "Feed your Boki",
 			"hints": {
-				"place": "A hungry Boki is a slow Boki. Press {build} and set the trough down",
+				"place": "Press {build} and set the trough down.",
 				"fill": "Press {interact} at the trough to fill it from your pantry."
 			},
 			"world": {
@@ -146,12 +146,12 @@
 			],
 			"title": "Grow a crop",
 			"hints": {
-				"patch": "Crops grow in patches. Press {build} and place a patch by the water. The water keeps it wet for you.",
-				"patch_dry": "Crops grow in patches. Press {build} and place one. Away from water, you water it yourself.",
+				"patch": "Press {build} and place a patch by the water.",
+				"patch_dry": "Press {build} and place a patch; you water it yourself.",
 				"plant": "Press {interact} at the patch to plant a seed.",
 				"water": "Press {interact} at the patch to water it.",
-				"grow": "Your seed is growing. Ripe in {secs}s. Wait by the patch, then pick it ({interact}).",
-				"pick": "It's ripe! Press {interact} to pick it."
+				"grow": "Ripe in {secs}s: wait by the patch, then pick it.",
+				"pick": "It's ripe: press {interact} to pick it."
 			},
 			"world": {
 				"patch": "Place the patch by the water",
@@ -180,8 +180,8 @@
 			],
 			"title": "Buy a seed",
 			"hints": {
-				"stall": "Go to the market stall and press {interact}. Open the Seeds tab and buy one seed.",
-				"bar": "Click Market on the bar below. Open the Seeds tab and buy one seed."
+				"stall": "Press {interact} at the stall and buy one seed.",
+				"bar": "Click Market below and buy one seed."
 			},
 			"world": {
 				"stall": "Market stall",
@@ -201,8 +201,8 @@
 			],
 			"title": "Sell a crop",
 			"hints": {
-				"stall": "Back at the stall, press {interact}. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals.",
-				"bar": "Click Market on the bar below. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals."
+				"stall": "Press {interact} at the stall and sell your crop.",
+				"bar": "Click Market below and sell your crop."
 			},
 			"world": {
 				"stall": "Sell here",
@@ -219,7 +219,7 @@
 			"needs": [],
 			"title": "Meet the builder",
 			"hints": {
-				"go": "Hob is calling you over at the market stall: walk up and press {interact}."
+				"go": "Hob is calling: walk up and press {interact}."
 			},
 			"world": {
 				"go": "Talk to Hob"
@@ -230,7 +230,7 @@
 			"needs_all": true,
 			"title": "Head out",
 			"hints": {
-				"go": "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press {interact} at the portal to start your first expedition."
+				"go": "Press {interact} at the portal to start your first expedition."
 			},
 			"world": {
 				"go": "Portal"
