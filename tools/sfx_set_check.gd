@@ -23,6 +23,8 @@ extends RefCounted
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
 ##  11. the farm's chop and mine sounds (axe, creak, tree fall, pick, crack, break) exist and are wired in HomeGather
+##  11. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
+##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -58,6 +60,7 @@ func run(main: Node) -> void:
 	_build_cues()
 	_strip_chime()
 	_chop_mine()
+	_rarity_stings()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -377,6 +380,23 @@ func _strip_chime() -> void:
 	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
+
+
+## 11. Rare and very rare Boki have a sting each; a common one plays nothing; each is under the scan chime.
+func _rarity_stings() -> void:
+	var rare: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	var common: String = Data.common_kin()[0]
+	var tiers := [RaritySting.tier(common, {}), RaritySting.tier(rare[0], {}) if not rare.is_empty() else -1,
+			RaritySting.tier(common, {"shimmer": true})]
+	ok(tiers == [0, 1, 2], "rarity tiers: common 0, a rare species 1, a shimmer 2 %s" % [tiers])
+	var names: Array = RaritySting.NAMES.slice(1)
+	var quiet := RaritySting.DB.slice(1).all(func(db): return db < 0.0) and RaritySting.DB[1] <= RaritySting.DB[2]
+	ok(names.all(func(n): return Sfx.ensure(n)) and quiet, "rarity stings exist, under the scan chime %s" % [names])
+	var src := {"scripts/match/music_dir.gd": "stings.tick(", "scripts/match/capture.gd": "RaritySting.claim(",
+			"scripts/ui/egg_hatch.gd": "RaritySting.play("}
+	var unwired := src.keys().filter(func(f): return not FileAccess.get_file_as_string("res://" + f).contains(src[f]))
+	ok(unwired.is_empty(), "rarity stings: first sight, claim and hatch play them (unwired %s)" % [unwired])
+	ok(RaritySting.SIGHT_M == 30.0 and RaritySting.LOUD_HEAT < 1.0, "rarity stings: within 30 m, held in a loud fight")
 
 func _takes(sname: String) -> Array:
 	var out := []

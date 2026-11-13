@@ -261,6 +261,7 @@ func _pop() -> void:
 	# a few bits of shell, nothing more
 	_chips(Vector3(0, cy, 0), 6)
 	_sfx("build", -4.0, 1.05)
+	RaritySting.play(RaritySting.tier(species, rec))
 	# the top tips off to one side and the whole shell shrinks away: gone about 0.8s after the pop
 	var side := Vector3(-0.75, 0, 0.25) * k
 	ct_tip(cap, side, k)
