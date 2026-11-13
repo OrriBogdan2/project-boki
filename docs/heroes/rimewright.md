@@ -25,6 +25,20 @@ Body (`body` in rimewright.json): the final design (art/wardens/claire/IMPORT.md
 
 Scaling: light, HP 124. Ratios kept from the footage: dart 35 -> 4, Shatter 529 (15x) -> 60, skating darts x2 (wiki; the footage's 56/35 is 1.6x), spear detonation 584 (about 1.1x a Shatter) -> 60. Cooldown ratio Skate : Wall kept at 1 : 2 (8.3 : 16.7) -> 8.5 : 17. Rimelock: cooldown 47s against the Wall's 17 (source card 45.8 : 16.7). Its crash is 40 (10 darts, two thirds of a Shatter) instead of the footage's 17 darts (607 / 35): with 68 the crash straight into a merge and the Titan form's ultimate knocked a full-health medium hunter, which the owner's burst rule forbids. `--rimewright-combo-check` "burst:" asserts it (50 + 82 = 132 of 145 at level 6, no armor).
 
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
+bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
+no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
+
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in |
+|---|---|---|---|---|
+| LMB frost darts | none [D] | - | - | - |
+| RMB Ice Spear | +15% damage -1.75 s / same / +45% explosion damage [D] (12 s) | cooldown 10.2 -> 8.7 s, damage +15% | 7.2 s, +30%; detonation +45% (`rmb.lance.r3_dmg_k`) | `--rimewright-combo-check` upgrade parity |
+| Shift Skate | -1.5 s / -1.5 s / ice islands over the Abyss [D] (13 s) | recharge 13 -> 11.5 s | 10 s; ice underfoot over the Abyss | same |
+| E Rink Wall | -2.5 s / -2.5 s / +1000 wall HP [D] (20 s) | cooldown 17 -> 14.9 s | 12.75 s; wall +40 HP (`e.hp_rank3`; the data's +1000 sits on a base we do not know) | same, `rank 3 (tier IV) Rink Wall` |
+| Passive Hoarfrost | none [D] | - | - | - |
+
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
 Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Celeste), [footage] = briefs/hero-ref/tamsin.md (5 fps).
 
@@ -71,7 +85,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | LMB stops homing while skating (owner 23:55: home toward the END of the flight, also skating) | HIGH | (b) | e5c73480: darts and skating beams fly out near the aim and turn in over 35-70% of the way; `tm LMB: a dart flies out straight ...`, `tm Shift: skating, beams aimed 1.5 m off a foe still home in late ...` |
 | 3 heavy darts at the end of the burst (data) | MED | (a) | f6250bd1; `tm LMB: the source's barrage ...` |
 | Ice trail 1.2 s vs "a few seconds" | MED | (b) | ec88bfc0: plates last 3 s; `tm Shift: her ice trail lasts a few seconds ...`. The trail does nothing in play (the data and footage show no gameplay on it) |
-| Skate cd 8.5 s vs 13 s (data) | MED | (b) | ec88bfc0: 13 s (ranks 11 / 9.1 s); the owner's early-release refund stays; asserted in the same row |
+| Skate cd 8.5 s vs 13 s (data) | MED | (b) | ec88bfc0: 13 s (ranks 11.5 / 10 s, see Ranks: upgrade parity); the owner's early-release refund stays; asserted in the same row |
 | Spear impact 4 single-target vs a 156 small AoE + slow (data) | MED | (b) | ec88bfc0: 18 (156 : 35 darts) and a short slow within 1.2 m where it lands; the detonation stays the big hit (owner item 13); `tm RMB: the landing hits a small area ...` |
 | Invented 0.5 s root on the detonation | MED | (b) | ec88bfc0: no root (data: damage + slow); the ice shell stays as the look; `tm RMB: it detonates ... no root` |
 | R cd 47 s vs 80 s (data) | MED | (b) | ec88bfc0: 80 s; `tm R: its own cooldown (80 s, game data) ...` |
@@ -155,6 +169,19 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Shift Skate | no separate air dash: the same held skate starts at once and carries on through the air (`tm_skate_air`) | the skate folds the glider; a held glide key opens it again when the skate ends | owner item 62; [D] Celeste: "HOLD to skate", no air rule |
 | E Rink Wall | the same cast | the same cast, glider stays open | [D] Celeste: no air rule |
 | X Rimelock | the same cast; she is sealed and invulnerable | the glider folds and stays shut while sealed ("NO GLIDE"); Shift or X again frees it | [D] Celeste: invulnerable, no glide rule; owner item 65 |
+## Rimelock movement, settled (Nov 10)
+Trust order: [O] owner > [D] data > [W] wiki > [F] footage (hero-ref/tamsin.md). The source roots her for the whole ult [D]
+[F] f25-f61; the carry is the owner's (DECISIONS: "skating into it carries her forward a decent distance, then she's
+encased"). Nothing changed but a wrong code comment (it said the carry slows evenly, speed x carry_t / 2; the code and the
+card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `ledge` / `abyss` rows of `--rimewright-combo-check`.
+
+| What | Ours | Source |
+|---|---|---|
+| Steering | none: the carry runs along the skate; WASD and the cursor never turn it, facing locked | [O] items 64/65 |
+| Speed curve | from the skate's speed, speed x (1 - (t/0.8)^2) over 0.8 s, about 6.1 m at 11.5 m/s; cast standing she is rooted at once | [O] carry_t 0.8 |
+| End | the crash (or X early) frees her the same step, with no momentum; Shift out skates straight away at full speed | [F] f61 free; [O] item 27 |
+| Ledges | the carry slides off a terrace (never blocked) sinking at the skate's air fall (1.5 m/s), then she drops to the ground rooted | [O] items 62/64; DECISIONS "walking off ledges is always allowed" |
+| Abyss | the carry runs on over the void; sealed she cannot glide and falls; X (or Shift) frees her, and held glide opens 0.30 s later, the step her break move ends (the shared rule: no glider during an ability move) | [O] item 27, item 162b |
 
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
@@ -224,6 +251,9 @@ Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), meas
 | Rink snap | 0.2 (f25 -> f27) | 0.2 s | unchanged |
 | Auto-crash | 3.2-3.5 | 3.52 s | unchanged |
 | Crash to recovery | 0.4 (f57 -> f61) | clip 0.4 s | unchanged |
+| Run gait (`run_*`) | a wide split every ~0.17 s (cycle 0.34 s), 4.8 m/s | cycle 1.0 s: a split every 0.5 s | cycle 0.34 s on the v95 loops: done, asserted (`--clip-check`) |
+
+The run re-time is data: `loco.run_cycle` in `content/rules/warden_anim/claire.json` scales the key times of the four v95 `run_*` loops at load (`WardenClips._retime_run`), the poses stay ours (parity is timing and weight). Her legs are not gated by `--anim-audit` (`NO_LEGS`); its foot-slide line for her at 4.65 m/s reads 4.21 m/s (90%) before and 3.86 m/s (83%) after, the clip's own foot speed 0.44 -> 0.79 m/s (a skater's stroke, not gated; `--gait-speed-check` is on the unmerged ext/anim-gait-speed, so the audit line is the measure on 0.24.5).
 
 Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%, the ult holds 3.5 s.
 

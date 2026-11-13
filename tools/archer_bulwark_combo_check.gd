@@ -364,6 +364,41 @@ func _archer_combos() -> void:
 		"cremations %d" % (K.cremations - cr0)
 	)
 	step(m, 3.5)
+	# Hail Wall vs Wisps (source parity): a rival Wisp on the arc loses down_hp per tick (no slow); an ally's does not
+	fresh(T)
+	fresh(T2)
+	K.cd["e"] = 0.0
+	P.teleport(home)
+	aim_at(P, home + Vector3(5.0, 0, 0))
+	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
+	T2.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(-45.0)))
+	var t2_team := T2.team
+	T2.team = P.team
+	for w in [T, T2]:
+		w.downed = true
+		w.hp = 0.0
+		w.down_hp = float(Data.MATCH["down_hp"])
+	var hp_foe := T.hp
+	P.ak.use_e()
+	step(m, 1.6)
+	var bled: float = float(Data.MATCH["down_hp"]) - T2.down_hp
+	var drained: float = float(Data.MATCH["down_hp"]) - T.down_hp
+	ok(
+		"pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds",
+		drained >= bled + 2.0 * float(K.e_def()["dmg"]) * ArcherKit.WISP_DRAIN_K and bled > 0.0,
+		"rival %.1f ally %.1f" % [drained, bled]
+	)
+	ok(
+		"pin E: the wall does not slow, burn or damage a Wisp",
+		T.slow_t <= 0.0 and T.blight_t <= 0.0 and T.hp == hp_foe and T.downed,
+		"slow %.2f hp %.1f" % [T.slow_t, T.hp]
+	)
+	for w in [T, T2]:
+		w.downed = false
+		w.hp = w.max_hp
+		w.down_hp = 0.0
+	T2.team = t2_team
+	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
 	K.ch_rmb = 1.0
@@ -569,6 +604,26 @@ func _archer_combos() -> void:
 		"combo pin: Spirit Walk ending inside a rock = back to the entry",
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
+	)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	var w0 := K.spirit.walks
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	step(m, 0.6, func(): P.inp["move"] = Vector2.ZERO)
+	P.teleport(Vector3(bx + 0.5, home.y, home.z))
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
+	sn0 = K.spirit.snap_backs
+	step(m, K.spirit.t + 0.2)
+	ok(
+		"combo pin: Spirit Walk running out inside a rock = back to the entry",
+		K.spirit.walks == w0 + 1 and not K.spirit.active() and P.spirit_t <= 0.0 and K.spirit.snap_backs == sn0 + 1
+			and P.pos.x < bx,
+		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
@@ -1125,6 +1180,20 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
 		"cds %s shields %s" % [str(cds), str(shields)]
 	)
+	# the Spin Dash recharge takes the data's -1.5 s a rank; no slot gets a rank damage step (the data names none)
+	var regens: Array = []
+	var dmgs: Array = []
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		regens.append(P.dash_regen())
+		dmgs.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the aegis, Smash or field",
+		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01
+				and dmgs[2] == dmgs[0],
+		"recharge %s power %s" % [str(regens), str(dmgs)]
+	)
+	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 3
 	ok(
 		"combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait)",
