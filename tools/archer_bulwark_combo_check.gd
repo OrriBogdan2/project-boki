@@ -1301,6 +1301,23 @@ func _bulwark_combos() -> void:
 		K.crushes == c0 + 1 and K.anim_id == "bul_smash",
 		"crushes %d anim %s" % [K.crushes - c0, K.anim_id]
 	)
+	# the same full blow in the open: damage and knockback, no stun of its own (data: "up to 522 dmg + Knockback")
+	step(m, 1.5)
+	reset.call()
+	_clear_wall(m, home, lv, 3)
+	c0 = K.crushes
+	var ox := T.pos.x
+	var hold := func():
+		P.inp["fire"] = true
+		aim_at(P, T.pos)
+	step(m, 1.55, hold)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"combo bulwark: a full Crushing Blow in the open knocks, no stun",
+		dmg(T) >= 30.0 and T.pos.x - ox > 1.0 and T.stun_t <= 0.0 and K.crushes == c0,
+		"took %.0f moved %.2f stun %.2f crushes %d" % [dmg(T), T.pos.x - ox, T.stun_t, K.crushes - c0]
+	)
 	# Shift while winding up the blow: a short plain dash on a full charge, the swing still charging (item 51)
 	step(m, 1.5)
 	reset.call()
