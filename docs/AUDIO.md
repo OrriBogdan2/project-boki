@@ -66,6 +66,44 @@ Steps are how you hear a flank. Both layers of a Hunter's step (the plain contac
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
 
+## Ultimate tails
+`python3 tools/sfx_stats.py --ults` measures every Warden's ult sounds (the `ULTS` table in the script): `t40` is when the 5 ms RMS envelope last stands above -40 dB of the peak, `tail` is `t40` minus the envelope maximum, `crest` is peak minus RMS. The sounds are already levelled to their category (RMS about -17 to -19 dB), so crest shows the shape, not the level. Tenzo's Basalt Spine is `br_spine`, one sound that holds a rumble while the rocks rise (a flat -12 to -14 dB for 0.8 s, then it falls and is past -40 dB at 1.37 s). Neve's ult is Rimelock (`rime_lock` into `rime_crash`); her Rink Wall (`rime_wall`, an E) ends at 0.64 s with a 0.53 s tail. Gil's X has no sound of its own, so he is not in the table.
+
+Result (the audit's "check by ear" item): **neither is an outlier, so no generator was changed.** The impact tails of the other ten run 0.10 to 1.79 s (median 0.87); Tenzo's is 1.12 s and Neve's 1.31 s, level with Bjorn's slam (1.36 s) and Vv's (1.36 s) and shorter than Vex's nuke (1.79 s). Their crest (15.2 and 15.4 dB) is inside the others' 12.8 to 17.6 dB, and both fall away steadily (no plateau after the hit). Trimming them would only make the two sound unlike the heroes they sit between.
+
+| Warden | role | sound | t40 s | tail s | crest dB |
+|---|---|---|---|---|---|
+| Pin | cast | pin_ult_cast | 0.93 | 0.52 | 15.1 |
+| Pin | impact | pin_ult_final | 0.87 | 0.87 | 16.1 |
+| Cinder | cast | lw_jet | 1.76 | 1.74 | 13.7 |
+| Cinder | impact | lw_jet_land | 0.64 | 0.59 | 13.0 |
+| Bjorn | cast | bjorn_ult_wind | 0.88 | 0.62 | 12.7 |
+| Bjorn | impact | bjorn_ult_slam | 1.39 | 1.36 | 16.0 |
+| Bjorn | loop | bjorn_ult_rumble | 1.78 | 1.71 | 15.7 |
+| Tenzo | impact | br_spine | 1.37 | 1.12 | 15.2 |
+| Dredge | cast | dr_blast_charge | 1.17 | 0.19 | 12.3 |
+| Dredge | impact | dr_blast | 0.77 | 0.73 | 15.9 |
+| Vex | cast | vn_nuke_fire | 0.73 | 0.70 | 14.9 |
+| Vex | impact | vn_nuke_boom | 1.80 | 1.79 | 16.6 |
+| Vex | loop | vn_nuke_burn | 3.09 | 2.96 | 19.3 |
+| Kael | impact | jug_meteor | 1.00 | 0.97 | 17.6 |
+| Vv | cast | vv_ult_rise | 0.64 | 0.25 | 14.4 |
+| Vv | impact | vv_ult_slam | 1.37 | 1.36 | 17.1 |
+| Vv | loop | vv_ult_hum | 2.19 | 1.63 | 11.9 |
+| Ostra | cast | os_well | 1.58 | 0.52 | 13.4 |
+| Ostra | loop | os_well_hum | 1.78 | 1.76 | 15.4 |
+| Neve | cast | rime_lock | 1.17 | 0.64 | 15.9 |
+| Neve | impact | rime_crash | 1.37 | 1.31 | 15.4 |
+| Tender | cast | tend_call | 1.19 | 1.02 | 13.2 |
+| Tender | impact | tend_arrive | 0.84 | 0.63 | 12.8 |
+| Tender | loop | tend_call_hum | 0.66 | 0.41 | 11.5 |
+| Sable | cast | dj_encore | 0.90 | 0.43 | 17.7 |
+| Sable | impact | dj_encore_hit | 0.10 | 0.10 | 15.2 |
+| Sable | loop | dj_encore_whirr | 1.96 | 0.77 | 16.8 |
+| median of the other ten | cast | | 0.93 | 0.52 | 13.7 |
+| median of the other ten | impact | | 0.87 | 0.87 | 16.0 |
+| median of the other ten | loop | | 1.87 | 1.67 | 15.6 |
+
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
 
