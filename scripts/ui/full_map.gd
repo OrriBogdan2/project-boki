@@ -175,6 +175,7 @@ func draw(sz: Vector2) -> void:
 	if tex_view.size.x > 0.0:
 		c.draw_texture_rect_region(hud.map_tex(), Rect2(rect.position + (tex_view.position - v.position) * kk, tex_view.size * kk), hud.map_region(tex_view))
 	_grid(c, v, kk)
+	HazardMap.draw(c, m, to_screen, rect, Vector3.ZERO, HazardMap.FULL_SHIELD)
 	c.draw_rect(rect, Color(0.85, 0.8, 1.0, 0.35), false, 2.0)
 	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ

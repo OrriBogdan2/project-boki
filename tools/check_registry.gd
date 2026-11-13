@@ -23,6 +23,8 @@ const CHECKS := {
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
+	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
+	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],      # GPU: MP4 frames
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
@@ -587,6 +589,7 @@ const CHECKS := {
 	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # only hard CC breaks a stomp
 	"--occlusion-outline-check": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "check"],
 	"--occlusion-outline-shots": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "shots"],
+	"--hazard-map-shots": ["res://tools/hazard_map_shots.gd", "hazard_map_shots", null],      # --shots-dir=<dir>
 	"--mob-glb-check": ["res://tools/mob_glb_check.gd", "mob_glb_check", null],      # skinned monster models
 	# the shell follows amount and time
 	"--shield-expiry-check": ["res://tools/shield_expiry_check.gd", "shield_expiry_check", null],

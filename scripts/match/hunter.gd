@@ -2112,7 +2112,7 @@ func _physics(dt: float) -> void:
 	else:
 		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
-			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
+			var grip: float = m.ground_grip(pos, self)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
 				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
