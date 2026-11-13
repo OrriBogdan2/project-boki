@@ -42,6 +42,31 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## air_rings (`content/rules/air_rings.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Air rings (scripts/match/air_rings.gd, docs/AIR_RINGS.md). Glide rings line an air lane (a map glide marked rings): through one, your glide is thrown along the lane at speed (m/s, under tuning.json glide.max) and held there for hold s while you keep gliding, at the lane's height; it cools the glider by heat (share of a full glider) and lifts you by at least kick_vy m/s. Rings sit every gap m along the lane, the first first m past the take-off and the last end m short of the landing, up m above the lane: level at the higher ground's height, changing only over the rise m next to the lower end (a glider over the void can't sink below where it took off); hit_r m from a ring's centre (to your body, 0.8 m over your feet) counts as through; one hunter takes a ring once per cd s. Lift rings lie flat over a map updraft marked ring, lift_y m above the ground: a hop into one (within lift_r m across, lift_dy m up or down) throws you up at lift_vy m/s and opens the glider, and the updraft carries you to its top. look_r: the ring's drawn radius (m). |
+| speed | 13 |
+| hold | 1.4 |
+| heat | 0.35 |
+| kick_vy | 2 |
+| gap | 16 |
+| first | 6 |
+| end | 6 |
+| up | 1 |
+| rise | 12 |
+| hit_r | 2.2 |
+| cd | 2 |
+| lift_y | 1.4 |
+| lift_r | 1.9 |
+| lift_dy | 1 |
+| lift_vy | 8 |
+| look_r | 1.9 |
+| sources | {"doc": "Where the glide ring stands against SUPERVIVE's hoops (docs/AIR_RINGS.md 'Source'). Notes only, nothing here is read as a number (AirRings.r reads the keys above). Searched Nov 12 2026: briefs/supervive-data/supervive_physics.md and PHYSICS_PARITY.md, the hero-ref footage sheets, all on ext/agent-briefs. [?] = not found, ours kept.", "entry_speed": "[?] GlideBoost* are encrypted C++ defaults (supervive_physics.md 'Glide boost (hoops/jetstreams)'; PHYSICS_PARITY.md 'Unknowns ... boost: locked'). Ours: any speed counts, the ring throws you at the faster of your own and `speed`.", "boost": "[?] GlideBoostBonusSpeed, GlideBoostForceMul encrypted. Ours: `speed` 13 m/s along the lane (a plain glide cruises at 5, tuning.json glide).", "duration": "[?] GlideBoostDuration, GlideBoostDecayDuration encrypted. Ours: `hold` 1.4 s at or above ring speed while you glide, then the glide's own drag (Loco.glide_step) takes it back.", "dash_inside": "[?] no hoop or jetstream in any hero-ref clip. Ours: Hunter.do_dash as anywhere in the air; the dash folds the glider and the hold drops with it.", "glider_inside": "[?] same. Ours: the glider steers as ever; the hold only keeps you at ring speed and, on a lane, eases you to its height.", "lift_ring": "[?] no SUPERVIVE equivalent found (updrafts are ours, world.updraft_at). Ours."} |
+
 ## base_drift (`content/rules/base_drift.json`)
 
 Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with farm_build.json base_mode on, once per in-game day at home each Boki's four traits (0..1) move a small step toward the average of its friends (base life bonds at or above base_life friend_at). Rivals do not pull.
