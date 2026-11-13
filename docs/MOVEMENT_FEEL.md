@@ -896,6 +896,34 @@ Asked: one shared movement profile for all modes, and falling never converts int
 Result: 13 Hunters x 12 rows x 2 modes = 312 rows, 0 broken. No path converts fall speed: the landing in both modes sets the vertical speed to 0 and leaves the horizontal speed alone (`Hunter._physics` landing block, `Home._move_player`), the ground is a height under the body with no slope term (no projection on landing, so the slope rows land at 0 and stay at 0), and the run speed after any landing comes from the ground step toward the keys, capped at the Hunter's run speed (content/rules/hunter_move.json, unchanged). Nothing in the movement code changed.
 
 The two rows that differ between the modes differ in the air, not at the landing: a match knock has its own window (`knock_t`: 6 m/s² drag, no idle drag) and a glider let go of in a match keeps glide drag for `FEATHER_KEEP`; the garden has neither (it has no knock at all: the row puts the same push on as `Hunter.impulse`). Filed in docs/DEBT.md; both still never carry fall speed.
+## Online casts: press to first frame at 100 ms (`--cast-predict-check`)
+Source parity: your own ability starts the frame you press it, even online. `tools/cast_predict_check.gd` runs a listen server (the host game, with the relay in-process) and a client (a second headless game) over the desktop relay with test weather: the relay holds every packet 50 ms (a 100 ms round trip between the games) and loses 2% (a lost snapshot is dropped, a lost reliable message comes one round trip late, `RelayServer` `--lag-ms` / `--loss`). The client presses LMB, RMB, E, R and dash of the four slice Wardens through the real input path, first on an offline match, then online, and records the first tick of animation (what `HunterAnim` is told) and of VFX (a burst, spark, flash or HeroVfx look starting within 6 m of the Hunter). Tick 0 is the press's own frame. Target: online is never later than offline.
+
+Measured on the client (ticks after the press, offline / online; the same numbers before and after this pass, as nothing in the game had to change):
+
+| Warden | LMB anim, vfx | RMB anim, vfx | E anim, vfx | R anim, vfx | Dash anim, vfx |
+|---|---|---|---|---|---|
+| Vex | 0/0, 0/0 | 0/0, 3/3 | 0/0, 1/1 | 0/0, 0/0 | 0/0, 0/0 |
+| Kael | 0/0, 13/13 | 19/19, 4/4 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+| Lace | 0/0, 1/1 | 10/10, 4/4 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+| Cinder | 0/0, 0/0 | 1/1, 1/1 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+
+Measured round trip, client to host and back: 149-162 ms (the 100 ms of weather plus each game and the relay reading the line once a frame). 14-19 packets lost per run.
+
+- **No cosmetic prediction was needed.** Each game owns its own Hunter (scripts/core/net.gd): the client's kit, animation, sounds and looks run on its own game in the press's frame, and only hits on bodies another game owns travel (to that game, which applies them). Nothing in the cast path waits for the host, so there is nothing to reconcile or cancel and `Net.VERSION` is unchanged.
+- **The later cells are local gates, the same offline:** Kael's LMB shows its wave-charge look once the hold becomes a charge (13), his RMB is the tap/hold split (its pose on the hold threshold, a charge spark at 4), Lace's RMB draw pose waits for the 0.15 s tap guard (10; ext/input-latency-check starts it on the press), Vex's RMB first spark at 3 and Cinder's aim at 1 (the kit's first hold tick).
+- **How the check keeps the comparison fair:** the same dice for both runs (Kael's charge sparks are a coin flip a tick), the offline bot stands idle and no Boki run about, the camp's monsters are cleared, and looks are counted only at the pressing Hunter.
+
+## The Boki key on a wisp: press to burst (`--summon-press-check`)
+G is the single Boki button (DECISIONS Controls; the 11-10 design review, fix 6): with Boki riding as wisps a G tap bursts the wisp into the full Boki (`KinSummon`), a tap again sends it back, a hold opens the order wheel. There is no separate summon action any more (an old saved Summon bind is dropped by `KeyMigrate` step 6). The burst goes off like your own abilities: `KinCommand.poll` reads the press in `Match._gather_input` and it is acted on in the fixed step of the same frame, so the wisp bursts on tick 0 (a tap is otherwise judged on release; the release of the press that burst is no tap, so it never sends the Boki straight back). The Boki is not the Hunter's body, so a dash, a cast or a recast window doesn't hold it. The check plays Sparkle (still, dash), Meeko (Hearthlight's recast window) and Neve (Rime's cast pose) with a Cindle wisp on --cast-predict-check's two games. It reads press to the first tick the burst shows (the wisp gone, a burst spawned), and that the Boki is still out when the watch ends:
+
+| Case | Offline | Online, 100 ms (rtt 160-170 ms measured) |
+|---|---|---|
+| Standing still, mid-dash, in a cast, in a recast window | 0 | 0 |
+| In hit-stop (0.1 s, the longest tier) | 7 (117 ms): the press waits out the freeze and goes on the first step after, within the 0.15 s shared buffer (`DashFlow.BUFFER_S`) | no hit-stop online (the sim never stops) |
+
+- **No game change was needed.** Each game owns its own Boki, so nothing in the summon path waits for the host and `Net.VERSION` is unchanged.
+- **G alone (offline rows):** a tap on the wisp bursts it and letting go keeps it out; a tap again sends it back into the wisp (cooldown on); a hold on the wisp bursts it on the press and the hold opens the order wheel on the summoned Boki, letting go picks and keeps it out; a hold while out only opens the wheel; a wisp on cooldown stays a wisp (the press says so). The HUD ring shows the Boki key through `Settings.key_cap("throw")`; `--keybind-check` covers the dropped action and the old-settings migration.
 
 ## Not touched
 

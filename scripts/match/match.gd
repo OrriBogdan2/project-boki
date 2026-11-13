@@ -3268,8 +3268,8 @@ func _gather_input() -> void:
 	PingInput.poll(self, map_up)
 	if paused:
 		player.inp["move"] = Vector2.ZERO
-	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
-		pending_input["throw"] = true
+	var g := KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel)      # G: a press on a wisp bursts it, a tap sics / calls back / sends it back, a hold opens the order wheel
+	if g != "": pending_input[g] = true
 	if KinKeys.poll(player, paused):       # the quick keys: the same orders and tap as the wheel and G
 		pending_input["throw"] = true
 	player.inp["interact"] = Input.is_action_pressed("interact")
@@ -3798,6 +3798,9 @@ func step(dt: float) -> void:
 		if pending_input["throw"]:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
+		if pending_input.get("summon", false):
+			pending_input["summon"] = false
+			KinSummon.press(player)
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")

@@ -548,6 +548,21 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | storm_sense | {"_doc": "seconds before rain starts that it starts warning about it", "kestrike": 25.0, "barokat": 25.0} |
 | rare_trait | {"_doc": "a rare trait a kind can hatch with, rolled once per Boki from its seed (BokiQuirks.rare_trait_for): id, name, chance (0..1) and a card note. Evo branches can need it ('trait' in evolve.json)", "marchleaf": {"id": "nightmark", "name": "Nightmark", "chance": 0.04, "note": "A dusk-dark stripe along its back. About 1 in 25 Marchleaf carry it, and it decides what they grow into."}} |
 
+## boki_summon (`content/rules/boki_summon.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
+| fallback | [10, 60] |
+| uptime_band | [0.09, 0.2] |
+| knocked_cd_mult | 1.25 |
+| leash | 10 |
+| leash_swing | 2 |
+| rebloom_dist | 20 |
+
 ## boki_system (`content/rules/boki_system.json`)
 
 The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.

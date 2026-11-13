@@ -16,6 +16,7 @@ extends RefCounted
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
+##   [--boki-wisps]  every Boki rides as a wisp (KinWisp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -39,6 +40,7 @@ var secs := 60.0
 var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
+var wisps := false
 var zone := ""
 var hunters := 6
 var trios := 0           # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
@@ -76,6 +78,7 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-base="): base_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a == "--boki-wisps": wisps = true
 		if a.begins_with("--bench-view="):
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
@@ -93,9 +96,9 @@ func setup(main_node: Node) -> void:
 
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
-		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
-		win.size.y, win.scaling_3d_scale])
+	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [hunters,
+		wisps, Settings.quality(), RenderingServer.get_current_rendering_method(),
+		RenderingServer.get_video_adapter_name(), win.size.x, win.size.y, win.scaling_3d_scale])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
@@ -103,8 +106,8 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": hunters / 2, "squad": 2, "total": hunters, "raid": "ash", "blight": true, "no_drop": true,
-		"god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": ceili(hunters / 2.0), "squad": 2, "total": hunters, "raid": "ash", "blight": true,
+		"no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
 	if trios > 0:
 		o.merge({"teams": trios, "squad": 3, "total": trios * 3}, true)
 	o.erase("demo_match")

@@ -4,21 +4,25 @@ extends RefCounted
 ##   G tap   Boki out beside you: Sic, it leaps at the cursor (its landing staggers what it lands on).
 ##           Boki away (far, guarding, running back): Call back, it leaps to your side and hits what is on its path.
 ##           Boki on you (Return): it is thrown at the cursor as before.
-##   G hold  the flick wheel (KinWheel): Chase, Guard, Return, Follow
+##           Boki riding as a wisp (KinWisp): the press bursts it into the full Boki (KinSummon, on the press
+##           frame, like an ability); a tap while it is summoned sends it back into the wisp.
+##   G hold  the flick wheel (KinWheel): Chase, Guard, Return, Follow (on a wisp: it bursts, then the wheel opens)
 ##   The Boki casts its own ability by itself (KinTactics.think_abilities); bots press it through cast_c.
 ##   Quick keys (unbound by default) give the wheel orders and the tap: KinKeys
 ##   X       the Merge (KinMerge.press)
-## A tap is judged on release (so a hold can be told apart); the press is polled each frame (poll),
-## the result is queued in Match.pending_input and applied on the fixed step (tap); a wheel pick waits in
-## h.inp["wheel_pick"] until apply_pick runs on the fixed step.
+## A tap is judged on release (so a hold can be told apart), the wisp burst on the press; the key is polled each
+## frame (poll), the result is queued in Match.pending_input and applied on the fixed step (tap, KinSummon.press);
+## a wheel pick waits in h.inp["wheel_pick"] until apply_pick runs on the fixed step.
 ## Numbers: content/rules/boki_system.json.
 
 static func rules() -> Dictionary:
 	return Content.rules("boki_system")
 
-## The G key, polled every frame for the local player. Returns "tap" on the frame a short press is released,
-## else "". A press held past g_hold_s opens the wheel (KinWheel), and letting go picks. `blocked`: a menu
-## or map is up (the press is ignored).
+## The G key, polled every frame for the local player. Returns the Match.pending_input key to queue: "summon"
+## on the frame it is pressed with the Boki riding as a wisp (the burst, KinSummon.press), "throw" on the frame
+## a short press is released (a tap), else "". A press held past g_hold_s opens the wheel (KinWheel), and
+## letting go picks. The release of a press that burst the wisp is no tap (it would send it straight back).
+## `blocked`: a menu or map is up (the press is ignored).
 static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 	if blocked or KinLoss.rescuing(h) != null:
 		h.inp["g_t"] = 0.0; h.inp["g_fired"] = true      # swallow the rest of this press: no tap on release
@@ -29,6 +33,9 @@ static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 	var out := ""
 	var mouse: Vector2 = h.get_viewport().get_mouse_position()
 	if down:
+		if Input.is_action_just_pressed("throw") and h.kin != null and (h.kin as Kin).wisp:
+			h.inp["g_burst"] = true
+			out = "summon"
 		t += dt
 		if t >= float(rules().get("g_hold_s", 0.35)) and not h.inp.get("g_fired", false):
 			h.inp["g_fired"] = true
@@ -42,10 +49,11 @@ static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 	else:
 		if KinWheel.is_open(h):
 			h.inp["wheel_pick"] = KinWheel.close(h)
-		elif t > 0.0 and not h.inp.get("g_fired", false):
-			out = "tap"
+		elif t > 0.0 and not h.inp.get("g_fired", false) and not h.inp.get("g_burst", false):
+			out = "throw"
 		t = 0.0
 		h.inp["g_fired"] = false
+		h.inp["g_burst"] = false
 	h.inp["g_t"] = t
 	return out
 
@@ -66,10 +74,14 @@ static func is_engaged(k: Kin) -> bool:
 		return true
 	return k.target != null and is_instance_valid(k.target) and not k.disengaged
 
-## G tap toggles: beside you it goes (Sic at the cursor); out or fighting it comes back.
+## G tap toggles: beside you it goes (Sic at the cursor); out or fighting it comes back. Summoned out of its
+## wisp (or a wisp still, when the window ended under the press): back into the wisp, or out of it.
 static func tap(h: Hunter) -> void:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding or (h.ak != null and h.ak.gate_kin_tap()):
+		return
+	if k.summon != null and (k.wisp or k.summon.out()):
+		KinSummon.press(h)
 		return
 	if k.resting():
 		say(h, resting_text(k), Color("a2a8bb"))

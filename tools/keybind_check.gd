@@ -1,9 +1,10 @@
 extends RefCounted
-## --keybind-check: two keys per action (Settings > Controls). Merge ships on X, the hunter ultimate on R, and there is no reload key; a
-## second key can be set, cleared and saved; a key already in use is caught and can be swapped;
-## nothing else is on X in a match (the arena/duel reset is Backspace, separating from the drop is
-## Z); glove 2 and play share V on purpose (a match key and a home key). With --shots-dir=<dir>, screenshots of
-## the Controls page and of the clash warning. tools/keybind_audit.gd: every action the game uses is listed in Controls.
+## --keybind-check: two keys per action (Settings > Controls). Merge ships on X, the hunter ultimate on R, and
+## there is no reload key; a second key can be set, cleared and saved; a key already in use is caught and can be
+## swapped; nothing else is on X in a match (the arena/duel reset is Backspace, separating from the drop is Z);
+## glove 2 and play share V on purpose (a match key and a home key); the Boki has one key (G, no summon
+## action) and an old saved Summon bind is dropped. With --shots-dir=<dir>, screenshots of the Controls page and
+## of the clash warning. tools/keybind_audit.gd: every action the game uses is listed in Controls.
 
 var bad := 0
 
@@ -108,6 +109,25 @@ func run(main: Node) -> void:
 	var clash = load("res://tools/keybind_clash_check.gd").new()
 	bad += clash.rules(S)
 	_dash_on_r(S)
+	# one Boki key: G taps (a wisp: out, again back) and holds; the old summon action (C) is gone, saved binds and all
+	var one_key: bool = not InputMap.has_action("summon") and S.ACTIONS.all(func(a): return a[0] != "summon")
+	ok(one_key and S.slots("throw")[0] == "key:%d" % KEY_G,
+			"no summon action: the Boki key %s bursts the wisp too" % S.key_cap("throw"))
+	var steps := {"keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys5_v": 1}      # a save from before the fold
+	var old_summon := {"keys": {"summon": ["key:%d" % KEY_C], "throw": ["key:%d" % KEY_H]}}
+	old_summon.merge(steps)
+	KeyMigrate.run(old_summon)
+	ok(not old_summon["keys"].has("summon") and old_summon["keys"]["throw"] == ["key:%d" % KEY_H]
+			and int(old_summon["keys7_v"]) == 1,
+			"an old saved Summon bind (C) is dropped, the custom Boki key stays: %s" % str(old_summon["keys"]))
+	var custom_summon := {"keys": {"summon": ["key:%d" % KEY_V, "mouse:%d" % MOUSE_BUTTON_XBUTTON2]}}
+	custom_summon.merge(steps)
+	KeyMigrate.run(custom_summon)
+	ok(custom_summon["keys"].is_empty(),
+			"a custom Summon bind is dropped too, nothing else moves: %s" % str(custom_summon["keys"]))
+	var again := custom_summon.duplicate(true)
+	KeyMigrate.run(again)
+	ok(again == custom_summon, "the drop runs once")
 	# (the move of old saves to the new defaults is --ultbond-check)
 	# the arena and duel resets are on Backspace now
 	var ar := FileAccess.get_file_as_string("res://scripts/match/arena.gd")

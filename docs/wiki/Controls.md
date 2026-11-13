@@ -22,7 +22,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | X | Your hunter's own ultimate (from level 6; no hero has one yet) |
 | T | Fuse with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
 | C | Your Boki's own ability: it hops off, casts and hops back |
-| G | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
+| G | Tap: Sic your Boki at the cursor, or Call it back if it is away; with Boki riding as wisps, a tap bursts the wisp into your Boki and a tap again sends it back. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | Middle mouse | Ping for your squad: on an enemy hunter a red "Enemy" ping, on loot "Loot", anywhere else the spot. With the map open, or while dropping in, it pings the point under the cursor |
 | F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
 | 1 / 2 | Tonic (heal) / armor kit. With full health, 1 uses an armor kit. |
@@ -74,7 +74,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Q | Glove 1 | `gear1` | yes |
 | V / Mouse 4 | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
-| G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
+| G | Boki: tap to send out or call back (a wisp: out of it, again: back), hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |
