@@ -33,6 +33,9 @@ var slot_i := 0
 var power_k := 0.0            # 0..1 while the unlock is held (HoldUnlock)
 var burst_t := -1.0           # s since the reveal burst, -1 when none
 var spin_t := 0.0             # s the stage has run
+var stage_only := false       # just the stage, standing front on (the lobby): no header, clips or frame
+var lockin_t := -1.0          # s into the lock-in pose (-1: not playing)
+var lockin_len := 0.0         # s the pose runs
 
 var vp: SubViewport
 var pivot: Node3D
@@ -91,6 +94,12 @@ static func make(hunter_id: String, stage_px := Vector2(220, 300), clip_px := Ve
 	v.clip_cols = cols
 	return v
 
+## Just the Hunter's stage, for the pre-match lobby: no turntable, it stands facing front (`play_lockin` for the pose).
+static func make_stage(hunter_id: String, stage_px: Vector2) -> HunterViewer:
+	var v := make(hunter_id, stage_px)
+	v.stage_only = true
+	return v
+
 ## The kit moves a slot plays, from the rules (only ids the animation knows).
 static func moves_for(hunter_id: String, slot: String) -> Array:
 	var list: Array = (rules().get("moves", {}) as Dictionary).get(hunter_id, {}).get(slot, [])
@@ -112,8 +121,12 @@ static func stat_line(hunter_id: String) -> String:
 			("  ·  " + w) if w != "" else ""]
 
 func _ready() -> void:
-	add_theme_stylebox_override("panel", _frame(Arch.color(id)))
 	set_meta("hunter_viewer", id)
+	if stage_only:
+		add_theme_stylebox_override("panel", StyleBoxEmpty.new())      # no frame or padding: just the stage
+		add_child(_stage(Arch.color(id)))
+		return
+	add_theme_stylebox_override("panel", _frame(Arch.color(id)))
 	slots = slots_for(id)
 	_cols = UI.hbox(14)
 	if stage_size != Vector2.ZERO:      # (the Relic moment shows the Hunter in the world instead)
@@ -127,10 +140,11 @@ func set_hunter(hunter_id: String) -> void:
 		return
 	id = hunter_id
 	var col := Arch.color(id)
-	slots = slots_for(id)
-	add_theme_stylebox_override("panel", _frame(col))
 	set_meta("hunter_viewer", id)
-	_rebuild_body()
+	if not stage_only:
+		slots = slots_for(id)
+		add_theme_stylebox_override("panel", _frame(col))
+		_rebuild_body()
 	if pivot == null:
 		return
 	if model:
@@ -296,6 +310,11 @@ func _build_model() -> void:
 	anim = HunterAnim.new(model)
 	_aim_camera()
 
+## The Hunter's lock-in pose (data "lockin" in its warden_anim file), from the start; back to its idle after.
+func play_lockin() -> void:
+	lockin_t = 0.0
+	lockin_len = WardenClips.lockin_dur(WardenGlb.art(id))
+
 func _aim_camera() -> void:
 	var s := model.scale.y
 	cam.transform = Transform3D(Basis(), Vector3(-1.0, 1.45, -5.3) * s).looking_at(Vector3(0, 0.95 * s, 0), Vector3.UP)
@@ -330,8 +349,12 @@ func tick(dt: float) -> void:
 	if model == null:
 		return
 	spin_t += dt
-	pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
+	if not stage_only:
+		pivot.rotation.y += dt * float(rules().get("turn_rate", 0.45)) * (1.0 - power_k)
 	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "wid": Arch.signature(id)}
+	if lockin_t >= 0.0:
+		s["lockin_t"] = lockin_t
+		lockin_t = lockin_t + dt if lockin_t + dt < lockin_len else -1.0
 	if power_k > 0.0:
 		s["crouch"] = 0.55 * power_k
 		s["cast_slot"] = "ult"

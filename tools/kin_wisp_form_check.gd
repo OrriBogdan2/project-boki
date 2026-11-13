@@ -162,7 +162,7 @@ func _hunter_wisp(P: Hunter, bot: Hunter, foe: Hunter) -> void:
 		m.knock(h, null, {})
 		h.down_hp = 1e6
 		h.reveal_t = 30.0          # seen however the headless camera faces
-	_show(0.4)
+	_show(0.8)          # the knocked-down beat (HunterFall, up to 0.5 s) hands over to the Wisp first
 	for h in [P, bot, foe]:
 		var swapped: bool = HunterWisp.mode_of(h) == HunterWisp.ON and not h.model.visible
 		ok(swapped, "%s knocked: the hero is gone, a Wisp sits in their place" % h.pname)
