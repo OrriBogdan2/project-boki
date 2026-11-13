@@ -6,8 +6,8 @@ extends RefCounted
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
 ## Every Hero's "air_legs" moves, played in the air, keep the fall's legs (no planted stance), and a landing before the
 ## move ends keeps them on the legs' own layer (no snap into the stance).
-## Every Hero with clips (WardenAirTilt): its dive clip is in the .glb, a plunge turns it head-down, a glider turn leans
-## it into the turn, and on the ground the .glb is back in its own place.
+## Every Hero with clips (HunterAnim's AIR_TILT on WardenClips): its dive clip is in the .glb, a plunge tips it
+## nose-down, and on the ground the body is upright again (the glider's bank: --glide-bank-check).
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -17,7 +17,8 @@ const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
 const AIR_FRAMES := 20          # frames of each air cast checked
-const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender"]    # Vex, Kael, Cinder, Meeko: their own ledge climb
+const MANTLERS := ["gunslinger", "juggernaut", "ashwick", "tender"]    # Vex, Kael, Cinder, Meeko: mantlekit.py poses
+const CLIMBERS := ["archer", "dolm", "dredge", "rimewright"]    # Lace, Tenzo, Grimble, Neve: glb_climb_clips.py keys
 
 var bad := 0
 var holder: Node3D
@@ -39,7 +40,12 @@ func run(main: Node) -> void:
 		_air(String(id))
 	_finishers()
 	for id in MANTLERS:
-		_mantle(String(id))
+		_mantle(String(id), false)
+	for id in CLIMBERS:
+		_mantle(String(id), true)
+	for id in Arch.ORDER:
+		if not MANTLERS.has(String(id)) and not CLIMBERS.has(String(id)):
+			_mantle_proc(String(id))
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -219,8 +225,8 @@ func _finishers() -> void:
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
 ## the sun carrying her FX points.
 ## A ledge rise plays the Hero's own climb clip: its time is how far up the face he is, the vault runs on in real time
-## after the lip, and the pose moves.
-func _mantle(id: String) -> void:
+## after the lip, and the pose moves: the hands reach up (a keyed climb over the head), then plant on the lip.
+func _mantle(id: String, keyed: bool) -> void:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	holder.add_child(m)
 	var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
@@ -246,15 +252,33 @@ func _mantle(id: String) -> void:
 	var an := HunterAnim.new(m)
 	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
 	var foot := WardenSkeleton.find(sk, "shin.R")
+	var hand := WardenSkeleton.find(sk, "hand.R")
+	var head := WardenSkeleton.find(sk, "head")
 	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false}
 	var lo := 0.0
 	var hi := 0.0
+	var hands: Array = []    # the hand's height off the head: up at the start, planted on the lip at the end
 	for k in [0.05, 0.3, 0.55, 0.8]:
 		_play(m, an, sync, st.merged({"mantle": k}), 12)
 		var p := sk.get_bone_global_pose(foot).origin
 		lo = minf(lo, p.y)
 		hi = maxf(hi, p.y)
+		hands.append(sk.get_bone_global_pose(hand).origin.y - sk.get_bone_global_pose(head).origin.y)
 	ok(hi - lo > 0.15, "%s: the legs move through the climb (%.2f m)" % [id, hi - lo])
+	var reach: float = 0.0 if keyed else float(hands[3]) + 0.15    # mantlekit's grab starts under the head
+	ok(float(hands[0]) > reach and float(hands[3]) < -0.1,
+			"%s: hands reach up, then plant on the lip (%.2f, %.2f m off the head)" % [id, hands[0], hands[3]])
+	m.free()
+
+## A Hunter with no climb clip keeps the rig's procedural reach and push for a ledge rise.
+func _mantle_proc(id: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var sync := m.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	if sync != null and sync.clips != null:
+		var clips: WardenClips = sync.clips
+		ok(not clips.d.has("mantle") and bool(clips._pick({"mantle": 0.5}, DT).get("proc", false)),
+				"%s: no climb clip, a ledge rise plays the procedural pose" % id)
 	m.free()
 
 func _companions() -> void:
@@ -430,23 +454,24 @@ func _air(id: String) -> void:
 	var an := HunterAnim.new(m)
 	var dive := String(sync.clips.d["air"]["dive"])
 	ok(sync.clips.lib.has_animation(dive), "%s: the dive clip %s is in the .glb" % [art_name, dive])
+	_play(m, an, sync, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 30)
+	var stand := _spine(m, sk)
 	var glide := {"vel": Vector3(0, -3.5, -9.0), "face": 0.0, "grounded": false, "gliding": true}
 	_play(m, an, sync, glide, 40)
 	var up := _spine(m, sk)
 	var plunge := {"vel": Vector3(0, -30.0, -6.0), "face": 0.0, "grounded": false, "diving": true}
 	_play(m, an, sync, plunge, 40)
 	var down := _spine(m, sk)
-	ok(down.y < 0.0 and down.z < 0.0, "%s: the dive goes head-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
+	# (HunterAnim's AIR_TILT pitches it DIVE_PITCH nose-down on top of the dive clip: head first, chest to the ground)
+	ok(down.z < -0.5, "%s: the dive goes nose-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
 			% [art_name, down.y, down.z, up.y])
-	var turn := glide.duplicate()
-	for i in 30:
-		turn["face"] = float(turn["face"]) + 5.0 * DT      # a left turn at 5 rad/s
-		_play(m, an, sync, turn, 1)
-	var lean := _spine(m, sk)
-	ok(lean.x < up.x - 0.15, "%s: a glider turn leans it into the turn (spine x %.2f, straight %.2f)" % [art_name,
-			lean.x, up.x])
-	_play(m, an, sync, {"vel": Vector3.ZERO, "face": float(turn["face"]), "grounded": true}, 60)
-	ok(w.transform.is_equal_approx(sync.clips.tilt.rest), "%s: on the ground the body is upright again" % art_name)
+	# (the glider's bank into a turn is main's AIR_TILT roll, asserted on every Hero by --glide-bank-check)
+	_play(m, an, sync, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 60)
+	var stood := _spine(m, sk)
+	var left := rad_to_deg((m.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY) as Quaternion).get_angle())
+	# (the idle's own sway moves the spine a few degrees: Tarek's guard ~4)
+	ok(left < 1.0 and absf(stood.y - stand.y) < 0.06, "%s: on the ground the body is upright again (air tilt %.1f deg"
+			% [art_name, left] + ", spine y %.2f, standing %.2f)" % [stood.y, stand.y])
 	m.free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:

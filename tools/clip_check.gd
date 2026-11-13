@@ -192,6 +192,8 @@ func _named(dd: Dictionary) -> Array:
 	out.append_array((dd.get("emotes", {}) as Dictionary).values())
 	var air: Array = (dd.get("air", {}) as Dictionary).values()
 	out.append_array(air.filter(func(v): return v is String))     # (not its tilts)
+	if dd.has("mantle"):
+		out.append(dd["mantle"]["clip"])
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
