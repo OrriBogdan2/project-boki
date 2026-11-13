@@ -20,6 +20,10 @@ func run(main_node: Node) -> void:
 	var bad: int = await flow.combos_of(main, "dolm")
 	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
 		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	# the one footage-sourced hold row (KIT_PARITY item 20): the RMB charge outlives a jump (card 0240)
+	var hj := DashFlow.hold_row_of("dolm", "rmb", "jump")
+	ok("hold.rmb.jump is keep, sourced to the footage (card 0240)",
+		hj["mode"] == "keep" and String(hj["source"]).contains("0240"), String(hj["mode"]))
 	var parity = load("res://tools/parity_pvb.gd").new()
 	parity.main = main
 	await parity.breah()
