@@ -549,7 +549,8 @@ func step(dt: float) -> void:
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 		out_fade = float(want.get("out", FADE_LOCO))
 	else:
-		act_w = move_toward(act_w, 0.0, dt / (act_out if act_out != FADE_LOCO else out_fade))   # (a lock-in settles slower)
+		# (a lock-in settles slower)
+		act_w = move_toward(act_w, 0.0, dt / (act_out if act_out != FADE_LOCO else out_fade))
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""

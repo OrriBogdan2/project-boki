@@ -91,7 +91,8 @@ func _hunter_row(art: String) -> Array:
 		"proc", _cell(walk_ok and run_ok), _cell(_has(clips, crouch.get("idle", ""))), _cell(upper)]
 
 ## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
-## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side (Kin.render).
+## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side
+## (Kin.render).
 ## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])

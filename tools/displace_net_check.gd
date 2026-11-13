@@ -527,7 +527,8 @@ func _fresh(T: Hunter) -> void:
 	T.set_meta("marks", {})
 	T.set_meta("gnd_until", 0.0)
 
-## Runs the match `secs` of its own time with no monsters about (a check's lair boss stays), stepped by the wall clock as Match._process
+## Runs the match `secs` of its own time with no monsters about (a check's lair boss stays), stepped by the wall clock
+## as Match._process
 ## steps a game: as many DT steps a frame as real time asks, never more than CATCH_UP behind. (One step a
 ## frame ran a host drawing ~35 fps under xvfb at ~0.6x the headless guest's clock, so the guest's copy of
 ## a pull ran on past its end and its body shoved the guest's own hunter away: not something two games do.)
