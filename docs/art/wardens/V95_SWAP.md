@@ -80,6 +80,13 @@ ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
   rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
 - Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
 
+## Cinder 2026-11-13 (ext/cinder-ba-promote): B-A body live
+Owner pick B-A (`~/meshy/v95/Cinder/r2/ba1113/cand_BA2.glb`, CURRENT_OVERRIDES Cinder line): the curvy1113 B-A body (bust
+about two sizes up, waist and hips unchanged) under the live facekeep head, head_diff `[]`. The live hair is carried down
+past the neck cut at the back, and its dark locks are grown down from the cut at the front, so there is no hair ledge
+(no `--ramp`). Lava kept orange with glow (Meshy lavafix emission). Tail cut, swapped and checked as on 11-12; notes,
+sheets and the unpromoted B-A bust + S-B hips mix in `~/meshy/cinder-body-1113/`.
+
 ## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
 The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:
 Cinder (the facekeep body: body6 cand_B's shape with the cand_A face3 image), Sable (prop1111 cand_B), Vex (prop1111
