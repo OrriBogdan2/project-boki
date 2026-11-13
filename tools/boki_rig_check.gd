@@ -11,7 +11,8 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"nettlynx", "thrumbird", "caecilith"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin"]
+	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin",
+	"strut", "pose", "bow"]
 const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
 const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
 const T_FRAMES := 8            # frames sampled over a game clip
@@ -81,6 +82,16 @@ func _game_clips(rig: BokiRig) -> void:
 		ok(is_equal_approx(a.length, want), "%s lasts %.2f s, its game's beat data says %.2f" % [c, a.length, want])
 		ok(a.loop_mode == Animation.LOOP_NONE, "%s plays once" % c)
 		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	for c in BokiHomePoses.SHOW_CLIPS:
+		var a := rig.player.get_animation(c)
+		var want := ShowRing.BOW_S if c == "bow" else ShowRing.POSE_S
+		var walk_s := rig.player.get_animation("walk").length
+		if c == "strut":
+			ok(a.loop_mode == Animation.LOOP_LINEAR and is_equal_approx(a.length, walk_s), "strut loops over the walk")
+		else:
+			var once := a.loop_mode == Animation.LOOP_NONE
+			ok(is_equal_approx(a.length, want) and once, "%s plays once for %.1f s" % [c, want])
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
 	for m in BaseTumble.rules()["moves"].values():
 		ok(String(m["clip"]) in CLIPS, "Tumble's %s plays the rig clip %s" % [m["name"], m["clip"]])
 
@@ -126,7 +137,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._shot_left = 0.0
 	ok(_clip_for(rig, "kstate", "sleep") == "nap", "then naps")
 	rig._asleep = false
-	for act in ["munch", "nudge", "climb", "splash"] + GAME_CLIPS:
+	for act in ["munch", "nudge", "climb", "splash"] + GAME_CLIPS + BokiHomePoses.SHOW_CLIPS:
 		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")

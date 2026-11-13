@@ -152,8 +152,10 @@ const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin"]
+	"rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
+## The strut takes steps this much quicker than a walk at the same ground speed (a high, proud step).
+const STRUT_CADENCE := 1.25
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
 ## Blend shapes each expression pushes.
@@ -178,6 +180,7 @@ const CLIP_FACE := {
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
 	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
+	"strut": "cheer", "pose": "cheer", "bow": "cheer",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -360,13 +363,14 @@ func _pick_clip(dt: float) -> void:
 	var want := _state_clip()
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = 1.0
-	if want != "run" and want != "walk" and want != "carry":
+	if want not in ["run", "walk", "carry", "strut"]:
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
 	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
 			* model.global_basis.z.length())
+	var quick := STRUT_CADENCE if want == "strut" else 1.0
 	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
-	player.speed_scale = clampf(_speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	player.speed_scale = clampf(quick * _speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 ## s the rig takes to hand one gait over to another.
 func gait_fade() -> float:
