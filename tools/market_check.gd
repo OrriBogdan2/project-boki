@@ -96,7 +96,7 @@ func _levels() -> void:
 	var e := {"u": 900, "id": "market_stall", "x": 30, "z": 30, "r": 0, "t": 1}
 	(lay["deco"] as Array).append(e)
 	var hm := HomeMarket.new(null, Callable())
-	ok(FarmUnlocks.gated() and Stalls.level() == 1 and hm.tabs() == ["Vendor", "Exchange"],
+	ok(FarmUnlocks.gated() and Stalls.level() == 1 and hm.tabs() == ["Vendor", "Relics", "Exchange"],
 		"L1: the vendor (and the Exchange) only: %s" % str(hm.tabs()))
 	var keys := func(tab: String) -> Array:
 		hm.vendor_tab = tab
@@ -125,7 +125,7 @@ func _levels() -> void:
 	ok(Stalls.level() == 1, "while the Boki build it, it still works at L1")
 	while FarmSites.has_site(e): FarmSites.add_swing(e)
 	ok(int(Save.d["gems"]) == g0 - int(cost["gems"]), "and the gems were spent by the time it was built")
-	ok(Stalls.level() == 2 and hm.tabs() == ["Vendor", "Exchange", "Shelter", "My stall", "Search"],
+	ok(Stalls.level() == 2 and hm.tabs() == ["Vendor", "Relics", "Exchange", "Shelter", "My stall", "Search"],
 		"L2 adds the Shelter, your stall and search: %s" % str(hm.tabs()))
 	e["t"] = 3
 	ok(Stalls.level() == 3 and hm.tabs().has("Auctions"), "L3 adds the Auction House")
