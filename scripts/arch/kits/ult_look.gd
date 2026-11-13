@@ -6,12 +6,14 @@ extends CareLook
 ##   crystals on its edge; the lit ring at the hit radius is the kit's AimKit circle), the frost bud
 ##   at her feet, the light pillar of the crash and the ice block on each stunned foe. Her body is
 ##   IceBody's while sealed.
-## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted), keep(key, "rink", at, {r, crack, a}),
+## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted),
+## keep(key, "rink", at, {r, crack, a, open}) (open: s since fully out, for the edge flash),
 ## keep(key, "frostbud", at, {grow, crack}),
 ## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).
 
 const FRINGE := 18            # crystals round the rink's edge
 const RINK_FILL := 0.35       # rink body strength (doubles by the crash): alpha 0.1-0.2 at the centre, the zone rule
+const RINK_PULSE_T := 0.3     # s the frost edge flashes once the rink is fully open, fading out
 const BUD_SPIKES := 6         # low ice spikes the frost bud throws out from her feet
 const BUD_REACH := 0.95       # m: how far those spikes reach, about half her height (not the rink's size)
 const TETHER_SEGS := 10       # straight pieces the tether arc is bent from
@@ -169,6 +171,7 @@ func _place_tether(n: Node3D, from: Vector3, p: Dictionary) -> void:
 func _place_rink(n: Node3D, p: Dictionary) -> void:
 	var r := float(p.get("r", 1.0))
 	var crack := clampf(float(p.get("crack", 0.0)), 0.0, 1.0)
+	var pulse := rink_pulse(float(p.get("open", RINK_PULSE_T)))
 	n.scale = Vector3.ONE
 	var disc := n.get_node_or_null("Disc") as MeshInstance3D
 	if disc:
@@ -177,6 +180,8 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		var sm := disc.material_override as ShaderMaterial
 		sm.set_shader_parameter("crack", crack)
 		sm.set_shader_parameter("fill", RINK_FILL + RINK_FILL * crack)
+		sm.set_shader_parameter("flash", pulse)
+		sm.set_shader_parameter("rim_w", 0.08 + 0.06 * pulse)
 	var fringe := n.get_node_or_null("Fringe") as Node3D
 	if fringe == null:
 		return
@@ -184,4 +189,9 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		var mi := c as MeshInstance3D
 		var a := float(mi.get_meta("a", 0.0))
 		mi.position = Vector3(cos(a) * r * 0.96, 0.1, sin(a) * r * 0.96)
-		(mi.material_override as ShaderMaterial).set_shader_parameter("glow", 0.2 + 0.9 * crack)
+		(mi.material_override as ShaderMaterial).set_shader_parameter("glow", 0.2 + 0.9 * maxf(crack, pulse))
+
+
+## The frost edge's opening flash at `open` s after the rink is fully out (full while it grows, 0 after RINK_PULSE_T).
+static func rink_pulse(open: float) -> float:
+	return 1.0 - smoothstep(0.0, RINK_PULSE_T, open)

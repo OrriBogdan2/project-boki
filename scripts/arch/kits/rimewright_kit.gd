@@ -1067,7 +1067,8 @@ func rime_slow_of(f: Ent) -> float:
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
-	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
+	var open := float(rime["t"]) - float(xd["snap_t"])          # s since it opened: the frost edge flashes
+	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k, "open": open})
 	ulk().keep("bud", "frostbud", at, {"grow": snap, "crack": k})
 	AimKit.circle(h, "x", {"at": at, "r": radius, "band": RINK_BAND, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt
