@@ -100,6 +100,14 @@ static func make_stage(hunter_id: String, stage_px: Vector2) -> HunterViewer:
 	v.stage_only = true
 	return v
 
+## Resizes a built stage (the lobby when the window changes): the holder's minimum size and the 3D view follow.
+func fit_stage(px: Vector2) -> void:
+	stage_size = px
+	if vp != null:
+		(vp.get_parent().get_parent() as Control).custom_minimum_size = px      # vp -> container -> holder
+		vp.size = Vector2i(px)
+	reset_size()
+
 ## The kit moves a slot plays, from the rules (only ids the animation knows).
 static func moves_for(hunter_id: String, slot: String) -> Array:
 	var list: Array = (rules().get("moves", {}) as Dictionary).get(hunter_id, {}).get(slot, [])

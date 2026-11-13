@@ -281,8 +281,8 @@ func _screen(main: Node) -> void:
 	view.set_process(false)
 	view.queue_free()
 
-## Cards are portrait + name + role word (stats and quests on hover); shut ones are dim with a padlock; the
-## voice button waits for a human squadmate.
+## Cards are portrait + name + role word plus the how-to block (ClassCard.howto_box, d45c24c5de; stats and quests on
+## hover); shut ones are dim with a padlock; the voice button waits for a human squadmate.
 func _declutter(view: Control) -> void:
 	var padlock = view.get_script().Padlock
 	var open := 0
@@ -290,16 +290,22 @@ func _declutter(view: Control) -> void:
 	for card in view.grid.get_children():
 		var ak: String = card.get_meta("arch")
 		var role := String(Arch.def(ak)["card"]["role_word"])
-		var texts: Array = card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+		var boxes: Array = card.find_children("*", "VBoxContainer", true, false)
+		var howto: Array = boxes.filter(func(b): return b.has_meta("howto"))
+		var tips: Array = [] if howto.is_empty() else howto[0].find_children("*", "Label", true, false)
+		var labels: Array = card.find_children("*", "Label", true, false).filter(func(l): return not tips.has(l))
+		var texts: Array = labels.map(func(l): return (l as Label).text)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)
 		open += 0 if shut else 1
 		var quest := "Locked: " + ClassUnlock.requirement(ak)
-		var plain: bool = texts.size() == 2 and texts[0] == HeroTitle.base_name(ak) and texts[1].begins_with(role)
+		var plain: bool = texts.size() == 2 and texts[0] == HeroTitle.base_name(ak) and texts[1].begins_with(role) \
+				and tips.size() == ClassCard.howto_lines(ak).size()
 		var tip: String = card.tooltip_text
 		var tip_ok := tip.contains("health") and (not shut or tip.begins_with(quest))
 		shut_ok = shut_ok and plain and lock == shut and tip_ok
-	ok(open == 2 and shut_ok, "each card is name + role word, shut ones have a padlock, hover has stats and quest")
+	var cards_row := "each card is name + role word + how-to, shut ones have a padlock, hover has stats and quest"
+	ok(open == 2 and shut_ok, cards_row)
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])

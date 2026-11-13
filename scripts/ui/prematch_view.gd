@@ -35,7 +35,9 @@ var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 const COLUMNS := 4          # Hunter cards per row
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
-const STAGE_PX := Vector2(240, 320)   # px, your pick's 3D stage beside the grid (4 cards + it fit 1240 px)
+const STAGE_PX := Vector2(240, 320)   # px, your pick's 3D stage beside the grid at full size (4 cards + it fit 1240 px)
+## The stage height per window height, up to STAGE_PX: 230 logical px (the UI is content-scaled from 1280x720).
+const STAGE_FRAC := 0.32
 
 ## A small padlock for a shut Hunter: a body and a shackle.
 class Padlock extends Control:
@@ -71,6 +73,7 @@ func _ready() -> void:
 	banner.add_child(caption)
 	timer_label = UI.label("", TIMER_SIZE, UI.INK, UI.big)
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	timer_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER      # just the digits: the throb stays in the margin
 	banner.add_child(timer_label)
 	note_label = UI.label("", 22, UI.GOOD, UI.semi)
 	note_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -99,12 +102,11 @@ func _ready() -> void:
 	grid.add_theme_constant_override("v_separation", 12)
 	sc.add_child(grid)
 	stage_slot = Control.new()      # holds its place before your first pick, so the cards don't shift
-	stage_slot.custom_minimum_size = STAGE_PX
 	body.add_child(stage_slot)
-	_stage_pick()
 	_build_chat(root)
-	_talk(false)
 	_fit_safe_area()
+	_stage_pick()
+	_talk(false)
 	if pm.first:
 		Prematch.mark_first_seen()
 	pm.turn_done.connect(_on_turn_done)
@@ -202,8 +204,9 @@ func _pulse(left: float) -> void:
 	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
 
 ## Keeps the whole screen inside the HUD safe margin (HudStyle.safe_pad), so the countdown shows at every window size;
-## smaller windows get smaller digits. The Hunter grid keeps COLUMNS at every size: 4 x CARD_MIN_W plus
-## the STAGE_PX stage beside it fits the 1240 logical px UI.
+## smaller windows get smaller digits and a shorter stage (STAGE_FRAC, so the 720 p column fits the margin).
+## The Hunter grid keeps COLUMNS at every size: 4 x CARD_MIN_W plus the STAGE_PX stage beside it fits the
+## 1240 logical px UI.
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var pad := HudStyle.safe_pad(win)
@@ -212,6 +215,13 @@ func _fit_safe_area() -> void:
 	for side in ["top", "bottom"]:
 		_pad.add_theme_constant_override("margin_" + side, int(pad.y))
 	timer_label.add_theme_font_size_override("font_size", clampi(int(win.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
+	stage_slot.custom_minimum_size = stage_px(win)
+	if stage != null:
+		stage.fit_stage(stage_px(win))
+
+## The stage's size for a window of size `win`: STAGE_PX, scaled down (same shape) on short windows.
+static func stage_px(win: Vector2) -> Vector2:
+	return (STAGE_PX * minf(1.0, win.y * STAGE_FRAC / STAGE_PX.y)).round()
 
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not e is InputEventKey or e.echo or chat_in.has_focus() or pm.locked:
@@ -258,7 +268,9 @@ func _tile(ak: String) -> PanelContainer:
 	if ak == pm.pick:
 		col.add_child(UI.label(role + ("  ·  your pick" if pm.my_turn() else "  ·  locked in"), 13, UI.GOOD))
 	elif mate != "":
-		col.add_child(UI.label(role + "  ·  taken by " + mate, 13, UI.FAINT))
+		var taken := UI.label(role + "  ·  taken by " + mate, 13, UI.FAINT)
+		taken.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS      # a long name must not widen the grid
+		col.add_child(taken)
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 	else:
 		col.add_child(UI.label(role, 13, UI.MUTED))
@@ -282,7 +294,7 @@ func _stage_pick() -> void:
 	if pm.pick == "":
 		return
 	if stage == null:
-		stage = HunterViewer.make_stage(pm.pick, STAGE_PX)
+		stage = HunterViewer.make_stage(pm.pick, stage_slot.custom_minimum_size)
 		stage_slot.add_child(stage)
 	else:
 		stage.set_hunter(pm.pick)
