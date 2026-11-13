@@ -10,8 +10,8 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
 const CANONICAL_ORDER := [
-	"gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer",
-	"dredge", "rimewright", "mage", "bulwark", "thief", "ostra",
+	"archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm",
+	"dredge", "rimewright", "mage", "thief", "ostra", "gil",
 ]
 const RELIC_STATUS := ["locked", "proposed"]
 const GENDERS := ["male", "female", "robot"]
@@ -30,7 +30,7 @@ func run(main: Node) -> void:
 	var titles: Array = []
 	for id in Arch.ids():
 		titles.append(HeroTitle.title(id))
-	ok(Arch.ids().size() == 12, "twelve classes (%d)" % Arch.ids().size())
+	ok(Arch.ids().size() == 13, "thirteen classes (twelve ported + Gil) (%d)" % Arch.ids().size())
 	ok(Arch.ORDER == CANONICAL_ORDER, "Arch.ORDER is the canonical Hunter order")
 	ok(Arch.name_of("rimewright") == "The Snowglide" and Arch.name_of("juggernaut", true) == "the Unbroken",
 		"a title on its own carries 'the' (%s, %s)" % [Arch.name_of("rimewright"), Arch.name_of("juggernaut", true)])

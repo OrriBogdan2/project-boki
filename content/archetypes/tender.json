@@ -21,16 +21,17 @@
 		"shoulder": 1.12,
 		"neck": -0.036
 	},
-	"color": "#ffc46a",
+	"color": "#5fdc6a",
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"howto": ["Play: support; heal with {signature}, carry the downed.", "Combo: {secondary} pins a chaser, then {dash} away.", "Avoid: duels; heal from behind your squad."],
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
 	"card": {
+		"role_word": "Medic",
 		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"lmb": "Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle.",
-		"rmb": "Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later.",
+		"rmb": "Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; 2s in your reach roots them.",
 		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
 		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
 		"passive": "Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them.",
@@ -56,7 +57,7 @@
 	},
 	"passive": {
 		"name": "Carrier",
-		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
+		"desc": "Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).",
 		"max": 2,
 		"pick_r": 1.1,
 		"pick_speed": 0.6,
@@ -68,8 +69,8 @@
 		"icon": "dash",
 		"col": "#ffe2a8",
 		"cd": 7.0,
-		"dist": 4.2,
-		"time": 0.174,
+		"dist": 3.6,
+		"time": 0.2,
 		"invuln": 0.12,
 		"desc": "A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).",
 		"air": {
@@ -99,14 +100,16 @@
 			"range": 14.0,
 			"hit_r": 0.7,
 			"dmg": 9.0,
-			"delay": 0.7,
+			"build": 2.0,
+			"unwind": 2.0,
+			"leash": 15.0,
 			"burst_r": 2.2,
 			"r3_k": 2.0,
 			"burst_dmg": 32.0,
 			"root": 1.1
 		},
 		"variants": {
-			"tap": "Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled."
+			"tap": "Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within 15m of you. After 2s of that it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off."
 		},
 		"sockets": {
 			"hit": "add",
