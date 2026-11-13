@@ -55,7 +55,7 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
-	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],,,
+	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
 	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
 	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
@@ -286,8 +286,8 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
-	bad += DIRS.new(m, flat, _reset).run()      # W A S D and the diagonals, on screen and in speed
 	_aim_rel()          # last: its ~11 s of match time would move the abyss rows
+	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel (the rows leave match state it reads); W A S D and the diagonals, on screen and in speed
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
