@@ -54,6 +54,12 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
+	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],,,
+	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
+	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
+	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
+	"haste_land_0p1s":         ["~", [0.99, 1.01], "x", "[game data] a haste lands as a Slow ends: MaxAcceleration"],
+	"haste_end_0p1s":          ["~", [0.99, 1.01], "x", "[game data] and ends as a Slow lands: the walking brake"],
 	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
 	# speed against the mean, distance kept, hand-over to the walk at or under run speed
 	"dash_curve_gunslinger_peak_u":   ["~", [0.04, 0.18], "", "[footage] Ghost slide peaks 0.04-0.06s into 0.47s"],
@@ -250,6 +256,7 @@ func run(main: Node) -> void:
 	_glide_dive()
 	_dash_glide()
 	_dash_exit()
+	_slow_ramp()
 	_dash_curves()
 	_plain_dash()
 	_kit_dashes()
@@ -772,6 +779,50 @@ func _dash_exit() -> void:
 			x_end = P.pos.x
 	rec("dash_exit_slide_m", P.pos.x - x_end)
 	P.set_arch(kit_was)
+
+# ---------------------------------------------------------------- slow and haste ramp
+## Speed 0.1 s and 0.3 s after a 30% Slow lands on a run and after it ends, as a share of the run speed
+## before it, one kit per weight class; then a haste landing and ending on the medium kit. Every Slow and
+## haste source moves the one cap, so this is the ramp rule for all of them (HunterMove.brake_rate).
+func _slow_ramp() -> void:
+	var kit_was := P.arch
+	var cls_was := P.cls
+	for id in ["thief", "gunslinger", "juggernaut"]:
+		P.reclass(Arch.weight(id), id)
+		var top := _run_up()
+		print("MFEEL slow ramp on %s (%s), run %.2f m/s" % [id, P.cls, top])
+		P.slow_t = 1.0
+		P.slow_k = 0.3
+		_steps(6)
+		rec("slow_land_0p1s", _hv(P).length() / top)
+		_steps(12)
+		rec("slow_land_0p3s", _hv(P).length() / top)
+		P.slow_t = 0.0
+		_steps(6)
+		rec("slow_end_0p1s", _hv(P).length() / top)
+		_steps(12)
+		rec("slow_end_0p3s", _hv(P).length() / top)
+	P.reclass("medium", "gunslinger")
+	P.haste_t = 9.0
+	var hasted := _run_up()
+	P.haste_t = 0.0
+	var run := _run_up()
+	P.haste_t = 9.0
+	_steps(6)
+	rec("haste_land_0p1s", _hv(P).length() / hasted)
+	P.haste_t = 0.0
+	_steps(6)
+	rec("haste_end_0p1s", _hv(P).length() / run)
+	P.slow_k = 0.0
+	P.reclass(cls_was, kit_was)
+
+## A clean start on the flat, then half a second of running right: the settled run speed.
+func _run_up() -> float:
+	_reset(flat)
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	return _hv(P).length()
+
 
 ## Each fitted hero's plain ground dash, keys held the way it goes: the speed of every step on the curve, where
 ## it peaks, the distance against the kit's, and the speed it hands the walk.

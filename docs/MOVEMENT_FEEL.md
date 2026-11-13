@@ -286,6 +286,17 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
+## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
+
+The source has no ramp time: a Slow or a speed boost moves the speed cap at once, and the body follows it under the ordinary movement, down at the walking brake (BrakingDecelerationWalking 22.2 m/s² plus GroundFriction 1 × 2 per second of speed) and up at MaxAcceleration (47-54 m/s²). A 30% Slow on a run settles in about 0.05 s either way. Ours: every Slow (`slow_t`/`slow_k`, from kits, hazards, Boki and merges) and every haste (`haste_t`, the kits' `pace()`, a `move_speed` buff) multiplies into the one cap in `Hunter._physics`, and the ground step follows it with `ground_accel` up and `HunterMove.brake_rate` down (decision 0020). The check runs one kit per weight class (thief, gunslinger, juggernaut) and the haste on the medium kit.
+
+| Key | Measured | Target | Source |
+|---|---|---|---|
+| slow_land_0p1s / 0p3s (speed over the run before it) | 0.70 / 0.70 | 0.69–0.71 | [game data] the brake: ~0.05 s |
+| slow_end_0p1s / 0p3s | 1.00 / 1.00 | 0.99–1.01 | [game data] MaxAcceleration: ~0.03 s |
+| haste_land_0p1s (over the hasted run) | 1.00 | 0.99–1.01 | [game data] as a Slow ends |
+| haste_end_0p1s (over the plain run) | 1.00 | 0.99–1.01 | [game data] as a Slow lands |
+
 ## Hits on the glider (`--glide-hit-check`, decision 0055; PARITY FIRST)
 
 Asked: what happens to a Hunter under the glider who is shot, knocked, stunned or pulled, and when they can open it again. Evidence read: `docs/SUPERVIVE_DATA.md` sections 4 (crowd control) and 5 (glider rules at 1.0), the 1.0 rules in `docs/KINFALL_CLASSES.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, `supervive_physics.md` (only the names `GliderHeatInboundDamageCoefficient` and `GliderFullHeatInboundDamageCoefficient`, no values), sync64 in `docs/ROADMAP.md`, and the hero-ref footage sheets. None of the footage shows a glider being hit, so the rows below come from the data.
