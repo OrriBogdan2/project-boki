@@ -17,14 +17,13 @@ const DUCK_ONSET := Vector2(3.0, -8.0)    # seconds held, dB: the score under th
 const DUCK_WARN := Vector2(1.0, -5.0)
 
 var cues: Array = []                      # every one-shot cue in order, for the check
-var _h: Heart
+var m: Match                              # not the Heart: it owns this (via HeartSfx), a back-reference leaks both
 var _stage := -2                          # -2 until the first tick
 
 func _init(heart: Heart) -> void:
-	_h = heart
+	m = heart.m
 
 func update() -> void:
-	var m := _h.m
 	var st := Heart.tide_stage(m)
 	if _stage == -2:
 		_stage = st
@@ -34,9 +33,9 @@ func update() -> void:
 	var p := m.player
 	if st < 0 or p == null or p.out or p.extracted:
 		return
-	var out := Vector2(p.pos.x - _h.site.x, p.pos.z - _h.site.z)
+	var out := Vector2(p.pos.x - m.heart.site.x, p.pos.z - m.heart.site.z)
 	out = out.normalized() * Heart.tide_r(m) if out.length() > 0.01 else Vector2.RIGHT * Heart.tide_r(m)
-	var wall := Vector3(_h.site.x + out.x, p.pos.y, _h.site.z + out.y)
+	var wall := Vector3(m.heart.site.x + out.x, p.pos.y, m.heart.site.z + out.y)
 	Sfx.loop_hold(FRONT_KEY, "tide_rumble", wall, FRONT_DB)
 
 func _cue(cue: String) -> void:
