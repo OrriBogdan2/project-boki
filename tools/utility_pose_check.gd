@@ -57,6 +57,9 @@ func _match(main: Node) -> Match:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	for k in m.kins: k.queue_free()      # a rival Boki's bite would stun the Hunter mid-move
+	m.kins.clear()
+	if m.biomes: m.biomes.hazards.clear()      # as would a lightning rod
 	for h in m.hunters:
 		h.ctrl = "idle"
 	return m
