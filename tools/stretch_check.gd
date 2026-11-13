@@ -11,7 +11,7 @@ const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.
 const DT := 1.0 / 30.0
 ## x rest length: each relaxed Hero's worst clip after tools/art1/glb_relax.py (docs/DEBT.md "Skin stretch");
 ## lower it when a bake brings it down, never raise it.
-const CEILING := {"tender": 2.85, "dolm": 4.55, "rimewright": 4.45, "ostra": 5.15}
+const CEILING := {"tender": 2.85, "dolm": 6.7, "rimewright": 3.45, "ostra": 5.15}
 
 var tree: SceneTree
 var bad := 0

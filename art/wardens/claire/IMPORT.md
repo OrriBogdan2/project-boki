@@ -1,5 +1,22 @@
 # Claire (rimewright): import note, v95 swap of Claire appeal3, body a (2026-11-10)
 
+## 2026-11-12 evening: the chiffon skirt body under the live head (ext/neve-skirt-livehead, spec claire_v95.json)
+claire.glb is now the v95 swap of `claire/r3/meshy1112/redo_skirt/graft/u1rm_livehead.glb` (the live appeal3 face kept
+byte-identical down to the fur collar, tools/meshy/head_graft.py). It replaces the arms fix below: that fix was made for the
+11-10 body, and on the skirt body its sleeve and glove detection finds 43 and 60 arm vertices and no glove, so it is not
+applied (the skirt swap's own spec puts the arms on the arm bones). Kept below as the 11-10 body's history.
+
+## Owner fix 2026-11-12 (11-10 body, superseded): arms and hands (`tools/art1/warden_fix_1112.py claire`, on the 11-10 file)
+The owner's Model Room note: "arm / hands are weird". Bone heat had put the sleeves mostly on `hips` and the gloves on
+`forearm`, and the skirt, the sash and its bow on the forearms and hands, so a raised arm dragged a lump of skirt and the
+bow up with it (the bulky "sleeve", the bow fused into the hand). The mesh's arms also hung 6-10 cm outside the arm bones.
+The fix: the sleeve (fur by the arm's line) and the glove (its purple paint, or all-arm weights, and the claws) are the arm,
+grown over the mesh; only they keep arm weights (upper_arm, then forearm over 3 cm round the elbow; the glove rides the
+forearm, as the clips' wrist turns were keyed for the old fist round the spear); everything else loses its arm weights.
+The 35 faces fusing the cuffs to the skirt and sash below the armpit are cut. Each arm is then turned onto its bones
+(upper arm about the shoulder, forearm about the elbow) so it bends where the clips bend it; the bones stay on the rig
+nodes (REST_TOL). Body proportions untouched. Stretch check: worst 5.41 (was 6.61); idle 0 stretched edges (was 93).
+
 `claire.glb`: the owner's pick (11-10), Claire v95 r2 appeal3 `cand_a.glb` (the appeal3 face on body a, one mesh), swapped onto
 Claire's own skeleton, 49 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/claire_v95.json`. Raw files in ~/meshy/v95/claire/r2/appeal3 (never in git); the spec reads
@@ -32,4 +49,4 @@ Stretch check: all 49 clips over 1.3 (worst 6.61 revive, idle 6.01, run_f 3.15),
 in `hips`; before the braid fix: worst 8.01, idle 6.35, run_f 5.72. The relax runs with CUTS 0 (no holes), as Lace, Sparkle and Meeko, so a stretched
 edge stays rather than a hole. Then relaxed in place (weights only, clips untouched), the spec's `relax` (800 passes, 2 rings):
 `blender -b --factory-startup --python tools/art1/glb_relax.py -- art/wardens/claire/claire.glb art/wardens/src/claire_v95.json`.
-Worst 4.44x (crouch_f), held there by stretch_check's `CEILING`; most of what is left is the hem welded to the right boot.
+Worst 3.43x (crouch_in) on the 11-12 skirt body, held there by stretch_check's `CEILING`; most of what is left is the hem welded to the right boot.
