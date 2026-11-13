@@ -48,7 +48,6 @@
   "knock_confirm": "a confirm sting, meant to cut through the fight above the menu sounds",
   "extract_ok": "a confirm sting, meant to cut through the fight above the menu sounds",
   "revive_hum": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
-  "rail": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "swap": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "ab_shield_hit": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "whoosh": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
