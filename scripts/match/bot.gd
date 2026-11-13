@@ -710,8 +710,6 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue
 		if m.truce and m.truce.holds(h, o):
 			continue
-		if o is Hunter and not m.can_see(h.team, o):
-			continue
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin) or helping.has(o)
@@ -724,6 +722,9 @@ func _choose(m: Match, h: Hunter) -> void:
 		if helping.has(o):
 			reach = maxf(reach, BotSquad.ASSIST_REACH)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
+			continue
+		# (after the reach test: sight is a few line-of-sight marches per teammate, the costliest test here)
+		if o is Hunter and not m.can_see(h.team, o):
 			continue
 		if not provoked and o != a.get("tgt") and BotSquad.outnumbered(m, h, a, o, d):
 			continue      # alone against more: don't start it (one already on is fought, BotRetreat backs out)
