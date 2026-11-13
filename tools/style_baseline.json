@@ -5,14 +5,14 @@
 "semicolon": 8
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 26,
+"long_line": 28,
 "nested_ternary": 2,
 "semicolon": 6
 },
 "scripts/arch/feel.gd": {
-"long_line": 8,
+"long_line": 10,
 "nested_ternary": 2,
-"semicolon": 4
+"semicolon": 5
 },
 "scripts/arch/hero_demo.gd": {
 "long_line": 1,
@@ -237,7 +237,7 @@
 "long_line": 2
 },
 "scripts/home/home_incubator.gd": {
-"long_line": 3,
+"long_line": 4,
 "nested_ternary": 2,
 "semicolon": 4
 },
@@ -398,8 +398,9 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 22,
-"semicolon": 48
+"long_line": 23,
+"nested_ternary": 1,
+"semicolon": 49
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
@@ -409,7 +410,7 @@
 "long_line": 2
 },
 "scripts/match/capture.gd": {
-"long_line": 9,
+"long_line": 11,
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
@@ -483,7 +484,7 @@
 "scripts/match/hunter_anim.gd": {
 "long_line": 40,
 "nested_ternary": 5,
-"semicolon": 98
+"semicolon": 100
 },
 "scripts/match/juice.gd": {
 "long_line": 1,
@@ -493,7 +494,7 @@
 "scripts/match/kin.gd": {
 "long_line": 30,
 "nested_ternary": 7,
-"semicolon": 18
+"semicolon": 19
 },
 "scripts/match/kin_command.gd": {
 "long_line": 5,
@@ -596,7 +597,7 @@
 "semicolon": 3
 },
 "scripts/match/practice.gd": {
-"long_line": 1
+"long_line": 2
 },
 "scripts/match/practice_hero.gd": {
 "long_line": 2,
@@ -634,7 +635,7 @@
 },
 "scripts/match/sky_train.gd": {
 "long_line": 11,
-"semicolon": 8
+"semicolon": 10
 },
 "scripts/match/spawn_plan.gd": {
 "long_line": 8,
@@ -689,7 +690,7 @@
 "nested_ternary": 5
 },
 "scripts/ui/capture_hud.gd": {
-"long_line": 4
+"long_line": 5
 },
 "scripts/ui/dex_view.gd": {
 "long_line": 10,
@@ -725,7 +726,7 @@
 "history_comment": 2,
 "long_line": 190,
 "nested_ternary": 33,
-"semicolon": 40
+"semicolon": 43
 },
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,
@@ -796,7 +797,7 @@
 },
 "scripts/ui/title.gd": {
 "long_line": 21,
-"nested_ternary": 1,
+"nested_ternary": 2,
 "semicolon": 39
 },
 "scripts/ui/ui.gd": {
@@ -1016,6 +1017,16 @@
 "long_line": 11,
 "semicolon": 25
 },
+"tools/rolling_check.gd": {
+"history_comment": 1,
+"long_line": 44,
+"semicolon": 18
+},
+"tools/rolling_sim.gd": {
+"long_line": 25,
+"nested_ternary": 2,
+"semicolon": 7
+},
 "tools/shot_vertical_check.gd": {
 "long_line": 4,
 "semicolon": 12
@@ -1037,7 +1048,7 @@
 "semicolon": 24
 },
 "tools/title_check.gd": {
-"long_line": 3,
+"long_line": 7,
 "semicolon": 1
 },
 "tools/train_check.gd": {

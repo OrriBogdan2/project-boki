@@ -42,7 +42,9 @@ func _draw_panels() -> void:
 	hud.hover_spots.clear()
 	var m: Match = hud.m
 	var p: Hunter = m.player
-	if not (m.tut and m.tut.intro):
+	if DropHud.aboard(p):
+		hud._draw_minimap(size)      # aboard the rocket: the map and nothing else (DropHud)
+	elif not (m.tut and m.tut.intro):
 		var sz := size
 		hud._draw_top(sz)
 		if p and m.lairs:
