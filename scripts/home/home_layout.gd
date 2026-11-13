@@ -25,16 +25,29 @@ const GAP := 3                       # tiles of sky kept between the main island
 const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
 const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
-## Ground colours for every home island. region is the world's region look (trees, rocks) to use.
+## Ground colours for every home island. region is the world's region look (trees, rocks) to use;
+## its ground colours win over the theme's unless own_ground; style: the Flora set its props use (Flora.STYLES).
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	# a zone's own ground (ZoneLayout): never for sale, it has no gems
+	"glasswater": {"name": "Glasswater", "zone": true, "region": 2, "top": "9ccfc4", "top2": "7db8b4",
+		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
+	"cinderstep": {"name": "Cinderstep", "zone": true, "own_ground": true, "region": 1,
+		"top": "66625f", "top2": "56524f", "side": "4a3e3a", "deep": "261a1a", "leaf": "e07a3a"},
+	"hushwood": {"name": "Hushwood", "zone": true, "region": 0, "style": "gloom", "top": "4a6a52", "top2": "3a5848",
+		"side": "4a3d52", "deep": "20202e", "leaf": "6f8f9c"},
+	"ridge": {"name": "Kitewind Ridge", "zone": true, "region": 0, "style": "storm", "top": "9cba86", "top2": "7fa27a",
+		"side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
 
+const CLIMB_TOP := 1.2      # m: a placed block's top; the farm's jump and mantle (reach 1.5 m) climbs it
+
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
-## brushes). size: footprint in tiles before turning. block: kin and you walk around it. line: dragged
+## brushes). size: footprint in tiles before turning. top: m you stand on a block at (default CLIMB_TOP).
+## block: kin walk around it and you climb it. line: dragged
 ## out in a line that joins up (fences). brush: painted on tiles (path / clear / water). colour: you
 ## pick its colour. light: glows at night. bed: kin sleep on it.
 const CATALOG := {
@@ -48,16 +61,18 @@ const CATALOG := {
 	"path_clear": {"name": "Grass (clear)", "cat": "Paths", "gems": 0, "brush": "clear"},
 	"clear_wild": {"name": "Clear the wild", "cat": "Island", "gems": 3, "brush": "wild"},
 	"river": {"name": "River", "cat": "Paths", "gems": 2, "brush": "water", "block": true,
-		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
+		"desc": "Drag a narrow channel of water across the ground. A crop patch or trough within 2 tiles of any water looks after itself, and the crops grow faster."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
 	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
+	"snack_patch": {"name": "Snack patch", "cat": "Garden", "gems": 0, "size": [2, 2], "max": 1,
+		"desc": "Grows four element snacks every few minutes. Walk over it to pick them. For feeding only."},
 	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
 	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true},
 	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true},
 	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true},
 	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true},
 	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true},
-	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true},
+	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "top": 0.5},
 	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true},
 	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true},
 	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true},
@@ -70,8 +85,12 @@ const CATALOG := {
 		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},
 	"toy_post": {"name": "Climbing post", "cat": "Base", "gems": 30, "block": true, "toy": true,
 		"desc": "Flying and Rock Boki love to climb it. Trains Power."},
-	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "toy": true,
+	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "top": 0.5, "toy": true,
 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
+	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "top": 0.5, "toy": true,
+		"desc": "Fire Boki love to bask on it. Trains Guard."},
+	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
+		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
 	# work: the element. wood / stone: building materials (Save.d["mats"]) on top of the gems.
 	"job_board": {"name": "Job Board", "cat": "Work", "gems": 30, "block": true, "work": "board",
@@ -103,7 +122,7 @@ const CATALOG := {
 	"house": {"name": "House", "cat": "Buildings", "gems": 90, "size": [5, 3], "block": true, "fixture": "house", "max": 1, "door": true,
 		"desc": "Your home. Go inside to rest and decorate; Boki nap here too. Its door needs open ground."},
 	"crop_patch": {"name": "Crop patch", "cat": "Buildings", "gems": 30, "size": [5, 4], "fixture": "farm", "max": 0,
-		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself."},
+		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself and grows 25% faster."},
 	"cook_pot": {"name": "Cooking pot", "cat": "Buildings", "gems": 20, "block": true, "fixture": "pot", "max": 1,
 		"desc": "Cook what you grow into treats for your Boki."},
 	"market_stall": {"name": "Market stall", "cat": "Buildings", "gems": 30, "size": [3, 2], "block": true, "fixture": "stall", "max": 1,
@@ -168,6 +187,8 @@ static func new_fs(d: Dictionary, seed := -1) -> Dictionary:
 static func fixtures(d: Dictionary, fx: String) -> Array:
 	var id := String(FIXTURES.get(fx, ""))
 	var out: Array = []
+	if HubLayout.holds(of(d), id):
+		return out      # the hub's, not the start zone's
 	for e in of(d).get("deco", []):
 		if String(e.get("id", "")) == id and not FarmSites.is_site(e): out.append(e)
 	out.sort_custom(func(a, b): return int(a["u"]) < int(b["u"]))
@@ -241,9 +262,14 @@ static func ensure(d: Dictionary) -> Dictionary:
 			(L["b"] as Dictionary).erase(b)
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
-	return L
+		FarmSites.clean(be)
+	FarmLots.migrate(d, L)
+	SnackPatch.grant(d)
+	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:
+	if not ZoneLayout.live.is_empty() and is_same(d, Save.d):
+		return ZoneLayout.live        # a built zone's Home is open: its island stands in for the save's
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 
@@ -306,6 +332,8 @@ static func cells_of(rc: Array) -> Array:
 
 # ------------------------------------------------------------------ decorations
 static func size_of(id: String, r: int) -> Vector2i:
+	if Data.BUILDINGS.has(id):
+		return turned(base_size(id), r)
 	var s: Array = CATALOG.get(id, {}).get("size", [1, 1])
 	return turned(Vector2i(int(s[0]), int(s[1])), r)
 
@@ -321,6 +349,10 @@ static func deco_center(e: Dictionary) -> Vector3:
 
 static func blocks(id: String) -> bool:
 	return bool(CATALOG.get(id, {}).get("block", false))
+
+## How high you stand on top of a placed block (m): "top" for a low one, else CLIMB_TOP.
+static func top_of(id: String) -> float:
+	return float(CATALOG.get(id, {}).get("top", CLIMB_TOP))
 
 ## [gems, scrap, wood, stone] for n of a catalog item.
 static func price(id: String, n := 1) -> Array:
@@ -345,6 +377,7 @@ static func lobe(level: int) -> Array:
 ## the save's size. The original island's shape is untouched, so nothing that stood on it falls off.
 ## sk: a farm-start island's size scale (its layout's "sk"); 0 for the classic and procedural meadows.
 static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
+	world.scatter_chunk = 1024      # the camera sees the whole home at once: one scatter batch per kind
 	# a farm-start island keeps only a small fixed heart round the portal: the rest is its own shape
 	var defs: Array = [["main", CORE_C, CORE_R] if sk <= 0.0 else ["main", FS_CORE_C, FS_CORE_R]]
 	for k in Data.ISLES:
@@ -710,7 +743,8 @@ static func fs_plan(seed: int, sk: float) -> Array:
 					p += dir
 				f["what"] = "water"
 			"cliff":
-				# a curved ridge of bare rock, two tiles thick: it stays (you walk round it)
+				# a curved grassy ridge two terraces high (1.6 m), two tiles thick: variety in the meadow. You jump
+				# up onto it, a Boki walks round it, and Clear the wild levels it (HomeBuild._apply_wild)
 				var dir := Vector2.from_angle(r.randf() * TAU)
 				var p := at - dir * 4.0
 				var bend := r.randf_range(-0.16, 0.16)

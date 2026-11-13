@@ -103,7 +103,7 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 	var hand: Vector3 = at + Vector3(0, 1.0, 0) + d3 * 0.6
 	var hot := col.lerp(Color.WHITE, 0.35)
 	# every cast: a ring at the caster's feet in the ability's colour, so you see who cast it
-	if not delivery in ["launch", "trap", "wall"]:
+	if not delivery in ["leap", "launch", "dash", "trap", "wall"]:
 		fx.ring((caster as Ent).pos if caster is Ent else at, 1.25, Color(col, 0.85), 0.22)
 	match delivery:
 		"rail", "beam":
@@ -122,7 +122,6 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 			fx.spark(hand, d3, hot, 9, 10.0, 18.0, 0.16, 0.0, 1.1)
 		"leap", "launch", "dash":
 			fx.dust(at, 12)
-			fx.ring(at, 1.8, Color(col, 0.8), 0.25)
 			fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, 10, 7.0, 60.0, 0.25, 10.0, 1.0)
 		"wall", "summon":
 			fx.flash(at + Vector3(0, 1.0, 0), hot, 1.0, 0.14)

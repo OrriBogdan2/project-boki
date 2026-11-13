@@ -3,13 +3,14 @@ extends RefCounted
 ## same drivers the other checks use (nothing is jumped over by setting save flags):
 ##   prologue (held to skip) -> hatch (card, look, egg pick, knocks, the Boki's look, naming) -> the first
 ##   Relic -> the tutorial match (TutorialDrive) -> results -> the farm (its tutorial walked step by step)
-##   -> Hob's second Relic -> the first expedition, played to the skiff.
+##   -> Hob's second Relic -> the first expedition, played out through the Ways Out Uplink.
 ## Also the skip paths: "Skip the tutorial" on the naming card, and skipping the farm tutorial.
 ## Every wait has a limit: a step that does not move on in time is a stall and fails the check. Each stage
 ## prints how long it took. Never touches the real save.
 
-const STALL_S := 60.0      # s a screen may take to offer its next step before it counts as stalled
-const PREMATCH_STALL_S := 120.0      # s the pre-match countdown may take
+const STALL_S := 60.0      # s of game time a screen may take to offer its next step before it is a stall
+const PREMATCH_STALL_S := 120.0      # s of game time the pre-match countdown may take
+const WALL_FACTOR := 12.0      # real s allowed per s of game time (a loaded box runs ~7x slow; a freeze fails)
 const EXPEDITION_SEED := 4242      # a fixed map and drop, so the driver's landing is the same every run
 const DROP_S := 90.0      # s of game time the opening drop may take
 const SIM_STALL_S := 45.0      # s of game time one tutorial step may take (as --tutorial-hud-check)
@@ -55,15 +56,19 @@ func _end() -> void:
 		timings.append("%s %.1f" % [stage_name, (Time.get_ticks_msec() - stage_start) / 1000.0])
 	stage_name = ""
 
-## Waits for `cond` (frames at a time) up to `secs`; a miss is a stall.
+## Waits for `cond` (frames at a time) up to `secs` of GAME time (the frame deltas the game itself ran on, so a
+## loaded box that caps the sim's frame step is not a stall); a real freeze still ends at WALL_FACTOR x `secs`
+## of real time. A miss is a stall.
 func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
 	var t0 := Time.get_ticks_msec()
-	while not cond.call() and Time.get_ticks_msec() - t0 < int(secs * 1000.0):
+	var game_s := 0.0
+	while not cond.call() and game_s < secs and Time.get_ticks_msec() - t0 < int(secs * WALL_FACTOR * 1000.0):
 		await tree.process_frame
+		game_s += tree.root.get_process_delta_time()
 	var got: bool = cond.call()
 	if not got:
 		print("NPF STALLED in '%s' on screen %s" % [stage_name, main.current])
-	ok(got, "%s (%.1f s)" % [what, (Time.get_ticks_msec() - t0) / 1000.0])
+	ok(got, "%s (%.1f s, %.1f s of game time)" % [what, (Time.get_ticks_msec() - t0) / 1000.0, game_s])
 	if not got:
 		_end()
 		print("NPF TIMES (s): " + ", ".join(timings))
@@ -151,8 +156,8 @@ func _hatch() -> void:
 		return rv != null and rv.met, "the new Boki meets you")
 	(_child_of(hx, "KinReveal") as KinReveal).name_btn.pressed.emit()
 	await _wait(func(): return hx.stage == "name", "then it can be named")
-	ok(_button(hx, "Skip the tutorial") != null, "the naming card offers 'Skip the tutorial' as well")
-	_press(hx, "Head out together")
+	ok(_button(hx, "Tend the garden") != null, "the naming card offers 'Tend the garden' beside 'Learn to fight'")
+	_press(hx, "Learn to fight")
 	await _relic(hx)
 
 ## Vex's card on the starter pick (HobOffer), or null before it shows.
@@ -177,9 +182,13 @@ func _relic(hx) -> void:
 	moment.go_button.pressed.emit()
 
 # ------------------------------------------------------------------ 3. the tutorial match
+## Called after every course step of the driven tutorial match (a subclass measures it; here nothing).
+func _course_tick(_m: Match) -> void:
+	pass
+
 func _tutorial_match():
 	_begin("tutorial match: load")
-	await _wait(_match_running, "'Head out together' opens the tutorial match")
+	await _wait(_match_running, "'Learn to fight' opens the tutorial match")
 	var m: Match = main.current
 	m.set_process(false)
 	ok(bool(m.opts.get("tutorial", false)), "it is the tutorial course")
@@ -191,6 +200,7 @@ func _tutorial_match():
 	while t < COURSE_S and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
+		_course_tick(m)
 		t += Match.DT
 		step_t += Match.DT
 		if m.tut.step != last:
@@ -300,13 +310,13 @@ func _first_expedition(home) -> void:
 	var worn := Arch.of_save()
 	ok(m.player.ak != null and m.player.ak.id == worn, "you play as the Relic you chose (%s)" % worn)
 	_begin("first expedition: play")
-	await _skiff(m)
+	await _ways_out(m)
 
 ## The stick direction from the hunter to a spot on the ground.
 func _toward(p: Hunter, at: Vector3) -> Vector2:
 	return Vector2(at.x - p.pos.x, at.z - p.pos.z).normalized()
 
-func _skiff(m: Match) -> void:
+func _ways_out(m: Match) -> void:
 	var P: Hunter = m.player
 	for mb in m.mobs:
 		mb.queue_free()
@@ -322,27 +332,31 @@ func _skiff(m: Match) -> void:
 	P.inp["move"] = Vector2.ZERO
 	var landed: bool = P.grounded and not P.riding and not P.dropping
 	ok(landed, "jumping off the ship ends with you on your feet (%.0f s)" % fall_t)
-	var docks := m.exits.of_kind("dock")
-	ok(not docks.is_empty(), "there is a skiff to take")
-	var d: Dictionary = docks[0]
-	P.max_hp = 5000.0      # the driver stands at the dock while rivals and the wave come: the exit is what is tested
+	var x: Dictionary = m.exits.uplink_x()
+	ok(not x.is_empty() and m.exits.seats != null, "there is an Uplink to take out (the Ways Out seat)")
+	P.max_hp = 5000.0      # the driver stands in the yard while rivals and the wave come: the exit is what is tested
 	P.hp = P.max_hp
-	while m.time < float(d["open_at"]) + 1.0 and not P.out:
-		P.teleport(d["pos"] + Vector3(0.3, 0, 0.3))
-		P.hp = P.max_hp
-		m.step(Match.DT)
-	ok(not P.out and d["state"] == "idle", "the skiff opens at %.0f s" % float(d["open_at"]))
+	m.time = float(x["open_at"]) + 1.0      # (the seat opens at 6:00: the drop and the walk are not what this tests)
+	P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
 	for i in int(2.5 / Match.DT):
 		P.inp["interact"] = true
 		m.step(Match.DT)
 	P.inp["interact"] = false
-	ok(d["state"] == "called", "holding interact at the dock calls it")
+	ok(x["state"] == "charging" and int(x["team"]) == P.team, "holding interact at the console starts the uplink")
 	var t0 := m.time
-	while d["state"] in ["called", "boarding"] and m.time - t0 < 120.0:
-		P.teleport(d["berth"])
+	while x["state"] == "charging" and m.time - t0 < 120.0:
+		P.teleport(x["pos"] + Vector3(0.6, 0, 0.6))
+		P.hp = P.max_hp
+		for h in m.hunters:
+			if h.team != P.team and m.exits.in_yard(x, h):
+				h.teleport(m.world.random_ground())      # a rival in the yard stalls the charge past the seat's window
+		m.step(Match.DT)
+	ok(x["state"] == "open", "holding the yard charges it and opens the lift (%.0f s)" % (m.time - t0))
+	while not P.extracted and m.time - t0 < 150.0:
+		P.teleport(x["pos"])
 		P.hp = P.max_hp
 		m.step(Match.DT)
-	ok(P.extracted, "the skiff takes you out (%.0f s of play)" % (m.time - t0))
+	ok(P.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
 	_press(main.current, "Back to the farm")
@@ -361,13 +375,12 @@ func _skip_paths() -> void:
 	hx.chosen = 0
 	hx.stage = "name"
 	hx._show_name()
-	_press(hx, "Skip the tutorial")
-	await _relic(hx)
+	_press(hx, "Tend the garden")
 	_begin("skip paths: farm")
-	await _wait(func(): return _is_screen("home.gd"), "'Skip the tutorial' goes straight to the farm")
+	await _wait(func(): return _is_screen("home.gd"), "'Tend the garden' goes straight to the farm, no Relic first")
 	var home = main.current
 	await _wait(func(): return home.panel_host != null, "the farm builds")
-	home._close_panel()
+	ok(ClassUnlock.needs_starters(), "the Relic pick waits")
 	var tut: Dictionary = Save.d["tutorial"]
 	ok(bool(tut.get("match", false)) and int(Save.d.get("matches", 0)) == 0, "the match tutorial is done, not played")
 	ok(FarmTutorial.active(), "the farm tutorial still starts")
@@ -379,4 +392,17 @@ func _skip_paths() -> void:
 	ok(not FarmTutorial.active() and FarmSites.is_site(FarmHob.house_entry()), "skipping leaves the house to build")
 	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "and the axe and the pickaxe")
 	ok(int(Save.d["gems"]) >= gems, "nothing was taken")
+	await _portal_relic(home)
 	_end()
+
+## The garden path's first Relic: the first portal use asks for it, it is put on, then the expedition opens.
+func _portal_relic(home) -> void:
+	home._open_expedition()
+	ok(home.panel_open == FirstRelic.PANEL, "the first portal use offers the Relic pick, not the expedition")
+	var cards: Array = home.panel_host.find_children("*", "PanelContainer", true, false).filter(
+			func(c): return c.has_meta("mask_card"))
+	ok(cards.size() == 3, "three Relics to pick from")
+	cards[2].mouse_entered.emit()
+	_press(home.panel_host, "Take Vex")
+	ok(Save.d.get("arch", "") == "gunslinger" and not ClassUnlock.needs_starters(), "Vex is picked and worn")
+	await _wait(func(): return home.panel_open == "Expedition", "the put-on ends on the expedition panel")

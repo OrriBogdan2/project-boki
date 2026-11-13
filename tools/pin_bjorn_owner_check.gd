@@ -471,6 +471,13 @@ func _throws_in(m: Match, P: Hunter, K: BulwarkKit, secs: float) -> int:
 		prev = press
 	P.inp["fire"] = false
 	step(m, 1.0)
+	if not K.mace.is_empty():
+		# called home: a planted hammer would turn the next hold's first press into a 0.3 s recall
+		P.fire_cd = 0.0
+		P.inp["fire"] = true
+		m.step(DT)
+		P.inp["fire"] = false
+		step(m, 0.5)
 	return K.throws - t0 if prev or true else 0
 
 ## #29: the raised aegis pushes foes back and shows it, is bigger and plated.
@@ -673,7 +680,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var loosed0 := K.draw.loosed_at
 	P.do_dash()
 	var rolling := P.roll_t > 0.0
-	for i in 3:
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
 	step(m, 0.8, _let_go.bind(P))
