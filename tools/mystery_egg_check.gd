@@ -3,15 +3,17 @@ extends RefCounted
 ## Its pool is many early wild species (rares included, drawn less often than commons, never a starter
 ## or a boss kin), it hatches with a mutation far more often than an egg at base odds while the
 ## starter eggs roll none, and in the scene the three starters stand front and centre while the black
-## egg sits in its basket at the back, its card showing only once you've found it. Never touches the
-## real save.
+## egg sits in its basket at the back: hovering it shows a small hint and a glow that are gone soon
+## after you leave, and its card shows only once it's picked. Never touches the real save.
 
 const HATCH := preload("res://scripts/ui/hatch.gd")
 const DRAWS := 30000
 const ROLLS := 20000
 const EGGS := 1000     # one thousand eggs rolled with fixed seeds
+const LEAVE_GONE := 0.3     # s: a hover hint must be gone this soon after the pointer leaves
 
 var bad := 0
+var main_vp: Viewport
 
 func ok(cond: bool, what: String) -> void:
 	print("MYSTERYEGG %s %s" % ["ok  " if cond else "FAIL", what])
@@ -19,6 +21,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	main_vp = main.get_viewport()
 	_pool()
 	_mutations()
 	_thousand_eggs()
@@ -114,9 +117,30 @@ func _scene(main: Node) -> void:
 	var in_basket := holder.get_children().any(func(c): return c is MysteryEgg)
 	ok(in_basket and egg.kind == "mystery", "it's the mystery egg (void shell, a cracked \"?\") in a basket")
 	ok(_cards(hx) == 3, "its card is hidden until you find it (%d cards)" % _cards(hx))
+	hx.cam.position = hx.cam_to      # (the camera settled, so the egg holds still under the pointer)
+	await tree.process_frame
+	await _hover(hx, m)
+	var hint: Label = hx.egg_hover.hint
+	var shown := hint.visible and hint.modulate.a > 0.99 and _cards(hx) == 3
+	ok(shown, "hovering it shows only a small hint over it (alpha %.2f, %d cards)" % [hint.modulate.a, _cards(hx)])
+	var lit: float = egg.shell_mat.get_shader_parameter("rim_amount")
+	ok(lit > EggHatch.REST_RIM + 1.0, "and its rim glows (rim %.2f)" % lit)
+	_mouse_to(Vector2(4, 4))
+	await tree.create_timer(LEAVE_GONE).timeout
+	var rest: float = egg.shell_mat.get_shader_parameter("rim_amount")
+	var gone := not hint.visible and _cards(hx) == 3 and is_equal_approx(rest, EggHatch.REST_RIM)
+	var why := "hint %s, %d cards" % [hint.visible, _cards(hx)]
+	ok(gone, "leaving it, the hint and glow are gone within %.1f s (%s)" % [LEAVE_GONE, why])
+	await _hover(hx, m)
+	hx._pick(m)
+	await tree.create_timer(LEAVE_GONE).timeout
+	ok(_cards(hx) == 4 and hx.chosen == m, "clicking the black egg picks it and shows its card")
+	ok(not hint.visible, "once it's picked its card replaces the hint")
 	hx._pick(m)
 	await tree.process_frame
-	ok(_cards(hx) == 4 and hx.chosen == m, "clicking the black egg picks it and shows its card")
+	var calm: float = egg.shell_mat.get_shader_parameter("rim_amount")
+	var left_over := is_instance_valid(hint) and not hint.is_queued_for_deletion()
+	ok(not left_over and is_equal_approx(calm, EggHatch.REST_RIM), "hatching it leaves no hint or glow behind")
 	hx.egg_defs[m]["rec"]["mutations"] = ["giant"]
 	hx.kin_node = Models.kin(hx.egg_defs[m]["species"], {"level": 1})
 	hx.add_child(hx.kin_node)
@@ -124,6 +148,18 @@ func _scene(main: Node) -> void:
 	ok(Mutations.of(Save.d["roster"][0]) == ["giant"], "the hatchling keeps the mutation it was born with")
 	hx.queue_free()
 	await tree.process_frame
+
+## The pointer over egg `i` for a while (long enough for its hint to fade fully in).
+func _hover(hx, i: int) -> void:
+	var at: Vector3 = (hx.eggs[i]["holder"] as Node3D).global_position + Vector3(0, 0.45, 0)
+	_mouse_to(hx.cam.unproject_position(at))
+	await hx.get_tree().create_timer(LEAVE_GONE).timeout
+
+func _mouse_to(p: Vector2) -> void:
+	var e := InputEventMouseMotion.new()
+	e.position = main_vp.get_screen_transform() * p      # (input arrives in window pixels)
+	e.global_position = e.position
+	Input.parse_input_event(e)
 
 ## The egg cards in the pick row (the last thing in the bottom box).
 func _cards(hx) -> int:
