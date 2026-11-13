@@ -427,7 +427,9 @@ def gen_boki():
     for sid, ln in ev.get("lines", {}).items():
         for o in ln.get("into", []):
             how = (o["item"].replace("ink_", "").title() + " Ink") if o.get("item") else ("trade" if o.get("trade") else "level %s" % ln.get("level"))
-            rows.append([nm(sid), nm(o["id"]), how, o.get("path", "").title()])
+            path = o.get("path", "")      # one affinity, or a list of them (either leads)
+            branch = " or ".join(p.title() for p in path) if isinstance(path, list) else path.title()
+            rows.append([nm(sid), nm(o["id"]), how, branch])
     b += table(["Boki", "Evolves into", "When", "Branch"], rows)
     b += "\n\n## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
     rows = []
