@@ -155,6 +155,18 @@ const T := {
 	"ledge_fling_timed_up_m":  [">=", 0.7, "m", "[est] ...and it goes higher than topping out with no jump"],
 	"ledge_fling_gain":        [">=", 1.5, "x", "[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
 	"ledge_window_s":          [">=", 0.08, "s", "[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
+	# three ledge heights x walk / jump / glide (docs/MOVEMENT_FEEL.md "Ledge mantle timing"): the rise from
+	# the catch to the top, and the speed over the lip against the source's floor
+	"ledge_jump_1.6_t":        ["<=", 0.35, "s", "[footage] rim to top ~0.2s; two terraces from a running jump"],
+	"ledge_jump_2.4_t":        ["<=", 0.35, "s", "[footage] rim to top ~0.2s; three terraces from a running jump"],
+	"ledge_glide_1.6_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; two terraces from a glide"],
+	"ledge_glide_2.4_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; three terraces from a glide"],
+	"ledge_glide_3.2_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; four terraces from a glide"],
+	"ledge_jump_1.6_keep":     [">=", 1.0, "x", "[game data] over the lip at least max(0.6x the approach, 3.5 m/s): MiniMantleXYSpeedTarget"],
+	"ledge_jump_2.4_keep":     [">=", 1.0, "x", "[game data] the same floor, three terraces from a running jump"],
+	"ledge_glide_1.6_keep":    [">=", 1.0, "x", "[game data] the same floor, two terraces from a glide"],
+	"ledge_glide_2.4_keep":    [">=", 1.0, "x", "[game data] the same floor, three terraces from a glide"],
+	"ledge_glide_3.2_keep":    [">=", 1.0, "x", "[game data] the same floor, four terraces from a glide"],
 	"updraft_rise_t":          ["<=", 0.30, "s", "[est] updrafts feel powerful: 8 m/s climb within 0.3s"],
 	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
 	"drop_dive_steer_t":       ["<=", 0.42, "s", "one air model, DECISIONS 11-08: 90% of 14 m/s in 0.39 s + a step"],
@@ -292,6 +304,7 @@ func run(main: Node) -> void:
 	_feather()
 	_ledge()
 	_glide_wall()
+	_ledge_matrix()
 	_drop()
 	_landing()
 	_camera()
@@ -1324,18 +1337,8 @@ func _ledge() -> void:
 		print("MFEEL (no ledge rise on this build)")
 		return
 	var wl := _wall2()
-	var carved := []      # [index, old level] to put back afterwards (later sections use the flat spot)
 	if wl.is_empty():
-		# carve one beside the flat test spot: a 5x3 block two terraces high, 3m east of it
-		var x0 := int(floor(flat.x)); var z0 := int(floor(flat.z))
-		var lv := int(w.level[w.idx(x0, z0)])
-		for dz in range(-2, 3):
-			for dx in range(3, 6):
-				var ci := w.idx(x0 + dx, z0 + dz)
-				carved.append([ci, w.level[ci]])
-				w.level[ci] = lv + 2
-		var face := Vector2(x0 + 3.0, z0 + 0.5)
-		wl = {"at": face - Vector2(1, 0) * (P.r + 0.6), "n": Vector2(1, 0), "low": lv * World.LEVEL, "top": (lv + 2) * World.LEVEL}
+		wl = _carve_wall(2)
 	var n: Vector2 = wl["n"]
 	var top: float = wl["top"]
 	var out := {}
@@ -1372,8 +1375,85 @@ func _ledge() -> void:
 	rec("ledge_fling_gain", out["timed"]["dist"] / maxf(0.1, out["none"]["dist"]))
 	rec("ledge_window_s", out["none"]["win"])
 	print("MFEEL ledge: no jump +%.2fm then %.2fm on; early jump +%.2fm %.2fm; timed +%.2fm %.2fm" % [out["none"]["peak"], out["none"]["dist"], out["early"]["peak"], out["early"]["dist"], out["timed"]["peak"], out["timed"]["dist"]])
-	for cv in carved:
+	_uncarve(wl)
+
+## Carves a straight wall `terraces` high beside the flat test spot: a 5x3 block 3m east of it, with
+## the spot's level ground in front. The wall (face point, normal, low and top heights) and the tiles
+## to put back (_uncarve: later sections use the flat spot).
+func _carve_wall(terraces: int) -> Dictionary:
+	var x0 := int(floor(flat.x)); var z0 := int(floor(flat.z))
+	var lv := int(w.level[w.idx(x0, z0)])
+	var carved := []
+	for dz in range(-2, 3):
+		for dx in range(3, 6):
+			var ci := w.idx(x0 + dx, z0 + dz)
+			carved.append([ci, w.level[ci]])
+			w.level[ci] = lv + terraces
+	var face := Vector2(x0 + 3.0, z0 + 0.5)
+	return {"at": face - Vector2(1, 0) * (P.r + 0.6), "n": Vector2(1, 0), "low": lv * World.LEVEL,
+		"top": (lv + terraces) * World.LEVEL, "carved": carved}
+
+func _uncarve(wl: Dictionary) -> void:
+	for cv in wl.get("carved", []):
 		w.level[int(cv[0])] = cv[1]
+
+## Two, three and four terraces (1.6, 2.4, 3.2m; one is a walk-up ramp, LAYOUT_RULES) x walk / jump /
+## glide, keys into the face: a walk never climbs (as in the source: jump, and you mantle at the top), a running
+## jump tops two and three but never four (the wall tier), a glide tops all three. Caught ledges rise
+## in the footage's time and send you over the lip at the source's speed floor.
+func _ledge_matrix() -> void:
+	for terraces in [2, 3, 4]:
+		var wl := _carve_wall(terraces)
+		var h: float = float(wl["top"]) - float(wl["low"])
+		for mode in ["walk", "jump", "glide"]:
+			var r := _ledge_run(wl, mode)
+			var tag := "ledge_%s_%.1f" % [mode, h]
+			var expect: bool = mode == "glide" or (mode == "jump" and terraces < 4)
+			ok(bool(r["top"]) == expect, "%s %s the top" % [tag, "reaches" if expect else "never reaches"])
+			if expect and bool(r["top"]):
+				rec(tag + "_t", r["t"])
+				var floor_v := maxf(float(r["v_in"]) * HunterMove.mantle_launch_keep, HunterMove.mantle_launch_min)
+				rec(tag + "_keep", float(r["v_out"]) / floor_v)
+			print("MFEEL ledge %.1fm %-5s: %s, in %.2f m/s, catch to top %.3fs, over the lip %.2f m/s" % [
+				h, mode, "top" if r["top"] else "no", r["v_in"], r["t"], r["v_out"]])
+		_uncarve(wl)
+
+## One approach at the carved wall: whether you reach its top, the time from the catch to the top,
+## and the horizontal speed you came in with and leave the lip with.
+func _ledge_run(wl: Dictionary, mode: String) -> Dictionary:
+	var n: Vector2 = wl["n"]
+	var at: Vector2 = wl["at"]
+	var top: float = wl["top"]
+	if mode == "glide":
+		# gliding in 3m back, aimed at the face's upper half (the sink takes a little off on the way)
+		var st := at - n * 3.0
+		_reset(Vector3(st.x, top - 0.3 + 0.6 * Hunter.GLIDE_SINK, st.y), false)
+		P.last_gy = wl["low"]
+		P.gliding = true
+		P.vel = Vector3(n.x, 0.0, n.y) * Hunter.GLIDE_SPEED
+	else:
+		# running in from half a metre back (a jump at the face from a standstill catches it too, at ~2 m/s)
+		var st := at - n * 0.5
+		_reset(Vector3(st.x, wl["low"], st.y))
+		P.vel = Vector3(n.x, 0.0, n.y) * P.base_speed
+	var out := {"top": false, "t": 0.0, "v_in": 0.0, "v_out": 0.0}
+	var rising := 0
+	for i in 150:
+		P.inp["move"] = n
+		P.inp["glide"] = mode == "glide"
+		P.inp["glide_btn"] = mode == "glide"
+		P.inp["jump"] = mode == "jump" and i == 2
+		m.step(DT)
+		if P.call("mantling"):
+			if rising == 0: out["v_in"] = float(P.get("lfloat").get("v_in", 0.0))
+			rising += 1
+		elif rising > 0 and float(out["v_out"]) == 0.0:
+			out["v_out"] = _hv(P).length()
+		if rising > 0 and float(out["t"]) == 0.0 and P.pos.y >= top: out["t"] = rising * DT
+		if P.grounded and P.pos.y >= top - 0.05:
+			out["top"] = true
+			break
+	return out
 
 # ---------------------------------------------------------------- the opening drop
 # ---------------------------------------------------------------- glider on a wall
