@@ -1768,7 +1768,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
 			if lv >= 0:
 				_armor_up(credit)
