@@ -5,7 +5,7 @@ extends "res://tools/vv_shots.gd"
 
 const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["rmb", "rocks", "dash", "spine", "climb", "glide"]
+const PARTS := ["lmb", "rmb", "rocks", "dash", "spine", "climb", "glide"]
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -73,6 +73,40 @@ func _save_strip(file: String) -> void:
 		var at := Vector2i((i % GRID_COLS) * (w + 4), (i / GRID_COLS) * (hh + 4))
 		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
 	out.save_png(dir.path_join(file))
+
+## The boulder's burst and the punch's blow, each shot on the frames after the dummy is first hurt.
+func _breah_lmb() -> void:
+	Sfx.listener = P.pos          # (the rig has no listening camera; HeroVfx draws nothing far from it)
+	await _reset(7.0)
+	_aim(T.pos)
+	var tap := func(t: float):
+		P.inp["fire"] = t < 0.06
+		_after_hit("lmb_boulder", "Boulder (LMB tap)")
+	await _go(0.8, tap)
+	await _reset(2.4)
+	_aim(T.pos)
+	var hold := func(t: float):
+		P.inp["fire"] = t < 0.95
+		_after_hit("lmb_punch", "Punch (LMB hold, release)")
+	await _go(1.5, hold)
+	P.inp["fire"] = false
+
+var _hit_frame := -1
+var _frames := 0
+
+## A close-up on the target 1, 3 and 6 frames after it is first hurt (the hit flash, then its debris).
+func _after_hit(file: String, what: String) -> void:
+	_frames += 1
+	if _hit_frame < 0 and T.hp < T.max_hp:
+		_hit_frame = _frames
+	if _hit_frame < 0:
+		return
+	for n in [1, 3, 6]:
+		if _frames - _hit_frame == n:
+			_take("full", "%s_%d" % [file, n], "%s, %d frames after the hit" % [what, n], _on_target)
+	if _frames - _hit_frame >= 6:
+		_hit_frame = -1
+		T.hp = T.max_hp
 
 ## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 func _breah_rmb() -> void:
