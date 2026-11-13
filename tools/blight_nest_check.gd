@@ -131,6 +131,15 @@ func _none_outside(main: Node) -> void:
 	for h in m.hunters:
 		h.ctrl = "bot"
 	m.player.ctrl = "bot"
+	m.player.ai = m.bot_brain.new_mind(m.rng, 0.7)  # a human has no mind until a bot takes over
+	# bots no longer wander to nests on their own: start one close to the first nest it can stand beside
+	for c in bl.nests.list:
+		var stand := _beside(m, c, 12.0)
+		if stand != Vector3.INF:
+			m.player.max_hp = 400.0
+			m.player.hp = 400.0
+			m.player.teleport(stand)
+			break
 	var seen := {}
 	var c := {"stray": 0, "far": 0.0}  # (lambdas capture locals by value: count in a dictionary)
 	var watch := func():
@@ -241,16 +250,16 @@ func _cycle(main: Node) -> void:
 	_run(m, 3.0, func(): pl.teleport(stand))
 	ok(nst.released == sk1 and _skitters(m).is_empty(), "standing by an empty nest for %.0fs: quiet" % (left - 2.0))
 	# break it: gems, XP to the squad close by, the feed line
-	var gems0 := m.pickups.filter(func(p): return p["kind"] == "gem").size()
+	var gems0 := _gem_total(m)
 	pl.lvl = 1  # (the 9999-damage kills above maxed the level; gain_xp stops at the top)
 	pl.xp = 0.0
 	var xp0 := pl.xp
 	nest.hurt(nest.hp + 1.0, pl, {})
 	m.step(Match.DT)
-	var gems1 := m.pickups.filter(func(p): return p["kind"] == "gem").size()
+	var gems1 := _gem_total(m)
 	print(
 		(
-			"NESTS broke a nest: +%d gem piles (%d gems), +%.0f XP, refill in %.0fs"
+			"NESTS broke a nest: +%d gems (mob table: %d), +%.0f XP, refill in %.0fs"
 			% [gems1 - gems0, int(Data.MOBS["bl_nest"]["gems"]), pl.xp - xp0, nst.refill_left(n)]
 		)
 	)
@@ -416,3 +425,12 @@ func _net_and_boss(main: Node) -> void:
 func _standing(n: Dictionary) -> bool:
 	var b = n["mob"]
 	return b is Blight and not b.dead and b.flat_dist(n["pos"]) < 0.5
+
+
+## Gems lying on the ground; DropMerge piles a new drop onto a pile within 3 m, so count the value, not the piles.
+func _gem_total(m: Match) -> int:
+	var total := 0
+	for p in m.pickups:
+		if p["kind"] == "gem":
+			total += int(p["v"])
+	return total
