@@ -20,6 +20,8 @@ const CHECKS := {
 	"--lair-fall-check": ["res://tools/lair_fall_check.gd", "lair_fall_check", null],      # no lair "you fell"
 	"--pacing-sim": ["res://tools/pacing_sim.gd", "pacing_sim", null],      # real-paced bot expedition clock
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
+	"--friendly-bodies-check": ["res://tools/friendly_bodies_check.gd", "friendly_bodies_check", null],
+	"--friendly-bodies-shots": ["res://tools/friendly_bodies_shots.gd", "friendly_bodies_shots", null],
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],      # XP bar, level-up moment
