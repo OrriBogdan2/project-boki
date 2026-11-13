@@ -21,10 +21,11 @@ shown twice in a row. Then comes a short **planning phase**: the full map is up 
 where they want to land (bots ping too). Then the skyship crosses the map with your squad on deck,
 its engines droning and its shadow sweeping over the islands below.
 
-- Your squad has a **drop leader**. The leader jumps and the rest of the squad follows in formation.
-  **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
-- After jumping you glide down; a ring on the ground shows where you'd land. Anyone still aboard at
-  the far side is dropped.
+- Your squad has a **drop leader**. The leader launches the squad's **mini rocket** and steers it down;
+  everyone else rides along, and a ring on the ground shows where it will hit. Do nothing and the
+  squad lands together. **P** passes the lead to a squadmate riding with you (or click a name on the map).
+- **Jump** jumps out of the rocket early: you free-fall (slower than the rocket) and **Jump** again opens
+  your glider to travel further. Anyone still aboard the ship at the far side is launched.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around
@@ -67,7 +68,7 @@ heartbeat and a warning near the end. There's room to recover:
   Walls cast sight shadows, teammates share what they see, tall grass hides you, and firing or getting
   hit gives you away for a moment. Sneaking (Ctrl) slows you, steadies your aim and keeps you hidden
   until rivals are close. Red arcs round the middle of the screen point at whoever is hitting you.
-- **Levels.** You start at level 1. XP comes from fighting; each level is a skill point. Your ultimate
+- **Levels.** You start at level 1. XP comes from knocking rivals down and from lair bosses, not from time or damage (damage to Hunters only builds your armour); each level is a skill point. Your ultimate
   opens at level 6. Some chests and events offer **run perks** (pick one of three with 1-3).
 - **Stagger.** Big monsters open short purple-ring windows while winding up a slam. Hit one with an
   ability (not a plain shot) in that window: a big hit, a long stun, extra damage the whole time, and
@@ -123,7 +124,8 @@ rolls which lairs are live (the rest lie dormant).
   - **Stormcoil, the Sky Serpent:** telegraphed lunges, lightning circles, a coiled discharge.
   - **The Brood Mother:** acid spit and puddles, egg sacs that hatch adds, burrowing.
 - **After.** The gate stays shut for 15 seconds unless someone inside pulls the lever by it, and an
-  updraft at the back carries the winners over the wall to glide out another way.
+  updraft at the back carries the winners over the wall to glide out another way. It sets you down on the
+  roomiest open ground outside, so a dash out of the ride still lands on the island.
 - **The Rare Egg** shows on everyone's minimap for a few seconds. It takes a backpack slot, stays in
   your deathbox if you fall, and hatches at home in the Incubator: Cairnback (Colossus), Zephyrak
   (Stormcoil) or Hivara (Brood Mother).

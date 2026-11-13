@@ -33,7 +33,7 @@ static func tick(m: Match, s: Dictionary, dt: float) -> void:
 	if m.player and m.player.riding and is_same(m.ship_of(m.player), s) and Sfx.ensure(WIND_SFX):
 		Sfx.loop_hold("ship_wind", WIND_SFX, null, WIND_DB, WIND_PITCH)
 	for h in m.hunters:
-		if h.riding and not h.remote and is_same(m.ship_of(h), s):
+		if h.riding and h.rocket == null and not h.remote and is_same(m.ship_of(h), s):
 			hold(h)     # (the planning doesn't run the hunters' sim: the squad must stand on deck for it too)
 	_wisps(m, s, n)
 
@@ -52,9 +52,10 @@ static func hold(h: Hunter) -> void:
 	h.vel = Vector3.ZERO
 	h.grounded = true
 
-## Whether a hunter is drawn as far as the ship goes: anyone not riding, and your own squad on deck.
+## Whether a hunter is drawn as far as the ship goes: anyone not riding, anyone on a squad rocket, and
+## your own squad on deck.
 static func drawn(h: Hunter) -> bool:
-	return not h.riding or shown(h)
+	return not h.riding or h.rocket != null or shown(h)
 
 ## Whether a rider is drawn on the deck: your own squad only.
 static func shown(h: Hunter) -> bool:
@@ -67,7 +68,7 @@ static func slot(m: Match, h: Hunter) -> Vector2:
 	for o in m.hunters:
 		if o == h:
 			break
-		if o.team == h.team and o.riding and is_same(m.ship_of(o), s):
+		if o.team == h.team and o.riding and o.rocket == null and is_same(m.ship_of(o), s):
 			i += 1
 	var row := int(i / 3.0)
 	var col := i % 3
@@ -96,7 +97,7 @@ static func _wisps(m: Match, s: Dictionary, n: Node3D) -> void:
 	var have: Dictionary = s.get("wisps", {})
 	s["wisps"] = have
 	for h in m.hunters:
-		var aboard: bool = h.riding and shown(h) and h.kin is Kin and is_same(m.ship_of(h), s)
+		var aboard: bool = h.riding and h.rocket == null and shown(h) and h.kin is Kin and is_same(m.ship_of(h), s)
 		var w: Node3D = have.get(h.nid)
 		if aboard and w == null:
 			var k := h.kin as Kin

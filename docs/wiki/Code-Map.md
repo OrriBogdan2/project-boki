@@ -59,7 +59,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
 | `spawn_plan.gd` | What's live on a fixed map each match |
-| `drop_squad.gd` | Planning phase, the skyship, squad drop formation |
+| `drop_squad.gd`, `drop_rocket.gd` | Planning phase, drop leaders, the squad mini rocket |
 | `squad_intro.gd` | The squad intro on the skyship deck before the planning map |
 | `skyship_model.gd`, `sky_deck.gd` | The skyship's look; the squad, wisps, shadow and engine sound aboard |
 | `raid_look.gd` | Raid conditions: light, weather, sight |

@@ -155,6 +155,12 @@ func _process(delta: float) -> void:
 func advance(frac: float) -> void:
 	want = maxf(want, clampf(frac, 0.0, 1.0))
 
+## Move the bar to a stage (0..1) and wait until it gets there.
+func step(frac: float) -> void:
+	advance(frac)
+	while prog < want - 0.01 and is_inside_tree():
+		await get_tree().process_frame
+
 ## The match is built and drawn: the bar fills at once and the screen goes, with nothing to wait out
 ## (playtest 11-09: players were held on a full bar). The ink covers it, then sweeps off the match.
 func finish() -> void:
@@ -183,29 +189,37 @@ func _draw() -> void:
 	c.draw_texture_rect(sky_tex, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a * (SKY_TINT if splash else 1.0)))
 	# a soft shade behind the text
 	c.draw_texture_rect(shade_tex, Rect2(0, sz.y * 0.42, sz.x, sz.y * 0.58), false, Color(1, 1, 1, a))
-	# text
+	# progress and the tip card sit at the bottom; the text block above them moves up when it would reach the bar
 	var cx := sz.x * 0.5
-	var base := sz.y * 0.47
-	var kick := "GETTING READY"
-	if mode_line != "":
-		kick = "EXPEDITION  ·  " + map_name.to_upper() if map_name != "" else "EXPEDITION"
-	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.GOLD, a), 3)
-	_text(Vector2(cx, base + 62), title, UI.big, 58, Color(UI.INK, a))
-	_wrap(Vector2(cx, base + 96), sub, 17, minf(620.0, sz.x - 60.0), Color(UI.MUTED, a))
-	if mode_line != "":
-		_text(Vector2(cx, base + 176), mode_line, UI.semi, 15, Color(UI.TEAL, a))
-	if raid != "":
-		# the raid condition, shown before you drop
-		var rc: Color = RaidLook.COLORS.get(raid, UI.INK)
-		_text(Vector2(cx, base + 204), "CONDITIONS  ·  " + String(RaidLook.NAMES.get(raid, raid)).to_upper(), UI.caps, 13, Color(rc, a), 2)
-		_wrap(Vector2(cx, base + 210), String(RaidLook.BLURBS.get(raid, "")), 14, minf(560.0, sz.x - 60.0), Color(UI.MUTED, a * 0.9))
-	# progress
 	var tw_ := minf(660.0, sz.x - 60.0)
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
 	var lore_h := UI.body.get_multiline_string_size(lore, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 14, 3).y + 12.0
 	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines + lore_h), tw_, 40.0 + lines + lore_h)
 	var bw := minf(480.0, sz.x - 80.0)
 	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 6)
+	# text: the block's height from its first line, so a short window lifts it clear of the bar
+	var tw_w := minf(620.0, sz.x - 60.0)
+	var blurb := String(RaidLook.BLURBS.get(raid, "")) if raid != "" else ""
+	var blurb_w := minf(560.0, sz.x - 60.0)
+	var block := 96.0 + UI.body.get_multiline_string_size(sub, HORIZONTAL_ALIGNMENT_CENTER, tw_w, 17, 3).y
+	if mode_line != "":
+		block = maxf(block, 182.0)
+	if raid != "":
+		block = 214.0 + UI.body.get_multiline_string_size(blurb, HORIZONTAL_ALIGNMENT_CENTER, blurb_w, 14, 3).y
+	var base := minf(sz.y * 0.47, br.position.y - 44.0 - block)
+	var kick := "GETTING READY"
+	if mode_line != "":
+		kick = "EXPEDITION  ·  " + map_name.to_upper() if map_name != "" else "EXPEDITION"
+	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.GOLD, a), 3)
+	_text(Vector2(cx, base + 62), title, UI.big, 58, Color(UI.INK, a))
+	_wrap(Vector2(cx, base + 96), sub, 17, tw_w, Color(UI.MUTED, a))
+	if mode_line != "":
+		_text(Vector2(cx, base + 176), mode_line, UI.semi, 15, Color(UI.TEAL, a))
+	if raid != "":
+		# the raid condition, shown before you drop
+		var rc: Color = RaidLook.COLORS.get(raid, UI.INK)
+		_text(Vector2(cx, base + 204), "CONDITIONS  ·  " + String(RaidLook.NAMES.get(raid, raid)).to_upper(), UI.caps, 13, Color(rc, a), 2)
+		_wrap(Vector2(cx, base + 210), blurb, 14, blurb_w, Color(UI.MUTED, a * 0.9))
 	var af := snappedf(a, 0.1)
 	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
 	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
