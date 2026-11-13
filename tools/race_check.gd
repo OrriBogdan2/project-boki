@@ -225,7 +225,7 @@ func _on_base() -> void:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "first_race": true}      # (the practice lap is its own section)
 	d["layout"] = HomeLayout.fresh()      # the full stock farm, with a Training post
 	Save.d = d
 	HomeLayout.ensure(Save.d)
@@ -284,6 +284,7 @@ func _on_base() -> void:
 		ok(nodes.all(func(n: Node3D) -> bool: return not n.has_meta("kact")) \
 				and race.beats.kins.all(func(k: Dictionary) -> bool: return not k["busy"]),
 				"on: each runner is let go once its finish clips are played (%.1f s after)" % left)
+		await _practice(home)
 		await _solo(home)
 		var wall: Array = Save.d.get("showcase", [])
 		var game := String(BaseRace.twist()["game"])
@@ -395,6 +396,41 @@ func _solo(home) -> void:
 	await _lap(home, true)
 	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == 10, "solo: a worn-out Boki does not start")
 	rec["needs"]["energy"] = 90.0
+
+## The first race opens with one practice lap that ends at the first press: no race, no cost, once per save.
+func _practice(home) -> void:
+	var race: BaseRace = home.hrace
+	var rec := Save.active_kin()
+	var speed: int = rec["stats"]["speed"]
+	rec["needs"]["energy"] = 90.0
+	Save.d["tutorial"].erase("first_race")
+	race.use()
+	ok(race.run != null and race.practice and race.runners.size() == 1, "practice: the first race opens as a solo lap")
+	ok(Save.d["tutorial"].get("first_race", false), "practice: offered once per save")
+	var press := InputEventAction.new()
+	press.action = "interact"
+	press.pressed = true
+	race.input(press)
+	ok(race.run == null and not race.practice, "practice: the first cheer ends it")
+	ok(int(rec["stats"]["speed"]) == speed and float(rec["needs"]["energy"]) == 90.0, "practice: no gain, no cost")
+	race.use()
+	ok(race.run != null and not race.practice and race.runners.size() >= 2, "practice: the next time is the real race")
+	race._end(false)
+	Save.d["tutorial"].erase("first_race")
+	race.use()
+	var t := 0.0
+	while race.run != null and t < MAX_S:
+		race.tick(DT)
+		t += DT
+	ok(race.run == null and int(rec["stats"]["speed"]) == speed and race.runners.is_empty(),
+			"practice: a lap left unpressed ends, no race result")
+	Save.d["tutorial"].erase("first_race")
+	Settings.v["tips"] = false
+	race.use()
+	ok(not race.practice, "practice: tips off, no offer")
+	race._end(false)
+	Settings.v["tips"] = true
+	Save.d["tutorial"]["first_race"] = true
 
 func _drill(home) -> void:
 	if home.yard == null:
