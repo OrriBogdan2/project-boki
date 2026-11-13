@@ -174,11 +174,11 @@ func _pose_rates() -> void:
 	m.cam._apply(Vector3.ZERO)
 	var far_at := Vector3.INF
 	for i in 36:
-		var at := P.pos + Vector3(SimLod.POSE_FAR_M + 4.0, 0, 0).rotated(Vector3.UP, TAU * i / 36.0)
+		var at := P.pos + Vector3(CamRig.POSE_FAR_M + 4.0, 0, 0).rotated(Vector3.UP, TAU * i / 36.0)
 		if m.cam.on_screen(at):
 			far_at = at
 			break
-	ok(far_at != Vector3.INF, "setup: a spot past %.0f m on screen from the ride's camera" % SimLod.POSE_FAR_M)
+	ok(far_at != Vector3.INF, "setup: a spot past %.0f m on screen from the ride's camera" % CamRig.POSE_FAR_M)
 	b.ai["tgt"] = null
 	b.hurt_at = -9.0
 	b.teleport(P.pos + Vector3(4.0, 0, 0))
@@ -225,14 +225,14 @@ func _pose_rates() -> void:
 			sync = h.model.get_node("Warden/Sync")
 	ok(sync != null, "setup: a Hero model")
 	if sync:
-		sync.held_dt = 0.0
+		sync.pace.held = 0.0
 		sync.root.set_meta(WardenGlb.POSE_HELD, Engine.get_process_frames())
 		sync._process(Match.DT)
 		sync._process(Match.DT)
-		var waited := sync.held_dt
+		var waited: float = sync.pace.held
 		sync.root.set_meta(WardenGlb.POSE_HELD, -1)
 		sync._process(Match.DT)
-		ok(is_equal_approx(waited, 2.0 * Match.DT) and sync.held_dt == 0.0,
+		ok(is_equal_approx(waited, 2.0 * Match.DT) and sync.pace.held == 0.0,
 			"a Hero's clips hold with the Hunter and catch up the time")
 	m.cam.zoom = 1.0
 	m.cam.chase = 0.0

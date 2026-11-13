@@ -30,7 +30,6 @@ const THINK_FAR_K := 2.0   # how much longer such a bot waits between picking go
 const POSE_UNSEEN := 6
 const POSE_OFF_SCREEN := 3
 const POSE_FAR := 2
-static var POSE_FAR_M: float = CamRig.RULES["pose_far_m"]   # m (flat) from the focus: past it on screen is "far"
 
 static var _n := 0             # sim steps planned (staggers the bots' slots)
 static var _hit_frame := -1    # the frame _hit_squad was filled in
@@ -80,7 +79,7 @@ static func kin_dt(k: Kin, dt: float) -> float:
 
 ## Frames per pose of a Hunter's model (HunterAnim, and a Hero's clips, springs and skeleton: WardenGlb.Sync): every
 ## frame for the local player's squad and anyone in a fight with it; else POSE_UNSEEN when hidden by sight,
-## POSE_OFF_SCREEN off screen and POSE_FAR on screen past POSE_FAR_M from the focus (a small figure at the wide
+## POSE_OFF_SCREEN off screen and POSE_FAR on screen past CamRig.POSE_FAR_M from the focus (a small figure at the wide
 ## camera; at zoom 1 that is off screen). Hunter.render staggers the frames and catches up the skipped time.
 static func pose_every(m: Match, h: Hunter) -> int:
 	var me := m.player
@@ -91,7 +90,8 @@ static func pose_every(m: Match, h: Hunter) -> int:
 	if not m.cam.on_screen(h.position):
 		return POSE_OFF_SCREEN
 	var cf := m.cam.focus
-	return POSE_FAR if Vector2(h.pos.x - cf.x, h.pos.z - cf.z).length_squared() > POSE_FAR_M * POSE_FAR_M else 1
+	var far := Vector2(h.pos.x - cf.x, h.pos.z - cf.z).length_squared() > CamRig.POSE_FAR_M * CamRig.POSE_FAR_M
+	return POSE_FAR if far else 1
 
 ## In a fight with the local player's squad: hit by one of it (or their Boki) or hit one within HIT_CALM_S, or a bot
 ## after one of it.
