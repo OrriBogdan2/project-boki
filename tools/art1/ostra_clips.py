@@ -69,6 +69,37 @@ def wobble(period, pitch, roll, bob):
     return fn
 
 
+def kick(q, q0, k):
+    """a looping bump at cycle phase q0 (0..1); k sets how sharp (bigger is narrower)"""
+    return math.exp(k * (math.cos(TAU * (q - q0)) - 1.0))
+
+
+def drift(period, pulses, way, bob, push, lag, arms):
+    """float-drift travel, no feet: each pulse the spring gives under him and kicks him on. The box dips and tips into the way he
+    goes first, the body is pulled behind it and catches up (lag, m), the spine follows a beat later and the head counters to hold
+    the grin level. The hands paddle, opposite each other, once a cycle. way: (right, forward) of the travel, unit."""
+    wx, wy = way
+    def fn(P, t):
+        q = (t / period * pulses) % 1.0
+        down = kick(q, 0.0, 5.0) - 0.45 * kick(q, 0.3, 3.0) - 0.074    # compress fast, rebound past rest, settle (mean ~0)
+        surge = kick(q, 0.12, 3.0) - 0.243                              # the body's lag, a beat after the dip
+        l = P["lift"]
+        P["lift"] = (l[0] - wx * lag * surge, l[1] - wy * lag * surge, l[2] - bob * down)
+        b = P["box"]
+        P["box"] = (b[0] + wy * push * down, b[1] + wx * push * down)
+        follow = kick(q, 0.2, 3.0) - 0.243
+        s = P["spine"]
+        P["spine"] = (s[0] + wy * push * 0.6 * follow + 1.5 * push * 0.3 * down, s[1], s[2] + wx * push * 0.6 * follow)
+        hd = P["head"]
+        P["head"] = (hd[0] - wy * push * 0.5 * follow - push * 0.4 * down, hd[1], hd[2] - wx * push * 0.3 * follow)
+        c = math.sin(t / period * TAU)          # the paddle, one stroke a cycle
+        for side, sg in (("hR", 1.0), ("hL", -1.0)):
+            x, y, z = P[side]
+            P[side] = (x, y + arms * sg * c, z + 0.25 * arms * (0.5 + 0.5 * sg * c) - 0.4 * arms * down)
+        P["wR"], P["wL"] = 0.25 + 0.15 * c, 0.2 - 0.15 * c
+    return fn
+
+
 def twitch(amp, rate):
     def fn(P, t):
         s = P["spine"]
@@ -151,14 +182,14 @@ CLIPS = {
         (3.2, {}),
     ]},
     "stance": {"len": 2.0, "base": READY, "add": stance_add, "loop": True, "keys": [(0.0, {}), (2.0, {})]},
-    "walk_f": {"len": 1.4, "loop": True, "base": loco((9.0, 0.0), (4.0, -4.0, 2.0), (0.0, -0.03, -0.03), head=(-18.0, 4.0, 8.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_b": {"len": 1.4, "loop": True, "base": loco((-9.0, 0.0), (10.0, -4.0, 0.0), (0.0, 0.03, -0.03), head=(-12.0, 2.0, 10.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_l": {"len": 1.4, "loop": True, "base": loco((3.0, -9.0), (6.0, 8.0, 6.0), (0.03, 0.0, -0.03)), "add": wobble(1.4, 2.0, 2.5, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_r": {"len": 1.4, "loop": True, "base": loco((3.0, 9.0), (6.0, -12.0, -6.0), (-0.03, 0.0, -0.03)), "add": wobble(1.4, 2.0, 2.5, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "run_f": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((17.0, 0.0), (2.0, 0.0, 0.0), (0.0, -0.09, -0.07), head=(-22.0, 0.0, 6.0), brow=-1.0, cheek=0.7), **TRAIL), "add": wobble(0.9, 3.5, 3.0, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_b": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((-16.0, 0.0), (14.0, 0.0, 0.0), (0.0, 0.08, -0.07), head=(-16.0, 0.0, 6.0), cheek=0.7)), "add": wobble(0.9, 3.5, 3.0, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_l": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, -17.0), (6.0, 8.0, 12.0), (0.08, 0.0, -0.07), head=(-16.0, -8.0, 4.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_r": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, 17.0), (6.0, -8.0, -12.0), (-0.08, 0.0, -0.07), head=(-16.0, 8.0, 20.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
+    "walk_f": {"len": 1.4, "loop": True, "base": loco((13.0, 0.0), (6.0, -4.0, 2.0), (0.0, -0.06, -0.04), head=(-20.0, 4.0, 8.0)), "add": drift(1.4, 2, (0.0, 1.0), 0.035, 5.0, 0.05, 0.05), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_b": {"len": 1.4, "loop": True, "base": loco((-13.0, 0.0), (12.0, -4.0, 0.0), (0.0, 0.06, -0.04), head=(-14.0, 2.0, 10.0)), "add": drift(1.4, 2, (0.0, -1.0), 0.035, 5.0, 0.05, 0.05), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_l": {"len": 1.4, "loop": True, "base": loco((3.0, -13.0), (6.0, 8.0, 8.0), (0.06, 0.0, -0.04)), "add": drift(1.4, 2, (-1.0, 0.0), 0.035, 5.0, 0.05, 0.05), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_r": {"len": 1.4, "loop": True, "base": loco((3.0, 13.0), (6.0, -12.0, -8.0), (-0.06, 0.0, -0.04)), "add": drift(1.4, 2, (1.0, 0.0), 0.035, 5.0, 0.05, 0.05), "keys": [(0.0, {}), (1.4, {})]},
+    "run_f": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((24.0, 0.0), (4.0, 0.0, 0.0), (0.0, -0.13, -0.08), head=(-26.0, 0.0, 6.0), brow=-1.0, cheek=0.7), **TRAIL), "add": drift(0.9, 2, (0.0, 1.0), 0.06, 8.0, 0.08, 0.03), "keys": [(0.0, {}), (0.9, {})]},
+    "run_b": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((-22.0, 0.0), (16.0, 0.0, 0.0), (0.0, 0.12, -0.08), head=(-18.0, 0.0, 6.0), cheek=0.7)), "add": drift(0.9, 2, (0.0, -1.0), 0.06, 8.0, 0.08, 0.05), "keys": [(0.0, {}), (0.9, {})]},
+    "run_l": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, -24.0), (6.0, 8.0, 16.0), (0.12, 0.0, -0.08), head=(-16.0, -8.0, 4.0), cheek=0.7), **TRAIL), "add": drift(0.9, 2, (-1.0, 0.0), 0.06, 8.0, 0.08, 0.03), "keys": [(0.0, {}), (0.9, {})]},
+    "run_r": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, 24.0), (6.0, -8.0, -16.0), (-0.12, 0.0, -0.08), head=(-16.0, 8.0, 20.0), cheek=0.7), **TRAIL), "add": drift(0.9, 2, (1.0, 0.0), 0.06, 8.0, 0.08, 0.03), "keys": [(0.0, {}), (0.9, {})]},
 
     # ---------------------------------------------------------------- the crouch: down with a squeeze past the hold, up with a small overshoot
     "crouch_idle": {"len": 3.6, "base": HUNCH, "add": hunch_add, "loop": True, "keys": [(0.0, {}), (3.6, {})]},
