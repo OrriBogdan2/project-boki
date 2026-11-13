@@ -1014,8 +1014,9 @@ above is superseded by this:
 draw, a melee charge such as the Bulwark's Crushing Blow, a held dash via `dash_charge`, e.g. the
 Juggernaut's Rampage) and gives it one language:
 
-- a rising wind-up voice in the archetype's own sound (`CHARGE_VOICE`: Thief swipe, Archer string
-  creak, Mage zap, Gunslinger cylinder, Juggernaut thump, Bulwark shield): ticks that climb in pitch
+- a rising wind-up voice in the archetype's own sound (`<arch>_charge_tick` and
+  `<arch>_charge_full` in each charging Hunter's set: Thief blade whisper, Archer string creak, Mage
+  static, Gunslinger ratchet, Juggernaut iron thump, Bulwark rim hum, Tenzo stone grind, Motley bubble): ticks that climb in pitch
   and volume and quicken as it fills;
 - a filling ring at the hunter (enemies see the hostile rim) and a glow growing at the hand, with
   motes drawn inward;

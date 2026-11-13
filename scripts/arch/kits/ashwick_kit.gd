@@ -189,7 +189,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.sfx("ashwick_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
+		m.sfx("ashwick_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick

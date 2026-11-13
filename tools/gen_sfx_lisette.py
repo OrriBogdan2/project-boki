@@ -389,6 +389,17 @@ def deadeye():
                at(S.chime(2200, 0.4, 0.14, ((1.0, 1.0), (2.76, 0.4))), 0.1))
 
 
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """A bowstring drawn: a short creak of wood and gut with a tick in it, rising as the draw deepens."""
+    return mix(S.creak(0.09, 240, 300, 0.5, 3200) * 0.5, click(0.003, 3000, 8000) * 0.4)
+
+
+def charge_full():
+    """The string at full draw: a tight tick, then a low twang that hums out."""
+    return mix(click(0.004, 2500, 9000) * 0.7, S.ring([196, 392, 588], 0.5, [0.25, 0.18, 0.12], [0.6, 0.4, 0.2]), S.hiss(0.2, 3000, 9000, 0.01, 0.12) * 0.25)
+
+
 def build():
     S.takes_cat('archer_thread_twang', twang, 3, 'signature')
     S.takes_cat('pin_loose', loose, 3, 'fire')
@@ -426,6 +437,8 @@ def build_vfx_pass():
     S.save_cat('pin_heavy_burst', heavy_burst(), 'fire')
     S.takes_cat('pin_arrow_hit', arrow_hit, 3, 'impact')
     S.save_cat('archer_deadeye', deadeye(), 'impact')
+    S.save_cat('archer_charge_tick', charge_tick(), 'cast')
+    S.save_cat('archer_charge_full', charge_full(), 'cast')
 
 
 if __name__ == '__main__':

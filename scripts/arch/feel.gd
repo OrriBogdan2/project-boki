@@ -210,55 +210,31 @@ static func _spend(p: Ent, want: float, now: float) -> float:
 	_budget[p.get_instance_id()] = b
 	return got
 
-# ---- §5.6 sound layering (placeholder sounds from the existing Sfx set) ----
-## Layer 1, the tell, by delivery: [sound, pitch].
+# ---- §5.6 the cast tell (placeholder sounds from the existing Sfx set) ----
+## The tell of a grammar cast, by delivery: [sound, pitch].
 const DELIVERY_TELL := {
 	"projectile": ["throw", 1.25], "cone": ["whoosh", 0.9], "beam": ["charge", 1.4], "burst": ["charge", 1.7],
 	"zone": ["cloak", 0.8], "trap": ["plant", 1.2], "wall": ["build", 0.9], "aura": ["shield", 0.8],
 	"tether": ["grab", 1.0], "leap": ["whoosh", 0.7], "blink": ["portal", 1.6], "summon": ["portal", 0.9], "dash": ["dash", 1.0],
 }
-## The tell and impact rows come from AbilityFx (the pop branch's synthesized ability sounds), so archetype kits, Boki and weapon right clicks share one sound language; these tables are
-## the fallback.
+## The tell rows come from AbilityFx (the pop branch's synthesized ability sounds), so Boki and weapon right clicks
+## share one sound language; this table is the fallback.
 static func tell_row(delivery: String) -> Array:
 	return AbilityFx.feel_tell(delivery) if AbilityFx.TELL.has(delivery) else DELIVERY_TELL.get(delivery, ["skill", 1.0])
 
-static func impact_row(cat: String) -> Array:
-	return AbilityFx.feel_impact(cat) if AbilityFx.IMPACT.has(cat) else CATEGORY_IMPACT.get(cat, ["hit", 1.0])
+static var _voices := {}       # "tell|caster|frame" -> 1: the tells started this frame
 
-## Layer 3, the impact, by effect category: [sound, pitch]. Control is a hard hit then a held tone.
-const CATEGORY_IMPACT := {"damage": ["thump", 1.0], "control": ["zap", 0.8], "sustain": ["heal", 1.1], "shield": ["shield", 1.2], "utility": ["ping", 1.3]}
-## Layer 4, the kin theme's sweetener.
-const SWEETENER := {"venom": "k_poison", "spore": "k_spore", "gravity": "k_psychic", "prism": "k_crystal", "lunar": "k_fairy", "echo": "k_sound"}
-const MAX_VOICES := 4
-static var _voices := {}       # event key -> voices started this frame
-
-## Plays one layer of an ability event: at most MAX_VOICES per event; an enemy tell that can reach
-## the local player is +3 dB, allies' casts are -4 dB, other people's impacts -8 dB.
-static func sound(m: Node, layer: String, what: String, at: Vector3, by: Ent = null, event := "") -> void:
+## Plays the tell of a grammar cast (KinExec), once per caster a frame: an enemy tell that can reach the
+## local player is +3 dB, allies' casts are -4 dB.
+static func tell(m: Node, delivery: String, at: Vector3, by: Ent = null) -> void:
 	if m == null:
 		return
-	var key := "%s|%d" % [event if event != "" else what, Engine.get_physics_frames()]
-	var n := int(_voices.get(key, 0))
-	if n >= MAX_VOICES:
+	var key := "tell|%d|%d" % [by.get_instance_id() if by else 0, Engine.get_physics_frames()]
+	if _voices.has(key):
 		return
-	_voices[key] = n + 1
 	if _voices.size() > 64: _voices.clear()
-	var row: Array = []
-	match layer:
-		"tell":
-			# one tell per caster per frame: the grammar runner (KinExec) and a kit's own cast_sound
-			# can both ask for it
-			var tk := "tell|%d|%d" % [by.get_instance_id() if by else 0, Engine.get_physics_frames()]
-			if _voices.has(tk):
-				return
-			_voices[tk] = 1
-			row = tell_row(what)
-		"impact": row = impact_row(what)
-		"sweet":
-			var sn := String(SWEETENER.get(what, ""))
-			if sn == "": return
-			row = [sn, 1.0]
-		_: row = [what, 1.0]
+	_voices[key] = 1
+	var row := tell_row(delivery)
 	var vol := 0.0
 	var p = m.get("player")
 	if p != null and by != null:
@@ -266,16 +242,5 @@ static func sound(m: Node, layer: String, what: String, at: Vector3, by: Ent = n
 			vol += 3.0 if p.flat_dist(at) < 12.0 else 0.0
 		elif by != p:
 			vol -= 4.0
-	match layer:
-		"sweet": vol -= 6.0
-		"impact": vol -= 3.0
 	m.sfx(String(row[0]), at, vol - 4.0, float(row[1]))
 
-## A whole ability event: tell (delivery), impact (category) and the kin's sweetener.
-static func cast_sound(m: Node, delivery: String, cat: String, at: Vector3, by: Ent, theme := "") -> void:
-	var ev := "cast%d" % (by.get_instance_id() if by else 0)
-	sound(m, "tell", delivery, at, by, ev)
-	if cat != "":
-		sound(m, "impact", cat, at, by, ev)
-	if theme != "":
-		sound(m, "sweet", theme, at, by, ev)

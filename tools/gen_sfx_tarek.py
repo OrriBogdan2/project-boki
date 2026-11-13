@@ -283,6 +283,17 @@ def rockfall():
                at(S.rattle(0.35, 80, 400, 2500, 0.7, 0.1) * 0.6, 0.05))
 
 
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """Stone grinding on stone: a low scrape and a dull knock."""
+    return mix(lpf(noise(0.1), 700) * env(N(0.1), 0.01, 0.06) * 0.7, kick(75, 45, 0.1, 0.02, 0.05) * 0.8)
+
+
+def charge_full():
+    """The boulder locked in: a deep knock, a crack and falling grit."""
+    return mix(kick(95, 38, 0.35, 0.04, 0.14), crack(0.08, 300, 3000, 0.04) * 0.7, at(S.rattle(0.25, 70, 300, 2000, 0.7, 0.1) * 0.5, 0.04))
+
+
 def build():
     takes('br_throw', throw, 3, 'fire')
     takes('br_boulder_hit', boulder_hit, 3, 'impact')
@@ -307,7 +318,8 @@ def build():
         takes('dolm_step_' + s, lambda i, s=s: step(s, i), 3, 'step')
     save('dolm_glide_fold', glide_fold(), 'cast')
     save('dolm_rockfall', rockfall(), 'impact')
-
+    save('dolm_charge_tick', charge_tick(), 'cast')
+    save('dolm_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

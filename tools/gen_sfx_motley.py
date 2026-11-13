@@ -384,6 +384,17 @@ def collapse():
                at(S.sweep(500, 120, 0.3, 'sin') * env(N(0.3), 0.005, 0.1) * 0.5, 0.05), tail(0.4, 1500, 0.12, 0.005, 0.06) * 0.5)
 
 
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """A bubble swelling: a short rising blip with a wet tick."""
+    return mix(S.sweep(320, 720, 0.08, 'sin') * env(N(0.08), 0.005, 0.05) * 0.6, click(0.003, 2000, 6000) * 0.3)
+
+
+def charge_full():
+    """The swelling reaching its limit: a long rising wobble, then a pop and a ring."""
+    return mix(S.sweep(250, 950, 0.22, 'sin') * env(N(0.22), 0.01, 0.1) * 0.6, at(click(0.004, 1800, 6000) * 0.6, 0.2), at(S.ring([660, 990], 0.3, [0.1, 0.07], [0.4, 0.3]), 0.2))
+
+
 def build():
     S.takes_cat('os_orb', orb, 3, 'fire')
     S.takes_cat('os_orb_hot', orb_hot, 3, 'fire')
@@ -408,7 +419,8 @@ def build():
     S.save_cat('ostra_death', death(), 'grunt')
     S.save_cat('ostra_swollen', swollen(), 'cast')
     S.save_cat('ostra_collapse', collapse(), 'impact')
-
+    S.save_cat('ostra_charge_tick', charge_tick(), 'cast')
+    S.save_cat('ostra_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

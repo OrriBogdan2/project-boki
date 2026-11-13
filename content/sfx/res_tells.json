@@ -1,0 +1,33 @@
+{
+ "group": "res_tells",
+ "name": "Resource-full tells",
+ "script": "tools/gen_sfx_res_tells.py",
+ "sounds": {
+  "ashwick_tell": "cast",
+  "bulwark_tell": "cast",
+  "dolm_tell": "cast",
+  "dredge_tell": "cast",
+  "gil_tell": "cast",
+  "gunslinger_tell": "cast",
+  "juggernaut_tell": "cast",
+  "mage_tell": "cast",
+  "ostra_tell": "cast",
+  "rimewright_tell": "cast",
+  "tender_tell": "cast",
+  "thief_tell": "cast"
+ },
+ "reach": {
+  "ashwick_tell": 25,
+  "bulwark_tell": 25,
+  "dolm_tell": 25,
+  "dredge_tell": 25,
+  "gil_tell": 25,
+  "gunslinger_tell": 25,
+  "juggernaut_tell": 25,
+  "mage_tell": 25,
+  "ostra_tell": 25,
+  "rimewright_tell": 25,
+  "tender_tell": 25,
+  "thief_tell": 25
+ }
+}

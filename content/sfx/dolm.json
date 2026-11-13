@@ -3,6 +3,8 @@
  "name": "Tenzo",
  "script": "tools/gen_sfx_tarek.py",
  "sounds": {
+  "dolm_charge_tick": "cast",
+  "dolm_charge_full": "cast",
   "br_throw": "fire",
   "br_boulder_hit": "impact",
   "br_wind": "cast",
@@ -29,7 +31,7 @@
   "dolm_glide_fold": "cast",
   "dolm_rockfall": "impact"
  },
- "kit_files": ["breah_slam.gd", "breah_spine.gd"],
+ "kit_files": ["breah_hop.gd", "breah_slam.gd", "breah_spine.gd"],
  "signature": ["dolm_rock_crunch"],
  "replaces": ["br_throw", "br_boulder_hit", "br_wind", "br_punch", "br_launch", "br_burst", "br_sense", "br_rise",
   "br_leap", "br_slam", "br_shove", "br_roll", "br_crack", "br_raise"]

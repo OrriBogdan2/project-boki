@@ -17,8 +17,9 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   ended. Particle layers only, and local.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
-- `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
-  cones and delivery sounds) stays out, so only the Hero's own look shows.
+- `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast look (AbilityFx, KinExec's rings
+  and cones) stays out, so only the Hero's own look shows. Both leave the shared cast sounds (the Feel tell and KinExec's
+  delivery sounds) out: a kit plays its own cast sound.
 
 ## A recipe
 `"move": {"sfx": [...], "fx": [...]}`. Options the kit passes (`"r"`, `"len"`, `"w"`, `"k"` the charge, `"flip"`, or any flag

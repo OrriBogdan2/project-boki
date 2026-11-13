@@ -317,6 +317,17 @@ def ready():
     return mix(click(0.004, 3000, 9000) * 0.6, at(bell(2600, 0.4, 0.15), 0.03), at(bell(3900, 0.3, 0.1) * 0.6, 0.09))
 
 
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """A blade whispering out of its sheath: a thin hiss with a hint of steel."""
+    return mix(bpf(noise(0.09), 3000, 9000) * env(N(0.09), 0.008, 0.05) * 0.5, S.ring([3300], 0.09, [0.03], [0.25]))
+
+
+def charge_full():
+    """The knife drawn clear: a tick and a bright steel ting."""
+    return mix(click(0.004, 3000, 9000) * 0.7, S.ring([2400, 3600, 5000], 0.4, [0.14, 0.1, 0.07], [0.5, 0.35, 0.25]))
+
+
 def build():
     takes('dj_bolt', bolt, 3, 'fire')
     save('thief_flintlock_crack', flintlock_crack(0), 'signature')
@@ -345,7 +356,8 @@ def build():
     save('thief_bola_ricochet', bola_ricochet(), 'impact')
     save('thief_shadowstep', shadowstep(), 'cast')
     save('thief_ready', ready(), 'cast')
-
+    save('thief_charge_tick', charge_tick(), 'cast')
+    save('thief_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

@@ -5,7 +5,8 @@ extends RefCounted
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##      and its signature weapon's JSON names one of them (no stock sound)
-##   4. every cue that Hunter's kit emits (m.sfx, payoff and armed sounds, content/vfx moves) is one of its own
+##   4. every cue that Hunter's kit emits (m.sfx, payoff and armed sounds, content/vfx moves, the charge-hold
+##      tick and ping) is one of its own
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
@@ -40,6 +41,8 @@ extends RefCounted
 ##      one 10 m past it is quieter, one past ~30 m is silent
 ##  19. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist;
 ##      every form file names its own cast, travel and hit sounds (MergeSfx), all on file
+##  20. every Hunter with a meter has its own resource-full tell (<arch>_tell) that carries past hearing range,
+##      and ArchKit._tells plays it; every kit file that emits a cue is walked by item 4
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -51,11 +54,15 @@ const HELD_S := 3.0            # s of held fire per sound
 const HELD_STEP_MS := 80       # ms a round: the source cadence of Vex's rifle (main has 0.12 s)
 # m.sfx("x"), armed_fx(word, slot, "x") and payoff_fx(at, word, col, "x"): the sound is group 1 (empty = shared)
 const CUE_CALLS := "(?:\\.sfx\\(|armed_fx\\([^,)]*,[^,)]*,\\s*|payoff_fx\\([^,]+,[^,]+,[^,]+,\\s*)\"([a-z0-9_]*)\""
+# the Hunters whose weapon or kit winds up a charge: ArchKit plays <arch>_charge_tick and <arch>_charge_full
+const CHARGERS := ["archer", "mage", "gunslinger", "juggernaut", "bulwark", "dolm", "ostra", "thief"]
+const TELL_REACH_MAX := 30.0  # m: the resource-full tell is for foes nearby (12-25 m), not across the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const UNDER_COMBAT_DB := 10.0  # dB: a rank cue as played sits at least this far under a weapon shot ("fire")
 const READY_SECS := 0.5        # s: the new-point chime's audible length at most
 
 var bad := 0
+var walked := {}               # kit file -> true once item 4 has read it
 var levels := {}
 
 func ok(cond: bool, what: String) -> void:
@@ -88,6 +95,8 @@ func run(main: Node) -> void:
 	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	_falloff()
 	_fusion_cues()
+	_res_tells()
+	_unwalked()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -214,6 +223,7 @@ func _kit_names(arch: String, extra: Array, own: Dictionary) -> void:
 	var re := RegEx.create_from_string(CUE_CALLS)
 	var holes := []
 	for f in ["%s_kit.gd" % arch] + extra:
+		walked[String(f)] = true
 		var path := "res://scripts/arch/kits/" + String(f)
 		if not FileAccess.file_exists(path):
 			ok(false, "%s: kit file %s exists" % [arch, f])
@@ -227,6 +237,8 @@ func _kit_names(arch: String, extra: Array, own: Dictionary) -> void:
 	for mv in moves:
 		for e in moves[mv].get("sfx", []):
 			_cue(String(e["n"]), "move %s:%s" % [mv, e["n"]], own, holes)
+	for w in (["_charge_tick", "_charge_full"] if arch in CHARGERS else []):
+		_cue(arch + w, "charge hold " + w, own, holes)
 	ok(holes.is_empty(), "%s: every cue its kit emits is its own sound and exists (holes: %s)" % [arch, holes])
 
 func _cue(sname: String, what: String, own: Dictionary, holes: Array) -> void:
@@ -326,7 +338,7 @@ func _nuke_fall() -> void:
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
-## 11. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
+## 19. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
 func _fusion_cues() -> void:
 	var cues := {}
 	var files := DirAccess.get_files_at("res://content/merge_forms")
@@ -355,8 +367,35 @@ func _fusion_cues() -> void:
 	ok(silent.is_empty() and named.size() == files.size() * 3,
 		"%d forms: own cast, travel and hit, %d sounds on file (silent %s)" % [files.size(), named.size(), silent])
 
+## 20. The resource-full tell: a Hunter's own sting when its meter comes full (Lace's Hawk Sense has no meter).
+func _res_tells() -> void:
+	var wrong := []
+	for arch in Arch.ids():
+		if String((Arch.def(arch).get("resource", {}) as Dictionary).get("kind", "")) == "none":
+			continue
+		var sname: String = arch + "_tell"
+		var reach: float = Sfx.sound_reach.get(sname, 0.0)
+		if not (Sfx.ensure(sname) and reach > Sfx.hear_range and reach <= TELL_REACH_MAX):
+			wrong.append("%s %.0f m" % [sname, reach])
+	ok(wrong.is_empty(), "every Hunter with a meter has its own resource-full tell that carries (%s)" % [wrong])
+	var kit := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
+	var own := kit.contains("m.sfx(id + \"_tell\"") and not kit.contains("\"unlock\"")
+	ok(own, "ArchKit._tells plays the Hunter's own tell")
+
+## 20. Every kit file that emits a cue is walked by item 4 (listed in its Hunter's "kit_files"), unless it is the
+## kit of a Hunter with no set (item 5's fallback).
+func _unwalked() -> void:
+	var re := RegEx.create_from_string(CUE_CALLS)
+	var loose := []
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if not f.ends_with(".gd") or walked.has(f) or Arch.ids().has(f.trim_suffix("_kit.gd")):
+			continue
+		if re.search(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)) != null:
+			loose.append(f)
+	ok(loose.is_empty(), "every kit file that plays a cue is walked (not walked: %s)" % [loose])
+
 ## 5. A Hunter without its own set plays the shared sounds.
-## 10. What you can see you can hear: the cue at the side edge of the SUPERVIVE view (half of CamRig.style_across)
+## 18. What you can see you can hear: the cue at the side edge of the wide match view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 6 dB quieter, past 30 m nothing plays.
 func _falloff() -> void:
 	var edge := CamRig.style_across("supervive") * 0.5

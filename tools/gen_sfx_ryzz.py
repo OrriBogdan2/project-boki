@@ -341,6 +341,17 @@ def blowout():
                at(S.chime(2900, 0.45, 0.09, ((1.0, 1.0), (2.76, 0.4))) * 0.35, 0.1))
 
 
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """A static crackle that builds: a dry spark and a small rising buzz."""
+    return mix(crack(0.07, 3000, 9000, 0.025) * 0.6, S.sweep(900, 1800, 0.08, 'saw') * env(N(0.08), 0.004, 0.05) * 0.25)
+
+
+def charge_full():
+    """The charge topping out: a sharp discharge crack and a bright humming ring."""
+    return mix(crack(0.06, 2500, 9500, 0.03) * 0.8, S.fm(1100, 1.5, 3.0, 0.4, 0.18) * 0.45, S.ring([880, 1760], 0.45, [0.15, 0.1], [0.4, 0.3]))
+
+
 def build():
     S.takes_cat('vv_bolt', bolt, 3, 'fire')
     S.takes_cat('mage_zap', zap, 3, 'signature')
@@ -367,7 +378,8 @@ def build():
     S.save_cat('mage_death', death(), 'grunt')
     S.save_cat('mage_rod_slam', rod_slam(), 'impact')
     S.save_cat('mage_blowout', blowout(), 'impact')
-
+    S.save_cat('mage_charge_tick', charge_tick(), 'cast')
+    S.save_cat('mage_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()
