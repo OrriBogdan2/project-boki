@@ -250,6 +250,7 @@ source's answer, so the newer press cancels the held draw with no shot, the rule
 (`ArcherKit.drop_draw`, `lmb_override`). The X window's own nock is left out of it (the X window | RMB row stays both).
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesPin ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
 | LMB draw | `arc_draw` (held) | side-on to the cursor in 0.2 s, string hand to the chest, deeper by Empowered |

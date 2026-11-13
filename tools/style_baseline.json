@@ -835,7 +835,7 @@
 "semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 65,
+"long_line": 64,
 "semicolon": 70
 },
 "tools/arena_check.gd": {
@@ -1014,6 +1014,12 @@
 "tools/revive_check.gd": {
 "long_line": 11,
 "semicolon": 25
+},
+"tools/rig_shots.gd": {
+"long_line": 1
+},
+"tools/rig_standard_check.gd": {
+"long_line": 1
 },
 "tools/shot_vertical_check.gd": {
 "long_line": 4,
