@@ -54,7 +54,7 @@ func items() -> Array:
 		out.append(["menu", "Duel", "gear", func(): if not m.paused: m.duel.open_menu(), "B"])
 	if bench:
 		out.append(["bench", "Bench", "gear", func(): bench.toggle(), ""])
-	out.append(["leave", "Leave", "back", func(): leave(m, true), ""])
+	out.append(["leave", "Skip" if m.opts.get("tutorial", false) else "Leave", "back", func(): leave(m, true), ""])
 	return out
 
 func _build_bar() -> void:
