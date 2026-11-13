@@ -12,18 +12,20 @@ extends RefCounted
 ## form -> a Boki that merges into it
 const FORM_BOKI := {"titan": "pebbit", "stormwing": "zephyrak", "tidal_shell": "puddlet"}
 const HERO_STATES := ["idle", "walk", "run", "lmb", "rmb", "e", "dash", "hit"]
-const WINDOW := 0.7      # s: how long after a press a state is watched for its move
-const BEAT_SLACK := 0.02 # s: an ultimate's key may sit this far off its beat
-const WALK_MAX := 4.0    # m/s: slower than this reads as the walk ring
+const WINDOW := 0.7  # s: how long after a press a state is watched for its move
+const BEAT_SLACK := 0.02  # s: an ultimate's key may sit this far off its beat
+const WALK_MAX := 4.0  # m/s: slower than this reads as the walk ring
 
 var bad := 0
-var mf                   # the merge-form check, for its match setup (fresh match, flat ground, merged)
+var mf  # the merge-form check, for its match setup (fresh match, flat ground, merged)
 var m: Match
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		print("FUSIONSTATES FAIL ", what)
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -59,11 +61,13 @@ func run(main: Node) -> void:
 	print("FUSIONSTATES DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Every form file has a Boki here, so a new form is swept too.
 func _forms_known() -> void:
 	for f in DirAccess.get_files_at("res://content/merge_forms"):
 		if f.ends_with(".json"):
 			ok(FORM_BOKI.has(f.get_basename()), "form %s has a Boki in FORM_BOKI" % f.get_basename())
+
 
 ## The ultimate's move keys every beat of the form (and a leap's landing and delayed blasts).
 func _beats(id: String) -> void:
@@ -87,88 +91,93 @@ func _beats(id: String) -> void:
 		ok(hit, "%s: the ultimate's move keys its beat at %.2fs" % [id, t])
 	ok(float((keys[-1] as Array)[0]) <= float(r["end"]) + BEAT_SLACK, "%s: the ultimate's move ends by r.end" % id)
 
+
 ## One hero through every state, merged into `form` ("" unmerged): state -> what the model showed.
 func _hero_states(hero: String, form: String) -> Dictionary:
 	var sp: String = FORM_BOKI.get(form, "pebbit")
 	m = mf._fresh(sp, Arch.weight(hero), hero)
-	var P: Hunter = m.player
+	var hp: Hunter = m.player
 	var out := {}
 	if form != "":
-		P.kin.stow()
-		P.ult = 1.0
-		KinMerge.press(P)
-		out["xform"] = _watch(P, 0.4)
-		_settle(P, float(MergeForm.data()["xform_s"]))
-		ok(MergeKit.is_live(P) and String(MergeForm.of(P)["id"]) == form, "%s: merged into %s" % [hero, form])
-	out["idle"] = _watch(P, 0.2, 0.5)
-	out["walk"] = _move(P, 0.35)
-	out["run"] = _move(P, 1.0)
+		hp.kin.stow()
+		hp.ult = 1.0
+		KinMerge.press(hp)
+		out["xform"] = _watch(hp, 0.4)
+		_settle(hp, float(MergeForm.data()["xform_s"]))
+		ok(MergeKit.is_live(hp) and String(MergeForm.of(hp)["id"]) == form, "%s: merged into %s" % [hero, form])
+	out["idle"] = _watch(hp, 0.2, 0.5)
+	out["walk"] = _move(hp, 0.35)
+	out["run"] = _move(hp, 1.0)
 	for st in ["lmb", "rmb", "e", "dash"]:
 		var key: String = {"lmb": "fire", "rmb": "sec", "e": "sig", "dash": "dash"}[st]
-		P.inp[key] = true
-		out[st] = _watch(P, WINDOW, 0.0, func(): P.inp[key] = false)
-		P.inp[key] = false
-		_settle(P, 1.2)
-	P.hurt(1.0, mf.rival(), {"src": "test"})
-	out["hit"] = _watch(P, 0.3)
+		hp.inp[key] = true
+		out[st] = _watch(hp, WINDOW, 0.0, func(): hp.inp[key] = false)
+		hp.inp[key] = false
+		_settle(hp, 1.2)
+	hp.hurt(1.0, mf.rival(), {"src": "test"})
+	out["hit"] = _watch(hp, 0.3)
 	if form != "":
-		_settle(P, 0.3)
-		var kit := MergeKit.of(P)
+		_settle(hp, 0.3)
+		var kit := MergeKit.of(hp)
 		kit.age = float(MergeForm.data()["ult_lock_s"]) + 0.1
-		P.inp["ult"] = true
-		out["ult"] = _watch(P, 0.6, 0.0, func(): P.inp["ult"] = false)
-		P.inp["ult"] = false
+		hp.inp["ult"] = true
+		out["ult"] = _watch(hp, 0.6, 0.0, func(): hp.inp["ult"] = false)
+		hp.inp["ult"] = false
 		var left := 3.0
-		while KinMerge.active(P) and left > 0.0:
-			_settle(P, Match.DT)
+		while KinMerge.active(hp) and left > 0.0:
+			_settle(hp, Match.DT)
 			left -= Match.DT
-		ok(not KinMerge.active(P), "%s as %s: the ultimate ends the merge" % [hero, form])
-		out["release"] = _watch(P, 0.3)
+		ok(not KinMerge.active(hp), "%s as %s: the ultimate ends the merge" % [hero, form])
+		out["release"] = _watch(hp, 0.3)
 	return out
 
+
 ## Steps the match while the merge timer is held full (states take longer than one merge).
-func _settle(P: Hunter, secs: float) -> void:
+func _settle(hp: Hunter, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
-		if KinMerge.active(P) and not MergeKit.of(P).ulting():
-			P.merge_st["t"] = maxf(float(P.merge_st.get("t", 0.0)), 5.0)
+		if KinMerge.active(hp) and not MergeKit.of(hp).ulting():
+			hp.merge_st["t"] = maxf(float(hp.merge_st.get("t", 0.0)), 5.0)
 		m.step(Match.DT)
-		P.render(Match.DT, 1.0)          # (the anim state is built in render)
+		hp.render(Match.DT, 1.0)  # (the anim state is built in render)
 		mf._clear_mobs()
 		t += Match.DT
 
+
 ## Run (k = 1) or walk (k < 1) toward +x and read the loco state.
-func _move(P: Hunter, k: float) -> String:
-	P.inp["move"] = Vector2(k, 0.0)
-	var got := _watch(P, 0.2, 0.5)
-	P.inp["move"] = Vector2.ZERO
-	_settle(P, 0.6)
+func _move(hp: Hunter, k: float) -> String:
+	hp.inp["move"] = Vector2(k, 0.0)
+	var got := _watch(hp, 0.2, 0.5)
+	hp.inp["move"] = Vector2.ZERO
+	_settle(hp, 0.6)
 	return got
 
+
 ## Watches `secs` (after `lead` s): the first move shown, else the loco or flinch state at the end.
-func _watch(P: Hunter, secs: float, lead := 0.0, after_first := Callable()) -> String:
-	_settle(P, lead)
+func _watch(hp: Hunter, secs: float, lead := 0.0, after_first := Callable()) -> String:
+	_settle(hp, lead)
 	var last := ""
 	var t := 0.0
 	while t < secs:
-		_settle(P, Match.DT)
+		_settle(hp, Match.DT)
 		if after_first.is_valid():
 			after_first.call()
 			after_first = Callable()
 		t += Match.DT
-		last = _shown(P)
+		last = _shown(hp)
 		if not last.begins_with("loco") and last != "flinch":
 			return last
 	return last
 
-## What P's model shows this frame: "clip <name>", "keyed <move>" (the rig plays a keyed pose), "loco <ring>",
+
+## What hp's model shows this frame: "clip <name>", "keyed <move>" (the rig plays a keyed pose), "loco <ring>",
 ## "flinch" (the procedural hit spring), or "FALLBACK <move>" (a move with nothing left to show).
-func _shown(P: Hunter) -> String:
-	var s: Dictionary = P.anim_s
+func _shown(hp: Hunter) -> String:
+	var s: Dictionary = hp.anim_s
 	var km := String(s.get("kmove", ""))
 	var kt := float(s.get("kmove_t", 99.0))
 	var keyed := not km.is_empty() and not HunterAnim.km_sample(km, kt).is_empty()
-	var sync := P.model.get_node_or_null("Warden/Sync") if P.model else null
+	var sync := hp.model.get_node_or_null("Warden/Sync") if hp.model else null
 	var clips: WardenClips = sync.get("clips") if sync else null
 	if clips != null:
 		var r := clips._pick(s, 0.0)

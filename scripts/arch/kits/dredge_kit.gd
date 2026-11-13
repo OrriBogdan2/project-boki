@@ -353,7 +353,7 @@ func _launch_hook() -> void:
 	run(stg, cx("rmb", "abyssal_hand", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
-		"on_shot_end": func(at: Vector3, why: String, e: Ent):
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
 			if pull.is_empty():
