@@ -50,8 +50,9 @@ func at_site() -> bool:
 	return not e.is_empty() and FarmSites.has_site(e)
 
 static func house_entry() -> Dictionary:
-	for e in HomeLayout.of(Save.d).get("deco", []):
-		if String(e.get("id", "")) == "house":
+	var L := HomeLayout.of(Save.d)
+	for e in L.get("deco", []):
+		if String(e.get("id", "")) == "house" and not HubLayout.holds(L, "house"):
 			return e
 	return {}
 

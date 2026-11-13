@@ -42,8 +42,8 @@ static func migrate(data: Dictionary) -> void:
 			rec["zone"] = start()
 
 ## The zone Game.goto("home", opts) shows: the one asked for; none for a visit or with the garden off;
-## the one you were in when coming back from the house; else the hub, once the first day's tutorial is done
-## (it runs in the start zone).
+## the one you were in when coming back from the house; else the hub, once the first day's tutorial is
+## done or skipped (it runs in the start zone; the house, Nook, stall and Burrow are the hub's: HubLayout.holds).
 static func landing(opts: Dictionary) -> String:
 	if opts.has("zone"):
 		return String(opts["zone"])
@@ -54,7 +54,8 @@ static func landing(opts: Dictionary) -> String:
 		return ""
 	if opts.has("spawn"):
 		return here
-	return HUB if bool(Save.d.get("tutorial", {}).get("day1_done", false)) else ""
+	var tut: Dictionary = Save.d.get("tutorial", {})
+	return HUB if bool(tut.get("day1_done", false)) or bool(tut.get("ft", {}).get("done", false)) else ""
 
 static func zone_of(rec: Dictionary) -> String:
 	return String(rec.get("zone", start()))

@@ -187,6 +187,8 @@ static func new_fs(d: Dictionary, seed := -1) -> Dictionary:
 static func fixtures(d: Dictionary, fx: String) -> Array:
 	var id := String(FIXTURES.get(fx, ""))
 	var out: Array = []
+	if HubLayout.holds(of(d), id):
+		return out      # the hub's, not the start zone's
 	for e in of(d).get("deco", []):
 		if String(e.get("id", "")) == id and not FarmSites.is_site(e): out.append(e)
 	out.sort_custom(func(a, b): return int(a["u"]) < int(b["u"]))

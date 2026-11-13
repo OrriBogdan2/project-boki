@@ -397,8 +397,8 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 23,
-"semicolon": 49
+"long_line": 22,
+"semicolon": 48
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
@@ -492,7 +492,7 @@
 "scripts/match/kin.gd": {
 "long_line": 30,
 "nested_ternary": 7,
-"semicolon": 19
+"semicolon": 18
 },
 "scripts/match/kin_command.gd": {
 "long_line": 5,
