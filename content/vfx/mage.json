@@ -26,7 +26,7 @@
 			{"p": "flare", "at": "finger_r", "delay": 0.06, "size": 0.75, "life": 0.08, "unless": "left", "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 		"lmb_trail": {"net": false, "end": "lmb_end", "fx": [
-			{"p": "ribbon", "size": 0.6, "life": 2.0, "tail": 0.034, "wave": 0.08, "c": "main", "c2": "hot", "c3": "deep"}
+			{"p": "ribbon", "size": 1.0, "life": 2.0, "tail": 0.14, "wave": 0.1, "soft": true, "head": 0.7, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 		"lmb_end": {"net": false, "fx": [
 			{"p": "ember", "n": 4, "way": "back", "lift": 0.3, "speed": 6.0, "spread": 0.45, "drag": 2.0, "life": 0.12,
@@ -97,7 +97,7 @@
 			{"p": "bolt", "len": "len", "jag": 0.5, "size": 0.7, "life": 0.2, "when": "loose", "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 		"rmb_trail": {"net": false, "end": "rmb_end", "fx": [
-			{"p": "ribbon", "size": 0.7, "life": 2.0, "tail": 0.058, "wave": 0.08, "c": "main", "c2": "hot", "c3": "deep"}
+			{"p": "ribbon", "size": 0.7, "life": 2.0, "tail": 0.058, "wave": 0.08, "head": 0.6, "head_len": 1.5, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 		"rmb_end": {"net": false, "fx": [
 			{"p": "flare", "size": 1.0, "life": 0.16, "c": "main", "c2": "hot", "c3": "deep"}

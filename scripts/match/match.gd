@@ -3131,6 +3131,22 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 			e.hurt(float(s["dmg"]) * f, by, o)
 
 # ------------------------------------------------------------------ main loop
+## The shots' frame (stock rounds between steps at `alpha`, deco, ability trails); the reels, stepping by hand, call it.
+func render_shots(alpha: float) -> void:
+	for s in shots:
+		if s.has("deco"):
+			_render_deco(s, alpha)
+		if String((s["x"] as Dictionary).get("src", "")) == "abil":
+			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+		if s["node"]:
+			var mi: MeshInstance3D = s["node"]
+			mi.global_position = ShotOrigin.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+			var v: Vector2 = s["vel"]
+			if v.length() > 1.0:
+				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
+				var r: float = s.get("vr", s["r"])
+				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
+
 func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
@@ -3192,19 +3208,7 @@ func _process(delta: float) -> void:
 			e.lod_dt += delta
 	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
-	for s in shots:
-		if s.has("deco"):
-			_render_deco(s, alpha)
-		if String((s["x"] as Dictionary).get("src", "")) == "abil":
-			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-		if s["node"]:
-			var mi: MeshInstance3D = s["node"]
-			mi.global_position = ShotOrigin.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-			var v: Vector2 = s["vel"]
-			if v.length() > 1.0:
-				mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
-				var r: float = s.get("vr", s["r"])
-				mi.scale = Vector3(r * 2.0, r * 2.0, Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0))))
+	render_shots(alpha)
 	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))

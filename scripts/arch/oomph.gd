@@ -115,6 +115,19 @@ static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 			halo = 0.18
 	return [vis_col, vis_size, Color(SideColor.fx(m, by, vis_col.lightened(0.2)), halo)]
 
+## A kit draws this round itself (an arrow, a trail and its head): the stock orb shrinks away and stays so (the match
+## sizes it from "vr" every frame). Kits skin a round just before a draw, so the size is pushed through at once: a
+## transform set then waits for the next flush and the orb would show for a frame.
+static func hide_orb(s: Dictionary) -> void:
+	s["vr"] = 0.001
+	var orb := s.get("node") as Node3D
+	if orb == null or not is_instance_valid(orb):
+		return
+	orb.scale = Vector3.ONE * 0.001
+	orb.force_update_transform()
+	for halo: Node3D in orb.get_children():
+		halo.force_update_transform()
+
 ## How long the streak behind a shot reads, from its speed (and the weapon's "tracer" scale).
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:
 	if legacy:

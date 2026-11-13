@@ -42,7 +42,7 @@ static var _data := {}         # arch -> its content/vfx data ({} when the Hero 
 var m: Node
 var pools := {}                # kind -> nodes made for it
 var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind}
-var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, pts}
+var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, head, pts}
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
 var live_n := 0                # GPU particles alive (asked for) now
@@ -481,7 +481,9 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("seed", randf() * SEED_MAX)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
+	mt.set_shader_parameter("soft", bool(layer.get("soft", false)))      # (M_RIBBON: a soft sparkly glow)
 
+## A mesh trail; its "head" (m across, "head_len" times as long) is a bright tip drawn on the newest point.
 func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 	var mi: MeshInstance3D = _take("ribbon", _surface_node.bind("ribbon"))
 	var mt: ShaderMaterial = mi.material_override
@@ -491,6 +493,7 @@ func _ribbon(layer: Dictionary, h: Hunter, o: Dictionary) -> void:
 	ribbons.append({"node": mi, "mat": mt, "h": h, "anchor": String(layer.get("at", "chest")), "t": 0.0,
 			"dur": _num(layer, "life", o, 0.3), "tail": float(layer.get("tail", 0.2)),
 			"width": _num(layer, "size", o, 0.4), "wave": float(layer.get("wave", 0.0)),
+			"head": float(layer.get("head", 0.0)), "head_len": float(layer.get("head_len", 1.0)),
 			"follow": o.get("follow") if layer.get("follow", false) else null, "pts": []})
 
 ## Where a bolt ends: the kit's `o.to`, else the move's point `to_y` m up ("to": "here": a bolt out of the sky), else a
@@ -801,18 +804,20 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 		_trail_end(e, pts)
 	elif now <= float(e["dur"]) and is_instance_valid(h):
 		var followed: Node3D = follow
-		pts.push_front([followed.global_position if followed else anchor_pos(h, String(e["anchor"])), now])
+		var at := followed.global_position if followed else anchor_pos(h, String(e["anchor"]))
+		pts.push_front(Vector4(at.x, at.y, at.z, now))      # (a sample is a value: no allocation per frame)
 		if pts.size() > RIBBON_SAMPLES:
 			pts.pop_back()
 	var tail := float(e["tail"])
-	while not pts.is_empty() and now - float(pts[-1][1]) > tail:
-		if pts.size() > 1 and now - float(pts[-2][1]) < tail:
+	while not pts.is_empty() and now - (pts[-1] as Vector4).w > tail:
+		if pts.size() > 1 and now - (pts[-2] as Vector4).w < tail:
 			# the oldest point is clipped back to exactly `tail` old, not dropped: a tail shorter than a frame
 			# (a fast tracer at 30 fps) keeps its length instead of vanishing
-			var newer: Array = pts[-2]
-			var oldest: Array = pts[-1]
-			var k := (now - tail - float(oldest[1])) / maxf(float(newer[1]) - float(oldest[1]), 1e-5)
-			pts[-1] = [(oldest[0] as Vector3).lerp(newer[0], k), now - tail]
+			var newer: Vector4 = pts[-2]
+			var oldest: Vector4 = pts[-1]
+			var k := (now - tail - oldest.w) / maxf(newer.w - oldest.w, 1e-5)
+			var q := _at(oldest).lerp(_at(newer), k)
+			pts[-1] = Vector4(q.x, q.y, q.z, now - tail)
 			break
 		pts.pop_back()
 	if pts.is_empty() and now > float(e["dur"]):
@@ -824,8 +829,8 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 func _trail_end(e: Dictionary, pts: Array) -> void:
 	if String(e.get("end", "")) == "" or pts.is_empty() or not is_instance_valid(e["h"]):
 		return
-	var at: Vector3 = pts[0][0]
-	var back: Vector3 = pts[mini(1, pts.size() - 1)][0]
+	var at := _at(pts[0])
+	var back := _at(pts[mini(1, pts.size() - 1)])
 	var way := Vector2(at.x - back.x, at.z - back.z)
 	play(e["h"], e["end"], at, way.normalized() if way.length() > 0.01 else (e["h"] as Hunter).aim_dir())
 	e["end"] = ""
@@ -838,18 +843,45 @@ func _draw_ribbon(e: Dictionary, pts: Array, now: float, tail: float) -> void:
 		return
 	var view := -cam.global_basis.z
 	var width := float(e["width"])
+	var last := Vector3.ZERO
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 	for i in pts.size():
-		var p: Vector3 = pts[i][0]
-		var q: Vector3 = pts[mini(i + 1, pts.size() - 1)][0]
-		var r: Vector3 = pts[maxi(i - 1, 0)][0]
-		var along := (q - r).normalized()
+		var p := _at(pts[i])
+		var born := (pts[i] as Vector4).w
+		var along := (_at(pts[mini(i + 1, pts.size() - 1)]) - _at(pts[maxi(i - 1, 0)])).normalized()
 		var side := along.cross(view).normalized()
-		var age := clampf((now - float(pts[i][1])) / tail, 0.0, 1.0)
+		var age := clampf((now - born) / tail, 0.0, 1.0)
 		var half := width * (1.0 - age) * 0.5
-		p += side * float(e["wave"]) * age * sin(age * RIBBON_WAVES + float(pts[i][1]) * 9.0)
+		p += side * float(e["wave"]) * age * sin(age * RIBBON_WAVES + born * 9.0)
 		mesh.surface_set_uv(Vector2(age, 0.0))
 		mesh.surface_add_vertex(p + side * half)
 		mesh.surface_set_uv(Vector2(age, 1.0))
-		mesh.surface_add_vertex(p - side * half)
+		last = p - side * half
+		mesh.surface_add_vertex(last)
+	if float(e["head"]) > 0.0:
+		_draw_head(e, mesh, pts, now, view, last)
 	mesh.surface_end()
+
+## The trail's bright head on its newest point: a quad facing the camera, head_len times as long along the flight as it
+## is wide, joined after the strip by degenerate triangles; UV.x -2..-1 tells the shader it is the head. It shrinks
+## away while the tail runs out.
+func _draw_head(e: Dictionary, mesh: ImmediateMesh, pts: Array, now: float, view: Vector3, last: Vector3) -> void:
+	var across := float(e["head"]) * (1.0 - clampf((now - float(e["dur"])) / float(e["tail"]), 0.0, 1.0))
+	if across <= 0.0:
+		return
+	var p := _at(pts[0])
+	var fwd := (p - _at(pts[1])).normalized()
+	var side := fwd.cross(view).normalized() * across * 0.5
+	fwd *= across * float(e["head_len"]) * 0.5
+	mesh.surface_add_vertex(last)
+	for i in 4:
+		var x := -1.0 if i < 2 else 1.0
+		var y := -1.0 if i % 2 == 0 else 1.0
+		var corner := p + fwd * x + side * y
+		mesh.surface_set_uv(Vector2(-1.5 + x * 0.5, 0.5 + y * 0.5))
+		if i == 0:
+			mesh.surface_add_vertex(corner)      # (twice: the last degenerate triangle of the join)
+		mesh.surface_add_vertex(corner)
+
+static func _at(sample: Vector4) -> Vector3:
+	return Vector3(sample.x, sample.y, sample.z)

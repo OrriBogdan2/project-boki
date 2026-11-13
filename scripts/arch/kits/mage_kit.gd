@@ -64,13 +64,8 @@ func _hide_fresh_round() -> void:
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
 		if shots[i]["by"] == h and not (shots[i]["x"] as Dictionary).has("src"):
-			_skin_round(shots[i])
+			Oomph.hide_orb(shots[i])
 			return
-
-func _skin_round(sd: Dictionary) -> void:
-	var orb := sd.get("node") as Node3D
-	if orb != null and is_instance_valid(orb):
-		orb.scale = Vector3.ONE * 0.001
 
 ## A rival went down: she pops her gum at them.
 func on_knock(_t: Hunter, mine: bool) -> void:
@@ -303,7 +298,7 @@ func _tick_lmb() -> void:
 	# a thrust from the shoulder to the fingertip, the hand's swoosh, then (at the release key) the fingertip
 	# crackles; a jagged bolt rides the round and splinters back where it ends
 	vfx("lmb", null, null, {"left": left})
-	_skin_round(sd)
+	Oomph.hide_orb(sd)
 	HeroVfx.of(m).trail(h, "lmb_trail", sd["node"])
 
 # ------------------------------------------------------------------ dash: Wirerun
@@ -654,7 +649,7 @@ func _coil(k: float) -> void:
 	var thrown: bool = shots.size() > n0 and shots[-1]["by"] == h
 	vfx("rmb", h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6), dir, {"len": rng, "loose": not thrown})
 	if thrown:
-		_skin_round(shots[-1])
+		Oomph.hide_orb(shots[-1])
 		HeroVfx.of(m).trail(h, "rmb_trail", shots[-1]["node"])
 	m.sfx("vv_rod_throw", h.pos, -1.0, 1.0 + 0.2 * (1.0 - k))
 
