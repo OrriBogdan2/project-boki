@@ -1160,6 +1160,20 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
 		"cds %s shields %s" % [str(cds), str(shields)]
 	)
+	# the Spin Dash recharge takes the data's -1.5 s a rank; no slot gets a rank damage step (the data names none)
+	var regens: Array = []
+	var dmgs: Array = []
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		regens.append(P.dash_regen())
+		dmgs.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the aegis, Smash or field",
+		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01
+				and dmgs[2] == dmgs[0],
+		"recharge %s power %s" % [str(regens), str(dmgs)]
+	)
+	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 3
 	ok(
 		"combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait)",

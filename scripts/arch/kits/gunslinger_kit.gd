@@ -352,7 +352,7 @@ func _skid_streaks(from: Vector3, dir: Vector2) -> void:
 func _slide_end() -> void:
 	h.roll_t = 0.0
 	if rank("dash") >= 3:
-		h.add_buff("move_speed", 0.25, 2.0)
+		h.add_buff("move_speed", float(dash_def()["rank3_speed"]), float(dash_def()["rank3_speed_t"]))
 	var air := bool(slide.get("air", false))
 	if air and not h.gliding:
 		h.vel.x *= 0.25          # an air slide stops short instead of carrying on (a glide press carries it, item 4)
