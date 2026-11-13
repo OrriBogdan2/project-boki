@@ -9,6 +9,7 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. knock banners (KnockBanner): a rival you knock shows KNOCK in the red ring (a second one at once
 ##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
+##   9. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -204,6 +205,7 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	await _check_ult(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -276,6 +278,57 @@ func _check_deny(P: Hunter) -> void:
 		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
+
+## 9. The ultimate tile reads "ready" at a glance, one look for every hero: the cooldown running out starts the
+## shine at once, which settles into the steady lit frame; a stun puts the padlock over it and lifting it goes
+## back to ready with no second shine; reaching the unlock level shines too.
+func _check_ult(P: Hunter) -> void:
+	var hud = P.m.hud
+	var m: Match = P.m
+	var plain := Arch.ids().filter(func(id):
+		var xd: Dictionary = Arch.def(id)["x"]
+		return not (xd.has("col") and xd.has("icon")))
+	ok(plain.is_empty(),
+		"every hero's ultimate has its own ability colour and icon for the tile (missing: %s)" % [plain])
+	P.ak.cd["x"] = 0.4
+	await _redraw(hud)
+	ok(HunterUltTile.state == "cooling", "cooling: the tile is in its cooldown state (%s)" % HunterUltTile.state)
+	var guard := 0
+	while float(P.ak.cd["x"]) > 0.0 and guard < 600:
+		await main.get_tree().process_frame
+		guard += 1
+	var back_at := m.time
+	await _redraw(hud)
+	var lag := HunterUltTile.shine_from - back_at
+	var redraw_s := 1.0 / HudPanels.REDRAW_HZ
+	ok(HunterUltTile.state == "ready" and lag >= -0.05 and lag <= redraw_s + 0.05,
+		"the cooldown runs out: ready, and the shine starts on the next redraw (%.3fs after)" % lag)
+	ok(HunterUltTile.shine(m.time) > 0.0, "... the shine is playing (%.2f left)" % HunterUltTile.shine(m.time))
+	await frames_until(m, HunterUltTile.shine_from + HunterUltTile.SHINE_T + 0.05)
+	await _redraw(hud)
+	ok(HunterUltTile.state == "ready" and HunterUltTile.shine(m.time) == 0.0,
+		"%.1fs later: the steady lit frame, no shine" % HunterUltTile.SHINE_T)
+	var shone_at := HunterUltTile.shine_from
+	P.stun_t = 3.0
+	await _redraw(hud)
+	ok(HunterUltTile.state == "blocked" and not bool(P.slot_info("x")["ready"]),
+		"stunned with the ultimate off cooldown: the padlock over it, not ready")
+	P.stun_t = 0.0
+	await _redraw(hud)
+	ok(HunterUltTile.state == "ready" and HunterUltTile.shine_from == shone_at,
+		"the stun ends: ready again, steady, no second shine")
+	P.lvl = 1
+	await _redraw(hud)
+	ok(HunterUltTile.state == "locked", "below level %d: locked" % int(Hunter.ULT_AT[0]))
+	P.lvl = int(Hunter.ULT_AT[0])
+	await _redraw(hud)
+	ok(HunterUltTile.state == "ready" and HunterUltTile.shine_from > shone_at,
+		"reaching the unlock level: ready, with the shine")
+
+## Waits for the next HudPanels redraw (the slots are drawn there, REDRAW_HZ times a second).
+func _redraw(hud) -> void:
+	await hud.panels.draw
+	await main.get_tree().process_frame
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
