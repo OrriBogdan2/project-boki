@@ -299,7 +299,7 @@ func _draw_all() -> void:
 		_draw_overhead(p)
 		_draw_glider_heat(p)
 	if p:
-		_draw_hurt_dirs(sz)
+		dmg_dir.draw(c, m, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
 		elif not map_open():
@@ -963,17 +963,7 @@ var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a p
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
-var hurt_dirs: Array = []  # {ang, t}
-
-func hurt_from(at: Vector3) -> void:
-	var p := m.player
-	if p == null:
-		return
-	var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)
-	if d.length() < 0.3:
-		return
-	hurt_dirs.append({"ang": atan2(d.y, d.x), "t": 0.0})
-	if hurt_dirs.size() > 6: hurt_dirs.pop_front()
+var dmg_dir := DamageDir.new()
 
 ## A less urgent message: it waits behind the others, and goes if it waits too long.
 func toast_small(text: String, col: Color) -> void:
@@ -1013,9 +1003,7 @@ func _hud_tick(delta: float) -> void:
 		guide_hidden = not guide_hidden
 	_h_down = hd
 	HudSlot.decay(self, delta)
-	for h in hurt_dirs.duplicate():
-		h["t"] = float(h["t"]) + delta
-		if float(h["t"]) > 1.2: hurt_dirs.erase(h)
+	dmg_dir.tick(delta)
 
 ## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
 const HUD_PORTRAIT := Vector2(112, 132)
@@ -1507,18 +1495,6 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		if String(st[0]) == "WISP": DownedMarks.badge(c, e - d * 26.0 - Vector2(0, 18), h, SideColor.ALLY, m.time, 10.0)
 		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
 		_ctext(e - d * 26.0 + Vector2(0, 5), lbl, 13, col, big)
-
-## Red arcs around the middle of the screen pointing at whoever just hit you.
-func _draw_hurt_dirs(sz: Vector2) -> void:
-	var ctr := sz * 0.5
-	for h in hurt_dirs:
-		var a := clampf(1.0 - float(h["t"]) / 1.2, 0.0, 1.0)
-		var ang: float = h["ang"]
-		var rad := minf(sz.x, sz.y) * 0.22
-		c.draw_arc(ctr, rad, ang - 0.32, ang + 0.32, 18, Color(1.0, 0.25, 0.2, 0.75 * a), 7.0, true)
-		var tip := ctr + Vector2(cos(ang), sin(ang)) * (rad + 12.0)
-		var nrm := Vector2(-sin(ang), cos(ang))
-		c.draw_colored_polygon(PackedVector2Array([tip, tip - Vector2(cos(ang), sin(ang)) * 12.0 + nrm * 9.0, tip - Vector2(cos(ang), sin(ang)) * 12.0 - nrm * 9.0]), Color(1.0, 0.25, 0.2, 0.8 * a))
 
 ## Aboard the skyship: when to jump.
 func _draw_ship_prompt(sz: Vector2) -> void:
