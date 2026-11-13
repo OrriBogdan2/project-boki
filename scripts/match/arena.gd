@@ -265,7 +265,6 @@ func reset() -> void:
 		D.set_meta("marks", {})
 		dm["hits"] = []; dm["total"] = 0.0; dm["last"] = 0.0
 	hits_all.clear(); dealt = 0.0
-	m.fx.ring(home, 1.6, Color("8fe3c8"), 0.35)
 	m.sfx("revive", null, -8.0, 1.2)
 
 ## Become another archetype on the spot (its weight class comes with it); your Boki stays.
