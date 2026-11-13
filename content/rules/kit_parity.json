@@ -30,6 +30,7 @@
 		{"hero": "rimewright", "slot": "E", "field": "e.slide", "value": 4.5, "tol": 0.45, "evidence": "F Ice Wall slides about 6 h in 2.4 s = 2.5 h/s (hero-ref/tamsin.md)"},
 		{"hero": "rimewright", "slot": "E", "field": "e.length", "value": 1.8, "tol": 0.18, "evidence": "F Ice Wall erupts about 1 h wide (hero-ref/tamsin.md)"},
 		{"hero": "rimewright", "slot": "E", "field": "e.length_max", "value": 4.5, "tol": 0.45, "evidence": "F Ice Wall widens to about 2.5 h (hero-ref/tamsin.md)"},
-		{"hero": "thief", "slot": "E", "field": "e.range", "value": 16.2, "tol": 0.9, "evidence": "F Phantom Dagger with no target landed about 9 bh out (hero-ref/dancer.md); 14 could not reach it"}
+		{"hero": "thief", "slot": "E", "field": "e.range", "value": 16.2, "tol": 0.9, "evidence": "F Phantom Dagger with no target landed about 9 bh out (hero-ref/dancer.md); 14 could not reach it"},
+		{"hero": "dolm", "slot": "R", "field": "x.len", "value": 21.6, "tol": 2.16, "evidence": "F Tetraform reticle about 12 bh = 21.6 m: 359 px at 30 px/bh (f0579), raised ridge 388 px (f0590) (hero-ref/breah.md)"}
 	]
 }
