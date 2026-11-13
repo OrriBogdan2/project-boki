@@ -31,7 +31,7 @@ func _press() -> void:
 	var ev := InputEventAction.new()
 	ev.action = DeathRecap.CYCLE_ACTION
 	ev.pressed = true
-	m.recap._unhandled_input(ev)
+	m.spectate.input(ev)
 
 func run(main: Node) -> void:
 	Save.no_write = true

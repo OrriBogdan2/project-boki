@@ -7,8 +7,9 @@ extends "res://tools/clip_shots.gd"
 ## --upper also shows each Hunter's atk2 on the upper body over the run (strip run_atk2: Tenzo's punch while running).
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
-## forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing. --react instead strips how he takes a hit (docs/art/REACT_AUDIT.md): hit_f and hit_b as the game hands
-## them off (f000 the hit frame, then one frame per DT), and the stun loop, the fall loop and the landing, keyed.
+## forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing. --react instead strips how
+## he takes a hit (docs/art/REACT_AUDIT.md): hit_f and hit_b as the game hands them off (f000 the hit frame, then
+## one frame per DT), and the stun loop, the fall loop and the landing, keyed.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk

@@ -326,17 +326,13 @@ func lmb_override(held: bool, dt: float) -> bool:
 		drop_holds()
 		return true
 	if not wall.is_empty():
-		if pressed:
-			boop.press()          # behind the raised aegis LMB is the shield thrust (BjornBoop)
+		if pressed: boop.press()      # behind the raised aegis LMB is the boop, never a swing or a throw
 		return true
 	if _hold_interrupted():
 		if lmb_t >= 0.0:
 			cancel_hold()
 		elif pressed:
 			lmb_was = false    # a fresh press while he's busy waits: still held when he's free, it goes then
-		return true
-	if not wall.is_empty():
-		if pressed: boop.press()      # behind the raised aegis LMB is the boop, never a swing or a throw
 		return true
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
@@ -560,7 +556,7 @@ func _reel() -> void:
 	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}
-	mace["reel"] = true
+	mace["t"] = 0.0
 	reels += 1
 	fx.taut = true
 	m.sfx("bjorn_reel", h.pos, -3.0)

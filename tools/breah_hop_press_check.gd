@@ -2,7 +2,8 @@ extends "res://tools/hero_pair_check.gd"
 ## Rock Hop's presses, for --dolm-combo-check (docs/heroes/dolm.md "Rock Hop"): every Shift press goes through
 ## Hunter.do_dash as a real one-step input, at each point of a chain. A press from the first rock's crouch to the
 ## window's last step is the next hop (a press in the flight waits for the landing), and it leaves the skid
-## running; a press in the last hop's final Loco.press_buffer, or after the window, is a fresh chain only with a charge up.
+## running; a press in the last hop's final Loco.press_buffer, or after the window, is a fresh chain only with a
+## charge up.
 ## The SHIFT AGAIN prompt is up exactly while a press is the next hop, and its time left is the chain's.
 
 var m: Match
@@ -83,7 +84,8 @@ func _to_last_flight() -> void:
 		_tap()
 	_until(func(): return _phase() == "air" and int(K.hop.st["n"]) == 3)
 
-## The last hop's final Loco.press_buffer and the time after the window: a fresh chain with a charge up, nothing without.
+## The last hop's final Loco.press_buffer and the time after the window: a fresh chain with a charge up, nothing
+## without.
 func _late_presses() -> void:
 	for charge in [1.0, 0.0]:
 		_to_last_flight()

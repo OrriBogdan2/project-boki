@@ -10,7 +10,7 @@
 		{"hero": "gunslinger", "slot": "LMB", "field": "weapons/quill_rifle:primary.dmg", "value": 12.0, "tol": 0.3, "evidence": "D MK7 51 dmg/round, the first 10 rounds extra (supervive_kits.md:48): 51 of a 1285 target = 6 of our 154 after round 10; the opening is 2x, wiki 'decays over your first 10 rounds to 50%'"},
 		{"hero": "gunslinger", "slot": "LMB", "field": "weapons/quill_rifle:primary.rate", "value": 0.08, "tol": 0.0, "evidence": "wiki (no D number; the 5 fps footage cannot resolve it): MK7 fires every 0.08s, the --ttk-check source row"},
 		{"hero": "gunslinger", "slot": "LMB", "field": "weapons/quill_rifle:primary.mag", "value": 30, "tol": 0.0, "evidence": "D MK7: 30-round mag, rapidly reloads when not firing (supervive_kits.md:48)"},
-		{"hero": "gunslinger", "slot": "LMB", "field": "resource.rattle_k", "value": 0.383, "tol": 0.01, "evidence": "D MK7 +39 dmg vs Dazed (supervive_kits.md:48) on the opening round 102 (2x 51), where a Dazed string holds = 39/102"},
+		{"hero": "gunslinger", "slot": "LMB", "field": "resource.rattle_k", "value": 0.76, "tol": 0.01, "evidence": "D MK7 +39 dmg vs Dazed (supervive_kits.md:48) on a 51 round = 39/51"},
 		{"hero": "gunslinger", "slot": "RMB", "field": "rmb.burr.hit_dmg", "value": 19.5, "tol": 0.3, "evidence": "D Spike Grenade 165 = 3.24 rounds of 51 (supervive_kits.md:49) x our 6"},
 		{"hero": "gunslinger", "slot": "E", "field": "e.dmg", "value": 24.0, "tol": 0.5, "evidence": "D Arcane Railgun 202 = 3.96 rounds of 51 (supervive_kits.md:51) x our 6"},
 		{"hero": "gunslinger", "slot": "X", "field": "x.tick_dmg", "value": 3.5, "tol": 0.1, "evidence": "D Summon Napalm fire zone 59 dmg/s (supervive_kits.md:52), 29.5 a 0.5s tick = 0.58 rounds of 51 x our 6"},

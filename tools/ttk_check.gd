@@ -20,8 +20,10 @@ const DT_SRC := 0.01       # s step of the source model
 
 ## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), level the numbers were read at,
 ## source LMB, abilities, and optionally the Daze its combo puts on the target]. The source target is the mean
-## Hunter at that level. The Daze is {"from": slot that applies it, "t": s, "lmb": flat extra per round, slot: extra share}.
-## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit), or + [front-load share, rounds]: the first round deals that much extra, falling off by that round]. Abilities map a slot to
+## Hunter at that level. The Daze is {"from": slot that applies it, "t": s, "lmb": flat extra per round, slot:
+## extra share}.
+## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit), or + [front-load share, rounds]:
+## the first round deals that much extra, falling off by that round]. Abilities map a slot to
 ## [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges, extra charges at max rank].
 ## Every number is a supervive_kits.md tooltip (level 1, or level 15 where its section says so), except the LMB of
 ## Myth, Elluna, Tetra, Kingpin and Celeste: the tooltips have no damage there, so it is read from the floating
