@@ -25,6 +25,8 @@ var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
 var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
 var run_exit := false          # the streak's hand-over at run speed is still to come (_exit_run)
+var run_n := 0                 # streaks started or cut: a cut streak's pending _arrive is not the current one's
+var glide_key_was := false     # the glide key held last step (only a fresh press cancels: _tick_glide_cancel)
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
@@ -87,6 +89,9 @@ func ult_recast() -> bool:
 
 func recast_window() -> Dictionary: return ult.window()
 
+func move_vel() -> Vector3:
+	return ult.move_vel()
+
 ## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
 func combo_marks(out: Array) -> void:
 	super(out)
@@ -95,7 +100,7 @@ func combo_marks(out: Array) -> void:
 		var sp: Dictionary = sparks[key]
 		if is_instance_valid(sp["e"]):
 			var n := int(sp["n"])
-			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
+			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), n >= int(rd["max"])))
 
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
@@ -155,7 +160,6 @@ func add_spark(f: Ent, n := 1) -> void:
 		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, PINK, 0.9, 0.28)
 		m.sfx("vv_static_full", f.pos, -2.0)
 		# the word goes above the marker so the two never print over each other
-		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", PINK, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
 	elif int(s["n"]) > was:
@@ -199,6 +203,7 @@ func _tick(dt: float) -> void:
 	if reset_dash_boost:
 		reset_boost_t -= dt
 		reset_dash_boost = reset_boost_t > 0.0
+	_tick_glide_cancel()
 	ult.tick(dt)
 	_tick_echo(dt)
 	_tick_trail()
@@ -480,9 +485,9 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	fx().arc(a + Vector3(0, 0.3, 0), b + Vector3(0, 0.2, 0), PINK, PINK.lightened(0.5), 0.5, time + 0.15)
 	net_bolt(a, b, col_of(dd))
 	m.sfx("vv_surge_go", h.pos, -1.0)
-	m.fx.word(h.pos + Vector3(0, 2.2, 0), "INVULNERABLE", PINK, false)   # the source labels the streak
 	if h.model: h.model.visible = false
-	m.later(time, _arrive)
+	run_n += 1
+	m.later(time, _arrive.bind(run_n))
 
 ## The streak itself: the body is hidden behind her own pink-teal after-images (_tick_echo); orbs crossed burst.
 func _tick_run(dt: float) -> void:
@@ -495,6 +500,38 @@ func _tick_run(dt: float) -> void:
 	if run_t <= 0.0 and h.model:
 		h.model.visible = true
 
+## Source patch 05.03.25: "Stuns, Roots, Grounds, and Glider cancel the state". A fresh press of the glide key
+## in the air (never Space held: DECISIONS 11-08) ends the Wirerun's charge or streak or Kitefall's climb and hang
+## the way a stun ends the charge: the charge stays spent, nothing hits after it, and Hunter._update_glide opens
+## the glider on the same press this step.
+func _tick_glide_cancel() -> void:
+	var key := bool(h.inp.get("glide_btn", false))
+	var fresh := key and not glide_key_was
+	glide_key_was = key
+	if not fresh or h.grounded or h.glide_cd > 0.0 or h.shot_down or m.time - h.kb_t <= 0.4:
+		return
+	if not wire.is_empty():
+		_end_wire(false)
+	elif run_t > 0.0:
+		_cut_run()
+	elif not ult.glide_out():
+		return
+	play("")
+	h.knock_t = 0.0                # the charge's own no-keys hold
+	h.loco.go(Loco.S.AIRBORNE)     # (that hold left the state Knocked, which may not open a glider)
+
+## The streak cut short: no more hits and no landing; she shows where she is and goes on at run speed, the
+## hand-over every Wirerun ends with (_exit_run). The run's invulnerability ends with it.
+func _cut_run() -> void:
+	run_t = 0.0
+	run_n += 1
+	h.roll_t = 0.0
+	h.dash_pass = {}
+	h.inv_t = 0.0
+	h.phase_t = 0.0
+	if h.model: h.model.visible = true
+	_exit_run()
+
 ## The step after the streak: she lands on the ring, handing over at run speed in the air too (a ground dash's
 ## exit), so its 40 m/s never carries on as an air slide or into the next Wirerun's drift. The kit
 ## ticks before the move, so nothing of the streak's speed slips into the air step; a jump out of it keeps its own.
@@ -506,8 +543,8 @@ func _exit_run() -> void:
 	h.vel.x = hv.x
 	h.vel.z = hv.y
 
-func _arrive() -> void:
-	if not is_instance_valid(h): return
+func _arrive(n: int) -> void:
+	if not is_instance_valid(h) or n != run_n: return
 	run_t = 0.0
 	if h.model: h.model.visible = true
 	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way
@@ -534,7 +571,7 @@ func _blowout(f: Ent) -> void:
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
-	payoff_fx(f.pos, "BLOWOUT", PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
+	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
 	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
 	# the refund tell on her: copper coil columns and a starburst (our own look)
 	var me := ground(h.pos)
@@ -553,6 +590,7 @@ func rmb_auto_t() -> float:
 func rmb_hold_tick(t: float) -> void:
 	if rod == null or not is_instance_valid(rod) or not rod.visible:
 		_summon_rod()
+	play_hold("mage_rmb_hold", t)
 	var k := clampf(t / float(rmb_def()["hold"]), 0.0, 1.0)
 	if k >= 1.0 and not rod_full:
 		rod_full = true
@@ -567,7 +605,6 @@ func _summon_rod() -> void:
 	if rod == null or not is_instance_valid(rod):
 		rod = _build_rod()
 	rod.visible = true
-	play("mage_rmb_hold")
 	_tick_rod()
 	# it arrives in her hand: a flash and a crackle off the tip
 	var tip := rod.global_position - rod.global_basis.z * 0.75
@@ -689,12 +726,11 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		if o != f:
 			other = o
 			break
-	if other != null or terrain_behind(f, dir, reach):
+	if other != null or KnockWall.hit(m, f, dir, reach, h):
 		slams += 1
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
-		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", PINK, false)   # over STUNNED
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
@@ -834,7 +870,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not wire.is_empty() or rmb_down or ult.busy():
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]):
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return

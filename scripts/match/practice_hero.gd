@@ -13,7 +13,7 @@ static func toggle(p: Practice) -> void:
 static func open(p: Practice) -> void:
 	var body := _show(p, "Relics", 860, func(): close(p), "Done", "heroes")
 	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. "
-			+ "Hover a Hunter for its kit, K for the full kit card.")
+			+ "Hover a Hunter for its kit, %s for the full kit card." % Settings.key_cap("kit_card"))
 	var grid := HeroGrid.build(body, func(ak: String): pick(p, ak), func(ak: String): kit(p, ak),
 			func(ak: String): p.hover_arch = ak, false)
 	p.picker.set_meta("grid", grid)
