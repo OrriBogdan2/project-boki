@@ -86,6 +86,8 @@ func pick(k: Dictionary, want := false) -> bool:
 	var rec: Dictionary = k["rec"]
 	if not FarmUnlocks.base_mode() or not h.visit.is_empty() or k.has("play"):
 		return k.has("play")
+	if BaseShy.shy(rec):
+		return false      # a newly adopted Boki keeps to the edge for its first day
 	if not want and (Care.need(rec, "joy") >= float(R["joy_below"]) or randf() > float(R["pick_chance"])):
 		return false
 	if not want and h.life and not h.life.machine(k).is_in(BaseLife.S.ROAM):

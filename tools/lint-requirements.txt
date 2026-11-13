@@ -1,0 +1,4 @@
+# Pinned lint tools for tools/check.sh (installed into its own venv, never into the game or the art tools).
+gdtoolkit==4.5.0
+ruff==0.17.4
+vulture==2.16
