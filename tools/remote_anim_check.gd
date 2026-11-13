@@ -4,18 +4,27 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts. Vex's tapped RMB
-## also compares the stuck burr's cone (Net 0.24.6's "cone" fx event): the copy draws the shooter's cone.
+## id and HunterAnim's), compared per cast. Then the lair bosses (Net 0.24.6's "bat" event): the host wakes a
+## Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a Boss fed
+## by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
+## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
+## Vex's tapped RMB also compares the stuck burr's cone (Net 0.24.6's "cone" fx event): the copy draws the
+## shooter's cone.
+## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3  # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15  # s: a move replaced sooner than this never makes a snapshot
 const SKEW := 0.05  # s: clocks of two processes on one machine
+const NET_SNAP_TOL := 0.08  # s: a re-time on the copy is the host's to within the age snap plus a frame
 const SETTLE := 1.6  # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8  # s a held key stays down
 const WALK := 3.6  # s more after Lace's Spirit Walk starts, so the walk (2.8 s, 3.3 s at rank 3) runs out
 const WASH_ON := 0.15  # the body tint (Ent.wash) counts as showing above this
 const CONE_TOL := 0.05  # m (and unit-vector parts): the event rounds to 0.01, the copy re-grounds it
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
+const BOSSES := {"colossus": "slam", "serpent": "dash", "brood": "spit"}  # the attack each plays
+const BOSS_LOOPS := ["idle", "walk", "stagger", "sleep"]  # (not compared: the copy's gait may differ a step)
+const BOSS_AT := Vector3(3.0, 0, 0)  # m from home: where a boss stands (the lair is round it)
 const ARCHS := [
 	"archer",
 	"ashwick",
@@ -43,10 +52,13 @@ var last_row := ["?", "?"]
 var last_prev_t := 0.0
 var unlike := {}  # arch -> casts whose copy differs
 var played := {}  # arch -> casts that played any move
+var boss_nid := ""  # the boss both games log (the guest's copy of it)
 var wash_rows: Array = []  # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []  # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []  # ... and the guest's copy's
+var retimes: Array = []  # [unix ms, s]: the watched move's clock jumped earlier, same id (a re-time)
 var cone := []  # the watched hunter's first burr cone since the mark: [from x, z, dir x, y, len, deg]
+var last_at := ["", 0.0]  # the watched kit's move id and anim_at at the last frame
 
 
 func _init() -> void:
@@ -64,11 +76,15 @@ func _host() -> void:
 	var G := await _host_up()
 	if G == null:
 		return _finish()
+	ok(Net.VERSION != "0.24.5", "the Net version moved on with the boss event (%s)" % Net.VERSION)
+	for kind in BOSSES:
+		await _boss(kind, String(BOSSES[kind]))
 	for arch in ARCHS:
 		for key in KEYS:
 			for held in [false] if key in ["e", "r"] else [false, true]:
 				await _cast(G, arch, key, held)
 	_wash_rows_ok()
+	await _ram_retime()
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(
@@ -77,6 +93,78 @@ func _host() -> void:
 			"unlike: %s" % str(unlike.get(arch, []))
 		)
 	_finish()
+
+
+## One boss of `kind` on the host, asleep, woken, one attack, a phase change: the guest's copy plays the same.
+func _boss(kind: String, atk: String) -> void:
+	var P := m.player
+	P.reclass(Arch.weight("gunslinger"), "gunslinger")
+	P.teleport(home)
+	var at := home + BOSS_AT
+	var b := Boss.new()
+	var lair := {"c": at, "half": 14, "state": "awake", "col": Color.WHITE, "name": kind, "adds": []}
+	b.init_boss(m, m.next_id("b"), kind, at, 1.0, lair)
+	m.add_child(b)
+	m.mobs.append(b)
+	m.ents_by_id[b.nid] = b
+	b.next_cd = 1e9
+	boss_nid = b.nid
+	Net.lobby_emit("ra", {"c": "boss", "nid": b.nid})
+	await _run(1.0)
+	log_rows.clear()
+	last_row = ["?", "?"]
+	Net.lobby_emit("ra", {"c": "mark"})
+	await _run(0.3)
+	b.dormant = false
+	b.awake_t = 0.0
+	await _run(2.0)
+	b.tgt = P
+	match atk:
+		"slam":
+			b._atk_slam()
+		"dash":
+			b._atk_dash()
+		"spit":
+			b._atk_spit()
+	await _run(3.5)
+	b.hp = b.max_hp * 0.6
+	await _run(3.2)
+	var mine := log_rows.duplicate()
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "log"})
+	await _reply()
+	var theirs: Array = replies[0].get("log", []) if not replies.is_empty() else []
+	var ids := mine.map(func(r): return String(r[2]))
+	for want in ["wake", atk + "_windup", atk + "_strike", "phase"]:
+		ok(ids.has(want), "%s: the host plays %s" % [kind, want], str(ids))
+	var cmp := _compare(mine, theirs)
+	ok(
+		cmp["bad"] == "",
+		(
+			"%s: the guest's copy plays the same moves, in order, within %.1f s (worst %.2f s)"
+			% [kind, LAG_TOL, cmp["lag"]]
+		),
+		str(cmp["bad"])
+	)
+	var first := _first_k(theirs, atk + "_windup")
+	ok(
+		first >= 0.0 and first < 0.4,
+		"%s: the copy's %s starts near its start (progress from the synced age)" % [kind, atk + "_windup"],
+		"k at first sight %.2f" % first
+	)
+	b.queue_free()
+	m.mobs.erase(b)
+	boss_nid = ""
+	Net.lobby_emit("ra", {"c": "boss", "nid": ""})
+	await _run(0.5)
+
+
+## How far through `move_name` the log's first row of it was (-1 when it never played).
+func _first_k(rows: Array, move_name: String) -> float:
+	for r in rows:
+		if String(r[2]) == move_name:
+			return float(r[3])
+	return -1.0
 
 
 func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
@@ -174,6 +262,41 @@ func _wash_rows_ok() -> void:
 	ok(g_off > g_on + 2.0 and g_off <= h_off + LAG_TOL, "archer: the copy's tint ends with the walk", detail)
 
 
+## Cinder's ram into a foe: the hit re-times as_leap onto its squash key (ArchKit.retime, about 0.23 s earlier,
+## under the 0.3 s resync), and the guest's copy must move its clock by the same within LAG_TOL of the host's.
+func _ram_retime() -> void:
+	var P := m.player
+	_kit("ashwick")
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "kit", "arch": "ashwick"})
+	await _reply()
+	var foe: Hunter = m.make_hunter("RT", 1, "medium", "Foe", "idle", {}, home + Vector3(3.0, 0, 0), {"arch": "none"})
+	_aim(foe.pos)
+	await _run(0.3)
+	retimes.clear()
+	Net.lobby_emit("ra", {"c": "mark"})
+	await _run(0.2)
+	P.do_dash()
+	await _run(SETTLE)
+	var mine := retimes.duplicate()
+	replies.clear()
+	Net.lobby_emit("ra", {"c": "log"})
+	await _reply()
+	var theirs: Array = replies[0].get("rt", []) if not replies.is_empty() else []
+	var detail := "host %s guest %s" % [str(mine), str(theirs)]
+	ok(
+		mine.size() == 1 and float(mine[0][1]) < -0.1,
+		"ashwick ram hit: the host's as_leap jumps to its squash key",
+		detail
+	)
+	var shown := false
+	for r in theirs:
+		if not mine.is_empty() and absf(float(r[1]) - float(mine[0][1])) <= NET_SNAP_TOL:
+			shown = shown or (float(r[0]) - float(mine[0][0])) / 1000.0 <= LAG_TOL
+	ok(shown, "ashwick ram hit: the guest's copy re-times as_leap by the same within %.1f s" % LAG_TOL, detail)
+	foe.teleport(home + Vector3(-6.0, 0, 9.0))
+
+
 ## The first time (s) the rows change to `on`; -99 when none.
 func _wash_at(rows: Array, on: bool) -> float:
 	for r in rows:
@@ -232,17 +355,23 @@ func _on_msg(topic: String, data, from: String) -> void:
 	if topic == "ra" and typeof(data) == TYPE_DICTIONARY and m and m.player:
 		var R := _copy()
 		match String(data.get("c", "")):
+			"boss":
+				boss_nid = String(data["nid"])
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
 			"kit":
 				if R:
 					R.reclass(Arch.weight(String(data["arch"])), String(data["arch"]))
 				Net.lobby_emit("dn_r", {"pos": [0, 0, 0]})
 			"mark":
 				log_rows.clear()
+				retimes.clear()
 				wash_rows.clear()
 				last_row = ["?", "?"]
 				cone = []
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "cone": cone})
+				Net.lobby_emit(
+					"dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone}
+				)
 		return
 	super._on_msg(topic, data, from)
 
@@ -261,6 +390,10 @@ func _copy() -> Hunter:
 func _sample() -> void:
 	if m == null or m.player == null:
 		return
+	var B := m.ents_by_id.get(boss_nid, null) as Boss if boss_nid != "" else null
+	if B != null:
+		_sample_boss(B)
+		return
 	var H := _copy()
 	H.render(DT, 1.0)  # (Match's own render pass is off in the checks)
 	if H.ak == null or H.anim == null:
@@ -268,6 +401,10 @@ func _sample() -> void:
 	var shown := H.wash > WASH_ON
 	if wash_rows.is_empty() and shown or not wash_rows.is_empty() and shown != wash_rows[-1][1]:
 		wash_rows.append([int(Time.get_unix_time_from_system() * 1000.0), shown])
+	var jump: float = H.ak.anim_at - float(last_at[1])
+	if H.ak.anim_id == last_at[0] and jump < -0.02 and jump > -0.6:
+		retimes.append([int(Time.get_unix_time_from_system() * 1000.0), snappedf(jump, 0.01)])
+	last_at = [H.ak.anim_id, H.ak.anim_at]
 	var row := [H.ak.anim_id, H.anim.km_id]
 	var restart: bool = H.anim.km_prev_t < last_prev_t - 0.001
 	last_prev_t = H.anim.km_prev_t
@@ -287,3 +424,12 @@ func _note_cone(H: Hunter) -> void:
 		if String(k).begins_with(pre) and String(e["kind"]) == "cone":
 			cone = [e["from"].x, e["from"].y, e["dir"].x, e["dir"].y, e["len"], e["deg"]]
 			return
+
+
+## A boss's frame: note a change of the BossAnim move it plays (the loops count as none).
+func _sample_boss(B: Boss) -> void:
+	B.render(DT, 1.0)
+	var id: String = "" if BossAnim.cur_move in BOSS_LOOPS else BossAnim.cur_move
+	if last_row[1] != id:
+		last_row = ["", id]
+		log_rows.append([int(Time.get_unix_time_from_system() * 1000.0), "", id, BossAnim.cur_k])
