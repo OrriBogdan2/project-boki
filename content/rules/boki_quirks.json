@@ -165,5 +165,14 @@
 		"_doc": "seconds before rain starts that it starts warning about it",
 		"kestrike": 25.0,
 		"barokat": 25.0
+	},
+	"rare_trait": {
+		"_doc": "a rare trait a kind can hatch with, rolled once per Boki from its seed (BokiQuirks.rare_trait_for): id, name, chance (0..1) and a card note. Evo branches can need it ('trait' in evolve.json)",
+		"marchleaf": {
+			"id": "nightmark",
+			"name": "Nightmark",
+			"chance": 0.04,
+			"note": "A dusk-dark stripe along its back. About 1 in 25 Marchleaf carry it, and it decides what they grow into."
+		}
 	}
 }

@@ -127,9 +127,9 @@ func _mask(tree: SceneTree) -> void:
 	await _shot(tree, "mask_2_boki_looks", 1.6)
 	await _shot(tree, "mask_3_put_on_prompt", 1.6)
 	moment.put_on()
-	await _shot(tree, "mask_4_reach", 0.25)
-	await _shot(tree, "mask_5_ghost_face", 0.35)
-	await _shot(tree, "mask_6_you_as_vex", 0.9)
+	await _shot(tree, "mask_4_lifting", 0.35)
+	await _shot(tree, "mask_5_flash", 0.4)
+	await _shot(tree, "mask_6_you_as_vex", 0.6)
 	await _shot(tree, "mask_7_vex_intro", 2.2)
 	hx.queue_free()
 	await tree.process_frame

@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://dwef6ci5mh5og"
-path="res://.godot/imported/mask_settle.wav-eec99cc69129197c15218c32cbf73e3c.sample"
+uid="uid://ud43topj2e4"
+path="res://.godot/imported/mask_sting.wav-b02ee94d98fcfcf38a778ae22cb0fe54.sample"
 
 [deps]
 
-source_file="res://audio/mask_settle.wav"
-dest_files=["res://.godot/imported/mask_settle.wav-eec99cc69129197c15218c32cbf73e3c.sample"]
+source_file="res://audio/mask_sting.wav"
+dest_files=["res://.godot/imported/mask_sting.wav-b02ee94d98fcfcf38a778ae22cb0fe54.sample"]
 
 [params]
 

@@ -68,7 +68,8 @@ func _data() -> void:
 			if id == "" or id != id.to_lower(): wrong.append(sp)
 			var ink := String(Goods.good(String(o.get("item", ""))).get("kind", ""))
 			if o.has("item") and ink != "ink": wrong.append(sp)
-			if o.has("path") and not Evo.AFF.has(String(o["path"])): wrong.append(sp)
+			for a in (o["path"] if o.get("path") is Array else [o.get("path", "fierce")]):
+				if not Evo.AFF.has(String(a)): wrong.append(sp)
 			var by_level: bool = not o.has("item") and not o.get("trade", false)
 			if by_level and int(lines[sp].get("level", 0)) < 2: wrong.append(sp)
 	ok(wrong.is_empty() and lines.size() > 0,
@@ -104,6 +105,20 @@ func _level() -> void:
 	Evo.on_level(fi)
 	ok(sw["species"] == "puddlet" and fi["species"] == "burrlet",
 		"level: a branch follows the leading affinity (swift %s, fierce %s)" % [sw["species"], fi["species"]])
+	var plain := _kin("marchleaf", 16)      # the real Marchleaf line: only a Nightmark takes the dark branch
+	var dark := _kin("marchleaf", 16)
+	plain["rare"] = ""
+	dark["rare"] = "nightmark"
+	for aff in ["swift", "fierce"]:
+		Evo.add(plain, aff, 500.0)
+		Evo.add(dark, aff, 500.0)
+	ok(Evo.next_for(plain, "level") == "scythant" and Evo.next_for(dark, "level") == "shinobant",
+		"level: a Nightmark Marchleaf -> Shinobant, any other -> Scythant (%s, %s)"
+		% [Evo.next_for(plain, "level"), Evo.next_for(dark, "level")])
+	var young := _kin("marchleaf", 15)
+	young["rare"] = "nightmark"
+	ok(Evo.next_for(young, "level") == "" and Evo.next_for(plain, "trade") == "",
+		"level: the trait doesn't skip the level")
 
 ## Item: only the right Ink, used from the goods, evolves it; it's used up only when it works.
 func _item() -> void:
@@ -145,6 +160,17 @@ func _art_gate() -> void:
 			no_art = id
 	ok(no_art != "" and not Evo.has_art(no_art) and Evo.has_art("cindle"),
 		"art gate: a species with data but no rig framing (%s) has no art; Vespyx does" % no_art)
+	var wait := _kin("marchleaf", 60)        # Shinobant and Harvantis are data-only: Boki wait for them
+	wait["rare"] = "nightmark"
+	var to_shin := Evo.next_for(wait, "level")
+	var ev_wait := Evo.on_level(wait)
+	ok(to_shin == "shinobant" and not Evo.has_art("shinobant") and wait["species"] == "marchleaf"
+		and String(ev_wait.get("kind", "")) != "form",
+		"art gate: a Nightmark level-60 Marchleaf waits, Shinobant has no model yet")
+	var scy := {"species": "scythant", "level": 60}
+	ok(Evo.next_for(scy, "level") == "harvantis" and not Evo.has_art("harvantis")
+		and Evo.try_evolve(scy, "level").is_empty() and scy["species"] == "scythant",
+		"art gate: Scythant waits, Harvantis has no model yet")
 	_line("hivara", {"level": 8, "into": [{"id": no_art}]})
 	var rec := _kin("hivara", 20)
 	Evo.on_level(rec)

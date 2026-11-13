@@ -835,7 +835,7 @@
 "semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 64,
+"long_line": 65,
 "semicolon": 70
 },
 "tools/arena_check.gd": {

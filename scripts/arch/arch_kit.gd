@@ -136,7 +136,8 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
-## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if left unused)}. The base reports E while it's up and e_recastable().
+## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if unused)}.
+## The base reports E while it's up and e_recastable().
 func recast_window() -> Dictionary:
 	if e_t > 0.0 and e_recastable():
 		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())
@@ -778,7 +779,9 @@ func slot_info(slot: String) -> Dictionary:
 				if (sd.get("variants", {}) as Dictionary).has(v):
 					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
-				"cd": float(cd["rmb"]) if ch_rmb < float(rmb_charges()) else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(), "charge_f": rmb_charge_f(),
+				"cd": float(cd["rmb"]) if ch_rmb < float(rmb_charges()) else 0.0,
+				"cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"),
+				"charges": int(floor(ch_rmb)), "max_charges": rmb_charges(), "charge_f": rmb_charge_f(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
@@ -804,7 +807,8 @@ func slot_info(slot: String) -> Dictionary:
 func rmb_charge_f() -> float:
 	if ch_rmb >= float(rmb_charges()):
 		return ch_rmb
-	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")), 0.0, 1.0)
+	var cd_full := maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec"))
+	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / cd_full, 0.0, 1.0)
 
 func e_recastable() -> bool: return false
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.

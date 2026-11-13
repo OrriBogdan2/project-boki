@@ -227,6 +227,9 @@ func _info_card() -> PanelContainer:
 		v.add_child(_note("Its egg was guarded by %s. Few of its kind are ever seen." % boss))
 	if rec.get("shimmer", false):
 		v.add_child(_note("Its coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)))
+	var rare := BokiQuirks.rare_of(rec)
+	if not rare.is_empty():
+		v.add_child(_note("%s, a rare trait: %s" % [rare["name"], rare["note"]]))
 	for mid in Mutations.of(rec):
 		v.add_child(_note("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)]))
 	if rec.has("parents"):
