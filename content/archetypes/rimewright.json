@@ -33,7 +33,7 @@
 		"weapons": {
 			"hoar_fan": "Hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones, then a short pause."
 		},
-		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
+		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside an 8.3m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},
 	"signature": "hoar_fan",
 	"resource": {
@@ -46,7 +46,7 @@
 	},
 	"passive": {
 		"name": "Hoarfrost",
-		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
+		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.7m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
 		"splinter_dmg": 37.0,
 		"splinter_r": 3.0,
 		"splinter_delay": 0.4,

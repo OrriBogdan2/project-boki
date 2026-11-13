@@ -1243,3 +1243,4 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+- Card text: `godot --headless -- --card-numbers-check` reads each Hunter's kit card (`KitCard.slot_text`) and fails any number it states (range, damage, cooldown, duration, slow, `A -> B` pair) that is not a field of that Hunter's JSON of the kind it names ("push N" a push/kb field, "stuns N" a stun field, "slowed N%" a slow field, "Ns" a time field, "Nm" a distance field; kinds come from the key path, a key of no kind passes for all but push, stun and slow); numbers a card works out from fields go in its `_derived`.
