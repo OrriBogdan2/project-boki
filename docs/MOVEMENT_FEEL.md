@@ -435,6 +435,23 @@ DECISIONS 2026-11-08 targets 30+ fps on low-end PCs, so a tap must not depend on
 - **Found and fixed: LMB.** It was read as `is_action_pressed`, "down now", so a click that came and went inside one frame was lost: 6/6 taps lost at 30 fps and after a stall. Shift, Space, E and R were already safe: they read `is_action_just_pressed`, which stays true for the frame in which the key went down and up, and queue the press in `Match.pending_input` until the next fixed step. `FireTap` (`scripts/match/fire_tap.gd`) now latches an LMB tap the same way: down for the next fixed step, once, then cleared (a held button is unchanged, a tap in a hitstop frame waits for its step, a paused or over-UI tap is dropped). After the fix: 0 lost in 180 taps (3 heroes x 5 keys x 2 rounds x 6).
 - **Dashes.** Fixed steps (1/60 s) do the movement, so a frame's length only changes when the press is read. Measured with `--move-feel-check`'s felt-dash rule and DASH_TOL (5 % distance, 0.035 s), the dash at 30 fps and at 60 fps with a 100 ms stall every 5th frame equals the 60 fps dash: gunslinger ground 4.81 m / 0.450 s, air 4.53 m / 0.330 s; juggernaut 3.82 m / 0.262 s; mage 5.83 m / 0.168 s at 60 fps, 5.95 m (+2 %, one step of a 2-step frame) at 30 fps. `DashPace` keeps a dash's frames (at most 2 steps a frame while it runs) so a stall doesn't skip it.
 - `--move-feel-check`: 0 failures on this branch.
+## Online casts: press to first frame at 100 ms (`--cast-predict-check`)
+Source parity: your own ability starts the frame you press it, even online. `tools/cast_predict_check.gd` runs a listen server (the host game, with the relay in-process) and a client (a second headless game) over the desktop relay with test weather: the relay holds every packet 50 ms (a 100 ms round trip between the games) and loses 2% (a lost snapshot is dropped, a lost reliable message comes one round trip late, `RelayServer` `--lag-ms` / `--loss`). The client presses LMB, RMB, E, R and dash of the four slice Wardens through the real input path, first on an offline match, then online, and records the first tick of animation (what `HunterAnim` is told) and of VFX (a burst, spark, flash or HeroVfx look starting within 6 m of the Hunter). Tick 0 is the press's own frame. Target: online is never later than offline.
+
+Measured on the client (ticks after the press, offline / online; the same numbers before and after this pass, as nothing in the game had to change):
+
+| Warden | LMB anim, vfx | RMB anim, vfx | E anim, vfx | R anim, vfx | Dash anim, vfx |
+|---|---|---|---|---|---|
+| Vex | 0/0, 0/0 | 0/0, 3/3 | 0/0, 1/1 | 0/0, 0/0 | 0/0, 0/0 |
+| Kael | 0/0, 13/13 | 19/19, 4/4 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+| Lace | 0/0, 1/1 | 10/10, 4/4 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+| Cinder | 0/0, 0/0 | 1/1, 1/1 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+
+Measured round trip, client to host and back: 149-162 ms (the 100 ms of weather plus each game and the relay reading the line once a frame). 14-19 packets lost per run.
+
+- **No cosmetic prediction was needed.** Each game owns its own Hunter (scripts/core/net.gd): the client's kit, animation, sounds and looks run on its own game in the press's frame, and only hits on bodies another game owns travel (to that game, which applies them). Nothing in the cast path waits for the host, so there is nothing to reconcile or cancel and `Net.VERSION` is unchanged.
+- **The later cells are local gates, the same offline:** Kael's LMB shows its wave-charge look once the hold becomes a charge (13), his RMB is the tap/hold split (its pose on the hold threshold, a charge spark at 4), Lace's RMB draw pose waits for the 0.15 s tap guard (10; ext/input-latency-check starts it on the press), Vex's RMB first spark at 3 and Cinder's aim at 1 (the kit's first hold tick).
+- **How the check keeps the comparison fair:** the same dice for both runs (Kael's charge sparks are a coin flip a tick), the offline bot stands idle and no Boki run about, the camp's monsters are cleared, and looks are counted only at the pressing Hunter.
 
 ## Not touched
 
