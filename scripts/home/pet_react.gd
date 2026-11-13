@@ -77,7 +77,8 @@ static func _beat(h, k: Dictionary, kd: String, spec: Dictionary, first_shy: boo
 		_pose(n, "flinch", float(spec["flinch_s"]))
 	else:
 		h.fx.burst(pos + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
-		Sfx.play("kin_happy", null, -4.0, 0.12, Unique.voice(k["rec"]) * (0.75 if kd == "sleepy" else 1.0))
+		var pitch := Unique.voice(k["rec"]) * (0.75 if kd == "sleepy" else 1.0)
+		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"), null, -4.0, 0.12, pitch)
 	_icon(n, icon)
 	match kd:
 		"playful": _roll(n, float(spec["roll_s"]))

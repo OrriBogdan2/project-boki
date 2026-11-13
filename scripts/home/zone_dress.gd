@@ -12,6 +12,7 @@ extends RefCounted
 const SHEET_Y := 0.03          # m above the ground: the water sheet
 const SHEET_COLOUR := Color(0.36, 0.78, 0.86, 0.55)
 const KEEP_OUT := 2.2          # m round the landing, the pad and a zone's stump that scatter stays away from
+const BEAM_AMOUNT := 20        # particles of the portal's beam (40 in a match, where it also marks the exit from afar)
 const TRIES := 40              # spots tried per prop before giving up on it
 const SHAPES := 1              # Flora shapes used per kind (one batch each)
 const KINDS_FLORA := ["crystal", "reed", "pebble", "mushroom", "fern", "flower"]
@@ -25,6 +26,23 @@ const KINDS_BOX := {
 	"crack": {"size": Vector3(1.4, 0.03, 0.12), "steps": 1, "clear": 0.4, "colour": Color(1.0, 0.36, 0.1, 0.0)},
 }
 const STEP_IN := 0.6           # a terrace's upper slab, as a fraction of the one under it
+
+## The expedition portal in a home (hub and every zone): its beam stays lit but thinner, and the extraction
+## circle (a dim outer ring and its fill, which only a match's exit uses) is freed, so the pad reads as
+## one lit ring you step on.
+static func calm_pad(portal: Node3D) -> void:
+	var beam := portal.get_node("Beam") as CPUParticles3D
+	beam.amount = BEAM_AMOUNT
+	beam.emitting = true
+	portal.get_node("Zone").queue_free()
+	portal.get_node("ZoneFill").queue_free()
+
+## The far landmarks' motes (22 each, simulated and out of the home camera's frame) are freed in a built
+## zone; the landmark rocks stay.
+static func quiet_landmarks(h) -> void:
+	for lm in h.world.find_children("Landmark_*", "Node3D", true, false):
+		for p in lm.find_children("*", "CPUParticles3D", true, false):
+			p.queue_free()
 
 ## Called once the zone's world is built; does nothing outside a built zone.
 static func place(h) -> void:
@@ -40,6 +58,7 @@ static func place(h) -> void:
 		var r: Array = B["shallow"]
 		shallow = Rect2(r[0], r[1], r[2] - r[0] + 1, r[3] - r[1] + 1)
 		_sheet(h, shallow)
+	quiet_landmarks(h)
 	_scatter(h, B["scatter"], shallow)
 
 static func _sheet(h, tiles: Rect2) -> void:
@@ -67,6 +86,7 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 	var stump := BaseShove.spot()
 	if not stump.is_empty():
 		keep.append(Vector3(stump[0], 0.0, stump[1]))
+	keep.append_array(BaseRace.loop_points())
 	for kind in KINDS_FLORA:
 		var by: Array = [[], []]
 		for i in int(S.get(kind, 0)):
