@@ -23,6 +23,8 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  12. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
+##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -58,6 +60,7 @@ func run(main: Node) -> void:
 	_garden()
 	_build_cues()
 	_strip_chime()
+	_boss_moves()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -523,3 +526,20 @@ func _heard(sname: String, act: Callable) -> float:
 	if not Sfx.last_played.has(sname):
 		return 0.0
 	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
+
+## 12. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
+func _boss_moves() -> void:
+	var boss: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boss.json"))["sounds"]
+	var missing := []
+	for kind in BossAnim.ATTACKS:
+		var cues := ["wake", "phase", "stagger", "fall", "defeat"]
+		for atk in BossAnim.ATTACKS[kind]:
+			cues += [atk + "_wind", atk + "_hit"]
+			if atk in ["boulders", "lob"]:
+				cues.append(atk + "_land")
+		for c in cues:
+			if not boss.has("boss_%s_%s" % [kind, c]):
+				missing.append("%s %s" % [kind, c])
+	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
+	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
+	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")

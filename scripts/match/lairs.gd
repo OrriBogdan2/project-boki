@@ -757,6 +757,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	for a in L["adds"]:
 		if is_instance_valid(a) and not a.dead: a.camp = a.pos
 	m.add_feed("%s felled %s!" % [killer.pname if killer else "Someone", b.md["name"]])
+	BossSfx.fall(m, b)
 	BossSfx.defeat(m, b, killer)
 	_music(false)
 

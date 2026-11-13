@@ -150,10 +150,13 @@ const CHECKS := {
 	"--kin-target-check": ["res://tools/kin_target_check.gd", "kin_target_check", null],      # pick_target's rule
 	# boss wake, phase and defeat cues
 	"--boss-sfx-check": ["res://tools/boss_sfx_check.gd", "boss_sfx_check", null],
+	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],      # graphics presets
 	"--clutter-check": ["res://tools/clutter_check.gd", "clutter_check", null],
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],  # item 103
+	"--boss-sfx-check": ["res://tools/boss_sfx_check.gd", "boss_sfx_check", null],      # boss cues, every move
 	# Settings > Audio sliders reach the buses
 	"--audio-settings-check": ["res://tools/audio_settings_check.gd", "audio_settings_check", null],
+	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],      # item 103
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],  # (the old name)
 	# sounds behind terrain
@@ -421,6 +424,10 @@ const CHECKS := {
 	"--results-stage-shots": ["res://tools/results_stage_check.gd", "results_stage_check", "shots"],      # --shots-dir
 	# boss keyed moves, strikes on the tell
 	"--boss-anim-check": ["res://tools/boss_anim_check.gd", "boss_anim_check", null],
+	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
+	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
+	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
+	"--boss-anim-check": ["res://tools/boss_anim_check.gd", "boss_anim_check", null],      # boss keyed moves
 	"--boss-anim-shots": ["res://tools/boss_anim_shots.gd", "boss_anim_shots", null],      # boss move strips (GPU)
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
