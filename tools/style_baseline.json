@@ -595,7 +595,7 @@
 "semicolon": 3
 },
 "scripts/match/practice.gd": {
-"long_line": 2
+"long_line": 1
 },
 "scripts/match/practice_hero.gd": {
 "long_line": 2,

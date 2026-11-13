@@ -1073,7 +1073,7 @@ func _place_spots() -> void:
 	var step := maxi(1, outer.size() / n_exits)
 	var off := rng.randi_range(0, outer.size() - 1)
 	var order: Array = []
-	for k in n_exits:
+	for k in (n_exits if not outer.is_empty() else 0):      # (a one-island map has no outer islands)
 		var cand: int = outer[(off + k * step) % outer.size()]
 		if not order.has(cand): order.append(cand)
 	for ii in outer:
