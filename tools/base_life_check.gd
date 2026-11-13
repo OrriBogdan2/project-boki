@@ -225,8 +225,8 @@ func run(m: Node) -> void:
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
 	var cap := int(BaseChase.rules()["per_zone"])
 	ok(chase_max <= cap, "never more than %d friend chase at once in the 10 minutes (most %d)" % [cap, chase_max])
+	await _nap_sounds(home)      # before the chase rows: they park and rest Boki their own way
 	_chase_rows(home, center)
-	await _nap_sounds(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
