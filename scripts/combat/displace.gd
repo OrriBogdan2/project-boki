@@ -170,7 +170,9 @@ func _reel(rec: Dictionary, e: Ent, to: Vector2, dist: float, gap: float, dt: fl
 		e.stun_t = maxf(e.stun_t, float(p["stun"]))
 	var want := to / dist * float(p["spd"])
 	var sw := float(p.get("swing", 0.0))
-	var v: Vector2 = (rec["v"] as Vector2).lerp(want, 1.0 - exp(-sw * dt)) if sw > 0.0 else want
+	var v: Vector2 = rec["v"]
+	# full speed from the grab (the source's reel has no wind-up); after that it eases onto each new heading
+	v = v.lerp(want, 1.0 - exp(-sw * dt)) if sw > 0.0 and v != Vector2.ZERO else want
 	rec["v"] = v
 	var left := minf(v.length() * dt, dist - gap)
 	var dir := v.normalized() if v.length() > 0.01 else to / dist
