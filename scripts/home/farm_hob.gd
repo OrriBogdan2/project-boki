@@ -143,6 +143,11 @@ func _call_out(dt: float) -> void:
 	Sfx.play("ping", node.position, -10.0)
 
 # ------------------------------------------------------------------ interaction
+## The head start `slack` m a place gets over the current pick in Home._find_interact, none over Hob: with him
+## the nearer one wins, so his prompt and the stall's never swap back and forth on a bias.
+static func lead(best: Dictionary, slack: float) -> float:
+	return 0.0 if best.get("kind") == "hob" else slack
+
 ## The thing to interact with near the player, or {}: Hob ({kind, d}: d m away, so the nearest thing wins), or
 ## a site you can help build.
 func find(p2: Vector2) -> Dictionary:

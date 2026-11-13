@@ -2072,18 +2072,18 @@ func _find_interact() -> void:
 		var reach := 2.6 if nm in ["house", "portal"] else 1.9
 		if nm == "house": sp = _house_door() - HomeLayout.facing(house_r) * 0.1
 		var d := p2.distance_to(Vector2(sp.x, sp.z))
-		if d < reach and d < bd + 0.6: bd = d; best = {"kind": nm}
+		if d < reach and d < bd + FarmHob.lead(best, 0.6): bd = d; best = {"kind": nm}
 	for b in lots:
 		var l: Dictionary = lots[b]
 		var dp: Vector3 = l["door"] if l["built"] else l["at"]
 		var d := p2.distance_to(Vector2(dp.x, dp.z))
-		if d < (1.8 if l["built"] else 2.4) and d < bd + 0.4: bd = d; best = {"kind": "lot", "b": b}
+		if d < (1.8 if l["built"] else 2.4) and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "lot", "b": b}
 	for k in bridges:
 		if bridges[k]["built"] or FarmUnlocks.base_mode():
 			continue
 		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
-		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
+		if d < 2.4 and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "bridge", "isle": k}
 	for k in kins:
 		if k.has("indoors"): continue
 		var d := p2.distance_to(Vector2(k["pos"].x, k["pos"].z))
@@ -2091,7 +2091,7 @@ func _find_interact() -> void:
 	if not _visiting() and is_instance_valid(burrow_node):
 		var bdoor := BURROW_AT + _turn(Vector3(0, 0, 1.55), burrow_r)
 		var bdd := p2.distance_to(Vector2(bdoor.x, bdoor.z))
-		if bdd < 1.7 and bdd < bd + 0.4: bd = bdd; best = {"kind": "burrow"}
+		if bdd < 1.7 and bdd < bd + FarmHob.lead(best, 0.4): bd = bdd; best = {"kind": "burrow"}
 	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and not _visiting():
 		best = {"kind": "egg"} if is_instance_valid(nest) else {"kind": "nook"}
 	if hinc and p2.distance_to(Vector2(INCUB_AT.x, INCUB_AT.z)) < 1.6 and not _visiting():
