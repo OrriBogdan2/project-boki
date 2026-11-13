@@ -31,6 +31,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, swim, paddle, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
@@ -53,6 +54,17 @@ BokiFly's metas: `aloft` picks hover (standing) or glide (moving, horizontal spe
 starts the flare, which comes before whatever it landed for; `lift` (m up) keeps a ground shadow, made the first
 time a flier lifts, on the ground under it. Strip: `--boki-fly-shots` (docs/shots/boki-fly/fly.png).
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
+asserts every rigged species has all fourteen, with the five game clips timed to those beats and no T-pose frame.
+Look at them with `--boki-home-shots`.
+
+Water: the root meta `kwater` is the water over its feet this frame (m; `BokiWade` sets it every step in a pond,
+the rig takes it, so a Boki lifted out or taken by a game is dry at once). Deeper than `SWIM_LINE` (half) of its
+height, the rig lifts the model off the bed to float with half its height under and plays `swim` (a Water type,
+`BokiRig.swimmer`: body level, legs tucked back, a wave down the tail, fins sculling) or `paddle` (the rest: nose and
+head up, front legs or wings stroking in turn, hind legs kicking); both bob with each stroke. One that hovers stays
+over the surface. A pond's deep middle is `swim_depth` (1 m, wade.json) deep under a rigged Boki. A glb clip of the
+same name wins over the built one. `--boki-rig-check` has the 1 m and puddle rows, `--wade-check` a Zapple paddling
+across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 

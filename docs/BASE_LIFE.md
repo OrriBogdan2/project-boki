@@ -71,6 +71,8 @@ check: `--base-life-check`.
   marks are one MultiMesh (one draw call), made when the first Boki steps in and never on Very Low. Water, Ice and
   Crystal
   types (`HomeToys.lean_of`: lean, else species theme) paddle: a free roaming one lingers 4 to 8 s playing the
+  (middle) of its dry pace, leaves a ripple and a splash going in and shakes off coming out. Water, Ice and Crystal
+  types (`HomeToys.lean_of`: lean, else species theme; wade.json `swim`) linger: a free roaming one stays 4 to 8 s playing the
   `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
   The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
   lane** (none exist yet; the walk just slows and the shake is a Body wobble): `wade` (a slow knee-high walk loop),
@@ -84,6 +86,10 @@ check: `--base-life-check`.
   a carry) brings it down first; a game sets it down at once. Up there it skips wading. Check: `--boki-rig-check`
   (two fliers on Kitewind Ridge for 120 s: never over 3 s on foot while roaming, hovering in the band, every landing
   flares, plus a bridge and a leap).
+  The rest wade through. A rigged Boki finds the deep middle `swim_depth` deep and floats there (BokiRig's swim
+  state, docs/art/kin/RIGGED_BOKI.md): Water types swim level, the rest paddle head up. Check: `--wade-check`;
+  `--garden-nav-check` has a stream in the sweep. **Clips for the anim lane** (none exist yet; the walk just slows and
+  the shake is a Body wobble): `wade` (a slow knee-high walk loop), `shake` (a shake-off, 0.6 s).
 - Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
   stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
   is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the
