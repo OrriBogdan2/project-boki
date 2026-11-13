@@ -93,11 +93,6 @@ func _course() -> void:
 	var under := 0
 	var texts := {}
 	var counters := {}
-	var talk_at := -1.0
-	var ran_in_talk := 0
-	var not_in_box := 0
-	var ahead := {}
-	var rv := {}
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -110,22 +105,9 @@ func _course() -> void:
 			if m.hud and not m.player.extracted:
 				m.hud.toast("check %d" % last, Color.WHITE)
 				asked += 1
-			counters[tu.id()] = tu.progress_text()
-		if not texts.has(tu.id()):
 			texts[tu.id()] = tu.text
+			counters[tu.id()] = tu.progress_text()
 		step_t += Match.DT
-		_rival_probe(tu, rv)
-		if tu.pell.talking():
-			talk_at = m.time if talk_at < 0.0 else talk_at
-			ran_in_talk += int(m.time != talk_at)
-			not_in_box += int(not is_instance_valid(tu.pell.box) or tu.pell.box.get_parent() != m.hud)
-		else:
-			talk_at = -1.0
-			var g := tu._lead_goal(tu.id())
-			var to_g := func(at: Vector3): return Vector2(g.x - at.x, g.z - at.z).length()
-			var near: bool = g != Vector3.INF and to_g.call(tu.pell.pos) < 2.5
-			if near or g != Vector3.INF and to_g.call(tu.pell.pos) < to_g.call(m.player.pos) - 1.0:
-				ahead[tu.id()] = true
 		if m.hud == null:
 			continue
 		if tu.card_up():
@@ -135,25 +117,13 @@ func _course() -> void:
 		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
 			m.hud.msgs.clear()
-	print("TUTHUD course %.1fs of play, %d steps" % [t, Tutorial.steps().size()])      # (the before/after timing)
 	ok(m.player.extracted, "the course still finishes")
-	var pl := tu.pell
-	ok(pl.beacon != null and pl.beacon.wants_arrow, "Pell wears a beacon (glow, name, edge arrow)")
-	var stops := Tutorial.steps().all(func(st): return String(st[0]) in pl.talked)
-	ok(stops and pl.talked.size() == Tutorial.steps().size(),
-		"Pell stops you before each new thing (%s)" % ", ".join(pl.talked))
-	ok(ran_in_talk == 0 and not_in_box == 0, "the match holds while Pell talks, in the dialogue box"
-		+ " (%d frames ran, %d without the box)" % [ran_in_talk, not_in_box])
-	var led := ["dash", "chest", "extract"].all(func(x): return ahead.has(x))
-	ok(led, "Pell flies ahead to the pad, the chest and the outpost (%s)" % str(ahead.keys()))
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	ok(Tutorial.steps().size() == 10 and texts.size() == 10, "10 steps, 10 banner lines (%s)" % str(texts.keys()))
-	_rival_beats(tu, rv)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
@@ -185,79 +155,6 @@ func _marker() -> void:
 	ok(ahead == Vector2.ZERO, "a target ahead whose pin is in the play box shows its pin (%s)" % str(ahead))
 	var back := MarkerDir.off_dir(cam, sz, me - fwd * 4.0, me)
 	ok(back != Vector2.ZERO and back.y > 0.0, "one behind the hunter gets an arrow pointing down (%s)" % str(back))
-
-## Beats 7 and 8, noted frame by frame while the driver plays them (rv collects what was seen).
-func _rival_probe(tu: Tutorial, rv: Dictionary) -> void:
-	var r := tu.rival
-	if r.h == null:
-		return
-	if not rv.has("hp"):
-		rv["hp"] = r.h.hp / r.h.max_hp
-		rv["dmg"] = float(r.h.ai["diff"]["dmg"])
-		rv["wisp"] = r.wisp != null
-	if r.phase == TutorialRival.Phase.LOOSE and not rv.has("slow"):
-		rv["slow"] = m.slowmo > 0.0
-		rv["round"] = r.h.downed and not r.h.out      # (HunterWisp draws it in a render frame)
-		rv["labels"] = r._labels.map(func(l): return String(l.text))
-		rv["loose_m"] = r.h.pos.distance_to(r.loose_at)
-	if r.phase == TutorialRival.Phase.LOOSE and not tu.card_up() and tu.id() == "grab" and not rv.has("told"):
-		_walk_to_round_wisp_first(r, rv)
-	if r.phase == TutorialRival.Phase.CARRIED:
-		rv["carried"] = r.wisp.position.distance_to(m.player.pos)
-		rv["tether"] = r._tether != null and r._tether.visible and r.wisp.get_child_count() > 3
-	if r.h.out or r.phase == TutorialRival.Phase.GONE:
-		rv["gone"] = r.carried_t
-
-## Standing at the round wisp and holding interact shows the toast and grabs nothing.
-func _walk_to_round_wisp_first(r: TutorialRival, rv: Dictionary) -> void:
-	var p := m.player
-	var back := p.pos
-	p.teleport(r.h.pos + Vector3(1.0, 0.0, 0.0))
-	p.inp["interact"] = true
-	r.hold = 0.0
-	r.tick(0.0)
-	rv["told"] = r.told
-	rv["held"] = r.hold
-	rv["phase"] = r.phase
-	p.teleport(back)
-
-func _rival_beats(tu: Tutorial, rv: Dictionary) -> void:
-	var cfg: Dictionary = tu.rival.cfg
-	var hp := float(rv.get("hp", 1.0))
-	var want_hp := float(cfg["hp"])
-	ok(absf(hp - want_hp) < 0.01, "the rival glides in at %d%% health (%.2f)" % [int(want_hp * 100), hp])
-	var dmg := float(rv.get("dmg", 1.0))
-	ok(dmg <= 0.1 and bool(rv.get("wisp", false)), "it fights at tutorial damage (%.2f) with its own Boki wisp" % dmg)
-	var popped: bool = bool(rv.get("slow", false)) and bool(rv.get("round", false))
-	ok(popped, "on the knock time slows and it pops into the round Hunter Wisp")
-	var labels: Array = rv.get("labels", [])
-	var named: bool = labels.size() == 2 and String(labels[0]) == "Hunter: can't be taken"
-	ok(named and String(labels[1]).begins_with("Boki: hold "), "both wisps are labelled (%s)" % str(labels))
-	var apart := float(rv.get("loose_m", 0.0))
-	ok(apart > 3.0, "the loose Boki wisp floats clear of the Hunter Wisp, out of stomp reach (%.1fm)" % apart)
-	var toast_ok: bool = bool(rv.get("told", false)) and float(rv.get("held", 1.0)) == 0.0
-	var still_loose: bool = rv.get("phase") == TutorialRival.Phase.LOOSE
-	ok(toast_ok and still_loose, "walking to the round wisp first shows the toast and grabs nothing")
-	var orbit := float(rv.get("carried", 99.0))
-	var carried: bool = orbit < 3.0 and bool(rv.get("tether", false))
-	ok(carried, "the grabbed wisp orbits you with a ring and tether (%.1fm)" % orbit)
-	var gone := float(rv.get("gone", 0.0))
-	ok(gone >= float(cfg["gone_s"]), "the downed rival is gone %ds after the grab (%.1fs)" % [cfg["gone_s"], gone])
-
-## Two falls on the gap step bring the plain help line; a downed Boki never passes the Boki step.
-func _gap_help_and_downed(tu: Tutorial) -> void:
-	var ids := Tutorial.steps().map(func(st): return String(st[0]))
-	tu.step = ids.find("dash")
-	tu.falls = 2
-	tu._words()
-	ok(tu.text.begins_with("Just jump"), "two falls on the gap step show the plain help ('%s')" % tu.text)
-	tu.step = ids.find("throw")
-	tu.falls = 0
-	tu.recalled = false
-	tu.need_back = false
-	tu.throws0 = m.player.kin.st_throws
-	m.player.kin.state = "downed"
-	ok(not tu._is_done("throw"), "a downed Boki does not pass the Boki step")
 
 ## Frames where the hunter or the Boki sit under the banner (at the screen sizes it is built for).
 func _under_banner() -> int:

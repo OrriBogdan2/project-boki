@@ -158,8 +158,6 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["kin_attack", "Boki order: attack my target"], ["kin_return", "Boki order: come back to me"],
-	["kin_hold", "Boki order: hold this position"],
 	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],

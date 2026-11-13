@@ -2181,7 +2181,6 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if player and credit == player:   # a dedicated server has no player
-		if tut: tut.kills += 1
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)
@@ -3389,8 +3388,8 @@ func step(dt: float) -> void:
 		if net_on:
 			Net.tick(dt)
 		return
-	if tut and tut.holding():
-		tut.hold_wait(dt)      # (the intro card or Pell's talk: the match waits)
+	if tut and tut.intro:
+		tut.intro_wait(dt)      # (the intro card: the match waits for a key or two seconds)
 		return
 	time += dt
 	if Game.god and player and not player.out:

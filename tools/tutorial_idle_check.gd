@@ -4,7 +4,7 @@ extends RefCounted
 ##   - a hint banner or the Boki lead is up within HINT_BY seconds, and the step's line stays on the pill
 ##   - a step with a place keeps its marker (beam, pin or edge arrow, and the distance label) every frame
 ##   - a nag (the pill and marker pulse, the Boki says it again) lands inside the window, so no wait
-##     goes SILENT_MAX seconds without a prompt
+##     goes SILENT_MAX seconds without a prompt; the timed waits all outlast a nag
 ## Then the farm tutorial: each step, with everything before it done, shows its hint line for IDLE_S
 ## seconds and, where it has a place, keeps its world marker. One table row per step is printed.
 
@@ -51,8 +51,7 @@ func _match_course() -> void:
 		if tu.step >= 0 and tu.step < Tutorial.steps().size() and not seen.has(tu.step):
 			seen[tu.step] = true
 			_idle_step(m, tu)
-	var n := Tutorial.steps().size()
-	ok(seen.size() >= n - 1, "the idle window ran on %d of %d steps" % [seen.size(), n])
+	ok(seen.size() >= 15, "the idle window ran on %d steps" % seen.size())
 	m.queue_free()
 
 ## Does nothing for IDLE_S s (or until the step ends by itself) and judges what the player saw.
@@ -77,8 +76,9 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 		if tu.step != s0:
 			break
 		frames += 1
-		var says: bool = m.bubbles.any(func(b): return b["ent"] == p.kin)
-		var leads: bool = tu.pell != null and tu.pell.state == "lead"      # (Pell leads the way, not the Boki)
+		var comp: KinCompanion = p.kin.comp if p.kin else null
+		var says := m.bubbles.any(func(b): return b["ent"] == p.kin)
+		var leads := comp != null and comp.leading()
 		if boki == "" and (leads or says):
 			boki = "lead" if leads else "says"
 		if hint_t < 0.0 and (tu.card_up() or leads or says or tu.nag_t > 0.0):
@@ -136,8 +136,7 @@ func _farm_course() -> void:
 		if id == "house":
 			ok(g.place_house(), "the house goes down as a site")
 			home._sync_fixtures()
-			FarmTutorial.detect()
-			ok(FarmTutorial.current() != "house", "placing the house finishes its step (no idle wait after it)")
+			_idle_farm(g, id)      # (the site is up: its "wait" hint)
 		elif id == "hammer":
 			FarmSites.finish(FarmHob.house_entry())      # (built, so the steps that wait for it open)
 		FarmTutorial.mark(id)

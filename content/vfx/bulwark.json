@@ -36,23 +36,6 @@
 
 		"crush": {"fx": [{"p": "star", "y": 1.9, "n": 6, "shape": "disc", "radius": 0.5, "way": "up", "speed": 0.3, "spread": 0.2, "grav": 0.0, "drag": 2.0, "life": 1.0, "size": 0.11, "c": "hot", "c2": "main"},
 				{"p": "smoke", "n": 6, "way": "up", "speed": 1.2, "spread": 0.9, "grav": -0.4, "life": 0.7, "size": 0.6, "radius": 0.5, "c": "dust"}]},
-		"aegis": {"fx": [{"p": "dome", "size": 2.6, "arc": 106, "c": "deep", "c2": "hot", "c3": "char"}]},
-		"aegis_rise": {"fx": [{"p": "flare", "y": 1.0, "size": 2.4, "life": 0.22},
-				{"p": "ember", "shape": "disc", "radius": 1.2, "way": "up", "n": 26, "speed": 3.2, "spread": 0.3, "grav": -1.2, "life": 0.6, "burst": 0.8, "size": 0.06},
-				{"p": "smoke", "shape": "disc", "radius": 1.0, "way": "up", "n": 8, "speed": 0.8, "spread": 0.6, "life": 0.8, "size": 0.8, "c": "smoke", "near": true}]},
-		"aegis_block": {"fx": [{"p": "flare", "size": 1.7, "life": 0.18, "c": "deep"},
-				{"p": "ember", "way": "fwd", "n": 16, "speed": 9.0, "spread": 0.4, "grav": 6.0, "life": 0.28, "size": 0.05, "stretch": 0.06},
-				{"p": "star", "way": "fwd", "n": 5, "speed": 3.0, "spread": 0.6, "life": 0.35, "size": 0.16, "near": true}]},
-		"aegis_push": {"fx": [{"p": "flare", "y": 1.0, "size": 1.4, "life": 0.16},
-				{"p": "ember", "y": 0.8, "way": "fwd", "n": 10, "speed": 7.0, "spread": 0.5, "grav": 4.0, "life": 0.25, "size": 0.05, "stretch": 0.05}]},
-		"aegis_break": {"fx": [{"p": "flare", "y": 1.0, "size": 3.0, "life": 0.25},
-				{"p": "shard", "y": 1.0, "way": "up", "n": 20, "speed": 7.5, "spread": 0.9, "grav": 14.0, "life": 0.8, "size": 0.14},
-				{"p": "chunk", "y": 0.8, "way": "up", "n": 12, "speed": 6.0, "spread": 0.8, "grav": 16.0, "life": 0.8, "size": 0.16, "c": "char"},
-				{"p": "smoke", "shape": "disc", "radius": 1.2, "way": "up", "n": 8, "speed": 1.0, "spread": 0.7, "life": 0.9, "size": 0.9, "c": "smoke", "near": true}]},
-		"shield_slam": {"fx": [{"p": "sweep", "y": 0.6, "size": "r", "arc": 100, "life": 0.3, "c": "deep"},
-				{"p": "flare", "fwd": 0.9, "y": 1.0, "size": 2.8, "life": 0.22},
-				{"p": "ember", "fwd": 0.9, "y": 0.9, "way": "fwd", "n": 24, "speed": 10.0, "spread": 0.5, "grav": 6.0, "life": 0.35, "size": 0.06, "stretch": 0.06},
-				{"p": "chunk", "fwd": 1.6, "way": "fwd", "lift": 0.8, "n": 10, "speed": 5.0, "spread": 0.7, "grav": 14.0, "life": 0.6, "size": 0.12, "c": "char", "near": true}]},
 		"mend_call": {"fx": [{"p": "skirt", "size": 1.1, "from": 0.7, "tall": 6.0, "life": 1.0, "c": "deep"},
 				{"p": "star", "shape": "disc", "radius": "r", "radius_x": 0.7, "y": 4.5, "way": "up", "n": 18, "speed": 0.3, "grav": 7.0, "life": 1.0, "burst": 0.0, "size": 0.14},
 				{"p": "flare", "y": 0.6, "size": 3.4, "life": 0.3, "delay": 0.95}]},
@@ -62,5 +45,6 @@
 				{"p": "flare", "y": 0.8, "size": 3.6, "life": 0.3},
 				{"p": "ember", "shape": "disc", "radius": "r", "way": "up", "n": 40, "speed": 4.5, "spread": 0.3, "grav": -2.0, "life": 0.8, "size": 0.07},
 				{"p": "star", "shape": "disc", "radius": "r", "way": "up", "n": 16, "speed": 2.0, "spread": 0.5, "life": 0.9, "size": 0.14, "c": "heal"}]}
+
 	}
 }

@@ -52,7 +52,6 @@ func pin() -> void:
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
-	_pin_two_charges(m, P, K, home)
 	await done(m)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(main, "archer")
@@ -448,7 +447,7 @@ func _bjorn_cadence(_m: Match, _P: Hunter, _T: Hunter, K: BulwarkKit) -> void:
 		"throw %.3f swing %.3f lock %.3f" % [tr, sr, rl])
 	var tail := 0.0
 	for id in ["bul_throw", "bul_recall"]:
-		var keys: Array = KMovesBjorn.MOVES[id]["keys"]
+		var keys: Array = (KMovesPin.MOVES if KMovesPin.MOVES.has(id) else KMovesBjorn.MOVES)[id]["keys"]
 		tail = maxf(tail, float((keys[-1] as Array)[0]))
 	ok("bjorn auto: the throw and recall poses end with the faster cadence (no pose cut mid-way)",
 		float((KMovesBjorn.MOVES["bul_throw"]["keys"][-1] as Array)[0]) <= tr + 0.08 and tail < 0.62,
@@ -505,12 +504,9 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	ok("bjorn shield: a foe walking into the raised wall is pushed back at least its push distance",
 		K.pushes >= 1 and moved >= float(sd["push"]) - 0.05, "pushed %d moved %.2f" % [K.pushes, moved])
 	ok("bjorn shield: a push flashes the wall", K.fx.aegis_hit > 0.0 or K.fx.push_flash > 0.0 or K.pushes >= 1)
-	var dome: MeshInstance3D = K.fx.aegis
-	ok("bjorn shield: the wall is an ivory dome (HeroVfx shell) spanning the wall",
-		dome.visible
-		and (dome.material_override as ShaderMaterial).get_shader_parameter("mode") == HeroVfx.MODES["dome"]
-		and K.fx.aegis_size.x * 2.0 * sin(deg_to_rad(53.0)) >= float(sd["len"]) - 0.1,
-		"radius %.2f" % K.fx.aegis_size.x)
+	ok("bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger",
+		K.fx.aegis.get_child_count() >= 30 and K.fx.AEGIS_H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
+		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), K.fx.AEGIS_H])
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
@@ -698,47 +694,6 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
-
-## Owner item 146: Spirit Walk has 2 charges (the HUD slot too); a third press waits for the recharge.
-func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
-	step(m, 1.0)
-	K.spirit.end("time")
-	P.dashes = P.max_dashes()
-	P.slot_lv["dash"] = 1
-	var info := P.slot_info("dash")
-	var got := "max %s info %s/%s" % [P.max_dashes(), info["charges"], info["max_charges"]]
-	ok("pin dash: 2 charges, both on the HUD slot (data roll 4 m)",
-		int(P.max_dashes()) == 2 and int(info["charges"]) == 2 and int(info["max_charges"]) == 2
-		and absf(float(K.dash_def()["roll"]) - 4.0) < 0.001, got)
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	P.inp["move"] = Vector2(-1, 0)
-	P.inp["fire"] = false
-	aim_at(P, home + Vector3(-6, 0, 0))
-	var x0 := P.pos.x
-	P.do_dash()
-	step(m, 0.4)
-	var d1 := x0 - P.pos.x
-	K.spirit.end("time")
-	var left := P.slot_info("dash")
-	P.do_dash()
-	step(m, 0.4)
-	K.spirit.end("time")
-	var both := "left %s dashes %.2f roll %.1f m" % [left["charges"], P.dashes, d1]
-	var roll_m := float(K.dash_def()["roll"]) * float(K.dash_feel()["dist"])      # (the shared dash feel scales it)
-	ok("pin dash: two presses back to back both roll; the first goes its data roll",
-		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > roll_m * 0.9, both + " want %.1f m" % roll_m)
-	var x1 := P.pos.x
-	P.do_dash()
-	step(m, 0.4)
-	var third := x1 - P.pos.x
-	var waits: bool = not K.spirit.active() and P.dashes < 1.0 and K.st.get("last_dash") == "flick"
-	var seen := "moved %.1f dashes %.2f" % [third, P.dashes]
-	ok("pin dash: the third press is only the shared long dash", waits, seen)
-	step(m, float(K.dash_def()["cd"]) + 0.5, func(): P.inp["move"] = Vector2.ZERO)
-	var back := int(floor(P.dashes + 0.001))
-	ok("pin dash: after the recharge one charge is back", back == 1, "dashes %.2f" % P.dashes)
-	P.inp["move"] = Vector2.ZERO
 
 ## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:

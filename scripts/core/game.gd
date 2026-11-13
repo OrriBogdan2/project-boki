@@ -82,9 +82,6 @@ func _setup_input() -> void:
 		_key(a, [])      # Boki quick keys: unbound until picked
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
 	_key("ping", [], MOUSE_BUTTON_XBUTTON1)   # Mouse 4 pings too
-	_key("kin_attack", [KEY_K])               # Boki order: attack my target (the Chase order)
-	_key("kin_return", [KEY_N])               # Boki order: come back to me (the Return order)
-	_key("kin_hold", [KEY_L])                 # Boki order: hold this position (the Guard order)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
 	_key("dash", [KEY_SHIFT], MOUSE_BUTTON_XBUTTON2)     # Mouse 5 (the front side button) dashes too
