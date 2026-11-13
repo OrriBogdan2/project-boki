@@ -888,7 +888,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | skip_label | Skip tutorial |
 | stay_label | Stay |
 | first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true}]} |
-| tracker | {"title": "Goals", "max": 5, "per_source": {"first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
+| tracker | {"title": "Goals", "max": 5, "per_source": {"shelter": 1, "first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "shelter": {"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)", "locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"}, "shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.", "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
 | picked_say | {"go": "Off to work!", "wait": "Ready when there's work!"} |
@@ -1601,7 +1601,7 @@ The talking NPCs drawn from a rigged Meshy model (NpcModel, art/npcs/<id>/<id>.g
 | Setting | Value |
 |---|---|
 | hob | {"height": 1.8, "face_y": 1.5, "clips": {"idle": "idle", "talk": "talk", "wave": "wave", "point": "point", "hammer": "hammer", "walk": "walk"}} |
-| pell | {"name": "Pell", "height": 1.55, "face_y": 1.3, "clips": {"idle": "idle", "talk": "talk", "wave": "wave", "walk": "walk"}} |
+| pell | {"name": "Pell", "height": 1.55, "face_y": 1.3, "clips": {"idle": "idle", "talk": "talk", "wave": "wave", "point": "point", "walk": "walk"}} |
 
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
