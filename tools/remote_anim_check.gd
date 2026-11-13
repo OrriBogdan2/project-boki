@@ -320,7 +320,8 @@ func _on_msg(topic: String, data, from: String) -> void:
 				tele.clear()
 				last_row = ["?", "?"]
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "tele": tele})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows,
+					"rt": retimes, "tele": tele})
 		return
 	super._on_msg(topic, data, from)
 
