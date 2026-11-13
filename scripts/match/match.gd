@@ -1710,12 +1710,12 @@ func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 			bubbles.erase(b); break
 	bubbles.append({"ent": k, "text": txt, "t": 0.0, "cat": cat, "life": maxf(life, BokiLines.bubble_s())})
 	if k.owner_h == player:
-		var s := "kin_happy"
-		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: s = "kin_unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover"]: s = "kin_alert"
-		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
+		var mood := "happy"
+		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: mood = "unsure"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover"]: mood = "alert"
+		sfx(KinVoice.cue(k.species, mood), null, -3.0, Unique.voice(k.rec))     # its own voice, over the fight
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
-		sfx("kin_alert", k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling something out
+		sfx(KinVoice.cue(k.species, "alert"), k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling out
 
 ## A Boki's callout ping (KinCompanion): a labelled marker over the spot for a few seconds, on the
 ## minimap too, for its squad. Returns the ping so a moving target can be followed.

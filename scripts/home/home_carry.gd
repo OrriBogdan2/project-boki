@@ -116,7 +116,7 @@ func press_hold(who: Dictionary) -> void:
 	var n: Node3D = who["node"]
 	base_scale = n.scale
 	h._emote(who, "★" if temper_of(who["rec"]) == "brave" else "♥", true)
-	Sfx.play("kin_happy", null, -6.0, 0.12, Unique.voice(who["rec"]))
+	Sfx.play(KinVoice.cue(who["rec"]["species"], "happy"), null, -6.0, 0.12, Unique.voice(who["rec"]))
 
 ## Press while carrying: set it down in front of you (or at your feet if that spot is blocked).
 func drop() -> void:

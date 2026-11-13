@@ -19,6 +19,9 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
+##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
+##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
+##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -81,6 +84,31 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "boki_voices":
+		_boki_voices(d["sounds"])
+
+## 11. A voice set per shown species (Data.KIN): five moods, two takes each, picked by KinVoice.cue; a shown
+## species on a shared cue fails, an unknown one falls back.
+func _boki_voices(sounds: Dictionary) -> void:
+	var gaps := []
+	var same := []
+	var seen := {}
+	for sp in Data.KIN:
+		for mood in KinVoice.GENERIC_CUE:
+			var want := "bk_%s_%s" % [sp, mood]
+			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
+				gaps.append(want)
+		var sig := hash(_data("res://audio/bk_%s_happy.wav" % sp))
+		if seen.has(sig):
+			same.append("%s = %s" % [sp, seen[sig]])
+		seen[sig] = sp
+	var what := "boki_voices: %d shown species, 5 moods, 2 takes, none on a shared cue" % Data.KIN.size()
+	ok(gaps.is_empty() and not Data.KIN.is_empty(), "%s (gaps %s)" % [what, gaps])
+	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
+	var fell := []
+	for mood in KinVoice.GENERIC_CUE:
+		fell.append(KinVoice.cue("no_such_species", mood))
+	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]

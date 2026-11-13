@@ -100,7 +100,7 @@ func _call(k: Dictionary, angle: float) -> void:
 	k["called_t"] = float(R["give_up_s"])
 	h._emote(k, "…" if sulk else "!")
 	if not sulk:
-		Sfx.play("kin_alert", k["pos"], -12.0, 0.15, Unique.voice(rec))
+		Sfx.play(KinVoice.cue(rec["species"], "alert"), k["pos"], -12.0, 0.15, Unique.voice(rec))
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
 	var mine: int = h.world.island_of(h.ppos.x, h.ppos.z)
 	if mine >= 0 and here != mine:
