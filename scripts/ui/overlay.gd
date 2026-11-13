@@ -235,6 +235,7 @@ func open_pause(where: String) -> void:
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
 	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
+	item.call("Help", "info", open_words)
 	if where != "match":
 		item.call("Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
@@ -278,6 +279,10 @@ func open_pause(where: String) -> void:
 			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
+
+## Help: the Words page (WordsView): what the game's terms mean, for the ones you have met.
+func open_words() -> void:
+	WordsView.fill(_page("words", "Help: words", 560, true))
 
 # ------------------------------------------------------------------ settings
 func open_settings() -> void:

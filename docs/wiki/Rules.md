@@ -1717,6 +1717,17 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | default | default |
 | looks | {"default": {"name": "Wisp", "desc": "A round soul-light in your team's colour with a white heart, slow and heavy.", "core": {"rim": "team", "color": "ffffff", "rim_width": 0.3, "glow": 1.3}, "body": {"radius": 0.3, "squash": 0.85, "head": 0.16}, "hover": 0.4, "bob": 0.04, "bob_hz": 0.45, "drag": 0.45, "settle": 0.5, "lean": 0.35, "hum": {"sfx": "wisp_hum", "db": -14.0}, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
 
+## words (`content/rules/words.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The Words page (Help in the pause menu, Help on the title): one plain line per term, in the canon wording (briefs/DECISIONS.md, briefs/LORE_MASKS.md). A term shows once its 'seen' rule holds: {} always, {tut: key} a Save.d tutorial flag, {matches: n} that many expeditions played. Budget (checked by --words-check): max_words per line, max_chars per line. |
+| max_words | 16 |
+| max_chars | 100 |
+| words | [{"term": "Relic", "line": "The cursed mask of a fallen Hunter. Take one up and you become them.", "seen": {}}, {"term": "Hunter", "line": "What you become when you put on a Relic. Every player in a match is one.", "seen": {}}, {"term": "Boki wisp", "line": "Your Boki's soul, orbiting you in a match as a small critter-shaped light.", "seen": {"tut": "hatched"}}, {"term": "Summon", "line": "Your Boki wisp bursts into the full Boki for a short time, then shrinks back.", "seen": {"tut": "hatched"}}, {"term": "Extract", "line": "Leave the expedition with what you carry. Only extracted loot comes home.", "seen": {"tut": "hatched"}}, {"term": "Wisp", "line": "A downed Hunter pops into a round glowing Wisp, until a friend revives them.", "seen": {"matches": 1}}, {"term": "Fusion", "line": "A Hunter merged with their Boki. It needs a full bond meter.", "seen": {"matches": 1}}, {"term": "The Blight", "line": "The Wyrm's blood. Each match it closes in toward the Heart.", "seen": {"matches": 1}}, {"term": "The Heart", "line": "The Wyrmheart: one wish to remake the world, or rule it. Every Hunter wants it.", "seen": {"matches": 1}}, {"term": "Heartspark", "line": "A mote of the Heart's light that charges at its site. Everyone sees where.", "seen": {"matches": 1}}] |
+
 ## Combos
 
 One fighter sets a foe up with a status, the partner pays it off (`content/combos/`).
