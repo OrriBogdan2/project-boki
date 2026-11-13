@@ -75,7 +75,7 @@ func _bring_fight(m: Match) -> void:
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
 func _voices_on(bus: String) -> int:
-	return Sfx.players.filter(func(p): return p.playing and p.bus == bus).size()
+	return Sfx.voices_on(bus)
 
 ## CPU seconds the process's helper threads have used: every thread but the main one and the worker pool, so
 ## the audio mixer (Godot names it like the rest) plus any stray loader. Compare before and after, not absolute.

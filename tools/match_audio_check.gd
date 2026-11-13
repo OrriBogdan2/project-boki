@@ -10,6 +10,8 @@ extends RefCounted
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
 ## And TellCue: a rival's ground telegraph plays tell_foe where it lands, sized by its area; not yours, an
 ## ally's, an ultimate's, an aim mark's or a telegraph that is only being refreshed.
+## Downed or out the world bus is muffled (and leaving the match lifts it); positional one-shots pan (a placed
+## voice at the sound), UI ones stay plain.
 ## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
 ## teammate's quieter than a rival's, your own one level wherever the camera is.
 ## And the region beds: each region of the map has its own bed, another region crossfades it in over
@@ -55,7 +57,7 @@ func run(main_node: Node) -> void:
 	ok(k.rescue_on and Sfx.loop_on(key), "...and comes back while the rescue goes on")
 	# the old leak: a looping file through the one-shot pool plays once now
 	Sfx.play("revive_hum", P.pos)
-	var once := Sfx.players.filter(func(p): return p.playing and Sfx.loops_forever(p.stream))
+	var once := Sfx.voices().filter(func(p): return p.playing and Sfx.loops_forever(p.stream))
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
@@ -71,6 +73,21 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
+	_panned(m, P)
+	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
+	await _muffle_step(m, true)
+	var dull := Sfx.muffle_state()
+	ok(dull.fx and is_equal_approx(dull.db, Sfx.MUFFLE_DB) and is_equal_approx(dull.hz, Sfx.MUFFLE_HZ),
+		"downed: the world bus is low-passed and ducked (%s)" % dull)
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	ok(Sfx._bus_for(null, true) != "SFXWorld" and Sfx._bus_for(null, false) == "SFXWorld",
+		"the Wisp hum, pings and Boki voices skip the world bus")
+	await _muffle_step(m, false)
+	var clear := Sfx.muffle_state()
+	ok(not clear.fx and is_zero_approx(clear.db) and is_equal_approx(clear.hz, Sfx.MUFFLE_OPEN_HZ),
+		"revived: the muffle is off again (%s)" % clear)
+	await _muffle_step(m, true)
+	ok(Sfx.muffle_state().fx and bus >= 0, "downed again: muffled")
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -84,6 +101,8 @@ func run(main_node: Node) -> void:
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	var sunk := Sfx.amb_duck.volume_db
 	ok(sunk == 0.0, "the farm's ambience is not left sunk by the fight (%.1f dB)" % sunk)
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
+	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
 	await main.get_tree().create_timer(SETTLE).timeout
 	var left := Sfx.match_voices()      # the farm's own beds are not counted (Sfx.MATCH_BEDS)
 	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
@@ -143,13 +162,13 @@ func _play(sname: String, pos = null) -> void:
 
 func _prio_count(prio: int) -> int:
 	var c := 0
-	for i in Sfx.players.size():
-		if Sfx.players[i].playing and Sfx.prios[i] == prio:
+	for i in Sfx.voices().size():
+		if Sfx.voices()[i].playing and Sfx.prios[i] == prio:
 			c += 1
 	return c
 
 func _quiet() -> void:
-	for p in Sfx.players:
+	for p in Sfx.voices():
 		p.stop()
 
 func _ult_chime(m: Match, P: Hunter) -> void:
@@ -307,7 +326,7 @@ func _step_db(h: Hunter, P: Hunter, d: float, contact: bool) -> float:
 		Juice.footstep(h)
 	if not Sfx.last_played.keys().any(func(k): return String(k).contains("step")):
 		return NAN
-	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].volume_db
+	return Sfx.last_voice.volume_db
 
 ## Each region's own bed, the crossfade between two of them, the two-bed cap and the fight ducking. The
 ## match is held still: the case moves the player and ticks MusicDir itself (its clock with it), and puts
@@ -476,6 +495,26 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 	Sfx.last_played.erase(cue)
 	g.tick(h)
 	ok(first and not Sfx.last_played.has(cue), what)
+
+## A sound with a place plays on a voice placed there, so the camera pans it; a UI sound on a plain voice.
+func _panned(m: Match, P: Hunter) -> void:
+	_quiet()
+	Sfx.listener = P.pos
+	var at := P.pos + Vector3(6.0, 0, 0)
+	_play("land", at)
+	var v = Sfx.last_voice
+	ok(m.get_viewport().get_camera_3d() != null and v is AudioStreamPlayer3D
+		and (v as AudioStreamPlayer3D).position.is_equal_approx(at),
+		"a sound 6 m to your side plays placed there (%s)" % v)
+	_play("click")
+	ok(Sfx.last_voice is AudioStreamPlayer and not Sfx.last_voice is AudioStreamPlayer3D,
+		"a UI sound (no place) plays on a plain voice")
+	_quiet()
+
+func _muffle_step(m: Match, down: bool) -> void:
+	m.player.downed = down
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

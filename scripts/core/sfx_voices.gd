@@ -17,9 +17,14 @@ static func rules() -> Dictionary:
 		_rules = parsed if parsed is Dictionary else {}
 	return _rules
 
-## Most voices sounding at once on a bus.
-static func cap(bus: String) -> int:
-	return int((rules()["cap"] as Dictionary)[bus])
+## Most voices sounding at once in a lane (see lane).
+static func cap(lane_name: String) -> int:
+	return int((rules()["cap"] as Dictionary)[lane_name])
+
+## The cap lane a bus is in: near ("SFX": the clear SFX bus and the SFXWorld bus the downed muffle dulls),
+## far ("SFXFar") or behind terrain ("SFXMuffled").
+static func lane(bus: String) -> String:
+	return "SFX" if bus == "SFXWorld" else bus
 
 ## dist: metres from the listener, or -1 for a sound with no place (a UI sound).
 static func priority(sname: String, dist: float, far_m: float) -> int:
@@ -35,17 +40,17 @@ static func priority(sname: String, dist: float, far_m: float) -> int:
 		return FAR_CHEAP if cheap else FAR_OTHER
 	return FAR_OTHER if cheap else NEAR_OTHER
 
-## The voice to give up for a new sound of priority `prio` on `bus`: the lowest priority that is not above
+## The voice to give up for a new sound of priority `prio` in a lane: the lowest priority that is not above
 ## the new one, then the quietest, then the oldest. -1 when every voice there matters more (the new
-## sound is dropped). `prios`, `born` (start time, ms) and `players` are the pool's parallel arrays.
-static func victim(players: Array[AudioStreamPlayer], prios: PackedInt32Array, born: PackedInt64Array,
-		bus: String, prio: int) -> int:
+## sound is dropped). `prios`, `born` (start time, ms) and `voices` (Sfx.voice_all: plain and placed
+## players, which share these fields) are the pool's parallel arrays.
+static func victim(voices: Array, prios: PackedInt32Array, born: PackedInt64Array, lane_name: String, prio: int) -> int:
 	var best := -1
-	for i in players.size():
-		var p := players[i]
-		if not p.playing or p.bus != bus or prios[i] > prio or prios[i] >= KEEP:
+	for i in voices.size():
+		var p = voices[i]
+		if not p.playing or lane(p.bus) != lane_name or prios[i] > prio or prios[i] >= KEEP:
 			continue
-		if best < 0 or _cheaper(prios[i], p.volume_db, born[i], prios[best], players[best].volume_db, born[best]):
+		if best < 0 or _cheaper(prios[i], p.volume_db, born[i], prios[best], voices[best].volume_db, born[best]):
 			best = i
 	return best
 

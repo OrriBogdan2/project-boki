@@ -148,6 +148,7 @@ func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
+	Sfx.set_muffle(p.downed or p.out)     # the world goes dull while you are down or out
 	if m.result.get("ending", false):
 		if not ended:
 			ended = true
