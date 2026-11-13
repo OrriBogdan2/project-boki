@@ -387,13 +387,12 @@ func aegis_block(at: Vector3) -> void:
 	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
 	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
 
-## Broken: the plates crumble into chunks and dust.
+## Broken: the shared shield break (ShieldBreak) across the wall, like every other shield.
 func aegis_break(at: Vector3) -> void:
 	aegis.visible = false
-	h.m.fx.burst(at + Vector3(0, 1.0, 0), PLATE_COL, 22, 7.0, 0.9, 16.0, 2.4)
-	h.m.fx.burst(at + Vector3(0, 0.8, 0), PLATE_EDGE, 16, 5.0, 1.0, 18.0, 2.0)
-	h.m.fx.dust(at, 16)
-	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color("ffd25a"), 14, 11.0, 160.0, 0.4, 14.0, 1.4)
+	AimKit.hide(h, "aegis_push")
+	var half := Vector2(AEGIS_R * sin(AEGIS_HALF), AEGIS_H * 0.5)
+	ShieldBreak.of(h.m).play(at + Vector3(0, half.y, 0), half, Arch.color(h.arch))
 
 # ------------------------------------------------------------------ Purify
 ## The column coming down over the delay (u 0 -> 1), then the disc's rings.

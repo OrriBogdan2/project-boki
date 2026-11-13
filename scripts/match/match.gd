@@ -331,6 +331,7 @@ func _start(o: Dictionary) -> void:
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
 	GlideTrail.of(self)
+	ShieldBreak.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -5371,6 +5372,7 @@ func _net_ev(x, from: String) -> void:
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
+				"sbrk": ShieldBreak.of(self).net_in(x)       # a shield broke in another game
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
