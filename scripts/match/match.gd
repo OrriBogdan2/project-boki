@@ -5644,6 +5644,7 @@ func tip_once(key: String) -> bool:
 	seen[key] = true
 	return true
 
+var ult_hint := FirstUltHint.new()   # the first-ready hint for the hero ultimate
 const SELF_HOLD_S := 0.12   # s of root a hunter's own statue or stomp keeps refreshing: not a foe's root
 
 func _tips() -> void:
@@ -5654,6 +5655,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	ult_hint.tick(self)
 	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])

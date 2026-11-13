@@ -18,6 +18,7 @@ func run(mn: Node) -> void:
 	Save.no_write = true
 	_save_flag()
 	_walk()
+	_first_ult()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
