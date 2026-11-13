@@ -272,6 +272,10 @@ func no_glide() -> bool:
 func air_rmb() -> bool:
 	return super() and float(cd["air"]) <= 0.0
 
+## The guard stops pulls too (Blockers).
+func blocks_from(_by: Ent) -> bool:
+	return riposte.guarding()
+
 ## The guard takes every hit (no damage, no crowd control) and counts it.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if riposte.block(by, o):
