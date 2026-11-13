@@ -446,10 +446,10 @@ C.bake("e_row", 0.95, [(0, STANCE), (0.06, m(REAR, e="out")), (0.18, m(SMASH, po
 # X held, Basalt Spine: sunk wide, both fists out at the ground; he leans along the ridge being dragged
 SPAIM = m(GATHER, pos=(0, 0, -0.44), hips=(-16, 0, 0), head=(10, 0, 0), hr=hand(0.5, 0.14, -0.62), hl=lhand(0.5, 0.14, -0.62), er=(0.5, -0.6, 0.6), el=(-0.5, -0.6, 0.6), fr=(AX + 0.3, -0.04, AZ), fl=(-AX - 0.3, 0.04, AZ), jaw=0.1, lip=-0.5)
 C.bake("x_aim", 0.62, [(0, STANCE), (0.12, m(SPAIM, e="out")), (0.32, m(SPAIM, pos=(0, 0, -0.46))), (0.62, m(SPAIM, pos=(0, 0, -0.44)))], over=tremble)
-# X let go (1.4): fists up (0.05), driven down (0.1, the cracks), held through the 0.2 s cracks and 0.8 s rise to 0.95, heaved up
-# as the ridge stands (1.0 = x.tell + x.rise), back to stance by 1.4
-C.bake("x_spine", 1.4, [(0, SPAIM), (0.05, m(REAR, pos=(0, 0, -0.12), hr=hand(0.0, 0.2, 0.5), hl=lhand(0.0, 0.2, 0.5), e="out")), (0.1, m(SMASH, pos=(0, 0.04, -0.58), hr=hand(0.0, 0.56, -0.74), hl=lhand(0.0, 0.56, -0.74), e="snap")),
-                        (0.95, m(SMASH, pos=(0, 0.04, -0.54), hr=hand(0.0, 0.56, -0.7), hl=lhand(0.0, 0.56, -0.7))), (1.0, m(HEAVE, e="out")), (1.4, STANCE)])
+# X let go (1.0): fists up (0.05), driven down (0.1, the cracks), held through the 0.2 s cracks and 0.4 s rise, heaved up
+# as the ridge stands (0.7)
+C.bake("x_spine", 1.0, [(0, SPAIM), (0.05, m(REAR, pos=(0, 0, -0.12), hr=hand(0.0, 0.2, 0.5), hl=lhand(0.0, 0.2, 0.5), e="out")), (0.1, m(SMASH, pos=(0, 0.04, -0.58), hr=hand(0.0, 0.56, -0.74), hl=lhand(0.0, 0.56, -0.74), e="snap")),
+                        (0.55, m(SMASH, pos=(0, 0.04, -0.54), hr=hand(0.0, 0.56, -0.7), hl=lhand(0.0, 0.56, -0.7))), (0.7, m(HEAVE, e="out")), (1.0, STANCE)])
 # Tremor Sense: a palm flat on the ground, the head cocked at what it feels, the other fist up
 SENSE = m(GATHER, pos=(0, 0.02, -0.5), hips=(-34, 0, 10), head=(14, 16, -24), hr=hand(-0.04, 0.5, -0.66), hl=lhand(0.0, 0.3, -0.16), er=(0.8, -0.4, 0.2), el=(-0.7, -0.3, -0.6), fing_r=0.0, thumb_r=0.0, wr=(-50, 0, 0), lip=0.5, jaw=0.05)
 C.bake("sense", 0.75, [(0, STANCE), (0.12, m(SENSE, e="out")), (0.45, SENSE), (0.75, STANCE)])
