@@ -512,16 +512,6 @@ func _ready() -> void:
 	if "--raid-check" in args:
 		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
 		return
-	if "--rolling-check" in args:
-		var rck = load("res://tools/rolling_check.gd").new()     # rolling sessions: waves, cut-off, level floor, catch-up XP, bounties, the end
-		set_meta("rolling_check", rck)      # (held, so nothing it waits on loses it)
-		rck.run(self)
-		return
-	if "--rolling-sim" in args:
-		var rsim = load("res://tools/rolling_sim.gd").new()      # a whole 30-minute rolling session, headless, with bots
-		set_meta("rolling_sim", rsim)       # (held: it yields frames so freed nodes really go, and must outlive its awaits)
-		rsim.run(self, opts)
-		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
 		return
