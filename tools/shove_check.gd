@@ -4,7 +4,7 @@ extends RefCounted
 ##      expected push wins 60 to 80% of them (a game, not a dice roll and not a certainty)
 ##   2. the timed press: the backed Boki's win share with a great press at the start against none,
 ##      over many bouts of evenly matched Boki, moves by more than 0 and under 15 points
-##   3. the type edge: a theme in "beats" gives 10% push, never both ways between two themes
+##   3. types are labels: Boki of different themes with the same stats are exactly level
 ##   4. a settled bout: the winner's joy and trust go up, the loser's joy down, both remember it, gems
 ##   5. on the base: no stump with base_mode off; with it on, a bout runs to a result card
 ## Never touches the real save.
@@ -31,7 +31,7 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	_stronger()
 	_press()
-	_edge()
+	_types()
 	_settle()
 	await _on_base()
 	print("SHOVE DONE, failures: %d" % bad)
@@ -99,23 +99,15 @@ func _press() -> void:
 	ok(moved > 0.0 and moved < PRESS_MAX,
 			what % [without * 100 / PRESS_BOUTS, with_press * 100 / PRESS_BOUTS, moved * 100.0, PRESS_MAX * 100.0])
 
-func _edge() -> void:
-	var beats: Dictionary = BaseShove.rules()["beats"]
-	var mutual := 0
-	for t in beats:
-		for u in beats[t]:
-			if beats.get(u, []).has(t):
-				mutual += 1
-	ok(mutual == 0, "no theme beats one that beats it")
+func _types() -> void:
 	var by_theme := {}
 	for id in Data.KIN:
 		by_theme[String(Data.KIN[id].get("theme", ""))] = id
 	var a := _kin(by_theme["ember"], "A", 10, 10, 50.0, 50.0)
 	var b := _kin(by_theme["frost"], "B", 10, 10, 50.0, 50.0)
-	ok(BaseShove.has_edge(a, b) and not BaseShove.has_edge(b, a), "ember beats frost and not the other way")
 	var plain := _kin(by_theme["stone"], "P", 10, 10, 50.0, 50.0)
-	var ratio := BaseShove.push(a, b) / BaseShove.push(a, plain)
-	ok(absf(ratio - 1.1) < 0.001, "the edge is 10%% of push (x%.3f)" % ratio)
+	ok(absf(BaseShove.push(a) - BaseShove.push(plain)) < 0.0001 and absf(BaseShove.expected(a, b)) < 0.0001,
+			"species themes change no push: equal Boki are level (%+.4f)" % BaseShove.expected(a, b))
 
 func _settle() -> void:
 	Save.d = Save.fresh()
