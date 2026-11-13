@@ -10,6 +10,8 @@ var n := 0
 const DT := 1.0 / 60.0
 const AUDIBLE_DB := -45.0      # a player quieter than this (and fading) isn't heard
 const SETTLE_SPEED := 4.0      # time scale while settling
+# Sfx.amb_layer names the match sets (AmbBeds, MusicDir); the farm's are HomeAmbience's
+const MATCH_BEDS := ["abyss", "ruins", "meadow", "cliffs", "water", "gust", "rain", "blight"]
 const SETTLE := 6.0            # seconds: longer than the slowest crossfade (home 2.5s, layers 3s)
 
 func ok(name: String, cond: bool, info := "") -> void:
@@ -100,7 +102,8 @@ func _training_duel_leave() -> void:
 	a = audible()
 	ok("leave duel: no stem of the match score is left", Sfx.layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("layer:")), str(a))
 	ok("leave duel: only the farm's own music + ambience", Sfx.music_name.begins_with("home") or Sfx.music_name in ["orchard", "meadow", "summit"], "music '%s' %s" % [Sfx.music_name, str(a)])
-	ok("leave duel: no match ambience beds (abyss / ruins)", Sfx.amb_layers.is_empty() and a.keys().all(func(k): return not String(k).begins_with("amb_layer")), str(a))
+	var leaked := MATCH_BEDS.filter(func(b): return Sfx.amb_layers.has(b) or a.has("amb_layer:" + b))
+	ok("leave duel: no match ambience beds (abyss / ruins), only the farm's own", leaked.is_empty(), str(a))
 	ok("leave duel: nothing stray on the Music bus", a.keys().all(func(k): return not String(k).begins_with("stray")), str(a))
 	await go("title")
 	await settle()

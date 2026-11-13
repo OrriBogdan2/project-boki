@@ -13,7 +13,7 @@
 		"walk_speed": 2.2, "run_speed": 4.8, "stride": [1.5, 1.5], "foot_mps": [1.51, 4.19]
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "fall", "glide_tilt": 0.0},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12}},
 	"free_arm": {"rmb": "L"},
 	"kmoves": {

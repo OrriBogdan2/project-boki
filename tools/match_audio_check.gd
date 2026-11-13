@@ -11,6 +11,8 @@ extends RefCounted
 var main: Node
 var fails := 0
 var n := 0
+# Sfx.amb_layer names the match sets (AmbBeds, MusicDir); the farm's are HomeAmbience's
+const MATCH_BEDS := ["abyss", "ruins", "meadow", "cliffs", "water", "gust", "rain", "blight"]
 const SETTLE := 4.0            # s: longer than the slowest match fade (the score's stems, 1.2s)
 
 func ok(cond: bool, what: String) -> void:
@@ -104,7 +106,9 @@ func run(main_node: Node) -> void:
 	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
 	await main.get_tree().create_timer(SETTLE).timeout
 	ok(Sfx.room == "", "the match's sound zones are gone with it")
-	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
+	var farm_beds := Sfx.amb_layers.keys().filter(func(b): return not MATCH_BEDS.has(b))
+	var left := Sfx.match_voices() - farm_beds.size()      # the farm's own beds sound on the farm
+	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -206,6 +210,13 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 ## then play their end cue, or the cancel cue when spilt (BeltSfx, content/rules/belt_sfx.json).
 func _belt_items(m: Match, P: Hunter) -> void:
 	Sfx.listener = P.pos
+	for h: Hunter in m.hunters:      # the rivals' Boki would walk up and hit the user, which spills the channel
+		if h != P and h.kin:
+			h.kin.dead = true
+			m.kins.erase(h.kin)
+		if h != P:                    # and a rival's ult or shot does the same: park them far off the user
+			h.downed = true
+			h.pos = P.pos + Vector3(300.0, 0.0, 300.0)
 	for id in BeltSfx.items():
 		var start := BeltSfx.cue(id, "start")
 		Sfx.last_played.erase(start)
