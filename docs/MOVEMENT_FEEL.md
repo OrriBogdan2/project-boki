@@ -404,6 +404,7 @@ No double buffering: a press is gathered, queued and applied in the same frame's
 - **A cleared kit move froze its pose.** When a kit cleared its move (a cancelled draw, the lowered aegis), `Hunter.anim_s` kept the old move with its clock stopped, so the body held that frame. The move now ends.
 - **Kael and Tenzo RMB: tap/hold splits, kept.** The press can't show which one it is until the release (the tap) or the hold threshold, so both act on the tap's release (tick 6 here, tick 0 from the release). Tenzo's is owner item 61 ("a tap shows nothing, it lands on the release"). Alternative not built: start Kael's Finishing Slam wind-up on the press, which would bring its strike up to 0.3 s earlier (a balance change).
 - **Cinder, Neve and Motley RMB: tick 1** (within target). The aim pose starts on the kit's first hold tick, which runs the step after the press.
+- **Since the branch was cut (11-13), main's kits act on the release for a tap/hold split** (the check's `WINDUP` rows carry it, tick 6 = the release): Kael and Tarek's LMB, Bjorn's LMB, Claire's, Cinder's, Ryzz's and Gil's RMB. Open, not built: start each hold pose on the press, as Lace's and Mossy's now do. Gil is new in the roster since the table above.
 ## Air velocity: kit casts add to it, never overwrite it (DECISIONS 11-08; the eight kits outside the slice)
 ## Snag audit (`--snag-check`, decision 0022)
 

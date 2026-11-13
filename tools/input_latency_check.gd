@@ -15,8 +15,21 @@ const ACTION := {"lmb": "fire", "rmb": "secondary", "e": "signature", "dash": "d
 ## hero -> slot -> [ticks allowed, source]: a wind-up the source has before the first motion or shot. A tap/hold
 ## RMB can't show which it is until the release (the tap) or the hold threshold: it acts on the tap's release.
 const WINDUP := {
-	"juggernaut": {"rmb": [TAP + 1, "tap/hold, the tap's Finishing Slam starts on the release (heroes/juggernaut.md)"]},
-	"dolm": {"rmb": [TAP + 1, "tap/hold, owner item 61: a tap shows nothing, lands on the release (heroes/dolm.md)"]},
+	"juggernaut": {
+		"rmb": [TAP + 1, "tap/hold, the tap's Finishing Slam starts on the release (heroes/juggernaut.md)"],
+		"lmb": [TAP + 1, "press = slash series, hold = blast: the tap acts on the release (MOVEMENT_FEEL lmb-spam)"],
+	},
+	"dolm": {
+		"rmb": [TAP + 1, "tap/hold, owner item 61: a tap shows nothing, lands on the release (heroes/dolm.md)"],
+		"lmb": [TAP + 1, "tap/hold, the hold punch: a tap acts on the release (docs/MOVEMENT_FEEL.md, lmb-spam)"],
+	},
+	# main's kits since the branch was cut (11-13): the tap acts on the release; the hold pose starts at the hold
+	# threshold. OPEN: each could start its pose on the press, as Lace's and Mossy's now do.
+	"bulwark": {"lmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
+	"rimewright": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
+	"ashwick": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
+	"mage": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
+	"gil": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 }
 
 var bad := 0
