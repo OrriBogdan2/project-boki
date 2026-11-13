@@ -34,6 +34,9 @@ extends RefCounted
 ##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
 ##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
 ## Never touches the save.
+##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
+##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
+##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -73,6 +76,7 @@ func run(main: Node) -> void:
 	_hostile()
 	_level_cues()
 	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
+	_hit_ticks()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -570,3 +574,31 @@ func _chop_mine() -> void:
 	var wired: bool = own.all(func(n): return src.contains('"%s"' % n))
 	ok(wired and not src.contains("break_wood") and not src.contains("armor_hit"),
 			"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins")
+
+## 11. One hit tick per weapon family; each Hunter's weapon names one; ability hits keep the shared tick.
+func _hit_ticks() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/hit.json"))
+	var family: Array = (set_d["sounds"] as Dictionary).keys()
+	ok(family.size() == 6, "hit ticks: six families (%s)" % [family])
+	var used := {}
+	var unmapped := []
+	var h := Hunter.new()
+	for arch in Arch.ids():
+		var w := Data.weapon_stats(Arch.signature(arch))
+		var tick := String(w.get("hit", ""))
+		used[tick] = true
+		if not family.has(tick):
+			unmapped.append("%s (%s)" % [arch, tick])
+	ok(unmapped.is_empty(), "hit ticks: every Hunter's weapon names one of them (%s)" % [unmapped])
+	var idle := family.filter(func(f): return not used.has(f))
+	ok(idle.is_empty(), "hit ticks: every family is some Hunter's weapon (unused %s)" % [idle])
+	h.wpn = Data.weapon_stats("longbow")
+	var shot := HeroSfx.hit_tick(h, {"src": "shot"})
+	var swing := HeroSfx.hit_tick(h, {"src": "abil", "ab": "primary"})
+	var cast := HeroSfx.hit_tick(h, {"src": "abil", "ab": "e"})
+	var picks := [shot, swing, cast]
+	ok(picks == ["hit_bow", "hit_bow", "hit"], "hit ticks: shot, primary, ability %s" % [picks])
+	h.wpn = Data.weapon_stats("rifle")
+	var bare := [HeroSfx.hit_tick(h, {"src": "shot"}), HeroSfx.hit_tick(null, {})]
+	ok(bare == ["hit", "hit"], "hit ticks: no weapon tick or no Hunter, the shared one %s" % [bare])
+	h.free()

@@ -14,6 +14,7 @@
 		"size": 0.26,
 		"color": "#bff7ef",
 		"sfx": "rime_shard",
+		"hit": "hit_thrown",
 		"fire_slow": 0.9,
 		"desc": "A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: one hold is one burst: let go and it ends on three large darts that hit twice as hard, fly faster and reach further, then a 0.5s pause before the next. Eight on one foe Shatter them. While skating they fly as fast, thick beams that hit twice as hard and home in the same way.",
 		"kick": 0.04,

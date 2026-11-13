@@ -15,6 +15,7 @@
 		"size": 0.13,
 		"color": "#ffb36a",
 		"sfx": "vn_rifle",
+		"hit": "hit_gun",
 		"sustain_loss": 0.5,
 		"sustain_rounds": 10,
 		"refill_after": 0.35,
