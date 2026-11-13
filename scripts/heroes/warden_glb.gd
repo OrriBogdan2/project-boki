@@ -1,7 +1,7 @@
 class_name WardenGlb
 extends RefCounted
 ## A Warden's 3D model (docs/art/wardens/RIG_CONTRACT.md): when art/wardens/<name>/<name>.glb exists and the
-## player hasn't set that Warden to procedural (Settings > Video > Warden models), the procedural hunter
+## the Warden has a model, the procedural hunter
 ## Models.hunter built keeps its rig, weapon, glider and hit ring but hides its body, and the .glb's armature
 ## (WardenSkeleton) follows the rig nodes HunterAnim poses, one bone per node (BONES), so every kit move
 ## plays on it. Otherwise the procedural model stays as it is: the fallback.
@@ -96,9 +96,6 @@ const INK_WIDTH := 0.0006
 const INK_FAR_THIN := 0.8       # the ink this much thinner at the match camera (outline.gdshader far_thin)
 ## Empties every .glb exports on its bones (RIG_CONTRACT "Anchor empties"); kits find them with anchor().
 const ANCHORS := ["anchor_head_top", "anchor_chest"]
-## Settings key: Warden id -> "procedural" for a Warden the player keeps on its procedural model (or a design
-## variant's name, art()).
-const SETTING := "warden_models"
 const FAR_HIDE_D := 13.0        # m from the camera: "far_hide" pieces stop being drawn
 const ORBIT_LOOK := "orbit_look"   # root meta, a world point: the seeing-stones turn to it (DolmKit)
 const WEAPON := "weapon"        # the .glb node that replaces the procedural weapon (RIG_CONTRACT)
@@ -143,14 +140,11 @@ static func path(arch: String) -> String:
 ## The folder and file name of a Warden's model: its art name, or a design variant picked for it. A variant is
 ## another design of the same Warden, built on the same rig and kept beside the shipped model so the two can be
 ## compared in game (art/wardens/<art>_<tag>/<art>_<tag>.glb, e.g. vex_r3b): `--warden-variant=vex_r3b`
-## (comma-separated for several) picks it for the session, and a Settings warden_models value of "vex_r3b"
-## for that Warden picks it in the save. A variant whose file is missing falls back to the shipped model.
+## (comma-separated for several) picks it for the session. A variant whose file is missing falls back to the
+## shipped model.
 static func art(arch: String) -> String:
 	var nm := String(ART.get(arch, arch))
 	var v := variant(nm)
-	if v == "":
-		var pick := String((Settings.get_v(SETTING) as Dictionary).get(arch, ""))
-		v = pick if pick.begins_with(nm + "_") else ""
 	return v if v != "" and ResourceLoader.exists("%s/%s/%s.glb" % [DIR, v, v]) else nm
 
 ## The variant `--warden-variant=` picks for an art name ("" for none).
@@ -166,18 +160,9 @@ static func variant(nm: String) -> String:
 static func has_model(arch: String) -> bool:
 	return arch != "" and ResourceLoader.exists(path(arch))
 
-## A Warden is drawn from its .glb when it has one, unless the player set it to procedural.
+## A Warden is drawn from its .glb whenever it has one.
 static func uses_model(arch: String) -> bool:
-	return has_model(arch) and String((Settings.get_v(SETTING) as Dictionary).get(arch, "3d")) != "procedural"
-
-## The player's pick for one Warden: true for its 3D model, false for the procedural one.
-static func set_model(arch: String, on: bool) -> void:
-	var picks: Dictionary = (Settings.get_v(SETTING) as Dictionary).duplicate()
-	if on:
-		picks.erase(arch)
-	else:
-		picks[arch] = "procedural"
-	Settings.set_v(SETTING, picks)
+	return has_model(arch)
 
 ## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
 ## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.

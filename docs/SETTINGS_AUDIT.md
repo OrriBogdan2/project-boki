@@ -11,6 +11,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `dash_hold` | Gameplay: "Hold Shift for the long dash" | Hold-dashes are per hunter now (`inp["dash_down"]`, Slide, Rampage). The option only stretched the old non-hero dash into an "ex" dash. Its read in `match.gd` and the stretch in `hunter.gd` are gone. |
 | `kin_auto` | Gameplay: "Boki also use your E ability on their own" | E is the hunter's utility now. The Boki's own ability is ordered by you (G), and the Merge is on T. A switch that lets the Boki spend that cooldown on its own fights all of that, so it is off for everyone. |
 | `hud_opacity` | (no row in the menu) | Nothing has read it since the HUD rework. |
+| `warden_models` | Video: per Warden "3D model" switch (Hunter models) | The 3D model is the only look a Warden with a .glb has; the procedural model stays for Wardens without one. Design variants are picked with `--warden-variant=` only. |
 
 ## Kept, with where they now live
 

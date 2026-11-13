@@ -199,6 +199,9 @@ func _screens() -> void:
 		await main.get_tree().process_frame
 		var off := _off_look(Overlay.root, ours)
 		ok("settings > %s: every box is the menu look" % t, off.is_empty(), str(off))
+		var switches := Overlay.root.find_children("*", "CheckButton", true, false)
+		var models := switches.filter(func(c): return c.text == "3D model")
+		ok("settings > %s: no per-Warden \"3D model\" switch" % t, models.is_empty())
 	Overlay.close()
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame

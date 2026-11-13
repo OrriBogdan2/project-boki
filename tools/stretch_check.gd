@@ -38,7 +38,6 @@ func run(main: Node) -> void:
 	tree.quit(1 if bad > 0 else 0)
 
 func _hero(id: String, holder: Node3D) -> Array:
-	WardenGlb.set_model(id, true)
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	holder.add_child(m)
 	for k in 30:

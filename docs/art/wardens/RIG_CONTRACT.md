@@ -8,8 +8,7 @@ the kits' effects can find their anchors, and gameplay stays per class. The load
 
 ## How the game uses it
 Models.hunter still builds the procedural hunter: the node rig HunterAnim poses, the weapon, the glider, the hit
-ring and the MantleLook sizes. When the Warden's .glb exists and the player hasn't set it to procedural
-(Settings > Video > Warden models, per Warden), `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
+ring and the MantleLook sizes. When the Warden's .glb exists, `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
 and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
 (`WardenGlb.BONES`, `WardenGlb.retarget`), so the kit moves retarget once for every Warden and MantleLook's
 sliders reshape the 3D model too. The .glb never needs to know about the animation code: it needs the bones
@@ -96,8 +95,8 @@ the `root` bone on `Rig` under them, so the hover and the kit's lifts carry on. 
 ### Design variants
 Another design of the same Warden can sit beside the shipped model while the owner compares them:
 `art/wardens/<art>_<tag>/<art>_<tag>.glb` (e.g. `vex_r3b`), built on the same rig. `--warden-variant=vex_r3b`
-picks it for the session (comma-separated for several), and a Settings `warden_models` value of `vex_r3b` for
-that Warden picks it in the save; with neither, or with the file missing, the Warden's own `<art>.glb` loads.
+picks it for the session (comma-separated for several); without it, or with the file missing, the Warden's
+own `<art>.glb` loads.
 Whichever design the owner picks ships as `<art>/<art>.glb`.
 
 ## Nodes the game keeps from the procedural rig (do not model these into the body)

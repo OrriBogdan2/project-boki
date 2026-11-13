@@ -111,11 +111,11 @@ func _bodies(main: Node) -> void:
 	_ok("a Hunter's canopy shader mixes the weights (%s)" % mat1.shader.resource_path, _weighs(mat1))
 	m.free()
 	m2.free()
-	WardenGlb.set_model(a, false)
+	WardenGlb._measuring = true
 	var pm := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.random(), a)
-	_ok("set to procedural, the body is built and merged", not WardenGlb.will_dress(a) and _loose(pm) > 0)
+	_ok("built without its .glb, the body is built and merged", not WardenGlb.will_dress(a) and _loose(pm) > 0)
 	pm.free()
-	WardenGlb.set_model(a, true)
+	WardenGlb._measuring = false
 
 func _ok(what: String, cond: bool) -> void:
 	print("LOADTRIM %s %s" % ["ok  " if cond else "FAIL", what])
