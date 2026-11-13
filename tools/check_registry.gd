@@ -261,6 +261,8 @@ const CHECKS := {
 	"--warden-blink-shots": ["res://tools/warden_blink_check.gd", "warden_blink_check", "shots"],  # --shots-dir=<dir>
 	"--build-threads-check": ["res://tools/build_threads_check.gd", "build_threads_check", null],
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
+	"--aim-pitch-check": ["res://tools/aim_pitch_check.gd", "aim_pitch_check", null],      # aim pitch: the pose
+	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--ult-pose-check": ["res://tools/ult_pose_check.gd", "ult_pose_check", null],      # R pose spans the cast lock

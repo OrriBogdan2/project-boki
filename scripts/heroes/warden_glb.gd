@@ -924,6 +924,7 @@ class Sync extends Node:
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
+	var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
@@ -981,6 +982,7 @@ class Sync extends Node:
 		clips = WardenClips.make(root, glb, skel, art_name)
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		flinch = WardenFlinch.make(root, skel) if clips else null
+		aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
 		if clips:
 			_look_pose()
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
@@ -1092,6 +1094,7 @@ class Sync extends Node:
 			flinch.step(dt)
 		if sway:
 			sway.step(dt)
+		aim.step(1.0 - w)
 		if w < 1.0:
 			var inv := skel.global_transform
 			for h in hand_nodes:

@@ -34,7 +34,7 @@ extends RefCounted
 ##   (Vector2, world, from the attacker) stun reviving base (0..1, -1) emote (id) emote_t (seconds)
 ##   fall (0..1 into the knocked-down beat's death clip, -1 when not: HunterFall; without the clip it kneels)
 ##   air_h (height above the ground, enables the long-jump tricks) squash (0..1) stretch
-##   kin_on_shoulder
+##   kin_on_shoulder aim_pitch (rad up +, AimPitch.of: the cursor's height across terraces)
 ## Out: stepped (a foot came down this frame) slammed (a heavy landing hit the ground) flipping; the root's
 ## AIR_TILT meta (the dive's pitch and the glider's bank, which a Hero's clips take too).
 
@@ -204,6 +204,7 @@ var tool_ph := 0.0             # where the tool is in its swing, 0..1
 var stow_k := 0.0              # the weapon put away for a tool, or holstered at home
 var base_k := 0.0
 var stun_k := 0.0
+var aim_pitch := 0.0           # rad the body aims up (+) or down at the cursor's height (AimPitch), eased
 var aim_k := 0.0               # 1 aiming (just fired), 0 relaxed carry
 var carry_k := 0.0             # running with the weapon in one hand
 var gun_vis := 1.0
@@ -1086,7 +1087,12 @@ func update(dt: float, s: Dictionary) -> void:
 	var tb := breath * still * (1.0 - emote_k * 0.5) * ws.breath_k
 	torso.position.y = hip_y + tb * 0.006 + glide_k * 0.02
 	torso.scale = Vector3(1.0 - tb * 0.006, 1.0 + tb * 0.012, 1.0 - tb * 0.006)
-	torso.rotation = Vector3(pitch + dz, yaw, roll)
+	# aiming across terraces: the spine takes its share (not in `pitch`: the gun rides it), the arms the rest in _upper
+	var aim_w := maxf(maxf(aim_k, cast_k), 0.0 if km.is_empty() else 1.0)
+	aim_w *= 1.0 - maxf(maxf(maxf(dash_k, glide_k), dive_k), maxf(maxf(ledge_k, roll_k), tuck))
+	aim_pitch = _ease(aim_pitch, float(s.get("aim_pitch", 0.0)) * aim_w, 10.0, dt)
+	model.set_meta(WardenAim.PITCH, aim_pitch)
+	torso.rotation = Vector3(pitch + dz + aim_pitch * AimPitch.SPINE, yaw, roll)
 	# ================================================================ WEAPON AND ARMS
 	_upper(dt, s, vel, r1, still, pitch, yaw, cast_k, em_t, fired, breath)
 	HunterTool.place(self)
@@ -1513,6 +1519,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 			ap += wa.x
 			ay += wa.y
 			ar += wa.z
+		ap += aim_pitch * (1.0 - AimPitch.SPINE)
 		if km.has("wo"): gpos += km["wo"] as Vector3
 		gbas = Basis.from_euler(Vector3(ap, ay, ar))
 		ap = lp; ay = ly; ar = 0.0
@@ -1523,7 +1530,9 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	free_l = maxf(free_l, ws.carry_free_l())
 	# emotes: the weapon goes away, the hands do the talking
 	var gvs := gun_vis * gun_scl
-	aim.rotation = Vector3(ap, ay, ar)
+	# a melee hold's arms take their share of the aim pitch about the torso's side axis (a gun's is in gbas)
+	var melee_up := aim_pitch * (1.0 - AimPitch.SPINE) if melee else 0.0
+	aim.basis = Basis(Vector3.RIGHT, melee_up) * Basis.from_euler(Vector3(ap, ay, ar))
 	aim.position = Vector3(0, AIM_Y, 0)
 	if gun:
 		gun.transform = Transform3D(gbas * Basis.from_scale(Vector3.ONE * maxf(gvs, 0.001)), gpos)

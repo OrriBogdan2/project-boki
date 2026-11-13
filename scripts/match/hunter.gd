@@ -3094,6 +3094,7 @@ func _anim_state(stretch: float) -> void:
 				break
 	s["reviving"] = rv or box_reviving()
 	s["act"] = holding()
+	s["aim_pitch"] = AimPitch.of(self)
 	# an emote bubble over us
 	var em := ""
 	var et := 99.0
