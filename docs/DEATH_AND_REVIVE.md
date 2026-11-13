@@ -138,3 +138,8 @@ All names and multipliers are placeholders.
 - Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.
 - A committed stomp (holding interact on a wisp for `stomp_commit`) runs its 2.4 s animation and cannot be cancelled or moved out of; only the animation ending (the wisp dies) or the stomper being hard-CC'd ends it, and then the wisp lives (decision 2026-11-11, `Life.cc_break`). Hard CC: a stun (wall stuns, Snap, Rimelock, Bola pair, Anchor, Nightwell included), a knock, a root, Grounded, a tow (Nightwell draw, a reel, a drag). Slows and Daze do not break it. `--stomp-check` sweeps every row of KIT_PARITY's Crowd control table.
 - Checked by `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
+
+## Watching your squad while you're out
+- Out with a teammate still in it, the camera, minimap and Boki card follow one of them (`scripts/match/spectate.gd`). The fire and secondary keys (rebindable) step to the next or previous living teammate, wrapping and skipping the out and the extracted.
+- A strip at the bottom reads "Watching <name> (<Hunter>)" with their health, armour and ability tiles, and one Give up button that leaves the match. Cooldowns of a remote teammate show as the owner last sent them.
+- Checked by `--spectate-check`; `--spectate-shots --shots-dir=<dir> [--shot-size=2560x1440]` takes the screenshots.
