@@ -1,5 +1,5 @@
 {
-	"desc": "Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops).",
+	"desc": "Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops). A game may name a first_crown item: a Boki's first Crown in that game also banks it (Echo Steps: Chimegrass).",
 	"day_s": 86400,
 	"day_doc": "Seconds in a garden day: the first-win item comes once per day per game.",
 	"week_s": 604800,
@@ -192,6 +192,36 @@
 				}
 			]
 		},
+		"echo": {
+			"name": "Echo Steps",
+			"first": "hushpearl",
+			"ribbon": "Echo Steps Cup Ribbon",
+			"colour": "#7ad0e0",
+			"cup_prize": "puzzlenut",
+			"first_crown": "chimegrass",
+			"table": [
+				{
+					"kind": "item",
+					"id": "hushpearl",
+					"w": 40
+				},
+				{
+					"kind": "snack",
+					"id": "puffcorn",
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 20
+				},
+				{
+					"kind": "item",
+					"id": "glassdew",
+					"w": 15
+				}
+			]
+		},
 		"relay": {
 			"name": "Relay Cup",
 			"first": "zipseed",
@@ -218,6 +248,40 @@
 					"kind": "snack",
 					"id": "tidebloom",
 					"w": 15
+				}
+			]
+		},
+		"lantern": {
+			"name": "Lantern Match",
+			"first": "hush_truffle",
+			"ribbon": "Lantern Match Cup Ribbon",
+			"colour": "#b48cff",
+			"cup_prize": "puzzlenut",
+			"table": [
+				{
+					"kind": "item",
+					"id": "peekbox",
+					"w": 35
+				},
+				{
+					"kind": "item",
+					"id": "hush_truffle",
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "glowmoss_sprig",
+					"w": 15
+				},
+				{
+					"kind": "snack",
+					"id": "glowcap",
+					"w": 15
+				},
+				{
+					"kind": "item",
+					"id": "hushpearl",
+					"w": 10
 				}
 			]
 		}

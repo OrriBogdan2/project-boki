@@ -28,10 +28,14 @@ const STARVE_INFO := {
 }
 
 const STATS := {
-	"power": {"name": "Power", "col": Color("ff7a5a"), "desc": "+0.4% damage a point", "drill": "Dummy strikes"},
-	"guard": {"name": "Guard", "col": Color("e6c26a"), "desc": "+0.5% health a point", "drill": "Brace and hold"},
-	"speed": {"name": "Speed", "col": Color("6ad8ff"), "desc": "+0.25% speed a point", "drill": "Hoop dash"},
-	"focus": {"name": "Focus", "col": Color("b9a6f5"), "desc": "Skill recharges 0.3% faster a point", "drill": "Still pond"},
+	"power": {"name": "Power", "col": Color("ff7a5a"), "desc": "+0.4% damage a point", "drill": "Dummy strikes",
+		"means": "Power: your Boki hits harder in a match and pushes harder at the stump"},
+	"guard": {"name": "Guard", "col": Color("e6c26a"), "desc": "+0.5% health a point", "drill": "Brace and hold",
+		"means": "Guard: your Boki has more health in a match and holds firmer at the stump"},
+	"speed": {"name": "Speed", "col": Color("6ad8ff"), "desc": "+0.25% speed a point", "drill": "Hoop dash",
+		"means": "Speed: your Boki runs faster in a match and in the Dash race"},
+	"focus": {"name": "Focus", "col": Color("b9a6f5"), "desc": "Skill recharges 0.3% faster a point", "drill": "Still pond",
+		"means": "Focus: your Boki's skill recharges faster in a match, and it sniffs out scents faster in Seek"},
 }
 
 # ------------------------------------------------------------------ inborn gifts (IVs)
@@ -136,6 +140,8 @@ static func ensure(rec: Dictionary) -> void:
 		rec["path"] = []           # path tokens it wears (GardenItems)
 		rec["stay"] = false        # wearing a Stayleaf: no new forms
 		rec["loose"] = 0           # points taken out of its stats, waiting to go back in
+	if not rec.has("aura"):
+		rec["aura"] = ""           # the aura item it wears, "" none (GardenItems, GardenAura draws it)
 	if not rec.has("hold"):
 		rec["hold"] = {}           # lean type -> garden days it is kept (GardenItems sweets)
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
@@ -183,7 +189,7 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	var joy_loss: float = DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
-	nd["joy"] = clampf(float(nd["joy"]) - joy_loss, 0.0, 100.0)
+	nd["joy"] = clampf(float(nd["joy"]) - joy_loss + ZoneAffinity.joy_per_min(rec) * mins, 0.0, 100.0)
 	if raining and not sleeping:
 		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
 	if floors.is_empty() and starve_h(rec) >= STARVE["sick"]:
@@ -288,6 +294,7 @@ static func condition(rec: Dictionary) -> float:
 static func condition_name(rec: Dictionary) -> String:
 	var ss := starve_stage(rec)
 	if ss != "" and ss != "dead": return String(STARVE_INFO[ss][0])
+	if rec.has("extra_care"): return "Needs extra care"
 	var c := condition(rec)
 	if c >= 75.0: return "In great shape"
 	if c >= 50.0: return "Doing fine"
@@ -610,6 +617,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
 	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
 	BokiQuirks.set_sex(baby)
+	BokiQuirks.set_rare_trait(baby)
 	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
@@ -669,6 +677,8 @@ static func hatch_rare(egg: Dictionary, rng: RandomNumberGenerator) -> Dictionar
 	baby["from_boss"] = String(egg.get("boss", ""))
 	baby["ivs"] = rare_ivs(rng)        # three stats 26 or better (shimmer doesn't touch IVs)
 	baby["origin"] = {"how": "boss_egg", "where": {"place": "home", "lair": String(egg.get("boss", ""))}}
+	if egg.has("visitor"):
+		baby["lineage"] = {"parents": [], "names": [], "gen": 0, "visitor": egg["visitor"]}
 	Evo.ensure(baby)
 	ensure(baby)
 	return baby

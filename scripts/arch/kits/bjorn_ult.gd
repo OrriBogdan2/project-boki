@@ -128,6 +128,8 @@ func tick(dt: float) -> void:
 		return
 	t += dt
 	_telegraph()
+	if planted() and h.vel.y > 0.0:
+		h.vel.y = 0.0          # no jumping off the plant (it lands straight back): dash_flow into_jump.x lock
 	if phase == "wind":
 		h.vel = Vector3(0, h.vel.y, 0)
 		if h.stun_t > 0.0 or h.downed or h.out:
@@ -162,7 +164,6 @@ func _interrupt() -> void:
 	phase = ""
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
-	k.m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
 	k.m.sfx("warn", h.pos, -4.0, 0.8)
 	_hide_lane()
 

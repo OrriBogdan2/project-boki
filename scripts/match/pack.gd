@@ -27,6 +27,15 @@ static func lowest_value(h) -> int:
 static func wants(h, it: Dictionary) -> bool:
 	return room(h) or Loot.value(it) > lowest_value(h)
 
+## Is this piece of gear better than what you wear in its slot (or is that slot empty)?
+static func beats_worn(h, it: Dictionary) -> bool:
+	var cur: Dictionary = h.gear[Gear.slot_on(h, String(it["id"]))]
+	return cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
+
+## A thing you could wear that beats what you have on: taking it from a box puts it on.
+static func wears(h, it: Dictionary) -> bool:
+	return String(it.get("t", "")) == "gear" and Gear.ALL.has(String(it.get("id", ""))) and beats_worn(h, it)
+
 # ------------------------------------------------------------------ things on the ground
 ## The item a ground pick-up stands for (made once and kept on it).
 static func ground_item(wp: Dictionary) -> Dictionary:
@@ -210,9 +219,8 @@ static func smart_loot(m, h, b: Dictionary) -> int:
 		var bg := _best_gear(b, slot)
 		if bg.is_empty():
 			continue
-		var cur: Dictionary = h.gear[Gear.slot_on(h, String(bg["it"]["id"]))]
-		if cur.is_empty() or Loot.value(bg["it"]) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))):
-			_box_to_hand(m, h, b, bg)
+		if beats_worn(h, bg["it"]):
+			wear_from_box(m, h, b, bg)
 			n += 1
 	# the pack: best first
 	var guard := 0
@@ -266,7 +274,8 @@ static func _box_put(b: Dictionary, it: Dictionary) -> void:
 	b["empty"] = false
 
 ## Takes a piece of gear out of a box onto you; what you wore goes into the box.
-static func _box_to_hand(m, h, b: Dictionary, c: Dictionary) -> void:
+## c is one of _box_things: {it, where, i}.
+static func wear_from_box(m, h, b: Dictionary, c: Dictionary) -> void:
 	var it: Dictionary = c["it"]
 	_box_remove(b, c)
 	var old_g := _wear(m, h, it)
