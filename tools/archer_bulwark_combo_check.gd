@@ -4,6 +4,8 @@ extends "res://tools/archetype_check.gd"
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
 const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and Albert's holds end
+const LACE_CANCEL_ROWS := preload("res://tools/lace_cancel_rows_check.gd")
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -716,6 +718,7 @@ func _archer_combos() -> void:
 		aim_at(P, P.pos + Vector3(8, 0, 0))
 		P.do_dash())
 	air_dash_is_ground(m, P, home)
+	LACE_CANCEL_ROWS.new(self).run(m, P, home)   # her Cancels table, row by row
 	await done(m)
 	var r2 := setup("archer", 7.0, "", true)
 	m = r2[0]
