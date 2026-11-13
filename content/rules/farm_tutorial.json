@@ -292,8 +292,8 @@
 			{"id": "feed", "text": "Feed your Boki"},
 			{"id": "toy", "text": "Play with a toy"},
 			{"id": "race", "text": "Run your first race"},
-			{"id": "nap", "text": "See a nap pile"},
-			{"id": "pair", "text": "Pair two Boki in the Nook"}
+			{"id": "nap", "text": "See a nap pile", "two": true},
+			{"id": "pair", "text": "Pair two Boki in the Nook", "two": true}
 		]
 	},
 	"tracker": {

@@ -73,7 +73,8 @@ func _list() -> void:
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "a save from before it has none")
 	GardenFirstDay.mark("feed")
 	ok(not old["tutorial"].has("gfd"), "and a tick does not start it")
-	Save.d = Save.fresh()
+	Save.d = _fresh_save()
+	Save.d["tutorial"] = Save.fresh()["tutorial"]      # (a fresh save's list, with two Boki: the pair lines show)
 	var rows := GoalTracker.lines()
 	var texts: Array = (GardenFirstDay.rules()["rows"] as Array).map(func(r): return String(r["text"]))
 	ok(rows.size() == 5 and rows.map(func(r): return r["text"]) == texts,

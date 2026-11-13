@@ -1,8 +1,9 @@
 class_name GoalTracker
 extends RefCounted
 ## The "Goals" card at the top right of the farm: what you are working towards, never the tutorial.
-## Rows come from five sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+## Rows come from six sources, caps and the title in content/rules/farm_tutorial.json "tracker":
 ##   first_day the new-save list (GardenFirstDay), in its own order with the ticked lines last
+##   garden    the garden's own long goal: your Boki's next level (base_mode), always there for a player who stays home
 ##   unlock    a Hunter's unlock challenge (ClassUnlock), for every Hunter not open yet
 ##   mastery   the goals of the Hunter you play that are not done
 ##   milestone a farm milestone not reached (FarmUnlocks)
@@ -11,7 +12,7 @@ extends RefCounted
 ## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
 ## and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
 
-const SOURCE_ORDER := ["first_day", "unlock", "mastery", "milestone", "level"]
+const SOURCE_ORDER := ["first_day", "garden", "unlock", "mastery", "milestone", "level"]
 
 static var all := false      # the full list is open
 
@@ -19,7 +20,7 @@ static func cfg() -> Dictionary:
 	return FarmTutorial.rules()["tracker"]
 
 static func lines() -> Array:
-	var by_source := {"first_day": _first_day(), "unlock": _unlocks(), "mastery": _mastery(),
+	var by_source := {"first_day": _first_day(), "garden": _garden(), "unlock": _unlocks(), "mastery": _mastery(),
 			"milestone": _milestones(), "level": _level()}
 	var caps: Dictionary = cfg()["per_source"]
 	var picked: Array = []
@@ -47,7 +48,18 @@ static func _row(text: String, prog: Dictionary, source: String, ready := false)
 			"ready": ready, "source": source}
 
 static func _first_day() -> Array:
-	return GardenFirstDay.rows().map(func(r): return _row(r["text"], _prog(int(r["done"]), 1), "first_day"))
+	var two: bool = Save.d["roster"].size() >= 2
+	return GardenFirstDay.rows().filter(func(r): return two or not r["two"]) \
+			.map(func(r): return _row(r["text"], _prog(int(r["done"]), 1), "first_day"))
+
+## "Raise <your Boki> to level N": its XP towards the next level, for a base that has no expeditions to chase.
+static func _garden() -> Array:
+	var rec := Save.active_kin()
+	if not FarmUnlocks.base_mode() or rec.is_empty() or int(rec["level"]) >= Evo.cap():
+		return []
+	var need := Game.xp_need(int(rec["level"]))
+	var text := "Raise %s to level %d" % [rec["name"], int(rec["level"]) + 1]
+	return [_row(text, _prog(mini(int(rec.get("xp", 0)), need), need), "garden")]
 
 static func _unlocks() -> Array:
 	var out: Array = []
@@ -55,7 +67,8 @@ static func _unlocks() -> Array:
 		return out
 	for id in Arch.ids():
 		var hid := String(id)
-		if ClassUnlock.status(hid) == "open":
+		# a starter that waits for the first expedition has no challenge text, so no row
+		if ClassUnlock.status(hid) == "open" or ClassUnlock.challenge_text(hid) == "":
 			continue
 		var prog := ClassUnlock.challenge_progress(hid)
 		out.append(_row(ClassUnlock.challenge_text(hid), prog, "unlock", ClassUnlock.can_unlock(hid)))

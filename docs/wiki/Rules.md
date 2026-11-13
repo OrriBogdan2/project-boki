@@ -776,6 +776,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | skip_label | Skip tutorial |
 | stay_label | Stay |
 | first_day | {"reward_gems": 15, "start_items": {"kibble": 2}, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile"}, {"id": "pair", "text": "Pair two Boki in the Nook"}]} |
+| first_day | {"reward_gems": 15, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile", "two": true}, {"id": "pair", "text": "Pair two Boki in the Nook", "two": true}]} |
 | tracker | {"title": "Goals", "max": 5, "per_source": {"first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
@@ -1007,7 +1008,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ratchet | {"medium": {"hub": {"draws": 520, "objects": 520}, "zone_cinderstep": {"frame_ms": 19.5}, "zone_ridge": {"frame_ms": 18.0}}, "low": {"hub": {"draws": 370, "objects": 560}}} |
 | ratchet_doc | Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one. |
 | budget_doc | What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column. |
-| wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
+| wayseed_from | Old Pell's Black Market (a new Wayseed every few days), or a lair of a matching type on a run |
 
 ## gear (`content/rules/gear.json`)
 

@@ -363,6 +363,8 @@ const CHECKS := {
 	"--toy-check": ["res://tools/toy_check.gd", "toy_check", null],      # base toys (GARDEN.md 4)
 	"--stat-up-vfx-check": ["res://tools/stat_up_vfx_check.gd", "stat_up_vfx_check", "check"],      # StatGlint
 	"--stat-up-vfx-shots": ["res://tools/stat_up_vfx_check.gd", "stat_up_vfx_check", "shots"],      # --shots-dir=<dir>
+	"--garden-first-15-check": ["res://tools/garden_first15_check.gd", "garden_first15_check", null],
+	"--garden-only-pass-check": ["res://tools/garden_only_pass_check.gd", "garden_only_pass_check", null],
 	"--garden-first-day-check": ["res://tools/garden_first_day_check.gd", "garden_first_day_check", null],
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],      # trust from care
 	"--lean-snacks-check": ["res://tools/lean_snacks_check.gd", "lean_snacks_check", null],

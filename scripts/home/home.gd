@@ -2309,7 +2309,8 @@ func _use(it: Dictionary) -> void:
 				_hatch_nest_egg()
 			else:
 				fx.burst(NEST_AT + Vector3(0, 0.5, 0), Color("ffd28a"), 8, 1.4)
-				_toast("It hatches after your next expedition")
+				var mins := ceili((float(Save.d["egg"]["t"]) - Time.get_unix_time_from_system()) / 60.0)
+				_toast("It hatches in about %d min" % maxi(1, mins))
 		"yard":
 			var ak := Save.active_kin()
 			if not ak.is_empty(): _open_train(ak)
@@ -2768,7 +2769,7 @@ func _open_plot(arr: String, i: int) -> void:
 			_close_panel(), 0, "plus"))
 		v.add_child(rc)
 	if not any:
-		v.add_child(UI.empty_state("seed", "No seeds", "Find them in chests and from monsters on expeditions, or buy some at the stall."))
+		v.add_child(UI.empty_state("seed", "No seeds", "Buy some at the stall. Expeditions find them too, in chests and from monsters."))
 	UI.subtitle(v, "Water it (%s) and it grows a stage every %d seconds while you're home." % [Settings.key_cap("interact"), int(Data.WATER_TIME)])
 
 ## Picking a ripe crop (by hand, or a Forage kin). A tended plant gives more, and a fully tended
