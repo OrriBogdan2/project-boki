@@ -92,3 +92,10 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
   shell (`POOL` of them, 0 particles; `shaders/receiver_cue.gdshader`, mix-blended so the tint reads on bright
   ground, where an additive glow washes out), so it reads at every quality. Sources call `Hunter.heal`, `Effects._heal` or
   `ReceiverCue.shield`; a zone ticking again inside `GAP_S` is one rise. Checked by `--receiver-cue-check`.
+
+## Missed shots
+A projectile that ends on nothing says where: `MissFx` (called from `Match._shot_end`, and by Sable's Bola) draws one pooled
+puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, wider and fainter where the shot ran out of
+range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
+oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
+asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).
