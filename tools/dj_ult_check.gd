@@ -6,6 +6,7 @@ extends RefCounted
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
 const EXIT := preload("res://tools/ult_exit.gd")
+const AimkitCheck := preload("res://tools/aimkit_check.gd")
 
 var A
 
@@ -72,6 +73,15 @@ func dancer(a) -> void:
 	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
 			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
 			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
+	var g := AimGeo.new()
+	for key in ["ult", "ult_rim"]:
+		var e: Dictionary = AimKit.entry(P, key).duplicate()
+		e["alpha"] = 2.0 if key == "ult" else float(e["alpha"])      # (the ring at its brightest, on a beat)
+		AimShapes.build(g, e)
+	var centre: float = AimkitCheck.alpha_at(g, thin["at"])
+	var rim: float = AimkitCheck.alpha_at(g, thin["at"] + Vector2(float(thin["r"]) - 0.1, 0.0))
+	A.ok("dancer X: a foe inside stays readable: centre %.2f alpha (<= %.2f), rim lit" % [centre, AimShapes.SOFT_A],
+			centre <= AimShapes.SOFT_A and rim >= 0.5)
 	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
