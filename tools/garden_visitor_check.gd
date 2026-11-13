@@ -108,6 +108,7 @@ func _stay_part() -> void:
 	await _step(60.0)
 	ok(_wild().size() == 1 and GardenVisitor.rec() == r, "only one visitor at a time")
 	var k: Dictionary = _wild()[0]
+	await _arrive_part(k)
 	k["rec"]["needs"]["energy"] = 100.0
 	ok(home.hrace.entrants().has(k), "it is in the Dash lineup as one more Boki")
 	var lines := CareJournal.arrival()
@@ -129,6 +130,27 @@ func _stay_part() -> void:
 		"a stay that ran out while you were away is told on arrival")
 	Save.d["visitor"]["next"] = 0.0
 	home._spawn_kin()      # the zone loads again: its visitor is not there
+
+## Its arrival reads: flat footprints (no rings) that fade in over fade_in_s, and a type-coloured shimmer on it for
+## its first shimmer_s only.
+func _arrive_part(k: Dictionary) -> void:
+	var a: Dictionary = Content.rules("garden_visitor")["arrive"]
+	var prints: Array = []
+	for c in home.get_children():
+		var first = c.get_child(0) if c.get_child_count() > 0 else null
+		if first is MeshInstance3D and (first as MeshInstance3D).mesh is SphereMesh:
+			prints = c.get_children()
+	ok(not prints.is_empty() and prints.size() <= int(a["prints"]), "footprints were laid (%d)" % prints.size())
+	ok(prints.all(func(p): return p.scale.y < 0.2 and p.scale.x < 2.0), "the prints are flat, not rings")
+	var mat: StandardMaterial3D = (prints[0] as MeshInstance3D).mesh.material
+	ok(mat.albedo_color.a < float(a["alpha"]), "they start faint and fade in")
+	await main.get_tree().create_timer(float(a["fade_in_s"]) + 0.3).timeout
+	ok(is_equal_approx(mat.albedo_color.a, float(a["alpha"])), "they are in after fade_in_s")
+	var before: int = home.fx.radial
+	VisitorArrive.shimmer(home, k, k["rec"], 0.0)
+	ok(home.fx.radial == before + 1, "it shimmers on arrival")
+	VisitorArrive.shimmer(home, k, k["rec"], float(a["shimmer_s"]) + 0.01)
+	ok(home.fx.radial == before + 1, "and stops after shimmer_s")
 
 ## Feeds the visitor its favourite three times, as the feed list does.
 func _feed_three() -> void:
@@ -182,3 +204,11 @@ func _egg_part() -> void:
 	var egg: Dictionary = (Incubator.shelf() + Incubator.eggs()).back() if Incubator.count() > eggs else {}
 	ok(Incubator.count() == eggs + 1 and egg.get("sp") == sp, "it left an egg of its kind (%s)" % sp)
 	ok(CareJournal.arrival().any(func(l): return "left a" in l and "Egg" in l), "the away card says it left an egg")
+	var from: Dictionary = egg.get("visitor", {})
+	var told: bool = from.get("sp") == sp and from.get("zone") == "bramblebank" and int(from.get("day", 0)) >= 1
+	ok(told, "the egg remembers who, where and which day")
+	if home.hinc != null:
+		var flashes: int = home.fx.flashes.size()
+		home.hinc.refresh()
+		VisitorArrive.glint(home.hinc, 99.0)
+		ok(home.fx.flashes.size() > flashes, "the egg glints in the Incubator")

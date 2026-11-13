@@ -1,0 +1,53 @@
+{
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-13 (ext/showcase-1113): current.json n95/c01, a body pass with the live head (eye stones left out: tarek_c01_body.glb). Earlier: Tarek's v95 master, appeal3 candidate b (waist taper, new warm-brown face with the gentle smile; ~/meshy/v95/tarek/r2/appeal3/cand_b.glb, its three floating eye stones left out: tarek_v95_b_body.glb) onto tarek.glb's (dolm's) skeleton, clips and anchors. The game's own eye stones (stone_0-2), shards and ground rings stay as they are. Points in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The stone arm is his LEFT, as in the v2 turnaround; the master carries it in the paint (no emission map).",
+ "master": "~/meshy/v95/tarek/r2/n95/c01/tarek_c01_body.glb",
+ "game": "art/wardens/tarek/tarek.glb",
+ "tris": 13000,
+ "max_tris": 14500,
+ "head": {"centre": [0.0, 0.04, 1.73], "r": 0.19},
+ "head_tris": 3200,
+ "head_uv": 2.2,
+ "tex": 2048,
+ "uv_margin": 0.002,
+ "keep": [],
+ "joints": {
+  "pelvis": [0.0, 0.0, 0.92],
+  "neck": [0.0, 0.02, 1.58],
+  "crown": [0.0, 0.03, 1.87],
+  "shoulder.R": [0.26, -0.02, 1.38],
+  "elbow.R": [0.33, -0.01, 1.15],
+  "wrist.R": [0.36, 0.05, 0.92],
+  "shoulder.L": [-0.26, -0.02, 1.38],
+  "elbow.L": [-0.36, -0.01, 1.15],
+  "wrist.L": [-0.38, 0.05, 0.9],
+  "hip.R": [0.12, 0.0, 0.92],
+  "knee.R": [0.18, 0.02, 0.53],
+  "ankle.R": [0.2, -0.03, 0.12],
+  "hip.L": [-0.12, 0.0, 0.92],
+  "knee.L": [-0.18, 0.02, 0.53],
+  "ankle.L": [-0.2, -0.03, 0.12]
+ },
+ "relax": {"CUTS": 0},
+ "past_wrist": {"R": "hand.R", "L": "hand.L"},
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [
+  {"bone": "hips", "box": [-9, 9, -9, 9, 0.95, 1.45], "except_segs": [["upper_arm.R", 0.09], ["upper_arm.L", 0.09], ["forearm.R", 0.09], ["forearm.L", 0.09]]},
+  {"bone": "pauldron.L", "box": [-0.6, -0.17, -0.3, 0.3, 1.28, 1.55], "except_segs": [["upper_arm.L", 0.08]]},
+  {"bone": "head", "box": [-0.3, 0.3, -0.35, 0.35, 1.58, 9]}
+ ],
+ "slots": [
+  {"slot": "hair", "box": [-0.35, 0.35, -0.35, 0.35, 1.3, 9], "v": [0, 0.24]},
+  {"slot": "cloth", "v": [0, 0.36]},
+  {"slot": "metal", "s": [0, 0.15], "v": [0.36, 0.85]},
+  {"slot": "cloth", "s": [0.6, 1]},
+  {"slot": "cloth", "box": [-0.3, 0.3, -0.35, 0.35, 1.5, 9], "s": [0, 0.38], "v": [0.82, 1]},
+  {"slot": "cloth", "box": [-0.3, 0.3, -0.35, 0.35, 0.92, 1.12], "s": [0, 0.35], "v": [0.8, 1]}
+ ],
+ "slot_default": "skin",
+ "room": {"*": 0.5},
+ "anchors": {
+  "anchor_head_top": [0.0, 0.03, 1.9],
+  "anchor_chest": [0.0, 0.14, 1.27]
+ }
+}

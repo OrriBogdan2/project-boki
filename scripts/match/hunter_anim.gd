@@ -16,7 +16,8 @@ extends RefCounted
 ##              flip (front, back or side by direction) and a landing roll, a medium a corkscrew
 ##              spin, a heavy a cannonball and a ground slam; landings squash by how far you fell
 ##   moves      class dodges (light phase lunge, medium combat roll, heavy shoulder charge), the
-##              glide (with the cloth streaming), skydiving, mantles and ledge pulls, crouching
+##              glide (with the cloth streaming, rolling into its turns), skydiving and the glider's dive
+##              (the whole body nose-down), mantles and ledge pulls, crouching
 ##   combat     the hands sit on the weapon's grips (elbows solved each frame), weapon aim poses and
 ##              relaxed carries, recoil per gun, reloads, melee swing arcs per combo step, casting,
 ##              flinches toward the hit, stun wobble, revive kneel, stomps, the base
@@ -31,9 +32,11 @@ extends RefCounted
 ##   combo (combo step of that swing, -1 for a charged attack) charge (0..1 holding a charge)
 ##   cast (seconds since an ability went off) cast_slot hit_t (seconds since a hit) hit_dir
 ##   (Vector2, world, from the attacker) stun reviving base (0..1, -1) emote (id) emote_t (seconds)
+##   fall (0..1 into the knocked-down beat's death clip, -1 when not: HunterFall; without the clip it kneels)
 ##   air_h (height above the ground, enables the long-jump tricks) squash (0..1) stretch
 ##   kin_on_shoulder
-## Out: stepped (a foot came down this frame) slammed (a heavy landing hit the ground) flipping.
+## Out: stepped (a foot came down this frame) slammed (a heavy landing hit the ground) flipping; the root's
+## AIR_TILT meta (the dive's pitch and the glider's bank, which a Hero's clips take too).
 
 const THIGH := 0.2
 const SHIN := 0.245
@@ -47,6 +50,11 @@ const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays 
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
 const GROUND_CLEAR := 0.05                # no part of a weapon ever goes nearer the ground than this (m)
+const FALL_SLUMP := 1.1                   # rad: a knocked-down body with no death clip slumps this far over its knee
+const GLIDE_BANK := 0.436                 # rad (25 deg): the roll into a glider turn at full steer
+const GLIDE_BANK_EASE := 8.0              # 1/s: how fast that roll follows the turn, and settles out of it
+const DIVE_PITCH := 1.15                  # rad: the whole body nose-down in a dive (the skydive, the glider's)
+const AIR_TILT := &"air_tilt"             # root meta, a Quaternion in the model's space about BODY_C: the air tilt
 
 ## How each class stands and moves.
 const STANCE := {
@@ -186,6 +194,7 @@ var crouch_k := 0.0
 var ledge_k := 0.0
 var stomp_k := 0.0
 var revive_k := 0.0
+var fall_k := 0.0           # into the knocked-down beat (state "fall"), 0 when not
 var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
 var act_kind := ""
 var act_t := 0.0
@@ -208,6 +217,7 @@ var lean_f := 0.0
 var lean_fv := 0.0
 var lean_s := 0.0
 var bank := 0.0
+var glide_bank := 0.0          # rad the glider rolls into its turn (+: a left turn), eased
 var mf_prev := 0.0
 var acc_f := 0.0
 var vdir_prev := 0.0
@@ -539,7 +549,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var rolling: bool = s.get("rolling", false)
 	var stun: bool = s.get("stun", false)
 	var fired: float = s.get("fired", 99.0)
-	var hv := Vector2(vel.x, vel.z)
+	var rooted := WardenClips.planted(s)      # feet planted, whatever the velocity says
+	var hv := Vector2.ZERO if rooted else Vector2(vel.x, vel.z)
 	var spd := hv.length()
 	# where the ground is, for keeping the weapon out of it (unknown in the air without air_h)
 	floor_ok = grounded or s.has("air_h")
@@ -563,6 +574,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
+	fall_k = maxf(0.0, float(s.get("fall", -1.0)))
 	HunterTool.tick(self, dt, s)
 	_act_tick(dt, s, grounded, spd)
 	var base_p := float(s.get("base", -1.0))
@@ -760,6 +772,7 @@ func update(dt: float, s: Dictionary) -> void:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
 	if gait != null:
+		gait.crouch = crouch_k
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
 		hl = gait.hl
 		hr = gait.hr
@@ -770,7 +783,9 @@ func update(dt: float, s: Dictionary) -> void:
 		ph = gait.ph
 		stepped = gait.landed
 	# crouch, landing, slam: knees bend, hips drop
-	var bend := maxf(crouch_k * 0.75, land_k * 0.85) + slam_k * 0.5
+	var own_k := 1.0 - (gait.gait_k if gait != null else 0.0)      # the Empty's gait sinks its own hips
+	var crouch_bend := crouch_k * 0.75 * own_k
+	var bend := maxf(crouch_bend, land_k * 0.85) + slam_k * 0.5
 	hl += bend * 0.62; hr += bend * 0.5
 	kl -= bend * 1.2; kr -= bend * 1.05
 	if slam_k > 0.0:
@@ -825,6 +840,8 @@ func update(dt: float, s: Dictionary) -> void:
 	if not km.is_empty() and km.has("legs") and float(km["lw"]) > 0.0:
 		var kl4: Array = km["legs"]
 		var lw := clampf(float(km["lw"]), 0.0, 1.0) * stance_leg_k(km_stance, run_k)
+		if rooted and not km_stance:
+			lw = 0.0      # (rooted: only a planted stance's legs play)
 		hl = lerpf(hl, kl4[0], lw); kl = lerpf(kl, kl4[1], lw)
 		hr = lerpf(hr, kl4[2], lw); kr = lerpf(kr, kl4[3], lw)
 	# pulling up a ledge or vaulting: one knee comes up onto it
@@ -841,8 +858,14 @@ func update(dt: float, s: Dictionary) -> void:
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
+	# knocked down (a Hero without a death clip): down on one knee, then slumping over it (see pitch)
+	var kneel := smoothstep(0.1, 0.45, fall_k)
+	hl = lerpf(hl, 1.35, kneel)
+	kl = lerpf(kl, -1.45, kneel)
+	hr = lerpf(hr, -0.15, kneel)
+	kr = lerpf(kr, -1.9, kneel)
 	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
-	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack":
+	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack" and not HunterRod.ACTS.has(act_kind):
 		var al := _act_legs()
 		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
 		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
@@ -869,6 +892,7 @@ func update(dt: float, s: Dictionary) -> void:
 	pitch += rising * 0.1 * ak - glide_k * 0.18 - ledge_k * lerpf(0.4, 0.15, ledge_up) - stomp_k * 0.12 - revive_k * 0.35
 	pitch -= tuck * (0.7 if trick != "spin" else 0.3) + roll_k * 0.6
 	pitch -= act_k * _act_pitch()
+	pitch -= smoothstep(0.4, 0.8, fall_k) * FALL_SLUMP
 	var yaw := -sin(ph) * 0.16 * r1 * back          # the shoulders swing against the hips
 	var roll := -lean_s * (1.0 + glide_k * 0.6) - bank * 0.8 + wk * 0.05
 	var dz := 0.0
@@ -1005,8 +1029,7 @@ func update(dt: float, s: Dictionary) -> void:
 	if roll_t >= 0.0:
 		rb = Basis(roll_ax, roll_ang) * rb
 		rpivot = Vector3(0, 0.4, 0)
-	if dive_k > 0.01:
-		rb = Basis(Vector3.RIGHT, -1.15 * dive_k) * rb
+	rb = _air_tilt(dt, turn, mf, ms, spd) * rb
 	# twin blades' charged attack: a full spin
 	if swing_t < swing_dur and swing_step == -1 and hold == "twin":
 		rb = Basis(Vector3.UP, -TAU * _spin_e(swing_t / swing_dur)) * rb
@@ -1067,6 +1090,7 @@ func update(dt: float, s: Dictionary) -> void:
 	# ================================================================ WEAPON AND ARMS
 	_upper(dt, s, vel, r1, still, pitch, yaw, cast_k, em_t, fired, breath)
 	HunterTool.place(self)
+	HunterRod.place(self)
 	# ================================================================ HEAD
 	if head:
 		glance_t -= dt
@@ -1125,6 +1149,22 @@ var km_swing := -1             # the weapon swing the move throws (its "swing" k
 const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to none), so no pose pops
 
 ## The kit move's channels this frame; a new move (or the same one restarted) blends in from the last pose.
+## The whole body's turn in the air, about the hips: nose-down by the dive (DIVE_PITCH), and under the glider a roll
+## into its turns by the turn rate (times the speed: the sideways pull), GLIDE_BANK at full steer, the glider's whole
+## steering pull (HunterMove.glide_accel); it leans toward the inside of the turn about the way it flies (the body
+## faces the aim, which need not be where it flies). Handed to a Hero's clips as AIR_TILT (WardenClips._air_tilt),
+## so the body you see, its glider and a Boki riding on it turn as one.
+func _air_tilt(dt: float, turn: float, mf: float, ms: float, spd: float) -> Basis:
+	var steer := clampf(turn * spd / HunterMove.glide_accel, -1.0, 1.0)
+	glide_bank = _ease(glide_bank, steer * GLIDE_BANK * glide_k, GLIDE_BANK_EASE, dt)
+	var tilt := Basis(Vector3.RIGHT, -DIVE_PITCH * dive_k)
+	if absf(glide_bank) > 0.0005:
+		# (about the way it flies, reversed: a positive roll leans the head to the left of it)
+		var axis := Vector3(-ms, 0.0, mf) / spd if spd > 0.1 else Vector3.BACK
+		tilt *= Basis(axis, glide_bank)
+	model.set_meta(AIR_TILT, tilt.get_rotation_quaternion())
+	return tilt
+
 func _update_km(id: String, tt: float, dt: float) -> void:
 	if id != km_id or tt < km_prev_t - 0.001:
 		km_from = km
@@ -1301,6 +1341,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))
 	stow = maxf(stow, stow_k)
+	stow = maxf(stow, 1.0 if km_id == WardenCarry.MOVE else 0.0)      # (both hands are on the Boki)
 	stow = maxf(stow, ledge_k * 0.0)
 	gun_vis = _ease(gun_vis, 0.0 if stow > 0.5 else 1.0, 14.0, dt)
 	var side_r := Vector3(1, 0, 0)
@@ -1699,6 +1740,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
 ##   feed, pat, toss, cheer   the garden moves (HunterVerbs)
+##   wait, cast, bite, reel, land   fishing with the rod (HunterRod): the legs stay on EmptyGait's planted feet
 ##   carry, pack   a Boki held against the chest, or on the back (home): both keep the walk cycle
 ##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
@@ -1744,6 +1786,8 @@ func _act_pitch() -> float:
 		return HunterTool.pitch(act_kind, tool_ph)
 	if HunterVerbs.ACTS.has(act_kind):
 		return HunterVerbs.pitch(act_kind, act_t)
+	if HunterRod.ACTS.has(act_kind):
+		return HunterRod.pitch(act_kind, act_t)
 	match act_kind:
 		"scan": return 0.25 + 0.04 * sin(act_t * 1.6)
 		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
@@ -1765,6 +1809,8 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 		return HunterTool.hands(act_kind, tool_ph, sh_l, sh_r)
 	if HunterVerbs.ACTS.has(act_kind):
 		return HunterVerbs.hands(act_kind, act_t, sh_l, sh_r)
+	if HunterRod.ACTS.has(act_kind):
+		return HunterRod.hands(act_kind, act_t, sh_l, sh_r)
 	var t := act_t
 	match act_kind:
 		"scan":
