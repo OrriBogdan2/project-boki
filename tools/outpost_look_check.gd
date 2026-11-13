@@ -120,11 +120,11 @@ func run(main_node: Node) -> void:
 	var holder := Control.new()
 	main.add_child(holder)
 	holder.draw.connect(func():
-		for lit in [0.0, 0.5, 1.0]:
-			OutpostGlyph.draw(holder, Vector2(20, 20), 1.0, ExitModels.UPLINK, team_col, lit))
+		for st in ["idle", "charging", "open"]:
+			ExitMark.glyph(holder, Vector2(20, 20), 9.0, {"state": st, "prog": 0.5, "t": 5.0}, 0.0))
 	holder.queue_redraw()
 	await main.get_tree().process_frame
-	ok(true, "the minimap glyph draws neutral, charging and lit")
+	ok(true, "the map glyph draws closed, opening and open")
 	holder.queue_free()
 	m.over = true
 	m.queue_free()

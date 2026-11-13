@@ -12,7 +12,7 @@ const MARGIN := 14.0      # px from the map's corner
 const ICON_X := 16.0      # px from the panel's left edge to the icon's centre
 
 ## Every kind, in the order the key lists it: [id, word].
-const KINDS := [["squad", "Squad"], ["boki", "Boki"], ["exit", "Exit"], ["hot", "Hot"], ["stop", "Stop"]]
+const KINDS := [["squad", "Squad"], ["boki", "Boki"], ["exit", "Extract"], ["hot", "Hot"], ["stop", "Stop"]]
 
 ## The ids of the kinds on the map now, in KINDS order.
 static func kinds(m: Match, tm: TrainMap) -> Array:
@@ -71,7 +71,7 @@ static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 			c.draw_circle(at, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
 			Icons.draw(c, "paw", at, MapDetail.ICON_R * 0.8, Color(k.sp.get("glow", k.sp["color"])))
 		"exit":
-			fm.hud._draw_exit_icon(at, m.exits.list[0])
+			ExitMark.glyph(c, at, 6.5, ExitMark.SAMPLE, 0.0)
 		"hot":
 			c.draw_arc(at, 6.0, 0.0, TAU, 24, Color(HotZone.COL, 0.85), 2.5)
 		"stop":

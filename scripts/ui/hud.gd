@@ -697,14 +697,8 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.exits:
 		for x in m.exits.list:
 			var pv: Vector2 = to_map.call(x["pos"])
-			var busy: bool = String(x["state"]) in ["charging", "open"]
-			if not MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x)):
-				continue
-			if not on_map.call(pv, 4.0):
-				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
-				if busy: _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
-				continue
-			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
+			var shown := MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x))
+			ExitMark.minimap(self, inner, x, pv, bool(on_map.call(pv, 4.0)), shown)
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, hold)
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
@@ -903,22 +897,6 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
-## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
-## when not; a pulsing ring while it's going.
-func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
-	var col: Color = Exits.color_of(x)
-	var usable: bool = m.exits.live(x)
-	var st := String(x["state"])
-	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
-	var held := OutpostLook.held(x)
-	var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
-	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
-	if st == "charging":
-		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["charging", "open"]:
-		var ph := fmod(m.time * 1.2, 1.0)
-		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
-
 ## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
 ## anywhere on the map.
 func _draw_exit_labels() -> void:
@@ -950,7 +928,7 @@ func _draw_exit_labels() -> void:
 			_draw_waypoint(at, "Lift" if st == "open" else "Uplink", col)
 
 ## A small arrow on the minimap's edge pointing at something off the map.
-func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:
+func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color, s := 1.0) -> void:
 	var d := (to - from)
 	if d.length() < 0.1: return
 	d = d.normalized()
@@ -960,7 +938,7 @@ func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:
 		from = Vector2(mm_circ.x, mm_circ.y); t = mm_circ.z - 7.0
 	var p := from + d * t
 	var side := Vector2(-d.y, d.x)
-	c.draw_colored_polygon(PackedVector2Array([p + d * 5.0, p - d * 3.0 + side * 4.0, p - d * 3.0 - side * 4.0]), col)
+	c.draw_colored_polygon(PackedVector2Array([p + d * 5.0 * s, p - d * 3.0 * s + side * 4.0 * s, p - d * 3.0 * s - side * 4.0 * s]), col)
 
 ## On narrow windows the ability bar takes the whole bottom row and the player card sits above it.
 func _narrow(sz: Vector2) -> bool:
