@@ -42,6 +42,8 @@ func _gate_shut(L: Dictionary) -> bool:
 	return (L["gate_tiles"] as Array).all(func(q): return m.world.kind[m.world.idx(q.x, q.y)] == World.T_BLOCK)
 
 ## A boss in its lair, woken with P and C inside, then killed by P. Returns the kill time.
+const SPILL_WAIT := 0.7      # s: the boss dissolves, then its drops spill (MobDissolve)
+
 func _kill(L: Dictionary, P: Hunter, C: Hunter) -> float:
 	for g in L["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
 	if L["state"] == "sealed": m.lairs.open(L, P, "dial")
@@ -52,11 +54,12 @@ func _kill(L: Dictionary, P: Hunter, C: Hunter) -> float:
 	if b.buried: b._clear_attack()
 	b.stagger_t = 0.0
 	var pk0: Array = m.pickups.duplicate()
+	var kill_at := m.time
 	b.hurt(b.hp + b.max_hp, P, {"src": "shot"})
+	_run(SPILL_WAIT)
 	dropped = m.pickups.filter(func(p): return not pk0.has(p))      # (before anyone walks over them)
-	_run(0.2)
 	for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false
-	return m.time - 0.2
+	return kill_at
 
 func run(main: Node) -> void:
 	main.set_meta("lair_lock_check", self)      # (a RefCounted that awaits frames must be kept alive, as the swim check does)
@@ -122,7 +125,7 @@ func run(main: Node) -> void:
 	ok(beam != null and beam.position.y > tallest * 2.0, "its beam reaches %.0f m, over twice the pile's pillars (%.0f m): it reads apart from across the lair" % [(beam.position.y * 2.0) if beam else 0.0, tallest * 2.0])
 	ok(m.lairs.egg_pings.size() > 0, "and it's pinged on everyone's map")
 	# ---------------------------------------------------------------- 2. locked in after the kill; campers locked out
-	ok(F.get("victory", false) and F.get("locked", false) and _gate_shut(F) and m.lairs.victory_left(F) > Lairs.VICTORY_T - 0.5,
+	ok(F.get("victory", false) and F.get("locked", false) and _gate_shut(F) and m.lairs.victory_left(F) > Lairs.VICTORY_T - SPILL_WAIT - 0.5,
 		"the kill locks the lair: gate shut, opens in %s" % Lairs.clock(m.lairs.victory_left(F)))
 	if sd != "":
 		for i in 3:

@@ -566,7 +566,7 @@
 "long_line": 5
 },
 "scripts/match/mob.gd": {
-"long_line": 12,
+"long_line": 9,
 "nested_ternary": 1,
 "semicolon": 19
 },

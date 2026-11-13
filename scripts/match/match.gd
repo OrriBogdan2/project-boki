@@ -2179,39 +2179,13 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
-	KeyCarry.on_mob_dead(self, mb)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	MobSfx.death(self, mb, big_mob)
 	if credit == player: sfx("kill", null, -12.0, 1.4)
-	fx.burst(mb.pos + Vector3(0, 0.6, 0), mb.md["color"], 22, 5.0, 0.6)
 	Juice.mob_dead(self, mb, credit, big_mob)
-	if not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false):
-		# the gems come as one pile (DropMerge)
-		var gn := int(mb.md["gems"])
-		DropMerge.gems(self, mb.pos + Vector3(0, 0.6, 0), gn, int(round(3 * float(T["loot"]))))
-		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
-			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
-		# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
-		GearDrops.run_table(self, mb.mkind, mb.pos + Vector3(0, 0, 0.4), rng, {"h": credit if credit is Hunter else null, "bonus": biomes.rarity_bonus_at(mb.pos) if biomes else 0})
-		if mb.mkind == "warden":
-			# the Warden guards the best things: treasure, maybe a Soul Ember
-			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
-			if rng.randf() < 0.5:
-				spawn_val(Loot.valuable("soul_ember"), mb.pos + Vector3(0.9, 0, -0.6))
-		elif mb.mkind == "brute" and rng.randf() < 0.25:
-			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
-		if mb.mkind == "glimmer":
-			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
-		if mb.mkind == "bl_warden":
-			# a Warden's lamp holds something worth the risk: armor, often a tonic
-			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
-			if rng.randf() < 0.4: drop("tonic", mb.pos + Vector3(0.4, 0.6, 0), 1)
-		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight or mb is Boss else 0.12)):
-			drop("seed", mb.pos + Vector3(0, 0.6, 0), 1, Data.pick_seed())
-	# the big ones are worth a perk to whoever brought them down
-	if mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote and (mb.mkind == "warden" or rng.randf() < 0.5):
-		PerkOrbs.drop(self, "boss" if mb.mkind == "warden" else "brute", mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
+	var loot: bool = not world.is_void(mb.pos.x, mb.pos.z) and not _o.get("self", false)
+	later(MobDissolve.begin(self, mb), func(): MobDrops.spill(self, mb, credit, loot))
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
 
