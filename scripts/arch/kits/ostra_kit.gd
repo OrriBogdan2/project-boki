@@ -11,7 +11,6 @@ extends ArchKit
 ## The seed is a ground zone placed through HeroZones (legal ground, short of walls, never in the
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
 
-const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
@@ -100,7 +99,7 @@ func add_swell(v: float) -> void:
 	if res >= res_max():
 		swollen_t = float(res_def()["swollen_t"])
 		swells += 1
-		armed_fx("SWOLLEN", "")
+		armed_fx("")
 		play("ostra_empower")
 		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
 		m.sfx("os_empower", h.pos, -2.0, 1.0)
@@ -552,7 +551,8 @@ func cast_e() -> bool:
 		"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(),
 		"col": null
 	}
-	e_t = grow + float(ed["hold_full"])
+	# no timer: the source lists none, so the recast window stays open until he pops it or goes down
+	e_t = INF
 	play("ostra_seed")
 	m.sfx("os_seed", p, -3.0, 1.0)
 	if (m.net_on or HeroZones.capture) and not h.remote:
@@ -563,7 +563,7 @@ func cast_e() -> bool:
 
 func seed_radius() -> float:
 	if seed.is_empty(): return 0.0
-	return float(seed["rmax"]) * clampf(float(seed["t"]) / float(seed["grow"]), 0.08, 1.0)
+	return HeroZones.seed_r(float(seed["rmax"]), float(seed["grow"]), float(seed["t"]))
 
 func seed_k() -> float:
 	return clampf(float(seed["t"]) / float(seed["grow"]), 0.0, 1.0) if not seed.is_empty() else 0.0
@@ -572,6 +572,7 @@ func _tick_seed(dt: float) -> void:
 	var ed := e_def()
 	seed["t"] = float(seed["t"]) + dt
 	var p: Vector3 = seed["pos"]
+	HeroZones.seed_size(seed["vis"], seed_radius())
 	# the cast: a small orb drops from his hand onto the spot
 	var drop := float(ed["drop"])
 	if float(seed["t"]) < drop:
@@ -581,7 +582,7 @@ func _tick_seed(dt: float) -> void:
 	AimKit.circle(
 		h, "seed",
 		{
-			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": TEAL, "col2": VOID_COL,
+			"at": p, "r": seed_radius(), "fill": seed_k(), "all": true, "col": VOID_COL, "col2": TEAL,
 			"dashed": seed_k() < 1.0
 		}
 	)
@@ -595,12 +596,6 @@ func _tick_seed(dt: float) -> void:
 			for f in foes_in(seed["pos"], seed_radius()):
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
-		_pop(false)
-
-## The source detonates only on the recast: a seed left at full size this long (e.hold_full) fizzles out
-## with no damage, so it can't be parked forever.
-func _e_end() -> void:
-	if not seed.is_empty():
 		_pop(false)
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't
@@ -657,14 +652,15 @@ func _pop(hit: bool) -> void:
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
-		payoff_fx(caught_hunter.pos, PAY, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
+		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist < 9.0 and los and randf() < 0.1:
-		h.inp["aim"] = tgt.pos
+	if HeroUlt.ready(self) and dist < 9.0 and los:
+		# (aimed where they walk to in the tell)
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * float(x_def()["tell"]) * 0.5
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():
