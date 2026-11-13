@@ -91,7 +91,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 52
+"long_line": 5
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -212,7 +212,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 201,
+"long_line": 200,
 "nested_ternary": 27,
 "semicolon": 243
 },
@@ -396,9 +396,9 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 23,
+"long_line": 22,
 "nested_ternary": 1,
-"semicolon": 49
+"semicolon": 48
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
@@ -492,7 +492,7 @@
 "scripts/match/kin.gd": {
 "long_line": 30,
 "nested_ternary": 7,
-"semicolon": 19
+"semicolon": 18
 },
 "scripts/match/kin_command.gd": {
 "long_line": 5,
@@ -541,10 +541,6 @@
 "long_line": 23,
 "nested_ternary": 1,
 "semicolon": 25
-},
-"scripts/match/life.gd": {
-"long_line": 12,
-"semicolon": 3
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
@@ -700,9 +696,7 @@
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 34,
-"nested_ternary": 4,
-"semicolon": 10
+"nested_ternary": 2
 },
 "scripts/ui/gear_panel.gd": {
 "long_line": 2
@@ -759,9 +753,7 @@
 "semicolon": 10
 },
 "scripts/ui/lobby.gd": {
-"long_line": 11,
-"nested_ternary": 2,
-"semicolon": 4
+"nested_ternary": 1
 },
 "scripts/ui/map_paint.gd": {
 "long_line": 1,
@@ -848,10 +840,6 @@
 "tools/balloon_check.gd": {
 "long_line": 8,
 "semicolon": 11
-},
-"tools/blight_check.gd": {
-"long_line": 15,
-"semicolon": 25
 },
 "tools/boki_follow_check.gd": {
 "long_line": 33,

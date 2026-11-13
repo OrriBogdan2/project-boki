@@ -7,17 +7,24 @@ var status: Label
 var ready_btn: Button
 var start_btn: Button
 var is_ready := false
-var mode := "trios"           # Data.MODES
+var mode := "trios"  # Data.MODES
 var mode_btns := {}
+
 
 func setup(o: Dictionary) -> void:
 	opts = o
 
+
 func _ready() -> void:
 	Sfx.play_music("title")
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
-	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)
+	var bg := ColorRect.new()
+	bg.color = UI.BG
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(bg)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(center)
 	var pb := UI.scroll_panel("Play online", 640, func(): Game.goto("home"), "Back")
 	var panel: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
@@ -37,12 +44,26 @@ func _ready() -> void:
 	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	track.add_child(modes)
 	for key in Data.MODES:
-		var b := UI.button(String(key).capitalize(), func(): mode = key; _refresh_modes())
+		var b := UI.button(
+			String(key).capitalize(),
+			func():
+				mode = key
+				_refresh_modes()
+		)
 		mode_btns[key] = b
 		modes.add_child(b)
 	v.add_child(track)
-	v.add_child(UI.para(("Bots fill the empty places: %d hunters in trios, %d in solos. " % [Data.MATCH_PLAYERS, Data.SOLO_PLAYERS])
-		+ "Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
+	v.add_child(
+		UI.para(
+			(
+				(
+					"Bots fill the empty places: %d hunters in trios, %d in solos. "
+					% [Data.MATCH_PLAYERS, Data.SOLO_PLAYERS]
+				)
+				+ "Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."
+			)
+		)
+	)
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
 	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
@@ -54,11 +75,13 @@ func _ready() -> void:
 	_announce()
 	_refresh()
 
+
 ## Esc goes back to the farm, like the X.
 func _unhandled_input(e: InputEvent) -> void:
 	if e.is_action_pressed("menu") and not Overlay.is_open():
 		get_viewport().set_input_as_handled()
 		Game.goto("home")
+
 
 func _exit_tree() -> void:
 	if Net.peers_changed.is_connected(_refresh):
@@ -66,26 +89,46 @@ func _exit_tree() -> void:
 	if Net.message.is_connected(_on_msg):
 		Net.message.disconnect(_on_msg)
 
+
 func _refresh_modes() -> void:
 	for k in mode_btns:
 		mode_btns[k].theme_type_variation = "SegOn" if k == mode else "Seg"
 
+
 func _announce() -> void:
 	var k := Save.active_kin()
-	var arch := ClassUnlock.online_arch(Arch.of_save())      # (Settings > Demo > All masks open is offline only)
+	var arch := ClassUnlock.online_arch(Arch.of_save())  # (Settings > Demo > All masks open is offline only)
 	var cls: String = opts.get("cls", Data.class_of_save())
 	var weapon: String = Save.d.get("weapon", "")
 	if arch != Arch.of_save():
 		cls = Arch.weight(arch)
 		weapon = Arch.signature(arch)
-	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready, "lobby": 1,
-		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
+	Net.set_presence(
+		{
+			"name": Save.d.get("name", "Hunter"),
+			"cls": cls,
+			"weapon": weapon,
+			"arch": arch,
+			"ready": is_ready,
+			"lobby": 1,
+			"kin":
+			{
+				"species": k.get("species", "cindle"),
+				"level": int(k.get("level", 1)),
+				"name": k.get("name", "Boki"),
+				"traits": k.get("traits", {}),
+				"trust": float(k.get("trust", 50))
+			}
+		}
+	)
+
 
 func _toggle_ready() -> void:
 	is_ready = not is_ready
 	ready_btn.text = "Ready" if is_ready else "I'm ready"
 	ready_btn.theme_type_variation = "Chosen" if is_ready else ""
 	_announce()
+
 
 func _refresh() -> void:
 	if not is_instance_valid(list_box):
@@ -104,18 +147,41 @@ func _refresh() -> void:
 		if not p.has("lobby"):
 			continue
 		var row := UI.card(UI.CARD, 10, 12)
-		var h := UI.hbox(12); row.add_child(h)
-		h.add_child(UI.IconDot.new("paw", Data.KIN.get(p.get("kin", {}).get("species", "cindle"), Data.KIN["cindle"])["color"], 20.0))
-		var nm := UI.label("%s%s" % [p.get("name", "Hunter"), "  (you)" if id == Net.me else ""], UI.T_BODY, UI.ACCENT_HI if id == Net.me else UI.INK, UI.semi)
+		var h := UI.hbox(12)
+		row.add_child(h)
+		h.add_child(
+			UI.IconDot.new(
+				"paw", Data.KIN.get(p.get("kin", {}).get("species", "cindle"), Data.KIN["cindle"])["color"], 20.0
+			)
+		)
+		var nm := UI.label(
+			"%s%s" % [p.get("name", "Hunter"), "  (you)" if id == Net.me else ""],
+			UI.T_BODY,
+			UI.ACCENT_HI if id == Net.me else UI.INK,
+			UI.semi
+		)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(nm)
 		var kin: Dictionary = p.get("kin", {})
-		var info := UI.label("%s · %s" % [Arch.label(String(p.get("arch", ""))), Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
+		var info := UI.label(
+			(
+				"%s · %s"
+				% [
+					Arch.label(String(p.get("arch", ""))),
+					Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]
+				]
+			),
+			14,
+			UI.MUTED
+		)
 		info.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(info)
-		h.add_child(UI.tag("Ready" if p.get("ready", false) else "Not ready", UI.GOOD if p.get("ready", false) else UI.MUTED))
+		h.add_child(
+			UI.tag("Ready" if p.get("ready", false) else "Not ready", UI.GOOD if p.get("ready", false) else UI.MUTED)
+		)
 		list_box.add_child(row)
+
 
 func _start() -> void:
 	if Net.mode == "":
@@ -136,12 +202,30 @@ func _start() -> void:
 		var p: Dictionary = Net.peers.get(id, Net.my_presence)
 		if id == Net.me:
 			p = Net.my_presence
-		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+		roster.append(
+			{
+				"peer": id,
+				"team": i / squad,
+				"name": p.get("name", "Hunter"),
+				"arch": p.get("arch", ""),
+				"cls": p.get("cls", "medium"),
+				"weapon": p.get("weapon", ""),
+				"kin": p.get("kin", {})
+			}
+		)
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(mo["teams"]))
-	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster,
-		"teams": mini(teams, int(mo["total"])), "squad": squad, "tier": int(opts.get("tier", 0))}
+	var d := {
+		"mid": "%d" % (Time.get_ticks_msec() % 100000000),
+		"seed": randi(),
+		"host": Net.me,
+		"roster": roster,
+		"teams": mini(teams, int(mo["total"])),
+		"squad": squad,
+		"tier": int(opts.get("tier", 0))
+	}
 	Net.lobby_emit("start", d)
 	_go(d)
+
 
 func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "start" or typeof(data) != TYPE_DICTIONARY:
@@ -151,6 +235,15 @@ func _on_msg(topic: String, data, _from: String) -> void:
 			_go(data)
 			return
 
+
 func _go(d: Dictionary) -> void:
 	Save.d["cls"] = opts.get("cls", Save.d.get("cls", "medium"))
-	Game.start_match({"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0))})
+	Game.start_match(
+		{
+			"net": d,
+			"seed": int(d["seed"]),
+			"teams": int(d["teams"]),
+			"squad": int(d["squad"]),
+			"tier": int(d.get("tier", 0))
+		}
+	)

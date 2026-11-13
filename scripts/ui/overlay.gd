@@ -7,6 +7,9 @@ signal closed
 
 const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 
+## Keys that only do something with a squadmate: not listed while you play a solos match.
+const SQUAD_KEYS := ["base", "ping", "pass_lead", "separate"]
+
 var root: Control
 var dim: ColorRect              # the blurred backdrop (UI.backdrop)
 var host: CenterContainer
@@ -327,9 +330,6 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
-
-## Keys that only do something with a squadmate: not listed while you play a solos match.
-const SQUAD_KEYS := ["base", "ping", "pass_lead", "separate"]
 
 ## The controls list's groups, [title, [action ids]]; `solo` (a solos match) drops SQUAD_KEYS.
 static func control_groups(solo: bool) -> Array:

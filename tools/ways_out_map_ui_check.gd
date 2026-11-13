@@ -12,12 +12,16 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("WAYSMAP %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _state(m: Match, i: int) -> int:
 	return int(WaysOutHud.seats(m)[i]["st"])
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -25,8 +29,9 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9,
-		"seed": 7401, "no_drop": true, "heart": true, "god": true})
+	m.start(
+		{"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 7401, "no_drop": true, "heart": true, "god": true}
+	)
 	for o in m.hunters:
 		o.ctrl = "idle"
 	var H: Heart = m.heart
@@ -36,22 +41,30 @@ func run(main: Node) -> void:
 	m.time = 0.0 - m.sess_t0
 	var at := WaysOutMap.sites(m)
 	ok(at[1] == H.gate and at[3] == H.site, "the Gate and the Heart ring are the Heart's own places")
-	ok(at[0] != Vector3.INF and at[2] != Vector3.INF,
-		"a lair and an outpost carry the quest seats (%s, %s)" % [at[0], at[2]])
+	ok(
+		at[0] != Vector3.INF and at[2] != Vector3.INF,
+		"a lair and an outpost carry the quest seats (%s, %s)" % [at[0], at[2]]
+	)
 	var outposts: Array = m.exits.list.filter(func(x): return x["kind"] == "outpost")
 	var far: float = 0.0
 	for x in outposts:
 		far = maxf(far, Vector2(x["pos"].x - at[0].x, x["pos"].z - at[0].z).length())
-	ok(Vector2(at[2].x - at[0].x, at[2].z - at[0].z).length() >= far - 0.01,
-		"the Uplink is the outpost farthest from the Lair")
+	ok(
+		Vector2(at[2].x - at[0].x, at[2].z - at[0].z).length() >= far - 0.01,
+		"the Uplink is the outpost farthest from the Lair"
+	)
 	# ---------------------------------------------------------------- 2. the ring fractions
 	var sd := WaysOutHud.seats(m)
-	ok(is_equal_approx(m.sess_time(), 0.0) and is_equal_approx(WaysOutMap.fraction(0, sd[0]), 0.0),
-		"at 0:00 nothing is lit yet")
+	ok(
+		is_equal_approx(m.sess_time(), 0.0) and is_equal_approx(WaysOutMap.fraction(0, sd[0]), 0.0),
+		"at 0:00 nothing is lit yet"
+	)
 	m.time = 60.0 - m.sess_t0
 	sd = WaysOutHud.seats(m)
-	ok(is_equal_approx(WaysOutMap.fraction(0, sd[0]), 60.0 / float(q["lair_open_s"])),
-		"half way to the Lair: the ring is half lit")
+	ok(
+		is_equal_approx(WaysOutMap.fraction(0, sd[0]), 60.0 / float(q["lair_open_s"])),
+		"half way to the Lair: the ring is half lit"
+	)
 	ok(WaysOutMap.fraction(3, sd[3]) < 0.2 and WaysOutMap.fraction(3, sd[3]) > 0.0, "the Final ring fills toward 10:00")
 	m.time = float(q["lair_open_s"]) + 0.5 - m.sess_t0
 	sd = WaysOutHud.seats(m)
@@ -70,16 +83,22 @@ func run(main: Node) -> void:
 	var open_col := WaysOutMap.color_of(WaysOutHud.seats(m)[0])
 	m.time = float(q["lair_shut_s"]) + 1.0 - m.sess_t0
 	var lost_col := WaysOutMap.color_of(WaysOutHud.seats(m)[0])
-	ok(locked_col != open_col and open_col != lost_col and locked_col != lost_col,
-		"locked, open and lost seats read in three colours")
+	ok(
+		locked_col != open_col and open_col != lost_col and locked_col != lost_col,
+		"locked, open and lost seats read in three colours"
+	)
 	H.carrier = m.player
 	H._force(Heart.S.CARRIED, "test")
-	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) == Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()],
-		"a carried spark: the Gate wears the carrier's squad colour")
+	ok(
+		WaysOutMap.color_of(WaysOutHud.seats(m)[1]) == Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()],
+		"a carried spark: the Gate wears the carrier's squad colour"
+	)
 	H.carrier = null
 	H.early_team = m.player.team
-	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) != Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()],
-		"a taken seat is dimmed")
+	ok(
+		WaysOutMap.color_of(WaysOutHud.seats(m)[1]) != Data.TEAM_COLORS[m.player.team % Data.TEAM_COLORS.size()],
+		"a taken seat is dimmed"
+	)
 	H.early_team = -1
 	# ---------------------------------------------------------------- 4. ways left
 	m.time = 30.0 - m.sess_t0
@@ -116,8 +135,10 @@ func run(main: Node) -> void:
 	ok(WaysOutMap.line(m) == "", "no line while you play")
 	m.player.out = true
 	var txt := WaysOutMap.line(m)
-	ok(txt.begins_with("Ways out left: %d" % WaysOutMap.ways_left(m)) and txt.contains("nearest"),
-		"dead: the count and the nearest seat (%s)" % txt)
+	ok(
+		txt.begins_with("Ways out left: %d" % WaysOutMap.ways_left(m)) and txt.contains("nearest"),
+		"dead: the count and the nearest seat (%s)" % txt
+	)
 	m.player.out = false
 	m.player.extracted = true
 	ok(WaysOutMap.line(m).begins_with("Ways out left"), "out through a seat and watching: the line shows too")
@@ -132,16 +153,22 @@ func run(main: Node) -> void:
 	H._force(Heart.S.WAITING, "test")
 	var t0: float = Heart.r("tide_start_s")
 	m.time = 10.0 - m.sess_t0
-	ok(is_equal_approx(Heart.next_r(m), minf(H.start_r, Heart.r("tide_r0") * H.ways_scale)),
-		"before the close the dashed ring is the play space the match starts with")
-	m.time = t0 + 300.0 - m.sess_t0         # (the closing ring is inside the play space by now)
+	ok(
+		is_equal_approx(Heart.next_r(m), minf(H.start_r, Heart.r("tide_r0") * H.ways_scale)),
+		"before the close the dashed ring is the play space the match starts with"
+	)
+	m.time = t0 + 300.0 - m.sess_t0  # (the closing ring is inside the play space by now)
 	var ahead := (300.0 + Heart.r("tide_next_s")) / Heart.r("tide_close_s")
 	var want := lerpf(Heart.r("tide_r0"), Heart.r("tide_r1"), ahead) * H.ways_scale
-	ok(is_equal_approx(Heart.next_r(m), want) and Heart.next_r(m) < Heart.tide_r(m),
-		"mid close: the dashed ring is tide_next_s ahead and smaller")
+	ok(
+		is_equal_approx(Heart.next_r(m), want) and Heart.next_r(m) < Heart.tide_r(m),
+		"mid close: the dashed ring is tide_next_s ahead and smaller"
+	)
 	m.time = t0 + Heart.r("tide_close_s") + 50.0 - m.sess_t0
-	ok(is_equal_approx(Heart.next_r(m), Heart.r("tide_r1") * H.ways_scale),
-		"once the ring holds there is no smaller one")
+	ok(
+		is_equal_approx(Heart.next_r(m), Heart.r("tide_r1") * H.ways_scale),
+		"once the ring holds there is no smaller one"
+	)
 	# ---------------------------------------------------------------- 8. the real HUD
 	m.player.out = true
 	m.hud.full_map.open()

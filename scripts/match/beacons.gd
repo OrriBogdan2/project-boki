@@ -10,23 +10,25 @@ extends RefCounted
 ## Online, the game that owns the Hunter on the beacon runs it and tells the others with the "bcn"
 ## event: [i, team, "lit" | "out" | "used"]; each game brings back the dead Hunters it owns.
 
-const RADIUS := 2.2              # metres: stand this close to light it
-const COUNT := 6                 # beacons per map (fewer if the islands are small)
-const SPACING := 30.0            # metres: at least this far apart
-const ALARM_DB := 4.0            # the lit hum's level at the beacon, loud
-const HORN_DB := -4.0            # the horn when one is lit (heard by everyone, no falloff)
+const RADIUS := 2.2  # metres: stand this close to light it
+const COUNT := 6  # beacons per map (fewer if the islands are small)
+const SPACING := 30.0  # metres: at least this far apart
+const ALARM_DB := 4.0  # the lit hum's level at the beacon, loud
+const HORN_DB := -4.0  # the horn when one is lit (heard by everyone, no falloff)
 const COL := Color("8fffc0")
+
 
 ## Seconds standing on a beacon until it goes off.
 static func time_s() -> float:
 	return float(BoxRevive.rules()["beacon_s"])
+
 
 ## Stands the beacons up on the biggest islands, apart from each other and the exits.
 static func place(m: Match) -> void:
 	if m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
 	if int(m.opts.get("squad", 1)) <= 1:
-		return          # solos: a beacon only brings back a dead squadmate, so none stand (no map or minimap pin)
+		return  # solos: a beacon only brings back a dead squadmate, so none stand (no map or minimap pin)
 	var isl: Array = []
 	for i in m.world.islands.size():
 		isl.append(i)
@@ -46,22 +48,37 @@ static func place(m: Match) -> void:
 		var n := Models.revive_beacon()
 		n.position = p
 		m.add_child(n)
-		m.beacons.append({"pos": p, "used": false, "prog": 0.0, "team": -1, "node": n, "contested": false,
-			"lit": false, "lit_team": -1, "lit_at": 0.0, "lit_net": false})
+		m.beacons.append(
+			{
+				"pos": p,
+				"used": false,
+				"prog": 0.0,
+				"team": -1,
+				"node": n,
+				"contested": false,
+				"lit": false,
+				"lit_team": -1,
+				"lit_at": 0.0,
+				"lit_net": false
+			}
+		)
+
 
 static func _clear(m: Match, spots: Array, p: Vector3) -> bool:
 	for s in spots:
 		if Vector2(s.x - p.x, s.z - p.z).length() < SPACING:
 			return false
-	for ep in (m.exits.spots() if m.exits else []):
+	for ep in m.exits.spots() if m.exits else []:
 		if Vector2(ep.x - p.x, ep.z - p.z).length() < 6.0:
 			return false
 	return true
+
 
 ## Who a beacon would bring back for this team: every dead or downed teammate still waiting
 ## (in any game; each game brings back its own).
 static func targets(m: Match, team: int) -> Array:
 	return m.hunters.filter(func(x): return x.team == team and not x.extracted and ((x.out and not x.gone) or x.downed))
+
 
 ## Every step: Hunters this game owns light and channel the beacons they stand on.
 static func tick(m: Match, dt: float) -> void:
@@ -69,7 +86,7 @@ static func tick(m: Match, dt: float) -> void:
 		if bc["used"]:
 			continue
 		var teams := {}
-		var mine := -1             # a team with a Hunter of ours on it and someone to bring back
+		var mine := -1  # a team with a Hunter of ours on it and someone to bring back
 		for h in m.hunters:
 			if h.out or h.extracted or h.downed or h.dropping:
 				continue
@@ -98,6 +115,7 @@ static func tick(m: Match, dt: float) -> void:
 			m.net_event(["bcn", m.beacons.find(bc), mine, "used"])
 			_use(m, bc, mine)
 
+
 ## Another game's Hunter lit, left or used a beacon (the "bcn" event).
 static func net_in(m: Match, x: Array) -> void:
 	if x.size() < 4:
@@ -116,14 +134,17 @@ static func net_in(m: Match, x: Array) -> void:
 		"used":
 			_use(m, bc, int(x[2]))
 
+
 ## The beacons lit right now, for every player's HUD whatever their team.
 static func lit(m: Match) -> Array:
 	return m.beacons.filter(func(bc): return bc["lit"] and not bc["used"])
+
 
 ## Stops every beacon hum (the match is ending).
 static func stop_sounds(m: Match) -> void:
 	for i in m.beacons.size():
 		Sfx.loop_stop("beacon%d" % i)
+
 
 ## Lit: the horn for everyone, the hum that carries, and the toast. Out: quiet again.
 static func _light(m: Match, bc: Dictionary, on: bool, team: int) -> void:
@@ -147,6 +168,7 @@ static func _light(m: Match, bc: Dictionary, on: bool, team: int) -> void:
 	else:
 		m.hud.toast("Revive beacon lit %s" % m.direction_word(m.player.pos, bc["pos"]), COL)
 
+
 ## The beacon goes off: every dead teammate this game owns comes back round it.
 static func _use(m: Match, bc: Dictionary, team: int) -> void:
 	_light(m, bc, false, team)
@@ -158,13 +180,14 @@ static func _use(m: Match, bc: Dictionary, team: int) -> void:
 			continue
 		var at: Vector3 = bc["pos"] + Vector3(cos(i * 2.1) * 1.2, 0, sin(i * 2.1) * 1.2)
 		Life.bring_back(m, o, at, 1.0, true)
-		o.gems = 0          # you come back empty-handed: your box is where you left it
+		o.gems = 0  # you come back empty-handed: your box is where you left it
 		o.seeds = {}
 		o.caught = []
 		names.append(o.pname)
 		i += 1
 	var glow: Node3D = (bc["node"] as Node3D).get_node_or_null("Glow")
-	if glow: glow.visible = false
+	if glow:
+		glow.visible = false
 	m.fx.ring(bc["pos"], 4.0, COL, 0.6)
 	m.sfx("unlock", bc["pos"], 0.0, 0.8)
 	if not names.is_empty():

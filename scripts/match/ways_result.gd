@@ -11,8 +11,10 @@ const HOWS := {
 	"heart_final": "You held the Heart ring and left.",
 }
 
+
 static func place_rules() -> Dictionary:
 	return Heart.rules()["place"]
+
 
 ## The line under the title: how you left, or where your squad placed.
 static func how_line(r: Dictionary) -> String:
@@ -24,20 +26,26 @@ static func how_line(r: Dictionary) -> String:
 		return "%s placed %s of %d. " % ["You" if solo else "Your squad", ordinal(int(r["place"])), int(r["squads"])]
 	return ""
 
+
 ## The one plain line when hiding earned nothing.
 static func hid_line(r: Dictionary) -> String:
 	if r.get("extracted", false) or not r.get("hid", false) or r.get("tutorial", false):
 		return ""
 	return "No placement pay: %s never levelled up." % ("you" if r.get("solo", false) else "your squad")
 
+
 static func ordinal(n: int) -> String:
 	var tail := n % 100
 	if tail < 11 or tail > 13:
 		match n % 10:
-			1: return "%dst" % n
-			2: return "%dnd" % n
-			3: return "%drd" % n
+			1:
+				return "%dst" % n
+			2:
+				return "%dnd" % n
+			3:
+				return "%drd" % n
 	return "%dth" % n
+
 
 ## Where `team` placed among the squads of `hunters` when the match ended for it: {} when one of its Hunters
 ## left (a squad that left has a seat, not a place), else {place, squads, hid, solo}; `hid` is a squad no Hunter of
@@ -60,13 +68,15 @@ static func placing(hunters: Array, team: int, now: float) -> Dictionary:
 			above += 1
 	var min_level := int(place_rules()["min_level"])
 	var hid := not hunters.any(func(h): return h.team == team and h.lvl >= min_level)
-	var solo := hunters.filter(func(h): return h.team == team).size() == 1      # solos: "You placed"
+	var solo := hunters.filter(func(h): return h.team == team).size() == 1  # solos: "You placed"
 	return {"place": above + 1, "squads": ends.size(), "hid": hid, "solo": solo}
+
 
 ## Gems for a squad that did not leave: a few for every squad that went out before it, up to a cap.
 static func pay(place: int, squads: int) -> int:
 	var pr := place_rules()
 	return clampi((squads - place) * int(pr["gems_per_squad_below"]), 0, int(pr["gems_max"]))
+
 
 ## Game.apply_result: placement pay into the save and the summary.
 static func settle(r: Dictionary, out: Dictionary) -> void:
@@ -74,6 +84,7 @@ static func settle(r: Dictionary, out: Dictionary) -> void:
 		return
 	out["place_gems"] = pay(int(r["place"]), int(r["squads"]))
 	Save.d["gems"] = int(Save.d["gems"]) + int(out["place_gems"])
+
 
 ## The seat reward's home half as one line (the egg and the materials; gems and seeds show with the rest).
 static func reward_line(hb: Dictionary) -> String:
@@ -83,6 +94,7 @@ static func reward_line(hb: Dictionary) -> String:
 	for g in hb.get("goods", {}):
 		parts.append("%d %s" % [int(hb["goods"][g]), String(g).capitalize()])
 	return "Heart reward: %s." % ", ".join(parts) if not parts.is_empty() else ""
+
 
 ## What the Heart seat you did not take pays (rules "reward"), for a Heart exit only: the early seat names the
 ## final one (and when it opens), the final seat names the early one.
@@ -105,6 +117,7 @@ static func other_line(how: String) -> String:
 	if early:
 		seat = "The final seat (%d:%02d, one squad)" % [int(rl["final_s"]) / 60, int(rl["final_s"]) % 60]
 	return "%s would have paid: %s." % [seat, ", ".join(parts)]
+
 
 ## One Boki you left behind, in one line.
 static func boki_line(news: Dictionary) -> String:

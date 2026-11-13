@@ -6,16 +6,17 @@ extends RefCounted
 ## Reads the match only: the Heart's state for the two Heart seats, the lairs and outposts for the quest seats
 ## (their schedule is content/rules/heart.json "quest"). Drawn with HudStyle on the Hud's canvas.
 
-enum St {LOCKED, OPEN, USE, TAKEN, LOST}
+enum St { LOCKED, OPEN, USE, TAKEN, LOST }
 const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
 const CELL := Vector2(86.0, 40.0)
 const SQUADS_W := 112.0
 const TOP_Y := 8.0
 const PIP_R := 7.0
-const LOST_COL := Color("8a3a4a")    # a seat the Blight took: the tide's crimson, dimmed
+const LOST_COL := Color("8a3a4a")  # a seat the Blight took: the tide's crimson, dimmed
 const STATE_WORD := ["", "OPEN", "IN USE", "TAKEN", "LOST"]
 
-static var _seats: Array = [{}, {}, {}, {}]    # reused every frame: name, st, t (seconds to open/shut or -1), team
+static var _seats: Array = [{}, {}, {}, {}]  # reused every frame: name, st, t (seconds to open/shut or -1), team
+
 
 ## The four seats as they stand now (the same dictionaries every call).
 static func seats(m: Match) -> Array:
@@ -28,12 +29,14 @@ static func seats(m: Match) -> Array:
 	_heart_final(m, now)
 	return _seats
 
+
 static func _seat(i: int, st: int, t: float, team: int) -> void:
 	var d: Dictionary = _seats[i]
 	d["name"] = NAMES[i]
 	d["st"] = st
 	d["t"] = t
 	d["team"] = team
+
 
 static func _quest(i: int, now: float, open_s: float, shut_s: float, taken: int, using: int) -> void:
 	if taken >= 0:
@@ -46,6 +49,7 @@ static func _quest(i: int, now: float, open_s: float, shut_s: float, taken: int,
 		_seat(i, St.OPEN, shut_s - now, -1)
 	else:
 		_seat(i, St.LOST, -1.0, -1)
+
 
 static func _heart_early(m: Match) -> void:
 	var ht: Heart = m.heart
@@ -62,6 +66,7 @@ static func _heart_early(m: Match) -> void:
 	else:
 		_seat(1, St.LOST, -1.0, -1)
 
+
 static func _heart_final(m: Match, now: float) -> void:
 	var ht: Heart = m.heart
 	match ht.state:
@@ -71,6 +76,7 @@ static func _heart_final(m: Match, now: float) -> void:
 			_seat(3, St.USE if ht.final_team >= 0 and ht.final_prog > 0.0 else St.OPEN, -1.0, ht.final_team)
 		_:
 			_seat(3, St.LOCKED, Heart.r("final_s") - now, -1)
+
 
 ## The squad of the first hunter listed under `key` on any lair ("flown": left by the updraft, "sealed_in": fighting).
 static func _lair_team(m: Match, key: String) -> int:
@@ -82,6 +88,7 @@ static func _lair_team(m: Match, key: String) -> int:
 			return (who[0] as Hunter).team
 	return -1
 
+
 ## The squad of the first outpost in one of these states.
 static func _uplink_team(m: Match, a: String, b := "") -> int:
 	if m.exits == null:
@@ -90,6 +97,7 @@ static func _uplink_team(m: Match, a: String, b := "") -> int:
 		if x["kind"] == "outpost" and (x["state"] == a or x["state"] == b):
 			return int(x.get("team", -1))
 	return -1
+
 
 ## Squads with at least one Hunter still in the match.
 static func squads_left(m: Match) -> int:
@@ -103,8 +111,10 @@ static func squads_left(m: Match) -> int:
 		mask >>= 1
 	return n
 
+
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+
 
 # ------------------------------------------------------------------ the strip
 ## The lowest y the strip and the line under it reach (the pill ends 11 px under its middle), or 0 when the strip
@@ -115,6 +125,7 @@ static func bottom(m: Match) -> float:
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return 0.0
 	return TOP_Y + CELL.y + 20.0 + 11.0
+
 
 static func draw(hud) -> void:
 	var m: Match = hud.m
@@ -133,6 +144,7 @@ static func draw(hud) -> void:
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), left, 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
+
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
@@ -173,6 +185,7 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 		var nw := TextCache.width(HudStyle.BIG, s["name"], 11)
 		c.draw_line(Vector2(tx - 1, r.position.y + 12), Vector2(tx + nw + 1, r.position.y + 12), col, 1.5)
 
+
 # ------------------------------------------------------------------ the Heart Gate prompt
 ## What the carrier sees at the Gate: the live key, "Leave now: small reward", the hold bar (rules gate_hold_s),
 ## one line under it. `it` is the Heart's interact dictionary; false when it is not the carrier's leave prompt.
@@ -198,6 +211,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)
 	HudStyle.ctext(c, Vector2(mid, y + 37), stay, 13, HudStyle.INK, 3, HudStyle.BODY)
 	return true
+
 
 ## The line under the Gate prompt: what staying gets you.
 static func stay_line(m: Match) -> String:

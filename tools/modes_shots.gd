@@ -6,6 +6,7 @@ extends RefCounted
 var main: Node
 var dir := ""
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -23,11 +24,13 @@ func run(main_node: Node) -> void:
 			await _shot(id, mode)
 	main.get_tree().quit(0)
 
+
 func _shot(id: String, mode: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	var o := {"map": id, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true, "god": true,
-		"length": 1e9}
+	var o := {
+		"map": id, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true, "god": true, "length": 1e9
+	}
 	o.merge(Data.mode_opts(mode))
 	await m.start(o)
 	m.set_process(false)
@@ -41,4 +44,5 @@ func _shot(id: String, mode: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
 	print("MODES-SHOT %s  play space %.0f m" % [file, m.heart.start_r])
 	m.queue_free()
-	for i in 3: await main.get_tree().process_frame
+	for i in 3:
+		await main.get_tree().process_frame

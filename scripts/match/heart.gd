@@ -18,7 +18,7 @@ extends RefCounted
 ##   ["ht","take",seat,team]  host -> all: a seat fired; each game takes its own Hunters of that squad
 ##   ["ht","pick",nid] / ["ht","done",nid] / ["ht","drop",nid,x,y,z]  a game -> host (its own hunter)
 
-enum S {ASLEEP, CHARGING, READY, CARRIED, WAITING, FINAL, DONE}
+enum S { ASLEEP, CHARGING, READY, CARRIED, WAITING, FINAL, DONE }
 const NEXT := {
 	S.ASLEEP: [S.CHARGING, S.FINAL],
 	S.CHARGING: [S.READY, S.FINAL],
@@ -28,28 +28,66 @@ const NEXT := {
 	S.FINAL: [S.DONE],
 	S.DONE: [],
 }
-const HOW_EARLY := "heart_early"    # the `how` of a Hunter who left by the Heart Gate
-const HOW_FINAL := "heart_final"    # ...and by the Heart ring
+const HOW_EARLY := "heart_early"  # the `how` of a Hunter who left by the Heart Gate
+const HOW_FINAL := "heart_final"  # ...and by the Heart ring
 const RULES_PATH := "res://content/rules/heart.json"
-const COL := Color("ff5d78")        # the Heart's soft pink-red light
-const GLASS := Color("b8203f")      # smooth crimson glass: no crack, no gold
+const COL := Color("ff5d78")  # the Heart's soft pink-red light
+const GLASS := Color("b8203f")  # smooth crimson glass: no crack, no gold
 const GATE_COL := Color("ff9aa8")
 const SYNC_S := 3.0
 const BEAM_H := 46.0
 const NEAR_LABEL := 7.0
-const TIDE_STAGES := 11          # the source's death circle has stages 0-10; our one close is split into as many
-const START_IN := 8.0              # m inside the play space's edge that squads start (in_play)
-const RING_DY := 3.0                # metres above or below the Heart that still count as in the ring
+const TIDE_STAGES := 11  # the source's death circle has stages 0-10; our one close is split into as many
+const START_IN := 8.0  # m inside the play space's edge that squads start (in_play)
+const RING_DY := 3.0  # metres above or below the Heart that still count as in the ring
 
 static var _rules := {}
+
+# ------------------------------------------------------------------ state
+var m: Match
+var site := Vector3.INF
+var gate := Vector3.INF
+var ways_scale := 1.0  # the map's "ways_scale": tide radii and gate_dist stretch with it (1.412 on the 2x map)
+var start_r := INF  # m round the Heart the tide starts at (start_r_of: the map's play_space for the mode)
+var state := S.ASLEEP
+var trail: Array[String] = []  # "time from>to why", every move of the state (the checks read it)
+var refused := 0  # edges NEXT turned down: always 0 in a sane run
+var charge := 0.0  # seconds the Heartspark has charged
+var carrier: Hunter = null
+var spark_pos := Vector3.ZERO  # where a lying Heartspark floats (the Heart, or where a carrier fell)
+var early_team := -1  # the squad that took the early seat
+var final_team := -1  # the squad whose progress the Heart ring holds
+var final_prog := 0.0  # 0..1
+var rush := false  # one squad left: the final seat is open and faster
+var drops := 0
+var hit_t := -99.0  # match time the tide last hurt the local player (the HUD's red pulse)
+var wall: BlightWall
+var audio: HeartSfx  # the hum, stings, heartbeat, gate cues and the Ways Out calls
+var _hold := {}  # nid -> seconds of interact held on the spark / the gate
+var _sync_t := 0.0
+var _tide_t := 0.0  # seconds since the last tide tick
+var _rng := RandomNumberGenerator.new()
+var _root: Node3D
+var _spark: Node3D
+var _beam: MeshInstance3D
+var _beam_mat: ShaderMaterial
+var _halo: MeshInstance3D
+
+
+func _init(match_node: Match) -> void:
+	m = match_node
+	audio = HeartSfx.new(self)
+
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 	return _rules
 
+
 static func r(k: String) -> float:
 	return float(rules()[k])
+
 
 ## A Heart in this match? Real matches only; tests with an endless clock opt in with opts["heart"].
 static func enabled(opts: Dictionary) -> bool:
@@ -57,6 +95,7 @@ static func enabled(opts: Dictionary) -> bool:
 		if opts.get(k, false):
 			return false
 	return bool(opts.get("heart", float(opts.get("length", 360.0)) < 1.0e8)) and not opts.get("no_heart", false)
+
 
 # ------------------------------------------------------------------ the tide (read by BlightDir)
 ## The tide ring's radius in metres at this match time: the play space it starts at (start_r) until the
@@ -66,11 +105,13 @@ static func tide_r(m: Match) -> float:
 		return 0.0
 	return minf(m.heart.start_r, ring_at(m.sess_time(), m.heart.ways_scale))
 
+
 ## The tide ring's radius t seconds into a match on a map of ways_scale k (the radius it starts at
 ## before the tide moves).
 static func ring_at(t: float, k: float) -> float:
 	var f := clampf((t - r("tide_start_s")) / r("tide_close_s"), 0.0, 1.0)
 	return lerpf(r("tide_r0"), r("tide_r1"), f) * k
+
 
 ## 0 inside the ring, 1 forty metres past it.
 static func tide_out(m: Match, p: Vector3) -> float:
@@ -79,11 +120,13 @@ static func tide_out(m: Match, p: Vector3) -> float:
 		return 0.0
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
+
 ## The ring's radius `tide_next_s` seconds on: where the tide closes to next (tide_r1 once the ring holds).
 static func next_r(m: Match) -> float:
 	if m.heart == null:
 		return 0.0
 	return minf(m.heart.start_r, ring_at(m.sess_time() + r("tide_next_s"), m.heart.ways_scale))
+
 
 ## The play space a match on this layout starts with, in metres round the Heart: the map's play_space for
 ## the mode (solos when every squad is one Hunter, else trios), or the closing ring's first radius.
@@ -92,18 +135,16 @@ static func start_r_of(layout: Dictionary, opts: Dictionary) -> float:
 	var first := r("tide_r0") * float(layout.get("ways_scale", 1.0))
 	return minf(first, float(layout.get("play_space", {}).get(mode, first)))
 
-## The points (spawns) inside the play space at the start, START_IN short of its edge; all of them if none are.
-func in_play(points: Array) -> Array:
-	var inside := points.filter(func(p): return Vector2(p.x - site.x, p.z - site.z).length() <= start_r - START_IN)
-	return inside if not inside.is_empty() else points
 
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
 
+
 ## Extra Skitter spawn heat per second for a squad out in the tide.
 static func tide_heat(m: Match, p: Vector3) -> float:
 	return r("tide_heat") * tide_out(m, p) if m.heart else 0.0
+
 
 ## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
 ## holding once the ring is closed (stage 0 before the close starts; -1 with no Heart).
@@ -112,6 +153,7 @@ static func tide_stage(m: Match) -> int:
 		return -1
 	var t := (m.sess_time() - r("tide_start_s")) / r("tide_close_s")
 	return clampi(int(t * TIDE_STAGES), 0, TIDE_STAGES - 1)
+
 
 ## Flat damage a tide tick deals at this stage, in our Hunter health (tide_dmg keys, linear between).
 static func tide_dmg(stage: int) -> float:
@@ -125,42 +167,16 @@ static func tide_dmg(stage: int) -> float:
 			break
 	return v * float(Data.CLASSES["medium"]["hp"]) / r("tide_src_hp")
 
-# ------------------------------------------------------------------ state
-var m: Match
-var site := Vector3.INF
-var gate := Vector3.INF
-var ways_scale := 1.0          # the map's "ways_scale": tide radii and gate_dist stretch with it (1.412 on the 2x map)
-var start_r := INF             # m round the Heart the tide starts at (start_r_of: the map's play_space for the mode)
-var state := S.ASLEEP
-var trail: Array[String] = []    # "time from>to why", every move of the state (the checks read it)
-var refused := 0               # edges NEXT turned down: always 0 in a sane run
-var charge := 0.0              # seconds the Heartspark has charged
-var carrier: Hunter = null
-var spark_pos := Vector3.ZERO  # where a lying Heartspark floats (the Heart, or where a carrier fell)
-var early_team := -1           # the squad that took the early seat
-var final_team := -1           # the squad whose progress the Heart ring holds
-var final_prog := 0.0          # 0..1
-var rush := false              # one squad left: the final seat is open and faster
-var drops := 0
-var audio: HeartSfx            # the hum, stings, heartbeat, gate cues and the Ways Out calls
-var _hold := {}                # nid -> seconds of interact held on the spark / the gate
-var _sync_t := 0.0
-var _tide_t := 0.0             # seconds since the last tide tick
-var hit_t := -99.0             # match time the tide last hurt the local player (the HUD's red pulse)
-var wall: BlightWall
-var _rng := RandomNumberGenerator.new()
-var _root: Node3D
-var _spark: Node3D
-var _beam: MeshInstance3D
-var _beam_mat: ShaderMaterial
-var _halo: MeshInstance3D
-
-func _init(match_node: Match) -> void:
-	m = match_node
-	audio = HeartSfx.new(self)
 
 func host() -> bool:
 	return not m.net_on or m.is_host
+
+
+## The points (spawns) inside the play space at the start, START_IN short of its edge; all of them if none are.
+func in_play(points: Array) -> Array:
+	var inside := points.filter(func(p): return Vector2(p.x - site.x, p.z - site.z).length() <= start_r - START_IN)
+	return inside if not inside.is_empty() else points
+
 
 ## Puts the Heart on the map's authored "heart" site (else one of the biggest islands, by the match seed),
 ## the Gate gate_dist from it at a seeded angle clear of the uplink outposts, and builds the nodes.
@@ -182,6 +198,7 @@ func setup(layout: Dictionary) -> void:
 	spark_pos = site
 	gate = _pick_gate(w)
 	_build()
+
 
 ## The first of 16 angles from a seeded start whose spot is on the Heart's island and gate_clear from
 ## every uplink outpost; failing that, the first one on that island, then the first spot found.
@@ -206,6 +223,7 @@ func _pick_gate(w: World) -> Vector3:
 			near = p
 	return near if near != Vector3.INF else any
 
+
 # ------------------------------------------------------------------ the state
 func go(to: S, why: String) -> bool:
 	if not (to in NEXT[state]):
@@ -214,6 +232,7 @@ func go(to: S, why: String) -> bool:
 		return false
 	_force(to, why)
 	return true
+
 
 ## Sets the state without the table: a client mirroring the host, or a demo. Everything else uses go().
 func _force(to: S, why: String) -> void:
@@ -233,9 +252,11 @@ func _force(to: S, why: String) -> void:
 			m.fx.ring(site + Vector3(0, 0.3, 0), r("final_r"), COL, 1.0)
 	_broadcast()
 
+
 ## Is the early seat's Heartspark charged, unused and out there (lying or carried)?
 func spark_live() -> bool:
 	return early_team < 0 and charge >= r("charge_s") and state in [S.READY, S.CARRIED, S.FINAL]
+
 
 # ------------------------------------------------------------------ tick
 func tick(dt: float) -> void:
@@ -254,6 +275,7 @@ func tick(dt: float) -> void:
 	_update_nodes()
 	audio.update()
 
+
 func _host_tick(dt: float) -> void:
 	var t := m.sess_time()
 	if state == S.ASLEEP and t >= r("wake_s"):
@@ -271,6 +293,7 @@ func _host_tick(dt: float) -> void:
 	if state == S.FINAL:
 		_ring_tick(dt)
 
+
 ## Only one squad is left (Match._check_last): the final seat opens for them at once, faster.
 func on_last_team() -> void:
 	if site == Vector3.INF or not host() or state == S.DONE:
@@ -278,6 +301,7 @@ func on_last_team() -> void:
 	rush = true
 	if state != S.FINAL:
 		go(S.FINAL, "last squad")
+
 
 ## Each game hits the Hunters it plays that stand outside the ring, once a tide tick. Environment
 ## damage ("heat"): armor doesn't take it and it doesn't drain a glider.
@@ -300,6 +324,7 @@ func _tide_tick(dt: float) -> void:
 				hit_t = m.time
 				Sfx.play("thump", null, -8.0, 0.0, 0.7)
 
+
 ## The slow and the reveal on whoever holds it (each game sets it on the Hunters it plays).
 func _apply_carrier() -> void:
 	for h in m.hunters:
@@ -308,18 +333,36 @@ func _apply_carrier() -> void:
 		if on and bool(rules()["carrier_reveal"]):
 			h.reveal_t = maxf(h.reveal_t, 0.3)
 
+
 func carrier_pos() -> Vector3:
 	return carrier.pos if carrier else spark_pos
+
 
 func _broadcast() -> void:
 	if m.net_on and m.is_host:
 		var cn: String = carrier.nid if carrier else ""
-		m.net_event(["ht", "s", state, cn, charge, early_team, final_team, final_prog, 1 if rush else 0,
-			spark_pos.x, spark_pos.y, spark_pos.z])
+		m.net_event(
+			[
+				"ht",
+				"s",
+				state,
+				cn,
+				charge,
+				early_team,
+				final_team,
+				final_prog,
+				1 if rush else 0,
+				spark_pos.x,
+				spark_pos.y,
+				spark_pos.z
+			]
+		)
+
 
 # ------------------------------------------------------------------ the final seat: the Heart ring
 func in_ring(h: Hunter) -> bool:
 	return not h.out and not h.extracted and h.flat_dist(site) <= r("final_r") and absf(h.pos.y - site.y) < RING_DY
+
 
 ## Standing Hunters in the ring, by squad.
 func _ring_crews() -> Dictionary:
@@ -328,6 +371,7 @@ func _ring_crews() -> Dictionary:
 		if not h.downed and in_ring(h):
 			crews[h.team] = int(crews.get(h.team, 0)) + 1
 	return crews
+
 
 func _ring_tick(dt: float) -> void:
 	var crews := _ring_crews()
@@ -350,6 +394,7 @@ func _ring_tick(dt: float) -> void:
 		final_prog = 1.0
 		_take(HOW_FINAL, final_team)
 
+
 # ------------------------------------------------------------------ a seat fires
 ## The host: the seat is used; every game then takes its own Hunters of that squad.
 func _take(seat: String, team: int) -> void:
@@ -367,6 +412,7 @@ func _take(seat: String, team: int) -> void:
 		m.net_event(["ht", "take", seat, team])
 	_leave(seat, team)
 
+
 ## This game's own Hunters of the squad at the seat leave (downed ones too): the Gate takes those within
 ## gate_take_r of it, the ring those inside it.
 func _leave(seat: String, team: int) -> void:
@@ -381,6 +427,7 @@ func _leave(seat: String, team: int) -> void:
 		if here:
 			m._extract(h, seat, "Heart Gate" if seat == HOW_EARLY else "the Heart")
 
+
 # ------------------------------------------------------------------ taking the spark, dropping it
 func _pick(h: Hunter) -> void:
 	if not spark_live() or carrier != null or h == null or h.downed or h.out or h.extracted:
@@ -392,6 +439,7 @@ func _pick(h: Hunter) -> void:
 		_broadcast()
 	m.add_feed("%s took the Heartspark" % h.pname)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), COL, 24, 4.0, 0.7, -3.0)
+
 
 func _drop(at: Vector3) -> void:
 	if carrier == null:
@@ -406,10 +454,12 @@ func _drop(at: Vector3) -> void:
 		_broadcast()
 	m.add_feed("%s dropped the Heartspark" % who)
 
+
 ## The carrier finished the hold at the Gate (the host's side).
 func _gate_done(h: Hunter) -> void:
 	if h != null and h == carrier and spark_live():
 		_take(HOW_EARLY, h.team)
+
 
 ## A Hunter this game plays leaves by another seat while carrying: the spark stays behind.
 func on_leave(h: Hunter, how: String) -> void:
@@ -419,6 +469,7 @@ func on_leave(h: Hunter, how: String) -> void:
 		_drop(h.pos)
 	else:
 		m.net_event(["ht", "drop", h.nid, h.pos.x, h.pos.y, h.pos.z])
+
 
 # ------------------------------------------------------------------ interact
 ## What holding interact near the Heart or the Gate does for this Hunter (Match._update_interact).
@@ -432,14 +483,25 @@ func interact_for(h: Hunter) -> Dictionary:
 	if spark_live() and carrier == null and at_spark:
 		var need := r("pickup_hold_s")
 		var slow := int(r("carrier_slow") * 100.0)
-		return {"kind": "heart", "act": "pick", "need": need, "col": COL, "prog": float(_hold.get(h.nid, 0.0)) / need,
-			"label": "Hold %s to take the Heartspark  ·  %d%% slower and everyone sees you" % [key, slow]}
+		return {
+			"kind": "heart",
+			"act": "pick",
+			"need": need,
+			"col": COL,
+			"prog": float(_hold.get(h.nid, 0.0)) / need,
+			"label": "Hold %s to take the Heartspark  ·  %d%% slower and everyone sees you" % [key, slow]
+		}
 	if spark_live() and carrier != null and h.flat_dist(gate) <= r("gate_r") + 1.0:
 		if h == carrier:
 			var gneed := r("gate_hold_s")
-			return {"kind": "heart", "act": "leave", "need": gneed, "col": GATE_COL,
+			return {
+				"kind": "heart",
+				"act": "leave",
+				"need": gneed,
+				"col": GATE_COL,
 				"prog": float(_hold.get(h.nid, 0.0)) / gneed,
-				"label": "Hold %s: leave now, small reward" % key}
+				"label": "Hold %s: leave now, small reward" % key
+			}
 		return {"kind": "heart", "col": GATE_COL, "label": "The Heart Gate only opens for the Heartspark's bearer"}
 	if h.flat_dist(site) > NEAR_LABEL:
 		return {}
@@ -455,6 +517,7 @@ func interact_for(h: Hunter) -> Dictionary:
 			say = "Hold the Heart ring to leave  ·  %d%%" % int(final_prog * 100.0)
 	return {} if say == "" else {"kind": "heart", "col": COL, "label": say}
 
+
 func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 	if not it.has("act"):
 		return
@@ -466,6 +529,7 @@ func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 		return
 	_hold.erase(h.nid)
 	act(String(it["act"]), h)
+
 
 func act(what: String, h: Hunter) -> void:
 	match what:
@@ -480,14 +544,20 @@ func act(what: String, h: Hunter) -> void:
 			else:
 				m.net_event(["ht", "done", h.nid])
 
+
 # ------------------------------------------------------------------ the reward
 ## The bundle for a Hunter who just left by a Heart seat (how = HOW_EARLY: minor, HOW_FINAL: major): evolution
 ## foods, gems and bond/trust now, and the rare egg and materials in the returned dict (Game.apply_result
 ## settles them at home).
 func pay(h: Hunter, how: String) -> Dictionary:
 	var rw: Dictionary = rules()["reward"]["major" if how == HOW_FINAL else "minor"]
-	var out := {"egg": {}, "goods": (rw["goods"] as Dictionary).duplicate(),
-		"seeds": (rw["seeds"] as Dictionary).duplicate(), "gems": int(rw["gems"]), "trust": float(rw["trust"])}
+	var out := {
+		"egg": {},
+		"goods": (rw["goods"] as Dictionary).duplicate(),
+		"seeds": (rw["seeds"] as Dictionary).duplicate(),
+		"gems": int(rw["gems"]),
+		"trust": float(rw["trust"])
+	}
 	if bool(rw["egg"]):
 		var sp := _egg_species()
 		out["egg"] = {"sp": sp, "boss": String(Data.KIN.get(sp, {}).get("boss", ""))}
@@ -500,12 +570,14 @@ func pay(h: Hunter, how: String) -> Dictionary:
 	m.add_feed("%s left through the Heart" % h.pname)
 	return out
 
+
 func _egg_species() -> String:
 	var pool: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
 	pool.sort()
 	if pool.is_empty():
 		return String(Data.common_kin()[0])
 	return pool[_rng.randi() % pool.size()]
+
 
 ## Applies the bundle's home half to the save (Game.apply_result, on an extract).
 static func settle(res: Dictionary, out: Dictionary) -> void:
@@ -519,6 +591,7 @@ static func settle(res: Dictionary, out: Dictionary) -> void:
 		for i in int(hb["goods"][g]):
 			Goods.give("good:" + String(g))
 	out["heart"] = hb
+
 
 # ------------------------------------------------------------------ online
 func net_in(x: Array) -> void:
@@ -543,6 +616,7 @@ func net_in(x: Array) -> void:
 			if host() and x.size() >= 6 and carrier != null and carrier.nid == String(x[2]):
 				_drop(Vector3(float(x[3]), float(x[4]), float(x[5])))
 
+
 func _mirror(x: Array) -> void:
 	carrier = m.ents_by_id.get(String(x[3]), null) as Hunter if String(x[3]) != "" else null
 	charge = float(x[4])
@@ -553,6 +627,7 @@ func _mirror(x: Array) -> void:
 	spark_pos = Vector3(float(x[9]), float(x[10]), float(x[11]))
 	if int(x[2]) != state:
 		_force(int(x[2]) as S, "host")
+
 
 # ------------------------------------------------------------------ the look
 func _build() -> void:
@@ -599,6 +674,7 @@ func _build() -> void:
 		var knob := Vector3(sgn * r("gate_r") * 0.8, 3.4, 0)
 		Models.part(gate_node, Models.sphere(0.34, 10), Models.toon(GLASS, false, 0.5), knob)
 
+
 func _update_nodes() -> void:
 	if _root == null:
 		return
@@ -627,9 +703,11 @@ func _update_nodes() -> void:
 		hs = f
 	_halo.scale = Vector3.ONE * (0.8 + 0.4 * hs)
 
+
 func stop() -> void:
 	if _root and is_instance_valid(_root):
 		_root.queue_free()
+
 
 # ------------------------------------------------------------------ the demo
 ## --heart-demo=ready|carry|gate|charging|final
@@ -640,7 +718,7 @@ func demo(mode: String) -> void:
 	if m.has_meta("heart_demo"):
 		var pin: Vector3 = m.get_meta("heart_demo")
 		p.teleport(pin)
-		p.vel = Vector3.ZERO     # hold the moment: a screenshot takes a varying time to render
+		p.vel = Vector3.ZERO  # hold the moment: a screenshot takes a varying time to render
 		p.hp = p.max_hp
 		return
 	for h in m.hunters:
@@ -648,7 +726,7 @@ func demo(mode: String) -> void:
 			h.ctrl = "idle"
 			h.inp["move"] = Vector2.ZERO
 			h.teleport(m.world.random_ground())
-	m.time = maxf(m.time, r("wake_s"))       # the tide is part-way in
+	m.time = maxf(m.time, r("wake_s"))  # the tide is part-way in
 	var near := m.world.free_spot_near(site + Vector3(5.0, 0, 1.5), [site], 1.0, 0.45, 6.0)
 	charge = r("charge_s")
 	spark_pos = site
