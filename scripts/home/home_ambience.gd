@@ -46,7 +46,8 @@ static func pond_level(d: Dictionary, from: Vector2) -> float:
 static func zone_bed(zone: String) -> String:
 	return "zone_" + (zone if zone != "" else GardenZones.start())
 
-## The home clock as this zone shows it: a zone with a "clock" is always at that time of day.
+
+## The home clock as this zone shows it (its bed and its sky): a zone with a "clock" is always at that hour.
 static func clock_in(zone: String, day_t: float) -> float:
 	return float(GardenZones.info(zone).get("clock", day_t))
 
