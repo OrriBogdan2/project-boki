@@ -40,6 +40,8 @@ var stage := "intro"          # intro (the card) | create (yourself) | pick (egg
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
+var skipper: HatchSkip       # watches the hatch beat for a key (freed once the Boki's card is up)
+var reveal: KinReveal
 var hover := -1
 var auto_warm := false        # test hook: hold the warmth on by itself
 var t := 0.0
@@ -707,6 +709,8 @@ func _process(delta: float) -> void:
 		wegg.rotation.z = lerpf(wegg.rotation.z, sin(t * (6.0 + warmth * 30.0)) * warmth * 0.05, minf(1.0, delta * 12.0))
 		if taps >= TAPS and warmth >= 0.98:
 			stage = "hatching"
+			skipper = HatchSkip.new(_skip_hatch)
+			add_child(skipper)
 			title.text = "Something's moving..."
 			_clear_bottom()
 			wegg.rotation.z = 0.0
@@ -719,7 +723,9 @@ func _process(delta: float) -> void:
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
 				var rv := KinReveal.new(egg_defs[chosen]["species"], egg_defs[chosen].get("rec", {}))
+				reveal = rv
 				add_child(rv)
+				rv.revealed.connect(skipper.queue_free)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
 					if top_box: top_box.visible = true
@@ -733,6 +739,11 @@ func _process(delta: float) -> void:
 			egg.position.y = lerpf(egg.position.y, 0.12 + lift + (sin(t * 3.0) * 0.03 if i == chosen else 0.0), minf(1.0, delta * 8.0))
 			# a little wobble now and then, like something inside is awake
 			egg.rotation.z = sin(t * 2.0 + i * 2.1) * 0.06 * (1.0 + float(sin(t * 0.7 + i) > 0.7) * 3.0)
+
+## Any key or click while the egg hatches and the Boki meets you: straight to its card (HatchSkip).
+func _skip_hatch() -> void:
+	eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
+	reveal.skip()
 
 func _show_name() -> void:
 	_clear_bottom()
