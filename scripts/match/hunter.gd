@@ -3086,6 +3086,7 @@ func _anim_state(stretch: float) -> void:
 	s["rooted"] = root_t > 0.0
 	s["rooted"] = root_t > 0.0          # (a Hero's clips show both: WardenCc)
 	s["gnd"] = KitStatus.grounded(self)
+	s["heart"] = Heart.carrying(self)
 	s["base"] = (1.0 - base_t / BASE_TIME) if base_t > 0.0 else -1.0
 	s["squash"] = squash
 	s["stretch"] = stretch
