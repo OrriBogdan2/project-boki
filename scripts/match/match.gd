@@ -2180,6 +2180,8 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)
+	KillXp.pay(self, mb, credit)
+	LastHitHint.kill(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	MobSfx.death(self, mb, big_mob)
@@ -5374,6 +5376,7 @@ func _net_ev(x, from: String) -> void:
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
+		"xp": KillXp.net_in(self, x)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			var by: Ent = ents_by_id.get(String(x[2]), null)
@@ -5473,6 +5476,7 @@ func _net_ev(x, from: String) -> void:
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:
 				who.dead = true
+				LastHitHint.kill(self, who, ents_by_id.get(String(x[2]), null))
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				MobSfx.death(self, who as Mob, false)

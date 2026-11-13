@@ -740,12 +740,6 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var sp := String(b.md.get("egg", ""))
 	if Data.KIN.has(sp):
 		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
-	# XP for everyone who fought it: the most for the killer's squad
-	for h in m.hunters:
-		if h.out or h.extracted or not inside(L, h.pos, 4.0):
-			continue
-		var share := 1.0 if killer and h.team == killer.team else (0.5 if float(b.damage_by.get(h.team, 0.0)) > b.max_hp * 0.1 else 0.2)
-		h.gain_xp(260.0 * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
