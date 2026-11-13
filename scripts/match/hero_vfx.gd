@@ -514,6 +514,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 	var mt: ShaderMaterial = mi.material_override
 	_paint(mt, layer, h)
 	mt.set_shader_parameter("jag", float(layer.get("jag", 0.0)))
+	mt.set_shader_parameter("core_w", float(layer.get("core", 0.0)))
 	var cam := get_viewport().get_camera_3d()
 	var view := -cam.global_basis.z if cam else Vector3.DOWN
 	var side := span.cross(view).normalized()
@@ -805,6 +806,14 @@ func _tick_ribbon(e: Dictionary, delta: float) -> bool:
 			pts.pop_back()
 	var tail := float(e["tail"])
 	while not pts.is_empty() and now - float(pts[-1][1]) > tail:
+		if pts.size() > 1 and now - float(pts[-2][1]) < tail:
+			# the oldest point is clipped back to exactly `tail` old, not dropped: a tail shorter than a frame
+			# (a fast tracer at 30 fps) keeps its length instead of vanishing
+			var newer: Array = pts[-2]
+			var oldest: Array = pts[-1]
+			var k := (now - tail - float(oldest[1])) / maxf(float(newer[1]) - float(oldest[1]), 1e-5)
+			pts[-1] = [(oldest[0] as Vector3).lerp(newer[0], k), now - tail]
+			break
 		pts.pop_back()
 	if pts.is_empty() and now > float(e["dur"]):
 		return false
