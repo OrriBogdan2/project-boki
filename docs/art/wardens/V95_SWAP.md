@@ -38,6 +38,16 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Props on the masters (2026-11-13): the Model Room's v95.glb carries what the game model carries
+The owner (11-13): "should motley have his cards with him?" -> yes. `tools/art1/v95_props.py` puts a Hunter's game props
+on his v95 master: each prop is the game mesh itself (UVs, materials, textures kept), moved from the game's rest frame
+into the fit frame, scaled by the height ratio, under one `props_fit_to_master` empty; the master is untouched.
+Recipes: `ostra` (Motley: the Fan on his left palm, the 8 orbit cards on their two rings, one spin clip), `breaker` (Albert:
+the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fist shards, the ground rings). Outputs:
+`~/meshy/v95/<Name>/props/`, the per-Hunter table in `~/meshy/v95/PROPS_1113.md`. Gil, Kael, Lace, Meeko, Neve
+and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
+Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
+
 ## Status (2026-11-13, ext/showcase-1113): Vex, Kael, Tarek and Meeko on their current masters
 Swapped to each current.json master (face kept: the specs name the promoted master): Vex (tilt1112 cand_A2), Kael
 (tilt_A, sword stripped: `kael_tilt_A_body.glb`), Tarek (n95 c01, eye stones stripped: `tarek_c01_body.glb`), Meeko (n95
