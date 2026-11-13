@@ -379,7 +379,7 @@ func _attack_move(spd: float) -> Vector2:
 func _begin(name: String, length: float, anim: String, hit: float) -> void:
 	_go(S.WINDUP, name)
 	atk = name; atk_t = 0.0; atk_began = m.time; atk_end = length; atk_hit = hit; atk_last = hit; steps = []
-	anim_kind = anim; anim_k = 0.0
+	anim_kind = anim
 	m.sfx("v_warden", pos, -2.0, {"colossus": 0.6, "serpent": 1.35, "brood": 0.9}.get(mkind, 1.0))
 
 func _at(t: float, f: Callable) -> void:
