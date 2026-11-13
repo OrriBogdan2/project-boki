@@ -2,6 +2,8 @@ extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
 ## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
 ## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## --release: only the release strip, <dir>/<id>/release/fNNN.png: the kit's own hand-off from the held draw
+## into arc_loose, one frame per 1/30 s from the arrow's spawn (the game's blend plays, so a snap eaten by it shows).
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced).
@@ -18,6 +20,7 @@ const DT := 1.0 / 30.0
 const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
 
 var close := false
+var release := false
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
@@ -39,6 +42,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--frames="): frames = int(a.substr(9))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--release": release = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -91,6 +95,10 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.rotation.y = SIDE_YAW
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
+	if release:
+		await _release(model, sync, dir.path_join("release"), frames)
+		model.queue_free()
+		return
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
@@ -121,6 +129,20 @@ func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> v
 		for k in steps:
 			sync.call("_process", DT)
 			_scroll(mps, DT)
+		await _grab(dir.path_join("f%03d.png" % i))
+	model.set_meta(WardenClips.STATE, {})
+
+## The draw held, then arc_loose from kmove_t 0 (the arrow's spawn), as the kit plays it.
+func _release(model: Node3D, sync: Node, dir: String, frames: int) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var s := {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": true, "kmove": "arc_draw", "kmove_t": 1.3}
+	model.set_meta(WardenClips.STATE, s)
+	for k in int(WARM_S / DT):
+		sync.call("_process", DT)
+	s["kmove"] = "arc_loose"
+	for i in frames:
+		s["kmove_t"] = i * DT
+		sync.call("_process", DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})
 
