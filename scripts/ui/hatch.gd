@@ -62,7 +62,7 @@ var top_box: VBoxContainer    # the title and its line: centred, or over the pre
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
-	CursorMode.menu()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
 	Sfx.play_ambience("home")
 	var env := WorldEnvironment.new()
@@ -96,7 +96,7 @@ func _ready() -> void:
 		if d.get("mystery", false):
 			holder.add_child(MysteryEgg.new())
 			MysteryEgg.hideout(self, MYSTERY_AT)
-			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS; egg.mystery = true
+			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS
 		else:
 			holder.add_child(_nest())
 		egg.hop_out = 0.35

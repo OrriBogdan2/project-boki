@@ -54,7 +54,7 @@ func _rules_and_save() -> void:
 	var e := {"u": HomeLayout._next_uid(L), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0}
 	(L["deco"] as Array).append(e)
 	L["inv"].erase(SnackPatch.ID)
-	e[SnackPatch.RIPE_KEY] = Time.get_unix_time_from_system()
+	e["t"] = Time.get_unix_time_from_system()
 	var back: Dictionary = JSON.parse_string(JSON.stringify(Save.d))
 	HomeLayout.ensure(back)
 	var kept := HomeLayout.count_of(SnackPatch.ID, back) == 1 and not SnackPatch.entry(back).is_empty()
@@ -98,7 +98,7 @@ func _in_the_garden() -> void:
 	HomeLayout.ensure(Save.d)
 	var L := HomeLayout.of(Save.d)
 	var e := {"u": HomeLayout._next_uid(L), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0,
-			SnackPatch.RIPE_KEY: Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
+			"t": Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
 	(L["deco"] as Array).append(e)
 	L["inv"].erase(SnackPatch.ID)
 	var home = await main._hb_home()

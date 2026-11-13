@@ -1,16 +1,13 @@
 class_name BokiHomeClips
 extends RefCounted
 ## Runtime clips for a rigged Boki's life at home (no Blender): settle, nap, wake, munch, nudge, climb, splash,
-## the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), timed by their rules, and sniff,
-## leap and bat (Dash, Seek, Volley). Each is the species' baked idle, sleep, walk, run or hop with BokiHomePoses'
-## deltas laid over it, sampled into a new Animation, so every Boki keeps its own rest shape and mover. Built once
-## per species and shared.
+## and the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), timed by their rules.
+## Each is the species' baked idle (or sleep) with BokiHomePoses' deltas laid over it, sampled into a new Animation,
+## so every Boki keeps its own rest shape and idle motion. Built once per species and shared.
 
 const NAMES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin", "sniff", "leap", "bat"]
-const LOOPED := ["nap", "munch", "nudge", "climb", "splash", "sniff", "leap"]
-## The baked clip each Dash/Seek/Volley clip rides on; its legs keep the baked cadence (BokiRig.GAIT_STRIDE).
-const GAME_BASE := {"sniff": "walk", "leap": "run", "bat": "hop"}
+	"rush", "brace", "dodge", "stonehop", "spin"]
+const LOOPED := ["nap", "munch", "nudge", "climb", "splash"]
 const SETTLE_SECS := 1.5
 const WAKE_SECS := 1.7
 const STEP := 0.05                  # s between keys
@@ -47,9 +44,6 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 		out[n] = _clip(skel, pose, n, idle, null, impact, BokiHomePoses.cycles(n, impact))
 	out["stonehop"] = _clip(skel, pose, "stonehop", idle, null, float(EchoSteps.rules()["hop_s"]))
 	out["spin"] = _clip(skel, pose, "spin", idle, null, EchoSteps.spin_s())
-	for n in GAME_BASE:
-		var base := player.get_animation(GAME_BASE[n])
-		out[n] = _clip(skel, pose, n, base, null, base.length, BokiHomePoses.cycles(n, base.length))
 	return out
 
 ## `a` is the base (and `b` what it turns into over the clip, for settle and wake).

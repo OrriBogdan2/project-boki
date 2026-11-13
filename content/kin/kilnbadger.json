@@ -1,7 +1,6 @@
 {
 	"id": "kilnbadger",
 	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/kilnbadger.json.",
-	"trade_to": "scaldamus",
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

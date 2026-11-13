@@ -206,10 +206,10 @@ func _unhandled_key_input(e: InputEvent) -> void:
 	if e.pressed and e.physical_keycode in [KEY_ENTER, KEY_KP_ENTER]:
 		_show_chat_line(true)
 		get_viewport().set_input_as_handled()
-	elif e.is_action("push_to_talk") and talk_btn.visible:
+	elif e.physical_keycode == KEY_V and talk_btn.visible:
 		_talk(e.pressed)
 
-## Push-to-talk: the button (hold) or the push_to_talk key. The transport is VoiceChat's; none ships yet.
+## Push-to-talk: the button (hold) or V. The transport is VoiceChat's; none ships yet.
 func _talk(on: bool) -> void:
 	voice.set_talking(on)
 	talk_btn.text = "Speaking..." if on else "Hold to talk (V)"

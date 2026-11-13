@@ -1,13 +1,26 @@
-
- {"id":"arena","name":"Training Area","size":216,"seed":31,"notes":"The Training Area (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding, and the Movement Fields south of the floor over the Bench Bridge: two long dash lanes (91 m and 96 m), tier steps up 6 terraces, a four-step cliff (2 to 5 terraces) for mantles and wall kicks, and a stair up to a Glide Jump-off that glides to Cloud Isle. Pads fire up; glide back down.","islands":[
- {"id":"floor","name":"Training Area","role":"grove","region":0,"poi":[72,72],"noise":0.04,"biome":"meadow","danger":0,"no_rocks":true,"shapes":[{"circle":[72,72],"r":31,"lv":0},{"rect":[67,59,77,63],"lv":1}],"sheer":[],"walls":[{"ring":[72,72],"r":12.2,"gates":4,"gate_w":3.5},{"ring":[93,72],"r":6.2,"gates":2,"gate_w":3.0}],"rocks":[[66,66,67,67],[77,66,78,67],[66,77,67,78],[77,77,78,78],[52,52,53,53],[90,52,91,53],[52,90,53,91],[90,90,91,91]],"bush":[[62,76,1.6],[82,76,1.6],[48,72,2.0],[96,90,2.0],[56,92,2.0],[90,52,2.0]]},
- {"id":"bench","name":"Movement Fields","role":"grove","region":0,"poi":[72,140],"noise":0.04,"biome":"meadow","danger":0,"no_rocks":true,"shapes":[{"circle":[72,113],"r":4.2,"lv":0},{"capsule":[72,113,72,205],"r":3.5,"lv":0},{"capsule":[24,128,120,128],"r":3.5,"lv":0},{"rect":[36,140,69,176],"lv":0},{"rect":[44,144,56,148],"lv":2},{"rect":[44,148,56,152],"lv":3},{"rect":[44,152,56,156],"lv":4},{"rect":[44,156,56,160],"lv":5},{"rect":[76,136,98,144],"lv":0},{"rect":[88,136,98,144],"lv":6},{"rect":[76,177,104,183],"lv":0},{"rect":[104,172,116,188],"lv":14}],"ramps":[{"at":[76,140],"dir":"e","w":8,"from":0,"to":6,"run":2},{"at":[76,180],"dir":"e","w":6,"from":0,"to":14,"run":2}],"sheer":[]},
- {"id":"cloud","name":"Cloud Isle","role":"perch","region":0,"poi":[146,180],"noise":0.05,"biome":"bloom","danger":0,"no_rocks":true,"shapes":[{"circle":[146,180],"r":9,"lv":8}],"sheer":[],"perch":true},
- {"id":"hunters","name":"Hunter Loft","role":"perch","region":0,"poi":[72.0,22.0],"noise":0.05,"biome":"storm","danger":0,"no_rocks":true,"shapes":[{"circle":[72.0,22.0],"r":7,"lv":11}],"sheer":[],"perch":true},
- {"id":"gear","name":"Gear Loft","role":"perch","region":0,"poi":[119.6,56.5],"noise":0.05,"biome":"ember","danger":0,"no_rocks":true,"shapes":[{"circle":[119.6,56.5],"r":10,"lv":12}],"sheer":[],"perch":true},
- {"id":"items","name":"Belt Loft","role":"perch","region":0,"poi":[101.4,112.5],"noise":0.05,"biome":"bloom","danger":0,"no_rocks":true,"shapes":[{"circle":[101.4,112.5],"r":7,"lv":13}],"sheer":[],"perch":true},
- {"id":"bots","name":"Bot Pen","role":"perch","region":0,"poi":[42.6,112.5],"noise":0.05,"biome":"gloom","danger":0,"no_rocks":true,"shapes":[{"circle":[42.6,112.5],"r":6.5,"lv":11}],"sheer":[],"perch":true},
- {"id":"boki","name":"Boki Roost","role":"perch","region":0,"poi":[24.4,56.5],"noise":0.05,"biome":"frost","danger":0,"no_rocks":true,"shapes":[{"circle":[24.4,56.5],"r":14,"lv":12}],"sheer":[],"perch":true}],
-"bridges":[{"name":"Bench Bridge","a":"floor","b":"bench","from":[72,101],"to":[72,109],"r":1.4}],"winds":[],
-"pads":[["floor","hunters","up"],["floor","gear","up"],["floor","items","up"],["floor","bots","up"],["floor","boki","up"]],"updrafts":[],"outposts":[],"chokepoints":[],"glides":[{"a":"bench","b":"cloud","take":[115.5,180.5],"land":[142.5,180.5],"name":"Glide Jump-off"},["cloud","bench"],["hunters","floor"],["gear","floor"],["items","floor"],["bots","floor"],["boki","floor"],["hunters","gear"],["gear","items"],["items","bots"],["bots","boki"],["boki","hunters"]],
-"grounds":{"lanes":[[72,114,72,205],[24,128,120,128]],"scatter":{"rect":[36,140,69,176],"n":240},"home":[72.5,79.5],"bot":[72.5,65.5],"dummies":[["still",69.5,72.5,"light"],["strafe",75.5,72.0,"medium"],["heavy",76.2,68.8,"heavy"]],"duel":[93,72],"stations":[{"kind":"arch","at":[72.0,22.0],"ring":4.6,"island":"hunters"},{"kind":"gear","at":[119.6,56.5],"ring":7.4,"island":"gear"},{"kind":"item","at":[101.4,112.5],"ring":4.8,"island":"items"},{"kind":"bot","at":[42.6,112.5],"ring":4.4,"island":"bots"},{"kind":"kin","at":[24.4,56.5],"ring":12.4,"island":"boki"}]}}
+{
+ "id": "arena",
+ "name": "The Arena",
+ "size": 52,
+ "seed": 31,
+ "notes": "The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.",
+ "islands": [
+  {"id": "floor", "name": "The Arena", "role": "grove", "region": 0, "poi": [26, 26], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
+   "shapes": [{"circle": [26, 26], "r": 14, "lv": 0}, {"rect": [21, 13, 31, 17], "lv": 1}],
+   "sheer": [],
+   "walls": [{"ring": [26, 26], "r": 12.2, "gates": 4, "gate_w": 3.5}],
+   "rocks": [[20, 20, 21, 21], [31, 20, 32, 21], [20, 31, 21, 32], [31, 31, 32, 32]],
+   "bush": [[16, 30, 1.6], [36, 30, 1.6]]},
+  {"id": "bench", "name": "Bench", "role": "grove", "region": 1, "poi": [26, 47], "noise": 0.04, "biome": "meadow", "danger": 0, "no_rocks": true,
+   "shapes": [{"circle": [26, 47], "r": 4.2, "lv": 0}], "sheer": []}
+ ],
+ "bridges": [
+  {"name": "Bench Bridge", "a": "floor", "b": "bench", "from": [26, 39], "to": [26, 44], "r": 1.4}
+ ],
+ "winds": [],
+ "pads": [],
+ "updrafts": [],
+ "outposts": [],
+ "chokepoints": [],
+ "glides": []
+}

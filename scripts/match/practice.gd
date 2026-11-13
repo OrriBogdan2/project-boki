@@ -1,6 +1,6 @@
 class_name Practice
 extends Node
-## What every practice area shares (the Training Area, the tutorial, the Arena and the Duel room;
+## What every practice area shares (the Training Grounds, the tutorial, the Arena and the Duel room;
 ## never a real match): a bottom bar like the farm's hub (Hero, the area's own menu, Leave), J for
 ## the hero picker (PracticeHero), the mouse wheel zooming the camera, and where there are dummies the parity bench
 ## (ParityBench). One node under the Match,
@@ -93,7 +93,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if picker_page == "kit": PracticeHero.open(self)
 			else: PracticeHero.close(self)
 			get_viewport().set_input_as_handled()
-		elif event.is_action_pressed("kit_card") and hover_arch != "":
+		elif event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and hover_arch != "":
 			PracticeHero.kit(self, hover_arch)
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("hero"):

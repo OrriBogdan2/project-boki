@@ -21,7 +21,7 @@ static var shown_keys := {}    # slot id -> the key cap last drawn under it (che
 static func decay(H, delta: float) -> void:
 	for id in H.slot_fx.keys():
 		H.slot_fx[id]["t"] = float(H.slot_fx[id]["t"]) + delta
-		if float(H.slot_fx[id]["t"]) > maxf(ResetPop.length(), DENY_T): H.slot_fx.erase(id)
+		if float(H.slot_fx[id]["t"]) > ResetPop.LEN: H.slot_fx.erase(id)
 	for id in H.ready_flash.keys():
 		H.ready_flash[id] = float(H.ready_flash[id]) - delta
 		if float(H.ready_flash[id]) <= 0.0: H.ready_flash.erase(id)
@@ -45,7 +45,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	var ctr := rect.get_center()
 	H.hover_spots.append([rect, id])
 	var was: bool = H.ready_was.get(id, true)
-	if ready and not was and sfx_d.get("kind", "") != "reset":      # a reset has its own flash
+	if ready and not was:
 		H.ready_flash[id] = READY_FLASH
 	H.ready_was[id] = ready
 	var cooling := cd_frac > 0.0 and cd_secs > 0.0 and not ready

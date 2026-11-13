@@ -29,7 +29,7 @@ func _ready() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
-	root.add_child(FsmReadout.new())
+	root.add_child(MoveReadout.new())
 	# behind every overlay menu: the screen blurred and darkened, fading in and out
 	dim = UI.backdrop()
 	root.add_child(dim)
@@ -63,7 +63,7 @@ func admin_allowed() -> bool:
 func _input(event: InputEvent) -> void:
 	if listening != "":
 		if event is InputEventKey and event.pressed and not event.echo:
-			if (event as InputEventKey).physical_keycode == KEY_ESCAPE:     # fixed: Esc cancels a rebind
+			if (event as InputEventKey).physical_keycode == KEY_ESCAPE:
 				listening = ""
 				_show_settings()
 			else:
@@ -166,7 +166,7 @@ func _page(name: String, title_txt: String, width := 620.0, scroll := false) -> 
 	page = name
 	if not was_open:
 		UI.show_backdrop(dim, true)
-	CursorMode.menu()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if not was_open and Game.main:
 		var s = Game.main.screen_node()
 		if s and s.has_method("on_menu_opened"):
@@ -333,9 +333,8 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
-	var readout_tip := "Speeds, cap, drag and every state machine on screen (%s)" % Settings.key_cap("move_readout")
+	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
 	_toggle(v, "Movement readout", "move_readout", readout_tip)
-	_toggle(v, "Keep cursor in window", "cursor_confine", "In a fight the cursor stays inside the window")
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
@@ -378,7 +377,7 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_slider(v, "Ambience", "ambience", 0.0, 1.0, 0.05, "Wind, rain and the sea")
 	_group(v, "Sounds")
 	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
-	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a reset hands an ability back")
+	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a kill resets your cooldowns")
 	_group(v, "Window")
 	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
 
@@ -671,7 +670,7 @@ func open_inventory() -> void:
 			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
-				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, FoodJournal.line(f) + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
 			for id in GardenItems.ids():
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
@@ -694,13 +693,12 @@ func open_inventory() -> void:
 				if n <= 0: continue
 				empty = false
 				var ck: String = k
-				cell.call(Data.CROPS[k]["name"], "×%d" % n, FoodJournal.line(k), Data.CROPS[k]["color"], "Feed to your partner", func():
+				cell.call(Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
 					CareJournal.fed(ak, ck, Evo.eat(ak, ck))
 					Save.remember(ak, "fed", "was fed a %s" % Data.CROPS[ck]["name"].to_lower(), 4.0)
-					FoodJournal.learn(ck)
 					Sfx.play("kin_happy")
 					Save.save_game()
 					open_inventory())

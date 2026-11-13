@@ -387,7 +387,7 @@ func _glasswater_part(m: Node) -> void:
 	ok(batches.size() >= 3 and batches.size() <= 6 and mats.size() == 3 and n > want / 2,
 		"the scatter is %d props in %d MultiMesh batches over 3 shared materials" % [n, batches.size()])
 	gw.hsp.tick(1.0)
-	ok(Save.d["zones"]["glasswater"]["patch"].has(SnackPatch.RIPE_KEY), "the patch's timer is kept on the save")
+	ok(Save.d["zones"]["glasswater"]["patch"].has("t"), "the patch's timer is kept on the save")
 	gw.hway.hop(GardenZones.HUB)
 	var hub = await _arrived(m, gw)
 	ok(hub != null and ZoneLayout.live.is_empty(), "the hub has no zone layout")
@@ -462,13 +462,14 @@ func _thrive_part() -> void:
 ## Toy training +25% for a thriver (never less), and the daily pull stops at the limit.
 func _train_pull_part(rec: Dictionary, other: Dictionary) -> void:
 	GardenZones.here = "cinderstep"
-	rec["zone"] = "cinderstep"
+	rec["zone"] = GardenZones.start()      # lives elsewhere: only thrive counts (--zone-affinity-check has the rest)
 	var gain := [0, 0]
 	for i in 400:
 		gain[0] += GardenZones.train_gain(rec, 1)
 		gain[1] += GardenZones.train_gain(other, 1)
 	ok(gain[1] == 400 and gain[0] > 440 and gain[0] < 560,
 		"a thriver's toys train about +25%% (%d vs %d per 400)" % [gain[0], gain[1]])
+	rec["zone"] = "cinderstep"
 	var P: Dictionary = GardenZones.rules()["trait_pull"]
 	rec["traits"]["temper"] = 0.5
 	BaseDrift.day([rec])
@@ -523,7 +524,7 @@ func _unlock_part(m: Node) -> void:
 	ok(ash["journal"].any(func(e): return CareJournal.text(e) == "woke Cinderstep"), "its journal says so")
 	ok(hub.hway.node.get_node("Stone2").get_meta("open") and hub.hway.node.has_node("Cap2"), "its stone is lit")
 	ok(not GardenZones.attune("cinderstep")["ok"], "an open zone cannot be woken again")
-	var lines: Array = ZoneCards.open_lines("cinderstep").map(func(l): return (l as Label).text)
+	var lines: Array = ZoneCards._open_lines("cinderstep").map(func(l): return (l as Label).text)
 	ok(lines.has("Woken by Ash"), "its card names the founder")
 	_lair_and_trader_part()
 	Content.rules("farm_build")["base_mode"] = false

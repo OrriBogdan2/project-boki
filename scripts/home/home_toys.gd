@@ -96,7 +96,7 @@ func pick(k: Dictionary, want := false) -> bool:
 	for t in toys():
 		var tp: Vector3 = t["pos"]
 		var full: bool = players(int(t["u"])).size() >= int(R["max_players"])
-		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp) or BaseRival.rival_near(h, k, tp):
+		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp):
 			continue
 		var company := float(R["join_weight"]) if not players(int(t["u"])).is_empty() else 1.0
 		weights[int(t["u"])] = weight(rec, String(t["id"])) * company
@@ -215,10 +215,8 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var def: Dictionary = R["toys"][t["id"]]
 	var stat := String(def["stat"])
-	var gained := StatCause.gain(rec, stat, GardenZones.train_gain(rec, int(R["stat_gain"])), "toy")
+	var gained := Care.add_stat(rec, stat, GardenZones.train_gain(rec, int(R["stat_gain"])))
 	FavToy.log_play(rec, String(t["id"]), float(k["play"]["secs"]))
-	var use: Dictionary = rec.get_or_add("toy_use", {})      # plays per toy: its habit (EvoPath care pip)
-	use[t["id"]] = int(use.get(t["id"], 0)) + 1
 	Care.change(rec, "joy", float(R["joy_gain"]))
 	if randf() < float(def.get("snack", 0.0)):
 		var item := String(R["snack_item"])
@@ -292,11 +290,6 @@ func pose(k: Dictionary, n: Node3D, d: float) -> void:
 			n.set_meta("pose", "comfort")
 			if randf() < d * 1.2:
 				h.fx.burst(tp + Vector3(0, 0.6, 0), Color("ffb066"), 2, 0.8, 0.9, -1.0)
-		"toy_vent":
-			body.position.y = 0.55 + sin(s * 2.0) * 0.12
-			n.set_meta("pose", "alert")
-			if randf() < d * 3.0:
-				h.fx.burst(tp + Vector3(0, 0.2, 0), Color("cfeeff"), 3, 1.2, 0.8, -1.0)
 		"toy_dig":
 			body.position.y = absf(sin(s * 10.0)) * 0.05
 			body.rotation.x = -0.45 + sin(s * 10.0) * 0.12

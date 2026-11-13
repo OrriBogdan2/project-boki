@@ -141,11 +141,6 @@ reads as field notes, plain sentences in the card's normal ink: "Stands 45 cm an
 Very large for a Vespyx (XL): few grow this big." and "Spotted with pale spots", then where it's
 from (origin, date, who first raised it, parents, its number "#0042 of Vespyx"). No gold serials,
 no coloured size badges. The Nesting Nook and Kin Burrow side panels show a three-line version.
-With two Boki picked, the Nook's preview card (`NookPreview`) shows what their egg would be, read from
-`Care.breed`'s inputs: both possible kinds pictured in the blended look (`Unique.blend_center`: the look
-`Unique.inherit` rolls around, plain coat), its size, the coats it can take, the lean head start
-(`Care.head_start`) and a note on an unstable mix. `--nest-demo=pair` opens it; `--nook-check` holds it to
-20 of 20 hatched babies.
 Player-facing words say *scanned* (the box and the Field Book say *caught*), not tamed (internal event names stay `caught`).
 
 Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coat), `--nest-demo=card-about`
@@ -178,10 +173,3 @@ female and male), so those kinds roll half and half and the note explains.
 - Provenance moves to the account service; the local log stays as a cache.
 - Importing offline Boki (ROADMAP §7g) keeps looks (`dna`) and memories but treats them as untradeable
   heirlooms.
-
-## Sex
-Every Boki is male or female, 50/50: `Unique.sex` hashes the seed, so hatches, breeding, wild and captured Boki, and old saves
-(v2 -> v3 migration, `Unique.ensure_sex`) all agree. The Boki card, hatch reveal and Field Book page show a small ♀ / ♂ icon.
-Only species with `"sex_forms": true` in `content/kin/<id>.json` have a separate female look: the Bellowary, Gongibbon,
-Kestrike, Lunowl and Murmurling lines (owner 11-08 20:20; the branching starter lines and Echolop get none)
-(`art/kin/<id>/<id>_f.glb`, routed by `BokiSex`); until that art exists they wear the base model. Check: `--boki-sex-check`.
