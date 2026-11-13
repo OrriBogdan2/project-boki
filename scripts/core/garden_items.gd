@@ -88,12 +88,13 @@ static func _verb(id: String) -> String:
 	return String(it.get("verb", rules()["verbs"][it["use"]]))
 
 ## Takes one from the bag and applies it (a sweet with its pick): the result of apply() plus look
-## (the body colour changed).
+## (the body colour changed) and id (GardenItemFx plays the give from it).
 static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	var pv := apply(rec, id, pick) if Save.d["items"].get(id, 0) > 0 else _no("none left")
 	if pv["ok"]:
 		Save.d["items"][id] = int(Save.d["items"][id]) - 1
 	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) in ["sweet", "aura"]
+	pv["id"] = id
 	pv["text"] = "%s: %s" % [item_name(id), pv["text"]] if pv["ok"] else pv["text"]
 	return pv
 
@@ -185,12 +186,14 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 	CareJournal.note(rec, "took off %s" % item_name(id))
 	return true
 
-## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it.
+## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it; id and
+## deltas (apply()'s) for GardenItemFx.
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
 	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "aura"]
 	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "",
-			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw}
+			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw, "id": id,
+			"deltas": pv["deltas"]}
 
 static func _no(why: String) -> Dictionary:
 	return {"ok": false, "text": why, "deltas": {}, "look": false}
