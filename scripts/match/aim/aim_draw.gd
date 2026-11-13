@@ -46,7 +46,11 @@ static func key(h: Node, id: String) -> String:
 func put(h: Hunter, id: String, e: Dictionary) -> void:
 	e["h"] = h
 	e["t"] = float(m.time)
-	entries[key(h, id)] = e
+	var k := key(h, id)
+	if e.has("ease"):
+		# the drawn width carries over from the last refresh and glides on from there (track)
+		e["deg_at"] = float((entries[k] as Dictionary).get("deg_at", e["deg"])) if entries.has(k) else float(e["deg"])
+	entries[k] = e
 
 func drop(h: Node, id: String) -> void:
 	entries.erase(key(h, id))
@@ -65,8 +69,23 @@ func live(e: Dictionary) -> bool:
 	return float(m.time) - float(e["t"]) <= float(e["keep"])
 
 func _process(delta: float) -> void:
+	track(delta)
 	rebuild()
 	tick_reticle(delta)
+
+## Per drawn frame, after the hunters rendered: a "follow" entry starts at its hunter's drawn body and points
+## at the aim gathered this frame; an "ease" cone's width glides toward its latest value (exponential, so the
+## same over any frame rate).
+func track(delta: float) -> void:
+	for k in entries:
+		var e: Dictionary = entries[k]
+		var h = e["h"]
+		if e.get("follow", false) and is_instance_valid(h):
+			var at: Vector3 = (h as Hunter).global_position
+			e["from"] = Vector2(at.x, at.z)
+			e["dir"] = (h as Hunter).aim_dir()
+		if e.has("ease"):
+			e["deg_at"] = lerpf(float(e["deg_at"]), float(e["deg"]), 1.0 - exp(-float(e["ease"]) * delta))
 
 ## The cursor states run on real time, so a perfect-window flash still shows through a hit stop.
 func tick_reticle(delta: float) -> void:

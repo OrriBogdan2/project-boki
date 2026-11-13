@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Abyssal Hand | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
 | E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
 | Hunter ultimate: Brass Broadside | Brass Broadside (level 6): charge a fan while you walk slowly, then two waves of heavy brass slugs with Anti-Heal. |
-| Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
+| Weapon: Shotgun | Seven slugs that stop 6m out, a shot every half second: wait for it and they fly in a tight pack, fire at once and they fan wide. Hits from behind hurt more. |
 
 ### Abilities in full
 

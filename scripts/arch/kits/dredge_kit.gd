@@ -5,9 +5,9 @@ extends ArchKit
 ##
 ## - Passive, Salvage: knocks and assists stack (+2.5% health each, 10 at most); being downed costs
 ##   one. Hits on a hunter's back deal 50% more. A knock heals.
-## - LMB: the scattergun (the weapon's own firing): a tight fan of slugs that stop and hang at 6.3m; the
-##   two cone-edge lines on the ground while firing, one aim line when idle; the body rocks back on each
-##   shot. At dash rank 3 pellet hits trim the barge recharge.
+## - LMB: the scattergun (the weapon's own firing): seven slugs that stop and hang at 6.3m, packed tight when
+##   he waits for the shot, fanned wide when he fires again at once; the spread's two edge lines on the ground
+##   follow it smoothly; the body rocks back on each shot. At dash rank 3 pellet hits trim the barge recharge.
 ## - RMB, Abyssal Hand: his mutated arm stretches out, a bone hook at its end, piercing terrain to the first body
 ##   (a placed wall still stops it), grabs it and reels it in stunned, over rocks and cliffs; he stands braced
 ##   while he reels (Grounded, a slow shuffle that swings the body), and only the barge works. Rank 3: a foe hit
@@ -39,7 +39,7 @@ const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); th
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
-const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
+const SPREAD_EASE := 35.0              # 1/s: how fast the drawn spread glides to the gun's (95% in ~0.09 s)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
@@ -64,7 +64,6 @@ var stop_t := 0.0               # the barge under way; when it ends he stops, ke
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
 var shot_seen := 0              # the last weapon volley the kit dressed
-var shot_at := -9.0
 var tight_pg := ""              # the volley id fired at zero bloom: its slugs shred armor (content gun.armor_k)
 var armor_shreds := 0           # (tests) hits that shredded armor
 var stunned: Array = []         # foes the Anchor stunned: {e, until} (the spiral over them)
@@ -239,14 +238,14 @@ func _drop_holds() -> void:
 	broadside.drop()
 
 ## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
-## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
-## ground out to the slug range; idle, they fold into one aim line to the cursor (sheet gap 4).
+## streaks that hang as violet dots where they stop). The spread's two edge lines lie on the ground out to the
+## slug range at the next volley's true fan: wide right after a shot, drawing in as he holds off, tight when
+## waited for. Drawn per frame from his body, the width gliding rather than jumping.
 func _tick_gun() -> void:
 	if h.wid != "shotgun" or KinMerge.active(h):
 		return
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
-		shot_at = m.time
 		volleys += 1
 		# the first shot after the bloom folded back leaves exactly one shot's worth of it
 		var tight: bool = h.wbloom <= float(h.wpn.get("bloom_deg", 0.0)) + 0.01
@@ -255,16 +254,13 @@ func _tick_gun() -> void:
 	if not pull.is_empty() or h.downed:
 		return
 	var w: Dictionary = h.wpn
-	if m.time - shot_at < IDLE_T or bool(h.inp.get("fire", false)):
-		AimKit.cone(
-			h, "spread",
-			{
-				"len": float(w["range"]), "deg": float(w.get("fan_deg", 30.0)) + h.wbloom, "edges": true, "inner": 0.6,
-				"col": Color("fff0f6"), "alpha": 0.8
-			}
-		)
-	else:
-		AimKit.line(h, "spread_idle", {"col": Color("fff0f6"), "alpha": 0.7})
+	AimKit.cone(
+		h, "spread",
+		{
+			"len": float(w["range"]), "deg": float(w["fan_deg"]) + h.wbloom, "edges": true, "inner": 0.6,
+			"col": Color("fff0f6"), "alpha": 0.8, "follow": true, "ease": SPREAD_EASE
+		}
+	)
 
 func _dress_volley() -> void:
 	play("dr_shot")
@@ -284,7 +280,7 @@ func _dress_volley() -> void:
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
 		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
-			if expired: fx.dot(at, SLUG_REST, 0.26))
+			if expired: fx.dot(at, SLUG_REST, 0.18))
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():

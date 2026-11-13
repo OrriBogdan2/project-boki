@@ -142,7 +142,7 @@ static func _barbs(g: AimGeo, p0: Vector2, p1: Vector2, barb_len: float, w: floa
 static func _cone(g: AimGeo, e: Dictionary) -> void:
 	var o: Vector2 = e["from"]; var u: Vector2 = e["dir"]
 	var l := float(e["len"]); var inner := float(e["inner"])
-	var h := deg_to_rad(float(e["deg"])) * 0.5
+	var h := deg_to_rad(float(e.get("deg_at", e["deg"]))) * 0.5      # deg_at: an eased cone's drawn width
 	var a := atan2(u.y, u.x)
 	var lw := _lw(e)
 	if bool(e.get("soft", false)):

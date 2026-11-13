@@ -381,7 +381,7 @@ func _all() -> void:
 		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
-	# --- the scattergun: a shot every 0.5s, a tight fan, the spread's edge lines while firing, one line idle
+	# --- the scattergun: a shot every 0.5s, the spread's edge lines wide while firing, tight idle
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
@@ -408,7 +408,10 @@ func _all() -> void:
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	ak.step(m, 1.0)
-	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
+	ok(
+		"gun: idle, the edge lines close in on the tight cluster",
+		AimKit.shown(P, "spread") and float(AimKit.entry(P, "spread")["deg"]) == float(P.wpn["fan_deg"])
+	)
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
 	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
