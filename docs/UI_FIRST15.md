@@ -108,6 +108,11 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
 2. **One prompt** (match tutorial: one strip, `TutorialStrip`; toasts wait while it is fresh, then carry the step's detail; the world prompt label waits while the card carries the interact key, `Tutorial.prompt_quiet`, `--tutorial-hud-check`). Still open outside the tutorial.
+2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
+   Done (ext/tut-one-prompt): the old card's faded copy went with the one-line strip (bab079536; not in fresh
+   `--tutorial-hud-shots` renders); the step's plain words were re-sent to the lane every frame ("x123", a lasting
+   copy of the tip) and now go once a step; the world's F prompt waits with the toasts; URGENT lines and revive /
+   stomp prompts still show (docs/HUD.md).
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit. **Done in ext/ui-relics-names:** tiles read the name with `the <Title>` smaller under it, the tile column is 38% of the window width (460-600 px), an unlocked tile drops the 'Unlocked' line, all 13 Hunters show without scrolling at 1280x720 and 1920x1080 ([shots](shots/ui-relics-names), software render: the GPU worker was lost 3x), `--hero-grid-check` asserts it. The right column and Mastery still scroll.
