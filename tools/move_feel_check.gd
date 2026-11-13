@@ -921,7 +921,8 @@ func _dash_curves() -> void:
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
 		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
 		rec("dash_curve_dist", (P.pos.x - x0) / want)
-		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))     # her run, a kit haste in it
+		# against her run, a kit haste in it (Sable hands over at her hasted run)
+		rec("dash_curve_exit_run", _hv(P).length() / (P.base_speed * P.ak.move_k()))
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
 			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
