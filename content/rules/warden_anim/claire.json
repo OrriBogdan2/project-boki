@@ -1,5 +1,5 @@
 {
-	"doc": "Neve's hand-keyed clips (art/wardens/claire/claire.glb) and which game state plays which (scripts/heroes/warden_clips.gd). She skates everywhere: walk and run are her strokes, tm_skate is Rink Run.",
+	"doc": "Neve's hand-keyed clips (art/wardens/claire/claire.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Walk and run are a real stride and run (the pilot gait recipe); her skate is tm_skate (Rink Run).",
 	"blink": {"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}},
 	"skinned_weapon": true,
 	"carry_drop": ["hand.R"],
@@ -9,7 +9,7 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.6, "run_cycle": 0.34
+		"walk_speed": 2.2, "run_speed": 4.6, "run_cycle": 0.34, "stride": [1.0, 1.0], "foot_mps": [2.0, 4.4]
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.13},
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
