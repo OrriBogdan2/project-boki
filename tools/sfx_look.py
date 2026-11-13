@@ -3,7 +3,7 @@ level numbers (tools/sfx_stats.py). For judging a sound set by eye and for READY
 
     python3 tools/sfx_look.py out.png audio/gunslinger_*.wav audio/vn_*.wav
 """
-import sys
+import argparse
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -12,7 +12,11 @@ from sfx_stats import load, stats
 
 
 def main():
-    out, paths = sys.argv[1], sorted(set(sys.argv[2:]))
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('out', help='the PNG to write')
+    ap.add_argument('wavs', nargs='+', help='the .wav files to draw (sorted, duplicates dropped)')
+    args = ap.parse_args()
+    out, paths = args.out, sorted(set(args.wavs))
     fig, axes = plt.subplots(len(paths), 2, figsize=(12, 1.25 * len(paths) + 0.4), squeeze=False,
                              gridspec_kw={'width_ratios': [1, 2]})
     for row, p in zip(axes, paths):
