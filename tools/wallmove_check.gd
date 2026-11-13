@@ -189,8 +189,10 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 
 # ---------------------------------------------------------------- 1b. tall climb
 ## Lace's passive ([game data] bCanWallJump, climb_tall in hunter_move.json): a plain jump facing a
-## four-terrace wall climbs it, no kick; Vex's doesn't. Walking off that wall's top still drops either
-## of them to the ground below, keys turned back into the face on the way down included.
+## four-terrace wall climbs it, no kick; Vex's doesn't. Walking off that wall's top drops either of
+## them to the ground below. Turning the keys back into the face on the way down is the shared ledge
+## float (main's strong air control brings you back to the face): Lace's tall reach catches the lip
+## she left and floats her back up; Vex's shorter reach doesn't, she lands below.
 func _tall(w4: Dictionary) -> void:
 	var cls0 := h.cls
 	var arch0 := h.arch
@@ -201,10 +203,14 @@ func _tall(w4: Dictionary) -> void:
 		var r := _attempt(w4, false)
 		ok(r["top"] == tall and r["kicks"] == 0, "%s: a jump facing a 4-terrace wall %s (peak %.2fm, no kick)" % [
 			hero, "climbs it" if tall else "doesn't climb it", r["peak"]])
-		for back in [false, true]:
-			var y := _walk_off(w4, back)
-			ok(y < 0.1, "%s walks off the 4-terrace top%s and lands below (%.2fm)" % [
-				hero, ", turning back into the face," if back else "", y])
+		var y := _walk_off(w4, false)
+		ok(y < 0.1, "%s walks off the 4-terrace top and lands below (%.2fm)" % [hero, y])
+		var top: float = float(w4["top"]) - float(w4["low"])
+		y = _walk_off(w4, true)
+		var caught := absf(y - top) < 0.1
+		var how := "floats back onto the top" if tall else "lands below"
+		ok(caught == tall and (caught or y < 0.1),
+			"%s walks off the 4-terrace top, turns back into the face: %s (%.2fm)" % [hero, how, y])
 	h.reclass(cls0, arch0)
 
 ## Walks off the wall's top (back: keys turn into the face once airborne). Returns the landing height
@@ -217,8 +223,9 @@ func _walk_off(wl: Dictionary, back: bool) -> float:
 	for i in 150:
 		air = air + DT if not h.grounded else 0.0
 		h.inp["move"] = n if back and air > 0.15 else -n
+		var was_air := air > 0.15
 		m.step(DT)
-		if h.grounded and i > 10 and h.pos.y < float(wl["top"]) - 0.5:
+		if h.grounded and i > 10 and (h.pos.y < float(wl["top"]) - 0.5 or (back and was_air)):
 			break
 	return h.pos.y - float(wl["low"])
 

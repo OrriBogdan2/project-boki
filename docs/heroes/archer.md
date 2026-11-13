@@ -97,7 +97,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 - During Spirit Walk she can still shoot and cast, and moves 10% faster (the sheet measures +5-10% outside); at rank 3, 33% more inside something, fading over the walk.
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
-- The double-high wall is our four-terrace wall (3.2 m, the map's wall tier; the source's single climb is about 1.5 m). Walking off ledges stays allowed (the source's bCanWalkOffLedges is off for everyone; ours is a separate, shared rule).
+- The double-high wall is our four-terrace wall (3.2 m, the map's wall tier; the source's single climb is about 1.5 m). Walking off ledges stays allowed (the source's bCanWalkOffLedges is off for everyone; ours is a separate, shared rule). Turning back into the face on the way down is the shared ledge float: her 2.4 m reach catches the lip she left and floats her back up (`--wallmove-check` 1b).
 - Not built: Hail Wall damaging wisps (our downed hunters take no ability damage).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
