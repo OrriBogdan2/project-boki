@@ -630,6 +630,8 @@ func reset_boss(b: Boss) -> void:
 	b.phase = 0
 	b.enraged = false
 	b.awake_t = 0.0
+	b.invul_t = 0.0      # (a reset during a phase roar must not carry its armour into the next fight)
+	b.empty_t = 0.0      # (nor the empty-lair clock: woken from outside again, it would sleep at once)
 	b.tgt = null
 	b.st = "idle"
 	b.stag_open = 0.0

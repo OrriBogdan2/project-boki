@@ -13,6 +13,9 @@ extends Mob
 ##   Brood Mother    spits fans of acid, lobs acid that leaves burning puddles, lays egg sacs that
 ##                   hatch into adds, burrows and bursts up under you; a brood of adds on each phase
 
+const PHASE_HP := [0.66, 0.33]   # health fractions where phases 1 and 2 start ([?] no source value)
+const LEASH_T := 12.0            # s with no foe inside the lair before it resets ([?] no source value)
+
 var lair: Dictionary = {}
 var dormant := true
 var phase := 0
@@ -201,8 +204,7 @@ func sim(dt: float) -> void:
 	if invul_t > 0.0: invul_t -= dt
 	if md.get("stag", false):
 		_tick_stagger(dt)
-	# phases at 66% and 33%
-	var want := 0 if hp > max_hp * 0.66 else (1 if hp > max_hp * 0.33 else 2)
+	var want := 0 if hp > max_hp * PHASE_HP[0] else (1 if hp > max_hp * PHASE_HP[1] else 2)
 	if want > phase:
 		_phase_up(want)
 	if not enraged and awake_t >= float(md.get("enrage", 75.0)):
@@ -212,7 +214,7 @@ func sim(dt: float) -> void:
 	var inside := foes_inside()
 	if inside.is_empty():
 		empty_t += dt
-		if empty_t > 12.0:
+		if empty_t > LEASH_T:
 			m.lairs.reset_boss(self)
 			return
 	else:

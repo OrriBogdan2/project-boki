@@ -52,6 +52,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
 | `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
+| `--boss-parity-check` | Lair boss against docs/CAMP_PARITY.md: the empty-lair reset after `Boss.LEASH_T`, phases at `Boss.PHASE_HP`, a reset mid-roar leaves no armour, and a stolen kill pays the last hit's squad (XP, kill stat, perk orbs), not the squad that did the damage |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
 | `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges |
