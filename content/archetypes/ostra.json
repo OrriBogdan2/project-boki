@@ -52,6 +52,7 @@
 		"size_k": 0.9
 	},
 	"dash": {
+		"ground": {"range": "reach", "r": "radius"},
 		"id": "swap",
 		"name": "Lantern Trade",
 		"icon": "shadowstep",
@@ -109,6 +110,7 @@
 		}
 	},
 	"e": {
+		"ground": {"range": "reach", "r": "rmax"},
 		"delivery": "burst",
 		"name": "Brimseed",
 		"short": "Seed",
@@ -136,6 +138,7 @@
 		"tell_k": 0.68
 	},
 	"x": {
+		"ground": {"range": "range", "r": "r"},
 		"name": "Nightwell",
 		"short": "Well",
 		"icon": "blaze_mantle",

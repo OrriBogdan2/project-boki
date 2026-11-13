@@ -117,6 +117,7 @@
 		}
 	},
 	"e": {
+		"ground": {"range": "reach", "r": "thrown_radius", "recast": true},
 		"delivery": "zone",
 		"name": "Hearthlight",
 		"short": "Hearth",

@@ -99,6 +99,7 @@ func _tick_aim(dt: float) -> void:
 	k.play_hold("breah_spine_aim", phase_t)
 	if h.is_local():
 		AimKit.span(h, "x", _span_p({"chevrons": 6, "col": PREVIEW_COL}))
+		AimReach.ring(k, "x")
 	if not _held() or phase_t >= float(xd()["aim_max"]):
 		_erupt()
 

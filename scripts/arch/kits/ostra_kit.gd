@@ -298,6 +298,7 @@ func _tick_swap_aim(dt: float) -> void:
 	if (held("dash") and swap_aim < float(dd["aim_max"])) and not h.downed and h.stun_t <= 0.0:
 		var spot := swap_spot()
 		AimKit.swap(h, "swap", {"b": spot, "r": float(dd["radius"]), "col": TRADE_COL})
+		AimReach.ring(self, "dash")
 		return
 	swap_aim = -1.0
 	if h.downed or h.stun_t > 0.0:

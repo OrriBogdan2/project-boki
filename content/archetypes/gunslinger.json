@@ -117,6 +117,7 @@
 		"recoil": 6.0
 	},
 	"x": {
+		"ground": {"range": "range", "r": "radius"},
 		"name": "Cinderfall",
 		"short": "Fall",
 		"icon": "earthshatter",

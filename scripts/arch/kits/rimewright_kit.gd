@@ -574,6 +574,7 @@ func rmb_hold_tick(t: float) -> void:
 			{
 				"range": float(ld["range"]), "r": float(ld["zone_r"]), "ticks": true, "star": true,
 				"col": Color("dffcff")})
+	AimReach.ring(self, "rmb")
 	if not spear_aim:
 		spear_aim = true
 		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)

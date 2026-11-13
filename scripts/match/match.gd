@@ -3422,6 +3422,12 @@ func _gather_input() -> void:
 		if PanelInput.pressed(self, a[0]):
 			pending_input[a[1]] = true
 	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
+		if not quick and AimReach.holds(player.ak, "x"):
+			aim_hold = "hunter_ult"      # a ground-target R: hold to see where it lands, let go to cast it
+		else:
+			HunterKeys.ult_pressed(player)
+	if aim_hold == "hunter_ult" and not Input.is_action_pressed("hunter_ult"):
+		aim_hold = ""
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -5797,6 +5803,9 @@ func _update_indicators(alpha: float) -> void:
 	for n in [ind_range, ind_area, ind_fill, ind_line, ind_fan, ind_wall]: n.visible = false
 	var p := player
 	if p == null or p.out or p.downed or paused or (aim_hold == "" and p.charge_frac() < 0.0):
+		return
+	if p.ak != null and aim_hold in ["signature", "hunter_ult"]:
+		AimReach.preview(p.ak, "e" if aim_hold == "signature" else "x")      # the hero kit's own slot, not the Boki's
 		return
 	var id := ""
 	var col := Color.WHITE

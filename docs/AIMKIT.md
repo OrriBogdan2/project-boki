@@ -12,6 +12,7 @@ cursor state plus `MANIFEST.txt`).
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
+| `aim_reach.gd` (`AimReach`) | The range preview of a ground-target slot: a faint max-range ring and the landing disc |
 
 Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
 
@@ -162,6 +163,23 @@ rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `ci
 `"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Sparkle's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the
 drag arrow.
+
+### Range preview of a ground-target slot (`AimReach`)
+A slot that places a zone or strike at the cursor names its range and landing radius in data:
+`"ground": {"range": "reach", "r": "radius"}` (key paths in the slot def, e.g. `"lance.range"`; `"recast": true`
+when only the recast lands at the cursor, Meeko's Hearthlight throw). While it is aimed, AimKit shows a faint
+ring at that range round the caster (`<slot>_reach`) and the landing disc at the cursor, clamped to the range so
+it stops where the cast lands (`<slot>_spot`). Aimed means:
+- **Quick cast off**: E or R held (`Match.aim_hold`), cast on release. R holds only for a ground-target R that has
+  no aim hold of its own (`AimReach.holds`). With Quick cast on (the default) these cast on the press, as in the source.
+- **The kit's own aim hold**: Neve's Ice Spear (RMB held), Motley's Trade (Shift held), Tenzo's Basalt Spine (R held)
+  draw their own landing mark and add the ring with `AimReach.ring(kit, slot)`. Sparkle's Kitefall hang keeps its
+  own `x_ring` round the take-off spot.
+
+The ground-target slots: Vex R, Sparkle E and R, Meeko E (throw), Neve RMB, Motley E, R and Shift, Tenzo R.
+`--aimkit-check` aims each at twice its range and asserts the ring at the data range and the mark on it.
+Not ground-targeted here (a wall, lane or skillshot, no disc): Lace E, Neve E, Sable E; Kael's Meteor Drop lands
+`drop.ahead` in front of him, not at the cursor.
 
 ### Reading back, hiding, clearing
 - `AimKit.shown(h, id)`: is it up?

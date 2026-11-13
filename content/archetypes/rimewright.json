@@ -79,6 +79,7 @@
 		"stop": 0.15
 	},
 	"rmb": {
+		"ground": {"range": "lance.range", "r": "lance.zone_r"},
 		"delivery": "projectile",
 		"name": "Ice Spear",
 		"short": "Spear",
