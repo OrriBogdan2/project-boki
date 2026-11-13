@@ -14,7 +14,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	ok(not Care.natural_death(), "content/rules/neglect.json: natural_death is false")
+	ok(not Care.natural_death(), "content/rules/care.json: natural_death is false")
 	_offline()
 	_tick()
 	_revive()
@@ -37,7 +37,7 @@ func _offline() -> void:
 		r["needs_t"] = Time.get_unix_time_from_system() - 14.0 * 86400.0
 		Econ.catch_up_all()
 	ok(Save.d["roster"].has(r) and Econ.graves().is_empty(), "60 days offline, nothing to eat: alive, no grave")
-	var capped := float(r["starve"]) <= Care.starve_cap_s()
+	var capped := float(r["starve"]) <= Care.starve_cap()
 	ok(Care.starve_stage(r) == "sick" and capped, "...sick, the clock held at the cap (%.0f h)" % Care.starve_h(r))
 	Care.fed(r)
 	r["needs"]["food"] = 80.0

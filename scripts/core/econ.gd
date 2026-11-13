@@ -382,7 +382,7 @@ static func kin_dies(rec: Dictionary, cause: String) -> Dictionary:
 		d["active2"] = ""
 	return g
 
-## No natural death (content/rules/neglect.json): a Boki that "starved" in an earlier version comes
+## No natural death (content/rules/care.json): a Boki that "starved" in an earlier version comes
 ## back weak, as itself (level, memories, trust kept), and a living one past the sick cap is eased down
 ## to it. Safe to run on every load: nothing is left to revive the second time. The names go to
 ## Save.d["neglect_back"] for the home screen to tell you about once.
@@ -391,8 +391,8 @@ static func revive_neglected() -> void:
 		return
 	var d := Save.d
 	for rec in d.get("roster", []):
-		if float(rec.get("starve", 0.0)) > Care.starve_cap_s():
-			rec["starve"] = Care.starve_cap_s()
+		if float(rec.get("starve", 0.0)) > Care.starve_cap():
+			rec["starve"] = Care.starve_cap()
 	for g in graves().filter(func(x): return String(x.get("cause", "")) == "starved"):
 		var rec := _grave_rec(g)
 		if String(rec.get("uid", "")) == "" or not Save.kin(String(rec["uid"])).is_empty():

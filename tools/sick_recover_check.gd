@@ -76,7 +76,7 @@ func _care(r: Dictionary, rest: bool, friend: bool) -> float:
 	Care.feed(r, "sweetbun")
 	while t < CARE_LIMIT_S:
 		Care.change(r, "food", maxf(0.0, 50.0 - Care.need(r, "food")))      # stays fed without more meals
-		Care.tick(r, STEP_S, rest, friend)
+		Care.tick(r, STEP_S, rest, false, friend)
 		t += STEP_S
 		if Care.starve_stage(r) == "" and not r.has("starve"):
 			return t
