@@ -20,7 +20,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
-- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
+- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
+  `moving` s (default `dur`) while he runs on, played at `rate` times its speed (default 1). `--clip-check` measures the
+  plain jump through the clips (take-off, apex, dip, recovery: the JL rows); `--jump-land-shots` films it at the match camera.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `hold_at` + `hold_until` (the clip stays on its pose at `hold_at` s from there to `hold_until` s into the move, then plays out or hands back), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (the sneak clip's own ground speed, m/s: the clip runs at the game's crouch speed over it, up to `WardenClips.CROUCH_RATE_MAX`, so the planted foot stays put; `--crouch-check` measures it). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne. Over the glide clip (and the dive, which
