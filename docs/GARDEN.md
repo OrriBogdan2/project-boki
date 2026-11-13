@@ -119,3 +119,13 @@ it keeps to the island's edge, joins no tag and no toy and is nobody's play mate
 join in. `rec["shy_s"]` holds the time left; a Boki without it is settled, so old saves need no migration.
 Default taken: the shy day runs only while its zone is loaded. The alternative is real time, which would let a
 closed game cure it. Checked by `--base-stray-check`.
+
+## Glint Fishing looks
+`scripts/home/glint_fx.gd` draws four small looks on the water with the shared cel pass (`shaders/glint_water.gdshader`,
+recipes in `content/rules/glint_fishing_vfx.json`): a ripple where the bobber lands (on a glint or in empty water), rings
+that hold wide while you wait and close in as the ears go up so they meet at the bite (the same warning the ears give,
+so Focus still sets it), one sharp splash on the bite (the moment to press), and one glint on a catch, sized snack, item
+or rare (rare is gold). Each is one quad, one at a time, with no particles. `--glint-fishing-check` covers them;
+`--glint-fx-shots --shots-dir=<dir>` (through `jobq submit --needs gpu`) writes the sheet `looks.png`.
+Default taken: the rings' timing is tied to the ears, not to the hidden bite time, so they never warn earlier than Focus
+allows. The alternative (rings closing over the whole wait) would leak the bite to a player with no Focus.
