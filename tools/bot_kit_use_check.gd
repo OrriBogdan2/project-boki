@@ -83,7 +83,7 @@ func _use(n: Dictionary, id: String, slot: String, instant: bool) -> void:
 func _hit(n: Dictionary, tags: Array) -> void:
 	var t := String(tags[0]) if not tags.is_empty() else ""
 	_add(n, "hit")
-	if "shot" in tags or t == "primary": _add(n, "lmb hit")
+	if "shot" in tags or "flame" in tags or t == "primary": _add(n, "lmb hit")
 	elif t == "utility": _add(n, "rmb hit")
 	elif t == "k1": _add(n, "e hit")
 
