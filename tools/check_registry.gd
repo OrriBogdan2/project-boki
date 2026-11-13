@@ -114,6 +114,8 @@ const CHECKS := {
 	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],      # map regions, hot drop zone
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
 	"--match-repeat-check": ["res://tools/match_repeat_check.gd", "match_repeat_check", null],      # leaks
+	# merged props hold their draws; --shots-dir=<dir> saves a lineup
+	"--prop-draws-check": ["res://tools/prop_draws_check.gd", "prop_draws_check", null],
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
 	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
 	# draw calls, tris, shadow lights, frame ms

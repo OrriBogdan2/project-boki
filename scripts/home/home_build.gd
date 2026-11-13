@@ -574,7 +574,7 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
-			_merge_parts(n)
+			Models.merge_tree(n, true)      # its plain parts, in every group: a mesh per material, shadows unchanged
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
 			ShadowPolicy.judge_tree(n, n.scale.x)      # small props throw no shadow (item 94)
@@ -582,13 +582,6 @@ func _sync_deco() -> void:
 			nodes[u] = n
 			for l in _lights_of(n): h.lamps.append(l)
 		(nodes[u] as Node3D).visible = not (held.get("kind", "") == "deco" and int(held.get("from", -1)) == int(u))
-
-## A placed piece's plain parts baked into one mesh per material in every group of it (a moving group keeps
-## moving: its parts merge among themselves), so a house or stall costs a few draws instead of dozens.
-func _merge_parts(n: Node3D) -> void:
-	var groups := n.find_children("*", "Node3D", true, false).filter(func(g): return not (g is MeshInstance3D))
-	for g in [n] + groups:
-		Models.merge_static(g)
 
 func _sig(e: Dictionary) -> String:
 	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e) + SnackPatch.sig(e)
@@ -616,6 +609,7 @@ func _sync_fences() -> void:
 			if f.get(c + dv, "") == id: links.append(dv)
 		var alone: bool = not (f.get(c + Vector2i(1, 0), "") == id or f.get(c + Vector2i(-1, 0), "") == id or f.get(c + Vector2i(0, 1), "") == id or f.get(c + Vector2i(0, -1), "") == id)
 		_fence_piece(n, id, links, alone)
+		Models.merge_static(n, false, true)      # a post and its rails: one mesh
 
 func _fence_piece(n: Node3D, id: String, links: Array, alone: bool) -> void:
 	match id:

@@ -1292,8 +1292,9 @@ static func _glider_set(gskin: String) -> Array:
 
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-## `discard`: those parts are only freed (a body nothing will draw).
-static func merge_static(node: Node3D, discard := false) -> void:
+## `discard`: those parts are only freed (a body nothing will draw). `keep_casts`: casters and
+## non-casters merge apart and keep their setting, so a merge changes no shadow (the farm's props).
+static func merge_static(node: Node3D, discard := false, keep_casts := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
@@ -1308,9 +1309,10 @@ static func merge_static(node: Node3D, discard := false) -> void:
 		if discard:
 			drop.append(mi)
 			continue
-		var key := _mat_key(mat)
+		var casts := mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var key := _mat_key(mat) + ("|%s" % casts if keep_casts else "")
 		if not groups.has(key):
-			groups[key] = {"mat": mat, "parts": []}
+			groups[key] = {"mat": mat, "parts": [], "casts": casts}
 		for arrs in _part_y_surfaces(mi.mesh, mi.transform):
 			(groups[key]["parts"] as Array).append([arrs, mi.transform])
 		drop.append(mi)
@@ -1319,11 +1321,24 @@ static func merge_static(node: Node3D, discard := false) -> void:
 		var mi := MeshInstance3D.new()
 		mi.mesh = MeshArrays.merge(g["parts"])     # (no SurfaceTool: it reads every part back from the GPU)
 		mi.material_override = g["mat"]
-		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
+		if not keep_casts:
+			ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
+		elif not g["casts"]:
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		node.add_child(mi)
 	for d in drop:
 		node.remove_child(d)
 		d.free()
+
+## merge_static on `root` and on every plain node under it (pivots, cradles, shelves).
+static func merge_tree(root: Node3D, keep_casts := false) -> void:
+	var stack: Array = [root]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Node3D and not (n is MeshInstance3D):
+			merge_static(n, false, keep_casts)
+		for ch in n.get_children():
+			stack.append(ch)
 
 ## A copy of a mesh whose UV2 holds the height range (bottom, top) the part spans once placed with
 ## xf, which the toon shader turns into the part's painted light-to-dark gradient and crease.
@@ -2193,6 +2208,7 @@ static func nesting_nook() -> Node3D:
 	part(heart, sphere(0.13, 12), toon(Color("ff5a7a"), false, 0.35), Vector3(0.08, 0.04, 0))
 	part(heart, cyl(0.0, 0.19, 0.24, 4), toon(Color("ff5a7a"), false, 0.35), Vector3(0, -0.1, 0), Vector3(1.0, 1.0, 0.45), Vector3(PI, PI / 4, 0))
 	PropAnim.on(heart, 0.0, 0.05, 2.0)
+	merge_tree(root, true)      # 60 draws to 17: the stones, stalks and flowers share colours
 	return root
 
 ## An egg in a straw nest, for kin you raise from an egg at home.
@@ -2271,6 +2287,7 @@ static func incubator() -> Node3D:
 			part(shelf, straw_ring, straw, Vector3(x, y + 0.04, 0), Vector3(1.0, 0.6, 1.0))
 			var mk := Marker3D.new(); mk.name = "S%d" % ((0 if y < 0.5 else 3) + j); mk.position = Vector3(x, y + 0.03, 0)
 			shelf.add_child(mk)
+	merge_tree(root, true)      # HomeIncubator finds the cradles, pebbles and grates by name only
 	return root
 
 ## A small Rare Egg for the incubator's shelf and cradle, its seam ring in the colour of the kin inside.

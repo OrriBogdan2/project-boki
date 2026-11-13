@@ -9,19 +9,21 @@ extends RefCounted
 static func build(level: int) -> Node3D:
 	var n := Node3D.new()
 	n.name = "Stall%d" % level
-	if level <= 1:
-		n.add_child(Models.stall())
-		_crate(n, Vector3(1.25, 0, 0.55))
-		return n
 	var counter := Models.stall()
-	counter.position = Vector3(0.38, 0, 0)
-	counter.scale = Vector3(0.74, 1, 1)
 	n.add_child(counter)
-	_hut(n, Vector3(-1.02, 0, 0.05))
-	_sign(n, Vector3(0.38, 1.62, -0.52), level)
+	if level <= 1:
+		_crate(n, Vector3(1.25, 0, 0.55))
+	else:
+		counter.position = Vector3(0.38, 0, 0)
+		counter.scale = Vector3(0.74, 1, 1)
+		_hut(n, Vector3(-1.02, 0, 0.05))
+		_sign(n, Vector3(0.38, 1.62, -0.52), level)
 	if level >= 3:
 		_bell(n, Vector3(1.22, 0, 0.62))
 		_bunting(n)
+	# nothing moves or recolours a part: a mesh per material (L3 69 draws to 38)
+	Models.merge_static(counter, false, true)
+	Models.merge_static(n, false, true)
 	return n
 
 static func _crate(n: Node3D, at: Vector3) -> void:

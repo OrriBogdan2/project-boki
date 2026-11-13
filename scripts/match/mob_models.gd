@@ -72,13 +72,7 @@ static func build(kind: String) -> Node3D:
 ## Merges each pivot's plain parts into a mesh per material (a handful of draw calls a monster),
 ## then gives what's left its painted part gradient.
 static func _finish(root: Node3D) -> void:
-	var stack: Array = [root]
-	while not stack.is_empty():
-		var n: Node = stack.pop_back()
-		if n is Node3D and not (n is MeshInstance3D):
-			Models.merge_static(n)
-		for ch in n.get_children():
-			stack.append(ch)
+	Models.merge_tree(root)
 	Models.bake_part_y(root)
 
 static var _meshes := MeshCache.new()

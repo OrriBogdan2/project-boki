@@ -38,7 +38,7 @@ if any held number gets worse.
 - A home's world scatter goes in one MultiMesh per kind (`World.scatter_chunk`): the whole island is on screen,
   so the match's 32-tile chunks only multiplied draws.
 - Every placed layout piece (house, stall, toys, patch) bakes its plain parts into one mesh per material in each
-  of its groups (`HomeBuild._merge_parts` over `Models.merge_static`; moving groups merge among themselves).
+  of its groups (`Models.merge_tree`, keep_casts; moving groups merge among themselves).
 - Ponds were one mesh per tile plus a foam strip and three rim stones per bank edge: now three MultiMeshes.
   This was the "unexplained" Cinderstep extra: the bench save (NavCheck) paints a stream.
 - No lights were added and no materials changed, so looks stay the same on every preset.
