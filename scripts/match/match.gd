@@ -2540,6 +2540,7 @@ func _exit_tree() -> void:
 	SeeThrough.off()
 	Capture.teardown(self)           # scan beams and hums outlive the match otherwise
 	Sfx.reset_scene_audio()          # every sound the match started stops with it, owner item 103
+	BackgroundWork.drop_reads()      # the read-ahead of Wardens and Boki the match never built
 	box_hums.clear()
 	Beacons.stop_sounds(self)
 	if biomes: biomes.free_up()

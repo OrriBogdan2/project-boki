@@ -367,9 +367,13 @@ func _summary(part: String, fl: Array) -> void:
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objs %.0f, nodes %.0f, fx %d, lights %d, shadowed %d, casters %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
 		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights(), _casters()])
-	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
+	var mem_line := "BENCH %s memory: textures %.0f MB, buffers %.0f MB, static %.0f MB, resources %d, orphan nodes %d"
+	print(mem_line % [part,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
-		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
+		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0,
+		Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+		Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT),
+		Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)])
 
 ## Particle systems still emitting (a GPU one simulates every frame even off screen), by owner name.
 func _emitters() -> void:

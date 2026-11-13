@@ -27,6 +27,13 @@ static func take(path: String) -> Resource:
 	_reads.erase(path)
 	return ResourceLoader.load_threaded_get(path)
 
+## Lets go of every finished read nobody took (a match's read-ahead of the Wardens and Boki it never built): the
+## loader holds each one, its textures and meshes in video memory, until it is taken. Reads still running stay out.
+static func drop_reads() -> void:
+	for path in _reads.keys():
+		if ResourceLoader.load_threaded_get_status(path) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			take(String(path))
+
 ## Runs `work` on a worker thread (join() collects it).
 static func add_task(work: Callable) -> int:
 	_hook_quit()
