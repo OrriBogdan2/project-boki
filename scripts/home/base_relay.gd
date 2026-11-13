@@ -6,7 +6,8 @@ extends RefCounted
 ## the timing bar: the grade sets the seconds the next runner loses taking the baton; rivals fumble unless the
 ## press is great, and duo friends (BaseDuo) hand off cleanly on their own and run the next leg faster.
 ## The visitors mirror your three at the cup round's strength (rivals()), so every win is a cup win in
-## content/rules/garden_prizes.json "relay". Tuning: content/rules/base_relay.json. Run has no nodes, so
+## content/rules/garden_prizes.json "relay". The runners' body language (hand-off contact, launch burst, finish
+## cheer and sulk) is RelayBeats. Tuning: content/rules/base_relay.json. Run has no nodes, so
 ## --relay-cup-check (tools/relay_cup_check.gd) runs it headless with a seed.
 
 const STAND_OFF := Vector3(-1.3, 0, -2.4)   # m from the loop's start line to the relay stand
@@ -204,6 +205,8 @@ var anchor := {}               # your Boki the prize and cup go to: your partner
 var bar: TimingBar = null
 var heard := [0, 0]            # hand-offs sounded so far, per team
 var crossed := [false, false]  # each team's finish sounded
+var beats := RelayBeats.new()  # the runners' hand-off, launch and finish body language
+var finish_left := -1.0        # s the finished teams still show their cheer or sulk (-1: the relay is on)
 
 func _init(dash: BaseRace) -> void:
 	race = dash
@@ -280,6 +283,7 @@ func use() -> void:
 	_place_runners()
 	heard = [0, 0]
 	crossed = [false, false]
+	finish_left = -1.0
 	GardenSfx.countdown(h, race.start)
 
 func _bar_label(last: String) -> void:
@@ -311,8 +315,13 @@ func tick(d: float) -> void:
 	bar.step(d)
 	_place_runners()
 	_hear()
+	beats.step(run.t)
 	if run.over():
-		_end(true)
+		if finish_left < 0.0:
+			finish_left = float(RelayBeats.rules()["finish_s"])
+		finish_left -= d
+		if finish_left <= 0.0:
+			_end(true)
 
 ## Sounds for what happened this step, per team: a clean pass (no more lost than a good press) or a fumble at the
 ## runner taking the baton, and the tape when its last runner is home.
@@ -325,9 +334,15 @@ func _hear() -> void:
 			var s := float(lost[heard[team]])
 			heard[team] = int(heard[team]) + 1
 			GardenSfx.cue("relay_handoff" if s <= clean_s else "relay_fumble", ents[heard[team]]["pos"])
+			var at: int = heard[team]
+			beats.hand_off(ents[at - 1]["node"], ents[at]["node"], run.t, s, run.boost[team])
 		if float(run.done_t[team]) >= 0.0 and not crossed[team]:
 			crossed[team] = true
 			GardenSfx.cue("relay_finish", ents[-1]["pos"])
+			RelayBeats.finish(_nodes(ents), not crossed[1 - team])
+
+func _nodes(ents: Array) -> Array:
+	return ents.map(func(e): return e["node"])
 
 func _place_runners() -> void:
 	var st: Array = BaseRace.rules()["stretches"]
@@ -357,6 +372,7 @@ func _end(finished: bool) -> void:
 	var res := {}
 	if finished:
 		res = settle(run, anchor)
+	beats.clear(_nodes(mine) + _nodes(visitors))
 	for k in mine:
 		k["busy"] = false
 		k["t"] = 1.5

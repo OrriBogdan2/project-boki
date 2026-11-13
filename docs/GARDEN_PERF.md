@@ -76,3 +76,39 @@ Every zone is now under 350 draws on both machines; the ratchet keeps only what 
 Low 370 held from rp1-0, which MRROBOTO's 470 is past: a different machine, not loosened) and the M5 frame of
 Cinderstep and Ridge (17-18 ms at a 640x360 window, near the 60 Hz line on both sides of the fixes, so the frame is
 not draw-bound there). Objects, nodes, emitters and base_life are within budget everywhere.
+
+## VFX clarity: keep / cut (ext/vfx-garden-clarity, 2026-11-12)
+Owner principle: a particle, glow card or decal stays only if it says something (a ripe plant, water, a Boki's mood,
+something you can use). `--perf-bench` now prints `BENCH vfx <part> <emitter|card:<shader>|decal> <owner> xN` for every
+particle system that is emitting, every Decal and every see-through light/glow mesh in the home
+(`FX_SHADERS` in `tools/perf_bench.gd`), and `--bench-shots=<dir>` saves each part's default-camera frame (UI hidden).
+
+| what (hub, Glasswater, Hushwood, Ridge) | what it says | verdict |
+|---|---|---|
+| Portal beam, 40 motes at the pad | "the expedition portal is here, press E" | keep, 40 -> 20 (`ZoneDress.BEAM_AMOUNT`) |
+| Portal Disc (glow card) and Base ring | the portal and where to step | keep |
+| Portal Zone ring and ZoneFill (r 2.6 m) | only a match's exit fills them; in a home a dim extra ring round the pad | cut (freed in `ZoneDress.calm_pad`) |
+| Landmark motes/snow/sparks, 22 each (Glasswater statue, Hushwood ring, Ridge spire) | nothing: 45 m from the camera frame, simulated all day | cut in built zones (`ZoneDress.quiet_landmarks`); the rocks stay, matches keep theirs |
+| Boki Aura, 7 motes while a Boki glows | its mood or type | keep |
+| Fx pool bursts (3-16 motes, a few at once at a toy) | a hit, a play, a cheer: one-shot, caused by an action | keep |
+| Rain (260) | weather | keep (not emitting unless raining) |
+| Decals | none exist in the home | n/a |
+| Shallows sheet (Glasswater) | water | keep |
+| Zone scatter (crystals, reeds, pebbles, mushrooms, ferns, flowers; counts in `garden_zones.json`) | ground dressing, not VFX | untouched; a lighter scatter is a separate look decision |
+
+Numbers, headless-GL (xvfb, opengl3, llvmpipe, 1280x720, 9 Boki out, UI hidden), before = 085d31018 -> after = this
+branch; draws / emitting emitters:
+
+| part | before | after |
+|---|---|---|
+| hub | 455 / 2 | 453 / 2 |
+| Glasswater | 244 / 9 | 242 / 4 |
+| Hushwood | 290 / 8 | 294 / 3 |
+| Kitewind Ridge | 249 / 3 | 243 / 2 |
+
+Draws barely move (a glow card is one draw; the zones are not particle-bound); the win is on screen: the pad is one
+lit ring plus a thinner beam, with no faint outer circle, and three fewer simulated landmark systems in the zones.
+Emitter counts also swing with how many Boki bursts are live in the frame (Hushwood's 8 -> 3 is mostly that), so the
+deterministic part is: Beam 40 -> 20, landmark emitters 1 -> 0 per zone. Shots: `docs/shots/garden-clarity/<part>.jpg`
+(left before, right after; software-GL frames). GPU frames: jobq 20261112-044534-13097 (before) and
+20261112-044708-17279 (after), `--quality=medium`, `--bench-shots=shots`; queued behind ~45 jobs when this was written.

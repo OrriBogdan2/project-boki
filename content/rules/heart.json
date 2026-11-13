@@ -63,7 +63,7 @@
   "_gate_arc_min_deg": "whole degrees of Gate angle that must be on ground and gate_clear from both outposts"
  },
  "reward": {
-  "_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is about 5x minor",
+  "_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is 3x to 4x minor in what it pays (gems 150 vs 40) and the only one with the egg; the ratio is an open question in docs/decisions/0051",
   "minor": {
    "egg": false,
    "seeds": {"emberberry": 1, "sunroot": 1, "mindmint": 1, "tidebloom": 1},

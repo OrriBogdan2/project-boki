@@ -62,3 +62,9 @@ Appeal4 (cand_5, ext/cinder-bust 7efd99345) in 0.24.5: that branch swapped onto 
 line's IDLE_AUDIT clips, so the 0.24.5 merge copied the line glb's 41 clips (spring tracks included) onto the cand_5
 body by node name (same skeleton, no rest drift) and added `x_breath` at the line's spot with the chest band
 1.00-1.32 m up, |x| under 0.17 m (kael_retarget.add_breath): 3288 vertices.
+
+Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with cinder_clips.py on
+~/meshy/cinder_v2/stage_p2/cinder.blend (a control bake of `walk_f` matched this glb's to 4e-7) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
+On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
+command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.

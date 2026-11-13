@@ -168,7 +168,7 @@ func _hook(m: Match, P: Hunter, K: JuggernautKit, at: Vector3, secs := 0.5) -> v
 
 func _settle(m: Match, P: Hunter, K: JuggernautKit, home: Vector3) -> void:
 	A.step(m, 0.6)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.stun_t = 0.0
