@@ -331,6 +331,7 @@ func _start(o: Dictionary) -> void:
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
 	GlideTrail.of(self)
+	StatusLooks.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -5088,6 +5089,7 @@ func _flags(h: Hunter) -> int:
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
+	f |= StatusLooks.net_bits(h) << StatusLooks.FLAG_SHIFT      # stun/root/slow, for the body look everywhere
 	return f
 
 const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "wisp", "wild", "dazed", "fused"]
@@ -5103,7 +5105,7 @@ func _ser(e: Ent) -> Array:
 		var k: Kin = e
 		return ["k", k.nid, _r(k.pos.x), _r(k.pos.y), _r(k.pos.z), _r(k.face), _r(k.hp), _r(k.max_hp), KIN_STATES.find(k.state), k.species,
 			k.owner_h.nid if k.owner_h else "", int(k.rec.get("level", 1)), String(k.rec.get("name", "")), _r(k.catch_prog), _r(k.vel.x), _r(k.vel.z),
-			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))] + KinNet.kin_extra(k)
+			1 if k.rec.get("shimmer", false) else 0, String(k.rec.get("acc", "")), ",".join(Mutations.of(k.rec))] + KinNet.kin_extra(k) + [StatusLooks.net_bits(k)]
 	var mb: Mob = e
 	var ms := ["m", mb.nid, _r(mb.pos.x), _r(mb.pos.y), _r(mb.pos.z), _r(mb.face), _r(mb.hp), _r(mb.max_hp), MOB_STATES.find(mb.st), mb.mkind,
 		_r(mb.atk_dir.x), _r(mb.atk_dir.y), _r(mb.st_t), _r(mb.vel.x), _r(mb.vel.z), _r(mb.stag_open), _r(mb.stagger_t)]
@@ -5113,6 +5115,7 @@ func _ser(e: Ent) -> Array:
 		ms.append_array([_r(bb.cone_a), _r(bb.spot), _r(bb.lvl), 1 if bb.tgt != null else 0])
 	else:
 		ms.append_array(KeyCarry.mob_extra(mb))      # key carrier flag, Shrubling pose (Net 0.15.3)
+	ms.append(StatusLooks.net_bits(mb))              # stun/root/slow, last (Net 0.24.6)
 	return ms
 
 ## Snapshot of what this game owns: its player (mine=true), or the host's world (mine=false).
@@ -5246,6 +5249,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.below_lip = f & (1 << 24) != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
+			h.net_cc = (f >> StatusLooks.FLAG_SHIFT) & 7
 			if f & 2048 != 0:
 				var hk := ((f >> 15) & 15) - 1
 				if hk >= 0 and hk < Hunter.HOLD_KINDS.size(): h.set_hold(String(Hunter.HOLD_KINDS[hk]), 0.3)
@@ -5270,6 +5274,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			k.net_vel = Vector3(it[14], 0, it[15])
 			k.dead = false
 			KinNet.apply_kin(k, it)
+			if it.size() > KinNet.KIN_AT + 5: k.net_cc = int(it[KinNet.KIN_AT + 5])
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
@@ -5288,6 +5293,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 				var bb: Blight = mb
 				bb.cone_a = float(it[17]); bb.spot = float(it[18]); bb.lvl = float(it[19])
 				bb.tgt = player if int(it[20]) == 1 else null     # (only "alerted or not" matters to a proxy's looks)
+			if it.size() > 19: mb.net_cc = int(it[it.size() - 1])
 
 func _net_hit_in(x) -> void:
 	if typeof(x) != TYPE_ARRAY or x.size() < 12:

@@ -6,7 +6,9 @@ extends RefCounted
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
 ## from their anchor, follow it, stream behind a run and are off at Low. Each ability's emitter on the swapped
-## models stays on its bone (tools/hero_vfx_emit.gd).
+## models stays on its bone (tools/hero_vfx_emit.gd). And the status looks
+## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
+## and a summoned Boki under crowd control wears the same looks as a Hunter, sized to its body.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -63,6 +65,8 @@ func run(main: Node) -> void:
 	_motley_trade(m, P)
 	_dolm_rocks(m)
 	_net(m, V, P)
+	_statuses(m, P)
+	_boki_statuses(m, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _vex_core(main)
@@ -492,3 +496,153 @@ func _dots(m: Match) -> void:
 	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
 	var g: float = m.world.ground_at(at.x, at.z)
 	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)
+
+# ------------------------------------------------------------------ status looks
+## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
+const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
+const RIG_PARTS := 16          # meshes one status look may use (30 Hunters each with a few stay cheap)
+
+## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
+func _set_status(m: Match, F: Hunter, st: String, on: bool) -> void:
+	var t := 1.5 if on else 0.0
+	match st:
+		"stun": F.stun_t = t
+		"root": F.root_t = t
+		"slow": F.slow_t = t
+		"burn": F.burn_t = t
+		"antiheal": F.blight_t = t
+		"sick": F.sick_t = t
+		"gnd": F.set_meta("gnd_until", m.time + t)
+		"daze": F.set_meta("rat_until", m.time + t)
+		"chill", "static":
+			if on: StatusLooks.of(m).keep(F, st)
+			else: m.time += StatusLooks.KEEP + 0.01
+
+func _statuses(m: Match, P: Hunter) -> void:
+	var L := StatusLooks.of(m)
+	var rules := StatusLooks.rules()
+	var F: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P: F = h
+	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	Sfx.listener = P.pos
+	ok(STATUSES.all(func(st): return rules.has(st)), "status looks: every plain status has data")
+	var looks := {}
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+		var up := L.showing(F, st)
+		var rig: Node3D = (L.rigs.get("%d/%s" % [F.get_instance_id(), st], {}) as Dictionary).get("n")
+		var parts := rig.find_children("*", "MeshInstance3D", true, false).size() if rig else 0
+		ok(up and not L.showing(P, st), "status %s: its look comes up on that body only" % st)
+		ok(parts > 0 and parts <= RIG_PARTS, "status %s: %d meshes (at most %d)" % [st, parts, RIG_PARTS])
+		if st == "gnd":
+			ok(rig.find_child("Arrow", true, false) != null, "status gnd: a down arrow over the head")
+		looks[String(rules[st]["look"])] = true
+		_set_status(m, F, st, false)
+		ok(not L.showing(F, st), "status %s: the look goes when it ends" % st)
+	ok(looks.size() == STATUSES.size(), "status looks: each status has a look of its own (%d)" % looks.size())
+	var made := L.made
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+	ok(STATUSES.all(func(st): return L.showing(F, st)) and L.made == made,
+		"status looks: all at once on one body, from the pool (built %d)" % L.made)
+	for st: String in STATUSES:
+		_set_status(m, F, st, false)
+	L.from_hit(F, {"stun": 0.5, "burn": 4.0, "burn_for": 2.0, "blight": 1.0})
+	ok(L.showing(F, "stun") and L.showing(F, "burn") and L.showing(F, "antiheal"),
+		"status looks: a hit sent to another game's body shows what it carries here")
+	m.time += 2.1
+	ok(not L.showing(F, "stun") and not L.showing(F, "burn"), "status looks: ... until that status would end")
+	F.stun_t = 1.0
+	F.teleport(P.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
+	ok(not L.showing(F, "stun"), "status looks: nothing draws past LOD_FAR")
+	F.stun_t = 0.0
+
+## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
+## pace, sized to the Boki (over its head, round its body), from the pool; Grounded never lands so shows nothing.
+const BOKI_CC := ["stun", "root", "slow", "daze"]
+
+func _boki_statuses(m: Match, P: Hunter) -> void:
+	var L := StatusLooks.of(m)
+	var F: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P: F = h
+	var k := m.give_kin(F, Save.new_kin("zapple", "Pip"))
+	k.state = "active"
+	k.set_meta("summoned", true)
+	k.teleport(P.pos + Vector3(-3.0, 0, 0))
+	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	k.render(1.0 / 60.0, 1.0)
+	var kk := StatusLooks.body_k(k)
+	ok(kk.y < kk.x and kk.x < 1.0, "boki status: a look's size comes from the Boki's body (%.2f across, %.2f up)"
+		% [kk.x, kk.y])
+	for st: String in BOKI_CC:
+		_put_cc(m, k, st, true)
+		_put_cc(m, F, st, true)
+		L.tick(0.0)
+		var kr: Dictionary = L.rigs.get("%d/%s" % [k.get_instance_id(), st], {})
+		var fr: Dictionary = L.rigs.get("%d/%s" % [F.get_instance_id(), st], {})
+		ok(L.showing(k, st) and L.showing(F, st), "boki status %s: the look comes up on the summoned Boki" % st)
+		if kr.is_empty() or fr.is_empty():
+			continue
+		ok(_mats(kr["n"]) == _mats(fr["n"]), "boki status %s: in the Hunter's colours" % st)
+		for i in 3:
+			L.tick(0.25)
+		ok(is_equal_approx(float(kr["t"]), float(fr["t"])), "boki status %s: at the Hunter's pace" % st)
+		var y := float(StatusLooks.rules()[st].get("y", 0.0))
+		var body: Node3D = (kr["n"] as Node3D).get_child(0)
+		if y > 0.0:
+			var up := body.global_position.y - k.pos.y
+			var head := k.model.scale.y * StatusLooks.KIN_TALL       # (a Boki's size varies: measured from its head)
+			var hunter_up: float = (fr["n"] as Node3D).get_child(0).global_position.y - F.pos.y
+			ok(up > head and up < head + 0.6,
+				"boki status %s: over the Boki's head (%.2f m up, its head %.2f, a Hunter's %.2f)"
+				% [st, up, head, hunter_up])
+		else:
+			var n: Node3D = kr["n"]
+			ok(n.scale.y < n.scale.x and n.scale.x < (fr["n"] as Node3D).scale.x,
+				"boki status %s: round its squat body (%.2f across, %.2f up)" % [st, n.scale.x, n.scale.y])
+		_put_cc(m, k, st, false)
+		_put_cc(m, F, st, false)
+		ok(not L.showing(k, st), "boki status %s: the look goes when it ends" % st)
+	k.stun_t = 1.0
+	k.render(1.0 / 60.0, 1.0)
+	ok(k.model.get_meta("dazed") and not k.model.get_meta("starry"),
+		"boki status: a stunned Boki squints but its own stars stay off (one ring of stars, the shared one)")
+	k.stun_t = 0.0
+	KitStatus.apply(k, "gnd", 3.0)
+	ok(not L.showing(k, "gnd"), "boki status: Grounded does not land on a summoned Boki, so no cords")
+	k.remote = true
+	L.from_hit(k, {"stun": 0.5, "root": 0.5})
+	KitStatus.apply(k, "rat", 1.0, 0.0, false)
+	ok(L.showing(k, "stun") and L.showing(k, "root") and L.showing(k, "daze"),
+		"boki status: another game's summoned Boki shows the CC it is sent")
+	m.time += 1.1
+	ok(not L.showing(k, "stun") and not L.showing(k, "daze"), "boki status: ... until it would end")
+	k.remote = false
+	m.kins.erase(k)
+	m.ents_by_id.erase(k.nid)
+	F.kin = null
+	k.queue_free()
+
+## Puts a crowd control kind on `e` the way the game does, or takes it off.
+func _put_cc(m: Match, e: Ent, st: String, on: bool) -> void:
+	var t := 1.5 if on else 0.0
+	match st:
+		"stun": e.stun_t = t
+		"root": e.root_t = t
+		"slow": e.slow_t = t
+		"daze":
+			if on: KitStatus.apply(e, "rat", t)
+			else: m.time += 1.51       # (a Boki's Daze is shown for its length: StatusLooks.put)
+
+## The materials a rig draws with (by colour), to compare two rigs of one status.
+func _mats(n: Node3D) -> Array:
+	var out := {}
+	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+		var mat := mi.material_override
+		if mat is StandardMaterial3D: out[(mat as StandardMaterial3D).albedo_color.to_html()] = true
+		elif mat is ShaderMaterial: out[Color((mat as ShaderMaterial).get_shader_parameter("albedo")).to_html()] = true
+	var keys := out.keys()
+	keys.sort()
+	return keys

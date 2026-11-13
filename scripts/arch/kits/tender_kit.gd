@@ -466,7 +466,7 @@ func _burst(t: Ent) -> void:
 	var at := t.pos
 	var rr := burst_radius()
 	var col := col_of(rmb_def())
-	# the flare: a swirl of starlight snaps out over the area, then a root beam holds on each foe
+	# the flare: a swirl of starlight snaps out over the area; each foe wears the root's body look (StatusLooks)
 	vfx("seed_burst", at, null, {"r": rr})
 	m.sfx("tend_root", at, 0.0, 1.0)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
@@ -476,7 +476,6 @@ func _burst(t: Ent) -> void:
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
-		lk().burst("beam_root", f.pos, {"col": Color("9a6aff"), "r": 1.0, "dur": root, "ent": f})
 	stats["flares"] += 1
 	play_soft("mm_tug")
 

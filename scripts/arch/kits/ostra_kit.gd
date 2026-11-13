@@ -524,7 +524,7 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	_boost(float(sn["boost"]["hit"]))
-	KitLooks.of(m).crown(e, stun)
+	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
 ## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a

@@ -603,6 +603,8 @@ const CHECKS := {
 	"--camera-follow-shots": ["res://tools/camera_follow_check.gd", "camera_follow_check", "shots"],  # GPU
 	# mashing LMB never beats holding
 	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],
+	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
+	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
