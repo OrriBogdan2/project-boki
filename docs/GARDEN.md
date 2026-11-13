@@ -166,3 +166,12 @@ or rare (rare is gold). Each is one quad, one at a time, with no particles. `--g
 `--glint-fx-shots --shots-dir=<dir>` (through `jobq submit --needs gpu`) writes the sheet `looks.png`.
 Default taken: the rings' timing is tied to the ears, not to the hidden bite time, so they never warn earlier than Focus
 allows. The alternative (rings closing over the whole wait) would leak the bite to a player with no Focus.
+
+## Expedition loot into the garden
+
+DECISIONS 2026-11-09: the garden and extraction feed each other. Before this no match drop was a garden item (drops were
+gear, treasure, the Rare Egg and Wayseeds). A boss's lair pile now also holds one of the four stat bites (Thumpnut, Shellbark
+Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items.json`. They ride the pack as treasure marked
+`bag` (`Loot.VALUABLES`, `Loot.is_bag_item`, like the Wayseeds), come home into the garden bag (`Econ._store`), and are eaten from
+the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
+"ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
