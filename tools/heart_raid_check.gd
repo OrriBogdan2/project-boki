@@ -88,9 +88,7 @@ func _tables() -> void:
 	var off: Array = stand.keys().filter(func(l): return not l.begins_with("_") and (
 		lines[l]["mode"] != HeartRaid.MODE or lines[l]["rarity"] != BokiModes.of(String(stand[l]))["rarity"]))
 	ok(off.is_empty(), "each stand-in has its raid line's rarity %s" % str(off))
-	ok(HeartRaid.site_pool({}, "wild") == BokiModes.site_pool("expedition", "wild"),
-		"an Expedition's wild spots draw BokiModes' Expedition pool")
-	ok(HeartRaid.site_pool(HeartRaid.opts(1, "hard"), "wild") == HeartRaid.boki("hard"),
+	ok(HeartRaid.boki_for(HeartRaid.opts(1, "hard")) == HeartRaid.boki("hard"),
 		"a raid's wild spots draw the raid's Boki at its difficulty")
 
 # ------------------------------------------------------------------ 2. an Expedition is untouched
