@@ -4,9 +4,11 @@ extends RefCounted
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
 ##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
-##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to
+##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to;
+##      the match HUD counts a hit you land as a fight, not only one you take
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
+##   8. two world labels on one spot leave one drawn (LabelClash): the loot name waits, the nameplate stays
 ## Never touches the save.
 
 var bad := 0
@@ -31,6 +33,7 @@ func run(main_node: Node) -> void:
 	_fight(host)
 	await _wiring()
 	_yield()
+	_clash()
 	host.queue_free()
 	print("MSGQ DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -164,6 +167,11 @@ func _wiring() -> void:
 	for i in 10:
 		hud._hud_tick(0.1)
 	ok(not hud.in_fight() and hud.kit_fade == 1.0, "the kit panel returns when the fight ends")
+	m.hud._place_msgs()
+	ok(not lane.fight, "no hits yet: the HUD's lane keeps its full budget")
+	m.hud.hitmarker(false)
+	m.hud._place_msgs()
+	ok(lane.fight, "a hit you land puts the HUD's lane on its fight budget")
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)
@@ -192,3 +200,19 @@ func _yield() -> void:
 	ok(lbl.transparency < 0.05, "and comes back when the card goes")
 	cam.queue_free()
 	lbl.queue_free()
+
+# ------------------------------------------------------------------ 8. two labels on one spot
+func _clash() -> void:
+	var plate := Vector2(640, 300)
+	var loot := Rect2(plate + Vector2(-40, -16), Vector2(80, 20))
+	LabelClash.begin()
+	ok(not LabelClash.blocked(loot), "no claimed box: the loot name draws")
+	LabelClash.claim(plate, LabelClash.PLATE)
+	ok(LabelClash.blocked(loot), "a nameplate over it: the loot name is skipped, one label is left")
+	ok(not LabelClash.blocked(Rect2(loot.position + Vector2(400, 0), loot.size)), "a loot name elsewhere still draws")
+	LabelClash.begin()
+	ok(not LabelClash.blocked(loot), "the next frame starts clear")
+	for i in LabelClash.CAP + 8:
+		LabelClash.claim(Vector2(i * 5, 0), LabelClash.NUM)
+	ok(LabelClash.boxes.size() == LabelClash.CAP, "claims stop at CAP, so a crowd never grows the array")
+	LabelClash.begin()
