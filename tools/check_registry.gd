@@ -34,6 +34,12 @@ const CHECKS := {
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
+	# first: it wraps the other flags on the line (a second launch of a bench or check)
+	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],      # a second launch, for benches
+	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],      # quick Boki command keys
+	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart early seat (0023, 0051)
+	"--lair-breach-check": ["res://tools/lair_breach_check.gd", "lair_breach_check", null],      # lair gate breach
+	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	# the Ways Out strip and Gate prompt
 	"--edge-marker-check": ["res://tools/edge_marker_check.gd", "edge_marker_check", null],      # EdgeMarker
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],

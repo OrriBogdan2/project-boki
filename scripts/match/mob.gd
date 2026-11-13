@@ -63,7 +63,7 @@ func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0)
 		add_child(stag_stars)
 
 func mass() -> float:
-	if mkind == "sentinel": return 50.0
+	if mkind in ["sentinel", "gate"]: return 50.0
 	return 6.0 if mkind == "warden" else (3.0 if mkind == "brute" else 1.0)
 
 func _on_zero(by: Ent, opts: Dictionary) -> void:

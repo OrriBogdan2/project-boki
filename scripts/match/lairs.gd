@@ -3,17 +3,20 @@ extends RefCounted
 ## Boss lairs: walled arenas on the islands, each sealed by a gate, holding a boss (see Boss) and the
 ## Rare Egg it guards. Every expedition map has at least one (Skyreach has three).
 ##
-## Getting in, after SUPERVIVE's vault locks:
-##  - The dial (every lair). A ring dial on a stone lectern at the gate, a needle sweeping round it and
-##    a few lit arcs. Press interact (or click, or the pad's A) as the needle passes through each arc;
-##    light them all and that lock opens. Each gate has three or four locks, and each lock's arcs are
-##    smaller and its needle faster. A miss resets the lock you're on and rings a loud chime: it pings
-##    you to everyone nearby, shows you through grass for a moment, and calls up a few guards.
-##    Everyone near can see the dial turning over the lectern and who's working it.
+## Getting in:
+##  - Breaking the gate down (every shipped lair: LairBreach). A Gate Seal of stone is braced across the
+##    gate; it only gives way to sustained damage, cracking in stages that each call guards and ring out.
+##  - The dial (a lair whose entry lists "dial": no shipped map's since the breach). A ring dial on a
+##    stone lectern at the gate, a needle sweeping round it and a few lit arcs. Press interact (or
+##    click, or the pad's A) as the needle passes through each arc; light them all and that lock opens.
+##    Each gate has three or four locks, and each lock's arcs are smaller and its needle faster. A miss
+##    resets the lock you're on and rings a loud chime: it pings you to everyone nearby, shows you
+##    through grass for a moment, and calls up a few guards. Everyone near can see the dial turning over
+##    the lectern and who's working it.
 ##  - Rune pylons (Stormcrown Eyrie). Hold interact at three pylons round the lair to light them; each
-##    one lit brings guards. All three lit and the seal breaks.
+##    one lit brings guards and knocks a share off the Gate Seal (or, with no seal, all three open it).
 ##  - Ward stones (the Thornhive). Three ward stones stand round it; hitting one calls its guards out,
-##    breaking all three breaks the seal.
+##    breaking one knocks a share off the Gate Seal (or, with no seal, breaking all three opens it).
 ## While sealed, a ward of light over the walls keeps everyone out (gliding in bounces off). Once open,
 ## the boss sleeps and you can walk in and out as you like. Step in past the threshold and it wakes:
 ## the gate's bars slam down and the ward lights up again, like a raid. Everyone inside is sealed in
@@ -64,11 +67,13 @@ var egg_pings: Array = []      # {pos, until, follow: Hunter or null, text}
 var _prev := {}                # hunter nid -> was interact held last tick
 var _told := {}
 var music_on := false
+var breach: LairBreach
 var press_log: Array = []      # tests: every stop attempt {lair, ok, lock}
 var alert_log: Array = []      # tests: every outside alert {lair, kind: fight|fallen, nid}
 
 func setup(match_node: Match) -> void:
 	m = match_node
+	breach = LairBreach.new(m, self)
 	if m.opts.get("training", false) or m.opts.get("duel", false) or m.opts.get("tutorial", false) or m.opts.get("sandbox", false):
 		return
 	for D in m.world.lair_defs:
@@ -92,7 +97,8 @@ func _add(D: Dictionary) -> void:
 	var dial := c + Vector3(out.x, 0, out.y) * (hf + 2.6)
 	dial = Vector3(dial.x, w.ground_at(dial.x, dial.z), dial.z) if not w.is_void(dial.x, dial.z) else gate_c + Vector3(out.x, 0, out.y) * 1.6
 	var L := {"i": list.size(), "id": D["id"], "name": D["name"], "boss": String(D["boss"]), "c": c, "half": hf, "out": out,
-		"gate_tiles": D["gate_tiles"], "gate_c": gate_c, "dial": dial, "entry": D.get("entry", ["dial"]), "state": "dormant",
+		"gate_tiles": D["gate_tiles"], "gate_c": gate_c, "dial": dial, "entry": D.get("entry", ["breach"]),
+		"state": "dormant",
 		"locks": int(LOCKS.get(String(D["boss"]), 3)), "lock": 0, "targets": [], "needle": randf() * TAU, "dir": 1.0, "active": false,
 		"user": null, "jam": 0.0, "grace": 0.0, "fails": 0, "boss_mob": null, "adds": [], "guards": [], "runes": [], "wards": [],
 		"gate_k": 0.0, "opened_by": "", "woke_at": -1.0, "bot_ti": -1, "bot_roll": false, "bot_wait": 0.0, "egg_wp": null, "egg_told": false}
@@ -107,12 +113,15 @@ func _add(D: Dictionary) -> void:
 	var dome := BossModels.dome(float(hf) + 0.5, col)
 	dome.position = c + Vector3(0, 0.02, 0)
 	m.add_child(dome)
-	var dn := BossModels.dial_stone(col)
 	Flora.paint_set_piece(gate)
-	Flora.paint_set_piece(dn)
-	dn.position = dial
-	dn.rotation.y = atan2(out.x, out.y)
-	m.add_child(dn)
+	var dn: Node3D = BossModels.dial_stone(col) if (L["entry"] as Array).has("dial") else null
+	if dn:
+		Flora.paint_set_piece(dn)
+		dn.position = dial
+		dn.rotation.y = atan2(out.x, out.y)
+		m.add_child(dn)
+	if (L["entry"] as Array).has("breach"):
+		L["seal_at"] = LairBreach.anchor(L, w)
 	var lbl := Label3D.new()
 	lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 	lbl.modulate = col.lightened(0.3); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
@@ -182,7 +191,8 @@ func _tint_dormant(L: Dictionary, dormant: bool) -> void:
 	var col: Color = L["col"] if not dormant else Color(0.6, 0.62, 0.68)
 	(sh.material_override as StandardMaterial3D).albedo_color = Color(col, 0.10 if not dormant else 0.05)
 	(dome.get_node("Rim") as MeshInstance3D).visible = not dormant
-	(L["nodes"]["dial"] as Node3D).get_node("Ring").visible = not dormant
+	if L["nodes"]["dial"]:
+		(L["nodes"]["dial"] as Node3D).get_node("Ring").visible = not dormant
 
 ## SpawnPlan decides which lairs are live this match: every lair is a "boss" candidate; the rolled ones
 ## get their boss, guards and wards (see activate), the others stay dormant. Skyreach rolls 2 or 3 of its
@@ -241,6 +251,8 @@ func activate(L: Dictionary) -> void:
 	m.ents_by_id[b.nid] = b
 	b.face = atan2(-out.x, -out.y)
 	L["boss_mob"] = b
+	if L.has("seal_at"):
+		breach.spawn(L)
 	# guards camped outside the gate: fight through them to get to the dial
 	for i in 3 + mini(int(m.tier), 1):
 		var gk: String = ["skitter", "spitter", "bomber", "brute" if m.tier >= 1 else "skitter"][i % 4]
@@ -338,6 +350,9 @@ func interact_for(h: Hunter) -> Dictionary:
 			or (L["runes"] as Array).any(func(rn): return h.flat_dist(rn["pos"]) < 1.7)
 		if wait != "" and near:
 			return {"kind": "lair", "what": "wait", "lair": L, "col": color_of(L), "label": wait}
+		var bp := breach.prompt(L, h)
+		if not bp.is_empty():
+			return bp
 		if h.flat_dist(L["dial"]) < DIAL_R and absf(h.pos.y - float(L["dial"].y)) < 1.5 and (L["entry"] as Array).has("dial"):
 			var u = L["user"]
 			if is_same(u, h):
@@ -378,10 +393,10 @@ func _light_rune(L: Dictionary, rn: Dictionary, h: Hunter) -> void:
 	if is_instance_valid(n): n.get_node("Lit").visible = true
 	m.sfx("unlock", rn["pos"], 2.0, 1.2)
 	m.fx.burst(rn["pos"] + Vector3(0, 1.4, 0), color_of(L), 24, 4.0, 0.6, -2.0)
-	_loud(L, rn["pos"], h, "A rune flares at %s" % L["name"])
-	_call_guards(L, rn["pos"], 2)
+	loud(L, rn["pos"], h, "A rune flares at %s" % L["name"])
+	call_guards(L, rn["pos"], 2)
 	var lit: int = (L["runes"] as Array).filter(func(x): return x["lit"]).size()
-	if lit >= (L["runes"] as Array).size():
+	if not breach.weaken(L, h) and lit >= (L["runes"] as Array).size():
 		open(L, h, "runes")
 	elif h == m.player and m.hud:
 		m.hud.toast("Rune %d of %d lit" % [lit, (L["runes"] as Array).size()], color_of(L))
@@ -466,14 +481,14 @@ func _miss(L: Dictionary, h: Hunter) -> void:
 	m.sfx("horn", L["dial"], -4.0, 1.6)
 	m.fx.ring(L["dial"], 4.0, Color("ff6a5a"), 0.5)
 	h.reveal_t = maxf(h.reveal_t, 3.0)
-	_loud(L, L["dial"], h, "A lock chime rings out at %s" % L["name"])
-	_call_guards(L, L["dial"], 2 + mini(int(m.tier), 1))
+	loud(L, L["dial"], h, "A lock chime rings out at %s" % L["name"])
+	call_guards(L, L["dial"], 2 + mini(int(m.tier), 1))
 	if h == m.player and m.hud:
 		m.hud.toast("MISSED  ·  the lock resets and the chime calls guards", Color("ff8a6a"))
 
 ## Something loud happened at a lair: a ping and a feed line for everyone close enough to hear it, a
 ## sound ping on the minimap, and nearby bots come and look.
-func _loud(L: Dictionary, at: Vector3, by: Hunter, text: String) -> void:
+func loud(L: Dictionary, at: Vector3, by: Hunter, text: String) -> void:
 	m.note_sound(by, at, "boom")
 	for o in m.hunters:
 		if o.out or o.extracted or o == by:
@@ -487,7 +502,7 @@ func _loud(L: Dictionary, at: Vector3, by: Hunter, text: String) -> void:
 		elif o.ctrl == "bot" and o.team != by.team and d < 45.0 and randf() < 0.35:
 			o.ai["wander"] = at
 
-func _call_guards(L: Dictionary, at: Vector3, n: int) -> void:
+func call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 	if m.net_on and not m.is_host:
 		return
 	var room := GUARD_CAP - _guards_alive(L)
@@ -570,6 +585,7 @@ func open(L: Dictionary, by: Hunter, how: String) -> void:
 	if m.exits and m.exits.seats and not m.exits.seats.lair_may_open(L, by, how):
 		return
 	L["state"] = "open"
+	breach.clear(L)
 	L["user"] = null
 	L["opened_by"] = by.pname if by else ""
 	L["open_at"] = m.time
@@ -582,7 +598,8 @@ func open(L: Dictionary, by: Hunter, how: String) -> void:
 	m.sfx("boom", L["gate_c"], 0.0, 0.5)
 	m.fx.burst(L["gate_c"] + Vector3(0, 1.5, 0), color_of(L), 40, 6.0, 0.7, 4.0, 1.4)
 	m.fx.ring(L["c"], float(L["half"]) + 1.0, color_of(L), 0.8)
-	var how_s: String = {"dial": "cracked the lock of", "runes": "lit the runes of", "wards": "broke the wards of"}.get(how, "opened")
+	var how_s: String = {"breach": "broke down the gate of",
+		"dial": "cracked the lock of", "runes": "lit the runes of", "wards": "broke the wards of"}.get(how, "opened")
 	m.add_feed("%s %s %s" % [by.pname if by else "Someone", how_s, L["name"]])
 	if m.player and not m.player.out:
 		m.ping(L["gate_c"], color_of(L))
@@ -674,13 +691,18 @@ func on_mob_dead(mb: Mob, credit: Ent) -> void:
 	if mb is Boss:
 		_boss_dead((mb as Boss).lair, mb as Boss, credit)
 		return
+	if mb.mkind == "gate":
+		for L in list:
+			if L.get("seal_at", Vector3.INF).distance_to(mb.pos) < 1.0:
+				breach.broken(L, mb, credit as Hunter if credit is Hunter else null)
+		return
 	if mb.mkind == "ward" and mb.has_meta("lair"):
 		var L: Dictionary = list[int(mb.get_meta("lair"))]
 		var left: int = (L["wards"] as Array).filter(func(x): return is_instance_valid(x) and not x.dead and x != mb).size()
 		m.sfx("boom", mb.pos, 2.0, 0.8)
 		m.fx.burst(mb.pos + Vector3(0, 1.5, 0), Color("8fd8ff"), 30, 6.0, 0.6, 3.0)
 		var hb: Hunter = credit if credit is Hunter else null
-		if left == 0:
+		if not breach.weaken(L, hb) and left == 0:
 			open(L, hb, "wards")
 		elif hb == m.player and m.hud:
 			m.hud.toast("Ward broken  ·  %d left" % left, color_of(L))
@@ -689,15 +711,18 @@ func on_mob_dead(mb: Mob, credit: Ent) -> void:
 func seat_wait(L: Dictionary) -> String:
 	return m.exits.seats.lair_wait(L) if m.exits and m.exits.seats else ""
 
-## A ward stone was hit for the first time: its guards come out.
+## A ward stone was hit for the first time: its guards come out. (A Gate Seal's hits go to LairBreach.)
 func on_ward_hit(mb: Mob, by: Ent) -> void:
+	if mb.mkind == "gate":
+		if mb.has_meta("lair"): breach.on_hit(list[int(mb.get_meta("lair"))])
+		return
 	if mb.has_meta("woke"):
 		return
 	mb.set_meta("woke", true)
 	var L: Dictionary = list[int(mb.get_meta("lair"))]
 	var hb: Hunter = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else (by as Hunter if by is Hunter else null)
-	if hb: _loud(L, mb.pos, hb, "A ward stone shrieks at %s" % L["name"])
-	_call_guards(L, mb.pos, 3)
+	if hb: loud(L, mb.pos, hb, "A ward stone shrieks at %s" % L["name"])
+	call_guards(L, mb.pos, 3)
 
 func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var killer: Hunter = (credit as Kin).owner_h if credit is Kin and (credit as Kin).owner_h else (credit as Hunter if credit is Hunter else null)
@@ -1006,6 +1031,7 @@ func tick(dt: float) -> void:
 		_tick_lock(L, dt)
 		_tick_gate(L, dt)
 		_tick_runes(L, dt)
+		breach.tick(L, dt)
 		_tick_egg(L)
 		_tick_show(L)
 		if not L.get("up_on", false) and not (L.get("flown", []) as Array).is_empty():
@@ -1018,8 +1044,8 @@ func tick(dt: float) -> void:
 					break
 	# the dial's needle on the lectern turns for everyone to see
 	for L in list:
-		var dn: Node3D = L["nodes"]["dial"]
-		if is_instance_valid(dn):
+		var dn = L["nodes"]["dial"]
+		if dn:
 			var nd: Node3D = dn.get_node("Face/Needle")
 			nd.rotation.y = -float(L["needle"])
 	egg_pings = egg_pings.filter(func(e): return m.time < float(e["until"]))
@@ -1351,7 +1377,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	for L in list:
 		if L["state"] in ["cleared", "dormant"] or L.get("locked", false): continue
 		# a sealed gate bots can't work (runes, wards) isn't a goal: try the next lair instead of giving up
-		if L["state"] == "sealed" and not (L["entry"] as Array).has("dial"): continue
+		if L["state"] == "sealed" and not L.has("seal_at") and not (L["entry"] as Array).has("dial"): continue
 		# (the lair we picked last time reaches a little further: at the edge of the range a bot
 		# walking about flipped between it and a roam goal every think, turning round each time)
 		var d := h.flat_dist(L["c"]) - (15.0 if a.get("lair_pick", "") == String(L["id"]) else 0.0)
@@ -1361,6 +1387,8 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		return []
 	a["lair_pick"] = String(best["id"])
 	if best["state"] == "sealed":
+		if best.has("seal_at"):
+			return [LairBreach.stand(best), "lair_breach"]      # batter the seal: any number can at once
 		if not (best["entry"] as Array).has("dial"):
 			return []
 		var u = best["user"]

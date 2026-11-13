@@ -2347,6 +2347,8 @@ func _boss_check() -> void:
 	ok.call(live >= 2 and live <= 3 and marks == live and LS.filter(func(L): return not L["active"]).all(func(L): return L["state"] == "dormant" and L["boss_mob"] == null),
 		"Skyreach rolled %d of 3 lairs live (%d boss markers on the full map), the rest dormant" % [live, marks])
 	for L in LS: m.lairs.activate(L)
+	# (this check covers the dial, runes and wards; --lair-breach-check the Gate Seal)
+	for L in LS: m.lairs.breach.as_dial(L)
 	var by_boss := {}
 	for L in LS: by_boss[L["boss"]] = L
 	var sealed_ok := true
@@ -2766,6 +2768,7 @@ func _boss_check() -> void:
 		if h != B: h.ctrl = "idle"; h.teleport(m2.world.spawns[0])
 	var L2: Dictionary = m2.lairs.list[0]
 	m2.lairs.activate(L2)
+	m2.lairs.breach.as_dial(L2)      # (a dial test: bots breaking a seal down are --lair-breach-check's)
 	# the only lair it can go for: bots don't plan lairs in a match's first 25 s and roam instead,
 	# then take the nearest live one, so with the other rolled-live lairs about, where that roam ended
 	# (which drifts with the RNG stream the earlier sections leave) decided which gate it worked
