@@ -64,6 +64,7 @@ var hfish: GlintFishing = null   # Glint Fishing's rock (glint_fishing.gd), base
 var htumble: BaseTumble = null   # Tumble's ring by the stump (base_tumble.gd), base_mode only
 var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
 var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
+var hkite: BaseKite = null       # the Kite Tow stand on Kitewind Ridge (base_kite.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var chimes: HomeChimes = null     # a Boki's chime when it gains a stat, level or change (home_chimes.gd)
 var hlantern: LanternMatch = null   # Lantern Match's glowcap ring (lantern_match.gd), base_mode only
@@ -191,8 +192,9 @@ func _ready() -> void:
 		hecho = EchoSteps.new(self)
 		hshow = ShowRing.new(self)
 		hlantern = LanternMatch.new(self)
+		hkite = BaseKite.new(self)
 		# in this order: Tumble's ring needs the stump placed
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hlantern]
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hlantern, hkite]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -1242,7 +1244,7 @@ func _move_player(d: float) -> void:
 		return
 	var mv := Vector2.ZERO
 	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty() \
-			and not (hecho and hecho.run)
+			and not (hecho and hecho.run) and not (hkite and hkite.flying())
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
@@ -1318,7 +1320,7 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
-	var jump_now := can_act and Input.is_action_just_pressed("jump")
+	var jump_now := can_act and Input.is_action_just_pressed("jump") and not (hkite != null and hkite.flying())
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
@@ -2275,6 +2277,7 @@ func _label_for(it: Dictionary) -> String:
 		"echo": return hecho.label()
 		"show": return hshow.label()
 		"lantern": return hlantern.label()
+		"kite": return hkite.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2319,6 +2322,7 @@ func _use(it: Dictionary) -> void:
 		"tumble": htumble.use()
 		"echo": hecho.use()
 		"show": hshow.use()
+		"kite": hkite.use()
 		"fishing": hfish.use()
 		"waystone": hway.use()
 		"lantern": hlantern.use()
