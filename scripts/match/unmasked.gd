@@ -51,10 +51,10 @@ static func default_look() -> Dictionary:
 	return {"unmasked": true, "gender": 1, "height": 1, "build": 1, "hollow": 0, "glow": 0, "ghost": 1, "aura": 1,
 		"shroud": 0, "colour": 1, "marks": [], "features": {}}
 
-static func random_look() -> Dictionary:
+static func random_look(rng: RandomNumberGenerator) -> Dictionary:
 	var out := default_look()
 	for row in ROWS:
-		out[row[0]] = randi() % (row[2] as Array).size()
+		out[row[0]] = rng.randi_range(0, (row[2] as Array).size() - 1)
 	return out
 
 static func is_look(lk: Dictionary) -> bool:

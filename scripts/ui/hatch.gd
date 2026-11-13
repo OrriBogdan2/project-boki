@@ -27,8 +27,6 @@ static func starter_eggs() -> Array:
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
 const CARD_BUTTON := "Choose your Boki"
-const CREATE_CAM := Vector3(0.05, 1.2, 4.75)     # m: the creator's fixed camera, the whole body in frame
-const CREATE_LOOK := Vector3(0.2, 0.98, 1.6)
 const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
 
 var cam: Camera3D
@@ -54,6 +52,7 @@ var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mut
 var mystery_found := false    # its card shows once you've hovered or picked the black egg
 var look: Dictionary = {}
 var preview: Node3D
+var view := CreatorView.new()     # the creator's turn, zoom and Surprise me
 var look_at_t := Vector3(0, 0.25, 0.5)
 var edit_only := false
 var create_box: Control
@@ -352,15 +351,9 @@ func _end_intro() -> void:
 	else:
 		_after_create()
 
-var turning := false
 func _unhandled_input(event: InputEvent) -> void:
-	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn yourself round
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-			turning = event.pressed
-		elif event is InputEventMouseMotion and turning:
-			preview.rotation.y += event.relative.x * 0.012
-			return
+	if stage == "create" and preview and view.handle(event, preview):
+		return
 	if stage == "warm" and ((event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump")):
 		_tap_egg()
 		return
@@ -405,11 +398,9 @@ func _show_create() -> void:
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
 	if sub_lbl:
-		sub_lbl.text = "You are one of the Empty. Drag (or hold %s / %s) to turn round." % [
+		sub_lbl.text = "You are one of the Empty. Drag (or hold %s / %s) to turn round, scroll to come closer." % [
 				Settings.key_cap("left"), Settings.key_cap("right")]
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
-	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
-	look_at_t = CREATE_LOOK
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(500, 0)
 	create_box = card
@@ -451,11 +442,19 @@ func _show_create() -> void:
 	v.add_child(nr)
 	var br := UI.hbox(10)
 	br.alignment = BoxContainer.ALIGNMENT_END
-	br.add_child(UI.ghost("Random", func():
+	var zr := UI.hbox(10)
+	zr.alignment = BoxContainer.ALIGNMENT_END
+	zr.add_child(view.zoom_button())
+	v.add_child(zr)
+	if not view.before.is_empty():
+		br.add_child(UI.ghost("Back", func():
+			look = view.back()
+			_show_create(), 90, "back"))
+	br.add_child(UI.ghost("Surprise me", func():
 		var kept: Dictionary = look["features"]
-		look = Unmasked.random_look()
+		look = view.surprise(look, randi())
 		look["features"] = kept
-		_show_create(), 120, "swap"))
+		_show_create(), 140, "swap"))
 	br.add_child(UI.primary("Looks good", _looks_good, 200))
 	v.add_child(br)
 	root_ui.add_child(card)
@@ -506,6 +505,7 @@ func _top_over(x_frac: float) -> void:
 
 func _step_look(key: String, d: int, n: int) -> void:
 	look[key] = posmod(int(look[key]) + d, n)
+	view.before = {}      # Back only undoes a Surprise me straight after it
 	Sfx.play("hover", null, -6.0)
 	_show_create()
 
@@ -520,6 +520,7 @@ func _rebuild_preview() -> void:
 	preview.position = Vector3(0.8, 0, 1.6)
 	preview.rotation.y = preview_yaw
 	add_child(preview)
+	view.fit(preview)
 	preview_anim = HunterAnim.new(preview)
 
 func _show_pick() -> void:
@@ -656,6 +657,9 @@ func _process(delta: float) -> void:
 	if stage == "mask":
 		pass       # (MaskMoment moves the camera)
 	elif stage == "create":
+		var shot := view.step(delta)      # the whole body, or closer to the face
+		cam_to = shot[0]
+		look_at_t = shot[1]
 		cam.look_at(look_at_t)
 		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
 			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5

@@ -137,7 +137,7 @@ func _hatch() -> void:
 	await _wait(func(): return hx.stage == "intro", "the hatch opens on its card")
 	_press(hx, String(hx.CARD_BUTTON))
 	await _wait(func(): return hx.stage == "create", "then you make yourself")
-	ok(_button(hx, "Random") != null, "with a Random button as well")
+	ok(_button(hx, "Surprise me") != null, "with a Surprise me button as well")
 	_press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")
