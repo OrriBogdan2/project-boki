@@ -393,6 +393,7 @@ const CHECKS := {
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--wall-kick-pose-check": ["res://tools/wall_kick_pose_check.gd", "wall_kick_pose_check", null],
 	"--first15-shots": ["res://tools/first15_shots.gd", "first15_shots", null],      # --shots-dir=<dir> --size=WxH
+	"--hud-timeline-shots": ["res://tools/hud_timeline_shots.gd", "hud_timeline_shots", null],      # GPU, --before
 	"--tutorial-strip-shots": ["res://tools/tutorial_strip_shots.gd", "tutorial_strip_shots", null],
 	# walking off a ledge is never gated
 	"--ledge-walk-check": ["res://tools/ledge_walk_check.gd", "ledge_walk_check", null],
