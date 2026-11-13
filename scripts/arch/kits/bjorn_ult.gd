@@ -128,6 +128,8 @@ func tick(dt: float) -> void:
 		return
 	t += dt
 	_telegraph()
+	if planted() and h.vel.y > 0.0:
+		h.vel.y = 0.0          # no jumping off the plant (it lands straight back): dash_flow into_jump.x lock
 	if phase == "wind":
 		h.vel = Vector3(0, h.vel.y, 0)
 		if h.stun_t > 0.0 or h.downed or h.out:

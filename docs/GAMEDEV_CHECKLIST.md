@@ -26,12 +26,13 @@ Use this list whenever a request is planned or reviewed. For each feature, ask w
 
 ## Performance (16.7 ms per frame at 60 fps)
 - [ ] **Frame budget:** measure before optimising (`--hitch-check`, `--load-check`, profiler sections) and fix the biggest cost first.
-- [ ] **Draw calls:** MultiMesh or instancing for flora, rocks and props. Merge static meshes that share a material.
+- [ ] **Draw calls:** MultiMesh or instancing for flora, rocks and props. Merge static meshes that share a material. A prop built from `Models.part` calls `Models.merge_static` (one node) or `Models.merge_tree` (every plain pivot under it) once built; pass `keep_casts` so the merge changes no shadow. Name a part that code finds or changes later: named parts never merge. `--prop-draws-check` holds the merged props to their draws.
 - [ ] **Spatial partitioning:** a uniform grid or buckets for broad-phase queries (targets, pickups, separation). Never all-pairs loops over hunters, mobs and Boki.
 - [ ] **Time slicing:** spread expensive AI thinking (bot decisions, target picks) across frames in buckets, while movement still runs every step.
 - [ ] **Overdraw:** limit stacked transparent layers (fog, tints, glows) and render heavy effects at lower resolution.
 - [ ] **Frustum and distance culling:** skip animation and FX updates for things off screen or far away. Use LOD with hysteresis for far models.
 - [ ] **Atlases and shared materials** for UI icons and sprites.
+- [ ] **Session memory:** a cache keyed by a rolled size or look grows every match. Make shape-keyed mesh caches a `MeshCache` (swept as a match starts), keep one painted map, and run `--match-repeat-check` after touching one.
 - [ ] **Streaming:** when the map grows (rolling sessions), keep only nearby chunks active, with separate load and unload radii.
 
 ## 3D and rendering

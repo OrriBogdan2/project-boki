@@ -63,6 +63,17 @@ jobs:
           grep -q "failures: 0" check.log
           python3 -m unittest discover -s server/matchmaker/tests
 
+      # Crash and error reporting (docs/SENTRY.md): after the checks (they run without the addon, like the suite),
+      # fetch the pinned Sentry addon and write the DSN secret into project.godot for this export only.
+      - name: Sentry addon and DSN
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          set -e
+          tools/sentry_addon.sh
+          godot --headless --path . --import || true
+          python3 -I tools/sentry_dsn.py
+
       - name: Export game
         run: |
           set -e
@@ -74,6 +85,23 @@ jobs:
           (cd ../build/win && zip -qr "$GITHUB_WORKSPACE/dist/ProjectBoki-windows.zip" .)
           cp ../build/mac/ProjectBoki.zip dist/ProjectBoki-macos.zip
           (cd ../build/linux && zip -qr "$GITHUB_WORKSPACE/dist/ProjectBoki-linux.zip" .)
+
+      # The Sentry release and the native debug files (unwind info for the exported binaries and the addon's libraries;
+      # the official export templates carry no symbols, see docs/SENTRY.md). Skipped without SENTRY_AUTH_TOKEN.
+      - name: Sentry release and debug files
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: project-boki
+          SENTRY_PROJECT: project-boki
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          if [ -z "$SENTRY_AUTH_TOKEN" ]; then echo "::warning::SENTRY_AUTH_TOKEN secret not set; skipping the Sentry upload"; exit 0; fi
+          REL="project-boki@${TAG#v}"   # the same name CrashReport.release_name() sends
+          CLI="npx --yes @sentry/cli@2.39.1"
+          $CLI releases new "$REL"
+          $CLI releases set-commits "$REL" --auto --ignore-missing || true
+          $CLI debug-files upload ../build/win ../build/linux addons/sentry/bin || echo "::warning::debug-files upload failed"
+          $CLI releases finalize "$REL"
 
       # The dedicated server: a build artifact only (S2 deploys it by hand with server/deploy/push.sh), never
       # a release asset and never auto-deployed. The "Linux Server" preset is in export_presets.cfg.
