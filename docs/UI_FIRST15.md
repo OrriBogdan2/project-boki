@@ -80,7 +80,7 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Expedition panel:** Relic, The Meadow / Dusk Isles / The Hollow, "BOKI AT RISK", Solo / Duos / Trios, "Arena / Training area / Duel room", ability names (Hot, Cinderfall, Burr).
 - **Relics page:** Mastery, Colourway, Emote, Trail, Glider, Field Wing, Hot Streak, Boki Fusion.
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).
-- **Title:** "Arena", "Save files".
+- **Title:** "Arena", "Save Files".
 
 ### Plain words pass (branch ext/ui-plain-words-menus)
 

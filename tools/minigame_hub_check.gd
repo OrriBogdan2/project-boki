@@ -1,5 +1,5 @@
 extends RefCounted
-## --minigame-hub-check: the title's "Play with your Boki" (scripts/home/minigame_hub.gd).
+## --minigame-hub-check: the title's "Play with Your Boki" (scripts/home/minigame_hub.gd).
 ##   1. the registry (content/rules/minigames.json) names each game once, with a member and a rule line
 ##   2. results: nothing played reads "No games yet"; wins make the best Boki, the latest the last
 ##   3. the title has the entry with a save, and not without one
@@ -81,7 +81,7 @@ func _title() -> void:
 				break
 		var labels: Array = main.screen_node().menu_labels()
 		var how := "there with a save" if with_save else "absent without a Boki"
-		ok(labels.has("Play with your Boki") == with_save, "title: the entry is %s (%s)" % [how, labels])
+		ok(labels.has(MinigameHub.TITLE) == with_save, "title: the entry is %s (%s)" % [how, labels])
 
 func _picker() -> void:
 	var d := Save.fresh()
@@ -97,7 +97,7 @@ func _picker() -> void:
 		home = main.screen_node()
 		if home != null and home.get("panel_open") == MinigameHub.TITLE:
 			break
-	ok(home != null and home.get("panel_open") == MinigameHub.TITLE, "picker: the home opens on 'Play with your Boki'")
+	ok(home != null and home.get("panel_open") == MinigameHub.TITLE, "picker: the home opens on 'Play with Your Boki'")
 	var tut: Dictionary = Save.d["tutorial"]
 	var ft: Dictionary = tut.get("ft", {})
 	var flags := [ft.get("did", {}).is_empty(), not ft.get("done", false)]
