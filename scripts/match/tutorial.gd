@@ -568,9 +568,10 @@ func _words() -> void:
 	elif sid == "shoot":
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
+	var was := detail
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
-	if detail != "" and m.hud:
-		m.hud.tip(detail)       # (the strip is one line: the plain words go to the message lane, which waits for it)
+	if detail != "" and detail != was and m.hud:
+		m.hud.tip(detail)       # once per new line (this runs every frame): the plain words go to the message lane
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()
