@@ -401,8 +401,10 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Volume")
 	_slider(v, "Master", "master", 0.0, 1.0)
 	_slider(v, "Music", "music", 0.0, 1.0)
-	_slider(v, "Sound effects", "sfx", 0.0, 1.0)
+	_slider(v, "Effects", "sfx", 0.0, 1.0, 0.05, "Shots, hits, steps and abilities")
+	_slider(v, "Voices", "voices", 0.0, 1.0, 0.05, "Hunters, Boki and monsters calling out")
 	_slider(v, "Ambience", "ambience", 0.0, 1.0, 0.05, "Wind, rain and the sea")
+	_slider(v, "UI", "ui_sounds", 0.0, 1.0, 0.05, "Menu clicks, tabs and pop-ups")
 	_group(v, "Music")
 	var styles: Array = Soundtrack.styles().keys().map(func(k): return [k, Soundtrack.styles()[k]["name"]])
 	_choice(v, "Soundtrack", "soundtrack", styles, Soundtrack.replay, "The music everywhere; a track picked below wins")
@@ -583,7 +585,10 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 		sl.value_changed.connect(func(val):
 			pct.text = "%d%%" % int(round(val * 100.0))
 			Settings.set_v(key, val, false))
-		sl.drag_ended.connect(func(_c): Settings.save())
+		sl.drag_ended.connect(func(_c):
+			Settings.save()
+			if Settings.BUSES.has(key):
+				Sfx.play_sample(Settings.BUSES[key]))
 	r.add_child(sl)
 	r.add_child(pct)
 

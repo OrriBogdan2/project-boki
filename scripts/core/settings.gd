@@ -7,7 +7,7 @@ signal changed(key: String)
 const PATH := "user://settings.cfg"
 const DEFAULTS := {
 	# audio
-	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
+	"master": 0.8, "music": 0.7, "sfx": 1.0, "voices": 1.0, "ambience": 0.8, "ui_sounds": 1.0, "mute_unfocused": false,
 	# music (Soundtrack): the style, Shuffle, and a hand-picked track id per place ("" = the style's)
 	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
 	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
@@ -31,6 +31,10 @@ const DEFAULTS := {
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
+}
+## The volume settings (Settings > Audio, in menu order) and the audio bus each one sets (Sfx._ready makes them).
+const BUSES := {
+	"master": "Master", "music": "Music", "sfx": "SFX", "voices": "Voice", "ambience": "Ambience", "ui_sounds": "UI",
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
@@ -181,6 +185,22 @@ var _quality_basics := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var cf := load_file()
+	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
+	_quality_basics = not cf.has_section_key("s", "quality")
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--quality="):
+			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
+		save.call_deferred()
+	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
+		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
+	get_tree().node_added.connect(_on_node_added)
+	get_tree().root.size_changed.connect(_apply_ui_scale)
+	get_tree().root.size_changed.connect(_apply_render_scale)
+
+## Reads the settings file over the defaults, bringing an older file up to date. Returns the file as read.
+func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
 	var cf := ConfigFile.new()
 	if cf.load(PATH) == OK:
@@ -213,18 +233,11 @@ func _ready() -> void:
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
-	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
-	_quality_basics = not cf.has_section_key("s", "quality")
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--quality="):
-			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
-	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
-		save.call_deferred()
-	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
-		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
-	get_tree().node_added.connect(_on_node_added)
-	get_tree().root.size_changed.connect(_apply_ui_scale)
-	get_tree().root.size_changed.connect(_apply_render_scale)
+	if not cf.has_section_key("s", "voices"):
+		# voices and menu sounds came off the Effects bus onto their own: they start where Effects was
+		v["voices"] = v["sfx"]
+		v["ui_sounds"] = v["sfx"]
+	return cf
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -296,11 +309,10 @@ func reset_all() -> void:
 	changed.emit("")
 
 func apply(k: String) -> void:
+	if BUSES.has(k):
+		Sfx.set_bus(BUSES[k], float(v[k]))
+		return
 	match k:
-		"master": AudioServer.set_bus_volume_db(0, linear_to_db(maxf(float(v[k]), 0.0001)))
-		"music": Sfx.set_bus("Music", float(v[k]))
-		"sfx": Sfx.set_bus("SFX", float(v[k]))
-		"ambience": Sfx.set_bus("Ambience", float(v[k]))
 		"fullscreen":
 			# browsers only allow fullscreen from a click, so the web build doesn't restore it at startup
 			if OS.has_feature("web") and not _started:

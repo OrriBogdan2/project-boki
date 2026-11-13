@@ -583,6 +583,19 @@ func _bus_for(pos, sname := "") -> StringName:
 	return mix.bus_for(sname, muffled, far)
 
 
+## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
+const SAMPLE := "ping"
+func play_sample(bus_name: String) -> void:
+	if not streams.has(SAMPLE) and not _lazy(SAMPLE):
+		return
+	var p := _voice(null)
+	var st = streams[SAMPLE]
+	p.stream = _once(st[0] if st is Array else st)
+	p.bus = bus_name
+	p.volume_db = 0.0
+	p.pitch_scale = 1.0
+	p.play()
+
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the sound's own
 ## "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
