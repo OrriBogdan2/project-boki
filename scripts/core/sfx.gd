@@ -55,6 +55,8 @@ var last_played := {}
 var rng := RandomNumberGenerator.new()
 
 signal new_track(name: String)
+## A one-shot started: where (null for UI), its dB before distance and pitch. SfxCast and the audio checks listen.
+signal played(sname: String, at: Variant, vol_db: float, pitch: float)
 var music: Array[AudioStreamPlayer] = []   # two players so tracks can crossfade
 var music_i := 0
 var music_name := ""
@@ -486,6 +488,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	p.volume_db = v
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
+	played.emit(sname, pos, vol_db, pitch)
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
 ## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
