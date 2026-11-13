@@ -1207,7 +1207,10 @@ func r_lock_text(p: Hunter) -> String:
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
+func _skill_slot(
+	slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool,
+	ch := -1.0, mx := 0
+) -> void:
 	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.

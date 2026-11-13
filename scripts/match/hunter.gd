@@ -2228,8 +2228,10 @@ func _physics(dt: float) -> void:
 					pos.x = tx; pos.z = tz
 					break
 	if (b1 > 0.0 or b2 > 0.0) and step_up == 0.0 and spirit_t <= 0.0 and _occ(pos.x, pos.z, false) > 0.0:
-		var out_to: Vector2 = m.world.eject(pos.x, pos.z, r, pos.y)     # inside a wall or prop: out to the nearest free spot
-		pos.x = out_to.x; pos.z = out_to.y
+		# inside a wall or prop: out to the nearest free spot
+		var out_to: Vector2 = m.world.eject(pos.x, pos.z, r, pos.y)
+		pos.x = out_to.x
+		pos.z = out_to.y
 	# a safety net: pushing to move for a second without going anywhere means something has us
 	# wedged, so step out to the nearest open ground
 	if grounded and mv.length() > 0.3 and stun_t <= 0.0 and root_t <= 0.0 and not remote and grap.is_empty():

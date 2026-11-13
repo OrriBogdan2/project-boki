@@ -494,7 +494,7 @@ func _build_ui() -> void:
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
-	items.append(["Help", func(): Overlay.ctx = "title"; Overlay.open_words(), "info"])
+	items.append(["Help", _open_words, "info"])
 	if not OS.has_feature("web"):
 		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
@@ -686,6 +686,13 @@ func _process(delta: float) -> void:
 ## The game's name: "PROJECT" set small and wide over a big carved "BOKI" in pale bone, its lower half
 ## warmed like metal near a fire, a faint ember glow that breathes underneath, a slow sheen that
 ## crosses the letters every few seconds and a few embers lifting off it. It settles in on open.
+
+
+func _open_words() -> void:
+	Overlay.ctx = "title"
+	Overlay.open_words()
+
+
 class TitleLogo extends Control:
 	var tt := 0.0
 	const WORD := "BOKI"

@@ -210,7 +210,8 @@ func press_rmb() -> void:
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
-	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check); its clip runs on the hold's clock
+	# the draw shows on the press (--input-latency-check); its clip runs on the hold's clock
+	play("arc_heavy_wind")
 
 func rmb_hold_tick(t: float) -> void:
 	if t > float(rmb_def()["hold"]) and not pin_aim:
