@@ -69,7 +69,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged duelist: stay on one foe, cartwheel, and land the big shot. |
-| Passive: Marks | Each hit on the same foe adds a Mark: +10% damage, with no cap. Knocks heal you. |
+| Passive: Marks | Each hit on the same foe adds a Mark: +1.3 damage on your shots at them, with no cap. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way (from a jump too, carried on to the landing). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
+**Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +1.3 per Mark (a tenth of a shot, added flat, the empowered shot included). The empowered shot adds 2, the Bola 1. A knock heals you 20% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
 **Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%.
 

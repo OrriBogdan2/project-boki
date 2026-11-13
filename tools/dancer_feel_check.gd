@@ -123,8 +123,8 @@ func _empowered(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> v
 	K.primed_on = T
 	var on_emp := K.outgoing(T, 10.0 * EMP_K, {"src": "shot"})
 	K.primed_on = null
-	A.ok("dancer feel: Marks add 10% of a bolt each, the empowered one too (flat, as the source's +16 a stack)",
-			absf(on_emp - (10.0 * EMP_K + 5.0)) < 0.01 and absf(K.outgoing(T, 10.0, {"src": "shot"}) - 15.0) < 0.01,
+	A.ok("dancer feel: Marks add a flat 1.3 each, the empowered bolt too (the source's +16 a stack on 160)",
+			absf(on_emp - (10.0 * EMP_K + 6.5)) < 0.01 and absf(K.outgoing(T, 10.0, {"src": "shot"}) - 16.5) < 0.01,
 			"%.2f" % on_emp)
 	A.fresh(T)
 

@@ -6,10 +6,10 @@ extends ArchKit
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
 ##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
-##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
+##   to 8 shown, no cap): each adds a flat +1.3 to your bolts on them. A knock or an assist heals you 25%.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
-## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
+## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
 ##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
@@ -527,14 +527,13 @@ func _vaulted(air: bool, empower: bool) -> void:
 		if h.is_local(): h._ab_feedback("dash", "ready")
 
 # ------------------------------------------------------------------ passive hooks
-## Marks make your bolts on that target stronger: +10% of a bolt each, a flat add like the source's +16 a stack,
-## so on the empowered bolt they add to its plain-bolt part, not to the bonus.
+## Marks make your bolts on that target stronger: a flat mark_dmg each (the source's +16 a stack on its 160 shot,
+## so 1.3 on our 13), the same on the empowered bolt; weapon upgrades do not grow it.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	var weapon := String(o.get("src", "")) == "shot" and String(o.get("ab", "")) == ""
 	if not weapon:
 		return dmg
-	var bolt := dmg / empowered_k() if t == primed_on else dmg
-	return dmg + bolt * float(res_def().get("per_mark", 0.1)) * float(marks_on(t))
+	return dmg + float(res_def()["mark_dmg"]) * float(marks_on(t))
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or t.dead:
@@ -582,7 +581,7 @@ func _reset_fx(t: Ent) -> void:
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
 	var hp0 := h.hp
-	h.heal(h.max_hp * float(rd.get("heal_knock", 0.15) if mine else rd.get("heal_assist", 0.25)))
+	h.heal(h.max_hp * float(rd["heal_knock"] if mine else rd["heal_assist"]))
 	var got := h.hp - hp0
 	if is_instance_valid(t):
 		fx().star(t.pos + Vector3(0, 1.2, 0), KNOCK_STAR, 3.0 if mine else 2.0, 0.55, Color(1, 0.9, 0.9))

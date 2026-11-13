@@ -109,12 +109,13 @@ func thief(a) -> void:
 			"%.1f m haste %.2f" % [ed, haste_after])
 	A.ok("dancer LMB: each bolt has its own pooled look",
 			DJFx.of(m).free_pools.has("ride_chakram") and DJFx.of(m).free_pools.has("puff"))
-	# Marks: +10% per Mark on bolts only, no cap
+	# Marks: a flat +1.3 per Mark on bolts only (the data's +16 a stack on its 160 shot), no cap
 	A.fresh(T)
 	K.mark_gap = {}
 	K.add_mark(T, 2, true)
-	A.ok("dancer passive: +10% per Mark on bolts only",
-			absf(K.outgoing(T, 10.0, {"src": "shot"}) - 12.0) < 0.01
+	A.ok("dancer passive: a flat +1.3 per Mark on bolts only, whatever the bolt deals",
+			absf(K.outgoing(T, 10.0, {"src": "shot"}) - 12.6) < 0.01
+			and absf(K.outgoing(T, 30.0, {"src": "shot"}) - 32.6) < 0.01
 			and absf(K.outgoing(T, 10.0, {"src": "abil", "ab": "utility"}) - 10.0) < 0.01,
 			"%.2f" % K.outgoing(T, 10.0, {"src": "shot"}))
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "utility"})
@@ -122,7 +123,7 @@ func thief(a) -> void:
 	K.add_mark(T, 20, true)
 	A.ok("dancer passive: Marks have no cap (22 after 20 more), eight diamonds show",
 			K.marks_on(T) == 22 and K.res_text() == "22" and K.pip_count() == 8 and K.res_frac() == 1.0, K.res_text())
-	A.ok("dancer passive: 22 Marks make a bolt 3.2x", absf(K.outgoing(T, 10.0, {"src": "shot"}) - 32.0) < 0.01)
+	A.ok("dancer passive: 22 Marks add 28.6 to a bolt", absf(K.outgoing(T, 13.0, {"src": "shot"}) - 41.6) < 0.01)
 	# Vault ranks: empowered +20% at rank 2 and again at rank 3, the speed boost half again as big at rank 3
 	var vault_ranks: Array = []
 	for rk in [1, 2, 3]:
@@ -326,14 +327,16 @@ func thief(a) -> void:
 	A.ok("dancer E: waiting 6s steps you to it anyway",
 			P.flat_dist(T) < 1.8 and K.knife.is_empty(), "dist %.1f" % P.flat_dist(T))
 	_knife_in_barriers(m, A, P, T, K, home)
-	# a knock heals a fifth (15% passive, 5% from the takedown reset) in all; the crimson star and the green pillar
+	# a knock heals a quarter (20% passive, 5% from the takedown reset) in all, the data's 25%; the crimson star
+	# and the green pillar
 	P.hp = P.max_hp * 0.5
 	var php := P.hp
 	T.hp = 4.0
 	T.hurt(10.0, P, {"src": "shot"})
 	A.step(m, 0.1)
-	A.ok("dancer passive: a knock heals (20% in all), star + pillar",
-			T.downed and K.knocks_seen >= 1 and P.hp >= php + P.max_hp * 0.19 and DJFx.of(m).free_pools.has("pillar")
+	A.ok("dancer passive: a knock heals (25% in all), star + pillar",
+			T.downed and K.knocks_seen >= 1 and absf(P.hp - php - P.max_hp * 0.25) <= P.max_hp * 0.01
+			and DJFx.of(m).free_pools.has("pillar")
 			and DJFx.of(m).free_pools.has("star"),
 			"hp %.0f -> %.0f" % [php, P.hp])
 	A.fresh(T)
