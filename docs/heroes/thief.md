@@ -327,7 +327,8 @@ starts, lowered by 0.7 with no next bolt; the legs a stance), `thf_primed` (the 
 throw: both blades cocked behind the shoulders, driven out together at 0.04, a recoil onto the heels by 0.24, settled
 by 0.55), `thf_vault_r` /
 `thf_vault_l` (the ground Cartwheel inside the 0.48s dash: a 0.05s crouch with the arms swung up, a push-off
-with the crossbows tucked and the wings flaring, one aerial turn by 0.30, a landing crouch at 0.36, up by 0.48),
+with the crossbows tucked and the wings flaring, one aerial turn by 0.30, a landing crouch at 0.36, up by 0.48;
+the arm away from the lead hangs loose, `free_arm` in content/rules/warden_anim/sable.json),
 `thf_vault_f` / `thf_vault_b` (the routine's tucked somersault, on the same beats), `thf_vault_twist` (its corkscrew;
 ThiefChain runs cartwheel, somersault, twist through a reset chain), `thf_exdash` (the air
 Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and stretched until she lands),

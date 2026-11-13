@@ -71,7 +71,10 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   - **clip speed**: the feet's backward speed at rate 1 (`foot_mps`), against the move speed.
   - **bob**, **steps/s** (cadence, timed between a leg's forward crossings), loop seams and first-pose gaps (`pop`, in body heights) of idle to walk, walk to run.
   - Attack rows (two per Hunter): the largest one-frame hand jump and the free arm's travel (body heights), and the
-    share of frames with an arm raised 60 degrees or more and sideways (T-pose).
+    share of frames with an arm raised 60 degrees or more and sideways (T-pose). Since 0.24.5 they read the arms about
+    the hips with the hips' tilt taken out, so a cartwheel or somersault no longer counts as an arm raised or flung (a
+    turn about the vertical still does). The attack numbers quoted below before Sable's were read in the model frame;
+    re-read this way most move a few points, the most `juggernaut` slash_r free arm sideways 8 -> 33 % and `tender` seed 4 -> 17 %.
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
@@ -115,7 +118,7 @@ body (not in the air, a crouch, or a move that owns the body):
 Data `"free_arm": {clip: "L"|"R"}` (content/rules/warden_anim/<art>.json) names the arm a move leaves unused. While that
 clip plays, its upper arm, forearm and hand ease (10/s) to their idle rotation over whatever the clip keys, so the free arm
 hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs are not re-baked (no Blender on this worker; the
-clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `mage` (rmb: the left arm, which the clip keys out and forward while the right hand throws the rod).
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r), `mage` (rmb: the left arm, which the clip keys out and forward while the right hand throws the rod) and `thief` (vault_r: the left arm, vault_l: the right; the pistol arm that leads the cartwheel keeps its key).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out.
 
@@ -236,7 +239,12 @@ posts scroll at the move speed).
 
 **Sable (`thief`)**
 1. Feet slid 60 % of the run speed, 73 % at a walk (now 17 %, 39 %); both arms paced their legs (counter -0.96, fixed to +0.82).
-2. vault_r flings the free arm 2.6 body heights and holds an arm sideways for 58 %.
+2. vault_r flung the free arm and held it sideways (fixed with `free_arm`, vault_l mirrored). `--anim-audit`, hips upright,
+   before -> after: vault_r free arm 1.44 -> 0.06 body heights, sideways 12 -> 0 %, any arm 21 -> 17 %; vault_l (mirror,
+   measured by adding it to the list for this run) 1.47 -> 0.04, 21 -> 0 %, 25 -> 17 %. The pistol arm (2.12 and 1.75 body
+   heights, jump 0.53 and 0.50) and the dash (4.5 m in 0.48 s) are unchanged. In the old model frame vault_r read free
+   2.62 -> 2.23, sideways 54 -> 29 %, any arm 58 -> 50 %: the whole-body roll of the cartwheel counted as the arm.
+   ![thief vault_r at the match camera, before (top) and after, 8 frames (GPU jobq 20261111-160007-08120, 20261111-155841-11263)](anim_audit/thief_vault.jpg)
 3. Idle to walk first-pose gap 0.20.
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
@@ -248,6 +256,8 @@ Split into backlog items per Hunter (role build):
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
+- `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
+- Arm use in attacks: `ostra` holds an arm sideways (`ashwick`, `tender`, `dredge`, `mage`, `thief` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).

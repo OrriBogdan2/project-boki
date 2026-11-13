@@ -6,7 +6,8 @@ extends RefCounted
 ##    foot is planted (m/s and % of the speed), the clip's own speed, hip bob, arm swing against the legs, how far
 ##    the arms reach;
 ##  - the loop seam of walk_f, run_f and the idle, and the pop from the idle into the walk and the walk into the run;
-##  - the two attacks of anim_shots.gd: the weapon hand's travel and how long an arm stands out sideways.
+##  - the two attacks of anim_shots.gd, with the hips upright: the weapon hand's travel and how long an arm stands
+##    out sideways.
 ## Prints one line per Hunter and writes every number to --json.
 
 const DT := 1.0 / 30.0
@@ -107,10 +108,13 @@ func _gate(id: String, top: Dictionary) -> void:
 		print("FAIL %s: hips bob %.1f cm at a run (limit %.0f)" % [id, top["bob_cm"], MAX_BOB_CM])
 		bad += 1
 
-## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction.
+## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction and the hips' up axis.
 func _read(sk: Skeleton3D) -> Dictionary:
 	var out := {}
 	var xf := sk.global_transform
+	var hips := WardenSkeleton.find(sk, "hips")
+	out["hips_up"] = (xf.basis * sk.get_bone_global_pose(hips).basis * sk.get_bone_global_rest(hips).basis.inverse()
+			* Vector3.UP).normalized()
 	for b in ["hips", "head", "hand.L", "hand.R", "upper_arm.L", "upper_arm.R", "forearm.L", "forearm.R"]:
 		out[b] = xf * sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
 	for side in ["L", "R"]:
@@ -272,7 +276,7 @@ func _touch(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> flo
 	return float(best) / (fr.size() - 1)
 
 func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
-	var fr := _clip_frames(sync, clips, sk, clip, 24)
+	var fr := _clip_frames(sync, clips, sk, clip, 24).map(_upright)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
 	var out_side := {"L": 0, "R": 0}
@@ -294,6 +298,16 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"t_free": float(out_side[loose]) / fr.size(),
 			"jump": jump / hgt}
+
+## The points about the hips with the hips' tilt taken out, so a whole-body roll or flip (Sable's cartwheel) does not
+## count as an arm flung or raised. A turn about the vertical (a twisted stance) is kept: the arm is read as before.
+func _upright(p: Dictionary) -> Dictionary:
+	var tilt := Basis(Quaternion(p["hips_up"] as Vector3, Vector3.UP))
+	var out := {}
+	for k in p:
+		if k != "hips_up":
+			out[k] = tilt * ((p[k] as Vector3) - (p["hips"] as Vector3))
+	return out
 
 func _t_posed(p: Dictionary, side: String) -> bool:
 	var d: Vector3 = (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
