@@ -121,7 +121,8 @@ func _fishing() -> void:
 	ok(GlintSfx.heard.get("glint_water", 0) == 5, "fishing: the water bed starts once per wait")
 	ok(GlintSfx.heard.get("glint_reel", 0) >= hooked.size() and not hooked.is_empty(),
 			"fishing: the reel loop runs on every reel")
-	ok(bed_bus == GlintSfx.BED_BUS and reel_bus == "SFX",
+	var world_bus: bool = reel_bus in ["SFXWorld", "SFXFar", "SFXMuffled"]      # (a placed loop: Sfx._bus_for)
+	ok(bed_bus == GlintSfx.BED_BUS and world_bus,
 			"fishing: the bed is on %s, the ratchet on %s" % [bed_bus, reel_bus])
 	ok(line_at, "fishing: the loops sit at the line")
 	var stings := {}
