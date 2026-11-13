@@ -26,7 +26,8 @@ func can_fire() -> bool:
 	var busy: bool = h.drink_t > 0.0 or h.reload_t > 0.0 or h.downed or h.stun_t > 0.0
 	if h.ak and h.roll_t > 0.0 and h.ak.fires_in_dash() and not busy:
 		return true          # shooting from a held slide
-	return not (busy or h.roll_t > 0.0 or h.out or h.grap.size() > 0 or h.gliding or h.charge.size() > 0)
+	var glide_shut: bool = h.gliding and not (h.ak and h.ak.fires_in_glide())
+	return not (busy or h.roll_t > 0.0 or h.out or h.grap.size() > 0 or glide_shut or h.charge.size() > 0)
 
 ## Called every frame with the attack key's state; decides what that means for this weapon.
 func trigger(dt: float) -> void:
@@ -111,8 +112,8 @@ func _draw_step(dt: float) -> void:
 func _loose() -> void:
 	var t := h.draw_t
 	h.draw_t = -1.0
-	if not can_fire() or h.ammo <= 0:
-		return
+	if not can_fire() or h.ammo <= 0 or t < float(h.wpn.get("draw_min", 0.0)):
+		return          # (let go inside draw_min it is a mashed click: no arrow, the next press draws afresh)
 	var stages: Array = h.wpn.get("draw", [])
 	var dmg := float(h.wpn.get("draw_early", 15.0))
 	var rng := float(h.wpn["range"])
@@ -261,9 +262,7 @@ func lunge(dist: float) -> void:
 	var d2 := h.aim_dir()
 	var moving := (h.inp["move"] as Vector2).length() > 0.1
 	var want := HunterMove.slide_speed(dist * k, h.base_speed if moving else 0.0)
-	var hv := Vector2(h.vel.x, h.vel.z)
-	var along := hv.dot(d2)
-	hv += d2 * (maxf(along, want) - along)
+	var hv := HunterMove.push(Vector2(h.vel.x, h.vel.z), d2, want)
 	h.vel.x = hv.x
 	h.vel.z = hv.y
 

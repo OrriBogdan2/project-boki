@@ -5,6 +5,7 @@ Kept apart so rerunning it doesn't reshuffle every other sound.
 
     python3 tools/gen_key_sfx.py      (then: godot --headless --import)
 """
+import argparse
 import numpy as np, wave, os
 from scipy.signal import butter, sosfilt
 
@@ -43,37 +44,43 @@ def save(name, x, rms_db=-20.0):
         w.writeframes((np.clip(x, -1, 1) * 32767).astype(np.int16).tobytes())
 
 
-# rustle: band-limited noise in a few quick swells, like leaves shaken
-d = 0.42; t = T(d); n = len(t)
-nz = bpf(rng.standard_normal(n), 1800, 6500)
-swell = np.zeros(n)
-for t0, g in [(0.0, 1.0), (0.07, 0.8), (0.14, 0.9), (0.22, 0.55), (0.3, 0.35)]:
-    s = N(t0); L = min(N(0.1), n - s)
-    swell[s:s + L] += g * np.sin(np.pi * np.arange(L) / L) ** 2
-save('rustle', nz * swell * env(n, 0.005, 0.5), -21.0)
+def main():
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
+    # rustle: band-limited noise in a few quick swells, like leaves shaken
+    d = 0.42; t = T(d); n = len(t)
+    nz = bpf(rng.standard_normal(n), 1800, 6500)
+    swell = np.zeros(n)
+    for t0, g in [(0.0, 1.0), (0.07, 0.8), (0.14, 0.9), (0.22, 0.55), (0.3, 0.35)]:
+        s = N(t0); L = min(N(0.1), n - s)
+        swell[s:s + L] += g * np.sin(np.pi * np.arange(L) / L) ** 2
+    save('rustle', nz * swell * env(n, 0.005, 0.5), -21.0)
 
-# squeak: a quick upward chirp with a little vibrato, thin and cartoonish
-d = 0.22; t = T(d); n = len(t)
-f = 1500 + 1500 * (t / d) ** 0.6 + 60 * np.sin(2 * np.pi * 38 * t)
-ph = 2 * np.pi * np.cumsum(f) / SR
-x = np.sin(ph) + 0.35 * np.sin(2 * ph) + 0.12 * np.sin(3 * ph)
-save('squeak', lpf(x, 7000) * env(n, 0.006, 0.08), -20.0)
+    # squeak: a quick upward chirp with a little vibrato, thin and cartoonish
+    d = 0.22; t = T(d); n = len(t)
+    f = 1500 + 1500 * (t / d) ** 0.6 + 60 * np.sin(2 * np.pi * 38 * t)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    x = np.sin(ph) + 0.35 * np.sin(2 * ph) + 0.12 * np.sin(3 * ph)
+    save('squeak', lpf(x, 7000) * env(n, 0.006, 0.08), -20.0)
 
-# key_get: two bright bell notes, a rising third
-def bell(fr, d, decay):
-    t = T(d); n = len(t)
-    return (np.sin(2 * np.pi * fr * t) + 0.2 * np.sin(2 * np.pi * fr * 2.01 * t)) * env(n, 0.003, decay)
+    # key_get: two bright bell notes, a rising third
+    def bell(fr, d, decay):
+        t = T(d); n = len(t)
+        return (np.sin(2 * np.pi * fr * t) + 0.2 * np.sin(2 * np.pi * fr * 2.01 * t)) * env(n, 0.003, decay)
 
-d = 0.7; x = np.zeros(N(d))
-for t0, fr in [(0.0, 880.0), (0.09, 1174.7)]:
-    s = N(t0); b = bell(fr, d - t0, 0.16); x[s:s + len(b)] += b
-save('key_get', x, -19.0)
+    d = 0.7; x = np.zeros(N(d))
+    for t0, fr in [(0.0, 880.0), (0.09, 1174.7)]:
+        s = N(t0); b = bell(fr, d - t0, 0.16); x[s:s + len(b)] += b
+    save('key_get', x, -19.0)
 
-# lock_rattle: three dull metallic clicks
-d = 0.38; x = np.zeros(N(d))
-for t0, g in [(0.0, 1.0), (0.1, 0.8), (0.19, 0.6)]:
-    s = N(t0); L = N(0.09); tt = np.arange(L) / SR
-    cl = (bpf(rng.standard_normal(L), 900, 3200) * 0.6 + np.sin(2 * np.pi * 540 * tt) * 0.5) * np.exp(-tt / 0.018)
-    x[s:s + L] += g * cl
-save('lock_rattle', x, -22.0)
-print('wrote rustle, squeak, key_get, lock_rattle')
+    # lock_rattle: three dull metallic clicks
+    d = 0.38; x = np.zeros(N(d))
+    for t0, g in [(0.0, 1.0), (0.1, 0.8), (0.19, 0.6)]:
+        s = N(t0); L = N(0.09); tt = np.arange(L) / SR
+        cl = (bpf(rng.standard_normal(L), 900, 3200) * 0.6 + np.sin(2 * np.pi * 540 * tt) * 0.5) * np.exp(-tt / 0.018)
+        x[s:s + L] += g * cl
+    save('lock_rattle', x, -22.0)
+    print('wrote rustle, squeak, key_get, lock_rattle')
+
+
+if __name__ == "__main__":
+    main()

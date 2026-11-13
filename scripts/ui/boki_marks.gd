@@ -2,8 +2,8 @@ class_name BokiMarks
 extends RefCounted
 ## Who a Boki belongs to and what it is doing, in a busy fight, in the one colour rule (SideColor):
 ##   - your own Boki, whenever it is out, has a thin tether to you (its ring is in your colour, SideRings)
-##   - a teammate's Boki, while that teammate is down, has a tether to them and a small icon over it:
-##     defending them, pulling them up, hanging back hurt, or down itself
+##   - a teammate's Boki, while that teammate is down, rides on them as a wisp (KinWispForm): no tether;
+##     one that is down itself, where it fell, has a tether to them and a small knocked icon over it
 ## Enemies' Boki get neither: their rings already say whose they are.
 
 const TETHER_W := 2.0          # px
@@ -12,7 +12,6 @@ const DASH_PX := 10.0          # px: tether dash length (dashes read as "belongs
 const ICON_UP := 1.5           # m over the Boki's feet
 const ICON_S := 7.0            # Icons size (half width, px)
 const NEAR := 1.6              # m: closer than this to its Hunter, no tether (it is plainly theirs)
-const DEFEND_R := 3.0          # m: a foe this close to the downed Hunter is what the Boki is defending against
 
 ## Draws every tether and status icon on the HUD canvas.
 static func draw(c: Control, m: Match) -> void:
@@ -34,20 +33,11 @@ static func tethers(m: Match, k: Kin) -> bool:
 		return false
 	if h != p and not h.downed:
 		return false
-	return not (k.state in ["shoulder", "fused", "bench", "away"])
+	return not (k.state in ["shoulder", "fused", "bench", "away", KinWispForm.STATE])
 
-## What a teammate's Boki is doing while its Hunter is down: an Icons id ("" when nothing to show).
+## What a teammate's Boki shows while its Hunter is down: an Icons id ("" when nothing to show).
 static func status(k: Kin) -> String:
-	if k.state == "downed":
-		return "knock"
-	if k.state == "reviving":
-		return "heart"
-	if k.target != null and is_instance_valid(k.target) and k.target is Hunter and k.owner_h != null \
-			and (k.target as Hunter).flat_dist(k.owner_h) < DEFEND_R:
-		return "fortify"
-	if k.hp < k.max_hp * k.brain.retreat_frac():
-		return "dash"
-	return ""
+	return "knock" if k.state == "downed" else ""
 
 static func _tether(c: Control, cam: Camera3D, from: Vector3, to: Vector3, col: Color) -> void:
 	var a3 := from + Vector3(0, 0.15, 0)

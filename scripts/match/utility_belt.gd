@@ -5,7 +5,7 @@ extends RefCounted
 ## kit keys. Items live in content/utility/*.json (name, icon, col, desc, use, cd, max charges per
 ## slot, bring[] = the most you can bring in by difficulty tier, price).
 ##
-## Keys (Rift Keys, chest keys) are belt items too: one slot per key type, found in the match only,
+## Chest keys are belt items too: one slot per key type, found in the match only,
 ## never brought or sold (BeltKeys).
 ##
 ## What a hunter holds: h.belt = four slots, each {} or {id, n, cd}; h.belt_free = {id: n} charges
@@ -52,11 +52,11 @@ static func ids() -> Array:
 static func is_item(id: String) -> bool:
 	return ALL.has(id)
 
-## The pickup kinds the match already used ("armor" was the armor kit, "key" is a Rift Key).
+## The pickup kinds the match already used ("armor" was the armor kit, "ckey" is a chest key).
 static func item_of(kind: String) -> String:
 	return String(OLD_KINDS.get(kind, kind))
 
-const OLD_KINDS := {"armor": "armor_kit", "key": "rift_key", "ckey": "chest_key"}
+const OLD_KINDS := {"armor": "armor_kit", "ckey": "chest_key"}
 
 ## Keys sit on the belt but are never brought in, bought or taken home.
 static func is_key(id: String) -> bool:
@@ -166,6 +166,12 @@ static func grant(h, id: String, n := 1, issued := false) -> int:
 	if issued:
 		h.belt_free[id] = int(h.belt_free.get(id, 0)) + put
 	return put
+
+## Swaps two belt slots (the inventory drag): what answers each key, charges and cooldown going along.
+static func swap_slots(h, a: int, b: int) -> void:
+	var s: Dictionary = h.belt[a]
+	h.belt[a] = h.belt[b]
+	h.belt[b] = s
 
 ## Fills one slot outright (the match start): n charges, `issued` of them the everyday issue.
 static func set_slot(h, i: int, id: String, n: int, issued := 0) -> void:

@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. gating: only a knocked-out wild Boki can be scanned
 ##   2. the flow: hold 0.4s commits, then 4s runs on its own (let go), you are rooted and cannot shoot
 ##   3. one active Boki: the captured one is only a capsule in the box, never in the world
-##   4. interruptions: crowd control and a dash cancel it, plain damage does not; the daze timer waits
+##   4. interruptions: crowd control, Space (no hop) and a dash cancel it, plain damage does not; the daze timer waits
 ##   5. the box: capacity 3 from the rules, shown on the HUD, a full box blocks, Release frees a place
 ##   6. your own Boki does not finish a dazed wild Boki
 ##   7. the Field Book: logged on sight with a place; the v3 save migration
@@ -32,6 +32,11 @@ func _fresh() -> Match:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	# the map's own wild Boki too (three start in this cleared patch on seed 4243): a bot picks fights with
+	# wild Boki near it and the bot rows would never get to their scan. The check spawns the Boki it needs.
+	for k in m.kins.filter(func(x: Kin) -> bool: return x.is_wild()):
+		m.kins.erase(k)
+		k.queue_free()
 	var P: Hunter = m.player
 	var W = m.world
 	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
@@ -165,7 +170,7 @@ func _flow() -> void:
 
 # ------------------------------------------------------------------ 4. interruptions
 func _interrupts() -> void:
-	for why in ["stun", "root", "dash", "damage", "nudge", "knock"]:
+	for why in ["stun", "root", "dash", "jump", "damage", "nudge", "knock"]:
 		_fresh()
 		var P := m.player
 		var k := wild()
@@ -174,15 +179,27 @@ func _interrupts() -> void:
 			ok(false, "%s: the scan did not start" % why)
 			continue
 		run_for(0.5)
+		if why == "jump":
+			var text := CaptureHud.prompt(P, k)
+			var names_key := text.contains("(%s to cancel)" % Settings.key_cap("jump"))
+			ok(names_key, "the scan prompt names the jump key (\"%s\")" % text)
 		match why:
 			"stun": P.stun_t = 0.4
 			"root": P.root_t = 0.4
 			"dash": P.inp["dash"] = true
+			"jump": P.inp["jump"] = true
 			"damage": P.hurt(8.0, m.hunters[1])
 			"knock": P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
 			"nudge": P.impulse(Vector2(Capture.HARD_KNOCK - 3.0, 0) * P.mass())
 		run_for(0.1)
 		P.inp["dash"] = false
+		if why == "jump":
+			ok(P.grounded and P.jump_at < 0.0, "...and that press does not also hop")
+			var bot: Hunter = m.hunters[1]
+			bot.ctrl = "bot"
+			bot.inp["jump"] = true          # (a bot hops when it thinks it is stuck, and a scan roots it)
+			ok(Capture.hunter_stop(bot) == "", "...but a bot's hop never cancels its own scan")
+		P.inp["jump"] = false
 		if why == "damage" or why == "nudge":
 			ok(Capture.active(P) and k.scan_by == P, "%s does not interrupt the scan" % ("a shove under 8 m/s" if why == "nudge" else "plain damage"))
 			run_for(float(Capture.rules()["scan_s"]))
