@@ -131,10 +131,10 @@ func _shatter(it: Dictionary) -> void:
 	var at: Vector3 = it["at"]
 	var r := float(vd["radius"])
 	var col := col_of(vd)
-	m.fx.burst(at + Vector3(0, 0.4, 0), col, 18 if v != "zeep" else 34, 5.0, 0.5, 6.0)
+	m.fx.burst(at + Vector3(0, 0.4, 0), col, 18 if v != "geyser" else 34, 5.0, 0.5, 6.0)
 	m.fx.ring(at, r, col, 0.4)
-	var sound := "boom" if v in ["thunder", "zeep", "fire"] else "whoosh"
-	m.sfx(sound, at, -3.0, 1.2 if v != "zeep" else 0.8)
+	var sound := "boom" if v in ["thunder", "geyser", "fire"] else "whoosh"
+	m.sfx(sound, at, -3.0, 1.2 if v != "geyser" else 0.8)
 	var p := power("sec")
 	for f in foes_in(at, r, 3.0):
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "gil_" + v]}
@@ -154,7 +154,7 @@ func _shatter(it: Dictionary) -> void:
 			"fire":
 				o["burn"] = float(vd["burn"])
 				o["burn_for"] = float(vd["burn_t"])
-			"zeep":
+			"geyser":
 				o["lift"] = float(vd["lift"])
 				o["stun"] = float(vd["knockup"])
 				o["dr"] = true

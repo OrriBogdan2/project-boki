@@ -103,8 +103,8 @@ func _bag() -> void:
 	for i in 9:
 		var v := K._draw_vial()
 		counts[v] = int(counts.get(v, 0)) + 1
-	ok("bag: one bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Super Zeep",
-		counts == {"thunder": 2, "slime": 2, "air": 2, "fire": 2, "zeep": 1}, str(counts))
+	ok("bag: one bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Geyser",
+		counts == {"thunder": 2, "slime": 2, "air": 2, "fire": 2, "geyser": 1}, str(counts))
 	ok("bag: refills itself when empty", K.bag.size() == 9, "left %d" % K.bag.size())
 	var nx := K.next_vial()
 	ok("bag: the next vial is visible on the HUD",
@@ -132,8 +132,8 @@ func _fencer() -> void:
 		"slow_t %.2f" % top["slow"])
 
 func _vials() -> void:
-	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}
-	for v in ["thunder", "slime", "air", "fire", "zeep"]:
+	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "geyser": "lift"}
+	for v in ["thunder", "slime", "air", "fire", "geyser"]:
 		_reset(6.0)
 		K.bag.append(v)
 		var x0 := T.pos.x
@@ -151,7 +151,7 @@ func _vials() -> void:
 				ok("Air: knocks the dummy away", T.pos.x - x0 > 1.5, "pushed %.2f" % (T.pos.x - x0))
 			"fire": ok("Fire: damage plus a burn", hit and top["burn"] > 0.0,
 				"dmg %.1f burn %.2f" % [dmg(T), top["burn"]])
-			"zeep": ok("Super Zeep: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
+			"geyser": ok("Geyser: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
 				"stun %.2f lift %.2f" % [top["stun"], top["lift"]])
 	# the slime puddle keeps slowing
 	_reset(6.0)
