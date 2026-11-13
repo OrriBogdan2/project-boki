@@ -10,8 +10,8 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const SHIELD_RAISE_RE := "\\.shield\\s*=\\s*maxf\\("
-## the scripts that may raise a shield by hand: the helper itself and the generic expiry/clear lines
-const SHIELD_OK := ["scripts/match/receiver_cue.gd"]
+## the scripts that may raise a shield by hand: the helper and the one writer it calls (ShieldSrc.give)
+const SHIELD_OK := ["scripts/match/receiver_cue.gd", "scripts/combat/shield_src.gd"]
 const SETTLE_S := 0.3        # s a source runs before its cues are counted (a Boki ability lands a moment later)
 const SHOT_S := 0.1          # s after a source the crop is taken, while the cue is at its fullest
 const CLEAR_S := 0.4         # s between sources, so the next one starts clean
