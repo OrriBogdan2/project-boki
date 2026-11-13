@@ -4,7 +4,7 @@ extends RefCounted
 ## stay-at-home Boki keeps growing closer; repeating the same care in one day adds no trust and no
 ## duplicate memory; old saves drop the once-per-expedition stamps. Fetch trains Speed. Meals lean
 ## its colour on the spot (Evo.eat, Evo.lean) and the last few meals decide it. A new bond rank
-## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't. Home after an hour
+## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't, panel up or not. Home after an hour
 ## away, it runs over to say hello (KinWelcome); after a minute it doesn't. Never touches the real
 ## save.
 
@@ -121,6 +121,31 @@ func _care_line(rec: Dictionary) -> void:
 	ok(good.contains("+10% health") and poor.contains("-18% damage"),
 		"the expedition panel says what raising does: \"%s\" / \"%s\"" % [good, poor])
 
+## Raising pays off on runs (RunPayoff, decision 0079): trained stats and the food lean scale the
+## carry passive and the summon window, capped at carry_max / summon_max; whole-number passives don't scale.
+func _run_payoff() -> void:
+	var rec := Save.new_kin("cindle", "Spark")
+	ok(is_zero_approx(RunPayoff.score(rec)) and RunPayoff.line(rec) == "", "a fresh Boki gets no run payoff")
+	var r := RunPayoff.rules()
+	ok(float(r["carry_max"]) <= 0.15 and float(r["summon_max"]) <= 0.1, "the payoff caps stay small (%s)" % r)
+	var full := int(StatBudget.rules()["expedition_stat_points"])
+	for st in Care.STATS:
+		rec["stats"][st] = full
+	var stats_only := RunPayoff.score(rec)
+	ok(is_equal_approx(stats_only, float(r["stats_w"])), "full expedition stats score stats_w (%.2f)" % stats_only)
+	for st in Care.STATS:
+		rec["stats"][st] = full * 3
+	ok(is_equal_approx(RunPayoff.score(rec), stats_only), "points past the expedition cap add nothing")
+	rec["lean"] = {"fire": Evo.LEAN_FULL}
+	ok(is_equal_approx(RunPayoff.carry_mult(rec), 1.0 + float(r["carry_max"]))
+		and is_equal_approx(RunPayoff.summon_mult(rec), 1.0 + float(r["summon_max"])),
+		"fully trained and leaned: carry x%.2f, summon x%.2f" % [RunPayoff.carry_mult(rec), RunPayoff.summon_mult(rec)])
+	var m := RunPayoff.carry_mult(rec)
+	ok(is_equal_approx(RunPayoff.amount({"stat": "armor", "amount": 0.1}, m), 0.1 * m)
+		and RunPayoff.amount({"stat": "extra_jumps", "amount": 1}, m) == 1.0, "float passives scale, whole jumps don't")
+	var card := RunPayoff.line(rec)
+	ok(card == "Raised for runs: carry passive +15%", "the Boki card says it: \"%s\"" % card)
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -131,9 +156,15 @@ func run(m: Node) -> void:
 	var k: Dictionary = home._kin_entry(rec)
 	ok(not k.is_empty(), "the Boki is out on the farm")
 	await _welcome(home, k)
+	home._close_panel()
+	rec.erase("bond_seen")
+	home.panel_open = "away"      # the away report is up after an hour: the rank is still noted
 	KinBondMoment.tick(home)
-	ok(home.panel_open == "" and int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
-		"the rank it arrives with is where it starts: no moment (%s)" % Care.bond(rec)[1])
+	ok(int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
+		"the rank it arrives with is where it starts, even under a panel (%s)" % Care.bond(rec)[1])
+	home._close_panel()
+	KinBondMoment.tick(home)
+	ok(home.panel_open == "", "and once the panel is gone it plays no moment for it")
 	var t0 := float(rec["trust"])
 	home._pet_kin(k)
 	var t1 := float(rec["trust"])
@@ -151,6 +182,7 @@ func run(m: Node) -> void:
 	ok(pets == 1 and pets2 == 1, "the same care before the next expedition is one memory (%d, %d)" % [pets, pets2])
 	_fetch_trains(home, k)
 	_care_line(rec)
+	_run_payoff()
 	await _meals_lean(home, k)
 	# a week of farm days with the usual care and no expeditions: it grows Close
 	for day in 7:
