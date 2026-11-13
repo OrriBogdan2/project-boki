@@ -114,6 +114,9 @@ func _drag_slow_shove() -> void:
 	var S := K.spine
 	# hold: the preview shows only while held, and dragging swings the ridge round its centre
 	_press(m, P, home + Vector3(6, 0, 0), true)
+	ok("ult hold: a press alone shows no crouch yet", S.aiming() and K.anim_id != "breah_spine_aim")
+	for i in ceili(ArchKit.HOLD_POSE_T / DT) + 1:
+		m.step(DT)
 	ok("ult hold: X held aims (nothing cast yet), the crouch move holds", S.aiming() and K.anim_id == "breah_spine_aim")
 	var prev: Dictionary = AimKit.entry(P, "x")
 	ok("ult hold: the preview line with chevrons, yours only", AimKit.shown(P, "x") and not bool(prev.get("all", true)))

@@ -551,6 +551,7 @@ func rmb_auto_t() -> float:
 func rmb_hold_tick(t: float) -> void:
 	if rod == null or not is_instance_valid(rod) or not rod.visible:
 		_summon_rod()
+	play_hold("mage_rmb_hold", t)
 	var k := clampf(t / float(rmb_def()["hold"]), 0.0, 1.0)
 	if k >= 1.0 and not rod_full:
 		rod_full = true
@@ -565,7 +566,6 @@ func _summon_rod() -> void:
 	if rod == null or not is_instance_valid(rod):
 		rod = _build_rod()
 	rod.visible = true
-	play("mage_rmb_hold")
 	_tick_rod()
 	# it arrives in her hand: a flash and a crackle off the tip
 	var tip := rod.global_position - rod.global_basis.z * 0.75

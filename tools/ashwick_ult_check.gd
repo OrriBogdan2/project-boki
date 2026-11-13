@@ -326,8 +326,8 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 				frames, held_in, pilot_in, K.hose.emitted - em, ak.dmg(T), K.chars.size(), K.burning(T)])
 	ok("ult 66: that hold ticks once, on its press", K.lmb_denied == denied + 1, "denied +%d" % (K.lmb_denied - denied))
 	ok("ult 66: LMB works on the first frame after the flight (the lance lights)",
-			K.was_held and K.spool > 0.0 and P.ak.anim_id == "as_lance",
-			"held %s spool %.3f anim %s" % [K.was_held, K.spool, P.ak.anim_id])
+			K.was_held and K.spool > 0.0,
+			"held %s spool %.3f" % [K.was_held, K.spool])
 	P.inp["fire"] = true
 	m.step(ak.DT)
 	ok("ult 66: its pilot flame is back a frame later", K.fx.shown(pilot))
@@ -335,6 +335,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 		P.inp["fire"] = true
 		T.teleport(P.pos + side)
 		ak.aim_at(P, T.pos))
+	ok("ult 66: the lance pose is up once the hold is past HOLD_POSE_T", P.ak.anim_id == "as_lance", P.ak.anim_id)
 	P.inp["fire"] = false
 	ok("ult 66: out of the flight the lance roars and hits, after only its usual pilot",
 			K.hose.emitted > em and ak.dmg(T) > 0.5, "puffs +%d, dmg %.1f" % [K.hose.emitted - em, ak.dmg(T)])

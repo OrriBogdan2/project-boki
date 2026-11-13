@@ -53,7 +53,6 @@ func start() -> bool:
 	axis = _across_aim()
 	phase = "aim"
 	phase_t = 0.0
-	k.play("breah_spine_aim")
 	return true
 
 ## A Boki merge (or a stun or knock) ends the aim before anything was cast: the ult is not spent.
@@ -92,6 +91,7 @@ func _tick_aim(dt: float) -> void:
 	var drag := Vector2(cur.x - center.x, cur.z - center.z)
 	if moved >= float(xd()["drag_min"]) and drag.length() > 0.1:
 		axis = drag.normalized()
+	k.play_hold("breah_spine_aim", phase_t)
 	if h.is_local():
 		AimKit.span(h, "x", _span_p({"chevrons": 6, "col": PREVIEW_COL}))
 	if not _held() or phase_t >= float(xd()["aim_max"]):
