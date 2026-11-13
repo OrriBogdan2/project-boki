@@ -176,7 +176,7 @@ const SWEEP_AT := [0.25, 0.5, 0.75]     # where in the move a press lands
 const SWEEP_LANE := 12                  # m of flat ground east of the start (a dash, or a hop chain's first hops)
 const SWEEP_GAP := 12                   # steps from a ground move's jump to the fresh press
 const SWEEP_HIGH := 1.2                 # m: a ground move's jump is still this high at the fresh press (not landing)
-const SWEEP_LEDGE := 2.0                # m short of the lane's end where a ledge or wall starts to take the move
+const SWEEP_LEVEL := 0.1                # m: the ground under the press is the start's (past that the lane has ended)
 const SWEEP_STAY := 8                   # steps the opened glider must stay open (a kit's wind-down must not fold it)
 const SWEEP_OPEN := 1                   # steps from the fresh press to the glider (MOVEMENT_FEEL reglide <= 1 frame)
 ## Motley's Shift on the ground is the Trade's aim (a held aim before the lob, no travel), and the lob moves him by
@@ -203,7 +203,7 @@ func _sweep_probe(pat: Dictionary, press: int) -> Dictionary:
 	h.ex_cd = 0.0
 	var fresh := press if air or press < 0 else press + SWEEP_GAP       # the press that must open the glider
 	var jumped_out := false
-	var x0 := h.pos.x
+	var ground0 := h.ground()
 	var out := {"busy": 0, "open": 0, "before": 0.0, "after": 0.0, "jumped": true, "stayed": true}
 	for i in 100:
 		var shifting: bool = press < 0 or i < press        # no more Shift taps once the player presses
@@ -216,9 +216,9 @@ func _sweep_probe(pat: Dictionary, press: int) -> Dictionary:
 		if i == fresh:
 			h.dash_buf = 0.0            # a queued Shift would fire after the glider opens and fold it (by design)
 			out["before"] = Vector2(h.vel.x, h.vel.z).length()
-			# (a ground move needs a jump out of it, still high at the press: no landing, and short of the lane's end,
-			# where the ledge or wall would mantle or stun it instead)
-			var in_lane := h.pos.x - x0 < SWEEP_LANE - SWEEP_LEDGE
+			# (a ground move needs a jump out of it, still high at the press: no landing, and still over the lane's
+			# own ground, not a ledge or dip the move has reached, which would mantle or drop it instead)
+			var in_lane := absf(h.ground() - ground0) < SWEEP_LEVEL
 			out["jumped"] = air or (jumped_out and in_lane and h.pos.y - h.ground() > SWEEP_HIGH and h.stun_t <= 0.0)
 		m.step(Match.DT)
 		if press >= 0 and i >= fresh and h.gliding:
