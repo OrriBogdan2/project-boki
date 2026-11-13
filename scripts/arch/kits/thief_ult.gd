@@ -51,7 +51,6 @@ func start() -> void:
 	beat = 0
 	var h := k.h
 	k.play("thf_encore")
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(d["short"]).to_upper(), ThiefKit.soft_col, false)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
 	k.vfx("encore", h.pos, null, {"r": float(d["reach"])})      # her cast: a violet ring out to the blades' reach
 	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
@@ -166,16 +165,12 @@ func _hit(f: Ent, rim: bool) -> void:
 	var o := {"src": "abil", "ab": "ult", "tags": ["encore"], "crit": rim}
 	if rim:
 		o["blight"] = float(d["rim_blight"])
-	var was_blighted := f.blight_t > 0.0
 	var dealt := f.hurt(dmg * k.power("x"), h, o)
 	if dealt <= 0.0:
 		return
 	blades += 1
 	if rim:
 		rim_blades += 1
-		if not was_blighted:
-			# once, as the blight lands (above the damage numbers, so they don't overprint)
-			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", ThiefKit.cord_col, false)
 	k.vfx("encore_hit_rim" if rim else "encore_hit", f.pos, k.h.dir_to(f))
 	k.refresh_marks()
 	HeroUlt.landed(k, f)

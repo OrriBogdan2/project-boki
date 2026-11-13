@@ -198,7 +198,6 @@ func _take_off() -> void:
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.main_col, MageKit.hot_col, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
 	leap["disc"] = kit.fx().disc(from, r, MageKit.deep_col.darkened(0.45), MageKit.hot_col, hover, MageKit.hot_col)
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.hot_col, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
