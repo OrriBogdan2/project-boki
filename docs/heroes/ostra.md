@@ -93,10 +93,9 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void
 | LMB charge | after not firing, the next orb is stronger (353 vs 263) [data]; binary since a patch (wiki) | continuous (owner item 60): plain at 0.6s to full at 1.4s, +34%, x1.4 speed, +90% size; full also slows | `item 60: ...`, `item 117: ...`, `charge: ...`, `slow: ...`, `held fire: ...`, `glow: ...`, `chime: ...` |
 | LMB spam penalty | "firing faster lowers projectile speed and damage" (card, footage) | none: the fixed 0.6s cadence can't be beaten, so there is nothing to penalise | (not built) |
 | RMB | a 0.2s black-orb wind-up, one crystal-spear cluster, stun 0.8-1.8s by distance [footage] | 0.32s wind-up (owner item 40: slower), one bundle, 0.8-1.8s | `item 40: ...`, `rmb: ...` |
-| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 30% (owner, item 75) | `item 17: ...`, `owner: ...` |
+| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 67.5% (owner, item 75: 30%; 11-08: 35%; 11-10 playtest: 67.5%, the slow halved from 65% to 32.5%) | `item 17: ...`, `owner: ...` |
 | E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast (a 10s fizzle cap at full) | `combo: ...`, seed rows |
 | R | a 1.0s dome telegraph with his cast held, then a 3.5s pull while he acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
-| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 67.5% (owner, item 75; 11-08 35%; 11-10 slow halved: 65% -> 32.5%) | `item 17: ...`, `owner: ...` |
 | Shift flight time | cast 0158 (rings at both ends) to the teleport 0168: 10 frames at 5 fps, 2.0s +-0.2 [footage] | 1.8s (1.25s Swollen), inside one frame of it | `dash: the lob takes about 1.8s ...` |
 | Shift steering | the landing ring is placed at the cast (0158), the sigil fills there (0159-0167) and it lands exactly on it: no steering in flight [footage captions] | the landing is fixed at the cast | `footage: the landing is set at the cast ...` |
 | Shift apex | "climbs well above the field" (0159-0167, key frame 0161); no height read off the frames [footage, not measured] | 4.5m over his hand (`dash.lob`), kept | `dash: a high lob ...` (4m+) |
@@ -220,7 +219,7 @@ A full orb slows **6% for 1.5s** (`lmb.prime_slow` 0.06, `prime_slow_t` 1.5; was
 | Snap stun grows with distance | wiki, card | yes | built 0.8-1.8s |
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
 | Swap travel 1.7s, 1.25s Empowered | wiki | yes (about 1.8s) | built |
-| Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 35% speed (item 75; was 20%, then 30%; owner 11-08 asked +15-25%, 35% keeps the earlier 25-35% band; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
+| Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 67.5% speed (owner 11-10 playtest; item 75 had 30%, 11-08 35%, was 20%; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing; wisps wait on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 7) |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies in his 1.5m ring as he leaves (47, 3s), checked as he goes; none at the landing |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
