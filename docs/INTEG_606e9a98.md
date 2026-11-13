@@ -114,6 +114,25 @@ Fixes found by the checks after the merge:
 - hero_vfx.gdshader: `swirl_rim`'s local `band` shadowed the `band` uniform, so the whole hero VFX shader failed to
   compile (pre-existing on main; every check log said "Redefinition of 'band'"). Renamed.
 
+### Checks after the main merge (w2, 2026-11-13)
+
+`godot --headless --import` 0 script errors after the fixes, `-- --check` 0 failures, `tools/health.py --strict` OK
+(style ratchet green), `gen_wiki.py --check` OK. The 22 checks the merged branches' READY notes name, run on this
+branch and, for every red, on a pristine origin/main worktree (`main-tree`, same machine):
+- Green on the branch: aim-lead, dolm-combo (after the Stone Row fix), friendly-fire (707), garden-save, hitstop-input
+  (after the Juggernaut fix), kin-indoors, level-hud, miss-fx, mood-icon, occlusion-outline, ostra-combo (257),
+  step-up, tips, tutorial-skip, words.
+- Red on main the same way (not this branch's): archer-combo 3 (Lace's hold draw looses nothing), farm-tutorial 3
+  (hint texts), keys-check 6 (the key carrier), mob-anim 1 (0.5 ms pose budget, 0.52-0.59 ms on a loaded box),
+  tutorial-hud (parse error: `WaysOutHud.SQUADS_W` is gone on main), wallmove's archer wall kick.
+- Red here and not on main: `--wallmove-check` "Lace walks off the 4-terrace top, turning back into the face, and
+  lands below (1.42 m)": she catches a lip on the way down. The test is this branch's (feel-lace-tall-climb; main has
+  no `_tall` test) against main's rewritten hunter.gd ledge float (`_try_ledge_grab`, `moves.ledge`); both sides were
+  green alone. Filed in docs/DEBT.md.
+- Known before the merge and still so (DEBT): leave-match tier 2.
+- Not runnable on main at all: hitstop-input (no Gil row, errors out) and tutorial-hud (parse error).
+- `tools/check.sh` not run: no gdformat, gdlint or ruff on w2.
+
 ## Left out: real conflicts in code or assets (resolve by rebuilding on this branch or main)
 
 Count is the number of conflicting code/asset files at this branch head.
