@@ -26,6 +26,7 @@
   "gunslinger_down": "grunt",
   "gunslinger_death": "grunt"
  },
+ "reach": {"vn_nuke_fall": 40},
  "signature": [
   "gunslinger_spinup",
   "gunslinger_grenade_thunk"

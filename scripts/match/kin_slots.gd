@@ -25,7 +25,7 @@ static func carry_stats(h: Hunter) -> Dictionary:
 	for k in from:
 		var own := {}
 		for ps in (k as Kin).ks.carry_passives:
-			own[ps["stat"]] = float(own.get(ps["stat"], 0.0)) + float(ps["amount"])
+			own[ps["stat"]] = float(own.get(ps["stat"], 0.0)) + RunPayoff.amount(ps, (k as Kin).carry_k)
 		for st in own:
 			out[st] = maxf(float(out[st]), float(own[st])) if out.has(st) else float(own[st])
 	return out
