@@ -3,13 +3,17 @@ extends RefCounted
 ## The audio buses, set up in one place, and the two ducks. Music, Ambience and UI go straight to the
 ## master; Voice (hurt and death voices, monster cries) and Boki go into SFX, so they share its glue
 ## compressor, room and limiter but can be levelled on their own; far sounds of any kind go through
-## SFXFar (low-passed) into SFX. Which bus a sound plays on comes from its category in its sound set
+## SFXFar (low-passed) into SFX, ones behind terrain through SFXMuffled (duller still).
+## Which bus a sound plays on comes from its category in its sound set
 ## (content/rules/audio_mix.json). Big events (a rival's ult, the Heart opening, a steal) dip Music and
 ## Ambience together and let them come back over a second.
 
 ## Name -> the bus it sends to. In creation order: Godot only sends to a bus created before.
 const BUSES := {"Music": "Master", "SFX": "Master", "Ambience": "Master", "SFXFar": "SFX",
-	"Voice": "SFX", "Boki": "SFX", "UI": "Master"}
+	"SFXMuffled": "SFX", "Voice": "SFX", "Boki": "SFX", "UI": "Master"}
+## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
+const OCCLUDED_HZ := 700.0
+const OCCLUDED_DB := -4.0
 const RULES := "res://content/rules/audio_mix.json"
 
 var rules: Dictionary
@@ -44,8 +48,11 @@ func learn(sounds: Dictionary) -> void:
 		if by_cat.has(sounds[sname]):
 			bus_of_sound[sname] = by_cat[sounds[sname]]
 
-## The bus a sound plays on; far (past Sfx.FAR from the listener) goes through the muffled one.
-func bus_for(sname: String, far: bool) -> StringName:
+## The bus a sound plays on: behind terrain (muffled) is SFXMuffled, far (past Sfx.FAR from the listener)
+## is SFXFar, else its kind's bus.
+func bus_for(sname: String, muffled: bool, far: bool) -> StringName:
+	if muffled:
+		return &"SFXMuffled"
 	if far:
 		return &"SFXFar"
 	if bus_of_sound.has(sname):
@@ -80,6 +87,11 @@ func _sfx_effects() -> void:
 	var lp := AudioEffectLowPassFilter.new()
 	lp.cutoff_hz = 1800.0
 	AudioServer.add_bus_effect(AudioServer.get_bus_index("SFXFar"), lp)
+	var muf := AudioServer.get_bus_index("SFXMuffled")
+	var mlp := AudioEffectLowPassFilter.new()
+	mlp.cutoff_hz = OCCLUDED_HZ
+	AudioServer.add_bus_effect(muf, mlp)
+	AudioServer.set_bus_volume_db(muf, OCCLUDED_DB)
 	var mlim := AudioEffectHardLimiter.new()
 	mlim.ceiling_db = -0.5
 	AudioServer.add_bus_effect(0, mlim)
