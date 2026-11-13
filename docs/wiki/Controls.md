@@ -72,14 +72,14 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | 3 | Utility belt slot 3 | `util3` | yes |
 | 4 | Utility belt slot 4 | `util4` | yes |
 | Q | Glove 1 | `gear1` | yes |
-| V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
+| V / Mouse 4 | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
-| Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
+| Mouse 5 | Glide (hold in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
@@ -89,6 +89,8 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
 | H | Whistle at home: your partner comes, hold for the nearest Boki | `whistle` | yes |
+| G | Goals list: open and close (at home) | `goals` | yes |
+| H | Fold the training guide away (training, duel) | `fold_guide` | yes |
 | J | Relics: change your Relic (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
@@ -97,8 +99,17 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
+| Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
+| Shift | Hold to keep placing (build mode) | `keep_placing` | yes |
+| Alt | Hold with a slot key to level it | `level_mod` | yes |
+| K | Hunter kit card (hover a hunter) | `kit_card` | yes |
+| Enter / Kp | Press the open panel's main button | `confirm` | yes |
+| V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
+| F1 | Look at teammate 1 (hold) | `mate_look_1` | yes |
+| F2 | Look at teammate 2 (hold) | `mate_look_2` | yes |
+| F3 | Look at teammate 3 (hold; 4-player squads) | `mate_look_3` | yes |
 | F7 | Movement readout (tuning) | `move_readout` | yes |
 | Z | Separate from the drop | `separate` | yes |
 
