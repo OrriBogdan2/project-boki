@@ -41,6 +41,8 @@
 	},
 	"dash": {
 		"id": "slipstep",
+		"rank3_speed": 0.25,
+		"rank3_speed_t": 2.0,
 		"name": "Slipstep",
 		"icon": "dash",
 		"col": "#e6ffb0",

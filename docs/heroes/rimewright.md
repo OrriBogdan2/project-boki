@@ -41,6 +41,20 @@ no such upgrade). LMB and the passive have no tiers in the data and do not rank;
 | E Rink Wall | -2.5 s / -2.5 s / +1000 wall HP [D] (20 s) | cooldown 17 -> 14.9 s | 12.75 s; wall +40 HP (`e.hp_rank3`; the data's +1000 sits on a base we do not know) | same, `rank 3 (tier IV) Rink Wall` |
 | Passive Hoarfrost | none [D] | - | - | - |
 
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
+bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
+no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
+
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in |
+|---|---|---|---|---|
+| LMB frost darts | none [D] | - | - | - |
+| RMB Ice Spear | +15% damage -1.75 s / same / +45% explosion damage [D] (12 s) | cooldown 10.2 -> 8.7 s, damage +15% | 7.2 s, +30%; detonation +45% (`rmb.lance.r3_dmg_k`) | `--rimewright-combo-check` upgrade parity |
+| Shift Skate | -1.5 s / -1.5 s / ice islands over the Abyss [D] (13 s) | recharge 13 -> 11.5 s | 10 s; ice underfoot over the Abyss | same |
+| E Rink Wall | -2.5 s / -2.5 s / +1000 wall HP [D] (20 s) | cooldown 17 -> 14.9 s | 12.75 s; wall +40 HP (`e.hp_rank3`; the data's +1000 sits on a base we do not know) | same, `rank 3 (tier IV) Rink Wall` |
+| Passive Hoarfrost | none [D] | - | - | - |
+
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
 Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Celeste), [footage] = briefs/hero-ref/tamsin.md (5 fps).
 

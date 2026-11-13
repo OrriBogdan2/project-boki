@@ -371,7 +371,7 @@ func _skid_streaks(from: Vector3, dir: Vector2) -> void:
 func _slide_end() -> void:
 	h.roll_t = 0.0
 	if rank("dash") >= 3:
-		h.add_buff("move_speed", 0.25, 2.0)
+		h.add_buff("move_speed", float(dash_def()["rank3_speed"]), float(dash_def()["rank3_speed_t"]))
 	var air := bool(slide.get("air", false))
 	if air and not h.gliding:
 		h.vel.x *= 0.25          # an air slide stops short instead of carrying on (a glide press carries it, item 4)
@@ -772,6 +772,7 @@ func _fire_needle() -> void:
 	var d := h.aim_dir()
 	var a := palm_at()                        # the beam leaves her open palm; what it hits is still from her feet
 	var L := float(ed["range"])
+	L = minf(L, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce"))   # placed walls stop it
 	var b := a + Vector3(d.x, 0, d.y) * L
 	needle_dir = d
 	# a taut needle of light (deep body, white-hot core, sparks shed along it), a bloom at her palm,

@@ -649,7 +649,7 @@ func _bash_impact(f: Ent) -> void:
 func _ram_reward() -> void:
 	var dd := dash_def()
 	boost_until = m.time + float(dd["rank3_boost_t"])
-	ReceiverCue.shield(h, h.max_hp * float(dd["rank3_shield"]))
+	ReceiverCue.shield(h, h.max_hp * float(dd["rank3_shield"]), Color.TRANSPARENT, ShieldSrc.HEAT)
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
 
 # ------------------------------------------------------------------ E: Furnace Cloak
@@ -685,13 +685,14 @@ func _cloak_blast() -> void:
 		add_char(f, float(ed["char"]))
 		KitStatus.apply(f, "blt", float(ed["blt_t"]))
 		vfx("cloak_hit", f.pos)        # a smoke puff over the target
-		if f.mass() < 6.0:
+		if f.mass() < 6.0 and not Blockers.body_stops(f, h):
 			# dragged in toward her (Displace: a player online is pulled on their own game)
 			var drag := {"mode": "step", "spd": float(ed["pull_speed"]), "gap": float(ed["gap"]), "dur": DRAG_T}
 			m.displace.tow(f, h, drag)
 			pulled += 1
 	if hit > 0:
-		ReceiverCue.shield(h, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
+		var amount: float = h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k
+		ReceiverCue.shield(h, amount, Color.TRANSPARENT, ShieldSrc.HEAT)
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
 		st["shield_foes"] = hit

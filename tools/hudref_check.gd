@@ -2,7 +2,8 @@ extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
 ##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
-##   3. armour (a strip under health) and shields (past the end of health) are drawn
+##   3. armour (a strip under health) and shields (past the end of health) are drawn; your own shield
+##      is a strip over your health with its source's icon, drains before health, fades before it drops
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
@@ -105,6 +106,7 @@ func run(main_node: Node) -> void:
 	arm.armor = 0.0
 	await main.get_tree().process_frame
 	ok(float(_state(hud, arm).get("brk", 0.0)) > 0.0, "armour hitting zero cracks the strip")
+	await _check_strip(P)
 	# ---------------------------------------------------------------- 4. downed, and status words
 	var dn: Hunter = foes[4]
 	var ds: Dictionary = hud.plates.shown.get(dn.nid, {})
@@ -208,6 +210,36 @@ func run(main_node: Node) -> void:
 	await _check_keys(P)
 	_check_deny(P)
 	_done()
+
+## 3. Your shield in the vitals: a heal shield lays a strip over the top of your health with the heal icon,
+## a hit drains it before health, and it fades over its last ShieldStrip.FADE_S before it drops.
+func _check_strip(P: Hunter) -> void:
+	var hud = P.m.hud
+	P.shield = 0.0
+	P.kin_shield = 0.0
+	await hud.panels.draw
+	ok(ShieldStrip.shown.is_empty(), "no shield: no strip in your vitals")
+	Effects.run([{"type": "ally_area", "shield": 60.0, "radius": 3.0, "time": 30.0}], P, {"at": P.pos})
+	await hud.panels.draw
+	var ss: Dictionary = ShieldStrip.shown
+	ok(String(ss.get("icon", "")) == ShieldSrc.HEAL and absf(float(ss.get("amount", 0.0)) - P.shield) < 0.5
+		and float(ss.get("frac", 0.0)) > 0.0 and float(ss.get("alpha", 0.0)) == 1.0,
+		"a heal shield lays a full-strength strip over your health with the heal icon (%s)" % str(ss))
+	var hp0 := P.hp
+	var sh0 := P.shield
+	P.hurt(20.0, null)
+	await hud.panels.draw
+	ss = ShieldStrip.shown
+	ok(P.hp == hp0 and P.shield < sh0 and float(ss.get("amount", 0.0)) < sh0,
+		"a hit drains the strip before health (hp %.0f -> %.0f, strip %.0f -> %.0f)" % [hp0, P.hp, sh0,
+			float(ss.get("amount", 0.0))])
+	P.shield_t = ShieldStrip.FADE_S * 0.4
+	await hud.panels.draw
+	var a := float(ShieldStrip.shown.get("alpha", 1.0))
+	ok(a < 1.0 and a >= ShieldStrip.FADE_MIN, "with %.1f s left the strip has faded (alpha %.2f)" % [P.shield_t, a])
+	await frames_until(P.m, P.m.time + ShieldStrip.FADE_S)
+	await hud.panels.draw
+	ok(P.shield == 0.0 and ShieldStrip.shown.is_empty(), "its time out, the shield and its strip are gone")
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
 ## right-side Boki box); every hunter has an X tile with a lock until level 6 and a cooldown after a cast.

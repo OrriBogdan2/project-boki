@@ -1,0 +1,77 @@
+- ext/parity-bulwark-guardcut: conflicts with main in content/rules/warden_anim/breaker.json scripts/arch/kits/bjorn_fx.gd scripts/arch/kits/bulwark_kit.gd scripts/ui/hud.gd
+- ext/tester-guide: conflicts with main in scripts/core/settings.gd tools/title_check.gd
+- ext/feel-camera-fast: superseded by main's camera trail (decision 0050), conflicts in scripts/match/cam.gd
+- ext/combat-glove-band: conflicts with main in tools/gear_check.gd
+- ext/feel-dash-refill-order: conflicts with main in scripts/arch/kits/ashwick_kit.gd tools/move_feel_check.gd
+- ext/sfx-knock-confirm: conflicts with main in scripts/match/juice.gd
+- ext/ui-buff-stack: conflicts with main in scripts/ui/hud.gd
+- ext/tut-first-capture: conflicts with main in scripts/match/capture.gd
+- ext/ui-fusion-hud: conflicts with main in scripts/ui/boki_hud.gd scripts/ui/grip_hud.gd tools/merge_form_check.gd
+- ext/anim-timing-bulwark: conflicts with main in tools/archer_bulwark_combo_check.gd
+- ext/combat-fusion-band: conflicts with main in scripts/arch/kits/juggernaut_kit.gd tools/merge_form_check.gd
+- ext/combat-shield-decay: conflicts with main in content/archetypes/ostra.json scripts/arch/kits/ostra_kit.gd tools/breah_combo_check.gd
+- ext/sparkle-dash-rebased: conflicts with main in content/archetypes/mage.json scripts/arch/kits/mage_kit.gd
+- ext/garden-decor-tags: conflicts with main in scripts/home/home_layout.gd
+- ext/feel-impact-tiers-rebased: conflicts with main in scripts/arch/kits/dredge_kit.gd
+- ext/parity-skycall-size: conflicts with main in content/rules/kit_parity.json
+- ext/tut-first-wayseed: conflicts with main in scripts/home/hub_hints.gd
+- ext/ui-ability-cards-rebased: conflicts with main in content/archetypes/ashwick.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/thief.json
+- ext/ui-audio-buses: conflicts with main in scripts/core/settings.gd scripts/core/sfx.gd tools/uipolish_check.gd
+- ext/garden-balance-sim-rebased: conflicts with main in briefs/design/GARDEN_MODERN_BALANCE.md content/rules/garden_sim.json tools/garden_sim.py
+- ext/ui-tab-board-stats: conflicts with main in scripts/ui/hud.gd
+- ext/parity-pin-kael-drop: conflicts with main in content/rules/kit_parity.json
+- ext/ui-lobby-720-fit: conflicts with main in scripts/ui/prematch_view.gd
+- ext/farm-base-only-breed: conflicts with main in content/rules/garden_xp.json scripts/home/nook_rules.gd tools/garden_pace_check.gd tools/nook_check.gd
+- ext/vfx-cel-ring-bursts: conflicts with main in scripts/match/fx.gd shaders/ring.gdshader
+- ext/albert-bulk-shear: conflicts with main in scripts/heroes/warden_glb.gd
+- ext/vfx-cel-leftovers: conflicts with main in scripts/arch/kits/kit_looks.gd
+- ext/parity-vex-coin-stick: conflicts with main in scripts/arch/kits/gunslinger_kit.gd
+- ext/tut-hud-term-hints: conflicts with main in tools/msg_queue_check.gd
+- ext/ui-wisp-picker: conflicts with main in tools/wisp_check.gd
+- ext/vfx-kael-slam-smoke: conflicts with main in content/vfx/juggernaut.json
+- ext/ui-tip-card-one-prompt: conflicts with main in scripts/match/tutorial.gd tools/msg_queue_check.gd tools/tutorial_hud_check.gd
+- ext/tut-drop-plan-first: conflicts with main in scripts/ui/full_map.gd
+- ext/tut-creator-first: conflicts with main in scripts/ui/hatch.gd
+- ext/ui-results-plain-0245: conflicts with main in scripts/ui/results.gd
+- ext/anim-look-at: conflicts with main in scripts/heroes/warden_glb.gd
+- ext/anim-meeko-stride: conflicts with main in content/rules/warden_anim/pip.json
+- ext/anim-loot-open: conflicts with main in scripts/heroes/warden_glb.gd
+- ext/anim-meeko-crouch-stride: conflicts with main in art/wardens/pip/pip.glb
+- ext/anim-boki-slide-starters: conflicts with main in art/kin/wisplet/wisplet.glb
+- ext/sfx-kael-slash-edge: conflicts with main in tools/dancer_jug_check.gd
+- ext/ui-minigame-picker-0245: conflicts with main in scripts/home/minigame_hub.gd
+- ext/farm-carry-trail-0245: conflicts with main in scripts/home/home.gd scripts/home/home_carry.gd tools/carry_boki_check.gd
+- ext/ui-mask-preview-warm: conflicts with main in scripts/match/hero_kit.gd scripts/match/models.gd
+- ext/anim-unmasked-feet: conflicts with main in scripts/match/empty_gait.gd tools/unmasked_check.gd
+- ext/feel-one-buffer: conflicts with main in scripts/arch/arch_kit.gd
+- ext/series-boki-1112: conflicts with main in scripts/match/match.gd scripts/match/spawn_plan.gd
+- ext/sfx-boki-remote: conflicts with main in scripts/match/kin.gd
+- ext/meeko-call-noself: conflicts with main in scripts/arch/kits/tender_kit.gd
+- ext/mc-integ-1112b: conflicts with main in tools/hero_vfx_check.gd
+- ext/npc-hob-guide-1111-r2: conflicts with main in art/npcs/hob/hob.glb art/npcs/pell/pell.glb scripts/match/npc_model.gd tools/meshy/npc_bake.py tools/npc_check.gd tools/npc_shots.gd
+- ext/farm-toys-joy-tune: conflicts with main in content/rules/toys.json
+- ext/farm-glasswater-garden-only: conflicts with main in content/rules/garden_zones.json
+- ext/ui-waystone-keys: conflicts with main in content/rules/garden_zones.json scripts/ui/zone_cards.gd
+- ext/anim-boki-state-cover: conflicts with main in tools/boki_anim_audit.gd
+- ext/combat-merge-form-text: conflicts with main in tools/merge_form_check.gd
+- ext/neve-skirt-chiffon: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/fix-ui-theme-optionbutton: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/farm-site-paused: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/feel-neve-statue-time: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/sfx-sable-ring-loop: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/sfx-wisp-hum-port: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/sfx-gil-dash-air: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/farm-site-assign: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/combat-daze-status: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/gil-train-1112: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/anim-nook-moment: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/sfx-lobby-pick: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/vfx-heal-shield-read: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/sfx-air-rings: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/vfx-soft-dots: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/anim-boki-slide-batch2: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/anim-sparkle-sky-hold: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/vfx-neve-statue-break: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/vfx-number-sources: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/vfx-sparkle-bolt-origin: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json
+- ext/pitch-reel-exit-1112: conflicts with main in art/wardens/claire/claire.glb art/wardens/claire/claire_atlas.jpg art/wardens/src/claire_v95.json

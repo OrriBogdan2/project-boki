@@ -37,6 +37,10 @@ func data() -> Dictionary:
 func power() -> float:
 	return kit.m.dmg_mult(kit.h) * LevelGrowth.ap(kit.h)
 
+## m: the hot centre that takes the +core_k bonus; its ground ring is drawn at exactly this radius.
+func core_r() -> float:
+	return float(data()["core_r"])
+
 func running() -> bool:
 	return not shells.is_empty()
 
@@ -112,6 +116,9 @@ func _fall_tick(s: Dictionary) -> void:
 	disc.merge({"all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.DEEP, "hot": k * 0.6, "lw": 0.09})
 	disc["alpha"] = DISC_ALPHA
 	AimKit.circle(kit.h, "x%d" % int(s["n"]), disc)
+	var core := {"at": at, "r": core_r(), "fill": k, "all": true, "col": GunslingerKit.DEEP}
+	core.merge({"col2": GunslingerKit.HOT, "hot": k * 0.5, "lw": 0.1})
+	AimKit.circle(kit.h, "xc%d" % int(s["n"]), core)
 	var rivets := {"at": at, "r": float(xd["radius"]) + 0.35 * (1.0 - k), "dashed": true, "all": true}
 	rivets.merge({"col": GunslingerKit.HOT, "col2": GunslingerKit.LIME, "alpha": 0.6 + 0.6 * k})
 	AimKit.circle(kit.h, "xr%d" % int(s["n"]), rivets)
@@ -139,9 +146,10 @@ func _impact(s: Dictionary) -> void:
 	var h := kit.h
 	var at: Vector3 = s["at"]
 	var r := float(xd["radius"])
-	var core_r := float(xd["core_r"])
+	var inner := core_r()
 	(s["node"] as Node3D).visible = false
 	AimKit.hide(h, "x%d" % int(s["n"]))
+	AimKit.hide(h, "xc%d" % int(s["n"]))
 	AimKit.hide(h, "xr%d" % int(s["n"]))
 	s["phase"] = BURN
 	s["t"] = 0.0
@@ -151,7 +159,7 @@ func _impact(s: Dictionary) -> void:
 	var n := 0
 	var centre := 0
 	for f in kit.foes_in(at, r, 2.6):
-		var core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= core_r + f.r * 0.5
+		var core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= inner + f.r * 0.5
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "cinderfall"], "crit": core}
 		f.hurt(dmg * (1.0 + float(xd["core_k"]) if core else 1.0), h, o)
 		HeroUlt.landed(kit, f)
@@ -208,6 +216,6 @@ func clear() -> void:
 		var n: Node3D = s["node"]
 		if is_instance_valid(n):
 			n.visible = false
-		for id in ["x%d", "xr%d", "xz%d"]:
+		for id in ["x%d", "xc%d", "xr%d", "xz%d"]:
 			AimKit.hide(kit.h, id % int(s["n"]))
 	shells.clear()
