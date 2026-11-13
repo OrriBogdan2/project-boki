@@ -70,6 +70,7 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 | Ally revived / eliminated / soul lost | was a 236x44 card top centre | was 2.6 s | **gone.** The same faint line by their row, 1.5 s |
 | "DOWN" knock burst over a downed hunter | 22-35 px word and rays over the plate | 1.1 s | rivals only now; a teammate's fall is the row's job |
 | Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
+| Alive counter (`AliveCounter`) | top right, 78x44 px per counter, 26 px numbers | always | squad icon + squads left, person icon + players left (solos: players only); your kills / knocks / gems in a quieter row under it. Counts only, never names. The Ways Out strip no longer repeats squads left |
 | Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
 | Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
 | Level-up gold wash | full screen at 16% | ~0.3 s | unchanged (brief; `--level-hud-check` holds it); the line goes through the lane |
