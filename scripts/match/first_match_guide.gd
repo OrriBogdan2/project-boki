@@ -7,11 +7,15 @@ extends RefCounted
 ## The "dive" line outlives that: the first time the glider has been open for a while, high up, in any
 ## Extraction, it says which key dives. It shows once per save and stops at the first dive
 ## (Save.d tutorial glide_dive); a guide kept only for it has `dive_only`.
+## The closing zone's two lines (the safe ring at the first warning; "you are outside" once the wall has
+## passed you) are told once per profile, not once per match.
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
 const MINT := Color("8fe3c8")
 # what to say first when two lines are due
-const ORDER := ["land", "dive", "squad", "blight", "exit", "rank", "send", "chest"]
+const ORDER := ["land", "dive", "zone", "wall", "squad", "blight", "exit", "rank", "send", "chest"]
+# the closing zone's two lines: taught once, then the save remembers
+const ONCE_PER_PROFILE := ["zone", "wall"]
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 
 var m: Match
@@ -87,6 +91,8 @@ func _life(lid: String) -> float:
 func _start(lid: String, p: Hunter) -> void:
 	id = lid
 	shown[lid] = true
+	if lid in ONCE_PER_PROFILE:
+		Save.d["tutorial"]["guide_" + lid] = true
 	_t = 0.0
 	_throws0 = p.kin.st_throws if p.kin else 0
 	var txt := ""
@@ -112,6 +118,9 @@ func _enemy_near(p: Hunter) -> bool:
 func _exit_near(p: Hunter) -> bool:
 	return m.exits != null and m.exits.spots().any(func(s: Vector3): return s.distance_to(p.pos) <= EXIT_NEAR)
 
+func _zone_told(lid: String) -> bool:
+	return bool(Save.d["tutorial"].get("guide_" + lid, false))
+
 func _kin_ready(p: Hunter) -> bool:
 	return p.kin != null and p.kin.state != "downed"
 
@@ -121,8 +130,12 @@ func _due(lid: String, p: Hunter) -> bool:
 		return p.dropping
 	if p.dropping:
 		return false
+	if lid in ONCE_PER_PROFILE and (m.zone == null or _zone_told(lid)):
+		return false
 	match lid:
 		"dive": return not dive_taught() and _glide_t >= float(rules()["dive_open_s"])
+		"zone": return m.zone.told >= 1
+		"wall": return m.zone.k >= 1 and m.zone.outside(p.pos)
 		"squad": return _enemy_near(p)
 		"blight": return _left() <= float(rules()["close_at"])
 		"exit": return shown.has("blight")
@@ -136,6 +149,7 @@ func _done(lid: String, p: Hunter) -> bool:
 	match lid:
 		"dive": return p.glide_dive.on or not p.gliding
 		"land": return not p.dropping
+		"wall": return not m.zone.outside(p.pos)
 		"squad": return not _enemy_near(p)
 		"exit": return _exit_near(p)
 		"rank": return p.skill_pts == 0

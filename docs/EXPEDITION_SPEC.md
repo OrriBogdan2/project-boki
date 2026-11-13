@@ -171,6 +171,13 @@ Recommendation: our expedition maps are smaller and tier-based; **don't
 match their scale.** Use the "zone with a basecamp and a boss" unit as a
 building block and size to our match length.
 
+Ours (owner order 11-11, docs/decisions/0060-shrinking-zone.md): on the
+2x Hollow Crown the zone closes in 4 phases toward a seeded final area round
+a dock or outpost (closes at 150-200, 280-325, 395-435, 490-520 s of 612;
+r 150, 95, 58, 32 m; outside 1/2/4/7% of max health a second). The islands
+outside the last circle fall at 520 s; the clock's fall at 612 s stays.
+Numbers: content/rules/shrink_zone.json.
+
 ---
 
 ## 10. What to copy closely vs change
