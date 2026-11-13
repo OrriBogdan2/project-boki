@@ -239,10 +239,11 @@ func _offer() -> void:
 	await _advance(box)
 	await _frames(3)
 	var beats: Array = home.find_children("*", "MaskBeat", true, false)
-	ok(beats.size() == 1 and (beats[0] as MaskBeat).short and home.panel_open == HobTalk.TALK,
-			"the short Mask moment plays (you stand still)")
+	ok(beats.size() == 1 and not (beats[0] as MaskBeat).swap and home.panel_open == HobTalk.TALK,
+			"the put-on beat plays without the swap (you stand still)")
 	await _shot("hob_7_mask_moment", 1.0)
-	await _wait(func(): return (beats[0] as MaskBeat).name_box != null, 6.0)
+	await _wait(func(): return not home.get_tree().root.find_children("*", "VBoxContainer", true, false).filter(
+			func(n): return n.has_meta("mask_name")).is_empty(), 6.0)
 	await _shot("hob_8_mask_name", 0.3)
 	await _wait(func(): return home.find_children("*", "MaskBeat", true, false).is_empty(), 10.0)
 	await _frames(5)
@@ -251,6 +252,8 @@ func _offer() -> void:
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
 	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
+	await _wait(func(): return not hob.node.bubble.visible, 8.0)      # (a shout from before the beat may still be up)
+	await _frames(2)
 	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
 	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
