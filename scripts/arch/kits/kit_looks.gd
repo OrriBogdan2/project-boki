@@ -23,6 +23,9 @@ extends Node3D
 
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
+const BASALT := Color("1f2633")         # Tenzo's rock: dark blue-grey basalt in the cracks and shadows
+const BASALT_HI := Color("4a566e")      # and on its faces
+const COBALT_HOT := Color("9ad0ff")     # the rim light: Tenzo's hot slot colour (docs/VFX_QUALITY.md)
 ## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
 ## so a rock's crack pattern must not change what a bot decides).
 static var vis_rng := RandomNumberGenerator.new()
@@ -138,19 +141,28 @@ func _build(kind: String) -> Node3D:
 	add_child(n)
 	return n
 
-## Tarek's rocks in flight: opaque molten basalt lumps with a warm (alpha-blended) heat haze.
+## Tenzo's thrown rocks: cold basalt (no heat) with a cobalt rim and cracks, never orange (DECISIONS 11-08).
+static func basalt_mat(seed_v: float) -> ShaderMaterial:
+	var mt := rock_mat(0.0, seed_v)
+	mt.set_shader_parameter("stone", BASALT)
+	mt.set_shader_parameter("stone_hi", BASALT_HI)
+	mt.set_shader_parameter("glow", DolmKit.COBALT)
+	mt.set_shader_parameter("rim_col", COBALT_HOT)
+	mt.set_shader_parameter("rim", 0.5)
+	return mt
+
+## Tenzo's rocks in flight: opaque basalt lumps with a cobalt (alpha-blended) haze.
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
-	var heat := {"boulder": 0.8, "rock": 0.95, "dashrock": 0.75}[kind] as float
 	# Rock Hop's last rock stands tall: a tumbling crag, not a ball
 	var tall := Vector3(1.0, 1.8, 1.0) if kind == "dashrock" else Vector3.ONE
 	var body := Models.part(
-		n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)
+		n, lump(r), basalt_mat(vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)
 	)
 	body.name = "Spin"
-	Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
-	Models.part(body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
-	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(1.0, 0.42, 0.1, 0.28)), Vector3.ZERO)
+	Models.part(body, lump(r * 0.55), basalt_mat(vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
+	Models.part(body, lump(r * 0.45), basalt_mat(vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
+	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(DolmKit.COBALT, 0.28)), Vector3.ZERO)
 
 ## The slab he rides through a Rock Hop, like a board: long along +Z (he turns it along the hop), a pale sunlit
 ## top so the match camera reads it under his feet, a hot underside.
