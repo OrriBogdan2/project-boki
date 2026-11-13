@@ -19,6 +19,8 @@ extends RefCounted
 ##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
+##   soft    bool    lanes and cones: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
+##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
 ##                   the hunter (Hem's draw), this big
@@ -208,7 +210,8 @@ static func entry(h: Hunter, id: String) -> Dictionary:
 
 # ------------------------------------------------------------------ cursor states
 ## The charge ring on the cursor, k 0..1, called each step while charging. Crossing 1 fires the flare.
-## p: col (hero colour), flare (true: flare on reaching full)
+## p: col (hero colour), flare (true: flare on reaching full), at ("cursor", or "body": round the hunter, where a
+## source kit shows its charge arc on the hero, e.g. Kael's blast)
 static func charge(h: Hunter, k: float, p := {}) -> void:
 	if blocked(h):
 		return
@@ -216,6 +219,7 @@ static func charge(h: Hunter, k: float, p := {}) -> void:
 	var was := float(r["k"]) if float(h.m.time) - float(r["t"]) <= AimDraw.KEEP else -1.0
 	r["k"] = k; r["t"] = float(h.m.time)
 	r["col"] = p.get("col", hero_col(h))
+	r["at"] = String(p.get("at", "cursor"))
 	if k >= 1.0 and was < 1.0 and bool(p.get("flare", true)):
 		flare(h, p)
 
@@ -235,20 +239,21 @@ static func perfect(h: Hunter, p := {}) -> void:
 	r["perfect"] = AimReticle.PERFECT_T
 	r["pcol"] = p.get("col", Color("ffd25a"))
 
-## This hunter's cursor states now: {charge (-1 = none), flare (s left), perfect (s left)}.
+## This hunter's cursor states now: {charge (-1 = none), flare (s left), perfect (s left), at (cursor | body)}.
 static func reticle(h: Hunter) -> Dictionary:
 	var d := layer(h.m)
 	if not d.ret.has(h.get_instance_id()):
-		return {"charge": -1.0, "flare": 0.0, "perfect": 0.0}
+		return {"charge": -1.0, "flare": 0.0, "perfect": 0.0, "at": "cursor"}
 	var r: Dictionary = d.ret[h.get_instance_id()]
 	var live := float(h.m.time) - float(r["t"]) <= AimDraw.KEEP
-	return {"charge": float(r["k"]) if live else -1.0, "flare": float(r["flare"]), "perfect": float(r["perfect"])}
+	return {"charge": float(r["k"]) if live else -1.0, "flare": float(r["flare"]), "perfect": float(r["perfect"]),
+		"at": String(r.get("at", "cursor"))}
 
 # ------------------------------------------------------------------ helpers
 static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
 	return {"kind": kind, "col": p.get("col", hero_col(h)), "col2": p.get("col2", accent_col(h)),
 		"alpha": float(p.get("alpha", 1.0)), "hot": clampf(float(p.get("hot", 0.0)), 0.0, 1.0),
-		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)),
+		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)), "soft": bool(p.get("soft", false)),
 		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y,
 		"fletch": float(p.get("fletch", 0.0))}
 

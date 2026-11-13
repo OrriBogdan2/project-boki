@@ -8,7 +8,7 @@ extends RefCounted
 ##   smoke   a cloud that hides everyone in it
 ##   pad     a launch pad on the ground
 ##   scan    reveal rival hunters nearby
-##   key     a Rift Key or chest key: open the lock beside you, or ping the nearest one (BeltKeys)
+##   key     a chest key: open the locked chest beside you, or ping the nearest one (BeltKeys)
 ##   fx      run the item's "effects" list through Effects (haste, shield, ...)
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
@@ -17,6 +17,8 @@ const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
 const SCAN_RANGE := 26.0        # tiles
 const SCAN_TIME := 3.0          # seconds rivals stay revealed
+const PAD_VY := 17.0            # m/s up off a Spring pad: ~9.8 m apex, ~2.3 s aloft ([?] no source number)
+const PAD_MIN_HV := 6.0         # m/s: the least a pad sends you on with (toward your aim if you stood still)
 
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
 static func channel(id: String, key: String) -> float:
@@ -103,6 +105,18 @@ static func _pad(h: Hunter, col: Color) -> void:
 	m.add_child(n)
 	m.gpads.append({"pos": at, "t": 20.0, "node": n, "cd": {}})
 	m.sfx("throw", h.pos, -2.0, 1.2)
+
+## Spring pad: up at PAD_VY, on with the speed you brought (at least PAD_MIN_HV). A dash ends here and
+## its speed carries ([wiki] dashing into a jump pad keeps the forward momentum); in the arc your keys steer
+## as in any jump (HunterMove.air_steer) and the glider stays shut until you open it.
+static func pad_launch(h: Hunter) -> void:
+	var hv := Vector2(h.vel.x, h.vel.z)
+	var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
+	hv = d * maxf(hv.length(), PAD_MIN_HV)
+	h.vel = Vector3(hv.x, PAD_VY, hv.y)
+	h.roll_t = 0.0
+	h.grounded = false
+	h.glide_cd = 0.0
 
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
