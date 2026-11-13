@@ -391,6 +391,8 @@ const CHECKS := {
 	# the first two Extractions' guide
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],  # one voice
+	# ADVISORY: pace flags (a beat over 45 s, a 5 s wait) never fail it; only a stall in the run does
+	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],  # no idle moment
 	# fight beats per starter
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
