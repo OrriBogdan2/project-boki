@@ -131,7 +131,7 @@ Takeaways for Kinfall:
 | Smash Ultimate hitlag = (damage×0.65 + 6)×multipliers frames, capped at 30 (a 15% hit freezes 15 frames); Melee capped at 20 | SmashWiki "Hitlag" |
 | A Godot reference hitstop of 0.08s (time scale 0.05, not 0), flash recovery 0.15s, trauma 0.7 decaying 3/s; one owner for time scale; a call token so a short stop can't end a long one | uhiyama-lab Godot hitstop note |
 | Trauma-based camera shake (shake = trauma² or trauma³, noise-driven) is the standard approach | Eiserloh GDC 2016 (session summary) |
-| Kinfall today: `freeze_frame()` 0.03-0.075s on heavy hits you deal or take (disabled online), `cam.add_trauma()` 0.08-0.6 across systems, `cam.punch()`, HUD flash, `_reward_moment` (0.07s freeze + 0.22s slow-mo) | scripts/match/match.gd |
+| Kinfall today: `freeze_frame()` 0.03-0.075s on heavy hits you deal or take (disabled online), `cam.add_trauma()` 0.08-0.6 across systems, `cam.punch()`, HUD flash, `_reward_moment` (0.07s freeze, ring, burst, kill sound; its 0.22s slow-mo and white flash were removed 11-11, §5.4 knock moment) | scripts/match/match.gd |
 
 ### 2.3 Colour, shape and sound language
 
@@ -425,7 +425,7 @@ making displacement fair.
 
 | Ability | Tell | Cast / Impact | Sound | Cat | HS | Shake | Cohesion and part changes |
 |---|---|---|---|---|---|---|---|
-| **Moon Swap** (projectile 9m, swap with owner, stun 0.4) | 0.15s wing flare and silver glint; the moon disc has a long tail | on hit, a **0.12s silver thread** joins the two bodies, both flash, then swap. The victim's screen gets a direction flash showing where they went | tell: chime; body: hum; impact: control hard hit + a reverse-whoosh swap | control | T3 both | 0.35 victim, 0.2 owner | swap counts as hard CC (5.3). Slow the disc from 30 to 22 m/s (0.41s at 9m) so it's dodgeable at range |
+| **Moon Mark** (projectile 9m, stun 0.4, reveal + vulnerable 15% for 4s; replaced Moon Swap, which moved the owner) | 0.15s wing flare and silver glint; the moon disc has a long tail | on hit, the foe flashes silver and keeps a soft silver rim for the 4s mark | tell: chime; body: hum; impact: control hit + a soft bell on the mark | control | T3 both | 0.35 victim | Slow the disc from 30 to 22 m/s (0.41s at 9m) so it's dodgeable at range |
 | **Moonlift** (auto, lift owner 14) | 0.2s column-of-light tell under you | the owner rises in a moonbeam | rising chime | utility | T0 | 0.1 owner | — |
 | **Moon Blink** (dodge rider) | — | blinks with a silver streak (the streak rule) | sweetener | utility | T0 | 0 | — |
 | **Eclipse** (merge) | 0.35s darkening of a 5.5m ring around you (enemies see the ring tighten) | on_start burst 4m: damage 12, lift 9; pulses every 0.6s: pull 7 in 5.5m | a low eclipse drone; each pulse is a soft "thrum" | control | T3 start; T0 pulses | 0.3 start | pull pulses every 0.6s with no break are hard to read. Add an edge ring that tightens with each pulse, and drop the pull to 6 so walking out against it is possible (counterplay) |
@@ -505,7 +505,7 @@ involved, plus a softer 50% version for the kin owner.
 | T2 | a hit ≥ 8%, or push/pull ≥ 8 m/s, or a reflect returning | 35ms melee / 0 ranged | 45ms | 3 |
 | T3 | CC landing (stun, root, hook yank, swap, lift), or ≥ 15% | 50ms melee / 0 ranged | 65ms | 4 |
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
-| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms + 0.2s slow-mo at ×0.35 (offline only, existing `_reward_moment`) | — | 6 |
+| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms (no slow-mo: see the knock moment below) | — | 6 |
 
 Rules:
 
@@ -514,8 +514,25 @@ Rules:
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
 - Cap: 110ms in any 0.5s per player.
+- A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
+  Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
 - The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
+
+**Knock moment (parity, 11-11, docs/FUN_AUDIT_1111.md gap 5).** The source confirms a knock with a
+sound, the kill feed and an icon, not slow motion. `_slow` already skipped online (`net_on`), so bot
+practice and online play ran on two rhythms, and in a 3v3 two quick knocks blinded the next target pick.
+
+| Knock | Before | After |
+|---|---|---|
+| You land it (`Match._reward_moment`, offline and the online `knock` event) | 0.07 s freeze, **0.22 s at ×0.35 slow-mo (offline only)**, **full-screen white flash 0.25**, ring 3 m, gold burst, duck 0.25, `kill` sound | 0.07 s freeze, ring 3 m, gold burst, duck 0.25, `kill` sound |
+| You take it (`Match.knock`, `h == player`) | **0.3 s at ×0.55 slow-mo (offline only)**, **full-screen red flash 0.3**, duck 0.6, killcam line | duck 0.6, killcam line |
+
+Both stay on the `knock` / `knock_confirm` sounds, the feed line and the knock callout. Still slow-mo
+(not knocks, left for the owner): you taken out 0.8 s ×0.3, the last rival squad 1.0 s ×0.22 + gold
+flash, losing a life 0.6 s ×0.35 + red flash, a perfect dodge 0.25 s ×0.4, a boss kill near you
+0.55 s ×0.3 (`Juice.boss_dead`). The tutorial's scripted beat-7 slow-mo (ext/tutorial-beats-7-8, `TutorialRival` calls `_slow` itself) is untouched.
+`--kill-reset-check` (a)/(m) asserts a knock leaves `slowmo` at 0 and no screen flash.
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 

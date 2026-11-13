@@ -1,0 +1,261 @@
+dex_no	file_id	display_name	line	stage	stages	branch	types	band	cry
+1	Mycroll	Mycroll	Mycroll	1	3		Spore	Starters	tiny squeak with a soft puff of spores
+2	Sporcupine	Sporcupine	Mycroll	2	3		Spore	Starters	cheeky yap and a rustle of quills
+3	Ringrove	Ringrove	Mycroll	3	3		Spore/Grass	Starters	deep warm bear hum with a wooden knock
+4	Vespyx	Vespyx	Vespyx	1	3		Poison	Starters	short fox yip that ends in a dry scorpion-tail rattle
+5	Vespox	Vespox	Vespyx	2	3		Poison	Starters	low cat growl with a quick tail-stinger click
+6	Glaivyx	Sabryx	Vespyx	3	3		Poison/Steel	Starters	sharp fox bark followed by a blade ring
+7	Prismander	Prismander	Prismander	1	3		Crystal	Starters	soft bubbly chirp like a sweet being unwrapped
+8	Glassolotl	Glassolotl	Prismander	2	3		Crystal	Starters	glassy two-note chime with a watery trill
+9	Chandelotl	Crystalotl	Prismander	3	3		Crystal/Fairy	Starters	proud rising trill over tinkling crystal
+10	Ermink	Ermink	Ermink	1	2		Normal	Mystery egg	quick stoat chitter
+11	Flarmink	Embermink	Ermink	2	2	a	Fire	Mystery egg	chitter that catches into a crackle of flame
+12	Rippmink	Rippmink	Ermink	2	2	b	Water	Mystery egg	chitter with a wave wash
+13	Blossmink	Blossmink	Ermink	2	2	c	Grass	Mystery egg	soft chitter and a breath of petals
+14	Voltmink	Voltmink	Ermink	2	2	d	Electric	Mystery egg	chitter with a snap of static
+15	Rimink	Rimink	Ermink	2	2	e	Ice	Mystery egg	chitter with ice cracking
+16	Umbrink	Nightmink	Ermink	2	2	f	Dark	Mystery egg	low chitter and an ink swish
+17	Lunink	Lunink	Ermink	2	2	g	Fairy	Mystery egg	dreamy chitter with a bell tone
+18	Prismink	Prismink	Ermink	2	2	h	Crystal	Mystery egg	chitter over a crystal glissando
+19	Wyrmink	Wyrmink	Ermink	2	2	i	Dragon	Mystery egg	chitter that deepens into a small roar
+20	Kestrike	Kestrike	Kestrike	1	3		Normal	Early common	sharp kestrel cry with a spark
+21	Arcestrel	Arcestrel	Kestrike	2	3		Normal	Early common	screech and a coil of rising static
+22	Voltalon	Voltalon	Kestrike	3	3		Normal/Electric	Early common	raptor shriek with a thunder crack
+23	Jerbit	Jerbit	Jerbit	1	3		Electric	Early common	squeak and a spring boing
+24	Jerbolt	Jerbolt	Jerbit	2	3		Electric	Early common	chirp and a static zap
+25	Dynaboa	Dynaboa	Jerbit	3	3		Electric	Early common	rising turbine whine and a spark
+26	Effigeetle	Sculptillar	Effigeetle	1	3		Rock/Bug	Early common	tiny tapping like a chisel on marble
+27	Effigoon	Effigoon	Effigeetle	2	3		Rock/Bug	Early common	stone hum from inside a shell
+28	Mortarfly	Mortarfly	Effigeetle	3	3		Rock/Bug	Early common	wide marble wing-beat and a soft chord
+29	Marchleaf	Marchleaf	Marchleaf	1	3		Bug	Early common	tiny marching chirps
+30	Scythant	Scythant	Marchleaf	2	3	a	Bug	Early common	chirp and a scythe swish
+31	Harvantis	Harvantis	Marchleaf	3	3	a	Bug	Early common	dry rustle and two blade snaps
+32	Shinobant	Shinobant	Marchleaf	2	3	b	Bug	Early common	near-silent chirp and a shuriken whirr
+33	Reapant	Reapant	Marchleaf	3	3	b	Bug/Grass	Early common	low buzz and a long blade sweep
+34	Mumblet	Mumblet	Mumblet	1	3		Bug	Early common	muffled mumble
+35	Klaxada	Klaxada	Mumblet	2	3		Bug	Early common	klaxon honk
+36	Sirencada	Sirencada	Mumblet	3	3		Sound/Bug	Early common	rising siren wail
+37	Dribbara	Dribbara	Dribbara	1	3		Water	Early common	tiny squeak and a single drip
+38	Soakybara	Soakybara	Dribbara	2	3		Water	Early common	content sigh in bubbling water
+39	Geysirbara	Geyserbara	Dribbara	3	3		Grass/Water	Early common	deep rumble and a geyser burst
+40	Cubbat	Cubwom	Cubbat	1	3		Normal	Early common	sleepy grunt and one die rolling
+41	Pipwom	Pipwom	Cubbat	2	3		Normal	Early common	grumble and dice shaken in a cup
+42	Critwom	Critwom	Cubbat	3	3		Normal	Early common	roar and dice crashing on a table
+43	Crofthorn	Crofthorn	Crofthorn	1	2		Grass/Normal	Early common	gentle moo with a cowbell
+44	Crofthollow	Crofthollow	Crofthorn	2	2		Grass/Normal	Early common	long low moo over a crackling hearth
+45	Kindlewren	Kindlewren	Kindlewren	1	3		Fire	Early common	chirp and a match strike
+46	Embrook	Embrook	Kindlewren	2	3		Fire	Early common	caw with a torch flare
+47	Pyrraven	Pyrraven	Kindlewren	3	3		Fire/Flying	Early common	dark caw over a roaring bonfire
+48	Moatpole	Moatpole	Moatpole	1	2		Rock/Water	Early common	wet croak with a small splash
+49	Rampartoad	Rampartoad	Moatpole	2	2		Rock/Water	Early common	booming croak like a gate slamming
+50	Echolop	Echolop	Echolop	1	2		Sound	Early common	quick squeak repeated as its own echo
+51	Howlop	Howlop	Echolop	2	2	a	Sound/Dark	Early common	rising howl with three pulsing sound rings
+52	Chimelop	Jinglop	Echolop	2	2	b	Sound/Fairy	Early common	soft chime and a quick hop
+53	Nymphane	Nymphane	Nymphane	1	2		Bug	Early common	glassy buzz
+54	Rosedart	Rosedart	Nymphane	2	2		Bug/Crystal	Early common	stained-glass chime and a dart whoosh
+55	Bucketmander	Pailmander	Bucketmander	1	3		Water	Early common	gulp and a bucket slosh
+56	Barrelmander	Kegmander	Bucketmander	2	3		Water/Electric	Early common	deep glug and a spark zap
+57	Cisternmander	Vatmander	Bucketmander	3	3		Water/Grass	Early common	slow gurgle through reeds
+58	Mothlet	Mothlet	Mothlet	1	3		Fairy	Early common	soft hoot with a wing flutter
+59	Lunowl	Lunowl	Mothlet	2	3		Fairy/Flying	Early common	airy two-note hoot with a faint shimmer
+60	Eclipsowl	Eclipsowl	Mothlet	3	3		Fairy/Dark	Early common	deep echoing hoot that fades to silence
+61	Glintmole	Glintmole	Glintmole	1	3		Rock	Early common	sniff and a crystal clink
+62	Geodemole	Geodemole	Glintmole	2	3		Rock	Early common	digging scrabble then a gem chime
+63	Druzemole	Gemole	Glintmole	3	3		Rock/Crystal	Early common	deep growl inside an echoing cave
+64	Nettlynx	Nettlynx	Nettlynx	1	3		Poison/Grass	Early common	kitten mew and a hedge-clipper snip
+65	Thistlynx	Thistlynx	Nettlynx	2	3		Poison/Grass	Early common	lynx chirrup and a leaf rustle
+66	Briarlynx	Briarlynx	Nettlynx	3	3		Poison/Grass	Early common	low lynx roar muffled by hedges
+67	Stamproo	Stamproo	Stamproo	1	3		Normal	Early common	chirp and a stamp thump
+68	Postroo	Postroo	Stamproo	2	3		Normal	Early common	hop hop and a letter drop
+69	Pillaroo	Pillaroo	Stamproo	3	3		Normal	Early common	gruff grunt and a postbox clang
+70	Mossgrade	Mossgrade	Mossgrade	1	2		Grass/Steel	Early common	soft squish and a happy mumble
+71	Mossbastion	Mosstodon	Mossgrade	2	2		Grass/Steel	Early common	slow stone groan under moss
+72	Murmurling	Murmurling	Murmurling	1	2		Bug/Sound	Early common	starling whistle on pan pipes
+73	Murmuron	Murmuron	Murmurling	2	2		Bug/Sound	Early common	pan-pipe call that breaks into a flock of wings
+74	Oarlet	Oarlet	Oarlet	1	3		Water	Early common	otter squeak and a splash
+75	Oarter	Oarter	Oarlet	2	3		Water	Early common	chirp and a quick paddle stroke
+76	Galleotter	Galleotter	Oarlet	3	3		Water/Steel	Early common	bark and many oars pulling together
+77	Scoopsy	Scoopsy	Scoopsy	1	2		Ice	Early common	squeak and an ice-cream scoop
+78	Sundormouse	Sundormouse	Scoopsy	2	2		Ice/Normal	Early common	sleepy squeak and a spoon clink
+79	Gravadillo	Gravadillo	Gravadillo	1	2		Psychic/Bug	Early common	small grunt and a heavy thud as it lands
+80	Gravitank	Gravidon	Gravadillo	2	2		Psychic/Bug	Early common	slow rumble that drops in pitch like something falling
+81	Fizzlet	Fizzlet	Fizzlet	1	3		Electric	Mid game	peep and a soda fizz
+82	Boltstrich	Boltstrich	Fizzlet	2	3		Electric	Mid game	honk with a crackle of static
+83	Thunderstrich	Thundrich	Fizzlet	3	3		Electric/Flying	Mid game	booming honk and thunder
+84	Bullpole	Bullpole	Bullpole	1	3		Poison	Mid game	bouncy boing
+85	Bullsfrog	Bullsfrog	Bullpole	2	3		Poison/Normal	Mid game	sharp croak and a dart thunk
+86	Quivertoad	Quivertoad	Bullpole	3	3		Poison	Mid game	bellow and a volley of arrows
+87	Kerchick	Kerchick	Kerchick	1	3		Flying	Mid game	grumpy squawk
+88	Jibbatross	Jibbatross	Kerchick	2	3		Flying	Mid game	gull cry with a sail snap
+89	Canvastross	Canvastross	Kerchick	3	3		Flying/Water	Mid game	long sea call over a full sail and breaking wave
+90	Tinbrock	Tinbrock	Tinbrock	1	3		Fire	Mid game	small grunt and a tin tap
+91	Anvilbrock	Anvilbrock	Tinbrock	2	3		Fire	Mid game	growl and a hammer on an anvil
+92	Forgebrock	Forgebrock	Tinbrock	3	3		Fire/Steel	Mid game	bear roar over bellows and fire
+93	Proofhop	Proofhop	Proofhop	1	2		Spore	Mid game	chirp and a dough squish
+94	Loafhopper	Loafhopper	Proofhop	2	2		Spore	Mid game	crisp chirp and crust crackle
+95	Moundlet	Moundlet	Moundlet	1	2		Bug	Mid game	snuffle and a few termite ticks
+96	Spirevark	Spirevark	Moundlet	2	2		Bug/Rock	Mid game	long sniff and a claw scrape
+97	Bubblisk	Bubblisk	Bubblisk	1	2		Crystal/Water	Mid game	blub and a bubble pop
+98	Tidalisk	Tidalisk	Bubblisk	2	2		Crystal/Water	Mid game	long hiss like a wave drawing back
+99	Coolatee	Coolatee	Coolatee	1	3		Ice	Mid game	happy seal bark with an icy tinkle
+100	Frigatee	Frigatee	Coolatee	2	3		Ice	Mid game	rolling bark with a shimmering whoosh
+101	Glaciatee	Glaciatee	Coolatee	3	3		Ice	Mid game	great bellow with a slow aurora hum
+102	Thrumbird	Thrumbird	Thrumbird	1	2		Flying	Mid game	hummingbird buzz like a plucked string
+103	Lyrewing	Lyrewing	Thrumbird	2	2		Sound/Flying	Mid game	three harp notes and a bright call
+104	Buckleron	Buckleron	Buckleron	1	3		Rock/Water	Mid game	small croak with a pot-lid clink
+105	Bulwartoad	Bulwartoad	Buckleron	2	3		Rock	Mid game	gruff croak and an iron clang
+106	Citadoad	Citadoad	Buckleron	3	3		Rock/Water	Mid game	heavy croak and a mace thud
+107	Fawngus	Fawnshroom	Fawngus	1	2		Spore	Mid game	gentle bleat with a spore puff
+108	Hatstag	Hatstag	Fawngus	2	2		Spore/Grass	Mid game	soft bell-like call in a quiet wood
+109	Pinster	Pinster	Pinster	1	2		Steel	Mid game	ball roll and a ping
+110	Tiltster	Tiltster	Pinster	2	2		Steel	Mid game	bumper pings and a flipper slap
+111	Bastling	Bastling	Bastling	1	2		Water/Rock	Mid game	click click and a little wave
+112	Bastionpet	Crabulwark	Bastling	2	2		Water/Rock	Mid game	slow claw clack and surf
+113	Gongibbon	Gongibbon	Gongibbon	1	2		Sound	Mid game	hoot hoot then one small gong tap
+114	Gongrowl	Gongrowl	Gongibbon	2	2		Sound/Steel	Mid game	chest-beat roar ending in a big gong
+115	Terrasloth	Pangolith	Terrasloth	1	2		Grass/Crystal	Mid game	soft snuffle and scales clicking shut
+116	Bonsolith	Bonsolith	Terrasloth	2	2		Grass	Mid game	old slow rumble with blossom falling
+117	Rimekit	Rimekit	Rimekit	1	3		Ice	Mid game	squeak inside a glass dome
+118	Rimeshrew	Rimeshrew	Rimekit	2	3		Ice	Mid game	chitter and a snow-globe shake
+119	Rimefang	Rimefang	Rimekit	3	3		Ice	Mid game	wolf howl through a blizzard
+120	Pocketpus	Pocketpus	Pocketpus	1	2		Poison	Mid game	quack-chirp and a zip
+121	Bladypus	Bladypus	Pocketpus	2	2		Poison	Mid game	quack and a blade snick
+122	Barokit	Barokit	Barokit	1	3		Electric	Mid game	mew and a tiny thunder rumble
+123	Barokat	Barokat	Barokit	2	3		Electric/Normal	Mid game	chirp and a barometer needle tick
+124	Barostorm	Barostorm	Barokit	3	3		Electric	Mid game	yowl inside rolling storm clouds
+125	Teapotamus	Teapotamus	Teapotamus	1	2		Fire	Mid game	happy grunt and a kettle whistle
+126	Chuggamus	Chuggamus	Teapotamus	2	2		Fire/Steel	Mid game	hippo roar with a steam hiss
+127	Lodestick	Magnestick	Lodestick	1	2		Psychic/Dark	Mid game	dry click and a magnet hum
+128	Lodestaff	Magnestaff	Lodestick	2	2		Psychic/Dark	Mid game	low thrum pulling stones together
+129	Pinguin	Pinguin	Pinguin	1	3		Ice/Normal	Mid game	honk and a single pin wobble
+130	Rollguin	Rollguin	Pinguin	2	3		Ice/Normal	Mid game	honk and a ball rolling
+131	Kingpinguin	Kingpinguin	Pinguin	3	3		Ice/Normal	Mid game	proud honk and a strike of ten pins
+132	Glomwort	Glomwort	Glomwort	1	2		Spore/Poison	Mid game	wet plop like a brush in paint
+133	Glomworth	Glombulus	Glomwort	2	2		Spore/Poison	Mid game	thick glooping swirl and a happy gurgle
+134	Foldbat	Foldbat	Foldbat	1	2		Sound	Mid game	squeak and a fan snapping shut
+135	Fanpire	Fanpire	Foldbat	2	2		Sound	Mid game	hiss and a fan snapping open
+136	Chiptero	Chiptero	Chiptero	1	2		Rock	Mid game	chirp and a pick tap
+137	Pickadactyl	Pickadactyl	Chiptero	2	2		Rock	Mid game	screech and a pickaxe strike
+138	Clinkpede	Clinkpede	Clinkpede	1	2		Poison	Mid game	tiny link clinks
+139	Chainipede	Chainipede	Clinkpede	2	2		Poison/Bug	Mid game	long chain drag and a hiss
+140	Skidlet	Skidlet	Skidlet	1	3		Ice	Mid game	chirp and a skate scrape
+141	Skateron	Skateron	Skidlet	2	3		Ice/Flying	Mid game	quick call and a long glide hiss
+142	Lanceron	Lanceron	Skidlet	3	3		Ice/Flying	Mid game	clear heron cry with a blade on ice
+143	Anchorbill	Anchorpup	Anchorbill	1	2		Psychic/Water	Mid game	short honk with a small bell clank
+144	Anchorhorn	Harpwhal	Anchorbill	2	2		Psychic/Water	Mid game	low whale call with a chain rattle and harpoon whoosh
+145	Bellowlet	Bellowlet	Bellowlet	1	3		Fire	Mid game	little puff and a bellows wheeze
+	Bellowary	Bellowary	Bellowlet	2	3		Fire	Mid game	a huffing bellows wheeze that ends in a cassowary boom
+146	Furnacowary	Furnowary	Bellowlet	3	3		Fire/Steel	Mid game	deep boom and a furnace roar
+147	Xylogator	Xylogator	Xylogator	1	3		Water/Sound	Mid game	three rising xylophone notes
+148	Marimbite	Marimbite	Xylogator	2	3		Water/Sound	Mid game	snap and a five-note run
+149	Glockodile	Glockodile	Xylogator	3	3		Water/Sound	Mid game	roar and a full descending scale
+150	Spanglin	Spanglin	Spanglin	1	2		Crystal	Mid game	giggle and mirror-tile tinkle
+151	Mirrolin	Mirrolin	Spanglin	2	2		Crystal/Psychic	Mid game	snort with a disco shimmer
+152	Rattlebub	Rattlebub	Rattlebub	1	2		Sound	Mid game	happy hiss and a baby rattle
+153	Maracoil	Maracoil	Rattlebub	2	2		Sound/Poison	Mid game	hiss over a maraca rhythm
+154	Filefin	Filefin	Filefin	1	3		Water/Steel	Mid game	blip and a file rasp
+155	Carpenjaw	Carpenjaw	Filefin	2	3		Water/Steel	Mid game	quick sawing
+156	Sawright	Sawright	Filefin	3	3		Water/Steel	Mid game	long saw stroke and a splash
+157	Lanterloris	Lanterloris	Lanterloris	1	2		Fairy/Fire	Mid game	sleepy coo with a paper rustle
+158	Lanternlong	Glowris	Lanterloris	2	2		Fairy/Fire	Mid game	rising coo as lanterns light one by one
+159	Kayak	Kayak	Kayak	1	3		Ice	Mid game	small bleat and a paddle splash
+160	Prowyak	Prowyak	Kayak	2	3		Ice	Mid game	snort and a creak of timber
+161	Dreadnoyak	Dreadnoyak	Kayak	3	3		Ice/Steel	Mid game	foghorn bellow with cracking ice
+162	Puffuse	Puffuse	Puffuse	1	2		Electric	Mid game	nervous puff and a fuse fizz
+163	Blastopuff	Blastopuff	Puffuse	2	2		Electric/Psychic	Mid game	angry puff then a big bang
+164	Polyshroom	Polyshroom	Polyshroom	1	3		Spore	Mid game	sleepy blub
+165	Starcap	Starcap	Polyshroom	2	3		Spore	Mid game	soft drifting hum
+166	Medushroom	Medushroom	Polyshroom	3	3		Spore/Poison	Mid game	airy sigh with trailing tones
+167	Pebblamb	Pebblamb	Pebblamb	1	2		Water/Crystal	Mid game	bleat and pebbles clicking
+168	Tesselamb	Tesselamb	Pebblamb	2	2		Rock/Normal	Mid game	deeper bleat and tiles clattering into place
+169	Latchling	Latchling	Latchling	1	3		Steel	Mid game	croak and a latch click
+170	Lockatara	Lockatara	Latchling	2	3		Steel	Mid game	hiss and a key turning
+171	Vaultara	Vaultara	Latchling	3	3		Steel	Mid game	low rumble and a vault door closing
+172	Jarmit	Jarmit	Jarmit	1	2		Water	Mid game	click and a tap on glass
+173	Lanternmit	Lanternmit	Jarmit	2	2	a	Water/Fire	Mid game	claw clack and a lamp flaring
+174	Stormit	Stormit	Jarmit	2	2	b	Water/Electric	Mid game	click with thunder in a bottle
+175	Terrarimit	Terrarimit	Jarmit	2	2	c	Water/Grass	Mid game	click and leaves rustling
+176	Tootle	Tootle	Tootle	1	3		Sound	Mid game	little toot from a horn
+177	Gramofrill	Gramofrill	Tootle	2	3		Sound	Mid game	crackly record start and a croon
+178	Phonodrake	Phonodrake	Tootle	3	3		Sound	Mid game	full roar through a gramophone horn
+179	Narfoil	Narfoil	Narfoil	1	2		Ice	Mid game	squeak and a foil swish
+180	Parrywhal	Parrywhal	Narfoil	2	2		Ice	Mid game	call and two blades ringing
+181	Foalaround	Foalaround	Foalaround	1	3		Fairy	Mid game	whinny and a music-box note
+182	Canopony	Canopony	Foalaround	2	3		Fairy	Mid game	trot and a carousel tune starting
+183	Carrousteed	Carrousteed	Foalaround	3	3		Fairy	Mid game	neigh over a full carousel organ
+184	Morelkin	Morelkin	Morelkin	1	3		Spore	Mid game	snuffle and a hollow knock
+185	Truffapir	Truffapir	Morelkin	2	3		Spore	Mid game	snort and digging
+186	Morelossus	Morelossus	Morelkin	3	3		Spore/Steel	Mid game	trumpet call and a deep forest echo
+187	Grainspin	Grainspin	Grainspin	1	3		Rock	Mid game	tiny patter of sand
+188	Sandwidow	Sandwidow	Grainspin	2	3		Rock	Mid game	dry hiss and sand pouring
+189	Hourachnid	Hourachnid	Grainspin	3	3		Rock/Fairy	Mid game	slow tick and an hourglass turning
+190	Parasolth	Parasolth	Parasolth	1	2		Dark	Late game	slow yawn and an umbrella pop
+191	Umbrathere	Ribbrella	Parasolth	2	2		Dark/Flying	Late game	hollow moan and bone wings unfolding
+192	Gravigrub	Gravigrub	Gravigrub	1	3		Psychic	Late game	low wobble
+193	Orbitle	Orbitle	Gravigrub	2	3		Psychic	Late game	hum that circles left to right
+194	Scarabit	Scarabit	Gravigrub	3	3	a	Psychic/Fairy	Late game	buzz with rings whirring
+195	Meteorab	Meteorab	Gravigrub	3	3	b	Psychic/Rock	Late game	falling whistle and impact boom
+196	Wickapi	Wickapi	Wickapi	1	3		Dark/Fire	Late game	shy bleat with a match-strike flick
+197	Snuffapi	Snuffapi	Wickapi	2	3		Dark/Fire	Late game	soft whinny and a candle being blown
+198	Chandelapi	Candelapi	Wickapi	3	3		Dark/Fire	Late game	long ghostly call over many small flames
+199	Pagodito	Pagodito	Pagodito	1	2		Dragon	Late game	little roar and a wooden bell
+200	Pagoguana	Pagoguana	Pagodito	2	2		Dragon/Rock	Late game	roar and a temple bell
+201	Lensling	Lensling	Lensling	1	3		Fairy	Late game	curious chirp and a lens twist
+202	Scopeleon	Scopeleon	Lensling	2	3		Fairy	Late game	soft click of a telescope extending
+203	Domeleon	Domeleon	Lensling	3	3		Fairy/Crystal	Late game	low hum and an observatory dome turning
+204	Blotlet	Blotlet	Blotlet	1	3		Dark	Late game	ink drop plip
+205	Slog	Slog	Blotlet	2	3		Dark	Late game	wet slide and type letters clacking
+206	Sloggoth	Sloggoth	Blotlet	3	3		Dark/Psychic	Late game	low growl over a printing press thump
+207	Knotling	Knotling	Knotling	1	2		Spore	Late game	squeak and a rope creak
+208	Knotwyrm	Knotwyrm	Knotling	2	2		Spore/Dragon	Late game	low creak as a knot pulls tight
+209	Bathilus	Bathilus	Bathilus	1	3		Psychic	Late game	sonar ping
+210	Torpecone	Torpecone	Bathilus	2	3		Psychic	Late game	ping and a fast whoosh
+211	Dreadmonite	Dreadmonite	Bathilus	3	3		Psychic/Water	Late game	deep horn call and a crashing wave
+212	Grammite	Grammite	Grammite	1	2		Bug	Late game	scratchy chirp and two blades crossing
+213	Dobsabre	Dobsabre	Grammite	2	2		Dragon/Bug	Late game	buzz and a sabre flourish
+214	Gloamshell	Duskargot	Gloamshell	1	2		Dark/Fairy	Late game	slow squelch with a soft purple hum
+215	Gloamspire	Duskspire	Gloamshell	2	2		Dark/Fairy	Late game	low drone with crystal ringing
+216	Olmlet	Olmlet	Olmlet	1	3		Water/Crystal	Late game	delicate porcelain tink
+217	Glazolm	Glazolm	Olmlet	2	3		Water/Crystal	Late game	flowing chime like pouring water
+218	Kintsuwyrm	Gildwyrm	Olmlet	3	3		Water/Crystal	Late game	rich bell tone with crystal ringing
+219	Malletary	Malletary	Malletary	1	1		Normal/Steel	Late game	harsh bird call and a mallet strike
+220	Lurklet	Lurklet	Lurklet	1	3		Dark	Late game	shy bubble pop with a soft lure hum
+221	Snapler	Snapler	Lurklet	2	3		Dark	Late game	gurgling snarl and a quick jaw snap
+222	Maulangler	Maulangler	Lurklet	3	3		Dark	Late game	deep sea roar with a slow glowing hum
+223	Pipewurm	Pipewurm	Pipewurm	1	2		Poison	Late game	hollow toot through a pipe
+224	Pipeworth	Pipeworth	Pipewurm	2	2		Poison/Dragon	Late game	deep organ-pipe drone with a bubbling undertone
+225	Selenfin	Lunafin	Selenfin	1	2		Fairy/Water	Late game	gentle blip like a tide clock tick
+226	Selenwhale	Lunarca	Selenfin	2	2		Fairy/Water	Late game	long whale song that rises and falls like a tide
+227	Reelacine	Reelacine	Reelacine	1	1		Dark/Normal	Late game	yip and a film reel whirr
+228	Pawnfry	Pawnfry	Pawnfry	1	3		Normal	Late game	grumpy blub and a wood knock
+229	Gambitfin	Gambitfin	Pawnfry	2	3		Normal	Late game	whinny and a chess piece set down
+230	Checkmare	Checkmare	Pawnfry	3	3		Dragon/Steel	Late game	sharp neigh and a clock slap
+231	Gilabacus	Gilabacus	Gilabacus	1	1		Poison/Fairy	Late game	hiss and beads clicking
+232	Hivara	Hivara	Hivara	1	1		Bug/Steel	Late game	deep buzz like an accordion drone
+233	Cairnback	Cairnback	Cairnback	1	1		Steel/Rock	Late game	stones settling
+234	Zephyrak	Zephyrak	Zephyrak	1	1		Flying/Dragon	Late game	wind gust and a weather vane squeak
+235	Zipling	Zipling	Zipling	1	3		Dark	Pseudo-legendary	tiny zip up then a giggle
+236	Zippelith	Zipperpent	Zipling	2	3		Dark	Pseudo-legendary	long zipper pull with a hiss
+237	Seamwyrm	Seamwyrm	Zipling	3	3		Dark/Dragon	Pseudo-legendary	slow unzipping roar that opens wide
+238	Kitlet	Kitlet	Kitlet	1	3		Dragon	Pseudo-legendary	little roar and a kite flutter
+239	Ribbonwyrm	Ribbonwyrm	Kitlet	2	3		Dragon/Flying	Pseudo-legendary	airy cry and ribbons snapping in wind
+240	Dragonkite	Kitedrake	Kitlet	3	3		Dragon/Flying	Pseudo-legendary	proud roar over a big kite catching the wind
+241	Luckhop	Luckhop	Luckhop	1	1		Grass/Fairy	Legendary: minor	cheerful chirp and a coin ping
+242	Twinklup	Twinklup	Twinklup	1	1		Normal/Fairy	Legendary: minor	happy yip and a twinkle
+243	Lockwren	Lockwren	Lockwren	1	1		Flying/Steel	Legendary: minor	sweet tweet and a locket click
+244	Glacione	Clionice	Glacione	1	1		Ice/Fairy	Legendary: minor	tiny ice bell
+245	Cometail	Cometail	Cometail	1	1		Fairy/Psychic	Legendary: minor	light yip with a rising star shimmer
+246	Wayshell	Wayshell	Wayshell	1	1		Water/Psychic	Legendary: minor	deep sea call and a compass tick
+247	Pharoheron	Pharoheron	Pharoheron	1	1		Flying/Electric	Legendary: minor	long heron call and a lighthouse horn
+248	Ghoulamari	Ghoulamari	Ghoulamari	1	1		Fairy/Dark	Legendary: minor	echoing warble and a crystal hum
+249	Pavonazar	Pavonazar	Pavonazar	1	1		Fairy/Crystal	Legendary: minor	peacock cry and a fan of bells
+250	Calderoise	Calderoise	Calderoise	1	1		Fire/Rock	Legendary: boss	slow roar and an eruption
+251	Siegephant	Siegephant	Siegephant	1	1		Steel/Rock	Legendary: boss	trumpet and a gate crashing down
+252	Glaciammoth	Glaciammoth	Glaciammoth	1	1		Ice/Steel	Legendary: boss	ancient bellow and a glacier cracking
+253	Sarcobra	Sarcobra	Sarcobra	1	1		Dragon/Dark	Legendary: boss	royal hiss and a sistrum rattle
+254	Aurostag	Aurostag	Aurostag	1	1		Ice/Fairy	Legendary: ultra	clear stag call under a wide aurora hum
+255	Cetorgan	Organwhal	Cetorgan	1	1		Sound/Fairy	Legendary: ultra	whale song played on a pipe organ
+256	Hydrangor	Hydrangor	Hydrangor	1	1		Grass/Dragon	Legendary: ultra	five voices calling in a chord
+257	Cindermaw	Cindermaw	Cindermaw	1	1		Fire/Dark	Legendary: blight	cackling howl with bone rattle
+258	Sphinxblight	Enigmane	Sphinxblight	1	1		Poison/Psychic	Legendary: blight	low riddle-like growl and wing thunder
+259	Palloth	Palloth	Palloth	1	1		Bug/Dark	Legendary: blight	dry whisper and soft heavy wing beats

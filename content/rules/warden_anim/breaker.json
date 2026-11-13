@@ -47,7 +47,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.0,
-		"run_speed": 4.8
+		"run_speed": 4.8, "stride": [1.35, 1.55], "foot_mps": [3.1, 7.4], "arm_swing": {"L": 0.5}
 	},
 	"air": {
 		"rise": "jump",
@@ -110,7 +110,8 @@
 			"upper": true
 		},
 		"bul_slamshield": {
-			"clip": "shield_slam"
+			"clip": "shield_slam",
+			"lead": 0.25
 		},
 		"bul_mend": {
 			"clip": "e_mend",
@@ -121,7 +122,8 @@
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"clip": "x_slam"
+			"clip": "x_slam",
+			"upper": "moving"
 		},
 		"mf_xform": {
 			"clip": "fuse"
@@ -140,6 +142,8 @@
 		},
 		"dead_t": 1.3
 	},
+	"carry_stow": ["x_weapon", "x_shield"],
+	"carry_fwd": 1.35,
 	"procedural": [
 		"ledge",
 		"mantle",
@@ -207,6 +211,6 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 1.65
 	}
 }

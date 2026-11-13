@@ -5,7 +5,7 @@ extends RefCounted
 ##   - hold the interact key (F) for hold_s beside it to commit; then the scan runs on its own for scan_s:
 ##     a beam from you binds the Boki, it dissolves into light and into a capsule, with a rising hum and a
 ##     pop at the end. No holding needed.
-##   - while it runs you are rooted and can aim but not shoot. A dash cancels it (your choice). Crowd control
+##   - while it runs you are rooted and can aim but not shoot. Space or a dash cancels it. Crowd control
 ##     on you (stun, root, a knockback, Grounded, a hex, a grapple) interrupts it; plain damage does not.
 ##     The Boki's daze timer waits (Kin.scan_by) and picks up again if you are interrupted, so you can retry.
 ##   - success puts a capsule in your box (Hunter.caught, capacity in content/rules/capture.json); a full box
@@ -118,6 +118,7 @@ static func _tick_scan(m, h: Hunter, st: Dictionary, dt: float) -> void:
 	var k: Kin = kv if is_instance_valid(kv) else null
 	var why := interrupt_reason(h, k)
 	if why != "":
+		h.inp["jump"] = false            # the Space press that cancelled is spent: it does not also hop
 		cancel(m, h, why)
 		return
 	# committed: rooted, aim stays free, no shooting
@@ -148,13 +149,15 @@ const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
 static func controlled(h: Hunter) -> bool:
 	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
-## What stops any channel on the hunter (a scan, a rescue): "dash" (your choice) or "cc" (crowd control). "" = neither.
+## What stops a channel on the hunter (a scan): "jump" or "dash" (your choice), or "cc" (crowd control). "" = none.
 static func hunter_stop(h: Hunter) -> String:
+	if h.inp.get("jump", false) and h.is_local():      # (a bot's hop never cancels its own scan)
+		return "jump"
 	if h.inp.get("dash", false) or h.roll_t > 0.0:
 		return "dash"
 	return "cc" if controlled(h) else ""
 
-## What stops a scan: "dash" (your choice), crowd control, or the Boki gone. "" keeps it going.
+## What stops a scan: "jump" or "dash" (your choice), crowd control, or the Boki gone. "" keeps it going.
 ## Plain damage is not on the list.
 static func interrupt_reason(h: Hunter, k: Kin) -> String:
 	if k == null or not is_instance_valid(k) or k.dead or k.state != "dazed":
@@ -180,10 +183,12 @@ static func cancel(m, h: Hunter, why: String) -> void:
 	if k is Kin and is_instance_valid(k):
 		(k as Kin).scan_by = null
 		_send(m, "scan_stop", h, k, 0.0)
-	if why in ["dash", "cc"]:               # (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
+	# (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
+	if why in ["jump", "dash", "cc"]:
 		if h.is_local() and m.hud:
-			m.hud.toast("Scan cancelled: hold %s beside it to try again" % Settings.key_cap("interact") if why == "dash" else "Scan interrupted: hold %s to try again" % Settings.key_cap("interact"), Color("ffd89a"))
-		m.sfx("kin_unsure", h.pos, -6.0)
+			var lead := "Scan interrupted" if why == "cc" else "Scan cancelled"
+			m.hud.toast("%s: hold %s beside it to try again" % [lead, Settings.key_cap("interact")], Color("ffd89a"))
+		m.sfx("scan_fail", h.pos, 0.0)
 
 ## The match is going away: stop every beam and hum (a loop key outlives the node that started it).
 static func teardown(m) -> void:
@@ -204,6 +209,7 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 		# the box filled while it ran (a deathbox looted, a net catch): it lets go, and rivals see it stop, not finish
 		_send(m, "scan_stop", h, k, 0.0)
 		full_note(m, h)
+		m.sfx("scan_fail", h.pos, 0.0)
 		return
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
@@ -215,7 +221,7 @@ static func release(m, h: Hunter, idx: int) -> bool:
 		return false
 	var rec: Dictionary = h.caught[idx]
 	h.caught.remove_at(idx)
-	m.sfx("kin_happy", h.pos, -4.0)
+	m.sfx(KinVoice.cue(String(rec["species"]), "happy"), h.pos, -4.0)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color(Data.KIN[String(rec["species"])]["color"]), 12, 3.0)
 	if h.is_local() and m.hud:
 		m.hud.toast("%s was let go" % rec.get("name", "The Boki"), Color("bfe9ff"))
@@ -251,6 +257,8 @@ static func on_net(m, h: Hunter, kind: String, extra: String) -> void:
 			if not st2.is_empty():
 				_stop_fx(m, h, st2)
 				h.remove_meta("cap")
+				if kind == "scan_stop" and k != null and not k.dead:
+					m.sfx("scan_fail", h.pos, 0.0)          # a rival's scan broke off: you hear the snap
 			if kind == "scan_done" and k != null:
 				_pop(m, h, k)
 
@@ -304,10 +312,20 @@ static func _stop_fx(m, h: Hunter, st: Dictionary) -> void:
 		Sfx.loop_stop(String(st["hum"]))
 		st.erase("hum")
 
+## 0 common, 1 a mutated Boki, 2 a shimmer or a rare species: picks the chime in rules "pop_sounds".
+static func rarity_tier(k: Kin) -> int:
+	if bool(k.rec.get("shimmer", false)) or bool(k.sp.get("rare", false)):
+		return 2
+	return 1 if Mutations.special(k.rec) else 0
+
 ## The finish: a bright pop and the capsule flying to the hunter.
 static func _pop(m, h: Hunter, k: Kin) -> void:
 	var col: Color = Data.KIN[k.species]["color"]
-	m.sfx("scan_pop", k.pos, 0.0)
+	var tier := rarity_tier(k)
+	m.sfx(rules()["pop_sounds"][tier], k.pos, 0.0)
+	m.sfx("scan_call", k.pos, -2.0)
+	if Sfx.listener.distance_to(k.pos) < Sfx.hear_range:
+		Sfx.duck(float(rules()["duck_s"]), float(rules()["duck_db"]))     # the music makes room for the catch
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
 	m.fx.ring(k.pos, 1.8, Color(BEAM_COL, 0.9), 0.45)

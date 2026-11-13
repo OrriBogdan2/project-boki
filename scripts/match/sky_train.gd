@@ -9,8 +9,8 @@ extends Node3D
 ## jump on top of that (Hunter._occ keeps you on the deck and lets you step off onto a pier or jump
 ## off). The train itself is deadly while it's moving: its front, or any car that hits you while you
 ## aren't on top of it, takes you straight out (Match.train_hit). It warns you: a headlight, a horn
-## about two seconds before it reaches you (and before it pulls out of a stop), and the rails ahead
-## of it pulsing.
+## about two seconds before it reaches you, and the rails ahead of it pulsing (also from the whistle
+## before it pulls out of a stop). Its halt and ride sounds are TrainSfx.
 
 const CAR_LEN := 4.6
 const CAR_GAP := 5.3          # centre to centre
@@ -18,8 +18,11 @@ const HALF_W := 1.2
 const ENGINE_KILL_SPEED := 2.0
 const GLOW_N := 16
 ## The decks reach half way across the couplings, so you can walk from car to car without a gap.
+const REACH_PAD := CAR_LEN + 1.0   # m: past the train's half-length nothing touches it (a car's half-diagonal
+                                   # is 2.6, the engine's front sweep reaches 3.6)
 const GAP_PAD := (CAR_GAP - CAR_LEN) * 0.5 + 0.05
 const HORN_LEAD := 2.2        # seconds of warning before the engine reaches someone in its path
+const DEPART_LEAD := 4.0      # s: the whistle before it pulls out of a stop, time to run for it (under the 6 s dwell)
 
 var m: Node = null
 var world: World = null
@@ -37,9 +40,10 @@ var old: Array = []
 var car_nodes: Array = []
 var glows: Array = []
 var light: SpotLight3D = null
+var halts: TrainHalts = null  # the beacons and pier glow
+var lamp: TrainLamp = null    # the headlight halo, beam and trail
+var sounds: TrainSfx = null   # brakes, bell, doors, whistle, ride and rumble
 var horn_cd := 0.0
-var rail_cd := 0.0
-var was_moving := false
 var ride_t := {}              # hunter -> match time they last stood on a car
 var carried := {}             # hunter -> how far the train carried them last step (world units)
 var depart_warned := false
@@ -54,10 +58,9 @@ func setup(match_node: Node) -> void:
 	speed = float(spec.get("speed", 8.0))
 	dwell = float(spec.get("dwell", 6.0))
 	loop_len = float(R["len"])
-	# the engine stops a little past the pier so the middle of the train sits at it
-	var mid_off := (cars_n - 1) * CAR_GAP * 0.5
+	# the engine stops a little past the pier so the middle of the train sits at it (_mid_off)
 	for s in R["stations"]:
-		stops.append(fposmod(float(s) + mid_off, loop_len))
+		stops.append(fposmod(float(s) + _mid_off(), loop_len))
 	stops.sort()
 	period = 0.0
 	for i in stops.size():
@@ -69,8 +72,16 @@ func setup(match_node: Node) -> void:
 		period += dwell + tm
 	_build_track()
 	_build_cars()
+	halts = TrainHalts.new()
+	add_child(halts)
+	halts.setup(self, Settings.quality() == "low")
+	lamp = TrainLamp.new()
+	lamp.setup(self, car_nodes[0], light.position)
+	sounds = TrainSfx.new()
+	sounds.setup(self)
 	for i in cars_n:
-		cur.append(Transform3D()); old.append(Transform3D())
+		cur.append(Transform3D())
+		old.append(Transform3D())
 	_place(0.0)
 	old = cur.duplicate()
 	# the cars stand at their first stop from the start (not at the origin until the first tick), so
@@ -78,6 +89,29 @@ func setup(match_node: Node) -> void:
 	for k in cars_n:
 		(car_nodes[k] as Node3D).transform = cur[k]
 	_attach_crates()
+
+## m: how far past a station's pier the engine stops, so the middle of the train sits at the pier.
+func _mid_off() -> float:
+	return (cars_n - 1) * CAR_GAP * 0.5
+
+## Seconds until the train next pulls into the stop at the station arc `station_s` (a route station),
+## and 0 while it stands there. The schedule is a pure function of the match clock, so this is exact.
+func halt_eta(station_s: float) -> float:
+	var at := fposmod(station_s + _mid_off(), loop_len)
+	var now := fposmod(float(m.time), period)
+	var leg_start := 0.0
+	for L in legs:
+		var gap := absf(fposmod(float(L["s0"]) - at + loop_len * 0.5, loop_len) - loop_len * 0.5)
+		if gap < 1.0:
+			if now >= leg_start and now < leg_start + dwell:
+				return 0.0
+			return fposmod(leg_start - now, period)
+		leg_start += dwell + float(L["t"])
+	return INF
+
+## m/s: how fast the train goes along the loop at match time t (0 while it stands at a stop).
+func speed_at(t: float) -> float:
+	return _schedule(t).y
 
 ## Where the engine is at a given match time, and how fast it's going.
 func _schedule(t: float) -> Vector2:
@@ -155,6 +189,8 @@ func solid_at(x: float, z: float, y: float, r: float) -> float:
 	return 0.0
 
 func _car_under(p: Vector3, xf: Array, up := 0.25) -> int:
+	if not _near_train(p, xf):
+		return -1
 	for k in range(1, cars_n):
 		var t: Transform3D = xf[k]
 		if absf(p.x - t.origin.x) > CAR_LEN or absf(p.z - t.origin.z) > CAR_LEN:
@@ -163,6 +199,14 @@ func _car_under(p: Vector3, xf: Array, up := 0.25) -> int:
 		if absf(l.x) <= HALF_W + 0.1 and absf(l.z) <= CAR_LEN * 0.5 + GAP_PAD + 0.05 and l.y > -0.3 and l.y < up:
 			return k
 	return -1
+
+## Is p (x/z) within reach of the train at all: the cheap cull before the per-car tests, which every
+## hunter, monster, Boki and pickup on the map goes through each tick.
+func _near_train(p: Vector3, xf: Array) -> bool:
+	var a: Vector3 = (xf[0] as Transform3D).origin
+	var b: Vector3 = (xf[cars_n - 1] as Transform3D).origin
+	var r := (cars_n - 1) * CAR_GAP * 0.5 + REACH_PAD
+	return Vector2(p.x - (a.x + b.x) * 0.5, p.z - (a.z + b.z) * 0.5).length_squared() < r * r
 
 func _carry(k: int, p: Vector3) -> Vector3:
 	return (cur[k] as Transform3D) * ((old[k] as Transform3D).affine_inverse() * p)
@@ -224,15 +268,13 @@ func tick(dt: float) -> void:
 			n.rotation.y = (cur[k5] as Transform3D).basis.get_euler().y + PI * 0.5
 	_kill_zone()
 	_visuals(dt, moving)
-	# all aboard: the horn goes a couple of seconds before it pulls out of a stop, so anyone on the
-	# rails ahead has time to step off
-	if not moving and not depart_warned and _schedule(float(m.time) + HORN_LEAD).y > 0.3:
+	# all aboard: DEPART_LEAD before it pulls out of a stop the whistle goes and the rails pulse, so
+	# you can run for it, and anyone on the rails ahead has time to step off
+	if not moving and not depart_warned and speed_at(float(m.time) + DEPART_LEAD) > 0.3:
 		depart_warned = true
-		horn_cd = HORN_LEAD + 0.5
-		m.sfx("horn", (cur[0] as Transform3D).origin, -1.0, 0.95)
 	if moving:
 		depart_warned = false
-	was_moving = moving
+	sounds.tick(moving)
 
 ## The train hits for good while it's moving: anything in front of the engine, or caught by the
 ## engine or a car while not standing on top of it (Match.train_hit: no wisp, straight out).
@@ -265,6 +307,8 @@ func _kill_zone() -> void:
 ## track ahead; the engine's body and the cars' frames hit anything that isn't up on a deck. A rider
 ## (on a car a moment ago) is never hit by the engine's body, only by its front.
 func hit_by(p: Vector3, rider := false) -> int:
+	if not _near_train(p, cur):
+		return -1
 	var t: Transform3D = cur[0]
 	var l := t.affine_inverse() * p
 	if absf(l.x) < HALF_W + 0.3 and l.z < -CAR_LEN * 0.5 + 0.8 and l.z > -CAR_LEN * 0.5 - 1.3 and l.y > -1.8 and l.y < 2.8:
@@ -432,21 +476,13 @@ func _visuals(dt: float, moving: bool) -> void:
 		(g.material_override as ShaderMaterial).set_shader_parameter("color", Color(1.0, 0.42 + 0.3 * (1.0 - heat), 0.18, clampf(a, 0.0, 1.0)))
 	if light:
 		light.light_energy = 1.4 + heat * 2.6
-	# sound: the horn about two seconds before it reaches anyone in its path, the rails singing when
-	# it's close
-	horn_cd -= dt; rail_cd -= dt
+	halts.tick(dt)
+	lamp.tick(heat, moving)
+	# the horn about two seconds before it reaches anyone in its path
+	horn_cd -= dt
 	if moving and horn_cd <= 0.0 and in_path(HORN_LEAD) != null:
 		m.sfx("horn", (cur[0] as Transform3D).origin, 1.0)
 		horn_cd = 4.0
-	var pl = m.player
-	if pl and not pl.out and moving:
-		var t: Transform3D = cur[0]
-		var near := 1e9
-		for k in cars_n:
-			near = minf(near, ((cur[k] as Transform3D).origin - pl.pos).length())
-		if near < 16.0 and rail_cd <= 0.0:
-			m.sfx("rail", t.origin, -12.0 + (16.0 - near) * 0.5, 0.9 + heat * 0.2)
-			rail_cd = 0.8
 
 ## The first hunter (not riding it) the engine will reach within `secs` at its current speed, or
 ## null. Measured along the loop, so it works round the bends.
@@ -463,13 +499,10 @@ func eta(e) -> float:
 		return INF
 	if e is Hunter and float(m.time) - float(ride_t.get(e, -9.0)) < 1.5:
 		return INF
-	var R: Dictionary = world.train_route
-	var c: Vector2 = R["center"]
-	var rad := float(R["r"])
-	var d2 := Vector2(e.pos.x, e.pos.z) - c
-	if absf(d2.length() - rad) > HALF_W + 1.5:
+	var nr := TrainRoute.near(world, e.pos.x, e.pos.z)
+	if nr == Vector3.INF or absf(nr.y) > HALF_W + 1.5:
 		return INF
-	var s := fposmod(d2.angle(), TAU) * rad
+	var s := nr.x
 	var ahead := fposmod(s - head_s, loop_len) - CAR_LEN * 0.5
 	if ahead < -1.0:
 		return INF
@@ -480,9 +513,9 @@ func eta(e) -> float:
 
 ## Which way to step to get off the rails (away from the loop's centre line), for bots.
 func step_off_dir(e) -> Vector2:
-	var c: Vector2 = world.train_route["center"]
-	var d2 := Vector2(e.pos.x, e.pos.z) - c
-	var out := d2.normalized() * (1.0 if d2.length() >= float(world.train_route["r"]) else -1.0)
+	var out := TrainRoute.off_dir(world, e.pos.x, e.pos.z)
+	if out == Vector2.ZERO:
+		return out
 	# the side with ground to stand on, if only one has it
 	var a: Vector2 = Vector2(e.pos.x, e.pos.z) + out * 2.2
 	var b: Vector2 = Vector2(e.pos.x, e.pos.z) - out * 2.2

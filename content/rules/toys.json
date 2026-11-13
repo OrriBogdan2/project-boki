@@ -1,0 +1,31 @@
+{
+	"desc": "The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.",
+	"joy_below": 85.0,
+	"pick_chance": 0.5,
+	"play_secs": [8.0, 12.0],
+	"go_timeout": 20.0,
+	"joy_gain": 14.0,
+	"stat_gain": 1,
+	"max_players": 2,
+	"fav_after": 3,
+	"fav_after_doc": "Plays at toys before a Boki crowns its most-used toy as its favourite (FavToy).",
+	"fav_weight": 6.0,
+	"fav_weight_doc": "How many times likelier a Boki is to pick its favourite toy than a plain one.",
+	"inherit_secs": 60.0,
+	"inherit_secs_doc": "Seconds of play a baby's inherited favourite starts with, so a few other plays do not undo it.",
+	"snack_item": "kibble",
+	"snack_item_doc": "What a dig finds (a pantry item) when it turns something up; each toy's \"snack\" is the chance per dig.",
+	"squabble_temper": 0.7,
+	"sulk_secs": 12.0,
+	"like_weight": 2.0,
+	"trait_weight": 1.0,
+	"join_weight": 2.5,
+	"join_weight_doc": "A toy someone is already playing with is this many times likelier, so a second Boki tends to join in.",
+	"toys": {
+		"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"},
+		"toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"},
+		"toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "crystal", "prism", "frost"], "doc": "splashed by Water, Ice and Crystal leans, the Glasswater types (species themes prism, frost today)"},
+		"toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"},
+		"toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}
+	}
+}

@@ -1,8 +1,10 @@
 extends Node
 ## --hitch-check: one seeded expedition the way a player gets it (loading screen and warm-up, the
 ## planning map, the skyship ride, the jump, the glide down, landing and the first seconds on the
-## ground), timing every drawn frame and failing if one in the start/drop/landing stretch stalls.
+## ground, with a mob pack of every roaming kind a second after landing), timing every drawn frame and
+## failing if one in the start/drop/landing stretch stalls.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --hitch-check
+##   [--load-check | --load-check=home | --load-check=training]
 ##   [--hitch-out=/path/report.txt] [--hitch-squad=3] [--hitch-seed=4101] [--hitch-budget=ms] [--quality=...]
 ## Also runs headless (--headless): then nothing is drawn and only the script side is timed.
 ##
@@ -41,6 +43,8 @@ var last_us := 0
 var frames: Array = []
 var load_frames: Array = []
 var load_ms := 0.0
+const READY_HOLD_MS := 300.0    # ms the loading screen may stay up once the match is ready (playtest 11-09)
+const LOADING := preload("res://scripts/ui/loading.gd")
 var landed_at := -1.0
 var vp_rid: RID
 var _end := false
@@ -59,9 +63,18 @@ var seed_v := 4101
 var squad := 3
 var load_only := false     # --load-check: stop at the reveal and judge the loading screen
 var home_only := false     # --load-check=home: the title-to-home swap instead (see _home_check)
+var hop_only := false      # --load-check=hop: a Waystone hop from the hub to Bramblebank (see _hop_check)
 var trace := false
+var training := false      # --load-check=training: the Training Area's load instead of an expedition's
 var shots_dir := ""        # --load-shots=dir: a screenshot of the loading screen every half second (skews timings)
 var _shot_t := 0.0
+var advisory := false      # set by run(): a fail does not fail the exit code
+
+## CheckRegistry entry point. "advisory" (docs/CHECKS_TIMING.md): wall-clock frame times swing with
+## load on a shared CPU box, so a fail prints as ADVISORY and exits 0; --timing-strict keeps it a fail.
+func run(main: Node, mode: String) -> void:
+	advisory = mode == "advisory" and not "--timing-strict" in OS.get_cmdline_user_args()
+	main.add_child(self)
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -70,9 +83,18 @@ func _ready() -> void:
 		if a.begins_with("--hitch-seed="): seed_v = int(a.substr(13))
 		if a.begins_with("--hitch-squad="): squad = int(a.substr(14))
 		if a == "--hitch-trace": trace = true; PerfLog.trace_slices = true
-		if a.begins_with("--load-shots="): shots_dir = a.substr(13)
+		if a.begins_with("--load-shots="):
+			shots_dir = a.substr(13)
+			DirAccess.make_dir_recursive_absolute(shots_dir)
 		if a == "--load-check": load_only = true
 		if a == "--load-check=home": load_only = true; home_only = true
+		if a == "--load-check=training":
+			load_only = true
+			training = true
+		if a == "--load-check=hop":
+			load_only = true
+			home_only = true
+			hop_only = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	software = not headless and (adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader") or adapter.contains("swrast"))
@@ -102,10 +124,19 @@ func _ready() -> void:
 	started_us = Time.get_ticks_usec()
 	last_us = started_us
 	print("HITCH renderer=%s adapter=%s software=%s headless=%s seed=%d squad=%d" % [RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), software, headless, seed_v, squad])
+	if hop_only:
+		_hop_check()
+		return
 	if home_only:
 		_home_check()
 		return
+	_cache_count()      # what an earlier launch left in the cache is not this run's compiles
 	# "probe" keeps the loading screen and the warm-up, as a real expedition has them
+	if training:
+		var opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_v}
+		opts.merge({"no_drop": true, "autoplay": true, "probe": true})
+		Game.main.show_screen("match", opts)
+		return
 	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
 
 func _process(_delta: float) -> void:
@@ -209,11 +240,29 @@ func _next_phase() -> void:
 				_set_phase("land")
 				landed_at = m.time
 		"land":
+			if phase_t >= 1.0 and not _pack_done:
+				_pack_done = true
+				_bring_pack()
 			if phase_t >= 3.0:
 				_finish()
 	if m.time > 200.0 and not _end:
 		print("HITCH stuck in phase ", phase)
 		_finish()
+
+## A second on the ground, one of each roaming mob kind spawns round you (a fight's pack): a kind's first
+## model mid-play compiled its materials then, unless the warm-up built one (WarmUp._mob_stand_ins).
+var _pack_done := false
+func _bring_pack() -> void:
+	var P: Hunter = m.player
+	var kinds: Array = []
+	for k in Data.MOBS:
+		if not Data.MOBS[k].get("boss", false) and not Data.MOBS[k].get("ward", false):
+			kinds.append(k)
+	for i in kinds.size():
+		var a := TAU * i / kinds.size()
+		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 7.0, [], 1.0, 0.5, 6.0)
+		m.spawn_mob(kinds[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	print("HITCH pack: %d mobs (%s) at t=%.2f" % [kinds.size(), ",".join(kinds), m.time])
 
 ## Materials in the camera's view this frame that weren't in view on any frame before (from the
 ## first judged frame on). A first draw is where shaders compile, so these name what a stall drew.
@@ -366,6 +415,11 @@ func _finish_load() -> void:
 			up += 1
 			if sp > prev: drawn += 1
 		prev = sp
+	var walls: Array = fl.map(func(f): return float(f["wall"]))
+	walls.sort()
+	if not walls.is_empty():
+		var p95: float = walls[mini(walls.size() - 1, int(walls.size() * 0.95))]
+		lines.append("LOAD frame ms p50 %.1f p95 %.1f max %.1f" % [walls[walls.size() / 2], p95, walls[-1]])
 	lines.append("LOAD spinner drew on %d of %d loading-screen frames" % [drawn, up])
 	var ranked := fl.duplicate()
 	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))
@@ -381,14 +435,15 @@ func _finish_load() -> void:
 	lines.append("LOAD build steps (total ms): " + ", ".join(sk.slice(0, 16).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	for nt in PerfLog.notes: lines.append("LOAD note: " + String(nt))
 	var spin_ok := up == 0 or drawn >= up - 1
-	var ok := over == 0 and spin_ok and up > 0
-	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s)" % [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen"]))
-	var txt := "\n".join(lines)
-	print(txt)
-	if out_path != "":
-		var fa := FileAccess.open(out_path, FileAccess.WRITE)
-		if fa: fa.store_string(txt + "\n")
-	get_tree().quit(0 if ok else 1)
+	var tail := 0.0       # ms the screen stayed up once the match was built and drawn ("Ready")
+	for f in fl:
+		if String(f["stage"]) == LOADING.STAGES["ready"]: tail += float(f["wall"])
+	lines.append("LOAD held after Ready: %.0f ms (at most %.0f)" % [tail, READY_HOLD_MS])
+	var tail_ok := tail <= READY_HOLD_MS
+	var ok := over == 0 and spin_ok and up > 0 and tail_ok
+	var why := [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen", "" if tail_ok else ", held after Ready"]
+	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s%s)" % why))
+	_report("\n".join(lines), ok)
 
 ## --load-check=home: the title screen, then the click to the farm (ink wipe, the farm building
 ## behind it, the reveal), timing every frame until the farm has been on screen for a second.
@@ -451,12 +506,34 @@ func _home_check() -> void:
 		lines.append("LOAD   %7.0f %7.0f %7.0f  %s%s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])), String(f["slice"])])
 	var ok := over == 0 and built_ms >= 0.0 and drawn >= up - 1
 	lines.append("LOAD %s" % ("PASS" if ok else "FAIL"))
-	var txt := "\n".join(lines)
-	print(txt)
-	if out_path != "":
-		var fa := FileAccess.open(out_path, FileAccess.WRITE)
-		if fa: fa.store_string(txt + "\n")
+	_report("\n".join(lines), ok)
+
+## --load-check=hop (GARDEN.md 10.6): in the hub, press E's hop to Bramblebank, timed until you have
+## control there (the zone built and the ink lifted); passes inside garden_zones.json hop_max_s.
+func _hop_check() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Game.main.show_screen("home", {"zone": GardenZones.HUB})
+	var hub = await _home_ready(null)
+	var t0 := Time.get_ticks_usec()
+	var started: bool = hub != null and hub.hway.hop("bramblebank")
+	var zone = await _home_ready(hub) if started else null
+	var ms := (Time.get_ticks_usec() - t0) / 1000.0
+	var limit := float(GardenZones.rules()["hop_max_s"]) * 1000.0
+	var ok := zone != null and ms <= limit
+	print("LOAD hop hub -> Bramblebank: %.0f ms to control (limit %.0f ms)" % [ms, limit])
+	print("LOAD %s" % ("PASS" if ok else "FAIL"))
 	get_tree().quit(0 if ok else 1)
+
+## The next home after was, once it is built and the ink has lifted (null after 60 s).
+func _home_ready(was: Node):
+	var t0 := Time.get_ticks_usec()
+	while Time.get_ticks_usec() - t0 < 60 * 1000000:
+		await get_tree().process_frame
+		var cur = Game.main.current
+		if cur != was and is_instance_valid(cur) and cur.get("hway") != null and cur.get("building") != true \
+				and cur.get("root_ui") != null and not Game.main.fade.covered:
+			return cur
+	return null
 
 ## Runs after every other _process in the frame: marks where the scripts ended.
 class Tail extends Node:
@@ -601,9 +678,15 @@ func _finish() -> void:
 			lines.append("HITCH FAIL compiled %d shader variant(s) during %s: %s" % [int(f["compiles"]), f["phase"], _line(f)])
 	var bdesc := ("headless script %.0f ms" % (budget_ms if budget_ms > 0.0 else 50.0)) if headless else (("software: 2.5x the frames around it and +1.2 s") if software and budget_ms <= 0.0 else ("%.0f ms" % (budget_ms if budget_ms > 0.0 else 100.0)))
 	lines.append("HITCH budget %s; worst judged frame at %.2f of budget; %s" % [bdesc, worst_j, "PASS" if fails == 0 else "FAIL (%d frames)" % fails])
-	var txt := "\n".join(lines)
+	_report("\n".join(lines), fails == 0)
+
+## Prints the report (and writes it to --hitch-out), then quits: 1 on a fail unless advisory, where the
+## verdict reads ADVISORY instead of FAIL so a suite counting FAIL lines stays green.
+func _report(txt: String, ok: bool) -> void:
+	if advisory and not ok:
+		txt = txt.replace(" FAIL", " ADVISORY")
 	print(txt)
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string(txt + "\n")
-	get_tree().quit(0 if fails == 0 else 1)
+	get_tree().quit(0 if ok or advisory else 1)

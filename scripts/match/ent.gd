@@ -38,14 +38,16 @@ var vuln_k := 0.0
 var dr := {}                # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false        # the running stun counts toward the immunity that follows it
 var cc_immune_t := 0.0      # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
-var marks := {}             # combo setups on this body: status -> {by, owner, until}
+var marks := {}             # combo setups on this body: combo id -> {team, owner, until, window}
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
+var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
@@ -143,7 +145,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
-	flash_t = 0.12
+	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
@@ -240,8 +242,8 @@ func impulse(kb: Vector2, lift := -1.0) -> void:
 	vel.x += kb.x / ms
 	vel.z += kb.y / ms
 	var s := kb.length() / ms
-	if lift >= 0.0 or s > 6.0:
-		var up := lift / ms if lift >= 0.0 else s * 0.45
+	if lift > 0.0 or s > 6.0:      # (a lift of 0 is no lift, the same as none)
+		var up := lift / ms if lift > 0.0 else s * 0.45
 		vel.y = maxf(vel.y, minf(9.0, up))
 		grounded = false
 
@@ -268,9 +270,12 @@ func body_vertical(dt: float) -> void:
 func fall_out() -> void:
 	m.on_fell(self)
 
+var bump_top := 0.0          # top of what the last slide() ran into (KnockWall.tall: a wall, or just a step)
+
 ## Horizontal move with walls and rocks; returns true if it bumped something.
 func slide(dt: float, guard := false) -> bool:
 	var bumped := false
+	bump_top = 0.0
 	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
 	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
@@ -282,18 +287,21 @@ func slide(dt: float, guard := false) -> bool:
 			vel.x = hv.x; vel.z = hv.y
 		tgt = po
 		bumped = true
+		bump_top = pos.y + World.BLOCK_H
 	var nx := tgt.x
 	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
+		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
 	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:
 		vel.z *= -0.1; bumped = true
+		bump_top = maxf(bump_top, b2)
 	return bumped
 
 func tick_status(dt: float) -> void:
@@ -318,14 +326,24 @@ func tick_status(dt: float) -> void:
 		if not remote:
 			hp -= burn_dps * dt
 			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
+				_burn_number()
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
+
+## The burn's tick number, only for burns that involve you; it rolls into the same label as the
+## burner's other damage on this body.
+func _burn_number() -> void:
+	var mt := m as Match
+	if mt and (self == mt.player or burn_by == mt.player):
+		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false, "", Fx.roll_key(burn_by, self))
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:
 	prev = pos
 	if net_t < 0.0:
+		return
+	if net_buf:
+		net_buf.follow(self, m.time)
 		return
 	var age := clampf(m.time - net_t, 0.0, 0.25)
 	var tgt := net_pos + net_vel * age
@@ -338,7 +356,10 @@ func net_follow(dt: float) -> void:
 ## Called every rendered frame. alpha blends between the last two simulation steps.
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
+var _flash_col := Color.WHITE
 var _flash_n := -1
+var wash := 0.0                    # 0..1: the body mixes toward wash_col (Lace's Spirit Walk); a hit's white flash wins
+var wash_col := Color.WHITE
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -356,9 +377,15 @@ func render(delta: float, alpha: float) -> void:
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
+	var fc := Color.WHITE
+	if f <= 0.0 and wash > 0.0:
+		f = wash
+		fc = wash_col
 	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n:
+	if f != _flash_set or fc != _flash_col or mats.size() != _flash_n:
 		_flash_set = f
+		_flash_col = fc
 		_flash_n = mats.size()
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", fc)

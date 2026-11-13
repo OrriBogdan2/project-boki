@@ -2,14 +2,22 @@ class_name UltLook
 extends CareLook
 ## Pooled looks of the support pair's ultimates on X, on top of CareLook's (same pool, burst and keep):
 ##   Pip, Hearth Call: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
-##   Claire, Rimelock: the rink (a ragged sheet of ice whose cracks glow as it builds, a fringe of
-##   crystals on its edge), her frost bud (six curved ice petals closing over her, not a star), the
-##   light pillar of the crash and the ice block on each stunned foe.
-## keep(key, "tether", from, {b, k}), keep(key, "rink", at, {r, crack, a}), keep(key, "frostbud", at, {k}),
+##   Claire, Rimelock: the rink (a faint sheet of ice whose cracks glow as it builds, a fringe of
+##   crystals on its edge; the lit ring at the hit radius is the kit's AimKit circle), the frost bud
+##   at her feet, the light pillar of the crash and the ice block on each stunned foe. Her body is
+##   IceBody's while sealed.
+## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted),
+## keep(key, "rink", at, {r, crack, a, open}) (open: s since fully out, for the edge flash),
+## keep(key, "frostbud", at, {grow, crack}),
 ## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).
 
 const FRINGE := 18            # crystals round the rink's edge
-const PETALS := 6             # ice petals of the frost bud
+const RINK_FILL := 0.35       # rink body strength (doubles by the crash): alpha 0.1-0.2 at the centre, the zone rule
+const RINK_PULSE_T := 0.3     # s the frost edge flashes once the rink is fully open, fading out
+const BUD_SPIKES := 6         # low ice spikes the frost bud throws out from her feet
+const BUD_REACH := 0.95       # m: how far those spikes reach, about half her height (not the rink's size)
+const TETHER_SEGS := 10       # straight pieces the tether arc is bent from
+const TETHER_BOW := 0.14      # the arc's sideways and upward bow, as a share of the hand-to-ally gap
 
 
 func _build(kind: String) -> Node3D:
@@ -38,18 +46,21 @@ func _build(kind: String) -> Node3D:
 	return n
 
 
-## Two strands of lantern light twisting round a soft core, 1 m long along -Z (scaled to the gap).
+## The tether: TETHER_SEGS short segments, each two strands of lantern light twisting round a 0.16 m core with a
+## 0.5 m halo, 1 m long along -Z; _place_tether bends them into an arc between the hand and the ally.
 func _build_tether(n: Node3D) -> void:
-	var core := _off(Models.part(n, Models.box(0.09, 0.09, 1.0), glow_mat(Color("ffe2b0", 0.95)), Vector3(0, 0, -0.5)))
-	core.name = "Core"
-	var halo := _off(Models.part(n, Models.box(0.32, 0.32, 1.0), glow_mat(Color("ffc46a", 0.22)), Vector3(0, 0, -0.5)))
-	halo.name = "Halo"
-	var twist := Node3D.new()
-	twist.name = "Twist"
-	n.add_child(twist)
-	for side in [-1.0, 1.0]:
-		var strand := Models.box(0.04, 0.04, 1.0)
-		_off(Models.part(twist, strand, glow_mat(Color("ffe6a8", 0.85)), Vector3(0.11 * side, 0, -0.5)))
+	for i in TETHER_SEGS:
+		var seg := Node3D.new()
+		seg.name = "Seg%d" % i
+		n.add_child(seg)
+		_off(Models.part(seg, Models.box(0.16, 0.16, 1.0), glow_mat(Color("ffe2b0", 0.95)), Vector3(0, 0, -0.5)))
+		_off(Models.part(seg, Models.box(0.5, 0.5, 1.0), glow_mat(Color("ffc46a", 0.3)), Vector3(0, 0, -0.5)))
+		var twist := Node3D.new()
+		twist.name = "Twist"
+		seg.add_child(twist)
+		var strand_mat := glow_mat(Color("ffe6a8", 0.85))
+		for side in [-1.0, 1.0]:
+			_off(Models.part(twist, Models.box(0.07, 0.07, 1.0), strand_mat, Vector3(0.2 * side, 0, -0.5)))
 
 
 ## A flat disc (care_disc pattern 4: ragged edge, cracks) and a fringe of short crystals on its rim.
@@ -70,22 +81,23 @@ func _build_rink(n: Node3D) -> void:
 		c.rotation = Vector3(0.35 * cos(float(i) * 1.9), a, 0.45 * sin(a))
 
 
-## Six long curved ice petals leaning in over her and meeting above the head, round a cold core glow.
+## The frost bud on her ice body: six low spikes splayed out from her feet in a star and six short
+## crystals standing close round her shins, so the centre of the rink is a crystal, not a filled disc.
 func _build_bud(n: Node3D) -> void:
-	for i in PETALS:
-		var a := TAU * i / PETALS
-		var p := Node3D.new()
-		p.name = "Petal%d" % i
-		p.rotation = Vector3(0, a, 0)
-		n.add_child(p)
-		var blade := _off(Models.part(
-				p, Models.crystal(0.24, 2.5, 5), ice_mat(Color("aee8ff"), 0.55, 0.3), Vector3(0, 1.15, 0.62)))
-		blade.rotation = Vector3(-0.42, 0, 0)
-		var tip := _off(Models.part(
-				p, Models.crystal(0.1, 0.7, 4), ice_mat(Color("e8ffff"), 0.8, 0.6), Vector3(0, 0.25, 0.75)))
-		tip.rotation = Vector3(0.9, 0, 0)
-	var glow := _off(Models.part(n, Models.capsule(0.5, 1.9), glow_mat(Color("9fe0ff", 0.28)), Vector3(0, 1.0, 0)))
-	glow.name = "Core"
+	for i in BUD_SPIKES:
+		var a := TAU * (float(i) + 0.5) / BUD_SPIKES
+		var out := Vector3(cos(a), 0.35, sin(a)).normalized()
+		_bud_crystal(n, Vector3(cos(a), 0.0, sin(a)) * 0.25, out, Models.crystal(0.11, BUD_REACH, 4), Color("aee8ff"))
+		var b := TAU * float(i) / BUD_SPIKES
+		var up := Vector3(cos(b) * 0.35, 1.0, sin(b) * 0.35).normalized()
+		_bud_crystal(n, Vector3(cos(b), 0.0, sin(b)) * 0.3, up, Models.crystal(0.08, 0.6, 4), Color("e8ffff"))
+
+
+## One crystal of the bud, its foot at `foot`, pointing along `dir` (Models.crystal is centred on its middle).
+func _bud_crystal(n: Node3D, foot: Vector3, dir: Vector3, mesh: ArrayMesh, c: Color) -> void:
+	var half := mesh.get_aabb().size.y * 0.5
+	var mi := _off(Models.part(n, mesh, ice_mat(c, 0.75, 0.3), foot + dir * half))
+	mi.basis = Basis(Quaternion(Vector3.UP, dir))
 
 
 # ------------------------------------------------------------------ timed one-offs
@@ -128,27 +140,38 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 		"rink":
 			_place_rink(n, p)
 		"frostbud":
-			var grow := _out_back(clampf(float(p.get("k", 1.0)), 0.0, 1.0))
-			n.scale = Vector3(grow, maxf(0.05, grow), grow)
-			n.rotation.y = m.time * 0.3
+			n.scale = Vector3.ONE * maxf(0.05, _out_back(clampf(float(p.get("grow", 1.0)), 0.0, 1.0)))
+			var glow := 0.3 + 0.9 * clampf(float(p.get("crack", 0.0)), 0.0, 1.0)
+			for c in n.get_children():
+				((c as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("glow", glow)
 
 
+## The arc from `from` to p.b: it bows out to her right and up by TETHER_BOW of the gap, so the line reads as
+## a throw to the ally at the match camera, not a stick between two bodies.
 func _place_tether(n: Node3D, from: Vector3, p: Dictionary) -> void:
 	var to: Vector3 = p.get("b", from + Vector3.FORWARD)
 	var gap := maxf(0.1, from.distance_to(to))
-	if gap > 0.15:
-		n.look_at(to, Vector3.UP)
-	n.scale = Vector3(1.0, 1.0, gap)
-	var tw := n.get_node_or_null("Twist") as Node3D
-	if tw:
-		tw.rotation.z = m.time * 7.0
-	var pulse := 0.75 + 0.25 * sin(m.time * 9.0)
-	_tint(n, Color.WHITE, pulse * float(p.get("a", 1.0)))
+	var flat := Vector3(to.x - from.x, 0.0, to.z - from.z)
+	var side := flat.cross(Vector3.UP).normalized() if flat.length() > 0.1 else Vector3.RIGHT
+	var bow := (side + Vector3.UP) * gap * TETHER_BOW
+	var pulse := 0.8 + 0.2 * sin(m.time * 9.0)
+	var prev := from
+	for i in TETHER_SEGS:
+		var u := float(i + 1) / TETHER_SEGS
+		var next := from.lerp(to, u) + bow * 4.0 * u * (1.0 - u)
+		var seg := n.get_node("Seg%d" % i) as Node3D
+		if prev.distance_to(next) > 0.01:
+			seg.global_transform = Transform3D(Basis.looking_at(next - prev, Vector3.UP), prev)
+			seg.scale = Vector3(1.0, 1.0, prev.distance_to(next))
+		(seg.get_node("Twist") as Node3D).rotation.z = m.time * 7.0 + float(i)
+		prev = next
+	_tint(n, p.get("col", Color.WHITE), pulse * float(p.get("a", 1.0)))
 
 
 func _place_rink(n: Node3D, p: Dictionary) -> void:
 	var r := float(p.get("r", 1.0))
 	var crack := clampf(float(p.get("crack", 0.0)), 0.0, 1.0)
+	var pulse := rink_pulse(float(p.get("open", RINK_PULSE_T)))
 	n.scale = Vector3.ONE
 	var disc := n.get_node_or_null("Disc") as MeshInstance3D
 	if disc:
@@ -156,7 +179,9 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		_disc(disc.get_parent() as Node3D, Color("7fd8ff"), Color("e8ffff"), float(p.get("a", 1.0)), 4.0, -1.0, 0.0)
 		var sm := disc.material_override as ShaderMaterial
 		sm.set_shader_parameter("crack", crack)
-		sm.set_shader_parameter("fill", 0.7 + 0.5 * crack)
+		sm.set_shader_parameter("fill", RINK_FILL + RINK_FILL * crack)
+		sm.set_shader_parameter("flash", pulse)
+		sm.set_shader_parameter("rim_w", 0.08 + 0.06 * pulse)
 	var fringe := n.get_node_or_null("Fringe") as Node3D
 	if fringe == null:
 		return
@@ -164,4 +189,9 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		var mi := c as MeshInstance3D
 		var a := float(mi.get_meta("a", 0.0))
 		mi.position = Vector3(cos(a) * r * 0.96, 0.1, sin(a) * r * 0.96)
-		(mi.material_override as ShaderMaterial).set_shader_parameter("glow", 0.2 + 0.9 * crack)
+		(mi.material_override as ShaderMaterial).set_shader_parameter("glow", 0.2 + 0.9 * maxf(crack, pulse))
+
+
+## The frost edge's opening flash at `open` s after the rink is fully out (full while it grows, 0 after RINK_PULSE_T).
+static func rink_pulse(open: float) -> float:
+	return 1.0 - smoothstep(0.0, RINK_PULSE_T, open)

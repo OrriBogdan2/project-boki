@@ -4,13 +4,14 @@ extends RefCounted
 ## drum that refills whenever the trigger rests, the firing brackets, the shouldered recoil pose, and the Burr
 ## Charge fired from the cannon's launcher (item 112), a tap she walks through, and the Longneedle's wide beam,
 ## pushed-out view and aim (item 68).
-const ROUND_GAP := 0.12      # s between rounds held
+const ROUND_GAP := 0.08      # s between rounds held (the source's ~12 rounds/s, docs/WEAPON_FIRING_DATA.md)
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
 const REFILL_DRY := 1.3      # s from running dry to the next round, the trigger held (0.35s rest + 30 at 40/s)
 const REFILL_BY := 1.2       # s of rest that brings a drum back from 18 to full ("rapidly reloads when not firing")
 const TURN_180 := 0.2        # s: the body turns 180 degrees to a new cursor (the source's 1280 deg/s: 0.14s)
 const WALK_KEEP := 0.85      # share of her walk she keeps while firing
 const OLD_NEEDLE_W := 0.5    # m either side of the line, before item 68
+const CANCEL_ROWS := preload("res://tools/vex_cancel_rows_check.gd")   # her Cancels table, row by row
 const SWEEP := 6.0           # rad/s the cursor swings round her (a round a step late would be 5.7 degrees off)
 var C                        # the combo check (ok, ac, helpers)
 
@@ -27,6 +28,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_launcher(m, P, K, T, home)
 	_needle(m, P, K, T, home)
 	_audit(m, P, K, T, home)
+	CANCEL_ROWS.new(C).run(m, P, K, T, home)
 	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
 	C.ac.step(m, 0.5)
@@ -48,7 +50,7 @@ func _rounds(m: Match, P: Hunter, home: Vector3) -> void:
 	var even := at.size() >= 7
 	for i in range(1, at.size()):
 		even = even and absf(float(at[i]) - float(at[i - 1]) - ROUND_GAP) <= C.DT * 1.5
-	C.ok("Vex parity LMB: held, a round every 0.12s", even, "%d rounds" % at.size())
+	C.ok("Vex parity LMB: held, a round every 0.08s", even, "%d rounds" % at.size())
 
 ## Walking while the cursor sweeps round her: every round leaves along the aim of its own step, and a cursor
 ## swung behind her turns her body round at the source's rate.
@@ -227,7 +229,7 @@ func _rifle_pose() -> void:
 	var kick := HunterAnim.km_sample("gunslinger_lmb", 0.025)
 	var same := is_equal_approx(a["p"], b["p"]) and is_equal_approx(a["gp"], b["gp"]) \
 			and (a["wo"] as Vector3).is_equal_approx(b["wo"])
-	C.ok("Vex parity LMB: each round kicks the gun by 0.025s, back on the shoulder by 0.09 (rounds 0.12 apart)",
+	C.ok("Vex parity LMB: each round kicks the gun by 0.025s, back on the shoulder by 0.09 (replayed every round)",
 			same and float(kick["gp"]) > 0.15 and absf(float(kick["p"]) - float(a["p"])) < 0.15
 			and bool(mv.get("stance", false)),
 			"gp %.2f, torso %.2f -> %.2f" % [kick["gp"], a["p"], kick["p"]])
@@ -339,13 +341,14 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	T.teleport(home + Vector3(9.0, 0, off))
 	P.teleport(home)
 	C.ac.step(m, 0.3)
-	var east := home + Vector3(10.0, 0, 0)
+	var east := home + Vector3(18.0, 0, 0)       # the full range: the push-out scales with the aim distance (item 144b)
 	C.ac.aim_at(P, east)
 	cam.cast_k = 0.0
 	var hits0 := K.needle_hits
 	K.cd["e"] = 0.0
 	K.use_e()
-	var rec := {"wide": 1.0, "aim": Vector2.ZERO, "dir": Vector2.ZERO, "face": 0.0, "t": 0.0, "shake": 0.0, "pan": 0.0}
+	var rec := {"wide": 1.0, "aim": Vector2.ZERO, "dir": Vector2.ZERO, "face": 0.0, "t": 0.0, "shake": 0.0, "pan": 0.0,
+			"mk": 0.0}      # mk: the largest move_k seen while the needle charges (the source stands still)
 	var charging := func():
 		C.ac.aim_at(P, east + Vector3(0, 0, float(rec["t"]) * 2.0))      # the cursor drifts: the line follows it
 		cam.follow(P.pos, C.DT, false)
@@ -356,6 +359,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 			rec["dir"] = AimKit.entry(P, "e").get("dir", Vector2.ZERO)
 			rec["face"] = absf(rad_to_deg(Vector2(-sin(P.face), -cos(P.face)).angle_to(P.aim_dir())))
 			rec["pan"] = maxf(float(rec["pan"]), (cam.focus - cam.base).dot(Vector3(1, 0, 0)))
+			rec["mk"] = maxf(float(rec["mk"]), K.move_k())
 		rec["t"] = float(rec["t"]) + C.DT
 	while not K.needle.is_empty() and float(rec["t"]) < 1.0:
 		charging.call()
@@ -365,6 +369,9 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 		cam.follow(P.pos, C.DT, false)
 		m.step(C.DT)
 	var wide_ok := float(K.e_def()["width"]) >= OLD_NEEDLE_W * 1.5
+	C.ok("Vex cast-move: rooted through the Longneedle cast (footage: still through its 0.6 s cast bar)",
+			float(rec["mk"]) == 0.0 and is_equal_approx(float(K.e_def()["self_slow"]), 1.0),
+			"move_k %.2f" % float(rec["mk"]))
 	C.ok("Vex item 68: the beam hits a line at least 1.5x as wide, and drawn that wide",
 			wide_ok and K.needle_hits > hits0 and absf(K.beam_width() - float(K.e_def()["width"]) * 2.0) < 0.001,
 			"%.2f m either side, a foe %.2f m off the line: %d hit" % [K.e_def()["width"], off, K.needle_hits - hits0])
@@ -381,6 +388,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	P.ctrl = "idle"
 	cam.cast_left = 0.0
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	K.use_e()
 	C.ac.step(m, 0.1)
 	var quiet := cam.cast_left <= 0.0 and not K.needle.is_empty()
@@ -425,6 +433,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	DashReset.takedown(P, T)         # the knock's dash back is the game-wide rule now (decision 0022), as Match runs it
 	var knocked := P.dashes >= 1.0
 	C.ac.step(m, 0.5, watch)
 	T.downed = false

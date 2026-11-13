@@ -250,11 +250,21 @@ func bjorn() -> void:
 	ok("bjorn ult cast: planted, hammer up (bul_ult_wind)",
 		K.ult.phase == "wind" and K.anim_id == "bul_ult_wind" and K.move_k() == 0.0,
 		"%s %s move %.2f" % [K.ult.phase, K.anim_id, K.move_k()])
-	var c0 := AimKit.entry(P, "x0")
-	ok("bjorn ult telegraph: four 4x4m cells down the lane, shown to everyone",
-		AimKit.shown(P, "x0") and AimKit.shown(P, "x3") and bool(c0.get("all", false))
-			and absf(float(c0.get("len", 0.0)) - 4.0) < 0.01,
+	var c0 := AimKit.entry(P, "x")
+	ok("bjorn ult telegraph: one outlined 16x4.5m lane (the gameplay box) for everyone, with its crack",
+		AimKit.shown(P, "x") and bool(c0.get("all", false)) and absf(float(c0.get("len", 0.0)) - 16.0) < 0.01
+			and absf(float(c0.get("width", 0.0)) - float(xd["width"])) < 0.01 and K.ult._crack.visible,
 		str(c0.keys()))
+	var crack_mat := K.ult._crack.material_override as ShaderMaterial
+	var heat0: float = crack_mat.get_shader_parameter("power")
+	var t_now: float = K.ult.t
+	K.ult.t = 0.35                      # glance at the crack late in the wind-up, then put the clock back
+	K.ult._glow_crack()
+	var heat1: float = crack_mat.get_shader_parameter("power")
+	K.ult.t = t_now
+	K.ult._glow_crack()
+	ok("bjorn ult telegraph: the crack glows brighter as the slam nears",
+		heat1 > heat0 + 0.2, "%.2f -> %.2f" % [heat0, heat1])
 	ok("bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s)",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.2,
 		"%.1f" % float(K.cd["x"]))
@@ -266,14 +276,16 @@ func bjorn() -> void:
 	step(m, 0.3)
 	ok("bjorn ult anim: the slam (bul_ult_slam) at 0.4s", K.ult.slams == 1 and K.anim_id == "bul_ult_slam", K.anim_id)
 	step(m, 0.35)
-	var hit_t := T.stun_t > 0.0 and T.slow_t > 0.0
+	var stunned := T.stun_t > 0.0       # the strike's stun; its cell erupts (the slow) after the "lead" s streak
+	ok("bjorn ult: a stun marker circles over each foe it stunned",
+		KitLooks.of(m).crowned(T), "stunned %s" % (T.stun_t > 0.0))
 	ok("bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
 		K.ult.hit.size() >= 2, "struck %d" % K.ult.hit.size())
 	step(m, 0.3)
 	var want := (float(xd["dmg"]) + float(xd["strike_dmg"])) * ap
 	ok("bjorn ult payoff: each foe on the lane struck (stun) and thrown once (4 + 18, a heavy slow)",
-		hit_t and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,
-		"took %.0f / %.0f (want %.0f) stunned %s" % [dmg(T), dmg(T2), want, hit_t])
+		stunned and T.slow_t > 0.0 and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,
+		"took %.0f / %.0f (want %.0f) stunned %s slow %.2f" % [dmg(T), dmg(T2), want, stunned, T.slow_t])
 	ok("bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6)",
 		absf(best(P) - 0.6) < 0.001 and HeroUlt.cast_id(K).begins_with("bulwark_") and P.ult >= 0.6,
 		"best %.2f cast %s meter %.3f" % [best(P), HeroUlt.cast_id(K), P.ult])
@@ -292,6 +304,30 @@ func bjorn() -> void:
 	await _bjorn_more()
 	await _bjorn_burst()
 
+## One jump press 0.1 s into the wind-up: planted (hero sheet bjorn.md "Ultimate": f25-f31), he doesn't rise,
+## and the press isn't kept for the plant's end (content/dash_flow into_jump.x lock); once the fissure runs a
+## jump goes. Leaves him 0.7 s into the cast.
+func _jump_in_plant(m: Match, P: Hunter, K: BulwarkKit) -> void:
+	step(m, 0.1)
+	var y0 := P.pos.y
+	P.inp["jump"] = true
+	m.step(DT)
+	P.inp["jump"] = false
+	var top := y0
+	while K.ult.planted():
+		m.step(DT)
+		top = maxf(top, P.pos.y)
+	step(m, 0.1)
+	top = maxf(top, P.pos.y)
+	ok("bjorn ult small: planted, a jump in the wind-up is ignored, not buffered (no rise to the plant's end)",
+		top < y0 + 0.02 and P.grounded, "rose %.2f m" % (top - y0))
+	P.inp["jump"] = true
+	m.step(DT)
+	P.inp["jump"] = false
+	step(m, 0.1)
+	ok("bjorn ult small: free once the fissure runs, a jump goes", P.pos.y > y0 + 0.3,
+		"%.2f m up, %s" % [P.pos.y - y0, K.ult.phase])
+
 ## A miss, the wall stop, an interrupt, a merge in the wind-up.
 func _bjorn_more() -> void:
 	var r := setup("bulwark", 7.0, BURST_KIN, false)
@@ -305,7 +341,8 @@ func _bjorn_more() -> void:
 	P.ult = 0.0
 	aim_at(P, home + Vector3(0, 0, -6))
 	press_x(m, P)
-	step(m, 1.4)
+	_jump_in_plant(m, P, K)
+	step(m, 0.9)
 	ok("bjorn ult bond: a Faultline that hits nobody pays nothing",
 		K.ult.slams == 1 and best(P) == 0.0 and HeroUlt.cast_id(K) != "",
 		"owed %.2f" % best(P))

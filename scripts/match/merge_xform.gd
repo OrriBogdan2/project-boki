@@ -200,6 +200,11 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 			m.fx.ring(h.pos, maxf(1.2, rad), Color(col, 0.7), 0.25)
 		"rmb":
 			m.fx.ring(h.pos, 1.4, Color(col, 0.7), 0.3)
+		"dash":
+			var look := h.get_node_or_null(MergeLook.NODE_NAME) as MergeLook
+			var d: Dictionary = MergeForm.aug_of(look.form).get("dash", {}) if look != null else {}
+			if String(d.get("kind", "")) == "reflect":
+				m.verbs.add_mirror(h, MergeAugment.mirror_spec(d, col))
 		"blink":
 			m.fx.bolt(h.pos + Vector3(0, 1.0, 0), tgt + Vector3(0, 1.0, 0), col)
 			m.sfx("zap", tgt, -4.0, 1.5)

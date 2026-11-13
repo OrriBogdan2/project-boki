@@ -19,15 +19,17 @@ extends ArchKit
 ##   in it.
 
 const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool spark in her palm against warm fire
-const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
-const BOLT_CORE := Color("ffe070")
+const BOLT_CORE := Color("fff4c8")     # Cinder Shot's white-hot core (its body is the RMB slot's flame orange)
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
-const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
+const SHIELD_RINGS := 3               # most swirls shown on her body: one per foe the cloak caught, up to this
+const SHIELD_RING_STEP := 0.4         # m between the swirls up her body
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
+# s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
+const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
@@ -67,6 +69,7 @@ var cloaks := 0
 var blasts := 0
 var pulled := 0
 var flame_ticks := 0
+var hose_hits := 0              # (tests) foe-ticks the stream landed on
 var bash_hits := 0
 var fizzles := 0
 var bolt_ends: Array = []       # (tests) where each Cinder Shot ended: [at, expired]
@@ -157,7 +160,6 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "ABLAZE", res_col(), false)
 		vfx("ablaze", f.pos)
 		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 
@@ -165,12 +167,12 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 ## flash; the shared payoff's rings stay out of Cinder's fire.
 func _flashover_fx(f: Ent) -> void:
 	var col := Color("ffe0a0")
-	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
 	m.sfx("crit", f.pos, -7.0, 0.85)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
+	RecastCue.payoff(self, f)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
@@ -183,14 +185,10 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	h.heal(h.max_hp * float(rd()["heal_knock"]))
 	vfx("knock")
 	_stoke_pose()
-	if h.dashes < h.max_dashes():
-		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
-		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
+		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
@@ -215,15 +213,7 @@ func _tick(dt: float) -> void:
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
 		if tells_visible():
-			# the Furnace Cloak's shield: a swirling ring of fire hugging Cinder while it holds (about 0.8 bh)
-			fx.place(
-				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), SHIELD_COL, Color("ffc040"),
-				1.8, m.time * 2.0, 1.0
-			)
-			fx.place(
-				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("c8301a"),
-				Color("ff9a3a"), 1.45, -m.time * 2.6, 0.85
-			)
+			_shield_swirls()
 	else:
 		st["shield_on"] = false
 	tell = ""
@@ -232,6 +222,17 @@ func _tick(dt: float) -> void:
 	elif _best_char() >= 12.0:
 		tell = "half"
 	net_pulse(dt, not ignites.is_empty(), 1.3)
+
+## The cloak's shield on her body: a lit swirl round her per foe it caught (up to SHIELD_RINGS), in her colours.
+func _shield_swirls() -> void:
+	var vx := HeroVfx.of(m)
+	for i in mini(int(st.get("shield_foes", 1)), SHIELD_RINGS):
+		var lead: bool = i % 2 == 0
+		var id := "swirl%d" % h.get_instance_id() if i == 0 else "swirl%d_%d" % [h.get_instance_id(), i]
+		fx.place(
+			id, "swirl", h.pos + Vector3(0, 0.55 + SHIELD_RING_STEP * i, 0), vx.color(h, "main" if lead else "red"),
+			vx.color(h, "hot"), 1.8 - 0.2 * i, m.time * (2.0 if lead else -2.6), 1.0 - 0.1 * i
+		)
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
 ## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
@@ -328,8 +329,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		_pause_hose()
 		return true
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
+		if was_held:
+			play("as_lance_end")           # (a key let go in a dash too: the pose never outlasts the key)
 		if was_held and not hose_paused:
-			play("as_lance_end")
 			vfx("lance_end")
 			m.sfx("ashwick_tank_hiss", h.pos, -4.0, 1.0)      # the fire gutters out as she lets go
 		if was_held:
@@ -347,17 +349,21 @@ func lmb_override(held: bool, dt: float) -> bool:
 		hose_paused = false
 		play("as_lance")        # out of the dash, hand already on the aim: back at once
 	if not was_held:
-		play("as_lance")
 		m.sfx("lw_pilot", h.pos, -3.0, 1.0)
 		vfx("lance_pilot")              # the pilot flares cyan before the roar
 	was_held = true
 	h.idle_fire = 0.0
 	spool += dt
 	h.mel_hold = minf(spool, float(ld["spool"]))
+	play_hold("as_lance", spool)
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
 	HeroVfx.of(m).hold(h, "lance")
-	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt, tip() - nozzle())
+	# the fire's rules start at her body (ShotOrigin), the same reach out; it's still drawn from the palm
+	var nz := nozzle()
+	var from := ShotOrigin.body(h, nz)
+	var reach := float(ld["range"]) + nz.distance_to(from)
+	hose.emit(from, h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), reach, dt, tip() - from)
 	flame_acc += dt
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:
@@ -406,6 +412,7 @@ func _flame_tick(tick: float) -> void:
 			continue
 		var dmg: float = float(ld["dps"]) * tick * ignite_k(f) + f.max_hp * ignite_pct(f) * tick
 		f.hurt(dmg, h, {"src": "flame", "ab": "primary", "tags": ["flame"], "melee": false})
+		hose_hits += 1
 		add_char(f, float(ld["char_tick"]))
 		if flame_ticks % 2 == 0 and tells_visible():
 			vfx("lance_hit", f.pos)
@@ -427,17 +434,18 @@ func _stream_looks() -> void:
 # ------------------------------------------------------------------ RMB: Cinder Shot
 ## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
 ## drawn back.
-func rmb_hold_tick(_t: float) -> void:
+func rmb_hold_tick(t: float) -> void:
 	if KinMerge.active(h) or not rmb_ready():
 		return
 	if not aiming:
 		aiming = true
-		if not jet.running(): play("as_aim")       # (flying, the flight pose stays)
+	if not jet.running(): play_hold("as_aim", t)       # (flying, the flight pose stays)
 	HeroVfx.of(m).hold(h, "shot_aim")
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
-		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
+		h, "rmb", {"len": ln, "width": float(rdf["size"]) * 2.0, "col": Color("fff4e6"), "col2": col_of(rdf),
+				"alpha": 0.9, "tip": true}
 	)
 
 func fire_rmb(c: Dictionary) -> void:
@@ -462,12 +470,14 @@ func fire_rmb(c: Dictionary) -> void:
 	var n0: int = m.shots.size()
 	run_own(stg, cx("rmb", "cinder_shot", aim(), {"on_foe": func(f: Ent, _c: Dictionary): _cinder_hit(f)}))
 	if m.shots.size() > n0:
-		fx.ride(m.shots[-1], "cinder", BOLT_COL, BOLT_CORE, 1.6, 0.5, _bolt_end)
-		HeroVfx.of(m).trail(h, "shot_trail", m.shots[-1]["node"])
+		# the plain shot node is hidden by ride(), so the flicker trail follows the look riding it
+		var sd: Dictionary = m.shots[-1]
+		var orb := fx.ride(sd, "cinder", col_of(rdf), BOLT_CORE, 1.1, 0.5, _bolt_end, tip() - (sd["pos"] as Vector3))
+		HeroVfx.of(m).trail(h, "shot_trail", orb)
 	vfx("shot")
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)
 
-## A cinder that ran its full length without a hit fizzles there in a small blue-white ring (sheet 0133).
+## A cinder that ran its full length without a hit fizzles there in a small flare of her fire (sheet 0133).
 func _bolt_end(at: Vector3, expired: bool) -> void:
 	bolt_ends.append([at, expired])
 	if bolt_ends.size() > 8: bolt_ends.pop_front()
@@ -485,7 +495,7 @@ func _cinder_hit(f: Ent) -> void:
 	if cur > 0:
 		var bonus := float(rdf["dmg"]) * power("sec") * (ignite_k(f) - 1.0)
 		f.hurt(bonus, h, {"src": "flame", "ab": "utility", "tags": ["flame"], "melee": false})
-	# the impact: a red flash and an ember shower (sheet 0076-0079)
+	# the impact: a white-hot flash, an ember shower and a rising ember puff (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
 	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
@@ -498,7 +508,6 @@ func _cinder_hit(f: Ent) -> void:
 			if o != f and is_instance_valid(o) and not o.dead and sees_from(f.pos, o):
 				_ignite(o, cur, burning(o))
 				vfx("shot_spread", f.pos, null, {"to": o.pos + Vector3(0, 1.0, 0)})
-		m.fx.word(f.pos + Vector3(0, 2.5, 0), "SPREAD", col_of(rdf), true)
 	else:
 		stoke(f)
 
@@ -577,8 +586,6 @@ func _tick_bash(dt: float) -> void:
 		bash = {}
 		if b.get("hop", false):
 			_keep_poof(b)
-		elif not b.get("hit", false):
-			m.fx.dust(h.pos, 6)
 
 ## The poof's cloud of smoke and flame blown out behind her along `dir` (no blast), and its sound.
 func _poof_cloud(dir: Vector2) -> void:
@@ -613,6 +620,8 @@ func _bash_impact(f: Ent) -> void:
 	bash["hit"] = true
 	bash_hits += 1
 	h.roll_t = 0.0                  # the dash stops on the foe
+	if anim_id == "as_leap":
+		retime(minf(anim_at, m.time - RAM_IMPACT_KEY))      # the squash on the hit frame, not at the full ram
 	var dir: Vector2 = bash["dir"]
 	# and he bounces back a little off them
 	h.vel.x = -dir.x * float(dd["recoil"])
@@ -636,7 +645,6 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
@@ -658,7 +666,7 @@ func _cloak_blast() -> void:
 	var ed := e_def()
 	blasts += 1
 	var hit := 0
-	var shield_k := float(ed["rank3_shield_k"]) if rank("kin") >= 3 else 1.0
+	var shield_k := rank_k("rank_shield", "kin", 1.0)
 	var r := float(ed["radius"])
 	vfx("cloak", null, null, {"r": r})        # no wider than the blast reaches
 	for f in foes_in(h.pos, r):
@@ -680,6 +688,7 @@ func _cloak_blast() -> void:
 		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
+		st["shield_foes"] = hit
 		m.sfx("shield", h.pos, -5.0, 0.9)
 
 # ------------------------------------------------------------------ X: Flue Flight
@@ -687,12 +696,36 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
+## RecastCue: X again lands the flight early, where you are (it lands by itself when it runs out).
+func recast_window() -> Dictionary:
+	if not jet.running():
+		return {}
+	var t := float(x_def()["time"])
+	return RecastCue.window("x", float(jet.flight["t"]), t, h.pos, true, true)
+
+## RecastCue's badge: Char on each foe; gold once it's Ablaze, where the next ignite is the Flashover.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var ttl := float(rd()["expire"])
+	for key in chars:
+		var c: Dictionary = chars[key]
+		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
+			continue
+		var lvl := burning(c["e"])
+		var left: float = ttl - (m.time - float(c["t"]))
+		if left > 0.0 or lvl > 0:
+			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
 func gate_inputs() -> void: jet.lock_inputs()
+func gate_kin_tap() -> bool: return jet.swallow_kin_tap()
 
 # ------------------------------------------------------------------ bots
+## The Torch Lance only reaches its stream's length: a bot walks in to it before holding LMB.
+func bot_reach() -> float: return float(lmbd()["range"]) - 0.4
+
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return

@@ -25,6 +25,7 @@ const COLS := [
 ]
 
 static var _rumble_at := -9.0
+static var _hush_until := -9.0       # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
 static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
 
 static func make() -> Node3D:
@@ -112,7 +113,7 @@ static func _cracks(n: Node3D) -> void:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
 		var len_ := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(1.0, 0.45, 0.1, 0.95)),
+			cracks, Models.box(0.035, 0.012, len_), KitLooks.shade_mat(Color(0.35, 0.6, 1.0, 0.95)),
 			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_ * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
@@ -129,12 +130,16 @@ static func cool(n: Node3D) -> void:
 		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
+## For the next `secs` rocks rising make no rumble of their own (the caster plays one for all of them).
+static func hush(m: Node, secs: float) -> void:
+	_hush_until = float(m.time) + secs
+
 ## A rock coming up: a burst of dust and earth at its foot and one short rumble.
 static func rise_fx(m: Node, at: Vector3) -> void:
 	m.fx.dust(at, 14)
 	m.fx.burst(at + Vector3(0, 0.3, 0), STONE_HI, 12, 3.5, 0.45, 8.0, 1.2)
-	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("ff7a2a"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
-	if absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
+	m.fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, Color("3a7cff"), 8, 5.0, 40.0, 0.3, 10.0, 1.0)
+	if float(m.time) >= _hush_until and absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
 		_rumble_at = float(m.time)
 		m.sfx("br_rumble", at, -3.0, 1.0)
 

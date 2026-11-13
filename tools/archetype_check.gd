@@ -64,6 +64,78 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 func aim_at(P: Hunter, p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
 
+## Item 183: with a charge in hand, a hero's air dash is its ground dash: the same kit move and clip, the same reach
+## (within 5%), one charge spent and the long-dash slot (ex_cd) untouched. `home` is open ground; the match is
+## left with the hunter back at home.
+func air_dash_is_ground(m: Match, P: Hunter, home: Vector3) -> void:
+	var parked := {}
+	for h in m.hunters:
+		if h != P:
+			parked[h] = h.pos
+			h.teleport(h.pos + Vector3(0, 0, 60))     # a dummy in the lane would stop the ground run short
+	var ground := _dash_run(m, P, home, false)
+	var air := _dash_run(m, P, home, true)
+	for h in parked:
+		h.teleport(parked[h])
+	var label := "item 183 %s: its air dash is its ground dash (%s, reach %.2f vs %.2f)"
+	ok(label % [P.arch, ground["anim"], air["reach"], ground["reach"]],
+		air["anim"] == ground["anim"] and air["spent"] == ground["spent"] and air["spent"] > 0.5 and air["ex_cd"] == 0.0
+		and absf(air["reach"] - ground["reach"]) <= 0.05 * ground["reach"], str([ground, air]))
+	P.teleport(home)
+
+func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
+	P.teleport(home + Vector3(0, 40.0 if air else 0.0, 0))
+	P.grounded = not air
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.dashes = P.max_dashes()
+	P.ex_cd = 0.0
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	var from := P.pos
+	var charges := P.dashes
+	P.do_dash()
+	var out := {"anim": P.ak.anim_id, "spent": charges - P.dashes, "ex_cd": P.ex_cd, "reach": 0.0}
+	var t := 0.0
+	while t < 1.0 and (t < 0.1 or P.roll_t > 0.0):
+		m.step(DT)
+		t += DT
+		if P.roll_t > 0.0:      # the dash itself: its exit (HunterMove.dash_exit) brakes on the ground, not in the air
+			out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+	P.inp["move"] = Vector2.ZERO
+	return out
+
+const AIR_STEER_T := 0.3        # s of keys after the move
+const AIR_STEER_MIN := 3.0      # m/s gained across the heading (Loco.air_step: 32 m/s2 up to the run cap)
+
+## DECISIONS 11-08 (docs/MOVEMENT_FEEL.md "Air velocity in the slice kits"): once a move cast in the air is over,
+## the keys steer again. `cast` runs on `P` 40 m over `home`; when its displacement ends, keys held across the
+## hunter's heading must win AIR_STEER_MIN m/s that way within AIR_STEER_T, still airborne. Returns the speed
+## carried out of the move. The match is left with the hunter back at home.
+func air_steers(m: Match, P: Hunter, home: Vector3, what: String, cast: Callable) -> float:
+	P.teleport(home + Vector3(0, 40.0, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.inp["move"] = Vector2.ZERO
+	cast.call()
+	var t := 0.0
+	while t < 1.5 and (t < 0.1 or P.roll_t > 0.0 or P.knock_t > 0.0):
+		step(m, DT)
+		t += DT
+	var hv0 := Vector2(P.vel.x, P.vel.z)
+	var keys := Vector2(-hv0.y, hv0.x).normalized() if hv0.length() > 0.5 else Vector2(0, 1)
+	P.inp["move"] = keys
+	step(m, AIR_STEER_T)
+	P.inp["move"] = Vector2.ZERO
+	var gain := Vector2(P.vel.x, P.vel.z).dot(keys) - hv0.dot(keys)
+	ok("air steer %s: %s, then the keys steer (+%.1f m/s across)" % [P.arch, what, gain],
+			gain >= AIR_STEER_MIN and not P.grounded, "carry %.1f m/s airborne %s" % [hv0.length(), not P.grounded])
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	step(m, 0.3)
+	return hv0.length()
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
@@ -128,6 +200,8 @@ func run(main_node: Node) -> void:
 		return
 	_controls()
 	_data()
+	_health()
+	_roster()
 	await _thief()
 	await _archer()
 	await _mage()
@@ -141,6 +215,50 @@ func run(main_node: Node) -> void:
 	_feel()
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Max health as a share of the roster average against the source's Base HP rows
+## (briefs/supervive-data/supervive_physics.md, docs/KIT_PARITY.md "Health"): no Hunter off by
+## more than 1.25x either way. The scales differ, so only the ratio is compared.
+const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
+		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
+
+## Every list of all the Hunters holds the same ids as Arch.ORDER (a new Hunter missing from one shows here).
+func _roster() -> void:
+	var want: Array = Arch.ORDER.duplicate()
+	want.sort()
+	var lists := {"HeroKit.ARCH_ORDER": HeroKit.ARCH_ORDER, "Arch.ids()": Arch.ids(),
+			"TitleBackdrop.ORDER": TitleBackdrop.ORDER}
+	for f in ["mantle_look", "warden_stance"]:
+		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/%s.json" % f))
+		lists[f + ".json"] = d.get("wardens", d).keys().filter(func(k): return want.has(k) or f == "mantle_look")
+	var files := Array(DirAccess.get_files_at("res://content/archetypes")).filter(func(f): return f.ends_with(".json"))
+	lists["content/archetypes/*.json"] = files.map(func(f): return f.get_basename())
+	ok("roster: Arch.ORDER is 13 distinct ids", want.size() == 13 and want.has("gil"), str(want))
+	for k in lists:
+		var got: Array = lists[k].duplicate()
+		got.sort()
+		ok("roster: %s holds the same 13 ids" % k, got == want, str(got))
+	var pk := FileAccess.get_file_as_string("res://server/matchmaker/mm/picks.py")
+	ok("roster: the matchmaker's HUNTERS names the same 13", want.all(func(a): return pk.contains('"%s"' % a)))
+
+const NO_SOURCE := ["gil"]      # our own Hunters: no source Base HP row, left out of the share
+
+func _health() -> void:
+	var ids := Arch.ids().filter(func(x): return not NO_SOURCE.has(x))
+	var ours := {}
+	var sum_o := 0.0
+	var sum_s := 0.0
+	for a in ids:
+		ours[a] = float(Data.CLASSES[Arch.weight(a)]["hp"])
+		sum_o += ours[a]
+		sum_s += float(SOURCE_HP.get(a, 0))
+	ok("health: every Hunter has a source Base HP row", ids.all(func(x): return SOURCE_HP.has(x)), str(ids))
+	var off: Array = []
+	for a in ids:
+		if not SOURCE_HP.has(a): continue
+		var ratio: float = (ours[a] / (sum_o / ids.size())) / (float(SOURCE_HP[a]) / (sum_s / ids.size()))
+		if ratio > 1.25 or ratio < 0.8: off.append("%s %.3f" % [a, ratio])
+	ok("health: max health share of roster average within 1.25x of the source", off.is_empty(), str(off))
 
 # ------------------------------------------------------------------ controls and data
 func _has_key(action: String, key: int) -> bool:
@@ -164,16 +282,21 @@ func _controls() -> void:
 
 func _data() -> void:
 	# rank previews: always the NEXT rank first (rank 2 at rank 1), then rank 3's special; every
-	# ability of every archetype has a concrete rank 2
+	# ability of every archetype has a concrete rank 2: a cooldown "a -> b" or a damage "+N%" (the source's
+	# upgrade numbers, rank_cd / rank_dmg: many are damage only)
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
 			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
-			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
+			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))
+	var rmb: Dictionary = Arch.def("archer")["rmb"]
+	var push: Array = rmb["pin"]["push"]
+	var push_text := "push %d -> %d" % [push[0], push[1]]
+	ok("Lace: Heavy Shot card names the data's %s" % push_text, String(rmb["variants"]["hold"]).contains(push_text))
 	var ids := Arch.ids()
 	ok("data: at least the six archetypes", ids.size() >= 6, str(ids))
 	for w in ["light", "medium", "heavy"]:
@@ -214,10 +337,10 @@ func _data() -> void:
 func _thief() -> void:
 	await _dj().thief(self)
 
-## An ultimate's data: no generic fuse, a 15-40s cooldown, opening at level 6.
+## An ultimate's data: no generic fuse, a 15-90s cooldown (Gil's Tidal Wave is 90s), opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
-	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 80.0 and int(rd.get("unlock", 6)) == 6
+	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 90.0 and int(rd.get("unlock", 6)) == 6
 
 ## The hero has its own ultimate on X: "r" data opening at level 6, and a card line for it.
 func _has_ult(arch: String) -> bool:
@@ -286,7 +409,10 @@ func _archer() -> void:
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
-	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
+		P.inp["fire"] = true
+		m.step(DT)
+	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
 		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
@@ -304,7 +430,7 @@ func _archer() -> void:
 	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	P.ak.press_rmb()
 	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and not bool(K.rmb_ctx["air"]) and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
-	K.rmb_down = false
+	K._drop_rmb()          # let go of the draw (the press-only hack left the pose and bar up)
 	step(m, 1.2)
 	# the bow's perfect window: let go right as Supercharged comes up: no extra damage, the next draw is faster
 	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
@@ -396,8 +522,14 @@ func _gunslinger() -> void:
 	var dazed := KitStatus.rattled(T) and K.direct_hits >= 1
 	ok("venator RMB: a direct hit hurts and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
+	var nums0: int = m.fx.nums.size()
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
-	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
+	ok("venator Dazed: rifle +76%", is_equal_approx(base, 17.6), "%.1f" % base)
+	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
+	ok("venator Dazed: the bonus gets its own pink +7.6 number",
+			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 7.6))
+	_burr_terrain(m, P, T, K, home, r[5])
+	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
@@ -405,13 +537,51 @@ func _gunslinger() -> void:
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
-	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
+	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 24.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
 	P.do_dash(); step(m, 0.6)      # the tap skid runs ~0.5s
 	ok("venator dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
+
+## Burr Charge over terrain: it rides two stair flights (1.6 m) up to a foe on the raised ground and hits;
+## a strict wall (a 2.4 m vertical terrain face, then a rock) in front of a foe stops it short.
+## Puts the strip back after.
+func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, lv: int) -> void:
+	var W: World = m.world
+	var x0 := int(home.x); var z0 := int(home.z)
+	var shape := func(lv_of: Callable, stair_at: Array, kind_at: int) -> void:
+		for dz in range(-3, 4):
+			for dx in range(1, 12):
+				var i: int = W.idx(x0 + dx, z0 + dz)
+				W.level[i] = lv + int(lv_of.call(dx))
+				W.kind[i] = World.T_BLOCK if dx == kind_at else World.T_GROUND
+				W.stairs.erase(i)
+				if dx in stair_at: W.stairs[i] = Vector2i(1, 0)
+	var shoot := func(at: Vector3) -> int:
+		fresh(T); KitStatus.clear_rattled(T); T.teleport(at); P.teleport(home); step(m, 0.2)
+		aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+		var hits := K.direct_hits
+		tap(m, P)
+		step(m, 0.8)
+		return K.direct_hits - hits
+	shape.call(func(dx: int) -> int: return clampi((dx - 2) / 2, 0, 2), [3, 5], -1)      # flights on tiles 3 and 5
+	var top := Vector3(home.x + 8.0, (lv + 2) * World.LEVEL, home.z)
+	var climbed: int = shoot.call(top)
+	var info := "hits %d took %.0f" % [climbed, dmg(T)]
+	ok("venator RMB: rides a ramp up to a foe on high ground", climbed == 1 and dmg(T) >= 12.0, info)
+	shape.call(func(dx: int) -> int: return 3 if dx == 4 else 0, [], -1)      # a 2.4 m face, one tile thick
+	var walled: int = shoot.call(home + Vector3(6.5, 0, 0))
+	var stuck := K.burrs.size() == 1 and absf(float(K.burrs[0]["pos"].x) - (home.x + 3.5)) < 0.6
+	info = "hits %d burrs %d" % [walled, K.burrs.size()]
+	ok("venator RMB: a vertical wall stops it, the foe behind is safe", walled == 0 and stuck, info)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], 4)
+	var rocked: int = shoot.call(home + Vector3(6.5, 0, 0))
+	ok("venator RMB: a rock stops it too", rocked == 0 and K.burrs.size() == 1, "hits %d" % rocked)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], -1)
 
 # ------------------------------------------------------------------ Juggernaut: tools/dancer_jug_check.gd
 func _juggernaut() -> void:
@@ -632,7 +802,8 @@ func _feel() -> void:
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
 	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
-	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-80s cooldown (the game data runs to 80s)",
+	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
+			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0

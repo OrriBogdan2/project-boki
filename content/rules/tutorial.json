@@ -1,13 +1,29 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you; hp = its own share of the monster's health in place of camp_hp). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (camp_hp times the health, so the kills come quickly; size up, damage and attack tempo down). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat.",
  "steps": [
   [
    "land",
    "Steer down to the meadow"
   ],
   [
-   "move",
-   "Walk to the glowing beam"
+   "points",
+   "You start with 1 ability point"
+  ],
+  [
+   "pick_sec",
+   "Unlock %A"
+  ],
+  [
+   "sec",
+   "Hit the monsters with %A"
+  ],
+  [
+   "shoot",
+   "Now shoot them down"
+  ],
+  [
+   "pick_dash",
+   "Level 2: unlock %A"
   ],
   [
    "dash",
@@ -19,63 +35,51 @@
   ],
   [
    "glide",
-   "Jump, then hold %G to glide"
+   "Jump, press %J again to glide"
+  ],
+  [
+   "wallkick",
+   "Jump at the cliff, then again"
   ],
   [
    "crouch",
-   "Climb up, then hold to crouch"
-  ],
-  [
-   "pickup",
-   "Pick up the item"
+   "Hold to crouch and scout"
   ],
   [
    "gkey",
-   "Send %s out"
+   "Send %s at the monsters"
   ],
   [
-   "rank",
-   "You levelled up!"
+   "pick_kin",
+   "Level 3: unlock %A"
   ],
   [
-   "shoot",
-   "%W the monster"
+   "kin",
+   "Hit the line with %A"
   ],
   [
-   "sig",
-   "Use %A on the group"
+   "glove",
+   "Grab the glove"
   ],
   [
-   "utility",
-   "Use %A"
+   "hook",
+   "Hook the Sentinel to you"
   ],
   [
-   "throw",
-   "Tap to send %s at the monster"
+   "pick_ult",
+   "Level 6: unlock your big move"
   ],
   [
-   "orders",
-   "Hold to give %s an order"
+   "ult",
+   "Merge with %s and win"
   ],
   [
-   "kin1",
-   "Watch %s use %A"
+   "ranks",
+   "Spend your spare points"
   ],
   [
-   "key",
-   "Grab the key"
-  ],
-  [
-   "chest",
-   "Open the chest with the key"
-  ],
-  [
-   "fight",
-   "Beat all the monsters"
-  ],
-  [
-   "goexit",
-   "Go to the outpost"
+   "wayout",
+   "Few ways out: reach the outpost"
   ],
   [
    "uplink",
@@ -91,45 +95,91 @@
   ]
  ],
  "detail": {
-  "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
-  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
-  "sig": "%X",
-  "key": "Chests are locked. Walk over the key to pick it up.",
-  "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.",
-  "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
-  "defend": "Stay inside the circle. Step out and the capture slips back!"
+  "points": "Monsters give XP; every level earns one more point.",
+  "pick_sec": "%L",
+  "pick_dash": "%L",
+  "pick_kin": "%L",
+  "pick_ult": "Merge with %s: one body, its power and yours, for a while.",
+  "shoot": "%L",
+  "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
+  "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
+  "wallkick": "A jump against a wall kicks you up it.",
+  "crouch": "Crouching shows what lies far ahead.",
+  "gkey": "%T sends %s at a monster; tap again to recall it.",
+  "glove": "Gloves need no points; %Q uses this one.",
+  "hook": "It shoots from afar, and your glove drags it to your feet.",
+  "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
+  "wayout": "A match has few ways out; this one is at the outpost.",
+  "uplink": "Stay in the circle, or the capture slips back.",
+  "defend": "Stay in the circle, or the capture slips back."
  },
  "alt": {
-  "utility_hold": "Tap, then hold, to use %A",
-  "throw_back": "Tap to call %s back",
-  "throw_send": "Tap again to send %s at the monster"
+  "sec_hold": "Tap, then hold, to use %A",
+  "shoot_draw": "Hold to draw, let go to loose",
+  "shoot_melee": "Step in and swing at them"
  },
- "need": {
-  "shoot": 3,
-  "sig": 2,
-  "utility": 2,
-  "throw": 2
- },
+ "need": {},
+ "cds": 0.25,
  "mob": {
-  "hp": 5.0,
   "scale": 1.4,
   "dmg": 0.1,
   "windup": 1.8,
-  "cd": 1.6
+  "cd": 1.6,
+  "camp_hp": 2.5
  },
  "labels": {
   "land": "Land here",
-  "move": "Walk here",
   "dash": "Dash across",
   "exdash": "Air dash",
   "glide": "Glide here",
+  "wallkick": "Climb",
   "crouch": "Lookout",
-  "pickup": "Item",
-  "key": "Key",
-  "chest": "Chest",
-  "goexit": "Outpost",
+  "glove": "Glove",
+  "wayout": "Uplink",
   "uplink": "Uplink",
   "defend": "Outpost",
   "extract": "Lift"
+ },
+ "camps": {
+  "sec": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 2
+  },
+  "gkey": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 3
+  },
+  "kin": {
+   "foes": [
+    "skitter",
+    "skitter",
+    "skitter"
+   ],
+   "to": 4,
+   "row": true,
+   "hp": 1.0
+  },
+  "hook": {
+   "foes": [
+    "sentinel",
+    "skitter"
+   ],
+   "to": 6,
+   "far": true
+  },
+  "ult": {
+   "foes": [
+    "skitter",
+    "spitter",
+    "skitter"
+   ],
+   "to": 0
+  }
  }
 }

@@ -9,7 +9,8 @@ extends RefCounted
 ##   glide                       gliding in below the lip
 ##   abyss                       falling below an island's rim, heading back in
 ## Asserts each kind of approach tops at least TOP_RATE of its tries, that over the lip you still have
-## KEEP (0.6) of the speed you came in with in KEEP_RATE of them, and that no face is topped by nobody.
+## KEEP (0.6) of the speed you came in with (up to MantleCarry.exit_cap: no launch off a fast dash) in KEEP_RATE
+## of them, and that no face is topped by nobody.
 ## Double-high ground (4 terraces, 3.2m: LAYOUT_RULES' wall tier) is never reached by jumping alone, a
 ## dash included: only a glide (or a launch, an ability, the abyss) gets you up it.
 ## With --verbose prints every try. Never touches the save.
@@ -120,7 +121,7 @@ func _count(k: String, r: Dictionary, f: Dictionary, arch: String) -> void:
 		f["topped"] = true
 		for key in ["vin", "vmin", "vlip", "t"]:
 			s[key] += r[key]
-		if r["vlip"] >= KEEP * r["vin"] - 0.01:
+		if r["vlip"] >= minf(KEEP * r["vin"], MantleCarry.exit_cap(h)) - 0.01:
 			s["kept"] += 1
 	if verbose:
 		print("CLIFF try %s %s at %s dir %s: %s" % [k, arch, f["a"], f["d"], r])
@@ -307,7 +308,9 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 			res["vmin"] = minf(res["vmin"], hv1)
 		var past := (Vector2(h.pos.x, h.pos.z) - face).dot(dv) > 0.3
 		var on_b := int(floor(h.pos.x)) == b.x and int(floor(h.pos.z)) == b.y
-		if (on_b or past) and h.pos.y >= top - 0.15 and touch_t >= 0.0:
+		# (over the top once the ledge rise has handed over: a rise at the suction's pace reaches the top tile a
+		# few steps before its pop and carry)
+		if (on_b or past) and h.pos.y >= top - 0.15 and touch_t >= 0.0 and h.lfloat.is_empty():
 			res["top"] = true
 			res["vlip"] = hv1
 			res["t"] = t - touch_t

@@ -235,7 +235,9 @@ vec3 depth_cues(vec3 c, float up, int st) {
 		float a = float(i) * 1.570796;
 		lip = max(lip, clamp((wpos.y - hgt(wpos.xz + vec2(cos(a), sin(a)) * 0.6)) * 1.2, 0.0, 1.0));
 	}
-	return c * (1.0 + 0.5 * lip * depth_k);
+	// lower terraces are a shade darker (levels run 0..3.2 m), so the tiers stack by value
+	float tier = mix(0.8, 1.0, clamp(wpos.y / 3.2, 0.0, 1.0));
+	return c * mix(1.0, tier, depth_k) * (1.0 + 0.5 * lip * depth_k);
 }
 
 void fragment() {
@@ -311,6 +313,7 @@ void fragment() {
 	ALBEDO = c;
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	EMISSION = rim_color.rgb * rim * rim_amount * (1.0 - fog) + gemit * 0.9 * (1.0 - fog * 0.85);
+	EMISSION += vis_edge(wpos);     // your sight wedge's sides
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

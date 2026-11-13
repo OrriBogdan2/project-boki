@@ -7,12 +7,13 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
-| The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
-| The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
+| Training Grounds | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
+| The Sparring Ring | `content/maps/duo_arena.json` | 40 x 40 | 1 | The 2v2 tutorial's ring (scripts/match/duo_tutorial.gd). |
+| The Hollow Crown | `content/maps/hollowcrown.json` | 540 x 540 | 14 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there; the design is docs/MAP_V2.md). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
 
-## The Arena
+## Training Grounds
 
 The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.
 
@@ -20,73 +21,87 @@ The practice arena: one round floor ringed by low ruin walls with four gates, fo
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Arena | grove | Meadow | quiet | 2 |  |
+| Training Grounds | grove | Meadow | quiet | 2 |  |
 | Bench | grove | Meadow | quiet | 0 |  |
 
 **Getting around:** 1 bridges.
 
 
 
-## The Hollow Crown
+## The Sparring Ring
 
-Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). A raised core (the Crown, its Throne and two boss Gaols), a ring of four regions each with one plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.
-
-### Regions
-
-| Region | Biome | Purpose |
-|---|---|---|
-| The Crown | Gloom | Contested core: the vault on the Throne, two boss Gaols, the richest loot and the most Blight. Every route in is a bridge or a glide over open air. |
-| Frostgate | Frost | Northern ridge and Keep: high ground over the Gate Span, a camp to level on, Rimefield cover. |
-| Cinder Steps | Ember | Western forge country: the Kilns overlook the Crown's west face; the Ash Bridge to the Ashen Gaol. |
-| Stormbreak | Storm | Eastern tableland with the shrine on the Shrine Table; launch pad up to Shardfall. |
-| Thornwood | Bloom | Southern wood: tall grass ambushes, the Boki nest, the Thornhive lair and its uplink. |
-| Larkhollow | Meadow | Quiet NW landing with a skiff dock. |
-| Highwatch | Frost | Quiet NE landing with an uplink outpost. |
-| Duskmoor | Storm | Quiet SE landing with a skiff dock. |
-| Saltmere | Bloom | Quiet SW landing with an uplink outpost. |
+The 2v2 tutorial's ring (scripts/match/duo_tutorial.gd): one round floor with an unbroken ruin wall two tiles thick all the way round (no gates, no ledges, no void inside it), four 2x2 stone blocks for cover and two patches of tall grass. Everyone is placed by the tutorial; nothing else spawns on it.
 
 ### Islands
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 27 |  |
-| Stormcrown Gaol | camp | Storm | dangerous | 4 |  |
-| Ashen Gaol | camp | Ember | dangerous | 6 |  |
-| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 11 |  |
-| Thornwood | nest | Bloom | contested | 30 |  |
-| Larkhollow | landing | Meadow | quiet | 20 | Lark Stones |
-| Highwatch | landing | Frost | quiet | 3 |  |
-| Duskmoor | landing | Storm | quiet | 11 |  |
-| Saltmere | landing | Bloom | quiet | 16 |  |
-| Shardfall | perch | Gloom | dangerous | 0 |  |
+| The Sparring Ring | grove | Meadow | quiet | 2 |  |
+
+
+
+## The Hollow Crown
+
+Hand-made expedition map (tools/make_hollowcrown.py; the format is described there; the design is docs/MAP_V2.md). A broken continent round the Hollow: wide joined land in the west, broken high ground in the east, Stormbreak's shards in the void between, the walled Crown on its north rim; each region a different fight. Nothing is placed by dice except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.
+
+### Regions
+
+| Region | Biome | Purpose |
+|---|---|---|
+| The Crown | Gloom | The vault on the Throne, the Stormcrown Eyrie and the richest chests, behind walls and gates, under the most Blight. |
+| Frostgate | Frost | The best armor on the map and the long shelf to shoot from; uplink A in the Rimefield below it. |
+| Cinder Steps | Ember | Forge country: gloves and weapon tunings up the cliff tiers, the Sunken Forge and uplink B at the foot. |
+| Stormbreak | Storm | The shrine on the Shrine Table, in the middle of the Hollow: every way across is a bridge. |
+| Thornwood | Bloom | The Boki nest and the Thornhive lair; ambushes in the trees and tall grass. |
+| Larkhollow | Meadow | Wild Boki graze on the open plain; the most landings, the widest flanks. |
+| Highwatch | Frost | Boots, and the towers: the Lantern is the highest ground on the map. |
+| Duskmoor | Storm | Relics in the Moor Chapel and its ruin maze: the closest fights on the map. |
+| Saltmere | Bloom | Salt caches round the lagoon and on its islet; fights on the rim and the one causeway. |
+
+### Islands
+
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| The Crown | heart | Gloom | dangerous | 172 | The Throne, The Keep |
+| Stormcrown Gaol | camp | Storm | dangerous | 26 |  |
+| Frostgate | camp | Frost | contested | 27 | Frostgate Keep, Rimefield, The Shelf |
+| Highwatch | landing | Frost | contested | 21 | The Lantern, Bellcliff, The Spur |
+| Larkhollow | landing | Meadow | quiet | 348 | The Graze |
+| Thornwood | nest | Bloom | contested | 218 | Bramble Rise, Nest Glade |
+| Saltmere | landing | Bloom | quiet | 100 | The Lagoon |
+| Duskmoor | landing | Storm | contested | 63 | Moor Chapel |
+| Stormbreak | shrine | Storm | contested | 12 | Shrine Table |
+| Crown Shard | landing | Storm | contested | 3 |  |
+| Thorn Shard | landing | Storm | contested | 7 |  |
+| Ember Shard | landing | Storm | contested | 8 |  |
+| Salt Shard | landing | Storm | contested | 7 |  |
+| Cinder Steps | camp | Ember | contested | 147 | The Kilns, Forge Yard |
 
 ### Boss lairs
 
 | Lair | Boss | Island | Ways in |
 |---|---|---|---|
 | Stormcrown Eyrie | Stormcoil | Stormcrown Gaol | lock dial, three rune pylons |
-| The Sunken Forge | Stone Colossus | Ashen Gaol | lock dial |
+| The Sunken Forge | Stone Colossus | Cinder Steps | lock dial |
 | The Thornhive | Brood Mother | Thornwood | lock dial, three ward stones |
 
-**Exits:** 2 skiff docks, 3 uplink outposts, 5 rift hatches.
+**Exits:** 2 uplink outposts.
 
-**Getting around:** 9 bridges, 17 glide routes, 1 jump pads, 1 updrafts.
+**Getting around:** 19 bridges, 6 glide routes, a sky train with 9 stops (Lark Halt, Watch Halt, Frost Halt, Eyrie Halt, Cinder Halt, Moor Halt, Salt Halt, Thorn Halt, Shard Halt).
 
 ### Rolled each match
 
 | What | Live per match | Candidate spots |
 |---|---|---|
-| Rare Boki | 3 | Larkhollow, Highwatch, Duskmoor, Saltmere, Nest Glade, Rimefield, Forge Yard, Stormbreak |
-| Vaults | 2 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
-| Item caches | 4 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol |
-| Live boss lairs | 2 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
+| Rare Boki | 5 | Larkhollow, Highwatch, Duskmoor, Saltmere, Nest Glade, Rimefield, Forge Yard, Stormbreak |
+| Vaults | 3 | Frostgate Keep, The Lantern, Shrine Table, Moor Chapel, The Kilns |
+| Item caches | 7 | The Crown, Stormcrown Gaol, Frostgate, Highwatch, Larkhollow, Thornwood, Saltmere, Duskmoor, Stormbreak, Crown Shard, Thorn Shard, Ember Shard, Salt Shard, Cinder Steps |
+| Live boss lairs | 3 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
 
 
 ## Skyreach
 
-Hand-made expedition map. Big walkable regions: the Heart in the middle, four large regions around it (Frostkeep N, Stormreach E, Bloomwild S, Ember Quarry W), four calm corner islands and four outer landings. A ring road of wide bridges joins every region to its corners, so most of the map can be walked. Only six bridges and one wind road lead into the Heart: these are the chokepoints. Perches float over the four diagonal gaps; reach them by a one-way pad or an updraft chain and glide back down. Angles are degrees around an island's centre (0 = east, 90 = south); 'sheer' arcs can't be grabbed, every other rim has a stone lip. Exits: skiff docks on the four landings, walled uplink outposts on three corner islands, rift hatches scattered over the regions. Three boss lairs (walled arenas sealed by a gate) sit on the Quarry, Stormreach and Bloomwild. Generated by tools/make_skyreach.py.
+Hand-made expedition map. Big walkable regions: the Heart in the middle, four large regions around it (Frostkeep N, Stormreach E, Bloomwild S, Ember Quarry W), four calm corner islands and four outer landings. A ring road of wide bridges joins every region to its corners, so most of the map can be walked. Only six bridges and one wind road lead into the Heart: these are the chokepoints. Perches float over the four diagonal gaps; reach them by a one-way pad or an updraft chain and glide back down. Angles are degrees around an island's centre (0 = east, 90 = south); 'sheer' arcs can't be grabbed, every other rim has a stone lip. Ways out: the Heart, and two walled uplink outposts on Frostkeep and Stormreach. Three boss lairs (walled arenas sealed by a gate) sit on the Quarry, Stormreach and Bloomwild. Generated by tools/make_skyreach.py.
 
 ### Islands
 
@@ -118,7 +133,7 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Stormcrown Eyrie | Stormcoil | Stormreach | lock dial, three rune pylons |
 | The Thornhive | Brood Mother | Bloomwild | lock dial, three ward stones |
 
-**Exits:** 4 skiff docks, 3 uplink outposts, 6 rift hatches.
+**Exits:** 2 uplink outposts.
 
 **Getting around:** 18 bridges, 12 glide routes, 8 jump pads, 16 updrafts, 9 wind roads, a sky train with 4 stops (Thornwatch Stop, Petal Stop, Cinder Stop, Static Stop).
 
@@ -136,7 +151,7 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 
 ## First Flight
 
-The tutorial course, one island per skill: a landing meadow, a dash gap, a ledge (jump plus air dash), a long wind crossing to glide, a low lookout rise, one step up (crouch to scout the range island), a range island for the fights and the chest, and the walled outpost isle. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from, pos for the rest. No rocks, no hazards, nothing random.
+The tutorial course, one island per skill: a landing meadow, a dash gap, a ledge (jump plus air dash), a long wind crossing to glide, a three-terrace lookout cliff (wall kick up it, then crouch to scout the range island), a range island for the glove and the last fights, and the walled outpost isle. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from, pos for the rest. No rocks, no hazards, nothing random.
 
 ### Islands
 

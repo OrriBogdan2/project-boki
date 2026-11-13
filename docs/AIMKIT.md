@@ -12,6 +12,9 @@ cursor state plus `MANIFEST.txt`).
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
+| `aim_reach.gd` (`AimReach`) | The range preview of a ground-target slot: a faint max-range ring and the landing disc |
+
+Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
 
 Scale: 1 body height (bh) = 1.8 m (`AimKit.BH`). The hero sheets measure in bh.
 
@@ -42,6 +45,8 @@ Membership tests (flat XZ), so a kit's hit test matches what it draws:
 `AimMode.in_lane(from, dir, len, width, p)`, `in_cone(from, dir, len, deg, p, inner)`,
 `in_arc(center, dir, radius, deg, thick, p)` and `in_circle(at, r, p)`. Each takes an optional `pad`
 (for example a target's radius).
+
+**Cursor on your own body:** `Hunter.aim_dir()` (the one direction every shot, cast and the facing read) ignores a cursor within two body radii (`AIM_MIN_BODIES`, a body width) and keeps the last good direction, so crossing the model never spins the body or sends rounds sideways. `--aim-near-check` sweeps the cursor across and around the body.
 
 ## 2. Telegraphs
 
@@ -159,6 +164,23 @@ rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `ci
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the
 drag arrow.
 
+### Range preview of a ground-target slot (`AimReach`)
+A slot that places a zone or strike at the cursor names its range and landing radius in data:
+`"ground": {"range": "reach", "r": "radius"}` (key paths in the slot def, e.g. `"lance.range"`; `"recast": true`
+when only the recast lands at the cursor, Meeko's Hearthlight throw). While it is aimed, AimKit shows a faint
+ring at that range round the caster (`<slot>_reach`) and the landing disc at the cursor, clamped to the range so
+it stops where the cast lands (`<slot>_spot`). Aimed means:
+- **Quick cast off**: E or R held (`Match.aim_hold`), cast on release. R holds only for a ground-target R that has
+  no aim hold of its own (`AimReach.holds`). With Quick cast on (the default) these cast on the press, as in the source.
+- **The kit's own aim hold**: Neve's Ice Spear (RMB held), Motley's Trade (Shift held), Tenzo's Basalt Spine (R held)
+  draw their own landing mark and add the ring with `AimReach.ring(kit, slot)`. Sparkle's Kitefall hang keeps its
+  own `x_ring` round the take-off spot.
+
+The ground-target slots: Vex R, Sparkle E and R, Meeko E (throw), Neve RMB, Motley E, R and Shift, Tenzo R.
+`--aimkit-check` aims each at twice its range and asserts the ring at the data range and the mark on it.
+Not ground-targeted here (a wall, lane or skillshot, no disc): Lace E, Neve E, Sable E; Kael's Meteor Drop lands
+`drop.ahead` in front of him, not at the cursor.
+
 ### Reading back, hiding, clearing
 - `AimKit.shown(h, id)`: is it up?
 - `AimKit.entry(h, id)`: the resolved params, for example the arc radius the kit should cast at.
@@ -169,9 +191,11 @@ drag arrow.
 ```gdscript
 AimKit.charge(h, k)                  # every step while charging: a thin ring fills round the cursor
                                      # crossing k = 1 fires the flare once (pass "flare": false to skip)
+                                     # "at": "body" draws the same ring round the hunter instead (44 px),
+                                     # where the source shows its charge arc on the hero (Kael's blast)
 AimKit.flare(h)                      # the full-charge flare now: a ring snaps out, a glint (0.28 s)
 AimKit.perfect(h)                    # the perfect-window star: gold 4-point star and ring, 0.12 s
-AimKit.reticle(h)                    # {charge, flare, perfect}, for checks
+AimKit.reticle(h)                    # {charge, flare, perfect, at}, for checks
 ```
 Params: `col` (charge ring colour, default the hero colour), `col2` (flare colour), and `col` on
 `perfect` (gold by default). The states run on real time, so they show through hit stop. The ring sits
@@ -189,6 +213,8 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   `_drop_holds()`. (KinMerge, which is reserved, calls `_drop_holds()` directly; the gate covers it.)
 - **Who sees it.**
   - Aim reticles (lanes, Vs, lines) stay at the default `all: false`.
+  - A kit that draws its own aim line returns true from `own_aim_line()`, so the shared weapon line hides
+    (two lines read as two aims). The per-hero audit is docs/AIM_PREVIEWS.md.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
   - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
     runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
@@ -203,5 +229,66 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
+- **Bots dodge them.** A shape shown with `all` (a circle, lane or cone) is a hostile area to the other
+  team's bots: `BotDodge` (scripts/match/bot_dodge.gd) walks a bot out of it, or dashes with a real charge,
+  after the difficulty's `react` time x 2. Check: `--bot-dodge-check` (normal out at least 70%, easy under 40%).
 - **The old helpers.** `ArchKit.tele_circle` and `tele_lane` (one tweened node per telegraph) still work.
   Move your kit's calls to AimKit as you touch them (docs/DEBT.md).
+
+## 5. Cursor past max range: source rule vs ours (parity audit, 2026-11-09)
+
+Three outcomes: **clamp** (lands at the cursor, at most max range), **full** (always flies the whole range
+in the aim direction) or **refuse** (no cast). Source = the hero-ref sheet on `ext/agent-briefs`
+(`briefs/hero-ref/<id>.md`) and the wiki rows in `docs/heroes/<id>.md`. Ours = `AimMode` and the kit.
+"?" = the sources don't record it (the footage never aimed past range), so ours is a guess.
+Shared rule, fixed in this audit: **a ground-placed zone, nuke or lob lands exactly at the cursor with no
+minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blank click still travels.
+
+| Hunter (sheet) | Slot | Source rule | Ours | Verdict |
+|---|---|---|---|---|
+| Lace (pin) | LMB stage 1 | clamp; lands at the cursor | clamp, 12 m | match |
+| | LMB stage 2 | full, past the cursor, longer range | full, 16 m | match |
+| | RMB Heavy Shot | skillshot toward the cursor; range ? | full, 14 m | match (?) |
+| | E Hail Wall | arc at the cursor distance, clamped | clamp 2..9 m radius | match (the 2 m floor is ours) |
+| | X Starpiercer | beam, fixed length | full, 18 m | match |
+| Cinder (linwick) | LMB | stream runs its full length | full, 6.1 m | match |
+| | RMB Cinder Shot | sheet: one miss ended near the cursor (?); owner note: always full | full, 14 m | owner note, kept |
+| | Shift | toward the cursor, stops on impact | fixed dash along the aim | match |
+| | X Flue Flight | flies forward along the aim | fixed flight, steers with the aim | match |
+| Albert (bjorn) | LMB throw | clamp; lands at the cursor, max range ? (seen to 7 bh = 12.6 m) | clamp, 2.5..9 m (owner: 2.5 m floor) | match on the rule; **9 m is below the 12.6 m seen, left for the owner** |
+| | E | at the planted hammer, not the cursor | the hammer | match |
+| | R | lane along the aim, not cursor-clamped | full lane | match |
+| | Shift | fixed-length dash, not to the cursor | fixed | match |
+| Tenzo (breah) | LMB boulder | cursor or max range: **unrecorded** | full, 11 m | ? (sheet open question) |
+| | RMB slam | a short hop ahead toward the cursor | fixed hop | match |
+| | Shift Rock Hop | toward the cursor, length ? | clamp, 1.2..2.4 m a hop (owner item) | owner note |
+| | X Basalt Spine | centre at the cursor, clamped | clamp 11 m, **now no minimum** | fixed |
+| Grimble (dredge) | LMB | fixed range, does not stop at the cursor | full | match |
+| | RMB Grasp | full range, to the first foe | full, 11.5 m | match |
+| | R | cone, fixed | fixed | match |
+| Vex (venator) | LMB | full, past the cursor | full | match |
+| | RMB Burr | along the aim to max range, not the cursor | full, 10.5 m | match |
+| | E Longneedle | fixed long lane | full, 18 m | match |
+| | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
+| Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
+| | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |
+| | E Warchain | hook toward the cursor, length ? | full, 13 m | match (?) |
+| Sparkle (vireo) | LMB, RMB | full range | full | match |
+| | E Skycall | ground spot at the cursor | clamp 11 m, **now no minimum** | fixed |
+| | X Kitefall | at the cursor, clamped inside a ring | clamp 14.4 m, backed off to standable ground | match |
+| Motley (ostra) | LMB, RMB Snap | full, past the cursor | full | match |
+| | Shift Swap | lands at the cursor (lob) | clamp 12 m, no minimum | match |
+| | E Brimseed | at the cursor | clamp 9 m; refuses with no ground | match (?) |
+| | X Nightwell | at the cursor, clamped (10 m) | clamp 10 m; refuses with no ground | match |
+| Neve (tamsin) | LMB darts | homing toward the cursor | full, homing | match |
+| | RMB Ice Spear | lands at the cursor | clamp 1.5..12 m | match (the 1.5 m floor is ours) |
+| | E Rink Wall | slides toward the cursor and stops there | clamp 4.5..16.2 m | match |
+| Meeko (mooshmoosh) | LMB, RMB | full range | full | match |
+| | E Hearth | thrown to the cursor | clamp 9 m, no minimum | match |
+| Sable (dancer) | LMB | ends at the cursor, clamped | clamp 1.5..12 m | match |
+| | RMB Bola | fixed-length lane toward the cursor | fixed | match |
+| | E Shadow Knife | skillshot; with no target lands at the cursor or the end of range | clamp 14 m | match (?) |
+
+Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
+1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
+footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.

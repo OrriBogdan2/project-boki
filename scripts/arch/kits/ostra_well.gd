@@ -50,7 +50,7 @@ func is_open() -> bool: return phase == "open"
 func start() -> bool:
 	if running():
 		return false
-	var pw := HeroZones.walk(k.m, k.h.pos, k.aim(), float(xd()["range"]))
+	var pw := HeroZones.walk(k.m, k.cast_from(), k.aim(), float(xd()["range"]))
 	if not pw["ok"]:
 		denied += 1
 		if k.h.is_local() and k.m.hud:
@@ -161,6 +161,8 @@ func _tick_open(dt: float) -> void:
 func _tick_catch(left: float) -> void:
 	ticks += 1
 	var dmg := float(xd()["tick_dmg"]) * k.power("x")
+	if swollen:
+		k.m.brk.hit_around(center + Vector3(0, 0.4, 0), radius, k.h)    # Empowered ticks are Explosive
 	for f in k.foes_in(center, radius):
 		if not k.m.world.los(center + Vector3(0, 0.6, 0), f.pos + Vector3(0, 0.6, 0), center.y + 0.6):
 			continue

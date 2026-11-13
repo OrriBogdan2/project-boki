@@ -4,14 +4,15 @@ extends RefCounted
 ## numbered tiles (#001...): a Boki you've caught shows in full colour, one you've only seen is a dark
 ## silhouette, one you've never met is a "?". Each tile carries a small type badge, and a soft
 ## sparkle when you've found its shimmer form. Clicking a tile opens its page: the Boki turning on a
-## stand, its number, name and type, a field note, its size range, the forms you've found, where it
-## lives and the ones you're raising.
+## stand, its number, name and type, a field note, its size range, where it lives, its quirk and how
+## its sexes work (BokiQuirks), where it's found and how rare it is (DexFound), the forms you've found
+## and the ones you're raising.
 ##
 ## Reads Save "dex" exactly as Care keeps it ({species: {seen, caught, forms, shimmer, mutations}});
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
-## percentage, no rarity colours.
+## percentage, no rarity colours (a rarity pip is filled, not coloured).
 
-## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
+## Each type's badge colour and name (the glyphs are drawn by TypeIcon); "ink" tints the glyph (white if unset).
 const TYPES := {
 	"spore": {"name": "Spore", "col": Color("9ccf6a")},
 	"titan": {"name": "Titan", "col": Color("cbb48a")},
@@ -19,9 +20,11 @@ const TYPES := {
 	"swarm": {"name": "Swarm", "col": Color("f2c24a")},
 	"gravity": {"name": "Gravity", "col": Color("8f8cff")},
 	"prism": {"name": "Prism", "col": Color("ff9fd0")},
-	"lunar": {"name": "Lunar", "col": Color("cfdcff")},
+	"lunar": {"name": "Fairy", "col": Color("cfdcff")},
 	"echo": {"name": "Echo", "col": Color("6fb6ff")},
 	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
+	"ghost": {"name": "Ghost", "col": Color("bcebdf"), "ink": Color("5a4aa8")},
+	"dark": {"name": "Dark", "col": Color("4a4a9a"), "ink": Color("ffb454")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
@@ -35,9 +38,10 @@ static func type_name(t: String) -> String:
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
 
-## Its number in the Field Book: the order species are listed in (Data.KIN: the starters first).
+## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
+## forms of a branching line share one.
 static func number(spk: String) -> int:
-	return Data.KIN.keys().find(spk) + 1
+	return FieldBook.number(spk)
 
 static func num_text(spk: String) -> String:
 	return "#%03d" % number(spk)
@@ -46,19 +50,9 @@ static func entry(spk: String) -> Dictionary:
 	var dx: Dictionary = Save.d.get("dex", {})
 	return dx.get(spk, {})
 
-static func seen(spk: String) -> bool:
-	return bool(entry(spk).get("seen", false))
-
-static func caught(spk: String) -> bool:
-	return bool(entry(spk).get("caught", false))
-
-## [seen, caught] across every species (caught ones count as seen).
+## [seen, caught] across every entry (caught ones count as seen).
 static func counts() -> Vector2i:
-	var s := 0; var t := 0
-	for spk in Data.KIN:
-		if seen(spk) or caught(spk): s += 1
-		if caught(spk): t += 1
-	return Vector2i(s, t)
+	return Vector2i(FieldBook.seen_count(), FieldBook.caught_count())
 
 ## The grid, under a "Seen N · Caught N" line. on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
@@ -77,14 +71,34 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	var g := GridContainer.new()
 	g.columns = 6
 	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
+	var fill := func():
+		for ch in g.get_children():
+			ch.queue_free()
+		for key in listed():
+			g.add_child(tile(key, tree, on_open))
+	v.add_child(KinFilter.new(fill))
 	v.add_child(g)
-	for spk in Data.KIN:
-		g.add_child(tile(spk, tree, on_open))
+	fill.call()
 
-## One numbered tile.
-static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
-	var is_caught := caught(spk)
-	var is_seen := is_caught or seen(spk)
+## The entries the filter shows, in the picked order (legendaries last). Entries you have not met pass
+## only under "All" (their type is not yours to know yet); one you own sorts by its best Boki, the rest by number.
+static func listed() -> Array:
+	var recs: Dictionary = {}
+	for key in FieldBook.entries():
+		if KinFilter.type != "" and not (FieldBook.entry_seen(key) and KinFilter.type_ok(FieldBook.face(key))):
+			continue
+		recs[key] = {"species": key, "name": String(Data.KIN[key]["name"])}
+	for r in Save.d.get("roster", []):
+		var key := FieldBook.entry_key(String(r["species"]))
+		if recs.has(key) and (not recs[key].has("uid") or KinBox.sorted([recs[key], r], KinFilter.sort)[0] == r):
+			recs[key] = r
+	return KinBox.sorted(recs.values(), KinFilter.sort).map(func(r): return FieldBook.entry_key(String(r["species"])))
+
+## One numbered tile, for an entry: it shows the form you own (or have seen) and opens that form's page.
+static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
+	var is_caught := FieldBook.entry_caught(key)
+	var is_seen := FieldBook.entry_seen(key)
+	var spk := FieldBook.face(key)
 	var t: PanelContainer
 	if is_seen:
 		var sk := spk
@@ -97,9 +111,10 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	var col := UI.vbox(2)
 	t.add_child(col)
 	var top := UI.hbox(4)
-	var nl := UI.label(num_text(spk), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
+	var nl := UI.label(num_text(key), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
+	top.add_child(DexFound.Pip.new(spk, is_seen))
 	if is_seen:
 		top.add_child(TypeIcon.new(type_of(spk), 16.0))
 	col.add_child(top)
@@ -120,6 +135,11 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 			sp.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 			sp.tooltip_text = "Shimmer form found"
 			holder.add_child(sp)
+		if FieldBook.both_forms(key):
+			var star := UI.label("★", UI.T_SMALL, UI.GOLD)
+			star.position = Vector2(PORTRAIT - 14.0, PORTRAIT - 18.0)
+			star.tooltip_text = "Both forms found"
+			holder.add_child(star)
 		pic.add_child(holder)
 	else:
 		var q := UI.title("?", 40, Color(1, 1, 1, 0.16))
@@ -139,7 +159,7 @@ static func demo() -> void:
 	Save.d["dex"] = dx
 	var ids: Array = Data.KIN.keys()
 	for spk in ids:
-		if not caught(spk) and not dx.has(spk):
+		if not FieldBook.form_caught(spk) and not dx.has(spk):
 			dx[spk] = {"seen": true, "caught": false, "forms": [], "shimmer": false, "mutations": []}
 			break
 	if not ids.is_empty() and dx.has(ids[1]):
@@ -147,11 +167,13 @@ static func demo() -> void:
 		if not (dx[ids[1]]["forms"] as Array).has("Pudward"): dx[ids[1]]["forms"].append("Pudward")
 
 # ------------------------------------------------------------------ a Boki's page
-## The page for one species: picture on the left, field notes on the right.
-static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
+## The page for one species: picture on the left, field notes on the right. An entry with two forms
+## gets a switch between them (`pick(species)` opens the other form's page) and the "both forms" star.
+static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callable) -> void:
 	var sp: Dictionary = Data.KIN[spk]
 	var e := entry(spk)
-	var is_caught := caught(spk)
+	var is_caught := FieldBook.form_caught(spk)
+	var forms_here := FieldBook.forms_of(spk)
 	var row := UI.hbox(UI.GAP_BIG + 6)
 	v.add_child(row)
 	# the Boki turning on its stand (a silhouette if you've only seen it)
@@ -167,6 +189,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 		var d := KinPortrait.view({"species": spk}, tree, 160)
 		if not is_caught: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		dc.add_child(d)
+	BokiCry.play(spk)
 	var info := UI.vbox(7)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(info)
@@ -184,16 +207,31 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	trow.add_child(tchip)
 	trow.add_child(UI.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
+	if FieldBook.both_forms(spk):
+		trow.add_child(UI.tag("★ Both forms", UI.GOLD))
 	info.add_child(trow)
+	if forms_here.size() > 1:
+		var swr := UI.hbox(6)
+		for f in forms_here:
+			var fb := UI.button(String(Data.KIN[f]["name"]) if FieldBook.form_seen(f) else "???", func(): pick.call(f))
+			fb.disabled = f == spk
+			swr.add_child(fb)
+		info.add_child(swr)
 	var note := UI.para(_field_note(spk), UI.T_SMALL + 1, UI.INK)
 	note.custom_minimum_size.x = 360
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
 	_fact(info, "pin", "Lives", _habitat(spk))
+	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
+	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
+	if BokiQuirks.quirk(spk) != "":
+		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
+	if BokiQuirks.sex_note(spk) != "":
+		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
-	fl.add_child(UI.section("Forms found", UI.FAINT.lightened(0.2)))
+	fl.add_child(UI.section("Forms found"))
 	var fr := UI.hbox(8)
 	var shown: Array = [String(sp["name"])] + forms.slice(0, 5)
 	for fname in shown:
@@ -226,7 +264,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	var mine: Array = (Save.d.get("roster", []) as Array).filter(func(r): return String(r.get("species", "")) == spk)
 	if not mine.is_empty():
 		var ml := UI.vbox(4)
-		ml.add_child(UI.section("Yours", UI.FAINT.lightened(0.2)))
+		ml.add_child(UI.section("Yours"))
 		var mr := HFlowContainer.new()
 		mr.add_theme_constant_override("h_separation", 8); mr.add_theme_constant_override("v_separation", 6)
 		for r in mine.slice(0, 8):
@@ -246,7 +284,7 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	var r := UI.hbox(8)
 	r.add_child(UI.IconDot.new(icon, UI.MUTED, 15.0))
 	var kl := UI.label(k, UI.T_SMALL, UI.MUTED, UI.semi)
-	kl.custom_minimum_size.x = 48
+	kl.custom_minimum_size.x = 64
 	r.add_child(kl)
 	var vl := UI.label(val, UI.T_SMALL, UI.INK)
 	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -300,12 +338,12 @@ static func _habitat(spk: String) -> String:
 		out += " Last seen at %s." % ", ".join(sighted.slice(-2))      # (logged on sight, newest last)
 	return out
 
-## A look-only record wearing a found form (from its name: the root plus an affinity's suffix).
+## A look-only record wearing a found form (an old save's form name: the root plus an affinity's suffix).
 static func _form_rec(spk: String, fname: String) -> Dictionary:
 	var rec := {"species": spk, "level": 5, "uid": "dex|%s|%s" % [spk, fname]}
-	var root := String(Evo.ROOTS.get(spk, "Kin"))
-	for aff in Evo.SUFFIX:
-		var sfx: Array = Evo.SUFFIX[aff]
+	var root := String(Evo.V11_ROOTS.get(spk, "Kin"))
+	for aff in Evo.V11_SUFFIX:
+		var sfx: Array = Evo.V11_SUFFIX[aff]
 		for i in sfx.size():
 			if fname == root + String(sfx[i]) or fname.begins_with(root + String(sfx[i]) + " "):
 				var fs: Array = []
@@ -322,7 +360,8 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 	ci.draw_circle(c, r, Color(col.darkened(0.45), alpha))
 	ci.draw_circle(c, r - 1.2, Color(col.darkened(0.15), alpha))
 	var s := r * 0.62
-	var ink := Color(1, 1, 1, 0.95 * alpha)
+	var ink: Color = TYPES.get(t, {}).get("ink", Color.WHITE)
+	ink.a = 0.95 * alpha
 	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
 	var w := maxf(1.2, r * 0.16)
 	match t:
@@ -358,6 +397,26 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
 		"tempest":     # a bolt
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
+		"ghost":       # a sheet ghost: round head, wavy hem, two eyes
+			var body := PackedVector2Array()
+			for i in 13:
+				var a := PI + PI * i / 12.0
+				body.append(P.call(cos(a) * 0.7, -0.1 + sin(a) * 0.75))
+			for hem in [[0.7, 0.9], [0.35, 0.55], [0.0, 0.9], [-0.35, 0.55], [-0.7, 0.9]]:
+				body.append(P.call(hem[0], hem[1]))
+			ci.draw_colored_polygon(body, ink)
+			for ex in [-0.27, 0.27]:
+				ci.draw_circle(P.call(ex, -0.2), s * 0.13, Color(col.darkened(0.55), alpha))
+		"dark":        # a slit eye open in the night
+			var lid := PackedVector2Array()
+			for i in 15:
+				var x := -0.95 + 1.9 * i / 14.0
+				lid.append(P.call(x, -0.6 * (1.0 - x * x / 0.9025)))
+			for i in range(13, 0, -1):
+				var x := -0.95 + 1.9 * i / 14.0
+				lid.append(P.call(x, 0.6 * (1.0 - x * x / 0.9025)))
+			ci.draw_colored_polygon(lid, ink)
+			ci.draw_circle(P.call(0.0, 0.0), s * 0.3, Color(col.darkened(0.15), alpha))
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
 

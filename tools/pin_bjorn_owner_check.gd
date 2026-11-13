@@ -113,7 +113,7 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
 	var end: Vector3 = n.points[-1]
 	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
-	ok("114 needle: the red thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
+	ok("114 needle: the orchid thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
 	var p0 := P.pos
 	step(m, 0.4, hold)
 	var held_v := p0.distance_to(P.pos) / 0.4
@@ -124,8 +124,10 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var eye1: float = eye_ahead.call()
 	var glow1: float = n.shell_mat.get_shader_parameter("color").a
 	var hot: Color = n.steel.get_shader_parameter("albedo")
-	ok("114 needle: it draws back and glows up with the charge, the silver going red-hot",
-		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3 and hot.r > hot.b + 0.3,
+	# (hot toward her orchid thread: the steel loses its green as it heats)
+	ok("114 needle: it draws back and glows up with the charge, the silver going orchid-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3
+			and hot.g < PinNeedle.SILVER.g - 0.3,
 		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
 	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
 	P.inp["sec_hold"] = false
@@ -469,6 +471,13 @@ func _throws_in(m: Match, P: Hunter, K: BulwarkKit, secs: float) -> int:
 		prev = press
 	P.inp["fire"] = false
 	step(m, 1.0)
+	if not K.mace.is_empty():
+		# called home: a planted hammer would turn the next hold's first press into a 0.3 s recall
+		P.fire_cd = 0.0
+		P.inp["fire"] = true
+		m.step(DT)
+		P.inp["fire"] = false
+		step(m, 0.5)
 	return K.throws - t0 if prev or true else 0
 
 ## #29: the raised aegis pushes foes back and shows it, is bigger and plated.
@@ -566,15 +575,15 @@ func _bjorn_hold(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -
 	step(m, float(K.lmb_def()["full"]) + 0.3, aim)      # past the perfect window (#49): the normal step
 	var p0 := P.pos
 	var t0 := T.pos
+	var swings := int(HeroVfx.of(m).plays.get("swing", 0))
 	P.inp["fire"] = false
 	m.step(DT)
-	var on_hit := _crescent_ahead(P, K)
 	step(m, 0.15)
-	var in_carry := _crescent_ahead(P, K)
-	ok("bjorn hold: the swing's crescent sweeps in front of him, inside its reach, on the hit and through the carry",
-		on_hit.x > 0.0 and on_hit.y <= float(K.lmb_def()["smash_reach"]) and in_carry.x > 0.0
-			and in_carry.y <= float(K.lmb_def()["smash_reach"]),
-		"hit: ahead %.2f out %.2f; carry: ahead %.2f out %.2f" % [on_hit.x, on_hit.y, in_carry.x, in_carry.y])
+	var sweep: Dictionary = HeroVfx.data("bulwark")["moves"]["swing"]["fx"][0]
+	ok("bjorn hold: the release plays one flaming sweep over the hit's own 180 degrees, drawn to its reach",
+		int(HeroVfx.of(m).plays.get("swing", 0)) == swings + 1 and sweep["p"] == "sweep" and sweep["size"] == "r"
+			and is_equal_approx(float(sweep["arc"]), float(K.lmb_def()["smash_arc"])),
+		"plays %d arc %s" % [int(HeroVfx.of(m).plays.get("swing", 0)) - swings, sweep["arc"]])
 	step(m, 0.65)
 	var lunge := Vector2(P.pos.x - p0.x, P.pos.z - p0.z).dot(Vector2(1, 0))
 	var knock := Vector2(T.pos.x - t0.x, T.pos.z - t0.z).dot(Vector2(1, 0))
@@ -586,12 +595,6 @@ func _glove_q(P: Hunter) -> void:
 	P.gear[0] = {"id": "barrier", "rar": 1}
 	P.gear_cd[0] = 0.0
 	P.inp["gear1"] = true
-
-## The swing crescent's centre against him: x = how far it lies along his facing, y = how far it is from him.
-func _crescent_ahead(P: Hunter, K: BulwarkKit) -> Vector2:
-	var c := K.fx.crescent_centre()
-	var off := Vector2(c.x - P.pos.x, c.z - P.pos.z)
-	return Vector2(off.dot(P.aim_dir()), off.length())
 
 ## #29: the Faultline's trail keeps drawing over the abyss, at his height.
 func _bjorn_abyss() -> void:
@@ -613,15 +616,11 @@ func _bjorn_abyss() -> void:
 	press_x(m, P)
 	step(m, 0.45)
 	var ud: BjornUlt = K.ult
-	var drawn := 0.0
-	var floating := true
-	for i in ud.cells.size():
-		var e := AimKit.entry(P, "x%d" % i)
-		if not e.is_empty():
-			drawn += float(e.get("len", 0.0))
-			var mid := (ud.cells[i] as Vector3) + Vector3(ud.dir.x, 0, ud.dir.y) * ud.cell_len() * 0.5
-			var at_height: bool = absf(float(e.get("y", -999.0)) - ud.origin.y) < 0.05
-			floating = floating and (at_height or W.ground_at(mid.x, mid.z) > World.VOID + 1.0)
+	var lane := AimKit.entry(P, "x")
+	var drawn := float(lane.get("len", 0.0))
+	var mid_lane := ud.origin + Vector3(ud.dir.x, 0, ud.dir.y) * ud.trail_len() * 0.5
+	var floating: bool = absf(float(lane.get("y", -999.0)) - ud.origin.y) < 0.05 \
+		or W.ground_at(mid_lane.x, mid_lane.z) > World.VOID + 1.0
 	var over := 0
 	for i in ud.cells.size():
 		var c: Vector3 = ud.cells[i]
@@ -681,7 +680,7 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var loosed0 := K.draw.loosed_at
 	P.do_dash()
 	var rolling := P.roll_t > 0.0
-	for i in 3:
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
 	step(m, 0.8, _let_go.bind(P))

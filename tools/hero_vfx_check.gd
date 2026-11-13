@@ -4,11 +4,13 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
-## a held stream turns with the aim, a projectile trail follows its node and ends with it.
+## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
+## from their anchor, follow it, stream behind a run and are off at Low. Each ability's emitter on the swapped
+## models stays on its bone (tools/hero_vfx_emit.gd).
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
-const MAX_VORTEX := 4.5        # m radius, the largest ground swirl
+const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -27,6 +29,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
+		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
@@ -45,6 +48,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -56,9 +60,12 @@ func run(main: Node) -> void:
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
+	_dolm_rocks(m)
 	_net(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
+	await _scarf(main)
+	_dots(m)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -98,7 +105,7 @@ func _recipes(arch: String) -> void:
 					bad_col.append(layer[key])
 			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
 			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
-			var vortex_big: bool = layer["p"] == "vortex" and big > MAX_VORTEX
+			var vortex_big: bool = layer["p"] in ["vortex", "ring"] and big > MAX_VORTEX
 			var life := float(layer.get("life", 0.0))
 			if layer["p"] == "ribbon" and layer.has("tail"):
 				life = minf(life, HeroVfx.TRAIL_MAX)     # a projectile trail runs as long as its shot, capped
@@ -229,6 +236,25 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
 
+## Tenzo's thrown rocks are cold basalt with a cobalt rim (DECISIONS 11-08): no heat, no material warmer than blue.
+func _dolm_rocks(m: Match) -> void:
+	var warm: Array = []
+	for kind in ["boulder", "rock", "dashrock"]:
+		var n := KitLooks.of(m)._build(kind)
+		for mi: Node in n.find_children("*", "MeshInstance3D", true, false):
+			var mat: Material = (mi as MeshInstance3D).material_override
+			if mat is ShaderMaterial:
+				var sm := mat as ShaderMaterial
+				var hues: Array = [sm.get_shader_parameter("glow"), sm.get_shader_parameter("rim_col")]
+				if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r > c.b):
+					warm.append(kind)
+			elif mat is StandardMaterial3D:
+				var c := (mat as StandardMaterial3D).albedo_color
+				if c.r > c.b:
+					warm.append(kind)
+		n.free()
+	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
+
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
 	var m: Match = flow._match(main, "archer")
@@ -263,6 +289,16 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
+	_clear(V)
+	V.play(P, "ring", P.pos, Vector2.RIGHT)
+	V.play(P, "all", P.pos, Vector2.RIGHT)
+	var arcs := [V._arc(360.0), V._arc(120.0)]
+	var sweeps := V.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh in arcs)
+	var got := sweeps.map(func(e): return [(e["mat"] as ShaderMaterial).get_shader_parameter("head_t"),
+		(e["mat"] as ShaderMaterial).get_shader_parameter("band")])
+	ok(sweeps.size() == 2 and is_equal_approx(got[0][0], 0.32) and is_equal_approx(got[0][1], 0.3)
+		and is_equal_approx(got[1][0], 0.28) and got[1][1] == 0.0,
+		"a sweep's even band runs round in its own turn (0.16 of 0.5 s); a plain one keeps the taper %s" % [got])
 	_clear(V)
 	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
 	var palm := V.anchor_pos(P, "palm")
@@ -308,3 +344,83 @@ func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	m.ents_by_id[P.nid] = P
 	V.net_in(["fx", "hvfx", P.nid, "spin", P.pos.x, P.pos.y, P.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
 	ok(int(V.plays.get("spin", 0)) == 1, "a move arrives from another game")
+
+## Claire's two scarf tails (HeroScarf): one ribbon each pinned beside the neck anchor, which follows the neck bone;
+## at rest they hang down behind her, running they stream back against the motion; a new frame after she moves, the
+## roots are where the anchor went; off at the Low preset, back on without new meshes.
+func _scarf(main: Node) -> void:
+	var m: Match = flow._match(main, "rimewright")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	Sfx.listener = P.pos
+	var S := V.scarves
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	S.tick(1.0 / 60.0)
+	ok(S.wearers.size() == 1 and S.wearers[0].h == P and S.wearers[0].tails.size() == 2, "Claire wears two scarf tails")
+	var w: HeroScarf.Wearer = S.wearers[0]
+	var a: Dictionary = HeroVfx.data("rimewright")["anchors"]["scarf"]
+	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
+	var neck := V.anchor_pos(P, "scarf")
+	if sk != null:
+		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, String(a["bone"])))
+		var off := Vector3(a["off"][0], a["off"][1], a["off"][2])
+		ok(neck.distance_to(sk.global_transform * (pose * off)) < 0.001, "the scarf anchor rides the neck bone")
+	ok(neck.y > P.pos.y + 1.0 and neck.y < P.pos.y + 1.8, "the scarf anchor sits at her neck (%.2f m up)"
+			% (neck.y - P.pos.y))
+	for i in 90:
+		S.tick(1.0 / 60.0)
+	var ln := float(w.cfg["len"])
+	var back := P.model.global_basis.z.normalized()
+	for tail: HeroScarf.Tail in w.tails:
+		var mesh := tail.node.mesh as ImmediateMesh
+		ok(tail.node.visible and mesh.get_surface_count() == 1, "a tail is one ribbon mesh, drawn")
+		var drop := tail.pts[0].y - tail.pts[-1].y
+		ok(drop > ln * 0.7, "at rest a tail hangs (tip %.2f m under its root)" % drop)
+		ok((tail.pts[-1] - tail.pts[0]).dot(back) > 0.0, "and hangs behind her, not through her")
+	ok(S.made == 2, "one mesh per tail (%d)" % S.made)
+	var step := Vector3(6.0, 0.0, 0.0) / 60.0
+	for i in 60:
+		P.model.global_position += step
+		S.tick(1.0 / 60.0)
+	var roots := S.roots(w)
+	for j in 2:
+		var tail: HeroScarf.Tail = w.tails[j]
+		ok(tail.pts[0].distance_to(roots[j]) < 0.001, "a tail's root follows the anchor as she moves")
+		var trail := tail.pts[0].x - tail.pts[-1].x
+		ok(trail > ln * 0.4, "running at 6 m/s it streams behind her (%.2f m back)" % trail)
+	Sfx.listener = P.pos + Vector3(HeroVfx.LOD_FAR * 2.0, 0.0, 0.0)
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible), "your own scarf shows past the LOD listener")
+	Sfx.listener = P.pos
+	Settings.v["quality"] = HeroScarf.OFF_PRESET
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return not t.node.visible), "off at the Low preset")
+	Settings.v["quality"] = "high"
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and S.made == 2, "back on, the same meshes")
+	Settings.v["quality"] = was
+	S.prewarm(P.pos)
+	S.prewarm_end()
+	S.prewarm(P.pos)
+	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
+	S.prewarm_end()
+
+## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
+## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
+## tells the dots the ground under it.
+func _dots(m: Match) -> void:
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	var high := FxDot.material()
+	Settings.v["quality"] = "low"
+	var low := FxDot.material()
+	ok(low.shader != high.shader and low.shader.code.begins_with("#define DOT_HEIGHT_FADE"), "Low dots fade by height")
+	ok(not high.shader.code.begins_with("#define") and FxDot.material() == low, "one material per preset")
+	Settings.v["quality"] = was
+	var at := Vector3(m.player.pos.x, m.player.pos.y + 1.0, m.player.pos.z)
+	m.fx.burst(at, Color.WHITE)
+	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
+	var g: float = m.world.ground_at(at.x, at.z)
+	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)

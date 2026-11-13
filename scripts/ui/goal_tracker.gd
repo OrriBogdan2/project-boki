@@ -1,31 +1,41 @@
 class_name GoalTracker
 extends RefCounted
 ## The "Goals" card at the top right of the farm: what you are working towards, never the tutorial.
-## Rows come from four sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+## Rows come from six sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+##   first_day the new-save list (GardenFirstDay), in its own order with the ticked lines last
+##   garden    the garden's own long goal: your Boki's next level (base_mode), always there for a player who stays home
 ##   unlock    a Hunter's unlock challenge (ClassUnlock), for every Hunter not open yet
 ##   mastery   the goals of the Hunter you play that are not done
 ##   milestone a farm milestone not reached (FarmUnlocks)
 ##   level     the next farm level, always last
 ## A row: {text, have, need, frac, ready, source}. Ready-to-claim rows lead; inside a source the
-## closest to done comes first. The card is hidden when there are no rows.
+## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
+## and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
 
-const SOURCE_ORDER := ["unlock", "mastery", "milestone", "level"]
+const SOURCE_ORDER := ["first_day", "garden", "unlock", "mastery", "milestone", "level"]
+
+static var all := false      # the full list is open
 
 static func cfg() -> Dictionary:
 	return FarmTutorial.rules()["tracker"]
 
 static func lines() -> Array:
-	var by_source := {"unlock": _unlocks(), "mastery": _mastery(), "milestone": _milestones(), "level": _level()}
+	var by_source := {"first_day": _first_day(), "garden": _garden(), "unlock": _unlocks(), "mastery": _mastery(),
+			"milestone": _milestones(), "level": _level()}
 	var caps: Dictionary = cfg()["per_source"]
 	var picked: Array = []
 	for src in SOURCE_ORDER:
 		var rows: Array = by_source[src]
-		rows.sort_custom(func(a, b): return _closer(a, b))
+		if src != "first_day":
+			rows.sort_custom(func(a, b): return _closer(a, b))
 		picked.append_array(rows.slice(0, int(caps.get(src, 1))))
+	var order := picked.duplicate()      # sort_custom is not stable: equal rows keep their order through this
 	picked.sort_custom(func(a, b):
 		if bool(a["ready"]) != bool(b["ready"]):
 			return bool(a["ready"])
-		return SOURCE_ORDER.find(a["source"]) < SOURCE_ORDER.find(b["source"]))
+		if a["source"] != b["source"]:
+			return SOURCE_ORDER.find(a["source"]) < SOURCE_ORDER.find(b["source"])
+		return order.find(a) < order.find(b))
 	return picked.slice(0, int(cfg()["max"]))
 
 static func _closer(a: Dictionary, b: Dictionary) -> bool:
@@ -37,13 +47,28 @@ static func _row(text: String, prog: Dictionary, source: String, ready := false)
 	return {"text": text, "have": int(prog["have"]), "need": int(prog["need"]), "frac": float(prog["frac"]),
 			"ready": ready, "source": source}
 
+static func _first_day() -> Array:
+	var two: bool = Save.d["roster"].size() >= 2
+	return GardenFirstDay.rows().filter(func(r): return two or not r["two"]) \
+			.map(func(r): return _row(r["text"], _prog(int(r["done"]), 1), "first_day"))
+
+## "Raise <your Boki> to level N": its XP towards the next level, for a base that has no expeditions to chase.
+static func _garden() -> Array:
+	var rec := Save.active_kin()
+	if not FarmUnlocks.base_mode() or rec.is_empty() or int(rec["level"]) >= Evo.cap():
+		return []
+	var need := Game.xp_need(int(rec["level"]))
+	var text := "Raise %s to level %d" % [rec["name"], int(rec["level"]) + 1]
+	return [_row(text, _prog(mini(int(rec.get("xp", 0)), need), need), "garden")]
+
 static func _unlocks() -> Array:
 	var out: Array = []
 	if ClassUnlock.needs_starters() or ClassUnlock.all_open():
 		return out
 	for id in Arch.ids():
 		var hid := String(id)
-		if ClassUnlock.status(hid) == "open":
+		# a starter that waits for the first expedition has no challenge text, so no row
+		if ClassUnlock.status(hid) == "open" or ClassUnlock.challenge_text(hid) == "":
 			continue
 		var prog := ClassUnlock.challenge_progress(hid)
 		out.append(_row(ClassUnlock.challenge_text(hid), prog, "unlock", ClassUnlock.can_unlock(hid)))
@@ -85,26 +110,42 @@ static func _prog(have: int, need: int) -> Dictionary:
 
 ## A short string that changes when what the card shows changes (to know when to rebuild it).
 static func signature() -> String:
-	return "|".join(lines().map(func(r): return "%s:%d/%d:%s" % [r["text"], r["have"], r["need"], r["ready"]]))
+	var rows := lines().map(func(r): return "%s:%d/%d:%s" % [r["text"], r["have"], r["need"], r["ready"]])
+	return "%s|%s" % [all, "|".join(rows)]
 
 ## The card, or null when there is nothing to show.
 static func build() -> PanelContainer:
 	var rows := lines()
 	if rows.is_empty():
 		return null
-	var box := UI.card(Color(0.06, 0.07, 0.11, 0.86), 14, 14)
-	UI.set_card_border(box, Color(1, 1, 1, 0.07), 1)
+	var box := UI.glass(12, 14, 0.5)
 	box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	box.offset_left = -316
 	box.offset_right = -16
 	box.offset_top = 14
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var v := UI.vbox(7)
 	box.add_child(v)
+	if not all:
+		v.add_child(_next_ui(rows[0]))
+		return box
 	v.add_child(UI.section(String(cfg()["title"])))
 	for r in rows:
 		v.add_child(_row_ui(r))
 	return box
+
+## The one-line card: the nearest goal, its count and the key that opens the list.
+static func _next_ui(r: Dictionary) -> Control:
+	var head := UI.hbox(8)
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var text := UI.label("Next: " + String(r["text"]), 14, UI.GOLD if bool(r["ready"]) else UI.INK)
+	text.autowrap_mode = TextServer.AUTOWRAP_OFF
+	text.clip_text = true
+	text.custom_minimum_size.x = 190
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(text)
+	head.add_child(UI.label("%d/%d" % [r["have"], r["need"]], 12, UI.MUTED, UI.caps))
+	head.add_child(UI.keycap(Settings.key_cap("goals"), 11))
+	return head
 
 static func _row_ui(r: Dictionary) -> Control:
 	var col := UI.vbox(3)

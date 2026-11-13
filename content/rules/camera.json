@@ -1,0 +1,29 @@
+{
+	"doc": "The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them.",
+	"styles": {
+		"supervive": {"pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Supervive"},
+		"supervive_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Supervive (wider lens)"},
+		"high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"},
+		"classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"},
+		"low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"}
+	},
+	"follow": {
+		"supervive": [1.4, 0.42, 7.5, 6.0, false],
+		"standard": [0.2, 0.8, 6.0, 7.0, true],
+		"dynamic": [0.1, 0.9, 10.0, 10.0, false],
+		"locked": [0.0, 0.0, 0.0, 0.0, false]
+	},
+	"trail": {
+		"doc": "The camera's follow across the ground [footage: briefs/hero-ref/dredge.md 4 and 8, ostra.md 2-3, mooshmoosh.md 2; 50 px = 1 m]. Each frame the view closes on you at min(follow_rate x gap, sqrt(2 x catch_decel x gap)) m/s: a run keeps it ~0.35 m behind and stopped with you in ~0.2 s, and a dash leaves it behind, then it eases in at a steady deceleration (Grimble's 4.6 m dash in 0.12 s: the pan peaks ~700 px/s, is down to ~300 px/s at 0.3 s and stops by ~0.5 s; ~0.4 s for a blink). follow_rate (1/s): the tight part, near you. catch_decel (m/s^2): fitted to that pan. max_gap (m): the furthest it may trail, just over the source dash's own ~3.2 m gap, so a long 40 m/s Wirerun can't take you off screen. cut_speed (m/s): a move faster than this in one frame is a teleport, and the view cuts to it, as the source does on Motley's Lantern Trade.",
+		"follow_rate": 15.0,
+		"catch_decel": 28.0,
+		"max_gap": 3.5,
+		"cut_speed": 90.0
+	},
+	"lean_edge_m": 1.5,
+	"source": {
+		"pitch_deg": [64.0, 67.0],
+		"fov_deg": [25.0, 34.0],
+		"feet_below_pct": [3.0, 4.0]
+	}
+}
