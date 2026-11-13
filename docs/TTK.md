@@ -1,15 +1,25 @@
 # Time to knock against the source
 
-PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (22 of 38 rows today); that is the finding, not a flake. No number was tuned; the outliers are listed with their causes as suggestions.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (28 of 38 rows today); that is the finding, not a flake. No number was tuned; the outliers are listed with their causes as suggestions.
 
 **Method**
-- Target: full health and full armour. Ours 154 health (mean of the 12), armour 339 (x2.2) and the game's 20% reduction. Source 1285 Base HP (mean of the 12, supervive_physics.md) and Common armour, 20% reduction (docs/SUPERVIVE_DATA.md section 3). Both armours outlast the health, so only the 20% counts. Void, Oath and Shiv tooltips were read at level 15, so their source target is the level 15 mean (1285 + 14 x 77.1).
+- Target: full health and full armour. Ours 154 health (mean of the 12), armour 339 (x2.2) and the game's 20% reduction. Source 1285 Base HP (mean of the 12, supervive_physics.md) and Common armour, 20% reduction (docs/SUPERVIVE_DATA.md section 3). Both armours outlast the health, so only the 20% counts. Void, Oath and Shiv tooltips were read at level 15, so their source target is the level 15 mean (1285 + 14 x 77.1); a footage row read at level N faces the level N mean (1285 + (N - 1) x 77.1).
 - (a) LMB only, held (taps for Kael and Albert, a 1.1 s draw for Lace). (b) Combo: every direct-damage non-ult ability the source has a number for, cast once at the start and again whenever its cooldown or charge is back, LMB between. Conditional bonuses (Dazed, Static, Ignite, Quickflip's empowered shot, sweet spots, stacks) are left out of the source side; ours runs live, so its passives count.
 - Rank 0 is the unspent rank (slot_lv 1); max is rank 3 for ours and every listed upgrade for the source (a "x2" upgrade counts for both tiers it covers, charges included). LMB has no ranks, so (a) is the same at both.
 - Source shots land at 0.00 s and every interval after; ours includes wind-ups, flight time and recoveries.
 - Bar: ours / source time to knock inside 0.8 to 1.25. Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES` (none yet: line 162, Motley "loses ~15% held-fire DPS, no compensation buff", explains 15% of a 1.9x gap, so it does not cover Motley).
 
-**Gaps in the source data.** `supervive_kits.md` has no LMB damage for Lace, Meeko, Tenzo, Grimble and Neve, so those five have no source row (n/a, ours only). Neve's, Meeko's, Tenzo's, Grimble's and Lace's abilities do have some numbers but no LMB to fill the time between them, so no combo row either.
+**Footage LMB (Lace, Meeko, Tenzo, Grimble, Neve).** `supervive_kits.md` has no LMB damage for these five, so their LMB row is read from the floating damage numbers in the hero-ref footage (origin/ext/hero-ref-footage, frames named below; trust order puts it under the tooltips, which have no number to beat it). The damage is the source's own number at the level the clip shows, against the mean Hunter at that level, the same conversion as the level 15 tooltips. Interval is the card cooldown where the hits agree with it, else the hit spacing in the footage.
+
+| Hunter (source) | Clip, level | Hits read | Source LMB used | Interval |
+|---|---|---|---|---|
+| Lace (Myth) | pin 0207, 0215, 0224 (knock), 0242; level 9 | Supercharged 505, 505; overdrawn 263 | 505 per full draw (ours draws 1.1 s) | 1.7 s: hits 8 and 9 frames apart (Supercharged ready at 1.2-1.4 s plus the 0.5 s card) |
+| Meeko (Elluna) | mooshmoosh 0084-0101; level 9 | 64, 66, ~75 (half hidden), 84, 93, 93, 93 | 64 rising 7.25 a hit, capped at 93 (+45%) | 0.4 s card (footage 2-3 frames, mean 0.57 s) |
+| Tenzo (Tetra) | breah 0110, 0112, 0115, 0117; level about 18 (badge unreadable; max HP 2,6x1 against Tetra 1290 + 77.4 a level) | boulder 169 x4 | 169 per tap | 0.6 s card (footage 7 frames for 3, 0.58 s) |
+| Grimble (Kingpin) | dredge 0062, 0066, 0073; level 9 | point-blank volleys split into 49 + 97 + 193 and 97 + 241: 338-339 each, 7 slugs of about 48 | 339 per volley (the 193 in the hero-ref sheet is one part) | 0.5 s card |
+| Neve (Celeste) | tamsin 0061-0067; level 9 | 35 x8, then Shatter 520 (0069) | 35 per dart; Shatter left out (a stack bonus, method above) | 0.2 s: 8 darts in 7 frames |
+
+Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15) and the LMB is level 9 (Tetra about 18), so no combo row mixes the two.
 
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
@@ -42,16 +52,16 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | ostra (Void) | LMB rank max | 12.62 | 6.60 | 1.91 | FAIL |
 | ostra (Void) | combo rank 0 | 10.33 | 4.80 | 2.15 | FAIL |
 | ostra (Void) | combo rank max | 8.37 | 4.80 | 1.74 | FAIL |
-| archer (Myth) | LMB rank 0 | 7.83 | never | n/a | n/a |
-| archer (Myth) | LMB rank max | 7.83 | never | n/a | n/a |
-| tender (Elluna) | LMB rank 0 | 7.10 | never | n/a | n/a |
-| tender (Elluna) | LMB rank max | 7.10 | never | n/a | n/a |
-| dolm (Tetra) | LMB rank 0 | 13.30 | never | n/a | n/a |
-| dolm (Tetra) | LMB rank max | 13.30 | never | n/a | n/a |
-| dredge (Kingpin) | LMB rank 0 | 9.43 | never | n/a | n/a |
-| dredge (Kingpin) | LMB rank max | 9.43 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank 0 | 2.93 | never | n/a | n/a |
-| rimewright (Celeste) | LMB rank max | 2.93 | never | n/a | n/a |
+| archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | ok |
+| archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | ok |
+| tender (Elluna) | LMB rank 0 | 7.10 | 10.40 | 0.68 | FAIL |
+| tender (Elluna) | LMB rank max | 7.10 | 10.40 | 0.68 | FAIL |
+| dolm (Tetra) | LMB rank 0 | 13.30 | 11.40 | 1.17 | ok |
+| dolm (Tetra) | LMB rank max | 13.30 | 11.40 | 1.17 | ok |
+| dredge (Kingpin) | LMB rank 0 | 9.43 | 3.50 | 2.70 | FAIL |
+| dredge (Kingpin) | LMB rank max | 9.43 | 3.50 | 2.70 | FAIL |
+| rimewright (Celeste) | LMB rank 0 | 2.93 | 13.40 | 0.22 | FAIL |
+| rimewright (Celeste) | LMB rank max | 2.93 | 13.40 | 0.22 | FAIL |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
@@ -81,8 +91,11 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | Cinder (Felix) | LMB 0.78, 0.76; combo 0.76, 0.61 | Stream 25.6% of the target a second vs 20.1% (258 of 1285). Cinder Shot 13.1% vs 8.2% (1.59x); the dash 0.70x and the cloak 0.76x are under. | Stream damage x0.8; Cinder Shot 20 -> 13; dash x1.4, cloak x1.3. |
 | Sparkle (Joule) | LMB 0.77; combo max 0.64 | Bolt 12 every 0.648 s is 12.0% a second against 90 every 0.8 s = 8.8% (1.37x); the owner set 0.648 s (items 70 and 116 in docs/heroes/mage.md, not in DECISIONS). Abilities are at parity (1.03 to 1.13x), so max rank (+90% spear, +100% dash, +50% strike on the source side vs our +15% and +30% steps) is where the combo drifts. | Bolt 12 -> 9 keeps 0.648 s (owner) at parity; ask the owner whether item 116 covers the damage. |
 | Albert (Oath) | LMB 0.73; combo 0.71, 0.73 | Hammer 12 is 7.8% against 192 of 2365 = 8.1% (match). Ours alternates throw and recall hits faster than 0.45 s (about 3.3 hits a second against 2.2); if the source recall hits as well, as the tooltip's "recall (192 dmg)" may mean, the source is 3.4 s and the ratio 1.45, still out. Spin Dash is at parity (1.01x). | Settle whether the source recall deals damage, then set throw_rate or recall_dmg. |
+| Meeko (Elluna) | LMB 0.68 | Lantern 8 is 5.2% of our target every 0.4 s against 64 of 1902 = 3.4% (rising to 4.9% at 93); our Kindle ramp runs on top. | Lantern 8 -> about 5 (64 / 1902 x 154 = 5.2), ramp capped at +45% like the source. |
+| Grimble (Kingpin) | LMB 2.70 | A full volley is 7 x 2 = 14 = 9.1% of our target against 339 of 1902 = 17.8% (0.51x), and ours takes 9.4 s where 14 full volleys at 0.5 s (192.5 raw after the 20%) would be 6.5 s, so not every pellet lands at 1.5 m (`pellet_floor` 0.457). | Pellet 2 -> about 3.9 (339 / 7 / 1902 x 154), then check how many pellets land point-blank. |
+| Neve (Celeste) | LMB 0.22 | Dart 4 is 2.6% every 0.18 s against 35 of 1902 = 1.8% every 0.2 s (1.6x), and our live Shatter (60 = 39% of the target every 8 darts) counts while the source side leaves it out. Without Shatter ours would be about 8.6 s (48 darts), ratio about 0.64. | Dart 4 -> about 2.8 (35 / 1902 x 154); decide whether the check should count Shatter on both sides (the source pops 520 = 27% of 1902 every 8 darts). |
 | Motley (Void) | LMB 1.91; combo 2.15, 1.74 | Orb 9 is 5.8% of the target against 263 of 2365 = 11.1% (0.53x). Spear 0.53x, bomb 0.59x. The whole kit sits about half the source. Held fire never charges (owner item 60, DECISIONS line 162 -15%). | Orb 9 -> 17, spear x1.9, bomb x1.7. |
 
-Within the bar: Sable at both ranks (0.85 to 0.95), Vex combo rank 0 (0.92), Sparkle combo rank 0 (0.81).
+Within the bar: Sable at both ranks (0.85 to 0.95), Vex combo rank 0 (0.92), Oath combo rank max (0.84), Lace (1.15) and Tenzo (1.17; at level 19 instead of 18 the source is about 0.6 s slower, still inside). The ours side of Kael, Cinder, Sparkle and Oath combo rows moved with main since the last write (Sparkle combo rank 0 0.81 -> 0.17, Kael combo 0.45 -> 0.55); the causes above were written against the older numbers.
 
-**Not done here:** no tuning; the five Hunters with no LMB number (and their combos) need the source's LMB damage, which no file in briefs has.
+**Not done here:** no tuning; Lace, Meeko, Tenzo, Grimble and Neve have footage LMB rows only, no combo rows (their ability tooltips are a different level from the footage).
