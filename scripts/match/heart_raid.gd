@@ -67,9 +67,9 @@ static func boki(difficulty: String) -> Array:
 			out.append(String(rules()["stand_ins"][line]))
 	return out
 
-## The pool a wild or rare-spot Boki of this match draws from: the raid's own Boki in a raid.
-static func site_pool(o: Dictionary, site: String) -> Array:
-	return boki(String(o.get("raid_diff", "normal"))) if on(o) else BokiModes.site_pool("expedition", site)
+## The pool a wild or rare-spot Boki of a raid draws from (the Expedition draws through ModeBoki, main's).
+static func boki_for(o: Dictionary) -> Array:
+	return boki(String(o.get("raid_diff", "normal")))
 
 var m: Match
 var phase := P.WAVES
