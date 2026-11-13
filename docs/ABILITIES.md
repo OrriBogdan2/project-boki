@@ -36,7 +36,7 @@ _The warden of high ground. Climbs, reads the field, pins people to walls._
 - **Passive: Hawk Sense.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
 - **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you (you climb a ledge face and drop off the far side); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends inside a rock, tree or barrier you are put back where you went in; ending in a ledge sets you on top of it.
 - **RMB: Heavy Shot** (16s):
-  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 8 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
 
@@ -107,6 +107,8 @@ Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unl
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
 
+In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets your own ranks to try them: Max all, Pick your max (one ability at its top rank with its rank-3 data bonus, shown as the button's tooltip; the rest at rank 1) and Reset to rank 1 ([shot, 1280x720](shots/ui-train-rank-port/practice_page.jpg)). Bots and dummies keep their own ranks and spend by their kit's `order`.
+
 ## Shift: class dashes
 
 Each class has its own dodge verb. Grounded with a charge, Shift does the class dodge; in the air or out of charges it does the class's long dash (its own cooldown). Both chain straight into a jump or the glider.
@@ -134,6 +136,8 @@ Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, land
 | Twin Blades | light | **Shadow Step** | blink-strike | 8s | Throw a knife 9m. If it hits, you appear behind that foe and your next hits for 1.5s crit. |
 
 ## Q: active gloves
+
+Gloves fill in order: the first pickup goes on Q (glove 1), the second on glove 2 (V, or Mouse 4, the back side button, by default), and a freed slot takes the next pickup. Saved configs with one glove 2 key gain Mouse 4 unless it is bound elsewhere (`KeyMigrate` step 6).
 
 Gloves drop in runs. Rarer gloves keep the same verb with bigger numbers: damage, wall health, heals and shields x1 / x1.3 / x1.6 / x2 (common to legendary), durations and pull strength by half as much, cooldown 8% shorter per step. Rank (skill points into Q) stacks on top.
 
@@ -236,6 +240,23 @@ Several verbs appear in more than one element, tuned to fit it:
 - **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).
 - **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits).
 - **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).
+
+## Blockers and crossers
+
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Abyssal Hand (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+
+| Crosser | Class | shield | rock | ice | wall | guard |
+|---|---|---|---|---|---|---|
+| every projectile (LMB weapons, kit shots, Boki shots) | solid | stop | stop | stop | stop | stop |
+| Grimble's Abyssal Hand (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Vex's Longneedle (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Kael's Warchain (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
+| Cinder's Furnace Cloak pull (needs sight) | solid | stop | stop | stop | stop | stop |
+| Albert's Faultline cells | solid | stop | stop | stop | stop | stop |
+| every knockback | solid | stop | stop | stop | stop | stop |
+| every dash | body | - | stop | stop | stop | - |
+| Lace's Spirit Walk (through walls, objects and raised terrain; only the edge guard stops it) | phase | - | pass | pass | pass | - |
+| Motley's Trade (a high lob, then a swap) | lob | pass | pass | pass | pass | pass |
 
 ## Readability
 

@@ -39,6 +39,8 @@ var stage := "intro"          # intro (the card) | create (yourself) | pick (egg
 var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
+var skipper: HatchSkip       # watches the hatch beat for a key (freed once the Boki's card is up)
+var reveal: KinReveal
 var hover := -1
 var auto_warm := false        # test hook: hold the warmth on by itself
 var t := 0.0
@@ -63,7 +65,7 @@ var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	var env := WorldEnvironment.new()
 	env.environment = Look.environment({"top": Color("1a1440"), "mid": Color("7a3a9a"), "horizon": Color("ffa860"), "below": Color("2a1e4a"),
@@ -96,7 +98,7 @@ func _ready() -> void:
 		if d.get("mystery", false):
 			holder.add_child(MysteryEgg.new())
 			MysteryEgg.hideout(self, MYSTERY_AT)
-			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS
+			egg.kind = "mystery"
 		else:
 			holder.add_child(_nest())
 		egg.hop_out = 0.35
@@ -398,12 +400,15 @@ func _show_create() -> void:
 	stage = "create"
 	if look.is_empty():
 		look = Unmasked.clean(Save.d.get("look", {}))
+		MasteryLook.refresh(look)
 	title.text = "Make yourself"
 	_clear_bottom()
 	if create_box: create_box.queue_free()
 	_rebuild_preview()
 	for e in eggs: (e["holder"] as Node3D).visible = false
-	if sub_lbl: sub_lbl.text = "You are one of the Empty. Drag (or hold A / D) to turn round."
+	if sub_lbl:
+		sub_lbl.text = "You are one of the Empty. Drag (or hold %s / %s) to turn round." % [
+				Settings.key_cap("left"), Settings.key_cap("right")]
 	_top_over(0.73)       # over you, clear of the tall creator card on the left
 	cam_to = CREATE_CAM          # fixed, so a change of height or build shows as one
 	look_at_t = CREATE_LOOK
@@ -438,6 +443,7 @@ func _show_create() -> void:
 			hr.add_child(val)
 		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
 		v.add_child(hr)
+	_mastery_rows(v)
 	var nr := UI.hbox(8)
 	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
 	nr.add_child(nl)
@@ -448,13 +454,35 @@ func _show_create() -> void:
 	var br := UI.hbox(10)
 	br.alignment = BoxContainer.ALIGNMENT_END
 	br.add_child(UI.ghost("Random", func():
+		var kept: Dictionary = look["features"]
 		look = Unmasked.random_look()
+		look["features"] = kept
 		_show_create(), 120, "swap"))
 	br.add_child(UI.primary("Looks good", _looks_good, 200))
 	v.add_child(br)
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
 	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+
+## What your Relics have left on you (MasteryLook): one row each, to keep or fade.
+func _mastery_rows(v: VBoxContainer) -> void:
+	var feats := MasteryLook.features().filter(func(f): return (look["features"] as Dictionary).has(String(f["id"])))
+	if feats.is_empty():
+		return
+	v.add_child(UI.label("Left by your Relics", 12, UI.ACCENT, UI.caps))
+	for f in feats:
+		var id := String(f["id"])
+		var hr := UI.hbox(8)
+		var l := UI.label("%s  (%s)" % [f["name"], HeroTitle.base_name(String(f["hunter"]))], UI.T_BODY, UI.MUTED)
+		l.custom_minimum_size.x = 250
+		hr.add_child(l)
+		var kept := bool(look["features"][id])
+		var b := UI.ghost("Keep" if kept else "Faded", func():
+			MasteryLook.toggle(look, id)
+			_show_create(), 120)
+		b.name = "Feature_%s" % id
+		hr.add_child(b)
+		v.add_child(hr)
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()
@@ -662,6 +690,8 @@ func _process(delta: float) -> void:
 		wegg.rotation.z = lerpf(wegg.rotation.z, sin(t * (6.0 + warmth * 30.0)) * warmth * 0.05, minf(1.0, delta * 12.0))
 		if taps >= TAPS and warmth >= 0.98:
 			stage = "hatching"
+			skipper = HatchSkip.new(_skip_hatch)
+			add_child(skipper)
 			title.text = "Something's moving..."
 			_clear_bottom()
 			wegg.rotation.z = 0.0
@@ -674,7 +704,9 @@ func _process(delta: float) -> void:
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
 				var rv := KinReveal.new(egg_defs[chosen]["species"], egg_defs[chosen].get("rec", {}))
+				reveal = rv
 				add_child(rv)
+				rv.revealed.connect(skipper.queue_free)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
 					if top_box: top_box.visible = true
@@ -688,6 +720,11 @@ func _process(delta: float) -> void:
 			egg.position.y = lerpf(egg.position.y, 0.12 + lift + (sin(t * 3.0) * 0.03 if i == chosen else 0.0), minf(1.0, delta * 8.0))
 			# a little wobble now and then, like something inside is awake
 			egg.rotation.z = sin(t * 2.0 + i * 2.1) * 0.06 * (1.0 + float(sin(t * 0.7 + i) > 0.7) * 3.0)
+
+## Any key or click while the egg hatches and the Boki meets you: straight to its card (HatchSkip).
+func _skip_hatch() -> void:
+	eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
+	reveal.skip()
 
 func _show_name() -> void:
 	_clear_bottom()
@@ -731,19 +768,27 @@ func _show_name() -> void:
 	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	you_row.add_child(ye)
 	v.add_child(you_row)
-	var btns := UI.hbox(10)
-	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
-	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
-	skip.flat = true
-	btns.add_child(skip)
+	var btns := UI.hbox(14)
+	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, ne.text, ye.text, false)))
+	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, ne.text, ye.text, true)))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in either box is the same as "Head out together"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
-	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, true))
+	# Enter in either box is the same as "Tend the garden"
+	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ne.grab_focus()
 	ne.select_all()
+
+## One of the two equal ways on from the naming card: a button and a line under it, one click.
+func _path_card(label: String, line: String, go: Callable) -> Control:
+	var c := UI.vbox(6)
+	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	c.add_child(UI.primary(label, go, 240))
+	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
+	return c
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
@@ -760,7 +805,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")
-	if ClassUnlock.needs_starters():
+	if tutorial and ClassUnlock.needs_starters():      # (the garden path picks at the portal: FirstRelic)
 		_mask_moment(func(): _head_out(tutorial))
 		return
 	_head_out(tutorial)
@@ -786,10 +831,7 @@ func _mask_moment(then: Callable) -> void:
 	ui.add_child(holder)
 
 func _put_on_first(first: String, then: Callable) -> void:
-	Save.d["arch"] = first
-	Save.d["cls"] = Arch.weight(first)
-	Save.d["weapon"] = Arch.signature(first)
-	Save.save_game()
+	FirstRelic.wear(first)
 	var moment := MaskMoment.make(self, cam, kin_node, first)
 	moment.finished.connect(then)
 	add_child(moment)

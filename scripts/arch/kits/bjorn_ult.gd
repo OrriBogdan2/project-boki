@@ -98,11 +98,15 @@ func _reach() -> Array:
 	var out: Array = []
 	var cl := cell_len()
 	var y0 := origin.y
-	for i in int(xd().get("cells", 4)):
+	var n := int(xd().get("cells", 4))
+	var lane := Vector3(dir.x * cl * n, 0.5, dir.y * cl * n)
+	# placed walls and rocks stop it as terrain does (Blockers)
+	var walled := Blockers.cut(k.m.verbs.walls, origin + Vector3(0, 0.5, 0), origin + lane, k.h.team, "solid")
+	for i in n:
 		var a := origin + Vector3(dir.x, 0, dir.y) * cl * i
 		var c := a + Vector3(dir.x, 0, dir.y) * cl * 0.5
 		var g: float = k.m.world.ground_at(c.x, c.z)
-		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2) and i > 0:
+		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2 or cl * (i + 0.5) > walled) and i > 0:
 			break
 		out.append(Vector3(a.x, y0, a.z))
 	return out
@@ -128,6 +132,8 @@ func tick(dt: float) -> void:
 		return
 	t += dt
 	_telegraph()
+	if planted() and h.vel.y > 0.0:
+		h.vel.y = 0.0          # no jumping off the plant (it lands straight back): dash_flow into_jump.x lock
 	if phase == "wind":
 		h.vel = Vector3(0, h.vel.y, 0)
 		if h.stun_t > 0.0 or h.downed or h.out:
@@ -162,7 +168,6 @@ func _interrupt() -> void:
 	phase = ""
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
-	k.m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
 	k.m.sfx("warn", h.pos, -4.0, 0.8)
 	_hide_lane()
 

@@ -1,6 +1,6 @@
 extends RefCounted
 ## --nook-check: the Nesting Nook gate (NookRules: Grown, friends, rested, one egg) and what Care.breed
-## passes on (the stronger parent's lean as a head start, one habit from each parent, unstable mixes).
+## passes on (the stronger parent's lean as a head start, one habit from each parent).
 ## Never touches the real save.
 
 var bad := 0
@@ -26,10 +26,10 @@ func run(m: Node) -> void:
 	b["level"] = 8
 	b["trust"] = 40.0
 	ok(NookRules.pair_why(a, b) != "", "no friendship, no egg (trust 40 and no bonds)")
-	b["bonds"] = {a["uid"]: 55.0}
-	ok(NookRules.pair_why(a, b) == "", "a recorded bond of 55 makes them friends")
-	b["bonds"] = {a["uid"]: 20.0}
-	ok(NookRules.pair_why(a, b) != "", "a recorded bond of 20 does not, whatever the trust")
+	b["bonds"] = {a["uid"]: 0.55}
+	ok(NookRules.pair_why(a, b) == "", "a recorded bond of 0.55 (friend_at 0.5, base scale) makes them friends")
+	b["bonds"] = {a["uid"]: 0.2}
+	ok(NookRules.pair_why(a, b) != "", "a recorded bond of 0.2 does not, whatever the trust")
 	b.erase("bonds")
 	b["trust"] = 60.0
 	a["bred_t"] = Time.get_unix_time_from_system()
@@ -63,30 +63,5 @@ func run(m: Node) -> void:
 	a.erase("lean")
 	b.erase("lean")
 	ok(not Care.breed(a, b, rng).has("lean"), "parents with no lean (older saves) breed a baby with none")
-	# ---- unstable mixes
-	a["traits"]["temper"] = 0.5
-	b["traits"]["temper"] = 0.5
-	ok(not Care.unstable_mix(a, b), "two even-tempered pairs are stable")
-	var fire := _kin("cindle", "Fi", 8, 60.0)
-	var ice := _kin("cindle", "Ic", 8, 60.0)
-	var th: Dictionary = Data.KIN
-	var ember_sp := ""
-	var frost_sp := ""
-	for sp in th:
-		if th[sp].get("theme", "") == "ember" and ember_sp == "": ember_sp = sp
-		if th[sp].get("theme", "") == "frost" and frost_sp == "": frost_sp = sp
-	fire["species"] = ember_sp
-	ice["species"] = frost_sp
-	fire["traits"]["temper"] = 0.5
-	ice["traits"]["temper"] = 0.5
-	var clash := Care.unstable_mix(fire, ice) and not Care.unstable_mix(fire, fire)
-	ok(clash, "ember and frost clash; ember and ember do not")
-	ice["species"] = ember_sp
-	ice["traits"]["temper"] = 0.95
-	fire["traits"]["temper"] = 0.1
-	ok(Care.unstable_mix(fire, ice), "tempers far apart clash")
-	var baby := Care.breed(fire, ice, rng)
-	var joy := float(baby["needs"]["joy"])
-	ok(joy == Care.UNSTABLE_JOY, "an unstable baby hatches low on joy (%.0f)" % joy)
 	print("NOOK done, %d failed" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)

@@ -57,7 +57,7 @@ static func plan(h: Hunter) -> String:
 	if not ready(h):
 		return ""
 	var k: Kin = h.kin
-	if k != null and not k.dead and k.state in ["downed", "reviving"]:
+	if k != null and not k.dead and k.state in ["downed", "wisp"]:
 		return "rescue"
 	if not boki_with_you(h):
 		return "surge"
@@ -72,6 +72,8 @@ static func press(h: Hunter) -> bool:
 	match plan(h):
 		"merge": return cast(h)
 		"leap":
+			if (h.kin as Kin).fly.get("merge", false):
+				return true      # (already leaping in to merge: a mashed R must not start the leap over)
 			MergeAugment.drop_class_holds(h)
 			if h.ak: h.ak.drop_holds()
 			return (h.kin as Kin).merge_leap()
