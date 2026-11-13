@@ -110,7 +110,8 @@
 			"upper": true
 		},
 		"bul_slamshield": {
-			"clip": "shield_slam"
+			"clip": "shield_slam",
+			"lead": 0.25
 		},
 		"bul_mend": {
 			"clip": "e_mend",

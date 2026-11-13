@@ -10,7 +10,7 @@ extends RefCounted
 
 const FALL := "fall"
 const BURN := "burn"
-const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
+const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.14),
                                  # the source's raise, then fire
 const COMMIT := 0.76             # s she is held from the tap: the source's ~0.8 s, rifle raised, fired and lowered
                                  # (briefs/hero-ref/venator.md, R 4: 561.8-562.4 s); the x clip (0.6 s) hands the
