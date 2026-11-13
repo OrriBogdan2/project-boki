@@ -24,7 +24,7 @@
 		"rmb": "Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls.",
 		"e": "Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing.",
 		"dash": "Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers.",
-		"passive": "Hawk Sense: rivals under half health show through cover.",
+		"passive": "Hawk Sense: rivals under half health show through cover. Jump at a wall twice your height and you climb it.",
 		"x": "Starpiercer (level 6): your next 3 shots need no draw and fly as big piercing arrows; the third can finish a foe.",
 		"weapons": {
 			"longbow": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw."
@@ -43,7 +43,7 @@
 	},
 	"passive": {
 		"name": "Hawk Sense",
-		"desc": "Rivals under half health are seen through cover within 22m."
+		"desc": "Rivals under half health are seen through cover within 22m. A jump while facing a wall up to twice your height climbs it, no extra key."
 	},
 	"dash": {
 		"id": "spirit_walk",
