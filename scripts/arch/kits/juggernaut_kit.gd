@@ -7,7 +7,7 @@ extends ArchKit
 ##   hunter swells): bonus damage, dash haste and ability haste. A knock heals you a share of the
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
-##   fills Rage fast).
+##   fills Rage fast). Neither knocks foes back.
 ## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a crimson strike cone (more to
 ##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
 ##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
@@ -379,7 +379,7 @@ func _wave_preview() -> void:
 func _hold_waits() -> bool:
 	return flow.pauses_hold("lmb") and not KinMerge.transforming(h) and not meteor.running()
 
-## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing).
+## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing); no knockback.
 func _slash() -> void:
 	var ld := lmb_def()
 	lmb_t = -1.0
@@ -395,7 +395,7 @@ func _slash() -> void:
 	h.wpn = h.wpn.duplicate()
 	h.wpn["tip_bonus"] = float(ld["tip"])
 	h.wpn["color"] = SLASH_OUT
-	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
+	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
 	h.wpn = keep
 	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
 	var dv := h.aim_dir()
@@ -426,8 +426,7 @@ func _wave() -> void:
 	var full := k >= 0.99
 	var rng := lerpf(float(ld["wave_range"][0]), float(ld["wave_range"][1]), k)
 	var wave_size := lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k)
-	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)},
-			{"type": "push", "strength": lerpf(3.0, 6.0, k), "from": "caster"}]
+	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)}]
 	if full:
 		effs.append({"type": "damage", "amount": float(ld["wave_burn"]) * 2.0, "over": 2.0})
 		effs.append({"type": "slow", "duration": 1.0, "strength": float(ld["wave_slow"])})

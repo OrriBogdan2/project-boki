@@ -632,6 +632,8 @@ func juggernaut(a) -> void:
 	P.inp["fire"] = false
 	A.step(m, 0.3)
 	var near := A.dmg(T)
+	# owner 11-11: the LMB knocks nobody back (slash, tip or Searing Wave): the target stays where it stood
+	var moved := T.flat_dist(home + Vector3(1.3, 0, 0))
 	A.fresh(T)
 	T.teleport(home + Vector3(2.95, 0, 0))
 	A.aim_at(P, T.pos)
@@ -642,6 +644,7 @@ func juggernaut(a) -> void:
 	A.step(m, 0.3)
 	A.ok("juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
 			near >= 7.0 and A.dmg(T) >= near * 1.5 and K.waves == 0, "near %.0f tip %.0f" % [near, A.dmg(T)])
+	moved = maxf(moved, T.flat_dist(home + Vector3(2.95, 0, 0)))
 	A.fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	A.aim_at(P, T.pos)
@@ -663,6 +666,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
 			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
 			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
+	moved = maxf(moved, T.flat_dist(home + Vector3(7.0, 0, 0)))
+	A.ok("juggernaut LMB: no knockback (slash, tip, Searing Wave)", moved < 0.01, "moved %.3fm" % moved)
 	K.res = 0.0
 	# RMB tap: the Finishing Slam winds up (aim it), then hits; +50% under 35%; its sweet spot is the payoff
 	P.teleport(home)
