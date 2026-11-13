@@ -694,7 +694,7 @@ func _world() -> void:
 	var shown: bool = ["Buildings", "Fences", "Paths", "Garden", "Work"].all(func(t): return tabs.has(t))
 	var hidden: bool = ["Lights", "Furniture", "Statues"].all(func(t): return not tabs.has(t))
 	ok(shown and hidden,
-			
+
 		"tabs with something to build stay, empty ones are hidden (%s)" % ", ".join(tabs))
 	home.hb.toggle()
 	# the one Boki builds it alone, and it is finished by the work
