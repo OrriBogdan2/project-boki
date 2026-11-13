@@ -74,8 +74,8 @@ func _cast_and_rise() -> void:
 	var across: bool = absf(S.axis.dot(Vector2(1, 0))) < 0.05
 	var at_cursor: bool = Vector2(S.center.x - home.x - 7.0, S.center.z - home.z).length() < 0.2
 	ok(
-		"ult telegraph: the cracks show to everyone, at the cursor, across the aim, 12m, bent 25 degrees",
-		bool(crack.get("all", false)) and at_cursor and across and absf(float(crack.get("len", 0.0)) - 12.0) < 0.1
+		"ult telegraph: the cracks show to everyone, at the cursor, across the aim, 21m, bent 25 degrees",
+		bool(crack.get("all", false)) and at_cursor and across and absf(float(crack.get("len", 0.0)) - 21.0) < 0.1
 			and absf(rad_to_deg(float(crack.get("bend", 0.0))) - 25.0) < 0.1,
 		"axis %s" % str(S.axis)
 	)
@@ -95,7 +95,7 @@ func _cast_and_rise() -> void:
 	var near_mid := mids.any(func(p): return Vector2(p.x - S.center.x, p.z - S.center.z).length() < 0.1)
 	ok(
 		"ult: rocks all along the ridge, one at its centre",
-		ult_rocks.size() >= 9 and near_mid,
+		ult_rocks.size() >= 15 and near_mid,
 		"rocks %d" % ult_rocks.size()
 	)
 	ok(
@@ -168,7 +168,7 @@ func _punch_and_bond() -> void:
 	var spread := K.spine.last_rise_t - K.spine.first_rise_t
 	ok("ult beats: the rocks rise from the centre outward over 0.4s", absf(spread - 0.4) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
-	ok("ult: 9 rocks over 12m on open ground", n_up == 9, "rocks %d" % n_up)
+	ok("ult: 15 rocks over 21m on open ground", n_up == 15, "rocks %d" % n_up)
 	var rd := K.rock_def()
 	var shape_ok := true
 	for w in rocks(m).filter(func(w): return w.has("ult")):
@@ -179,7 +179,7 @@ func _punch_and_bond() -> void:
 			float(w["len"]) - float(rd["len"])
 		) < 0.01 and float(w["th"]) == HeroZones.ROCK_TH and float(w["top"]) == HeroZones.ROCK_TOP and absf(
 			span.normalized().dot(K.spine.axis)
-		) > cos(deg_to_rad(13.0)) and off_line < 0.75
+		) > cos(deg_to_rad(13.0)) and off_line < 1.25
 	ok(
 		"spine (item 15): real rocks, Stone Row's own (length, top, thickness), lying along the line, one rock deep",
 		shape_ok and HeroZones.ROCK_TH * 2.0 < 1.0
@@ -268,7 +268,7 @@ func _guards() -> void:
 	await done(m)
 
 ## The ridge on open ground (laid along +x, bowing away from her): a shallow arc about 25 degrees in all,
-## its ends set back toward her, and well narrower than the old 19.8m line.
+## its ends set back toward her, spanning its 21m (the footage's 12 bh reticle, hero-ref/breah.md f0579).
 func _arc_and_width(m: Match, K: DolmKit) -> void:
 	var u: Vector2 = K.spine.axis
 	var n: Vector2 = K.spine.bow
@@ -288,12 +288,12 @@ func _arc_and_width(m: Match, K: DolmKit) -> void:
 	var extent := absf(along.call(ult_rocks[-1]) - along.call(ult_rocks[0]))
 	ok(
 		"spine arc: the ridge bends about 25 degrees (20-30), its ends curve back toward her",
-		bend >= 20.0 and bend <= 30.0 and set_back > 0.3 and set_back < 1.2,
+		bend >= 20.0 and bend <= 30.0 and set_back > 0.5 and set_back < 2.0,
 		"bend %.1f set back %.2f" % [bend, set_back]
 	)
 	ok(
-		"spine width: the ridge is about 60% of the old 19.8m",
-		extent < 0.65 * 19.8 and extent > 0.5 * 19.8 * 0.6, "extent %.1f" % extent
+		"spine width: the end rocks sit about 21m apart (20-21.5)",
+		extent > 20.0 and extent < 21.5, "extent %.1f" % extent
 	)
 
 ## Over the abyss the rocks are ground: Tenzo and a foe land on the ridge and stand on it (no fall, no abyss
@@ -312,7 +312,7 @@ func _walkway() -> void:
 	var gap := rocks(m).filter(func(w): return m.world.is_void(K.rock_mid(w).x, K.rock_mid(w).z))
 	ok(
 		"spine walkway: the whole ridge is laid over the abyss, none refused",
-		gap.size() == 9 and K.spine.casts == 1, "over the gap %d" % gap.size()
+		gap.size() == 15 and K.spine.casts == 1, "over the gap %d" % gap.size()
 	)
 	var mid := K.rock_mid(gap[0])
 	var top := mid.y + HeroZones.ROCK_TOP

@@ -67,10 +67,11 @@ func _setup() -> void:
 	launch = BjornLaunch.new(self)
 	boop = BjornBoop.new(self)
 
-## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%).
+## The aegis grows by "hp_rank" of its base HP for every rank past the first (rank 2: +25%, rank 3: +50%),
+## and with the max health levels give (LevelGrowth.hp), as the source's Brightshield scales with max health.
 func shield_max() -> float:
 	var sd: Dictionary = rmb_def()["shield"]
-	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1))
+	return float(sd["hp"]) * (1.0 + float(sd["hp_rank"]) * float(rank("sec") - 1)) * LevelGrowth.hp(h)
 
 ## One of the aegis's repair numbers; rank 3 swaps in the faster "<key>_rank3" value.
 func _shield_stat(key: String) -> float:
@@ -89,9 +90,10 @@ func cd_k(slot: String) -> float:
 		return float(e_def()["cooldown_rank3"]) / float(e_def()["cooldown"]) if rank("kin") >= 3 else 1.0
 	return super.cd_k(slot)
 
-## Mending Ground heals 25% more at rank 2 and another 25% at rank 3.
+## Mending Ground heals 25% more at rank 2 and another 25% at rank 3, grown by the level's
+## ability power (LevelGrowth.ap).
 func heal_k() -> float:
-	return 1.0 + 0.25 * float(rank("kin") - 1)
+	return (1.0 + 0.25 * float(rank("kin") - 1)) * LevelGrowth.ap(h)
 
 func full_ready() -> bool:
 	return res >= float(res_def().get("slam", 50.0))
@@ -260,6 +262,10 @@ func _aegis_takes(by: Ent, o: Dictionary) -> bool:
 	var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
 	var half := deg_to_rad(float(rmb_def()["shield"].get("arc", 140.0)) * 0.5)
 	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(half)
+
+## The raised aegis faces `by`: it stops their pulls too (Blockers).
+func blocks_from(by: Ent) -> bool:
+	return _aegis_takes(by, {})
 
 ## A Shield Charge counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
@@ -747,7 +753,7 @@ func on_dash(use_ex: bool) -> bool:
 		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
 		# Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
-		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
+		var dist := float(dd["charge"])
 		var t := dist / float(dd["charge_speed"])
 		var t_felt := t * float(dash_feel()["time"])
 		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
@@ -775,7 +781,7 @@ func on_dash(use_ex: bool) -> bool:
 			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5))
 		return true
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
-	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
+	var dist2 := float(dd["whirl"])
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
 	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd, "curved": true})
