@@ -25,6 +25,7 @@ const FLAT_U := 0.3          # of the stance: the foot is flat and the hips at t
 const RISE_U := 0.7          # of the stance: the heel is up and the hips at their "lift" height from here on
 const KICK := 0.7            # the swing arc's time warp: height ~ sin(pi * w^KICK), up fast behind, down slowly ahead
 const LAND_T := 0.03         # s: the landing foot brakes from the body's pace to a standstill over this long
+const LAND_CLEAR := 0.03     # m: the landing foot is this high as it starts to brake and touches only as it stops
 const STAND_LIFT := 0.5      # x the arc height for a standing re-step
 const ROLL_TOL := 0.0005     # m: a sole point this much lower than the one on the ground takes the ground over
 const ON_RATE := 10.0        # /s: how fast the planted legs take over on landing
@@ -32,6 +33,7 @@ const OFF_RATE := 6.0        # /s: and let go when the body leaves the ground
 const MOVE_RATE := 10.0      # /s: how fast the hips go from their standing height to the gait's, and back
 const STAND_Z := 0.06        # m: standing, the heel settles this far behind the hip (the hip over the sole)
 const STAND_STEP := 0.25     # s: a standing re-step (the body turned too far for a planted foot)
+const CROUCH_DROP := 0.05    # m at the rig's size: how far the hips sink over a full crouch
 
 ## One leg's state: planted on its world anchor, or swinging to its landing pose.
 class Leg:
@@ -51,6 +53,7 @@ var legs: Node3D
 var left := Leg.new()
 var right := Leg.new()
 var gait_k := 0.0            # 1: these legs; 0: HunterAnim's own legs
+var crouch := 0.0            # 0..1: HunterAnim's crouch, set each frame before step: it lowers the hip heights
 var ph := 0.0                # the walk phase HunterAnim's arms and torso follow: the left leg's cycle
 var landed := false          # a foot came down this frame
 var hl := 0.0
@@ -91,9 +94,10 @@ func _init(legs_node: Node3D, gait: Dictionary) -> void:
 ## Hip height over the ground through a stance: the strike height, the flat height by FLAT_U, the lift height
 ## from RISE_U on, eased between.
 func _hip_h(u: float) -> float:
+	var sink := crouch * CROUCH_DROP
 	if u <= FLAT_U:
-		return lerpf(float(_hip[0]), float(_hip[1]), smoothstep(0.0, FLAT_U, u))
-	return lerpf(float(_hip[1]), float(_hip[2]), smoothstep(FLAT_U, RISE_U, u))
+		return lerpf(float(_hip[0]), float(_hip[1]), smoothstep(0.0, FLAT_U, u)) - sink
+	return lerpf(float(_hip[1]), float(_hip[2]), smoothstep(FLAT_U, RISE_U, u)) - sink
 
 ## Advances the legs a frame: `on` while the feet have ground under them, `moving` as HunterAnim sees it, `vel` the
 ## body's world velocity, `own` HunterAnim's own legs [hl, hr, kl, kr, wl, wr] these blend over. Reads the legs'
@@ -184,7 +188,7 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 	var a := inv * leg.anchor
 	leg.u = (a.z - _strike) / _stance
 	var target := Vector3(a.x, 0.0, a.z)
-	var hip_h := lerpf(float(_hip[1]), _hip_h(leg.u), _move_k)      # standing: the flat-footed height
+	var hip_h := lerpf(float(_hip[1]) - crouch * CROUCH_DROP, _hip_h(leg.u), _move_k)      # standing: flat-footed
 	while _too_far(leg, a, hip_h) and leg.contact < SOLE.size() - 1:
 		leg.contact += 1      # the heel comes up: the boot rolls on to the next sole point
 	var done := (dir > 0.0 and leg.u >= 1.0) or (dir < 0.0 and leg.u <= 0.0)
@@ -240,6 +244,8 @@ func _swing_frame(leg: Leg, dt: float, dir: float, xf: Transform3D, inv: Transfo
 		s = 1.0 + over - pace / (2.0 * brake) * (w - 1.0 + brake) * (w - 1.0 + brake)
 	var at := Vector2(lerpf(leg.from.x, land.x, smoothstep(0.0, 1.0, w)), lerpf(leg.from.y, land.y, s))
 	var arc := _swing * lerpf(STAND_LIFT, 1.0, _move_k) * sin(PI * pow(w, lerpf(1.0, KICK, _move_k)))
+	if w > 1.0 - brake:
+		arc += LAND_CLEAR * (1.0 - (w - 1.0 + brake) / brake)      # still braking, so still off the ground
 	var depth := _hip_now - arc
 	if w > 0.5:
 		leg.contact = 0      # coming down to land: the heel rides the arc unless that pose hangs the toe lower

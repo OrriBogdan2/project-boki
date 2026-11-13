@@ -771,6 +771,7 @@ func update(dt: float, s: Dictionary) -> void:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
 	if gait != null:
+		gait.crouch = crouch_k
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
 		hl = gait.hl
 		hr = gait.hr
@@ -781,7 +782,9 @@ func update(dt: float, s: Dictionary) -> void:
 		ph = gait.ph
 		stepped = gait.landed
 	# crouch, landing, slam: knees bend, hips drop
-	var bend := maxf(crouch_k * 0.75, land_k * 0.85) + slam_k * 0.5
+	var own_k := 1.0 - (gait.gait_k if gait != null else 0.0)      # the Empty's gait sinks its own hips
+	var crouch_bend := crouch_k * 0.75 * own_k
+	var bend := maxf(crouch_bend, land_k * 0.85) + slam_k * 0.5
 	hl += bend * 0.62; hr += bend * 0.5
 	kl -= bend * 1.2; kr -= bend * 1.05
 	if slam_k > 0.0:
