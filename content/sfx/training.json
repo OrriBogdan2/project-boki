@@ -1,0 +1,12 @@
+{
+ "group": "training",
+ "name": "Training Grounds",
+ "script": "tools/gen_sfx_training.py",
+ "sounds": {
+  "training_count": "ui", "training_horn": "signature", "training_dummy_hit": "ui",
+  "training_reset": "ui", "training_bot_spawn": "cast"
+ },
+ "signature": [],
+ "replaces": [],
+ "loops": []
+}

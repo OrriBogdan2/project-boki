@@ -67,6 +67,7 @@ var amb_t := 0.0
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
 const CALLS := ["v_warden", "v_brute", "v_sentinel", "v_spitter"]
+var training := TrainingSfx.new()   # the Training Grounds' beds, in place of these
 
 func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t -= dt
@@ -75,6 +76,9 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	amb_t = 0.25
 	var w: World = m.world
 	if w == null:
+		return
+	if m.opts.get("training", false):
+		training.ambience(w, p)
 		return
 	var voids := 0; var walls := 0; var n := 0
 	for r: float in [3.0, 6.0, 9.5]:

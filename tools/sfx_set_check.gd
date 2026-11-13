@@ -48,6 +48,10 @@ extends RefCounted
 ##  22. footsteps: a Hunter walked over every surface of the Hollow Crown (the sky train's car deck; a plank
 ##      bridge tile laid on it) plays the cue for it: its own set on grass, stone, wood and snow, the
 ##      weight class's steps on metal, a little louder the heavier it is; farm wading has a set per class
+##  23. the Training Grounds (TrainingSfx): every cue is a sound of the training set with its own file (a shared
+##      fallback such as "revive" fails), the stations and the duel ring play them, the count-in plays 3-2-1 and
+##      one horn, the expanse has the full wind and a sky island less of it under its own bed, the beds sit on
+##      the Ambience bus, and the grounds never play the match's beds
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -106,6 +110,7 @@ func run(main: Node) -> void:
 	_res_tells()
 	_unwalked()
 	await _steps(main)
+	_training()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -626,6 +631,64 @@ func _breakables() -> void:
 	var ends: bool = ChestLoot.creak(0) == lids[0] and ChestLoot.creak(lids.size() + 2) == lids[-1]
 	ok(lids.size() >= 2 and odd.is_empty() and ends,
 			"%d chest tiers open with their own lid creak, the last for richer (wrong: %s)" % [lids.size(), odd])
+
+## 23. The Training Grounds' cues and beds.
+func _training() -> void:
+	var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/training.json"))
+	var shared := FileAccess.get_file_as_string("res://scripts/core/sfx.gd")
+	var off := []
+	for c in TrainingSfx.CUES:
+		if not (d["sounds"] as Dictionary).has(c) or _takes(c).is_empty() or shared.contains("\"%s\"," % c):
+			off.append(c)
+	ok(off.is_empty(), "training: %d cues of its own set, each with its own file (off: %s)"
+			% [TrainingSfx.CUES.size(), off])
+	var arena := FileAccess.get_file_as_string("res://scripts/match/arena.gd")
+	var duel := FileAccess.get_file_as_string("res://scripts/match/duel.gd")
+	var wired := arena.contains("cue(TrainingSfx.RESET)") and arena.contains("cue(TrainingSfx.DUMMY_HIT")
+	wired = wired and arena.contains("cue(TrainingSfx.BOT_SPAWN") and duel.contains("cue(TrainingSfx.BOT_SPAWN")
+	wired = wired and duel.contains("TrainingSfx.count_start()") and duel.contains("TrainingSfx.count_in(")
+	var borrowed := arena.contains("m.sfx(\"revive\"") or duel.contains("m.sfx(\"revive\"")
+	ok(wired and not borrowed, "training: the stations and the duel ring play their own cues, not the shared revive")
+	TrainingSfx.heard.clear()
+	TrainingSfx.count_start()
+	var left := TrainingSfx.COUNT_S
+	while left > -1.0:
+		TrainingSfx.count_in(left, left - 0.25)
+		left -= 0.25
+	var heard := [int(TrainingSfx.heard.get(TrainingSfx.COUNT, 0)), int(TrainingSfx.heard.get(TrainingSfx.HORN, 0))]
+	ok(heard == [3, 1], "training: the duel ring counts 3-2-1 and sounds the horn once %s" % [heard])
+	var missing := [TrainingSfx.WIND, TrainingSfx.ISLAND].filter(
+			func(b): return not ResourceLoader.exists("res://audio/amb_%s.ogg" % b))
+	ok(missing.is_empty(), "training: both beds have their file %s" % [missing])
+	var w := World.new()
+	w.generate(4242, 64, 7)
+	var big := TrainingSfx.expanse_of(w)
+	var other := (big + 1) % w.islands.size()
+	var on_big: Vector2i = w.islands[big]["cells"][0]
+	var on_other: Vector2i = w.islands[other]["cells"][0]
+	var t := TrainingSfx.new()
+	var at_big := t.beds_at(w, on_big.x + 0.5, on_big.y + 0.5)
+	var at_isle := t.beds_at(w, on_other.x + 0.5, on_other.y + 0.5)
+	var big_wind := float(at_big[TrainingSfx.WIND])
+	var quieter := float(at_isle[TrainingSfx.WIND]) < big_wind and float(at_isle[TrainingSfx.ISLAND]) > 0.0
+	ok(big_wind == 1.0 and quieter, "training: full wind on the expanse, less on an island %s %s" % [at_big, at_isle])
+	var h := Hunter.new()
+	h.pos = Vector3(on_other.x + 0.5, 0, on_other.y + 0.5)
+	Sfx.play_ambience("")
+	t.ambience(w, h)
+	var on_bus := Sfx.amb_layers.size() == 2
+	for n in Sfx.amb_layers:
+		on_bus = on_bus and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).bus == "Ambience"
+	ok(on_bus, "training: both beds play on the Ambience bus %s" % [Sfx.amb_layers.keys()])
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var music := FileAccess.get_file_as_string("res://scripts/match/music_dir.gd")
+	var own := match_src.contains("Sfx.play_ambience(\"\" if o.get(\"training\", false) else \"match\")")
+	own = own and music.contains("training.ambience(w, p)\n\t\treturn\n\tvar voids")
+	var none_borrowed := not (Sfx.amb_layers.has("abyss") or Sfx.amb_layers.has("ruins") or Sfx.amb_name == "match")
+	ok(own and none_borrowed, "training: never the match's wind, abyss or ruins beds")
+	h.free()
+	w.free()
+	Sfx.clear_amb_layers(0.0)
 
 func _takes(sname: String) -> Array:
 	var out := []

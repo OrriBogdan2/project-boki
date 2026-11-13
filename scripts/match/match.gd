@@ -302,7 +302,7 @@ func _start(o: Dictionary) -> void:
 	_build_env()
 	music_dir = MusicDir.new()
 	music_dir.start(self)
-	Sfx.play_ambience("match")
+	Sfx.play_ambience("" if o.get("training", false) else "match")     # the grounds have their own beds (TrainingSfx)
 	world = World.new()
 	world.name = "World"
 	world.biome = T["biome"].duplicate()

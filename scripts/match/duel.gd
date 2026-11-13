@@ -3,7 +3,8 @@ extends RefCounted
 ## The duel room, next to the Training Grounds: you against one sparring bot hunter on an empty
 ## island. Pick its Hunter, glove, difficulty and behaviour (fight / dodge only / stand
 ## still), reset whenever you like, and watch your numbers: damage dealt and taken, how many of your
-## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.
+## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round,
+## and every round is counted in (TrainingSfx: 3-2-1 and a horn, no damage before it).
 
 const MODES := ["fight", "dodge", "still"]
 const MODE_NAMES := {"fight": "Fights back", "dodge": "Only dodges", "still": "Stands still"}
@@ -19,6 +20,7 @@ var mode := "fight"
 var home_at := Vector3.ZERO      # where you start each round
 var bot_at := Vector3.ZERO       # where the bot starts each round
 var reset_t := -1.0
+var count_t := 0.0               # s left of the round's count-in (TrainingSfx.COUNT_S): no damage until the horn
 var round_n := 1
 var stats := {}
 var _cb: Callable
@@ -86,6 +88,7 @@ func spawn_bot() -> void:
 	if glove2 != "" and Gear.ALL.has(glove2) and glove2 != glove:
 		bot.gear[1] = {"id": glove2, "rar": 2}
 	bot.refresh_gear()
+	TrainingSfx.cue(TrainingSfx.BOT_SPAWN, bot_at)
 	reset()
 
 func _remove_bot() -> void:
@@ -109,13 +112,14 @@ func reset() -> void:
 		h.armor = h.max_armor
 		h.down_hp = 0.0
 		h.stun_t = 0.0
-		h.inv_t = 0.6
+		h.inv_t = TrainingSfx.COUNT_S
 		h.vel = Vector3.ZERO
 		h.teleport(home_at if h == m.player else bot_at)
 		if h.kin and (h.kin as Kin).state != "shoulder":
 			(h.kin as Kin).recall()
 	_near.clear()
-	m.sfx("revive", null, -8.0, 1.2)
+	count_t = TrainingSfx.COUNT_S
+	TrainingSfx.count_start()
 
 func heal_both() -> void:
 	for h in [m.player, bot]:
@@ -130,6 +134,8 @@ func tick(dt: float) -> void:
 	# otherwise leave two hunters standing back to back, neither ever spotting the other)
 	bot.reveal_t = maxf(bot.reveal_t, 0.3)
 	m.player.reveal_t = maxf(m.player.reveal_t, 0.3)
+	TrainingSfx.count_in(count_t, count_t - dt)
+	count_t = maxf(count_t - dt, 0.0)
 	if _test_cast > 0.0 and m.time >= _test_cast:
 		_test_cast = -1.0
 		bot.inp["aim"] = m.player.pos
