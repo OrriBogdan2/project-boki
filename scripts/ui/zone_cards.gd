@@ -3,7 +3,7 @@ extends RefCounted
 ## The Waystone's destination cards (briefs/design/GARDEN.md 10.5): one per zone, plus the hub when
 ## you're in a zone. An open zone's card has its colour, who lives there and how they feel, and
 ## today's game. A locked one is grey and lists its two keys as ticks, and where to get each; with both
-## in hand its button reads "Wake it" (HubWaystone.attune).
+## in hand its button reads "Wake it" (HubWaystone.attune); "Locked" is refused with a knock (HubWaystone.hop).
 ## The same cards answer "Move to..." for a Boki (move_to): Send, or why it can't go there.
 
 const CARD_W := 150.0       # px, one card's width
@@ -29,10 +29,14 @@ static func open(h, here: String) -> void:
 			for i in 2:
 				lines.append(UI.para(key_lines(id)[i], 12, UI.MUTED))
 				lines.append(UI.para(hints[i], 11, UI.FAINT))
+			if here == GardenZones.HUB and h.hhints != null:
+				lines.append_array(HubFirstVisit.card_line(id))
 			var keys := GardenZones.keys_for(id)
 			var ready: bool = keys["seed"] and keys["lean"]
-			var wake := func(): h.hway.attune(id)
-			row.add_child(_card(String(z["name"]), UI.FAINT, lines, wake, "Wake it" if ready else "Locked", ready))
+			var pick := func(): h.hway.hop(id)     # refused: the knock and what it still needs
+			if ready:
+				pick = func(): h.hway.attune(id)
+			row.add_child(_card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true))
 
 ## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
 ## the showcase wall's winners.
