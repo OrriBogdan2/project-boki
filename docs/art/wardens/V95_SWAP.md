@@ -48,6 +48,17 @@ the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fi
 and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
 Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
 
+## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
+In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
+re-time: Vex's `x` and Meeko's `seed`/`seed_aim` (tools/art1/glb_add_clips.py). Sparkle is on her current master
+(`m4c_livehead`, the owner's chest fix under the live head): the bake_warden fix keeps her base colour in a server bake.
+Her stretch check is red on main too (worst 14.3 vs main's 13.1, 45 clips over on both). Not swapped:
+- Albert i1: without `emit` the master bakes no crack glow, the porthole `eyes-mood` disc shows blank glass with a dark
+  wedge, and the fish (no `move_bones`) stretches 16x (main 9.5). The porthole and fish need re-placing first.
+- Sable: as below. Gil: no swap spec yet.
+v95_swap.py now stops when `emit` is set but the master has no emission map (it used to bake the base colour as glow:
+Albert's solid cyan).
+
 ## Status (2026-11-13, ext/showcase-1113): Vex, Kael, Tarek and Meeko on their current masters
 Swapped to each current.json master (face kept: the specs name the promoted master): Vex (tilt1112 cand_A2), Kael
 (tilt_A, sword stripped: `kael_tilt_A_body.glb`), Tarek (n95 c01, eye stones stripped: `tarek_c01_body.glb`), Meeko (n95
