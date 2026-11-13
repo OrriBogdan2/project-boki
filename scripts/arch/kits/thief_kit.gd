@@ -32,7 +32,6 @@ const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
-const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
@@ -46,6 +45,8 @@ var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
 var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
+var pip_spare: Array = []      # pip rings whose Marks ran out, hidden, for the next target (none made mid-fight)
+var pip_mats: Array[ShaderMaterial] = []    # [lit, unlit]: every diamond wears one of the two
 var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
@@ -172,26 +173,35 @@ func refresh_marks() -> void:
 			_pip_pop(f, int(mk[h.nid][0]))
 
 # ---- Marks you can read from across the fight: gold diamonds orbiting over the target's head, one per
-# Mark, spinning faster as they stack (everyone sees them, the victim included). Made once per target.
+# Mark, spinning faster as they stack (everyone else sees them, the victim included; your own read off RecastCue's
+# MARKS badge, so they hide on your screen). A ring is made once and goes back to pip_spare when its target's
+# Marks run out.
 func _pip_node(t: Ent) -> Dictionary:
 	var key := t.get_instance_id()
 	if pips.has(key) and is_instance_valid(pips[key]["node"]):
 		return pips[key]
+	var ring: Dictionary = pip_spare.pop_back() if not pip_spare.is_empty() else _pip_ring()
+	(ring["node"] as Node3D).visible = true
+	pips[key] = {"node": ring["node"], "t": t, "d": ring["d"], "pop": 0.0}
+	return pips[key]
+
+func _pip_ring() -> Dictionary:
+	if pip_mats.is_empty():
+		pip_mats = [Models.glow_mat(Color(res_col(), 1.0)), Models.glow_mat(Color(1, 1, 1, 0.2))]
 	var n := Node3D.new()
 	n.top_level = true
-	var gold := res_col()
 	var ds: Array = []
 	for i in pip_count():
 		var d := MeshInstance3D.new()
 		d.mesh = Models.box(0.24, 0.24, 0.24)
-		d.material_override = Models.glow_mat(Color(gold, 0.95))
+		d.material_override = pip_mats[1]
 		d.rotation = Vector3(0.0, 0.0, PI * 0.25)
 		d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		n.add_child(d)
 		ds.append(d)
 	m.add_child(n)
-	pips[key] = {"node": n, "t": t, "d": ds, "pop": 0.0}
-	return pips[key]
+	self_nodes.append(n)
+	return {"node": n, "d": ds}
 
 func _pip_pop(t: Ent, _c: int) -> void:
 	var p := _pip_node(t)
@@ -205,9 +215,12 @@ func _tick_pips(dt: float) -> void:
 		var t: Ent = tv if is_instance_valid(tv) else null
 		var c := marks_on(t) if t != null and not t.dead else 0
 		if c <= 0 or not is_instance_valid(n):
-			if is_instance_valid(n): n.queue_free()
+			if is_instance_valid(n):
+				n.visible = false
+				pip_spare.append({"node": n, "d": p["d"]})
 			pips.erase(key)
 			continue
+		n.visible = not h.is_local()
 		var top := 2.7 if t is Hunter else 1.9
 		n.global_position = t.position + Vector3(0, top, 0)
 		p["pop"] = maxf(0.0, float(p["pop"]) - dt * 4.0)
@@ -220,7 +233,7 @@ func _tick_pips(dt: float) -> void:
 			var lit := i < c
 			var wob: float = 0.15 * sin(m.time * 9.0) if c >= ds.size() else 0.0
 			d.scale = Vector3.ONE * ((1.0 + float(p["pop"]) * 0.8 + wob) if lit else 0.45)
-			d.material_override.set_shader_parameter("color", Color(res_col(), 1.0) if lit else Color(1, 1, 1, 0.2))
+			d.material_override = pip_mats[0 if lit else 1]
 
 ## Highest mark count on any foe (the resource readout).
 func best_marks() -> int:
@@ -856,7 +869,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))
 
-## The stuck dagger (a pooled look, everyone sees it) and, on your screen, the white arrival circle.
+## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
 func _tick_knife() -> void:
 	if knife.is_empty():
 		return
@@ -875,7 +888,6 @@ func _tick_knife() -> void:
 	if tells_visible() or f != null or knife.has("wall"):
 		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
 				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
-	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": KNIFE_VIOLET, "ticks": true, "alpha": 1.0})
 
 ## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
 func _wall_out(w: Dictionary) -> Vector2:
@@ -908,7 +920,6 @@ func _step_to_knife() -> void:
 	knife = {}
 	e_t = 0.0
 	fx().unplace("knife%d" % h.get_instance_id())
-	AimKit.hide(h, "knife")
 	if busy():
 		return
 	if in_dash():

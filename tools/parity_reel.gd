@@ -7,7 +7,8 @@ extends "res://tools/hero_vfx_reel.gd"
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
 ## REEL_MARK lines give the frame each part starts on. --reel-only takes a comma list, and also plays the parts
-## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups). Never writes the save.
+## kept out of the reel (idle, rmb_walk_lmb: owner-video close-ups; rmb_ground and rmb_air: an RMB at the dummy,
+## then one past it, from the ground or a jump's top). Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -156,6 +157,26 @@ func _p_rmb_walk_lmb() -> void:
 		P.inp["sec_hold"] = _in(t, 0.2, 5.6)
 		P.inp["move"] = Vector2(1, 0) if _in(t, 0.5, 3.5) else Vector2.ZERO
 		P.inp["fire"] = _in(t, 4.4), 4.0)
+
+func _p_rmb_ground() -> void:
+	await _seg("RMB at the dummy, then past it", 4.0, func(t: float) -> void:
+		P.inp["sec"] = _rmb_shot(t, 0.2, false) or _rmb_shot(t, 2.0, true))
+
+func _p_rmb_air() -> void:
+	await _seg("Jump, RMB at the dummy; jump, RMB past it", 4.0, func(t: float) -> void:
+		P.inp["jump"] = _in(t, 0.2) or _in(t, 2.0)
+		P.inp["sec"] = _rmb_shot(t, 0.5, false) or _rmb_shot(t, 2.3, true))
+
+## True for an RMB press at `when`, with the cooldown cleared; aimed 4 m to the dummy's side just before it
+## when `past`.
+func _rmb_shot(t: float, when: float, past: bool) -> bool:
+	if past and t >= when - 0.2:
+		_aim(T.pos + Vector3(0, 0, 4.0))
+	if not _in(t, when):
+		return false
+	P.ak.cd["rmb"] = 0.0
+	P.ak.ch_rmb = 1.0
+	return true
 
 func _p_e() -> void:
 	if who == "ostra":

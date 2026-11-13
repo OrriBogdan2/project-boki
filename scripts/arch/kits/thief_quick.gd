@@ -7,12 +7,13 @@ extends RefCounted
 ## is hers, no floating UI: the bolts that came quick carry the cartwheel's cyan (ThiefKit._bolt).
 ## Owned by ThiefKit (_vaulted, _tick, _bolt); numbers in the dash def (content/archetypes/thief.json).
 
-const GRACE := 0.2             # s past a quick interval that the next bolt may still come before the run ends
+const GRACE := 0.2  # s past a quick interval that the next bolt may still come before the run ends
 
-var open_t := 0.0              # s left for a bolt to start or keep the run
-var left := 0                  # quick intervals left in the run
-var cut := false               # the last bolt's interval was cut: the next one comes quick
-var quick_bolts := 0           # (tests, demo)
+var open_t := 0.0  # s left for a bolt to start or keep the run
+var left := 0  # quick intervals left in the run
+var cut := false  # the last bolt's interval was cut: the next one comes quick
+var quick_bolts := 0  # (tests, demo)
+
 
 ## An empowering Vault: the window opens.
 func vaulted(h: Hunter, dd: Dictionary) -> void:
@@ -21,8 +22,10 @@ func vaulted(h: Hunter, dd: Dictionary) -> void:
 	cut = false
 	h.fire_cd = minf(h.fire_cd, float(h.wpn.get("rate", 0.45)) * float(dd["quick_k"]))
 
+
 func tick(dt: float) -> void:
 	open_t = maxf(0.0, open_t - dt)
+
 
 ## A bolt just left (h.fire_cd is its interval): cuts that interval while the run lasts. True when this bolt came
 ## quick itself (the tell).

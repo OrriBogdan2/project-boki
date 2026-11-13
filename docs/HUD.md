@@ -11,7 +11,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 17-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `team_boki.gd` (`TeamBoki`, drawn by `hud_panels.gd` right after `Hud._draw_squad`) | the squad rows' extras: a level chip on the portrait's lower-left (gold once the ultimate is open, the plate's own chip), and the teammate's small Boki icon with a thin health bar, tinted when it is down, resting or its owner is a wisp. The rest of a row (portrait, name, armour strip over segmented health, status icons, distance, KNOCKED / DEAD / EXTRACTED states) is `Hud._draw_squad`. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
-| `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, armour strip, shell, resource bar |
+| `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
+| `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips (each fills as its charge recharges; a ready charge shows the next one's countdown small at the top), key pill, rank pips, lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
@@ -49,7 +50,7 @@ Rules of the look:
   A remote body keeps the Net `kst` time (`KitStatus._note_remote`). Check: `--clarity-check` section 4.
 
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
-drawn, the downed plate and status words show, cooldown text appears).
+drawn, your shield strip drains first and fades, the downed plate and status words show, cooldown text appears).
 
 ## Boki HUD: decision, state, gaps
 
@@ -93,7 +94,7 @@ for the squad rows). Verified 11-11:
 
 Owner playtest 11-09: "ally knocked is way too in your face". The rule now: nothing that pops up during
 a fight covers the middle of the screen or stays more than 2 s; edge-anchored, small, merged, few. "In a
-fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are owned elsewhere
+fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MSG_FIGHT_S` (4 s). The opening "Your kit" panel fades out while it is on (its 14 s timer waits) and returns when it ends; holding Tab (the scores key) shows it. Shots: `--kit-panel-fight-shots`, `docs/shots/ui-kit-panel-fight/`. Tutorial hints are owned elsewhere
 (`ext/tutorial-visibility`) and not covered here.
 
 | Pop-up | Where, size | How long | Now |
@@ -140,6 +141,22 @@ nothing else on screen:
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
+## Steal window (StealTell)
+
+DECISIONS 2026-11-10 "XP follows the source": kill XP and a lair boss's rewards go to the last hit (`KillXp`), so a
+rival can steal a boss. The counterplay needs a readable line, drawn by `scripts/ui/steal_tell.gd`:
+
+- **Line.** `content/rules/steal_window.json` `at` (0.25 of max health), the one number; the prize cry
+  (`StealSfx`, ext/sfx-steals) marks the same quarter.
+- **Bar.** At or under it a lair boss's health fill pulses gold (`StealTell.COL`, 2 Hz toward white) on the world bar
+  over its head and on the top boss bar the squad in its lair sees. Gold is apart from the bar's red, the stagger's
+  lilac and the chip's white; it wins over stagger and enrage colours while the window is open.
+- **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
+  end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
+  enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
+- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
+  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
+
 ## Two-step abilities (RecastCue)
 
 DECISIONS 2026-11-08 "two-step abilities must be obvious and in your face". Kits report and `RecastCue` draws;
@@ -159,12 +176,17 @@ no kit draws its own recast HUD.
   false). A badge over each marked foe (its count, a ring for the time left, gold when the payoff is ready), and a white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
+- **Owner and others.** On the owner's screen the cue is the only readout: a kit's world copy of the same state
+  hides there and stays for everyone else (Sable's Mark pips, Sparkle's Static marker and its Live pips, Neve's
+  frost glow; Sable's knife has no ring of its own). Zones and objects stay for everyone (Motley's seed, Meeko's
+  hearth, Tenzo's landing ring, Albert's hammer and beacon, Kael's chain). `--recast-cue-check` asserts the split;
+  `--recast-cue-shots` shoots every recast kit as its owner and as the foe (docs/shots/recast-art-dedupe/).
 - **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
-Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Badges:
-Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
+Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift), Gil Riptide (E).
+Badges: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
