@@ -13,7 +13,7 @@ extends Node3D
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
-##   hidden), with a pulsing double chevron in front of it showing its push
+##   hidden)
 ## - Purify: the green light column coming down over the 1 s delay, then the rings
 
 const GOLD := Color("ffc94a")
@@ -61,9 +61,8 @@ const PLATE_COL := Color("c9953a")
 const PLATE_EDGE := Color("8a6428")
 const RIVET_COL := Color("f0d27a")
 const BROKEN_COL := Color("4a3a30")
-## s the wall takes to rise out of the ground, and how long a push flashes its chevron
+## s the wall takes to rise out of the ground
 const RISE_T := 0.2
-const PUSH_FLASH_T := 0.2
 
 var h: Hunter
 var hammer: Node3D            # the thrown hammer
@@ -74,7 +73,6 @@ var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
 var aegis_hit := 0.0
 var rise_t := 0.0
-var push_flash := 0.0
 var wakes: Array[MeshInstance3D] = []
 var wake_life: Array[float] = []
 var wake_next := 0
@@ -373,7 +371,6 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 
 func aegis_hide() -> void:
 	aegis.visible = false
-	AimKit.hide(h, "aegis_push")
 
 ## The wall comes up: it rises out of the ground in a puff of dust.
 func aegis_rise(at: Vector3) -> void:
@@ -393,27 +390,10 @@ func aegis_block(at: Vector3) -> void:
 ## Broken: the plates crumble into chunks and dust.
 func aegis_break(at: Vector3) -> void:
 	aegis.visible = false
-	AimKit.hide(h, "aegis_push")
 	h.m.fx.burst(at + Vector3(0, 1.0, 0), PLATE_COL, 22, 7.0, 0.9, 16.0, 2.4)
 	h.m.fx.burst(at + Vector3(0, 0.8, 0), PLATE_EDGE, 16, 5.0, 1.0, 18.0, 2.0)
 	h.m.fx.dust(at, 16)
 	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color("ffd25a"), 14, 11.0, 160.0, 0.4, 14.0, 1.4)
-
-## The push the raised wall gives, shown in front of it to everyone: a double chevron pointing outward that
-## pulses along its reach (a gameplay area: foes that touch the wall are pushed this far); `flash` on a push.
-func push_hint(w: Dictionary, n: Vector2, push: float, flash: bool) -> void:
-	if flash:
-		push_flash = PUSH_FLASH_T
-		aegis_hit = 1.0
-	var a: Vector2 = w["a"]
-	var b: Vector2 = w["b"]
-	var mid := (a + b) * 0.5
-	var t := float(h.m.time)
-	var hot := clampf(push_flash / PUSH_FLASH_T, 0.0, 1.0)
-	AimKit.lane(h, "aegis_push", {
-		"from": Vector3(mid.x + n.x * 0.5, h.pos.y, mid.y + n.y * 0.5), "dir": n, "len": push,
-		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
-		"alpha": 1.1 + 0.4 * (0.5 + 0.5 * sin(t * 7.0)) + hot, "hot": 0.3 + hot, "lw": 0.1, "all": true})
 
 # ------------------------------------------------------------------ Purify
 ## The column coming down over the delay (u 0 -> 1), then the disc's rings.
@@ -452,7 +432,6 @@ func _process(_delta: float) -> void:
 		_tick_chain()
 	if aegis_hit > 0.0:
 		aegis_hit = maxf(0.0, aegis_hit - delta * 5.0)
-	push_flash = maxf(0.0, push_flash - delta)
 	if rise_t > 0.0:
 		rise_t = maxf(0.0, rise_t - delta)
 		var u := 1.0 - rise_t / RISE_T

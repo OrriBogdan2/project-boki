@@ -21,8 +21,14 @@ var trust := 50.0
 var mood := 0.0
 var dmg := 8.0
 var speed := 6.5
+## s from the start of a bite to it landing: a rigged Boki's attack clip is played at the rate that puts its
+## contact frame (BokiRig.CONTACT) here, so the hit and its cues fire on the frame the bite connects.
+const STRIKE_WINDUP := 0.3
+const STRIKE_SLACK := 0.6         # m past its reach a target may have got to by then and still be bitten
 var atk_cd := 0.0
 var lunge_t := 0.0
+var strike_t := 0.0               # s until the bite under way lands (0: none)
+var strike_at: Ent = null         # who it lands on
 var target: Ent = null
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
@@ -162,7 +168,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
-	ring.material_override = Models.ring_mat(Color(tc, 0.85), 0.16)
+	ring.material_override = SideRings.mat(Color(tc, 0.85), 0.16)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ring.top_level = true
 	add_child(ring)
@@ -472,6 +478,7 @@ func start_rush(d: Vector2, e: Dictionary, ctx: Dictionary) -> void:
 		k -= 0.5
 	fly = {"from": pos, "to": to, "t": 0.0, "dur": maxf(0.08, pos.distance_to(to) / float(e.get("speed", 22.0))), "hit": {}, "rush": true, "e": e, "ctx": ctx}
 	state = "flying"
+	KinFlinch.dash(model, Vector3(d.x, 0, d.y), mass())
 
 ## A jump onto a spot (a grammar leap): untouchable in the air, then its landing.
 func start_leap(to: Vector3, e: Dictionary, ctx: Dictionary) -> void:
@@ -597,6 +604,10 @@ func sim(dt: float) -> void:
 	throw_cd = maxf(0.0, throw_cd - dt)
 	haste_t = maxf(0.0, haste_t - dt)
 	rest_t = maxf(0.0, rest_t - dt)
+	if strike_t > 0.0:
+		strike_t -= dt
+		if strike_t <= 0.0:
+			_land_strike()
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
@@ -844,14 +855,7 @@ func _sim_active(dt: float) -> void:
 				target = null
 				wish = Vector2.ZERO
 		if target and d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5 and not BokiHit.held(self):
-			atk_cd = 0.95
-			lunge_t = 0.15
-			vel.x += to.normalized().x * 5.0; vel.z += to.normalized().y * 5.0
-			var tp := target.pos
-			target.hurt(dmg * power, self, {"kb": to.normalized() * 2.0, "src": "kin", "tags": ["kin", "melee"]})
-			m.sfx("kinhit", pos, -6.0, 1.0)
-			melee_n += 1
-			fire_trigger("on_hit", {"at": tp})
+			_start_strike(target, 0.95)
 	elif owner_h:
 		# no fight for it: back to your side like a teammate (or its guard spot); it hops onto you if you glide off
 		wish = KinFollow.idle(self, dt, spd)
@@ -861,6 +865,32 @@ func _sim_active(dt: float) -> void:
 			wish = Vector2.ZERO
 	_ground_move(wish, dt)
 	KinFollow.watch_stuck(self, wish, dt)
+
+## Starts a bite at `who`; it lands STRIKE_WINDUP later (_land_strike). `cd`: s before the next one.
+func _start_strike(who: Ent, cd: float) -> void:
+	atk_cd = cd
+	strike_t = STRIKE_WINDUP
+	strike_at = who
+
+## The bite connects: the lunge, the damage and its hit cues, if it is still fighting and the target is still there.
+func _land_strike() -> void:
+	var who := strike_at
+	strike_at = null
+	if not (state in ["active", "wild"]) or BokiHit.held(self) or not is_instance_valid(who) or who.dead:
+		return
+	if flat_dist(who) > float(sp["range"]) + who.r + STRIKE_SLACK:
+		return
+	var to := Vector2(who.pos.x - pos.x, who.pos.z - pos.z).normalized()
+	lunge_t = 0.15
+	vel.x += to.x * 5.0; vel.z += to.y * 5.0
+	if state == "wild":
+		who.hurt(dmg * 0.8, self, {"kb": to * 2.0, "src": "kin"})
+		return
+	var tp := who.pos
+	who.hurt(dmg * power, self, {"kb": to * 2.0, "src": "kin", "tags": ["kin", "melee"]})
+	m.sfx("kinhit", pos, -6.0, 1.0)
+	melee_n += 1
+	fire_trigger("on_hit", {"at": tp})
 
 func _ground_move(wish: Vector2, dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
@@ -945,9 +975,7 @@ func _sim_wild(dt: float) -> void:
 			if to.length() > 1.2:
 				wish = to.normalized() * speed * 0.85
 			elif atk_cd <= 0.0 and not BokiHit.held(self):
-				atk_cd = 1.1
-				lunge_t = 0.15
-				angry_at.hurt(dmg * 0.8, self, {"kb": to.normalized() * 2.0, "src": "kin"})
+				_start_strike(angry_at, 1.1)
 	else:
 		if wander_to == Vector3.INF or flat_dist(wander_to) < 0.5 or randf() < dt * 0.15:
 			var a := randf() * TAU
@@ -1045,7 +1073,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = 0.0
 		return
 	var on_you := state == "shoulder" and not beside
-	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 else ""))
+	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 or strike_t > 0.0 else ""))
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
 	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
 	# body language (KinPuppet): growl, point, whine, cheer...
