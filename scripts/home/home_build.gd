@@ -361,9 +361,10 @@ func _apply_blockers() -> void:
 			w.kind[i] = World.T_GROUND
 		w.no_deco.erase(i)
 	blocked.clear()
+	w.block_top.clear()
 	occ.clear()
 	var lay := L()
-	var mark := func(c: Vector2i, tag: String, solid: bool):
+	var mark := func(c: Vector2i, tag: String, solid: bool, top := HomeLayout.CLIMB_TOP):
 		if not w.inb(c.x, c.y): return
 		var i := w.idx(c.x, c.y)
 		if w.kind[i] == World.T_VOID: return
@@ -375,6 +376,7 @@ func _apply_blockers() -> void:
 				w.kind[i] = World.T_BLOCK
 				w.no_deco[i] = true
 				blocked[i] = true
+				w.block_top[i] = w.level[i] * World.LEVEL + top      # every placed block is climbable
 	for b in Data.BUILDINGS:
 		if not HomeLayout.placed(b, h._d()): continue      # a farm-start lot you haven't put down yet
 		var built: bool = h._has_b(b)
@@ -382,7 +384,7 @@ func _apply_blockers() -> void:
 			mark.call(c, "b:" + b, built)
 	for e in lay["deco"]:
 		for c in HomeLayout.deco_cells(e):
-			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])))
+			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])), HomeLayout.top_of(String(e["id"])))
 	for k in lay["water"]:
 		mark.call(HomeLayout.unkey(k), "w", false)      # (feelfix) ponds are water you can wade and swim in, not walls
 	_evict_feeders()

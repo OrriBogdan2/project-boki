@@ -43,8 +43,11 @@ const THEMES := {
 		"side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
 
+const CLIMB_TOP := 1.2      # m: a placed block's top; the farm's jump and mantle (reach 1.5 m) climbs it
+
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
-## brushes). size: footprint in tiles before turning. block: kin and you walk around it. line: dragged
+## brushes). size: footprint in tiles before turning. top: m you stand on a block at (default CLIMB_TOP).
+## block: kin walk around it and you climb it. line: dragged
 ## out in a line that joins up (fences). brush: painted on tiles (path / clear / water). colour: you
 ## pick its colour. light: glows at night. bed: kin sleep on it.
 const CATALOG := {
@@ -69,7 +72,7 @@ const CATALOG := {
 	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true},
 	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true},
 	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true},
-	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true},
+	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "top": 0.5},
 	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true},
 	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true},
 	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true},
@@ -82,9 +85,9 @@ const CATALOG := {
 		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},
 	"toy_post": {"name": "Climbing post", "cat": "Base", "gems": 30, "block": true, "toy": true,
 		"desc": "Flying and Rock Boki love to climb it. Trains Power."},
-	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "toy": true,
+	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "top": 0.5, "toy": true,
 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
-	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "toy": true,
+	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "top": 0.5, "toy": true,
 		"desc": "Fire Boki love to bask on it. Trains Guard."},
 	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
 		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
@@ -340,6 +343,10 @@ static func deco_center(e: Dictionary) -> Vector3:
 
 static func blocks(id: String) -> bool:
 	return bool(CATALOG.get(id, {}).get("block", false))
+
+## How high you stand on top of a placed block (m): "top" for a low one, else CLIMB_TOP.
+static func top_of(id: String) -> float:
+	return float(CATALOG.get(id, {}).get("top", CLIMB_TOP))
 
 ## [gems, scrap, wood, stone] for n of a catalog item.
 static func price(id: String, n := 1) -> Array:

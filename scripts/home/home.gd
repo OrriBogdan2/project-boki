@@ -1605,7 +1605,8 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 	for k in 17:
 		var q := Vector2(x, z) + dv * (0.1 * k)
 		var g := _ground_h(q.x, q.y)
-		if world.is_block(q.x, q.y) or g <= World.VOID + 1.0 or g < top - 0.05 or g - py > reach:
+		var wall := world.is_block(q.x, q.y) and not world.is_stand_block(q.x, q.y)      # (a placed block is a landing)
+		if wall or g <= World.VOID + 1.0 or g < top - 0.05 or g - py > reach:
 			continue
 		if world.occupy(q.x, q.y, 0.38, g, false) != 0.0:
 			continue
@@ -3746,7 +3747,8 @@ var wedge_t := 0.0
 ## Moves you (and any kin) to the nearest open ground if something has boxed you in.
 func unstick() -> void:
 	var p2 := world.free_spot_near(ppos, [], 1.0, 0.5)
-	if p2.distance_to(ppos) > 0.05:
+	var on_top := world.is_stand_block(ppos.x, ppos.z) and py >= world.ground_at(ppos.x, ppos.z) - 0.05
+	if not on_top and p2.distance_to(ppos) > 0.05:
 		ppos = Vector3(p2.x, ppos.y, p2.z)
 		if player: player.position = ppos
 	for k in kins:

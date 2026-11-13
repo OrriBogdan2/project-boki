@@ -62,3 +62,14 @@ Checks: `--farm-tutorial-check` (a crop by water grows a stage in 72 s, the same
 does not; troughs; the preview), `--farm-climb-check` (4 seeded islands with a ridge: every tile is
 standable ground, a sample of faces is topped by a running jump, you walk off it, a Boki reaches every
 open tile, the brush levels it).
+
+## Placed blocks are climbable (owner, 11-11: "all farm blocks are climbable")
+Every solid thing you place (walls, fences, hedges, crates, benches, trees, statues, stations, buildings) stands
+you at a low top, not at a 3 m wall: `HomeLayout.CLIMB_TOP` 1.2 m, or a catalog `"top"` for a low item (bench, tub,
+warm stone: 0.5 m). `HomeBuild._apply_blockers` writes it into `World.block_top`; `ground_at` and the block
+collision read it, so the farm's one jump-and-mantle (`Home._mantle`, reach 1.5 m) climbs it and you walk off the
+edge back down. No second climbing system. A Boki stays on the ground: it walks round blocks on the same tile
+grid (`HomeBuild.refresh_grid` after every placement); one set down on a block (dropped from up there, or there
+when the layout changes) is stepped off by `HomeCarry.drop` / `Home.unstick`, and you are not pushed off a block you
+climbed. The wild trees and rocks of the meadow stay 3 m walls. Check: `--farm-climb-blocks-check`. Not built: Boki
+walking onto blocks (Boki have no height on the farm; say so if you want it).

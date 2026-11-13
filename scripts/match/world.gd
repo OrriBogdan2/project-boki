@@ -74,6 +74,8 @@ func ground_at(x: float, z: float) -> float:
 	var i := idx(ix, iz)
 	if kind[i] == T_VOID:
 		return VOID
+	if not block_top.is_empty() and block_top.has(i):
+		return block_top[i]
 	if stairs.has(i):
 		# a flight of stairs up to the next terrace: the ground rises smoothly across the tile
 		var d: Vector2i = stairs[i]
@@ -84,6 +86,16 @@ func ground_at(x: float, z: float) -> float:
 
 func is_void(x: float, z: float) -> bool:
 	return ground_at(x, z) <= VOID + 1.0
+
+## Tile idx -> top height of a block you can climb (the farm's placed blocks); a block not in here is BLOCK_H tall.
+var block_top := {}
+
+func block_top_of(i: int) -> float:
+	return block_top.get(i, level[i] * LEVEL + BLOCK_H)
+
+## Standing room on a block's top: a climbable block, not a wall of BLOCK_H.
+func is_stand_block(x: float, z: float) -> bool:
+	return is_block(x, z) and block_top.has(idx(int(floor(x)), int(floor(z))))
 
 func is_block(x: float, z: float) -> bool:
 	var ix := int(floor(x)); var iz := int(floor(z))
@@ -195,7 +207,7 @@ func _block_hit(x: float, z: float, rb: float, y: float) -> float:
 				continue
 			var cx := clampf(x, tx, tx + 1.0); var cz := clampf(z, tz, tz + 1.0)
 			if (cx - x) * (cx - x) + (cz - z) * (cz - z) < rb * rb:
-				var top := level[idx(tx, tz)] * LEVEL + BLOCK_H
+				var top := block_top_of(idx(tx, tz))
 				if top > y + STEP:
 					return top
 	return 0.0
@@ -213,7 +225,7 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 			for tx in range(int(floor(p.x - rb)), int(floor(p.x + rb)) + 1):
 				if not inb(tx, tz) or kind[idx(tx, tz)] != T_BLOCK:
 					continue
-				if level[idx(tx, tz)] * LEVEL + BLOCK_H <= y + STEP:
+				if block_top_of(idx(tx, tz)) <= y + STEP:
 					continue
 				var c := Vector2(clampf(p.x, tx, tx + 1.0), clampf(p.y, tz, tz + 1.0))
 				var d := p - c
