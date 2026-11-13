@@ -86,21 +86,21 @@ func _line_at(W: World, a: Vector2i, d: Vector2i, kind: String, onto: bool) -> D
 	if not W.inb(a.x + d.x * 20, a.y + d.y * 20) or W.kind[W.idx(a.x, a.y)] != World.T_GROUND:
 		return {}
 	var lv := int(W.level[W.idx(a.x, a.y)])
-	var run := int(ceil(FAR)) + 1
-	for s in range(1, run + 1):
+	var reach := int(ceil(FAR)) + 1
+	for s in range(1, reach + 1):
 		if _kind_at(W, a + d * s, lv) != "floor":
 			return {}
 	var thick := 0
-	while thick < 5 and _kind_at(W, a + d * (run + 1 + thick), lv) == kind:
+	while thick < 5 and _kind_at(W, a + d * (reach + 1 + thick), lv) == kind:
 		thick += 1
 	var fits := thick >= 3 if onto else thick >= 1 and thick <= 4
 	if not fits:
 		return {}
-	var face := a + d * (run + 1)
+	var face := a + d * (reach + 1)
 	if onto:
 		return {"face": face, "dir": d, "thick": 0, "lv": lv, "top": true}
 	for s in range(0, 4):
-		if _kind_at(W, a + d * (run + 1 + thick + s), lv) != "floor":
+		if _kind_at(W, a + d * (reach + 1 + thick + s), lv) != "floor":
 			return {}
 	return {"face": face, "dir": d, "thick": thick, "lv": lv, "top": false}
 
