@@ -131,6 +131,8 @@ branch and, for every red, on a pristine origin/main worktree (`main-tree`, same
   green alone. Filed in docs/DEBT.md.
 - Known before the merge and still so (DEBT): leave-match tier 2.
 - Not runnable on main at all: hitstop-input (no Gil row, errors out) and tutorial-hud (parse error).
+- `--online-feel-check` (the one the first job could not finish): run alone, 0 failures; the game adds 2-22 ms on top of
+  the line's 100 ms each way (budget 60) for Vex, Kael and Neve's dash, LMB, E and recast.
 - `tools/check.sh` not run: no gdformat, gdlint or ruff on w2.
 
 ## Left out: real conflicts in code or assets (resolve by rebuilding on this branch or main)
