@@ -446,8 +446,8 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": SEED_FILL, "rim_w": 0.14,
-					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
+					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": SEED_FILL,
+					"rim_w": 0.14, "sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
