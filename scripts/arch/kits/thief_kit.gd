@@ -6,10 +6,10 @@ extends ArchKit
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
 ##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
-##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
+##   to 8 shown, no cap): each adds a flat +1.3 to your bolts on them. A knock or an assist heals you 25%.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
-## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
+## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
 ##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
@@ -35,13 +35,10 @@ const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
-## The ground Cartwheel's speed over its run (time share, speed as a share of its average): a quick burst
-## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
-const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
-const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
+const KNIFE_RELEASE_S := 0.12      # s into thf_knife: the throw's key pose, where the knife leaves her hand
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
 
 var primed_t := 0.0            # Vault empowered the next bolt
@@ -373,7 +370,9 @@ func _bolt() -> void:
 	var d := h.aim_dir()
 	var right := Vector2(-d.y, d.x)
 	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
-	var start: Vector3 = (sd["pos"] as Vector3) + Vector3(off.x, 0, off.y)
+	var side := Vector3(off.x, 0, off.y)
+	var start: Vector3 = (sd["pos"] as Vector3) + side
+	var gun: Vector3 = sd.get("muzzle", sd["pos"]) + side      # where it's drawn from; it hits from the body
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
 	var to := AimMode.point(h, rng)
 	var v := Vector2(to.x - start.x, to.z - start.z)
@@ -387,6 +386,7 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
+	if sd.has("muzzle"): sd["muzzle"] = gun
 	# the throw: the torso unwinds into it and winds toward the other hand for the next bolt (KMovesDJ
 	# thf_lmb_r / thf_lmb_l) while the swing whips that hand's blade out (HunterAnim.SWINGS "arc_bolts"); the
 	# empowered one is both blades driven out together (thf_primed)
@@ -394,7 +394,7 @@ func _bolt() -> void:
 	play("thf_primed" if emp else throw)
 	h.swing_n += 1
 	h.combo_i = 1 if hand == 1 else 2
-	var muzzle := start + Vector3(d.x, 0, d.y) * 0.1
+	var muzzle := gun + Vector3(d.x, 0, d.y) * 0.1
 	if emp:
 		primed_t = 0.0
 		haste_t = 0.0
@@ -430,7 +430,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 
 # ------------------------------------------------------------------ dash: Vault
 ## The Cartwheel: a Vault charge, the same in the air as on the ground (item 183); out of charges, the class's
-## long dash, flipped her way. Both run down VAULT_CURVE and the air's drag carries her on to the landing like
+## long dash, flipped her way. Both run down her fitted curve and the air's drag carries her on to the landing like
 ## every Hunter. The sheet's air cartwheel, 8.4m held flat over 0.95s, flew far past the cast.
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
@@ -439,8 +439,9 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	var air := use_ex or not h.grounded
 	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
+	extra["curved"] = true            # the fitted Cartwheel curve (dash_feel.json "thief"), ground and air alike
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "air": air}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -451,7 +452,8 @@ func _empowers(use_ex: bool) -> bool:
 		return false
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
-## The Cartwheel's speed curve, on the ground and in the air; from the air it ends where she lands.
+## The Cartwheel's run (its speed is ArchKit's fitted curve, content/rules/dash_feel.json "thief"); from the air
+## it ends where she lands.
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -462,8 +464,6 @@ func _tick_vault(dt: float) -> void:
 		return
 	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
 		h.roll_t = 0.0
-		return
-	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
@@ -527,14 +527,13 @@ func _vaulted(air: bool, empower: bool) -> void:
 		if h.is_local(): h._ab_feedback("dash", "ready")
 
 # ------------------------------------------------------------------ passive hooks
-## Marks make your bolts on that target stronger: +10% of a bolt each, a flat add like the source's +16 a stack,
-## so on the empowered bolt they add to its plain-bolt part, not to the bonus.
+## Marks make your bolts on that target stronger: a flat mark_dmg each (the source's +16 a stack on its 160 shot,
+## so 1.3 on our 13), the same on the empowered bolt; weapon upgrades do not grow it.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	var weapon := String(o.get("src", "")) == "shot" and String(o.get("ab", "")) == ""
 	if not weapon:
 		return dmg
-	var bolt := dmg / empowered_k() if t == primed_on else dmg
-	return dmg + bolt * float(res_def().get("per_mark", 0.1)) * float(marks_on(t))
+	return dmg + float(res_def()["mark_dmg"]) * float(marks_on(t))
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or t.dead:
@@ -582,7 +581,7 @@ func _reset_fx(t: Ent) -> void:
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
 	var hp0 := h.hp
-	h.heal(h.max_hp * float(rd.get("heal_knock", 0.15) if mine else rd.get("heal_assist", 0.25)))
+	h.heal(h.max_hp * float(rd["heal_knock"] if mine else rd["heal_assist"]))
 	var got := h.hp - hp0
 	if is_instance_valid(t):
 		fx().star(t.pos + Vector3(0, 1.2, 0), KNOCK_STAR, 3.0 if mine else 2.0, 0.55, Color(1, 0.9, 0.9))
@@ -788,18 +787,18 @@ func combo_marks(out: Array) -> void:
 		var e: Array = mk.get(h.nid, [0, 0.0])
 		if int(e[0]) > 0 and float(e[1]) > 0.0:
 			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "MARKS", primed_t > 0.0))
+			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
 
 func cast_e() -> bool:
 	play("thf_knife")
-	m.later(0.12, func():               # spun into a side-arm throw, released on the key pose
+	m.later(KNIFE_RELEASE_S, func():     # spun into a side-arm throw, released on the key pose
 		if not is_instance_valid(h) or busy(): return
 		_throw_knife())
 	return true
 
 func _throw_knife() -> void:
 	var ed := e_def()
-	var rng := AimMode.dist(h, float(ed["range"]))     # to the cursor, 14m at most
+	var rng := AimMode.dist(h, float(ed["range"]))     # to the cursor, e.range at most
 	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": rng, "size": 0.2},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])},
 				{"type": "slow", "duration": float(ed["slow_t"]), "strength": float(ed["slow"])}]})

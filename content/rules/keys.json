@@ -20,7 +20,6 @@
   "seed_add": 31,
   "no_carry": ["ward", "glimmer", "warden", "sentinel"],
   "glint_h": 1.9,
-  "pickup_pull": 2.2,
   "cap": 3,
   "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."
  },

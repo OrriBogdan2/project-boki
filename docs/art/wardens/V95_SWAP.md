@@ -38,6 +38,14 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Judge framing gotcha (2026-11-13, ext/low4-hunters)
+v95-promote's renderer (`_tools/r95_render.py`) turns the model about its glTF origin, not its bbox centre, and
+the side frame is only ~0.62 m either side of the origin (Grimble's height, 1.9 m). A hunched pose that pushes the head
+forward (Grimble hunch E: head at z 0.64) puts the face out of frame. The judge then reports "too upright, head tucked
+in". Moving the whole mesh 10 cm back (-Z, `_low4-1112/tools/shift_z.py`) gave 85/80/84/83 vs the live 79/79 with the
+same scorer. The face is unchanged, but the pose moves it, so promote such a pass with `--face`. The candidate and the
+command are in `/home/boki/meshy/v95/_low4-1112/PROMOTE_GRIMBLE.txt`. The swap then needs the feet re-centred.
+
 ## Status (2026-11-12 evening, ext/hunters-best-1112): the 11-12 evening promotions
 In game on top of the table below: Neve's chiffon skirt body under the live head (`claire_v95.json`, from
 ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
@@ -117,3 +125,25 @@ be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's
 Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
+
+## Face lock (2026-11-12): a body pass never changes a hunter's face
+The /3d/v95 masters are promoted by `v95-promote` (boki-tools; model-room-sync runs `--auto`). It used to copy the
+whole GLB, so a body pass built on an older head put that head live: Cinder's body5/body6/prop1111 chain started from
+appeal4 cand_5 (rebuilt from appeal3 cand_b) and lost the owner's appeal4 cand_3 face. Now a promote keeps the head
+of the current v95.glb (top 13% of the Meshy body: positions, UVs, base-colour texture, plus the eye/head parts in
+that box) unless the pass is declared a face pass: `FACE: <what>` in its pick/applied file, the word `face` after
+the glb in CURRENT_OVERRIDES.txt, or `--face` by hand. An undeclared head change with the same topology and UVs is
+put back (`<stem>_keephead.glb`); anything else is refused. `v95-promote --check` fails if a lock-era promote changed
+a head without a face pass (`--selftest` covers the lock). Swap specs here should name the promoted master
+(`current.json` "glb"), not an r2 candidate, so the game gets the same face.
+
+## The hunters are counted from art/wardens (2026-11-12)
+v95-promote takes its hunters from `~/meshy/v95/_tools/v95_roster.py`: every `art/wardens/<id>/<id>.glb` on the
+game's origin/main (13 with Gil), not a fixed list. Its `KNOWN` table only maps an art id to its v95 folder and
+display name (owner room order 2026-11-08); a warden that is not in it still counts, named after its id. A hunter in
+art/wardens without a `v95.glb` yet shows in `--status` and is a WARN in `--check`. The Model Room's build3d.py on
+hetzner reads the same roster once `~/meshy/v95/_tools/model-room-roster-patch.py` has replaced its fixed 12-row
+list (it refuses unless that list is found exactly once).
+Gil's first v95 pass (no gil_v2 refs, so the approved 2D): `~/meshy/v95/Gil/r2/v95a/NOTES.txt` (cand_B, judge 85;
+the live 12 score 76-88), sheet `Gil/before_after.jpg`, `Gil/turntable.mp4`. Its promote is a face pass:
+`v95-promote Gil r2/v95a/cand_B.glb --face "first v95 face for Gil"`; his swap spec follows from the promoted master.
