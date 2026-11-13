@@ -424,15 +424,22 @@ func _moved(b: Dictionary, move: String) -> bool:
 	var started := (hunter.ak.in_dash() and not bool(b["dashing"])) or hunter.roll_t > float(b["roll"]) + 0.01
 	return spent or started
 
-## Control: held past the kit's threshold then let go on the ground, does `slot` go off on the release?
+## Control: held past the kit's threshold then let go on the ground, does `slot` go off on the release? A slot
+## that also goes off with the key still down is a tap with a wind-up (Grimble's hook coil), not a hold.
 func _is_hold(m: Match, slot: String) -> bool:
-	return _hold(m, slot, "") == "keep"
+	if _hold(m, slot, "") != "keep":
+		return false
+	var by_itself := _hold(m, slot, "", false) == "keep"
+	_hold_key(slot, false)
+	_steps(m, 1)
+	return not by_itself
 
 ## `slot` held, the move made with it still held (moving forward), then let go: right after a dash, or
 ## JUMP_RELEASE into a jump. "keep" (it went off on the release, and in the air kept KEEP_SPEED of the speed),
 ## "keep, stops" (went off but stopped the hunter), "cancel" (nothing came out), or "n/a" (it never started
 ## or went off by itself before the release).
-func _hold(m: Match, slot: String, move: String) -> String:
+## `let_go` false keeps the key down instead (the control: what goes off without a release).
+func _hold(m: Match, slot: String, move: String, let_go := true) -> String:
 	_fresh(m)
 	hunter.inp["move"] = Vector2(0, -1)
 	_hold_key(slot, true)
@@ -452,7 +459,7 @@ func _hold(m: Match, slot: String, move: String) -> String:
 	# aim ahead again: the move carried the hunter past the first aim point, and a release that steps toward the aim
 	# (a punch) would then throw them backward, which W's counter-steer brakes (Loco.air_step), not a "stop"
 	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -6)
-	_hold_key(slot, false)
+	_hold_key(slot, not let_go)
 	for i in 12:
 		m.step(Match.DT)
 		if _released(before, _snap(), slot):
