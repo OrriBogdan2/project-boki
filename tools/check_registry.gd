@@ -119,6 +119,8 @@ const CHECKS := {
 	# docs/heroes/deployables.md
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],
 	"--tenzo-edge-check": ["res://tools/tenzo_edge_check.gd", "hero_pair_check", null],
+	"--recast-marker-check": ["res://tools/recast_marker_check.gd", "recast_marker_check", "check"],
+	"--recast-marker-shots": ["res://tools/recast_marker_check.gd", "recast_marker_check", "shots"],      # --shots-dir=<dir>
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # Gil, the Novice Mage
 	"--gil-kit-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # (the old name)

@@ -789,6 +789,9 @@ func combo_marks(out: Array) -> void:
 			var dur := float(res_def().get("dur", 4.0))
 			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
 
+func recast_at() -> Vector3:
+	return ground(knife["pos"]) if not knife.is_empty() else Vector3.INF
+
 func cast_e() -> bool:
 	play("thf_knife")
 	m.later(KNIFE_RELEASE_S, func():     # spun into a side-arm throw, released on the key pose

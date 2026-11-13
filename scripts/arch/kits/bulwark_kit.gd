@@ -669,6 +669,15 @@ func _catch(quiet := false) -> void:
 	m.sfx("bjorn_catch", h.pos, -6.0)
 	vfx("catch", h.pos)
 
+## The recall: while the hammer is out (flying or lying) a press on the attack key calls it back, no time limit.
+func recast_at() -> Vector3:
+	if mace.is_empty() or String(mace["st"]) in ["wind", "back"]:
+		return Vector3.INF
+	return ground(mace["pos"])
+
+func recast_key() -> String: return "fire"
+func recast_left() -> float: return -1.0
+
 # ------------------------------------------------------------------ RMB: Shield (hold to block)
 ## The shield is a block, not a charge (the Crushing Blow on LMB is the Bulwark's charge).
 func rmb_charge_full() -> float:
