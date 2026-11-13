@@ -10,7 +10,7 @@ extends RefCounted
 ## Prints one line per Hunter and writes every number to --json.
 
 const DT := 1.0 / 30.0
-const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
+const WARM_S := 3.0          # s of locomotion before a sample: the blends and the gait's 0.8 s running means settle
 const SAMPLE_S := 2.4        # s of locomotion sampled
 const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
 const CROUCH_K := 0.55      # of the run speed a crouch walks at (Hunter._physics): the sneak sampled at full stick
@@ -61,6 +61,10 @@ func _hero(main: Node, id: String) -> void:
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:          # (a Hunter with no keyed clips yet: Gil)
+		print("NOTE %s: no clips to audit" % id)
+		m.free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
 	var row := {}
