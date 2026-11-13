@@ -1,0 +1,241 @@
+--- a/claude-job
++++ b/claude-job
+@@ -2,7 +2,7 @@
+ # claude-job: start a headless Claude Code worker session on hetzner under a chosen cswap account.
+ # Runs as boki. Each job gets its own git worktree, a tmux window, a usage guard and a published report.
+ #
+-#   claude-job start <account> [--role R] [--model ID] [--effort LEVEL] [--branch REF] [--label TEXT] [--force]
++#   claude-job start <account> [--role R] [--model ID] [--effort LEVEL] [--branch REF] [--label TEXT] [--force] [--redo "<reason>"]
+ #                    [--wip-root ID] [--task-branch ext/NAME] -- "<task>"
+ #   claude-job start any|art [opts] -- "<task>"   (11-12 anyhost) account = most 5h + weekly headroom with a host for the task now
+ #                    (cj_place.py pick-account: skips the coordinator, limit-hold.json, 5h >= 85%, week >= cap-1); art jobs incl. vertex-gen
+@@ -11,7 +11,7 @@
+ #   claude-job result <id>            the worker's final answer
+ #   claude-job resume <id>            relaunch an interrupted job in its worktree (--continue its session)
+ #   claude-job stop <id>              stop a job (its worktree is kept for inspection)
+-#   claude-job queue [--force] [--role R] [--label T] [--model ID] [--effort L] [--accounts a,b] -- "<task>"   add to the pacer backlog
++#   claude-job queue [--redo "<reason>"] [--role R] [--label T] [--model ID] [--effort L] [--accounts a,b] -- "<task>"   add to the pacer backlog
+ #   claude-job start <account> --dry-place ... -- "<task>"   print the host a start would get (load table on stderr), launch nothing
+ #   claude-job host "<task>"          where a job would run now (worker name | hetzner | none); start takes --host NAME|hetzner|auto (default auto)
+ #   claude-job route "<task>"         role/model/effort a task text would get (starts nothing)
+@@ -25,7 +25,10 @@
+ # first job id; usage-pacer passes the item's wip_root) makes cj-wip-push checkpoint to wip/cj-<ID> instead of wip/cj-<this id>,
+ # so all attempts of one task share one wip branch; --task-branch ext/NAME adds a TASK BRANCH line (continue on that branch,
+ # never a -rebased/-v2 copy). finish records the worktree's ext/* branch in $J/branch (cj_routing taskref reads it for retries).
+-# Redo guard (11-12, cj_dedup.py): start/queue/pacer/requeue refuse a task that is running (exit 71), stuck (72) or done in the last 72 h (73), queued (74); --force bypasses; ~/cj/dedup.log, stuck.jsonl, cj-redo-report.
++# Redo guard (11-12, cj_dedup.py): start/queue/pacer/requeue refuse a task that is running (exit 71), stuck (72) or done in the last 72 h (73), queued (74); --redo "<reason>" bypasses (logged REDO); ~/cj/dedup.log, stuck.jsonl, cj-redo-report.
++# Prior-work gate (11-12, prior_work.py): after cj_dedup, start refuses HIGH overlap (active branch / running job / READY post on the same system,
++# exit 75) unless the task has a line "Builds on: <ids>" or "Not a dupe: <reason>" or --redo is given; lower matches go into the prompt.
++# --force bypasses only the meter/Fable caps (logged FORCE in dedup.log), never the redo guard or the prior-work gate.
+ # Usage guard: refuses when the account's 7-day meter is >= 95% (override with --force).
+ # Up to max_jobs running jobs per account (accounts.json, default 1). Output: ~/cj/<id>/{task,result.json,answer.md,log}; a report on the private reports repo (OrriBogdan2/project-boki-reports).
+ set -u
+@@ -134,11 +137,11 @@
+ fetchl() { local e; e=$(flock $REPO/.git/cj-fetch.lock gitnet fetch -q origin 2>&1) && return 0
+   echo "$e" | grep -q 'cannot lock ref' || { echo "$e" >&2; return 1; }; sleep 3; flock $REPO/.git/cj-fetch.lock gitnet fetch -q origin; }
+ start() {
+-  local acct=$1; shift; local role="" model="" effort="" ref=$(cat $CJ/base-ref 2>/dev/null || echo origin/main) label="" force=0 esc="" host=${CJ_HOST:-auto} dry=0 picked=0 wroot="" tbranch=""
++  local acct=$1; shift; local role="" model="" effort="" ref=$(cat $CJ/base-ref 2>/dev/null || echo origin/main) label="" force=0 redo="" esc="" host=${CJ_HOST:-auto} dry=0 picked=0 wroot="" tbranch=""
+   while [ $# -gt 0 ]; do case "$1" in
+     --role) role=$2; shift 2;; --model) model=$2; shift 2;; --effort) effort=$2; shift 2;; --branch) ref=$2; shift 2;;
+     --escalated-from) esc=$2; shift 2;; --host) host=$2; shift 2;; --wip-root) wroot=$2; shift 2;; --task-branch) tbranch=$2; shift 2;;
+-    --label) label=$2; shift 2;; --force) force=1; shift;; --dry-place) dry=1; shift;; --) shift; break;; *) die "unknown option $1";; esac; done
++    --label) label=$2; shift 2;; --force) force=1; shift;; --redo) redo=$2; [ -n "$redo" ] || die "--redo needs a reason"; shift 2;; --dry-place) dry=1; shift;; --) shift; break;; *) die "unknown option $1";; esac; done
+   local task="$*"; [ -n "$task" ] || die "no task given (put it after --)"
+   if [ "$acct" = any ] || [ "$acct" = art ]; then   # 11-12 anyhost: pick the account (and its host) with the most headroom
+     local pa; pa=$(CJ_PLACE_EXPLAIN= python3 $(dirname $SELF)/cj_place.py pick-account --task "$task" $([ $dry = 1 ] && echo --explain))
+@@ -169,8 +172,14 @@
+   local id=$(date -u +%Y%m%d-%H%M%S)-a$num; local J=$CJ/$id
+   # 11-12 redo guard (cj_dedup.py): refuse a start whose task is already running (71), stuck (72: 3+ runs, none done) or finished done in the last 72 h (73); --force bypasses. Claims the key so a parallel start of the same task is refused too. A guard crash never blocks a start.
+   local lbl=${label:-$(echo "$task" | head -c 60)}
+-  python3 $(dirname $SELF)/cj_dedup.py check --label "$lbl" --task-file /dev/stdin --claim "$id" --by start $([ $force = 1 ] && echo --force) <<<"$task"; local drc=$?; case $drc in 71|72|73|74) exit $drc;; esac
++  if [ $force = 1 ]; then local fw=""; [ "$meter" -ge 95 ] && fw=meter; [ "$fwait" = 1 ] && fw="${fw:+$fw+}fable"
++    echo "$(date -u '+%F %TZ') FORCE by=start bypassed=${fw:-none} [${lbl:0:70}] $id" >> $CJ/dedup.log; fi   # 11-12: every --force is logged with the cap it passed
++  python3 $(dirname $SELF)/cj_dedup.py check --label "$lbl" --task-file /dev/stdin --claim "$id" --by start ${redo:+--redo "$redo"} <<<"$task"; local drc=$?; case $drc in 71|72|73|74) exit $drc;; esac
+   DCLAIM=$lbl
++  # 11-12 prior-work gate (prior_work.py): HIGH overlap with an active branch / running job / READY post -> exit 75 (names the item); lower matches -> PRIOR WORK block in the prompt
++  local pwork pwrc; pwork=$(timeout 150 python3 $(dirname $SELF)/prior_work.py gate --label "$lbl" --task-file /dev/stdin --by start ${redo:+--redo "$redo"} <<<"$task"); pwrc=$?
++  if [ $pwrc = 75 ]; then python3 $(dirname $SELF)/cj_dedup.py release --label "$DCLAIM" >/dev/null 2>&1; exit 75; fi
++  [ $pwrc = 0 ] || pwork=""
+   [ $picked = 1 ] && python3 $(dirname $SELF)/cj_place.py note "$host"
+   # 2026-11-09: hetzner jobs live on the 500 GB volume (boki-cj-1); ~/cj/<id> is a symlink so every tool keeps working
+   if [ -w "$CJ_VOL" ] && [ "$(df --output=pcent "$CJ_VOL" | tail -1 | tr -dc 0-9)" -lt 95 ]; then   # 11-11: remote-host jobs too (their hetzner-side tree+before ~2.4 GB filled root)
+@@ -183,7 +192,7 @@
+   else
+     ( cd $REPO && fetchl && git worktree add -q --detach $J/tree "$ref" ) || die "could not create worktree at $ref"
+   fi
+-  printf '%s\n' "$task" > $J/task
++  printf '%s\n' "$task" > $J/task; [ -n "$redo" ] && printf '%s\n' "$redo" > $J/redo
+   [ -n "$wroot" ] && echo "$wroot" > $J/wip-root; [ -n "$tbranch" ] && echo "$tbranch" > $J/task-branch
+   local rules; rules=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("worker_rules",""))' $CJ/roles.json 2>/dev/null)   # 11-12 branch rules (roles.json worker_rules)
+   [ -n "$rules" ] || rules="BRANCH RULES: one branch per task (ext/<short-name>); reuse it for retries and follow-ups (never a -rebased/-v2 copy); it is deleted after merge. Before building any system, search the repo for an existing one and extend it instead of making a second one. Small, clearly labeled commits."
+@@ -192,12 +201,15 @@
+ You are a Project Boki worker session, started on the hetzner box by the owner's coordinator session ("claude-job" $id, account $email, role $role).
+ Follow AGENTS.md and CLAUDE.md in this repo. Work only in this worktree ($J/tree). Push only ext/* branches (never main), post READY only with \`ready-post 'READY ext/<branch> <sha> (<what>)'\` (it appends to briefs/EXT_TO_MAIN.md on ext/agent-briefs safely; never check out or commit ext/agent-briefs yourself), and never wait for the owner (decide, note the alternative, continue).
+ Usage is tight: no subagents unless the task needs them, run only the checks the task needs (Godot through \`godot\`, GPU renders/perf through \`jobq submit --needs gpu\`), and keep command output short.
++Step 0, before building anything: check prior work for your concept with \`prior-work --label '<short label>' '<concept words>'\` and \`git ls-remote origin 'refs/heads/ext/*' | grep -i <concept>\`. If the task is already done on a branch or in main, stop with STATUS: skipped and a line "DUPE-OF <branch or job id>"; that is a valid outcome, not a failure. If it is partly done, build on that branch's work.
+ $rules${tline:+
+ $tline}
+ When done, your final message is the report: what you did, branches/commits, checks run with results, anything unfinished. Under 300 words.
+ The last line of your final message must be exactly one of: STATUS: done | STATUS: partial | STATUS: blocked | STATUS: skipped
+-(done = finished and checked; partial = some of it done; blocked = could not proceed; skipped = the guard found the owner already did it).
+-
++(done = finished and checked; partial = some of it done; blocked = could not proceed; skipped = already done by the owner or another job: name it with DUPE-OF <id>).
++${pwork:+
++$pwork
++}
+ TASK:
+ $task
+ EOP
+@@ -277,11 +289,13 @@
+ }
+ 
+ queue() {  # append a task to the pacer backlog
+-  local label="" model="" effort="" accts="" role="" qforce=0
+-  while [ $# -gt 0 ]; do case "$1" in --force) qforce=1; shift;; --role) role=$2; shift 2;; --label) label=$2; shift 2;; --model) model=$2; shift 2;; --effort) effort=$2; shift 2;;
++  local label="" model="" effort="" accts="" role="" qforce=0 qredo=""
++  while [ $# -gt 0 ]; do case "$1" in --force) qforce=1; shift;; --redo) qredo=$2; qforce=1; shift 2;; --role) role=$2; shift 2;; --label) label=$2; shift 2;; --model) model=$2; shift 2;; --effort) effort=$2; shift 2;;
+     --accounts) accts=$2; shift 2;; --) shift; break;; *) die "unknown option $1";; esac; done
+   [ -n "$*" ] || die "no task given (put it after --)"
+-  [ "$qforce" = 1 ] || { python3 $(dirname $SELF)/cj_dedup.py check --backlog --label "${label:-$(echo "$*" | head -c 60)}" --task-file /dev/stdin --by queue <<<"$*"; case $? in 71|72|73|74) return 1;; esac; }   # 11-12 redo guard (--force queues anyway)
++  [ "$qforce" = 1 ] || { python3 $(dirname $SELF)/cj_dedup.py check --backlog --label "${label:-$(echo "$*" | head -c 60)}" --task-file /dev/stdin --by queue <<<"$*"; case $? in 71|72|73|74) return 1;; esac; }   # 11-12 redo guard (--redo "<reason>" queues anyway; --force kept for old callers)
++  if [ -n "$qredo" ]; then echo "$(date -u '+%F %TZ') REDO by=queue [${label:0:70}] reason: ${qredo:0:200}" >> $CJ/dedup.log; set -- "$*
++Not a dupe: $qredo"; fi   # 11-12: the pacer's prior-work gate honours the reason line
+   python3 -c 'import json,sys; l,m,e,a,r,t=sys.argv[1:7]; d={"label":l or t[:60],"task":t}
+ if r: d["role"]=r
+ if m: d["model"]=m
+--- a/cj_dedup.py
++++ b/cj_dedup.py
+@@ -10,10 +10,12 @@
+   73  REDO: a run finished done/skipped in the last 72 h
+   74  already QUEUED in the pacer backlog (only when asked: queue / refill / requeue paths)
+ 
+---force (claude-job start --force) bypasses all of them and is logged as FORCED. Exempt: "backlog planner ..." labels.
++--redo "<reason>" (claude-job start --redo "<reason>", 11-12) bypasses all of them and is logged as REDO with the reason.
++claude-job start --force no longer bypasses this guard (it only passes the meter/Fable caps); cj_dedup.py check --force is
++kept for old callers and logged as FORCED. Exempt: "backlog planner ..." labels.
+ Infra deaths (host lost, limit at start, owner stop) are not real runs and never count towards 72.
+ 
+-  cj_dedup.py check --label L (--task T | --task-file F) [--backlog] [--claim ID] [--force] [--by WHO]
++  cj_dedup.py check --label L (--task T | --task-file F) [--backlog] [--claim ID] [--redo REASON] [--by WHO]
+         exit 0 ok | 71 | 72 | 73 | 74; the reason is printed on stderr. --claim ID claims the key (atomic with the check)
+   cj_dedup.py release --label L           drop the claim (start failed after the check)
+   cj_dedup.py report [--hours 24]         redo/dupe numbers from the job records + dedup.log (cj-redo-report)
+@@ -152,11 +154,11 @@
+         if cid != exclude and t - cts < CLAIM_S and key_match(k, ck): return RUNNING, f"a start for the same task is in flight (claim {cid})"
+     for j, w in mine:
+         if j["status"] in DONE:
+-            return REDO, f"already finished {j['status']}: job {j['id']} [{j['label'][:60]}] {int((t - j['fin']) / 3600)} h ago ({w}); --force to redo it"
++            return REDO, f"already finished {j['status']}: job {j['id']} [{j['label'][:60]}] {int((t - j['fin']) / 3600)} h ago ({w}); --redo \"<reason>\" to redo it"
+     real = [j for j, _ in mine if j["real"]]
+     if len(real) >= STUCK_RUNS:
+         return STUCK, (f"stuck: {len(real)} runs in {WINDOW_H} h and none done ({', '.join(j['id'] for j in real[-3:])}, last "
+-                       f"{real[-1]['status'] or '?'}); read their answers and decide by hand, --force to run it anyway")
++                       f"{real[-1]['status'] or '?'}); read their answers and decide by hand, --redo \"<reason>\" to run it anyway")
+     for it in backlog:
+         w = same(k, shs, {"key": norm_key(it.get("label", "")), "sh": shingles(it.get("task", ""))})
+         if w: return QUEUED, f"already queued in the backlog [{str(it.get('label'))[:60]}] ({w})"
+@@ -248,13 +250,21 @@
+     out.append(f"cj-redo-report {dt.datetime.now(dt.timezone.utc).strftime('%F %H:%MZ')} last {hours} h: {n} starts; would-have-been-blocked: "
+                f"{len(by[RUNNING])} duplicate-while-running, {len(by[REDO])} redo-after-done, {len(by[STUCK])} stuck (3+ runs, none done); "
+                f"cost of the dupes+redos ${waste:.2f}")
+-    p = os.path.join(cj_dir(), "dedup.log"); cut = time.time() - hours * 3600; blocked = 0; forced = 0
++    p = os.path.join(cj_dir(), "dedup.log"); cut = time.time() - hours * 3600; blocked = forced = pwref = pwfold = pwredo = redo = force = 0
+     try:
+         for l in open(p):
+             ts = parse_ts(l[:19].replace(" ", "T") + "+00:00")
+-            if ts and ts >= cut: blocked += " BLOCK " in l[:30]; forced += " FORCED " in l[:30]
++            if not ts or ts < cut: continue
++            h = l[:40]; blocked += " BLOCK " in h; forced += " FORCED " in h; redo += " REDO " in h; force += " FORCE " in h
++            pwref += " PRIORWORK REFUSE " in h; pwfold += " PRIORWORK FOLD " in h; pwredo += " PRIORWORK REDO " in h
+     except OSError: pass
+-    out.append(f"  guard live: {blocked} start(s) refused, {forced} forced past")
++    dupe = []   # 11-12 prior-work: jobs that ended STATUS: skipped with DUPE-OF <id> (a valid outcome)
++    for j in load_jobs(cut):
++        if (j.get("fin") or j.get("start") or 0) >= cut and str(j.get("status", "")).startswith("skip") and "DUPE-OF" in _rd(os.path.join(cj_dir(), j["id"]), "answer.md", 20000):
++            dupe.append(j["id"])
++    out.append(f"  guard live: {blocked} start(s) refused, {redo} --redo past it, {forced} forced past (old --force)")
++    out.append(f"  prior-work: {pwref} refused (start+pacer+refill), {pwfold} folded (PRIOR WORK block in the prompt), {pwredo} --redo past it, "
++               f"{len(dupe)} skipped-as-dupe{(' (' + ', '.join(dupe[:6]) + ')') if dupe else ''}; {force} --force cap bypasses")
+     for c, name in ((RUNNING, "DUP"), (REDO, "REDO"), (STUCK, "STUCK")):
+         for j, _, why in by[c][:6]: out.append(f"  {name} {j['id']} [{j['label'][:50]}] {why[:110]}")
+     try:
+@@ -268,7 +278,7 @@
+ def main(argv):
+     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0]); sp = ap.add_subparsers(dest="cmd", required=True)
+     c = sp.add_parser("check"); c.add_argument("--label", required=True); c.add_argument("--task"); c.add_argument("--task-file")
+-    c.add_argument("--backlog", action="store_true"); c.add_argument("--claim"); c.add_argument("--force", action="store_true"); c.add_argument("--by", default="")
++    c.add_argument("--backlog", action="store_true"); c.add_argument("--claim"); c.add_argument("--force", action="store_true"); c.add_argument("--redo", default=""); c.add_argument("--by", default="")
+     r = sp.add_parser("release"); r.add_argument("--label", required=True)
+     p = sp.add_parser("report"); p.add_argument("--hours", type=float, default=24)
+     d = sp.add_parser("dryrun"); d.add_argument("--hours", type=float, default=48); d.add_argument("-v", action="store_true")
+@@ -276,8 +286,9 @@
+     if a.cmd == "check":
+         task = a.task if a.task is not None else open(a.task_file).read() if a.task_file else ""
+         code, why = check(a.label, task, include_backlog=a.backlog, claim=a.claim, by=a.by)
+-        if code and a.force:
+-            log(f"FORCED {code} by={a.by or '?'} [{a.label[:70]}] {why}"); print(f"claude-job: forced past the redo guard: {why}", file=sys.stderr)
++        if code and (a.force or a.redo):
++            if a.redo: log(f"REDO {code} by={a.by or '?'} [{a.label[:70]}] reason: {a.redo[:200]} | {why}"); print(f"claude-job: --redo past the redo guard ({a.redo[:80]}): {why}", file=sys.stderr)
++            else: log(f"FORCED {code} by={a.by or '?'} [{a.label[:70]}] {why}"); print(f"claude-job: forced past the redo guard: {why}", file=sys.stderr)
+             if a.claim:
+                 os.makedirs(_claims_dir(), exist_ok=True); open(_claim_file(norm_key(a.label)), "w").write(f"{norm_key(a.label)}\t{a.claim}\t{time.time()}")
+             return 0
+--- a/usage-pacer.py
++++ b/usage-pacer.py
+@@ -498,6 +498,17 @@
+         if dcode:
+             dup = items.pop(pick); cj.bl_remove(dup.get("label"), dup.get("task"))
+             log(f"DEDUP {tag}: dropped backlog item '{str(dup.get('label'))[:60]}' ({dcode}): {dwhy}"); continue
++        try:  # 11-12 prior-work gate (semantic overlap: an active branch / running job / READY post on the same system) -> dropped, logged
++            import prior_work
++            pcode, pwhy, _ = prior_work.gate(items[pick].get("label") or "pacer task", items[pick]["task"], by="pacer")
++        except Exception: pcode, pwhy = 0, ""
++        if pcode:
++            dup = items.pop(pick); cj.bl_remove(dup.get("label"), dup.get("task"))
++            try:   # parked, not lost: re-queue it with a 'Builds on: <id>' / 'Not a dupe: <reason>' line if the gate was wrong
++                with open(os.path.expanduser("~/cj/backlog-parked.jsonl"), "a") as f:
++                    f.write(json.dumps(dict(dup, parked=time.strftime("%FT%TZ", time.gmtime()), parked_why=pwhy[:400])) + "\n")
++            except Exception: pass
++            log(f"PRIORWORK {tag}: parked backlog item '{str(dup.get('label'))[:60]}' in ~/cj/backlog-parked.jsonl ({pcode}): {pwhy[:240]}"); continue
+         it = items.pop(pick)
+         wc = work_class(it)
+         if not cj.bl_remove(it.get("label"), it.get("task")):  # re-read under the lock; gone = someone else removed/took it
+@@ -541,7 +552,14 @@
+                     if wc == "build" and BUILDS["t"]: BUILDS["n"] -= 1; BUILDS["t"].pop()
+                 running[num].remove("new")
+                 state[email].setdefault("failed", {})[it.get("label") or "?"] = now.isoformat()
+-                cj.backlog_edit(lambda cur: cur.insert(0, it)); log(f"FAILED to start on {email}: {(r.stderr or r.stdout).strip()[:200]}")
++                if r.returncode in (71, 72, 73, 74, 75):  # 11-12: refused by the redo guard / prior-work gate: never requeued (it looped)
++                    if r.returncode == 75:   # prior-work refusals are parked like the pre-start gate's
++                        try:
++                            with open(os.path.expanduser("~/cj/backlog-parked.jsonl"), "a") as f:
++                                f.write(json.dumps(dict(it, parked=time.strftime("%FT%TZ", time.gmtime()), parked_why=(r.stderr or "").strip()[:400])) + "\n")
++                        except Exception: pass
++                    log(f"GUARD refused start on {email} ({r.returncode}), item {'parked' if r.returncode == 75 else 'dropped'}: {(r.stderr or r.stdout).strip()[:200]}")
++                else: cj.backlog_edit(lambda cur: cur.insert(0, it)); log(f"FAILED to start on {email}: {(r.stderr or r.stdout).strip()[:200]}")
+         pool.submit(run_start, cmd, {**os.environ, "CJ_MAX_JOBS": str(max_jobs(email, pct, exp))}, host, num).add_done_callback(done)
+         # owner Nov 9: below pace = fill every free slot this tick (was: only when >10 points behind, max 4)
+         if not small_only and host_for("", email) != "none" and len(running.get(num, [])) < eff_max(email, pct, exp):  # fill every free slot
+--- a/backlog-refill
++++ b/backlog-refill
+@@ -42,6 +42,11 @@
+             dcode,dwhy=cj_dedup.check(it['label'],it['task'],by='refill')
+         except Exception: dcode,dwhy=0,''
+         if dcode: res['dup']=res.get('dup',0)+1; print(f"DEDUP dropped proposal '{it['label'][:60]}' ({dcode}): {dwhy}"[:300],file=sys.stderr); continue
++        try:  # 11-12 prior-work gate: same system already active (branch / running job / READY post) -> dropped, logged in dedup.log
++            import prior_work
++            pcode,pwhy,_=prior_work.gate(it['label'],it['task'],by='refill')
++        except Exception: pcode,pwhy=0,''
++        if pcode: res['dup']=res.get('dup',0)+1; print(f"PRIORWORK dropped proposal '{it['label'][:60]}' ({pcode}): {pwhy}"[:300],file=sys.stderr); continue
+         seen.add(k); items.append({x:it[x] for x in ('label','task','role','domain','accounts','small') if x in it}); res['add']+=1
+ cj.backlog_edit(merge,bl)
+ os.rename(pr,pr+'.merged')
+--- a/jobs/backlog-planner.task
++++ b/jobs/backlog-planner.task
+@@ -4,4 +4,4 @@
+ 2. docs/KIT_PARITY.md on main (parity audit, top-20 + all rows); docs/heroes/*.md, docs/heroes/dash_interactions.md, docs/ARCHETYPES.md source tables. One task per unresolved row or tight group of rows, per hero: ability timings, numbers, cancels, animations and clips, VFX readability.
+ 0. briefs/PRIORITIES.md top section (OWNER PRIORITIES 2026-11-09) sets the MIX: >=70% of tasks in its 8 areas, >=3 per area, label each task starting with its area tag like "[feel]", "[farm]", "[combat]", "[anim]", "[vfx]", "[sfx]", "[ui]", "[tutorial]", "[extra]". Parity rules below still apply inside each area.
+ 3. briefs/PRIORITIES.md, briefs/INBOX*.md, briefs/OWNER_REVIEW*.md (playtest notes not yet done), docs/ROADMAP.md.
+-Skip anything already queued in ~/cj/backlog.jsonl or already run (labels in ~/cj/*/label), and anything already done on main (check git log). Skip items marked owner-decision (owner) unless DECISIONS settles them. Every task brief must say: branch from origin/main as ext/<short-name>; prove it with the relevant checks + `python3 tools/health.py --strict` + `python3 tools/gen_wiki.py --check`; never pkill by pattern (stop only your own pids); post one line to briefs/EXT_TO_MAIN.md on ext/agent-briefs exactly 'READY ext/<branch> <sha> (<what>)'; never merge to main. Prefer tasks one worker finishes in under 2 hours. Order the file by priority (parity first). Validate the file with python (every line parses, keys present) before finishing. Final answer: count written and the top 10 labels.
++Skip anything already queued in ~/cj/backlog.jsonl or already run (labels in ~/cj/*/label), and anything already done on main (check git log). Prior-work gate (11-12): before writing each proposal, run `prior-work --label '<label>' '<one-line concept>'`; drop it if any match is HIGH (an active ext/* branch, running job or READY post on the same system), and if it extends a lower match add a line 'Builds on: <branch or job id>' to its task. backlog-refill and the pacer run the same gate and drop HIGH overlaps. Skip items marked owner-decision (owner) unless DECISIONS settles them. Every task brief must say: branch from origin/main as ext/<short-name>; prove it with the relevant checks + `python3 tools/health.py --strict` + `python3 tools/gen_wiki.py --check`; never pkill by pattern (stop only your own pids); post one line to briefs/EXT_TO_MAIN.md on ext/agent-briefs exactly 'READY ext/<branch> <sha> (<what>)'; never merge to main. Prefer tasks one worker finishes in under 2 hours. Order the file by priority (parity first). Validate the file with python (every line parses, keys present) before finishing. Final answer: count written and the top 10 labels.

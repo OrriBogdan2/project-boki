@@ -30,6 +30,7 @@ func run(main: Node) -> void:
 	_toggle()
 	_squad()
 	_chat_and_voice()
+	_first_lobby()
 	await _screen(main)
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
@@ -73,6 +74,30 @@ func _turns() -> void:
 	idle.tick(Prematch.TURN + 0.01)
 	var auto_ok := idle.locked and ClassUnlock.is_open(idle.pick)
 	ok(auto_ok, "a turn that runs out gives you a random open Hunter (%s)" % idle.pick)
+
+## A save's first lobby: on your turn the note says what 0:00 does, then that the squad sees the pick; once.
+func _first_lobby() -> void:
+	var o := {"teams": 10, "squad": 2, "tier": 0, "seed": 5}
+	Prematch.deal_mates(o)
+	var pm := Prematch.new(o)
+	ok(pm.first and pm.teach_line() == "", "first lobby: no teach while loading")
+	pm.tick(0.01)
+	ok(pm.teach_line().contains("before 0:00"), "first lobby, your turn, no pick: says 0:00 picks for you")
+	pm.choose("bulwark")
+	ok(pm.teach_line().contains("squad sees"), "first lobby, after a pick: says the squad sees it")
+	pm.tick(Prematch.TURN + 0.01)
+	ok(pm.teach_line() == "", "first lobby: no teach once locked")
+	Prematch.mark_first_seen()
+	var again := Prematch.new(o.duplicate(true))
+	again.tick(0.01)
+	ok(not again.first and again.teach_line() == "", "second lobby: the usual note, teach shown once per save")
+	Save.d["tutorial"].erase("first_lobby")         # the screen check below runs as a first lobby again
+	var old := Save.fresh()
+	old.erase("tutorial")
+	var keep := Save.d
+	Save.d = old
+	ok(Prematch.first_lobby(), "an older save with no tutorial flag sees the first-lobby teach once")
+	Save.d = keep
 
 ## Online: three on your squad, one rival who mirrors a pick. Peer "2" is you.
 func _online() -> void:
@@ -210,6 +235,8 @@ func _screen(main: Node) -> void:
 	ok(view.squad_box.get_child_count() == 2, "the screen shows your squad")
 	ok(view.caption.text == "YOUR TURN", "the banner says it's your turn (%s)" % view.caption.text)
 	ok(view.timer_label.text == "0:10", "the turn counts down from 0:10 (%s)" % view.timer_label.text)
+	ok(view.note_label.text.contains("before 0:00"), "first lobby: the note teaches the countdown")
+	ok(not Prematch.first_lobby(), "opening the first lobby marks it seen in the save")
 	_declutter(view)
 	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
 	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
@@ -248,6 +275,14 @@ func _screen(main: Node) -> void:
 	view.set_process(false)
 	view.queue_free()
 
+## True when `node` sits inside the card's how-to block (the lines under the name, tagged meta "howto").
+func _in_howto(node: Node, card: Node) -> bool:
+	while node != null and node != card:
+		if node.has_meta("howto"):
+			return true
+		node = node.get_parent()
+	return false
+
 ## Cards are portrait + name + role word (stats and quests on hover); shut ones are dim with a padlock; the
 ## voice button waits for a human squadmate.
 func _declutter(view: Control) -> void:
@@ -257,7 +292,8 @@ func _declutter(view: Control) -> void:
 	for card in view.grid.get_children():
 		var ak: String = card.get_meta("arch")
 		var role := String(Arch.def(ak)["card"]["role_word"])
-		var texts: Array = card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+		var texts: Array = card.find_children("*", "Label", true, false).filter(
+				func(l): return not _in_howto(l, card)).map(func(l): return (l as Label).text)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)
 		open += 0 if shut else 1

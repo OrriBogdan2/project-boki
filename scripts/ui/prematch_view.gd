@@ -33,12 +33,15 @@ const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is pi
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 var _root: VBoxContainer
 var _fit := Vector2i(COLUMNS, PORTRAIT_PX)      # the grid as drawn: columns, portrait px
+var _howto := true          # whether the cards show their how-to lines (a short screen drops them)
 
 const COLUMNS := 4          # Hunter cards per row on a roomy screen
 const MAX_COLUMNS := 6      # the most cards per row on a short, wide screen
 const CARD_MIN_W := 200.0   # px, a card's least width with the full portrait (name, role word)
 const PORTRAIT_PX := 84     # px, a card's portrait on a roomy screen
 const PORTRAIT_MIN := 60    # px, the smallest portrait (a card is then as tall as its two text lines)
+const HOWTO_FONT := 12      # px, a card's how-to lines
+const HOWTO_SLACK := 20.0   # px, headroom on the how-to height (estimated with the fallback font)
 const CARD_PAD := 10        # px, a card's padding on each side
 const GRID_GAP := 12        # px, between cards
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
@@ -57,7 +60,7 @@ func setup(opts: Dictionary) -> void:
 	pm = Prematch.new(opts)
 
 func _ready() -> void:
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.color = UI.BG
@@ -105,6 +108,8 @@ func _ready() -> void:
 	_build_chat(root)
 	_talk(false)
 	_fit_safe_area()
+	if pm.first:
+		Prematch.mark_first_seen()
 	pm.turn_done.connect(_on_turn_done)
 	_tick_label()
 	Net.message.connect(_on_msg)
@@ -175,7 +180,8 @@ func _tick_label() -> void:
 		note_label.text = "%s locked in. Loading in..." % HunterViewer.display_name(pm.pick)
 	elif pm.my_turn():
 		caption.text = "YOUR TURN"
-		note_label.text = "Pick a Hunter. No two on a squad can be the same one."
+		var teach := pm.teach_line()
+		note_label.text = teach if teach != "" else "Pick a Hunter. No two on a squad can be the same one."
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
@@ -210,7 +216,8 @@ func _fit_safe_area() -> void:
 
 ## Redraws the cards when the room for them changed (the window, or the squad strip's height).
 func _refit_grid() -> void:
-	if _shown_turn != -2 and _grid_fit() != _fit:
+	var was := _howto
+	if _shown_turn != -2 and (_grid_fit() != _fit or _howto != was):
 		_fill_hunters()
 
 func _margin() -> int:
@@ -219,18 +226,30 @@ func _margin() -> int:
 ## The Hunter grid for the room inside the safe margin below the banner, title, squad strip and chat
 ## (the chat log's growth is kept free): x = columns, y = portrait px. It takes the fewest columns that
 ## show every card at the full portrait; a short screen gets more columns and smaller portraits, and
-## only below PORTRAIT_MIN does the grid scroll.
+## only below PORTRAIT_MIN does the grid scroll. When the cards' how-to lines leave less than a
+## PORTRAIT_MIN portrait, they move to the tooltip (_howto false).
 func _grid_fit() -> Vector2i:
 	var room := get_viewport_rect().size - Vector2.ONE * 2.0 * _margin()
 	var gap := _root.get_theme_constant("separation")
 	room.y -= _root.get_combined_minimum_size().y + LOG_H + gap
 	if chat_scroll.visible:
 		room.y += chat_scroll.get_combined_minimum_size().y + gap
+	var best := _fit_in(room, true)
+	_howto = best.y >= PORTRAIT_MIN
+	if not _howto:
+		best = _fit_in(room, false)
+	best.y = maxi(best.y, PORTRAIT_MIN)
+	return best
+
+## The best columns and portrait px in `room`; `howto` adds each card's how-to lines to its height.
+## y is the portrait px before clamping, so a value under PORTRAIT_MIN means the cards do not fit.
+func _fit_in(room: Vector2, howto: bool) -> Vector2i:
 	var cards := Arch.ids().size()
 	var best := Vector2i(COLUMNS, -1)
 	for cols in range(COLUMNS, MAX_COLUMNS + 1):
 		var rows := ceili(float(cards) / cols)
-		var px := int((room.y - (rows - 1) * GRID_GAP) / rows) - 2 * CARD_PAD
+		var extra := _howto_h(((room.x + GRID_GAP) / cols - GRID_GAP) - 2.0 * CARD_PAD) if howto else 0.0
+		var px := int((room.y - (rows - 1) * GRID_GAP) / rows - extra) - 2 * CARD_PAD
 		var too_wide := cols * (_card_w(clampi(px, PORTRAIT_MIN, PORTRAIT_PX)) + GRID_GAP) - GRID_GAP > room.x
 		if cols > COLUMNS and too_wide:
 			break
@@ -238,8 +257,19 @@ func _grid_fit() -> Vector2i:
 			best = Vector2i(cols, px)
 		if px >= PORTRAIT_PX:
 			break
-	best.y = clampi(best.y, PORTRAIT_MIN, PORTRAIT_PX)
+	best.y = mini(best.y, PORTRAIT_PX)
 	return best
+
+## The height the tallest Hunter's how-to lines take, wrapped to `width` px, with the gap above them.
+func _howto_h(width: float) -> float:
+	var font := ThemeDB.fallback_font
+	var tallest := 0.0
+	for ak in Arch.ids():
+		var h := 0.0
+		for line in ClassCard.howto_lines(String(ak)):
+			h += font.get_multiline_string_size(String(line), HORIZONTAL_ALIGNMENT_LEFT, width, HOWTO_FONT).y + 1.0
+		tallest = maxf(tallest, h)
+	return tallest + 6.0 + HOWTO_SLACK
 
 ## A card's least width: the name and role word plus the portrait.
 func _card_w(portrait_px: int) -> float:
@@ -248,16 +278,16 @@ func _card_w(portrait_px: int) -> float:
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not e is InputEventKey or e.echo or chat_in.has_focus() or pm.locked:
 		return
-	if e.pressed and e.physical_keycode in [KEY_ENTER, KEY_KP_ENTER]:
+	if e.pressed and e.is_action("confirm"):
 		_show_chat_line(true)
 		get_viewport().set_input_as_handled()
-	elif e.physical_keycode == KEY_V and talk_btn.visible:
+	elif e.is_action("push_to_talk") and talk_btn.visible:
 		_talk(e.pressed)
 
-## Push-to-talk: the button (hold) or V. The transport is VoiceChat's; none ships yet.
+## Push-to-talk: the button (hold) or the push_to_talk key. The transport is VoiceChat's; none ships yet.
 func _talk(on: bool) -> void:
 	voice.set_talking(on)
-	talk_btn.text = "Speaking..." if on else "Hold to talk (V)"
+	talk_btn.text = "Speaking..." if on else "Hold to talk (%s)" % Settings.key_cap("push_to_talk")
 
 # ------------------------------------------------------------------ hunters and squad
 func _fill_hunters() -> void:
@@ -276,8 +306,12 @@ func _tile(ak: String) -> PanelContainer:
 	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), CARD_PAD, Arch.color(ak))
 	card.custom_minimum_size = Vector2(_card_w(_fit.y), 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var stack := UI.vbox(6)
+	card.add_child(stack)
 	var row := UI.hbox(10)
-	card.add_child(row)
+	stack.add_child(row)
+	if _howto:
+		stack.add_child(ClassCard.howto_box(ak, _card_w(_fit.y) - 28.0, HOWTO_FONT))
 	row.add_child(ClassCard.portrait(ak, _fit.y))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -297,6 +331,8 @@ func _tile(ak: String) -> PanelContainer:
 		line.clip_text = true
 		line.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	card.tooltip_text = HunterViewer.stat_line(ak) + "\n" + ClassCard.kit_tip(ak)
+	if not _howto:      # the lines the short screen left off the card
+		card.tooltip_text += "\n" + "\n".join(ClassCard.howto_lines(ak))
 	if not open:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
@@ -328,14 +364,30 @@ func _fill_squad() -> void:
 		var state := "Picking..." if m == now else "Waiting to pick"
 		var shown_ak := Arch.label(ak) if Arch.exists(ak) else state
 		h.add_child(UI.label(shown_ak, UI.T_SMALL, UI.GOLD if m == now else UI.MUTED))
+		if not you and not bool(m["bot"]):
+			h.add_child(_mute_button(String(m["name"])))
 		squad_box.add_child(chip)
 	if mates.size() == 1 and int(pm.opts.get("squad", 1)) <= 1:
 		squad_box.add_child(UI.para("A solo drop: nobody to plan with, but everyone else is out there."))
 	talk_btn.visible = voice.available() and mates.any(func(m): return not m["you"] and m.get("peer", "") != "")
 
 # ------------------------------------------------------------------ chat and picks
+## The squad row's Mute button: silences that teammate's chat and voice for you, this session.
+func _mute_button(who: String) -> Button:
+	var b := UI.button("", Callable())
+	var refresh := func() -> void: b.text = "Muted" if MuteList.has(who) else "Mute"
+	refresh.call()
+	b.pressed.connect(func():
+		MuteList.toggle(who)
+		refresh.call()
+		for l in chat_log.get_children():
+			if l.get_meta("who", "") == who:
+				l.visible = not MuteList.has(who))
+	return b
+
 func _add_chat(who: String, text: String, col: Color) -> void:
 	var l := UI.para("%s: %s" % [who, text], UI.T_BODY, col)
+	l.set_meta("who", who)
 	chat_log.add_child(l)
 	chat_scroll.visible = true
 	await get_tree().process_frame
@@ -378,7 +430,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 	if not _teammate(from):
 		return
 	if topic == "chat":
-		_add_chat(String(data.get("name", "Hunter")), Prematch.clean_chat(String(data.get("t", ""))), UI.INK)
+		var who := String(data.get("name", "Hunter"))
+		if not MuteList.has(who):
+			_add_chat(who, Prematch.clean_chat(String(data.get("t", ""))), UI.INK)
 	elif topic == "pick" and pm.remote_pick(from, String(data.get("arch", "")), bool(data.get("final", false))):
 		_fill_squad()
 		_fill_hunters()

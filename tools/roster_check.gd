@@ -1,14 +1,11 @@
 extends RefCounted
 ## --roster-check: the 50-species roster (docs/boki/ROSTER_50.md) is whole and live. Every kin in content/kin_v2
 ## loads through the grammar (KinLib), there are exactly 50 with no clashing display names, each has home data
-## in content/kin, and the big ones split into the 4-6 rideables the owner capped (a rideable is a large kin
-## whose mount speed is at least RIDEABLE_SPEED; the other large kin have non-ridden roles kept in the doc).
+## in content/kin, and any large kin with mount settings counts as rideable (DECISIONS 2026-11-08: the 4-6 cap is
+## loosened; the ride code reads mount speed as a plain multiplier, so no minimum speed is needed).
 ## Never touches the save.
 
 const TARGET_TOTAL := 50
-const RIDEABLE_SPEED := 1.1      # x; slower large kin have another big-Boki role (ROSTER_50.md)
-const RIDEABLE_MIN := 4
-const RIDEABLE_MAX := 6      # the owner capped mounts at about 6
 
 var bad := 0
 
@@ -37,16 +34,14 @@ func run(main: Node) -> void:
 	var total := KinLib.kin_ids().size()
 	ok(total == TARGET_TOTAL, "%d species (want %d)" % [total, TARGET_TOTAL])
 	var rideable := int(sizes["rideable"])
-	var want := "%d-%d" % [RIDEABLE_MIN, RIDEABLE_MAX]
-	ok(rideable >= RIDEABLE_MIN and rideable <= RIDEABLE_MAX, "rideables: %d (want %s)" % [rideable, want])
 	print("ROSTER sizes: small %d, medium %d, large %d, rideable %d" % [
 		sizes["small"], sizes["medium"], sizes["large"], rideable])
 	print("ROSTER DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## small, medium, large (a heavy mount) or rideable (a fast mount).
+## small, medium, large (no mount settings) or rideable (a large kin that may be ridden, at any mount speed).
 func _size_class(k: KinSpec) -> String:
-	if k.size == "large" and float(k.mount.get("speed", 1.0)) >= RIDEABLE_SPEED:
+	if k.size == "large" and not k.mount.is_empty():
 		return "rideable"
 	return k.size
 
