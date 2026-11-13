@@ -10,7 +10,7 @@ extends ArchKit
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v, id}
-var puddles: Array = []             # slime puddles: {at, r, left, k, tick}
+var puddles: Array = []             # slime puddles: {at, r, t, left, k, tick, node, rim, inside}
 var marks := {}                     # foe instance id -> {mark: time it landed}
 var beach_at := {}                  # foe instance id -> time it can be Beached again
 var combo_n := 0
@@ -27,6 +27,11 @@ var aim_t := 0.0
 const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
 const TELE_LW := 0.1                 # m, their rim
 var tele_n := 0                     # each potion and line has its own AimKit telegraph id
+var lmb_t := -1.0                  # s the Tide Lunge has been charging (-1: not)
+var lmb_was := false
+var lmb_buf := 0.0                 # s a click still waits to thrust
+var press_at := -9.0               # when the attack key went down
+var tide := {}                     # the Tide Lunge under way: {left, dir, hit, full, dmg}
 
 func _setup() -> void:
 	rng.seed = hash("gil_bag_%d" % h.get_instance_id())
@@ -72,12 +77,39 @@ func slot_info(slot: String) -> Dictionary:
 		out["next"] = next_vial()
 	return out
 
-# ------------------------------------------------------------------ LMB: Fencer
-func lmb_override(held: bool, _dt: float) -> bool:
+# ------------------------------------------------------------------ LMB: Fencer / Tide Lunge
+const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
+const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
+
+## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
+## the press, he draws back into the Tide Lunge and lets it go on release. Bots keep the held chain.
+func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "swordfish" or KinMerge.active(h):
+		_drop_tide()
 		return false
-	if not held or h.fire_cd > 0.0 or not h.can_fire():
+	var pressed := held and not lmb_was
+	lmb_was = held
+	if lmb_t >= 0.0:
+		if not h.can_fire(): _drop_tide()
+		elif held: _tide_tick(dt)
+		else: _tide_lunge()
 		return true
+	if pressed:
+		lmb_buf = BUFFER
+		press_at = m.time
+	lmb_buf -= dt
+	var bot := h.ctrl != "local"
+	if not h.can_fire():
+		return true
+	if h.fire_cd <= 0.0 and (lmb_buf > 0.0 or (bot and held)):
+		lmb_buf = 0.0
+		_thrust()
+	elif held and not bot and m.time - press_at >= float(lmb_def()["tide"]["after"]):
+		lmb_t = 0.0
+		play("gil_tide_wind")
+	return true
+
+func _thrust() -> void:
 	var ld := lmb_def()
 	if m.time - combo_at > float(ld["chain_reset"]): combo_n = 0
 	var i := combo_n % 3
@@ -86,13 +118,82 @@ func lmb_override(held: bool, _dt: float) -> bool:
 	h.combo_i = i + 1
 	h._lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
-	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2})
+	var how := {"heavy": i == 2, "own_look": true}
+	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
-	return true
+	play(THRUSTS[i])
+	var o := {"len": float(ld["reach"][i])}
+	if i == 2: vfx("lunge", h.pos, h.aim_dir(), o)
+	else: vfx("thrust", h.pos, h.aim_dir(), o)
+
+func tide_k() -> float:
+	var td: Dictionary = lmb_def()["tide"]
+	return clampf(lmb_t / float(td["full"]), 0.0, 1.0)
+
+## Charging: slowed, the point drawn back, water gathering on the bill; the lane shows how far he will go.
+func _tide_tick(dt: float) -> void:
+	var was := tide_k()
+	lmb_t += dt
+	var k := tide_k()
+	var td: Dictionary = lmb_def()["tide"]
+	var reach := float(td["reach"])
+	AimKit.lane(h, "lmb", {"len": float(td["dist"][1]) + reach, "len0": float(td["dist"][0]) + reach,
+			"width": float(td["w"]), "k": k, "fill": k, "col": col_of(lmb_def()), "col_full": res_col()})
+	AimKit.charge(h, k, {"col": col_of(lmb_def()), "col2": res_col()})
+	HeroVfx.of(m).hold(h, "tide_charge", k)
+	if k >= 1.0 and was < 1.0:
+		vfx("tide_full", h.pos)
+
+## Let go: he drives down the lane behind the point; everyone along it is hit once as he passes.
+func _tide_lunge() -> void:
+	var td: Dictionary = lmb_def()["tide"]
+	var k := tide_k()
+	var full := k >= 1.0
+	lmb_t = -1.0
+	var dir := h.aim_dir()
+	var dist := lerpf(float(td["dist"][0]), float(td["dist"][1]), k)
+	var t := float(td["time"])
+	Effects.run([{"type": "dash", "speed": dist / t, "time": t, "dir": dir, "invuln": 0.0}], h,
+			{"slot": "primary", "ability": "tide_lunge", "level": 1})
+	tide = {"left": t + 0.05, "dir": dir, "hit": {}, "full": full,
+			"dmg": lerpf(float(td["dmg"][0]), float(td["dmg"][1]), k)}
+	h.fire_cd = float(td["cd"])
+	combo_n = 0
+	play("gil_tide_lunge")
+	vfx("tide_lunge", h.pos, dir, {"len": dist + float(td["reach"]), "full": full, "k": k})
+	CombatBus.ability_used.emit(h, "tide_lunge", "primary")
+
+func _tick_tide(dt: float) -> void:
+	tide["left"] = float(tide["left"]) - dt
+	var td: Dictionary = lmb_def()["tide"]
+	var dir: Vector2 = tide["dir"]
+	var tip := h.pos + Vector3(dir.x, 0, dir.y) * float(td["reach"]) * 0.5
+	for f in foes_in(tip, float(td["reach"]) * 0.5 + float(td["w"]) * 0.5, 2.5):
+		var key: int = f.get_instance_id()
+		if tide["hit"].has(key): continue
+		tide["hit"][key] = true
+		var o := {"kb": dir * float(td["kb"]), "src": "abil", "ab": "primary", "tags": ["primary", "tide"]}
+		f.hurt(float(tide["dmg"]), h, o)
+		vfx("tide_hit", f.pos, dir, {"full": tide["full"]})
+		if tide["full"]:
+			_mark(f, String(td["mark"]), col_of(lmb_def()))
+	if float(tide["left"]) <= 0.0:
+		tide = {}
+
+func _drop_tide() -> void:
+	lmb_t = -1.0
+	lmb_was = false
+	if anim_id == "gil_tide_wind": anim_id = ""
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
-	# the swing's rays reach on_deal as "shot" hits (Gil's only shots; the vials are "abil")
-	if String(o.get("src", "")) == "shot" and m.time < third_until and t != null and not t.dead:
+	# the thrust's rays reach on_deal as "shot" hits (Gil's only shots; the vials are "abil"), once a foe a thrust
+	if String(o.get("src", "")) != "shot" or t == null:
+		return
+	if m.time >= third_until:
+		vfx("thrust_hit", t.pos, h.aim_dir())
+		return
+	vfx("lunge_hit", t.pos, h.aim_dir())
+	if not t.dead:
 		var ld := lmb_def()
 		var slow := {"slow": float(ld["slow_t"]), "slow_k": float(ld["slow"]), "src": "abil", "ab": "primary"}
 		slow["tags"] = ["primary", "lunge"]
@@ -113,8 +214,9 @@ func fire_rmb(c: Dictionary) -> void:
 		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
-	flying.append({"at": at, "from": h.pos + Vector3(0, 1.3, 0), "t": ft, "left": ft, "v": v, "id": _tele_id()})
-	m.sfx("throw", h.pos, -4.0, 1.15)
+	flying.append({"at": at, "from": HeroVfx.of(m).anchor_pos(h, "hand_l"), "t": ft, "left": ft, "v": v, "id": _tele_id()})
+	play("gil_throw")
+	vfx("throw", h.pos)
 
 func rmb_hold_tick(t: float) -> void:
 	# held past the tap: the landing circle follows the cursor, 50% further
@@ -132,10 +234,7 @@ func _shatter(it: Dictionary) -> void:
 	var at: Vector3 = it["at"]
 	var r := float(vd["radius"])
 	var col := col_of(vd)
-	m.fx.burst(at + Vector3(0, 0.4, 0), col, 18 if v != "zeep" else 34, 5.0, 0.5, 6.0)
-	m.fx.ring(at, r, col, 0.4)
-	var sound := "boom" if v in ["thunder", "zeep", "fire"] else "whoosh"
-	m.sfx(sound, at, -3.0, 1.2 if v != "zeep" else 0.8)
+	_shatter_look(v, at, r)
 	var p := power("sec")
 	for f in foes_in(at, r, 3.0):
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "gil_" + v]}
@@ -162,8 +261,57 @@ func _shatter(it: Dictionary) -> void:
 		f.hurt(float(vd["dmg"]) * p, h, o)
 		_mark(f, String(vd.get("mark", v)), col)
 	if v == "slime":
-		puddles.append({"at": at, "r": float(vd["puddle_r"]), "left": float(vd["puddle_t"]),
-			"k": float(vd["puddle_k"]), "tick": 0.0})
+		_add_puddle(at, vd)
+
+## Each bottle breaks in its own look (content/vfx/gil.json shatter_<vial>, sized to its circle).
+func _shatter_look(v: String, at: Vector3, r: float) -> void:
+	var dir := h.aim_dir()
+	match v:
+		"thunder": vfx("shatter_thunder", at, dir, {"r": r})
+		"slime": vfx("shatter_slime", at, dir, {"r": r})
+		"air": vfx("shatter_air", at, dir, {"r": r})
+		"fire": vfx("shatter_fire", at, dir, {"r": r})
+		_: vfx("shatter_zeep", at, dir, {"r": r})
+
+const PUDDLE_PEAK := 0.05       # s the puddle's rim holds its white flare as it lands (3 frames at 60 fps)
+const PUDDLE_SETTLE := 0.25     # s from landing to its steady glow (the flare eases out)
+const PUDDLE_FADE := 0.4        # s it fades on an ease-out curve before its slow ends
+const PUDDLE_FLARE := 0.6       # how far toward white the rim flares as it lands
+const PUDDLE_RIM := 0.06        # share of the radius the lit rim takes
+const PUDDLE_RIM_A := 0.85      # the rim's steady alpha
+const PUDDLE_IN_A := 0.8        # the inside's alpha: the ring shader's wash tops out at 0.3 of it (0.24 by the rim)
+
+## The slime's puddle slows whoever stands in it for puddle_t. It is drawn for exactly that long and on its radius:
+## Gil's lit rim over a faint inside in the slime's colour (the wash: clear at the centre, rising toward the rim).
+func _add_puddle(at: Vector3, vd: Dictionary) -> void:
+	var r := float(vd["puddle_r"])
+	var n := Node3D.new()
+	var quad := Models.flat_quad(r * 2.0)
+	var inside := Models.ring_mat(Color(col_of(vd), PUDDLE_IN_A), 0.0)
+	inside.set_shader_parameter("wash", 1.0)
+	var rim := Models.ring_mat(Arch.color(h.arch), PUDDLE_RIM)
+	rim.set_shader_parameter("halo", 1.0)
+	Models.part(n, quad, inside, Vector3(0, 0.06, 0))
+	Models.part(n, quad, rim, Vector3(0, 0.08, 0))
+	ShadowPolicy.off(n)
+	m.add_child(n)
+	n.global_position = at
+	puddles.append({"at": at, "r": r, "t": float(vd["puddle_t"]), "left": float(vd["puddle_t"]),
+		"k": float(vd["puddle_k"]), "tick": 0.0, "node": n, "rim": rim, "inside": inside})
+
+## The puddle's glow now: the rim's flare as it lands, then steady, then the ease-out fade as it dries.
+func _puddle_look(pd: Dictionary) -> void:
+	var left := float(pd["left"])
+	var age := float(pd["t"]) - left
+	if age > PUDDLE_SETTLE and left > PUDDLE_FADE:
+		return
+	var flare := pow(1.0 - clampf((age - PUDDLE_PEAK) / (PUDDLE_SETTLE - PUDDLE_PEAK), 0.0, 1.0), 2.0)
+	var fade := pow(clampf(left / PUDDLE_FADE, 0.0, 1.0), 2.0)
+	var sig := Arch.color(h.arch)
+	(pd["rim"] as ShaderMaterial).set_shader_parameter("color",
+		Color(sig.lerp(Color.WHITE, PUDDLE_FLARE * flare), lerpf(PUDDLE_RIM_A, 1.0, flare) * fade))
+	var inside: ShaderMaterial = pd["inside"]
+	inside.set_shader_parameter("color", Color(inside.get_shader_parameter("color"), PUDDLE_IN_A * fade))
 
 # ------------------------------------------------------------------ passive: Fish Out of Water
 func _mark(f: Ent, mk: String, col: Color) -> void:
@@ -182,10 +330,10 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
-		m.fx.burst(f.pos + Vector3(0, 0.6, 0), res_col(), 20, 4.0, 0.6, 8.0)
-		m.sfx("unlock", f.pos, -4.0, 0.7)
+		vfx("beached", f.pos)
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
+		vfx("mark", f.pos)
 
 ## Different marks on a foe right now (tests and the HUD).
 func marks_on(f: Ent) -> int:
@@ -207,16 +355,21 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):
 		return true
-	travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
-	swim_t = float(dd["time"]) * float(dash_feel()["time"])
-	m.fx.burst(h.pos, col_of(dd), 12, 3.0, 0.4, 8.0)
+	swim_t = float(dd["time"]) * float(dash_feel()["time"])      # (before the dash: own_dash_trail reads it)
+	travel(float(dd["dist"]), float(dd["time"]))
+	# head first into the ground: the body goes fully under (gil_dive) and only the wake shows on top
+	play("gil_dive")
+	vfx("dive", h.pos, h.roll_dir, {"len": h.roll_speed * h.roll_t})
 	return true
+
+## Under the ground there is no body to leave after-images: the wake is the trail.
+func own_dash_trail() -> bool:
+	return swim_t > 0.0
 
 func _surface() -> void:
 	var dd := dash_def()
-	m.fx.ring(h.pos, float(dd["radius"]), col_of(dd), 0.4)
-	m.fx.burst(h.pos + Vector3(0, 0.3, 0), col_of(dd), 22, 5.0, 0.5, 10.0)
-	m.sfx("whoosh", h.pos, -3.0, 0.8)
+	play("gil_surface")
+	vfx("surface", h.pos, h.aim_dir(), {"r": float(dd["radius"])})
 	for f in foes_in(h.pos, float(dd["radius"])):
 		var o := {"lift": float(dd["lift"]), "stun": float(dd["knockup"]), "dr": true, "src": "abil", "ab": "dodge"}
 		o["tags"] = ["dodge", "surface"]
@@ -229,6 +382,7 @@ func cast_e() -> bool:
 	spin_t = 0.0
 	spin_tick = 0.0
 	e_t = float(e_def()["spin_t"])
+	play("gil_spin")
 	return true
 
 func e_recastable() -> bool:
@@ -246,7 +400,9 @@ func _e_end() -> void:
 		_release_spout()
 
 func move_k() -> float:
-	return float(e_def().get("move_k", 0.7)) if spin_t >= 0.0 else 1.0
+	if spin_t >= 0.0:
+		return float(e_def().get("move_k", 0.7))
+	return float(lmb_def()["tide"]["walk_k"]) if lmb_t >= 0.0 else 1.0
 
 func _spin_k() -> float:
 	return clampf(spin_t / float(e_def()["spin_t"]), 0.0, 1.0)
@@ -254,14 +410,14 @@ func _spin_k() -> float:
 func _tick_spin(dt: float) -> void:
 	var ed := e_def()
 	spin_t += dt
+	HeroVfx.of(m).hold(h, "spin_spray", _spin_k())
 	spin_tick -= dt
 	if spin_tick > 0.0:
 		return
 	spin_tick = float(ed["every"])
 	var k := _spin_k()
 	var r := float(ed["spin_r"])
-	m.fx.slash(h.pos + Vector3(0, 0.8, 0), m.time * 12.0, TAU, r, col_of(ed), k > 0.6)
-	m.sfx("swipe", h.pos, -6.0, 0.9 + k * 0.7)
+	vfx("spin", h.pos, h.aim_dir(), {"r": r, "k": k})
 	for f in foes_in(h.pos, r):
 		var dmg := lerpf(float(ed["tick"][0]), float(ed["tick"][1]), k) * power("kin")
 		f.hurt(dmg, h, {"src": "abil", "ab": "k1", "tags": ["k1", "riptide"]})
@@ -278,8 +434,9 @@ func _release_spout() -> void:
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
 		"id": _tele_id(), "from": h.pos, "len": length,
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
-		"col": col_of(ed), "ab": "k1"})
-	m.sfx("whoosh", h.pos, -2.0, 0.7)
+		"ab": "k1", "fx_t": 0.0})
+	play("gil_spout")
+	vfx("spout", h.pos, dir, {"len": length, "w": w, "k": k})
 
 func _tele_id() -> String:
 	tele_n += 1
@@ -296,7 +453,7 @@ func _tick_lines(list: Array, dt: float) -> void:
 		s["p"] = (s["p"] as Vector2) + (s["dir"] as Vector2) * step
 		s["left"] = float(s["left"]) - step
 		var at := Vector3(s["p"].x, float(s["y"]), s["p"].y)
-		m.fx.burst(at + Vector3(0, 0.5, 0), s["col"], 3, 3.0, 0.4, -2.0)
+		_line_look(s, at, dt)
 		for f in foes_in(at, float(s["w"]) * 0.5 + 0.3, 3.0):
 			var key: int = f.get_instance_id()
 			if s["hit"].has(key): continue
@@ -310,6 +467,17 @@ func _tick_lines(list: Array, dt: float) -> void:
 			if s["ab"] == "ult": HeroUlt.landed(self, f)
 		if float(s["left"]) <= 0.0:
 			list.erase(s)
+
+## The moving head of a spout or the wave's crest, every LINE_FX_DT (local: the cast's own look carries the
+## line for other games).
+const LINE_FX_DT := 0.06
+func _line_look(s: Dictionary, at: Vector3, dt: float) -> void:
+	s["fx_t"] = float(s["fx_t"]) - dt
+	if float(s["fx_t"]) > 0.0:
+		return
+	s["fx_t"] = LINE_FX_DT
+	if s["ab"] == "ult": vfx("wave_crest", at, s["dir"], {"w": s["w"]})
+	else: vfx("spout_col", at, s["dir"], {"w": s["w"]})
 
 # ------------------------------------------------------------------ X: Tidal Wave
 func cast_ult() -> bool:
@@ -332,18 +500,20 @@ func _start_wave() -> bool:
 		"id": "x", "from": h.pos, "len": length,
 		"w": float(xd["width"]), "spd": length / t, "hit": {}, "lift": float(xd["lift"]), "stun": float(xd["knockup"]),
 		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
-		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
+		"dmg": float(xd["dmg"]) * power("ult"), "ab": "ult", "fx_t": 0.0}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
-	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, ctx)
-	m.sfx("whoosh", h.pos, 0.0, 0.6)
+	# along the wave's own line: a bare dash steers by the move keys, so a moving cast surfed off the wave
+	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t, "dir": dir}], h, ctx)
+	play("gil_surf")
+	vfx("wave", h.pos, dir, {"len": length, "w": float(xd["width"])})
 	return true
 
 func _land_wave() -> void:
 	var xd := x_def()
 	ShieldSrc.give(h, float(xd["shield"]), ShieldSrc.TIDE)
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
-	m.fx.ring(h.pos, 2.0, col_of(xd), 0.4)
-	m.fx.burst(h.pos + Vector3(0, 0.4, 0), col_of(xd), 24, 5.0, 0.5, 10.0)
+	play("gil_land")
+	vfx("wave_land", h.pos)
 
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 	if untarget_t > 0.0:
@@ -369,19 +539,23 @@ func _tick(dt: float) -> void:
 		pd["tick"] = float(pd["tick"]) - dt
 		if float(pd["tick"]) <= 0.0:
 			pd["tick"] = 0.25
-			m.fx.ring(pd["at"], float(pd["r"]), Color("#7be05a", 0.5), 0.26)
 			for f in foes_in(pd["at"], float(pd["r"])):
 				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
 				f.slow_t = maxf(f.slow_t, 0.35)
 		if float(pd["left"]) <= 0.0:
+			(pd["node"] as Node3D).queue_free()
 			puddles.erase(pd)
+		else:
+			_puddle_look(pd)
 	if swim_t > 0.0:
 		swim_t -= dt
-		m.fx.burst(ground(h.pos) + Vector3(0, 0.1, 0), col_of(dash_def()), 2, 1.5, 0.3, 4.0)
 		if swim_t <= 0.0:
 			_surface()
+	_end_stale_hold()
 	if spin_t >= 0.0:
 		_tick_spin(dt)
+	if not tide.is_empty():
+		_tick_tide(dt)
 	_tick_lines(spouts, dt)
 	if not wave.is_empty():
 		var one := [wave]
@@ -395,12 +569,23 @@ func _tick(dt: float) -> void:
 	glow_t -= dt
 	if glow_t <= 0.0 and not h.unseen and h.visible and not h.out:
 		glow_t = 0.3
-		var fw := h.aim_dir()
-		var side := Vector2(-fw.y, fw.x)
-		m.fx.burst(h.pos + Vector3(side.x * 0.35, 1.0, side.y * 0.35), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
+		m.fx.burst(HeroVfx.of(m).anchor_pos(h, "hand_l"), col_of(vial_def(next_vial())), 1, 0.2, 0.3, 0.0)
 
 func _drop_holds() -> void:
 	spin_t = -1.0
+	_drop_tide()
+	_end_stale_hold()
+
+## The held poses (under the ground, spinning, on the wave) stay on until their move replaces them; one whose
+## move was cut short (a merge, a death) lets go here.
+func _end_stale_hold() -> void:
+	var stale := false
+	match anim_id:
+		"gil_dive": stale = swim_t <= 0.0
+		"gil_spin": stale = spin_t < 0.0
+		"gil_surf": stale = wave.is_empty()
+	if stale:
+		anim_id = ""
 
 # ------------------------------------------------------------------ bots
 const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
