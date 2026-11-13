@@ -179,9 +179,15 @@ badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU throu
   (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
 - The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
   Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
-  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+  message-lane tip when the step opens (once a step, not re-sent every frame), not a second line. The farm's Skip
+  sits just under the strip's right end.
 - The glide dive is taught in that strip: `FirstMatchGuide`'s "dive" line ("Gliding: hold <crouch key> to dive")
   shows once per save in any real Extraction, the first time the glider has been open for 1.5 s above 15 m (not
   in the opening drop). It clears at the first dive and never returns (`Save.d tutorial glide_dive`).
+- One prompt at a time (DECISIONS 2026-11-08): while a new step's strip is fresh (`Tutorial.card_up`, 1.5 s) the
+  message lane holds (`MsgLane.hold`), Boki bubbles and the scout hint wait, and the world's F prompt
+  (`TutorialHud.prompt_shows`) waits. Combat-critical things still show: `MsgLane.URGENT` lines (your Boki is down,
+  you are being stomped) and the revive / finish / stomp prompts (`TutorialHud.FIGHT_PROMPTS`).
+  `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
-  never again after a dive), `--tutorial-strip-shots`.
+  never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
