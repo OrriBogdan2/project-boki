@@ -419,8 +419,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var length := lib.get_animation(clip).length
 		if mv.has("fit"):
 			tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
-		# (a lead clip holds its last frame rather than ending before the move does)
-		if mv.has("lead"):
+		# (a lead clip holds its last frame for the lead, so it ends when the clip would have without one)
+		if mv.has("lead") and float(s.get("kmove_t", 0.0)) < length:
 			tt = minf(tt, length - 0.001)
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])

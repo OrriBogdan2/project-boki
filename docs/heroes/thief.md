@@ -402,6 +402,31 @@ Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and s
 0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_encore` (R: blades raised as the
 ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats that loop, a fling on each: two side flings, a pirouette, two low sweeps, a twirl back with the crossbows overhead; the legs are a stance, so walking she keeps walking)
 
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+
+Every slot measured three ways: the source from briefs/hero-ref/dancer.md (one frame = 0.2 s, the ult strip 0.1 s), the
+kit's own release (the code and content/archetypes/thief.json, on the move clock `kmove_t`), and the v2 clip
+(art/wardens/sable/sable.glb, its clip map content/rules/warden_anim/sable.json) swept at 60 Hz: "strike" is its
+fastest hand frame, "end" its length, the moment it hands back to the legs. `--dancer-combo-check` asserts each
+release's strike within 0.05 s of the kit's (tools/clip_strike_check.gd, lines `thief clip timing ...`). The v2
+clips are keyed on KMovesDJ's beats, so no row needed a fix.
+
+| Slot | Source: wind-up / strike / active / recover | Ours: release / clip strike / end | Verdict |
+|---|---|---|---|
+| LMB tap (`thf_lmb_r`, `thf_lmb_l`) | one arm whipped out inside one frame, 2-3 frames a shot [0028-0039] | 0.00 / 0.03 / 0.70 (the other arm cocked by 0.45) | matches; asserted |
+| LMB hold | a hit every 2-3 frames, 0.45 s on the card, left then right [0001-0045] | every 0.45 s, hands alternating, each throw from the other's 0.45 pose | matches (`parity` rows) |
+| Empowered LMB (`thf_primed`) | a big streak and a blade flash at her hands, the same beat [0143] | 0.00 / 0.02 / 0.53 | matches; asserted |
+| RMB (`thf_bola`) | a 0.4-0.6 s lane with the bolas whirled overhead, slung with a lunge [0085-0087, 0100-0102] | 0.40 (data `cast`) / sling 0.38 / 0.73 | matches; asserted (the whirl's raise is skipped) |
+| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_OUT`) / 0.08 / 0.47 | matches; asserted |
+| E recast (`thf_arrive`) | a blink under one frame [0237-0238] | at the dagger at once / the pop 0.6 | matches |
+| Shift ground (`thf_vault_*`) | a 0.05 s crouch, over the top 0.25-0.3 s, up by about 0.5 s [0176-0178] | dash 0.48 (data) / hips over by 0.12-0.18 / 0.47 | matches |
+| Air dash (`thf_exdash`, `thf_land`) | over in about 0.25 s, landing crouch about 0.1 s, up by 0.15 [0129-0134] | turned over by 0.23, carried flat from 0.46 until she lands (0.95 s at most) / a 0.17 s landing | matches |
+| X (`thf_encore`, `thf_encore_dance`) | the ring grows 0.4 s with the blades raised, blades every 0.2-0.4 s for 2 s [f27-f50] | grows 0.4 (data), the spin ends 0.35 as it opens; 0.2 s fling beats for 2 s | matches |
+| R | the Boki Merge (`mf_xform`, ours) | 0.80 | no source |
+
+Suggestions (ours, not built): the release snaps (0.02-0.03 s) land inside the 0.1 s blend in, so a lone tap shows
+about half the whip; a per-move `"fade"` near 0.04 would show it whole (ext/anim-time-sable measured this on v1).
+
 ## Look and sound (all ours)
 
 - Arc Bolts model: two dark ring blades with swept spikes and a gold inner edge (scripts/match/hero_arms_dj.gd).
