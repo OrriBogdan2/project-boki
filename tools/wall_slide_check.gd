@@ -70,6 +70,7 @@ func _setup(main: Node) -> void:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
 	P.ctrl = "local"
+	P.unlock_all()      # a locked dash slot spends the first Shift press on levelling it, not on the dash
 	P.reclass(Arch.weight(HEROES[-1]), HEROES[-1], Arch.signature(HEROES[-1]))      # the widest body finds the room
 
 ## The body's centre where it first touches surface s: its edge point plus the Hunter's reach against it
