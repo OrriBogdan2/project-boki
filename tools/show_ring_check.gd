@@ -8,7 +8,9 @@ extends RefCounted
 ##      retired mentors sit on the bench first
 ##   5. A run: the same Boki and presses score the same twice, the run lasts about 2 minutes, its
 ##      score matches the static one, and the prizes are paid once
-##   6. on the base: no stage with base_mode off; with it on, a show runs to a result card
+##   6. result look: three marks in turn, gone by 1.5 s, then a ribbon in the placing's colour that stays
+##      until the Boki leaves the ring
+##   7. on the base: no stage with base_mode off; with it on, a show runs to a result card
 ## Never touches the real save.
 
 const DT := 1.0 / 30.0           # s per step
@@ -33,6 +35,7 @@ func run(m: Node) -> void:
 	_bond()
 	_judges()
 	_run_once()
+	_placing()
 	await _on_base()
 	print("SHOW DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -138,6 +141,32 @@ func _run_once() -> void:
 	var bag_after := JSON.stringify(Save.d.get("items", {})) + JSON.stringify(Save.d["crops"])
 	ok(again.is_empty() and int(Save.d["gems"]) == gems and bag_after == bag, "settle: prizes paid once")
 
+func _placing() -> void:
+	var at: Dictionary = ShowRing.rules()["ribbon_at"]
+	var M: Dictionary = ShowRing.rules()["marks"]
+	ok(ShowRing.placing(true, 0.0) == "gold", "ribbon: the win is gold")
+	ok(ShowRing.placing(false, float(at["silver"])) == "silver", "ribbon: a close second is silver")
+	ok(ShowRing.placing(false, float(at["bronze"])) == "bronze", "ribbon: a lower second is bronze")
+	ok(ShowRing.placing(false, 0.0) == "part", "ribbon: the rest took part")
+	var cols := {}
+	for id in M["colors"]:
+		cols[M["colors"][id]] = true
+	ok(cols.size() == 4, "ribbon: four colours, one per placing")
+	ok(2.0 * float(M["gap_s"]) + float(M["life_s"]) <= 1.5, "marks: all gone within 1.5 s")
+	var n := Node3D.new()
+	main.add_child(n)
+	var full := {"look": 10.0, "trick": 5.0, "bond": 0.0}
+	var m := ShowMarks.new({"node": n}, Vector3.ZERO, full, "gold")
+	ok(m.marks == [int(M["pips"]), roundi(M["pips"] * 0.5), 0], "marks: pips follow each round's points %s" % [m.marks])
+	m.t = 0.9
+	m._process(0.0)
+	ok(not m.is_queued_for_deletion(), "ribbon: stays while the Boki is in the ring")
+	n.position = Vector3(ShowMarks.LEAVE_M + 0.5, 0, 0)
+	m._process(0.1)
+	ok(m.is_queued_for_deletion(), "ribbon: gone once the Boki leaves the ring")
+	n.queue_free()
+	m.free()
+
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	var d := Save.fresh()
@@ -173,10 +202,27 @@ func _on_base() -> void:
 		sr.use()
 		ok(sr.run != null and sr.pair.size() == 2, "on: a show starts with two Boki")
 		var t := 0.0
+		var beats := {}
 		while sr.run != null and t < LONG_HIGH + 30.0:
 			sr.tick(0.1)
 			t += 0.1
+			if sr.run != null:
+				var n := sr.pair[sr.run.backed]["node"] as Node3D
+				beats[String(n.get_meta("kact", "")) + "@" + str(sr.run.phase)] = true
+		ok(beats.has("strut@" + str(ShowRing.Run.Phase.BOND)), "on: it struts on the walk-in")
+		ok(beats.has("pose@" + str(ShowRing.Run.Phase.JUDGE)), "on: it holds a pose when the judges look")
+		ok(not beats.has("pose@" + str(ShowRing.Run.Phase.LOOK)), "on: no pose before the judges' round")
 		ok(sr.run == null and is_instance_valid(sr.card), "on: the show ends with a result card (%.1f s)" % t)
+		var shown: bool = is_instance_valid(sr.marks) and sr.marks.get_parent() == home.root_ui
+		ok(shown, "on: the result shows its marks and ribbon")
+		var clips: Array = []
+		for k in home.kins:
+			clips.append(String((k["node"] as Node3D).get_meta("kact", "")))
+		ok("hop" in clips and "bow" in clips, "on: the placing is read with a hop and a bow (%s)" % str(clips))
+		for i in int(ceil(float(ShowRing.rules()["card_s"]) * 10.0)) + 2:
+			sr.tick(0.1)
+		ok(sr.acts.is_empty() and home.kins.all(func(k): return not (k["node"] as Node3D).has_meta("kact")),
+				"on: and nobody keeps a show clip")
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

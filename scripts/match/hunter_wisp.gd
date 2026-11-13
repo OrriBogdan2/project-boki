@@ -3,29 +3,20 @@ extends RefCounted
 ## A downed Hunter shows as a Wisp instead of the hero (docs/decisions/0019-downed-wisp.md). Purely
 ## presentation: it follows Hunter.downed and Hunter.out and changes nothing about timers, speed, revive
 ## or targeting. Per hunter, tick() runs a small state machine:
-##   hero --down--> pop in (hero hidden, Wisp puffs out) -> on (slow bob, trails heavily behind the hunter
-##   and settles when they stop, a quiet hum)
+##   hero --down--> in: the knocked-down beat (HunterFall: the hero staggers along the hit, drops to a knee and
+##   collapses, fading out as the Wisp rises out of it; a ring and a puff mark the down) -> on (hero hidden, slow
+##   bob, trails heavily behind the hunter and settles when they stop, a quiet hum)
 ##   on --revive--> pop out (Wisp brightens and fades, hero grows back from the look's hero_from with a squash) -> hero
-##   on --bleed out or executed--> elim (the look's snuff time: the hit, the heart flashing in the killer's
-##     side colour; the fall, dimming into the deathbox as it grows in; then the Wisp's pop) -> gone (the Wisp
-##     was the death: no death clip after it) --back from the dead--> ""
+##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
 ## The look (colours, body, drift, hum, timing) is WispLook's data. State lives in the hunter's meta "wisp".
 
 const IN := "in"
 const ON := "on"
 const OUT := "out"
-const ELIM := "elim"
-const GONE := "gone"
 const POP_OVERSHOOT := 1.70158   # the "back" ease's overshoot: the pop swells a little past full size
 const POP_FROM := 0.3         # fraction of full size the Wisp pops in from
 const FLASH_BOOST := 3.0      # extra glow at the instant of a pop
-const ELIM_HIT := 0.25        # fraction of the elimination beat that is the hit (the heart in the killer's colour)
-const ELIM_DIM := 0.25        # fraction of its opacity the Wisp keeps as it reaches the box
-const ELIM_SHRINK := 0.6      # fraction of its size the Wisp keeps as it reaches the box (uniform: it stays round)
-const ELIM_BOX_FROM := 0.4    # fraction of its size the deathbox grows in from during the beat
-const HIT_RISE := 0.3         # m the hit knocks the Wisp up before it falls
-const BOX_IN := 0.15          # m above the box's spot the Wisp falls to (inside the crate)
-const BOX_REACH := 2.0        # m: a box further off (abyss, sky train) is not fallen into
+const RISE_FROM := 0.15       # m above the ground: where the Wisp leaves the fallen body from
 
 ## Runs every render frame, before the hero's own basis is built: advances the state and poses the hero's
 ## size (a pop-out) and the Wisp.
@@ -40,17 +31,10 @@ static func tick(h: Hunter, dt: float) -> void:
 		IN: _pose_in(h, st, dt)
 		ON: _pose_on(h, st, dt)
 		OUT: _pose_out(h, st, dt)
-		ELIM: _pose_elim(h, st)
 
-## True while the hero model stays hidden (the Wisp stands in, or was the death).
+## True while the hero model stays hidden (the Wisp stands in): after the knocked-down beat.
 static func hides(h: Hunter) -> bool:
-	return String(_state(h)["mode"]) in [IN, ON, ELIM, GONE]
-
-## For an out hunter: the node stays up through the elimination beat, or through the hero's death clip
-## when there was no Wisp (died outright).
-static func out_visible(h: Hunter) -> bool:
-	var mode := String(_state(h)["mode"])
-	return mode == ELIM or (mode != GONE and WardenClips.dying(h))
+	return String(_state(h)["mode"]) == ON
 
 ## The Wisp's node, or null when the hero is up.
 static func node_of(h: Hunter) -> Node3D:
@@ -73,17 +57,15 @@ static func _state(h: Hunter) -> Dictionary:
 static func _advance(h: Hunter, st: Dictionary) -> void:
 	var mode := String(st["mode"])
 	var look: Dictionary = st["look"]
+	var fall := HunterFall.of(h)
 	if h.out and (mode == IN or mode == ON):
-		_elim_start(h, st)
-	elif mode == ELIM and (not h.out or float(st["t"]) >= float(look["snuff"]["time"])):
-		_elim_end(h, st)
-	elif mode == GONE and not h.out:
-		st["mode"] = ""
+		_snuff(h, st)
 	elif h.downed and not h.out and (mode == "" or mode == OUT):
 		_pop_in(h, st)
 	elif not h.downed and (mode == IN or mode == ON):
 		_pop_out(h, st)
-	elif mode == IN and float(st["t"]) >= float(look["pop_in"]["time"]):
+	elif mode == IN and (fall == null or float(st["t"]) >= fall.time):
+		HunterFall.stop(h)
 		st["mode"] = ON
 	elif mode == OUT and float(st["t"]) >= float(look["pop_out"]["time"]):
 		_finish(h, st)
@@ -98,6 +80,7 @@ static func _pop_in(h: Hunter, st: Dictionary) -> void:
 	_free_node(st)
 	if st["mode"] == OUT:
 		_restore_hero(h, st)
+	HunterFall.start(h)
 	var look := WispLook.get_look(_look_id(h))
 	var node := WispLook.build(look, _team_col(h))
 	node.position = Vector3(0, float(look["hover"]), 0)
@@ -112,6 +95,7 @@ static func _pop_in(h: Hunter, st: Dictionary) -> void:
 
 static func _pop_out(h: Hunter, st: Dictionary) -> void:
 	var look: Dictionary = st["look"]
+	HunterFall.stop(h)       # revived mid-fall: the hero comes back where the hunter is
 	st["mode"] = OUT
 	st["t"] = 0.0
 	st["base"] = h.model.scale if h.model else Vector3.ONE
@@ -128,35 +112,16 @@ static func _pop_fx(h: Hunter, spec: Dictionary, height: float) -> void:
 	h.m.fx.burst(at, col.lightened(0.5), int(spec["burst"]), 4.0, 0.45, -1.0, 0.9)
 	h.m.sfx(String(spec["sfx"]), h.position, -6.0 if h.is_local() else -12.0)
 
-## Bled out or executed: the Wisp stays for the beat, takes the hit in the killer's side colour (its own
-## when nobody is known) and heads for the deathbox.
-static func _elim_start(h: Hunter, st: Dictionary) -> void:
+## Bled out or executed: the Wisp breaks into sparks where it floated.
+static func _snuff(h: Hunter, st: Dictionary) -> void:
 	var spec: Dictionary = (st["look"] as Dictionary)["snuff"]
-	var by := h.last_hit_by
-	st["kcol"] = SideColor.of(h.m, by) if by != null and is_instance_valid(by) and by != h else _team_col(h)
-	var box := Life.box_of(h.m, h)
-	# only this death's box: a remote copy may not have it yet, the abyss keeps none
-	st["box"] = box if not box.is_empty() and Life.soul_here(h.m, box) else {}
-	st["mode"] = ELIM
-	st["t"] = 0.0
-	st.erase("from")
+	var at := h.position + Vector3(0, float((st["look"] as Dictionary)["hover"]), 0)
+	h.m.fx.burst(at, _team_col(h).lightened(0.4), int(spec["burst"]), 5.0, 0.7, 4.0, 1.0)
+	h.m.sfx(String(spec["sfx"]), h.position, -8.0)
 	Sfx.loop_stop(hum_key(h))
-	h.m.sfx(String(spec["hit_sfx"]), h.position, -8.0)
-
-## The beat's end: the Wisp pops where it fell and is freed, the box stands at full size. A revive in the
-## middle of it ends it at once, with no pop.
-static func _elim_end(h: Hunter, st: Dictionary) -> void:
-	var node := st["node"] as Node3D
-	if h.out:
-		_pop_fx(h, (st["look"] as Dictionary)["snuff"], node.position.y)
-	_box_scale(st, 1.0)
+	HunterFall.stop(h)
 	_free_node(st)
-	st["mode"] = GONE if h.out else ""
-
-static func _box_scale(st: Dictionary, grow: float) -> void:
-	var n := (st["box"] as Dictionary).get("node") as Node3D
-	if n and is_instance_valid(n):
-		n.scale = Vector3.ONE * grow
+	st["mode"] = ""
 
 static func _finish(h: Hunter, st: Dictionary) -> void:
 	_restore_hero(h, st)
@@ -183,14 +148,20 @@ static func _set_glow(node: Node3D, flash: float, fade: float) -> void:
 	mat.set_shader_parameter("flash", flash)
 	mat.set_shader_parameter("fade", fade)
 
+## The knocked-down beat: the body falls (HunterFall), and as it fades the Wisp comes out of it, white hot, growing
+## and rising to its hover.
 static func _pose_in(h: Hunter, st: Dictionary, dt: float) -> void:
 	var node := st["node"] as Node3D
-	var look: Dictionary = st["look"]
-	var k := clampf(float(st["t"]) / float(look["pop_in"]["time"]), 0.0, 1.0)
-	var grow := lerpf(POP_FROM, 1.0, _back(k))
-	node.scale = Vector3.ONE * grow
-	_set_glow(node, 1.0 + FLASH_BOOST * (1.0 - k), 1.0)
+	var fall := HunterFall.of(h)
+	fall.pose(h, clampf(float(st["t"]) / fall.time, 0.0, 1.0))
+	var out_k := fall.gone
+	node.scale = Vector3.ONE * lerpf(POP_FROM, 1.0, _back(out_k))
+	_set_glow(node, 1.0 + FLASH_BOOST * (1.0 - out_k), out_k)
 	_pose_body(h, st, dt)
+	var body := h.model.position
+	var floats := node.position
+	node.position = Vector3(lerpf(body.x, floats.x, out_k), lerpf(RISE_FROM, floats.y, _back(out_k)),
+			lerpf(body.z, floats.z, out_k))
 	_hum(h, st)
 
 static func _pose_on(h: Hunter, st: Dictionary, dt: float) -> void:
@@ -247,34 +218,3 @@ static func _pose_out(h: Hunter, st: Dictionary, dt: float) -> void:
 	var base: Vector3 = st["base"]
 	if h.model:
 		h.model.scale = base * Vector3(grow * (1.0 + squash * 0.5), grow * (1.0 - squash), grow * (1.0 + squash * 0.5))
-
-## The hit (the Wisp is knocked up, its heart takes the killer's colour; the rim keeps the team colour), then
-## the fall: the Wisp dims and drops into the deathbox as the box grows in. It only ever scales evenly, so
-## the round outline holds to the end.
-static func _pose_elim(h: Hunter, st: Dictionary) -> void:
-	var node := st["node"] as Node3D
-	var look: Dictionary = st["look"]
-	var k := clampf(float(st["t"]) / float(look["snuff"]["time"]), 0.0, 1.0)
-	var hit := k < ELIM_HIT
-	var heart := WispLook.colour(String(look["core"]["color"]), _team_col(h))
-	var mat := node.get_meta("mat") as ShaderMaterial
-	mat.set_shader_parameter("core_col", st["kcol"] if hit else heart)
-	var fall := clampf((k - ELIM_HIT) / (1.0 - ELIM_HIT), 0.0, 1.0)
-	_set_glow(node, 1.0, lerpf(1.0, ELIM_DIM, fall))
-	if not st.has("from"):
-		st["from"] = node.position
-	var from: Vector3 = st["from"]
-	var to := Vector3(from.x, BOX_IN, from.z)
-	var box := st["box"] as Dictionary
-	if box.has("pos"):
-		var off := (box["pos"] as Vector3) - h.position
-		if Vector2(off.x, off.z).length() <= BOX_REACH:
-			to = off + Vector3(0, BOX_IN, 0)
-	var top := float(look["hover"]) + HIT_RISE
-	if hit:
-		node.position.y = lerpf(float(look["hover"]), top, sin(k / ELIM_HIT * PI * 0.5))
-	else:
-		var f2 := fall * fall
-		node.position = Vector3(lerpf(from.x, to.x, f2), lerpf(top, to.y, f2), lerpf(from.z, to.z, f2))
-	node.scale = Vector3.ONE * lerpf(1.0, ELIM_SHRINK, fall)
-	_box_scale(st, lerpf(ELIM_BOX_FROM, 1.0, _back(k)))

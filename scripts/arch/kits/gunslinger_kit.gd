@@ -7,7 +7,7 @@ extends ArchKit
 ## damages and Dazes it ("rat" Rattled in code) on the spot.
 ## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
 ## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
-## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
+## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +76% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
 ## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
@@ -42,6 +42,9 @@ const TUBE_SWING := 0.1              # s from the press to the bell coming forwa
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
 const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
+const E_RECOVER := 0.6               # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
+                                     # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
+                                     # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -66,6 +69,7 @@ var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
+var commit_end := 0.0          # match time her committed recovery ends (E after the beam, X from the tap)
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
@@ -117,6 +121,10 @@ func own_dash_trail() -> bool:
 func dodge_anim() -> String:
 	return "slide" if not slide.is_empty() else ""      # Slipstep: the kit move is the whole pose (no roll)
 
+## Her rifle goes from an open glider, which stays open (docs/heroes/gunslinger.md Cancels: every interaction chains).
+func fires_in_glide() -> bool:
+	return true
+
 func shows_charge_ball() -> bool:
 	return false                   # the Longneedle charges an ember orb at the muzzle instead
 
@@ -124,19 +132,16 @@ func shows_charge_ball() -> bool:
 const TRAILS := {"gunslinger_knock": ["r", 0.0, 0.25]}
 const SLIDE_KEY := 0.45              # s: the dash clip's last slide key (vex.json "dash", low from 0.08): a held slide
                                      # keeps the clip there, so she stands up as the skid ends, not mid-skid
-const WALK_OFF := {"gunslinger_dash": 0.0, "gunslinger_e": 0.8}   # s into the move its hit is past: the dash's
-                                     # from the skid's end, the Longneedle's once its shove has played
 const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
                                      # is over to the clips (the kit's anim_id is read as long as it is set)
 
-## Walking out of a move's recovery (the slide's stand-up, the Longneedle's settle): the legs are hers again and
-## the walk blends in (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
+## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
+## (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
 ## (Clearing anim_id would not do: the published anim state keeps the last kmove until another move plays.)
 func _tick_walk_off() -> void:
-	if not WALK_OFF.has(anim_id) or not slide.is_empty() or not needle.is_empty() or not h.grounded:
+	if anim_id != "gunslinger_dash" or not slide.is_empty() or not h.grounded:
 		return
-	var walking := (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5
-	if walking and float(m.time) - anim_at >= float(WALK_OFF[anim_id]):
+	if (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5:
 		anim_at = float(m.time) - OVER        # the move reads as over: past its clip, the body goes back to the legs
 
 func _tick_trail() -> void:
@@ -172,11 +177,26 @@ func teardown() -> void:
 	_end_needle()
 
 func move_k() -> float:
+	if commit_left() > 0.0:
+		return 0.0
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
-## The rifle can't fire while a dry drum refills (_tick_mag).
+## The rifle can't fire while a dry drum refills (_tick_mag), nor in a committed recovery.
 func fire_ok() -> bool:
-	return not dry
+	return not dry and commit_left() <= 0.0
+
+## The source's recoveries (E_RECOVER, GunslingerUlt.COMMIT): she stands, and no ability, jump or Shift goes.
+## A press in the last DashFlow.BUFFER_S waits for the end (DashFlow.cc_left); one before it is dropped.
+func commit_left() -> float:
+	return maxf(0.0, commit_end - float(m.time))
+
+func busy() -> bool:
+	return super.busy() or commit_left() > 0.0
+
+func gate_inputs() -> void:
+	if commit_left() > DashFlow.BUFFER_S:
+		h.inp["dash"] = false
+		h.inp["jump"] = false
 
 func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
@@ -189,14 +209,13 @@ func combo_read(t: Ent) -> Dictionary:
 	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
 			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
 
-## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.
+## Dazed foes take +76% from the rifle (the source's +39 on 51): a crit-style big gold number.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if t is Hunter or t is Mob:
 		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.rattled(t):
 			o["crit"] = true
 			dazed_hits += 1
 			ComboMark.payoff(m, h, t)
-			h.sus_n = maxi(0, h.sus_n - 1)
 			var bonus := dmg * float(res_def()["rattle_k"])
 			_daze_bonus_fx(t, bonus)
 			return dmg + bonus
@@ -225,7 +244,6 @@ func _on_knock(t: Ent) -> void:
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
 	m.sfx("vn_stim", h.pos, -3.0)
 	play("gunslinger_knock")
 
@@ -312,7 +330,7 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	var start := h.position
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
-	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
+	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0, "from": h.pos}
 	play("gunslinger_dash")
 	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
 	# No rings or discs: those mean damage or an area in this game
@@ -372,6 +390,10 @@ func _tick_slide(dt: float) -> void:
 				slide["held"] = true
 				curved = {}                              # the hold slide sets its own speed
 				slide["t0"] = t
+				# `slide` m is the whole hold from where she pressed: the slide covers what the skid hasn't
+				var from: Vector3 = slide["from"]
+				var skidded := Vector2(h.pos.x - from.x, h.pos.z - from.z).length()
+				slide["left"] = maxf(float(dd["slide"]) - skidded, 0.0)
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
@@ -389,7 +411,7 @@ func _tick_slide(dt: float) -> void:
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
 	if anim_id == "gunslinger_dash":
 		anim_at = maxf(anim_at, float(m.time) - SLIDE_KEY)   # the clip stays low on its slide key while she slides
-	h.roll_speed = float(dd["slide"]) / dur * (0.5 + k)
+	h.roll_speed = float(slide["left"]) / dur * (0.5 + k)
 	h.inv_t = 0.0
 
 # ------------------------------------------------------------------ RMB: Burr Charge
@@ -587,7 +609,7 @@ func combo_marks(out: Array) -> void:
 		if left <= 0.0:
 			daze_for.erase(key)
 		elif not f.dead:
-			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), "DAZED", true))
+			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), true))
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data) and is slowed.
 func daze(foe: Ent, seconds: float) -> void:
@@ -636,13 +658,12 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 		o["lift"] = 2.0
 		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
 		daze(f, float(bd["cone_rattle"]))         # the training dummy too
-		if f is Hunter and terrain_behind(f, away, 2.4):
+		if f is Hunter and KnockWall.hit(m, f, away, 2.4, h):
 			wall_slams += 1
 			var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "stun": float(bd["wall_stun"])}
 			slam["dr"] = true
 			f.hurt(0.1, h, slam)
 			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))     # the data: walled, "Dazed longer"
-			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", EMBER, false)   # over DAZED
 
 # ------------------------------------------------------------------ E: Longneedle
 func cast_e() -> bool:
@@ -749,6 +770,7 @@ func _fire_needle() -> void:
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
+	commit_end = float(m.time) + E_RECOVER
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):
@@ -771,9 +793,7 @@ func _fire_needle() -> void:
 			hits += 1
 			if rat:
 				skewers += 1
-				# the word rides up the screen, clear of the damage number on the body
-				payoff_fx(f.pos, "", EMBER, "", h.dir_to(f), f)
-				m.fx.word(f.pos + Vector3(0, 2.7, 0) + fx().screen_up() * 1.3, "SKEWERED", EMBER, true)
+				payoff_fx(f.pos, EMBER, "", h.dir_to(f), f)
 				m.sfx("hero_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
@@ -790,7 +810,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if not needle.is_empty() or rmb_down:
 		h.inp["aim"] = aimp
 		return
-	if HeroUlt.ready(self) and tgt is Hunter and los and dist > 2.5 and randf() < 0.35:
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist > 2.5:
 		h.inp["aim"] = aimp
 		if HunterKeys.ult_pressed(h):
 			return
