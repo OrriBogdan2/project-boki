@@ -4197,7 +4197,7 @@ func _update_interact(dt: float) -> void:
 					# your own revive bar, so you know it's working (and when it's blocked)
 					var blocked: bool = o.get_meta("stomped", false)
 					var rv := {"kind": "revive", "ent": o, "col": Color("ff6a5a") if blocked else Color("9ee2a0")}
-					rv.merge({"note": "An enemy is standing on them  ·  knock them off"} if blocked else {"verb": "Reviving", "hold": true, "note": "Stay in the ring"})
+					rv.merge({"note": "An enemy is standing on them: revive blocked  ·  knock them off"} if blocked else {"verb": "Reviving", "hold": true, "note": "Stay on the wisp"})
 					cs.append(InteractPick.cand(rv, o.pos, o, o.pname, true))
 			elif not o.remote:
 				cs.append(InteractPick.cand({"kind": "finish", "ent": o, "verb": "Stomp", "hold": true, "note": "You'll be locked in", "col": Color("ff8a6a")}, o.pos, o, o.pname))
@@ -5070,7 +5070,7 @@ func _flags(h: Hunter) -> int:
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
-const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "reviving", "wild", "dazed", "fused"]
+const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "wisp", "wild", "dazed", "fused"]
 const MOB_STATES := ["idle", "chase", "windup", "lunge", "recover"]
 
 func _ser(e: Ent) -> Array:

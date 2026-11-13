@@ -180,3 +180,15 @@ that: squads left out of the start, each squad as a row of alive / downed / out 
 levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
 Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).
 - Interact prompt (InteractPrompt, `scripts/ui/interact_prompt.gd`): one widget for every press-F moment: the match (revives, loot, gear, chests, shrines, shops, loose wisps, lairs, the uplink seats, the Heart and its Gate), the farm (and the garden hub's Waystone and games), town and indoors. It shows the live key cap (`Settings.key_cap`), a short verb, the target, an optional detail line, and a ring on the cap that fills for hold actions. Only the picked target (InteractPick) is ever shown, and in the match it yields to a tutorial tip card while that pops in (unless a hold is under way). Checks: `--interact-prompt-check`, `--interact-pick-check`.
+
+## Tutorial objective strip (one banner for both tutorials)
+- `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
+  title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
+  pulses for 1.6 s whenever the objective changes, then keeps a steady rim. The message lane starts at 72% of the
+  width, so the strip never touches it. In the match tutorial the Ways Out strip, the match clock and the ship's
+  planning countdown are off; in a real match (`FirstMatchGuide`) the strip drops under `WaysOutHud.bottom()`
+  (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
+- The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
+  Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
+  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.

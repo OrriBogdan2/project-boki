@@ -1252,9 +1252,9 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
-		"reviving": st = "reviving you!"
+		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
 		"fused": st = "merged"
-	if k.state in ["active", "downed", "reviving", "fused", "returning"] or not k.giant.is_empty():
+	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
 		var sr := SafeArea.keep(Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14)), sz)
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
@@ -1523,7 +1523,8 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var side := Vector2(-d.y, d.x)
 		c.draw_colored_polygon(PackedVector2Array([e + d * 16.0, e - d * 6.0 + side * 11.0, e - d * 6.0 - side * 11.0]), col)
 		var lbl := "%s %dm" % [h.pname.substr(0, 10), dist]
-		if String(st[0]) == "WISP": lbl = "%s DOWN %dm" % [h.pname.substr(0, 10), dist]
+		if String(st[0]) == "WISP":
+			DownedMarks.badge(c, e - d * 26.0 - Vector2(0, 18), h, SideColor.ally(), m.time, 10.0)
 		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
 		_ctext(e - d * 26.0 + Vector2(0, 5), lbl, 13, col, big)
 
