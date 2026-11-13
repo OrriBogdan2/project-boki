@@ -129,7 +129,7 @@ defaults aren't cited, since the data names no field for these windows.
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
-| drop_dive_steer_t (90% of commanded) | 0.783s | 0.233s | <= 0.3s | [est] responsive |
+| drop_dive_steer_t (90% of commanded) | 0.783s | 0.4s | <= 0.42s | the dive steers with every jump's air control (Loco.air_step, owner 11-08 one model; was 0.233s on its own 45 m/s² ramp) |
 | drop_deploy_frames | 1 | 1 | <= 1 | |
 | drop_deploy_settle_t | 0.267s | 0.217s | <= 0.3s | [est] |
 | drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
