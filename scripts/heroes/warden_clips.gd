@@ -275,7 +275,6 @@ func _build() -> AnimationNodeBlendTree:
 	bs.min_space = Vector2(-1, -1)
 	bs.max_space = Vector2(1, 1)
 	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
-	bs.sync = true          # every loop runs at zero weight too: a ring's loops of one length stay in step on a turn
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	var cycle := float(lc.get("cycle_s", 0.0))
