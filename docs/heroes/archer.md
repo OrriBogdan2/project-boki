@@ -145,7 +145,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Spirit Walk base speed | x1.35 inside something from rank 1 | x1.1 everywhere; the inside bonus is rank 3 only | the data lists the terrain speed as the last upgrade |
 | Focus from snares | a snare that roots gave 40 Focus | none: Focus is cut | none |
 
-Rank paths that do not fit our system: the dash recharge is shared code (Hunter.dash_regen, -15% a rank: 6 -> 5.1 -> 4.2 s) where the data's -1 s twice would be 6 -> 5.4 -> 4.7 s; the data's tiers II/III/IV fold into our two upgrades (II -> rank 2, III and IV -> rank 3); the shared +15% damage a rank is below the data's +20% on the Heavy Shot; the Hail Wall's rank cuts are the shared -10% a rank where the data has -2 s on the E.
+Rank paths that do not fit our system: the data's tiers II/III/IV fold into our two upgrades (II -> rank 2, III and IV -> rank 3); the Upgrade parity table below lists the numbers per rank (the dash recharge takes the data's seconds, `rank_cd.dash` in archer.json: 9.5 -> 8.5 -> 7.5 s).
 
 Skipped, with reasons: the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on X) untouched.
 

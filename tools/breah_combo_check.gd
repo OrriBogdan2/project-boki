@@ -648,8 +648,8 @@ func _breah() -> void:
 		"shield %.0f" % P.shield
 	)
 	ok(
-		"data rank 3: a second charge, recharging in 8.4s (12s x 0.7 on the shared rank step)",
-		P.max_dashes() == 2.0 and absf(P.dash_regen() - 8.4) < 0.05,
+		"data rank 3: a second charge, recharging in 10s (the data's -2s from rank 2, 12s base)",
+		P.max_dashes() == 2.0 and absf(P.dash_regen() - 10.0) < 0.05,
 		"charges %.0f regen %.2f" % [P.max_dashes(), P.dash_regen()]
 	)
 	reset.call()
