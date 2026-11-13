@@ -7,7 +7,9 @@ extends RefCounted
 ##     holds there gate_hold_s, and every member of that squad within gate_take_r of the Gate leaves: MINOR.
 ##   - the final seat: at final_s (or at once, rush_k faster, when one squad is left) the Heart ring opens.
 ##     A squad holding it alone fills it (faster with more of them, Exits.crew_rate); a standing rival stalls
-##     it; an empty ring drains. Full: that squad's members in the ring leave, MAJOR, the islands fall soon.
+##     it; an empty ring drains. Downed Hunters (Wisps) neither hold nor stall it: when none of the holders
+##     stands in it and one other squad does, that squad takes it over from nothing. Full: that squad's
+##     members in the ring leave, MAJOR, the islands fall soon.
 ##   The Blight's tide closes on the Heart all match (tide_r; read by BlightDir.level / _spawn_tick).
 ## One explicit state (briefs/STATE_MACHINES.md): S, with the legal edges in NEXT; only go() moves it (a
 ## refused edge is counted, never applied), and only the host does. _force() is the mirror for clients and demos.
@@ -315,6 +317,9 @@ func _ring_crews() -> Dictionary:
 
 func _ring_tick(dt: float) -> void:
 	var crews := _ring_crews()
+	if final_team >= 0 and not crews.has(final_team) and crews.size() == 1:
+		final_team = -1      # the holders are out of the ring or down: a squad standing in it alone takes it over
+		final_prog = 0.0
 	if final_team < 0 and crews.size() == 1:
 		final_team = int(crews.keys()[0])
 		audio.call_out("start", "final", final_team)
