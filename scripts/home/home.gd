@@ -460,6 +460,7 @@ func _ready_rest() -> void:
 	await _slice()
 	_build_bridges()
 	ZoneDress.place(self)
+	ZoneAir.add(self)
 	_build_plots()
 	await _slice()
 	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Unmasked.worn(), Arch.of_save())

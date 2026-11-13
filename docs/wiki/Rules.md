@@ -1775,6 +1775,19 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | default | default |
 | looks | {"default": {"name": "Wisp", "desc": "A round soul-light in your team's colour with a white heart, slow and heavy.", "core": {"rim": "team", "color": "ffffff", "rim_width": 0.3, "glow": 1.3}, "body": {"radius": 0.3, "squash": 0.85, "head": 0.16}, "hover": 0.4, "bob": 0.04, "bob_hz": 0.45, "drag": 0.45, "settle": 0.5, "lean": 0.35, "hum": {"sfx": "wisp_hum", "db": -14.0}, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
 
+## zone_air (`content/rules/zone_air.json`)
+
+Each garden zone's ambient layer (scripts/home/zone_air.gd): one GPUParticles3D over the island, unshaded, no lights, no bursts. Off at the lowest quality preset, count x Settings fx above it. Keys are garden_zones.json ids.
+
+| Setting | Value |
+|---|---|
+| off_at | low |
+| off_at_doc | The quality preset (Settings.QUALITY) at which no zone has its layer. |
+| box | [16.0, 2.0, 12.0] |
+| box_doc | m, half-extents of the box round HomeLayout.LANDING the motes start in (the start island is about 32 x 24 m). |
+| zones_doc | col: colour (hex) · count: particles at fx 1 · life: s each lives · size: m [width, height] of its quad · y: m above the ground the box centre sits · vel: m/s start velocity · spread: degrees off vel · grav: m/s2 (y) · fade: share of its life it takes to fade in and out (a twinkle at 0.5) |
+| zones | {"bramblebank": {"name": "pollen", "col": "f6eaa0", "count": 40, "life": 9.0, "size": [0.07, 0.07], "y": 1.6, "vel": [0.25, 0.05, 0.1], "spread": 60.0, "grav": -0.02, "fade": 0.2}, "glasswater": {"name": "glints", "col": "e8fbff", "count": 36, "life": 1.4, "size": [0.12, 0.12], "y": 0.15, "vel": [0.0, 0.0, 0.0], "spread": 0.0, "grav": 0.0, "fade": 0.5}, "cinderstep": {"name": "embers", "col": "ff8a3a", "count": 36, "life": 5.0, "size": [0.06, 0.06], "y": 0.6, "vel": [0.1, 0.45, 0.0], "spread": 25.0, "grav": 0.0, "fade": 0.3}, "hushwood": {"name": "fireflies", "col": "d6ff7a", "count": 28, "life": 6.0, "size": [0.09, 0.09], "y": 1.2, "vel": [0.0, 0.08, 0.2], "spread": 180.0, "grav": 0.0, "fade": 0.5}, "ridge": {"name": "wind streaks", "col": "ffffff", "count": 18, "life": 1.6, "size": [1.1, 0.03], "y": 1.8, "vel": [6.0, 0.0, 0.6], "spread": 6.0, "grav": 0.0, "fade": 0.4}} |
+
 ## Combos
 
 One fighter sets a foe up with a status, the partner pays it off (`content/combos/`).

@@ -83,3 +83,7 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+
+## Zone air (ambient layer per zone)
+
+Each garden zone has one ambient layer so arriving through the Waystone reads as a new place: pollen in Bramblebank, glints in Glasswater, embers in Cinderstep, fireflies in Hushwood, wind streaks on Kitewind Ridge (`scripts/home/zone_air.gd`, `content/rules/zone_air.json`). It is one `GPUParticles3D` named `ZoneAir` over the island round `HomeLayout.LANDING`, a small fixed count, unshaded billboards with a fade ramp, no light, no burst, added once by Home's build in base_mode (never in the hub). Off at the lowest quality preset (`off_at`, Low), the count times `Settings` `fx` above it; a quality change shows on the next zone load. `--zone-air-check` asserts all of that and one layer per zone in a real Home; `--garden-zone-shots --zone=<id>` shows it by day and night.
