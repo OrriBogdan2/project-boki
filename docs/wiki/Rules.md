@@ -1349,6 +1349,26 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | face | {"bulwark": [0.52, 0.29], "archer": [0.46, 0.33], "juggernaut": [0.58, 0.33], "thief": [0.49, 0.42], "mage": [0.47, 0.27], "dolm": [0.49, 0.31], "gil": [0.46, 0.4], "ostra": [0.44, 0.47], "ashwick": [0.55, 0.33], "gunslinger": [0.41, 0.32], "tender": [0.51, 0.36], "rimewright": [0.42, 0.47], "dredge": [0.45, 0.43]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.52, 0.22], "juggernaut": [0.68, 0.25], "thief": [0.44, 0.3], "gil": [0.36, 0.24], "mage": [0.55, 0.22], "dolm": [0.44, 0.22], "ostra": [0.71, 0.25], "ashwick": [0.52, 0.27], "rimewright": [0.22, 0.25], "dredge": [0.6, 0.22], "gunslinger": [0.64, 0.19], "tender": [0.51, 0.55]} |
 
+## results_pose (`content/rules/results_pose.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The pose each Hunter holds on the results stage (scripts/ui/results_stage.gd): one clip of its own GLB, frozen at t seconds, a held strike or an idle beat that fits it. Keyed by Hunter id; a Hunter left out stands in the plain idle. |
+| gunslinger | {"clip": "lmb", "t": 0.2} |
+| juggernaut | {"clip": "slash_r", "t": 0.25} |
+| thief | {"clip": "flourish", "t": 0.4} |
+| ashwick | {"clip": "lance", "t": 0.3} |
+| rimewright | {"clip": "spear", "t": 0.3} |
+| archer | {"clip": "draw", "t": 1.2} |
+| dredge | {"clip": "flex", "t": 0.3} |
+| ostra | {"clip": "flurry", "t": 0.5} |
+| tender | {"clip": "hearth", "t": 0.5} |
+| mage | {"clip": "rmb_hold", "t": 0.5} |
+| dolm | {"clip": "lmb_punch", "t": 0.35} |
+| bulwark | {"clip": "rmb_guard", "t": 0.5} |
+
 ## revive (`content/rules/revive.json`)
 
 

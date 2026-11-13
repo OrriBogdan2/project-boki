@@ -5039,6 +5039,7 @@ func _finish() -> void:
 		r["belt"] = Equal.belt_home(player, result.get("extracted", false))
 		r["backpack"] = Backpacks.home_tier(player, result.get("extracted", false))
 		r["stats"] = player.stats.duplicate()
+		r["squad"] = ResultsStage.roster(hunters, player)
 		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):

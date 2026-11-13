@@ -255,6 +255,8 @@ const CHECKS := {
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
+	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
+	"--results-stage-shots": ["res://tools/results_stage_check.gd", "results_stage_check", "shots"],      # --shots-dir
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
