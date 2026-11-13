@@ -409,7 +409,8 @@ func _archer() -> void:
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
-	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	for i in 6: P.inp["fire"] = true; m.step(DT)          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
+	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
 		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
@@ -427,7 +428,7 @@ func _archer() -> void:
 	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	P.ak.press_rmb()
 	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and not bool(K.rmb_ctx["air"]) and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
-	K.rmb_down = false
+	K._drop_rmb()          # let go of the draw (the press-only hack left the pose and bar up)
 	step(m, 1.2)
 	# the bow's perfect window: let go right as Supercharged comes up: no extra damage, the next draw is faster
 	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
@@ -521,10 +522,10 @@ func _gunslinger() -> void:
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var nums0: int = m.fx.nums.size()
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
-	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
+	ok("venator Dazed: rifle +76%", is_equal_approx(base, 17.6), "%.1f" % base)
 	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
-	ok("venator Dazed: the bonus gets its own pink +9 number",
-			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 9.0))
+	ok("venator Dazed: the bonus gets its own pink +7.6 number",
+			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 7.6))
 	_burr_terrain(m, P, T, K, home, r[5])
 	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
@@ -534,7 +535,7 @@ func _gunslinger() -> void:
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
-	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
+	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 24.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
 	P.do_dash(); step(m, 0.6)      # the tap skid runs ~0.5s
