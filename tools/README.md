@@ -64,7 +64,7 @@ here; see AGENTS.md. Pipeline detail lives in `docs/art/wardens/PIPELINE.md`, `d
 | `sfx_stats.py` | Loudness and spectrum numbers for a mix pass | `python3 tools/sfx_stats.py audio --json now.json` |
 | `sfx_look.py` | Waveform and spectrogram review sheet | `python3 tools/sfx_look.py out.png audio/vn_*.wav` |
 
-After any generator: `godot --headless --import`.
+After any generator: `godot --headless --import`. Also after checking out a branch that adds a `class_name`: the class list lives in the untracked `.godot/global_script_class_cache.cfg`, and with a stale one every script naming the new class fails to compile (a two-game check then stalls with nothing in guest.log; jobq ships the tree with its `.godot`, so import before submitting).
 
 ## Build / CI
 
