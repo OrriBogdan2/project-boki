@@ -30,6 +30,8 @@ extends RefCounted
 ##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
 ##  11. the rarity stings (RaritySting): rare and very rare each have a sound, quieter than the scan chime,
 ##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
+## 11. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
+##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -68,6 +70,7 @@ func run(main: Node) -> void:
 	_chop_mine()
 	_cc_cues()
 	_rarity_stings()
+	_boss_moves()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -554,3 +557,20 @@ func _chop_mine() -> void:
 	var wired: bool = own.all(func(n): return src.contains('"%s"' % n))
 	ok(wired and not src.contains("break_wood") and not src.contains("armor_hit"),
 			"chop: the axe, creak, fall, pick, crack and break are wired; no stand-ins")
+
+## 11. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
+func _boss_moves() -> void:
+	var boss: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boss.json"))["sounds"]
+	var missing := []
+	for kind in BossAnim.ATTACKS:
+		var cues := ["wake", "phase", "stagger", "fall", "defeat"]
+		for atk in BossAnim.ATTACKS[kind]:
+			cues += [atk + "_wind", atk + "_hit"]
+			if atk in ["boulders", "lob"]:
+				cues.append(atk + "_land")
+		for c in cues:
+			if not boss.has("boss_%s_%s" % [kind, c]):
+				missing.append("%s %s" % [kind, c])
+	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
+	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
+	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")
