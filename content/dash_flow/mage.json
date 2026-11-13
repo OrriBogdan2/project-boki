@@ -66,5 +66,11 @@
 			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."},
 			"e": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."}
 		}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:65); no cast from the air in the footage (hero-ref/vireo.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:66); no cast from the air in the footage (hero-ref/vireo.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:68); no cast from the air in the footage (hero-ref/vireo.md)", "verdict": "[?]"},
+		"x": {"h": "zero", "v": "rise", "ours": "Kitefall: the 0.3 s crouch, then straight up", "source": "Data: PRESS to launch into the air (supervive_kits.md:69); footage f28-f32: a 0.3 s crouch, then straight up (hero-ref/vireo.md:397, 404); a cast from the air not shown", "verdict": "match"}
 	}
 }

@@ -69,5 +69,11 @@
 			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."}
 		}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:105); no cast from the air in the footage (hero-ref/breah.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "drop", "ours": "the air Quakefall: a dive onto the floor below", "source": "Data: hold and release to slam, 'jump while charging to leap forward' (supervive_kits.md:106); no press from the air shown (hero-ref/breah.md:259, 445)", "verdict": "[?]"},
+		"e": {"cast": "no", "h": "keep", "v": "fall", "source": "Data: 'only castable over ground' (supervive_kits.md:108), which reads as the terrain under the wall, not the caster's feet; a cast from the air not shown", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:109); no cast from the air in the footage (hero-ref/breah.md)", "verdict": "[?]"}
 	}
 }

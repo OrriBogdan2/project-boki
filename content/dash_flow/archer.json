@@ -68,5 +68,11 @@
 			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281)."},
 			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281)."}
 		}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:73); no cast from the air in the footage (hero-ref/pin.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:74); no cast from the air in the footage (hero-ref/pin.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:76); no cast from the air in the footage (hero-ref/pin.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:77); no cast from the air in the footage (hero-ref/pin.md)", "verdict": "[?]"}
 	}
 }
