@@ -11,7 +11,6 @@ extends ArchKit
 ## The seed is a ground zone placed through HeroZones (legal ground, short of walls, never in the
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
 
-const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")             # the pale teal of his rings and the COLLAPSE payoff
 const SEA := Color("2ee6c0")              # his signature (docs/VFX_QUALITY.md): orbs, Snap, Brimseed, Nightwell
 const DEEP := Color("0b5a50")             # their deep teal (the seed's filling accent)
@@ -102,7 +101,7 @@ func add_swell(v: float) -> void:
 	if res >= res_max():
 		swollen_t = float(res_def()["swollen_t"])
 		swells += 1
-		armed_fx("SWOLLEN", "")
+		armed_fx("")
 		play("ostra_empower")
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
@@ -657,14 +656,15 @@ func _pop(hit: bool) -> void:
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
-		payoff_fx(caught_hunter.pos, PAY, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
+		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist < 9.0 and los and randf() < 0.1:
-		h.inp["aim"] = tgt.pos
+	if HeroUlt.ready(self) and dist < 9.0 and los:
+		# (aimed where they walk to in the tell)
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * float(x_def()["tell"]) * 0.5
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():

@@ -5,6 +5,7 @@ extends RefCounted
 ## table row per Hunter (docs/BOT_KIT_USE.md) and fails any slot a bot never uses, or uses in a way that cannot
 ## hit: a recast never recast, a hold never released, Kael's Lunge never perfect-released, Lace never drawing
 ## the Heavy Shot to full. The fix lives in the kit's bot_use or the Bot, never in the kit's numbers.
+## With --kit-use-match: the ultimate and Boki use in a 10-trio match instead (tools/bot_ult_use.gd).
 ## Never touches the save.
 
 ## arch -> the kit's own counters (keys of the tally) that must be above zero.
@@ -61,6 +62,11 @@ func run(main: Node) -> void:
 		if a.begins_with("--bot-kit-check="): only = a.substr(16)
 		if a.begins_with("--bot-kit-t="): secs = float(a.substr(12))
 		if a.begins_with("--bot-kit-seed="): seed_n = int(a.substr(15))
+	if "--kit-use-match" in OS.get_cmdline_user_args():
+		var ult := preload("res://tools/bot_ult_use.gd").new()
+		await ult.run(main)
+		main.get_tree().quit(1 if ult.bad > 0 else 0)
+		return
 	for arch in Arch.ids():
 		if only == "" or only == arch:
 			await _fight(main, String(arch), seed_n, secs)
