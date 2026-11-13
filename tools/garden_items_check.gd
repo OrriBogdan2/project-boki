@@ -105,8 +105,9 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = 4
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 4 grows a form")
+	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
+	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
+			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
@@ -149,7 +150,7 @@ func _feeding() -> void:
 	ok(rinse and Care.lean_total(rec) == 0.0, "Rinse Melon clears the lean through Care.feed")
 	var tea := Care.feed(rec, "unwind_tea")
 	var power: int = rec["stats"]["power"]
-	ok(tea["ok"] and int(rec["loose"].get("power", 0)) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
+	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")
@@ -161,5 +162,5 @@ func _migration() -> void:
 	no_aura.erase("aura")
 	Care.ensure(no_aura)
 	ok(no_aura["aura"] == "", "a Boki saved before auras loads wearing none")
-	var gained: bool = old["path"] == [] and old["stay"] == false and old["loose"] == {}
+	var gained: bool = old["path"] == [] and old["stay"] == false and old["loose"] == 0
 	ok(moved and gained, "a v12 save gains path, stay, loose")

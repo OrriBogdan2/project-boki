@@ -210,7 +210,7 @@ func _lead(rec: Dictionary) -> void:
 	ok(c.k.is_empty() and not k.has("led"), "holding again lets it go")
 
 func _pose() -> void:
-	var a: HunterAnim = home.p_anim
+	var a: HunterAnim = home.p_anim if home.p_anim != null else HunterAnim.new(home.player)
 	for mode in ["carry", "pack"]:
 		for i in 40:
 			a.update(1.0 / 60.0, {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true, "act": mode})
