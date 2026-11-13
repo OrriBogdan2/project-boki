@@ -601,8 +601,7 @@ func wake(L: Dictionary, by: Ent) -> void:
 	L["woke_at"] = m.time
 	var lbl: Label3D = L["nodes"]["label"]
 	lbl.text = "%s\n%s" % [L["name"], b.md["name"]]
-	m.sfx("horn", L["c"], 4.0, 0.55)
-	m.sfx("v_warden", L["c"], 6.0, 0.45)
+	BossSfx.wake(m, b)
 	Shake.incoming_big(m, L["c"], 0.6)
 	m.fx.burst(b.pos + Vector3(0, 2.0, 0), color_of(L), 50, 7.0, 0.8, 0.0, 1.6)
 	m.add_feed("%s has woken in %s" % [b.md["name"], L["name"]])
@@ -650,13 +649,14 @@ func on_boss_phase(b: Boss, p: int) -> void:
 	var L: Dictionary = b.lair
 	if m.player and inside(L, m.player.pos, 6.0) and m.hud:
 		m.hud.toast("PHASE %d  ·  %s grows furious" % [p + 1, b.md["name"]], color_of(L))
-	m.sfx("warn", b.pos, 2.0, 0.6)
+	BossSfx.phase(m, b)
 	Juice.boss_phase(m, b)
 
 func on_enrage(b: Boss) -> void:
 	if m.player and inside(b.lair, m.player.pos, 6.0) and m.hud:
 		m.hud.toast("%s IS ENRAGED" % String(b.md["name"]).to_upper(), Color("ff5a4a"))
 	m.add_feed("%s is enraged" % b.md["name"])
+	BossSfx.phase(m, b, true)
 
 ## Adds a boss calls up (the Brood Mother's brood); they belong to the lair and stay in it.
 func spawn_add(L: Dictionary, kind: String, at: Vector3) -> void:
@@ -753,7 +753,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	for a in L["adds"]:
 		if is_instance_valid(a) and not a.dead: a.camp = a.pos
 	m.add_feed("%s felled %s!" % [killer.pname if killer else "Someone", b.md["name"]])
-	m.sfx("horn", null, -2.0, 0.7)
+	BossSfx.defeat(m, b, killer)
 	_music(false)
 
 ## The boss is dead and its gate still shut: VICTORY_T on the clock, the lever lit, the updraft
