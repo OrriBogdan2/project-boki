@@ -9,3 +9,8 @@ Rendered on rpc7 under xvfb with the opengl3 (Compatibility) renderer, because t
 - `full_map.jpg`: every hazard area is tinted by kind, and the key strip along the bottom is from before the main merge: the kinds now sit as rows in the full map's corner key (MapKey).
 - `full_zoom.jpg`: zoomed in on the two Cinder Steps lava fields.
 - `compare_north.jpg`: full map, Frostgate / Stormbreak area, before (left) and after (right). It shows the ice sheet and static flats outlines.
+
+`v2/` (after the map v2 merge, rpc1 xvfb opengl3, `--hazard-map-shots`): `1280x720_full_map.jpg` shows the
+hazard kinds as rows in the full map's corner key (MapKey), with the Safe shield row (the ember Boki counters
+lava); `1280x720_full_zoom.jpg` zooms on the Cinder lava fields, each with its shield. The v2 areas are small
+(about 10 m across), so on the unzoomed map they read as dots.
