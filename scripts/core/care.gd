@@ -182,7 +182,9 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 ## farm, which some kinds love and some hate (BokiQuirks.rain_joy); friend: a friend close by (it recovers faster);
 ## away: time you were gone (catch_up), when joy wears at Care.DECAY's slow pace because nobody models the toys
 ## it played with meanwhile.
-static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false, friend := false, away := false) -> void:
+static func tick(
+		rec: Dictionary, secs: float, sleeping := false, raining := false, friend := false, away := false
+) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -197,7 +199,11 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 	var floors := sulky()
 	if floors.is_empty():
 		# the part of this stretch spent with nothing in it counts toward starving
-		var help := (RECOVER_NAP if sleeping else 0.0) + (RECOVER_FRIEND if friend else 0.0)
+		var help := 0.0      # extra recovery a second while fed
+		if sleeping:
+			help += RECOVER_NAP
+		if friend:
+			help += RECOVER_FRIEND
 		starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0, help)
 	nd["clean"] = clampf(float(nd["clean"]) - DECAY["clean"] * mins * (0.2 if sleeping else 1.0), 0.0, 100.0)
 	if sleeping:

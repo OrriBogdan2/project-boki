@@ -79,7 +79,7 @@ Everything you can place in build mode (B), from `HomeLayout.CATALOG`. Costs are
 |---|---|---|---|
 | Bench | 25 gems | 2x1 |  |
 | Boki bed | 15 gems | 1x1 |  |
-| Feeding bowl | 12 gems | 1x1 | Drop a snack in and hungry Boki nearby walk over. Bold ones push in first, timid ones wait, and rivals huff. |
+| Feeding bowl | 12 gems | 1x1 | Drop a snack in: hungry Boki nearby come. Bold ones push in, timid ones wait. |
 | Picnic rug | 20 gems | 2x2 |  |
 | Long rug | 30 gems | 3x2 |  |
 
