@@ -24,15 +24,19 @@ about 14, held lower for the same cap) and slows 30%. Its cooldown follows the s
 slide tap 4.6 m and hold 7 m (the whole hold from the press: the skid, then the slide covers the rest).
 slide tap 4.8 m and hold 7 m.
 
-## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Vex: each slot reads
-`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Ghost, `Upg:` lines.
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
+bulwark doc does it. [D] = game data (briefs/supervive-data/supervive_kits.md, `Upg:` II / III / IV). Our seconds keep
+the source's cut as a share of its cooldown. Each slot reads `rank_cd` / `rank_dmg` in the JSON (1.0 where the data names
+no such upgrade). LMB and the passive have no tiers in the data and do not rank; R ranks are decision 0022's.
 
-| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
-|---|---|---|---|
-| RMB Burr Charge | -1.5s cooldown x2, tier IV: resets on a knock | 5.85s / 5.2s, reset on a knock | 5.4s / 4.3s, reset on a knock at 3 |
-| Space Slipstep | -1.5s recharge x2, tier IV: +25% speed 2s after a slide | 7.65s / 6.0s, speed burst at 3 | 7.4s / 6.3s, +25% speed 2s at 3 |
-| E Longneedle | +20% damage x2, tier IV: 30% shave per hunter | cooldown 10.35s / 9.2s, damage +15% / +30%, shave at 3 | cooldown 11.5s flat, damage +20% / +40%, 30% shave per hunter at 3 |
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in |
+|---|---|---|---|---|
+| LMB Fever | none [D] | - | - | - |
+| RMB Burr Charge | -1.5 s / -1.5 s / resets on a knock [D] (9 s) | cooldown 6.5 -> 5.4 s | 4.3 s; a knock resets it | `--gunslinger-combo-check` upgrade parity, `Knock at rank 3` |
+| Shift Slipstep | -1.5 s / -1.5 s / speed when a slide ends [D] (11.5 s) | recharge 8.5 -> 7.4 s | 6.3 s; +25% speed for 2 s when a slide ends (`dash.rank3_speed`) | same, `rank 3 (tier IV) a slide's end` |
+| E Longneedle | +20% / +20% damage / -30% cooldown per hunter hit [D] | damage +20% | +40%; 30% off per hunter hit (20% once below) | same, `Longneedle at rank 3` |
+| Passive Hot Streak | none [D] | - | - | - |
 
 ## Audit (Nov 3 23:40)
 

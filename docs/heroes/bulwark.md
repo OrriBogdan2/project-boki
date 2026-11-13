@@ -213,6 +213,25 @@ Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, t
 Rank paths that do not fit our system: the Spin Dash's own cooldown still uses the shared -15% a rank (9 -> 7.65 -> 6.3 s, the data's -1.5 s a rank would be 7.5 -> 6) because the dash recharge is shared code (Hunter.dash_regen); the data's four tiers fold into our three (III and IV share our rank 3); the shared +15% damage a rank applies to the Crush and Slam where the data names no damage upgrade; the data's -1.5 s Shield Bash is on the dash rank here, as the data lists it under the Shift upgrades. Skipped: R (Abyssalbreaker) is the Faultline on R, untouched; the Guard meter stays as our own loop (the data has no such meter, but the Shield Slam payoff depends on it).
 Rank paths that do not fit our system: the Spin Dash's own cooldown still uses the shared -15% a rank (8 -> 6.8 -> 5.6 s now the base is 8, the data's -1.5 s a rank would be 6.5 -> 5) because the dash recharge is shared code (Hunter.dash_regen); the data's four tiers fold into our three (III and IV share our rank 3); the shared +15% damage a rank applies to the Crush and Slam where the data names no damage upgrade; the data's -1.5 s Shield Bash is on the dash rank here, as the data lists it under the Shift upgrades. Skipped: R (Abyssalbreaker) is the Faultline on X, untouched; the Guard meter stays as our own loop (the data has no such meter, but the Shield Slam payoff depends on it).
 Rank paths that do not fit our system: the data's four tiers fold into our three (III and IV share our rank 3); the upgrade table at the top lists the numbers per rank.
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV (III and IV share our
+rank 3). [D] = game data (briefs/supervive-data/supervive_kits.md, Oath `Upg:` II / III / IV). Each slot reads `rank_cd` /
+`rank_dmg` in bulwark.json; `rank_dmg` is 1.0 on every slot because the data names no damage upgrade (the shared +15% a
+rank is gone from the Crush, 360 Smash and field). LMB and the Guard passive have no tiers in the data and do not rank;
+R (Abyssalbreaker, our Faultline on X) is decision 0022's.
+
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--bulwark-combo-check` |
+|---|---|---|---|---|
+| LMB hammer | none [D] | - | - | - |
+| RMB Aegis | +25% max-HP shield / faster repair and regen / +25% max-HP shield [D] | shield 160 -> 200 HP | 240 HP; regen 20 -> 30 a second, back in 2 s when broken, 1.4 s wait | `aegis 160 / 200 / 240`, `rank 3 repairs faster` |
+| Shift 360 Smash | -1.5 s (Spin Dash and Shield Bash) / -1.5 s / a dash hit refunds the Shield Bash [D] (8 s) | recharge 8 -> 6.5 s; Shield Charge 6 -> 4.5 s | 5 s; Shield Charge 3 s; a Smash that hits refunds it | `rank row`, `Shield Charge cooldown 6 / 4.5 / 3`, `rank 3, a 360 Smash` |
+| E Mending Ground | +25% heal / -4 s / +25% heal [D] (8 s at IV) | healing +25%, cooldown 12 s | cooldown 8 s, healing +50% | `E cooldown 12 / 12 / 8 s` |
+| Passive Guard | none [D] | - | - | - |
+
+Fixed to the data in this pass: the Spin Dash recharge was the shared -15% a rank (6.8 / 5.6 s), now the data's -1.5 s
+(`rank_cd.dash`); the shared +15% damage a rank on the aegis, Smash and field is gone; the extra 1 m on both dashes at
+rank 3 (ours, not in the data) is gone. Skipped: the Guard meter stays as our own loop (the data has no such meter, but
+the Shield Slam payoff depends on it).
 
 ## Scaling
 Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Slam 18; Crushed 8 + stun 0.5; Mending Ground 2 per 0.5 s for 4 s + a burst of 18; Faultline 4 strike + 18 eruption (40 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.
