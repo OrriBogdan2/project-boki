@@ -846,19 +846,19 @@ The check asserts: a rim in reach is topped with at most 0.1 s stood at the face
 ## Online casts: press to first frame at 100 ms (`--cast-predict-check`)
 Source parity: your own ability starts the frame you press it, even online. `tools/cast_predict_check.gd` runs a listen server (the host game, with the relay in-process) and a client (a second headless game) over the desktop relay with test weather: the relay holds every packet 50 ms (a 100 ms round trip between the games) and loses 2% (a lost snapshot is dropped, a lost reliable message comes one round trip late, `RelayServer` `--lag-ms` / `--loss`). The client presses LMB, RMB, E, R and dash of the four slice Wardens through the real input path, first on an offline match, then online, and records the first tick of animation (what `HunterAnim` is told) and of VFX (a burst, spark, flash or HeroVfx look starting within 6 m of the Hunter). Tick 0 is the press's own frame. Target: online is never later than offline.
 
-Measured on the client (ticks after the press, offline / online; the same numbers before and after this pass, as nothing in the game had to change):
+Measured on the client (ticks after the press, offline / online; re-measured 2026-11-13 on main ce8bb5edd0, nothing in the game had to change):
 
 | Warden | LMB anim, vfx | RMB anim, vfx | E anim, vfx | R anim, vfx | Dash anim, vfx |
 |---|---|---|---|---|---|
-| Vex | 0/0, 0/0 | 0/0, 3/3 | 0/0, 1/1 | 0/0, 0/0 | 0/0, 0/0 |
-| Kael | 0/0, 13/13 | 19/19, 4/4 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
-| Lace | 0/0, 1/1 | 10/10, 4/4 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
-| Cinder | 0/0, 0/0 | 1/1, 1/1 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+| Vex | 0/0, 0/0 | 0/0, 7/7 | 0/0, 1/1 | 0/0, 0/0 | 0/0, 0/0 |
+| Kael | 13/13, 13/13 | 19/19, 4/4 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 4/4 |
+| Lace | 1/1, 1/1 | 1/1, 1/1 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
+| Cinder | 0/0, 0/0 | 7/7, 1/1 | 0/0, 0/0 | 0/0, 0/0 | 0/0, 0/0 |
 
-Measured round trip, client to host and back: 149-162 ms (the 100 ms of weather plus each game and the relay reading the line once a frame). 14-19 packets lost per run.
+Measured round trip, client to host and back: 149-162 ms (the 100 ms of weather plus each game and the relay reading the line once a frame). 13-19 packets lost per run.
 
 - **No cosmetic prediction was needed.** Each game owns its own Hunter (scripts/core/net.gd): the client's kit, animation, sounds and looks run on its own game in the press's frame, and only hits on bodies another game owns travel (to that game, which applies them). Nothing in the cast path waits for the host, so there is nothing to reconcile or cancel and `Net.VERSION` is unchanged.
-- **The later cells are local gates, the same offline:** Kael's LMB shows its wave-charge look once the hold becomes a charge (13), his RMB is the tap/hold split (its pose on the hold threshold, a charge spark at 4), Lace's RMB draw pose waits for the 0.15 s tap guard (10; ext/input-latency-check starts it on the press), Vex's RMB first spark at 3 and Cinder's aim at 1 (the kit's first hold tick).
+- **The later cells are local gates, the same offline:** Kael's LMB pose and look wait for the hold to become a charge (13), his RMB is the tap/hold split (its pose on the hold threshold, a charge spark at 4) and his dash spark comes at 4; Vex's RMB first spark at 7, Cinder's RMB pose at 7 (the kit's first hold ticks).
 - **How the check keeps the comparison fair:** the same dice for both runs (Kael's charge sparks are a coin flip a tick), the offline bot stands idle and no Boki run about, the camp's monsters are cleared, and looks are counted only at the pressing Hunter.
 
 
