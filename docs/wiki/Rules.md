@@ -1117,6 +1117,19 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
 | demo_charge | 1 |
 
+## home_lead (`content/rules/home_lead.json`)
+
+A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own pace and speeds up to catch a gap, so it keeps up with the Empty's walk and run (HunterMove speed x carry_speed_k) instead of a fixed pace; its stride follows the speed (BokiRig clip cadence), so the feet keep planted.
+
+| Setting | Value |
+|---|---|
+| top_k | 1.2 |
+| top_k_doc | most its catch-up speeds it past your own speed, as a multiple; 1.2 of a 4.5 m/s lead is 5.4 m/s, the fastest pace --boki-anim-audit checks (HOME_SPEEDS). |
+| catch_gain | 1.2 |
+| catch_gain_doc | share of your speed it adds per metre it is behind its slot (1/m), up to top_k. |
+| back_s | 0.075 |
+| back_s_doc | s of your walking it trails behind its side slot: the slot sits your speed x back_s metres behind you (0.3 m at 4 m/s). |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 

@@ -7,8 +7,9 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
-## m/s: a stroll, a home wander, a home fetch (home.gd); the match speed is added per species.
-const HOME_SPEEDS := [1.5, 2.4, 4.4]
+## m/s: a stroll, a home wander, a home fetch (home.gd), a led Boki at its catch-up top (home_lead.json), and the
+## match speed per species.
+const HOME_SPEEDS := [1.5, 2.4, 4.4, 5.4]
 const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
 const MAX_SLIDE := 0.25       # of the move speed: how fast a planted foot may slip against the ground
 const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
