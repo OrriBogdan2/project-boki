@@ -150,6 +150,7 @@ const CHECKS := {
 	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],  # each Hunter dashes four ways (GPU)
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],
 	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],      # the cursor on or under your own body
+	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],  # key to picture
 	"--boki-moves-check": ["res://tools/boki_moves_check.gd", "boki_moves_check", null],      # move tiles
 	"--boki-moves-shots": ["res://tools/boki_moves_shots.gd", "boki_moves_shots", null],      # --shots-dir=<dir>
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],      # choose what to rank: + and pips

@@ -379,6 +379,35 @@ func _archer_combos() -> void:
 		dmg(T) <= 0.0 and T.root_t <= 0.0 and K.ch_rmb >= 1.0 and K.last_variant == "tap" and not K.d["rmb"].has("snare"),
 		"took %.0f root %.2f charges %.1f variant %s" % [dmg(T), T.root_t, K.ch_rmb, K.last_variant]
 	)
+	# the draw shows from the press, as the source's charge does; let go before the hold and it is put away
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	m.step(DT)
+	var drawn := K.anim_id == "arc_heavy_wind" and K.pin_aim
+	P.inp["sec_hold"] = false
+	step(m, 0.3)
+	ok(
+		"combo archer: RMB press draws at once; let go before the hold and the draw is put away, nothing looses",
+		drawn and K.anim_id != "arc_heavy_wind" and not K.pin_aim and dmg(T) <= 0.0 and K.ch_rmb >= 1.0,
+		"drawn %s anim %s aim %s took %.0f charges %.1f" % [drawn, K.anim_id, K.pin_aim, dmg(T), K.ch_rmb]
+	)
+	# while the bow is drawn for the LMB, the Heavy Shot's draw waits for the hold: a quick tap leaves the LMB's alone
+	step(m, 0.3, func(): P.inp["fire"] = true)
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	m.step(DT)
+	P.inp["sec_hold"] = false
+	step(m, 0.1, func(): P.inp["fire"] = true)
+	ok(
+		"combo archer: a quick RMB tap while the LMB draws leaves that draw on",
+		P.draw_t >= 0.0 and K.anim_id == "arc_draw" and not K.pin_aim,
+		"draw %.2f anim %s aim %s" % [P.draw_t, K.anim_id, K.pin_aim]
+	)
+	P.inp["fire"] = false
+	step(m, 1.0)
+	fresh(T)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
 	hold(m, P, 1.2)
 	step(m, 0.3)
 	ok(
