@@ -1,0 +1,10 @@
+# Ruff for the Python tools (tools/check.sh -> tools/lint_gate.py baselines the old debt per file).
+target-version = "py311"
+line-length = 120
+
+[lint]
+# Real bugs only: pyflakes (F), syntax (E9), and the import/statement E4/E7 rules.
+select = ["F", "E4", "E7", "E9"]
+# Packed one-liners, late imports, one-letter names and lambda assignments are the style of the old
+# generator scripts; the format ratchet handles the layout, so these rules would only add noise.
+ignore = ["E401", "E402", "E701", "E702", "E731", "E741"]
