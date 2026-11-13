@@ -327,6 +327,9 @@ func _ready() -> void:
 	if "--move-feel-check" in args:
 		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
 		return
+	if "--step-up-check" in args:
+		load("res://tools/step_up_check.gd").new().run(self)    # lips up to the step height are walked over, smoothly (docs/MOVEMENT_FEEL.md, Step height)
+		return
 	if "--wallhug-check" in args:
 		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
 		return
