@@ -53,6 +53,8 @@ const MUFFLE_HZ := 1200.0      # Hz: the low-pass cutoff while muffled
 const MUFFLE_OPEN_HZ := 20000.0 # Hz: the cutoff the ramp starts from, above hearing
 const MUFFLE_DB := -6.0        # dB: the duck on the world bus while muffled
 const MUFFLE_S := 0.3          # s: ramp in / out
+## Where each one-shot bus sends (the rest go to Master): far and occluded sounds pass through SFXWorld.
+const SENDS := {"SFXWorld": "SFX", "SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld"}
 var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
@@ -94,7 +96,7 @@ func _ready() -> void:
 		AudioServer.add_bus()
 		var bi := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(bi, bn)
-		AudioServer.set_bus_send(bi, {"SFXWorld": "SFX", "SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld"}.get(bn, "Master"))
+		AudioServer.set_bus_send(bi, SENDS.get(bn, "Master"))
 	music_bus = AudioServer.get_bus_index("Music")
 	_setup_mix()
 	for i in 2:

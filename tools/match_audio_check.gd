@@ -357,7 +357,8 @@ func _panned(m: Match, P: Hunter) -> void:
 	_play("land", at)
 	var v = Sfx.last_voice
 	ok(m.get_viewport().get_camera_3d() != null and v is AudioStreamPlayer3D
-		and (v as AudioStreamPlayer3D).position.is_equal_approx(at), "a sound 6 m to your side plays placed there (%s)" % v)
+		and (v as AudioStreamPlayer3D).position.is_equal_approx(at),
+		"a sound 6 m to your side plays placed there (%s)" % v)
 	_play("click")
 	ok(Sfx.last_voice is AudioStreamPlayer and not Sfx.last_voice is AudioStreamPlayer3D,
 		"a UI sound (no place) plays on a plain voice")
