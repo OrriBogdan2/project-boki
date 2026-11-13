@@ -24,7 +24,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `tools/boki/face.py` | Eye domes, lids, brows, mouth: one vertex grid, one blend shape per expression |
 | `tools/boki/boki_clips.py`, `*_anim.py` | Shared clips, then each species' skeleton and own clips |
 | `tools/boki/boki_rig.py`, `build_boki.py` | Armature, weights from the primitives, sampling, .glb export |
-| `tools/boki/boki_scan.py`, `boki_meshy.py`, `pose_shots.py` | A body from a Meshy model of the sheet on the same rig (Kestrike, Cairnback, Gongibbon `gibbelle`, Effigeetle `goliathite`, Skateron `hoarheron`): `MESHY_BOKI_RECIPE.md` |
+| `tools/boki/boki_scan.py`, `boki_meshy.py`, `pose_shots.py` | A body from a Meshy model of the sheet on the same rig (Kestrike, Cairnback, Gongibbon `gibbelle`, Effigeetle `goliathite`, Skateron `hoarheron`, Frigatee `floenatee`): `MESHY_BOKI_RECIPE.md` |
 | `scripts/match/boki_rig.gd` | Loader and driver (`BokiRig`): clip from metas, face on top, marks and colours |
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |

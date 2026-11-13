@@ -9,6 +9,11 @@ Since then (11-13): Effigeetle (`goliathite`) and Skateron (`hoarheron`), both o
 with every lobe merged to root, so the body rides the root's bob and turn. Tried and dropped: Knotwyrm (`threadwyrm`),
 whose scan's head sits off the midline and tilted, so the face (mirrored about x=0) lands one eye per view. Soakybara
 (`lilybara`) waits too: its Meshy model has 6 materials and only one carries a texture, and the loader reads one.
+Frigatee (`floenatee`) followed on the same borrowed rig, from the boki3d batch's model (`~/meshy/boki3d/frigatee/
+model.glb` as `run1/glb.glb`, its base-colour image saved out as `tex0_base_color.png`). It follows the owner's seal
+sheet, not the manatee-and-icebox line in content/kin_v2. Its face sits on the scan's own eyes and snout through the
+row's `face` keys (`mouth_y`, `mouth_z` in scan space now override the fitted mouth), and its FRAME marks were set by
+hand off the scan's profile: a sitting seal is no blob, so the fitted ones floated off its back.
 
 What one species ends as: a body of 16,000 triangles (the whole model 18-19k with face, tools and grown parts), a
 2048 colour atlas and a 2048 normal atlas baked from the dense model, in `art/kin/<id>/` (about 2-3 MB).

@@ -8,7 +8,7 @@ const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
 	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird", "gibbelle", "caecilith", "goliathite", "hoarheron"]
+	"nettlynx", "thrumbird", "gibbelle", "caecilith", "goliathite", "hoarheron", "floenatee"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin",
@@ -24,7 +24,7 @@ const MESHY_TRIS := 20000
 ## Models merged from the single-species branches over that rule: a ratchet at their count today, to be cut down.
 const OVER_TRIS := {"kindlewren": 10714, "marchleaf": 5006, "mossgrade": 11914, "thrumbird": 7636,
 	"kestrike": MESHY_TRIS, "cairnback": MESHY_TRIS, "gibbelle": MESHY_TRIS,
-	"goliathite": MESHY_TRIS, "hoarheron": MESHY_TRIS}
+	"goliathite": MESHY_TRIS, "hoarheron": MESHY_TRIS, "floenatee": MESHY_TRIS}
 const MAX_BONES := 64
 
 var bad := 0

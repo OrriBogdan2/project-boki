@@ -59,6 +59,13 @@ SCANS = {
                   "merge": {"lobe%d" % i: "root" for i in range(7)},
                   "eye_c": (0.05, 0.357, -0.372), "eye_r": (0.022, 0.022, 0.011), "eye_yaw": 0.9, "face": {},
                   "sat": 0.8, "cover": 1.2},
+    "floenatee": {"height": 0.7, "tris": 16000, "x": [(0.2, 0.2)],
+                  "y": [(0.0, 0.0), (0.26, 0.58), (0.44, 0.7)], "z": [(-0.22, -0.42), (0.0, 0.0), (0.28, 0.5)],
+                  "drop": ("puffs",),
+                  "merge": {"lobe%d" % i: "root" for i in range(7)},
+                  "eye_c": (0.05, 0.635, -0.455), "eye_r": (0.022, 0.022, 0.011), "eye_yaw": 0.35,
+                  "face": {"mouth_y": 0.585, "mouth_z": -0.515},
+                  "sat": 0.8, "cover": 1.6},
 }
 
 
@@ -133,7 +140,7 @@ class Scan:
         self.EYE_C, self.EYE_R = v3(*s["eye_c"]), v3(*s["eye_r"])
         face = creature.FACE
         mouth = self.fit.fwd(v3(face["brow_x"], face["mouth_y"], face["mouth_z"]))
-        self.FACE = dict(face, brow_x=mouth[0], mouth_y=mouth[1], mouth_z=mouth[2], **s["face"])
+        self.FACE = {**face, "brow_x": mouth[0], "mouth_y": mouth[1], "mouth_z": mouth[2], **s["face"]}   # the row wins
         self.BONES = {name: (self.fit.fwd(head), self.fit.fwd(tail), parent)
                       for name, (head, tail, parent) in anim.BONES.items()}
         self._limbs = []
