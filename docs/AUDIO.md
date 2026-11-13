@@ -52,6 +52,8 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
  "kit_files": ["gunslinger_ult.gd"], "replaces": ["vn_rifle", "..."],
  "reach": {"gunslinger_fire": 45}, "loops": ["gunslinger_spin"]}
 ```
+Vex's Cinderfall plays `vn_nuke_fall` at the landing point on the cast: a whistle rising in pitch and level over exactly the 1.6 s fall (`tools/gen_sfx_vex.py` `FALL_S`), cut at the impact `vn_nuke_boom`; it carries 40 m (`reach`); `--sfx-set-check` holds its length to `x.delay` within 50 ms.
+
 `--sfx-set-check` asserts: every listed sound has its file(s); every take is within 3 dB of its category and under the ceiling; a Hunter set has hurt/down/death, dash, steps on all four surfaces, a `fire` sound and its signature list; `HeroSfx` picks them up; every literal `m.sfx("...")` in that Hunter's kit (`<arch>_kit.gd` plus its `kit_files`) names a sound that exists. `replaces` lists old-name files the set regenerated. `reach` (metres, 5-80) sets how far a sound carries: past the usual 22 m for a heavy sound, so you hear a carry coming, or less for a call that should stay close (`scan_call`: 11 m, half of gunfire) (past 9 m it plays through the muffled bus, so the low end is what carries); `Sfx` reads it from every set at start. Each sound under `loops` must repeat seamlessly.
 
 ## Playing and buses
