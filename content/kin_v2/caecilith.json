@@ -6,7 +6,7 @@
 		"Caecilian",
 		"Giant zipper"
 	],
-	"theme": "shadow",
+	"theme": "dark",
 	"flavor": "A worm that unzips the ground: it dives into a seam, zips it shut behind it, and comes up somewhere else. Secretive and sly; loves surprises, appears where you least expect it, grinning.",
 	"colors": {
 		"body": "#2a2630",

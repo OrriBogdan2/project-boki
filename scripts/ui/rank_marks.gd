@@ -10,9 +10,12 @@ const PIP_H := 5.0
 const PIP_GAP := 3.0
 const PLUS_R := 11.0           # px: the "+" badge's radius before its pulse
 const PLUS_HIT := 16.0         # px: half the clickable square round the "+"
+const BEAM_H := 90.0           # px: how far the "upgrade ready" beam rises over a slot
+const BEAM_A := 0.28           # opacity at the slot; it fades to nothing at the top
 const HINT_SECS := 5.0         # s: the ALT+key hint shows on every rankable slot after a new point
 
 static var plus_spots := {}    # slot -> [Rect2 the "+" covers, HudPanels.draws when drawn] (RankClick reads it)
+static var beams := {}         # slot -> HudPanels.draws when its beam was drawn
 static var _pts_was := 0
 static var _hint_until := 0.0
 
@@ -33,12 +36,29 @@ static func pips(H, r: Rect2, slot: String, lv: int, col: Color) -> void:
 		c.draw_rect(pr.grow(1.0), HudStyle.SHADE_EDGE)
 		c.draw_rect(pr, Color(lit, 0.95) if i < lv else Color(1, 1, 1, 0.16))
 
+## A quiet light column rising from a slot that can rank, until a point goes in. It breathes slowly
+## and stays inside the slot's width, so it never reads as a burst over the Hunter.
+static func beam(H, r: Rect2, slot: String) -> void:
+	var a := BEAM_A * (0.75 + 0.25 * sin(float(H.m.time) * 2.5))
+	var top := r.position.y - BEAM_H
+	var base := Color(1.0, 0.82, 0.48, a)
+	var clear := Color(base, 0.0)
+	var edge := r.grow_individual(-6.0, 0.0, -6.0, 0.0)
+	H.c.draw_polygon(PackedVector2Array([edge.position, Vector2(edge.end.x, edge.position.y),
+		Vector2(edge.end.x, top), Vector2(edge.position.x, top)]), PackedColorArray([base, base, clear, clear]))
+	beams[slot] = HudPanels.draws
+
+## True if `slot` drew its beam in HudPanels' latest redraw.
+static func beam_on(slot: String) -> bool:
+	return int(beams.get(slot, -1)) == HudPanels.draws
+
 ## The spend-a-point marks on a slot that can rank now: the pulsing frame, the "+" (recorded in
 ## plus_spots for clicks) and the ALT+key hint while it's fresh or hovered.
 static func plus(H, r: Rect2, id: String, slot: String, key: String) -> void:
 	var c: CanvasItem = H.c
 	var t: float = H.m.time
 	var pulse := 0.5 + 0.5 * sin(t * 5.0)
+	beam(H, r, slot)
 	var glow := Color(1.0, 0.82, 0.48, 0.35 + 0.5 * pulse)
 	H._rounded(r.grow(2.0 + pulse * 3.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
 	if H.hover_id == id or t < _hint_until:
