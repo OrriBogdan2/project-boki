@@ -49,7 +49,7 @@ var step := -1
 var intro := true            # the "Training run" card: the first time only, until a key or INTRO_T
 var intro_t := 0.0
 var text := ""               # this step's one line, on the panel
-var detail := ""             # and the plain-words line under it ("" for none)
+var detail := ""             # and the plain-words line for it, sent to the message lane ("" for none)
 var key_cap := ""            # the key cap beside it ("" for none)
 var got := 0                 # times this step's action has landed (shown as got/need)
 var got_seen := 0            # got at the last cooldown reset
@@ -590,6 +590,8 @@ func _words() -> void:
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
+	if detail != "" and m.hud:
+		m.hud.tip(detail)       # (the strip is one line: the plain words go to the message lane, which waits for it)
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()
