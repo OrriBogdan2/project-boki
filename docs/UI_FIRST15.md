@@ -31,7 +31,7 @@ pictures.
 | 04 | Hatch card ([04](ui_first15/1280x720/04_hatch_card.jpg)) | 2 | no | one line, one button |
 | 05 | Creator ([05](ui_first15/1280x720/05_creator.jpg)) | 3 | no | **fixed (ext/tut-creator-first-pass):** a new save shows Sex, Height, Build, Shroud colour and your name; one More fold ([05b](ui_first15/1280x720/05b_creator_more.jpg)) opens the rest and scrolls past 1280x720 as rows are added; the Mirror (Change your look) and a returning player open it |
 | 06-07 | Egg pick, knock ([06](ui_first15/1280x720/06_hatch_eggs.jpg)) | 2 | no | title, 4 cards |
-| 08 | Name your Boki ([08](ui_first15/1280x720/08_hatch_name.jpg)) | 1 card | no | **fixed:** one text box (the Boki's; yours is in the creator), 4 idea chips, More, 2 buttons; the subtitle is hidden once you knock |
+| 08 | Name your Boki ([08](ui_first15/1280x720/08_hatch_name.jpg)) | 1 card | no | **fixed:** one text box (the Boki's; yours is in the creator), 4 idea chips, More, 2 path cards (Tend the garden, Learn to fight); the subtitle is hidden once you knock. (The shot jumps from the knocks to this card, so its heading still reads the knock line and the egg is unhatched; in play the reveal comes first.) |
 | 09 | First Relic ([09](ui_first15/1280x720/09_first_mask.jpg)) | 1 | no | |
 | 10 | Tutorial intro ([10](ui_first15/1280x720/10_tutorial_intro.jpg)) | 2 | no | card, Relics/Leave bar |
 | 11 | Tutorial landing ([11](ui_first15/1280x720/11_tutorial_00_land.jpg)) | **9** | **yes** | minimap, vitals, ability row, glider strip, belt 1-4, Q/V/X, weapon, Relics/Leave, tip |
