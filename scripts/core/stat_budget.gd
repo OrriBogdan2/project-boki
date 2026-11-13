@@ -11,10 +11,8 @@ static func rules() -> Dictionary:
 static func ensure(rec: Dictionary) -> void:
 	if not rec.has("stat_frac"):
 		rec["stat_frac"] = {}
-	if typeof(rec.get("loose")) != TYPE_DICTIONARY:
-		# per stat; a save from before the merge kept GardenItems' loose points as one number: they go to Power
-		var n := int(rec.get("loose", 0))
-		rec["loose"] = {"power": n} if n > 0 else {}
+	if not rec.has("loose"):
+		rec["loose"] = 0
 
 static func cap(rec: Dictionary) -> int:
 	var r := rules()
