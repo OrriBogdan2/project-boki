@@ -60,6 +60,11 @@ func _moments() -> void:
 	m.time = Heart.r("tide_start_s") + 1.0
 	ok(_shows("tide"), "the Blight's first close: its line in the lane, kept in the save")
 	ok(WaysHints.due(m).is_empty(), "the tide line is seen: nothing else due yet")
+	ok(_text("tide") == "The Blight is closing. Get inside the circle.", "the tide line is the owner's one line")
+	ok(WaysHints.arrow_due(m), "the edge arrow is up with the tide line")
+	m.time += WaysHints.ARROW_S + 1.0
+	ok(not WaysHints.arrow_due(m), "and gone ARROW_S later")
+	m.time -= WaysHints.ARROW_S + 1.0
 	m.exits.seats.lair._force(QuestSeat.S.OPEN, "check")
 	ok(_shows("quest"), "a quest seat opens: its line")
 	m.heart._force(Heart.S.CHARGING, "check")
@@ -70,6 +75,7 @@ func _moments() -> void:
 
 func _again() -> void:
 	_match(_real())
+	ok(not WaysHints.arrow_due(m), "a new match starts with no arrow")
 	m.time = Heart.r("tide_start_s") + 1.0
 	m.exits.seats.lair._force(QuestSeat.S.OPEN, "check")
 	m.heart._force(Heart.S.CHARGING, "check")

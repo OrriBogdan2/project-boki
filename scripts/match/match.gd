@@ -93,12 +93,12 @@ var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
 var displace: Displace = null     # abilities moving someone else's body (online too: its owner's game moves it)
-var _later: Array = []     # [due time, Callable]: delayed ability steps, on match time (not wall-clock timers)
+var _later: Array = []     # [due time, Callable, its owner for SfxCast]: delayed ability steps, on match time
 
 ## Run cb after `delay` seconds of match time: delayed effects, echoes, landing blasts. Unlike a
 ## SceneTree timer it pauses with the match, keeps step with headless sims and dies with the match.
 func later(delay: float, cb: Callable) -> void:
-	_later.append([time + maxf(0.0, delay), cb])
+	_later.append([time + maxf(0.0, delay), cb, SfxCast.current()])
 
 func _run_later() -> void:
 	if _later.is_empty():
@@ -108,7 +108,9 @@ func _run_later() -> void:
 		if float(it[0]) <= time: due.append(it)
 	for it in due:
 		_later.erase(it)
+		SfxCast.scope(it[2])
 		(it[1] as Callable).call()
+	SfxCast.scope(null)
 var _bond_cb: Callable
 var _combo_cb: Callable
 var player_lost: Array = []  # your kin left behind when you went down: {uid, kin, holder}
@@ -837,9 +839,8 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := 70.0      # item 163: a high start, a long readable glide down
+const SHIP_Y := 100.0     # m: the skyship's height, where the squad rockets launch from
 const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship in frame (item 163)
-const LAUNCH_CAM_DIST := 26.0  # m back from the squad in the launch
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
@@ -888,34 +889,16 @@ func plan_jump(h: Hunter, at: Vector3) -> void:
 	var k := clampf(Vector2(at.x - a.x, at.z - a.z).dot(ab) / ab.length_squared(), 0.04, 0.97)
 	h.ai["jump_at"] = clampf(st + k * float(s["dur"]) - 2.2 + randf_range(-0.5, 0.5), maxf(st + 0.6, time + 0.2), st + float(s["ride"]) - 0.5)
 
-## Off the ship. A squadmate waiting on the drop leader can't jump by themselves (force: they're
-## jumping with the leader, or the ship has reached the end of its run).
+## Off the ship: the drop leader launches the squad's rocket. A squadmate waiting on the leader can't
+## launch by themselves (force: a bot's planned launch, or the ship has reached the end of its run).
 func ship_jump(h: Hunter, force := false) -> void:
-	if not h.riding:
+	if not h.riding or h.rocket != null:
 		return
-	if not force and skydrop and skydrop.waits(h):
+	if not force and skydrop.waits(h):
 		if h == player and hud:
-			hud.toast_small("%s leads the drop  ·  %s to go solo" % [skydrop.leader(h.team).pname, Settings.key_cap("separate")], Color("ffd27a"))
+			hud.toast_small("%s leads the drop" % skydrop.leader(h.team).pname, Color("ffd27a"))
 		return
-	h.riding = false
-	var off := Vector3(rng.randf_range(-0.8, 0.8), 0, rng.randf_range(-0.8, 0.8))
-	var hs := ship_of(h)
-	h.teleport(ship_pos_of(hs) + Vector3(0, -1.5, 0) + off)
-	h.dropping = true
-	h.diving = true
-	h.drop_from = Vector2(h.pos.x, h.pos.z)
-	h.gliding = true
-	h.glide_k = 1.0
-	h.grounded = false
-	DropLaunch.start(h, hs["dir"])      # the squad's rocket launch (item 163)
-	if h == player:
-		sfx("whoosh", null, -2.0)
-		if hud and not force:
-			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down", Color("cfeaff"))
-		elif hud:
-			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"), Color("cfeaff"))
-	if skydrop and skydrop.is_lead(h):
-		skydrop.on_lead_jump(h)
+	skydrop.launch(h if force or skydrop.is_lead(h) else skydrop.leader(h.team))
 
 func _update_ship(dt: float) -> void:
 	_update_one_ship(ship, dt)
@@ -932,24 +915,17 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 		(n.get_node(pn) as Node3D).rotation.z += dt * 14.0
 	var done := time >= st + float(s["ride"])
 	for h in hunters:
-		if h.riding and not is_same(ship_of(h), s):
+		if h.riding and (h.rocket != null or not is_same(ship_of(h), s)):
 			continue
 		if h.riding and h.remote and is_host and time > st + float(s["ride"]) + 6.0:
 			# someone who dropped connection aboard: stop counting them as still in the match
 			h.riding = false
 			eliminate(h, null, "left", true)
 			continue
-		if not h.riding or h.remote:
+		if not h.riding or h.remote or h.rocket != null:
 			continue
 		var auto: bool = h.ctrl == "bot" or opts.get("autoplay", false)
-		var lead: Hunter = skydrop.leader(h.team) if skydrop else null
-		if lead and lead != h and lead.remote and not h.drop_solo and not lead.riding and lead.dropping:
-			# online: the leader jumped on their own machine; join them
-			ship_jump(h, true)
-			h.drop_follow = lead
-			h.drop_slot = skydrop._free_slot(lead)
-			continue
-		if skydrop and skydrop.waits(h):
+		if skydrop.waits(h):
 			continue          # jumps with the leader
 		if done or (auto and time >= float(h.ai.get("jump_at", 0.0))):
 			ship_jump(h, done)
@@ -1769,7 +1745,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
 			if lv >= 0:
 				_armor_up(credit)
@@ -2596,17 +2571,20 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 	if net_on and not is_host and pid == "":
 		return
 	if pid == "":
+		if DropMerge.stack(self, kind_s, at, v, key):
+			return
 		drop_n += 1
 		pid = "d%d" % drop_n
 	var n: Node3D
 	match kind_s:
-		"gem": n = Models.gem()
+		"gem": n = DropMerge.gem_node(self, v)
 		"seed": n = Models.seed_bag(Data.CROPS[key]["color"])
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"ckey": n = KeyModels.pickup()
 		_: n = UtilityBelt.pickup_model(kind_s) if UtilityBelt.is_item(kind_s) else Models.gem()
-	add_child(n)
+	if n.get_parent() == null:
+		add_child(n)
 	n.position = at
 	var a := randf() * TAU
 	var v0: Vector3 = vel0 if vel0 != null else Vector3(cos(a) * randf_range(1.5, 3.5), randf_range(4.0, 7.0), sin(a) * randf_range(1.5, 3.5))
@@ -2651,10 +2629,10 @@ func _update_pickups(dt: float) -> void:
 		n.position = pos + Vector3(0, sin(time * 3.0 + p["v"]) * 0.06, 0)
 		n.rotation.y += dt * 2.0
 		if pos.y < -12.0:
-			n.queue_free(); pickups.erase(p)
+			DropMerge.release(self, p); pickups.erase(p)
 
 func _collect(h: Hunter, p: Dictionary) -> void:
-	p["node"].queue_free()
+	DropMerge.release(self, p)
 	pickups.erase(p)
 	if net_on:
 		net_event(["take", p["id"]])
@@ -2697,6 +2675,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.global_position = at
 	var from := ShotOrigin.hit_from(by, at, v2, extra)      # the hit sweep starts at the body; `at` is the muzzle
 	life += ShotOrigin.extra_life(at, from, v2)
+	v2 = ShotOrigin.keep_reach(at, from, v2, extra)
 	if not extra.has("dy") and not extra.get("mob", false) and not extra.get("cos", false) and not extra.get("melee", false):
 		var src: Hunter = by as Hunter if by is Hunter else ((by as Kin).owner_h as Hunter if by is Kin and (by as Kin).owner_h else null)
 		if src and src.inp.has("aim_y"):
@@ -2727,6 +2706,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 
 func _update_shots(dt: float) -> void:
 	for s in shots.duplicate():
+		SfxCast.scope(s["by"])
 		s["life"] -= dt
 		var p: Vector3 = s["pos"]
 		s["prev"] = p
@@ -2839,6 +2819,7 @@ func _update_shots(dt: float) -> void:
 				continue
 		if s["life"] <= 0.0:
 			_shot_end(s, p, null, "expire")
+	SfxCast.scope(null)
 
 ## Shots fly level, so a target one terrace above or below still gets hit. Two terraces up and the
 ## shot goes under them into the cliff; two down and it sails over their head.
@@ -3232,7 +3213,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
-	if player and player.riding:
+	if player and player.riding and player.rocket == null:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
 		var ps := ship_of(player)
@@ -3247,40 +3228,18 @@ func _process(delta: float) -> void:
 		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
 		var fp := ship_pos_of(ps) + sd * 3.0
 		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
-	elif player and DropLaunch.locked(player):
-		# the launch: chasing the squad down its heading, the ship receding overhead (item 163)
-		var hd := Vector2(player.vel.x, player.vel.z)
-		if hd.length() > 0.5:
-			cam.yaw_to = atan2(-hd.x, -hd.y)
-		cam.chase_to = 1.0
-		cam.top_to = 0.0
-		cam.zoom_to = LAUNCH_CAM_DIST / cam.dist
-		cam.follow(player.pos + Vector3(0, 4.0, 0), delta, false)
+	elif player and (player.rocket != null or player.dropping):
+		cam.skydive(player.render_pos(alpha), skydrop.drop_yaw(player), player_altitude(), delta)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
 		cam.yaw_to = 0.0
-		if player.dropping:
-			# the drop: looking down over your shoulder, pulled back while you're high up
-			var gy: float = world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else 0.0
-			var hk := clampf((player.pos.y - gy) / SHIP_Y, 0.0, 1.0)
-			cam.zoom_to = lerpf(1.05, 1.7, hk)
-			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
-		else:
-			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
-			# the camera only eases back while gliding, so jumps and falls never change the framing
-			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
-			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
-			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
-			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
-			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
-			# high up, the camera pulls back with your altitude so you can still read the ground
-			var alt := player_altitude()
-			if alt > 4.0:
-				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
-			cam.top_to = 0.0
+		cam.zoom_to = cam.air_zoom(player, player_altitude())
+		if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
+		if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
+		cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
 		var peek := mate_look.focus(player.render_pos(alpha), alpha)
-		cam.follow(peek, delta, not player.dropping and mate_look.looking == null)
+		cam.follow(peek, delta, mate_look.looking == null)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)
@@ -3338,11 +3297,8 @@ func _gather_input() -> void:
 	# dropping in without steering over the abyss: drift toward the nearest island so letting go
 	# of the keys never drops you into the void
 	if player.dropping and mv.length() < 0.1 and world.is_void(player.pos.x, player.pos.z):
-		var best := Vector3.INF; var bd := 1e9
-		for sp in world.spawns + world.portal_spots:
-			var d := Vector2(sp.x - player.pos.x, sp.z - player.pos.z).length()
-			if d < bd: bd = d; best = sp
-		if best != Vector3.INF and bd > 0.8:
+		var best := DropRocket.island_near(world, player.pos)
+		if Vector2(best.x - player.pos.x, best.z - player.pos.z).length() > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
 	player.inp["aim"] = _mouse_aim()
 	player.inp["aim_ray"] = cam.mouse_ray()
@@ -3450,7 +3406,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("pass_lead") and skydrop.pass_lead(player):
 			get_viewport().set_input_as_handled()
 			return
-		if event.is_action_pressed("separate") and skydrop.separate(player):
+		if event.is_action_pressed("separate") and skydrop.detach(player):
 			get_viewport().set_input_as_handled()
 			return
 	if event.is_action_pressed("menu") and hud and (hud.swap_open() or hud.pack_open()):
@@ -3917,7 +3873,7 @@ func step(dt: float) -> void:
 		arena.tick(dt)
 	if duo: duo.tick(dt)
 	_prof("train")
-	for h in hunters: h.sim(SimLod.step_dt(h, dt))
+	for h in hunters: SfxCast.sim(h, SimLod.step_dt(h, dt))
 	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
@@ -5271,6 +5227,8 @@ func _net_make(it: Array) -> Ent:
 				var bl := Blight.new()
 				bl.init_blight(self, nid, mk, Vector3(it[2], it[3], it[4]), float(it[19]) if it.size() > 19 else 0.1, blight)
 				mb = bl
+			elif mk in Data.BOSSES:
+				mb = BossNet.make(self, nid, mk, Vector3(it[2], it[3], it[4]))
 			elif mk == "shrubling":
 				mb = Shrubling.new()
 				(mb as Shrubling).init_shrub(self, nid, Vector3(it[2], it[3], it[4]))
@@ -5382,6 +5340,8 @@ func _net_ev(x, from: String) -> void:
 		return
 	var who: Ent = null
 	match String(x[0]):
+		"bat":
+			BossNet.net_in(self, x)
 		"zone":
 			HeroZones.net_in(self, x)
 		"disp":
@@ -5411,6 +5371,7 @@ func _net_ev(x, from: String) -> void:
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
+				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
@@ -5474,9 +5435,9 @@ func _net_ev(x, from: String) -> void:
 			var lh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			var lt: Hunter = ents_by_id.get(String(x[2]), null) as Hunter
 			if skydrop and lh and lt: skydrop.pass_lead(lh, lt, true)
-		"dsep":
-			var sh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
-			if skydrop and sh: skydrop.separate(sh, true)
+		"rkt":
+			var rh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
+			if skydrop and rh: skydrop.launch(rh, true)
 		"ext":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.extracted:
@@ -5520,7 +5481,7 @@ func _net_ev(x, from: String) -> void:
 		"take", "gone":
 			for p in pickups:
 				if p["id"] == String(x[1]):
-					p["node"].queue_free()
+					DropMerge.release(self, p)
 					pickups.erase(p)
 					break
 			if String(x[0]) == "take" and is_host:
