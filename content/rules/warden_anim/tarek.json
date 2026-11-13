@@ -47,8 +47,7 @@
 	},
 	"kmoves": {
 		"breah_throw": {
-			"clip": "lmb_throw",
-			"upper": "moving"
+			"clip": "lmb_throw"
 		},
 		"breah_wind": {
 			"clip": "lmb_wind",
@@ -87,8 +86,7 @@
 			"turn_max": 3.2
 		},
 		"breah_raise": {
-			"clip": "e_row",
-			"upper": "moving"
+			"clip": "e_row"
 		},
 		"breah_sense": {
 			"clip": "sense"

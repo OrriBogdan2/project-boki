@@ -8,10 +8,10 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+##   [--bench-shots=<dir>]  saves each zone part's default-camera frame (screen UI hidden) as <part>.jpg
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
-##   [--bench-hunters=6] (squads of 2) [--boki-wisps] (every Boki rides as a wisp, KinWisp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -34,9 +34,8 @@ var farm_secs := 20.0
 var base_secs := 60.0
 var out_path := ""
 var zone := ""
+var shots_dir := ""      # --bench-shots=<dir>: each budgeted part's default-camera frame, UI hidden, as <part>.jpg
 var failed := false      # a budget line said FAIL: the exit code carries it
-var hunters := 6
-var wisps := false
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -67,8 +66,7 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
-		if a.begins_with("--bench-hunters="): hunters = maxi(2, int(a.substr(16)))
-		if a == "--boki-wisps": wisps = true
+		if a.begins_with("--bench-shots="): shots_dir = a.substr(14)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -79,9 +77,9 @@ func setup(main_node: Node) -> void:
 
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [
-		hunters, wisps, Settings.quality(), RenderingServer.get_current_rendering_method(),
-		RenderingServer.get_video_adapter_name(), win.size.x, win.size.y, win.scaling_3d_scale])
+	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
+		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
+		win.size.y, win.scaling_3d_scale])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
@@ -89,8 +87,8 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": ceili(hunters / 2.0), "squad": 2, "total": hunters, "raid": "ash", "blight": true,
-		"no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
+	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
+		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -163,7 +161,7 @@ func _farm(part: String, params: Dictionary) -> void:
 	if part == "hub": Content.rules("farm_build")["base_mode"] = true      # the hub only exists in base mode
 	var was = main.current
 	Game.goto("home", params)
-	while main.current == was or main.current.get("root_ui") == null or main.fade.covered:
+	while main.current == was or main.current == null or main.current.get("root_ui") == null or main.fade.covered:
 		await main.get_tree().process_frame      # the home is built and the ink wipe is off it
 	for i in 30:
 		await main.get_tree().process_frame
@@ -188,6 +186,7 @@ func _frames(part: String) -> void:
 	_meshes()
 	if part != "farm" and part != "hub_bare":
 		await _budget(part, fl)
+		_vfx_inventory(part)
 
 ## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
 func _zone(id: String) -> void:
@@ -219,6 +218,9 @@ func _budget(part: String, fl: Array) -> void:
 		cl.visible = false
 	for i in 8:
 		await main.get_tree().process_frame
+	if shots_dir != "":
+		DirAccess.make_dir_recursive_absolute(shots_dir)
+		main.get_viewport().get_texture().get_image().save_jpg("%s/%s.jpg" % [shots_dir, part], 0.9)
 	var got := {"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
 		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall"), "base_life_ms": _life_ms(home)}
@@ -376,6 +378,59 @@ func _emitters() -> void:
 	print("BENCH emitting particles (%d): %s" % [by.values().reduce(func(a, b): return a + b, 0),
 		", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, by[k]]))])
 
+## Every particle system, Decal and see-through glow card of the part, grouped by owner path (the keep/cut list
+## in docs/GARDEN_PERF.md starts from these lines): "BENCH vfx <part> <kind> <owner/name> xN (emitting or shown)".
+func _vfx_inventory(part: String) -> void:
+	var by := {}
+	for n in main.current.find_children("*", "Node3D", true, false):
+		var kind := _vfx_kind(n)
+		if kind == "" or not n.is_visible_in_tree():
+			continue
+		var key := "%s %s" % [kind, _owner_path(n)]
+		if kind == "emitter" and not "Aura" in key:
+			key += " amount %d at %s" % [n.amount, (n as Node3D).global_position.snapped(Vector3.ONE * 0.5)]
+		by[key] = int(by.get(key, 0)) + 1
+	var ks := by.keys()
+	ks.sort()
+	for k in ks:
+		print("BENCH vfx %s %s x%d" % [part, k, by[k]])
+
+const FX_SHADERS := [      # the see-through light and glow shaders ("card" lines of the vfx inventory)
+	"glow", "ring", "mote", "spark", "light_shaft", "waterfall", "updraft", "wind", "seat_beam", "exit_beam",
+	"glowball", "fx_dot", "care_glow", "care_disc", "care_ice", "cloud_puff", "kin_aura", "boki_wisp", "wisp_core",
+	"blob_shadow"]
+
+func _vfx_kind(n: Node3D) -> String:
+	if n is GPUParticles3D or n is CPUParticles3D:
+		return "emitter" if n.emitting else ""
+	if n is Decal:
+		return "decal"
+	if not n is GeometryInstance3D:
+		return ""
+	var mats: Array[Material] = [(n as GeometryInstance3D).material_override]
+	var mesh: Mesh = null
+	if n is MeshInstance3D:
+		mesh = (n as MeshInstance3D).mesh
+	elif n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh != null:
+		mesh = (n as MultiMeshInstance3D).multimesh.mesh
+	for i in (mesh.get_surface_count() if mesh != null else 0):
+		mats.append(mesh.surface_get_material(i))
+	for m in mats:
+		var sm := m as ShaderMaterial
+		if sm != null and sm.shader != null and sm.shader.resource_path.get_file().get_basename() in FX_SHADERS:
+			return "card:" + sm.shader.resource_path.get_file().get_basename()
+	return ""
+
+func _owner_path(n: Node) -> String:
+	var names := PackedStringArray()
+	var cur := n
+	while cur != null and names.size() < 4 and cur != main.get_tree().root:
+		var nm := String(cur.name).rstrip("0123456789")
+		names.append(cur.get_class() if nm.begins_with("@") else nm)
+		cur = cur.get_parent()
+	names.reverse()
+	return "/".join(names)
+
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
 
@@ -417,3 +472,33 @@ func _meshes() -> void:
 	ks.sort_custom(func(a, b): return by[a][1] > by[b][1])
 	var top := ks.slice(0, 12).map(func(k): return "%s: %d, %.1fk, %d" % [k, by[k][0], by[k][1] / 1000.0, by[k][2]])
 	print("BENCH heaviest meshes (name: instances, total tris k, shadow casters): " + ", ".join(top))
+	_owners()
+
+## Draw passes per piece of the open scene (its direct children, the grouping the draw fixes work on): a
+## visible mesh or MultiMesh costs one pass per surface, two where its material has an outline next_pass.
+func _owners() -> void:
+	var by := {}
+	var scene: Node = main.current
+	for n in scene.find_children("*", "GeometryInstance3D", true, false):
+		var gi := n as GeometryInstance3D
+		var mesh: Mesh = null
+		if gi is MeshInstance3D:
+			mesh = gi.mesh
+		elif gi is MultiMeshInstance3D and gi.multimesh:
+			mesh = gi.multimesh.mesh
+		if mesh == null or not gi.is_visible_in_tree():
+			continue
+		var passes := 0
+		for si in mesh.get_surface_count():
+			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)
+			passes += 2 if mat and mat.next_pass else 1
+		var top: Node = gi
+		var under: Node = gi      # the level below `top`: the home's world root holds most pieces
+		while top.get_parent() != scene:
+			under = top
+			top = top.get_parent()
+		var key := "%s/%s" % [String(top.name).rstrip("0123456789@"), String(under.name).rstrip("0123456789@")]
+		by[key] = int(by.get(key, 0)) + passes
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 20).map(func(k): return "%s %d" % [k, by[k]])))

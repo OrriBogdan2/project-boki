@@ -326,16 +326,16 @@ func _armor_levels() -> void:
 	ok(not ArmorHud.tip(P).is_empty() and String(ArmorHud.tip(P)[2][0]).begins_with("Next"),
 			"the HUD tip names the next level")
 	for i in 3: B.hurt(100.0, P, {"src": "shot"})
-	ok(P.armor_tier >= 1 and float(Hunter.ARMOR_TIERS[P.armor_tier][2]) > float(Hunter.ARMOR_TIERS[0][2]),
-			"enough damage levels your armor up: a bigger reduction (plates %.0f -> %.0f)" % [base, P.max_armor])
-	ok(is_equal_approx(P.max_armor, round(P.base_armor * float(Hunter.ARMOR_TIERS[P.armor_tier][3]))),
-			"plates follow the tier's durability (docs/ARMOUR_PARITY.md)")
-	ok(B.armor_xp > 0.0, "damage taken from a rival fills armor progress too (source)")
+	ok(P.armor_tier >= 1 and P.max_armor > base,
+			"enough damage levels your armor up: more plates (%.0f -> %.0f)" % [base, P.max_armor])
+	ok(is_equal_approx(P.max_armor, round(P.base_armor * (1.0 + Hunter.ARMOR_TIER_BONUS * P.armor_tier))),
+			"each level adds %d%% of the base armor" % int(Hunter.ARMOR_TIER_BONUS * 100.0))
+	ok(B.armor_tier == 0, "the one who was hit does not level")
 	var xp0 := P.armor_xp
 	var mob: Mob = m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
 	mob.hurt(30.0, P, {"src": "shot"})
-	ok(is_equal_approx(P.armor_xp, xp0),
-			"monsters build no armor progress (%.1f xp for 30 damage)" % (P.armor_xp - xp0))
+	ok(P.armor_xp - xp0 > 0.0 and P.armor_xp - xp0 < 30.0 * 0.5,
+			"monsters count for a third (%.1f xp for 30 damage)" % (P.armor_xp - xp0))
 	P.armor_gain(5000.0)
 	ok(P.armor_tier == Hunter.ARMOR_TIERS.size() - 1 and ArmorHud.tip(P).size() == 3,
 			"the top level is reachable and the HUD says so")

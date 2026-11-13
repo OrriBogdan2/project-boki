@@ -20,14 +20,6 @@ var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
 var death_t := 0.0
-## The leash: a camp monster LEASH_M from its camp drops the fight, walks home at full speed paying
-## nobody any mind (homing) and is back to full health when it gets there.
-const AGGRO_M := 7.5         # m: an idle monster notices a Hunter this close
-const CHASE_M := 11.0        # m: a fighting monster switches to anyone this close to it
-const LEASH_M := 13.0        # m from its camp: past this it gives up the chase
-const HOME_M := 1.0          # m from its camp: home again, healed
-const HOME_T := 6.0          # s: the longest walk home (a void in the way); then it heals where it stands
-var homing := false
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
 ## hit, is stunned for a few seconds, takes extra damage the whole time, and the ability that did
@@ -36,7 +28,6 @@ const STAGGER_DMG := 2.5
 var stag_open := 0.0
 var stag_next := 0.0
 var stagger_t := 0.0
-var wallstun := 0.0                     # s the next wall slam stuns, when a hit asks for more than 1 s
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null           # a treasure kin slips away if nobody hurts it for a while
 
@@ -91,8 +82,6 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		elif stag_open > 0.0 and opts.has("ab"):
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
-	if opts.has("wallstun"):
-		wallstun = float(opts["wallstun"])
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0: calm_t = 0.0
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
@@ -101,7 +90,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		var real: Ent = by
 		if by is Kin and by.state != "active" and by.owner_h:
 			real = by.owner_h
-		if not homing and (tgt == null or randf() < 0.4):
+		if tgt == null or randf() < 0.4:
 			tgt = real
 			if st == "idle":
 				st = "chase"
@@ -150,7 +139,7 @@ func _engaged_on(t: Ent) -> int:
 	return n
 
 func _find_target() -> Ent:
-	var best: Ent = null; var bd := AGGRO_M if st == "idle" else CHASE_M
+	var best: Ent = null; var bd := 7.5 if st == "idle" else 11.0
 	for h in m.hunters:
 		if not h.targetable() or m.demo_shielded(h):
 			continue
@@ -200,14 +189,19 @@ func sim(dt: float) -> void:
 	var wish := Vector2.ZERO
 	match st:
 		"idle":
-			if homing:
-				wish = _walk_home(spd)
-			else:
-				wish = _idle_wander(dt, spd)
+			if randf() < dt * 2.0:
+				tgt = _find_target()
+				if tgt:
+					st = "chase"
+			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
+				var a := randf() * TAU
+				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
+				if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
+					wander = q
+			if wander != Vector3.INF:
+				wish = dir_to(wander) * spd * 0.3
 		"chase":
-			if flat_dist(camp) > LEASH_M and not md.get("flee", false):
-				_leash_home()
-			elif tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > LEASH_M:
+			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > 13.0:
 				tgt = _find_target()
 				engaged = false
 				if tgt == null:
@@ -261,11 +255,10 @@ func sim(dt: float) -> void:
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
 	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
-		stun_t = maxf(stun_t, maxf(1.0, wallstun))
-		wallstun = 0.0
+		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})
@@ -285,7 +278,7 @@ const NAP_CHECK := 0.5       # s between its looks around, asleep or awake
 var _nap := 0.0              # s to its next look around
 var _asleep := false
 func _napping(dt: float) -> bool:
-	if st != "idle" or homing or not grounded or tgt != null or md.get("flee", false):
+	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
 		_nap = 0.0
 		_asleep = false
 		return false
@@ -325,37 +318,6 @@ func _anyone_near() -> bool:
 		if not k.dead and pos.distance_squared_to(k.pos) < r2:
 			return true
 	return false
-
-## Looks around now and then, and ambles about its camp. Returns the wish velocity.
-func _idle_wander(dt: float, spd: float) -> Vector2:
-	if randf() < dt * 2.0:
-		tgt = _find_target()
-		if tgt:
-			st = "chase"
-	if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
-		var a := randf() * TAU
-		var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
-		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
-			wander = q
-	if wander != Vector3.INF:
-		return dir_to(wander) * spd * 0.3
-	return Vector2.ZERO
-
-func _leash_home() -> void:
-	tgt = null
-	engaged = false
-	st = "idle"
-	wander = Vector3.INF
-	homing = true
-	st_t = HOME_T
-
-## Straight home at full speed; healed on arrival.
-func _walk_home(spd: float) -> Vector2:
-	if flat_dist(camp) < HOME_M or st_t <= 0.0:
-		homing = false
-		hp = max_hp
-		return Vector2.ZERO
-	return dir_to(camp) * spd
 
 func _begin_attack() -> void:
 	st = "windup"

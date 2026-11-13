@@ -77,9 +77,9 @@ func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
-## false when the passive has no meter (Hawk Sense, Crushed)
-func has_meter() -> bool: return d.has("resource") and String(res_def().get("kind", "")) != "none"
-func res_col() -> Color: return Color(String(res_def().get("col", d["passive"].get("col", "#ffffff"))))
+## false when the passive has no meter (Hawk Sense)
+func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
+func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 
 func rank(slot: String) -> int:
@@ -87,9 +87,8 @@ func rank(slot: String) -> int:
 
 ## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
 ## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
-## `key` names the row when it is not the slot's (rank_cd.air follows the dash rank).
-func rank_k(table: String, slot: String, shared: float, key := "") -> float:
-	var row: Array = d.get(table, {}).get(key if key != "" else slot, [])
+func rank_k(table: String, slot: String, shared: float) -> float:
+	var row: Array = d.get(table, {}).get(slot, [])
 	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
 
 ## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
@@ -165,7 +164,6 @@ func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
-func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
@@ -403,7 +401,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), String(rd.get("name", "")).to_upper(), col, true)
 	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
@@ -412,7 +409,6 @@ func _fuse_start(bond: bool) -> void:
 		m.sfx("bond", h.pos, -3.0, 0.9)
 	if String(fuse["guard"]) == "unstoppable":
 		h.fortify_t = maxf(h.fortify_t, T + 0.05)
-		m.fx.word(h.pos + Vector3(0, 2.2, 0), "UNSTOPPABLE", Color("ffe2a0"), false)
 	# everyone else's game: a ring and a column of light where it's winding up (the existing fx path)
 	if m.net_on and not h.remote:
 		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 2.4, col.to_html(false)])
@@ -431,7 +427,6 @@ func _tick_fuse(dt: float) -> void:
 		# interrupted: the ult fizzles and comes back after a short wait (that's the counterplay)
 		fuse = {}
 		cd["r"] = minf(float(cd["r"]), 8.0)
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
 		m.sfx("warn", h.pos, -4.0, 0.8)
 		return
 	# energy gathers inward, faster and brighter toward the end
@@ -498,15 +493,13 @@ func _bond_tell() -> void:
 	m.fx.ring(h.pos, 2.6, Color(kc, 0.95), 0.35)
 	for i in 6:
 		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.4 + 0.5 * i, 0), kc, 10, 2.5, 0.35, -2.0, 1.1))
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "BONDED", kc, true)
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
-## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's;
-## a hero's `rank_cd.air` row shortens it by dash rank.
+## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
+	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
@@ -764,9 +757,7 @@ func slot_info(slot: String) -> Dictionary:
 				if (sd.get("variants", {}) as Dictionary).has(v):
 					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
-				"cd": float(cd["rmb"]) if ch_rmb < float(rmb_charges()) else 0.0,
-				"cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"),
-				"charges": int(floor(ch_rmb)), "max_charges": rmb_charges(), "charge_f": rmb_charge_f(),
+				"cd": float(cd["rmb"]) if ch_rmb < 1.0 else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
@@ -787,13 +778,6 @@ func slot_info(slot: String) -> Dictionary:
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
 				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
-
-## The RMB's charges as a fraction: the whole ones plus how far the next one has recharged (the HUD's pip fill).
-func rmb_charge_f() -> float:
-	if ch_rmb >= float(rmb_charges()):
-		return ch_rmb
-	var full := maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec"))
-	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / full, 0.0, 1.0)
 
 func e_recastable() -> bool: return false
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
@@ -983,21 +967,18 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 		_pulse_t = 1.1
 		net_ring(h.pos, r, res_col())
 
-## The payoff becoming armed: a word over the hunter, the body glow, the ready ping (the owner's slot pings too).
-func armed_fx(word: String, slot := "sec") -> void:
-	var rc := res_col()
-	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
-	m.fx.body_glow(h.pos, rc)
+## The payoff becoming armed: the body glow, the ready ping (the owner's slot pings too).
+func armed_fx(slot := "sec") -> void:
+	m.fx.body_glow(h.pos, res_col())
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
-## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
+## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
+func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
 		rings := true) -> void:
-	m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
 	if rings:
 		m.fx.ring(at, 2.4, col, 0.38)
 		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
@@ -1203,4 +1184,13 @@ func _charge_release() -> void:
 	if k > 0.5:
 		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
+## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
+func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
+	var k := 0.3
+	while k <= reach:
+		var q := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + k)
+		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > t.pos.y + 0.8:
+			return true
+		k += 0.3
+	return false
 
