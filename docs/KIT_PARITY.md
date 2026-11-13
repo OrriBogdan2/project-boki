@@ -76,7 +76,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Q | none | glove | ours |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
 | R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) |
-| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match |
+| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | One charge (archetype `dash.charges`), tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match |
 | Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +38% rifle (+39 on the 102 opening) | match |
 | Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
 
