@@ -61,8 +61,7 @@ func start() -> bool:
 	axis = _across_aim()
 	phase = "aim"
 	phase_t = 0.0
-	k.play("breah_spine_aim")
-	floor_under()
+	floor_under()       # (the aim pose comes through the hold-clip rule, HOLD_POSE_T into the hold)
 	return true
 
 ## Owner 11-08: the press raises a slab of rock ground under him on the same frame, so R saves him over the

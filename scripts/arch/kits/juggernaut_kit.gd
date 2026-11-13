@@ -165,7 +165,7 @@ func _tick(dt: float) -> void:
 			h.dashes = minf(h.max_dashes(), h.dashes + dt / h.dash_regen() * float(rd.get("dash_haste", 0.12)))
 	elif res_wait <= 0.0:
 		add_res(-float(rd.get("decay", 9.0)) * dt)
-	if lmb_buf > 0.0: lmb_buf -= dt
+	if lmb_buf > 0.0 and m.hitstop <= 0.0: lmb_buf -= dt      # (a hitstop freeze does not eat a kept press)
 	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	warchain.tick(dt)
