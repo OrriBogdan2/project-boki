@@ -2,8 +2,8 @@ class_name HomeClasses
 extends RefCounted
 ## The Hunters screen on the farm (J or the Hunters button; docs/decisions/0005). On the left every
 ## Hunter as a small tile: open, ready to unlock, in progress or locked, with its challenge's progress;
-## under the tiles the picked Hunter's mastery goals and your glider. On the right the Hunter viewer
-## (HunterViewer) and what you can do with it: play it, hold to unlock it (HoldUnlock, then the reveal),
+## under the tiles the picked Hunter's mastery goals, your glider and your Wisp (WispPick). On the right the
+## Hunter viewer (HunterViewer) and what you can do with it: play it, hold to unlock it (HoldUnlock, then the reveal),
 ## or the challenge it still needs. Rules and numbers: content/rules/class_unlock.json, logic:
 ## ClassUnlock. (Internal names keep "class": the file, the save key and the ids.)
 
@@ -72,6 +72,7 @@ static func _fill(home: Node, id: String, viewer: HunterViewer) -> void:
 		c.queue_free()
 	details.add_child(ClassCard.mastery_list(id, left_w(home)))
 	details.add_child(_glider_pick(home, id))
+	details.add_child(WispPick.make(func(): open(home, id)))
 	acts.add_child(_actions(home, id, viewer))
 
 ## Every Hunter: ready ones first, then open, in progress and locked; each group in the usual order.
