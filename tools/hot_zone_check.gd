@@ -3,7 +3,8 @@ extends RefCounted
 ## (scripts/match/hot_zone.gd). Every region has a landmark, raised terrain, tall grass and a
 ## reason to go; region loot leans multiply into the biome's; each match picks one hot region
 ## from its seed (same seed, same zone; it varies between seeds; never the Crown), loot there rolls
-## a rarity step better, and bot squads drop there without piling in. Never touches the save.
+## a rarity step better, and bot squads drop there without piling in; the first drop plan names it
+## in one line under the map, once per save. Never touches the save.
 
 const SEEDS := [3, 5, 9, 12, 21, 33, 47, 58]
 const LANDMARK_ROLES := ["heart", "camp", "nest", "shrine", "grove"]
@@ -28,6 +29,7 @@ func run(main: Node) -> void:
 	_regions(main)
 	_hot(main)
 	_bots(main)
+	_line(main)
 	print("HOTZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -107,3 +109,30 @@ func _bots(main: Node) -> void:
 		into += squads
 		m.free()
 	ok(into >= 2, "bot squads pick the hot zone over %d matches (%d times)" % [SEEDS.size(), into])
+
+## The first time a player plans a drop, one line under the map names the hot region; never again
+## (Match.tip_once, the first-time hints' store), not on the M map, and not with tips off.
+func _line(main: Node) -> void:
+	Save.d = Save.fresh()
+	var m := _match(main, SEEDS[0])
+	var fm := FullMap.new(null, m)
+	var nm := m.biomes.hot.region_name()
+	Settings.v["tips"] = false
+	fm.open(true)
+	ok(fm.hot_line == "" and not Save.d["tutorial"].has(HotZone.TIP_KEY), "tips off: no line, the hint stays unseen")
+	Settings.v["tips"] = true
+	fm.open(false)
+	ok(fm.hot_line == "", "the M map (not a drop plan) shows no line")
+	fm.open(true)
+	var want := "This match's hot zone is %s: better loot, more fights" % nm
+	ok(nm != "" and fm.hot_line == want, "first drop plan: '%s'" % fm.hot_line)
+	fm.close()
+	ok(fm.hot_line == "", "the line goes with the planning map")
+	fm.open(true)
+	ok(fm.hot_line == "", "second drop plan, same save: no line")
+	m.free()
+	var m2 := _match(main, SEEDS[1])
+	var fm2 := FullMap.new(null, m2)
+	fm2.open(true)
+	ok(fm2.hot_line == "", "the next match, same save: never again")
+	m2.free()

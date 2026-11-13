@@ -1,0 +1,13 @@
+{
+ "group": "train",
+ "name": "Sky train",
+ "script": "tools/gen_sfx_train.py",
+ "sounds": {
+  "train_brake": "cast", "train_bell": "cast", "train_door_open": "dash", "train_door_close": "dash",
+  "train_whistle": "signature", "train_ride": "loop", "train_rumble": "loop"
+ },
+ "signature": [],
+ "reach": {"train_brake": 35, "train_bell": 45, "train_door_open": 16, "train_door_close": 16, "train_whistle": 60,
+  "train_rumble": 40},
+ "loops": ["train_ride", "train_rumble"]
+}
