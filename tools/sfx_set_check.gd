@@ -27,6 +27,8 @@ extends RefCounted
 ##  12. held fire (docs/AUDIO.md): every weapon under FireSfx.HELD_RATE, and Neve's dart, fired every HELD_STEP_MS for
 ##      HELD_S seconds through FireSfx keeps at most FireSfx.VOICES voices sounding, opens on its base take and goes
 ##      round three or more others without repeating one
+##  13. the rank HUD's cues (RankSfx) are in the ui set, play at least UNDER_COMBAT_DB under a weapon shot,
+##      and the new-point chime is short
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -37,6 +39,8 @@ const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall 
 const HELD_S := 3.0            # s of held fire per sound
 const HELD_STEP_MS := 80       # ms a round: the source cadence of Vex's rifle (main has 0.12 s)
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+const UNDER_COMBAT_DB := 10.0  # dB: a rank cue as played sits at least this far under a weapon shot ("fire")
+const READY_SECS := 0.5        # s: the new-point chime's audible length at most
 
 var bad := 0
 var levels := {}
@@ -64,6 +68,7 @@ func run(main: Node) -> void:
 	_build_cues()
 	_strip_chime()
 	await _held_fire(main)
+	_rank_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -389,6 +394,18 @@ func _strip_chime() -> void:
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
 
+## 13. The rank HUD's three cues, as RankSfx plays them.
+func _rank_cues() -> void:
+	var ui: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/ui.json"))["sounds"]
+	var fire := float(levels["cats"]["fire"])
+	for cue in RankSfx.DB:
+		var takes := _takes(cue)
+		var played := float(RankSfx.DB[cue]) + (float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0)
+		ok(ui.has(cue) and not takes.is_empty() and played <= fire - UNDER_COMBAT_DB,
+			"%s is a ui sound playing at %.1f dBFS, %.1f dB under a weapon shot" % [cue, played, fire - played])
+	var secs := _audible_secs("res://audio/rank_ready.wav")
+	ok(secs > 0.0 and secs <= READY_SECS, "the new-point chime is short (%.2f s)" % secs)
+
 func _takes(sname: String) -> Array:
 	var out := []
 	var paths: Array = ["res://audio/%s.wav" % sname]
@@ -415,6 +432,19 @@ func _measure(path: String) -> Dictionary:
 			cnt += 1
 	var rms := sqrt(sum / maxf(1.0, cnt))
 	return {"peak": linear_to_db(maxf(pk, 1e-6)), "rms": linear_to_db(maxf(rms, 1e-6))}
+
+## Seconds to the last sample above 2% of the peak, in a mono 44.1 kHz wav (as tools/sfx_lib.py writes them).
+func _audible_secs(path: String) -> float:
+	var data := _data(path)
+	var n := data.size() / 2
+	var pk := 0.0
+	for k in n:
+		pk = maxf(pk, absf(data.decode_s16(k * 2)))
+	var last := 0
+	for k in n:
+		if absf(data.decode_s16(k * 2)) > pk * 0.02:
+			last = k
+	return last / 44100.0
 
 ## The 16-bit PCM samples of a wav file (its "data" chunk).
 func _data(path: String) -> PackedByteArray:

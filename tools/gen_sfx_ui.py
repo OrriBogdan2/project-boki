@@ -4,7 +4,9 @@ Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quie
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick, your
-ultimate back = a low fifth and one bell over it (UltReadyCue).
+ultimate back = a low fifth and one bell over it (UltReadyCue). Ranks
+(RankSfx): a point ready = two small rising bells, ranking a slot = a rising fifth, its top rank = that
+fifth with a soft bloom.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
@@ -122,6 +124,33 @@ def level_up(i):
     return finish(room(mix(*arp, top, glow), 0.9), 5600)
 
 
+def rank_ready(i):
+    """A rank point waits to be spent: two small bells rising a fourth, short and airy, over a quiet tine."""
+    bell = ((1.0, 0.8), (2.76, 0.12))
+    lo = S.chime(NOTE['D6'], 0.35, 0.12, bell)
+    hi = at(S.chime(NOTE['G6'], 0.5, 0.18, bell), 0.075)
+    tine = at(pluck(NOTE['G5'], 0.35, 0.1, 0.5) * 0.45, 0.075)
+    return finish(room(mix(lo, hi, tine), 0.6), 6000)
+
+
+def rank_pair():
+    """The rank confirm's rising fifth (C5, G5); RankSfx pitches it a step per slot."""
+    return mix(pluck(NOTE['C5'], 0.25, 0.06), at(pluck(NOTE['G5'], 0.35, 0.1), 0.06))
+
+
+def rank_up(i):
+    """You ranked an ability: the short rising pair."""
+    return finish(room(rank_pair(), 0.5), 4800)
+
+
+def rank_max(i):
+    """A slot reached its top rank and its bonus opened: the pair, then a soft warm bloom (a slow-attack
+    triad and a faint bell), darker than the level-up so it stays an accent."""
+    bloom = [pluck(NOTE[n], 0.9, 0.3, 0.3, 0.02) * g for n, g in (('C5', 1.0), ('E5', 0.7), ('G5', 0.6))]
+    glow = S.chime(NOTE['C6'], 0.8, 0.3, ((1.0, 0.6), (2.76, 0.1))) * 0.18
+    return finish(room(mix(rank_pair(), at(mix(*bloom), 0.13), at(glow, 0.14)), 0.8), 3800)
+
+
 def ping(i):
     return finish(room(mix(pluck(NOTE['A5'] * jit(i, 0.01), 0.6, 0.18, 0.8),
                            0.4 * pluck(NOTE['A5'] * 1.5, 0.4, 0.1, 0.3)), 0.7), 4800)
@@ -159,6 +188,9 @@ def main():
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
     S.save_cat('ui_ult_ready', ult_ready(0), 'ui')
+    S.save_cat('rank_ready', rank_ready(0), 'ui')      # (last, so the random draws above stay the same)
+    S.save_cat('rank_up', rank_up(0), 'ui')
+    S.save_cat('rank_max', rank_max(0), 'ui')
 
 
 if __name__ == '__main__':
