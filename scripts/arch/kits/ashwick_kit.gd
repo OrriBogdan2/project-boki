@@ -25,10 +25,6 @@ const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
 const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
-const HEAT_CORE := Color("ffd23a")     # the heat glow's core (her vfx palette "hot"); its body is SHIELD_COL
-const HEAT_RISE := 0.8                 # s of roaring before her palm glows at full heat
-const HEAT_COOL := 0.8                 # s it takes to cool from full heat once the fire stops
-const HEAT_SIZE := 1.2                 # the heat glow's scale at full heat (the pilot flame is 0.4)
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
@@ -58,7 +54,6 @@ var relight_t := 0.0            # the lance can't relight until this runs out (0
 var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
-var heat := 0.0                 # 0..1: how hot her palm glows, building while the lance roars
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
@@ -164,7 +159,6 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "ABLAZE", res_col(), false)
 		vfx("ablaze", f.pos)
 		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 
@@ -172,7 +166,6 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 ## flash; the shared payoff's rings stay out of Cinder's fire.
 func _flashover_fx(f: Ent) -> void:
 	var col := Color("ffe0a0")
-	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
 	m.sfx("crit", f.pos, -7.0, 0.85)
@@ -192,13 +185,12 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	vfx("knock")
 	_stoke_pose()
 	if h.dashes < h.max_dashes():
-		h.dashes = minf(h.max_dashes(), h.dashes + 1.0)     # one ram charge back; the recharge keeps its time
+		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
 		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
+		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
@@ -242,8 +234,7 @@ func _tick(dt: float) -> void:
 	net_pulse(dt, not ignites.is_empty(), 1.3)
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
-## Boki: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b). A rival Hunter's burn
-## stage is the ComboMark tag over their plate instead (combo_read).
+## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
@@ -253,7 +244,6 @@ func _tick_tells(dt: float) -> void:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
-	_heat_glow(dt, vis)
 	ember_t -= dt
 	if ember_t <= 0.0:
 		ember_t = 0.35
@@ -266,7 +256,7 @@ func _tick_tells(dt: float) -> void:
 	for key in ignites:
 		var e: Dictionary = ignites[key]
 		var f := e["e"] as Ent
-		if not is_instance_valid(f) or f is Hunter:
+		if not is_instance_valid(f):
 			continue
 		var lvl := int(e["lvl"])
 		var top := f.pos + Vector3(0, 3.7, 0)
@@ -283,29 +273,6 @@ func _tick_tells(dt: float) -> void:
 				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
-
-## The heat in her palm: an orange glow that builds over HEAT_RISE of roaring and cools after she lets go.
-func _heat_glow(dt: float, vis: bool) -> void:
-	var roaring := was_held and spool >= float(lmbd()["spool"])
-	if roaring:
-		heat = minf(1.0, heat + dt / HEAT_RISE)
-	else:
-		heat = maxf(0.0, heat - dt / HEAT_COOL)
-	var id := "heat%d" % h.get_instance_id()
-	if heat <= 0.0 or not vis or jet.running():
-		fx.unplace(id)
-		return
-	var flicker := 0.9 + 0.1 * sin(m.time * 23.0)
-	fx.place(id, "glow", tip(), SHIELD_COL, HEAT_CORE, HEAT_SIZE * heat * flicker, 0.0, heat)
-
-## The burn on `f`, for the ComboMark tag: Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
-func combo_read(f: Ent) -> Dictionary:
-	var lvl := burning(f)
-	if lvl == 0:
-		return {}
-	var e: Dictionary = ignites[f.get_instance_id()]
-	return {"icon": "fireball", "n": lvl, "max": 2, "left": float(e["until"]) - m.time,
-			"total": float(rd()["ignite_t"])}
 
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:
@@ -520,7 +487,6 @@ func _cinder_hit(f: Ent) -> void:
 	if cur > 0:
 		var bonus := float(rdf["dmg"]) * power("sec") * (ignite_k(f) - 1.0)
 		f.hurt(bonus, h, {"src": "flame", "ab": "utility", "tags": ["flame"], "melee": false})
-		ComboMark.payoff(m, h, f)        # the Ignite payoff: bonus damage on a burning foe
 	# the impact: a red flash and an ember shower (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
@@ -534,7 +500,6 @@ func _cinder_hit(f: Ent) -> void:
 			if o != f and is_instance_valid(o) and not o.dead and sees_from(f.pos, o):
 				_ignite(o, cur, burning(o))
 				vfx("shot_spread", f.pos, null, {"to": o.pos + Vector3(0, 1.0, 0)})
-		m.fx.word(f.pos + Vector3(0, 2.5, 0), "SPREAD", col_of(rdf), true)
 	else:
 		stoke(f)
 
@@ -674,7 +639,6 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
@@ -724,8 +688,6 @@ func _cloak_blast() -> void:
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
-func recast_left() -> float: return jet.left()
-func recast_slot() -> String: return "x"
 func ult_running() -> bool: return jet.running()
 ## RecastCue: X again lands the flight early, where you are (it lands by itself when it runs out).
 func recast_window() -> Dictionary:
@@ -747,8 +709,6 @@ func combo_marks(out: Array) -> void:
 		if left > 0.0 or lvl > 0:
 			var label := "ABLAZE" if lvl > 0 else "CHAR"
 			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
-## X again lands the flight early (it lands by itself when it runs out).
-	return {"slot": "x", "left": float(jet.flight["t"])} if jet.running() else {}
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
@@ -771,7 +731,6 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and in_reach and (burning(te) > 0 or randf() < 0.5):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
-		bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.3      # a held lane, then the release
 		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist > 2.5 and dist < 5.0 and randf() < 0.2:
 		h.inp["aim"] = tgt.pos

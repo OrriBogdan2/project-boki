@@ -1,8 +1,7 @@
 extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
 ## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
-## audit
-## (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced).
@@ -11,7 +10,6 @@ extends "res://tools/clip_shots.gd"
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
-const START_FPS := 30.0    # frames/s of the start strip: the first 0.27 s from standing still to a run
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
 const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
@@ -24,7 +22,7 @@ var close := false
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
 	"dolm": ["lmb_throw", "lmb_punch"], "dredge": ["shot", "throw"], "gunslinger": ["lmb", "rmb"],
-	"juggernaut": ["slam", "meteor"], "mage": ["lmb_l", "rmb"], "ostra": ["orb", "snap"],
+	"juggernaut": ["slash_r", "slam"], "mage": ["lmb_l", "rmb"], "ostra": ["orb", "snap"],
 	"rimewright": ["dart_r", "dart_heavy"], "tender": ["shot_r", "seed"], "thief": ["lmb_r", "vault_r"],
 }
 
@@ -93,9 +91,8 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.rotation.y = SIDE_YAW
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
-	await _loco(model, sync, dir.path_join("start"), RUN_MPS, frames, 0.0, START_FPS)
-	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames, WARM_S, LOCO_FPS)
-	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames, WARM_S, LOCO_FPS)
+	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
+	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
 	await _keyed(model, sync, clips, dir.path_join("idle"), String(lc["idle"]), frames)
 	var atk: Array = ATTACKS[id]
@@ -112,18 +109,14 @@ func _close_cam(sk: Skeleton3D) -> void:
 	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, warm_s: float, fps: float) -> void:
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
-	model.set_meta(WardenClips.STATE, {})
-	(sync.get("clips") as WardenClips).loco_pos = Vector2.ZERO
+	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
-	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
-	for k in int(warm_s / DT):
-		sync.call("_process", DT)
 		_scroll(mps, DT)
-	var steps := int(round(1.0 / (fps * DT)))
+	var steps := int(round(1.0 / (LOCO_FPS * DT)))
 	for i in frames:
 		for k in steps:
 			sync.call("_process", DT)

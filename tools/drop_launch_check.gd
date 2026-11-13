@@ -54,7 +54,7 @@ func _locked_flight() -> void:
 	var squad := _squad(m.skydrop.leader(m.player.team))
 	var l := _launch()
 	ok(squad.size() >= 2, "the squad jumps together (%d members)" % squad.size())
-	var sd: Vector3 = m.ship.get("dir", Vector3.FORWARD)
+	var sd: Vector3 = m.ship_of(l).get("dir", Vector3.FORWARD)
 	var head := Vector2(sd.x, sd.z).normalized()
 	var P: Hunter = m.player
 	var spread := 0.0

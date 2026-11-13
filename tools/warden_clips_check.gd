@@ -4,14 +4,12 @@ extends RefCounted
 ## clip is as long as the kit's move; the blend tree plays them (a move changes the pose, kit time drives it); the
 ## locomotion blends (a run moves the feet); the skinned weapon stays on its bone through every move and only one
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
-## Every Hero with clips (WardenAirTilt): its dive clip is in the .glb, a plunge turns it head-down, a glider turn leans
-## it into the turn, and on the ground the .glb is back in its own place.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
 const MAX_TRIS := 15000         # S1: weapon and shield included
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
-const PREFIX := {"breaker": ["bulwark", "bul_"], "tarek": ["dolm", "breah_"]}
+const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
 
 var bad := 0
@@ -29,8 +27,6 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
-	for id in Arch.ORDER:
-		_air(String(id))
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -55,12 +51,10 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for k in moves:
 		want.append(String((moves[k] as Dictionary)["clip"]))
 	var lc: Dictionary = cfg["loco"]
-	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"]])
-	if cfg.has("weapon_out"):
-		want.append(cfg["weapon_out"]["clip"])
+	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"], cfg["weapon_out"]["clip"]])
 	want.append_array((lc["walk"] as Dictionary).values())
 	want.append_array((lc["run"] as Dictionary).values())
-	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"], cfg["air"]["dive"]])
+	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
 	var sts: Dictionary = cfg["states"]
 	for k in sts:
 		if sts[k] is Dictionary:
@@ -72,7 +66,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	# every kit move mapped, and long enough for the kit's clock
 	var short: Array = []
 	var unmapped: Array = []
-	for table in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]:
+	for table in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES]:
 		for k in table:
 			if not String(k).begins_with(prefix) or k in SKIP:
 				continue
@@ -101,13 +95,10 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	for i in 40:
 		_play(m, an, sync, run_st, 1)
 		far = maxf(far, sk.get_bone_global_pose(foot).origin.distance_to(idle_f))
-	if art_name == "breaker":      # Tenzo's legs are rigid parts, not these bones
-		ok(far > 0.1, "%s: the run blend moves the feet (%.2f m)" % [art_name, far])
+	ok(far > 0.1, "%s: the run blend moves the feet (%.2f m)" % [art_name, far])
 	# every move: changes the pose, the weapon bone stays on the hand
 	var wp := WardenSkeleton.find(sk, "x_weapon")
-	var rest_off := Vector3.ZERO
-	if wp >= 0:
-		rest_off = (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(wp)).origin
+	var rest_off := (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(wp)).origin
 	var worst := 0.0
 	var worst_mv := ""
 	var still: Array = []
@@ -132,13 +123,8 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 			still.append(k)
 		_play(m, an, sync, st, 12)
 	ok(still.is_empty(), "%s: each move's clip moves the hand (%s)" % [art_name, str(still)])
-	if art_name == "breaker":      # Tenzo's fists are skinned in the body, nothing to keep in a hand
-		ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
-				% [art_name, worst, worst_mv])
-	if art_name == "tarek":
-		_tenzo(moves, lib)
-		m.free()
-		return
+	ok(worst <= GRIP_TOL, "%s: the weapon stays in the hand in every move (worst %.3f m, %s)"
+			% [art_name, worst, worst_mv])
 	if art_name == "breaker":
 		_whirl(m, an, sync, sk, st)
 	# the weapon: one drawn; hidden when out of the hand; anchors on it
@@ -202,25 +188,6 @@ func _companions() -> void:
 		ok(bone == "pauldron.L", "tender: %s rides the sun" % a)
 	m.free()
 
-## Tenzo (source Tetra, docs/heroes/dolm.md timings): his punches run on the legs' stride, the LMB clips carry the
-## release beat the kit's delayed boulder uses, and the spine's heave lands as its ridge finishes rising.
-func _tenzo(moves: Dictionary, lib: AnimationLibrary) -> void:
-	for k in ["breah_throw", "breah_wind", "breah_punch"]:
-		ok((moves[k] as Dictionary).get("upper", "") == "moving", "tarek: %s keeps walking under the fist" % k)
-	var rel := float(Arch.def("dolm")["lmb"]["boulder"]["release"])
-	var keys: Array = (KMovesStone.MOVES["breah_throw"] as Dictionary)["keys"]
-	ok(keys.any(func(kk): return absf(float((kk as Array)[0]) - rel) < 0.03),
-			"tarek: the throw's whip key sits at the boulder's release (%.2f s)" % rel)
-	ok(lib.get_animation("lmb_throw").length >= rel + 0.1, "tarek: the throw clip outlasts its release")
-	# the spine's heave (its last pose key) lands as the last rock stands: cracks + rise after the release
-	var xd: Dictionary = Arch.def("dolm")["x"]
-	var stand := float(xd["tell"]) + float(xd["rise"])
-	var spd := float((moves["breah_spine"] as Dictionary).get("speed", 1.0))
-	var sk: Array = (KMovesStone.MOVES["breah_spine"] as Dictionary)["keys"]
-	var heave := float((sk[sk.size() - 2] as Array)[0]) / spd
-	ok(absf(heave - stand) <= 0.1, "tarek: the spine heaves at %.2f s, the ridge stands at %.2f s" % [heave, stand])
-	ok(lib.get_animation("x_spine").length / spd >= stand, "tarek: the spine clip holds the hunch through the rise")
-
 ## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
 func _hammer_scale(w: Node, sk: Skeleton3D) -> void:
 	var box := (w.find_child("hammer", true, false) as MeshInstance3D).get_aabb()
@@ -277,45 +244,6 @@ func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st:
 	_play(m, an, sync, st, 12)
 	ok(worst < 0.6, "breaker: the kit's angle turns the skinned hammer (worst %.2f rad off)" % worst)
 	ok(reach <= 2.8, "breaker: the whirl's head stays inside the slam's reach (%.2f m of 2.8)" % reach)
-
-## The hips-to-head line in the model's frame: x its lean to the Hero's right, z behind, y up.
-func _spine(m: Node3D, sk: Skeleton3D) -> Vector3:
-	var inv := m.global_transform.affine_inverse() * sk.global_transform
-	var hips := inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hips")).origin
-	return ((inv * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin) - hips).normalized()
-
-func _air(id: String) -> void:
-	var art_name := WardenGlb.art(id)
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
-	holder.add_child(m)
-	var w := m.get_node_or_null("Warden")
-	var sync := w.get_node("Sync") as WardenGlb.Sync if w else null
-	if sync == null or sync.clips == null:
-		ok(false, "%s: plays its clips" % art_name)
-		m.free()
-		return
-	var sk := WardenGlb.skeleton(w)
-	var an := HunterAnim.new(m)
-	var dive := String(sync.clips.d["air"]["dive"])
-	ok(sync.clips.lib.has_animation(dive), "%s: the dive clip %s is in the .glb" % [art_name, dive])
-	var glide := {"vel": Vector3(0, -3.5, -9.0), "face": 0.0, "grounded": false, "gliding": true}
-	_play(m, an, sync, glide, 40)
-	var up := _spine(m, sk)
-	var plunge := {"vel": Vector3(0, -30.0, -6.0), "face": 0.0, "grounded": false, "diving": true}
-	_play(m, an, sync, plunge, 40)
-	var down := _spine(m, sk)
-	ok(down.y < 0.0 and down.z < 0.0, "%s: the dive goes head-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
-			% [art_name, down.y, down.z, up.y])
-	var turn := glide.duplicate()
-	for i in 30:
-		turn["face"] = float(turn["face"]) + 5.0 * DT      # a left turn at 5 rad/s
-		_play(m, an, sync, turn, 1)
-	var lean := _spine(m, sk)
-	ok(lean.x < up.x - 0.15, "%s: a glider turn leans it into the turn (spine x %.2f, straight %.2f)" % [art_name,
-			lean.x, up.x])
-	_play(m, an, sync, {"vel": Vector3.ZERO, "face": float(turn["face"]), "grounded": true}, 60)
-	ok(w.transform.is_equal_approx(sync.clips.tilt.rest), "%s: on the ground the body is upright again" % art_name)
-	m.free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:

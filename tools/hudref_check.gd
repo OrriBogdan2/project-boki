@@ -1,13 +1,14 @@
 extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
-##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
+##   1. segments follow max health (HudStyle.seg_step: 25 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip under health) and shields (past the end of health) are drawn
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
-##   7. the low-health wash grows with missing health and leans toward the side the last hits came from
+##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
+##      MateAlerts.LINE_S
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -30,10 +31,10 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	# ---------------------------------------------------------------- 1. segments follow max health
-	var counts := [HudStyle.seg_count(124.0), HudStyle.seg_count(145.0), HudStyle.seg_count(193.0)]
-	ok(counts == [8, 9, 12], "17 health a segment: the classes' 124 -> 8, 145 -> 9, 193 -> 12 (%s)" % str(counts))
-	ok(HudStyle.seg_count(600.0) == 9 and HudStyle.seg_step(600.0) == 68.0,
-		"a huge pool doubles the segment size instead of crowding (600 -> 9 of 68)")
+	var counts := [HudStyle.seg_count(100.0), HudStyle.seg_count(145.0), HudStyle.seg_count(300.0)]
+	ok(counts == [4, 6, 12], "25 health a segment: 100 -> 4, 145 -> 6, 300 -> 12 (%s)" % str(counts))
+	ok(HudStyle.seg_count(600.0) == 12 and HudStyle.seg_step(600.0) == 50.0,
+		"a huge pool doubles the segment size instead of crowding (600 -> 12 of 50)")
 	var m := Match.new()
 	main.add_child(m)
 	var opts := HudRefDemo.opts("--hudref-demo=plates")
@@ -51,11 +52,11 @@ func run(main_node: Node) -> void:
 	var sh: Dictionary = hud.plates.shown.get(full.nid, {})
 	ok(int(sh.get("segs", -1)) == HudStyle.seg_count(full.max_hp),
 		"the drawn plate has one segment per 25 health (%s for %d)" % [str(sh.get("segs")), int(full.max_hp)])
-	full.max_hp = 193.0
-	full.hp = 193.0
+	full.max_hp = 300.0
+	full.hp = 300.0
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 193: the plate redraws with 12 segments")
+	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 300: the plate redraws with 12 segments")
 	# ---------------------------------------------------------------- 2. the chip holds, then drains
 	var hp := HudPlate.new()
 	var dt := 1.0 / 60.0
@@ -110,19 +111,22 @@ func run(main_node: Node) -> void:
 	var down_word := String(ds.get("word", ""))
 	ok(dn.downed and bool(ds.get("downed", false)) and down_word.begins_with("DOWN"),
 		"a downed rival shows the downed plate ('%s')" % down_word)
-	var sl: Hunter = foes[3]
+	var sl: Hunter = foes[3]  # the demo holds the whole CC row on them: the bar's word is the worst, STUNNED
 	sl.reveal_t = 3.0       # seen however the headless camera faces
 	var sw := ""
 	for i in 60:            # vision refreshes every 0.05s and line of sight can lag a few frames headless
 		await main.get_tree().process_frame
 		sw = String(_shown(hud, sl).get("word", ""))
-		if sw == "SLOWED":
+		if sw == "STUNNED":
 			break
 	var why := "slow %.2f, unseen %s, drawn %s" % [sl.slow_t, sl.unseen, not _shown(hud, sl).is_empty()]
-	ok(sw == "SLOWED", "a slowed rival's plate says SLOWED over the bar ('%s', %s)" % [sw, why])
+	var cc_row: Array = HudPlate.statuses(sl).map(func(ic): return String(ic[2]))
+	ok(sw == "STUNNED" and "SLOWED" in cc_row,
+		"a stunned, slowed rival's plate: STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
+	await _mate_down(m, hud, P)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -168,6 +172,8 @@ func run(main_node: Node) -> void:
 		"each of the %d teammates' squad rows draws its Boki icon" % mates.size())
 	if mates.size() >= 1:
 		var mate: Hunter = mates[0]
+		var chip: int = TeamBoki.levels.get(mate.nid, -1)
+		ok(chip == mate.lvl, "a squad row carries the teammate's level chip (%d vs %d)" % [chip, mate.lvl])
 		mate.downed = false        # (the demo downs one rival)
 		mate.kin.hp = mate.kin.max_hp * 0.5
 		await hud.panels.draw
@@ -197,8 +203,6 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
-	await _check_gear_reveal(P)
-	await _check_wash(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -272,63 +276,6 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.0
 	flow.held.clear()
 
-## 7. Empty gear slots and belt slots stay hidden: only filled ones are drawn; holding the info key shows all
-## the gear slots and one plain line per item.
-func _check_gear_reveal(P: Hunter) -> void:
-	P.gear = Gear.empty_slots()
-	P.belt = UtilityBelt.empty()
-	await hud.panels.draw
-	await main.get_tree().process_frame
-	var spots := func(prefix: String) -> int:
-		return hud.hover_spots.filter(func(x): return String(x[1]).begins_with(prefix)).size()
-	ok(spots.call("gslot:") == 0 and spots.call("util") == 0, "a new hunter: no gear slots and no belt slots drawn")
-	var armor: String = Gear.ids_for(2)[0]
-	P.gear[2] = {"id": armor, "rar": 0}
-	var tonic: String = UtilityBelt.stock_ids()[0]
-	P.belt[1] = {"id": tonic, "n": 1}
-	await hud.panels.draw
-	await main.get_tree().process_frame
-	ok(GearPanel.shown(P) == [2] and spots.call("gslot:") == 1, "one armor piece: only the armor slot is drawn")
-	ok(spots.call("util") == 1, "one belt item: only its slot is drawn, with its key")
-	Input.action_press("scores")
-	var held := GearPanel.shown(P).size() == Gear.SLOTS.size()
-	var line := GearPanel._card_line(P, 2)
-	var empty_line := GearPanel._card_line(P, 0)
-	Input.action_release("scores")
-	ok(held and line.contains(Gear.desc_of(armor, 0)) and empty_line == "Glove 1: empty",
-		"holding the info key: every gear slot and a plain line per item ('%s' / '%s')" % [line, empty_line])
-	P.gear = Gear.empty_slots()
-	P.belt = UtilityBelt.empty()
-
-## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
-## Hud.hurt_from, the real path) weights the left edge, and a second later the wash is even again.
-func _check_wash(P: Hunter) -> void:
-	var hp_was := P.hp
-	P.hp = P.max_hp * 0.5
-	var above := HurtWash.strength(P)
-	P.hp = P.max_hp * 0.3
-	var high := HurtWash.strength(P)
-	P.hp = P.max_hp * 0.1
-	var low := HurtWash.strength(P)
-	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
-		% [int(HurtWash.BELOW * 100.0), high, low])
-	hud.hurt_dirs.clear()
-	ok(HurtWash.weight_at(hud.hurt_dirs, PI) == 0.0, "no recent hits: the wash is even all round")
-	hud.hurt_from(P.pos + Vector3(-6.0, 0.0, 0.0))
-	var left := HurtWash.weight_at(hud.hurt_dirs, PI)
-	var right := HurtWash.weight_at(hud.hurt_dirs, 0.0)
-	var top := HurtWash.weight_at(hud.hurt_dirs, -PI * 0.5)
-	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
-	ok(left > 0.9 and right == 0.0 and top < left, said)
-	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
-	var eased := HurtWash.weight_at(hud.hurt_dirs, PI)
-	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
-	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
-	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
-	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
-	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)     # (the middle third stays clear)
-	P.hp = hp_was
-
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})
@@ -336,6 +283,27 @@ func _shown(hud, h: Hunter) -> Dictionary:
 ## The plate's animation state (chip, crack, burst ...) for this hunter.
 func _state(hud, h: Hunter) -> Dictionary:
 	return hud.plates.st.get(h.nid, {})
+
+## 7. A teammate knocked: a short faint line (MateAlerts), gone after LINE_S.
+func _mate_down(m: Match, hud, P: Hunter) -> void:
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.downed)
+	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
+	ok(not mates.is_empty() and not rivals.is_empty(),
+		"a teammate and a rival to knock them (%d, %d)" % [mates.size(), rivals.size()])
+	if mates.is_empty() or rivals.is_empty():
+		return
+	var mate: Hunter = mates[0]
+	m.knock(mate, rivals[0], {})
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var ln: Dictionary = hud.mates.lines.get(mate.nid, {})
+	ok(String(ln.get("text", "")) == "down",
+		"a teammate down: one line by their squad row ('%s')" % ln.get("text", ""))
+	ok(MateAlerts.LINE_S <= 1.5 and MateAlerts.LINE_A <= 0.6,
+		"the line is short and faint (%.1fs, %.1f)" % [MateAlerts.LINE_S, MateAlerts.LINE_A])
+	hud.mates.track(hud, P, MateAlerts.LINE_S)
+	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
+		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

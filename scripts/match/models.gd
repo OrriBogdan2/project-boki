@@ -824,7 +824,8 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		gtrail.position = Vector3(0, 1.0, 0.3)
 		glider.add_child(gtrail)
 	var gset := _glider_set(gskin)
-	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()], [gset[1], toon(Color("5a4636"), false)]]:
+	for pc in [[gset[0], Gliders.canopy_material(gskin, team_col, hero_col)],
+			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
 		gmi.material_override = pc[1]
@@ -912,11 +913,12 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
 	var body := Arch.body(arch)
 	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
+	var bulk := float(body.get("bulk", 1.0))
 	var look_k := rs * ck * size_k * float(lk["height"])
-	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * look_k
+	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * look_k
 	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
 	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * look_k)
-	ring.scale = Vector3.ONE * ring_k
+	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * ring_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
@@ -1263,29 +1265,29 @@ static func vtoon_outlined() -> ShaderMaterial:
 	m.next_pass = _outline_mat
 	return m
 
-## A skin's glider merged once (merge_static): [the canopy's arrays, colour weights still in them (Gliders.paint
-## colours each Hunter's), the strings' mesh (one for all)]. Merging both per Hunter was ~3.5 ms each.
+## A glider per canopy shape, merged once (merge_static) for every Hunter on a skin of that shape: [the canopy,
+## its vertex colours still the colour weights (Gliders.canopy_material colours each Hunter's), the strings].
 static var _glider_sets := {}
 static func _glider_set(gskin: String) -> Array:
-	if not _glider_sets.has(gskin):
+	var sheet := Gliders.canopy(gskin)
+	if not _glider_sets.has(sheet):
 		var g := Node3D.new()
 		var canopy := MeshInstance3D.new()
-		var sheet := ArrayMesh.new()
-		sheet.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, Gliders.sheet(gskin))
 		canopy.mesh = sheet
 		canopy.material_override = vtoon_outlined()
 		canopy.position = Vector3(0, 1.05, 0.02)
 		g.add_child(canopy)
 		var m_line := toon(Color("5a4636"), false)
 		for sx in [-1.0, -0.4, 0.4, 1.0]:
-			part(g, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE, Vector3(0, 0, -0.62 * sx))
+			part(g, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE,
+					Vector3(0, 0, -0.62 * sx))
 		merge_static(g)
 		var got := {}
 		for ch in g.get_children():
 			got[(ch as MeshInstance3D).material_override == m_line] = (ch as MeshInstance3D).mesh
-		_glider_sets[gskin] = [(got[false] as Mesh).surface_get_arrays(0), got[true]]
+		_glider_sets[sheet] = [got[false], got[true]]
 		g.free()
-	return _glider_sets[gskin]
+	return _glider_sets[sheet]
 
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
@@ -1295,6 +1297,8 @@ static func merge_static(node: Node3D, discard := false) -> void:
 	var drop: Array = []
 	for ch in node.get_children():
 		if not (ch is MeshInstance3D) or ch.get_child_count() > 0 or not String(ch.name).begins_with("@"):
+			continue
+		if not ch.visible:
 			continue
 		var mi: MeshInstance3D = ch
 		var mat: Material = mi.material_override
@@ -1731,7 +1735,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			for k in 6:
 				part(gun, cyl(0.062, 0.062, 0.022, 12), cop, Vector3(0, 0.0, -0.06 - k * 0.075), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.075, 0.05, 0.07, 12), cop, Vector3(0, 0.0, -0.5), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, sphere(0.045, 10), glow.call(Color("ff8fd0")), Vector3(0, 0.0, -0.55))
+			part(gun, sphere(0.045, 10), glow.call(Color("9ff5e0")), Vector3(0, 0.0, -0.55))
 			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
 			grip.call(-0.02, 0.15)
 		"quill_rifle":
@@ -1760,7 +1764,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			part(gun, cyl(0.15, 0.14, 0.1, 14), m_acc, Vector3(0, 0, -0.52), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			grip.call(-0.02, 0.18)
 
-## A piece of gear lying on the ground: a gem-like token in a rarity halo (LootGlow).
+## A piece of gear lying on the ground: a glowing gem-like token with a light beam.
 static func gear_drop(col: Color, rar: int) -> Node3D:
 	var root := Node3D.new()
 	var rc: Color = Data.RARITY[clampi(rar, 0, Data.RARITY.size() - 1)]["color"]
@@ -1770,7 +1774,12 @@ static func gear_drop(col: Color, rar: int) -> Node3D:
 	part(spin, core, toon(col, true, 0.6), Vector3(0, -0.12, 0), Vector3.ONE, Vector3(PI, 0, 0))
 	var t := TorusMesh.new(); t.inner_radius = 0.28; t.outer_radius = 0.33
 	part(spin, t, toon(rc, false, 0.8), Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0))
-	LootGlow.attach(root, rar)
+	var beam := part(root, cyl(0.12, 0.22, 4.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.0, 0))
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.2)
+	ring.material_override = ring_mat(rc, 0.12); ring.position.y = 0.05
+	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a ground ring: no shadow, item 94)
+	root.add_child(ring)
 	return root
 
 static func gear_pad(col: Color) -> Node3D:
@@ -2069,6 +2078,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
 		accessory(body, acc, Goods.wear_col(rec))
+	PrizeBoard.dress(body, rec)      # a rosette for each Cup Ribbon (garden games)
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
@@ -2609,14 +2619,18 @@ static func chest_prim() -> Node3D:
 	root.set_meta("mats", [mw, mg])
 	return root
 
-## A dead hunter's deathbox: a squat crate that glows in the rarity of the best thing in it.
-static func deathbox(col: Color, rar: int) -> Node3D:
+## A dead hunter's deathbox: a squat crate with a glow in its value colour.
+static func deathbox(col: Color) -> Node3D:
 	var root := PropSculpt.chest() if Flora.v2() else chest_prim()
 	var own := root.get_node_or_null("Beacon")
 	if own:
-		root.remove_child(own); own.free()      # a deathbox glows in its loot's rarity, not a chest's
+		root.remove_child(own); own.free()      # a deathbox glows in its value colour, not a chest's
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
-	LootGlow.attach(g, rar)
+	var beam := part(g, cyl(0.12, 0.24, 5.0, 10), glow_mat(Color(col, 0.3)), Vector3(0, 2.5, 0))
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var ring := MeshInstance3D.new(); ring.mesh = flat_quad(1.6)
+	ring.material_override = ring_mat(col, 0.1); ring.position.y = 0.04
+	g.add_child(ring)
 	# the soul: a little wisp bobbing over the box while a teammate can still bring them back
 	var soul := Node3D.new(); soul.name = "Soul"; soul.position = Vector3(0, 1.3, 0); root.add_child(soul)
 	part(soul, sphere(0.16, 10), glow_mat(Color(0.85, 1.0, 0.95, 0.9)), Vector3.ZERO)
@@ -2629,11 +2643,10 @@ static func deathbox(col: Color, rar: int) -> Node3D:
 # ------------------------------------------------------------------ world legend: interactable icons
 ## Everything you can use out in the world (not loot, not breakables) wears a small floating badge
 ## with a symbol, in one colour per kind, so it reads at a glance from the match camera:
-## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
-## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
-## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
-const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "key": Color("b98aff"), "ckey": Color("f2c84a"),
-	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
+## shrines (blessing, teal), chest keys (brass), eggs (warm gold), revive beacons (mint). Loot is
+## gold / rarity coloured with a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
+const ICON_COLS := {"bless": Color("5fd0b0"), "ckey": Color("f2c84a"), "egg": Color("ffc04a"),
+	"revive": Color("6ae8a0")}
 static var _icon_tex := {}
 
 ## Is the point (x, y) (-1..1, y up) inside the white symbol for this kind?
@@ -2641,10 +2654,7 @@ static func _icon_sym(kind: String, x: float, y: float) -> bool:
 	match kind:
 		"bless":     # a four-point sparkle
 			return pow(absf(x), 0.5) + pow(absf(y + 0.02), 0.5) < 0.86
-		"hatch", "dock":   # an arrow up and out
-			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
-			return absf(x) < 0.15 and y > -0.56 and y < 0.0
-		"key", "ckey":
+		"ckey":
 			var d := Vector2(x, y - 0.24).length()
 			if d < 0.27 and d > 0.12: return true
 			if absf(x) < 0.075 and y < 0.0 and y > -0.6: return true

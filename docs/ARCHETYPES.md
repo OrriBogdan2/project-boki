@@ -20,7 +20,7 @@ and passive build-ups.
 
 | Layer | Gives | Lives in |
 |---|---|---|
-| **Weight class** (light, medium, heavy) | HP, run speed, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
+| **Weight class** (light, medium, heavy) | HP, run speed, mass and knockback, glide heat, **dash charges and recharge**, air dash | `Data.CLASSES` (unchanged) |
 | **Archetype** (2 per weight) | silhouette, **weapon family (LMB + RMB)**, **passive** (and its resource, if any), **E**, **R**, **dash shape** | new core data `content/archetypes/<id>.json` (reviewed, not community-authored) |
 | **Weapon** (2 per archetype) | LMB firing pattern, and the RMB's flavour within the archetype's verb | `content/weapons/*.json` (+ a `archetype` field) |
 | **Kin** | **modifies** archetype abilities through sockets (§4), plus its own throw (G), owner bonus, carry mode (shoulder, perch, mount), auto ability, dodge rider and **merge** | `content/kin_v2/*.json` (+ an optional `infusion` field) |
@@ -40,7 +40,7 @@ Current binds are in `scripts/core/game.gd` `_setup_input()`.
 |---|---|---|
 | LMB | weapon fire | weapon fire (unchanged) |
 | RMB | the weapon's own utility (9 different abilities, one per weapon) | the **archetype's RMB**, tied to firing, with contextual variants (tap, hold, airborne, during E, resource full). Both weapons of an archetype share the verb |
-| Shift | class dodge (phase step, roll, shoulder charge) | the **archetype dash** (charges: its own `dash.charges`, else the weight class's) |
+| Shift | class dodge (phase step, roll, shoulder charge) | the **archetype dash** (charges from weight) |
 | Space / Mouse 5 | jump / glide | unchanged |
 | Q | active glove (`gear1`) | **unchanged**: gloves stay the run's loot layer, so Q is still the glove |
 | E | the kin's ability (`signature`) | the **archetype's E** (usually utility). The kin's old E becomes the kin's **infusion source** (§4) |
@@ -880,7 +880,9 @@ set the bar for "oomph": one resource that the kit's own abilities build, a hunt
 changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
 `payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
 follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_fx`, `self_pips`,
-`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`):
+`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`).
+No kit prints a word in the world (owner 11-11): armed, landed, reset and crowd-control moments read
+through glow, ring, flash, sound and the plate's status icon; only numbers float.
 
 - **HUD:** the resource bar and crosshair arc as before, plus a pulsing label under the crosshair
   while the payoff is armed (`ready_label`) and the gold "ready" dot on the slot the payoff lives on.
@@ -900,7 +902,7 @@ three empowered arrows on R. Mechanics only; names, numbers and art are ours.
 | Slot | What it does |
 |---|---|
 | LMB (Longbow) | hold to draw: a creak and flash at stage 1 (0.4s, 30), a ping, flash and ring at full draw (0.9s, 60) that opens a 0.15s **perfect window**: let go inside it for +25% ("PERFECT", 75) |
-| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 6 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
+| RMB | **tap: Snare** (8, root 0.6; on the ground a Tripwire). **Hold: Heavy Shot**, charged 0.5s -> full at 1.1s: 16 -> 30, push 8 -> 12, pierces 2, a bigger arrow; driven into a wall within 3m it stuns 0.8 ("PINNED"). In the air: Plunge |
 | Dash | Grapple Arrow (unchanged) |
 | Passive | **Focus** -> **Deadeye** (below) |
 | E | **Hail Wall**: lob a volley up to 9m; 0.35s later (the strip fills, soft-CC floor) a 6m x 2.2m line of arrows rains across your aim for 3.75s: 5 every 0.5s, slow 35%, blight 1s (healing barely takes). A steady patter while it falls. During it the tap snare roots 1.0 |
@@ -987,7 +989,7 @@ above is superseded by this:
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Mending Ground on it.
 - Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
-  shield burns gold, "SLAM READY" / "SHIELD SLAM READY". Payoff: "CRUSHED", `pay_slam`, T4.
+  shield burns gold. Payoff: `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.
@@ -1074,10 +1076,10 @@ ranks.)
 |---|---|---|---|
 | Passive | none | **Blazing Spirit**: dealing damage builds it; Empowered: +15% damage, +12% dash haste, +20% ability haste; knocking a hunter (or killing a creep) heals 20% of the enemy's max HP | **Rage**: damage you deal fills it (+0.7 per point; a Searing Wave fills it 3x as fast; cools after 3s out of a fight); full = **Enraged** 6s: +15% damage, +12% dash recharge, +20% cooldown speed (the red shell and swell stay). A knock heals 20% of the knocked hunter's max health; a monster kill 20% of its |
 | LMB | tap / hold | **Quick melee** cone slash, the central tip deals bonus equal to the base; **hold**: a charged ranged fireblast that quickly builds Blazing Spirit | Greatsword (kit-run): slashes 8 every 0.34s, alternating, double at the tip (no heavier third: Brall's 3rd/4th-hit bonus was removed in a patch); **hold**: charge 0.22 -> 0.95s, a **Searing Wave** 6 -> 10m, 12 -> 28, through a line (full: burns, slows). Shotgun and minigun as before |
-| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (SWEET SPOT, T4, `pay_rage`); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.6m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
+| RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (SWEET SPOT, T4, `pay_rage`); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.2m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
 | E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
-| R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock sends the hunter straight to the deathbox and resets its cooldown | **No R (kits2-nor).** Folded into Smash rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
+| R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock resets its cooldown | **No R (kits2-nor).** Folded into Smash rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
 
 ### E + RMB combinations and the other cross-ability interactions
 
@@ -1088,7 +1090,7 @@ pose, sound and VFX.
 
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
-| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.6m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
+| Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
 | Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
@@ -1167,9 +1169,6 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
   upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
   knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
 - Shiv (Sable): the Bolas row is **owner-overridden** (30% slow, cd 7, owner item 53; see docs/KIT_PARITY.md Sable RMB), and the Dagger row matches (E: 14 m, 6 s, cd 15). Still missing (see docs/KIT_PARITY.md, Sable): Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
-- Brall: climbing double-height walls; dodging shots building Blazing Spirit (his level-4 dash
-  upgrade); turn restriction when dashing out of a Smash.
-- Shiv: Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
   destructibles; whether the weaker Fusillade dashes empower (ours do).
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
@@ -1238,43 +1237,5 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 `content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
 - **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
-- Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
-- Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
-
-## Body and hitbox parity (item 46 follow-up, Nov 8)
-
-Each hero's height and breadth against the source hero's footage sheet (`briefs/hero-ref/<file>.md`, "Body, scale and movement feel"; the data in `briefs/supervive-data` has no per-hero hitbox, only one bot agent radius 0.43 m for all). Source index `S = height x sqrt(width)`, both against a medium; `hit_r = standard x clamp(1 + 0.5 (S - 1), 0.85, 1.15)`. A hit radius changed only where it was off by 0.015 m or more (footage error is about 5-10%). **No art mesh was rescaled** (every Warden has an art branch); the model height is the true height from `--warden-model-check`, so the art follow-ups are listed. DECISIONS wins: Breaker's model is 1.5x and his hitbox the heavy class's 0.50 m.
-
-| Archetype | Source (file) | Source height x / width x | Model height before = after | `hit_r` before | `hit_r` after | Note |
-|---|---|---|---|---|---|---|
-| bulwark | Oath (bjorn) | 1.15 / 2.0 | 1.50 | 0.460 | **0.500** | DECISIONS: model 1.5x, hitbox 0.50 m (past the item-46 cap) |
-| dredge | Kingpin (dredge) | 1.17-1.2 / 1.5 | 1.30 | 0.452 | 0.452 | at the high end already (cap 0.46) |
-| juggernaut | Brall (juggernaut) | 1.12 / 1.3 | 1.26 | 0.428 | **0.445** | hunched; model 1.26 vs 1.12: art follow-up (Kael, stature carried as a hunch) |
-| gunslinger | Ghost (venator) | 1.0 / 1.0 | 1.04 | 0.416 | **0.400** | the source's medium reference |
-| ostra | Void (ostra) | 1.0 with hover / 1.0 | 1.18 | 0.412 | 0.412 | within 0.012; model 1.18 is owner's "bigger, menacing" (size 0.9, Nov 4) |
-| mage | Joule (vireo) | 0.96 / 1.15 (shoulders) | 1.04 | 0.400 | 0.400 | model 8% over: art follow-up (Ryzz) |
-| archer | Myth (pin) | 0.98 / 1.0 | 0.98 | 0.392 | 0.392 | matches |
-| dolm | Tetra (breah) | 0.97 / 1.2 (fists excluded) | 1.19 | 0.388 | **0.412** | model is lean and 1.19 tall vs short and blocky: art follow-up (Tarek) |
-| thief | Shiv (dancer) | 0.96 / 0.9 | 0.95 | 0.384 | 0.384 | matches |
-| rimewright | Celeste (tamsin) | 1.15 / 0.5 | 1.08 | 0.380 | **0.362** | tall but half a medium wide; size 1.15 already matches (Neve) |
-| ashwick | Felix (linwick) | 0.90 / 1.0 (pack) | 1.02 | 0.376 | 0.376 | model 13% over: art follow-up (Cinder; flame excluded) |
-| tender | Elluna (mooshmoosh) | 0.70 / 1.0 | 0.60 | 0.340 | 0.340 | at the floor; model 0.6 vs 0.70 is item 108's owner shrink |
-
-`--hitbox-size-check` asserts each `hit_r` equals the value above (Breaker's band top is 1.25 by DECISIONS); `--warden-model-check` freezes the same radii.
-
-## Kit parity lock
-`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
-- **Add a row** for a number in the source: `[D]` evidence from `briefs/supervive-data` (file:line), cooldowns at level 1 included (PARITY FIRST: 1.0x unless the owner says otherwise). A row whose value differs on main FAILS and is listed for a kit fix; it is never loosened.
-- **Owner override:** a row main may not match because the owner said so carries `"owner": "<DECISIONS date and note>"` and `"ours": <the pinned value>`; the check prints OWNER and still fails if ours drifts.
-- **Other files:** `field` and `per` may read another content file as `"weapons/quill_rifle:primary.dmg"` (`content/<file>.json`, then the dotted path); a number in an array is `smash_dmg.0`.
-- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance (12% of the ratio). Oath, Joule, Shiv, Tetra and Void damage is read at level 15 in the data, so only ratios to the same kit's other hit are usable.
-- Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
-- Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
-
-## Kit parity lock
-`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
-- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios, and level-1 cooldowns. A cooldown we scale on purpose stays a row: it FAILs and is listed for the owner (gap 10 in `docs/KIT_PARITY.md`), nothing is loosened to hide it. `value` is the source number, so a FAIL is a real difference.
-- `"owner": "<note>"` marks a row where an owner call overrides the source: `value` is then the owner's number (ours), `evidence` still names the source number it replaces, and the check prints the note.
-- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance. A path may index an array (`rmb.coil.dmg.0`) or start `weapon.` to read the hero's `signature` weapon (`weapon.primary.dmg` is the LMB).
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).

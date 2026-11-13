@@ -3,10 +3,10 @@ extends Node3D
 ## Hem's ultimate on X, Starpiercer (docs/heroes/archer.md; hero sheet pin.md "Ultimate"). A tap with no
 ## cast lock empowers her next shots ("shots", 3) for "window" seconds. While empowered the bow needs no
 ## draw: each LMB press nocks for "nock" s (the bow glows, the cursor ring fills), then looses a big
-## arrow that flies "speed" m/s (the source's beam crosses its 18 m in about 0.2 s), pierces every foe and
-## smashes breakable props without stopping, out to "range" (1.5x her Empowered range), knocks back and
-## strips "shred" armor. The last arrow hits harder and finishes a hunter it leaves under "execute" of
-## their health. She can walk, roll and Spirit Walk between shots. The window ends after the last arrow or on time.
+## arrow that flies "speed" m/s (the source's beam crosses its 18 m in about 0.2 s), pierces every foe out
+## to "range" (1.5x her Empowered range), knocks back and strips "shred" armor. The last arrow hits harder
+## and finishes a hunter it leaves under "execute" of their health. She can walk, roll and Spirit Walk
+## between shots. The window ends after the last arrow or on time.
 ##
 ## Telegraphs (AimKit, own player): the arrow's lane out to its range and a ticked crosshair ring at her
 ## feet while empowered, the cursor ring filling through each nock. Everyone sees three pips over her
@@ -92,6 +92,7 @@ func tick(dt: float) -> void:
 	var nk := clampf(nock_t / float(x.get("nock", 0.3)), 0.0, 1.0) if nock_t >= 0.0 else 0.0
 	AimKit.lane(h, "x", {"len": float(x.get("range", 18.0)), "width": float(x.get("width", 0.5)), "tip": true,
 		"col": PinFx.THREAD, "col2": CORE, "k": nk, "fill": nk, "hot": nk})
+	AimKit.circle(h, "x_ring", {"self": true, "r": 0.9, "ticks": true, "star": true, "col": PinFx.THREAD})
 	if nock_t >= 0.0:
 		AimKit.charge(h, nk, {"col": PinFx.THREAD, "col2": CORE})
 	_tells(true)
@@ -102,6 +103,7 @@ func end() -> void:
 	window = 0.0
 	nock_t = -1.0
 	AimKit.hide(h, "x")
+	AimKit.hide(h, "x_ring")
 	_tells(false)
 
 ## A Boki merge: the nock and the empowered window both end with no arrow.
@@ -123,8 +125,8 @@ func _loose() -> void:
 	var dmg: float = base * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	var start := h.pos + Vector3(dir.x * 0.6, 0.95 * float(h.cdat.get("scale", 1.0)), dir.y * 0.6)
 	var arrow := {"last": last}
-	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "pierce_break": true, "hitset": {},
-		"kb": float(x.get("kb", 4.0)), "tracer": 0.0,
+	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 4.0)),
+		"tracer": 0.0,
 		"kx": func(_s: Dictionary, _at: Vector3, e: Ent, _why: String): _hit(e, arrow)}
 	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, PinFx.THREAD, extra)
 	k.vfx("ult_beam", Vector3(start.x, h.pos.y, start.z), dir, {"last": last})
@@ -145,22 +147,22 @@ func _hit(e: Ent, arrow: Dictionary) -> void:
 		k.m.later(0.05, func(): if is_instance_valid(foe): HeroUlt.landed(k, foe))
 	var big := bool(arrow["last"])
 	k.vfx("ult_hit", e.pos, h.dir_to(e), {"last": big})
-	if big and e is Hunter:
-		var foe := e as Hunter
-		k.m.later(0.03, func(): _execute(foe))
+	if big and (e is Hunter or (e is Kin and BokiHit.executes())):
+		k.m.later(0.03, func(): _execute(e))
 
-## The last arrow finishes a hunter it left under the execute share of their health.
-func _execute(foe: Hunter) -> void:
-	if not is_instance_valid(foe) or foe.dead or foe.downed or foe.out:
+## The last arrow finishes a hunter (or a Boki, BokiHit) it left under the execute share of their health.
+func _execute(foe: Ent) -> void:
+	if not is_instance_valid(foe) or not foe.hittable() or (foe is Hunter and (foe as Hunter).downed):
 		return
 	if foe.hp > foe.max_hp * float(xd().get("execute", 0.12)):
 		return
 	executes += 1
 	var opts := {"src": "abil", "ab": "ultimate", "tags": ["ultimate", "execute"], "payoff": true}
-	foe.hurt(foe.hp * 4.0 + foe.armor * 4.0, h, opts)
+	var armor := (foe as Hunter).armor if foe is Hunter else 0.0
+	foe.hurt(foe.hp * 4.0 + armor * 4.0, h, opts)
 	HeroUlt.landed(k, foe)
 	k.m.fx.own_look = true
-	k.payoff_fx(foe.pos, "EXECUTED", GOLD, "pay_deadeye", h.dir_to(foe), foe)
+	k.payoff_fx(foe.pos, GOLD, "pay_deadeye", h.dir_to(foe), foe)
 	k.m.fx.own_look = false
 
 ## The tells everyone sees: three pips over her head (one per shot left) and a glow on the bow.

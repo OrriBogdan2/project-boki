@@ -10,7 +10,7 @@ const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
 const ART := {"bulwark": "breaker", "archer": "hem", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "ryzz", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
-	"tender": "pip", "dredge": "dredge"}
+	"tender": "pip", "dredge": "dredge", "gil": "gil"}
 ## Armature bone -> the rig node it follows (paths under the model root).
 const BONES := {
 	"root": "Rig",
@@ -70,16 +70,19 @@ const INK_TAGS := ["braid", "mane", "mane_dk"]
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
 ## the match camera, so the model reads as bright as the art. (A procedural hero's shadow floor is 0.37.)
-## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
-## blue fill), which turned a painted atlas's skin lilac and its blacks muddy: ambient_cut and own_ambient swap the
-## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
-## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm. At the match
-## camera far_smooth takes the atlas's fine detail out (no speckle) and the ink thins (INK_FAR_THIN); a Hunter's
-## signature rim there is rim_far / rim_far_color in its warden_look.json "painted".
-const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.95, 0.91), "shadow_sat": 0.0, "sss": 0.0,
-	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
-	"top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0, "own_ambient": Vector3(0.58, 0.54, 0.5),
-	"light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7, "far_smooth_bias": 1.0}
+## The scene's light is split: a cool violet ambient and blue fill (Look: about half the light on a painted model)
+## against a low amber sun (RaidLook "clear": ffb27a). The cool half turned a painted atlas's skin lilac, so
+## ambient_cut and own_ambient swap the scene's ambient for a neutral one a step brighter and light_neutral takes the
+## hue out of the cool fill; the sun's amber then had nothing left to balance it and every Hunter read red (owner
+## 11-11), so light_neutral_warm takes most of its hue out too and the toon tints stay near white. dark_lift raises
+## near-black paint one step. At the match camera far_smooth takes the atlas's fine detail out (no speckle) and the
+## ink thins (INK_FAR_THIN); a Hunter's signature rim there is rim_far / rim_far_color in its warden_look.json
+## "painted".
+const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.98, 0.96), "light_tint": Color.WHITE,
+	"shadow_sat": 0.0, "sss": 0.0, "sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3,
+	"fres_tint": 0.95, "rim_amount": 0.5, "top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0,
+	"own_ambient": Vector3(0.56, 0.55, 0.54), "light_neutral": 0.9, "light_neutral_warm": 0.8, "dark_lift": 0.07,
+	"far_smooth": 0.7, "far_smooth_bias": 1.0}
 ## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
 ## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
 const ICE := {"fres": 2.6, "fres_color": Color(0.72, 0.9, 1.0), "fres_tint": 0.25, "gloss": 0.45, "rim_amount": 0.8}
@@ -127,6 +130,12 @@ static var _look = null         # content/rules/warden_look.json, read once (loo
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
 
+## Starts reading every Warden model a match may dress a Hunter in (as the loading screen comes up): the first
+## load of each was 200-450 ms on the main thread, a dozen of them in a 40-hunter build.
+static func fetch_all() -> void:
+	for a in Arch.ORDER:
+		fetch(a)
+
 static func path(arch: String) -> String:
 	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
@@ -170,6 +179,13 @@ static func set_model(arch: String, on: bool) -> void:
 		picks[arch] = "procedural"
 	Settings.set_v(SETTING, picks)
 
+## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
+## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+static func shown_torso(model: Node3D) -> Transform3D:
+	var torso := model.get_node(^"Rig/Torso") as Node3D
+	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
+	return sync.shown(torso) if sync and sync.clips else torso.global_transform
+
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
 	var skels: Array = glb.find_children("*", "Skeleton3D", true, false) if glb else []
@@ -203,7 +219,6 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
-	_narrow(glb, float(Arch.body(arch).get("bulk", 1.0)))
 	var sync := Sync.new()
 	sync.name = "Sync"
 	# (before the toon pass and the moods)
@@ -211,6 +226,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
+	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
@@ -250,14 +266,6 @@ static func misfits(arch: String) -> Array:
 		if not bad.is_empty():
 			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
 	return _misfits[p]
-
-## The body's "bulk" (Mossy 0.8): the model's meshes are narrowed on x and z, not the root, which would shear
-## the blade turning in the hand.
-static func _narrow(glb: Node3D, bulk: float) -> void:
-	if bulk == 1.0:
-		return
-	for mi in glb.find_children("*", "MeshInstance3D", true, false):
-		(mi as MeshInstance3D).scale = Vector3(bulk, 1.0, bulk)
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
@@ -538,7 +546,7 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p):
+	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
@@ -930,7 +938,6 @@ class Sync extends Node:
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
-	var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
@@ -946,6 +953,7 @@ class Sync extends Node:
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
+	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -979,12 +987,10 @@ class Sync extends Node:
 		for ch in springs.chains:
 			var first := skel.get_bone_name(int(ch["ids"][0]))
 			ch["own_rest"] = Array(dd.get("hang_own_rest", [])).any(func(n): return first.begins_with(String(n)))
-		springs.tune(dd.get("springs", {}))
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
-		aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
 		if clips:
 			_look_pose()
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
@@ -1010,14 +1016,7 @@ class Sync extends Node:
 			WardenGlb._skinned_weapon(root)
 			WardenGlb._hide_shield(root)
 
-	var lod: AnimLod.Gate
-
 	func _process(dt: float) -> void:
-		if lod == null:
-			lod = AnimLod.Gate.new(root)
-		dt = lod.step(root.global_position, get_viewport(), dt)
-		if dt == 0.0:
-			return
 		_keep_one_weapon()
 		if clips:
 			_play(dt)
@@ -1039,6 +1038,14 @@ class Sync extends Node:
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
+
+	## A rig node's place on the body you see (world): its bone's pose back through the retarget.
+	func shown(nd: Node3D) -> Transform3D:
+		for l in links:
+			if l[1] == nd:
+				var to_rest := (l[3] as Transform3D).affine_inverse() * (l[2] as Transform3D).affine_inverse()
+				return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
+		return nd.global_transform
 
 	func apply() -> void:
 		for l in links:
@@ -1089,7 +1096,6 @@ class Sync extends Node:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if sway:
 			sway.step(dt)
-		aim.step(1.0 - w)
 		if w < 1.0:
 			var inv := skel.global_transform
 			for h in hand_nodes:
@@ -1100,6 +1106,8 @@ class Sync extends Node:
 	func apply_blade() -> void:
 		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
 			return
+		if square_blade:
+			_square_blade()
 		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
 		var a := skel.global_transform * skel.get_bone_global_pose(blade_root_bone) * blade_root.position
@@ -1111,21 +1119,27 @@ class Sync extends Node:
 		if muzzle:
 			muzzle.global_position = b
 
+	## A root scaled on x and z only (body "bulk": Mossy) shears a blade turning in the hand, which then stretches
+	## and shrinks. The blade bone's world basis is made square again at the skeleton's height scale (its size along
+	## the root's up axis, which the shear leaves alone), so it never builds on last frame's pose. A bone pose cannot
+	## hold a shear, so a little is left (under 2 cm on Mossy's blade, --clip-check).
+	func _square_blade() -> void:
+		var pose := skel.get_bone_global_pose(blade_bone)
+		var k := (skel.global_basis.transposed() * root.global_basis.y.normalized()).length()
+		pose.basis = skel.global_basis.inverse() * ((skel.global_basis * pose.basis).orthonormalized() * k)
+		skel.set_bone_global_pose(blade_bone, pose)
+
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
 ## joints in world space: it keeps its momentum (damped), is pulled back toward the shape it has riding its parent
 ## rigidly (firmer at the root than at the tip; a spring_hang_* chain toward straight down from its root), and
 ## keeps its links' lengths, so a braid trails behind a run,
 ## swings out of a turn and settles when she stands. The last bone is the tip (no skin of its own).
-## A Hero's data "springs" tunes a chain by its name's start: {"pull": [root, tip], "damp", "limit": radians a
-## link may bend off its rest line, "limit_in": and toward the bone it hangs from, the body} (docs/art/
-## secondary_motion/README.md; --spring-settle-check).
 class Springs:
 	const PREFIX := "spring_"
 	const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
 	const PULL_TIP := 0.07      # and at the tip
 	const DAMP := 0.84          # the velocity kept per 1/60 s
-	const LIMIT := PI          # radians a link may bend off its rest line (PI: free)
 	const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
 	const FLOOR_CHAIN := PREFIX + "scarftail_tail"     # a tail lies on the ground, not through it (the feet's height)
 	const FLOOR_UP := 0.04      # m its joints stay over the model's origin
@@ -1158,24 +1172,10 @@ class Springs:
 				# root, not riding its parent: Kael's Warchain hangs from his fist whichever way the arm points;
 				# a "wing" chain folds back while the Warden skates, WING_FOLD)
 				chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
-					"pull": Vector2(PULL, PULL_TIP), "damp": DAMP, "limit": LIMIT, "limit_in": LIMIT,
 					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
 					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
 					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail"),
 					"floor": skel.get_bone_name(bi).begins_with(FLOOR_CHAIN)})
-
-	## A Hero's data "springs": {chain name start: {"pull": [root, tip], "damp", "limit"}} on the chains it names.
-	func tune(data: Dictionary) -> void:
-		for ch in chains:
-			var first := skel.get_bone_name(int(ch["ids"][0]))
-			for key in data:
-				if first.begins_with(String(key)):
-					var t: Dictionary = data[key]
-					var pull: Array = t.get("pull", [PULL, PULL_TIP])
-					ch["pull"] = Vector2(float(pull[0]), float(pull[1]))
-					ch["damp"] = float(t.get("damp", DAMP))
-					ch["limit"] = float(t.get("limit", LIMIT))
-					ch["limit_in"] = float(t.get("limit_in", ch["limit"]))
 
 	func _spring(bi: int) -> bool:
 		return skel.get_bone_name(bi).begins_with(PREFIX)
@@ -1229,40 +1229,21 @@ class Springs:
 			if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
 				pts = want.duplicate()
 				prev = want.duplicate()
-			var tune: Vector2 = ch["pull"]
-			var keep := pow(float(ch["damp"]), k)
 			for i in range(1, n):
 				var p := pts[i]
-				var v := (p - prev[i]) * keep
+				var v := (p - prev[i]) * pow(DAMP, k)
 				prev[i] = p
 				p += v
-				var pull := lerpf(tune.x, tune.y, float(i) / float(n - 1))
+				var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
 				if bool(ch["wing"]) and fold < -0.3:
 					pull = lerpf(pull, 1.0, 0.85)      # (flared through a flip: the wing turns with her, no twist)
 				pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
 			pts[0] = want[0]
 			prev[0] = want[0]
-			var limit: float = ch["limit"]
-			var limit_in: float = ch["limit_in"]
-			var hold := xf * skel.get_bone_global_pose(par).origin      # (the body side: the bone it hangs from)
 			for i in range(1, n):
 				var d := pts[i] - pts[i - 1]
-				var line := want[i] - want[i - 1]
-				var ln := line.length()
-				d = d.normalized() * ln if d.length() > 1e-5 else line
-				var most := limit
-				if limit_in < limit:
-					var inward := (hold - pts[i - 1]).slide(line.normalized()).normalized()
-					most = lerpf(limit, limit_in, maxf(d.slide(line.normalized()).normalized().dot(inward), 0.0))
-				if d.angle_to(line) > most:
-					# (bent past its limit: back onto the cone round its rest line, so a braid can't swing into her)
-					var bend := line.cross(d)
-					if bend.length_squared() < 1e-10:
-						bend = line.cross(Vector3.RIGHT if absf(line.normalized().x) < 0.9 else Vector3.FORWARD)
-					var held := line.rotated(bend.normalized(), most)
-					prev[i] += held - d        # (the limit stops it; it doesn't throw it back past its rest)
-					d = held
-				pts[i] = pts[i - 1] + d
+				var ln := want[i].distance_to(want[i - 1])
+				pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
 				if ch["floor"]:
 					pts[i].y = maxf(pts[i].y, xf.origin.y + FLOOR_UP)
 			ch["pts"] = pts

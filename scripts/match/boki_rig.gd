@@ -2,8 +2,8 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet) and "kburst" (a factor on the gait's
+## cadence), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -104,16 +104,7 @@ const FRAME := {
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
-	"lilybara": {"head": Vector3(0, 0.40, -0.34), "top": 0.6, "carry": Vector3(0, 0.5, 0.14),
-		"ear_tip": Vector3(0.11, 0.56, -0.23), "tail_tip": Vector3(0, 0.295, 0.5), "tip_bone": "tail2", "hip": 0.17,
-		"marks": {"left flank": Vector3(-0.25, 0.27, 0.1), "right flank": Vector3(0.25, 0.27, 0.1),
-			"back": Vector3(0, 0.46, 0.14), "chest": Vector3(0, 0.27, -0.22)}},
-	"umbrathere": {"head": Vector3(0, 0.466, -0.157), "top": 0.76, "carry": Vector3(0, 0.28, -0.19), "hip": 0.18,
-		"ear_tip": Vector3(0.057, 0.551, -0.157), "tail_tip": Vector3(0.124, 0.029, 0.304), "tip_bone": "tail3",
-		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
-			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
 }
-const STRIDE_DEFAULT := [0.6, 1.2]     # [walk, run] for a species not measured yet (a mid-size Boki)
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
 	"cindle": [0.80, 1.60],
@@ -129,6 +120,7 @@ const STRIDE := {
 	"selenfin": [1.50, 2.90],
 	"zapple": [0.75, 1.74],
 	"hivara": [0.63, 1.42],
+	"caecilith": [0.14, 0.35],
 	"glomwort": [1.50, 2.90],
 	"kestrike": [0.30, 0.42],
 	"kindlewren": [0.39, 0.50],
@@ -155,7 +147,8 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -177,6 +170,10 @@ const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -202,19 +199,16 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
 var _look := Vector2.ZERO
 var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
-var _idle := BokiIdle.new()    # its breathing loop's fidgets, see BokiIdle
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
-var lod: AnimLod.Gate
-var _ink_pass: ShaderMaterial         # the coat's ink outline pass
-var _ink_on: Material                 # the pass it hangs from (the coat, or its marks)
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -224,6 +218,8 @@ static func has(kin_id: String) -> bool:
 ## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
 ## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
 static func fetch_common() -> void:
+	if not BackgroundWork.can_read_ahead():
+		return
 	for sp in Data.common_kin():
 		var p := PATH % [sp, sp]
 		if has(String(sp)) and not _scenes.has(p) \
@@ -273,14 +269,12 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL     # advanced by AnimLod
+	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
-	BokiIdle.build(player, skeleton(), species)
-	_idle.rest(_rng)
 	set_clip("idle")
 
 ## The model's skeleton.
@@ -307,10 +301,7 @@ func seek(at: float) -> void:
 		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
 
 func _process(dt: float) -> void:
-	if dt <= 0.0:
-		return
-	if manual:
-		player.advance(dt)
+	if manual or dt <= 0.0:
 		return
 	var seen := root.is_visible_in_tree()
 	player.active = seen
@@ -318,18 +309,9 @@ func _process(dt: float) -> void:
 		return
 	_flinch.update(root, dt)
 	_keep_flex()
-	if lod == null:
-		lod = AnimLod.Gate.new(flex)
-	var was_near := lod.near
-	dt = lod.step(root.global_position, get_viewport(), dt)
-	if lod.near != was_near and _ink_on:
-		_ink_on.next_pass = _ink_pass if lod.near else null       # far or off screen: no ink outline pass
-	if dt == 0.0:
-		return
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
-	player.advance(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
 ## the jolt of a hit (KinFlinch) stay.
@@ -366,19 +348,21 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	if asleep != _asleep:
+		_asleep = asleep
+		if _speed < WALK_SPEED:
+			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
-	if want == "idle":
-		want = _idle.step(dt, player, clip, _rng)       # a fidget now and then, never over an action
-	else:
-		_idle.rest(_rng)
 	set_clip(want)
 	player.speed_scale = 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
-	var sp: Array = STRIDE.get(species, STRIDE_DEFAULT)
-	var stride: float = sp[1 if want == "run" else 0] * model.global_basis.z.length()
-	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
+			* model.global_basis.z.length())
+	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
+	player.speed_scale = clampf(_speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 func _start_shot(which: String) -> void:
 	_shot = which
@@ -386,7 +370,7 @@ func _start_shot(which: String) -> void:
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
-		return "sleep"
+		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work
@@ -482,9 +466,7 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
 	if id == "boki_coat":
 		_coat = m
-		_ink_pass = _ink()
-		_ink_on = m
-		m.next_pass = _ink_pass
+		m.next_pass = _ink()
 	mats.append(m)
 	return m
 
@@ -544,7 +526,6 @@ func _copy_coat() -> void:
 		marks.set_shader_parameter(k, body.get_shader_parameter(k))
 	marks.next_pass = _coat.next_pass
 	_coat.next_pass = marks
-	_ink_on = marks
 
 ## How far a colour has moved from the species' own (white: not at all), to multiply a painted atlas with.
 static func _tint(now: Color, base: Color) -> Color:

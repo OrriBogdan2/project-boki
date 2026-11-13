@@ -36,8 +36,6 @@ const ROWS := [
 	["aura", "Aura", AURA, "Glowing specks that drift around you"],
 ]
 const HOLLOW_ROW := 5
-# ROWS a new player sees first (Sex, Shroud colour, Glow); "More looks..." opens the rest
-const FIRST_ROWS := [0, 4, 6]
 const VOID_SHADER := preload("res://shaders/void_face.gdshader")
 const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
 const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)
@@ -51,7 +49,7 @@ const EYES_FROM_FACE := [0, 1, 2, 3, 4, 3, 5, 4, 1]
 
 static func default_look() -> Dictionary:
 	return {"unmasked": true, "gender": 1, "height": 1, "build": 1, "hollow": 0, "glow": 0, "ghost": 1, "aura": 1,
-		"shroud": 0, "colour": 1, "marks": [], "features": {}}
+		"shroud": 0, "colour": 1, "marks": []}
 
 static func random_look() -> Dictionary:
 	var out := default_look()
@@ -74,7 +72,6 @@ static func clean(lk: Dictionary) -> Dictionary:
 		out[row[0]] = clampi(_i(out[row[0]], 0), 0, (row[2] as Array).size() - 1)
 	if not out["marks"] is Array:
 		out["marks"] = []
-	out["features"] = out["features"].duplicate() if out["features"] is Dictionary else {}
 	return out
 
 ## A look from the face-marks creator (eyes, brows, blush, no hollow yet): the closest hollow, ghost and glow.
@@ -141,7 +138,6 @@ static func _brows_for(face: int, gender: int) -> int:
 static func migrate(data: Dictionary) -> void:
 	if data.has("look") and data["look"] is Dictionary:
 		data["look"] = clean(data["look"])
-		MasteryLook.refresh(data["look"])
 
 ## The look the farm, town and house wear: yours, as the Unmasked.
 static func worn() -> Dictionary:
@@ -191,8 +187,7 @@ static func colour(lk: Dictionary) -> Color:
 
 # ------------------------------------------------------------------------------------------ the hollow
 ## The void head: a shell of the head (Head's own mesh, a hair larger) that is void all the way round, with the
-## hollow's socket, rim and ghost features floating on it; the aura drifting round you; any kept Relic marks
-## and the mastery features you keep (MasteryLook).
+## hollow's socket, rim and ghost features floating on it; the aura drifting round you; any kept Relic marks.
 static func face(torso: Node3D, lk: Dictionary) -> void:
 	var u := clean(lk)
 	var head := torso.get_node("Head") as MeshInstance3D
@@ -210,7 +205,6 @@ static func face(torso: Node3D, lk: Dictionary) -> void:
 		var col := Models.toon(Color(String(md.get("col", "#ffffff"))), false)
 		var at := Vector3(float(md.get("x", 0.0)), float(md.get("y", 0.85)), -0.215)
 		Models.part(torso, Models.sphere(float(md.get("size", 0.02)), 10), col, at, Vector3(1.0, 1.0, 0.3))
-	MasteryLook.draw(torso, u)
 
 ## The void material for a head with a hollow of this shape (see shaders/void_face.gdshader), its ghost
 ## features and glow.

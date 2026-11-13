@@ -13,13 +13,13 @@ const R := {
 	"revive_radius": 1.6,       # [est] a teammate this close revives you
 	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
 	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
-	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] speed each 1st..4th+ person on a wisp adds (revive, stomp)
-	"revive_decay": 0.5,        # [design] revive bar lost per second when nobody revives (the wiki)
+	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
 	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
+	"execute_time": 3.0,        # [footage] (old: hold interact on an enemy wisp; now the stomp below)
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
-	"stomp_time": 2.8,          # [footage] ...then you're locked in: about 3 s in all
-	"stomp_cycle": 0.8,         # seconds per foot-lift-and-slam: three stomps fit in stomp_time
+	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
+	"stomp_cycle": 0.7,         # one foot-lift-and-slam
 	"kin_revive_time": 8.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
@@ -32,6 +32,7 @@ const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map 
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
 const OWNER_TINT := 0.6               # how far the body leans to the owner's colour (0..1)
 const OWNER_RING_M := 2.4             # metres across the owner's ring round a box
+const TRAIN_BOX_REACH := 40.0         # m: a sky train kill over the abyss drops the box on ground this near the hit
 
 ## Box colour by what's inside: grey, blue, purple, gold.
 const BOX_TIERS := [[0, Color("b8b4ac")], [12, Color("6ab8ff")], [35, Color("c08aff")], [80, Color("ffb64a")]]
@@ -55,24 +56,7 @@ static func box_color(b: Dictionary) -> Color:
 		if box_value(b) >= int(t[0]): col = t[1]
 	return col
 
-## The rarity tier of the best piece of gear or valuable in a box (what its glow shows).
-static func box_rarity(b: Dictionary) -> int:
-	var best := 0
-	for g in b.get("gear", []):
-		best = maxi(best, int(g["rar"]))
-	for it in b.get("pack", []):
-		best = maxi(best, Loot.rar_of(it))
-	return best
-
 ## Is anyone on this team still in the fight (standing or a wisp)?
-## Speed factor for n people on one wisp: each adds less than the one before (R.crowd).
-static func crowd(n: int) -> float:
-	var curve: Array = R["crowd"]
-	var k := 0.0
-	for i in n:
-		k += float(curve[mini(i, curve.size() - 1)])
-	return k
-
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
 
@@ -116,17 +100,17 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			o.set_meta("crush_t", st)
 		var kin_on := false
 		for kk in [o.kin, o.kin2]:
-			if kk and not (kk as Kin).dead and (kk as Kin).state == "reviving" and (kk as Kin).flat_dist(o) < 1.4:
-				kin_on = true
+			if kk and not (kk as Kin).dead and KinWispForm.pulling(kk):
+				kin_on = true          # its Boki, riding as a wisp, is pulling it up: no bleed meanwhile
 		if foes > 0 and not o.get_meta("stomped", false) and o == m.player and m.hud:
 			m.hud.toast("%s is on you! Drift away" % stompers[0].pname, Color("ff5a4a"))
 		o.set_meta("stomped", foes > 0)
 		if foes > 0:
 			# stomped: drains fast and nobody can pick you up
-			o.down_hp -= base * R["stomp_mult"] * crowd(foes) * dt
-			o.revive = maxf(0.0, o.revive - dt * R["revive_decay"])
+			o.down_hp -= base * R["stomp_mult"] * dt
+			o.revive = maxf(0.0, o.revive - dt * 0.5)
 		elif allies > 0:
-			o.revive += dt / R["revive_time"] * crowd(allies)
+			o.revive += dt / R["revive_time"] * (1.0 + R["extra_reviver"] * (allies - 1))
 			if o.revive >= 1.0:
 				trace(m, "wisp revive %s" % o.pname)
 				for rv in revivers: (rv as Hunter).revives += 1
@@ -134,19 +118,9 @@ static func tick_wisps(m: Match, dt: float) -> void:
 				continue
 		elif not kin_on:
 			o.down_hp -= base * dt
-			o.revive = maxf(0.0, o.revive - dt * R["revive_decay"])
 		if o.down_hp <= 0.0:
 			trace(m, "%s %s" % [o.pname, "bled out" if foes == 0 else "stomped out"])
 			m.eliminate(o, o.last_hit_by, "bled out" if foes == 0 else "finished")
-
-## A hit on a wisp. A wisp can't be shot: it's lost to stomps, an execute, bleeding out, and the few
-## abilities the source lets reach it (opts "src": "wisp", e.g. Hail Wall), which drain `down_hp` by `dmg`.
-## Always 0: the wisp has no health to take. It runs on the wisp's own game (remote hits arrive by "hit").
-static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
-	if opts.get("src", "") == "wisp":
-		o.down_hp = maxf(0.0, o.down_hp - dmg)
-		o.last_hit_by = by
-	return 0.0
 
 # ------------------------------------------------------------------ the stomp
 ## Holding interact on an enemy wisp commits you to stomping it out: a fixed animation you can't
@@ -214,7 +188,7 @@ static func box_spot(m: Match, h: Hunter, why: String) -> Vector3:
 	var at := h.pos
 	if why == "train" and m.world.is_void(at.x, at.z):
 		# hit by the sky train over the abyss: the box lands on the nearest ground to where they were hit
-		var near: Vector3 = m.world.free_spot_near(at, [], 1.0, 0.4, 14.0)
+		var near: Vector3 = m.world.free_spot_near(at, [], 1.0, 0.4, TRAIN_BOX_REACH)
 		if not m.world.is_void(near.x, near.z):
 			at = near
 	if why == "abyss" or m.world.is_void(at.x, at.z) or at.y < m.world.ground_at(at.x, at.z) - 1.0:
@@ -234,9 +208,8 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	KinTrack.drop_carried(m, h, at)       # a Boki you were carrying home drops for its owner
 	var b := {"owner": h, "team": h.team, "pos": at, "gems": h.gems, "seeds": h.seeds.duplicate(), "caught": h.caught.duplicate(true),
 		"belt": UtilityBelt.clear(h), "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,
-		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys, "chest_keys": h.chest_keys}
+		"gear": [], "pack": h.pack.duplicate(true), "chest_keys": h.chest_keys}
 	h.pack = []
-	h.rift_keys = 0
 	h.chest_keys = 0
 	Backpacks.into_box(h, b)
 	# the gear you wear goes in the box too (Supervive: the box holds everything); your weapon stays with you
@@ -254,7 +227,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	return b
 
 static func _place_box(m: Match, b: Dictionary, at: Vector3) -> void:
-	var n := Models.deathbox(box_color(b), box_rarity(b))
+	var n := Models.deathbox(box_color(b))
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
@@ -321,8 +294,6 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 	for i in (b.get("belt", []) as Array).size():
 		var st: Dictionary = b["belt"][i]
 		out.append({"key": "belt", "i": i, "id": String(st["id"]), "name": "%d %s" % [int(st["n"]), UtilityBelt.name_of(String(st["id"])).to_lower()], "sub": "Utility", "icon": UtilityBelt.icon_of(String(st["id"])), "col": UtilityBelt.col_of(String(st["id"])), "upgrade": UtilityBelt.has_room(h, String(st["id"]))})
-	if int(b.get("keys", 0)) > 0:
-		out.append({"key": "keys", "name": "%d Rift Key%s" % [int(b["keys"]), "" if int(b["keys"]) == 1 else "s"], "sub": "Opens a rift hatch", "icon": "gem", "col": ExitModels.HATCH, "upgrade": true})
 	if int(b.get("chest_keys", 0)) > 0:
 		var n_keys := int(b["chest_keys"])
 		var key_label := "%d key%s" % [n_keys, "" if n_keys == 1 else "s"]
@@ -381,8 +352,6 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				if int(st["n"]) <= 0:
 					(b["belt"] as Array).remove_at(bi)
 				break
-		"keys":
-			b["keys"] = int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
 		"backpack":
 			Backpacks.take_from_box(m, h, b)
 		"chest_keys":
@@ -425,7 +394,7 @@ static func smart_loot(m: Match, h: Hunter, b: Dictionary) -> int:
 
 static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
-		and (b.get("belt", []) as Array).is_empty() and int(b.get("keys", 0)) <= 0 and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
+		and (b.get("belt", []) as Array).is_empty() and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
 		and (b.get("pack", []) as Array).is_empty() \
 		and int(b.get("backpack", Backpacks.POUCH)) <= Backpacks.POUCH
 	_refresh_box(b)
@@ -476,13 +445,11 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 		st["n"] = int(st["n"]) - UtilityBelt.grant(h, String(st["id"]), int(st["n"]))
 		if int(st["n"]) > 0: belt_left.append(st)
 	b["belt"] = belt_left
-	var rift_left := int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
 	var box_keys := int(b.get("chest_keys", 0))
 	var keys_left := box_keys - BeltKeys.give(h, "chest_key", box_keys)
 	var got := int(b["gems"])
 	b["gems"] = 0
 	b["seeds"] = {}
-	b["keys"] = rift_left
 	b["chest_keys"] = keys_left
 	_settle_box(b)
 	m.sfx("pickup", b["pos"], -2.0, 0.9)

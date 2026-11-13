@@ -67,8 +67,10 @@ var noted := {}             # memory kinds already written this match
 var ping_ref: Dictionary = {}
 var ping_follow: Ent = null
 var side := 1.0             # which flank it walks on
-var guide := {}             # the tutorial step it's cheering you through: {id, to, t, said, demo_t}
+var guide := {}             # the tutorial step it's leading: {id, to, t, said, demo_t}
 var demo := {}              # a little demonstration it's doing: {kind, t}
+var lead_dir := Vector2.ZERO
+var lead_t := 0.0
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -182,7 +184,7 @@ func _find_threat() -> void:
 	threat = null
 	var o := h()
 	var bd := 10.0
-	for f in m.foes_of(o.team):
+	for f in m.foes_of(o.team, false):
 		if f == k or (f is Kin and (f as Kin).owner_h == o) or Shrubling.hidden(f):
 			continue
 		if f is Mob and not ((f as Mob).tgt == o or (f as Mob).tgt == k or o.flat_dist(f) < 5.0):
@@ -276,7 +278,7 @@ func _best_callout() -> Dictionary:
 		var best_x: Dictionary = {}
 		var bxd := 1e9
 		for x in m.exits.list:
-			var usable: bool = m.exits.callable(x) or m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
+			var usable: bool = m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
 			if usable and o.flat_dist(x["pos"]) < bxd:
 				bxd = o.flat_dist(x["pos"]); best_x = x
 		if not best_x.is_empty():
@@ -407,7 +409,6 @@ func on_owner_hit(d: float, by: Ent) -> void:
 	if d >= o.max_hp * 0.12 and yelp_cd <= 0.0 and not o.downed:
 		yelp_cd = 7.0
 		history.append({"t": m.time, "cat": "yelp", "pri": 0})
-		m.sfx(KinVoice.cue(k.species, "hurt"), k.pos, -6.0, Unique.voice(k.rec))
 		var txt := BokiChatter.line(k, "yelp")
 		if txt != "":
 			m.kin_bark(k, txt, "yelp")
@@ -456,7 +457,7 @@ func _almost_home() -> void:
 	if noted.has("almost_home") or m.exits == null:
 		return
 	var x: Dictionary = m.exits.active_for(h().team)
-	if x.is_empty() or not String(x["state"]) in ["open", "boarding"] or h().flat_dist(x["pos"]) > 7.0:
+	if x.is_empty() or String(x["state"]) != "open" or h().flat_dist(x["pos"]) > 7.0:
 		return
 	noted["almost_home"] = true
 	cheer_cd = 3.0
@@ -533,7 +534,7 @@ static func demo_tick(m, mode: String) -> void:
 				p.down_hp = 1e6
 			if p.downed:
 				p.revive = minf(p.revive, 0.35)
-				if k.state in ["reviving", "active"]:
+				if k.state in ["wisp", "active"]:
 					if not m.bubbles.any(func(b): return b["ent"] == k):
 						m.kin_bark(k, BokiChatter.line(k, "owner_down"), "owner_down")
 					_hold_bubble(m, k)
@@ -554,6 +555,12 @@ func heel_spot() -> Vector3:
 	var fwd := aim_dir()
 	var sd := Vector2(-fwd.y, fwd.x) * side
 	var offs: Array = []
+	if guide.size() > 0 and lead_dir != Vector2.ZERO:
+		var gto: Vector3 = guide.get("to", Vector3.INF)
+		var gd := Vector2(gto.x - o.pos.x, gto.z - o.pos.z).length() if gto != Vector3.INF else 99.0
+		var ahead := clampf(gd - 1.2, 1.2, 8.0)
+		for kk in [1.0, 0.75, 0.5, 0.3]:
+			offs.append(lead_dir * ahead * kk)
 	if threat and is_instance_valid(threat) and not threat.dead:
 		var to := Vector2(threat.pos.x - o.pos.x, threat.pos.z - o.pos.z)
 		if to.length() > 0.5:
@@ -575,26 +582,53 @@ func _ground_ok(p: Vector3, y0: float) -> bool:
 		return false
 	return absf(w.ground_at(p.x, p.z) - y0) < 0.75
 
+## Is it leading the way right now (tutorial)? Then the HUD can drop its own arrow.
+func leading() -> bool:
+	if guide.size() == 0 or lead_dir == Vector2.ZERO or h() == null or k.state not in ["shoulder", "active"]:
+		return false
+	var kp := k.seen_pos()
+	var rel := Vector2(kp.x - h().pos.x, kp.z - h().pos.z)
+	return rel.length() < 9.0 and rel.dot(lead_dir) > 0.8
+
 # ------------------------------------------------------------------ the tutorial guide
-## Tutorial.update tells it every step what the step is about and where it wants you (Pell leads the way;
-## the Boki says it in its own voice, looks there and shows you the moves).
+## Match._update_tutorial tells it every step what the step is about.
 func tut(id: String, to: Vector3) -> void:
 	if guide.get("id", "") != id:
 		guide = {"id": id, "to": to, "t": 0.0, "said": false, "demo_t": 0.4}
+		lead_dir = Vector2.ZERO
+		lead_t = 0.0
+		if to != Vector3.INF and h() and Tutorial.leads(id):
+			# off it goes straight away, the straight way first (the walked path comes on the next look)
+			guide["dir"] = Vector2(to.x - h().pos.x, to.z - h().pos.z).normalized()
+			lead_dir = guide["dir"]
+			lead_t = 0.4
 	guide["to"] = to
 
-## Stalled: it says the step again (the card and marker pulse too).
+## Stalled: it runs back to you and says the step again (the card and marker pulse too).
 func nag() -> void:
 	if guide.size() == 0:
 		return
 	guide["said"] = false
+	guide["back_t"] = 2.5
 	pose = "beckon"
 	pose_t = 2.0
 
 func _tut_tick() -> void:
+	var o := h()
 	var id := String(guide["id"])
 	var to: Vector3 = guide["to"]
 	guide["t"] = float(guide["t"]) + 0.4
+	# which way to go: straight there, or the way a bot would walk it (bridges, gaps)
+	lead_dir = Vector2.ZERO
+	guide["back_t"] = maxf(0.0, float(guide.get("back_t", 0.0)) - 0.4)
+	var back := float(guide["back_t"]) > 0.0       # (just nagged: it runs back to you first)
+	if to != Vector3.INF and not back and o.flat_dist(to) > 2.5 and Tutorial.leads(id):
+		lead_t -= 0.4
+		if lead_t <= 0.0:
+			lead_t = 0.8
+			var pd: Vector2 = m.bot_brain._path_dir(m, o, to)
+			guide["dir"] = pd if pd.length() > 0.1 else Vector2(to.x - o.pos.x, to.z - o.pos.z).normalized()
+		lead_dir = guide.get("dir", Vector2.ZERO)
 	# a hint in its own voice when the step starts, and again if you seem stuck
 	var t := float(guide["t"])
 	if not guide["said"] and not (m.tut and m.tut.card_up()):
@@ -605,7 +639,7 @@ func _tut_tick() -> void:
 			m.kin_bark(k, txt, "tut", 4.0 if txt.length() < 60 else 7.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "growl" if id in ["shoot", "throw", "fight"] else "point"
+			pose = "point" if Tutorial.leads(id) else ("growl" if id in Tutorial.FOE_STEPS else "beckon")
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4
@@ -613,7 +647,7 @@ func _tut_tick() -> void:
 		guide["demo_t"] = 3.6
 		match id:
 			"dash": demo = {"kind": "dash", "t": 0.0, "dir": aim_dir()}
-			"glide": demo = {"kind": "jump", "t": 0.0, "dir": aim_dir()}
+			"glide", "exdash": demo = {"kind": "jump", "t": 0.0, "dir": aim_dir()}
 			"move": demo = {"kind": "hop", "t": 0.0, "dir": aim_dir()}
 		if demo.size() > 0:
 			history.append({"t": m.time, "cat": "demo_" + String(demo["kind"]), "pri": 0})

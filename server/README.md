@@ -10,7 +10,7 @@ server/
   matchmaker/           Python 3 stdlib only, no pip
     matchmaker.py       the service (also --selftest)
     fake_server.py      stand-in game server for tests
-    mm/                 config, queue, launcher, core, api, selftest, log
+    mm/                 config, queue, launcher, core, picks, api, selftest, log
     tests/              python3 -m unittest
   deploy/
     install.sh          box setup, run as root on Ubuntu 24.04 (idempotent, --dry-run)
@@ -35,6 +35,7 @@ All bodies are JSON. The client's `Net.VERSION` must equal the version the match
 | `POST /queue` | `{"mode": "duel\|arena\|trio", "name": "...", "version": "<client Net.VERSION>", "party": ["friend", ...]}` | `200 {"ticket": "<id>"}`; `409 {"error": "version", "server_version": "..."}`; `400 {"error": "mode"}` or `{"error": "bad_request"}` |
 | `GET /queue/<ticket>` | | `{"state": "waiting", "position": n, "eta_s": n}` while queued or while the server boots; `{"state": "ready", "host": "<PUBLIC_HOST>", "port": N, "token": "<one-time>"}`; `{"state": "gone"}` |
 | `DELETE /queue/<ticket>` | | `{"state": "gone"}` (leaves the queue; a ticket that already has a match leaves its slot to a bot) |
+| `POST /queue/<ticket>/pick` | `{"hunter": "<Hunter id>"}` (`""` only reads) | `200 {"ok": true, "picks": {"phase": "loading\|picking\|done", "loaded": n, "of": N, "teams": [{"order", "picking", "left_s", "picks"}]}}`; `409 {"error": "loading\|turn\|taken"}`; `400 {"error": "unknown"}`; `404 {"error": "no_match"}`. Works after the token is spent: picking waits until every human slot joined (or 60 s), then each team picks in turn, 10 s each, one of each Hunter per team (mm/picks.py) |
 
 Queues: duel is 1v1 (2 slots), arena 4v4 (8 slots), trio is extraction in teams of 3 (`TRIO_SLOTS`,
 default 18). A match starts as soon as the line holds a full match of humans, or when the oldest ticket
@@ -82,25 +83,10 @@ with stdout piped, and:
 | `READY_TIMEOUT_S` | `30` | how long a server may take to print `ready` |
 | `TOKENS_DIR` | `/run/boki` | where tokens files are written (0600) |
 
-## The game server process
-
-`godot --headless -- --server --port <N> --mode duel|arena|trio --match-id <id> --tokens-file <path>
-[--seed <s>] [--idle-exit <s>]` (scripts/core/dedicated_server.gd) runs one match as the authoritative
-host with no local player: the relay (scripts/server/relay.gd) on that port with the tokens as the only
-way in, and the match in the same process, bots in every seat nobody takes. Seats are team-major and
-sized from the tokens file's `slots`/`team_size` (defaults: duel 2, arena 4v4, trio 4 trios). The match
-starts when every seat is taken or 15 s after the first player; it ends when one team is left or the
-islands fall, the server tells the players (`end`) and exits 0. Exit 2: bad arguments or tokens file;
-3: the port is taken. `--version` prints `BOKI_SERVER version=<Net.VERSION>`. A refused handshake carries
-a reason the online screen keys its message on: `version` (with the server's version), `bad_token`, `full`.
-
-Checks: `godot --headless -- --server-check` (a server on port 7877, two headless players through
-`--join-server=`, the refusals) and `--server-e2e-check` (the matchmaker on 18080 with match ports
-7880-7882, two players queued through it, the refusals it is part of).
-
 ## Run it locally
 
-With a Godot checkout (the "Linux Server" preset's `--server` mode):
+With a Godot checkout (needs the "Linux Server" preset's `--server` mode on this branch, from
+`ext/servers`):
 
 ```sh
 SERVER_CMD="godot --headless --path $PWD --" PUBLIC_HOST=127.0.0.1 TOKENS_DIR=/tmp/boki-tokens \

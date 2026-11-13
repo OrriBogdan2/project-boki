@@ -12,7 +12,6 @@ extends RefCounted
 
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
-const TARGET_DB := -9.0                 # dB: the target layer sits quietly under the weapon's own hit sound
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 
 ## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
@@ -39,8 +38,8 @@ static func _credit(by: Ent) -> Ent:
 		return (by as Kin).owner_h
 	return by
 
-## Every hit that lands (Match.on_damage): the look for what it struck (HitClass: armour chips, a body
-## flash, a Boki puff, monster sparks), more of it the harder it hit; crits flash gold. Hits
+## Every hit that lands (Match.on_damage): an impact flash at the point it struck, sparks out the
+## far side, more of everything the harder it hit; crits flash gold, armor sheds blue shards. Hits
 ## that involve you are full size, other fights nearby are smaller, far ones draw nothing.
 static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: bool, armor: bool) -> void:
 	if m == null or m.fx == null or target == null:
@@ -64,32 +63,23 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var col := HURT_COL if target == p else HIT_COL
 	var ability := o.has("ab") and src != "kin"
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
-	var cls := HitClass.of(target, armor)
-	HitClass.draw(m.fx, cls, at, dir, HitClass.tint(target, cls, col), power, crit)
+	m.fx.impact(at, dir, col, power, crit, armor)
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	# sound layers on top of the hit tick Match plays: the target answers, heavy hits thud, blades bite
+	# sound layers on top of the hit tick Match plays: armor rings, heavy hits thud, blades bite
 	if credit == p and target != p:
 		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
 		if melee:
 			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0)
-		m.sfx(HitClass.SOUND[HitClass.of(target, armor)], target.pos, TARGET_DB)
+		if armor:
+			m.sfx("armor_hit", target.pos, -9.0)
 		if d >= 28.0 and not melee:
 			m.sfx("hit_heavy", target.pos, -7.0)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
-
-## A shot stopped by a wall or terrain (Match._shot_end): a puff of dust where it struck, and the
-## dull thud of it if you fired.
-static func wall(m: Match, at: Vector3, by: Ent) -> void:
-	var p: Hunter = m.player
-	if m.fx != null and (p == null or p.pos.distance_to(at) <= FAR):
-		HitClass.draw(m.fx, HitClass.WALL, at, Vector3.UP, Color.WHITE, 1.0, false)
-	if _credit(by) == p:
-		m.sfx(HitClass.SOUND[HitClass.WALL], at, TARGET_DB)
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
@@ -119,7 +109,8 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
-	_squad_cue(m, h, credit, "knock_confirm", -6.0)
+	if credit == m.player and h != m.player:
+		m.sfx("knock_confirm", null, -6.0)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -130,16 +121,9 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
 	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
 	m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
-	if _squad_cue(m, h, credit, "elim_confirm", -3.0) and credit == m.player and m.hud:
-		m.hud.flash(Color(tc, 1.0), 0.14)
-
-## The knock / finish cue, heard only by the attacker's squad (their team, so the local player hears it
-## whenever a squadmate downs or finishes a rival). Returns whether it played.
-static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: float) -> bool:
-	if m.player == null or not credit is Hunter or credit.team != m.player.team or h.team == credit.team:
-		return false
-	Sfx.play(cue, null, vol_db, 0.0)
-	return true
+	if credit == m.player and h != m.player:
+		m.sfx("kill", null, -3.0)
+		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)
 
 ## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
 ## freeze for whoever broke it (Feel tier 3: 0.045s).
@@ -221,3 +205,24 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 		m.sfx("extract_ok", null, -3.0)
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
+
+## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
+## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). Only for people
+## close to you, quieter for everyone else, silent while sneaking.
+static func footstep(h: Hunter) -> void:
+	var m: Match = h.m
+	if m == null or m.world == null or h.unseen or h.crouch:
+		return
+	var p: Hunter = m.player
+	if p != null and h != p and p.flat_dist(h) > 14.0:
+		return
+	var w: World = m.world
+	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
+	if not w.inb(ix, iz):
+		return
+	var i := w.idx(ix, iz)
+	var surf := "grass"
+	if w.bridge.has(i): surf = "wood"
+	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
+	elif w.style_at(i) == "frost": surf = "snow"
+	Sfx.play(HeroSfx.of(h, "step_" + surf, "step_" + surf), h.pos, -13.0 if h == p else -17.0, 0.08)

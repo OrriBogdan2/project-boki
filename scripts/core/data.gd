@@ -2,37 +2,42 @@ extends Node
 ## Every tunable definition in the game lives here: classes, weapons, kin, monsters, crops.
 ## Distances are in tiles (1 unit), speeds in tiles per second, times in seconds.
 
+## One per squad (MATCH_PLAYERS solos repeat none). The first eight are the old palette; the rest are
+## picked farthest-first in OKLab among mid-light, mid-chroma colours, so no two sit closer than
+## TEAM_COLOR_GAP (--team-colors checks it). Past ~40, colour alone runs out: add marks, not shades.
 const TEAM_COLORS := [Color("f2a24a"), Color("5ab0f0"), Color("e0607e"), Color("8fd16a"), Color("b48cf2"), Color("f0d45a"),
-	Color("4ad8c8"), Color("ff8ad8"), Color("c8a07a"), Color("9ab4ff"), Color("ff6a4a"), Color("b8e05a"), Color("e6e6f0"),
-	Color("7a8cff"), Color("ffb8a0"), Color("5ae08a"), Color("d07aff"), Color("ffe08a"), Color("6ac0ff"), Color("ff9a5a")]
-## The expedition's one format, the owner's call: always SQUADS squads of SQUAD_SIZE, bots filling the
-## spots no player takes. No solo or duo queue.
-const SQUADS := 10
-const SQUAD_SIZE := 3
-const MATCH_PLAYERS := SQUADS * SQUAD_SIZE
-
-## A match's squads in that format (the expedition, the lobby and the Demo match start from these).
-static func squad_opts() -> Dictionary:
-	return {"teams": SQUADS, "squad": SQUAD_SIZE, "total": MATCH_PLAYERS}
+	Color("4ad8c8"), Color("ff8ad8"), Color("227722"), Color("4455cc"), Color("995522"), Color("993399"),
+	Color("779977"), Color("ccccff"), Color("227788"), Color("8877aa"), Color("cc7700"), Color("bb2255"),
+	Color("66aa00"), Color("0088dd"), Color("44ffaa"), Color("cc99aa"), Color("ffccbb"), Color("aaeedd"),
+	Color("00bb88"), Color("bb55bb"), Color("bbaa00"), Color("885577"), Color("ff7755"), Color("777733"),
+	Color("0099aa"), Color("009955"), Color("cc4422"), Color("8855cc"), Color("bbbb88"), Color("bbee55"),
+	Color("aa7766"), Color("7788ff"), Color("77ddff"), Color("00ffee")]
+## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
+## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
+const TEAM_COLOR_GAP := 0.08
+## Every expedition has about this many hunters, however they're split into squads. 30 on the 305 m
+## Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a
+## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
+const MATCH_PLAYERS := 30
 
 const CLASSES := {
 	"light": {
-		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 4.4, "dashes": 1, "scale": 0.9, "hit_r": 0.35,
+		"name": "Light", "color": Color("c9bcff"), "hp": 124, "speed": 4.4, "dashes": 1, "mass": 0.85, "scale": 0.9, "hit_r": 0.35,
 		"ex_dist": 5.0, "ex_time": 0.2, "ex_cd": 12.0, "glide_cap": 1.2,
 		"weapon": "smg", "weapons": ["smg", "sniper", "twin_blades", "longbow", "coilcaster"],
-		"desc": "Fast and fragile. The fastest dash and the longest glide.",
+		"desc": "Fast and fragile. The fastest dash, the longest glide, and hits throw you furthest.",
 	},
 	"medium": {
-		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.4, "dashes": 1, "scale": 1.0, "hit_r": 0.40,
+		"name": "Medium", "color": Color("9ee2a0"), "hp": 145, "speed": 4.4, "dashes": 1, "mass": 1.0, "scale": 1.0, "hit_r": 0.40,
 		"ex_dist": 4.6, "ex_time": 0.2, "ex_cd": 13.0, "glide_cap": 1.0,
 		"weapon": "rifle", "weapons": ["rifle", "burst_rifle", "longsword", "spellstaff", "quill_rifle"],
 		"desc": "The all-rounder: middle health, speed, dash and glide.",
 	},
 	"heavy": {
-		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.4, "dashes": 2, "scale": 1.14, "hit_r": 0.50,
+		"name": "Heavy", "color": Color("e6dbc4"), "hp": 193, "speed": 4.4, "dashes": 2, "mass": 1.35, "scale": 1.14, "hit_r": 0.50,
 		"ex_dist": 4.2, "ex_time": 0.21, "ex_cd": 15.0, "glide_cap": 0.85,
 		"weapon": "shotgun", "weapons": ["shotgun", "minigun", "greatsword", "tower_shield"],
-		"desc": "Slow and tough. Two short dashes and the most health.",
+		"desc": "Slow and tough. Two short dashes, the most health, and very hard to push off a ledge.",
 	},
 }
 
@@ -127,7 +132,7 @@ const PERKS := {
 	"satchel": {"name": "Wayfarer's Satchel", "desc": "A deep bag: one more backpack slot.", "icon": "satchel", "col": Color("d9b27a"), "max": 2, "stats": {"pack": 1.0}},
 	"spyglass": {"name": "Brass Spyglass", "desc": "See 12% further through grass and gloom.", "icon": "scanner", "col": Color("ffe08a"), "max": 1, "stats": {"sight": 0.12}},
 	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
-	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Orbs and tuning pickups drop them.
+	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
 	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},
@@ -374,6 +379,7 @@ const TIERS := [
 ]
 
 ## Home islands beyond the first one. Build a bridge to reach them. Rects are in home grid tiles.
+## Retired in the Boki base (base_mode hides the unbuilt bridges); delete after sign-off, GARDEN.md 10.7 step 11.
 const ISLES := {
 	"orchard": {"name": "Orchard Isle", "cost": 100, "need": 1, "c": Vector2(69, 11), "r": Vector2(8.5, 6.5),
 		"bridge": [62, 14, 63, 29], "sign": Vector2(60.6, 29.4), "desc": "A sunny isle with room for a greenhouse."},
@@ -414,11 +420,9 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"length": 360.0,       # seconds until the islands fall
-	"portal_open": 150.0,  # first exit portals open this many seconds in
 	"extract_time": 4.0,   # seconds standing in an exit's circle to leave; a hit from another hunter resets it
 	"revive_time": 3.0,
 	"kin_revive_time": 5.0,
 	"bleed": 2.5,          # downed health lost per second
-	"down_hp": 100.0,      # a wisp's pool; it drains over Life.R.bleed_out (15 s)
+	"down_hp": 100.0,      # so about 40 seconds downed before you bleed out
 }

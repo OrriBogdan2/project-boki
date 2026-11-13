@@ -98,58 +98,6 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
 	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
 
-## The summon timer round the Boki box (KinSummon) while Boki ride as wisps, with one tag above it:
-##   SUMMONED  out: a ring in its glow colour drains with the seconds left (the seconds in the corner badge)
-##   RESTING   cooling down: a grey ring fills, with the seconds; the wisp is dim in the world
-##   READY     a flash for KinSummon.READY_FLASH_S seconds when the cooldown ends, then only the key cap stays
-##   STOLEN    a rival holds your Boki: the empty box says so
-## Nothing else is shown (the key cap only when pressing it does something). The tag is skipped while merged
-## (the Merge chip owns that spot).
-const SUMMON_GROW := 7.0     # px: the summon ring sits outside the bond ring
-
-## [ring fill 0..1, tag] for a Boki's summon: out drains, resting fills, ready is full ("READY" only in the flash).
-static func summon_view(s: KinSummon) -> Array:
-	if s.out():
-		return [clampf(s.left / s.dur, 0.0, 1.0), "SUMMONED"]
-	if s.cd > 0.0:
-		return [clampf(1.0 - s.cd / maxf(0.1, s.cd_full), 0.0, 1.0), "RESTING"]
-	return [1.0, "READY" if s.ready_flash > 0.0 else ""]
-
-## One of your Boki is held by a rival (a lost Boki someone caught: Match.player_lost).
-static func stolen(m, p: Hunter) -> bool:
-	if p != m.player:
-		return false
-	return m.player_lost.any(func(L): return is_instance_valid(L["holder"]) and (L["holder"] as Hunter).team != p.team)
-
-static func summon_ring(H, p: Hunter, r: Rect2) -> void:
-	var k: Kin = p.kin
-	if k == null or not is_instance_valid(k):
-		if stolen(H.m, p):
-			_chip(H, r, "STOLEN", HudStyle.HURT)
-		return
-	if k.summon == null or not (k.wisp or k.summon.out()):
-		return
-	var s := k.summon
-	var col: Color = k.sp.get("glow", k.sp["color"])
-	var rr := r.grow(SUMMON_GROW)
-	var at := r.position + Vector2(2, -2)
-	var view := summon_view(s)
-	var tag := String(view[1])
-	if s.out():
-		_ring(H, rr, view[0], col, 3.0)
-		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
-		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.left), 13, col, H.big)
-	elif s.cd > 0.0:
-		_ring(H, rr, view[0], Color(HudStyle.MUTED, 0.8), 2.0)
-		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
-		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.cd), 12, HudStyle.MUTED, H.big)
-	else:
-		var pulse := 0.5 + 0.5 * sin(float(H.m.time) * 8.0) if tag != "" else 0.0
-		_ring(H, rr, 1.0, Color(col, 0.6 + 0.4 * pulse), 2.0 + 2.0 * pulse)
-		HudStyle.key_pill(H.c, at, Settings.key_cap("summon"), col)
-	if tag != "" and not KinMerge.active(p):
-		_chip(H, r, tag, HudStyle.MUTED if tag == "RESTING" else col)
-
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 	if frac <= 0.0:
@@ -310,6 +258,16 @@ static func downed_arrow(H, k: Kin, sz: Vector2) -> void:
 	H.c.draw_colored_polygon(PackedVector2Array([edge + dir * 14.0, edge - dir * 8.0 + side * 10.0, edge - dir * 8.0 - side * 10.0]), col)
 	H._ctext(edge - dir * 22.0 + Vector2(0, 4), "%ds" % int(ceil(k.down_t)), 11, Color(H.INK, 0.9), H.big)
 
+## Your Boki on the minimap once it is off your shoulder: a paw in its colour (the default minimap's "boki" kind).
+static func map_kin(c: Control, m: Match, to_map: Callable, on_map: Callable) -> void:
+	var k: Kin = m.player.kin if m.player else null
+	if k == null or not k.state in ["active", "flying", "returning", "flying_home", "dazed"]:
+		return
+	var pv: Vector2 = to_map.call(k.position)
+	if on_map.call(pv, 3.0):
+		c.draw_circle(pv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+		Icons.draw(c, "paw", pv, MapDetail.ICON_R * 0.8, Color(k.sp.get("glow", k.sp["color"])))
+
 ## Your squad's downed Boki on a map: a ringed cross in its colour (the minimap draws it at `pv`).
 static func map_dot(c: Control, pv: Vector2, k: Kin, r: float, time: float) -> void:
 	var col := Color(k.sp.get("glow", k.sp["color"]))
@@ -330,8 +288,6 @@ static func order_tip(H, p: Hunter) -> Array:
 	out.append(["Boki  ·  %s  ·  now: %s" % [Settings.key_cap("throw"), String(KinFollow.NAMES.get(k.cmd, "Follow"))], H.MUTED, 12])
 	out.append([("Tap: Sic, your Boki dives on the cursor from above" if k.carry_style() == "perch" else "Tap: Sic, your Boki leaps at the cursor") + ". Whatever it hits is stunned, and your shots crit stunned foes. Tap while it is away to call it back.", H.INK, 14])
 	out.append(["Hold and flick: up Chase (stick to a foe), right Guard (hold this spot), down Return (back on you), left Follow (at your side).", H.INK, 14])
-	var quick := "Quick orders  ·  %s attack my target  ·  %s come back  ·  %s hold position"
-	out.append([quick % ["kin_attack", "kin_return", "kin_hold"].map(Settings.key_cap), H.MUTED, 12])
 	if k.ks and not k.ks.throw_effects.is_empty():
 		out.append(["Its Sic also: " + KinText.effects(k.ks.throw_effects), KinRules.effects_color(k.ks.throw_effects), 13])
 	if k.ks:

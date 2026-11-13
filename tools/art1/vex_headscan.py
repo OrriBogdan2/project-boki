@@ -12,11 +12,7 @@ import vex_head as VH
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, SCAN, OUT = a[0], a[1], a[2]
-HEAD_TRIS = int(os.environ.get("VEX_HEAD_TRIS", 5000))      # asked of the decimator, face included
-FACE_TRIS = int(os.environ.get("VEX_FACE_TRIS", 1800))
-# "all": every vertex within 3.5 mm welds (the shipped head: thin hair collapses, about half the triangles go).
-# "seam": only the open borders weld, so the head keeps the triangles it was given (the higher tiers).
-WELD = os.environ.get("VEX_HEAD_WELD", "all")
+HEAD_TRIS = 5000
 # the head scan, its own metres (flipped to face +Y, her right +X), read on grid_h_front / grid_h_right
 EYE_Z, CHIN_Z, NAPE_Y, NAPE_Z = float(os.environ.get("H_EYE", 1.25)), float(os.environ.get("H_CHIN", 0.88)), float(os.environ.get("H_NAPE_Y", -0.2)), float(os.environ.get("H_NAPE_Z", 0.75))
 AXIS_X = float(os.environ.get("H_AXIS_X", 0.0))
@@ -82,6 +78,7 @@ lc = np.zeros(m_ * 3)
 low.data.vertices.foreach_get("co", lc)
 lc = lc.reshape(-1, 3)
 # a denser budget on the face: the face and the rest decimated apart, then welded
+FACE_TRIS = 1800
 pc = np.array([p.center[:] for p in low.data.polygons])
 fy = VH.EYE_FRONT_Y[0]
 in_f = (((pc[:, 0]) / 0.095) ** 2 + ((pc[:, 2] - (T_EYE - 0.03)) / 0.1) ** 2 < 1.0) & (pc[:, 1] > fy - 0.075)
@@ -119,8 +116,7 @@ bpy.context.view_layer.objects.active = low
 bpy.ops.object.join()
 bm = bmesh.new()
 bm.from_mesh(low.data)
-seam = [v for v in bm.verts if v.is_boundary]
-bmesh.ops.remove_doubles(bm, verts=seam if WELD == "seam" else bm.verts, dist=0.0035)
+bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0035)
 bmesh.ops.dissolve_degenerate(bm, edges=bm.edges, dist=0.0002)
 bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
 bm.to_mesh(low.data)

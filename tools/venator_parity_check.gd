@@ -22,8 +22,6 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_tracking(m, P, home)
 	_dash_aim(m, P, K, home)
 	_drum(m, P, K, home)
-	_string_fades(m, P, home)
-	_shift(m, P, home)
 	_brackets(m, P, home)
 	_rifle_pose()
 	_launcher(m, P, K, T, home)
@@ -121,98 +119,6 @@ func _drum(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			"after 12: %d, after 0.25s rest: %d, full at %.2f s" % [after12, t_full["early"], t_full["at"]])
 	_dry(m, P, K, home)
 
-## Ghost's Combat Slide is one charge: the archetype's own count wins over its weight class's, and a perk's or a
-## gear's extra charge still adds on top.
-func _shift_charges(P: Hunter) -> void:
-	var base := P.max_dashes()
-	P.add_perk("secondwind")
-	var perked := P.max_dashes()
-	P.perks.clear()
-	C.ok("Vex Shift: one charge (Ghost's Combat Slide), Second Wind still adds one",
-			base == 1.0 and perked == base + 1.0 and P.max_dashes() == base,
-			"%.0f, with Second Wind %.0f" % [base, perked])
-
-## The wiki: the rifle's damage decays over the first 10 rounds to 50%. Each round carries its share of full damage
-## (sus_k) and its tracer is drawn that much smaller, back to full size after a pause.
-func _string_fades(m: Match, P: Hunter, home: Vector3) -> void:
-	P.teleport(home)
-	C.ac.step(m, 0.6)
-	P.ammo = MAG
-	P.fire_cd = 0.0
-	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
-	var vfx := HeroVfx.of(m)
-	var rec := {"n": P.shot_n, "k": [], "w": [], "sd": {}}
-	var fire := func():
-		P.inp["fire"] = true
-		# the kit dresses a round on the step after it leaves: its two newest ribbons (shot nodes are pooled, so
-		# older ribbons may follow the same node), the outer one is the wider
-		var node: Variant = (rec["sd"] as Dictionary).get("node")
-		var mine: Array = vfx.ribbons.filter(func(r: Dictionary) -> bool: return node != null and r["follow"] == node)
-		if not mine.is_empty():
-			var outer := float(mine[-2]["width"]) if mine.size() > 1 else 0.0
-			(rec["w"] as Array).append(maxf(float(mine[-1]["width"]), outer))
-			rec["sd"] = {}
-		if P.shot_n > int(rec["n"]):
-			rec["n"] = P.shot_n
-			rec["sd"] = C._last_shot(m, P)
-			(rec["k"] as Array).append(float((rec["sd"]["x"] as Dictionary)["sus_k"]))
-	C.ac.step(m, 1.6, fire)
-	P.inp["fire"] = false
-	var ks: Array = rec["k"]
-	var ws: Array = rec["w"]
-	var steady := ks.size() >= 12 and absf(float(ks[0]) - 1.0) < 0.001 and absf(float(ks[10]) - 0.5) < 0.001
-	for i in range(1, ks.size()):
-		steady = steady and float(ks[i]) <= float(ks[i - 1]) + 0.0001
-	C.ok("Vex LMB: damage decays over the first 10 rounds to 50% and holds there (the wiki)", steady,
-			"%d rounds, first %.2f, 11th %.2f, last %.2f" % [ks.size(), ks[0], ks[10], ks[-1]])
-	C.ok("Vex LMB: the tracer thins as the string decays", ws.size() >= 11 and float(ws[-1]) < float(ws[0]) * 0.5
-			and float(ws[5]) < float(ws[0]), "%.3f m wide, then %.3f" % [ws[0], ws[-1]])
-	C.ac.step(m, 0.6)
-	rec["k"] = []
-	rec["w"] = []
-	rec["sd"] = {}
-	rec["n"] = P.shot_n
-	P.fire_cd = 0.0
-	C.ac.step(m, 0.3, fire)
-	P.inp["fire"] = false
-	C.ok("Vex LMB: after a pause the string starts over, full damage and a full-size tracer",
-			(rec["k"] as Array).size() >= 1 and float(rec["k"][0]) == 1.0
-			and absf(float(rec["w"][0]) - float(ws[0])) < 0.001)
-
-## Shift: one charge, and the tap skid and the hold slide ease in and out (a lower peak than the old linear
-## bleed-off: 11.2 m/s for the tap, 19.1 for the slide), over a little longer, the same distance, the camera untouched.
-func _shift(m: Match, P: Hunter, home: Vector3) -> void:
-	_shift_charges(P)
-	for kind in ["tap", "held"]:
-		C.ac.step(m, 0.5)
-		P.teleport(home)
-		C.ac.step(m, 0.1)
-		P.dashes = P.max_dashes()
-		P.inp["move"] = Vector2(1, 0)
-		P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0.0)
-		P.inp["dash_down"] = kind == "held"
-		var x0 := P.pos.x
-		P.do_dash()
-		var rec := {"t": 0.0, "peak": 0.0, "first": -1.0, "end": 0.0}
-		C.ac.step(m, 1.2, func():
-			var v := Vector2(P.vel.x, P.vel.z).length()
-			if P.roll_t > 0.0:
-				if float(rec["first"]) < 0.0:
-					rec["first"] = v
-				rec["peak"] = maxf(float(rec["peak"]), v)
-				rec["end"] = float(rec["t"])
-			rec["t"] = float(rec["t"]) + C.DT)
-		P.inp["dash_down"] = false
-		P.inp["move"] = Vector2.ZERO
-		var peak_max := 10.0 if kind == "tap" else 16.5
-		var eased := float(rec["peak"]) <= peak_max and float(rec["first"]) < float(rec["peak"]) * 0.7
-		C.ok("Vex Shift %s: eases in and out, lower peak (%.1f m/s), a little longer (%.2fs)"
-				% [kind, rec["peak"], rec["end"]], eased and float(rec["end"]) >= 0.6,
-				"start %.1f" % float(rec["first"]))
-		var want_m := 3.6 if kind == "tap" else 4.2
-		var went := P.pos.x - x0
-		C.ok("Vex Shift %s: it still covers its distance (%.1f m)" % [kind, went], went >= want_m)
-
 ## Item 109: a dash east with the cursor north, LMB held from before it to after it. Every round leaves north, none
 ## goes missing across the dash, and the body stays on the aim while the legs turn toward the dash.
 func _dash_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
@@ -275,7 +181,6 @@ func _dash_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.fire_cd = 0.0
 	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG, "reload": 0.0}
-	var clicks0 := int(HeroVfx.of(m).plays.get("reload", 0))
 	C.ac.step(m, 6.0, func():
 		C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 		P.inp["fire"] = true
@@ -296,8 +201,6 @@ func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			and P.reload_t == 0.0 and int(run["low"]) >= MAG - 1 and P.wpn.get("ammo", true),
 			"dry at %.2f, firing again %.2f s later with %d rounds; reload %.2f" % [run["dry_at"], gap, run["low"],
 					run["reload"]])
-	C.ok("Vex parity LMB: the dry drum clicks home once it is full (HeroVfx reload)",
-			int(HeroVfx.of(m).plays.get("reload", 0)) > clicks0)
 	C.ac.step(m, 1.5)
 
 ## The firing brackets: two arcs either side of her while she fires (your screen only), gone soon after.
@@ -522,6 +425,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	DashReset.takedown(P, T)         # the knock's dash back is the game-wide rule now (decision 0022), as Match runs it
 	var knocked := P.dashes >= 1.0
 	C.ac.step(m, 0.5, watch)
 	T.downed = false
@@ -531,7 +435,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 			"%s, knock %s, %s" % [slid, knocked, str(seen)])
 	C.ac.fresh(T)
 	KitStatus.apply(T, "rat", 1.4)
-	C.ok("Vex audit: Dazed adds no slow (it locks like a stun instead: CcLockout)",
+	C.ok("Vex audit: Dazed is a damage window only, no slow (the data)",
 			KitStatus.rattled(T) and T.slow_t <= 0.0, "slow %.2f for %.2f s" % [T.slow_k, T.slow_t])
 	KitStatus.clear_rattled(T)
 	P.teleport(home)

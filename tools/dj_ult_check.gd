@@ -49,7 +49,6 @@ func dancer(a) -> void:
 	A.aim_at(P, T.pos)
 	P.ult = 0.0
 	P.dashes = 0.0
-	P.ex_cd = 5.0
 	K.add_mark(T, 2, true)
 	var used0 := int(P.used.get("x", 0))
 	HunterKeys.ult_pressed(P)
@@ -61,7 +60,6 @@ func dancer(a) -> void:
 			U.running() and AimKit.shown(P, "ult") and bool(ring.get("all", false))
 			and float(ring.get("r", 0.0)) < float(d["reach"]) * 0.6 and P.dashes >= P.max_dashes() - 0.01,
 			"r %.2f dashes %.2f" % [float(ring.get("r", 0.0)), P.dashes])
-	A.ok("dancer X: Encore resets the Vault whole, the long dash too", P.ex_cd <= 0.0, "ex_cd %.1f" % P.ex_cd)
 	A.ok("dancer X: its cooldown runs from the cast (24s)", absf(float(K.cd["x"]) - float(d["cooldown"])) < 0.1,
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
@@ -241,24 +239,10 @@ func zedran(a) -> void:
 	T.hp = 10.0
 	K.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
-	var deaths0 := T.deaths
-	var seen_wisp := false
-	for _i in int(1.3 / A.DT):
-		m.step(A.DT)
-		seen_wisp = seen_wisp or T.downed
+	A.step(m, 0.9)
 	var knock_paid := _owed(P)
-	# the source's Volcanic Rebuke: the knock sends them straight to the deathbox (a Wisp for a beat, then out)
-	var boxed := seen_wisp and not T.downed and T.deaths == deaths0 + 1 and not T.has_meta("box_at")
-	var rules := boxed and _plain_knock_stays(m, T2) and _box_rides_net()
-	A.ok("juggernaut X parity: the Riposte's knock goes on to the deathbox (Wisp %.1fs, then out); "
-			% JuggernautKit.BOX_AFTER + "a plain knock stays down; \"box\" rides a hit online", rules,
-			"wisp %s downed %s deaths +%d" % [seen_wisp, T.downed, T.deaths - deaths0])
-	# back in for the cases after
-	T.out = false
-	T.gone = false
-	T.downed = false
 	A.ok("juggernaut X small mechanic: knocking a hunter with it resets it; the bond counts the knock (0.7)",
-			boxed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
+			T.downed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
 	# the reset is for taking a hunter down: a hunter already down takes nothing from it, a plain hit resets nothing
 	A.step(m, 0.5)
@@ -303,22 +287,6 @@ func _cleave_fits(d: Dictionary) -> void:
 	var w := float(d["width"])
 	A.ok("juggernaut X: the cleave's crescent fits its strip", absf(tip - ln) < 0.1 and half >= w * 0.5
 			and half <= w * 0.6, "tip %.2f / %.1f, half-width %.2f / %.2f" % [tip, ln, half, w * 0.5])
-
-## Any other knock leaves the hunter a Wisp: no deathbox beat.
-func _plain_knock_stays(m: Match, T: Hunter) -> bool:
-	A.fresh(T)
-	T.hp = 1.0
-	T.hurt(5.0, m.player, {"src": "abil"})
-	A.step(m, 0.5)
-	var stays := T.downed and not T.has_meta("box_at")
-	m.revive_hunter(T, null)
-	return stays
-
-## The flag survives Match.net_send_hit's extras into the knocked body's own game (Match._net_hit_in).
-func _box_rides_net() -> bool:
-	var o := {}
-	Displace.apply_hit_extra(o, Displace.hit_extra({"box": true, "heavy": true}))
-	return o.get("box") == true and Displace.hit_extra({"heavy": true}).get("box") == null
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:

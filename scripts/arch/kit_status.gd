@@ -1,11 +1,11 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola): no dash, jump or glide (CcLockout); the legs show the tangled cords
+##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
 ##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
-##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder, and it locks the
-##        body like a stun (CcLockout, the source's "Ghost's version of stun"; no slow); stars over the head
+##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
+##        source's Daze is only a damage window); stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
@@ -96,9 +96,7 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				c.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				n.add_child(c)
 			e.add_child(n)
-			m.later(secs, n.queue_free)
-			if toast == "":
-				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
+			m.later(secs, func(): if is_instance_valid(n): n.queue_free())
 			m.fx.ring(e.pos, 1.1, GROUND_COL, 0.3)
 			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
@@ -117,14 +115,11 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 				st.position = Vector3(cos(a) * 0.38, top, sin(a) * 0.38)
 				rn.add_child(st)
 			e.add_child(rn)
-			m.later(secs, rn.queue_free)
-			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
+			m.later(secs, func(): if is_instance_valid(rn): rn.queue_free())
 			m.fx.ring(e.pos, 1.1, RATTLE_COL, 0.25)
 		"dsr":
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
 ## A Net "kst" event: the body's own game runs the rule.

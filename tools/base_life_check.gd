@@ -3,7 +3,7 @@ extends RefCounted
 ## real farm (home.gd _move_kin at 4 steps a second, BaseLife at 10 Hz) with one toy. Two hot tempers and two calm
 ## ones: at least one friend pair and one rival pair form, no state but Nap lasts over 90 s, the fourth Boki's
 ## arrival brings the others over (React), at night the three day Boki nap while the nocturnal Zapple stays up,
-## no machine refuses a transition, bonds are symmetric, and an old record gains an empty bonds map. Never
+## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map. Never
 ## touches the real save.
 
 const SIM_SECS := 600.0      # 10 simulated minutes
@@ -34,7 +34,7 @@ func _new_save() -> Array:
 	recs[0]["starter"] = true
 	d["roster"] = recs.slice(0, 3)
 	d["active"] = recs[0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	Save.d = d
 	HomeLayout.ensure(d)
 	return recs
@@ -48,10 +48,13 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	seed(11)
-	var old := {"uid": "old1", "species": "zapple", "name": "Old", "traits": {}, "trust": 35.0}
-	Care.ensure(old)
-	ok(old.get("bonds") is Dictionary and (old["bonds"] as Dictionary).is_empty(),
-		"an old record gains an empty bonds map")
+	var old := Save.fresh()
+	old["v"] = 11
+	old["roster"] = [{"uid": "old1", "species": "zapple", "name": "Old", "traits": {}, "trust": 35.0}]
+	var upgraded := Save.migrate(old) and int(old["v"]) == Save.VERSION
+	var bonds = old["roster"][0].get("bonds")
+	ok(upgraded and bonds is Dictionary and (bonds as Dictionary).is_empty(),
+		"a v11 save upgrades and its Boki gain an empty bonds map")
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
 	var recs := _new_save()
@@ -60,9 +63,8 @@ func run(m: Node) -> void:
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)       # you are away: nobody clings to you
 	var center: Vector3 = home.world.random_ground(0)
-	Save.d["layout"]["deco"].append({"id": "training_post", "u": 990001, "px": center.x + 3.0, "pz": center.z})
-	home.life.find_toys()
-	ok(home.life.toys.size() == 1, "the placed Training post counts as a toy")
+	Save.d["layout"]["deco"].append({"id": "toy_ball", "u": 990001, "px": center.x + 3.0, "pz": center.z})
+	ok(home.life.toy_spots().size() == 1, "the placed ball is the one toy the machine knows (HomeToys owns the toys)")
 	_gather(home, center)
 	var longest := {}         # state name -> longest s seen
 	var reacted := false

@@ -188,21 +188,6 @@ func _presses() -> void:
 	ok(wheel_open and not KinWheel.is_open(P) and P.inp.has("wheel_pick"),
 		"holding G opens the order wheel, letting go picks")
 	ok(KinCommand.order(P, "guard") and k.cmd == "guard", "a wheel order is applied (the Boki is told to guard)")
-	await _quick_orders(P)
-
-## The quick order keys (KinKeys) give the same orders as the wheel, from the match's input step.
-func _quick_orders(P: Hunter) -> void:
-	var k: Kin = P.kin
-	for o in [["kin_return", "return"], ["kin_hold", "guard"]]:
-		P.inp.erase("wheel_pick")
-		Input.action_press(o[0])
-		m._gather_input()
-		Input.action_release(o[0])
-		var picked := String(P.inp.get("wheel_pick", ""))
-		KinCommand.apply_pick(P)
-		var cap := Settings.key_cap(o[0])
-		ok(picked == o[1] and k.cmd == o[1], "%s gives the %s order (picked '%s', now %s)" % [cap, o[1], picked, k.cmd])
-		await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ the bond hook
 func _bond() -> void:
@@ -212,7 +197,7 @@ func _bond() -> void:
 	var shares_ok := is_equal_approx(float(rules["hit"]), 0.6) and is_equal_approx(float(rules["knock"]), 0.7)
 	shares_ok = shares_ok and is_equal_approx(float(rules["kill"]), 0.8)
 	ok(shares_ok,
-		
+
 		"bond_from_ult is hit 0.6, knock 0.7, kill 0.8 (%s)" % str(rules))
 	P.ult = 0.0
 	ok(is_equal_approx(KinBond.add(P, 0.25, "test"), 0.25) and is_equal_approx(P.ult, 0.25),
@@ -271,7 +256,7 @@ func _release() -> void:
 	var glow_ok := is_equal_approx(float(ag["secs"]), 3.0) and is_equal_approx(float(ag["move_speed"]), 0.15)
 	glow_ok = glow_ok and is_equal_approx(float(ag["shield_frac"]), 0.08)
 	ok(glow_ok,
-		
+
 		"afterglow data: 3s, +15% speed, 8%% max health shield (%s)" % str(ag))
 	ok(_glowing(P) and P.buff("move_speed") >= 0.15 - 0.001,
 		"the hunter has the afterglow: +%.0f%% speed" % (P.buff("move_speed") * 100.0))

@@ -53,8 +53,7 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "dive",
-		"dive_tilt": 50.0
+		"dive": "dive"
 	},
 	"land": {
 		"clip": "land",
@@ -64,7 +63,6 @@
 	"kmoves": {
 		"bul_throw": {
 			"clip": "lmb_throw",
-			"fade": 0.04,
 			"upper": "moving"
 		},
 		"bul_recall": {
@@ -77,8 +75,7 @@
 			"hold_from": 0.2
 		},
 		"bul_smash": {
-			"clip": "lmb_slam",
-			"fade": 0.04
+			"clip": "lmb_slam"
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
@@ -97,8 +94,7 @@
 			"upper": true
 		},
 		"bul_whirl": {
-			"clip": "shift_whirl",
-			"fade": 0.04
+			"clip": "shift_whirl"
 		},
 		"bul_charge": {
 			"clip": "shift_charge"
@@ -125,8 +121,7 @@
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"clip": "x_slam",
-			"fade": 0.04
+			"clip": "x_slam"
 		},
 		"mf_xform": {
 			"clip": "fuse"
@@ -145,7 +140,6 @@
 		},
 		"dead_t": 1.3
 	},
-	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_cross"},
 	"procedural": [
 		"ledge",
 		"mantle",

@@ -22,7 +22,6 @@ func step(m: Match, secs: float) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	await _arena()
-	await _dummy_modes()
 	await _breaker_whirl()
 	await _cards()
 	await _loadout()
@@ -101,90 +100,6 @@ func _breaker_whirl() -> void:
 		m.queue_free()
 		await main.get_tree().process_frame
 
-## The station dummy in each mode for 25 s (you stand at your start): Still stays put; Strafe runs side to side at its
-## run speed and turns in 0.6-1.4 s legs; Dodge strafes and dashes every 4-6 s; both stay in the pen.
-func _dummy_modes() -> void:
-	var m := Match.new()
-	main.add_child(m)
-	await m.start(Match.arena_opts("thief"))
-	m.set_process(false)
-	var A: Arena = m.arena
-	# the player's Boki fights whatever is near, so its hits would knock the station dummy about;
-	# this measures only how DummyMove moves it
-	for o in m.kins.filter(func(k): return k.owner_h == m.player):
-		o.dead = true
-		m.kins.erase(o)
-		o.queue_free()
-	m.player.kin = null
-	var mv: DummyMove = A.dummies[0]["mv"]
-	var sign_still := func() -> bool: return A.station_label.text.begins_with("DUMMY: STILL")
-	ok("dummy station: Still to start, the sign says so", mv.mode == "still" and sign_still.call())
-	for want in ["still", "strafe", "dodge"]:
-		A.reset()
-		step(m, 0.5)
-		_dummy_mode_asserts(m, want)
-		A.cycle_dummy()
-	ok("dummy station: F cycles Still, Strafe, Dodge, then Still", mv.mode == "still" and sign_still.call())
-	A.teardown()
-	m.queue_free()
-	await main.get_tree().process_frame
-
-## Watches the station dummy for 25 s in its current mode and asserts what that mode promises.
-func _dummy_mode_asserts(m: Match, want: String) -> void:
-	var D: Hunter = m.arena.dummies[0]["h"]
-	var mark: Vector3 = m.arena.dummies[0]["at"]
-	var pen := float(DummyMove.rules["pen_r"])
-	var path := 0.0
-	var far := 0.0
-	var top := 0.0
-	var dashes := 0
-	var turns := 0
-	var first_dash := -1.0
-	var last_dash := 0.0
-	var min_gap := 99.0
-	var side_v := 0.0
-	var last := D.pos
-	var was_roll := false
-	var t := 0.0
-	while t < 25.0:
-		m.step(DT)
-		t += DT
-		var vel := (D.pos - last) / DT
-		path += D.pos.distance_to(last)
-		last = D.pos
-		far = maxf(far, Vector2(D.pos.x - mark.x, D.pos.z - mark.z).length())
-		if D.roll_t <= 0.0:
-			top = maxf(top, Vector2(vel.x, vel.z).length())
-		elif not was_roll:
-			dashes += 1
-			if first_dash < 0.0:
-				first_dash = t
-			else:
-				min_gap = minf(min_gap, t - last_dash)
-			last_dash = t
-		was_roll = D.roll_t > 0.0
-		if absf(vel.x) > 1.0 and signf(vel.x) != side_v:
-			turns += 1 if side_v != 0.0 else 0
-			side_v = signf(vel.x)
-	var info := "path %.1f m, top %.2f (run %.2f), %d turns, %d dashes (first %.1fs), far %.2f m" % [
-		path, top, D.base_speed, turns, dashes, first_dash, far]
-	var tag := "dummy " + want
-	var moves := path > 40.0 and top > D.base_speed * 0.9 and top < D.base_speed * 1.1
-	var in_pen := far <= pen + 0.8
-	var dash_min := float(DummyMove.rules["dash_min"])
-	var dash_max := float(DummyMove.rules["dash_max"])
-	var dash_gap_ok := first_dash >= dash_min - 0.5 and first_dash <= dash_max + 2.0 and min_gap >= dash_min - 0.1
-	match want:
-		"still":
-			ok(tag + ": stands still", path < 0.5 and dashes == 0, info)
-		"strafe":
-			ok(tag + ": side to side at run speed, short legs", moves and turns >= 12 and turns <= 45, info)
-			ok(tag + ": stays in its pen, never dashes", in_pen and dashes == 0, info)
-		"dodge":
-			ok(tag + ": strafes and dashes every 4-6 s", moves and dashes >= 3 and dashes <= 7 and dash_gap_ok,
-				info)
-			ok(tag + ": stays in its pen", in_pen, info)
-
 func _arena() -> void:
 	var m := Match.new()
 	main.add_child(m)
@@ -192,8 +107,7 @@ func _arena() -> void:
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(
-		"the Training Grounds boots on its own map",
-		m.world.layout_id == "training" and m.arena != null and m.arena.layout == "arena",
+		"arena boots on its own map", m.world.layout_id == "arena" and m.arena != null and m.arena.layout == "arena",
 		"layout %s" % m.world.layout_id
 	)
 	ok(
@@ -205,7 +119,7 @@ func _arena() -> void:
 		"%s on %s" % [P.arch, m.world.island_id(P.pos.x, P.pos.z)]
 	)
 	var A: Arena = m.arena
-	ok("arena: six dummies (three in the ring, three on the range)", A.dummies.size() == 6)
+	ok("arena: three dummies", A.dummies.size() == 3)
 	ok("arena: ult unlocked by default", int(P.slot_lv["ult"]) >= 1 and P.lvl >= 6)
 	# dummies take damage and show it
 	var D: Hunter = A.dummies[0]["h"]
@@ -223,17 +137,16 @@ func _arena() -> void:
 		"dummy label shows DPS", String((A.dummies[0]["label"] as Label3D).text).begins_with("DPS"),
 		String((A.dummies[0]["label"] as Label3D).text)
 	)
-	# a real Bola lands on a dummy: Grounded (no Mark of its own); SMG hits on it stack Marks (the pips)
+	# a real Bola lands on a dummy: Grounded, a Mark; SMG hits on it stack Marks (the pips)
 	P.teleport(D.pos + Vector3(0, 0, 4.0)); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
-	var marks0 := (P.ak as ThiefKit).marks_on(D)
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
-	step(m, 0.75)          # (the Bola's flight)
+	step(m, 0.75)          # (the Bola's 0.4s wind-up with the lane, then its flight)
 	var tk := P.ak as ThiefKit
-	ok("thief Bola hits a dummy, no Mark", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) == marks0,
-		"total %.0f marks %d (was %d)" % [float(A.dummies[0]["total"]), tk.marks_on(D), marks0])
-	tk.add_mark(D, 5, true)
+	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
+		"total %.0f marks %d" % [float(A.dummies[0]["total"]), tk.marks_on(D)])
+	(P.ak as ThiefKit).add_mark(D, 4, true)
 	step(m, 0.05)
 	ok("five Marks: diamonds over the dummy", tk.pips.size() >= 1 and tk.marks_on(D) >= 5,
 		"marks %d pips %d" % [tk.marks_on(D), tk.pips.size()])
@@ -433,41 +346,23 @@ func _arena() -> void:
 	await main.get_tree().process_frame
 	printerr("ARENACHECK (next frame)")
 
-## The Esc menu's Practice page (PracticeRanks): Max all, Pick your max, Reset.
-func _practice_ranks(P: Hunter) -> void:
-	PracticeRanks.max_all(P)
-	var maxed := true
-	for s in Hunter.SLOTS:
-		maxed = maxed and int(P.slot_lv[s]) == int(Hunter.SLOT_MAX[s])
-	ok("practice ranks: Max all puts every slot at its max rank", maxed, str(P.slot_lv))
-	var cd_k := P.rank_cd_k("sec")
-	ok("practice ranks: max rank shortens the cooldown", is_equal_approx(cd_k, 0.8), str(cd_k))
-	PracticeRanks.pick_max(P, "dash")
-	ok(
-		"practice ranks: Pick your max maxes that slot only (ult stays open)",
-		int(P.slot_lv["dash"]) == 3 and int(P.slot_lv["sec"]) == 1 and int(P.slot_lv["kin"]) == 1
-			and int(P.slot_lv["ult"]) == 1, str(P.slot_lv)
-	)
-	PracticeRanks.reset(P)
-	var rank1 := true
-	for s in Hunter.SLOTS:
-		rank1 = rank1 and int(P.slot_lv[s]) == 1
-	ok("practice ranks: Reset restores rank 1 everywhere", rank1 and P.skill_pts == 0, str(P.slot_lv))
-
 func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
 	printerr("ARENACHECK starting the training match")
-	await m.start(Match.arena_opts())      # (the old training island is now the Grounds' Practice Wing)
+	await m.start(
+		{
+			"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
+			"no_drop": true
+		}
+	)
 	m.set_process(false)
 	printerr("ARENACHECK training match up")
 	var P: Hunter = m.player
 	ok(
-		"the Training Grounds: six dummies (ring and range), the duel pad on the Practice Wing",
-		m.arena != null and m.arena.dummies.size() == 6 and m.duel_pad != Vector3.INF
-			and m.duel_pad.distance_to(Arena.WING) < Arena.WING_R + 2.0
+		"training gets the practice tools",
+		m.arena != null and m.arena.layout == "practice" and m.arena.dummies.size() == 3
 	)
-	await _duel_ring(m)
 	ok("training: ult open from the start", int(P.slot_lv["ult"]) >= 1)
 	m.arena.set_arch("thief")
 	ok("training: archetype swap", P.arch == "thief")
@@ -481,7 +376,6 @@ func _training() -> void:
 	var dsh := P.dashes
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
-	_practice_ranks(P)
 	m.queue_free()
 	await main.get_tree().process_frame
 
@@ -534,52 +428,3 @@ func _loadout() -> void:
 	)
 	var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
 	ok("expedition panel shows no ability strip", not src.contains("KitCard.strip("))
-
-## The duel ring's choices (opened where interact on the pad opens them): Fight a bot always, Find a duel
-## when a matchmaker is configured, searching with Cancel while queued, the refusal text on an error.
-func _duel_ring(m: Match) -> void:
-	var ring := DuelRing.open(m)
-	ok("duel ring: opens and pauses the match", ring.layer != null and m.paused)
-	var texts := _texts(ring.layer)
-	ok("duel ring: Fight a bot is offered", "Fight a bot" in texts)
-	ok("duel ring: no friend duel button (no 1v1 invite exists)", not ("Fight a friend" in texts))
-	var online := OnlineSession.configured()
-	ok("duel ring: Find a duel only with a matchmaker", ("Find a duel" in texts) == online, str(online))
-	if online:
-		var session := OnlineSession.get_session()
-		session.state = "queue"
-		session.place = 3
-		session.changed.emit()
-		texts = _texts(ring.layer)
-		ok("duel ring: searching shows the place and Cancel",
-			texts.any(func(t): return t.contains("number 3")) and "Cancel search" in texts)
-		ok("duel ring: no choices while searching", not ("Fight a bot" in texts))
-		session.state = "error"
-		session.message = "No matchmaking server answered."
-		session.changed.emit()
-		texts = _texts(ring.layer)
-		ok("duel ring: an error shows its text beside the choices",
-			"No matchmaking server answered." in texts and "Fight a bot" in texts)
-		session.state = "idle"
-	ring.close()
-	await main.get_tree().process_frame
-	ok("duel ring: Back gives the match back", not m.paused and not is_instance_valid(ring.layer))
-	# the pad drops open()'s return: the ring must outlive that and its Back button still work
-	var lay: CanvasLayer = DuelRing.open(m).layer
-	await main.get_tree().process_frame
-	var back: Button = null
-	for b in lay.find_children("*", "Button", true, false):
-		if b.name == "Close":
-			back = b
-	ok("duel ring: kept alive by its layer", lay.has_meta("ring") and back != null)
-	if back:
-		back.pressed.emit()
-	await main.get_tree().process_frame
-	ok("duel ring: Back works when open()'s return was dropped", not m.paused and not is_instance_valid(lay))
-
-func _texts(node: Node) -> Array:
-	var out: Array = []
-	for c in node.find_children("*", "", true, false):
-		if c is Label or c is Button:
-			out.append(String(c.text))
-	return out

@@ -55,11 +55,11 @@ func start() -> void:
 	beat = 0
 	var h := k.h
 	k.play("thf_encore")
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(d["short"]).to_upper(), RING_COL, false)
 	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
-	k.vault_back()                        # the source's info card: it resets the cartwheel
+	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
+	DashReset.cue(h)
 
 ## The cast ends (its time ran out, a merge, a knock): nothing more flies.
 func drop() -> void:
@@ -131,7 +131,7 @@ func _volley(d: Dictionary) -> void:
 	beat += 1
 	pulse = 1.0
 	for f in k.foes_in(h.pos, r):
-		if f is Kin or not k.sees(f):
+		if not k.sees(f):
 			continue
 		var key: int = f.get_instance_id()
 		var got := int((st["hits"] as Dictionary).get(key, 0))
@@ -156,8 +156,7 @@ func _blade(f: Ent, rim: bool, right: bool) -> void:
 	k.m.spawn_shot(h, from, dv.normalized() * BLADE_SPEED, 0.0, dist / BLADE_SPEED, 0.08, RING_COL, {"cos": true})
 	if k.m.shots.size() > n0:
 		k.fx().ride(k.m.shots[-1], "blade", RIM_COL if rim else RING_COL, HIT_COL, BLADE_TRAIL, BLADE_WIDTH)
-	var fid := f.get_instance_id()      # (a lambda that captured a foe freed by then errors when it runs)
-	k.m.later(dist / BLADE_SPEED, func(): _hit(instance_from_id(fid) as Ent, rim))
+	k.m.later(dist / BLADE_SPEED, func(): _hit(f, rim))
 
 ## A blade arrives: its damage (more from the outer band, which also blights), a red flash, Marks refreshed,
 ## and the bond for a rival hunter.
@@ -170,7 +169,6 @@ func _hit(f: Ent, rim: bool) -> void:
 	var o := {"src": "abil", "ab": "ult", "tags": ["encore"], "crit": rim}
 	if rim:
 		o["blight"] = float(d["rim_blight"])
-	var was_blighted := f.blight_t > 0.0
 	var dealt := f.hurt(dmg * k.power("x"), h, o)
 	if dealt <= 0.0:
 		return
@@ -178,9 +176,6 @@ func _hit(f: Ent, rim: bool) -> void:
 	if rim:
 		rim_blades += 1
 		k.fx().puff(f.pos + Vector3(0, 1.0, 0), RIM_COL, 0.8, 0.3, HIT_COL)
-		if not was_blighted:
-			# once, as the blight lands (above the damage numbers, so they don't overprint)
-			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", Color("b08aff"), false)
 	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
 	k.m.sfx("dj_encore_hit", f.pos, -10.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
 	k.refresh_marks()

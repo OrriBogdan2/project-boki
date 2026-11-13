@@ -1,10 +1,6 @@
 {
 	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
 	"extra_bones": {"x_breath": "hips"},
-	"springs": {
-		"spring_mane": {"pull": [0.3, 0.12], "damp": 0.72, "limit": 0.6, "limit_in": 0.0}
-	},
-	"free_arm": {"slam": "L", "meteor": "L"},
 	"hide_while_chain": [
 		"spring_hangwarchain_0"
 	],
@@ -12,7 +8,6 @@
 		"spring_hangwarchain"
 	],
 	"loco": {
-		"blend_rate": 7.5,
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 4.0,
@@ -29,7 +24,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [1.0, 0.55], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
+		"run_speed": 4.6, "stride": [1.5, 1.2], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -47,23 +42,19 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "glide"
+		"dive": "exdash"
 	},
 	"land": {
 		"clip": "land",
-		"dur": 0.27,
-		"moving": 0.13,
-		"rate": 1.5,
+		"dur": 0.4,
 		"min_fall": 0.25
 	},
 	"kmoves": {
 		"jug_slash_r": {
-			"clip": "slash_r",
-			"upper": "moving"
+			"clip": "slash_r"
 		},
 		"jug_slash_l": {
-			"clip": "slash_l",
-			"upper": "moving"
+			"clip": "slash_l"
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
@@ -71,8 +62,7 @@
 			"fade": 0.2
 		},
 		"jug_wave": {
-			"clip": "wave",
-			"lead": 0.05
+			"clip": "wave"
 		},
 		"jug_slam": {
 			"clip": "slam"
@@ -83,16 +73,14 @@
 			"fade": 0.18
 		},
 		"jug_lunge": {
-			"clip": "lunge",
-			"lead": -0.17
+			"clip": "lunge"
 		},
 		"jug_meteor": {
 			"clip": "meteor",
 			"hold_from": 0.3
 		},
 		"jug_meteor_land": {
-			"clip": "meteor_land",
-			"lead": 0.13
+			"clip": "meteor_land"
 		},
 		"jug_dash": {
 			"clip": "dash"
@@ -101,12 +89,10 @@
 			"clip": "exdash"
 		},
 		"jug_chain": {
-			"clip": "chain",
-			"upper": "moving"
+			"clip": "chain"
 		},
 		"jug_reel": {
 			"clip": "reel",
-			"fade": 0.2,
 			"hold_from": 0.25,
 			"heading": true
 		},
@@ -128,8 +114,7 @@
 			"hold_from": 0.2
 		},
 		"jug_riposte": {
-			"clip": "riposte",
-			"lead": -0.08
+			"clip": "riposte"
 		},
 		"jug_roar": {
 			"clip": "roar",
@@ -139,6 +124,7 @@
 			"clip": "fusion"
 		}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -207,14 +193,13 @@
 		],
 		[
 			"jug_riposte",
-			0.47
+			0.3
 		],
 		[
 			"jug_slam",
 			0.8
 		]
 	],
-	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
 	"procedural": [
 		"ledge",
 		"mantle",

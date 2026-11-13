@@ -6,15 +6,14 @@
 	"bone_scale": {"gatling": 0.8, "launcher": 0.9},
 	"blade": {"root": "anchor_gatling_root", "root_bone": "forearm.R", "tip": "weapon_muzzle", "bone": "gatling"},
 	"loco": {
-		"blend_rate": 9,
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
 		"walk_speed": 2.1, "run_speed": 4.55, "stride": [1.5, 1.3], "foot_mps": [1.65, 5.0], "arm_swing": {"R": 0.2}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.32},
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex", "dive_at": 0.49},
-	"land": {"clip": "land", "dur": 0.27, "moving": 0.13, "rate": 1.5, "min_fall": 0.25},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex"},
+	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"gunslinger_lmb": {"clip": "lmb", "upper": "moving"},
 		"gunslinger_rmb": {"clip": "rmb", "upper": "moving"},
@@ -25,9 +24,9 @@
 		"gunslinger_knock": {"clip": "knock", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["gunslinger_lmb", 0.25], ["gunslinger_lmb", 0.12], ["gunslinger_dash", 0.5], ["gunslinger_lmb", 0.25], ["gunslinger_rmb", 0.4], ["gunslinger_e", 1.0], ["gunslinger_knock", 0.5], ["gunslinger_x", 0.5]],
-	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_cross"},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"]
 }

@@ -3,9 +3,8 @@ extends RefCounted
 ## Boki rescue channelling (its revive_hum loop) plus a deathbox revive hum and the looping hum also
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
-## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel),
-## and movement sounds (MoveSfx): a remote Hunter's footstep plays placed at it (panned), quieter than
-## yours, out to the step reach and silent past it or while crouched; landings are placed and weighted.
+## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
+## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
 
 var main: Node
 var fails := 0
@@ -32,9 +31,7 @@ func run(main_node: Node) -> void:
 	if k == null:
 		main.get_tree().quit(1)
 		return
-	_footsteps(m, P)
 	var key := "rescue%d" % k.get_instance_id()
-	_mob_alerts(m, P)
 	# the Boki goes down beside you and you run into it: the rescue's hum starts and follows the carry
 	k.pos = P.pos + Vector3(0.6, 0, 0)
 	k.state = "active"
@@ -49,14 +46,17 @@ func run(main_node: Node) -> void:
 	ok(k.rescue_on and Sfx.loop_on(key), "...and comes back while the rescue goes on")
 	# the old leak: a looping file through the one-shot pool plays once now
 	Sfx.play("revive_hum", P.pos)
-	var once := Sfx.voices().filter(func(p): return p.playing and Sfx.loops_forever(p.stream))
+	var once := Sfx.players.filter(func(p): return p.playing and Sfx.loops_forever(p.stream))
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
 	_ult_cues(m, P)
-	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
-	m.music_dir.beds.tick(m, P)
-	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
+	await _glider(P, "yours")
+	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
+	other.remote = true
+	other.pos = P.pos + Vector3(8, 0, 0)
+	await _glider(other, "another player's")
+	other.remote = false
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -69,7 +69,12 @@ func run(main_node: Node) -> void:
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
-	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
+	var farm_beds := 0      # HomeAmbience's own beds, still up on the farm
+	for n in Sfx.amb_layers:
+		if not n in ["abyss", "ruins"] and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).playing:
+			farm_beds += 1
+	var left := Sfx.match_voices() - farm_beds
+	ok(left == 0, "after the fades nothing the match started is playing (%d, %d farm beds)" % [left, farm_beds])
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -97,92 +102,76 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
 
-## A camp's alert (MobAlert): fires once when an idle monster sees a Hunter, not again within the
-## camp's gap; five camps each alert once, the pool stays within its voices; an idle camp murmurs near the listener.
-func _mob_alerts(m: Match, P: Hunter) -> void:
-	var sk: Mob = m.spawn_mob("skitter", P.pos + Vector3(4.0, 0, 0))
-	sk.st = "idle"
-	sk.tgt = null
-	var start := Time.get_ticks_msec()
-	var seen := false
-	for i in 150:
-		m.step(Match.DT)
-		if sk.st == "chase":
-			seen = true
-			break
-	var at := int(MobAlert.last.get(MobAlert._cell(sk.camp), 0))
-	ok(seen and at >= start, "an idle skitter that sees you alerts (state %s)" % sk.st)
-	ok(not MobAlert.aggro(sk), "...and its camp does not alert again within %d ms" % MobAlert.ALERT_GAP_MS)
-	var played := 0
-	var kinds: Array = MobAlert.ALERT.keys()
-	for i in 5:
-		var mb: Mob = m.spawn_mob(kinds[i + 1], P.pos + Vector3(30.0 + 12.0 * i, 0, 30.0))
-		played += int(MobAlert.aggro(mb)) + int(MobAlert.aggro(mb))
-	ok(played == 5, "five camps alert once each, twice-asked still once (%d)" % played)
-	var busy := Sfx.players.filter(func(p): return p.playing).size()
-	ok(busy <= Sfx.POOL, "the voice pool holds with five camps (%d of %d)" % [busy, Sfx.POOL])
-	var idle: Mob = m.spawn_mob("brute", P.pos + Vector3(-6.0, 0, 0))
-	idle.st = "idle"
-	idle.murmur_t = 0.0
-	var sang := MobAlert.murmur(idle, 0.0)
-	ok(sang and idle.murmur_t >= MobAlert.MURMUR_GAP.x, "an idle camp near you murmurs, then waits")
-	idle.murmur_t = 0.0
-	Sfx.listener = P.pos + Vector3(60.0, 0, 0)
-	ok(not MobAlert.murmur(idle, 0.0), "...and stays quiet when you are far off")
+## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
+## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on
+## the change of state and stays clear while the state just goes on.
+func _glider(h: Hunter, who: String) -> void:
+	var g := h.glider_snd
+	var wind := "glider_wind%d" % h.get_instance_id()
+	var burn := "glider_burn%d" % h.get_instance_id()
+	h.gliding = false
+	h.dropping = false
+	h.glide_fuel = 1.0
+	_set_speed(h, 0.0, 0.0)
+	g.tick(h)
+	for cue in ["glider_snap", "glider_dive", "glider_crackle", "glider_fold", "glider_hiss"]:
+		ok(Sfx.ensure(cue), "%s: %s is a sound on file" % [who, cue])
+	h.gliding = true
+	_once(g, h, "glider_snap", who + " glider: opening plays the snap once")
+	ok(Sfx.loop_on(wind), "%s glider: the wind loop runs" % who)
+	var slow_pitch := _pitch(wind)
+	var slow_vol := float(Sfx.loops[wind]["vol"])
+	_set_speed(h, 24.0, -5.0)
+	g.tick(h)
+	var swells := _pitch(wind) > slow_pitch and float(Sfx.loops[wind]["vol"]) > slow_vol
+	ok(swells, "%s glider: the wind pitches and swells with speed" % who)
+	if h.remote:
+		ok(Sfx.loops[wind]["pos"] != null, "another player's glider: the wind is positional")
+	_set_speed(h, 6.0, -HunterMove.dive_vy)
+	h.glide_dive.on = true
+	_once(g, h, "glider_dive", who + " glider: the dive plays its whoosh once")
+	h.glide_dive.on = false
+	_set_speed(h, 6.0, -5.0)
+	g.tick(h)
+	var hiss := "glider_hiss%d" % h.get_instance_id()
+	h.glide_fuel = 0.3
+	g.tick(h)
+	var faint := float(Sfx.loops[hiss]["vol"]) if Sfx.loop_on(hiss) else 0.0
+	h.glide_fuel = 0.05
+	g.tick(h)
+	var near := float(Sfx.loops[hiss]["vol"]) if Sfx.loop_on(hiss) else 0.0
+	var swelled := faint != 0.0 and near > faint
+	ok(h.remote or swelled, "%s glider: the heat hiss swells toward overheat (%.1f -> %.1f dB)" % [who, faint, near])
+	ok(not h.remote or not Sfx.loop_on(hiss), "another player's glider: no heat hiss (the heat is not synced)")
+	h.glide_fuel = 0.0
+	g.net_hot = true
+	_once(g, h, "glider_crackle", who + " glider: overheating plays the crackle once")
+	ok(Sfx.loop_on(burn), "%s glider: the burn loop runs while overheated" % who)
+	h.glide_fuel = 1.0
+	g.net_hot = false
+	g.tick(h)
+	ok(not g.hot, "%s glider: cooled, no longer burning" % who)
+	h.gliding = false
+	_once(g, h, "glider_fold", who + " glider: folding plays the fold once")
+	await main.get_tree().create_timer(0.5).timeout
+	var running := Sfx.loop_on(wind) or Sfx.loop_on(burn) or Sfx.loop_on(hiss)
+	ok(not running, "%s glider: all loops stop once the glider is folded" % who)
 
-func _footsteps(m: Match, P: Hunter) -> void:
-	var e: Hunter = null
-	for h in m.hunters:
-		if h.team != P.team and e == null: e = h
-	ok(e != null and _cam(m) != null, "setup: an enemy Hunter and a camera to hear from")
-	if e == null:
-	var reach := float(MoveSfx.rules()["step_reach_m"])
-	e.unseen = false
-	e.crouch = false
-	var mine = _probe(P, P.pos, func(): MoveSfx.footstep(P))
-	var theirs = _step_of(P, e, Vector3(6.0, 0, 0))
-	ok(theirs is AudioStreamPlayer3D, "an enemy's footstep 6 m away plays placed at it, so it pans (%s)" % theirs)
-	if theirs is AudioStreamPlayer3D and mine != null:
-		var wt := MoveSfx.weight(e.arch)
-		var dbs := [theirs.volume_db, mine.volume_db]
-		ok(dbs[0] < dbs[1], "...quieter than yours (%.1f vs %.1f dB)" % dbs)
-		var pitch: float = theirs.pitch_scale
-		ok(absf(pitch / wt.x - 1.0) <= 0.081, "...at its weight's pitch (%.2f, weight %.2f)" % [pitch, wt.x])
-	ok(_step_of(P, e, Vector3(0, 0, reach - 1.0)) != null, "...heard just inside the step reach (%.0f m)" % reach)
-	ok(_step_of(P, e, Vector3(0, 0, reach + 1.0)) == null, "...silent past it")
-	e.crouch = true
-	ok(_step_of(P, e, Vector3(3.0, 0, 0)) == null, "...and silent while it sneaks (crouched)")
-	e.crouch = false
-	var landed = _probe(P, P.pos + Vector3(-8.0, 0, 0), func(): MoveSfx.land(e, -12.0), e)
-	ok(landed is AudioStreamPlayer3D, "an enemy's landing plays placed at it")
-	var kael := MoveSfx.weight("juggernaut")
-	var neve := MoveSfx.weight("rimewright")
-	var what := "weight: Kael (2.05 m) lower and louder than Neve (1.56 m)"
-	ok(kael.x < neve.x and kael.y > neve.y, "%s: %s vs %s" % [what, kael, neve])
+func _set_speed(h: Hunter, flat: float, vy: float) -> void:
+	h.vel = Vector3(flat, vy, 0)
+	h.net_vel = h.vel
 
-## The voice e's footstep starts with e standing `off` from P (null if none).
-func _step_of(P: Hunter, e: Hunter, off: Vector3):
-	return _probe(P, P.pos + off, func(): MoveSfx.footstep(e), e)
+func _pitch(key: String) -> float:
+	return (Sfx.loops[key]["p"] as AudioStreamPlayer).pitch_scale
 
-func _cam(m: Match) -> Camera3D:
-	return m.get_viewport().get_camera_3d()
-
-## Runs `make` with `who` standing at `at` (the listener on P) and returns the one-shot voice it started
-## at that spot, or null if nothing played there. (A voice reads as playing only once the audio server has
-## mixed it, a frame later, so the probe clears every voice's stream and looks for the one given a sound.)
-func _probe(P: Hunter, at: Vector3, make: Callable, who: Hunter = P):
-	for p in Sfx.voices():
-		p.stop()
-		p.stream = null
-	Sfx.recent.clear()
-	var home := who.pos
-	who.pos = at
-	make.call()
-	who.pos = home
-	for p in Sfx.voices():
-		if p.stream != null and (p is AudioStreamPlayer or (p as AudioStreamPlayer3D).position.is_equal_approx(at)):
-			return p
-	return null
+## The state just changed: one tick plays `cue`; a second tick in the same state does not play it again.
+func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
+	Sfx.last_played.erase(cue)
+	g.tick(h)
+	var first := Sfx.last_played.has(cue)
+	Sfx.last_played.erase(cue)
+	g.tick(h)
+	ok(first and not Sfx.last_played.has(cue), what)
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

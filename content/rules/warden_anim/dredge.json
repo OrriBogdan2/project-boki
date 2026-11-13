@@ -26,7 +26,6 @@
 	],
 	"free_arm": {"throw": "L", "shot": "R"},
 	"loco": {
-		"blend_rate": 5.5,
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 6.0,
@@ -43,22 +42,18 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.4, "stride": [1.3, 1.2], "bob": [1.0, 0.55], "foot_mps": [1.61, 5.01]
+		"run_speed": 4.4, "stride": [1.3, 1.2], "foot_mps": [1.61, 5.01]
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "pounce",
-		"dive_at": 0.36,
-		"dive_tilt": 90.0
+		"dive": "pounce"
 	},
 	"land": {
 		"clip": "land",
-		"dur": 0.27,
-		"moving": 0.13,
-		"rate": 1.5,
+		"dur": 0.4,
 		"min_fall": 0.25
 	},
 	"kmoves": {
@@ -165,7 +160,6 @@
 			1.3
 		]
 	],
-	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "flex", "refuse": "g_cross"},
 	"procedural": [
 		"ledge",
 		"mantle",

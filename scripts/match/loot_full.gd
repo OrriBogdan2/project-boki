@@ -6,14 +6,12 @@ class_name LootFull
 
 const FULL_COL := Color("ff6a5a")
 ## A box thing that can't go anywhere without a swap: kept in the box, never reported as taken.
-const NEEDS_ROOM := ["pack", "belt", "keys", "chest_keys", "caught"]
+const NEEDS_ROOM := ["pack", "belt", "chest_keys", "caught"]
 
 ## Does this box row fit on you right now? (Gems, seeds, gear and a backpack always do; your own
 ## Boki the dead hunter had taken always come back to you.)
 static func fits(h: Hunter, row: Dictionary, b: Dictionary) -> bool:
 	match String(row["key"]):
-		"keys":
-			return UtilityBelt.room_for(h, "rift_key") > 0
 		"chest_keys":
 			return UtilityBelt.room_for(h, "chest_key") > 0
 		"caught":
@@ -61,7 +59,7 @@ static func swap_held(m: Match, h: Hunter, b: Dictionary, held_i: int, mine_i: i
 	h.pack[mine_i] = held
 	Life._settle_box(b)
 	_told(m, h, "Swapped %s for %s" % [Loot.name_of(mine), Loot.name_of(held)], Loot.col_of(held))
-	m.sfx(PickupSfx.of(held), h.pos, -2.0, 0.95)
+	m.sfx("pickup", h.pos, -2.0, 0.95)
 	return true
 
 ## Hold window "Drop": your backpack thing i goes on the ground, the held box thing takes its slot.

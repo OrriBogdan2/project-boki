@@ -40,7 +40,7 @@ const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, nam
 const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
 
 # ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
-const HP_PER_SEG := 17.0       # health per segment: classes (124, 145, 193) read 8, 9, 12 segments (source: 8-12)
+const HP_PER_SEG := 25.0       # health per segment: a bigger pool shows more segments, not longer ones
 const MAX_SEGS := 12           # more than this and each segment doubles (stays readable on huge pools)
 const SEG_GAP := 2.0           # px between segments
 const PLATE_W := 100.0         # overhead health bar width (rivals and allies)

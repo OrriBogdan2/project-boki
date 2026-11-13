@@ -9,10 +9,10 @@ var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
-var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
+var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
@@ -120,12 +120,12 @@ func flash(col: Color, strength := 0.35) -> void:
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
 
-## The message lane sits under the ally alerts (they take its first rows), or in the tutorial's own
-## lane while that runs (Tutorial holds it while its banner is up).
+## The message lane sits under the timer, or in the tutorial's own lane while that runs (Tutorial
+## holds it while its banner is up). In a fight it shows fewer, shorter lines (MsgLane.fight).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-	msgs.reserved = alerts.size()
-	msgs.top = 84.0 + alerts_h
+	msgs.fight = m.player != null and m.time - m.player.hurt_at < MSG_FIGHT_S
+	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
@@ -150,6 +150,7 @@ func tip(text: String) -> void:
 		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
+const MSG_FIGHT_S := 4.0   # s after you were last hit that the message lane keeps to its fight budget
 
 func _build_minimap() -> void:
 	var w := m.world
@@ -189,7 +190,6 @@ func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBox
 	return sb
 
 func _panel(r: Rect2, col := PANEL, rad := 10) -> void:
-	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, EDGE, 1, true), r)
 
 func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> void:
@@ -282,15 +282,15 @@ func _draw_all() -> void:
 			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
-	HurtWash.draw(c, sz, p, hurt_dirs, m.time)      # low health: the red edge, heavier where the hits came from
+	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
+		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
+		for i in 5:
+			var inset := i * 16.0
+			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.75, 0.05, 0.05, (0.09 - i * 0.016) * (0.6 + pulse * 0.4)), false, 16.0)
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, msgs.bottom() + 30.0)), m.killcam_text, 22, Color("ff9a8a"), big)
-	if p and not m.duel:
-		_draw_alerts(sz, p)
-	else:
-		alerts_h = 0.0
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
 	if p and not p.out and not p.extracted:
@@ -300,7 +300,6 @@ func _draw_all() -> void:
 		_draw_hurt_dirs(sz)
 		if not p.riding:
 			_draw_kit(sz, p)
-			buffs.draw(self, p, sz)       # after the kit tips so they never cover it
 		elif not map_open():
 			_draw_ship_prompt(sz)
 		if p.dropping and not map_open():
@@ -347,7 +346,7 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
-		if cam.is_position_behind(h.position) or HudPlate.hidden(m.player, h):
+		if cam.is_position_behind(h.position) or LabelCull.ride_skip(m, h):
 			continue
 		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
 		if not sp.is_finite():
@@ -528,13 +527,15 @@ func _draw_top(sz: Vector2) -> void:
 	if m.duel:
 		_draw_duel(sz)
 		return
+	if m.opts.get("arena", false):
+		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
 		if Record.clean():
 			return      # (recording: no training banner or checklist)
-		if not m.opts.get("arena", false):      # (the Grounds draw their own key line: scripts/match/arena.gd)
-			_panel(Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54)), Color(0.06, 0.07, 0.1, 0.88), 12)
-			_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
-			_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
+		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
+		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
+		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
+		_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
 		# the checklist: only what's left (up to six), with a count; H folds it away
 		var all_rows: Array = m.train_rows()
 		var left: Array = all_rows.filter(func(t): return not m.train.has(t[0]))
@@ -633,10 +634,10 @@ func _draw_feed(sz: Vector2) -> void:
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
-	var s := minf(340.0, sz.y * 0.44) if riding else 196.0      # (the big drop map leaves room under it for the squad)
+	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
+	var s := 340.0 if riding else 196.0
 	var r := Rect2(Vector2(18, 18), Vector2(s, s))
 	mm_bottom = r.end.y
-	SafeArea.note(r)
 	var w := m.world
 	var inner := Rect2(r.position + Vector2(8, 8), r.size - Vector2(16, 16))
 	if riding:
@@ -673,9 +674,10 @@ func _draw_minimap(sz: Vector2) -> void:
 	elif tex_view.size.x > 0.0 and tex_view.size.y > 0.0:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
-	_draw_map_labels(w, inner, view, k, riding)
-	if m.skytrain:
-		_draw_map_train(inner, view, k)
+	if MapDetail.shows("place", hold):
+		_draw_map_labels(w, inner, view, k, riding)
+	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
+		train_map.draw(self, m.skytrain, inner, view, k, false)
 	# your view cone, faintly
 	if m.player and not riding:
 		var pp: Vector2 = to_map.call(m.player.pos)
@@ -689,31 +691,54 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(pts, Color(1, 1, 1, 0.07))
 	if m.exits:
 		for x in m.exits.list:
-			var pv: Vector2 = to_map.call(x.get("berth", x["pos"]))
-			var busy: bool = String(x["state"]) in ["called", "boarding", "charging", "open"]
-			if not on_map.call(pv, 4.0):
-				# off the map: an arrow for the loud ones (a called skiff, a charging uplink, an open lift)
-				if busy and x["kind"] != "hatch": _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
+			var pv: Vector2 = to_map.call(x["pos"])
+			var busy: bool = String(x["state"]) in ["charging", "open"]
+			if not MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x)):
 				continue
-			_draw_exit_icon(pv, x, 1.0 if not riding else 0.8)
+			if not on_map.call(pv, 4.0):
+				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
+				if busy: _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
+				continue
+			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
 	if m.lairs:
-		_draw_map_lairs(inner, to_map, on_map, riding)
-	ReviveHud.minimap(self, inner, to_map, on_map)
-	if m.biomes: m.biomes.hot.minimap(self, to_map, on_map)
+		_draw_map_lairs(inner, to_map, on_map, hold)
+	ReviveHud.minimap(self, inner, to_map, on_map, hold)
+	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
+	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
 			if m.spawn_plan.state_for(cnd, m.player.team) != "active":
 				continue
+			if not MapDetail.shows("cache", hold, (cnd["known"] as Dictionary).has(m.player.team)):
+				continue
 			var cpv: Vector2 = to_map.call(cnd["pos"])
 			if on_map.call(cpv, 5.0):
 				var cdef: Dictionary = m.spawn_plan.cats.get(cnd["cat"], {})
-				full_map.marker(c, String(cdef.get("shape", "star")), cpv, 4.5 if riding else 4.0, cdef.get("col", Color.WHITE), "active")
-	if not m.ship.is_empty() and not m.ship.get("gone", false):
+				full_map.marker(c, String(cdef.get("shape", "star")), cpv, MapDetail.ICON_R / 1.35, cdef.get("col", Color.WHITE), "active")
+	if not m.ship.is_empty() and not m.ship.get("gone", false) and MapDetail.shows("ship", hold):
 		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
-		c.draw_circle(to_map.call(m.ship_pos()), 5.0, GOLD)
+		c.draw_circle(to_map.call(m.ship_pos()), MapDetail.ICON_R, GOLD)
+	if m.rolling and MapDetail.shows("bounty", hold):
+		# the other drop waves' skyships (amber), and hunters with a bounty on them (seen by everyone)
+		for ws in m.ships:
+			if ws.get("gone", false) or ws.get("node") == null:
+				continue
+			var wp: Vector2 = to_map.call(m.ship_pos_of(ws))
+			if on_map.call(wp, 3.0):
+				var wa: Vector2 = to_map.call(ws["a"]); var wb: Vector2 = to_map.call(ws["b"])
+				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
+				c.draw_circle(wp, MapDetail.ICON_R, Color("ffb64a"))
+			else:
+				_edge_arrow(inner, inner.get_center(), wp, Color("ffb64a"))
+		for h in m.hunters:
+			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
+				continue
+			var bp: Vector2 = to_map.call(h.pos)
+			if on_map.call(bp, 3.0): bounty_marker(c, bp, MapDetail.ICON_R / 6.5)
+			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
 	if m.tut and m.tut.target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut.target)
 		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
@@ -726,10 +751,10 @@ func _draw_minimap(sz: Vector2) -> void:
 			if pg.has("by") or pg.has("kin"):
 				# a squad ping: a little pin in the pinger's colour
 				c.draw_colored_polygon(PackedVector2Array([pv, pv + Vector2(-4, -7), pv + Vector2(4, -7)]), pg["col"])
-				c.draw_circle(pv + Vector2(0, -9), 5.0, Color(0, 0, 0, 0.6))
-				c.draw_circle(pv + Vector2(0, -9), 4.0, pg["col"])
+				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R - 1.0, pg["col"])
 			else:
-				c.draw_circle(pv, 4.0, pg["col"])
+				c.draw_circle(pv, MapDetail.ICON_R - 1.0, pg["col"])
 		else: _edge_arrow(inner, inner.get_center(), pv, pg["col"])
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
@@ -754,12 +779,12 @@ func _draw_minimap(sz: Vector2) -> void:
 			if m.truce.is_marked(h):
 				var ph := fmod(m.time * 1.5, 1.0)
 				if on_map.call(tv, 3.0):
-					c.draw_circle(tv, 4.0, BAD)
-					c.draw_arc(tv, 5.0 + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
+					c.draw_circle(tv, MapDetail.ICON_R - 1.0, BAD)
+					c.draw_arc(tv, MapDetail.ICON_R + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
 				else: _edge_arrow(inner, inner.get_center(), tv, BAD)
-			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0):
-				c.draw_circle(tv, 4.5, Color(0, 0, 0, 0.6))
-				c.draw_circle(tv, 3.5, Color("f4f1e6"))
+			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0) and MapDetail.shows("ally", hold):
+				c.draw_circle(tv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+				c.draw_circle(tv, MapDetail.ICON_R - 1.0, Color("f4f1e6"))
 	# your squad, with an arrow for anyone off the edge (a dead teammate shows at their deathbox)
 	for h in m.hunters:
 		if m.player == null or h.team != m.player.team:
@@ -777,13 +802,14 @@ func _draw_minimap(sz: Vector2) -> void:
 			var side := Vector2(-d.y, d.x)
 			c.draw_colored_polygon(PackedVector2Array([pv + d * 8.0, pv - d * 4.0 + side * 5.0, pv - d * 2.0, pv - d * 4.0 - side * 5.0]), col)
 		else:
-			c.draw_circle(pv, 4.5, Color(0, 0, 0, 0.6))
-			c.draw_circle(pv, 3.5, col)
+			c.draw_circle(pv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
+			c.draw_circle(pv, MapDetail.ICON_R - 1.0, col)
 			_ctext(pv + Vector2(0, -7), h.pname.substr(0, 1), 11, col, big)
+	BokiHud.map_kin(c, m, to_map, on_map)
 	for dk in BokiHud.squad_downed(m):
 		var dv: Vector2 = to_map.call(dk.position)
 		if on_map.call(dv, 3.0):
-			BokiHud.map_dot(c, dv, dk, 5.0, m.time)
+			BokiHud.map_dot(c, dv, dk, MapDetail.ICON_R, m.time)
 		else:
 			_edge_arrow(inner, inner.get_center(), dv, Color(dk.sp.get("glow", dk.sp["color"])))
 
@@ -793,18 +819,17 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]), Color("ffd27a"))
 	_draw_clock_bar(sz, r)
 
-## Under the minimap, like Supervive's day bar: the match clock, what the exits are doing, your run
+## Under the minimap, like Supervive's day bar: the match clock, your run
 ## level, and a thin bar for how far through the match you are.
 func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
+	WaysOutHud.draw(self)
 	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, 196.0), 30))
 	mm_bottom = r.end.y
 	var left := m.length - m.time
 	var phase := ""; var pc := MUTED
-	var xl: Array = m.exits.clock_line() if m.exits else ["", MUTED]
-	if left < 30.0 and (m.exits == null or m.exits.active_for(m.player.team if m.player else -9).is_empty()): phase = "ISLANDS FALLING"; pc = BAD
-	else: phase = String(xl[0]); pc = xl[1]
+	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
@@ -825,6 +850,20 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.sight_k < 0.99:
 		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
 		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
+	if m.rolling:
+		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
+
+## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
+func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
+	var amber := Color("ffb64a")
+	var ph := fmod(m.time * 1.2, 1.0)
+	cv.draw_arc(p, (6.0 + ph * 7.0) * k, 0, TAU, 20, Color(amber, 1.0 - ph), 2.0, true)
+	cv.draw_circle(p, 6.5 * k, Color(0, 0, 0, 0.65))
+	cv.draw_arc(p, 5.0 * k, 0, TAU, 18, amber, 2.0, true)
+	cv.draw_circle(p, 2.0 * k, amber)
+	for i in 4:
+		var a := PI * 0.5 * i
+		cv.draw_line(p + Vector2(cos(a), sin(a)) * 3.5 * k, p + Vector2(cos(a), sin(a)) * 8.0 * k, amber, 1.5, true)
 
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
@@ -833,32 +872,24 @@ func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
 	return inner.grow(-pad).has_point(v)
 
 ## A world marker: a bobbing pin and label over the spot, or (when it's off screen or behind the
-## camera) a big arrow at the screen edge pointing the way. Both show how far it is.
+## camera, or under the hunter: MarkerDir) a big arrow at the screen edge pointing the way. Both show how far.
 func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 	var cam := m.cam
 	var sz := c.size
 	var dist := int(round(Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length()))
 	var bob := sin(Time.get_ticks_msec() / 1000.0 * 4.0) * 4.0
-	var tp := cam.unproject_position(at + Vector3(0, 2.6, 0))
-	var behind := cam.is_position_behind(at)
-	var on := not behind and Rect2(Vector2(40, 110), sz - Vector2(80, 230)).has_point(tp)
-	if on:
-		var p := tp + Vector2(0, bob)
+	var d := MarkerDir.off_dir(cam, sz, at, m.player.pos)
+	if d == Vector2.ZERO:
+		var p := cam.unproject_position(at + Vector3(0, MarkerDir.PIN_UP, 0)) + Vector2(0, bob)
 		c.draw_circle(p, 24.0, Color(0, 0, 0, 0.5))
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -20), p + Vector2(16, 0), p + Vector2(0, 20), p + Vector2(-16, 0)]), col)
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-12, 27), p + Vector2(12, 27), p + Vector2(0, 46)]), col)
 		_ctext(p + Vector2(0, 70), "%s  ·  %dm" % [label, dist], 22, col, big)
-		# a ring on the ground under it
-		if not behind:
-			var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))
-			c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
+		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))      # a ring on the ground under it
+		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
-		var ctr := sz * 0.5
-		var d := (tp - ctr).normalized() if not behind else (ctr - tp).normalized()
-		if d.length() < 0.1: d = Vector2.UP
-		# kept inside the play area: under the tutorial banner, above the pill and the ability bar
-		var ctr2 := Vector2(sz.x * 0.5, sz.y * 0.47)
-		ctr = ctr2
+		# kept inside the play area: under the tutorial panel, above the ability bar
+		var ctr := Vector2(sz.x * 0.5, sz.y * 0.47)
 		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.24
 		var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
 		var edge := ctr + d * t + d * bob * 0.5
@@ -867,79 +898,51 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
-## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, an outpost's banner
-## post (OutpostGlyph). Bright when it's usable, grey when not; a pulsing ring while it's going.
+## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
+## when not; a pulsing ring while it's going.
 func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var col: Color = Exits.color_of(x)
 	var usable: bool = m.exits.live(x)
 	var st := String(x["state"])
 	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
-	var dark := Color(0, 0, 0, 0.7)
-	match String(x["kind"]):
-		"dock":
-			var hull := PackedVector2Array([pv + Vector2(-6, 1) * k, pv + Vector2(6, 1) * k, pv + Vector2(4, 5) * k, pv + Vector2(-4, 5) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-7, 0) * k, pv + Vector2(7, 0) * k, pv + Vector2(5, 6) * k, pv + Vector2(-5, 6) * k]), dark)
-			c.draw_colored_polygon(hull, col)
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 0) * k]), col)
-			c.draw_line(pv + Vector2(0, -7) * k, pv + Vector2(0, 1) * k, dark, 1.5)
-			if st == "closed":
-				c.draw_line(pv + Vector2(-6, -6) * k, pv + Vector2(6, 6) * k, Color(BAD, 0.8), 2.0)
-		"hatch":
-			var dm := PackedVector2Array([pv + Vector2(0, -5) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 5) * k, pv + Vector2(-5, 0) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6.5) * k, pv + Vector2(6.5, 0) * k, pv + Vector2(0, 6.5) * k, pv + Vector2(-6.5, 0) * k]), dark)
-			c.draw_colored_polygon(dm, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55))
-			c.draw_circle(pv, 1.6 * k, dark)
-		"outpost":
-			var held := OutpostLook.held(x)
-			var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
-			OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
-			if st == "charging":
-				_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["called", "boarding", "charging", "open", "unlocking"]:
+	var held := OutpostLook.held(x)
+	var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
+	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
+	if st == "charging":
+		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
+	if st in ["charging", "open"]:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
-## Over each exit nearby: its name and what it's doing (the exit in the ExtractWidget keeps just its name).
+## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
+## anywhere on the map.
 func _draw_exit_labels() -> void:
 	if m.exits == null or m.player == null or m.player.out or m.player.extracted:
 		return
 	var cam := m.cam
 	var p: Hunter = m.player
-	var shown: Dictionary = ExtractWidget.state(m, p).get("x", {})
+	var mine: Dictionary = m.exits.active_for(p.team)
 	for x in m.exits.list:
 		var at: Vector3 = x["pos"]
 		var col: Color = Exits.color_of(x)
 		var d := p.flat_dist(at)
 		var st := String(x["state"])
 		var line := ""
-		match String(x["kind"]):
-			"dock":
-				match st:
-					"called": line = "Skiff inbound  %s" % _fmt(x["t"])
-					"boarding": line = "BOARDING  %ds" % int(ceil(x["t"]))
-					"gone": line = "Skiff away"
-					"closed": line = "Closed"
-					_: line = "Call skiff" if m.exits.callable(x) else ("Opens %s" % _fmt(float(x["open_at"]) - m.time) if m.time < float(x["open_at"]) else "")
-			"hatch":
-				match st:
-					"unlocking": line = "OPENING  %ds" % int(ceil(float(x["t"])))
-					"open": line = "OPEN  ·  %d/%d left" % [int(x["uses"]), Exits.HATCH_USES]
-					_: line = "Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed  ·  needs a Rift Key"
-			"outpost":
-				match st:
-					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
-					"fizzling": line = "Shutting off"
-					"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
-					"spent": line = "Cooling down"
-					_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
-		var reach := 26.0 if x["kind"] == "hatch" else 44.0
-		if st in ["boarding", "open", "unlocking"]: reach = 70.0
+		match st:
+			"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
+			"fizzling": line = "Shutting off"
+			"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
+			"spent": line = "Cooling down"
+			_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
+		var reach := 70.0 if st == "open" else 44.0
 		var prompted: bool = not m.interact.is_empty() and is_same(m.interact.get("x"), x)     # the prompt already says it
 		if d < reach and not cam.is_position_behind(at) and not prompted:
-			var lp := cam.unproject_position(at + Vector3(0, 3.4 if x["kind"] != "hatch" else 1.6, 0))
+			var lp := cam.unproject_position(at + Vector3(0, 3.4, 0))
 			_ctext(lp, String(x["name"]), 13, col, big)
-			if line != "" and not is_same(x, shown):
-				_ctext(lp + Vector2(0, 17), line, 12 if st not in ["boarding", "open", "unlocking"] else 16, INK if st not in ["boarding", "open", "unlocking"] else col, big)
+			if line != "":
+				_ctext(lp + Vector2(0, 17), line, 16 if st == "open" else 12, col if st == "open" else INK, big)
+		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
+			_draw_waypoint(at, "Lift" if st == "open" else "Uplink", col)
 
 ## A small arrow on the minimap's edge pointing at something off the map.
 func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:
@@ -989,7 +992,6 @@ func toast_small(text: String, col: Color) -> void:
 	msgs.push(text, col, MsgLane.LOW)
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
-	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, border, bw, true), r)
 
 ## The key label under a slot (HudStyle.key_pill).
@@ -1014,7 +1016,7 @@ func glider_hit(amount: float) -> void:
 var _h_down := false
 
 func _hud_tick(delta: float) -> void:
-	_track_mates(m.player, delta)
+	mates.track(self, m.player, delta)
 	_loot_tick(delta)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
 	# H folds the training guide (G is send / recall your kin) and the kit panel away (and back)
@@ -1034,12 +1036,15 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
-## A level just went up (Hunter.gain_xp): the badge pops, the screen washes gold and the lane names
-## the skill point to rank an ability with (the growth itself is quiet, LevelGrowth).
-func level_up(lv: int) -> void:
-	lvl_pop = 0.35
-	flash(Color("ffd27a"), 0.16)
-	msgs.push("LEVEL %d  ·  +1 skill point" % lv, Color("ffd27a"), MsgLane.HIGH)
+## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
+## weapon's step on even levels, which also get a gold wash).
+func level_up(lv: int, info := {}) -> void:
+	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
+	var line := "LEVEL %d  ·  +1 skill point" % lv
+	if lv % 2 == 0:
+		flash(Color("ffd27a"), 0.16)
+		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
+	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1152,7 +1157,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var k: Kin = p.kin
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
-	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), float(info.get("charge_f", info["charges"])) if int(info["max_charges"]) > 1 else -1.0, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
+	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), int(info["charges"]) if int(info["max_charges"]) > 1 else -1, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
 	if info.get("full", false) and int(p.slot_lv["sec"]) > 0:
 		# the resource-full variant is ready (Cash In, Called Shot, Shield Slam...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
@@ -1186,7 +1191,6 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = HunterUltTile.draw(self, p, x, y, s, gap)
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	RecastCue.draw(self, p)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
@@ -1203,7 +1207,7 @@ func r_lock_text(p: Hunter) -> String:
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
+func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1, mx := 0) -> void:
 	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
@@ -1214,10 +1218,8 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var kc: Color = Data.KIN[k.species]["color"]
 	var glow: Color = Data.KIN[k.species].get("glow", kc)
+	var pc := o + Vector2(6, 6)
 	var rr := 20.0
-	var ring := Vector2(rr + 4.0, rr + 4.0)
-	var pc := SafeArea.keep(Rect2(o + Vector2(6, 6) - ring, ring * 2.0), sz).get_center()      # (the corner of the portrait, kept on screen)
-	SafeArea.note(Rect2(pc - ring, ring * 2.0))
 	c.draw_circle(pc, rr + 4, Color(0.03, 0.03, 0.05, 0.95))
 	c.draw_arc(pc, rr + 1.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
 	c.draw_arc(pc, rr + 1.5, -PI / 2, -PI / 2 + TAU * clampf(k.hp / k.max_hp, 0.0, 1.0), 40, kc, 3.0, true)
@@ -1240,11 +1242,11 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
 		"downed": st = "down"
-		"reviving": st = "reviving you!"
+		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
 		"fused": st = "merged"
-	if k.state in ["active", "downed", "reviving", "fused", "returning"] or not k.giant.is_empty():
+	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		var sr := SafeArea.keep(Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14)), sz)
+		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
 		_ctext(sr.get_center() + Vector2(0, 3.5), st.to_upper(), 9, Color(kc.lerp(INK, 0.3), 0.95), big)
 
@@ -1382,8 +1384,9 @@ func _bleed_left(h: Hunter) -> float:
 var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
 
 ## Your squad, stacked under the minimap: portrait, name, armor over segmented health, status icons.
-## A knocked teammate pulses red with their bleed-out timer; a dead one is greyed with an X and the
-## time left to bring them back from their deathbox; one who got out wears a check mark.
+## A knocked teammate's row is outlined, with a knocked mark (MateAlerts) and their bleed-out timer,
+## pulsing only while they're stomped; a dead one is greyed with an X and the time left to bring them
+## back from their deathbox; one who got out wears a check mark.
 func _draw_squad(sz: Vector2, p: Hunter) -> void:
 	var y := mm_bottom + 10.0
 	var w := 210.0
@@ -1395,7 +1398,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 		var r := Rect2(Vector2(16, y), Vector2(w, 60))
 		var down := lbl == "WISP"
 		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
-		_rounded(r, Color(0.05, 0.06, 0.09, 0.84), 10, Color(st[1], 0.35 + (0.5 * pulse if down else 0.0)), 2 if down else 1)
+		_rounded(r, Color(0.05, 0.06, 0.09, 0.84), 10, Color(st[1], 0.7 if down else 0.35), 2 if down else 1)
 		var pr := Rect2(r.position + Vector2(6, 6), Vector2(48, 48))
 		var pst := ""
 		match lbl:
@@ -1403,6 +1406,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 			"DEATHBOX", "DEAD": pst = "dead"
 			"EXTRACTED": pst = "out"
 		_draw_portrait(pr, h, pst, SideColor.of(m, h))
+		mates.draw_row(self, r, pr, h, lbl)
 		var tx := pr.end.x + 8.0
 		var tw := r.end.x - 8.0 - tx
 		_text(Vector2(tx, r.position.y + 19), h.pname.substr(0, 13), 14, INK if lbl == "ALIVE" else Color(INK, 0.7), big)
@@ -1427,7 +1431,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
-				_bar(Rect2(Vector2(tx, r.position.y + 28), Vector2(tw, 6)), h.down_hp / Data.MATCH["down_hp"], (Color("ff2a1a") if stp else Color("ff6a4a")).lerp(Color.WHITE, (0.5 if stp else 0.25) * pulse))
+				_bar(Rect2(Vector2(tx, r.position.y + 28), Vector2(tw, 6)), h.down_hp / Data.MATCH["down_hp"], Color("ff2a1a").lerp(Color.WHITE, 0.5 * pulse) if stp else Color("ff6a4a"))
 				_text(Vector2(tx, r.position.y + 51), ("STOMPED  %ds" if stp else "KNOCKED  %ds") % int(ceil(left)), 13, Color("ff4a3a") if stp else Color("ff8a6a"), big)
 				if h.revive > 0.0:
 					_arc(Vector2(r.end.x - 16, r.position.y + 46), 8, h.revive, GOOD, 3.0)
@@ -1444,113 +1448,6 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 func _has_status(e: Ent) -> bool:
 	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
 		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
-
-## Ally alerts, top centre under the timer. A teammate getting knocked gets a big card (their face,
-## name, bleed-out countdown, and how far and which way); it turns green if they're picked up, red if
-## they're lost, then fades. Smaller cards for a teammate eliminated or revived from their deathbox.
-var mate_last := {}       # nid -> last squad state label
-var alerts: Array = []    # {h, kind, t}
-
-func _track_mates(p: Hunter, delta: float) -> void:
-	for a in alerts.duplicate():
-		a["t"] = float(a["t"]) + delta
-		var life := 999.0 if a["kind"] == "knocked" else 2.6
-		if float(a["t"]) > life or (a["kind"] == "knocked" and not is_instance_valid(a["h"])) or (a["kind"] == "knocked" and not (a["h"] as Hunter).downed and float(a["t"]) > 1.0):
-			alerts.erase(a)
-	if p == null:
-		return
-	for h in m.hunters:
-		if h == p or h.team != p.team:
-			continue
-		var now := String(_mate_state(h)[0])
-		var was := String(mate_last.get(h.nid, now))
-		mate_last[h.nid] = now
-		if now == was:
-			continue
-		var card = null
-		for a in alerts:
-			if a["h"] == h and a["kind"] == "knocked":
-				card = a
-		if now == "WISP":
-			if card == null:
-				alerts.append({"h": h, "kind": "knocked", "t": 0.0})
-			Sfx.play("warn", null, -4.0, 0.0, 0.8)
-		elif was == "WISP" and now == "ALIVE":
-			if card: card["kind"] = "revived"; card["t"] = 0.0
-			else: alerts.append({"h": h, "kind": "revived", "t": 0.0})
-			Sfx.play("revive", null, -6.0)
-		elif (now == "DEATHBOX" or now == "DEAD") and was in ["WISP", "ALIVE"]:
-			if card: card["kind"] = "eliminated"; card["t"] = 0.0
-			else: alerts.append({"h": h, "kind": "eliminated", "t": 0.0, "small": true})
-			Sfx.play("warn", null, -8.0, 0.0, 0.6)
-		elif was == "DEATHBOX" and now == "ALIVE":
-			alerts.append({"h": h, "kind": "revived", "t": 0.0, "small": true})
-			Sfx.play("revive", null, -6.0)
-		elif was == "DEATHBOX" and now == "DEAD":
-			alerts.append({"h": h, "kind": "lost", "t": 0.0, "small": true})
-	while alerts.size() > 3:
-		alerts.pop_front()
-
-var alerts_h := 0.0       # how much room the alerts take (the message lane sits below them)
-
-func _draw_alerts(sz: Vector2, p: Hunter) -> void:
-	var y := 82.0
-	alerts_h = 0.0
-	for a in alerts:
-		var h: Hunter = a["h"]
-		var kind := String(a["kind"])
-		var t := float(a["t"])
-		var fade := 1.0 if kind == "knocked" else clampf((2.6 - t) / 0.6, 0.0, 1.0)
-		var pop := clampf(t / 0.15, 0.0, 1.0)
-		var small: bool = a.get("small", false)
-		var w := 300.0 if not small else 236.0
-		var hh := 70.0 if not small else 44.0
-		var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, y + (1.0 - pop) * -10.0), Vector2(w, hh))
-		var col := Color("ff5a3a")
-		var title := "ALLY KNOCKED"
-		match kind:
-			"revived": col = GOOD; title = "ALLY REVIVED"
-			"eliminated": col = BAD; title = "ALLY ELIMINATED"
-			"lost": col = MUTED; title = "WISP LOST"
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0) if kind == "knocked" else 0.0
-		_rounded(r, Color(0.06, 0.03, 0.04, 0.9 * fade), 10, Color(col, (0.6 + 0.4 * pulse) * fade), 2)
-		var ps := hh - 12.0
-		var pr := Rect2(r.position + Vector2(6, 6), Vector2(ps, ps))
-		var pst := "down" if kind == "knocked" else ("dead" if kind in ["eliminated", "lost"] else "")
-		if fade > 0.05:
-			_draw_portrait(pr, h, pst, col)
-		var tx := pr.end.x + 10.0
-		if small:
-			_text(Vector2(tx, r.position.y + 19), title, 12, Color(col, fade), big)
-			_text(Vector2(tx, r.position.y + 36), h.pname.substr(0, 16), 14, Color(INK, fade), big)
-		else:
-			_text(Vector2(tx, r.position.y + 21), title, 13, Color(col, fade), big)
-			_text(Vector2(tx, r.position.y + 42), h.pname.substr(0, 16), 17, Color(INK, fade), big)
-			if kind == "knocked":
-				_text(Vector2(tx, r.position.y + 61), "%ds to revive" % int(ceil(_bleed_left(h))), 12, Color("ffb0a0"))
-				# which way, and how far
-				var dv := Vector2(h.pos.x - p.pos.x, h.pos.z - p.pos.z)
-				var ctr := Vector2(r.end.x - 34, r.position.y + 30)
-				var ang := _screen_dir(dv)
-				var tip := ctr + Vector2.from_angle(ang) * 13.0
-				var side := Vector2.from_angle(ang + PI * 0.5) * 7.0
-				var back := ctr - Vector2.from_angle(ang) * 6.0
-				c.draw_circle(ctr, 17.0, Color(0, 0, 0, 0.35))
-				c.draw_colored_polygon(PackedVector2Array([tip, back + side, back - side]), col)
-				_ctext(Vector2(ctr.x, r.position.y + 63), "%dm" % int(round(dv.length())), 12, INK, big)
-			else:
-				_text(Vector2(tx, r.position.y + 61), "Back on their feet" if kind == "revived" else "Get to their deathbox", 12, Color(MUTED, fade))
-		y += hh + 8.0
-		alerts_h += hh + 8.0
-
-## A ground direction as a screen angle, using the camera's view.
-func _screen_dir(dv: Vector2) -> float:
-	var cam := m.cam
-	if cam == null or m.player == null:
-		return dv.angle()
-	var a := cam.unproject_position(m.player.position)
-	var b := cam.unproject_position(m.player.position + Vector3(dv.x, 0, dv.y).normalized() * 3.0)
-	return (b - a).angle()
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -1571,6 +1468,10 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 	if not sp.is_finite():
 		return
 	plates.draw(self, sp, h, _np_show_name(sp, h))
+	if m.rolling and h.has_meta("bounty"):
+		# a bounty: a target over the plate and what knocking them is worth
+		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
+		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
 	if not h.downed:
 		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
@@ -1615,7 +1516,7 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var side := Vector2(-d.y, d.x)
 		c.draw_colored_polygon(PackedVector2Array([e + d * 16.0, e - d * 6.0 + side * 11.0, e - d * 6.0 - side * 11.0]), col)
 		var lbl := "%s %dm" % [h.pname.substr(0, 10), dist]
-		if String(st[0]) == "WISP": lbl = "%s DOWN %dm" % [h.pname.substr(0, 10), dist]
+		if String(st[0]) == "WISP": DownedMarks.badge(c, e - d * 26.0 - Vector2(0, 18), h, SideColor.ALLY, m.time, 10.0)
 		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
 		_ctext(e - d * 26.0 + Vector2(0, 5), lbl, 13, col, big)
 
@@ -1770,6 +1671,8 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var ud := KinMerge.def_for(k)
 		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
+	if p.kin:
+		lines.append_array(KinKeys.card_lines(Data.KIN[p.kin.species]["color"]))
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]), String(dsi["desc"]), dsi["col"]])
 	lines.append_array(GripHud.kit_lines(p))
@@ -1837,8 +1740,8 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
-	var y := TutorialHud.prompt_y(self, sz)
-	if not it.is_empty() and not ExtractWidget.covers_prompt(m, it):
+	var y := sz.y - 222.0
+	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:
 			"revive": prog = it["ent"].revive
@@ -1851,13 +1754,17 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
 			"heart": prog = float(it.get("prog", 0.0))
-		var s: String = it["label"]
-		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
-		_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
-		if prog > 0.0:
-			_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
-	ExtractWidget.draw(self, sz)
+		if not WaysOutHud.gate_prompt(self, sz, y, it):
+			var s: String = it["label"]
+			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
+			_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+			if prog > 0.0:
+				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
+	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
+	if not st.is_empty():
+		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
+		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
@@ -1916,7 +1823,6 @@ func _draw_crosshair(p: Hunter) -> void:
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
-	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
 	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
@@ -1954,7 +1860,9 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
-	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
+	var mate := m.spectating()
+	if mate:
+		lines.append("Watching %s." % mate.pname)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
 	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
@@ -2372,34 +2280,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		c.draw_multiline_string(body, Vector2(pos.x + 12, y + 13), String(lines[i][0]), HORIZONTAL_ALIGNMENT_LEFT, w - 24, 13, -1, lines[i][1])
 		y += hh + 3.0
 
-## The sky train on the minimap: its loop as a dashed amber line (fainter where it runs under a
-## bridge), and the train itself, the engine marked red so you can see which way it's coming.
-var _train_line := PackedVector2Array()
-var _train_low: Array = []
-func _draw_map_train(inner: Rect2, view: Rect2, k: float) -> void:
-	var st: SkyTrain = m.skytrain
-	if _train_line.is_empty():
-		var s := 0.0
-		while s < st.loop_len:
-			var p := m.world.train_at(s)
-			_train_line.append(Vector2(p.x, p.z)); _train_low.append(p.y < -1.0)
-			s += 1.5
-	var n := _train_line.size()
-	for i in n:
-		if i % 2 == 1:
-			continue
-		var a := inner.position + (_train_line[i] - view.position) * k
-		var b := inner.position + (_train_line[(i + 1) % n] - view.position) * k
-		if not (_mm_has(inner, a) and _mm_has(inner, b)):
-			continue
-		c.draw_line(a, b, Color(1.0, 0.72, 0.35, 0.35 if _train_low[i] else 0.8), 2.0, true)
-	var cars: Array = st.car_positions()
-	for ci in range(cars.size() - 1, -1, -1):
-		var pv: Vector2 = inner.position + ((cars[ci] as Vector2) - view.position) * k
-		if not _mm_has(inner, pv, 3.0):
-			continue
-		c.draw_circle(pv, 4.0 if ci == 0 else 3.2, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 3.0 if ci == 0 else 2.3, Color("ff5a3a") if ci == 0 else Color("ffcf7a"))
+var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
 var _regions_of: World = null
 var _regions := {}
@@ -2433,10 +2314,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
-			# a train stop: a small amber square, named in the overview
-			c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-			c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-			continue      # (unnamed here: stop, road and perch names piled on top of each other at this size; the full map names them)
+			continue      # (the halts are TrainMap's, gated as the "train" kind)
 		if String(lb["kind"]) == "choke":
 			# a chokepoint: a small orange diamond, named in the overview
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
@@ -2894,10 +2772,8 @@ func _draw_wisp_rings() -> void:
 		var o2 = p.get_meta("standing_on")
 		if is_instance_valid(o2) and (o2 as Hunter).downed:
 			var sz := c.size
-			var s := "Standing on %s  ·  they drain %.1fx faster and can barely move" % [(o2 as Hunter).pname, Life.R["stomp_mult"]]
-			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
-			_rounded(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 14, sz.y * 0.5 + 70), Vector2(w + 28, 28)), Color(0.12, 0.02, 0.02, 0.85), 8, Color(1, 0.3, 0.2, 0.7), 2)
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 89), s, 15, Color("ff8a7a"))
+			var s := "Standing on %s  ·  %.1fx drain" % [(o2 as Hunter).pname, Life.R["stomp_mult"]]
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 89), s, 13, Color("ff8a7a", 0.85))
 	ReviveHud.revive_rings(self)       # deathbox revives in progress
 
 ## A soft coloured glow round the screen edges (danger to you).
@@ -3052,8 +2928,10 @@ func _lair_icon(pv: Vector2, L: Dictionary, k := 1.0) -> void:
 			c.draw_circle(pv, 5.5 * k, Color(0.55, 0.58, 0.64, 0.9))
 			c.draw_polyline(PackedVector2Array([pv + Vector2(-3, 0) * k, pv + Vector2(-0.8, 2.6) * k, pv + Vector2(3.4, -2.6) * k]), dark, 2.0 * k)
 
-func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, overview: bool) -> void:
+func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: bool) -> void:
 	for L in m.lairs.list:
+		if not MapDetail.shows("lair", hold, m.player != null and MapDetail.lair_matters(m, L)):
+			continue
 		var pv: Vector2 = to_map.call(L["c"])
 		# a fight you heard (or its boss falling): a big pulsing ring round the boss's icon
 		var al: bool = m.player != null and m.lairs.alerted(L, m.player)
@@ -3063,7 +2941,7 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, overview:
 				var ph := fmod(m.time * 1.2, 1.0)
 				c.draw_arc(pv, 9.0 + ph * 16.0, 0, TAU, 28, Color(acol, 1.0 - ph), 3.0, true)
 				c.draw_arc(pv, 10.0, 0, TAU, 24, Color(acol, 0.9), 2.0, true)
-			_lair_icon(pv, L, (1.0 if not overview else 0.9) * (1.3 if al else 1.0))
+			_lair_icon(pv, L, MapDetail.ICON_R / 8.0)
 		elif al:
 			_edge_arrow(inner, inner.get_center(), pv, acol)
 		elif L["state"] == "awake":

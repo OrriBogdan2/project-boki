@@ -1,9 +1,8 @@
 extends RefCounted
-## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
-## [--run-fire=kmove,kmove]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets):
-## <dir>/<clip>/f000.png..., with --turn a turntable in <dir>/turntable/, and with --run-fire each kit move played
-## the way the game does while he runs at full stick (the state, in place: <dir>/run_<kmove>/). Needs a renderer.
-## ffmpeg makes the GIFs and sheets.
+## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]:
+## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
+## and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--heavy: stagger).
+## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -98,34 +97,12 @@ func run(main: Node) -> void:
 			clips.force = {"clip": anim_name, "t": t}
 			sync.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--run-fire="):
-			for km in a.substr(11).split(",", false):
-				await _run_fire(model, sync, clips, String(km), out.path_join("run_" + km), fps)
+	if OS.get_cmdline_user_args().has("--flinch"):
+		await _flinch(model, sync, fps, out)
 	if OS.get_cmdline_user_args().has("--moods"):
 		await _moods(model, sync, clips, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
-
-## Half a second of the run, then the move from its start to its end, still running (scripts/heroes/warden_clips.gd
-## picks the layer from the state, as in a match).
-func _run_fire(model: Node3D, sync: Node, clips: WardenClips, km: String, dir: String, fps: float) -> void:
-	DirAccess.make_dir_recursive_absolute(dir)
-	clips.force = {}
-	var length := clips.lib.get_animation(String(clips.d["kmoves"][km]["clip"])).length
-	var s := {"vel": Vector3(0, 0, -float(clips.d["loco"]["run_speed"])), "face": 0.0, "grounded": true}
-	model.set_meta(WardenClips.STATE, s)
-	for k in 30:
-		sync.call("_process", 1.0 / 60.0)
-	var n := int(ceil((length + 0.5) * fps)) + 1
-	for i in n:
-		var t := float(i) / fps - 0.5
-		s["kmove"] = km if t >= 0.0 else ""
-		s["kmove_t"] = t
-		for k in 4:
-			sync.call("_process", 1.0 / fps / 4.0)
-		await _grab(dir.path_join("f%03d.png" % i))
-	model.remove_meta(WardenClips.STATE)
 
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
@@ -148,6 +125,22 @@ func _stage(main: Node) -> void:
 	cam = Camera3D.new()
 	holder.add_child(cam)
 	cam.make_current()
+
+## --flinch: running at 4 m/s, a hit lands 0.2 s in; <dir>/flinch/f###.png every 1/fps s for 1 s.
+func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
+	var dir := out.path_join("flinch")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var heavy := OS.get_cmdline_user_args().has("--heavy")
+	var s := {"vel": Vector3(0, 0, -4.0), "face": model.rotation.y, "grounded": true, "hit_t": 99.0,
+			"hit_k": Oomph.HEAVY_FLINCH if heavy else 1.0, "hit_dir": Vector2(0, -1)}
+	model.set_meta(WardenClips.STATE, s)
+	for k in 30:
+		sync.call("_process", 1.0 / 30.0)
+	for i in int(fps):
+		var t := float(i) / fps
+		s["hit_t"] = t - 0.2 if t >= 0.2 else 99.0
+		sync.call("_process", 1.0 / fps)
+		await _grab(dir.path_join("f%03d.png" % i))
 
 ## --moods: one frame of each face a Hero's mood data draws (WardenMood), <dir>/moods/<mood>.png.
 func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:

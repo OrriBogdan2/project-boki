@@ -39,8 +39,7 @@
 	},
 	"passive": {
 		"name": "Swell",
-		"desc": "Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.",
-		"float_tags": ["hazard", "lava", "spore", "toxic", "molten"]
+		"desc": "Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a pink sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by."
 	},
 	"lmb": {
 		"idle": 1.4,
@@ -63,11 +62,11 @@
 		"radius": 1.5,
 		"ally_shield": 26.0,
 		"ally_r": 3.0,
-		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 35% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
+		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
 		"aim_max": 1.5,
 		"keep_h": 3.0,
-		"fly_slow": 0.35
+		"fly_slow": 0.675
 	},
 	"rmb": {
 		"delivery": "projectile",
@@ -139,7 +138,7 @@
 		"name": "Nightwell",
 		"short": "Well",
 		"icon": "blaze_mantle",
-		"col": "#2ee6c0",
+		"col": "#b06bff",
 		"cooldown": 70.0,
 		"range": 10.0,
 		"tell": 1.0,
@@ -170,15 +169,7 @@
 	"rank_next": {"sec": "Rank 3: cooldown 10s -> 7s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s.", "kin": "Rank 3: cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 8 a second.", "dash": "Rank 3: recharge 9.5s -> 6.5s; allies beside you or at your landing get a 26 shield for 3s."},
 	"tells": {
 		"half": "a ring of teal motes closes around him",
-		"full": "the jack-in-the-box glows white and his spring coils tall",
+		"full": "the lantern burns white and his ribbons lift",
 		"dash_spent": "a pale ripple where he stood"
-	},
-	"src": {
-		"lmb": "[D] [O] (owner items 60, data overruled) (cd/dmg/range/timing: KIT_PARITY row)",
-		"rmb": "[D] [O] (owner item 40) (cd/dmg/range/timing: KIT_PARITY row)",
-		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
-		"x": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
-		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
-		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

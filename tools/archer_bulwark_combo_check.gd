@@ -3,8 +3,6 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
-const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
-
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -19,32 +17,19 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
-	var atime = load("res://tools/bjorn_anim_time_check.gd").new()
-	atime.main = main_node
-	if both:
-		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
-		await _ally("archer")
 		await ult.pin()
 		await own.pin()
 		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
-		await _ally("bulwark")
-		await _aegis_covers()
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-		await atime.anim_time()
-		var abyss = load("res://tools/abyss_cast.gd").new()
-		abyss.main = main_node
-		await abyss.bulwark()
-		n += abyss.n
-		fails += abyss.fails
-	n += ult.n + own.n + launch.n + tall.n + atime.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + atime.fails
+	n += ult.n + own.n + launch.n + tall.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -68,45 +53,6 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 		for dx in range(0, 3):
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
-
-## Hawk Sense: the half-health line, the 22m range, the 0.4s linger, and seen through a wall and behind her.
-func _hawk_sense(m: Match, P: Hunter, T: Hunter, lv: int) -> void:
-	var rd := (P.ak as ArcherKit).res_def()
-	var cut := float(rd["sense_hp"])
-	var reach := float(rd["sense_r"])
-	var linger := float(rd["sense_linger"])
-	ok("combo archer: Hawk Sense numbers (half health, 22m, 0.4s)",
-		cut == 0.5 and reach == 22.0 and linger == 0.4, "%.2f %.1f %.2f" % [cut, reach, linger])
-	fresh(T)
-	var spot := T.pos
-	var away := Vector3(T.pos.x - P.pos.x, 0.0, T.pos.z - P.pos.z).normalized()
-	T.hp = T.max_hp * (cut + 0.02)
-	step(m, 0.4)
-	var healthy := ArcherKit.sensed_by(m, P.team, T)
-	T.hp = T.max_hp * (cut - 0.02)
-	step(m, 0.4)
-	ok("combo archer: Hawk Sense threshold (sensed just under half health, not just over)",
-		not healthy and ArcherKit.sensed_by(m, P.team, T), "over %s" % healthy)
-	ok("combo archer: Hawk Sense is her team's, not the rival's", not ArcherKit.sensed_by(m, T.team, T))
-	T.pos = P.pos + away * (reach + 1.0)
-	step(m, 0.5)
-	var far := ArcherKit.sensed_by(m, P.team, T)
-	T.pos = P.pos + away * (reach - 1.0)
-	step(m, 0.4)
-	ok("combo archer: Hawk Sense range (21m sensed, 23m not)",
-		not far and ArcherKit.sensed_by(m, P.team, T), "23m %s" % far)
-	T.pos = spot
-	_wall_at(m, P.pos, lv, 2)
-	aim_at(P, P.pos - away)
-	step(m, 0.4)
-	ok("combo archer: Hawk Sense sees through a wall and behind her", m.can_see(P.team, T))
-	T.hp = T.max_hp
-	step(m, 0.05)
-	var held := ArcherKit.sensed_by(m, P.team, T)
-	step(m, linger)
-	ok("combo archer: Hawk Sense expiry (held for a moment after a heal, gone within 0.4s)",
-		held and not ArcherKit.sensed_by(m, P.team, T) and not m.can_see(P.team, T), "held %s" % held)
-	_clear_wall(m, P.pos, lv, 2)
 
 ## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:
@@ -375,30 +321,12 @@ func _archer_combos() -> void:
 		) < 0.3 and bool(AimKit.entry(P, "e").get("all", false)),
 		str(AimKit.entry(P, "e").get("radius"))
 	)
-	var arc := AimKit.entry(P, "e")
-	ok(
-		"telegraph == hit: the Hail Wall arc is the rain's own arc (drawn radius, degrees and thickness == hit)",
-		absf(float(arc.get("radius", 0.0)) - float(K.rain.get("radius", -1.0))) < 0.01
-			and absf(float(arc.get("deg", 0.0)) - K._arc_deg()) < 0.01
-			and absf(float(arc.get("thick", 0.0)) - float(K.e_def()["width"])) < 0.01,
-		str(arc.get("radius"))
-	)
 	ok("archer anim: Hail Wall plays arc_hail", K.anim_id == "arc_hail", K.anim_id)
 	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
 		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
-	)
-	# DoT parity (data: Rain of Arrows 61 dmg/s on a 1,100 HP Myth; ours on 124 HP): whole ticks, every 0.5 s
-	var hail: Dictionary = K.e_def()
-	var share := float(hail["dmg"]) / float(hail["every"]) / float(Data.CLASSES["light"]["hp"])
-	var ticks: float = dmg(T) / float(hail["dmg"])
-	ok(
-		"pin E DoT parity: 6.1% of Myth's HP a second (61 of 1,100), 0.5 s ticks, whole hits",
-		absf(share - 61.0 / 1100.0) < 0.003 and float(hail["every"]) == 0.5
-		and absf(ticks - roundf(ticks)) < 0.01 and ticks > 2.9,
-		"share %.4f ticks %.2f" % [share, ticks]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
 	var cr0 := K.cremations
@@ -415,41 +343,6 @@ func _archer_combos() -> void:
 		K.cremations == cr0 + 1,
 		"cremations %d" % (K.cremations - cr0)
 	)
-	step(m, 3.5)
-	# Hail Wall vs Wisps (source parity): a rival Wisp on the arc loses down_hp per tick (no slow); an ally's does not
-	fresh(T)
-	fresh(T2)
-	K.cd["e"] = 0.0
-	P.teleport(home)
-	aim_at(P, home + Vector3(5.0, 0, 0))
-	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
-	T2.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(-45.0)))
-	var t2_team := T2.team
-	T2.team = P.team
-	for w in [T, T2]:
-		w.downed = true
-		w.hp = 0.0
-		w.down_hp = float(Data.MATCH["down_hp"])
-	var hp_foe := T.hp
-	P.ak.use_e()
-	step(m, 1.6)
-	var bled: float = float(Data.MATCH["down_hp"]) - T2.down_hp
-	var drained: float = float(Data.MATCH["down_hp"]) - T.down_hp
-	ok(
-		"pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds",
-		drained >= bled + 2.0 * float(K.e_def()["dmg"]) * ArcherKit.WISP_DRAIN_K and bled > 0.0,
-		"rival %.1f ally %.1f" % [drained, bled]
-	)
-	ok(
-		"pin E: the wall does not slow, burn or damage a Wisp",
-		T.slow_t <= 0.0 and T.blight_t <= 0.0 and T.hp == hp_foe and T.downed,
-		"slow %.2f hp %.1f" % [T.slow_t, T.hp]
-	)
-	for w in [T, T2]:
-		w.downed = false
-		w.hp = w.max_hp
-		w.down_hp = 0.0
-	T2.team = t2_team
 	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
@@ -523,7 +416,20 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
-	_hawk_sense(m, P, T, lv)
+	# Hawk Sense: a rival under half health is seen through cover
+	fresh(T)
+	T.hp = T.max_hp
+	T.reveal_t = 0.0
+	step(m, 0.5)
+	var healthy_seen := T.reveal_t > 0.0
+	T.hp = T.max_hp * 0.4
+	step(m, 0.5)
+	ok(
+		"combo archer: Hawk Sense shows only the injured",
+		not healthy_seen and T.reveal_t > 0.0,
+		"healthy %s injured %.2f" % [healthy_seen, T.reveal_t]
+	)
+	T.hp = T.max_hp
 	# Spirit Walk: the roll plays pin_roll; then she walks through a rock column that stops anyone else
 	var W: World = m.world
 	var bx := int(home.x) + 3
@@ -541,15 +447,23 @@ func _archer_combos() -> void:
 	var roll_t0 := K.anim_at
 	step(m, 0.18, func(): P.inp["move"] = Vector2(1, 0))
 	ok(
-		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.24, footage: no landing beat)",
-		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.24) < 0.03,
+		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.27, footage: no landing beat)",
+		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.27) < 0.03,
 		"%s at +%.2f" % [K.anim_id, K.anim_at - roll_t0]
 	)
 	var in0 := K.spirit.passed
 	var mk := [0.0]
+	var wash := [0.0]
 	step(m, 1.2, func():
 		P.inp["move"] = Vector2(1, 0)
+		K.fx._process(0.0)
+		wash[0] = maxf(wash[0], P.wash)
 		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
+	ok(
+		"pin tint: her body darkens toward a deep orchid while she phases (not a ring or disc)",
+		wash[0] > 0.4 and P.wash_col.v < PinFx.THREAD.v * 0.5 and P.wash_col.b > P.wash_col.g,
+		"wash %.2f %s" % [wash[0], P.wash_col]
+	)
 	var mk_in: float = mk[0]
 	ok(
 		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
@@ -580,6 +494,10 @@ func _archer_combos() -> void:
 	)
 	# ...and ending inside it puts her back where she went in (no cost: there is no Focus)
 	K.spirit.end("time")
+	for _i in 8:
+		K.fx._process(0.0)
+		step(m, 0.05)
+	ok("pin tint: the body is back to normal when the walk ends", P.wash < 0.01, "wash %.2f" % P.wash)
 	step(m, 0.5)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -825,32 +743,6 @@ func _growth() -> void:
 		"L1 %.2f L10 %.2f" % [d1, d10]
 	)
 
-## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
-func _ally(arch: String) -> void:
-	var bad: Array = await ALLY.sweep(main, arch)
-	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
-
-## Brightshield blocks everything from the front (data), so a teammate behind the raised aegis takes no shot
-## a foe fires at them; with the aegis down the same shot lands.
-func _aegis_covers() -> void:
-	var taken := []
-	for raised in [false, true]:
-		var r := setup("bulwark", 9.0)
-		var m: Match = r[0]
-		var P: Hunter = r[1]
-		var mate := ALLY.spawn(m, P, r[4] + Vector3(0.4, 0, 0.7))
-		aim_at(P, r[2].pos)
-		if raised:
-			P.inp["sec_hold"] = true
-			P.ak.press_rmb()
-			step(m, 0.4, func(): P.inp["sec_hold"] = true)
-		m.spawn_shot(r[2], mate.pos + Vector3(6.0, 1.0, 0), Vector2(-30.0, 0), 40.0, 1.0, 0.2, Color.RED)
-		step(m, 0.8, func(): P.inp["sec_hold"] = raised)
-		taken.append(dmg(mate))
-		await done(m)
-	ok("bjorn ally: a teammate behind the raised aegis takes the shot a foe fires at them",
-			taken[0] >= 39.0 and taken[1] == 0.0, "aegis down %.0f raised %.0f" % [taken[0], taken[1]])
-
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)
 	var m: Match = r[0]
@@ -924,12 +816,10 @@ func _bulwark_combos() -> void:
 	ok("bjorn: tap again calls it back", K.mace.is_empty())
 	K.cd["e"] = 0.0
 	aim_at(P, home + Vector3(-5.0, 0, 0))
-	var calls0 := int(HeroVfx.of(m).plays.get("mend_call", 0))
 	P.ak.use_e()
 	ok(
 		"bjorn E: with the hammer in hand it comes down on him, the column and circle shown",
-		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5
-		and int(HeroVfx.of(m).plays.get("mend_call", 0)) == calls0 + 1,
+		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5 and K.fx.column.visible,
 		"mend %s" % str(K.mend.get("pos"))
 	)
 	step(m, 0.1)
@@ -1014,6 +904,14 @@ func _bulwark_combos() -> void:
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
+	var hv := HeroVfx.of(m)
+	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
+	var sweep_arc := func(move: String) -> float:
+		return float(vmoves[move]["fx"].filter(func(l): return l["p"] == "sweep")[0]["arc"])
+	ok("bjorn vfx: the release plays the swing, its crescent drawn at the hit's arc",
+		int(hv.plays.get("swing", 0)) == 1
+		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
+		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -1235,6 +1133,10 @@ func _bulwark_combos() -> void:
 		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
 		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
 	)
+	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
+		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
+		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
@@ -1347,7 +1249,7 @@ func _bulwark_combos() -> void:
 		"Mate",
 		"idle",
 		{},
-		P.pos + Vector3(0, 0, 2.7),
+		P.pos + Vector3(0, 0, 1.8),
 		{"arch": "none"}
 	)
 	T.teleport(home + Vector3(0, 0, -5.0))
@@ -1421,7 +1323,7 @@ func _bulwark_combos() -> void:
 	step(m, 4.0)
 	ok("bulwark: no class R", not K.d.has("r") and K.r_def().is_empty())
 	# a Boki merge that starts mid-hold ends the holds: no Crushing Blow when LMB is let go, the raised shield comes down
-	
+
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes

@@ -8,7 +8,7 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
 	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop", "wisp_hum",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
-	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "elim_confirm", "extract_ok",
+	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
 	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
@@ -16,14 +16,12 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
 	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
-## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
-## the combat crowd never steal it, and no gap or stack cap thins it.
-const CUES := ["knock_confirm", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
-const MIN_GAP := {"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
+const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200,
+	"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
 	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
@@ -39,20 +37,13 @@ const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
-## A positional one-shot plays from a 3D voice placed where it happens, so the camera pans it: you hear which
-## side a footstep or a landing is on. Its level stays this file's own falloff (_distance_db), so Godot's
-## attenuation and distance low-pass are off. PAN: how hard it pans (x the project's 3d_panning_strength, 0.5).
-const PAN := 2.0
 var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
 
 var streams := {}
-var players: Array[AudioStreamPlayer] = []      # the one-shot voices with no position (UI)
-var spots: Array[AudioStreamPlayer3D] = []      # ...and the placed ones
+var players: Array[AudioStreamPlayer] = []
 var next := 0
-var cue_voice: AudioStreamPlayer
-var cue_plays := {}           # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
@@ -101,16 +92,6 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
-	cue_voice = AudioStreamPlayer.new()
-	cue_voice.bus = "SFX"
-	add_child(cue_voice)
-		var s := AudioStreamPlayer3D.new()
-		s.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
-		s.attenuation_filter_db = 0.0
-		s.max_db = 6.0
-		s.panning_strength = PAN
-		add_child(s)
-		spots.append(s)
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -261,6 +242,36 @@ var layer_want := {}      # stem -> 0..1
 const LAYER_DB := -9.0    # a stem at full, the same level a single track plays at
 const LAYER_IN := 1.2     # seconds to fade a stem in, and out
 const LAYER_OUT := 3.0
+const LAYER_UNDER := 0.5  # seconds a stem takes to fall away while a sting plays over it
+const STING_DB := -6.0
+const STING_CUT := 0.15   # seconds: a sting still ringing when its scene ends fades this fast
+signal stung(which: String)      # a sting started ("extract", "out", "last", "home")
+var _sting_p: AudioStreamPlayer
+
+## A short musical sting (audio/sting_<name>.ogg, tools/compose.py) over the score, one at a time:
+## a new one replaces one still ringing. The layered stems fall away fast while it plays.
+func sting(which: String) -> void:
+	var path := "res://audio/sting_%s.ogg" % which
+	if not ResourceLoader.exists(path):
+		return
+	if _sting_p == null:
+		_sting_p = AudioStreamPlayer.new()
+		_sting_p.bus = "Music"
+		_sting_p.volume_db = STING_DB
+		add_child(_sting_p)
+	stung.emit(which)
+	_sting_p.stream = load(path)
+	_sting_p.volume_db = STING_DB
+	_sting_p.play()
+
+func sting_on() -> bool:
+	return _sting_p != null and _sting_p.playing
+
+func _cut_sting() -> void:
+	if sting_on():
+		var tw := create_tween()
+		tw.tween_property(_sting_p, "volume_db", -60.0, STING_CUT)
+		tw.tween_callback(_sting_p.stop)
 
 ## Starts a group's stems together (music_<group>_<stem>.ogg); `want` gives each stem's starting
 ## level. Crossfades out whatever was playing.
@@ -289,11 +300,12 @@ func set_layers(want: Dictionary) -> void:
 		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
 
 ## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
-## stops. The layered score and the place beds (abyss, ruins, AmbBeds) fade out (a screen asking for the
-## "match" wind while it is already the current ambience returns early, so it would never clear them),
-## every keyed loop stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
+## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
+## is already the current ambience, an early return, so it would never clear them), every keyed loop
+## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
 ## next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
+	_cut_sting()
 	if not layers.is_empty():
 		_stop_layers(fade)
 		music_name = ""
@@ -301,7 +313,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 		clear_amb_layers(fade)
 	for key in loops.keys():
 		loop_stop(key)
-	for p in voices():
+	for p in players:
 		p.stop()
 
 ## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
@@ -309,7 +321,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 ## (--match-audio-check). A pool one-shot ends by itself, so a farm footstep doesn't count.
 func match_voices() -> int:
 	var n := 0
-	for p in voices():
+	for p in players:
 		if p.playing and loops_forever(p.stream):
 			n += 1
 	for key in loops:
@@ -328,8 +340,9 @@ func _stop_layers(fade: float) -> void:
 	layers = {}
 	layer_want = {}
 
-## Extra ambience beds on top of the main one (wind over the abyss, ruins), each faded to a level
-## by where you are; created on first use, stopped by clear_amb_layers.
+## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
+## and pond beds), each faded to a level by where you are; created on first use, freed once faded
+## to nothing, stopped together by clear_amb_layers.
 var amb_layers := {}      # name -> {p, want}
 
 func amb_layer(name: String, level: float) -> void:
@@ -356,18 +369,24 @@ func clear_amb_layers(fade := 1.0) -> void:
 func _process(delta: float) -> void:
 	if not loops.is_empty():
 		_drop_stale_holds()
-	for n in amb_layers:
+	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
 		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / 2.5)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
+		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
+			ap.queue_free()
+			amb_layers.erase(n)
 	if layers.is_empty():
 		return
 	for st in layers:
 		var p: AudioStreamPlayer = layers[st]
 		var cur := db_to_linear(p.volume_db)
 		var tgt := float(layer_want.get(st, 0.0)) * db_to_linear(LAYER_DB)
-		var rate := db_to_linear(LAYER_DB) * delta / (LAYER_IN if tgt > cur else LAYER_OUT)
+		var secs := LAYER_IN
+		if tgt <= cur:
+			secs = LAYER_UNDER if sting_on() else LAYER_OUT
+		var rate := db_to_linear(LAYER_DB) * delta / secs
 		cur = move_toward(cur, tgt, rate)
 		p.volume_db = linear_to_db(maxf(cur, 0.0001))
 
@@ -392,56 +411,33 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
-## Every one-shot voice, plain and placed.
-func voices() -> Array:
-	var all: Array = []
-	all.append_array(players)
-	all.append_array(spots)
-	return all
-
-## Starts `st` on a free voice (a new sound doesn't cut one that's still ringing; the oldest if all are
-## busy): a placed one at pos, so it pans, when there's a position and a camera to hear it from.
-func _start(st: AudioStream, pos, vol_db: float, pitch: float) -> void:
-	var placed: bool = pos != null and get_viewport().get_camera_3d() != null
-	var p = spots[_free(spots)] if placed else players[_free(players)]   # the same fields on both kinds
-	if placed:
-		(p as AudioStreamPlayer3D).position = pos
-	var far: bool = pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
-	p.bus = "SFXFar" if far else "SFX"
-	p.stream = st
-	p.volume_db = vol_db
-	p.pitch_scale = pitch
-	p.play()
-
-func _free(pool: Array) -> int:
+## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
+func _voice(pos) -> AudioStreamPlayer:
+	var p: AudioStreamPlayer = null
 	for k in POOL:
-		var i := (next + k) % POOL
-		if not pool[i].playing:
-			next = (i + 1) % POOL
-			return i
-	var oldest := next
-	next = (next + 1) % POOL
-	return oldest
+		var c := players[(next + k) % POOL]
+		if not c.playing:
+			p = c
+			next = (next + k + 1) % POOL
+			break
+	if p == null:
+		p = players[next]
+		next = (next + 1) % POOL
+	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
+	p.bus = "SFXFar" if far else "SFX"
+	return p
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
-## burst of the same sound is capped and stacked quieter. reach > 0: metres it carries, in place of the usual.
-func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0) -> void:
+## burst of the same sound is capped and stacked quieter.
+func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
-		return
-	if sname in CUES:
-		cue_plays[sname] = int(cue_plays.get(sname, 0)) + 1
-		cue_voice.stream = streams[sname]
-		cue_voice.volume_db = vol_db
-		cue_voice.pitch_scale = pitch
-		cue_voice.play()
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	var v := vol_db + _distance_db(pos, carry) + (BLAST_DB if sname in BLAST else 0.0)
+	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -453,6 +449,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
+	var p := _voice(pos)
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
@@ -462,7 +459,10 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	_start(_once(st), pos, v, pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var)))
+	p.stream = _once(st)
+	p.volume_db = v
+	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
+	p.play()
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
 ## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
@@ -539,6 +539,7 @@ func loop_stop(key: String) -> void:
 const HOLD_MS := 250
 func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0) -> void:
 	loop_start(key, sname, pos, vol_db)
+	loops[key]["vol"] = vol_db
 	loops[key]["held"] = Time.get_ticks_msec()
 	loop_set(key, pos, pitch)
 
@@ -571,7 +572,11 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	if is_nan(v):
 		return
 	last_played[key] = now
-	_start(st, pos, v, 1.0 + rng.randf_range(-pitch_var, pitch_var))
+	var p := _voice(pos)
+	p.stream = st
+	p.volume_db = v
+	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
+	p.play()
 
 ## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
 ## audio/<name>.wav (and its takes <name>_1..4.wav) the first time it plays, so new kit sounds need no

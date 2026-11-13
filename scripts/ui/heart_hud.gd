@@ -3,12 +3,12 @@ extends RefCounted
 ## The Heart on screen (docs/decisions/0023), for the Hud and the FullMap, the same for every player:
 ##   - the Heart's marker with a charge ring on the minimap and the full map, and a waypoint in the world;
 ##   - the carrier's glyph on every map (revealed) with their name, and a waypoint over them;
-##   - the Heart Gate (dim until the Heartspark is carried, then lit);
+##   - the Heart Gate (dim until the Heartspark is carried, then lit), the Heart ring's progress once it opens;
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 
 const TIDE_COL := Color(0.75, 0.2, 0.35, 0.8)
-const NEXT_COL := Color(0.95, 0.55, 0.65, 0.7)
+const NEXT_COL := Color(0.95, 0.55, 0.65, 0.7)    # the dashed ring the tide closes to next
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
 const DASHES := 48
@@ -21,26 +21,23 @@ static func world_labels(hud) -> void:
 		return
 	var cam: Camera3D = m.cam
 	_outside(hud, m, ht)
-	match ht.state:
-		"charging":
-			hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), _word(ht), Heart.COL)
-		"ready":
-			hud._draw_waypoint(ht.spark_pos + Vector3(0, 1.0, 0), "Heartspark", Heart.COL)
-		"carried":
-			if ht.carrier and ht.carrier != m.player:
-				var who := "%s has the Heartspark" % ht.carrier.pname
-				hud._draw_waypoint(ht.carrier.pos + Vector3(0, 1.0, 0), who, Heart.COL)
-			elif ht.carrier == m.player:
-				hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.GATE_COL)
-		"cooling":
-			if m.player.flat_dist(ht.site) < 40.0 and not cam.is_position_behind(ht.site):
-				var cp := cam.unproject_position(ht.site + Vector3(0, 3.8, 0))
-				hud._ctext(cp, "Cooling  %ds" % int(ceil(ht.cool)), 13, Heart.COL, hud.big)
-	if ht.state != "carried" and ht.state != "cooling" and m.player.flat_dist(ht.site) < 30.0:
+	if ht.carrier and ht.carrier != m.player:
+		var who := "%s has the Heartspark" % ht.carrier.pname
+		hud._draw_waypoint(ht.carrier.pos + Vector3(0, 1.0, 0), who, Heart.COL)
+	elif ht.carrier == m.player:
+		hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.GATE_COL)
+	elif ht.spark_live() and ht.state != Heart.S.FINAL:
+		hud._draw_waypoint(ht.spark_pos + Vector3(0, 1.0, 0), "Heartspark", Heart.COL)
+	elif ht.state in [Heart.S.CHARGING, Heart.S.FINAL]:
+		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), _word(ht), Heart.COL)
+	elif m.player.flat_dist(ht.site) < 40.0 and not cam.is_position_behind(ht.site):
+		var cp := cam.unproject_position(ht.site + Vector3(0, 3.8, 0))
+		hud._ctext(cp, _word(ht), 13, Heart.COL, hud.big)
+	if ht.spark_live() and ht.carrier == null and m.player.flat_dist(ht.site) < 30.0:
 		var gp := cam.unproject_position(ht.gate + Vector3(0, 3.6, 0))
 		if m.player.flat_dist(ht.gate) < 30.0 and not cam.is_position_behind(ht.gate):
 			hud._ctext(gp, "Heart Gate", 12, Heart.GATE_COL.darkened(0.2), hud.big)
-	if ht.state == "carried" and ht.carrier == m.player:
+	if ht.carrier != null and ht.carrier == m.player:
 		var cp2 := cam.unproject_position(m.player.pos + Vector3(0, 3.4, 0))
 		hud._ctext(cp2, "You carry the Heartspark  ·  everyone sees you", 13, Heart.COL, hud.big)
 
@@ -73,13 +70,13 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 	_tide(hud.c, m, to_map, on_map, 1.5)
 	var gv: Vector2 = to_map.call(ht.gate)
 	if on_map.call(gv, 4.0):
-		gate_glyph(hud.c, gv, 4.0, ht.state == "carried")
+		gate_glyph(hud.c, gv, 4.0, ht.carrier != null)
 	var hv: Vector2 = to_map.call(ht.site)
 	if on_map.call(hv, 4.0):
 		heart_glyph(hud.c, hv, 5.0, ht, m.time)
 	else:
 		hud._edge_arrow(inner, inner.get_center(), hv, Heart.COL)
-	if ht.state == "carried" and ht.carrier:
+	if ht.carrier:
 		var cv: Vector2 = to_map.call(ht.carrier.pos)
 		if on_map.call(cv, 4.0):
 			spark_glyph(hud.c, cv, 4.0, m.time)
@@ -96,13 +93,13 @@ static func full_map(fm) -> void:
 	_tide(c, m, fm.to_screen, func(pv: Vector2, pad: float) -> bool: return area.grow(-pad).has_point(pv), 2.5)
 	var gv: Vector2 = fm.to_screen(ht.gate)
 	if area.has_point(gv):
-		gate_glyph(c, gv, 7.0, ht.state == "carried")
+		gate_glyph(c, gv, 7.0, ht.carrier != null)
 		fm.hud._ctext(gv + Vector2(0, 18), "Heart Gate", 11, Heart.GATE_COL, fm.hud.big)
 	var hv: Vector2 = fm.to_screen(ht.site)
 	if area.has_point(hv):
 		heart_glyph(c, hv, 9.0, ht, m.time)
 		fm.hud._ctext(hv + Vector2(0, -20), _word(ht), 12, Heart.COL, fm.hud.big)
-	if ht.state == "carried" and ht.carrier:
+	if ht.carrier:
 		var cv: Vector2 = fm.to_screen(ht.carrier.pos)
 		if area.has_point(cv):
 			spark_glyph(c, cv, 7.0, m.time)
@@ -110,12 +107,16 @@ static func full_map(fm) -> void:
 
 static func _word(ht: Heart) -> String:
 	match ht.state:
-		"charging":
+		Heart.S.ASLEEP:
+			return "Heart wakes in %ds" % int(ceil(Heart.r("wake_s") - ht.m.sess_time()))
+		Heart.S.CHARGING:
 			return "Heart  %d%%" % int(ht.charge / Heart.r("charge_s") * 100.0)
-		"ready":
+		Heart.S.READY:
 			return "Heartspark ready"
-		"cooling":
-			return "Cooling  %ds" % int(ceil(ht.cool))
+		Heart.S.WAITING:
+			return "Heart opens in %ds" % int(ceil(Heart.r("final_s") - ht.m.sess_time()))
+		Heart.S.FINAL:
+			return "Heart open  %d%%" % int(ht.final_prog * 100.0)
 	return "Heart"
 
 ## The tide ring now (solid) and the ring it closes to next (dashed, lighter): short segments of the
@@ -142,14 +143,14 @@ static func _circle(c: Control, ctr: Vector3, radius: float, to_map: Callable, o
 
 ## The Heart on a map: a crimson heart-gem with a charge ring; lit and pulsing when the spark is ready.
 static func heart_glyph(c: Control, pv: Vector2, s: float, ht: Heart, now: float) -> void:
-	var f := clampf(ht.charge / Heart.r("charge_s"), 0.0, 1.0) if ht.state != "cooling" else 0.0
-	if ht.state == "ready":
+	var f := clampf(ht.charge / Heart.r("charge_s"), 0.0, 1.0) if ht.state <= Heart.S.CARRIED else ht.final_prog
+	if ht.state == Heart.S.READY or ht.state == Heart.S.FINAL:
 		var ph := fmod(now * 1.1, 1.0)
 		c.draw_arc(pv, s + 2.0 + ph * s * 3.0, 0, TAU, 28, Color(Heart.COL, 1.0 - ph), 2.0, true)
 	c.draw_arc(pv, s + 3.0, 0, TAU, 28, Color(0, 0, 0, 0.55), 3.0, true)
 	if f > 0.0:
 		c.draw_arc(pv, s + 3.0, -PI * 0.5, -PI * 0.5 + TAU * f, 28, Heart.COL, 3.0, true)
-	var body := Heart.GLASS if ht.state != "cooling" else Heart.GLASS.darkened(0.5)
+	var body := Heart.GLASS if ht.state != Heart.S.ASLEEP and ht.state != Heart.S.WAITING else Heart.GLASS.darkened(0.5)
 	var pts := PackedVector2Array([pv + Vector2(0, s * 1.2), pv + Vector2(-s * 1.1, -s * 0.1),
 		pv + Vector2(-s * 0.55, -s * 0.9),
 		pv + Vector2(0, -s * 0.4), pv + Vector2(s * 0.55, -s * 0.9), pv + Vector2(s * 1.1, -s * 0.1)])

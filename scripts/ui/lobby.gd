@@ -7,6 +7,8 @@ var status: Label
 var ready_btn: Button
 var start_btn: Button
 var is_ready := false
+var mode := "ffa"
+var mode_btns := {}
 
 func setup(o: Dictionary) -> void:
 	opts = o
@@ -29,10 +31,22 @@ func _ready() -> void:
 	v.add_child(list_box)
 	v.add_child(UI.spacer(2))
 	v.add_child(UI.section("Teams"))
-	v.add_child(UI.para("%d squads of %d. Empty spots are filled with bots. Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front." % [Data.SQUADS, Data.SQUAD_SIZE]))
+	var modes := UI.hbox(2)
+	var track := PanelContainer.new()
+	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
+	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	track.add_child(modes)
+	for m in [["ffa", "Everyone for themselves"], ["duo", "Teams of 2"], ["trio", "Teams of 3"]]:
+		var key: String = m[0]
+		var b := UI.button(m[1], func(): mode = key; _refresh_modes())
+		mode_btns[key] = b
+		modes.add_child(b)
+	v.add_child(track)
+	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads. Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
 	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
+	_refresh_modes()
 	Net.peers_changed.connect(_refresh)
 	Net.message.connect(_on_msg)
 	Net.start()
@@ -52,12 +66,20 @@ func _exit_tree() -> void:
 	if Net.message.is_connected(_on_msg):
 		Net.message.disconnect(_on_msg)
 
+func _refresh_modes() -> void:
+	for k in mode_btns:
+		mode_btns[k].theme_type_variation = "SegOn" if k == mode else "Seg"
+
 func _announce() -> void:
-	var p := OnlineSession.presence()
-	p["cls"] = opts.get("cls", p["cls"])
-	p["ready"] = is_ready
-	p["lobby"] = 1
-	Net.set_presence(p)
+	var k := Save.active_kin()
+	var arch := ClassUnlock.online_arch(Arch.of_save())      # (Settings > Demo > All masks open is offline only)
+	var cls: String = opts.get("cls", Data.class_of_save())
+	var weapon: String = Save.d.get("weapon", "")
+	if arch != Arch.of_save():
+		cls = Arch.weight(arch)
+		weapon = Arch.signature(arch)
+	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready, "lobby": 1,
+		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
 
 func _toggle_ready() -> void:
 	is_ready = not is_ready
@@ -98,13 +120,15 @@ func _refresh() -> void:
 func _start() -> void:
 	if Net.mode == "":
 		return
-	var squad := Data.SQUAD_SIZE
+	var squad: int = {"ffa": 1, "duo": 2, "trio": 3}[mode]
 	var ids: Array = []
 	for id in Net.peers:
 		var p: Dictionary = Net.peers[id]
 		if p.has("lobby") and (p.get("ready", false) or id == Net.me):
 			ids.append(id)
-	ids = roster_ids(ids, Net.me)
+	if not ids.has(Net.me):
+		ids.append(Net.me)
+	ids.sort()
 	var roster := []
 	for i in ids.size():
 		var id: String = ids[i]
@@ -112,18 +136,10 @@ func _start() -> void:
 		if id == Net.me:
 			p = Net.my_presence
 		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
-	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": Data.SQUADS, "squad": squad, "tier": int(opts.get("tier", 0))}
+	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
+	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, Data.MATCH_PLAYERS), "squad": squad, "tier": int(opts.get("tier", 0))}
 	Net.lobby_emit("start", d)
 	_go(d)
-
-## Who goes: the host first, then the ready players in id order, at most Data.MATCH_PLAYERS (10 trios).
-## Anyone past that stays in the lobby for the next match.
-static func roster_ids(ready_ids: Array, host: String) -> Array:
-	var rest := ready_ids.filter(func(id): return id != host)
-	rest.sort()
-	var ids := [host]
-	ids.append_array(rest.slice(0, Data.MATCH_PLAYERS - 1))
-	return ids
 
 func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "start" or typeof(data) != TYPE_DICTIONARY:
@@ -132,8 +148,6 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		if String(r["peer"]) == Net.me:
 			_go(data)
 			return
-	if is_instance_valid(status):
-		status.text = "That match is full (%d hunters). You stay here for the next one." % Data.MATCH_PLAYERS
 
 func _go(d: Dictionary) -> void:
 	Save.d["cls"] = opts.get("cls", Save.d.get("cls", "medium"))

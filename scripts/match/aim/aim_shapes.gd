@@ -7,6 +7,8 @@ extends RefCounted
 const FILL_A := 0.18      # the fill's alpha: readable over grass and sand, never a solid sheet
 const RIM_A := 0.7        # the rim's alpha
 const LW := 0.06          # m: the rim's line width
+const SOFT_A := 0.25      # "soft": the inside never passes this alpha (docs/VFX_QUALITY.md, the zone rule)
+const GLOW_W := 0.3       # m: "soft": how far the lit rim glows inward
 
 static func build(g: AimGeo, e: Dictionary) -> void:
 	g.at_height(float(e["y"]))
@@ -16,7 +18,6 @@ static func build(g: AimGeo, e: Dictionary) -> void:
 		"vee": _vee(g, e)
 		"cone": _cone(g, e)
 		"circle": _circle(g, e)
-		"ring": g.ring(e["at"], float(e["r"]), _lw(e), _rim(e))
 		"arc_wall": _arc_wall(g, e)
 		"swap": _swap(g, e)
 		"line": _line(g, e)
@@ -46,11 +47,15 @@ static func _lane(g: AimGeo, e: Dictionary) -> void:
 	var l := float(e["len"]); var w0 := float(e["width"]); var w1 := float(e["width_end"])
 	var end := o + u * l
 	var lw := _lw(e)
-	if not e["rails"]:
+	var soft := bool(e.get("soft", false))
+	if soft:
+		_soft_lane(g, e, o, u, l, w0, w1)
+	elif not e["rails"]:
 		g.band(o, end, w0, w1, _fill(e))
 	var f := float(e["fill"])
 	if f > 0.0:
-		g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
+		if not soft:
+			g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
 		g.ribbon(o + u * l * f - n * lerpf(w0, w1, f) * 0.5, o + u * l * f + n * lerpf(w0, w1, f) * 0.5, lw, _hot(e, 0.7))
 	var tip := end + u * w1 * 0.55
 	for s in [-1.0, 1.0]:
@@ -63,6 +68,30 @@ static func _lane(g: AimGeo, e: Dictionary) -> void:
 	for i in ch:
 		var t := (float(i) + 0.75) / float(ch + 0.5)
 		g.chevron(o + u * l * t, u, clampf(minf(w0, w1) * 0.32, 0.14, 0.4), lw * 0.9, _rim(e, 0.75))
+
+## "soft": a faint inside that fills toward the far end (at most SOFT_A where both layers meet) and a
+## glow fading inward from each rail, so the lane reads by its lit edges, not a solid sheet.
+static func _soft_lane(g: AimGeo, e: Dictionary, o: Vector2, u: Vector2, l: float, w0: float, w1: float) -> void:
+	var n := Vector2(-u.y, u.x)
+	var base := _fill(e, 0.45)
+	g.band(o, o + u * l, w0, w1, base)
+	var f := float(e["fill"])
+	if f > 0.0:
+		var top := (SOFT_A - base.a) / (1.0 - base.a)          # what the front may add and stay under SOFT_A
+		var c: Color = e["col"]
+		g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), Color(c, top * 0.3), Color(c, top))
+	for s in [-1.0, 1.0]:
+		_glow(g, e, o + n * w0 * 0.5 * s, o + u * l + n * w1 * 0.5 * s, -n * s, minf(GLOW_W, w0 * 0.3))
+
+## A glow strip along the rim p0 -> p1, the rim colour at the edge fading to nothing `gw` m inward (along `inward`).
+static func _glow(g: AimGeo, e: Dictionary, p0: Vector2, p1: Vector2, inward: Vector2, gw: float) -> void:
+	var lit := _rim(e, 0.55)
+	var none := Color(lit, 0.0)
+	var pieces := maxi(1, int(ceil(p0.distance_to(p1) / AimGeo.STEP)))
+	for i in pieces:
+		var a := p0.lerp(p1, float(i) / pieces)
+		var b := p0.lerp(p1, float(i + 1) / pieces)
+		g.quad(a, a + inward * gw, b + inward * gw, b, lit, none)
 
 static func _dotted(g: AimGeo, e: Dictionary) -> void:
 	var o: Vector2 = e["from"]; var u: Vector2 = e["dir"]
@@ -116,7 +145,9 @@ static func _cone(g: AimGeo, e: Dictionary) -> void:
 	var h := deg_to_rad(float(e["deg"])) * 0.5
 	var a := atan2(u.y, u.x)
 	var lw := _lw(e)
-	if not e["edges"]:
+	if bool(e.get("soft", false)):
+		_soft_cone(g, e, o, l, inner, a, h)
+	elif not e["edges"]:
 		g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
 		g.ring(o, l, lw, _rim(e), a - h, a + h)
 		var f := float(e["fill"])
@@ -125,6 +156,24 @@ static func _cone(g: AimGeo, e: Dictionary) -> void:
 	for s in [-1.0, 1.0]:
 		var ed := Vector2(cos(a + h * s), sin(a + h * s))
 		g.ribbon(o + ed * inner, o + ed * l, lw, _rim(e, 0.9), _rim(e, 0.6 if e["edges"] else 1.0))
+
+## "soft" cone: the lane's look on a wedge: faint inside, a radial fill with a hot front, the arc and edges lit.
+static func _soft_cone(g: AimGeo, e: Dictionary, o: Vector2, l: float, inner: float, a: float, h: float) -> void:
+	var base := _fill(e, 0.45)
+	g.sector(o, inner, l, a - h, a + h, base)
+	var f := float(e["fill"])
+	if f > 0.0:
+		var top := (SOFT_A - base.a) / (1.0 - base.a)
+		var c: Color = e["col"]
+		var front := lerpf(inner, l, f)
+		g.sector(o, inner, front, a - h, a + h, Color(c, top * 0.3), Color(c, top))
+		g.ring(o, front, _lw(e), _hot(e, 0.7), a - h, a + h)
+	var gw := minf(GLOW_W, (l - inner) * 0.3)
+	g.ring(o, l, _lw(e), _rim(e), a - h, a + h)
+	g.sector(o, l - gw, l, a - h, a + h, Color(_rim(e, 0.55), 0.0), _rim(e, 0.55))
+	for s in [-1.0, 1.0]:
+		var ed := Vector2(cos(a + h * s), sin(a + h * s))
+		_glow(g, e, o + ed * inner, o + ed * l, Vector2(-ed.y, ed.x) * -s, gw)
 
 static func _circle(g: AimGeo, e: Dictionary) -> void:
 	var ctr: Vector2 = e["at"]; var r := float(e["r"])

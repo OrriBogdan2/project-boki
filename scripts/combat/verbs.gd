@@ -16,7 +16,6 @@ var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, co
 var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
 var drags: Array = []     # {ent, from, to, t, dur, h}
 var decoys: Array = []    # {pos, team, t, node, owner}
-var ripple: BarrierRipple = null     # the hit ripple every barrier shares
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
@@ -25,7 +24,6 @@ const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bea
 func _init(match_node: Node) -> void:
 	m = match_node
 	m.world.dyn_walls = walls
-	ripple = BarrierRipple.new(m)
 
 # ------------------------------------------------------------------ barrier walls
 ## A wall segment centred at `at`, running across `d` (the aim), `length` long.
@@ -340,9 +338,11 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			if v.dot(nrm) > 0.0: nrm = -nrm
 			_take_shot(s, v - 2.0 * v.dot(nrm) * nrm, w["by"] if is_instance_valid(w["by"]) else null, int(w["team"]), float(w.get("rk", 1.0)))
 			s["pos"] = Vector3(c.x, p.y, c.y) + Vector3(nrm.x, 0, nrm.y) * (float(w["th"]) + float(s["r"]) + 0.12)
-			_hit_wall(w, float(s["dmg"]) * 0.5, p)
+			_hit_wall(w, float(s["dmg"]) * 0.5, s["col"])
 			return "bounce"
-		_hit_wall(w, float(s["dmg"]), p)
+		_hit_wall(w, float(s["dmg"]), s["col"])
+		m.fx.burst(p, w["col"], 6, 3.0, 0.25, 4.0, 0.8)
+		m.fx.flash(p, Color(w["col"]).lerp(Color.WHITE, 0.4), 0.35, 0.07)
 		m.sfx("ab_shield_hit", p, -8.0)
 		return "end"
 	for mr in mirrors:
@@ -408,27 +408,22 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
 ## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
-## `from` is where the blow came from.
-func absorb(w: Dictionary, dmg: float, from: Vector3) -> void:
+func absorb(w: Dictionary, dmg: float) -> void:
 	if walls.has(w):
-		_hit_wall(w, dmg, from)
+		_hit_wall(w, dmg, Color.WHITE)
 
-## `from`: the shot's position, or where the blow came from; the ripple lands on the face that side.
-func _hit_wall(w: Dictionary, dmg: float, from: Vector3) -> void:
+func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
 	var by = w.get("by")
 	if by != null and is_instance_valid(by) and by is Hunter and (by as Hunter).ak:
 		(by as Hunter).ak.on_block(minf(dmg, float(w["hp"])), null)
 	w["hp"] = float(w["hp"]) - dmg
 	w["hit_t"] = 0.12
-	var broke := float(w["hp"]) <= 0.0
-	ripple.on_wall(w, from, broke)
-	if broke:
+	if float(w["hp"]) <= 0.0:
 		_break_wall(w)
 
 # ------------------------------------------------------------------ simulation
 func tick(dt: float) -> void:
-	ripple.tick(dt)
 	for w in walls.duplicate():
 		w["t"] = float(w["t"]) - dt
 		w["hit_t"] = maxf(0.0, float(w["hit_t"]) - dt)
@@ -445,7 +440,7 @@ func tick(dt: float) -> void:
 		if not touch.is_empty():
 			for f in m.foes_of(int(w["team"])):
 				var c2 := Geometry2D.get_closest_point_to_segment(Vector2(f.pos.x, f.pos.z), w["a"], w["b"])
-				if Vector2(f.pos.x, f.pos.z).distance_to(c2) < f.r + 0.5 and AimMode.in_reach(float(w["y"]), f.pos.y):
+				if Vector2(f.pos.x, f.pos.z).distance_to(c2) < f.r + 0.5 and absf(f.pos.y - float(w["y"])) < 2.0:
 					var key: String = str(f.get_instance_id())
 					if float(w["touched"].get(key, -9.0)) > m.time - 0.6:
 						continue
@@ -508,7 +503,7 @@ func tick(dt: float) -> void:
 			continue
 		var at: Vector3 = tr["at"]
 		for f in m.foes_of(int(tr["team"])):
-			if f.flat_dist(at) < float(tr["r"]) + f.r and AimMode.in_reach(at.y, f.pos.y) and f.hittable():
+			if f.flat_dist(at) < float(tr["r"]) + f.r and absf(f.pos.y - at.y) < 1.5 and f.hittable():
 				var c3: Dictionary = (tr["ctx"] as Dictionary).duplicate()
 				c3["at"] = at
 				c3["target"] = f

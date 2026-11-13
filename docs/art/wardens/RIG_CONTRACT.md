@@ -76,9 +76,6 @@ each is the next one's parent, and the last is the tip (no skin of its own; its 
 loader (`WardenGlb.Springs`, run by Sync after the contract bones) swings every chain as a damped rope in world
 space, pulled back toward the shape it has riding its parent rigidly (firmer at the root than at the tip), so it
 trails behind a run, swings out of a turn and settles. Nothing in the kit moves or the checks depends on them.
-A Hero's `content/rules/warden_anim/<art>.json` may tune its chains by name start in a `"springs"` block (`pull` at
-root and tip, `damp`, a bend `limit` and a tighter `limit_in` toward the body), gated by `--spring-settle-check`
-(docs/art/secondary_motion/README.md).
 `tools/meshy/warden_parts.py` builds Vex r3b's two braids this way; `fit_warden.py`'s `hair_springs` puts a scan's own
 fused hair on such chains (Tarek's locs: the vertices of the hair slot in a box handed from the head to the chain by
 how far down it they hang).
@@ -186,8 +183,7 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
 - **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
   bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
   triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses. What 25k and 40k would
-  look like and cost, measured on Vex and Cinder: [DETAIL_PILOT.md](DETAIL_PILOT.md).
+  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
 - Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
   BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
   A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with

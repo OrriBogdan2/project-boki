@@ -27,7 +27,7 @@ Tenzo, the quarry-hand who reads the ground. Raise rocks out of the ground, stan
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Rubble Fists (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The stone seer. Raises stone out of the ground, climbs it, then punches it into you. |
+| Fantasy | The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you. |
 | Silhouette | the huge stone left arm, the stone gauntlet and the three floating eye stones |
 | Resource | Rocks (max 6) |
 
@@ -38,7 +38,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy. |
-| Passive: Molten Guard | Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens and lengthens as you sneak. |
+| Passive: Molten Guard | Molten Guard: punching your own rocks gives you a shield. Tremor Sense: sneak to see enemies in a cone ahead through walls; it widens as you sneak. |
 | Dash: Rock Hop | Rock Hop: spring off a rock toward the cursor; press again as you land to hop on, up to 3 hops. The last landing crashes, and a rock rolls on and slows. |
 | LMB | Rubble Fists: tap to throw a boulder; hold and let go to punch everything in the lane, and every rock in it flies. |
 | RMB: Quakefall | Quakefall: tap to slam just ahead; hold for a moment to hop forward and up, then slam harder. The centre stuns. Jump while holding to leap further. |
@@ -48,7 +48,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees widening to 40, and 18m lengthening to 25m, over 2s of sneaking) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
+**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 over 2s of sneaking, 16m long) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
 
 **Rock Hop (dash, Shift, 12s cooldown).** A rock bursts up under you and you spring off it toward the cursor, about 2.5m. A fresh rock rises under your feet at each landing and you skid along it, skateboard style. Press again within 0.6s of a take-off to hop on toward the cursor, up to 3 hops; press nothing and you land. Each landing nudges whoever is beside you. The last one crashes (8 damage and a shove), and a rock rolls on 6m: 12 damage, a shove, Shred (+15% damage taken for 3s) and a 1.5s slow. Rocks crumble in a moment, allies can hop them, and a hop crosses the abyss only if ground lies within your hops left. The cooldown starts when the chain ends. In the air: your long dash.
 
@@ -56,11 +56,11 @@ What the in-game kit card (K) says.
 
 - *Tap:* An instant slam just ahead, no hop: a slightly smaller circle, 14 damage and a shove; the centre stuns, rocks in the ring fly outward.
 - *Hold:* Hold up to 0.45s (it goes by itself at the end): hop about 2.5m forward and up, keeping your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
-- *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
+- *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops 3m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
 **Stone Row (E, 12.5s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 5m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
 
-**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 9 rocks, 12m long, in a shallow arc round you (about 25 degrees of bend, bowing away from you), centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.8s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the rocks are ground you can land on and walk along; when they crumble, whoever stands on them falls. 45s.
+**Basalt Spine (hunter ultimate, from level 6, 45s cooldown).** Tap: a ridge of 9 rocks, 12m long, in a shallow arc round you (about 25 degrees of bend, bowing away from you), centred at the cursor (up to 11m away) and across your aim. Hold the key and drag the cursor to swing it round its centre; let go to cast. Molten cracks show along the line for 0.2s, then the rocks erupt from the centre outward over 0.4s, slowing foes beside them by 35% for 1s and shoving anyone on the line aside. They are your rocks for 7s: they stop foes and their shots, you stand on them and climb them, and a punch along the ridge launches the whole line (its rocks deal at most 40 to any one hunter). Over the abyss the rocks are ground you can land on and walk along; when they crumble, whoever stands on them falls. 45s.
 
 ### Ranks
 
@@ -68,9 +68,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 11s -> 10s, damage +24%. | cooldown 11s -> 9s, damage +48%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
-| Dash (Shift) | recharge 12s -> 10s per charge. | recharge 12s -> 10s; a second charge, and each hop goes a third further. |
-| E | cooldown 12.5s -> 11.5s. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
+| RMB | cooldown 11s -> 9.9s, damage +15%. | cooldown 11s -> 8.8s, damage +30%; slamming a foe or a rock gives a shield of 18, up to 4 stacks. |
+| Dash (Shift) | recharge 12s -> 10.2s per charge. | recharge 12s -> 8.4s; a second charge, and each hop goes a third further. |
+| E | cooldown 12.5s -> 11.3s, rocks hit +15%. | cooldown 12.5s -> 10s; an extra row of rocks behind the first. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > E > Dash (Shift) > Glove (Q).
 

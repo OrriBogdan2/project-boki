@@ -1,6 +1,6 @@
 class_name Practice
 extends Node
-## What every practice area shares (the Training Grounds, the tutorial and the Duel room;
+## What every practice area shares (the Training Grounds, the tutorial, the Arena and the Duel room;
 ## never a real match): a bottom bar like the farm's hub (Hero, the area's own menu, Leave), J for
 ## the hero picker (PracticeHero), the mouse wheel zooming the camera, and where there are dummies the parity bench
 ## (ParityBench). One node under the Match,
@@ -40,8 +40,6 @@ static func attach(match_node: Match) -> Practice:
 	p.bench = ParityBench.attach(match_node)
 	p._build_bar()
 	KitDrill.attach(p)
-	if match_node.opts.get("try_relic", false):
-		TryRelic.arm(match_node)
 	return p
 
 ## The bar's entries: [id, label, icon, open, key cap]. The Arena and the Training Grounds share a loadout

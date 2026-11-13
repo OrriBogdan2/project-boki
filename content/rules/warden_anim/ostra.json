@@ -5,7 +5,6 @@
 	"offset_bones": ["hips"],
 	"extra_bones": {"x_box": "root", "x_boxlid": "x_box", "x_crank": "x_box", "x_smoke": "x_box", "x_void": "x_box", "x_fan": "hand.L", "x_jaw": "head", "x_brow.L": "head", "x_brow.R": "head", "x_cheek.L": "head", "x_cheek.R": "head"},
 	"blade": {"root": "anchor_orb", "tip": "weapon_muzzle", "bone": "hand.R"},
-	"free_pose": "stun", "free_arm": {"orb": "L", "orb_hot": {"L": 0.0, "R": 0.2}, "orb_l": "R", "seed": "L", "swap_aim": "L", "swap": {"L": 0.0, "R": 0.22}, "snap": {"L": 0.1, "R": 0.1}},
 	"sway": {"bone": "hips", "stiff": 70.0, "damp": 7.0, "gain": 0.009, "max": 0.45, "tumble_hz": 0.35, "swirl_m": 0.13, "clear_m": 0.5, "clear_orbit": "orbit_cards"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
@@ -15,7 +14,7 @@
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"flow": [["ostra_swap_aim", 0.2], ["ostra_swap", 0.2], ["ostra_orb", 0.2], ["ostra_snap_wind", 0.2], ["ostra_snap", 0.2], ["ostra_seed", 0.2], ["ostra_pop", 0.2]],
-	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive", "dive_tilt": 12.0},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"ostra_orb": {"clip": "orb", "alt": "orb_l", "upper": true}, "ostra_orb_hot": {"clip": "orb_hot", "upper": true},
@@ -28,7 +27,6 @@
 		"mf_xform": {"clip": "fuse"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.6, "stun": "stun", "emote": "emote", "hit": {"front": "hit", "back": "hit", "dur": 0.35}},
-	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_bow", "refuse": "g_wag"},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "x_fan", "x_jaw", "x_brow.L", "x_brow.R", "x_cheek.L", "x_cheek.R",
 		"x_fing1.L", "x_fing1b.L", "x_fing2.L", "x_fing2b.L", "x_fing3.L", "x_fing3b.L", "x_fing4.L", "x_fing4b.L", "x_thumb.L", "x_thumbb.L",

@@ -1,7 +1,10 @@
 extends RefCounted
 ## --perf-throttle-check, item 94's script throttles: an idle monster with nobody within Mob.NAP_M stops
-## simulating and wakes when a Hunter comes close; a bot further than Bot.FAR_M from the local player decides
-## and roaming decides every Bot.FAR_EVERY steps (the skipped time added in), a near one every step.
+## simulating and wakes when a Hunter comes close; a bot further than SimLod.FAR_M from the local player, on
+## the ground, roaming or fighting something as far off, thinks and simulates every SimLod.EVERY steps (the
+## skipped time added in); a near one, one fighting near the player or just hit by them, every step; its
+## Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals SimLod.THINK_FAR_K times less often;
+## a bot aboard the sky ship picks nothing.
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
@@ -26,7 +29,6 @@ func run(main_node: Node) -> void:
 	_far_bots()
 	_far_mobs()
 	_shadows()
-	await _occluders()
 	await _plates()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -69,25 +71,71 @@ func _far_bots() -> void:
 	ok(b != null, "setup: a bot")
 	if b == null:
 		return
-	var brain := Bot.new()
-	b.teleport(m.player.pos + Vector3(Bot.FAR_M + 15.0, 0, 0))
+	b.teleport(m.player.pos + Vector3(SimLod.FAR_M + 15.0, 0, 0))
+	b.grounded = true
 	b.ai["tgt"] = null
 	b.ai["goal_kind"] = "roam"
-	var thinks := 0
-	for i in Bot.FAR_EVERY * 4:
-		var before := float(b.ai["dash_cd"])
-		brain.tick(m, b, Match.DT)
-		if float(b.ai["dash_cd"]) != before:
-			thinks += 1
-	ok(thinks == 4, "far away it decides every %d steps (%d decisions)" % [Bot.FAR_EVERY, thinks])
+	var every := SimLod.EVERY
+	ok(_lod_steps(b, every * 4) == [4, every * 4], "far and calm it steps every %d sim steps, losing no time" % every)
+	var kin: Kin = null
+	for k in m.kins:
+		if k.owner_h == b:
+			kin = k
+	if kin:
+		kin.state = "active"
+		kin.cmd = "follow"
+		kin.target = null
+		ok(SimLod.kin_dt(kin, Match.DT) == SimLod.step_dt(b, Match.DT), "its Boki on follow steps with it")
+	var far_foe: Ent = null
+	for mb in m.mobs:
+		if mb.flat_dist(m.player) > SimLod.FAR_M:
+			far_foe = mb
+			break
+	b.ai["tgt"] = far_foe
+	var far_runs: int = _lod_steps(b, every * 2)[0] if far_foe else -1
+	ok(far_runs == 2, "fighting something far off it still steps every %d" % every)
+	b.ai["tgt"] = m.player
+	ok(_lod_steps(b, 6)[0] == 6, "fighting the player (or anything near them) it steps every step")
+	b.ai["tgt"] = null
+	b.last_hit_by = m.player
+	b.hurt_at = m.time
+	ok(_lod_steps(b, 6)[0] == 6, "just hit by the player it steps every step")
+	b.hurt_at = -9.0
+	b.ai["goal_kind"] = "box"
+	ok(_lod_steps(b, every * 2)[0] == 2, "walking to a box far off it still steps every %d" % every)
+	b.ai["goal_kind"] = "board"
+	ok(_lod_steps(b, 6)[0] == 6, "boarding something that moves it steps every step")
+	b.ai["goal_kind"] = "roam"
+	ok(SimLod.think_k(m, b) == 1.0, "inside %.0f m it chooses at the usual pace" % SimLod.THINK_FAR_M)
+	b.teleport(m.player.pos + Vector3(SimLod.THINK_FAR_M + 15.0, 0, 0))
+	b.grounded = true
+	var far_m := SimLod.THINK_FAR_M
+	var k := SimLod.THINK_FAR_K
+	ok(SimLod.think_k(m, b) == k, "past %.0f m and calm it chooses %.0fx less often" % [far_m, k])
+	b.ai["tgt"] = m.player
+	ok(SimLod.think_k(m, b) == 1.0, "past %.0f m but fighting the player it chooses at the usual pace" % far_m)
+	b.ai["tgt"] = null
+	b.riding = true
+	b.inp["move"] = Vector2(1, 0)
+	m.bot_brain.think(m, b, Match.DT)
+	ok(b.inp["move"] == Vector2.ZERO, "aboard the sky ship it holds still and picks nothing")
+	b.riding = false
 	b.teleport(m.player.pos + Vector3(5.0, 0, 0))
-	thinks = 0
-	for i in 6:
-		var before := float(b.ai["dash_cd"])
-		brain.tick(m, b, Match.DT)
-		if float(b.ai["dash_cd"]) != before:
-			thinks += 1
-	ok(thinks == 6, "near the player it decides every step (%d of 6)" % thinks)
+	b.grounded = true
+	ok(_lod_steps(b, 6)[0] == 6, "near the player it steps every step")
+
+## Plans n sim steps; returns [steps the bot ran, sim steps of time it was given].
+func _lod_steps(b: Hunter, n: int) -> Array:
+	var runs := 0
+	var got := -float(b.ai.get("lod_dt", 0.0))   # time banked before, and after, counts as given
+	for i in n:
+		SimLod.plan(m, Match.DT)
+		var sd := SimLod.step_dt(b, Match.DT)
+		if sd > 0.0:
+			runs += 1
+			got += sd
+	got += float(b.ai.get("lod_dt", 0.0))
+	return [runs, roundi(got / Match.DT)]
 
 func _far_mobs() -> void:
 	var mb: Mob = null
@@ -165,7 +213,7 @@ func _shadows() -> void:
 		if _under(g, Hunter) or _under(g, Kin) or g is MultiMeshInstance3D:
 			continue
 		if _world_size(g) < lim:
-			var k := "%s/%s" % [_nm(g.get_parent()), _nm(g)]
+			var k := "%s/%s/%s" % [_nm(g.get_parent().get_parent()), _nm(g.get_parent()), _nm(g)]
 			bad[k] = int(bad.get(k, 0)) + 1
 	ok(bad.is_empty(), "no mesh under %.1f m casts outside Hunters and Boki bodies (%d casters; small ones: %s)"
 		% [lim, n_cast, str(bad).left(1500)])
@@ -267,45 +315,3 @@ func _plates() -> void:
 	ok(is_same(a, b) and TextCache.shaped == n0, "the same label reuses its layout")
 	TextCache.line(f, "Wild Pebblit 2", 16)
 	ok(TextCache.shaped == n0 + 1, "changed text is laid out once")
-
-## Baked occluders (Occluders): on for Medium and up, off at Low; on a big map the boxes stay under the
-## ground and above the underside (so they never hide what shows), large rocks get a box inside them,
-## small rocks none, and a small map gets nothing.
-func _occluders() -> void:
-	var low: bool = Settings.QUALITY["low"]["occlusion"]
-	ok(not low and bool(Settings.QUALITY["medium"]["occlusion"]), "occlusion culling is off at Low, on at Medium")
-	var W := m.world
-	var holder := Node3D.new()
-	main.add_child(holder)
-	await Occluders.build(W, holder, {})
-	var oi := holder.get_node_or_null("Occluders") as OccluderInstance3D
-	ok(W.w < Occluders.MIN_MAP or oi != null, "a %d-tile map gets an occluder" % W.w)
-	if oi != null:
-		var arr := (oi.occluder as ArrayOccluder3D)
-		var verts := arr.vertices
-		var bad := 0
-		for p in verts:
-			# a corner on a tile border is judged by the highest ground of the four tiles around it
-			var g := -INF
-			for d in [Vector2(-0.01, -0.01), Vector2(0.01, -0.01), Vector2(-0.01, 0.01), Vector2(0.01, 0.01)]:
-				g = maxf(g, W.ground_at(p.x + d.x, p.z + d.y))
-			if p.y > g + 0.01: bad += 1
-		ok(bad == 0, "no occluder corner above the ground (%d boxes' %d corners)" % [verts.size() / 8, verts.size()])
-		ok(arr.indices.size() / 3 <= 24000, "%d occluder triangles stay under the budget" % (arr.indices.size() / 3))
-		var sunk := 0
-		for p in verts:
-			var ti := W.idx(clampi(int(p.x), 0, W.w - 1), clampi(int(p.z), 0, W.h - 1))
-			if W.kind[ti] != World.T_VOID and p.y < W.under[ti] - 0.01: sunk += 1
-		ok(sunk == 0, "no occluder corner below its island's underside")
-	holder.free()
-	var at := [Transform3D(Basis.IDENTITY, Vector3(5, 2, 5)), Color.WHITE]
-	var rock := {"k": {"mesh": Models.box(3.0, 3.0, 3.0), "label": "rock_a", "items": [at]},
-		"s": {"mesh": Models.box(1.0, 1.0, 1.0), "label": "rock_b", "items": [at]}}
-	var o := Occluders.new()
-	o._w = W
-	o._rocks(rock)
-	ok(o._verts.size() == 8, "a 3 m rock gets one box and a 1 m rock none (%d corners)" % o._verts.size())
-	var inside := true
-	for p in o._verts:
-		if absf(p.x - 5.0) > 1.5 or absf(p.y - 2.0) > 1.5 or absf(p.z - 5.0) > 1.5: inside = false
-	ok(inside, "the rock's box is inside its bounds")

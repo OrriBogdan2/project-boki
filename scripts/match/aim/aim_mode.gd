@@ -12,9 +12,6 @@ extends RefCounted
 const CURSOR := "cursor"
 const MAX := "max"
 const MIN_D := 1.5      # m: a cursor-placed shot still travels at least this far (the old boom clamp)
-const RAY_STEP := 0.25  # m along the cursor's ray
-const RAY_FINE := 8     # the last step, cut this many times
-const RAY_SPAN := 12.0  # m: the ray is walked from this far above the hunter to this far below
 
 ## The mode the next shot will use, without taking the per-shot override (reticles, previews).
 static func mode_of(h: Hunter) -> String:
@@ -59,42 +56,7 @@ static func ground(m: Node, p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## The first ground the cursor's ray ([origin, direction], Cam.mouse_ray()) meets within RAY_SPAN above or
-## below height y, with y on that ground: a cliff face the ray strikes counts as the top of that cliff, and
-## ground hidden behind a lip is never picked. Vector3.INF when it meets none (the abyss, a flat ray).
-static func ray_ground(world, ray: Array, y: float) -> Vector3:
-	var o: Vector3 = ray[0]
-	var d: Vector3 = ray[1]
-	if d.y > -0.01:
-		return Vector3.INF
-	var t := maxf(0.0, (y + RAY_SPAN - o.y) / d.y)
-	var end := (y - RAY_SPAN - o.y) / d.y
-	while t < end:
-		var p := o + d * t
-		var g: float = world.ground_at(p.x, p.z)
-		if p.y <= g:
-			# (back up the last step in small ones, for the exact spot)
-			for i in range(1, RAY_FINE):
-				var q := o + d * (t - RAY_STEP * float(i) / RAY_FINE)
-				var gq: float = world.ground_at(q.x, q.z)
-				if q.y > gq:
-					break
-				p = q
-				g = gq
-			return Vector3(p.x, g, p.z)
-		t += RAY_STEP
-	return Vector3.INF
-
 # ------------------------------------------------------------------ membership (flat, XZ)
-## The height rule for every ability shape (docs/COMBAT.md): a body is in reach when its feet are within this
-## of the shape's own level (m): two tiers (World.LEVEL, the mantle ledge) plus a jump's slack. A wall's top
-## (3 m and up) is out, so a cliff face ends a shape the way it ends a walk.
-const REACH_Y := 2.2
-
-## Are two feet heights in each other's reach (the shape's level and the body's)?
-static func in_reach(shape_y: float, body_y: float) -> bool:
-	return absf(body_y - shape_y) < REACH_Y
-
 ## Inside a lane of `length` x `width` starting at `from` along `dir` (the AimKit.lane footprint).
 static func in_lane(from: Vector3, dir: Vector2, length: float, width: float, p: Vector3, pad := 0.0) -> bool:
 	var v := Vector2(p.x - from.x, p.z - from.z)

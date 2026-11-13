@@ -76,11 +76,9 @@ func pin() -> void:
 	ok("pin ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.01, "%.3f" % P.ult)
 	step(m, 0.1)
 	var lane := AimKit.entry(P, "x")
-	ok("pin ult telegraph: the beam's lane out to 18m and no ground ring (the beam is the hit area)",
-		AimKit.shown(P, "x") and not AimKit.shown(P, "x_ring")
-		and absf(float(lane.get("len", 0.0)) - 18.0) < 0.1
-		and absf(float(lane.get("width", 0.0)) - float(xd.get("width", 0.5))) < 0.01,
-		"lane %s w %s" % [str(lane.get("len")), str(lane.get("width"))])
+	ok("pin ult telegraph: the beam's lane out to 18m and the crosshair ring at her feet",
+		AimKit.shown(P, "x") and AimKit.shown(P, "x_ring") and absf(float(lane.get("len", 0.0)) - 18.0) < 0.1,
+		"lane %s ring %s" % [str(lane.get("len")), AimKit.shown(P, "x_ring")])
 	# a press nocks (0.5 s, its own held move, the cursor ring filling), then the beam pierces both
 	T.teleport(home + Vector3(7, 0, 0))
 	T2.teleport(home + Vector3(16, 0, 0))
@@ -152,7 +150,6 @@ func pin() -> void:
 	await done(m)
 	await _pin_window()
 	await _pin_burst()
-	await _pin_prop()
 
 ## The window, the cooldown, the bow coming back, Spirit Walk between shots, a wall, a merge.
 func _pin_window() -> void:
@@ -375,27 +372,4 @@ func _bjorn_burst() -> void:
 	ok("bjorn ult burst: a Faultline then a merge leave a full-health light hunter standing",
 		not T.downed and not T.dead and T.hp > 0.0 and K.ult.slams == 1 and after_ult > 0.0,
 		"ult %.0f, with the merge %.0f of %.0f" % [after_ult, dmg(T), T.max_hp])
-	await done(m)
-
-## Parity (ability pierce rules): Starpiercer pierces enemies and destructibles, so a crate on the line breaks
-## and both foes behind it are hit; a Heavy Shot stops on the same crate.
-func _pin_prop() -> void:
-	var r := setup("archer", 7.0, "", true)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var T2: Hunter = r[3]
-	var home: Vector3 = r[4]
-	var K: ArcherKit = P.ak
-	P.equip("longbow", 0)
-	step(m, 0.3)
-	m._add_break("crate", home + Vector3(3.0, 0, 0))
-	var crate: Dictionary = m.breaks[-1]
-	press_x(m, P)
-	hold_fire(m, P, T.pos, 0.6)
-	P.inp["fire"] = false
-	step(m, 0.4)
-	ok("pin ult prop: the arrow smashes a crate on the line and pierces both foes behind it (source: destructibles)",
-		crate["dead"] and dmg(T) > 0.0 and dmg(T2) > 0.0,
-		"crate dead %s, took %.0f / %.0f" % [crate["dead"], dmg(T), dmg(T2)])
 	await done(m)

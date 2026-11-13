@@ -9,8 +9,6 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
-const MTIME := preload("res://tools/mage_anim_time_check.gd")        # Sparkle's move timing against the footage frames
-const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -27,34 +25,20 @@ func run(main_node: Node, who: String) -> void:
 	if who == "mage":
 		await _mage()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
-		await _knocked_holds()
 		await _growth()
 		await ults.mage()
-		MTIME.new(self).run()
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
 		await parity.vireo()
 		n += parity.n
 		fails += parity.fails
-		await _ally("mage")
 	else:
 		await _gunslinger()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gunslinger")
 		await ults.gunslinger()
-		await _ally("gunslinger")
-		var abyss = load("res://tools/abyss_cast.gd").new()
-		abyss.main = main
-		await abyss.gunslinger()
-		n += abyss.n
-		fails += abyss.fails
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
-
-## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
-func _ally(arch: String) -> void:
-	var bad: Array = await ALLY.sweep(main, arch)
-	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 func _wall(m: Match, p: Vector3) -> void:
 	var W = m.world
@@ -137,9 +121,7 @@ func _mage() -> void:
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
 			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
-	ok("LMB: the round trails crackling pink (HeroVfx lmb_trail, drawing)",
-			int(HeroVfx.of(m).plays.get("lmb_trail", 0)) >= 1 and HeroVfx.of(m).ribbons.size() >= 2,
-			"%d ribbons" % HeroVfx.of(m).ribbons.size())
+	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
 	_fire(m, P)
@@ -171,11 +153,6 @@ func _mage() -> void:
 			K.live(T) and int(mk.get("n", 0)) == 4 and grows,
 			"%d -> %d" % [sparks_1, sparks_4])
 	ok("Static: the marker sits above the HP bar", high >= K._top(T) + 0.45, "%.2f m" % high)
-	P.hp = P.max_hp * 0.5
-	K.on_knock(T, true)
-	ok("Static (data: 4 stacks, no knock heal): cap 4, a knock heals nothing, the card says none",
-			int(K.res_def()["max"]) == 4 and P.hp <= P.max_hp * 0.5 + 1.0
-			and not String(K.d["passive"]["desc"]).contains("heals you"), "hp %.1f" % P.hp)
 	# 3. Wirerun: the charge is spent on the press, the lane + end ring grow with the hold (not the cursor)
 	K.sparks.clear()
 	ac.fresh(T)
@@ -195,24 +172,18 @@ func _mage() -> void:
 	var de := AimKit.entry(P, "dash_end")
 	ok("Wirerun held: rails lane and the ticked end ring show",
 			AimKit.shown(P, "dash") and not de.is_empty() and bool(de["ticks"]) and absf(float(de["r"]) - 2.25) < 0.01)
-	var dd: Dictionary = K.dash_def()
-	var d_min := float(dd["dist"][0])
-	var d_max := float(dd["dist"][1])
-	ac.step(m, float(dd["hold"]) - 0.1, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
+	ac.step(m, 0.45, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
 	var e2 := _flat(K.wire.get("end", home), P.pos)
-	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < d_min + 1.0 and e2 > d_max - 0.3,
-			"%.1f -> %.1f" % [e1, e2])
+	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 7.5 and e2 > 8.6, "%.1f -> %.1f" % [e1, e2])
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
-	ac.step(m, 0.8)
-	var ran := _flat(P.pos, home)
-	ok("Wirerun: a full hold streaks its full length (11 m)", ran >= d_max - 0.5 and ran < d_max + 1.0, "%.1f m" % ran)
-	var short_v := d_min / K.run_time(d_min)
-	var long_v := d_max / K.run_time(d_max)
-	var want_v := float(dd["speed"]) / float(K.dash_feel()["time"])
-	ok("Wirerun: a constant speed (34 m/s under the global dash feel), so a short run is quicker",
-			absf(short_v - long_v) < 0.5 and absf(long_v - want_v) < 0.5, "%.1f / %.1f m/s" % [short_v, long_v])
+	ac.step(m, 0.7)
+	ok("Wirerun: a full hold streaks at least 9.4 m", _flat(P.pos, home) >= 9.4, "%.1f m" % _flat(P.pos, home))
+	var short_v := 7.5 / K.run_time(7.5)
+	var long_v := 13.0 / K.run_time(13.0)
+	ok("Wirerun: a constant speed (40 m/s under the global dash feel), so a short run is quicker",
+			absf(short_v - long_v) < 0.5 and long_v > 31.0 and long_v < 46.0, "%.1f / %.1f m/s" % [short_v, long_v])
 	# 4. height holds while charging in the air; drift carries into the run
 	P.teleport(home)
 	ac.step(m, 0.2)
@@ -303,10 +274,6 @@ func _mage() -> void:
 			absf(kb - 1.8) < 0.3, "%.2f m" % kb)
 	ok("Storm Rod: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
-	var rod_looks := HeroVfx.of(m).plays
-	ok("Storm Rod: summoned, full, thrown with a trail and the hit, as her own looks (HeroVfx rmb_*)",
-			["rmb_summon", "rmb_hold", "rmb_full", "rmb_throw", "rmb_trail", "rmb_hit"].all(
-				func(mv): return int(rod_looks.get(mv, 0)) >= 1), str(rod_looks.keys()))
 	P.slot_lv["dash"] = 3
 	ok("Rank 3: Wirerun's own hit doubles (rank 1: 1.0)", is_equal_approx(K.run_rank_k(), 2.0), "%.2f" % K.run_rank_k())
 	P.slot_lv["dash"] = 1
@@ -432,9 +399,6 @@ func _mage() -> void:
 	ok("Skycall: 1 Static (data), Grounded, dragged toward you",
 			K.spark_n(T) == 1 and KitStatus.grounded(T) and ac.dmg(T) >= 15.0 and T.pos.x < tx0 - 0.5,
 			"sparks %d moved %.1f" % [K.spark_n(T), T.pos.x - tx0])
-	var sky_looks := HeroVfx.of(m).plays
-	ok("Skycall: placed, counting down and striking as her own looks (HeroVfx e_place, e_count, e_strike)",
-			["e_place", "e_count", "e_strike"].all(func(mv): return int(sky_looks.get(mv, 0)) >= 1))
 	ac.step(m, 0.9)
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))
@@ -534,8 +498,8 @@ func _mage() -> void:
 	# dash animation: Wirerun and Slipstep keep their own moves, none shared
 	var dm := HunterAnim.km_def("mage_dash_go")
 	var dg := HunterAnim.km_def("gunslinger_dash")
-	ok("dash anim: Wirerun and Slipstep each have their own move, neither a shared roll (Sparkle has no tumble)",
-			not dm.is_empty() and not dg.is_empty() and HunterAnim.km_def("mage_dash_ex").is_empty()
+	ok("dash anim: Wirerun and Slipstep each have their own move; neither is a shared roll",
+			not dm.is_empty() and not dg.is_empty() and not HunterAnim.km_def("mage_dash_ex").is_empty()
 			and not HunterAnim.km_def("gunslinger_dash_ex").is_empty() and not K.dash_def().is_empty())
 	# small mechanics (the wiki's fine print, docs/heroes/mage.md "Small mechanics")
 	ac.fresh(T)
@@ -553,8 +517,8 @@ func _mage() -> void:
 	_dash(m, P, 0.45, func(): if K.run_t > 0.0 and P.phase_t <= 0.0: ok("small: Wirerun ignores projectiles while it runs", false))
 	ac.step(m, 0.1)
 	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
-	var words: Array = m.fx.nums.map(func(n): return n["node"].text)
-	ok("Wirerun: the INVULNERABLE word shows on the run (source)", "INVULNERABLE" in words)
+	ok("Wirerun: the body turns into the bolt for the run (hidden), no floating word",
+			not P.model.visible and m.fx.nums.all(func(n): return not String(n["node"].text).contains("INVULNERABLE")))
 	ac.step(m, 0.6)
 	ok("small: Wirerun hits every foe it passes (two in a line), about 1.7 bolts each (data: Surge 153 / Jolt 90)",
 			ac.dmg(T) >= 18.0 and ac.dmg(T2) >= 18.0,
@@ -655,38 +619,6 @@ func _mage() -> void:
 	await ac.done(m)
 	fails += ac.fails
 
-## Interrupts (docs/heroes/mage.md): knocked mid Storm Rod hold she throws nothing; knocked in the Kitefall crouch
-## she never takes off. (The check sets `downed` itself: a real knock of the lone player ends the training team.)
-func _knocked_holds() -> void:
-	var r: Array = ac.setup("mage", 5.0, "", true)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K: MageKit = P.ak
-	ac.aim_at(P, T.pos)
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	P.inp["sec_hold"] = true
-	K.press_rmb()
-	ac.step(m, 0.6, func(): P.inp["sec_hold"] = true)
-	P.downed = true
-	P.down_hp = 60.0          # a wisp with no down health is finished at once
-	ac.step(m, 1.2)
-	ok("knocked mid Storm Rod hold: no throw, no damage, the charge kept",
-			not K.rmb_down and ac.dmg(T) == 0.0 and K.ch_rmb == 1.0, "took %.0f charges %.0f" % [ac.dmg(T), K.ch_rmb])
-	P.downed = false
-	P.inp["sec_hold"] = false
-	P.lvl = int(Hunter.ULT_AT[0])
-	var y0 := P.pos.y
-	var pressed := HunterKeys.ult_pressed(P)
-	P.downed = true
-	P.down_hp = 60.0          # a wisp with no down health is finished at once
-	ac.step(m, 0.8)
-	ok("knocked in the Kitefall crouch: no take-off", pressed and not K.ult.running() and P.pos.y < y0 + 0.5,
-			"pressed %s running %s y +%.1f" % [pressed, K.ult.running(), P.pos.y - y0])
-	P.downed = false
-	await ac.done(m)
-
 # ------------------------------------------------------------------ Vex
 ## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the
 ## screen moves the beam at most cap x charge time while a small adjustment still lands; the camera push-out
@@ -762,9 +694,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
-	var looks := HeroVfx.of(m).plays
-	ok("LMB: each round is a lime tracer with a muzzle flash (HeroVfx shot, shot_trail)",
-			int(looks.get("shot", 0)) >= 1 and int(looks.get("shot_trail", 0)) >= 1)
+	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
 	ok("Dazed: the rifle does +90%", is_equal_approx(K.outgoing(T, 10.0, o), 19.0))
@@ -799,6 +729,7 @@ func _gunslinger() -> void:
 	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
 			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
 			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
+	ok("RMB direct hit: the struck foe's body is held lit longer than a plain hit's 0.12 s flash", T.flash_t > 0.12, "%.2f" % T.flash_t)
 	var rifle := {"src": "shot"}
 	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
 	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
@@ -893,9 +824,6 @@ func _gunslinger() -> void:
 	ac.step(m, 0.4)
 	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
-	var needle_looks := HeroVfx.of(m).plays
-	ok("Longneedle: it charges, fires and hits as its own needle (HeroVfx e_charge, e_fire, e_hit)",
-			["e_charge", "e_fire", "e_hit"].all(func(mv): return int(needle_looks.get(mv, 0)) >= 1))
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
@@ -948,10 +876,10 @@ func _gunslinger() -> void:
 	var early := _flat(P.pos, home)
 	ac.step(m, 0.15)
 	var skidding := not K.slide.is_empty()
-	ac.step(m, 0.4)
+	ac.step(m, 0.25)
 	var total := _flat(P.pos, home)
-	ok("Slipstep tap: a ~0.65s skid that eases in (slow at 0.15s) and is still going at 0.3s",
-			skidding and early < total * 0.2 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
+	ok("Slipstep tap: a ~0.5s skid that bleeds off (front-loaded past an even pace, still going at 0.3s)",
+			skidding and early > total * 0.35 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
 	P.inp["move"] = Vector2(0, 1)
 	ok("Slipstep: along the keys, not the cursor",
 			P.pos.z - home.z > 3.0 and absf(P.pos.x - home.x) < 1.0,

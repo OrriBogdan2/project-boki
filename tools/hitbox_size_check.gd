@@ -2,19 +2,10 @@ extends RefCounted
 ## --hitbox-size-check: hitboxes follow the Warden's size, compressed (docs/HITBOX_SIZE.md). Every
 ## archetype's hit_r is 0.85-1.15 x the standard (the Medium class's), the ground circle under the
 ## hunter is drawn at exactly that radius, and shots are tested against it (a bullet just inside
-## the circle hits, just outside misses) for the smallest and the biggest. Body contact (the Body
-## contact table in that doc): two Hunters walking into each other pass through, a dash goes through a
-## foe without moving it, and a Hunter walking into a Boki is held off and pushes it. Never touches the save.
+## the circle hits, just outside misses) for the smallest and the biggest. Never touches the save.
 
 var bad := 0
 const BAND := Vector2(0.85, 1.15)
-## Breaker's hit radius is the heavy class's 0.50 m (DECISIONS, owner Nov 4, after item 46): 1.25 x standard.
-const BAND_TOP := {"bulwark": 1.25}
-## Each hit_r (m) set from the source hero's height and breadth (docs/ARCHETYPES.md "Body and hitbox parity").
-const PARITY := {
-	"bulwark": 0.5, "dredge": 0.452, "juggernaut": 0.445, "gunslinger": 0.4, "ostra": 0.412, "mage": 0.4,
-	"archer": 0.392, "dolm": 0.412, "thief": 0.384, "rimewright": 0.362, "ashwick": 0.376, "tender": 0.34,
-}
 
 func ok(cond: bool, what: String) -> void:
 	print("HBCHECK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -49,69 +40,6 @@ func _fire(m: Match, shooter: Hunter, h: Hunter, side: float) -> bool:
 	m.shots.clear()
 	return h.hp < h.max_hp
 
-## Walks `a` (and `b`, when it has a move set) for `steps` frames; the closest the two bodies came, centre to centre.
-func _walk(m: Match, a: Ent, b: Ent, steps: int) -> float:
-	var closest := 1e9
-	for i in steps:
-		m.step(Match.DT)
-		closest = minf(closest, Vector2(a.pos.x - b.pos.x, a.pos.z - b.pos.z).length())
-	return closest
-
-## Standing still at `at`, healthy, with no speed left from the last trial.
-func _park(h: Hunter, at: Vector3) -> void:
-	h.teleport(at)
-	h.vel = Vector3.ZERO
-	h.hp = h.max_hp
-
-## Two Hunters 3 m apart walk straight at each other for a second: they cross, undeflected.
-func _hunters_meet(m: Match, h: Hunter, o: Hunter) -> void:
-	var at := h.pos
-	_park(h, at)
-	_park(o, at + Vector3(3.0, 0, 0))
-	h.inp["move"] = Vector2(1, 0)
-	o.inp["move"] = Vector2(-1, 0)
-	var closest := _walk(m, h, o, 60)
-	h.inp["move"] = Vector2.ZERO
-	o.inp["move"] = Vector2.ZERO
-	var bodies := h.r + o.r
-	ok(closest < bodies * 0.5,
-		"two Hunters walking into each other overlap (closest %.2f of %.2f m)" % [closest, bodies])
-	ok(h.pos.x > o.pos.x + h.r + o.r, "...and pass through: %.2f m past each other" % (h.pos.x - o.pos.x))
-	var aside := Vector2(h.pos.z - at.z, o.pos.z - at.z)
-	ok(absf(aside.x) < 0.05 and absf(aside.y) < 0.05, "...with no sideways shove (%.3f, %.3f m)" % [aside.x, aside.y])
-
-## A dash into a foe standing 1 m ahead goes through it; the foe stays where it was.
-func _dash_through(m: Match, h: Hunter, o: Hunter) -> void:
-	var at := h.pos
-	_park(o, at + Vector3(1.0, 0, 0))
-	h.inp["move"] = Vector2(1, 0)
-	h.inp["aim"] = at + Vector3(8, 0.9, 0)
-	h.dashes = h.max_dashes()
-	h.do_dash()
-	h.inp["move"] = Vector2.ZERO
-	var closest := _walk(m, h, o, 45)
-	ok(closest < (h.r + o.r) * 0.5, "a dash through a foe overlaps it (closest %.2f m)" % closest)
-	ok(h.pos.x > o.pos.x + h.r + o.r, "...and ends %.2f m past it" % (h.pos.x - o.pos.x))
-	var moved := o.pos.distance_to(at + Vector3(1.0, 0, 0))
-	ok(moved < 0.02, "...without moving the foe (%.3f m)" % moved)
-
-## Walking into a dazed wild Boki 2 m ahead for a second: held outside its body and pushing it along.
-func _boki_block(m: Match, h: Hunter) -> void:
-	var at := h.pos
-	var k := m.spawn_wild(Save.new_kin("cindle", "Ash"), at + Vector3(2.0, 0, 0), true)
-	k.teleport(at + Vector3(2.0, 0, 0))
-	var k0 := k.pos
-	h.inp["move"] = Vector2(1, 0)
-	var closest := _walk(m, h, k, 60)
-	h.inp["move"] = Vector2.ZERO
-	var bodies := h.r + k.r
-	ok(closest >= bodies - 0.03,
-		"a Hunter walking into a Boki is held off its body (closest %.2f of %.2f m)" % [closest, bodies])
-	var pushed := k.pos.x - k0.x
-	ok(pushed > 0.5 and h.pos.x < k.pos.x, "...and pushes it along: %.2f m, Hunter still behind" % pushed)
-	k.queue_free()
-	m.kins.erase(k)
-
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -139,10 +67,8 @@ func run(main: Node) -> void:
 		var cls := Arch.weight(a)
 		h.reclass(cls, a)
 		var hr := Arch.hit_r(a, Data.CLASSES[cls])
-		var in_band := hr >= std * BAND.x - 0.0005 and hr <= std * float(BAND_TOP.get(a, BAND.y)) + 0.0005
+		var in_band := hr >= std * BAND.x - 0.0005 and hr <= std * BAND.y + 0.0005
 		ok(in_band, "%s: hit_r %.3f is %.3f x standard (band 0.85-1.15)" % [a, hr, hr / std])
-		var want := float(PARITY.get(a, -1.0))
-		ok(absf(hr - want) < 0.0005, "%s: hit_r %.3f is the source-parity value %.3f" % [a, hr, want])
 		ok(absf(h.r - hr) < 0.0001, "%s: the hunter's r is its hit_r" % a)
 		var ring := h.model.get_node("TeamRing") as MeshInstance3D
 		var drawn := (ring.mesh as PlaneMesh).size.x * 0.5 * ring.global_transform.basis.x.length()
@@ -165,16 +91,5 @@ func run(main: Node) -> void:
 		ok(not _fire(m, shooter, h, edge + 0.04), "%s: %.2f m off, just outside, misses" % [a, edge + 0.04])
 		ok(_fire(m, shooter, h, edge - 0.04), "%s: %.2f m off, just inside, hits" % [a, edge - 0.04])
 		ok(_fire(m, shooter, h, 0.0), "%s: a bullet through the centre hits" % a)
-	h.reclass("medium", "gunslinger")
-	for k in m.kins:
-		if k.state == "active": k.state = "bench"      # the shooter's own Boki would fight the walker
-	var home := h.pos
-	_hunters_meet(m, h, shooter)
-	_park(h, home)
-	_park(shooter, home)
-	_dash_through(m, h, shooter)
-	_park(h, home)
-	_park(shooter, home + Vector3(0, 0, 40.0))
-	_boki_block(m, h)
 	print("HITBOX SIZE CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
