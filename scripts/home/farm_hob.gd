@@ -67,8 +67,9 @@ func at_site() -> bool:
 	return not e.is_empty() and FarmSites.has_site(e)
 
 static func house_entry() -> Dictionary:
-	for e in HomeLayout.of(Save.d).get("deco", []):
-		if String(e.get("id", "")) == "house":
+	var L := HomeLayout.of(Save.d)
+	for e in L.get("deco", []):
+		if String(e.get("id", "")) == "house" and not HubLayout.holds(L, "house"):
 			return e
 	return {}
 
@@ -115,9 +116,8 @@ func _walk(dt: float) -> void:
 		return
 	if to.length() > step:
 		node.position += to.normalized() * step
-		node.position.y = absf(sin(t * 9.0)) * 0.05
 		node.face_to = pos
-		node.pose = "idle"
+		node.pose = "walk"
 		return
 	node.position = Vector3(pos.x, 0, pos.z)
 	node.pose = "hammer" if at_site() else "idle"
@@ -151,10 +151,11 @@ static func lead(best: Dictionary, slack: float) -> float:
 ## The thing to interact with near the player, or {}: Hob ({kind, d}: d m away, so the nearest thing wins), or
 ## a site you can help build.
 func find(p2: Vector2) -> Dictionary:
-	if not h.visit.is_empty() or not FarmUnlocks.gated():
+	if not h.visit.is_empty():
 		return {}
-	var d := p2.distance_to(Vector2(node.position.x, node.position.z)) if is_instance_valid(node) else INF
-	if d < float(rules()["talk_reach"]):
+	var reach := float(rules()["talk_reach"])
+	var d := p2.distance_to(Vector2(node.position.x, node.position.z)) if FarmUnlocks.gated() and is_instance_valid(node) else INF
+	if d < reach:
 		return {"kind": "hob", "d": d}
 	if not swing_on():
 		return {}
@@ -179,7 +180,7 @@ func label(it: Dictionary) -> String:
 	var need := FarmSites.need_text(e)
 	if need != "":
 		return need
-	var nm := String(HomeLayout.CATALOG[String(e["id"])]["name"]).to_lower()
+	var nm := FarmUnlocks.name_of(String(e["id"])).to_lower()
 	return "Hold to hammer the %s (%d/%d)" % [nm, int(e["site"]["got"]), int(e["site"]["need"])]
 
 func use(it: Dictionary) -> void:

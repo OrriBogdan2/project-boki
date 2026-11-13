@@ -26,9 +26,8 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - Main wiring left: none beyond the few lines already in home.gd.
 
 ## Round 3: Hob in person and the second Mask (items 87, 89; owner, Nov 4)
-- **Hob is a person** (`HobModel`: a stocky builder in the toon style, built from shapes: rolled sleeves, apron,
-  tool belt with a hammer, flat cap, pencil behind his ear, simple face marks like the rest of the Empty; poses
-  idle, wave, talk, point, hammer). He waits by the market stall (`farm_builder.json` "stall_stand") and walks to
+- **Hob is a person** (`HobModel`; since Nov 11 a rigged Meshy model, "Old Road Hob": patched ochre coat, goggled
+  hat, braided beard, mallet on his back, docs/art/npcs/PIPELINE.md; poses idle, wave, talk, point, hammer, walk). He waits by the market stall (`farm_builder.json` "stall_stand") and walks to
   the house while it is a site. His name shows over him until you have met him; a "!" while he has something.
 - **Face to face** (`HobTalk`, `TalkBox`, lines in `farm_builder.json` "talk"): interact opens a talk box with his
   portrait (rendered from the model) and name, one line at a time (click or the interact key), you stand still
@@ -65,3 +64,10 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - **Interact**: Hob wins only when he is nearer than the best target found so far (`FarmHob.find` returns his distance). Before, he overrode anything in his ring. Round 4b (11-13): the stall, pot, portal, house, lots, bridge signs and burrow no longer get their 0.3-0.6 m head start over Hob (`FarmHob.lead`), so where rings do overlap (Hob walking past, a crowded layout) the nearer one wins.
 - Only Hob is covered: he is the only fixed farm NPC. Pell is the Black Market panel, not a person on the farm.
 - Checks: `--hob-spot-check` (new, `--shots-dir=`). `--hob-check` and `--farm-tutorial-check` now allow up to 9 m from the stall (the ring keeps him at least ~4.5 m from its centre).
+
+## Nov 11: Hob and Pell designed and modelled
+- Owner: "Hob and the future tutorial person need a design - and a Meshy design". Hob's shapes model is replaced by
+  a rigged Meshy model and Pell (LORE_MASKS round 5's tutorial guide) is designed, modelled and placed: Pell waits
+  beside each first-match tutorial stop as its step begins, talks, and waves when you come near (`TutorialPell`).
+  Both are `NpcModel`s (content/rules/npcs.json). Designs, picks and the pipeline: docs/art/npcs/PIPELINE.md.
+  Check: `--npc-check`.
