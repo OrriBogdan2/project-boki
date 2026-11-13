@@ -26,6 +26,11 @@ click (tap, then hold), your glove (take one from the rack first), sneak, throw 
 combo, heal, stagger a big dummy, break a crate, take a found weapon off the ground, dash off an
 edge and float back up, and dodge the strafer's shot three times.
 
+The bar's **Two-step** button opens the recast drill. It lists your Hunter's two-step abilities (the
+ones that say "again") and runs three reps on each: cast it, wait for the marker, press again while
+the window is open. Each rep reads out hit, late or early; a press up to 0.15 s before the window
+opens still counts, the way it does in a match. A Hunter with no recast sees "No two-step abilities".
+
 ## The Training Grounds and the duel room
 
 Open the Training Grounds from the portal's "Training Grounds" button or the farm's Esc menu. Your whole kit works there
