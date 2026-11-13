@@ -6,7 +6,8 @@ extends RefCounted
 
 const GROUND_M := 4.5        # m: the ground Cartwheel (sheet: 105-144 px, about 4.5m)
 const GROUND_S := 0.48       # s: start to upright (sheet: 0.45-0.5s)
-const PEAK_MS := [14.0, 18.0]        # m/s: the fitted curve's peak (dash_feel.json "thief": 1.84 x the mean, about 17 m/s) ...
+# m/s: the fitted curve's peak (dash_feel.json "thief": 1.84 x the mean, about 17 m/s) ...
+const PEAK_MS := [14.0, 18.0]
 const PEAK_AT := [0.08, 0.27]        # s: ... at +0.1 to 0.27s
 const AIR_CARRY := 1.2       # m: from a jump, at most this past the ground Cartwheel (the air's drag to the landing)
 const EMP_K := 2.34          # the empowered bolt over a plain one (data: +214 on a 160 bolt)

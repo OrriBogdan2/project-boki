@@ -409,7 +409,9 @@ func _archer() -> void:
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
-	for i in 6: P.inp["fire"] = true; m.step(DT)          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
+		P.inp["fire"] = true
+		m.step(DT)
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
