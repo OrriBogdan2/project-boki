@@ -597,6 +597,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
 | stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
 | stat_budget_doc | Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
+| run_payoff | {"stats_w": 0.75, "lean_w": 0.25, "carry_max": 0.15, "summon_max": 0.1} |
+| run_payoff_doc | How raising pays off on runs (RunPayoff, decision 0079). score 0..1 = stats_w x (expedition stat points / their max) + lean_w x lean strength (Evo.lean). Carry passive amounts x (1 + score x carry_max); summon window x (1 + score x summon_max). The carry passive still stops at its per-stat carry cap (KinParts.OWNER_STATS), so this never lifts a Boki past the cap a wild one has. |
 
 ## chest_keys (`content/rules/chest_keys.json`)
 
