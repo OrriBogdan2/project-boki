@@ -15,7 +15,7 @@ class CatSpy extends Fx:
 	var seen: Array = []
 	func _ready() -> void:
 		pass
-	func dust(_at: Vector3, _n := 8) -> void:
+	func dust(_at: Vector3, _n := 8, _col := Color.WHITE) -> void:
 		pass
 	func spark(_at: Vector3, _dir: Vector3, col: Color, _n := 8, _speed := 9.0, _spread := 50.0, _life := 0.22,
 			_grav := 10.0, _size := 1.0) -> void:
@@ -33,7 +33,7 @@ class CatSpy extends Fx:
 		seen.append(col)
 	func body_glow(_at: Vector3, col: Color) -> void:
 		seen.append(col)
-	func number(_at: Vector3, _v: float, col: Color, _crit: bool, _prefix := "") -> void:
+	func number(_at: Vector3, _v: float, col: Color, _crit: bool, _prefix := "", _key := "") -> void:
 		seen.append(col)
 	func word(_at: Vector3, _txt: String, col: Color, _big := false) -> void:
 		seen.append(col)
