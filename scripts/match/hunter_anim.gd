@@ -1324,6 +1324,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))
 	stow = maxf(stow, stow_k)
+	stow = maxf(stow, 1.0 if km_id == WardenCarry.MOVE else 0.0)      # (both hands are on the Boki)
 	stow = maxf(stow, ledge_k * 0.0)
 	gun_vis = _ease(gun_vis, 0.0 if stow > 0.5 else 1.0, 14.0, dt)
 	var side_r := Vector3(1, 0, 0)
