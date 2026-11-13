@@ -534,7 +534,7 @@ func _make_base(e: Dictionary) -> Node3D:
 			var sp := String(e.get("sp", "zapple"))
 			if not Data.KIN.has(sp): sp = Data.KIN.keys()[0]
 			var k := Models.kin(sp, {})
-			k.position = Vector3(0, 0.58, 0); k.scale = Vector3.ONE * 1.25
+			k.position = Vector3(0, 0.58, 0); k.scale = Vector3.ONE
 			for mi in k.find_children("*", "MeshInstance3D", true, false):
 				(mi as MeshInstance3D).material_override = stone
 			for gp in k.find_children("*", "GPUParticles3D", true, false): gp.queue_free()
