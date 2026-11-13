@@ -16,6 +16,7 @@ var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
 var knocks := KnockBanner.new()  # ALLY KNOCKED / KNOCK top-centre
+var loot := LootFeed.new()     # what you just picked up, bottom right
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
 
@@ -50,6 +51,7 @@ func setup(match_node: Match) -> void:
 	c.draw.connect(_draw_all)
 	add_child(msgs)
 	add_child(knocks)
+	add_child(loot)
 	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
 	add_child(abyss_fx)
 	# the pointer over the item windows: drawn above them (the crosshair lives under them on `c`,
@@ -130,6 +132,8 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
+	loot.fight = msgs.fight
+	loot.visible = msgs.visible
 	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
