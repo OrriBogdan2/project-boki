@@ -573,7 +573,6 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
-	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	RecastCue.payoff(self, t)
@@ -590,8 +589,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")
-	var who: String = "TAKEN" if mine else "ASSIST"
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, Color("7fe08a"), true)
+	m.fx.number(h.pos + Vector3(0, 2.6, 0), got, Color("7fe08a"), true, "+")
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
 # ------------------------------------------------------------------ RMB: Bola
@@ -766,7 +764,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
