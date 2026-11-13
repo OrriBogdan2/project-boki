@@ -63,7 +63,8 @@ func run(main: Node) -> void:
 	# another camp far off is its own camp
 	var c2 := c + Vector3(40.0, 0, 0)
 	var lone: Mob = m.spawn_mob("brute", c2)
-	lone.aggro(null, "check"); lone._go(Mob.S.CHASE, "check")
+	lone.aggro(null, "check")
+	lone._go(Mob.S.CHASE, "check")
 	ok(MobNotice.woke(lone) and not MobNotice.woke(lone), "a second camp cues once on its own")
 	print("MOBNOTICE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

@@ -80,6 +80,8 @@ func _windup(m: Match, k: String) -> void:
 	mb.tgt = P
 	mb.cd = 0.0
 	mb.engaged = true
+	mb.aggro(P, "check")
+	mb._go(Mob.S.CHASE, "check")
 	mb._begin_attack()
 	ok(mb.tele != null and MobAnim.state_of(mb) == MobAnim.WINDUP, "%s: wind-up starts with its telegraph" % k)
 	var wind := float(md["windup"])
