@@ -90,12 +90,8 @@ static func leave(match_node: Match, extracted: bool) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if m == null or m.over:
 		return
-	if picker != null:
-		if event.is_action_pressed("menu"):
-			if picker_page == "kit": PracticeHero.open(self)
-			else: PracticeHero.close(self)
-			get_viewport().set_input_as_handled()
-		elif event.is_action_pressed("kit_card") and hover_arch != "":
+	if picker != null:      # (Esc closes it, or goes back from a kit page: PanelClose)
+		if event.is_action_pressed("kit_card") and hover_arch != "":
 			PracticeHero.kit(self, hover_arch)
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("hero"):

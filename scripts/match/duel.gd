@@ -251,9 +251,6 @@ class DuelKeys extends Node:
 		elif k == KEY_BACKSPACE and d.menu_layer == null and not d.m.paused:
 			d.reset()
 			get_viewport().set_input_as_handled()
-		elif k == KEY_ESCAPE and d.menu_layer:
-			d.close_menu()
-			get_viewport().set_input_as_handled()
 
 func attach_keys() -> void:
 	keys_node = DuelKeys.new(self)

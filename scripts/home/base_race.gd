@@ -686,5 +686,6 @@ static func result_card(home, rows: Array) -> Control:
 	c.add_child(v)
 	for r in rows:
 		v.add_child(UI.label(r[0], r[1], r[2]))
+	PanelClose.attach(c, c.queue_free)
 	home.root_ui.add_child(c)
 	return c
