@@ -708,6 +708,16 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | barks | {"you_knock": ["Nice!", "Down they go!", "Textbook.", "Ha! Did you see that?"], "guide_knock": ["Got one!", "Sorry! Not sorry.", "My little sun did most of that."], "you_down": ["Up you get. Happens to me all the time.", "Shake it off, I've got you."], "foe_back": ["Aaand they're back.", "They always come back. It's kind of sweet."]} |
 | skip | ["We'll come back to that. Probably.", "Let's skip ahead. I won't tell.", "Fine, moving on. This part's better anyway."] |
 
+## drop_poses (`content/rules/drop_poses.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The drop's two shared body poses (WardenDropPose), worn by every Hero over its clips or rig. Directions are in the body's own frame: [out, up, front] for a limb (out mirrored to each side; up toward the head; front the chest's side), [up, front] for the body line (hips to head) and the head's crown, in the frame of the Hero facing ahead. fade: s the pose takes to come on or go (skydive: open is the ease into the glider-open clip). lean, pitch: deg the skydive banks at full sideways steer and tips at full forward steer. |
+| ride | {"fade": 0.2, "body": [1.0, 0.2], "head": [1.0, 0.3], "upper_arm": [0.55, 0.15, 1.0], "forearm": [-0.7, 0.15, 1.0], "thigh": [0.25, -0.75, 0.6], "shin": [0.05, -1.0, -0.35]} |
+| skydive | {"fade": 0.25, "open": 0.35, "body": [0.3, 1.0], "head": [0.75, -0.7], "upper_arm": [1.0, 0.35, -0.15], "forearm": [0.3, 1.0, -0.2], "thigh": [0.45, -1.0, -0.15], "shin": [0.25, -0.55, -0.9], "lean": 28.0, "pitch": 14.0} |
+
 ## equal (`content/rules/equal.json`)
 
 

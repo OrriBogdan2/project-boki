@@ -166,6 +166,20 @@ func lean_to(rel: Vector3) -> Vector3:
 	var amt := minf((l - float(fm[0])) * float(fm[1]), float(fm[2]) * maxf(1.0, zoom)) * lead
 	return dir * maxf(0.0, minf(amt, _cast_room(Vector2(dir.x, dir.z), 0.0)))
 
+## The drop's skydive view: close behind you along the drop's heading and looking down at the
+## map, a little further back the higher you are; over the last few metres it turns back to the usual view.
+const SKYDIVE_CHASE := 0.35        # of the low chase view: tips the pitch from the style's ~57 down to ~50 degrees
+const SKYDIVE_ZOOM := Vector2(0.55, 0.9)     # zoom close to the ground .. SKYDIVE_HIGH metres up
+const SKYDIVE_HIGH := 90.0         # m above the ground for the widest skydive zoom
+const SKYDIVE_TURN_H := 8.0        # m above the ground: below this the view turns back to north-up
+func skydive(p: Vector3, heading: float, alt: float, delta: float) -> void:
+	var low := alt < SKYDIVE_TURN_H
+	yaw_to = 0.0 if low else heading
+	chase_to = 0.0 if low else SKYDIVE_CHASE
+	top_to = 0.0
+	zoom_to = lerpf(SKYDIVE_ZOOM.x, SKYDIVE_ZOOM.y, clampf(alt / SKYDIVE_HIGH, 0.0, 1.0))
+	follow(p, delta, false)
+
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()

@@ -947,6 +947,7 @@ class Sync extends Node:
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 	var pace: RigPace             # how often the bones are posed (every frame but on GL over Metal)
 	var leg_bones := PackedInt32Array()     # LEG_BONES' indices, for FootPlant.bones
+	var drop_pose: WardenDropPose  # the drop's shared ride and skydive poses over the clips or the rig, or null
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -964,6 +965,7 @@ class Sync extends Node:
 			leg_bones.append(WardenSkeleton.find(skel, b))
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
+		drop_pose = WardenDropPose.make(root, skel)
 
 	## Plays the Hero's clips when its art has them; and finds a skinned weapon's FX points.
 	func use_clips(glb: Node3D, art_name: String) -> void:
@@ -1027,6 +1029,8 @@ class Sync extends Node:
 			springs.still = clips.cur in clips.d.get("still", [])
 		else:
 			apply()
+			if drop_pose:
+				drop_pose.step(dt)
 			apply_blade()
 		FootPlant.bones(root, skel, leg_bones, dt)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
@@ -1101,6 +1105,8 @@ class Sync extends Node:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if flinch:
 			flinch.step(dt)
+		if drop_pose:
+			drop_pose.step(dt)
 		if sway:
 			sway.step(dt)
 		aim.step(1.0 - w)

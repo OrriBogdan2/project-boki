@@ -17,10 +17,11 @@ Pick it from the Expedition menu at home: your class, your Boki, a **tier** and 
 The match opens with a short **planning phase**: the full map is up and everyone can ping where they
 want to land (bots ping too). Then the skyship crosses the map.
 
-- Your squad has a **drop leader**. The leader jumps and the rest of the squad follows in formation.
-  **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
-- After jumping you glide down; a ring on the ground shows where you'd land. Anyone still aboard at
-  the far side is dropped.
+- Your squad has a **drop leader**. The leader launches the squad's **mini rocket** and steers it down;
+  everyone else rides along, and a ring on the ground shows where it will hit. Do nothing and the
+  squad lands together. **P** passes the lead to a squadmate riding with you (or click a name on the map).
+- **Jump** jumps out of the rocket early: you free-fall (slower than the rocket) and **Jump** again opens
+  your glider to travel further. Anyone still aboard the ship at the far side is launched.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around

@@ -3,7 +3,10 @@ extends RefCounted
 ## [--carry [--heart]] [--cc]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets):
 ## <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in
 ## <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun, a root and Grounded standing in <dir>/cc_<state>/.
+## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
+
+const ClipCheck := preload("res://tools/clip_check.gd")
 
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -41,6 +44,11 @@ func run(main: Node) -> void:
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
+	if OS.get_cmdline_user_args().has("--drop"):
+		await _drop_lineup(out)
+		print("CLIP_SHOTS_DONE")
+		tree.quit()
+		return
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)
@@ -167,6 +175,43 @@ func _cc(model: Node3D, sync: Node, fps: float, out: String, key: String) -> voi
 		s[key] = t >= 0.2 and t < 1.0
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
+
+## --drop: the 12 Heroes 1.6 m apart in each drop pose: aboard the rocket, the skydive, banking into a right steer,
+## and a beat after the glider opens; side-on, and from behind and above (as the skydive camera sees them).
+func _drop_lineup(out: String) -> void:
+	var dir := out.path_join("drop")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var ids: Array = ClipCheck.OWN_MODELS.keys()
+	var models: Array = []
+	for i in ids.size():
+		var m := Models.hunter(Arch.weight(ids[i]), Data.TEAM_COLORS[0], Arch.signature(ids[i]), "",
+				PlayerLook.neutral(), ids[i])
+		m.set_meta("anim_seed", 1)
+		holder.add_child(m)
+		m.position = Vector3((i - (ids.size() - 1) * 0.5) * 1.6, 1.2, 0.0)
+		m.get_node("Warden/Sync").set_process(false)
+		models.append(m)
+	for k in 120:
+		await tree.process_frame       # (past the title: 12 Heroes load slower than one)
+	var poses := {"ride": {"rocket": true}, "skydive": {"skydive": true}, "bank": {"skydive": true, "bank": true},
+		"open": {"gliding": true}}
+	var views := {"side": [PI / 2.0, Vector3(0.0, 3.0, 30.0), 40.0], "behind": [0.0, Vector3(0.0, 14.0, 22.0), 48.0]}
+	for v in views:
+		var face := float(views[v][0])
+		cam.position = views[v][1]
+		cam.fov = float(views[v][2])
+		cam.look_at(Vector3(0, 1.6, 0))
+		for nm in poses:
+			var s: Dictionary = {"vel": Vector3(0, -13.0, 0), "face": face, "grounded": false}
+			s.merge(poses[nm], true)
+			if s.has("bank"):      # (steering right of the facing)
+				s["vel"] = Vector3(cos(face), 0.0, -sin(face)) * Hunter.DIVE_SPEED + Vector3(0, -13.0, 0)
+			for k in 40:
+				for m in models:
+					(m as Node3D).rotation.y = face
+					(m as Node3D).set_meta(WardenClips.STATE, s)
+					(m as Node3D).get_node("Warden/Sync").call("_process", 1.0 / 30.0)
+			await _grab(dir.path_join("%s_%s.png" % [nm, v]))
 
 ## --moods: one frame of each face a Hero's mood data draws (WardenMood), <dir>/moods/<mood>.png.
 func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:

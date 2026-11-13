@@ -2,6 +2,7 @@ class_name DropReticle
 extends Node3D
 ## Where you will land if you keep steering as you are: a team-coloured ring on the ground with a soft
 ## pulse and a beam up to you, red with a warning over the void. Squadmates still dropping show smaller.
+## Aboard the squad's rocket it marks where the rocket will hit, so everyone sees the leader's course.
 
 const RADIUS := 3.0           # m, your ring
 const MATE_RADIUS := 1.5      # m, a squadmate's
@@ -22,14 +23,14 @@ var t := 0.0
 static func tick(h: Hunter, delta: float) -> void:
 	var r: DropReticle = h.get_node_or_null("DropReticle")
 	if r == null:
-		if not (h.dropping and h.is_local()):
+		if not ((h.dropping or h.rocket != null) and h.is_local()):
 			return
 		r = DropReticle.new()
 		r.name = "DropReticle"
 		r.top_level = true
 		h.add_child(r)
 		r._build()
-	r.visible = h.dropping and not h.grounded
+	r.visible = (h.dropping or h.rocket != null) and not h.grounded
 	if r.visible:
 		r._update(h, delta)
 
@@ -85,7 +86,7 @@ func _build() -> void:
 
 func _update(h: Hunter, delta: float) -> void:
 	t += delta
-	var land := project(h, h.inp["move"])
+	var land := h.rocket.project() if h.rocket != null else project(h, h.inp["move"])
 	var at: Vector3 = land["at"]
 	var over_void: bool = land["void"]
 	var col: Color = RED if over_void else Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]

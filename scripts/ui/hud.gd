@@ -306,9 +306,9 @@ func _draw_all() -> void:
 		dmg_dir.draw(c, m, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
-		elif not map_open():
+		elif not map_open() and p.rocket == null:
 			_draw_ship_prompt(sz)
-		if p.dropping and not map_open():
+		if (p.dropping or p.rocket != null) and not map_open():
 			_draw_drop_prompt(sz, p)
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
@@ -1408,9 +1408,8 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 		_text(Vector2(tx, r.position.y + 19), h.pname.substr(0, 13), 14, INK if lbl == "ALIVE" else Color(INK, 0.7), big)
 		if m.skydrop and (h.riding or h.dropping):
 			# on the way in: who leads the drop, who follows, who's gone solo
-			var tag := "LEAD" if m.skydrop.is_lead(h) else ("SOLO" if h.drop_solo else "")
-			if tag != "":
-				_text(Vector2(tx + big.get_string_size(h.pname.substr(0, 13), HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 6, r.position.y + 18), tag, 10, GOLD if tag == "LEAD" else Color("8fd8ff"), big)
+			if m.skydrop.is_lead(h):
+				_text(Vector2(tx + big.get_string_size(h.pname.substr(0, 13), HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 6, r.position.y + 18), "LEAD", 10, GOLD, big)
 		# how far, on the right of the name row
 		var at: Vector3 = st[2]
 		if at != Vector3.INF and lbl != "DEAD":
@@ -1547,19 +1546,19 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	elif waits:
 		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "%s leads the drop" % lead.pname, 26, GOLD, big)
 	else:
-		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Press %s to jump" % Settings.key_cap("jump"), 26, GOLD, big)
+		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Press %s to launch" % Settings.key_cap("jump"), 26, GOLD, big)
 	var sub := "Pick your spot on the map. Everyone left aboard drops in %ds" % int(ceil(left))
 	if dr and dr.planning: sub = "The ship sets off in %ds  ·  %s opens the map to ping a spot" % [int(ceil(dr.plan_t)), Settings.key_cap("map")]
-	elif waits: sub = "You'll jump together and glide in behind them. %ds left aboard" % int(ceil(left))
-	elif i_lead and squad: sub = "Your squad jumps with you. %ds left aboard" % int(ceil(left))
+	elif waits: sub = "You'll ride the squad's rocket down with them. %ds left aboard" % int(ceil(left))
+	elif i_lead and squad: sub = "Your squad rides your rocket down. %ds left aboard" % int(ceil(left))
 	_ctext(Vector2(sz.x * 0.5, rr.position.y + 62), sub, 14, INK)
 	_bar(Rect2(Vector2(rr.position.x + 20, rr.position.y + 76), Vector2(w - 40, 4)), clampf(m.time / maxf(1.0, float(m.ship.get("ride", 1.0))), 0.0, 1.0), GOLD)
 	if squad:
 		# the keys for the drop, as keycaps
 		var keys: Array = []
-		if i_lead: keys = [["jump", "Jump"], ["pass_lead", "Pass lead"], ["map", "Map"]]
-		elif waits: keys = [["separate", "Separate"], ["map", "Map"]]
-		else: keys = [["jump", "Jump"], ["map", "Map"]]
+		if i_lead: keys = [["jump", "Launch"], ["pass_lead", "Pass lead"], ["map", "Map"]]
+		elif waits: keys = [["map", "Map"]]
+		else: keys = [["jump", "Launch"], ["map", "Map"]]
 		_key_row(Vector2(sz.x * 0.5, rr.position.y + 104), keys)
 
 ## A centred row of keycap prompts: [[action, label], ...].
@@ -1580,21 +1579,19 @@ func _key_row(center: Vector2, keys: Array) -> void:
 		_text(Vector2(kr.end.x + 6, center.y + 5), pt[2], 13, INK)
 		x = kr.end.x + 6 + float(pt[3]) + 22.0
 
-## On the way down: who leads, and what you can do about it.
+## On the way down: who steers the rocket, and what you can do.
 func _draw_drop_prompt(sz: Vector2, p: Hunter) -> void:
-	var dr: DropSquad = m.skydrop
-	if dr == null or m.hunters.filter(func(x): return x.team == p.team).size() < 2:
-		return
 	var y := 96.0
-	if dr.is_lead(p):
-		var n := m.hunters.filter(func(x): return x.drop_follow == p).size()
-		_ctext(Vector2(sz.x * 0.5, y), "Leading the drop" + ("  ·  %d following" % n if n > 0 else ""), 18, GOLD, big)
-		if n > 0: _key_row(Vector2(sz.x * 0.5, y + 24), [["pass_lead", "Pass lead"]])
-	elif p.drop_follow != null:
-		_ctext(Vector2(sz.x * 0.5, y), "Following %s" % p.drop_follow.pname, 18, GOLD, big)
-		_key_row(Vector2(sz.x * 0.5, y + 24), [["separate", "Separate"]])
-	elif p.drop_solo:
-		_ctext(Vector2(sz.x * 0.5, y), "Dropping solo", 16, Color("8fd8ff"), big)
+	if p.rocket != null:
+		var l: Hunter = m.skydrop.leader(p.team)
+		var mine := l == null or l == p
+		var line := "Steering the rocket" if mine else "%s steers the rocket" % l.pname
+		_ctext(Vector2(sz.x * 0.5, y), line, 18, GOLD, big)
+		var keys: Array = [["jump", "Jump out"]]
+		if mine and p.rocket.riders.size() > 1: keys.append(["pass_lead", "Pass lead"])
+		_key_row(Vector2(sz.x * 0.5, y + 24), keys)
+	elif p.diving:
+		_key_row(Vector2(sz.x * 0.5, y + 24), [["jump", "Open glider"]])
 
 ## Squad pings out in the world: a marker over each with how far it is.
 func _draw_squad_pings(p: Hunter) -> void:

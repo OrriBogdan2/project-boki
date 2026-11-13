@@ -72,6 +72,15 @@ under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-s
 renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
 
+## The drop poses (WardenDropPose, `content/rules/drop_poses.json`)
+One pose set every Hero wears over its clips or rig, not a clip per Hero: `ride` (braced on the squad rocket's hull,
+DropRocket.seat) and `skydive` (belly down, arms and legs spread, banking `lean` deg and tipping `pitch` deg with the
+steer), which eases off over `open` s into the `air.glide` clip when the canopy opens. The body line and each limb are
+aimed along a direction in the body's own frame, read off the armature's rest, so the numbers fit every rig. Runs in
+WardenGlb's Sync after the clips, before the hands and blade are read. No per-Hero offsets: the lineup shots
+(`--clip-shots --drop`, docs/shots/anim-skydive) show no body clipping itself. `--clip-check` asserts both poses, the
+bank and the hand-over for all 12.
+
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)
 1. Get the footage folder: `git fetch origin ext/hero-ref-footage && git checkout origin/ext/hero-ref-footage -- footage/<folder>` (folders in its README; Vex is `venator_ghost`). Don't commit it.
 2. Pick the frame range of the move in `briefs/hero-ref/<sheet>.md` (frame N = video second base + (N-1)/5, 5 fps). Start on the press.

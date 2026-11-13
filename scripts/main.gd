@@ -3223,8 +3223,8 @@ func _boss_ttk() -> void:
 				await get_tree().process_frame
 	get_tree().quit()
 
-## The drop: the planning phase, map pings, the squad following its leader in formation, passing the
-## lead, separating, and the randomised spawns (different between seeds, rare kin only where rolled).
+## The drop: the planning phase, map pings, the squad launching one rocket, passing the lead, jumping
+## out, and the randomised spawns (different between seeds, rare kin only where rolled).
 func _drop_check() -> void:
 	var ok := true
 	var m := Match.new()
@@ -3263,48 +3263,25 @@ func _drop_check() -> void:
 	while Vector2(m.ship_pos().x - mid.x, m.ship_pos().z - mid.z).length() > 26.0 and m.time < 60.0 and P.riding:
 		m.step(Match.DT)
 	m.ship_jump(P)
-	var fol := mates.filter(func(x): return x.drop_follow == P)
-	print("DCHECK leader jumped at t=%.1f: %d of %d squadmates jumped with them (%s)" % [m.time, fol.size(), mates.size(), str(mates.map(func(x): return [x.pname, x.riding, x.dropping]))])
-	if fol.size() != mates.size(): ok = false; print("DCHECK FAIL the squad didn't jump together")
-	var sep_plan: Array = fol.map(func(x): return snappedf(float(x.ai.get("sep_h", -1.0)), 0.1))
-	for f in fol: f.ai["sep_h"] = -1.0       # (bots that break off low down: checked below, not here)
-	# the leader steers; the squad follows in its slots
-	var worst := 0.0; var t := 0.0
-	# (the turn is relative to the ship's heading, so every map and ship route tests the same turn:
-	# veer 17 degrees right of the flight line, then swing a further 85 degrees right)
-	var sdir := Vector2((m.ship["dir"] as Vector3).x, (m.ship["dir"] as Vector3).z).normalized() if m.ship.has("dir") else Vector2(1, 0)
-	while t < 1.3 and P.dropping:
-		P.inp["move"] = sdir.rotated(0.29) if t < 0.7 else sdir.rotated(1.77)
-		m.step(Match.DT); t += Match.DT
-		if t > 0.5:
-			for f in fol:
-				if f.drop_follow == P:
-					worst = maxf(worst, D.target_of(f).distance_to(Vector2(f.pos.x, f.pos.z)))
-	var spread: Array = fol.map(func(x): return snappedf(Vector2(x.pos.x - P.pos.x, x.pos.z - P.pos.z).length(), 0.1))
-	var dy: Array = fol.map(func(x): return snappedf(x.pos.y - P.pos.y, 0.1))
-	print("DCHECK formation: worst slot error %.2fm, distance to leader %s, height difference %s (bots planning to break off at %s m)" % [worst, str(spread), str(dy), str(sep_plan)])
-	if worst > 1.6 or fol.any(func(x): return x.drop_follow != P): ok = false; print("DCHECK FAIL formation")
-	# pass the lead: the next squadmate leads, you follow them
+	var aboard := mates.filter(func(x): return x.rocket != null and x.rocket == P.rocket)
+	print("DCHECK leader launched at t=%.1f: %d of %d squadmates in the rocket" % [m.time, aboard.size(), mates.size()])
+	if P.rocket == null or aboard.size() != mates.size(): ok = false; print("DCHECK FAIL the squad didn't launch together")
+	for i in 30: m.step(Match.DT)
+	# pass the lead: the next squadmate steers the rocket
 	var passed := D.pass_lead(P)
 	var L2: Hunter = D.leader(P.team)
-	t = 0.0
-	while t < 0.8 and P.dropping:
-		m.step(Match.DT); t += Match.DT
-	var err2 := D.target_of(P).distance_to(Vector2(P.pos.x, P.pos.z)) if P.drop_follow else 99.0
-	print("DCHECK pass lead=%s: leader now %s, you follow %s (slot error %.2fm), others follow %s" % [passed, L2.pname, P.drop_follow.pname if P.drop_follow else "nobody", err2, str(fol.map(func(x): return x.drop_follow.pname if x.drop_follow else "-"))])
-	if not passed or L2 == P or P.drop_follow != L2 or err2 > 2.5 or fol.any(func(x): return x != L2 and x.drop_follow != L2): ok = false; print("DCHECK FAIL pass lead")
-	# separate: you steer yourself again
-	var sep := D.separate(P)
-	var v0 := Vector2(P.vel.x, P.vel.z)
-	var want := -Vector2(L2.vel.x, L2.vel.z).normalized() if Vector2(L2.vel.x, L2.vel.z).length() > 0.5 else Vector2(-1, 0)
-	var alt0 := m.player_altitude()
-	t = 0.0
+	print("DCHECK pass lead=%s: leader now %s" % [passed, L2.pname])
+	if not passed or L2 == P or not aboard.has(L2): ok = false; print("DCHECK FAIL pass lead")
+	# jump out: you free-fall and steer yourself
+	var det := D.detach(P)
+	var want := Vector2(-1, 0)
+	var t := 0.0
 	while t < 0.7 and P.dropping:
 		P.inp["move"] = want
 		m.step(Match.DT); t += Match.DT
 	var v1 := Vector2(P.vel.x, P.vel.z)
-	print("DCHECK separate=%s at %.1fm up: solo=%s follow=%s, velocity %s -> %s (steering %s)" % [sep, alt0, P.drop_solo, P.drop_follow, str(v0.snapped(Vector2(0.1, 0.1))), str(v1.snapped(Vector2(0.1, 0.1))), str(want.snapped(Vector2(0.01, 0.01)))])
-	if not sep or P.drop_follow != null or not P.drop_solo or v1.normalized().dot(want) < 0.7: ok = false; print("DCHECK FAIL separate")
+	print("DCHECK detach=%s: rocket=%s dropping=%s, velocity %s (steering %s)" % [det, P.rocket, P.dropping, str(v1.snapped(Vector2(0.1, 0.1))), str(want)])
+	if not det or P.rocket != null or not P.dropping or v1.normalized().dot(want) < 0.7: ok = false; print("DCHECK FAIL detach")
 	# everyone lands
 	t = 0.0
 	while t < 20.0 and m.hunters.any(func(x): return x.dropping or x.riding):

@@ -98,7 +98,61 @@ func _own_model(id: String, art_name: String) -> void:
 	var own := WardenGlb.art(id) == art_name and WardenGlb.has_model(id) and bool(m.get_meta("glb", false))
 	ok(own and sync != null and sync.get("clips") != null,
 			"%s: its own %s.glb with clips, not the fallback" % [id, art_name])
+	if sync != null:
+		_drop_poses(id, m, sync)
 	m.free()
+
+## The drop's shared poses (WardenDropPose) on this Hero: aboard the rocket the body stays upright, braced, the hands
+## out ahead on the hull; in the skydive the body lies along the drop with the chest down, the hands spread wider
+## out past the shoulders and above the hips, banking into a sideways steer; with the canopy open it is the glide
+## clip's.
+func _drop_poses(id: String, m: Node3D, sync: Node) -> void:
+	var dp: WardenDropPose = sync.get("drop_pose")
+	ok(dp != null, "%s: wears the drop poses" % id)
+	if dp == null:
+		return
+	sync.set_process(false)
+	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false, "rocket": true}
+	_drop_frames(m, sync, s, 20)
+	var f := dp.frame
+	var sh := _bone_at(dp, "upper_arm.R") - _bone_at(dp, "upper_arm.L")
+	var torso := _bone_at(dp, "head") - _bone_at(dp, "hips")
+	var ahead := minf(_hand(dp, "L").dot(-f.z), _hand(dp, "R").dot(-f.z)) - _bone_at(dp, "hips").dot(-f.z)
+	var lean := rad_to_deg(torso.angle_to(f.y))
+	ok(lean < 25.0 and ahead > 0.1,
+			"%s: rides the rocket upright (%.0f deg), hands %.2f m out ahead" % [id, lean, ahead])
+	s["rocket"] = false
+	s["skydive"] = true
+	_drop_frames(m, sync, s, 20)
+	torso = _bone_at(dp, "head") - _bone_at(dp, "hips")
+	var reach := (_bone_at(dp, "forearm.R") - _bone_at(dp, "upper_arm.R")).length()
+	var spread := ((_hand(dp, "R") - _hand(dp, "L")).dot(f.x) - sh.dot(f.x)) / maxf(reach, 0.01)
+	var lift := minf(_hand(dp, "L").dot(f.y), _hand(dp, "R").dot(f.y)) - _bone_at(dp, "hips").dot(f.y)
+	var flat := rad_to_deg(torso.angle_to(-f.z))
+	ok(flat < 25.0 and spread > 1.0 and lift > 0.0, ("%s: skydives belly down along the drop (%.0f deg off level),"
+			+ " hands out past the shoulders by %.1f upper arms, %.2f m above the hips") % [id, flat, spread, lift])
+	s["vel"] = Vector3(Hunter.DIVE_SPEED, -13.0, 0.0)     # (steering right of the facing)
+	_drop_frames(m, sync, s, 40)
+	var bank := _hand(dp, "L").dot(f.y) - _hand(dp, "R").dot(f.y)
+	ok(bank > 0.1, "%s: banks into a right steer (right hand %.2f m lower)" % [id, bank])
+	s["skydive"] = false
+	s["gliding"] = true
+	_drop_frames(m, sync, s, 20)
+	ok(dp.dive_w == 0.0 and dp.ride_w == 0.0,
+			"%s: the glider opens into its own glide clip (skydive %.2f left)" % [id, dp.dive_w])
+	m.remove_meta(WardenClips.STATE)
+
+func _drop_frames(m: Node3D, sync: Node, s: Dictionary, n: int) -> void:
+	for i in n:
+		m.set_meta(WardenClips.STATE, s)
+		sync.call("_process", DT)
+
+func _bone_at(dp: WardenDropPose, b: String) -> Vector3:
+	return dp.skel.get_bone_global_pose(int(dp.aims[b][0])).origin
+
+## Where a hand is (its bone's head, the wrist).
+func _hand(dp: WardenDropPose, side: String) -> Vector3:
+	return dp.skel.get_bone_global_pose(WardenSkeleton.find(dp.skel, "hand." + side)).origin
 
 func _hero(main: Node, id: String, art_name: String) -> void:
 	var dd := WardenClips.data(art_name)

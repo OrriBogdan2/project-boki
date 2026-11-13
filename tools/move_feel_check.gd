@@ -212,7 +212,6 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
-	P.drop_follow = null
 	if "lfloat" in P: P.set("lfloat", {})
 	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
 	_clear_inp()
