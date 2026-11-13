@@ -3,6 +3,7 @@ extends RefCounted
 ## one Hunter at a time (both fighters play that Hunter), counting what the bots really press in each
 ## slot: presses, holds, recasts and hits, plus dashes and glides (table in docs/BOT_KIT_USE.md).
 ## Fails when a slot a bot should use is never used, or a hold-only slot is only ever tapped.
+## With --kit-use-match: the ultimate and Boki use in a 10-trio match instead (tools/bot_ult_use.gd).
 ## Never touches the save.
 
 ## arch -> the counters (keys of the tally) that must be above zero: the slots with a hold or a recast.
@@ -14,7 +15,6 @@ const MUST := {
 	"ashwick": ["cloak pull"],
 }
 const ALWAYS := ["lmb hit", "rmb press", "e", "ultimate", "dash", "glide"]       # every Hunter, every duel
-const NO_ULT := ["tender"]       # (its ultimate heals a teammate: a duel has none)
 const COLS := ["lmb hit", "rmb press", "rmb hold", "rmb hit", "e", "e hit", "ultimate", "dash", "glide"]
 
 var bad := 0
@@ -30,6 +30,11 @@ func run(main: Node) -> void:
 		if a.begins_with("--bot-kit-use="): only = a.substr(14)
 		if a.begins_with("--kit-use-t="): secs = float(a.substr(12))
 		if a.begins_with("--kit-use-seeds="): seeds = Array(a.substr(16).split(",")).map(func(x): return int(x))
+	if "--kit-use-match" in OS.get_cmdline_user_args():
+		var ult := preload("res://tools/bot_ult_use.gd").new()
+		await ult.run(main)
+		main.get_tree().quit(1 if ult.bad > 0 else 0)
+		return
 	for arch in Arch.ids():
 		if only == "" or only == arch:
 			_duel(main, String(arch), seeds, secs)
@@ -78,7 +83,7 @@ func _use(n: Dictionary, id: String, slot: String, instant: bool) -> void:
 func _hit(n: Dictionary, tags: Array) -> void:
 	var t := String(tags[0]) if not tags.is_empty() else ""
 	_add(n, "hit")
-	if "shot" in tags or t == "primary": _add(n, "lmb hit")
+	if "shot" in tags or "flame" in tags or t == "primary": _add(n, "lmb hit")
 	elif t == "utility": _add(n, "rmb hit")
 	elif t == "k1": _add(n, "e hit")
 
@@ -117,6 +122,7 @@ func _totals(n: Dictionary, k: ArchKit) -> void:
 		_add(n, "hops", k.hop.hops)
 	elif k is AshwickKit:
 		_add(n, "cloak pull", k.pulled)
+		_add(n, "lmb hit", k.hose_hits)     # (the stream's hits are tagged "flame", not "primary")
 
 func _report(arch: String, n: Dictionary) -> void:
 	n["hop recast"] = int(n.get("hops", 0)) - int(n.get("hop chain", 0))
@@ -129,7 +135,6 @@ func _report(arch: String, n: Dictionary) -> void:
 	print("KITUSE | %s | %s | %s |" % [arch, " | ".join(cells), ", ".join(extras)])
 	var want: Array = ALWAYS + MUST.get(arch, [])
 	for key in want:
-		if key == "ultimate" and arch in NO_ULT: continue
 		if int(n.get(key, 0)) <= 0:
 			print("KITUSE FAIL %s never uses '%s'" % [arch, key])
 			bad += 1

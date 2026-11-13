@@ -51,13 +51,18 @@ static func show_all(m: Match, on: bool) -> void:
 		if n is Node3D and is_instance_valid(n):
 			(n as Node3D).visible = on
 
+## True when `h` opens locked chest `c` with a key: one press of interact, no hold (a free chest is held open).
+static func keyed(h: Hunter, c: Dictionary) -> bool:
+	return not bool(c.get("free", false)) and h.chest_keys > 0
+
+
 ## What the interact prompt says and does beside chest `c` for hunter `h`.
 static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
 	var k := Settings.key_cap("interact")
-	if bool(c.get("free", false)) or h.chest_keys > 0:
-		return {
-				"kind": "chest", "chest": c,
-				"label": "Hold %s to open%s" % [k, "" if bool(c.get("free", false)) else "  ·  uses 1 key"]}
+	if keyed(h, c):
+		return {"kind": "chest", "chest": c, "label": "%s to open  ·  uses 1 key" % k}
+	if bool(c.get("free", false)):
+		return {"kind": "chest", "chest": c, "label": "Hold %s to open" % k}
 	return {
 			"kind": "locked", "chest": c, "label": "Locked  ·  needs a key  ·  monsters with a key glint carry them",
 			"col": Color("ffb0a0")}
@@ -72,17 +77,14 @@ static func spend(h: Hunter, c: Dictionary) -> bool:
 static func cap() -> int:
 	return int(KeyRun.rules()["keys"]["cap"])
 
-## Keys of `kind` ("chest" or "rift") that `h` holds: what the utility belt shows.
-static func count(h: Hunter, kind: String) -> int:
-	return h.chest_keys if kind == "chest" else h.rift_keys
+## Keys of `kind` ("chest", the only kind) that `h` holds: what the utility belt shows.
+static func count(h: Hunter, _kind: String) -> int:
+	return h.chest_keys
 
 ## Removes up to `n` keys of `kind` from `h` and returns how many it took (the belt spends through this).
 static func take(h: Hunter, kind: String, n: int) -> int:
 	var taken := mini(n, count(h, kind))
-	if kind == "chest":
-		h.chest_keys -= taken
-	else:
-		h.rift_keys -= taken
+	h.chest_keys -= taken
 	return taken
 
 ## Adds up to `n` chest keys, never past the cap, and returns how many fit. The rest stay where they were.
