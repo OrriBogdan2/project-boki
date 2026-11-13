@@ -588,7 +588,9 @@ const SAMPLE := "ping"
 func play_sample(bus_name: String) -> void:
 	if not streams.has(SAMPLE) and not _lazy(SAMPLE):
 		return
-	var p := _voice(null)
+	var p := _voice(null, voices.rank_of(null, listener), SAMPLE)
+	if p == null:
+		return
 	var st = streams[SAMPLE]
 	p.stream = _once(st[0] if st is Array else st)
 	p.bus = bus_name
