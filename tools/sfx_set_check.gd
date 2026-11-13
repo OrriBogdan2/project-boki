@@ -4,6 +4,7 @@ extends RefCounted
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
+##      and its signature weapon's JSON names one of them (no stock sound)
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
@@ -92,6 +93,10 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
 	ok(not sig.is_empty() and sig_missing.is_empty(), "%s: signature sounds %s (missing %s)" % [arch, sig, sig_missing])
+	var wid := Arch.signature(arch)
+	var wdef: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/weapons/%s.json" % wid))
+	var wsfx := String((wdef["primary"] as Dictionary).get("sfx", ""))
+	ok(sounds.has(wsfx), "%s: signature weapon %s plays its own %s, not a stock sound" % [arch, wid, wsfx])
 	var h := Hunter.new()
 	h.arch = arch
 	var picked := []
