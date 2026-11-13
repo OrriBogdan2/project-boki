@@ -687,7 +687,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		if o != f:
 			other = o
 			break
-	if other != null or terrain_behind(f, dir, reach):
+	if other != null or KnockWall.behind(m, f, dir, reach):
 		slams += 1
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}

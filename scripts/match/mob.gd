@@ -263,7 +263,7 @@ func sim(dt: float) -> void:
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
 	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
 		stun_t = maxf(stun_t, 1.0)

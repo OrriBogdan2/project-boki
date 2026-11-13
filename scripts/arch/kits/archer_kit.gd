@@ -306,7 +306,7 @@ func _pin(a: Vector3, k: float) -> void:
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
 		# driven into terrain within 3m: pinned (a stun)
-		if _wall_behind(f, dir, float(pd["wall"])):
+		if KnockWall.behind(m, f, dir, float(pd["wall"])):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
@@ -323,16 +323,6 @@ func _pin(a: Vector3, k: float) -> void:
 	# layers the orchid body, sweep and sparks round it), and a screen kick along the shot
 	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
-
-func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
-	var g0: float = f.pos.y
-	var k := 0.4
-	while k <= reach:
-		var q := f.pos + Vector3(dir.x, 0, dir.y) * k
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > g0 + 0.8:
-			return true
-		k += 0.3
-	return false
 
 # ------------------------------------------------------------------ E: Hail Wall
 ## A wall of falling arrows on a curved arc round you (hero sheet: Rain of Arrows): centred on your aim at
