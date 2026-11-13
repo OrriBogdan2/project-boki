@@ -65,6 +65,7 @@ uniform float mark_amt = 0.5;
 uniform float mark_glow = 0.0;
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
+#include "res://shaders/canopy_heat.gdshaderinc"
 varying vec3 lpos;
 varying vec3 wnorm;
 varying vec2 part_y;
@@ -182,13 +183,15 @@ void fragment() {
 			c *= 0.8 + 0.6 * smoothstep(0.1, 0.8, r.y);
 		}
 	}
+	float ember = canopy_ember(lpos.xz);
+	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
 	// light-facing rim is added per light below
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
+	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }
