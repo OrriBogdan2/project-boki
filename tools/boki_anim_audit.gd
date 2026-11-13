@@ -38,8 +38,8 @@ const MAX_SEAM := 1.0
 ## keys match in pose, not in speed), with the most their seam may read. Lower or drop a row when the clip is re-keyed
 ## so its ends match in speed too (docs/DEBT.md).
 const SEAM_OVER := {
-	"puddlet walk": 1.20, "burrlet walk": 1.05, "gloamshell walk": 2.05, "zapple run": 1.50, "kestrike walk": 2.45, "kestrike run": 1.90,
-	"mossgrade run": 1.35, "caecilith walk": 1.40,
+	"puddlet walk": 1.20, "burrlet walk": 1.05, "gloamshell walk": 2.05, "zapple run": 1.50, "kestrike walk": 2.45,
+	"kestrike run": 1.90, "mossgrade run": 1.35, "caecilith walk": 1.40,
 }
 const MAX_POP := 3.0          # the idle-to-walk hand-over's biggest bone jump over the steady walk's (pop())
 const SAMPLES := 48           # poses per loop
