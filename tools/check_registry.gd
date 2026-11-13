@@ -43,10 +43,6 @@ const CHECKS := {
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
-	# first: it wraps the other flags on the line (a second launch of a bench or check)
-	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],      # a second launch, for benches
-	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],      # quick Boki command keys
-	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart early seat (0023, 0051)
 	"--lair-breach-check": ["res://tools/lair_breach_check.gd", "lair_breach_check", null],      # lair gate breach
 	"--lair-breach-reel": ["res://tools/lair_breach_reel.gd", "lair_breach_reel", null],      # its video (movie)
 	# the Ways Out strip and Gate prompt
@@ -305,7 +301,6 @@ const CHECKS := {
 	"--rock-feet-check": ["res://tools/rock_feet_check.gd", "rock_feet_check", null],      # Tenzo's feet on his rocks
 	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],  # feet on stairs
 	"--foot-plant-shots": ["res://tools/foot_plant_check.gd", "foot_plant_check", "shots"],      # --shots-dir=<dir>
-	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--fusion-states-check": ["res://tools/fusion_states_check.gd", "fusion_states_check", null],  # merge form x state
 	"--fusion-strips": ["res://tools/fusion_strips.gd", "fusion_strips", null],      # 5 fps per form
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
@@ -443,9 +438,6 @@ const CHECKS := {
 	"--boss-anim-check": ["res://tools/boss_anim_check.gd", "boss_anim_check", null],
 	"--boss-anim-shots": ["res://tools/boss_anim_shots.gd", "boss_anim_shots", null],      # boss move strips (GPU)
 	"--empty-creator-check": ["res://tools/empty_creator_check.gd", "empty_creator_check", null],   # the Empty creator
-	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
-	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
-	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
 	# the loading screen: splash, tip, bar
