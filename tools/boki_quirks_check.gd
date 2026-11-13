@@ -35,6 +35,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_data()
 	_sexes()
+	_rare_trait()
 	_care()
 	_rain_warning()
 	_field_book(main)
@@ -75,6 +76,44 @@ func _sexes() -> void:
 	for i in 20:
 		if Unique.sex(Care.breed(a, b, rng, "hivara")) != "f": bred = false
 	ok(bred, "Care.breed keeps the kind's sexes after inheriting looks")
+
+## Marchleaf's Nightmark: about 4% at hatch, from the seed, only that kind, kept by save and load.
+func _rare_trait() -> void:
+	var hits := 0
+	var same := true
+	for i in 10000:
+		var t := BokiQuirks.rare_trait_for("marchleaf", 7000 + i)
+		if t == "nightmark": hits += 1
+		elif t != "": same = false
+		if BokiQuirks.rare_trait_for("marchleaf", 7000 + i) != t: same = false
+	ok(hits >= 300 and hits <= 500 and same,
+		"Nightmark: %.1f%% of 10k seeded Marchleaf hatches, the same each time" % (hits / 100.0))
+	ok(BokiQuirks.rare_trait_for("zapple", 1) == "" and not Save.new_kin("zapple").has("rare"),
+		"other kinds roll no rare trait")
+	var found: Dictionary = {}
+	for i in 400:
+		var m := Save.new_kin("marchleaf")
+		found[String(m["rare"])] = m
+	ok(found.has("nightmark") and found.has("") and BokiQuirks.has_trait(found["nightmark"], "nightmark")
+		and BokiQuirks.rare_of(found["nightmark"])["name"] == "Nightmark" and BokiQuirks.rare_of(found[""]).is_empty(),
+		"Save.new_kin rolls it at hatch (%s) and the card finds its badge text" % str(found.keys()))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 3
+	var a := Save.new_kin("marchleaf")
+	var kid := Care.breed(a, Save.new_kin("marchleaf"), rng, "marchleaf")
+	ok(kid.has("rare"), "Care.breed rolls it for the baby too")
+	var round_trip: Variant = JSON.parse_string(JSON.stringify({"roster": [found["nightmark"].duplicate(true)]}))
+	ok(String(round_trip["roster"][0]["rare"]) == "nightmark", "the trait survives a save and load")
+	var old: Dictionary = found["nightmark"].duplicate(true)      # an older save: Marchleaf with no roll yet
+	old.erase("rare")
+	var plain := Save.new_kin("zapple")
+	var save_data := {"roster": [old, plain]}
+	BokiQuirks.migrate(save_data)
+	var rolled := String(old.get("rare", "?"))
+	BokiQuirks.migrate(save_data)
+	var expect := BokiQuirks.rare_trait_for("marchleaf", int(old["dna"]["seed"]))
+	ok(old.has("rare") and String(old["rare"]) == rolled and rolled == expect
+		and not plain.has("rare"), "an older save's Marchleaf rolls once on load (from its seed) and keeps it")
 
 ## How much food a new Boki of this kind loses in ten awake minutes.
 func _food_drop(species: String) -> float:

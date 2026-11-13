@@ -49,9 +49,10 @@ static func offset(h: Hunter, slot: String, at: Vector3) -> Vector3:
 	return _on_ray(h, w, at) - at
 
 ## Tags round `s` (its "start" set) to leave h's `slot` muzzle: its look starts there and follows the weapon (a
-## swinging lantern, an arm still in its throw) while it eases onto the round's line.
+## swinging lantern, an arm still in its throw) while it eases onto the round's line. (The look starts at the
+## muzzle the kit asked for, `muzzle`, when the hit sweep starts at the body: ShotOrigin.)
 static func leave(s: Dictionary, h: Hunter, slot: String) -> void:
-	s["vis"] = offset(h, slot, s["start"])
+	s["vis"] = offset(h, slot, s.get("muzzle", s["start"]))
 	var an := anchor(h, slot)
 	if an != null and h.m.cam != null:
 		s["muz_n"] = an
