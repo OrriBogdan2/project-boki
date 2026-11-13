@@ -2,7 +2,7 @@ extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
 ## [--carry]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets):
 ## <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in
-## <dir>/flinch/ (--heavy: stagger). Needs a renderer. ffmpeg makes the GIFs and sheets.
+## <dir>/flinch/ (--solid or --heavy: a harder hit). Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -133,8 +133,13 @@ func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
 	var dir := out.path_join("flinch")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var heavy := OS.get_cmdline_user_args().has("--heavy")
+	var hit_k := Oomph.hit_strength(0.03, 2.0)      # a chip hit
+	if OS.get_cmdline_user_args().has("--solid"):
+		hit_k = Oomph.hit_strength(0.09, 8.0)
+	if heavy:
+		hit_k = Oomph.HEAVY_FLINCH
 	var s := {"vel": Vector3(0, 0, -4.0), "face": model.rotation.y, "grounded": true, "hit_t": 99.0,
-			"hit_k": Oomph.HEAVY_FLINCH if heavy else 1.0, "hit_dir": Vector2(0, -1)}
+			"hit_k": hit_k, "hit_dir": Vector2(0, -1)}
 	model.set_meta(WardenClips.STATE, s)
 	for k in 30:
 		sync.call("_process", 1.0 / 30.0)

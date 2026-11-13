@@ -414,6 +414,7 @@ const CHECKS := {
 	"--crowd-check": ["res://tools/crowd_check.gd", "crowd_check", null],  # 40 hunters: colours, naps, models once
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input
+	"--hit-react-check": ["res://tools/hit_react_check.gd", "hit_react_check", null],      # hit strength
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
 	# the same with one dummy moved around: reach, lane and arc to 0.1 m / 3 degrees
 	"--hit-shape-fine": ["res://tools/hit_shape_fine.gd", "hit_shape_fine", null],

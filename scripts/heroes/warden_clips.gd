@@ -452,11 +452,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if hit < float(hd.get("dur", 0.0)) and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH:
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
-		var vel: Vector3 = s.get("vel", Vector3.ZERO)
-		var heavy := float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
-		var running := Vector2(vel.x, vel.z).length() >= STILL or not bool(s.get("grounded", true))
-		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)
-		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
+		var hk := float(s.get("hit_k", 1.0))
+		# (a hit flinches the spine and arms through the additive layer, as much as it is hard: a chip hit lightly,
+		# the legs keep their clip; only a stagger takes the whole body)
+		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit,
+				"flinch": hk < Oomph.HEAVY_FLINCH, "flinch_w": Oomph.flinch_weight(hk)}
 	return {}
 
 ## The lobby's lock-in pose (data "lockin": clip, from, dur, rate, fade, settle): `t` s into it, a window of an
@@ -486,7 +486,7 @@ func step(dt: float) -> void:
 			_node("anim_" + nm).animation = String(want["clip"])
 		_p("seek_hit/seek_request", float(want["t"]))
 		_p("seek_hit0/seek_request", 0.0)
-	flinch_w = move_toward(flinch_w, 1.0 if flinching else 0.0, dt / FADE)
+	flinch_w = move_toward(flinch_w, float(want["flinch_w"]) if flinching else 0.0, dt / FADE)
 	if flinching:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)

@@ -561,11 +561,16 @@ func _recoil(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictiona
 	ok(rest < deg * 0.1, "%s: the kick settles (%.3f deg left)" % [id, rest])
 	clips.force = {}
 
-## A hit mid-run (item: additive flinch): the legs run exactly as they would unhit, the spine and arms flinch on top;
-## standing still, or a stagger, takes the whole body. Two identical models run the same 1 s, one of them hit.
+## A hit flinches through the base additive layer, as hard as the hit is (content/rules/hit_flinch.json): the legs run
+## exactly as they would unhit, the spine and arms flinch on top; a chip hit lightly, a solid hit more, still or on the
+## run; only a stagger takes the whole body. Identical models run the same 1 s, one of them hit.
 func _flinch(id: String) -> void:
-	var calm := await _run_hit(id, 99.0, 1.0, 4.0)
-	var hit := await _run_hit(id, 0.0, 1.0, 4.0)
+	var chip := Oomph.hit_strength(0.03, 2.0)
+	var solid := Oomph.hit_strength(0.09, 8.0)
+	ok(chip < solid and solid < Oomph.HEAVY_FLINCH,
+			"%s: strength grows with damage share and knock (%.2f < %.2f)" % [id, chip, solid])
+	var calm := await _run_hit(id, 99.0, chip, 4.0)
+	var hit := await _run_hit(id, 0.0, chip, 4.0)
 	ok(calm.size() > 0 and hit.size() == calm.size(), "%s: flinch run recorded (%d frames)" % [id, calm.size()])
 	var legs := 0.0
 	var arms := 0.0
@@ -576,11 +581,19 @@ func _flinch(id: String) -> void:
 			% [id, legs, FLINCH_LEGS_M])
 	ok(arms >= FLINCH_ARMS_M, "%s: a hit mid-run flinches the arms (hand moves %.3f m, min %.3f)"
 			% [id, arms, FLINCH_ARMS_M])
-	var still := await _run_hit(id, 0.0, 1.0, 0.0)
+	var solid_hit := await _run_hit(id, 0.0, solid, 4.0)
+	var solid_arms := 0.0
+	for i in mini(calm.size(), solid_hit.size()):
+		solid_arms = maxf(solid_arms, float(solid_hit[i]["hand"].distance_to(calm[i]["hand"])))
+	ok(solid_arms > arms,
+			"%s: a solid hit flinches the arms more than a chip hit (%.3f m > %.3f m)" % [id, solid_arms, arms])
+	var still := await _run_hit(id, 0.0, chip, 0.0)
 	var stagger := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 4.0)
+	var stagger_still := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 0.0)
 	var mid := hit.size() / 3
-	ok(float(still[mid]["act"]) > 0.5, "%s: a hit standing still takes the whole body" % id)
+	ok(float(still[mid]["act"]) <= 0.0, "%s: a chip hit standing still flinches the upper body only" % id)
 	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
+	ok(float(stagger_still[mid]["act"]) > 0.5, "%s: a stagger standing still takes the whole body" % id)
 	ok(float(hit[mid]["act"]) <= 0.0, "%s: a chip hit on the run leaves the body to the legs" % id)
 
 ## 1 s of play at `speed` m/s, hit at the start (hit_t 99: none); per frame: leg bone sum, right hand, act_w.
