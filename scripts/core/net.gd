@@ -30,13 +30,23 @@ var enet: NetEnet = null      # desktop connection to the relay
 var server_addr := ""         # "host:port" of the relay (desktop)
 var token := ""               # Discord access token from the launcher
 var deny_reason := ""         # why the server refused us, for the lobby to show
+var mm: NetMatchmaker = null  # matchmaker HTTP (--matchmaker=host:port, else the --server= host on 8080)
+var party: Party = null       # queueing alone or with friends through the matchmaker
 
 func _ready() -> void:
+	var matchmaker_arg := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--server="): server_addr = a.substr(9)
+		if a.begins_with("--matchmaker="): matchmaker_arg = a.substr(13)
 		if a.begins_with("--token="): token = a.substr(8)
 	if server_addr == "":
 		server_addr = OS.get_environment("BOKI_SERVER")
+	mm = NetMatchmaker.new()
+	mm.addr = NetMatchmaker.pick_addr(matchmaker_arg, server_addr)
+	add_child(mm)
+	party = Party.new()
+	party.mm = mm
+	add_child(party)
 
 ## Online play is possible here: the browser room, or a relay server on desktop.
 func available() -> bool:

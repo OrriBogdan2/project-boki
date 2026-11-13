@@ -9,7 +9,8 @@ const WAIT := 4.0              # s the first step gets to open its window (Rimel
 
 ## [hero, slot]: each recast kit, from a fresh setup with the target 6m east; _first() takes the first step.
 const CASES := [["thief", "e"], ["tender", "e"], ["ostra", "e"], ["rimewright", "e"], ["rimewright", "x"],
-	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"]]
+	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"]]
+const RUN_OUT := 18.0          # s a window left alone gets to close (Brimseed: 6.5s grow + 10s at full, the longest)
 
 func _first(m: Match, P: Hunter, slot: String) -> void:
 	match slot:
@@ -59,6 +60,24 @@ func _window(hero: String, slot: String) -> void:
 	var key := RecastCue.key_of(slot)
 	ok("%s %s: the local cue carries it (slot, AGAIN key)" % [hero, slot],
 			String(cw.get("slot", "")) == slot and key != "", "cue %s key %s" % [cw.get("slot", "-"), key])
+	if float(w.get("left", 0.0)) >= float(w.get("total", 0.0)) and hero == "bulwark":
+		await done(m)      # the hammer lies until called back (lmb.lie_t 0): no timer, nothing runs out
+		return
+	# left alone: the closing ticks play and the slot shows EXPIRED for about 0.6s (never closes silently)
+	var ticks := 0
+	var exp_t := 0.0
+	var t := 0.0
+	while t < RUN_OUT and String(P.ak.recast_window().get("slot", "")) == slot:
+		ticks = maxi(ticks, int(P.ak.cue.get("tick", 0)))
+		m.step(DT)
+		t += DT
+	m.step(DT)
+	ticks = maxi(ticks, int(P.ak.cue.get("tick", 0)))
+	exp_t = float(P.ak.cue.get("exp_t", 0.0))
+	ok("%s %s: the warning ticks play before it closes" % [hero, slot], ticks >= 1, "ticks %d" % ticks)
+	ok("%s %s: unused, the slot shows EXPIRED ~0.6s" % [hero, slot], String(P.ak.cue.get("exp_slot", "")) == slot
+			and exp_t > 0.4 and exp_t <= RecastCue.EXPIRED_T and absf(RecastCue.EXPIRED_T - 0.6) < 0.05,
+			"exp %s %.2f after %.2fs" % [P.ak.cue.get("exp_slot", "-"), exp_t, t])
 	await done(m)
 
 ## Dolm's dash left alone: the window runs out and the slot shows EXPIRED (never closes silently). Ostra's
@@ -85,11 +104,11 @@ func _buffered() -> void:
 	P.ak.use_e()
 	_open(m, P, "e")
 	var min_t := float(K.e_def()["min_recast"])
-	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - ArchKit.RECAST_BUFFER * 0.6:
+	while not K.seed.is_empty() and float(K.seed["t"]) < min_t - Loco.press_buffer * 0.6:
 		m.step(DT)
 	P.ak.use_e()
 	var held := not K.seed.is_empty()
-	step(m, ArchKit.RECAST_BUFFER)
+	step(m, Loco.press_buffer)
 	var popped := K.seed.is_empty()
 	ok("ostra e: an early press is buffered into the window", held and popped, "held %s popped %s" % [held, popped])
 	await done(m)
@@ -109,4 +128,7 @@ func _badges() -> void:
 		var marks: Array = P.ak.cue.get("marks", [])
 		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
 		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
+		if hero == "gunslinger" and mine.size() == 1:
+			var ring := float(mine[0]["total"])
+			ok("gunslinger: the Daze badge reads KitStatus's timer", is_equal_approx(ring, 2.0), str(ring))
 		await done(m)

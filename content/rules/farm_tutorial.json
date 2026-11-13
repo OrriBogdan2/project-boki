@@ -21,6 +21,7 @@
 		"kibble": 3
 	},
 	"build_wait_s": 30,
+	"site_hint": "Boki build it while you are home: a run pauses the work until you are back.",
 	"steps": [
 		{
 			"id": "axe",
@@ -273,7 +274,7 @@
 				"id": "out",
 				"needs": ["toy"],
 				"title": "Head out or stay",
-				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing. Later, the Waystone in your hub wakes the next zone."},
+				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to play on. The Waystone in your hub opens the next zone: bring it a Wayseed and a Boki that leans its way."},
 				"world": {"go": "Portal"},
 				"boki": "Out there, or more play? Your call!"
 			}
@@ -285,7 +286,8 @@
 	"stay_label": "Stay",
 	"first_day": {
 		"reward_gems": 15,
-		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.",
+		"start_items": {"kibble": 2},
+		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it. start_items: what a new save's bag holds besides the tonic, so 'Feed your Boki' has food from the first frame (the tutorial's own feed step adds more later).",
 		"rows": [
 			{"id": "feed", "text": "Feed your Boki"},
 			{"id": "toy", "text": "Play with a toy"},

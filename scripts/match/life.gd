@@ -8,11 +8,13 @@ class_name Life
 ## Everything here runs on whichever game owns the hunter (local and bots); remote hunters only
 ## show what their owner sends.
 
+const STOMP_ROOT := 0.12   # s: the stomper's own hold on its feet, topped up every frame; a root above it is CC
+
 const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
 	"revive_radius": 1.6,       # [est] a teammate this close revives you
 	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
-	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
+	"revive_hp": 0.25,          # [design] a quarter of your health (a per-tick heal scaled to ours gives 12-35%)
 	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
 	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
@@ -122,9 +124,18 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			trace(m, "%s %s" % [o.pname, "bled out" if foes == 0 else "stomped out"])
 			m.eliminate(o, o.last_hit_by, "bled out" if foes == 0 else "finished")
 
+## A hit on a wisp. A wisp can't be shot: it's lost to stomps, an execute, bleeding out, and the few
+## abilities the source lets reach it (opts "src": "wisp", e.g. Hail Wall), which drain `down_hp` by `dmg`.
+## Always 0: the wisp has no health to take. It runs on the wisp's own game (remote hits arrive by "hit").
+static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
+	if opts.get("src", "") == "wisp":
+		o.down_hp = maxf(0.0, o.down_hp - dmg)
+		o.last_hit_by = by
+	return 0.0
+
 # ------------------------------------------------------------------ the stomp
 ## Holding interact on an enemy wisp commits you to stomping it out: a fixed animation you can't
-## cancel or move out of. You can still be shot, and a stun or a knockback breaks it (the wisp
+## cancel or move out of. You can still be shot, and hard CC breaks it (cc_break; the wisp
 ## lives), and if the wisp drifts away (off a ledge, say) your stomps miss and it gets away.
 static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
@@ -143,19 +154,33 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
 		m.sfx("whoosh", h.pos, -6.0, 1.3)
 
+## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
+## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
+## (Nightwell, a reel, a drag). Slows and Daze never do; your own input never does. "" = still going.
+static func cc_break(m: Match, h: Hunter) -> String:
+	if h.downed or h.out: return "down"
+	if h.stun_t > 0.0: return "stun"
+	if m.time - h.kb_t < 0.08: return "knock"
+	if h.root_t > STOMP_ROOT + 0.001: return "root"
+	if KitStatus.grounded(h): return "ground"
+	for t in m.displace.tows:
+		if t["e"] == h: return "pulled"
+	return ""
+
 static func tick_stomps(m: Match, dt: float) -> void:
 	for h in m.hunters:
 		if h.stomp.is_empty() or h.remote:
 			continue
 		var o: Hunter = h.stomp["o"]
-		# a hit that stuns or knocks you breaks it; your own input never does
-		if h.downed or h.out or h.stun_t > 0.0 or m.time - h.kb_t < 0.08:
+		var why := cc_break(m, h)
+		if why != "":
+			trace(m, "stomp cc %s on %s" % [why, h.pname])
 			end_stomp(m, h, "broken")
 			continue
 		if o == null or o.out or not o.downed:
 			end_stomp(m, h, "gone")
 			continue
-		h.root_t = maxf(h.root_t, 0.12)
+		h.root_t = maxf(h.root_t, STOMP_ROOT)
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
 		var t0 := float(h.stomp["t"])

@@ -468,7 +468,8 @@ func _build_ui() -> void:
 	lt.texture = load("res://art/brand/logo_wordmark.png")
 	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	lt.custom_minimum_size = Vector2(500, 244)
+	lt.custom_minimum_size = Vector2(500, 150)      # shrinks on a short window; the list below never leaves it
+	lt.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo = lt
 	logo.name = "Logo"
@@ -492,6 +493,8 @@ func _build_ui() -> void:
 		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
+	if Net.mm.addr != "":
+		items.append(["Party", func(): Game.goto("party", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
 	if not OS.has_feature("web"):
@@ -531,6 +534,14 @@ func _build_ui() -> void:
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
+	var try_card := TryCard.build()
+	if try_card:
+		try_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		try_card.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		try_card.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		try_card.offset_right = -28; try_card.offset_bottom = -112
+		root.add_child(try_card)
+		UI.pop_in(try_card, 1.6)
 	b1.grab_focus()
 
 ## The menu's item labels in order (the main button first): read by --title-check.

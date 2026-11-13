@@ -62,6 +62,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Heavy Shot",
+		"card_range": "pin.range",
 		"short": "Heavy",
 		"icon": "snare",
 		"col": "#e04aff",
@@ -100,6 +101,7 @@
 	"e": {
 		"delivery": "zone",
 		"name": "Hail Wall",
+		"card_range": "reach",
 		"short": "Hail",
 		"icon": "barrage",
 		"col": "#d060ff",
@@ -126,6 +128,7 @@
 	},
 	"x": {
 		"name": "Starpiercer",
+		"card_range": "range",
 		"short": "Starpierce",
 		"icon": "skypierce",
 		"col": "#e04aff",
@@ -160,6 +163,7 @@
 	"rank3": {"sec": "Heavy Shot flies 3m farther; a wall stun gives a dash charge", "dash": "Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading) and allies near you walk with you", "kin": "the Hail Wall is 30% wider"},
 	"rank2": {"sec": "Rank 2: cooldown 16s -> 13s, damage +20%.", "dash": "Rank 2: recharge 9.5s -> 8.5s per charge.", "kin": "Rank 2: cooldown 15s -> 13s, damage +30%."},
 	"rank_next": {"sec": "Rank 3: cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge.", "kin": "Rank 3: cooldown 15s -> 9s, damage +60%; the Hail Wall is 30% wider.", "dash": "Rank 3: recharge 9.5s -> 7.5s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."},
+	"clip": {"lines": {"lmb": "Hold to draw, then let go on the gold flash.", "rmb": "Hold to draw a Heavy Shot; a foe pinned to a wall takes it twice.", "dash": "Roll, then walk through rocks and trees for 2.8s."}, "holds": ["lmb"]},
 	"tells": {
 		"dash_spent": "a green spirit shell over her while it lasts; dash pip dark"
 	}

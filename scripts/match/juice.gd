@@ -109,8 +109,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
-	if credit == m.player and h != m.player:
-		m.sfx("knock_confirm", null, -6.0)
+	_squad_cue(m, h, credit, "knock_confirm", -6.0)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -121,9 +120,16 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
 	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
 	m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
-	if credit == m.player and h != m.player:
-		m.sfx("kill", null, -3.0)
-		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)
+	if _squad_cue(m, h, credit, "elim_confirm", -3.0) and credit == m.player and m.hud:
+		m.hud.flash(Color(tc, 1.0), 0.14)
+
+## The knock / finish cue, heard only by the attacker's squad (their team, so the local player hears it
+## whenever a squadmate downs or finishes a rival). Returns whether it played.
+static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: float) -> bool:
+	if m.player == null or not credit is Hunter or credit.team != m.player.team or h.team == credit.team:
+		return false
+	Sfx.play(cue, null, vol_db, 0.0)
+	return true
 
 ## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
 ## freeze for whoever broke it (Feel tier 3: 0.045s).
@@ -207,14 +213,11 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
-## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). Only for people
-## close to you, quieter for everyone else, silent while sneaking.
+## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). It carries as far
+## as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
 static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
-	if m == null or m.world == null or h.unseen or h.crouch:
-		return
-	var p: Hunter = m.player
-	if p != null and h != p and p.flat_dist(h) > 14.0:
+	if m == null or m.world == null or not StepReach.heard(h):
 		return
 	var w: World = m.world
 	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
@@ -225,4 +228,4 @@ static func footstep(h: Hunter) -> void:
 	if w.bridge.has(i): surf = "wood"
 	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
 	elif w.style_at(i) == "frost": surf = "snow"
-	Sfx.play(HeroSfx.of(h, "step_" + surf, "step_" + surf), h.pos, -13.0 if h == p else -17.0, 0.08)
+	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)

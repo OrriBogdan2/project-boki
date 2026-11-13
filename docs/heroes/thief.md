@@ -105,10 +105,44 @@ pass above.
 | LMB | legs | wide low stance standing; running, "the torso snaps to the cursor while firing with either hand, and the legs keep running" [footage] | the throw's legs at full weight for 0.35s of every 0.45s, running or not (the feet froze mid-run) | the legs are a stance (`"stance": true`): full standing, none at a run, so the legs keep running |
 | LMB | tracking | the bolt flies to the cursor point; the body faces the cursor, yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted: a bolt swung behind her leaves on the new cursor, the body turns 180 degrees in 0.13s |
 | LMB | cadence | 0.45s [footage card] | 0.45s | unchanged; asserted held (a bolt every 0.45s, hands alternating) |
-| LMB | move while firing | 77-86 px/s firing against 113 (unconfirmed) [footage] | 90% of the run | unchanged (90%); asserted she keeps 85% or more |
+| LMB | move while firing | 77-86 px/s firing against 113 in three stretches: 68-76% [footage] | 90% of the run | 72% (`fire_slow`, cast-move pass 2026-11-11, docs/KIT_PARITY.md); asserted 66-78% |
 | LMB | the empowered bolt's own kick | a big streak and a blade flash at her hands [footage 0143] | a screen shake on your own camera | no screen shake (owner rule 50); the streak, the flash and the sound carry it |
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
 | Shift, E, X | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
+
+## Animation timing (ext/anim-time-sable, ext/anim-sable-first-pose)
+
+Every move of content/rules/warden_anim/sable.json measured in game: the kit's keyed time (KMovesDJ) drives the
+skinned clip, so wind-up start, release and recovery end are the kit's; what the clip adds is the blend in and out
+(`FADE` 0.1 s, every move). [footage] is briefs/hero-ref/dancer.md at 5 fps (one frame = 0.2 s, so a release is only
+known to a frame); [game data] has no animation timings. Asserted in `--dancer-combo-check`
+(tools/dancer_timing_check.gd, lines `dancer timing ...`).
+
+ext/anim-time-sable first gave the quick moves a short per-move `"fade"` (0.03-0.04 s), because a 0.1 s blend in
+showed 25% of the clip at the move's first key and some clips spent that blend on a settled pose. Instead, each quick
+clip is now keyed on its first pose at 0.0 in tools/art1/sable_clips.py, so the blend in moves straight into the
+move, and the fades are back to the default. "Frame 0" is how far the clip's first frame turns some bone off the
+settled pose (END, the LMB clip's last frame); 60 degrees or more counts as the move.
+
+| Move | Source s | Frame 0 before | Frame 0 now |
+|---|---|---|---|
+| LMB throw (`thf_lmb_r/l`) | arm whipped out inside a 2-3 frame shot, a hit every 0.45 s [footage] | the arm already cocked wide (152 deg) | unchanged |
+| Empowered LMB (`thf_primed`) | one big shot, same beat [footage] | coiled (128 deg) | unchanged |
+| Cartwheel (`thf_vault_r/l/f/b/twist`) | dash 0.37-0.57 s, 3 frames with recovery [footage] | settled (0 deg), the crouch keyed at 0.05 | the crouch with the arms swung up from 0.0 to 0.05 (112-172 deg) |
+| Air Cartwheel (`thf_exdash`) | the same flick, then carried to the ground [footage] | settled (0 deg) | the crouch from 0.0 (118 deg) |
+| Landing (`thf_land`) | carried to the ground [footage] | the low crouch (90 deg) | unchanged |
+| Bola (`thf_bola`) | whirled through the 0.4-0.6 s lane, slung at its end [footage] | cast 0.4 s, sling at 0.42 | unchanged (already at the source) |
+| Knife (`thf_knife`) | dagger in the air one frame after the spin starts [footage] | a settled dip (42 deg), the spin from 0.04 | the spin and the cocked hand from 0.0 (127 deg); release 0.12 unchanged |
+| Encore ring (`thf_encore`) | ring grows 0.4 s [footage] | 0.4 s | unchanged |
+| Reset (`thf_reset`) | the heel-snap on the card, 0.4 s | a settled dip (42 deg) | the arms flung wide and the spin from 0.0 (129 deg) |
+
+The hit frames did not move: every key from the move's first key on is the same, and the rebaked clips match the
+old ones there to 0.04 degrees (the vaults and the air vault from 0.05, the knife from 0.04, the reset from 0.08).
+The clips' peak motion lands on the kit's release frames (the lmb whip 0.00-0.03, the bola sling 0.37-0.40, the
+knife release 0.10-0.13). Clip lengths against the kit's moves are within 0.06 s for every move (asserted).
+
+Suggestions (ours, not built): a held LMB could cross-fade the two arms' clips on the release instead of the
+channel swap; a 0.03 s hit-stop on the empowered bolt.
 
 ## Per-slot table
 
@@ -187,13 +221,33 @@ and asserted in `--dancer-combo-check` / `--kit-combo-check`.
 | A dagger in an enemy at the top rank resets Quickflip; terrain refunds 25%, characters 50% | owner's game data (Farstep rank IV) | n/a | Built on the Knife's rank 3 (it was on Vault's); asserted |
 | Quickflip: +20% empowered damage twice, then +50% speed boost | owner's game data | n/a | Built: +20% at rank 2, +40% in all at rank 3 with the speed boost half again as big |
 | The ult fires after a short delay (the ring growing) | wiki R | yes (ult f27-f31) | Built: 0.4s, no blade before it; asserted |
-| Up to 5 shots at each nearby enemy over 2s | wiki R | yes | Built; asserted (10 blades on two foes) |
+| Up to 5 shots at each nearby enemy over 2s | wiki R | yes (hits 122, 127, 114, 236 within 0.6s) | Built as 10 at 0.2s: the footage's cadence, owner item 54, differs on purpose from the card's 5; measured below |
 | The ult's outer ring deals bonus damage and anti-heals 6s | wiki R | yes (ult f121, f127) | Built on the outer 25% (blight 6s); asserted |
 | Every ult shot refreshes all stacks | wiki R | n/a | Built; asserted |
 | LMB keeps firing during the ult, and she moves freely with the ring attached | wiki R, gamerblurb | yes (ult f41-f47) | Built; asserted |
 | The ult resets Cartwheel (the wiki: dashes while active) | in-game card, wiki R | yes (0193) | Built as the Vault back on the cast; asserted |
 | The ult's numbers grow with rank (rank 2: damage, cooldown) | wiki R levels | n/a | Not built: the X ultimates have no ranks (HeroUlt); its damage grows with level through ability power |
 | A knock or assist heals 25% | wiki passive | yes (0063) | Built; asserted |
+
+## Death Blossom: source vs ours (measured, nov 12)
+
+Measured by `dancer_ring` in tools/dj_ult_check.gd (run by `--dancer-combo-check`): dummies standing still in the band,
+in the middle and just out of reach, then one dummy the ring passes over while she walks at full speed. bh = 1.8 m.
+
+| Row | Source [where] | Ours (measured) | Verdict |
+|---|---|---|---|
+| Ring grow | 1.3 bh to 3 bh in about 0.4s [footage f27-f31]; the older overview row says about 3.5 bh, the frame read wins | 2.3 m (1.28 bh) to 5.4 m (3.00 bh) at 0.4s | match |
+| Blades | 2s after the grow, "up to 5 shots at each nearby enemy" [card], about every 0.2-0.4s per target [footage] | 10 landings per foe, one every 0.2s (gaps 0.18-0.22 from the flight), the first at 0.55s (volley at 0.4s plus 0.15s of flight), the last at 2.35s | cadence matches the footage; the cap is 10 not 5 on purpose (item 54). Alternative: `shots` 5 and `time` 2.0 gives 0.4s |
+| Hit reach | every enemy inside the ring [footage] | a foe is hit when its centre is within the radius plus its own body radius (`foes_in`), so about 0.4 m past the drawn line; an out-of-reach dummy 0.3 m past that takes none | accepted: a body touching the line is inside |
+| Damage, middle | 114-127 on a 137 bolt, so 0.83-0.93 of a bolt [footage]; 36 + 19% [card] | 4 of a 13 bolt, 0.31 | lower, left: item 54 kept the cast totals (40 inside, 60 in the band) and the bolt was raised from 9 to 13 afterwards |
+| Damage, band | +18 + 9.5% (+50%) and the Anti-Heal icon [card, f121]; 236 seen [footage] | 6 (+50%), blight 6s | the +50% matches the card; 236 is not read as a rule |
+| Per cast, one foe in reach | 5 shots: about 4.4 bolts inside | 10 blades: 3.1 bolts inside, 4.6 in the band | 0.7 of the source, left (owner balance, not a sourced value) |
+| Standing dummy | n/a | 10 landings, 40 in the middle, 60 in the band; none past the radius | asserted |
+| Walking, ring passes a dummy that starts 8 m ahead | the ring rides with her, shots follow whoever is inside [card, f41-f47] | 9 of 10 beats landed (the first beat found it out of reach), 2 of those in the band, 40 damage, equal to the beats' geometry | asserted: every beat's blade follows where the foe is then |
+| Moves, shoots, dashes | free [footage] | free | match (see the rows above) |
+
+No data row was changed: nothing in `x` contradicts a single sourced value; the two gaps are the cap and the damage, both owner balance calls
+filed above. The old `--dj-ult-check` and `--dancer-parity-check` names are sections of `--dancer-combo-check`.
 
 ## Combinations
 
@@ -251,6 +305,6 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
   to its landing). A reset gives back the air Vault's cooldown too. Asserted in `tools/dancer_loop_check.gd`.
 - Encore lives in `scripts/arch/kits/thief_ult.gd` (`ThiefUlt`, owned by the kit); X reaches it through
   `ArchKit.cast_ult()` on the `hunter_ult` action. Its numbers are `x` in content/archetypes/thief.json; the shared X base (gate, cooldown `cd["x"]`, HUD slot, bond) is `HeroUlt` (scripts/arch/hero_ult.gd).
-  Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
+  Sounds: `dj_encore` (the ring opening), `dj_encore_rise` (the 0.4s grow), `dj_encore_whirr` (a loop held at her position while the ring runs, stopped by `ThiefUlt.drop`), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).

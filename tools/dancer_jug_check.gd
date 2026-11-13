@@ -9,7 +9,9 @@ const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimate
 const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Meteor Drop and dashes
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
+const DTIMING := preload("res://tools/dancer_timing_check.gd")   # her animation timing against the source
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
+const HOLD := preload("res://tools/hold_release_check.gd")      # how Kael's RMB hold ends
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -21,6 +23,7 @@ func run(main_node: Node, who := "all") -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
+		await HOLD.kael(A)
 	await combos(A)
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)
@@ -36,7 +39,8 @@ func thief(a) -> void:
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
 	var K: ThiefKit = P.ak
-	T2.teleport(home + Vector3(0, 0, 5.5))
+	# parked clear of the Vault landing (~4.9 m): a shot now hits a body touching her
+	T2.teleport(home + Vector3(0, 0, 8.0))
 	A.ok("dancer: kit, model, Arc Bolts",
 			K != null and P.model.get_meta("arch") == "thief" and P.wid == "arc_bolts"
 			and Arch.name_of("thief") == "The Silver Thief",
@@ -355,10 +359,12 @@ func thief(a) -> void:
 	await _dancer_dash_flow(m, P, K, T, home)
 	await DFEEL.new().run(A, m, P, K, T, home)
 	DPARITY.new().run(A, m, P, K, T, home)
+	DTIMING.new().run(A, m, K)
 	DLOOP.new().run(A, m, P, K, T, T2, home)
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
+	await ULT.new().dancer_ring(A)
 
 
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
@@ -656,6 +662,7 @@ func juggernaut(a) -> void:
 			and not mv["drop_hit"]["fx"][1].has("size_x")
 			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
 			"")
+	_slash_edge(mv)
 	A.ok("juggernaut RMB tap: strike cone drawn = hit (%.1f m, %.0f deg)" % [sl["radius"], sl["angle"]],
 			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "cone"
 			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
@@ -1365,3 +1372,35 @@ func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 			% [what, col, got[0], AimShapes.SOFT_A, got[1]],
 			(e.get("col", Color.BLACK) as Color).is_equal_approx(Color("ff3a2a")) and bool(e.get("soft", false))
 			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
+
+
+const SLASH_HIT := 0.08     # s: the slash's contact in its sound (tools/gen_sfx_kael.py SLASH_HIT)
+const CLEAVE_HIT := 0.1     # s: the cleave's cut in jug_riposte (gen_sfx_kael.py RIPOSTE_HIT)
+
+## Kael's LMB slash sound: the swish keeps its 0.42 s and its play on the press, and every take's loudest
+## moment is a hard edge on the contact frame, as sharp over its swish as the cleave's cut, and quieter in game.
+func _slash_edge(mv: Dictionary) -> void:
+	var cleave := _edge("jug_riposte", CLEAVE_HIT)
+	var heard := float(mv["slash"]["sfx"][0]["db"]) - float(mv["riposte_go"]["sfx"][0]["db"])
+	var bad: Array = []
+	for take in ["jug_slash", "jug_slash_1", "jug_slash_2", "jug_slash_3"]:
+		var e := _edge(take, SLASH_HIT)
+		var louder: float = e["edge"] + heard - cleave["edge"]
+		if absf(e["len"] - 0.42) > 0.002 or e["lead"] < cleave["lead"] - 1.5 or louder > 0.0 or louder < -6.0:
+			bad.append("%s %s, %+.1f dB in game vs the cleave" % [take, e, louder])
+	A.ok("juggernaut LMB sound: a hard edge on the contact frame over the swish, levelled under the cleave",
+			bad.is_empty() and not mv["slash"]["sfx"][0].has("delay"), "cleave %s %s" % [cleave, bad])
+
+## A source wav (44.1 kHz mono 16-bit) at its hit time: length, the peak (dBFS) in the 15 ms from it, and
+## how far that peak sits over the loudest moment anywhere else (the swish before it, the tail after 30 ms).
+func _edge(sname: String, hit: float) -> Dictionary:
+	var b := FileAccess.get_file_as_bytes("res://audio/%s.wav" % sname)
+	var edge := 0.0
+	var rest := 1.0
+	for i in range(44, b.size() - 1, 2):
+		var t := float(i - 44) / 2.0 / 44100.0
+		var v := absf(b.decode_s16(i))
+		if t >= hit and t < hit + 0.015: edge = maxf(edge, v)
+		elif t < hit - 0.005 or t >= hit + 0.03: rest = maxf(rest, v)
+	return {"len": snappedf(float(b.size() - 44) / 2.0 / 44100.0, 0.001),
+			"edge": snappedf(linear_to_db(edge / 32768.0), 0.1), "lead": snappedf(linear_to_db(edge / rest), 0.1)}

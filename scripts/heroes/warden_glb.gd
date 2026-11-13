@@ -226,7 +226,6 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
-	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
@@ -241,6 +240,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 		_hold_weapon(root, glb, float(own.get("weapon_scale", 1.0)), Vector3(off[0], off[1], off[2]))
 	_hold_shield(root, glb)
 	sync.mood = WardenMood.make(root, glb, skel, art(arch))
+	WardenBlink.make(glb, skel, art(arch))
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
@@ -253,19 +253,20 @@ static func will_dress(arch: String) -> bool:
 static var _misfits := {}      # .glb path -> the bones that don't fit the rig ([] when it fits)
 static func misfits(arch: String) -> Array:
 	var p := path(arch)
-	if not _misfits.has(p):
+	var held = SharedCache.read(_misfits, p)
+	if held == null:
 		var scene := _scene(arch)
 		var glb: Node3D = scene.instantiate() as Node3D if scene else null
 		var skel := skeleton(glb)
 		var bad: Array = ["no armature"]
 		if skel:
 			bad = WardenSkeleton.mismatches(skel, neutral_rest(arch), extra_bones(arch))
-		_misfits[p] = bad
+		held = SharedCache.put(_misfits, p, bad)
 		if glb:
 			glb.free()
 		if not bad.is_empty():
 			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
-	return _misfits[p]
+	return held
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
@@ -546,7 +547,7 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
+	if not uses_model(arch) or SharedCache.read(_scenes, p) != null or not BackgroundWork.can_read_ahead():
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
@@ -568,19 +569,20 @@ static func fetch_for(opts: Dictionary) -> void:
 static func fetched(arch: String) -> bool:
 	fetch(arch)
 	var p := path(arch)
-	return not uses_model(arch) or _scenes.has(p) \
+	return not uses_model(arch) or SharedCache.read(_scenes, p) != null \
 			or ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS
 
 ## Whether the Warden's neutral rig rest is known yet (else the next build measures it first: a build of its own).
 static func has_rest(arch: String) -> bool:
-	return _neutral.has(arch) or not uses_model(arch)
+	return SharedCache.read(_neutral, arch) != null or not uses_model(arch)
 
 static func _scene(arch: String) -> PackedScene:
 	var p := path(arch)
-	if not _scenes.has(p):
+	var held = SharedCache.read(_scenes, p)
+	if held == null:
 		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
-	return _scenes[p] as PackedScene
+		held = SharedCache.put(_scenes, p, BackgroundWork.take(p) if asked else load(p))
+	return held as PackedScene
 
 ## A Warden's variant bones: the code table above, plus its art's data file (content/rules/warden_anim/<art>.json).
 static func extra_bones(arch: String) -> Dictionary:
@@ -604,10 +606,11 @@ static func _skinned_weapon(root: Node3D) -> void:
 
 ## The rig rest of the Warden's model in the neutral look: baked (WardenRest), else measured once a session.
 static func neutral_rest(arch: String) -> Dictionary:
-	if not _neutral.has(arch):
+	var held = SharedCache.read(_neutral, arch)
+	if held == null:
 		var baked := WardenRest.baked(arch)
-		_neutral[arch] = baked if not baked.is_empty() else measure_rest(arch)
-	return _neutral[arch]
+		held = SharedCache.put(_neutral, arch, baked if not baked.is_empty() else measure_rest(arch))
+	return held
 
 ## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
 static func measure_rest(arch: String) -> Dictionary:
@@ -720,13 +723,14 @@ static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag:
 		else:
 			var own_ink: Dictionary = own.get("ink", {})
 			var key := [ink, JSON.stringify(own_ink)]
-			if not _far_inks.has(key):
-				var far := ink.duplicate() as ShaderMaterial
+			var far = SharedCache.read(_far_inks, key)
+			if far == null:
+				far = ink.duplicate() as ShaderMaterial
 				far.set_shader_parameter("far_cut", INK_FAR_CUT)
 				for k in own_ink:
 					far.set_shader_parameter(k, _param(own_ink[k]))
-				_far_inks[key] = far
-			m.next_pass = _far_inks[key]
+				far = SharedCache.put(_far_inks, key, far)
+			m.next_pass = far
 	if slot == "glow" and m.next_pass == null:
 		var cfg: Dictionary = GLOW_SHELL.merged(own.get("glow_shell", {}), true)
 		if float(cfg["glow_px"]) > 0.0:
@@ -939,7 +943,9 @@ class Sync extends Node:
 	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
+	var head_look: WardenLookAt   # the head turns to the aim ahead of the body (WardenLookAt)
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
+	var opener: WardenOpen        # the open channel's reach over the clips (WardenOpen), or null
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
 	var blade_bone := -1
@@ -953,7 +959,6 @@ class Sync extends Node:
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
-	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -966,6 +971,7 @@ class Sync extends Node:
 				continue
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
+		head_look = WardenLookAt.make(model, skeleton)
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
@@ -990,6 +996,7 @@ class Sync extends Node:
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
+		opener = WardenOpen.make(clips) if clips else null
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		if clips:
 			_look_pose()
@@ -1024,6 +1031,7 @@ class Sync extends Node:
 		else:
 			apply()
 			apply_blade()
+		head_look.step(dt, clips)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		if companions:
@@ -1094,6 +1102,8 @@ class Sync extends Node:
 						_rig_pose(l), w))
 		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+		if opener:
+			opener.step(dt, 1.0 - w)
 		if sway:
 			sway.step(dt)
 		if w < 1.0:
@@ -1106,8 +1116,6 @@ class Sync extends Node:
 	func apply_blade() -> void:
 		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
 			return
-		if square_blade:
-			_square_blade()
 		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
 		var a := skel.global_transform * skel.get_bone_global_pose(blade_root_bone) * blade_root.position
@@ -1118,16 +1126,6 @@ class Sync extends Node:
 		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
 		if muzzle:
 			muzzle.global_position = b
-
-	## A root scaled on x and z only (body "bulk": Mossy) shears a blade turning in the hand, which then stretches
-	## and shrinks. The blade bone's world basis is made square again at the skeleton's height scale (its size along
-	## the root's up axis, which the shear leaves alone), so it never builds on last frame's pose. A bone pose cannot
-	## hold a shear, so a little is left (under 2 cm on Mossy's blade, --clip-check).
-	func _square_blade() -> void:
-		var pose := skel.get_bone_global_pose(blade_bone)
-		var k := (skel.global_basis.transposed() * root.global_basis.y.normalized()).length()
-		pose.basis = skel.global_basis.inverse() * ((skel.global_basis * pose.basis).orthonormalized() * k)
-		skel.set_bone_global_pose(blade_bone, pose)
 
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its

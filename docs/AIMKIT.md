@@ -13,6 +13,8 @@ cursor state plus `MANIFEST.txt`).
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
 
+Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
+
 Scale: 1 body height (bh) = 1.8 m (`AimKit.BH`). The hero sheets measure in bh.
 
 ## 1. Aim modes
@@ -42,6 +44,8 @@ Membership tests (flat XZ), so a kit's hit test matches what it draws:
 `AimMode.in_lane(from, dir, len, width, p)`, `in_cone(from, dir, len, deg, p, inner)`,
 `in_arc(center, dir, radius, deg, thick, p)` and `in_circle(at, r, p)`. Each takes an optional `pad`
 (for example a target's radius).
+
+**Cursor on your own body:** `Hunter.aim_dir()` (the one direction every shot, cast and the facing read) ignores a cursor within two body radii (`AIM_MIN_BODIES`, a body width) and keeps the last good direction, so crossing the model never spins the body or sends rounds sideways. `--aim-near-check` sweeps the cursor across and around the body.
 
 ## 2. Telegraphs
 
@@ -169,9 +173,11 @@ drag arrow.
 ```gdscript
 AimKit.charge(h, k)                  # every step while charging: a thin ring fills round the cursor
                                      # crossing k = 1 fires the flare once (pass "flare": false to skip)
+                                     # "at": "body" draws the same ring round the hunter instead (44 px),
+                                     # where the source shows its charge arc on the hero (Kael's blast)
 AimKit.flare(h)                      # the full-charge flare now: a ring snaps out, a glint (0.28 s)
 AimKit.perfect(h)                    # the perfect-window star: gold 4-point star and ring, 0.12 s
-AimKit.reticle(h)                    # {charge, flare, perfect}, for checks
+AimKit.reticle(h)                    # {charge, flare, perfect, at}, for checks
 ```
 Params: `col` (charge ring colour, default the hero colour), `col2` (flare colour), and `col` on
 `perfect` (gold by default). The states run on real time, so they show through hit stop. The ring sits
@@ -205,6 +211,9 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
+- **Bots dodge them.** A shape shown with `all` (a circle, lane or cone) is a hostile area to the other
+  team's bots: `BotDodge` (scripts/match/bot_dodge.gd) walks a bot out of it, or dashes with a real charge,
+  after the difficulty's `react` time x 2. Check: `--bot-dodge-check` (normal out at least 70%, easy under 40%).
 - **The old helpers.** `ArchKit.tele_circle` and `tele_lane` (one tweened node per telegraph) still work.
   Move your kit's calls to AimKit as you touch them (docs/DEBT.md).
 

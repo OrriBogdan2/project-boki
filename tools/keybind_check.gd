@@ -3,7 +3,7 @@ extends RefCounted
 ## second key can be set, cleared and saved; a key already in use is caught and can be swapped;
 ## nothing else is on X in a match (the arena/duel reset is Backspace, separating from the drop is
 ## Z); glove 2 and play share V on purpose (a match key and a home key). With --shots-dir=<dir>, screenshots of
-## the Controls page and of the clash warning.
+## the Controls page and of the clash warning. tools/keybind_audit.gd: every action the game uses is listed in Controls.
 
 var bad := 0
 
@@ -14,6 +14,35 @@ func ok(cond: bool, what: String) -> void:
 func _key(k: int) -> InputEventKey:
 	var e := InputEventKey.new(); e.physical_keycode = k; e.pressed = true
 	return e
+
+## Binds R (the ultimate's, shared with turning a piece) to dash: the swap leaves every action
+## bound, and the saved file round-trips.
+func _dash_on_r(S) -> void:
+	var r := "key:%d" % KEY_R
+	var dash_old: String = S.slots("dash")[0]
+	var owners: Array = S.conflicts(_key(KEY_R), "dash")
+	ok(owners.any(func(o): return o[0] == "hunter_ult") and S.slots("hunter_ult")[0] == r,
+			"R is the hunter ultimate's: binding it to dash is a clash (%s)" % str(owners))
+	S.swap_bind("dash", 0, _key(KEY_R), owners)
+	ok(S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old and S.slots("rotate")[0] == dash_old,
+			"swap: dash on R, the ultimate and turn take dash's old key (%s / %s / %s)"
+			% [S.binding_text("dash"), S.binding_text("hunter_ult"), S.binding_text("rotate")])
+	var none: bool = S.unbound("dash") or S.unbound("hunter_ult") or S.unbound("rotate")
+	ok(not none and S.conflicts(_key(KEY_R), "dash").is_empty(), "nobody is left unbound, and R is only dash's")
+	var cf := ConfigFile.new()
+	ok(cf.load(S.PATH) == OK and cf.get_value("s", "keys")["dash"] == [r], "the swap is saved")
+	for a in ["dash", "hunter_ult", "rotate"]: InputMap.action_erase_events(a)
+	S.v["keys"] = (cf.get_value("s", "keys") as Dictionary).duplicate(true)
+	S.apply("keys")
+	var back: bool = S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old
+	ok(back and InputMap.action_get_events("dash").size() == 1, "the saved settings load back to the same bindings")
+	# dash with no key: its owners get nothing and read as unbound (the Controls page paints that red)
+	S.reset_all()
+	S.clear_bind("dash", 0)
+	S.clear_bind("dash", 1)
+	S.swap_bind("dash", 0, _key(KEY_R), S.conflicts(_key(KEY_R), "dash"))
+	ok(S.unbound("hunter_ult") and S.unbound("rotate") and not S.unbound("dash"), "an owner given no key reads unbound")
+	S.reset_all()
 
 func run(main: Node) -> void:
 	var tree := main.get_tree()
@@ -49,14 +78,18 @@ func run(main: Node) -> void:
 	# clashes: F is interact's
 	var cf: Array = S.conflicts(_key(KEY_F), "ultimate")
 	ok(cf.size() == 1 and cf[0][0] == "interact", "giving the ultimate F is caught: it's Interact's (%s)" % str(cf))
-	S.swap_bind("ultimate", 0, _key(KEY_F), "interact", 0)
+	S.swap_bind("ultimate", 0, _key(KEY_F), cf)
 	ok(S.slots("ultimate")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == "key:%d" % KEY_X, "swapping gives Interact the ultimate's old key (ult %s, interact %s)" % [S.binding_text("ultimate"), S.binding_text("interact")])
 	S.reset_all()
+	_dash_on_r(S)
 	# (the move of old saves to the new defaults is --ultbond-check)
 	# the arena and duel resets are on Backspace now
 	var ar := FileAccess.get_file_as_string("res://scripts/match/arena.gd")
 	var du := FileAccess.get_file_as_string("res://scripts/match/duel.gd")
 	ok(not ar.contains("KEY_X:") and ar.contains("KEY_BACKSPACE:") and not du.contains("KEY_X") and du.contains("KEY_BACKSPACE"), "the arena and duel resets moved to Backspace")
+	# every action the game uses is in Controls, ships bound, and no code names a physical key on its own
+	var audit: Array = load("res://tools/keybind_audit.gd").problems()
+	ok(audit.is_empty(), "every action is in Controls, no hard-wired key (%s)" % "; ".join(audit))
 	# the Controls page, and the clash warning
 	var shot := ""
 	for a in OS.get_cmdline_user_args():
@@ -72,6 +105,8 @@ func run(main: Node) -> void:
 	ok(Overlay.has_meta("bind_conflict") and is_instance_valid(Overlay.get_meta("bind_conflict")), "the binding page warns about the clash and offers a swap")
 	if shot != "":
 		tree.root.get_texture().get_image().save_png(shot + "/keybinds_conflict.png")
+	var stale: Array = S.ACTIONS.filter(func(x): return String(x[1]).containsn("archetype"))
+	ok(stale.is_empty(), "no Controls label says Archetype (the game says Hunter)")
 	S.reset_all()
 	print("KEYS DONE, failures: %d" % bad)
 	tree.quit()

@@ -3,7 +3,7 @@ import math
 
 import boki_clips
 import lunowl
-from boki_clips import add, s, seq
+from boki_clips import add, plant, s, seq, stride_leg
 from lunowl import SIDES, TAIL_PTS, antenna_pts, on_wing, streamer_pts, v3
 
 LOOK_UP = 0.22     # its face is already a flat disc to the front: a little tilt up is enough for the high cameras
@@ -133,8 +133,21 @@ def waddle(t, roll, lift, step):
     return p
 
 
+# each foot's touch-down (of the cycle): neither is down across 0, where the exported loop holds its first frame
+STEP_DOWN = {"L": 0.06, "R": 0.56}
+STEP_DUTY = 0.35      # of the cycle a foot is down
+STEP_REACH = 0.08     # m before and behind its rest place that a foot sweeps back through at one speed
+STEP_LIFT = 0.045     # m a foot clears on its way forward
+
+
 def walk(t):
+    """The waddle with its feet planted: each goes back at one steady speed, so it holds the ground at the rate
+    BokiRig picks."""
     p = waddle(t, 0.14, 0.7, 0.42)
+    for sd, down in STEP_DOWN.items():
+        ankle = BONES["hpaw." + sd][0]
+        y, z = stride_leg(t - down, STEP_DUTY, ankle[2] - STEP_REACH, ankle[2] + STEP_REACH, ankle[1], STEP_LIFT)
+        plant(p, BONES, ("hleg", "." + sd), (y, z))
     flap(p, t, 2, 0.05, -0.08)
     return p
 

@@ -1,0 +1,17 @@
+walk_loop__albert	CLEANUP: loops; faces ~90deg off our forward; shield arm splayed (rest-pose mismatch on bulky rig)
+walk_loop__lace	CLEANUP: clean retarget, bow in hand; heavyset style wrong for her; forward axis off
+run_loop__albert	CLEANUP: loops; shield held flat sideways
+run_loop__lace	CLEANUP: good gait, loops; forward axis + speed tuning
+idle_v2__albert	CLEANUP: shield arm splayed
+idle_v2__lace	USABLE: clean, bow aligned (feet ~0.1 m high at times)
+hit_v2__albert	CLEANUP: reads, 4 s too long, needs trim
+hit_v2__lace	CLEANUP: reads, needs trim
+light_v1__albert	NOT USABLE: v1.0 vague, weapon never swings
+light_v2__albert	NOT USABLE: shield leads, hammer not swung
+light_v3__albert	CLEANUP: swing present, prop hand not aligned
+heavy_v3__albert	CLEANUP: overhead lift + slam reads well; shield clips, trim
+victory_v3__albert	CLEANUP: good pose/personality; shield arm
+light_v3__lace	CLEANUP: draw/loose reads; hands not on string
+dodge_v3__lace	NOT USABLE: root sinks ~0.8 m under floor mid-roll
+death_v3__lace	USABLE: clean fall to floor, slight foot slide
+cast_v3__lace	CLEANUP: subtle/generic; thread motif weak

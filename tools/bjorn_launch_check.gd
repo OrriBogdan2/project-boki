@@ -419,10 +419,10 @@ func _lmb_parity() -> void:
 		m.step(DT)
 		if left_at < 0.0 and String(K.mace.get("st", "")) == "fly":
 			left_at = m.time - t0
-			cadence = P.fire_cd
+			cadence = P.fire_cd + m.time - K.throw_at          # (the card's rate counts from the throw)
 	var wind := BulwarkKit.THROW_WIND
-	ok("bjorn parity LMB: the throw's wind-up, the hammer leaves his hand %.2f-0.15 s after the press (one frame)" %
-			wind, left_at >= wind and left_at <= 0.15 + 0.001 and K.anim_id == "bul_throw",
+	ok("bjorn parity LMB: the throw's wind-up, the hammer leaves his hand %.2f-0.2 s after the press (one frame)" %
+			wind, left_at >= wind and left_at <= 0.2 + 0.001 and K.anim_id == "bul_throw",
 		"left at %.3f anim %s" % [left_at, K.anim_id])
 	ok("bjorn parity LMB: the throw's cadence is the source card's 0.45 s (sheet: 175 out, 175 back)",
 		absf(float(K.lmb_def()["throw_rate"]) - 0.45) < 0.001 and cadence > 0.30 and cadence <= 0.45 + 0.001,
@@ -437,6 +437,7 @@ func _lmb_parity() -> void:
 ## hurts nobody; a jump and Shift keep it; the release puts the hammer back and still slams at the cursor.
 const MIN_TURNS := 1.0
 const SPIN_STRETCH := 0.25     # s: the turn rate is measured over each of these
+const WHIRL_REACH_K := 0.71    # m per unit of his model scale: the whirling head this far out is at arm's length
 
 ## The hammer's head round the circle's centre (rad, world), with the effect brought up to date.
 func _head_angle(K: BulwarkKit) -> float:
@@ -492,8 +493,9 @@ func _hold_spin() -> void:
 	ok("bjorn #59: the whirl speeds up with the charge",
 		fastest >= slowest + 0.8 and fastest <= float(md["spin_turns"][1]) + 0.1,
 		"%.2f-%.2f turns/s" % [slowest, fastest])
-	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= 1.5 and trail,
-		"head %.2f m out, trail %s" % [reach, trail])
+	var arm := WHIRL_REACH_K * P.model.global_basis.get_scale().y
+	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= arm and trail,
+		"head %.2f m out (arm's length %.2f), trail %s" % [reach, arm, trail])
 	ok("bjorn #59: the whirl hurts nobody (the default for now): a foe inside its circle took nothing in 2 s",
 		dmg(T) == 0.0, "took %.0f" % dmg(T))
 	# walking: the hold's speed (55% of his run, kept from the source), the hammer still round

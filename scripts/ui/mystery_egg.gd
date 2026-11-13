@@ -3,12 +3,10 @@ extends Node3D
 ## The mystery egg of the hatch scene (the owner's call in briefs/DECISIONS.md): a black egg in a
 ## small woven basket, tucked at the back of the dais among rocks and flowers, with a faint glint on
 ## its shell now and then so a curious player finds it. This node is the basket and the glint (the
-## egg itself is an EggHatch the hatch scene puts on top); the draw and the mutation odds come from
-## content/rules/mystery_egg.json.
+## egg itself is an EggHatch the hatch scene puts on top); the pool and the mutation odds come from
+## content/rules/mystery_egg.json, each species' rarity from BokiModes.
 
 const PATH := "res://content/rules/mystery_egg.json"
-const SHELL := Color("17131f")      # the black shell
-const SPOTS := Color("3d3352")      # faint plum speckles on it
 const GLINT_EVERY := 3.4            # s between two glints on the shell
 const GLINT_LEN := 0.4              # s one glint lasts
 const GLINT_SIZE := 0.09            # m: the glint's widest
@@ -23,27 +21,16 @@ static func rules() -> Dictionary:
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	return _rules
 
-## {species: tickets}: each pool species' roster rarity as its share of the draw.
+## {species: tickets}: each pool species' rarity tickets (BokiModes) as its share of the draw.
 static func weights() -> Dictionary:
-	var r := rules()
 	var out := {}
-	for sp in r["pool"]:
-		if Data.KIN.has(sp):
-			out[sp] = int(r["weights"][r["pool"][sp]])
+	for sp in _pool():
+		out[sp] = BokiModes.tickets(sp)
 	return out
 
 ## The species inside: a draw weighted by rarity, so a rare one hatches now and then.
 static func roll_species(rng: RandomNumberGenerator) -> String:
-	var w := weights()
-	var total := 0
-	for sp in w:
-		total += int(w[sp])
-	var ticket := rng.randi_range(1, maxi(1, total))
-	for sp in w:
-		ticket -= int(w[sp])
-		if ticket <= 0:
-			return sp
-	return "cindle"
+	return BokiModes.draw(_pool(), rng)
 
 ## Its mutations at birth: Mutations' own roll at mutation_mult times the base odds.
 static func roll_mutations(rng: RandomNumberGenerator) -> Array:
@@ -99,3 +86,6 @@ func _process(delta: float) -> void:
 	if glint.visible:
 		glint.scale = Vector3.ONE * sin(phase / GLINT_LEN * PI)
 		glint.rotation.z = phase * 2.0
+
+static func _pool() -> Array:
+	return (rules()["pool"] as Array).filter(func(sp): return Data.KIN.has(sp))

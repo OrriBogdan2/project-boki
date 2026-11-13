@@ -26,10 +26,10 @@
 		"seeds": 200, "days": 16,
 		"runs_a_day": 3, "run_lair_p": 0.5, "run_gems": 40, "garden_gems": 20, "zone_gems": 10,
 		"biomes": ["meadow", "bloom", "frost", "ember", "storm", "gloom"],
-		"meals": 2,
+		"meals": 2, "ripenings": 3,
 		"zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]
 	},
-	"pace_doc": "The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1].",
+	"pace_doc": "The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on; ripenings = start-patch ripenings a day (8 min each), each adding its rotating extra snack to the ones grown (zone patches add theirs once open). Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1].",
 	"hub_hints": {
 		"start_s": 1.5,
 		"start_s_doc": "Seconds after you arrive in the hub before its first hint can show.",
@@ -37,6 +37,14 @@
 		"gap_s_doc": "Seconds between two hub hints: one at a time, each longer than its 6 s on screen.",
 		"near_m": 6.0,
 		"near_m_doc": "Metres from the place a hint is about (the Waystone, the nest corner) at which it shows.",
+		"wayseed_text": "Wayseed: plant it at the Waystone at home to open a new garden zone.",
+		"wayseed_text_doc": "The line shown once per save, the first time a Wayseed goes into your pack on a run (Save.d tutorial wayseed_tip).",
+		"pulse_s": 4.0,
+		"pulse_s_doc": "Seconds the Waystone pulses, once per save (hub_hints seed_pulse), on the first arrival in the hub holding a Wayseed.",
+		"pulse_amp": 0.06,
+		"pulse_amp_doc": "How far the Waystone's scale swings in the pulse (0.06 = 6%).",
+		"pulse_hz": 1.5,
+		"pulse_hz_doc": "Pulses a second.",
 		"list": [
 			{"id": "waystone", "at": "waystone", "text": "The Waystone: step on the ring and press {interact} to travel."},
 			{"id": "nest", "at": "nest", "text": "The nest corner: pair two Boki here, hatch eggs and pass on gifts."},
@@ -70,5 +78,5 @@
 		"low": {"hub": {"draws": 370, "objects": 560}}},
 	"ratchet_doc": "Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one.",
 	"budget_doc": "What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column.",
-	"wayseed_from": "a lair of a matching type on a run, or the Drift Trader once a week"
+	"wayseed_from": "a lair of a matching type on a run, or Old Pell at the Black Market (one every %d days, %d gems)"
 }

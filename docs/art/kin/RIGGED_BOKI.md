@@ -24,6 +24,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `tools/boki/face.py` | Eye domes, lids, brows, mouth: one vertex grid, one blend shape per expression |
 | `tools/boki/boki_clips.py`, `*_anim.py` | Shared clips, then each species' skeleton and own clips |
 | `tools/boki/boki_rig.py`, `build_boki.py` | Armature, weights from the primitives, sampling, .glb export |
+| `tools/boki/boki_scan.py`, `boki_meshy.py`, `pose_shots.py` | A body from a Meshy model of the sheet on the same rig (Kestrike, Cairnback, Gongibbon `gibbelle`): `MESHY_BOKI_RECIPE.md` |
 | `scripts/match/boki_rig.gd` | Loader and driver (`BokiRig`): clip from metas, face on top, marks and colours |
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
@@ -93,21 +94,30 @@ fix (lodestick, mossgrade, cairnback): `docs/art/kin/boki_gait/<id>_before.png` 
 bottom row its match speed). These are not committed yet: they are queued GPU jobs 20261109-153605-29862 (before)
 and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback --tag=before|after`.
 
+Planted paws (cindle run, wisplet walk): these two clips place each paw with `boki_clips.plant` (a two-bone leg
+solved in the side view onto a target) along `boki_clips.stride_leg` (down for part of the step, going back at one
+speed from a little before touch-down to a little after lift-off, so a paw is in the air when it turns). Cindle's run
+is its own gallop (`vespyx_anim.run`: hind paws, then fore, then a gathered flight over the loop's start, whose
+first frame the export holds); wisplet's walk keeps the waddle with its feet planted. Their `OVER` rows are gone:
+at most 18% (cindle at scale 0.8 and match speed, at full cadence) and 9%. Only those two clips' tracks were
+copied into the committed glbs by bone name: a full `build_boki.py` rebuild of either differs from the committed
+mesh and textures.
+
 | Boki | 1.5 m/s | 2.4 | 4.4 | match (m/s) | seam idle/walk/run | idle-walk pop |
 |---|---|---|---|---|---|---|
-| cindle | 58% → 21% 2.6 steps/s | 58% → 38% 3.2 steps/s | 63% → 38% 5.9 steps/s | 75% → 46% 6.0 steps/s (6.8) | 1.1 / 1.0 / 1.3 | 0.9 |
+| cindle | 58% → 21% 2.6 steps/s | 58% → 15% 1.9 steps/s | 63% → 15% 3.4 steps/s | 75% → 15% 5.3 steps/s (6.8) | 1.1 / 1.0 / 0.6 | 0.9 |
 | puddlet | 54% → 16% 3.5 steps/s | 54% → 36% 4.5 steps/s | 71% → 42% 6.0 steps/s | 78% → 57% 6.0 steps/s (6.0) | 1.1 / 1.0 / 1.4 | 0.8 |
 | burrlet | 75% → 30% 4.1 steps/s | 75% → 33% 5.0 steps/s | 83% → 49% 6.0 steps/s | 87% → 64% 6.0 steps/s (6.2) | 1.5 / 1.1 / 1.3 | 0.9 |
 | glintmole | 74% → 33% 4.2 steps/s | 74% → 33% 4.9 steps/s | 79% → 46% 6.0 steps/s | 84% → 61% 6.0 steps/s (6.2) | 1.6 / 1.1 / 1.3 | 0.9 |
 | rimeshrew | 71% → 27% 4.2 steps/s | 71% → 40% 5.5 steps/s | 74% → 54% 6.0 steps/s | 84% → 72% 6.0 steps/s (7.4) | 1.6 / 1.0 / 1.3 | 0.9 |
 | pebbit | 75% → 33% 4.1 steps/s | 75% → 33% 4.7 steps/s | 82% → 44% 6.0 steps/s | 85% → 55% 6.0 steps/s (5.4) | 1.5 / 1.1 / 1.2 | 0.9 |
 | cairnback | 88% → 29% 5.5 steps/s | 88% → 40% 5.0 steps/s | 86% → 56% 6.0 steps/s | 88% → 65% 6.0 steps/s (5.6) | 1.5 / 1.1 / 1.1 | 0.9 |
-| wisplet | 69% → 34% 5.6 steps/s | 69% → 43% 6.0 steps/s | 82% → 62% 6.0 steps/s | 90% → 79% 6.0 steps/s (8.0) | 3.2 / 1.4 / 1.1 | 0.8 |
+| wisplet | 69% → 9% 4.7 steps/s | 69% → 43% 6.0 steps/s | 82% → 62% 6.0 steps/s | 90% → 79% 6.0 steps/s (8.0) | 3.2 / 0.9 / 1.1 | 0.9 |
 | zapple | 57% → 59% 2.7 steps/s | 57% → 71% 3.0 steps/s | 67% → 71% 5.4 steps/s | 73% → 69% 6.0 steps/s (7.6) | 1.0 / 0.8 / 0.8 | 0.6 |
 | hivara | 66% → 27% 3.2 steps/s | 66% → 36% 3.6 steps/s | 63% → 33% 6.0 steps/s | 75% → 56% 6.0 steps/s (7.0) | 1.3 / 1.0 / 1.0 | 0.9 |
 | kestrike | 81% → 28% 6.0 steps/s | 81% → 49% 6.0 steps/s | 85% → 68% 6.0 steps/s | 91% → 81% 6.0 steps/s (7.4) | 0.6 / 1.5 / 1.2 | 1.0 |
 | kindlewren | 77% → 30% 6.0 steps/s | 77% → 43% 6.0 steps/s | 84% → 69% 6.0 steps/s | 90% → 81% 6.0 steps/s (7.4) | 0.6 / 2.1 / 1.4 | 0.9 |
-| lodestick | 99% → 62% 6.0 steps/s | 99% → 48% 6.0 steps/s | 90% → 70% 6.0 steps/s | 94% → 82% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 0.9 |
+| lodestick | 99% → 44% 6.0 steps/s | 99% → 53% 6.0 steps/s | 90% → 74% 6.0 steps/s | 94% → 85% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 1.0 |
 | marchleaf | ?% → 48% 4.0 steps/s | ?% → 41% 3.0 steps/s | ?% → 41% 5.4 steps/s | ?% → 46% 6.0 steps/s (6.6) | 0.5 / 1.0 / 0.9 | 0.9 |
 | mossgrade | 96% → 51% 6.0 steps/s | 96% → 35% 4.4 steps/s | 77% → 41% 6.0 steps/s | 82% → 57% 6.0 steps/s (6.0) | 1.5 / 1.1 / 1.2 | 1.6 |
 | nettlynx | 80% → 26% 3.8 steps/s | 80% → 33% 4.8 steps/s | 82% → 51% 6.0 steps/s | 87% → 67% 6.0 steps/s (6.6) | 1.3 / 1.1 / 1.3 | 0.9 |
@@ -116,3 +126,53 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
+
+## State coverage
+
+`--boki-anim-audit` also drives all 22 rigged Boki through every state the game plays (`tools/boki_state_cover.gd`)
+with the metas and speeds the game sets, and fails if a state does not resolve to the clip its row names, to a clip
+the Boki lacks, or to one that never leaves the bind pose or holds a single pose. Every Boki lands on the same clip
+in every state, so the table is per state (22 Boki x 36 states, 0 gaps). Kinds: **authored** (baked in the glb by the
+species' `*_anim.py`), **retargeted** (`BokiHomeClips`: the species' own idle or sleep with body-plan deltas),
+**fallback** (the state has no clip of its own: the best existing one of the same rig plays), **proc** (a spring layer
+on top, no clip).
+
+| State | Where | Clip | Kind |
+|---|---|---|---|
+| idle, perch (on a shoulder) | home, garden, match | idle | authored |
+| walk / run / summon recall / Relay run | home, match, garden | walk / run (rate from speed) | authored |
+| joy (cheer) | home, match | hop | authored |
+| attack, ability | match | attack, ability | authored |
+| chop, mine, carry, tend | home jobs | same name | authored |
+| hit | match | whatever plays + `KinFlinch` | proc |
+| stun | match | idle (sad face, spins) | fallback, authored |
+| summon throw (in the air) | match | run | fallback, authored |
+| faint, then held, then revive | match | settle, nap, wake | fallback, retargeted |
+| settle, nap, wake | home | same name | retargeted |
+| munch, ball (nudge), post (climb), tub / wade (splash) | home, garden | same name | retargeted |
+| Tumble rush, brace, dodge; Echo hop (stonehop), spin | garden | same name | retargeted |
+| Relay bump (nudge), brace, duo tap (stonehop) | garden | same name | retargeted |
+| Relay win | garden | hop | fallback, authored |
+| Relay sulk | garden | idle, head dropped | fallback, authored |
+
+Gaps found and filled without new art: a **fainted** Boki (a match `downed` state) lay on its side but kept playing
+idle (or the walk, sliding); `Kin.render` now sets the `kdown` meta and `BokiRig` treats it like home sleep: settle
+down, nap (curled, slow breathing), wake on revive. The Relay's **win** and **sulk** names have no clip on any rig, so
+both played a happy `stonehop`; the data in `content/rules/base_relay.json` "beats"."fallback" now gives win its
+hop and sulk its idle (with the head drop). `eat` and `pet` are baked but no game state plays them.
+
+Shared base: where a species did not write its own clip, it plays the shared one from `boki_clips.py` with only
+its sway layer on top. Those are, per species, cindle, puddlet, burrlet, glintmole, rimeshrew, nettlynx: idle, walk,
+run, hop, pet, carry, tend; pebbit: idle, run, hop, pet, carry, tend; cairnback: idle, hop, pet, carry, tend; hivara:
+idle, walk, hop, pet, carry, tend; mossgrade: idle, hop, tend; gloamshell: pet, tend; glomwort: tend. The other
+twelve Boki write all of theirs.
+
+### States that truly need authored clips
+
+None of these is a gap (each resolves to a real clip); each is a stand-in an animator should replace:
+1. **faint / downed** (fall, lie, get up): today settle then nap; a fall onto the side and a get-up on revive.
+2. **hit** (stagger): a spring layer only; a short flinch clip per body plan would read better.
+3. **stun / dazed**: idle with a sad face and a spin; a woozy sway.
+4. **summon throw** (flying): the run clip; a tucked tumble or glide (`ext/anim-boki-hop-air` plays hop in the air).
+5. **Relay win** and **sulk**: a hop and a stand; a cheer jump and a slump.
+6. The shared idle, walk, run, hop, pet, carry and tend of the species listed above under "Shared base".

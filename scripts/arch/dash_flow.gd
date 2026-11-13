@@ -5,10 +5,9 @@ extends RefCounted
 ## dash to end ("buffer", the default for a missing row) or cancels the dash. A press is never dropped.
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
-## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
-## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md).
+## A press that crowd control still forbids, made in its last Loco.press_buffer (tuning.json), is held the same way
+## and goes on the first step the CC allows it (docs/decisions/0022-cc-exit-buffer.md).
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
@@ -188,20 +187,22 @@ func _cancel(carry: bool) -> void:
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(h.base_speed)
 	h.vel = Vector3(flat.x, h.vel.y, flat.y)
 
-## Seconds until the hunter's crowd control allows `slot` (0: it does now). A stun stops every slot but Q's glove
-## and an ult's recast, a root the dash, Grounded the dash (not a reeling Dredge's) and the jump.
+## Seconds until the hunter's crowd control allows `slot` (0: it does now). A stun or the kit's committed recovery
+## (ArchKit.commit_left) stops every slot but Q's glove and an ult's recast, a root the dash, Grounded the dash (not
+## a reeling Dredge's) and the jump.
 func cc_left(slot: String) -> float:
 	var h := kit.h
 	if slot == "q" or (slot == "x" and kit.ult_running()):
 		return 0.0
+	var stop := maxf(h.stun_t, kit.commit_left())     # a stun, or the kit's own committed recovery: every slot
 	if slot == "dash":
 		var ground := 0.0 if DredgeKit.reeling(h) else KitStatus.grounded_left(h)
-		return maxf(h.stun_t, maxf(h.root_t, ground))
+		return maxf(stop, maxf(h.root_t, ground))
 	if slot == "jump":
-		return maxf(h.stun_t, KitStatus.grounded_left(h))
-	return maxf(h.stun_t, 0.0)
+		return maxf(stop, KitStatus.grounded_left(h))
+	return stop
 
-## Presses the CC forbids now, in its last BUFFER_S: held for the first step it allows them. A held LMB is left
+## Presses the CC forbids now, in its last Loco.press_buffer: held for the first step it allows them. A held LMB is left
 ## alone (it fires on its own once allowed); a tap is replayed. A cast that holds the hunter still (Rimelock's
 ## statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> void:
@@ -217,14 +218,14 @@ func _route_cc(fire_pressed: bool) -> void:
 
 func _hold_for_cc(slot: String) -> bool:
 	var left := cc_left(slot)
-	if left <= 0.0 or left > BUFFER_S:
+	if left <= 0.0 or left > Loco.press_buffer:
 		return false
 	held[slot] = 0.0
 	return true
 
 func _release(dt: float) -> void:
 	for slot in held.keys():
-		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < BUFFER_S:
+		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < Loco.press_buffer:
 			held[slot] = float(held[slot]) + dt
 			continue
 		held.erase(slot)

@@ -94,7 +94,7 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
-| Bulwark | **Guard** | blocking | defence meter |
+| Bulwark | **Crushed** | knocks into walls | none (a stun payoff, no meter) |
 
   The Gunslinger's is the lightest. If playtests show six resources is too much to read, cut that one first.
 
@@ -120,6 +120,8 @@ That's 10 points for 14 possible ranks, so choices matter.
 - Generic rank effects stay (ABILITIES.md): +15% damage per rank, −10% cooldown (dash −15%
   recharge), the verb's own numbers grow (`Effects.RANK_GROW`). Dash distances never grow. R rank 2:
   +30% duration and +15% cast effects. Each archetype adds **one rank-3 special** per slot, listed below.
+  A kit's JSON overrides the damage and cooldown steps per slot with the source's numbers: `rank_dmg` / `rank_cd`
+  {slot: [rank 1, rank 2, rank 3]} multipliers (`ArchKit.rank_k`; `rank_cd.dash` is the dash recharge). No row = the shared step.
 
 ### 3.5 HUD: making the level obvious (SUPERVIVE-style portrait cluster)
 
@@ -970,7 +972,7 @@ stun is your window to unload. Quickdraw (E) speeds the loading and doubles the 
   check 50 -> 41.
 - Bots: a full cylinder taps a Called Shot within 9m; otherwise the Rail from range.
 
-### Bulwark: Block -> Guard -> Crushed (rebuilt on an Oath-style shield-tank baseline)
+### Bulwark: Block -> Crushed (rebuilt on an Oath-style shield-tank baseline)
 
 Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
 close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
@@ -979,17 +981,16 @@ above is superseded by this:
 | Slot | What it does |
 |---|---|
 | LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
-| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
+| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). (the Guard meter and Shield Slam were cut: not in the source kit, owner 2026-11-07) |
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
-| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
+| Passive | **Crushed**: a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
 | E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
-| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
+| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each) |
 
-- Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
+- Loop: raise the shield into their fire -> Shield Charge them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Mending Ground on it.
-- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
-  shield burns gold. Payoff: `pay_slam`, T4.
+- Tells: none for a meter (it has none). Payoff: `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.
@@ -1232,6 +1233,7 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
 | `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+| `gil` | Gil | none (ours, no reference hero) | `docs/heroes/gil.md` |
 
 ## Kit parity lock
 `content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.

@@ -26,10 +26,10 @@ func run(m: Node) -> void:
 	b["level"] = 8
 	b["trust"] = 40.0
 	ok(NookRules.pair_why(a, b) != "", "no friendship, no egg (trust 40 and no bonds)")
-	b["bonds"] = {a["uid"]: 55.0}
-	ok(NookRules.pair_why(a, b) == "", "a recorded bond of 55 makes them friends")
-	b["bonds"] = {a["uid"]: 20.0}
-	ok(NookRules.pair_why(a, b) != "", "a recorded bond of 20 does not, whatever the trust")
+	b["bonds"] = {a["uid"]: 0.8}
+	ok(NookRules.pair_why(a, b) == "", "a recorded bond of 0.8 makes them friends")
+	b["bonds"] = {a["uid"]: 0.2}
+	ok(NookRules.pair_why(a, b) != "", "a recorded bond of 0.2 does not, whatever the trust")
 	b.erase("bonds")
 	b["trust"] = 60.0
 	a["bred_t"] = Time.get_unix_time_from_system()

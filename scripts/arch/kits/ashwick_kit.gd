@@ -24,7 +24,8 @@ const BOLT_CORE := Color("ffe070")
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
-const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
+const SHIELD_RINGS := 3               # most swirls shown on her body: one per foe the cloak caught, up to this
+const SHIELD_RING_STEP := 0.4         # m between the swirls up her body
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
@@ -185,7 +186,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	vfx("knock")
 	_stoke_pose()
 	if h.dashes < h.max_dashes():
-		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
+		h.dashes = minf(h.max_dashes(), h.dashes + 1.0)     # one ram charge back; the recharge keeps its time
 		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
@@ -215,15 +216,7 @@ func _tick(dt: float) -> void:
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
 		if tells_visible():
-			# the Furnace Cloak's shield: a swirling ring of fire hugging Cinder while it holds (about 0.8 bh)
-			fx.place(
-				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), SHIELD_COL, Color("ffc040"),
-				1.8, m.time * 2.0, 1.0
-			)
-			fx.place(
-				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("c8301a"),
-				Color("ff9a3a"), 1.45, -m.time * 2.6, 0.85
-			)
+			_shield_swirls()
 	else:
 		st["shield_on"] = false
 	tell = ""
@@ -232,6 +225,17 @@ func _tick(dt: float) -> void:
 	elif _best_char() >= 12.0:
 		tell = "half"
 	net_pulse(dt, not ignites.is_empty(), 1.3)
+
+## The cloak's shield on her body: a lit swirl round her per foe it caught (up to SHIELD_RINGS), in her colours.
+func _shield_swirls() -> void:
+	var vx := HeroVfx.of(m)
+	for i in mini(int(st.get("shield_foes", 1)), SHIELD_RINGS):
+		var lead: bool = i % 2 == 0
+		var id := "swirl%d" % h.get_instance_id() if i == 0 else "swirl%d_%d" % [h.get_instance_id(), i]
+		fx.place(
+			id, "swirl", h.pos + Vector3(0, 0.55 + SHIELD_RING_STEP * i, 0), vx.color(h, "main" if lead else "red"),
+			vx.color(h, "hot"), 1.8 - 0.2 * i, m.time * (2.0 if lead else -2.6), 1.0 - 0.1 * i
+		)
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
 ## foe: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b).
@@ -358,7 +362,11 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if spool < float(ld["spool"]):
 		return true                # the pilot's flicker: no fire yet
 	HeroVfx.of(m).hold(h, "lance")
-	hose.emit(nozzle(), h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), float(ld["range"]), dt, tip() - nozzle())
+	# the fire's rules start at her body (ShotOrigin), the same reach out; it's still drawn from the palm
+	var nz := nozzle()
+	var from := ShotOrigin.body(h, nz)
+	var reach := float(ld["range"]) + nz.distance_to(from)
+	hose.emit(from, h.aim_dir(), h.vel, h.pos.y, float(ld["speed"]), reach, dt, tip() - from)
 	flame_acc += dt
 	var tick := float(ld["tick"])
 	while flame_acc >= tick:
@@ -490,7 +498,6 @@ func _cinder_hit(f: Ent) -> void:
 	# the impact: a red flash and an ember shower (sheet 0076-0079)
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
-	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
 	if cur > 0:
 		# a burning foe: upgrade, and the burn the foe had spreads to the ones around
 		spreads += 1
@@ -631,7 +638,6 @@ func _bash_impact(f: Ent) -> void:
 		_ram_reward()
 	vfx("ram_hit", (h.pos + f.pos) * 0.5, dir)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 
 ## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
 func _ram_reward() -> void:
@@ -682,6 +688,7 @@ func _cloak_blast() -> void:
 		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
+		st["shield_foes"] = hit
 		m.sfx("shield", h.pos, -5.0, 0.9)
 
 # ------------------------------------------------------------------ X: Flue Flight
@@ -713,6 +720,7 @@ func combo_marks(out: Array) -> void:
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
 func gate_inputs() -> void: jet.lock_inputs()
+func gate_kin_tap() -> bool: return jet.swallow_kin_tap()
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

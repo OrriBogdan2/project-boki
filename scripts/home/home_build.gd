@@ -162,20 +162,49 @@ func _apply_wild() -> void:
 	for i in left.keys():
 		if left[i] == "water": left.erase(i)
 	wild_t = left
+	_settle_ridge(w)
 	for i in w.props.keys():
 		if w.kind[i] != World.T_BLOCK: w.props.erase(i)
 
-## Takes a wild tree or boulder out (cliffs stay). regrow: seconds until it grows back (chopped and
-## mined wild does; land cleared with the Clear the wild brush stays clear).
+## The ridge left standing becomes a ledge you climb (jump at it: the mantle tops its 1.6 m), and a Boki
+## walks round it (raised ground is solid on the kin grid; the gaps opened above keep every pocket open).
+## A stub not part of any 2x2 of ridge is levelled: too thin to stop on once you're up.
+func _settle_ridge(w: World) -> void:
+	var stubs: Array = cliff_t.keys().filter(func(i): return not _ridge_square(w, i))
+	for i in stubs:
+		cliff_t.erase(i)
+		wild_t.erase(i)
+		w.level[i] = 0
+		w.no_deco.erase(i)
+	for i in cliff_t:
+		w.kind[i] = World.T_GROUND
+	for i in stubs:
+		w.kind[i] = World.T_GROUND
+
+## Is ridge tile i a corner of some 2x2 square of ridge tiles?
+func _ridge_square(w: World, i: int) -> bool:
+	for o in [0, -1, -w.w, -w.w - 1]:
+		var a: int = i + o
+		if cliff_t.has(a) and cliff_t.has(a + 1) and cliff_t.has(a + w.w) and cliff_t.has(a + w.w + 1):
+			return true
+	return false
+
+## Takes a wild tree, boulder or ridge tile out (the tools only take trees and boulders; the Clear the
+## wild brush levels a ridge too). regrow: seconds until it grows back (chopped and mined wild does;
+## land cleared with the brush stays clear).
 func clear_wild(t: Vector2i, regrow := 0.0) -> bool:
 	var w: World = h.world
 	if not w.inb(t.x, t.y): return false
 	var i := w.idx(t.x, t.y)
-	if not wild_t.has(i) or wild_t[i] == "cliff": return false
+	if not wild_t.has(i): return false
 	var what := String(wild_t[i])
 	wild_t.erase(i)
 	w.props.erase(i)
 	w.kind[i] = World.T_GROUND
+	if cliff_t.has(i):
+		w.level[i] = 0
+		w.no_deco.erase(i)
+		cliff_t.erase(i)
 	var k := HomeLayout.key(t.x, t.y)
 	L()["cleared"][k] = 1
 	if regrow > 0.0:
@@ -636,6 +665,8 @@ func _sync_water() -> void:
 	if sig == _water_sig:
 		return
 	_water_sig = sig
+	if h.wade.marks:
+		h.wade.marks.clip_to(wt)      # the Boki's water marks stay on the new water
 	for c in water_root.get_children():
 		c.queue_free()
 	if wt.is_empty():
@@ -643,8 +674,12 @@ func _sync_water() -> void:
 	var wm := HomeBuild.water_mat()
 	var fm := HomeBuild.foam_mat()
 	var rim := Models.toon(Color("8d8a86"))
-	var plane := PlaneMesh.new(); plane.size = Vector2(1.02, 1.02); plane.subdivide_width = 3; plane.subdivide_depth = 3
-	var strip := PlaneMesh.new(); strip.size = Vector2(1.0, 0.26)
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(1.02, 1.02)
+	plane.subdivide_width = 3
+	plane.subdivide_depth = 3
+	var strip := PlaneMesh.new()
+	strip.size = Vector2(1.0, 0.26)
 	var tiles: Array = []
 	var foam: Array = []
 	var stones: Array = []
@@ -687,12 +722,16 @@ func refresh_grid() -> void:
 	var w: World = h.world
 	for z in w.h:
 		for x in w.w:
-			astar.set_point_solid(Vector2i(x, z), w.kind[w.idx(x, z)] != World.T_GROUND)
+			astar.set_point_solid(Vector2i(x, z), _solid_tile(w, w.idx(x, z)))
+
+## A Boki walks the meadow's own level only: a wall, a rock or raised ground (a ridge) is in its way.
+func _solid_tile(w: World, i: int) -> bool:
+	return w.kind[i] != World.T_GROUND or w.level[i] > 0
 
 func _solid_at(x: float, z: float) -> bool:
 	var w: World = h.world
 	var ix := int(floor(x)); var iz := int(floor(z))
-	return not w.inb(ix, iz) or w.kind[w.idx(ix, iz)] != World.T_GROUND
+	return not w.inb(ix, iz) or _solid_tile(w, w.idx(ix, iz))
 
 ## Nothing solid along the way (with a kin's width either side).
 func clear_line(a: Vector2, b: Vector2, width := 0.28) -> bool:
@@ -775,7 +814,7 @@ func cell_reason(c: Vector2i, self_tag := "") -> String:
 		blocker = o
 		return "Blocked by: %s" % occ_name(o)
 	if wild_t.has(i):
-		if wild_t[i] == "cliff": return "That's a cliff"
+		if wild_t[i] == "cliff": return "A ridge: level it with Clear the wild (Island tab)"
 		return "Wild land: chop it with an axe or pickaxe, or clear it (Island tab)" if fs() else "Wild land: clear it first (Island tab, Clear the wild)"
 	if w.kind[i] == World.T_BLOCK and not (blocked.has(i) and o == self_tag):
 		return "Something's in the way"
@@ -1235,7 +1274,7 @@ func _brush_ok(c: Vector2i, mode: String) -> bool:
 	if not w.inb(c.x, c.y): return false
 	var i := w.idx(c.x, c.y)
 	if mode == "wild":
-		return wild_t.has(i) and wild_t[i] != "cliff"
+		return wild_t.has(i)
 	if w.kind[i] == World.T_VOID or w.bridge.has(i) or not _isle_ok(i) or reserved.has(i):
 		return false
 	var o := String(occ.get(i, ""))
@@ -1456,15 +1495,12 @@ func _draw_cells() -> void:
 			post.material_override = good; post.position = Vector3(t.x + 0.5, 0.35, t.y + 0.5)
 			ghost_cells.add_child(post)
 	FarmBuildUi.outline(ghost_cells, cells, ghost_ok)
-	if ghost_ok and held["kind"] == "deco" and String(held["id"]) == "crop_patch":
-		# a patch by water waters itself: say so in green, or that it won't
-		var wet := FarmWater.near_cells(h._d(), cells)
-		if wet:
-			FarmBuildUi.note(ghost_cells, cells, "Near water: waters itself", Color("5ff07f"))
-		else:
-			FarmBuildUi.note(ghost_cells, cells, "No water within %d tiles" % FarmWater.reach(), Color("e8e2c8"))
-	else:
-		FarmBuildUi.note(ghost_cells, cells, "")
+	# by the water a patch grows faster and a trough fills itself: a drop and two words, nothing otherwise
+	var gain := ""
+	if ghost_ok and FarmWater.near_cells(h._d(), cells):
+		if held["kind"] == "deco" and id == "crop_patch": gain = "+growth"
+		elif held["kind"] == "feeder" and not Econ.FEEDERS[id]["auto"]: gain = "fills itself"
+	FarmBuildUi.note(ghost_cells, cells, gain, Color("7fd8ff"), true)
 	if held["kind"] == "b" and not cells.is_empty():
 		# where the door ends up
 		var door := HomeLayout.door_at(id, cells[0].x, cells[0].y, int(held["r"]))
@@ -1522,6 +1558,7 @@ func _update_keys() -> void:
 		var over := "" if is_instance_valid(menu) else _tag_under_mouse()
 		_light(_node_of(over) if over != "w" else null)
 		state["over"] = occ_name(over)
+		state.merge(FarmBuildUi.hover_state(over))
 		if over == "w":
 			text = "Pond water: paint over it with Grass (clear) to fill it in"
 		elif over != "":
@@ -1544,7 +1581,7 @@ func _place_text(nm: String) -> String:
 		return "%s: click and drag to lay a line  ·  %d tile%s" % [nm, n, "" if n == 1 else "s"]
 	if c.has("brush"):
 		return "%s: click and drag to paint" % nm
-	return "%s: click to place it here  ·  Hold Shift to place more" % nm
+	return "%s: click to place it here  ·  Hold %s to place more" % [nm, Settings.key_cap("keep_placing")]
 
 func held_name() -> String:
 	var id := String(held["id"])
@@ -1570,12 +1607,14 @@ func input(event: InputEvent) -> bool:
 		return true
 	if event is InputEventKey and event.pressed and not event.echo:
 		var ke := event as InputEventKey
-		if ke.physical_keycode == KEY_Z and (ke.ctrl_pressed or ke.meta_pressed):
+		if event.is_action_pressed("undo") and (ke.ctrl_pressed or ke.meta_pressed):
 			undo_last()
 			return true
-		if event.is_action_pressed("store") or ke.physical_keycode == KEY_BACKSPACE:
+		if event.is_action_pressed("store"):
 			_store_key()
 			return true
+	if event.is_action_pressed("interact") and held.is_empty() and FarmBuildUi.show_upgrade(self, _tag_under_mouse()):
+		return true
 	if event.is_action_pressed("rotate"):
 		if not held.is_empty(): rotate_held()
 		elif _tag_under_mouse() != "": rotate_placed(_tag_under_mouse())
@@ -1611,7 +1650,7 @@ func _mouse(mb: InputEventMouseButton) -> bool:
 			drag = {"from": t, "tiles": {}, "last": t}
 			if c.has("brush") and _brush_ok(t, String(c["brush"])): drag["tiles"][t] = true
 		else:
-			click_place(Input.is_key_pressed(KEY_SHIFT))
+			click_place(Input.is_action_pressed("keep_placing"))
 	elif not drag.is_empty():
 		tick(0.0)
 		place_held()
@@ -1814,7 +1853,10 @@ func place_held() -> bool:
 	apply(false)
 	if from < 0 and TOY_CATS.has(String(c["cat"])):
 		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
-	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), "Site marked out: hold %s to hammer, Boki help" % Settings.key_cap("interact") if not site.is_empty() else "", id, from >= 0)
+	var msg := ""
+	if not site.is_empty():
+		msg = "Site marked out: hold %s to hammer, Boki help. %s" % [Settings.key_cap("interact"), FarmTutorial.site_hint()]
+	_done(Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), msg.strip_edges(), id, from >= 0)
 	if nodes.has(popped): FarmBuildUi.pop(nodes[popped])
 	return true
 

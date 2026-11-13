@@ -15,7 +15,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
 | **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Crushed | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -82,13 +82,12 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Passive: Crushed.** Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
 - **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Aegis** (6s):
   - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
   - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
-  - resource full: Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 - **E: Mending Ground** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
@@ -106,6 +105,8 @@ Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unl
 - dash and charge distances never grow: dashes stay short
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
+
+In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets your own ranks to try them: Max all, Pick your max (one ability at its top rank with its rank-3 data bonus, shown as the button's tooltip; the rest at rank 1) and Reset to rank 1 ([shot, 1280x720](shots/ui-train-rank-port/practice_page.jpg)). Bots and dummies keep their own ranks and spend by their kit's `order`.
 
 ## Shift: class dashes
 
@@ -236,6 +237,25 @@ Several verbs appear in more than one element, tuned to fit it:
 - **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).
 - **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits).
 - **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).
+
+## Shields: duration, fade, stacking (2026-11-10)
+
+Source = `supervive_kits.md` on origin/ext/agent-briefs ([D]); amounts are in [HEAL_PARITY](HEAL_PARITY.md). The data names no shield that decays: nothing says "fades" or "drains", so "drops at the end" is ours everywhere and stays `[?]`. How it works for every timed shield: one pool (`Hunter.shield`, soaks before armour and health) with one timer (`shield_t`); at 0 the whole pool is gone, no slope. A new shield from a different source keeps the larger amount and the longer time (`Effects`), except the three kit shields (Tenzo, Cinder, Void's swap), which set their own time. Checks: `--breah-combo-check` (Tenzo gone at 6 s, stacks add and cap), `--ashwick-combo-check` (cloak gone at 3 s).
+
+| Source | Ours | Source says | Verdict |
+|---|---|---|---|
+| Tenzo punch (Molten Guard) | 18 a punch at your own rock, up to 4 stacks (72), 6 s; each punch refreshes one shared timer; the whole pool drops at 6 s; rank 3 slam of a foe or rock adds a stack | "temporary Shield" (passive); rank IV: a slam of enemies or Rocks grants a stack. No amount, time, cap or fade | slam stack matches; time, cap and fade `[?]` |
+| Cinder spin (Heat Shield, E) | 6.4% + 5.1% of max health per foe hit, 3 s, drops at the end; a recast resets the time | "shield per enemy hit" | per-foe stacking matches; time and fade `[?]` (HEAL_PARITY cites a 3 s wiki page) |
+| Cinder pounce, rank 3 (source rank IV) | 11.6% of max health (150 of 1290), 2 s | 150 shield for 2 s with +75 move speed | match; fade `[?]` |
+| Albert aegis (Brightshield) | its own pool, no timer: 160 HP, regen 20 a second after 2 s, locked 3 s when broken; rank +25% / +50% | "shield energy that regens/repairs", blocks all damage from the front; amounts not listed | `[?]`; the ranks match |
+| Albert Shield Bash | invulnerable for the charge | "shield briefly Invulnerable" | match |
+| Albert Mending Ground burst | mends the aegis 60 | not listed | `[?]` |
+| Meeko Carrier shield | none (cut 11-07, owner call) | Soulpack: 200 to 450 shield, refilled on pickup (wiki, not in the data file); kits.md only has the drop rule | `[?]` owner call |
+| Void (Motley) swap, rank 3 | 26 to allies beside him, 3 s (`ally_shield_t`) | 375 HP for 3 s | time match (26 is the same share of health) |
+| Level-up | none; each level scales ability shields by AP (`level_growth.json`) | no level-up shield | match |
+| Belt: Shield cell | 40 for 8 s | no source item (UTILITY_PARITY: ours only) | ours, keep |
+| Perk orbs | none give a shield (`perk_orbs.json`) | none | match |
+| Two shields at once | larger amount, longer time; Tenzo stacks add | not stated | `[?]` |
 
 ## Readability
 

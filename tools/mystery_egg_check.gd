@@ -9,6 +9,7 @@ extends RefCounted
 const HATCH := preload("res://scripts/ui/hatch.gd")
 const DRAWS := 30000
 const ROLLS := 20000
+const EGGS := 1000     # one thousand eggs rolled with fixed seeds
 
 var bad := 0
 
@@ -20,19 +21,20 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_pool()
 	_mutations()
+	_thousand_eggs()
 	await _scene(main)
 	print("MYSTERYEGG DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _pool() -> void:
 	var w := MysteryEgg.weights()
-	var tiers: Dictionary = MysteryEgg.rules()["pool"]
-	ok(w.size() == tiers.size(), "every pool species is in the game (%d of %d)" % [w.size(), tiers.size()])
+	var listed: Array = MysteryEgg.rules()["pool"]
+	ok(w.size() == listed.size(), "every pool species is in the game (%d of %d)" % [w.size(), listed.size()])
 	ok(w.size() >= 20, "the pool is many early species, not just a few (%d)" % w.size())
 	var wrong: Array = w.keys().filter(func(sp): return Data.is_rare(sp) or sp in HATCH.STARTERS)
 	ok(wrong.is_empty(), "no starter or boss kin in the pool %s" % str(wrong))
-	var rares: Array = w.keys().filter(func(sp): return tiers[sp] == "rare")
-	var commons: Array = w.keys().filter(func(sp): return tiers[sp] == "common")
+	var rares: Array = w.keys().filter(func(sp): return BokiModes.of(sp)["rarity"] == "very_rare")
+	var commons: Array = w.keys().filter(func(sp): return BokiModes.of(sp)["rarity"] == "common")
 	ok(rares.size() >= 3, "rares are in the pool (%d)" % rares.size())
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
@@ -66,6 +68,28 @@ func _mutations() -> void:
 	var rates := "%.1f%% of the time, an egg at base odds %.1f%%" % [pm * 100.0, pb * 100.0]
 	ok(pm > 0.15 and pm > 3.0 * pb, "the black egg hatches mutated far more often (%s)" % rates)
 
+## A thousand black eggs, fixed seeds: rares turn up, far more than the 3 starter species hatch, and
+## the born-with-a-mutation rate beats a starter egg's (they roll none).
+func _thousand_eggs() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1112
+	var tiers: Dictionary = MysteryEgg.rules()["pool"]
+	var species := {}
+	var rares := 0
+	var mutated := 0
+	for i in EGGS:
+		var sp := MysteryEgg.roll_species(rng)
+		species[sp] = true
+		if tiers.get(sp, "") == "rare": rares += 1
+		if not MysteryEgg.roll_mutations(rng).is_empty(): mutated += 1
+	var starter_mutated := 0
+	rng.seed = 1113
+	for i in EGGS:
+		if not Mutations.roll(rng, 1.0).is_empty(): starter_mutated += 1
+	ok(rares >= 1, "1000 eggs: a rare hatches (%d)" % rares)
+	ok(species.size() > HATCH.STARTERS.size(), "1000 eggs: more species than starters (%d)" % species.size())
+	ok(mutated > starter_mutated, "1000 eggs: mutated %d vs a starter egg %d" % [mutated, starter_mutated])
+
 func _scene(main: Node) -> void:
 	var tree := main.get_tree()
 	Save.d = Save.fresh()
@@ -88,7 +112,7 @@ func _scene(main: Node) -> void:
 	var holder: Node3D = hx.eggs[m]["holder"]
 	var egg: EggHatch = hx.eggs[m]["egg"]
 	var in_basket := holder.get_children().any(func(c): return c is MysteryEgg)
-	ok(in_basket and egg.shell_col.get_luminance() < 0.15, "it's a black egg in a basket")
+	ok(in_basket and egg.kind == "mystery", "it's the mystery egg (void shell, a cracked \"?\") in a basket")
 	ok(_cards(hx) == 3, "its card is hidden until you find it (%d cards)" % _cards(hx))
 	hx._pick(m)
 	await tree.process_frame
@@ -96,7 +120,7 @@ func _scene(main: Node) -> void:
 	hx.egg_defs[m]["rec"]["mutations"] = ["giant"]
 	hx.kin_node = Models.kin(hx.egg_defs[m]["species"], {"level": 1})
 	hx.add_child(hx.kin_node)
-	hx._finish(hx.egg_defs[m]["species"], "Nyx", "Orri", true)
+	hx._finish(hx.egg_defs[m]["species"], "Nyx", true)
 	ok(Mutations.of(Save.d["roster"][0]) == ["giant"], "the hatchling keeps the mutation it was born with")
 	hx.queue_free()
 	await tree.process_frame

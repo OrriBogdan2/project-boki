@@ -65,8 +65,9 @@ static func _fn_normal(fn: Callable, u: float, v: float, sgn: float) -> Vector3:
 
 ## A smooth patch from fn(u, v) -> Vector3, u and v in 0..1 (cols x rows quads). ao(u, v) -> 0..1.
 static func surf(key: String, fn: Callable, cols: int, rows: int, ao := Callable(), sgn := 1.0) -> ArrayMesh:
-	if key != "" and _cache.has(key):
-		return _cache[key]
+	var hit = SharedCache.read(_cache, key)
+	if hit:
+		return hit
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var cs := PackedColorArray(); var idx: Array = []
 	for j in rows + 1:
 		var v := float(j) / rows
@@ -80,15 +81,15 @@ static func surf(key: String, fn: Callable, cols: int, rows: int, ao := Callable
 			var a0 := j * (cols + 1) + i
 			Models._quad(verts, norms, idx, a0, a0 + 1, a0 + cols + 2, a0 + cols + 1)
 	var am := _commit(verts, norms, uvs, cs, idx)
-	if key != "": _cache[key] = am
-	return am
+	return SharedCache.put(_cache, key, am) if key != "" else am
 
 ## A sheet of cloth or plate with real thickness: fn is the outer face; the inner face sits `thick`
 ## inside it, darker (the inside of a coat or a hood), and the open edges are closed with a rim.
 ## closed_u: the patch wraps round (a skirt), so only its top and bottom edges get a rim.
 static func shell(key: String, fn: Callable, cols: int, rows: int, thick: float, ao := Callable(), closed_u := false, sgn := 1.0, inner_ao := 0.55) -> ArrayMesh:
-	if key != "" and _cache.has(key):
-		return _cache[key]
+	var hit = SharedCache.read(_cache, key)
+	if hit:
+		return hit
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var cs := PackedColorArray(); var idx: Array = []
 	var W := cols + 1
 	var outer: Array = []
@@ -141,8 +142,7 @@ static func shell(key: String, fn: Callable, cols: int, rows: int, thick: float,
 			var a0 := base + m * 2
 			Models._quad(verts, norms, idx, a0, a0 + 2, a0 + 3, a0 + 1)
 	var am := _commit(verts, norms, uvs, cs, idx)
-	if key != "": _cache[key] = am
-	return am
+	return SharedCache.put(_cache, key, am) if key != "" else am
 
 ## Catmull-Rom through 3D points, `sub` steps per span.
 static func curve3(pts: Array, sub := 4) -> Array:
@@ -161,8 +161,9 @@ static func curve3(pts: Array, sub := 4) -> Array:
 ## through: a flat lock of hair, a strap, a horn), rounded off at both ends. `up` orients the flat
 ## side; ao runs from `ao_root` at the start to 1 at the tip.
 static func loft(key: String, pts: Array, wid: Array, seg := 12, up := Vector3.UP, ao_root := 0.7, sub := 4) -> ArrayMesh:
-	if key != "" and _cache.has(key):
-		return _cache[key]
+	var hit = SharedCache.read(_cache, key)
+	if hit:
+		return hit
 	var sp := curve3(pts, sub)
 	var n := sp.size()
 	var ws: Array = []
@@ -213,8 +214,7 @@ static func loft(key: String, pts: Array, wid: Array, seg := 12, up := Vector3.U
 			if fn.dot(t) > 0.0: idx.append_array([tri[0], tri[2], tri[1]])
 			else: idx.append_array(tri)
 	var am := _commit(verts, norms, uvs, cs, idx)
-	if key != "": _cache[key] = am
-	return am
+	return SharedCache.put(_cache, key, am) if key != "" else am
 
 ## Puts a mesh on a node (the same as Models.part).
 static func put(n: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO, scl := Vector3.ONE, rot := Vector3.ZERO) -> MeshInstance3D:

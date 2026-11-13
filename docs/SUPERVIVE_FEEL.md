@@ -27,6 +27,8 @@ The owner read these straight from the installed game (config files, curve table
 
 Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, glide braking, hoop boost, jump hold time, air-dash multipliers. Keep current tuning for those (TODO).
 
+Air-dash multipliers (`AirDashSpeedMultiplier`, `AirDashSpeedClamp`) [?]: no footage either (searched 11-11). None of the 13 hero-ref folders (`ext/hero-ref-footage`) shows an air dash taken out of a long fall or a glide dive; their §5 notes agree. The nearest are Elluna's dashes 0.1-0.3 s after a jump (mooshmoosh.md §4: flat through the burst, so the jump's rise is not kept), Shiv's Cartwheel from a jump (dancer.md §5) and Myth's likely hop (pin.md §5). The two match clips on hetzner (`refs/supervive-mantle/sv_joule_1v4.mp4`, 42 s, and `sv_tetra_guide.mp4`, 300 s, 2 fps sheets) show no dive or long fall into a dash either. The kit cards "dash forward, further if airborne" (Elluna Lunar Dash, Kingpin Brute Dash) suggest another reading: the two scale and cap the air dash's own speed, not the speed you carry in. Ours for now: the class air dash keeps none of the fall or of the forward speed and ends on its own speed (`--move-feel-check` airdash_* rows, reference only). To settle it: a 60 fps clip of two hunters dashing out of a 10 m drop and out of a glide dive, with the ground marker in view.
+
 ## Dash speed curves, fitted from footage (Nov 9 2026)
 The game's DashCurves (e.g. `C_AssaultSlide_VelCurve`) sit in the encrypted code, so these come from the hero-ref sheets (`ext/agent-briefs:briefs/hero-ref/<hero>.md`, "Body, scale and movement feel" section 4). The sheets tracked the hunter's bar plus the camera pan at 30 fps and give the ground speed over each 1/15 s; the 5 fps frames alone (0.2 s) hold only 2-3 frames of a dash, too few for a shape, so the 1/15 s samples are the evidence here. 1 px (960 wide) = 0.0375 m. Model: speed rises in a straight line from a start speed to a peak, holds, then falls in a straight line to the end; least squares on the interval averages (each sample is the mean over its 1/15 s, not a point), knots on a 0.01 grid.
 
@@ -38,6 +40,21 @@ The game's DashCurves (e.g. `C_AssaultSlide_VelCurve`) sit in the encrypted code
 | Felix (ashwick, Soot Ram) [?] | none per frame: "about 700 px/s (1080p) for the first 0.1 s, then 450-500, then it stops dead" (245.53-245.87 s, frames 0159-0160) | 0.33 s, 3.4 m | n/a | n/a | 10 m/s | n/a | none: the kit's own two-step (1.4x for the first 30%, then 0.85x, `RAM_FRONT*`) stays | `dash_exit_run` [?] (the sheet says a dead stop) |
 
 How the game uses them: the curve is in the dash's own time (u = share of its duration) and speed against its mean (mean 1), so each kit keeps its distance and time; only the shape is the source's (`ArchKit.travel` with `"curved"`, `HunterMove.dash_k`). The dash then hands over through `HunterMove.dash_exit`: never above run speed, so a curve that ends under run speed (Ghost 0.48x, Myth 0.31x of ours) hands over that slower speed and the walk (47-54 m/s²) brings it back to run in ~0.05 s with keys held, as the footage's last samples dip and recover. Our Rampage is 0.20 s against Brall's 0.47 s (owner, item 113: "a quicker Rampage"), so the same shape peaks at ~34 m/s (1.73 x 19.5); the source peak is 17 m/s. Air dashes, Ghost's hold slide and every other hero keep a constant speed (no footage). `--move-feel-check` asserts each fitted hero's peak share, peak / mean, distance and hand-over (`dash_curve_*`).
+
+### Dash tails against the over-run shed (Nov 11 2026)
+DEBT "Dash exit" asked whether the tracks give one shed rate for speed over the run. Each track's last ~30% (the samples still above run speed), converted with the row's own metres per pixel, against the over-run shed the game uses (the source's walking brake, `HunterMove.brake_rate`: 2/s x speed + 22.2 m/s², from content/rules/hunter_move.json) at the tail's mean speed, and against the old kit-tuned 110 m/s² (`GROUND_SHED`, deleted Nov 9 in decision 0026). Albert's 360 Smash (3 samples, the decay is only pinned by its total) and Meeko's glide (in the air: air drag, not the ground brake) have no measurable ground tail; Kingpin, Joule and Felix are from ext/dash-curves-c.
+
+| Track | Tail (m/s, 1/15 s) | Decel | Brake there | vs brake | vs 110 |
+|---|---|---|---|---|---|
+| Ghost Slipstep | 8.0 5.4 3.2 | 36 m/s² | 33 | +7% | -68% |
+| Brall Rampage | 10.0 7.1 4.2 | 43 m/s² | 36 | +19% | -61% |
+| Myth Spirit Walk roll | 9.7 4.7 | 75 m/s² | 37 | +105% | -32% |
+| Sable Cartwheel | 7.9 5.8 5.2 | 20 m/s² | 35 | -44% | -82% |
+| Kingpin Brute Dash | 7.8 7.7 6.7 6.2 4.6, then a dead stop in 1/30 s | 12 m/s² | 35 | -65% | -89% |
+| Joule Surge (0.58 s) | 27.8 24.6 12.3 | 116 m/s² | 62 | +87% | +6% |
+| Felix Soot Ram | 8.2 9.5 9.3 7.6, then a dead stop in 1/15 s | 3 m/s² | 38 | -92% | -97% |
+
+They do not agree within 20% (3 to 116 m/s²): a dash's tail is the dash's own curve (Kingpin and Felix hold their push, then stop dead; Myth's roll ends in a step), not a free slide, so the tracks set no single shed. The shed stays the source's brake, with no number of ours: the two clean free tails (Ghost, Brall) land within 20% of it, and all but Joule are 32-97% under the old 110. The dash exit does not use the shed: `HunterMove.dash_exit` caps the hand-over at run speed, so it only acts on knocks and on kit steps over the run (`HunterMove.slide`, `slide_speed`), which `--move-feel-check` (`ground_shed_*`) and `--archetype-check` measure.
 
 ## What's in it
 

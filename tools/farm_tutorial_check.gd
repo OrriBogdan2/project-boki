@@ -113,7 +113,10 @@ func _base_tutorial() -> void:
 			one_line = one_line and not String(t).contains("\n")
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
-	ok(FarmTutorial.hint_text("out").contains("Waystone"), "the last hint points at the Waystone")
+	var last := FarmTutorial.hint_text("out")
+	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
+	ok(last.contains("Waystone") and path_said and not last.contains("\n"),
+			"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line")
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
@@ -151,6 +154,16 @@ func _skip_shown(guide: FarmGuide) -> bool:
 			return true
 	return false
 
+## None of the points is on a bridged side isle (Data.ISLES, retired by the garden zones).
+func _on_no_isle(pts: Array) -> bool:
+	for p in pts:
+		for isle in Data.ISLES.values():
+			var c: Vector2 = isle["c"]
+			var r: Vector2 = isle["r"]
+			if pow((p.x - c.x) / r.x, 2) + pow((p.z - c.y) / r.y, 2) < 1.0:
+				return false
+	return true
+
 ## Two of BaseLife's 10 Hz ticks for this Boki (Roam to Lead, then one Lead tick).
 func _lead_tick(home, k: Dictionary) -> void:
 	k.erase("busy")
@@ -176,6 +189,9 @@ func _base_world() -> void:
 	ok(Vector2(k["goal"].x - home.ppos.x, k["goal"].z - home.ppos.z).length() < 8.0, "it comes toward you")
 	guide._poll()
 	ok(_skip_shown(guide), "step 1: Skip is on screen")
+	var me: Vector3 = k["node"].position
+	ok(guide.target("meet") == me and guide.target("eat") == me and _on_no_isle([me]),
+			"meet and feed: the marker is on your Boki, not a side isle")
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	guide._poll()
 	ok(FarmTutorial.current() == "eat" and _berries() == 3, "walking up meets it and hands over the food")
@@ -200,7 +216,10 @@ func _base_world() -> void:
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
+	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
 	guide.place_toy()
+	ok(guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
+			"toy: the marker is on the toy you put down, not a side isle")
 	_lead_tick(home, k)
 	var leading: bool = home.life.machine(k).is_in(BaseLife.S.LEAD)
 	ok(k.has("play") and not leading, "a toy down: it leaves the lead to go and play")
@@ -210,6 +229,7 @@ func _base_world() -> void:
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	_lead_tick(home, k)
 	var portal: Vector3 = home.spots["portal"]
+	ok(guide.target("out") == portal and _on_no_isle([portal]), "head out: the marker is on the portal, no side isle")
 	var gap := Vector2(portal.x - k["pos"].x, portal.z - k["pos"].z).length()
 	var ahead := Vector2(portal.x - k["goal"].x, portal.z - k["goal"].z).length()
 	ok(FarmTutorial.current() == "out" and String(k["lead_said"]) == "out" and ahead < gap,
@@ -419,6 +439,12 @@ func _tutorial_rules() -> void:
 			"the owner's decision: the farm tutorial is not skippable (a data option)")
 	for key in ["tracker_replaces_day1", "player_swing", "end_gems", "free_order", "skippable"]:
 		ok(FarmTutorial.rules()["options"].has(key), "option '%s' is data" % key)
+	# the first construction site says once that Boki build it while you are home
+	Save.d = _new_save()
+	var first := FarmTutorial.site_hint()
+	ok(first.begins_with("Boki build it while you are home"), "the first site gets the home-only line")
+	ok(FarmTutorial.site_hint() == "", "the second site gets none")
+	ok(bool(Save.d["tutorial"]["site_hint"]), "the line is seen once per profile")
 	# a test save that says the first day is done never sees it
 	Save.d = _new_save()
 	Save.d["tutorial"]["day1_done"] = true
@@ -822,6 +848,8 @@ func _farm2() -> void:
 	ok(lbl.contains("water nearby"), "the prompt says why: '%s'" % lbl)
 	ok(String(HomeLayout.CATALOG["crop_patch"]["desc"]).contains("2 tiles of water"), "and the build menu says it in the patch's tooltip")
 	ok(home._dry_plot().is_empty(), "the farmhand has nothing to water there")
+	_grows_faster(home, L)
+	_trough_by_water(L)
 	# the preview in build mode
 	L["water"].clear()
 	Save.d["plot_cap"] = 8
@@ -833,12 +861,22 @@ func _farm2() -> void:
 	home.hb.debug_m = Vector2(cs[0].x + psz.x * 0.5, cs[0].y + psz.y * 0.5)
 	home.hb.tick(0.0)
 	var note := _note_text(home.hb)
-	ok(note.contains("No water"), "the preview of a patch away from water says so: '%s'" % note)
+	ok(note == "" and not _has_drop(home.hb), "the preview of a patch away from water stays clear (no note): '%s'" % note)
 	L["water"][HomeLayout.key(cs[0].x + psz.x + 1, cs[0].y)] = 1
 	home.hb.ghost_cells.set_meta("sig", "")
 	home.hb.tick(0.0)
 	note = _note_text(home.hb)
-	ok(note.to_lower().contains("near water") and _note_col(home.hb).g > 0.8 and _note_col(home.hb).r < 0.5, "by the water it says 'near water' in green: '%s'" % note)
+	ok(note == "+growth" and _has_drop(home.hb) and _note_col(home.hb).b > 0.8,
+		"by the water it shows a water drop and '+growth' in blue: '%s'" % note)
+	Save.d["feeder_inv"]["trough"] = 1
+	home.hb.take_feeder("trough")
+	home.hb.debug_m = Vector2(cs[0].x + psz.x - 0.5, cs[0].y + 0.5)      # (in the open ground found for the patch)
+	home.hb.ghost_cells.set_meta("sig", "")
+	home.hb.tick(0.0)
+	note = _note_text(home.hb)
+	ok(note == "fills itself" and _has_drop(home.hb),
+		"a trough held by the water shows the drop and 'fills itself': '%s'" % note)
+	home.hb.take("crop_patch")
 	# a river brush: cheap, and it counts as water
 	ok(HomeLayout.CATALOG.has("river") and int(HomeLayout.CATALOG["river"]["gems"]) < int(HomeLayout.CATALOG["water"]["gems"]),
 			"a River brush costs less than a pond tile")
@@ -863,6 +901,43 @@ func _note_label(hb) -> Label3D:
 	for c in hb.ghost_cells.get_children():
 		if c is Label3D and c.get_meta("fbui", "") == "note" and not c.is_queued_for_deletion(): return c
 	return null
+
+func _has_drop(hb) -> bool:
+	for c in hb.ghost_cells.get_children():
+		if not c is Label3D and c.get_meta("fbui", "") == "note" and not c.is_queued_for_deletion(): return true
+	return false
+
+## The same stretch of growing time: a watered plot away from water stays at its stage, the same plot
+## with water beside the patch moves on one (FarmWater.grow_mul, 1.25: 72 s a stage instead of 90 s).
+func _grows_faster(home, L: Dictionary) -> void:
+	var day1 := bool(Save.d["tutorial"].get("day1_done", false))
+	Save.d["tutorial"]["day1_done"] = true      # (the tutorial's quick first crop would hide the difference)
+	L["water"].clear()
+	var away_s := FarmWater.stage_s(Save.d, "plots", 0)
+	var into := Data.WATER_TIME / FarmWater.grow_mul() + 4.0      # past the by-water stage, short of the dry one
+	var planted := {"crop": "tidebloom", "stage": 0, "care": 0, "wt": Time.get_unix_time_from_system() - into, "wet": 2}
+	Save.d["plots"][0] = planted.duplicate()
+	home._farm_tick()
+	var dry_stage := int(Save.d["plots"][0]["stage"])
+	L["water"][HomeLayout.key(49, 31)] = 1
+	var near_s := FarmWater.stage_s(Save.d, "plots", 0)
+	Save.d["plots"][0] = planted.duplicate()
+	home._farm_tick()
+	var wet_stage := int(Save.d["plots"][0]["stage"])
+	ok(is_equal_approx(away_s / near_s, FarmWater.grow_mul()) and dry_stage == 0 and wet_stage == 1,
+		"a crop by the water grows faster: a stage in %.0f s, not %.0f s (after %.0f s: dry stage %d, by water %d)"
+			% [near_s, away_s, into, dry_stage, wet_stage])
+	ok(FarmWater.plot_note().contains("25% faster"), "the plot panel says so: '%s'" % FarmWater.plot_note())
+	Save.d["tutorial"]["day1_done"] = day1
+
+## A plain trough fills itself from the pantry only by the water; away from it you fill it yourself.
+func _trough_by_water(L: Dictionary) -> void:
+	Save.d["items"]["kibble"] = 10
+	var f := {"id": "fw", "kind": "trough", "x": 49.5, "z": 33.5, "food": [], "auto": true}
+	ok(Econ.auto_refill(f) > 0, "a trough two tiles from water tops itself up from the pantry")
+	var far := {"id": "fd", "kind": "trough", "x": 49.5, "z": 40.5, "food": [], "auto": true}
+	ok(Econ.auto_refill(far) == 0 and not Econ.self_fills(far), "a trough away from water waits for you to fill it")
+	L["water"].erase(HomeLayout.key(49, 31))
 
 func _note_text(hb) -> String:
 	var l := _note_label(hb)

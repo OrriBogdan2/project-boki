@@ -23,7 +23,9 @@ extends RefCounted
 ## opens its cards. Unlock (step 6): no Wayseed, a Wayseed but no lean, and both: only both wake the zone,
 ## the Wayseed is used up and the Boki that leaned becomes the founder (it lives there, with a memory and a
 ## journal line, and the stone lights); lairs of a matching biome hold a Wayseed only for a locked zone; the
-## trader holds one weekly Wayseed, never for an open zone.
+## trader holds one weekly Wayseed, never for an open zone. The unlock moment (ZoneReveal): the woken stone
+## lights in its colour and drops its lock once per zone per save, at the next hub if woken elsewhere; with
+## --shots-dir it also saves zone_unlock.png mid-reveal.
 ## opens its cards. Visits (step 10): your profile doc carries the hub and each open zone's layout and
 ## each Boki's zone; a visitor lands in the friend's hub and hops to their zones, seeing only that zone's
 ## Boki; an older doc stays one island; a hostile layout is cut down to what the island needs.
@@ -145,6 +147,14 @@ func _travel_part(m: Node) -> void:
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
 	var lines := ZoneCards.key_lines("glasswater")
 	ok(lines.size() == 2 and "Wayseed" in lines[0] and "leaning" in lines[1], "its card lists both keys")
+	var hints := ZoneCards.key_hints("glasswater")
+	var terms := BlackMarket.seed_terms()
+	ok("Old Pell" in hints[0] and ("%d days" % terms[0]) in hints[0] and ("%d gems" % terms[1]) in hints[0],
+		"the Wayseed line names the trader, his every-%d-days stock and %d gems: %s" % [terms[0], terms[1], hints[0]])
+	var near := GardenZones.closest("glasswater")
+	ok(not near.is_empty() and String(near["rec"]["name"]) in hints[1] and "Closest" in hints[1],
+		"the lean line names the closest Boki: %s" % hints[1])
+	await _grab(m, "waystone_cards.png")
 	var home_uids: Array = GardenZones.residents("bramblebank").map(func(r): return String(r["uid"]))
 	home_uids.sort()
 	ok(hub.hway.hop("bramblebank"), "a hop to open Bramblebank starts")
@@ -333,6 +343,18 @@ func _texts(n: Node) -> String:
 		out += "\n" + _texts(c)
 	return out
 
+## The open panel as it shows now, saved in --shots-dir when one is given.
+func _grab(m: Node, file: String) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): dir = a.substr(12)
+	if dir == "" or DisplayServer.get_name() == "headless":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
+	m.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+	print("ZONES shot %s" % dir.path_join(file))
+
 ## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
 func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> void:
 	var dir := ""
@@ -446,7 +468,7 @@ func _thrive_part() -> void:
 	for i in 2:
 		var r: Dictionary = [rec, other][i]
 		r["needs"] = {"food": 90.0, "clean": 90.0, "energy": 90.0, "joy": 90.0}
-		Care.tick(r, 600.0)
+		Care.tick(r, 60.0 * 30.0 / Care.joy_decay())      # a 30-point fall at the usual pace, clear of the sulky floor
 		lost[i] = 90.0 - Care.need(r, "joy")
 	ok(lost[1] > 0.0 and is_equal_approx(lost[0], lost[1] * float(T["joy_rate"])),
 		"thriving joy falls at %.1fx (%.1f vs %.1f)" % [float(T["joy_rate"]), lost[0], lost[1]])
@@ -505,7 +527,7 @@ func _unlock_part(m: Node) -> void:
 	var ash: Dictionary = Save.d["roster"][1]
 	var key := float(GardenZones.rules()["lean_key"])
 	var stone: Node = hub.hway.node.get_node("Stone2")
-	var marks: bool = hub.hway.node.has_node("Key2_0") and hub.hway.node.has_node("Key2_1")
+	var marks: bool = hub.hway.node.has_node("Lock2/Key0") and hub.hway.node.has_node("Lock2/Key1")
 	ok(not stone.get_meta("open") and marks, "the locked Cinderstep stone shows its two keys")
 	ok(not GardenZones.attune("cinderstep")["ok"], "no Wayseed and no lean: Cinderstep stays asleep")
 	ash["lean"] = {"fire": key}
@@ -523,11 +545,42 @@ func _unlock_part(m: Node) -> void:
 	ok(ash["memory"].any(func(e): return "the day I woke Cinderstep" in String(e["text"])), "it remembers the day")
 	ok(ash["journal"].any(func(e): return CareJournal.text(e) == "woke Cinderstep"), "its journal says so")
 	ok(hub.hway.node.get_node("Stone2").get_meta("open") and hub.hway.node.has_node("Cap2"), "its stone is lit")
+	await _reveal_part(m, hub)
 	ok(not GardenZones.attune("cinderstep")["ok"], "an open zone cannot be woken again")
 	var lines: Array = ZoneCards._open_lines("cinderstep").map(func(l): return (l as Label).text)
 	ok(lines.has("Woken by Ash"), "its card names the founder")
 	_lair_and_trader_part()
 	Content.rules("farm_build")["base_mode"] = false
+
+## The unlock moment (ZoneReveal): the woken stone starts dark with its lock look on, lights in its zone's
+## colour, drops the lock and pops its cap; once per zone per save. A zone woken away from the hub is shown
+## the next time the hub builds its Waystone.
+func _reveal_part(m: Node, hub) -> void:
+	var way: Node3D = hub.hway.node
+	var cap: Node3D = way.get_node("Cap2")
+	var mat: ShaderMaterial = way.get_node("Stone2").material_override
+	var col := Color(String(GardenZones.info("cinderstep")["colour"]))
+	ok(not ZoneReveal.owed("cinderstep") and way.has_node("Lock2") and cap.scale == Vector3.ZERO
+		and mat.get_shader_parameter("albedo") == Color(FarmModels.STONE_DARK),
+		"the woken stone starts dark with its lock on, the reveal is spent on the save")
+	await _hub_shot(m, hub, "zone_unlock.png", 0.8)
+	var all_s := ZoneReveal.WAIT_S + ZoneReveal.LIGHT_S + ZoneReveal.CAP_S + 0.3
+	await m.get_tree().create_timer(all_s).timeout
+	ok(not way.has_node("Lock2") and cap.scale.is_equal_approx(Vector3.ONE)
+		and (mat.get_shader_parameter("albedo") as Color).is_equal_approx(col),
+		"then it lights in Cinderstep's colour, the lock gone, the cap on")
+	GardenZones.wake("ridge")
+	ok(ZoneReveal.owed("ridge"), "a zone woken away from the hub waits for it")
+	way.free()
+	hub.hway.place()
+	way = hub.hway.node
+	var ridge := GardenZones.ids().find("ridge")
+	ok(way.has_node("Lock%d" % ridge) and not way.has_node("Lock2") and way.get_node("Cap2").scale == Vector3.ONE,
+		"the next hub plays it for that zone only")
+	way.free()
+	hub.hway.place()
+	ok(not hub.hway.node.has_node("Lock%d" % ridge), "and never again")
+	Save.d["zones"].erase("ridge")      # the parts after this expect Kitewind Ridge asleep
 
 func _lair_and_trader_part() -> void:
 	ok(GardenZones.seed_zone_for("ember") == "" and GardenZones.seed_zone_for("frost") == "glasswater"

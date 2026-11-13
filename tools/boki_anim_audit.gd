@@ -4,9 +4,11 @@ extends RefCounted
 ## the planted feet's slide as a share of the move speed, steps per second, then the loop seams and the idle-to-walk
 ## pop. Fails a slide over MAX_SLIDE (except the OVER ceilings); Boki with no stepping feet are EXEMPT and listed.
 ## BokiRig.STRIDE must also match what the clips measure. Table: docs/art/kin/RIGGED_BOKI.md "Gait audit".
+## Then every Boki in every state the game plays resolves to a clip (boki_state_cover.gd, "State coverage").
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
+const Cover := preload("res://tools/boki_state_cover.gd")
 ## m/s: a stroll, a home wander, a home fetch (home.gd); the match speed is added per species.
 const HOME_SPEEDS := [1.5, 2.4, 4.4]
 const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
@@ -22,12 +24,12 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
 ## re-keyed (docs/DEBT.md).
 const OVER := {
-	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
+	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75,
 	"glintmole walk": 0.35, "glintmole run": 0.70, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.75,
+	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.68,
 	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
 	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
-	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
+	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet run": 0.85,
 	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
 }
 const SAMPLES := 48           # poses per loop
@@ -46,6 +48,10 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	for id in Check.SPECIES_LIST:
 		await _species(main, id)
+	var cover := Cover.new()
+	for id in Check.SPECIES_LIST:
+		await cover.species(main, id)
+	bad += cover.bad
 	print("BOKIGAIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

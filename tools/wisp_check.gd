@@ -18,6 +18,7 @@ var _spot: Vector3       # each hero cycle starts here: the drift rows walk the 
 func run(main_node: Node) -> void:
 	main = main_node
 	_looks()
+	_picker()
 	_start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	_spot = m.player.pos
 	for a in Arch.ids():
@@ -49,6 +50,7 @@ func _start(opts: Dictionary) -> void:
 		h.inp["move"] = Vector2.ZERO
 
 func _frames(secs: float, drift := Vector3.ZERO) -> void:
+	Sfx.listener = m.player.pos      # the hum is heard only in earshot
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
@@ -80,7 +82,7 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.4)
 	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the pop-in ends and the Wisp idles")
 	ok(p.downed and not p.out, tag + "downed gameplay untouched: still downed, not out")
-	ok(Sfx.loop_on(HunterWisp.hum_key(p)), tag + "a downed Wisp hums")
+	ok(Sfx.loop_on(WispHum.key(p)), tag + "a downed Wisp hums")
 	_frames(0.3, Vector3(0.08, 0, 0))
 	ok(wisp.position.x < -0.1, tag + "a moving Wisp hangs back behind the hunter (%.2f m)" % -wisp.position.x)
 	ok((wisp.get_node("Body") as Node3D).basis != Basis.IDENTITY, tag + "...and leans")
@@ -92,7 +94,7 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.04)
 	var popping: bool = HunterWisp.mode_of(p) == HunterWisp.OUT
 	ok(not p.downed and p.model.visible and popping, tag + "revived: the hero is back, the pop-out plays")
-	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), tag + "the revive stops the hum")
+	ok(not Sfx.loop_on(WispHum.key(p)), tag + "the revive stops the hum")
 	ok(p.model.scale.y < base.y * 0.95, tag + "the hero starts small (%.2f of full)" % (p.model.scale.y / base.y))
 	_frames(0.5)
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
@@ -110,7 +112,7 @@ func _bleed_out() -> void:
 	_frames(0.1)
 	var gone: bool = HunterWisp.node_of(p) == null and HunterWisp.mode_of(p) == ""
 	ok(gone, "bleed-out or an execute breaks the Wisp (it is freed)")
-	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), "...and stops the hum")
+	ok(not Sfx.loop_on(WispHum.key(p)), "...and stops the hum")
 	ok(m.fx.radial > burst0, "...with a burst of sparks")
 	m.revive_hunter(p, null)
 	Life.bring_back(m, p, p.pos, 0.5, false)
@@ -157,7 +159,7 @@ func _looks() -> void:
 		for key in default_look:
 			same_keys = same_keys and look.has(key)
 		ok(same_keys, "look '%s' has every key" % id)
-		for spec in [look["pop_in"], look["pop_out"], look["snuff"], look["hum"]]:
+		for spec in [look["pop_in"], look["pop_out"], look["snuff"]]:
 			ok(String(spec["sfx"]) in Sfx.NAMES, "look '%s': sound '%s' exists" % [id, spec["sfx"]])
 		_outline(String(id), look)
 	ok(WispLook.get_look("no_such_wisp") == default_look, "an unknown id gives the default Wisp")
@@ -202,3 +204,45 @@ func _outline(id: String, look: Dictionary) -> void:
 	var heavy: bool = float(look["settle"]) >= 0.3 and float(look["bob_hz"]) <= 0.7
 	ok(heavy, tag + "slow and heavy: settle %.1f s, bob %.2f Hz" % [look["settle"], look["bob_hz"]])
 	body.free()
+
+## The picker on the Hunters screen (WispPick): a card per look with a live preview, the worn one chosen, a
+## locked one greyed with how to unlock it, a click that wears and saves the Wisp (Save.d["look"]["wisp"]).
+func _picker() -> void:
+	var looks: Dictionary = WispLook.rules()["looks"]
+	looks["check_lock"] = {"name": "Check Lock", "unlock": "extracts:999999", "how": "Make it out 999999 times"}
+	looks["check_open"] = {"name": "Check Open", "core": {"rim": "00ff88"}}
+	WispLook.equip("default")
+	var worn := [0]
+	var picker := WispPick.make(func(): worn[0] += 1)
+	var cards := picker.find_children("*", "VBoxContainer", true, false).filter(func(n): return n.has_meta("wisp"))
+	ok(cards.size() == looks.size(), "the picker has a card per look (%d)" % cards.size())
+	var open_card: Control = cards.filter(func(n): return n.get_meta("wisp") == "check_open")[0]
+	var lock_card: Control = cards.filter(func(n): return n.get_meta("wisp") == "check_lock")[0]
+	var open_btn := open_card.get_child(1) as Button
+	var lock_btn := lock_card.get_child(1) as Button
+	var preview := open_card.get_child(0) as SubViewportContainer
+	var built := preview.get_child(0).get_node_or_null("Wisp") as Node3D
+	ok(built != null and built.get_child_count() == 1 and built.get_node("Body") is MeshInstance3D,
+			"the preview builds the real Wisp body (one round mesh)")
+	var mat := built.get_meta("mat") as ShaderMaterial
+	ok(mat.get_shader_parameter("rim_col") == Color("00ff88") and mat.get_shader_parameter("core_col") == Color.WHITE,
+			"...with the look's own rim and the white core")
+	var greyed: bool = lock_btn.disabled and lock_card.modulate.a < 1.0 and not open_btn.disabled
+	ok(greyed, "a locked Wisp is greyed, an owned one is not")
+	var says_how: bool = lock_btn.tooltip_text.contains("999999") and not WispLook.equip("check_lock")
+	ok(says_how, "...it says how to unlock and cannot be worn")
+	var first := cards[0].get_child(1) as Button
+	ok(not first.disabled and first.theme_type_variation == "Chosen", "the worn Wisp (the default, first) is marked")
+	open_btn.pressed.emit()
+	ok(WispLook.equipped() == "check_open" and Save.d["look"]["wisp"] == "check_open" and worn[0] == 1,
+			"a click wears the Wisp and saves it in look.wisp")
+	var again := WispPick.make(func(): pass)
+	var buttons := again.find_children("*", "Button", true, false)
+	var marked := buttons.filter(func(b): return b.theme_type_variation == "Chosen")
+	var marks_new: bool = marked.size() == 1 and marked[0].get_parent().get_meta("wisp") == "check_open"
+	ok(marks_new, "a rebuilt picker marks the new one")
+	picker.free()
+	again.free()
+	looks.erase("check_lock")
+	looks.erase("check_open")
+	WispLook.equip("default")

@@ -52,7 +52,7 @@ func is_open() -> bool:
 	return page != ""
 
 ## Admin tools are for the game's owner: always on desktop, and on the web for the artifact's owner. They are hidden
-## (no F1 / ` panel, no Admin or Mod mode entries in the menus) only when launched with `-- --showcase`, or while
+## (no ` panel, no Admin or Mod mode entries in the menus) only when launched with `-- --showcase`, or while
 ## recording mode (F10) is on, so filmed footage never shows them.
 func admin_allowed() -> bool:
 	if OS.get_cmdline_user_args().has("--showcase") or Record.clean():
@@ -63,7 +63,7 @@ func admin_allowed() -> bool:
 func _input(event: InputEvent) -> void:
 	if listening != "":
 		if event is InputEventKey and event.pressed and not event.echo:
-			if (event as InputEventKey).physical_keycode == KEY_ESCAPE:
+			if (event as InputEventKey).physical_keycode == KEY_ESCAPE:     # fixed: Esc cancels a rebind
 				listening = ""
 				_show_settings()
 			else:
@@ -92,7 +92,7 @@ func _input(event: InputEvent) -> void:
 			elif page == "": open_inventory()
 			get_viewport().set_input_as_handled()
 			return
-		if (k == KEY_F1 or (k == KEY_QUOTELEFT and not typing)) and admin_allowed() and Game.main and ctx_now() != "title":
+		if k == KEY_QUOTELEFT and not typing and admin_allowed() and Game.main and ctx_now() != "title":
 			if page == "admin": close()
 			else: open_admin()
 			get_viewport().set_input_as_handled()
@@ -225,6 +225,7 @@ func open_pause(where: String) -> void:
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
 		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+		item.call("Practice", "plus", open_practice.bind(practice.m.player))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
@@ -251,7 +252,7 @@ func open_pause(where: String) -> void:
 			scr.unstick()
 			Sfx.play("whoosh")))
 	if admin_allowed():
-		minor.add_child(UI.ghost("Admin tools  (F1)", open_admin))
+		minor.add_child(UI.ghost("Admin tools  (`)", open_admin))
 	if minor.get_child_count() > 0:
 		v.add_child(minor)
 	v.add_child(UI.spacer(2))
@@ -280,6 +281,10 @@ func open_pause(where: String) -> void:
 	res.grab_focus.call_deferred()
 
 # ------------------------------------------------------------------ settings
+## The Training Grounds' Practice page: your ability ranks (PracticeRanks).
+func open_practice(h: Hunter) -> void:
+	PracticeRanks.fill(_page("practice", "Practice", 440), h, open_practice.bind(h))
+
 func open_settings() -> void:
 	_show_settings()
 
@@ -326,7 +331,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
-		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
+		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (`)")
 
 func _tab_controls(v: VBoxContainer) -> void:
 	_group(v, "How keys behave")
@@ -341,7 +346,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		] + KinKeys.ids()],
-		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
+		["Squad and map", ["ping", "map", "scores", "emote"] + MateLook.ACTIONS + ["pass_lead", "separate"]],
 		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
 	var named := {}
 	for a in Settings.ACTIONS:
@@ -505,6 +510,9 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
 		if code == "" and slot == 1:
 			b.modulate = Color(1, 1, 1, 0.55)
+		elif Settings.unbound(an):
+			for c in ["font_color", "font_hover_color", "font_pressed_color"]: b.add_theme_color_override(c, UI.BAD)
+			b.tooltip_text = "No key: this action can't be used until you set one"
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -550,7 +558,10 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 		sl.value_changed.connect(func(val):
 			pct.text = "%d%%" % int(round(val * 100.0))
 			Settings.set_v(key, val, false))
-		sl.drag_ended.connect(func(_c): Settings.save())
+		sl.drag_ended.connect(func(_c):
+			Settings.save()
+			if Settings.BUSES.has(key):
+				Sfx.play_sample(Settings.BUSES[key]))
 	r.add_child(sl)
 	r.add_child(pct)
 
@@ -591,26 +602,19 @@ func _finish_rebind(ev: InputEvent) -> void:
 		Settings.rebind(an, ev, slot)
 		_show_settings()
 		return
-	# already someone else's key: say whose, and offer to swap (they get what this slot had)
+	# already someone else's key: say whose, and offer to swap (they take what this slot had) or cancel
 	var named := {}
-	for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
-	var other: String = cf[0][0]; var oslot: int = cf[0][1]
+	for a in Settings.ACTIONS: named[String(a[0])] = "\"%s\"" % a[1]
+	var owners: Array = cf.map(func(c): return named.get(c[0], c[0]))
 	var mine: String = Settings.slots(an)[slot]
-	var key_txt := Settings.code_text(Settings.ev_code(ev))
-	var oname := "\"%s\"" % named.get(other, other)
-	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
+	var txt := "%s is already the key for %s.\nSwap: they take %s, and this action gets %s." % [
+			Settings.code_text(Settings.ev_code(ev)), " and ".join(owners),
+			Settings.code_text(mine) if mine != "" else "no key (they are marked red until you set one)",
+			Settings.code_text(Settings.ev_code(ev))]
 	_show_settings()
-	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
-		Settings.swap_bind(an, slot, ev, other, oslot)
-		_show_settings(), false)
-	set_meta("bind_conflict", layer)
-	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
-	var both := UI.ghost("Use for both", func():
-		layer.queue_free()
-		Settings.rebind(an, ev, slot)
-		_show_settings())
-	row.add_child(both)
-	row.move_child(both, 1)
+	set_meta("bind_conflict", UI.confirm(root, "Key already in use", txt, "Swap", func():
+		Settings.swap_bind(an, slot, ev, cf)
+		_show_settings(), false))
 
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
@@ -803,7 +807,7 @@ func open_admin() -> void:
 		stack.append(page)
 	var c := ctx_now()
 	var v := _page("admin", "Admin tools", 640)
-	v.add_child(UI.label("For testing. F1 or ` opens this anywhere.", 13, UI.MUTED))
+	v.add_child(UI.label("For testing. ` opens this anywhere.", 13, UI.MUTED))
 	var god := CheckButton.new()
 	god.text = "God mode: can't be hurt or fall, no cooldowns, endless ammo"
 	god.button_pressed = Game.god

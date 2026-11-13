@@ -19,6 +19,10 @@ static func rattled(e: Ent) -> bool:
 static func rattled_left(e: Ent) -> float:
 	return maxf(0.0, float(e.get_meta("rat_until")) - float(e.m.time)) if rattled(e) else 0.0
 
+## The length of the Daze last put on `e` (the badge's ring), never less than what is left.
+static func rattled_total(e: Ent) -> float:
+	return maxf(rattled_left(e), float(e.get_meta("rat_for", 0.0)))
+
 static func clear_rattled(e: Ent) -> void:
 	if e != null and is_instance_valid(e) and e.has_meta("rat_until"):
 		e.set_meta("rat_until", 0.0)
@@ -33,7 +37,7 @@ static func grounded_left(e: Ent) -> float:
 ## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
 ## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
 static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
-	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
+	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0 or SummonCc.immune(e, kind):
 		return
 	var m: Node = e.m
 	if m == null:
@@ -57,6 +61,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"rat":
 			var was_r := rattled(e)
 			e.set_meta("rat_until", maxf(float(e.get_meta("rat_until", 0.0)), float(m.time) + secs))
+			e.set_meta("rat_for", secs)
 			if not was_r: _show(e, kind, secs)
 		"dsr":
 			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))
@@ -74,6 +79,8 @@ static func _note_remote(e: Ent, kind: String, secs: float) -> void:
 	if kind == "gnd" or kind == "rat":
 		var key := kind + "_until"
 		e.set_meta(key, maxf(float(e.get_meta(key, 0.0)), float(e.m.time) + secs))
+		if kind == "rat":
+			e.set_meta("rat_for", secs)
 	elif kind == "dsr":
 		e.slow_t = maxf(e.slow_t, secs)
 

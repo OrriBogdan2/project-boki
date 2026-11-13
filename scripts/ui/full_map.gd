@@ -139,6 +139,18 @@ func ping_at(p: Vector3) -> void:
 	p.x = clampf(p.x, 0.5, m.world.w - 0.5); p.z = clampf(p.z, 0.5, m.world.h - 0.5)
 	m.squad_ping(m.player, p)
 
+## A save's first expedition, while the ship waits: the plan screen is only the map, the timer and the jump
+## prompt. Holding the scoreboard key brings back the squad, the legend and the ways out.
+func plain_plan() -> bool:
+	var planning: bool = m.skydrop != null and m.skydrop.planning
+	var first: bool = m.guide != null and int(Save.d.get("first_guide", 0)) <= 1
+	return planning and first and not Input.is_action_pressed("scores")
+
+## The groups on screen: the header, the map, and the three side panels unless the plan is plain.
+func groups() -> PackedStringArray:
+	var all := ["header", "map", "squad", "legend", "ways out"]
+	return PackedStringArray(all.slice(0, 2) if plain_plan() else all)
+
 # ------------------------------------------------------------------ drawing
 func draw(sz: Vector2) -> void:
 	var c: Control = hud.c
@@ -197,9 +209,22 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
-	_legend(c, sz, team)
-	_side(c, sz)
+	_roster.clear()
+	if plain_plan():
+		_plain_hint(sz)
+	else:
+		_legend(c, sz, team)
+		_side(c, sz)
 	_cursor(c)
+
+## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
+func _plain_hint(sz: Vector2) -> void:
+	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
+	var line := "Press %s to jump  ·  hold %s for the legend and ways out" % keys
+	var w: float = hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
+	var pill := Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
+	hud._rounded(pill, Color(0.04, 0.05, 0.08, 0.88), 10)
+	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), line, 16, INK, hud.big)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:
@@ -623,7 +648,6 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
-	_roster.clear()
 	var p: Hunter = m.player
 	if p == null:
 		return

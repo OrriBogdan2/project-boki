@@ -9,8 +9,9 @@ check: `--base-life-check`.
   React (a newcomer). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
   Nap ends only when its nap clock runs out. Every non-Nap state has a cap in `max`; a Boki that roamed `max.roam`
   seconds is bored and picks something (tag, a toy, else a nap).
-- home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed). While one has a
-  Boki its machine waits. home.gd asks `choose()` after its care and job picks, in place of the old wander/tag/nap
+- home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed, and ComeLook's
+  news: `k["look"]`). While one has a Boki its machine waits, so a Boki that went to look at a Rare Egg you brought
+  home carries on in the state it was in (`--homecoming-react-check`). home.gd asks `choose()` after its care and job picks, in place of the old wander/tag/nap
   choices; `step()` ticks every machine at 10 Hz; `pile()` lets napping friends lie close in `_separate_kin`.
 - Bonds: `rec["bonds"] = {uid: -1..1}`, the same both ways (`BaseLife.add_bond`). Tag catches and napping side by
   side raise it; a squabble (two hot tempers meeting at a toy or in tag, or a rival at the toy) lowers it. Friends
@@ -24,6 +25,11 @@ check: `--base-life-check`.
   `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
   `bond_squabble`, sharing one `bond_share` (base_life.json). `BaseLife.toy_spots()` lists the toys for chores.
+  Joy sets the pace: at the base it wears `base_joy_decay` a minute awake (care.json, 8; Care.DECAY's 0.6 off the
+  base and for time you were away), a Boki under toys.json `joy_below` (90) goes to a toy on its own, and a play
+  gives only `joy_gain` (3): play trains stats, care keeps a Boki happy. A favourite meal (+28) is about one day's
+  wear, so a Boki you feed plays 5-10 times a day and stays content; one left alone plays too but slides toward
+  sulky (care.json `sulky`), never sick.
 - Feeding itself (GARDEN.md section 2, `scripts/home/base_feed.gd`): a hungry Boki (food under `Econ.HUNGRY_AT`)
   goes to a feeder with food first (HomeEcon), else picks the ripe snack patch and eats one snack (the rest go to
   the pantry), else fetches a snack from the pantry (Save.d crops) at the house door or the landing. The walk is
@@ -32,7 +38,8 @@ check: `--base-life-check`.
   `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
   so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
 - Duo bonus (`scripts/home/base_duo.gd`, `content/rules/base_duo.json`): friends at bond 0.6 or more wake +6 joy from a shared nap (8 s asleep side by side), hand off cleanly in the Dash (x1.06 pace into a stretch with the friend alongside), show a heart pair and "Duo with X" on the Boki card in the Burrow view, and get one journal line the first time. The Show Ring joint trick waits for the Show Ring. Check: `--duo-check`.
-- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, or an unfed Boki that never ate on its own, and writes every state change to user://garden_soak.json.
+- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, an unfed Boki that never ate on its own, or a fed Boki that plays under 3.5 toys a day, starts under one every other day from low joy, or
+  is ever sulky (it prints toys a day, lowest joy and time sulky for each Boki), and writes every state change to user://garden_soak.json.
 - Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
   mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
   = {gifted}`. In `BaseLife` it is the MENTOR state: slow steps (`Mentor.PACE`, `mentor`/`mentor_radius` in the
@@ -51,7 +58,8 @@ check: `--base-life-check`.
   are already `rec["lineage"]["parents"]`; old babies have no gifts: read with `.get`, no migration). A young (not
   yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
-  The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
+  The hatch card (home.gd `_name_baby`, every mode) shows both parents' portraits and marks each gift (kind and colour, lean, best inherited
+  stat, favourite food and play, mutations) with a dot for the parent it came from (`scripts/ui/hatch_parents.gd`); `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
 - Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
   grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
@@ -63,7 +71,11 @@ check: `--base-life-check`.
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
 - Wading (`scripts/home/boki_wade.gd`, `content/rules/wade.json`, base_mode only; the Bramblebank stream and the
   Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
-  (middle) of its dry pace, leaves a ripple and a splash going in and shakes off coming out. Water, Ice and Crystal
+  (middle) of its dry pace, splashes going in and shakes off coming out. While in, it leaves marks
+  (`scripts/home/boki_wake.gd`, `shaders/boki_wake.gdshader`): a ripple ring under it (a wave every `ripple_secs`)
+  and a short V wake while it moves, sized by its body and faded out at the bank by a water-tile mask; every Boki's
+  marks are one MultiMesh (one draw call), made when the first Boki steps in and never on Very Low. Water, Ice and
+  Crystal
   types (`HomeToys.lean_of`: lean, else species theme) paddle: a free roaming one lingers 4 to 8 s playing the
   `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
   The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
@@ -77,3 +89,13 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+
+## Decor with a purpose (comfort tags)
+Every decoration in the build catalog has one comfort tag (`HomeLayout.CATALOG` `"comfort"`: cosy, bright, wild,
+quiet). A zone holding three of one tag (`content/rules/decor_comfort.json` `need`) gets that tag's named effect,
+shown in gold on its Waystone card (`ZoneCards.open_lines`). `DecorComfort` counts and caches the tags; each effect
+is one number read where it acts: Snug naps (cosy) restore joy while napping (`BaseLife._nap_tick`), Sunny patch
+(bright) ripens the snack patch faster (`SnackPatch.grow_secs`), Wild welcome (wild) raises the visitor chance
+(`GardenVisitor.chance`), Calm air (quiet) lowers the squabble chance (`BaseLife._clash`). A built zone counts its
+fixed pieces; every other zone counts the save's island. No scores: an effect is on or off. Check:
+`--decor-tags-check`.

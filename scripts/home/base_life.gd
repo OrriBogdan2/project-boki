@@ -257,6 +257,7 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 		return
 	if not _awake(k):
 		k["nap_t"] = maxf(nap, 2.0)      # night: it sleeps on till dawn
+	Care.change(k["rec"], "joy", DecorComfort.value("cosy", "nap_joy", 0.0) * dt / 60.0)
 	for o in h.kins:
 		if o != k and o.has("life") and (o["life"] as Fsm).is_in(S.NAP) and float(o.get("nap_t", 0.0)) > 0.0 \
 				and _dist(k, o) < PILE_JOIN * 1.5:
@@ -415,10 +416,11 @@ func _arrived(k: Dictionary) -> void:
 func _awake(k: Dictionary) -> bool:
 	return not night or nocturnal(k["rec"])
 
-## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors or leaping).
+## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors, leaping or looking at
+## news with ComeLook).
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
-		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) \
+		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) or k.has("look") \
 		or float(k.get("hold_t", 0.0)) > 0.0
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:
@@ -457,7 +459,7 @@ func _greet(k: Dictionary, near: Array) -> void:
 ## Two hot tempers that meet may squabble: the chance grows with how far their summed temper is over 1.0.
 func _clash(a: Dictionary, b: Dictionary) -> bool:
 	var over := float(a["traits"].get("temper", 0.5)) + float(b["traits"].get("temper", 0.5)) - 1.0
-	return randf() < maxf(0.0, over) * float(R["clash"])
+	return randf() < maxf(0.0, over) * float(R["clash"]) * DecorComfort.value("quiet", "clash", 1.0)
 
 func _squabble(a: Dictionary, b: Dictionary) -> void:
 	add_bond(a["rec"], b["rec"], float(R["bond_squabble"]))

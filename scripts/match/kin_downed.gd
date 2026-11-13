@@ -245,7 +245,7 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
 	k.m.fx.ring(from, 1.2, Color(k.sp["color"], 0.8), 0.3)
-	k.m.sfx("recall", k.owner_h.pos, -4.0)
+	SfxCast.hold_back(func(): k.m.sfx("recall", k.owner_h.pos, -4.0))     # (the scoop/round event plays it there)
 	if rescued:
 		k.note("rescued", "you ran in and carried it out", 1.5)
 		k.bark("revive")
@@ -293,5 +293,7 @@ static func scoop_pose(k: Kin) -> void:
 	var lift := smoothstep(0.0, float(rules()["carry_lift_s"]), k.rescue_t)
 	var bob := 0.04 * sin(k.m.time * 4.0)
 	var arms := h.global_position + Vector3(-sin(h.face) * ARMS_FWD, ARMS_UP + bob, -cos(h.face) * ARMS_FWD)
+	if h.model != null and h.model.has_meta(WardenCarry.SOCKET):
+		arms = (h.model.get_meta(WardenCarry.SOCKET) as Vector3) + Vector3(0.0, bob, 0.0)   # (a .glb Hero's cradle)
 	k.global_position = k.global_position.lerp(arms, lift)
 	k.model.scale *= lerpf(1.0, 0.7, lift)

@@ -32,6 +32,7 @@ func run(main_node: Node) -> void:
 	_removed(src)
 	await _migration()
 	_static_styles(src)
+	_theme_types()
 	await _screens()
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -94,6 +95,8 @@ func _migration() -> void:
 	for k in Settings.REMOVED:
 		cf.set_value("s", k, true)
 	cf.set_value("s", "music", 0.42)
+	if cf.has_section_key("s", "ambience"):
+		cf.erase_section_key("s", "ambience")      # a file from before the Ambience slider
 	cf.save(Settings.PATH)
 	var fresh: Node = load("res://scripts/core/settings.gd").new()
 	main.add_child(fresh)
@@ -105,12 +108,28 @@ func _migration() -> void:
 	ok("an old settings file drops the removed keys on start", left.is_empty(), str(left))
 	var kept := is_equal_approx(float(after.get_value("s", "music", 0.0)), 0.42)
 	ok("...and keeps the others", kept and is_equal_approx(float(fresh.get_v("music")), 0.42))
+	ok("...and a missing volume starts at its default", fresh.get_v("ambience") == Settings.DEFAULTS["ambience"])
 	main.remove_child(fresh)
 	fresh.free()
 	if had:
 		keep.save(Settings.PATH)
 	else:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+
+## Settings > Audio has one slider per bus the mix ends in (SFXFar feeds SFX), and letting go of
+## each plays the sample through its own bus.
+func _audio_tab() -> void:
+	var mains: Array = []
+	for i in AudioServer.bus_count:
+		if i == 0 or AudioServer.get_bus_send(i) == "Master":
+			mains.append(AudioServer.get_bus_name(i))
+	var sampled: Array = []
+	for sl: HSlider in Overlay.root.find_children("*", "HSlider", true, false):
+		sl.drag_ended.emit(false)
+		sampled.append(String(Sfx.sample_voice.bus) if Sfx.sample_voice else "")
+	mains.sort()
+	sampled.sort()
+	ok("settings > Audio: one slider per bus, each samples its own", sampled == mains, "%s %s" % [sampled, mains])
 
 # ------------------------------------------------------------------ 3, 4: the look
 func _static_styles(src: Dictionary) -> void:
@@ -132,6 +151,23 @@ func _static_styles(src: Dictionary) -> void:
 			if line.contains("UI.section(") and line.contains(".lerp("):
 				dim_heads.append(path)
 	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
+
+## Collects engine errors (the theme build logs one and carries on).
+class ErrLog extends Logger:
+	var errors: Array = []
+	func _log_error(_fn: String, _file: String, _line: int, _code: String, rationale: String, _editor: bool, _type: int, _bt: Array) -> void:
+		errors.append(rationale)
+
+## Sentry PROJECT-BOKI-1: building the theme must not log an engine error (a native class like
+## OptionButton can't be a type variation); native types are styled as themselves, custom ones vary Button.
+func _theme_types() -> void:
+	var errs := ErrLog.new()
+	OS.add_logger(errs)
+	var t := UiTheme.build()
+	OS.remove_logger(errs)
+	ok("UiTheme.build logs no engine error", errs.errors.is_empty(), str(errs.errors))
+	ok("OptionButton is styled as itself", t.has_stylebox("normal", "OptionButton"))
+	ok("custom button types still vary Button", t.get_type_variation_base("Primary") == &"Button")
 
 func _theme_boxes() -> Dictionary:
 	var out := {}
@@ -159,10 +195,16 @@ func _off_look(root: Node, ours: Dictionary) -> Array:
 		out.append(String(root.get_path_to(ctl)) + (" (%s)" % owner_script.resource_path if owner_script else ""))
 	return out
 
+## Opens `screen` and waits until it is the new, built, uncovered screen. Under the ink wipe
+## (xvfb, real play) `main.current` is still the outgoing screen, or gone, for the first second.
 func _go(screen: String) -> Node:
+	var old_id: int = main.current.get_instance_id() if main.current else 0
 	Game.goto(screen)
-	for i in 10:
+	for i in 600:
 		await main.get_tree().process_frame
+		var cur: Node = main.current
+		if i >= 9 and cur and cur.get_instance_id() != old_id and not main.fade.covered and not cur.get("building"):
+			break
 	return main.current
 
 func _screens() -> void:
@@ -181,6 +223,8 @@ func _screens() -> void:
 		await main.get_tree().process_frame
 		var off := _off_look(Overlay.root, ours)
 		ok("settings > %s: every box is the menu look" % t, off.is_empty(), str(off))
+		if t == "Audio":
+			_audio_tab()
 	Overlay.close()
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame

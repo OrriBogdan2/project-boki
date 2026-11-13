@@ -515,40 +515,56 @@ def smooth_weights(low, W, passes):
     return W
 
 
-def move_bones(arm, kept):
+def move_bones(arm, kept, T, K):
     """`move_bones` {bone: offset}: the bone's rest (and the kept parts on it) moves by the offset; its translation keys lose
     the offset in proportion to how far each goes toward the largest one, so the clips still end where they did (the junk
-    ball hides in the new body at rest and still grows round him in a dash)."""
-    for name, d in SPEC.get("move_bones", {}).items():
-        d = Vector(d)
-        b = arm.data.bones[name]
-        dl = b.matrix_local.to_3x3().inverted() @ d
-        path = 'pose.bones["%s"].location' % name
-        curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
-        keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
-                for cs in curves if len(cs) == 3]
-        far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max())
-        top = far[np.linalg.norm(far, axis=1).argmax()]
-        for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
-            if len(cs) != 3:
-                continue
-            cs = sorted(cs, key=lambda c: c.array_index)
-            loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
-            frac = loc @ top / float(top @ top)
-            for i, fc in enumerate(cs):
-                for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
-                    kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    ball hides in the new body at rest and still grows round him in a dash). {bone: {"to": point, "chain": [bones]}}: the
+    bone's head onto a master point (through the fit) and its chain by the same offset, the keys as they were (Albert's fish
+    onto the master's mast)."""
+    for name, spec in SPEC.get("move_bones", {}).items():
+        bones, fix = [name], not isinstance(spec, dict)
+        if fix:
+            d = Vector(spec)
+        else:
+            p = np.array([spec["to"]], float)
+            d = Vector(fit(p, fit_weights(arm, p), T, K)[0]) - arm.data.bones[name].head_local
+            bones += spec.get("chain", [])
+        rest = {bn: (arm.data.bones[bn].head_local.copy(), arm.data.bones[bn].tail_local.copy()) for bn in bones}
+        for bn in bones:
+            move_bone(arm, kept, bn, d, fix)
         select([arm], arm)
         bpy.ops.object.mode_set(mode="EDIT")
-        eb = arm.data.edit_bones[name]
-        eb.head += d
-        eb.tail += d
+        for bn, (h, t) in rest.items():     # (from the rest as it was: a connected child follows its parent's tail)
+            arm.data.edit_bones[bn].head = h + d
+            arm.data.edit_bones[bn].tail = t + d
         bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def move_bone(arm, kept, name, d, fix):
+    """One bone's keys (corrected if `fix`) and kept parts."""
+    b = arm.data.bones[name]
+    dl = b.matrix_local.to_3x3().inverted() @ d
+    path = 'pose.bones["%s"].location' % name
+    curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
+    keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
+            for cs in curves if len(cs) == 3]
+    far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max()) if keys and fix else np.zeros((1, 3))
+    top = far[np.linalg.norm(far, axis=1).argmax()]
+    for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
+        if len(cs) != 3:
+            continue
+        cs = sorted(cs, key=lambda c: c.array_index)
+        loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
+        frac = loc @ top / float(top @ top)
+        for i, fc in enumerate(cs):
+            for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
+                kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    if name in kept.vertex_groups:
         gi = kept.vertex_groups[name].index
         for v in kept.data.vertices:
             if any(g.group == gi and g.weight > 0.5 for g in v.groups):
                 v.co += d
-        print("moved", name, tuple(d), "keys", len(keys), flush=True)
+    print("moved", name, tuple(round(x, 3) for x in d), "keys", len(keys), flush=True)
 
 
 # ----------------------------------------------------- step 4: slots, ink room, anchors
@@ -631,7 +647,7 @@ def main():
     P = P[o]
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
-    move_bones(arm, kept)
+    move_bones(arm, kept, T, K)
     slots = [s + "-atlas" for s in tri_slots(low, img, top, P)] + (kept["slots"].split(",") if kept["slots"] else [])
     room = SPEC.get("room", {})
     vals = [room.get(b, room.get("*", 0.7)) for b in top]

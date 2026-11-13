@@ -40,6 +40,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
+| `--lair-fall-check` | A jump dash anywhere in a boss lair, or a dash out of its escape updraft, never ends in "you fell"; nobody over solid ground is lost to the abyss |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
 | `--train-map-check` | The sky train on the maps: one halt icon per stop, the marker at the engine's arc position, the countdown to a halt, the minimap's range rule |
@@ -58,6 +59,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
+| `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |
@@ -72,6 +74,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--work-check` | Boki at work: knacks, mutation bonuses, old saves, jobs from the farm's state, priorities and pins, real output |
 | `--farm-start-check` | A new save's farm start: placing the essentials, chopping and mining, materials paying for buildings, assigned Boki working, old saves |
 | `--demo-check` | The recording presets (docs/DEMO_PRESETS.md): each `--demo=` name boots and runs a few seconds, the farm and care presets at home with six grown Boki, the match presets in a full bot lobby with the `--hunter` pick, the demo save never written and the player's save file untouched |
+| `--pitch-check` | The pitch reel's scripted shots (docs/PITCH_REEL.md) play through without the movie writer: the hatch reaches its reveal, the evolution plays or says why it cannot, the Hunter select lands on and saves the chosen Hunter with its screen up, the kit rota runs, the escape Hunter rides out; the save file is untouched |
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--mask-moment-check` | The put-on Mask moment (item 83, `MaskBeat`): every Hunter has a whisper and a sting key, the sounds exist, 4-6 s with 0.6-0.8 s of black; build-up camera, the Mask rising with the ghost face, black and silence on contact with the Hunter swapped in behind it, a memory frame and the whisper, the snap back with a ripple, the name and title, the scene camera back; skippable once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |
@@ -84,6 +87,9 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
+
+The two timing checks are advisory: a fail prints `ADVISORY` and exits 0, unless `--timing-strict` is on the
+line (the gate's GPU-host run). See [CHECKS_TIMING](../CHECKS_TIMING.md).
 
 ## Tooling flags
 

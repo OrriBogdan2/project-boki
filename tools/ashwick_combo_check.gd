@@ -242,6 +242,8 @@ func _all() -> void:
 		P.inp["move"] = Vector2.ZERO
 		ak.aim_at(P, T.pos)
 		ak.step(m, 0.05)
+		for mb in m.mobs: mb.queue_free()      # (one spawned on that last step would count as a third foe)
+		m.mobs.clear()
 	var hold_fire := func(secs: float):
 		var t := 0.0
 		while t < secs:
@@ -379,16 +381,17 @@ func _all() -> void:
 		"lance: +40% and 2.5% of health a second on a Flashed-over foe (per tick)",
 		absf(flash - (cold * 1.4 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * 1.4 + chip2]
 	)
-	# a burning foe builds Char as fast as a cold one (the old halving is gone)
+	# a burning foe builds Char as fast as a cold one (the old halving is gone). 0.8 s: the fire leaves from
+	# her body (ShotOrigin), so it reaches the foe ~0.08 s later than from the old 1.3 m nozzle
 	reset.call()
 	K.relight_t = 0.0
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	var char_cold: float = K.char_of(T)
 	P.inp["fire"] = false
 	reset.call()
 	K.relight_t = 0.0
 	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	ok(
 		"lance: a burning foe builds Char at the full rate", char_cold > 6.0 and K.char_of(T) >= char_cold * 0.9,
 		"cold %.1f burning %.1f" % [char_cold, K.char_of(T)]
@@ -649,7 +652,29 @@ func _all() -> void:
 		"dist %.1f" % P.flat_dist(T)
 	)
 	ok("cloak: the swirling fire shield shows while it holds", K.fx.shown("swirl%d" % P.get_instance_id()))
+	var swirl_id := "swirl%d" % P.get_instance_id()
+	ok("cloak: one foe caught, one shield swirl on her", not K.fx.shown(swirl_id + "_1"))
+	K.st["shield_foes"] = 3
+	ak.step(m, 1.0 / 60.0)
+	ok(
+		"cloak: a shield swirl per foe caught, three at most",
+		K.fx.shown(swirl_id + "_2") and not K.fx.shown(swirl_id + "_3")
+	)
+	var cloak_fx: Array = HeroVfx.data("ashwick")["moves"]["cloak"]["fx"]
+	ok(
+		"cloak look: thin lit swirls on the blast radius, no scorch disc or skirt fill",
+		cloak_fx.any(func(l: Dictionary) -> bool: return l["p"] == "vortex" and l.get("thin", false))
+			and not cloak_fx.any(func(l: Dictionary) -> bool: return l["p"] in ["scorch", "skirt"])
+	)
 	var pulled_far: float = P.flat_dist(T)
+	# the cloak's shield is a 3 s pool that drops whole at its time (0.7 s already stepped)
+	ak.step(m, float(K.e_def()["shield_t"]) - 0.9)
+	var held: bool = P.shield_t > 0.0
+	ak.step(m, 0.4)
+	ok(
+		"cloak: the shield is gone at its 3 s", held and P.shield_t <= 0.0 and P.shield == 0.0,
+		"t %.2f shield %.1f" % [P.shield_t, P.shield]
+	)
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	ak.aim_at(P, T.pos)

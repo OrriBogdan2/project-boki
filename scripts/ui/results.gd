@@ -47,6 +47,7 @@ func show_result(r: Dictionary) -> void:
 	var tag := UI.tag("First expedition" if r.get("tutorial", false) and won else ("Extracted" if won else "Didn't make it"), UI.TEAL if won else Color("ff9a8a"))
 	var hunter := String(Save.d.get("name", "Hunter")).substr(0, 16)
 	var head := UI.vbox(6)
+	tag.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN      # a tag, not a bar across the card
 	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))
 	var how := (WaysResult.how_line(r) + ("" if won else "Everything you carried stays out in the islands.")).strip_edges()
@@ -64,14 +65,16 @@ func show_result(r: Dictionary) -> void:
 	var secs := int(r.get("time", 0))
 	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
 	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
+	var big4 := [["knock", "Foes downed", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
 		["clock", "Time", float(secs), "time"]]
 	for i in big4.size():
 		var t: Array = big4[i]
 		if i > 0:
 			var sep := ColorRect.new(); sep.color = UI.LINE; sep.custom_minimum_size = Vector2(1, 0)
 			sh.add_child(sep)
-		sh.add_child(_stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08))
+		var tile := _stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08)
+		tile.tooltip_text = String(STAT_TIPS.get(t[0], ""))
+		sh.add_child(tile)
 	v.add_child(strip)
 	var det := UI.vbox(6)      # what is behind the Details toggle
 	det.visible = false
@@ -81,7 +84,10 @@ func show_result(r: Dictionary) -> void:
 		if int(s["gems"]) > 0:
 			chips.append(["gem", "%d gems" % s["gems"], UI.GOLD])
 		for sd in s["seeds"]:
-			chips.append(["seed", "%d %s seeds" % [s["seeds"][sd], Data.CROPS[sd]["name"]], Data.CROPS[sd]["color"]])
+			var crop: Dictionary = Data.CROPS[sd]
+			var n := int(s["seeds"][sd])
+			var what := "%d %s %s to plant" % [n, crop["name"], "seed" if n == 1 else "seeds"]
+			chips.append(["seed", what, crop["color"]])
 		for k in s["caught"]:
 			var rare := " ".join(Mutations.tags(k))
 			chips.append(["egg", ("%s the %s %s" % [k["name"], rare, Data.KIN[k["species"]]["name"]]) if rare != "" else Data.kin_title(String(k["name"]), String(Data.KIN[k["species"]]["name"])), Data.KIN[k["species"]]["color"], k])
@@ -112,7 +118,9 @@ func show_result(r: Dictionary) -> void:
 	if won and eggs_home > 0:
 		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
-		v.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
+		v.add_child(UI.section("Weapons and gloves you found"))
+		if not Save.has_building("armory"):
+			v.add_child(_note("Build an armory on your farm to use them.", UI.MUTED))
 		var hf := HFlowContainer.new()
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
@@ -171,6 +179,9 @@ func show_result(r: Dictionary) -> void:
 	outer.add_child(row)
 	go.grab_focus()
 	Sfx.play("bond" if won else "fall", null, -6.0, 0.0, 1.0 if won else 0.8)
+
+## One line of plain words on hover for the strip tiles that need one (by icon).
+const STAT_TIPS := {"knock": "Enemy hunters you put on the ground this match."}
 
 ## One stat on the strip: a number that counts up from zero, with what it is under it.
 func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: float) -> Control:
@@ -258,7 +269,7 @@ func _kin_card(s: Dictionary, det: Control) -> Control:
 func _small_stats(r: Dictionary, tier_name: String) -> Control:
 	var small := HFlowContainer.new()
 	small.add_theme_constant_override("h_separation", 18)
-	for t in [["Tier", tier_name], ["Kills", int(r.get("kills", 0))], ["Damage taken", int(r.get("taken", 0))], ["Times downed", int(r.get("downs", 0))], ["Revives", int(r.get("revives", 0))]]:
+	for t in [["Where", tier_name], ["Kills", int(r.get("kills", 0))], ["Damage taken", int(r.get("taken", 0))], ["Times downed", int(r.get("downs", 0))], ["Revives", int(r.get("revives", 0))]]:
 		var one := UI.hbox(6)
 		one.add_child(UI.label(String(t[0]), UI.T_SMALL, UI.MUTED))
 		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.semi))
@@ -289,61 +300,12 @@ func _unhandled_input(e: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		Game.goto("home")
 
-var hunter_node: Node3D
-var h_anim: HunterAnim
-var kin_node: Node3D
-var won_k := false
-var t := 0.0
-
-## Behind the card: your hunter and kin on a little island, cheering if you made it out,
-## sitting it out if you didn't.
+## Behind the card: your squad on a little island, in their poses if you made it out, as dimmed Wisps if not.
 func _stage(r: Dictionary, s: Dictionary) -> void:
-	won_k = r.get("extracted", false)
-	var svc := SubViewportContainer.new(); svc.stretch = true
-	svc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	svc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(svc)
-	var vp := SubViewport.new(); vp.own_world_3d = true; vp.msaa_3d = Viewport.MSAA_2X
-	svc.add_child(vp)
-	var w3 := Node3D.new(); vp.add_child(w3)
-	var env := WorldEnvironment.new(); env.environment = Look.environment({}); w3.add_child(env)
-	if not won_k:
-		Look.night(env.environment, 0.6)
-	Look.lights(w3, Color("fff1d8") if won_k else Color("b9c4ff"), 1.05 if won_k else 0.7)
-	var rng := RandomNumberGenerator.new(); rng.seed = 7
-	var isl := Models.float_island(rng, 2.6, 5.0, Color("6aa64a"), Color("9a7a5a"), Color("3a2f48"))
-	w3.add_child(isl)
-	var tr := Models.tree(rng, Color("5a9a4f"), "round"); tr.position = Vector3(-1.4, 0, -1.2); w3.add_child(tr)
-	var rk := Models.rock(rng, 0.7); rk.position = Vector3(1.5, 0, -0.9); w3.add_child(rk)
-	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Unmasked.mask_look(), Arch.of_save())
-	hunter_node.position = Vector3(-0.3, 0, 0.3); hunter_node.rotation.y = PI + 0.5
-	var ring := hunter_node.get_node_or_null("TeamRing") as Node3D
-	if ring: ring.visible = false
-	w3.add_child(hunter_node)
-	h_anim = HunterAnim.new(hunter_node)
-	if s.has("kin") and won_k:
-		kin_node = Models.kin(String(s["kin"]["species"]), s["kin"])
-		kin_node.position = Vector3(0.75, 0, 0.6); kin_node.rotation.y = PI + 0.9
-		kin_node.set_meta("happy", true)
-		w3.add_child(kin_node)
-	var cam := Camera3D.new(); cam.fov = 40
-	# the island sits left of the results card
-	cam.position = Vector3(4.6, 2.6, 8.4)
-	w3.add_child(cam)
-	cam.look_at(Vector3(3.3, 0.6, 0))
-
-func _process(dt: float) -> void:
-	t += dt
-	if h_anim:
-		var vy := 0.0
-		if won_k:
-			# a little victory hop every couple of seconds
-			var ph := fmod(t, 2.2)
-			hunter_node.position.y = maxf(0.0, sin(ph / 0.5 * PI)) * 0.35 if ph < 0.5 else 0.0
-			vy = cos(ph / 0.5 * PI) * 2.0 if ph < 0.5 else 0.0
-		h_anim.update(dt, {"grounded": hunter_node.position.y < 0.01, "vel": Vector3(0, vy, 0), "crouch": 0.0 if won_k else 0.7, "downed": false})
-	if kin_node:
-		kin_node.get_node("Body").position.y = absf(sin(t * 5.0)) * 0.25
+	var squad: Array = r.get("squad", [])
+	if squad.is_empty():
+		squad = [{"arch": Arch.of_save(), "name": String(Save.d.get("name", "Hunter")), "you": true, "kin": s.get("kin", {})}]
+	add_child(ResultsStage.make(squad, r.get("extracted", false)))
 
 func _lost_title(why: String) -> String:
 	match why:

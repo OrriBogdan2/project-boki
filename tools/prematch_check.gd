@@ -239,6 +239,10 @@ func _screen(main: Node) -> void:
 	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
 	var log_open: bool = view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible
 	ok(log_open, "the first message opens the log and the input folds back")
+	for i in 4:
+		await view._add_chat("Ember", "line %d" % i, UI.INK)
+	var crowded: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
+	ok(crowded.is_empty(), "with the chat log full every Hunter row still shows (%s)" % [crowded.slice(0, 2)])
 	view._choose("bulwark")
 	view.pm.tick(Prematch.TURN + 0.01)
 	view._tick_label()
@@ -270,3 +274,9 @@ func _declutter(view: Control) -> void:
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
+	var win := view.get_viewport_rect().size
+	var timer_box: Rect2 = view.timer_label.get_global_rect()
+	var up_top := timer_box.end.y < win.y * 0.4 and absf(timer_box.get_center().x - win.x * 0.5) < 2.0
+	var big: bool = view.timer_label.get_theme_font_size("font_size") >= view.DIGITS_MIN
+	ok(view.grid.get_child_count() >= 13 and up_top and big,
+			"13+ Hunter cards fit and the countdown stays big, top centre (%s)" % [timer_box])

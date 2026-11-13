@@ -223,7 +223,7 @@ func _inks() -> void:
 	var types := ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"]
 	var missing: Array = []
 	for t in types:
-		var named := Goods.name_of("good:ink_" + t) == String(t).capitalize() + " Ink"
+		var named := Goods.name_of("good:ink_" + t) == ("Fairy" if t == "lunar" else String(t).capitalize()) + " Ink"
 		if String(Goods.good("ink_" + t).get("kind", "")) != "ink" or not named: missing.append(t)
 	ok(missing.is_empty(), "inks: all nine Inks are market goods named '<Type> Ink' (missing: %s)" % str(missing))
 	var boss_inks: Array = []

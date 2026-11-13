@@ -272,6 +272,7 @@ static func assign(rec: Dictionary, u: int) -> void:
 	if u < 0: rec.erase("work_at")
 	else:
 		rec["work_at"] = u
+		rec.erase("build_at")      # (a site assignment: FarmSites)
 		rec.erase("work_rest")
 		rec.erase("work_pin")
 

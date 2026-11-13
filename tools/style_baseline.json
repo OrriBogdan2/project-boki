@@ -10,8 +10,8 @@
 "semicolon": 6
 },
 "scripts/arch/feel.gd": {
-"long_line": 10,
-"nested_ternary": 2,
+"long_line": 9,
+"nested_ternary": 1,
 "semicolon": 5
 },
 "scripts/arch/hero_demo.gd": {
@@ -32,7 +32,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 9,
+"long_line": 8,
 "nested_ternary": 1,
 "semicolon": 8
 },
@@ -147,7 +147,7 @@
 "semicolon": 2
 },
 "scripts/core/save.gd": {
-"long_line": 9,
+"long_line": 8,
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
@@ -156,7 +156,7 @@
 "semicolon": 4
 },
 "scripts/core/sfx.gd": {
-"long_line": 5,
+"long_line": 6,
 "semicolon": 3
 },
 "scripts/core/shiny.gd": {
@@ -207,19 +207,19 @@
 "semicolon": 3
 },
 "scripts/home/farm_sites.gd": {
-"long_line": 3,
+"long_line": 2,
 "semicolon": 1
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
-"nested_ternary": 27,
-"semicolon": 243
+"long_line": 192,
+"nested_ternary": 25,
+"semicolon": 237
 },
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 70
+"semicolon": 68
 },
 "scripts/home/home_econ.gd": {
 "long_line": 40,
@@ -323,9 +323,9 @@
 "semicolon": 2
 },
 "scripts/main.gd": {
-"long_line": 365,
+"long_line": 360,
 "nested_ternary": 7,
-"semicolon": 380
+"semicolon": 373
 },
 "scripts/match/abilities.gd": {
 "long_line": 1
@@ -357,7 +357,7 @@
 "semicolon": 14
 },
 "scripts/match/arena.gd": {
-"long_line": 22,
+"long_line": 21,
 "nested_ternary": 2,
 "semicolon": 36
 },
@@ -387,28 +387,27 @@
 "semicolon": 4
 },
 "scripts/match/boss.gd": {
-"long_line": 15,
-"nested_ternary": 4,
-"semicolon": 19
+"long_line": 11,
+"nested_ternary": 2,
+"semicolon": 12
 },
 "scripts/match/boss_models.gd": {
 "long_line": 40,
-"semicolon": 64
+"semicolon": 62
 },
 "scripts/match/bot.gd": {
-"long_line": 23,
-"nested_ternary": 1,
-"semicolon": 49
+"long_line": 22,
+"semicolon": 48
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
 },
 "scripts/match/cam.gd": {
-"history_comment": 3,
+"history_comment": 1,
 "long_line": 2
 },
 "scripts/match/capture.gd": {
-"long_line": 11,
+"long_line": 10,
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
@@ -440,9 +439,9 @@
 "semicolon": 54
 },
 "scripts/match/fx.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 1,
-"semicolon": 25
+"semicolon": 24
 },
 "scripts/match/gear.gd": {
 "long_line": 4
@@ -475,7 +474,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 27,
-"long_line": 92,
+"long_line": 94,
 "nested_ternary": 15,
 "semicolon": 47
 },
@@ -490,9 +489,9 @@
 "semicolon": 1
 },
 "scripts/match/kin.gd": {
-"long_line": 30,
+"long_line": 29,
 "nested_ternary": 7,
-"semicolon": 19
+"semicolon": 18
 },
 "scripts/match/kin_command.gd": {
 "long_line": 5,
@@ -548,8 +547,8 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 217,
-"nested_ternary": 19,
+"long_line": 216,
+"nested_ternary": 18,
 "semicolon": 142
 },
 "scripts/match/merge_look.gd": {
@@ -574,9 +573,9 @@
 "semicolon": 39
 },
 "scripts/match/models.gd": {
-"long_line": 280,
+"long_line": 279,
 "nested_ternary": 12,
-"semicolon": 276
+"semicolon": 269
 },
 "scripts/match/music_dir.gd": {
 "nested_ternary": 1,
@@ -593,9 +592,6 @@
 "scripts/match/polish_tools.gd": {
 "long_line": 5,
 "semicolon": 3
-},
-"scripts/match/practice.gd": {
-"long_line": 2
 },
 "scripts/match/practice_hero.gd": {
 "long_line": 2,
@@ -642,7 +638,7 @@
 "scripts/match/terrain_mesh.gd": {
 "long_line": 49,
 "nested_ternary": 2,
-"semicolon": 86
+"semicolon": 85
 },
 "scripts/match/train_route.gd": {
 "long_line": 2,
@@ -661,9 +657,9 @@
 "semicolon": 3
 },
 "scripts/match/world.gd": {
-"long_line": 77,
+"long_line": 75,
 "nested_ternary": 9,
-"semicolon": 172
+"semicolon": 163
 },
 "scripts/server/relay.gd": {
 "long_line": 4,
@@ -696,8 +692,8 @@
 "semicolon": 15
 },
 "scripts/ui/egg_hatch.gd": {
-"long_line": 10,
-"semicolon": 13
+"long_line": 9,
+"semicolon": 10
 },
 "scripts/ui/full_map.gd": {
 "long_line": 34,
@@ -708,9 +704,9 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 29,
+"long_line": 28,
 "nested_ternary": 2,
-"semicolon": 66
+"semicolon": 63
 },
 "scripts/ui/hero_grid.gd": {
 "long_line": 2,
@@ -722,9 +718,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 174,
-"nested_ternary": 33,
-"semicolon": 43
+"long_line": 170,
+"nested_ternary": 30,
+"semicolon": 41
 },
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,
@@ -768,8 +764,8 @@
 "semicolon": 5
 },
 "scripts/ui/overlay.gd": {
-"long_line": 32,
-"semicolon": 24
+"long_line": 30,
+"semicolon": 23
 },
 "scripts/ui/prologue.gd": {
 "long_line": 23,
@@ -780,9 +776,9 @@
 "long_line": 1
 },
 "scripts/ui/results.gd": {
-"long_line": 25,
-"nested_ternary": 6,
-"semicolon": 38
+"long_line": 24,
+"nested_ternary": 5,
+"semicolon": 28
 },
 "scripts/ui/scenery.gd": {
 "long_line": 8,
@@ -796,7 +792,7 @@
 "scripts/ui/title.gd": {
 "long_line": 21,
 "nested_ternary": 2,
-"semicolon": 39
+"semicolon": 40
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -832,7 +828,7 @@
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 19
+"semicolon": 18
 },
 "tools/archetype_check.gd": {
 "long_line": 65,
@@ -905,7 +901,7 @@
 "semicolon": 7
 },
 "tools/hatch_check.gd": {
-"long_line": 10,
+"long_line": 9,
 "semicolon": 1
 },
 "tools/hero_check.gd": {
@@ -955,12 +951,15 @@
 "nested_ternary": 1,
 "semicolon": 11
 },
+"tools/last_alive_shots.gd": {
+"long_line": 2
+},
 "tools/level_hud_check.gd": {
 "long_line": 6,
 "semicolon": 4
 },
 "tools/loop_tour.gd": {
-"long_line": 23,
+"long_line": 22,
 "nested_ternary": 1,
 "semicolon": 39
 },
@@ -991,8 +990,11 @@
 "nested_ternary": 1,
 "semicolon": 23
 },
+"tools/online_displace_check.gd": {
+"long_line": 1
+},
 "tools/pack_ui_check.gd": {
-"long_line": 15,
+"long_line": 14,
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
@@ -1014,16 +1016,6 @@
 "tools/revive_check.gd": {
 "long_line": 11,
 "semicolon": 25
-},
-"tools/rolling_check.gd": {
-"history_comment": 1,
-"long_line": 44,
-"semicolon": 18
-},
-"tools/rolling_sim.gd": {
-"long_line": 25,
-"nested_ternary": 2,
-"semicolon": 7
 },
 "tools/shot_vertical_check.gd": {
 "long_line": 4,
@@ -1052,6 +1044,9 @@
 "tools/train_check.gd": {
 "long_line": 10,
 "semicolon": 7
+},
+"tools/uipolish_check.gd": {
+"long_line": 1
 },
 "tools/unique_check.gd": {
 "long_line": 49,

@@ -234,60 +234,6 @@ func _ready() -> void:
 				if o != sm.player:
 					o.teleport(sm.world.spawns[-1]); o.ctrl = "idle"
 			return
-	if "--perch-check" in args:
-		# tooling: for each perch, start on the island next to its updraft chain, jump, glide into the
-		# short column, then the tall one, then onto the perch. Reports who made it and how high.
-		var pm := Match.new()
-		add_child(pm)
-		pm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 31, "no_drop": true, "length": 1e9, "autoplay": true})
-		pm.set_process(false)
-		for mb in pm.mobs: mb.queue_free()
-		pm.mobs.clear()
-		var ph: Hunter = pm.hunters[0]
-		for o in pm.hunters:
-			o.ctrl = "idle"
-			if o != ph: o.teleport(pm.world.spawns[-1])
-		ph.ctrl = "local"
-		var chains := {"spire": [Vector2(127, 93), Vector2(130, 89)], "emberspire": [Vector2(72, 100), Vector2(78, 92)], "eye": [Vector2(124, 124), Vector2(130, 128)], "needle": [Vector2(146, 48), Vector2(139, 43)]}
-		var ok := 0
-		for pid in chains:
-			var pi := -1
-			for ii in pm.world.islands.size():
-				if String(pm.world.islands[ii].get("id", "")) == pid: pi = ii
-			var steps: Array = chains[pid]
-			var u1: Vector2 = steps[0]
-			# the nearest ground to the first column that isn't a perch
-			var start := Vector3.INF; var bd := 1e9
-			for z in range(int(u1.y) - 10, int(u1.y) + 11):
-				for x in range(int(u1.x) - 10, int(u1.x) + 11):
-					if not pm.world.inb(x, z) or pm.world.kind[pm.world.idx(x, z)] != World.T_GROUND: continue
-					var isl := pm.world.island_of(x, z)
-					if pm.world.islands[isl].get("perch", false): continue
-					var d := Vector2(x + 0.5, z + 0.5).distance_to(u1)
-					if d < bd: bd = d; start = Vector3(x + 0.5, pm.world.ground_at(x + 0.5, z + 0.5), z + 0.5)
-			ph.teleport(start); ph.vel = Vector3.ZERO; ph.grounded = true; ph.glide_fuel = 1.0; ph.pad = {}
-			var goal := pm.world._poi(pi)
-			var stage := 0; var t := 0.0; var top_y := 0.0; var made := false
-			while t < 14.0:
-				var tgt: Vector2 = steps[stage] if stage < steps.size() else Vector2(goal.x, goal.z)
-				var to := tgt - Vector2(ph.pos.x, ph.pos.z)
-				ph.inp["move"] = to.normalized() if to.length() > 0.4 else Vector2.ZERO
-				ph.inp["jump"] = t < 0.1 or (ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) != pi)
-				ph.inp["glide"] = t > 0.25
-				pm.step(Match.DT); t += Match.DT
-				top_y = maxf(top_y, ph.pos.y)
-				var up: Dictionary = pm.world.updraft_at(ph.pos)
-				if stage < steps.size() and not up.is_empty() and ph.pos.y > float(up["top"]) - 0.6:
-					stage += 1
-				if ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) == pi:
-					made = true; break
-				if ph.out: break
-			if made: ok += 1
-			print("PERCH %s: %s in %.1fs, highest %.1fm (perch top %.1fm)" % [pid, "made it" if made else "FAILED", t, top_y, goal.y])
-			ph.out = false; ph.hp = ph.max_hp
-		print("PERCHCHECK done, %d of %d reached" % [ok, chains.size()])
-		get_tree().quit()
-		return
 	if "--biome-check" in args:
 		# tooling: an expedition on the authored map; what each biome spawned, then a minute of play
 		var bm := Match.new()
@@ -468,6 +414,7 @@ func _ready() -> void:
 		return
 	if "--airheal-check" in args:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
+		return
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
@@ -510,16 +457,6 @@ func _ready() -> void:
 		return
 	if "--raid-check" in args:
 		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
-		return
-	if "--rolling-check" in args:
-		var rck = load("res://tools/rolling_check.gd").new()     # rolling sessions: waves, cut-off, level floor, catch-up XP, bounties, the end
-		set_meta("rolling_check", rck)      # (held, so nothing it waits on loses it)
-		rck.run(self)
-		return
-	if "--rolling-sim" in args:
-		var rsim = load("res://tools/rolling_sim.gd").new()      # a whole 30-minute rolling session, headless, with bots
-		set_meta("rolling_sim", rsim)       # (held: it yields frames so freed nodes really go, and must outlive its awaits)
-		rsim.run(self, opts)
 		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
@@ -574,11 +511,6 @@ func _ready() -> void:
 	if "--perf-probe" in args:
 		# tooling: a scripted expedition with per-phase frame costs and hitches (tests/perf_probe.gd)
 		add_child(load("res://tests/perf_probe.gd").new())
-		return
-	if "--hitch-check" in args or _has_arg("--load-check"):
-		# a seeded expedition through the drop and landing; fails on a stalled frame (tools/hitch_check.gd);
-		# --load-check stops at the reveal and judges the loading screen
-		add_child(load("res://tools/hitch_check.gd").new())
 		return
 	if OS.has_feature("web"):
 		_expose_test_hooks()
@@ -709,6 +641,8 @@ func _ready() -> void:
 		_open_arena("")
 	elif "--training" in args:
 		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
+	elif "--duo-tutorial" in args:
+		show_screen("match", DuoTutorial.opts("", "--duo-test" in args))
 	elif "--tutorial" in args or "--tut-test" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:
@@ -835,6 +769,10 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = L.new()
 			scr.setup(opts)
 			current = _layer(scr)
+		"party":
+			var Pt = PartyView.new()
+			Pt.setup(opts)
+			current = _layer(Pt)
 		"prematch":
 			var Pv = load("res://scripts/ui/prematch_view.gd")
 			var pscr = Pv.new()
@@ -1712,6 +1650,7 @@ func _grammar_runtime_check() -> void:
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
 	_ac_run(m, 3.5)
 	_grt_reset(T)
+	T.teleport(home + Vector3(6, 0, 0))        # (the slam knocked it close: the shot must start past the wall)
 	k = _grt_kin(m, P, "puddlet")
 	_grt_out(k, home + Vector3(0.5, 0, 1.0))
 	k.use_ability("k1", home + Vector3(2.5, 0, 0))
@@ -1934,8 +1873,8 @@ func _grammar_runtime_check() -> void:
 	_grt("shoulder: shots poison (carry rider)", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	_grt_reset(T)
 	# ---- 7. owner bonuses
-	var base_hp := float(Data.CLASSES[P.cls]["hp"])
-	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (class %.0f)" % [P.max_hp, base_hp])
+	var base_hp := float(Data.CLASSES[P.cls]["hp"]) + float(P.get_meta("growth_hp", 0.0))        # (+ LevelGrowth)
+	_grt("owner bonus: Vespyx +8 hp, +3% speed", is_equal_approx(P.max_hp, base_hp + 8.0) and absf(P.kin_pt("owner_move_speed") - 0.03) < 0.001, "max hp %.0f (base %.0f)" % [P.max_hp, base_hp])
 	k = _grt_kin(m, P, "puddlet")
 	_grt("owner bonus: Prismander shield + regen", is_equal_approx(P.kin_shield, 16.0) and absf(P.kin_pt("owner_regen") - 0.75) < 0.01 and is_equal_approx(P.max_hp, base_hp), "shield %.0f regen %.2f" % [P.kin_shield, P.kin_pt("owner_regen")])
 	var hp0 := P.hp
@@ -1957,7 +1896,7 @@ func _grammar_runtime_check() -> void:
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
 	P.ult = 1.0
 	var blocked := not KinMerge.can_cast(P)
-	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
+	_ac_run(m, P.merge_cd + 0.1)        # (a timed-out merge rests the Boki timeout_rest_s, past the spent window)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
 	KinCommand.tap(P)
@@ -2360,6 +2299,7 @@ func _truce_check() -> void:
 		if T.allied(0, 1): break
 	print("TCHECK reversed: the beaten squad accepted=%s after %.1fs (events %s)" % [T.allied(0, 1), tt, str(T.events.slice(-3))])
 	if not T.allied(0, 1) and not T.events.has("fake 1"): ok = false; print("TCHECK FAIL beaten squad refused")
+	if not TruceCalmCheck.run(m, home): ok = false
 	m.over = true
 	print("TCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()

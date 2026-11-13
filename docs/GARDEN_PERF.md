@@ -94,6 +94,8 @@ particle system that is emitting, every Decal and every see-through light/glow m
 | Rain (260) | weather | keep (not emitting unless raining) |
 | Decals | none exist in the home | n/a |
 | Shallows sheet (Glasswater) | water | keep |
+| Sky light shafts, 4 faint glow cards in the void past the island edge (`SkyDeco._shafts`, intensity 0.045-0.08) | nothing, but they sit off the island, never behind a Boki, and are the sky shared with matches | keep; quality `shafts` already drops them on Low (cut alternative: free them in homes) |
+| One more ring card on Ridge (under a home station; source not traced) | unchanged before/after | untouched |
 | Zone scatter (crystals, reeds, pebbles, mushrooms, ferns, flowers; counts in `garden_zones.json`) | ground dressing, not VFX | untouched; a lighter scatter is a separate look decision |
 
 Numbers, headless-GL (xvfb, opengl3, llvmpipe, 1280x720, 9 Boki out, UI hidden), before = 085d31018 -> after = this
@@ -110,5 +112,20 @@ Draws barely move (a glow card is one draw; the zones are not particle-bound); t
 lit ring plus a thinner beam, with no faint outer circle, and three fewer simulated landmark systems in the zones.
 Emitter counts also swing with how many Boki bursts are live in the frame (Hushwood's 8 -> 3 is mostly that), so the
 deterministic part is: Beam 40 -> 20, landmark emitters 1 -> 0 per zone. Shots: `docs/shots/garden-clarity/<part>.jpg`
-(left before, right after; software-GL frames). GPU frames: jobq 20261112-044534-13097 (before) and
-20261112-044708-17279 (after), `--quality=medium`, `--bench-shots=shots`; queued behind ~45 jobs when this was written.
+are now the GPU frames below.
+
+GPU, same machine both sides (rp1-1, Vulkan, `--quality=medium`, 9 Boki out, default home camera, UI hidden):
+before = 085d31018 (jobq 20261112-080512-23012), after = eaf834490 (jobq 20261112-081310-12233). Draws / emitting
+emitters / glow+ring cards from `BENCH vfx`:
+
+| part | before | after |
+|---|---|---|
+| hub | 755 / 2 / 6 | 749 / 2 / 4 |
+| Glasswater | 524 / 4 / 6 | 512 / 3 / 4 |
+| Hushwood | 586 / 3 / 6 | 583 / 3 / 4 |
+| Kitewind Ridge | 533 / 3 / 7 | 544 / 3 / 5 |
+
+The fixed part shows in every zone: Beam 40 -> 20, Zone + ZoneFill cards gone, the landmark emitter gone; emitter
+counts move only by live Boki bursts (Hushwood had 4 small bursts in the after frame). Draws are within run noise
+(Ridge +11 is Boki in frame). `docs/shots/garden-clarity/<part>.jpg` are these GPU frames, left before, right after.
+(Before also exits with a core dump at cleanup, rc 134, after all shots and numbers are written; after exits 0.)

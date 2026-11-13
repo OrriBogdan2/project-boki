@@ -262,13 +262,14 @@ func sim(dt: float) -> void:
 		if grounded and hv.length() <= spd * 1.3 and m.world.is_void(ahead.x, ahead.y):
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
-	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
+	var pre_dir := Vector2(vel.x, vel.z)
+	var pre_v := pre_dir.length()
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
 		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
-		m.on_wall_slam(self)
+		m.on_wall_slam(self, pre_dir / pre_v)
 		hurt(10.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
@@ -310,7 +311,7 @@ func _far_step(dt: float) -> float:
 	_far_dt += dt
 	var near_me := pos.distance_squared_to(me.pos) <= FAR_M * FAR_M
 	near_me = near_me or (tgt != null and tgt.flat_dist(me) <= FAR_M)
-	if not near_me and (int(m.time / Match.DT) + get_instance_id()) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
+	if not near_me and (int(m.time / Match.DT) + hash(nid)) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
 		return 0.0
 	var out := _far_dt
 	_far_dt = 0.0

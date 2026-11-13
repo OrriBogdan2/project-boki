@@ -10,6 +10,7 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
+const VSTICK := preload("res://tools/vex_coin_stick_check.gd")      # her Coin Blast sticking to placed walls
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
 func ok(name_: String, cond: bool, info := "") -> void:
@@ -27,7 +28,12 @@ func run(main_node: Node, who: String) -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
 		await _growth()
 		await ults.mage()
+		var before: Array = [ac.n, ac.fails]
+		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Skycall drag ends
+		n += ac.n - before[0]
+		fails += ac.fails - before[1]
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
+		await load("res://tools/mage_glide_cancel_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
 		await parity.vireo()
@@ -61,6 +67,15 @@ func _last_shot(m: Match, P: Hunter) -> Dictionary:
 	for i in range(m.shots.size() - 1, -1, -1):
 		if m.shots[i]["by"] == P: return m.shots[i]
 	return {}
+
+## How far a shot flies past its muzzle: its sweep starts at the body (ShotOrigin), so the muzzle lead is off.
+func _flight(sd: Dictionary) -> float:
+	var lead := 0.0
+	if sd.has("muzzle"):
+		var mz: Vector3 = sd["muzzle"]
+		var st: Vector3 = sd["start"]
+		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+	return float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length() - lead
 
 func _dash(m: Match, P: Hunter, hold_s: float, each := Callable()) -> void:
 	P.inp["dash_down"] = true
@@ -119,8 +134,7 @@ func _mage() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
-			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
+			not sd.is_empty() and absf(_flight(sd) - 13.0) < 0.5, "%.1f m" % _flight(sd))
 	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
@@ -403,9 +417,11 @@ func _mage() -> void:
 	ok("Skycall: the drag is a modest slide (about 3.4 m)",
 			absf((tx0 - T.pos.x) - 3.4) < 0.5, "%.1f m" % (tx0 - T.pos.x))
 	var e_d: Dictionary = K.e_def()
-	ok("Skycall: radius 1.5 m, slide 3.4 m over 1.1 s",
-			absf(float(e_d["radius"]) - 1.5) < 0.001 and absf(float(e_d["slide_dist"]) - 3.4) < 0.001
-			and absf(float(e_d["slide_t"]) - 1.1) < 0.001)
+	# radius: the footage circle about 2 bh across (vireo.md 0184, 0190); slide 3.4 m is owner item 9b (footage ~4 bh)
+	ok("Skycall: radius 1.8 m, the drawn ring at it; slide 3.4 m over 1.1 s",
+			absf(float(e_d["radius"]) - 1.8) < 0.001 and absf(float(ce["r"]) - float(e_d["radius"])) < 0.001
+			and absf(float(e_d["slide_dist"]) - 3.4) < 0.001 and absf(float(e_d["slide_t"]) - 1.1) < 0.001,
+			str(ce["r"]))
 	var sl_d := float(e_d["slide_dist"])
 	var sl_t := float(e_d["slide_t"])
 	ok("Skycall: the speed eases out (6.2 m/s peak, half at the midpoint, zero at the end)",
@@ -484,7 +500,7 @@ func _mage() -> void:
 	m.step(DT)
 	ok("dash table: Wirerun is rolling and DashFlow says LMB fires (the source is silent), E fires",
 			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
-			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
+			and absf(Loco.press_buffer - 0.15) < 0.001)
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
@@ -629,6 +645,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var east := Vector2(1, 0)
 	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
 		K.cd["e"] = 0.0
+		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + aim_from)
@@ -653,6 +670,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var cam: CamRig = m.cam
 	var push := func(at_m: float) -> Array:
 		K.cd["e"] = 0.0
+		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + Vector3(at_m, 0, 0))
@@ -693,7 +711,7 @@ func _gunslinger() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
+			not sd.is_empty() and absf(_flight(sd) - 11.0) < 0.6, "%.1f m" % _flight(sd))
 	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
@@ -829,6 +847,7 @@ func _gunslinger() -> void:
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	P.teleport(home)
 	ac.step(m, 0.1)
 	ac.aim_at(P, T.pos)
@@ -842,6 +861,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.1)
 	for zz in [-1, 0, 1]: _wall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
@@ -1022,6 +1042,7 @@ func _gunslinger() -> void:
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
 	VPARITY.new(self).run(m, P, K, T, home)
+	VSTICK.new(self).run(m, P, K, T, home)
 	VTIME.new(self).run(m, P, K, T, home)
 	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
 	ac.fresh(T)

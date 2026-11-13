@@ -8,8 +8,9 @@ extends RefCounted
 ## Every wait has a limit: a step that does not move on in time is a stall and fails the check. Each stage
 ## prints how long it took. Never touches the real save.
 
-const STALL_S := 60.0      # s a screen may take to offer its next step before it counts as stalled
-const PREMATCH_STALL_S := 120.0      # s the pre-match countdown may take
+const STALL_S := 60.0      # s of game time a screen may take to offer its next step before it is a stall
+const PREMATCH_STALL_S := 120.0      # s of game time the pre-match countdown may take
+const WALL_FACTOR := 12.0      # real s allowed per s of game time (a loaded box runs ~7x slow; a freeze fails)
 const EXPEDITION_SEED := 4242      # a fixed map and drop, so the driver's landing is the same every run
 const DROP_S := 90.0      # s of game time the opening drop may take
 const SIM_STALL_S := 45.0      # s of game time one tutorial step may take (as --tutorial-hud-check)
@@ -55,15 +56,19 @@ func _end() -> void:
 		timings.append("%s %.1f" % [stage_name, (Time.get_ticks_msec() - stage_start) / 1000.0])
 	stage_name = ""
 
-## Waits for `cond` (frames at a time) up to `secs`; a miss is a stall.
+## Waits for `cond` (frames at a time) up to `secs` of GAME time (the frame deltas the game itself ran on, so a
+## loaded box that caps the sim's frame step is not a stall); a real freeze still ends at WALL_FACTOR x `secs`
+## of real time. A miss is a stall.
 func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
 	var t0 := Time.get_ticks_msec()
-	while not cond.call() and Time.get_ticks_msec() - t0 < int(secs * 1000.0):
+	var game_s := 0.0
+	while not cond.call() and game_s < secs and Time.get_ticks_msec() - t0 < int(secs * WALL_FACTOR * 1000.0):
 		await tree.process_frame
+		game_s += tree.root.get_process_delta_time()
 	var got: bool = cond.call()
 	if not got:
 		print("NPF STALLED in '%s' on screen %s" % [stage_name, main.current])
-	ok(got, "%s (%.1f s)" % [what, (Time.get_ticks_msec() - t0) / 1000.0])
+	ok(got, "%s (%.1f s, %.1f s of game time)" % [what, (Time.get_ticks_msec() - t0) / 1000.0, game_s])
 	if not got:
 		_end()
 		print("NPF TIMES (s): " + ", ".join(timings))
@@ -177,6 +182,10 @@ func _relic(hx) -> void:
 	moment.go_button.pressed.emit()
 
 # ------------------------------------------------------------------ 3. the tutorial match
+## Called after every course step of the driven tutorial match (a subclass measures it; here nothing).
+func _course_tick(_m: Match) -> void:
+	pass
+
 func _tutorial_match():
 	_begin("tutorial match: load")
 	await _wait(_match_running, "'Head out together' opens the tutorial match")
@@ -191,6 +200,7 @@ func _tutorial_match():
 	while t < COURSE_S and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
+		_course_tick(m)
 		t += Match.DT
 		step_t += Match.DT
 		if m.tut.step != last:

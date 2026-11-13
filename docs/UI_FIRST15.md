@@ -29,9 +29,9 @@ pictures.
 | 01 | Title ([01](ui_first15/1280x720/01_title.jpg)) | 4 | no | menu, playtest card, key hints, version |
 | 02-03 | Prologue ([02](ui_first15/1280x720/02_prologue_1.jpg)) | 5 | at the limit | progress pips, title, caption, skip, next |
 | 04 | Hatch card ([04](ui_first15/1280x720/04_hatch_card.jpg)) | 2 | no | one line, one button |
-| 05 | Creator ([05](ui_first15/1280x720/05_creator.jpg)) | 3 | no | but one panel has 10 option rows (Sex, Height, Build, Shroud, colour, Hollow, Glow, Ghost, Aura, name) |
+| 05 | Creator ([05](ui_first15/1280x720/05_creator.jpg)) | 3 | no | **fixed (ext/tut-creator-first):** a new save shows Sex, Height, Build, Shroud colour, name; More ([05b](ui_first15/1280x720/05b_creator_more.jpg)) opens the other rows |
 | 06-07 | Egg pick, knock ([06](ui_first15/1280x720/06_hatch_eggs.jpg)) | 2 | no | title, 4 cards |
-| 08 | Name your Boki ([08](ui_first15/1280x720/08_hatch_name.jpg)) | 1 card | no | but 2 text boxes, 4 idea chips, More, 2 buttons; stale subtitle "Every Boki is different..." stays under "Knock on the shell" |
+| 08 | Name your Boki ([08](ui_first15/1280x720/08_hatch_name.jpg)) | 1 card | no | **fixed:** one text box (the Boki's; yours is in the creator), 4 idea chips, More, 2 buttons; the stale subtitle is hidden once you knock |
 | 09 | First Relic ([09](ui_first15/1280x720/09_first_mask.jpg)) | 1 | no | |
 | 10 | Tutorial intro ([10](ui_first15/1280x720/10_tutorial_intro.jpg)) | 2 | no | card, Relics/Leave bar |
 | 11 | Tutorial landing ([11](ui_first15/1280x720/11_tutorial_00_land.jpg)) | **9** | **yes** | minimap, vitals, ability row, glider strip, belt 1-4, Q/V/X, weapon, Relics/Leave, tip |
@@ -45,7 +45,7 @@ pictures.
 | 32 | **Plan your drop** ([32](ui_first15/1280x720/32_expedition_plan.jpg)) | **7+** | **yes, the worst** | title and timer, squad panel, full map, "This match" legend (4 kinds + 4 states), "Ways out" (5), bottom HUD, counters |
 | 33 | Ship ([33](ui_first15/1280x720/33_expedition_ship.jpg)) | 9 | **yes** | the match HUD, with locked ability slots reading "UNLOCK" |
 | 34-35 | Landed, 15 s ([35](ui_first15/1280x720/35_expedition_15s.jpg)) | **10** | **yes** | minimap, clock, status strip (Dusk / Sight), counters, vitals, abilities, glider strip, belt, Q/V/X, weapon, plus the Truce chip |
-| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (F1)", Leave match, Save and quit |
+| 36 | Pause ([36](ui_first15/1280x720/36_pause.jpg)) | 1 | no | 3 buttons, "I'm stuck", "Admin tools (`)", Leave match, Save and quit |
 
 **Breaches (over about 5):** tutorial landing and every tutorial step (9-12), the first expedition HUD (9-10), Plan your drop (7+), the expedition panel
 and the Relics page (6 blocks each, plus 12 Relic tiles). The in-match HUD is the same 9 blocks from the first second; nothing is introduced a step at a time,
@@ -82,14 +82,28 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).
 - **Title:** "Arena", "Save files".
 
+### Tutorial HUD terms: what was done (ext/tut-hud-term-hints)
+
+Hints are one lane line each, once per save (`TermHints`, `scripts/ui/term_hints.gd`; flags `term_*` in `Save.d["tutorial"]`, off with the Tips setting), fired the moment the thing first changes.
+
+| Term | What was done |
+|---|---|
+| Fever | Name kept (owner-set kit name). Hint when it first lights: "Fever is lit: your hits heal you until it burns out". |
+| FIGHTING / FOLLOW (under the portrait) | Plain words: "attacking" while it has a target, else "with you" / "guarding" / "chasing" (`KinFollow.PLAIN`). The order names (Follow, Guard...) stay on the G wheel and tile. |
+| COMMON / UNCOMMON (armour tier) | Tier 0 shows no tier word. The tier name appears at the first tier-up, with a hint: "Armor tier up: hitting foes fills it, and each tier adds plates". Tier names kept (owner-set). |
+| AUTO | Kept on the tile. Hint the first time the Boki is out: "Your Boki fights and uses its move by itself (AUTO)  ·  hold G for orders". |
+| "from Boki" | Plain words: "Boki's move" (over the Boki ability tile). |
+
+Not touched (still in the list above): CARRY OFF FOLLOW, the Relics / Leave bar, glider strip, belt, Q V X, Box, weapon class, perk toasts.
+
 ## 5. For the declutter jobs (not done here)
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
-2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
+2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card. *(Done on `ext/ui-tip-card-one-prompt`: while the step card is up `MsgLane.hold` queues LOW/NORMAL lines (HIGH, e.g. a level-up, still shows) and `Hud._draw_prompt` shows the world's interact prompt only on steps that ask for it, `Tutorial.asks_prompt`. Shots before/after at 1280x720: `docs/shots/tip-card-one-prompt/`. The faded copy under the card did not reproduce on 0.24.4: the card is drawn once.)*
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
-4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
+4. **Plan your drop:** done (ext/tut-drop-plan-first): a save's first expedition shows the map, the timer and the jump line; the legend, "Ways out" and squad return while the scoreboard key is held (`FullMap.plain_plan`). Shots: `docs/shots/tut-drop-plan-first/` (`--plan-first-shots`).
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
-6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
+6. **Creator and name card (done, `--creator-check`):** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
 

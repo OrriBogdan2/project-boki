@@ -15,6 +15,10 @@ const PREVIEW_COL := Color("d8ecff")
 const PUSH_PAD := 0.15                  # m past the rock's half thickness a body on the line is moved to
 const CRACK_LW := 0.16                  # m: the cracks are a heavy line, wider than an aim reticle
 const PUFF_GAP := 0.02                  # s between fire puffs walking along the cracks
+const HUSH_PAD := 0.1                  # s past the last rock the rocks make no rumble of their own
+const TELL_DB := -3.0                   # the cracks opening (the cast level of Stone Row's tell)
+const ROLL_DB := -4.0                   # each half of the rolling rumble (two voices sum to about -1)
+const END_DB := -1.0                    # the one heavy crack when the ridge is up (the ultimate's level)
 
 var k: DolmKit
 var phase := ""                         # "" | "aim" (X held) | "tell" (the cracks) | "up" (rising, standing)
@@ -32,6 +36,7 @@ var casts := 0
 var rocks_raised := 0
 var slowed := 0
 var shoved := 0
+var rolling := false                    # the rumble is travelling out (the eruption's 0.4 s)
 var first_rise_t := -1.0
 var last_rise_t := -1.0
 
@@ -62,6 +67,8 @@ func drop() -> void:
 		phase = ""
 		k.cd["x"] = 0.0
 		AimKit.hide(k.h, "x")
+		if k.anim_id == "breah_spine_aim":
+			k.anim_id = ""        # the aim pose goes with the hold
 
 func tick(dt: float) -> void:
 	match phase:
@@ -113,7 +120,7 @@ func _erupt() -> void:
 	phase_t = 0.0
 	spots = _plan()
 	k.play("breah_spine")
-	k.m.sfx("br_spine", center, -1.0, 1.0)
+	k.m.sfx("br_crack", center, TELL_DB, 1.0)
 	for s in spots:
 		var p: Vector3 = s["at"]
 		k.m.fx.burst(p + Vector3(0, 0.2, 0), Color("3a7cff"), 5, 3.0, 0.3, 4.0, 0.9)
@@ -177,15 +184,38 @@ func _tick_tell(dt: float) -> void:
 		phase = "up"
 		phase_t = 0.0
 		erupt_at = k.m.time
+		rolling = true
+		RockLook.hush(k.m, float(xd()["rise"]) + HUSH_PAD)
 
 func _tick_up(dt: float) -> void:
 	phase_t += dt
+	if rolling:
+		_roll()
 	for s in spots:
 		if not bool(s["done"]) and phase_t >= float(s["delay"]):
 			s["done"] = true
 			_raise(s["at"], s["dir"])
 	if phase_t >= float(xd()["rise"]) + float(xd()["time"]):
 		phase = ""
+
+## One rumble for the whole eruption: two voices of it (one per half of the ridge) run out from the centre to the
+## ends as the rocks rise, so it pans along the arc; when they arrive they stop and one heavy crack lands.
+func _roll() -> void:
+	var rise := float(xd()["rise"])
+	var len_ := float(xd()["len"])
+	var front := minf(phase_t / rise, 1.0)
+	for side in [-1, 1]:
+		var p2 := AimShapes.bent(Vector2(center.x, center.z), axis, bow, _bend(), len_, len_ * 0.5 * front * side)
+		var at := Vector3(p2.x, center.y, p2.y)
+		Sfx.loop_hold(_roll_key(side), "br_rumble", at, ROLL_DB, 0.9 + 0.2 * front)
+	if front >= 1.0:
+		rolling = false
+		for side in [-1, 1]:
+			Sfx.loop_stop(_roll_key(side))
+		k.m.sfx("br_slam", center, END_DB, 1.0)
+
+func _roll_key(side: int) -> String:
+	return "spine_roll_%d_%d" % [k.h.get_instance_id(), side]
 
 func _raise(p: Vector3, along: Vector2) -> void:
 	var m := k.m

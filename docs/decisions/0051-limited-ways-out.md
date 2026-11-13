@@ -15,7 +15,8 @@ Heart's two seats (spec tasks 1-2); the quest seats, deleting docks/hatches/keys
    Rejected: unlimited Heart exits, and two machines over one Heart.
 2. One state enum on `Heart`: ASLEEP > CHARGING > READY <> CARRIED > WAITING > FINAL > DONE (any pre-final state
    jumps to FINAL at 10:00 or when one squad is left). The Gate takes the carrier's squad within 8 m; the ring
-   fills for a squad alone (Exits.crew_rate), stalls with a standing rival, drains when empty.
+   fills for a squad alone (Exits.crew_rate), stalls with a standing rival, drains when empty; downed Hunters neither hold nor stall it, and with no holder standing in it a squad
+   alone in it takes it over from nothing (spec risk 4: no beaten squad stalls the final to 12:00).
 3. A boss at the Heart for the final. Rejected (spec section 2: perf with 5-8 squads on one island).
 
 ## Decision
@@ -45,7 +46,7 @@ as gems stays; a live h.rift_keys never reached the save. Outposts stay as they 
 until task 4 reworks them; alternative considered: switch off non-tutorial outposts now. --extract-check keeps
 only its uplink sections.
 
-UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out strip (four pips, Squads left) top centre
+UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out strip (four pips) top centre
 and the carrier's Heart Gate prompt; `Exits.clock_line` is deleted. The Lair and Uplink pips read the lairs and
 outposts and the "quest" times in heart.json until task 4 gives Exits its own seat states. Checks:
 --ways-out-hud-check, --ways-out-hud-shots (GPU). Not built yet: the dead/watching line, banner calls, map icons.

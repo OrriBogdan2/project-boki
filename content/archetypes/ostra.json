@@ -53,6 +53,7 @@
 	"dash": {
 		"id": "swap",
 		"name": "Lantern Trade",
+		"card_range": "reach",
 		"icon": "shadowstep",
 		"col": "#c65cff",
 		"cd": 9.5,
@@ -61,6 +62,7 @@
 		"time_swollen": 1.25,
 		"radius": 1.5,
 		"ally_shield": 26.0,
+		"ally_shield_t": 3.0,
 		"ally_r": 3.0,
 		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
@@ -71,6 +73,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Shard Snap",
+		"card_range": "snap.range",
 		"short": "Snap",
 		"icon": "skypierce",
 		"col": "#9be8dc",
@@ -110,6 +113,8 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Brimseed",
+		"card_range": "reach",
+		"again": "pop the seed",
 		"short": "Seed",
 		"icon": "blaze_mantle",
 		"col": "#6fd0c6",
@@ -136,6 +141,7 @@
 	},
 	"x": {
 		"name": "Nightwell",
+		"card_range": "range",
 		"short": "Well",
 		"icon": "blaze_mantle",
 		"col": "#b06bff",

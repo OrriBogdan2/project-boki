@@ -31,6 +31,8 @@ extends RefCounted
 ## few seconds, plus a strong weapon, a glove, treasure and XP.
 
 const DIAL_R := 1.8            # reach to work the dial
+const SEALED_STATES := ["sealed", "dormant"]      # lair states whose walls put bodies back out
+const SEAL_KIN_STATES := ["active", "flying", "returning", "wild", "dazed"]   # a Boki out in the world, not on a shoulder
 const LOCKS := {"colossus": 4, "serpent": 3, "brood": 3}
 const SPEEDS := [1.7, 2.25, 2.8, 3.4]      # the needle's speed per lock (radians a second)
 const WIDTHS := [0.95, 0.74, 0.58, 0.46]   # each lit arc's width per lock (radians)
@@ -50,6 +52,7 @@ const ALERT_R := 150.0         # everyone this close hears a lair fight start (a
 const UP_R := 1.5              # the escape updraft's radius
 const UP_TOP := 9.0            # ... and how high over the lair floor it carries you
 const UP_PUSH := 8.0           # ... and how hard it throws you out over the wall at the top
+const UP_LAND_ROOM := 9        # tiles of ground the ride's landing looks for round it (a dash out of the ride runs ~8 m on)
 const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
 
 var m: Match
@@ -146,18 +149,27 @@ func _add(D: Dictionary) -> void:
 	# lairs stay dormant (empty, sealed for good) until SpawnPlan rolls them live: see plug_into
 	_tint_dormant(L, true)
 
-## Where the escape updraft throws you: open ground just beyond the back wall (or failing that one of
-## the side walls), never the gate side. Out over the abyss if there's no ground there at all.
+## Where the escape updraft throws you: open ground beyond the back wall (or failing that one of the side
+## walls), never the gate side. The roomiest such spot wins (the first found of the most room, up to
+## UP_LAND_ROOM): a dash out of the ride carries you metres past the landing, and a spot only a few metres
+## from the island's rim sends that dash off the edge. Out over the abyss if there's no ground there at all.
 func _escape_spot(c: Vector3, hf: int, out: Vector2) -> Vector3:
 	var w := m.world
+	var best := Vector3.INF
+	var best_room := 1
 	for dv in [-out, Vector2(-out.y, out.x), Vector2(out.y, -out.x)]:
 		var d: Vector2 = dv
 		for dist in [3.5, 5.0, 6.5, 8.0, 10.0]:
 			for slide in [0.0, 2.0, -2.0, 4.0, -4.0]:
 				var p: Vector3 = c + Vector3(d.x, 0, d.y) * (float(hf) + float(dist)) + Vector3(-d.y, 0, d.x) * float(slide)
-				if w.is_void(p.x, p.z) or w.is_block(p.x, p.z) or w.lair_at(p.x, p.z, 1.5) >= 0 or w.edge_dist(int(p.x), int(p.z), 2) < 2:
+				if w.is_void(p.x, p.z) or w.is_block(p.x, p.z) or w.lair_at(p.x, p.z, 1.5) >= 0:
 					continue
-				return Vector3(floor(p.x) + 0.5, w.ground_at(p.x, p.z), floor(p.z) + 0.5)
+				var room := w.edge_dist(int(p.x), int(p.z), UP_LAND_ROOM)
+				if room > best_room:
+					best_room = room
+					best = Vector3(floor(p.x) + 0.5, w.ground_at(p.x, p.z), floor(p.z) + 0.5)
+	if best != Vector3.INF:
+		return best
 	var far := c - Vector3(out.x, 0, out.y) * (float(hf) + 6.0)
 	return Vector3(far.x, c.y, far.z)
 
@@ -1052,29 +1064,33 @@ static func clock(t: float) -> String:
 
 ## While a lair is sealed, its ward keeps everything out: walking, gliding or being thrown in bounces.
 func _tick_seal(L: Dictionary, dt: float) -> void:
-	if not L["state"] in ["sealed", "dormant"]:
+	if not L["state"] in SEALED_STATES:
 		return
-	var bodies: Array = []
 	for h in m.hunters:
-		if not h.out and not h.extracted and not h.riding: bodies.append(h)
+		if not h.out and not h.extracted and not h.riding: _seal_body(L, h)
 	for k in m.kins:
-		if not k.dead and k.state in ["active", "flying", "returning", "wild", "dazed"]: bodies.append(k)
+		if not k.dead and k.state in SEAL_KIN_STATES: _seal_body(L, k)
 	for mb in m.mobs:
-		if not mb.dead and not (mb is Boss): bodies.append(mb)
-	for e in bodies:
-		if not inside(L, e.pos, 0.25):
-			continue
-		# hunters still dropping in from the skyship, and anyone flying high over the walls, pass over;
-		# whoever comes down inside (or walks, glides or is thrown in low) is put back out
-		if e is Hunter and (e as Hunter).dropping:
-			continue
-		if not e.grounded and e.pos.y > float(L["c"].y) + 3.6:
-			continue
-		_push_out(L, e)
-		if e == m.player and m.hud and m.time - float(_told.get("seal", -9.0)) > 3.0:
-			_told["seal"] = m.time
-			m.hud.toast(("%s is sealed. Open its gate first" if L["state"] == "sealed" else "%s lies dormant this time. Its gate is rusted shut") % L["name"], color_of(L))
-			m.sfx("shield", e.pos, -4.0, 1.4)
+		if not mb.dead and not (mb is Boss): _seal_body(L, mb)
+
+## A body found inside a sealed lair's walls is put back out. Hunters still dropping in from the
+## skyship, and anyone flying high over the walls, pass over; whoever comes down inside (or walks,
+## glides or is thrown in low) is put back out.
+func _seal_body(L: Dictionary, e: Ent) -> void:
+	if not inside(L, e.pos, 0.25):
+		return
+	if e is Hunter and (e as Hunter).dropping:
+		return
+	if not e.grounded and e.pos.y > float(L["c"].y) + 3.6:
+		return
+	_push_out(L, e)
+	if e == m.player and m.hud and m.time - float(_told.get("seal", -9.0)) > 3.0:
+		_told["seal"] = m.time
+		var line := "%s is sealed. Open its gate first"
+		if L["state"] != "sealed":
+			line = "%s lies dormant this time. Its gate is rusted shut"
+		m.hud.toast(line % L["name"], color_of(L))
+		m.sfx("shield", e.pos, -4.0, 1.4)
 
 ## Puts someone just outside a lair's walls, out the nearest side (or by the dial), set down still.
 func _push_out(L: Dictionary, e: Ent) -> void:

@@ -18,9 +18,11 @@ const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
 const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## The gate (every Hunter whose clips move the legs): at full stick a planted foot slides at most this share of the
-## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
+## speed, the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted), and the
+## hips bob at most this far (lights 4 to 9 cm, heavies up to 10; 15 cm and more reads bouncy at match zoom).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
+const MAX_BOB_CM := 11.0
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
@@ -100,6 +102,9 @@ func _gate(id: String, top: Dictionary) -> void:
 		bad += 1
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
+		bad += 1
+	if top["bob_cm"] > MAX_BOB_CM:
+		print("FAIL %s: hips bob %.1f cm at a run (limit %.0f)" % [id, top["bob_cm"], MAX_BOB_CM])
 		bad += 1
 
 ## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction.

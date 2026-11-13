@@ -40,16 +40,32 @@ static var FOLLOW: Dictionary = RULES["follow"]
 var follow_mode := "supervive"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
-## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
-## stops dead with you; softer up and down so falls and glides don't jolt the view. While gliding
-## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
-const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
-const FOLLOW_Y := 3.5
+## Follow: locked across (the view moves with you, so a dash, a pull or a swap never leaves you off centre
+## [footage]; --camera-fast-check), softer up and down so falls and glides don't jolt the view. While
+## gliding Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
+const FOLLOW_Y := 3.5         # 1/s
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
 const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
+
+## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
+## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
+## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
+const GLIDE_ZOOM := 1.25      # x the distance under the glider [spec] +15..25% boom in the air
+const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [Supervive]
+const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
+const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
+const ALT_ZOOM_MAX := 0.7     # ...up to +70%
+func air_zoom(h: Hunter, alt: float) -> float:
+	var z := 1.0
+	if h.gliding:
+		z = GLIDE_ZOOM
+	elif h.crouch and h.grounded:
+		z = SNEAK_ZOOM
+	z *= user_zoom * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX))
+	return maxf(z, zoom) if h.glide_dive.on else z
 
 ## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
 ## about 0.2 s, no shake. Only the casting player's camera ever hears about it.
@@ -194,9 +210,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
 	if p.y < 0.0:
 		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
-	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
-	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
-	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
+	# across, the view is locked to you; only recording mode trails, at its own slower, smoother rates
+	var kxz := 1.0 - exp(-float(rr[0]) * delta) if Record.clean() else 1.0
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))

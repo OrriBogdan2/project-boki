@@ -116,8 +116,6 @@ storm field over the arena, where the footage zooms out to a dark ring with a go
 [bulwark.mp4](bulwark.mp4)
 
 Still differs:
-- The Guard meter and Shield Slam are ours and still on main (KIT_PARITY gap 15); `ext/parity-bulwark-guardcut`
-  b2e942eb4 removes them and is not merged.
 - LMB hold walks at 55% while charging, with a 1.5 to 1.8 m step and a 4 m perfect-release launch (owner items 30,
   49, 59); the source stands still [F].
 - Aegis: a 160 HP shield with Shield Charge on Shift; the source's is regenerating shield energy and the routing is
@@ -153,7 +151,7 @@ Still differs:
 - Brimseed: peaks at 3.5x like the source, but fizzles after 10 s unpopped (ours); cooldown 10 vs 8 at the top rank.
 - Nightwell: about a 1 s cast lock (owner); the radius 3.6 m and a 12 m pull.
 - Lantern Trade: 12 m lob; faster (1.25 s) only while Swollen.
-- Footstep silence while floating is `[?]`.
+- He floats silently (matches): no step sounds, his and a remote Motley's (source passive [D], --ostra-combo-check).
 
 Seen in the reel: the reel predates `ext/parity-reel-tool`, so the Brimseed is popped at 1.8 s and its full growth
 (the footage's room-sized violet globe) is not shown; the tool now holds it to full size (not re-rendered); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
@@ -183,8 +181,8 @@ re-rendered with it so far (xvfb opengl3 on rpc3; GPU job 20261112-030437-07461 
 
 **KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
   `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
-  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's ground and air rows
-  still `buffer`.
+  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's and Albert's ground and air rows
+  stay `buffer`: the source never shows an LMB press inside the dash, so each row now says "Not determinable" with what was checked.
 
 ## Vex the Hired Gun (`gunslinger`, source Ghost)
 [gunslinger.mp4](gunslinger.mp4)
@@ -260,7 +258,8 @@ Still differs:
 
 Seen in the reel: the cyan orb is in her palm from the first frame; the hose is a narrow-then-billowing orange stream
 like the footage [F 0024]; the RMB aim is a white lane with an arrow tip and the bolt hits with FLASHOVER and an
-orange sunburst [F 0077]; the Cloak is a crackle of yellow sparks round her and the dummy, not the footage's
+orange sunburst [F 0077]; the Cloak (re-rendered with the dummy inside the 4.5 m pull, `ext/vfx-cinder-cloak-swirl`) is a thin lit swirl
+running in from the 4.5 m edge with the pull, then a lit shield swirl on her per foe caught, like the footage's
 swirling shield ring [F 0186]; Flue Flight lays a thick orange fire carpet and carries the dummy with her to the
 island rim, close to the footage's wide magma band [F 0226].
 
@@ -275,10 +274,13 @@ Still differs:
 - Hearthlight: cooldown 11 s vs 12 [D]; heals her at a third (ours); the throw latches onto the first teammate it
   passes (owner call), where the source's lands on the cursor and no latch was seen [F].
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
-  (ours). The channel is 5 s where the footage's tether runs about 2.4 s [F 0249-0271].
+  (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
+  stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
 - Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
-  steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
+  steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
+  footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
+  "Ally-pass refund").
 - Bearer: the Carrier shield is cut (tender.md, owner 11-07); the KIT_PARITY row still lists it and should be
   updated. Which hits drop a carried teammate was not traced.
 - Body 0.66 of a medium (owner item 108).
@@ -289,7 +291,7 @@ with thorns, and the root shows as a white swirl where the footage has a smaller
 thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan disc, but the ring on her before the
 throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
-cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271],
+cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271 of the 5 fps set],
 ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
 side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 

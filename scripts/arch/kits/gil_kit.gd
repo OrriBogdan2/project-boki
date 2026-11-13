@@ -135,6 +135,7 @@ func _shatter(it: Dictionary) -> void:
 	m.fx.ring(at, r, col, 0.4)
 	var sound := "boom" if v in ["thunder", "zeep", "fire"] else "whoosh"
 	m.sfx(sound, at, -3.0, 1.2 if v != "zeep" else 0.8)
+	if v == "zeep": Shake.incoming_big(m, at, 0.25, h)
 	var p := power("sec")
 	for f in foes_in(at, r, 3.0):
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "gil_" + v]}
@@ -326,6 +327,7 @@ func _start_wave() -> bool:
 		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
 	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, ctx)
+	Shake.incoming_big(m, h.pos, 0.35, h)
 	m.sfx("whoosh", h.pos, 0.0, 0.6)
 	return true
 
@@ -390,6 +392,8 @@ func _drop_holds() -> void:
 	spin_t = -1.0
 
 # ------------------------------------------------------------------ bots
+const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
@@ -403,4 +407,5 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if float(cd["e"]) <= 0.0 and dist < 2.8:
 		use_e()
 	elif rmb_ready() and los and dist < float(rmb_def()["range"]) + 1.0:
+		bot_hold["rmb"] = BOT_TAP
 		press_rmb()

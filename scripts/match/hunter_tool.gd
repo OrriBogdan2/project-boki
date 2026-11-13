@@ -25,7 +25,7 @@ const GRIP_GAP := 0.2  # m between the two hands on a haft
 const SIZE := 1.4  # the tool is drawn this much larger than life so it reads at the farm camera
 const POP_RATE := 12.0  # how fast the tool and the stowed weapon fade (per second)
 const DIR_HIT := Vector3(0.0, -0.35, -1.0)
-const DIR_LIFT := Vector3(0.0, 0.8, -0.7)
+const DIR_LIFT := Vector3(0.25, 1.0, -0.1)
 const HAMMER_DIR_HIT := Vector3(0.0, -0.25, -1.0)
 const HAMMER_DIR_LIFT := Vector3(0.0, 0.9, -0.5)
 
@@ -72,16 +72,23 @@ static func pitch(act: String, phase: float) -> float:
 	return 0.3 * (1.0 - u) - 0.1 * u
 
 
+## Where the tool points at `u` (0 on the target, 1 at the top of the swing), in the torso's space.
+static func dir_of(tool: String, u: float) -> Vector3:
+	if bool(TOOLS[tool]["two_hands"]):
+		return DIR_HIT.normalized().slerp(DIR_LIFT.normalized(), u)
+	return HAMMER_DIR_HIT.normalized().slerp(HAMMER_DIR_LIFT.normalized(), u)
+
+
 ## Where the tool's butt, its direction and the right hand go, in the torso's space.
 static func grip(tool: String, phase: float, sh_l: Vector3, sh_r: Vector3) -> Dictionary:
 	var u := _u(act_of(tool), phase)
 	var centre := (sh_l + sh_r) * 0.5
 	if bool(TOOLS[tool]["two_hands"]):
-		var low := centre + Vector3(0.0, -0.18, -0.18).lerp(Vector3(0.12, 0.14, -0.12), u)
-		var dir := DIR_HIT.normalized().slerp(DIR_LIFT.normalized(), u)
+		var low := centre + Vector3(0.0, -0.18, -0.18).lerp(Vector3(0.04, 0.24, -0.04), u)
+		var dir := dir_of(tool, u)
 		return {"left": low, "right": low + dir * GRIP_GAP, "dir": dir, "butt": low - dir * 0.1}
 	var hand := sh_r + Vector3(-0.06, -0.2, -0.38).lerp(Vector3(-0.04, 0.28, -0.1), u)
-	var dir_h := HAMMER_DIR_HIT.normalized().slerp(HAMMER_DIR_LIFT.normalized(), u)
+	var dir_h := dir_of(tool, u)
 	return {"left": sh_l + Vector3(0.14, -0.2, -0.36), "right": hand, "dir": dir_h, "butt": hand - dir_h * 0.05}
 
 
@@ -121,9 +128,9 @@ static func place(a: HunterAnim) -> void:
 		return
 	var left := a.arm_l.transform * (a.el_l.transform * a.hand_l.position)
 	var right := a.arm_r.transform * (a.el_r.transform * a.hand_r.position)
-	var grip_dir := (right - left) if bool(TOOLS[a.tool_kind]["two_hands"]) else _hammer_dir(a)
-	var dir := grip_dir.normalized() if grip_dir.length() > 0.02 else Vector3.UP
-	var edge := Basis(Vector3.RIGHT, -PI * 0.5) * dir  # the blade, pick or face points where the swing goes
+	# the pose's own direction, not the hands' line: a broad Hunter's arms cannot meet over the head
+	var dir := dir_of(a.tool_kind, lift(a.tool_ph) * float(TOOLS[a.tool_kind]["lift"]))
+	var edge := Basis(Vector3.RIGHT, -PI * 0.5) * dir        # the blade, pick or face points where the swing goes
 	var z_axis := -edge
 	var x_axis := dir.cross(z_axis).normalized()
 	z_axis = x_axis.cross(dir)
@@ -133,12 +140,6 @@ static func place(a: HunterAnim) -> void:
 
 static func _ease(cur: float, on: bool, dt: float) -> float:
 	return lerpf(cur, 1.0 if on else 0.0, 1.0 - exp(-POP_RATE * dt))
-
-
-static func _hammer_dir(a: HunterAnim) -> Vector3:
-	var u := _u("build", a.tool_ph)
-	return HAMMER_DIR_HIT.normalized().slerp(HAMMER_DIR_LIFT.normalized(), u)
-
 
 static func _build(a: HunterAnim) -> void:
 	var old := a.torso.get_node_or_null("Tool")

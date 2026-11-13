@@ -3,6 +3,8 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and Albert's holds end
+
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -17,19 +19,24 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var bow = load("res://tools/pin_one_bow_check.gd").new()
+	bow.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		await HOLD.lace(self)
 		await ult.pin()
 		await own.pin()
 		await tall.tall()
+		await bow.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await HOLD.albert(self)
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails
+	n += ult.n + own.n + launch.n + tall.n + bow.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -343,6 +350,41 @@ func _archer_combos() -> void:
 		K.cremations == cr0 + 1,
 		"cremations %d" % (K.cremations - cr0)
 	)
+	step(m, 3.5)
+	# Hail Wall vs Wisps (source parity): a rival Wisp on the arc loses down_hp per tick (no slow); an ally's does not
+	fresh(T)
+	fresh(T2)
+	K.cd["e"] = 0.0
+	P.teleport(home)
+	aim_at(P, home + Vector3(5.0, 0, 0))
+	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
+	T2.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(-45.0)))
+	var t2_team := T2.team
+	T2.team = P.team
+	for w in [T, T2]:
+		w.downed = true
+		w.hp = 0.0
+		w.down_hp = float(Data.MATCH["down_hp"])
+	var hp_foe := T.hp
+	P.ak.use_e()
+	step(m, 1.6)
+	var bled: float = float(Data.MATCH["down_hp"]) - T2.down_hp
+	var drained: float = float(Data.MATCH["down_hp"]) - T.down_hp
+	ok(
+		"pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds",
+		drained >= bled + 2.0 * float(K.e_def()["dmg"]) * ArcherKit.WISP_DRAIN_K and bled > 0.0,
+		"rival %.1f ally %.1f" % [drained, bled]
+	)
+	ok(
+		"pin E: the wall does not slow, burn or damage a Wisp",
+		T.slow_t <= 0.0 and T.blight_t <= 0.0 and T.hp == hp_foe and T.downed,
+		"slow %.2f hp %.1f" % [T.slow_t, T.hp]
+	)
+	for w in [T, T2]:
+		w.downed = false
+		w.hp = w.max_hp
+		w.down_hp = 0.0
+	T2.team = t2_team
 	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
@@ -764,7 +806,6 @@ func _bulwark_combos() -> void:
 		K.lock_t = 0.0
 		K.ch_rmb = 1.0
 		K.cd["rmb"] = 0.0
-		K.res = 0.0
 		P.fire_cd = 0.0
 		P.dashes = P.max_dashes()
 		K.lmb_t = -1.0
@@ -793,7 +834,17 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
+	var left_clip := -1.0
+	for i in 30:
+		m.step(DT)
+		if left_clip < 0.0 and String(K.mace.get("st", "")) == "fly":
+			left_clip = m.time - K.anim_at
 	step(m, 0.6)
+	ok(
+		"bjorn anim timing: the hammer leaves as the lmb_throw clip's hand opens (key 0.19; sheet: one frame)",
+		K.anim_id == "bul_throw" and left_clip >= 0.14 and left_clip <= 0.2,
+		"left at clip %.3f" % left_clip
+	)
 	ok(
 		"bjorn aim: the hammer lands at the cursor (5m) and stays planted",
 		K.throws == thr0 + 1 and String(
@@ -812,8 +863,18 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
+	var catch_clip := -1.0
+	for i in 40:
+		m.step(DT)
+		if catch_clip < 0.0 and K.mace.is_empty():
+			catch_clip = m.time - K.anim_at
 	step(m, 1.2)
 	ok("bjorn: tap again calls it back", K.mace.is_empty())
+	ok(
+		"bjorn anim timing: the recall clip's catch key (0.3) lands on the real catch from 5 m (sheet: a flash)",
+		K.anim_id == "bul_recall" and absf(catch_clip - BulwarkKit.RECALL_CATCH) < 0.05,
+		"caught at clip %.3f" % catch_clip
+	)
 	K.cd["e"] = 0.0
 	aim_at(P, home + Vector3(-5.0, 0, 0))
 	P.ak.use_e()
@@ -940,6 +1001,18 @@ func _bulwark_combos() -> void:
 	reset.call()
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
+	var guard_on_press := K.anim_id == "bul_guard"
+	var up_clip := -1.0
+	for i in 24:
+		P.inp["sec_hold"] = true
+		m.step(DT)
+		if up_clip < 0.0 and not K.wall.is_empty():
+			up_clip = m.time - K.anim_at
+	ok(
+		"bjorn anim timing: the raise clip starts on the press, its hand-up key (0.1) is the wall (sheet: 0.1-0.15 s)",
+		guard_on_press and absf(up_clip - float(K.rmb_def()["hold"])) < 0.03,
+		"on press %s wall up at clip %.3f" % [guard_on_press, up_clip]
+	)
 	step(m, 0.4, func(): P.inp["sec_hold"] = true)
 	ok(
 		"bjorn RMB: his aegis is drawn in place of the plain wall",
@@ -950,6 +1023,18 @@ func _bulwark_combos() -> void:
 	)
 	P.inp["sec_hold"] = false
 	step(m, 0.5)
+	# a tap shorter than the cast never raises it: the arm drops with the press
+	reset.call()
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	step(m, 0.03, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	step(m, 0.2)
+	ok(
+		"bjorn anim timing: a RMB tap shorter than the cast leaves no raise clip behind",
+		K.wall.is_empty() and K.anim_id != "bul_guard",
+		"wall %s anim %s" % [not K.wall.is_empty(), K.anim_id]
+	)
 	_wall_at(m, home, lv, 3)
 	# the long dash (no charges left): Breaker's lumbering shove
 	reset.call()
@@ -1114,28 +1199,25 @@ func _bulwark_combos() -> void:
 		)
 	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
-	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
+	# the source kit: Shift behind the shield is the Bash on the source's 6 s cooldown; no Guard meter, no Shield Slam
 	step(m, 1.0)
 	reset.call()
-	K.res = 80.0
-	var guard_before := K.res
-	var slams_before := K.shield_slams
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.3, func(): P.inp["sec_hold"] = true; K.res = maxf(K.res, 80.0))
-	guard_before = K.res
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	var cd_full := float(K.cd["rmb"])
 	P.do_dash()
 	step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
 	ok(
-		"combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent",
-		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
-		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
+		"combo bulwark: Shift behind the shield = the Bash (6 s cooldown), no Guard meter, no Shield Slam",
+		float(K.rmb_def()["cooldown"]) == 6.0 and float(K.cd["rmb"]) > 4.5 and cd_full <= 0.0
+				and not K.has_meter() and not K.d["rmb"].has("slam"),
+		"cd %.2f" % float(K.cd["rmb"])
 	)
-	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
-		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
-		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+	ok("bulwark vfx: the Shield Charge plays its look; no Shield Slam look is left",
+		int(hv.plays.get("charge_go", 0)) >= 1 and not hv.plays.has("slam"),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)

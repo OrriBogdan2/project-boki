@@ -43,9 +43,10 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var at := "%d" % int(ceil(p.armor))
 		var aw := HudStyle.BIG.get_string_size(at, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 		HudStyle.text(c, Vector2(x0 + w - aw, y0 + 1), at, 15, p.armor_col())
-		var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
-		var tw := HudStyle.BIG.get_string_size(tn, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-		HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
+		if p.armor_tier > 0:          # the tier's name waits until the first tier-up (TermHints says what it is)
+			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
+			var tw := HudStyle.BIG.get_string_size(tn, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+			HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
 	# health: thick, segmented, the chip and flash shared with your overhead plate
 	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
 	H._rounded(hr.grow(2.0), HudStyle.SHADE, 4)
@@ -67,11 +68,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 			c.draw_rect(ar.grow(1.0), HudStyle.SHADE)
 			HudStyle.strip(c, ar, H.armor_lerp, HudStyle.CHIP)
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), p.armor_col())
-	# progress to the next armour tier: a hairline under the armour strip in the next tier's colour
-	if p.armor_tier < Hunter.ARMOR_TIERS.size() - 1:
-		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
-		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w, 1)), Color(0, 0, 0, 0.35))
-		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
+	ArmorHud.bar(H, x0, ar.end.y + 2, w, p)    # progress to the next armour tier, under the strip
 	if p.ak and p.ak.has_meter():
 		H._draw_res_bar(x0, ar.end.y + 4, w, p)
 	_hidden_tag(H, sz, p)

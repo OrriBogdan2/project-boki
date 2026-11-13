@@ -65,6 +65,7 @@ var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base
 var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var chimes: HomeChimes = null     # a Boki's chime when it gains a stat, level or change (home_chimes.gd)
+var hlantern: LanternMatch = null   # Lantern Match's glowcap ring (lantern_match.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
@@ -75,6 +76,7 @@ var guide: FarmGuide = null        # the Goals card and the farm tutorial on scr
 var toys: HomeToys = null        # the base's balls, posts and tubs, played with on their own (home_toys.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
+var nap_sound := BokiNapSfx.new()     # the napping Boki breathe and yawn (boki_nap_sfx.gd)
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
@@ -90,6 +92,7 @@ var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
 var verbs := HomeVerbs.new()       # your garden moves: feed, pat, toss, cheer (home_verbs.gd)
+var kin_frame := HomeKinFrame.new()  # the camera leaning in on a Boki you're with (kin_frame.gd)
 var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hsp: SnackPatch = null           # the garden snack patch (snack_patch.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
@@ -184,8 +187,9 @@ func _ready() -> void:
 		htumble = BaseTumble.new(self)
 		hecho = EchoSteps.new(self)
 		hshow = ShowRing.new(self)
+		hlantern = LanternMatch.new(self)
 		# in this order: Tumble's ring needs the stump placed
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish]
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hlantern]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -665,8 +669,8 @@ func _ready_rest() -> void:
 			var kw := a.substr(14) if a.length() > 14 else "box"
 			get_tree().create_timer(0.4).timeout.connect(func(): KinBoxView.demo_show(self, kw))
 		if a.begins_with("--nest-demo"):
-			# test: a full roster, then the Nesting Nook (=grid, =kin, =rare, =pair), a kin card's IVs (=card)
-			# or the Kin Burrow's side panel (=box). Never written to the save.
+			# test: a full roster, then the Nesting Nook (=grid, =kin, =rare, =pair, =egg: a pair's egg
+			# appears), a kin card's IVs (=card) or the Kin Burrow's side panel (=box). Never written to the save.
 			KinBoxView.demo_roster()
 			var nw := a.substr(12) if a.length() > 12 else "grid"
 			get_tree().create_timer(0.4).timeout.connect(func(): _nest_demo(nw))
@@ -715,7 +719,7 @@ func _ready_rest() -> void:
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
-	if not visit.is_empty():
+	if not visit.is_empty() and not play_hub:     # (the hub counts as a visit; the picker opens there too)
 		pass
 	elif play_hub:
 		MinigameHub.open(self)
@@ -1094,8 +1098,11 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
-	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
-	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
+	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
+	cam.dist_mul *= kin_frame.closer()
+	var focus := kin_frame.frame(Vector3(ppos.x, minf(py, 0.0), ppos.z))
+	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing()
+	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
@@ -1110,6 +1117,8 @@ func _process(delta: float) -> void:
 			if Input.is_action_just_pressed("play"): _play_with_kin(interact["k"])
 			elif Input.is_action_just_pressed("talk"): _open_chat(interact["k"]["rec"])
 			elif Input.is_action_just_pressed("details"): _open_kin(interact["k"]["rec"])
+		elif interact["kind"] == "site" and Input.is_action_just_pressed("details"):
+			hob.open_site(interact)
 
 # ---- moving at home: walk, jump, dash (Shift, your class's dodge) and glide (press Space again in the air).
 # py is your feet's height (terraces are 0.8 each). Off the edge you can glide over to another isle;
@@ -1404,6 +1413,7 @@ func _move_kin(d: float) -> void:
 	talk_cd = maxf(0.0, talk_cd - d)
 	_separate_kin(d)
 	if life: life.step(d)
+	nap_sound.step(kins, d)
 	for k in kins:
 		if k.get("busy", false):
 			continue
@@ -1526,7 +1536,11 @@ func _move_kin(d: float) -> void:
 			aim = KinAvoid.around(kins, k, pos, aim, d)
 			var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 			if Vector2(goal.x - pos.x, goal.z - pos.z).length() > 0.4 and to.length() > 0.01:
-				wish = to.normalized() * (4.4 * float(k.get("call_pace", 1.0)) if (k.has("fetch") or k.has("called_t") or k.has("led")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0)) * wade.speed(k, pos)
+				var pace := 3.6 if k.has("chase") else 2.4
+				if k.has("fetch") or k.has("called_t"):
+					pace = 4.4 * float(k.get("call_pace", 1.0))
+				var own := pace * _care_speed(rec) * float(pers.get("speed", 1.0))
+				wish = to.normalized() * (carry.lead_pace() if k.has("led") else own) * wade.speed(k, pos)
 		var hv := Vector2(k["vel"].x, k["vel"].z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * d))
 		var nx := pos.x + hv.x * d
@@ -1554,7 +1568,7 @@ func _move_kin(d: float) -> void:
 			k["joy_t"] = joy - d
 			k["hop"] += d * 10.0
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * (0.26 if joy > 0.0 else (float(pers.get("hop_a", 0.14)) if hv.length() > 0.3 else 0.03))
-		_quirk(k, n, hv.length() > 0.3, d)
+		KinHabit.step(k, n, hv.length() > 0.3, d)
 		if hw: hw.pose(k, n, d)
 		toys.pose(k, n, d)
 		n.set_meta("happy", joy > 0.0)
@@ -2124,6 +2138,7 @@ func _find_interact() -> void:
 		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], [Settings.key_cap("interact") + " hold", "Pick up"]]
 	else:
 		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
+		if best["kind"] == "site": pairs.append([Settings.key_cap("details"), "Assign Boki"])
 	# the prompt is keycaps and words, rebuilt only when what it says changes
 	var sig := str(pairs)
 	if String(prompt_box.get_meta("sig", "")) != sig:
@@ -2228,10 +2243,10 @@ func _label_for(it: Dictionary) -> String:
 			var cd: Dictionary = Data.CROPS[d["crop"]]
 			if int(d["stage"]) >= int(cd["grow"]): return "Harvest the %s" % cd["name"]
 			if it["arr"] == "plots" and FarmWater.plot_near(Save.d, it["i"]):
-				return "%s: the water nearby tends it (%s)" % [cd["name"], _grow_left(it["arr"], d)]
+				return "%s: the water nearby tends it (%s)" % [cd["name"], _grow_left(it["arr"], it["i"])]
 			if float(d.get("wt", 0.0)) <= 0.0: return "Water the %s" % cd["name"]
 			if int(d.get("wet", 2)) < 2: return "Water the %s (the rain only soaked it)" % cd["name"]
-			return "%s: watered, growing (%s)" % [cd["name"], _grow_left(it["arr"], d)]
+			return "%s: watered, growing (%s)" % [cd["name"], _grow_left(it["arr"], it["i"])]
 		"pot": return "Cook"
 		"rack": return "Glider skins"
 		"stall": return "Shop"
@@ -2257,6 +2272,7 @@ func _label_for(it: Dictionary) -> String:
 		"tumble": return htumble.label()
 		"echo": return hecho.label()
 		"show": return hshow.label()
+		"lantern": return hlantern.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2302,6 +2318,7 @@ func _use(it: Dictionary) -> void:
 		"show": hshow.use()
 		"fishing": hfish.use()
 		"waystone": hway.use()
+		"lantern": hlantern.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
@@ -2355,11 +2372,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
-	if panel_open == HomeClasses.TITLE and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
+	if panel_open == HomeClasses.TITLE and event.is_action_pressed("kit_card") and has_meta("hero_hover"):
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
 		return
-	if panel_open == "" and visit.is_empty() and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_G and guide and guide.toggle_goals():
+	if panel_open == "" and visit.is_empty() and event.is_action_pressed("goals") and guide and guide.toggle_goals():
 		get_viewport().set_input_as_handled()      # G: the Goals line opens into the full list
 		return
 	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == HomeClasses.TITLE):
@@ -2377,8 +2394,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hecon.cancel_carry()
 		get_viewport().set_input_as_handled()
 		return
-	if panel_open != "" and not Overlay.is_open() and event is InputEventKey and event.pressed and not event.echo \
-			and (event.physical_keycode == KEY_ENTER or event.physical_keycode == KEY_KP_ENTER) and not (get_viewport().gui_get_focus_owner() is LineEdit):
+	if panel_open != "" and not Overlay.is_open() and event.is_action_pressed("confirm") and not (get_viewport().gui_get_focus_owner() is LineEdit):
 		if UI.press_primary(panel_host):
 			get_viewport().set_input_as_handled()
 			return
@@ -2625,10 +2641,10 @@ func _open_welcome() -> void:
 	b.grab_focus.call_deferred()
 
 # ---- farm
-## How long until the next stage, for a watered plant.
-func _grow_left(arr: String, d: Dictionary) -> String:
-	var need := Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)
-	var left := int(ceil(need - (Time.get_unix_time_from_system() - float(d.get("wt", 0.0)))))
+## How long until the next stage, for watered plant i of arr.
+func _grow_left(arr: String, i: int) -> String:
+	var need := FarmWater.stage_s(Save.d, arr, i)
+	var left := int(ceil(need - (Time.get_unix_time_from_system() - float(Save.d[arr][i].get("wt", 0.0)))))
 	return "%ds" % maxi(1, left)
 
 ## Watered plants grow while you're home; rain and a farmhand kin water for you.
@@ -2650,7 +2666,7 @@ func _farm_tick() -> void:
 			if (wt <= 0.0 or (by_water and int(d.get("wet", 2)) < 2)) and (raining or by_water):
 				_water(arr, i, "stream" if by_water else "rain")
 				continue
-			if wt > 0.0 and now - wt >= FarmCropGuide.stage_time(Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)):
+			if wt > 0.0 and now - wt >= FarmWater.stage_s(Save.d, arr, i):
 				d["stage"] = int(d["stage"]) + 1
 				# rain only makes it wet; watering it yourself (or a farmhand kin) is what counts as tending
 				if int(d.get("wet", 2)) >= 2:
@@ -2711,8 +2727,8 @@ func _open_plot(arr: String, i: int) -> void:
 			return
 		var v := _new_panel(cd["name"], 440)
 		if arr == "plots" and FarmWater.plot_near(Save.d, i):
-			v.add_child(UI.label("This patch is by the water, so it waters itself.", 14, UI.GOOD))
-		v.add_child(UI.label("Watered. It grows a stage in %s while you're home, or after your next expedition." % _grow_left(arr, d), 16))
+			v.add_child(UI.label(FarmWater.plot_note(), 14, UI.GOOD))
+		v.add_child(UI.label("Watered. It grows a stage in %s while you're home, or after your next expedition." % _grow_left(arr, i), 16))
 		v.add_child(UI.label("Stage %d of %d. Tended %d time%s: %s" % [int(d["stage"]), grow, int(d.get("care", 0)), "" if int(d.get("care", 0)) == 1 else "s",
 			"water it every stage for a bigger harvest, and maybe a seed back." if int(d.get("care", 0)) < grow else "it'll be a big harvest."], 14, UI.MUTED))
 		v.add_child(UI.label(cd["desc"], 14, UI.MUTED))
@@ -2941,6 +2957,7 @@ func _pet_kin(k: Dictionary) -> void:
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
 	verbs.play("pat")
+	kin_frame.start(k, ppos)
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
@@ -2974,6 +2991,7 @@ func _play_with_kin(k: Dictionary) -> void:
 	_emote(k, "!")
 	Sfx.play("throw", null, -8.0)
 	verbs.play("toss")
+	kin_frame.start(k, ppos)
 
 func _fetch_step(k: Dictionary, d: float) -> void:
 	var f: Dictionary = k["fetch"]
@@ -3081,6 +3099,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
 	var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
 	if ob != "": lines.append(["Owner bonus while it's your Boki: " + ob, Color("ffd84a").lerp(UI.INK, 0.35)])
+	if RunPayoff.line(rec) != "": lines.append([RunPayoff.line(rec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)])
 	for ln in lines:
 		if compact:
 			var l := UI.label(String(ln[0]), 12, ln[1])
@@ -3118,6 +3137,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var partner: bool = rec["uid"] == Save.d.get("active", "")
 	var rare_pre := Mutations.prefix(rec)
 	var kpre := ("shimmering " if rec.get("shimmer", false) else "") + ((rare_pre + " ") if rare_pre != "" else "")
+	kin_frame.start(_kin_entry(rec), ppos, true)
 	var v := _new_panel(("%s the %s%s" % [rec["name"], kpre, Evo.form_name(rec)]) if kpre != "" else Data.kin_title(String(rec["name"]), Evo.form_name(rec)), 820)
 	UI.hold(v, KIN_CARD_H)
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
@@ -3125,7 +3145,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var hx := UI.head_extra(v)
 	hx.add_child(VoidPortrait.of(rec, get_tree(), 84.0))
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
-	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
+	elif rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
 	if KinBox.is_boxed(rec): hx.add_child(UI.tag("In the Boki Burrow", Color("cdb8ff")))
 	for mid in Mutations.of(rec):
@@ -3257,11 +3277,11 @@ func _open_kin(rec: Dictionary) -> void:
 			if not swapped.is_empty(): _toast("%s went to the Boki Burrow to make room" % swapped["name"])
 			_spawn_kin(); _refresh_burrow()
 			_open_kin(rec)))
-		if Match.TWO_KIN and rec["uid"] != Save.d.get("active2", ""):     # (one Boki per run now: no second)
+		if rec["uid"] != Save.d.get("active2", ""):
 			fl.add_child(UI.ghost("Bring as second", func():
 				Save.d["active2"] = rec["uid"]
 				Save.save_game()
-				_toast("%s joins your next expedition (%s swaps)" % [rec["name"], Settings.key_cap("swap_kin")])
+				_toast("%s goes with you as your second Boki" % rec["name"])
 				_open_kin(rec)))
 	ZoneCards.add_move_link(self, fl, rec)
 	# the Kin Burrow: put it to sleep there, or wake it and bring it out
@@ -3449,10 +3469,8 @@ func _open_expedition() -> void:
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
 		left.add_child(UI.section("Boki you bring"))
-		left.add_child(_kin_pick_row("Partner", ak, "active"))
+		CarryPick.add_cards(left, _open_expedition)
 		left.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
-		if Match.TWO_KIN and Save.d["roster"].size() > 1:
-			left.add_child(_kin_pick_row("Second", Save.second_kin(), "active2"))
 		if float(ak["trust"]) < 30.0:
 			left.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
 	if Save.d.get("treat", "") != "":
@@ -3490,14 +3508,7 @@ func _open_expedition() -> void:
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
 	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
-	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
-	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
-	var rolling_on: bool = Save.d.get("exp_rolling", false)
-	var stabs := UI.tabs(["Fixed match", "Rolling session"], "Rolling session" if rolling_on else "Fixed match", func(nm): Save.d["exp_rolling"] = nm == "Rolling session"; _open_expedition(), {}, 150)
-	for tb in stabs.get_child(0).get_children():
-		tb.tooltip_text = "Everyone drops together; the islands fall after about 10 minutes" if String(tb.get_meta("tab")) == "Fixed match" else "A 30-minute session already under way: you drop in with the next wave, wherever it's at"
-	right.add_child(stabs)
-	right.add_child(UI.label("30 minutes, waves every 2-3 minutes; late arrivals start at a higher level" if rolling_on else "Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
+	right.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
@@ -3526,61 +3537,6 @@ func _open_kit_card() -> void:
 ## The old separate loadout page now lives inside the expedition panel.
 func _open_loadout() -> void:
 	_open_expedition()
-
-## One row of the expedition loadout: which kin, with ‹ › to change it.
-func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
-	var card := UI.card(UI.CARD, 10, 10)
-	var row := UI.hbox(10); card.add_child(row)
-	var roster: Array = Save.d["roster"]
-	var other := str(Save.d.get("active2" if key == "active" else "active", ""))
-	var choices: Array = roster.filter(func(r): return r["uid"] != other)
-	var cur := str(Save.d.get(key, ""))
-	var cycle := func(dir: int) -> void:
-		var ids: Array = choices.map(func(r): return r["uid"])
-		if key == "active2": ids.append("none")
-		var i := ids.find(cur)
-		Save.d[key] = ids[(i + dir + ids.size()) % ids.size()] if ids.size() > 0 else cur
-		Save.save_game()
-		_open_expedition()
-	var prev_b := UI.icon_button("back", func(): cycle.call(-1), "Previous Boki", 12.0)
-	prev_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(prev_b)
-	if not rec.is_empty():
-		var ksp: Dictionary = Data.KIN[rec["species"]]
-		var kcol: Color = Color(ksp["color"]).lerp(Color.WHITE, 0.25)
-		var dot := UI.badge("paw", kcol, 36.0)
-		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(dot)
-	var info := UI.vbox(1); info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if rec.is_empty():
-		info.add_child(UI.label("%s: none" % label_t, 16, UI.MUTED, UI.big))
-		info.add_child(UI.label("Bring only your partner. Nothing else at risk.", 12, UI.MUTED))
-	else:
-		var sp: Dictionary = Data.KIN[rec["species"]]
-		var nl := UI.label(Data.kin_title(String(rec["name"]), String(sp["name"])), 17, UI.INK, UI.big)
-		nl.autowrap_mode = TextServer.AUTOWRAP_OFF
-		nl.clip_text = true
-		info.add_child(nl)
-		var sl := UI.label("%s  ·  level %d  ·  trust %d%s" % [label_t, int(rec.get("level", 1)), int(rec["trust"]), "  ·  asleep in the Boki Burrow: comes out to go with you" if KinBox.is_boxed(rec) else ""], 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.MUTED)
-		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
-		info.add_child(sl)
-		var names: Array = []
-		for aid in sp.get("abilities", []):
-			var ad := KinLib.ability(String(aid))
-			if ad: names.append(ad.display_name)
-		var ud := KinLib.merge(String(sp.get("ultimate", "")))
-		var keys := "auto" if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
-		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
-		al.autowrap_mode = TextServer.AUTOWRAP_OFF
-		al.clip_text = true
-		al.tooltip_text = al.text
-		al.mouse_filter = Control.MOUSE_FILTER_PASS
-		info.add_child(al)
-	row.add_child(info)
-	var next_b := UI.icon_button("next", func(): cycle.call(1), "Next Boki", 12.0)
-	next_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(next_b)
-	return card
 
 ## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
 func _start_training() -> void:
@@ -3630,8 +3586,6 @@ func _start_match() -> void:
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
 	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
-	if Save.d.get("exp_rolling", false):
-		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
@@ -4166,10 +4120,9 @@ func _refresh_nest() -> void:
 	var egg: Dictionary = Save.d.get("egg", {})
 	if egg.is_empty() or _visiting():
 		return
-	var col: Color = Data.KIN[_egg_species()]["color"] if _egg_species() != "" else Color("f2e6cf")
 	if egg.get("rare", false):
-		# a boss's egg: gold, glowing, with the rare kin's colour in its spots
-		nest = Models.nest_egg(Color("ffd36a"), Data.KIN[_egg_species()].get("glow", col) if _egg_species() != "" else col)
+		# a boss's egg: the gold Rare Egg, glowing, its seam ring in the rare kin's glow
+		nest = Models.nest_egg("rare", 0.35, Data.KIN[_egg_species()].get("glow", Color("6fe0d0")) if _egg_species() != "" else Color("6fe0d0"))
 		var sp2 := CPUParticles3D.new()
 		sp2.amount = 16; sp2.lifetime = 1.6; sp2.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; sp2.emission_sphere_radius = 0.35
 		sp2.direction = Vector3.UP; sp2.spread = 25.0; sp2.initial_velocity_min = 0.3; sp2.initial_velocity_max = 0.8; sp2.gravity = Vector3.ZERO
@@ -4177,7 +4130,7 @@ func _refresh_nest() -> void:
 		sp2.material_override = Models.glow_mat(Color(1.0, 0.88, 0.45, 0.9)); sp2.position.y = 0.4
 		nest.add_child(sp2)
 	else:
-		nest = Models.nest_egg(col, Color("fff6c0"))
+		nest = Models.nest_egg(EggModels.kind_of(_egg_species()))
 	nest.position = NEST_AT
 	add_child(nest)
 
@@ -4358,6 +4311,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	(k["node"] as Node3D).position = at
 	k["hold_t"] = 3.2
 	verbs.play("feed")
+	kin_frame.start(k, ppos)
 	_face(at)
 	var food := MeshInstance3D.new()
 	food.mesh = Models.sphere(0.11, 10)
@@ -4910,7 +4864,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.save_game()
 	_close_panel()
 	_refresh_nest()
-	fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
+	NestReveal.play(fx, nest, esp)
 	Sfx.play("unlock")
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
@@ -4974,6 +4928,11 @@ func _nest_demo(which: String) -> void:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
 		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"egg":
+			ppos = NEST_AT + Vector3(0, 0, 2.2)
+			player.position = ppos
+			cam.snap(ppos)
+			_make_egg(pa, pb)
 		"card": kin_tab = "Growth"; _open_kin(kid)
 		"card-care": kin_tab = "Care"; _open_kin(kid)
 		"card-train": kin_tab = "Training"; _open_kin(kid)
@@ -5040,12 +4999,10 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	Save.save_game()
 	building_now = true
 	# the egg hatches in stages: wiggles, cracks, a peek, then the kin pops out
-	var shell_c: Color = Color("ffd36a") if rare else Color(Data.KIN[baby["species"]]["color"]).lightened(0.15)
 	if is_instance_valid(hide):
 		hide.visible = false
 	var eh := EggHatch.new(baby["species"], fx, 0.26, 0.36, 1.0, baby)
-	eh.shell_col = shell_c
-	eh.spot_col = Color("fff6c0")
+	eh.kind = "rare" if rare else ""
 	eh.position = at
 	eh.scale = Vector3.ONE * 1.2
 	add_child(eh)
@@ -5083,7 +5040,7 @@ func _name_baby(baby: Dictionary) -> void:
 		v.add_child(UI.label("A rare %s%s%s, hatched from the egg %s guarded. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], String(Data.MOBS.get(String(baby.get("from_boss", "")), {}).get("name", "a boss")), Care.nature(baby)], 15))
 	else:
 		v.add_child(UI.label("A %s%s%s, child of %s and %s. %s nature." % ["shimmering " if baby.get("shimmer", false) else "", (rare_pre + " ") if rare_pre != "" else "", sp["name"], baby["parents"][0], baby["parents"][1], Care.nature(baby)], 15))
-		if life and baby.has("gifts"): v.add_child(UI.label(Parentage.gift_text(baby), 14, UI.MUTED))      # base_mode: who gave what
+		if HatchParents.has_row(baby): v.add_child(HatchParents.view(baby, get_tree()))      # who gave what
 	if baby.has("gift"):
 		v.add_child(UI.label(Mentor.line(baby["gift"]), 15, UI.ACCENT_HI))
 	for mid in Mutations.of(baby):
@@ -5188,7 +5145,7 @@ func _open_feed(rec: Dictionary) -> void:
 	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
 	var any := GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
 			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or not rows.is_empty()
-	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
+	any = GardenItemRows.add_inks_and_worn(v, rec, func(): _open_feed(rec), [_close_panel, _play_evolutions]) or any
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
@@ -5225,7 +5182,6 @@ func _personality(rec: Dictionary) -> Dictionary:
 	# [hop rate, hop height, pace]: heavy kinds plod, light ones skip
 	var gait: Array = {"gravity": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "lunar": [4.5, 0.2, 0.95],
 		"prism": [11.0, 0.09, 1.12], "venom": [9.5, 0.05, 1.06], "echo": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
-	var quirks := ["spin", "sniff", "hop", "sit", "look", "wiggle"]
 	return {
 		"speed": float(gait[2]) * lerpf(0.86, 1.18, (brave + hot) * 0.5) * (0.94 + float(h % 13) * 0.01),
 		"hop_f": float(gait[0]) * (0.9 + float(h % 7) * 0.035),
@@ -5236,7 +5192,7 @@ func _personality(rec: Dictionary) -> Dictionary:
 		"rest": lerpf(1.6, 0.7, hot * 0.5 + cur * 0.5),
 		"chatty": lerpf(0.35, 1.3, hot * 0.5 + cur * 0.5),
 		"haunt": h % 7,
-		"quirk": quirks[(h / 7) % quirks.size()],
+		"quirk": KinHabit.HABITS[(h / 7) % KinHabit.HABITS.size()],
 	}
 
 ## A spot in a ring around a place, different for every kin, so a crowd fans out instead of piling up.
@@ -5300,40 +5256,6 @@ func _separate_kin(d: float) -> void:
 		if world.occupy(pos.x, pos.z + push.y, 0.3, 0.0, true) == 0.0 and not world.is_void(pos.x, pos.z + push.y): pos.z += push.y
 		a["pos"] = pos
 		(a["node"] as Node3D).position = pos
-
-## Each kin's little habit when it stops: a spin, a sniff at the ground, a happy hop, sitting down,
-## looking around, or a wiggle. Rare and staggered, so it reads as character, not a dance routine.
-func _quirk(k: Dictionary, n: Node3D, moving: bool, d: float) -> void:
-	var body := n.get_node_or_null("Body") as Node3D
-	if body == null: return
-	k["qt"] = float(k.get("qt", randf_range(4.0, 12.0))) - d
-	var q := float(k.get("q_on", 0.0))
-	if moving or float(k.get("hold_t", 0.0)) > 0.0 or float(k.get("nap_t", 0.0)) > 0.0 or k.has("bath") or k.has("fetch"):
-		# interrupted: only undo our own pose, so feeding and training animations keep theirs
-		if q > 0.0:
-			k["q_on"] = 0.0
-			body.rotation = Vector3.ZERO; body.scale = Vector3.ONE
-		k["qt"] = maxf(float(k["qt"]), 3.0)
-		return
-	if q <= 0.0 and float(k["qt"]) <= 0.0:
-		k["qt"] = randf_range(7.0, 16.0) * float(k.get("pers", {}).get("rest", 1.0))
-		k["q_on"] = 1.2
-		q = 1.2
-	if q <= 0.0:
-		return
-	q -= d
-	k["q_on"] = q
-	var t := 1.0 - clampf(q / 1.2, 0.0, 1.0)      # 0 -> 1 over the habit
-	var e := sin(t * PI)
-	match String(k.get("pers", {}).get("quirk", "look")):
-		"spin": body.rotation.y = t * TAU
-		"sniff": body.rotation.x = e * 0.35; body.position.y = -e * 0.04
-		"hop": body.position.y = absf(sin(t * TAU * 1.5)) * 0.22
-		"sit": body.scale = Vector3(1.0 + e * 0.12, 1.0 - e * 0.16, 1.0 + e * 0.12)
-		"look": body.rotation.y = sin(t * TAU) * 0.7
-		"wiggle": body.rotation.z = sin(t * TAU * 3.0) * 0.18 * e
-	if q <= 0.0:
-		body.rotation = Vector3.ZERO; body.scale = Vector3.ONE
 
 # ------------------------------------------------------------------ build mode screenshots
 ## --build-demo: build mode open with a bench's ghost by the farm; --decor-demo: an island decorated

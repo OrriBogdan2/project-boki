@@ -88,6 +88,7 @@ func scan() -> void:
 	for st in HomeLayout.stations(h._d()): live_u[int(st["e"]["u"])] = true
 	for r in Save.d["roster"]:
 		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
+	FarmSites.clean_crew(Save.d)
 	_plot_jobs()
 	if not FarmUnlocks.base_mode():
 		_wild_jobs()
@@ -463,17 +464,21 @@ func best_job(k: Dictionary) -> Dictionary:
 		var el := String(j["el"])
 		if not takes_job(rec, j): continue
 		var at: Vector3 = j["at"]
-		if _isle(at) != here and mine < 0: continue      # (an assigned kin goes over to its station)
-		var sc := Work.score(FarmSites.level(rec, j), maxi(Work.prio(el), 2) if mine >= 0 else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
+		var posted := mine >= 0 or FarmSites.site_of(rec) >= 0
+		if _isle(at) != here and not posted: continue      # (an assigned kin goes over to its station or site)
+		var sc := Work.score(FarmSites.level(rec, j), maxi(Work.prio(el), 2) if posted else Work.prio(el), Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length())
 		if sc > bs: bs = sc; best = j
 	return best
 
-## Would this kin take this job? One assigned to a station only works that station (whatever the
-## Job Board says); the rest take any job they're suited to, but not the ones only assigned kin do.
+## Would this kin take this job? One assigned to a station only works that station, one assigned to a
+## site only builds it (whatever the Job Board says); the rest take any job they're suited to, but not
+## the ones only assigned kin do.
 func takes_job(rec: Dictionary, j: Dictionary) -> bool:
 	var mine := Work.assigned(rec)
 	if String(j.get("kind", "")) == "build":
 		return mine == int(j.get("u", -1)) or (mine < 0 and FarmSites.takes(rec, j))
+	if FarmSites.site_of(rec) >= 0:
+		return false
 	if mine >= 0:
 		return int(j.get("u", -1)) == mine and Work.can_work(rec) and Work.level(rec, String(j["el"])) > 0
 	if j.get("need", false):
@@ -984,7 +989,7 @@ func open_station(e: Dictionary) -> void:
 		var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), "" if Work.can_work(r) else "  (%s)" % Work.why_not(r)], UI.T_BODY, Data.KIN.get(String(r["species"]), {}).get("color", UI.INK))
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
-		row.add_child(UI.button("Unassign", func(): Work.assign(rr, -1); _reassign(rr); open_station(e), 120))
+		row.add_child(UI.button("Unassign", func(): Work.assign(rr, -1); reassign(rr); open_station(e), 120))
 		v.add_child(row)
 	var cands: Array = []
 	for r in Save.d["roster"]:
@@ -1007,11 +1012,11 @@ func open_station(e: Dictionary) -> void:
 			var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), note], UI.T_BODY, UI.INK)
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(l)
-			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); _reassign(rr); Save.save_game(); open_station(e), 120))
+			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); reassign(rr); Save.save_game(); open_station(e), 120))
 			v.add_child(row)
 
 ## A kin's assignment changed: it drops whatever it was doing and picks again.
-func _reassign(rec: Dictionary) -> void:
+func reassign(rec: Dictionary) -> void:
 	var k: Dictionary = h._kin_entry(rec)
 	if not k.is_empty():
 		drop(k)

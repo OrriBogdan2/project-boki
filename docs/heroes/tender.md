@@ -12,7 +12,7 @@ Internal design doc (was "Linnet"; the id and file names stay `tender`). Source 
 | RMB Burrseed | press; a fixed 1s wind-up, then it throws itself (owner item 118) | Wind-up: half speed, a short 6m dotted lane along the aim (AimKit `dotted`), a ring round her and a coiled pose; not a hold, letting go does nothing; a stun, Hex or going down loses the throw, not the charge. At the end, along the aim of that moment: a fast seed (30 m/s) sticks to the first foe (9 damage) and a vine runs from her to them. A violet disc the size of the burst shows under them at once for everyone, filling while they stay within 15m of her (`leash`), the vine thickening; after 2s of that (`build`, owner 11-10) it flares: 32 damage and a 1.1s root in 2.2m, with root beams, and Kindles all. Out of her reach, or with her down, it unwinds twice as fast (`unwind`), the vine faint and coral; empty there, the seed falls off. 10.5s cooldown (the data's 11.5 : 12 against Hearthlight). Rank 3: the root lasts 0.3s longer and the burst is twice as wide (4.4m) | Darkside Binding / Bound by Fate | The wiki's 2s, held by her reach (owner 11-10: the footage's 0.7s "procs way too fast"); escaped by dashing or running out of 15m |
 | Shift Relay Step | tap (in the air: her long glide) | A skip where you move, 3.6m in 0.2s (Elluna's ground dash, off the global dash feel). In the air: Elluna's long floaty glide, 13.3m over 0.95s (a 0.1s ramp, a 0.4s burst at about 17 m/s, then a float out easing to 45% of that, held up while it floats; the move keys steer it at 3 rad/s; `dash.air`). The glide is airborne only: on the ground with the hop spent, Shift is refused. No bonus for passing through a teammate (data pass). Rank 3: picking up a teammate refreshes the air dash | Lunar Dash | Goes in the movement direction (footage); the "Dash toward the cursor" setting covers the other preference. Both dashes copy Elluna's distances and timings (owner 18:20, replacing item 24's 3x rule); see "Dashes: Elluna's numbers and ours" |
 | E Hearthlight | tap, tap again to throw | A 2.6m (1.4 bh) ring of light on you for 2.5s heals teammates 10 over its life, then blooms to heal 22 more (a soft swell of the disc, light rising and a quiet chime: no ring, blast or shake); you at a third, a downed teammate five times over. E again throws it to the cursor (up to 9m) at 45 m/s: it lands almost at once as a brighter 2.9m disc, heals 50% more for 1s (100% more at rank 3, still 1s), and latches onto the first teammate it passes (or onto the one you carry, aimed at yourself). A stun does not put it out | Rejuvenating Aura / Moonlight Blessing | Radius from the footage (1.3-1.6 bh). Rank 3 is the source's level 4 (the throw's healing increase doubled, same 1s); the revive it borrowed went back to the X ultimate |
-| X Hearth Call (level 6) | X with the cursor on a teammate (tap) | While it is ready and the cursor rests on a teammate in reach, a gold ring of 12.6m (7 bh) round her shows the reach and a line runs onto them. X starts a lantern tether that heals them 7 a second for 5s while she walks and casts freely. At the end a downed teammate is pulled to her side and stood up (a green arrival burst). While they are down the tether heals them (it tops up their bleed-out pool, as the data's heal on an ally or Wisp). It breaks (the tether snaps with coral sparks at both ends and a BROKEN word, no bond) if she is knocked, stunned or dies, or they die or leave the ring. The teammate being knocked does not break it: it carries on, heals them, and stands them up at the end. Damage on her and her own dash do not break it. 46s cooldown. Solo (no teammate in the match): it lights on her | Divine Intervention | Our own lantern tether and arrival look (no crescent motif) |
+| X Hearth Call (level 6) | X with the cursor on a teammate (tap) | While it is ready and the cursor rests on a teammate in reach, a gold ring of 12.6m (7 bh) round her shows the reach and a line runs onto them. X starts a lantern tether that heals them 7 a second for 5s while she walks and casts freely. At the end a downed teammate is pulled to her side and stood up (a green arrival burst). While they are down the tether heals them (it tops up their bleed-out pool, as the data's heal on an ally or Wisp). It breaks (the tether snaps with coral sparks at both ends and a BROKEN word, no bond) if she is knocked, stunned or dies, or they die or leave the ring. The teammate being knocked does not break it: it carries on, heals them, and stands them up at the end. Damage on her and her own dash do not break it. 46s cooldown. With no teammate or downed teammate (the source's ally Wisp) inside the ring the press does nothing: no cooldown is spent and the X tile shows its usual red denied pulse, no words (bots do not try it either) | Divine Intervention | Our own lantern tether and arrival look (no crescent motif) |
 | R | none | The Boki Merge | (Merge) | Merge stays on R |
 
 Body: a very small hunter (`body` in tender.json; legs 0.98, torso 1.02, shoulder 1.12, neck -0.036 since the ART-1 rebuild): fallback model 0.6, .glb 0.66 of a medium (body size 0.68; owner item 108 took her down from 0.78, about 13%), nothing above her head, hitbox radius 0.34 (from 0.40; the 0.85x floor of item 46's band, so it stays there), nameplate 1.85 m (it came down with her head) and own bars 2.35 m (`Arch.plate_y` / `Arch.body`, for the HUD to read). A low forward-leaning scurry at 1.25x step cadence with a small per-step bob, her ember-tipped tail swinging with each step; the torso keeps facing the aim while the legs go where she moves. Run speed is the shared one.
@@ -65,7 +65,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | Its area shows at once and roots 2s later, held by her reach (owner 11-10 over the footage's 0.6-0.8s) | wiki (2s), owner | no (footage 0.6-0.8s) | yes, 2s; out of 15m it unwinds 2x and falls off | "it roots at about 2.0 s of contact", "out of her reach it unwinds 2x", "escaped ... never roots" |
 | The aura's recast throws it to a spot, and it sticks to the first ally it passes | [wiki](https://supervive.wiki.gg/wiki/Elluna), footage | the spot, yes | yes | "thrown, it lands on the cursor"; `--support-check` latch |
 | A stun on you does not put out the aura (data pass; the wiki's rule was not in the tooltip data) | tooltip data | no | yes | `--support-check` |
-| Dashing through an ally refunds nothing (data pass: the source has no such bonus) | tooltip data | no | removed | `--support-check` |
+| Dashing through an ally refunds nothing `[?]`: not base kit in any source; the refund sits only on the footage card's upgraded Super dash (older build), and the Nov 2 tooltips have it at no rank (see "Ally-pass refund" below) | tooltip data, footage card | card only (Super) | removed | `--support-check` |
 | Rank 3 (source level 4): picking up a wisp refreshes the air dash | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
 | Healing is x5 on wisps and x0.33 on yourself | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | `--support-check` |
 | Relay Step goes where you move, not at the cursor | footage | yes | yes | "Relay Step goes where you move" |
@@ -76,7 +76,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | X: unit-targeted, an aim line onto the ally first | footage f19-f24 | yes | yes (a tap; the line and ring show while the cursor is on a teammate) | "mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them" |
 
 ## Footage gaps, Nov 9 re-check
-The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main d255acbee. Closed rows cite the code or commit (e87df2c59 is the fidelity pass that built most of them). Nothing was built in this pass: the one row that is not closed (9, numbers) lives in `tender_kit.gd`, which ext/meeko-rmb-motion, ext/meeko-ult-cancels, ext/meeko-carry-drop and ext/meeko-rmb-orbit-1108 all change, and its assert would go in `care_combo_check.gd`, also in flight.
+The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main d255acbee. Closed rows cite the code or commit (e87df2c59 is the fidelity pass that built most of them). Row 9 (the numbers) was closed on ext/meeko-gap9, stacked on this branch; rows 1-8 and 10 needed no build.
 
 | # | Gap | State on main | Where |
 |---|---|---|---|
@@ -88,9 +88,18 @@ The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main 
 | 6 | Hearthlight cast and thrown look | closed | `cast_e` lantern plus and rising rays (`lk().burst("plus", ...)`), thrown disc `fill` 1.8, amber to teal rim, brighter than the carried ring (`_hearth_node`) |
 | 7 | Cooldowns | closed (data wins) | Burrseed 10.5 s, Hearthlight 11 s, dashes 7 / 14 s: the tooltip data over the blurry card (see the dash table's precedence); "mm RMB: Burrseed 10.5 s", "mm dashes: Elluna's cooldowns". Suggestion only: the footage card reads about 7.2 s for Bound by Fate |
 | 8 | Crook cast swirl | closed | a swirl, flash and sparks at the casting hand per ember (`_dress_ember`, `stats["swirls"]`); "mm LMB: each ember has its comet look, a swirl at the hand and the flick move" |
-| 9 | Ramp readability | partly open | closed: the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`) and "KINDLED" at 5. Open: damage numbers do not tint with the stacks (the shared `HudStyle.dmg_col` path in match.gd); the sheet itself calls it optional, so it is a suggestion, and the kit hook would sit in `tender_kit.gd` (in flight) |
+| 9 | Ramp readability | closed (footage; ext/meeko-gap9) | the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`), "KINDLED" at 5, and the damage number is yellow (`HudStyle.CRIT`) on an ember into a foe at full Kindle, white before (`TenderKit.number_col`, the `ArchKit.number_col` hook, 2 wiring lines in `Match.on_damage`); `mm passive: the damage number is yellow at the plateau ...`. Numbers: see the table below |
 | 10 | Dash direction | closed | `on_dash` steers by `h.roll_dir` (movement); "mm Shift: Relay Step goes where you move" |
 | 11 | Sound | n/a | no audio in the footage |
+
+Row 9 numbers (source order: owner note > game data > footage; no owner note covers them, and the tooltip data (`supervive_kits.md`, Elluna) gives the ramp no figure, so the footage decides):
+
+| Number | Source | Old | New | Assert |
+|---|---|---|---|---|
+| Ramp at the plateau | footage 64 -> 93 (f84-f98): x1.453 | `per_stack` 0.72 x 5 / 8 = +45% (check window 38-52%) | unchanged, 8 -> 11.6; the check window is now +/-3 points round the footage's +45.3% | `mm passive: Kindle ramps embers +45% at 5 stacks (footage 64 -> 93)` |
+| Damage number colour | footage f98: 93 is yellow, the earlier hits white | white at every stack | yellow at full Kindle (5 stacks, the plateau), white below; the brief's "warm yellow at 3+" was a suggestion, the footage shows yellow only on the 93 | `mm passive: the damage number is yellow at the plateau, white before it (footage)` |
+
+Not changed, to note: the footage reads the plateau after 4 hits (64, 66, 84, 93, 93); ours needs 5 stacks (6 hits). One dummy and five hits do not fix a curve, so the 5-stack cap stays.
 
 ## Assumptions
 Where the footage and the wiki are silent, this is the most likely behaviour, and each is easy to change in `content/archetypes/tender.json`:
@@ -99,7 +108,7 @@ Where the footage and the wiki are silent, this is the most likely behaviour, an
 - The Hearthlight keeps its heal amount and duration when thrown. The throw reach is 9m.
 - Kindle: 5 stacks, 4s, refreshed per hit, no per-stack decay (the wiki says up to 5).
 - The Empowered pause is 1s.
-- **Hearth Call:** it can't be ended early (no recast in the source); X again is ignored. Damage on her, her own dash and the teammate being knocked do not break it (the wiki lists only her being knocked or stunned, and range; it says nothing about silence, and nothing like silence exists in our game). The break range is the same 12.6m as the cast range. A downed teammate in our game is the source's wisp. Its healing does not scale with ranks (no X ranks); it grows with level (LevelGrowth). The cooldown starts on the cast. With no teammate in the match at all it lights on her (healing at a third) so the key is never dead in solo play.
+- **Hearth Call:** it can't be ended early (no recast in the source); X again is ignored. Damage on her, her own dash and the teammate being knocked do not break it (the wiki lists only her being knocked or stunned, and range; it says nothing about silence, and nothing like silence exists in our game). The break range is the same 12.6m as the cast range. A downed teammate in our game is the source's wisp. Its healing does not scale with ranks (no X ranks); it grows with level (LevelGrowth). The cooldown starts on the cast. It needs a valid ally or ally Wisp inside its 12.6m range (source: a channel on an ally or ally Wisp); otherwise the press is refused and the cooldown is kept. The old "lights on herself with no teammate in the match" was ours, not the source's, and is removed (parity reel note, DECISIONS 2026-11-07: no ours-only riders).
 - **Hearth Call and the bond:** a completed tether counts as a "hit" for `KinBond.from_ult` (with the cast's `HeroUlt.cast_id`), a rescue (a downed teammate stood up) as its top event ("kill"); a broken one pays nothing. The sheet's +0.2 on the teammate's own meter is not built (the amounts are the main session's, in boki_system.json).
 - **Body and movement** (owner study, 23:00): the scale, hitbox and cadence are from the study; the dashes are Elluna's (below).
 - Starts and stops use the shared acceleration (no per-hero change).
@@ -120,6 +129,15 @@ Item 24's "air about 3x the ground" rule is dropped; both dashes copy the source
 | Cooldowns | ground 7 s, air 14 s (separate) | data | `dash.cd` 7.0, `dash.air.cd` 14.0 (`ArchKit.long_dash_cd`) | 7 s per hop charge, 14 s for the glide (owner: copy Elluna) |
 
 Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm dashes: the ground hop is Elluna's ...", "... the air glide is Elluna's ...", "... 3-4x the hop's distance and about 5x its time").
+
+### Ally-pass refund `[?]` (Nov 12 check: not settled, no code changed)
+The parity reel asked whether dashing through a teammate should refund the dash. The evidence:
+- **Footage card** (briefs/hero-ref/mooshmoosh.md, `0157`): the card names "Lighter Than Air / Super Lighter Than Air". Only the **Super** (upgraded) version has it: "through an ally refunds half its cooldown and 1 s of E", on a 9.2 s cooldown. The card's names (Backpack, Moon Shot) are from an older build than the tooltip data.
+- **Tooltip data** (briefs/supervive-data/supervive_kits.md, Nov 2): Lunar Dash 7 s and Lunar Air Dash 14 s, upgrades "-0.75 s (-1.5 s air) cooldown x2 / air dash cooldown refreshed on picking up a wisp". There is no ally refund at any rank.
+- **Ours:** the old Relay Step refund (half a charge and 1 s of Hearthlight, `ally_r` 1.1) was removed by the owner's data pass (c6932ae60, kit_comparison.md "Relay Step bonus ... invented"). Rank 3 has the tooltip upgrade (a wisp pickup refreshes the air glide). `--support-check` asserts that a pass refunds nothing.
+- **What `refund` 0.2 / `emp_refund` 0.4 are:** they're unrelated to the dash. They are Kindle's Hearthlight wind-back: an ember into a Kindled foe takes 0.2 s off Hearthlight's cooldown, or 0.4 s for an Empowered ember (`TenderKit.on_deal`).
+
+Verdict: it is not base kit in either source. As an upgrade it exists only in the older footage build, and the current tooltips replace it with the wisp refresh. So nothing is built. Bringing it back as a rank upgrade would be an owner call.
 
 ## Combinations
 | Interaction | Implemented in | Check (`--tender-combo-check` unless noted) |
@@ -177,13 +195,39 @@ The moves live in `scripts/match/kmoves_care.gd` (`KMovesCare.MOVES`, read by `H
 | Air glide | `mm_float` | 0.06-0.26 somersault, 0.36-0.62 float, 0.85 legs down, 0.95 touchdown, 1.05 | tucked into a ball for one forward somersault, then a seated float with the knees tucked and the arms out wide like a drifting seed, a little sway, a soft squash on touchdown |
 | Bearer pickup | `mm_pickup` | 0.12 squat, 0.3 heave, 0.55 | a scoop and a heave onto her back |
 | Kindled to 5 | `mm_kindled` | 0.06 / 0.12 / 0.34 | a snap of the fingers by the shoulder, a little bounce |
-| X cast (f25) | `mm_call` | 0.05 coil, 0.1 thrust high, 0.2 overshoot, 0.35 into the channel | the hand pulled back low, then thrust up as the plus bursts on the teammate |
+| X cast (f25) | `mm_call` | 0.05 coil, 0.1 thrust high, 0.2 overshoot, 0.33 into the channel | the hand pulled back low, then thrust up as the plus bursts on the teammate |
 | X channel (f26-f73) | `mm_call_hold` (hold) | 0 / 0.3 | one hand held high over the tether; the legs keep walking |
 | X end (f74-f77) | `mm_call_end` | 0.07 sweep down, 0.14 arms open, 0.3 | the raised hand swept down to her side (the pull home), open on the arrival burst |
 
 Her dashes leave a few soft ember motes (CareLook "mote") instead of the shared after-image pill, burst and ring (`own_dash_trail`), and her moves are the whole dash pose (`dodge_anim` "kit": no shared roll under them).
 
 Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer|carry|payoff|walk|pose|ultaim|ultkey|ult> --arena-shot=<dir>/x.png [--care-close]` (scripts/match/care_demo.gd) saves each key moment at its moment and a strip of 4-6 frames cropped round her, at the gameplay camera or (with `--care-close`) a low close-up.
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured through `WardenClips` (pip.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, out to
+locomotion 0.16 s, under one footage frame) by `tools/tender_anim_time_check.gd`, which runs inside
+`--tender-combo-check`, prints one `TIME` line a move and asserts each row below ("mm timing ..."). "In" is when the
+clip owns the body, "out" when the legs have it back. Source: briefs/hero-ref/mooshmoosh.md (one frame = 0.2 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `mm_shot_r` `mm_shot_l` `mm_shot_emp` | an ember every 0.4 s, hands alternating (card 0.4 s) | embers at 0.02, 0.43, 0.85, 1.27 (0.42 s apart), each move on its ember's frame, Empowered first, no gap | same | matches (0.42 = 0.4 + one 60 Hz tick of the shared fire timer, far under a frame) |
+| `mm_seed_aim` | 1.0 s wind-up | in 0.10 / throw 1.0 on the clip's last frame (seed_aim 1.0) | same | matches; asserted |
+| `mm_seed` | hop on the release, about 0.3 s in the air | in at once from the wind-up / air 0.0-0.27 / out 0.60 | same | matches on timing (the hop is about 0.08 m against her half height in the footage; the bigger hop is on the unmerged ext/meeko-rmb-verify) |
+| `mm_hearth` | arms up about 0.3 s after the press [f195] | in 0.10 / ring up 0.02 / arms up 0.18 / 0.67 | same | matches; asserted |
+| `mm_toss` | lands on the cursor within a frame | in 0.03 / tossed 0.02 / 0.5 | same | matches; asserted |
+| `mm_call` | burst f25, range ring f28 (0.3 s) | in 0.10 / kit hands to the channel at 0.35, its clip ends at 0.333: one frame fading to the legs | hands over at 0.33, on the clip's last frame | fixed; asserted |
+| `mm_call_hold` | channel f26-f73 (about 4.9 s; ours 5.0) | held from 0.33 | same | matches |
+| `mm_call_end` | f74-f77 (0.4 s) | in 0.02 / out 0.47 | same | matches; asserted |
+| `mm_skip` | not in the footage (the card says "short") | in 0.10 / 0.23 / out 0.40, dash 4.2 m in 0.174 s | same | no source |
+| `mm_float` | Elluna's glide: 0.1 ramp, 0.4-0.6 burst, 11-15 m over 0.8-1.1 s | in 0.10 / clip 1.07 / out 1.23, glide 13.3 m over 0.95 s | same | matches; asserted |
+| run (`run_f`) | about 0.57 s a stride, 3.5 steps/s (low confidence); the sheet's note: x1.25 cadence, about 4.1 steps/s, "tune until feet don't slide" | 4.55 m/s, 2.5 Hz cycle, 5.0 steps/s, 1.82 m a cycle | same | differs, kept: the stride is fitted so the feet don't slide at run speed (the sheet's own rule) |
+
+Clip re-keys for the model (tools/art1): none needed for parity. The run would need longer strides (about 2.2 m a
+cycle at 4.1 steps/s) to slow its cadence without sliding.
+
+Suggestions (ours, not built): a bigger RMB hop (taken up by ext/meeko-rmb-verify); a run re-key to the sheet's 4.1
+steps/s with longer strides; a quicker fade (0.05 s) on `mm_call` so the 0.1 s thrust lands at full weight.
 
 ## Look and sound
 - Pooled looks (`scripts/arch/kits/care_look.gd`, shaders `care_disc` and `care_glow`, both mixed rather than additive so the colours hold on bright grass): the 0.44 m amber ember comet with a 1.6 m tail and a violet-star impact, the burr orb, the saturated violet Burrseed root disc with thorns, the violet light column and root beams, the lantern plus and rising rays, the warm ring on her and the thrown disc (amber in the middle to teal at a bright rim, with a small caged lantern of light floating over it and drifting motes; no floor plus), the Kindle foot glow, and the dash's ember motes. Nothing is created per shot. Hearth Call's tether (a braid of warm light with two twisting strands) is pooled in `UltLook` (`ult_look.gd`, extends CareLook); its reach ring, pick ring and aim line are AimKit circles and a line.

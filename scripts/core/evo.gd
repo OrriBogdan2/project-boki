@@ -156,6 +156,18 @@ static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	rec.erase("form_name")
 	return {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
 
+## What an Ink would do to this Boki, before using it (its item card in the Feed menu shows this):
+## {"state": "form" | "waits" | "none", "to": species id or "", "name": the form's name or "", "text"}.
+## "waits": its line has that Ink branch but the form has no model yet (has_art), so it would not change.
+static func ink_preview(rec: Dictionary, ink: String) -> Dictionary:
+	var to := next_for(rec, "item", ink)
+	if to == "":
+		return {"state": "none", "to": "", "name": "", "text": "No effect on this Boki."}
+	var nm := String(Data.KIN[to]["name"]) if Data.KIN.has(to) else to.capitalize()
+	if not has_art(to):
+		return {"state": "waits", "to": to, "name": nm, "text": "Would become %s, but %s waits for its art." % [nm, nm]}
+	return {"state": "form", "to": to, "name": nm, "text": "Becomes %s." % nm}
+
 ## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
 static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
 	if Goods.have("good:" + ink) <= 0:

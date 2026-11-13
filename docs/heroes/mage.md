@@ -21,7 +21,7 @@ source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. 
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
 its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static. Its cooldown follows the
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
-height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Skycall circle 1.5 m radius.
+height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Skycall circle 1.8 m radius (about 2 bh across in the footage), slide 3.4 m (owner item 9b).
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
 Source: Joule, `Upg:` lines. Cooldown cuts keep the source's fraction of its own cooldown (ours stay as the owner set them);
@@ -89,7 +89,8 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | E numbers re-measured (KIT_PARITY) | (a) | countdown 0.8 s = 4 frames at 5 fps (briefs/hero-ref/vireo.md, E: Lightning Javelin, 0186 to 0190); 1 Static and 12 s from briefs/supervive-data/supervive_kits.md (Joule E). The source states no drag window ("hold and drag before release"; the footage shows the commit one frame after placing), so the 1 s cap is ours; asserted: held with no release it commits at 1 s. Enemies see the all-player rim circle from the placement and the pillar for the 0.8 s. Open: the footage info panel says the javelin adds 2 Static (kept at the data's 1), and the cooldown is 10.5 at our 8 : 8 : 10.5 pace (data 12 / 10 / 9) |
 | Wirerun arrival ring (HIGH) | (a) | 6d054633 (and the press flash) |
 | Blowout ground ring (MED) | (b) | removed (the shared payoff ring too: `payoff_fx(..., rings := false)`); the copper pillars stay |
-| Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its 1.5 m radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
+| E size re-measured (KIT_PARITY, 11-11) | (b) | radius **1.8** (was 1.5, cut on 11-03 with no owner line): briefs/hero-ref/vireo.md reads the placement circle (`0184`) and the strike flash (`0190`) each about 2 bh across, so 1.8 m; the AimKit rim, the placement disc, the strike ring and the hit all read `e.radius` (a body overlapping the ring is hit). Slide kept at **3.4 m**: the footage reads about 4 bh (7.2 m) over about 1 s (`0197` to `0209`, `0212` to `0224`), but owner item 9b (OWNER_REVIEW_1103: "Joule E sends people too far; it wasn't that drastic in the game") set the cut, and an owner note stands. Asserted in `--mage-combo-check` and `--kit-parity-check` |
+| Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
 | Kit VFX pass: bursts that are not gameplay (MED) | (b) | out: the per-shot ground sparks, the Static pop's second bolt and flash, the Wirerun pass burst (a crackle instead), the rod's end and hit bursts, the SLAMMED ring, Skycall's strike spray, Kitefall's take-off spray (dust). Kept: the source's rod shock ring, the strike rings at the hit size, the copper refund pillars |
 | E Static 2 vs 1 (MED) | (b) | 1 (data); asserted |
 | E numbers (-) | (a) | already per items 9/9b |
@@ -114,6 +115,49 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | R / T | | | the Boki Merge (the Boki system's key, see below) | | | |
 
 Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it, a Wirerun through it, or Skycall dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Skycall fling is 6 m.
+
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen, and each ability's frames are a separate stretch of the clip, so no pair is shown back to back),
+[W] the wiki page linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours is
+origin/main d255acbee, read in the code (cancel-matrix-b pass, 11-09). **Unsettled** means no frame, card line or wiki
+line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both (ArchKit has no
+shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack key does
+nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB bolt (0.648 s cadence) | LMB | one bolt per 0.8 s held | next bolt on the cadence while held | owner (items 70, 116: faster than the 0.8 s card) | `LMB: ...` lines |
+| LMB held | RMB, E | not shown ("she stood still in every LMB shot") | both: the bolts keep leaving while the rod is held | unsettled | [F] 0003-0020, open question 5 |
+| RMB tap (under 0.33 s) | RMB | "Cast time increased from 0.25 >>> 0.33 seconds"; earlier "minimum cast time 0.2 >>> 0.4" | the throw **waits** to 0.33 s; a second press is denied (one charge), no queue | match | [W] patches 05.03.25, 20.11.24; `small: ...` |
+| RMB held (rod) | LMB, E | not shown | both | unsettled | |
+| RMB held | X | not shown | the cast is refused while the rod is held; the hold goes on | unsettled | `MageUlt.cast` |
+| Storm Rod throw | any | spear flight is nearly instant | free at once | unsettled | [F] 0063 |
+| Wirerun charge (to 0.9 s, press to release) | LMB, RMB, E | not shown | both: the bolts, the rod and Skycall go while she charges | unsettled | [F] open question 5 |
+| Wirerun charge | X | not shown | **ignored** (refused, not buffered) | unsettled | `MageUlt.cast` |
+| Wirerun charge | jump | not shown | **ignored**: the walk and the jump are zeroed while she holds it | unsettled | [F] open question 5 |
+| Wirerun charge | stun, root, ground | "Stuns, Roots, Grounds, and Glider cancel the state" | the charge is cut and stays spent | match | [W] patch 05.03.25; `a stun mid-hold cancels Wirerun` |
+| Wirerun charge or run (in the air) | glide key (Space held never) | "Stuns, Roots, Grounds, and Glider cancel the state" | **cancels** as a stun does: the charge or streak ends and stays spent, the glider opens that step, no hit after it; a cut streak hands over at run speed, never lands (`MageKit._tick_glide_cancel`) | match (fixed, sparkle-glider-cancel 11-11) | [W] patch 05.03.25; `glider: the glide key mid-charge ...`, `... mid-streak ...`, `no hit ...` (main: wire on, glide shut; the streak landed) |
+| Wirerun through a full-Static foe | Wirerun | "Surge is ready again at once"; "dashes straight back" | back at once | match | [F] 0133-0171; the dash rows |
+| E Skycall flick (held up to 1 s) | E release | "the video can't tell which" (release or second click) | the release commits; a tap commits away | match (the input is the data's "HOLD AND DRAG") | [D]; [F] 0184-0186 |
+| E flick or countdown (0.8 s) | any | not shown | free: LMB, RMB, X all go | unsettled | [F] 0181-0226 |
+| X Kitefall crouch (0.3 s) and climb | X | "REACTIVATE to crash down" | the second press is **queued** and lands her when the hang starts | match | [D]; [F] 0349-0395 |
+| X hang (from 0.25 s, up to 1.7 s) | X | reactivate crashes down | lands at the cursor in 0.2 s | match | [D]; [F] "stayed up 1.2 to 1.8 s" |
+| X hang | LMB | not shown | **an attack press also lands her** (from 0.25 s in; a button already down at the cast does not) | ours (the source names only the reactivate) | `MageUlt._wants_down` |
+| X crouch to strike | RMB, E | not shown | **ignored** (`busy`), not buffered | unsettled | `MageKit.busy` |
+| X crouch to strike | jump, Shift | not shown | the crouch combines (owner item 51); in the hang a jump or Shift does nothing | owner | #51; content/dash_flow `into_jump.x` |
+| X climb and hang | glide key (Space held never) | "Glider cancel the state" | **cancels**: Kitefall ends where she is and she glides down from there, no strike, the cooldown stays spent (`MageUlt.glide_out`) | match (fixed, sparkle-glider-cancel 11-11) | [W] patch 05.03.25; `glider: the glide key in the hang ...`, `no strike ...` (main: the hang went on, `h.gliding` cleared) |
+| X strike (0.5 s crackle) | any | not shown | free at once | unsettled | |
+
+Fixes made: the glider ends Wirerun and Kitefall (sparkle-glider-cancel 11-11, the two glide rows); before, the
+glider stayed shut through both. The wiki gives the state change, not what comes after it, so the cancel is built as
+the stun's (charge spent, no hit) plus a normal glide; checked by `--mage-combo-check` (`glider: ...`).
+Suggestions (not built): the LMB landing in Kitefall's hang is ours (the source names only the reactivate); if the
+owner wants strict parity, X would be the only landing key.
 
 ## Combinations
 | Combination | What fires | Check |
@@ -170,6 +214,8 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 - Orbs: 4s life, no Static (item 74); a pickup that refunds Wirerun, as the source data says (items 71/74 replace the older owner rule that only a Live foe resets it).
 - Static lasts 4.5s, refreshed by every hit.
 - Wirerun: a stun, root or Grounded mid-hold cancels it and the charge stays spent (cooldown started on the press); a Boki merge refunds it.
+  A fresh glide-key press in the air (Space held never) cancels the charge or the streak the same way and opens the
+  glider; it ends Kitefall's climb or hang too, with no strike (source patch 05.03.25: "Glider cancel the state").
 - An airborne Shift with a charge is a Wirerun too (height held); with no charge left it is the plain air dash.
 - Skycall: press places, holding E drags (up to 1 s), the release commits; a tap drags away from Sparkle.
 - She can move while firing bolts and holding the rod (the footage only shows her standing).
@@ -182,6 +228,19 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
   ground. No cancel and no ally effect (the sources mention neither). The knock is a push away from the centre
   with a little lift (the sources say knockback, not knock-up). A Boki merge mid-cast drops her where she took
   off with no strike.
+
+## Kitefall movement, settled (Nov 10)
+Trust order: [O] owner > [D] data > [W] wiki > [F] footage (hero-ref/vireo.md, ult frames at 10 fps). The data says only
+"launch into the air ... reactivate to crash down at target location" [D]. Nothing changed: every number below matched.
+Asserted by the `Kitefall move` / `Kitefall end` / `Kitefall abyss` / `Kitefall ledge` rows of `--mage-combo-check`.
+
+| What | Ours | Source |
+|---|---|---|
+| Steering | none: WASD never moves her in the crouch or the hang (straight up over the take-off); the cursor only places the landing, clamped in the 14.4 m ring | [F] f28-f46, [D] "target location" |
+| Speed curve | 0.3 s crouch, 0.3 s eased rise to 5 m, a hang of up to 1.7 s, then a 0.2 s drop that speeds up (u^2) onto the spot | [F] f28-f31 crouch, airborne 1.6-2.0 s, f47-f49 marker to impact |
+| End | no momentum (planar speed 0 on the strike); she is free on the strike frame (walks, LMB) | [F] f51 a normal shot right after |
+| Ledges | a landing on a higher or lower terrace lands on its top (the cursor ray meets the ground) | ours |
+| Abyss | no cast over the void; a cursor over it (or in a wall) backs off toward the take-off to the nearest ground | ours ([F] silent) |
 
 ## Ultimate choice
 X is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the

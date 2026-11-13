@@ -92,6 +92,11 @@ func _key(k: Key) -> void:
 func _ids(h: Hunter) -> Array:
 	return h.pack.map(func(it): return String(it.get("uid", "")))
 
+## Is this item lying on the ground? Treasure keeps its uid; dropped gear is only {gear, rar} until someone picks it up.
+func _on_ground(it: Dictionary) -> bool:
+	return m.wpicks.any(func(w): return String((w.get("item", {}) as Dictionary).get("uid", "")) == String(it["uid"]) \
+		or (String(w.get("gear", "")) == String(it["id"]) and int(w.get("rar", -1)) == int(it.get("rar", 0))))
+
 func _fill(P: Hunter) -> void:
 	P.pack_cap = 4
 	P.pack = [Loot.valuable("old_coin"), Loot.gear("quilted_coat", 1), Loot.valuable("sky_pearl"), Loot.gear("windstep_boots", 2)]
@@ -118,6 +123,7 @@ func run(mn: Node) -> void:
 	for slot in 4:
 		_fill(P)
 		var before: Array = _ids(P)
+		var gone: Dictionary = P.pack[slot]
 		var at := m.world.free_spot_near(P.pos + Vector3(0.7, 0, 0.3), [P.pos], 0.5)
 		m.spawn_val(Loot.valuable("crown_shard"), Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 		var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
@@ -137,7 +143,7 @@ func run(mn: Node) -> void:
 		var after: Array = _ids(P)
 		ok(not after.has(before[slot]) and P.pack.any(func(it): return String(it.get("id", "")) == "crown_shard") and P.pack.size() == 4,
 			"slot %d: the click dropped exactly that slot and packed the shard" % slot)
-		ok(m.wpicks.any(func(w): return String((w.get("item", {}) as Dictionary).get("uid", "")) == before[slot]), "slot %d: the dropped thing is on the ground" % slot)
+		ok(_on_ground(gone), "slot %d: the dropped thing is on the ground" % slot)
 		# tidy the dropped thing away so the next round starts clean
 		for w in m.wpicks.duplicate():
 			if w.has("val") or (w.get("item", {}) as Dictionary).has("t"): Pack._off_ground(m, w)

@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
 var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
@@ -122,6 +121,7 @@ func drop_holds() -> void:
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
+func _rmb_dropped() -> void: pass                    # the hold was dropped (stun, down): clear what it showed
 func rmb_hold_tick(_t: float) -> void: pass          # while RMB is held (shields, charge previews)
 func rmb_auto_t() -> float: return 9.0               # a hold this long fires by itself
 func full_ready() -> bool: return false              # the resource-full RMB variant is ready
@@ -134,7 +134,7 @@ func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 ## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
-## armed (false while a press is still eaten), auto (it fires itself at the end: no "EXPIRED")}. The base reports E while it's up and e_recastable().
+## armed (false while a press is still eaten), auto (it fires itself at the end; it still shows "EXPIRED" if left unused)}. The base reports E while it's up and e_recastable().
 func recast_window() -> Dictionary:
 	if e_t > 0.0 and e_recastable():
 		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())
@@ -155,6 +155,7 @@ func recast_now(slot_id: String) -> void:
 		"e": use_e()
 		"x": cast_ult()
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
+func gate_kin_tap() -> bool: return false           # G's tap runs outside inp (Match.pending_input): true = swallowed
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
@@ -163,8 +164,12 @@ func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
 func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
+## The colour of the floating damage number this hit shows (a kit tints its own ramp).
+func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func move_k() -> float: return 1.0
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.press_buffer.
+func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
 func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's quick draw after a perfect release)
@@ -210,7 +215,9 @@ func tick(dt: float) -> void:
 	for k in bot_hold.keys():
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
 	if rmb_down:
-		if held("rmb") and not h.downed and h.stun_t <= 0.0:
+		if h.downed or h.stun_t > 0.0:
+			_drop_rmb()
+		elif held("rmb"):
 			rmb_t += dt
 			rmb_hold_tick(rmb_t)
 			if rmb_t >= rmb_auto_t():
@@ -235,7 +242,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.press_buffer for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -251,7 +258,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.press_buffer
 
 func held(which: String) -> bool:
 	match which:
@@ -299,6 +306,14 @@ func _release_rmb() -> void:
 	c["hold"] = rmb_t >= float(rmb_def().get("hold", 0.3)) and not c.get("air", false)
 	c["variant"] = describe_rmb_variant(c)
 	fire_rmb(c)
+
+## Stunned or downed mid-hold: the hold ends with no release and nothing is spent, so no charged move leaves a
+## hunter who can't act (docs/heroes/hold_release_rules.md). Kits clean up what the hold showed in _rmb_dropped().
+func _drop_rmb() -> void:
+	rmb_down = false
+	rmb_t = 0.0
+	AimKit.clear(h)
+	_rmb_dropped()
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:
@@ -973,7 +988,7 @@ func armed_fx(slot := "sec") -> void:
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
-## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
+## A payoff landing (Flashpoint, Called Shot): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
@@ -1184,13 +1199,4 @@ func _charge_release() -> void:
 	if k > 0.5:
 		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
-## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
-func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
-	var k := 0.3
-	while k <= reach:
-		var q := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + k)
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > t.pos.y + 0.8:
-			return true
-		k += 0.3
-	return false
 

@@ -43,6 +43,7 @@ var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
 var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
+var assist_t := -1.0        # m.time of the last takedown here that counted assists: older hits don't count again
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
@@ -117,8 +118,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
+			if opts.get("src", "") == "wisp":
+				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
 			flash_t = 0.12
-			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
 			return dmg
 		return 0.0
@@ -146,7 +148,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
-	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
@@ -270,9 +271,12 @@ func body_vertical(dt: float) -> void:
 func fall_out() -> void:
 	m.on_fell(self)
 
+var bump_top := 0.0          # top of what the last slide() ran into (KnockWall.tall: a wall, or just a step)
+
 ## Horizontal move with walls and rocks; returns true if it bumped something.
 func slide(dt: float, guard := false) -> bool:
 	var bumped := false
+	bump_top = 0.0
 	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
 	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
@@ -284,18 +288,21 @@ func slide(dt: float, guard := false) -> bool:
 			vel.x = hv.x; vel.z = hv.y
 		tgt = po
 		bumped = true
+		bump_top = pos.y + World.BLOCK_H
 	var nx := tgt.x
 	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
+		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
 	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:
 		vel.z *= -0.1; bumped = true
+		bump_top = maxf(bump_top, b2)
 	return bumped
 
 func tick_status(dt: float) -> void:
@@ -320,9 +327,16 @@ func tick_status(dt: float) -> void:
 		if not remote:
 			hp -= burn_dps * dt
 			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
+				_burn_number()
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
+
+## The burn's tick number, only for burns that involve you; it rolls into the same label as the
+## burner's other damage on this body.
+func _burn_number() -> void:
+	var mt := m as Match
+	if mt and (self == mt.player or burn_by == mt.player):
+		mt.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false, "", Fx.roll_key(burn_by, self))
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:

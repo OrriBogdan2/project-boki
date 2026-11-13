@@ -56,6 +56,12 @@ const T := {
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
+	"coyote_jump_050ms":       [">=", 1.0, "yes", "ran off a rim, jump 0.05s later: inside the 0.12s coyote [est]"],
+	"coyote_jump_100ms":       [">=", 1.0, "yes", "ran off a rim, jump 0.10s later: inside the 0.12s coyote [est]"],
+	"coyote_jump_150ms":       ["<=", 0.0, "yes", "ran off a rim, jump 0.15s later: past the coyote, no jump [est]"],
+	"buffer_jump_050ms":       [">=", 1.0, "yes", "jump 0.05s before landing goes off on landing: 0.12s buffer [est]"],
+	"buffer_jump_100ms":       [">=", 1.0, "yes", "jump 0.10s before landing goes off on landing: 0.12s buffer [est]"],
+	"buffer_jump_150ms":       ["<=", 0.0, "yes", "jump 0.15s before landing (3m): past the buffer, no jump [est]"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
@@ -82,6 +88,13 @@ const T := {
 	"dashglide_2s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] ...within 1-2 s"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
+	# the class air dash out of a fast fall: the source's AirDashSpeedMultiplier / AirDashSpeedClamp are not
+	# decoded and no footage shows such a dash (docs/SUPERVIVE_FEEL.md), so these rows only print what ours does
+	"airdash_fall_vy_keep":    ["~", [0.0, 1.0], "x", "[?] share of a 10 m fall's speed (12 m/s) the dash keeps"],
+	"airdash_fall_speed":      [">=", 0.0, "m/s", "[?] speed the dash ends on (reference)"],
+	"airdash_dive_vy_keep":    ["~", [0.0, 1.0], "x", "[?] share of a glide dive's fall speed the dash keeps"],
+	"airdash_dive_hv_keep":    ["~", [0.0, 1.0], "x", "[?] share of the dive's forward speed added to the dash"],
+	"airdash_dive_speed":      [">=", 0.0, "m/s", "[?] speed the dash ends on (reference)"],
 	"abyss_lift_t":            ["<=", 1.0, "s", "[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
 	"abyss_bounce_m":          [">=", 1.5, "m", "[est] a bouncy lift from 6m deep"],
 	"abyss_kill_depth":        ["~", [17.0, 18.0], "m", "[game data] AbyssHeight -1750 uu: 17.5m under ground level"],
@@ -117,6 +130,11 @@ const T := {
 	"cam_lag_m":               ["<=", 0.40, "m", "[footage] hunter stays roughly centred; [spec] follow 0.08-0.15s"],
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
+	"cam_glide_zoom_05":       ["~", [1.12, 1.25], "x", "[spec] glider opens the view +15..25%, mostly by +0.5 s"],
+	"cam_dive_zoom_hold":      [">=", 0.98, "x", "plunge keeps the view open (min / start zoom)"],
+	"cam_dive_land_view":      ["<=", 0.3, "x", "ground under a plunge, screens below centre"],
+	"cam_land_step":           ["<=", 0.1, "x", "zoom-out lost on landing's first step: no pop"],
+	"cam_land_left_05":        ["<=", 0.35, "x", "zoom-out left 0.5 s after landing: eased back"],
 	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
 	# (the reference body is the plain medium hunter since Vex took her own proportions: at the same camera it
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
@@ -223,6 +241,7 @@ func run(main: Node) -> void:
 	_glide()
 	_glide_dive()
 	_dash_glide()
+	_airdash_fall()
 	_dash_exit()
 	_dash_curves()
 	_plain_dash()
@@ -235,6 +254,7 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
+	load("res://tools/dash_refill_check.gd").run(self)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -370,11 +390,39 @@ func _jump() -> void:
 		if jumped and not P.gliding: bb = k
 		else: break
 	rec("jump_buffer_frames", bb)
+	_jump_grace(land_f)
 	# free fall for 1s from rest
 	_reset(flat + Vector3(0, 30.0, 0), false)
 	var y0 := P.pos.y
 	_steps(60)
 	rec("freefall_1s_depth", y0 - P.pos.y)
+
+## Jump grace (docs/MOVEMENT_FEEL.md "Jump grace"): run off a rim and press jump 0.05 / 0.10 / 0.15 s after
+## the last grounded step; fall from 3 m and press it 0.05 / 0.10 / 0.15 s before the landing step (land_f).
+## A ground jump leaves at Hunter.JUMP_V; a glider opening or nothing doesn't.
+func _jump_grace(land_f: int) -> void:
+	var rim := _find_rim()
+	for ms in [50, 100, 150]:
+		var late := roundi(ms / 1000.0 / DT)
+		if not rim.is_empty():
+			var rg: Vector3 = rim["at"]
+			var rd: Vector2 = rim["dir"]
+			_reset(Vector3(rg.x - rd.x * 1.0, rg.y, rg.z - rd.y * 1.0))
+			P.inp["move"] = rd
+			for i in 120:
+				m.step(DT)
+				if not P.grounded: break
+			_steps(late - 1)
+			P.inp["jump"] = true
+			m.step(DT)
+			rec("coyote_jump_%03dms" % ms, 1.0 if P.vel.y > Hunter.JUMP_V * 0.9 else 0.0)
+		_reset(flat + Vector3(0, 3.0, 0), false)
+		var jumped := false
+		for i in land_f + 4:
+			P.inp["jump"] = (i + 1) == land_f - late
+			m.step(DT)
+			if i + 1 >= land_f and P.vel.y > Hunter.JUMP_V * 0.9: jumped = true
+		rec("buffer_jump_%03dms" % ms, 1.0 if jumped else 0.0)
 
 ## A running jump: let go at take-off (how far the run-up carries), or reverse the keys (how long the
 ## turn takes in the air).
@@ -629,6 +677,49 @@ func _dash_glide() -> void:
 	rec("dashglide_2s_speed", v2)
 	P.set_arch(kit_was)
 
+# ---------------------------------------------------------------- air dash out of a fast fall
+## The class dash pressed out of a 10 m free fall and out of a glide dive (keys let go): how much of the fall
+## and forward speed it keeps, and the speed it ends on.
+func _airdash_fall() -> void:
+	var kit_was := P.arch
+	P.set_arch("")
+	_reset(flat + Vector3(0, 30.0, 0), false)
+	for i in 120:
+		if flat.y + 30.0 - P.pos.y >= 10.0: break
+		m.step(DT)
+	_airdash("fall")
+	_reset(flat + Vector3(0, 60.0, 0), false)
+	P.inp["jump"] = true
+	for i in 135:
+		P.inp["glide"] = true
+		P.inp["crouch"] = i >= 60
+		P.inp["move"] = Vector2(1, 0)
+		m.step(DT)
+	_airdash("dive")
+	P.set_arch(kit_was)
+
+## An east dash from the fall the hunter is in: the airdash_<tag>_* rows.
+func _airdash(tag: String) -> void:
+	_clear_inp()
+	var before := P.vel
+	P.ex_cd = 0.0
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	m.step(DT)
+	P.inp["dash"] = false
+	ok(P.roll_t > 0.0 and not P.grounded, "airdash_%s: the air dash fires out of a %.1f m/s fall, %.1f m/s forward"
+			% [tag, -before.y, before.x])
+	rec("airdash_%s_vy_keep" % tag, P.vel.y / before.y)
+	if tag == "dive":
+		var own := P.roll_speed * Loco.dash_speed(P.arch)
+		rec("airdash_dive_hv_keep", (P.vel.x - own) / maxf(0.01, before.x))
+	for i in 120:
+		if P.roll_t <= 0.0: break
+		m.step(DT)
+	rec("airdash_%s_speed" % tag, P.vel.length())
+	_clear_inp()
+
 # ---------------------------------------------------------------- abyss lift, updrafts
 var _rim := {}
 ## A rim tile with open sky beyond it: {at: ground point, dir: outward}.
@@ -699,7 +790,6 @@ func _plain_dash() -> void:
 	for airborne in [false, true]:
 		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
 		m.fields.clear()      # (a Boki's patch sparkles on its own clock)
-		P.xp = 0.0            # (the long glide-dive rows feed the xp trickle: no level-up ring mid-dash)
 		var radial0: int = m.fx.radial
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
@@ -713,12 +803,14 @@ func _plain_dash() -> void:
 		ok(dashed and spawned == 0, "a plain %s dash spawns no burst or ring (%d)" % [where, spawned])
 	m.biomes = biomes
 
-## Per-kit felt dash (KIT_PARITY gap 4): [metres, seconds] each plain dash really travels, ground and air.
+## Per-kit felt dash (KIT_PARITY gap 4): [metres, seconds] each plain dash really travels, ground and air
+## ("hold": the key kept down on the ground, for a kit whose held dash goes further).
 ## A sourced kit runs its source numbers as-is (no dash feel); the owner's x0.85 / x1.15 stays only on the
 ## kits with no source dash (content/rules/dash_feel.json). Claire's Skate and Ostra's Lantern Trade never
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
-	"gunslinger": {"ground": [4.8, 0.45], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
+	# the hold: the source gives no length; its longest footage slide is ~1.6x the tap (KIT_PARITY Vex hold row)
+	"gunslinger": {"ground": [4.8, 0.45], "hold": [7.0, 0.73], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
 	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7
 	"archer": {"ground": [3.0, 0.386], "src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
@@ -732,6 +824,7 @@ const KIT_DASH := {
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
 	# owner playtest 11-10 (754d177a0): the lane cut to 5.6-9.75 m, still at 40 m/s, so 5.6 / 40 x1.15
 	"mage": {"ground": [5.6, 0.161], "src": "owner 11-10: shortest lane 5.6 m at 40 m/s, time x1.15"},
+	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 
@@ -740,10 +833,10 @@ func _kit_dashes() -> void:
 	for id in KIT_DASH:
 		var row: Dictionary = KIT_DASH[id]
 		P.reclass(Arch.weight(id), id)
-		for where in ["ground", "air"]:
+		for where in ["ground", "air", "hold"]:
 			if not row.has(where): continue
 			var want: Array = row[where]
-			var got := _dolm_hop() if id == "dolm" else _felt_dash(where == "air")
+			var got := _dolm_hop() if id == "dolm" else _felt_dash(where == "air", where == "hold")
 			var hit := absf(got[0] / float(want[0]) - 1.0) <= DASH_TOL[0]
 			hit = hit and absf(got[1] - float(want[1])) <= DASH_TOL[1]
 			ok(hit, "felt dash %-10s %-6s %.2f m in %.3f s, want %.2f m in %.3f s  (%s)"
@@ -757,11 +850,13 @@ func _kit_dashes() -> void:
 ## One plain dash the way you move: the distance and time of the travel itself (move keys let go during it),
 ## to the moment the dash ends. The step it ends in runs the dash for the `left` it had, then the hand-over
 ## (the run, or in the air the dash's speed carried on, owner 11-08) for the rest: that tail isn't the dash.
-func _felt_dash(air: bool) -> Array:
+## `hold` keeps the dash key down to the end.
+func _felt_dash(air: bool, hold := false) -> Array:
 	_steps(30)          # past any chain gap from the dash before (Grimble's Barge refuses a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
+	P.inp["dash_down"] = hold
 	var start := Vector3.INF
 	var n := 0
 	for i in 150:
@@ -775,6 +870,7 @@ func _felt_dash(air: bool) -> Array:
 			n += 1
 		elif start != Vector3.INF:
 			var end := Vector2(P.pos.x, P.pos.z) - _hv(P) * (DT - left)
+			P.inp["dash_down"] = false
 			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
 	return [0.0, 0.0]
 
@@ -1153,6 +1249,81 @@ func _camera() -> void:
 		if m.has_method("cam_lead_vel"): cam.set("lead_vel", m.call("cam_lead_vel"))
 		cam.follow(P.position, DT, false)
 	rec("cam_glide_lead_m", cam.focus.x - P.pos.x)
+	_glide_cam(cam)
+
+## One step of play with the camera driven the way Match drives it (zoom, glide lead, follow).
+func _cam_step(cam: CamRig) -> void:
+	m.step(DT)
+	P.render(DT, 0.0)
+	cam.zoom_to = cam.air_zoom(P, m.player_altitude())
+	cam.lead_vel = m.cam_lead_vel()
+	cam.follow(P.position, DT, false)
+
+## The view opens up under the glider, stays open through a plunge (so you see where you'll land), and
+## eases back on landing, with no shake and no change of lens.
+func _glide_cam(cam: CamRig) -> void:
+	var lens := cam.fov
+	cam.shake_left = 0.0
+	cam.pull = 0.0
+	# glide start: a jump from the ground, the glider opened at the top
+	_reset(flat)
+	cam.snap(P.pos)
+	cam.zoom = 1.0
+	P.inp["jump"] = true
+	_cam_step(cam)
+	P.inp["jump"] = false
+	for i in 20: _cam_step(cam)
+	var z0 := cam.zoom
+	for i in 30:
+		P.inp["glide"] = true
+		_cam_step(cam)
+	ok(P.gliding, "glide_cam: the glider is open")
+	rec("cam_glide_zoom_05", cam.zoom / z0)
+	# the plunge: steady glide high up, then crouch held to the cancel height
+	_reset(flat + Vector3(0, 20.0, 0), false)
+	P.inp["jump"] = true
+	cam.snap(P.pos)
+	for i in 90:
+		P.inp["glide"] = true
+		_cam_step(cam)
+	cam.zoom = cam.zoom_to
+	var z_dive := cam.zoom
+	var z_min := z_dive
+	var lead := 0.0
+	var n_on := 0
+	var land_y := -1.0
+	for i in 240:
+		P.inp["glide"] = true
+		P.inp["crouch"] = true
+		_cam_step(cam)
+		if not P.glide_dive.on:
+			break
+		n_on += 1
+		z_min = minf(z_min, cam.zoom)
+		lead = maxf(lead, Vector2(cam.focus.x - P.pos.x, cam.focus.z - P.pos.z).length())
+		var vh := cam.get_viewport().get_visible_rect().size.y
+		land_y = maxf(land_y, cam.unproject_position(Vector3(P.pos.x, P.ground(), P.pos.z)).y / vh - 0.5)
+	ok(n_on > 10, "glide_cam: the plunge ran (%d steps)" % n_on)
+	rec("cam_dive_zoom_hold", z_min / z_dive)
+	rec("cam_dive_land_view", land_y)
+	print("MFEEL glide_cam dive lead %.2fm, zoom at dive start %.2f" % [lead, z_dive])
+	# landing: let the glide set you down, then 0.5 s on the ground
+	P.inp["crouch"] = false
+	for i in 600:
+		P.inp["glide"] = true
+		_cam_step(cam)
+		if P.grounded: break
+	ok(P.grounded, "glide_cam: landed")
+	var z_land := cam.zoom
+	P.inp["glide"] = false
+	_cam_step(cam)
+	rec("cam_land_step", (z_land - cam.zoom) / maxf(0.001, z_land - 1.0))
+	for i in 29: _cam_step(cam)
+	rec("cam_land_left_05", (cam.zoom - 1.0) / maxf(0.001, z_land - 1.0))
+	print("MFEEL glide_cam zoom at landing %.2f, 0.5 s on %.2f" % [z_land, cam.zoom])
+	ok(cam.fov == lens, "glide_cam: no lens change (fov %.1f)" % cam.fov)
+	ok(cam.shake_left == 0.0 and cam.pull == 0.0, "glide_cam: no shake or pull-back")
+	_clear_inp()
 
 # ---------------------------------------------------------------- framing: how big you are on screen
 func _screen_scale() -> void:

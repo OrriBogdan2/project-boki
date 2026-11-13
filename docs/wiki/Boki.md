@@ -126,6 +126,10 @@ it, and its number among its kind.
   for 2 expeditions or about 8 minutes at home; an Ember Boki at the brazier doubles that, and Ember
   Coals from the Kiln add as much again. It hatches a rare species with 3 IVs of 26 or better.
 - **Your first egg** is one of three starters (or the mystery egg): see [Getting started](Getting-Started.md).
+- **Reading an egg.** An egg wears its type's shell: plates with glowing seams in the type's colour and
+  the type's emblem on the front (a flame for Ember, a snowflake for Frost, and so on). A Rare Egg is
+  gold with a glowing ring round its middle in the colour of the Boki inside. The mystery egg is void
+  black with oil-slick bands and a question mark cracked into its shell.
 
 The farm only has room for so many Boki (6 at first, more with expansions); the rest sleep in the
 **Boki Burrow**, a box of pages you can sort and move Boki in and out of.

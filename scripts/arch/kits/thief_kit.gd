@@ -344,8 +344,6 @@ func empowered_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
-	if KinMerge.active(h):
-		return true
 	if held and not _fire_was:
 		bolt_buf = float(h.wpn.get("rate", 0.45))
 	else:
@@ -373,7 +371,9 @@ func _bolt() -> void:
 	var d := h.aim_dir()
 	var right := Vector2(-d.y, d.x)
 	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
-	var start: Vector3 = (sd["pos"] as Vector3) + Vector3(off.x, 0, off.y)
+	var side := Vector3(off.x, 0, off.y)
+	var start: Vector3 = (sd["pos"] as Vector3) + side
+	var gun: Vector3 = sd.get("muzzle", sd["pos"]) + side      # where it's drawn from; it hits from the body
 	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
 	var to := AimMode.point(h, rng)
 	var v := Vector2(to.x - start.x, to.z - start.z)
@@ -387,6 +387,7 @@ func _bolt() -> void:
 	sd["life0"] = sd["life"]
 	var x: Dictionary = sd["x"]
 	x["kx"] = func(s: Dictionary, at: Vector3, e: Ent, why: String) -> void: _bolt_end(s, at, e, why, emp)
+	if sd.has("muzzle"): sd["muzzle"] = gun
 	# the throw: the torso unwinds into it and winds toward the other hand for the next bolt (KMovesDJ
 	# thf_lmb_r / thf_lmb_l) while the swing whips that hand's blade out (HunterAnim.SWINGS "arc_bolts"); the
 	# empowered one is both blades driven out together (thf_primed)
@@ -394,7 +395,7 @@ func _bolt() -> void:
 	play("thf_primed" if emp else throw)
 	h.swing_n += 1
 	h.combo_i = 1 if hand == 1 else 2
-	var muzzle := start + Vector3(d.x, 0, d.y) * 0.1
+	var muzzle := gun + Vector3(d.x, 0, d.y) * 0.1
 	if emp:
 		primed_t = 0.0
 		haste_t = 0.0

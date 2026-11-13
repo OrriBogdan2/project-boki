@@ -7,9 +7,11 @@ extends RefCounted
 ##   3. a placed building is a construction site: it pays gems + materials, drops out of the working
 ##      stations, is drawn scaffolded with a bar, can be moved, taken down for a full refund, undone
 ##   4. Boki build it: swings, progress, skill makes swings quicker, the finished building works
+##      4b. a Boki assigned to a site (Assign list in its panel) goes there within 5 s, keeps a slot of
+##      its own, stays until the site stands; the assignment is saved and tidied on load
 ##   5. upgrades: tier 2 and 3 cost materials and labour, need farm level, show on the model and
 ##      speed the station up; a station keeps working while it is upgraded
-##   6. save and load of sites and tiers (JSON round trip), and an old save with none of it
+##   6. save and load of sites and tiers (JSON round trip), the paused line after a run, and an old save with none of it
 ## Never touches the real save.
 
 var bad := 0
@@ -56,6 +58,15 @@ func _entry(lay: Dictionary, id: String) -> Dictionary:
 func _mats(wood: int, stone: int, fibre: int, coals: int) -> void:
 	Save.d["mats"] = {"wood": wood, "stone": stone, "fibre": fibre}
 	Save.d["items"]["coals"] = coals
+
+func _build_job(hw: HomeWork, u: int, slot: int) -> Dictionary:
+	for j in hw.jobs:
+		if String(j["kind"]) == "build" and int(j["u"]) == u and int(j["slot"]) == slot: return j
+	return {}
+
+## The uids of the Boki in a save dictionary that are assigned to a site.
+func _crew_of(d: Dictionary) -> Array:
+	return d["roster"].filter(func(r): return r.has("build_at")).map(func(r): return r["uid"])
 
 func _sim(home, hw: HomeWork, secs: float, until: Callable = Callable()) -> void:
 	for i in int(secs / 0.05):
@@ -331,6 +342,81 @@ func run(m: Node) -> void:
 	var j_off := {"kind": "build", "el": "craft", "u": cu}
 	ok(not FarmSites.takes(rk, j_off), "Craft set to Off on the Job Board stops the building")
 	Work.set_prio("craft", 2)
+	# ---------------------------------------------------------------- 4b. assigning a Boki to a site
+	_mats(30, 30, 30, 6)
+	hb.toggle()
+	hb.take("quarry")
+	ok(_put(hb, _spot(hb, home.spots["house"] + Vector3(-5, 0, -6))), "a Quarry site goes down for the assignment rows")
+	hb.toggle()
+	var qu := int(_entry(L, "quarry")["u"])
+	hw.scan_t = 0.0
+	hw.scan()
+	var s0 := _build_job(hw, qu, 0)
+	var s1 := _build_job(hw, qu, 1)
+	ok(int(s0["crew"]) == 0 and hw.takes_job(rk, s0) and hw.takes_job(ash, s0) and hw.takes_job(rk, s1),
+			"before any assignment both Boki may take either slot of the site")
+	FarmSites.assign(ash, qu)
+	hw.reassign(ash)
+	hw.scan()
+	s0 = _build_job(hw, qu, 0)
+	s1 = _build_job(hw, qu, 1)
+	ok(FarmSites.crew(qu).size() == 1 and hw.takes_job(ash, s0) and not hw.takes_job(rk, s0) and hw.takes_job(rk, s1),
+			"the assigned Boki has a slot kept for it: the other one is left only the free slot")
+	ok(not hw.takes_job(ash, {"key": "w", "el": "tide", "kind": "water"}),
+			"an assigned Boki takes no other kind of job")
+	Work.set_prio("craft", 0)
+	ok(hw.takes_job(ash, s0) and not hw.takes_job(rk, s1),
+			"Craft Off on the Job Board stops the others, not the assigned Boki")
+	Work.set_prio("craft", 2)
+	var seen_at := [-1.0]          # sim seconds until the assigned Boki held its site's job (a lambda sees copies)
+	var t_sim := [0.0]
+	var stole := [0]
+	await _sim(home, hw, 5.0, func() -> bool:
+		t_sim[0] += 0.05
+		for k in home.kins:
+			var jb: Dictionary = k.get("job", {})
+			if String(jb.get("kind", "")) != "build" or int(jb["u"]) != qu:
+				continue
+			if k["rec"] == ash and seen_at[0] < 0.0: seen_at[0] = t_sim[0]
+			elif k["rec"] != ash and int(jb["slot"]) < 1: stole[0] += 1
+		return false)
+	ok(seen_at[0] > 0.0 and seen_at[0] <= 5.0,
+			"an assigned Boki is on its way to the site within 5 s (%.1f s)" % seen_at[0])
+	ok(stole[0] == 0, "no other Boki took the assigned Boki's slot (%d steals in 5 s)" % stole[0])
+	var rt: Dictionary = JSON.parse_string(JSON.stringify(Save.d))
+	HomeLayout.ensure(rt)
+	var rt_ash: Dictionary = rt["roster"].filter(func(r): return r["uid"] == ash["uid"])[0]
+	ok(typeof(rt_ash.get("build_at")) == TYPE_INT and int(rt_ash["build_at"]) == qu and not _crew_of(rt).has(rk["uid"]),
+			"the assignment is saved on the Boki and comes back as a whole number")
+	for e in (rt["layout"]["deco"] as Array):
+		if int(e["u"]) == qu: e.erase("site")
+	HomeLayout.ensure(rt)
+	ok(_crew_of(rt).is_empty(), "a save whose site is already built loses the assignment on load")
+	await _sim(home, hw, 300.0, func() -> bool: return not FarmSites.has_site(_entry(L, "quarry")))
+	ok(not FarmSites.has_site(_entry(L, "quarry")) and not ash.has("build_at"),
+			"it stays until the site stands, then the assignment ends")
+	_mats(30, 30, 30, 6)
+	hb.toggle()
+	hb.take("quarry")
+	ok(_put(hb, _spot(hb, home.spots["house"] + Vector3(-8, 0, -8))), "a second site goes down")
+	hb.toggle()
+	var q2 := int(FarmSites.sites()[0]["u"])
+	FarmSiteAssign.open(home, FarmSites.entry(q2))
+	var btns: Array = home.panel_host.find_children("*", "Button", true, false)
+	var pick: Array = btns.filter(func(b): return b.text == "Assign" and not b.disabled)
+	var can_build: Array = Save.d["roster"].filter(func(r): return Work.can_work(r))
+	ok(home.panel_open != "" and pick.size() == can_build.size(),
+			"the site panel lists the free Boki with an Assign button each (%d)" % pick.size())
+	pick[0].pressed.emit()
+	ok(FarmSites.crew(q2).size() == 1, "picking one in the panel sends it to the site")
+	home._close_panel()
+	FarmSites.assign(ash, q2)
+	Work.assign(ash, 99)
+	ok(not ash.has("build_at") and Work.assigned(ash) == 99, "assigning a Boki to a station ends its site assignment")
+	FarmSites.assign(ash, q2)
+	ok(Work.assigned(ash) < 0 and FarmSites.site_of(ash) == q2, "and a site assignment replaces a station one")
+	FarmSites.assign(ash, -1)
+	Work.assign(ash, -1)
 	# ---------------------------------------------------------------- 5. upgrades
 	_stats(0, 0, 0, 24)          # farm level 2: tier 2 needs 3
 	_mats(40, 40, 40, 6)
@@ -410,6 +496,27 @@ func run(m: Node) -> void:
 	var n2: Node3D = home2.hb.nodes.get(int(chest2["u"]))
 	ok(is_instance_valid(n2) and n2.get_node_or_null("Bar") != null and is_instance_valid(home2.hb.nodes.get(int(camp2["u"]))) and home2.hb.nodes[int(camp2["u"])].get_node_or_null("Tier") != null,
 			"both come back drawn: scaffold with its bar, and the tier 3 look")
+	# after a run the site says it was paused, until the first panel has closed
+	var it := {"kind": "site", "u": int(chest2["u"])}
+	var hob: FarmHob = home2.hob
+	var before := hob.label(it)
+	hob.note_return(3600.0, true)
+	var shown := hob.label(it)
+	hob.tick(0.0)
+	home2.panel_open = "While you were away"
+	hob.tick(0.0)
+	var while_open := hob.label(it)
+	home2.panel_open = ""
+	hob.tick(0.0)
+	var after_close := hob.label(it)
+	hob.note_return(5.0, true)
+	var label_note := "label before run '%s' / after run '%s' / panel open still shown=%s" % [
+			before, shown, while_open.ends_with(FarmHob.PAUSED_LINE)]
+	print("FARMBUILD paused line: %s / after close '%s' / short trip shown=%s" % [
+			label_note, after_close, hob.label(it).ends_with(FarmHob.PAUSED_LINE)])
+	var line := " · " + FarmHob.PAUSED_LINE
+	ok(shown == before + line and while_open == shown and after_close == before and hob.label(it) == before,
+			"a site left standing by a run says so until the first panel closes; a short trip does not")
 	# a finished build carries on
 	home2.hw.scan_t = 0.0
 	home2.hw.scan()

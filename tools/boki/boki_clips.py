@@ -24,6 +24,13 @@ def ease(x):
     return x * x * (3 - 2 * x)
 
 
+def sweep(t, n=1.0, ph=0.0):
+    """s(t, n, ph), a paw's swing round the hip from 1 forward to -1 back, but its stance (the back half) is a
+    straight line, so the planted paw goes back at one pace; the swing forward keeps the sine's ease."""
+    u = (n * t + ph) % 1.0
+    return 2.0 - 4.0 * u if 0.25 <= u < 0.75 else math.sin(TAU * u)
+
+
 def seq(t, keys):
     """keys: (t, value), eased between. Values may be numbers."""
     if t <= keys[0][0]:
@@ -38,6 +45,64 @@ def seq(t, keys):
 def add(pose, bone, rx=0.0, ry=0.0, rz=0.0):
     o = pose.get(bone, (0, 0, 0))
     pose[bone] = (o[0] + rx, o[1] + ry, o[2] + rz)
+
+
+def _side(v):
+    """A point's (y, z) as y + iz: a turn by rx is then a multiply by e^(i rx)."""
+    return complex(v[1], v[2])
+
+
+def pitch_at(bones, pose, name):
+    """Seen from the side, the pitch of `name`'s parent and where `name`'s head sits under the pose's rx and its
+    root/hips offsets (ry and rz are left out: a gait keeps them small)."""
+    chain = []
+    b = bones[name][2]
+    while b:
+        chain.insert(0, b)
+        b = bones[b][2]
+    turn, at = 0.0, 0j
+    for b in chain:
+        h = _side(bones[b][0])
+        w = _side(pose.get(b + "_at", (0, 0, 0))) if b in ("root", "hips") else 0j
+        rx = pose.get(b, (0, 0, 0))[0]
+        at += complex(math.cos(turn), math.sin(turn)) * (h + w - complex(math.cos(rx), math.sin(rx)) * h)
+        turn += rx
+    return turn, at + complex(math.cos(turn), math.sin(turn)) * _side(bones[name][0])
+
+
+def plant(pose, bones, leg, target, paw_pitch=0.0, bend=1.0):
+    """Puts a two-bone leg's ankle on `target` ((y, z) in the creature's axes) by setting the rx of `leg` ("hleg"
+    and ".L" make hleg1.L, hleg2.L, hpaw.L), the knee folding the way it does at rest (`bend`'s way for a straight leg),
+    the paw `paw_pitch` from its rest angle. Out of reach, the leg points straight at it."""
+    pre, sd = leg
+    upper, lower, paw = pre + "1" + sd, pre + "2" + sd, pre.replace("leg", "paw") + sd
+    turn, hip = pitch_at(bones, pose, upper)
+    u1 = _side(bones[lower][0]) - _side(bones[upper][0])
+    u2 = _side(bones[paw][0]) - _side(bones[lower][0])
+    d = complex(*target) - hip
+    k = (abs(d) ** 2 - abs(u1) ** 2 - abs(u2) ** 2) / (2 * abs(u1) * abs(u2))
+    rest = math.atan2((u2 / u1).imag, (u2 / u1).real)
+    knee = math.copysign(math.acos(max(-1.0, min(1.0, k))), rest if abs(rest) > 0.05 else bend) - rest
+    reach = u1 + u2 * complex(math.cos(knee), math.sin(knee))
+    hip_rx = math.atan2(d.imag, d.real) - math.atan2(reach.imag, reach.real)
+    hip_rx = (hip_rx + math.pi) % TAU - math.pi
+    pose[upper] = (hip_rx - turn, 0.0, 0.0)
+    pose[lower] = (knee, 0.0, 0.0)
+    pose[paw] = (paw_pitch - hip_rx - knee, 0.0, 0.0)
+
+
+def stride_leg(u, duty, front, back, ground, lift, sweep=0.06):
+    """Where a paw is at `u` (0..1) of its step, as (y, z): down for the first `duty` of it, then up through a `lift`
+    arc and forward. It goes back from `front` to `back` at one speed from `sweep` before it lands to `sweep` after it
+    lifts (an animal matches the ground's pace before touch-down), so it is in the air by the time it turns."""
+    u %= 1.0
+    air = (u - duty) / (1.0 - duty) if u >= duty else 0.0
+    y = ground + lift * (1.0 - (1.0 - math.sin(math.pi * air)) ** 3)
+    v = (u + sweep) % 1.0
+    if v < duty + 2 * sweep:
+        return y, front + (back - front) * v / (duty + 2 * sweep)
+    w = (v - duty - 2 * sweep) / (1.0 - duty - 2 * sweep)
+    return y, back + (front - back) * (w - math.sin(TAU * w) / TAU)
 
 
 def tail_wave(pose, phase, amp, up=0.0, side=0.0, roll=0.0, lag=0.09):

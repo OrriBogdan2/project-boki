@@ -81,6 +81,7 @@ var st_kos := 0
 var st_throws := 0
 var st_skills := 0
 var cd_mult := 1.0
+var carry_k := 1.0                 # carry passives x this: how well it was raised (RunPayoff)
 var runner: KinRunner = null      # its two abilities (k1 = E, k2 = auto)
 var ks: KinSpec = null            # its species in the grammar (content/kin_v2)
 var grow := 0.0                   # level growth, capped by the expedition tier (KinRules.level_growth)
@@ -132,6 +133,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 		cd_mult *= float(cm["cd"])
 		power *= float(cm["skill"])
 		mood = float(cm["mood"])
+		carry_k = RunPayoff.carry_mult(rec)
 		# IVS (inborn stats, Care.iv_mult): at most +10% health / +10% damage / +5% speed at 31,
 		# on top of the kin's final stats (budget points + level growth + mutations + care).
 		# The only match-side use besides the bond meter (Bond.add).
@@ -324,7 +326,7 @@ func _launch(p: Vector3) -> void:
 		cmd = "follow"        # sent out from your shoulder: it is out beside you now
 	hold_at = tgt if cmd == "guard" else Vector3.INF
 	last_safe = owner_h.pos
-	m.sfx("throw", owner_h.pos, 0.0)
+	SfxCast.hold_back(func(): m.sfx("throw", owner_h.pos, 0.0))     # (the throw event plays it there)
 	KinNet.event(m, "throw", self, tgt)
 	CombatBus.kin_thrown.emit(self, owner_h)
 	if danger_at(tgt) > 1.2 and hp < max_hp * 0.4:
@@ -352,7 +354,7 @@ func recall() -> void:
 			cmd = "follow"; chase_target = null
 		if cmd == "follow":
 			KinFollow.disengage(self)       # Call back in a fight: it stays with you
-		m.sfx("recall", pos, -6.0)
+		SfxCast.hold_back(func(): m.sfx("recall", pos, -6.0))
 		KinNet.event(m, "recall", self)
 		CombatBus.kin_recalled.emit(self, owner_h)
 		fire_trigger("on_recall", {"at": owner_h.pos})
@@ -410,6 +412,8 @@ func effective(slot: String) -> AbilitySpec:
 func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array = []) -> void:
 	var def := runner.def_of(slot)
 	var rank := owner_h.ability_level("kin") if owner_h else 1
+	var by: Variant = SfxCast.current()       # (a bot's brain orders it outside any sim: it is heard as its hunter's)
+	SfxCast.scope(self)
 	pend_skill = Vector3.INF
 	pend_slot = ""
 	runner.spend(slot, rank)
@@ -429,6 +433,7 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	var cue := "k_%s" % String(sp.get("type", ""))
 	m.sfx(cue if Sfx.has(cue) else "skill", pos, -2.0 if not auto else -7.0)
 	m.on_kin_ability(self, def, auto)
+	SfxCast.scope(by)
 
 ## An event trigger (KinParts.TRIGGERS): on_throw, on_hit, on_recall, on_bond_full, on_low_hp.
 ## Fires the kin's matching ability if it's unlocked and ready. An ability is never set off by its
@@ -511,7 +516,7 @@ func merge_leap() -> bool:
 	state = "flying_home"
 	hold_at = Vector3.INF
 	target = null
-	m.sfx("recall", pos, -4.0)
+	SfxCast.hold_back(func(): m.sfx("recall", pos, -4.0))
 	KinNet.event(m, "merge_leap", self)
 	return true
 
@@ -590,11 +595,15 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	var was_rest := rest_t > 0.0
-	for k in ["atk_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	atk_cd = maxf(0.0, atk_cd - dt)
+	lunge_t = maxf(0.0, lunge_t - dt)
+	throw_cd = maxf(0.0, throw_cd - dt)
+	haste_t = maxf(0.0, haste_t - dt)
+	rest_t = maxf(0.0, rest_t - dt)
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
-		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
+		# (each game times the rest and plays this itself)
+		SfxCast.hold_back(func(): m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec)))
 		KinCommand.say(owner_h, "%s is rested" % rec.get("name", "Your Boki"), sp["color"])
 	if shield_t > 0.0:
 		shield_t -= dt
@@ -734,6 +743,7 @@ func _sim_fly(dt: float) -> void:
 		else:
 			pos.y = g
 			grounded = true
+			KinFlinch.land(model, mass())
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
@@ -816,7 +826,8 @@ func _sim_active(dt: float) -> void:
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
-		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
+		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) \
+				or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
@@ -1037,6 +1048,8 @@ func render(delta: float, alpha: float) -> void:
 		return
 	var on_you := state == "shoulder" and not beside
 	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 else ""))
+	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
+	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	model.set_meta("pose", pose_now)
@@ -1083,6 +1096,7 @@ func render(delta: float, alpha: float) -> void:
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
 	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("kdown", state == "downed")
 	if state in ["downed", "dazed"]:
 		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
@@ -1090,7 +1104,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
 		body.rotation.x = -0.4 if lunge_t > 0.0 else 0.0
-	if state == "flying" and not fly.get("rush", false):
+	if airborne:
 		body.rotation.x += delta * 14.0
 	if state == "active":
 		_render_attention(delta, body)

@@ -173,7 +173,42 @@ func _tender_breaks() -> void:
 	ok("mm merge: drop_holds ends Hearth Call (no pull, no bond)", up and K.hearth_call.is_empty()
 		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and _bond_kind(K) == "")
 	await _free(m)
+	await _tender_needs_ally()
 	await _tender_cancels()
+
+
+## The source's channel needs an ally or ally Wisp: with nobody in reach X does nothing, the cooldown is
+## kept and the press is refused (the X tile's denied pulse), for a player and for a bot; with one it casts.
+func _tender_needs_ally() -> void:
+	var r: Array = sc.setup("tender", 14.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var K: TenderKit = P.ak
+	var calls0 := int(K.stats["calls"])
+	A.out = true
+	sc.aim_at(P, P.pos)
+	ok("mm X alone: no teammate in the match, no target (not herself)", K.call_target() == null)
+	ok("mm X alone: the press is refused, nothing runs, the cooldown is kept", not HunterKeys.ult_pressed(P)
+		and K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0 and int(K.stats["calls"]) == calls0)
+	K._bot_call()
+	ok("mm X alone: a bot does not try it", K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.out = false
+	A.teleport(P.pos + Vector3(-16.0, 0, 0))
+	sc.aim_at(P, A.pos)
+	step(m, 0.1)
+	ok("mm X ally out of range: no target, the press is refused, the cooldown is kept", K.call_target() == null
+		and not HunterKeys.ult_pressed(P) and K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.hp = A.max_hp * 0.2
+	K._bot_call()
+	ok("mm X ally out of range: a bot does not try it", K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.teleport(P.pos + Vector3(-6.0, 0, 2.0))
+	sc.aim_at(P, A.pos)
+	step(m, 0.1)
+	ok("mm X ally in range: the target is the teammate", K.call_target() == A)
+	ok("mm X ally in range: the press casts and the cooldown starts", HunterKeys.ult_pressed(P)
+		and not K.hearth_call.is_empty() and K.hearth_call["who"] == A and float(K.cd["x"]) > 40.0)
+	await _free(m)
 
 
 ## The source's cancels, one case each: she is stunned, she is knocked, she dies, the teammate dies cancel
@@ -286,8 +321,8 @@ func rimewright() -> void:
 			"tm X: the ring (and the cracks) brighten as it builds: the countdown",
 			float(AimKit.entry(P, "x").get("hot", 0.0)) > hot1 + 0.3)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
-	step(m, 1.3)
-	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
+	step(m, float(xd["hold"]) - 2.2)     # 2.35 s stepped so far: look 0.15 s after the crash
+	ok("tm X: it cracks open by itself at 3.3 s: damage and an ice-block stun", K.rime.is_empty()
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
 	ok("tm X: the crash plays its own move", K.anim_id == "tm_rime_crash", K.anim_id)

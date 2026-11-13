@@ -61,5 +61,20 @@ func run(main: Node) -> void:
 	ok(P.lvl == 6 and P.can_level("ult") and hud.r_lock_text(P) == "UNLOCK", "level 6: R is ready to unlock ('%s')" % hud.r_lock_text(P))
 	P.level_slot("ult")
 	ok(int(P.slot_lv["ult"]) == 1 and hud.r_lock_text(P) == "", "unlocked: no lock on R any more")
+	# ---------------------------------------------------------------- 5. no XP for time or for damage
+	P.lvl = 1
+	P.xp = 0.0
+	P.armor_xp = 0.0
+	P.armor_tier = 0
+	for i in 1800:
+		m.step(1.0 / 30.0)
+	ok(P.xp == 0.0 and P.lvl == 1, "60 s standing still gives no XP (%.1f)" % P.xp)
+	B.downed = false
+	B.hp = B.max_hp
+	m.on_damage(B, P, 30.0, {})
+	if not m.mobs.is_empty():
+		m.on_damage(m.mobs[0], P, 30.0, {})
+	ok(P.xp == 0.0 and P.lvl == 1, "a damage-only fight gives no XP (%.1f)" % P.xp)
+	ok(P.armor_xp >= 30.0, "damage to a Hunter still builds armour (%.1f)" % P.armor_xp)
 	print("LEVEL HUD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

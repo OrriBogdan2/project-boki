@@ -264,9 +264,13 @@ static func _auto_food() -> String:
 		if pantry(key) > bn: bn = pantry(key); best = key
 	return best
 
+## Does this feeder top itself up: a hopper or banquet, or any trough set down by water (FarmWater)?
+static func self_fills(f: Dictionary) -> bool:
+	return bool(fdef(f)["auto"]) or FarmWater.near_feeder(Save.d, f)
+
 ## A self-filling feeder below half tops itself up from the pantry. Returns how many it took.
 static func auto_refill(f: Dictionary) -> int:
-	if not fdef(f)["auto"] or not f.get("auto", true) or fill(f) > int(fdef(f)["cap"]) / 2:
+	if not self_fills(f) or not f.get("auto", true) or fill(f) > int(fdef(f)["cap"]) / 2:
 		return 0
 	var got := 0
 	while room_in(f) > 0:

@@ -4,7 +4,7 @@ import math
 
 import boki_clips
 import lodestick
-from boki_clips import add, c, s, seq
+from boki_clips import add, c, s, seq, sweep
 from lodestick import LEGS, SIDES, leg_pts, mir, v3
 
 LOOK_UP = 0.3      # the face tips up toward the high cameras
@@ -69,7 +69,7 @@ def all_legs(p, swing=0.0, lift=0.0, bend=0.0, only=("fleg", "mleg", "hleg")):
 def tripod(p, t, swing, lift):
     """Three legs on the ground pushing back while the other three swing forward in the air."""
     for (pre, sd), ph in TRIPOD.items():
-        a = s(t, 1, ph)
+        a = sweep(t, 1, ph)
         up = max(0.0, c(t, 1, ph))
         leg(p, pre, sd, swing * a, lift * up, lift * 0.6 * up)
 

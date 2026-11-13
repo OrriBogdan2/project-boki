@@ -1,0 +1,8 @@
+{
+ "group": "wisp",
+ "name": "Hunter Wisp",
+ "script": "tools/gen_wisp_sfx.py",
+ "sounds": {"wisp_hum": "loop", "wisp_hum_end": "loop"},
+ "signature": [],
+ "loops": ["wisp_hum"]
+}

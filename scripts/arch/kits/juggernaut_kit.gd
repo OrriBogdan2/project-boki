@@ -29,6 +29,8 @@ const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
+const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
+                                       # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -311,8 +313,8 @@ func wave_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h) or riposte.move_k() <= 0.0:
-		# merged, the form owns the attack key (a charge from before must not go off); guarding, no swings
+	if riposte.move_k() <= 0.0:
+		# guarding: no swings
 		lmb_was = false
 		return true
 	var ld := lmb_def()
@@ -364,7 +366,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	return true
 
 ## The Searing Wave charging: its lane on the ground grows as long and as wide as the wave it would throw now,
-## going gold-hot at full, and the cursor ring fills.
+## going gold-hot at full, and the charge ring fills round his body (the source's thin white arc round the hero
+## while the blast charges; hero-ref juggernaut item 8), flaring at full.
 func _wave_preview() -> void:
 	var ld := lmb_def()
 	var k := wave_k()
@@ -372,7 +375,7 @@ func _wave_preview() -> void:
 			"width": lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k) * 2.0, "k": k, "fill": k,
 			"col": WAVE_RED, "col_full": WAVE_FULL}
 	AimKit.lane(h, "lmb", lane)
-	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
+	AimKit.charge(h, k, {"col": Color.WHITE, "col2": WAVE_FULL, "at": "body"})
 	HeroVfx.of(m).hold(h, "wave_charge", k)
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
@@ -386,7 +389,7 @@ func _slash() -> void:
 	h.mel_hold = 0.0
 	h.fire_cd = float(ld["rate"])
 	# quick slashes, alternating right-to-left and back (no heavier third: each is the same cut)
-	if m.time - slash_at > 0.8: slash_n = 0
+	if m.time - slash_at > CHAIN_RESET: slash_n = 0
 	slash_at = m.time
 	h.combo_i = slash_n % 2 + 1
 	play("jug_slash_r" if slash_n % 2 == 0 else "jug_slash_l")
@@ -701,6 +704,11 @@ func _end_held_poses() -> void:
 	if over:
 		anim_id = ""
 
+## Stunned or downed holding the Lunge: the charge ends with no lunge (its pose goes with _end_held_poses).
+func _rmb_dropped() -> void:
+	lunge_full = false
+	perfect_flashed = -1
+
 ## The RMB variants by state: docs/heroes/juggernaut.md "RMB: the interaction table".
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
@@ -768,7 +776,6 @@ func _slam(pin := Vector2.ZERO) -> void:
 		var sw: Array = sl["sweet"]
 		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
 		var sweet := in_band and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
-		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not f.dead:
 			# the data's "edge hits do more": the far tip lands sweet_k harder
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["sweet_k"]) * power("sec"), h,

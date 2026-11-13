@@ -46,7 +46,11 @@ static func entry(d: Dictionary) -> Dictionary:
 	return {}
 
 static func ripe(e: Dictionary, now: float) -> bool:
-	return not e.is_empty() and now - float(e.get("t", now)) >= float(rules()["grow_secs"])
+	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs()
+
+## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort).
+static func grow_secs() -> float:
+	return float(rules()["grow_secs"]) * DecorComfort.value("bright", "grow", 1.0)
 
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:

@@ -14,6 +14,8 @@ const QUIET_MAX := 900          # steps: the last trial's ability (an ult, a zon
 const DASH_WAIT := 40           # steps: a dash with a wind-up shows up within this
 const WATCH := 120              # steps after the press that we watch for the ability
 const GLOVE := "barrier"        # Q: an active glove that stays where it's cast
+const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast it on (Hearth Call): a squad of 2
+const ALLY_AT := Vector3(5, 0, -3)      # m from home: the teammate stands beside the dash lane, inside X's 12.6 m
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
 ## the press goes mid-dash; Zedran and Bjorn dash AS the attack (no slash or swing inside it:
@@ -32,6 +34,7 @@ var bad := 0
 var skipped := 0
 var cast_n := {}                # CombatBus slot name -> casts by the hunter under test
 var hunter: Hunter
+var ally: Hunter                # the idle teammate of a NEEDS_ALLY hero, else null
 var wait_s := 0.0               # how long after the dash's end a buffered press went off
 
 func ok(cond: bool, what: String) -> void:
@@ -45,6 +48,7 @@ func run(main: Node) -> void:
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
 	for hero in _heroes():
 		await check_hero(main, hero)
+	await _one_window(main)
 	_print_exceptions()
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
@@ -112,7 +116,8 @@ func _match(main: Node, hero: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
-		"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+		"training": true, "teams": 2, "squad": 2 if hero in NEEDS_ALLY else 1, "tier": 0, "length": 1e9,
+		"seed": 77, "no_drop": true,
 		"cls": Arch.weight(hero), "arch": hero, "weapon": Arch.signature(hero),
 	})
 	m.set_process(false)
@@ -139,9 +144,14 @@ func _match(main: Node, hero: String) -> Match:
 	hunter.unlock_all()
 	hunter.lvl = 10
 	hunter.gear[0] = {"id": GLOVE, "rar": 1}
+	ally = null
 	for other in m.hunters:
-		if other != hunter:
-			other.ctrl = "idle"
+		if other == hunter:
+			continue
+		other.ctrl = "idle"
+		if other.team == hunter.team:
+			ally = other
+		else:
 			other.teleport(hunter.pos + Vector3(60, 0, 60))
 	set_meta("home", hunter.pos)
 	_steps(m, 20)
@@ -163,7 +173,7 @@ func _ready_up(m: Match) -> void:
 	for i in QUIET_MAX:
 		# (a shot still out counts: a slow one, like Grimble's hook, would deny the next press)
 		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running() \
-				or _last_shot() >= 0
+				or _last_shot() >= 0 or k.commit_left() > 0.0      # (a move's committed recovery: Vex's E and X)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
@@ -189,6 +199,10 @@ func _ready_up(m: Match) -> void:
 	hunter.inp["move"] = Vector2.ZERO
 	hunter.inp["fire"] = false
 	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -6)
+	if ally:
+		ally.teleport(hunter.pos + ALLY_AT)
+		ally.hp = ally.max_hp
+		hunter.inp["aim"] = ally.pos + Vector3(0, 0.9, 0)
 	_steps(m, 2)
 
 ## Control: the slot goes off when pressed without a dash, on the ground or up in the air (some need ground in
@@ -293,6 +307,79 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 			return more.call("used", "x") or more.call("cd", "x") or more.call("cast", "ultimate")
 		"q":
 			return up.call("gear")
+	return false
+
+# ------------------------------------------------------------------ the one press window (tuning.json press_buffer)
+const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes
+const FAR_S := 0.2              # s early: outside it, so the press is dropped
+
+## Loco.press_buffer by its three uses: Gil's E held past a dash's end while a stun still runs, Gil's E made before
+## a stun ends, and Ostra's early recast before her seed arms. NEAR_S early goes, FAR_S early doesn't.
+func _one_window(main: Node) -> void:
+	CombatBus.ability_used.connect(_on_used)
+	var went := {}
+	var m := _match(main, "gil")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "gil e held past a dash's end"]] = _past_dash(m, lead)
+		went[[lead, "gil e before a stun ends"]] = _before_stun(m, lead)
+	m.queue_free()
+	m = _match(main, "ostra")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ostra e before the recast arms"]] = _before_recast(m, lead)
+	m.queue_free()
+	await main.get_tree().process_frame
+	CombatBus.ability_used.disconnect(_on_used)
+	for key in went:
+		ok(went[key] == (float(key[0]) < Loco.press_buffer), "one window %.2fs: %s, pressed %.2fs early: %s" % [
+				Loco.press_buffer, key[1], key[0], "went off" if went[key] else "dropped"])
+
+## E pressed as a dash sets off (held for its end), then a stun running `lead` s past that end.
+func _past_dash(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.inp["move"] = Vector2(0, -1)
+	hunter.inp["dash"] = true
+	for i in DASH_WAIT:
+		if hunter.ak.in_dash():
+			break
+		m.step(Match.DT)
+	hunter.inp["dash"] = false
+	var before := _snap()
+	_press("e")
+	while hunter.ak.dash_left() > Match.DT * 1.5:
+		m.step(Match.DT)
+	if _went_off(before, "e") or not hunter.ak.in_dash():
+		return true           # (not held to the dash's end: both leads read "went off" and one fails)
+	hunter.stun_t = lead + hunter.ak.dash_left()
+	return _goes_off(m, before, "e")
+
+func _before_stun(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.stun_t = lead
+	var before := _snap()
+	_press("e")
+	return _goes_off(m, before, "e")
+
+## Ostra's E plants the seed; E again `lead` s before it arms pops it (or not) within NEAR_S of arming.
+func _before_recast(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	var k := hunter.ak as OstraKit
+	k.use_e()
+	for i in WATCH:
+		if not k.seed.is_empty():
+			break
+		m.step(Match.DT)
+	var min_t := float(k.e_def()["min_recast"])
+	while not k.seed.is_empty() and float(k.seed["t"]) < min_t - lead:
+		m.step(Match.DT)
+	_press("e")
+	_steps(m, ceili((lead + NEAR_S) / Match.DT))
+	return k.seed.is_empty()
+
+func _goes_off(m: Match, before: Dictionary, slot: String) -> bool:
+	for i in WATCH:
+		m.step(Match.DT)
+		if _went_off(before, slot):
+			return true
 	return false
 
 # ------------------------------------------------------------------ combos with Shift and jump (item 51)

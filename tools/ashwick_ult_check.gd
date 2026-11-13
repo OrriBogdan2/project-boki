@@ -24,8 +24,60 @@ func _owed(P: Hunter) -> float:
 
 func run() -> void:
 	await _flight()
+	await _flight_inputs()
 	await _carpet()
 	await _burst()
+
+## Owner rule (item 66), the negatives: in the flight LMB, RMB, G and the Merge key fire nothing (each through its real
+## route: the fire line, the sec press, Match.pending_input), none is queued for the landing, and E and X still work.
+func _flight_inputs() -> void:
+	var r: Array = ak.setup("ashwick", 16.0, "cindle", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: AshwickKit = P.ak
+	var J := K.jet
+	var at := home + Vector3(16, 0, 0)
+	T.teleport(home + Vector3(0, 0, 3.0))
+	P.ult = 1.0
+	var kin: Kin = P.kin
+	K.ch_rmb = float(K.rmb_charges())
+	K.cd["e"] = 0.0
+	var ch0 := K.ch_rmb
+	var em0: int = K.hose.emitted
+	var shots0: int = m.shots.size()
+	_cast(P, at)
+	ak.step(m, 0.3, func(): ak.aim_at(P, at))
+	var cloaks0: int = K.cloaks
+	for key in ["fire", "sec", "throw", "ult"]:      # one key at a time, held a quarter second, then let go
+		ak.step(m, 0.25, func():
+			if key == "fire" or key == "sec":
+				P.inp[key] = true
+				P.inp["sec_hold"] = key == "sec"
+			else:
+				m.pending_input[key] = true
+			ak.aim_at(P, at))
+		P.inp["fire"] = false
+		P.inp["sec_hold"] = false
+		ak.step(m, 0.05, func(): ak.aim_at(P, at))
+	ok("ult 66: in the flight LMB, RMB, G and the Merge key fire nothing, the flight goes on",
+			J.running() and K.hose.emitted == em0 and m.shots.size() == shots0 and K.ch_rmb == ch0
+			and kin.state == "shoulder" and not KinMerge.active(P) and P.ult == 1.0,
+			"puffs +%d shots +%d charges %.1f kin %s merged %s bond %.2f" % [K.hose.emitted - em0,
+			m.shots.size() - shots0, K.ch_rmb, kin.state, KinMerge.active(P), P.ult])
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ok("ult 66: E fires in the flight", K.cloaks == cloaks0 + 1 and J.running())
+	HunterKeys.ult_pressed(P)
+	ok("ult 66: X lands on the press frame", not J.running())
+	ak.step(m, 0.3)      # the 0.3 s after landing: nothing stale goes off
+	ok("ult 66: nothing queued in the flight fires in the 0.3s after landing",
+			K.hose.emitted == em0 and m.shots.size() == shots0 and K.ch_rmb == ch0 and kin.state == "shoulder"
+			and not KinMerge.active(P) and P.ult == 1.0 and ak.dmg(T) < 0.5,
+			"puffs +%d shots +%d charges %.1f kin %s merged %s bond %.2f" % [K.hose.emitted - em0,
+			m.shots.size() - shots0, K.ch_rmb, kin.state, KinMerge.active(P), P.ult])
+	await ak.done(m)
 
 ## Starts the flight toward `at` (cooldown cleared) and returns the jet.
 func _cast(P: Hunter, at: Vector3) -> AshwickJet:
@@ -110,6 +162,7 @@ func _flight() -> void:
 	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new flight", not J.running() and J.flights == 2, "cd %.1f" % float(K.cd["x"]))
 	await _steer(m, P, K, home)
+	await _move_feel(m, P, K, home)
 	await ak.done(m)
 
 ## Steering: the flight follows the cursor at no more than 120 degrees a second, so the carpet curves.
@@ -131,6 +184,96 @@ func _steer(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 		"ult steer: the flight curves (it ends well to the side)", P.pos.z - home.z > 3.0 and P.pos.x - home.x > 3.0,
 		"x %.1f z %.1f" % [P.pos.x - home.x, P.pos.z - home.z]
 	)
+
+## How the flight moves him (docs/heroes/ashwick.md "Movement settled"): the cursor steers, WASD never does;
+## full speed from lift-off to the end; the end hands over at run speed (the shared dash exit) and the next step
+## is free; off a terrace he eases back down to his low flight; ending over the void he falls, the glider keeps
+## the flight's burst.
+func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
+	var J := K.jet
+	ak.step(m, 0.5)
+	P.teleport(home)
+	var ahead := func(): ak.aim_at(P, P.pos + Vector3(12, 0, 0))
+	_cast(P, home + Vector3(12, 0, 0))
+	var slow := 99.0
+	var fast := 0.0
+	var q := P.pos
+	var t := 0.0
+	while J.running():
+		P.inp["move"] = Vector2(0, 1)
+		ak.step(m, 1.0 / 60.0, ahead)
+		t += 1.0 / 60.0
+		var v := Vector2(P.pos.x - q.x, P.pos.z - q.z).length() * 60.0
+		q = P.pos
+		if J.running() and t > 0.03:
+			slow = minf(slow, v)
+			fast = maxf(fast, v)
+	var dir: Vector2 = Vector2(P.pos.x - home.x, P.pos.z - home.z).normalized()
+	var drift := rad_to_deg(absf(dir.angle_to(Vector2.RIGHT)))
+	ok("ult move: WASD never steers the flight, only the cursor does", drift < 2.0, "%.1f deg off the cursor" % drift)
+	var top := float(K.x_def()["speed"])
+	ok(
+		"ult move: full speed from lift-off to the end, no ramp (12.6 m/s)",
+		slow > top - 0.5 and fast < top + 0.5, "%.1f..%.1f m/s" % [slow, fast]
+	)
+	P.inp["move"] = Vector2(1, 0)
+	ak.step(m, 1.0 / 60.0)
+	var hv := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"ult end: the run carries on at run speed (the shared dash exit), not a stop",
+		absf(hv - P.base_speed * HunterMove.dash_exit_run) < 0.3 and P.roll_t <= 0.0,
+		"%.2f m/s, run %.2f" % [hv, P.base_speed]
+	)
+	P.dashes = P.max_dashes()
+	P.inp["dash"] = true
+	ak.step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	ok("ult end: the first step after it is free (Shift dashes)", P.roll_t > 0.0 and not J.running())
+	ak.step(m, 0.6)
+	await _ledge_and_void(m, P, K, home, m.world)
+
+func _ledge_and_void(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> void:
+	var J := K.jet
+	var hx := int(floor(home.x))
+	var hz := int(floor(home.z))
+	for dz in range(-3, 4):
+		for dx in range(-3, 3):
+			W.level[W.idx(hx + dx, hz + dz)] += 2
+	P.teleport(home + Vector3(0, 2.0 * World.LEVEL, 0))
+	ak.step(m, 0.3)
+	_cast(P, home + Vector3(16, 0, 0))
+	ak.step(m, 0.9, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+	var low: float = P.pos.y - W.ground_at(P.pos.x, P.pos.z)
+	ok(
+		"ult ledge: off a terrace he eases back down to his low flight",
+		J.running() and P.pos.x - home.x > 6.0 and low < float(K.x_def()["hover"]) + 0.3, "%.2f m up" % low
+	)
+	ak.step(m, 1.2)
+	for dz in range(-3, 4):
+		for dx in range(-3, 3):
+			W.level[W.idx(hx + dx, hz + dz)] -= 2
+	for dz in range(-4, 5):
+		for dx in range(12, 30):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
+	P.teleport(home)
+	ak.step(m, 0.3)
+	_cast(P, home + Vector3(30, 0, 0))
+	var y0 := 0.0
+	while J.running():
+		y0 = P.pos.y
+		ak.step(m, 1.0 / 60.0, func(): ak.aim_at(P, home + Vector3(30, 0, 0)))
+	var handed := not P._handoff.is_empty()
+	ak.step(m, 0.3)
+	ok(
+		"ult abyss: ending over the void he falls (no hold), the flight's burst handed to the glider",
+		W.is_void(P.pos.x, P.pos.z) and P.pos.y < y0 - 0.2 and handed, "fell %.2f handoff %s" % [y0 - P.pos.y, handed]
+	)
+	for dz in range(-4, 5):
+		for dx in range(12, 30):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
+	P.teleport(home)
+	P.vel = Vector3.ZERO
 
 func _carpet() -> void:
 	var r: Array = ak.setup("ashwick", 16.0, "", true)
@@ -154,6 +297,11 @@ func _carpet() -> void:
 		J.trail.size() >= 14 and absf(linger - 5.2) < 0.01 and left > linger - 0.5 and left <= linger,
 		"pieces %d left %.1f" % [J.trail.size(), left]
 	)
+	var look_w := 0.0
+	for e in K.fx.live:
+		if e["kind"] == "lava": look_w = (e["s0"] as Vector3).z * 2.0
+	ok("ult look: the carpet is drawn as wide as it burns (trail_w)", absf(look_w - float(K.x_def()["trail_w"])) < 0.01,
+		"look %.2f m, burns %.2f m" % [look_w, float(K.x_def()["trail_w"])])
 	ak.step(m, 0.7)
 	var char_t := K.char_of(T) + 31.0 * float(K.burning(T))
 	ok(

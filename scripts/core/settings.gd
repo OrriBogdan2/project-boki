@@ -12,7 +12,7 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	"damage_numbers": true, "tips": true, "try_dismissed": "", "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
@@ -33,6 +33,8 @@ const DEFAULTS := {
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
+## The volume settings and the audio bus each one sets (the buses are made in Sfx._ready).
+const BUSES := {"master": "Master", "music": "Music", "sfx": "SFX", "ambience": "Ambience"}
 const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
@@ -149,6 +151,8 @@ const ACTIONS := [
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
+	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
+	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
@@ -156,8 +160,12 @@ const ACTIONS := [
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
+	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
 	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
+	["undo", "Undo the last piece (build mode, with Ctrl)"], ["keep_placing", "Hold to keep placing (build mode)"],
+	["level_mod", "Hold with a slot key to level it"], ["kit_card", "Hunter kit card (hover a hunter)"],
+	["confirm", "Press the open panel's main button"], ["push_to_talk", "Push to talk (before a match)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
 	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
@@ -288,11 +296,10 @@ func reset_all() -> void:
 	changed.emit("")
 
 func apply(k: String) -> void:
+	if BUSES.has(k):
+		Sfx.set_bus(BUSES[k], float(v[k]))
+		return
 	match k:
-		"master": AudioServer.set_bus_volume_db(0, linear_to_db(maxf(float(v[k]), 0.0001)))
-		"music": Sfx.set_bus("Music", float(v[k]))
-		"sfx": Sfx.set_bus("SFX", float(v[k]))
-		"ambience": Sfx.set_bus("Ambience", float(v[k]))
 		"fullscreen":
 			# browsers only allow fullscreen from a click, so the web build doesn't restore it at startup
 			if OS.has_feature("web") and not _started:
@@ -498,9 +505,13 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	sl[slot] = s
-	if sl[1 - slot] == s: sl[1 - slot] = ""
+	_put(sl, slot, s)
 	_set_slots(action, sl)
+
+## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
+func _put(sl: Array, slot: int, code: String) -> void:
+	sl[slot] = code
+	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -522,21 +533,29 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
+		["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
+		["goals", "throw"], ["fold_guide", "whistle"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
-## `action` had there.
-func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
+## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
+## what `action` had there instead, so none of them loses a key.
+func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
 	var mine := slots(action)
-	var theirs := slots(other)
-	theirs[other_slot] = mine[slot]
-	mine[slot] = ev_code(ev)
-	_set_slots(other, theirs)
+	var old: String = mine[slot]
+	_put(mine, slot, ev_code(ev))
+	for o in owners:
+		var theirs := slots(o[0])
+		_put(theirs, o[1], old)
+		_set_slots(o[0], theirs)
 	_set_slots(action, mine)
+
+## True when an action has no key at all (the Controls page marks it red).
+func unbound(action: String) -> bool:
+	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")

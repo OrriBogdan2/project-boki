@@ -540,32 +540,30 @@ func _bulwark() -> void:
 	var home: Vector3 = r[4]
 	var K: BulwarkKit = P.ak
 	ok("bulwark: War Hammer & Aegis", P.wid == "tower_shield")
-	# hold: raise the shield; blocked shots become Guard
-	K.res = 0.0
+	# hold: raise the shield; it blocks shots from the front
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks, no swing", not K.wall.is_empty() and P.hp >= php and not P.can_fire(), "hp %.0f" % P.hp)
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
-	# tap: no Bash (it is Shift behind the shield); at 50 Guard the Shield Charge ends in a Shield Slam
+	# tap: no Bash (it is Shift behind the shield)
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	var x0 := T.pos.x
 	tap(m, P)
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)
 	step(m, 0.3)
 	ok("bulwark RMB release after block: only lowers", K.wall.is_empty() and K.last_variant == "hold" and dmg(T) <= 0.0 and absf(T.pos.x - x0 - 2.0) < 0.3, "pushed %.1f" % (T.pos.x - x0))
-	K.res = 0.0
 	# Crushed: a Shield Charge into a wall stuns (no heal)
 	var W: World = m.world
 	var lv: int = r[5]
@@ -751,14 +749,15 @@ func _feel() -> void:
 	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
 			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
-	# hitstop tiers
+	# hit weights (the Hunters' own are --impact-weight-check's): what a hit did, when no rule names it
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
-	ok("feel: chip hit T1", Feel.tier(dummy, 4.0, {"src": "shot"}) == 1)
-	ok("feel: solid hit T2", Feel.tier(dummy, 14.0, {"src": "shot"}) == 2)
-	ok("feel: CC landing T3", Feel.tier(dummy, 2.0, {"stun": 0.4}) == 3)
-	ok("feel: wall slam / payoff T4", Feel.tier(dummy, 10.0, {"src": "wall"}) == 4 and Feel.tier(dummy, 5.0, {"payoff": true}) == 4)
-	ok("feel: bonded start T5", Feel.tier(dummy, 0.0, {"bonded": true}) == 5)
-	ok("feel: ticks never freeze", Feel.tier(dummy, 30.0, {"src": "burn"}) == 0)
+	ok("feel: chip hit is light", ImpactWeight.of_hit(null, dummy, 4.0, {"src": "shot"}) == "light")
+	ok("feel: a hit of 8%+ is solid", ImpactWeight.of_hit(null, dummy, 14.0, {"src": "shot"}) == "solid")
+	ok("feel: CC landing is solid", ImpactWeight.of_hit(null, dummy, 2.0, {"stun": 0.4}) == "solid")
+	ok("feel: wall slam and a solid payoff are heavy", ImpactWeight.of_hit(null, dummy, 10.0, {"src": "wall"}) == "heavy"
+			and ImpactWeight.of_hit(null, dummy, 14.0, {"payoff": true}) == "heavy")
+	ok("feel: bonded start is heavy", ImpactWeight.of_hit(null, dummy, 0.0, {"bonded": true}) == "heavy")
+	ok("feel: ticks never hold", ImpactWeight.of_hit(null, dummy, 30.0, {"src": "burn"}) == "")
 	ok("feel: category colours", Feel.cat_color("control") == Color("c46bff") and Feel.cat_color("damage") == Color("ff7a3d") and Feel.cat_color("utility") == Color("5fd8ff"))
 	ok("feel: severity from parts", Feel.severity([{"type": "root", "duration": 1.2}]) == "hard_cc" and Feel.severity([{"type": "slow", "duration": 1.0}]) == "soft_cc" and Feel.severity([{"type": "damage", "amount": 30}]) == "heavy_dmg")
 	dummy.free()

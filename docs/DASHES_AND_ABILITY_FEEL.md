@@ -292,6 +292,12 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
   sound per archetype. The kin's rider adds a theme sweetener.
 - Wind-down: no glider for 0.12s after a ground dash ends, as SUPERVIVE did. Dash → jump is unchanged.
 - Dash buffer (0.18s), rush cancels and the glide → dash → glide chains stay as built (KINFALL_CLASSES.md).
+- One press window for abilities: `press_buffer` in content/rules/tuning.json (0.15s, owner 11-08 "recasts
+  buffered ~0.15s"). An ability pressed that early still goes: held past a dash's end while the hunter can't
+  act, before a two-step's recast arms, before a stun, root or Grounded ends. A kit that needs another window
+  keeps a per-kit override with its source. `--dash-flow-check` asserts 0.1s early goes and 0.2s early doesn't
+  for all three. (The Shift buffer, Hunter.DASH_BUFFER 0.18s, and the jump buffer, 0.12s, are movement presses,
+  not this window.)
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
 
@@ -498,24 +504,30 @@ global `freeze_frame()`. Online (it's disabled there today, since `net_on` skips
 while their hurtboxes keep updating (Sakurai's rule), only on the clients of the two players
 involved, plus a softer 50% version for the kin owner.
 
-| Tier | Trigger (derived from the parts) | Attacker | Target | ≈ frames @60 |
+Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/impact_weight.json`):
+
+| Weight | What | Hold (struck body) | Attacker (melee only) | Shake on the struck player |
 |---|---|---|---|---|
-| T0 | damage ticks, zone ticks, slow-only, reveal, buffs | 0 | 0 (a 40ms hit flash only) | 0 |
-| T1 | a single hit under 8% of target max HP, no CC | 0 | 25ms (melee: both) | 1-2 |
-| T2 | a hit ≥ 8%, or push/pull ≥ 8 m/s, or a reflect returning | 35ms melee / 0 ranged | 45ms | 3 |
-| T3 | CC landing (stun, root, hook yank, swap, lift), or ≥ 15% | 50ms melee / 0 ranged | 65ms | 4 |
-| T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
-| T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms + 0.2s slow-mo at ×0.35 (offline only, existing `_reward_moment`) | — | 6 |
+| light | a poke: every Hunter's LMB, chip hits | 25ms | none | none |
+| solid | a real hit: RMB, E, dash hits, a CC landing, a hit of 8%+ max HP | 50ms | 50ms | none |
+| heavy | an ult or a slam (Kael's Smash, Tenzo's Quakefall), a wall slam, a merge start | 90ms | 90ms | 0.6 |
 
-Rules:
+- A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
+  or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
+  LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+  is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
+- No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
+- Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
 
-- Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
-  tier (multi-hit rule). Echoes (`repeat`) use half.
-- Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
-  hit direction (Sakurai). The shake starts big and shrinks.
-- Cap: 110ms in any 0.5s per player.
-- The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
-  of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
+Rules (the stacking caps, `cap` in the rules):
+
+- Take the max, never the sum. Within 0.25s, a hit no heavier than the last on the same pair holds a third of
+  its weight (multi-hit rule). Echoes (`repeat`) use half.
+- Projectiles never hold the attacker (Capcom); a heavy hit you land holds you too, even from range.
+- Cap: every body takes at most 110ms of hold in any 0.5s however many hit it, and every offline global freeze
+  (`Match.freeze_frame`: hits, parries, armor breaks, the ult moment) spends the player's same budget.
+- The shake of heavy hits on you starts at most once per 0.5s; inside that gap more only raise its strength.
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 
@@ -523,7 +535,8 @@ Your own abilities, dashes, landings and hits never shake or kick your camera: i
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
-never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off).
+never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
+started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
 `--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering

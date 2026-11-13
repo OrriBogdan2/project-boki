@@ -9,6 +9,7 @@ func run(main_node: Node) -> void:
 	await _breah()
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
+	await load("res://tools/hold_release_check.gd").tenzo(self)      # how the Basalt Spine drag ends
 	n += ult_check.n
 	fails += ult_check.fails
 	var flow = load("res://tools/dash_flow_check.gd").new()
@@ -589,6 +590,23 @@ func _breah() -> void:
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
 		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
 	)
+	# Molten Guard stacks add (18 each) up to the cap of 4, share one 6 s timer, and the pool drops whole at 6 s
+	var gt: float = float(K.d["passive"]["guard"]["t"])
+	P.shield = 0.0
+	K.shield_stacks = 0
+	for i in 5:
+		K.guard_stack()
+	ok(
+		"data: Molten Guard stacks add to the cap of 4 (72)", K.shield_stacks == 4 and absf(P.shield - 72.0) < 0.5,
+		"stacks %d shield %.1f" % [K.shield_stacks, P.shield]
+	)
+	step(m, gt - 0.3)
+	var left: float = P.shield
+	step(m, 0.6)
+	ok(
+		"data: the Molten Guard shield is gone at its 6 s, not before",
+		left > 71.0 and P.shield == 0.0 and K.shield_stacks == 0, "5.7 s: %.1f, after: %.1f" % [left, P.shield]
+	)
 	reset.call()
 	P.shield = 0.0
 	K.shield_stacks = 0
@@ -628,6 +646,7 @@ func _breah() -> void:
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
 	_air_dash_hold(m, P, K, reset)
+	_air_punch_steer(m, P, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -643,8 +662,8 @@ func _breah() -> void:
 		"shield %.0f" % P.shield
 	)
 	ok(
-		"data rank 3: a second charge, recharging in 8.4s (12s x 0.7 on the shared rank step)",
-		P.max_dashes() == 2.0 and absf(P.dash_regen() - 8.4) < 0.05,
+		"data rank 3: a second charge, recharging in 10s (the data's -2s from rank 2, 12s base)",
+		P.max_dashes() == 2.0 and absf(P.dash_regen() - 10.0) < 0.05,
 		"charges %.0f regen %.2f" % [P.max_dashes(), P.dash_regen()]
 	)
 	reset.call()
@@ -680,13 +699,26 @@ func _breah() -> void:
 	var c1 := AimKit.entry(P, "sight")
 	step(m, 2.1, func(): P.inp["crouch"] = true)
 	var c2 := AimKit.entry(P, "sight")
-	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 15.0)
+	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 18.0)
+	ok(
+		"passive: the cone lengthens 18 -> 25 m over the same 2s",
+		float(c1.get("len", 0.0)) < 19.5 and absf(float(c2.get("len", 0.0)) - 25.0) < 0.1,
+		"%.1f -> %.1f" % [float(c1.get("len", 0)), float(c2.get("len", 0))]
+	)
 	ok(
 		"passive: the cone widens 25 -> 40 degrees over 2s of sneaking",
 		float(c1.get("deg", 0.0)) < 28.0 and absf(float(c2.get("deg", 0.0)) - 40.0) < 0.5,
 		"%.1f -> %.1f" % [float(c1.get("deg", 0)), float(c2.get("deg", 0))]
 	)
 	var s_front := K.stonesight()
+	T.teleport(home + Vector3(23.0, 0, 0))
+	var s_far := K.stonesight()
+	T.teleport(home + Vector3(27.0, 0, 0))
+	var s_out := K.stonesight()
+	ok(
+		"passive: Tremor Sense reaches 25 m grown, not 27", s_far == 1 and s_out == 0,
+		"23 m %d, 27 m %d" % [s_far, s_out]
+	)
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	var s_back := K.stonesight()
 	ok(
@@ -925,6 +957,35 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	var kept := Vector2(P.vel.x, P.vel.z).length()
 	ok("item 51: let go in the air dash, she punches as it ends, still in the air and moving",
 		K.punches == n0 + 1 and not P.grounded and kept >= speed * 0.5, "%.2fs speed %.1f -> %.1f" % [t, speed, kept])
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.8)
+
+## DECISIONS 11-08 (docs/MOVEMENT_FEEL.md "Air velocity"): the air punch's step is added to what she carries, so a
+## sideways drift survives it and the keys still turn her against it.
+func _air_punch_steer(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.inp["fire"] = true
+	step(m, float(K.lmb_def()["tap"]) + 0.15)
+	var n0 := K.punches
+	P.pos.y += 4.0
+	P.grounded = false
+	P.vel = Vector3(0.0, 0.0, 3.0)
+	P.inp["fire"] = false
+	var t := 0.0
+	while K.punches == n0 and t < 0.3:
+		m.step(DT)
+		t += DT
+	var after := P.vel
+	ok("air steer: an air punch east keeps her 3 m/s drift south and steps her east",
+		K.punches == n0 + 1 and not P.grounded and after.z > 2.5 and after.x > 0.5,
+		"punches +%d vel x %.2f z %.2f" % [K.punches - n0, after.x, after.z])
+	P.inp["move"] = Vector2(0, -1)
+	t = 0.0
+	while P.vel.z > 0.0 and t < 0.5 and not P.grounded:
+		m.step(DT)
+		t += DT
+	ok("air steer: holding the keys against the drift after the punch turns it within 0.25s", P.vel.z <= 0.0
+		and t <= 0.25, "%.2fs vz %.2f" % [t, P.vel.z])
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 

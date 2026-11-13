@@ -32,7 +32,7 @@
 		"weapons": {
 			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
 		},
-		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
+		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.3s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},
 	"signature": "hoar_fan",
 	"resource": {
@@ -80,6 +80,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Ice Spear",
+		"card_range": "lance.range",
 		"short": "Spear",
 		"icon": "binding",
 		"col": "#8fe8d8",
@@ -113,6 +114,8 @@
 	"e": {
 		"delivery": "wall",
 		"name": "Rink Wall",
+		"card_range": "travel",
+		"again": "freeze the wall in place",
 		"short": "Rink",
 		"icon": "dome",
 		"col": "#9af0e6",
@@ -169,6 +172,8 @@
 	},
 	"x": {
 		"name": "Rimelock",
+		"card_range": "radius",
+		"again": "break out early",
 		"short": "Rime",
 		"icon": "quake",
 		"col": "#7fd8ff",
@@ -178,7 +183,7 @@
 		"snap_t": 0.2,
 		"carry_t": 0.8,
 		"carry_k": 1.05,
-		"hold": 3.5,
+		"hold": 3.3,
 		"late": 0.75,
 		"late_k": 0.67,
 		"dmg": 40.0,
@@ -186,6 +191,6 @@
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,
-		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.3s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

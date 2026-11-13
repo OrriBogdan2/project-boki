@@ -19,11 +19,12 @@ A new farm let you buy every building at once and placing one was instant, so th
 - **Tools (item 91):** chopping, mining and hammering run on `ToolWork` (the swing clock, holding interact loops it) and `HunterTool` (axe, pickaxe and hammer poses, the tool node in the hands, the weapon stowed through `HunterAnim`'s `stow_k`). At home the Empty carries no class weapon (`holster`).
 - **Tiers:** `t` on the entry (1..3). An upgrade is a site with `up = true` (the building keeps working). Stations work 25% / 50% faster at tier 2 / 3. Tier 2/3 need farm level 3/5.
 - **Fibre** is a new material in `Save.d["mats"]`: one per harvest of two or more, and one per tile of wild cleared.
-- **Build mode:** locked entries with their requirement, cost icons (FarmIcon), an Upgrades tab, footprint outline + snapping grid + floating refusal reason, a pop when something lands.
+- **Build mode:** locked entries with their requirement, cost icons (FarmIcon), an Upgrades tab (and in build mode the cursor card over a placed building shows its level and an Upgrade key that opens the tab on its row, or "Max"), footprint outline + snapping grid + floating refusal reason, a pop when something lands.
 
 ## Consequences
 - Files: `farm_unlocks.gd`, `farm_sites.gd`, `farm_models.gd`, `farm_build_ui.gd`, `farm_icons.gd` (scripts/home); hooks in `home_build.gd`, `home_work.gd`, `home_layout.gd`, `incubator.gd` (cradles 6 to 8 need farm level 4/5/6), `lairs.gd` (boss stat), `game.gd` (counts it).
 - Save stays v4. New optional fields only: `layout.fb`, `layout.fbs`, `deco[].t`, `deco[].site`, `mats.fibre`, `stats.bosses`, `stats.fb_built`. `HomeLayout.ensure` tidies them (JSON floats). Old saves load unchanged and stay ungated.
 - Net: nothing synced changes (the farm is local), `Net.VERSION` unchanged.
 - Checks: `--farmbuild-check`. `--farm-start-check` now runs its older instant-placement sections on a layout with the pass switched off.
-- Not done: assigning a Boki to one site from a panel (use the Job Board: Craft priority and pins), progress of sites while you are away on a run.
+- Assigning (ext/farm-site-assign): near a new-build site the Details key opens its panel (`FarmSiteAssign`) with an Assign list of Boki and their building skill. `rec["build_at"]` (optional, save stays v4; `FarmSites.clean_crew` makes it an int and drops it once the site stands or is gone, from `HomeLayout.ensure` and every `HomeWork.scan`) sends that Boki to that site only, whatever the Job Board says, and its slot (`crew_slots` per site) is not taken by free Boki. Assigning it to a station clears it, and the other way round.
+- Not done: progress of sites while you are away on a run, and a panel for upgrade sites (only new builds can be walked up to).

@@ -24,21 +24,25 @@ short/slight, average, tall/sturdy; female average), the tool moving the model a
 |---|---|---|---|---|---|---|---|---|
 | before, average | 39-54 cm | 65-82 cm | 64-87 cm | 2.5 / 3.8 | 1-3 cm | 0.6 s | 4 cm | 6 cm (free foot) |
 | male short/slight | 0.3 cm | 0.7 cm | 1.1 cm | 3.3 / 4.6 | 5.0 cm | 0.33 s | 2.9 cm | 0.2 cm |
-| male average | 0.4 cm | 0.8 cm | 1.8 cm | 2.9 / 4.2 | 5.5 cm | 0.42 s | 4.0 cm | 0.2 cm |
+| male average | 0.4 cm | 0.8 cm | 1.8 cm | 2.9 / 4.2 | 5.5 cm | 0.40 s | 3.8 cm | 0.2 cm |
 | male tall/sturdy | 0.5 cm | 0.8 cm | 2.5 cm | 2.9 / 3.8 | 6.1 cm | 0.38 s | 5.3 cm | 0.3 cm |
-| female average | 0.1 cm | 0.0 cm | 0.0 cm | 5.8* / 4.2 | 5.5 cm | 0.47 s | 4.6 cm | 0.0 cm |
+| female average | 0.2 cm | 0.7 cm | 2.6 cm | 2.9 / 4.2 | 5.2 cm | 0.45 s | 4.3 cm | 0.5 cm |
 
-"Before" is the same tool on origin/main's legs (slide there is a contact that is really a skating foot). *The
-female walk count is doubled by a toe brush at toe-off (the toe comes back under 1.2 cm one frame after lifting);
-her real cadence is 2.9 steps/s like the male. Strips: docs/art/home_gait/ (before, after; eight shots half a
-second apart at 5 m/s past floor posts every half metre).
+"Before" is the same tool on origin/main's legs (slide there is a contact that is really a skating foot). Strips:
+docs/art/home_gait/ (before, after; eight shots half a second apart at 5 m/s past floor posts every half metre).
+Feet: docs/art/home_gait/feet_extremes.jpg (`--empty-shots --only=feet`, GPU): the smallest woman, the tallest
+sturdiest woman and the tallest sturdiest man standing, then three shots across a step of their 2.2 m/s walk.
 
 ## What the gait does
 
 - **Planted**: the heel's ground point is stored in world space when the foot lands; each frame the hip, knee and
-  leg-out angles are solved (closed form: thigh and boot are one planar chain about the thigh's axis) so the sole
-  point on the ground stays on it while the hips pass over. The boot rolls heel, mid, toe as the hips move on and
-  the leg cannot reach with the earlier point.
+  leg-out angles are solved (thigh and boot are one planar chain about the thigh's axis, the knee set by its
+  length) so the sole point on the ground stays on it while the hips pass over. The boot rolls heel, mid, toe as
+  the hips move on and the leg cannot reach with the earlier point.
+  The knee is bisected between the folded boot and the straight leg, on the leg node's own z scale (a woman's legs
+  are 0.9, Unmasked._shape; `FootPlant.at`), and the leg's reach, the sole's length on the ground and the hip drop
+  (`FootPlant.reach`) use that scale too (--unmasked-check: every body, plus a row each for the four women's bodies
+  that stood 2.1 to 2.8 cm high when the scale was left out).
 - **Hips**: at the rig's size 0.43 m at the strike, 0.445 m flat-footed (by 30 % of the stance), 0.485 m from the
   push-off (70 %) on: the body rises onto the toe because there is no ankle, and comes down again in the air.
 - **Swing**: the lowest sole point (the toe as it leaves, the heel as it lands) travels in the body's frame from
@@ -54,6 +58,8 @@ second apart at 5 m/s past floor posts every half metre).
 
 ## Left open
 - Crouch-walking adds HunterAnim's knee bend after the solve, so a crouched walk slides a little (DEBT).
+- Standing after a stop or a turn leaves a foot on its toe, the heel 8-15 cm up, until a leg is out of reach; the
+  short slight and tall sturdy women, not in the check, fail its idle creep and turning-run slide bars (DEBT).
 - The toe dips up to 2 cm into the floor just after toe-off on the sturdy body (gated at 3 cm).
 - Arm swing is HunterAnim's, following the gait's phase (left leg's cycle); not re-tuned here.
 

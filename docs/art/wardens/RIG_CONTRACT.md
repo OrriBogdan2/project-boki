@@ -44,7 +44,7 @@ Each bone's head sits on its rig node's origin, Y along the limb.
 |---|---|---|
 | `root` | `Rig` | body lean, squash, dives, the downed fall |
 | `hips` | `Rig/Torso` | the torso's twist, bob and lean; everything above hangs on it |
-| `head` | `Rig/Torso/HeadPivot` | look, nod, emotes; the `head`, `jaw` sliders scale it |
+| `head` | `Rig/Torso/HeadPivot` | look, nod, emotes; the `head`, `jaw` sliders scale it; the look-at layer turns it to the aim (LOOK_AT.md) |
 | `upper_arm.L` / `.R` | `Rig/Torso/ArmLPivot` / `ArmRPivot` | arm IK (hands on grips, free hands, `fl`/`fr` keys) |
 | `forearm.L` / `.R` | `.../ArmLPivot/Elbow` / `ArmRPivot/Elbow` | elbow bend |
 | `hand.L` / `.R` | `.../Elbow/Hand` | the hand (kits read its world position: `ArchKit.hand_pos`) |
@@ -117,7 +117,7 @@ Whichever design the owner picks ships as `<art>/<art>.glb`.
 Empties (glTF nodes without mesh) parented to the bone, named exactly, for effects that should start on the
 model rather than at a fixed offset. None is required today (kits use the hand bones, the Muzzle and the
 Hammer pivot); export these so FX can move onto them without another export:
-- `anchor_head_top` (bone `head`): nameplate, overhead tells (Bjorn's Guard pips, Pin's glint).
+- `anchor_head_top` (bone `head`): nameplate, overhead tells (Pin's glint).
 - `anchor_chest` (bone `hips`, at chest height): hit sparks, buffs.
 - `anchor_weapon_tip` (on the weapon mesh, if exported): trails.
 - Per hero: Bjorn `anchor_prow_crack` (the prow's glow), Zedran `anchor_fuller` (the blade's heat), Pin
@@ -183,7 +183,8 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
 - **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
   bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
   triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.
+  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses. What 25k and 40k would
+  look like and cost, measured on Vex and Cinder: [DETAIL_PILOT.md](DETAIL_PILOT.md).
 - Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
   BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
   A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with

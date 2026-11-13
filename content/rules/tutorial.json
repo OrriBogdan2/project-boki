@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down; camp_hp replaces hp for the camps, so their kills come quickly). fight_foes: the last fight's monsters per starter (the ult step). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat.",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you; hp = its own share of the monster's health in place of camp_hp). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (camp_hp times the health, so the kills come quickly; size up, damage and attack tempo down). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat.",
  "steps": [
   [
    "land",
@@ -121,42 +121,11 @@
  "need": {},
  "cds": 0.25,
  "mob": {
-  "hp": 8.0,
   "scale": 1.4,
   "dmg": 0.1,
   "windup": 1.8,
   "cd": 1.6,
   "camp_hp": 2.5
- },
- "fight_foes": {
-  "archer": [
-   "skitter",
-   "spitter",
-   "skitter",
-   "skitter",
-   "spitter",
-   "skitter",
-   "skitter"
-  ],
-  "juggernaut": [
-   "skitter",
-   "spitter",
-   "skitter",
-   "spitter",
-   "skitter",
-   "skitter",
-   "spitter",
-   "skitter"
-  ],
-  "gunslinger": [
-   "skitter",
-   "spitter",
-   "skitter",
-   "skitter",
-   "spitter",
-   "skitter",
-   "skitter"
-  ]
  },
  "labels": {
   "land": "Land here",
@@ -193,7 +162,8 @@
     "skitter"
    ],
    "to": 4,
-   "row": true
+   "row": true,
+   "hp": 1.0
   },
   "hook": {
    "foes": [
@@ -204,7 +174,11 @@
    "far": true
   },
   "ult": {
-   "foes": [],
+   "foes": [
+    "skitter",
+    "spitter",
+    "skitter"
+   ],
    "to": 0
   }
  }
