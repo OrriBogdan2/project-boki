@@ -590,6 +590,7 @@ func _ostra() -> void:
 		"charge %.2f" % K.charge
 	)
 	_dash_moves(K)
+	_quiet_float(m, P, T, home)
 	# ---- every move, sound and look exists
 	var moves := [
 		"ostra_orb", "ostra_orb_hot", "ostra_snap_wind", "ostra_snap", "ostra_swap_aim", "ostra_swap", "ostra_swap_air",
@@ -606,6 +607,63 @@ func _ostra() -> void:
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
+
+## Source: Void's passive "floats: no footstep noise" (supervive_kits.md), the footage "no footsteps"
+## (briefs/hero-ref/ostra.md). 3 s of floating walk plays no step sound, for him and for a Motley another game
+## moves; a footed Hunter walking the same 3 s the same way does step (so the counter hears steps).
+func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
+	var steps := func() -> int:
+		var n := 0
+		for k in Sfx.last_played.keys():
+			if String(k).contains("step_"):
+				n += 1
+				Sfx.last_played.erase(k)
+				Sfx.recent.erase(k)
+		return n
+	var local_walk := func(arch: String) -> Array:
+		P.set_arch(arch)
+		P.teleport(home)
+		P.vel = Vector3.ZERO
+		P.grounded = true
+		P.inp["move"] = Vector2(0, -1)
+		steps.call()
+		var w := [0, 0]       # step sounds, ticks grounded and over the step speed (4 m/s, Hunter.render)
+		step(m, 3.0, func():
+			Sfx.listener = P.pos      # (the camera sets it each frame; headless it stays at the origin, out of hearing)
+			P.render(DT, 1.0)
+			w[0] += steps.call()
+			if P.grounded and Vector2(P.vel.x, P.vel.z).length() > 4.0: w[1] += 1)
+		P.inp["move"] = Vector2.ZERO
+		return w
+	var walk: Array = local_walk.call("ostra")
+	var foot: Array = local_walk.call("thief")
+	P.set_arch("ostra")
+	P.teleport(home)
+	ok(
+		"float: 3 s of his floating walk plays zero step sounds; a footed Hunter's same walk does step",
+		walk[0] == 0 and walk[1] >= 60 and foot[0] >= 3 and foot[1] >= 60,
+		"Motley %d steps (%d ticks walking), thief %d (%d)" % [walk[0], walk[1], foot[0], foot[1]]
+	)
+	var remote_steps := func(arch: String) -> int:
+		T.set_arch(arch)
+		T.remote = true
+		T.teleport(P.pos + Vector3(3.0, 0, 0))
+		var n := [0]
+		for i in int(3.0 / DT):
+			T.vel = Vector3(5.0, 0, 0)
+			T.grounded = true
+			Sfx.listener = P.pos
+			T.render(DT, 1.0)
+			n[0] += steps.call()
+		T.remote = false
+		T.vel = Vector3.ZERO
+		return n[0]
+	var other: int = remote_steps.call("ostra")
+	var footed: int = remote_steps.call("thief")
+	ok(
+		"float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step",
+		other == 0 and footed >= 5, "Motley %d, thief %d" % [other, footed]
+	)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
 ## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
