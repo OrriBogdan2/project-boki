@@ -186,7 +186,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var aim: Vector2 = Vector2(tgt.pos.x, tgt.pos.z) + lead + a["aim_err"]
 		inp["aim"] = Vector3(aim.x, tgt.hit_y() + 0.9, aim.y)
 		inp["aim_y"] = tgt.hit_y()      # someone below a lip: their balloon, not their body
-		var los := can_hit(m, h, tgt)
+		var los := los_to(m, h, tgt, dt)
 		# fast guns fire in bursts with a beat between them (to reposition); slow ones on cooldown
 		a["burst"] = float(a.get("burst", 0.0)) - dt
 		# fast guns fire in bursts; on easier bots the pauses between them are longer
@@ -411,6 +411,18 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 		cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
 	var L := maxf(dv.length(), 1.0)
 	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)
+
+## The line-of-sight test (3 traces and 24 ground samples) once per LOS_RECHECK_S on the same target,
+## or at once on a new one: a 10 Hz look is all the trigger needs, every step was most of a bot's fight.
+const LOS_RECHECK_S := 0.1
+func los_to(m: Match, h: Hunter, tgt: Ent, dt: float) -> bool:
+	var a := h.ai
+	a["los_t"] = float(a.get("los_t", 0.0)) - dt
+	if a.get("los_tgt") != tgt or float(a["los_t"]) <= 0.0:
+		a["los_tgt"] = tgt
+		a["los_t"] = LOS_RECHECK_S
+		a["los"] = can_hit(m, h, tgt)
+	return a["los"]
 
 ## A clear shot from where we stand: from our feet's eye height (not the top of a hop), at the lower
 ## of the two heights, so a ledge or a rock between us stops us firing into it.

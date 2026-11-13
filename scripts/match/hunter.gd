@@ -12,6 +12,8 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
 const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
+const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]   # one-step presses, cleared after each sim step
+const SLOT_GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]   # [input key, skill slot, feedback slot]: a press on a slot with no point is refused
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
@@ -1848,8 +1850,7 @@ func sim(dt: float) -> void:
 	tick_status(dt)
 	if grounded:
 		air_peak = pos.y
-	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "regen_wait", "land_t", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	HunterCooldowns.tick(self, dt)
 	if shield_t > 0.0:
 		shield_t -= dt
 		if shield_t <= 0.0: shield = 0.0
@@ -1915,7 +1916,7 @@ func sim(dt: float) -> void:
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
-	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
+	for gk in SLOT_GATES:
 		_gate(gk[0], gk[1], gk[2])
 	if not downed and not dropping and not out:
 		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
@@ -1976,7 +1977,7 @@ func sim(dt: float) -> void:
 		use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+	for k in PRESS_KEYS:
 		inp[k] = false
 	_physics(dt)
 	var ad := aim_dir()
