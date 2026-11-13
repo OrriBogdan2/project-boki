@@ -112,7 +112,8 @@ func _plays_out() -> void:
 	ok(n.position.distance_to(y0) > 5.0, "the ship sails")
 	ok(m.player.riding and _on_deck(m.player, n), "the squad rides on deck")
 	m.ship_jump(m.skydrop.leader(m.player.team), true)
-	ok(not m.player.riding and m.player.dropping, "the jump hands off to the drop")
+	ok(m.player.riding and m.player.rocket != null, "the leader's launch hands the squad to the rocket")
+	ok(SkyDeck.drawn(m.player), "the rocket's riders are drawn")
 	m.queue_free()
 	await main.get_tree().process_frame
 
