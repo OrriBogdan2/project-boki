@@ -26,7 +26,7 @@ hit's stagger (Oomph: a 0.28 s slow that is the hit's own feel) shows no slow lo
 the Grounded and Daze metas) on the game that owns the body. `keep()` once per tick for a kit's own status (Neve's
 Chill, Sparkle's Static). `put()` for a remote body's kit status (KitStatus `kst`) and `from_hit()` for a hit sent
 to another game. Every game sees a remote body's stun, root and slow from its owner's snapshot (`net_bits`,
-Net 0.24.7: a Hunter's flags bits 25-27, the last field of a Boki's and a monster's), so the look is up exactly as
+Net 0.24.8: a Hunter's flags bits 25-27, the last field of a Boki's and a monster's), so the look is up exactly as
 long as the owner runs the status, give or take one snapshot; `from_hit()` covers the first `BRIDGE` (0.5 s) until
 that snapshot arrives. Grounded and Daze reach every game as the kit's `kst` event, shown for its length.
 

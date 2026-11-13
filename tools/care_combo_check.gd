@@ -532,7 +532,7 @@ func _rime_skate_in() -> void:
 			K.ult_running() and face_dev < 0.001 and yaw_dev < 0.01 and K.face_locked(),
 			"face off by %.4f rad, model %.4f rad" % [face_dev, yaw_dev])
 	HunterKeys.ult_pressed(P)
-	step(m, 0.4)
+	step(m, float(K.x_def()["recover"]) + 0.4)      # a late recast cracks it open: free after the crash's recovery
 	ok(
 			"tm X: an early recast frees her: she walks off",
 			not K.ult_running() and P.root_t <= 0.0 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.5,
@@ -584,7 +584,7 @@ func _rime_move() -> void:
 	var still := Vector2(P.vel.x, P.vel.z).length()
 	var p1 := P.pos
 	P.inp["move"] = Vector2(0, 1)
-	step(m, 0.15)
+	step(m, float(K.x_def()["recover"]) + 0.15)      # the crash's recovery lock first (parity-neve-crash-recovery)
 	ok("tm X end: no momentum after the crash, and the next step is hers (she walks off)",
 			still < 0.01 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.25,
 			"%.2f m/s then %.2f m" % [still, Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length()])
@@ -1576,6 +1576,15 @@ func burr_ranks() -> void:
 	var wide3 := K.burst_radius()
 	ok("mm RMB: the burst is 2.2 m wide, 4.4 m at rank 3", absf(wide1 - 2.2) < 0.01 and absf(wide3 - 4.4) < 0.01,
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
+	# rank 3 (the source's tier IV): the burst takes 1.5x the ability power bonus (none at level 1)
+	var ap3 := K.burst_ap_k()
+	P.set_meta("growth_lvl", 10)
+	var bonus := LevelGrowth.ap_pct(10)
+	var ap10 := K.burst_ap_k()
+	P.slot_lv["sec"] = 1
+	ok("mm RMB rank 3: the burst takes 1.5x the ability power bonus (x%.3f at level 10, x1 at level 1)" % ap10,
+			absf(ap3 - 1.0) < 0.001 and absf(ap10 - (1.0 + 1.5 * bonus) / (1.0 + bonus)) < 0.001
+			and bonus > 0.0 and K.burst_ap_k() == 1.0, "L1 %.3f L10 %.3f" % [ap3, ap10])
 	await _free(m)
 
 # ================================================================== Neve
@@ -1661,9 +1670,11 @@ func rimewright() -> void:
 			T.max_hp - T.hp >= thrown_dmg * 0.75,
 			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
+	# the badges carry no label (DECISIONS 11-11): the FAN badge is the mark on this foe
+	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T)
 	ok(
-			"tm passive: the frost glow on the foe shows the stacks",
-			K.lk().showing("frost%d" % T.get_instance_id()) or K.splinter_log > 0)
+			"tm passive: the stacks show on your FAN badge (the frost glow on the foe is for the others)",
+			(fan.size() == 1 and not K.lk().showing("frost%d" % T.get_instance_id())) or K.splinter_log > 0)
 	await _free(m)
 	await _late_homing()
 	# --- 8 darts on one foe Shatter them for about 15 darts' worth, with the spikes

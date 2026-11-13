@@ -145,7 +145,8 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 ## Combinations
 | Combination | What fires | Check |
 |---|---|---|
-| Grenade past a foe, ground cone back over them | Dazed, shoved toward you | `--gunslinger-combo-check` |
+| Grenade past a foe, wall cone back over them | Dazed, shoved toward you | `--gunslinger-combo-check` |
+| Grenade on nothing (ground, or cast in the air) | a dud: no damage, no cone | `--gunslinger-combo-check`, `--archetype-check` |
 | Dazed foe + rifle | +90%, gold numbers, no decay | `--gunslinger-combo-check` |
 | Dazed foe + Longneedle | +20%, Skewered on a hunter | `--gunslinger-combo-check` |
 | Grenade on a wall, foe shoved into terrain | stun, the cooldown is untouched | `--gunslinger-combo-check` |
@@ -243,7 +244,8 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 | X | Cinderfall, tap | 1.0 | free to move, takes a jump pad as it falls (f103) | match |
 
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
-- **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).
+- **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).
+- **Owner rule (item 130, Nov 5; applied 11-11 after the owner saw air casts proc): a miss is a miss.** Only a wall gives the cone (the source's Spike Grenade: "if it hits a wall it explodes in a cone"). Reaching the lane's end with no foe and no wall is a dud (`_dud`: a small puff, a low thunk, no damage, no Daze, no cone), wherever it is: on the ground, or still in the air because she cast it while gliding or jumping. An air cast still fires and still hits a foe or a wall on its lane.
 - **Owner rule (11-10 playtest): the Burr Charge climbs terrain, only strict walls stop it.** In flight it reads the ground every 0.25 m (`BURR_SAMPLE`) and never flies lower than 0.25 m over it (`BURR_RIDE`), so it rides up ramps, stairs and ledges below it to a foe on high ground. A strict wall is a blocker tile (rock, tree, wall) standing above it, or ground that rises more than a walkable step (`World.STEP`, 0.32 m) at steeper than 50 deg (`BURR_WALL_DEG`; stairs are 39 deg) with its top above the charge: a terrace face. It sticks just in front, never past. (Before, any ground 0.6 m over her feet stopped it, so the top of a ramp did.) Assert `venator RMB: rides a ramp up to a foe on high ground`, `... a vertical wall stops it`, `... a rock stops it too`. Training Area: stand below a stair flight, aim RMB at a dummy on the terrace above. Other ground lanes keep their own rule, no shared code: Bjorn's ult lane (`bjorn_ult.gd` `_reach`, any ground 1.2 m over his feet ends it).
 - RMB is a tap fired from the arm-cannon's top launcher (owner item 112: no hold, no throw): on the press, ground or air, no lane first. It leaves from `launcher_fire` on the new model, above the gun's muzzle otherwise; the flash waits 0.1 s for `launcher_muzzle`.
 - **The drum, with no reload in the game (owner decision 23:45 UTC):** the data gives Ghost's rifle a 30-round
@@ -272,7 +274,7 @@ Asserts named are in `--gunslinger-combo-check` (tools/hero_combo_check.gd, tool
 |---|---|---|---|
 | 1 | Daze payoff on the rifle | closed | 22ceca1e1: `rattle_k` 0.9, gold numbers, no string decay. Asserts `Dazed: the rifle does +90%`, `Dazed: big gold numbers`, `Dazed: the string's decay pauses` |
 | 2 | Wall cone has no pre-telegraph | closed; in flight to be cut | 22ceca1e1: `_tick_burrs` fills an `AimKit.cone` for everyone over the fuse, then `_detonate`. Assert `RMB: the cone shows back toward you, for everyone`. ext/vex-greenfire-1108 (owner 11-08 item 12) makes Coin Blast hit-only and deletes the stick, fuse and cone |
-| 2b | Cone length, knock | closed; in flight to be cut | 22ceca1e1: `cone_len` 6.0, `push` 11.0. Assert `RMB ground cone: damage + Dazed + shoved toward you`. Same greenfire note |
+| 2b | Cone length, knock | closed; in flight to be cut | 22ceca1e1: `cone_len` 6.0, `push` 11.0. Assert `RMB wall cone: hits, Dazes, shoves into terrain = stun` (the ground cone is gone, item 130). Same greenfire note |
 | 3 | Fuse 0.9 | closed; in flight to be cut | 22ceca1e1: `burr.fuse` 0.9. Assert `RMB: 0.9s fuse`. Same greenfire note |
 | 4 | RMB held aim lane | owner override | OWNER_REVIEW_1103 item 112 (Nov 5, after the "side toss" line in DECISIONS): tap only, no hold; 04648e2a0. Assert `RMB tap: thrown on the press, nothing held, no lane shown`. The coin flick (ext/vex-coin-palm-1108) keeps the tap |
 | 5 | Fires on a tapped slide; cooldown | firing closed; cooldown open (row 9) | `ArchKit.fires_in_dash` reads the dash's LMB row (`fire`). Assert `Slipstep tap: the rifle keeps firing`. ext/vex-dash-parity-rebased: one Shift charge |
@@ -312,15 +314,13 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 |---|---|---|---|---|---|
 | Rifle (LMB) | two thin arcs flanking her, r 1.25 m (firing brackets) | none (hitscan rounds) | her screen only | thin brackets while firing | kept: a tell on her body, not an area |
 | Burr Charge (RMB), in flight | none | 0.72 m wide shot, 10.5 m | - | a shell, no ground shape | ok |
-| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone locally | a cone back toward her | ok, asserted. Online the cone shows as a fixed 5 m fan (the net event has no length); a real fix needs a Net change, so it is a suggestion only |
+| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone, online too | a cone back toward her | ok, asserted. Online (Net 0.24.6) the stick sends the "cone" fx with its length, width and fuse, and other games draw the same 6 m cone for the fuse (no fill sweep there); `--remote-anim-check` compares host and guest lengths |
 | Burr hit / stuck / detonation | none (was a 1.0, 1.6 and 1.8 m ring) | the cone above | - | no ring on the burr | removed: cosmetic rings that matched no hit |
 | Longneedle (E) charge | line 18 m long, 1.8 m wide narrowing to a core over 0.6 s | beam 18 m, 1.8 m wide, at 0.6 s | everyone locally | wide line narrowing to a core | ok, asserted |
 | Slipstep (dash) | none | none | - | none | ok |
 | Cinderfall (X) fall | disc r 3.4 m filling over 1.6 s, hot core 1.2 m, rivet ring closing onto r | 3.4 m, core 1.2 m, at 1.6 s | everyone locally (rivals in the hostile tint) | disc and core ring fill to the impact together | ok, asserted (core = data at every rank: --hero-vfx-check) |
 | Cinderfall impact | one ring at r 3.4 m | the disc | everyone | impact ring | fixed: was two rings at 1.3x and 0.7x r |
 | Cinderfall burn, 3 s | rim r 3.4 m fading | ticks inside 3.4 m | everyone locally | burning patch | ok |
-
-Suggestion (not built): carry the burr cone length over the network so remote players see the true 6 m cone.
 
 ## Engine notes
 - Kit `scripts/arch/kits/gunslinger_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd`; moves

@@ -191,7 +191,7 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		fx().marker("vs%d" % key, f, n, mx, PINK_WHITE, PINK, _top(f) + MARK_LIFT)
+		fx().marker("vs%d" % key, f, n, mx, PINK_WHITE, PINK, _top(f) + MARK_LIFT, not h.is_local())     # yours: the badge
 		StatusLooks.of(m).keep(f, "static")
 		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
 			# Live: arcs crawl down the body from the marker to the ground

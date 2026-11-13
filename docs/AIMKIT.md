@@ -224,6 +224,8 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
   - Online, every `all` telegraph reaches the other games by itself (AimNet, section 6); aim reticles
     and cursor states stay on your own screen. Nothing to add in the kit.
+  - Ground cones also have `ArchKit.net_cone`: `["fx", "cone", nid, at, dir, len, deg, dur, col]`, a static
+    `all` cone for `dur` s on the other games (no fill sweep). Vex's stuck Burr Charge uses it.
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
