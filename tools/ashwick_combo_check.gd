@@ -595,7 +595,8 @@ func _all() -> void:
 	_dash_moves(K, ram_move, ram_t, poof_move, poof_t, int(rings["made"]))
 	P.dashes = 0.0
 	K.on_knock(T, true)
-	ok("passive: a knock gives back one ram charge, not both", absf(P.dashes - 1.0) < 0.01, "charges %.2f" % P.dashes)
+	ok("passive: the kit adds no ram charge on a knock (DashReset gives one back, --knock-reset-check)",
+			P.dashes < 0.01, "charges %.2f" % P.dashes)
 	# --- rank 3: more damage, a speed boost and a shield on a hit (the lava carpet is the X ult now, not the ram)
 	# (the target stands 3.9 m out: Cinder's own hit radius is 0.376 now, so the ram reaches 0.12 m less)
 	reset.call()
