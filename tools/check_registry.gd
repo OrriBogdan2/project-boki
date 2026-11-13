@@ -35,6 +35,8 @@ const CHECKS := {
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],      # XP bar, level-up moment
 	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],      # movie writer: a level-up mid-fight
+	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
+	"--watchdog-check": ["res://tools/watchdog_check.gd", "watchdog_check", null],      # a dead check run ends
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
@@ -634,12 +636,23 @@ const GPU_HOST := {
 }
 
 
+## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
+## old name). One entry per line: suite-fast.sh reads the lines. --watchdog-check holds each entry to one script.
+const COVERED := {
+	"--class-unlock-check": ["--hunter-unlock-check"],
+	"--hero-combo-check": ["--archer-combo-check", "--bulwark-combo-check"],
+	"--support-check": ["--tender-combo-check", "--rimewright-combo-check"],
+	"--equal-migrate-check": ["--equal-check"],
+}
+
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
-## Returns true when one started (Main stops there).
+## Returns true when one started (Main stops there). The global random draws are seeded from the flag,
+## so the game code a check drives (172 scripts draw unseeded) rolls the same on every run.
 static func run(main: Node, args: PackedStringArray) -> bool:
 	for flag in CHECKS:
 		if Array(args).any(func(a): return String(a).begins_with(flag)):
 			var e: Array = CHECKS[flag]
+			seed(hash(flag))
 			var c = load(String(e[0])).new()
 			main.set_meta(String(e[1]), c)
 			if e[2] == null:

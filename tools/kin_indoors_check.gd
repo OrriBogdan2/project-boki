@@ -92,8 +92,12 @@ func run(m: Node) -> void:
 		"with you nearby the nap runs several times faster (%.1f -> %.1f)" % [t0, float(k["indoors"])])
 	enter.call()
 	home.ppos = door + Vector3(30, 0, 0)
-	_step(home, 45.0)
-	ok(not k.has("indoors"), "even with you away it is out within %d s" % int(KinIndoors.NAP_NIGHT.y + 5))
+	var away_s := 0.0      # stops when it is out: at night it may well choose to go back in before the time is up
+	while k.has("indoors") and away_s < KinIndoors.NAP_NIGHT.y + 5.0:
+		_step(home, 0.25)
+		away_s += 0.25
+	ok(not k.has("indoors"), "even with you away it is out within %d s (%.1f)" % [
+		int(KinIndoors.NAP_NIGHT.y + 5), away_s])
 	enter.call()
 	home.spots["house"] = home.FAR
 	_step(home, 0.5)

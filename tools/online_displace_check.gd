@@ -60,6 +60,7 @@ func _server() -> void:
 	if relay.start(PackedStringArray(["--port=%d" % relay_port])) != OK:
 		main.get_tree().quit(1)
 		return
+	CheckChild.hold(relay.peer, START_S)
 	relay.api.peer_packet.connect(_tap)
 	FileAccess.open(dir.path_join("server.ready"), FileAccess.WRITE).close()
 	while not FileAccess.file_exists(dir.path_join("stop")):
@@ -105,30 +106,26 @@ func _on_msg(topic: String, data, from: String) -> void:
 	super._on_msg(topic, data, from)
 
 # ------------------------------------------------------------------ the host
-func _spawn(cmd: String) -> int:
-	var dir := ProjectSettings.globalize_path("res://")
-	return OS.create_process("/bin/sh", ["-c", "cd '%s' && exec timeout -k 5 300 %s" % [dir, cmd]])
-
 func _host() -> void:
-	relay_port = 7930 + OS.get_process_id() % 60
+	relay_port = CheckChild.free_port(7860 + OS.get_process_id() % 60, PORT_GAP if delay_ms > 0 else 0)
 	port = relay_port + (PORT_GAP if delay_ms > 0 else 0)
 	dir = ProjectSettings.globalize_path(OD_DIR)
 	DirAccess.make_dir_recursive_absolute(dir)
 	for f in ["stop", "server.csv", "guest.csv", "host.csv", "server.ready"]:
 		DirAccess.remove_absolute(dir.path_join(f))
-	var common := "%s --headless -- --od-dir='%s' --od-port=%d --dn-port=%d --od-delay=%d" % [
-		GODOT, dir, relay_port, port, delay_ms]
-	pids.append(_spawn("%s --online-displace-check=server > '%s' 2>&1" % [common, dir.path_join("server.log")]))
+	var common := "--od-dir='%s' --od-port=%d --dn-port=%d --od-delay=%d" % [dir, relay_port, port, delay_ms]
+	pids.append(CheckChild.start(common + " --online-displace-check=server", dir.path_join("server.log")))
 	var t0 := Time.get_ticks_msec()
 	while not FileAccess.file_exists(dir.path_join("server.ready")) and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 	ok(FileAccess.file_exists(dir.path_join("server.ready")), "the headless relay server listens on %d" % relay_port)
 	if delay_ms > 0:
-		pids.append(_spawn("python3 -I tools/udp_delay.py %d %d %d %d > '%s' 2>&1" % [
-			port, relay_port, delay_ms, jitter_ms, dir.path_join("proxy.log")]))
+		pids.append(CheckChild.run("exec python3 -I '%s' %d %d %d %d" % [ProjectSettings.globalize_path(
+			"res://tools/udp_delay.py"), port, relay_port, delay_ms, jitter_ms], dir.path_join("proxy.log")))
 		await main.get_tree().create_timer(0.5).timeout
 	ok(await _connect(), "the host is on the server as %s (%d ms each way, jitter %d)" % [Net.me, delay_ms, jitter_ms])
-	pids.append(_spawn("%s --online-displace-check=guest > '%s' 2>&1" % [common, dir.path_join("guest.log")]))
+	guest_pid = CheckChild.start(common + " --online-displace-check=guest", dir.path_join("guest.log"))
+	pids.append(guest_pid)
 	t0 = Time.get_ticks_msec()
 	while peer_id == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
@@ -144,12 +141,13 @@ func _host() -> void:
 	Net.lobby_emit("dn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + peer_id, null)
-	t0 = Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t0 < START_S * 1000.0:
+	t0 = CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t0 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + peer_id, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
-	if G == null:
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
+	if G == null or G.net_t < 0.0:
 		await _finish()
 		return
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + BOT_AT, {"arch": "none"})

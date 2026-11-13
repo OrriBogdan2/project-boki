@@ -536,8 +536,8 @@ func _viewer(tree: SceneTree) -> void:
 	layer.add_child(host)
 	var v := HunterViewer.make("juggernaut", Vector2(220, 300))
 	host.add_child(v)
-	var t0 := Time.get_ticks_msec()
-	while v.model == null and Time.get_ticks_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
+	var t0 := CheckClock.own_msec()
+	while v.model == null and CheckClock.own_msec() - t0 < 8000:      # (built on its own frame: PreviewBuild)
 		await tree.process_frame
 	v.set_process(false)       # (stepped by hand below)
 	var want: Array = KitCard.slots_of("juggernaut").filter(func(x): return x != "r" and x != "x") + ["x", "r"]

@@ -29,6 +29,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
+		k["uid"] = "ftut%d" % i      # likes are seeded from the uid: a random one hates the tutorial's food
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
@@ -821,8 +822,8 @@ func _home(kin_count: int):
 ## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
 func _ready_home():
 	var home = await main._hb_home()
-	var t0 := Time.get_ticks_msec()
-	while home.panel_host == null and Time.get_ticks_msec() - t0 < 60000:
+	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()
 	return home

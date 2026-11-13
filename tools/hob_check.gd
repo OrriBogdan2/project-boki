@@ -296,14 +296,14 @@ func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
-## Waits for `cond` (at most `secs` of wall time); returns the game seconds it took (the frames' own delta).
+## Waits for `cond`, at most `secs` of the home's own clock (its frame step is capped at 0.05 s, so slow frames
+## on a loaded box do not use the wait up before the game got there); returns the game seconds it took.
 func _wait(cond: Callable, secs: float) -> float:
-	var t0 := Time.get_ticks_msec()
-	var game_s := 0.0
-	while not cond.call() and Time.get_ticks_msec() - t0 < int(secs * 1000.0):
+	var t := 0.0
+	while not cond.call() and t < secs:
 		await main.get_tree().process_frame
-		game_s += main.get_process_delta_time()
-	return game_s
+		t += minf(main.get_process_delta_time(), 0.05)
+	return t
 
 func _shot(file: String, secs: float) -> void:
 	if shots == "":

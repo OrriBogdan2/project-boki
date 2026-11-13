@@ -122,8 +122,8 @@ func _farm_course() -> void:
 	HomeLayout.ensure(Save.d)
 	Save.d["stats"] = {"extracts": 0, "bosses": 0, "caught": 0, "harvested": 0, "hatched": 0, "fb_built": 0}
 	var home = await main._hb_home()
-	var t0 := Time.get_ticks_msec()
-	while home.panel_host == null and Time.get_ticks_msec() - t0 < 60000:
+	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()
 	var g: FarmGuide = home.guide

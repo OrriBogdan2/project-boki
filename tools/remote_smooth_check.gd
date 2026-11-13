@@ -13,9 +13,8 @@ extends RefCounted
 ##   backsteps  frames where the drawn body steps back against the way the true one moves
 ##   overshoot  frames where the drawn body is more than OFF_PATH from anywhere on the true path
 ##   max step   the drawn body's biggest step in one frame (the fall: under NET_CAP, no jump)
-## Lines: RSMOOTH ok|FAIL <what>, RSMOOTH <phase> <numbers>; the guest prints RSMOOTH guest pid=<pid>.
+## Lines: RSMOOTH ok|FAIL <what>, RSMOOTH <phase> <numbers>.
 
-const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0        # s for the guest to come up and build its match
 const ONE_WAY_MS := 40        # ms: half the 80 ms ping
@@ -80,13 +79,16 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
+	RenderingServer.render_loop_enabled = false   # not looked at; slow frames stretch game time
 	dn = DN.new()
 	dn.main = main
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == "--remote-smooth-check=guest": guest = true
 		if a.begins_with("--rs-port="): dn.port = int(a.substr(10))
-	dir = ProjectSettings.globalize_path("user://remote_smooth")
+		if a.begins_with("--rs-dir="): dir = a.substr(9)      # the guest writes its record where the host reads it
+	if dir == "":
+		dir = ProjectSettings.globalize_path("user://remote_smooth")
 	DirAccess.make_dir_recursive_absolute(dir)
 	Net.message.connect(_on_msg)
 	if guest:
@@ -96,16 +98,16 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	dn.port = 7990 + OS.get_process_id() % 40
+	dn.port = CheckChild.free_port(7990 + OS.get_process_id() % 40)
 	var relay := LagRelay.new()
 	relay.rng.seed = 80
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the host is on the relay")
-	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- --remote-smooth-check=guest --rs-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, dn.port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("--remote-smooth-check=guest --rs-port=%d '--rs-dir=%s'" % [dn.port, dir],
+			dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -122,8 +124,9 @@ func _host() -> void:
 	await dn._build(d)
 	m = dn.m
 	var G: Hunter = null
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	var t1 := CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _host_run(0.2, "", [])
 		G = m.ents_by_id.get("P" + other, null)
 	ok(G != null, "the guest's game is sending")
@@ -202,10 +205,6 @@ func _host_run(secs: float, phase: String, truth: Array) -> void:
 func _finish() -> void:
 	Net.lobby_emit("rs", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	var p := dir.path_join("guest.log")
-	if FileAccess.file_exists(p):
-		for line in FileAccess.get_file_as_string(p).split("\n"):
-			if line.begins_with("RSMOOTH guest pid="): guest_pid = int(line.get_slice("=", 1))
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("RSMOOTH DONE, failures: ", bad)
@@ -330,7 +329,6 @@ static func _off_path(truth: Array, j: int, q: Vector3) -> float:
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("RSMOOTH guest pid=%d" % OS.get_process_id())
 	if not await dn._connect():
 		print("RSMOOTH guest: no relay")
 		main.get_tree().quit(1)
@@ -338,7 +336,7 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
+	while m != null and not stop:
 		for mb in m.mobs: mb.queue_free()       # (as on the host: nothing shoves the bodies)
 		m.mobs.clear()
 		m.step(DT)

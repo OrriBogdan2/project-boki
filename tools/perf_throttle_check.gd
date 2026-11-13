@@ -328,6 +328,7 @@ func _spot(lo: float, hi: float, turn: int) -> Vector3:
 func _place(b: Hunter, at: Vector3) -> void:
 	b.teleport(at)
 	b.grounded = true
+	b.gliding = false      # the monster phase may have left it gliding: never calm
 	b.vel = Vector3.ZERO
 	b.step_vis = 0.0
 	b.ai["lod_dt"] = 0.0
