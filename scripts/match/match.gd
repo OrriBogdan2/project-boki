@@ -80,6 +80,7 @@ var sight_k := 1.0                 # sight range under the raid condition (RaidL
 var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
+var ult_cue := UltReadyCue.new()   # the chime when your R is back
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
 var pending_input := {"base": false, "dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
@@ -3951,6 +3952,7 @@ func step(dt: float) -> void:
 	LastAlive.tick(self, dt)
 	_tick_chase()
 	Beacons.tick(self, dt)
+	ult_cue.tick(self)
 	if heart: heart.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
 	if not net_on:

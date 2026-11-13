@@ -34,6 +34,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
 | `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (buses) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
+| `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
 | `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |
 | `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
