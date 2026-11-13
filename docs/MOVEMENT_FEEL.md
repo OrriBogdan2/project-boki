@@ -317,6 +317,14 @@ So the footage shows no wall bounce from a walking or running jump, and no frame
 | Vex walkjump@35 | 4.55 m/s | 3.73 m/s | stops |
 
 A walking jump bounces between 20 and about 30 degrees off the normal (where `cos` x 4.55-4.65 m/s drops under 4). Tenzo walks a little faster than Vex at the wall (4.65 vs 4.55 m/s), so the slow/fast split doesn't show on a walking jump. **Suggestion (not built, parity):** with no source clip either way, the 3 m/s guess would make every walking jump up to about 50 degrees off the normal ricochet. Settle it with a clip of a hunter jumping at a wall at walking speed.
+**Wall bounce gates: no source number (checked 2026-11-11).** `WallMoves.BOUNCE_MIN_INTO` (4 m/s into the wall) and `BOUNCE_HEAD_ON_DEG` (20 degrees off the normal) stay our estimates. The source's movement data (briefs/supervive-data/supervive_physics.md) has no wall bounce field: its only wall setting is bCanWallJump, the tall-ledge climb for Myth and Brall. briefs/hero-ref has no wall-kick or wall-bounce clip, and the footage pass in ext/wall-bounce-walk found no run- or walk-jump bounce with a speed or angle you could measure. A run is 4.4-4.9 m/s, so a plain run-and-jump bounces between 20 and about 26-35 degrees off the normal. The `runin@` rows in `--wallmove-check` measure Tenzo and Neve, the two slowest in the air:
+
+| Run in | Tenzo (run 4.65) | Neve (run 4.45) |
+|---|---|---|
+| 25 degrees | 4.21 m/s into the wall: bounces | 4.03 m/s: bounces |
+| 40 degrees | 3.56 m/s: stops | 3.41 m/s: stops |
+
+A row fails when the bounce disagrees with the two gates. Neve's 25-degree hit clears `BOUNCE_MIN_INTO` by only 0.03 m/s, so any cut to her run speed ends that bounce. If source footage ever shows a walking jump bouncing, drop `BOUNCE_MIN_INTO` to about 3 m/s.
 
 ## Physics pass: SUPERVIVE's game data (`physics76`)
 

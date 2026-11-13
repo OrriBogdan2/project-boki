@@ -19,6 +19,10 @@ const RUN_ANGLE := 25.0             # degrees off the normal for the run bounce 
 ## kit (Tenzo) and a fast one (Vex). It bounces exactly when it meets the wall at WallMoves.BOUNCE_MIN_INTO or more.
 const WALK_ROWS := ["dolm", "gunslinger"]
 const WALK_ANGLES := [25.0, 35.0]   # degrees off the wall's normal
+## Run-in rows (docs/MOVEMENT_FEEL.md): a run and a jump at these angles off the normal for the two Hunters slowest
+## in the air (Tenzo, Neve). Each must bounce exactly when the hit passes both WallMoves gates.
+const RUN_ROWS := ["dolm", "rimewright"]
+const RUN_ROW_ANGLES := [25.0, 40.0]   # degrees off the wall's normal
 ## Cases a kit move is allowed to own (the move commits), per Hunter: case-name prefixes, with the cite.
 const COMMITS := {}
 ## Placed casts (not moves), tapped or held, per Hunter: the bounce sweep aims them back the way she came (at a
@@ -74,6 +78,8 @@ func _hunter(a: String) -> void:
 	_runs()
 	if arch in WALK_ROWS:
 		_walk_jumps()
+	if arch in RUN_ROWS:
+		_run_rows()
 	_sweeps()
 	m.queue_free()
 
@@ -281,6 +287,35 @@ func _walk_jumps() -> void:
 		print("WHUNT %s %s walk %.2f into %.2f m/s %s" % [arch, case_, walk, into, "bounces" if bounced else "stops"])
 		if into <= 0.0 or bounced != (into >= WallMoves.BOUNCE_MIN_INTO):
 			blocked.append("%s {into %.2f, bounced %s}" % [case_, into, bounced])
+
+## Run in at each RUN_ROW_ANGLES, jump, drift into the wall: prints "WHUNT <hunter> runin@<deg>" with the speed
+## and angle the wall was met at, and blocks the row when the bounce disagrees with the WallMoves gates.
+func _run_rows() -> void:
+	for deg in RUN_ROW_ANGLES:
+		var keys := Vector2.from_angle(deg_to_rad(deg))
+		_fresh(Vector3(face - P.r - 0.02 - RUN_START + 3.0, low, z0 - 1.0), true)
+		_go(keys, 0.4)
+		var run := Vector2(P.vel.x, P.vel.z).length()
+		P.inp["jump"] = true
+		_go(keys, DT)
+		P.inp["jump"] = false
+		var hit := Vector2.ZERO     # m/s: x into the wall, y along it (wall_hit_v keeps only the blocked axis)
+		var bounced := false
+		var t := 0.0
+		while t < 1.0 and not bounced:
+			var along := P.vel.z
+			_go(keys, DT)
+			t += DT
+			bounced = _bounced()
+			if P.wall_touch_t > 0.0 and not P.grounded and P.wall_hit_v.x > hit.x:
+				hit = Vector2(P.wall_hit_v.x, along)
+		var off := rad_to_deg(atan2(absf(hit.y), hit.x))
+		var gates := hit.x >= WallMoves.BOUNCE_MIN_INTO and off >= WallMoves.BOUNCE_HEAD_ON_DEG
+		var case_ := "runin@%d" % deg
+		print("WHUNT %s %s run %.2f into %.2f m/s at %.0f deg %s" % [arch, case_, run, hit.x, off,
+				"bounces" if bounced else "stops"])
+		if hit.x <= 0.0 or bounced != gates:
+			blocked.append("%s {into %.2f at %.0f deg, bounced %s}" % [case_, hit.x, off, bounced])
 
 # ------------------------------------------------------------ out of each ability
 func _sweeps() -> void:
