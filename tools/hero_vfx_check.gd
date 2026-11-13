@@ -22,6 +22,7 @@ const SETTLE_TOP_V := 5.0      # m/s: the landing dust is never faster than this
 const STREAK_PILE := 40        # streaks asked for at once: the pool still caps them
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
+const TRACER_FULL := 3         # steps (60/s) a round flies before its tracer must be drawn full length
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -83,6 +84,7 @@ func run(main: Node) -> void:
 	_dots(m)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	await _rocket(main)
+	await _vex_tracer(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -315,6 +317,61 @@ func _dolm_rocks(m: Match) -> void:
 					warm.append(kind)
 		n.free()
 	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
+
+## Vex's rifle rounds are HeroVfx data (content/vfx/gunslinger.json): through a held string every live round of hers
+## carries a tracer riding it, drawn 2-4.5 m long once the round has flown a few steps at the weapon's speed and wide
+## enough to follow at match zoom, the stock round glow dark under it, with a flash at the gun for each round and a
+## spark where one lands. The round nodes and the looks are stepped with the match here, as a 60 fps frame draws them.
+func _vex_tracer(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	V.plays.clear()
+	P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0.0)
+	P.inp["aim_y"] = P.pos.y
+	P.inp["fire"] = true
+	var bare := 0                  # steps a live round had no full tracer riding it
+	var born := {}                 # round sid -> the step it was first seen
+	var thin := 0.0
+	var lit := 0                   # steps a tracer rode a round whose stock glow still showed
+	var spd := float(P.wpn["speed"])
+	for i in 150:
+		m.step(1.0 / 60.0)
+		m.render_shots(1.0)
+		V._process(1.0 / 60.0)
+		for sd: Dictionary in m.get("shots"):
+			if sd["by"] != P or (sd["x"] as Dictionary).has("src") or not is_instance_valid(sd["node"]):
+				continue
+			var mine: Array = V.ribbons.filter(func(e: Dictionary): return e["follow"] == sd["node"])
+			if not born.has(sd["sid"]):
+				born[sd["sid"]] = i
+				if born.size() == 1:
+					var fly := (sd["vel"] as Vector2).length()
+					ok(absf(fly - spd) < 0.5, "a round flies at the weapon's speed (%.0f m/s)" % spd)
+			var drawn := 0.0           # the longest layer, head to tail, riding the round
+			for e: Dictionary in mine:
+				thin = maxf(thin, float(e["width"]))
+				var pts: Array = e["pts"]
+				if pts.size() > 1 and (pts[0][0] as Vector3).distance_to((sd["node"] as Node3D).global_position) < 0.1:
+					drawn = maxf(drawn, (pts[0][0] as Vector3).distance_to(pts[-1][0]))
+			var age := i - int(born[sd["sid"]])          # steps since it was fired (the kit picks it up a step on)
+			if (mine.is_empty() and age > 0) or (age >= TRACER_FULL and (drawn < 2.0 or drawn > 4.5)):
+				bare += 1
+			var orb := (sd["node"] as MeshInstance3D).material_override as ShaderMaterial
+			if not mine.is_empty() and (orb.get_shader_parameter("color") as Color).a > 0.0:
+				lit += 1
+	P.inp["fire"] = false
+	ok(born.size() >= 15, "a held string fires its rounds (%d)" % born.size())
+	ok(bare == 0, "every live round has a tracer riding it, drawn 2-4.5 m long (%d bare)" % bare)
+	ok(thin >= 0.3, "the tracer is wide enough for the match camera (%.2f m)" % thin)
+	ok(lit == 0, "the tracer is the whole round: the stock glow is dark under it (%d lit)" % lit)
+	var flashes := int(V.plays.get("shot", 0))
+	var tracers := int(V.plays.get("shot_trail", 0))
+	ok(flashes >= born.size(), "a muzzle flash for every round (%d of %d)" % [flashes, born.size()])
+	ok(tracers >= born.size(), "a tracer for every round (%d of %d)" % [tracers, born.size()])
+	var spark: Array = (V._rec(P, "shot_hit").get("fx", []) as Array).map(func(l: Dictionary): return String(l["p"]))
+	ok(spark.has("flare") and spark.has("ember"), "a round that lands has a flash and sparks")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:

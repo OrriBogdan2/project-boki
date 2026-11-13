@@ -6,7 +6,9 @@ moment in its kit, and sounds. Check: `--hero-vfx-check` (every data file agains
 `tools/hero_cat_fence_check.gd`). Tuning a
 palette: `--hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>]` plays every move side by side (no Hero: one of every
 layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command); a Hero's
-scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays.
+scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays. The reels step the match themselves
+(`tools/vv_shots.gd`): each step moves the rounds (`Match.render_shots`) and ticks these looks at 60 fps, so a
+tracer is drawn as long and as far along as in play, however slow the capture.
 The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs/parity_reel/`) are `tools/parity_reel.gd`.
 
 ## From a kit
@@ -16,7 +18,8 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
   ended. Particle layers only, and local.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
-  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
+  is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges. `"round": false` on the recipe darkens
+  the shot's own glow and halo, so the ribbons are the whole round.
 - `HeroVfx.of(m).streak(node, col, width, tail)`: not a Hero's look but on the same ribbon pool: one colour (hot core
   and spent tail derived from it) behind any node until it is hidden or freed, a point every `STREAK_STEP` so it is as
   long at any frame rate. The drop rocket's exhaust trail (`DropRocket`, squad colour, none at Very Low).
@@ -33,7 +36,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
-| `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |
+| `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread), `"streak": true` a clean tracer (hot head, tail thinning and cooling, no burn-away noise; `tail` s x the round's m/s is its length) |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |

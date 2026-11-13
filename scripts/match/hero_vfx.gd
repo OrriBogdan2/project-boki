@@ -18,8 +18,9 @@ const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "t
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
-## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10)
-const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 20, "thread": 18, "bolt": 12, "vortex": 4,
+## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10), and
+## the tracers riding Vex's rounds (6)
+const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 26, "thread": 18, "bolt": 12, "vortex": 4,
 	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
@@ -478,6 +479,7 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
 	mt.set_shader_parameter("seed", randf() * SEED_MAX)
+	mt.set_shader_parameter("clean_streak", bool(layer.get("streak", false)))
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
 
@@ -537,6 +539,16 @@ func trail(h: Hunter, move: String, follow: Node3D) -> void:
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)
+	if not bool(rec.get("round", true)):
+		_unlit_round(follow)
+
+## A shot's own glow and halo go dark under a trail that is the whole round ("round": false). The node stays shown,
+## so the trail keeps following it and the pool doesn't hand it out; spawn_shot repaints both when it is reused.
+func _unlit_round(node: Node3D) -> void:
+	for part: Node in [node, node.get_node_or_null("Halo")]:
+		var mt := (part as MeshInstance3D).material_override as ShaderMaterial if part is MeshInstance3D else null
+		if mt:
+			mt.set_shader_parameter("color", Color(0, 0, 0, 0))
 
 ## A trail in one colour behind something that is not a Hero's (the drop rocket's exhaust): a ribbon from the same
 ## pool, `width` m at its head, each point lasting `tail` s, following `follow` until it is hidden or freed.
