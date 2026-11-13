@@ -179,7 +179,8 @@ func _interrupts() -> void:
 			"root": P.root_t = 0.4
 			"dash": P.inp["dash"] = true
 			"damage": P.hurt(8.0, m.hunters[1])
-			"knock": P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
+			"knock":         # past the second Boki's knockback resist (its carry passive is on)
+				P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass() / (1.0 - P.owner_stat("knockback_resist")))
 			"nudge": P.impulse(Vector2(Capture.HARD_KNOCK - 3.0, 0) * P.mass())
 		run_for(0.1)
 		P.inp["dash"] = false
