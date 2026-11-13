@@ -140,6 +140,7 @@ const CHECKS := {
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],      # sound sets, loudness
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
+	"--cooldown-text-check": ["res://tools/cooldown_text_check.gd", "cooldown_text_check", null],      # seconds left and charges on the bar
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--charge-hint-check": ["res://tools/charge_hint_check.gd", "charge_hint_check", null],
