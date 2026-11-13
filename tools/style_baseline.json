@@ -794,9 +794,9 @@
 "semicolon": 1
 },
 "scripts/ui/title.gd": {
-"long_line": 21,
-"nested_ternary": 2,
-"semicolon": 39
+"long_line": 2,
+"nested_ternary": 1,
+"semicolon": 16
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -1036,7 +1036,7 @@
 "semicolon": 24
 },
 "tools/title_check.gd": {
-"long_line": 7,
+"long_line": 3,
 "semicolon": 1
 },
 "tools/train_check.gd": {
