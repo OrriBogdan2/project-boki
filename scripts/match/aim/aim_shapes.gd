@@ -190,7 +190,8 @@ static func _cone(g: AimGeo, e: Dictionary) -> void:
 	if bool(e.get("soft", false)):
 		_soft_cone(g, e, o, l, inner, a, h)
 	elif not e["edges"]:
-		g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
+		if not e["outline"]:
+			g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
 		g.ring(o, l, lw, _rim(e), a - h, a + h)
 		var f := float(e["fill"])
 		if f > 0.0:
