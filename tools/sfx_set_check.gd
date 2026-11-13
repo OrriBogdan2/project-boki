@@ -31,6 +31,9 @@ extends RefCounted
 ##  11. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
 ##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
 ##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
+##  11. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
+##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
+## Never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -69,6 +72,7 @@ func run(main: Node) -> void:
 	await _call_loop(main)
 	_hostile()
 	_level_cues()
+	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

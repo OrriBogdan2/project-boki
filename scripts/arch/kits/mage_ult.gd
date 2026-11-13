@@ -20,6 +20,7 @@ const RAY_STEP := 0.25           # m along the cursor's ray
 const RAY_FINE := 8              # the last step, cut this many times
 const RAY_ABOVE := 12.0          # m: the ray is walked from this far above the take-off...
 const RAY_BELOW := 12.0          # ... to this far below it
+const HUM_DB := -6.0             # dB: the hover's hum loop
 const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
 
 var kit: MageKit
@@ -70,7 +71,7 @@ func cast() -> bool:
 	# the range ring snaps out round her at once; a bolt drops onto her as she gathers
 	kit.fx().ring(from, float(data()["range"]), MageKit.PINK, MageKit.TEAL, 0.3)
 	kit.fx().arc(h.position + Vector3(0, 7.0, 0), h.position + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.PINK, 0.7, 0.2)
-	kit.m.sfx("vv_ult_rise", h.pos, -2.0)
+	kit.m.sfx("vv_ult_charge", h.pos, -2.0)
 	kit.net_ring(from, float(data()["range"]), MageKit.PINK)
 	return true
 
@@ -121,6 +122,7 @@ func tick(dt: float) -> void:
 		AIR:
 			_hold_air(1.0)
 			_aim_tick()
+			Sfx.loop_hold(hum_key(), "vv_ult_hum", kit.h.pos, HUM_DB)
 			_air_fx(dt)
 			if _wants_down(t, xd):
 				_slam()
@@ -132,6 +134,10 @@ func tick(dt: float) -> void:
 			_after_fx(dt)
 			if t >= float(xd["after"]):
 				leap = {}
+
+## The hover's hum loop (one per Hunter): held while she hangs, stopped on the drop.
+func hum_key() -> String:
+	return "ult_hum%d" % kit.h.get_instance_id()
 
 func _next(p: String) -> void:
 	leap["phase"] = p
@@ -197,7 +203,7 @@ func _take_off() -> void:
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
 	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK, true, true)
-	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
+	kit.m.sfx("vv_ult_rise", h.pos, -2.0)
 	_untouchable(0.2)
 
 # ------------------------------------------------------------------ aiming the landing
@@ -270,6 +276,8 @@ func _air_fx(dt: float) -> void:
 
 # ------------------------------------------------------------------ the strike
 func _slam() -> void:
+	Sfx.loop_stop(hum_key())
+	kit.m.sfx("vv_ult_crack", kit.h.pos, -2.0)
 	var land: Vector3 = land_point()
 	leap["land"] = land
 	leap["high"] = kit.h.pos
