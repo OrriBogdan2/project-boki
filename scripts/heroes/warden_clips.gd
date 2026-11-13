@@ -460,8 +460,8 @@ func step(dt: float) -> void:
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_air_tilt()
-	if root_bi >= 0:
-		skel.set_bone_pose_scale(root_bi, skel.get_bone_rest(root_bi).basis.get_scale())    # (unkeyed: feel can't build up)
+	if root_bi >= 0:     # (the root's scale is unkeyed: reset, feel() can't build up)
+		skel.set_bone_pose_scale(root_bi, skel.get_bone_rest(root_bi).basis.get_scale())
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 
