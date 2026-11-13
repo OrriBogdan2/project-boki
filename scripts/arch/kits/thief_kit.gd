@@ -32,7 +32,6 @@ const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
-const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
@@ -172,7 +171,8 @@ func refresh_marks() -> void:
 			_pip_pop(f, int(mk[h.nid][0]))
 
 # ---- Marks you can read from across the fight: gold diamonds orbiting over the target's head, one per
-# Mark, spinning faster as they stack (everyone sees them, the victim included). Made once per target.
+# Mark, spinning faster as they stack (everyone else sees them, the victim included; your own read off RecastCue's
+# MARKS badge, so they hide on your screen). Made once per target.
 func _pip_node(t: Ent) -> Dictionary:
 	var key := t.get_instance_id()
 	if pips.has(key) and is_instance_valid(pips[key]["node"]):
@@ -208,6 +208,7 @@ func _tick_pips(dt: float) -> void:
 			if is_instance_valid(n): n.queue_free()
 			pips.erase(key)
 			continue
+		n.visible = not h.is_local()
 		var top := 2.7 if t is Hunter else 1.9
 		n.global_position = t.position + Vector3(0, top, 0)
 		p["pop"] = maxf(0.0, float(p["pop"]) - dt * 4.0)
@@ -856,7 +857,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))
 
-## The stuck dagger (a pooled look, everyone sees it) and, on your screen, the white arrival circle.
+## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
 func _tick_knife() -> void:
 	if knife.is_empty():
 		return
@@ -875,7 +876,6 @@ func _tick_knife() -> void:
 	if tells_visible() or f != null or knife.has("wall"):
 		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
 				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
-	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": KNIFE_VIOLET, "ticks": true, "alpha": 1.0})
 
 ## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
 func _wall_out(w: Dictionary) -> Vector2:
@@ -908,7 +908,6 @@ func _step_to_knife() -> void:
 	knife = {}
 	e_t = 0.0
 	fx().unplace("knife%d" % h.get_instance_id())
-	AimKit.hide(h, "knife")
 	if busy():
 		return
 	if in_dash():

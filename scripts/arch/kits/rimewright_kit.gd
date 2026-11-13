@@ -170,7 +170,9 @@ func _tick(dt: float) -> void:
 		if float(e2["left"]) <= 0.0 or not is_instance_valid(tv2):
 			fan_hits.erase(key)
 			continue
-		# the frost glow on the foe grows with each dart toward the Shatter
+		# the frost glow on the foe grows with each dart toward the Shatter (others see it; you, the FAN badge)
+		if h.is_local():
+			continue
 		var n := int(e2["n"])
 		lk().keep(
 				"frost%d" % key, "frost", (tv2 as Node3D).global_position,

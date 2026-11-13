@@ -1652,9 +1652,10 @@ func rimewright() -> void:
 			T.max_hp - T.hp >= thrown_dmg * 0.75,
 			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
+	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T and mk["label"] == "FAN")
 	ok(
-			"tm passive: the frost glow on the foe shows the stacks",
-			K.lk().showing("frost%d" % T.get_instance_id()) or K.splinter_log > 0)
+			"tm passive: the stacks show on your FAN badge (the frost glow on the foe is for the others)",
+			(fan.size() == 1 and not K.lk().showing("frost%d" % T.get_instance_id())) or K.splinter_log > 0)
 	await _free(m)
 	await _late_homing()
 	# --- 8 darts on one foe Shatter them for about 15 darts' worth, with the spikes
