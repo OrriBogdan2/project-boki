@@ -4,12 +4,13 @@ extends World
 ## [from u (m), height at u (m), rise per metre], so a ledge, a deep drop, a slope of any angle or a
 ## wall to mantle is a row of numbers. Everywhere else is the map as it was.
 
-const LANE_HALF := 1.5      # m: half the lane's width (the body's ground probes stay inside it)
-const LANE_LEN := 44.0      # m: long enough for a 10 m/s knock over a 15 m fall
+const LANE_HALF := 1.5  # m: half the lane's width (the body's ground probes stay inside it)
+const LANE_LEN := 44.0  # m: long enough for a 10 m/s knock over a 15 m fall
 
-var at := Vector2.ZERO      # the lane's start (x, z centre line)
-var pieces: Array = []      # [[u0, y0, grade], ...] sorted by u0 (set through lay_pieces)
-var _was := {}              # tile index -> [kind, level] before the lane stamped it
+var at := Vector2.ZERO  # the lane's start (x, z centre line)
+var pieces: Array = []  # [[u0, y0, grade], ...] sorted by u0 (set through lay_pieces)
+var _was := {}  # tile index -> [kind, level] before the lane stamped it
+
 
 ## The open-sky patch where the lane fits, or Vector2.INF: whole tiles of sky round the lane.
 func find_lane() -> Vector2:
@@ -20,12 +21,14 @@ func find_lane() -> Vector2:
 				return Vector2(x + 1, z + 0.5)
 	return Vector2.INF
 
+
 func _sky(x0: int, z0: int, span: int) -> bool:
 	for z in range(z0 - 3, z0 + 4):
 		for x in range(x0, x0 + span):
 			if kind[idx(x, z)] != T_VOID:
 				return false
 	return true
+
 
 ## Lays this row's ground ([] clears the lane). A whole tile of flat ground on a whole terrace becomes a real
 ## ground tile too: the match's ledge rise reads tiles (Hunter._try_ledge_grab), not ground_at.
@@ -48,16 +51,20 @@ func lay_pieces(list: Array) -> void:
 			kind[i] = T_GROUND
 			level[i] = int(roundf(lv))
 
+
 func _in_lane(x: float, z: float) -> bool:
 	var u := x - at.x
 	return not pieces.is_empty() and absf(z - at.y) <= LANE_HALF and u >= 0.0 and u <= LANE_LEN
+
 
 ## No wind road or updraft blows in the lane: nothing but the movement code moves the body.
 func wind_at(p: Vector3) -> Dictionary:
 	return {} if _in_lane(p.x, p.z) else super(p)
 
+
 func updraft_at(p: Vector3) -> Dictionary:
 	return {} if _in_lane(p.x, p.z) else super(p)
+
 
 func ground_at(x: float, z: float) -> float:
 	if not _in_lane(x, z):
