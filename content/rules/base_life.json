@@ -48,7 +48,11 @@
 		"perk_s": 0.12,
 		"turn_s": 0.33,
 		"wait_s": 0.6,
-		"give_up_s": 9.0
+		"give_up_s": 9.0,
+		"hint_far_m": 25.0,
+		"hint_away_s": 10.0,
+		"hint_lift_px": 52.0,
+		"hint_text": "Whistle to call your partner"
 	},
-	"whistle_doc": "the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (a droop and a head turn), waits wait_s s and walks over at sulky_pace of the call run; an answering Boki first makes a beat: perk_s s, plus up to turn_s s to turn to face you (so one already facing you loses only perk_s); slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped."
+	"whistle_doc": "the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (a droop and a head turn), waits wait_s s and walks over at sulky_pace of the call run; an answering Boki first makes a beat: perk_s s, plus up to turn_s s to turn to face you (so one already facing you loses only perk_s); slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped; the hint_* keys are the one-time whistle line (scripts/home/whistle_hint.gd): shown once the partner has been over hint_far_m m away, or out of sight, for hint_away_s s; hint_lift_px px above the screen's bottom edge (over the key row); hint_text beside the key cap."
 }

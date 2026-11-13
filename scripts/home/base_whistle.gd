@@ -12,6 +12,7 @@ extends RefCounted
 var h                       # the home (home.gd)
 var R: Dictionary           # base_life.json "whistle"
 var held := -1.0            # s the key has been down, -1 when it is up or the hold call is made
+var hint: WhistleHint       # the one-time nudge to use the key (whistle_hint.gd)
 var _other: Dictionary = {}   # the Boki a long hold will call
 var _answering: Array = []    # the Boki in their answer beat (k["answer"] = {t, beat, sulky})
 
@@ -25,6 +26,7 @@ const HEAD_MAX := 1.2         # rad
 func _init(home, rules: Dictionary) -> void:
 	h = home
 	R = rules["whistle"]
+	hint = WhistleHint.new(self)
 
 ## How readily a Boki answers, 0 to 1: trust counts most, then its overall condition.
 func eagerness(rec: Dictionary) -> float:
@@ -37,9 +39,10 @@ func sulky(rec: Dictionary) -> bool:
 ## The key went down: the partner is called now, the nearest other Boki if it stays down.
 func press() -> void:
 	held = 0.0
-	var partner := _partner()
-	_call(partner, 0.4)
-	_other = _nearest(partner)
+	hint.used()
+	var mine := partner()
+	_call(mine, 0.4)
+	_other = _nearest(mine)
 
 func release() -> void:
 	held = -1.0
@@ -47,6 +50,7 @@ func release() -> void:
 
 ## Called every frame by BaseLife.step.
 func step(d: float) -> void:
+	hint.tick(d)
 	_pose_answers(d)
 	if held < 0.0:
 		return
@@ -56,18 +60,18 @@ func step(d: float) -> void:
 		_call(_other, 0.4 + PI)
 		_other = {}
 
-func _partner() -> Dictionary:
+func partner() -> Dictionary:
 	for k in h.kins:
 		if k["rec"]["uid"] == Save.d.get("active", ""):
 			return k
 	return {}
 
 ## The closest Boki to you that is free to come and is not the partner.
-func _nearest(partner: Dictionary) -> Dictionary:
+func _nearest(mine: Dictionary) -> Dictionary:
 	var best := {}
 	var best_d := INF
 	for k in h.kins:
-		if k == partner or _busy(k):
+		if k == mine or _busy(k):
 			continue
 		var d: float = Vector2(k["pos"].x - h.ppos.x, k["pos"].z - h.ppos.z).length()
 		if d < best_d:
