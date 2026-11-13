@@ -201,9 +201,8 @@ func _steer(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	)
 
 ## How the flight moves him (docs/heroes/ashwick.md "Movement settled"): the cursor steers, WASD never does;
-## full speed from lift-off to the end; the end hands over at run speed (the shared dash exit) and the next step
-## is free; off a terrace he eases back down to his low flight; ending over the void he falls, the glider keeps
-## the flight's burst.
+## full speed after the lift-off hang to the end; the end hands over at run speed (the shared dash exit) and the
+## next step is free; off a terrace he eases back down to his low flight; ending over the void he falls.
 func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	var J := K.jet
 	ak.step(m, 0.5)
@@ -212,6 +211,7 @@ func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	_cast(P, home + Vector3(12, 0, 0))
 	var slow := 99.0
 	var fast := 0.0
+	var lift_end := float(K.x_def()["lift_t"]) + 0.03  # s: past the lift-off hang (she holds still there)
 	var q := P.pos
 	var t := 0.0
 	while J.running():
@@ -220,7 +220,7 @@ func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 		t += 1.0 / 60.0
 		var v := Vector2(P.pos.x - q.x, P.pos.z - q.z).length() * 60.0
 		q = P.pos
-		if J.running() and t > 0.03:
+		if J.running() and t > lift_end:
 			slow = minf(slow, v)
 			fast = maxf(fast, v)
 	var dir: Vector2 = Vector2(P.pos.x - home.x, P.pos.z - home.z).normalized()
