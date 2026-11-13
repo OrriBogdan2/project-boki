@@ -9,7 +9,7 @@ extends RefCounted
 const IDLE_SWEEPS := 2          # sweeps (match starts) in a row a key went unasked before it goes
 
 static var _all: Array[MeshCache] = []
-static var _lock := Mutex.new()  # PreviewBuild fills these on a worker thread while the main thread reads and sweeps them
+static var _lock := Mutex.new()  # PreviewBuild's worker fills these while the main thread reads and sweeps
 
 var _meshes := {}               # key -> Mesh
 var _idle := {}                 # key -> sweeps in a row since a build last asked for it
@@ -37,7 +37,7 @@ func put(key: Variant, m: Mesh) -> void:
 	_idle.erase(key)
 	_lock.unlock()
 
-## The cached mesh for key counted as asked for, or null: one locked step, so a sweep can't land between has() and mesh().
+## The cached mesh for key counted as asked for, or null: one locked step (a sweep can't land between has() and mesh()).
 func read(key: Variant) -> Mesh:
 	_lock.lock()
 	var m: Mesh = _meshes.get(key)
