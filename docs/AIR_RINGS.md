@@ -35,25 +35,26 @@ than 25 s at ring speed, or puts a ring over land or within 5 m of the sky train
 region's ground at the foot (within 4 m) of its level, or sits on stairs. It prints each lane's length, rings
 and time.
 
-## Current routes (the 0.24.5 Hollow Crown; the v2 layout re-places them)
+## Current routes (Hollow Crown 2.0, docs/MAP_V2.md)
 | Lane | Regions | Length | Rings |
 |---|---|---|---|
-| Kestrel Line | Larkhollow -> the Crown | 93 m | 6 |
-| Moor Line | Duskmoor -> the Crown | 97 m | 6 |
-| Salt Line | Saltmere -> Cinder Steps | 75 m | 4 |
-| Kiln Leap | Cinder Steps <-> the Crown | 28 m | 1 |
-| Storm Leap | Stormbreak <-> the Crown | 31 m | 2 |
-| (unnamed) | Highwatch <-> Stormcrown Gaol | 33 m | 2 |
-| (unnamed) | Duskmoor <-> Thornwood | 40 m | 2 |
+| Lantern Line | Highwatch <-> the Crown (west side) | 87 m | 5 |
+| Salt Line | Saltmere <-> Stormbreak (the Shrine shard) | 64 m | 4 |
+| Moor Line | Duskmoor <-> Stormbreak (the Shrine shard) | 58 m | 3 |
+| Bramble Leap | Larkhollow <-> Thorn Shard | 56 m | 3 |
+| Slag Leap | Ember Shard <-> Cinder Steps | 45 m | 3 |
+| Ember Leap | the Crown <-> Cinder Steps | 34 m | 2 |
 
-Lift rings: the Throne (Crown, north side), the Frostgate plateau (west foot), the Kilns' plateau (Cinder, east
-foot), the Shrine Table (Stormbreak, north foot), the Thornhive rise (Thornwood, north foot), the Highwatch crest
-(south foot). Every region has at least one ring.
+The three Leaps are main's v2 glides made lanes (ends moved a few metres so every ring is over the void and 5 m
+off the train track); the three Lines run from edge regions to the middle. Lift rings: the keep (Crown, lv 8,
+Gate Span side), the ice shelf (Frostgate, lv 10, from the Rimefield), the first cliff (Cinder, lv 6, by Ember
+Leap's landing), the Shrine Table (Stormbreak, lv 6, north foot), Bramble Rise (Thornwood, lv 6, east foot), a
+yard tower (Highwatch, lv 8). Every region has at least one ring (Larkhollow, Duskmoor and Saltmere by a lane).
 
 Measured by `--air-rings-check` (keys held like a player: run off the rim, jump, glide toward the landing):
-every lane both ways goes through all its rings and lands in 3-9.5 s, never more than 2.7 s between rings; a
-bot crosses the 97 m Moor Line on its own crossing logic in 8 s; every lift ring puts you on its high ground
-in about 4.5 s.
+every lane both ways goes through all its rings and lands, never more than 1.9 s between rings; a bot
+crosses the 87 m Lantern Line on its own crossing logic in 7.4 s; every lift ring puts you on its high ground
+in 3.2-5.1 s.
 
 ## On the maps
 The full map always shows lanes (dashed cyan lines, a tick per ring) and lift rings (gold ring with an up

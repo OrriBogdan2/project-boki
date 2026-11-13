@@ -20,11 +20,14 @@ func run(m: Node) -> void:
 	await _stall_on_every_save()
 	_levels()
 	_shelter()
+	_always_adopt()
+	_adopt_edges()
 	_transfer()
 	_stalls()
 	_search()
 	_auction()
 	_black_market()
+	await _lost_cards()
 	_anti_mint()
 	_conservation()
 	_migration()
@@ -213,6 +216,117 @@ func _shelter() -> void:
 	Save.d["layout"] = HomeLayout.new_fs(Save.d, 7)
 	ok(not Shelter.adopt(String(Shelter.cards()[0]["id"]))["ok"] and Shelter.why_not(Save.d["roster"][1]) != "",
 		"a stall at L1 has no shelter yet")
+
+## Always adoptable: an empty shelter shows 3 strays (commons, no usual starters, the flat
+## fee), adopting one restocks at once, and a player with no Boki and only the fee can adopt one.
+func _always_adopt() -> void:
+	_save()
+	var st := MarketSave.section("shelter")
+	st["stock"] = []
+	var fee := int(Goods.rules()["shelter"]["stray_fee"])
+	var cs := Shelter.cards()
+	ok(cs.size() == 3 and cs.all(func(c): return String(c["from"]) == ""), "an empty shelter shows 3 strays")
+	var plain := func(c: Dictionary) -> bool:
+		var sp := String(c["rec"]["species"])
+		return not Data.is_rare(sp) and not Data.LAUNCH_KIN.has(sp)
+	ok(cs.all(plain), "the strays are commons that aren't usual starters")
+	var flat := func(c: Dictionary) -> bool: return int(c["price"]) == fee and int(c["rec"]["level"]) == 1
+	ok(cs.all(flat) and Shelter.cheapest() == fee, "each costs the flat fee (%d gems)" % fee)
+	Save.d["roster"].clear()
+	Save.d["gems"] = fee
+	var r := Shelter.adopt(String(cs[0]["id"]))
+	ok(r["ok"] and int(Save.d["gems"]) == 0 and Save.d["roster"].size() == 1, "no Boki and only the fee: adopts one")
+	var after := Shelter.cards()
+	ok(after.size() == 3 and after.all(func(c): return String(c["from"]) == ""), "adopting restocks a stray at once")
+	Save.d["roster"].clear()
+	Save.d["gems"] = fee
+	ok(not Lifeline.stuck(), "no Boki and the fee in gems is not stuck")
+	# a fresh save at 0 gems and 0 Boki: the shelter still shows 3 strays, and the floor gives one for free
+	_save(0)
+	Save.d["roster"].clear()
+	ok(Shelter.cards().size() == 3 and Lifeline.stuck(), "0 gems, 0 Boki: 3 strays shown, but none affordable")
+	ok(Lifeline.check().size() == 1 and Save.d["roster"].size() == 1, "and the floor hands over a stray")
+
+## Fills a zone with launch-species Boki (a stray is never one of those, so none is a repeat) up to `cap` out.
+func _fill(zone: String, cap: int) -> void:
+	while GardenZones.residents(zone).size() < cap:
+		var sp: String = Data.LAUNCH_KIN[GardenZones.residents(zone).size() % Data.LAUNCH_KIN.size()]
+		var f := Save.new_kin(sp)
+		f["zone"] = zone
+		Save.d["roster"].append(f)
+
+## The edges of "always adoptable": a full zone, no gems, a reload, and a Boki you gave up.
+func _adopt_edges() -> void:
+	var cap := KinBox.farm_cap()
+	var fee := int(Goods.rules()["shelter"]["stray_fee"])
+	# the zone you are in holds the cap: the newcomer sleeps in the Burrow and a line says why
+	_save()
+	Save.d["zones"]["glasswater"] = {"open": true}
+	GardenZones.here = "glasswater"
+	_fill("glasswater", cap)
+	var r := Shelter.adopt(String(Shelter.cards()[0]["id"]))
+	var rec: Dictionary = r.get("rec", {})
+	ok(r["ok"] and KinBox.is_boxed(rec) and GardenZones.zone_of(rec) == "glasswater"
+		and GardenZones.residents("glasswater").size() == cap,
+		"a full zone: the adopted Boki sleeps in the Burrow, the zone keeps its %d" % cap)
+	var line := Shelter.arrival_line(rec)
+	ok(line.contains("Burrow") and line.contains("full (%d out)" % cap) and line.contains(String(rec["name"])),
+		"and the player reads why: %s" % line)
+	ok(Shelter.cards().size() == 3, "the shelter restocked to 3 anyway")
+	# the start zone is full but the zone you are in has room: it comes out here, not into the full one
+	GardenZones.here = "glasswater"
+	_save()
+	Save.d["zones"]["glasswater"] = {"open": true}
+	_fill(GardenZones.start(), cap)
+	r = Shelter.adopt(String(Shelter.cards()[0]["id"]))
+	rec = r.get("rec", {})
+	ok(r["ok"] and not KinBox.is_boxed(rec) and GardenZones.zone_of(rec) == "glasswater"
+		and GardenZones.residents(GardenZones.start()).size() == cap and GardenZones.out_here().has(rec),
+		"it lives in the zone you are in (Glasswater), not the full start zone")
+	ok(Shelter.arrival_line(rec).contains("coming home"), "and the line says it is coming home")
+	GardenZones.here = ""
+	# no Boki and no gems: the shelter says what is missing, and the floor stray comes instead
+	_save(0)
+	Save.d["roster"].clear()
+	var cs := Shelter.cards()
+	r = Shelter.adopt(String(cs[0]["id"]))
+	ok(not r["ok"] and String(r["why"]).contains("%d more gems" % fee) and Save.d["roster"].is_empty()
+		and cs.size() == 3,
+		"0 gems, 0 Boki: adopting says '%s' and takes nothing" % r["why"])
+	var floor_ev := Lifeline.check()
+	ok(floor_ev.size() == 1 and Save.d["roster"].size() == 1 and Save.d["active"] == Save.d["roster"][0]["uid"],
+		"and the floor brings a stray, set as your partner")
+	# the stock survives a reload: same strays, the adopted one gone, still 3
+	_save(fee * 3)
+	cs = Shelter.cards()
+	var gone := String(cs[0]["id"])
+	var keep := [String(cs[1]["id"]), String(cs[2]["id"])]
+	r = Shelter.adopt(gone)
+	var path := "user://market_adopt_save.json"
+	var fh := FileAccess.open(path, FileAccess.WRITE)
+	fh.store_string(JSON.stringify(Save.d))
+	fh.close()
+	Save.load_from(path)
+	DirAccess.remove_absolute(path)
+	var ids: Array = Shelter.cards().map(func(c): return String(c["id"]))
+	ok(r["ok"] and ids.size() == 3 and not ids.has(gone) and ids.has(keep[0]) and ids.has(keep[1])
+		and Shelter.cards().all(func(c): return String(c["from"]) == "" and int(c["price"]) == fee),
+		"after save and reload the strays are the same 3 (one restocked), the adopted one is not back")
+	ok(Save.d["roster"].size() == 4 and int(Save.d["gems"]) == fee * 2, "and the adoptee and the gems are kept")
+	# giving a Boki up, then adopting it back: refused with a line, nothing paid, the stock still 3 strays
+	_save()
+	var mine: Dictionary = Save.d["roster"][1]
+	var uid := String(mine["uid"])
+	ok(Shelter.give_up(uid)["ok"], "gave a Boki up")
+	var card := _card_of(uid)
+	var gems := int(Save.d["gems"])
+	r = Shelter.adopt(String(card["id"]))
+	ok(not r["ok"] and String(r["why"]).contains("gave") and int(Save.d["gems"]) == gems and Save.kin(uid).is_empty(),
+		"adopting it back is refused (%s), no gems taken" % r["why"])
+	var strays := Shelter.cards().filter(func(c): return String(c["from"]) == "")
+	ok(strays.size() == 3, "the shelter still holds its 3 strays")
+	r = Shelter.adopt(String(Shelter.cards()[0]["id"]))
+	ok(r["ok"] and Save.kin(uid).is_empty(), "a stray can be adopted in its place")
 
 func _card_of(uid: String) -> Dictionary:
 	for c in Shelter.cards():
@@ -434,6 +548,58 @@ func _black_market() -> void:
 	var bm := HomeBlackMarket.new(null)
 	ok(bm.TABS.has("ransom") and bm.TABS.has("rare") and String(HomeBlackMarket.OLD_TABS["house"]) == "ransom",
 		"the Black Market has a Ransom tab and a Rare stock tab")
+
+## The Ransom and Captured tabs at 1280x720 (decision 11-08, a new player sees few buttons and one
+## highlighted next action): per card one highlighted button and at most two controls (that and
+## More), picture, time left and price on one line, and two Boki still fit above the fold.
+func _lost_cards() -> void:
+	_save()
+	var rocky := Save.new_kin("pebbit", "Rocky")
+	Save.register(rocky)
+	Save.d["roster"].append(rocky)
+	var lost: Array = Save.d["roster"].slice(1)
+	Ransom.lose(lost[0], "ransom", "", 2)
+	Ransom.lose(lost[1], "rival", "Vexa", 2)
+	Ransom.lose(lost[2], "ransom", "", 5)
+	var bm := HomeBlackMarket.new(null)
+	var pb := UI.scroll_panel("Black Market", 860, Callable(), "Close", true)
+	var panel: PanelContainer = pb[0]
+	var body: VBoxContainer = pb[1]
+	main.add_child(panel)
+	panel.size = Vector2(860, 0)
+	for t in ["ransom", "captured"]:
+		bm.tab = t
+		for c in body.get_children(): c.free()
+		bm.fill(body)
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		var cards := body.get_children().filter(func(c): return c is PanelContainer)
+		var want := 2 if t == "ransom" else 1
+		ok(cards.size() == want, "%s tab: %d card(s)" % [t, cards.size()])
+		var most := 0
+		var hot_each := true
+		var one_line := true
+		for c in cards:
+			var ctl := _controls(c)
+			most = maxi(most, ctl.size())
+			var hot := ctl.filter(func(n): return n is Button and n.theme_type_variation == "Primary")
+			hot_each = hot_each and hot.size() == 1
+			var head: Control = c.get_child(0).get_child(0)
+			one_line = one_line and head.get_child_count() == 4 and head.size.y < 60
+		ok(most <= 2, "%s tab: at most %d controls on a card (a button and More)" % [t, most])
+		ok(hot_each, "%s tab: each card has one highlighted button" % t)
+		ok(one_line, "%s tab: picture, name, time left or holder and price share one line" % t)
+		var h := body.get_combined_minimum_size().y
+		ok(h + 150 <= 720 - 24, "%s tab: fits 1280x720 with the panel's header" % t)
+		print("MARKET info %s: %d controls on a card, %d px tall" % [t, most, h])
+	panel.free()
+
+## Buttons, sliders and text boxes under a node.
+func _controls(n: Node) -> Array:
+	var out: Array = []
+	if n is Button or n is HSlider or n is LineEdit: out.append(n)
+	for ch in n.get_children(): out.append_array(_controls(ch))
+	return out
 
 # ------------------------------------------------------------------ no gem mint
 func _anti_mint() -> void:
