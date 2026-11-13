@@ -26,7 +26,8 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
-			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
+			{"p": "vortex", "size": 2.0}, {"p": "ring", "size": 2.0},
+			{"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
 		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
@@ -63,6 +64,7 @@ func run(main: Node) -> void:
 	_motley_trade(m, P)
 	_dolm_rocks(m)
 	_net(m, V, P)
+	_tier_up(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _vex_core(main)
@@ -354,6 +356,7 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	V._anchors.clear()
 	_clear(V)
 	V.play(P, "all", P.pos, Vector2.RIGHT)
+	# (- 1: the tier-up sheen is drawn by HeroVfx.tier_up, never by a recipe layer)
 	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
@@ -480,6 +483,36 @@ func _vex_rounds(main: Node) -> void:
 static func _star_near(F: VVFx, at: Vector3) -> bool:
 	var stars: Array = F.pools.get("star", [])
 	return stars.any(func(s: Node3D): return s.visible and s.global_position.distance_to(at) < 0.05)
+
+## The armour tier-up sheen: one per tier-up (the real path, Match._armor_up), coloured by the new tier, climbing the
+## body for SHEEN_LIFE; a break and a gain that stays inside the tier draw none; another game's tier-up arrives too.
+func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
+	_clear(V)
+	V.plays.clear()
+	var sheens := func() -> Array:
+		return (V.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
+	P.armor_xp = 0.0
+	P.armor_tier = 0
+	ok(P.armor_gain(10.0) < 0, "a gain inside the tier is no tier-up")
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen without a tier-up")
+	for tier in range(1, Hunter.ARMOR_TIERS.size()):
+		_clear(V)
+		V.plays.clear()
+		P.armor_gain(float(Hunter.ARMOR_TIERS[tier][2]) - P.armor_xp)
+		m._armor_up(P)
+		var made: Array = sheens.call()
+		ok(made.size() == 1 and int(V.plays.get("armor_up", 0)) == 1, "tier %d: one sheen" % tier)
+		var col := Color.BLACK
+		if made.size() == 1:
+			col = (made[0].material_override as ShaderMaterial).get_shader_parameter("col")
+		ok(col.is_equal_approx(Hunter.ARMOR_TIERS[tier][1]), "tier %d: the new tier's colour" % tier)
+	ok(V.live.size() == 1 and is_equal_approx(float(V.live[0]["dur"]), 0.4), "the sheen sweeps in 0.4 s")
+	_clear(V)
+	V.plays.clear()
+	m.on_armor_break(P, null)
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen on an armour break")
+	V.net_in(["fx", "hvfx", P.nid, "armor_up", P.pos.x, P.pos.y, P.pos.z, 0.0, 0.0, 2.0, 0.0, 0.0])
+	ok(sheens.call().size() == 1, "a rival's tier-up arrives from another game")
 
 ## Claire's two scarf tails (HeroScarf): one ribbon each pinned beside the neck anchor, which follows the neck bone;
 ## at rest they hang down behind her, running they stream back against the motion; a new frame after she moves, the

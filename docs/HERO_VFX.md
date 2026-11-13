@@ -79,6 +79,11 @@ a little `back` and out (`splay`); moving, the air's drag streams it back agains
 faster she goes. Keys: `at`, `gap`, `len`, `w` m wide, `back`, `splay`, `c`, `c2`. A wearer keeps its pair of meshes; a
 gone one's pair goes back to the pool, and one drawn while the match loads compiles the shader. Off at the Low preset, past `LOD_FAR` and while the Hero is hidden.
 
+## Armour tier-up
+`HeroVfx.tier_up(h, tier)` (called from `Match._armor_up`) is the one look that is not a recipe: a `sheen` (a band of light climbing a
+body-shaped capsule that faces the camera, so it reads from above) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
+everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). None on an armour break; no ring, no burst.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
