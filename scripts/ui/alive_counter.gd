@@ -3,7 +3,6 @@ class_name AliveCounter
 ## icon and a number, a person icon and a number; solos show players only), and under it your own
 ## kills, knocks and gems in a quieter row. Never who is left. Drawn by Hud; the kill feed hangs under it.
 
-const PAD := 18.0            # px from the screen edge
 const BIG_CELL := Vector2(78.0, 44.0)    # px, one big counter (icon + number)
 const BIG_PX := 26           # px, the big numbers
 const SMALL_CELL := Vector2(54.0, 26.0)  # px, one of your own numbers
@@ -34,6 +33,15 @@ static func players_left(m: Match) -> int:
 static func shows_squads(m: Match) -> bool:
 	return int(m.opts.get("squad", 1)) > 1
 
+## The two rows for a window of size `sz` with `big_cells` big counters: [big row, your own numbers row],
+## both hung from the top-right corner of the one screen-edge margin (HudStyle.safe_pad).
+static func rects(sz: Vector2, big_cells: int) -> Array[Rect2]:
+	var pad := HudStyle.safe_pad(sz)
+	var bw := BIG_CELL.x * big_cells
+	var r := Rect2(Vector2(sz.x - pad.x - bw, pad.y), Vector2(bw, BIG_CELL.y))
+	var sw := SMALL_CELL.x * 3.0      # kills, knocks, gems
+	return [r, Rect2(Vector2(sz.x - pad.x - sw, r.end.y + GAP), Vector2(sw, SMALL_CELL.y))]
+
 ## Draws both rows; returns the y the kill feed starts at.
 static func draw(c: Control, m: Match) -> float:
 	var big := HudStyle.BIG
@@ -41,8 +49,8 @@ static func draw(c: Control, m: Match) -> float:
 	if shows_squads(m):
 		cells.append(["squad", str(squads_left(m))])
 	cells.append(["person", str(players_left(m))])
-	var bw := BIG_CELL.x * cells.size()
-	var r := Rect2(Vector2(c.size.x - PAD - bw, PAD), Vector2(bw, BIG_CELL.y))
+	var rows := rects(c.size, cells.size())
+	var r: Rect2 = rows[0]
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 10, Color(1, 1, 1, 0.16), 1), r)
 	for i in cells.size():
 		var x := r.position.x + BIG_CELL.x * i
@@ -55,8 +63,7 @@ static func draw(c: Control, m: Match) -> float:
 	var knocks := p.knocks if p else 0
 	var gems := p.gems if p else 0
 	var mine := [["knock", kills, Color("ff9a8a")], ["burst", knocks, Color("ffd27a")], ["gem", gems, HudStyle.GOLD]]
-	var sw := SMALL_CELL.x * mine.size()
-	var sr := Rect2(Vector2(c.size.x - PAD - sw, r.end.y + GAP), Vector2(sw, SMALL_CELL.y))
+	var sr: Rect2 = rows[1]
 	c.draw_style_box(HudStyle.box(Color(0.05, 0.03, 0.08, 0.7), 8, Color(0, 0, 0, 0), 0), sr)
 	for i in mine.size():
 		var x := sr.position.x + SMALL_CELL.x * i

@@ -208,8 +208,9 @@ func run(main_node: Node) -> void:
 	_check_safe(hud)
 	_done()
 
-## 9. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap
-## and the tip card sit inside HudStyle.safe_rect, at the window size the run has and at 1280x720 / 1920x1080.
+## 9. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap,
+## the alive counter and the tip card sit inside HudStyle.safe_rect, at the window size the run has and at
+## 1280x720 / 1920x1080.
 func _check_safe(hud) -> void:
 	var sz: Vector2 = hud.c.size
 	var pad := HudStyle.safe_pad(sz)
@@ -230,6 +231,9 @@ func _check_safe(hud) -> void:
 		var origin: Vector2 = hud._hud_origin(size)
 		var vitals := Rect2(origin - Vector2(reach, 0.0), Vector2(HudVitals.BAR_W + 144.0 + reach, 132.0 + reach))
 		ok(s.encloses(vitals), "%s: the vitals block sits in the safe area" % tag)
+		var alive := AliveCounter.rects(size, 2)
+		var alive_in := s.encloses(alive[0]) and s.encloses(alive[1])
+		ok(alive_in, "%s: the alive counter hangs from the safe top-right corner" % tag)
 		var strips := minf(WaysOutHud.top_y(size), TutorialStrip.rect(size).position.y)
 		ok(strips >= s.position.y, "%s: the top strips start under it" % tag)
 
