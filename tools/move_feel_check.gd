@@ -143,6 +143,15 @@ const T := {
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
 	"ledge_fling_early_m":     [">=", 0.0, "m", "a jump as the rise starts: a weak fling (distance onto the top, reference)"],
 	"ledge_fling_timed_m":     [">=", 1.5, "m", "[est] a jump in the window near the top: a real fling onto the top"],
+	# a glider on a cliff face, a ruin wall or a Tenzo rock (UE CharacterMovementComponent slide, no source row
+	# for the glider itself [?]): the part of its speed into the wall is dropped, the part along it kept, no
+	# bounce, and the canopy stays open; the glide force then holds the along-wall speed at cruise x sin(angle)
+	"glide_wall_tangent_lo":   [">=", 0.9, "x", "along-wall speed over the 1 s after a 30/60 degree hit, as a share"
+		+ " of the tangent speed it hit with (worst case)"],
+	"glide_wall_tangent_hi":   ["<=", 1.1, "x", "...and the best case: the wall neither brakes nor speeds the slide"],
+	"glide_wall_speed_min":    [">=", 1.0, "m/s", "slowest frame while the keys push along the wall: no dead stop"],
+	"glide_wall_flips":        ["<=", 0.0, "n", "along-wall speed sign flips over 1 s, every angled hit: no jitter"],
+	"glide_wall_bounce_mps":   ["<=", 0.3, "m/s", "fastest frame moving away from the wall after any hit: no rebound"],
 	"ledge_fling_timed_up_m":  [">=", 0.7, "m", "[est] ...and it goes higher than topping out with no jump"],
 	"ledge_fling_gain":        [">=", 1.5, "x", "[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
 	"ledge_window_s":          [">=", 0.08, "s", "[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
@@ -282,6 +291,7 @@ func run(main: Node) -> void:
 	_abyss_updraft()
 	_feather()
 	_ledge()
+	_glide_wall()
 	_drop()
 	_landing()
 	_camera()
@@ -1366,6 +1376,113 @@ func _ledge() -> void:
 		w.level[int(cv[0])] = cv[1]
 
 # ---------------------------------------------------------------- the opening drop
+# ---------------------------------------------------------------- glider on a wall
+## The glider flown into a wall at 0, 30 and 60 degrees off its normal, keys held the same way: a 7-terrace
+## cliff and a one-tile ruin wall carved east of the flat spot, and a Tenzo rock placed turned 30 degrees
+## off the grid (long enough to slide along for the whole second). Reads the 60 frames after the hit.
+const GLIDE_WALL_DEG := [0.0, 30.0, 60.0]
+const GLIDE_WALL_H := 2.5          # m up the glider starts: under a ruin wall's top, airborne a second after the hit
+const GLIDE_WALL_ROCK_H := 1.85    # m: a rock blocks a body within 1.9 m of its base (Verbs.wall_blocks), so lower
+const GLIDE_WALL_ROCK_LEN := 12.0  # m: a test rock long enough to slide along (a real one is 1.3 m)
+const GLIDE_WALL_OUT := 1.0        # m in front of the face the glider starts
+func _glide_wall() -> void:
+	var x0 := int(floor(flat.x))
+	var z0 := int(floor(flat.z))
+	var lv := int(w.level[w.idx(x0, z0)])
+	var gy := lv * World.LEVEL
+	var tan := [9.0, 0.0]          # worst and best along-wall share over the angled hits
+	var speed_min := 99.0
+	var flips := 0
+	var bounce := 0.0
+	for what in ["cliff", "ruin wall", "tenzo rock"]:
+		var carved := []           # [index, old level, old kind] to put back afterwards
+		var rock := {}
+		var n := Vector2(-1, 0)    # out of the wall
+		var mid := Vector2(x0 + 3.0, z0 + 0.5)
+		if what == "tenzo rock":
+			n = n.rotated(deg_to_rad(30.0))      # off the grid, as an aimed rock lands
+			mid = Vector2(x0 + 4.0, z0 + 0.5)
+			# (someone else's rock, so it is a full wall; it faces the glider and outlasts the try)
+			var at := Vector3(mid.x, gy, mid.y)
+			rock = HeroZones.rock(m, m.hunters[1], at, -n, "gwall", GLIDE_WALL_ROCK_LEN, 30.0, 999.0, false)
+		else:
+			for dz in range(-5, 6):
+				for dx in range(3, 6 if what == "cliff" else 4):
+					var ci := w.idx(x0 + dx, z0 + dz)
+					carved.append([ci, w.level[ci], w.kind[ci]])
+					if what == "cliff":
+						w.level[ci] = lv + 7
+					else:
+						w.kind[ci] = World.T_BLOCK
+						w.walls[ci] = true
+		var t := (-n).rotated(PI / 2.0)      # along the wall, the way a positive angle slides
+		var h0 := GLIDE_WALL_ROCK_H if what == "tenzo rock" else GLIDE_WALL_H
+		for deg in GLIDE_WALL_DEG:
+			var r := _glide_wall_hit(mid, n, t, gy + h0, deg)
+			var tag := "glide_wall %s %d deg" % [what, int(deg)]
+			ok(r["hit"], "%s: the glider met the wall" % tag)
+			ok(r["open"], "%s: the glider stays open on the wall" % tag)
+			ok(r["into"] < 0.5, "%s: it stays pressed on the wall (%.2f m/s into it at most)" % [tag, r["into"]])
+			bounce = maxf(bounce, r["out"])
+			if deg > 0.0 and r["hit"]:
+				var row := [tag, r["tan"], r["tan0"], r["slow"]]
+				print("MFEEL %s: along-wall %.2fx of %.2f m/s, slowest %.2f m/s" % row)
+				tan[0] = minf(tan[0], r["tan"])
+				tan[1] = maxf(tan[1], r["tan"])
+				speed_min = minf(speed_min, r["slow"])
+				flips += int(r["flips"])
+		if not rock.is_empty():
+			HeroZones.remove_rock(m, rock, false)
+		for c in carved:
+			w.level[c[0]] = c[1]
+			w.kind[c[0]] = c[2]
+			w.walls.erase(c[0])
+	rec("glide_wall_tangent_lo", tan[0])
+	rec("glide_wall_tangent_hi", tan[1])
+	rec("glide_wall_speed_min", speed_min)
+	rec("glide_wall_flips", float(flips))
+	rec("glide_wall_bounce_mps", bounce)
+
+## One glide at the wall whose face passes `mid` with normal `n` (out of it) and tangent `t`, `deg` off the
+## normal, from `y` up: {hit, open, into (max m/s into the wall after it), out (max m/s away), tan (mean
+## along-wall share of tan0 over the second), tan0, slow (slowest frame), flips (along-wall sign flips)}.
+func _glide_wall_hit(mid: Vector2, n: Vector2, t: Vector2, y: float, deg: float) -> Dictionary:
+	var dir := (-n).rotated(deg_to_rad(deg))
+	var start := mid + n * GLIDE_WALL_OUT - t * GLIDE_WALL_OUT * sin(deg_to_rad(deg))
+	_reset(Vector3(start.x, y, start.y), false)
+	P.gliding = true
+	P.inp["glide"] = true
+	P.inp["move"] = dir
+	P.vel = Vector3(dir.x * Hunter.GLIDE_SPEED, 0.0, dir.y * Hunter.GLIDE_SPEED)
+	var into0 := Hunter.GLIDE_SPEED * cos(deg_to_rad(deg))
+	var r := {"hit": false, "open": true, "into": 0.0, "out": 0.0, "tan": 0.0, "slow": 99.0, "flips": 0,
+		"tan0": Hunter.GLIDE_SPEED * sin(deg_to_rad(deg))}
+	var since := 0           # frames since the hit
+	var last_sign := 0.0
+	for i in 120:
+		m.step(DT)
+		var hv := _hv(P)
+		if not r["hit"]:
+			r["hit"] = hv.dot(-n) < into0 * 0.5      # (the wall took the speed into it)
+			if not r["hit"]:
+				continue
+		since += 1
+		if since > 60:
+			break
+		r["open"] = r["open"] and P.gliding
+		r["out"] = maxf(r["out"], hv.dot(n))
+		r["into"] = maxf(r["into"], hv.dot(-n))
+		if deg <= 0.0:
+			continue
+		var tv := hv.dot(t)
+		r["tan"] += tv / 60.0 / r["tan0"]
+		r["slow"] = minf(r["slow"], hv.length())
+		if absf(tv) > 0.05:
+			if last_sign != 0.0 and signf(tv) != last_sign:
+				r["flips"] += 1
+			last_sign = signf(tv)
+	return r
+
 func _drop() -> void:
 	_reset(flat + Vector3(0, 40.0, 0), false)
 	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0

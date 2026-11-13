@@ -441,6 +441,7 @@ const CHECKS := {
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
 	"--mantle-fling-check": ["res://tools/mantle_fling_check.gd", "mantle_fling_check", null],      # owner bug 11-11
+	"--wall-slide-check": ["res://tools/wall_slide_check.gd", "wall_slide_check", null],  # walls, corners
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	# which surfaces a wall stun counts
 	"--wall-stun-check": ["res://tools/wall_stun_check.gd", "wall_stun_check", null],
