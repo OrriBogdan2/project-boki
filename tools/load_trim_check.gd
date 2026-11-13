@@ -6,7 +6,6 @@ extends RefCounted
 ## share its glider's meshes, each with its own canopy material. A Warden drawn from its .glb keeps the rig nodes
 ## that drive its bones but none of the hidden procedural body's loose parts; set to procedural, the same Warden
 ## still merges its body.
-## Reads a match never took are let go at its end (the loader would hold their textures for the rest of the session).
 
 const RIG := ["Rig/Torso", "Rig/Torso/HeadPivot", "Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Legs/LegR/Knee"]
 
@@ -76,13 +75,7 @@ func _fetches() -> void:
 	BokiRig.fetch_common()
 	var kin_missing := Data.common_kin().filter(func(k): return BokiRig.has(k) and not _asked(BokiRig.PATH % [k, k]))
 	_ok("and every common Boki's (missing %s)" % str(kin_missing), kin_missing.is_empty())
-	var out: Array = BackgroundWork._reads.keys()
-	while out.any(func(p): return ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_IN_PROGRESS):
-		OS.delay_msec(20)
-	BackgroundWork.drop_reads()
-	_ok("a match's end lets go of every read it never took (%d held)" % out.filter(_asked).size(),
-		BackgroundWork._reads.is_empty() and not out.any(_asked))
-	_ok("and a Warden it let go still builds (read again)", WardenGlb._scene(own) != null)
+	BackgroundWork.drain()
 
 func _loose(n: Node) -> int:
 	var c := 0
