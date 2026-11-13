@@ -11,8 +11,11 @@ extends RefCounted
 
 const SEXES := ["Female", "Male"]
 ## Per sex, in SEXES order: the face sliders (MantleLook "face_w" and "jaw", 0.5 neutral) that give her a narrower,
-## shorter face and him a wider, longer jaw. With her smaller head and torso she stands about 7 cm shorter.
+## shorter face and him a wider, longer jaw.
 const SEX_FACE := [{"face_w": 0.3, "jaw": 0.4}, {"face_w": 0.7, "jaw": 0.65}]
+## Per sex, in SEXES order: x the body's size (the model only; the ring, her hitbox, keeps its size). With her
+## smaller head and torso she stands about 7 cm shorter.
+const SEX_HEIGHT := [0.985, 1.0]
 const HEIGHTS := ["Short", "Average", "Tall"]
 const HEIGHT_SCALE := [0.9, 1.0, 1.1]       # x the hunter's size: the whole body, its ring and the camera
 const BUILDS := ["Slight", "Average", "Sturdy"]
@@ -182,7 +185,8 @@ static func legacy(lk: Dictionary) -> Dictionary:
 ## The race entry Models.hunter reads: always human, sized by height.
 static func race(lk: Dictionary) -> Dictionary:
 	var u := clean(lk)
-	return {"id": "human", "name": "Human", "scale": HEIGHT_SCALE[u["height"]],
+	var size_k := float(HEIGHT_SCALE[u["height"]]) * float(SEX_HEIGHT[u["gender"]])
+	return {"id": "human", "name": "Human", "scale": size_k,
 		"head": 0.95 if int(u["gender"]) == 0 else 1.0, "bulk": BUILD_BULK[u["build"]], "skin": 1, "desc": ""}
 
 static func colour(lk: Dictionary) -> Color:
