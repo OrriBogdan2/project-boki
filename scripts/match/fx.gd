@@ -363,12 +363,14 @@ const HEAL_MOTES := 16        # motes in a heal's rise, before the particle qual
 ## a crit never rolls into the count. Without a key, nearby numbers of the same kind merge. A heal
 ## (Num.HEAL) never joins a damage number, whatever its prefix.
 ## Numbers stay out of the screen area round the reticle.
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "", kind := Num.HIT) -> void:
+func number(
+	at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "", kind := Num.HIT, small := false
+) -> void:
 	if v <= 0.0 or (kind == Num.HIT and (v < NUM_MIN or (prefix == "" and not Settings.get_v("damage_numbers")))):
 		return
 	at = _off_reticle(at)
 	for n in nums:
-		if n.has("val") and _rolls_into(n, at, prefix, crit, key, kind):
+		if n.has("val") and _rolls_into(n, at, prefix, crit, key, kind, small):
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -381,7 +383,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 			elif not n.get("crit", false):
 				ln.modulate = col
 			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)), bool(n["small"]))
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			ln.visible = float(n["val"]) >= NUM_MIN
@@ -394,18 +396,19 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
 	_num_look(l, crit)
-	l.font_size = _num_size(v, crit)
+	l.font_size = _num_size(v, crit, small)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = v >= NUM_MIN       # a sliver of a heal (lifesteal on a light hit) shows once more adds up
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v,
-		"pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key, "kind": kind})
+		"pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key, "kind": kind,
+		"small": small})
 
 ## Does a new hit join this number? Keyed hits join the same key's number (ticks, so a long window;
 ## a crit only within MERGE_T and never into a number past ROLL_MAX_T); unkeyed ones join any nearby one.
-func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String, kind: int) -> bool:
-	if String(n["pre"]) != prefix or int(n["kind"]) != kind:
+func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String, kind: int, small: bool) -> bool:
+	if String(n["pre"]) != prefix or int(n["kind"]) != kind or bool(n["small"]) != small:
 		return false
 	if key == "":
 		return String(n["key"]) == "" and float(n["last"]) < MERGE_T and (n["base"] as Vector3).distance_to(at) < 1.6
@@ -417,7 +420,8 @@ func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: St
 
 ## A hit on `target` from `src`, over its head; one source's hits on one target roll together.
 func hit_number(target: Ent, src: Ent, v: float, col: Color, crit: bool) -> void:
-	number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), v, col, crit, "", roll_key(src, target))
+	var at := target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0)
+	number(at, v, col, crit, "", roll_key(src, target), Num.HIT, target is Kin)
 
 ## The roll key for damage from `src` onto `target`.
 static func roll_key(src: Ent, target: Ent) -> String:
@@ -466,12 +470,13 @@ func _num_look(l: Label3D, crit: bool) -> void:
 	l.outline_size = 20 if crit else 14
 
 ## Big hits read big: the size steps up with the damage tier, a crit is larger again.
-static func _num_size(v: float, crit: bool) -> int:
+static func _num_size(v: float, crit: bool, small := false) -> int:
 	var px := 0
 	for t in SIZE_TIERS:
 		if v >= float(t[0]):
 			px = int(t[1])
-	return px + (CRIT_SIZE if crit else 0)
+	px += CRIT_SIZE if crit else 0
+	return int(px * Juice.BOKI_NUM_K) if small else px
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
