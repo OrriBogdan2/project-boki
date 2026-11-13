@@ -18,7 +18,7 @@ grows with every knock.
 
 1. **Salvage** builds from knocks and assists (+2.5% health each, up to 10). Hits on a hunter's back deal 50% more.
 2. **Scattergun** (LMB): seven slugs in a tight fan, a shot every half second. The fan's edges show on the ground while you fire.
-3. **Abyssal Hand** (RMB): your arm reaches through rocks and cliffs to the first foe and reels them to your feet, stunned, while you stand braced (a slow shuffle swings them). It also pulls an ally to safety. Only the barge works while you reel.
+3. **Deep Reach** (RMB): your arm reaches through rocks and cliffs to the first foe and reels them to your feet, stunned, while you stand braced (a slow shuffle swings them). It also pulls an ally to safety. Only the barge works while you reel.
 4. **Anchor Drop** (E): hop forward and slam a giant anchor down in front of you for a long stun. In the air you smash straight down, and the higher you fall the harder it hits.
 5. **Barge** (Shift, 3 charges a beat apart): a low clawing lunge the way you move that touches nobody, further in the air; just after the Anchor it can't turn much.
 
@@ -26,10 +26,10 @@ grows with every knock.
 
 | Do this | And you get |
 |---|---|
-| Abyssal Hand, then Anchor Drop on the arriving foe | the core combo: damage, a long stun, slam |
+| Deep Reach, then Anchor Drop on the arriving foe | the core combo: damage, a long stun, slam |
 | Barge while reeling | works; the reel carries on |
-| Abyssal Hand past a rock | the foe is dragged over it |
-| Abyssal Hand at a cliff face | it reaches through and drags the foe over |
+| Deep Reach past a rock | the foe is dragged over it |
+| Deep Reach at a cliff face | it reaches through and drags the foe over |
 | A reel over a gap | the foe falls (the abyss rules) |
 | Jump, then Anchor Drop | a straight-down smash with a ring of damage |
 | Anchor over the abyss | no downward push |
@@ -61,7 +61,7 @@ What the in-game kit card (K) says.
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
 | Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
 | Dash: Barge | A short, low lunge the way you move, clawing the ground; a pounce, further, in the air. It works while you reel. |
-| RMB: Abyssal Hand | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
+| RMB: Deep Reach | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
 | E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
 | Hunter ultimate: Brass Broadside | Brass Broadside (level 6): charge a fan while you walk slowly, then two waves of heavy brass slugs with Anti-Heal. |
 | Weapon: Shotgun | Seven slugs in a tight fan that stop 6m out, a shot every half second. Hits from behind hurt more. |
@@ -72,7 +72,7 @@ What the in-game kit card (K) says.
 
 **Barge (dash, Shift, 10s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
-**Abyssal Hand (RMB, 12s cooldown).**
+**Deep Reach (RMB, 12s cooldown).**
 
 - *Tap:* Your abyssal arm coils back for 0.2s, then reaches 11.5m (slowly: a foe who sees it can sidestep) through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 

@@ -410,7 +410,7 @@ What the game does with a number (so a row reads straight): areas (cone, ring, s
 | LMB | 7 slugs, bloom [D]; [F] fan 20 rested, 30 firing, fixed stop ~3.5 bh, no falloff with range | 7 slugs, the first volley of a burst on the aim line (owner 11-10), then fan 20 + bloom to 30 (was 30 + 15, fixed), stop 6.3 m, no falloff; aimed volley 14.0 at 2, 6 and 6.2 m; a 30 degree volley 14.0 at 2 m, 8.9 (3 slugs) at 6 m and 6.2 m, asserted in `--dredge-combo-check` | match |
 | RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, slugs hang at 6.3 m, bloom folds back 0.7 s after the last shot | match |
-| RMB | Arm pierces terrain, pulls first target (enemy or ally), scoops Wisps, 18 s [D] | Abyssal Hand: 11.5 m through rocks and cliffs (a placed wall stops it), reel, braced shuffle at 1/5 walk, ally and Wisps caught, cd 12 | match; 0.67x cd (gap 10) |
+| RMB | Arm pierces terrain, pulls first target (enemy or ally), scoops Wisps, 18 s [D] | Deep Reach: 11.5 m through rocks and cliffs (a placed wall stops it), reel, braced shuffle at 1/5 walk, ally and Wisps caught, cd 12 | match; 0.67x cd (gap 10) |
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
 | RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd · cd **open** (gap 10) |
 | Q | none | glove | ours |

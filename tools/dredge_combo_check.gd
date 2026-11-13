@@ -1,6 +1,6 @@
 extends RefCounted
 ## --dredge-combo-check: Grimble's abilities and their interactions, scripted one by one in the
-## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Abyssal Hand
+## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Deep Reach
 ## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
@@ -37,7 +37,7 @@ func run(main_node: Node) -> void:
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## Taps the Abyssal Hand and steps through the coil-back and the flight (it grabs, misses or is stopped), then
+## Taps the Deep Reach and steps through the coil-back and the flight (it grabs, misses or is stopped), then
 ## one frame more so a reel's first frame is drawn.
 func _throw(m: Match, P: Hunter) -> void:
 	ak.tap(m, P)
@@ -437,7 +437,7 @@ func _all() -> void:
 		and (wear[0][0] / wear[0][1]) > (wear[1][0] / wear[1][1]) * 1.5,
 		"tight armor %.1f hp %.1f, spread armor %.1f hp %.1f" % [wear[0][0], wear[0][1], wear[1][0], wear[1][1]]
 	)
-	# --- Abyssal Hand reels a foe in
+	# --- Deep Reach reels a foe in
 	reset.call()
 	_throw(m, P)
 	var d0 := P.flat_dist(T)
@@ -457,7 +457,7 @@ func _all() -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	ak.tap(m, P)
-	ok("reel: a second Abyssal Hand is denied", K.grapples == 1)
+	ok("reel: a second Deep Reach is denied", K.grapples == 1)
 	K.cd["e"] = 0.0
 	P.ak.use_e()
 	ok("reel: E is denied while reeling", K.anchors == 0 and K.wind <= 0.0)
@@ -558,7 +558,7 @@ func _all() -> void:
 	var gw0 := K.grapples
 	_throw(m, P)
 	ok(
-		"placed wall: stops the Abyssal Hand, no hook and no damage behind it",
+		"placed wall: stops the Deep Reach, no hook and no damage behind it",
 		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
 		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
 	)
@@ -889,7 +889,7 @@ func _all() -> void:
 		"passive: from behind +50%, from the front none", absf(behind - 15.0) < 0.01 and absf(front - 10.0) < 0.01,
 		"behind %.1f front %.1f" % [behind, front]
 	)
-	# --- rank 3: the Abyssal Hand refunds on a hit, pellet hits trim the barge recharge
+	# --- rank 3: the Deep Reach refunds on a hit, pellet hits trim the barge recharge
 	reset.call()
 	P.slot_lv["sec"] = 3
 	P.slot_lv["dash"] = 3
