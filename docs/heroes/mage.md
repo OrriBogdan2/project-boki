@@ -4,7 +4,7 @@ Internal design note. This file may name the source hero for traceability; nothi
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
 sheet: briefs/hero-ref/vireo.md, from gameplay footage; owner playtest notes override the footage).
 Our hero is an original character, the storm-kite runner: flight goggles, a cropped jacket, copper
-coils at both wrists and a copper rod mast flying a pennant. Palette: teal and hot pink lightning, copper rod (the lightning, orbs and Static marks are teal + pink; not yellow). Payoff word: BLOWOUT.
+coils at both wrists and a copper rod mast flying a pennant. Palette: pink-white and hot pink lightning, copper rod (the lightning, orbs and Static marks are pink-white + pink; no cyan, not yellow: DECISIONS 11-08). Payoff word: BLOWOUT.
 
 ## Kit card (L picker)
 - Role: Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.

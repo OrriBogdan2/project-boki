@@ -31,7 +31,7 @@ func cast() -> bool:
 	var ed := kit.e_def()
 	var at := AimMode.place(kit.h, float(ed["reach"]))
 	kit.strikes.append({"at": at, "t": float(ed["drag_max"]), "dir": default_dir(at), "phase": "flick"})
-	kit.fx().star(at + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.PINK, 0.8, 0.12)
+	kit.fx().star(at + Vector3(0, 0.3, 0), MageKit.PINK_WHITE, MageKit.PINK, 0.8, 0.12)
 	kit.fx().disc(at, float(ed["radius"]), MageKit.VIOLET, MageKit.PINK, 0.2, MageKit.COPPER)
 	kit.m.sfx("vv_sky_place", at, -3.0)
 	kit.play("mage_e")
@@ -121,7 +121,7 @@ func _strike(s: Dictionary) -> void:
 		_slide(f, dir, ed)
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
-		kit.fx().shackle(f, MageKit.TEAL, MageKit.PINK, float(ed["grounded"]))
+		kit.fx().shackle(f, MageKit.PINK_WHITE, MageKit.PINK, float(ed["grounded"]))
 	for o in kit.m.hunters:       # rival Wisps (downed hunters) are launched too; no Static, no Grounded
 		if o.team != kit.h.team and o.downed and o.hittable() and not CareUtil.is_carried(o) \
 				and o.flat_dist(at) < float(ed["radius"]) + o.r and absf(o.pos.y - at.y) < 2.2:
@@ -139,9 +139,9 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	var fx := kit.fx()
 	for i in 3:
 		var sky := at + Vector3(0, 9.0, 0) + kit._jitter(0.6, 0.0, 0.0)
-		fx.arc(sky, at + kit._jitter(0.4, 0.1, 0.1), MageKit.TEAL, MageKit.PINK, 1.0 - 0.25 * i, 0.22)
-	kit.net_bolt(at + Vector3(0, 9.0, 0), at, MageKit.TEAL)
-	fx.ring(at, r, MageKit.PINK, MageKit.TEAL, 0.35)          # the hit area, at its true size
+		fx.arc(sky, at + kit._jitter(0.4, 0.1, 0.1), MageKit.PINK_WHITE, MageKit.PINK, 1.0 - 0.25 * i, 0.22)
+	kit.net_bolt(at + Vector3(0, 9.0, 0), at, MageKit.PINK_WHITE)
+	fx.ring(at, r, MageKit.PINK, MageKit.PINK_WHITE, 0.35)          # the hit area, at its true size
 	fx.disc(at, r * 0.9, Color("1a1420"), MageKit.PINK, 0.45, MageKit.COPPER)
 	kit.m.fx.flash(at + Vector3(0, 1.0, 0), MageKit.PINK, 1.8, 0.12)
 	kit.m.sfx("vv_sky_strike", at, 0.0)
@@ -159,4 +159,4 @@ func _fling_orb(mt: Dictionary, dir: Vector2, ed: Dictionary) -> void:
 	var dest := kit.ground(kit.h.pos) if homing else kit.ground(land)
 	mt["fly"] = {"from": from, "to": dest, "t": 0.0, "home": homing}
 	var lift := Vector3(0, 0.55, 0)
-	kit.fx().arc(from + lift, dest + lift, MageKit.TEAL, MageKit.PINK, 0.6, 0.25)
+	kit.fx().arc(from + lift, dest + lift, MageKit.PINK_WHITE, MageKit.PINK, 0.6, 0.25)

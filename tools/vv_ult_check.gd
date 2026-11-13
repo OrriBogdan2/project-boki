@@ -66,6 +66,8 @@ func mage() -> void:
 	ok("Kitefall: the gold range ring (8 bh) round the take-off, seen by everyone",
 			AimKit.shown(P, "x_ring") and bool(ring.get("all", false)) and absf(ring_r - 8.0 * AimKit.BH) < 0.1,
 			"r %.1f" % float(ring.get("r", 0.0)))
+	var big := K.fx().live.filter(func(e): return e["kind"] == "disc" and (e["s0"] as Vector3).x > ring_r * 0.5)
+	ok("Kitefall: the look stays local (no ring-sized dark disc over the screen)", big.is_empty(), "%d" % big.size())
 	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
 	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
