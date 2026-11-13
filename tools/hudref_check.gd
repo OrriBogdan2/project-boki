@@ -11,6 +11,8 @@ extends RefCounted
 ##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
 ##   9. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
 ##   9. every drawn HUD block, the tip card and the top strips sit inside the HudStyle safe margin
+##   9. an ally's Hearth Call on you: a slim bar with Meeko's portrait under your vitals, draining over the
+##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -130,6 +132,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
 	await _knock_banners(m, hud, P)
+	await _channel(m, hud, P)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -444,6 +447,49 @@ func _banner_closes(kb: KnockBanner) -> void:
 		guard += 1
 	ok(kb.word() == "" and shown_for >= 1.0 and shown_for <= 1.5,
 		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
+
+## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
+func _channel(m: Match, hud, P: Hunter) -> void:
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.out)
+	ok(not mates.is_empty(), "an ally to be Meeko (%d)" % mates.size())
+	if mates.is_empty():
+		return
+	var M: Hunter = mates[0]
+	M.downed = false         # (section 7 knocked them)
+	M.reclass(Arch.weight("tender"), "tender")
+	var K: TenderKit = M.ak
+	var total := float(K.x_def()["time"])
+	await main.get_tree().process_frame
+	ok(ChannelBar.shown.is_empty(), "no channel, no bar")
+	K.hearth_call = {"who": P, "left": total, "tick": 0.0, "fx": 0.0}
+	await hud.panels.draw
+	var bar: Dictionary = ChannelBar.shown.get(M.nid, {})
+	ok(not bar.is_empty() and is_equal_approx(float(bar["frac"]), 1.0) and total == 5.0,
+		"her channel on you (%.1f s): the bar is up, full (%s)" % [total, bar])
+	K.hearth_call["left"] = total * 0.4
+	await hud.panels.draw
+	var drained := float(ChannelBar.shown.get(M.nid, {}).get("frac", -1.0))
+	ok(absf(drained - 0.4) < 0.01, "it drains with the seconds left (%.2f, want 0.40)" % drained)
+	var row: Array = m._ser(M)
+	K.hearth_call = {}
+	M.remote = true
+	m._net_apply(M, row)
+	await hud.panels.draw
+	ok(ChannelBar.shown.has(M.nid), "another machine: the snapshot's target and seconds left bring it back")
+	m._net_apply(M, row.slice(0, row.size() - 2) + ["", 0.0])
+	await hud.panels.draw
+	ok(ChannelBar.shown.is_empty(), "a snapshot with no channel: the bar is gone")
+	ChannelBar.store(M, P.nid, 0.05)
+	await frames_until(m, m.time + 0.1)
+	await hud.panels.draw
+	ok(ChannelBar.shown.is_empty(), "the seconds run out: gone with no further snapshot")
+	ChannelBar.store(M, P.nid, 3.0)
+	await hud.panels.draw
+	M.downed = true
+	await hud.panels.draw
+	ok(ChannelBar.shown.is_empty(), "Meeko knocked down mid-channel: gone that frame")
+	M.downed = false
+	M.remote = false
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

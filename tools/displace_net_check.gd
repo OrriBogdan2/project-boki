@@ -123,6 +123,7 @@ func _host() -> void:
 	await _glide_spike(G, B, _boki_spike, "a Boki spike")
 	ok(bool(early.get("shot", false)), "a Boki spike: the player is spiked on their own game within one snapshot",
 		"vy %.1f" % float(early.get("vy", 0.0)))
+	await _meeko_bar(G)
 	_finish()
 
 func _finish() -> void:
@@ -300,6 +301,32 @@ func _hazard(G: Hunter, B: Hunter) -> void:
 	B.teleport(home + Vector3(-6.0, 0, 9.0))
 	await _place(G, home + PARK)
 
+## Meeko's Hearth Call on the guest: its own game shows the protection bar (her nid, the seconds left from the
+## snapshot) while she channels, and not once she is stunned out of it.
+func _meeko_bar(G: Hunter) -> void:
+	var P := m.player
+	_kit("tender")
+	G.team = P.team
+	Net.lobby_emit("dn", {"c": "team", "team": P.team})
+	await _place(G, home + Vector3(6.0, 0, 0))
+	await _ask()
+	var before: Array = replies[0].get("chan", [0]) if not replies.is_empty() else [0]
+	_aim(G.pos)
+	P.ak.cast_ult()
+	await _run(1.0)
+	await _ask()
+	var chan: Array = replies[0].get("chan", []) if not replies.is_empty() else []
+	var left := float(chan[1]) if chan.size() == 2 else -1.0
+	ok(before.is_empty() and chan.size() == 2 and chan[0] == P.nid and left > 2.5 and left < 4.5,
+		"Meeko's channel on the guest: its game draws her bar, ~4 s of 5 left (before %s, then %s)" % [before, chan])
+	P.stun_t = 1.0
+	await _run(1.0)
+	await _ask()
+	var after: Array = replies[0].get("chan", [0]) if not replies.is_empty() else [0]
+	ok(after.is_empty(), "she is stunned out of it: the bar is gone on the guest's game (%s)" % [after])
+	P.stun_t = 0.0
+	await _place(G, home + PARK)
+
 ## Hit options beyond damage and the impulse travel with a hit on a player: a knock into a wall with a long
 ## wall stun stuns them that long on their own game; a burn's length and a slow's strength hold.
 func _knock_extras(G: Hunter, B: Hunter) -> void:
@@ -451,6 +478,12 @@ func _on_msg(topic: String, data, _from: String) -> void:
 				m.player.teleport(Vector3(a[0], a[1], a[2]))
 				_say()
 		"ask": _say()
+		"team":
+			if m and m.player:
+				m.player.team = int(data["team"])
+				for h in m.hunters:      # (a lobby roster would name the host's arch; this match only reclasses)
+					if h != m.player:
+						h.reclass(Arch.weight("tender"), "tender")
 		"glide":
 			if m and m.player:
 				_fresh(m.player)
@@ -462,7 +495,13 @@ func _say() -> void:
 		var P := m.player
 		Net.lobby_emit("dn_r", {
 			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k,
-			"air": 0.0 if P.grounded else 1.0, "vx": P.vel.x, "vy": P.vel.y, "shot": P.shot_down})
+			"air": 0.0 if P.grounded else 1.0, "vx": P.vel.x, "vy": P.vel.y, "shot": P.shot_down,
+			"chan": _chan(P)})
+
+## The protection bar this game would draw for its player: [Meeko's nid, seconds left], or [] when none.
+func _chan(P: Hunter) -> Array:
+	var from := ChannelBar.caster_on(m, P)
+	return [] if from == null else [from.nid, ChannelBar.read(from)[1]]
 
 # ------------------------------------------------------------------ both
 func _connect() -> bool:
