@@ -33,6 +33,8 @@ class CatSpy extends Fx:
 		seen.append(col)
 	func body_glow(_at: Vector3, col: Color) -> void:
 		seen.append(col)
+	func healed(_h: Hunter, _n: float) -> void:   # the heal read is sustain-coloured, not a fenced damage colour
+		pass
 	func number(_at: Vector3, _v: float, col: Color, _crit: bool, _prefix := "", _key := "", _kind := Fx.Num.HIT) -> void:
 		seen.append(col)
 	func word(_at: Vector3, _txt: String, col: Color, _big := false) -> void:
