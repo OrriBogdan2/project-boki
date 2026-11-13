@@ -7,6 +7,8 @@ extends RefCounted
 ##      clicking the "+" spends the point; with no points left the "+" and its click target go away
 ##   5. a quiet beam shows over each slot that can rank, and clears after the pick
 ##   6. a new point shows the ALT+key hint for a few seconds
+##   7. the level-up rise plays once per level, the rank confirm once per slot rank, the max sting once
+##      at the top rank (instead of the confirm), a rival's levels and ranks make no sound (LevelSfx)
 ## Runs a real match headless with the real HUD. Never touches the save.
 
 var bad := 0
@@ -45,10 +47,17 @@ func _max_e_first(P: Hunter) -> void:
 	var e_max := int(Hunter.SLOT_MAX["kin"])
 	var pow1 := P.ak.power("kin") if P.ak.rank("kin") == 1 else -1.0
 	var cd1 := P.ak.cd_k("kin")
+	var h0 := LevelSfx.heard.duplicate()
 	P.gain_xp(float(Hunter.XP_TO[e_max - 1]) - P.xp + 1.0)
 	ok(P.lvl == e_max and P.skill_pts == e_max, "level %d banks %d points (%d)" % [e_max, e_max, P.skill_pts])
+	var rises := _heard(h0, "level_up")
+	ok(rises == e_max - 1, "the level-up rise played once per level gained (%d)" % rises)
 	for i in e_max:
 		P.level_slot("kin")
+	var ups := _heard(h0, "rank_up")
+	var stings := _heard(h0, "rank_max")
+	ok(ups == e_max - 1 and stings == 1,
+		"E's ranks: a confirm each below the top, one sting at the top (%d, %d)" % [ups, stings])
 	ok(int(P.slot_lv["kin"]) == e_max and P.skill_pts == 0, "every point went into E: rank %d of %d" % [
 		int(P.slot_lv["kin"]), e_max])
 	ok(int(P.slot_lv["sec"]) == 0 and int(P.slot_lv["dash"]) == 0, "RMB and dash untouched (E-max first)")
@@ -65,7 +74,9 @@ func _bot_ranks(bot: Hunter) -> void:
 	if bot == null:
 		ok(false, "a bot in the match")
 		return
+	var h0 := LevelSfx.heard.duplicate()
 	bot.gain_xp(float(Hunter.XP_TO[4]) - bot.xp + 1.0)
+	ok(LevelSfx.heard == h0, "a rival's levels and ranks made no sound")
 	var spent := 0
 	for s in Hunter.SLOTS:
 		spent += int(bot.slot_lv[s])
@@ -77,7 +88,9 @@ func _bar(m: Match, P: Hunter) -> void:
 	var clicks: Array = m.hud.ui_extra.filter(func(n): return n is RankClick)
 	ok(clicks.size() == Hunter.SLOTS.size(), "one click target per ranked slot (%d)" % clicks.size())
 	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
+	var h0 := LevelSfx.heard.duplicate()
 	P.level_slot("dash")
+	ok(_heard(h0, "rank_up") == 1 and _heard(h0, "rank_max") == 0, "ranking dash once: one confirm, no sting")
 	await _frames(3)
 	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
 	await m.hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
@@ -106,6 +119,9 @@ func _bar(m: Match, P: Hunter) -> void:
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
 	ok(not RankMarks.beam_on("sec") and not RankMarks.beam_on("dash"), "after the pick the beam is cleared")
+
+func _heard(before: Dictionary, cue: String) -> int:
+	return int(LevelSfx.heard.get(cue, 0)) - int(before.get(cue, 0))
 
 func _frames(n: int) -> void:
 	for i in n:

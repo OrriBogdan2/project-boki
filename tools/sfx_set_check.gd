@@ -30,6 +30,7 @@ extends RefCounted
 ## Reads the files (and, for the Hearth Call loop, one short training match); never touches the save.
 ##  11. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
 ##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
+##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
@@ -67,6 +68,7 @@ func run(main: Node) -> void:
 	_rarity_stings()
 	await _call_loop(main)
 	_hostile()
+	_level_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -293,6 +295,21 @@ func _hostile() -> void:
 	var x := cue_src.contains("HostileCue.play(m.player, h)")
 	var net := match_src.contains("\"hcast\": HostileCue.net_in")
 	ok(used and x and net, "E and R (ability_used), X (UltCue) and other games' casts (hcast) play it")
+
+## 9. Levelling up has its own cues, each called from one place, for the local Hunter only.
+func _level_cues() -> void:
+	var made := true
+	for sname in ["level_up", "rank_up", "rank_max"]:
+		made = made and Sfx.ensure(sname) and Sfx.sound_reach.get(sname, 0.0) == 0.0
+	ok(made, "level_up, rank_up and rank_max exist and are not positional")
+	var pitched := true
+	for slot in Hunter.SLOTS:
+		pitched = pitched and LevelSfx.SLOT_PITCH.has(slot)
+	ok(pitched, "every ranked slot has its own confirm pitch")
+	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
+	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
+			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

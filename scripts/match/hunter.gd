@@ -2807,8 +2807,7 @@ func gain_xp(x: float) -> void:
 			m.fx.body_glow(pos, Arch.color(arch) if Arch.exists(arch) else Color("ffd27a"))
 		if is_local() and m and m.hud:
 			m.hud.level_up(lvl, wstep)
-			# the level-up chime: its own rising bell run over a warm swell (tools/gen_sfx_ui.py)
-			m.sfx("level_up", null, -2.0, 1.0)
+			LevelSfx.level_up(m)      # the soft rising bell run (tools/gen_sfx_ui.py)
 			if kin is Kin: BokiChatter.say(m, kin, "level_up")
 			level_ups += 1
 	if not is_local():
@@ -2841,7 +2840,7 @@ func level_slot(slot: String) -> bool:
 		if m and m.has_method("on_bond_ready"): m.on_bond_ready(self)
 	if is_local() and m and m.hud:
 		m.hud.ability_feedback({"sec": "sec", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
-		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
+		LevelSfx.rank(m, slot, int(slot_lv[slot]))
 	return true
 
 ## Bots (and anyone skipping the choice) spend points in a sensible order.

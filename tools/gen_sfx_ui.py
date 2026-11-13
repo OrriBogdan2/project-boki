@@ -122,6 +122,19 @@ def level_up(i):
     return finish(room(mix(*arp, top, glow), 0.9), 5600)
 
 
+def rank_up(i):
+    """Choosing which ability to rank: a short rising pair; the caller pitches it per slot."""
+    return finish(room(mix(pluck(NOTE['C5'], 0.3, 0.06), at(pluck(NOTE['G5'], 0.4, 0.1), 0.06)), 0.5), 4800)
+
+
+def rank_max(i):
+    """A slot hits its top rank and its bonus opens: a fuller rising chord with a bright tail."""
+    run = [at(pluck(NOTE[n], 0.5, 0.1), 0.05 * k) for k, n in enumerate(['C5', 'G5', 'C6'])]
+    top = at(mix(pluck(NOTE['E6'], 0.9, 0.25), pluck(NOTE['G5'], 0.9, 0.25) * 0.6), 0.15)
+    glow = at(S.chime(NOTE['C6'] * 2, 0.7, 0.25, ((1.0, 0.6), (2.76, 0.15))) * 0.2, 0.17)
+    return finish(room(mix(*run, top, glow), 0.8), 5600)
+
+
 def ping(i):
     return finish(room(mix(pluck(NOTE['A5'] * jit(i, 0.01), 0.6, 0.18, 0.8),
                            0.4 * pluck(NOTE['A5'] * 1.5, 0.4, 0.1, 0.3)), 0.7), 4800)
@@ -156,6 +169,8 @@ def main():
     S.takes_cat('pickup', pickup, 3, 'ui')
     S.save_cat('unlock', unlock(0), 'ui')
     S.save_cat('level_up', level_up(0), 'ui')
+    S.save_cat('rank_up', rank_up(0), 'ui')
+    S.save_cat('rank_max', rank_max(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
     S.save_cat('ui_ult_ready', ult_ready(0), 'ui')
