@@ -58,6 +58,10 @@ func _rival_beat(home) -> void:
 		for key in ["rival_cd", "play", "eat", "nap_t", "life_at", "life_rival"]:
 			k.erase(key)
 		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+	# the beat walks 4 m away from the other, which only counts on open ground: start from the island's middle
+	var mid: Vector2 = home.world.islands[maxi(home.world.island_of(a["pos"].x, a["pos"].z), 0)]["c"]
+	a["pos"] = home.world.free_spot_near(Vector3(mid.x, 0, mid.y), [], 0.8)
+	(a["node"] as Node3D).position = a["pos"]
 	b["pos"] = a["pos"] + Vector3(float(R["pass_m"]) * 0.5, 0, 0)
 	c["pos"] = a["pos"] + Vector3(-float(R["pass_m"]) * 0.5, 0, 0)
 	BaseLife.add_bond(a["rec"], b["rec"], -1.0 - BaseLife.bond(a["rec"], b["rec"]))
