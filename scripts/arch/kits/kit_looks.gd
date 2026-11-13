@@ -24,6 +24,9 @@ extends Node3D
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 const TINT_SH := preload("res://shaders/cel_tint.gdshader")
+const BASALT := Color("1f2633")         # Tenzo's rock: dark blue-grey basalt in the cracks and shadows
+const BASALT_HI := Color("4a566e")      # and on its faces
+const COBALT_HOT := Color("9ad0ff")     # the rim light: Tenzo's hot slot colour (docs/VFX_QUALITY.md)
 ## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
 ## so a rock's crack pattern must not change what a bot decides).
 static var vis_rng := RandomNumberGenerator.new()
@@ -43,7 +46,7 @@ var m: Node
 var pools := {}               # kind -> Array[Node3D] (hidden, free)
 var live: Array = []          # {s, n, kind, t, trail}
 var held := {}                # key -> {n, kind, t, ent}
-var timed: Array = []         # {n, kind, t, dur, ent, at}
+var timed: Array = []         # {n, kind, t, dur, ent, at, key (a timed sigil)}
 
 static func of(match_node: Node) -> KitLooks:
 	var k := match_node.get_node_or_null("KitLooks") as KitLooks
@@ -138,19 +141,28 @@ func _build(kind: String) -> Node3D:
 	add_child(n)
 	return n
 
-## Tarek's rocks in flight: opaque molten basalt lumps with a warm (alpha-blended) heat haze.
+## Tenzo's thrown rocks: cold basalt (no heat) with a cobalt rim and cracks, never orange (DECISIONS 11-08).
+static func basalt_mat(seed_v: float) -> ShaderMaterial:
+	var mt := rock_mat(0.0, seed_v)
+	mt.set_shader_parameter("stone", BASALT)
+	mt.set_shader_parameter("stone_hi", BASALT_HI)
+	mt.set_shader_parameter("glow", DolmKit.COBALT)
+	mt.set_shader_parameter("rim_col", COBALT_HOT)
+	mt.set_shader_parameter("rim", 0.5)
+	return mt
+
+## Tenzo's rocks in flight: opaque basalt lumps with a cobalt (alpha-blended) haze.
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
-	var heat := {"boulder": 0.8, "rock": 0.95, "dashrock": 0.75}[kind] as float
 	# Rock Hop's last rock stands tall: a tumbling crag, not a ball
 	var tall := Vector3(1.0, 1.8, 1.0) if kind == "dashrock" else Vector3.ONE
 	var body := Models.part(
-		n, lump(r), rock_mat(heat, vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)
+		n, lump(r), basalt_mat(vis_rng.randf() * 10.0), Vector3.ZERO, tall, Vector3(0.3, 0.5, 0.2)
 	)
 	body.name = "Spin"
-	Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
-	Models.part(body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
-	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(1.0, 0.42, 0.1, 0.28)), Vector3.ZERO)
+	Models.part(body, lump(r * 0.55), basalt_mat(vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
+	Models.part(body, lump(r * 0.45), basalt_mat(vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
+	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(DolmKit.COBALT, 0.28)), Vector3.ZERO)
 
 ## The slab he rides through a Rock Hop, like a board: long along +Z (he turns it along the hop), a pale sunlit
 ## top so the match camera reads it under his feet, a hot underside.
@@ -531,6 +543,10 @@ func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
 				e2["t"] = e2["dur"]
 		"column":
 			n2.scale = Vector3(1.0, clampf(u * 4.0, 0.1, 1.0), 1.0)
+		"sigil":
+			if (e2["ent"] as Hunter).downed:
+				e2["t"] = e2["dur"]
+			_paint_sigil(n2, float(e2["r"]), u, e2["col"])
 
 ## Every tint material of a pooled look at `k` of its built alpha (cached on the node at build).
 func _fade(n: Node3D, k: float) -> void:
@@ -616,7 +632,27 @@ func chips(at: Vector3, count: int, k: float) -> void:
 
 ## Ostra's rune sigil at `at` (radius `r`), its ring lit to `fill` 0..1 in `col` (refresh every step).
 func sigil(key: String, ent: Node3D, at: Vector3, r: float, fill: float, col: Color) -> void:
-	var n := hold_on(key, "sigil", ent, at + Vector3(0, 0.06, 0))
+	_paint_sigil(hold_on(key, "sigil", ent, at + Vector3(0, 0.06, 0)), r, fill, col)
+
+## The same sigil filling itself from 0 to 1 over `secs` at `at`, for a body another game runs (its Trade's
+## landing, Net "zone" "trade"); it goes when `ent` is downed or end_sigil(key) is called.
+func timed_sigil(key: String, ent: Hunter, at: Vector3, r: float, secs: float, col: Color) -> void:
+	end_sigil(key)
+	var n := _take("sigil")
+	n.global_position = at + Vector3(0, 0.06, 0)
+	_paint_sigil(n, r, 0.0, col)
+	timed.append({"n": n, "kind": "sigil", "t": 0.0, "dur": secs, "ent": ent, "follows": true, "r": r, "col": col,
+		"key": key})
+
+func end_sigil(key: String) -> void:
+	for t in timed.duplicate():
+		if t.get("key", "") == key:
+			timed.erase(t)
+			_give("sigil", t["n"])
+
+## The sigil's ring lit to `fill` 0..1 (kept on the node as meta "fill"), turning a quarter as it fills.
+func _paint_sigil(n: Node3D, r: float, fill: float, col: Color) -> void:
+	n.set_meta("fill", fill)
 	n.scale = Vector3(r, 1.0, r)
 	n.rotation.y = fill * PI * 0.5
 	var segs := n.get_node("Segs")

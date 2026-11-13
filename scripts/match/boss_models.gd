@@ -345,22 +345,12 @@ static func rune_pylon(col: Color) -> Node3D:
 	root.add_child(ring)
 	return root
 
-## The Rare Egg on the ground: big, gold and glowing, with a light shaft you can see across the map.
+## The Rare Egg on the ground: big, gold and glowing (its seam ring in the kin's glow `col`), with a light shaft you can see across the map.
 static func rare_egg(col: Color) -> Node3D:
 	var root := Node3D.new()
-	var spin := Node3D.new(); spin.name = "Spin"; spin.position = Vector3(0, 0.15, 0); root.add_child(spin)
-	var shell := Models.toon(Color("ffe08a"), true, 0.55)
-	shell.set_shader_parameter("rim_color", Color("fff6c0"))
-	shell.set_shader_parameter("rim_amount", 2.0)
-	Models.part(spin, Models.sphere(0.4, 18), shell, Vector3(0, 0.3, 0), Vector3(0.85, 1.18, 0.85))
-	var rng := RandomNumberGenerator.new(); rng.seed = int(col.r * 997 + col.b * 31)
-	var spot := Models.toon(col, false, 1.3)
-	for i in 9:
-		var a := rng.randf() * TAU; var y := rng.randf_range(0.3, 0.85)
-		var rr := sqrt(maxf(0.0, 1.0 - pow((y - 0.55) / 0.47, 2.0))) * 0.34
-		y -= 0.25
-		Models.part(spin, Models.sphere(rng.randf_range(0.04, 0.07), 8), spot, Vector3(cos(a) * rr, y, sin(a) * rr), Vector3(1, 1, 0.5))
-	PropAnim.on(spin, 0.6, 0.1)
+	var spin := Node3D.new(); spin.name = "Spin"; spin.position = Vector3(0, 0.13, 0); root.add_child(spin)
+	spin.add_child(EggModels.shell("rare", 0.95, 0.0, 0.35, col))
+	PropAnim.on(spin, 0.25, 0.1)          # (on top of the egg's idle turn: a dropped egg spins and floats more)
 	var nest := Models.toon(Color("6a5638"))
 	Models.part(root, Models.cyl(0.5, 0.42, 0.18, 14), nest, Vector3(0, 0.09, 0))
 	var beam := Models.part(root, Models.cyl(0.18, 0.4, 14.0, 12), Models.glow_mat(Color(1.0, 0.85, 0.35, 0.32)), Vector3(0, 7.0, 0))

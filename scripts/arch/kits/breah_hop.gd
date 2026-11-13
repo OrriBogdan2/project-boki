@@ -20,7 +20,7 @@ const FOOT_KEY := "br_foot"
 var k: DolmKit
 var h: Hunter
 var m: Node
-var st := {}                   # {n, phase: crouch|air|skid|roll, t, T, from, spot, dir, left, press, start}
+var st := {}         # {n, phase: crouch|air|skid|roll, t, T, from, spot, dir, left, press, again, start, skid_T}
 var dash_was := false
 var rock_n := 0
 # counters for the checks
@@ -55,10 +55,16 @@ func drop() -> void:
 	AimKit.hide(h, "leap")
 	KitLooks.of(m).release(FOOT_KEY)
 
-## A re-press: the next hop, as soon as he is on a rock.
+## A re-press, from the first rock's crouch to the window's end: the next hop, as soon as he is on a rock. On the
+## skid, Hunter.do_dash has cut its roll as it cuts any rush: the skid runs on. With no hop left, a press in the
+## last flight's final BUFFER_S is held for the landing (_crash).
 func press() -> void:
-	if int(st["n"]) < int(dd()["hops"]):
-		st["press"] = true
+	if int(st["n"]) >= int(dd()["hops"]):
+		st["again"] = bool(st.get("again", false)) or left() <= DashFlow.BUFFER_S
+		return
+	st["press"] = true
+	if String(st["phase"]) == "skid" and h.roll_t <= 0.0:
+		h.roll_t = maxf(0.0, float(st["skid_T"]) - float(st["t"]))
 
 func start() -> void:
 	if not st.is_empty():
@@ -220,7 +226,6 @@ func _kick() -> void:
 	st["from"] = h.pos
 	st["phase"] = "air"
 	st["t"] = 0.0
-	st["press"] = false
 	st["rock_up"] = not bool(spot["rock"])
 	hops += 1
 	chain_hops = int(st["n"])
@@ -240,7 +245,6 @@ func _kick() -> void:
 	k.play("breah_hop")
 	m.fx.dust(h.pos, 6)
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
-	Feel.dash_sound(m, k.id, h.pos, h)
 
 ## Rock Hop falls at its own leap_grav: the pull on top of gravity.
 func _pull() -> float:
@@ -288,7 +292,8 @@ func _touchdown() -> void:
 	h.vel.x = 0.0
 	h.vel.z = 0.0
 	var run := _skid_room(dir)
-	k._lunge(run, float(d["skid_t"]) * run / float(d["skid"]), dir)
+	st["skid_T"] = float(d["skid_t"]) * run / float(d["skid"])
+	k._lunge(run, float(st["skid_T"]), dir)
 
 ## How far the skid can run: on ground it stops short of an edge, so a chain never slides him off one.
 func _skid_room(dir: Vector2) -> float:
@@ -305,6 +310,7 @@ func _skid_room(dir: Vector2) -> float:
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt
 	if bool(st["press"]) and float(st["t"]) >= float(dd()["skid_min"]) and int(st["n"]) < int(dd()["hops"]):
+		st["press"] = false
 		if _aim_hop():
 			_kick()
 		else:
@@ -322,7 +328,8 @@ func _nudge() -> void:
 		m.displace.knock(f, away * float(d["shove_kb"]), 0.0)
 		shoves += 1
 
-## The chain's end: today's crash, then its rock rolls on. The recharge runs from here.
+## The chain's end: today's crash, then its rock rolls on. The recharge runs from here. A press held from the
+## last flight goes now through the shared dash buffer: a fresh chain with a charge up.
 func _crash() -> void:
 	var d := dd()
 	var at := h.pos
@@ -343,6 +350,8 @@ func _crash() -> void:
 		)
 	KitLooks.of(m).release(FOOT_KEY)
 	AimKit.hide(h, "leap")
+	if bool(st.get("again", false)):
+		h.dash_buf = DashFlow.BUFFER_S
 	st = {"phase": "roll", "t": 0.0, "at": at, "dir": st["dir"]}
 
 func _roll_on() -> void:

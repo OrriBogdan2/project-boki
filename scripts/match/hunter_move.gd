@@ -65,6 +65,15 @@ static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 	return dash_v.limit_length(run * dash_exit_run)
 
+## A knock (one that sets knock_t) or a stun landing on an air Shift dash after its i-frames ends the dash on the
+## spot, as a glide press does: the knock's push or the stun's stop takes over (source: a stun is "no movement",
+## a knockback pushes you). A kit's rush, and a dash on the ground, ride on (MOVEMENT_FEEL "Knocked in the air").
+static func cut_air_dash(h: Hunter) -> void:
+	if h.roll_t <= 0.0 or h.grounded or h.move_kind != "dash":
+		return
+	h.roll_t = 0.0
+	h.shove = {}
+
 ## The step a ground dash ends in runs the dash for the `left` seconds it still had, then the hand-over: the
 ## metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate. (An
 ## air dash needs none: it carries its own speed through the step, under air drag after.)
@@ -98,6 +107,12 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 		else:
 			hi = mid
 	return hi
+
+## `hv` pushed along unit `dir` up to at least `speed` there, everything across `dir` kept (a knock, a lunge, a
+## kit's air step): it adds to what you carry instead of overwriting it, so air steering lives on (DECISIONS 11-08).
+static func push(hv: Vector2, dir: Vector2, speed: float) -> Vector2:
+	var along := hv.dot(dir)
+	return hv + dir * (maxf(along, speed) - along)
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
