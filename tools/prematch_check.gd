@@ -239,6 +239,7 @@ func _screen(main: Node) -> void:
 	ok(view.note_label.text.contains("before 0:00"), "first lobby: the note teaches the countdown")
 	ok(not Prematch.first_lobby(), "opening the first lobby marks it seen in the save")
 	_declutter(view)
+	_start_here(view)
 	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
 	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
 	view._show_chat_line(true)
@@ -290,7 +291,10 @@ func _declutter(view: Control) -> void:
 	for card in view.grid.get_children():
 		var ak: String = card.get_meta("arch")
 		var role := String(Arch.def(ak)["card"]["role_word"])
-		var texts: Array = card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+		var chip: Node = card.find_child("StartHere", false, false)
+		var labels: Array = card.find_children("*", "Label", true, false)
+		var lines: Array = labels.filter(func(l): return chip == null or not chip.is_ancestor_of(l))
+		var texts: Array = lines.map(func(l): return (l as Label).text)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)
 		open += 0 if shut else 1
@@ -354,3 +358,32 @@ func _lockin(main: Node) -> void:
 			stage.tick(0.05)
 		ok(clips.act_w == 0.0, "%s: settled fully into its idle 0.6 s after" % ak)
 	stage.queue_free()
+
+## The three starters wear a "Start here" stamp on both pickers until one match is played (a stamp over the card,
+## not a third line: _declutter counts the lines); it picks nothing for you.
+func _start_here(view: Control) -> void:
+	var tagged: Array = _tagged(view.grid)
+	var starters: Array = ClassUnlock.starters()
+	var three: bool = starters.size() == 3 and tagged.size() == 3 and starters.all(func(a): return tagged.has(a))
+	var msg := "a fresh save: Start here on the three starters only, no pick made for you (%s)" % [tagged]
+	ok(three and view.pm.pick == "", msg)
+	var panel := VBoxContainer.new()
+	HunterPickRow.add(null, panel)
+	var grid: Node = panel.get_child(1)
+	ok(_tagged(grid) == tagged, "the expedition panel tags the same three (%s)" % [_tagged(grid)])
+	Save.d["matches"] = 1
+	view._fill_hunters()
+	var gone: bool = _tagged(view.grid).is_empty()
+	panel.free()
+	panel = VBoxContainer.new()
+	HunterPickRow.add(null, panel)
+	gone = gone and _tagged(panel.get_child(1)).is_empty()
+	panel.free()
+	Save.d["matches"] = 0
+	view._fill_hunters()
+	ok(gone, "after one match no card says Start here")
+
+func _tagged(grid: Node) -> Array:
+	var cards: Array = grid.get_children().filter(func(c): return not c.is_queued_for_deletion())
+	var tagged: Array = cards.filter(func(c): return c.find_child("StartHere", false, false) != null)
+	return tagged.map(func(c): return String(c.get_meta("arch")))
