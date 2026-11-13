@@ -119,6 +119,7 @@ const CHECKS := {
 	"--zone-bounce-check": ["res://tools/zone_bounce_check.gd", "zone_bounce_check", null],      # STATE_MACHINES 3.5
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--perch-check": ["res://tools/perch_check.gd", "perch_check", null],      # every perch by its updraft chain
 	"--sting-check": ["res://tools/sting_check.gd", "sting_check", null],      # run-end stingers
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--music-combat-check": ["res://tools/music_combat_check.gd", "music_combat_check", null],
