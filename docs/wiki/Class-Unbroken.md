@@ -112,7 +112,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | red heat glowing through the pauldrons as Rage fills, steam from half |
-| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
+| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a crimson strike cone while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->
