@@ -16,6 +16,7 @@ const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible 
 const NO_STRIDE_M := 0.05      # m: a shin swinging less than this does not step (Motley hovers: his legs hang, 0.024 m)
 const HAND_PIECE_M := 0.25     # m: carrying, a shown piece on one hand alone may reach this far (a hand, not a weapon)
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
+const SNAP_BY := 0.05          # s: a release move's blend-in is over this long after the arrow's spawn
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
@@ -118,6 +119,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	await _rooted(id, m, sync, clips, dd)
 	await _handover(id, m, sync, clips, dd)
 	await _carry(id, m, sync, clips, dd)
+	if id == "archer":
+		_release_snap(id, sync, clips, m)
 	m.free()
 	await _flinch(id)
 
@@ -424,6 +427,29 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	for k in 12:
 		sync.call("_process", DT)
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+
+## The bow's release: the string hand's snap is shown in full, not eaten by the blend-in. From the held draw, the
+## move's blend is over (the pose is the clip's own) SNAP_BY s after the arrow's spawn (kmove_t 0), by the earliest
+## snap key of the clip (0.04-0.06 s). Stepped at 60 fps.
+func _release_snap(id: String, sync: Node, clips: WardenClips, m: Node3D) -> void:
+	var step_s := 1.0 / 60.0
+	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	for km in ["arc_tap", "arc_loose", "arc_super"]:
+		s["kmove"] = "arc_draw"
+		s["kmove_t"] = 1.3
+		for i in 30:
+			sync.call("_process", step_s)
+		s["kmove"] = km
+		var blended_t := -1.0
+		for i in 12:
+			s["kmove_t"] = i * step_s
+			sync.call("_process", step_s)
+			if blended_t < 0.0 and clips.up_w >= 1.0 and is_equal_approx(clips.xf_u, float(clips.chan_u)):
+				blended_t = i * step_s
+		ok(blended_t >= 0.0 and blended_t <= SNAP_BY, "%s: %s: the blend-in is over %.3f s after the spawn (limit %.2f)"
+				% [id, km, blended_t, SNAP_BY])
+	m.set_meta(WardenClips.STATE, {})
 
 ## A hit mid-run (item: additive flinch): the legs run exactly as they would unhit, the spine and arms flinch on top;
 ## standing still, or a stagger, takes the whole body. Two identical models run the same 1 s, one of them hit.

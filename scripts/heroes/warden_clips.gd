@@ -451,7 +451,7 @@ func step(dt: float) -> void:
 			if up_w <= 0.0:
 				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
 		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / FADE)
+		up_w = move_toward(up_w, 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])
