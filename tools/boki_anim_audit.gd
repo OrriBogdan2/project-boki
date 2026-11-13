@@ -24,28 +24,22 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
 ## re-keyed (docs/DEBT.md).
 const OVER := {
-	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
-	"glintmole walk": 0.35, "glintmole run": 0.70, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.68,
-	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
-	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
+	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.62,
+	"glintmole walk": 0.35, "glintmole run": 0.73, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
+	"kestrike run": 0.91, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.68,
+	"lodestick run": 0.90, "marchleaf walk": 0.52, "marchleaf run": 0.64, "mossgrade walk": 0.65,
+	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.78, "pebbit walk": 0.35, "pebbit run": 0.69,
 	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
-	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
+	"zapple walk": 0.62, "zapple run": 0.75, "caecilith walk": 0.66, "caecilith run": 0.90,
 }
 ## A loop's wrap may be no rougher than the roughest moment inside the clip (seam()).
 const MAX_SEAM := 1.0
-## Ratchet: glbs built before boki_rig.export slid the clips to 0 hold their first pose a frame at each wrap (and
-## some clips also break speed there), with the most their seam may read. Lower or drop a row when the glb is rebuilt
-## (docs/DEBT.md).
+## Ratchet: clips whose motion breaks at the loop point (a bone turns or changes speed at the wrap: the first and last
+## keys match in pose, not in speed), with the most their seam may read. Lower or drop a row when the clip is re-keyed
+## so its ends match in speed too (docs/DEBT.md).
 const SEAM_OVER := {
-	"cindle walk": 1.20, "cindle run": 1.55, "puddlet idle": 1.20, "puddlet walk": 1.15, "puddlet run": 1.50,
-	"burrlet idle": 1.15, "burrlet walk": 1.20, "burrlet run": 1.75, "glintmole run": 1.85, "rimeshrew walk": 1.05,
-	"zephyrak idle": 1.15, "zephyrak walk": 1.50, "pebbit idle": 1.20, "pebbit walk": 1.10, "pebbit run": 1.80,
-	"cairnback idle": 1.20, "cairnback walk": 1.40, "gloamshell idle": 1.25, "gloamshell walk": 1.80,
-	"gloamshell run": 1.90, "selenfin walk": 1.30, "hivara walk": 1.15, "hivara run": 1.60, "glomwort walk": 1.35,
-	"glomwort run": 1.15, "kestrike walk": 1.40, "lodestick walk": 1.75, "lodestick run": 1.05, "marchleaf walk": 1.20,
-	"mossgrade idle": 1.20, "mossgrade walk": 1.25, "nettlynx walk": 1.25, "nettlynx run": 1.90, "caecilith idle": 1.20,
-	"caecilith walk": 1.40, "caecilith run": 1.20,
+	"puddlet walk": 1.20, "burrlet walk": 1.05, "gloamshell walk": 2.05, "zapple run": 1.50, "kestrike walk": 2.45, "kestrike run": 1.90,
+	"mossgrade run": 1.35, "caecilith walk": 1.40,
 }
 const MAX_POP := 3.0          # the idle-to-walk hand-over's biggest bone jump over the steady walk's (pop())
 const SAMPLES := 48           # poses per loop
