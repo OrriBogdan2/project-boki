@@ -178,7 +178,7 @@ func run(main_node: Node) -> void:
 	var mv: Node = home4
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = 0.0; mv.pvy = 0.0
 	var x0: float = mv.ppos.x
-	mv.dash_charges = 2.0
+	mv.dash.charges = 2.0
 	mv.start_dash(Vector2(1, 0), 23.0, 0.15)
 	for i in 6: mv._move_player(0.05)
 	ok.call(mv.ppos.x - x0 > 2.0, "a dash at home carries you %.1fm" % (mv.ppos.x - x0))
@@ -201,34 +201,39 @@ func run(main_node: Node) -> void:
 	mv.panel_open = ""
 	ok.call(mv.ppos.distance_to(safe) < 0.01 and mv.py >= -0.01, "falling off the island puts you back where you last stood")
 	Save.d["classes"] = ClassUnlock.legacy()      # an old save: every Hunter open (the locks: --hunter-unlock-check)
-	# dashing at home: the match's charges and recharge for each class, then the long dash
+	# dashing at home: the hero's DashState (the match Hunter's rules: --dash-slot-check compares them per
+	# hero), its charges and recharge for each class's default hero, then the long dash
 	var cls0 := String(Save.d.get("cls", "medium"))
+	var arch0 = Save.d.get("arch", "")
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.gliding = false
 	for ck in ["light", "medium", "heavy"]:
 		Save.d["cls"] = ck
-		var dg: Dictionary = mv._dodge()
-		var want := int(Content.class_dodge(ck).charges) if Content.class_dodge(ck) else int(Data.CLASSES[ck]["dashes"])
-		mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0; mv.ex_cd = 0.0
-		mv.dash_charges = 9.0; mv._move_player(0.0001)     # topped up to the class's count
+		Save.d["arch"] = Arch.DEFAULT[ck]
+		var ds: DashState = mv.dash_rules()
+		var want := int(ds.cap())
+		mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0; mv.dash.air_cd = 0.0
+		mv.dash.charges = ds.cap(); mv._move_player(0.0001)     # topped up to the hero's count
 		var shorts := 0
 		var longs := 0
 		for k in want + 2:
 			mv.dash_t = 0.0; mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0
-			var had: float = mv.dash_charges
+			var had: float = mv.dash.charges
 			if mv.try_dash(Vector2(1, 0), false):
 				if had >= 1.0: shorts += 1
 				else: longs += 1
-		var regen := float(dg["cd"])
+		var regen := ds.regen()
+		var long_cd: float = mv.dash.air_cd
 		mv.dash_t = 0.0
 		var waited := 0.0
-		while mv.dash_charges < 1.0 and waited < 40.0:
+		while mv.dash.charges < 1.0 and waited < 40.0:
 			mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0
 			mv._move_player(0.05); waited += 0.05
 		mv.dash_t = 0.0
 		var again: bool = mv.try_dash(Vector2(1, 0), false)
-		ok.call(shorts == want and longs == 1 and absf(waited - regen) < 0.2 and again and absf(float(dg["ex_cd"]) - float(Data.CLASSES[ck]["ex_cd"])) < 0.01,
-			"%s dashes at home as in a match: %d short (%d), then the long one (%d), %.1fs to recharge (dodge cooldown %.1fs), then again (%s)" % [ck, shorts, want, longs, waited, regen, again])
+		ok.call(shorts == want and longs == 1 and absf(waited - regen) < 0.2 and again and absf(long_cd - ds.air_max()) < 0.01,
+			"%s (%s) dashes at home as in a match: %d short (%d), then the long one (%d, %.1fs cooldown), %.1fs to recharge (%.1fs), then again (%s)" % [ck, Arch.DEFAULT[ck], shorts, want, longs, long_cd, waited, regen, again])
 	Save.d["cls"] = cls0
+	Save.d["arch"] = arch0
 	mv.dash_t = 0.0
 	home4.queue_free()
 	await main.get_tree().process_frame

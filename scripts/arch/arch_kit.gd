@@ -103,7 +103,7 @@ func cd_k(slot: String) -> float:
 
 ## The dash recharge multiplier at the dash rank (rank_cd.dash, else 15% faster a rank past the first).
 func dash_k() -> float:
-	return rank_k("rank_cd", "dash", 1.0 - 0.15 * float(rank("dash") - 1))
+	return h.dash_rules().rank_k(rank("dash"))
 
 func rmb_charges() -> int: return int(rmb_def().get("charges", 1))
 
@@ -163,7 +163,7 @@ func gate_kin_tap() -> bool: return false           # G's tap runs outside inp (
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
-func has_long_dash() -> bool: return true
+func has_long_dash() -> bool: return h.dash_rules().has_long()
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
@@ -524,23 +524,16 @@ func _bond_tell() -> void:
 ## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's;
 ## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
-	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
+	return h.dash_rules().air_max(rank("dash"))
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
+	if not h.dash.spend(use_ex, long_dash_cd()):
+		h._ab_feedback("dash", "deny")
+		return false
 	if use_ex:
-		if h.ex_cd > 0.0:
-			h._ab_feedback("dash", "deny")
-			return false
-		h.ex_cd = long_dash_cd()
 		h.ex_next = true
 		h.gliding = false
-	else:
-		if h.dashes < 1.0:
-			h._ab_feedback("dash", "deny")
-			return false
-		h.dashes -= 1.0
 	return true
 
 ## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
