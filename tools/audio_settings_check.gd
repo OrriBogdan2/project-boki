@@ -91,6 +91,8 @@ func _mouse_drag(where: String, sliders: Array) -> void:
 	sl.value = 1.0
 	await main.get_tree().process_frame
 	var vp := sl.get_viewport()
+	for fade in main.find_children("*", "ColorRect", true, false):      # (the boot fade takes clicks in a real window)
+		(fade as ColorRect).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var in_canvas := sl.get_global_transform_with_canvas() * Vector2(sl.size.x * 0.1, sl.size.y * 0.5)
 	var pos := vp.get_final_transform() * in_canvas
 	var mv := InputEventMouseMotion.new()
