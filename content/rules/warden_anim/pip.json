@@ -1,6 +1,17 @@
 {
 	"doc": "Meeko's hand-keyed clips (art/wardens/pip/pip.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Her weapon is the little sun that floats at her left shoulder (skinned on pauldron.L; the raincloud rides pauldron.R), so the FX points ride the sun. Their faces are one atlas (pip.glb's eyes-mood_sun / eyes-mood_cloud, 4x2 cells) that \"mood\" swaps (scripts/heroes/warden_mood.gd).",
+	"blink": {"move": {"lid.R": [0.0, 0.05, 0.0], "lid.L": [0.0, 0.05, 0.0]}},
 	"skinned_weapon": true,
+	"companions": {
+		"doc": "Meeko's sun and raincloud float round her on a mostly horizontal circle (scripts/heroes/warden_companions.gd): cut out of the body mesh at load, each on its own pivot instead of a shoulder bone. Metres, seconds, degrees; 'at' is the circle's centre in skeleton space, radius [side, front-back], phase 0 = her right.",
+		"bone": "hips", "at": [0.0, 1.0, 0.2], "radius": [1.05, 1.0], "period": 4.0, "dir": 1,
+		"wobble": [0.25, 5.3], "bob": 0.07, "lag": 7.0, "trail_max": 0.25, "face": "forward",
+		"sway_deg": 8.0, "lean_deg": 5.0, "clear_min": 0.01,
+		"list": [
+			{"id": "sun", "surfaces": ["cloth-sun", "eyes-mood_sun"], "at": [-0.40, 1.10, -0.04], "phase_deg": 180.0, "bob_period": 2.7, "bob_phase": 0.0, "bone": "pauldron.L", "anchors": ["weapon_muzzle", "anchor_hang_lantern", "anchor_lantern_top"]},
+			{"id": "cloud", "surfaces": ["skin-cloud", "ice-drop", "eyes-mood_cloud"], "at": [0.40, 1.06, -0.04], "phase_deg": 0.0, "bob_period": 3.3, "bob_phase": 1.9, "bone": "pauldron.R", "anchors": []}
+		]
+	},
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "ear.L": "head", "ear.R": "head", "jaw": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "wing.L": "hips", "wing.R": "hips", "apron": "hips"},
 	"blade": {"root": "anchor_lantern_top", "tip": "weapon_muzzle", "bone": "pauldron.L"},
 	"mood": {
@@ -16,14 +27,14 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.55, "stride": [1.5, 1.5], "foot_mps": [0.93, 3.04], "arm_swing": {"L": 0.5}
+		"walk_speed": 2.2, "run_speed": 4.55, "stride": [2.0, 1.9], "foot_mps": [0.93, 3.08], "arm_swing": {"L": 0.7, "R": 0.7}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.4},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "float"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"mm_shot_r": {"clip": "shot_r", "lead": 0.06, "upper": "moving"}, "mm_shot_l": {"clip": "shot_l", "lead": 0.06, "upper": "moving"}, "mm_shot_emp": {"clip": "shot_emp", "lead": 0.1, "upper": "moving"},
-		"mm_seed_aim": {"clip": "seed_aim", "upper": "moving"}, "mm_seed": {"clip": "seed", "lead": 0.06, "upper": "moving"},
+		"mm_seed_aim": {"clip": "seed_aim", "fit": 0.35, "upper": "moving"}, "mm_seed": {"clip": "seed", "lead": 0.06, "upper": "moving"},
 		"mm_hearth": {"clip": "hearth", "lead": 0.15, "upper": "moving"}, "mm_toss": {"clip": "toss", "upper": "moving"},
 		"mm_skip": {"clip": "skip", "heading": true}, "mm_float": {"clip": "float", "heading": true},
 		"mm_pickup": {"clip": "pickup"}, "mm_flare": {"clip": "flare", "upper": "moving"},
@@ -32,7 +43,8 @@
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
-	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 1.0], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
+	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 0.35], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_bow", "refuse": "g_wag"},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "lid.L", "lid.R", "jaw", "ear.L", "ear.R", "wing.L", "wing.R"]
 }

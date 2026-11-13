@@ -291,6 +291,22 @@ func _dredge() -> void:
 	)
 	await _go(2.3, blast, bmarks)
 
+## Grimble's Barge run (--combo51-part=barge): three shoves 0.42 s apart (the 0.22 s gap and a frame), one burst.
+func _dredge_barge() -> void:
+	await _reset(9.0)
+	P.dashes = 3.0
+	var run := func(t: float):
+		for k in 3:
+			if _at(t, 0.1 + 0.42 * k):
+				P.do_dash()
+	var marks := _strip(
+		"barge_run_strip",
+		"Grimble's Barge, three chained shoves: the first, the ball rolling in the gap, the second, rolling, the third,"
+			+ " the ball still closed as it ends, opening, standing",
+		[0.14, 0.3, 0.48, 0.6, 0.74, 1.02, 1.16, 1.22, 1.45]
+	)
+	await _go(1.5, run, marks)
+
 ## Cinder: the lance held through a ram; Shift in the flight; a jump off the flight.
 func _ashwick() -> void:
 	P.lvl = 6
@@ -407,7 +423,7 @@ func _juggernaut_chain() -> void:
 		[2.6, "full", "warchain_taut_2", "Kael Warchain: ~17 m, the chain paying out after him"],
 		[4.6, "full", "warchain_taut_3", "Kael Warchain: at 24 m it is taut and hot and holds: he keeps walking but"
 				+ " stays at its end"]], -9.0)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	await _reset(9.0)
 	var sling := func(t: float):
 		if _at(t, 0.1):
@@ -444,7 +460,7 @@ func _haul_strip(name_of_run: String, look: Vector3) -> void:
 		marks.append([when, "full", "haul_%s_%d" % [name_of_run, i],
 				"Kael Warchain, %s haul, %.2f s after the press" % [name_of_run, when - 0.8]])
 	await _go(1.65, haul, marks)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 
 ## Item 113: one frame run per point, for GIFs.
 func _juggernaut_acc() -> void:
@@ -465,7 +481,7 @@ func _juggernaut_acc() -> void:
 		if _at(t, 0.3):
 			_aim(T.pos)
 			K.use_e())
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	await _acc("meteor", 3.0, 1.2, func(t: float):
 		if _at(t, 0.1): P.do_jump()
 		if _at(t, 0.45):
@@ -477,7 +493,7 @@ func _juggernaut_acc() -> void:
 			K.use_e()
 		if _at(t, 0.65): K.cast_ult()
 		if _at(t, 0.8): K.use_e())
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	await _acc("dash", 4.0, 0.7, func(t: float):
 		if _at(t, 0.1): P.do_dash()
 		P.inp["move"] = Vector2(1, 0) if t > 0.05 and t < 0.5 else Vector2.ZERO
