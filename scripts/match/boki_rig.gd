@@ -131,6 +131,10 @@ const STRIDE := {
 	"thrumbird": [1.50, 2.90],
 }
 const FADE := 0.14            # s between body clips
+## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
+## and back over a few wingbeats instead of snapping (the idle-to-walk pop, --boki-anim-audit).
+const GAIT_FADE := {"thrumbird": 0.45}
+const GAITS := ["idle", "walk", "run"]
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
@@ -354,7 +358,7 @@ func _pick_clip(dt: float) -> void:
 		if _speed < WALK_SPEED:
 			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
-	set_clip(want)
+	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
@@ -363,6 +367,10 @@ func _pick_clip(dt: float) -> void:
 			* model.global_basis.z.length())
 	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
 	player.speed_scale = clampf(_speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
+
+## s the rig takes to hand one gait over to another.
+func gait_fade() -> float:
+	return GAIT_FADE.get(species, FADE)
 
 func _start_shot(which: String) -> void:
 	_shot = which
