@@ -7,7 +7,8 @@ shader_type spatial;
 //   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
 //   2 RING    a flat quad: a cel shockwave ring with radial spark needles (arrival bursts, shock rings)
 //   3 DISC    a flat quad: a lit jagged crackling rim at 0.9, a soft dark falloff in from it down to `fill_a` at
-//             the centre (never a solid fill: the target reads through) and lightning veins (placed areas)
+//             the centre (never a solid fill: the target reads through) and lightning veins (placed areas);
+//             hollow: no falloff or veins, a glowing centre
 //   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
 //   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the rifle rounds)
 //   6 FAN     a flat sector (UV.x across the sector, UV.y from the apex 0 to the rim 1): a blast front
@@ -22,6 +23,8 @@ uniform float life = 0.0;
 uniform float seed = 0.0;
 uniform float strength = 1.0;
 uniform float fill_a = 0.2;
+uniform float hollow = 0.0;   // DISC: 0 a falloff fill, 1 only the rim and a glowing centre
+uniform float hold = 0.0;     // DISC: 1 stands at full strength and fades only over its last fifth
 uniform bool billboard = false;
 #include "res://shaders/cel.gdshaderinc"
 
@@ -88,8 +91,10 @@ void fragment() {
 		float veins = (1.0 - smoothstep(0.0, 0.05, abs(spoke - 0.5))) * inside * smoothstep(0.15, 0.6, r);
 		veins *= step(0.45, vnoise(ang * 3.0 + tick * 0.7));
 		body = mix(color.rgb, color3.rgb, rim * color3.a);
-		body_a = max(inside * falloff, rim) * k;
-		glow = color2.rgb * (rim * (0.5 + 0.5 * crackle) + veins * 0.5) * k;
+		float centre = (1.0 - smoothstep(0.0, 0.12, r)) + 0.3 * (1.0 - smoothstep(0.0, 0.3, r));
+		float kd = mix(k, 1.0 - smoothstep(0.8, 1.0, life), hold);
+		body_a = max(inside * falloff * (1.0 - hollow), rim) * kd;
+		glow = color2.rgb * (rim * (0.5 + 0.5 * crackle) + veins * 0.5 * (1.0 - hollow) + centre * hollow) * kd;
 	} else if (mode == 4) {
 		vec2 p = uv * 2.0 - 1.0;
 		float r = length(p);

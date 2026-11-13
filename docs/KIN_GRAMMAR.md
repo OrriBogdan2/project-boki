@@ -298,7 +298,7 @@ growth, mutation and care (`Kin.init_kin`), and the Bond IV speeds every fill of
 |---|---|
 | shoulder | as before: rides your shoulder, its carry passives and shot riders work once it has settled |
 | perch | sits on your pack; same passive rules. Its throw is a **dive**: it rises off your pack and comes straight down on the spot (11 m reach, strikes only as it lands, a little wider). Lunowl's perch also gives +20% glide |
-| mount | a big kin (body mass over `follow.shoulder_max_mass`): on the Return order it guards at your side (`KinFollow.guard_tick`), `guard_side_m` from you on the flank it holds, the other flank when that one is blocked, never closer than `guard_min_m` and never below your feet. -15% damage taken and half knockback (Gravadillo). When you glide or cross a gap it curls up into a ball on your back and its passives pause until you land. Only its giant Fusion form is ridden (`carry.mount` speed and jump apply then) |
+| mount | a big kin (body mass over `follow.shoulder_max_mass`): on the Return order it guards at your side (`KinFollow.guard_tick`), `guard_side_m` from you on the flank it holds, the other flank when that one is blocked, never closer than `guard_min_m`, and on its own ground when you jump. -15% damage taken and half knockback (Gravadillo). When you glide or cross a gap it curls up into a ball on your back and its passives pause until you land. Only its giant Fusion form is ridden (`carry.mount` speed and jump apply then) |
 
 Carry passives and merge passives feed one place, `Hunter.owner_stat`, capped at the carry or
 merge maximum: move speed, jumps, air dodges, glide, dodge charges and regen, armor (wears slower),

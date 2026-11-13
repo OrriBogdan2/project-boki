@@ -1,5 +1,11 @@
 # Ostra (Motley, the Void Jester): import note (ART-1, 2026-11-05)
 
+## Owner fix 2026-11-12: cards (`tools/art1/warden_fix_1112.py ostra`, on the 11-11 file)
+"He should be having those cards in his hand, and the cards floating around him should be much smaller." The fan of cards
+(on `x_fan`, a child of `hand.L`) floated about 10 cm off the appeal glove: it is turned over and its foot set in the
+glove's palm, so it fans out past the fingertips between thumb and fingers. The eight orbiting cards are 0.42 of their
+size (about one fan card); their orbits, the sway and the clips are unchanged.
+
 `ostra.glb` is the owner's final design, a cursed jack-in-the-box, built by script in Blender on the shared armature; id and files stay `ostra`.
 v2 (2026-11-07) follows briefs/art-refs/motley_v2 (motley_v2_turnaround, motley_v2_master_sheet; the older motley_turnaround is retired): the
 sheet's painted palette (magenta-violet and plum doublet, lilac ruff and gloves, muted bronze spring, mauve box with spades front and back and
