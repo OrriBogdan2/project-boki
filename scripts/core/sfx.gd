@@ -6,7 +6,7 @@ extends Node
 
 const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
-	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop", "wisp_hum",
+	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "train_hit", "revive_hum", "revive_done", "scan_pop", "wisp_hum",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
 	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
@@ -21,7 +21,7 @@ const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", 
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {"scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200,
-	"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
+	"boki_yawn": 400, "break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
 	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
@@ -37,6 +37,10 @@ const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
+## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus: a low-pass and a small gain drop.
+const OCCLUDED_HZ := 700.0
+const OCCLUDED_DB := -4.0
+var occlusion := SfxOcclusion.new()
 var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
@@ -62,11 +66,11 @@ var _duck_tw: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for bn in ["Music", "SFX", "Ambience", "SFXFar"]:
+	for bn in ["Music", "SFX", "Ambience", "SFXFar", "SFXMuffled"]:
 		AudioServer.add_bus()
 		var bi := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(bi, bn)
-		AudioServer.set_bus_send(bi, "SFX" if bn == "SFXFar" else "Master")
+		AudioServer.set_bus_send(bi, "SFX" if bn in ["SFXFar", "SFXMuffled"] else "Master")
 	music_bus = AudioServer.get_bus_index("Music")
 	_setup_mix()
 	for i in 2:
@@ -130,6 +134,11 @@ func _setup_mix() -> void:
 	var lp := AudioEffectLowPassFilter.new()
 	lp.cutoff_hz = 1800.0
 	AudioServer.add_bus_effect(far, lp)
+	var muf := AudioServer.get_bus_index("SFXMuffled")      # behind terrain: duller than far, and a little quieter
+	var mlp := AudioEffectLowPassFilter.new()
+	mlp.cutoff_hz = OCCLUDED_HZ
+	AudioServer.add_bus_effect(muf, mlp)
+	AudioServer.set_bus_volume_db(muf, OCCLUDED_DB)
 	var mlim := AudioEffectHardLimiter.new()
 	mlim.ceiling_db = -0.5
 	AudioServer.add_bus_effect(0, mlim)
@@ -186,8 +195,8 @@ func play_music(name: String, fade := 1.5) -> void:
 	if not layers.is_empty():
 		_stop_layers(fade)
 	music_name = name
-	if name != "" and not Save.d.get("music", []).has(name):
-		# first time hearing this one: it joins the music list
+	if Data.MUSIC.has(name) and not Save.d.get("music", []).has(name):
+		# first time hearing one of the house's records: it joins the music list
 		if not Save.d.has("music"): Save.d["music"] = []
 		Save.d["music"].append(name)
 		Save.save_game()
@@ -326,8 +335,11 @@ func match_voices() -> int:
 			n += 1
 	for key in loops:
 		if is_instance_valid(loops[key]["p"]): n += 1
+	var own := []           # the farm's garden beds belong to the farm, not to a match (MATCH_BEDS are the match's)
+	for nm in amb_layers:
+		if not nm in MATCH_BEDS: own.append(amb_layers[nm]["p"])
 	for c in get_children():
-		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb:
+		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb and not c in own:
 			n += 1          # also a stem or bed or loop still fading out
 	return n
 
@@ -344,6 +356,7 @@ func _stop_layers(fade: float) -> void:
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
 var amb_layers := {}      # name -> {p, want}
+const MATCH_BEDS := ["abyss", "ruins"]   # MusicDir's beds; other amb_layers are the farm's
 
 func amb_layer(name: String, level: float) -> void:
 	if not amb_layers.has(name):
@@ -391,9 +404,10 @@ func _process(delta: float) -> void:
 		p.volume_db = linear_to_db(maxf(cur, 0.0001))
 
 var _step_i := 0
-func step(pos = null, vol := -16.0) -> void:
+## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
+func step(pos = null, vol := -16.0, reach := 0.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12)
+	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
 
 func has(sname: String) -> bool:
 	return streams.has(sname)
@@ -423,13 +437,21 @@ func _voice(pos) -> AudioStreamPlayer:
 	if p == null:
 		p = players[next]
 		next = (next + 1) % POOL
-	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
-	p.bus = "SFXFar" if far else "SFX"
+	p.bus = _bus_for(pos)
 	return p
 
+## Which bus a sound at pos plays on: muffled behind terrain, low-passed when far, else the plain SFX bus.
+func _bus_for(pos) -> String:
+	if pos == null:
+		return "SFX"
+	if occlusion.blocked(pos, listener):
+		return "SFXMuffled"
+	return "SFXFar" if Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR else "SFX"
+
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
-## burst of the same sound is capped and stacked quieter.
-func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
+## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the
+## sound's own "reach", else hear_range).
+func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0) -> void:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	var now := Time.get_ticks_msec()
@@ -437,7 +459,8 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
+	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
+	var v := vol_db + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -556,8 +579,7 @@ func _loop_level(L: Dictionary) -> void:
 	var p: AudioStreamPlayer = L["p"]
 	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
 	p.volume_db = -80.0 if is_nan(v) else v
-	var far: bool = L["pos"] != null and Vector2(L["pos"].x - listener.x, L["pos"].z - listener.z).length() > FAR
-	p.bus = "SFXFar" if far else "SFX"
+	p.bus = _bus_for(L["pos"])
 
 ## Plays a ready-made stream (a glider skin's sound, say) with the same distance falloff as play().
 func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) -> void:
