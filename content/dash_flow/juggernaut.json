@@ -78,18 +78,22 @@
 				"source": "As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air."
 			},
 			"jump": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. The hold-blast charge is shown standing (briefs/hero-ref/juggernaut.md:41, frame 0087); no plain jump is shown (briefs/hero-ref/juggernaut.md:284), so nothing says a charge ends or goes on in a jump. Kept: the hold carries through (owner: every interaction chains)."
 			}
 		},
 		"rmb": {
 			"ground": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. Data: Fiery Lunge is a HOLD (briefs/supervive-data/supervive_kits.md:21); footage shows the hold only standing (briefs/hero-ref/juggernaut.md:57-64, frames 0121-0127, 0141-0146) and no Shift inside it (card: 'Dash while attacking', briefs/hero-ref/juggernaut.md:20). Kept: the hold carries through (owner: every interaction chains)."
 			},
 			"air": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. No air dash is shown (frames 0251-0300 show only the jump into the Air Slam, briefs/hero-ref/juggernaut.md:75-83), and no Lunge charge inside one. Kept: the hold carries through (owner: every interaction chains)."
 			},
 			"jump": {
-				"mode": "keep"
+				"mode": "keep",
+				"source": "Not determinable. Data: RMB while airborne is Obsidian Slam (briefs/supervive-data/supervive_kits.md:22), a press variant; nothing says whether a Lunge charge begun on the ground turns into it or goes on. Frames 0251-0300 show the jump, then the slam (briefs/hero-ref/juggernaut.md:75-83); no plain jump (briefs/hero-ref/juggernaut.md:284). Kept: the hold carries through (owner: every interaction chains)."
 			}
 		}
 	},
