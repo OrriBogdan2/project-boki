@@ -212,6 +212,11 @@ func _clear_inp() -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
+## No monsters about: the Blight spawns them as match time passes, and a long run reaches it.
+func _clear_mobs() -> void:
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+
 ## A clean, standing hunter at p.
 func _reset(p: Vector3, grounded := true) -> void:
 	P.out = false; P.gone = false; P.downed = false
@@ -224,6 +229,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
+	_clear_mobs()
 	if "lfloat" in P: P.set("lfloat", {})
 	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
 	_clear_inp()
@@ -259,8 +265,7 @@ func run(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	m.set_process(false)
 	w = m.world
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
+	_clear_mobs()
 	P = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
