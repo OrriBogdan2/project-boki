@@ -74,6 +74,8 @@ const CATALOG := {
 	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true},
 	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "top": 0.5},
 	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true},
+	"feed_bowl": {"name": "Feeding bowl", "cat": "Furniture", "gems": 12, "base": true,
+		"desc": "Drop a snack in: hungry Boki nearby come. Bold ones push in, timid ones wait."},
 	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true},
 	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true},
 	"banner": {"name": "Banner", "cat": "Statues", "gems": 20, "colour": true},
@@ -155,6 +157,10 @@ const STOCK := [["lamp_post", 36.2, 30.0], ["lamp_post", 39.6, 35.5], ["lamp_pos
 static func fresh() -> Dictionary:
 	return {"v": 1, "grow": 0, "theme": "meadow", "themes": ["meadow"], "b": {}, "deco": [], "paths": {}, "water": {}, "inv": {}, "uid": 0,
 		"seed": 0, "made": true, "cleared": {}, "fs": 0, "regrow": {}}
+
+## Base mode (Save.d["base_mode"], off unless set): only then can the catalog items marked "base" be built.
+static func base_mode(d: Dictionary = Save.d) -> bool:
+	return bool(d.get("base_mode", false))
 
 ## A farm-start island (new saves from the farm-start update on): it begins almost empty and you
 ## place the house, crop patch, pot and the rest yourself. Older islands keep their fixed farm.

@@ -164,6 +164,12 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 		var fp := _fpos(f)
 		var dd := p2.distance_to(Vector2(fp.x, fp.z))
 		if dd < 1.7 and dd < bd: bd = dd; best = {"kind": "feeder", "f": f}
+	for e in FeedBowl.bowls(h):
+		var bp := FeedBowl.at(e)
+		var dd := p2.distance_to(Vector2(bp.x, bp.z))
+		if dd < 1.3 and dd < bd:
+			bd = dd
+			best = {"kind": "bowl", "e": e}
 	for g in gnodes:
 		var gp: Vector3 = (g as Node3D).position
 		var dd := p2.distance_to(Vector2(gp.x, gp.z + 0.6))
@@ -181,6 +187,7 @@ func label(it: Dictionary) -> String:
 		"feeder":
 			var f: Dictionary = it["f"]
 			return "%s  ·  %d/%d meals" % [Econ.fdef(f)["name"], Econ.fill(f), int(Econ.fdef(f)["cap"])]
+		"bowl": return FeedBowl.label(it["e"])
 		"grave": return "Visit %s's grave" % it["g"]["name"]
 		"graveyard": return "The graveyard  ·  %d resting" % Econ.graves().size()
 	return ""
@@ -189,12 +196,15 @@ func use(it: Dictionary) -> void:
 	match String(it["kind"]):
 		"place": place()
 		"feeder": open_feeder(it["f"])
+		"bowl": FeedBowl.drop(h, it["e"])
 		"grave": open_grave(it["g"])
 		"graveyard": open_graveyard()
 
 # ------------------------------------------------------------------ feeders: kin eat on their own
 ## A hungry kin picks a feeder on its island with something it'll eat. True if it's off to eat.
 func feed_goal(k: Dictionary) -> bool:
+	if FeedBowl.want(h, k):
+		return true      # off to a feeding bowl
 	var rec: Dictionary = k["rec"]
 	if Care.need(rec, "food") >= Econ.HUNGRY_AT or k.has("eat"):
 		return k.has("eat")
@@ -234,6 +244,8 @@ func _taken(fid: String, i: int, me: Dictionary) -> bool:
 
 ## Walking up, waiting a turn in the outer ring, eating. True while it's busy with that.
 func feed_step(k: Dictionary, d: float) -> bool:
+	if k.has("bowl"):
+		return FeedBowl.step(h, k, d)
 	if not k.has("eat"):
 		return false
 	var e: Dictionary = k["eat"]

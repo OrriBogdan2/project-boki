@@ -553,7 +553,7 @@ func step(k: Dictionary, d: float) -> void:
 		return
 	var J: Dictionary = k["job"]
 	var rec: Dictionary = k["rec"]
-	if k.has("called_t") or k.get("busy", false) or k.has("fetch") or k.has("bath") or k.has("eat") or float(k.get("nap_t", 0.0)) > 0.0 \
+	if k.has("called_t") or k.get("busy", false) or k.has("fetch") or k.has("bath") or k.has("eat") or k.has("bowl") or float(k.get("nap_t", 0.0)) > 0.0 \
 			or k.has("indoors") or k.has("leap") or k.get("nap_go", false) or not takes_job(rec, J):
 		drop(k)
 		return
@@ -950,7 +950,7 @@ func workers() -> Array:
 		if t == "":
 			if why != "": t = why
 			elif k.has("break_t"): t = "On a break"
-			elif k.has("eat"): t = "Eating"
+			elif k.has("eat") or k.has("bowl"): t = "Eating"
 			elif float(k.get("nap_t", 0.0)) > 0.0 or k.has("indoors"): t = "Resting"
 			elif _night() and not Work.NOCTURNAL.has(String(r["species"])): t = "Off for the night"
 			else: t = "Free: nothing it's suited to needs doing"

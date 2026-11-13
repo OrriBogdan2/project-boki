@@ -514,6 +514,7 @@ func _make_base(e: Dictionary) -> Node3D:
 				for sx in [-0.7, 0.7]:
 					Models.part(n, Models.box(0.08, 0.42, 0.4), wood, Vector3(sx, 0.21, 0))
 		"kin_bed": n = Models.kin_bed(col)
+		"feed_bowl": n = FeedBowl.model(e)
 		"rug", "rug_long":
 			n = Node3D.new()
 			var sz := Vector2(1.8, 1.8) if id == "rug" else Vector2(2.8, 1.8)

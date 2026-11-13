@@ -83,6 +83,8 @@ static func eligible(id: String) -> bool:
 static func open(id: String) -> bool:
 	if id == SnackPatch.ID and not base_mode():
 		return false
+	if HomeLayout.CATALOG.get(id, {}).get("base", false) and not base_mode():
+		return false
 	if not gated():
 		return true
 	var need := need_of(id)
