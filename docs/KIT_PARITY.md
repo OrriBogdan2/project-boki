@@ -364,6 +364,20 @@ Suggestion (not built): the Breah tip 'Punch to Extend Dash/RMB' may describe a 
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
 
+**The other kits' `keep` rows (2026-11-11).** The rows in the sentence above now carry a `source`. Each one cites the frames and lines checked. None could be settled: in every clip the held ability and the dash or jump are in separate windows. All stay `keep` and still `[?]`, and no behaviour changes.
+
+| Hero | Rows | Checked |
+|---|---|---|
+| Cinder (`ashwick`, Felix) | `hold.rmb.{ground,air,jump}` (3) | linwick.md:55-63 (bolt lane 0073-0074, 0102-0103, 0131), :267-276 (bash 0143-0144, 0159-0160, never inside a lane), :278-279 and :285-286 (air dash and jump not shown); supervive_kits.md:41-42 |
+| Zedran (`juggernaut`, Brall) | `hold.rmb.{ground,air,jump}`, `hold.lmb.jump` (4; the old count of 3 missed `hold.lmb.jump`) | juggernaut.md:20 (card 'Dash while attacking', silent on a charge), :41 (blast charge 0087), :57-65 (Charge Dash 0121-0127, 0141-0146), :86-92 and :259-266 (Quick Dash on its own, 0371-0420), :273-274 (air dash not shown), :283 (no plain jump; jumps are Air Slams 0251-0300); supervive_kits.md:18, 21-22, 26 |
+| Bjorn (`bulwark`, Oath) | `hold.lmb.jump` (1) | bjorn.md:67-74 (swing holds 0101-0172, all standing), :271 (open question: can he move while charging), :363-366 (air and jump not shown); supervive_kits.md:88 |
+| Claire (`rimewright`, Celeste) | `hold.rmb.{ground,air,jump}` (3) | tamsin.md:18 (the spear is a tap in the source), :48-53 (RMB 0094-0168) against :66-79 (Skate 0169-0296), no overlap; :293-298 (air dash and jump not shown); supervive_kits.md:33-34 |
+| Pip (`tender`, Elluna) | `hold.rmb.{ground,air,jump}` (3) | mooshmoosh.md:61-72 and :386-388 (aim f105-113, f116-120), :340 (dashes at f35, f157, f181, f227, none in an aim; no clean ground dash); supervive_kits.md:9-11. Ours: holding RMB does nothing past the wind-up, so these rows have nothing held to act on |
+
+I re-checked Cinder's and Grimble's `dash.ground.lmb`: nothing new. Cinder's LMB is never pressed inside a bash (linwick.md:267-276). Grimble's Buckshot (0040-0080) and his ~0.12 s Brute Dash (0188, dredge.md:100-103, 302-306) are in separate windows. Their sources stand as written.
+
+To settle any of these rows, a clip has to show the held ability running into the move: Felix aiming the bolt and then bashing, Brall charging and then Quick Dashing, Oath charging and then jumping, Elluna aiming and then dashing. For Celeste the spear is a tap, so the hold is ours and there is no source row to match.
+
 ## Health
 
 PARITY FIRST ratio audit (briefs/DECISIONS.md 2026-11-07). Our numbers are on a smaller scale than the source's, so each Hunter is compared as a share of its own roster's average: ours = max health / 154 (mean of the 12), source = Base HP / 1285 (mean of the 12). Ratio = ours share / source share; 1.00 is parity, the bar is 1.25x either way.

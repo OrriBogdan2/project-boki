@@ -30,7 +30,7 @@
 		"lmb": {
 			"ground": {"mode": "keep", "source": "Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it"},
 			"air": {"mode": "keep", "source": "Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is)"},
-			"jump": {"mode": "keep"},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/bjorn.md:67-74): every charged-swing hold (frames 0101-0110, 0116-0128, 0132-0149, 0160-0172) is made standing; he never moves while charging (open question bjorn.md:271) and no jump is shown (bjorn.md:363-366). Data (briefs/supervive-data/supervive_kits.md:88: HOLD to charge a swing) silent on jumping. Kept: the charge carries through, as on the dash rows (owner item 51)."},
 			"mantle": {"mode": "cancel", "reason": "owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)", "source": "Owner item 30; the source has no mantle rule."}
 		}
 	}
