@@ -1189,7 +1189,7 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 |---|---|
 | _doc | Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
 | chest | {"keep": 0.6, "keep_doc": "Share of the map's chests and of the item caches a match places (owner 11-10: about 40% fewer). Vaults are not cut. KeyChest.thin drops the most crowded map chests first. Change it with the bonus key odds in chest_keys.json (the --keys-check surplus).", "hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "soul_ember_min_bonus": 2, "soul_ember_odds": 0.3} |
-| keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "pickup_pull": 2.2, "cap": 3, "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."} |
+| keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "cap": 3, "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."} |
 | shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "relax_r": 7.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "expose_s": 1.2, "tell_s": [5.0, 10.0], "grounded_speed": 0.55, "gems": 6} |
 | cover | {"biome_targets": {"bloom": [0.15, 0.2], "meadow": [0.085, 0.12], "gloom": [0.04, 0.075], "storm": [0.02, 0.04], "ember": [0.015, 0.032], "frost": [0.0, 0.01]}} |
 
@@ -1368,6 +1368,17 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | kinds | {"flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"], "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"], "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]} |
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
+
+## pickup (`content/rules/pickup.json`)
+
+Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each rule is a flat radius and a height (m) a hunter must be within, and nothing may stand between them and the thing: a rock, higher ground or a kit wall blocks a pickup as it blocks sight. walk: consumables, armor shards, gems, seeds, Rift and chest keys fly to you as you pass (no key); pull_speed + (radius - distance) x pull_gain m/s, taken when within grab m of your chest, settle s after they land. tune: a weapon tuning taken by walking over it. bot: a bot walking over a tuning or a gear piece better than its own. interact: gear and treasure, taken with the interact key; of several in reach the key takes the one nearest the cursor.
+
+| Setting | Value |
+|---|---|
+| walk | {"radius": 2.2, "height": 2.0, "settle": 0.5, "pull_speed": 6.0, "pull_gain": 6.0, "grab": 0.6} |
+| tune | {"radius": 1.1, "height": 1.0} |
+| bot | {"radius": 1.4, "height": 1.0} |
+| interact | {"radius": 1.5, "height": 1.2} |
 
 ## portraits (`content/rules/portraits.json`)
 

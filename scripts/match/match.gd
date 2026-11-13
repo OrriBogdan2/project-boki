@@ -2620,7 +2620,7 @@ func _update_pickups(dt: float) -> void:
 			if dk > World.VOID + 1.0 and (g < dk or g > pos.y + 0.9): g = dk
 		var v: Vector3 = p["vel"]
 		var grabbed := false
-		if p["t"] > 0.5:
+		if p["t"] > PickupReach.settle():
 			for h in hunters:
 				if h.out or h.extracted or h.downed or h.remote:
 					continue
@@ -2628,11 +2628,9 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
-				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
-				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0 and UtilityBelt.can_take(h, String(p["kind"])):
-					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
-					v = dir.normalized() * (6.0 + (2.2 - d) * 6.0)
-					if dir.length() < 0.6:
+				if PickupReach.near(self, h, pos, "walk") and UtilityBelt.can_take(h, String(p["kind"])):
+					v = PickupReach.pull(h, pos)
+					if PickupReach.grabbed(h, pos):
 						_collect(h, p)
 						grabbed = true
 					break
@@ -4277,15 +4275,9 @@ func _update_interact(dt: float) -> void:
 					break
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
-			var bd := 1.5
-			for wp in wpicks:
-				var d: float = h.flat_dist(wp["pos"])
-				if d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("gear"):
-					bd = d
-					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
-				elif d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("val") and h == player:
-					bd = d
-					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
+			var wp := PickupReach.under_cursor(self, h)
+			if not wp.is_empty():
+				best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
 		# 4. open a chest
 		if best.is_empty():
 			for c in chests:
