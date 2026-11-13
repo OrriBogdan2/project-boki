@@ -1564,6 +1564,7 @@ func _move_kin(d: float) -> void:
 			k["hop"] += d * 10.0
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * (0.26 if joy > 0.0 else (float(pers.get("hop_a", 0.14)) if hv.length() > 0.3 else 0.03))
 		KinHabit.step(k, n, hv.length() > 0.3, d)
+		KinAiling.pose(k, n, d)
 		if hw: hw.pose(k, n, d)
 		toys.pose(k, n, d)
 		n.set_meta("happy", joy > 0.0)
@@ -4147,7 +4148,7 @@ func _care_tick(d: float) -> void:
 			var rec: Dictionary = k["rec"]
 			var in_bed: bool = k.has("bed") and Vector2(k["pos"].x - k["bed"].x, k["pos"].z - k["bed"].z).length() < 0.6
 			var resting: bool = float(k.get("nap_t", 0.0)) > 0.0 or (night and in_bed) or k.has("indoors")
-			Care.tick(rec, care_acc, resting, raining)
+			Care.tick(rec, care_acc, resting, raining, KinAiling.friend_near(kins, k))
 		care_acc = 0.0
 		KinBondMoment.tick(self)      # a bond rank it just reached: a heart, a line and a card
 	if care_save > 20.0:
@@ -4267,7 +4268,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 ## Speed multiplier for a tired kin.
 func _care_speed(rec: Dictionary) -> float:
 	var tired := 0.7 if Care.need(rec, "energy") < 25.0 else 1.0
-	return tired * (0.7 if Care.starve_h(rec) >= Care.STARVE["weak"] else 1.0) * Mentor.pace(rec)
+	return tired * Care.pace(rec) * Mentor.pace(rec)
 
 # ---- care actions, from the kin's card; they play out in the world, not in a menu
 func _care_start(k: Dictionary) -> bool:

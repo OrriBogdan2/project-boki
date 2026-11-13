@@ -133,6 +133,8 @@ func tick(d: float) -> void:
 		var was := String(told.get(rec["uid"], ""))
 		if st != was:
 			told[rec["uid"]] = st
+			if st == "" and Care.STARVE_INFO.has(was) and not h._kin_entry(rec).is_empty():
+				KinAiling.perk_up(h, h._kin_entry(rec))
 			if st != "":
 				var k: Dictionary = h._kin_entry(rec)
 				if not k.is_empty():
@@ -576,6 +578,7 @@ func show_away() -> void:
 			lines.append("%s: %s. %s" % [e["rec"]["name"], String(info[0]).to_lower(), info[1]])
 			told[e["rec"]["uid"]] = String(e["stage"])
 	away = []
+	_tell_neglect_back()
 	for g in died:
 		_notice("%s has died" % g["name"], ["%s starved while you were away. It had nothing to eat for days." % g["name"],
 			"Its grave is in the graveyard, east of the farm. You can visit it there.",
@@ -583,6 +586,17 @@ func show_away() -> void:
 	if not lines.is_empty():
 		lines.append("Fill a feeder (by the cooking pot), or feed them from their card.")
 		_notice("Your Boki are starving", lines)
+
+## The Boki that came back weak under "no natural death" (Econ.revive_neglected), told once.
+func _tell_neglect_back() -> void:
+	var back: Array = Save.d.get("neglect_back", [])
+	if back.is_empty():
+		return
+	Save.d["neglect_back"] = []
+	var state := "It is weak, and needs a meal and some rest."
+	if back.size() > 1:
+		state = "They are weak, and need a meal and some rest."
+	_notice("%s came back" % ", ".join(back), ["Hunger and neglect never take a Boki for good now.", state])
 
 func _notice(title: String, lines: Array) -> void:
 	h.arrivals.add(func():
