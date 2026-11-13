@@ -66,7 +66,12 @@ def import_dense(path):
 def base_image(ob, socket="Base Color"):
     """The image feeding the first material's `socket` ("Emission Color": a Meshy master's emission map), through
     any mix or factor nodes the glTF importer put between, or None."""
-    bsdf = next(n for n in ob.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    return material_image(ob.data.materials[0], socket)
+
+
+def material_image(mat, socket="Base Color"):
+    """The image feeding the material's `socket` (see base_image), or None."""
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
     todo = [l.from_node for l in bsdf.inputs[socket].links]
     while todo:
         n = todo.pop(0)
@@ -300,12 +305,15 @@ def _islands(bm, lay):
     return out
 
 
-def bake_colour(high, low, size, cage, ray, margin_px, src=None):
-    """The dense mesh's base colour, or its `src` image, (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
-    src = src or base_image(high)
+def bake_colour(high, low, size, cage, ray, margin_px, src=None, socket="Base Color"):
+    """The dense mesh's base colour (or its `socket`'s image), or its `src` image, (as emission, so nothing of the scene's
+    light) onto the low mesh's UVs. A material without `src` bakes its own `socket` image: a two-material master (a head
+    graft: the kept head's paint and the new body's) bakes both."""
+    src = src or base_image(high, socket)
     for m in high.data.materials:
         nt = m.node_tree
-        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src), None)
+        img = src if any(n.type == "TEX_IMAGE" and n.image == src for n in nt.nodes) else material_image(m, socket)
+        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and img and n.image == img), None)
         em = nt.nodes.new("ShaderNodeEmission")
         if tex:
             tex.interpolation = "Cubic"
@@ -313,6 +321,9 @@ def bake_colour(high, low, size, cage, ray, margin_px, src=None):
         else:       # a flat-colour part (Claire's sheer skirt): its base colour, opaque
             bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
             em.inputs["Color"].default_value = bsdf.inputs["Base Color"].default_value
+            if socket == "Emission Color":  # (no emission map: its flat glow, black when it has none)
+                c, k = bsdf.inputs[socket].default_value, bsdf.inputs["Emission Strength"].default_value
+                em.inputs["Color"].default_value = (c[0] * k, c[1] * k, c[2] * k, 1.0)
         out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
         nt.links.new(em.outputs[0], out.inputs["Surface"])
     img = bpy.data.images.new("baked", size, size, alpha=False)

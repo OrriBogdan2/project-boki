@@ -205,7 +205,7 @@ def bake():
         layers.append(("emit", "Emission Color", BW.base_image(high, "Emission Color")))
     for name, socket, src in layers:
         low.data.materials.clear()
-        img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
+        img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src, socket)
         body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
         if name == "atlas":     # (not the emission map, where black is no glow)
             fill_misses(body, max(32, tex // 64))
