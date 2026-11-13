@@ -82,6 +82,28 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).
 - **Title:** "Arena", "Save files".
 
+### Plain words pass (branch ext/ui-plain-words-menus)
+
+Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery as a tooltip word, glider and armor-tier names). Each term gets plain words or a tooltip.
+
+| Screen | Term | Old | New |
+|---|---|---|---|
+| Results | Knocks | "Knocks" | "Hunters downed" |
+| Results | Armor "Uncommon" | "Armor" over "Uncommon" | tile removed on main (armor is no longer one of the three big numbers); nothing to reword |
+| Results | Tidebloom seeds | "5 Tidebloom seeds" | same chip, tooltip: plant these on the farm |
+| Results | Into your armory | "Into your armory" | "Gear you kept, in the armory" / "Gear you found (build the armory on the farm to keep it)" |
+| Expedition | BOKI AT RISK | "Boki at risk" | "Boki can be lost", tooltip on the tier: go down here and the Boki you bring are left behind |
+| Expedition | Solo / Duos / Trios | already gone | the Match line reads "Extraction: trios, 7 squads of three" (trios only); only the loading card still names squad size |
+| Expedition | Arena / Training area / Duel room | already gone | the panel's practice button reads "Training Grounds"; Arena stays reserved (title comment fixed) |
+| Expedition | ability names (Hot, Cinderfall, Burr) | unchanged | each sits next to its one-line description on the kit card; tile tooltips carry the line |
+| Relics page | Mastery | "Mastery" | "Goals: each earns a look", tooltip names Mastery |
+| Relics page | Colourway | "Colourway: Forge Red" | "Colours: Forge Red" |
+| Relics page | Glider / Field Wing | "Glider" | "Glider (looks only)"; the Field Wing line already says it is the starting wing |
+| Relics page | Hot Streak | unchanged | its line directly under it says what it does |
+| Relics page | Boki Fusion | unchanged | DECISIONS name; its line sits under it |
+| Title | Arena | already "Training Grounds" | only a code comment still said Arena (fixed) |
+| Title | Save files | unchanged | plain already; the page subtitle says what a save holds |
+
 ## 5. For the declutter jobs (not done here)
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.

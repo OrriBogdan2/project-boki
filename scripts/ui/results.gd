@@ -64,7 +64,7 @@ func show_result(r: Dictionary) -> void:
 	var secs := int(r.get("time", 0))
 	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
 	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
+	var big4 := [["knock", "Hunters downed", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
 		["clock", "Time", float(secs), "time"]]
 	for i in big4.size():
 		var t: Array = big4[i]
@@ -97,6 +97,9 @@ func show_result(r: Dictionary) -> void:
 			flow.add_theme_constant_override("h_separation", 8); flow.add_theme_constant_override("v_separation", 8)
 			for i in chips.size():
 				var ch := _chip(chips[i][0], chips[i][1], chips[i][2], 0.75 + i * 0.14)
+				if chips[i][0] == "seed":
+					ch.tooltip_text = "Plant these on the farm to grow crops."
+					ch.mouse_filter = Control.MOUSE_FILTER_PASS
 				if chips[i].size() > 3:
 					# a Boki you brought home: where it went
 					var krec: Dictionary = chips[i][3]
@@ -114,7 +117,9 @@ func show_result(r: Dictionary) -> void:
 	if won and eggs_home > 0:
 		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
-		v.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
+		var gear_head := "Gear you kept, in the armory"
+		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
+		v.add_child(UI.section(gear_head))
 		var hf := HFlowContainer.new()
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
