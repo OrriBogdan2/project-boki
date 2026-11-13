@@ -4,6 +4,7 @@ extends RefCounted
 ## rimewright.md: where shots land, the telegraph shown while holding, the timings, the payoffs, the
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
+const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -144,6 +145,10 @@ func _skate_only() -> void:
 			for mv in (viewer[hero] as Dictionary).get("dash", []):
 				others[mv] = hero
 	var dd: Dictionary = K.dash_def()
+	var footage_bh_s := (450.0 + 600.0) / 2.0 / 90.0   # tamsin.md: 450-600 px/s, a 90 px medium = 1.8 m = 1 bh
+	ok(
+			"tm Shift: the skate runs at the footage's mean, 10.5 m/s (5.83 body heights a second, 1 bh = 1.8 m)",
+			absf(float(dd["speed"]) - footage_bh_s * 1.8) < 0.01, "%.2f m/s" % float(dd["speed"]))
 	ok(
 			"tm Shift: her dash moves are her own skate (push-off, stride), no other hero's, fitting the skate",
 			not others.has("tm_skate_go") and not others.has("tm_skate")
@@ -535,6 +540,113 @@ func _rime_skate_in() -> void:
 	P.inp["move"] = Vector2.ZERO
 	await _free(m)
 
+## Skates east for 0.4 s and casts Rimelock from it; returns the skate's speed at the cast.
+func _skate_into_rime(m: Match, P: Hunter) -> float:
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	step(m, 0.4)
+	var v := P.roll_speed
+	HunterKeys.ult_pressed(P)
+	P.inp["dash_down"] = false
+	return v
+
+## How Rimelock moves her (docs/heroes/rimewright.md "Movement settled"): WASD never steers the carry; after the
+## crash she has no momentum and the next step is hers; the carry slides off a terrace (never blocked) sinking
+## gently, then she drops rooted to the ground below; over the void it carries on, and X frees her glider.
+func _rime_move() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var W = m.world
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	var home := P.pos
+	_skate_into_rime(m, P)
+	var p0 := P.pos
+	var worst := 1.0
+	for i in int(round(float(K.x_def()["carry_t"]) * 60.0)):
+		P.inp["move"] = Vector2(0, 1)
+		var q := P.pos
+		step(m, 1.0 / 60.0)
+		var dv := Vector2(P.pos.x - q.x, P.pos.z - q.z)
+		if dv.length() > 0.001:
+			worst = minf(worst, dv.normalized().dot(Vector2.RIGHT))
+	ok("tm X move: WASD never steers the carry (held sideways, it runs on along the skate)",
+			worst > 0.99 and P.pos.x - p0.x > 2.0, "dot %.3f" % worst)
+	P.inp["move"] = Vector2.ZERO
+	while K.ult_running():
+		step(m, 1.0 / 60.0)
+	var still := Vector2(P.vel.x, P.vel.z).length()
+	var p1 := P.pos
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.15)
+	ok("tm X end: no momentum after the crash, and the next step is hers (she walks off)",
+			still < 0.01 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.25,
+			"%.2f m/s then %.2f m" % [still, Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length()])
+	P.inp["move"] = Vector2.ZERO
+	# a terrace: she starts two levels up, the edge 3 m ahead
+	var hx := int(floor(home.x))
+	var hz := int(floor(home.z))
+	for dz in range(-3, 4):
+		for dx in range(-6, 3):
+			W.level[W.idx(hx + dx, hz + dz)] += 2
+	P.teleport(home + Vector3(-3.0, 2.0 * World.LEVEL, 0))
+	step(m, 0.5)
+	K.cd["x"] = 0.0
+	_skate_into_rime(m, P)
+	var y_top := 2.0 * World.LEVEL + home.y
+	var off := false
+	var sink := 0.0
+	for i in int(round(float(K.x_def()["carry_t"]) * 60.0)):
+		step(m, 1.0 / 60.0)
+		if not off and P.pos.x > home.x + 3.0:
+			off = true
+		if off and K._rime_carrying():
+			sink = maxf(sink, y_top - P.pos.y)
+	step(m, 1.0)
+	var on_ground: bool = absf(P.pos.y - W.ground_at(P.pos.x, P.pos.z)) < 0.1
+	var sink_max := float(K.dash_def()["air_fall"]) * float(K.x_def()["carry_t"])
+	ok("tm X ledge: the carry slides off a terrace (never blocked), sinking at the skate's air fall, then drops rooted",
+			off and sink <= sink_max and on_ground and K.ult_running() and P.root_t > 0.0,
+			"off %s sank %.2f grounded %s" % [off, sink, on_ground])
+	HunterKeys.ult_pressed(P)
+	step(m, 0.2)
+	for dz in range(-3, 4):
+		for dx in range(-6, 3):
+			W.level[W.idx(hx + dx, hz + dz)] -= 2
+	# the abyss 2 m ahead: the carry runs on over it; X frees her and the glider opens
+	for dz in range(-4, 5):
+		for dx in range(2, 20):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
+	P.teleport(home)
+	step(m, 0.5)
+	K.cd["x"] = 0.0
+	_skate_into_rime(m, P)
+	step(m, float(K.x_def()["carry_t"]))
+	var over: bool = W.is_void(P.pos.x, P.pos.z) and K.ult_running()
+	HunterKeys.ult_pressed(P)
+	var opened_t := -1.0
+	var t := 0.0
+	while t < 1.0 and opened_t < 0.0:
+		P.inp["glide"] = true
+		P.inp["glide_btn"] = true
+		step(m, 1.0 / 60.0)
+		t += 1.0 / 60.0
+		if P.gliding:
+			opened_t = t
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
+	var brk := KMovesCare.length("tm_rime_break")
+	ok("tm X abyss: the carry runs on over the void; X frees her and held glide opens the step the break move ends",
+			over and opened_t > 0.0 and opened_t <= brk + 0.05,
+			"over %s glider at %.2f s (break move %.2f s)" % [over, opened_t, brk])
+	await _free(m)
+
 ## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
 func _skate_ice() -> void:
 	var laid := {}
@@ -821,6 +933,7 @@ func tender() -> void:
 	var A: Hunter = r[2]
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
+	var home: Vector3 = r[4]
 	ok(
 			"mm: renamed Meeko, kit sounds load",
 			Arch.name_of("tender") == "The Dawnfox"
@@ -865,13 +978,29 @@ func tender() -> void:
 	ok(
 			"mm LMB: looks are pooled (no new nodes per ember)", K.lk().made - made0 <= 3,
 			"made %d -> %d" % [made0, K.lk().made])
-	# the ramp: about +45% over 5 hits (sheet: 64 -> 93)
-	var ramp := float(Arch.def("tender")["resource"]["per_stack"]) * 5.0 / float(P.wpn["dmg"])
+	# the ramp, footage 64 -> 93 (the data has no number): +45.3% at the plateau, its numbers white then yellow
+	var res: Dictionary = Arch.def("tender")["resource"]
+	var ramp := float(res["per_stack"]) * float(res["max"]) / float(P.wpn["dmg"])
 	ok(
-			"mm passive: Kindle ramps embers about +45% at 5 stacks", ramp > 0.38 and ramp < 0.52,
-			"+%.0f%%" % (ramp * 100.0))
+			"mm passive: Kindle ramps embers +45% at 5 stacks (footage 64 -> 93)",
+			absf(ramp - (93.0 / 64.0 - 1.0)) < 0.03, "+%.1f%%" % (ramp * 100.0))
+	var shot := {"src": "shot"}
+	K.kind.clear()
+	K.add_kindle(T, int(res["max"]) - 1)
+	var white: bool = K.number_col(T, HudStyle.HIT, shot) == HudStyle.HIT
+	K.add_kindle(T, 1)
+	ok(
+			"mm passive: the damage number is yellow at the plateau, white before it (footage)",
+			white and K.number_col(T, HudStyle.HIT, shot) == HudStyle.CRIT
+			and K.number_col(T, HudStyle.HIT, {"src": "abil"}) == HudStyle.HIT)
+	K.kind.clear()
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
+	var res: Dictionary = Arch.def("tender")["resource"]
+	ok(
+			"mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider)",
+			P.shot_range_k == 1.0 and not res.has("emp_range") and not res.has("emp_refund"),
+			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
@@ -879,7 +1008,7 @@ func tender() -> void:
 	step(m, 0.05)
 	P.inp["fire"] = false
 	ok(
-			"mm LMB: after a pause the next ember is Empowered (40% further, its own move)",
+			"mm LMB: after a pause the next ember is Empowered (its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
 	# --- Burrseed (items 118 and 23): a press, a quick fixed wind-up, the throw by itself on the aim of that moment
@@ -988,6 +1117,14 @@ func tender() -> void:
 	ok(
 			"mm E: lit on her, a 2.6 m ring (1.4 bh) and the raise-the-lantern move",
 			K.in_e() and absf(K.hearth_r() - 2.6) < 0.01 and K.anim_id == "mm_hearth" and K.lk().showing("hearth"))
+	# parity: the source gives no self-heal factor, so she is healed by the full tick (no self_k rider)
+	var ed: Dictionary = Arch.def("tender")["passive"]
+	P.hp = P.max_hp * 0.5
+	var hp0 := P.hp
+	K._pulse(P.pos, 2.0)
+	ok(
+			"mm E: the ring heals her for the full tick, no self-heal factor in the data",
+			not ed.has("self_k") and absf(P.hp - hp0 - 2.0 * K.heal_k()) < 0.01, "healed %.2f" % (P.hp - hp0))
 	var cur := P.pos + Vector3(6.0, 0, 0)
 	sc.aim_at(P, cur)
 	step(m, 0.2)
@@ -1121,16 +1258,17 @@ func tender() -> void:
 	step(m, 1.2)
 	ok("mm RMB: a stun in the wind-up loses the throw, not the charge",
 			not K.seed_aim and K.ch_rmb >= 1.0 and _mine(m, P).size() == n3)
+	TTIME.new(self).run(m, P, K, A, home)
 	await _free(m)
 	await growth()
 	await burr_ranks()
 	await _dashes_cute()
 	await _no_blasts()
 
-## Elluna's dashes, copied (numbers in docs/heroes/tender.md): the ground hop is the source's 2 bh
-## in 0.2 s (after the dash feel), the air glide its measured 13.3 m over 0.95 s peaking about 17 m/s, 3-4x the
-## hop's distance and about 5x its time; each plays its own move (item 35), sized to its dash, and no other kit
-## plays those moves.
+## Her dashes (numbers in docs/heroes/tender.md): Elluna's, slowed by the owner (11-11): the ground hop 3.15 m in
+## 0.23 s (after the dash feel), the air glide 10.5 m over 0.95 s peaking about 14 m/s with a short float-out that
+## leaves her under run speed, 3-4x the hop's distance and about 5x its time; each plays its own move (item 35),
+## sized to its dash, and no other kit plays those moves.
 func _dashes_cute() -> void:
 	var r: Array = sc.setup("tender", 20.0)
 	var m: Match = r[0]
@@ -1148,8 +1286,8 @@ func _dashes_cute() -> void:
 	step(m, P.roll_t)
 	var ground_d := P.pos.x - p0.x
 	ok(
-			"mm dashes: the ground hop is Elluna's: 2 bh (3.6 m) in 0.2 s (off the dash feel)",
-			absf(ground_d - 3.6) < 0.25 and absf(ground_t - 0.2) < 0.02,
+			"mm dashes: the ground hop is 3.15 m in 0.23 s, shorter and slower than Elluna's",
+			absf(ground_d - 3.15) < 0.25 and absf(ground_t - 0.23) < 0.02,
 			"%.2f m in %.2f s" % [ground_d, ground_t])
 	step(m, 0.5)
 	P.teleport(P.pos + Vector3(0, 3.0, 0))
@@ -1162,15 +1300,26 @@ func _dashes_cute() -> void:
 	var air_t := P.roll_t
 	var glide_cd := P.ex_cd
 	var air_move := K.anim_id
-	var peak := {"v": 0.0}
+	var air: Dictionary = K.dash_def()["air"]
+	var tail_t := air_t - float(air["ramp"]) - float(air["burst"])
+	var peak := {"v": 0.0, "tail_x": 0.0}
 	# measured at the glide's end: what she carries out of it after is the shared air drag's (Loco, tuning.json)
-	step(m, air_t, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
+	step(m, air_t, func():
+		peak["v"] = maxf(float(peak["v"]), P.roll_speed)
+		if P.roll_t > tail_t:
+			peak["tail_x"] = P.pos.x)
 	var air_d := P.pos.x - a0.x
+	var exit_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"mm dashes: the air glide is Elluna's: 13.3 m over 0.95 s, peaking 16.5-22 m/s",
-			absf(air_d - 13.3) < 0.7 and absf(air_t - 0.95) < 0.03 and float(peak["v"]) >= 16.5
-				and float(peak["v"]) <= 22.0,
+			"mm dashes: the air glide is 10.5 m over 0.95 s, peaking 13-15.5 m/s, slower than Elluna's",
+			absf(air_d - 10.5) < 0.7 and absf(air_t - 0.95) < 0.03 and float(peak["v"]) >= 13.0
+				and float(peak["v"]) <= 15.5,
 			"%.2f m in %.2f s, peak %.1f m/s" % [air_d, air_t, float(peak["v"])])
+	var tail_d := P.pos.x - float(peak["tail_x"])
+	ok(
+			"mm air dash: little movement at the end: a float-out under a quarter, left under run speed",
+			tail_d <= air_d * 0.25 and exit_v < P.base_speed,
+			"float-out %.2f m of %.2f, leaves at %.1f m/s" % [tail_d, air_d, exit_v])
 	var ratio := air_d / maxf(0.01, ground_d)
 	ok(
 			"mm dashes: Elluna's cooldowns: the glide 14 s, a hop charge 7 s (separate)",
@@ -1663,6 +1812,7 @@ func rimewright() -> void:
 	await _statue_locks()
 	await _rime_glide_skate()
 	await _rime_skate_in()
+	await _rime_move()
 	await _skate_ice()
 	await _spear_rank3()
 	await _spear_travel()

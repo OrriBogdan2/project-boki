@@ -20,13 +20,15 @@ var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s o
 var burr_n := 0
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
-var emp_until := 0.0           # the ember in flight left an idle gun (long range, double refund)
+var emp_until := 0.0           # the next ember left an idle gun (Empowered: look and sound only)
 var lock_t := 0.0              # can't pick anyone up (after dropping them)
 var pick_blocked := 0.0
 var carry_t := 0.0
 var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
+const BOT_CALL_SAFE := 3.0      # m: a bot starts Hearth Call on a teammate only with no rival Hunter this close
+const BOT_SELF_CALL_HP := 0.7   # a bot with no teammate lights Hearth Call on herself below this HP share
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
@@ -86,6 +88,13 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		return dmg + float(res_def().get("per_stack", 1.0)) * float(kindle_on(t))
 	return dmg
 
+## Footage: the numbers go white to yellow and stay yellow at the plateau (64 -> 93):
+## an ember into a foe at full Kindle shows yellow.
+func number_col(t: Ent, col: Color, o: Dictionary) -> Color:
+	if String(o.get("src", "")) == "shot" and kindle_on(t) >= int(res_def().get("max", 5)):
+		return HudStyle.CRIT
+	return col
+
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
 		return
@@ -93,8 +102,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if src == "shot":
 		var had := kindle_on(t)
 		if had > 0:
-			var emp: bool = m.time < emp_until
-			wind_back_hearth(float(res_def().get("emp_refund" if emp else "refund", 0.2)))
+			wind_back_hearth(float(res_def().get("refund", 0.2)))
 		add_kindle(t, 1)
 	elif src == "abil" and String(o.get("ab", "")) == "utility" and o.get("kindle", false):
 		add_kindle(t, 1)
@@ -111,9 +119,8 @@ func _tick(dt: float) -> void:
 		e["left"] = float(e["left"]) - dt
 		if float(e["left"]) <= 0.0 or not is_instance_valid(e["t"]) or (e["t"] as Ent).dead:
 			kind.erase(key)
-	# an idle gun: the next ember flies further (and winds Hearthlight back twice as much)
+	# an idle gun: the next ember is Empowered (the source gives no effect, so it only looks different)
 	if h.idle_fire >= 1.0 and not h.downed:
-		h.shot_range_k = 1.4
 		emp_until = m.time + 0.9
 	_tick_seed(dt)
 	_tick_burrs(dt)
@@ -150,7 +157,8 @@ func _tick_look(dt: float) -> void:
 		ult_look.tick(dt)
 
 func _dress_ember(s: Dictionary) -> void:
-	var emp: bool = float(s["life0"]) * (s["vel"] as Vector2).length() > float(h.wpn["range"]) * 1.2
+	var emp: bool = m.time < emp_until
+	emp_until = 0.0
 	var right := h.shot_n % 2 == 1
 	var d2 := h.aim_dir()
 	# the ember leaves from the casting hand's side at hand height (the hit band is the same)
@@ -491,7 +499,7 @@ func cast_e() -> bool:
 func e_recastable() -> bool:
 	return not hearth.is_empty() and not bool(hearth.get("tossed", false))
 
-## RecastCue: the light is the marker; left alone it flares by itself (no "EXPIRED").
+## RecastCue: the light is the marker; left alone it flares by itself (the slot still shows "EXPIRED").
 func recast_window() -> Dictionary:
 	var w := super()
 	if not w.is_empty():
@@ -598,7 +606,7 @@ func _pulse(c: Vector3, per: float) -> void:
 			continue
 		if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > hearth_r() + o.r:
 			continue
-		var amt := per * heal_k() * boost * (float(ed.get("self_k", 0.33)) if o == h else 1.0)
+		var amt := per * heal_k() * boost
 		_mend(o, amt, float(ed.get("wisp_k", 5.0)))
 
 ## A heal from her light: CareUtil.heal, and twinkling stars rising off whoever it mends (content/vfx
@@ -624,7 +632,7 @@ func _hearth_end(flare: bool) -> void:
 			if o.downed:
 				_mend(o, amt, float(ed.get("wisp_k", 5.0)))
 			else:
-				_mend(o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
+				_mend(o, amt)
 	else:
 		m.sfx("knock", c, -6.0, 1.4)
 	lk().drop("hearth")
@@ -763,13 +771,13 @@ func _tick_call(dt: float) -> void:
 		_call_end(true)
 
 
-## A tick of the tether's heal on the teammate (or herself in solo, at self_k). A downed teammate is healed
+## A tick of the tether's heal on the teammate (or herself in solo). A downed teammate is healed
 ## too, as the source's channel heals an ally or a Wisp: it tops up what keeps them from bleeding out.
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
 	if who == h:
-		_mend(h, amt * float(e_def().get("self_k", 0.33)))
+		_mend(h, amt)
 	else:
 		_mend(who, amt, float(e_def().get("wisp_k", 5.0)))
 
@@ -894,12 +902,17 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["dash"] = true
 
 
-## A bot calls a downed or badly hurt teammate home when it can.
+## A bot calls a downed or badly hurt teammate home when it can and no rival is on top of her; with no
+## teammate in the match (a duel) it lights the tether on herself once hurt, as the player's key does.
 func _bot_call() -> void:
 	if not hearth_call.is_empty() or not _x_ready():
 		return
+	var mates := CareUtil.mates(m, h)
 	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
-		if o.downed or o.hp < o.max_hp * 0.35:
+		if (o.downed or o.hp < o.max_hp * 0.35) and not _foes_near(BOT_CALL_SAFE):
 			h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)
 			HunterKeys.ult_pressed(h)
 			return
+	if mates.is_empty() and h.hp < h.max_hp * BOT_SELF_CALL_HP:
+		h.inp["aim"] = h.pos
+		HunterKeys.ult_pressed(h)

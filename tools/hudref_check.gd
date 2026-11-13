@@ -1,6 +1,6 @@
 extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
-##   1. segments follow max health (HudStyle.seg_step: 25 each, doubling past 12)
+##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip under health) and shields (past the end of health) are drawn
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
@@ -31,10 +31,10 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	# ---------------------------------------------------------------- 1. segments follow max health
-	var counts := [HudStyle.seg_count(100.0), HudStyle.seg_count(145.0), HudStyle.seg_count(300.0)]
-	ok(counts == [4, 6, 12], "25 health a segment: 100 -> 4, 145 -> 6, 300 -> 12 (%s)" % str(counts))
-	ok(HudStyle.seg_count(600.0) == 12 and HudStyle.seg_step(600.0) == 50.0,
-		"a huge pool doubles the segment size instead of crowding (600 -> 12 of 50)")
+	var counts := [HudStyle.seg_count(124.0), HudStyle.seg_count(145.0), HudStyle.seg_count(193.0)]
+	ok(counts == [8, 9, 12], "17 health a segment: the classes' 124 -> 8, 145 -> 9, 193 -> 12 (%s)" % str(counts))
+	ok(HudStyle.seg_count(600.0) == 9 and HudStyle.seg_step(600.0) == 68.0,
+		"a huge pool doubles the segment size instead of crowding (600 -> 9 of 68)")
 	var m := Match.new()
 	main.add_child(m)
 	var opts := HudRefDemo.opts("--hudref-demo=plates")
@@ -52,11 +52,11 @@ func run(main_node: Node) -> void:
 	var sh: Dictionary = hud.plates.shown.get(full.nid, {})
 	ok(int(sh.get("segs", -1)) == HudStyle.seg_count(full.max_hp),
 		"the drawn plate has one segment per 25 health (%s for %d)" % [str(sh.get("segs")), int(full.max_hp)])
-	full.max_hp = 300.0
-	full.hp = 300.0
+	full.max_hp = 193.0
+	full.hp = 193.0
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 300: the plate redraws with 12 segments")
+	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 193: the plate redraws with 12 segments")
 	# ---------------------------------------------------------------- 2. the chip holds, then drains
 	var hp := HudPlate.new()
 	var dt := 1.0 / 60.0
@@ -123,6 +123,7 @@ func run(main_node: Node) -> void:
 	var cc_row: Array = HudPlate.statuses(sl).map(func(ic): return String(ic[2]))
 	ok(sw == "STUNNED" and "SLOWED" in cc_row,
 		"a stunned, slowed rival's plate: STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
+	await _cc_words(m, hud, sl)
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
@@ -282,6 +283,40 @@ func _check_deny(P: Hunter) -> void:
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})
+
+## One crowd-control effect at a time on a rival (KIT_PARITY "Crowd control"): the plate's word is its own,
+## in its own colour, and no two effects share a colour.
+func _cc_words(m: Match, hud, h: Hunter) -> void:
+	m.remove_meta("hudref_stun")           # (the demo stops holding the whole row on them)
+	var cc := {
+		"STUNNED": [Color("fff27a"), func(): h.stun_t = 3.0],
+		"ROOTED": [Color("8fe0a0"), func(): h.root_t = 3.0],
+		"GROUNDED": [KitStatus.GROUND_COL, func(): KitStatus.apply(h, "gnd", 3.0, 0.0, false, "demo")],
+		"DAZED": [KitStatus.RATTLE_COL, func(): KitStatus.apply(h, "rat", 3.0, 0.0, false)],
+		"SLOWED": [Color("9ae8ff"), func(): h.slow_t = 3.0],
+	}
+	var cols := {}
+	for word in cc:
+		h.stun_t = 0.0
+		h.root_t = 0.0
+		h.slow_t = 0.0
+		h.set_meta("gnd_until", 0.0)
+		KitStatus.clear_rattled(h)
+		h.reveal_t = 3.0
+		(cc[word][1] as Callable).call()
+		var got := {}
+		for i in 60:
+			await main.get_tree().process_frame
+			got = _shown(hud, h)
+			if String(got.get("word", "")) == word:
+				break
+		var col: Color = got.get("word_col", Color.BLACK)
+		var row: Array = HudPlate.statuses(h).map(func(ic): return String(ic[2]))
+		var own: bool = String(got.get("word", "")) == word and col.is_equal_approx(cc[word][0])
+		ok(own and row == [word],
+			"%s alone: plate word %s in its colour, row %s" % [word, got.get("word", ""), row])
+		cols[col.to_html()] = true
+	ok(cols.size() == cc.size(), "the %d crowd-control words use %d different colours" % [cc.size(), cols.size()])
 
 ## The plate's animation state (chip, crack, burst ...) for this hunter.
 func _state(hud, h: Hunter) -> Dictionary:

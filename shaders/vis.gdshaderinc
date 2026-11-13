@@ -1,5 +1,5 @@
 // Sight: everyone on your team lights up a small circle around them and a wide wedge in front of them
-// (where they aim) out to their range. Walls and high ground cast sight shadows. Everything outside
+// (where they aim) out to their range; a rival who gave herself away lights a soft circle of her own. Walls and high ground cast sight shadows. Everything outside
 // what your team can see is darkened and turned a cool grey-blue, so the lit space reads at a glance;
 // your own wedge's two sides carry a thin soft cyan line on the ground. Set from Match; the numbers
 // are measured from the owner's reference in docs/specs/VISION_LOOK.md.
@@ -15,9 +15,14 @@ global uniform vec4 vis_ally1;
 global uniform vec4 vis_ally2;
 global uniform float vis_ally_range;   // how far teammates see (the raid condition shortens it)
 global uniform float vis_dark;         // how dark it is outside sight (RaidLook.VIS_DARK; darker at night)
+global uniform float vis_reveals;      // rivals who gave themselves away (RevealLight, up to three)
+global uniform vec3 vis_reveal0;       // xy = position (x, z), z = strength (fades out as the reveal ends)
+global uniform vec3 vis_reveal1;
+global uniform vec3 vis_reveal2;
 
 const float VIS_COS = 0.087;           // cos of half the wedge: 170 degrees wide (Match.VIEW_COS, the same rule)
 const float VIS_NEAR = 2.0;           // m: the circle all round you that is always lit (Match.NEAR_SENSE)
+const float VIS_REVEAL_R = 2.0;        // m: lit round a revealed rival, soft to +0.6 (~10% of the screen across, as measured)
 const float VIS_SOFT = 0.35;           // m: the lit side fades in over this much past the wedge's side
 const float VIS_LINE_W = 0.035;        // m: the edge line core fades out by this far each side (~3 px solid at 1080p)
 const float VIS_GLOW_W = 0.25;         // m: the glow falling off into the lit side (1/e at ~7 px at 1080p)
@@ -54,12 +59,20 @@ float vis_one(vec2 eye, vec2 dir, float range, vec2 wp, int max_steps) {
 	return max(near_v, cone);
 }
 
+// A revealed rival's own soft circle (RevealLight): no sight shadows, it is her light, not your view.
+float vis_reveal(vec3 r, vec2 wp) {
+	return r.z * (1.0 - smoothstep(VIS_REVEAL_R, VIS_REVEAL_R + 0.6, distance(wp, r.xy)));
+}
+
 float vis_fog(vec3 wp) {
 	if (vis_on < 0.5) { return 0.0; }
 	float lit = vis_one(vis_focus.xz, vis_dir, vis_range, wp.xz, 60);
 	if (lit < 0.999 && vis_allies > 0.5) { lit = max(lit, vis_one(vis_ally0.xy, vis_ally0.zw, vis_ally_range, wp.xz, 28)); }
 	if (lit < 0.999 && vis_allies > 1.5) { lit = max(lit, vis_one(vis_ally1.xy, vis_ally1.zw, vis_ally_range, wp.xz, 28)); }
 	if (lit < 0.999 && vis_allies > 2.5) { lit = max(lit, vis_one(vis_ally2.xy, vis_ally2.zw, vis_ally_range, wp.xz, 28)); }
+	if (lit < 0.999 && vis_reveals > 0.5) { lit = max(lit, vis_reveal(vis_reveal0, wp.xz)); }
+	if (lit < 0.999 && vis_reveals > 1.5) { lit = max(lit, vis_reveal(vis_reveal1, wp.xz)); }
+	if (lit < 0.999 && vis_reveals > 2.5) { lit = max(lit, vis_reveal(vis_reveal2, wp.xz)); }
 	return 1.0 - lit;
 }
 

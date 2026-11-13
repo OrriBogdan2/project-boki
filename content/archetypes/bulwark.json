@@ -63,7 +63,7 @@
 		"throw_speed": 24.0,
 		"throw_rate": 0.45,
 		"recall_dmg": 13.0,
-		"recall_speed": 34.0,
+		"recall_t": 0.3,
 		"lie_t": 0.0,
 		"vision_r": 4.5,
 		"smash_dmg": [
@@ -139,9 +139,15 @@
 			"len": 4.2,
 			"arc": 140.0,
 			"slow": 0.6,
-			"push": 2.0,
-			"push_gap": 0.6,
-			"push_speed": 14.0,
+			"boop": {
+				"cd": 0.55,
+				"wind": 0.07,
+				"snap": 0.06,
+				"settle": 0.17,
+				"thrust": 0.7,
+				"reach": 1.3,
+				"push": 2.8,
+				"push_speed": 18.0,
 			"boop": {
 				"cd": 0.55,
 				"wind": 0.07,
@@ -151,6 +157,7 @@
 				"reach": 1.3,
 				"push": 2.8,
 				"push_speed": 18.0
+			}
 			}
 		},
 		"slam": {
@@ -162,7 +169,7 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
+			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
@@ -214,7 +221,7 @@
 		"cells": 4,
 		"cell_len": 4.0,
 		"width": 5.5,
-		"lead": 0.2,
+		"lead": 0.4,
 		"cell_t": 0.15,
 		"strike_dmg": 1.9,
 		"strike_stun": 0.5,

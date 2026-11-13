@@ -34,6 +34,8 @@ uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (shar
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
+uniform float head_t = 0.28;  // M_SWEEP: the share of the life its head takes to run the arc
+uniform float band = 0.0;     // M_SWEEP: an even blade this deep (share of the arc's depth), not tapered at the ends
 
 void vertex() {
 	if (billboard) {
@@ -69,11 +71,11 @@ vec3 ramp(float h) {
 }
 
 vec4 sweep(vec2 uv) {
-	float head = min(life / 0.28, 1.0) * 1.25;
+	float head = min(life / head_t, 1.0) * (band > 0.0 ? 1.0 : 1.25);
 	float behind = head - uv.x;
 	if (behind < 0.0) { return vec4(0.0); }
-	// a thin blade of flame along the outer edge, tapered at both ends, tongues licking inward off it
-	float thick = pow(sin(3.14159 * clamp(uv.x, 0.0, 1.0)), 0.8) * 0.46;
+	// a thin blade of flame along the outer edge, tapered at both ends (or even), tongues licking inward off it
+	float thick = band > 0.0 ? band : pow(sin(3.14159 * clamp(uv.x, 0.0, 1.0)), 0.8) * 0.46;
 	float n = fbm3(vec2(uv.x * 9.0 - TIME * 5.0 + seed, uv.y * 4.0 + TIME * 3.0));
 	float burn = smoothstep(0.2, 1.0, life);
 	float body = thick - uv.y + (n - 0.42) * 0.55 - burn * 0.75;

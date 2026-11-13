@@ -41,6 +41,12 @@ func _model(id: String) -> void:
 	var ab := _world_aabb(n)
 	ok(absf(ab.size.y - n.height()) < n.height() * 0.06 and absf(ab.position.y) < 0.08,
 			"%s: %.2f m tall on the ground (%.2f m, feet at %.2f)" % [id, n.height(), ab.size.y, ab.position.y])
+	var sk := n.find_child("Skeleton3D", true, false) as Skeleton3D      # (the body draws at the bones' size)
+	var top := 0.0
+	for b in sk.get_bone_count():
+		top = maxf(top, (sk.global_transform * sk.get_bone_global_pose(b)).origin.y - n.global_position.y)
+	ok(top > n.height() * 0.7 and top < n.height() * 1.1,
+			"%s: its skeleton stands %.2f m, not 100x (the glb's armature scale)" % [id, top])
 	ok(n.tag.position.y > ab.end.y and n.tag.text != "", "%s: its name over its head" % id)
 	for pose in clips:
 		n.pose = pose
@@ -103,25 +109,11 @@ func _tutorial() -> void:
 	m.queue_free()
 
 ## The NPC's mesh bounds in the world, at rest.
-## The skinned mesh's real bounds in the world (each vertex through its bones, as the renderer draws it).
 static func _world_aabb(n: Node3D) -> AABB:
 	var out := AABB()
 	var first := true
 	for mi in n.find_children("*", "MeshInstance3D", true, false):
-		var inst := mi as MeshInstance3D
-		var sk := inst.get_node(inst.skeleton) as Skeleton3D
-		var arr := inst.mesh.surface_get_arrays(0)
-		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-		var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
-		var wts: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
-		var per := bones.size() / verts.size()
-		var skinned: Array[Transform3D] = []
-		for b in inst.skin.get_bind_count():
-			skinned.append(sk.global_transform * sk.get_bone_global_pose(b) * inst.skin.get_bind_pose(b))
-		for i in verts.size():
-			var p := Vector3.ZERO
-			for j in per:
-				p += wts[i * per + j] * (skinned[bones[i * per + j]] * verts[i])
-			out = AABB(p, Vector3.ZERO) if first else out.expand(p)
-			first = false
+		var ab: AABB = (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+		out = ab if first else out.merge(ab)
+		first = false
 	return out

@@ -11,45 +11,46 @@ const RATIO_HI := 1.15
 const SOURCE_DR := 0.2     # Common armour reduction (docs/SUPERVIVE_DATA.md section 3; its durability outlasts it)
 const OUR_HP := 154.0      # mean of the 12 Hunters' health (light 124, medium 145, heavy 193)
 const SRC_HP := 1285.0     # mean Base HP of the 12 (supervive_physics.md attribute table)
-const SRC_HP_LV := 77.1    # mean HP per level; the level 15 tooltips face a level 15 target
+const SRC_HP_LV := 77.1    # mean HP per level; numbers read at level N face a level N target
 const DIST := 1.5          # m to the target: inside every melee reach, short of the sweet-spot tips
 const DRAW_S := 1.1        # s a bow is held before the release (the full draw)
 const STATIC_NEVER := 99   # Static stacks Sparkle's Blowout waits for: out of reach, see _fight
 const MAX_S := 20.0        # a row that has not knocked by then counts as never
 const DT_SRC := 0.01       # s step of the source model
 
-## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), read at level 15, source LMB, abilities,
-## and optionally the Daze its combo puts on the target]. LMB is [damage, interval s, extra damage per consecutive
-## hit], optionally + [front-load share, rounds]: the first round deals that much extra, falling off by that round.
-## The Daze is {"from": slot that applies it, "t": s, "lmb": flat extra per round, slot: extra share}.
-## Abilities map a slot to [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges,
-## extra charges at max rank]. Every number is a supervive_kits.md tooltip (level 1, or level 15 where its
-## section says so) unless its row's comment names another source. A Hunter whose
-## LMB has no damage number there has no source row (n/a).
+## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), level the numbers were read at,
+## source LMB, abilities, and optionally the Daze its combo puts on the target]. The source target is the mean
+## Hunter at that level. The Daze is {"from": slot that applies it, "t": s, "lmb": flat extra per round, slot: extra share}.
+## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit), or + [front-load share, rounds]: the first round deals that much extra, falling off by that round]. Abilities map a slot to
+## [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges, extra charges at max rank].
+## Every number is a supervive_kits.md tooltip (level 1, or level 15 where its section says so), except the LMB of
+## Myth, Elluna, Tetra, Kingpin and Celeste: the tooltips have no damage there, so it is read from the floating
+## damage numbers in the hero-ref footage (docs/TTK.md "Footage LMB"). Those five keep no abilities: their
+## tooltips are level 1 (Tetra 15) and the footage is level 9 (Tetra about 18), so no combo row mixes the two.
 const HEROES := [
 	# MK7: 51/round, the first 10 extra (supervive_kits.md:48), opening at 2x (wiki: "decays over your first 10
 	# rounds to 50%"); its Spike Grenade Dazes: +39 a round, Railgun +20% (:48-51), 1.2 s (docs/SUPERVIVE_DATA.md)
-	["gunslinger", "Ghost", "hold", false, [51.0, 0.08, 0.0, 1.0, 10], {
+	["gunslinger", "Ghost", "hold", 1, [51.0, 0.08, 0.0, 1.0, 10], {
 		"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]},
 		{"from": "rmb", "t": 1.2, "lmb": 39.0, "e": 0.2}],
-	["juggernaut", "Brall", "tap", false, [43.0, 0.35, 0.0], {
+	["juggernaut", "Brall", "tap", 1, [43.0, 0.35, 0.0], {
 		"rmb": [130.0, 0.4, 2.5, 0.0, 1, 0], "dash": [49.0, 0.0, 13.0, 5.0, 2, 1],
 		"e": [30.0, 0.0, 16.0, 6.0, 1, 0]}],
-	["ashwick", "Felix", "hold", false, [25.8, 0.1, 0.0], {
+	["ashwick", "Felix", "hold", 1, [25.8, 0.1, 0.0], {
 		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [150.4, 0.266, 9.0, 1.5, 2, 0],
 		"e": [76.8, 0.5, 13.0, 4.0, 1, 0]}],
-	["mage", "Joule", "hold", false, [90.0, 0.8, 0.0], {
+	["mage", "Joule", "hold", 1, [90.0, 0.8, 0.0], {
 		"rmb": [133.0, 0.9, 10.0, 2.0, 1, 0], "dash": [153.0, 1.0, 9.0, 1.5, 1, 0],
 		"e": [162.0, 0.5, 12.0, 3.0, 1, 0]}],
-	["bulwark", "Oath", "tap", true, [192.0, 0.45, 0.0], {"dash": [364.0, 0.0, 8.0, 3.0, 1, 0]}],
-	["thief", "Shiv", "hold", true, [160.0, 0.45, 16.0], {"rmb": [46.0, 0.5, 13.0, 4.0, 1, 0]}],
-	["ostra", "Void", "hold", true, [263.0, 0.6, 0.0], {
+	["bulwark", "Oath", "tap", 15, [192.0, 0.45, 0.0], {"dash": [364.0, 0.0, 8.0, 3.0, 1, 0]}],
+	["thief", "Shiv", "hold", 15, [160.0, 0.45, 16.0], {"rmb": [46.0, 0.5, 13.0, 4.0, 1, 0]}],
+	["ostra", "Void", "hold", 15, [263.0, 0.6, 0.0], {
 		"rmb": [277.0, 0.4, 10.0, 3.0, 1, 0], "e": [365.0, 0.2, 10.0, 2.0, 1, 0]}],
-	["archer", "Myth", "draw", false, [], {}],
-	["tender", "Elluna", "hold", false, [], {}],
-	["dolm", "Tetra", "tap", false, [], {}],
-	["dredge", "Kingpin", "hold", false, [], {}],
-	["rimewright", "Celeste", "hold", false, [], {"rmb": [346.0, 0.547, 12.0, 3.5, 2, 0]}],
+	["archer", "Myth", "draw", 9, [505.0, 1.7, 0.0], {}],
+	["tender", "Elluna", "hold", 9, [64.0, 0.4, 7.25, 93.0], {}],
+	["dolm", "Tetra", "tap", 18, [169.0, 0.6, 0.0], {}],
+	["dredge", "Kingpin", "hold", 9, [339.0, 0.5, 0.0], {}],
+	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0], {}],
 ]
 
 ## Gil has no source Hunter (he is ours), so his rows are held to the roster's own median time to knock instead,
@@ -98,8 +99,10 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 	var n := 0
 	while t <= MAX_S:
 		var dmg := float(lmb[0]) + float(lmb[2]) * n
-		if lmb.size() > 3:
+		if lmb.size() > 4:
 			dmg += float(lmb[0]) * float(lmb[3]) * maxf(0.0, 1.0 - float(n) / float(lmb[4]))
+		elif lmb.size() > 3:
+			dmg = minf(dmg, float(lmb[3]))
 		if _in_daze(dazed, daze, t):
 			dmg += float(daze["lmb"])
 		shots.append([t, dmg])
@@ -142,7 +145,7 @@ func _in_daze(starts: Array, daze: Dictionary, t: float) -> bool:
 	return false
 
 func _src_hp(hero: Array) -> float:
-	return SRC_HP + (SRC_HP_LV * 14.0 if hero[3] else 0.0)
+	return SRC_HP + SRC_HP_LV * float(int(hero[3]) - 1)
 
 ## A fresh fight: the Hunter at `rank` and the standard target (armoured or not) held on its spot.
 func _fight(arch: String, rank: int, armoured: bool) -> Array:

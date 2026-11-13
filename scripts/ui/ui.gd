@@ -178,6 +178,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var to := func(s: float, secs: float) -> void:
 		if not is_instance_valid(b) or not b.is_inside_tree(): return
 		var tw := b.create_tween()
+		s = minf(s, _room(b))
 		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
@@ -192,6 +193,15 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 			UiSfx.hover(true))
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
+
+## How far a button may scale (about its centre) before it pokes past its parent's sides: 1.0 for
+## one that fills its row.
+static func _room(b: Button) -> float:
+	var par := b.get_parent() as Control
+	if par == null or b.size.x < 1.0:
+		return 1.0
+	var gap := minf(b.position.x, par.size.x - b.position.x - b.size.x)
+	return 1.0 + maxf(0.0, gap) * 2.0 / b.size.x
 
 ## The main button of a screen: filled accent, dark text. One per screen.
 static func primary(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:

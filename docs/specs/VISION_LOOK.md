@@ -4,7 +4,8 @@ The owner's private reference (a match frame, kept off the repo) shows a wide li
 player with a soft cyan line on each side; everything else is a dim blue where the ground still reads and rivals
 are hidden. This page holds the numbers measured from that frame and the numbers we use. Rule: `Match.sees`
 (docs/specs/VISION.md, decision 0022); look: `shaders/vis.gdshaderinc`; plates: `HudPlate.hidden`;
-check: `--vision-check`; shots: `--vision-shots`.
+check: `--vision-check`; shots: `--vision-shots`. A rival who gives herself away is lit in her own soft circle
+(`RevealLight`, section "Revealed rival" below).
 
 ## How it was measured
 The frame is 2000x1299 with browser and video player bars. The game area is x 0-2000, y 44-1236 (2000x1192: black bar
@@ -24,6 +25,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
 | Camera scale | ~22 px/m (~87 m of ground across: the sneak camera, zoomed out) | 82 px/m standing (23.5 m across), 56 px/m crouched (zoom 1.45) |
 | Rival hiding in a bush | no plate, only a faint name tag on your own | rivals crouched / in grass / in smoke: no plate (name, level, bars, gloves) and no hover card; revealed, downed and teammates keep theirs |
 | HUD | unchanged by hiding | unchanged |
+| Revealed rival (second frame) | outside the wedge, lit to ~154 px round her, gone by ~197 px (~7-9 m at ~22 px/m; radius ~8-10% of the width); no edge line, no particles | lit to 2.0 m, soft to 2.6 m (`VIS_REVEAL_R`): 164-213 px at 82 px/m, the same share of the screen; no edge line |
 
 ## Where we differ, and why
 - **Dim is a blue with the red mostly gone, tuned on GPU shots.** One GPU run tried eight tints on the same
@@ -39,3 +41,16 @@ above, player controls below, found by row brightness). Numbers below are scaled
   a 6-9 m sight range, which would hide every ranged fight. Owner call if wanted.
 - **A small lit circle stays behind you (2.0 m).** Someone touching your back is still seen; it is drawn as lit so
   the screen never lies about who you can see.
+
+## Revealed rival
+A second owner frame, 4 s later, shows a rival past the wedge's side, drawn with her own soft lit circle while she
+attacks. Only the still exists (no footage on disk, and the kit notes have no reveal times), so what reveals and how
+long can't be measured; the rule we already had stays and is now drawn:
+- **What reveals** (`Hunter.reveal_t`): your shot or strike 1.2 s, being hit 1.0 s, a glove 0.6 s, plus every kit and
+  item reveal in docs/specs/VISION.md. While it runs `Match.sees` ignores the wedge, grass and crouching (range
+  `VIEW_RANGE` + 2 m, walls still block).
+- **The circle** (`RevealLight`, up to three rivals, `vis_reveal0..2`): round a rival who is seen and revealed, at full
+  strength until the reveal's last 0.3 s, then fading out with it. Sized from the frame by screen share, not world
+  size: the reference camera is ~3.7x further out, and its 7-9 m would light half our screen.
+- **Net:** nothing new. A client gets the reveal with each rival's state (flag 4096, refreshed to 0.3 s), so the
+  circle follows the same sight sync.

@@ -24,7 +24,6 @@ const MUTED := Color("aab4c2")
 var m: Match
 var _hits := {}                   # Hunter id -> [{t, who: String, hunter: Hunter or null, amt, how: String}]
 var _hit_cb: Callable
-var _watch: Hunter = null
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -101,23 +100,9 @@ func mates() -> Array:
 		return []
 	return m.hunters.filter(func(x): return x.team == p.team and x != p and not x.out and not x.extracted)
 
-## The teammate the camera follows, or null. Follows the last one picked while they are still up.
+## The teammate the camera follows, or null: Match's Spectate picks and cycles it (fire / secondary).
 func watched() -> Hunter:
-	var list := mates()
-	if list.is_empty():
-		return null
-	if not list.has(_watch):
-		_watch = list[0]
-	return _watch
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_action_pressed(CYCLE_ACTION) or event.is_echo():
-		return
-	var list := mates()
-	if list.is_empty() or Overlay.is_open():
-		return
-	_watch = list[(maxi(0, list.find(watched())) + 1) % list.size()]
-	get_viewport().set_input_as_handled()
+	return m.spectate.current()
 
 ## One short card centred on `at` (its top edge): who, how, the damage line, the camera key.
 func draw(c: CanvasItem, at: Vector2, p: Hunter) -> void:

@@ -1,13 +1,16 @@
 class_name BjornBoop
 extends RefCounted
-## LMB behind the raised aegis (docs/heroes/bulwark.md): a short punchy shield thrust, the "boop". The aegis draws
-## back ("shield.boop.wind" s), snaps out "thrust" m ("snap" s) and settles home ("settle" s); at the snap, foes
-## within "reach" m in front of it are shoved "push" m with a small pop and a clank. It does no damage: it makes room.
-## The thrust moves the aegis wall itself (Verbs reads a following wall's "dist" each step), so the block and the
-## look move together.
+## LMB behind the raised aegis (docs/heroes/bulwark.md): a short punchy shield thrust, the "boop", and the only
+## way the aegis moves foes (walking into it pushes nobody). The aegis draws back ("shield.boop.wind"
+## s), snaps out "thrust" m ("snap" s) and settles home ("settle" s); at the snap, foes in front of him up to
+## "reach" m past it, across its width, are shoved "push" m with a pop and a clank (one he walked into, pressed
+## between him and the aegis, too). No damage: it makes room. The thrust moves the aegis wall
+## itself (Verbs reads a following wall's "dist" each step), so the block and the look move together.
 
 const PULL := 0.15             # m the aegis draws back in the wind-up: the anticipation before the snap
-const GUARD_HOLD := 0.12       # s into bul_guard its hold starts (breaker.json hold_from): the guard resumes held
+const BODY_Y := 2.2            # m: a foe further above or below the wall's base than this is out of reach
+const POP_COL := Color("ffe6a8")
+const RING_COL := Color("ffd27a")
 
 var k: BulwarkKit
 var h: Hunter
@@ -25,7 +28,7 @@ func _init(kit: BulwarkKit) -> void:
 	m = kit.m
 
 func bd() -> Dictionary:
-	return k.rmb_def()["shield"].get("boop", {})
+	return k.rmb_def()["shield"]["boop"]
 
 ## LMB pressed with the aegis up: thrusts when off cooldown.
 func press() -> void:
@@ -34,9 +37,8 @@ func press() -> void:
 	t = 0.0
 	hit_done = false
 	home = float(k.wall["dist"])
-	ready_at = m.time + float(bd().get("cd", 0.55))
+	ready_at = m.time + float(bd()["cd"])
 	boops += 1
-	k.play("bul_boop")
 	m.sfx("bjorn_shield_up", h.pos, -9.0, 1.5)
 
 func tick(dt: float) -> void:
@@ -46,10 +48,10 @@ func tick(dt: float) -> void:
 		t = -1.0
 		return
 	var b := bd()
-	var w1 := float(b.get("wind", 0.07))
-	var w2 := w1 + float(b.get("snap", 0.06))
-	var w3 := w2 + float(b.get("settle", 0.17))
-	var out := float(b.get("thrust", 0.7))
+	var w1 := float(b["wind"])
+	var w2 := w1 + float(b["snap"])
+	var w3 := w2 + float(b["settle"])
+	var out := float(b["thrust"])
 	t += dt
 	var off := 0.0
 	if t < w1:
@@ -65,33 +67,31 @@ func tick(dt: float) -> void:
 	if t >= w3:
 		k.wall["dist"] = home
 		t = -1.0
-		k.play("bul_guard")
-		k.anim_at = m.time - GUARD_HOLD
 
-## The snap lands: every foe in front of the thrust aegis within "reach" m is shoved back along the aim.
+## The snap lands: every foe in front of him, out to "reach" m past the thrust aegis and across its width, is
+## shoved back along the aim.
 func _hit(b: Dictionary) -> void:
 	var n := h.aim_dir()
-	var a: Vector2 = k.wall["a"]
-	var c: Vector2 = k.wall["b"]
-	var reach := float(b.get("reach", 1.3))
+	var me := Vector2(h.pos.x, h.pos.z)
+	var far := float(k.wall["dist"]) + float(b["reach"])
+	var half := float(k.wall["len"]) * 0.5
 	var any := false
 	for f in m.foes_of(h.team):
 		if not f.hittable():
 			continue
-		var p := Vector2(f.pos.x, f.pos.z)
-		var q := Geometry2D.get_closest_point_to_segment(p, a, c)
-		var ahead := (p - q).dot(n)
-		if ahead < -f.r or p.distance_to(q) > reach + f.r or absf(f.pos.y - float(k.wall["y"])) > 2.2:
+		var rel := Vector2(f.pos.x, f.pos.z) - me
+		var ahead := rel.dot(n)
+		var off_y := absf(f.pos.y - float(k.wall["y"]))
+		if ahead < 0.0 or ahead > far + f.r or absf(rel.cross(n)) > half + f.r or off_y > BODY_Y:
 			continue
-		k.pushed_at[f.get_instance_id()] = m.time
-		k.shove(f, n, float(b.get("push", 2.8)), float(b.get("push_speed", 18.0)))
-		m.fx.burst(f.pos + Vector3(0, 1.0, 0), Color("ffe6a8"), 8, 4.0, 0.2, 4.0, 0.9)
+		k.shove(f, n, float(b["push"]), float(b["push_speed"]))
+		m.fx.burst(f.pos + Vector3(0, 1.0, 0), POP_COL, 8, 4.0, 0.2, 4.0, 0.9)
 		booped += 1
 		any = true
-	var mid := (a + c) * 0.5
+	var mid := ((k.wall["a"] as Vector2) + (k.wall["b"] as Vector2)) * 0.5
 	if any:
-		k.fx.aegis_hit = 1.0          # (the wall flashes as it thrusts)
-		m.fx.ring(Vector3(mid.x, float(k.wall["y"]) + 0.3, mid.y), 0.9, Color("ffd27a"), 0.18)
-		m.sfx("bjorn_boop", h.pos, -3.0)
+		k.fx.aegis_hit = 1.0
+		m.fx.ring(Vector3(mid.x, float(k.wall["y"]) + 0.3, mid.y), 0.9, RING_COL, 0.18)
+		m.sfx("bjorn_bash", h.pos, -3.0, 1.4)
 	else:
-		m.sfx("bjorn_boop", h.pos, -14.0, 1.3)
+		m.sfx("bjorn_bash", h.pos, -14.0, 1.6)

@@ -24,19 +24,34 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `tools/boki/face.py` | Eye domes, lids, brows, mouth: one vertex grid, one blend shape per expression |
 | `tools/boki/boki_clips.py`, `*_anim.py` | Shared clips, then each species' skeleton and own clips |
 | `tools/boki/boki_rig.py`, `build_boki.py` | Armature, weights from the primitives, sampling, .glb export |
-| `tools/boki/plant_gait.py` | Plants the paws of the clips a species lists in `PLANT`: one steady back-sweep, IK legs, in the .glb |
+| `tools/boki/boki_scan.py`, `boki_meshy.py`, `pose_shots.py` | A body from a Meshy model of the sheet on the same rig (Kestrike, Cairnback, Gongibbon `gibbelle`): `MESHY_BOKI_RECIPE.md` |
 | `scripts/match/boki_rig.gd` | Loader and driver (`BokiRig`): clip from metas, face on top, marks and colours |
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
-Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
 Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
 `impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
 asserts every rigged species has all twelve, with the five game clips timed to those beats and no T-pose frame.
+The Show Ring (`ShowRing`) sets `kact` strut (the walk clip's cycle with chin up, knees lifted, steps `STRUT_CADENCE` quicker) over
+the Bond walk, pose (`POSE_S` 1.0 s: a quad plants and lifts its head, a bird flares its wings, a legless body rises) when the
+judges look, then hop for the winner and bow (`BOW_S`) for the other when the placing is read; the same check covers all three.
+`impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). The Dash
+(`RaceBeats`) plays crouch on the line through the countdown, burst (the species' run, stretched long and low, easing
+out over `burst_s`), then hop and spin for the first two home or sulk (huff, head hung) for the rest. `--boki-rig-check`
+asserts every rigged species has all fifteen, with the eight game clips timed to those beats and no T-pose frame.
+A flier (its species JSON `colors.wing`: `BokiFly.flier`; rigged today: hivara, kestrike, kindlewren, thrumbird,
+wisplet, zapple, zephyrak) also gets hover (a wingbeat every 0.4 s, KinPuppet's flyer rate: tipped up, legs hanging,
+the body rising on each downstroke), glide (wings held wide with a slow rock, nose down, legs tucked, a 1.2 s bank)
+and flare (once, `boki_fly.json` `flare_s`: pitched up, wings forward to brake, feet reaching, a squash as they land
+halfway). No rig has them baked, so they reuse its wing, leg and tail bones the same way. The rig plays them from
+BokiFly's metas: `aloft` picks hover (standing) or glide (moving, horizontal speed only); `aloft` turning false
+starts the flare, which comes before whatever it landed for; `lift` (m up) keeps a ground shadow, made the first
+time a flier lifts, on the ground under it. Strip: `--boki-fly-shots` (docs/shots/boki-fly/fly.png).
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
@@ -75,6 +90,15 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 `MAX_CADENCE` cycles/s. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
 `STRIDE`.
 
+## Attack contact
+
+A Boki's bite lands `Kin.STRIKE_WINDUP` (0.3 s) after it starts (decision 0061). `BokiRig.CONTACT` holds where the
+attack clip connects, per starter line (cindle 0.333 s, puddlet and burrlet 0.367 s at speed 1): the first frame the
+front-most bone is 90% of the way to its farthest reach. The rig plays the attack at `CONTACT / STRIKE_WINDUP`, so
+the snap lands on the hit; a species without a row plays at speed 1. `--boki-anim-audit` reads the contact off each
+clip (must match `CONTACT` to a frame) and drives the bite live (must connect within a frame of the hit). A re-keyed
+attack clip: copy the measured time into `CONTACT`.
+
 ## Gait audit
 
 `--boki-anim-audit` drives every rigged Boki through the live `BokiRig` hand-off (clip and rate from its speed) at
@@ -112,16 +136,14 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | cairnback | 88% → 29% 5.5 steps/s | 88% → 40% 5.0 steps/s | 86% → 56% 6.0 steps/s | 88% → 65% 6.0 steps/s (5.6) | 1.5 / 1.1 / 1.1 | 0.9 |
 | wisplet | 69% → 34% 5.6 steps/s | 69% → 43% 6.0 steps/s | 82% → 62% 6.0 steps/s | 90% → 79% 6.0 steps/s (8.0) | 3.2 → 1.0 / 1.4 / 1.1 | 0.8 |
 | zapple | 57% → 59% 2.7 steps/s | 57% → 71% 3.0 steps/s | 67% → 71% 5.4 steps/s | 73% → 69% 6.0 steps/s (7.6) | 1.0 / 0.8 / 0.8 | 0.6 |
-| wisplet | 69% → 34% 5.6 steps/s | 69% → 43% 6.0 steps/s | 82% → 62% 6.0 steps/s | 90% → 79% 6.0 steps/s (8.0) | 3.2 / 1.4 / 1.1 | 0.8 |
-| zapple | 57% → 13% 2.4 steps/s | 57% → 22% 2.1 steps/s | 67% → 22% 3.9 steps/s | 73% → 24% 6.0 steps/s (7.6) | 1.0 / 0.8 / 0.8 | 0.5 |
 | hivara | 66% → 27% 3.2 steps/s | 66% → 36% 3.6 steps/s | 63% → 33% 6.0 steps/s | 75% → 56% 6.0 steps/s (7.0) | 1.3 / 1.0 / 1.0 | 0.9 |
 | kestrike | 81% → 28% 6.0 steps/s | 81% → 49% 6.0 steps/s | 85% → 68% 6.0 steps/s | 91% → 81% 6.0 steps/s (7.4) | 0.6 / 1.5 / 1.2 | 1.0 |
 | kindlewren | 77% → 33% 6.0 steps/s | 77% → 43% 6.0 steps/s | 84% → 69% 6.0 steps/s | 90% → 81% 6.0 steps/s (7.4) | 0.6 / 2.1 → 0.8 / 1.4 | 0.9 |
 | lodestick | 99% → 62% 6.0 steps/s | 99% → 48% 6.0 steps/s | 90% → 70% 6.0 steps/s | 94% → 82% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 0.9 |
 | kindlewren | 77% → 30% 6.0 steps/s | 77% → 43% 6.0 steps/s | 84% → 69% 6.0 steps/s | 90% → 81% 6.0 steps/s (7.4) | 0.6 / 2.1 / 1.4 | 0.9 |
-| lodestick | 99% → 17% 4.3 steps/s | 99% → 48% 6.0 steps/s | 90% → 70% 6.0 steps/s | 94% → 82% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 0.9 |
+| lodestick | 99% → 44% 6.0 steps/s | 99% → 53% 6.0 steps/s | 90% → 74% 6.0 steps/s | 94% → 85% 6.0 steps/s (7.6) | 1.2 / 1.3 / 1.3 | 1.0 |
 | marchleaf | ?% → 48% 4.0 steps/s | ?% → 41% 3.0 steps/s | ?% → 41% 5.4 steps/s | ?% → 46% 6.0 steps/s (6.6) | 0.5 / 1.0 / 0.9 | 0.9 |
-| mossgrade | 96% → 21% 4.7 steps/s | 96% → 35% 4.4 steps/s | 77% → 41% 6.0 steps/s | 82% → 57% 6.0 steps/s (6.0) | 1.5 / 1.0 / 1.2 | 0.8 |
+| mossgrade | 96% → 51% 6.0 steps/s | 96% → 35% 4.4 steps/s | 77% → 41% 6.0 steps/s | 82% → 57% 6.0 steps/s (6.0) | 1.5 / 1.1 / 1.2 | 1.6 |
 | nettlynx | 80% → 26% 3.8 steps/s | 80% → 33% 4.8 steps/s | 82% → 51% 6.0 steps/s | 87% → 67% 6.0 steps/s (6.6) | 1.3 / 1.1 / 1.3 | 0.9 |
 | caecilith | ?% → 55% 6.0 steps/s | ?% → 57% 6.0 steps/s | ?% → 77% 6.0 steps/s | ?% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |
 | thrumbird | EXEMPT: flyer, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | 0.8 / 0.8 / 0.8 | 8.1 → 2.1 |
@@ -129,12 +151,3 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
-
-Planted (`tools/boki/plant_gait.py`, the species' `PLANT`): zapple walk and run, lodestick walk and mossgrade walk.
-Per clip, every paw that is down sweeps back at one speed (the median of the clip's own; the lodestick and mossgrade
-walks 1.4x and 2.2x it, so 6 steps/s keeps up with a stroll), on the ground as low as the leg reaches, touching down
-and lifting off on whole keys, its speed carried one key into the air either side; the leg is re-solved by IK, the
-paw keeps its world turn, the mesh and the other clips are untouched. Their rows above are after it (scale 1).
-Zapple run at scale 0.8 and its 7.6 m/s match speed is at full cadence: 34% (`OVER` 0.35). Strips:
-`docs/art/kin/boki_gait/plant_<id>_before.jpg` and `plant_<id>_after.jpg` (top row 2.4 m/s, bottom row the match
-speed: runs, so only zapple's changed; xvfb opengl3, the GPU queue was 122 deep).

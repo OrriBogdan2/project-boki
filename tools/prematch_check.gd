@@ -31,8 +31,10 @@ func run(main: Node) -> void:
 	_toggle()
 	_squad()
 	_chat_and_voice()
+	_first_lobby()
 	await _screen(main)
 	await _cues(main)
+	await _lockin(main)
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -75,6 +77,30 @@ func _turns() -> void:
 	idle.tick(Prematch.TURN + 0.01)
 	var auto_ok := idle.locked and ClassUnlock.is_open(idle.pick)
 	ok(auto_ok, "a turn that runs out gives you a random open Hunter (%s)" % idle.pick)
+
+## A save's first lobby: on your turn the note says what 0:00 does, then that the squad sees the pick; once.
+func _first_lobby() -> void:
+	var o := {"teams": 10, "squad": 2, "tier": 0, "seed": 5}
+	Prematch.deal_mates(o)
+	var pm := Prematch.new(o)
+	ok(pm.first and pm.teach_line() == "", "first lobby: no teach while loading")
+	pm.tick(0.01)
+	ok(pm.teach_line().contains("before 0:00"), "first lobby, your turn, no pick: says 0:00 picks for you")
+	pm.choose("bulwark")
+	ok(pm.teach_line().contains("squad sees"), "first lobby, after a pick: says the squad sees it")
+	pm.tick(Prematch.TURN + 0.01)
+	ok(pm.teach_line() == "", "first lobby: no teach once locked")
+	Prematch.mark_first_seen()
+	var again := Prematch.new(o.duplicate(true))
+	again.tick(0.01)
+	ok(not again.first and again.teach_line() == "", "second lobby: the usual note, teach shown once per save")
+	Save.d["tutorial"].erase("first_lobby")         # the screen check below runs as a first lobby again
+	var old := Save.fresh()
+	old.erase("tutorial")
+	var keep := Save.d
+	Save.d = old
+	ok(Prematch.first_lobby(), "an older save with no tutorial flag sees the first-lobby teach once")
+	Save.d = keep
 
 ## Online: three on your squad, one rival who mirrors a pick. Peer "2" is you.
 func _online() -> void:
@@ -212,6 +238,8 @@ func _screen(main: Node) -> void:
 	ok(view.squad_box.get_child_count() == 2, "the screen shows your squad")
 	ok(view.caption.text == "YOUR TURN", "the banner says it's your turn (%s)" % view.caption.text)
 	ok(view.timer_label.text == "0:10", "the turn counts down from 0:10 (%s)" % view.timer_label.text)
+	ok(view.note_label.text.contains("before 0:00"), "first lobby: the note teaches the countdown")
+	ok(not Prematch.first_lobby(), "opening the first lobby marks it seen in the save")
 	_declutter(view)
 	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
 	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
@@ -242,6 +270,11 @@ func _screen(main: Node) -> void:
 	var log_open: bool = view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible
 	ok(log_open, "the first message opens the log and the input folds back")
 	view._choose("bulwark")
+	await main.get_tree().process_frame
+	var staged: bool = view.stage != null and view.stage.id == "bulwark" and view.stage.lockin_t >= 0.0
+	ok(staged, "your pick stands on the stage beside the grid, striking its lock-in pose")
+	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
+	ok(fits.is_empty(), "with the stage up every element still sits inside the safe margin (%s)" % [fits.slice(0, 2)])
 	view.pm.tick(Prematch.TURN + 0.01)
 	view._tick_label()
 	ok(view.pm.locked and view.caption.text == "PICKS LOCKED", "once the squad has picked the banner says so")
@@ -338,3 +371,54 @@ func _declutter(view: Control) -> void:
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
+
+## The lock-in pose: every Hunter whose model has clips names one of them, it runs 1-1.5 s once and the Hunter is back
+## on its idle, and choosing again mid-pose restarts it from the top.
+func _lockin(main: Node) -> void:
+	var ids := Arch.ids()
+	var stage := HunterViewer.make_stage(ids[0], load("res://scripts/ui/prematch_view.gd").STAGE_PX)
+	main.add_child(stage)
+	for ak in ids:
+		stage.set_hunter(ak)
+		stage.set_process(true)
+		for _i in 900:
+			if stage.model != null:
+				break
+			await main.get_tree().process_frame
+		stage.set_process(false)
+		if stage.model == null:
+			ok(false, "%s: model built for the stage" % ak)
+			continue
+		var art := WardenGlb.art(ak)
+		var sync := stage.model.get_node_or_null("Warden/Sync")
+		var clips: WardenClips = sync.get("clips") if sync != null else null
+		var lk: Dictionary = WardenClips.data(art).get("lockin", {})
+		var clip := String(lk.get("clip", ""))
+		if clips == null:      # no clips in its .glb yet (Gil): no pose to pick, it stands on its posed idle
+			ok(lk.is_empty(), "%s: a model without clips names no lock-in" % ak)
+			continue
+		var has_clip := clips != null and clips.lib.has_animation(clip)
+		ok(has_clip, "%s: lock-in clip '%s' is in its model" % [ak, clip])
+		if not has_clip:
+			continue
+		var reach := float(lk.get("from", 0.0)) + float(lk.get("dur", 0.0)) * float(lk.get("rate", 1.0))
+		ok(reach <= clips.lib.get_animation(clip).length + 0.01, "%s: the pose's window ends inside '%s'" % [ak, clip])
+		stage.play_lockin()
+		for _i in 10:
+			stage.tick(0.05)
+		stage.play_lockin()      # chosen again half-way: from the top
+		ok(stage.lockin_t == 0.0, "%s: choosing again restarts the pose" % ak)
+		var posed := 0.0
+		for _i in 100:
+			stage.tick(0.05)
+			if not stage.model.get_meta(WardenClips.STATE).has("lockin_t"):
+				break
+			posed += 0.05
+		ok(posed >= 1.0 and posed <= 1.5, "%s: the pose runs %.2f s (1-1.5)" % [ak, posed])
+		stage.tick(0.05)
+		var state: Dictionary = stage.model.get_meta(WardenClips.STATE)
+		ok(stage.lockin_t < 0.0 and not state.has("lockin_t"), "%s: back to its idle after the pose" % ak)
+		for _i in 12:
+			stage.tick(0.05)
+		ok(clips.act_w == 0.0, "%s: settled fully into its idle 0.6 s after" % ak)
+	stage.queue_free()

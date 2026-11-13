@@ -29,12 +29,15 @@ var chat_scroll: ScrollContainer
 var chat_in: LineEdit
 var chat_hint: Label
 var talk_btn: Button
+var stage: HunterViewer          # your pick, standing: it strikes its lock-in pose each time you choose
+var stage_slot: Control          # where the stage stands, beside the Hunter grid
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 
 const COLUMNS := 4          # Hunter cards per row
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
+const STAGE_PX := Vector2(240, 320)   # px, your pick's 3D stage beside the grid (4 cards + it fit 1240 px)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
 class Padlock extends Control:
@@ -50,7 +53,7 @@ func setup(opts: Dictionary) -> void:
 	pm = Prematch.new(opts)
 
 func _ready() -> void:
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("menu", "title"))
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.color = UI.BG
@@ -84,19 +87,28 @@ func _ready() -> void:
 	strip.add_child(UI.section("Squad"))
 	squad_box = UI.hbox(10)
 	strip.add_child(squad_box)
+	var body := UI.hbox(12)
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	root.add_child(body)
 	var sc := ScrollContainer.new()
-	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	root.add_child(sc)
+	body.add_child(sc)
 	grid = GridContainer.new()
 	grid.columns = COLUMNS
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	sc.add_child(grid)
+	stage_slot = Control.new()      # holds its place before your first pick, so the cards don't shift
+	stage_slot.custom_minimum_size = STAGE_PX
+	body.add_child(stage_slot)
+	_stage_pick()
 	_build_chat(root)
 	_talk(false)
 	_fit_safe_area()
+	if pm.first:
+		Prematch.mark_first_seen()
 	pm.turn_done.connect(_on_turn_done)
 	_tick_label()
 	Net.message.connect(_on_msg)
@@ -167,7 +179,8 @@ func _tick_label() -> void:
 		note_label.text = "%s locked in. Loading in..." % HunterViewer.display_name(pm.pick)
 	elif pm.my_turn():
 		caption.text = "YOUR TURN"
-		note_label.text = "Pick a Hunter. No two on a squad can be the same one."
+		var teach := pm.teach_line()
+		note_label.text = teach if teach != "" else "Pick a Hunter. No two on a squad can be the same one."
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
@@ -191,8 +204,8 @@ func _pulse(left: float) -> void:
 	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
 
 ## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size;
-## smaller windows get smaller digits. The declutter layout has no side column, so the Hunter grid
-## keeps COLUMNS at every size (4 x CARD_MIN_W fits the 1240 logical px UI).
+## smaller windows get smaller digits. The Hunter grid keeps COLUMNS at every size: 4 x CARD_MIN_W plus
+## the STAGE_PX stage beside it fits the 1240 logical px UI.
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var m := maxi(SAFE_MIN, int(win.y * SAFE_FRAC))
@@ -203,16 +216,16 @@ func _fit_safe_area() -> void:
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not e is InputEventKey or e.echo or chat_in.has_focus() or pm.locked:
 		return
-	if e.pressed and e.physical_keycode in [KEY_ENTER, KEY_KP_ENTER]:
+	if e.pressed and e.is_action("confirm"):
 		_show_chat_line(true)
 		get_viewport().set_input_as_handled()
-	elif e.physical_keycode == KEY_V and talk_btn.visible:
+	elif e.is_action("push_to_talk") and talk_btn.visible:
 		_talk(e.pressed)
 
-## Push-to-talk: the button (hold) or V. The transport is VoiceChat's; none ships yet.
+## Push-to-talk: the button (hold) or the push_to_talk key. The transport is VoiceChat's; none ships yet.
 func _talk(on: bool) -> void:
 	voice.set_talking(on)
-	talk_btn.text = "Speaking..." if on else "Hold to talk (V)"
+	talk_btn.text = "Speaking..." if on else "Hold to talk (%s)" % Settings.key_cap("push_to_talk")
 
 # ------------------------------------------------------------------ hunters and squad
 func _fill_hunters() -> void:
@@ -262,9 +275,21 @@ func _choose(ak: String) -> void:
 		UiSfx.error()
 		return
 	UiSfx.lobby_pick()
+	_stage_pick()
 	_fill_hunters()
 	_fill_squad()
 	_announce_pick(false)
+
+## Your pick on the stage, striking its lock-in pose (none before your first pick).
+func _stage_pick() -> void:
+	if pm.pick == "":
+		return
+	if stage == null:
+		stage = HunterViewer.make_stage(pm.pick, STAGE_PX)
+		stage_slot.add_child(stage)
+	else:
+		stage.set_hunter(pm.pick)
+	stage.play_lockin()
 
 ## Your squad in pick order; whoever is picking is outlined.
 func _fill_squad() -> void:
@@ -284,14 +309,30 @@ func _fill_squad() -> void:
 		var state := "Picking..." if m == now else "Waiting to pick"
 		var shown_ak := Arch.label(ak) if Arch.exists(ak) else state
 		h.add_child(UI.label(shown_ak, UI.T_SMALL, UI.GOLD if m == now else UI.MUTED))
+		if not you and not bool(m["bot"]):
+			h.add_child(_mute_button(String(m["name"])))
 		squad_box.add_child(chip)
 	if mates.size() == 1 and int(pm.opts.get("squad", 1)) <= 1:
 		squad_box.add_child(UI.para("A solo drop: nobody to plan with, but everyone else is out there."))
 	talk_btn.visible = voice.available() and mates.any(func(m): return not m["you"] and m.get("peer", "") != "")
 
 # ------------------------------------------------------------------ chat and picks
+## The squad row's Mute button: silences that teammate's chat and voice for you, this session.
+func _mute_button(who: String) -> Button:
+	var b := UI.button("", Callable())
+	var refresh := func() -> void: b.text = "Muted" if MuteList.has(who) else "Mute"
+	refresh.call()
+	b.pressed.connect(func():
+		MuteList.toggle(who)
+		refresh.call()
+		for l in chat_log.get_children():
+			if l.get_meta("who", "") == who:
+				l.visible = not MuteList.has(who))
+	return b
+
 func _add_chat(who: String, text: String, col: Color) -> void:
 	var l := UI.para("%s: %s" % [who, text], UI.T_BODY, col)
+	l.set_meta("who", who)
 	chat_log.add_child(l)
 	chat_scroll.visible = true
 	await get_tree().process_frame
@@ -321,6 +362,8 @@ func _announce_loaded() -> void:
 func _on_turn_done(i: int) -> void:
 	UiSfx.lobby_lock(String(pm.squad[i]["arch"]), pm.squad[i]["you"])
 	if pm.squad[i]["you"]:
+		if stage == null or stage.id != pm.pick:      # your turn ran out on an auto-pick: it strikes its pose too
+			_stage_pick()
 		_announce_pick(true)
 
 ## Someone loaded (every squad: picking waits for the whole lobby), or a teammate's chat line or pick
@@ -335,7 +378,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 	if not _teammate(from):
 		return
 	if topic == "chat":
-		_add_chat(String(data.get("name", "Hunter")), Prematch.clean_chat(String(data.get("t", ""))), UI.INK)
+		var who := String(data.get("name", "Hunter"))
+		if not MuteList.has(who):
+			_add_chat(who, Prematch.clean_chat(String(data.get("t", ""))), UI.INK)
 	elif topic == "pick" and pm.remote_pick(from, String(data.get("arch", "")), bool(data.get("final", false))):
 		_fill_hunters()
 		_fill_squad()

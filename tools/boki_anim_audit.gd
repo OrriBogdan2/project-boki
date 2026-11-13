@@ -3,12 +3,15 @@ extends RefCounted
 ## (HOME_SPEEDS and the species' own match speed, KinLib kin_speed), unscaled and at the size roll's ends. Per gait:
 ## the planted feet's slide as a share of the move speed, steps per second, then the loop seams and the idle-to-walk
 ## pop. Fails a slide over MAX_SLIDE (except the OVER ceilings); Boki with no stepping feet are EXEMPT and listed.
-## BokiRig.STRIDE must also match what the clips measure. Table: docs/art/kin/RIGGED_BOKI.md "Gait audit".
+## BokiRig.STRIDE must also match what the clips measure, and so must BokiRig.CONTACT (the starter lines' attack
+## contact), each to a frame; driven live, the contact must land within a frame of the hit (Kin.STRIKE_WINDUP).
+## Tables: docs/art/kin/RIGGED_BOKI.md "Gait audit" and "Attack contact".
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Check := preload("res://tools/boki_rig_check.gd")
-## m/s: a stroll, a home wander, a home fetch (home.gd); the match speed is added per species.
-const HOME_SPEEDS := [1.5, 2.4, 4.4]
+## m/s: a stroll, a home wander, a home fetch (home.gd), a led Boki at its catch-up top (home_lead.json), and the
+## match speed per species.
+const HOME_SPEEDS := [1.5, 2.4, 4.4, 5.4]
 const SIZES := [1.0, 0.8, 1.25]       # the Boki's world scale: a size roll scales its stride too
 const MAX_SLIDE := 0.25       # of the move speed: how fast a planted foot may slip against the ground
 const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
@@ -20,20 +23,23 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
-## re-keyed or planted (tools/boki/plant_gait.py, docs/DEBT.md).
+## re-keyed or planted (docs/DEBT.md).
 const OVER := {
 	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
 	"glintmole walk": 0.35, "glintmole run": 0.70, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick run": 0.90,
-	"marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75,
-	"pebbit walk": 0.35, "pebbit run": 0.65, "puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80,
-	"wisplet walk": 0.35, "wisplet run": 0.85, "zapple run": 0.35, "caecilith walk": 0.65, "caecilith run": 0.90,
+	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.68,
+	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
+	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
+	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
+	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
 }
 const SAMPLES := 48           # poses per loop
 const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground
 const DT := 1.0 / 60.0        # s per frame when the rig is driven live (the idle-to-walk pop)
 ## Bones that are not limbs when a Boki has no paws and its lowest limb stands in for a foot.
 const NOT_LIMB := ["root", "hips", "spine", "neck", "head"]
+const STARTERS := ["cindle", "puddlet", "burrlet"]      # Vespyx, Prismander, Mycroll: they must have a CONTACT
+const REACH := 0.9            # of its forward travel: the front of the Boki has struck once it is this far out
 
 var bad := 0
 
@@ -43,6 +49,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	for id in STARTERS:
+		ok(id in BokiRig.CONTACT, "%s has its attack contact in BokiRig.CONTACT" % id)
 	for id in Check.SPECIES_LIST:
 		await _species(main, id)
 	print("BOKIGAIT DONE, failures: %d" % bad)
@@ -62,6 +70,8 @@ func _species(main: Node, id: String) -> void:
 	var seams := "seam idle %.1f walk %.1f run %.1f" % [seam(rig, "idle"), seam(rig, "walk"), seam(rig, "run")]
 	print("BOKIGAIT %s measured walk %.2f run %.2f m/s, %s, pop %.1f" % [id, measured[0], measured[1], seams,
 			pop(k, rig)])
+	if id in BokiRig.CONTACT:
+		_contact(k, rig, id)
 	var feetless: bool = measured.min() < FEETLESS
 	ok(feetless == (id in EXEMPT), "%s is %s" % [id, "EXEMPT " + EXEMPT[id] if id in EXEMPT else "gated"])
 	if feetless:
@@ -82,6 +92,60 @@ func _species(main: Node, id: String) -> void:
 				row.append("%.0f%% %.1f/s" % got)
 	print("BOKIGAIT ROW %s | %s | %s" % [id, " | ".join(row), seams])
 	k.queue_free()
+
+## The attack clip's contact, read off the clip and then driven live through the rig as a Boki's bite plays it.
+func _contact(k: Node3D, rig: BokiRig, id: String) -> void:
+	var curve := front_reach(rig)
+	var at := contact_time(curve)
+	ok(absf(at - BokiRig.CONTACT[id]) <= DT, "%s attack contact %.3f s matches its clip (%.3f s)" % [id,
+			BokiRig.CONTACT[id], at])
+	var lo: float = curve[0]
+	var struck: float = lo + REACH * (curve.max() - lo)
+	rig.set_clip("idle", 0.0)
+	rig._shot_left = 0.0
+	rig._attacking = false
+	k.set_meta("kstate", "attack")
+	var hit_at := INF
+	for f in int(1.0 / DT):
+		rig._pick_clip(DT)
+		rig.player.advance(DT)
+		if _front(rig) >= struck:
+			hit_at = (f + 1) * DT
+			break
+	k.set_meta("kstate", "")
+	rig._shot_left = 0.0
+	rig.player.speed_scale = 1.0
+	ok(absf(hit_at - Kin.STRIKE_WINDUP) <= DT, "%s bite connects at %.3f s, the hit lands at %.3f s" % [id, hit_at,
+			Kin.STRIKE_WINDUP])
+
+## How far forward (m, models face -Z) the front-most bone reaches, per frame (DT) of the attack clip at speed 1.
+static func front_reach(rig: BokiRig) -> Array:
+	rig.set_clip("attack", 0.0)
+	var anim := rig.player.get_animation("attack")
+	var out: Array = []
+	for f in int(anim.length / DT) + 1:
+		rig.player.seek(f * DT, true)
+		rig.player.advance(0.0)
+		out.append(_front(rig))
+	return out
+
+## s into the clip the front first gets REACH of the way from where it starts to its farthest.
+static func contact_time(curve: Array) -> float:
+	var lo: float = curve[0]
+	var struck: float = lo + REACH * (curve.max() - lo)
+	for f in curve.size():
+		if curve[f] >= struck:
+			return f * DT
+	return INF
+
+static func _front(rig: BokiRig) -> float:
+	var skel := rig.skeleton()
+	var best := -INF
+	for b in skel.get_bone_count():
+		var nm := skel.get_bone_name(b)
+		if not (nm.begins_with("prop_") or nm.begins_with("part_")):
+			best = maxf(best, -rig.model.to_local(skel.to_global(skel.get_bone_global_pose(b).origin)).z)
+	return best
 
 ## m/s the species runs at in a match (Kin.speed before its level and mutation).
 static func match_speed(id: String) -> float:
@@ -115,7 +179,7 @@ static func contact_steps(rig: BokiRig, clip: String) -> Array:
 		paths.append([])
 	for i in SAMPLES:
 		rig.player.seek(anim.length * i / SAMPLES, true)
-		rig.player.advance(0.0)
+		rig.advance(0.0)
 		for f in feet.size():
 			var at := skel.get_bone_global_pose(feet[f]).origin
 			paths[f].append(rig.model.to_local(skel.to_global(at)))
@@ -174,7 +238,7 @@ static func seam(rig: BokiRig, clip: String) -> float:
 	var poses: Array = []
 	for i in SAMPLES:
 		rig.player.seek(anim.length * i / SAMPLES, true)
-		rig.player.advance(0.0)
+		rig.advance(0.0)
 		poses.append(_bones(rig.skeleton()))
 	var jumps: Array = []
 	for i in SAMPLES - 1:
@@ -199,7 +263,7 @@ static func pop(k: Node3D, rig: BokiRig) -> float:
 			k.position.z -= HOME_SPEEDS[0] * DT
 		rig._track_speed(DT)
 		rig._pick_clip(DT)
-		rig.player.advance(DT)
+		rig.advance(DT)
 		var now := _bones(rig.skeleton())
 		var jump := _jump(prev, now)
 		prev = now
