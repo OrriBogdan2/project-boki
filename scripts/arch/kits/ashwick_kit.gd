@@ -718,6 +718,7 @@ func combo_marks(out: Array) -> void:
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
 func gate_inputs() -> void: jet.lock_inputs()
+func gate_kin_tap() -> bool: return jet.swallow_kin_tap()
 
 # ------------------------------------------------------------------ bots
 ## The Torch Lance only reaches its stream's length: a bot walks in to it before holding LMB.

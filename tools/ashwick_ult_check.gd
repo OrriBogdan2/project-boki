@@ -24,8 +24,60 @@ func _owed(P: Hunter) -> float:
 
 func run() -> void:
 	await _flight()
+	await _flight_inputs()
 	await _carpet()
 	await _burst()
+
+## Owner rule (item 66), the negatives: in the flight LMB, RMB, G and the Merge key fire nothing (each through its real
+## route: the fire line, the sec press, Match.pending_input), none is queued for the landing, and E and X still work.
+func _flight_inputs() -> void:
+	var r: Array = ak.setup("ashwick", 16.0, "cindle", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: AshwickKit = P.ak
+	var J := K.jet
+	var at := home + Vector3(16, 0, 0)
+	T.teleport(home + Vector3(0, 0, 3.0))
+	P.ult = 1.0
+	var kin: Kin = P.kin
+	K.ch_rmb = float(K.rmb_charges())
+	K.cd["e"] = 0.0
+	var ch0 := K.ch_rmb
+	var em0: int = K.hose.emitted
+	var shots0: int = m.shots.size()
+	_cast(P, at)
+	ak.step(m, 0.3, func(): ak.aim_at(P, at))
+	var cloaks0: int = K.cloaks
+	for key in ["fire", "sec", "throw", "ult"]:      # one key at a time, held a quarter second, then let go
+		ak.step(m, 0.25, func():
+			if key == "fire" or key == "sec":
+				P.inp[key] = true
+				P.inp["sec_hold"] = key == "sec"
+			else:
+				m.pending_input[key] = true
+			ak.aim_at(P, at))
+		P.inp["fire"] = false
+		P.inp["sec_hold"] = false
+		ak.step(m, 0.05, func(): ak.aim_at(P, at))
+	ok("ult 66: in the flight LMB, RMB, G and the Merge key fire nothing, the flight goes on",
+			J.running() and K.hose.emitted == em0 and m.shots.size() == shots0 and K.ch_rmb == ch0
+			and kin.state == "shoulder" and not KinMerge.active(P) and P.ult == 1.0,
+			"puffs +%d shots +%d charges %.1f kin %s merged %s bond %.2f" % [K.hose.emitted - em0,
+			m.shots.size() - shots0, K.ch_rmb, kin.state, KinMerge.active(P), P.ult])
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ok("ult 66: E fires in the flight", K.cloaks == cloaks0 + 1 and J.running())
+	HunterKeys.ult_pressed(P)
+	ok("ult 66: X lands on the press frame", not J.running())
+	ak.step(m, 0.3)      # the 0.3 s after landing: nothing stale goes off
+	ok("ult 66: nothing queued in the flight fires in the 0.3s after landing",
+			K.hose.emitted == em0 and m.shots.size() == shots0 and K.ch_rmb == ch0 and kin.state == "shoulder"
+			and not KinMerge.active(P) and P.ult == 1.0 and ak.dmg(T) < 0.5,
+			"puffs +%d shots +%d charges %.1f kin %s merged %s bond %.2f" % [K.hose.emitted - em0,
+			m.shots.size() - shots0, K.ch_rmb, kin.state, KinMerge.active(P), P.ult])
+	await ak.done(m)
 
 ## Starts the flight toward `at` (cooldown cleared) and returns the jet.
 func _cast(P: Hunter, at: Vector3) -> AshwickJet:

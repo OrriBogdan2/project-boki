@@ -157,6 +157,7 @@ func recast_now(slot_id: String) -> void:
 		"e": use_e()
 		"x": cast_ult()
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
+func gate_kin_tap() -> bool: return false           # G's tap runs outside inp (Match.pending_input): true = swallowed
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
