@@ -69,6 +69,7 @@ func run(main: Node) -> void:
 	await _scarf(main)
 	_dots(m)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
+	await _vex_rounds(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -412,6 +413,73 @@ func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	m.ents_by_id[P.nid] = P
 	V.net_in(["fx", "hvfx", P.nid, "spin", P.pos.x, P.pos.y, P.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
 	ok(int(V.plays.get("spin", 0)) == 1, "a move arrives from another game")
+
+## Vex's rifle rounds (her kit's own VVFx looks): through a held string each round is one tracer in her green fire,
+## wide enough to follow at match zoom, round a hot core streak; the string's first, harder rounds burn wider and
+## hotter than the sustain rounds; a flash shows at the gun's mouth and a spark where a round lands; once warm the
+## string makes no new nodes. The shared smear keeps no core.
+func _vex_rounds(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var F := VVFx.of(m)
+	var lime := Arch.color("gunslinger")
+	var mouth := P.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D
+	ok(mouth != null, "Vex's model has the Gun's Muzzle (her weapon's mouth)")
+	P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0.0)
+	P.inp["aim_y"] = P.pos.y
+	P.inp["fire"] = true
+	var looks: Array = []          # [width, core alpha, body colour, riders on its shot] per round, in order
+	var flashes := 0               # rounds with a flash at the gun's mouth
+	var lands := [0, 0]            # rounds that ended, those with a spark where they landed
+	var made_warm := -1
+	var was: Array = []
+	for i in 150:                  # 2.5 s held: about 20 rounds of the 30-round drum
+		m.step(1.0 / 60.0)
+		for r: Dictionary in F.riders:
+			if not was.has(r):
+				var mt := (r["node"] as MeshInstance3D).material_override as ShaderMaterial
+				var core: Color = mt.get_shader_parameter("color3")
+				looks.append([float(r["width"]), core.a, mt.get_shader_parameter("color"),
+						F.riders.filter(func(o: Dictionary): return o["sd"] == r["sd"]).size()])
+				if mouth != null and _star_near(F, mouth.global_position):
+					flashes += 1
+		was = F.riders.duplicate()
+		await main.get_tree().process_frame          # (VVFx ends the riders whose round is gone)
+		for r: Dictionary in was:
+			if not F.riders.has(r):
+				lands[0] += 1
+				lands[1] += int(_star_near(F, r["last"]))
+		was = F.riders.duplicate()
+		if looks.size() == 5 and made_warm < 0:
+			made_warm = F.made
+	P.inp["fire"] = false
+	var n := looks.size()
+	ok(n >= 15, "a held string fires its rounds (%d)" % n)
+	if n < 15:
+		return
+	ok(looks.all(func(l: Array): return int(l[3]) == 1), "each round carries one tracer")
+	ok(looks.all(func(l: Array): return (l[2] as Color).is_equal_approx(lime)), "each tracer burns her green fire")
+	ok(looks.all(func(l: Array): return float(l[0]) >= 0.35), "each tracer is at least 0.35 m across")
+	ok(looks.all(func(l: Array): return float(l[1]) >= 0.5), "each tracer has a hot core streak")
+	ok(float(looks[0][0]) > float(looks[n - 1][0]) and float(looks[0][1]) > float(looks[n - 1][1]),
+			"the string's first round burns wider and hotter than a sustain round")
+	var cooling := range(1, 11).all(func(j: int): return float(looks[j][0]) <= float(looks[j - 1][0]))
+	ok(cooling and range(10, n).all(func(j: int): return is_equal_approx(float(looks[j][0]), float(looks[10][0]))),
+			"the first ten rounds cool with the damage ramp, the sustain rounds after them all alike")
+	ok(flashes == n, "each round flashes at the gun's mouth (%d of %d)" % [flashes, n])
+	ok(lands[0] >= n - 2 and lands[1] == lands[0], "each round sparks where it lands (%d of %d)" % [lands[1], lands[0]])
+	ok(made_warm > 0 and F.made == made_warm, "once warm the string makes no new nodes (%d)" % F.made)
+	F.smear(P.pos, P.pos + Vector3(2.0, 0.0, 0.0), lime, lime)
+	var sm := (F.pools["smear"] as Array).filter(func(s: Node3D): return s.visible)
+	var sm_mat := (sm[0] as MeshInstance3D).material_override as ShaderMaterial if sm.size() == 1 else null
+	ok(sm_mat != null and (sm_mat.get_shader_parameter("color3") as Color).a == 0.0,
+			"the shared smear keeps no core streak")
+
+## A star look showing within 5 cm of `at` (the muzzle flash, the landing spark).
+static func _star_near(F: VVFx, at: Vector3) -> bool:
+	var stars: Array = F.pools.get("star", [])
+	return stars.any(func(s: Node3D): return s.visible and s.global_position.distance_to(at) < 0.05)
 
 ## Claire's two scarf tails (HeroScarf): one ribbon each pinned beside the neck anchor, which follows the neck bone;
 ## at rest they hang down behind her, running they stream back against the motion; a new frame after she moves, the

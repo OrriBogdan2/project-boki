@@ -45,6 +45,16 @@ const SPIN_REST := 0.5               # s without a round before the next string 
 const E_RECOVER := 0.6               # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
                                      # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
                                      # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
+const ROUND_CORE := Color("eaffa8")  # the white-hot core of her green-fire rounds (the body is round_col)
+const ROUND_LEN := 2.6               # m of tracer behind a round (about 1.5 body heights, the source's bolt)
+const ROUND_W := 0.36                # m across a sustain round's tracer: it stays easy to follow in a brawl
+const ROUND_W_HOT := 0.46            # m across one of the string's first, harder rounds (_round_heat 1)
+const ROUND_CORE_A := 0.6            # how strong a sustain round's core streak burns (a hot round's is 1)
+const FLASH_W := 0.6                 # m across a sustain round's muzzle flash at the gun's mouth
+const FLASH_W_HOT := 0.8             # m across a hot round's
+const FLASH_SECONDS := 0.06          # s the muzzle flash and the landing spark show (3-4 frames)
+const LAND_W := 0.4                  # m across the spark where a round lands
+const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"   # on her model's weapon mouth (WardenGlb.WEAPON_MUZZLE)
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
@@ -68,11 +78,13 @@ var echo_t := 0.0
 var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
+var round_col: Color           # her rounds' green fire (Arch.color)
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
 var commit_end := 0.0          # match time her committed recovery ends (E after the beam, X from the tap)
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
+	round_col = Arch.color(id)
 
 func fx() -> VVFx:
 	return VVFx.of(m)
@@ -248,7 +260,9 @@ func _on_knock(t: Ent) -> void:
 	play("gunslinger_knock")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
-## Each round: a hot ember needle with a cooling tail, a bronze star at the muzzle, the shoulder kick.
+## Each round, in her green fire: a tracer riding it (a coloured body round a white-hot core streak), a flash at
+## the gun's mouth, the shoulder kick, and a spark where it lands. The string's first, harder rounds burn a
+## little wider and hotter than the sustain rounds after them.
 func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
@@ -260,8 +274,10 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			fx().ride(sd, "tracer", EMBER, HOT, 2.6, 0.18, _round_end)
-			fx().star(sd["pos"], BRONZE, HOT, 0.75, 0.06)
+			var heat := _round_heat()
+			fx().ride(sd, "tracer", round_col, ROUND_CORE, ROUND_LEN, lerpf(ROUND_W, ROUND_W_HOT, heat), _round_end,
+					Color(ROUND_CORE, lerpf(ROUND_CORE_A, 1.0, heat)))
+			fx().star(_gun_mouth(h.aim_dir()), round_col, ROUND_CORE, lerpf(FLASH_W, FLASH_W_HOT, heat), FLASH_SECONDS)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -299,9 +315,17 @@ func _tick_mag(dt: float) -> void:
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
+## How hot the round just fired burns: 1 for a string's first, down to 0 from its sustain_rounds-th on, the
+## same ramp as its damage (Hunter._emit_shot counts sus_n), so the tracer cools as the string loses punch.
+func _round_heat() -> float:
+	var n := float(h.wpn.get("sustain_rounds", 10))
+	return 1.0 - clampf(float(h.sus_n - 1) / n, 0.0, 1.0)
+
+## Where a round lands (a body, a wall, the end of its range): a small spark of her green fire.
 func _round_end(at: Vector3, vel: Vector2) -> void:
 	var d := Vector3(-vel.x, 0.4, -vel.y).normalized() if vel.length() > 0.1 else Vector3.UP
-	m.fx.spark(at, d, EMBER, 3, 5.0, 50.0, 0.14, 8.0, 0.7)
+	m.fx.spark(at, d, round_col, 5, 6.0, 55.0, 0.16, 8.0, 0.8)
+	fx().star(at, round_col, ROUND_CORE, LAND_W, FLASH_SECONDS)
 
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
@@ -446,8 +470,12 @@ func _launcher_at(d: Vector2) -> Vector3:
 	var spot := WardenGlb.anchor(h.model, TUBE_FIRE)
 	if spot != null:
 		return spot.global_position
-	var muzzle := h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D if h.model else null
-	return (muzzle.global_position if muzzle else _muzzle(d)) + Vector3.UP * TUBE_UP
+	return _gun_mouth(d) + Vector3.UP * TUBE_UP
+
+## The rifle's mouth: the Gun's Muzzle (on her weapon's mouth), read live so it follows the pose; else ahead of her.
+func _gun_mouth(d: Vector2) -> Vector3:
+	var muzzle := h.model.get_node_or_null(GUN_MUZZLE) as Node3D if h.model else null
+	return muzzle.global_position if muzzle else _muzzle(d)
 
 ## The launcher's puff: at the bell once it has swung forward, or at once where there is no swinging bell.
 func _launcher_puff(at: Vector3, d: Vector2) -> void:

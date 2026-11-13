@@ -10,7 +10,8 @@ shader_type spatial;
 //             the centre (never a solid fill: the target reads through) and lightning veins (placed areas);
 //             hollow: no falloff or veins, a glowing centre
 //   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
-//   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the rifle rounds)
+//   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the rifle rounds); color3, a hot core
+//             streak down its front
 //   6 FAN     a flat sector (UV.x across the sector, UV.y from the apex 0 to the rim 1): a blast front
 //   7 SWIRL   a flat quad: spinning comma arcs (the Dazed mark)
 //   8 BEAM    a ribbon: a hot core, a coloured body and a shimmering edge, thinning with life
@@ -109,8 +110,9 @@ void fragment() {
 		float w = mix(0.9, 0.08, uv.x);
 		float shaft = 1.0 - smoothstep(w * 0.5, w, d);
 		float head = (1.0 - smoothstep(0.0, 0.12, uv.x)) * (1.0 - smoothstep(0.0, 0.8, d));
+		float core = (1.0 - smoothstep(w * 0.15, w * 0.35, d)) * (1.0 - smoothstep(0.15, 0.8, uv.x));
 		body_a = shaft * (1.0 - uv.x) * k;
-		glow = color2.rgb * head * k;
+		glow = (color2.rgb * head + color3.rgb * color3.a * core) * k;
 	} else if (mode == 6) {
 		float front = 0.15 + 0.85 * sqrt(life);
 		float band = 1.0 - smoothstep(0.0, 0.12, abs(uv.y - front));
