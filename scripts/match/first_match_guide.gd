@@ -59,7 +59,8 @@ func tick(dt: float) -> void:
 		return
 	_gap = maxf(_gap - dt, 0.0)
 	_watch_glide(p, dt)
-	if not dive_only and not shown.has("seat") and _due("seat", p):  # a seat's countdown does not wait for the line on screen
+	# a seat's countdown does not wait for the line on screen
+	if not dive_only and not shown.has("seat") and _due("seat", p):
 		_start("seat", p)
 		return
 	if id != "":
