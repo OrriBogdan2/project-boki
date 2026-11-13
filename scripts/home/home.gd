@@ -18,6 +18,7 @@ var top_chips: HBoxContainer
 var prompt_box: PanelContainer
 var prompt_lbl: Label
 var key_row: FarmKeyHints = null      # the bottom key row, each hint fading once used (farm_key_hints.gd)
+var first_evolve := FirstEvolveBeat.new(self)      # the one-time beat the first time a Boki can evolve
 var player: Node3D
 var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
@@ -1077,6 +1078,7 @@ func _process(delta: float) -> void:
 	if guide: guide.tick(d)
 	if hhints: hhints.tick(d)
 	if key_row and visit.is_empty(): key_row.tick()
+	if visit.is_empty(): first_evolve.tick(d)
 	_care_tick(d)
 	if hecon: hecon.tick(d)
 	for g in games: g.tick(d)
