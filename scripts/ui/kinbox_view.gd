@@ -191,7 +191,7 @@ func _build_farm(fk: Array) -> void:
 	for i in maxi(0, KinBox.farm_cap() - fk.size()): fg.add_child(_cell({}, "farm", -1))
 	var cost := KinBox.expand_cost()
 	if cost >= 0:
-		var nxt: int = KinBox.FARM_CAPS[KinBox.farm_lvl() + 1]
+		var nxt: int = KinBox.farm_caps()[KinBox.farm_lvl() + 1]
 		var eb := UI.button("Expand: room for %d\n%d gems" % [nxt, cost], func():
 			var why := KinBox.expand()
 			if why != "": _fail(why)

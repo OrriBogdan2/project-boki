@@ -1517,6 +1517,7 @@ func _move_kin(d: float) -> void:
 			# being petted or talked to: it stays put and looks at you
 			k["hold_t"] = hold - d
 			k["goal"] = pos
+		if k.has("burrow_t") and BurrowSwap.step(self, k, d): continue      # through the Burrow door
 		var wish := Vector2.ZERO
 		var goal: Vector3 = k["goal"]
 		if goal != Vector3.INF:
@@ -2314,7 +2315,7 @@ func _use(it: Dictionary) -> void:
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
-		"burrow": _open_burrow()
+		"burrow": BurrowPanel.open(self)
 		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station":

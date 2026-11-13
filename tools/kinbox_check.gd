@@ -44,7 +44,7 @@ func run(m: Node) -> void:
 	while KinBox.farm().size() < KinBox.farm_cap():
 		add.call(_kin(sps[i % sps.size()], "Fill%d" % i, 30.0 + i))
 		i += 1
-	ok(KinBox.farm().size() == KinBox.FARM_CAPS[0], "farm holds %d to start (%d out)" % [KinBox.FARM_CAPS[0], KinBox.farm().size()])
+	ok(KinBox.farm().size() == KinBox.farm_caps()[0], "farm holds %d to start (%d out)" % [KinBox.farm_caps()[0], KinBox.farm().size()])
 	var over := _kin(sps[3 % sps.size()], "Over"); over["shimmer"] = true
 	ok(add.call(over) == "box" and KinBox.farm().size() == KinBox.farm_cap(), "the farm is full: even a shimmer waits in the box (cap respected)")
 	# through the real results path: a caught kin's destination is on the record
