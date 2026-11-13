@@ -218,7 +218,24 @@ func _fixes() -> void:
 	ok("hit" in plain, "a hit between two others has an impact cue")
 	ok("crit" in crit, "...and a crit its crit cue")
 	ok("pickup" in _cues_of(func(): Juice.rival_pickup(_m, a)), "another hunter's pickup is heard")
+	var tgt: Hunter = b
+	for t in KinLib.TYPES:      # a Boki's ability hit between two others: its type's impact, not the shared hit
+		k.sp = k.sp.duplicate()
+		k.sp["type"] = t
+		var heard := _cues_of(func(): Juice.hit(_m, tgt, k, 10.0, {"src": "kin", "ab": "k1"}, false, false))
+		if not ("ki_" + t in heard and not "hit" in heard):
+			ok(false, "a %s Boki's ability hit plays ki_%s, not the shared hit (%s)" % [t, t, heard])
+			break
+		if t == KinLib.TYPES[-1]:
+			ok(true, "all 19 types: a Boki's ability hit plays its own ki_<type> impact")
 	ok(missing.is_empty(), "no cue the match asked for lacks a sound file (%s)" % [missing.keys()])
+
+## A Boki ability hit row (k1, k2 or zone, seen 10+ times) none of whose cues is a type impact ki_<type>.
+func _plain_boki_row(key: String, t: Dictionary) -> bool:
+	var ability := " k1," in key or " k2," in key or " zone," in key
+	if not key.begins_with("hit kin>") or not ability or int(t["n"]) < 10:
+		return false
+	return not t["cues"].keys().any(func(c): return String(c).begins_with("ki_"))
 
 func _bad(t: Dictionary) -> int:
 	return int(t["none"]) + int(t["shared"])
@@ -234,6 +251,11 @@ func _report() -> void:
 	var kinds := {}
 	for r in rows:
 		kinds[String(r[0]).get_slice(" ", 0)] = true
+	var plain_rows := []
+	for r in rows:
+		if _plain_boki_row(String(r[0]), r[1]):
+			plain_rows.append(r[0])
+	ok(plain_rows.is_empty(), "every Boki ability hit row (kin>*) shows a type impact ki_*: %s" % [plain_rows])
 	ok(kinds.size() >= 5, "event kinds seen: %s" % [", ".join(kinds.keys())])
 	rows.sort_custom(func(x, y): return _bad(x[1]) > _bad(y[1]))
 	var lines: Array = []
