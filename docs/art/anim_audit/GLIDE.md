@@ -47,3 +47,11 @@ dash fade with the glide weight (0.12 s) and the dash clip owns the body meanwhi
 - The opening skydive is a plunge too, so it takes the same head-down dive (alternative: keep it chest-down, the
   procedural rig's skydive; it would need a state key to tell the two apart).
 - Weapons stay in hand while gliding (skinned weapons; the procedural Gun is stowed). No canopy clipping seen.
+
+**0.24.6 wave onto main (ext/mantle-port-a, 2026-11-13):** main's ext/anim-glide-bank (HunterAnim's AIR_TILT on
+WardenClips._air_tilt: DIVE_PITCH nose-down, GLIDE_BANK into turns, `--glide-bank-check`) does the same job as fixes 1,
+2 and 4 above, so WardenAirTilt and the per-Hero `dive_tilt`/`glide_tilt`/`glide_bank`/`dive_at` data are gone (with
+both, the dive pitched 105 + 66 deg and the bank doubled), and the dive plays the glide clip again (the dive clips'
+own root lean put the body 15-46 deg off the rig). WardenAimLead is off under the glider and in a dive (its yaw
+swung the rolled root off the flight line). Kael's dive data is main's `exdash` again (fix 3; unread by the code).
+Same call as READY ext/move-feel-1111: one air tilt, main's.

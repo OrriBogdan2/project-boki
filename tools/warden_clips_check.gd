@@ -6,8 +6,8 @@ extends RefCounted
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
 ## Every Hero's "air_legs" moves, played in the air, keep the fall's legs (no planted stance), and a landing before the
 ## move ends keeps them on the legs' own layer (no snap into the stance).
-## Every Hero with clips (WardenAirTilt): its dive clip is in the .glb, a plunge turns it head-down, a glider turn leans
-## it into the turn, and on the ground the .glb is back in its own place.
+## Every Hero with clips (HunterAnim's AIR_TILT on WardenClips): its dive clip is in the .glb, a plunge tips it
+## nose-down, and on the ground the body is upright again (the glider's bank: --glide-bank-check).
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -430,23 +430,24 @@ func _air(id: String) -> void:
 	var an := HunterAnim.new(m)
 	var dive := String(sync.clips.d["air"]["dive"])
 	ok(sync.clips.lib.has_animation(dive), "%s: the dive clip %s is in the .glb" % [art_name, dive])
+	_play(m, an, sync, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 30)
+	var stand := _spine(m, sk)
 	var glide := {"vel": Vector3(0, -3.5, -9.0), "face": 0.0, "grounded": false, "gliding": true}
 	_play(m, an, sync, glide, 40)
 	var up := _spine(m, sk)
 	var plunge := {"vel": Vector3(0, -30.0, -6.0), "face": 0.0, "grounded": false, "diving": true}
 	_play(m, an, sync, plunge, 40)
 	var down := _spine(m, sk)
-	ok(down.y < 0.0 and down.z < 0.0, "%s: the dive goes head-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
+	# (HunterAnim's AIR_TILT pitches it DIVE_PITCH nose-down on top of the dive clip: head first, chest to the ground)
+	ok(down.z < -0.5, "%s: the dive goes nose-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
 			% [art_name, down.y, down.z, up.y])
-	var turn := glide.duplicate()
-	for i in 30:
-		turn["face"] = float(turn["face"]) + 5.0 * DT      # a left turn at 5 rad/s
-		_play(m, an, sync, turn, 1)
-	var lean := _spine(m, sk)
-	ok(lean.x < up.x - 0.15, "%s: a glider turn leans it into the turn (spine x %.2f, straight %.2f)" % [art_name,
-			lean.x, up.x])
-	_play(m, an, sync, {"vel": Vector3.ZERO, "face": float(turn["face"]), "grounded": true}, 60)
-	ok(w.transform.is_equal_approx(sync.clips.tilt.rest), "%s: on the ground the body is upright again" % art_name)
+	# (the glider's bank into a turn is main's AIR_TILT roll, asserted on every Hero by --glide-bank-check)
+	_play(m, an, sync, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 60)
+	var stood := _spine(m, sk)
+	var left := rad_to_deg((m.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY) as Quaternion).get_angle())
+	# (the idle's own sway moves the spine a few degrees: Tarek's guard ~4)
+	ok(left < 1.0 and absf(stood.y - stand.y) < 0.06, "%s: on the ground the body is upright again (air tilt %.1f deg"
+			% [art_name, left] + ", spine y %.2f, standing %.2f)" % [stood.y, stand.y])
 	m.free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
