@@ -67,6 +67,82 @@ func _sim(home, hw: HomeWork, secs: float, until: Callable = Callable()) -> void
 		if until.is_valid() and until.call(): return
 		if i % 100 == 0: await main.get_tree().process_frame
 
+## The Job Board's Craft priority and a pin steer builders (docs/DEBT.md): three free Boki on chores
+## (ripe crops, Craft Low) and two sites. Craft on top and a pin to Craft put the pinned Boki at a site
+## within BUILD_ARRIVE secs; unpinned (Craft back to Low) it returns to a chore. (A pin is per Boki and
+## per kind of job: there is no per-site pin.)
+const BUILD_ARRIVE := 5.0       # secs for the pinned Boki to be hammering at a site
+
+func _building(k: Dictionary) -> bool:
+	return k.has("job") and String(k["job"]["kind"]) == "build"
+
+func _on_chore(k: Dictionary) -> bool:
+	return k.has("job") and String(k["job"]["kind"]) != "build"
+
+## Runs until `until` holds (or BUILD_ARRIVE secs pass): the secs it took, or -1.
+func _within(home, hw: HomeWork, until: Callable, secs := BUILD_ARRIVE) -> float:
+	var t := 0.0
+	while t < secs:
+		_ripen()
+		await _sim(home, hw, 0.25)
+		t += 0.25
+		if until.call(): return t
+	return -1.0
+
+## Every crop patch is ripe, so there is always a chore.
+func _ripen() -> void:
+	for pd in Save.d["plots"]:
+		var c: String = Data.CROPS.keys()[0]
+		pd["crop"] = c
+		pd["stage"] = int(Data.CROPS[c]["grow"])
+
+func _craft_steer(home, hw: HomeWork, hb: HomeBuild, pinned: Dictionary) -> void:
+	for r in Save.d["roster"]: Work.set_pin(r, "")
+	Work.set_prio("craft", 1)
+	_mats(60, 60, 60, 6)
+	hb.toggle()
+	for off in [Vector3(7, 0, 6), Vector3(-9, 0, 7)]:
+		hb.take("storage_chest")
+		_put(hb, _spot(hb, home.spots["house"] + off))
+	hb.toggle()
+	var made: Array = FarmSites.sites().duplicate()
+	ok(made.size() == 2, "two construction sites are marked out")
+	_ripen()
+	for k in home.kins: hw.drop(k)
+	hw.scan_t = 0.0
+	hw.scan()
+	var pk: Dictionary = home._kin_entry(pinned)
+	var first := await _within(home, hw, func() -> bool: return _on_chore(pk))
+	ok(first >= 0.0, "with Craft Low a free Boki is on a chore within %.0f s (%.2f s)" % [BUILD_ARRIVE, first])
+	Work.set_prio("craft", 3)
+	Work.set_pin(pinned, "craft")
+	hw.drop(pk)      # (the Job Board's pin menu drops the job, as here)
+	pk["t"] = 0.0
+	var at := await _within(home, hw, func() -> bool: return _building(pk) and String(pk["job"]["phase"]) == "work")
+	print("FARMBUILD  Craft top + pin: %s at a site after %.2f s" % [pinned["name"], at])
+	ok(at >= 0.0, "a Boki pinned to Craft (Craft on top) is hammering at a site within %.0f s" % BUILD_ARRIVE)
+	var chore_j: Array = hw.jobs.filter(func(j): return String(j["kind"]) != "build")
+	ok(not chore_j.is_empty() and not hw.takes_job(pinned, chore_j[0]), "while pinned it takes no chores")
+	Work.set_pin(pinned, "")
+	Work.set_prio("craft", 1)
+	hw.drop(pk)
+	pk["t"] = 0.0
+	var back := await _within(home, hw, func() -> bool: return pk.has("job"))
+	print("FARMBUILD  unpinned, Craft Low: back on a job after %.2f s" % back)
+	ok(Work.pin(pinned) == "" and hw.takes_job(pinned, chore_j[0]) and back >= 0.0,
+			"unpinning releases it: chores are open to it again and it picks a job within %.0f s" % BUILD_ARRIVE)
+	# tidy up: the sites come down (full refund) and the crops go
+	Work.set_prio("craft", 2)
+	for k in home.kins: hw.drop(k)
+	hb.toggle()
+	for e in made:
+		hb.pick_up_at(HomeLayout.deco_cells(e)[0])
+		hb.store_held()
+	hb.toggle()
+	for pd in Save.d["plots"]:
+		pd["crop"] = ""
+		pd["stage"] = 0
+
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
@@ -331,6 +407,7 @@ func run(m: Node) -> void:
 	var j_off := {"kind": "build", "el": "craft", "u": cu}
 	ok(not FarmSites.takes(rk, j_off), "Craft set to Off on the Job Board stops the building")
 	Work.set_prio("craft", 2)
+	await _craft_steer(home, hw, hb, ash)
 	# ---------------------------------------------------------------- 5. upgrades
 	_stats(0, 0, 0, 24)          # farm level 2: tier 2 needs 3
 	_mats(40, 40, 40, 6)
