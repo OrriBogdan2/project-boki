@@ -2,12 +2,12 @@
 
 Status: **proposal, for owner review before any art.** Revised after the owner's review: big Boki now have roles, not just riding. Phase 1 (design, no credits). The owner asked for
 "a bunch of original Boki to play with that have good 3D modelling I can later change": 50 species in
-total, a range of sizes, and some big rideable ones (revised: big Boki get roles, at most about 6 mounts). Today's 9 count toward the 50, so this adds 41.
+total, a range of sizes, and some big rideable ones (revised: big Boki get roles, the owner later loosened the 4-6 mount cap, DECISIONS 2026-11-08). Today's 9 count toward the 50, so this adds 41.
 
 - Stubs: `content/kin_v2/<id>.json`, one per new species, in the real kin grammar (docs/KIN_GRAMMAR.md), with home data in
   `content/kin/<id>.json`. All 50 are **loaded by the game** (see "Where the stubs live" below). A species with no model yet
   is drawn by the `KinModels` primitives of its `look`; the 21 with `art/kin/<id>/<id>.glb` use their rig.
-- Check: `godot --headless -- --roster-check` (tools/roster_check.gd): 50 species, no name clashes, home data present, 4-6 rideables.
+- Check: `godot --headless -- --roster-check` (tools/roster_check.gd): 50 species, no name clashes, home data present, any large kin with mount settings may be rideable (no 4-6 cap).
 - Big-Boki roles and riding: docs/boki/RIDING_SPEC.md (specs only, waiting for the owner's OK).
 
 ## Name map (creature-design pass, 2026-11-07)
@@ -58,11 +58,11 @@ The 21 species with models and the 8 kept designs are untouched; the 13 "v2 upgr
 - **Size classes.** small = rides a shoulder (or perches if it flies); medium = perches on the pack;
   large = a big Boki you don't ride (it has another big-Boki role, below); rideable = a mount you ride.
   In the grammar all 16 big ones are `body.size: "large"` with `carry.style: "mount"`, because that is the
-  only carry style a large kin may have today. `--roster-check` counts mount speed x1.1 and up as
-  rideable; the non-ridden big Boki are stubbed at x1.0 or below. The role itself lives in this doc only
+  only carry style a large kin may have today. `--roster-check` counts every large kin with mount settings as
+  rideable (no speed floor, no cap; the old 4-6 cap and x1.1 floor are gone). The role itself lives in this doc only
   (see "Big-Boki roles" for the grammar field it needs).
 - **Big-Boki roles (owner review, 02:30).** Large Boki aren't all mounts. The 16 big ones (today's
-  Cairnback and Gravadillo, 14 new) split into six roles, with at most 6 mounts. Each role has a pitch
+  Cairnback and Gravadillo, 14 new) split into six roles, with the mount count no longer capped. Each role has a pitch
   and a short spec in docs/boki/RIDING_SPEC.md (for owner approval).
 - **Themes are the grammar's cosmetic themes** (`KinParts.THEMES`): no new theme was invented, so every
   stub validates. There is no water theme; aquatic Boki wear frost, storm or lunar (decision 5).
