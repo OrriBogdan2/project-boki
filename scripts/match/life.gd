@@ -63,6 +63,20 @@ static func team_alive(m: Match, team: int) -> bool:
 static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
 
+# ------------------------------------------------------------------ the revive/stomp curve
+## Speed factor for this Hunter's next revive ("revived_n": wisp or box) or finish ("stomped_n"):
+## the source's one curve slows the 1st..4th+ of each for the match (content/rules/revive.json).
+static func diminish(o: Hunter, key: String) -> float:
+	var curve: Array = BoxRevive.rules()["diminish"]
+	return float(curve[mini(int(o.get_meta(key, 0)), curve.size() - 1)])
+
+static func tally(o: Hunter, key: String) -> void:
+	o.set_meta(key, int(o.get_meta(key, 0)) + 1)
+
+## Seconds one teammate needs to bring this wisp back, as the revive prompt and bar show it.
+static func revive_secs(o: Hunter) -> float:
+	return float(R["revive_time"]) / diminish(o, "revived_n")
+
 # ------------------------------------------------------------------ wisps
 ## Every frame, for each wisp: teammates on it revive it, enemies on it stomp it, otherwise it
 ## bleeds out.
@@ -107,10 +121,10 @@ static func tick_wisps(m: Match, dt: float) -> void:
 		o.set_meta("stomped", foes > 0)
 		if foes > 0:
 			# stomped: drains fast and nobody can pick you up
-			o.down_hp -= base * R["stomp_mult"] * dt
+			o.down_hp -= base * R["stomp_mult"] * diminish(o, "stomped_n") * dt
 			o.revive = maxf(0.0, o.revive - dt * 0.5)
 		elif allies > 0:
-			o.revive += dt / R["revive_time"] * (1.0 + R["extra_reviver"] * (allies - 1))
+			o.revive += dt / R["revive_time"] * diminish(o, "revived_n") * (1.0 + R["extra_reviver"] * (allies - 1))
 			if o.revive >= 1.0:
 				trace(m, "wisp revive %s" % o.pname)
 				for rv in revivers: (rv as Hunter).revives += 1
@@ -120,6 +134,7 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			o.down_hp -= base * dt
 		if o.down_hp <= 0.0:
 			trace(m, "%s %s" % [o.pname, "bled out" if foes == 0 else "stomped out"])
+			if foes > 0: tally(o, "stomped_n")
 			m.eliminate(o, o.last_hit_by, "bled out" if foes == 0 else "finished")
 
 # ------------------------------------------------------------------ the stomp
@@ -159,7 +174,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
 		var t0 := float(h.stomp["t"])
-		var t1 := t0 + dt
+		var t1 := t0 + dt * diminish(o, "stomped_n")
 		h.stomp["t"] = t1
 		var cyc: float = R["stomp_cycle"]
 		var hit_at := cyc * 0.7
@@ -176,6 +191,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		if t1 >= float(R["stomp_time"]):
 			if near:
 				end_stomp(m, h, "done")
+				tally(o, "stomped_n")
 				m.eliminate(o, h, "executed")
 				m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
 				m.sfx("crit", o.pos, -2.0, 0.7)
