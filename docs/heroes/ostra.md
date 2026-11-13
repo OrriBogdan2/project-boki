@@ -122,7 +122,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Trade slows swapped foes 40% for 3 s (invented) | MED | (b) | 8e5c6340: removed; `dash: Trade trades places; the foe is only moved, not slowed ...` |
 | Shift hold-to-aim | LOW | (c) | kept: a tap behaves like the source; the hold shows both ends (owner Nov 2) |
 | Floating `[?]`: hover height, bob, foot-planting | LOW | (a) | the code hovered 0.15 m (half the source and this doc): now 0.3 m +-0.03 m; he has no foot to plant (Timing pass; `he floats about 0.3 m ...`, `he never plants a foot ...`) |
-| Shift radius 1.5 m | LOW | (c) | kept: the data has no number and the footage scale is about 2x uncertain |
+| Shift radius 1.5 m | LOW | (c) | 1.9 m since owner 11-11 ("a bit bigger"); the data has no number |
 | Pronouns and the old lamplighter concept in his text | MED | (b) | 8e5c6340: fantasy, silhouette and tells rewritten for the Void Jester; he/him in this doc, the DashFlow rows, kit comments and check names |
 | Charged-orb ground ring (cosmetic) | LOW | (b) | 8e5c6340: removed (the hand glow stays) |
 | Self screen shake | MED | (c) | ext/no-shake owns it |

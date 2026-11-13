@@ -181,15 +181,24 @@ Rank paths that do not fit our system: the data's tiers II/III/IV fold into our 
 Skipped, with reasons: the tall-ledge climb has no heightmap equivalent (main's movement work); the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on R) untouched.
 Skipped, with reasons: the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on X) untouched.
 
-## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Myth, `Upg:` lines. Rank cooldown and damage now come from `rank_cd` / `rank_dmg` (the old `cd_per_rank` and the
-shared dash step are gone).
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
+(briefs/supervive-data/supervive_kits.md, Myth `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
+archer.json (the old `cd_per_rank` and the shared steps are gone); cooldowns match the data directly (Heavy Shot 16s,
+Spirit Walk 9.5s, Hail Wall 15s). LMB and Hawk Sense have no tiers in the data and do not rank; R (Starpiercer on X) is
+decision 0022's.
 
-| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
-|---|---|---|---|
-| RMB Heavy Shot | -3s cooldown x2 (flat), +20% damage x2, tier IV: +3m range, wall stun gives a dash charge | 13s / 10s, damage +15% / +30% | 13s / 10s, damage +20% / +40%; range and charge at 3 |
-| Space Spirit Walk | -1s recharge x2, tier IV: lasts 0.5s longer, faster inside something, allies in 6m walk too | 8.1s / 6.7s | 8.5s / 7.5s; tier IV riders at 3 |
-| E Hail Wall | -2s cooldown x2, +30% damage x2, tier IV: -2s more, 30% wider | 13.5s / 12s, damage +15% / +30% | 13s / 9s, damage +30% / +60%; 30% wider at 3 |
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--archer-combo-check` |
+|---|---|---|---|---|
+| LMB bow | none [D] | - | - | - |
+| RMB Heavy Shot | +20% dmg, -3s / +20% dmg, -3s / more range, a wall stun gives a dash charge [D] | 13s, damage +20% | 10s, damage +40%; flies 3m farther; a wall stun gives a dash charge | `upgrade parity: Heavy Shot ...`, `Heavy Shot ranks cut 3 s ...`, `pin rank 3: a Heavy Shot wall stun ...` |
+| Shift Spirit Walk | -1s / -1s / +0.5s, +150 decaying speed inside terrain, allies get it too [D] | recharge 8.5s | 7.5s; 3.3s long, +33% inside something (fading), allies within 6m walk too | `upgrade parity: Spirit Walk ...`, `pin rank 3: Spirit Walk lasts 0.5 s longer ...`, `pin rank 3: +33% inside ...` |
+| E Hail Wall | +30% dmg, -2s / +30% dmg, -2s / -2s, +30% arc [D] | 13s, damage +30% | 9s, damage +60%; arc 120 -> 156 degrees (`e.deg_r3_k`) | `upgrade parity: Hail Wall ...`, `upgrade parity: rank 3 (tier IV) Hail Wall arc ...` |
+| Passive Hawk Sense | none [D] | - | - | - |
+
+Before the source pass: Heavy Shot 13s / 10s with +15% / +30% (shared), Spirit Walk 8.1s / 6.7s (shared -15%), Hail Wall
+13.5s / 12s with +15% / +30%. This pass moved the Hail Wall's rank 3 width (1.3) from an inline number into the data and
+asserts it.
 
 ## Scaling
 Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full Heavy Shot 30 (+148 wall hit, 4.94x), Hail Wall 5 per 0.5 s, Starpiercer 18 / 18 / 23.3 per beam (60 s cooldown, 4x the E cooldown of 15 s as in the source). Source numbers were used only as ratios (overdraw half of Supercharged, E cooldown about RMB's).

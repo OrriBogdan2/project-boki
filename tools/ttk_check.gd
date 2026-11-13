@@ -1,10 +1,11 @@
 extends "res://tools/archetype_check.gd"
-## --ttk-check: time to knock for all 12 Hunters against the source (PARITY FIRST, briefs/DECISIONS.md 2026-11-07).
+## --ttk-check: time to knock for every Hunter against the source (PARITY FIRST, briefs/DECISIONS.md 2026-11-07).
 ## Ours: a live Match, the Hunter against an idle standard target (roster mean health, full armour).
 ## Source: the same fight worked out from supervive_kits.md (briefs/supervive-data on origin/ext/agent-briefs).
 ## (a) LMB alone; (b) the kit's simple combo: every direct-damage non-ult ability once, then again whenever its
 ## cooldown or charge is back, LMB between. Each at rank 0 (unspent, slot_lv 1) and max.
 ## Rows outside RATIO_LO..RATIO_HI fail unless OVERRIDES cites the owner decision. --write updates docs/TTK.md.
+## A Hunter with no source hero (Gil) is held to the roster median: the median source time of the same row.
 
 const RATIO_LO := 0.85     # ours / source time to knock: the parity bar, +-15% either side
 const RATIO_HI := 1.15
@@ -53,13 +54,11 @@ const HEROES := [
 	["dolm", "Tetra", "tap", 18, [169.0, 0.6, 0.0], {}],
 	["dredge", "Kingpin", "hold", 9, [339.0, 0.5, 0.0], {}],
 	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0], {}],
+	# Gil: LMB clicked (held is his Tide Lunge); last, it needs the rows above
+	["gil", MEDIAN_BAR, "tap", false, [], {"rmb": [], "dash": [], "e": []}],
 ]
+const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
 
-## Gil has no source Hunter (he is ours), so his rows are held to the roster's own median time to knock instead,
-## with the same bar. Same row shape as HEROES: LMB clicked (held is his Tide Lunge), no source numbers; his combo
-## is every damage slot but the ult.
-const GIL := ["gil", "roster median", "tap", false, [], {
-	"rmb": [0.0, 0.0, 0.0, 0.0, 1, 0], "dash": [0.0, 0.0, 0.0, 0.0, 1, 0], "e": [0.0, 0.0, 0.0, 0.0, 1, 0]}]
 
 ## Ults the share table lists (never in a combo): hero -> source damage of one cast. our_hit casts it, then
 ## waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s).
@@ -145,6 +144,17 @@ func _in_daze(starts: Array, daze: Dictionary, t: float) -> bool:
 		if t >= s and t <= s + float(daze["t"]):
 			return true
 	return false
+## The median source time of the rows so far with this label (the bar for a Hunter with no source hero).
+func _median_src(label: String) -> float:
+	var times := []
+	for r in rows:
+		if r["label"] == label and r["src"] > 0.0:
+			times.append(r["src"])
+	if times.is_empty():
+		return -1.0
+	times.sort()
+	var mid := times.size() / 2
+	return times[mid] if times.size() % 2 == 1 else (times[mid - 1] + times[mid]) / 2.0
 
 func _src_hp(hero: Array) -> float:
 	return SRC_HP + SRC_HP_LV * float(int(hero[3]) - 1)
@@ -286,17 +296,18 @@ func run(main_node: Node) -> void:
 				continue
 			for rank in [1, 3]:
 				var ours: float = await our_ttk(hero, combo, rank)
-				var src := src_ttk(hero, combo, rank == 3)
 				var kind := "combo" if combo else "LMB"
 				var label := "%s %s" % [kind, "rank 0" if rank == 1 else "rank max"]
+				var src := _median_src(label) if hero[1] == MEDIAN_BAR else src_ttk(hero, combo, rank == 3)
 				var row := _cell(hero, label, ours, src)
 				rows.append(row)
 				bad += int(row["state"] == "FAIL")
 				print("TTK %-4s %-11s %-14s ours %s s, source %s s, ratio %s" % [
 					row["state"], hero[0], label, _fmt(ours), _fmt(src), _ratio_text(row["ratio"])])
-	bad += await _gil_rows()
 	for hero in HEROES:
 		for slot in hero[5]:
+			if hero[5][slot].is_empty():
+				continue
 			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
 			var ours_share: float = await our_hit(hero[0], slot)
 			_add_hit(hero, slot, ours_share, src_share)
@@ -316,26 +327,6 @@ func run(main_node: Node) -> void:
 		_write()
 	print("TTK CHECK DONE, rows: %d, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
-
-## Gil's LMB and combo against the median of the 12 Hunters' own times (the rows above, same rank and kind).
-func _gil_rows() -> int:
-	var bad := 0
-	for combo in [false, true]:
-		for rank in [1, 3]:
-			var kind := "combo" if combo else "LMB"
-			var label := "%s %s" % [kind, "rank 0" if rank == 1 else "rank max"]
-			var times: Array = []
-			for r in rows:
-				if r["label"] == label and r["ours"] > 0.0:
-					times.append(r["ours"])
-			times.sort()
-			var mid: float = (times[(times.size() - 1) / 2] + times[times.size() / 2]) / 2.0
-			var row := _cell(GIL, label, await our_ttk(GIL, combo, rank), mid)
-			rows.append(row)
-			bad += int(row["state"] == "FAIL")
-			print("TTK %-4s gil %-14s ours %s s, median of %d Hunters %s s, ratio %s" % [
-				row["state"], label, _fmt(row["ours"]), times.size(), _fmt(mid), _ratio_text(row["ratio"])])
-	return bad
 
 ## One share-of-target row: printed and kept for the table.
 func _add_hit(hero: Array, slot: String, ours_share: float, src_share: float) -> void:

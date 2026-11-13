@@ -30,6 +30,7 @@ const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back int
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
+const LAND_DONE := 99.0       # s: land_t past any land clip (none plays)
 const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
@@ -75,7 +76,7 @@ var still_t := 0.0
 var stance_w := 0.0
 var was_air := false
 var air_t := 0.0
-var land_t := 99.0
+var land_t := LAND_DONE
 var hit_seen := 99.0
 var last_emote := ""
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
@@ -427,6 +428,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			alt_on = not alt_on
 		alt_km = km
 		alt_t = tt
+		if mv.get("owns_land", false):
+			# this move is the landing (it may start in the air): the generic land clip must not follow it, and the
+			# fall counts afresh from here, so only a real fall (land.min_fall) after it lands again
+			land_t = LAND_DONE
+			air_t = 0.0
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
 		if mv.has("fit"):

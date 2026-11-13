@@ -43,6 +43,11 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - Re-render one: `jobq submit --needs gpu --tree <tree> --out shots -- --parity-reel --shots-dir=shots
   --reel-hero=<id>`, then `ffmpeg -framerate 30 -i shots/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p
   <id>.mp4` (`tools/parity_reel.gd`, built on `tools/hero_vfx_reel.gd`; `--reel-only=<part>` plays one part).
+- `thief_dash_lmb.mp4` (12 s): Sable's quick bolts after the Vault (docs/heroes/thief.md, Quick hands): LMB held at
+  0.45s, Shift then LMB held (the empowered bolt and three cyan-tailed bolts 0.27s apart), Shift then LMB 1.5s later
+  (the usual pace). `--reel-only=dash_lmb --reel-hero=thief`; not part of the shared timeline.
+- The R segment of each MP4 is spliced from a second render of just that part (the first render pressed R through
+  the wrong key path); the timeline above is unchanged.
 - The R segment of the first six MP4s is spliced from a second render of just that part (the first render pressed R
   through the wrong key path); the timeline above is unchanged. The four slice Wardens' reels and Meeko's and
   Tenzo's are one render each.

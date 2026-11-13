@@ -8,6 +8,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 - Rank 0 is the unspent rank (slot_lv 1); max is rank 3 for ours and every listed upgrade for the source (a "x2" upgrade counts for both tiers it covers, charges included). LMB has no ranks, so (a) is the same at both.
 - Source shots land at 0.00 s and every interval after; ours includes wind-ups, flight time and recoveries.
 - Bar: ours / source time to knock inside 0.85 to 1.15 (+-15%, owner digest 1112). Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES` (none yet: line 162, Motley "loses ~15% held-fire DPS, no compensation buff", explains 15% of a 1.9x gap, so it does not cover Motley).
+- Gil has no source hero. His bar is the roster median: the median source time of the same row (LMB or combo, same rank) across the Hunters that have one. His LMB is clicked (a held click is his Tide Lunge). He gets no per-cast share rows. His combo varies by a few tenths of a second between runs, because the Grab Bag draws vary.
 
 **Footage LMB (Lace, Meeko, Tenzo, Grimble, Neve).** `supervive_kits.md` has no LMB damage for these five, so their LMB row is read from the floating damage numbers in the hero-ref footage (origin/ext/hero-ref-footage, frames named below; trust order puts it under the tooltips, which have no number to beat it). The damage is the source's own number at the level the clip shows, against the mean Hunter at that level, the same conversion as the level 15 tooltips. Interval is the card cooldown where the hits agree with it, else the hit spacing in the footage.
 
@@ -21,7 +22,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 
 Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15) and the LMB is level 9 (Tetra about 18), so no combo row mixes the two.
 
-**Gil (ours, no source Hunter).** His rows are `gil (roster median)`: his LMB and combo (Grab Bag, Riptide, Ground Swim, no ult) against the median of the 12 Hunters' own times for the same row, with the same 0.85-1.15 bar. His combo moves run to run (the bag draws its potion at random: combo rank 0 5.7-7.7 s, rank max 5.0-7.2 s over 3 runs), so judge it by the range. Fix if out: `content/archetypes/gil.json` `lmb.rate` 0.32 -> 0.23 puts all four rows inside (LMB 0.87, combo 1.11 / 1.07 in the run measured); nothing else was touched.
+**Gil (ours, no source Hunter).** His rows are `gil (roster median)`: his LMB (clicked; a held click is his Tide Lunge) and combo (Grab Bag, Riptide, Ground Swim, no ult) against the median source time of the same row across the Hunters that have one (main's method since 11-12, kept on the 11-13 re-merge), with the same 0.85-1.15 bar. His chain is main's 9.2 / 9.2 / 14.5 (11-12). His combo moves run to run (the bag draws its potion at random), so judge it by the range.
 
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
