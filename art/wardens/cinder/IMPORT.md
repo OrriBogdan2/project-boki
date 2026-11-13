@@ -1,5 +1,9 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+the facekeep body `~/meshy/v95/Cinder/r2/ingame1112/cinder_v95_facekeep_body.glb`: body6 cand_B's shape on the cut `cinder_v95_body6_body` (every vertex matched) with the cand_A face3 face image. Was appeal4 cand_5 below. 13.7k tris, 2048 atlas + 2048 emit, 44 clips (pet/give/cheer gain sampled channels, same timing).
+Spec `art/wardens/src/cinder_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
+
 `cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads
@@ -69,8 +73,12 @@ Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with
 On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
 command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.
 
+v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
+texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
+
 Re-key (ext/anim-dash-clips-cinder-lace, 11-12): `leap` (Soot Ram) re-keyed to the felt ram (3.4 m / 0.33 s, fastest at
 the start): flat out by 0.12 s, the stop on RAM_IMPACT_KEY 0.36 as before. The source .blend was not on the art worker, so
 the bake ran on this glb through `tools/art1/clip_blend.py ... palm=anchor_blade_root` (a control bake of `leap` and `hop`
 matched this glb's exactly) and was copied on with `glb_add_clips.py ... leap`. `hop` (the air poof) already fits the felt
 6.8 m / 0.28 s (the roll done at 0.25 s) and is unchanged.
+On the v95 swap the `leap` re-key was copied again onto main's v95 glb with `glb_add_clips.py ... leap`.
