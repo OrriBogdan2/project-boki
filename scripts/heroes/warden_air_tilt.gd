@@ -5,6 +5,9 @@ extends RefCounted
 ## turns. The clips own the limbs; this turns the whole .glb about the hips, the way HunterAnim tips the procedural rig.
 ## Per Hero in content/rules/warden_anim/<art>.json "air": dive_tilt, glide_tilt, glide_bank (degrees); "rig_root"
 ## Heroes already ride the rig's own tip, so their data sets what they add to it.
+## Since HunterAnim's own air tilt (the root's AIR_TILT: the glider's bank and the dive's DIVE_PITCH, turned onto every
+## Hero's clips by WardenClips._air_tilt) every Hero rides the rig's tip: this adds only the rest of its dive_tilt past
+## that pitch, and glide_tilt; the bank is HunterAnim's alone (glide_bank data is no longer read).
 
 const DIVE_TILT := 105.0     # deg forward in a plunge: past 90 the head is below the hips
 const GLIDE_TILT := 12.0     # deg forward under the glider: the legs trail behind
@@ -24,14 +27,16 @@ var bank := 0.0
 var turn := 0.0              # rad/s, smoothed
 var face_was := NAN
 
-func _init(node: Node3D, skel: Skeleton3D, air: Dictionary) -> void:
+func _init(node: Node3D, skel: Skeleton3D, air: Dictionary, rig_tip := false) -> void:
 	glb = node
 	rest = glb.transform
 	var to_glb := glb.global_transform.affine_inverse() * skel.global_transform
 	pivot = to_glb * skel.get_bone_global_rest(WardenSkeleton.find(skel, "hips")).origin
 	dive_tilt = float(air.get("dive_tilt", DIVE_TILT))
+	if not rig_tip:
+		dive_tilt -= rad_to_deg(HunterAnim.DIVE_PITCH)     # (HunterAnim's AIR_TILT pitches the clips that far already)
 	glide_tilt = float(air.get("glide_tilt", GLIDE_TILT))
-	glide_bank = float(air.get("glide_bank", GLIDE_BANK))
+	glide_bank = 0.0
 
 func step(s: Dictionary, dt: float) -> void:
 	var face := float(s.get("face", 0.0))
