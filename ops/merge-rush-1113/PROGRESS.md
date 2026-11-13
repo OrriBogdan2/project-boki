@@ -64,3 +64,5 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
 4. Family candidates not archived (sibling merged but content differs, needs a look): dredge-auto-rebased,
    garden-hub-theme, grimble-stretch-v2-rebased, npc-hob-guide-1111-r2, sfx-boki-voices-3, sfx-garden-games-3,
    ui-void-masks-v3, vex-daze-rebased, vex-rmb-terrain-rebased (+10 big old-base -rebased branches).
+- Final batch C gate (main ca96e707c5): full suite both trees, branch-only reds rerun at low load: race and
+  drop-launch are red on main too; 10 checks fixed vs main; import 0 parse errors; health --strict OK.
