@@ -1,0 +1,8 @@
+{
+ "group": "egg",
+ "name": "Eggs nearing their hatch",
+ "script": "tools/gen_sfx_egg.py",
+ "sounds": {"egg_knock": "step", "egg_crack": "step", "egg_ready": "boki"},
+ "signature": [],
+ "replaces": []
+}
