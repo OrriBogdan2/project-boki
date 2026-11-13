@@ -23,6 +23,9 @@ const SLICE := ["archer", "juggernaut", "gunslinger", "ashwick"]
 ## Moves whose clip hands back to the legs as the kit's movement hold lifts (tools/vex_anim_time_check.gd E and R rows):
 ## a longer blend-out would keep the legs in the clip after she may walk, so theirs stays at FADE_LOCO.
 const HOLD_BOUND := ["gunslinger_e", "gunslinger_x"]
+## A blend-in this short is a deliberate snap (hem.json: the release shows in full; `--clip-check` asserts it
+## over within 0.05 s of the spawn), so the gap does not ask it longer.
+const SNAP_FADE := 0.04
 const WARM := 45                # frames before sampling: the gait and sway settled
 
 var bad := 0
@@ -86,7 +89,7 @@ func _hero(id: String, dd: Dictionary) -> void:
 		print("POP %s %s | %.3f %s / %.3f %s | %.3f %s / %.3f %s | %.2f / %.2f -> %.2f / %.2f" % [id, km,
 				gaps[0][0], gaps[0][1], gaps[1][0], gaps[1][1], gaps[2][0], gaps[2][1], gaps[3][0], gaps[3][1],
 				fade_in, fade_out, need_in, need_out])
-		if fade_in < need_in - 0.005 or fade_out < need_out - 0.005:
+		if (fade_in < need_in - 0.005 and fade_in > SNAP_FADE) or fade_out < need_out - 0.005:
 			short.append("%s fade %.2f/%.2f" % [km, maxf(need_in, fade_in), maxf(need_out, fade_out)])
 	ok(short.is_empty(), "%s: every move's blend is as long as its cast gap asks, inside its first key and the caps "
 			% id + "(short: %s)" % str(short))

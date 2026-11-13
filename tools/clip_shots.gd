@@ -1,9 +1,14 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
-## [--carry] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the game's renderer
-## (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch
-## a hit mid-run in <dir>/flinch/ (--heavy: stagger), with --cast a move pressed on the run (or standing,
-## --cast-speed=0) in <dir>/cast_<kmove>/. Needs a renderer. ffmpeg makes the GIFs and sheets.
+## [--carry [--heart]] [--cc] [--cast=<kmove> [--cast-speed=<m/s>]]: a Hero's hand-keyed clips frame by frame in the
+## game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in
+## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
+## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
+## --cast-speed=0) in <dir>/cast_<kmove>/.
+## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
+## Needs a renderer. ffmpeg makes the GIFs and sheets.
+
+const ClipCheck := preload("res://tools/clip_check.gd")
 
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -41,6 +46,11 @@ func run(main: Node) -> void:
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
+	if OS.get_cmdline_user_args().has("--drop"):
+		await _drop_lineup(out)
+		print("CLIP_SHOTS_DONE")
+		tree.quit()
+		return
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)
@@ -100,6 +110,10 @@ func run(main: Node) -> void:
 			await _grab(dir.path_join("f%03d.png" % i))
 	if OS.get_cmdline_user_args().has("--flinch"):
 		await _flinch(model, sync, fps, out)
+	if OS.get_cmdline_user_args().has("--cc"):
+		await tree.create_timer(1.5).timeout       # (the title's logo fades in real time, not in frames)
+		for key in ["stun", "rooted", "gnd"]:
+			await _cc(model, sync, fps, out, key)
 	var cast_speed := 4.0
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--cast-speed="):
@@ -163,8 +177,13 @@ func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
 	var dir := out.path_join("flinch")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var heavy := OS.get_cmdline_user_args().has("--heavy")
+	var hit_k := Oomph.hit_strength(0.03, 2.0)      # a chip hit
+	if OS.get_cmdline_user_args().has("--solid"):
+		hit_k = Oomph.hit_strength(0.09, 8.0)
+	if heavy:
+		hit_k = Oomph.HEAVY_FLINCH
 	var s := {"vel": Vector3(0, 0, -4.0), "face": model.rotation.y, "grounded": true, "hit_t": 99.0,
-			"hit_k": Oomph.HEAVY_FLINCH if heavy else 1.0, "hit_dir": Vector2(0, -1)}
+			"hit_k": hit_k, "hit_dir": Vector2(0, -1)}
 	model.set_meta(WardenClips.STATE, s)
 	for k in 30:
 		sync.call("_process", 1.0 / 30.0)
@@ -173,6 +192,57 @@ func _flinch(model: Node3D, sync: Node, fps: float, out: String) -> void:
 		s["hit_t"] = t - 0.2 if t >= 0.2 else 99.0
 		sync.call("_process", 1.0 / fps)
 		await _grab(dir.path_join("f%03d.png" % i))
+
+## --cc: standing, state `key` on from 0.2 s to 1.0 s; <dir>/cc_<key>/f###.png every 1/fps s for 1.2 s.
+func _cc(model: Node3D, sync: Node, fps: float, out: String, key: String) -> void:
+	var dir := out.path_join("cc_" + key)
+	DirAccess.make_dir_recursive_absolute(dir)
+	var s := {"vel": Vector3.ZERO, "face": model.rotation.y, "grounded": true}
+	model.set_meta(WardenClips.STATE, s)
+	for k in 30:
+		sync.call("_process", 1.0 / 30.0)
+	for i in int(fps * 1.2):
+		var t := float(i) / fps
+		s[key] = t >= 0.2 and t < 1.0
+		sync.call("_process", 1.0 / fps)
+		await _grab(dir.path_join("f%03d.png" % i))
+
+## --drop: the 12 Heroes 1.6 m apart in each drop pose: aboard the rocket, the skydive, banking into a right steer,
+## and a beat after the glider opens; side-on, and from behind and above (as the skydive camera sees them).
+func _drop_lineup(out: String) -> void:
+	var dir := out.path_join("drop")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var ids: Array = ClipCheck.OWN_MODELS.keys()
+	var models: Array = []
+	for i in ids.size():
+		var m := Models.hunter(Arch.weight(ids[i]), Data.TEAM_COLORS[0], Arch.signature(ids[i]), "",
+				PlayerLook.neutral(), ids[i])
+		m.set_meta("anim_seed", 1)
+		holder.add_child(m)
+		m.position = Vector3((i - (ids.size() - 1) * 0.5) * 1.6, 1.2, 0.0)
+		m.get_node("Warden/Sync").set_process(false)
+		models.append(m)
+	for k in 120:
+		await tree.process_frame       # (past the title: 12 Heroes load slower than one)
+	var poses := {"ride": {"rocket": true}, "skydive": {"skydive": true}, "bank": {"skydive": true, "bank": true},
+		"open": {"gliding": true}}
+	var views := {"side": [PI / 2.0, Vector3(0.0, 3.0, 30.0), 40.0], "behind": [0.0, Vector3(0.0, 14.0, 22.0), 48.0]}
+	for v in views:
+		var face := float(views[v][0])
+		cam.position = views[v][1]
+		cam.fov = float(views[v][2])
+		cam.look_at(Vector3(0, 1.6, 0))
+		for nm in poses:
+			var s: Dictionary = {"vel": Vector3(0, -13.0, 0), "face": face, "grounded": false}
+			s.merge(poses[nm], true)
+			if s.has("bank"):      # (steering right of the facing)
+				s["vel"] = Vector3(cos(face), 0.0, -sin(face)) * Hunter.DIVE_SPEED + Vector3(0, -13.0, 0)
+			for k in 40:
+				for m in models:
+					(m as Node3D).rotation.y = face
+					(m as Node3D).set_meta(WardenClips.STATE, s)
+					(m as Node3D).get_node("Warden/Sync").call("_process", 1.0 / 30.0)
+			await _grab(dir.path_join("%s_%s.png" % [nm, v]))
 
 ## --moods: one frame of each face a Hero's mood data draws (WardenMood), <dir>/moods/<mood>.png.
 func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
@@ -192,21 +262,29 @@ func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
 	await _grab(dir.path_join("flare.png"))
 	model.set_meta(WardenMood.FLARE, false)
 
-## --carry: the rescue carry on the walk (<dir>/carry/fNN.png, 8 frames), a ball at the socket for the Boki.
+## --carry: the rescue carry on the walk (<dir>/carry/fNN.png, 8 frames), a ball at the socket for the Boki; with
+## --heart the Heartspark carry on the run instead, the ball at the held mote.
 func _carry(model: Node3D, sync: Node, out: String) -> void:
 	var dir := out.path_join("carry")
 	DirAccess.make_dir_recursive_absolute(dir)
+	var heart := OS.get_cmdline_user_args().has("--heart")
 	var ball := MeshInstance3D.new()
 	ball.mesh = SphereMesh.new()
-	ball.scale = Vector3.ONE * 0.3
+	ball.scale = Vector3.ONE * (0.15 if heart else 0.3)
 	holder.add_child(ball)
-	var state := {"vel": Vector3(0, 0, -3.6), "face": 0.0, "grounded": true, "kmove": WardenCarry.MOVE, "kmove_t": 1.0}
+	(sync.get("clips") as WardenClips).force = {}      # (the state plays, not the clip the shots forced)
+	var state := {"vel": Vector3(0, 0, -3.6), "face": 0.0, "grounded": true}
+	if heart:
+		state["heart"] = true
+	else:
+		state["kmove"] = WardenCarry.MOVE
+		state["kmove_t"] = 1.0
 	model.set_meta(WardenClips.STATE, state)
 	for k in 30:
 		sync.call("_process", 1.0 / 30.0)
 	for i in 8:
 		for k in 4:
 			sync.call("_process", 1.0 / 30.0)
-		ball.global_position = model.get_meta(WardenCarry.SOCKET, Vector3.ZERO)
+		ball.global_position = model.get_meta(WardenCarry.MOTE if heart else WardenCarry.SOCKET, Vector3.ZERO)
 		await _grab(dir.path_join("f%02d.png" % i))
 	ball.queue_free()

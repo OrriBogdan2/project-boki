@@ -372,7 +372,7 @@ func _ashwick_item66() -> void:
 		"item66_lmb_held_strip",
 		"Cinder (item 66), LMB held throughout: the lance roaring; lift-off, the stream goes out; flying, no"
 			+ " flame and no pilot, the carpet behind; still flying, still held; the frame after the flight, the"
-			+ " cyan pilot lights; the lance roars again",
+			+ " gold pilot lights; the lance roars again",
 		[0.6, 0.8, 1.5, 2.4, 2.56, 2.95]
 	)
 	await _go(3.1, held, marks)
