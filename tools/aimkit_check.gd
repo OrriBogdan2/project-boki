@@ -110,8 +110,10 @@ func _all_shapes(caster: Hunter, k: float, other: Hunter, all := false) -> void:
 	AimKit.lane(caster, "lane", a.merged(lp))
 	AimKit.dotted(caster, "dotted", a.merged({"len": 9.0}))
 	AimKit.vee(caster, "vee", a.merged({"k": k, "glint": 0.4}))
-	AimKit.cone(caster, "cone", a.merged({"from": other.pos, "dir": Vector2(-1, 0), "len": 6.0, "deg": 100.0, "fill": k}))
-	AimKit.circle(caster, "circle", a.merged({"r": 1.35, "ticks": true, "star": true, "fill": k, "pointer": Vector2(0, 1)}))
+	var cone := {"from": other.pos, "dir": Vector2(-1, 0), "len": 6.0, "deg": 100.0, "fill": k}
+	AimKit.cone(caster, "cone", a.merged(cone))
+	var disc := {"r": 1.35, "ticks": true, "star": true, "fill": k, "pointer": Vector2(0, 1)}
+	AimKit.circle(caster, "circle", a.merged(disc))
 	AimKit.sweet(caster, "sweet", a.merged({"self": true, "k": k}))
 	AimKit.arc_wall(caster, "arc", a)
 	AimKit.swap(caster, "swap", a.merged({"fill": k}))
@@ -215,10 +217,12 @@ func _net(m: Match, caster: Hunter, other: Hunter) -> void:
 		var theirs := AimKit.entry(other, id)
 		var off := _unlike(mine, theirs)
 		ok("net %s: shows on the other game as the caster drew it" % String(mine.get("kind", id)), off == "", off)
-	ok("net: a received one outlives its keep by AimNet.LAG", is_equal_approx(float(AimKit.entry(other, "lane")["keep"]),
+	var keep := float(AimKit.entry(other, "lane")["keep"])
+	ok("net: a received one outlives its keep by AimNet.LAG", is_equal_approx(keep,
 		float(AimKit.entry(caster, "lane")["keep"]) + AimNet.LAG))
 	layer.rebuild()
-	ok("net: both sets draw, the caster's and the remote copy's", layer.built == 2 * IDS.size(), "built %d" % layer.built)
+	ok("net: both sets draw, the caster's and the remote copy's", layer.built == 2 * IDS.size(),
+		"built %d" % layer.built)
 	AimNet.sent_log.clear()
 	AimKit.hide(caster, "lane")
 	layer.rebuild()
@@ -229,7 +233,8 @@ func _net(m: Match, caster: Hunter, other: Hunter) -> void:
 	ok("net: the drop takes it off the other game", not AimKit.shown(other, "lane") and AimKit.shown(other, "cone"))
 	AimNet.sent_log.clear()
 	AimKit.circle(caster, "one", {"self": true, "all": true})
-	AimKit.circle(caster, "one", {"self": true, "all": true, "r": 3.0, "dur": 1.0})  # replaced inside the gap, never again
+	# replaced inside the gap, never again
+	AimKit.circle(caster, "one", {"self": true, "all": true, "r": 3.0, "dur": 1.0})
 	m.time += AimNet.SEND_GAP
 	layer.rebuild()
 	var one: Array = AimNet.sent_log.filter(func(x): return x.size() == 4 and String(x[2]) == "one")
