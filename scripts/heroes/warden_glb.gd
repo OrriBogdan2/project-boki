@@ -212,6 +212,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
 	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
+	if sync.wall:
+		sync.wall.heavy = Arch.weight(arch) == "heavy"
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
@@ -927,6 +929,7 @@ class Sync extends Node:
 	var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
+	var wall: WardenWall          # the plant and push of a wall kick or bounce over the clips, or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
@@ -983,6 +986,7 @@ class Sync extends Node:
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		flinch = WardenFlinch.make(root, skel) if clips else null
 		aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
+		wall = WardenWall.make(root, skel) if clips else null
 		if clips:
 			_look_pose()
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
@@ -1095,6 +1099,8 @@ class Sync extends Node:
 		if sway:
 			sway.step(dt)
 		aim.step(1.0 - w)
+		if wall:
+			wall.step(dt)
 		if w < 1.0:
 			var inv := skel.global_transform
 			for h in hand_nodes:
