@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. the flow: hold 0.4s commits, then 4s runs on its own (let go), you are rooted and cannot shoot
 ##   3. one active Boki: the captured one is only a capsule in the box, never in the world
 ##   4. interruptions: crowd control, Space (no hop) and a dash cancel it, plain damage does not; the daze timer waits
-##   5. the box: capacity 3 from the rules, shown on the HUD, a full box blocks, Release frees a place
+##   5. the box: the carry-out slot (1) from the rules, shown on the HUD, a full slot blocks, Release frees it
 ##   6. your own Boki does not finish a dazed wild Boki
 ##   7. the Field Book: logged on sight with a place; the v3 save migration
 ##   8. the net: rivals see and hear the scan (events, a timeout when nobody confirms)
@@ -189,7 +189,8 @@ func _interrupts() -> void:
 			"dash": P.inp["dash"] = true
 			"jump": P.inp["jump"] = true
 			"damage": P.hurt(8.0, m.hunters[1])
-			"knock": P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
+			"knock":         # past the second Boki's knockback resist (its carry passive is on)
+				P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass() / (1.0 - P.owner_stat("knockback_resist")))
 			"nudge": P.impulse(Vector2(Capture.HARD_KNOCK - 3.0, 0) * P.mass())
 		run_for(0.1)
 		P.inp["dash"] = false
@@ -231,12 +232,12 @@ func _box() -> void:
 	_fresh()
 	var P := m.player
 	var cap := Capture.box_cap()
-	ok(cap == int(Content.rules("capture")["box_capacity"]) and cap == 3, "the box holds %d (from content/rules/capture.json)" % cap)
+	ok(cap == int(Content.rules("capture")["carry_out"]) and cap == 1, "the carry-out slot holds %d (from content/rules/capture.json)" % cap)
 	for i in cap:
 		P.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	var k := wild()
-	ok(Capture.block_reason(P, k).contains("Box full"), "a full box blocks the scan (\"%s\")" % Capture.block_reason(P, k))
-	ok(CaptureHud.box_text(P) == "Box 3/3", "the HUD shows the box (%s)" % CaptureHud.box_text(P))
+	ok(Capture.block_reason(P, k).contains("Carry-out full"), "a full carry-out slot blocks the scan (\"%s\")" % Capture.block_reason(P, k))
+	ok(CaptureHud.box_text(P) == "Carry-out 1/1", "the HUD shows the slot (%s)" % CaptureHud.box_text(P))
 	begin(P)
 	ok(not Capture.active(P) and Capture.state(P).is_empty(), "...holding the key does not start one")
 	ok(Capture.release(m, P, 0) and P.caught.size() == cap - 1, "Release lets a capsule go (%d left)" % P.caught.size())

@@ -22,6 +22,7 @@ static var _rules := {}
 var m: Match
 var w: World
 var areas: Array = []                 # {kind, def, y, centre, cells: Array[Vector2i], poly, box, mat, t, phase}
+var kinds: Array[String] = []         # the hazard kinds this map has, in the order its areas were added
 var cell := PackedInt32Array()        # per tile: area index + 1, 0 = no hazard
 var state := {}                       # hunter instance id -> {area, safe, breath, tick, fx}
 var hint_t := 0.0
@@ -81,6 +82,8 @@ func _add_area(kind: String, pts: Array) -> void:
 	var A := {"kind": kind, "def": def, "y": y, "centre": Vector3(c.x, y, c.y), "cells": cells,
 		"poly": poly, "box": box,
 		"t": float(def["effect"].get("every_s", 0.0)), "phase": "idle"}
+	if kind not in kinds:
+		kinds.append(kind)
 	A["mat"] = _surface(poly, box.grow(SDF_PAD), y, def["look"])
 	if kind == "bramble":
 		_thorns(cells, y)
@@ -150,13 +153,20 @@ func area_at(p: Vector3) -> int:
 		return -1
 	return a
 
-## Whether h's active Boki walks this kind of ground safely (its type or its species is a counter).
+## Whether h's active Boki walks this kind of ground safely.
 func guards(h: Hunter, kind: String) -> bool:
 	var k := h.kin as Kin
-	if k == null or k.state == "downed":
-		return false
+	return k != null and k.state != "downed" and counters(k, kind)
+
+## Whether this Boki's type or species is a counter to the hazard kind.
+static func counters(k: Kin, kind: String) -> bool:
 	var C: Dictionary = kind_def(kind).get("counter", {})
 	return String(k.sp.get("theme", "")) in C.get("themes", []) or k.species in C.get("kin", [])
+
+## The kind of hazard h stands in ("" on plain ground).
+func kind_under(h: Hunter) -> String:
+	var a := int(state.get(h.get_instance_id(), {}).get("area", -1))
+	return String(areas[a]["kind"]) if a >= 0 else ""
 
 ## Footing at p for h: low on an ice sheet unless its Boki is a frost one.
 func grip(p: Vector3, h: Hunter) -> float:

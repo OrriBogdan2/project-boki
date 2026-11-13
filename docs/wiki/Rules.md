@@ -641,8 +641,12 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | scan_s | 4 |
 | range | 3.5 |
 | cancel_range | 5 |
-| box_capacity | 3 |
-| box_capacity_doc | How many captured Boki (capsules) a hunter can carry in the run box (Hunter.caught). Full: a new scan is blocked until one is released. |
+| carry_out | 1 |
+| carry_out_doc | Carry-out slots (owner 11-11, carry 2 in, 1 extra out): Boki claimed in the match (scanned wild, or taken from a deathbox) a hunter can ride home in Hunter.caught. No passive, no summon. Full: a scan is blocked and the kin points to a teammate with room. |
+| stolen | 1 |
+| stolen_doc | Stolen-Boki slots: other hunters' own Boki (lost_from set) a hunter can hold in Hunter.caught. |
+| wisp_cap | 4 |
+| wisp_cap_doc | Most Boki one hunter holds at once: lead + second + carry-out + stolen. |
 | noise_every_s | 0.5 |
 | hear_range | 26 |
 | rise_pitch | [0.8, 1.6] |

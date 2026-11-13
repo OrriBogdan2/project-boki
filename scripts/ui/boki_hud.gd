@@ -196,8 +196,38 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)
 		mode = "RESTING"
 	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
+	H._ctext(Vector2(gr.get_center().x, gr.position.y - 29.0), "LEAD", 8, Color(H.INK, 0.9), H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
+	return slots_strip(H, p, x + 42.0, y, s)
+
+## The second Boki (its swap key, the swap cooldown, CARRY ON while its passive counts) and the carry-out slot
+## (claimed Boki riding home, plus a stolen one). Returns the x where the next badge starts.
+static func slots_strip(H, p: Hunter, x: float, y: float, s: float) -> float:
+	var b: Kin = p.kin2
+	if b != null and is_instance_valid(b) and not b.dead:
+		var br := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
+		var cd := float(Content.rules("kin_ai").get("swap_cooldown", 3.0))
+		H._ab_slot("swap", br, "swap", Settings.key_cap("swap_kin"), b.sp["color"], p.swap_cd / cd, p.swap_cd,
+			p.swap_cd <= 0.0 and b.hp > 0.0)
+		var on := KinSlots.second_on(p)
+		H._ctext(Vector2(br.get_center().x, br.position.y - 17.0), "CARRY ON" if on else "CARRY OFF", 8,
+			Color(b.sp["color"], 0.95) if on else Color(H.INK, 0.4), H.big)
+		H._ctext(Vector2(br.get_center().x, br.position.y - 5.0), String(b.rec.get("name", "")).to_upper().left(8), 8,
+			Color(H.INK, 0.8), H.big)
+		H._ctext(Vector2(br.get_center().x, br.position.y - 29.0), "SECOND", 8, Color(H.INK, 0.9), H.big)
+		x += 42.0
+	var orr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
+	var full := not Capture.room(p)
+	H._rounded(orr, Color(0.05, 0.06, 0.09, 0.7), 8)
+	var st := Capture.stolen_count(p)
+	var paw := Color("ffb0d0") if p.caught.size() > st else Color(H.INK, 0.35)
+	Icons.draw(H.c, "paw", orr.get_center() + Vector2(0, -3), 8.0, paw)
+	H._ctext(orr.get_center() + Vector2(0, 13), "%d/%d" % [p.caught.size() - st, Capture.box_cap()], 9,
+		Color("ffb08a") if full else Color(H.INK, 0.8), H.big)
+	if st > 0:
+		H._ctext(Vector2(orr.get_center().x, orr.position.y - 17.0), "+%d STOLEN" % st, 8, Color("ffd23f"), H.big)
+	H._ctext(Vector2(orr.get_center().x, orr.position.y - 5.0), "CARRY-OUT", 8, Color(H.INK, 0.9), H.big)
 	return x + 42.0
 
 ## The flick wheel, drawn round where the mouse was when you started holding G. Four wedges with a label and a
