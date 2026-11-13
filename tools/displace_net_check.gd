@@ -401,6 +401,11 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
+	if m == null:        # what the guest lacked (a GPU worker's guest.log is all we see of it)
+		print("%s guest: no match after %.0f s: %s, peers seen %s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0,
+			"still building" if building else "no start heard", Net.peers.keys()])
+	else:
+		print("%s guest: match up after %.1f s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0])
 	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
 		await _run(DT)
 	main.get_tree().quit(0)
@@ -417,6 +422,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		"start":
 			if m == null and not building:
 				building = true
+				print("%s guest: start heard" % tag)
 				_build(data["d"])
 		"done": stop = true
 		"place":
