@@ -133,5 +133,5 @@ func _results_name_line(main: Node) -> void:
 	var player := String(Save.d.get("name", "Hunter"))
 	ok(texts.has("%s made it out" % player.substr(0, 16)), "results: the headline carries the name '%s'" % player)
 	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
-	ok(texts.has("FOES DOWNED"), "results: the strip says Foes downed")
+	ok(texts.has("HUNTERS DOWNED"), "results: the strip says Hunters downed (main's wording)")
 	screen.queue_free()
