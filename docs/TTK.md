@@ -1,6 +1,8 @@
 # Time to knock against the source
 
 PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (21 of 38 rows today); that is the finding, not a flake. Cinder and Neve were set from the source (ext/parity-ttk-cinder-neve, pinned in content/rules/kit_parity.json); the other outliers are listed with their causes as suggestions.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (28 of 38 rows today); that is the finding, not a flake. No number was tuned; the outliers are listed with their causes as suggestions.
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --ttk-check` fights each Hunter against an idle standard target in a live match and works the same fight out for the source Hunter from `supervive_kits.md` (briefs/supervive-data on origin/ext/agent-briefs). `--ttk-check --write` rewrites the tables below. The check exits 1 while any row is out of the bar without an override (20 of 38 rows today); that is the finding, not a flake. Tuned so far: Sparkle's and Sable's damage (ext/parity-ttk-sparkle-sable-lace, pinned in content/rules/kit_parity.json); the other outliers are listed with their causes as suggestions. Rows of Hunters not tuned here moved since 11-09 with other changes on main.
 
 **Method**
 - Target: full health and full armour. Ours 154 health (mean of the 12), armour 339 (x2.2) and the game's 20% reduction. Source 1285 Base HP (mean of the 12, supervive_physics.md) and Common armour, 20% reduction (docs/SUPERVIVE_DATA.md section 3). Both armours outlast the health, so only the 20% counts. Void, Oath and Shiv tooltips were read at level 15, so their source target is the level 15 mean (1285 + 14 x 77.1); a footage row read at level N faces the level N mean (1285 + (N - 1) x 77.1).
@@ -8,6 +10,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 - Rank 0 is the unspent rank (slot_lv 1); max is rank 3 for ours and every listed upgrade for the source (a "x2" upgrade counts for both tiers it covers, charges included). LMB has no ranks, so (a) is the same at both.
 - Source shots land at 0.00 s and every interval after; ours includes wind-ups, flight time and recoveries.
 - Bar: ours / source time to knock inside 0.8 to 1.25. Below 1 means ours knocks faster. An outlier passes only with an owner override from DECISIONS in `OVERRIDES` (none yet: line 162, Motley "loses ~15% held-fire DPS, no compensation buff", explains 15% of a 1.9x gap, so it does not cover Motley).
+- Gil has no source hero. His bar is the roster median: the median source time of the same row (LMB or combo, same rank) across the Hunters that have one. He gets no per-cast share rows. His combo varies by a few tenths of a second between runs, because the Grab Bag draws vary.
 
 **Footage LMB (Lace, Meeko, Tenzo, Grimble, Neve).** `supervive_kits.md` has no LMB damage for these five, so their LMB row is read from the floating damage numbers in the hero-ref footage (origin/ext/hero-ref-footage, frames named below; trust order puts it under the tooltips, which have no number to beat it). The damage is the source's own number at the level the clip shows, against the mean Hunter at that level, the same conversion as the level 15 tooltips. Interval is the card cooldown where the hits agree with it, else the hit spacing in the footage.
 
@@ -62,6 +65,43 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | dredge (Kingpin) | LMB rank max | 7.38 | 3.50 | 2.11 | FAIL |
 | rimewright (Celeste) | LMB rank 0 | 3.35 | 13.40 | 0.25 | FAIL |
 | rimewright (Celeste) | LMB rank max | 3.35 | 13.40 | 0.25 | FAIL |
+| ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
+| ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
+| ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
+| ashwick (Felix) | combo rank max | 1.83 | 3.00 | 0.61 | FAIL |
+| mage (Joule) | LMB rank 0 | 10.42 | 13.60 | 0.77 | FAIL |
+| mage (Joule) | LMB rank max | 10.42 | 13.60 | 0.77 | FAIL |
+| mage (Joule) | combo rank 0 | 1.53 | 9.00 | 0.17 | FAIL |
+| mage (Joule) | combo rank max | 1.27 | 6.40 | 0.20 | FAIL |
+| mage (Joule) | LMB rank 0 | 13.67 | 13.60 | 1.00 | ok |
+| mage (Joule) | LMB rank max | 13.67 | 13.60 | 1.00 | ok |
+| mage (Joule) | combo rank 0 | 2.68 | 9.00 | 0.30 | FAIL |
+| bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
+| bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
+| bulwark (Oath) | combo rank 0 | 4.08 | 5.85 | 0.70 | FAIL |
+| bulwark (Oath) | combo rank max | 4.18 | 5.00 | 0.84 | ok |
+| thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
+| thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
+| thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
+| thief (Shiv) | combo rank max | 4.22 | 4.95 | 0.85 | ok |
+| ostra (Void) | LMB rank 0 | 12.62 | 6.60 | 1.91 | FAIL |
+| ostra (Void) | LMB rank max | 12.62 | 6.60 | 1.91 | FAIL |
+| ostra (Void) | combo rank 0 | 10.33 | 4.80 | 2.15 | FAIL |
+| ostra (Void) | combo rank max | 8.37 | 4.80 | 1.74 | FAIL |
+| archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | ok |
+| archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | ok |
+| tender (Elluna) | LMB rank 0 | 7.10 | 10.40 | 0.68 | FAIL |
+| tender (Elluna) | LMB rank max | 7.10 | 10.40 | 0.68 | FAIL |
+| dolm (Tetra) | LMB rank 0 | 13.30 | 11.40 | 1.17 | ok |
+| dolm (Tetra) | LMB rank max | 13.30 | 11.40 | 1.17 | ok |
+| dredge (Kingpin) | LMB rank 0 | 9.43 | 3.50 | 2.70 | FAIL |
+| dredge (Kingpin) | LMB rank max | 9.43 | 3.50 | 2.70 | FAIL |
+| rimewright (Celeste) | LMB rank 0 | 2.93 | 13.40 | 0.22 | FAIL |
+| rimewright (Celeste) | LMB rank max | 2.93 | 13.40 | 0.22 | FAIL |
+| gil (roster median) | LMB rank 0 | 6.43 | 6.60 | 0.97 | ok |
+| gil (roster median) | LMB rank max | 6.43 | 6.60 | 0.97 | ok |
+| gil (roster median) | combo rank 0 | 5.43 | 4.95 | 1.10 | ok |
+| gil (roster median) | combo rank max | 5.03 | 4.95 | 1.02 | ok |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
@@ -76,8 +116,14 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | mage (Joule) | rmb | 0.117 | 0.104 | 1.13 |
 | mage (Joule) | dash | 0.130 | 0.119 | 1.09 |
 | mage (Joule) | e | 0.130 | 0.126 | 1.03 |
+| ashwick (Felix) | rmb | 0.131 | 0.082 | 1.59 |
+| ashwick (Felix) | dash | 0.104 | 0.148 | 0.70 |
+| ashwick (Felix) | e | 0.045 | 0.060 | 0.76 |
+| mage (Joule) | rmb | 0.104 | 0.104 | 1.00 |
+| mage (Joule) | dash | 0.119 | 0.119 | 1.00 |
+| mage (Joule) | e | 0.126 | 0.126 | 1.00 |
 | bulwark (Oath) | dash | 0.156 | 0.154 | 1.01 |
-| thief (Shiv) | rmb | 0.032 | 0.019 | 1.67 |
+| thief (Shiv) | rmb | 0.019 | 0.019 | 1.00 |
 | ostra (Void) | rmb | 0.062 | 0.117 | 0.53 |
 | ostra (Void) | e | 0.091 | 0.154 | 0.59 |
 | rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
@@ -111,6 +157,8 @@ Out of the bar after the slice, each with the number that puts it there: **Kael*
 | Vex (Ghost) | LMB 3.25x slow; combo max 0.78 | Per round the shares match (6 of 154 = 3.9%, 51 of 1285 = 4.0%), but ours fires every 0.12 s (wiki and weapon sheet say 0.08 s; our 5 fps footage says about 0.14 s) and `sustain_loss` 0.5 halves every round after the tenth, where the source's first 10 rounds are the extra ones and rounds 11 to 30 stay at base. Our grenade matches (1.11x), the E beam is 1.49x. | Drop `sustain_loss` so rounds 11+ keep full damage and the first 10 get a bonus; settle 0.08 vs 0.12 s from footage first. |
 | Kael (Brall) | LMB 0.65; combo 0.45 and 0.16 | Slash 8 is 5.2% of our target against 43 = 3.3% (1.56x, cadence 0.34 vs 0.35 s matches). Rampage hits 9 + tip 18 = 17.5% of the target against Flame Step 49 = 3.8% (4.6x); Warchain 5.2% vs 2.3% (2.2x); Smash 16.9% vs 10.1% (1.67x). Max rank adds +40% Smash and a shorter dash recharge on top. | Slash 8 -> 5, Rampage hit 9 / tip 18 -> about 2 / 4 (the tip doubling is ours), Warchain hit 8 -> 3.6, Smash 26 -> 15. |
 | Sparkle (Joule) | LMB 0.77; combo max 0.64 | Bolt 12 every 0.648 s is 12.0% a second against 90 every 0.8 s = 8.8% (1.37x); the owner set 0.648 s (items 70 and 116 in docs/heroes/mage.md, not in DECISIONS). Abilities are at parity (1.03 to 1.13x), so max rank (+90% spear, +100% dash, +50% strike on the source side vs our +15% and +30% steps) is where the combo drifts. | Bolt 12 -> 9 keeps 0.648 s (owner) at parity; ask the owner whether item 116 covers the damage. |
+| Cinder (Felix) | LMB 0.78, 0.76; combo 0.76, 0.61 | Stream 25.6% of the target a second vs 20.1% (258 of 1285). Cinder Shot 13.1% vs 8.2% (1.59x); the dash 0.70x and the cloak 0.76x are under. | Stream damage x0.8; Cinder Shot 20 -> 13; dash x1.4, cloak x1.3. |
+| Sparkle (Joule) | combo 0.30, 0.20 (LMB 1.00 and every ability 1.00) | Traced 11-12 at rank 0: the Rod's orb gives the Wirerun back at 1.17 s, and the run at 1.27 s goes through a full-Static target, so it hits double and Blowouts: 64 of 154 health in one pass, 42% of the knock. With the orb off: 0.90 / 1.03. The source has the same loop but no number for its payoff, and the source side leaves the loop out. A loop modelled with our payoff as a stand-in would be circular, and since source casts land at once it pushes max rank to about 1.7. Every slot is at the source share, so no data change. | Owner: a number for the source payoff, or an override for these two rows. |
 | Albert (Oath) | LMB 0.73; combo 0.71, 0.73 | Hammer 12 is 7.8% against 192 of 2365 = 8.1% (match). Ours alternates throw and recall hits faster than 0.45 s (about 3.3 hits a second against 2.2); if the source recall hits as well, as the tooltip's "recall (192 dmg)" may mean, the source is 3.4 s and the ratio 1.45, still out. Spin Dash is at parity (1.01x). | Settle whether the source recall deals damage, then set throw_rate or recall_dmg. |
 | Meeko (Elluna) | LMB 0.68 | Lantern 8 is 5.2% of our target every 0.4 s against 64 of 1902 = 3.4% (rising to 4.9% at 93); our Kindle ramp runs on top. | Lantern 8 -> about 5 (64 / 1902 x 154 = 5.2), ramp capped at +45% like the source. |
 | Grimble (Kingpin) | LMB 2.70 | A full volley is 7 x 2 = 14 = 9.1% of our target against 339 of 1902 = 17.8% (0.51x), and ours takes 9.4 s where 14 full volleys at 0.5 s (192.5 raw after the 20%) would be 6.5 s, so not every pellet lands at 1.5 m (`pellet_floor` 0.457). | Pellet 2 -> about 3.9 (339 / 7 / 1902 x 154), then check how many pellets land point-blank. |
@@ -118,11 +166,16 @@ Out of the bar after the slice, each with the number that puts it there: **Kael*
 | Kael (Brall) | LMB 0.65; combo 0.55 and 0.59 | Slash 8 is 5.2% of our target against 43 = 3.3% (1.56x, cadence 0.34 vs 0.35 s matches). Rampage now lands only its pass hit 9 = 5.8% against Flame Step 49 = 3.8% (1.53x; the tip 18 misses a target 1.5 m ahead since main moved on from 11-09, data unchanged); Warchain 5.2% vs 2.3% (2.2x); Smash 16.9% vs 10.1% (1.67x). Max rank adds +40% Smash and a shorter dash recharge on top. | Slash 8 -> 5, Rampage hit 9 / tip 18 -> about 2 / 4 (the tip doubling is ours), Warchain hit 8 -> 3.6, Smash 26 -> 15. |
 | Sparkle (Joule) | LMB 0.77; combo 0.17, 0.20 (were 0.81, 0.64 on 11-09) | Bolt 12 every 0.648 s is 12.0% a second against 90 every 0.8 s = 8.8% (1.37x); the owner set 0.648 s (items 70 and 116 in docs/heroes/mage.md, not in DECISIONS). Abilities are at parity per cast (1.03 to 1.13x), yet the combo now knocks in 1.53 / 1.27 s against 9.00 / 6.40: something outside the three casts (main drift since 11-09, not found here) adds most of the damage. | Bolt 12 -> 9 keeps 0.648 s (owner) at parity; ask the owner whether item 116 covers the damage. |
 | Albert (Oath) | LMB 0.72; combo 0.70 (max 0.84 is now inside) | Hammer 12 is 7.8% against 192 of 2365 = 8.1% (match). Ours alternates throw and recall hits faster than 0.45 s (about 3.3 hits a second against 2.2); if the source recall hits as well, as the tooltip's "recall (192 dmg)" may mean, the source is 3.4 s and the ratio 1.45, still out. Spin Dash is at parity (1.01x). | Settle whether the source recall deals damage, then set throw_rate or recall_dmg. |
+| Gil (roster median) | before 11-12: LMB 1.32; combo 1.38, 1.23 | Damage per hit: the swordfish chain 7 / 7 / 11 at 0.32 s was 26 a second raw, too little for a held melee chain. The cadence and chain shape were fine. | Done 11-12: chain x1.3 to 9.2 / 9.2 / 14.5. LMB 0.97, combo 1.10 to 1.15 and 1.02 to 1.08 (two runs). |
 | Motley (Void) | LMB 1.91; combo 2.15, 1.74 | Orb 9 is 5.8% of the target against 263 of 2365 = 11.1% (0.53x). Spear 0.53x, bomb 0.59x. The whole kit sits about half the source. Held fire never charges (owner item 60, DECISIONS line 162 -15%). | Orb 9 -> 17, spear x1.9, bomb x1.7. |
 
 Within the bar: Cinder at every row (0.88 to 0.92), Sable at both ranks (0.85 to 0.95), Vex combo rank 0 (0.92), Oath combo rank max (0.84), Lace (1.15) and Tenzo (1.17; at level 19 instead of 18 the source is about 0.6 s slower, still inside). The ours side of Kael, Sparkle and Oath combo rows moved with main since the last write (Sparkle combo rank 0 0.81 -> 0.17, Kael combo 0.45 -> 0.55); the causes above were written against the older numbers.
 
 **Cinder and Neve (set from the source).** Direct damage is the source's tooltip x 154/1285 (our / source mean Hunter health): Flamethrower 258/s -> 31/s, Embry Bolt 106 -> 13, Pyro Pounce 150.4 (+40 at tier IV; this table used to read 190.4 at rank 0) -> 18 (+5), Heat Shield 76.8 -> 9; the Flue Flight carpet stays 4.5/s (owner burst cap, SERVER_UPDATE6; the source's 239.2/s would be 28.7). With only that, Cinder knocked at 0.54 to 0.71: the whole gap was our Flashover numbers (burn, stream bonus and health chip), which the source has no number for and this table leaves out on its side (with them at zero every row was 1.05 to 1.11). They are now a quarter of what they were (burn 0.5% / 1% a second, +6% / +10%, chip 0.4% / 0.6%), which puts every row at about 0.9. Neve: detonation 22 = 190/156 x hit 18, Rimelock 18 = 155/156 x 18.
 Within the bar: Sable at both ranks (0.85 to 0.95), Vex combo rank 0 (0.92), Albert combo rank max (0.84).
+Within the bar: Gil (roster median, since 11-12), Sable at both ranks (0.85 to 0.95; Bola now 3 / +6.1, the source's share), Sparkle LMB (1.00), Vex combo rank 0, Albert combo max.
 
 **Not done here:** no tuning; Lace, Meeko, Tenzo, Grimble and Neve have footage LMB rows only, no combo rows (their ability tooltips are a different level from the footage).
+**Lace (Myth), shares of the target with no LMB anchor** (source level 1 against 1285, ours against 154; not tuned, no check row: the check's RMB tap does not loose her held Heavy Shot): Heavy Shot 16 to 30 is 10.4 to 19.5% against Heartpiercer 35 = 2.7% (3.8 to 7.1x), its wall hit +79 to +148 against +173 = 13.5% (3.8 to 7.1x); Hail Wall 10 a second is 6.5% against Rain of Arrows 61 = 4.7% a second (1.37x); Starpiercer 18 / 18 / 23.3 is 11.7 / 11.7 / 15.1% against 326 / 326 / 422 = 25.4 / 25.4 / 32.8% (0.46x). The third beam keeps the source's 422 : 326 = 1.29x (25 -> 23.3). At the source's shares: Heavy Shot about 4.2, wall +20.7, Hail Wall 3.7 a tick, Starpiercer 39 / 50.6.
+
+**Not done here:** no tuning past Sparkle and Sable; the five Hunters with no LMB number (and their combos) need the source's LMB damage, which no file in briefs has.
