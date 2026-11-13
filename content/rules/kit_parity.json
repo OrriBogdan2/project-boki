@@ -8,6 +8,8 @@
 		{"hero": "gunslinger", "slot": "E", "field": "e.rattle_k", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: +20% dmg vs Dazed"},
 		{"hero": "gunslinger", "slot": "X", "field": "x.zone_t", "value": 3.0, "tol": 0.0, "evidence": "D Summon Napalm: 3s fire zone"},
 		{"hero": "mage", "slot": "RMB", "field": "rank_dmg.sec.2", "value": 1.9, "tol": 0.001, "evidence": "D Voltaic Spear upgs: +20% dmg x2, upg IV +50% dmg, added (docs/heroes/mage.md)"},
+		{"hero": "ostra", "slot": "LMB", "field": "lmb.prime_slow", "value": 0.06, "tol": 0.0, "evidence": "D Gravity Orb card: a fully charged orb slows 6% for 1.5 s (game text read off the card in briefs/hero-ref/ostra.md; outranks the wiki 10%, docs/heroes/ostra.md Orb slow)"},
+		{"hero": "ostra", "slot": "LMB", "field": "lmb.prime_slow_t", "value": 1.5, "tol": 0.0, "evidence": "D Gravity Orb card: slows 6% for 1.5 s (card and wiki agree on 1.5 s)"},
 		{"hero": "thief", "slot": "E", "field": "e.time", "value": 6.0, "tol": 0.0, "evidence": "D Farstep Dagger: after 6s Shiv MUST teleport back"},
 		{"hero": "thief", "slot": "E", "field": "e.refund_wall", "value": 0.25, "tol": 0.0, "evidence": "D Farstep Dagger upg: refund 25% CD on hitting terrain"},
 		{"hero": "thief", "slot": "E", "field": "e.refund_foe", "value": 0.5, "tol": 0.0, "evidence": "D Farstep Dagger upg: doubled (50%) on enemies"},

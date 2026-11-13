@@ -230,6 +230,12 @@ func _ostra() -> void:
 		"data: a full orb is 34% harder (353 vs 263)",
 		absf(float(K.lmb_def()["prime_dmg"]) - (353.0 / 263.0 - 1.0)) < 0.01
 	)
+	var slow_k := float(K.lmb_def()["prime_slow"])
+	var slow_t := float(K.lmb_def()["prime_slow_t"])
+	ok(
+		"data: a full orb slows 6% for 1.5s (the in-game card; the wiki's 10% is outranked)",
+		absf(slow_k - 0.06) < 0.001 and absf(slow_t - 1.5) < 0.001, "%.3f for %.2fs" % [slow_k, slow_t]
+	)
 	ok("data: no speed burst before rank 3", K.boost_t <= 0.0 and absf(K.move_k() - 1.0) < 0.01)
 	# ---- Shift: hold to see both ends, let go to lob; the foe at the landing goes to where he was
 	reset.call()

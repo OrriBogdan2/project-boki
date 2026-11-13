@@ -47,7 +47,7 @@
 		"charge_from": 0.6,
 		"prime_dmg": 0.34,
 		"prime_speed": 1.4,
-		"prime_slow": 0.1,
+		"prime_slow": 0.06,
 		"prime_slow_t": 1.5,
 		"size_k": 0.9
 	},
