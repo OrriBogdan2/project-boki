@@ -1444,6 +1444,22 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 | finds | {"material": 0.25, "trophy_per_boss": 1, "ink": 0.05} |
 | finds_doc | Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill. ink: the chance of one Ink of any type (weighted by restock), rare on purpose. Inks that bosses and camps drop in a match are carried out in the backpack instead (content/rules/ink_drops.json). |
 
+## mask_moment (`content/rules/mask_moment.json`)
+
+Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, flashes of the fallen Hunter with a whisper, the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. After the first one the player can skip.
+
+| Setting | Value |
+|---|---|
+| full | {"build_s": 1.2, "rise_s": 1.4, "black_s": 0.7, "memory_s": [0.3, 0.28, 0.36], "reveal_s": 1.6, "push_in": 0.7} |
+| short | {"build_s": 0.5, "rise_s": 0.8, "black_s": 0.45, "memory_s": [0.38], "reveal_s": 1.5, "push_in": 0.6} |
+| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art). reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
+| music_duck_db | -30 |
+| heart_gaps_s | [0.62, 0.5, 0.4, 0.32] |
+| punch_fov | 5 |
+| whispers | {"gunslinger": "Another job. Another mark on the tally.", "juggernaut": "The blade is hungry. Feed it, or it feeds on you.", "archer": "Every mask I sewed, I will cut loose.", "bulwark": "Hold on. The shore is close.", "mage": "One day I give the storm back.", "ashwick": "Bottled Blight. Drink up.", "dredge": "Come down where it's quiet.", "tender": "Stay close to the light.", "rimewright": "Skate. Don't look down at the ice.", "dolm": "Stone remembers what eyes forget.", "ostra": "Go on, laugh. I'll keep it.", "thief": "I only meant to take a look.", "gil": "Ooh, what does this one do?"} |
+| sting_semitones | {"gunslinger": 0, "juggernaut": -5, "archer": 3, "bulwark": -7, "mage": 5, "ashwick": 2, "dredge": -9, "tender": 7, "rimewright": 4, "dolm": -3, "ostra": 1, "thief": 6, "gil": 8} |
+| sting_doc | Each Hunter's sting is the same rising motif in their own key (semitones from A3). |
+
 ## merge_forms (`content/rules/merge_forms.json`)
 
 How a merge looks and plays (docs/decisions/0003). Forms with a kit live in content/merge_forms/<merge id>.json. This file holds the shared timings, the stat-style fallback every other Boki gets until its form is written (the Boki's type picks its look, rider and dash trail; the same for everyone, no tiers), and the weak surge.
