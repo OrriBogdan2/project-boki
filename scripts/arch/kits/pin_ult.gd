@@ -56,8 +56,7 @@ func cast() -> bool:
 	window = float(x.get("window", 6.0))
 	nock_t = -1.0
 	recover = 0.0
-	h.draw_t = -1.0
-	k.draw.drop()
+	k.drop_draw()
 	k.vfx("ult_cast")
 	k.play("pin_ult_cast")
 	return true
@@ -162,7 +161,7 @@ func _execute(foe: Ent) -> void:
 	foe.hurt(foe.hp * 4.0 + armor * 4.0, h, opts)
 	HeroUlt.landed(k, foe)
 	k.m.fx.own_look = true
-	k.payoff_fx(foe.pos, "EXECUTED", GOLD, "pay_deadeye", h.dir_to(foe), foe)
+	k.payoff_fx(foe.pos, GOLD, "pay_deadeye", h.dir_to(foe), foe)
 	k.m.fx.own_look = false
 
 ## The tells everyone sees: three pips over her head (one per shot left) and a glow on the bow.
