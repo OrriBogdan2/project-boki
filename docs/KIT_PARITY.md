@@ -71,13 +71,13 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.08 (~12 rounds/s, docs/WEAPON_FIRING_DATA.md; was 0.12 until fun audit 11-11), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) |
 | Q | none | glove | ours |
-| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
+| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, dmg 24 (the source's 0.157 of a target; 36 until 11-11), recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
 | R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) |
 | Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match |
-| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match |
+| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +76% rifle (the source's +39 on 51; the ours-only pause of the string's falloff on a Dazed foe is gone) | match |
 | Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
 
 ## Zedran (`juggernaut`, source Brall) · slice Warden

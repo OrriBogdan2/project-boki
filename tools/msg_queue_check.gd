@@ -4,7 +4,8 @@ extends RefCounted
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
 ##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
-##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to
+##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to;
+##      the match HUD counts a hit you land as a fight, not only one you take
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
 ## Never touches the save.
@@ -145,6 +146,11 @@ func _wiring() -> void:
 	m.hud.tip("Hold left click to shoot")
 	ok(lane.count() == 1, "a hint lands in the same lane")
 	ok(lane.get_parent() == m.hud, "the lane is part of the HUD")
+	m.hud._place_msgs()
+	ok(not lane.fight, "no hits yet: the HUD's lane keeps its full budget")
+	m.hud.hitmarker(false)
+	m.hud._place_msgs()
+	ok(lane.fight, "a hit you land puts the HUD's lane on its fight budget")
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)

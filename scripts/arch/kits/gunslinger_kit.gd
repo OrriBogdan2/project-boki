@@ -7,7 +7,7 @@ extends ArchKit
 ## damages and Dazes it ("rat" Rattled in code) on the spot.
 ## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
 ## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
-## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
+## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +76% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
 ## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
 ## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
@@ -189,14 +189,13 @@ func combo_read(t: Ent) -> Dictionary:
 	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
 			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
 
-## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.
+## Dazed foes take +76% from the rifle (the source's +39 on 51): a crit-style big gold number.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if t is Hunter or t is Mob:
 		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.rattled(t):
 			o["crit"] = true
 			dazed_hits += 1
 			ComboMark.payoff(m, h, t)
-			h.sus_n = maxi(0, h.sus_n - 1)
 			var bonus := dmg * float(res_def()["rattle_k"])
 			_daze_bonus_fx(t, bonus)
 			return dmg + bonus

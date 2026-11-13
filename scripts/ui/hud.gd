@@ -104,9 +104,11 @@ func _process(delta: float) -> void:
 	cursor.queue_redraw()
 
 var hit_armor := false
+var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the message lane's fight budget
 
 func hitmarker(crit: bool, armor := false) -> void:
 	hit_t = 0.14
+	dealt_at = m.time
 	hit_crit = crit
 	hit_armor = armor
 
@@ -121,10 +123,10 @@ func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
 
 ## The message lane sits under the timer, or in the tutorial's own lane while that runs (Tutorial
-## holds it while its banner is up). In a fight it shows fewer, shorter lines (MsgLane.fight).
+## holds it while its banner is up). In a fight (hit, or landing hits) it shows fewer, shorter lines (MsgLane.fight).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-	msgs.fight = m.player != null and m.time - m.player.hurt_at < MSG_FIGHT_S
+	msgs.fight = m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
 	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
@@ -150,7 +152,7 @@ func tip(text: String) -> void:
 		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
-const MSG_FIGHT_S := 4.0   # s after you were last hit that the message lane keeps to its fight budget
+const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the message lane keeps to its fight budget
 
 func _build_minimap() -> void:
 	var w := m.world
