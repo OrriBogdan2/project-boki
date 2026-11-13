@@ -58,6 +58,7 @@ var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
 var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
+var repress := false             # a hold dropped (a merge): the key is let go before the lance lights again
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
 var lmb_denied := 0              # (tests) presses refused during Flue Flight
 var jet: AshwickJet             # X, Flue Flight (its flight is a hold: jet.flight)
@@ -240,7 +241,7 @@ func _tick_tells(dt: float) -> void:
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
 	if jet.running():
 		fx.unplace("pilot%d" % h.get_instance_id())      # the lance is out, its pilot flame too
-	elif vis and h.wid == "flamethrower" and not h.downed and not KinMerge.active(h) and not flamer_up:
+	elif vis and h.wid == "flamethrower" and not h.downed and not KinMerge.transforming(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
@@ -284,6 +285,7 @@ func pips_on(f: Ent) -> int:
 
 ## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
 func _drop_holds() -> void:
+	repress = true
 	hose.clear()
 	if fx: fx.flame_off("hose%d" % h.get_instance_id())
 	spool = 0.0
@@ -322,8 +324,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if h.wid != "flamethrower":
 		return false
-	# a merge ends the roar: holding the key on must not relight it
-	var merging := KinMerge.transforming(h) or KinMerge.active(h)
+	# a merge ends the roar: holding the key on must not relight it (a new press does, in the live form)
+	repress = repress and held
+	var merging := KinMerge.transforming(h) or repress
 	if held and was_held and not merging and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true

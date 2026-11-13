@@ -68,6 +68,7 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 	var m := h.m
 	var col: Color = form["glow"]
 	MergeLook.peel(h)
+	h.set_meta(MergeMoves.OUT_AT, m.time)          # (the release move, MergeKit.anim_state)
 	if why == "shell":
 		h.set_meta("shell_break_at", m.time)           # (the plate's bar flashes, BokiHud)
 		h.set_meta("shell_break_col", col)
