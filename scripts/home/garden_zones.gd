@@ -2,7 +2,8 @@ class_name GardenZones
 extends RefCounted
 ## The garden's zones (briefs/design/GARDEN.md 10, docs/decisions/0022-garden-zones.md): which are
 ## open, who lives where and the two keys a locked one needs. Data: content/rules/garden_zones.json.
-## On the save: Save.d["zones"] = {id: {"open": bool}} and rec["zone"] (missing = the start zone).
+## On the save: Save.d["zones"] = {id: {"open": bool}} and rec["zone"] (missing = the start zone); a woken
+## zone also has "reveal" until the hub has shown its stone lighting (ZoneReveal).
 ## "hub" is not a zone: it is the island with the Waystone (HubLayout) and nobody lives there.
 ## Only the zone you are in is loaded: its residents and your partner walk it. Each zone holds up to
 ## KinBox.farm_cap() Boki out; the rest sleep in the shared Burrow. Boki never change zone on their
@@ -41,19 +42,20 @@ static func migrate(data: Dictionary) -> void:
 			rec["zone"] = start()
 
 ## The zone Game.goto("home", opts) shows: the one asked for; none for a visit or with the garden off;
-## the one you were in when coming back from the house; else the hub, once the first day's tutorial is done
-## (it runs in the start zone).
+## the one you were in when coming back from the house; else the hub, once the first day's tutorial is
+## done or skipped (it runs in the start zone; the house, Nook, stall and Burrow are the hub's: HubLayout.holds).
 static func landing(opts: Dictionary) -> String:
 	if opts.has("zone"):
 		return String(opts["zone"])
 	var visiting: Dictionary = opts.get("visit", {})
 	if not visiting.is_empty():
 		return HUB if VisitZones.has(visiting) else ""
-	if not FarmUnlocks.base_mode():
+	if not FarmUnlocks.base_mode() or bool(opts.get("play_hub", false)):     # the games stand in the start zone
 		return ""
 	if opts.has("spawn"):
 		return here
-	return HUB if bool(Save.d.get("tutorial", {}).get("day1_done", false)) else ""
+	var tut: Dictionary = Save.d.get("tutorial", {})
+	return HUB if bool(tut.get("day1_done", false)) or bool(tut.get("ft", {}).get("done", false)) else ""
 
 static func zone_of(rec: Dictionary) -> String:
 	return String(rec.get("zone", start()))
@@ -65,7 +67,7 @@ static func is_open(id: String) -> bool:
 static func wake(id: String) -> void:
 	if is_open(id):
 		return
-	Save.d["zones"][id] = {"open": true}
+	Save.d["zones"][id] = {"open": true, "reveal": true}      # its stone lights at the hub (ZoneReveal)
 	Sfx.play("garden_wake")
 
 ## The Boki out (not in the Burrow) whose home is this zone.
@@ -180,7 +182,7 @@ static func attune(id: String) -> Dictionary:
 	var rec := leaner(id)
 	var nm: String = info(id)["name"]
 	Save.add_item(wayseed(id), -1)
-	Save.d["zones"][id] = {"open": true, "founder": rec["uid"]}
+	Save.d["zones"][id] = {"open": true, "founder": rec["uid"], "reveal": true}
 	rec["zone"] = id
 	Save.remember(rec, "zone", "the day I woke " + nm)
 	CareJournal.note(rec, "woke " + nm)
