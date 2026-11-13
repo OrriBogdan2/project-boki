@@ -123,6 +123,8 @@ static func on_event(m: Match, x: Array) -> void:
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)
 		"merge_end":
+			if e is Hunter:
+				(e as Hunter).set_meta(MergeMoves.OUT_AT, m.time)      # (the release move, MergeKit.anim_state)
 			if String(x[6]) == "shell" and e is Hunter:
 				(e as Hunter).set_meta("shell_break_at", m.time)
 				(e as Hunter).set_meta("shell_break_col", (e as Hunter).get_meta("mf_glow", Color.WHITE))
