@@ -97,6 +97,12 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 
+## The block's top-right corner: the XP bar's right end and top (popped and shaded). A centre-lane line that
+## reaches left of it rises above it (HeartHud's Blight line on a narrow 1240 px logical screen).
+static func corner(H, sz: Vector2) -> Vector2:
+	var o: Vector2 = H._hud_origin(sz)
+	return Vector2(o.x + H.HUD_PORTRAIT.x + 16.0 + BAR_W, o.y - 5.0 - 9.0 - 3.0)
+
 ## The XP tracker on the block's top edge, just above the health number: LV and the run level, then a
 ## thin bar toward Hunter.XP_TO. XP landing (camp or kill) pops the number, brightens the bar and
 ## fills it smoothly (through a level-up too); unspent skill points pulse the whole bar gold, and a
