@@ -21,6 +21,7 @@
 		"kibble": 3
 	},
 	"build_wait_s": 30,
+	"site_hint": "Boki build it while you are home: a run pauses the work until you are back.",
 	"steps": [
 		{
 			"id": "axe",
