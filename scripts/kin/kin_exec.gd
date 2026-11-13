@@ -351,12 +351,19 @@ static func _cone(st: StageSpec, cx: Dictionary) -> void:
 	var r := float(p["radius"])
 	var cosv := cos(deg_to_rad(float(p["angle"])) * 0.5)
 	var col := _color(st, cx)
+	# a kit's strike lane (cx "lane_w", m): the wedge becomes a strip that wide over the same reach
+	var lane_w := float(cx.get("lane_w", 0.0))
 	m.fx.cone(from, dir, r, col)
 	m.sfx("whoosh", from, -4.0, 0.9)
 	var foes: Array = []
 	for f in m.foes_of(int(cx["team"])):
+		if not f.hittable() or absf(f.pos.y - from.y) >= 2.2:
+			continue
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
-		if f.hittable() and to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(dir) > cosv) and absf(f.pos.y - from.y) < 2.2:
+		if lane_w > 0.0:
+			if AimMode.in_lane(from, dir, r, lane_w, f.pos, f.r):
+				foes.append(f)
+		elif to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(dir) > cosv):
 			foes.append(f)
 	var hit := _hit(st.effects, st, foes, cx, from, r)
 	for f in hit:
