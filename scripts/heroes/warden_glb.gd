@@ -1068,9 +1068,24 @@ class Sync extends Node:
 				return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
 		return nd.global_transform
 
+	## Every mapped bone onto its rig node's pose. Each local pose is worked out against its parent's pose as set (a
+	## pose keeps no shear, so that can differ from the rig's), kept here, not read back from the skeleton: a global
+	## pose read after a set recomputed the dirty bones and told every BoneAttachment3D, once per mapped bone.
 	func apply() -> void:
+		var real := {}
 		for l in links:
-			skel.set_bone_global_pose(int(l[0]), _rig_pose(l))
+			var bi := int(l[0])
+			var par := _real(skel.get_bone_parent(bi), real)
+			skel.set_bone_pose(bi, par.affine_inverse() * _rig_pose(l))
+			real[bi] = par * skel.get_bone_pose(bi)
+
+	## A bone's skeleton-space pose as set this frame: from real, else its parent's times its local pose (kept in real).
+	func _real(bi: int, real: Dictionary) -> Transform3D:
+		if bi < 0:
+			return Transform3D.IDENTITY
+		if not real.has(bi):
+			real[bi] = _real(skel.get_bone_parent(bi), real) * skel.get_bone_pose(bi)
+		return real[bi]
 
 	func _rig_pose(l: Array) -> Transform3D:
 		var now := WardenGlb.model_xf(root, l[1])
@@ -1286,7 +1301,9 @@ class Springs:
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
 				var q := Quaternion.IDENTITY
-				if c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
+				if from.is_zero_approx() or to.is_zero_approx():
+					pass      # two joints on one point (a teleport, a floor clamp): no turn, and no zero-vector error
+				elif c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
 					var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
 					q = Quaternion(from.cross(side).normalized(), PI)
 				elif c < 0.99999:
