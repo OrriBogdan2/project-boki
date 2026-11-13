@@ -120,7 +120,6 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 		"dsr":
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
 		"vul":
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
 ## A Net "kst" event: the body's own game runs the rule.
