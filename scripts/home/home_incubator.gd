@@ -109,6 +109,7 @@ func tick(d: float) -> void:
 	var warm := warmed()
 	Incubator.tick(d, warm)
 	acc += d
+	VisitorArrive.glint(self, d)
 	var tt := Time.get_ticks_msec() / 1000.0
 	var hot := Incubator.rate(warm)
 	var gl: OmniLight3D = node.get_node("Glow")
