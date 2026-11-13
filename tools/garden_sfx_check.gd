@@ -140,6 +140,10 @@ func _seeded(n: int) -> RandomNumberGenerator:
 func _count(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
 
+## Boki voice sounds heard: the shared kin_* cues and the species' own bk_* voices (KinVoice).
+func _voiced() -> int:
+	return _total("kin_") + _total("bk_")
+
 func _total(prefix: String) -> int:
 	var n := 0
 	for k in GardenSfx.heard:
@@ -462,17 +466,18 @@ func _whistle(home) -> void:
 	ok(_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1, "whistle: a hold adds one rising whistle (%s)"
 			% [GardenSfx.heard])
 	_answer(home, 90.0, 80.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count("kin_happy") == 1
-			and _total("kin_") == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
+	var sp: String = home.kins[0]["rec"]["species"]
+	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "happy")) == 1
+			and _voiced() == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
 			% [GardenSfx.heard])
 	_answer(home, 25.0, 40.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count("kin_unsure") == 1
-			and _total("kin_") == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
+	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "unsure")) == 1
+			and _voiced() == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
 	var rec: Dictionary = _answer(home, 90.0, 5.0, false)["rec"]
-	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _total("kin_") == 0,
+	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _voiced() == 0,
 			"whistle: a sulky Boki grumbles (%s)" % [GardenSfx.heard])
 	for joy in [80.0, 5.0]:
 		_answer(home, 90.0, joy, true)
-		ok(_total("kin_") == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
+		ok(_voiced() == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
 				% [joy, GardenSfx.heard])
 	home.kins[0]["nap_t"] = 0.0

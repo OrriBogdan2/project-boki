@@ -450,7 +450,7 @@ func _unwalked() -> void:
 			loose.append(f)
 	ok(loose.is_empty(), "every kit file that plays a cue is walked (not walked: %s)" % [loose])
 
-## 11. Hunter callouts: every Hunter with its own voice has every bark, and the game reports what it barks on.
+## 25. Hunter callouts: every Hunter with its own voice has every bark, and the game reports what it barks on.
 func _barks() -> void:
 	var h := Hunter.new()
 	var voiced := []
