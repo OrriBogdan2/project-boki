@@ -9112,3 +9112,4 @@ READY ext/stuck-integ-86b7d6eb b6edb30663 (bulk-rebase: origin/main merged in me
 READY ext/mc-demo-1112 eb392e01d1 (SUPERSEDES 9b82bdde45; merged origin/main 6cebd08e06 (audio-settings check, evo-dex sync) clean, no conflicts; the conflict list in the task was from the pre-#44 base and is already resolved in 9b82bdde45. rpc4 checks: --import 0 script errors, --check 0 failures, health --strict OK, --clip-check 1 = known Motley/ostra DEBT row (0.41 m, same as main). No Net/save change)
 READY ext/tenzo-arm-slate 83aeafc09e (Tarek stone arm A look: blue slate, teal runes; PR #50 stacked on #48)
 READY ext/hunters-best-1113 bd78c94419 (v95 best Hunters: Vex, Kael, Tarek, Meeko, Sparkle swapped; merged as PR #48 -> main ce8bb5edd0; footage reshoot 1113 in /home/boki/footage/1113)
+READY ext/dex-organwhal-gloamwade 71ebe3a770 (Organwhal Sound/Water in cries roster + preview; dex data already live)
