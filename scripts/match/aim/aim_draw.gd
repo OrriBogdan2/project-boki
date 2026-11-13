@@ -44,9 +44,12 @@ static func key(h: Node, id: String) -> String:
 	return "%d:%s" % [h.get_instance_id(), id]
 
 func put(h: Hunter, id: String, e: Dictionary) -> void:
+	var k := key(h, id)
+	if e["all"] and not (entries.has(k) and live(entries[k])):
+		TellCue.aim(m, h, id, e)        # a rival's area starting: its wind-up where it lands
 	e["h"] = h
 	e["t"] = float(m.time)
-	entries[key(h, id)] = e
+	entries[k] = e
 
 func drop(h: Node, id: String) -> void:
 	entries.erase(key(h, id))

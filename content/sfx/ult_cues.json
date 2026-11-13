@@ -1,6 +1,6 @@
 {
  "group": "ult_cues",
- "name": "Ultimate cast cues",
+ "name": "Ultimate cast cues and the rival telegraph wind-up",
  "script": "tools/gen_sfx_ult_cues.py",
  "sounds": {
   "archer_ult_cue": "signature",
@@ -17,7 +17,8 @@
   "tender_ult_cue": "signature",
   "thief_ult_cue": "signature",
   "ult_tag_ally": "cast",
-  "ult_tag_foe": "cast"
+  "ult_tag_foe": "cast",
+  "tell_foe": "cast"
  },
  "reach": {
   "archer_ult_cue": 60,
