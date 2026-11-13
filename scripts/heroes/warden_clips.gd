@@ -18,6 +18,10 @@ extends RefCounted
 
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
+const FEEL := "anim_feel"     # root meta from HunterAnim: Vector2(landing 0..1, run-start/stop lean, rad)
+const LAND_SQUASH := 0.1     # how far a hard landing flattens him (share of his height; widens by 0.6 of that)
+const LEAN_K := 0.5          # of HunterAnim's torso lean, tipped from the feet over the clips
+const LEAN_RATE := 12.0      # 1/s: how fast that lean follows
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
@@ -69,6 +73,7 @@ var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
+var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -455,8 +460,29 @@ func step(dt: float) -> void:
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_air_tilt()
+	if root_bi >= 0:
+		skel.set_bone_pose_scale(root_bi, skel.get_bone_rest(root_bi).basis.get_scale())    # (unkeyed: feel can't build up)
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+
+## HunterAnim's landing squash and its lean into starting and stopping (meta FEEL), laid on the root bone over what
+## the clips show (WardenGlb, after the blend with the rig, which has its own; `squash` false: the root rides the Rig,
+## which already squashes). The root sits at the feet, so the body flattens and tips over them. Visual only.
+func feel(dt: float, squash: bool) -> void:
+	var f: Vector2 = root.get_meta(FEEL, Vector2.ZERO)
+	lean = lerpf(lean, f.y * LEAN_K, 1.0 - exp(-LEAN_RATE * dt))
+	var bi := WardenSkeleton.find(skel, "root")
+	var k := 1.0 - proc_w
+	var sq := f.x * LAND_SQUASH * k if squash else 0.0
+	if bi < 0 or (sq < 0.001 and absf(lean * k) < 0.001):
+		return
+	# (in the skeleton's space: his up and right, whichever way the .glb was built)
+	var inv := skel.global_basis.inverse()
+	var up := (inv * root.global_basis.y).normalized()
+	var flat := Basis.from_scale(Vector3.ONE * (1.0 + sq * 0.6))
+	var squashed := Basis(flat.x - up * up.x * sq * 1.6, flat.y - up * up.y * sq * 1.6, flat.z - up * up.z * sq * 1.6)
+	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * k)
+	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that

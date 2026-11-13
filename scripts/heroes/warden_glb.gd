@@ -1094,6 +1094,7 @@ class Sync extends Node:
 						_rig_pose(l), w))
 		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+		clips.feel(dt, rig_root.is_empty())
 		if sway:
 			sway.step(dt)
 		if w < 1.0:

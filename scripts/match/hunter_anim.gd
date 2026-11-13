@@ -587,7 +587,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var vy := vel.y
 	acc_f = lerpf(acc_f, (mf - mf_prev) / dt, 1.0 - exp(-12.0 * dt))
 	mf_prev = mf
-	var lv := Vector2(clampf(mf / 32.0, -0.12, 0.2) + clampf(acc_f * 0.01, -0.2, 0.2) * (1.0 if grounded else 0.3), clampf(ms / 24.0, -0.16, 0.16))
+	var acc_lean := clampf(acc_f * 0.01, -0.2, 0.2)
+	var lv := Vector2(clampf(mf / 32.0, -0.12, 0.2) + acc_lean * (1.0 if grounded else 0.3), clampf(ms / 24.0, -0.16, 0.16))
 	if snap:
 		lean_f = lv.x; lean_s = lv.y
 	else:
@@ -632,6 +633,7 @@ func update(dt: float, s: Dictionary) -> void:
 	was_grounded = grounded
 	vy_prev = vy
 	land_k = maxf(0.0, land_k - dt * land_rate)
+	model.set_meta(WardenClips.FEEL, Vector2(land_k, acc_lean if grounded else 0.0))     # (a Hero's clips lay these on)
 	slam_k = maxf(0.0, slam_k - dt * 1.8)
 	# a long enough jump (we know the height left from air_h) gets the class's trick
 	if not grounded and trick == "" and not trick_done and not gliding and not diving and not rolling and air_t > 0.06 and s.has("air_h"):

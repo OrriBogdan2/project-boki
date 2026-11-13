@@ -76,7 +76,7 @@ func _species(main: Node, id: String) -> void:
 	var row: Array = []
 	for grown in SIZES:
 		k.scale = Vector3.ONE * grown
-		rig._keep_flex()
+		rig._keep_flex(1.0 / 60.0)
 		for v in speeds:
 			var got := _gait(rig, steps, id, grown, v)
 			if grown == 1.0:
