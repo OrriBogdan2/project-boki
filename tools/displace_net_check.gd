@@ -5,7 +5,7 @@ extends RefCounted
 ## second headless game, the guest (--displace-net-check=guest), through the queue wrapper. Both build the
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
-## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
+## Sparkle's Skycall drag, Mossy's shield boop; Kael's Warchain pulls Kael to the player (not the player).
 ## A Boki's pull and spike (KinExec) move the player on their own game the same way, there by the next snapshot.
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
@@ -221,7 +221,10 @@ func _bjorn(t: Hunter) -> void:
 	P.ak.press_rmb()
 	for i in 30:
 		P.inp["sec_hold"] = true
+		# owner 11-11: touching the aegis pushes nobody; LMB with it up is the boop (BjornBoop)
+		P.inp["fire"] = i >= 10 and i < 13
 		await _run(DT)
+	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	await _run(DT)
 
