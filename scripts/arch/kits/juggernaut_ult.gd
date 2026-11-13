@@ -65,6 +65,8 @@ func pull_through() -> void:
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
+	if String(st.get("phase", "")) == "recover":
+		k.play("")               # (a jump or Shift cuts the recovery clip on the press frame)
 	st = {}
 	_show_glow(false)
 	AimKit.hide(k.h, "ult")
@@ -89,7 +91,6 @@ func tick(dt: float) -> void:
 				drop()
 			elif not h.grounded:
 				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
-				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
 func _tick_guard(d: Dictionary) -> void:
@@ -136,6 +137,7 @@ func _land(d: Dictionary) -> void:
 	var from: Vector3 = h.pos if pulled else st["from"]
 	st["phase"] = "recover"
 	st["t"] = 0.0
+	k.play("jug_ult_recover")
 	if not pulled:
 		h.roll_t = 0.0
 	var blocks := int(st["blocks"])
