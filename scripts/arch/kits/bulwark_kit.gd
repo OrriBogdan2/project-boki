@@ -292,6 +292,10 @@ func _aegis_takes(by: Ent, o: Dictionary) -> bool:
 	var half := deg_to_rad(float(rmb_def()["shield"].get("arc", 140.0)) * 0.5)
 	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(half)
 
+## The raised aegis faces `by`: it stops their pulls too (Blockers).
+func blocks_from(by: Ent) -> bool:
+	return _aegis_takes(by, {})
+
 ## A Shield Charge counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
 	return not mend.is_empty()

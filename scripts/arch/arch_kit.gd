@@ -171,6 +171,7 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 ## The colour of the floating damage number this hit shows (a kit tints its own ramp).
 func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
+func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
 ## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
 func commit_left() -> float: return 0.0
