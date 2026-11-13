@@ -477,6 +477,16 @@ const CHECKS := {
 	"--dex-sort-check": ["res://tools/dex_sort_check.gd", "dex_sort_check", null],      # type filter + sort
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],      # shots at point blank
+	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
+	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # drop and landing frames
+	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # the loading screen; =home|training
+}
+
+## The strict runs of the advisory timing checks: the gate sends each through
+## `jobq submit --needs gpu --tree <tree> --out <name> -- <args>`, where frame times are stable.
+const GPU_HOST := {
+	"hitch-gpu": "--hitch-check --timing-strict",
+	"load-gpu": "--load-check --timing-strict",
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
