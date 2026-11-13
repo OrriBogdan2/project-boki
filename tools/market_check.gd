@@ -26,6 +26,7 @@ func run(m: Node) -> void:
 	_search()
 	_auction()
 	_black_market()
+	await _lost_cards()
 	_anti_mint()
 	_conservation()
 	_migration()
@@ -465,6 +466,58 @@ func _black_market() -> void:
 	var bm := HomeBlackMarket.new(null)
 	ok(bm.TABS.has("ransom") and bm.TABS.has("rare") and String(HomeBlackMarket.OLD_TABS["house"]) == "ransom",
 		"the Black Market has a Ransom tab and a Rare stock tab")
+
+## The Ransom and Captured tabs at 1280x720 (decision 11-08, a new player sees few buttons and one
+## highlighted next action): per card one highlighted button and at most two controls (that and
+## More), picture, time left and price on one line, and two Boki still fit above the fold.
+func _lost_cards() -> void:
+	_save()
+	var rocky := Save.new_kin("pebbit", "Rocky")
+	Save.register(rocky)
+	Save.d["roster"].append(rocky)
+	var lost: Array = Save.d["roster"].slice(1)
+	Ransom.lose(lost[0], "ransom", "", 2)
+	Ransom.lose(lost[1], "rival", "Vexa", 2)
+	Ransom.lose(lost[2], "ransom", "", 5)
+	var bm := HomeBlackMarket.new(null)
+	var pb := UI.scroll_panel("Black Market", 860, Callable(), "Close", true)
+	var panel: PanelContainer = pb[0]
+	var body: VBoxContainer = pb[1]
+	main.add_child(panel)
+	panel.size = Vector2(860, 0)
+	for t in ["ransom", "captured"]:
+		bm.tab = t
+		for c in body.get_children(): c.free()
+		bm.fill(body)
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		var cards := body.get_children().filter(func(c): return c is PanelContainer)
+		var want := 2 if t == "ransom" else 1
+		ok(cards.size() == want, "%s tab: %d card(s)" % [t, cards.size()])
+		var most := 0
+		var hot_each := true
+		var one_line := true
+		for c in cards:
+			var ctl := _controls(c)
+			most = maxi(most, ctl.size())
+			var hot := ctl.filter(func(n): return n is Button and n.theme_type_variation == "Primary")
+			hot_each = hot_each and hot.size() == 1
+			var head: Control = c.get_child(0).get_child(0)
+			one_line = one_line and head.get_child_count() == 4 and head.size.y < 60
+		ok(most <= 2, "%s tab: at most %d controls on a card (a button and More)" % [t, most])
+		ok(hot_each, "%s tab: each card has one highlighted button" % t)
+		ok(one_line, "%s tab: picture, name, time left or holder and price share one line" % t)
+		var h := body.get_combined_minimum_size().y
+		ok(h + 150 <= 720 - 24, "%s tab: fits 1280x720 with the panel's header" % t)
+		print("MARKET info %s: %d controls on a card, %d px tall" % [t, most, h])
+	panel.free()
+
+## Buttons, sliders and text boxes under a node.
+func _controls(n: Node) -> Array:
+	var out: Array = []
+	if n is Button or n is HSlider or n is LineEdit: out.append(n)
+	for ch in n.get_children(): out.append_array(_controls(ch))
+	return out
 
 # ------------------------------------------------------------------ no gem mint
 func _anti_mint() -> void:
