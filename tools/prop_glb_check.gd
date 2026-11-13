@@ -18,14 +18,22 @@ const TOL := 0.03
 
 var bad := 0
 
+
 func ok(cond: bool, msg: String) -> void:
 	print("PGCHECK %s %s" % ["ok  " if cond else "FAIL", msg])
 	if not cond:
 		bad += 1
 
+
 func run(main: Node) -> void:
-	var hunter := Models.hunter(Arch.weight(Arch.ORDER[0]), Data.TEAM_COLORS[0], Arch.signature(Arch.ORDER[0]), "",
-		PlayerLook.neutral(), Arch.ORDER[0])
+	var hunter := Models.hunter(
+		Arch.weight(Arch.ORDER[0]),
+		Data.TEAM_COLORS[0],
+		Arch.signature(Arch.ORDER[0]),
+		"",
+		PlayerLook.neutral(),
+		Arch.ORDER[0]
+	)
 	main.add_child(hunter)
 	var tall := 0.0
 	for mi: MeshInstance3D in hunter.find_children("*", "MeshInstance3D", true, false):
@@ -53,8 +61,13 @@ func run(main: Node) -> void:
 			for s in mi.mesh.get_surface_count():
 				tris += (mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 				var m := mi.get_surface_override_material(s) as ShaderMaterial
-				textured = textured and m != null and m.shader == Models.TOON and m.get_shader_parameter("use_tex") \
+				textured = (
+					textured
+					and m != null
+					and m.shader == Models.TOON
+					and m.get_shader_parameter("use_tex")
 					and m.get_shader_parameter("albedo_tex") != null
+				)
 		ok(textured, "%s draws on the toon shader with its texture" % id)
 		ok(tris <= spec[2], "%s is in its budget (%d <= %d tris)" % [id, tris, spec[2]])
 		ok(absf(box.position.y) < TOL, "%s stands on its origin (bottom %.2f)" % [id, box.position.y])
@@ -62,21 +75,26 @@ func run(main: Node) -> void:
 			ok(absf(box.size.x - spec[1]) < TOL, "%s is %.2f m wide (%.2f)" % [id, spec[1], box.size.x])
 		var h: Array = spec[3]
 		var share := box.size.y / tall
-		ok(share > h[0] and share < h[1], "%s is %.2f m tall, %d%% of a hunter (%d%% to %d%%)"
-			% [id, box.size.y, share * 100, h[0] * 100, h[1] * 100])
+		ok(
+			share > h[0] and share < h[1],
+			"%s is %.2f m tall, %d%% of a hunter (%d%% to %d%%)" % [id, box.size.y, share * 100, h[0] * 100, h[1] * 100]
+		)
 		_pivots(id, n, box)
 		n.queue_free()
 	_pad()
 	print("PGCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Each moving part's origin sits where it moves from.
 func _pivots(id: String, n: Node3D, box: AABB) -> void:
 	match id:
 		"jump_pad":
 			var top := n.get_node("Top") as MeshInstance3D
-			ok(absf(top.mesh.get_aabb().position.y) < TOL and Vector2(top.position.x, top.position.z).length() < TOL,
-				"the pad's plate pivots at its bottom centre (it squashes down)")
+			ok(
+				absf(top.mesh.get_aabb().position.y) < TOL and Vector2(top.position.x, top.position.z).length() < TOL,
+				"the pad's plate pivots at its bottom centre (it squashes down)"
+			)
 			ok(top.position.y > box.size.y * 0.5, "the plate sits on the top half of the pad")
 		"gust_fan":
 			var bl := n.get_node("Blades") as MeshInstance3D
@@ -93,6 +111,7 @@ func _pivots(id: String, n: Node3D, box: AABB) -> void:
 			var at := lock.transform * lock.mesh.get_aabb().get_center()
 			ok(at.z > box.get_center().z, "the padlock hangs on the front")
 
+
 ## The game's jump pad: from its model, the plate tinted, and the primitive under --prim-art.
 func _pad() -> void:
 	var tint := Color("ff8a7a")
@@ -104,8 +123,16 @@ func _pad() -> void:
 		ok(m.get_shader_parameter("albedo") == tint * PropGlb.GLOW_GAIN, "the plate takes the caller's colour")
 		ok(m.next_pass == null and m.get_shader_parameter("glow") > 0.0, "the plate glows, unoutlined")
 	var pad2 := Models.jump_pad(tint)
-	ok(top != null and (pad2.get_node("Top") as MeshInstance3D).get_surface_override_material(0)
-		== top.get_surface_override_material(0), "pads of one colour share their materials")
+	ok(
+		(
+			top != null
+			and (
+				(pad2.get_node("Top") as MeshInstance3D).get_surface_override_material(0)
+				== top.get_surface_override_material(0)
+			)
+		),
+		"pads of one colour share their materials"
+	)
 	pad.free()
 	pad2.free()
 	Assets._off = 1

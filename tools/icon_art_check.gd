@@ -5,21 +5,43 @@ extends RefCounted
 ## texture, and no file in art/icons is left unused.
 
 const SLOTS := ["dash", "rmb", "e", "x"]
-const STATUSES := ["status_stunned", "status_rooted", "status_grounded", "status_dazed", "status_slowed",
-	"status_burning", "status_weakened", "status_shielded", "status_guarded"]
+const STATUSES := [
+	"status_stunned",
+	"status_rooted",
+	"status_grounded",
+	"status_dazed",
+	"status_slowed",
+	"status_burning",
+	"status_weakened",
+	"status_shielded",
+	"status_guarded"
+]
 const MARKS := ["mark_static", "mark_thief", "mark_daze"]
 ## The weapons the vector set has no glyph for (docs/art/ICONS_PROPS_INVENTORY.md); the rest keep their glyphs.
-const WEAPONS := ["quill_rifle", "coilcaster", "longbow", "flamethrower", "tower_shield", "rubble_fists",
-	"tether_lantern", "hoar_fan", "lantern_crook", "spellstaff", "swordfish"]
-const SIZE := 128                         # px: the icon masters
+const WEAPONS := [
+	"quill_rifle",
+	"coilcaster",
+	"longbow",
+	"flamethrower",
+	"tower_shield",
+	"rubble_fists",
+	"tether_lantern",
+	"hoar_fan",
+	"lantern_crook",
+	"spellstaff",
+	"swordfish"
+]
+const SIZE := 128  # px: the icon masters
 
 var bad := 0
-var used := {}       # icon id -> true, for the unused-file sweep
+var used := {}  # icon id -> true, for the unused-file sweep
+
 
 func ok(cond: bool, what: String) -> void:
 	print("ICONART %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	_hunters()
@@ -30,6 +52,7 @@ func run(main: Node) -> void:
 	print("ICONART DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _has(id: String) -> bool:
 	used[id] = true
 	var tex := Icons.art(id) as CanvasTexture
@@ -38,8 +61,10 @@ func _has(id: String) -> bool:
 	var img := tex.diffuse_texture.get_image()
 	return img.get_width() == SIZE and img.has_mipmaps()
 
+
 func _missing(ids: Array) -> Array:
 	return ids.filter(func(id): return not _has(String(id)))
+
 
 func _hunters() -> void:
 	var ids: Array = []
@@ -55,9 +80,11 @@ func _hunters() -> void:
 	gone = _missing(WEAPONS)
 	ok(gone.is_empty(), "every weapon with no glyph has a painted icon %s" % [gone])
 
+
 func _named(what: String, ids: Array) -> void:
 	var gone := _missing(ids)
 	ok(gone.is_empty(), "every %s has a painted icon %s" % [what, gone])
+
 
 func _boki() -> void:
 	var wrong: Array = []
@@ -75,6 +102,7 @@ func _boki() -> void:
 		if ItemPages.icon_of(id) != "garden_" + id or not _has("garden_" + id):
 			wrong.append(id)
 	ok(wrong.is_empty(), "every shaping item draws its painted icon %s" % [wrong])
+
 
 func _unused() -> void:
 	var spare: Array = []

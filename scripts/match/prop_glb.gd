@@ -8,10 +8,11 @@ extends RefCounted
 ## take it (the texture's light and shade times the tint). null when the file is missing or with --prim-art,
 ## so callers keep their primitive model.
 const PATH := "res://art/props/%s/%s.glb"
-const GLOW := 0.45       # the glow part's emission (as the primitive pad's plate)
+const GLOW := 0.45  # the glow part's emission (as the primitive pad's plate)
 const GLOW_GAIN := 1.35  # the glow parts' texture is pale (mean light 0.65 to 0.8): bring the tint back up
 static var _scenes := {}
 static var _mats := {}
+
 
 static func build(id: String, tint := Color(0, 0, 0, 0)) -> Node3D:
 	if not Assets.on():
@@ -26,6 +27,7 @@ static func build(id: String, tint := Color(0, 0, 0, 0)) -> Node3D:
 		for s in mi.mesh.get_surface_count():
 			mi.set_surface_override_material(s, _material(mi.mesh.surface_get_material(s) as BaseMaterial3D, id, tint))
 	return root
+
 
 ## One shared material per source surface and tint, so every pad batches.
 static func _material(src: BaseMaterial3D, id: String, tint: Color) -> ShaderMaterial:
