@@ -271,7 +271,7 @@ func _egg_sounds() -> void:
 		Sfx.last_played.erase("egg_ready")      # (Sfx merges a quick repeat and plays a burst of one sound quieter)
 		Sfx.recent.erase("egg_ready")
 		EggSfx.hear("loud", 1.0, egg_at, 0.1)
-		var voice: AudioStreamPlayer = Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL]
+		var voice: AudioStreamPlayer3D = Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL]
 		return voice.volume_db if Sfx.last_played.has("egg_ready") else NAN
 	var v_close: float = vol_at.call(1.0)
 	var v_far: float = vol_at.call(8.0)

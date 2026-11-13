@@ -490,9 +490,9 @@ func _scan_through(edit: Callable) -> Dictionary:
 	var scan_s := float(Capture.rules()["scan_s"])
 	run_for(0.5)
 	var hum := String(Capture.state(P).get("hum", ""))
-	var lo := (Sfx.loops[hum]["p"] as AudioStreamPlayer).pitch_scale if Sfx.loops.has(hum) else 0.0
+	var lo := (Sfx.loops[hum]["p"] as AudioStreamPlayer3D).pitch_scale if Sfx.loops.has(hum) else 0.0
 	run_for(scan_s - 1.2)
-	var hi := (Sfx.loops[hum]["p"] as AudioStreamPlayer).pitch_scale if Sfx.loops.has(hum) else 0.0
+	var hi := (Sfx.loops[hum]["p"] as AudioStreamPlayer3D).pitch_scale if Sfx.loops.has(hum) else 0.0
 	run_for(2.0)
 	return {"cues": _cue_counts(), "lo": lo, "hi": hi, "caught": P.caught.size(), "k": k}
 

@@ -255,7 +255,7 @@ func _set_speed(h: Hunter, flat: float, vy: float) -> void:
 	h.net_vel = h.vel
 
 func _pitch(key: String) -> float:
-	return (Sfx.loops[key]["p"] as AudioStreamPlayer).pitch_scale
+	return (Sfx.loops[key]["p"] as AudioStreamPlayer3D).pitch_scale
 
 ## The state just changed: one tick plays `cue`; a second tick in the same state does not play it again.
 func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:

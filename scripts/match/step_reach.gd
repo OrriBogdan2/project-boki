@@ -7,7 +7,7 @@ class_name StepReach
 ## (briefs/supervive-data/supervive_physics.md) and Void's "floats: no footstep noise" (supervive_kits.md),
 ## so both numbers here are ours ([?]).
 
-const RIVAL_M := 20.0       # m: how far a Hunter's step carries [?] (just under Sfx.hear_range, 22 m)
+const RIVAL_M := 20.0       # m: how far a Hunter's step carries [?] (under Sfx.hear_range, 32 m)
 const SNEAK_K := 0.4        # of RIVAL_M while crouch walking [?] (no source value)
 const MATE_DB := -6.0       # dB: a teammate's step under a rival's at the same distance
 
