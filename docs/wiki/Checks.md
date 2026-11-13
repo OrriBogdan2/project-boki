@@ -68,6 +68,8 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--iv-check` | IV rolls, stable IVs for old saves, breeding passes 3 of 5, the Rare Egg floor, caps, save round trip |
 | `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent |
 | `--breed-sim-check` | Breeding sim: 500 random pairs bred, sex split half and half (documented shares aside), traits from the parents' mean, IVs, habits and looks from one parent, no mutation outside the base-odds roll |
+| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent, the pairing sounds (two-note size chime, nuzzle, settle, wobble on an unstable mix) |
+| `--garden-react-check` | The garden's reactions (pet, feed, toy, egg, trait, friend) each play their own cue and leave `unlock` for real unlocks; the Boki eat and nap sounds |
 | `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |

@@ -1460,6 +1460,7 @@ func _move_kin(d: float) -> void:
 					_emote(k, "♪"); _emote(other, "!")
 					var cue := KinVoice.cue(other["rec"]["species"], "happy")
 					Sfx.play(cue, other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
+					Sfx.play("garden_friend", other["pos"], -16.0)
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -2963,6 +2964,7 @@ func _pet_kin(k: Dictionary) -> void:
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
 	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0, 0.12, Unique.voice(rec))
+	Sfx.play("garden_pet", null, -6.0)
 	if Care.care_day(rec, "petted"):
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
@@ -2990,7 +2992,7 @@ func _play_with_kin(k: Dictionary) -> void:
 	k["fetch"] = {"ball": ball, "from": ball.position, "to": to, "t": 0.0, "phase": "fly", "life": 14.0}
 	k.erase("chase"); k.erase("task")
 	_emote(k, "!")
-	Sfx.play("throw", null, -8.0)
+	Sfx.play("garden_toy", null, -6.0)
 	verbs.play("toss")
 	kin_frame.start(k, ppos)
 
@@ -3646,7 +3648,7 @@ func _play_evolutions() -> void:
 		k["busy"] = false
 		k["t"] = 3.0
 		fx.body_glow(at, tint)
-		Sfx.play("unlock")
+		Sfx.play("garden_trait")
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")
 		building_now = false
@@ -4234,6 +4236,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 		k["slept"] = 0.0
 		k["nap_t"] = 30.0
 		k["z_t"] = 0.5
+		Sfx.play("boki_sleep", pos, -8.0, 0.1, Unique.voice(rec))
 	if k.has("stare") and Vector2(pos.x - k["goal"].x, pos.z - k["goal"].z).length() < 0.5:
 		var at: Vector3 = k["stare"]
 		k.erase("stare")
@@ -4309,7 +4312,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
-			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("pickup", fp, -16.0, 0.1, 1.4))
+			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("boki_eat", fp, -8.0, 0.1, Unique.voice(rec)))
 		tw.tween_callback(func(): food.queue_free())
 	else:
 		# a sniff, then a firm no
@@ -4353,11 +4356,13 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_emote(k, "♥")
 		fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 16, 2.2)
 		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -2.0, 0.1)
+		Sfx.play("garden_feed", null, -4.0)
 		_say(k, BokiLines.say(rec, "fed_fav"))
 		if res["new"]: _toast("%s loves %s!" % [nm, Care.food_name(f)])
 	else:
 		_emote(k, "♪")
 		Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -8.0)
+		Sfx.play("garden_feed", null, -8.0)
 		_say(k, BokiLines.say(rec, "fed"))
 	if res.get("hungry", false):
 		Save.remember(rec, "fed", "was fed when it was hungry", 2.0)
@@ -4429,6 +4434,7 @@ func _care_nap(rec: Dictionary) -> void:
 	else:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
+		Sfx.play("boki_sleep", k["pos"], -8.0, 0.1, Unique.voice(rec))
 	_say(k, BokiLines.say(rec, "nap"))
 	Sfx.play(KinVoice.cue(rec["species"], "sleepy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
 
@@ -4842,7 +4848,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	NestReveal.play(fx, nest, esp)
-	Sfx.play("unlock")
+	NookSfx.commit(get_tree(), rec, ok, NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.
@@ -4904,7 +4910,7 @@ func _nest_demo(which: String) -> void:
 	match which:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
-		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"pair": pa["lean"] = {"ember": 6.0, "storm": 2.0}; nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"egg":
 			ppos = NEST_AT + Vector3(0, 0, 2.2)
 			player.position = ppos
