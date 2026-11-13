@@ -644,3 +644,21 @@ code to a running Blender and looks at viewport screenshots). What his file show
 - **Watch:** keep colours on the Principled base colour (the friend's node colours exported as white). A collapse
   decimate keeps primitives' shapes well (Dredge 43.7k -> 14.5k: no loss at match zoom, some faceting on the hull
   close up; the planar pass only took 300). Build to the budget instead of decimating where you can.
+
+## Baked normal map (the shared bake)
+`warden_kit.bake_normal(low, sources, 2048, cage 0.005 m, ray 0.012 m, 16 samples)` bakes the dense Meshy raw's sculpt
+onto the low mesh's UVs as a tangent normal (bake_warden.py: the `normal` {size, cage, ray} spec key), then
+`paintkit.clean_normal` flattens the texels tilted past 65° (wrong ray hits: 0.2-1.8%). Ship it as a lossless PNG beside
+the JPEG atlas (`export_image_format="AUTO"` in every export and clips stage; a JPEG normal blocks into facets under the
+toon ramp). Settings are the warden-detail-pilot's (Vex).
+
+The ~25k revamp of Pip, Ryzz, Sable, Tarek and Vex (owner 11-09) used this bake, but none of its models ship. The owner's
+11-10 appeal3 picks replaced Pip, Ryzz, Sable and Vex. Tarek kept main's v2 build, which has the idle/stance clips.
+The builds, their art1 recipes and old-vs-new renders are in git at fb240baa2c (`git show fb240baa2c --stat`).
+
+### Revamp re-rolls, 2026-11-09 (meshy-7.1, PBR, same inputs as the shipped runs; balance 3416 before, 1496 after with other agents' spend; 12 tasks, 480 credits)
+Pip body `01a1c20d-dc11-75b4` (enhance on), `01a1c20d-dbac-712c` (off), head `01a1c20d-db5b-75f4`; Ryzz `01a1c20d-dc36-7040`,
+`01a1c20d-dcbf-77b4`; Sable `01a1c20d-dc00-7229`, `01a1c20d-dc11-730e`; Tarek `01a1c20d-dbf3-70cc`, `01a1c20d-dbdb-7449`;
+Vex body `01a1c20d-dbe6-747e`, `01a1c20d-dc12-71ff`, head `01a1c20d-db57-7423` (raws: ~/meshy/<name>/rvA, rvB). None was
+used: side by side with the shipped raws they read the same (no sharper face, hands or weapon), and the shipped raws
+already carry the fit's tuned landmarks, so each build keeps its old dense raw.

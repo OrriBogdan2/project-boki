@@ -2,6 +2,8 @@
  "_doc": "Loudness per sound category (docs/AUDIO.md): RMS in dBFS over the audible part (above 2% of the peak), peak ceiling and the check's tolerance. tools/sfx_lib.py levels every generated sound to these; --sfx-set-check measures the files.",
  "peak_db": -1.0,
  "tolerance_db": 3.0,
+ "cue_db": {"objective": -10.0, "objective_fight": -20.0},
+ "_cue_db": "volume_db at the call site, on top of the sound's own category level: the tutorial strip's new-objective chime (TutorialStrip.chime), and the same ducked while you are in a fight",
  "cats": {
   "fire": -17.0,
   "impact": -16.0,

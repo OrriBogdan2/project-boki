@@ -109,7 +109,7 @@ func add_guard(v: float) -> void:
 		if was < step and res >= step:
 			if anim_id == "": play("bul_armed")
 	if was < float(res_def().get("slam", 50.0)) and full_ready():
-		armed_fx("SLAM READY", "sec")
+		armed_fx("sec")
 
 func on_block(dmg: float, by) -> void:
 	add_guard(dmg * float(res_def().get("per_hp", 0.5)))
@@ -134,7 +134,6 @@ func _tick(dt: float) -> void:
 			shield_hp = 0.0
 			lock_t = _shield_stat("lock")
 			down_t = 0.0
-			m.fx.word(h.pos + Vector3(0, 2.2, 0), "SHIELD BROKEN", Feel.cat_color("damage"), false)
 			var d0 := h.aim_dir()
 			fx.aegis_break(h.pos + Vector3(d0.x, 0, d0.y) * 0.95)
 			play("bul_break")
@@ -268,7 +267,8 @@ func ult_running() -> bool:
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
-		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		# it takes the hit (and turns it into Guard) as it does a shot
+		m.verbs.absorb(wall, dmg, by.pos + Vector3.UP)
 		o = o.duplicate(); o.erase("kb"); o.erase("lift")
 		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
@@ -310,7 +310,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not KnockWall.hit(m, t, dir, float(res_def().get("crush_reach", 1.5)), h):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()
@@ -322,7 +322,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		var crush_stun := float(rd.get("crush_stun", 0.8))
 		tgt.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true,
 			"stun": crush_stun, "dr": true})
-		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
+		payoff_fx(tgt.pos, res_col(), "pay_slam", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
 		vfx("crush", tgt.pos, dir))
 
@@ -573,6 +573,7 @@ func _recall() -> void:
 	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}
+	mace["t"] = 0.0
 	HeroVfx.of(m).trail(h, "throw", fx.hammer)
 	m.sfx("bjorn_recall", mace["pos"], -4.0)
 	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
@@ -615,7 +616,10 @@ func _tick_mace(dt: float) -> void:
 			if blocked or float(mace["d"]) >= float(mace.get("to", md["throw_range"])):
 				var gy: float = m.world.ground_at(p.x, p.z)
 				if gy <= World.VOID + 1.0:
-					mace["st"] = "back"; mace["hit"] = {}       # over the abyss: it comes straight back
+					# over the abyss: it comes straight back
+					mace["st"] = "back"
+					mace["hit"] = {}
+					mace["t"] = 0.0
 				else:
 					p = Vector3(p.x, gy + 0.15, p.z)
 					mace["st"] = "ground"; mace["t"] = 0.0
@@ -634,13 +638,16 @@ func _tick_mace(dt: float) -> void:
 			if float(md.get("lie_t", 0.0)) > 0.0 and float(mace["t"]) >= float(md["lie_t"]):
 				_recall()
 		"back":
-			var to := h.pos + Vector3(0, 1.0, 0) - p
-			var step := float(md["recall_speed"]) * dt
-			var dir2 := Vector2(to.x, to.z).normalized()
-			if to.length() <= step + 0.6:
+			# it homes on the hand and lands on the recall clip's catch key "recall_t" s after the call, from any range
+			# (sheet: recall flight 0.2-0.4 s)
+			mace["t"] = float(mace["t"]) + dt
+			var left := float(md["recall_t"]) - float(mace["t"])
+			if left <= 0.5 * dt:
 				_catch()
 				return
-			p += to.normalized() * step
+			var to := h.pos + Vector3(0, 1.0, 0) - p
+			var dir2 := Vector2(to.x, to.z).normalized()
+			p += to * minf(1.0, dt / left)
 			for f in foes_in(p, 0.9, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
@@ -781,7 +788,6 @@ func on_dash(use_ex: bool) -> bool:
 			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
 		st["last_dash"] = "charge"
 		play("bul_charge")
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
 		m.sfx("bulwark_charge", h.pos, -2.0)
 		return true
 	use_ex = use_ex and h.dashes < 1.0         # a charge in the air is the same 360 Smash (item 183)
@@ -800,7 +806,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd})
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd, "curved": true})
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
@@ -811,8 +817,8 @@ func on_dash(use_ex: bool) -> bool:
 ## m/s he keeps sliding forward with through the 360 Smash's spin (about 1 m)
 const SPIN_GLIDE := 6.0
 
-## The 360 Smash's spin on arrival: one hit all round him, a red-gold swirl ring, still sliding on along
-## `wd`.
+## The 360 Smash's spin on arrival: one hit all round him, still sliding on along `wd`; its ring (HeroVfx "spin")
+## lies on the hit radius and runs round once with the turn.
 func _spin_hit(wd: Vector2) -> void:
 	if h.grounded:
 		h.vel.x += wd.x * SPIN_GLIDE
@@ -829,10 +835,9 @@ func _spin_hit(wd: Vector2) -> void:
 	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
-	fx.smash_ring(h.pos, r)
+	vfx("spin", h.pos, null, {"r": r})
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
-	net_ring(h.pos, r, Color("ff7a3a"))
 
 # ------------------------------------------------------------------ E: Mending Ground
 ## Where the zone sits: round the hammer wherever it is (planted, flying out or back), else round him.
@@ -937,13 +942,14 @@ func _bot_hammer(dist: float, los: bool) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and (h.hp < h.max_hp * 0.65 or shield_hp < shield_max() * 0.4) and randf() < 0.5:
-		h.inp["aim"] = h.pos; h.inp["sig"] = true; return
-	_bot_hammer(dist, los)
-	if HeroUlt.ready(self) and los and dist > 4.0 and dist < 13.0:
+	# the Faultline first: its lane starts at his feet, so a foe up close is on it too
+	if HeroUlt.ready(self) and los and dist > 1.5 and dist < 13.0:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and (h.hp < h.max_hp * 0.65 or shield_hp < shield_max() * 0.4) and randf() < 0.5:
+		h.inp["aim"] = h.pos; h.inp["sig"] = true; return
+	_bot_hammer(dist, los)
 	if int(h.slot_lv["sec"]) > 0:
 		var shot_at: bool = m.time - h.hurt_at < 0.6 and dist > 3.0
 		if shot_at and lock_t <= 0.0 and shield_hp > 30.0:
