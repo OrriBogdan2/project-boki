@@ -140,7 +140,13 @@ fade. What is left of its 2.1 is the idle's own head dart still showing at the e
 
 Slide at scale 1, before (origin/main: speed over 1.5 / 2.9 m/s, at most 1.6x, run from 3.2 m/s) → after (measured
 `STRIDE` per species, run from 2.2 m/s, `MAX_CADENCE` 6 steps/s). The rate fix only matches the paw's average
-pace to the ground: the clips' sine stance and their short steps at match speed keep most gaits over 25%. The fix
+pace to the ground: the clips' sine stance and their short steps at match speed keep most gaits over 25%.
+Lodestick, kestrike, kindlewren, rimeshrew and wisplet are re-keyed as bounds (`boki_clips.stance`: each foot or tripod
+pushes back along the ground for two frames of a 16-frame run clip, then swings forward in the air while the body
+hops). The clip starts halfway through a hop (`from_mid_flight`): Godot holds a clip's first pose for one frame, and
+a held planted foot slides. Rimeshrew's legs also take back its body's pitch, so the gallop's rocking does not drag
+them. What is left is the touch-down and lift-off of a two-frame stance, and at scale 0.8 and match speed the birds'
+short legs (about 0.1 m) cannot reach a full stride even at 6 steps/s (kindlewren 41%, wisplet 38%; kestrike, rebuilt on its Meshy body after the merge with main, measures stride walk 0.19 and run 1.04 and slides up to 66% at scale 0.8 and 7.4 m/s, ceilings `OVER` 0.65 / 0.70). The fix
 for those is re-keying the clips (`docs/DEBT.md`), not the rate. Side-view strips of the worst three before the
 fix (lodestick, mossgrade, cairnback): `docs/art/kin/boki_gait/<id>_before.png` and `_after.png` (top row 2.4 m/s,
 bottom row its match speed). These are not committed yet: they are queued GPU jobs 20261109-153605-29862 (before)
@@ -172,3 +178,25 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | 0.39 / 0.41 / 0.30 | 0.9 |
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | 0.21 / 0.69 / 0.46 | 1.3 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | 0.20 / 2.03 / 0.76 | 1.4 |
+| cindle | 58% → 21% 2.6 steps/s | 58% → 38% 3.2 steps/s | 63% → 38% 5.9 steps/s | 75% → 46% 6.0 steps/s (6.8) | 1.1 / 1.0 / 1.3 | 0.9 |
+| puddlet | 54% → 16% 3.5 steps/s | 54% → 36% 4.5 steps/s | 71% → 42% 6.0 steps/s | 78% → 57% 6.0 steps/s (6.0) | 1.1 / 1.0 / 1.4 | 0.8 |
+| burrlet | 75% → 30% 4.1 steps/s | 75% → 33% 5.0 steps/s | 83% → 49% 6.0 steps/s | 87% → 64% 6.0 steps/s (6.2) | 1.5 / 1.1 / 1.3 | 0.9 |
+| glintmole | 74% → 33% 4.2 steps/s | 74% → 33% 4.9 steps/s | 79% → 46% 6.0 steps/s | 84% → 61% 6.0 steps/s (6.2) | 1.6 / 1.1 / 1.3 | 0.9 |
+| rimeshrew | 71% → 27% 4.2 steps/s | 71% → 18% 1.6 steps/s | 74% → 18% 2.9 steps/s | 84% → 18% 4.9 steps/s (7.4) | 1.6 / 1.0 / 0.5 | 0.9 |
+| pebbit | 75% → 33% 4.1 steps/s | 75% → 33% 4.7 steps/s | 82% → 44% 6.0 steps/s | 85% → 55% 6.0 steps/s (5.4) | 1.5 / 1.1 / 1.2 | 0.9 |
+| cairnback | 88% → 29% 5.5 steps/s | 88% → 40% 5.0 steps/s | 86% → 56% 6.0 steps/s | 88% → 65% 6.0 steps/s (5.6) | 1.5 / 1.1 / 1.1 | 0.9 |
+| wisplet | 69% → 34% 5.6 steps/s | 69% → 14% 2.1 steps/s | 82% → 14% 3.8 steps/s | 90% → 23% 6.0 steps/s (8.0) | 3.2 → 1.0 / 1.4 / 0.7 | 0.8 |
+| zapple | 57% → 59% 2.7 steps/s | 57% → 71% 3.0 steps/s | 67% → 71% 5.4 steps/s | 73% → 69% 6.0 steps/s (7.6) | 1.0 / 0.8 / 0.8 | 0.6 |
+| hivara | 66% → 27% 3.2 steps/s | 66% → 36% 3.6 steps/s | 63% → 33% 6.0 steps/s | 75% → 56% 6.0 steps/s (7.0) | 1.3 / 1.0 / 1.0 | 0.9 |
+| kestrike | 81% → 53% 6.0 steps/s | 81% → 16% 4.1 steps/s | 85% → 28% 6.0 steps/s | 91% → 57% 6.0 steps/s (7.4) | 0.4 / 1.5 / 0.5 | 1.0 |
+| kindlewren | 77% → 33% 6.0 steps/s | 77% → 16% 2.4 steps/s | 84% → 16% 4.3 steps/s | 90% → 26% 6.0 steps/s (7.4) | 0.6 / 0.8 / 0.7 | 0.9 |
+| lodestick | 99% → 62% 6.0 steps/s | 99% → 32% 1.6 steps/s | 90% → 32% 2.9 steps/s | 94% → 32% 5.0 steps/s (7.6) | 1.2 / 1.3 / 0.7 | 0.9 |
+| marchleaf | ?% → 48% 4.0 steps/s | ?% → 41% 3.0 steps/s | ?% → 41% 5.4 steps/s | ?% → 46% 6.0 steps/s (6.6) | 0.5 / 1.0 / 0.9 | 0.9 |
+| mossgrade | 96% → 51% 6.0 steps/s | 96% → 35% 4.4 steps/s | 77% → 41% 6.0 steps/s | 82% → 57% 6.0 steps/s (6.0) | 1.5 / 1.1 / 1.2 | 1.6 |
+| nettlynx | 80% → 26% 3.8 steps/s | 80% → 33% 4.8 steps/s | 82% → 51% 6.0 steps/s | 87% → 67% 6.0 steps/s (6.6) | 1.3 / 1.1 / 1.3 | 0.9 |
+| caecilith | ?% → 55% 6.0 steps/s | ?% → 57% 6.0 steps/s | ?% → 77% 6.0 steps/s | ?% → 86% 6.0 steps/s (7.6) | 1.2 / 1.4 / 1.5 | 1.1 |
+| thrumbird | EXEMPT: flyer, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | 0.8 / 0.8 / 0.8 | 8.1 → 2.1 |
+| selenfin | EXEMPT: flyer (fins), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.0 |
+| zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
+| glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
+| gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |

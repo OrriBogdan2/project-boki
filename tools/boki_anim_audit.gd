@@ -20,7 +20,7 @@ const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not st
 const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
-	"gloamshell": "blob (snail foot)"}
+	"gloamshell": "blob (snail foot)", "gibbelle": "blob"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
@@ -28,10 +28,10 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 const OVER := {
 	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.62,
 	"glintmole walk": 0.35, "glintmole run": 0.73, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.91, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.68,
+	"kestrike run": 0.70, "kindlewren walk": 0.35, "kindlewren run": 0.45, "lodestick walk": 0.68,
 	"lodestick run": 0.90, "marchleaf walk": 0.52, "marchleaf run": 0.64, "mossgrade walk": 0.65,
 	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.78, "pebbit walk": 0.35, "pebbit run": 0.69,
-	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
+	"puddlet run": 0.70, "rimeshrew walk": 0.30, "wisplet walk": 0.35, "wisplet run": 0.40,
 	"zapple walk": 0.62, "zapple run": 0.75, "caecilith walk": 0.66, "caecilith run": 0.90,
 }
 ## A loop's wrap may be no rougher than the roughest moment inside the clip (seam()).

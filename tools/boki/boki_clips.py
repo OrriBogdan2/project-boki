@@ -31,6 +31,50 @@ def sweep(t, n=1.0, ph=0.0):
     return 2.0 - 4.0 * u if 0.25 <= u < 0.75 else math.sin(TAU * u)
 
 
+def stance(t, ph=0.0, w=0.125):
+    """A bounding foot: (sweep, up), sweep +1 forward to -1 back. It is on the ground for the share `w` of the cycle,
+    sweeping straight back at the ground's speed (a short brisk push of two frames in a 16-frame clip), then swings
+    forward through the air, up 0 to 1 and back, between touch-downs."""
+    x = (t + ph) % 1.0
+    if x < w:
+        return 1 - 2 * x / w, 0.0
+    k = (x - w) / (1 - w)
+    return -1 + 2 * k, math.sin(math.pi * k)
+
+
+MID_FLIGHT = 0.3125   # of the cycle: halfway from the first touch-down's lift-off (0.125) to the second (0.5)
+
+
+def from_mid_flight(bound):
+    """A `stance` bound clip started halfway through a hop. Godot holds a clip's first pose for a frame (its glTF keys
+    start at frame 1), so the hold lands in the air instead of freezing a planted foot."""
+    return lambda t: bound((t + MID_FLIGHT) % 1.0)
+
+
+def bound_air(t, w=0.125):
+    """How high a body that touches down twice a cycle (a foot, or a tripod, each half) is between touch-downs, 0 to
+    1: on the ground for the two stances of `stance`, a ballistic arc after each."""
+    return math.sin(math.pi * max(0.0, (2 * t % 1.0 - 2 * w) / (1 - 2 * w)))
+
+
+def bound_land(t, w=0.125):
+    """The squash of a touch-down, 0 to 1 and back over the two stances of `bound_air`."""
+    x = 2 * t % 1.0 / (2 * w)
+    return math.sin(math.pi * x) if x < 1 else 0.0
+
+
+def hang_swing(sweep, length, reach):
+    """The hip angle (rad, forward) that puts a foot hanging `length` under its hip `sweep` (+1 front, -1 back) of
+    `reach` along the body: it swings on an arc, so an even sweep takes an uneven angle."""
+    return math.asin(max(-1.0, min(1.0, sweep * reach / (2 * length))))
+
+
+def drop(p, *prefixes):
+    """Forgets the bones of a pose that start with any of `prefixes`, to key them again."""
+    for bone in [b for b in p if b.startswith(prefixes)]:
+        del p[bone]
+
+
 def seq(t, keys):
     """keys: (t, value), eased between. Values may be numbers."""
     if t <= keys[0][0]:

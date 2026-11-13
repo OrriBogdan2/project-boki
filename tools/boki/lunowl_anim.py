@@ -3,7 +3,7 @@ import math
 
 import boki_clips
 import lunowl
-from boki_clips import add, s, seq
+from boki_clips import add, bound_air, bound_land, from_mid_flight, hang_swing, s, seq, stance
 from lunowl import SIDES, TAIL_PTS, antenna_pts, on_wing, streamer_pts, v3
 
 LOOK_UP = 0.22     # its face is already a flat disc to the front: a little tilt up is enough for the high cameras
@@ -139,12 +139,17 @@ def walk(t):
     return p
 
 
+RUN_HOP = 0.05     # m the body rises between touch-downs
+RUN_REACH = 0.14   # m a foot sweeps back along the ground while it is down
+LEG = 0.124        # m from hip to ankle
+
+
 def run(t):
-    """A skittering flit: a kick off the ground, a glide on two quick beats with the legs tucked, a light touch-down."""
+    """A skittering flit: a push off each foot in turn along the ground, two quick wingbeats and a hop between."""
     p = {}
-    air = seq(t, [(0, 0), (0.12, 0), (0.5, 1), (0.86, 0), (1, 0)])
-    land = seq(t, [(0, 1), (0.1, 0), (0.88, 0), (1, 1)])
-    p["root_at"] = (0, 0.11 * air - 0.012 * land, 0)
+    air = bound_air(t)
+    land = bound_land(t)
+    p["root_at"] = (0, RUN_HOP * air - 0.012 * land, 0)
     p["root_sc"] = (1 + 0.06 * land, 1 - 0.08 * land + 0.04 * air, 1 + 0.04 * land)
     add(p, "hips", rx=-0.32 - 0.06 * land)
     add(p, "neck", rx=0.12)
@@ -153,9 +158,9 @@ def run(t):
     streamers(p, t * 2, 0.06, droop=-0.7)
     tufts(p, 0.35, 0.05)
     feelers(p, t * 2, 0.1, 0.4)
-    k = seq(t, [(0, 0), (0.14, 0), (0.24, 1), (0.74, 1), (0.88, 0), (1, 0)])
-    for sd, _ in SIDES:
-        legs(p, sd, -0.5 * k + 0.25 * land, 1.0 * k)
+    for sd, ph in (("L", 0.0), ("R", 0.5)):
+        sweep, up = stance(t, ph)
+        legs(p, sd, hang_swing(sweep, LEG, RUN_REACH), up)
     add(p, "tail1", rx=-0.15 * air)
     return p
 
@@ -332,7 +337,7 @@ def ability(t):
     return p
 
 
-CLIPS = {"idle": (3.2, True, idle), "walk": (0.56, True, walk), "run": (0.5, True, run), "hop": (1.0, True, hop),
+CLIPS = {"idle": (3.2, True, idle), "walk": (0.56, True, walk), "run": (16 / 30, True, from_mid_flight(run)), "hop": (1.0, True, hop),
          "pet": (2.4, True, pet), "carry": (0.6, True, carry), "tend": (1.3, True, tend),
          "attack": (0.8, False, attack), "ability": (1.3, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
