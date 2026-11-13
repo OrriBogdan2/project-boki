@@ -190,10 +190,11 @@ In every run log the three travel parts end on the island (`on ground true`) exc
 it travels 24 m and ends 14.9 m below the rim, because her air dash is long. Motley's Brimseed full growth is now
 shown. The rest of the "Seen in the reel" lines match the new renders.
 
-**KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
-  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
-  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's ground and air rows
-  still `buffer`.
+**KIT_PARITY rows fixed (checked against main 11-12):** Kael's animation (gap 1) is closed: `kael.glb` has 49
+  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot
+  wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
+  and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
+  (gap 14 closed).
 
 ## Vex the Hired Gun (`gunslinger`, source Ghost)
 [gunslinger.mp4](gunslinger.mp4)
@@ -294,6 +295,8 @@ Still differs:
   "Ally-pass refund").
 - Bearer: the Carrier shield is cut (tender.md, owner 11-07); the KIT_PARITY row still lists it and should be
   updated. Which hits drop a carried teammate was not traced.
+  steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
+- Bearer: the Carrier shield is cut (tender.md, owner 11-07; KIT_PARITY row updated). Which hits drop a carried teammate was not traced.
 - Body 0.66 of a medium (owner item 108).
 
 Seen in the reel: the Crook's shots are small gold sparks with a Kindle glow, where the footage's are a blue comet
@@ -311,8 +314,7 @@ side in a gold ring, like the footage's ally appearing next to the hunter [F 027
 
 Still differs:
 - Stone Row (E): three rocks 3.4 m ahead, cooldown 12.5 s [D]; he climbs them by walking (owner item 25), allies hop
-  them by jumping as in the source (owner 23:55, `StoneStand`). KIT_PARITY gap 14 and dolm.md's "not built" rows
-  still say allies cannot, and should be updated.
+  them by jumping as in the source (owner 23:55, `StoneStand`); KIT_PARITY gap 14 and dolm.md's ally-hop row say so too.
 - Rock Hop (Shift): up to three steerable hops off rocks he raises, cooldown 12 s (owner item 111), in place of
   Landslide's short dash with a rock riding ahead [F]; the rolling rock at the end keeps the source's slow and knock.
 - Basalt Spine (X): nine rocks erupting centre-out along a 12 m arc, a 35% slow for 1 s, a drag sets the angle,
