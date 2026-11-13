@@ -40,6 +40,7 @@ const SNAP_T := 0.14                   # s the stretched arm takes to snap back 
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
+const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
@@ -459,11 +460,16 @@ func _grab(f: Ent, ally := false) -> void:
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
 
+## The Anchor's wind-up holds him on its line (the "turn" e row) and the reel keeps him turned to the catch wherever
+## the cursor goes (footage 0147; the rmb row); the barge faces where it goes.
+func face_locked() -> bool:
+	return (wind > 0.0 or not pull.is_empty()) and h.roll_t <= 0.0
+
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
 ## pull). It is dragged over rocks, props and cliff faces; only a placed wall stops it; the abyss takes it.
 ## Displace moves it ("haul"); here the arm follows it and the reel ends with it.
-func _tick_pull(_dt: float) -> void:
+func _tick_pull(dt: float) -> void:
 	var f = pull["t"]
 	var gone: bool = not is_instance_valid(f) or (f as Ent).dead
 	var state_changed: bool = not gone and f is Hunter and (f as Hunter).downed != bool(pull.get("wisp", false))
@@ -471,6 +477,9 @@ func _tick_pull(_dt: float) -> void:
 		_end_pull(false)
 		return
 	var fe := f as Ent
+	var to := Vector2(fe.pos.x - h.pos.x, fe.pos.z - h.pos.z)
+	if to.length() > 0.05 and face_locked():
+		h.face = lerp_angle(h.face, atan2(-to.x, -to.y), minf(1.0, dt * REEL_TURN))      # (face_locked)
 	if tells_visible():
 		_draw_arm(fe.pos + Vector3(0, 0.95, 0), _arm_thick())
 	for w in scoop.duplicate():

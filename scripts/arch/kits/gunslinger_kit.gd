@@ -720,14 +720,9 @@ func _tick_needle(dt: float) -> void:
 		_fire_needle()                                              # along the capped aim, so before the lock lifts
 		_end_needle()
 
-## The locked aim turns toward the cursor at the data's capped rate (deg/s): a flick across the screen can't drag it.
+## The locked aim turns toward the cursor at the "turn" e row's capped deg/s: a flick can't drag it.
 func _turn_needle(dt: float) -> void:
-	var want := _cursor()
-	if want.length() < 0.05:
-		return
-	var cur: Vector2 = needle["dir"]
-	var step := deg_to_rad(float(e_def()["turn_deg_s"])) * dt
-	needle["dir"] = cur.rotated(clampf(cur.angle_to(want), -step, step)).normalized()
+	needle["dir"] = turn_lock(needle["dir"], turn_deg_s("e", "early"), dt).normalized()
 
 ## The cursor relative to her on the ground: where she wants to aim, as against the capped aim she holds.
 func _cursor() -> Vector2:

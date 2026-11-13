@@ -164,5 +164,11 @@
 	"clip": {"lines": {"lmb": "Hold to draw, then let go on the gold flash.", "rmb": "Hold to draw a Heavy Shot; a foe pinned to a wall takes it twice.", "dash": "Roll, then walk through rocks and trees for 2.8s."}, "holds": ["lmb"]},
 	"tells": {
 		"dash_spent": "a green spirit shell over her while it lasts; dash pip dark"
+	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/pin.md:49 'the hunter turns to the cursor throughout' the draw; :313 she walks side-on to the cursor while drawing"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/pin.md:21 hold to charge toward the cursor; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/pin.md:23 a tap placed at the cursor distance; no turn limit shown"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/pin.md:254 'a self-buff with no cast lock'"}
 	}
 }

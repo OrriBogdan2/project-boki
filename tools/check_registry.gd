@@ -180,6 +180,7 @@ const CHECKS := {
 	# the cursor on or under your own body
 	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],
 	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],  # key to picture
+	"--yaw-lock-check": ["res://tools/yaw_lock_check.gd", "yaw_lock_check", null],      # body turn per slot
 	"--boki-moves-check": ["res://tools/boki_moves_check.gd", "boki_moves_check", null],      # move tiles
 	"--boki-moves-shots": ["res://tools/boki_moves_shots.gd", "boki_moves_shots", null],      # --shots-dir=<dir>
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],      # choose what to rank: + and pips
