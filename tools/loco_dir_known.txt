@@ -1,7 +1,10 @@
 # --loco-dir-check: cells failing today (--update)
-bulwark crouch_walk fr
 bulwark crouch_walk br
+bulwark crouch_walk b
 bulwark crouch_walk bl
-bulwark crouch_walk fl
+bulwark crouch_walk l
+bulwark crouch_idle br
 bulwark crouch_idle b
+bulwark crouch_idle bl
+bulwark crouch_idle l
 tender run r
