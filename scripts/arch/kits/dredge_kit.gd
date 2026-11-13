@@ -161,7 +161,7 @@ func _shred_armor(t: Ent, dmg: float, o: Dictionary) -> void:
 	var ht := t as Hunter
 	if ht.armor <= 0.0:
 		return
-	var wear := dmg * (1.0 - float(Hunter.ARMOR_TIERS[ht.armor_tier][2])) * float(gun_def()["armor_k"])
+	var wear := dmg * (1.0 - Hunter.ARMOR_DR) * float(gun_def()["armor_k"])
 	ht.armor = maxf(0.01, ht.armor - wear)
 	armor_shreds += 1
 

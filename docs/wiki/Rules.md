@@ -42,22 +42,6 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
-## armor_xp (`content/rules/armor_xp.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | Armour progress (scripts/match/armor_xp.gd, docs/ARMOUR_PARITY.md Progress). Only damage dealt to and taken from rival Hunters fills it; monsters and Boki build none; no level XP comes from any of it. thresholds_source: the source's cumulative damage to reach Uncommon, Rare, Epic, Legendary, in source damage points (docs/SUPERVIVE_DATA.md section 3, 1.04 data). Ours = round(source x our_health / source_health): our_health is the Medium class's base health (scripts/core/data.gd), source_health the source's median base health (SUPERVIVE_DATA section 5). Rates are progress per point of damage after armour. knock_source_damage: the chunk a knock adds, in source damage points (the source counts knocks, amount unpublished). |
-| thresholds_source | [2000, 3600, 12000, 20000] |
-| our_health | 145 |
-| source_health | 1030 |
-| dealt | 1 |
-| taken | 1 |
-| monster | 0 |
-| boki | 0 |
-| knock_source_damage | 1000 |
-
 ## base_drift (`content/rules/base_drift.json`)
 
 Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with farm_build.json base_mode on, once per in-game day at home each Boki's four traits (0..1) move a small step toward the average of its friends (base life bonds at or above base_life friend_at). Rivals do not pull.

@@ -64,10 +64,11 @@ const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4
 const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
 const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
 const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
-## Armor (docs/ARMOUR_PARITY.md): while it has durability it takes its tier's share off every hit
-## (ARMOR_TIERS), then what gets through hurts your health and wears the durability by the same
+## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
+## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
-const ARMOR_DUR := 2.2        # Common durability as a multiple of max health
+const ARMOR_DR := 0.2
+const ARMOR_DUR := 2.2        # durability as a multiple of max health
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
@@ -549,7 +550,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
 	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
-		d *= 1.0 - float(ARMOR_TIERS[armor_tier][2])
+		d *= 1.0 - ARMOR_DR
 		# your kin's armor stats make it wear more slowly
 		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
 		if armor <= 0.0:
@@ -2888,13 +2889,13 @@ func _gate(key: String, slot: String, fb: String) -> void:
 			m.hud.toast(TutorialCamps.locked_text(self), Color("a2a8bb"))
 
 var base_armor := 50.0
-## Armor evolves through a run, like the source's: damage you deal to and take from rival hunters
-## fills it (ArmorXp: monsters and Boki build none), and a knock adds a chunk. A tier raises the
-## reduction and, at the top two, the durability; new plates arrive full. Tier colour shows on
-## everyone's armor bar. Rows: name, colour, damage reduction, durability x the Common piece (source
-## 2,500 / 2,500 / 2,500 / 3,000 / 3,500). Progress to reach a tier: ArmorXp.thresholds.
-const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.20, 1.0], ["Uncommon", Color("7fe08a"), 0.25, 1.0],
-	["Rare", Color("5fb6ff"), 0.30, 1.0], ["Epic", Color("c27cff"), 0.35, 1.2], ["Legendary", Color("ffbf3a"), 0.35, 1.4]]
+## Armor evolves through a run, like Supervive's: damage you deal to rival hunters fills it (monsters
+## count a third), and a knock adds a big chunk. Each tier adds plates on top of the base, and the new
+## plates arrive full. Tier colour shows on everyone's armor bar, so you can read how fed a rival is.
+const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.0], ["Uncommon", Color("7fe08a"), 220.0], ["Rare", Color("5fb6ff"), 560.0],
+	["Epic", Color("c27cff"), 1000.0], ["Legendary", Color("ffbf3a"), 1600.0]]
+const ARMOR_TIER_BONUS := 0.15     # of base armor per tier above Common
+const ARMOR_KNOCK_XP := 140.0
 var armor_xp := 0.0
 var armor_tier := 0
 var dmg_taken := 0.0
@@ -2906,7 +2907,7 @@ var revives := 0              # teammates you picked up
 func armor_gain(xp: float) -> int:
 	armor_xp += xp
 	var up := -1
-	while armor_tier < ARMOR_TIERS.size() - 1 and armor_xp >= float(ArmorXp.thresholds[armor_tier + 1]):
+	while armor_tier < ARMOR_TIERS.size() - 1 and armor_xp >= float(ARMOR_TIERS[armor_tier + 1][2]):
 		armor_tier += 1
 		up = armor_tier
 	if up >= 0:
@@ -2919,15 +2920,14 @@ func armor_gain(xp: float) -> int:
 func armor_frac() -> float:
 	if armor_tier >= ARMOR_TIERS.size() - 1:
 		return 1.0
-	var a := float(ArmorXp.thresholds[armor_tier])
-	var b := float(ArmorXp.thresholds[armor_tier + 1])
+	var a := float(ARMOR_TIERS[armor_tier][2]); var b := float(ARMOR_TIERS[armor_tier + 1][2])
 	return clampf((armor_xp - a) / (b - a), 0.0, 1.0)
 
 func armor_col() -> Color:
 	return ARMOR_TIERS[armor_tier][1]
 
 func refresh_gear() -> void:
-	max_armor = round(base_armor * float(ARMOR_TIERS[armor_tier][3])) + gear_stat("armor")
+	max_armor = round(base_armor * (1.0 + ARMOR_TIER_BONUS * float(armor_tier))) + gear_stat("armor")
 	armor = minf(armor, max_armor)
 	Gear.apply_worn(self)
 
