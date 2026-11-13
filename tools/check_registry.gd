@@ -46,6 +46,11 @@ const CHECKS := {
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],  # GARDEN_MODERN.md 5
 	"--garden-items-check": ["res://tools/garden_items_check.gd", "garden_items_check", null],  # GARDEN_MODERN.md 1
 	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],  # GARDEN_MODERN 1.2
+	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
+	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5
+	"--icon-art-check": ["res://tools/icon_art_check.gd", "icon_art_check", null],      # painted icons, art/icons
+	"--garden-items-check": ["res://tools/garden_items_check.gd", "garden_items_check", null],      # GARDEN_MODERN.md 1
+	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],      # GARDEN_MODERN 1.2
 	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
 	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],  # Mixing Bowl
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],  # GARDEN.md 9.2
@@ -381,6 +386,9 @@ const CHECKS := {
 	# every Hunter run/dash/glide on The Hollow Crown: stall count + worst spots
 	"--snag-check": ["res://tools/snag_check.gd", "snag_check", null],
 	"--item-art-check": ["res://tools/item_art_check.gd", "item_art_check", null],      # sculpted item models
+	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
+	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],      # far rocks and trees batched
+	"--prop-glb-check": ["res://tools/prop_glb_check.gd", "prop_glb_check", null],      # art/props models
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--wall-kick-pose-check": ["res://tools/wall_kick_pose_check.gd", "wall_kick_pose_check", null],
 	"--first15-shots": ["res://tools/first15_shots.gd", "first15_shots", null],      # --shots-dir=<dir> --size=WxH
