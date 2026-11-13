@@ -5672,11 +5672,16 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 	return best
 
 func _tip(key: String, text: String) -> void:
+	if hud != null and tip_once(key):
+		hud.tip(text)
+
+## The first-time hints' once-per-save gate (Save.d.tutorial): true the one time key is asked for.
+func tip_once(key: String) -> bool:
 	var seen: Dictionary = Save.d["tutorial"]
-	if seen.get(key, false) or hud == null:
-		return
+	if seen.get(key, false):
+		return false
 	seen[key] = true
-	hud.tip(text)
+	return true
 
 func _tips() -> void:
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
