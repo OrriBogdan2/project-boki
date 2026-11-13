@@ -162,6 +162,7 @@ func _flight() -> void:
 	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new flight", not J.running() and J.flights == 2, "cd %.1f" % float(K.cd["x"]))
 	await _steer(m, P, K, home)
+	await _move_feel(m, P, K, home)
 	await ak.done(m)
 
 ## Steering: the flight follows the cursor at no more than turn_deg a second, so the carpet curves.
@@ -184,6 +185,96 @@ func _steer(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 		"ult steer: the flight curves (it ends well to the side)", P.pos.z - home.z > 3.0 and P.pos.x - home.x > 3.0,
 		"x %.1f z %.1f" % [P.pos.x - home.x, P.pos.z - home.z]
 	)
+
+## How the flight moves him (docs/heroes/ashwick.md "Movement settled"): the cursor steers, WASD never does;
+## full speed from lift-off to the end; the end hands over at run speed (the shared dash exit) and the next step
+## is free; off a terrace he eases back down to his low flight; ending over the void he falls, the glider keeps
+## the flight's burst.
+func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
+	var J := K.jet
+	ak.step(m, 0.5)
+	P.teleport(home)
+	var ahead := func(): ak.aim_at(P, P.pos + Vector3(12, 0, 0))
+	_cast(P, home + Vector3(12, 0, 0))
+	var slow := 99.0
+	var fast := 0.0
+	var q := P.pos
+	var t := 0.0
+	while J.running():
+		P.inp["move"] = Vector2(0, 1)
+		ak.step(m, 1.0 / 60.0, ahead)
+		t += 1.0 / 60.0
+		var v := Vector2(P.pos.x - q.x, P.pos.z - q.z).length() * 60.0
+		q = P.pos
+		if J.running() and t > 0.03:
+			slow = minf(slow, v)
+			fast = maxf(fast, v)
+	var dir: Vector2 = Vector2(P.pos.x - home.x, P.pos.z - home.z).normalized()
+	var drift := rad_to_deg(absf(dir.angle_to(Vector2.RIGHT)))
+	ok("ult move: WASD never steers the flight, only the cursor does", drift < 2.0, "%.1f deg off the cursor" % drift)
+	var top := float(K.x_def()["speed"])
+	ok(
+		"ult move: full speed from lift-off to the end, no ramp (12.6 m/s)",
+		slow > top - 0.5 and fast < top + 0.5, "%.1f..%.1f m/s" % [slow, fast]
+	)
+	P.inp["move"] = Vector2(1, 0)
+	ak.step(m, 1.0 / 60.0)
+	var hv := Vector2(P.vel.x, P.vel.z).length()
+	ok(
+		"ult end: the run carries on at run speed (the shared dash exit), not a stop",
+		absf(hv - P.base_speed * HunterMove.dash_exit_run) < 0.3 and P.roll_t <= 0.0,
+		"%.2f m/s, run %.2f" % [hv, P.base_speed]
+	)
+	P.dashes = P.max_dashes()
+	P.inp["dash"] = true
+	ak.step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	ok("ult end: the first step after it is free (Shift dashes)", P.roll_t > 0.0 and not J.running())
+	ak.step(m, 0.6)
+	await _ledge_and_void(m, P, K, home, m.world)
+
+func _ledge_and_void(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> void:
+	var J := K.jet
+	var hx := int(floor(home.x))
+	var hz := int(floor(home.z))
+	for dz in range(-3, 4):
+		for dx in range(-3, 3):
+			W.level[W.idx(hx + dx, hz + dz)] += 2
+	P.teleport(home + Vector3(0, 2.0 * World.LEVEL, 0))
+	ak.step(m, 0.3)
+	_cast(P, home + Vector3(16, 0, 0))
+	ak.step(m, 0.9, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
+	var low: float = P.pos.y - W.ground_at(P.pos.x, P.pos.z)
+	ok(
+		"ult ledge: off a terrace he eases back down to his low flight",
+		J.running() and P.pos.x - home.x > 6.0 and low < float(K.x_def()["hover"]) + 0.3, "%.2f m up" % low
+	)
+	ak.step(m, 1.2)
+	for dz in range(-3, 4):
+		for dx in range(-3, 3):
+			W.level[W.idx(hx + dx, hz + dz)] -= 2
+	for dz in range(-4, 5):
+		for dx in range(12, 30):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
+	P.teleport(home)
+	ak.step(m, 0.3)
+	_cast(P, home + Vector3(30, 0, 0))
+	var y0 := 0.0
+	while J.running():
+		y0 = P.pos.y
+		ak.step(m, 1.0 / 60.0, func(): ak.aim_at(P, home + Vector3(30, 0, 0)))
+	var handed := not P._handoff.is_empty()
+	ak.step(m, 0.3)
+	ok(
+		"ult abyss: ending over the void he falls (no hold), the flight's burst handed to the glider",
+		W.is_void(P.pos.x, P.pos.z) and P.pos.y < y0 - 0.2 and handed, "fell %.2f handoff %s" % [y0 - P.pos.y, handed]
+	)
+	for dz in range(-4, 5):
+		for dx in range(12, 30):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
+	P.teleport(home)
+	P.vel = Vector3.ZERO
 
 func _carpet() -> void:
 	var r: Array = ak.setup("ashwick", 16.0, "", true)
