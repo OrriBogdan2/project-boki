@@ -54,6 +54,11 @@ func _flat_round(w: World, g: Vector3) -> bool:
 			var q := Vector2(g.x + dx, g.z + dz)
 			if absf(w.ground_at(q.x, q.y) - y) > 0.001 or w.stairs.has(w.idx(int(floor(q.x)), int(floor(q.y)))):
 				return false
+			# a block (a prop's footprint) beside the lane would push a falling body out of its side at its top
+			for bz in range(int(floor(q.y)) - 1, int(floor(q.y)) + 2):
+				for bx in range(int(floor(q.x)) - 1, int(floor(q.x)) + 2):
+					if w.inb(bx, bz) and w.kind[w.idx(bx, bz)] == World.T_BLOCK:
+						return false
 			if w.occupy(q.x, q.y, 0.45, y, false) != 0.0:
 				return false
 	return true
@@ -80,6 +85,11 @@ var m: Match
 var h: Hunter
 
 func _reset(at: Vector3, v: Vector3, standing: bool) -> void:
+	# a mode that respawns mobs (the Training Area) must not walk one into the faller: it nudges its position
+	if is_instance_valid(m):
+		for mb in m.mobs:
+			if is_instance_valid(mb): mb.queue_free()
+		m.mobs.clear()
 	h.teleport(at)
 	h.vel = v
 	h.grounded = standing
