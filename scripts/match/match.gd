@@ -1668,7 +1668,7 @@ const SQUAD_PING_T := 45.0
 ## A squad ping: one per hunter (a new one moves it), seen by their squad on the map, the minimap and
 ## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" or "loot".
 func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
-	if h == null:
+	if h == null or (from_net and MuteList.has(h.pname)):
 		return
 	if not world.is_void(p.x, p.z):
 		p.y = world.ground_at(p.x, p.z)

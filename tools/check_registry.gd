@@ -306,6 +306,7 @@ const CHECKS := {
 	"--results-stage-check": ["res://tools/results_stage_check.gd", "results_stage_check", "check"],
 	"--results-stage-shots": ["res://tools/results_stage_check.gd", "results_stage_check", "shots"],      # --shots-dir
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
+	"--mute-check": ["res://tools/mute_check.gd", "mute_check", null],      # muting a player: chat, voice, pings
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],

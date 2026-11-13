@@ -9,6 +9,7 @@ var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
+var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
@@ -85,7 +86,7 @@ func close_map() -> void:
 		full_map.close()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if full_map and full_map.input(event):
+	if score_mute.click(event, c.get_local_mouse_position()) or (full_map and full_map.input(event)):
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
@@ -319,6 +320,8 @@ func _draw_all() -> void:
 			_draw_dead(sz, p)
 	if Input.is_action_pressed("scores"):
 		_draw_scores(sz)
+	else:
+		score_mute.hide()
 	if wheel_open:
 		_draw_wheel()
 	if p and not p.out and not p.extracted and not map_open():
@@ -1837,7 +1840,7 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 		_ctext(Vector2(sz.x * 0.5, y0 + 28 + i * 22), lines[i], 16, INK if i < 2 else MUTED)
 
 func _draw_scores(sz: Vector2) -> void:
-	var r := Rect2(Vector2(sz.x * 0.5 - 300, sz.y * 0.18), Vector2(600, 40 + m.hunters.size() * 28))
+	var r := Rect2(Vector2(sz.x * 0.5 - 345, sz.y * 0.18), Vector2(690, 40 + m.hunters.size() * 28))
 	_panel(r, Color(0.05, 0.06, 0.09, 0.9), 14)
 	_text(r.position + Vector2(20, 30), "Hunter", 14, MUTED); _text(r.position + Vector2(260, 30), "Boki", 14, MUTED)
 	_text(r.position + Vector2(380, 30), "Knocks", 14, MUTED); _text(r.position + Vector2(450, 30), "Damage", 14, MUTED); _text(r.position + Vector2(530, 30), "State", 14, MUTED)
@@ -1853,6 +1856,7 @@ func _draw_scores(sz: Vector2) -> void:
 		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
 		var st := "Out" if h.out else ("Extracted" if h.extracted else ("Down" if h.downed else "Alive"))
 		_text(Vector2(r.position.x + 530, y), st, 14, BAD if h.out else (Color("8fe3c8") if h.extracted else INK))
+		score_mute.draw(self, h, r.position.x + 606, y)
 		y += 28
 
 var abyss_cued := false
@@ -2306,7 +2310,7 @@ func loot_is(b: Dictionary) -> bool:
 	return loot_open != null and is_same(loot_open, b)
 
 func mouse_on_ui() -> bool:
-	return wheel_open or map_open() or mouse_on_panel()
+	return wheel_open or map_open() or mouse_on_panel() or score_mute.over(c.get_local_mouse_position())
 
 var ui_extra: Array = []      # other panels that own the mouse (the practice areas' bottom bar)
 
