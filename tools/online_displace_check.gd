@@ -2,10 +2,12 @@ extends "res://tools/displace_net_check.gd"
 ## --online-displace-check[=<delay ms>]: abilities that move a Hunter look the same online as offline, with
 ## added network delay. Three real processes on one machine: a headless relay server (it logs every position
 ## snapshot it forwards), and two games (this one is the host, the other the guest) that connect to it through
-## tools/udp_delay.py (default 100 ms each way, so 200 ms of round trip; `=0` goes straight to the relay).
+## tools/udp_delay.py (default 100 ms each way, so 200 ms of round trip; `=0` goes straight to the relay;
+## `--od-jitter=<ms>` adds up to that much either way to each datagram, like netem's jitter).
 ## Each move is played first on a bot (the offline reference), then on the guest's hunter. The moved Hunter's
 ## path is recorded on the server, on its own game and on the other game, and compared with the offline path:
-## largest step in one frame (a snap), where it ends, and whether it moved twice as far (a double move).
+## largest step in one frame (a snap), where it ends, whether it moved twice as far (a double move), how far the
+## other game's copy strays off the own game's path (a rubber band) and how late each game starts the move.
 ## Lines: ODISP row|ok|FAIL ...; the table is written to <user dir>/online_displace/table.md.
 
 const OD_DIR := "user://online_displace"
@@ -16,9 +18,11 @@ const END_TOL := 0.75        # m: a view ends this close to the offline end and 
 const DOUBLE := 1.5          # a path or displacement this many times the offline one is a double move
 const SNAP := 4.0            # m in one frame on the mover's own game: no move here is that fast (Ent.net_follow's jump)
 const BOT_AT := Vector3(-6.0, 0, 9.0)   # m from home: where the bot waits
+const GO := 0.3              # m from where it stood: the move has started (for the late-start columns)
 
 var role := ""
 var delay_ms := 100
+var jitter_ms := 0
 var relay_port := 0
 var peer_id := ""
 var pids: Array = []
@@ -36,6 +40,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--od-port="): relay_port = int(a.substr(10))
 		if a.begins_with("--od-dir="): dir = a.substr(9)
 		if a.begins_with("--od-delay="): delay_ms = int(a.substr(11))
+		if a.begins_with("--od-jitter="): jitter_ms = int(a.substr(12))
 	if role.is_valid_int():
 		delay_ms = int(role)
 		role = ""
@@ -126,10 +131,10 @@ func _host() -> void:
 		await main.get_tree().create_timer(0.5).timeout
 	ok(FileAccess.file_exists(dir.path_join("server.ready")), "the headless relay server listens on %d" % relay_port)
 	if delay_ms > 0:
-		pids.append(_spawn("python3 -I tools/udp_delay.py %d %d %d > '%s' 2>&1" % [
-			port, relay_port, delay_ms, dir.path_join("proxy.log")]))
+		pids.append(_spawn("python3 -I tools/udp_delay.py %d %d %d %d > '%s' 2>&1" % [
+			port, relay_port, delay_ms, jitter_ms, dir.path_join("proxy.log")]))
 		await main.get_tree().create_timer(0.5).timeout
-	ok(await _connect(), "the host is on the server as %s (%d ms each way)" % [Net.me, delay_ms])
+	ok(await _connect(), "the host is on the server as %s (%d ms each way, jitter %d)" % [Net.me, delay_ms, jitter_ms])
 	pids.append(_spawn("%s --online-displace-check=guest > '%s' 2>&1" % [common, dir.path_join("guest.log")]))
 	t0 = Time.get_ticks_msec()
 	while peer_id == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -163,6 +168,9 @@ func _host() -> void:
 		{"mates": true, "tp": true})
 	await _move("Sparkle Kitefall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self", "guest"])
 	await _move("Knock into a wall", "mage", Vector3(4, 0, 2), _knock, 1.4, G, B, ["guest"])
+	await _move("Kael Rampage dash", "juggernaut", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
+	await _move("Grimble Barge dash", "dredge", Vector3(6, 0, 0), _dash.bind(0.0), 1.0, G, B, ["self"])
+	await _move("Neve Skate (held 0.5 s)", "rimewright", Vector3(6, 0, 0), _dash.bind(0.5), 1.2, G, B, ["self"])
 	await _finish()
 
 ## One move: the same ability on a bot (the offline reference), then on the guest's hunter from the same spot.
@@ -238,6 +246,16 @@ func _sparkle(t: Hunter) -> void:
 	await _run(DT)
 	m.player.ak.ult_recast()          # pressed in the crouch: she comes down after the hang
 
+## The caster's dash away from the target (-x), the key held `hold` seconds (Neve's skate runs while it is held).
+func _dash(_t: Hunter, hold: float) -> void:
+	var P := m.player
+	P.inp["move"] = Vector2(-1, 0)
+	P.inp["dash_down"] = true
+	P.do_dash()
+	await _run(maxf(hold, DT))
+	P.inp["dash_down"] = false
+	P.inp["move"] = Vector2.ZERO
+
 func _knock(t: Hunter) -> void:
 	t.hurt(1.0, m.player, {"kb": Vector2(0, 16.0), "wallstun": 1.0, "src": "abil", "ab": "lmb", "melee": true})
 	await _run(DT)
@@ -269,9 +287,10 @@ func _load(who: String) -> Dictionary:
 		out[f[1]].append([float(f[0]), Vector3(float(f[2]), float(f[3]), float(f[4]))])
 	return out
 
-## A path inside [a, b]: its largest step between samples, its length, where it starts and ends.
+## A path inside [a, b]: its largest step between samples, its length, where it starts and ends, when it first
+## got GO from its start (s after a) and its samples.
 static func _walk(log: Array, a: float, b: float) -> Dictionary:
-	var r := {"max": 0.0, "len": 0.0, "start": Vector3.INF, "end": Vector3.INF}
+	var r := {"max": 0.0, "len": 0.0, "start": Vector3.INF, "end": Vector3.INF, "go": INF, "pts": []}
 	var prev := Vector3.INF
 	for s in log:
 		if s[0] < a or s[0] > b: continue
@@ -281,9 +300,31 @@ static func _walk(log: Array, a: float, b: float) -> Dictionary:
 			r["len"] += step
 		else:
 			r["start"] = s[1]
+		if r["go"] == INF and s[1].distance_to(r["start"]) > GO:
+			r["go"] = s[0] - a
 		prev = s[1]
 		r["end"] = s[1]
+		r["pts"].append(s[1])
 	return r
+
+## The farthest any point of `view` is from the path `path` (a polyline), in m: how far a copy strays off
+## the line its owner took, whenever it took it (a rubber band; being late along the line does not count).
+static func _off_path(view: Array, path: Array) -> float:
+	var worst := 0.0
+	for p in view:
+		var near := INF
+		for i in range(1, path.size()):
+			var a: Vector3 = path[i - 1]
+			var ab: Vector3 = path[i] - a
+			var k := clampf((p - a).dot(ab) / maxf(ab.length_squared(), 1e-6), 0.0, 1.0)
+			near = minf(near, p.distance_to(a + ab * k))
+		if path.size() == 1: near = p.distance_to(path[0])
+		worst = maxf(worst, near)
+	return worst
+
+## ms later than offline a path got going ("-" if it never did).
+static func _late(w: Dictionary, ref: Dictionary) -> String:
+	return "-" if w["go"] == INF or ref["go"] == INF else "%d" % roundi((w["go"] - ref["go"]) * 1000.0)
 
 func _report() -> void:
 	var host_log := _load("host")
@@ -292,8 +333,9 @@ func _report() -> void:
 	var me := "P" + Net.me
 	var gu := "P" + peer_id
 	var md := "| Move | Mover | Step/frame own (offline) | Step/frame other | Step/snapshot server | "
-	md += "End: own vs offline | End: other vs own | End: server vs own | Moved vs offline | Note |\n"
-	md += "|---|---|---|---|---|---|---|---|---|---|\n"
+	md += "End: own vs offline | End: other vs own | End: server vs own | Moved vs offline | "
+	md += "Rubber band other (m) | Late start own / other (ms) | Note |\n"
+	md += "|---|---|---|---|---|---|---|---|---|---|---|---|\n"
 	for r in rows:
 		for w in r["who"]:
 			var nid: String = me if w == "self" else gu
@@ -309,9 +351,11 @@ func _report() -> void:
 			var d_ref: float = ref["start"].distance_to(ref["end"]) if ref["end"] != Vector3.INF else 0.0
 			var ratio: float = d_own / maxf(d_ref, 0.01)
 			var lratio: float = own["len"] / maxf(ref["len"], 0.01)
-			md += "| %s | %s | %.2f (%.2f) | %.2f | %.2f | %.2f | %.2f | %.2f | %.1f vs %.1f m (x%.2f) | %s |\n" % [
+			var band := _off_path(other["pts"], own["pts"])
+			md += "| %s | %s | %.2f (%.2f) | %.2f | %.2f | %.2f | %.2f | %.2f | %.1f vs %.1f m (x%.2f) " % [
 				r["name"], "caster" if w == "self" else "moved Hunter", own["max"], ref["max"], other["max"],
-				srv["max"], e_own, e_oth, e_srv, d_own, d_ref, ratio, r["note"]]
+				srv["max"], e_own, e_oth, e_srv, d_own, d_ref, ratio]
+			md += "| %.2f | %s / %s | %s |\n" % [band, _late(own, ref), _late(other, ref), r["note"]]
 			var tag: String = "%s, %s" % [r["name"], w]
 			ok(d_ref > MOVE_MIN and d_own > MOVE_MIN, "%s: moved (%.1f m online, %.1f offline)" % [tag, d_own, d_ref])
 			ok(own["max"] < SNAP or r["tp"], "%s: no snap on its own game (step %.2f m)" % [tag, own["max"]])
