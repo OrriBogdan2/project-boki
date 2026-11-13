@@ -11,6 +11,8 @@ extends RefCounted
 ##      and the player build, save and load mid-build, skipping still puts the house down
 ##   5. base_mode: the four-step base tutorial (meet, feed and the lean, toy, head out or stay), your Boki
 ##      leading each step, a Skip on screen at every step, resume after save and load, the farm guides retired
+##   6. the hub's first visit (HubFirstVisit): the Waystone marker, the one line on the first locked zone's
+##      card, each once per save, and neither on a skipped save
 ## Never touches the real save.
 
 var bad := 0
@@ -64,6 +66,7 @@ func run(m: Node, mode := "") -> void:
 	await _farm2()
 	await _base_mode()
 	await _base_tutorial()
+	await _hub_first_visit()
 	print("FTUT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -943,3 +946,59 @@ func _free_cells(hb, sz: Vector2i) -> Array:
 			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
 			if hb.fits(hb.held, cs): return cs
 	return []
+
+# ------------------------------------------------------------------ 7. the hub's first visit
+func _labels(n: Node) -> Array:
+	var out: Array = [n.text] if n is Label and not n.is_queued_for_deletion() else []
+	for c in n.get_children().filter(func(c): return not c.is_queued_for_deletion()):
+		out.append_array(_labels(c))
+	return out
+
+func _hub_first_visit() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = _new_save()
+	Save.d["tutorial"]["ft"] = {"did": {}, "done": false, "skipped": false, "gift": false}
+	HomeLayout.ensure(Save.d)
+	Game.goto("home", {"zone": GardenZones.HUB})
+	var hub = null
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 60000:
+		await main.get_tree().process_frame
+		var cur = Game.main.current
+		var built: bool = is_instance_valid(cur) and cur.get("hhints") != null and cur.get("building") != true
+		if built and cur.get("root_ui") != null:
+			hub = cur
+			break
+	ok(hub != null, "hub first visit: the hub loads")
+	if hub == null:
+		return
+	var first: HubFirstVisit = hub.hhints.first
+	var at: Vector3 = hub.hway.node.position
+	ok(first.marker != null and first.marker.text == "Step in to travel" and first.marker.position.y > at.y + 1.0,
+			"beat 1: a marker floats over the Waystone saying 'Step in to travel'")
+	hub.ppos = at + Vector3(6, 0, 6)
+	first.tick(0.5)
+	ok(first.marker != null and hub.panel_open == "", "far from the ring it stays, and nothing is blocked")
+	hub.ppos = at + Vector3(1, 0, 0)
+	first.tick(0.1)
+	ok(first.marker == null and Save.d["tutorial"]["hub_first"].has("marker"), "stepping on the ring retires it")
+	ok(HubFirstVisit.new(hub).marker == null, "and it never shows again")
+	ZoneCards.open(hub, GardenZones.HUB)
+	var line := String(HubFirstVisit.rules()["line_text"])
+	var texts := _labels(hub.panel_host)
+	ok(texts.count(line) == 1 and Save.d["tutorial"]["hub_first"].has("line"),
+			"beat 2: the first time the list opens, exactly one locked card carries the line")
+	hub._close_panel()
+	ZoneCards.open(hub, GardenZones.HUB)
+	ok(_labels(hub.panel_host).count(line) == 0, "the next time the list opens, the line is gone")
+	hub._close_panel()
+	Save.d["tutorial"]["hub_first"].clear()
+	FarmTutorial.state()["skipped"] = true
+	var seen_any := HubFirstVisit.wanted("marker") or HubFirstVisit.wanted("line")
+	ok(HubFirstVisit.new(hub).marker == null and not seen_any,
+			"a skipped save sees neither beat")
+	ZoneCards.open(hub, GardenZones.HUB)
+	ok(_labels(hub.panel_host).count(line) == 0 and Save.d["tutorial"]["hub_first"].is_empty(),
+			"and its list has no line and records nothing")
+	hub._close_panel()
+	Content.rules("farm_build")["base_mode"] = false
