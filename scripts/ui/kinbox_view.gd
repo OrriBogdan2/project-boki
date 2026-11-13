@@ -423,6 +423,11 @@ func _build_detail() -> void:
 	detail.add_child(top)
 	if rec.get("shimmer", false):
 		detail.add_child(_rare_row("shimmer", "Shimmering", "its own rare colours", UI.INK))
+	var rare := BokiQuirks.rare_of(rec)
+	if not rare.is_empty():
+		var rr := _rare_row(String(rare["id"]), String(rare["name"]), "a rare trait", Color("c9a6ff"))
+		rr.tooltip_text = "%s: %s" % [rare["name"], rare["note"]]
+		detail.add_child(rr)
 	for mid in Mutations.of(rec):
 		detail.add_child(_rare_row(mid, Mutations.name_of(mid), Mutations.perk_text(mid), UI.INK))
 	var bd: Array = Care.bond(rec)
