@@ -1,0 +1,15 @@
+{
+	"_doc": "The pose each Hunter holds on the results stage (scripts/ui/results_stage.gd): one clip of its own GLB, frozen at t seconds, a held strike or an idle beat that fits it. Keyed by Hunter id; a Hunter left out stands in the plain idle.",
+	"gunslinger": {"clip": "lmb", "t": 0.2},
+	"juggernaut": {"clip": "slash_r", "t": 0.25},
+	"thief": {"clip": "flourish", "t": 0.4},
+	"ashwick": {"clip": "lance", "t": 0.3},
+	"rimewright": {"clip": "spear", "t": 0.3},
+	"archer": {"clip": "draw", "t": 1.2},
+	"dredge": {"clip": "flex", "t": 0.3},
+	"ostra": {"clip": "flurry", "t": 0.5},
+	"tender": {"clip": "hearth", "t": 0.5},
+	"mage": {"clip": "rmb_hold", "t": 0.5},
+	"dolm": {"clip": "lmb_punch", "t": 0.35},
+	"bulwark": {"clip": "rmb_guard", "t": 0.5}
+}
