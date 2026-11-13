@@ -7,16 +7,10 @@ extends RefCounted
 ## A bonus key drops on the ground like a carrier's (KeyCarry.drop_keys) and bots go for it (BotKeys).
 ## Keys are never sold in shops.
 
-const RULES_PATH := "res://content/rules/chest_keys.json"
-
-static var _rules: Dictionary = {}
-
-## The bonus odds per source kind, read once from content/rules/chest_keys.json.
+## The bonus odds per source kind (content/rules/chest_keys.json, cached by Content).
 static func rules() -> Dictionary:
-	if _rules.is_empty():
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
-		_rules = parsed if parsed is Dictionary else {}
-	return _rules
+	return Content.rules("chest_keys")
+
 
 ## What kind of source a monster is: "boss", "elite", "monster", or "" for none. The Shrubling always
 ## carries a key anyway, and the Blight swarm would flood the map with keys.
@@ -30,6 +24,7 @@ static func mob_source(mb: Mob) -> String:
 		return "elite"
 	return "monster"
 
+
 ## Expected keys from one source of kind `source` (the check sums these to measure the surplus).
 static func expected(source: String) -> float:
 	var odds = rules().get(source)
@@ -38,6 +33,7 @@ static func expected(source: String) -> float:
 	if odds == null:
 		return 0.0
 	return float(odds)
+
 
 ## How many keys a source of kind `source` gives on this roll (0, 1 or 2). Only the host rolls.
 static func roll(m: Match, source: String) -> int:
@@ -53,6 +49,7 @@ static func roll(m: Match, source: String) -> int:
 		return 2 if dice.randf() < float(odds["two"]) else 1
 	return 1 if dice.randf() < float(odds) else 0
 
+
 ## A monster died: maybe a bonus key, on top of its carrier key if it had one.
 static func on_mob_dead(m: Match, mb: Mob) -> void:
 	var n := roll(m, mob_source(mb))
@@ -61,6 +58,7 @@ static func on_mob_dead(m: Match, mb: Mob) -> void:
 	m.keys.bonus_given += n
 	KeyCarry.drop_keys(m, KeyCarry.drop_spot(m, mb), n)
 
+
 ## A breakable broke (kind "pot", "crate", "barrel" or "keg"), or a sky-train crate was opened ("train_crate").
 static func on_break(m: Match, at: Vector3, source: String) -> void:
 	var n := roll(m, source)
@@ -68,6 +66,7 @@ static func on_break(m: Match, at: Vector3, source: String) -> void:
 		return
 	m.keys.bonus_given += n
 	KeyCarry.drop_keys(m, at + Vector3(0, 0.5, 0), n)
+
 
 ## The expected bonus keys over everything in the world now (monsters, pots, crates, sky-train
 ## crates), as a share of the locked chests: the surplus --keys-check holds to 20-30%.

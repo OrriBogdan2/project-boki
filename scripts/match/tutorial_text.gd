@@ -2,7 +2,7 @@ class_name TutorialText
 extends RefCounted
 ## The tutorial's longer words: the second line under a step's banner (content/rules/tutorial.json
 ## "detail") and the Boki's hints, filled in from the player's own keys and the hunter's ability data.
-## %E the E key, %U the ultimate's level, %F interact, %T the Boki key, %R rank-up combo,
+## %C crouch (the dive), %E the E key, %U the ultimate's level, %F interact, %T the Boki key, %R rank-up combo,
 ## %N the E ability's name, %X the E ability in
 ## plain words (key included).
 
@@ -29,7 +29,8 @@ static func fill(txt: String, h: Hunter) -> String:
 	if h != null and h.ak != null:
 		nm = String(h.ak.e_def().get("name", nm))
 	return txt.replace("%X", ability_tip(h)).replace("%R", rank_combo()).replace("%N", nm) \
-			.replace("%E", Settings.key_cap("signature")).replace("%F", Settings.key_cap("interact")) \
+			.replace("%C", Settings.key_cap("crouch")).replace("%E", Settings.key_cap("signature")) \
+			.replace("%F", Settings.key_cap("interact")) \
 			.replace("%T", Settings.key_cap("throw")).replace("%U", str(Hunter.ULT_AT[0]))
 
 ## Word-wraps a line to a pixel width, shrinking the type until it fits `max_lines`. Returns {lines, px}.

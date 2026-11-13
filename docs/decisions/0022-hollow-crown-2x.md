@@ -47,6 +47,13 @@ MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
   the sky ship picks nothing; a calm bot past SimLod.THINK_FAR_M (90 m) chooses half as often; shots
   gather their possible targets once a step, not every 0.25 m. `--crowd-check` covers the naps, the
   scene cache and the colours.
+- Per-step pass (2026-11-11, ext/perf-frame-1111): `World.occupy` samples the ground from a const table
+  (nine Vector2s a call, every body twice a step, were a third of a slide); Hunter and Kin cooldowns
+  count down directly (`HunterCooldowns`), not by name through set()/get(); the lair seal sweep walks
+  the entities without a bodies array; a bot re-tests line of sight to the same target every
+  Bot.LOS_RECHECK_S (0.1 s), a new target at once. (A 10 Hz foe scan for an idle Boki was tried and
+  dropped: `--bot-sanity-check` flagged bots flipping their facing far more often with it.)
+  `--perf-throttle-check` covers the line-of-sight cache.
 - The generator now fails a rock over the void, and `sc_rocks` moves touching rocks as one group so
   an L-shaped boulder doesn't split under the scale.
 - GPU pass, pc-MRROBOTO, `--perf-probe` (ms a frame; load and steps in s). Main is ext/map-parity-integ at

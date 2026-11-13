@@ -1,9 +1,10 @@
 extends RefCounted
-## --wisp-shots --shots-dir=<dir>: review frames for the downed Wisp (docs/decisions/0019), in a live match
-## under xvfb with a renderer. The player is knocked, drifts, then is revived:
+## --wisp-shots --shots-dir=<dir> [--shots-arch=<hero>]: review frames for the downed Wisp (docs/decisions/0019),
+## in a live match under xvfb with a renderer. The player is knocked, drifts, then is revived:
 ##   wisp_0_hero      standing, before the knock
-##   wisp_1_pop_a     the pop-in, first frames (flash and ring)
-##   wisp_2_pop_b     the pop-in settling (puff, Wisp small)
+##   wisp_1_fall_a    the knocked-down beat (HunterFall), staggering along the hit
+##   wisp_2_fall_b    down on a knee, the Wisp coming out of the body
+##   wisp_2_fall_c    collapsed, the body fading, the Wisp risen
 ##   wisp_3_idle      the Wisp floating low with a steady glow, the hero gone
 ##   wisp_4_moving    the Wisp hanging back behind the moving hunter, leaning back
 ##   wisp_5_settle    the hunter stopped, the Wisp still catching up
@@ -15,11 +16,13 @@ extends RefCounted
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
+const STRIP_ZOOM := 0.6      # the camera in closer, so the fall's pose reads
 
 var main: Node
 var m: Match
 var P: Hunter
 var dir := ""
+var arch := ""
 var lines: Array = []
 
 func run(main_node: Node) -> void:
@@ -27,6 +30,8 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--shots-arch="):
+			arch = String(a).substr(13)
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	await _go(0.4)
@@ -34,11 +39,13 @@ func run(main_node: Node) -> void:
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	m.knock(P, foe, {})
 	P.down_hp = 1e6
-	await _go(0.07)
-	_take("wisp_1_pop_a", "Pop-in, first frames: the flash and the ring where the hero was")
 	await _go(0.1)
-	_take("wisp_2_pop_b", "Pop-in settling: the puff drifts off, the Wisp grows to size")
-	await _go(0.5)
+	_take("wisp_1_fall_a", "Knocked down, 0.1 s: staggering along the hit, the flash and ring of the down")
+	await _go(0.12)
+	_take("wisp_2_fall_b", "0.22 s: dropping to a knee, the Wisp coming out of the body")
+	await _go(0.13)
+	_take("wisp_2_fall_c", "0.35 s: collapsed, the body fading as the Wisp rises")
+	await _go(0.4)
 	_take("wisp_3_idle", "The Wisp idling low: round outline, team rim, white core, steady glow, the hero hidden")
 	await _go(0.5, Vector3(0.05, 0, 0.03))
 	_take("wisp_4_moving", "The Wisp hangs back behind the moving hunter and leans back, slow and heavy")
@@ -84,6 +91,10 @@ func _setup() -> void:
 	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	P = m.player
+	if arch != "":
+		P.reclass(Arch.weight(arch), arch)
+	m.cam.zoom_to = STRIP_ZOOM
+	m.cam.zoom = STRIP_ZOOM
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()

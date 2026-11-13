@@ -100,6 +100,8 @@ func run(m: Node) -> void:
 	var H = load("res://scripts/home/home.gd").new()
 	main.add_child(H)
 	for _f in 4: await main.get_tree().process_frame
+	# built under a still-covered fade, the farm comes in slices
+	while H.building: await main.get_tree().process_frame
 	H.day_t = 0.5
 	var hw: HomeWork = H.hw
 	ok(hw != null and H.kins.size() == 6, "home puts the 6 farm kin out to work (the boxed one stays in the burrow)")

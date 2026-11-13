@@ -4,7 +4,12 @@ extends RefCounted
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
+## The ultimate-ready chime (UltReadyCue): once per R coming back, only for you (never a rival's or a
+## teammate's R), never on a match's first look, held while you're down until you're up, and set lower
+## under a kill callout.
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
+## teammate's quieter than a rival's, your own one level wherever the camera is.
 
 var main: Node
 var fails := 0
@@ -19,7 +24,7 @@ func ok(cond: bool, what: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.d["music"] = Save.d.get("music", [])
-	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
 		"demo_kin": "cindle"})
 	for i in 6:
 		await main.get_tree().process_frame
@@ -50,7 +55,9 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	await _ult_chime(m, P)
 	_ult_cues(m, P)
+	_steps(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
@@ -69,9 +76,57 @@ func run(main_node: Node) -> void:
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
-	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
+	var left := Sfx.match_voices()      # the farm's own beds are not counted (Sfx.MATCH_BEDS)
+	ok(left == 0, "after the fades nothing the match started is playing (%d)" % left)
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+func _ult_chime(m: Match, P: Hunter) -> void:
+	var mate: Hunter = null
+	var rival: Hunter = null
+	for h in m.hunters:
+		if h != P and h.team == P.team: mate = h
+		elif h.team != P.team: rival = h
+	ok(P.ak != null and not P.ak.x_def().is_empty() and mate != null and rival != null,
+		"setup: you have an R, a teammate and a rival")
+	if mate == null or rival == null or P.ak == null:
+		return
+	P.ctrl = "local"          # (a bot could cast it the step it's back; you hold no keys here)
+	var fresh := UltReadyCue.new()
+	for h in [P, mate, rival]:
+		h.lvl = maxi(h.lvl, int(Hunter.ULT_AT[0]))
+		h.ak.cd["x"] = 0.0
+	fresh.tick(m)
+	ok(fresh.plays == 0, "a match's first look at an R already ready is quiet")
+	var cue: UltReadyCue = m.ult_cue
+	_step(m, 0.1)
+	var before := cue.plays
+	P.ak.cd["x"] = 0.8
+	mate.ak.cd["x"] = 0.3
+	rival.ak.cd["x"] = 0.3
+	_step(m, 0.5)
+	ok(HeroUlt.ready(mate.ak) and HeroUlt.ready(rival.ak) and cue.plays == before,
+		"a teammate's and a rival's R coming back stays quiet (%d chimes)" % (cue.plays - before))
+	_step(m, 0.5)
+	ok(cue.plays == before + 1, "your R coming back chimes once (%d)" % (cue.plays - before))
+	_step(m, 1.0)
+	ok(cue.plays == before + 1, "...and only once while it stays ready (%d)" % (cue.plays - before))
+	m.knock(P, rival, {})
+	P.ak.cd["x"] = 0.3
+	_step(m, 0.6)
+	ok(P.downed and HeroUlt.ready(P.ak) and cue.plays == before + 1, "back while you're down: no chime yet")
+	m.revive_hunter(P, mate)
+	_step(m, 0.1)
+	ok(cue.plays == before + 2, "...it plays once you're up (%d)" % (cue.plays - before))
+	await main.get_tree().create_timer(0.2).timeout      # (Sfx spaces repeats in real ms)
+	Sfx.play("kill")
+	P.ak.cd["x"] = 0.05
+	_step(m, 0.1)
+	var want := UltReadyCue.VOL_DB + UltReadyCue.UNDER_CALLOUT_DB
+	var under := Sfx.players.filter(func(p): return p.playing and p.stream == Sfx.streams[UltReadyCue.SOUND])
+	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
+		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
+	P.ctrl = "bot"
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
@@ -96,6 +151,49 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(P.ak)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+
+## Footsteps by distance, both the foot's contact step and the surface step (Juice.footstep).
+func _steps(m: Match, P: Hunter) -> void:
+	var R: Hunter = m.hunters.filter(func(x): return x != P and x.team != P.team)[0]
+	var far := StepReach.RIVAL_M + 5.0
+	Sfx.listener = P.pos
+	ok(not is_nan(_step_db(R, P, 15.0, true)) and not is_nan(_step_db(R, P, 15.0, false)),
+			"a rival's footsteps (contact and surface) are heard 15 m away, seen or not (unseen %s)" % R.unseen)
+	ok(is_nan(_step_db(R, P, far, true)) and is_nan(_step_db(R, P, far, false)),
+			"...and not at their reach + 5 m (%.0f m)" % far)
+	R.crouch = true
+	var sneak := StepReach.reach(R)
+	ok(sneak < StepReach.RIVAL_M and is_nan(_step_db(R, P, 15.0, true)) and is_nan(_step_db(R, P, 15.0, false)),
+			"a sneaking rival's steps carry %.0f m, not %.0f m: not heard 15 m away" % [sneak, StepReach.RIVAL_M])
+	ok(not is_nan(_step_db(R, P, sneak - 2.0, true)), "...but heard %.0f m away" % (sneak - 2.0))
+	R.crouch = false
+	var rival := _step_db(R, P, 10.0, true)
+	var team := R.team
+	R.team = P.team
+	var mate := _step_db(R, P, 10.0, true)
+	R.team = team
+	ok(mate < rival - 3.0, "a teammate's step 10 m away is quieter than a rival's (%.1f vs %.1f dB)" % [mate, rival])
+	var own_near := _step_db(P, P, 0.0, true)
+	Sfx.listener = P.pos + Vector3(15, 0, 0)
+	var own_far := _step_db(P, P, 0.0, true)
+	Sfx.listener = P.pos
+	ok(not is_nan(own_near) and is_equal_approx(own_near, own_far),
+			"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far])
+
+## The level (dB) of one step of h placed `d` m from P along x (h == P: where P stands), NAN when nothing played.
+## contact: the foot's plain step (StepReach.contact), else the surface step (Juice.footstep).
+func _step_db(h: Hunter, P: Hunter, d: float, contact: bool) -> float:
+	if h != P:
+		h.pos = P.pos + Vector3(d, 0, 0)
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	if contact:
+		StepReach.contact(h)
+	else:
+		Juice.footstep(h)
+	if not Sfx.last_played.keys().any(func(k): return String(k).contains("step")):
+		return NAN
+	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].volume_db
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
 ## step at a time and ticking its GliderSfx directly. A cue plays once: its last-played stamp is set on

@@ -1,0 +1,43 @@
+{
+	"desc": "The garden's daily hooks (scripts/home/garden_wishes.gd, scripts/home/garden_away.gd; briefs/design/GARDEN_MODERN.md section 5, ranks 1 and 3). Each garden day three Boki wish for something (a need back up); granting one is a gift, nothing is ever taken for missing a day. Coming back after time away brings small gifts. Nothing here lowers a need or a stat.",
+	"day_s": 86400,
+	"day_s_doc": "Seconds in one garden day (the local calendar day, cut at midnight).",
+	"wishes": {
+		"count": 3,
+		"count_doc": "Wishes picked each garden day, one card.",
+		"needs": ["food", "energy", "clean", "joy"],
+		"needs_doc": "The needs a wish can be for (the same four KinWants shows as thought bubbles).",
+		"pick_below": 60.0,
+		"pick_below_doc": "A Boki is only picked for a need that is under this (0 to 100), so a wish always has something to do.",
+		"wish_to": 80.0,
+		"wish_to_doc": "The wish is granted when that need is back at or above this (0 to 100), however it got there: you, a toy, a feeder.",
+		"trust": 2.0,
+		"trust_doc": "Trust points (0 to 100) the Boki gains when its wish is granted.",
+		"item": "kibble",
+		"item_n": 1,
+		"item_doc": "The small item a granted wish puts in the pantry (Save.d items).",
+		"bonus_gems": 6,
+		"bonus_doc": "Gems for all the wishes of the day (the Sunsap of GARDEN_MODERN.md 1.2 stands in until the item engine is merged).",
+		"tip": "Grant one for trust and a snack; all %d give %d gems. Miss a day and nothing is lost.",
+		"ask": {
+			"food": "%s is hungry for a meal",
+			"energy": "%s would love a nap",
+			"clean": "%s wants a wash",
+			"joy": "%s wants some fun"
+		}
+	},
+	"away": {
+		"gift_every_h": 2.0,
+		"gift_every_h_doc": "Hours away for each small gift a Boki saves you (a snack of its leading lean).",
+		"gift_max": 3,
+		"gift_max_doc": "Most gifts on one return (so 6 hours away fills it).",
+		"toy_rate": 0.25,
+		"toy_rate_doc": "Share of the at-home training speed toys keep while you are away.",
+		"toy_cycle_s": 90.0,
+		"toy_cycle_s_doc": "Seconds one stat point takes at a toy while you are home (play time plus the walk to it).",
+		"toy_cap": 3,
+		"toy_cap_doc": "Most stat points one Boki trains on one return, never past its level cap.",
+		"patch_overflow_max": 3,
+		"patch_overflow_max_doc": "Most extra snack-patch batches (beyond the one that waits on the patch) that go to the feeder bowl on one return."
+	}
+}

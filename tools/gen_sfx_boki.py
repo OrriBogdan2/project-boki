@@ -6,9 +6,14 @@ of each so a Boki that talks a lot never repeats itself. Moves are by element:
   venom   bubbling gloop and a spit      spore   fluffy puffs and falling sparkle
   gravity a deep soft thud and a pull    prism   a glassy chime fan
   lunar   moonlit wind and a pale bell   echo    one ping bouncing away through a dark room
+Every species the game can show (Data.KIN) also has its own voice set, bk_<species>_<mood> (happy,
+alert, unsure, sleepy, hurt; 2 takes each): base pitch from its weight, timbre from its type
+(SPECIES_VOICE below), and a 3-note signature motif that every mood bends (happy as is, alert
+clipped and high, unsure ending on a question, sleepy a sigh, hurt a yelp). KinVoice.cue picks the set; kin_happy/alert/unsure stay the fallback.
 Existing names are regenerated (kin_happy/unsure/alert, kinhit, recall, throw, catch, bond, skill,
 k_<element>); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
 """
+import json, os
 import numpy as np
 import sfx_lib as S
 from sfx_lib import N, T, env, mix, at, lpf, hpf, bpf, noise
@@ -220,13 +225,39 @@ def eat(i):
     return soft(room(mix(out, hum), 0.3), 3800)
 
 
-def sleep(i):
-    """A tiny sleeper's breath: a slow soft in-and-out with a tiny snore at the end."""
-    d = 1.5; n = N(d); u = np.arange(n) / n
-    breath = bpf(noise(d), 300, 1500) * (np.sin(np.pi * np.clip(u * 2, 0, 1)) ** 2 * (u < 0.5) +
-                                          0.7 * np.sin(np.pi * np.clip(u * 2 - 1, 0, 1)) ** 2 * (u >= 0.5))
-    snore = at(vowel(210, 190, 0.3, 'mm', 1.3, 0.1) * 0.4, 1.0)
-    return soft(room(mix(breath * 0.8, snore), 0.3), 2200)
+BREATH = 3.1       # s: one sleeping in-and-out at pitch 1 (the game pitches it by body size, so a small Boki breathes faster)
+
+
+def breath_cycle(snore_amt):
+    """One slow sleeping breath: a soft drawn-in hiss, a longer lower sigh out, a short rest; `snore_amt`
+    lays a small throaty snore under the in-breath."""
+    d = BREATH; n = N(d); u = np.arange(n) / n
+    inhale = np.sin(np.pi * np.clip(u / 0.38, 0, 1)) ** 2 * (u < 0.38)
+    exhale = np.sin(np.pi * np.clip((u - 0.42) / 0.45, 0, 1)) ** 2 * ((u >= 0.42) & (u < 0.87))
+    air = bpf(noise(d), 380, 1700) * inhale * 0.7 + bpf(noise(d), 220, 1100) * exhale * 0.55
+    snore = S.voice(d * 0.36, 150, 135, 'uh', breath=0.5, rasp=0.7, scale=1.25, a=0.25, decay=d * 0.2)
+    flutter = 0.6 + 0.4 * np.sin(2 * np.pi * 27 * np.arange(len(snore)) / S.SR)
+    return mix(air, at(lpf(snore * flutter, 900) * snore_amt, d * 0.03))
+
+
+def sleep_loop():
+    """boki_sleep, a seamless loop: two breaths, the second with a tiny snore, over a faint room hush.
+    Four breaths are rendered and two cut from the middle, starting mid-sigh, so the seam falls on sound
+    and the room's echoes run on across it (Sfx.loop_hold plays it at each sleeper near you: BokiNapSfx)."""
+    d = BREATH * 4
+    cycles = [at(breath_cycle(0.35 * (c % 2)), BREATH * c) for c in range(4)]
+    x = soft(room(mix(lpf(noise(d), 500) * 0.06, *cycles), 0.3), 2000)
+    start = N(BREATH * 1.65)
+    return x[start:start + N(BREATH * 2 + 0.06)]      # + the 0.06 s save_loop folds into the start
+
+
+def yawn(i):
+    """Waking: a small open-mouthed yawn that stretches up and sighs down, ending on a contented 'mm'."""
+    f = j(i, 0.05)
+    ah = S.voice(0.62, 360 * f, 470 * f, 'ah', breath=0.45, vib=0.03, scale=1.35, a=0.12, decay=0.4)
+    oh = at(S.voice(0.45, 440 * f, 280 * f, 'oh', breath=0.4, scale=1.35, a=0.04, decay=0.25), 0.5)
+    mm = at(vowel(300 * f, 270 * f, 0.22, 'mm', 1.3, 0.1) * 0.45, 0.98)
+    return soft(room(mix(ah * 0.8, oh * 0.7, mm), 0.35), 3600)
 
 
 def work(i):
@@ -254,6 +285,136 @@ def unfuse(i):
     return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
 
 
+# ---------------------------------------------------------------- per-species voices
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+MOODS = ['happy', 'alert', 'unsure', 'sleepy', 'hurt']
+# Species theme -> the texture laid under its voice. crackle: Fire and sparks, burble: Water and venom,
+# rustle: Grass, spores and swarms, chime: Crystal, moon and sound; anything else stays a plain voice.
+TIMBRE = {'ember': 'crackle', 'storm': 'crackle', 'venom': 'burble', 'tempest': 'burble',
+          'spore': 'rustle', 'bloom': 'rustle', 'swarm': 'rustle',
+          'prism': 'chime', 'lunar': 'chime', 'echo': 'chime', 'frost': 'chime', 'stone': 'chime'}
+# Per species: (vowel, signature motif as 3 pitch ratios). The motif is what makes a Pebbit and a
+# Cairnback tell apart even at the same size.
+SPECIES_VOICE = {
+    'burrlet': ('eh', (1, 1.26, 1.12)), 'cairnback': ('oh', (1, 0.84, 0.84)), 'cindle': ('eh', (1, 1.5, 1.19)),
+    'glintmole': ('ee', (1, 1.12, 1.5)), 'gloamshell': ('uh', (1, 0.9, 1.07)), 'glomwort': ('uh', (1, 1.19, 1.41)),
+    'hivara': ('eh', (1, 1, 1.26)), 'kestrike': ('ee', (1, 1.78, 1.34)), 'kindlewren': ('ee', (1, 1.33, 1.67)),
+    'lodestick': ('ah', (1, 0.94, 1.12)), 'marchleaf': ('eh', (1, 1.12, 1.26)), 'mossgrade': ('mm', (1, 0.89, 1)),
+    'nettlynx': ('ah', (1, 1.41, 1.12)), 'pebbit': ('oh', (1, 1, 0.89)), 'puddlet': ('uh', (1, 1.26, 1.5)),
+    'rimeshrew': ('ee', (1, 1.68, 1.5)), 'selenfin': ('oh', (1, 1.12, 1.33)), 'thrumbird': ('eh', (1, 1.19, 1.19)),
+    'wisplet': ('ee', (1, 1.5, 1.78)), 'zapple': ('ah', (1, 1.33, 1)), 'zephyrak': ('ee', (1, 1.5, 2.0)),
+    # added later: appended, not sorted in, so the takes above keep their random draws
+    'caecilith': ('mm', (1, 0.84, 1.12)),     # a low, curious hum from under the ground
+    'lilybara': ('oh', (1, 1.06, 0.94)),      # a slow, contented bath sigh
+    'umbrathere': ('uh', (1, 0.89, 0.79)),    # a brooding, falling grumble
+    'basaltoad': ('uh', (1, 0.75, 1)),        # a deep gulping croak: down a fourth and back
+    'casquebill': ('ah', (1, 1.33, 0.75)),    # a honk that climbs, then sinks like a dropped anchor
+    'cindowary': ('ah', (1, 1.19, 0.84)),     # a hot bellow that swells and drops
+    'duskapi': ('mm', (1, 0.94, 0.79)),       # a soft snuffling hum sinking into the dusk
+    'floenatee': ('oh', (1, 1.12, 1)),        # a slow, gentle song that rises and settles
+    'gibbelle': ('ee', (1, 1.5, 1.26)),       # a whoop up a fifth that rings back down
+    'glaciyak': ('oh', (1, 0.89, 1.06)),      # a low lowing with a lift at the end
+    'goliathite': ('uh', (1, 1.06, 1.12)),    # a grinding, step-by-step climb
+    'heatherhorn': ('eh', (1, 1.06, 0.89)),   # a wobbling bleat
+    'hoarheron': ('ah', (1, 1.41, 1.41)),     # a stiff two-tone call held on the high note
+    'kilnbadger': ('ah', (1, 0.89, 1.19)),    # a gruff huff that flares up
+    'limpetor': ('mm', (1, 1, 1.06)),         # a clamped, steady hum that barely moves
+    'moonloris': ('oh', (1, 1.26, 1.68)),     # a soft, wondering "ooh" that rises
+    'moundvark': ('uh', (1, 1.19, 0.94)),     # a busy snuffling grunt
+    'murmurling': ('mm', (1, 1.12, 1.19)),    # a murmur that crowds upward
+    'nacrolin': ('ee', (1, 2.0, 1.5)),        # a bright octave flash that settles a fourth lower
+    'nimbostrich': ('ah', (1, 1.5, 1.33)),    # a booming, rolling call
+    'opalisk': ('eh', (1, 1.33, 1.78)),       # a bubbly, climbing sparkle
+    'orchisloth': ('ah', (1, 0.94, 0.84)),    # a slow yawning sigh
+    'scaldamus': ('uh', (1, 1.33, 1.12)),     # a chugging bark
+    'sentrikat': ('eh', (1, 1.41, 1.68)),     # a sharp lookout chirp, up and up again
+    'spatewader': ('eh', (1, 0.84, 1.26)),    # a sloshing dip and rise
+    'squalltross': ('ah', (1, 1.78, 1.5)),    # a wide, gliding sea cry
+    'threadwyrm': ('uh', (1, 1.12, 0.84)),    # a soft call that winds up and coils back
+    'tuatrune': ('oh', (1, 1.33, 1.33)),      # a solid step up a fourth, held like a lock clicking shut
+    'velvorm': ('eh', (1, 0.79, 0.94)),       # a gurgle dipping down a pipe
+}
+
+
+def species_data(sp):
+    """(weight kg, theme, curiosity, temper) of a species from its content files."""
+    home = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
+    v2 = json.load(open(os.path.join(ROOT, 'content', 'kin_v2', sp + '.json')))
+    pers = v2['personality']
+    return home['size']['kg'], v2['theme'], pers['curiosity'], pers['temper']
+
+
+def texture(kind, d, f, amt):
+    """The type's colour under a voice of d seconds around pitch f."""
+    n = N(d)
+    if kind == 'crackle':
+        return amt * 0.5 * S.grains(d, 150, 2500, 9000, 0.001, 0.004, fall=d * 0.7)
+    if kind == 'burble':
+        out = np.zeros(n)
+        for _ in range(int(14 * d) + 1):
+            out = mix(out, at(bubble(f * S.rng.uniform(0.4, 0.8), 0.05, 1.8) * 0.5, S.rng.uniform(0, d * 0.8)))
+        return amt * out
+    if kind == 'rustle':
+        gate = np.abs(lpf(S.rng.standard_normal(n), 40)) * 14
+        return amt * 0.4 * bpf(noise(d), 3500, 9000) * np.clip(gate, 0, 1) * env(n, 0.01, d * 0.8)
+    if kind == 'chime':
+        return amt * 0.35 * S.chime(f * 2, d, 0.25, ((1.0, 1.0), (2.76, 0.3)))
+    return amt * 0.4 * S.sweep(f * 0.5, f * 0.5, d) * env(n, 0.01, d * 0.6)
+
+
+def note(f, f_end, d, vow, tail_d=None):
+    """One syllable: a squeak with a soft vowel under it, gliding f -> f_end."""
+    sq = squeak(f, d, 0.1, 0.02, tail_d=tail_d)
+    return mix(sq, 0.45 * vowel(f * 0.5, f_end * 0.5, d, vow, 1.4))
+
+
+def species_voice(sp, mood, i):
+    kg, theme, curious, temper = species_data(sp)
+    vow, motif = SPECIES_VOICE[sp]
+    kind = TIMBRE.get(theme, 'plain')
+    base = float(np.clip(1000.0 * (2.5 / kg) ** 0.2, 520, 1450)) * j(i, 0.04)
+    dd = 0.11 / (0.8 + 0.5 * curious)                 # curious ones chatter faster
+    f = [base * m for m in motif]
+    if mood == 'happy':
+        out, t0 = np.zeros(0), 0.0
+        for fr, d in zip(f, (dd, dd, dd * 1.5)):
+            out = mix(out, at(note(fr, fr * 1.04, d, vow), t0))
+            t0 += d * 0.85
+        d_all = t0 + 0.1
+    elif mood == 'alert':
+        hi = 1.0 + 0.3 * temper                       # the temperamental ones go higher
+        parts = [at(note(f[k % 2] * hi, f[k % 2] * hi * 1.05, 0.07, vow, 0.04), 0.085 * k) for k in range(3)]
+        out, d_all = mix(*parts), 0.4
+    elif mood == 'unsure':
+        a = note(f[2] * 0.8, f[1] * 0.75, dd * 1.2, vow)
+        b = note(f[0] * 0.7, f[0] * 1.15, dd * 2.2, vow)          # ends on a question
+        out, d_all = mix(a, at(b, dd * 1.1)), dd * 3.6
+    elif mood == 'sleepy':
+        d_all = 0.7
+        sigh = note(f[0] * 0.75, f[0] * 0.45, d_all * 0.85, 'mm', tail_d=0.4)
+        out = lpf(mix(sigh, 0.3 * hpf(noise(d_all), 1500) * env(N(d_all), 0.2, 0.3)), 2200)
+    else:   # hurt
+        d_all = 0.26
+        yelp = mix(squeak(f[0] * 1.3, 0.2, -0.25, 0.0, a=0.003, tail_d=0.1),
+                   0.6 * S.voice(0.2, f[0] * 0.65, f[0] * 0.4, vow, rasp=0.5, scale=1.35, a=0.004))
+        out = mix(yelp, at(S.kick(180, 80, 0.1, 0.01, 0.03, 1.2) * 0.4, 0.0))
+    amt = 0.45 if mood in ('sleepy', 'hurt') else 1.0
+    out = mix(out, texture(kind, d_all, base, amt))
+    return soft(room(out, 0.3), 5200 if mood != 'sleepy' else 3000)
+
+
+def species_names():
+    return list(SPECIES_VOICE)
+
+
+def voice_sets():
+    """Writes bk_<species>_<mood> (2 takes) for every species the game can show."""
+    S.reseed(7001)
+    for sp in species_names():
+        for mood in MOODS:
+            S.takes_cat('bk_%s_%s' % (sp, mood), lambda i, sp=sp, mood=mood: species_voice(sp, mood, i), 1, 'boki')
+
+
 def main():
     S.takes_cat('kin_happy', happy, 3, 'boki')
     S.takes_cat('kin_unsure', unsure, 3, 'boki')
@@ -273,10 +434,12 @@ def main():
     S.takes_cat('boki_downed', downed, 2, 'boki')
     S.takes_cat('boki_revive', revive, 0, 'boki')
     S.takes_cat('boki_eat', eat, 2, 'boki')
-    S.takes_cat('boki_sleep', sleep, 1, 'boki')
+    S.save_loop('boki_sleep', sleep_loop(), 'loop')
+    S.takes_cat('boki_yawn', yawn, 1, 'boki')
     S.takes_cat('boki_work', work, 3, 'boki')
     S.takes_cat('boki_fuse', fuse, 0, 'boki')
     S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
+    voice_sets()
 
 
 if __name__ == '__main__':
