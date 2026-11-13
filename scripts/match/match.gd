@@ -1840,11 +1840,10 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 func freeze_frame(t: float) -> void:
 	hitstop = maxf(hitstop, t)
 
-## Armor went up a tier: a coloured ring for everyone to see, and a callout for you.
+## Armor went up a tier: a sheen up the body for everyone to see (HeroVfx.tier_up), and a callout for you.
 func _armor_up(h: Hunter) -> void:
 	var col := h.armor_col()
-	fx.ring(h.pos, 2.4, Color(col, 0.9), 0.45)
-	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 14, 3.5, 0.5)
+	HeroVfx.of(self).tier_up(h, h.armor_tier)
 	if h == player:
 		sfx("revive", null, -6.0)
 		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)

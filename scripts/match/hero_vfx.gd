@@ -14,14 +14,15 @@ const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"ring": 8}
+	"ring": 8, "sheen": 9}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 ## nodes per kind at most; "ribbon" also holds the drop rockets' streaks, one a squad in the air (up to 10), and
 ## the tracers riding Vex's rounds (6)
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 26, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
+	"ring": 6, "sheen": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6,
+	"drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
@@ -40,6 +41,9 @@ const ARC_SEGS := 24           # segments of a sweep's arc mesh
 const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its outer one
 const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
 const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
+const SHEEN_LIFE := 0.4        # s the armour tier-up sheen takes to sweep up the body
+const SHEEN_SIZE := 2.2        # m square, facing the camera: the band climbs a body-shaped capsule inside it
+const SHEEN_LIFT := 0.95       # m above the feet the square is centred (a Hunter's mid-body)
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
 
 static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
@@ -194,9 +198,32 @@ func play(h: Hunter, move: String, at: Vector3, dir: Vector2, o := {}) -> void:
 ## The same moment arriving from another game (["fx", "hvfx", ...]: other players' games don't run this kit).
 func net_in(x: Array) -> void:
 	var who: Variant = m.ents_by_id.get(String(x[2]), null)
-	if who is Hunter:
+	if who is Hunter and String(x[3]) == "armor_up":
+		tier_up(who, int(x[9]))
+	elif who is Hunter:
 		play(who, String(x[3]), Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]),
 				{"k": float(x[9]), "len": float(x[10]), "r": float(x[11])})
+
+## Armor went up a tier: one sheen in the new tier's colour sweeps up the body, for everyone to read (a rival just got
+## tougher). Not a recipe: the colour is the tier's, so the tier rides the net message's charge slot.
+func tier_up(h: Hunter, tier: int) -> void:
+	plays["armor_up"] = int(plays.get("armor_up", 0)) + 1
+	if m.get("net_on") and not h.remote:
+		m.net_fx(["hvfx", h.nid, "armor_up", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 0.0, 0.0, tier, 0.0,
+				0.0])
+	if lod_at(h.pos) <= 0.0 or (h.unseen and h != m.get("player")):
+		return
+	var mi: MeshInstance3D = _take("sheen", _surface_node.bind("sheen"))
+	var mt: ShaderMaterial = mi.material_override
+	var col: Color = Hunter.ARMOR_TIERS[tier][1]
+	mt.set_shader_parameter("col", col)
+	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, 0.6))
+	mt.set_shader_parameter("life", 0.0)
+	mt.set_shader_parameter("gain", view_k(h))
+	var s := Vector3.ONE * SHEEN_SIZE
+	mi.global_transform = Transform3D(Basis.from_scale(s), h.pos + Vector3(0, SHEEN_LIFT, 0))
+	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": SHEEN_LIFE, "b": Basis.IDENTITY, "s0": s, "s1": s,
+			"follow": h})
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:
@@ -316,7 +343,7 @@ func _surface_node(kind: String) -> Node3D:
 			mi.mesh = plane
 		"skirt":
 			mi.mesh = _cylinder()
-		"flare":
+		"flare", "sheen":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
 			mi.mesh = quad
@@ -782,6 +809,8 @@ func _process(delta: float) -> void:
 		if e.has("ride") and is_instance_valid(e["ride"]):
 			var r: Hunter = e["ride"]
 			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)
+		if e.has("follow") and is_instance_valid(e["follow"]):
+			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + Vector3(0, SHEEN_LIFT, 0)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)
