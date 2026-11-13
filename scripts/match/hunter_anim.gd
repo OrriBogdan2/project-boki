@@ -1184,7 +1184,9 @@ const KM_BLEND := 0.08         # s: one kit move eases into the next (or back to
 func _air_tilt(dt: float, turn: float, mf: float, ms: float, spd: float) -> Basis:
 	var steer := clampf(turn * spd / HunterMove.glide_accel, -1.0, 1.0)
 	glide_bank = _ease(glide_bank, steer * GLIDE_BANK * glide_k, GLIDE_BANK_EASE, dt)
-	var tilt := Basis(Vector3.RIGHT, -DIVE_PITCH * dive_k)
+	# (a Hero's clips add their own pitch: WardenAirTilt, x in a plunge, y under the glider)
+	var own: Vector2 = model.get_meta(WardenAirTilt.META, Vector2.ZERO)
+	var tilt := Basis(Vector3.RIGHT, -(DIVE_PITCH + own.x) * dive_k - own.y * glide_k)
 	if absf(glide_bank) > 0.0005:
 		# (about the way it flies, reversed: a positive roll leans the head to the left of it)
 		var axis := Vector3(-ms, 0.0, mf) / spd if spd > 0.1 else Vector3.BACK

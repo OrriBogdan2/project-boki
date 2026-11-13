@@ -1,8 +1,9 @@
 extends RefCounted
 ## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
-## [--carry [--heart]] [--cast=<kmove>]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets):
-## <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch a hit mid-run in
-## <dir>/flinch/ (--heavy: stagger), with --cast a move pressed mid-run in <dir>/cast_<kmove>/. Needs a renderer. ffmpeg makes the GIFs and sheets.
+## [--carry [--heart]] [--cast=<kmove>]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1
+## approval sheets): <dir>/<clip>/f000.png..., and with --turn a turntable in <dir>/turntable/, with --flinch a hit
+## mid-run in <dir>/flinch/ (--heavy: stagger), with --cast a move pressed mid-run in <dir>/cast_<kmove>/. Needs a
+## renderer. ffmpeg makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
 var holder: Node3D

@@ -75,7 +75,6 @@ var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less 
 var air_w := 0.0
 var glide_w := 0.0
 var dive_w := 0.0
-var tilt: WardenAirTilt      # the whole body pitched and banked in the air
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
@@ -187,7 +186,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.root_node = tree.get_path_to(glb)
 	tree.add_animation_library("", lib)
 	tree.tree_root = _build()
-	tilt = WardenAirTilt.new(glb, sk, d["air"], bool(d.get("rig_root", false)))
+	WardenAirTilt.hand_over(root, d["air"], bool(d.get("rig_root", false)))
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
@@ -637,7 +636,6 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
-	tilt.step(s, dt)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	var legs := bool(want.get("legs_heading", false))
