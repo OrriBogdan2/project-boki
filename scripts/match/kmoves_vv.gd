@@ -158,14 +158,13 @@ const MOVES := {
 		[0.09, SHOULDER],
 		[0.3, SHOULDER],
 		[0.55, {}]]},
-	# Burr Charge: fired from the cannon's launcher, no throw. A hard kick up the arm and the chest driven back, her
-	# free hand staying out of it, then back on the aim by 0.3
+	# Coin Blast: the free (cyborg) hand cocked by the shoulder at the press, flicks the coin out along the aim by
+	# 0.07, the chest turning into it, follows through, home by 0.5
 	"gunslinger_rmb": {"stance": true, "keys": [
-		[0.00, SHOULDER],
-		[0.04, {"p": 0.1, "y": 0.1, "lift": -0.06, "sq": 0.1, "gp": 0.55, "wo": Vector3(0.0, 0.05, 0.18),
+		[0.00, {"y": -0.15, "fl": Vector3(0.14, 0.32, 0.06), "hw": 1.0}],
+		[0.07, {"y": 0.25, "p": 0.08, "sq": 0.08, "fl": Vector3(0.1, 0.28, -0.6), "hw": 1.0,
 			"legs": AIM_CROUCH, "lw": 0.7}],
-		[0.18, SHOULDER],
-		[0.3, SHOULDER],
+		[0.2, {"y": 0.2, "p": 0.04, "fl": Vector3(0.1, 0.2, -0.62), "hw": 0.9, "legs": AIM_CROUCH, "lw": 0.5}],
 		[0.5, {}]]},
 	# Combat Slide: dropped feet-first, leaning back (no further than 0.45, so she stays upright enough to
 	# aim), both hands left on the rifle so it stays up and aimed; a scrape squash, then the stand-up
@@ -182,16 +181,18 @@ const MOVES := {
 		[0.22, {"fz": 6.283, "p": -0.2, "legs": [1.1, -1.6, 1.0, -1.5], "lw": 1.0}],
 		[0.36, {"fz": 6.283, "sq": 0.3, "lift": -0.08}],
 		[0.5, {"fz": 6.283}]]},
-	# Ion Cannon: braced low behind the barrel through the 0.6 s cast, the beam goes, the recoil throws
-	# the chest back (overshoot) and she settles over ~0.4 s
+	# Palm Lance: the free (cyborg) hand raised palm out along the aim through the 0.6 s cast, the beam goes, the
+	# recoil kicks the palm up and the chest back (overshoot) and she settles over ~0.4 s
 	"gunslinger_e": {"keys": [
 		[0.00, {"sq": -0.1}],
-		[0.15, {"p": -0.2, "y": 0.35, "lift": -0.1, "legs": BRACE, "lw": 1.0, "sq": 0.2}],
-		[0.58, {"p": -0.26, "y": 0.35, "lift": -0.12, "legs": [0.65, -1.1, 0.42, -0.85], "lw": 1.0, "sq": 0.28,
-			"gp": -0.05}],
-		[0.65, {"p": 0.7, "y": 0.2, "lift": 0.02, "gp": 0.6, "wo": Vector3(0.0, 0.05, 0.12),
-			"legs": [0.1, -0.25, 0.3, -0.5], "lw": 1.0, "sq": -0.3}],
-		[0.8, {"p": 0.35, "gp": 0.25, "sq": 0.1, "legs": [0.15, -0.3, 0.2, -0.4], "lw": 0.8}],
+		[0.15, {"p": -0.1, "y": 0.2, "lift": -0.06, "legs": BRACE, "lw": 1.0, "sq": 0.12,
+			"fl": Vector3(0.06, 0.38, -0.52), "hw": 1.0}],
+		[0.58, {"p": -0.14, "y": 0.2, "lift": -0.08, "legs": [0.65, -1.1, 0.42, -0.85], "lw": 1.0, "sq": 0.18,
+			"fl": Vector3(0.06, 0.38, -0.58), "hw": 1.0}],
+		[0.65, {"p": 0.5, "y": 0.15, "lift": 0.02, "fl": Vector3(0.06, 0.5, -0.4), "hw": 1.0,
+			"legs": [0.1, -0.25, 0.3, -0.5], "lw": 1.0, "sq": -0.25}],
+		[0.8, {"p": 0.25, "sq": 0.1, "fl": Vector3(0.06, 0.4, -0.48), "hw": 0.8,
+			"legs": [0.15, -0.3, 0.2, -0.4], "lw": 0.8}],
 		[1.05, {}]]},
 	# Cinderfall (X, f29 on the sheet): the rifle snapped straight up over her head in 0.1 s, the shot kicks it
 	# and squashes her a little, held up a beat, then back down into her aim by 0.6 s

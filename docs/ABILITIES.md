@@ -13,7 +13,7 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
 | **Lace** | light | Longbow | Spirit Walk | Hawk Sense | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
-| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
+| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Coin Blast | Palm Lance (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
 | **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
@@ -56,12 +56,12 @@ _The storm-kite runner. Charges you up shot by shot, then runs straight through 
 
 _The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands._
 
-- **Passive: Fever.** Each ability that lands (Burr Charge, its blast, Longneedle) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Burr Charge counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
+- **Passive: Fever.** Each ability that lands (Coin Blast, its blast, Palm Lance) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Coin Blast counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
 - **Shift: Slipstep** (11.5s a charge). Tap: a quick 3.4m skid. Hold: a 6m low slide you can shoot from; let go early and part of the cooldown comes back. A knock refreshes it.
-- **RMB: Burr Charge** (9s):
+- **RMB: Coin Blast** (9s):
   - tap: Lob a burr 11m. On a hunter or monster it sticks, then pops after 0.7s: 13 damage in 1.9m and Rattled for 1.2s.
-  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Burr Charge's cooldown drops 40%.
-- **E: Longneedle** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
+  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Coin Blast's cooldown drops 40%.
+- **E: Palm Lance** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
 ### Juggernaut (heavy)

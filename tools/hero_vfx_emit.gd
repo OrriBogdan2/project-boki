@@ -9,11 +9,10 @@ extends RefCounted
 const REACH := 0.15             # m: the most an emitter may sit off its bone (or off the mesh it carries)
 const OWN := 0.5                # a vertex belongs to the bone with this much of its weight or more
 ## arch -> [label, emitter, bone]. An emitter is one of the Hero's FX anchors (content/vfx/<arch>.json) or
-## "node:<empty>", a .glb anchor its kit reads by name.
+## "node:<empty>", a .glb anchor its kit reads by name, or "kit:palm" (Vex's palm point, GunslingerKit.palm_in).
 const EMITTERS := {
 	"gunslinger": [["LMB rounds", "node:weapon_muzzle", "forearm.R"],
-		["RMB Burr Charge", "node:launcher_fire", "forearm.R"],
-		["RMB Burr Charge bell", "node:launcher_muzzle", "forearm.R"]],
+		["RMB Coin Blast and E Palm Lance (left palm)", "kit:palm", "hand.L"]],
 	"juggernaut": [["LMB slash", "blade_tip", "hand.R"], ["RMB Smash", "blade_tip", "hand.R"],
 		["E Warchain throw", "hand_chain", "hand.R"], ["E Warchain line", "node:anchor_chain", "hand.R"],
 		["X Gilded Riposte", "blade_tip", "hand.R"]],
@@ -95,6 +94,8 @@ func _emitter(m: Node3D, sk: Skeleton3D, arch: String, emitter: String) -> Vecto
 	if emitter.begins_with("node:"):
 		var nd := WardenGlb.anchor(m, emitter.trim_prefix("node:"))
 		return nd.global_position if nd else Vector3.INF
+	if emitter == "kit:palm":
+		return GunslingerKit.palm_in(sk)
 	var a: Dictionary = (HeroVfx.data(arch).get("anchors", {}) as Dictionary).get(emitter, {})
 	for n in a.get("nodes", []):
 		var nd := WardenGlb.anchor(m, String(n))

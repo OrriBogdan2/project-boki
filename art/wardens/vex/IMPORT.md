@@ -35,8 +35,14 @@ six barrels on `gatling` (spins), the ammo drum under the receiver, the ribbed b
 forearm and hand are brass machine parts, rigid per bone, with the gold coin on `coin`. The stickers, the trousers' green splatter and tally marks,
 the shoulder tattoos and freckles are texture. The gold coin hip chain is rigid on `hips`.
 
-v2 has no launcher tube: the `launcher` bone stays for the clip set and carries no mesh; `launcher_muzzle` sits on its pivot (the swing leaves
-it in place) at the drum's mouth, the same spot as `launcher_fire` on `forearm.R`. The Burr Charge leaves from there.
+v2 has no launcher tube: the `launcher` bone stays for the clip set and carries no mesh; `launcher_muzzle` and `launcher_fire` stay at the
+drum's mouth but nothing leaves from them now. Coin Blast (the flicked coin) and Palm Lance (the charge and beam) leave from the open
+palm: `GunslingerKit.palm_in`, a point on `hand.L` (4 cm to the palm side, 7.5 cm along the hand from the wrist)
+read off the skeleton's live pose (an empty's BoneAttachment3D lags the clip). --hero-vfx-check holds it within 0.15 m of the hand.
+
+Clips (11-12): `rmb` (the coin flick: left hand cocked by the shoulder, out along the aim by 0.07) and `e` (Palm Lance: left arm raised, open
+palm square to the aim) are the new keys of tools/art1/vex_clips.py, put into this glb by copying those two animations' channels
+from the 11-08 build onto the cand_A master (same bone names, 11-13, glb_add_clips with exact names) with Blender not at hand. A Blender re-bake of vex_clips.py gives the same keys.
 
 FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `launcher_muzzle`, `launcher_fire`, `anchor_gatling_root`, `anchor_sleeve_mouth`
 (the cuff's top), `anchor_grenade_drum`, `anchor_eye_glow` (= `anchor_lens`: her mechanical left eye; nothing glows there), `anchor_spine`,

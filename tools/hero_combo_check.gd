@@ -622,7 +622,7 @@ func _mage() -> void:
 	fails += ac.fails
 
 # ------------------------------------------------------------------ Vex
-## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the
+## Items 144 and 144b: the Palm Lance's aim locks at the press and turns at a capped rate, so a flick across the
 ## screen moves the beam at most cap x charge time while a small adjustment still lands; the camera push-out
 ## scales with the aim distance (none close in, the full 25% at the 18 m range).
 func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
@@ -644,13 +644,13 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 		return [held, cursor]
 	var mid_deg: float = float(charge.call(Vector3(8, 0, 0), Vector3(-8, 0, 0), 0.2)[0])
 	var flick_deg := rad_to_deg(absf(K.needle_dir.angle_to(east)))
-	ok("Longneedle: the line shows the lagging aim, not the cursor, through the charge",
+	ok("Palm Lance: the line shows the lagging aim, not the cursor, through the charge",
 			mid_deg > 5.0 and mid_deg < cap_deg * 0.6, "%.1f deg after 0.2 s" % mid_deg)
-	ok("Longneedle: a 180-degree flick at the press moves the beam at most %.0f degrees" % cap_deg,
+	ok("Palm Lance: a 180-degree flick at the press moves the beam at most %.0f degrees" % cap_deg,
 			K.needle.is_empty() and flick_deg <= cap_deg + 2.0 and flick_deg >= cap_deg * 0.7, "%.1f deg" % flick_deg)
 	var cursor: Vector2 = charge.call(Vector3(8, 0, 0), Vector3(8, 0, 2), 0.2)[1]
 	var nudge_deg := rad_to_deg(absf(K.needle_dir.angle_to(cursor)))
-	ok("Longneedle: a small tracking adjustment still lands on the cursor", nudge_deg <= 1.0,
+	ok("Palm Lance: a small tracking adjustment still lands on the cursor", nudge_deg <= 1.0,
 			"%.2f deg off" % nudge_deg)
 	var cam: CamRig = m.cam
 	var push := func(at_m: float) -> Array:
@@ -664,11 +664,11 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 		ac.step(m, 0.4)
 		return out
 	var near: Array = push.call(3.0)
-	ok("Longneedle: an aim at 3 m leaves the camera alone", float(near[0]) < 0.005 and float(near[1]) < 0.05,
+	ok("Palm Lance: an aim at 3 m leaves the camera alone", float(near[0]) < 0.005 and float(near[1]) < 0.05,
 			"zoom %.3f, pan %.2f m" % near)
 	var mid: Array = push.call(11.0)
 	var far: Array = push.call(18.0)
-	ok("Longneedle: the push-out ramps with the aim distance, the full 25% at 18 m",
+	ok("Palm Lance: the push-out ramps with the aim distance, the full 25% at 18 m",
 			float(mid[0]) > 0.05 and float(mid[0]) < 0.2 and absf(float(far[0]) - float(ed["view_zoom"])) < 0.005
 			and float(far[1]) > 1.0,
 			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
@@ -804,7 +804,7 @@ func _gunslinger() -> void:
 		_unwall(m, home + Vector3(9.5, 0, z))
 	for z in [1, 2]:
 		_unwall(m, home + Vector3(5.5, 0, z))
-	# 5. Longneedle: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
+	# 5. Palm Lance: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	T.teleport(home + Vector3(8, 0, 0))
@@ -815,23 +815,23 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.05)
 	var w1: float = float(AimKit.entry(P, "e").get("width", 0.0))
-	ok("Longneedle: you stand still to charge", K.move_k() <= 0.001)
+	ok("Palm Lance: you stand still to charge", K.move_k() <= 0.001)
 	ac.step(m, 0.45)
 	var w2: float = float(AimKit.entry(P, "e").get("width", 0.0))
-	ok("Longneedle: the line narrows over the cast (18m)",
+	ok("Palm Lance: the line narrows over the cast (18m)",
 			w1 > 0.8 and w2 < w1 * 0.4 and absf(float(AimKit.entry(P, "e").get("len", 0.0)) - 18.0) < 0.01,
 			"%.2f -> %.2f" % [w1, w2])
-	ok("Longneedle: the line starts at the width of the beam that hits (%.2f m)" % K.beam_width(),
+	ok("Palm Lance: the line starts at the width of the beam that hits (%.2f m)" % K.beam_width(),
 			w1 <= K.beam_width() + 0.001 and w1 > K.beam_width() * 0.85, "%.2f" % w1)
-	ok("Longneedle: nothing before 0.6s", ac.dmg(T) < 0.5)
+	ok("Palm Lance: nothing before 0.6s", ac.dmg(T) < 0.5)
 	var px := P.pos.x
 	ac.step(m, 0.4)
-	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 22.0, "took %.0f" % ac.dmg(T))
-	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
+	ok("Palm Lance: fires at 0.6s", ac.dmg(T) >= 22.0, "took %.0f" % ac.dmg(T))
+	ok("Palm Lance: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	var needle_looks := HeroVfx.of(m).plays
-	ok("Longneedle: it charges, fires and hits as its own needle (HeroVfx e_charge, e_fire, e_hit)",
+	ok("Palm Lance: it charges, fires and hits as its own needle (HeroVfx e_charge, e_fire, e_hit)",
 			["e_charge", "e_fire", "e_hit"].all(func(mv): return int(needle_looks.get(mv, 0)) >= 1))
-	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
+	ok("Palm Lance hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
@@ -842,7 +842,7 @@ func _gunslinger() -> void:
 	var sk0 := K.skewers
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 24.0 * 1.15)
+	ok("Palm Lance on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 24.0 * 1.15)
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
@@ -852,7 +852,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle passes through a wall", ac.dmg(T) >= 22.0)
+	ok("Palm Lance passes through a wall", ac.dmg(T) >= 22.0)
 	for zz in [-1, 0, 1]: _unwall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
 	ac.fresh(T)
@@ -863,7 +863,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.3)
 	P.stun_t = 0.5
 	ac.step(m, 0.2)
-	ok("Longneedle: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
+	ok("Palm Lance: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
 	P.stun_t = 0.0
 	_gunslinger_needle_aim(m, P, K, home)
 	# 6. Slipstep: goes where you move (not the aim), you fire through a tap too
@@ -921,7 +921,7 @@ func _gunslinger() -> void:
 	ok("dash table: a shot tapped mid-slide fires at once", P.shot_n == n_gd + 1, "%d -> %d" % [n_gd, P.shot_n])
 	ac.fresh(T)
 	P.ak.use_e()
-	ok("dash table: E (Longneedle) starts mid-slide", not K.needle.is_empty())
+	ok("dash table: E (Palm Lance) starts mid-slide", not K.needle.is_empty())
 	P.inp["move"] = Vector2.ZERO
 	ac.step(m, 0.8)
 	var gk: Array = (HunterAnim.km_def("gunslinger_dash")["keys"] as Array)
@@ -972,9 +972,9 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 22.0 and ac.dmg(T2) >= 22.0)
+	ok("small: Palm Lance hits everyone in its line (two)", ac.dmg(T) >= 22.0 and ac.dmg(T2) >= 22.0)
 	var cd_two := float(K.cd["e"])
-	ok("small: Longneedle at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
+	ok("small: Palm Lance at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
 	P.slot_lv["kin"] = 3
 	ac.fresh(T)
 	ac.fresh(T2)
@@ -988,7 +988,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown)",
+	ok("small: Palm Lance at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown)",
 			float(K.cd["e"]) < 11.5 * 0.5, "%.2f" % float(K.cd["e"]))
 	P.slot_lv["kin"] = 1
 	# upgrade parity (docs/heroes/gunslinger.md): the source's tier II / III+IV numbers per slot
@@ -1002,18 +1002,18 @@ func _gunslinger() -> void:
 			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin") / K.power("sec"),
 		])
-	ok("upgrade parity: Burr Charge cooldown 6.5 -> 5.4 -> 4.3",
+	ok("upgrade parity: Coin Blast cooldown 6.5 -> 5.4 -> 4.3",
 			near.call(up[0][0], 6.5) and near.call(up[1][0], 5.4) and near.call(up[2][0], 4.3), str(up))
 	ok("upgrade parity: Slipstep recharge 8.5 -> 7.4 -> 6.3",
 			near.call(up[0][1], 8.5) and near.call(up[1][1], 7.4) and near.call(up[2][1], 6.3), str(up))
-	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
+	ok("upgrade parity: Palm Lance cooldown stays 11.5 and damage +20% / +40%",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	T2.teleport(home + Vector3(30, 0, 0))
-	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Burr Charge
+	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Coin Blast
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0
 	K.cd["rmb"] = 5.0
@@ -1024,13 +1024,13 @@ func _gunslinger() -> void:
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
 	ok("Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires)",
 			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
-	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
+	ok("Knock at rank 3: Coin Blast resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
 	T.downed = false
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
 	VPARITY.new(self).run(m, P, K, T, home)
 	VTIME.new(self).run(m, P, K, T, home)
-	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
+	# 8. a Boki merge mid-hold: the Palm Lance charge goes with nothing fired
 	ac.fresh(T)
 	P.teleport(home)
 	T.teleport(home + Vector3(5, 0, 0))
@@ -1040,13 +1040,13 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.2)
 	var needle_before: bool = not K.needle.is_empty()
-	ok("merge hold: the Longneedle is charging before the merge", needle_before)
+	ok("merge hold: the Palm Lance is charging before the merge", needle_before)
 	var sk1 := K.skewers
 	ok("merge hold: a merge is under way", ac.merge_now(P))
 	ac.step(m, 0.1)
 	var took1: float = ac.dmg(T)
 	ac.step(m, 1.3)
-	ok("merge hold: the Longneedle charge is dropped, no shot mid-merge",
+	ok("merge hold: the Palm Lance charge is dropped, no shot mid-merge",
 			K.needle.is_empty() and K.e_t == 0.0 and K.skewers == sk1 and ac.dmg(T) == took1)
 	await ac.done(m)
 	fails += ac.fails
