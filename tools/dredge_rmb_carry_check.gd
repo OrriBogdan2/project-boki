@@ -5,7 +5,7 @@ extends RefCounted
 ## than without the hand; thrown on the ground he stays braced at a fifth of his walk.
 
 const RUN_UP := 0.5          # s running back before the jump or the throw
-const CARRY_MIN := 0.9       # share of the throw's speed still there when the hand misses (a plain jump keeps 1.0)
+const CARRY_MIN := 0.9       # share of the throw's speed still there at the miss, and of the miss's at the landing
 const BRAKE_T := 0.3         # s on the ground after landing, keys let go (braking as after a plain jump)
 
 var ak = null
@@ -31,8 +31,9 @@ func run() -> void:
 			+ "height %+.3f, braked to %.2f (plain %.2f)"
 	ok(
 		"hand mid-jump: the jump back keeps its speed while his height holds, then he lands and brakes",
-		hand["v_end"] >= CARRY_MIN * hand["v_throw"] and hand["drift"] <= 0.05 and hand["dist"] > plain["dist"]
-		and hand["v_land"] >= CARRY_MIN * hand["v_throw"] and hand["v_brake"] <= plain["v_brake"] + 0.05,
+		hand["v_end"] >= CARRY_MIN * hand["v_throw"] and hand["v_end"] >= plain["v_end"] - 0.05
+		and hand["drift"] <= 0.05 and hand["dist"] > plain["dist"]
+		and hand["v_land"] >= CARRY_MIN * hand["v_end"] and hand["v_brake"] <= plain["v_brake"] + 0.05,
 		info % [hand["v_throw"], hand["v_end"], plain["v_end"], hand["v_land"], hand["dist"], plain["dist"],
 			hand["drift"], hand["v_brake"], plain["v_brake"]]
 	)
@@ -58,30 +59,30 @@ func _leap(m: Match, P: Hunter, home: Vector3, dash: bool, hand: bool) -> Dictio
 	var out := _run_back(m, P, home)
 	var from := P.pos
 	P.inp["jump"] = true
-	m.step(ak.DT)
+	_tick(m)
 	P.inp["jump"] = false
 	while P.vel.y > 0.0:
-		m.step(ak.DT)
+		_tick(m)
 	if dash:
 		P.do_dash()
 		while P.roll_t > 0.0:
-			m.step(ak.DT)
+			_tick(m)
 	out["v_throw"] = _hv(P)
 	var y0 := P.pos.y
 	var t := 0.0
 	if hand:
 		ak.tap(m, P)
 		while K.flying:
-			m.step(ak.DT)
+			_tick(m)
 			out["drift"] = maxf(out["drift"], absf(P.pos.y - y0))
 	else:
 		while t < float(K.rmb_def()["range"]) / float(K.rmb_def()["speed"]):
-			m.step(ak.DT)
+			_tick(m)
 			t += ak.DT
 	out["v_end"] = _hv(P)
 	while not P.grounded:
 		out["v_land"] = _hv(P)
-		m.step(ak.DT)
+		_tick(m)
 	out["dist"] = P.flat_dist(from)
 	P.inp["move"] = Vector2.ZERO
 	ak.step(m, BRAKE_T)
@@ -99,7 +100,7 @@ func _ground_throw(m: Match, P: Hunter, home: Vector3) -> Dictionary:
 	ak.step(m, 0.25)
 	var out := {"k": P.flat_dist(from) / 0.25 / maxf(0.01, v_run), "dist": 0.0}
 	while K.flying:
-		m.step(ak.DT)
+		_tick(m)
 	out["dist"] = P.flat_dist(from)
 	P.inp["move"] = Vector2.ZERO
 	ak.step(m, 1.0)
@@ -119,6 +120,13 @@ func _run_back(m: Match, P: Hunter, home: Vector3) -> Dictionary:
 	P.inp["move"] = Vector2(1, 0)     # (+x: open ground, the abyss is 9 m behind -x)
 	ak.step(m, RUN_UP)
 	return {"drift": 0.0, "v_land": 0.0}
+
+## One frame with the camps cleared first, as ak.step does: a respawned mob in the arm's line would be grabbed
+## and the reel would hold his height (this check is about a miss).
+func _tick(m: Match) -> void:
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+	m.step(ak.DT)
 
 func _hv(P: Hunter) -> float:
 	return Vector2(P.vel.x, P.vel.z).length()
