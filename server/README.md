@@ -10,7 +10,7 @@ server/
   matchmaker/           Python 3 stdlib only, no pip
     matchmaker.py       the service (also --selftest)
     fake_server.py      stand-in game server for tests
-    mm/                 config, queue, launcher, core, api, selftest, log
+    mm/                 config, queue, launcher, core, picks, api, selftest, log
     tests/              python3 -m unittest
   deploy/
     install.sh          box setup, run as root on Ubuntu 24.04 (idempotent, --dry-run)
@@ -35,6 +35,7 @@ All bodies are JSON. The client's `Net.VERSION` must equal the version the match
 | `POST /queue` | `{"mode": "duel\|arena\|trio", "name": "...", "version": "<client Net.VERSION>", "party": ["friend", ...]}` | `200 {"ticket": "<id>"}`; `409 {"error": "version", "server_version": "..."}`; `400 {"error": "mode"}` or `{"error": "bad_request"}` |
 | `GET /queue/<ticket>` | | `{"state": "waiting", "position": n, "eta_s": n}` while queued or while the server boots; `{"state": "ready", "host": "<PUBLIC_HOST>", "port": N, "token": "<one-time>"}`; `{"state": "gone"}` |
 | `DELETE /queue/<ticket>` | | `{"state": "gone"}` (leaves the queue; a ticket that already has a match leaves its slot to a bot) |
+| `POST /queue/<ticket>/pick` | `{"hunter": "<Hunter id>"}` (`""` only reads) | `200 {"ok": true, "picks": {"phase": "loading\|picking\|done", "loaded": n, "of": N, "teams": [{"order", "picking", "left_s", "picks"}]}}`; `409 {"error": "loading\|turn\|taken"}`; `400 {"error": "unknown"}`; `404 {"error": "no_match"}`. Works after the token is spent: picking waits until every human slot joined (or 60 s), then each team picks in turn, 10 s each, one of each Hunter per team (mm/picks.py) |
 
 Queues: duel is 1v1 (2 slots), arena 4v4 (8 slots), trio is extraction in teams of 3 (`TRIO_SLOTS`,
 default 18). A match starts as soon as the line holds a full match of humans, or when the oldest ticket

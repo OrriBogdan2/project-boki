@@ -1,38 +1,44 @@
 class_name FarmTaskGuide
 extends RefCounted
-## A Boki's first job, made hard to miss (the farm's one-time "task" hint, FarmHints, says to click it): until
-## any Boki is pinned to a job, a pulsing outline and arrow on the page's job dropdown, a confirmation on
-## picking one, and, during the farm tutorial, a Care page that points at the one next thing: Done, not Feed.
-## WorkView/Home call in here.
+## The farm tutorial's "give your Boki a job" step, made hard to miss: a pulsing outline and arrow on the
+## page's job dropdown (the Boki button on the bar is FarmSpotlight's), the best job named in the hint, a
+## confirmation on picking one, and a Boki page that points at the one next thing: Done, not Feed.
+## FarmTutorial/FarmGuide/WorkView/Home call in here. Retired with base_mode on (the base tutorial has no job
+## step); delete with the farm steps (docs/DEBT.md).
 
 const GOLD := Color("f2c84a")
 const PULSE := "TutPulse"
 const PICKED_SAY_S := 6.0      # s the "Off to work!" bubble stays up, long enough to close the page and see it
 
-static var _drop: OptionButton = null     # the pulsing job dropdown on the open Boki page (until a first job)
+static var _drop: OptionButton = null     # the job dropdown on the open Boki page (while this step is up)
+static var _job := ""                     # the best job for that Boki, in words
+static var _boki := ""                    # and its name
 
 ## Is the Boki's page open with the dropdown on it?
 static func page_up() -> bool:
 	return is_instance_valid(_drop) and _drop.is_inside_tree()
 
-## Has any Boki been pinned to a job yet?
-static func any_job() -> bool:
-	return (Save.d["roster"] as Array).any(func(r): return Work.pin(r) != "")
-
-## The page's dropdown goes in: until a first job is picked, outline it.
-static func mark_dropdown(opt: OptionButton, _rec: Dictionary) -> void:
-	if any_job() or not HomeLayout.fs(Save.d):
+## The page's dropdown goes in while the step is up: outline it and name the best job.
+static func mark_dropdown(opt: OptionButton, rec: Dictionary) -> void:
+	if not FarmTutorial.active() or FarmTutorial.current() != "task":
 		return
 	_drop = opt
+	_boki = String(rec.get("name", "your Boki"))
+	var jobs := Work.list(rec)
+	_job = WorkView.job_label(String(jobs[0][0])) if not jobs.is_empty() else "the first one on the list"
 	pulse(opt, "▶")
 
-## A job was picked on the page: the task hint is done with; on a first job the Boki is thanked and the page
-## says what's next.
+## What the hint line fills in: {boki}, {job}.
+static func fill(txt: String) -> String:
+	var rec := Save.active_kin()
+	var nm := _boki if _boki != "" else String(rec.get("name", "your Boki"))
+	return txt.replace("{boki}", nm).replace("{job}", _job)
+
+## A job was picked on the page: the step completes, the Boki is thanked, and the page says what's next.
 static func picked(h: Node, rec: Dictionary, job: String) -> void:
-	var was := page_up()
-	_drop = null
+	var was := FarmTutorial.active() and FarmTutorial.current() == "task"
 	FarmTutorial.event("task")
-	if was:
+	if was and h.has_method("_toast"):
 		var nm := String(rec.get("name", "your Boki"))
 		var on_it := "%s is on %s now!" % [nm, Work.name_of(job)]
 		h._toast("Great, %s Press Done to carry on." % on_it)
@@ -53,7 +59,7 @@ static func care_footer(v: VBoxContainer, feed: Callable, close: Callable) -> vo
 		UI.footer_primary(v, "Feed", feed, 110, "seed")
 		return
 	UI.footer(v).add_child(UI.button("Feed", feed, 0, "seed"))
-	if any_job():
+	if FarmTutorial.did("task"):
 		pulse(UI.footer_primary(v, "Done", close, 110))
 
 ## A gold outline that breathes round a control, with an arrow beside it if given.
@@ -81,3 +87,7 @@ static func pulse(c: Control, arrow := "") -> void:
 		tw.tween_property(box, "modulate:a", 0.35, 0.5)
 		tw.tween_property(box, "modulate:a", 1.0, 0.5))
 	c.add_child(box)
+
+## Has any Boki been pinned to a job yet?
+static func any_job() -> bool:
+	return (Save.d["roster"] as Array).any(func(r): return Work.pin(r) != "")

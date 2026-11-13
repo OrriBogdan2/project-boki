@@ -32,7 +32,7 @@ func _new_save() -> Dictionary:
 	recs[3]["needs"]["joy"] = GLUM_JOY
 	d["roster"] = recs
 	d["active"] = recs[0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	d["egg"] = {"a": recs[0]["uid"], "b": recs[1]["uid"], "m": 99999, "t": Time.get_unix_time_from_system() + HATCH_S}
 	Save.d = d
 	HomeLayout.ensure(d)
@@ -56,11 +56,12 @@ func run(m: Node) -> void:
 	home._sync_fixtures()
 	home._refresh_nest()
 	home.life.R["chore_chance"] = 1.0      # a chore whenever one can run: the check is about the chores, not the dice
-	home.life.find_toys()
+	d["layout"]["deco"].append({"id": "toy_ball", "u": 990003, "px": center.x + 6.0, "pz": center.z})
+	home._sync_fixtures()
 	for k in home.kins:
 		k["pos"] = home.world.free_spot_near(center + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
-	ok(is_instance_valid(home.nest) and home.life.toys.size() == 1, "an egg sits in the Nook and one toy stands")
+	ok(is_instance_valid(home.nest) and home.life.toy_spots().size() == 1, "an egg sits in the Nook and one toy stands")
 	var left0 := float(d["egg"]["t"]) - Time.get_unix_time_from_system()
 	var kinds := {}        # name -> {kind: true}: the chores each Boki was seen doing
 	var starts := {}       # name -> chores begun (a Boki can finish one and begin the next in a single step)
@@ -115,7 +116,8 @@ func run(m: Node) -> void:
 		"Glom has nobody left to cheer once Bur is up")
 	d["egg"] = {}
 	ok(BaseChore.pick(home.life, by["Wren"]) == "", "no egg in the Nook: no Ember chore")
-	home.life.toys.clear()
+	d["layout"]["deco"] = d["layout"]["deco"].filter(func(e): return e.get("u", 0) != 990003)
+	home._sync_fixtures()
 	ok(BaseChore.pick(home.life, by["Mole"]) == "", "no toy spot: no Haul chore")
 	var refused := 0
 	for k in home.kins:

@@ -234,7 +234,7 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 | | RMB Heavy Shot | skillshot toward the cursor; range ? | full, 14 m | match (?) |
 | | E Hail Wall | arc at the cursor distance, clamped | clamp 2..9 m radius | match (the 2 m floor is ours) |
 | | X Starpiercer | beam, fixed length | full, 18 m | match |
-| Cinder (linwick) | LMB | stream runs its full length | full, 7 m | match |
+| Cinder (linwick) | LMB | stream runs its full length | full, 6.1 m | match |
 | | RMB Cinder Shot | sheet: one miss ended near the cursor (?); owner note: always full | full, 14 m | owner note, kept |
 | | Shift | toward the cursor, stops on impact | fixed dash along the aim | match |
 | | X Flue Flight | flies forward along the aim | fixed flight, steers with the aim | match |

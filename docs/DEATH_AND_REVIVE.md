@@ -78,7 +78,7 @@ All names and multipliers are placeholders.
 
 **Other kin rules in every tier:**
 - **Knocked out while you're alive:** a kin comes back to you after `kin_recall_time` (25s).
-- **While you're downed:** your kin guards your wisp (`kin_guards_wisp`).
+- **While you're downed:** your kin rides round your wisp as a Boki wisp and pulls you up (`KinWispForm`).
 - **However you come back:** a kin that's still loose returns to you, so kin don't need beacons of their own.
 
 **Worth deciding before launch:**
@@ -131,9 +131,10 @@ All names and multipliers are placeholders.
 
 ## Revive readability
 
-- Every visible wisp has a ring on the ground the size of the revive range. Teammates see it green, enemies orange.
-- While a teammate revives, the ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
-- A teammate near your wisp but outside the range gets "Step in to revive · 1.3m".
+- Every visible wisp has a compact ring hugging it in its side colour (ally or rival): the bleed-out drains round it, revive progress fills inside it, it flashes over the last 5 s and goes red while stomped (`DownedMarks`, docs/decisions/0019). No big ground circle.
+- While a teammate revives, the inner ring fills green and the nameplate reads "<name> reviving 62%". Both teams see it.
+- A teammate within 9 m sees the revive reach on the ground (thin, filling as they revive) and "Step onto <name>'s wisp to revive" on the HUD.
+- Your Boki come back to you and ride round your wisp as Boki wisps (no fighting, can't be hit); they pull you up after a short wait unless an enemy stands on you, and pop back onto your shoulder when you're up (`KinWispForm`).
 - The downed player sees "<name> is reviving you" under their revive bar.
 - Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes.
 - Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.

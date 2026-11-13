@@ -10,7 +10,7 @@ const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
 const ART := {"bulwark": "breaker", "archer": "hem", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "ryzz", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
-	"tender": "pip", "dredge": "dredge"}
+	"tender": "pip", "dredge": "dredge", "gil": "gil"}
 ## Armature bone -> the rig node it follows (paths under the model root).
 const BONES := {
 	"root": "Rig",
@@ -70,16 +70,19 @@ const INK_TAGS := ["braid", "mane", "mane_dk"]
 ## soft and near white (no violet shadow, no warm terminator band, no sun self-shadow, no procedural
 ## brushwork), a light-coloured rim and top light lift its edges off the ground, and far_lift brightens it at
 ## the match camera, so the model reads as bright as the art. (A procedural hero's shadow floor is 0.37.)
-## The scene's light leans cool and violet (Look: a c4cbe6 ambient, about half the light on a painted model, and a
-## blue fill), which turned a painted atlas's skin lilac and its blacks muddy: ambient_cut and own_ambient swap the
-## scene's ambient for a warm-neutral one a step brighter, light_neutral takes the hue out of the cool fill (the
-## warm key keeps its warmth), dark_lift raises near-black paint one step; the shadow tint is warm. At the match
-## camera far_smooth takes the atlas's fine detail out (no speckle) and the ink thins (INK_FAR_THIN); a Hunter's
-## signature rim there is rim_far / rim_far_color in its warden_look.json "painted".
-const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.95, 0.91), "shadow_sat": 0.0, "sss": 0.0,
-	"sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3, "fres_tint": 0.95, "rim_amount": 0.5,
-	"top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0, "own_ambient": Vector3(0.58, 0.54, 0.5),
-	"light_neutral": 0.9, "dark_lift": 0.07, "far_smooth": 0.7, "far_smooth_bias": 1.0}
+## The scene's light is split: a cool violet ambient and blue fill (Look: about half the light on a painted model)
+## against a low amber sun (RaidLook "clear": ffb27a). The cool half turned a painted atlas's skin lilac, so
+## ambient_cut and own_ambient swap the scene's ambient for a neutral one a step brighter and light_neutral takes the
+## hue out of the cool fill; the sun's amber then had nothing left to balance it and every Hunter read red (owner
+## 11-11), so light_neutral_warm takes most of its hue out too and the toon tints stay near white. dark_lift raises
+## near-black paint one step. At the match camera far_smooth takes the atlas's fine detail out (no speckle) and the
+## ink thins (INK_FAR_THIN); a Hunter's signature rim there is rim_far / rim_far_color in its warden_look.json
+## "painted".
+const PAINTED := {"shade": 0.86, "ramp": 2.6, "shadow_tint": Color(1.0, 0.98, 0.96), "light_tint": Color.WHITE,
+	"shadow_sat": 0.0, "sss": 0.0, "sky_ao": 0.12, "self_shadow": 0.0, "surface": 0, "paint": 0.0, "fres": 1.3,
+	"fres_tint": 0.95, "rim_amount": 0.5, "top_light": 1.0, "far_lift": 0.35, "ambient_cut": 1.0,
+	"own_ambient": Vector3(0.56, 0.55, 0.54), "light_neutral": 0.9, "light_neutral_warm": 0.8, "dark_lift": 0.07,
+	"far_smooth": 0.7, "far_smooth_bias": 1.0}
 ## The `ice` slot (Claire's ice costume, spear and blades; Breaker's hammer block): read as clear ice without real
 ## transparency: a strong cold fresnel rim and a little gloss over the painted atlas.
 const ICE := {"fres": 2.6, "fres_color": Color(0.72, 0.9, 1.0), "fres_tint": 0.25, "gloss": 0.45, "rim_amount": 0.8}
@@ -127,6 +130,12 @@ static var _look = null         # content/rules/warden_look.json, read once (loo
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
 
+## Starts reading every Warden model a match may dress a Hunter in (as the loading screen comes up): the first
+## load of each was 200-450 ms on the main thread, a dozen of them in a 40-hunter build.
+static func fetch_all() -> void:
+	for a in Arch.ORDER:
+		fetch(a)
+
 static func path(arch: String) -> String:
 	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
@@ -169,6 +178,13 @@ static func set_model(arch: String, on: bool) -> void:
 	else:
 		picks[arch] = "procedural"
 	Settings.set_v(SETTING, picks)
+
+## Where the rig's torso shows, world: on a Hero playing clips, the torso of the body you see (its hips bone, back
+## through the retarget); else the rig's own. A Boki riding on you sits on it (Kin), so it keeps its seat on that body.
+static func shown_torso(model: Node3D) -> Transform3D:
+	var torso := model.get_node(^"Rig/Torso") as Node3D
+	var sync := model.get_node_or_null(^"Warden/Sync") as Sync
+	return sync.shown(torso) if sync and sync.clips else torso.global_transform
 
 ## The .glb's armature, or null.
 static func skeleton(glb: Node) -> Skeleton3D:
@@ -538,7 +554,7 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p):
+	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
@@ -1039,6 +1055,14 @@ class Sync extends Node:
 		if bool(root.get_meta(CHAIN_OUT, false)):
 			for bi in hide_out:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
+
+	## A rig node's place on the body you see (world): its bone's pose back through the retarget.
+	func shown(nd: Node3D) -> Transform3D:
+		for l in links:
+			if l[1] == nd:
+				var to_rest := (l[3] as Transform3D).affine_inverse() * (l[2] as Transform3D).affine_inverse()
+				return root.global_transform * skel.get_bone_global_pose(int(l[0])) * to_rest
+		return nd.global_transform
 
 	func apply() -> void:
 		for l in links:

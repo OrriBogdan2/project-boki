@@ -21,6 +21,7 @@ source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. 
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
 its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static. Its cooldown follows the
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
+height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Skycall circle 1.5 m radius.
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 7 to 11 m (owner item 70, trimmed 11-08: too far; its time is scaled by the dash feel, its length is not), Skycall circle 1.5 m radius.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
@@ -92,8 +93,9 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | E input: hold, drag, release (HIGH) | (b) | held E keeps the drag open (up to 1 s), the release commits; a tap drags away (asserted: still dragging at 0.6 s, the release starts the countdown) |
 | E numbers re-measured (KIT_PARITY) | (a) | countdown 0.8 s = 4 frames at 5 fps (briefs/hero-ref/vireo.md, E: Lightning Javelin, 0186 to 0190); 1 Static and 12 s from briefs/supervive-data/supervive_kits.md (Joule E). The source states no drag window ("hold and drag before release"; the footage shows the commit one frame after placing), so the 1 s cap is ours; asserted: held with no release it commits at 1 s. Enemies see the all-player rim circle from the placement and the pillar for the 0.8 s. Open: the footage info panel says the javelin adds 2 Static (kept at the data's 1), and the cooldown is 10.5 at our 8 : 8 : 10.5 pace (data 12 / 10 / 9) |
 | Wirerun arrival ring (HIGH) | (a) | 6d054633 (and the press flash) |
-| Blowout ground ring (MED) | (b) | removed; the copper pillars stay |
+| Blowout ground ring (MED) | (b) | removed (the shared payoff ring too: `payoff_fx(..., rings := false)`); the copper pillars stay |
 | Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its 1.5 m radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
+| Kit VFX pass: bursts that are not gameplay (MED) | (b) | out: the per-shot ground sparks, the Static pop's second bolt and flash, the Wirerun pass burst (a crackle instead), the rod's end and hit bursts, the SLAMMED ring, Skycall's strike spray, Kitefall's take-off spray (dust). Kept: the source's rod shock ring, the strike rings at the hit size, the copper refund pillars |
 | E Static 2 vs 1 (MED) | (b) | 1 (data); asserted |
 | E numbers (-) | (a) | already per items 9/9b |
 | Shift pass damage 10 vs ~20 (MED) | (b) | 20 (1.7 bolts, the data's ratio); asserted |

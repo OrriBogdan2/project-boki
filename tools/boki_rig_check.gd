@@ -11,7 +11,10 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"nettlynx", "thrumbird", "caecilith", "lilybara", "umbrathere"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend"]
+	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin"]
+const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
+const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
+const T_FRAMES := 8            # frames sampled over a game clip
 const SHAPES := ["blink", "closed", "happy", "sad", "sleepy", "angry", "m_smile", "m_frown", "m_snarl", "m_chomp",
 	"m_o"]
 const MAX_TRIS := 5000         # Boki and props (S1's perf rule)
@@ -52,6 +55,7 @@ func _contents(rig: BokiRig) -> void:
 		ok(a != null and a.length > 0.1, "clip %s" % c)
 	for c in BokiRig.LOOPED:
 		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+	_game_clips(rig)
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0
@@ -64,6 +68,40 @@ func _contents(rig: BokiRig) -> void:
 	_lods(rig)
 	var skel := rig.model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	ok(skel.get_bone_count() <= MAX_BONES, "%d bones, budget %d" % [skel.get_bone_count(), MAX_BONES])
+
+## Tumble's and Echo Steps' clips last as long as their beat data says, play once, and never show the bind pose.
+func _game_clips(rig: BokiRig) -> void:
+	var impact := float(BaseTumble.rules()["impact_s"])
+	var hop := float(EchoSteps.rules()["hop_s"])
+	for c in GAME_CLIPS:
+		var a := rig.player.get_animation(c)
+		var want := EchoSteps.spin_s()
+		if c in ["rush", "brace", "dodge"]: want = impact
+		elif c == "stonehop": want = hop
+		ok(is_equal_approx(a.length, want), "%s lasts %.2f s, its game's beat data says %.2f" % [c, a.length, want])
+		ok(a.loop_mode == Animation.LOOP_NONE, "%s plays once" % c)
+		ok(not _t_pose(rig, c), "%s has no T-pose frame" % c)
+	for m in BaseTumble.rules()["moves"].values():
+		ok(String(m["clip"]) in CLIPS, "Tumble's %s plays the rig clip %s" % [m["name"], m["clip"]])
+
+## True when some frame of the clip leaves every bone within T_POSE of its bind pose.
+func _t_pose(rig: BokiRig, clip: String) -> bool:
+	var skel := rig.skeleton()
+	rig.manual = true
+	rig.set_clip(clip, 0.0)
+	var length := rig.player.get_animation(clip).length
+	var worst := 99.0
+	for f in T_FRAMES + 1:
+		rig.seek(length * float(f) / float(T_FRAMES))
+		var far := 0.0
+		for b in skel.get_bone_count():
+			var q := skel.get_bone_pose_rotation(b)
+			far = maxf(far, q.angle_to(skel.get_bone_rest(b).basis.get_rotation_quaternion()))
+		worst = minf(worst, far)
+	print("BOKIRIG %s %s closest frame to bind pose: %.3f rad" % [kin_id, clip, worst])
+	rig.manual = false
+	rig.set_clip("idle", 0.0)
+	return worst < T_POSE
 
 ## The coat has generated LODs (the art budget), the face stays whole (BokiRig.FACE_LOD_BIAS).
 func _lods(rig: BokiRig) -> void:
@@ -84,7 +122,12 @@ func _clip_for(rig: BokiRig, key: String, value: Variant) -> String:
 
 func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	ok(rig.clip == "idle", "starts idle")
-	ok(_clip_for(rig, "kstate", "sleep") == "sleep", "kstate sleep sleeps")
+	ok(_clip_for(rig, "kstate", "sleep") == "settle", "kstate sleep settles down first")
+	rig._shot_left = 0.0
+	ok(_clip_for(rig, "kstate", "sleep") == "nap", "then naps")
+	rig._asleep = false
+	for act in ["munch", "nudge", "climb", "splash"] + GAME_CLIPS:
+		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")

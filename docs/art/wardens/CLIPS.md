@@ -21,20 +21,20 @@ Hero live in `tools/art1/` (Kael is the pilot).
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
-- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `hold_at` + `hold_until` (the clip stays on its pose at `hold_at` s from there to `hold_until` s into the move, then plays out or hands back), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
-- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
+- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne. Over the glide clip (and the dive, which
+  plays it too) the whole body takes HunterAnim's air tilt (root meta `AIR_TILT`, WardenClips._air_tilt): the roll into
+  a glider turn (25 deg at full steer) and the dive's nose-down pitch, about the rig's hips as the rig takes it, so the
+  glider stays in the hands. A Boki riding on you sits on the torso you see (`WardenGlb.shown_torso`, the hips bone back
+  through the retarget), not the hidden rig's. `--glide-bank-check` asserts it on every Hero; `--glide-shots` films it.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
+  The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
+- `act` (DECISIONS 2026-11-09, the garden): home verb (HunterVerbs: `pat`, `feed`, `cheer`) -> clip (`pet` 1.3 s, `give` 1.0 s, `cheer` 0.8 s, as long as HunterVerbs.LENGTH). Seeked to the state's `act_t`; a verb with no entry stays on the procedural rig. Vex, Kael, Lace (hem), Cinder: tools/art1/gardenkit.py holds the shared timing, each hero's `*_clips.py` (Kael: `kael_garden.py`) the poses and attitude; `glb_add_clips.py` copies them onto the shipped glb.
   `moving` s (default `dur`) while he runs on, played at `rate` times its speed (default 1). `--clip-check` measures the
   plain jump through the clips (take-off, apex, dip, recovery: the JL rows); `--jump-land-shots` films it at the match camera.
-- `air`, `land`: rise, fall, glide, dive (a plunge: the glider's Ctrl dive and the opening skydive; `dive_at` s holds a
   one-shot clip on one frame); a landing clip after `min_fall` s airborne. WardenAirTilt turns the whole .glb about the
   hips on top: `dive_tilt` (deg forward in a plunge, default 105: head-down), `glide_tilt` (deg forward under the
   glider, default 12: the legs trail), `glide_bank` (deg into a glider turn, default 28). A clip that already leans
   sets less (Tarek's and Breaker's dive 50, Hem's 35, Ostra's 12 on top of the rig's own tip). Strips: `--glide-shots`.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running; `"moving"`: only while he moves, standing the clip owns the body), `fade` (s into the move), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
-  The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
-- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `lead` (s: the clip starts that far in, so a late strike key lands on the kit's hit; under zero, its first frame is held that long)}.
   The clip is seeked to the kit's own `kmove_t` (plus the lead), so it can't drift from the hit. Clip length = the table's last key.
   Firing on the run: a move the kit lets him run through (a shot, a throw, a slash, a cast he can walk in) is `upper`
   (`"moving"` when it also has a standing pose), or the legs freeze and the feet skid. `--fire-run-check` runs every

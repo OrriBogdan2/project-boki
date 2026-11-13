@@ -934,13 +934,7 @@ func tender() -> void:
 			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
 			and K.lk().showing(bid),
 			"r %.2f" % float(tele.get("r", 0.0)))
-	var rooted_early := T.root_t > 0.0
-	var h1 := T.hp
-	step(m, 0.7)
-	ok(
-			"mm RMB: it roots about 0.7 s after it sticks (not before), damages and Kindles",
-			not rooted_early and T.root_t > 0.0 and h1 - T.hp > 25.0 and K.kindle_on(T) >= 1,
-			"root %.2f dmg %.0f" % [T.root_t, h1 - T.hp])
+	await _burr_build(m, P, T, K, bid)
 	await _free(m)
 	# --- Hearthlight: on her a 2.6 m ring with its own cast move; E again throws it to the cursor at once
 	r = sc.setup("tender", 6.0)
@@ -1126,7 +1120,7 @@ func _dashes_cute() -> void:
 	step(m, P.roll_t)
 	var ground_d := P.pos.x - p0.x
 	ok(
-			"mm dashes: the ground hop is Elluna's: 2 bh (3.6 m) in 0.2 s after the dash feel",
+			"mm dashes: the ground hop is Elluna's: 2 bh (3.6 m) in 0.2 s (off the dash feel)",
 			absf(ground_d - 3.6) < 0.25 and absf(ground_t - 0.2) < 0.02,
 			"%.2f m in %.2f s" % [ground_d, ground_t])
 	step(m, 0.5)
@@ -1141,7 +1135,8 @@ func _dashes_cute() -> void:
 	var glide_cd := P.ex_cd
 	var air_move := K.anim_id
 	var peak := {"v": 0.0}
-	step(m, air_t + 0.05, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
+	# measured at the glide's end: what she carries out of it after is the shared air drag's (Loco, tuning.json)
+	step(m, air_t, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
 	var air_d := P.pos.x - a0.x
 	ok(
 			"mm dashes: the air glide is Elluna's: 13.3 m over 0.95 s, peaking 16.5-22 m/s",
@@ -1300,6 +1295,59 @@ static func wav_peak_db(path: String) -> float:
 		at += 8 + n + (n % 2)
 	return -99.0
 
+## Owner 11-10: a stuck Burrseed roots only after about 2 s of the foe in her reach (`leash`), with a vine
+## on them that thickens as it builds; out of reach it unwinds (2x) and, empty, the seed falls off.
+## Called 0.1 s after the throw's seed stuck on T, about 6 m from her.
+func _burr_build(m: Match, P: Hunter, T: Hunter, K: TenderKit, bid: String) -> void:
+	var sd: Dictionary = K.rmb_def()["seed"]
+	var need := float(sd["build"])
+	ok(
+			"mm RMB: the build-up is about 2 s, unwinds 2x out of a reach longer than the throw",
+			absf(need - 2.0) < 0.01 and float(sd["unwind"]) >= 2.0 and float(sd["leash"]) >= float(sd["range"]))
+	var a0 := float(K.ult_look.held.get(bid, {}).get("p", {}).get("a", 0.0)) if K.ult_look else 0.0
+	step(m, need - 0.1 - 0.15)
+	var a1 := float(K.ult_look.held.get(bid, {}).get("p", {}).get("a", 0.0)) if K.ult_look else 0.0
+	ok(
+			"mm RMB: no root %.2f s after it sticks; the vine on them thickens as it builds" % (need - 0.15),
+			T.root_t <= 0.0 and K.burrs.size() == 1 and K.ult_look.showing(bid) and a1 > a0 + 0.3,
+			"root %.2f vine %.2f -> %.2f" % [T.root_t, a0, a1])
+	var h1 := T.hp
+	step(m, 0.25)
+	ok(
+			"mm RMB: it roots at about 2.0 s of contact (by 2.1 s), damages and Kindles, the vine gone",
+			T.root_t > 0.0 and h1 - T.hp > 25.0 and K.kindle_on(T) >= 1 and K.burrs.is_empty()
+			and not K.ult_look.showing(bid),
+			"root %.2f dmg %.0f" % [T.root_t, h1 - T.hp])
+	# breaking contact: 1 s built, then 0.3 s out of reach unwinds it 0.6 s; back in, it needs 1.6 s more
+	T.root_t = 0.0
+	var home := T.pos
+	K._stick(T)
+	step(m, 1.0)
+	T.teleport(P.pos + (home - P.pos).normalized() * (float(sd["leash"]) + 3.0))
+	step(m, 0.3)
+	var unwound := float(K.burrs[0]["build"]) if K.burrs.size() == 1 else -1.0
+	T.teleport(home)
+	step(m, 1.4)
+	var early := T.root_t > 0.0
+	step(m, 0.3)
+	ok(
+			"mm RMB: out of her reach it unwinds 2x; back in, the root waits for the lost time",
+			absf(unwound - 0.4) < 0.05 and not early and T.root_t > 0.0,
+			"built %.2f after 0.3 s out, early %s root %.2f" % [unwound, early, T.root_t])
+	# breaking it fully: out of reach until it is empty, the seed falls off and nothing roots
+	T.root_t = 0.0
+	K._stick(T)
+	step(m, 1.0)
+	T.teleport(P.pos + (home - P.pos).normalized() * (float(sd["leash"]) + 3.0))
+	step(m, 0.6)
+	T.teleport(home)
+	var fell := K.burrs.is_empty()
+	step(m, need + 0.3)
+	ok(
+			"mm RMB: escaped (out of reach until it unwinds), the seed falls off and never roots",
+			fell and T.root_t <= 0.0,
+			"burrs %d root %.2f" % [K.burrs.size(), T.root_t])
+
 ## Burrseed's burst damage on the first foe, with the hunter at level `lvl`.
 func _seed_burst(lvl: int) -> float:
 	var r: Array = sc.setup("tender", 6.0)
@@ -1318,7 +1366,7 @@ func _seed_burst(lvl: int) -> float:
 	step(m, 0.3)
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 1.2 + float(K.rmb_def()["windup"]))
+	step(m, 0.7 + float(K.rmb_def()["windup"]) + float(K.rmb_def()["seed"]["build"]))
 	var dmg := h0 - T.hp
 	await _free(m)
 	return dmg
@@ -1493,7 +1541,7 @@ func rimewright() -> void:
 			"tm passive: Chill lasts 4s and a new hit refreshes it",
 			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
 	await _free(m)
-	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
+	# --- Skate: darts fly straight and thick at double damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
 	m = r[0]
 	P = r[1]
@@ -1511,6 +1559,13 @@ func rimewright() -> void:
 	P.teleport(P.pos + Vector3(0, World.LEVEL, 0))
 	step(m, 0.1)
 	P.dashes = P.max_dashes()
+	sc.aim_at(P, T.pos)
+	P.inp["fire"] = true
+	step(m, 0.05)
+	P.inp["fire"] = false
+	var plain_shots: Array = _mine(m, P)
+	var plain_d := float(plain_shots[-1]["dmg"]) if not plain_shots.is_empty() else 0.0
+	step(m, 0.3)
 	P.inp["move"] = Vector2(-1, 0)
 	P.inp["dash"] = true
 	P.inp["dash_down"] = true
@@ -1527,9 +1582,11 @@ func rimewright() -> void:
 	var bs: Array = _mine(m, P)
 	var bd := float(bs[-1]["dmg"]) if bs.size() > nb else 0.0
 	ok(
-			"tm Shift: darts while skating are straight beams at normal damage",
-			bs.size() > nb and absf(bd - float(P.wpn["dmg"])) < 0.05 and K.stats["beams"] >= 1,
-			"dmg %.2f" % bd)
+			"tm Shift: darts while skating are straight beams at dash.skate_dart_dmg_k (2x) the plain dart's damage",
+			bs.size() > nb and plain_d > 0.0 and K.stats["beams"] >= 1
+				and float(K.dash_def()["skate_dart_dmg_k"]) == 2.0
+				and absf(bd - plain_d * float(K.dash_def()["skate_dart_dmg_k"])) < 0.05,
+			"plain dart %.2f, skating beam %.2f" % [plain_d, bd])
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(

@@ -282,7 +282,7 @@ def gen_classes():
         for g in cu["mastery"].get(aid, []):
             m_rows.append([the(ARCH[aid]["title"]), g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
     starters = ", ".join(the(ARCH[a]["title"]) for a in cu["starters"] if a in ARCH)
-    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. " % (cu["starter_picks"], len(cu["starters"]), starters)
+    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) after naming your first Boki and plays the tutorial as it. After your first expedition the other starters open, and you pick a second Relic from Kael, Cinder and Meeko (whichever you do not hold). " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
     unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)
@@ -545,9 +545,7 @@ def gen_maps():
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
-        if m.get("docks"): ex.append("%d skiff docks" % len(m["docks"]))
         if m.get("outposts"): ex.append("%d uplink outposts" % len(m["outposts"]))
-        if m.get("hatches"): ex.append("%d rift hatches" % len(m["hatches"]))
         if ex: body += "**Exits:** " + ", ".join(ex) + ".\n\n"
         trav = []
         for key, label in (("bridges", "bridges"), ("glides", "glide routes"), ("pads", "jump pads"), ("updrafts", "updrafts"), ("winds", "wind roads")):
@@ -595,7 +593,7 @@ def gen_rules():
     rules = content("rules")
     for rid, r in rules.items():
         if rid == "lore": continue   # the Lore page
-        body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight"}.get(rid, rid), rid, r.get("desc", ""))
+        body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight", "boki_hit": "How kit hits land on a Boki"}.get(rid, rid), rid, r.get("desc", ""))
         body += table(["Setting", "Value"], [[k, num(v) if not isinstance(v, (dict, list)) else json.dumps(v)] for k, v in r.items() if k != "desc"])
     co = content("combos")
     body += "\n\n## Combos\n\nOne fighter sets a foe up with a status, the partner pays it off (`content/combos/`).\n\n"

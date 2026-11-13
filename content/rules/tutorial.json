@@ -1,33 +1,85 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd), short (owner, Nov 8): ten steps, one banner line each. steps: [id, the line]. %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for part of a step (steering the drop before the walk, the gap step after two falls, the Boki starting out). labels: the marker's caption per course stop or step. mob: how the tutorial's monsters differ from real ones (a little tougher and bigger, damage and attack tempo down; the first one dies to one magazine). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land (shoot: monsters beaten, sig: casts), shown as 1/3 on the pill when more than one. rival: beats 7 and 8 (TutorialRival): the rival Hunter's name, how far off it lands (dist_m), its health share (hp; late_hp after late_s of fighting), its damage share (dmg), the slow-motion and camera nudge on its knock (slow_s, slow_k, shake), how far the loose Boki wisp floats from the Hunter Wisp (apart_m), the reach of the 'that's the Hunter' toast (warn_m) and of the grab (grab_m), the hold that grabs (hold_s), seconds until the downed rival is gone after the grab (gone_s), and the labels and lines. The moves and rules the cut steps taught are one-time hints now (content/rules/hints.json).",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down; camp_hp replaces hp for the camps, so their kills come quickly). fight_foes: the last fight's monsters per starter (the ult step). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat.",
  "steps": [
   [
-   "move",
-   "Walk to the glowing beam"
+   "land",
+   "Steer down to the meadow"
   ],
   [
-   "dash",
-   "Dash, then hold %G to glide"
+   "points",
+   "You start with 1 ability point"
+  ],
+  [
+   "pick_sec",
+   "Unlock %A"
+  ],
+  [
+   "sec",
+   "Hit the monsters with %A"
   ],
   [
    "shoot",
-   "%W the monster"
+   "Now shoot them down"
   ],
   [
-   "sig",
-   "Use %A on the group"
+   "pick_dash",
+   "Level 2! Unlock %A"
   ],
   [
-   "throw",
-   "Tap %T: send %s at it"
+   "dash",
+   "Dash across the gap"
   ],
   [
-   "fight",
-   "Beat all the monsters"
+   "exdash",
+   "Jump, then dash in mid-air"
   ],
   [
-   "rival",
-   "Knock down the rival Hunter"
+   "glide",
+   "Jump, press %J again to glide"
+  ],
+  [
+   "wallkick",
+   "Jump at the cliff, then again"
+  ],
+  [
+   "crouch",
+   "Hold to crouch and scout"
+  ],
+  [
+   "gkey",
+   "Send %s at the monsters"
+  ],
+  [
+   "pick_kin",
+   "Level 3! Unlock %A"
+  ],
+  [
+   "kin",
+   "Hit the line with %A"
+  ],
+  [
+   "glove",
+   "Grab the glove"
+  ],
+  [
+   "hook",
+   "Hook the Sentinel to you"
+  ],
+  [
+   "pick_ult",
+   "Level 6! Unlock your ultimate"
+  ],
+  [
+   "ult",
+   "Fuse with %s and win"
+  ],
+  [
+   "ranks",
+   "Spend your spare points"
+  ],
+  [
+   "wayout",
+   "Few ways out: reach the Uplink"
   ],
   [
    "grab",
@@ -42,91 +94,117 @@
    "Step into the light to go home"
   ]
  ],
+ "detail": {
+  "points": "Choose wisely: every level gives one more. Monsters give XP when they fall.",
+  "pick_sec": "%L",
+  "pick_dash": "%L",
+  "pick_kin": "%L",
+  "pick_ult": "Fuse with %s: one body, its power and yours, for a while.",
+  "shoot": "%L",
+  "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
+  "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
+  "wallkick": "A jump against a wall kicks you up it.",
+  "crouch": "Crouching shows what lies far ahead.",
+  "gkey": "%T sends %s at a monster. Tap again to call it back.",
+  "glove": "Gloves need no points. %Q uses this one.",
+  "hook": "It shoots from afar. Your glove drags it to your feet.",
+  "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
+  "wayout": "A match has only a few ways out. This one is the Uplink at the outpost.",
+  "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
+  "defend": "Stay inside the circle. Step out and the capture slips back!"
+ },
  "alt": {
-  "land": "Steer down to the meadow",
-  "gap_help": "Just jump and hold %G. The wind carries you.",
-  "throw_back": "Tap %T to call %s back",
-  "throw_send": "Tap %T again to send %s at the monster"
+  "sec_hold": "Tap, then hold, to use %A",
+  "shoot_draw": "Hold to draw, let go to loose",
+  "shoot_melee": "Step in and swing at them"
  },
- "need": {
-  "shoot": 1,
-  "sig": 1,
-  "throw": 2
- },
+ "need": {},
  "cds": 0.25,
  "mob": {
-  "hp": 1.6,
+  "hp": 8.0,
   "scale": 1.4,
   "dmg": 0.1,
   "windup": 1.8,
-  "cd": 1.6
+  "cd": 1.6,
+  "camp_hp": 2.5
  },
- "labels": {
-  "move": "Walk here",
-  "dash": "Dash across",
-  "glide": "Glide here",
-  "chest": "Chest",
-  "extract": "Lift",
-  "rival": "Rival",
-  "grab": "Boki"
- },
- "pell_doc": "Pell, the guide (TutorialGuide): one short line when it stops you at the start of a step (the same %keys as the steps; the box closes itself after a few seconds), and the portrait mood for steps that are not neutral.",
- "pell": {
-  "move": [
-   "I'm Pell. Follow me, Hunter!"
+ "fight_foes": {
+  "archer": [
+   "skitter",
+   "spitter",
+   "skitter",
+   "skitter",
+   "spitter",
+   "skitter",
+   "skitter"
   ],
-  "dash": [
-   "A gap! Run off the glowing pad and dash."
+  "juggernaut": [
+   "skitter",
+   "spitter",
+   "skitter",
+   "spitter",
+   "skitter",
+   "skitter",
+   "spitter",
+   "skitter"
   ],
-  "shoot": [
-   "A Hollow beast. %W it!"
-  ],
-  "sig": [
-   "A whole group: that's what %A is for."
-  ],
-  "throw": [
-   "That one spits from afar. Send %s at it!"
-  ],
-  "fight": [
-   "More of them! Beat them all, you and %s."
-  ],
-  "chest": [
-   "Here's a chest key. Open that chest!"
-  ],
-  "extract": [
-   "The lift is open. Step into the light!"
-  ],
-  "rival": [
-   "Other Hunters carry Boki lights too. Knock that one down!"
-  ],
-  "grab": [
-   "You can't take a Hunter. You can take a Boki. Hold %F on the critter light."
+  "gunslinger": [
+   "skitter",
+   "spitter",
+   "skitter",
+   "skitter",
+   "spitter",
+   "skitter",
+   "skitter"
   ]
  },
- "pell_moods": {
-  "fight": "warning",
-  "extract": "happy",
-  "rival": "warning"
+ "labels": {
+  "land": "Land here",
+  "dash": "Dash across",
+  "glide": "Glide here",
+  "wallkick": "Climb",
+  "crouch": "Lookout",
+  "glove": "Glove",
+  "wayout": "Uplink",
+  "uplink": "Uplink",
+  "defend": "Outpost",
+  "extract": "Lift"
  },
- "rival": {
-  "name": "Rival",
-  "dist_m": 10.0,
-  "hp": 0.4,
-  "late_hp": 0.1,
-  "late_s": 30.0,
-  "dmg": 0.1,
-  "slow_s": 0.5,
-  "slow_k": 0.3,
-  "shake": 0.5,
-  "apart_m": 3.6,
-  "warn_m": 2.5,
-  "grab_m": 1.5,
-  "hold_s": 0.6,
-  "gone_s": 5.0,
-  "hunter_label": "Hunter: can't be taken",
-  "boki_label": "Boki: hold %F",
-  "hunter_toast": "That's the Hunter. Try the little critter.",
-  "grab_toast": "You carry a stolen Boki. It goes home when the match ends, and you keep its echo.",
-  "grab_bubble": "A new friend?"
+ "camps": {
+  "sec": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 2
+  },
+  "gkey": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 3
+  },
+  "kin": {
+   "foes": [
+    "skitter",
+    "skitter",
+    "skitter"
+   ],
+   "to": 4,
+   "row": true
+  },
+  "hook": {
+   "foes": [
+    "sentinel",
+    "skitter"
+   ],
+   "to": 6,
+   "far": true
+  },
+  "ult": {
+   "foes": [],
+   "to": 0
+  }
  }
 }

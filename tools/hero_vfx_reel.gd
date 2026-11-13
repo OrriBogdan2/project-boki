@@ -231,7 +231,7 @@ func _juggernaut_lunge() -> void:
 	await _go(GAP)
 
 func _juggernaut_drop() -> void:
-	await _reset(5.0)
+	await _reset(2.4)
 	var K: JuggernautKit = P.ak
 	var drop := func(t: float):
 		P.inp["jump"] = t < DT
@@ -239,9 +239,9 @@ func _juggernaut_drop() -> void:
 			K.press_rmb()
 		_aim(T.pos)
 	await _go(3.0, drop, _sheet("drop",
-			"RMB in the air, Meteor Drop: the gather over the marker, the comet dive, the ground "
-			+ "breaking open, the wall of flame at the stun's edge, debris, cooling fissures",
-			[0.34, 0.45, 0.55, 0.64, 0.7, 0.8, 1.0, 1.6, 2.6]), 2.0)
+			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle ahead of him), "
+			+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust",
+			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]), 2.0)
 	await _go(GAP)
 
 func _juggernaut_dash() -> void:
