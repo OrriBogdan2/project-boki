@@ -47,6 +47,23 @@ def skin(body, face_obj, arm, pieces, piece_of, bl, sigma=0.012):
     bind(face_obj, arm)
 
 
+def rest_pose(body, arm, pose):
+    """Bakes `pose` (bone: game-axis euler) into the body's and the rig's rest shape: a scanned tail lifted off the
+    ground, say. The face is not moved, so the head's chain must not be posed."""
+    for name, rot in pose.items():
+        b = arm.pose.bones[name]
+        rest = b.bone.matrix_local.to_quaternion()
+        b.rotation_mode = "QUATERNION"
+        b.rotation_quaternion = rest.inverted() @ quat_of(*rot) @ rest
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.modifier_apply(modifier="Armature")
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.object.mode_set(mode="POSE")
+    bpy.ops.pose.armature_apply(selected=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    body.modifiers.new("Armature", "ARMATURE").object = arm
+
+
 def skin_only(body, arm, pieces, sigma=0.012):
     """Each vertex follows the primitives it sits on, softened by their blend radii."""
     offset = 0
@@ -151,7 +168,8 @@ def _bone_scale(rest, sc):
     return out
 
 
-def export(path):
+def export(path, tangents=False):
+    """`tangents`: a body with a normal map carries the frame it was baked in."""
     import os
     os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.ops.export_scene.gltf(
@@ -159,4 +177,4 @@ def export(path):
         export_force_sampling=True, export_frame_step=1, export_morph=True, export_skins=True,
         export_anim_slide_to_zero=True,     # Blender keys from frame 1: without this each loop holds a frame at its start
         export_morph_normal=True, export_vertex_color="ACTIVE", export_all_vertex_colors=False, export_image_format="WEBP", export_image_quality=88, export_apply=False,
-        export_yup=True, export_def_bones=False, export_extras=False)
+        export_yup=True, export_def_bones=False, export_extras=False, export_tangents=tangents)
