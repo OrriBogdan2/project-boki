@@ -7,8 +7,9 @@ extends RefCounted
 ## HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
 ## five-terrace one stays sheer however long you dance. Near a wall a capped press does nothing (it never
 ## opens the glider: the glide button still does). Bounce: hitting a
-## wall at an angle with speed in the air (a dash, a glide, a boosted jump) rebounds you off it;
-## head-on you just stop, as ever, and a jump there kicks.
+## wall at an angle with speed in the air (a dash, a boosted jump) rebounds you off it;
+## head-on you just stop, as ever, and a jump there kicks. Slide: the glider never bounces or stops dead
+## on a wall, see stopped().
 
 const KICK_RISE := 0.8          # m of extra jump height: one terrace (World.LEVEL)
 const HOP_CLIMB_CAP := 1.6      # m above the take-off ground a hop may still start (a plain jump's apex)
@@ -34,6 +35,7 @@ const BOUNCE_WINDOW := 0.25     # s to steer before ordinary air control returns
 const BOUNCE_DUST := 3          # dust puffs
 const FX_OFFSET := 0.3          # m the spark sits in front of the wall face
 const FX_HEIGHT := 0.8          # m above the feet
+const WALL_BACK := -0.1         # share of the speed into a wall a walker or jumper gets back off it (a nudge clear)
 
 static var scuffs := 0          # (tests) hop scuffs played
 var bounce_t := 0.0
@@ -87,10 +89,19 @@ func _at_wall(h: Hunter) -> bool:
 	h.wall_n = -dir
 	return true
 
+## The speed left along an axis a wall stopped this step (Hunter's axis moves). A glider keeps none of it:
+## [game data] SUPERVIVE's glide runs on UE's CharacterMovementComponent, whose wall hit (HandleImpact,
+## SlideAlongSurface) drops the part of the velocity into the wall and keeps the part along it, so a
+## glider slides, never rebounds or stops dead, and nothing closes the canopy; the glide force
+## (Hunter.GLIDE_ACCEL) then settles the slide at cruise x sin(angle off the normal). The source dump has no
+## glide-wall row of its own [?]. Everyone else gets WALL_BACK of it. Measured by --move-feel-check glide_wall_*.
+static func stopped(h: Hunter, v: float) -> float:
+	return 0.0 if h.gliding else v * WALL_BACK
+
 ## Called the step a wall stopped you in the air, with the velocity you hit it at and the wall's top.
-## Reflects an angled hit about the wall's normal.
+## Reflects an angled hit about the wall's normal (a glider slides instead: stopped()).
 func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
-	if h.grounded or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
+	if h.grounded or h.gliding or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
 		return
 	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()      # (a shove outlives the dash: only its run is a ram)
 	if wall_top - h.pos.y <= Hunter.MANTLE_REACH or ramming or not h.charge.is_empty():
