@@ -676,15 +676,21 @@ func _all() -> void:
 	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
+	var n1: int = K.foes_in(P.pos, float(K.e_def()["radius"])).size()     # a wandering third foe may stand in range
 	K._cloak_blast()
 	var shield1: float = P.shield
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	P.slot_lv["kin"] = 3
+	var n3: int = K.foes_in(P.pos, float(K.e_def()["radius"])).size()
 	K._cloak_blast()
+	var ed: Dictionary = K.e_def()
+	var per1 := float(ed["shield_base"]) + float(ed["shield_each"]) * n1     # the shield a hit count gives, per max hp
+	var per3 := float(ed["shield_base"]) + float(ed["shield_each"]) * n3
 	ok(
-		"cloak rank 3: shield +80% in all", shield1 > 5.0 and absf(P.shield / shield1 - 1.8) < 0.02,
-		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
+		"cloak rank 3: shield +80% in all (same foes in range)",
+		shield1 > 5.0 and absf((P.shield / per3) / (shield1 / per1) - 1.8) < 0.02,
+		"rank 1 %.1f (%d foes) rank 3 %.1f (%d foes)" % [shield1, n1, P.shield, n3]
 	)
 	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
 	ok("cinder: one charge at rank 1", K.rmb_charges() == 1)
