@@ -5137,7 +5137,7 @@ func _open_feed(rec: Dictionary) -> void:
 	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
 	var any := GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
 			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or not rows.is_empty()
-	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
+	any = GardenItemRows.add_inks_and_worn(v, rec, func(): _open_feed(rec), [_close_panel, _play_evolutions]) or any
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
