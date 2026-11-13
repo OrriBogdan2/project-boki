@@ -81,7 +81,7 @@ What the in-game kit card (K) says.
 - *Hold:* The landing circle shows while you hold, and the throw reaches 50% further.
 - *In the air:* In the air or gliding, the potion drops straight down under you.
 
-**Riptide (E, 12s cooldown).** Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press E again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.
+**Riptide (E, 12s cooldown).** Spin with the swordfish for up to 2s, hitting everything within 2.2m every 0.25s for rising damage (2 up to 5). Press the key again, or spin the full 2s, to send a waterspout toward the cursor: 10 damage and a 1s knockup to every foe in its line. The longer the spin, the wider, longer and faster the spout.
 
 **Tidal Wave (hunter ultimate, from level 6, 90s cooldown).** Call a wave and surf its crest 14m toward the cursor in 1s; you can't be targeted while you ride it. Every foe it rolls over takes 18, is knocked up for 1s, then slowed 50% for 2s. You land with a 40 shield for 3s.
 

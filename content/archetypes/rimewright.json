@@ -123,7 +123,7 @@
 		"slide": 4.5,
 		"time": 4.5,
 		"push": 5.0,
-		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots (200 HP) and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
+		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots (200 HP) and shoving foes it touches. It stands 4.5s in all. Press the key again while it slides to freeze it in place for 6s.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"

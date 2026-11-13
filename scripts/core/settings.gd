@@ -570,24 +570,25 @@ func binding_text(action: String) -> String:
 		if c != "": names.append(code_text(c))
 	return " / ".join(names) if names.size() > 0 else "unbound"
 
+## Short cap text for the mouse buttons (code_text has the long names for the Controls page). No spaces,
+## so a row of caps (UI.key_hints) never splits one into two.
+const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
+
+## One saved binding ("key:70", "mouse:8") as a cap: "F", "SPACE", "M4", "WHEEL-UP".
+func cap_text(code: String) -> String:
+	var parts := code.split(":")
+	if parts.size() != 2: return "?"
+	if parts[0] == "key": return OS.get_keycode_string(int(parts[1])).to_upper().replace(" ", "")
+	return MOUSE_CAPS.get(int(parts[1]), "M%s" % parts[1])
+
 ## Both bindings, short ("R / X"), where a prompt has room for them.
 func key_caps(action: String) -> String:
 	var out: Array = []
 	for c in slots(action):
-		if c == "": continue
-		var t := code_text(c)
-		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
-		out.append(t.to_upper() if c.begins_with("key:") else t)
+		if c != "": out.append(cap_text(c))
 	return " / ".join(out) if out.size() > 0 else "?"
 
-## The first binding of an action, short, for HUD key caps ("E", "LMB").
+## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
 func key_cap(action: String) -> String:
 	var evs := InputMap.action_get_events(action)
-	if evs.is_empty():
-		return "?"
-	var e: InputEvent = evs[0]
-	if e is InputEventKey:
-		return OS.get_keycode_string((e as InputEventKey).physical_keycode).to_upper()
-	if e is InputEventMouseButton:
-		return {1: "LMB", 2: "RMB", 3: "MMB", 8: "M4", 9: "M5"}.get((e as InputEventMouseButton).button_index, "M%d" % (e as InputEventMouseButton).button_index)
-	return "?"
+	return cap_text(ev_code(evs[0])) if not evs.is_empty() else "?"
