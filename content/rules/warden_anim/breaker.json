@@ -1,5 +1,5 @@
 {
-	"doc": "Albert's hand-keyed clips (art/wardens/breaker/breaker.glb) and which game state plays which (scripts/heroes/warden_clips.gd). walk_f and run_f are generated (tools/art1/breaker_gait.py): a long slow stride, planted soles match 2.0 and 4.8 m/s.",
+	"doc": "Albert's hand-keyed clips (art/wardens/breaker/breaker.glb) and which game state plays which (scripts/heroes/warden_clips.gd).",
 	"skinned_weapon": true,
 	"extra_bones": {
 		"x_weapon": "hand.R",
