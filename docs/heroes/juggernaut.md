@@ -87,7 +87,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | Row | Sev | Verdict | Where / why |
 |---|---|---|---|
 | E pull model (facing, input, slingshot) | HIGH | (a) | ext/zedran-warchain 1ae768d5: an impulse that input and facing curve, backing away slingshots; "jug chain pull: ..." asserts. Speed 22 m/s (footage 5 bh / 0.4 s) over the wiki's 19: the game data has none |
-| E tether extend | MED | (a) | 1ae768d5 / 95c291c8: pays out to 24 m and holds there; the length is ours `[?]` (no data, no frame shows a limit; 24 m kept), see "Warchain" |
+| E tether extend | MED | (a) | 1ae768d5 / 95c291c8: pays out to 24 m and holds there; the length is ours, **not determinable** from the source (11-11: no clip pays the chain out past its throw; every clip listed under "Tether length"), 24 m kept |
 | E range / cooldown | MED | (b) | cooldown 12.8 s (the data's 16 s at the kit's 0.8x), ranks still -12.5% / -37.5% (8 s at rank 3 = 0.8 x the data's 10 s) |
 | E pull exits | LOW | (a) | kept and re-asserted under the new model ("jug pull: Shift exits ...", "... a jump exits ...") |
 | E hooked-foe blight | LOW | (b) | no Anti-Heal from the hook alone; the spin blights who it hits (the data's Scorching Spin). "juggernaut E: Warchain hooks (no blight ...)" |
@@ -126,9 +126,9 @@ flying at 32 m/s (7 bh / 0.4 s = 31.5 m/s). The pull: [W] 1900 uu/s = 19 m/s at 
 
 **Tether length and the pull model (owner 23:00 UTC: "stays attached while he moves back, extending to a max
 length; the pull depends on his facing and movement input: steer, curve, slingshot").** Neither [D] nor [W] gives a
-maximum tether length, and the footage never shows one: in the frames (0306-0316) the chain stays on for ~2.5 s
-while he moves about, but only ~5-6 bh (~10 m) long, and it is let go by 0320 without reaching a limit (the big
-ring on screen there is centred on him: the throw's range, ~6.8 bh). Ours: the chain pays out to **24 m** (about
+maximum tether length, and the footage never shows one: **not determinable** (frames read 11-11, see "Tether
+length" below): in no clip does he back off past the point where the hook bit, so the chain is never longer than
+its throw and no limit (break, drag or hold) is ever reached. Ours: the chain pays out to **24 m** (about
 1.8x the 13 m throw, so backing off is a real choice) and holds there (no break: [W] breaks it only on a stun or
 the 5 s). The 24 m is our pick; the owner can set it. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
 the pull starts at the reel speed plus his motion along the chain (moving in adds all of it, as an impulse adds to
@@ -250,11 +250,22 @@ Differences from the source, and why:
   hold; a Smash held when the pull starts (however briefly) becomes a Haul Slam.
 - **Exits:** the footage never shows a dash or a jump in the pull; we let Shift cancel it and a jump launch out of
   it, so it never locks you in.
-- **The tether length** (24 m, held taut there) is ours `[?]`: neither the data nor the footage shows one. Re-checked 11-09
-  (`supervive_kits.md` Brall rows, `kit_comparison.md`, `supervive_physics.md`, `hero-ref/juggernaut.md` 0301-0366): the
-  only numbers are the throw (7 bh on the wall test, ~12.6 m, a floor; our 13 m) and the pull (5 bh in 0.4 s). The chain
-  stays on while he walks ~2.5 s at ~3.9 m/s, so the leash is at least ~10 m; no frame shows it taut or breaking. Kept 24 m.
-  Revisit when a frame shows the chain longer than the throw. Alternative not taken: leash = throw range would end the extend-on-retreat the owner asked for.
+- **The tether length** (24 m, held taut there) is ours: **not determinable** from the source (re-audit 11-11, the frames
+  themselves read, not only the notes; do not reopen without new footage). Every Warchain use in the Tether Chain window
+  (svvid frames/juggernaut 0301-0366, 5 fps), the chain measured hook to hand on screen each frame:
+  - Wall test 0302-0317: thrown 0302, bites the pillar 0305, attached to 0317 (2.6 s). He only shuffles near where he
+    threw from: the chain is 512-584 px every frame, longest at the bite (0305, 584 px), so it never pays out. Cut at 0318.
+  - Pull cut 0318-0319: a pull starting (the dust puff), the chain shorter than a throw.
+  - Dummy hook 0326-0335: thrown 0327, bites 0329, held to 0332 (464-494 px), pull 0333, spin 0335. Never longer than at the bite.
+  - Dummy hook 0344-0356: thrown 0346, bites 0347, held to 0354 (354-428 px, the dummy drifting), pull 0355, spin 0356.
+    Never longer than the 0329 throw.
+
+  So the longest stretch shown is the throw itself (7 bh, ~12.6 m, our 13 m), and what happens at a limit (break, drag
+  or hold) is never shown. The data has no length either: `supervive_kits.md` Feysteel Chain (16s, 15, 30 dmg; upgrades
+  only -2s CD x3), `kit_comparison.md` (rank paths, cooldowns), `supervive_physics.md` and `PHYSICS_PARITY.md` (no
+  chain rows); the wiki patch notes we cite ([W]) change only stun breaks and no throw while rooted or Grounded. Kept:
+  24 m, held taut (DECISIONS: extends up to a max). Alternative not taken: leash = throw range would end the
+  extend-on-retreat the owner asked for.
 
 ## Ult choice
 
