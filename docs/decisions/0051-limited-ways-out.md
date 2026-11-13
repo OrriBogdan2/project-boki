@@ -85,6 +85,11 @@ to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBea
 rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
 outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
 
+## First-time hints (a new player's first match)
+`WaysHints` (scripts/match/ways_hints.gd) gives the three moments that teach the mode one plain line each in the
+message lane, the shortened tutorials' hint pattern (Match._tip: once per save in Save.d["tutorial"] as
+"ways_<id>", tips setting, no tutorial step, nothing blocks): the Blight's tide first closes, a quest seat first
+opens, the Heart wakes. Texts: heart.json "hints". No save-format or Net change. Check: --ways-hints-check.
 ## Heart reward gap (ext/combat-heart-reward-gap)
 Owner 2026-11-10: the early seat pays MINOR, the final seat MAJOR. Code pays exactly heart.json "reward" (`Heart.pay`: gems, seeds,
 materials and Boki trust at the exit; the Rare Egg and materials home through `Game.apply_result`). Loot kept and the Boki
