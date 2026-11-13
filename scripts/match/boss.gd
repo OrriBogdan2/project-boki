@@ -711,8 +711,7 @@ func render(delta: float, alpha: float) -> void:
 		position = prev.lerp(pos, alpha)
 	squash = maxf(0.0, squash - delta * 2.5)
 	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	for mt in mats:
-		if mt is ShaderMaterial: mt.set_shader_parameter("flash", f)
+	show_flash(f)
 	if stag_ring:
 		stag_ring.visible = stag_open > 0.0 and stagger_t <= 0.0 and not dead
 		if stag_ring.visible:
