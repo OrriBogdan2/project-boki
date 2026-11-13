@@ -1,9 +1,9 @@
 extends RefCounted
 ## --dredge-combo-check: Grimble's abilities and their interactions, scripted one by one in the
 ## archetype check's flat training strip (docs/heroes/dredge.md, combinations table): the Deep Reach
-## reel, only the barge during it, reel into the Anchor Drop, terrain the hook pierces, the abyss, the Salvage
-## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
-## Brass Broadside (tools/dredge_ult_check.gd).
+## reel (its parity rows: tools/dredge_reel_check.gd), only the barge during it, reel into the Anchor Drop,
+## terrain the hook pierces, the abyss, the Salvage passive, the back hit, the barge's turn lock after the
+## Anchor, the rank-3 specials, and the X ult, Brass Broadside (tools/dredge_ult_check.gd).
 
 var main: Node
 var fails := 0
@@ -29,6 +29,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_gun_range_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
@@ -442,7 +443,7 @@ func _all() -> void:
 	_throw(m, P)
 	var d0 := P.flat_dist(T)
 	ok(
-		"abyssal hand: hooks the first foe, reel begins",
+		"deep reach: hooks the first foe, reel begins",
 		K.grapples == 1 and not K.pull.is_empty() and ak.dmg(T) >= 5.0 and float(K.cd["rmb"]) > 8.0,
 		"grapples %d took %.1f cd %.1f" % [K.grapples, ak.dmg(T), float(K.cd["rmb"])]
 	)
@@ -476,7 +477,7 @@ func _all() -> void:
 		ak.step(m, 0.05)
 		tw += 0.05
 	ok(
-		"abyssal hand: foe arrives at your feet and does not land Grounded",
+		"deep reach: foe arrives at your feet and does not land Grounded",
 		K.arrivals == 1 and K.pull.is_empty() and not KitStatus.grounded(T) and P.flat_dist(T) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [K.arrivals, P.flat_dist(T), d0]
 	)
@@ -895,7 +896,7 @@ func _all() -> void:
 	P.slot_lv["dash"] = 3
 	_throw(m, P)
 	ok(
-		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
+		"deep reach rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
 		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
 	)
 	P.dashes = 0.0

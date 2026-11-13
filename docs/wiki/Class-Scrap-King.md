@@ -1,6 +1,6 @@
 # The Scrap King
 
-A harbour hauler in a brass diving helm. Reaches out with an abyssal hand, reels foes in, drops an anchor on them and
+A harbour hauler in a brass diving helm. Hooks foes with the Deep Reach, reels them in, drops an anchor on them and
 grows with every knock.
 
 <!-- gen:profile -->
