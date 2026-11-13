@@ -5,9 +5,7 @@ extends RefCounted
 ##     its owner), whose name is drawn in their squad colour (SideColor)
 ##  3. hits older than WINDOW_S fall off the card
 ##  4. downed by a foe: the last hit is the finisher; out: the card is fixed at the moment you went out
-##  5. dead with a teammate up: after the short pause the camera follows them, the key cycles through
-##     the living ones, a teammate who goes out is skipped, nobody left: no camera
-##  6. the card draws without error, with the key's label from Settings.key_cap
+##  5. the card draws without error (the spectate cycle is --spectate-check's)
 
 var bad := 0
 var m: Match
@@ -27,12 +25,6 @@ func _calm(h: Hunter) -> void:
 	h.kin_shield = 0.0
 	h.hp = h.max_hp
 
-func _press() -> void:
-	var ev := InputEventAction.new()
-	ev.action = DeathRecap.CYCLE_ACTION
-	ev.pressed = true
-	m.recap._unhandled_input(ev)
-
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -47,7 +39,6 @@ func run(main: Node) -> void:
 		h.inp["move"] = Vector2.ZERO
 		h.lives = 1
 	var P: Hunter = m.player
-	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	foe.arch = "thief"
 	foe.pname = "Foe"
@@ -76,22 +67,9 @@ func run(main: Node) -> void:
 		"the card names the Hunter and ability that downed you")
 	m.eliminate(P, foe, "finished")
 	var died := float(P.get_meta("died_at"))
-	ok(m.spectating() == null, "no camera on a teammate in the first moments after you go out")
 	_run(DeathRecap.WINDOW_S + 1.0)
 	ok(m.recap.recent(P, died).size() == down_hits.size(),
 		"out: the card stays fixed at the moment you went out")
-	for h in mates: h.ctrl = "idle"
-	var cap := Settings.key_cap(DeathRecap.CYCLE_ACTION)
-	ok(cap != "?", "the camera key has a label (%s)" % cap)
-	ok(m.spectating() == mates[0], "a teammate is watched once you are out")
-	_press()
-	ok(m.spectating() == mates[1], "the key moves to the next teammate")
-	_press()
-	ok(m.spectating() == mates[0], "and round again")
-	m.eliminate(mates[0], foe, "finished")
-	ok(m.spectating() == mates[1], "a teammate who goes out is skipped")
-	m.eliminate(mates[1], foe, "finished")
-	ok(m.spectating() == null, "nobody left to watch: no camera")
 	var cv := Control.new()
 	main.add_child(cv)
 	var drew := [false]
