@@ -452,6 +452,21 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | courts | {"glasswater": {"at": [38.5, 31.5], "splash": "9fe4f2"}} |
 | courts_doc | A zone's own court (GardenZones.here): at = the log's middle, tiles; splash = the colour of the water a miss throws up. It lies across the zone's shallow channel (garden_zones.json build.shallow) and needs no Training post. |
 
+## boki_fly (`content/rules/boki_fly.json`)
+
+Fliers in the garden (scripts/home/boki_fly.gd, BokiRig's hover, glide and flare clips). A species whose look has wings (its species JSON colors.wing) takes to the air while it roams (BaseLife's Roam) a zone listed in zones, and while it crosses a gap (a bridge over the void, the leap to another isle, The Dash's jump). Each flight picks a height in height (m over the ground); it rises at climb and comes down at sink (m/s), hovering while it stands and gliding while it moves. It flares for flare_s (s) as it touches down: the flare starts sink x flare_s / 2 m up, so the feet land halfway through it. Then it walks.
+
+| Setting | Value |
+|---|---|
+| zones | ["ridge"] |
+| zones_doc | Garden zones where a roaming flier stays in the air: Kitewind Ridge. |
+| height | [0.5, 1.5] |
+| climb | 1.6 |
+| sink | 1.4 |
+| flare_s | 0.4 |
+| gap_lead | 0.5 |
+| gap_lead_doc | s: a flier takes off this long before it reaches a bridge at its pace, so it is up over the gap. |
+
 ## boki_forms (`content/rules/boki_forms.json`)
 
 Second forms of a Boki (docs/boki/GEODEMOLE_FORMS.md). A Boki with an entry here shows its 'cracked' look instead of its base look while its health is below damaged_below (fraction of max) in a match, or while it is sick at home. Same Boki, same stats: a look swap only. 'art' names the approved 2D art; 'model' is the 3D model file, empty until it exists, and then the base look is used for both forms.
@@ -686,6 +701,16 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | thief | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.0], [0.36, 1.84], [1, 0.25]]} |
 | bulwark | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.15], [0.15, 1.2], [0.52, 1.22], [1, 0.66]]} |
 
+## drop_poses (`content/rules/drop_poses.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The drop's two shared body poses (WardenDropPose), worn by every Hero over its clips or rig. Directions are in the body's own frame: [out, up, front] for a limb (out mirrored to each side; up toward the head; front the chest's side), [up, front] for the body line (hips to head) and the head's crown, in the frame of the Hero facing ahead. fade: s the pose takes to come on or go (skydive: open is the ease into the glider-open clip). lean, pitch: deg the skydive banks at full sideways steer and tips at full forward steer. |
+| ride | {"fade": 0.2, "body": [1.0, 0.2], "head": [1.0, 0.3], "upper_arm": [0.55, 0.15, 1.0], "forearm": [-0.7, 0.15, 1.0], "thigh": [0.25, -0.75, 0.6], "shin": [0.05, -1.0, -0.35]} |
+| skydive | {"fade": 0.25, "open": 0.35, "body": [0.3, 1.0], "head": [0.75, -0.7], "upper_arm": [1.0, 0.35, -0.15], "forearm": [0.3, 1.0, -0.2], "thigh": [0.45, -1.0, -0.15], "shin": [0.25, -0.55, -0.9], "lean": 28.0, "pitch": 14.0} |
+
 ## duo_tutorial (`content/rules/duo_tutorial.json`)
 
 
@@ -708,16 +733,6 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | beats | [{"id": "meet", "need": 1, "foes": "still", "guide": "wait", "key": "", "say": "Hi! I'm %G. Come over here, I don't bite.", "nag": "Over here! I'm the one waving.", "done": "Those two are %1 and %2. They lose for a living.", "tip": "Walk over to %G"}, {"id": "slide", "need": 2, "foes": "still", "guide": "follow", "key": "dash", "say": "Slide is faster than running. And you look great doing it.", "nag": "Slide! Like you're late for something.", "done": "Smooth.", "tip": "%K  Slide"}, {"id": "attack", "need": 4, "foes": "still", "guide": "follow", "key": "fire", "say": "%1 is napping on the job. Go wake him up.", "nag": "Still asleep. Rude, honestly. Hit him!", "done": "He felt that. Probably.", "tip": "%K  Attack %1"}, {"id": "sec", "need": 1, "foes": "still", "guide": "follow", "key": "secondary", "say": "Your %A hits harder. Show him.", "nag": "%K. Trust me, it's the fun one.", "done": "Ooh. Do that again sometime.", "tip": "%K  %A"}, {"id": "kin", "need": 1, "foes": "strafe", "guide": "follow", "key": "signature", "say": "And your %N. That one's a crowd-pleaser.", "nag": "%N! %K! Go on, they won't mind.", "done": "Show-off. I love it.", "tip": "%K  %N"}, {"id": "dodge", "need": 2, "foes": "poke", "guide": "follow", "key": "dash", "say": "Uh-oh, they're awake. When they shoot, slide out of the way!", "nag": "Don't stand in it! Slide!", "done": "Can't hit what isn't there.", "tip": "%K  Slide away from shots"}, {"id": "focus", "need": 1, "foes": "poke", "guide": "focus", "key": "fire", "say": "I'm marking %2. Both of us, same one. That's the whole trick.", "nag": "%2! The one with the red marker!", "done": "Teamwork! %2 needs a minute.", "tip": "Knock out the marked one"}, {"id": "boki", "need": 1, "foes": "poke", "guide": "fight", "key": "throw", "say": "%s is wiggling. Send them in!", "nag": "%K! %s has been so patient.", "done": "Good Boki. Best Boki.", "tip": "%K  Send %s"}, {"id": "capture", "need": 1, "foes": "hold", "guide": "follow", "key": "interact", "say": "Oh! A wild Boki wandered in. Knock it out, then hold %F on it.", "nag": "Bonk it gently, then hold %F. It's basically a hug.", "dazed": "It's dazed! Hold %F next to it, quick!", "tripped": "My little sun bonked it for you. Your turn!", "done": "Into your box! Be nice to it.", "tip": "Knock it out, then hold %K"}, {"id": "revive", "need": 1, "foes": "hold", "guide": "down", "key": "", "say": "Oof. I'm down! Stand on my wisp, I'll owe you one.", "nag": "Still down here. Lovely view. Bit lonely.", "done": "Back up! I totally meant to do that.", "tip": "Stand on %G's wisp"}, {"id": "ult", "need": 1, "foes": "fight", "guide": "fight", "key": "ultimate", "say": "Your bond is full. Press %K, you and %s, together!", "nag": "%K! The big one! I've been waiting all day.", "done": "Okay, WOW. That's the good stuff.", "tip": "%K  Merge with %s"}, {"id": "finale", "need": 2, "foes": "full", "guide": "fight", "key": "", "say": "That's everything. Now let's win one for real!", "nag": "We've got this. One at a time, together.", "done": "We won! You're ready for the real thing.", "tip": "Knock out %1 and %2"}] |
 | barks | {"you_knock": ["Nice!", "Down they go!", "Textbook.", "Ha! Did you see that?"], "guide_knock": ["Got one!", "Sorry! Not sorry.", "My little sun did most of that."], "you_down": ["Up you get. Happens to me all the time.", "Shake it off, I've got you."], "foe_back": ["Aaand they're back.", "They always come back. It's kind of sweet."]} |
 | skip | ["We'll come back to that. Probably.", "Let's skip ahead. I won't tell.", "Fine, moving on. This part's better anyway."] |
-
-## drop_poses (`content/rules/drop_poses.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| doc | The drop's two shared body poses (WardenDropPose), worn by every Hero over its clips or rig. Directions are in the body's own frame: [out, up, front] for a limb (out mirrored to each side; up toward the head; front the chest's side), [up, front] for the body line (hips to head) and the head's crown, in the frame of the Hero facing ahead. fade: s the pose takes to come on or go (skydive: open is the ease into the glider-open clip). lean, pitch: deg the skydive banks at full sideways steer and tips at full forward steer. |
-| ride | {"fade": 0.2, "body": [1.0, 0.2], "head": [1.0, 0.3], "upper_arm": [0.55, 0.15, 1.0], "forearm": [-0.7, 0.15, 1.0], "thigh": [0.25, -0.75, 0.6], "shin": [0.05, -1.0, -0.35]} |
-| skydive | {"fade": 0.25, "open": 0.35, "body": [0.3, 1.0], "head": [0.75, -0.7], "upper_arm": [1.0, 0.35, -0.15], "forearm": [0.3, 1.0, -0.2], "thigh": [0.45, -1.0, -0.15], "shin": [0.25, -0.55, -0.9], "lean": 28.0, "pitch": 14.0} |
 
 ## equal (`content/rules/equal.json`)
 
@@ -1214,6 +1229,17 @@ Glint Fishing looks (scripts/home/glint_fx.gd, shaders/glint_water.gdshader, the
 | bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
 | hints | {"_doc": "first-time one-line hints for a new player (scripts/match/ways_hints.gd), each once per save, in the message lane: tide when the Blight first closes, quest when a quest seat first opens, heart when the Heart wakes", "tide": "The Blight is closing in on the Heart: stay inside its ring", "quest": "A way out is open: the first squad to finish its quest leaves", "heart": "The Heart is awake: carry its spark to the Gate and your squad leaves early"} |
 | demo_charge | 1 |
+
+## hit_flinch (`content/rules/hit_flinch.json`)
+
+How hard a hit flinches a Hunter (Oomph.hit_strength, Oomph.flinch_weight). Strength hit_k = chip_k + damage share of max health * frac_k + knock (m/s) * knock_k, from chip_k up to Oomph.HEAVY_FLINCH; a big hit (stagger) is always the heaviest. The body's spring (HunterAnim) scales by hit_k; the clip hero's base additive flinch layer (WardenClips) plays `light` of the hit clip on a chip hit and all of it by a stagger, which takes the whole body. Source-quality weight: a chip hit never looks like a knockdown, a big one is never a twitch.
+
+| Setting | Value |
+|---|---|
+| chip_k | 0.8 |
+| frac_k | 9 |
+| knock_k | 0.06 |
+| light | 0.35 |
 
 ## home_lead (`content/rules/home_lead.json`)
 
