@@ -158,10 +158,17 @@ func _setup_mix() -> void:
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music_bus, mlim2)
 
+## Sets a bus ("Master", "Music", "SFX", "Ambience") from its Settings > Audio slider (0-1).
 func set_bus(bus_name: String, v: float) -> void:
 	var i := AudioServer.get_bus_index(bus_name)
 	if i >= 0:
-		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(v, 0.0001)))
+		AudioServer.set_bus_volume_db(i, slider_db(v))
+
+## A volume slider's bus level. The gain is the slider squared, so the slider follows loudness: 50% is
+## about half as loud (-12 dB) and 0 is silent. (Gain = slider made 50% only -6 dB, and a slider seemed
+## to do nothing until it was nearly at 0.)
+static func slider_db(v: float) -> float:
+	return linear_to_db(maxf(v * v, 0.0001))
 
 ## Starts loading tracks on a worker thread ("music_match", "amb_match"), e.g. while a loading
 ## screen comes up, so starting them later doesn't read and parse the file on the main thread.
