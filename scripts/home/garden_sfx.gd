@@ -40,6 +40,10 @@ static func fanfare(home, win: Dictionary, lose: Dictionary) -> void:
 	var huff := func(): cue("garden_sulk_" + _size(lose["rec"]), lose["pos"])
 	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
 
+## A rival's huff as it passes another (BaseRival): the loser's sulk in the Boki's size.
+static func huff(rec: Dictionary, pos) -> void:
+	cue("garden_sulk_" + _size(rec), pos)
+
 ## Tumble: the exchange lands with the move that decided it, then the loser scuffs back unless it was dead level.
 static func clash(home, move: String, pos, pushed: bool) -> void:
 	cue("tumble_clash_" + move, pos)
