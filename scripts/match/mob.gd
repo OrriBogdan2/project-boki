@@ -9,11 +9,13 @@ var st_t := 0.0
 var tgt: Ent = null
 var camp := Vector3.ZERO
 var atk_dir := Vector2.ZERO
-var atk_at := Vector3.ZERO
-var tele: Node3D = null
+var atk_at := Vector3.ZERO      # where a slam or burst lands; a lunge's start
+var atk_pad: float = MobTell.REF_R   # m, radius of who the tell is drawn for (MobTell grows its shapes by it)
+var tele: Array = []            # the ground tell: one Fx telegraph per shape
+var tele_t := 0.0               # s the filled tell still stays after the hit frame
+var glowing := false            # the wind-up body glow is on
 var cd := 0.0
 var wander := Vector3.INF
-var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
@@ -71,9 +73,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 	m.on_mob_dead(self, by, opts)
 
 func _cancel_tele() -> void:
-	if tele:
-		m.fx.end_telegraph(tele)
-		tele = null
+	MobTell.clear(self)
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if not remote and not dead and d > 0.0:
@@ -164,7 +164,7 @@ func sim(dt: float) -> void:
 	if remote:
 		st_t -= dt
 		net_follow(dt)
-		_net_telegraph()
+		_net_telegraph(dt)
 		return
 	dt = _far_step(dt)
 	if dt <= 0.0:
@@ -235,19 +235,11 @@ func sim(dt: float) -> void:
 				# track the target a little during the windup, then commit
 				if st_t > float(md["windup"]) * 0.4:
 					atk_dir = atk_dir.slerp(dir_to(tgt), dt * 4.0)
-					if tele:
-						m.fx.aim_telegraph(tele, pos, atk_dir)
-			if tele:
-				m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
+			MobTell.update(self)
 			if st_t <= 0.0:
 				_strike()
 		"lunge":
-			vel.x = atk_dir.x * 12.0; vel.z = atk_dir.y * 12.0
-			for e in m.foes_of(team):
-				if lunge_hit.has(e.nid): continue
-				if flat_dist(e) < e.r + r + 0.3 and absf(e.pos.y - pos.y) < 1.2:
-					lunge_hit[e.nid] = true
-					e.hurt(md["dmg"] * dmg_mult, self, {"kb": atk_dir * 4.0, "src": "mob"})
+			vel.x = atk_dir.x * MobTell.LUNGE_SPEED; vel.z = atk_dir.y * MobTell.LUNGE_SPEED
 			if st_t <= 0.0:
 				st = "recover"; st_t = 0.45
 				vel.x *= 0.2; vel.z *= 0.2
@@ -270,6 +262,7 @@ func sim(dt: float) -> void:
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})
+	MobTell.linger(self, dt)
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
 	if look.length() > 0.2:
@@ -330,65 +323,61 @@ func _begin_attack() -> void:
 	st = "windup"
 	st_t = md["windup"]
 	atk_dir = dir_to(tgt)
-	match md["attack"]:
-		"lunge":
-			tele = m.fx.telegraph_rect(pos, atk_dir, 2.6, 0.8, Color("ff6a4a"))
-		"spit":
-			tele = m.fx.telegraph_rect(pos, atk_dir, 8.0, 0.45, Color("ffb04a"))
-		"slam":
-			atk_at = pos + Vector3(atk_dir.x, 0, atk_dir.y) * 0.9
-			tele = m.fx.telegraph_circle(atk_at, float(md.get("slam_r", 2.3)), Color("ff4a3a"))
-			if md.get("stag", false) and stagger_t <= 0.0:
-				if stag_open <= 0.0: m.on_stag_open(self)
-				stag_open = maxf(stag_open, float(md["windup"]) + 0.15)
-		"fuse":
-			atk_at = pos
-			tele = m.fx.telegraph_circle(atk_at, float(md.get("slam_r", 2.3)), Color("ff8a2a"))
-		"volley":
-			tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
+	MobTell.begin(self)
+	if md["attack"] == "slam" and md.get("stag", false) and stagger_t <= 0.0:
+		if stag_open <= 0.0: m.on_stag_open(self)
+		stag_open = maxf(stag_open, float(md["windup"]) + 0.15)
 	# each kind has its own call as it winds up, instead of the same alarm for everyone
 	m.sfx("v_" + mkind, pos, -9.0 if mkind != "warden" else -3.0, randf_range(0.9, 1.12))
 
 func _strike() -> void:
-	_cancel_tele()
+	tele_t = MobTell.LINGER          # the filled tell holds a moment on the hit frame
 	cd = md["cd"] * randf_range(0.85, 1.15)
 	match md["attack"]:
 		"lunge":
-			st = "lunge"; st_t = 0.2; lunge_hit = {}
+			atk_at = pos
+			st = "lunge"; st_t = MobTell.LUNGE_T
+			for e in m.foes_of(team):
+				if MobTell.hits(self, e):
+					e.hurt(md["dmg"] * dmg_mult, self, {"kb": atk_dir * 4.0, "src": "mob"})
 		"spit":
 			st = "recover"; st_t = 0.5
-			m.spawn_shot(self, pos + Vector3(atk_dir.x * 0.6, 0.8, atk_dir.y * 0.6), atk_dir * 8.5, md["dmg"] * dmg_mult, 8.5 / 8.5, 0.32, Color("b6ff6a"), {"mob": true, "kb": 2.0})
+			var sp: Dictionary = MobTell.SPIT
+			m.spawn_shot(self, pos + Vector3(atk_dir.x, 0.0, atk_dir.y) * MobTell.MUZZLE + Vector3(0, 0.8, 0), atk_dir * float(sp["speed"]), md["dmg"] * dmg_mult, sp["life"], sp["size"], Color("b6ff6a"), {"mob": true, "kb": 2.0})
 			m.sfx("k_spore", pos, -8.0, 1.25)      # a wet spit
 		"volley":
 			st = "recover"; st_t = 0.6
-			for k in [-0.2, 0.0, 0.2]:
+			var vo: Dictionary = MobTell.VOLLEY
+			for k in vo["fan"]:
 				var d := atk_dir.rotated(k)
-				m.spawn_shot(self, pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), d * 9.5, md["dmg"] * dmg_mult, 10.5 / 9.5, 0.28, Color("8ae8ff"), {"mob": true, "kb": 2.5})
+				m.spawn_shot(self, pos + Vector3(d.x, 0.0, d.y) * MobTell.MUZZLE + Vector3(0, 1.0, 0), d * float(vo["speed"]), md["dmg"] * dmg_mult, vo["life"], vo["size"], Color("8ae8ff"), {"mob": true, "kb": 2.5})
 			m.sfx("throw", pos, -8.0, 1.3)        # three bolts hissing out
 		"fuse":
 			# a puffbomb goes off and takes itself with it
-			var rad := float(md.get("slam_r", 2.3))
+			var rad := float(md.get("slam_r", MobTell.SLAM_R))
 			m.fx.ring(atk_at, rad, Color("ffb070"), 0.35)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), rad, "ffb070"])
 			m.fx.burst(atk_at + Vector3(0, 0.5, 0), Color("ffb070"), 28, 6.5, 0.55, 6.0, 1.3)
 			m.sfx("boom", atk_at, 0.0, 1.1)
-			for e in m.foes_of(team):
-				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
-				if to.length() < rad + e.r and absf(e.pos.y - pos.y) < 1.6:
-					e.hurt(md["dmg"] * dmg_mult, self, {"kb": to.normalized() * 9.5, "lift": 6.5, "src": "mob"})
+			_blast(9.5, 6.5)
 			hp = 0.0
 			_on_zero(null, {"self": true})
 			return
 		"slam":
 			st = "recover"; st_t = 0.8
-			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
-			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
+			var rad := float(md.get("slam_r", MobTell.SLAM_R))
+			m.fx.ring(atk_at, rad, Color("ffb090"), 0.3)
+			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), rad, "ffb090"])
 			m.fx.dust(atk_at, 16)
 			m.sfx("k_gravity", atk_at, -2.0, 0.9)  # a heavy stone slam
-			for e in m.foes_of(team):
-				var to := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
-				if to.length() < float(md.get("slam_r", 2.3)) + e.r and absf(e.pos.y - pos.y) < 1.5:
-					e.hurt(md["dmg"] * dmg_mult, self, {"kb": to.normalized() * 7.0, "lift": 5.0, "src": "mob"})
+			_blast(7.0, 5.0)
+
+## A slam or burst: whoever is inside the ground tell is thrown outward (m/s) and up (m/s).
+func _blast(kb: float, lift: float) -> void:
+	for e in m.foes_of(team):
+		if MobTell.hits(self, e):
+			var out := Vector2(e.pos.x - atk_at.x, e.pos.z - atk_at.z)
+			e.hurt(md["dmg"] * dmg_mult, self, {"kb": out.normalized() * kb, "lift": lift, "src": "mob"})
 
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
@@ -423,6 +412,7 @@ func render(delta: float, alpha: float) -> void:
 	var wind := 0.0
 	if st == "windup":
 		wind = 1.0 - st_t / float(md["windup"])
+	MobTell.glow(self, wind)
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
 	# throw the weight forward on the attack, recoil when hit
 	var shiver := sin(m.time * 60.0) * 0.03 * maxf(0.0, wind - 0.6) * 2.5
@@ -554,18 +544,11 @@ func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 	ap.speed_scale = rate
 
 ## Telegraphs on proxies follow the host's attack state.
-func _net_telegraph() -> void:
+func _net_telegraph(dt: float) -> void:
 	if st == "windup":
-		if tele == null:
-			match md["attack"]:
-				"lunge": tele = m.fx.telegraph_rect(pos, atk_dir, 2.6, 0.8, Color("ff6a4a"))
-				"spit": tele = m.fx.telegraph_rect(pos, atk_dir, 8.0, 0.45, Color("ffb04a"))
-				"slam": tele = m.fx.telegraph_circle(pos + Vector3(atk_dir.x, 0, atk_dir.y) * 0.9, float(md.get("slam_r", 2.3)), Color("ff4a3a"))
-				"fuse": tele = m.fx.telegraph_circle(pos, float(md.get("slam_r", 2.3)), Color("ff8a2a"))
-				"volley": tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
-		elif md["attack"] in ["lunge", "spit", "volley"]:
-			m.fx.aim_telegraph(tele, pos, atk_dir)
-		if tele:
-			m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
-	elif tele:
-		_cancel_tele()
+		if tele.is_empty():
+			MobTell.begin(self)
+		MobTell.update(self)
+		tele_t = MobTell.LINGER
+	else:
+		MobTell.linger(self, dt)

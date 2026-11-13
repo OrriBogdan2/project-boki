@@ -695,7 +695,7 @@ func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
 	var c := col
 	var p = m.get("player")
 	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
+		c = Feel.hostile(col)
 	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
@@ -707,7 +707,7 @@ func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Colo
 	var c := col
 	var p = m.get("player")
 	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
+		c = Feel.hostile(col)
 	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
 	if t > 0.0:
 		var tw := tele.create_tween()
