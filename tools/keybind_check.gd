@@ -129,6 +129,8 @@ func run(main: Node) -> void:
 	ok(Overlay.has_meta("bind_conflict") and is_instance_valid(Overlay.get_meta("bind_conflict")), "the binding page warns about the clash and offers a swap")
 	if shot != "":
 		tree.root.get_texture().get_image().save_png(shot + "/keybinds_conflict.png")
+	var stale: Array = S.ACTIONS.filter(func(x): return String(x[1]).containsn("archetype"))
+	ok(stale.is_empty(), "no Controls label says Archetype (the game says Hunter)")
 	S.reset_all()
 	print("KEYS DONE, failures: %d" % bad)
 	tree.quit()
