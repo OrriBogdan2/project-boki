@@ -212,9 +212,10 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 202,
 "nested_ternary": 27,
-"semicolon": 243
+"semicolon": 240,
+"shadow": 3
 },
 "scripts/home/home_build.gd": {
 "long_line": 55,
