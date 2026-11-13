@@ -65,7 +65,7 @@ so any edit here would conflict. Suggestions for after they merge are in the las
 | 5 | RMB is a held, summoned spear | closed | `mage_rmb_hold` and `mage_rmb`, rod in hand, body flash at full (`rmb_hold_tick`); checks "the rod is in the hand", "full at 1s: the body flash" |
 | 6 | RMB fixed max-range lane | closed | `_coil()` reads one fixed `range` 13 m (charge only scales damage and push), lane `width` 0.3 with rails (22ceca1e1); check "a fixed 13m double-rail lane (no growth)" 13.0 / 13.0 |
 | 7 | Surge end marker | closed | `_tick_wire()`: end circle `end_r` 2.25 m (4.5 m across, about 2.5 bh) with ticks and star, rails lane 0.35 wide; check "rails lane and the ticked end ring show". Lane length changes to 7 to 11 m in ext/sparkle-dash-feel (owner 11-08) |
-| 8 | Surge look | closed, owner override (arrival ring) | sky bolt on the press and the lightning body (model hidden, pink-teal after-images, invulnerable) are in `on_dash()` and `_run()`. `_run()` now prints the INVULNERABLE word at the release, as the source does (vireo.md: label over the silhouette), through `m.fx.word` like Kitefall, and sends it to the other games (`ArchKit.net_word`, a `["fx", "word", ...]` event, one case in `Match._net_ev`) so their copy of her prints it too; it is up from the release through the streak (source 0105 to 0108) and gone 0.8 s on; checks "Wirerun: the INVULNERABLE word shows on the run", "... up from the release through the streak", "... sent to the other games once", "... gone 0.8 s on", "another player's game prints the INVULNERABLE word". The arrival ring and burst are an owner override (DECISIONS: no bursts, rings or discs on dashes; 6d0546330) |
+| 8 | Surge look | closed, owner override (arrival ring) | sky bolt on the press and the lightning body (model hidden, pink-teal after-images, invulnerable) are in `on_dash()` and `_run()`. The source's INVULNERABLE label is not ported: the owner cut every floating callout word on 11-11 (010edcd17); the hidden lightning body is the cue, and the check asserts it and that no word floats (so nothing to send to other games; ext/parity-sparkle-surge-word's net word is dropped). The arrival ring and burst are an owner override (DECISIONS: no bursts, rings or discs on dashes; 6d0546330) |
 | 9 | E: place, then pick the direction | closed | hold, drag, release (audit); checks "Skycall held 0.6s ... still dragging", "the release commits the drag" |
 | 10 | E delay, stacks, Grounded | closed, one owner call | delay 0.8, Grounded 1.5 s in `mage.json` `e`; 1 Static follows the game data, the footage info panel says 2 (audit; ext/sparkle-e-verify notes it). Owner call: keep 1 |
 | 11 | Cooldown ratios | closed | spear 8 : Surge 8 : E 10.5 (data, scaling section); ext/sparkle-e-verify asserts E : rod = 9.2 : 7 |
@@ -76,7 +76,8 @@ so any edit here would conflict. Suggestions for after they merge are in the las
 | 16 | Sfx | nothing to copy | no audio in the footage |
 | 17 | R (ult relocate) | owner override | X is Kitefall, R is the Boki Merge (SERVER_UPDATE6; "Ultimate choice" below) |
 
-Open after this check: nothing (rows 8 and 15 closed on main); rows 10 (Static count) and 4 (cadence) are owner calls already recorded.
+Open after this check: row 15 (knockback size), small, blocked on the in-flight branches (row 8 closed: word cut by the owner)
+above; rows 10 (Static count) and 4 (cadence) are owner calls already recorded.
 
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/vex_vireo_sable.md. (a) done on this branch, (b) fixed now, (c) not applied, with the

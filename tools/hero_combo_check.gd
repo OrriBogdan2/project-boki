@@ -514,30 +514,15 @@ func _mage() -> void:
 	T2.inv_t = 0.0
 	P.dashes = P.max_dashes()
 	ac.aim_at(P, home + Vector3(11, 0, 0))
-	m.net_on = true          # the kit also sends its word to the other games (Net.out_events, nothing connected)
-	Net.out_events.clear()
 	_dash(m, P, 0.45, func(): if K.run_t > 0.0 and P.phase_t <= 0.0: ok("small: Wirerun ignores projectiles while it runs", false))
 	ac.step(m, 0.1)
 	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
-	var words: Array = m.fx.nums.map(func(n): return n["node"].text)
-	ok("Wirerun: the INVULNERABLE word shows on the run (source)", "INVULNERABLE" in words)
-	ok("Wirerun: the word is up from the release through the streak (0105-0108)",
-			"INVULNERABLE" in words and K.run_t > 0.0)
-	var sent: Array = Net.out_events.filter(func(e): return e.size() > 5 and e[1] == "word" and e[5] == "INVULNERABLE")
-	m.net_on = false
-	Net.out_events.clear()
-	ok("Wirerun: the word is sent to the other games once", sent.size() == 1)
+	ok("Wirerun: the body turns into the bolt for the run (hidden), no floating word",
+			not P.model.visible and m.fx.nums.all(func(n): return not String(n["node"].text).contains("INVULNERABLE")))
 	ac.step(m, 0.6)
 	ok("small: Wirerun hits every foe it passes (two in a line), about 1.7 bolts each (data: Surge 153 / Jolt 90)",
 			ac.dmg(T) >= 18.0 and ac.dmg(T2) >= 18.0,
 			"%.0f / %.0f" % [ac.dmg(T), ac.dmg(T2)])
-	m.fx._process(0.8)       # Match.step does not tick Fx: let the word's 0.75 s life run out
-	words = m.fx.nums.map(func(n): return n["node"].text)
-	ok("Wirerun: the word is gone 0.8 s on (a quick label, not a stuck one)", not "INVULNERABLE" in words)
-	if sent.size() == 1:
-		m._net_ev(sent[0], "")          # the other player's game receives the same event
-	words = m.fx.nums.map(func(n): return n["node"].text)
-	ok("Wirerun: another player's game prints the INVULNERABLE word over her", "INVULNERABLE" in words)
 	ac.fresh(T)
 	ac.fresh(T2)
 	T.teleport(home + Vector3(5, 0, 0))
