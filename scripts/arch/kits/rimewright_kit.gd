@@ -754,7 +754,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 	var g: float = m.world.ground_at(at.x, at.z)
 	if g <= World.VOID + 1.0 or m.world.is_block(at.x, at.z):
 		at = h.pos + Vector3(dir.x, 0, dir.y) * 1.0
-	var hp := float(ed["hp"]) + (40.0 if rank("kin") >= 3 else 0.0)
+	var hp := float(ed["hp"]) + (float(ed["hp_rank3"]) if rank("kin") >= 3 else 0.0)
 	var w: Dictionary = m.verbs.add_wall(
 			h, at, dir,
 			{
@@ -763,6 +763,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 				"touch": {"kb": float(ed["push"]), "dmg": 0.5, "slow": 1.0, "slow_k": 0.3}},
 			power("kin"))
 	w["y"] = at.y
+	w["ice"] = true          # (Blockers.kind_of)
 	# her own ice look instead (CareLook "wall")
 	if is_instance_valid(w["node"]): (w["node"] as Node3D).visible = false
 	wall = {
@@ -936,8 +937,8 @@ func has_ult() -> bool: return true
 
 
 ## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside. Cast from
-## a skate, her momentum carries her on as the shell closes (x.carry_t, slowing evenly from the skate's speed
-## to a stop, so she travels speed * carry_t / 2), the rink riding with her; then she is rooted.
+## a skate, her momentum carries her on as the shell closes (x.carry_t, easing out as speed x (1 - (t/carry_t)^2),
+## so she travels speed * carry_t * 2/3), the rink riding with her; then she is rooted.
 func _start_rime() -> bool:
 	var carry := {}
 	if not rinkrun.is_empty():
