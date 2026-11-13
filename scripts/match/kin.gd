@@ -162,7 +162,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
-	ring.material_override = Models.ring_mat(Color(tc, 0.85), 0.16)
+	ring.material_override = SideRings.mat(Color(tc, 0.85), 0.16)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ring.top_level = true
 	add_child(ring)

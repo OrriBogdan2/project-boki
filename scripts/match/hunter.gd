@@ -650,11 +650,11 @@ static func _marker_mats(c: Color) -> Dictionary:
 		return _mk_mats[c]
 	var d := {}
 	if c == Color.WHITE:      # the flash
-		d["ring"] = Models.ring_mat(Color(1, 1, 1, 1), 0.3)
+		d["ring"] = SideRings.mat(Color(1, 1, 1, 1), 0.3)
 		d["ball"] = Models.toon(Color(1.0, 0.97, 0.9), true, 1.0)
 		d["knot"] = d["ball"]
 	else:
-		d["ring"] = Models.ring_mat(c, 0.2)
+		d["ring"] = SideRings.mat(c, 0.2)
 		d["ball"] = Models.toon(Color(c, 1.0), c.a > 0.75, 0.35 if c.a > 0.75 else 0.1)
 		d["knot"] = Models.toon(Color(c, 1.0).darkened(0.3), false)
 	_mk_mats[c] = d
