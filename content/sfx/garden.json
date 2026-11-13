@@ -1,0 +1,23 @@
+{
+ "group": "garden",
+ "name": "Garden minigames",
+ "script": "tools/gen_sfx_garden.py",
+ "sounds": {
+  "garden_count": "boki", "garden_go": "boki", "garden_lap": "ui", "garden_finish": "boki", "garden_crowd": "boki",
+  "garden_cheer_perfect": "boki", "garden_cheer_good": "boki", "garden_cheer_miss": "boki",
+  "garden_strain": "loop", "garden_creak": "step", "garden_thud": "impact",
+  "garden_win_small": "boki", "garden_win_medium": "boki", "garden_win_large": "boki",
+  "garden_sulk_small": "boki", "garden_sulk_medium": "boki", "garden_sulk_large": "boki",
+  "garden_sniff": "loop", "garden_bat": "ui",
+  "tumble_clash_rush": "impact", "tumble_clash_brace": "impact", "tumble_clash_dodge": "boki",
+  "tumble_push": "step", "tumble_ringout": "impact",
+  "echo_hit": "ui", "echo_miss": "ui", "echo_streak": "ui",
+  "show_reveal": "ui", "show_crowd": "boki",
+  "relay_handoff": "boki", "relay_fumble": "boki", "relay_finish": "boki",
+  "garden_chime_stat": "boki", "garden_chime_level": "boki", "garden_chime_evolve": "boki",
+  "garden_hop": "boki", "garden_wake": "boki"
+ },
+ "signature": [],
+ "replaces": [],
+ "loops": ["garden_strain", "garden_sniff"]
+}

@@ -2,8 +2,8 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet) and "kburst" (a factor on the gait's
+## cadence), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -148,7 +148,10 @@ const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const EAR_TWITCH := 0.3       # rad an ear flicks asleep
-const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
+## The nap clips (BokiHomeClips), played slower by a bigger Boki (KinNap.slow).
+const NAP_CLIPS := ["settle", "nap", "wake"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -170,6 +173,10 @@ const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -195,6 +202,7 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -268,6 +276,7 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
@@ -314,7 +323,6 @@ func _process(dt: float) -> void:
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
-	_nap.update(root, clip == "sleep", dt)
 	_twitch_ears()
 	_face_step(dt)
 
@@ -322,9 +330,8 @@ func _process(dt: float) -> void:
 ## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot - Vector3(_nap.bow, 0, 0)
-	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall * (1.0 - _nap.low),
-			lerpf(1.0, girth, 0.5) * _flinch.wide * (1.0 + _nap.long))
+	flex.rotation = _flinch.rot
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -354,24 +361,28 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	_nap.update(root, asleep, dt)       # its settle, nap and wake run slower for a bigger Boki
+	if asleep != _asleep:
+		_asleep = asleep
+		if _speed < WALK_SPEED:
+			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
-	var fade := FADE
-	if (want == "sleep") != (clip == "sleep"):
-		fade = _nap.fade(want == "sleep")      # lies down over the nap's settle, gets up slower than a blend
-	set_clip(want, fade)
-	player.speed_scale = 1.0
+	set_clip(want)
+	player.speed_scale = 1.0 / _nap.slow if want in NAP_CLIPS else 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
 	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
 			* model.global_basis.z.length())
-	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	var burst := float(root.get_meta("kburst", 1.0))      # the Relay Cup's launch: the legs go faster for a moment
+	player.speed_scale = clampf(_speed / stride * burst, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
-## The root ear bones the sleep clip keys (ear, ear1.L, not ear2.L down the same ear nor an ear_glow): the clip
+## The root ear bones the nap clip keys (ear, ear1.L, not ear2.L down the same ear nor an ear_glow): the clip
 ## sets them every frame, so a twitch on top never builds up.
 func _keyed_ears() -> PackedInt32Array:
 	var out := PackedInt32Array()
-	var anim := player.get_animation("sleep")
+	var anim := player.get_animation("nap")
 	for i in anim.get_track_count():
 		var bone := _skel.find_bone(String(anim.track_get_path(i).get_concatenated_subnames()))
 		if bone >= 0 and anim.track_get_type(i) == Animation.TYPE_ROTATION_3D and _is_ear(bone) \
@@ -383,9 +394,9 @@ func _is_ear(bone: int) -> bool:
 	var bone_name := _skel.get_bone_name(bone) if bone >= 0 else ""
 	return bone_name.begins_with("ear") and not bone_name.begins_with("ear_")
 
-## Asleep, an ear flicks now and then (KinNap.twitch), on top of the clip's pose.
+## Asleep, an ear flicks now and then (KinNap.twitch), on top of the nap clip's pose.
 func _twitch_ears() -> void:
-	if _nap.twitch <= 0.0:
+	if _nap.twitch <= 0.0 or clip != "nap":
 		return
 	var turn := Quaternion(Vector3.BACK, sin(_nap.twitch * TAU) * EAR_TWITCH)
 	for b in _ears:
@@ -393,11 +404,11 @@ func _twitch_ears() -> void:
 
 func _start_shot(which: String) -> void:
 	_shot = which
-	_shot_left = player.get_animation(which).length
+	_shot_left = player.get_animation(which).length * (_nap.slow if which in NAP_CLIPS else 1.0)
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
-		return "sleep"
+		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work

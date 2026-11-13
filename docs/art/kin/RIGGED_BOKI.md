@@ -28,7 +28,15 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. Faces (`BokiRig.FACES`): neutral,
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
+loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
+`TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
+`kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
+Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
+`impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
+asserts every rigged species has all twelve, with the five game clips timed to those beats and no T-pose frame.
+Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 
@@ -109,10 +117,10 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
 
-Naps: every garden nap (the home sets `kstate` "sleep" while `nap_t` runs, alone or in a friends' pile) plays three
-moves from `KinNap` (`scripts/match/kin_nap.gd`), shared by both bodies. Settle: it lies down over 0.6 s (the rig
-crossfades into its sleep clip that long; `KinPuppet` curls up by `lie`). Asleep: a breath every 3.6 s (`KinPuppet`;
-the rig keeps its clip's breathing) and an ear flick every 3-8 s (`KinPuppet`'s ears; on the rig the root ear bones the
-sleep clip keys, so the flick never builds up). Wake: up in 0.4 s, then a stretch long and low, front down, done by
-1.1 s. A bigger Boki (scale times the root of its mass) does all of it slower (x0.85 to x1.4). Checks:
+Naps: every garden nap (the home sets `kstate` "sleep" while `nap_t` runs, alone or in a friends' pile). The rigged
+body plays the `settle`, `nap` and `wake` clips (`BokiHomeClips`; wake has the stretch). On top of them, `KinNap`
+(`scripts/match/kin_nap.gd`) adds an ear flick every 3-8 s on the root ear bones the nap clip keys, so the flick never
+builds up, and slows all three clips for a bigger Boki (scale times the root of its mass, x0.85 to x1.4). The primitive
+body (`KinPuppet`) gets the whole nap from `KinNap`: it lies down over 0.6 s, breathes once every 3.6 s, flicks an ear,
+and on waking gets up in 0.4 s and stretches long and low with the front down, done by 1.1 s. Checks:
 `--boki-nap-check`; `--boki-nap-shots --shots-dir=<dir>` (GPU: two Boki, awake, settling, asleep, stretching).

@@ -4,8 +4,8 @@ extends RefCounted
 ##   2. asleep it breathes one breath per BREATH * slow and flicks an ear within TWITCH_GAP once settled
 ##   3. waking it is up within WAKE * UP and stretches long, low and front down, done by WAKE
 ##   4. a primitive body (KinPuppet) curls lower asleep and stretches long waking
-##   5. a rigged body (BokiRig) crossfades into its sleep clip over the settle and twitches only bones the clip
-##      keys, so the twitch never builds up on the pose
+##   5. a rigged body (BokiRig) plays main's settle, nap and wake clips (BokiHomeClips) at 1 / slow, and twitches
+##      only ear bones the nap clip keys, so the twitch never builds up on the pose
 ##   6. 30 Boki napping cost under COST_MS a frame
 ## --boki-nap-shots --shots-dir=<dir> [--px=384]: two Boki side by side (a rigged one and a primitive one, the
 ## second a size bigger) awake, settling, asleep and stretching awake: <dir>/nap_pair.png. Needs a renderer.
@@ -160,9 +160,13 @@ func _rig() -> void:
 	_run_rig(rig, 0.5)
 	k.set_meta("kstate", "sleep")
 	_run_rig(rig, STEP)
-	ok(rig.clip == "sleep", "kstate sleep plays the sleep clip")
-	ok(absf(rig._nap.fade(true) - KinNap.SETTLE * rig._nap.slow) < 0.001, "it fades in over the settle")
-	ok(rig._ears.size() > 0, "%s has ear bones keyed in its sleep clip: %d" % [RIGGED, rig._ears.size()])
+	ok(rig.clip == "settle", "kstate sleep plays the settle clip")
+	ok(is_equal_approx(rig.player.speed_scale, 1.0 / rig._nap.slow), "at 1 / slow (%.2f)" % rig._nap.slow)
+	var settle_s := rig.player.get_animation("settle").length * rig._nap.slow
+	ok(absf(rig._shot_left - settle_s) < 0.001, "and holds it %.2f s" % settle_s)
+	_run_rig(rig, settle_s)
+	ok(rig.clip == "nap", "then the nap clip")
+	ok(rig._ears.size() > 0, "%s has ear bones keyed in its nap clip: %d" % [RIGGED, rig._ears.size()])
 	var t := 0.0
 	while t < KinNap.SETTLE * 2.0 + KinNap.TWITCH_GAP.y * KinNap.SLOW_MAX and absf(rig._nap.twitch - 0.75) > 0.05:
 		_run_rig(rig, STEP)
@@ -178,9 +182,10 @@ func _rig() -> void:
 		ok(rig._skel.get_bone_pose_rotation(b).angle_to(clip_q) < 0.001, "and the clip sets the ear back each frame")
 	k.set_meta("kstate", "")
 	_run_rig(rig, STEP)
-	ok(rig.clip == "idle", "awake it goes back to idle")
-	_run_rig(rig, KinNap.WAKE * 0.5 * rig._nap.slow)
-	ok(rig.flex.rotation.x < -0.1, "and stretches front down: %.2f rad" % rig.flex.rotation.x)
+	ok(rig.clip == "wake", "awake it plays the wake clip (its stretch)")
+	_run_rig(rig, rig.player.get_animation("wake").length * rig._nap.slow)
+	ok(rig.clip == "idle", "then idle")
+	ok(rig._nap.twitch <= 0.0 or rig.clip != "nap", "no ear twitch awake")
 	k.queue_free()
 
 func _run_rig(rig: BokiRig, secs: float) -> void:
