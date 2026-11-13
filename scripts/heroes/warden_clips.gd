@@ -153,6 +153,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
 	if (d["loco"] as Dictionary).has("run_cycle"):
 		_retime_run(float(d["loco"]["run_cycle"]))
+	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -420,7 +421,14 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": st["stun"], "t": -1.0}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
-		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}
+		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))
+		var et := float(s.get("emote_t", 0.0))
+		if et < lib.get_animation(clip).length:
+			# (data "emotes": the clip each wheel emote plays. Moving, the arms and head gesture and the legs keep
+			# running; standing, a clip of the .glb owns the body. The "g_" gestures only key the upper body.)
+			var vel: Vector3 = s.get("vel", Vector3.ZERO)
+			var moving := Vector2(vel.x, vel.z).length() >= STILL
+			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
 	land_t += dt
 	var ld: Dictionary = d.get("land", {})
 	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
