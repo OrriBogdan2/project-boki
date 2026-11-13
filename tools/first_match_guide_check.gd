@@ -4,8 +4,6 @@ extends RefCounted
 ##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
 ##   3. every line fits the banner lane in at most two lines at 1280x720
-##   4. the first-ready hero ultimate hint (FirstUltHint): only when ready, never in a fight's first 2 s of
-##      damage, the key from Settings.key_cap, once per save, a short line for every hero
 var bad := 0
 var m: Match
 var main: Node
@@ -20,7 +18,6 @@ func run(mn: Node) -> void:
 	Save.no_write = true
 	_save_flag()
 	_walk()
-	_first_ult()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
