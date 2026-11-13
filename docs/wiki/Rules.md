@@ -919,6 +919,19 @@ The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui
 |---|---|
 | recipes | [{"id": "fourfold_bun", "gives": "fourfold_bun", "n": 1, "need": {"kind": "different", "of": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"], "n": 2}}, {"id": "bramble_honey", "gives": "bramble_honey", "n": 1, "need": {"kind": "snack_type", "types": ["grass", "bug", "spore"], "n": 3}}, {"id": "glassdew", "gives": "glassdew", "n": 1, "need": {"kind": "snack_type", "types": ["water", "ice", "crystal"], "n": 3}}, {"id": "cinderbrittle", "gives": "cinderbrittle", "n": 1, "need": {"kind": "snack_type", "types": ["fire", "rock", "steel", "dragon"], "n": 3}}, {"id": "hush_truffle", "gives": "hush_truffle", "n": 1, "need": {"kind": "snack_type", "types": ["dark", "psychic", "poison"], "n": 3}}, {"id": "windfloss", "gives": "windfloss", "n": 1, "need": {"kind": "snack_type", "types": ["flying", "electric", "fairy", "sound"], "n": 3}}, {"id": "twinbun", "gives": "twinbun", "n": 1, "need": {"kind": "same", "item": "sweetbun", "n": 2}}] |
 
+## garden_seasons (`content/rules/garden_seasons.json`)
+
+Garden seasons (scripts/home/garden_seasons.gd; briefs/design/GARDEN_MODERN.md section 5 rank 9). Every few weeks one zone is in season, in list order, counted on the weekly-event clock (BaseRace.week_now, the device clock the save uses; no server). While in season: the zone's game plays its season twist (unless this week's weekly format is already for that game), the snack patch grows the season's snack on top of its four, and that game's Crown also gives the season's keepsake (rec.keepsakes, once a season per Boki).
+
+| Setting | Value |
+|---|---|
+| weeks | 2 |
+| weeks_doc | Weeks each season lasts. |
+| seasons | [{"zone": "bramblebank", "name": "Bramblebank", "game": "dash", "twist": "two_streams", "snack": "glowcap", "keepsake": {"id": "mossbank_acorn", "name": "Mossbank Acorn"}}, {"zone": "glasswater", "name": "Glasswater Shallows", "game": "volley", "twist": "seven_up", "snack": "mindmint", "keepsake": {"id": "rimeglass_pebble", "name": "Rimeglass Pebble"}}, {"zone": "cinderstep", "name": "Cinderstep", "game": "shove", "twist": "hot_ledge", "snack": "glowcap", "keepsake": {"id": "cinder_bead", "name": "Cinder Bead"}}, {"zone": "hushwood", "name": "Hushwood", "game": "seek", "twist": "night_seek", "snack": "mindmint", "keepsake": {"id": "lantern_moth_charm", "name": "Lantern Moth Charm"}}, {"zone": "kitewind", "name": "Kitewind Ridge", "game": "dash", "twist": "gusty", "snack": "starfruit", "keepsake": {"id": "ridge_kite_tassel", "name": "Ridge Kite Tassel"}}] |
+| seasons_doc | In rotation order. zone: GARDEN.md 10.2 zone id; game: the game that zone hosts (a garden_prizes.json game id); twist: an id in base_race.json twists or in twists below; snack: a Data.CROPS id the patch does not already grow; keepsake: what the season's Crown adds. |
+| twists | [{"id": "hot_ledge", "game": "shove", "name": "Hot ledge", "note": "The stump rocks harder: footing slips", "wobble": 0.95}] |
+| twists_doc | Season-only twists, in the same shape as base_race.json twists. wobble: Stump Shove's per-side push roll (base_shove.json wobble, +- fraction). |
+
 ## garden_sim (`content/rules/garden_sim.json`)
 
 Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/design/GARDEN_MODERN_BALANCE.md). The sim reads the live rules where they exist (care.json stat_budget, garden_prizes.json, garden_items.json, evo_paths.json) and falls back to the copies under fallback, taken from the READY branches ext/garden-stat-budget 7d1acb8c6, ext/garden-prizes-cups 9f2fdb16f and ext/garden-path-meter c1275d53a. Garden XP (GARDEN_MODERN 2.5) is not built anywhere yet, so garden_xp is the brief's numbers. Everything marked assume is a sim guess, not a game rule.

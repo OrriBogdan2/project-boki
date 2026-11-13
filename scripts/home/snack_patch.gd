@@ -2,8 +2,9 @@ class_name SnackPatch
 extends RefCounted
 ## The garden's one snack patch (briefs/design/GARDEN.md section 10 question 1, default). With base_mode on, a save has
 ## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens four element snacks
-## on a timer (content/rules/snack_patch.json) and walking over it picks them up for the pantry, to feed the lean
-## foods. Never sold, no seeds, no watering. The timer is the deco entry's "t" (unix seconds of the last pick).
+## and the season's snack (GardenSeasons) on a timer (content/rules/snack_patch.json) and walking over it picks
+## them up for the pantry, to feed the lean foods. Never sold, no seeds, no watering. The timer is the deco
+## entry's "t" (unix seconds of the last pick).
 
 const ID := "snack_patch"
 
@@ -22,17 +23,24 @@ static func grant(d: Dictionary) -> void:
 	if FarmUnlocks.base_mode() and HomeLayout.count_of(ID, d) == 0:
 		HomeLayout.of(d)["inv"][ID] = 1
 
-## The snacks this island's patch grows: its zone theme's list, else the start garden's four.
-static func snacks(d: Dictionary) -> Array:
+## The snacks this island's patch grows: its zone theme's list, else the start garden's four, plus the season's snack
+## (GardenSeasons) when that list lacks it.
+static func snacks(d: Dictionary, now := -1.0) -> Array:
+	var own := zone_snacks(d)
+	var season := GardenSeasons.snack(Time.get_unix_time_from_system() if now < 0.0 else now)
+	return own if own.has(season) else own + [season]
+
+## The zone theme's own list, else the start garden's four.
+static func zone_snacks(d: Dictionary) -> Array:
 	return rules()["zone_snacks"].get(String(HomeLayout.of(d)["theme"]), rules()["snacks"])
 
 ## Where the zones are not built, one more food every ripening so every snack gets grown: the next, in
 ## zone-list order, that the patch's own list lacks (rot on the entry counts ripenings). "" on a zone.
-static func extra(d: Dictionary, e: Dictionary) -> String:
+static func extra(d: Dictionary, e: Dictionary, now := -1.0) -> String:
 	var zones: Dictionary = rules()["zone_snacks"]
 	if zones.has(String(HomeLayout.of(d)["theme"])):
 		return ""
-	var own := snacks(d)
+	var own := snacks(d, now)
 	var rest: Array = []
 	for z in zones:
 		rest.append_array((zones[z] as Array).filter(func(s): return not own.has(s)))
@@ -54,8 +62,8 @@ static func harvest(d: Dictionary, now: float) -> Array:
 	if not ripe(e, now):
 		return []
 	e["t"] = now
-	var got: Array = snacks(d).duplicate()
-	var more := extra(d, e)
+	var got: Array = snacks(d, now).duplicate()
+	var more := extra(d, e, now)
 	if more != "":
 		got.append(more)
 		e["rot"] = int(e.get("rot", 0)) + 1
@@ -68,16 +76,21 @@ static func shelve(d: Dictionary, snack: String, n := 1) -> void:
 	var store: Dictionary = d["crops"] if Data.CROPS.has(snack) else d["items"]
 	store[snack] = int(store.get(snack, 0)) + n
 
-## Part of the deco signature, so the model changes when it ripens.
+## Part of the deco signature, so the model changes when it ripens or the season turns.
 static func sig(e: Dictionary) -> String:
-	return "r" if String(e["id"]) == ID and ripe(e, Time.get_unix_time_from_system()) else ""
+	if String(e["id"]) != ID:
+		return ""
+	var now := Time.get_unix_time_from_system()
+	return ("r" if ripe(e, now) else "") + GardenSeasons.snack(now)
 
-## Four little beds, each with its snack's colour: sprouts while growing, fat berries once ripe.
+## Little beds, one per snack (the season's too), each with its snack's colour: sprouts while growing, fat berries
+## once ripe.
 static func model(e: Dictionary) -> Node3D:
 	var n := Node3D.new()
-	var is_ripe := ripe(e, Time.get_unix_time_from_system())
+	var now := Time.get_unix_time_from_system()
+	var is_ripe := ripe(e, now)
 	Models.part(n, Models.box(1.9, 0.08, 1.9), Models.toon(Color("7a5a3a"), false), Vector3(0, 0.04, 0))
-	var grown := snacks(Save.d)
+	var grown := snacks(Save.d, now)
 	for i in grown.size():
 		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45)
 		var leaf := Models.toon(Color("5f9a45"))

@@ -56,12 +56,14 @@ class Run:
 	var boost := 1.0                # your press, on the backed Boki's push
 	var boost_t := 0.0              # s of boost left
 	var base: Array = []            # each side's push over the other's hold
+	var wobble: float               # +- fraction of each side's push roll: the rules', or the twist's
 
-	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
+	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
 		R = BaseShove.rules()
 		recs = pair
 		backed = back
 		rng = r
+		wobble = float(tw.get("wobble", R["wobble"]))
 		for i in 2:
 			base.append(BaseShove.push(recs[i]) / BaseShove.hold(recs[1 - i]))
 
@@ -86,7 +88,7 @@ class Run:
 		if roll_t <= 0.0:
 			roll_t = float(R["wobble_s"])
 			for i in 2:
-				roll[i] = rng.randf_range(1.0 - float(R["wobble"]), 1.0 + float(R["wobble"]))
+				roll[i] = rng.randf_range(1.0 - wobble, 1.0 + wobble)
 		var force: Array = []
 		for i in 2:
 			var f := float(base[i]) * float(roll[i])
@@ -182,7 +184,7 @@ func use() -> void:
 	for k in pair:
 		k["busy"] = true
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
-	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
+	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new(), BaseRace.tweak("shove"))
 	run.rng.randomize()
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to shove" % Settings.key_cap("interact"))

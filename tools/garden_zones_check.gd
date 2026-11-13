@@ -423,7 +423,7 @@ func _glasswater_part(m: Node) -> void:
 		"its layout stands in while it is open; the save's own layout stays Bramblebank's")
 	ok(gw.toys.toys().any(func(t): return t["id"] == "toy_tub"),
 		"the splash tub stands in it")
-	var snacks := SnackPatch.snacks(Save.d)
+	var snacks := SnackPatch.zone_snacks(Save.d)
 	var types: Array = GardenZones.info("glasswater")["types"]
 	ok(snacks.size() == 3 and snacks.all(func(f): return types.has(Content.rules("lean")["foods"][f])),
 		"its patch grows Water, Ice and Crystal snacks (%s)" % ", ".join(snacks))
@@ -464,7 +464,7 @@ func _cinderstep_part(m: Node) -> void:
 	ok(HomeLayout.of(Save.d)["theme"] == "cinderstep", "its own cinder ground")
 	var ids: Array = cs.toys.toys().map(func(t): return t["id"])
 	ok(ids.has("toy_stone") and ids.has("toy_post"), "a warm stone and a climbing post (%s)" % ", ".join(ids))
-	var snacks := SnackPatch.snacks(Save.d)
+	var snacks := SnackPatch.zone_snacks(Save.d)
 	var grown := {}
 	for f in snacks:
 		grown[Content.rules("lean")["foods"][f]] = true

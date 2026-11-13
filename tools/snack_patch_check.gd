@@ -64,10 +64,11 @@ func _rules_and_save() -> void:
 	ok(SnackPatch.harvest(Save.d, now).is_empty() and Save.d["crops"] == before, "before its timer it yields nothing")
 	var late: float = now + float(SnackPatch.rules()["grow_secs"]) + 1.0
 	var got := SnackPatch.harvest(Save.d, late)
-	var each: bool = got.size() == 5 and got[4] == SnackPatch.extra(Save.d, {"rot": 0})      # + one rotating extra
+	var extra := SnackPatch.extra(Save.d, {"rot": 0}, late)
+	var each: bool = got.size() == 6 and got[5] == extra      # the four, the season snack, a rotating extra
 	for s in SnackPatch.rules()["snacks"]:
 		each = each and got.has(s) and int(Save.d["crops"].get(s, 0)) == int(before.get(s, 0)) + 1
-	ok(each, "after its timer it yields the four snacks, one each, and a rotating extra: %s" % str(got))
+	ok(each, "after its timer it yields the four snacks, one each, the season's and a rotating extra: %s" % str(got))
 	ok(SnackPatch.harvest(Save.d, late).is_empty(), "picked, it starts over")
 
 ## On Kitewind Ridge the patch grows the ridge's four types (Flying, Electric, Fairy, Sound), crops and foods alike.
@@ -75,17 +76,17 @@ func _ridge() -> void:
 	Save.d = _save()
 	HomeLayout.ensure(Save.d)["theme"] = "ridge"
 	var types := {}
-	for s in SnackPatch.snacks(Save.d):
+	for s in SnackPatch.zone_snacks(Save.d):
 		types[Lean.key_of(String(s))] = true
 	var ridge_types := ["flying", "electric", "fairy", "sound"]
 	ok(types.size() == 4 and ridge_types.all(func(t): return types.has(t)),
-			"ridge: the patch grows Flying, Electric, Fairy and Sound snacks: %s" % str(SnackPatch.snacks(Save.d)))
+			"ridge: the patch grows Flying, Electric, Fairy and Sound snacks: %s" % str(SnackPatch.zone_snacks(Save.d)))
 	var L := HomeLayout.of(Save.d)
 	var e := {"u": HomeLayout._next_uid(L), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0,
 			"t": Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
 	(L["deco"] as Array).append(e)
 	var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system())
-	var each := got.size() == 4
+	var each := got == SnackPatch.snacks(Save.d)      # its list, plus the season snack
 	for s in got:
 		each = each and Econ.pantry(String(s)) == 1
 	ok(each, "ridge: a ripe patch puts one of each in the pantry: %s" % str(got))
