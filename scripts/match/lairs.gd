@@ -700,7 +700,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
 	# (1.6 m out: at 0.9 their names ran into each other)
-	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
+	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "boss": b.mkind, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
 	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
 	if zone != "" and not wayseed_given:
@@ -730,7 +730,6 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		h.gain_xp(260.0 * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
-		if b.md.has("ink"): killer.add_stat("ink_" + String(b.md["ink"]))
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
 	# the boss's brood scatters
 	for a in L["adds"]:

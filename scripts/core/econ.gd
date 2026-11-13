@@ -78,6 +78,9 @@ static func _store(it: Dictionary) -> void:
 		# a boss's egg goes onto the Incubator's shelf by the Nesting Nook (and into its cradle if that's empty)
 		Incubator.add(String(it.get("sp", "")), String(it.get("boss", "")))
 		return
+	if Loot.is_ink(it):
+		Goods.give(Loot.ink_key(it))      # an Ink is a good: it goes to the farm's goods, where Boki use it
+		return
 	if Loot.is_wayseed(it):
 		Save.add_item(String(it["id"]), 1)      # a bag item: the Waystone looks for it there (GardenZones)
 		return

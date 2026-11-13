@@ -1151,6 +1151,19 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 | turn_rate_desc | rad/s the viewer's turntable spins |
 | moves | {"thief": {"dash": ["thf_vault_r"], "lmb": ["thf_lmb_r", "thf_lmb_l"], "passive": ["thf_primed"], "rmb": ["thf_bola"], "e": ["thf_knife", "thf_arrive"], "x": ["thf_encore"]}, "archer": {"dash": ["pin_walk"], "lmb": ["arc_draw", "arc_loose"], "rmb": ["arc_heavy_wind", "arc_heavy"], "e": ["arc_hail"], "passive": ["arc_perfect"], "x": ["pin_ult_cast", "pin_ult_loose"]}, "mage": {"dash": ["mage_dash", "mage_dash_go"], "lmb": ["mage_lmb_r", "mage_lmb_l"], "rmb": ["mage_rmb_hold", "mage_rmb"], "e": ["mage_e"], "x": ["mage_x", "mage_x_land"]}, "gunslinger": {"dash": ["gunslinger_dash"], "lmb": ["gunslinger_lmb"], "rmb": ["gunslinger_rmb"], "e": ["gunslinger_e"], "x": ["gunslinger_x"]}, "juggernaut": {"dash": ["jug_dash"], "lmb": ["jug_slash_r", "jug_slash_l"], "rmb": ["jug_lunge_wind", "jug_lunge"], "e": ["jug_chain", "jug_reel"], "passive": ["jug_roar"], "x": ["jug_guard", "jug_riposte"]}, "bulwark": {"dash": ["bul_charge"], "lmb": ["bul_smash_wind", "bul_smash"], "rmb": ["bul_guard", "bul_slamshield"], "e": ["bul_mend"], "passive": ["bul_whirl"], "x": ["bul_ult_wind", "bul_ult_slam"]}, "dredge": {"dash": ["dr_lunge", "dr_pounce"], "lmb": ["dr_shot"], "rmb": ["dr_throw", "dr_reel", "dr_pullend"], "e": ["dr_anchor", "dr_quake"], "x": ["dr_blast"]}, "ashwick": {"dash": ["as_leap", "lw_hop"], "lmb": ["as_lance", "as_lance_end"], "rmb": ["as_aim", "as_shot"], "e": ["as_cloak"], "x": ["lw_jet"]}, "tender": {"dash": ["mm_skip", "mm_float"], "lmb": ["mm_shot_r", "mm_shot_l"], "rmb": ["mm_seed_aim", "mm_seed"], "e": ["mm_hearth"], "x": ["mm_call", "mm_call_end"]}, "rimewright": {"dash": ["tm_skate", "tm_skate_go", "tm_skate_air"], "lmb": ["tm_dart_r", "tm_dart_l"], "rmb": ["tm_spear_aim", "tm_spear"], "e": ["tm_wall"], "x": ["tm_rime", "tm_rime_crash"]}, "dolm": {"dash": ["breah_hop", "breah_skate"], "lmb": ["breah_throw"], "rmb": ["breah_crouch", "breah_slam"], "e": ["breah_raise"], "x": ["breah_spine_aim", "breah_spine"]}, "ostra": {"dash": ["ostra_swap_aim", "ostra_swap"], "lmb": ["ostra_orb"], "rmb": ["ostra_snap_wind", "ostra_snap"], "e": ["ostra_seed"], "x": ["ostra_well"]}} |
 
+## ink_drops (`content/rules/ink_drops.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Where Inks come from in a match (scripts/match/ink_drops.gd, called from GearDrops.run_table). An Ink is a backpack item (Loot.ink): carry it out and it goes to your goods (Goods, content/rules/market.json 'ink_<type>'), where Boki that evolve by Ink use it (content/rules/evolve.json). Bosses drop the Ink of their kin's type; camp monsters and guards rarely drop a random one. Per expedition, Goods.on_result adds one more small chance (market.json finds.ink). |
+| inks | ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"] |
+| type_ink_doc | The 18 types (theme ids in content/kin_v2, owner names from DECISIONS 2026-11-08 22:29 in brackets) to the 9 Inks. Nine types have their own Ink. The rest take the nearest in feel: spore and swarm (Bug) are growth, venom (Poison) is dark, tempest (Flying) rides the Wyrm's sky, titan (Steel) is forged in fire, stone (Rock) is cold and old, echo (Sound) is storm, gravity (Psychic) is lunar, wild (Normal) is every colour at once. |
+| type_ink | {"ember": "ember", "tide": "tide", "bloom": "bloom", "storm": "storm", "frost": "frost", "shadow": "shadow", "lunar": "lunar", "prism": "prism", "wyrm": "wyrm", "spore": "bloom", "swarm": "bloom", "venom": "shadow", "tempest": "wyrm", "titan": "ember", "stone": "frost", "echo": "storm", "gravity": "lunar", "wild": "prism"} |
+| chance_doc | Chance a kill drops one Ink, by drop table (a mob's kind, or 'boss' for a lair boss). Absent = never. A boss always drops its own. The rest are rare on purpose: an Ink is a 60-gem good and a match has about 40 small kills, so the small ones add up to roughly one Ink in ten matches; guards and the Glimmerkin are the few worth hunting for. |
+| chance | {"boss": 1.0, "warden": 0.1, "glimmer": 0.1, "brute": 0.03, "sentinel": 0.01, "spitter": 0.003, "bomber": 0.003, "skitter": 0.003} |
+
 ## keys (`content/rules/keys.json`)
 
 
@@ -1253,7 +1266,7 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 | utility_rarity | {"armor_kit": "common", "jump_pad": "common", "smoke": "common", "stim": "uncommon", "medkit": "uncommon", "shield_cell": "rare", "scanner": "rare"} |
 | wear_rarity | {"bell": "common", "bow": "common", "leafhat": "common", "scarf": "uncommon", "crown": "uncommon", "goggles": "uncommon", "cape": "rare", "tophat": "rare", "collar": "uncommon", "charm": "epic"} |
 | finds | {"material": 0.25, "trophy_per_boss": 1, "ink": 0.05} |
-| finds_doc | Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill. ink: the chance of one Ink of any type (weighted by restock), rare on purpose; a boss with an 'ink' in its def (Data.MOBS) also gives its own Ink to the hunter who killed it. |
+| finds_doc | Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill. ink: the chance of one Ink of any type (weighted by restock), rare on purpose. Inks that bosses and camps drop in a match are carried out in the backpack instead (content/rules/ink_drops.json). |
 
 ## mask_moment (`content/rules/mask_moment.json`)
 
