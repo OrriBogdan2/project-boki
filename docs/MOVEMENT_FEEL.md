@@ -612,7 +612,7 @@ two steps, found by halving (a press later in the recovery is taken as never les
 and 75 percent of that window records **now** (acted within two steps), **end +t** (acted, t seconds after the
 press) or **never** (not within 1.5 s). On the ground Space is a jump. In the air it is the glider: Space is held
 from the press, as a player holds it, and "acted" is the glider opening. `n/a`: the ability does not go off there
-without a target or the ground. The check fails a press in a window's last `DashFlow.BUFFER_S` (0.15 s) that never
+without a target or the ground. The check fails a press in a window's last `Loco.press_buffer` (0.15 s) that never
 acts, unless the hero's `into_jump` row is a documented lock.
 
 Source tags as above; `[?]` marks rows the source does not settle (the footage shows no jump out of that
@@ -689,7 +689,7 @@ What the table says:
 - **Suggestions, not built (PARITY FIRST):** Albert's Faultline is planted about 0.6 s in the source but our
   jump goes at once in the wind-up; Grimble's Kaiju Blast charge is planted in the source and ours walks and
   jumps (owner item 36 keeps the walk). If the owner wants the air tap chainable too, a 0.15 s hold of a Space
-  tap made in a move's last `BUFFER_S` would fit DashFlow's held slots.
+  tap made in a move's last `Loco.press_buffer` would fit DashFlow's held slots.
 ## Press to picture: key to first visible frame (`--press-latency-check`)
 
 How many frames pass between a key going down and the first frame its result is on screen, for every hero's LMB, RMB, E, R (the Merge), dash and jump, at 60 and 144 Hz. Budget: 2 frames at 60 Hz, and the same 33 ms at 144 Hz (4 frames); the check fails above it. For Vex, Kael, Lace and Cinder it also holds LMB, RMB, E and dash to the source footage ("against the source", below).

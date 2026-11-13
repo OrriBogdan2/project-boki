@@ -611,7 +611,7 @@ const SPACE_FRACS := [0.25, 0.5, 0.75]
 ## Space in `slot`'s recovery, on the ground (a jump) or in the air (the glider, Space held from the press): the
 ## window after the cast in which a press does not act at once (its lock), and what a press at 25, 50 and 75
 ## percent of it does: at once, at the end (how long after the press) or never. Unless the hero's into_jump row
-## is a lock, a press in the window's last DashFlow.BUFFER_S must act by its end (every interaction is chainable).
+## is a lock, a press in the window's last Loco.press_buffer must act by its end (every interaction is chainable).
 func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 	var where := "air" if in_air else "ground"
 	var first := _space_at(m, slot, in_air, 0)
@@ -627,7 +627,7 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 		var at := int(round(absi(lock) * frac))
 		var got := first if lock == 0 else _space_at(m, slot, in_air, at)
 		cells.append(got)
-		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= DashFlow.BUFFER_S + 0.001
+		var in_buffer: bool = lock > 0 and float(lock - at) * Match.DT <= Loco.press_buffer + 0.001
 		if not locked and in_buffer and got == "never":
 			right = false
 	var span := "lock %s%.2fs" % ["> " if lock < 0 else "", absi(lock) * Match.DT]

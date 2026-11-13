@@ -201,8 +201,8 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   (0.3s) and the skid: press any time in it, and the next hop goes `skid_min` (0.1s) after touchdown, at the cursor as it is
   then. No press: the skid (up to `skid` 0.55m in `skid_t` 0.3s) ends in the landing. Three hops at most; the third lands at once.
 - **Presses (ours; the source has one dash, no chain):** a press in the first rock's crouch counts as in the window (it is
-  inside DashFlow's `BUFFER_S` 0.15s of it), and a press on the skid leaves the skid running. With no hop left, a press in
-  the last flight's final `BUFFER_S` is held for the landing and goes through the shared dash buffer there; an earlier one
+  inside `Loco.press_buffer` 0.15s of it), and a press on the skid leaves the skid running. With no hop left, a press in
+  the last flight's final `Loco.press_buffer` is held for the landing and goes through the shared dash buffer there; an earlier one
   does nothing. After the window, a press is a fresh chain with a charge up, and the shared no-charge rule without one.
   SHIFT AGAIN shows from the press to the window's end while a hop is left, its time left the chain's. Asserted:
   `hop press ...`, `hop prompt: ...` (tools/breah_hop_press_check.gd, run by `--dolm-combo-check`).
