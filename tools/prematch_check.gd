@@ -279,6 +279,11 @@ func _screen(main: Node) -> void:
 	ok(view.pm.locked and view.caption.text == "PICKS LOCKED", "once the squad has picked the banner says so")
 	var note: String = view.note_label.text
 	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
+	for i in 4:
+		view._add_chat("sleepyfox_", "push north, I hold the ridge", UI.INK)
+	for i in 6:
+		await main.get_tree().process_frame
+	_fits(view, " with the picks locked and a full chat log")
 	view.set_process(false)
 	view.queue_free()
 
@@ -293,7 +298,9 @@ func _declutter(view: Control) -> void:
 		var role := String(Arch.def(ak)["card"]["role_word"])
 		var chip: Node = card.find_child("StartHere", false, false)
 		var labels: Array = card.find_children("*", "Label", true, false)
-		var lines: Array = labels.filter(func(l): return chip == null or not chip.is_ancestor_of(l))
+		var howto: Node = card.get_meta("howto")   # its lines are not the card's name and role
+		var lines: Array = labels.filter(func(l): return not howto.is_ancestor_of(l))
+		lines = lines.filter(func(l): return chip == null or not chip.is_ancestor_of(l))
 		var texts: Array = lines.map(func(l): return (l as Label).text)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)
@@ -305,8 +312,15 @@ func _declutter(view: Control) -> void:
 		shut_ok = shut_ok and plain and lock == shut and tip_ok
 	ok(open == 2 and shut_ok, "each card is name + role word, shut ones have a padlock, hover has stats and quest")
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
+	_fits(view, "")
+
+## The whole screen inside the safe margin and every Hunter row in view (`when` names the moment).
+func _fits(view: Control, when: String) -> void:
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
-	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
+	ok(fits.is_empty(), "every element sits inside the screen's safe margin%s (%s)" % [when, fits.slice(0, 2)])
+	var room: Rect2 = view.grid.get_parent().get_global_rect()
+	var rows: Rect2 = view.grid.get_global_rect()
+	ok(room.encloses(rows), "every Hunter row shows without scrolling%s (grid %s in %s)" % [when, rows, room])
 
 ## The lock-in pose: every Hunter whose model has clips names one of them, it runs 1-1.5 s once and the Hunter is back
 ## on its idle, and choosing again mid-pose restarts it from the top.

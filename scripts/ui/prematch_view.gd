@@ -32,8 +32,13 @@ var stage_slot: Control          # where the stage stands, beside the Hunter gri
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 
-const COLUMNS := 4          # Hunter cards per row
+const COLUMNS := 5          # Hunter cards per row (13 Hunters fit in 3 rows)
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
+const CARD_PAD := 10        # px, inside a card
+const GRID_GAP := 12        # px, between cards in a row
+const ROW_GAP := 8          # px, between rows (3 rows and a chat line fit 1280x720)
+const PIC_MAX := 84.0       # px, a card's portrait at full size
+const PIC_MIN := 48.0       # px, the smallest card portrait (the name and role stack is about this tall)
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
 const STAGE_PX := Vector2(240, 320)   # px, your pick's 3D stage beside the grid (4 cards + it fit 1240 px)
 
@@ -90,13 +95,14 @@ func _ready() -> void:
 	root.add_child(body)
 	var sc := ScrollContainer.new()
 	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.resized.connect(_fit_cards)
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	body.add_child(sc)
 	grid = GridContainer.new()
 	grid.columns = COLUMNS
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	grid.add_theme_constant_override("h_separation", GRID_GAP)
+	grid.add_theme_constant_override("v_separation", ROW_GAP)
 	sc.add_child(grid)
 	stage_slot = Control.new()      # holds its place before your first pick, so the cards don't shift
 	stage_slot.custom_minimum_size = STAGE_PX
@@ -203,7 +209,8 @@ func _pulse(left: float) -> void:
 
 ## Keeps the whole screen inside the HUD safe margin (HudStyle.safe_pad), so the countdown shows at every window size;
 ## smaller windows get smaller digits. The Hunter grid keeps COLUMNS at every size: 4 x CARD_MIN_W plus
-## the STAGE_PX stage beside it fits the 1240 logical px UI.
+## the STAGE_PX stage beside it fits the 1240 logical px UI, and _fit_cards sizes the portraits so every row
+## shows without scrolling.
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var pad := HudStyle.safe_pad(win)
@@ -233,21 +240,56 @@ func _fill_hunters() -> void:
 		c.queue_free()
 	for ak in Arch.ids():
 		grid.add_child(_tile(String(ak)))
+	_fit_cards()
+
+## Card portraits sized so all the rows fit the room the grid has (PIC_MAX at most, PIC_MIN at least).
+## A card is never shorter than its name and role; when even those rows overflow, the chat log gives
+## up the difference (it scrolls).
+func _fit_cards() -> void:
+	var rows := ceili(Arch.ids().size() / float(COLUMNS))
+	var room: float = grid.get_parent().size.y - ROW_GAP * (rows - 1)
+	# The how-to lines under each card show only where every row still fits with them (portraits at
+	# PIC_MIN); on a short screen they hide and the card's tooltip carries them instead.
+	_set_howto(true)
+	var px := PIC_MIN
+	if _card_h(px) * rows > room:
+		_set_howto(false)
+		px = clampf(floorf(room / rows) - 2 * CARD_PAD, PIC_MIN, PIC_MAX)
+	var over := _card_h(px) * rows - room
+	if over > 0.0 and chat_scroll and chat_scroll.visible and chat_log.get_child_count() > 0:
+		var line: float = chat_log.get_child(-1).get_combined_minimum_size().y
+		chat_scroll.custom_minimum_size.y = maxf(line, chat_scroll.custom_minimum_size.y - ceilf(over))
+
+## Every card's portrait at `px`; returns the tallest card's least height.
+func _card_h(px: float) -> float:
+	var card_h := 0.0
+	for card in grid.get_children():
+		card.get_meta("pic").custom_minimum_size = Vector2(px, px)
+		card_h = maxf(card_h, card.get_combined_minimum_size().y)
+	return card_h
+
+func _set_howto(on: bool) -> void:
+	for card in grid.get_children():
+		card.get_meta("howto").visible = on
 
 ## One card: portrait, name, role word (a starter wears a "Start here" stamp until the first match). Stats and
 ## the unlock quest are the tooltip. A shut Hunter is dim with a padlock.
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var mate := pm.taken_by(ak) if ak != pm.pick else ""
-	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
+	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), CARD_PAD, Arch.color(ak))
 	card.custom_minimum_size = Vector2(CARD_MIN_W, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var stack := UI.vbox(6)
 	card.add_child(stack)
 	var row := UI.hbox(10)
 	stack.add_child(row)
-	stack.add_child(ClassCard.howto_box(ak, CARD_MIN_W - 28.0, 12))
-	row.add_child(ClassCard.portrait(ak))
+	var howto := ClassCard.howto_box(ak, CARD_MIN_W - 28.0, 12)
+	stack.add_child(howto)
+	card.set_meta("howto", howto)
+	var pic := ClassCard.portrait(ak)
+	card.set_meta("pic", pic)
+	row.add_child(pic)
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -262,7 +304,10 @@ func _tile(ak: String) -> PanelContainer:
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 	else:
 		col.add_child(UI.label(role, 13, UI.MUTED))
-	card.tooltip_text = HunterViewer.stat_line(ak) + "\n" + ClassCard.kit_tip(ak)
+	# a long "taken by" trims instead of widening the card
+	col.get_child(-1).text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	card.tooltip_text = HunterViewer.stat_line(ak) + "\n" + ClassCard.kit_tip(ak) \
+			+ "\n" + "\n".join(ClassCard.howto_lines(ak))
 	if not open:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
