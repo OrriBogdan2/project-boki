@@ -248,7 +248,7 @@ func _trial(m: Match, slot: String, in_air: bool, late: bool) -> String:
 ## A kit's own cast lock (its ult holding the body: busy() while not disabled()): an E or RMB pressed LOCK_LATE before
 ## the lock ends goes off once it ends, never inside it; one pressed at the lock's start is dropped. Heroes whose ult
 ## holds no lock are skipped.
-const LOCK_LATE := 0.1          # s before the lock's end: inside DashFlow.BUFFER_S
+const LOCK_LATE := 0.1          # s before the lock's end: inside Loco.buf_ability_hold
 func _lock(main: Node, hero: String) -> void:
 	var m := _match(main, hero)
 	var k := hunter.ak
@@ -278,7 +278,7 @@ func _lock(main: Node, hero: String) -> void:
 			if late:
 				var when := "inside the lock" if inside else "after %d steps" % went
 				ok(went >= 0 and not inside, "%s goes off once it ends (%s)" % [what, when])
-			elif lock_n * Match.DT > DashFlow.BUFFER_S + 0.1:
+			elif lock_n * Match.DT > Loco.buf_ability_hold + 0.1:
 				ok(went < 0, "%s is dropped, not held for the whole lock" % what)
 	m.queue_free()
 	await main.get_tree().process_frame
@@ -589,7 +589,7 @@ const SPACE_FRACS := [0.25, 0.5, 0.75]
 ## Space in `slot`'s recovery, on the ground (a jump) or in the air (the glider, Space held from the press): the
 ## window after the cast in which a press does not act at once (its lock), and what a press at 25, 50 and 75
 ## percent of it does: at once, at the end (how long after the press) or never. Unless the hero's into_jump row
-## is a lock, a press in the window's last DashFlow.BUFFER_S must act by its end (every interaction is chainable).
+## is a lock, a press in the window's last Loco.buf_ability_hold must act by its end (every interaction is chainable).
 func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 	var where := "air" if in_air else "ground"
 	var first := _space_at(m, slot, in_air, 0)
@@ -605,7 +605,7 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 		var at := int(round(absi(lock) * frac))
 		var got := first if lock == 0 else _space_at(m, slot, in_air, at)
 		cells.append(got)
-		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= DashFlow.BUFFER_S + 0.001
+		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= Loco.buf_ability_hold + 0.001
 		if not locked and in_buffer and got == "never":
 			right = false
 	var span := "lock %s%.2fs" % ["> " if lock < 0 else "", absi(lock) * Match.DT]

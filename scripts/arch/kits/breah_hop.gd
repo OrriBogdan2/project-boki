@@ -60,7 +60,7 @@ func drop() -> void:
 ## last flight's final BUFFER_S is held for the landing (_crash).
 func press() -> void:
 	if int(st["n"]) >= int(dd()["hops"]):
-		st["again"] = bool(st.get("again", false)) or left() <= DashFlow.BUFFER_S
+		st["again"] = bool(st.get("again", false)) or left() <= Loco.buf_ability_hold
 		return
 	st["press"] = true
 	if String(st["phase"]) == "skid" and h.roll_t <= 0.0:
@@ -351,7 +351,7 @@ func _crash() -> void:
 	KitLooks.of(m).release(FOOT_KEY)
 	AimKit.hide(h, "leap")
 	if bool(st.get("again", false)):
-		h.dash_buf = DashFlow.BUFFER_S
+		h.dash_buf = Loco.buf_ability_hold
 	st = {"phase": "roll", "t": 0.0, "at": at, "dir": st["dir"]}
 
 func _roll_on() -> void:

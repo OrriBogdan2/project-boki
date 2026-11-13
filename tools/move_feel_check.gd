@@ -85,8 +85,8 @@ const T := {
 	"flue_lift_hold_s":        ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
 	"flue_hover_m":            ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
 	"flue_turn_deg_s":         ["~", [85.0, 95.0], "deg/s", "[footage] peaks ~85-100 deg/s (cast 1: 52-67)"],
-	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
-	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
+	"coyote_frames":           [">=", 6.0, "frames", "buffers.coyote 0.12s (walked off a rim over the void)"],
+	"jump_buffer_frames":      [">=", 7.0, "frames", "buffers.jump 0.12s (7 steps)"],
 	"coyote_jump_050ms":       [">=", 1.0, "yes", "ran off a rim, jump 0.05s later: inside the 0.12s coyote [est]"],
 	"coyote_jump_100ms":       [">=", 1.0, "yes", "ran off a rim, jump 0.10s later: inside the 0.12s coyote [est]"],
 	"coyote_jump_150ms":       ["<=", 0.0, "yes", "ran off a rim, jump 0.15s later: past the coyote, no jump [est]"],
@@ -268,6 +268,7 @@ func run(main: Node) -> void:
 	_ground()
 	_face_turn()
 	_jump()
+	_buffers()
 	_glide()
 	_glide_dive()
 	_dash_glide()
@@ -493,6 +494,25 @@ func _jump_grace(land_f: int) -> void:
 			m.step(DT)
 			if i + 1 >= land_f and P.vel.y > Hunter.JUMP_V * 0.9: jumped = true
 		rec("buffer_jump_%03dms" % ms, 1.0 if jumped else 0.0)
+# ---------------------------------------------------------------- input windows
+## The input windows live in tuning.json buffers (DECISIONS 11-08): every key is set and has its line in
+## buffers.doc, and none of the old code constants (or a literal window) is back anywhere in scripts/.
+const BUFFER_KEYS := ["ability_hold", "recast", "jump", "coyote", "shift", "juggernaut_heavy"]
+const OLD_CONSTS := "const (BUFFER_S|RECAST_BUFFER|JUMP_BUFFER|DASH_BUFFER)\\b|const BUFFER :="
+# a non-zero window set inline
+const WINDOW_LITERAL := "(coyote|jump_buf|dash_buf|recast_buf\\[[^]]*\\]) = [0-9.]*[1-9]"
+
+func _buffers() -> void:
+	var b: Dictionary = Loco.T["buffers"]
+	for k in BUFFER_KEYS:
+		var documented := String(b["doc"].get(k, "")) != ""
+		ok(b.get(k) is float and documented, "tuning.json buffers.%s = %s, documented" % [k, b.get(k)])
+	var re := RegEx.create_from_string(OLD_CONSTS + "|" + WINDOW_LITERAL)
+	var hits := []
+	for f in load("res://tools/check.gd").new()._scan("res://scripts"):
+		for r in re.search_all(FileAccess.get_file_as_string(f)):
+			hits.append("%s: %s" % [f.get_file(), r.get_string()])
+	ok(hits.is_empty(), "no input window is a code constant again %s" % str(hits))
 
 ## A running jump: let go at take-off (how far the run-up carries), or reverse the keys (how long the
 ## turn takes in the air).

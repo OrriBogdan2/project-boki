@@ -54,6 +54,9 @@ only for a source value). `--move-feel-check` asserts the match rows (`coyote_ju
 
 Footage can't settle these: a video shows the jump, not the frame the button went down. UE CharacterMovement
 defaults aren't cited, since the data names no field for these windows.
+  - Coyote time or buffer values. Ours live in content/rules/tuning.json `buffers` (coyote 0.12 s, jump 0.12 s,
+    Shift 0.18 s, ability hold 0.15 s, recast 0.15 s), one line each in `buffers.doc`; `--move-feel-check` fails if
+    one comes back as a code constant.
 
 ## Targets and results
 
