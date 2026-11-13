@@ -17,7 +17,7 @@ head first, and hits back harder after every knock.
 ## How it plays
 
 1. Every hit builds **Char**; at 31 the foe is **Ablaze** (one flame over their head) and burns for 3s. Fed to 31 again they **Flash over** (three flames, a fiercer burn).
-2. **Torch Lance** (LMB, hold): a cyan pilot flickers, then a hose of fire 7m long. It trails behind a sweep, narrow at the nozzle and billowing at the end, and hits harder on a burning foe. It stops the moment you let go.
+2. **Torch Lance** (LMB, hold): a gold pilot flickers in her palm, then a hose of fire 7m long. It trails behind a sweep, narrow at the nozzle and billowing at the end, and hits harder on a burning foe. It stops the moment you let go.
 3. **Cinder Shot** (RMB, hold to aim, release): a lane to your cursor, then a fireball that lands there (14m at most). On a burning foe it upgrades the burn and spreads it.
 4. **Soot Ram** (Shift, 2 charges): head first toward the cursor; you stop on the first foe with a fiery hit. Rank 3 lays a lava carpet behind you.
 5. **Furnace Cloak** (E): a ring flashes for a moment, then the blast drags foes in and wraps you in a swirling fire shield. A knock resets it.
@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 9 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
-**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, Shift, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s.
+**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers, hang there a moment, then fly 1.8s toward the cursor, steering as you aim (up to 90 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, Shift, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s.
 
 ### Ranks
 

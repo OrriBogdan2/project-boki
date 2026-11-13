@@ -165,7 +165,7 @@ static func stop(k: Kin, h: Hunter, why: String) -> void:
 	if at != Vector3.INF:
 		k.teleport(at)
 	if why == "cc":
-		k.m.sfx("kin_unsure", k.pos, -6.0)
+		k.m.sfx(KinVoice.cue(k.species, "unsure"), k.pos, -6.0)
 		if h.is_local() and k.m.hud:
 			k.m.hud.toast_small("Dropped it", Color("ffd89a"))
 
@@ -293,5 +293,7 @@ static func scoop_pose(k: Kin) -> void:
 	var lift := smoothstep(0.0, float(rules()["carry_lift_s"]), k.rescue_t)
 	var bob := 0.04 * sin(k.m.time * 4.0)
 	var arms := h.global_position + Vector3(-sin(h.face) * ARMS_FWD, ARMS_UP + bob, -cos(h.face) * ARMS_FWD)
+	if h.model != null and h.model.has_meta(WardenCarry.SOCKET):
+		arms = (h.model.get_meta(WardenCarry.SOCKET) as Vector3) + Vector3(0.0, bob, 0.0)   # (a .glb Hero's cradle)
 	k.global_position = k.global_position.lerp(arms, lift)
 	k.model.scale *= lerpf(1.0, 0.7, lift)
