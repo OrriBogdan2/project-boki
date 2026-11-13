@@ -85,7 +85,7 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 ## 5. For the declutter jobs (not done here)
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
-2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
+2. **One prompt** (match tutorial: one strip, `TutorialStrip`; toasts wait while it is fresh, then carry the step's detail; the world prompt label waits while the card carries the interact key, `Tutorial.prompt_quiet`, `--tutorial-hud-check`). Still open outside the tutorial.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.

@@ -5,7 +5,8 @@ extends RefCounted
 ##      toasts, intro) intersect, none sits in the middle
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
-##      hunter and the Boki are never under the banner
+##      hunter and the Boki are never under the banner; on a step whose card carries the interact key the
+##      world prompt label is held (the card says it)
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
 ##   5. the strip's new-objective chime: once per step, none on a re-pulse, ducked in a fight
@@ -96,6 +97,8 @@ func _course() -> void:
 	var shown_after := 0
 	var asked := 0
 	var under := 0
+	var key_label := 0      # frames an interact step's card and a world prompt were both up
+	var key_loud := 0       # ... of those, frames the world label would still have drawn
 	var texts := {}
 	var counters := {}
 	var chimed := 0
@@ -126,6 +129,9 @@ func _course() -> void:
 		step_t += Match.DT
 		if m.hud == null:
 			continue
+		if not m.interact.is_empty() and Tutorial.KEYS.get(tu.id(), "") == "interact":
+			key_label += 1
+			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
 			toast_in_card += m.hud.msgs.texts().size()
 			bubble_in_card += m.bubbles.size()
@@ -145,6 +151,8 @@ func _course() -> void:
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
+	var held := "(%d of %d frames drawn)" % [key_loud, key_label]
+	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)

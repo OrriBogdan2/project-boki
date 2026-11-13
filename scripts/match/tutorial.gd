@@ -648,6 +648,11 @@ func scout_hint() -> String:
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 	return "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch") if d > FAR_SCOUT else ""
 
+## The world prompt label waits: while the banner is fresh, and for the whole step when the card already
+## carries the interact key (it says the same thing; one prompt, not two).
+func prompt_quiet() -> bool:
+	return card_up() or (step >= 0 and step < steps().size() and KEYS.get(id(), "") == "interact")
+
 ## The banner is up (the first CARD_T of a step): other popups wait their turn.
 func card_up() -> bool:
 	return intro or (step >= 0 and card_t < CARD_T)
