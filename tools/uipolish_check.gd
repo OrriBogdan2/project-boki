@@ -112,6 +112,7 @@ func _migration() -> void:
 	for k in Settings.REMOVED:
 		cf.set_value("s", k, true)
 	cf.set_value("s", "music", 0.42)
+	cf.set_value("s", "audio_v", 2)      # (a file already on the perceptual volume curve)
 	cf.save(Settings.PATH)
 	var fresh: Node = load("res://scripts/core/settings.gd").new()
 	main.add_child(fresh)
