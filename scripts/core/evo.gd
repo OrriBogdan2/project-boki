@@ -130,11 +130,16 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 				if String(o.get("item", "")) == item: fits.append(o)
 			"trade":
 				if o.get("trade", false): fits.append(o)
+	fits = fits.filter(func(o): return not o.has("trait") or BokiQuirks.has_trait(rec, String(o["trait"])))
 	if fits.is_empty():
 		return ""
+	for o in fits:
+		if o.has("trait"):      # a rare trait it carries decides the branch
+			return String(o["id"])
 	var lead := leading(rec)
 	for o in fits:
-		if String(o.get("path", "")) == lead: return String(o["id"])
+		var path = o.get("path", "")        # one affinity, or a list of them
+		if lead in path if path is Array else String(path) == lead: return String(o["id"])
 	return String(fits[0]["id"])
 
 ## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
