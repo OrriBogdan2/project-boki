@@ -75,11 +75,14 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Glove 2 (in a match; V plays fetch at home) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
-| Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
+| C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
+| Middle mouse / Mouse 4 | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
+| K | Boki order: attack my target | `kin_attack` | yes |
+| N | Boki quick key: Return | `kin_return` | yes |
+| L | Boki order: hold this position | `kin_hold` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
-| Shift | Hunter dash | `dash` | yes |
-| Space | Jump (hold to glide) | `jump` | yes |
-| Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |
+| Shift / Mouse 5 | Hunter dash | `dash` | yes |
+| Space | Jump (again in the air: glide) | `jump` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
@@ -97,6 +100,12 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
+| Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
+| Shift | Hold to keep placing (build mode) | `keep_placing` | yes |
+| Alt | Hold with a slot key to level it | `level_mod` | yes |
+| K | Hunter kit card (hover a hunter) | `kit_card` | yes |
+| Enter / Kp | Press the open panel's main button | `confirm` | yes |
+| V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
 | F7 | Movement readout (tuning) | `move_readout` | yes |

@@ -51,6 +51,7 @@ var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are liv
 var time := 0.0
 func sess_time() -> float: return time     # the session clock is the match clock (rolling sessions are cut; Ways Out reads this)
 func sess_len() -> float: return length     # and the session is the match
+func at_sess(k: float) -> float: return k * sess_len() - sess_t0     # match time at a share of the session
 var sess_t0 := 0.0     # (rolling sessions are cut: a session starts with its match)
 var acc := 0.0
 var player: Hunter = null
@@ -3389,8 +3390,8 @@ func step(dt: float) -> void:
 		if net_on:
 			Net.tick(dt)
 		return
-	if tut and tut.holding():
-		tut.hold_wait(dt)      # (the intro card or Pell's talk: the match waits)
+	if tut and tut.intro:
+		tut.intro_wait(dt)      # (the intro card: the match waits for a key or two seconds)
 		return
 	time += dt
 	if Game.god and player and not player.out:

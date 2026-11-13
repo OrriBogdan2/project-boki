@@ -67,7 +67,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 ### How Hunters unlock
 
-A new save picks 1 of 3 starters (the Red Stitch, the Unbroken, the Hired Gun) after naming your first Boki and plays the tutorial as it. After your first expedition the other starters open, and you pick a second Relic from Kael, Cinder and Meeko (whichever you do not hold). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
+A new save picks 1 of 3 starters (the Red Stitch, the Unbroken, the Hired Gun) after naming your first Boki and plays the tutorial as it. After your first expedition the other starters open, and you pick a second Relic from Kael, Cinder and Meeko (whichever you do not hold). Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for 1.6s, and letting go early cancels it. Tiers: easy is about 1-2 expeditions, medium a handful of expeditions, hard real effort, once other Hunters are open. Locked Hunters stay playable in the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.
 
 | Hunter | Tier | Challenge | Target |
 |---|---|---|---|

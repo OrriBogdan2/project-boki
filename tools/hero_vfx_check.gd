@@ -26,7 +26,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
-			{"p": "vortex", "size": 2.0}, {"p": "dome", "size": 2.0, "arc": 120}, {"p": "ember", "n": 40},
+			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40},
 			{"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}, {"p": "petal", "n": 16}]},
