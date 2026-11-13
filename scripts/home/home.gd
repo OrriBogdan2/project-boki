@@ -65,6 +65,7 @@ var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base
 var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var chimes: HomeChimes = null     # a Boki's chime when it gains a stat, level or change (home_chimes.gd)
+var hlantern: LanternMatch = null   # Lantern Match's glowcap ring (lantern_match.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var photo: HomePhoto = null         # photo mode (home_photo.gd)
@@ -185,8 +186,9 @@ func _ready() -> void:
 		htumble = BaseTumble.new(self)
 		hecho = EchoSteps.new(self)
 		hshow = ShowRing.new(self)
+		hlantern = LanternMatch.new(self)
 		# in this order: Tumble's ring needs the stump placed
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish]
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hlantern]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -2262,6 +2264,7 @@ func _label_for(it: Dictionary) -> String:
 		"tumble": return htumble.label()
 		"echo": return hecho.label()
 		"show": return hshow.label()
+		"lantern": return hlantern.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2307,6 +2310,7 @@ func _use(it: Dictionary) -> void:
 		"show": hshow.use()
 		"fishing": hfish.use()
 		"waystone": hway.use()
+		"lantern": hlantern.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
