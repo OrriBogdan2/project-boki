@@ -320,7 +320,13 @@ func _swap_cast() -> void:
 	m.fx.burst(h.pos + Vector3(0, 0.4, 0), SMOKE, 12, 1.6, 0.7, -1.5, 2.0 * TRADE_LOOK_K)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), TRADE_EDGE)
+	_tx_trade(["zone", "trade", h.nid, m._r(land.x), m._r(land.y), m._r(land.z), float(dd["radius"]), swap_time()])
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
+
+## The Trade's landing sigil on every other game (HeroZones "trade" / "tradego"): the cue a foe steps out on.
+func _tx_trade(e: Array) -> void:
+	if (m.net_on or HeroZones.capture) and not h.remote:
+		HeroZones.tx(m, e)
 
 ## His dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
 func swap_move() -> String:
@@ -400,6 +406,7 @@ func _swap_end(go: bool) -> void:
 	for key in ["os_star", "os_sigil_from", "os_sigil_to"]:
 		KitLooks.of(m).release(key)
 	if not go:
+		_tx_trade(["zone", "tradego", h.nid])
 		return
 	swaps += 1
 	_fold_in(from, TRADE_COL)

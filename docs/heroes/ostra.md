@@ -151,8 +151,15 @@ The 8 ranked rows of briefs/hero-ref/ostra.md section 4, marked on main d255acbe
 
 Nothing is open in the ranked list, so no code was changed. In flight, not touched:
 ext/anim-time-motley-rebased, ext/ostra-gait-rebased, ext/vfx-quality-motley and ext/vfx-ostra-abilities (VFX look),
-ext/recast-marker-a (a world ring on the seed). Suggestions, not built: assert that the Swap's flight marker fills from 0 to 1
-(the sigil) and that the aim line ends at the cursor; both sit in `tools/ostra_combo_check.gd`, which two of those branches edit.
+ext/recast-marker-a (a world ring on the seed). Suggestions, not built: assert that the aim line ends at the cursor (in
+`tools/ostra_combo_check.gd`, which two of those branches edit).
+
+Built (ext/vfx-motley-swap-marker): the Swap's flight marker, the landing sigil, is asserted by `tools/ostra_swap_mark_check.gd`
+(run by `--ostra-combo-check`): it is there at launch, fills 0.009 -> 1.0 in 1/60 s steps of at most 0.009 over the 1.8s
+lob, and sits 0.06 m from the landing point. On his own game that already held. A rival online saw no sigil at all (other
+games don't run his kit; they got only the cast's bolt), so the cast now sends `["zone", "trade", ...]` and every other game
+draws the same sigil filling over the flight (`KitLooks.timed_sigil`); a Trade cut short sends `"tradego"` and it goes.
+Net.VERSION 0.24.5.
 
 ## Data pass (SERVER_UPDATE7, owner's tooltip data)
 Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 9.5, full orb 353 -> +34%, Swollen Snap 399 ->
@@ -262,7 +269,7 @@ Suggestions, not built: a "firing faster lowers speed and damage" penalty (card 
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
   HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
-- Net: the seed travels as `["zone", ...]` events; Trade's moves go through Displace (`["disp", "tp", ...]`, decision 0016).
+- Net: the seed and the Trade's landing sigil travel as `["zone", ...]` events; Trade's moves go through Displace (`["disp", "tp", ...]`, decision 0016).
   Nightwell runs on the caster's game like the seed's pop: hits carry the stun, and every caught body (a player online on
   their own game) is drawn to the centre by a Displace "glide" tow.
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It

@@ -26,6 +26,10 @@ func run(main_node: Node) -> void:
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
+	var mark_check = load("res://tools/ostra_swap_mark_check.gd").new()
+	await mark_check.swap_mark(main)
+	n += mark_check.n
+	fails += mark_check.fails
 	print("PAIRCHECK ostra DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

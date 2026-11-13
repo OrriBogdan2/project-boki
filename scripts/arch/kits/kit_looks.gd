@@ -42,7 +42,7 @@ var m: Node
 var pools := {}               # kind -> Array[Node3D] (hidden, free)
 var live: Array = []          # {s, n, kind, t, trail}
 var held := {}                # key -> {n, kind, t, ent}
-var timed: Array = []         # {n, kind, t, dur, ent, at}
+var timed: Array = []         # {n, kind, t, dur, ent, at, key (a timed sigil)}
 
 static func of(match_node: Node) -> KitLooks:
 	var k := match_node.get_node_or_null("KitLooks") as KitLooks
@@ -531,6 +531,10 @@ func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
 				e2["t"] = e2["dur"]
 		"column":
 			n2.scale = Vector3(1.0, clampf(u * 4.0, 0.1, 1.0), 1.0)
+		"sigil":
+			if (e2["ent"] as Hunter).downed:
+				e2["t"] = e2["dur"]
+			_paint_sigil(n2, float(e2["r"]), u, e2["col"])
 
 ## Every alpha-blended material of a pooled look at `k` of its built alpha (cached on the node at build).
 func _fade(n: Node3D, k: float) -> void:
@@ -614,7 +618,27 @@ func chips(at: Vector3, count: int, k: float) -> void:
 
 ## Ostra's rune sigil at `at` (radius `r`), its ring lit to `fill` 0..1 in `col` (refresh every step).
 func sigil(key: String, ent: Node3D, at: Vector3, r: float, fill: float, col: Color) -> void:
-	var n := hold_on(key, "sigil", ent, at + Vector3(0, 0.06, 0))
+	_paint_sigil(hold_on(key, "sigil", ent, at + Vector3(0, 0.06, 0)), r, fill, col)
+
+## The same sigil filling itself from 0 to 1 over `secs` at `at`, for a body another game runs (its Trade's
+## landing, Net "zone" "trade"); it goes when `ent` is downed or end_sigil(key) is called.
+func timed_sigil(key: String, ent: Hunter, at: Vector3, r: float, secs: float, col: Color) -> void:
+	end_sigil(key)
+	var n := _take("sigil")
+	n.global_position = at + Vector3(0, 0.06, 0)
+	_paint_sigil(n, r, 0.0, col)
+	timed.append({"n": n, "kind": "sigil", "t": 0.0, "dur": secs, "ent": ent, "follows": true, "r": r, "col": col,
+		"key": key})
+
+func end_sigil(key: String) -> void:
+	for t in timed.duplicate():
+		if t.get("key", "") == key:
+			timed.erase(t)
+			_give("sigil", t["n"])
+
+## The sigil's ring lit to `fill` 0..1 (kept on the node as meta "fill"), turning a quarter as it fills.
+func _paint_sigil(n: Node3D, r: float, fill: float, col: Color) -> void:
+	n.set_meta("fill", fill)
 	n.scale = Vector3(r, 1.0, r)
 	n.rotation.y = fill * PI * 0.5
 	var segs := n.get_node("Segs")
