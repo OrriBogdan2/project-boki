@@ -44,3 +44,25 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
   every red only on the branch was rerun 3 at a time on both trees: all green. Fixed vs main: 4. Import: 0 parse
   errors. health --strict OK. Export dry run: every preset packs, 652.4 MB (main 641.3 MB; baseline 471.5 MB is
   stale on main, not bumped here).
+- ~22:00: main moved (PR #54 integ-1113-C3, ca96e707c5) and PR #55 went dirty: merged main in (warden_clips and
+  clip_check: main's side, it already had the release snap). Re-gated vs the new main: two more drops, reverted
+  in the branch:
+  - ext/anim-timing-dolm: its tools/parity_pvb.gd calls plan() with 2 args; PR #54 made it 3 (--dolm-combo-check)
+  - ext/tut-first-ult: its own --first-match-guide-check fails 3 asserts on the new main
+  Batch C ships 29 branches.
+
+## Next steps (gap <100)
+1. Clean merges are used up: every other gap tip conflicts with main in code (`skip_all.tsv`, col 1 = files).
+   Lanes for parallel workers, cheapest first: the 221 one-file conflicts, then 165 two-file ones. Per branch:
+   merge main into it on its own ext/ branch (AGENTS.md section 7), resolve, run its checks, READY. Then a batch
+   job runs `merge_batch.sh` over the READY ones, `dedupe_registry.py`, gen_wiki, `suite.sh` vs main, PR.
+2. Owner calls that would cut the most: the stuck-integ tips (11014837 carries 141, 42241ff1 133, 86b7d6eb 115;
+   docs/INTEG_b6204ee2.md suggests archiving 511), and old pre-11-10 lanes whose files main rewrote since
+   (e.g. feel-camera-fast vs decision 0050, overlay-typed-calls). Archive = tag only, as `archived.log`.
+3. Port the `merge_gap.py` archive filter into hetzner's merge-gap (boki-tools master, boki-install): rpc5
+   cannot reach it.
+4. Family candidates not archived (sibling merged but content differs, needs a look): dredge-auto-rebased,
+   garden-hub-theme, grimble-stretch-v2-rebased, npc-hob-guide-1111-r2, sfx-boki-voices-3, sfx-garden-games-3,
+   ui-void-masks-v3, vex-daze-rebased, vex-rmb-terrain-rebased (+10 big old-base -rebased branches).
+- Final batch C gate (main ca96e707c5): full suite both trees, branch-only reds rerun at low load: race and
+  drop-launch are red on main too; 10 checks fixed vs main; import 0 parse errors; health --strict OK.
