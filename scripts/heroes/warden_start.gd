@@ -9,10 +9,11 @@ extends RefCounted
 ## The rings are in step (every direction shares the forward loop's length and strike keys), so one time serves all
 ## eight directions.
 
-const STEPS := 48            # phases tried per loop
+const STEPS := 48  # phases tried per loop
 ## The points whose distance from the idle's is summed: the trunk and the limbs' ends, what a pop in a start shows
 ## (the ankle is the foot bone's head, or the shin's on a rig without feet).
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
+
 
 ## [walk, run]: the phases (0..1) of the walk and run rings a start seeks them to: the same point of the stride.
 static func phases(lib: AnimationLibrary, lc: Dictionary, sk: Skeleton3D) -> Array:
@@ -30,6 +31,7 @@ static func phases(lib: AnimationLibrary, lc: Dictionary, sk: Skeleton3D) -> Arr
 	var run_t := _nearest(run, [idle, _pose(walk, walk_t, sk, pts)], sk, pts)
 	return [walk_t / walk.length, run_t / run.length]
 
+
 ## The time in `a` whose points lie nearest, summed, the poses in `to`.
 static func _nearest(a: Animation, to: Array, sk: Skeleton3D, pts: Dictionary) -> float:
 	var best := INF
@@ -45,6 +47,7 @@ static func _nearest(a: Animation, to: Array, sk: Skeleton3D, pts: Dictionary) -
 			best = dist
 			at = t
 	return at
+
 
 ## Point name -> where `a` puts it at `t` in the skeleton's frame: the clip's rotations on the rest's offsets (the
 ## clips play rotations only, WardenClips._setup).
