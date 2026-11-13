@@ -9,22 +9,23 @@ extends Node
 ## is reset so the next rep needs no waiting.
 
 const NAME := "RecastDrill"
-const SLOTS := ["e", "x", "dash"]       # the slots a recast window can sit on (RecastCue.window ids; rmb has none)
+const SLOTS := ["e", "x", "dash"]  # the slots a recast window can sit on (RecastCue.window ids; rmb has none)
 const ACTIONS := {"e": "signature", "x": "hunter_ult", "dash": "dash"}
-const REPS := 3                  # reps per ability
-const CAST_WAIT := 1.0           # s the cast gets to open its window before the rep is dropped (cast denied)
-const COOL_MAX := 20.0           # s a finished rep waits for its window to close before the slot resets anyway
-const PANEL_POS := Vector2(16, 120)   # px, from the top left, under the portrait
+const REPS := 3  # reps per ability
+const CAST_WAIT := 1.0  # s the cast gets to open its window before the rep is dropped (cast denied)
+const COOL_MAX := 20.0  # s a finished rep waits for its window to close before the slot resets anyway
+const PANEL_POS := Vector2(16, 120)  # px, from the top left, under the portrait
 const WORDS := {"hit": "HIT", "late": "LATE: the window had closed", "early": "EARLY: wait for the marker"}
 
 var m: Match
-var plan: Array = []             # the Hunter's recast slots, in SLOTS order
+var plan: Array = []  # the Hunter's recast slots, in SLOTS order
 var arch := ""
-var reps := {}                   # slot -> {n, res (grades), ph (idle|cast|open|cool), t, buf (s a press waits for the
-								# window), last (s left at the press), seen (s left on the last look)}
+var reps := {}  # slot -> {n, res (grades), ph (idle|cast|open|cool), t, buf (s a press waits for the
+# window), last (s left at the press), seen (s left on the last look)}
 var _layer: CanvasLayer = null
 var _panel: PanelContainer = null
 var _text: Label = null
+
 
 ## Adds the drill to a practice area with an Arena (Practice.attach calls this).
 static func attach(p: Practice) -> RecastDrill:
@@ -38,16 +39,22 @@ static func attach(p: Practice) -> RecastDrill:
 	d.set_process(false)
 	return d
 
+
 ## The slots of a Hunter that take a second press: the ones whose own text says "again".
 static func slots(hunter_id: String) -> Array:
 	return SLOTS.filter(func(s): return KitDrill.how(hunter_id, s) == "again")
 
+
 func is_open() -> bool:
 	return _layer != null
 
+
 func toggle() -> void:
-	if is_open(): _close()
-	else: _open()
+	if is_open():
+		_close()
+	else:
+		_open()
+
 
 func _open() -> void:
 	_layer = CanvasLayer.new()
@@ -67,6 +74,7 @@ func _open() -> void:
 	start(m.player.arch)
 	set_process(true)
 
+
 func _close() -> void:
 	if m.hud:
 		m.hud.ui_extra.erase(_panel)
@@ -75,6 +83,7 @@ func _close() -> void:
 	_panel = null
 	_text = null
 	set_process(false)
+
 
 ## Starts over for a Hunter (the picker swapped it, or the station opened).
 func start(hunter_id: String) -> void:
@@ -85,6 +94,7 @@ func start(hunter_id: String) -> void:
 		reps[s] = {"n": 0, "res": [], "ph": "idle", "t": 0.0, "buf": -1.0, "last": 0.0, "seen": 0.0}
 	_refresh()
 
+
 func _input(event: InputEvent) -> void:
 	if m.paused or not is_open():
 		return
@@ -92,10 +102,12 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed(ACTIONS[s]) and not event.is_echo():
 			on_press(s)
 
+
 func _process(dt: float) -> void:
 	if m.player.arch != arch:
 		start(m.player.arch)
 	tick(dt)
+
 
 ## A press of the slot's key (the input, or a check): the cast, then the second press that is graded.
 func on_press(slot: String) -> void:
@@ -107,7 +119,7 @@ func on_press(slot: String) -> void:
 			r["ph"] = "cast"
 			r["t"] = 0.0
 		"cast":
-			r["buf"] = ArchKit.RECAST_BUFFER           # before the marker: it may still open inside the buffer
+			r["buf"] = ArchKit.RECAST_BUFFER  # before the marker: it may still open inside the buffer
 		"open":
 			var w := m.player.ak.recast_window()
 			if bool(w.get("armed", true)):
@@ -115,6 +127,7 @@ func on_press(slot: String) -> void:
 			else:
 				r["buf"] = ArchKit.RECAST_BUFFER
 	_refresh()
+
 
 ## One step: follows each rep's window and ends it (late or early) when it has to.
 func tick(dt: float) -> void:
@@ -130,7 +143,7 @@ func tick(dt: float) -> void:
 				if mine:
 					r["ph"] = "open"
 				elif float(r["t"]) > CAST_WAIT and float(r["buf"]) < 0.0:
-					r["ph"] = "idle"          # the cast never opened a window (it was denied): no rep
+					r["ph"] = "idle"  # the cast never opened a window (it was denied): no rep
 			"cool":
 				if not mine or float(r["t"]) > COOL_MAX:
 					_reset(s)
@@ -150,6 +163,7 @@ func tick(dt: float) -> void:
 			elif float(r["buf"]) < 0.0:
 				_grade(s, "early", 0.0)
 
+
 func _grade(slot: String, res: String, left: float) -> void:
 	var r: Dictionary = reps[slot]
 	(r["res"] as Array).append(res)
@@ -160,6 +174,7 @@ func _grade(slot: String, res: String, left: float) -> void:
 	r["last"] = left
 	_refresh()
 
+
 ## A finished rep's slot is ready again: no cooldown to wait for between reps.
 func _reset(slot: String) -> void:
 	var k: ArchKit = m.player.ak
@@ -167,9 +182,13 @@ func _reset(slot: String) -> void:
 	r["ph"] = "idle"
 	r["buf"] = -1.0
 	match slot:
-		"e": k.cd["e"] = 0.0
-		"x": k.cd["x"] = 0.0
-		"dash": m.player.dashes = m.player.max_dashes()
+		"e":
+			k.cd["e"] = 0.0
+		"x":
+			k.cd["x"] = 0.0
+		"dash":
+			m.player.dashes = m.player.max_dashes()
+
 
 func _refresh() -> void:
 	if _text == null:
@@ -187,6 +206,7 @@ func _refresh() -> void:
 		lines.append("    %s" % _readout(s, r))
 	_text.text = "\n".join(lines)
 
+
 ## What the slot's last rep said, or what to do next.
 func _readout(slot: String, r: Dictionary) -> String:
 	var key := Settings.key_cap(ACTIONS[slot])
@@ -196,6 +216,6 @@ func _readout(slot: String, r: Dictionary) -> String:
 	if (r["res"] as Array).is_empty():
 		return "Press %s, then %s AGAIN" % [key, key]
 	var last := String((r["res"] as Array).back())
-	if last == "hit":
+	if last == "hit" and is_finite(float(r["last"])):  # (a window with no timer, Ostra's seed, has no time left)
 		return "%s (%.1f s left)" % [WORDS[last], float(r["last"])]
 	return WORDS[last]
