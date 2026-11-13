@@ -28,7 +28,7 @@ func setup(arch: String, dist: float, abyss := 0, rank := 1) -> Array:
 	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
 	var hi: int = W.idx(hx, hz)
 	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
-	for dz in range(-7, 8):
+	for dz in range(-12, 13):
 		for dx in range(-8, 26):
 			if not W.inb(hx + dx, hz + dz): continue
 			var i: int = W.idx(hx + dx, hz + dz)
