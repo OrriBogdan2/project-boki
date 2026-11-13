@@ -80,6 +80,10 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, a
   counter under 0.3, or a hip bob over 11 cm at a run on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
+  move speed, so a sliding foot slides against them. `--aim-runs=60,130` adds runs that many degrees off the facing
+  (the aim twist). The "before" is a frozen copy of this branch's parent.
+- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
+  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
   counter under 0.3 on a Hunter with legs, fails. `ostra` has no stepping legs and is exempt, and

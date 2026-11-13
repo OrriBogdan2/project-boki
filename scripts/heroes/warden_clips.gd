@@ -34,6 +34,8 @@ const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
+const TWIST_HYST := 0.1      # rad: the legs turn round this far past 90 deg off the aim and back this far inside it
+const TWIST_MAX := PI / 2.0 + TWIST_HYST   # rad (~96 deg): the most the torso twists off the legs, forwards or back
 const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl)
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
@@ -76,8 +78,12 @@ var air_t := 0.0
 var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
-var legs_was := false        # the turn on now is a legs_heading one
-var head_turn := 0.0         # rad the root is turned toward his heading
+var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
+var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
+var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
+var twist_goal := 0.0        # rad the legs turn off the aim this frame (0 when he is not running)
+var twist_back := false      # past the twist limit the legs turn round and run backwards
+var twist_face := 0.0        # rad: the facing last frame, so the legs can hold their way while the aim swings
 var root_bi := -1            # the root bone: the heading and HunterAnim's air tilt turn it on top of the clip
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
@@ -172,6 +178,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
+	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
@@ -606,26 +613,52 @@ func _recoil(s: Dictionary, dt: float) -> void:
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
 ## plays moving backwards turns all the way round); "heading_off" turns it that much further (a sideways cartwheel
 ## travelling forward turns its side to the way he goes).
-## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
-## and the arm on the aim keep their pose.
+## "legs_heading" (Vex's slide, aims_in_dash) and the aim twist: only the legs go: the hips take the turn back, so the
+## torso and the arm on the aim keep their pose. The torso eases between the two, so a roll out of a twisted run turns
+## him whole without a snap.
 func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = _vel(s)
+	var face := float(s.get("face", 0.0))
 	var goal := 0.0
+	var twisting := false
 	if (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
-		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
+		goal = wrapf(atan2(-vel.x, -vel.z) - face + float(want.get("heading_off", 0.0)), -PI, PI)
 		var most := LEGS_MAX if legs_only else float(want.get("turn_max", HEADING_MAX))
 		goal = clampf(goal, -most, most)
-	head_turn = lerp_angle(head_turn, goal, 1.0 - exp(-dt * HEADING_RATE))
-	legs_was = legs_only or (legs_was and absf(head_turn) >= 0.002)     # (it unwinds the same way after the slide)
-	if absf(head_turn) < 0.002:
+	elif twist_on:
+		legs_only = true
+		twisting = true
+		goal = twist_goal * (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w)
+		if twist_goal != 0.0:
+			# running: the legs hold their way while the aim swings, but never twist him past the limit
+			var held := head_turn - wrapf(face - twist_face, -PI, PI)
+			head_turn = clampf(held, minf(head_turn, -TWIST_MAX), maxf(head_turn, TWIST_MAX))
+	twist_face = face
+	var follow := 1.0 - exp(-dt * HEADING_RATE)     # how far the turn eases toward its goal this frame
+	# (the twist swings the legs across his front, never round his back)
+	head_turn = lerpf(head_turn, goal, follow) if twisting else lerp_angle(head_turn, goal, follow)
+	torso_turn = lerp_angle(torso_turn, 0.0 if legs_only else goal, follow)
+	if absf(head_turn) < 0.002 and absf(torso_turn) < 0.002:
 		return
 	var bi := WardenSkeleton.find(skel, "root")
 	var was := skel.get_bone_pose_rotation(bi)
-	var turn := Quaternion(Vector3.UP, head_turn)
-	skel.set_bone_pose_rotation(bi, turn * was)
-	if legs_only or legs_was:
+	skel.set_bone_pose_rotation(bi, Quaternion(Vector3.UP, head_turn) * was)
+	if absf(torso_turn - head_turn) >= 0.002:     # the hips take back what the torso does not turn
 		var hb := WardenSkeleton.find(skel, "hips")
-		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
+		var back := Quaternion(Vector3.UP, torso_turn - head_turn)
+		skel.set_bone_pose_rotation(hb, was.inverse() * back * was * skel.get_bone_pose_rotation(hb))
+
+## The source's run-and-aim: the legs play the run forward and turn to where he goes while the torso stays on the aim,
+## up to TWIST_MAX; beyond it the legs turn round and run backwards, so the torso never twists past TWIST_MAX.
+## Returns the loco blend goal (forward or back at run strength `k`) and sets `twist_goal` for _turn_to_heading.
+func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
+	if k <= 0.0:
+		twist_goal = 0.0
+		return Vector2.ZERO
+	var rel := wrapf(atan2(-flat.x, -flat.y) - face, -PI, PI)
+	twist_back = absf(rel) > (PI - TWIST_MAX if twist_back else TWIST_MAX)
+	twist_goal = rel - signf(rel) * PI if twist_back else rel
+	return Vector2(0.0, -k if twist_back else k)
 
 ## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
 ## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
@@ -664,6 +697,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
+	if twist_on:
+		goal = _aim_twist(flat, face, k)
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
 	var rate := gait.plan(spd, lc, loco_pos)
