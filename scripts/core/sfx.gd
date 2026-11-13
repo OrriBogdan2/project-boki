@@ -457,18 +457,20 @@ func play_reset_cue(vol_db := RESET_CUE_DB) -> void:
 ## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
 ## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
 ## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
-var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach}
+var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach, bus}
 
-func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0) -> void:
+## bus: "SFX", or "Music" for a bed that sits under the score and ducks with it (LastAlive).
+func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0, bus := "SFX") -> void:
 	if loops.has(key):
 		return
 	if cue_log != null: cue_log.append([sname, pos, ensure(sname)])
-	var st = streams.get(sname)
+	var st = streams.get(sname) if ensure(sname) else null
 	if st is Array: st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()
+	p.bus = bus
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry, "sound": sname}
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry, "sound": sname, "bus": bus}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
@@ -502,8 +504,8 @@ func loop_stop(key: String) -> void:
 ## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
 ## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
 const HOLD_MS := 250
-func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0) -> void:
-	loop_start(key, sname, pos, vol_db)
+func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0, bus := "SFX") -> void:
+	loop_start(key, sname, pos, vol_db, 0.0, bus)
 	loops[key]["vol"] = vol_db
 	loops[key]["held"] = Time.get_ticks_msec()
 	loop_set(key, pos, pitch)
@@ -521,7 +523,8 @@ func _loop_level(L: Dictionary) -> void:
 	var p: AudioStreamPlayer = L["p"]
 	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
 	p.volume_db = -80.0 if is_nan(v) else v
-	p.bus = _bus_for(L["pos"], L["sound"])
+	# A bed on another bus (LastAlive's on Music) stays there so it ducks with the score.
+	p.bus = _bus_for(L["pos"], L["sound"]) if String(L["bus"]) == "SFX" else String(L["bus"])
 
 ## Plays a ready-made stream (a glider skin's sound, say) with the same distance falloff as play().
 func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) -> void:
