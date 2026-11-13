@@ -297,7 +297,7 @@ _Tall okapi crowned_ (`chandelapi`). Tall okapi crowned with a great candle chan
 | Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Chandelapi Egg: Something sly is in here. |
 
-- E ability: `moon_swap` (missing)
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -477,7 +477,7 @@ _Great owl_ (`eclipsowl`). Great owl, eclipse-ring facial disc, moth cloak wings
 | Farm work | Frost 3, Mend 2, Craft 1 |
 | Egg | Eclipsowl Egg: Something sleepy is in here. |
 
-- E ability: `moon_swap` (missing)
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -757,7 +757,7 @@ _Evolution of Gloamshell._ (`gloamspire`). Evolution of Gloamshell.
 | Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Gloamspire Egg: Something sly is in here. |
 
-- E ability: `moon_swap` (missing)
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -1098,7 +1098,7 @@ _Silver ink_ (`lunink`). Silver ink, crescent strokes, moth-feather ears.
 | Farm work | Frost 3, Mend 2, Craft 1 |
 | Egg | Lunink Egg: Something sleepy is in here. |
 
-- E ability: `moon_swap` (missing)
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -1538,7 +1538,7 @@ _Great dragon-worm_ (`seamwyrm`). Great dragon-worm, zipper splits open as its j
 | Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Seamwyrm Egg: Something sly is in here. |
 
-- E ability: `moon_swap` (missing)
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
@@ -1758,7 +1758,7 @@ _Soaked jet-black_ (`umbrink`). Soaked jet-black, smoking brush.
 | Farm work | Forage 3, Craft 2, Haul 1 |
 | Egg | Umbrink Egg: Something sly is in here. |
 
-- E ability: `moon_swap` (missing)
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
