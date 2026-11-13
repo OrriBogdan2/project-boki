@@ -14,7 +14,8 @@ static func prompt(h: Hunter, k: Kin) -> String:
 		return why
 	var key := Settings.key_cap("interact")
 	if Capture.active(h):
-		return "Scanning… %ds (dash to cancel)" % int(ceil((1.0 - Capture.scan_frac(h)) * float(Capture.rules()["scan_s"])))
+		var secs_left := int(ceil((1.0 - Capture.scan_frac(h)) * float(Capture.rules()["scan_s"])))
+		return "Scanning… %ds (%s to cancel)" % [secs_left, Settings.key_cap("jump")]
 	return "Hold %s to scan %s" % [key, Data.KIN[k.species]["name"]]
 
 ## Progress of the bar under the prompt: the hold first, then the scan.
@@ -28,18 +29,24 @@ static func box_text(p: Hunter) -> String:
 static func box_col(p: Hunter, normal: Color) -> Color:
 	return Color("ffb08a") if p.caught.size() >= Capture.box_cap() else normal
 
-## The wild Boki that is knocked out, in the world: its name, how to scan it, the ring while it scans.
+## [progress 0..1, colour] of the scan on this Boki as any viewer sees it: the scanner's progress in the colour of
+## their side (you, your squad, everyone else). [] when nobody is scanning it.
+static func scan_fill(m, k: Kin) -> Array:
+	var scanner: Hunter = k.scan_by
+	if scanner == null or not is_instance_valid(scanner):
+		return []
+	return [Capture.scan_frac(scanner), SideColor.of(m, scanner)]
+
+## The wild Boki that is knocked out, in the world: its name, how to scan it, the fill while it scans.
 static func dazed_label(H, k: Kin, sp: Vector2) -> void:
 	var p := _mine(H)
 	var nm: String = Data.KIN[k.species]["name"]
 	var col := Color(k.sp.get("glow", k.sp["color"])).lerp(Color.WHITE, 0.3)
 	H._ctext(sp + Vector2(0, -34), ("%s (left behind)" if k.lost_from != "" else "%s, knocked out") % nm, 15, col, H.big)
-	var scanning: bool = p != null and Capture.active(p) and Capture.state(p).get("k") == k
-	var beaming := scanning or k.scan_by != null
-	if beaming:
-		var frac := Capture.scan_frac(p) if scanning else 0.0
-		H._arc(sp + Vector2(0, -10), 20.0, frac if scanning else 1.0, Capture.BEAM_COL, 4.0)
-		H._ctext(sp + Vector2(0, -52), "Scanning…", 13, Capture.BEAM_COL, H.big)
+	var fill := scan_fill(H.m, k)
+	if not fill.is_empty():
+		H._arc(sp + Vector2(0, -10), 20.0, fill[0], fill[1], 4.0)
+		H._ctext(sp + Vector2(0, -52), "Scanning…", 13, fill[1], H.big)
 		return
 	if p != null and FirstCapture.marked(p, k):
 		var y := -80.0 + 3.0 * sin(H.m.time * 5.0)      # the first-time marker: a bobbing arrow

@@ -1,13 +1,15 @@
 extends RefCounted
-## --mystery-egg-check: the black mystery egg of the garden hatch (MysteryEgg, GardenHatch, briefs/DECISIONS.md).
+## --mystery-egg-check: the black mystery egg of the hatch scene (MysteryEgg, briefs/DECISIONS.md).
 ## Its pool is many early wild species (rares included, drawn less often than commons, never a starter
 ## or a boss kin), it hatches with a mutation far more often than an egg at base odds while the
 ## starter eggs roll none, and in the scene the three starters stand front and centre while the black
 ## egg sits in its basket at the back, its card showing only once you've found it. Never touches the
 ## real save.
 
+const HATCH := preload("res://scripts/ui/hatch.gd")
 const DRAWS := 30000
 const ROLLS := 20000
+const EGGS := 1000     # one thousand eggs rolled with fixed seeds
 
 var bad := 0
 
@@ -19,6 +21,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_pool()
 	_mutations()
+	_thousand_eggs()
 	await _scene(main)
 	print("MYSTERYEGG DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -28,7 +31,7 @@ func _pool() -> void:
 	var tiers: Dictionary = MysteryEgg.rules()["pool"]
 	ok(w.size() == tiers.size(), "every pool species is in the game (%d of %d)" % [w.size(), tiers.size()])
 	ok(w.size() >= 20, "the pool is many early species, not just a few (%d)" % w.size())
-	var wrong: Array = w.keys().filter(func(sp): return Data.is_rare(sp) or sp in GardenHatch.STARTERS)
+	var wrong: Array = w.keys().filter(func(sp): return Data.is_rare(sp) or sp in HATCH.STARTERS)
 	ok(wrong.is_empty(), "no starter or boss kin in the pool %s" % str(wrong))
 	var rares: Array = w.keys().filter(func(sp): return tiers[sp] == "rare")
 	var commons: Array = w.keys().filter(func(sp): return tiers[sp] == "common")
@@ -65,15 +68,41 @@ func _mutations() -> void:
 	var rates := "%.1f%% of the time, an egg at base odds %.1f%%" % [pm * 100.0, pb * 100.0]
 	ok(pm > 0.15 and pm > 3.0 * pb, "the black egg hatches mutated far more often (%s)" % rates)
 
+## A thousand black eggs, fixed seeds: rares turn up, far more than the 3 starter species hatch, and
+## the born-with-a-mutation rate beats a starter egg's (they roll none).
+func _thousand_eggs() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1112
+	var tiers: Dictionary = MysteryEgg.rules()["pool"]
+	var species := {}
+	var rares := 0
+	var mutated := 0
+	for i in EGGS:
+		var sp := MysteryEgg.roll_species(rng)
+		species[sp] = true
+		if tiers.get(sp, "") == "rare": rares += 1
+		if not MysteryEgg.roll_mutations(rng).is_empty(): mutated += 1
+	var starter_mutated := 0
+	rng.seed = 1113
+	for i in EGGS:
+		if not Mutations.roll(rng, 1.0).is_empty(): starter_mutated += 1
+	ok(rares >= 1, "1000 eggs: a rare hatches (%d)" % rares)
+	ok(species.size() > HATCH.STARTERS.size(), "1000 eggs: more species than starters (%d)" % species.size())
+	ok(mutated > starter_mutated, "1000 eggs: mutated %d vs a starter egg %d" % [mutated, starter_mutated])
+
 func _scene(main: Node) -> void:
 	var tree := main.get_tree()
 	Save.d = Save.fresh()
-	var hx := GardenHatch.new()      # (on its own: no farm round it)
+	Save.d["tutorial"] = {"intro": true}
+	Save.d["look"] = Unmasked.default_look()
+	var hx = HATCH.new()
 	main.add_child(hx)
 	for i in 4: await tree.process_frame
+	hx._looks_good()
+	await tree.process_frame
 	var m: int = hx.egg_defs.find_custom(func(d): return d.get("mystery", false))
 	var first_three: Array = hx.egg_defs.slice(0, 3).map(func(d): return d["species"])
-	ok(m == 3 and first_three == GardenHatch.STARTERS, "three starter eggs and the mystery egg")
+	ok(m == 3 and first_three == HATCH.STARTERS, "three starter eggs and the mystery egg")
 	var starters_plain: bool = hx.egg_defs.slice(0, 3).all(func(d): return not d.has("rec"))
 	ok(starters_plain and hx.egg_defs[m].has("rec"), "only the mystery egg rolls mutations at birth")
 	var front: Array = hx.eggs.slice(0, 3).map(func(e): return (e["holder"] as Node3D).position)
@@ -83,18 +112,20 @@ func _scene(main: Node) -> void:
 	var holder: Node3D = hx.eggs[m]["holder"]
 	var egg: EggHatch = hx.eggs[m]["egg"]
 	var in_basket := holder.get_children().any(func(c): return c is MysteryEgg)
-	ok(in_basket and egg.shell_col.get_luminance() < 0.15, "it's a black egg in a basket")
+	ok(in_basket and egg.kind == "mystery", "it's the mystery egg (void shell, a cracked \"?\") in a basket")
 	ok(_cards(hx) == 3, "its card is hidden until you find it (%d cards)" % _cards(hx))
 	hx._pick(m)
 	await tree.process_frame
 	ok(_cards(hx) == 4 and hx.chosen == m, "clicking the black egg picks it and shows its card")
 	hx.egg_defs[m]["rec"]["mutations"] = ["giant"]
-	hx.finish(hx.egg_defs[m]["species"], "Nyx")
+	hx.kin_node = Models.kin(hx.egg_defs[m]["species"], {"level": 1})
+	hx.add_child(hx.kin_node)
+	hx._finish(hx.egg_defs[m]["species"], "Nyx", "Orri", true)
 	ok(Mutations.of(Save.d["roster"][0]) == ["giant"], "the hatchling keeps the mutation it was born with")
 	hx.queue_free()
 	await tree.process_frame
 
 ## The egg cards in the pick row (the last thing in the bottom box).
-func _cards(hx: GardenHatch) -> int:
+func _cards(hx) -> int:
 	var rows: Array = hx.bottom.get_children().filter(func(c): return not c.is_queued_for_deletion())
 	return (rows[-1] as Node).get_child_count() if not rows.is_empty() else 0

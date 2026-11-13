@@ -16,10 +16,12 @@ const TIP_LIFE := 6.0      # s a hint stays in the lane, the same as a match's f
 var h                      # the Home screen (the hub)
 var _wait := 0.0           # s until the next hint may show
 var _pulse := 0.0          # s of the Waystone's Wayseed pulse left
+var first: HubFirstVisit   # the Waystone marker (hub_first_visit.gd)
 
 func _init(home) -> void:
 	h = home
 	_wait = float(rules()["start_s"])
+	first = HubFirstVisit.new(home)
 
 static func rules() -> Dictionary:
 	return GardenZones.rules()["hub_hints"]
@@ -34,6 +36,7 @@ static func seed_in_bag(hud) -> void:
 
 ## Per frame: shows the first unseen hint whose place you are near, if none is up.
 func tick(dt: float) -> void:
+	first.tick(dt)
 	if _pulse > 0.0:
 		_pulse_step(dt)
 	_wait -= dt

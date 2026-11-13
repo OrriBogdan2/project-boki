@@ -109,13 +109,16 @@ func tick(d: float) -> void:
 		return
 	var warm := warmed()
 	Incubator.tick(d, warm)
+	_hear(d)
 	acc += d
+	VisitorArrive.glint(self, d)
 	var tt := Time.get_ticks_msec() / 1000.0
 	var hot := Incubator.rate(warm)
 	var gl: OmniLight3D = node.get_node("Glow")
 	gl.light_energy = (0.0 if Incubator.eggs().is_empty() else 0.4 + 0.5 * hot) + sin(tt * 3.1) * 0.12
 	if hot > 1.0 and randf() < d * 3.0 * hot:
-		h.fx.burst(at() + Vector3(randf_range(-0.25, 0.25), 0.9, -0.38 + randf_range(-0.25, 0.25)), Color("ff9a3a"), 2, 1.2, 0.3)
+		var spark := at() + Vector3(randf_range(-0.25, 0.25), 0.9, -0.38 + randf_range(-0.25, 0.25))
+		h.fx.burst(spark, Color("ff9a3a"), 2, 1.2, 0.3)
 	for e in Incubator.eggs():
 		var en: Node3D = egg_nodes.get(String(e["id"]), null)
 		if en == null or not is_instance_valid(en): continue
@@ -152,3 +155,10 @@ func prompt() -> String:
 	if Incubator.count() == 0:
 		return "Incubator (empty: Rare Eggs from boss lairs hatch here)"
 	return "Incubator: %d warming%s" % [Incubator.eggs().size(), (", %d on the shelf" % Incubator.shelf().size()) if not Incubator.shelf().is_empty() else ""]
+
+## Each cradled egg's sounds as it nears its hatch (EggSfx), from where it sits.
+func _hear(d: float) -> void:
+	for e in Incubator.eggs():
+		var en: Node3D = egg_nodes.get(String(e["id"]), null)
+		if en != null and is_instance_valid(en):
+			EggSfx.hear(String(e["id"]), Incubator.progress(e), en.global_position, d)

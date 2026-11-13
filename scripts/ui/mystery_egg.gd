@@ -7,8 +7,6 @@ extends Node3D
 ## content/rules/mystery_egg.json.
 
 const PATH := "res://content/rules/mystery_egg.json"
-const SHELL := Color("17131f")      # the black shell
-const SPOTS := Color("3d3352")      # faint plum speckles on it
 const GLINT_EVERY := 3.4            # s between two glints on the shell
 const GLINT_LEN := 0.4              # s one glint lasts
 const GLINT_SIZE := 0.09            # m: the glint's widest
