@@ -162,7 +162,10 @@ func fire(c: Dictionary) -> void:
 		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
 		k.m.sfx("glide", h.pos, -6.0, 0.7)
 	var ck := charge_k(float(c["t"])) if c.get("hold", false) else 0.0
-	var air: bool = c.get("air", false) or not h.grounded
+	# a jump pressed on the release's own step counts as released on the ground: the jump goes on, the slam
+	# lands at the feet (a tap) or hops into the circle (a charge), not an air dive that eats the jump
+	var jumped_now := was_ground and not h.grounded and h.vel.y > 0.5
+	var air: bool = c.get("air", false) or (not h.grounded and not jumped_now)
 	if not air and not c.get("hold", false):
 		taps += 1
 		k.dive = false

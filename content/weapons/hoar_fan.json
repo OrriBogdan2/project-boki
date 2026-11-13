@@ -15,7 +15,7 @@
 		"color": "#bff7ef",
 		"sfx": "rime_shard",
 		"fire_slow": 0.9,
-		"desc": "A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: four darts, then three large ones that hit twice as hard, fly faster and reach further, and round again. Eight on one foe Shatter them. While skating they fly as fast, thick beams that hit twice as hard and home in the same way.",
+		"desc": "A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: one hold is one burst: let go and it ends on three large darts that hit twice as hard, fly faster and reach further, then a 0.5s pause before the next. Eight on one foe Shatter them. While skating they fly as fast, thick beams that hit twice as hard and home in the same way.",
 		"kick": 0.04,
 		"bow_deg": 10.0,
 		"turn": 12.0,
@@ -25,7 +25,7 @@
 		"acquire": 9.0,
 		"cone_deg": 75.0,
 		"skate_speed": 30.0,
-		"burst": 4,
+		"barrage_cd": 0.5,
 		"heavy": {"n": 3, "dmg_k": 2.0, "speed_k": 1.5, "range_k": 1.3, "size_k": 1.5},
 		"aim": "max"
 	},
