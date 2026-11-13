@@ -37,7 +37,8 @@
 				"life": 0.7, "size": 0.06, "c": "main", "c2": "hot", "c3": "red", "near": true}
 		]},
 		"lance_hit": {"net": false, "fx": [
-			{"p": "flare", "y": 1.0, "size": 0.8, "life": 0.14, "c": "main", "c2": "hot", "c3": "red"},
+			{"p": "skirt", "size": 0.8, "from": 0.5, "tall": 1.5, "life": 0.3, "c": "main", "c2": "hot", "c3": "red"},
+			{"p": "flare", "y": 1.0, "size": 1.1, "life": 0.14, "c": "main", "c2": "hot", "c3": "red"},
 			{"p": "ember", "y": 1.0, "n": 8, "speed": 4.0, "spread": 0.6, "grav": 4.0, "life": 0.35, "size": 0.07,
 				"c": "main", "c2": "white", "c3": "red"}
 		]},
@@ -110,7 +111,6 @@
 			{"p": "flare", "at": "chest", "size": 1.0, "life": 0.2, "c": "main", "c2": "white", "c3": "red"}
 		]},
 		"ram": {"fx": [
-			{"p": "flare", "at": "chest", "fwd": -0.4, "size": 1.2, "grow": 1.4, "life": 0.18, "c": "main", "c2": "hot", "c3": "red"},
 			{"p": "smoke", "y": 0.6, "n": 4, "way": "back", "speed": 2.5, "spread": 0.4, "grav": -1.0, "life": 0.8,
 				"size": 0.17, "c": "smoke", "c3": "soot", "near": true}
 		]},
@@ -121,8 +121,7 @@
 				"life": 0.25, "size": 0.12, "c": "hot", "c2": "white", "c3": "main"}
 		]},
 		"ram_hit": {"fx": [
-			{"p": "flare", "y": 1.0, "size": 2.6, "grow": 1.3, "life": 0.26, "c": "main", "c2": "white", "c3": "red"},
-			{"p": "sweep", "y": 0.9, "fwd": -0.5, "size": 1.6, "arc": 150, "tilt": 15, "life": 0.3, "c": "main", "c2": "hot", "c3": "red"},
+			{"p": "flare", "y": 1.0, "size": 1.5, "grow": 1.3, "life": 0.2, "c": "main", "c2": "white", "c3": "red"},
 			{"p": "ember", "y": 1.0, "n": 30, "way": "fwd", "speed": 7.0, "spread": 0.7, "grav": 5.0, "drag": 1.5,
 				"life": 0.55, "size": 0.09, "stretch": 0.05, "c": "red", "c2": "hot", "c3": "char"},
 			{"p": "scorch", "size": 1.0, "life": 1.4, "c": "main", "c2": "hot", "c3": "char"}
@@ -131,8 +130,7 @@
 			{"p": "smoke", "y": 0.9, "fwd": -0.5, "n": 8, "way": "back", "speed": 3.5, "spread": 0.45, "drag": 2.0,
 				"grav": -0.6, "life": 0.9, "size": 0.23, "c": "smoke", "c3": "soot"},
 			{"p": "ember", "y": 0.9, "fwd": -0.4, "n": 18, "way": "back", "speed": 6.0, "spread": 0.35, "drag": 2.0,
-				"life": 0.45, "size": 0.12, "c": "main", "c2": "hot", "c3": "red"},
-			{"p": "flare", "y": 0.9, "fwd": -0.6, "size": 1.2, "grow": 1.4, "life": 0.18, "c": "main", "c2": "hot", "c3": "red"}
+				"life": 0.45, "size": 0.12, "c": "main", "c2": "hot", "c3": "red"}
 		]},
 		"cloak": {"fx": [
 			{"p": "flare", "at": "chest", "size": 2.2, "grow": 1.2, "life": 0.22, "c": "main", "c2": "white", "c3": "red"},

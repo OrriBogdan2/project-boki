@@ -589,8 +589,6 @@ func _tick_bash(dt: float) -> void:
 		bash = {}
 		if b.get("hop", false):
 			_keep_poof(b)
-		elif not b.get("hit", false):
-			m.fx.dust(h.pos, 6)
 
 ## The poof's cloud of smoke and flame blown out behind her along `dir` (no blast), and its sound.
 func _poof_cloud(dir: Vector2) -> void:
