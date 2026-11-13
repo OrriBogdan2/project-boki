@@ -34,6 +34,7 @@ static func rules() -> Dictionary:
 static func begin(k: Kin, fell: bool) -> void:
 	var r := rules()
 	k.state = "downed"
+	k.m.sfx("boki_downed", k.pos, -4.0)
 	k.hp = 0.0
 	k.target = null
 	k.fly = {}
@@ -254,7 +255,7 @@ static func come_round(k: Kin, rescued: bool) -> void:
 static func rescue(k: Kin) -> void:
 	k.m.fx.flash(k.pos + Vector3(0, 0.8, 0), Color.WHITE, 1.2, 0.1)           # the finish pop
 	k.m.fx.ring(k.pos, 2.0, Color(k.sp.get("glow", k.sp["color"]), 0.9), 0.4)
-	k.m.sfx("revive_done", k.pos, -2.0)
+	k.m.sfx("boki_revive", k.pos, -2.0)
 	come_round(k, true)
 
 ## 0..1 while it is being scooped (the render lifts it toward you).
