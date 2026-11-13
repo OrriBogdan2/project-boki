@@ -22,6 +22,15 @@ const CHECKS := {
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
 	"--friendly-bodies-check": ["res://tools/friendly_bodies_check.gd", "friendly_bodies_check", null],
 	"--friendly-bodies-shots": ["res://tools/friendly_bodies_shots.gd", "friendly_bodies_shots", null],
+	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],      # loot, kin keeping, the Soul Shrine
+	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],      # each ability verb at a dummy rival
+	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],      # KIN_GRAMMAR phase 2
+	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],      # the duel room smoke test
+	"--extract-check": ["res://tools/extract_check.gd", "extract_check", null],
+	"--truce-check": ["res://tools/truce_check.gd", "truce_check", null],
+	"--bot-sanity-check": ["res://tools/bot_sanity_check.gd", "bot_sanity_check", null],
+	"--drop-check": ["res://tools/drop_plan_check.gd", "drop_plan_check", null],      # the drop: planning, pings, the squad
+	"--home-build-check": ["res://tools/home_build_check.gd", "home_build_check", null],      # build mode at home
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],      # XP bar, level-up moment
