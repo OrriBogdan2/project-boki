@@ -224,6 +224,7 @@
 		]
 	],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
+	"turn": {"dur": 0.34, "lift": 0.36},
 	"procedural": [
 		"ledge",
 		"mantle",

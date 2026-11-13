@@ -482,7 +482,7 @@
 "scripts/match/hunter_anim.gd": {
 "long_line": 40,
 "nested_ternary": 5,
-"semicolon": 100
+"semicolon": 98
 },
 "scripts/match/juice.gd": {
 "long_line": 1,

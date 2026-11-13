@@ -4,8 +4,9 @@ extends RefCounted
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each emote of the wheel
-## has its own clip (a gesture or a .glb clip) that ends within the bubble and plays on the right layer. Never touches
-## the save.
+## has its own clip (a gesture or a .glb clip) that ends within the bubble and plays on the right layer; standing, a
+## 180° swing of the aim at the body's turn rate steps the feet round on the spot and no planted foot slides (TurnStep,
+## WardenTurn). Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -29,6 +30,13 @@ const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as
 ## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
 ## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
 const END_OFF := DT / 2.0 + 0.001
+const TURN_DT := 1.0 / 60.0    # s: one frame of the turn rows
+const TURN_SLIDE := 0.05       # m: the most a planted foot may slide through a 180° turn on the spot
+const TURN_SETTLE := 1.4       # s after the swing for the steps to finish
+const TURN_LIFT := 0.02        # m: a stepping foot leaves the ground at least this far
+## What keeps the feet out of a turn step: a row's name and the state laid over standing still.
+const TURN_BUSY := {"moving": {"vel": Vector3(0, 0, -3.0)}, "casting": {"cast": 0.1}, "shooting": {"fired": 0.05},
+	"in a kit move": {"kmove": "x", "kmove_t": 0.1}}
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -131,6 +139,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_recoil(id, m, sync, clips, dd)
 	m.free()
 	await _flinch(id)
+	_turn(id)
 
 ## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
 ## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
@@ -758,3 +767,90 @@ func _stride(sync: Node, sk: Skeleton3D) -> float:
 		lo = minf(lo, z)
 		hi = maxf(hi, z)
 	return hi - lo
+
+## Turning on the spot (TurnStep, WardenTurn): a standing 180° swing of the aim at the body's turn rate steps the
+## feet round with the planted ones held (the same swing with the step off printed beside it); a 45° one stays an
+## upper-body lead; moving, a cast, a shot or a kit move never steps, and moving cancels a step at once.
+func _turn(id: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	var sync := m.get_node("Warden/Sync")
+	sync.set_process(false)
+	var clips: WardenClips = sync.get("clips")
+	var an := HunterAnim.new(m)
+	var feet := clips.turn
+	if feet == null:
+		ok(bool(clips.d.get("rig_root", false)), "%s: no turn step only for a body that rides the rig (no feet)" % id)
+		m.free()
+		return
+	var off := _turn_swing(m, an, sync, feet, false, PI, {})
+	var on := _turn_swing(m, an, sync, feet, true, PI, {})
+	ok(on["slide"] < TURN_SLIDE, "%s: 180° on the spot, planted feet slide %.1f cm (limit %.0f; no step: %.1f cm)"
+			% [id, on["slide"] * 100.0, TURN_SLIDE * 100.0, off["slide"] * 100.0])
+	ok(on["steps"] >= 2 and on["lift"] > TURN_LIFT and absf(an.spot.lag) < TurnStep.STEP_AGAIN,
+			"%s: %d turn steps, the foot lifts %.1f cm, the legs end under the body (lag %.2f rad)"
+			% [id, on["steps"], on["lift"] * 100.0, an.spot.lag])
+	var small := _turn_swing(m, an, sync, feet, true, PI / 4.0, {})
+	ok(small["steps"] == 0 and absf(an.spot.lag) > 0.6, "%s: a 45° turn keeps the upper-body lead (no step)" % id)
+	for busy in TURN_BUSY:
+		ok(_turn_swing(m, an, sync, feet, true, PI, TURN_BUSY[busy])["steps"] == 0,
+				"%s: no turn step while %s" % [id, busy])
+	# a step under way stops the moment he moves
+	_turn_rest(m, an, sync)
+	var face := 0.0
+	while an.spot.t < 0.0 and face < PI:
+		face = minf(face + HunterMove.turn_rate * TURN_DT, PI)
+		_turn_play(m, an, sync, {}, face, TURN_DT)
+	var stepping := an.spot.t >= 0.0
+	_turn_play(m, an, sync, TURN_BUSY["moving"], face, TURN_DT)
+	ok(stepping and an.spot.t < 0.0 and feet.pin_w.max() < 1.0, "%s: moving cancels a turn step at once" % id)
+	m.free()
+
+## From a rest, the aim swung `angle` at the body's turn rate, then held (`step_on` false: the step layer off, the
+## feet still measured): {slide (m, the worst planted foot), steps, lift (m, the highest a stepping foot rose)}.
+func _turn_swing(m: Node3D, an: HunterAnim, sync: Node, feet: WardenTurn, step_on: bool, angle: float,
+		extra: Dictionary) -> Dictionary:
+	var clips: WardenClips = sync.get("clips")
+	clips.turn = feet
+	_turn_rest(m, an, sync)
+	clips.turn = feet if step_on else null
+	var serial := an.spot.serial
+	var anchor: Array = [null, null]
+	var floor_y := [0.0, 0.0]
+	var out := {"slide": 0.0, "lift": 0.0}
+	var face := 0.0
+	var t := 0.0
+	while t < angle / HunterMove.turn_rate + TURN_SETTLE:
+		t += TURN_DT
+		face = minf(face + HunterMove.turn_rate * TURN_DT, angle)
+		_turn_play(m, an, sync, extra, face, TURN_DT)
+		for f in 2:
+			var at: Vector3 = feet.skel.global_transform * feet.ankle(f)
+			if step_on and an.spot.t >= 0.0 and an.spot.swing == f:
+				anchor[f] = null
+				out["lift"] = maxf(out["lift"], at.y - float(floor_y[f]))
+			elif anchor[f] == null:
+				anchor[f] = at
+				floor_y[f] = at.y
+			else:
+				out["slide"] = maxf(out["slide"], Vector2(at.x - anchor[f].x, at.z - anchor[f].z).length())
+	clips.turn = feet
+	out["steps"] = an.spot.serial - serial
+	return out
+
+## `dur` s of frames standing at facing `face`, the state `extra` laid over it.
+func _turn_play(m: Node3D, an: HunterAnim, sync: Node, extra: Dictionary, face: float, dur: float) -> void:
+	var s := {"vel": Vector3.ZERO, "face": face, "grounded": true, "fired": 99.0}
+	s.merge(extra, true)
+	var t := 0.0
+	while t < dur - 0.0001:
+		m.rotation.y = face
+		an.update(TURN_DT, s)
+		sync.call("_process", TURN_DT)
+		t += TURN_DT
+
+## Back to facing 0 with the legs under him: a few steps of a walk, then standing.
+func _turn_rest(m: Node3D, an: HunterAnim, sync: Node) -> void:
+	_turn_play(m, an, sync, TURN_BUSY["moving"], 0.0, 0.3)
+	_turn_play(m, an, sync, {}, 0.0, 0.6)

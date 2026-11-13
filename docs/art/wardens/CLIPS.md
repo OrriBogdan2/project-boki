@@ -53,6 +53,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
   Cinder cackles over a flame, Albert laughs and pats his hull, Grimble rears up at his monocle. The art lane owes real
   clips for the weakest: Kael's hoist (today a crossfade into `stance`), and Vex's coin and Tenzo's pebble, both too
   small to read at the lobby's stage size.
+- `turn`: {`dur` s, `lift` rad}, the step of turning on the spot (TurnStep, WardenTurn). Standing, the legs stay put
+  while the aim swings (the body turns at `turn_rate`, 1280°/s) and the upper body leads; past 90° the foot on the side
+  of the turn steps round, pivoting on the other (planted by aiming its thigh), then the other follows. Moving, a shot
+  (0.25 s), a cast (0.6 s), a kit move or an emote cancels it (`TurnStep.busy`). Heavy Heroes take a slower, lower
+  step. No key: 0.26 s, 0.5 rad. No feet (`rig_root`): no step.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 - `blink`: the lids' closed pose off their rest, `turn` {bone: axis x angle, rad} or `move` {bone: m}, in the bone's own frame. WardenBlink closes them over the clip every 2-6 s in close-ups only ([BLINK.md](BLINK.md)).
 - No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants
@@ -61,7 +66,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
-timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+timings, weapon on the bone, FX on the blade, hand-overs and the turn on the spot (a 180° swing: planted feet slide
+under 5 cm, no step while moving, casting, shooting or in a kit move). `--clip-shots` shoots the clips in the game's
+renderer; `--turn-shots` the turn, step off and on ([turn_in_place.jpg](turn_in_place.jpg), the slice four).
 
 ## Parity strip: our move beside the footage (`--parity-strip`, tools/parity_strip.gd)
 1. Get the footage folder: `git fetch origin ext/hero-ref-footage && git checkout origin/ext/hero-ref-footage -- footage/<folder>` (folders in its README; Vex is `venator_ghost`). Don't commit it.

@@ -106,6 +106,7 @@ var stowed := false          # "carry_stow" bones are put away
 var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is in a "carry_drop" hand or surface
 var fired_prev := 99.0       # the state's s since the last shot, last frame
 var recoil_deg := 0.0        # the arms' kick now
+var turn: WardenTurn         # turning on the spot (null: no legs, or the root bone rides the rig)
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -182,6 +183,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
+	if not bool(d.get("rig_root", false)):
+		turn = WardenTurn.make(model, sk)
 	return true
 
 ## "loco.run_cycle" (s): the four run loops are re-timed to this cycle, their keys' times scaled and the poses kept
@@ -563,6 +566,8 @@ func step(dt: float) -> void:
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_air_tilt()
+	if turn:
+		turn.step(dt)
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
