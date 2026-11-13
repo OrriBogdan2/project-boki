@@ -7,7 +7,7 @@
 set -u
 LIST=$1 SKIPS=$2
 UNION='^(tools/check_registry\.gd|docs/[^/]+\.md|docs/(heroes|art|decisions)/.*\.md)$'
-OURS='^(docs/wiki/.*|tools/(style|lint)_baseline\.json|.*\.import)$'
+OURS='^(MERGE_REPORT\.md|docs/wiki/.*|tools/(style|lint)_baseline\.json|.*\.import)$'
 while read -r b s; do
 	[ -n "$b" ] || continue
 	git merge-base --is-ancestor "$s" HEAD 2>/dev/null && continue
