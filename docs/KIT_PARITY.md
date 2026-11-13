@@ -151,11 +151,11 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
+| LMB | 7 slugs, bloom [D]; [F] fan 20 rested, 30 firing, fixed stop ~3.5 bh, no falloff with range | 7 slugs, the first volley of a burst on the aim line (owner 11-10), then fan 20 + bloom to 30 (was 30 + 15, fixed), stop 6.3 m, no falloff; aimed volley 14.0 at 2, 6 and 6.2 m; a 30 degree volley 14.0 at 2 m, 8.9 (3 slugs) at 6 m and 6.2 m, asserted in `--dredge-combo-check` | match |
 | RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, Grounded (ours) | match; **0.58x cd** |
-| R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
+| R | Two waves, 36 s [D]; [F] 6-7 orbs, ~120 degrees, ~756 a close volley against 193 for the gun | Charge 1.1, 2 waves of 6, 105 degrees, 4 a slug (3.4x a gun volley, burst cap), no falloff, cd 21 | match; **0.58x cd**; damage ratio 3.4x vs 3.9x is held by the burst cap |
 | Dash | One every 7 s; own air slot 12.5 s [D] | 3 chained, 3.2 m/.16 s raw (owner 23:40; F 4.6 m/.12 s) ×.85/×1.15 = 2.7 m/.18 s, air ×1.35 = 3.7 m (scaled once), cd 10, air shares slot | differ (owner); air slot missing (gap 13) |
 | Passive | Stacks of max HP [D] | Salvage 10, +2.5%, lose 1 on down | match |
 | Anim | Footage poses | 13 moves, all on `dredge.glb` (40) | match on coverage |
