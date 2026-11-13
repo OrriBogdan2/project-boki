@@ -3,8 +3,9 @@ extends RefCounted
 ## rival standing at medium range: an ally bot ~12 m away has to reach them and finish the revive in
 ## time (open ground; a wall in the way; the player down by the island's edge; the player down on
 ## the far side of a terrace step). And with a rival behind a wall, the bot never fires without a
-## clear shot. First, the downed loop's numbers against the source (docs/DOWNED.md). And the diminishing curve (content/rules/revive.json): the 2nd and 3rd wisp revive,
-## and the 2nd and 3rd stomp finish, of the same Hunter take 1/.75 and 1/.58 as long. Prints PASS/FAIL.
+## clear shot. First, the downed loop's numbers against the source (docs/DOWNED.md). And the diminishing
+## curve (content/rules/revive.json): the 2nd and 3rd wisp revive, and the 2nd and 3rd stomp finish, of the
+## same Hunter take 1/.75 and 1/.58 as long. Prints PASS/FAIL.
 
 var bad := 0
 var m: Match

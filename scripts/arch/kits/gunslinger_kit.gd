@@ -751,7 +751,8 @@ func _fire_needle() -> void:
 	var L := float(ed["range"])
 	var b := a + Vector3(d.x, 0, d.y) * L
 	needle_dir = d
-	# a taut needle of light (deep body, white-hot core, sparks shed along it), a bloom at her palm, recoil smoke round her
+	# a taut needle of light (deep body, white-hot core, sparks shed along it), a bloom at her palm,
+	# recoil smoke round her
 	vfx("e_fire", a, d, {"len": L, "r": beam_width()})
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
 	var hits := 0

@@ -395,7 +395,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if hit < float(hd.get("dur", 0.0)):
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
-		var vel: Vector3 = s.get("vel", Vector3.ZERO)
 		var heavy := float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
 		var running := Vector2(vel.x, vel.z).length() >= STILL or not bool(s.get("grounded", true))
 		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)

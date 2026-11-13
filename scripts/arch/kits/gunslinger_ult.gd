@@ -69,7 +69,7 @@ func _shell_mesh() -> Node3D:
 	var n := kit.own_node()
 	Models.part(n, Models.sphere(0.15, 12), Models.shiny(GunslingerKit.BRONZE, 0.6))
 	Models.part(n, Models.cyl(0.155, 0.155, 0.06, 14), Models.toon(Color("2b2a33"), false, 0.0))
-	var heart := Models.part(n, Models.sphere(0.07, 8), kit.solid_mat(GunslingerKit.EMBER), Vector3(0, 0.1, 0.1))
+	var heart := Models.part(n, Models.sphere(0.07, 8), kit.solid_mat(GunslingerKit.LIME), Vector3(0, 0.1, 0.1))
 	heart.name = "Glow"
 	for i in 8:
 		var a := TAU * i / 8.0
