@@ -39,6 +39,50 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Status (2026-11-12 evening, ext/hunters-best-1112): the 11-12 evening promotions
+In game on top of the table below: Neve's chiffon skirt body under the live head (`claire_v95.json`, from
+ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
+- Sparkle, the owner's chest fix (`Sparkle/r3/meshy1112/graft/m4c_livehead.glb`, live 19:59Z). The 160 MB master ran
+  out of memory twice in the server bake. On a remote Blender worker (mac, `jobq submit --app blender`, a minimal tree:
+  tools/, art/wardens/src, the master, WORK/game.glb = `95f0fef3e5^`'s ryzz.glb) it ran in 2 min, but the game showed
+  her white-grey with black specks: the base colour did not bake there. Re-run on a worker whose bake keeps colour.
+- Albert's i1 face pass (`Albert/r3/meshy1112/candidates/i1/glb.glb`, live 20:35Z): the same mac run (current
+  breaker.glb as WORK/game.glb, `move_bones` dropped, since v95_swap.py now takes offsets and his spec has `to`/`chain`)
+  rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
+- Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
+
+## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
+The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:
+Cinder (the facekeep body: body6 cand_B's shape with the cand_A face3 image), Sable (prop1111 cand_B), Vex (prop1111
+cand_A), Sparkle (prop1111 cand_A) and Lace (body6); Tarek's appeal3 cand_b and Grimble's appeal3 cand_b come in from
+their branches. Albert, Kael, Motley, Neve and Meeko already were live (Neve and Motley with the 11-12 owner fixes).
+
+| Hunter (id) | tris | textures | clips |
+|---|---|---|---|
+| Albert (breaker) | 14.8k | 3 x 2048 | 48 |
+| Lace (hem) | 13.9k | 2 x 2048 | 51 |
+| Kael (kael) | 13.9k | 2 x 2048 | 52 |
+| Vex (vex) | 13.1k | 2048 | 39 |
+| Motley (ostra) | 14.1k | 2 x 2048 + 512 | 45 |
+| Sparkle (ryzz) | 13.2k | 4096 | 45 |
+| Tarek (tarek) | 13.4k | 1024 + 2 x 2048 | 48 |
+| Sable (sable) | 13.0k | 2048 | 47 |
+| Neve (claire) | 13.4k | 2048 | 49 |
+| Cinder (cinder) | 13.7k | 2 x 2048 | 44 |
+| Meeko (pip) | 14.3k | 2 x 2048 | 45 |
+| Grimble (dredge) | 14.9k | 2048 | 40 |
+
+Re-swapping a model that is itself a swap: pre-place its current .glb as WORK/game.glb (no move_bones in the spec)
+or the file from before the first swap (Sparkle: `95f0fef3e5^`, its move_bones are deltas). The old mesh drops whole
+unless `keep` names bones. Proof: `tools/art1/ingame_face_sheet.py` (ffmpeg) from two `--warden-shots` runs, the
+engine's own close-up and match cameras; the older facekeep sheets framed the glb in Blender with guessed fractions
+of a bounding box, in rest pose, which is why their "game" column looked wrong.
+
+Bake misses: a triangle the decimation folds under catches no ray, and its texels bake exactly black (Sparkle's
+forehead, Cinder's arm in the first 11-12 swaps; a bigger cage or ray distance did not reach them). `fill_misses` in
+v95_swap.py fills exact-black base-colour texels from their neighbours (max(32, tex/64) texels in), not the glow map.
+Step 1 is skipped while WORK/bake.blend exists: delete it to re-bake.
+
 ## Status (2026-11-10): Ryzz and Vex swapped (ext/sparkle-underbust2, specs ryzz_v95.json, vex_v95.json); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
 the master has no extra hand and its slime arm and gauntlet are right (master_v95_grid_front.jpg), the skeleton,

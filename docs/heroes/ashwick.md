@@ -279,8 +279,9 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 ## Animation timing
 Measured against the footage (briefs/hero-ref/linwick.md on ext/agent-briefs, a frame = 0.2 s) and the kit's own timings; "ours" is
 the kit move's key (kmoves_pair.gd) the .glb clip is seeked to (clip length = the table's last key). Fixed here: the ram's
-squash now plays on the hit frame (ashwick_kit.gd `RAM_IMPACT_KEY`) and the run clip plays at 1.8x its planted-foot rate
-(cinder.json `loco.cadence`, warden_clips.gd `_loco`). Checked by `--ashwick-combo-check` (timing rows, the ram row).
+squash now plays on the hit frame (ashwick_kit.gd `RAM_IMPACT_KEY`); the `run_*` and `jet_land` clips are re-keyed
+(ext/anim-cinder-rekey, below), so the run plays at its own planted-foot rate (cinder.json `loco.foot_mps`, WardenGait) with no
+cadence override. Checked by `--ashwick-combo-check` (timing rows, the ram row) and `--anim-audit` (foot slide).
 | Move | Source (s) | Ours before | Ours after |
 |---|---|---|---|
 | Torch Lance wind-up (pilot to roar) | 0.2 (1 frame), body barely moves | spool 0.2 = `as_lance` kick key 0.2, feet set at 0.1 | same |
@@ -292,18 +293,21 @@ squash now plays on the hit frame (ashwick_kit.gd `RAM_IMPACT_KEY`) and the run 
 | Furnace Cloak | ring + arms 1 frame then blast; owner item 11: instant on press, 0.15-0.25 flare | blast on press, ring 0.18, `as_cloak` arms wide 0.13, done 0.24 | same |
 | Flue Flight lift-off | ember ring at 0.1, flying by 0.2 | ring on press, `lw_jet` crouch 0.08, flight pose 0.22 | same |
 | Flue Flight flight | 1.3-1.4 (owner item 20: 1.8) | 1.8 | same |
-| Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | same (re-key listed below) |
-| Run cadence (footfall) | every 0.15-0.2 | every 0.35 (0.7 s cycle at 4.65 m/s) | every 0.19 (cadence 1.8) |
+| Flue Flight landing | no visible squash or dust | `lw_land` squash 0.36 + dust | `jet_land` 0.2, a soft knee give (hips -0.07), 3 small embers, no smoke |
+| Run cadence (footfall) | every 0.15-0.2 | every 0.35 (0.7 s cycle at 4.65 m/s) | every 0.19 (0.339 s clip, half on the ground, played at 0.88: 0.384 s cycle), feet planted |
 | Stop / turn | instant | loco blend 12/s (every warden) | same |
 | Stoke, hop, jump, hit, death | no source footage | our beats | same |
 
-Clip re-keys the model needs (tools/art1/cinder_clips.py, not edited here; the data above plays them at the kit's time):
-- `run_*`: author the stride for the cadence (stride ~0.33 m, cycle ~0.38 s) so the feet plant at 1.8x; until then each step slides ~0.27 m.
-- `jet_land`: shorter and lighter (~0.2 s, little squash): the source lands without a visible squash.
+Clip re-keys (tools/art1/cinder_clips.py):
+- Done (ext/anim-cinder-rekey): `run_*` stride 0.39 (model units, each way), share 0.5 (half the cycle on the ground: a scurry with
+  little flight), lift 0.12, clip 0.339 s; `foot_mps` run 5.19 -> 5.15 (`--anim-audit`: foot speed 4.64 m/s at 4.65, slide 17%).
+  A 0.37 share at this cycle left a stance of ~4 frames at 30 fps and read 28-37% slide. Baked on the stage_p2 rig and copied
+  onto cinder.glb by glb_add_clips.py (art/wardens/cinder/IMPORT.md).
+- Done (ext/anim-cinder-rekey): `jet_land` 0.2 s, light (the kit's `lw_land` keys 0.36 -> 0.2 to match); it is also the jump landing.
 - `cloak`: put the arms-wide peak on the blast frame (0.0-0.05) rather than 0.13, so the pose and the blast land together.
 
 Suggestions (not built, parity first): the 0.4 s lane in the footage may be a cast time rather than the player's hold;
-the landing dust (ashwick_jet.gd `_land`) is ours, not the source's; a per-hero stop blend (loco_pos 12/s is shared by
+a per-hero stop blend (loco_pos 12/s is shared by
 every warden) would give the source's instant stop; remote views keep the old ram timing when a hit re-times
 `anim_at` by less than ArchKit's 0.3 s re-time tolerance (the hit frame is 0.23 s earlier, under it).
 ## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
