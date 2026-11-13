@@ -43,6 +43,15 @@ func run(main_node: Node) -> void:
 		if h.kin == null:
 			m.give_kin(h, m.bot_kin_record())
 	var spot := m.world.random_ground()
+	var th := TerrainHazards.of(m)
+	for _try in 200:      # (land clear of the hazard fields 25 m round it: the Hunters stand there until the revive)
+		var land := true
+		for d: Vector2 in [Vector2(-25, 0), Vector2(-25, 3), Vector2(0, 0), Vector2(25, 0)]:
+			var at := Vector3(spot.x + d.x, m.world.ground_at(spot.x + d.x, spot.z + d.y), spot.z + d.y)
+			land = land and at.y > -1000.0 and (th == null or th.area_at(at) < 0)
+		if land:
+			break
+		spot = m.world.random_ground()
 	_put(bot, spot)
 	_put(P, spot + Vector3(25, 0, 0))
 	_put(foe, spot + Vector3(-25, 0, 0))
