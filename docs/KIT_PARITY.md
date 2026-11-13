@@ -255,6 +255,48 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 - Albert: the Shield Slam stun 0.6 s and the Crushing Blow stun 0.4 s have no source row.
 - Ostra: decide 10% (wiki) or 6% (card read) for the full orb slow. Sable: pair stun 0.9 or about 1.8 s.
 
+## Moving while casting: the slice four (main 88b06b9e7, 2026-11-12)
+
+Vex, Kael, Lace and Cinder, every held or cast ability (LMB hold, RMB hold or charge, E, R), the same columns as the
+eight-Hunter table of ext/cast-move-eight. **Source** is the walk speed inside the ability's frame window in the hero sheet
+(briefs/hero-ref on ext/agent-briefs), in px/s and body heights a second against that sheet's run plateau; the frames
+themselves are not on this worker, so a row the sheet does not measure stays "not seen" and nothing moves. **Ours** is the
+kit's `move_k` times the weapon's `fire_slow` / `draw_slow` (`Hunter._fire_slow`), a share of the run. A row is a fix
+only when ours is off the source's band by more than 15%; owner rows keep the owner's number. The earlier RMB/E tables for
+these four (ext/cast-move-a, ext/feel-cast-move, docs/heroes, never merged) are folded in here; their one fix, Kael's Lunge
+charge walk, landed on main through the mc line (`rmb.lunge.walk_k` 0.8).
+
+| Hunter (sheet, run) | Ability, phase | Source | Ours | Verdict |
+|---|---|---|---|---|
+| Vex `gunslinger` (venator.md, 110 px/s = 2.3 bh/s) | LMB rifle held | walks while firing, upper body on the cursor, "no visible slow" (0007-0023); no px/s inside the firing window | 1.0 (`quill_rifle.fire_slow`) | match (no slow shown); `--gunslinger-combo-check` "she keeps walking while she fires" |
+| | RMB Burr Charge | a 0.2 s overhand throw, "the legs keep walking" | a tap, no hold (owner item 112); 1.0 | match (owner) |
+| | E Longneedle, 0.6 s cast | stands still through the cast bar (555.8-556.4 s); then a 0.5 bh recoil shove and about 0.4 s of recovery | 0 for the cast (`e.self_slow` 1.0); free the step it fires, with the shove | match for the cast; the recovery walk is not measured; asserted "Vex cast-move" |
+| | R Cinderfall | a tap; keeps walking and jumping while it falls (f103, a jump pad) | 1.0 | match |
+| Kael `juggernaut` (juggernaut.md, 104 px/s median = 2.1 bh/s; plain runs 113-124) | LMB swings | "keeps walking while swinging" | 1.0 (greatsword, melee) | match |
+| | LMB held, Searing Wave charge (0.6-1.0 s) | not measured (the white arc grows, 0087) | 0.55 past the 0.22 s tap | not seen; kept |
+| | RMB tap, Finishing Slam wind-up (0.6 s) | not measured (blade cocked low, 0155-0157) | 0.6 | not seen; kept |
+| | RMB held, Lunge charge | 85-95 px/s = 1.7-1.9 bh/s against 113-124 plain runs: 0.69-0.84 (0178-0181, 0198-0208) | 0.8 (`rmb.lunge.walk_k`) | match; asserted "juggernaut RMB hold: he walks at 80%" |
+| | RMB air, Meteor Drop | hang, crash, about 0.5 s of low recovery; walk not measured | 0 airborne and 0.2 s planted, then 0.3 rising to 1.0 by 0.5 s | not seen; kept |
+| | E Warchain, throw and hooked | no lock; the tether stays on while he walks about 2.5 s (0305-0317), no px/s | 1.0 | match (no slow shown) |
+| | R Gilded Riposte | planted through the 0.6 s guard (f33-f38), recovered by f44 | 0 in the guard and strike, 0.5 through the 0.5 s recovery | match for the guard; the recovery walk is not measured |
+| Lace `archer` (pin.md, 113 px/s = 2.05 bh/s) | LMB draw held | "walks slowly while drawing", body side-on (0111-0116); no px/s | 0.7 (`longbow.draw_slow`); 0.85 on the quick draw after a perfect | a slow is shown, its size is not measured; kept |
+| | LMB, the 0.5 s after a shot | "she can walk between shots", no px/s | 0.8 (the ranged `fire_slow` default) | not measured; kept |
+| | RMB Heavy Shot held | the draw pose, sunk lower (0494, f264); no px/s | 0.38 (`rmb.pin.hold_move`) | owner item 114 (slowed while holding RMB); the number is ours |
+| | Shift Spirit Walk | 117-126 px/s = 2.1-2.3 bh/s against 113: 1.04-1.12 (0349-0356) | 1.1 (`dash.walk_k`) | match; asserted "pin cast-move" |
+| | E Hail Wall | a tap, instant; the bow raised, no stop (f456, f496) | a 0.35 s lob tell, no lock; 1.0 | match |
+| | R Starpiercer | a tap self-buff with no cast lock; "she can walk between shots" | 1.0; the empowered draws keep the LMB's 0.7 | match |
+| Cinder `ashwick` (linwick.md, 205-230 px/s at 50 px/m = 4.1-4.6 m/s, 2.3-2.6 bh/s) | LMB stream held | walks while firing, "no visible slow" (0007-0019); no px/s | 1.0 (the kit runs the lance; no `fire_slow`) | match (no slow shown); `--ashwick-combo-check` "lance audit ... at his full walk" |
+| | LMB, 0.35 s after letting go | not resolvable at 5 fps (sheet gap 12: "subtle", keep) | 0.6 (`lmb.slow_after`) | not seen; kept |
+| | RMB Cinder Shot, lane held about 0.4 s, release | "does not stop moving" (0072-0137); a quick arm thrust | 1.0 | match; asserted "cinder cast-move" |
+| | E Furnace Cloak | arms wide about 0.2 s, then the blast; walk not stated | instant on the press (owner item 11); 1.0 | match (no lock shown) |
+| | R Flue Flight | a flight: about 500 px/s (10 m/s) for 1.6 s, the ult clip 9-10 bh in 1.3-1.4 s; walks on with no landing beat | the flight carries her (12.6 m/s for 1.8 s); 1.0 on landing | n/a for a walk factor; match on landing |
+
+**Result:** no row is off by more than 15%, so no kit data moved. The two rows the sheets measure (Kael's Lunge charge
+0.69-0.84 against 0.8, Lace's Spirit Walk 1.04-1.12 against 1.1) match; every other row either shows no slow where we have
+none, or has no number. **Checks:** the four combo checks (`--gunslinger-combo-check`, `--juggernaut-combo-check`,
+`--archer-combo-check`, `--ashwick-combo-check`) and `--move-feel-check`. **Footage to get:** a straight walk during Kael's
+wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, and Cinder's 0.35 s after the stream.
+
 ## Felt dash per kit (gap 4)
 
 `content/rules/dash_feel.json` defaults to ×1 / ×1: a kit whose dash is the source's measured one runs it as-is. The owner's "slower and shorter" (×.85 distance, ×1.15 time) stays only where no source number exists; Ryzz gets the time part only (his lane is the owner's, item 70). Felt = raw × feel, measured in `--move-feel-check` (`felt dash` rows, ±5% / ±0.035 s) to the moment the dash ends: the step it ends in runs the dash for the time it had left, then the hand-over (on the ground the run, in the air the dash's speed carried on under drag, owner 11-08), and that tail isn't counted.

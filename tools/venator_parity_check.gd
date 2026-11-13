@@ -345,7 +345,8 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	var hits0 := K.needle_hits
 	K.cd["e"] = 0.0
 	K.use_e()
-	var rec := {"wide": 1.0, "aim": Vector2.ZERO, "dir": Vector2.ZERO, "face": 0.0, "t": 0.0, "shake": 0.0, "pan": 0.0}
+	var rec := {"wide": 1.0, "aim": Vector2.ZERO, "dir": Vector2.ZERO, "face": 0.0, "t": 0.0, "shake": 0.0, "pan": 0.0,
+			"mk": 0.0}      # mk: the largest move_k seen while the needle charges (the source stands still)
 	var charging := func():
 		C.ac.aim_at(P, east + Vector3(0, 0, float(rec["t"]) * 2.0))      # the cursor drifts: the line follows it
 		cam.follow(P.pos, C.DT, false)
@@ -356,6 +357,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 			rec["dir"] = AimKit.entry(P, "e").get("dir", Vector2.ZERO)
 			rec["face"] = absf(rad_to_deg(Vector2(-sin(P.face), -cos(P.face)).angle_to(P.aim_dir())))
 			rec["pan"] = maxf(float(rec["pan"]), (cam.focus - cam.base).dot(Vector3(1, 0, 0)))
+			rec["mk"] = maxf(float(rec["mk"]), K.move_k())
 		rec["t"] = float(rec["t"]) + C.DT
 	while not K.needle.is_empty() and float(rec["t"]) < 1.0:
 		charging.call()
@@ -365,6 +367,9 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 		cam.follow(P.pos, C.DT, false)
 		m.step(C.DT)
 	var wide_ok := float(K.e_def()["width"]) >= OLD_NEEDLE_W * 1.5
+	C.ok("Vex cast-move: rooted through the Longneedle cast (footage: still through its 0.6 s cast bar)",
+			float(rec["mk"]) == 0.0 and is_equal_approx(float(K.e_def()["self_slow"]), 1.0),
+			"move_k %.2f" % float(rec["mk"]))
 	C.ok("Vex item 68: the beam hits a line at least 1.5x as wide, and drawn that wide",
 			wide_ok and K.needle_hits > hits0 and absf(K.beam_width() - float(K.e_def()["width"]) * 2.0) < 0.001,
 			"%.2f m either side, a foe %.2f m off the line: %d hit" % [K.e_def()["width"], off, K.needle_hits - hits0])

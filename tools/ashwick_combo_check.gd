@@ -428,6 +428,11 @@ func _all() -> void:
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
 	ok(
+		"cinder cast-move: her full walk while the lane is held (footage: the source does not stop moving)",
+		K.aiming and is_equal_approx(K.move_k(), 1.0),
+		"move_k %.2f after_t %.2f" % [K.move_k(), K.after_t]
+	)
+	ok(
 		"cinder: the aim lane is twice the shot radius (%.2f m), drawn = hit" % float(K.rmb_def()["size"]),
 		absf(float(lane.get("width", 0.0)) - 2.0 * float(K.rmb_def()["size"])) < 0.001,
 		"width %.2f" % float(lane.get("width", 0.0))
