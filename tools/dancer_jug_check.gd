@@ -11,6 +11,7 @@ const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
 const DTIMING := preload("res://tools/dancer_timing_check.gd")   # her animation timing against the source
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
+const HOLD := preload("res://tools/hold_release_check.gd")      # how Kael's RMB hold ends
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -22,6 +23,7 @@ func run(main_node: Node, who := "all") -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(A.ok, A, "thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
+		await HOLD.kael(A)
 	await combos(A)
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)

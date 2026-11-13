@@ -701,6 +701,11 @@ func _end_held_poses() -> void:
 	if over:
 		anim_id = ""
 
+## Stunned or downed holding the Lunge: the charge ends with no lunge (its pose goes with _end_held_poses).
+func _rmb_dropped() -> void:
+	lunge_full = false
+	perfect_flashed = -1
+
 ## The RMB variants by state: docs/heroes/juggernaut.md "RMB: the interaction table".
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])

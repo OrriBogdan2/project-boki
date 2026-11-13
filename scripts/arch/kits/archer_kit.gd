@@ -271,6 +271,12 @@ func _drop_tele() -> void:
 	needle.put_away()
 	AimKit.hide(h, "rmb_bar")
 
+## Stunned or downed holding the Heavy Shot: the needle goes back and the draw pose ends, no arrow.
+func _rmb_dropped() -> void:
+	_drop_tele()
+	if anim_id == "arc_heavy_wind":
+		anim_id = ""
+
 func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
 	last_variant = String(c["variant"])
