@@ -1,0 +1,11 @@
+{
+	"palette": {"main": "3a7cff", "hot": "9ad0ff", "pale": "d8ecff", "stone": "8f9cb8", "char": "10224a"},
+	"moves": {
+		"boulder_hit": {"fx": [{"p": "flare", "y": 0.0, "size": "r", "size_x": 3.4, "life": 0.18, "c": "main", "c2": "pale"},
+				{"p": "ember", "n": 16, "speed": 7.0, "spread": 0.9, "grav": 9.0, "life": 0.35, "size": 0.06, "stretch": 0.06, "c": "hot", "c2": "pale"},
+				{"p": "chunk", "n": 8, "speed": 5.0, "spread": 0.8, "grav": 20.0, "drag": 0.2, "life": 0.4, "size": 0.1, "radius": "r", "c": "stone", "c3": "char"}]},
+		"punch_hit": {"fx": [{"p": "flare", "y": 0.7, "size": "r", "size_x": 2.9, "size_k": 0.5, "life": 0.2, "c": "main", "c2": "pale"},
+				{"p": "ember", "y": 0.6, "way": "fwd", "n": 18, "speed": 10.0, "spread": 0.4, "grav": 9.0, "life": 0.3, "size": 0.06, "stretch": 0.07, "c": "hot", "c2": "pale"},
+				{"p": "chunk", "y": 0.4, "way": "fwd", "n": 8, "speed": 6.0, "spread": 0.6, "grav": 20.0, "drag": 0.2, "life": 0.45, "size": 0.1, "size_k": 0.4, "radius": "r", "c": "stone", "c3": "char"}]}
+	}
+}
