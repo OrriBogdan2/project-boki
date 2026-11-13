@@ -36,7 +36,8 @@ static func fresh(m: Match, o: Ent) -> bool:
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
 const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
-const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
+const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft",
+	"retreat", "assist"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
 func tick(m: Match, h: Hunter, dt: float) -> void:
@@ -215,6 +216,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if Hex.active(h):
 			move = -to
 			inp["fire"] = false
+		move = BotRetreat.move(m, h, a, tgt, move, inp)      # losing: back out of it (bot_retreat.gd)
 		# defensive moves
 		if h.hp < a["hurt_hp"] - 12.0 and a["dash_cd"] <= 0.0 and randf() < 0.35 + abil * 0.65:
 			a["dash_cd"] = randf_range(1.2, 3.0) / (0.5 + a["skill"])
@@ -246,6 +248,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				_use_sec(m, h, tgt)
 			# both gloves (Q and V), each when its moment comes (hook in range, wall when shot at...)
 			Gloves.bot_use(h, tgt, abil, inp, func(gdf, t): return ability_aim(m, h, gdf, t))
+			BotBelt.think(m, h, a, inp)       # the belt in a fight too: mending kit, smoke, cell (a tonic in a lull)
 	else:
 		a["tgt"] = null
 		var goal: Vector3 = a["goal"]
@@ -268,7 +271,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever"]:
 				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp", "roam"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
@@ -672,6 +675,8 @@ func _choose(m: Match, h: Hunter) -> void:
 	var best: Ent = null; var bs := -1e9
 	var ign: Dictionary = a.get("ignore", {})
 	var ign_e = ign.get("e") if m.time < float(ign.get("until", 0.0)) else null
+	var helping: Array = BotSquad.foes(m, h, a)       # rivals our squadmates are fighting (bot_squad.gd)
+	var called: Hunter = BotSquad.called(m, h, helping)
 	for o in m.hunters:
 		if o.team == h.team or not o.targetable() or o == ign_e:
 			continue
@@ -681,18 +686,26 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
-		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
+		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin) or helping.has(o)
 		if (not provoked and fresh(m, o)) or m.demo_shielded(o):
 			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
 		var bounty: bool = m.rolling != null and o.has_meta("bounty")
 		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
+		if helping.has(o):
+			reach = maxf(reach, BotSquad.ASSIST_REACH)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
 			continue
+		if not provoked and o != a.get("tgt") and BotSquad.outnumbered(m, h, a, o, d):
+			continue      # alone against more: don't start it (one already on is fought, BotRetreat backs out)
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
-		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
+		var s: float = 20.0 - d - o.hp * 0.03 + (5.0 if bounty else 0.0)
+		if o == a["tgt"]:
+			s += BotSquad.held(m, a)      # keep to the rival we are on
+		if o == called:
+			s += BotSquad.FOCUS      # shoot what the squad is shooting
 		if s > bs: bs = s; best = o
 	if best == null:
 		for mb in m.mobs:
@@ -722,6 +735,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
+	if best != a.get("tgt"):
+		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	a["tgt"] = best
 	if best:
 		return
@@ -751,6 +766,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		var fl := _blight_flee(m, h)
 		if fl != Vector3.INF:
 			goal = fl; gk = "flee"
+	# losing a fight: keep walking away from the rival (drinking on the way)
+	if goal == Vector3.INF:
+		goal = BotRetreat.goal(m, h, a)
+		if goal != Vector3.INF:
+			gk = "retreat"
 	# our squad's uplink is charging: every hunter in its yard charges it faster (and an empty yard
 	# drains it), so go and hold it rather than wander off after boxes, pings or lairs (unless we're
 	# sealed in a lair already)
@@ -760,6 +780,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		var yg: Array = m.exits.bot_goal(h, true)
 		if not yg.is_empty() and String(yg[1]) == "yard":
 			goal = yg[0]; gk = "yard"
+	# a squadmate is in a fight within earshot: go and help
+	if goal == Vector3.INF:
+		goal = BotSquad.assist_goal(m, h, a, helping)
+		if goal != Vector3.INF:
+			gk = "assist"
 	# a rival's deathbox revive humming within earshot: go and stop it
 	if goal == Vector3.INF:
 		for b in m.box_hums.values():
@@ -814,7 +839,7 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF and m.exits and not m.exits.list.is_empty():
 		# heading home: late in the match, with a good haul, or just because
 		if not a.get("leave", false) and randf() < 0.0015:
-			a["leave"] = true
+			BotSquad.agree(m, h, "leave", true)      # (the squad's bots leave together)
 		# (not in the first stretch of the match: everyone heading straight home empties the map)
 		var leaving: bool = time_left < 170.0 or (Rolling.bot_past(m, h, 0.3) and (h.gems > 40 or a.get("leave", false)))
 		var g: Array = m.exits.bot_goal(h, leaving)
@@ -822,10 +847,16 @@ func _choose(m: Match, h: Hunter) -> void:
 			g = []
 		if g.is_empty() and not leaving:
 			# some bots go and crash a rival's uplink
-			if not a.has("contest"): a["contest"] = randf() < 0.35
+			if not a.has("contest"):
+				BotSquad.agree(m, h, "contest", randf() < 0.35)
 			if a["contest"]: g = m.exits.bot_contest(h, 40.0)
 		if not g.is_empty():
 			goal = g[0]; gk = String(g[1])
+	# drifted off from the squad with only errands left: head back to it
+	if goal == Vector3.INF:
+		goal = BotSquad.regroup_goal(m, h, a)
+		if goal != Vector3.INF:
+			gk = "regroup"
 	if goal == Vector3.INF:
 		goal = BotKin.scan_goal(m, h, cur, BotKin.SCAN_FAR)
 		if goal != Vector3.INF: gk = "catch"
@@ -850,8 +881,11 @@ func _choose(m: Match, h: Hunter) -> void:
 			var d := h.flat_dist(p["pos"]) - (GOAL_KEEP if p["pos"].distance_to(cur) < 1.0 else 0.0)
 			if d < bd: bd = d; goal = p["pos"]; gk = "loot"
 	if goal == Vector3.INF:
-		# roam toward monsters or another island
-		if a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02:
+		# roam toward monsters or another island (where the squad's lead roams, if that isn't us)
+		var lead_to := BotSquad.roam_to(m, h, a)
+		if lead_to != Vector3.INF:
+			a["wander"] = lead_to
+		elif a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02:
 			var alive_mobs := m.mobs.filter(func(x): return not x.dead and not (x is Blight))     # (camps level you; the Blight doesn't)
 			if alive_mobs.size() > 0 and randf() < 0.6:
 				a["wander"] = alive_mobs.pick_random().pos
