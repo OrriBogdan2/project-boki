@@ -54,7 +54,7 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
-	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],,,
+	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
 	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
 	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
@@ -1129,7 +1129,8 @@ func _abyss_updraft() -> void:
 		return
 	var u: Dictionary = w.updrafts[0]
 	var c: Vector3 = u["pos"]
-	_reset(Vector3(c.x, c.y + 1.0, c.z), false)
+	# (an authored updraft's pos.y is 0, not its ground; start over the ground, above any lift ring on it)
+	_reset(Vector3(c.x, w.ground_at(c.x, c.z) + 3.0, c.z), false)
 	P.inp["jump"] = true
 	for i in 2:
 		P.inp["glide"] = true; m.step(DT)
