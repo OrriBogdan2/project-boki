@@ -30,6 +30,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
+		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
@@ -62,6 +63,7 @@ func run(main: Node) -> void:
 	await _holds(main, m, V, P)
 	_view(m, V, P)
 	_kit(m, V, P)
+	_dolm_rocks(m)
 	_net(m, V, P)
 	_soft_edges(m)
 	await _core_kinds(main, m, V, P)
@@ -70,6 +72,7 @@ func run(main: Node) -> void:
 	await main.get_tree().process_frame
 	_scarf(mr)
 	_rime_ends(mr)
+	_dots(m)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -248,6 +251,25 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
 
+## Tenzo's thrown rocks are cold basalt with a cobalt rim (DECISIONS 11-08): no heat, no material warmer than blue.
+func _dolm_rocks(m: Match) -> void:
+	var warm: Array = []
+	for kind in ["boulder", "rock", "dashrock"]:
+		var n := KitLooks.of(m)._build(kind)
+		for mi: Node in n.find_children("*", "MeshInstance3D", true, false):
+			var mat: Material = (mi as MeshInstance3D).material_override
+			if mat is ShaderMaterial:
+				var sm := mat as ShaderMaterial
+				var hues: Array = [sm.get_shader_parameter("glow"), sm.get_shader_parameter("rim_col")]
+				if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r > c.b):
+					warm.append(kind)
+			elif mat is StandardMaterial3D:
+				var c := (mat as StandardMaterial3D).albedo_color
+				if c.r > c.b:
+					warm.append(kind)
+		n.free()
+	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
+
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
 	var m: Match = flow._match(main, "archer")
@@ -282,6 +304,16 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
+	_clear(V)
+	V.play(P, "ring", P.pos, Vector2.RIGHT)
+	V.play(P, "all", P.pos, Vector2.RIGHT)
+	var arcs := [V._arc(360.0), V._arc(120.0)]
+	var sweeps := V.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh in arcs)
+	var got := sweeps.map(func(e): return [(e["mat"] as ShaderMaterial).get_shader_parameter("head_t"),
+		(e["mat"] as ShaderMaterial).get_shader_parameter("band")])
+	ok(sweeps.size() == 2 and is_equal_approx(got[0][0], 0.32) and is_equal_approx(got[0][1], 0.3)
+		and is_equal_approx(got[1][0], 0.28) and got[1][1] == 0.0,
+		"a sweep's even band runs round in its own turn (0.16 of 0.5 s); a plain one keeps the taper %s" % [got])
 	_clear(V)
 	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
 	var palm := V.anchor_pos(P, "palm")
@@ -429,3 +461,20 @@ func _rime_ends(m: Match) -> void:
 	V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
 	ok(V.made == made and V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of ends stays pooled and capped (%d nodes)" % made)
 	_clear(V)
+## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
+## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
+## tells the dots the ground under it.
+func _dots(m: Match) -> void:
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	var high := FxDot.material()
+	Settings.v["quality"] = "low"
+	var low := FxDot.material()
+	ok(low.shader != high.shader and low.shader.code.begins_with("#define DOT_HEIGHT_FADE"), "Low dots fade by height")
+	ok(not high.shader.code.begins_with("#define") and FxDot.material() == low, "one material per preset")
+	Settings.v["quality"] = was
+	var at := Vector3(m.player.pos.x, m.player.pos.y + 1.0, m.player.pos.z)
+	m.fx.burst(at, Color.WHITE)
+	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
+	var g: float = m.world.ground_at(at.x, at.z)
+	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)

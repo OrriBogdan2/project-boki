@@ -120,6 +120,8 @@ That's 10 points for 14 possible ranks, so choices matter.
 - Generic rank effects stay (ABILITIES.md): +15% damage per rank, −10% cooldown (dash −15%
   recharge), the verb's own numbers grow (`Effects.RANK_GROW`). Dash distances never grow. R rank 2:
   +30% duration and +15% cast effects. Each archetype adds **one rank-3 special** per slot, listed below.
+  A kit's JSON overrides the damage and cooldown steps per slot with the source's numbers: `rank_dmg` / `rank_cd`
+  {slot: [rank 1, rank 2, rank 3]} multipliers (`ArchKit.rank_k`; `rank_cd.dash` is the dash recharge). No row = the shared step.
 
 ### 3.5 HUD: making the level obvious (SUPERVIVE-style portrait cluster)
 
@@ -847,7 +849,7 @@ Subsets and gaps:
   silent knife only drops its sound (the streak still shows), Shield Surf heats the glider but doesn't stop
   spikes from the front specifically, Last Round lock lines are drawn as flickering bolts (no thickening mesh).
 - Sounds are placeholders layered from the existing Sfx set (`Feel.DELIVERY_TELL`, `CATEGORY_IMPACT`,
-  `SWEETENER`, `DASH_SOUND`); the level-up chime is a three-note layer of existing sounds.
+  `SWEETENER`); the level-up chime is a three-note layer of existing sounds.
 
 ## Ult fuse and cooldowns (owner, Oct 31)
 
@@ -1049,7 +1051,7 @@ step (cooldown -10%, damage +15%); rank 3 carries the wiki's level 3-4 specials.
 
 | Slot | Input | Shiv (wiki) | Ours |
 |---|---|---|---|
-| Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, one per Mark, up to 5; 4s, refreshed): +8% damage from your weapon hits per Mark. Primed hit +2, Bola +1. A knock heals 15% on top of the shared 10% knock heal (25%); an assist heals 25% |
+| Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, eight shown, no cap; 4s, refreshed): a flat +1.3 on your weapon hits per Mark (the data's +16 on a 160 shot). Primed hit +2, Bola +1. A knock heals 20% on top of the takedown's 5% (25%); an assist heals 25% |
 | LMB | tap / hold | Arcslinger, one stack per hit | Twin Blades or SMG; every hit stacks |
 | Shift | tap | **Quickflip**: a short dash and a speed boost; the next LMB is empowered (damage, 2 stacks, armor shred); landing it resets the cooldown; the speed boost ends on the empowered attack | **Vault**: a 3.4m flip, +30% speed until the next hit (2s max); the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s); landing it resets Vault (the payoff: VAULT RESET, T4, `pay_cashin`) |
 | RMB | tap | **Chain Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 (TANGLED) |
@@ -1238,6 +1240,12 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 ## Kit parity lock
 `content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, or `<file>:<path>` into another content file such as `weapons/quill_rifle:primary.dmg`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
 - **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+| `gil` | Gil | none (ours, no reference hero) | `docs/heroes/gil.md` |
+| `gil` | Gil | none, our own Hunter (0.24.4) | `content/archetypes/gil.json` |
+
+## Kit parity lock
+`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (or a footage `F` / wiki read the hero doc settles, with the read's error as `tol`) (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).

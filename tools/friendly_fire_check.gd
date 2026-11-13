@@ -35,6 +35,7 @@ func ok(label: String, cond: bool, info := "") -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	Game.god = false     # mod mode turns god on: the keg row needs the caster mortal
 	ac = load("res://tools/archetype_check.gd").new()
 	ac.main = main_node
 	for arch in ARCHS:

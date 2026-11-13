@@ -1,11 +1,12 @@
 extends RefCounted
-## --title-check: the title screen. It builds; its menu has the items it should (Continue or New
-## game, Training Grounds, Play with your Boki with a save, Play with friends when online play is there, Save files,
-## Settings, Help, Quit off the web) and
-## nothing called "The story so far"; the tagline is there; the key art has its squad of six with
-## their Boki, the Wyrm and the logo; and the scene stays inside a frame budget, on the High preset
-## and again on Low (which must build a cheaper scene). Headless, so the budget is the CPU side of a
-## frame: scene logic, animation and particles. Never touches the real save or settings.
+## --title-check: the title screen (painted splashes, logo and a torn-strip menu: briefs/UI_STYLE.md).
+## It builds; its menu has the items it should (Continue or New game, Training Grounds, Demo match and
+## Play with your Boki with a save, Play with friends when online play is there, Save files, Settings, Help, Quit off the web) and
+## nothing called "The story so far"; the first button is the big one and holds focus, the rest are
+## strips, and pointing at one focuses it; no subtext, tagline or currency under the logo; the logo,
+## the painted backdrop and the build version are there; and the screen stays inside a frame budget
+## (headless only: with a window the number holds a software renderer's draw time). Never touches the real save
+## or settings.
 
 const BUDGET_MS := 12.0          # average CPU time per frame the title may take (headless)
 const FRAMES := 150
@@ -21,34 +22,27 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()
-	var q0 = Settings.v.get("quality", "auto")
-	var stats_hi := await _pass("high")
-	var stats_lo := await _pass("low")
-	Settings.v["quality"] = q0
-	ok(int(stats_lo["parts"]) < int(stats_hi["parts"]) and int(stats_lo["meshes"]) < int(stats_hi["meshes"]),
-		"Low builds a cheaper scene (particles %d -> %d, meshes %d -> %d)" % [stats_hi["parts"], stats_lo["parts"], stats_hi["meshes"], stats_lo["meshes"]])
+	await _pass()
 	# a save with a Boki: the main button carries on
 	Save.d = Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
 	Save.d["roster"].append(k); Save.d["active"] = k["uid"]
-	main.show_screen("title", {})
+	await main.show_screen("title", {})     # (done once the old screen has faded out and the title is built)
 	for i in 6: await main.get_tree().process_frame
 	var ts: Node = main.screen_node()
 	var labels: Array = ts.menu_labels() if ts and ts.has_method("menu_labels") else []
 	ok(not labels.is_empty() and String(labels[0]) == "Continue", "with a save in progress the first item is Continue (%s)" % [labels])
-	ok(ts != null and ts.lead_boki != null, "your partner stands with the lead hunter")
 	print("TITLE CHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
-## Builds the title on one preset, checks it, and measures it. Returns counts of what it built.
-func _pass(preset: String) -> Dictionary:
-	Settings.v["quality"] = preset
-	main.show_screen("title", {})
+## Builds the title, checks it, and measures it.
+func _pass() -> void:
+	await main.show_screen("title", {})     # (done once the old screen has faded out and the title is built)
 	for i in 6: await main.get_tree().process_frame
 	var ts: Node = main.screen_node()
-	ok(ts != null and ts.get_script() == load("res://scripts/ui/title.gd"), "[%s] the title screen builds" % preset)
+	ok(ts != null and ts.get_script() == load("res://scripts/ui/title.gd"), "the title screen builds")
 	if ts == null:
-		return {"parts": 0, "meshes": 0}
+		return
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
 	var want: Array = ["Continue" if has else "New game", "Training Grounds"]
@@ -56,14 +50,28 @@ func _pass(preset: String) -> Dictionary:
 	if Net.available(): want.append("Play with friends")
 	want.append_array(["Save files", "Settings", "Help"])
 	if not OS.has_feature("web"): want.append("Quit")
-	ok(labels == want, "[%s] menu items %s" % [preset, labels])
+	ok(labels == want, "menu items %s" % [labels])
 	var texts := _texts(ts)
-	ok(not texts.any(func(s): return String(s).to_lower().contains("story so far")), "[%s] no \"The story so far\" anywhere on the title" % preset)
-	ok(texts.any(func(s): return String(s).to_lower().contains("raise them") and String(s).to_lower().contains("bring them home")), "[%s] the tagline is there" % preset)
-	ok(not texts.any(func(s): return String(s).to_lower().contains("gems")), "[%s] no currency on the title" % preset)
-	ok(ts.squad.size() == 6 and ts.boki.size() == 6, "[%s] a squad of six hunters with six Boki (%d, %d)" % [preset, ts.squad.size(), ts.boki.size()])
-	ok(ts.wyrm != null and ts.logo != null and ts.lead != null and ts.lead_boki != null, "[%s] the Wyrm, the logo, the lead hunter and their Boki are there" % preset)
-	# the frame budget: the CPU cost of a frame of the title, scene logic and particles included
+	ok(not texts.any(func(s): return String(s).to_lower().contains("story so far")), "no \"The story so far\" anywhere on the title")
+	ok(not texts.any(func(s): return String(s).to_lower().contains("gems")), "no currency on the title")
+	var controls := ts.find_children("*", "Control", true, false)
+	var backdrop: bool = controls.any(func(c): return c is TitleBackdrop)
+	ok(ts.logo.is_visible_in_tree() and backdrop, "the logo is up over the painted backdrop")
+	ok(texts.has("v" + Net.VERSION), "the build version is shown (v%s)" % [Net.VERSION])
+	var flat := ts.find_children("*", "Camera3D", true, false) + ts.find_children("*", "MeshInstance3D", true, false)
+	ok(flat.is_empty(), "no 3D scene runs under the painted backdrop")
+	var strips := _menu_buttons(ts)
+	var focus: Control = ts.get_viewport().gui_get_focus_owner()
+	var big: bool = strips[0].theme_type_variation == "MenuMain"
+	ok(big and focus == strips[0], "the first button is the big one and holds focus")
+	ok(strips.slice(1).all(func(b): return b.theme_type_variation == "MenuItem"), "the other items are strips")
+	ok(not ts.menu_col.get_children().any(func(c): return c is Label), "no subtext or tagline in the menu column")
+	var lit: Button = strips[1]
+	lit.mouse_entered.emit()
+	var focused: bool = ts.get_viewport().gui_get_focus_owner() == lit
+	var hover := lit.get_theme_stylebox("hover", "MenuItem")
+	ok(focused and lit.get_theme_stylebox("normal") == hover, "pointing at a strip focuses and lights it")
+	# the frame budget: wall time of a frame (headless, that is the CPU side: scene logic and animation)
 	var times: Array = []
 	var last := Time.get_ticks_usec()
 	for i in FRAMES:
@@ -77,12 +85,12 @@ func _pass(preset: String) -> Dictionary:
 	avg /= maxf(1.0, times.size())
 	times.sort()
 	var p95: float = times[int(times.size() * 0.95)]
-	ok(avg < BUDGET_MS, "[%s] frame budget: %.2f ms average, %.2f ms p95 (budget %.0f ms)" % [preset, avg, p95, BUDGET_MS])
-	var parts := 0
-	for n in ts.find_children("*", "CPUParticles3D", true, false): parts += (n as CPUParticles3D).amount
-	var meshes := ts.find_children("*", "MeshInstance3D", true, false).size()
-	print("TITLE [%s] built %d particles, %d mesh instances, %d nodes" % [preset, parts, meshes, _count(ts)])
-	return {"parts": parts, "meshes": meshes}
+	if DisplayServer.get_name() == "headless":      # (with a window the number holds a software rasteriser's draw time)
+		ok(avg < BUDGET_MS, "frame budget: %.2f ms average, %.2f ms p95 (budget %.0f ms)" % [avg, p95, BUDGET_MS])
+	print("TITLE %d nodes" % _count(ts))
+
+func _menu_buttons(ts: Node) -> Array:
+	return ts.menu_col.get_children().filter(func(c): return c is Button)
 
 func _texts(n: Node) -> Array:
 	var out: Array = []

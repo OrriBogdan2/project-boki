@@ -18,6 +18,7 @@ var perfects: int:
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
 var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
+var lmb_was := false           # LMB was held last frame (a fresh press drops a held Heavy Shot)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
@@ -110,9 +111,26 @@ func has_ult() -> bool: return true
 func ult_running() -> bool:
 	return ult.active()
 
-## While Starpiercer is up the bow is the ult's: nock, then a beam (PinUlt.lmb).
+## While Starpiercer is up the bow is the ult's: nock, then a beam (PinUlt.lmb). Otherwise one bow holds one
+## arrow: a fresh LMB press drops a held Heavy Shot with no shot, and the bow rests while RMB holds one.
 func lmb_override(held: bool, dt: float) -> bool:
-	return ult.lmb(held, dt)
+	var pressed := held and not lmb_was
+	lmb_was = held
+	if ult.lmb(held, dt):
+		return true
+	if pressed and rmb_down:
+		rmb_down = false
+		_drop_tele()
+		if anim_id == "arc_heavy_wind":
+			anim_id = ""
+	return rmb_down
+
+## A bow draw under way ends with no arrow (a Heavy Shot or Starpiercer press takes the bow).
+func drop_draw() -> void:
+	h.draw_t = -1.0
+	draw.drop()
+	if anim_id in ["arc_draw", "arc_over"]:
+		anim_id = ""
 
 ## Hunter.trigger scales the bow's draw by this (the quick draw after a perfect release).
 func draw_rate() -> float:
@@ -200,13 +218,16 @@ func move_k() -> float:
 	return k
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
-## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant.
+## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant. It drops a
+## bow draw under way with no arrow (one bow; the newer press wins, as with Starpiercer).
 func press_rmb() -> void:
 	if busy():
 		h._ab_feedback("sec", "deny")
 		return
 	if rmb_down:
 		return
+	if h.draw_t >= 0.0:
+		drop_draw()
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
@@ -214,8 +235,10 @@ func press_rmb() -> void:
 	play("arc_heavy_wind")
 
 func rmb_hold_tick(t: float) -> void:
-	if t > float(rmb_def()["hold"]) and not pin_aim:
-		# the Heavy Shot's draw: the needle on the bow, an orchid bar growing from it (its own creak)
+	# the Heavy Shot's draw, from the press (the source's charge shows at once; the hold threshold only decides
+	# whether the release looses), or from the threshold while the bow is drawn for the LMB, so a quick tap leaves
+	# that draw alone: the needle on the bow, an orchid bar growing from it (its own creak)
+	if not pin_aim and (h.draw_t < 0.0 or t > float(rmb_def()["hold"])):
 		play("arc_heavy_wind")
 		anim_at = m.time - t          # on the hold's clock: the clip's full-draw key (1.1) lands with "full" (1.1)
 		pin_aim = true
@@ -273,13 +296,19 @@ func _drop_tele() -> void:
 	needle.put_away()
 	AimKit.hide(h, "rmb_bar")
 
+## Stunned or downed holding the Heavy Shot: the needle goes back and the draw pose ends, no arrow.
+func _rmb_dropped() -> void:
+	_drop_tele()
+	if anim_id == "arc_heavy_wind":
+		anim_id = ""
+
 func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
 	last_variant = String(c["variant"])
 	if not c.get("hold", false):
 		if anim_id == "arc_heavy_wind":
-			anim_id = ""
-		return                     # a tap before the draw starts looses nothing and costs nothing
+			anim_id = ""           # a tap looses nothing and costs nothing: the draw it started is put away
+		return
 	if not spend_rmb(): return
 	var pd: Dictionary = rmb_def()["pin"]
 	play("arc_heavy")
@@ -310,7 +339,7 @@ func _pin(a: Vector3, k: float) -> void:
 			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
 		# driven into terrain within 3m: pinned (a stun)
-		if _wall_behind(f, dir, float(pd["wall"])):
+		if KnockWall.hit(m, f, dir, float(pd["wall"]), h):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
@@ -327,16 +356,6 @@ func _pin(a: Vector3, k: float) -> void:
 	# layers the orchid body, sweep and sparks round it), and a screen kick along the shot
 	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
-
-func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
-	var g0: float = f.pos.y
-	var k := 0.4
-	while k <= reach:
-		var q := f.pos + Vector3(dir.x, 0, dir.y) * k
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > g0 + 0.8:
-			return true
-		k += 0.3
-	return false
 
 # ------------------------------------------------------------------ E: Hail Wall
 ## A wall of falling arrows on a curved arc round you (hero sheet: Rain of Arrows): centred on your aim at

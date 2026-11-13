@@ -4,6 +4,7 @@ extends RefCounted
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
+##      and its signature weapon's JSON names one of them (no stock sound)
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
@@ -18,13 +19,17 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
-##  11. every sound named in UiSfx (menus, pickup, capture, extraction, the lobby) has its file
+##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
+##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
+##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  12. every sound named in UiSfx (menus, pickup, capture, extraction, the lobby) has its file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
+const FALL_TOL_S := 0.05       # s: how far a fall cue may differ from the fall it sounds under
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 var bad := 0
@@ -47,10 +52,12 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_nuke_fall()
 	_garden_names()
 	_garden()
 	_build_cues()
 	_ui_cues()
+	_strip_chime()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -79,6 +86,31 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "boki_voices":
+		_boki_voices(d["sounds"])
+
+## 11. A voice set per shown species (Data.KIN): five moods, two takes each, picked by KinVoice.cue; a shown
+## species on a shared cue fails, an unknown one falls back.
+func _boki_voices(sounds: Dictionary) -> void:
+	var gaps := []
+	var same := []
+	var seen := {}
+	for sp in Data.KIN:
+		for mood in KinVoice.GENERIC_CUE:
+			var want := "bk_%s_%s" % [sp, mood]
+			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
+				gaps.append(want)
+		var sig := hash(_data("res://audio/bk_%s_happy.wav" % sp))
+		if seen.has(sig):
+			same.append("%s = %s" % [sp, seen[sig]])
+		seen[sig] = sp
+	var what := "boki_voices: %d shown species, 5 moods, 2 takes, none on a shared cue" % Data.KIN.size()
+	ok(gaps.is_empty() and not Data.KIN.is_empty(), "%s (gaps %s)" % [what, gaps])
+	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
+	var fell := []
+	for mood in KinVoice.GENERIC_CUE:
+		fell.append(KinVoice.cue("no_such_species", mood))
+	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -91,6 +123,10 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sig: Array = d.get("signature", [])
 	var sig_missing := sig.filter(func(s): return not sounds.has(s))
 	ok(not sig.is_empty() and sig_missing.is_empty(), "%s: signature sounds %s (missing %s)" % [arch, sig, sig_missing])
+	var wid := Arch.signature(arch)
+	var wdef: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/weapons/%s.json" % wid))
+	var wsfx := String((wdef["primary"] as Dictionary).get("sfx", ""))
+	ok(sounds.has(wsfx), "%s: signature weapon %s plays its own %s, not a stock sound" % [arch, wid, wsfx])
 	var h := Hunter.new()
 	h.arch = arch
 	var picked := []
@@ -192,6 +228,18 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
+## Cinderfall's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
+## it carries past hearing range, and the kit plays it where the shell will land.
+func _nuke_fall() -> void:
+	var delay := float(Arch.def("gunslinger")["x"]["delay"])
+	var b := FileAccess.get_file_as_bytes("res://audio/vn_nuke_fall.wav")
+	var secs := float(_data("res://audio/vn_nuke_fall.wav").size() / 2) / float(b.decode_u32(24))
+	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
+	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
+	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
+	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
+	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -318,7 +366,16 @@ func _build_cues() -> void:
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
 
-## 11. Every sound UiSfx plays by name has a file, so a typo never plays silence.
+## 11. The tutorial strip's new-objective chime: a sound of the UI set, with its two levels in the table.
+func _strip_chime() -> void:
+	var ui: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/ui.json"))["sounds"]
+	var has_it: bool = ui.has(TutorialStrip.CHIME) and Sfx.ensure(TutorialStrip.CHIME)
+	ok(has_it, "strip chime: %s is in the UI set and has its file" % TutorialStrip.CHIME)
+	var cue: Dictionary = levels.get("cue_db", {})
+	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
+			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
+	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
+## 12. Every sound UiSfx plays by name has a file, so a typo never plays silence.
 func _ui_cues() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
 	var re := RegEx.create_from_string('"([a-z_]+)"')

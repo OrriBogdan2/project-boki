@@ -15,7 +15,9 @@ var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
 var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, col, slow, team, warn}
 var drags: Array = []     # {ent, from, to, t, dur, h}
+var yanked: Array = []    # {hunter, to, t, dur}: a hunter in flight from a yank, set down at `to` when it ends
 var decoys: Array = []    # {pos, team, t, node, owner}
+var ripple: BarrierRipple = null     # the hit ripple every barrier shares
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
@@ -31,6 +33,7 @@ const BRIDGE_FALL_T := 0.45     # s: ...over this long
 func _init(match_node: Node) -> void:
 	m = match_node
 	m.world.dyn_walls = walls
+	ripple = BarrierRipple.new(m)
 
 # ------------------------------------------------------------------ barrier walls
 ## A wall segment centred at `at`, running across `d` (the aim), `length` long.
@@ -336,6 +339,11 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 		h.roll_t = 0.0
 		h.launch_to(to + Vector3(0, 0.3, 0), dur)
 		h.knock_t = 0.0
+		for y in yanked:
+			if y["hunter"] == h:
+				yanked.erase(y)
+				break
+		yanked.append({"hunter": h, "to": to, "t": 0.0, "dur": maxf(0.12, dur)})
 		return
 	if ent.mass() >= 6.0:
 		return          # too heavy to drag (wardens, sentinels)
@@ -399,11 +407,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			if v.dot(nrm) > 0.0: nrm = -nrm
 			_take_shot(s, v - 2.0 * v.dot(nrm) * nrm, w["by"] if is_instance_valid(w["by"]) else null, int(w["team"]), float(w.get("rk", 1.0)))
 			s["pos"] = Vector3(c.x, p.y, c.y) + Vector3(nrm.x, 0, nrm.y) * (float(w["th"]) + float(s["r"]) + 0.12)
-			_hit_wall(w, float(s["dmg"]) * 0.5, s["col"])
+			_hit_wall(w, float(s["dmg"]) * 0.5, p)
 			return "bounce"
-		_hit_wall(w, float(s["dmg"]), s["col"])
-		m.fx.burst(p, w["col"], 6, 3.0, 0.25, 4.0, 0.8)
-		m.fx.flash(p, Color(w["col"]).lerp(Color.WHITE, 0.4), 0.35, 0.07)
+		_hit_wall(w, float(s["dmg"]), p)
 		m.sfx("ab_shield_hit", p, -8.0)
 		return "end"
 	for mr in mirrors:
@@ -469,22 +475,27 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
 ## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
-func absorb(w: Dictionary, dmg: float) -> void:
+## `from` is where the blow came from.
+func absorb(w: Dictionary, dmg: float, from: Vector3) -> void:
 	if walls.has(w):
-		_hit_wall(w, dmg, Color.WHITE)
+		_hit_wall(w, dmg, from)
 
-func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
+## `from`: the shot's position, or where the blow came from; the ripple lands on the face that side.
+func _hit_wall(w: Dictionary, dmg: float, from: Vector3) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
 	var by = w.get("by")
 	if by != null and is_instance_valid(by) and by is Hunter and (by as Hunter).ak:
 		(by as Hunter).ak.on_block(minf(dmg, float(w["hp"])), null)
 	w["hp"] = float(w["hp"]) - dmg
 	w["hit_t"] = 0.12
-	if float(w["hp"]) <= 0.0:
+	var broke := float(w["hp"]) <= 0.0
+	ripple.on_wall(w, from, broke)
+	if broke:
 		_break_wall(w)
 
 # ------------------------------------------------------------------ simulation
 func tick(dt: float) -> void:
+	ripple.tick(dt)
 	for w in walls.duplicate():
 		w["t"] = float(w["t"]) - dt
 		w["hit_t"] = maxf(0.0, float(w["hit_t"]) - dt)
@@ -607,6 +618,17 @@ func tick(dt: float) -> void:
 		ent.grounded = false
 		if k >= 1.0:
 			drags.erase(dg)
+	for y in yanked.duplicate():
+		var h: Hunter = y["hunter"]
+		y["t"] = float(y["t"]) + dt
+		if not is_instance_valid(h) or h.dead:
+			yanked.erase(y)
+		elif float(y["t"]) >= float(y["dur"]) and h.pad.is_empty():
+			# the arc ends at the hook's spot and stops there: no launch speed left to slide it into the caster
+			var to: Vector3 = y["to"]
+			h.pos = Vector3(to.x, h.pos.y, to.z)
+			h.vel = Vector3(0.0, minf(h.vel.y, 0.0), 0.0)
+			yanked.erase(y)
 	for dc in decoys.duplicate():
 		dc["t"] = float(dc["t"]) - dt
 		if float(dc["t"]) <= 0.0:

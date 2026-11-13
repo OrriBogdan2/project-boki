@@ -242,6 +242,8 @@ func _all() -> void:
 		P.inp["move"] = Vector2.ZERO
 		ak.aim_at(P, T.pos)
 		ak.step(m, 0.05)
+		for mb in m.mobs: mb.queue_free()      # (one spawned on that last step would count as a third foe)
+		m.mobs.clear()
 	var hold_fire := func(secs: float):
 		var t := 0.0
 		while t < secs:
@@ -382,16 +384,17 @@ func _all() -> void:
 		"lance: ignite_bonus on a Flashed-over foe, more again (per tick)",
 		absf(flash - (cold * k2 + chip2)) < cold * 0.12, "flash %.2f expect %.2f" % [flash, cold * k2 + chip2]
 	)
-	# a burning foe builds Char as fast as a cold one (the old halving is gone)
+	# a burning foe builds Char as fast as a cold one (the old halving is gone). 0.8 s: the fire leaves from
+	# her body (ShotOrigin), so it reaches the foe ~0.08 s later than from the old 1.3 m nozzle
 	reset.call()
 	K.relight_t = 0.0
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	var char_cold: float = K.char_of(T)
 	P.inp["fire"] = false
 	reset.call()
 	K.relight_t = 0.0
 	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
-	ak.step(m, 0.7, func(): _hold_at(P, T))
+	ak.step(m, 0.8, func(): _hold_at(P, T))
 	ok(
 		"lance: a burning foe builds Char at the full rate", char_cold > 6.0 and K.char_of(T) >= char_cold * 0.9,
 		"cold %.1f burning %.1f" % [char_cold, K.char_of(T)]
@@ -431,6 +434,11 @@ func _all() -> void:
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
 	ok(
+		"cinder cast-move: her full walk while the lane is held (footage: the source does not stop moving)",
+		K.aiming and is_equal_approx(K.move_k(), 1.0),
+		"move_k %.2f after_t %.2f" % [K.move_k(), K.after_t]
+	)
+	ok(
 		"cinder: the aim lane is twice the shot radius (%.2f m), drawn = hit" % float(K.rmb_def()["size"]),
 		absf(float(lane.get("width", 0.0)) - 2.0 * float(K.rmb_def()["size"])) < 0.001,
 		"width %.2f" % float(lane.get("width", 0.0))
@@ -446,8 +454,10 @@ func _all() -> void:
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	ak.aim_at(P, home + Vector3(20.0, 0, 0))
+	var old_ribbons: Array = HeroVfx.of(m).ribbons.duplicate()      # the miss's, untouched by m.step
 	ak.tap(m, P)
 	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(20.0, 0, 0)))
+	_orb_look(K, m, old_ribbons)
 	ak.step(m, 0.8)
 	var e2: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
 	var far_d := Vector2((e2[0] as Vector3).x - home.x, (e2[0] as Vector3).z - home.z).length()
@@ -586,9 +596,15 @@ func _all() -> void:
 		"poof %.1f m in %.2fs, ground %.1f, speed kept %.1f m/s" % [poof_d, poof_t, ram_d, kept]
 	)
 	_dash_moves(K, ram_move, ram_t, poof_move, poof_t, int(rings["made"]))
+	ak.air_steers(m, P, home, "the air poof", func():
+		P.dashes = P.max_dashes()
+		P.ex_cd = 0.0
+		ak.aim_at(P, P.pos + Vector3(12.0, 0, 0))
+		P.ak.on_dash(true))
 	P.dashes = 0.0
 	K.on_knock(T, true)
-	ok("passive: a knock gives back one ram charge, not both", absf(P.dashes - 1.0) < 0.01, "charges %.2f" % P.dashes)
+	ok("passive: the kit adds no ram charge on a knock (DashReset gives one back, --knock-reset-check)",
+			P.dashes < 0.01, "charges %.2f" % P.dashes)
 	# --- rank 3: more damage, a speed boost and a shield on a hit (the lava carpet is the X ult now, not the ram)
 	# (the target stands 3.9 m out: Cinder's own hit radius is 0.376 now, so the ram reaches 0.12 m less)
 	reset.call()
@@ -766,3 +782,48 @@ func _all() -> void:
 	P.merge_cd = 0.0
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Cinder Shot in flight reads as fire: the orb is her flame orange (the archetype colour) round a white-hot core in a
+## deep-red glow, drawn at its hit radius (docs/VFX_QUALITY.md "Scale"), leaving her palm and then on its hitbox, with
+## the data's flicker trail following it.
+func _orb_look(K: AshwickKit, m: Node, old_ribbons: Array) -> void:
+	var r: Dictionary = {}
+	for e: Dictionary in K.fx.riders:
+		if e["kind"] == "cinder": r = e
+	var n: Node3D = r.get("node")
+	var hd := n.get_node_or_null("Head") as MeshInstance3D if n else null
+	var hl := n.get_node_or_null("Halo") as MeshInstance3D if n else null
+	var body: Color = (hd.material_override as ShaderMaterial).get_shader_parameter("color") if hd else Color.BLACK
+	var core: Color = (hd.material_override as ShaderMaterial).get_shader_parameter("color2") if hd else Color.BLACK
+	var glow: Color = (hl.material_override as ShaderMaterial).get_shader_parameter("color") if hl else Color.BLUE
+	var hero := Arch.color("ashwick")
+	ok(
+		"cinder: the orb is her flame orange #%s round a white-hot core" % hero.to_html(false),
+		hd != null and body.is_equal_approx(hero) and core.s < 0.3 and core.v > 0.95,
+		"body %s core %s" % [body.to_html(false), core.to_html(false)]
+	)
+	ok(
+		"cinder: its glow is fire (red-orange, not violet)",
+		hl != null and (glow.h < 0.12 or glow.h > 0.95) and glow.s > 0.6, "glow %s" % glow.to_html(false)
+	)
+	var sd: Dictionary = r.get("sd", {})
+	var hr := float(sd.get("r", 0.0))
+	var gs := hl.scale.x if hl else 0.0
+	var bs := hd.scale.x if hd else 0.0
+	ok(
+		"cinder: the orb is drawn at its hit radius (%.2f m), the body inside its glow" % hr,
+		hr > 0.0 and absf(gs - hr * LDFx.ORB_GLOW_K) < 0.001 and bs > 0.0 and bs < gs, "glow %.3f body %.3f" % [gs, bs]
+	)
+	var start: Vector3 = sd.get("start", Vector3.ZERO) + (r.get("drawn", Vector3.ZERO) as Vector3)
+	ok(
+		"cinder: the orb is drawn leaving her palm",
+		(r.get("drawn", Vector3.ZERO) as Vector3).length() > 0.05 and start.distance_to(K.tip()) < 0.35,
+		"%.2f m off" % start.distance_to(K.tip())
+	)
+	K.fx._process(0.0)
+	var off: float = n.global_position.distance_to(sd.get("pos", Vector3.ZERO)) if n else 9.0
+	ok("cinder: after %.2f s the orb is drawn on its hitbox" % LDFx.DRAWN_FADE, off < 0.01, "%.3f m off" % off)
+	var trails := 0
+	for e: Dictionary in HeroVfx.of(m).ribbons:
+		if is_same(e.get("follow"), n) and not old_ribbons.has(e): trails += 1
+	ok("cinder: the flicker trail (shot_trail, 2 ribbons) follows the orb", trails == 2, "%d ribbons" % trails)

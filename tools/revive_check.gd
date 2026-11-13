@@ -4,6 +4,9 @@ extends RefCounted
 ## time (open ground; a wall in the way; the player down by the island's edge; the player down on
 ## the far side of a terrace step). And with a rival behind a wall, the bot never fires without a
 ## clear shot. First, the downed loop's numbers against the source (docs/DOWNED.md). Prints PASS/FAIL.
+## clear shot. The knocked-down beat (HunterFall) holds nothing up: a teammate on the player fills the
+## revive from the first step while the hero still falls, and a revive mid-beat brings the hero back
+## clean. Prints PASS/FAIL.
 
 var bad := 0
 var m: Match
@@ -118,6 +121,51 @@ func _numbers() -> void:
 	ok(drained, "stepping off drains the bar (%.2f -> %.2f) and the wisp" % [rv0, p.revive])
 	m.revive_hunter(p, null)
 	ok(is_equal_approx(p.hp, p.max_hp * r["revive_hp"]), "back up at %d%% HP" % int(r["revive_hp"] * 100.0))
+## The knocked-down beat is only a picture: a teammate standing on the player when it goes down fills the revive
+## from the first steps while the hero is still falling, and a revive late in the beat (the body fading) brings the
+## hero back opaque and on the hunter, the Wisp popping out.
+func _beat_revive(at: Vector3) -> void:
+	var p: Hunter = m.player
+	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	for h in m.hunters:
+		h.ctrl = "idle"
+		h.inp["move"] = Vector2.ZERO
+		h.inp["fire"] = false
+		if h != p and h != mate:
+			var far := m.world.random_ground()
+			for k in 50:
+				if far.distance_to(at) > 40.0:
+					break
+				far = m.world.random_ground()
+			_put(h, far)
+	if p.downed:
+		m.revive_hunter(p, null)
+	_put(p, at)
+	_put(mate, at + Vector3(0.8, 0, 0))
+	m.knock(p, foe, {})
+	p.down_hp = 1e6
+	for f in 3:
+		m.step(Match.DT)
+		p.render(Match.DT, 1.0)
+	var fall := HunterFall.of(p)
+	var falling: bool = fall != null and HunterWisp.mode_of(p) == HunterWisp.IN and p.model.visible
+	ok(falling and p.revive > 0.0, "the beat holds nothing up: a teammate's revive fills from the first steps (%.3f)"
+			% p.revive + " while the hero still falls")
+	if fall == null:
+		return
+	var t := 3 * Match.DT
+	while t < fall.time * 0.85:
+		m.step(Match.DT)
+		p.render(Match.DT, 1.0)
+		t += Match.DT
+	var fading := fall.gone
+	m.revive_hunter(p, mate)
+	p.render(Match.DT, 1.0)
+	var on_hunter: bool = is_zero_approx(p.model.position.x) and is_zero_approx(p.model.position.z)
+	var clean: bool = fading > 0.05 and fall.gone == 0.0 and on_hunter and HunterFall.of(p) == null
+	ok(not p.downed and p.model.visible and clean and HunterWisp.mode_of(p) == HunterWisp.OUT,
+		"a revive mid-beat (body %.2f faded) brings the hero back opaque, on the hunter, the Wisp popping out" % fading)
 
 func run(mn: Node) -> void:
 	main = mn
@@ -134,6 +182,7 @@ func run(mn: Node) -> void:
 	ok(home != Vector3.INF, "found open ground")
 	if home != Vector3.INF:
 		_case("open ground", home, home + Vector3(6, 0, 0), home + Vector3(-4, 0, 5), 16.0)
+		_beat_revive(home)
 	# ---- 2. a wall between the bot and the player
 	_fresh(); w = m.world
 	var wall := Vector3.INF; var wdir := Vector3.ZERO

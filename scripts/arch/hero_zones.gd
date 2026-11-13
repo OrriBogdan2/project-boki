@@ -12,6 +12,8 @@ extends RefCounted
 ##   ["zone", "bridge", nid, x, y, z, dx, dz, len, width, time, color?]   (color: hex, rock-tan when absent)
 ##   ["zone", "seed",   nid, sid, x, y, z, rmax, grow]
 ##   ["zone", "pop",    sid]
+##   ["zone", "trade",  nid, x, y, z, r, secs]   Motley's Trade in flight: its landing sigil fills over secs
+##   ["zone", "tradego", nid]                    the Trade was cut short: the sigil goes
 
 const ROCK_COL := Color("c98d4a")
 const ROCK_R := 0.5                  # a rock's footprint when it asks the world if it fits
@@ -250,3 +252,11 @@ static func net_in(m: Node, x: Array) -> void:
 				seed_visual(m, sid, Vector3(x[4], x[5], x[6]), float(x[7]), float(x[8]), Color("6fd0c6"), true)
 		"pop":
 			seed_pop(m, String(x[2]), Color("6fd0c6"))
+		"trade":
+			var by3: Ent = m.ents_by_id.get(String(x[2]), null)
+			if by3 is Hunter and x.size() >= 8:
+				var land := Vector3(x[3], x[4], x[5])
+				var key := "trade/" + String(x[2])
+				KitLooks.of(m).timed_sigil(key, by3, land, float(x[6]), float(x[7]), OstraKit.TRADE_EDGE)
+		"tradego":
+			KitLooks.of(m).end_sigil("trade/" + String(x[2]))

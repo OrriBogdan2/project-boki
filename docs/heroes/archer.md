@@ -115,6 +115,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
 - The double-high wall is our four-terrace wall (3.2 m, the map's wall tier; the source's single climb is about 1.5 m). Walking off ledges stays allowed (the source's bCanWalkOffLedges is off for everyone; ours is a separate, shared rule).
 - Not built: Hail Wall damaging wisps (our downed hunters take no ability damage).
+- Not built, waits on rule 2 decision: Hail Wall on wisps (proposal: bleed x2 and slow 35% inside the wall, no hit on the pool; docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
 - Starpiercer: each beam nocks for 0.5 s (the footage shows a 0.4-0.8 s draw; the fine print says no charge) and the next nock waits 1.0 s: 1.5 s a shot like the footage (f48/f63/f78), all three inside the 6 s window.
@@ -141,7 +142,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
 | Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
 | Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
-| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
+| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
 | Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
 | Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
 | Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
@@ -151,19 +152,19 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 23.3 vs 18 (422 : 326), execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
+| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built, waits on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098) | - |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
 |---|---|---|---|
-| RMB tap | a rooting snare arrow (11 m, 8 damage, root 0.6) and a Tripwire on a miss, with a 2-charge pool shared with the Heavy Shot; Plunge in the air; longer root during the Hail Wall | removed: a tap before the draw starts looses nothing and costs nothing; the draw works in the air too | none |
+| RMB tap | a rooting snare arrow (11 m, 8 damage, root 0.6) and a Tripwire on a miss, with a 2-charge pool shared with the Heavy Shot; Plunge in the air; longer root during the Hail Wall | removed: a tap looses nothing and costs nothing (the draw shows from the press, as the source's charge does, and a tap puts it away; while the bow is drawn for the LMB it waits for the 0.15 s hold, so a tap leaves that draw alone); the draw works in the air too | none |
 | Heavy Shot charges and cooldown | 2 charges, 9 s each (shared with the snare) | 1 charge, 16 s | 16 s is the data's cooldown and the work list's "about 1.8x the old 9 s" (the E-relative ratio would be 9.6 s; kept 16 on purpose, one number in `rmb.cooldown`) |
 | Heavy Shot ranks | rank 2 cooldown -10%, rank 3 -20% and 3 Tripwires | rank 2: 13 s, rank 3: 10 s (-3 s a rank), plus at rank 3 +3 m range and a wall stun gives a dash charge | the data's -3 s twice and its range and dash-charge upgrade; the +3 m is our pick (the data says "more range"). The data's III and IV fold into our rank 3 |
 | Spirit Walk rank 3 | +0.6 s | +0.5 s, +33% move speed inside something fading over the walk, allies within 6 m walk too | +0.5 s taken directly; 150 on the data's 455 base speed = 0.33 (`dash.inside_boost`); the 6 m ally reach is our pick |
 | Spirit Walk base speed | x1.35 inside something from rank 1 | x1.1 everywhere; the inside bonus is rank 3 only | the data lists the terrain speed as the last upgrade |
 | Focus from snares | a snare that roots gave 40 Focus | none: Focus is cut | none |
 
-Rank paths that do not fit our system: the dash recharge is shared code (Hunter.dash_regen, -15% a rank: 6 -> 5.1 -> 4.2 s) where the data's -1 s twice would be 6 -> 5.4 -> 4.7 s; the data's tiers II/III/IV fold into our two upgrades (II -> rank 2, III and IV -> rank 3); the shared +15% damage a rank is below the data's +20% on the Heavy Shot; the Hail Wall's rank cuts are the shared -10% a rank where the data has -2 s on the E.
+Rank paths that do not fit our system: the data's tiers II/III/IV fold into our two upgrades (II -> rank 2, III and IV -> rank 3); the Upgrade parity table below lists the numbers per rank (the dash recharge takes the data's seconds, `rank_cd.dash` in archer.json: 9.5 -> 8.5 -> 7.5 s).
 
 Skipped, with reasons: the tall-ledge climb has no heightmap equivalent (main's movement work); the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on R) untouched.
 Skipped, with reasons: the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on X) untouched.
@@ -218,8 +219,8 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| LMB draw (held) | RMB | not shown; one bow, and the Heavy Shot's "charge pose is like the LMB draw" | both: two draws run at once and each looses on its own release | **mismatch, not fixed**: one bow can't hold two arrows, but the source's answer (the press cancels the draw, is ignored, or waits) isn't shown. Flagged below | [F] 0264-0269, 0494 |
-| RMB held (Heavy Shot) | LMB | not shown | both, as above | **mismatch, not fixed** (same row) | |
+| LMB draw (held) | RMB | not shown: [D] has no ability tags or block lists for Myth (hold to charge, release to fire, nothing on the other button); [F] shows one reticle at a time (the gold V in place of the green one, f264-269) and no press mid-draw | cancels: the RMB press drops the draw with no arrow (its pose and reticle go); a still-held LMB stays idle until the Heavy Shot looses, then draws again | **fixed, rule ours** (one bow holds one arrow; the newer press wins, the same rule as LMB -> X). Not chosen, as nothing shows them: the press ignored while drawing, or waiting for the arrow to loose | [D] supervive_kits.md Myth; [F] 0264-0269, 0494; `--archer-combo-check` (`one bow LMB>RMB: ...`, tools/pin_one_bow_check.gd) |
+| RMB held (Heavy Shot) | LMB | not shown (as above) | cancels: the LMB press drops the hold with no shot and no charge spent (bar, needle and pose go) and the bow draws; the still-held RMB starts nothing until pressed again | **fixed, rule ours** (same row; not chosen: LMB ignored while the Heavy Shot is held) | `--archer-combo-check` (`one bow RMB>LMB: ...`) |
 | LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | unsettled | [F] 0457, 0498 |
 | LMB draw, RMB held | jump | not shown | the draw carries through the jump | owner | item 51 (content/dash_flow `hold`) |
 | LMB draw | X | "a self-buff with no cast lock" | the draw is dropped with no arrow; a still-held LMB nocks the first empowered shot at once (0.3 s) | unsettled (the clip's cast at f33 isn't mid-draw) | [F] ult f33 |
@@ -231,8 +232,9 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 | Glide | LMB | not shown | ignored | unsettled | |
 | Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) | unsettled | |
 
-Fixes made: none. The draw-plus-Heavy-Shot row is a clear fault against a one-bow source, but which way the
-source resolves it is not shown, so it waits for the owner or a frame (see the suggestion in the pass report).
+Fixes made: the draw-plus-Heavy-Shot pair (11-11, ext/lace-one-bow). Neither the data nor the frames show the
+source's answer, so the newer press cancels the held draw with no shot, the rule the LMB -> X row already follows
+(`ArcherKit.drop_draw`, `lmb_override`). The X window's own nock is left out of it (the X window | RMB row stays both).
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |

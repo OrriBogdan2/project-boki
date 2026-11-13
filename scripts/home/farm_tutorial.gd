@@ -192,6 +192,15 @@ static func detect() -> void:
 	if Progress.stat("harvested") > 0 and not HomeLayout.fixtures(Save.d, "farm").is_empty():
 		mark("crop")
 
+## The line for the first construction site a profile places ("" after that): sites only progress while you
+## are on the farm. Shown once through the placement toast; the seen flag is Save.d.tutorial.site_hint.
+static func site_hint() -> String:
+	var tut: Dictionary = Save.d["tutorial"]
+	if bool(tut.get("site_hint", false)):
+		return ""
+	tut["site_hint"] = true
+	return String(rules()["site_hint"])
+
 static func mark(id: String) -> void:
 	var st := state()
 	if bool((st["did"] as Dictionary).get(id, false)) or step_def(id).is_empty():

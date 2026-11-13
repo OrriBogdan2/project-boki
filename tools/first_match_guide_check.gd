@@ -29,8 +29,13 @@ func _save_flag() -> void:
 	var first := FirstMatchGuide.for_match(null, o)
 	var second := FirstMatchGuide.for_match(null, o)
 	ok(first != null and second != null, "the first two Extractions get the guide")
+	Save.d["tutorial"]["glide_dive"] = true
 	var third := FirstMatchGuide.for_match(null, o)
-	ok(third == null and int(Save.d["first_guide"]) == 2, "the third does not; the flag stays at 2")
+	ok(third == null and int(Save.d["first_guide"]) == 2, "the third does not (the dive learnt); the flag stays at 2")
+	Save.d["tutorial"].erase("glide_dive")
+	var dive_only := FirstMatchGuide.for_match(null, o)
+	var dive_ok: bool = dive_only != null and dive_only.dive_only and int(Save.d["first_guide"]) == 2
+	ok(dive_ok, "the third keeps only the dive line, uncounted")
 	var old := {"matches": 5}
 	FirstMatchGuide.migrate(old)
 	var young := {"matches": 1}

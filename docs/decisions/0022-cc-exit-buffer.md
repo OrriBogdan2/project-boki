@@ -36,3 +36,8 @@ So the same rule holds: `DashFlow._route_lock` holds RMB and E (`LOCK_SLOTS`) th
 (`ArchKit.lock_refuses`, which Kael's E on a held chain passes, owner 113.7) and replays them on the first step
 the lock lets them, at most `Loco.press_buffer` after the press; a lock that runs on past that answers with the deny cue
 then. X stays the ult's own recast, Q's glove goes through. Check `--cast-lock-buffer-check`.
+Addendum (11-11, ext/parity-vex-recovery): a kit's committed recovery counts as a stun here.
+`ArchKit.commit_left()` (0 by default) is read by `cc_left` for every slot but Q and an ult's recast, so a press
+in a commit's last 0.15 s waits for its end; the kit drops earlier presses (busy() for the abilities, its
+`gate_inputs` for Shift and jump). First use: Vex's Longneedle recovery and Cinderfall commit
+(docs/heroes/gunslinger.md). No Net or save change: the commit is the local hunter's own input gate.

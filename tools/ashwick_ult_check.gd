@@ -24,8 +24,60 @@ func _owed(P: Hunter) -> float:
 
 func run() -> void:
 	await _flight()
+	await _flight_inputs()
 	await _carpet()
 	await _burst()
+
+## Owner rule (item 66), the negatives: in the flight LMB, RMB, G and the Merge key fire nothing (each through its real
+## route: the fire line, the sec press, Match.pending_input), none is queued for the landing, and E and X still work.
+func _flight_inputs() -> void:
+	var r: Array = ak.setup("ashwick", 16.0, "cindle", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var K: AshwickKit = P.ak
+	var J := K.jet
+	var at := home + Vector3(16, 0, 0)
+	T.teleport(home + Vector3(0, 0, 3.0))
+	P.ult = 1.0
+	var kin: Kin = P.kin
+	K.ch_rmb = float(K.rmb_charges())
+	K.cd["e"] = 0.0
+	var ch0 := K.ch_rmb
+	var em0: int = K.hose.emitted
+	var shots0: int = m.shots.size()
+	_cast(P, at)
+	ak.step(m, 0.3, func(): ak.aim_at(P, at))
+	var cloaks0: int = K.cloaks
+	for key in ["fire", "sec", "throw", "ult"]:      # one key at a time, held a quarter second, then let go
+		ak.step(m, 0.25, func():
+			if key == "fire" or key == "sec":
+				P.inp[key] = true
+				P.inp["sec_hold"] = key == "sec"
+			else:
+				m.pending_input[key] = true
+			ak.aim_at(P, at))
+		P.inp["fire"] = false
+		P.inp["sec_hold"] = false
+		ak.step(m, 0.05, func(): ak.aim_at(P, at))
+	ok("ult 66: in the flight LMB, RMB, G and the Merge key fire nothing, the flight goes on",
+			J.running() and K.hose.emitted == em0 and m.shots.size() == shots0 and K.ch_rmb == ch0
+			and kin.state == "shoulder" and not KinMerge.active(P) and P.ult == 1.0,
+			"puffs +%d shots +%d charges %.1f kin %s merged %s bond %.2f" % [K.hose.emitted - em0,
+			m.shots.size() - shots0, K.ch_rmb, kin.state, KinMerge.active(P), P.ult])
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ok("ult 66: E fires in the flight", K.cloaks == cloaks0 + 1 and J.running())
+	HunterKeys.ult_pressed(P)
+	ok("ult 66: X lands on the press frame", not J.running())
+	ak.step(m, 0.3)      # the 0.3 s after landing: nothing stale goes off
+	ok("ult 66: nothing queued in the flight fires in the 0.3s after landing",
+			K.hose.emitted == em0 and m.shots.size() == shots0 and K.ch_rmb == ch0 and kin.state == "shoulder"
+			and not KinMerge.active(P) and P.ult == 1.0 and ak.dmg(T) < 0.5,
+			"puffs +%d shots +%d charges %.1f kin %s merged %s bond %.2f" % [K.hose.emitted - em0,
+			m.shots.size() - shots0, K.ch_rmb, kin.state, KinMerge.active(P), P.ult])
+	await ak.done(m)
 
 ## Starts the flight toward `at` (cooldown cleared) and returns the jet.
 func _cast(P: Hunter, at: Vector3) -> AshwickJet:
@@ -154,6 +206,11 @@ func _carpet() -> void:
 		J.trail.size() >= 14 and absf(linger - 5.2) < 0.01 and left > linger - 0.5 and left <= linger,
 		"pieces %d left %.1f" % [J.trail.size(), left]
 	)
+	var look_w := 0.0
+	for e in K.fx.live:
+		if e["kind"] == "lava": look_w = (e["s0"] as Vector3).z * 2.0
+	ok("ult look: the carpet is drawn as wide as it burns (trail_w)", absf(look_w - float(K.x_def()["trail_w"])) < 0.01,
+		"look %.2f m, burns %.2f m" % [look_w, float(K.x_def()["trail_w"])])
 	ak.step(m, 0.7)
 	var char_t := K.char_of(T) + 31.0 * float(K.burning(T))
 	ok(
@@ -326,8 +383,8 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 				frames, held_in, pilot_in, K.hose.emitted - em, ak.dmg(T), K.chars.size(), K.burning(T)])
 	ok("ult 66: that hold ticks once, on its press", K.lmb_denied == denied + 1, "denied +%d" % (K.lmb_denied - denied))
 	ok("ult 66: LMB works on the first frame after the flight (the lance lights)",
-			K.was_held and K.spool > 0.0 and P.ak.anim_id == "as_lance",
-			"held %s spool %.3f anim %s" % [K.was_held, K.spool, P.ak.anim_id])
+			K.was_held and K.spool > 0.0,
+			"held %s spool %.3f" % [K.was_held, K.spool])
 	P.inp["fire"] = true
 	m.step(ak.DT)
 	ok("ult 66: its pilot flame is back a frame later", K.fx.shown(pilot))
@@ -335,6 +392,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 		P.inp["fire"] = true
 		T.teleport(P.pos + side)
 		ak.aim_at(P, T.pos))
+	ok("ult 66: the lance pose is up once the hold is past HOLD_POSE_T", P.ak.anim_id == "as_lance", P.ak.anim_id)
 	P.inp["fire"] = false
 	ok("ult 66: out of the flight the lance roars and hits, after only its usual pilot",
 			K.hose.emitted > em and ak.dmg(T) > 0.5, "puffs +%d, dmg %.1f" % [K.hose.emitted - em, ak.dmg(T)])

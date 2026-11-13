@@ -124,16 +124,13 @@ static func _toon(src: Material) -> Material:
 	m.next_pass = ink
 	return m
 
-## The model's mesh bounds in its own space, at rest. A skinned mesh draws through its bind pose (a Meshy rig's is
-## 100x, under a 0.01 armature), so the mesh bounds are scaled by it.
+## The model's mesh bounds in its own space, at rest.
 static func _rest_aabb(model: Node3D) -> AABB:
 	var out := AABB()
 	var first := true
 	for mi in model.find_children("*", "MeshInstance3D", true, false):
 		var inst := mi as MeshInstance3D
 		var ab := inst.get_aabb()
-		if inst.skin and inst.skin.get_bind_count() > 0:
-			ab = Transform3D(Basis.from_scale(inst.skin.get_bind_pose(0).basis.get_scale()), Vector3.ZERO) * ab
 		var tr := Transform3D()
 		var n: Node = inst
 		while n != model and n is Node3D:

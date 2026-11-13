@@ -1,14 +1,11 @@
 extends Control
 ## After a match: what you brought home, what your kin thinks, and the way back to the farm.
 
-const CAM_FROM := Vector3(4.6, 2.6, 8.4)     # m: the camera and what it looks at; the island sits left of the card
-const CAM_AT := Vector3(3.3, 0.6, 0)
-
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func show_result(r: Dictionary) -> void:
-	Sfx.play_music("title")
+	Sfx.play_music(Soundtrack.track("victory" if r.get("extracted", false) else "menu", "title"))
 	Sfx.play_ambience("")
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
@@ -67,7 +64,7 @@ func show_result(r: Dictionary) -> void:
 	var secs := int(r.get("time", 0))
 	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
 	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
+	var big4 := [["knock", "Hunters downed", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
 		["clock", "Time", float(secs), "time"]]
 	for i in big4.size():
 		var t: Array = big4[i]
@@ -92,12 +89,17 @@ func show_result(r: Dictionary) -> void:
 		for it in s.get("haul", []):
 			if Loot.is_rare_egg(it):
 				chips.push_front(["egg", "Brought home a Rare Egg  ·  %s" % Loot.name_of(it), Color("ffd36a")])
+			elif Loot.is_ink(it):
+				chips.append(["gem", "Brought home %s" % Loot.name_of(it), Loot.col_of(it)])
 		if not chips.is_empty():
 			v.add_child(UI.section("Brought home"))
 			var flow := HFlowContainer.new()
 			flow.add_theme_constant_override("h_separation", 8); flow.add_theme_constant_override("v_separation", 8)
 			for i in chips.size():
 				var ch := _chip(chips[i][0], chips[i][1], chips[i][2], 0.75 + i * 0.14)
+				if chips[i][0] == "seed":
+					ch.tooltip_text = "Plant these on the farm to grow crops."
+					ch.mouse_filter = Control.MOUSE_FILTER_PASS
 				if chips[i].size() > 3:
 					# a Boki you brought home: where it went
 					var krec: Dictionary = chips[i][3]
@@ -110,12 +112,14 @@ func show_result(r: Dictionary) -> void:
 				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
 					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
-	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
+	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it) and not Loot.is_ink(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
 		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
-		v.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
+		var gear_head := "Gear you kept, in the armory"
+		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
+		v.add_child(UI.section(gear_head))
 		var hf := HFlowContainer.new()
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
@@ -286,81 +290,18 @@ func _note(txt: String, col: Color) -> Label:
 var shown_at := 0
 ## Enter, Space or Esc also takes you home, so you can never get stuck on this screen.
 func _unhandled_input(e: InputEvent) -> void:
-	if zoom.wheel(e):
-		get_viewport().set_input_as_handled()
-		return
 	if Time.get_ticks_msec() - shown_at < 900:
 		return
 	if e.is_action_pressed("ui_accept") or e.is_action_pressed("menu") or e.is_action_pressed("jump"):
 		get_viewport().set_input_as_handled()
 		Game.goto("home")
 
-var hunter_node: Node3D
-var h_anim: HunterAnim
-var kin_node: Node3D
-var won_k := false
-var t := 0.0
-
-## Behind the card: your hunter and kin on a little island, cheering if you made it out,
-## sitting it out if you didn't.
+## Behind the card: your squad on a little island, in their poses if you made it out, as dimmed Wisps if not.
 func _stage(r: Dictionary, s: Dictionary) -> void:
-	won_k = r.get("extracted", false)
-	var svc := SubViewportContainer.new(); svc.stretch = true
-	svc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	svc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(svc)
-	var vp := SubViewport.new(); vp.own_world_3d = true; vp.msaa_3d = Viewport.MSAA_2X
-	svc.add_child(vp)
-	var w3 := Node3D.new(); vp.add_child(w3)
-	var env := WorldEnvironment.new(); env.environment = Look.environment({}); w3.add_child(env)
-	if not won_k:
-		Look.night(env.environment, 0.6)
-	Look.lights(w3, Color("fff1d8") if won_k else Color("b9c4ff"), 1.05 if won_k else 0.7)
-	var rng := RandomNumberGenerator.new(); rng.seed = 7
-	var isl := Models.float_island(rng, 2.6, 5.0, Color("6aa64a"), Color("9a7a5a"), Color("3a2f48"))
-	w3.add_child(isl)
-	var tr := Models.tree(rng, Color("5a9a4f"), "round"); tr.position = Vector3(-1.4, 0, -1.2); w3.add_child(tr)
-	var rk := Models.rock(rng, 0.7); rk.position = Vector3(1.5, 0, -0.9); w3.add_child(rk)
-	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Unmasked.mask_look(), Arch.of_save())
-	hunter_node.position = Vector3(-0.3, 0, 0.3); hunter_node.rotation.y = PI + 0.5
-	var ring := hunter_node.get_node_or_null("TeamRing") as Node3D
-	if ring: ring.visible = false
-	w3.add_child(hunter_node)
-	h_anim = HunterAnim.new(hunter_node)
-	if s.has("kin") and won_k:
-		kin_node = Models.kin(String(s["kin"]["species"]), s["kin"])
-		kin_node.position = Vector3(0.75, 0, 0.6); kin_node.rotation.y = PI + 0.9
-		kin_node.set_meta("happy", true)
-		w3.add_child(kin_node)
-	cam = Camera3D.new(); cam.fov = 40
-	w3.add_child(cam)
-	_aim_cam()
-
-## The island sits left of the results card; the wheel (or the pad) moves the camera in and out along its line.
-func _aim_cam() -> void:
-	cam.position = CAM_AT + (CAM_FROM - CAM_AT) * zoom.k
-	cam.look_at(CAM_AT)
-	_cam_k = zoom.k
-
-var cam: Camera3D
-var zoom := ViewZoom.new()
-var _cam_k := 1.0
-
-func _process(dt: float) -> void:
-	t += dt
-	zoom.tick(dt)
-	if cam and not is_equal_approx(zoom.k, _cam_k):
-		_aim_cam()
-	if h_anim:
-		var vy := 0.0
-		if won_k:
-			# a little victory hop every couple of seconds
-			var ph := fmod(t, 2.2)
-			hunter_node.position.y = maxf(0.0, sin(ph / 0.5 * PI)) * 0.35 if ph < 0.5 else 0.0
-			vy = cos(ph / 0.5 * PI) * 2.0 if ph < 0.5 else 0.0
-		h_anim.update(dt, {"grounded": hunter_node.position.y < 0.01, "vel": Vector3(0, vy, 0), "crouch": 0.0 if won_k else 0.7, "downed": false})
-	if kin_node:
-		kin_node.get_node("Body").position.y = absf(sin(t * 5.0)) * 0.25
+	var squad: Array = r.get("squad", [])
+	if squad.is_empty():
+		squad = [{"arch": Arch.of_save(), "name": String(Save.d.get("name", "Hunter")), "you": true, "kin": s.get("kin", {})}]
+	add_child(ResultsStage.make(squad, r.get("extracted", false)))
 
 func _lost_title(why: String) -> String:
 	match why:

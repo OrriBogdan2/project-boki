@@ -67,17 +67,17 @@
 		"icon": "dash",
 		"col": "#ffe2a8",
 		"cd": 7.0,
-		"dist": 3.6,
-		"time": 0.2,
+		"dist": 3.15,
+		"time": 0.23,
 		"invuln": 0.12,
-		"desc": "A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).",
+		"desc": "A quick skip about 3m where you move; in the air, a long floaty glide of about 10m (its own 14s cooldown).",
 		"air": {
-			"dist": 13.3,
+			"dist": 10.5,
 			"time": 0.95,
 			"cd": 14.0,
 			"ramp": 0.1,
-			"burst": 0.4,
-			"out_k": 0.45,
+			"burst": 0.55,
+			"out_k": 0.1,
 			"float_fall": 1.2,
 			"steer": 3.0
 		}
@@ -117,6 +117,7 @@
 		}
 	},
 	"e": {
+		"ground": {"range": "reach", "r": "thrown_radius", "recast": true},
 		"delivery": "zone",
 		"name": "Hearthlight",
 		"short": "Hearth",

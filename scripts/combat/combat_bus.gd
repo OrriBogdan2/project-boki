@@ -14,5 +14,7 @@ signal dash_reset_cue(hunter: Node, source: String)
 ## A Hunter did their signature tech (the drill in the Training Area listens): hunter, Hunter id.
 signal tech(hunter: Node, id: String)
 signal bond_gained(hunter: Node, amount: float, reason: String)
+## A body was stunned by a wall: where the surface is, which way it faces (out of the wall), and who drove it there.
+signal wall_stunned(target: Node, at: Vector3, normal: Vector3, by: Node)
 signal kin_thrown(kin: Node, owner: Node)
 signal kin_recalled(kin: Node, owner: Node)

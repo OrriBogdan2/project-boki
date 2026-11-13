@@ -301,6 +301,7 @@ func _tick_swap_aim(dt: float) -> void:
 	if (held("dash") and swap_aim < float(dd["aim_max"])) and not h.downed and h.stun_t <= 0.0:
 		var spot := swap_spot()
 		AimKit.swap(h, "swap", {"b": spot, "r": float(dd["radius"]), "col": TRADE_COL})
+		AimReach.ring(self, "dash")
 		return
 	swap_aim = -1.0
 	if h.downed or h.stun_t > 0.0:
@@ -323,7 +324,13 @@ func _swap_cast() -> void:
 	m.fx.burst(h.pos + Vector3(0, 0.4, 0), SMOKE, 12, 1.6, 0.7, -1.5, 2.0 * TRADE_LOOK_K)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), TRADE_EDGE)
+	_tx_trade(["zone", "trade", h.nid, m._r(land.x), m._r(land.y), m._r(land.z), float(dd["radius"]), swap_time()])
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
+
+## The Trade's landing sigil on every other game (HeroZones "trade" / "tradego"): the cue a foe steps out on.
+func _tx_trade(e: Array) -> void:
+	if (m.net_on or HeroZones.capture) and not h.remote:
+		HeroZones.tx(m, e)
 
 ## His dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
 func swap_move() -> String:
@@ -403,19 +410,22 @@ func _swap_end(go: bool) -> void:
 	for key in ["os_star", "os_sigil_from", "os_sigil_to"]:
 		KitLooks.of(m).release(key)
 	if not go:
+		_tx_trade(["zone", "tradego", h.nid])
 		return
 	swaps += 1
 	_fold_in(from, TRADE_COL)
+	if rank("dash") >= 3:
+		_shield_allies(from, dd)
 	_trade_bodies(land, from, float(dd["radius"]))
 	_arrive(land, from, from_void)
-	if rank("dash") >= 3:
-		# allies who were by his side when he left share in it: a shield
-		for o2 in m.hunters:
-			if o2 != h and o2.team == h.team and not o2.downed and (
-				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
-			):
-				ReceiverCue.shield(o2, float(dd["ally_shield"]))
-				o2.shield_t = 3.0
+
+## Rank 3 (the source's tier IV): allies in his ring as he leaves get a shield, a share of his health, with the
+## receiver's cue (ReceiverCue).
+func _shield_allies(from: Vector3, dd: Dictionary) -> void:
+	for o2 in m.hunters:
+		if o2 != h and o2.team == h.team and not o2.downed and o2.flat_dist(from) < float(dd["radius"]):
+			ReceiverCue.shield(o2, h.max_hp * float(dd["ally_shield"]))
+			o2.shield_t = maxf(o2.shield_t, float(dd["ally_shield_t"]))
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
 ## its place in the circle. Bodies another game owns are moved there over Net.

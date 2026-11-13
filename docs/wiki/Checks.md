@@ -41,6 +41,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
+| `--lair-fall-check` | A jump dash anywhere in a boss lair, or a dash out of its escape updraft, never ends in "you fell"; nobody over solid ground is lost to the abyss |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
 | `--train-map-check` | The sky train on the maps: one halt icon per stop, the marker at the engine's arc position, the countdown to a halt, the minimap's range rule |
@@ -59,6 +60,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
+| `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |
@@ -66,6 +68,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |
 | `--iv-check` | IV rolls, stable IVs for old saves, breeding passes 3 of 5, the Rare Egg floor, caps, save round trip |
 | `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent |
+| `--breed-sim-check` | Breeding sim: 500 random pairs bred, sex split half and half (documented shares aside), traits from the parents' mean, IVs, habits and looks from one parent, no mutation outside the base-odds roll |
 | `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
 | `--nook-moment-check` | The pairing beat at the Nook: both Boki walk to the nest, face, nuzzle, circle, settle; the egg fades in; unstable mixes wobble it; any key skips; the save is untouched (`--nook-moment-shots` for the day and night sheets) |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
@@ -87,6 +90,10 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
+| `--mob-damage-check` | PvE: a level-1 and level-5 Hunter standing still in each monster, camp mix and lair, never fighting back. Prints the seconds to fall, damage per hit and per second (docs/EXPEDITION_SPEC.md section 13). Asserts that every damaging row fells them within 90 s over 3 or more hits, the Glimmerkin never hurts anyone, and a lone Puffbomb blows up once |
+
+The two timing checks are advisory: a fail prints `ADVISORY` and exits 0, unless `--timing-strict` is on the
+line (the gate's GPU-host run). See [CHECKS_TIMING](../CHECKS_TIMING.md).
 
 ## Tooling flags
 

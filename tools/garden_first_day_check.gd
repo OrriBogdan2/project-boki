@@ -64,13 +64,17 @@ func _list() -> void:
 	ok(ids.size() == 5 and ids == ["feed", "toy", "race", "nap", "pair"], "five lines: feed, toy, race, nap, pair")
 	Save.d = Save.fresh()
 	ok(GardenFirstDay.active() and GardenFirstDay.rows().size() == 5, "a fresh save has the list")
+	var kibble := int(Save.d["items"].get("kibble", 0))
+	ok(kibble >= 1 and kibble == int(GardenFirstDay.rules()["start_items"]["kibble"]),
+			"a fresh bag holds the starting kibble, so 'Feed your Boki' has food (%d)" % kibble)
 	var old := Save.fresh()
 	old["tutorial"] = {"home": true, "day1_done": true}
 	Save.d = old
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "a save from before it has none")
 	GardenFirstDay.mark("feed")
 	ok(not old["tutorial"].has("gfd"), "and a tick does not start it")
-	Save.d = Save.fresh()
+	Save.d = _fresh_save()
+	Save.d["tutorial"] = Save.fresh()["tutorial"]      # (a fresh save's list, with two Boki: the pair lines show)
 	var rows := GoalTracker.lines()
 	var texts: Array = (GardenFirstDay.rules()["rows"] as Array).map(func(r): return String(r["text"]))
 	ok(rows.size() == 5 and rows.map(func(r): return r["text"]) == texts,
@@ -101,7 +105,6 @@ func _list() -> void:
 func _bot() -> void:
 	Save.d = _fresh_save()
 	Save.d["tutorial"]["day1_done"] = true      # the guided tutorial stays out of it
-	Save.d["items"]["kibble"] = 3
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
 	var lay := HomeLayout.ensure(Save.d)

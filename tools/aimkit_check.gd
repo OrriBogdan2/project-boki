@@ -4,6 +4,8 @@ extends RefCounted
 ## boom default kept), every telegraph shape shown, updated, expired and hidden, who sees what, the
 ## membership tests, pooling (no node growth over 300 frames of every shape), the cursor states (charge
 ## ring, full flare, perfect star) and the merge-start cleanup through ArchKit.drop_holds().
+## The range preview (AimReach): every ground-target slot of the 12 Hunters, aimed at twice its range, shows
+## the faint ring at the data range round the caster and the landing mark stopped on that range.
 ## With --shots-dir=<dir>: one screenshot per telegraph and cursor state (aimkit_*.png).
 
 var main: Node
@@ -35,8 +37,11 @@ func run(main_node: Node) -> void:
 	_pooling(m, P, T)
 	await _reticle(m, P)
 	_cleanup(m, P)
+	m.queue_free()
+	var g: Array = ak.setup("gunslinger", 30.0, "", false)
+	_ground_reach(g[0], g[1])
 	if shots != "":
-		m.queue_free()
+		g[0].queue_free()
 		await main.get_tree().process_frame
 		await load("res://tools/aimkit_shots.gd").new().take(main, shots)
 	print("AIMKIT DONE, %d checks, failures: %d" % [n, fails])
@@ -310,3 +315,78 @@ func _cleanup(m: Match, P: Hunter) -> void:
 	# the base kit runs drop_holds every step while merged (ArchKit.tick); every kit's override runs first
 	var src := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
 	ok("drop_holds: ArchKit's own merge paths call drop_holds, not _drop_holds", src.count("\t\tdrop_holds()") >= 2 and not src.contains("\t\t_drop_holds()"))
+
+## Every ground-target slot ("ground" in content/archetypes) and the id of its landing mark: "<slot>_spot" is
+## the held-key preview (Quick cast off, Match.aim_hold); the others are the kit's own aim hold.
+const GROUND := {
+	"gunslinger.x": "x_spot", "mage.e": "e_spot", "mage.x": "x_spot", "tender.e": "e_spot", "ostra.e": "e_spot",
+	"ostra.x": "x_spot", "rimewright.rmb": "rmb", "ostra.dash": "swap", "dolm.x": "x"}
+
+func _ground_slots() -> Array:
+	var out := []
+	for f in DirAccess.get_files_at("res://content/archetypes"):
+		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
+		for slot in ["rmb", "e", "x", "dash"]:
+			if (d.get(slot, {}) as Dictionary).has("ground"):
+				out.append("%s.%s" % [f.get_basename(), slot])
+	out.sort()
+	return out
+
+func _ground_reach(m: Match, P: Hunter) -> void:
+	var want := GROUND.keys()
+	want.sort()
+	ok("reach: the data's ground-target slots are the ones checked", _ground_slots() == want, str(_ground_slots()))
+	for key in GROUND:
+		var a := String(key).get_slice(".", 0)
+		var slot := String(key).get_slice(".", 1)
+		P.reclass(Arch.weight(a), a)
+		P.unlock_all()
+		P.lvl = 6
+		P.slot_lv["ult"] = 1
+		P.dashes = P.max_dashes()
+		AimKit.clear(P)
+		var g := AimReach.of(P.ak, slot)
+		_aim(P, 2.0 * g.x)
+		_aim_slot(m, P, key, slot)
+		var ring := AimKit.entry(P, slot + "_reach")
+		var me := Vector2(P.pos.x, P.pos.z)
+		ok("reach %s: the ring sits round the caster at the data range" % key,
+				not ring.is_empty() and absf(float(ring.get("r", 0.0)) - g.x) < 0.01
+				and (ring.get("at", Vector2.INF) as Vector2).distance_to(me) < 0.05, "%.1f m" % g.x)
+		var mark := AimKit.entry(P, GROUND[key])
+		var at: Vector2 = mark.get("b" if GROUND[key] == "swap" else "at", Vector2.INF)
+		var r_ok := g.y <= 0.0 or absf(float(mark.get("r", 0.0)) - g.y) < 0.01
+		var out := at.distance_to(me)
+		ok("reach %s: the landing mark stops on the range, cursor at 2x" % key,
+				not mark.is_empty() and absf(out - g.x) < 0.2 and r_ok, "%.2f of %.1f" % [out, g.x])
+		for k in ["sec_hold", "dash_down", "x_down"]:
+			P.inp[k] = false
+		ak.step(m, 0.5)
+	m.aim_hold = ""
+
+## Aim one slot the way a player does: hold its key (Quick cast off), or the kit's own hold.
+func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
+	match key:
+		"rimewright.rmb":
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			ak.step(m, 0.1)
+		"ostra.dash":
+			P.inp["dash_down"] = true
+			P.ak.on_dash(false)
+			ak.step(m, 0.1)
+		"dolm.x":
+			ok("reach dolm.x: R aims on its own hold, not Match's", not AimReach.holds(P.ak, "x"))
+			P.inp["x_down"] = true
+			P.ak.cast_ult()
+			ak.step(m, 0.1)
+		_:
+			if key == "tender.e":
+				m.aim_hold = "signature"
+				m._update_indicators(1.0)
+				ok("reach tender.e: her first E is self-cast, so no preview", not AimKit.shown(P, "e_spot"))
+				P.ak.use_e()
+			if slot == "x":
+				ok("reach %s: Quick cast off, R holds to aim" % key, AimReach.holds(P.ak, "x"))
+			m.aim_hold = "signature" if slot == "e" else "hunter_ult"
+			m._update_indicators(1.0)

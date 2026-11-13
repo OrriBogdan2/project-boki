@@ -3,35 +3,111 @@
 	"kit_owns": [],
 	"dash": {
 		"ground": {
-			"lmb": {"mode": "fire", "carry": true, "variant": "beam", "source": "Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on."},
-			"rmb": {"mode": "fire", "carry": true, "source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating."},
-			"e": {"mode": "fire", "carry": true, "source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating."},
-			"x": {"mode": "fire", "carry": true, "source": "Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner items 64/65: the skate's velocity and direction go on into the ult as a frozen statue that slides on its ice (x.carry_t 0.8 s, easing to a stop, no steering or turning), then she is rooted. Symmetric with item 27 (Shift out of the ult keeps momentum)."},
-			"q": {"mode": "fire", "carry": true, "source": "No source glove; the skate is a held move, so a glove goes off from it like her abilities."}
+			"lmb": {
+				"mode": "fire",
+				"carry": true,
+				"variant": "beam",
+				"source": "Data: Skate is a held mode, released to stop. Footage (0239-0245, 0285-0290): she fires the whole skate and the darts become straight thick beams. Ours: darts fly as beams at normal damage (data pass); the skate goes on."
+			},
+			"rmb": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the spear aim and throw go on while she keeps skating."
+			},
+			"e": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Data: nothing stops a cast during the held Skate. Footage: not shown. Ours: the Rink Wall's tell and slide start while she keeps skating."
+			},
+			"x": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Data: the ult makes her invulnerable inside a slowing zone; footage (ult f25-f55): she is rooted in the crystal. Owner items 64/65: the skate's velocity and direction go on into the ult as a frozen statue that slides on its ice (x.carry_t 0.8 s, easing to a stop, no steering or turning), then she is rooted. Symmetric with item 27 (Shift out of the ult keeps momentum)."
+			},
+			"q": {
+				"mode": "fire",
+				"carry": true,
+				"source": "No source glove; the skate is a held move, so a glove goes off from it like her abilities."
+			}
 		},
 		"air": {
-			"lmb": {"mode": "fire", "carry": true, "variant": "beam", "source": "Same as the ground skate: the air skate is the same held mode (owner item 62), the darts turn to beams while she skates in the air too."},
-			"rmb": {"mode": "fire", "carry": true, "source": "Same as the ground skate (owner item 62)."},
-			"e": {"mode": "fire", "carry": true, "source": "Same as the ground skate (owner item 62)."},
-			"x": {"mode": "fire", "carry": true, "source": "Same as the ground skate (owner items 62/64): an ult cast from the air skate keeps its velocity and direction as the sliding statue."},
-			"q": {"mode": "fire", "carry": true, "source": "Same as the ground skate (owner item 62)."}
+			"lmb": {
+				"mode": "fire",
+				"carry": true,
+				"variant": "beam",
+				"source": "Same as the ground skate: the air skate is the same held mode (owner item 62), the darts turn to beams while she skates in the air too."
+			},
+			"rmb": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Same as the ground skate (owner item 62)."
+			},
+			"e": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Same as the ground skate (owner item 62)."
+			},
+			"x": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Same as the ground skate (owner items 62/64): an ult cast from the air skate keeps its velocity and direction as the sliding statue."
+			},
+			"q": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Same as the ground skate (owner item 62)."
+			}
 		}
 	},
 	"into_dash": {
-		"lmb": {"mode": "fire", "carry": true, "variant": "beam", "source": "Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same."},
-		"rmb": {"mode": "fire", "carry": true, "source": "Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes."},
-		"e": {"mode": "fire", "carry": true, "source": "Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts."},
-		"x": {"mode": "cancel", "carry": true, "source": "Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed, in the air too (item 62)."},
-		"q": {"mode": "fire", "carry": true, "source": "No source glove; the skate starts and the glove's effect stays."}
+		"lmb": {
+			"mode": "fire",
+			"carry": true,
+			"variant": "beam",
+			"source": "Footage: she starts skating while firing and keeps firing; the darts turn to beams. Ours: the same."
+		},
+		"rmb": {
+			"mode": "fire",
+			"carry": true,
+			"source": "Data: Skate can be held at any time. Ours: Shift during the spear aim or the throw's wind-up starts the skate and the throw still goes."
+		},
+		"e": {
+			"mode": "fire",
+			"carry": true,
+			"source": "Data: Skate can be held at any time. Ours: Shift during the wall's 0.2s tell starts the skate and the wall still erupts."
+		},
+		"x": {
+			"mode": "cancel",
+			"carry": true,
+			"source": "Data: reactivating ends Chilling Finale early. Owner item 27: Shift ends Rimelock (as X again would; a late press still cracks it open) and she skates straight out at full speed, in the air too (item 62)."
+		},
+		"q": {
+			"mode": "fire",
+			"carry": true,
+			"source": "No source glove; the skate starts and the glove's effect stays."
+		}
 	},
 	"into_jump": {
-		"x": {"mode": "lock", "reason": "Owner item 65: she is a frozen statue; only the recast and Shift end it.", "source": "Owner item 65; footage (ult f25-f55): she is rooted in the crystal."}
+		"x": {
+			"mode": "lock",
+			"reason": "Owner item 65: she is a frozen statue; only the recast and Shift end it.",
+			"source": "Owner item 65; footage (ult f25-f55): she is rooted in the crystal."
+		}
 	},
 	"hold": {
 		"rmb": {
-			"ground": {"mode": "keep", "source": "Not determinable. The source spear is a tap, with no hold to carry (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33); ours holds to aim. No spear cast inside the skate is shown. Kept: the hold carries through (owner: every interaction chains)."},
-			"air": {"mode": "keep", "source": "Not determinable. As on the ground; no air skate is shown (briefs/hero-ref/tamsin.md:294, :332). Kept: the hold carries through (owner: every interaction chains)."},
-			"jump": {"mode": "keep", "source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18); no jump is shown (briefs/hero-ref/tamsin.md:297-298, :334). Kept: the hold carries through (owner: every interaction chains)."}
+			"ground": {
+				"mode": "keep",
+				"source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Kept: the hold carries through (owner item 51)."
+			},
+			"air": {
+				"mode": "keep",
+				"source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Air dash not shown (tamsin.md:293-295). Kept: the hold carries through (owner item 51)."
+			},
+			"jump": {
+				"mode": "keep",
+				"source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Jump not shown (tamsin.md:297-298). Kept: the hold carries through (owner item 51)."
+			}
 		}
 	}
 }

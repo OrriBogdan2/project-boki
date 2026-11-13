@@ -179,6 +179,7 @@ Shots connect inside `hit_r + Match.HIT_SLACK (0.08) + the shot's radius`. `--hi
 | Dash | 34 | grid+w | 6.9 | 3.5 | 44 | 6 / – / – | reach +15% |
 
 Gil (13th Hunter, ours only). LMB: one dummy hurt at 0.8 m, the same kind of low melee read as Kael and Tenzo above, so the 3.1 m content reach and 50 degree arc are not confirmed by this probe (cause not traced; a measurement limit or a narrow thrust). E: the probe presses it once, so the row is the 2 s spin (2.3 m against its 2.2 m radius, a match); the 11 m figure is the spout, which needs the second press. RMB: the flask lands on the 8 m throw spot, so the grid ends first (`+r`); the held throw (12 m) lands past the grid and hurts nothing. The probe window now includes the flask's flight (`_flight_s`); without it the RMB row read 0 hits.
+**Finer run for four heroes.** `--hit-shape-fine` (one dummy moved around, game step 60 Hz, edges to about 0.1 m) re-measured Vex, Kael, Lace and Cinder: every area and lane matches its content number to 0.15 m, and the Kael LMB this grid reads short (1.6 m against 3.7 m fine) is a grid effect (each swing ray stops at the first dummy it meets); the same short reads on other heroes' swings (Breah, Bulwark) were not re-measured. Table and sources in docs/KIT_PARITY.md, "Hit shapes in game".
 
 ### Mismatches over 10% (follow-ups; nothing was changed in kits)
 

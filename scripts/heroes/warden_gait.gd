@@ -10,8 +10,8 @@ extends RefCounted
 ##    about the side axis follows minus the leg's, around the arm's running mean (a static arm gets a swing too).
 ##  - "loco.bob": [walk, run] the hips' up and down about their running mean is scaled by it (0..1) for a clip that
 ##    bobs too far for the speed (Grimble 17 cm, Kael 16 cm at a run). The clip's bob is the root bone's, which the
-##    thighs hang from too, so only the hips and what hangs from them (torso, arms, head) are held back: the feet
-##    stay planted.
+##    thighs hang from too, so only the hips and what hangs from them (torso, arms, head) are held back: the feet stay
+##    planted.
 ## Everything fades with how much the legs run the body (not in the air, a crouch, or a move that owns the body).
 
 const LEG_BONES := ["thigh.L", "thigh.R"]

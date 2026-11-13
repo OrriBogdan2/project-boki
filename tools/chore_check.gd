@@ -1,15 +1,17 @@
 extends RefCounted
 ## --chore-check (GARDEN.md section 4): with base_mode on, four Boki live on the real farm for 4 simulated minutes
-## (home.gd _move_kin at 4 steps a second): an Ember one (Wren) with an egg in the Nook, a Mend one (Glom) beside a
-## glum friend, a Haul one (Mole) with a toy spot to fetch the ball back to, and a Boki with none of those knacks
-## (Bur). Each chore starts for the right Boki and nobody else, ends, writes exactly one journal line each time
-## and shows on the debug readout; its effect lands (egg time halved once, joy up); each chore's guard refuses
-## when its reason is gone; no machine refuses a transition. Never touches the real save.
+## (home.gd _move_kin at 4 steps a second) in Bramblebank: a Mend one (Glom) beside a glum friend, a Haul one (Mole)
+## with a toy spot to fetch the ball back to, a Boki with none of those knacks (Bur) and an Ember one (Wren), your
+## partner, who minds the egg only in the hub, where the one Nook is (HubLayout.holds). Each chore starts for the
+## right Boki and nobody else, ends, writes exactly one journal line each time and shows on the debug readout;
+## its effect lands (egg time halved once, joy up); each chore's guard refuses when its reason is gone; no machine
+## refuses a transition. Never touches the real save.
 
 const SIM_SECS := 240.0      # simulated seconds
 const DT := 0.25             # s per farm step
 const HATCH_S := 600.0       # s of home hatch time the egg starts with (home.gd _start_egg)
 const GLUM_JOY := 25.0       # Bur's joy at the start: glum, but one cheer lifts it out of it
+const HUB_FRAMES := 600      # frames to wait for the hub to load
 
 var bad := 0
 var main: Node
@@ -52,17 +54,67 @@ func run(m: Node) -> void:
 	home.ppos = Vector3(-500, 0, -500)
 	var center: Vector3 = home.world.random_ground(0)
 	d["layout"]["deco"].append({"id": "training_post", "u": 990001, "px": center.x + 3.0, "pz": center.z})
-	d["layout"]["deco"].append({"id": "nesting_nook", "u": 990002, "px": center.x - 6.0, "pz": center.z})
-	home._sync_fixtures()
-	home._refresh_nest()
 	home.life.R["chore_chance"] = 1.0      # a chore whenever one can run: the check is about the chores, not the dice
 	d["layout"]["deco"].append({"id": "toy_ball", "u": 990003, "px": center.x + 6.0, "pz": center.z})
 	home._sync_fixtures()
 	for k in home.kins:
 		k["pos"] = home.world.free_spot_near(center + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
-	ok(is_instance_valid(home.nest) and home.life.toy_spots().size() == 1, "an egg sits in the Nook and one toy stands")
+	ok(home.NEST_AT.x < -100.0 and home.life.toy_spots().size() == 1,
+		"Bramblebank: one toy stands and no Nook (the egg waits in the hub's)")
+	var s := _sim(home)
+	var by := {}
+	for k in home.kins:
+		by[k["rec"]["name"]] = k
+	_chore_ran(s, "Glom", "cheer")
+	_chore_ran(s, "Mole", "fetch")
+	ok(not s["kinds"].get("Wren", {}).has("mind") and not d["egg"].get("minded", false),
+		"Wren minds no egg in Bramblebank: there is no Nook there")
+	ok(not s["kinds"].has("Bur"), "Bur has no chore knack and does none")
+	ok(Care.need(by["Bur"]["rec"], "joy") > GLUM_JOY, "Bur's joy went up (%.0f)" % Care.need(by["Bur"]["rec"], "joy"))
+	ok(BaseChore.pick(home.life, by["Glom"]) == "" or Care.need(by["Bur"]["rec"], "joy") < BaseChore.GLUM_AT,
+		"Glom has nobody left to cheer once Bur is up")
+	d["layout"]["deco"] = d["layout"]["deco"].filter(func(e): return e.get("u", 0) != 990003)
+	home._sync_fixtures()
+	ok(BaseChore.pick(home.life, by["Mole"]) == "", "no toy spot: no Haul chore")
+	_no_refusals(home)
+	home.queue_free()
+	await main.get_tree().process_frame
+	await _hub_part(d)
+	Content.rules("farm_build")["base_mode"] = false
+	print("CHORE DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The Ember chore runs at the hub's Nook (HubLayout): Wren, your partner, walks there and minds the egg.
+func _hub_part(d: Dictionary) -> void:
+	Game.goto("home", {"zone": GardenZones.HUB})
+	var hub = null
+	for f in HUB_FRAMES:
+		await main.get_tree().process_frame
+		var cur = Game.main.current
+		if is_instance_valid(cur) and cur.get("zone") == GardenZones.HUB and cur.get("life") != null \
+				and cur.get("building") != true:
+			hub = cur
+			break
+	ok(hub != null and is_instance_valid(hub.nest), "the hub loads with the egg in its Nook")
+	if hub == null:
+		return
+	hub.life.R["chore_chance"] = 1.0
+	hub.ppos = Vector3(-500, 0, -500)
 	var left0 := float(d["egg"]["t"]) - Time.get_unix_time_from_system()
+	var s := _sim(hub)
+	_chore_ran(s, "Wren", "mind")
+	var wren: Dictionary = Save.active_kin()
+	var left := float(d["egg"]["t"]) - Time.get_unix_time_from_system()
+	ok(_lines(wren, "minded the egg") == 1, "the egg was minded once, with one line")
+	ok(d["egg"].get("minded", false) and left <= left0 * 0.55,
+		"minding halved the egg's hatch time once (%.0f of %.0f s)" % [left, left0])
+	d["egg"] = {}
+	ok(BaseChore.pick(hub.life, hub._kin_entry(wren)) == "", "no egg in the Nook: no Ember chore")
+	_no_refusals(hub)
+
+## SIM_SECS of farm steps on `home`, watching every Boki: {kinds, starts, writes, last_chore, shown}.
+func _sim(home) -> Dictionary:
 	var kinds := {}        # name -> {kind: true}: the chores each Boki was seen doing
 	var starts := {}       # name -> chores begun (a Boki can finish one and begin the next in a single step)
 	var writes := {}       # name -> journal lines written
@@ -93,38 +145,21 @@ func run(m: Node) -> void:
 				if not shown.has(kind) and home.life.readout().contains("Chore " + kind):
 					shown[kind] = true
 	print(home.life.readout())
-	var by := {}
-	for k in home.kins:
-		by[k["rec"]["name"]] = k
-	var want := {"Wren": "mind", "Glom": "cheer", "Mole": "fetch"}
-	for who in want:
-		var seen: Dictionary = kinds.get(who, {})
-		ok(seen.keys() == [want[who]], "%s does only the %s chore (%s)" % [who, want[who], seen.keys()])
-		var ended := int(starts.get(who, 0)) - (1 if last_chore.get(who, false) else 0)
-		ok(ended >= 1, "%s's %s chore ends (%d of %d begun)" % [who, want[who], ended, int(starts.get(who, 0))])
-		ok(int(writes.get(who, 0)) == ended,
-			"%s wrote one journal line per chore (%d lines)" % [who, int(writes.get(who, 0))])
-		ok(shown.has(want[who]), "the readout shows Chore %s" % want[who])
-	ok(not kinds.has("Bur"), "Bur has no chore knack and does none")
-	var wren: Dictionary = by["Wren"]["rec"]
-	var left := float(d["egg"]["t"]) - Time.get_unix_time_from_system()
-	ok(_lines(wren, "minded the egg") == 1, "the egg was minded once, with one line")
-	ok(d["egg"].get("minded", false) and left <= left0 * 0.55,
-		"minding halved the egg's hatch time once (%.0f of %.0f s)" % [left, left0])
-	ok(Care.need(by["Bur"]["rec"], "joy") > GLUM_JOY, "Bur's joy went up (%.0f)" % Care.need(by["Bur"]["rec"], "joy"))
-	ok(BaseChore.pick(home.life, by["Glom"]) == "" or Care.need(by["Bur"]["rec"], "joy") < BaseChore.GLUM_AT,
-		"Glom has nobody left to cheer once Bur is up")
-	d["egg"] = {}
-	ok(BaseChore.pick(home.life, by["Wren"]) == "", "no egg in the Nook: no Ember chore")
-	d["layout"]["deco"] = d["layout"]["deco"].filter(func(e): return e.get("u", 0) != 990003)
-	home._sync_fixtures()
-	ok(BaseChore.pick(home.life, by["Mole"]) == "", "no toy spot: no Haul chore")
+	return {"kinds": kinds, "starts": starts, "writes": writes, "last_chore": last_chore, "shown": shown}
+
+## `who` did only chore `kind`, it ended, one journal line each time, and the readout showed it.
+func _chore_ran(s: Dictionary, who: String, kind: String) -> void:
+	var seen: Dictionary = s["kinds"].get(who, {})
+	ok(seen.keys() == [kind], "%s does only the %s chore (%s)" % [who, kind, seen.keys()])
+	var begun := int(s["starts"].get(who, 0))
+	var ended := begun - (1 if s["last_chore"].get(who, false) else 0)
+	ok(ended >= 1, "%s's %s chore ends (%d of %d begun)" % [who, kind, ended, begun])
+	var writes := int(s["writes"].get(who, 0))
+	ok(writes == ended, "%s wrote one journal line per chore (%d lines)" % [who, writes])
+	ok(s["shown"].has(kind), "the readout shows Chore %s" % kind)
+
+func _no_refusals(home) -> void:
 	var refused := 0
 	for k in home.kins:
 		refused += (k["life"] as Fsm).refused
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
-	Content.rules("farm_build")["base_mode"] = false
-	home.queue_free()
-	await main.get_tree().process_frame
-	print("CHORE DONE, failures: %d" % bad)
-	main.get_tree().quit(1 if bad > 0 else 0)

@@ -201,18 +201,20 @@ func _cancel(carry: bool) -> void:
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(h.base_speed)
 	h.vel = Vector3(flat.x, h.vel.y, flat.y)
 
-## Seconds until the hunter's crowd control allows `slot` (0: it does now). A stun stops every slot but Q's glove
-## and an ult's recast, a root the dash, Grounded the dash (not a reeling Dredge's) and the jump.
+## Seconds until the hunter's crowd control allows `slot` (0: it does now). A stun or the kit's committed recovery
+## (ArchKit.commit_left) stops every slot but Q's glove and an ult's recast, a root the dash, Grounded the dash (not
+## a reeling Dredge's) and the jump.
 func cc_left(slot: String) -> float:
 	var h := kit.h
 	if slot == "q" or (slot == "x" and kit.ult_running()):
 		return 0.0
+	var stop := maxf(h.stun_t, kit.commit_left())     # a stun, or the kit's own committed recovery: every slot
 	if slot == "dash":
 		var ground := 0.0 if DredgeKit.reeling(h) else KitStatus.grounded_left(h)
-		return maxf(h.stun_t, maxf(h.root_t, ground))
+		return maxf(stop, maxf(h.root_t, ground))
 	if slot == "jump":
-		return maxf(h.stun_t, KitStatus.grounded_left(h))
-	return maxf(h.stun_t, 0.0)
+		return maxf(stop, KitStatus.grounded_left(h))
+	return stop
 
 ## Presses the CC forbids now, in its last Loco.press_buffer: held for the first step it allows them. A held LMB is left
 ## alone (it fires on its own once allowed); a tap is replayed. A cast that holds the hunter still (Rimelock's

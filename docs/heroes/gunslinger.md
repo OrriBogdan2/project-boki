@@ -26,6 +26,7 @@ a merge cannot one-shot a full-health Light even at level 10 (growth +35%). The 
 second; the footage build's 144 a tick would be about 14) and slows 30%. Its cooldown follows the source's 37.5 s at our pace,
 42 s. Ranges use
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Longneedle 18 m (10 bh),
+slide tap 4.6 m and hold 7 m (the whole hold from the press: the skid, then the slide covers the rest).
 slide tap 4.8 m and hold 7 m.
 
 ## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
@@ -83,6 +84,7 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | E | recoil | a ~0.5 bh shove back on fire [footage] | the shove, and a screen shake on your own camera | the shove; no screen shake (owner rule 50) |
 | R | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
 | Shift | | a front-loaded 0.45s skid, firing through it [footage] | already the source's (kit data pass) | unchanged |
+| Shift held | length | no number in the source; the footage's slides (frames 0117-0121, 0134-0138, 0149-0153) run ~1.2x, ~1.6x and 1x the fitted 4.73 m tap, so its longest is ~7-8 m, none near 10 m [footage] | 9.7 m: the 0.18 s skid (2.7 m), then a 7 m slide on top | 7.1 m in 0.73 s from the press: the slide covers what the skid left of `slide` (7 m); felt-dash `hold` row in `--move-feel-check` |
 
 ## Timing pass (Nov 8)
 
@@ -100,20 +102,23 @@ FADE_LOCO): both under one footage frame. Seconds from the press.
 | Shift tap | skid ~0.45, upright by 0.55-0.6 | skid ends 0.53 (dash feel's time scale), clip 0.87 (stand-up key 0.62), legs back 1.03; walking off: the clip's standing legs stayed on her (full 1.00) to 0.75 and past | walking off the skid, the legs are hers from the skid's end (loco blends in by 0.68) |
 | Shift held | the slide holds, she stands as it ends | the clip stood up at 0.62 mid-slide (skid ends 0.73) | the clip holds its slide key (0.45) while she slides; stand-up 0.73, legs back 1.30 |
 | Shift in the air / dash_ex | not in the footage | 0.87 clip at the air hop, 0.6 travel | unchanged |
-| E Longneedle | cast bar 0.6, shove 0.2, recovery ~0.4 (settled ~1.2) | beam 0.63 on the clip's fire key (0.65), clip 1.07, legs back 1.23; walking after the shove: the clip's standing legs stayed on her to 1.05 and past | beam 0.63; walking off after the shove (from 0.8) the legs are hers (loco in by 1.03) |
-| X Cinderfall | raise then fire ~0.2, ~0.8 committed, no move seen | star, column and shot sfx on the press (0.02); clip 0.60, arm down 0.77; walking: frozen legs (full 1.00) | the shot leaves on the clip's kick key (0.14: the barrel is up at 0.1); walking through it the legs walk (upper body raise); the disc and column still show at the press |
+| E Longneedle | cast bar 0.6, shove 0.2, recovery ~0.4 (settled ~1.2) | beam 0.63 on the clip's fire key (0.65), clip 1.07, legs back 1.23; walking after the shove: the clip's standing legs stayed on her to 1.05 and past | beam 0.63; then held 0.6 s (`GunslingerKit.E_RECOVER`: the 0.2 s shove, which still carries her back, and the ~0.4 s recovery): no walk, jump, Shift, LMB, RMB, E or X until 1.23, the frame the clip hands the body back (1.07 + the 0.16 fade); a press in the last 0.15 s goes then, an earlier one is dropped |
+| X Cinderfall | raise then fire ~0.2, ~0.8 committed, no move seen | star, column and shot sfx on the press (0.02); clip 0.60, arm down 0.77; walking: frozen legs (full 1.00) | the shot leaves on the clip's kick key (0.14: the barrel is up at 0.1); held 0.76 s from the tap (`GunslingerUlt.COMMIT`, the source's ~0.8 s within a frame): no walk, jump, Shift or ability until the clip hands the body back on that frame (0.60 + the 0.16 fade; the clip is full body again, no upper-body walk); a press in the last 0.15 s goes then; the disc and column still show at the press |
 | Knock (gunslinger_knock) | not in the footage | 0.60 clip, back 0.77 | unchanged |
 | Hit, land | not in the footage | hit 0.42, land 0.4 | unchanged |
 
-Not built (ours, for the owner): an E recovery lock of ~0.4 s after the beam (the source's ~0.4 s recovery; ours
-lets her walk right after the shove, which the recoil impulse already allows) and the source's ~0.8 s X commit
-(ours is 0.6 s of clip, free to walk).
+Both holds are the source's (PARITY FIRST, briefs/DECISIONS.md 2026-11-07; no owner note on a Vex E or X recovery):
+the frames are briefs/hero-ref/venator.md E 4 and section 7 (fire, then the shove 556.6-556.8 s at 0170, recovery
+~0.4 s) and R 4 (raised 561.8-562.0 s, fired 562.2-562.4 s, ~0.8 s committed, no move seen). The presses wait as
+after crowd control: DashFlow's 0.15 s exit buffer (docs/decisions/0022-cc-exit-buffer.md) reads the kit's
+`commit_left()`. Q's glove and the Boki's C still go in a hold, as through a stun. Asserted in
+--gunslinger-combo-check (`Vex timing E/R: held ...`, `... goes as it lifts`, `... after the hold she walks`).
 
 Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 are that branch's):
 
 | Clip | Re-key |
 |---|---|
-| x | hold the barrel up from 0.1 to ~0.3 (the source's raise then fire) and settle by ~0.8 if the owner wants the source's 0.8 s commit; the shot's kick key stays at 0.14 (GunslingerUlt.FIRE_T) |
+| x | hold the barrel up from 0.1 to ~0.3 (the source's raise then fire); the clip's end + fade must stay on GunslingerUlt.COMMIT (0.76) and the kick key at 0.14 (GunslingerUlt.FIRE_T) |
 | rmb | the swing could return by ~0.3 (a tap, item 112); 0.5 now |
 | dash | a loopable slide window around 0.45 (the held slide holds that key; a 2-3 key loop would read better than a still) |
 | lmb | none: 0.53 at a 0.08 cadence re-plays from its kick each round |
@@ -133,6 +138,9 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 | E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain; the line locks to the press direction and turns toward the cursor at most `turn_deg_s` 90 deg/s (so a flick cannot drag it), and the beam goes exactly along it | a 1.8 m wide beam (0.9 m either side, was 0.5: item 68) through everything in line: 24, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
 | Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
 | X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3.5 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
+| E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain; the line locks to the press direction and turns toward the cursor at most `turn_deg_s` 90 deg/s (so a flick cannot drag it), and the beam goes exactly along it | a 1.8 m wide beam (0.9 m either side, was 0.5: item 68) through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step, then she recovers 0.6 s from the beam, held still | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
+| Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
+| X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she stands 0.76 s for the shot, then moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | R / T | | | the Boki Merge (the Boki system's key) | | | |
 | R Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | X | | | Fuse with your Boki (the Boki system's key) | | | |
@@ -158,12 +166,17 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
 Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
-that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
-line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
-(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet briefs/hero-ref/venator.md (5 fps: one frame is 0.2 s,
+so a buffer shorter than that can't be seen), [W] the wiki page linked above and its patch notes, [O] the owner
+(DECISIONS / OWNER_REVIEW_1103). The 11-09 cancel-matrix pass read the code and probed it headless. The 11-12 pass
+settled the 11 rows it had left unsettled. None of [D], [F] or [W] shows those pairs: the card lines (supervive_kits.md
+:47-51) give no cancel, the clips never press a second key during these moves, and no wiki or patch line on the kit
+(the slide's air tap, 05.03.25; the 0.8 s charge) names a cancel. So each row follows the owner where they have a line (162b, 51), otherwise
+**rule**: DECISIONS 11-07 "every interaction is chainable" read through DashFlow's default (decision 0015: a missing
+row combines, so the second press goes and the first runs on). Each row is one assert in `--gunslinger-combo-check`
+("Vex cancel ...", tools/vex_cancel_rows_check.gd). Any pair not in the table: both (ArchKit has no shared cast lock),
+except that every press is ignored, not buffered, while stunned or downed, and no hero but Vex fires from a glide
+(`Hunter.can_fire`, `ArchKit.fires_in_glide`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
@@ -172,18 +185,28 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 | E wind-up | jump | not shown (he stands still, no jump pressed in the clip) | both: a 0.9 m hop, the charge goes on (walking is 0 in the cast) | unsettled | [F] 555.8-556.4 s |
 | E wind-up | X | not shown | ignored, not buffered (`GunslingerUlt.cast` refuses while the needle charges) | unsettled | |
 | E wind-up | glide | not shown | the glider opens, the charge goes on | unsettled | |
-| E recovery (about 0.4 s after the recoil) | any | not shown | the cast is over at the beam: everything goes at once | unsettled | [F] 0170 |
+| E recovery (0.6 s from the beam: the shove, then about 0.4 s) | any (but Q's glove, the Boki's C) | committed: he stands through it | waits: a press in its last 0.15 s goes as it ends, an earlier one is dropped | match | [F] 0170, venator.md E 4 |
+| E Longneedle, wind-up (0.6 s, standing still) | LMB | not shown: the rifle is braced through the cast bar, but no press is seen | both: the rifle fires through the charge (3 rounds in 0.3 s) and the beam still goes | both | rule; [F] 0164-0169 shows no press |
+| E wind-up | RMB | not shown | both: the grenade leaves, the beam still goes | both | rule |
+| E wind-up | jump | not shown (he stands still, no jump pressed in the clip) | both: a 0.9 m hop, the charge goes on (walking is 0 in the cast) | both | rule (no `into_jump.e` row: combine); [F] 555.8-556.4 s |
+| E wind-up | X | not shown | both: Cinderfall goes and the beam still goes (was ignored: `GunslingerUlt.cast` refused while the needle charged) | both, **fixed** | rule |
+| E wind-up | glide | not shown | waits: the glider stays shut through the charge (`AirLimits`: the needle's charge) and the recoil shove; held, it opens about 0.42 s after the beam (the 11-09 pass had it opening at once, which main never did) | waits | [O] OWNER_REVIEW_1103 162b: no glider during an ability animation, it opens after, buffered |
+| E recovery (about 0.4 s after the recoil) | any | not shown | no lock: a jump, LMB and RMB go the step the beam fires (Shift: [dash_interactions.md](dash_interactions.md)); only the glider waits out the recoil shove (row above) | both | [O] item 51: a jump or Shift leaves any recovery within 0.1 s; rule; [F] 0170 shows the recoil only |
 | X Cinderfall, after the shot (shell falling 1.6 s) | walk, jump, LMB | free: he walks and takes a jump pad while it falls | free: she moves, jumps and shoots | match | [F] ult f103 |
-| X | E, RMB | not shown | both | unsettled | |
+| X, the commit (0.76 s from the tap) | any (but Q's glove, the Boki's C) | about 0.8 s committed, no move seen | waits: a press in its last 0.15 s goes as it ends, an earlier one is dropped | match | venator.md R 4 |
+| X, after the commit | E, RMB | not shown | both | unsettled | |
 | LMB held (the string) | RMB, E, X | not shown | both: the string goes on through each | unsettled | |
 | LMB held | jump | not shown (he fires while walking) | both | unsettled | [F] 0007-0023 |
+| X | E, RMB | not shown | both: each goes while the shell falls | both | rule |
+| LMB held (the string) | RMB, E, X | not shown | both: each goes and the string goes on through each (X too while the E charges) | both | rule (no `hold.lmb` row: keep) |
+| LMB held | jump | not shown (he fires while walking) | both: the string goes on through the hop | both | rule (no `hold.lmb.jump` row: keep); [F] 0007-0023 |
 | RMB (the launcher shot) | any | owner item 112: a tap, no hold and no throw, so there is no wind-up to cancel | instant: everything goes at once | owner | OWNER_REVIEW_1103 112 |
-| Glide | LMB | not shown | ignored | unsettled | |
-| Glide | RMB, E, X | not shown | each goes (RMB as its air variant) | unsettled | |
+| Glide | LMB | not shown | both: the rifle fires from the open glider, which stays open (was ignored) | both, **fixed** | rule; MOVEMENT_FEEL "an open glider is never folded" |
+| Glide | RMB, E, X | not shown | each goes (RMB as its air variant), the glider stays open | both | rule |
 
-Fixes made: none. No pair has a source frame or line that disagrees with ours. Timing note (not a cancel): the
-wiki's Railgun reads "Charge for 0.8s"; ours is the footage's 0.6 s cast bar (a later patch than the clip, or the
-level-9 hunter).
+Fixes made (11-12): X during the Longneedle's charge now casts (`GunslingerUlt.cast` no longer refuses), and her
+rifle fires from an open glider (`GunslingerKit.fires_in_glide`). Timing note (not a cancel): the wiki's Railgun reads
+"Charge for 0.8s"; ours is the footage's 0.6 s cast bar (a later patch than the clip, or the level-9 hunter).
 
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
@@ -196,7 +219,7 @@ level-9 hunter).
 | The push-out scales with the aim distance: none inside 5 m (`view_near_m`), a smooth ramp to the full 25% at the 18 m range, eased | Owner item 144b | not shown | yes: "an aim at 3 m leaves the camera alone" |
 | Aim stays free through a dash: the body and rifle stay on the cursor, only the legs follow the slide (owner item 109) | Owner | slides up-left while firing up-right | yes: "Vex item 109", `--dash-aim-check` |
 | Combat Slide: tapped in the air for 2/3 of the full-hold distance | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "an air tap slides 2/3 of the full hold" |
-| Hold = a longer dash on a longer cooldown, no refund | kit data (SERVER_UPDATE7) | not separable | yes: "a held slide is owed a longer cooldown and letting go early refunds nothing" |
+| Hold = a longer dash on a longer cooldown, no refund | kit data (SERVER_UPDATE7) | longest slide ~1.6 taps (frames 0134-0138) | yes, 7 m in all (`felt dash gunslinger hold`): "a held slide is owed a longer cooldown and letting go early refunds nothing" |
 | Knocks reset the slide | [wiki](https://supervive.wiki.gg/wiki/Ghost) | not shown | yes |
 | The omnivamp stacks wear off all at once | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 05.03.25 | not shown | yes: "Fever wears off all at once"; "one flat level of 6%" |
 | Railgun pierces terrain and every target | [wiki](https://supervive.wiki.gg/wiki/Ghost) | crosses a chasm | yes: through a wall, two targets |

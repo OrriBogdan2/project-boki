@@ -575,10 +575,11 @@ func rmb_hold_tick(t: float) -> void:
 			{
 				"range": float(ld["range"]), "r": float(ld["zone_r"]), "ticks": true, "star": true,
 				"col": Color("dffcff")})
+	AimReach.ring(self, "rmb")
 	if not spear_aim:
 		spear_aim = true
-		play("tm_spear_aim")
 		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)
+	play_hold("tm_spear_aim", t)
 	HeroVfx.of(m).hold(h, "spear_aim")
 	_hold_spear(lerpf(0.45, 1.0, clampf(t / SPEAR_FORM_T, 0.0, 1.0)), -0.25)
 
@@ -636,7 +637,9 @@ func _release_spear() -> void:
 	var dir := h.aim_dir()
 	var start := _spear_at(0.0)
 	var spd := float(ld["speed"])
-	var dist := AimMode.dist(h, float(ld["range"]))
+	# from her palms to the held ring's centre: a far cursor lands on the range edge, not SPEAR_AHEAD past it
+	var to := AimMode.point(h, float(ld["range"]))
+	var dist := Vector2(to.x - start.x, to.z - start.z).length()
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "kx": on_land}
 	# the spear itself does no damage on the way: its hit is the landing's small area (_spear_land)
@@ -799,13 +802,13 @@ func combo_marks(out: Array) -> void:
 	for key in chill:
 		var c: Dictionary = chill[key]
 		if is_instance_valid(c["t"]):
-			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), "CHILL", true))
+			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), true))
 	for key in fan_hits:
 		var f: Dictionary = fan_hits[key]
 		if is_instance_valid(f["t"]):
 			var n := int(f["n"])
 			var full := n >= int(pd.get("fan_hits", 8)) - 1
-			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, "FAN", full))
+			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, full))
 
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
@@ -1069,7 +1072,8 @@ func rime_slow_of(f: Ent) -> float:
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
-	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
+	var open := float(rime["t"]) - float(xd["snap_t"])          # s since it opened: the frost edge flashes
+	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k, "open": open})
 	ulk().keep("bud", "frostbud", at, {"grow": snap, "crack": k})
 	AimKit.circle(h, "x", {"at": at, "r": radius, "band": RINK_BAND, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt

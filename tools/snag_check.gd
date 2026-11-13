@@ -22,8 +22,9 @@ const TIMERS := [
 ]
 const SEG_S := {"run": RUN_S, "dash": DASH_HOLD_S + 0.5, "glide": GLIDE_S}     # s per segment kind
 const GLIDE_WANT := 4.5        # m/s: the glide's cruise (MaxGlide), the wanted speed while gliding
-const MAX_STALLS := 2          # over this fails (2 are left: a dolm and a tender glide, see docs/MOVEMENT_FEEL.md)
+const MAX_STALLS := 0          # over this fails (docs/MOVEMENT_FEEL.md, snag audit)
 const WORST := 12
+const WARD_PAD := 2.0          # m: a sealed lair's ward bounces a body this close back out by design (Lairs)
 
 var bad := 0
 var m: Match
@@ -198,7 +199,8 @@ func _stall(arch: String, kind: String, dir: Vector2) -> void:
 	var reach := Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if HunterMove.climbs_tall(P) else 0.0)
 	var d := dir.normalized()
 	var slide := _ideal_slide(d, reach)
-	if slide < STALL_FRAC:
+	var ward: Dictionary = m.lairs.lair_of(P.pos, WARD_PAD) if m.lairs else {}
+	if slide < STALL_FRAC or String(ward.get("state", "")) in ["sealed", "dormant"]:
 		return
 	stalls += 1
 	var key := "%d,%d" % [int(floor(P.pos.x)), int(floor(P.pos.z))]

@@ -25,7 +25,7 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 
 | layer `p` | what | key fields |
 |---|---|---|
-| `sweep` | an arc of flame, burning away | `size`, `arc` deg, `tilt`, `yaw`, `flip` |
+| `sweep` | an arc of flame, burning away; its head runs the arc in `turn` s (default 0.28 of the life); `band` (0..1 of its depth) draws an even blade, not tapered (a 360 ring) | `size` outer radius, `arc` deg, `tilt`, `yaw`, `flip`, `turn`, `band` |
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
@@ -79,6 +79,9 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
+- **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
+  (`--hunter-colour-gap-check`). Gil is sea teal `#2fa08c` (was `#4aa8ff`, 0.117 from Tenzo's blue). Nine older pairs
+  under the bar wait for the owner (the check's `OPEN` list, docs/DEBT.md).
 - **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m, swirls at most 4.5 m (checked).
@@ -99,3 +102,13 @@ puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, w
 range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
 oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
 asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).
+
+## Shot floor (LMB projectiles)
+Every LMB projectile (not a swing, decoy, mob shot or ability, which have their own tells) carries `ShotFloor`'s
+beacon: a hot white core at least `MIN_CORE_PX` (6 px) across at 720p (9 px at 1080p) with the default camera, sized
+at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.far_depth`), inside a side-coded rim
+(foe's shots red-orange, your side's cool and softer), drawn over particles (render priority) on its own render layer
+(`ShotFloor.LAYER`). The shot keeps its own look and Hunter ability colour. It is visual only: the hit radius
+`s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
+the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
+exactly that size and measures its own look, the core and the rim in pixels across the flight line.

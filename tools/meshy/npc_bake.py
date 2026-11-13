@@ -10,6 +10,32 @@ import bpy
 TEX = 1024
 
 
+def _meters() -> None:
+    """Meshy's rig is an Armature object scaled 0.01 over a skeleton in cm: Godot skins the mesh in the skeleton's own
+    space and ignores that scale, so the mesh came out 100x big. Apply the scale (bones in metres, the clips' bone
+    moves scaled to match, the mesh's own scale applied) and drop the importer's stray bone-shape sphere."""
+    for o in list(bpy.data.objects):
+        if o.type == "MESH" and o.parent is None:
+            bpy.data.objects.remove(o)
+    arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
+    mesh = next(o for o in bpy.data.objects if o.type == "MESH")
+    k = arm.scale[0]
+    for o in (arm, mesh):
+        for x in bpy.data.objects:
+            x.select_set(False)
+        bpy.context.view_layer.objects.active = o
+        o.select_set(True)
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    for a in bpy.data.actions:
+        for fc in a.fcurves:
+            if fc.data_path.endswith(".location"):
+                for kp in fc.keyframe_points:
+                    kp.co.y *= k
+                    kp.handle_left.y *= k
+                    kp.handle_right.y *= k
+                fc.update()
+
+
 def main(src, out, nid, pairs):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=src)
@@ -22,6 +48,7 @@ def main(src, out, nid, pairs):
                 break
         else:
             bpy.data.actions.remove(a)
+    _meters()
     for m in bpy.data.materials:
         if not m.use_nodes:
             continue

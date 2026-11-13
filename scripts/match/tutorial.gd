@@ -65,7 +65,7 @@ var down_t := 0.0
 var flag := false
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
-var stall_got := 0            # got at the last look: a hit or a cast is progress too
+var stall_got := 0            # got + camp kills at the last look: a hit, a cast or a kill is progress
 var best_d := 1e9            # closest you've been to this step's target
 var target := Vector3.INF    # where the marker points (INF for none)
 var label := ""
@@ -263,6 +263,7 @@ func _enter() -> void:
 	var sid := id()
 	t = 0.0
 	card_t = 0.0
+	TutorialStrip.chime(m)
 	m.bubbles.clear()       # one voice at a time: the old step's lines go, the banner has the floor
 	if m.hud:
 		m.hud.msgs.clear()
@@ -297,17 +298,19 @@ func _enter() -> void:
 			var o := outpost()
 			if not o.is_empty():
 				m.ping(o["pos"], ExitModels.UPLINK)
+	if sid == "kin" and p.ak:
+		p.ak.cd["e"] = 0.0      # (an E pressed again on the unlock step fired at nothing: it is ready when asked for)
 	if sid == "hook" and (p.gear[0] as Dictionary).is_empty():
 		p.gear[0] = {"id": "grapple", "rar": 1}      # (skipped ahead past the glove: it is yours anyway)
 		p.refresh_gear()
 	_words()
 
-## The tutorial's monsters: many times the health and bigger, barely a scratch when they hit, slow
-## telegraphed attacks (content/rules/tutorial.json "mob"). A camp's monsters take camp_hp instead of hp, so
-## the kills that pay its XP come quickly. Real matches keep the global stats.
-func tank(mb: Mob, camp: bool) -> void:
+## A tutorial camp's monster: `hp` times the health (camp_hp, or the camp's own "hp"), so the kills that pay
+## its XP come quickly; bigger, barely a scratch when it hits, slow telegraphed attacks (content/rules/tutorial.json
+## "mob"). Real matches keep the global stats.
+func tank(mb: Mob, hp: float) -> void:
 	var c: Dictionary = Content.rules("tutorial")["mob"]
-	mb.max_hp *= float(c["camp_hp"] if camp else c["hp"])
+	mb.max_hp *= hp
 	mb.hp = mb.max_hp
 	mb.dmg_mult = float(c["dmg"])
 	mb.r *= float(c["scale"])
@@ -496,14 +499,17 @@ func _point(sid: String) -> void:
 ## more. No card comes back and nothing pauses.
 func _stall(dt: float) -> void:
 	stall_t += dt
-	if got != stall_got:
-		stall_got = got
+	var progress := got + camps.killed()      # (a monster of the step's camp falling is progress too)
+	if progress != stall_got:
+		stall_got = progress
 		stall_t = 0.0
 	if target != Vector3.INF and id() not in FOE_STEPS:      # (a monster walking up to you is not progress)
 		var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 		if d < best_d - 1.0:
 			best_d = d
 			stall_t = 0.0
+	if id() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
+		stall_t = 0.0      # (holding the circle while the capture runs is the progress)
 	if stall_t >= NAG_T and wait <= 0.0:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
@@ -641,6 +647,11 @@ func scout_hint() -> String:
 		return ""
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 	return "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch") if d > FAR_SCOUT else ""
+
+## The world prompt label waits: while the banner is fresh, and for the whole step when the card already
+## carries the interact key (it says the same thing; one prompt, not two).
+func prompt_quiet() -> bool:
+	return card_up() or (step >= 0 and step < steps().size() and KEYS.get(id(), "") == "interact")
 
 ## The banner is up (the first CARD_T of a step): other popups wait their turn.
 func card_up() -> bool:

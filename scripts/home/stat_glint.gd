@@ -67,6 +67,7 @@ static func _shows(k: Dictionary) -> bool:
 	return (k["node"] as Node3D).is_visible_in_tree()
 
 func _fire(k: Dictionary, s: String, was: int) -> void:
+	StatMeaning.rise(h, s)
 	var g := _open(k)
 	if g.is_empty():
 		g = {"k": k, "stats": [], "from": {}, "t": 0.0}

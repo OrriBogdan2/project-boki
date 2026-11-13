@@ -1,3 +1,58 @@
+# Animation quality audit
+
+## Monsters at match zoom: every state on the body (Nov 10)
+
+`scripts/match/mob.gd` telegraphs every attack on the ground; `mob_models.gd` sculpts the six common monsters
+(the brute family includes the Watcher). Audited by reading the pivot code `Mob.render` drove before, state by state.
+`ok` = a real move; `thin` = one small tweak (a lean, a flare); `static` = nothing but the shared body lean, so the
+tell or the reaction did not read on the body. `n/a` = the kind cannot enter the state (no attack, never moves).
+
+| kind | idle | walk / run | wind-up | strike | stagger | hit flinch | death |
+|---|---|---|---|---|---|---|---|
+| skitter | thin (legs shiver, jaw) | ok walk, run = walk | ok (jaws, legs splay) | thin (jaws only) | static | static (lean) | static (shared pop) |
+| spitter | ok (leaf sway) | thin (bulb scale 3%) | ok (bulb swells, leaves lift) | thin (one tilt) | static | thin (leaves) | static |
+| brute / warden | ok (breath, head turn) | ok walk, run = walk | ok (fists overhead) | ok (arms slam) | static | static | static |
+| puffbomb | thin (hops while still) | ok | ok (swell, flap) | n/a (it bursts: death) | static | static | static |
+| sentinel | ok (crystal spins) | n/a (shoves only: static) | ok (spin up) | static (spin just stops) | static | static | static |
+| glimmerkin | thin (hops while still) | ok | n/a | n/a | static | static | static |
+
+Cross-cutting gaps: **stagger and hit flinch were the shared lean for every kind** (nothing on the limbs, jaws, leaves or
+crystal), **death was one swell-and-flatten for every kind**, **run was the walk**, and the **strike had no follow-through
+on four of five attacking kinds**.
+
+### What changed
+
+`scripts/match/mob_anim.gd` (`MobAnim`) holds keyed moves per kind and state (tracks of pivots, channel and keys, baked
+once into 32-sample curves), and `Mob.render` calls `MobAnim.pose` instead of the per-kind `match` block it replaces.
+Every kind now has the table below; `check` runs on all of it.
+
+| state | what plays | phase |
+|---|---|---|
+| idle | slow breathing / sway per kind, jaw chew, ear twitch, crystal spin | loop (`IDLE_S`, offset per monster) |
+| walk | skitter tripod, brute stride and arm counter-swing, spitter root hop, puffbomb and glimmer bounds | gait distance (`Mob.anim`) |
+| run | the walk at 1.4x amplitude (above 3.6 m/s) | same |
+| wind-up | gather, coil, raise, inflate, spin up | `MobAnim.windup_k`: **the same fraction the ground telegraph fills with** |
+| strike | the blow and its follow-through (jaw snap and leap, spit recoil, slam and heave, crystal kick) | blow + recovery, `RECOVER_S` |
+| stagger | slack legs / drooping leaves and ears / bowed brute / dimmed crystal | loop, 2 s |
+| flinch | a 0.12 s recoil along the hit flash | `FLASH_S` |
+| death | per kind: legs curl, bulb wilts, brute topples, puff bursts, crystal cracks out, ears droop | `DEATH_S` (0.32 s) |
+
+The wind-up cannot drift from the telegraph: `Mob.sim`, the proxy path (`_net_telegraph`) and `MobAnim.phase_of` all use
+`windup_k(st_t, windup)`, and `--mob-anim-check` steps the real sim and compares the two every frame.
+
+### Proof
+
+`godot -- --mob-anim-check` (registered in `tools/check_registry.gd`): every state a kind can enter has tracks that move
+at least 0.02 and loops that close; every pivot named exists in the model; the wind-up fraction equals the telegraph's
+shader progress on every frame, lasts the data's `windup` seconds to within one frame, and the first pivot sits on its
+key at the end; 30 monsters pose in under 0.5 ms a frame (0.21 ms measured, 300 frames, headless).
+
+`--perf-bench` (30 s match, jobq rp1, software GL so wall time is noise; script numbers compare): match script avg
+24.2 ms before, 21.4 ms after (p99 49.9 / 44.2 ms); step section `mobs` 3.17 ms before, 3.04 ms after. No regression;
+the per-kind `match` block with its string-built node lookups is gone from the frame.
+
+Not covered: the old procedural models used only with `--art1` lose their per-kind wobble (they were hand-driven by the
+removed block); pack-model (`.glb`) monsters keep their clips; bosses and Blight monsters have their own renderers.
 # Animation quality audit: every Hunter walking, running and using the arms (Nov 8)
 
 The owner (Nov 8): all Hunter animations look janky, in walking and in arm use. The `anim-time-*` jobs fixed timing
@@ -16,12 +71,15 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   - **clip speed**: the feet's backward speed at rate 1 (`foot_mps`), against the move speed.
   - **bob**, **steps/s** (cadence, timed between a leg's forward crossings), loop seams and first-pose gaps (`pop`, in body heights) of idle to walk, walk to run.
   - Attack rows (two per Hunter): the largest one-frame hand jump and the free arm's travel (body heights), and the
-    share of frames with an arm raised 60 degrees or more and sideways (T-pose).
+    share of frames with an arm raised 60 degrees or more and sideways (T-pose). Since 0.24.5 they read the arms about
+    the hips with the hips' tilt taken out, so a cartwheel or somersault no longer counts as an arm raised or flung (a
+    turn about the vertical still does). The attack numbers quoted below before Sable's were read in the model frame;
+    re-read this way most move a few points, the most `juggernaut` slash_r free arm sideways 8 -> 33 % and `tender` seed 4 -> 17 %.
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
-- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
+- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, a
+  counter under 0.3, or a hip bob over 11 cm at a run on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open.
 
 ## What is wrong with all of them
@@ -52,6 +110,9 @@ body (not in the air, a crouch, or a move that owns the body):
 - **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble and Kael: 1.0, 0.55).
   The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso, arms,
   head) are held back; the feet stay planted and slide is unchanged.
+- **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble 1.0, 0.55; Kael 1.0,
+  0.6). The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso,
+  arms, head) are held back; the feet stay planted and slide is unchanged.
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
@@ -67,6 +128,7 @@ its strike key: his snap keeps both palms through the shove (the source's releas
 full orb lets its casting arm go at 0.2 s and the Trade lob at 0.22 s, so the arm hangs on the recovery instead of holding its
 elbow out.
 clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `mage` (rmb: the left arm, which the clip keys out and forward while the right hand throws the rod).
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r), `mage` (rmb: the left arm, which the clip keys out and forward while the right hand throws the rod) and `thief` (vault_r: the left arm, vault_l: the right; the pistol arm that leads the cartwheel keeps its key).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out. It measures every clip a Hunter's data names in
 `free_arm`, not only the two shown in the strips, and gates three things: the free arm out for at most 10 % of the clip; the
@@ -86,12 +148,13 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `ashwick` | 6 → 5 | 18 → 12 | 5.1 → 4.6 | -0.93 → +0.80 | 9 | 2.5 |
 | `bulwark` | 22 → 16 | 25 → 11 | 4.0 → 4.6 | +0.17 → +0.68 | 4 | 3.5 |
 | `dolm` | 54 → 25 | 38 → 18 | 3.1 → 5.5 | -0.86 → +0.72 | 4 | 3.3 |
-| `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 | 2.5 |
+| `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 → 10 | 2.5 |
 | `gunslinger` | 50 → 21 | 25 → 13 | 3.6 → 4.5 | +0.90 → +0.90 | 7 | 3.3 |
 | `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 | 3.3 |
 | `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 → 10 | 2.5 |
 | `gunslinger` | 50 → 21 | 25 → 23 | 3.6 → 4.5 | +0.90 → +0.89 | 7 | 4.2 |
 | `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 → 9 | 3.3 |
+| `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 → 10 | 3.3 |
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
 | `rimewright` | 93 → 93 | 90 → 90 | 0.4 → 0.4 | -0.39 → -0.39 | 1 | 1.7 |
@@ -141,6 +204,7 @@ posts scroll at the move speed).
 **Grimble (`dredge`)**
 1. Hip bob 17 cm at a run (12 % of his height); damped by `loco.bob` to 10 cm (7 %).
    Rows: walk before, walk after, run before, run after: ![dredge hip bob](anim_audit/bob_dredge.jpg)
+1. Hip bob 17.0 cm at a run (12 % of his height, v95 master); damped by `loco.bob` to 10.1 cm (7 %).
 2. Idle to walk first-pose gap 0.45 body heights, the largest of the roster.
 3. The throw held the free arm sideways for most of the clip (fixed: the free arm is loose; the thrower's own arm still reaches out, 62 %) and the free hand still travels 1.4 body heights, because the torso spins under it; slide 28 % to 12 % (fixed).
 
@@ -157,6 +221,8 @@ posts scroll at the move speed).
 1. Feet slid 27 % at a run, 53 % at a walk (fixed: 12 %, 25 %); the left arm paced with its leg (counter -0.65, fixed to +0.84).
 2. Hip bob 16 cm at a run (10 % of his height); damped by `loco.bob` to 9 cm (6 %).
    Rows as above: ![juggernaut hip bob](anim_audit/bob_juggernaut.jpg)
+2. Hip bob 15.7 cm at a run (10 % of his height, v2 retargeted clips); damped by `loco.bob` to 9.8 cm (6 %), still
+   above every light Hunter (9.1 at most).
 3. The slam flings the free arm 1.7 body heights and holds an arm out for 29 to 46 %.
 
 ![juggernaut walk and run, before and after](anim_audit/juggernaut.jpg)
@@ -196,7 +262,12 @@ posts scroll at the move speed).
 
 **Sable (`thief`)**
 1. Feet slid 60 % of the run speed, 73 % at a walk (now 17 %, 39 %); both arms paced their legs (counter -0.96, fixed to +0.82).
-2. vault_r flings the free arm 2.6 body heights and holds an arm sideways for 58 %.
+2. vault_r flung the free arm and held it sideways (fixed with `free_arm`, vault_l mirrored). `--anim-audit`, hips upright,
+   before -> after: vault_r free arm 1.44 -> 0.06 body heights, sideways 12 -> 0 %, any arm 21 -> 17 %; vault_l (mirror,
+   measured by adding it to the list for this run) 1.47 -> 0.04, 21 -> 0 %, 25 -> 17 %. The pistol arm (2.12 and 1.75 body
+   heights, jump 0.53 and 0.50) and the dash (4.5 m in 0.48 s) are unchanged. In the old model frame vault_r read free
+   2.62 -> 2.23, sideways 54 -> 29 %, any arm 58 -> 50 %: the whole-body roll of the cartwheel counted as the arm.
+   ![thief vault_r at the match camera, before (top) and after, 8 frames (GPU jobq 20261111-160007-08120, 20261111-155841-11263)](anim_audit/thief_vault.jpg)
 3. Idle to walk first-pose gap 0.20.
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
@@ -213,6 +284,9 @@ Split into backlog items per Hunter (role build):
 - Arm use in attacks: `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `ostra` done: free arm); `bulwark`
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
 - Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
+- Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
+- `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
+- Arm use in attacks: `ostra` holds an arm sideways (`ashwick`, `tender`, `dredge`, `mage`, `thief` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).

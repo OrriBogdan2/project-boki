@@ -7,7 +7,7 @@ extends ArchKit
 ##   hunter swells): bonus damage, dash haste and ability haste. A knock heals you a share of the
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
-##   fills Rage fast).
+##   fills Rage fast). Neither knocks foes back.
 ## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a crimson strike cone (more to
 ##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
 ##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
@@ -21,12 +21,12 @@ extends ArchKit
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
-const SLASH_OUT := Color("ff3df0")     # the greatsword slash's magenta edge
-const LUNGE_FULL := Color("ff8a6a")    # the cursor ring at a full Lunge: his crimson gone hot
+const SLASH_OUT := Color("ffe9cc")     # the greatsword slash's edge: white-hot (Kael's glows are never orange)
+const LUNGE_FULL := Color("fff1dc")    # the cursor ring at a full Lunge: white-hot
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
-const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
-const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
-const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
+const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his crimson
+const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
+const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 
 var enraged_t := 0.0
@@ -127,12 +127,6 @@ func _drop_aura() -> void:
 	if aura and is_instance_valid(aura):
 		aura.queue_free()
 	aura = null
-
-## Spending the Rage: the shell bursts outward and the hunter shrinks back.
-func _spend_fx() -> void:
-	var rc := res_col()
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), rc, 26, 7.0, 0.5, 4.0, 1.3)
-	_drop_aura()
 
 func _tick_look(dt: float) -> void:
 	var want := 1.0 if enraged_t > 0.0 else 0.0
@@ -257,7 +251,8 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
-## Planted in the guard and the cleave: no other button does anything (but E on a held chain, use_e).
+## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits
+## Loco.press_buffer for the cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)
 
@@ -313,9 +308,13 @@ func wave_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "greatsword":
 		return false
-	if KinMerge.active(h) or riposte.move_k() <= 0.0:
-		# merged, the form owns the attack key (a charge from before must not go off); guarding, no swings
-		lmb_was = false
+	if KinMerge.active(h):
+		lmb_was = false         # merged, the form owns the attack key (a charge from before must not go off)
+		return true
+	if riposte.move_k() <= 0.0:
+		# planted in the guard or the cleave: a slash press is kept for Loco.press_buffer and swings as the cleave lands
+		if held and not lmb_was: lmb_buf = Loco.press_buffer
+		lmb_was = held
 		return true
 	var ld := lmb_def()
 	var pressed := held and not lmb_was
@@ -366,7 +365,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	return true
 
 ## The Searing Wave charging: its lane on the ground grows as long and as wide as the wave it would throw now,
-## going gold-hot at full, and the cursor ring fills.
+## going gold-hot at full, and the charge ring fills round his body (the source's thin white arc round the hero
+## while the blast charges; hero-ref juggernaut item 8), flaring at full.
 func _wave_preview() -> void:
 	var ld := lmb_def()
 	var k := wave_k()
@@ -374,14 +374,14 @@ func _wave_preview() -> void:
 			"width": lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k) * 2.0, "k": k, "fill": k,
 			"col": WAVE_RED, "col_full": WAVE_FULL}
 	AimKit.lane(h, "lmb", lane)
-	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
+	AimKit.charge(h, k, {"col": Color.WHITE, "col2": WAVE_FULL, "at": "body"})
 	HeroVfx.of(m).hold(h, "wave_charge", k)
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
 func _hold_waits() -> bool:
 	return flow.pauses_hold("lmb") and not KinMerge.transforming(h) and not meteor.running()
 
-## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing).
+## A quick slash: a cone, twice as hard on the tip (the sweet spot at the far end of the swing); no knockback.
 func _slash() -> void:
 	var ld := lmb_def()
 	lmb_t = -1.0
@@ -397,7 +397,7 @@ func _slash() -> void:
 	h.wpn = h.wpn.duplicate()
 	h.wpn["tip_bonus"] = float(ld["tip"])
 	h.wpn["color"] = SLASH_OUT
-	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
+	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), 0.0, {})
 	h.wpn = keep
 	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
 	var dv := h.aim_dir()
@@ -428,8 +428,7 @@ func _wave() -> void:
 	var full := k >= 0.99
 	var rng := lerpf(float(ld["wave_range"][0]), float(ld["wave_range"][1]), k)
 	var wave_size := lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k)
-	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)},
-			{"type": "push", "strength": lerpf(3.0, 6.0, k), "from": "caster"}]
+	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)}]
 	if full:
 		effs.append({"type": "damage", "amount": float(ld["wave_burn"]) * 2.0, "over": 2.0})
 		effs.append({"type": "slow", "duration": 1.0, "strength": float(ld["wave_slow"])})
@@ -446,7 +445,7 @@ func _wave() -> void:
 	var sd: Variant = _my_last_shot()
 	if sd != null:
 		sd["col"] = WAVE_RED              # its sparks along the way are red too
-		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 3.6)
+		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 2.0)
 	vfx("wave_fire", from, dv, {"k": k, "full": full, "len": rng, "w": wave_size * 2.0})
 	h.swing_t = 0.18
 	h.swing_n += 1
@@ -637,10 +636,11 @@ func slot_info(slot: String) -> Dictionary:
 		out["ready"] = float(cd["air"]) <= 0.0
 	return out
 
-## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop) is kept for
-## Loco.press_buffer and goes off when it ends; in the Warchain's pull (and just after) it spins at once.
+## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop, the Gilded
+## Riposte's guard and cleave) is kept for Loco.press_buffer and goes off when it ends; in the Warchain's pull (and just
+## after) it spins at once.
 func press_rmb() -> void:
-	if smash_running():
+	if _rmb_waits():
 		rmb_queued_at = m.time
 		return
 	super.press_rmb()
@@ -651,6 +651,10 @@ func press_rmb() -> void:
 func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
+## Every interaction is chainable (DECISIONS): a Smash pressed in a heavy move or the Riposte's planted beat waits.
+func _rmb_waits() -> bool:
+	return smash_running() or riposte.move_k() <= 0.0
+
 ## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
 ## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
 func _pull_waits() -> bool:
@@ -658,7 +662,7 @@ func _pull_waits() -> bool:
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
-	if not smash_running() and rmb_queued_at > -9.0:
+	if not _rmb_waits() and rmb_queued_at > -9.0:
 		var fresh: bool = m.time - rmb_queued_at <= Loco.press_buffer
 		rmb_queued_at = -9.0
 		if fresh and not rmb_down: press_rmb()
@@ -702,6 +706,11 @@ func _end_held_poses() -> void:
 			or (anim_id == "jug_haul_wind" and haul.is_empty()) or (anim_id == "jug_meteor" and not meteor.airborne())
 	if over:
 		anim_id = ""
+
+## Stunned or downed holding the Lunge: the charge ends with no lunge (its pose goes with _end_held_poses).
+func _rmb_dropped() -> void:
+	lunge_full = false
+	perfect_flashed = -1
 
 ## The RMB variants by state: docs/heroes/juggernaut.md "RMB: the interaction table".
 func fire_rmb(c: Dictionary) -> void:
@@ -924,7 +933,7 @@ func _tick_tells() -> void:
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
 	if not h.grounded and air_ready and not h.gliding and not rmb_down:
 		AimKit.circle(h, "drop_aim", {"at": meteor.point(), "r": float(rmb_def()["drop"]["radius"]),
-				"col": JuggernautDrop.PURPLE, "alpha": 0.7, "ticks": true})
+				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
 		var k := wave_k()
 		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": WAVE_RED})
@@ -965,7 +974,7 @@ func combo_marks(out: Array) -> void:
 		var f := instance_from_id(key) as Ent
 		var left: float = reset_t - (m.time - float(slam_hit[key]))
 		if f != null and not f.dead and left > 0.0:
-			out.append(RecastCue.mark(f, 0, left, reset_t, "SLAMMED", true))
+			out.append(RecastCue.mark(f, 0, left, reset_t, true))
 
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":

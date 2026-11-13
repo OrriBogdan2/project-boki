@@ -68,9 +68,36 @@ func _raise() -> void:
 	for m in [m0, m1, m2, m3]:
 		m.free()
 
+## Every rigged species has what the lean draws on: the head frame (FRAME head and top) for the flecks and, in its
+## model, a bone for each type's part (BokiDna.part_bone).
+func _anchors() -> void:
+	var parts: Array = []
+	for t in Lean.rules()["types"].values():
+		if t.has("part") and not parts.has(t["part"]):
+			parts.append(t["part"])
+	var missing: Array = []
+	var rigged := 0
+	for sp in BokiRig.FRAME:
+		if not Evo.has_art(sp):
+			continue
+		rigged += 1
+		var fr: Dictionary = BokiRig.FRAME[sp]
+		for key in ["head", "top"]:
+			if not fr.has(key):
+				missing.append("%s FRAME %s" % [sp, key])
+		var model := (load(BokiRig.PATH % [sp, sp]) as PackedScene).instantiate()
+		var skel := model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+		for part in parts:
+			if skel.find_bone(BokiDna.part_bone(part, skel)) < 0:
+				missing.append("%s %s" % [sp, BokiDna.part_bone(part, skel)])
+		model.free()
+	ok(rigged >= 10 and missing.is_empty(),
+		"every rigged species (%d) has the lean's anchors (missing: %s)" % [rigged, missing])
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	_data()
+	_anchors()
 	ok(not Lean.on() and Evo.eat(Save.new_kin("puddlet"), "emberberry") == "fierce",
 		"base_mode is off by default and meals lean the old way")
 	FarmUnlocks.rules()["base_mode"] = true

@@ -163,6 +163,7 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 		locked(H, id, r, icon, col, key, can, H.r_lock_text(p) if slot == "ult" else "")
 		deny_pulse(H, id, r)
 		if can:
+			RankMarks.beam(H, r, slot)
 			RankMarks.mark(slot, r)
 		return
 	ab_slot(H, id, r, icon, key, col, cdf, cds, ready, ch, mx)

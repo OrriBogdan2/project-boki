@@ -27,6 +27,8 @@ var carry_t := 0.0
 var safe_t := 0.0
 var setdown_was := false        # the set-down key (crouch, never F: F is the Boki system's) was down last tick
 const SETDOWN := "crouch"      # the one place to change the set-down key (a Hunter.inp key)
+const BOT_CALL_SAFE := 3.0      # m: a bot starts Hearth Call on a teammate only with no rival Hunter this close
+const BOT_SELF_CALL_HP := 0.7   # a bot with no teammate lights Hearth Call on herself below this HP share
 var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
@@ -85,6 +87,13 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if String(o.get("src", "")) == "shot":
 		return dmg + float(res_def().get("per_stack", 1.0)) * float(kindle_on(t))
 	return dmg
+
+## Footage: the numbers go white to yellow and stay yellow at the plateau (64 -> 93):
+## an ember into a foe at full Kindle shows yellow.
+func number_col(t: Ent, col: Color, o: Dictionary) -> Color:
+	if String(o.get("src", "")) == "shot" and kindle_on(t) >= int(res_def().get("max", 5)):
+		return HudStyle.CRIT
+	return col
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
@@ -490,7 +499,7 @@ func cast_e() -> bool:
 func e_recastable() -> bool:
 	return not hearth.is_empty() and not bool(hearth.get("tossed", false))
 
-## RecastCue: the light is the marker; left alone it flares by itself (no "EXPIRED").
+## RecastCue: the light is the marker; left alone it flares by itself (the slot still shows "EXPIRED").
 func recast_window() -> Dictionary:
 	var w := super()
 	if not w.is_empty():
@@ -893,12 +902,17 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["dash"] = true
 
 
-## A bot calls a downed or badly hurt teammate home when it can.
+## A bot calls a downed or badly hurt teammate home when it can and no rival is on top of her; with no
+## teammate in the match (a duel) it lights the tether on herself once hurt, as the player's key does.
 func _bot_call() -> void:
 	if not hearth_call.is_empty() or not _x_ready():
 		return
+	var mates := CareUtil.mates(m, h)
 	for o in CareUtil.mates(m, h, h.pos, float(x_def()["range"]) - 1.0):
-		if o.downed or o.hp < o.max_hp * 0.35:
+		if (o.downed or o.hp < o.max_hp * 0.35) and not _foes_near(BOT_CALL_SAFE):
 			h.inp["aim"] = o.pos + Vector3(0, 0.9, 0)
 			HunterKeys.ult_pressed(h)
 			return
+	if mates.is_empty() and h.hp < h.max_hp * BOT_SELF_CALL_HP:
+		h.inp["aim"] = h.pos
+		HunterKeys.ult_pressed(h)

@@ -33,10 +33,10 @@ var anchor := Vector3.ZERO          # where the hook bit (follows a hooked foe)
 var tether_t := 0.0                 # s the hook still holds
 var e_pressed_at := -9.0            # an E pressed while the hook flew (becomes the pull if it bites soon)
 var pull_dir := Vector2.ZERO        # the pull's heading now (it turns toward the anchor, bent by input and facing)
-var pull_speed := 0.0               # m/s of the pull (the reel speed plus the slingshot)
+var pull_speed := 0.0               # m/s of the pull (the reel speed plus his motion along the chain)
 var pull_t := 0.0                   # s left before the pull gives up (a wall in the way)
 var pull_at := -9.0                 # when the pull started (a jump after it breaks off)
-var sling := 0.0                    # (tests) m/s the slingshot added to the last pull
+var sling := 0.0                    # (tests) m/s his motion along the chain added to the last pull
 var line := Vector2.ZERO            # the chain's line when the pull started (the steer is sideways to it)
 var reach := 0.0                    # m of chain when the pull started (the swing is a share of it, so the arc's angle
 									# is the same on a short pull and a long one)
@@ -57,7 +57,7 @@ var breaks := 0
 var holds := 0                      # times the chain held at its full length
 var reels := 0
 var arrivals := 0
-var exits := ""                     # how the last pull ended: arrived | dash | jump | stopped
+var exits := ""                     # how the last pull ended: arrived | dash | jump | knocked | stopped
 var last_arrival := Vector3.ZERO
 
 func _init(kit: JuggernautKit) -> void:
@@ -206,16 +206,17 @@ func pull() -> void:
 	k.vfx("chain_pull", h.pos, pull_dir)
 	k.last_e = "reel"
 
-## The pull's start along `chain` (him to the anchor): the reel speed, plus a slingshot from his speed away from
-## the anchor at the press (backing away stretches it); the sideways part of his motion carries in, so a strafe
-## swings the pull wide from the start.
+## The pull's start along `chain` (him to the anchor): the reel speed plus his own motion along the chain, up to
+## sling_max (the impulse adds to it: moving in adds his speed, backing away stretches it into a slingshot of sling_k
+## of that speed); the sideways part of his motion carries in, so a strafe swings the pull wide from the start.
 func _launch(chain: Vector2) -> void:
 	var ed := data()
 	var h := k.h
 	var v := Vector2(h.vel.x, h.vel.z)
 	var toward := chain.normalized()
 	var side := Vector2(-toward.y, toward.x)
-	sling = minf(maxf(0.0, -v.dot(toward)) * float(ed["sling_k"]), float(ed["sling_max"]))
+	var along := v.dot(toward)
+	sling = minf(along if along > 0.0 else -along * float(ed["sling_k"]), float(ed["sling_max"]))
 	line = toward
 	reach = chain.length()
 	steer = 0.0
@@ -397,7 +398,10 @@ func _draw_flight() -> void:
 func _tick_pull(dt: float) -> void:
 	var h := k.h
 	var ed := data()
-	if h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.downed:
+	if h.knock_t > 0.0:
+		_stop("knocked", false)     # the knock's push (added to the pull's speed) takes over
+		return
+	if h.stun_t > 0.0 or h.root_t > 0.0 or h.downed:
 		_stop("stopped", false)
 		return
 	if h.jump_at > pull_at:
@@ -474,7 +478,9 @@ func _stop(how: String, arrived: bool) -> void:
 	state = "ready"
 	if h.move_kind == "rush" and how != "dash":
 		h.roll_t = 0.0
-		if how == "stopped":
+		# a stopped pull halts him on the ground; in the air its speed carries under air drag and the keys
+		# steer (Loco.air_step, DECISIONS 11-08: never overwrite air velocity)
+		if how == "stopped" and h.grounded:
 			h.vel.x = 0.0
 			h.vel.z = 0.0
 	k.fx().unchain(_fx_id())

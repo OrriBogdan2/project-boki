@@ -38,6 +38,8 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
   not sit under the title.
 - Motley's E part waits for the Brimseed to grow full (6.5 s, her `e.grow`) before the recast, so it runs
   about 5 s longer than the other Hunters' E parts and her later parts start that much later.
+- Every MP4 here is re-rendered on main fb360f614 (no drill card, travel parts on the island); see the reel-tool
+  fixes note below. The juggernaut and tender line above describes an earlier render.
 - Re-render one: `jobq submit --needs gpu --tree <tree> --out shots -- --parity-reel --shots-dir=shots
   --reel-hero=<id>`, then `ffmpeg -framerate 30 -i shots/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p
   <id>.mp4` (`tools/parity_reel.gd`, built on `tools/hero_vfx_reel.gd`; `--reel-only=<part>` plays one part).
@@ -82,7 +84,7 @@ Still differs:
 - Ice Spear is pushed out of her palms and travels to the cursor, with a 2.2 m 35% slow zone and a burst at 1.8 s;
   the source throws a spear with a slow cone and a delayed blast (owner, Nov 5). Cooldown 10.2 s vs 12.
 - Rink Wall: slides up to 50% further than the footage (owner item 13); cooldown 17 s vs 20.
-- Skate: 11.5 m/s vs the footage's 10 to 11; an early release refunds up to 60% of the cooldown (owner); ice over the
+- Skate: 10.5 m/s, the footage mean; an early release refunds up to 60% of the cooldown (owner); ice over the
   abyss only at rank 3.
 - Rimelock: skating into it carries her 0.8 s and she is a frozen statue (owner items 62 to 65); the crash is
   40 damage and a 0.75 s stun, scaled down from the source's 155 and a stun by the owner's burst rule. The zone's
@@ -127,7 +129,8 @@ Still differs:
 
 Seen in the reel: the throw's dotted line, the flame-arc swing and the green zone match the footage's beats; the
 Faultline telegraph is an amber rectangle with rubble where the footage's is a cyan one with a gold eruption
-[F]; the 360 Smash leaves an orange ring, the footage a red spin ring with a damage number.
+[F]; the 360 Smash's ring is a red spin ring (ivory rim) on its 2.2 m hit radius, running round with the hammer, and its
+damage number, as in the footage (it was an orange swirl inside the radius).
 
 ## Sable the Silver Thief (`thief`, source Shiv)
 [thief.mp4](thief.mp4)
@@ -135,7 +138,9 @@ Faultline telegraph is an amber rectangle with rubble where the footage's is a c
 Still differs:
 - Cooldowns: Bola 7 s vs 13, Encore 24 vs 50, Shadow Knife 15 vs 20 at the top rank, Vault 4.5 vs 5.
 - Bola slows 30% (owner item 53), Grounds for 1.5 s, range 7 m; the stun on two foes is 0.9 s.
-- Marks add +10% each (16 of the 160 shot) with no cap; a knock heals 15% extra; the source stacks a flat +16.
+- Marks: a flat +1.3 per hit (the source's +16 on its 160 shot) with no cap, as the data; the 4 s fade is ours (the
+  data gives none). A knock heals 25% in all (the data's). The Bola and the Knife still add a Mark, the empowered
+  shot 2 (the owner's call); the source stacks only on Arcslinger hits.
 - LMB: 12 m to the cursor (the footage's bolt also stops at the cursor); damage is the scaled 13.
 - Encore's look (violet ring, gold outer band) is ours; the source's is a cyan ring about 3.5 body heights wide.
 
@@ -153,10 +158,11 @@ Still differs:
 - Brimseed: peaks at 3.5x like the source, but fizzles after 10 s unpopped (ours); cooldown 10 vs 8 at the top rank.
 - Nightwell: about a 1 s cast lock (owner); the radius 3.6 m and a 12 m pull.
 - Lantern Trade: 12 m lob; faster (1.25 s) only while Swollen.
-- Footstep silence while floating is `[?]`.
+- He floats silently (matches): no step sounds, his and a remote Motley's (source passive [D], --ostra-combo-check).
 
-Seen in the reel: the reel predates `ext/parity-reel-tool`, so the Brimseed is popped at 1.8 s and its full growth
-(the footage's room-sized violet globe) is not shown; the tool now holds it to full size (not re-rendered); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
+Seen in the reel: re-rendered on main with `ext/parity-reel-tool`, so the Brimseed now grows to full size before the
+recast and shows as a big violet-and-cyan globe (the footage's room-sized violet one, fixed on main; the reel's R part
+starts at frame 672); the Nightwell tell is a pale-cyan disc where the footage's vortex is a
 violet swirl [F].
 
 # The four slice Wardens (main 88b06b9e7, 2026-11-11)
@@ -176,15 +182,19 @@ the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on
   red laces for Hail Wall. Based on ext/release-integ-0245, not main.
 - `ext/albert-hold-cinder-orb` 4cf2f22b4: Cinder's cyan palm orb becomes a gold/white tell in the 0.2 s spool only.
 
-**Reel-tool fixes** (`ext/parity-reel-tool`): these four reels show the kit drill card ("1/5, Skip drill") under
-the title and both dash parts ending in the void, because the 12 m dummy stood past the island rim. The tool now
-skips the drill and keeps the travel parts on the island (see the notes at the top); only `juggernaut.mp4` is
-re-rendered with it so far (xvfb opengl3 on rpc3; GPU job 20261112-030437-07461 queued ~146 deep at the time).
+**Reel-tool fixes** (`ext/parity-reel-tool`, rows now fixed on main): the old reels showed the kit drill card
+("1/5, Skip drill") under the title and both dash parts ending in the void, because the 12 m dummy stood past the
+island rim. The tool now skips the drill and keeps the travel parts on the island. All twelve MP4s are re-rendered
+with it (`ext/parity-reels-rerender`, from main fb360f614; GPU jobs 20261112-124742-*, ashwick 20261112-145556-25476).
+In every run log the three travel parts end on the island (`on ground true`) except Meeko's air dash, a kit property:
+it travels 24 m and ends 14.9 m below the rim, because her air dash is long. Motley's Brimseed full growth is now
+shown. The rest of the "Seen in the reel" lines match the new renders.
 
-**KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
-  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
-  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's ground and air rows
-  still `buffer`.
+**KIT_PARITY rows fixed (checked against main 11-12):** Kael's animation (gap 1) is closed: `kael.glb` has 49
+  clips and `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot
+  wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
+  and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
+  (gap 14 closed).
 
 ## Vex the Hired Gun (`gunslinger`, source Ghost)
 [gunslinger.mp4](gunslinger.mp4)
@@ -276,12 +286,17 @@ Still differs:
 - Hearthlight: cooldown 11 s vs 12 [D]; heals her at a third (ours); the throw latches onto the first teammate it
   passes (owner call), where the source's lands on the cursor and no latch was seen [F].
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
-  (ours). The channel is 5 s where the footage's tether runs about 2.4 s [F 0249-0271].
+  (ours). The channel is 5 s, as the source's [D 5 s; F 4.9 s, ult frames 25-74 at 10 fps]. It ends early when she is
+  stunned or knocked, or the ally leaves the ring (data: stunned, knocked or too far), as ours does.
 - Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
-  steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
+  steering is the owner's. No refund for passing through a teammate: `[?]`, not base kit in any source. Only the
+  footage card's upgraded Super dash (an older build) has one, and the Nov 2 tooltips have it at no rank (tender.md
+  "Ally-pass refund").
 - Bearer: the Carrier shield is cut (tender.md, owner 11-07); the KIT_PARITY row still lists it and should be
   updated. Which hits drop a carried teammate was not traced.
+  steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
+- Bearer: the Carrier shield is cut (tender.md, owner 11-07; KIT_PARITY row updated). Which hits drop a carried teammate was not traced.
 - Body 0.66 of a medium (owner item 108).
 
 Seen in the reel: the Crook's shots are small gold sparks with a Kindle glow, where the footage's are a blue comet
@@ -290,7 +305,7 @@ with thorns, and the root shows as a white swirl where the footage has a smaller
 thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan disc, but the ring on her before the
 throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
-cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271],
+cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271 of the 5 fps set],
 ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
 side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 
@@ -299,8 +314,7 @@ side in a gold ring, like the footage's ally appearing next to the hunter [F 027
 
 Still differs:
 - Stone Row (E): three rocks 3.4 m ahead, cooldown 12.5 s [D]; he climbs them by walking (owner item 25), allies hop
-  them by jumping as in the source (owner 23:55, `StoneStand`). KIT_PARITY gap 14 and dolm.md's "not built" rows
-  still say allies cannot, and should be updated.
+  them by jumping as in the source (owner 23:55, `StoneStand`); KIT_PARITY gap 14 and dolm.md's ally-hop row say so too.
 - Rock Hop (Shift): up to three steerable hops off rocks he raises, cooldown 12 s (owner item 111), in place of
   Landslide's short dash with a rock riding ahead [F]; the rolling rock at the end keeps the source's slow and knock.
 - Basalt Spine (X): nine rocks erupting centre-out along a 12 m arc, a 35% slow for 1 s, a drag sets the angle,
@@ -312,12 +326,16 @@ Still differs:
 - Quakefall (RMB): the charge is capped at 0.45 s (owner item 61); cooldown 11 s matches [D].
 - Punch hold: he walks at 85% while charging and at 55% through the Quakefall hold; `ext/feel-charge-walk` (docs
   only) finds the source standing in every hold seen [F]. An air punch no longer slows him below his flying speed.
-- Molten Guard: the shield per punch matches; the charge scaling is ours.
+- Molten Guard: the shield per punch matches, flat 18 whatever the charge (never scaled by it in code; a tap-charge and
+  a full-charge punch are asserted equal in `--dolm-combo-check`). The charge scaling that is ours is the punch's
+  damage and knockback only.
 
-Seen in the reel: the boulder trails an orange dotted line and bursts small, where the footage's bursts in a big
-fire flash with the damage number [F]; the punch shows its pale chevron lane but little impact, the footage a
-bright streak and rocks bursting in fire; the Quakefall hold circle is pale blue-white where the footage's is red,
-while the dark red crater with orange cracks matches; Stone Row's molten basalt columns read like the footage's
+Seen in the reel (before `ext/tenzo-hit-impact`): the boulder trails an orange dotted line and bursts small, where
+the footage's bursts in a big fire flash with the damage number [F]; the punch shows its pale chevron lane but little
+impact, the footage a bright streak and rocks bursting in fire. Both hits now play a blue flash and short debris
+(`content/vfx/dolm.json`, sized by the 0.9 m splash and the lane's half width), no fire and no explosion (GPU
+before/after: `docs/shots/tenzo-hit-impact/before_after_gpu.jpg`); the Quakefall hold circle is pale blue-white where
+the footage's is red, while the dark red crater with orange cracks matches; Stone Row's molten basalt columns read like the footage's
 spiked rocks; Basalt Spine is a row of separate rocks where the footage's is one continuous orange spiked ridge
 with fire [F]; the Rock Hop shows a blue landing circle and a "SHIFT AGAIN" prompt, with no fire burst like the
 footage's Landslide.

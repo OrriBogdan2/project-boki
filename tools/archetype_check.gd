@@ -105,6 +105,37 @@ func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
 	P.inp["move"] = Vector2.ZERO
 	return out
 
+const AIR_STEER_T := 0.3        # s of keys after the move
+const AIR_STEER_MIN := 3.0      # m/s gained across the heading (Loco.air_step: 32 m/s2 up to the run cap)
+
+## DECISIONS 11-08 (docs/MOVEMENT_FEEL.md "Air velocity in the slice kits"): once a move cast in the air is over,
+## the keys steer again. `cast` runs on `P` 40 m over `home`; when its displacement ends, keys held across the
+## hunter's heading must win AIR_STEER_MIN m/s that way within AIR_STEER_T, still airborne. Returns the speed
+## carried out of the move. The match is left with the hunter back at home.
+func air_steers(m: Match, P: Hunter, home: Vector3, what: String, cast: Callable) -> float:
+	P.teleport(home + Vector3(0, 40.0, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.inp["move"] = Vector2.ZERO
+	cast.call()
+	var t := 0.0
+	while t < 1.5 and (t < 0.1 or P.roll_t > 0.0 or P.knock_t > 0.0):
+		step(m, DT)
+		t += DT
+	var hv0 := Vector2(P.vel.x, P.vel.z)
+	var keys := Vector2(-hv0.y, hv0.x).normalized() if hv0.length() > 0.5 else Vector2(0, 1)
+	P.inp["move"] = keys
+	step(m, AIR_STEER_T)
+	P.inp["move"] = Vector2.ZERO
+	var gain := Vector2(P.vel.x, P.vel.z).dot(keys) - hv0.dot(keys)
+	ok("air steer %s: %s, then the keys steer (+%.1f m/s across)" % [P.arch, what, gain],
+			gain >= AIR_STEER_MIN and not P.grounded, "carry %.1f m/s airborne %s" % [hv0.length(), not P.grounded])
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	step(m, 0.3)
+	return hv0.length()
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
@@ -378,7 +409,10 @@ func _archer() -> void:
 	var dd0 := dmg(T)
 	T.root_t = maxf(T.root_t, 1.0)
 	P.fire_cd = 0.0; P.ammo = maxi(P.ammo, 1); P.reload_t = 0.0
-	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
+	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
+		P.inp["fire"] = true
+		m.step(DT)
+	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
 		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
@@ -396,7 +430,7 @@ func _archer() -> void:
 	P.teleport(home + Vector3(0, 3.0, 0)); P.grounded = false; P.vel = Vector3(0, -2, 0); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	P.ak.press_rmb()
 	ok("archer RMB air: the press starts a draw, no Plunge", K.rmb_down and not bool(K.rmb_ctx["air"]) and P.vel.y < 5.0, "vy %.1f" % P.vel.y)
-	K.rmb_down = false
+	K._drop_rmb()          # let go of the draw (the press-only hack left the pose and bar up)
 	step(m, 1.2)
 	# the bow's perfect window: let go right as Supercharged comes up: no extra damage, the next draw is faster
 	P.teleport(home); P.vel = Vector3.ZERO; fresh(T); T.teleport(home + Vector3(-6.5, 0, 0)); aim_at(P, T.pos)    # (clear of the test walls east)
@@ -490,10 +524,10 @@ func _gunslinger() -> void:
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var nums0: int = m.fx.nums.size()
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
-	ok("venator Dazed: rifle +38%", is_equal_approx(base, 13.83), "%.1f" % base)
+	ok("venator Dazed: rifle +76%", is_equal_approx(base, 17.6), "%.1f" % base)
 	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
-	ok("venator Dazed: the bonus gets its own pink +3.8 number",
-			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 3.83))
+	ok("venator Dazed: the bonus gets its own pink +7.6 number",
+			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 7.6))
 	_burr_terrain(m, P, T, K, home, r[5])
 	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
@@ -503,7 +537,7 @@ func _gunslinger() -> void:
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
-	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 22.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
+	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 24.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
 	P.do_dash(); step(m, 0.6)      # the tap skid runs ~0.5s
