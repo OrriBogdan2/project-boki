@@ -262,7 +262,7 @@ func _session(main: Node) -> void:
 	var ext: Hunter = null
 	for h in m.hunters:
 		if h != P and not h.out and not h.extracted and not h.riding and not h.dropping: ext = h; break
-	if ext: m._extract(ext, "skiff", "test")
+	if ext: m._extract(ext, "uplink", "test")
 	m.time = m.length - 0.5
 	_run(m, 1.0)
 	var still := m.hunters.filter(func(h): return not h.out and not h.extracted)
@@ -281,12 +281,12 @@ func _default_match(main: Node) -> void:
 	m.set_process(false)
 	ok(m.rolling == null and m.ships.is_empty() and m.sess_t0 == 0.0, "without the option it's the fixed match")
 	var map_size := int(World.load_layout(World.layout_for_tier(0)).get("size", World.BIG_SIZE))
-	ok(absf(m.length - Data.MATCH["length"] * 1.7) < 0.01 and m.world.w == map_size and m.world.layout_id == World.layout_for_tier(0),
+	ok(absf(m.length - Heart.r("match_s")) < 0.01 and m.world.w == map_size and m.world.layout_id == World.layout_for_tier(0),
 			"same length (%.0f s) and map (%d tiles)" % [m.length, m.world.w])
-	var dock: Dictionary = {}
+	var up: Dictionary = {}
 	for x in m.exits.list:
-		if x["kind"] == "dock": dock = x; break
-	ok(dock.is_empty() or absf(float(dock["open_at"]) - m.length * 0.18) < 0.01, "exits open when they always did")
+		if x["kind"] == "outpost": up = x; break
+	ok(up.is_empty() or absf(float(up["open_at"]) - m.length * 0.22) < 0.01, "exits open when they always did")
 	ok(m.hunters.all(func(h): return h.riding), "everyone boards the one skyship")
 	_run(m, 2.0)
 	ok(absf(m.sess_time() - m.time) < 0.001, "the session clock is the match clock")

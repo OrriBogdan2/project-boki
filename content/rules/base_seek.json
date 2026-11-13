@@ -16,8 +16,6 @@
 	"night_right": 0.2,
 	"night_themes": ["spore", "shadow"],
 	"night_doc": "At night (HomeWork.is_night, the base's day clock) a Boki whose species theme is in night_themes, or whose species is in Work.NOCTURNAL, adds night_right to its chance of sniffing the right way.",
-	"night_zones": ["hushwood"],
-	"night_zones_doc": "Garden zones where Seek always runs by the night rules (their sky stays at dusk).",
 	"friend_share": 0.15,
 	"friend_doc": "Friends (bond at or above base_race friend_at) hunt as a pair: when a friend's last sniff was right, a Boki's chance goes up by friend_share.",
 	"rival_near": 1.0,

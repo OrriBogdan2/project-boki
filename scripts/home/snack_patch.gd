@@ -17,14 +17,26 @@ func _init(home) -> void:
 static func rules() -> Dictionary:
 	return Content.rules("snack_patch")
 
-## The snacks the patch in this zone grows (ZoneLook patch, else the garden's four).
-static func snacks() -> Array:
-	return ZoneLook.look(GardenZones.current()).get("patch", rules()["snacks"])
-
 ## base_mode saves keep one patch: a missing one waits in storage to be put down.
 static func grant(d: Dictionary) -> void:
 	if FarmUnlocks.base_mode() and HomeLayout.count_of(ID, d) == 0:
 		HomeLayout.of(d)["inv"][ID] = 1
+
+## The snacks this island's patch grows: its zone theme's list, else the start garden's four.
+static func snacks(d: Dictionary) -> Array:
+	return rules()["zone_snacks"].get(String(HomeLayout.of(d)["theme"]), rules()["snacks"])
+
+## Where the zones are not built, one more food every ripening so every snack gets grown: the next, in
+## zone-list order, that the patch's own list lacks (rot on the entry counts ripenings). "" on a zone.
+static func extra(d: Dictionary, e: Dictionary) -> String:
+	var zones: Dictionary = rules()["zone_snacks"]
+	if zones.has(String(HomeLayout.of(d)["theme"])):
+		return ""
+	var own := snacks(d)
+	var rest: Array = []
+	for z in zones:
+		rest.append_array((zones[z] as Array).filter(func(s): return not own.has(s)))
+	return String(rest[int(e.get("rot", 0)) % rest.size()])
 
 ## The placed patch's deco entry, or {}.
 static func entry(d: Dictionary) -> Dictionary:
@@ -42,10 +54,19 @@ static func harvest(d: Dictionary, now: float) -> Array:
 	if not ripe(e, now):
 		return []
 	e["t"] = now
-	var got: Array = snacks().duplicate()
+	var got: Array = snacks(d).duplicate()
+	var more := extra(d, e)
+	if more != "":
+		got.append(more)
+		e["rot"] = int(e.get("rot", 0)) + 1
 	for s in got:
-		d["crops"][s] = int(d["crops"].get(s, 0)) + 1
+		shelve(d, String(s))
 	return got
+
+## Puts n of a snack on the pantry shelf: crops (Data.CROPS) and prepared foods (Care.FOODS) have their own stores.
+static func shelve(d: Dictionary, snack: String, n := 1) -> void:
+	var store: Dictionary = d["crops"] if Data.CROPS.has(snack) else d["items"]
+	store[snack] = int(store.get(snack, 0)) + n
 
 ## Part of the deco signature, so the model changes when it ripens.
 static func sig(e: Dictionary) -> String:
@@ -56,14 +77,13 @@ static func model(e: Dictionary) -> Node3D:
 	var n := Node3D.new()
 	var is_ripe := ripe(e, Time.get_unix_time_from_system())
 	Models.part(n, Models.box(1.9, 0.08, 1.9), Models.toon(Color("7a5a3a"), false), Vector3(0, 0.04, 0))
-	var grown := snacks()
+	var grown := snacks(Save.d)
 	for i in grown.size():
 		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45)
 		var leaf := Models.toon(Color("5f9a45"))
 		Models.part(n, Models.sphere(0.2, 8), leaf, at + Vector3(0, 0.22, 0), Vector3(1, 0.7, 1))
 		if is_ripe:
-			var col: Color = Data.CROPS[grown[i]]["color"]
-			Models.part(n, Models.sphere(0.13, 8), Models.toon(col), at + Vector3(0, 0.5, 0))
+			Models.part(n, Models.sphere(0.13, 8), Models.toon(Care.food_col(grown[i])), at + Vector3(0, 0.5, 0))
 	return n
 
 func tick(d: float) -> void:
@@ -83,7 +103,7 @@ func tick(d: float) -> void:
 		var got := harvest(Save.d, now)
 		_ripe = false
 		h.hb.apply(false)
-		h._toast("Picked: " + ", ".join(got.map(func(s): return String(Data.CROPS[s]["name"]))))
+		h._toast("Picked: " + ", ".join(got.map(func(s): return Care.food_name(s))))
 		h.fx.burst(HomeLayout.deco_center(e) + Vector3(0, 0.5, 0), Color("ffe08a"), 10, 1.5, 0.4)
 
 func _on_it(e: Dictionary) -> bool:
