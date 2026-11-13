@@ -19,7 +19,6 @@ const WIND_HIGH := 1.6          # ...and at the dive's full speed
 const HISS_FROM := 0.35         # heat left (1 cool, 0 overheated) below which the hiss starts
 const HISS_DB := -12.0          # dB, loop, at the point of overheating
 const OTHERS_DB := -6.0         # dB under yours for another player's glider
-const DIVE_VY_MIN := 18.0       # m/s of fall that counts as the plunge for another player (no dive flag is sent)
 
 var open := false               # the glider was open last tick
 var hot := false                # ...and burning
@@ -32,7 +31,7 @@ func tick(h: Hunter) -> void:
 	var v := h.net_vel if h.remote else h.vel
 	var trim := 0.0 if h.is_local() else OTHERS_DB
 	var burning := gliding and not h.dropping and (net_hot if h.remote else h.glide_fuel <= 0.001)
-	var plunging := gliding and not h.dropping and (-v.y > DIVE_VY_MIN if h.remote else h.glide_dive.on)
+	var plunging := gliding and not h.dropping and h.glide_dive.on
 	if gliding and not open:
 		Sfx.play("glider_snap", h.pos, SNAP_DB + trim)
 	elif open and not gliding:
