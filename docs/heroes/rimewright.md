@@ -155,6 +155,19 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Shift Skate | no separate air dash: the same held skate starts at once and carries on through the air (`tm_skate_air`) | the skate folds the glider; a held glide key opens it again when the skate ends | owner item 62; [D] Celeste: "HOLD to skate", no air rule |
 | E Rink Wall | the same cast | the same cast, glider stays open | [D] Celeste: no air rule |
 | X Rimelock | the same cast; she is sealed and invulnerable | the glider folds and stays shut while sealed ("NO GLIDE"); Shift or X again frees it | [D] Celeste: invulnerable, no glide rule; owner item 65 |
+## Rimelock movement, settled (Nov 10)
+Trust order: [O] owner > [D] data > [W] wiki > [F] footage (hero-ref/tamsin.md). The source roots her for the whole ult [D]
+[F] f25-f61; the carry is the owner's (DECISIONS: "skating into it carries her forward a decent distance, then she's
+encased"). Nothing changed but a wrong code comment (it said the carry slows evenly, speed x carry_t / 2; the code and the
+card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `ledge` / `abyss` rows of `--rimewright-combo-check`.
+
+| What | Ours | Source |
+|---|---|---|
+| Steering | none: the carry runs along the skate; WASD and the cursor never turn it, facing locked | [O] items 64/65 |
+| Speed curve | from the skate's speed, speed x (1 - (t/0.8)^2) over 0.8 s, about 6.1 m at 11.5 m/s; cast standing she is rooted at once | [O] carry_t 0.8 |
+| End | the crash (or X early) frees her the same step, with no momentum; Shift out skates straight away at full speed | [F] f61 free; [O] item 27 |
+| Ledges | the carry slides off a terrace (never blocked) sinking at the skate's air fall (1.5 m/s), then she drops to the ground rooted | [O] items 62/64; DECISIONS "walking off ledges is always allowed" |
+| Abyss | the carry runs on over the void; sealed she cannot glide and falls; X (or Shift) frees her, and held glide opens 0.30 s later, the step her break move ends (the shared rule: no glider during an ability move) | [O] item 27, item 162b |
 
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
