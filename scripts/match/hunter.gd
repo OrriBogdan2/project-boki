@@ -758,10 +758,7 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 		return
 	if s > 4.0:
 		kb_t = m.time
-	var dir := k / k.length()
-	var hv := Vector2(vel.x, vel.z)
-	var along := hv.dot(dir)
-	hv += dir * (maxf(along, s) - along)
+	var hv := HunterMove.push(Vector2(vel.x, vel.z), k / k.length(), s)
 	vel.x = hv.x; vel.z = hv.y
 	if s > 2.5:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
@@ -1435,9 +1432,7 @@ func _lunge(dist: float) -> void:
 	var d2 := aim_dir()
 	var moving := (inp["move"] as Vector2).length() > 0.1
 	var want := HunterMove.slide_speed(dist * k, base_speed if moving else 0.0)
-	var hv := Vector2(vel.x, vel.z)
-	var along := hv.dot(d2)
-	hv += d2 * (maxf(along, want) - along)
+	var hv := HunterMove.push(Vector2(vel.x, vel.z), d2, want)
 	vel.x = hv.x; vel.z = hv.y
 
 func _charged_attack() -> void:
