@@ -66,6 +66,7 @@ func run(main: Node) -> void:
 	await _lisette(main, V)
 	await _scarf(main)
 	_dots(m)
+	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 

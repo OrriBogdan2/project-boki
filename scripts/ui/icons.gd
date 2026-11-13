@@ -95,6 +95,17 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 		"heart":
 			F.call([[0.0, 0.7], [-0.65, 0.0], [-0.6, -0.45], [-0.3, -0.62], [0.0, -0.38], [0.3, -0.62], [0.6, -0.45],
 					[0.65, 0.0]])
+		"happy", "content", "sulky":     # a Boki's mood today (ZoneCards): a face, the mouth up, flat or down
+			O.call(0.0, 0.0, 0.85)
+			O.call(-0.3, -0.2, 0.13, Color(0, 0, 0, 0.8 * col.a))
+			O.call(0.3, -0.2, 0.13, Color(0, 0, 0, 0.8 * col.a))
+			var ink := Color(0, 0, 0, 0.8 * col.a)
+			if id == "content":
+				c.draw_line(P.call(-0.3, 0.3), P.call(0.3, 0.3), ink, w, true)
+			elif id == "happy":     # a smile: the lower arc of a circle above the mouth
+				c.draw_arc(P.call(0.0, 0.1), 0.35 * s, 0.15 * PI, 0.85 * PI, 12, ink, w, true)
+			else:                   # a frown: the upper arc of a circle below it
+				c.draw_arc(P.call(0.0, 0.6), 0.35 * s, 1.15 * PI, 1.85 * PI, 12, ink, w, true)
 		"dash":
 			L.call([[-0.7, -0.6], [-0.1, 0.0], [-0.7, 0.6]])
 			L.call([[0.0, -0.6], [0.6, 0.0], [0.0, 0.6]])
