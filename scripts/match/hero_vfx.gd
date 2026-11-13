@@ -417,7 +417,8 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	match kind:
 		"sweep":
 			mi.mesh = _arc(float(layer.get("arc", 120.0)))
-			b = b * Basis(Vector3(0, 0, 1), deg_to_rad(float(layer.get("tilt", 0.0))))
+			var cam := get_viewport().get_camera_3d()
+			b = b * Basis(Vector3(0, 0, 1), sweep_roll(layer, b, cam.global_basis.z if cam else Vector3.UP))
 			var flip: bool = o.get("flip", false) != bool(layer.get("flip", false))
 			s0 = Vector3(-extent if flip else extent, extent, extent)
 			s1 = s0
@@ -467,6 +468,14 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	if layer.get("ride", false):      # it rides on the Hero (an anchor goes with the clip: a hop, a lunge)
 		e.merge({"ride": h, "layer": layer, "dir": dir, "off": p - _where(layer, h, h.pos, dir)})
 	live.append(e)
+
+## A sweep's roll about its aim (rad): the layer's "tilt", turned by up to its "lean" (deg) toward `back` (the
+## camera's back axis) so a crescent stood up along the aim never shows edge-on.
+static func sweep_roll(layer: Dictionary, b: Basis, back: Vector3) -> float:
+	var tilt := deg_to_rad(float(layer.get("tilt", 0.0)))
+	var lean := deg_to_rad(float(layer.get("lean", 0.0)))
+	var c := b.transposed() * back
+	return tilt + clampf(wrapf(atan2(-c.x, c.y) - tilt, -PI * 0.5, PI * 0.5), -lean, lean)
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
