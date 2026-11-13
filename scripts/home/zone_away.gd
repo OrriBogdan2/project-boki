@@ -4,12 +4,15 @@ extends RefCounted
 ## zone you arrive in is simulated (Econ.catch_up_all(zone)); the others catch up when you reach them.
 ## The card is the facts already written down, so it lists every zone, each under its name once two are open.
 
-## Shows the card for arriving in the hub or a zone: what the stations made, then the journals.
+## Shows the card for arriving in the hub or a zone: what the stations made, then the journals, then today's open
+## wishes (the first arrival of the day). One card, one close; with nothing new it is the wishes alone.
 static func card(h) -> void:
 	var lines := CareJournal.arrival(Work.catch_up())
-	BaseHud.arrived(lines)      # the base HUD's "what changed" row
-	if not lines.is_empty():
-		h._show_when_free(lines)
+	var wishes: Array = GardenWishes.card_lines() if FarmUnlocks.base_mode() and h.visit.is_empty() else []
+	if lines.is_empty() and not wishes.is_empty():
+		h._show_when_free(wishes, "Today's wishes")
+	elif not lines.is_empty():
+		h._show_when_free(lines + wishes)
 
 ## `work` lines (the start zone's stations) and `found` [[time, zone, line]], oldest first, as card
 ## lines: flat while one zone is open, else a name per zone with its lines indented under it.
