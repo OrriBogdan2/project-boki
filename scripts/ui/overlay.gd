@@ -722,7 +722,13 @@ func open_inventory() -> void:
 			for id in GardenItems.ids():
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
-					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
+					var take := Callable()
+					if GardenItems.fed(id) and GardenItems.item(id)["effect"]["kind"] != "twin":
+						take = func():
+							ItemHold.want(id)
+							close()
+					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD,
+							"Hold" if take.is_valid() else "", take)
 			if FarmUnlocks.base_mode():
 				cell.call("Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
 						"Open", open_bowl)

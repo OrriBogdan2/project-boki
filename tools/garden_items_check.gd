@@ -3,7 +3,9 @@ extends RefCounted
 ## For every item on three sample Boki, preview() changes nothing, apply() does exactly the deltas preview
 ## named (and nothing else), writes one journal line, and an item that can't be used changes nothing. Also:
 ## the three-token limit, take_off back to the bag, Stayleaf stops forms, tokens steer the form, feeding
-## through Care.feed, and an old v12 save gaining the new fields. Never touches the real save.
+## through Care.feed, and an old v12 save gaining the new fields. Their sounds: each fed item's family cue
+## (GardenSfx.item), a path token's pip, and the brighter chime at a Boki's evolve level (HomeChimes). Never
+## touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
 const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
@@ -43,7 +45,10 @@ func run(m: Node) -> void:
 		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
+	_ribbon()
 	_migration()
+	await _cues()
+	_evolve_chime()
 	print("GARDENITEMS DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -55,7 +60,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 29 and fine, "29 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 30 and fine, "30 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -217,6 +222,78 @@ func _feeding() -> void:
 	var tea := Care.feed(rec, "unwind_tea")
 	var power: int = rec["stats"]["power"]
 	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
+
+func _ribbon() -> void:
+	var rec := _boki("cindle", 3, "power")
+	var fresh := GardenItems.award_ribbon(rec, "dash", 5, "won the Dash Crown cup")
+	ok(fresh and not GardenItems.award_ribbon(rec, "dash", 6, "again"), "a Cup Ribbon: once a sport a Boki")
+	var other := GardenItems.award_ribbon(rec, "shove", 6, "won the Shove Crown cup")
+	ok(other and rec["ribbons"].size() == 2, "...and one for each sport")
+	var paged := int(rec["ribbons"]["dash"]["week"]) == 6 and GardenItems.owned("cup_ribbon")
+	ok(paged, "the cup's week moves on and the item has its page")
+	var kept: bool = not GardenItems.fed("cup_ribbon") and not GardenItems.preview(rec, "cup_ribbon")["ok"]
+	ok(kept and not GardenItems.take_off(rec, "cup_ribbon"), "worn for good: not eaten, not taken off")
+
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
+
+## The cues played since `before` (a copy of GardenSfx.heard), one entry a play.
+func _played(before: Dictionary) -> Array:
+	var out := []
+	for sname in GardenSfx.heard:
+		for i in int(GardenSfx.heard[sname]) - int(before.get(sname, 0)):
+			out.append(sname)
+	return out
+
+## Every fed item has its family's cue on file; a give plays exactly that one at the Boki, and a path token's pip
+## clicks into the meter PIP_S later.
+func _cues() -> void:
+	var pips := _heard("garden_item_pip")
+	GardenSfx.item(main, Vector3.ZERO, "keepstone")
+	ok(_heard("garden_item_token") > 0 and _heard("garden_item_pip") == pips, "Keepstone: the token cue, no pip yet")
+	await main.get_tree().create_timer(GardenSfx.PIP_S + 0.15).timeout
+	ok(_heard("garden_item_pip") == pips + 1, "...then its pip clicks into the meter %.2f s later" % GardenSfx.PIP_S)
+	var missing := []
+	var wrong := []
+	for id in GardenItems.ids().filter(GardenItems.fed):
+		var want := String(GardenSfx.ITEM.get(String(GardenItems.item(id)["effect"]["kind"]), ""))
+		if want == "" or not Sfx.ensure(want):
+			missing.append(id)
+			continue
+		var before := GardenSfx.heard.duplicate()
+		GardenSfx.item(main, Vector3.ZERO, id)
+		if _played(before) != [want]:
+			wrong.append(id)
+	ok(missing.is_empty(), "every fed item has its family's cue, on file (missing: %s)" % [missing])
+	ok(wrong.is_empty(), "a give plays one cue, its family's (wrong: %s)" % [wrong])
+
+## The brighter chime (HomeChimes "ready") once a Boki reaches its evolve level: Zapple's branching final.
+func _evolve_chime() -> void:
+	var rec := _boki("zapple", 5, "focus")
+	var due := EvoPath.level(rec)
+	rec["level"] = due - 1
+	var home := FakeHome.new()
+	home.kins = [{"rec": rec, "pos": Vector3.ZERO, "node": null}]
+	var chimes := HomeChimes.new(home)
+	chimes.tick(1.0)
+	var ready := _heard("garden_chime_ready")
+	var level := _heard("garden_chime_level")
+	rec["level"] = due
+	chimes.tick(1.0)
+	var bright := _heard("garden_chime_ready") == ready + 1 and _heard("garden_chime_level") == level
+	ok(bright, "Zapple reaches level %d, its evolve level: the brighter chime instead of the level one" % due)
+	rec["level"] = due + 1
+	chimes.tick(1.0)
+	ok(_heard("garden_chime_ready") == ready + 1, "a level past it: the level chime, no second brighter one")
+	Save.d["items"]["stayleaf"] = 1
+	GardenItems.use(rec, "stayleaf")
+	rec["level"] = due + 2
+	chimes.tick(1.0)
+	var held := _heard("garden_chime_ready") == ready + 1 and _heard("garden_chime_level") == level + 2
+	ok(held, "a Stayleaf holds it: no brighter chime, a level is the level chime")
+	GardenItems.take_off(rec, "stayleaf")
+	chimes.tick(1.0)
+	ok(_heard("garden_chime_ready") == ready + 2, "the Stayleaf off: it can evolve again, the brighter chime")
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")

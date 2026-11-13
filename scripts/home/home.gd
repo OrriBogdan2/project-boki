@@ -71,6 +71,7 @@ var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and 
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var photo: HomePhoto = null         # photo mode (home_photo.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
+var hold: ItemHold                    # an item in your hand and its preview card (item_hold.gd)
 var wade := BokiWade.new(self)        # Boki in the water: slower, ripples, paddling (boki_wade.gd)
 var fly := BokiFly.new(self)          # fliers over Kitewind Ridge and the gaps (boki_fly.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
@@ -1101,11 +1102,12 @@ func _process(delta: float) -> void:
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
-	if hb and hb.active:
+	var idle := panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()
+	if hold.tick(idle and not carry.carrying() and not (hb and hb.active)) or (hb and hb.active):
 		return
-	if carry.tick(d, interact, panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()):
+	if carry.tick(d, interact, idle):
 		return
-	if panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty() and not interact.is_empty():
+	if idle and not interact.is_empty():
 		if Input.is_action_just_pressed("interact"):
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
@@ -2421,6 +2423,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ ui
 func _build_ui() -> void:
 	ui = CanvasLayer.new(); add_child(ui)
+	hold = ItemHold.new(self)
 	stat_glint = StatGlint.new(self); ui.add_child(stat_glint)
 	root_ui = Control.new()
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -4334,6 +4337,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var nm: String = rec["name"]
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
+		if res["ok"]: GardenSfx.item(self, k["pos"], res["id"])
 		_toast(res["text"])
 		Save.save_game()
 		_refresh_top()
@@ -5126,7 +5130,8 @@ func _open_feed(rec: Dictionary) -> void:
 			row_for.call(f, n, aff + "Fills it up.")
 	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
 	var any := GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
-			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or not rows.is_empty()
+			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec),
+			func(id: String, pick: String): hold.peek(rec, id, pick)) or not rows.is_empty()
 	any = GardenItemRows.add_inks_and_worn(v, rec, func(): _open_feed(rec), [_close_panel, _play_evolutions]) or any
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))

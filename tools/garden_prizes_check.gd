@@ -80,18 +80,19 @@ func _cup() -> void:
 		var res := GardenPrizes.settle("shove", me, _boki(foe_power), true, t, rng)
 		names.append(res["round"])
 	ok(names == ["Sprout", "Bloom", "Crown"], "Sprout, Bloom, Crown in a row (got %s)" % str(names))
-	ok(GardenPrizes.ribbon_count(me, "shove") == 1, "the Crown grants exactly one Stump Shove ribbon")
+	var crowned := GardenPrizes.has_ribbon(me, "shove") and GardenItems.owned("cup_ribbon")
+	ok(crowned, "the Crown grants the Shove ribbon and its page")
 	ok(int(Save.d["items"].get("keepstone", 0)) == bag_before + 1, "the Crown grants a Keepstone, the cup prize")
 	var again: Array = []
 	for foe_power in [19, 21, 23]:
 		again.append(GardenPrizes.settle("shove", me, _boki(foe_power), true, t + DAY, rng))
-	var ribbons := GardenPrizes.ribbon_count(me, "shove")
-	ok(ribbons == 1 and not again[2]["ribbon"], "a second Crown the same week: no ribbon")
+	ok(not again[2]["ribbon"], "a second Crown the same week: no ribbon")
 	ok(int(Save.d["items"].get("keepstone", 0)) == bag_before + 1, "...and no second cup prize")
 	var later: Array = []
 	for foe_power in [19, 21, 23]:
 		later.append(GardenPrizes.settle("shove", me, _boki(foe_power), true, t + WEEK, rng))
-	ok(GardenPrizes.ribbon_count(me, "shove") == 2 and later[2]["ribbon"], "the next week's Crown grants again")
+	var week_now := int(me["ribbons"]["shove"]["week"]) == GardenPrizes.week_of(t + WEEK)
+	ok(not later[2]["ribbon"] and week_now, "next week's Crown: no second ribbon, the week moves on")
 	_echo_crown(rng, t + 5.0 * WEEK)
 	_loss_and_games(rng, t + 3.0 * WEEK)
 
@@ -102,7 +103,8 @@ func _echo_crown(rng: RandomNumberGenerator, t: float) -> void:
 		for foe_power in [19, 21, 23]:
 			GardenPrizes.settle("echo", me, _boki(foe_power), true, t + week * WEEK, rng)
 		ok(int(Save.d["items"].get("chimegrass", 0)) == 1, "Echo Steps Crown %d: Chimegrass once in all" % (week + 1))
-	ok(GardenPrizes.ribbon_count(me, "echo") == 2, "...and the Echo Steps Cup Ribbon each time")
+	var week_two := int(me["ribbons"]["echo"]["week"]) == GardenPrizes.week_of(t + WEEK)
+	ok(GardenPrizes.has_ribbon(me, "echo") and week_two, "...and it wears the Echo Steps Cup Ribbon, both weeks")
 
 func _loss_and_games(rng: RandomNumberGenerator, t: float) -> void:
 	var me := _boki(20)

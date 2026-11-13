@@ -34,16 +34,15 @@ static func _cup_line(id: String, rec: Dictionary, rounds: Array) -> String:
 ## A row on the Boki's card for each Cup Ribbon it holds.
 static func add_ribbons(parent: Control, rec: Dictionary) -> void:
 	for id in GardenPrizes.ids():
-		var n := GardenPrizes.ribbon_count(rec, id)
-		if n > 0:
-			parent.add_child(UI.kv(String(GardenPrizes.game(id)["ribbon"]), "×%d" % n if n > 1 else "worn",
+		if GardenPrizes.has_ribbon(rec, id):
+			parent.add_child(UI.kv(String(GardenPrizes.game(id)["ribbon"]), "worn",
 					Color(String(GardenPrizes.game(id)["colour"]))))
 
 ## Marks a kin model's body (Models.kin) with a small rosette for each Cup Ribbon it holds, in the game's colour.
 static func dress(body: Node3D, rec: Dictionary) -> void:
 	var at := 0
 	for id in GardenPrizes.ids():
-		if GardenPrizes.ribbon_count(rec, id) > 0:
+		if GardenPrizes.has_ribbon(rec, id):
 			var c := Color(String(GardenPrizes.game(id)["colour"]))
 			var side := -0.2 + 0.2 * at
 			Models.part(body, Models.cyl(0.07, 0.07, 0.03, 12), Models.toon(c, true, 0.3),

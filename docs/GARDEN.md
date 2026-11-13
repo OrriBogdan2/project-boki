@@ -36,6 +36,17 @@ curve is halved, so a garden-only first form is 123 min and the runner's 76. The
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
 
+## Shaping items: the preview card
+
+Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
+`ItemPreviewCard` (scripts/ui/item_preview_card.gd) slides in with every change drawn as a ghost. It shows the stat
+bars with the real gain after caps, the budget and lean rings, and on a branching line the path meter (both finals
+as silhouettes, pips before and after, the verdict, and a Why? list of pip sources). For a second the Boki tries the
+change on: its new colour or the path token. While the card is up it ticks softly (`garden_item_tick`, every
+`GardenSfx.TICK_S`). Interact there gives the item, and the give plays its family's cue at the Boki (docs/AUDIO.md);
+walking away from that Boki ends the hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
+`EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
+in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.

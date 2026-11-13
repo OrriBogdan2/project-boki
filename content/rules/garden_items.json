@@ -4,6 +4,8 @@
 	"pip_doc": "Affinity points one worn path token adds to its path when a form is chosen (Evo.leading); the same as one meal of that path's food.",
 	"max_tokens": 3,
 	"max_tokens_doc": "Path tokens worn at once on one Boki.",
+	"hold": {"give_m": 2.2, "tryon_s": 1.0, "token_m": 0.09, "token_at": 0.8},
+	"hold_doc": "Holding an item at home (ItemHold, GARDEN_MODERN 1.3). give_m: m from a Boki at which its preview card shows and interact gives the item; walking past it again ends the hold. tryon_s: s the Boki wears the change (new colour or path token). token_m: m radius of the tried-on token. token_at: share of the emote height the token floats at.",
 	"verbs": {
 		"eaten": "ate",
 		"worn": "put on"
@@ -166,6 +168,18 @@
 			"sources": [
 				"Bramblebank nap tree",
 				"Drift Trader"
+			]
+		},
+		{
+			"id": "cup_ribbon",
+			"name": "Cup Ribbon",
+			"family": "path",
+			"use": "worn",
+			"effect": {
+				"kind": "ribbon"
+			},
+			"sources": [
+				"Crown cup"
 			]
 		},
 		{
