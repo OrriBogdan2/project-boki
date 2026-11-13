@@ -723,4 +723,8 @@ func _visit_part(m: Node) -> void:
 	var zone = await _arrived(m, hub)
 	ok(zone != null and zone._visiting() and zone.zone == "glasswater" and _uids(zone) == [String(ash["uid"])],
 		"and finds only Ash there, still a visit")
+	var egg := Incubator.add(String(Data.common_kin()[0]))
+	for _f in 20: await m.get_tree().process_frame
+	ok(zone != null and zone.hinc == null and float(Incubator.find(String(egg["id"])).get("heat", 0.0)) > 0.0,
+		"your own Rare Egg keeps warming while you visit (play time; decision 0080)")
 	Content.rules("farm_build")["base_mode"] = false

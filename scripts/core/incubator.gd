@@ -2,15 +2,16 @@ class_name Incubator
 ## The Incubator by the Nesting Nook: where Rare Eggs from boss lairs hatch. It has SLOTS cradles
 ## round a warm brazier (more bought as an unlock, up to MAX_SLOTS). Every Rare Egg you carry home
 ## goes into a free cradle, or waits on the shelf beside it (Save.d["rare_eggs"]) until one frees up.
-## All the placed eggs warm at once. Each is ready after TRIPS expeditions or HEAT_NEED seconds of
-## warmth (time at home and time away both count), whichever comes first. Two things warm them
+## All the placed eggs warm at once. Each is ready after hatch_secs (content/rules/incubator.json,
+## 20 minutes) of play: time in the garden and time in a match both count (Game.apply_result hands
+## the match's seconds to tick), time with the game closed does not. Two things warm them
 ## faster, and they add up: an Ember kin working the "Warm the incubator" job (HomeWork, kind
 ## "warm"), and Ember Coals from the market, stoked into the brazier (COAL_SECS of extra heat each).
 ## A ready egg waits until you hatch it there (Care.hatch_rare: a rare kin, three IVs 26 or better):
 ## Rare Eggs never hatch on their own and never go in the breeding nest.
 ##
 ## On the save:
-##   Save.d["incubator"]  {slots: n, eggs: [{sp, boss, id, slot, m0 (expeditions when placed), heat (seconds), t}], coal: seconds, t}
+##   Save.d["incubator"]  {slots: n, eggs: [{sp, boss, id, slot, heat (seconds of warmth), slow}], coal: seconds}
 ##   Save.d["rare_eggs"]  [{sp, boss, rare, id}] waiting on the shelf, next first
 ##   A wild visitor's egg also carries "visitor" {sp, zone, day} (who left it); an older egg has none.
 ##   Save.d["items"]["coals"]  Ember Coals not used yet
@@ -18,13 +19,14 @@ class_name Incubator
 const SLOTS := 5              # cradles to start with
 const MAX_SLOTS := 8
 const SLOT_COST := [300, 450, 650]     # gems for the 6th, 7th and 8th
-const TRIPS := 2              # expeditions to hatch
-const HEAT_NEED := 480.0      # or this many seconds warm (about eight minutes at home)
 const WARM_BONUS := 1.0       # an Ember kin at the brazier: +1x (twice as fast)
 const COAL_BONUS := 1.0       # Ember Coals burning: +1x (with a kin as well, three times as fast)
 const COAL_SECS := 240.0      # how long one scoop of Ember Coals burns
 const COAL_PRICE := 45
-const AWAY_CAP := 7200.0      # the most time away counted in one go
+
+## Seconds of warmth an egg needs at the plain pace.
+static func need() -> float:
+	return float(Content.rules("incubator")["hatch_secs"])
 
 static func _inc() -> Dictionary:
 	return Save.d.get("incubator", {})
@@ -40,7 +42,7 @@ static func ensure() -> void:
 	if not inc.has("eggs"):
 		# an early one-egg incubator ({sp, boss, ...}) becomes the first cradle
 		var old: Dictionary = inc.duplicate()
-		inc = {"slots": SLOTS, "eggs": [], "coal": 0.0, "t": Time.get_unix_time_from_system()}
+		inc = {"slots": SLOTS, "eggs": [], "coal": 0.0}
 		if old.has("sp"):
 			old["slot"] = 0
 			inc["eggs"].append(old)
@@ -48,6 +50,13 @@ static func ensure() -> void:
 	Save.d["incubator"] = inc
 	for e in Save.d["rare_eggs"]:
 		if not (e as Dictionary).has("id"): e["id"] = _id()
+	for e in inc["eggs"]:
+		if not e.has("slow"):      # a cradle from before the 20-minute hatch: starts cold
+			e["heat"] = 0.0
+			e["slow"] = true
+			e.erase("m0")
+			e.erase("t")
+	inc.erase("t")
 	migrate()
 	settle()
 
@@ -115,8 +124,8 @@ static func settle() -> int:
 		if q.is_empty(): break
 		if not in_slot(i).is_empty(): continue
 		var e: Dictionary = q.pop_front()
-		var cradle := {"sp": String(e.get("sp", "")), "boss": String(e.get("boss", "")), "id": String(e.get("id", _id())),
-			"slot": i, "m0": int(Save.d.get("matches", 0)), "heat": 0.0, "t": Time.get_unix_time_from_system()}
+		var cradle := {"sp": String(e.get("sp", "")), "boss": String(e.get("boss", "")), "id": String(e.get("id", _id())), "slot": i,
+			"heat": 0.0, "slow": true}
 		if e.has("visitor"):
 			cradle["visitor"] = e["visitor"]
 		(inc["eggs"] as Array).append(cradle)
@@ -132,15 +141,9 @@ static func next_up(id: String) -> void:
 			return
 
 # ------------------------------------------------------------------ warming
-## Expeditions since this egg was placed.
-static func trips(e: Dictionary) -> int:
-	return 0 if e.is_empty() else maxi(0, int(Save.d.get("matches", 0)) - int(e.get("m0", 0)))
-
-## 0..1: whichever of the two is further along.
+## 0..1: how warm the egg has got.
 static func progress(e: Dictionary) -> float:
-	if e.is_empty():
-		return 0.0
-	return clampf(maxf(float(trips(e)) / TRIPS, float(e.get("heat", 0.0)) / HEAT_NEED), 0.0, 1.0)
+	return 0.0 if e.is_empty() else clampf(float(e.get("heat", 0.0)) / need(), 0.0, 1.0)
 
 static func egg_ready(e: Dictionary) -> bool:
 	return not e.is_empty() and progress(e) >= 1.0
@@ -162,27 +165,16 @@ static func coal_left() -> float:
 static func rate(warmed := false) -> float:
 	return 1.0 + (WARM_BONUS if warmed else 0.0) + (COAL_BONUS if coal_left() > 0.0 else 0.0)
 
-## Time passing: dt seconds, at rate() for every egg still warming. Coals burn down.
+## Play time passing: dt seconds, at rate() for every egg still warming. Coals burn down.
 static func tick(dt: float, warmed := false) -> void:
 	var inc := _inc()
 	if inc.is_empty():
 		return
 	var r := rate(warmed)
 	for e in eggs():
-		e["heat"] = minf(HEAT_NEED, float(e.get("heat", 0.0)) + dt * r)
+		e["heat"] = minf(need(), float(e.get("heat", 0.0)) + dt * r)
 	if coal_left() > 0.0 and any_warming():
 		inc["coal"] = maxf(0.0, coal_left() - dt)
-	inc["t"] = Time.get_unix_time_from_system()
-
-## The time you were away (up to AWAY_CAP) warms them too (with whatever coals were burning).
-static func catch_up() -> void:
-	var inc := _inc()
-	if inc.is_empty():
-		return
-	var gone := clampf(Time.get_unix_time_from_system() - float(inc.get("t", Time.get_unix_time_from_system())), 0.0, AWAY_CAP)
-	var hot := minf(gone, coal_left())
-	tick(hot, false)
-	tick(gone - hot, false)
 
 ## Stokes one scoop of Ember Coals into the brazier. "" if it worked, else why not.
 static func stoke() -> String:
@@ -196,7 +188,7 @@ static func stoke() -> String:
 
 ## Seconds of warmth left for this egg at the plain rate.
 static func secs_left(e: Dictionary) -> float:
-	return 0.0 if e.is_empty() else maxf(0.0, HEAT_NEED - float(e.get("heat", 0.0)))
+	return 0.0 if e.is_empty() else maxf(0.0, need() - float(e.get("heat", 0.0)))
 
 ## "Ready to hatch!", or how long it has left.
 static func status_text(e: Dictionary) -> String:
@@ -204,9 +196,7 @@ static func status_text(e: Dictionary) -> String:
 		return "Empty"
 	if egg_ready(e):
 		return "Ready to hatch!"
-	var tl := TRIPS - trips(e)
-	var m := int(ceil(secs_left(e) / 60.0 / rate()))
-	return "%d expedition%s or ~%d min at home" % [tl, "" if tl == 1 else "s", m]
+	return "~%d min of play left" % int(ceil(secs_left(e) / 60.0 / rate()))
 
 # ------------------------------------------------------------------ hatching and more cradles
 ## Hatches one ready egg (by id, or the first ready one): a rare kin (Care.hatch_rare), and its

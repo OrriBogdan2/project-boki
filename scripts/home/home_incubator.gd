@@ -3,7 +3,8 @@ extends RefCounted
 ## The Incubator on the home island, beside the Nesting Nook (the rules are Incubator's,
 ## scripts/core/incubator.gd). Puts each Rare Egg in its own cradle and the rest on the shelf,
 ## lights each cradle's ember pebbles as its egg warms, shows unbought cradles behind an iron grate,
-## glows brighter (and sparks) while an Ember kin or Ember Coals warm it, and wobbles ready eggs.
+## glows brighter (and sparks) while an Ember kin or Ember Coals warm it, and shows each egg's warmth
+## on the egg itself (EggStages: glow, cracks, wobble) with a sharp rattle once it is ready.
 ## home.gd calls build(), tick(d), refresh(), prompt() and nearest_ready().
 ## A ready egg says so by its look alone, with no message (DECISIONS 2026-11-11).
 
@@ -17,6 +18,7 @@ var gold_mat: Material = null
 var dark_mat: Material = null
 var acc := 0.0
 var ready_ids := {}                     # eggs we've already told you are ready
+var film_t := -1.0                      # >= 0: the clock the wobble runs on (the video tool sets it per frame)
 
 func _init(home) -> void:
 	h = home
@@ -36,7 +38,6 @@ func slot_pos(i: int) -> Vector3:
 
 func build() -> void:
 	Incubator.ensure()
-	Incubator.catch_up()
 	node = Models.incubator()
 	node.position = at()
 	h.add_child(node)
@@ -69,6 +70,7 @@ func refresh() -> void:
 		for j in 6: (c.get_node("P%d" % j) as Node3D).visible = open
 	for e in Incubator.eggs():
 		var en := Models.rare_egg_small(Incubator.spot_col(e), 0.55)
+		EggStages.dress(en, 0.55)
 		en.rotation.y = float(int(e.get("slot", 0))) * 0.9
 		(node.get_node("C%d/Egg" % int(e.get("slot", 0))) as Node3D).add_child(en)
 		egg_nodes[String(e["id"])] = en
@@ -112,7 +114,7 @@ func tick(d: float) -> void:
 	_hear(d)
 	acc += d
 	VisitorArrive.glint(self, d)
-	var tt := Time.get_ticks_msec() / 1000.0
+	var tt := film_t if film_t >= 0.0 else Time.get_ticks_msec() / 1000.0
 	var hot := Incubator.rate(warm)
 	var gl: OmniLight3D = node.get_node("Glow")
 	gl.light_energy = (0.0 if Incubator.eggs().is_empty() else 0.4 + 0.5 * hot) + sin(tt * 3.1) * 0.12
@@ -122,12 +124,11 @@ func tick(d: float) -> void:
 	for e in Incubator.eggs():
 		var en: Node3D = egg_nodes.get(String(e["id"]), null)
 		if en == null or not is_instance_valid(en): continue
-		var sh: Node3D = en.get_node("Shell")
 		var ph := float(int(e.get("slot", 0))) * 0.7
+		EggStages.apply(en, Incubator.progress(e), tt, ph)
 		if Incubator.egg_ready(e):
-			sh.rotation.z = sin(tt * 11.0 + ph) * 0.15 * (1.0 if fmod(tt + ph, 2.6) < 0.7 else 0.0)
-		else:
-			sh.rotation.z = sin(tt * 1.3 + ph) * 0.03
+			var rattling := fmod(tt + ph, 2.6) < 0.7
+			(en.get_node("Shell") as Node3D).rotation.z = sin(tt * 11.0 + ph) * 0.15 * float(rattling)
 	if acc >= 0.5:
 		acc = 0.0
 		_light()
