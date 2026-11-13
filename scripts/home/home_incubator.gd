@@ -5,6 +5,7 @@ extends RefCounted
 ## lights each cradle's ember pebbles as its egg warms, shows unbought cradles behind an iron grate,
 ## glows brighter (and sparks) while an Ember kin or Ember Coals warm it, and wobbles ready eggs.
 ## home.gd calls build(), tick(d), refresh(), prompt() and nearest_ready().
+## A ready egg says so by its look alone, with no message (DECISIONS 2026-11-11).
 
 var h                                   # the Home screen
 var node: Node3D = null

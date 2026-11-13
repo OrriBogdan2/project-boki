@@ -478,7 +478,7 @@ func _archer_combos() -> void:
 		P.slot_lv["kin"] = rk
 		up.append([
 			K.power("sec") / p1, K.power("kin") / pk1,
-			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"),
+			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"), K.arc_deg(),
 		])
 	ok("upgrade parity: Heavy Shot damage +20% / +40%", near.call(up[1][0], 1.2) and near.call(up[2][0], 1.4), str(up))
 	ok("upgrade parity: Spirit Walk recharge 9.5 -> 8.5 -> 7.5",
@@ -486,6 +486,8 @@ func _archer_combos() -> void:
 	ok("upgrade parity: Hail Wall cooldown 15 -> 13 -> 9 and damage +30% / +60%",
 			near.call(up[1][3], 13.0) and near.call(up[2][3], 9.0)
 			and near.call(up[1][1], 1.3) and near.call(up[2][1], 1.6), str(up))
+	ok("upgrade parity: rank 3 (tier IV) Hail Wall arc 120 -> 156 degrees",
+			near.call(up[1][4], 120.0) and near.call(up[2][4], 156.0), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
@@ -604,6 +606,26 @@ func _archer_combos() -> void:
 		"combo pin: Spirit Walk ending inside a rock = back to the entry",
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
+	)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	var w0 := K.spirit.walks
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	step(m, 0.6, func(): P.inp["move"] = Vector2.ZERO)
+	P.teleport(Vector3(bx + 0.5, home.y, home.z))
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
+	sn0 = K.spirit.snap_backs
+	step(m, K.spirit.t + 0.2)
+	ok(
+		"combo pin: Spirit Walk running out inside a rock = back to the entry",
+		K.spirit.walks == w0 + 1 and not K.spirit.active() and P.spirit_t <= 0.0 and K.spirit.snap_backs == sn0 + 1
+			and P.pos.x < bx,
+		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
@@ -1160,6 +1182,20 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
 		"cds %s shields %s" % [str(cds), str(shields)]
 	)
+	# the Spin Dash recharge takes the data's -1.5 s a rank; no slot gets a rank damage step (the data names none)
+	var regens: Array = []
+	var dmgs: Array = []
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		regens.append(P.dash_regen())
+		dmgs.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the aegis, Smash or field",
+		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01
+				and dmgs[2] == dmgs[0],
+		"recharge %s power %s" % [str(regens), str(dmgs)]
+	)
+	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 3
 	ok(
 		"combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait)",

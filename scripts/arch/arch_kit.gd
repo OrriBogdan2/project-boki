@@ -88,8 +88,9 @@ func rank(slot: String) -> int:
 
 ## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
 ## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
-func rank_k(table: String, slot: String, shared: float) -> float:
-	var row: Array = d.get(table, {}).get(slot, [])
+## `key` names the row when it is not the slot's (rank_cd.air follows the dash rank).
+func rank_k(table: String, slot: String, shared: float, key := "") -> float:
+	var row: Array = d.get(table, {}).get(key if key != "" else slot, [])
 	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
 
 ## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
@@ -170,6 +171,7 @@ func outgoing(_t: Ent, dmg: float, _o: Dictionary) -> float: return dmg
 ## The colour of the floating damage number this hit shows (a kit tints its own ramp).
 func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
+func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
 ## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
 func commit_left() -> float: return 0.0
@@ -519,10 +521,11 @@ func _bond_tell() -> void:
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
-## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
+## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's;
+## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
@@ -1017,6 +1020,20 @@ static func net_vel(h: Hunter) -> Vector3:
 
 func move_vel() -> Vector3:
 	return h.vel
+
+## A ground cone everyone must dodge (Net 0.24.6): other players' games don't run this kit, so they get its
+## true length and width and draw the same AimKit cone for `dur` s (net_cone_in).
+func net_cone(at: Vector3, dir: Vector2, length: float, deg: float, dur: float, col: Color) -> void:
+	if m.net_on and not h.remote:
+		m.net_fx(["cone", h.nid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.01), snappedf(dir.y, 0.01),
+				m._r(length), m._r(deg), m._r(dur), col.to_html(false)])
+
+static func net_cone_in(match_node: Node, x: Array) -> void:
+	var who: Variant = match_node.ents_by_id.get(String(x[2]), null)
+	if who is Hunter and not (who as Hunter).is_local():
+		var p := {"from": Vector3(x[3], x[4], x[5]), "dir": Vector2(x[6], x[7]), "len": float(x[8]), "deg": float(x[9])}
+		p.merge({"dur": float(x[10]), "all": true, "col": Color.html(String(x[11]))})
+		AimKit.cone(who as Hunter, "net_cone", p)
 
 ## Other players' games don't run this kit: while the payoff is armed a ring in the resource colour
 ## pulses under the hunter for them every 1.1s (the existing Net fx ring; the protocol is unchanged).

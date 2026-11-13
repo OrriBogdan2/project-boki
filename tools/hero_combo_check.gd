@@ -56,6 +56,33 @@ func _unwall(m: Match, p: Vector3) -> void:
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
+## Vex's Burr Charge cast from `up` m over the ground along an empty lane, a foe standing just past the lane's
+## end off to the side: a dud there (gone, no cone, no blast, the foe untouched), never a stick or a cone.
+func _burr_dud(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, up: float, how: String) -> void:
+	ac.fresh(T)
+	KitStatus.clear_rattled(T)
+	T.teleport(home + Vector3(10.5, 0, 2.0))
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, up, 0))
+	P.grounded = up <= 0.0
+	P.vel = Vector3.ZERO
+	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
+	var duds := K.duds
+	var blasts := K.rattles
+	var airborne := not P.grounded
+	ac.tap(m, P)
+	var stuck := false
+	for _i in int(1.6 / DT):
+		m.step(DT)
+		stuck = stuck or K.burrs.any(func(b: Dictionary) -> bool: return float(b["fuse"]) >= 0.0)
+	ok("RMB %s on nothing: a dud, no stick, no cone, no blast, the foe past the end untouched" % how,
+			airborne == (up > 0.0) and K.duds == duds + 1 and not stuck and K.rattles == blasts
+			and K.burrs.is_empty() and ac.dmg(T) < 0.5 and not KitStatus.rattled(T),
+			"duds +%d stuck %s blasts +%d took %.1f" % [K.duds - duds, stuck, K.rattles - blasts, ac.dmg(T)])
+	P.teleport(home)
+	ac.step(m, 0.3)
+
 func _fire(m: Match, P: Hunter) -> void:
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
@@ -747,36 +774,24 @@ func _gunslinger() -> void:
 	ok("RMB direct hit: the struck foe's body is held lit longer than a plain hit's 0.12 s flash", T.flash_t > 0.12, "%.2f" % T.flash_t)
 	var rifle := {"src": "shot"}
 	ok("RMB direct hit: the Dazed foe takes the rifle's +76%", is_equal_approx(K.outgoing(T, 10.0, rifle), 17.6))
-	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
-	ac.fresh(T)
-	KitStatus.clear_rattled(T)
-	T.teleport(home + Vector3(4, 0, 6))
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	P.teleport(home)
-	ac.step(m, 0.1)
-	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
-	ac.tap(m, P)
-	ac.step(m, 0.5)
-	var b0: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB: sticks on the ground at the lane's end",
-			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"]) and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
-			"at %.1f" % (_flat(b0.get("pos", home), home)))
-	var cone_id := ("burr%d" % (b0["node"] as Node3D).get_instance_id()) if not b0.is_empty() else ""
-	var ce := AimKit.entry(P, cone_id)
-	ok("RMB: the cone shows back toward you, for everyone",
-			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
-	ok("RMB: the cone drawn is the cone that hits (length %.1f, %.0f degrees)" % [bd["cone_len"], bd["cone_deg"]],
-			is_equal_approx(float(ce.get("len", 0.0)), float(bd["cone_len"]))
-			and is_equal_approx(float(ce.get("deg", 0.0)), float(bd["cone_deg"])), str(ce.get("deg", -1)))
+	# 3b. a miss is a miss: the lane's end on no foe and no wall is a dud, on the ground or from the air
+	_burr_dud(m, P, T, K, home, 0.0, "a ground cast")
+	_burr_dud(m, P, T, K, home, 4.0, "an air cast 4 m up")
 	ac.fresh(T)
 	T.teleport(home + Vector3(8, 0, 0))
-	ac.step(m, 0.05)
-	var tx := T.pos.x
-	ac.step(m, 1.0)
-	ok("RMB ground cone: damage + Dazed + shoved toward you",
-			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and T.pos.x < tx - 1.5,
-			"took %.0f moved %.1f" % [ac.dmg(T), T.pos.x - tx])
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.teleport(home + Vector3(0, 2.0, 0))
+	P.grounded = false
+	P.vel = Vector3.ZERO
+	ac.aim_at(P, T.pos)
+	ac.tap(m, P)
+	ac.step(m, 0.4)
+	ok("RMB air cast 2 m up: a foe 8 m down the lane is still struck and Dazed",
+			ac.dmg(T) >= 20.0 and KitStatus.rattled(T), "took %.1f" % ac.dmg(T))
+	KitStatus.clear_rattled(T)
+	P.teleport(home)
+	ac.step(m, 0.3)
 	ok("RMB: 0.9s fuse", is_equal_approx(float(bd["fuse"]), 0.9))
 	# 4. on a wall: sticks, the cone back out, a hunter shoved into more terrain is stunned (no cooldown shave)
 	ac.fresh(T)
@@ -801,7 +816,15 @@ func _gunslinger() -> void:
 	ac.tap(m, P)
 	ac.step(m, 0.5)
 	var bw: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and bool(bw["wall"]), str(bw.get("pos", "")))
+	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and absf(float(bw["pos"].x) - (home.x + 9.5)) < 0.8,
+			str(bw.get("pos", "")))
+	var cone_id := ("burr%d" % (bw["node"] as Node3D).get_instance_id()) if not bw.is_empty() else ""
+	var ce := AimKit.entry(P, cone_id)
+	ok("RMB: the cone shows back toward you, for everyone",
+			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
+	ok("RMB: the cone drawn is the cone that hits (length %.1f, %.0f degrees)" % [bd["cone_len"], bd["cone_deg"]],
+			is_equal_approx(float(ce.get("len", 0.0)), float(bd["cone_len"]))
+			and is_equal_approx(float(ce.get("deg", 0.0)), float(bd["cone_deg"])), str(ce.get("deg", -1)))
 	ac.step(m, 1.1)
 	ok("RMB wall cone: a second foe in the cone is hurt and Dazed too",
 			KitStatus.rattled(T2) and ac.dmg(T2) >= 12.0, "took %.0f at %s" % [ac.dmg(T2), str(T2.pos - home)])
@@ -1027,6 +1050,14 @@ func _gunslinger() -> void:
 	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
+	var speeds: Array = []
+	for rk in [1, 3]:
+		P.slot_lv["dash"] = rk
+		var before := P.buff("move_speed")
+		K._slide_end()
+		speeds.append(P.buff("move_speed") - before)
+	ok("upgrade parity: rank 3 (tier IV) a slide's end gives +25% speed, rank 1 none",
+			near.call(speeds[0], 0.0) and near.call(speeds[1], 0.25), str(speeds))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
