@@ -146,7 +146,7 @@ func _reset(p: Vector3) -> void:
 	P.root_t = 0.0
 	P.mantle_cd = 0.0
 	P.air_t = 0.0
-	P.step_vis = 0.0
+	P.drawn_y = INF        # StepSmooth: draw from the body again
 	P.squash = 0.0
 	P.pad = {}
 	P.grap = {}

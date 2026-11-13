@@ -3,7 +3,7 @@ extends "res://tools/abyss_check.gd"
 ##  1. the fall: on the speed cap inside a second (12 m/s at the lip easing to 10 m/s by 16.5 m under,
 ##     AbyssFallSlow: the cap has eased to ~11.3 by the time gravity gets you there), about 2 s from the lip
 ##     to the point of no return
-##  2. control: the keys barely steer a fall (AirControl 0.015 of your ground acceleration): held back toward
+##  2. control: the keys steer a fall only by the air push (tuning.json air, owner 11-08): held back toward
 ##     the island you still drift away and are lost; only the glider, or a ledge in reach, saves you
 ##  3. the camera: the usual view down to 1 m under the lip, then it pulls out with your depth (eased, never
 ##     a pop) to most of the abyss zoom by the bottom, and is back to the usual view 1.5 s after the lift
@@ -118,14 +118,15 @@ func _check_fall(fall: Dictionary) -> void:
 	ok(dip <= 1e-4, "the pull-out never backs off on the way down (%.4f)" % dip)
 	ok(pop <= step_max, "the pull-out eases, never pops (%.4f per step, cap %.4f)" % [pop, step_max])
 
-## 2. control: a key sideways moves you no more than AirControl allows; a key back doesn't bring you back.
+## 2. control: a key sideways moves you no more than the air push allows (tuning.json air.accel, the owner's
+## 11-08 call over AirControl); a key back doesn't bring you back.
 func _check_control(e: Dictionary) -> void:
 	var d: Vector2 = e["dir"]
 	var side := _fall(e, Vector2(-d.y, d.x), 0.0, 1.0)
 	var held := float(side["fall_t"]) - KEYS_AT
-	var steer := h.ground_accel * HunterMove.air_control * held * held * 0.5
+	var steer := Loco.air_accel * held * held * 0.5
 	var moved := absf(float(side["side"]))
-	var side_txt := "a key held sideways from %.1f s moves you %.2f m by the end (AirControl: at most %.2f m)"
+	var side_txt := "a key held sideways from %.1f s moves you %.2f m by the end (air push: at most %.2f m)"
 	ok(side["fell"] and moved > 0.05 and moved <= steer + 0.1, side_txt % [KEYS_AT, moved, steer])
 	var back := _fall(e, -d, 0.0, 1.0)
 	var back_txt := "held back toward the island from %.1f s you still drift away (%.1f m out) and are lost"

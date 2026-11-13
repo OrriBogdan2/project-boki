@@ -22,6 +22,8 @@ static func shot_ended(m: Match, s: Dictionary, at: Vector3, why: String) -> voi
 	if x.has("boom") or x.has("lob") or x.get("mob", false) or x.get("melee", false):
 		return
 	var by = s["by"]
+	if not is_instance_valid(by):
+		return      # the shooter is gone (freed) before its shot ended
 	if by is Kin:
 		by = (by as Kin).owner_h
 	if by is Hunter:
