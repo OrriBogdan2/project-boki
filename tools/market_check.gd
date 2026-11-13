@@ -20,6 +20,7 @@ func run(m: Node) -> void:
 	await _stall_on_every_save()
 	_levels()
 	_shelter()
+	_always_adopt()
 	_transfer()
 	_stalls()
 	_search()
@@ -213,6 +214,36 @@ func _shelter() -> void:
 	Save.d["layout"] = HomeLayout.new_fs(Save.d, 7)
 	ok(not Shelter.adopt(String(Shelter.cards()[0]["id"]))["ok"] and Shelter.why_not(Save.d["roster"][1]) != "",
 		"a stall at L1 has no shelter yet")
+
+## Always adoptable: an empty shelter shows 3 strays (commons, no usual starters, the flat
+## fee), adopting one restocks at once, and a player with no Boki and only the fee can adopt one.
+func _always_adopt() -> void:
+	_save()
+	var st := MarketSave.section("shelter")
+	st["stock"] = []
+	var fee := int(Goods.rules()["shelter"]["stray_fee"])
+	var cs := Shelter.cards()
+	ok(cs.size() == 3 and cs.all(func(c): return String(c["from"]) == ""), "an empty shelter shows 3 strays")
+	var plain := func(c: Dictionary) -> bool:
+		var sp := String(c["rec"]["species"])
+		return not Data.is_rare(sp) and not Data.LAUNCH_KIN.has(sp)
+	ok(cs.all(plain), "the strays are commons that aren't usual starters")
+	var flat := func(c: Dictionary) -> bool: return int(c["price"]) == fee and int(c["rec"]["level"]) == 1
+	ok(cs.all(flat) and Shelter.cheapest() == fee, "each costs the flat fee (%d gems)" % fee)
+	Save.d["roster"].clear()
+	Save.d["gems"] = fee
+	var r := Shelter.adopt(String(cs[0]["id"]))
+	ok(r["ok"] and int(Save.d["gems"]) == 0 and Save.d["roster"].size() == 1, "no Boki and only the fee: adopts one")
+	var after := Shelter.cards()
+	ok(after.size() == 3 and after.all(func(c): return String(c["from"]) == ""), "adopting restocks a stray at once")
+	Save.d["roster"].clear()
+	Save.d["gems"] = fee
+	ok(not Lifeline.stuck(), "no Boki and the fee in gems is not stuck")
+	# a fresh save at 0 gems and 0 Boki: the shelter still shows 3 strays, and the floor gives one for free
+	_save(0)
+	Save.d["roster"].clear()
+	ok(Shelter.cards().size() == 3 and Lifeline.stuck(), "0 gems, 0 Boki: 3 strays shown, but none affordable")
+	ok(Lifeline.check().size() == 1 and Save.d["roster"].size() == 1, "and the floor hands over a stray")
 
 func _card_of(uid: String) -> Dictionary:
 	for c in Shelter.cards():
