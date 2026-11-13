@@ -40,7 +40,8 @@ static func worn(rec: Dictionary) -> Array:
 
 ## What the item would do to this Boki: {ok, text, deltas}. deltas maps a field (see value()) to
 ## [before, after]; text is the one line the menu and the journal show, or why it can't be used.
-## pick: the lean type a sweet is eaten for ("" = the one it leans to most, else the first).
+## pick: the lean type a sweet is eaten for ("" = the one it leans to most, else the first), or the stat
+## Unwind Tea loosens ("" = its highest).
 static func preview(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	Care.ensure(rec)
 	var e: Dictionary = item(id)["effect"]
@@ -57,7 +58,7 @@ static func preview(rec: Dictionary, id: String, pick := "") -> Dictionary:
 		"sweet": return _sweet(rec, e, pick)
 		"trait": return _trait(rec, String(e["trait"]), float(e["by"]))
 		"twin": return _no("shared by two Boki: give it to a pair")
-		_: return _loose(rec, int(e["n"]))
+		_: return _loose(rec, int(e["n"]), pick)
 
 ## Does it: returns the preview it followed. Not usable (ok false) changes nothing.
 static func apply(rec: Dictionary, id: String, pick := "") -> Dictionary:
@@ -164,7 +165,7 @@ static func nudge(id: String) -> String:
 		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
 		"stay": return "no new forms while worn"
 		"rinse": return "clears the lean; the grown parts stay"
-		_: return "%d points of the top stat become loose points" % int(e["n"])
+		_: return "up to %d points of a stat become loose points" % int(e["n"])
 
 ## Takes a worn item off and puts it back in the bag. False if the Boki isn't wearing it.
 static func take_off(rec: Dictionary, id: String) -> bool:
@@ -339,15 +340,21 @@ static func _down(rec: Dictionary, n: int) -> Dictionary:
 	var text := "trust +%d (%d to %d): %s" % [int(gain), int(now), int(now + gain), NestItems.memory_line()]
 	return _yes(text, {"trust": [now, now + gain]})
 
-static func _loose(rec: Dictionary, n: int) -> Dictionary:
-	var best := "power"
-	for s in Care.STATS:
-		if int(rec["stats"].get(s, 0)) > int(rec["stats"].get(best, 0)):
-			best = s
-	var now := int(rec["stats"].get(best, 0))
+## Unwind Tea: up to n points of one stat come out as loose points, which StatBudget.add puts back into
+## any stat at loose_rate a gain (double the first band). IVs, species and form are never touched.
+static func _loose(rec: Dictionary, n: int, pick: String) -> Dictionary:
+	if not Care.STATS.has(pick):
+		pick = "power"
+		for s in Care.STATS:
+			if int(rec["stats"].get(s, 0)) > int(rec["stats"].get(pick, 0)):
+				pick = s
+	var now := int(rec["stats"].get(pick, 0))
 	var take := mini(n, now)
+	var nm: String = Care.STATS[pick]["name"]
 	if take <= 0:
-		return _no("no trained points to loosen")
+		return _no("no trained %s points to loosen" % nm)
 	var loose := int(rec["loose"])
-	return _yes("%d %s points come out as loose points" % [take, Care.STATS[best]["name"]],
-			{"stats." + best: [now, now - take], "loose": [loose, loose + take]})
+	var rate := int(StatBudget.rules()["loose_rate"])
+	var text := "%d %s points come out as loose points (%s %d to %d); they go back into any stat %d a play"
+	return _yes(text % [take, nm, nm, now, now - take, rate],
+			{"stats." + pick: [now, now - take], "loose": [loose, loose + take]})

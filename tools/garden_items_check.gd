@@ -3,7 +3,9 @@ extends RefCounted
 ## For every item on three sample Boki, preview() changes nothing, apply() does exactly the deltas preview
 ## named (and nothing else), writes one journal line, and an item that can't be used changes nothing. Also:
 ## the three-token limit, take_off back to the bag, Stayleaf stops forms, tokens steer the form, feeding
-## through Care.feed, and an old v12 save gaining the new fields. Never touches the real save.
+## through Care.feed, Unwind Tea's respec (GARDEN_MODERN.md 2.4: a picked stat's points come back at double
+## speed up to the old total, tokens come off into the bag, IVs, species and forms stay), and an old v12 save
+## gaining the new fields. Never touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
 const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
@@ -43,6 +45,7 @@ func run(m: Node) -> void:
 		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
+	_respec()
 	_migration()
 	print("GARDENITEMS DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -217,6 +220,46 @@ func _feeding() -> void:
 	var tea := Care.feed(rec, "unwind_tea")
 	var power: int = rec["stats"]["power"]
 	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
+
+func _respec() -> void:
+	var rec := _boki("cindle", 15, "power")           # level 15: every stat may reach 100
+	rec["stats"] = {"power": 40, "guard": 0, "speed": 10, "focus": 0}
+	GardenItems.apply(rec, "galeribbon")
+	GardenItems.apply(rec, "keepstone")
+	var kept := _fixed(rec)
+	var old_total := StatBudget.total(rec)
+	Save.d["items"]["unwind_tea"] = 1
+	var lines: Array = rec["journal"]
+	var jn := lines.size()
+	var tea := GardenItems.use(rec, "unwind_tea", "power")
+	var drank: bool = tea["ok"] and int(rec["stats"]["power"]) == 20 and int(rec["loose"]) == 20
+	ok(drank and int(Save.d["items"]["unwind_tea"]) == 0, "Unwind Tea on Power 40: 20 come out as loose, one tea used")
+	var said := lines.size() == jn + 1 and CareJournal.text(lines.back()).contains("Power 40 to 20")
+	ok(said, "the journal line names the exact change (%s)" % CareJournal.text(lines.back()))
+	ok(_fixed(rec) == kept, "IVs, species, forms untouched")
+	var fresh: Dictionary = rec.duplicate(true)
+	fresh["loose"] = 0
+	var plays := 0
+	while StatBudget.total(rec) < old_total and plays < 100:
+		Care.add_stat(rec, "guard", 1)
+		plays += 1
+	var normal := 0
+	while StatBudget.total(fresh) < old_total and normal < 100:
+		Care.add_stat(fresh, "guard", 1)
+		normal += 1
+	var back := StatBudget.total(rec) == old_total and int(rec["loose"]) == 0
+	var what := "retrained back to %d in %d plays, half of %d without tea" % [old_total, plays, normal]
+	ok(back and plays * 2 == normal, what)
+	ok(Care.add_stat(rec, "guard", 1) <= 1, "past the old total a play gains at the normal rate again")
+	Save.d["items"]["galeribbon"] = 0
+	Save.d["items"]["keepstone"] = 0
+	var off := GardenItems.take_off(rec, "galeribbon") and GardenItems.take_off(rec, "keepstone")
+	var bag := int(Save.d["items"]["galeribbon"]) == 1 and int(Save.d["items"]["keepstone"]) == 1
+	ok(off and bag and rec["path"].is_empty(), "both path tokens come off and return to the bag")
+
+## What a respec never changes: inborn values, species, the forms taken, the DNA.
+func _fixed(rec: Dictionary) -> String:
+	return JSON.stringify([rec["ivs"], rec["species"], rec.get("forms", []), rec.get("dna")])
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")
