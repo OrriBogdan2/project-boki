@@ -165,7 +165,8 @@ HUDDLE = {
     "FL": (-0.125, 0.14, A + 0.03), "FR": (0.135, -0.12, A + 0.04), "FLy": -0.16, "FRy": 0.12, "FLp": 0.4, "FRp": 0.5,
     "brow": -0.95, "lid": -0.1, "jaw": 0.0, "ear": 0.72, "earR": 0.0, "earL": 0.0, "fing": 0.85, "skirt": 0.3, "wing": -0.1, "wfl": 0.02, "wfq": 2.0, "wb": -0.75,
 }
-TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.16, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.38, "toe_out": 0.12}
+# stride 0.26: the longest step her crouched leg reaches with the knee still bent; T 0.26 walks it at about the crouch speed (pip.json "speed", measured by --crouch-check)
+TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.26, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.26, "toe_out": 0.12}
 
 
 def huddle(u):
