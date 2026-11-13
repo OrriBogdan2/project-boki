@@ -102,7 +102,7 @@ func _rig() -> Dictionary:
 
 func _fresh(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> void:
 	A.step(m, 2.2)                 # (the Searing Wave's burn ticks for 2 s)
-	K.warchain.snap("")
+	K.warchain.snap(true)
 	K.riposte.drop()
 	K.res = 0.0
 	K.enraged_t = 0.0           # (an Enrage would play jug_roar over the move)
@@ -238,9 +238,10 @@ func kit() -> void:
 	for f in ["dive", "recover"]:
 		print("EVENT meteor %-15s at %.3f into %s" % [f, ph.get(f, [-1.0, "?"])[0], ph.get(f, [-1.0, "?"])[1]])
 	var dv: Array = ph.get("dive", [-1.0, "?"])
+	var dive_at := float(beats["jug_meteor"]["peak"]) - float(leads["jug_meteor"])
 	A.ok("kael anim: jug_meteor's dive starts on the kit's dive (the hang is the held pose)",
-			dv[1] == "jug_meteor" and absf(float(dv[0]) - float(beats["jug_meteor"]["peak"])) <= 0.04,
-			"kit dive at %.3f, clip %.2f" % [dv[0], beats["jug_meteor"]["peak"]])
+			dv[1] == "jug_meteor" and absf(float(dv[0]) - dive_at) <= 0.04,
+			"kit dive at %.3f, clip %.2f - lead %.2f" % [dv[0], beats["jug_meteor"]["peak"], leads["jug_meteor"]])
 	_ev("meteor free", _until(m, K, func(): return K.meteor.phase == "", 1.0))
 	# dash (Rampage)
 	_fresh(m, P, K, home, T)
@@ -322,7 +323,7 @@ func kit() -> void:
 	_ev("riposte strikes", _until(m, K, func(): return String(K.riposte.st.get("phase", "")) == "strike", 1.0))
 	r = _hit(m, K, T, 0.5)
 	_ev("riposte hit", r)
-	_strike("jug_riposte", r)
+	_strike("jug_ult_recover", r)       # (the cleave lands as the recover clip takes over: JuggernautUlt._land)
 	_ev("riposte recovers", _until(m, K, func(): return String(K.riposte.st.get("phase", "")) == "recover", 0.5))
 	_ev("riposte done", _until(m, K, func(): return not K.riposte.running(), 1.0))
 	A.done(m)

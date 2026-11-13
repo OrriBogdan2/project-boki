@@ -37,7 +37,7 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
-	# Sparkle (thief): the knife stuck by the foe, "E AGAIN" and the marker on the knife; Marks on the foe
+	# Sparkle (thief): the knife stuck by the foe, "E AGAIN" on the slot, a plain ring on the knife; Marks on the foe
 	var s := await _scene("thief")
 	var m: Match = s[0]
 	var P: Hunter = s[1]
@@ -52,7 +52,7 @@ func run(main_node: Node) -> void:
 	step(m, 0.08)
 	await _grab("thief_payoff_flash")
 	await done(m)
-	# Motley (mage): Kitefall's hang, "X AGAIN" on the ult tile and the marker on the landing spot; Sparks
+	# Motley (mage): Kitefall's hang, "X AGAIN" on the ult tile, a plain ring on the landing spot; Sparks
 	s = await _scene("mage")
 	m = s[0]
 	P = s[1]
@@ -63,7 +63,7 @@ func run(main_node: Node) -> void:
 	await _until(m, P, "x", 0.6)
 	await _grab("mage_hang")
 	await done(m)
-	# Mossy (bulwark): the hammer out, "LMB AGAIN" on the weapon card and the marker on the hammer
+	# Mossy (bulwark): the hammer out, "LMB AGAIN" on the weapon card, a plain ring on the hammer
 	s = await _scene("bulwark")
 	m = s[0]
 	P = s[1]

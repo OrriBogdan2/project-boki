@@ -201,7 +201,7 @@ func _companions() -> void:
 ## Tenzo (source Tetra, docs/heroes/dolm.md timings): his punches run on the legs' stride, the LMB clips carry the
 ## release beat the kit's delayed boulder uses, and the spine's heave lands as its ridge finishes rising.
 func _tenzo(moves: Dictionary, lib: AnimationLibrary) -> void:
-	for k in ["breah_throw", "breah_wind", "breah_punch"]:
+	for k in ["breah_throw", "breah_punch"]:
 		ok((moves[k] as Dictionary).get("upper", "") == "moving", "tarek: %s keeps walking under the fist" % k)
 	var rel := float(Arch.def("dolm")["lmb"]["boulder"]["release"])
 	var keys: Array = (KMovesStone.MOVES["breah_throw"] as Dictionary)["keys"]

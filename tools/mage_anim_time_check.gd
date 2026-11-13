@@ -79,7 +79,7 @@ func _time(m: Match, P: Hunter, K: MageKit, move: String, secs: float, event: Ca
 			r["in"] = t
 		var live := c.cur
 		if live == "" and c.up_w > 0.0:
-			live = ((c.tree.tree_root as AnimationNodeBlendTree).get_node("anim_u") as AnimationNodeAnimation).animation
+			live = c.cur_u
 		if live != "" and String(r["clip"]) == "":
 			r["clip"] = live
 			r["len"] = c.lib.get_animation(live).length
