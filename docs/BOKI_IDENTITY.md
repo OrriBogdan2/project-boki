@@ -20,7 +20,7 @@ Code:
 | Wild and bot seeds, where a Boki was caught | `scripts/match/match.gd` (`kin_seed`, `where_at`), `spawn_plan.gd` |
 | The About tab, Nesting Nook and Burrow lines | `scripts/ui/about_view.gd` (`AboutView`) |
 | Species base sizes | `content/kin/<id>.json` `"size": {"cm", "kg"}` |
-| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/save_fixtures/v1_save.json` |
+| Tests | `tools/unique_check.gd` (`--unique-check`), `tests/fixtures/saves/save_v1.json` |
 
 ## The record
 

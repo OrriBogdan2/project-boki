@@ -510,6 +510,9 @@ const CHECKS := {
 	"--party-client-check": ["res://tools/party_client_check.gd", "party_client_check", null],      # docs/specs/PARTY.md, fake matchmaker
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--dex-sort-check": ["res://tools/dex_sort_check.gd", "dex_sort_check", null],      # type filter + sort
+	"--size-budget-check": ["res://tools/size_budget_check.gd", "size_budget_check", null],      # SIZE_BUDGET.md
+	"--save-compat-check": ["res://tools/save_compat_check.gd", "save_compat_check", "check"],      # SAVES.md
+	"--save-golden-capture": ["res://tools/save_compat_check.gd", "save_compat_check", "capture"],      # --out=<dir>
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],      # shots at point blank
 	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
