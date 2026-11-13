@@ -593,7 +593,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var rows := cats.size()
 	var notes: Array = cats.map(func(cat): return Glossary.first_line(String(sp.cats[cat].get("name", cat))))
 	var note_rows := notes.filter(func(note): return note != "").size()
-	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + note_rows * NOTE_H + 138))
+	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + note_rows * NOTE_H + 94))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "THIS MATCH", 16, GOLD, hud.big)
 	hud._text(r.position + Vector2(14, 44), "Same map every time, different spawns", 11, MUTED)
@@ -621,7 +621,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	# what the marks mean
 	y += 4.0
 	c.draw_line(Vector2(r.position.x + 14, y - 14), Vector2(r.end.x - 14, y - 14), Color(1, 1, 1, 0.08), 1.0)
-	var keyrows := [["unknown", "Could be there: scout it"], ["active", "Here this match"], ["empty", "Empty this match"], ["taken", "Taken"]]
+	var keyrows := [["unknown", "Could be there: scout it"], ["active", "Here this match"]]
 	for kr in keyrows:
 		marker(c, "star", Vector2(r.position.x + 26, y), 6.0, Color("d8d4ff"), String(kr[0]))
 		hud._text(Vector2(r.position.x + 48, y + 4), String(kr[1]), 12, INK)

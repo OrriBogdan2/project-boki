@@ -63,7 +63,7 @@ func _lanes() -> void:
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
 		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
-		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0, 240.0)
 		var wo_top := WaysOutHud.top_y(sz)
 		var wo_b := wo_top + WaysOutHud.CELL.y + 31.0
 		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, wo_top), Vector2(wo_w, wo_b - wo_top))

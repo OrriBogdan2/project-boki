@@ -149,6 +149,33 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words. Done for the expedition panel, Relics page, the drop and the title (section 4 table).
 
+## 6. Rerun on the 0.24.5 line (ext/ui-first15-0245)
+
+Same tool, same fresh save, same counting rule as section 1, on origin/main + ext/release-integ-0245 (272368589). The new save lands on the garden, so the
+tour is: title, prologue, hatch (card, creator, eggs, name), first Relic, tutorial, results, **farm (garden) arrival**, expedition panel, Plan your drop, ship,
+landed, 15 s, pause (36 shots). `layout.txt`: 0 controls CLIPPED before and after. Shots: before [`11`](ui_first15_0245/before_11_tutorial_00_land.jpg),
+[`32`](ui_first15_0245/before_32_expedition_plan.jpg), [`35`](ui_first15_0245/before_35_expedition_15s.jpg); after (`after_` files, same folder).
+**Renderer: software (llvmpipe, `--rendering-driver opengl3` under Xvfb), 1280x720.** The GPU queue held 75 jobs, so the two `jobq submit --needs gpu` runs
+(before 20261111-162418-27399, after 20261111-163153-00469; `--first15-shots --size=1280x720`) had not started when this was written; the UI is 2D, positions match.
+Another branch (ext/tut-first15-reshoot) re-measured on a GPU and changed no code; its ranking (gear strip, Ways Out strip, legend) is what was fixed here.
+
+Counted worst spots on the 0.24.5 line, and what changed (no new features: three things drawn later, or shorter):
+
+| # | Spot | Before | Fix | After |
+|---|---|---|---|---|
+| 1 | Gear panel: four empty frames (two gloves, armor, boots) right of the belt, from the first frame of every match and tutorial step | one group on every match screen | `GearPanel` draws the frames once any slot holds gear | gone until the first glove or armor piece |
+| 2 | Q and V: two empty glove boxes with key caps beside the weapon card | one group (Q/V/X) | `GripHud._glove` skips an empty glove slot; the X (Boki ult) box stays | only X; Q/V appear with the first glove (tutorial "Grab the glove") |
+| 3 | Ways Out strip on the first expedition: Lair/Heart/Uplink/Final timers, top centre, from the ship on | 11 groups on the ship, landed and 15 s screens | Done on main by `HudGroups.ways_out_shown` (`ways_out_lead_s`, 30 s before the first seat opens; section 8); this branch's own 60 s gate and its "Squads left" cell were dropped in the merge (main's AliveCounter shows squads) | 9 on those screens |
+| 3b | Plan your drop legend: 4 kinds, 4 mark states, 2 note lines, subtitle (11 text lines) | 11 lines | `FullMap._legend` keeps the two marks a first-timer needs (could be there / here this match); empty and taken marks explain themselves once seen | 9 lines, card 44 px shorter |
+
+Groups per frame (same rule as section 1; by eye on the pictures): tutorial landing 9 to **7** ([11](ui_first15_0245/after_11_tutorial_00_land.jpg)),
+glove step 9-10 to 8, first expedition landed/15 s 11 to **9** ([35](ui_first15_0245/after_35_expedition_15s.jpg)), ship 11 to 9, Plan your drop 7 (the legend is shorter, not fewer blocks;
+[32](ui_first15_0245/after_32_expedition_plan.jpg)). Stacked lines: legend 11 to 9. Still over 5 everywhere in a match: the staged HUD (section 5, item 1)
+is not done here; the second tip (the hover card in shot 35 sits on the tip card; it follows the crosshair, so that is the shot tool's cursor on a rival) is left.
+Not changed: the farm arrival (5 groups) and the garden first-day screens; the hatch screens' long cards (section 4).
+Checks: `--ways-out-hud-check` 0 fail, `--msg-queue-check` 0 fail, `--tutorial-hud-check` 0 fail (1 fail once in 4 runs, flaky, passed 3 reruns).
+`--hud-budget-check` is not on this line (it exists only on ext/ui-hud-budget, not merged), so it was not run.
+
 ## 8. Match HUD groups at the 0.24.5 moments (`--hud-groups-check`)
 
 Counted by `HudGroups.on_screen` (rules: `content/rules/hud_groups.json`), pinned in `tools/hud_groups_check.gd`, pictured by `--hud-groups-shots` (1280x720, 2560x1080).
