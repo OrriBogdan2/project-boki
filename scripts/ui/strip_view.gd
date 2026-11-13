@@ -20,6 +20,7 @@ func set_line(l: Dictionary, objective: String) -> void:
 	if objective != key:
 		key = objective
 		age = 0.0
+		TutorialStrip.chime()
 	queue_redraw()
 
 func rect() -> Rect2:
