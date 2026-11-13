@@ -67,11 +67,11 @@ static func find(id: String) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ adopting
-## Adopts a Boki: the gems are destroyed and it comes home. {ok, why, rec}.
 ## Open from stall level 2; the base has no Upgrades tab, so base_mode opens it from the start.
 static func open() -> bool:
 	return Stalls.level() >= 2 or FarmUnlocks.base_mode()
 
+## Adopts a Boki: the gems are destroyed and it comes home. {ok, why, rec}.
 static func adopt(id: String) -> Dictionary:
 	if not open():
 		return {"ok": false, "why": "Upgrade the market stall to open the shelter"}
