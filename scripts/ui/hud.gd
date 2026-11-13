@@ -15,6 +15,7 @@ var hit_crit := false
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
+var knocks := KnockBanner.new()  # ALLY KNOCKED / KNOCK top-centre
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
 
@@ -48,6 +49,7 @@ func setup(match_node: Match) -> void:
 	add_child(c)
 	c.draw.connect(_draw_all)
 	add_child(msgs)
+	add_child(knocks)
 	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
 	add_child(abyss_fx)
 	# the pointer over the item windows: drawn above them (the crosshair lives under them on `c`,
@@ -1378,9 +1380,9 @@ func _bleed_left(h: Hunter) -> float:
 var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
 
 ## Your squad, stacked under the minimap: portrait, name, armor over segmented health, status icons.
-## A knocked teammate's row is outlined, with a knocked mark (MateAlerts) and their bleed-out timer,
-## pulsing only while they're stomped; a dead one is greyed with an X and the time left to bring them
-## back from their deathbox; one who got out wears a check mark.
+## A knocked teammate's row is outlined, with a KNOCKED tag and arrow (MateAlerts) and their bleed-out
+## timer, pulsing only while they're stomped; a dead one is greyed with an X, a DEAD tag and the time left
+## to bring them back from their deathbox; one who got out wears a check mark.
 func _draw_squad(sz: Vector2, p: Hunter) -> void:
 	var y := mm_bottom + 10.0
 	var w := 210.0
@@ -1426,12 +1428,11 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
 				_bar(Rect2(Vector2(tx, r.position.y + 28), Vector2(tw, 6)), h.down_hp / Data.MATCH["down_hp"], Color("ff2a1a").lerp(Color.WHITE, 0.5 * pulse) if stp else Color("ff6a4a"))
-				_text(Vector2(tx, r.position.y + 51), ("STOMPED  %ds" if stp else "KNOCKED  %ds") % int(ceil(left)), 13, Color("ff4a3a") if stp else Color("ff8a6a"), big)
+				_text(Vector2(tx, r.position.y + 51), ("STOMPED  %ds" if stp else "%ds left") % int(ceil(left)), 13, Color("ff4a3a") if stp else Color("ff8a6a"), big)
 				if h.revive > 0.0:
 					_arc(Vector2(r.end.x - 16, r.position.y + 46), 8, h.revive, GOOD, 3.0)
 			"DEATHBOX":
-				_text(Vector2(tx, r.position.y + 37), "DEAD", 13, Color("ff6a5a"), big)
-				_text(Vector2(tx, r.position.y + 53), "Deathbox  %s" % String(st[3]), 12, Color("ffb0a0"))
+				_text(Vector2(tx, r.position.y + 42), "Deathbox  %s" % String(st[3]), 12, Color("ffb0a0"))
 			"EXTRACTED":
 				_text(Vector2(tx, r.position.y + 42), "EXTRACTED", 13, Color("8fe3c8"), big)
 			_:
