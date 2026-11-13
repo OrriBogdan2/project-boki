@@ -14,7 +14,8 @@ extends RefCounted
 
 const KEEP := 0.7
 const STEP_DV := 4.0
-const STEP_DV_OWN := {"mage": 8.5}      # Sparkle: a press cancels her 40 m/s streak, which hands over at run speed (_cut_run, source patch 05.03.25)
+## Sparkle: a press cancels her 40 m/s streak, which hands over at run speed (_cut_run, source patch 05.03.25)
+const STEP_DV_OWN := {"mage": 8.5}
 const STEADY_F := 30
 const LATE := 6
 const HEIGHT := 40.0
@@ -56,7 +57,7 @@ func _step(m: Match, f: int, press: int) -> float:
 	hunter.inp["aim"] = hunter.pos + Vector3(8, 0.9, 0)
 	hunter.inp["jump"] = f == press
 	hunter.inp["glide"] = f >= press
-	hunter.inp["glide_btn"] = f >= press      # the raw key: a fresh press cancels Sparkle's Wirerun (_tick_glide_cancel)
+	hunter.inp["glide_btn"] = f >= press      # the raw key (cancels Sparkle's Wirerun)
 	var p0 := hunter.pos
 	m.step(Match.DT)
 	return Vector2(hunter.pos.x - p0.x, hunter.pos.z - p0.z).length() / Match.DT
@@ -118,7 +119,8 @@ func run(main: Node) -> void:
 			await main.get_tree().process_frame
 			var tag := "%s %s: press @%d opens @%d" % [arch, when, int(r["press"]), int(r["open"])]
 			ok(int(r["open"]) >= 0 and int(r["open"]) <= int(r["press"]), tag + " (the press step)")
-			ok(float(r["worst"]) <= float(STEP_DV_OWN.get(arch, STEP_DV)), "%s, worst step %.1f m/s" % [tag, float(r["worst"])])
+			var cap := float(STEP_DV_OWN.get(arch, STEP_DV))
+			ok(float(r["worst"]) <= cap, "%s, worst step %.1f m/s" % [tag, float(r["worst"])])
 			if when != "late":
 				var exit_v := float(r["exit"])
 				ok(float(r["open_v"]) >= exit_v * KEEP, "%s at %.1f m/s, dash exit %.1f m/s (%.0f%%)" % [tag,
