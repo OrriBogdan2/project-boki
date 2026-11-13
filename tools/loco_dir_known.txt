@@ -34,3 +34,7 @@ dredge sprint r
 dredge strafe r
 thief run fr
 thief run fl
+ashwick run br
+ashwick run b
+ashwick run bl
+ashwick run l
