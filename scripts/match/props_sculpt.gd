@@ -44,13 +44,7 @@ static func bx(x: float, y: float, z: float) -> Mesh:
 	return _boxes[key]
 
 static func _finish(root: Node3D) -> void:
-	var stack: Array = [root]
-	while not stack.is_empty():
-		var n: Node = stack.pop_back()
-		if n is Node3D and not (n is MeshInstance3D):
-			Models.merge_static(n)
-		for ch in n.get_children():
-			stack.append(ch)
+	Models.merge_tree(root)
 	Models.bake_part_y(root)
 
 # ------------------------------------------------------------------ chests
