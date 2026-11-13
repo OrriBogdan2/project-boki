@@ -4,7 +4,7 @@ extends RefCounted
 ## else (the abilities are on the Hunters screen, the codex and the tutorial). A locked Hunter is
 ## desaturated with a lock on its portrait, can't be picked, and says how to unlock it on hover.
 ## Picking saves it as your expedition Hunter (its weight and weapon family follow) and turns the farm hunter
-## into it (docs/decisions/0005: no weight labels).
+## into it (docs/decisions/0066: no weight labels).
 
 const PORTRAIT_PX := 72.0     # px: the Hunter's portrait on its card
 const LOCK_PX := 26.0         # px: the lock icon over a locked portrait

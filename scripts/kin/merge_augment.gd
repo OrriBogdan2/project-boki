@@ -1,6 +1,6 @@
 class_name MergeAugment
 extends RefCounted
-## What a merge adds to YOUR hero's own abilities (docs/decisions/0004). You keep LMB, RMB, E, Shift and Q; the form
+## What a merge adds to YOUR hero's own abilities (docs/decisions/0064). You keep LMB, RMB, E, Shift and Q; the form
 ## (content/merge_forms/<id>.json `aug`, or the Boki type's fallback, MergeForm.aug_of) makes each stronger, the same
 ## for every hero:
 ##   LMB    a rider on every attack: chain, pierce, slow, burn, leech, an effect list on every Nth attack (lmb)

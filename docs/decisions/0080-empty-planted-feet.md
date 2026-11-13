@@ -1,4 +1,4 @@
-# 0022: The Empty's feet are planted
+# 0080: The Empty's feet are planted
 
 - **Status:** accepted
 - **Date:** 2026-11-11

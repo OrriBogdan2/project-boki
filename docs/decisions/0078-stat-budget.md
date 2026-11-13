@@ -1,4 +1,4 @@
-# 0022: Stat budget (caps, bands, expedition clamp)
+# 0078: Stat budget (caps, bands, expedition clamp)
 
 - **Status:** accepted
 - **Date:** 2026-11-10

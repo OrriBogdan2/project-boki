@@ -3,7 +3,7 @@ extends RefCounted
 ## What a merge is and how it looks (docs/decisions/0003), the same for everyone. Two kinds:
 ##   - a FORM (content/merge_forms/<merge id>.json): its palette, look, weight-class baseline, its ultimate (R) and
 ##     its augments (`aug`: LMB rider, RMB and E add-ons, the form dash, a passive), run by MergeAugment. You keep
-##     your own hero's abilities (docs/decisions/0004).
+##     your own hero's abilities (docs/decisions/0064).
 ##   - the fallback every other Boki gets until its form is written (docs/DEBT.md): the Boki's own merge
 ##     (content/merges_v2) plus a look, the type's rider on LMB and its trail as the form dash
 ##     (content/rules/merge_forms.json). No tiers, no scaling by level or trust.
@@ -75,7 +75,7 @@ static func has_kit(f: Dictionary) -> bool:
 static func of(h: Hunter) -> Dictionary:
 	return h.merge_st.get("form", {}) if h != null and not h.merge_st.is_empty() else {}
 
-## The augment set of a form (docs/decisions/0004): {lmb, rmb, e, dash, stats}. Same for every hero.
+## The augment set of a form (docs/decisions/0064): {lmb, rmb, e, dash, stats}. Same for every hero.
 static func aug_of(f: Dictionary) -> Dictionary:
 	return f.get("aug", {})
 

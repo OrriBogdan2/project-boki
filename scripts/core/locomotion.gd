@@ -1,7 +1,7 @@
 class_name Loco
 extends RefCounted
 ## ONE movement model for the farm avatar (Home) and every match hunter (Hunter, the Training Area too): ground,
-## air and glide steps, the dash ease, and the locomotion state machine both own (docs/decisions/0022). Numbers
+## air and glide steps, the dash ease, and the locomotion state machine both own (docs/decisions/0071). Numbers
 ## come from content/rules/tuning.json, re-read live while the movement readout is open (MoveReadout).
 
 enum S {GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED}

@@ -190,7 +190,7 @@ static func c_deny_text(h: Hunter) -> String:
 		return "%s is down: it can't cast" % k.rec.get("name", "Your Boki")
 	return ""
 
-## What a drained Boki says to any order (docs/decisions/0004).
+## What a drained Boki says to any order (docs/decisions/0064).
 static func resting_text(k: Kin) -> String:
 	return "%s is resting: %ds" % [k.rec.get("name", "Your Boki"), int(ceil(k.rest_t))]
 

@@ -1,5 +1,5 @@
 extends RefCounted
-## --merge-form-check: the merge forms and their augments (docs/decisions/0003, 0004). Prints PASS/FAIL lines.
+## --merge-form-check: the merge forms and their augments (docs/decisions/0003, 0064). Prints PASS/FAIL lines.
 ##   0. the data: form files carry `aug` and no kit blocks; the warning and rest numbers
 ##   1. the transformation: 0.7s of invulnerability, then the form is live; R with a downed Boki waits; a knock-out pops the Boki out
 ##   2. the augments: you keep your own LMB / RMB / E / Shift / Q and the form makes each stronger (per Boki type)

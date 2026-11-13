@@ -226,7 +226,7 @@ func slot_open(_slot: String) -> bool:
 func ready_to_fight() -> bool:
 	return not dead and rest_t <= 0.0 and state not in ["downed", "wisp", "bench", "wild", "dazed", "away"]
 
-## Resting after the merge ultimate (docs/decisions/0004)?
+## Resting after the merge ultimate (docs/decisions/0064)?
 func resting() -> bool:
 	return rest_t > 0.0 and not dead
 

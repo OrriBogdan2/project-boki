@@ -1,6 +1,6 @@
 class_name HubLayout
 extends RefCounted
-## The garden's hub (briefs/design/GARDEN.md 10.1, docs/decisions/0022-garden-zones.md): a small fixed
+## The garden's hub (briefs/design/GARDEN.md 10.1, docs/decisions/0077-garden-zones.md): a small fixed
 ## island you arrive on. The Waystone stands in the middle (HubWaystone), the house north, the expedition
 ## portal and glider rack south (Home's fixed heart), the nest corner west (Nesting Nook, Incubator,
 ## Soul Shrine), the market stall and the games board east, the Burrow door south-west. No toys, no games

@@ -3,12 +3,12 @@
 > Superseded on ext/map-v2-1111 by the Hollow Crown 2.0 (540 m, one fight type per region): docs/MAP_V2.md.
 
 Branch ext/map-2x-0245 = ext/release-integ-0244 (with ext/map-regions) + ext/map-2x-flat2-rebased + ext/hot-zone.
-Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Shots: docs/map2x_shots/ (top-down, and slanted from the south, north-east and north-west: `--map-overview [--map-angle --map-yaw=<deg>]`; small cover is past its visibility range at that height).
+Design: docs/decisions/0070-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Shots: docs/map2x_shots/ (top-down, and slanted from the south, north-east and north-west: `--map-overview [--map-angle --map-yaw=<deg>]`; small cover is past its visibility range at that height).
 
 | Order point | State | What is there |
 |---|---|---|
 | Double the size, one SIZE constant | done | `SIZE = 305` in tools/make_hollowcrown.py (216 design grid × √2 = 2x the land); everything with a body keeps its size. |
-| More squads, same squads per m² | partial | Data.MATCH_PLAYERS 20 → 30 (10 trios). 2x land wants 40; 40 was not frame-time flat on the GPU box (0022), so it is capped at 30: about 0.75 of today's density. |
+| More squads, same squads per m² | partial | Data.MATCH_PLAYERS 20 → 30 (10 trios). 2x land wants 40; 40 was not frame-time flat on the GPU box (0070), so it is capped at 30: about 0.75 of today's density. |
 | Sky train is the fast travel: winding loop, every region, stops that matter | done | A 938 m closed loop with 10 halts (one per outer region, Eyrie and Ash Halts for the Crown's Gaols); a lap is 177 s; every leg rides faster than running it (`check_train`). Each stop's deck sits level with its pier (7 of 10 piers are on 1.6-3.2 m terraces), so you step on and off. |
 | The Crown: a reason to go | done | The vault on the Throne, two boss Gaols, the richest chests (most Blight). |
 | Frostgate | done | Best armor (armor ×1.6 region lean on the frost biome's ×1.8) and the Keep's high ground. Leans slots, not rarity: "gold" armor there comes from the Crown/hot zone steps. |

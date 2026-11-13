@@ -1,5 +1,5 @@
 extends RefCounted
-## --cc-exit-buffer-check (docs/decisions/0022-cc-exit-buffer.md): for every hero, a press of LMB, RMB, E, R, Shift
+## --cc-exit-buffer-check (docs/decisions/0076-cc-exit-buffer.md): for every hero, a press of LMB, RMB, E, R, Shift
 ## or jump made PRESS_S before the end of a crowd control that forbids it is held (DashFlow) and goes off on the
 ## first step the CC allows it: as many steps after that one as the same press with no CC takes (a slot's own
 ## wind-up), and never while the CC still forbids it. The CCs: a stun (every slot), a root (Shift), Grounded (Shift

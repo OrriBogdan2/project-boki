@@ -1754,7 +1754,7 @@ func _kin_riders(extra: Dictionary) -> void:
 	var mo := KinMerge.on_shot(self)
 	if not mo.is_empty():
 		lists.append([mo, 1.0])
-	MergeAugment.lmb(self, extra)          # a merge form's rider on this attack (docs/decisions/0004)
+	MergeAugment.lmb(self, extra)          # a merge form's rider on this attack (docs/decisions/0064)
 	for pair in lists:
 		var os: Dictionary = pair[0]
 		var kk: float = pair[1]

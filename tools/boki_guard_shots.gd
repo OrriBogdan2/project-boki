@@ -1,6 +1,6 @@
 extends RefCounted
 ## --boki-guard-shots --shots-dir=<dir>: a big Boki (Gravadillo) on the Return order guarding its hunter while
-## he runs, jumps and glides (docs/decisions/0022): frames guard_000.. at the match camera, for a clip. It
+## he runs, jumps and glides (docs/decisions/0072): frames guard_000.. at the match camera, for a clip. It
 ## stays at his side, never under or in him, and curls up on his back while he glides. Needs a renderer.
 
 const DT := 1.0 / 60.0

@@ -1,6 +1,6 @@
 class_name ClassUnlock
 extends RefCounted
-## Relic unlocks and mastery (docs/decisions/0005; internally Hunters, archetypes and the save key "classes").
+## Relic unlocks and mastery (docs/decisions/0066; internally Hunters, archetypes and the save key "classes").
 ## A new save picks 1 of 3 starters (Lace, Kael or Vex; after naming the first Boki) and plays the tutorial as
 ## it. After the first finished expedition (the tutorial) it picks 1 of 3 as the second Relic: Kael, Cinder or
 ## Meeko ("second_picks", minus one already taken). A starter not taken opens then too. Every other Relic opens

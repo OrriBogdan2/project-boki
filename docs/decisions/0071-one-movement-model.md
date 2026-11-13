@@ -1,4 +1,4 @@
-# 0022: One movement model for the farm and the match, as an explicit state machine
+# 0071: One movement model for the farm and the match, as an explicit state machine
 
 - **Status:** accepted
 - **Date:** 2026-11-08

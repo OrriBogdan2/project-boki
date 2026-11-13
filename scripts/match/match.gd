@@ -3854,7 +3854,7 @@ func step(dt: float) -> void:
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")
-	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0022)
+	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0070)
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted and SimLod.step_dt(h, dt) > 0.0:
 			bot_brain.tick(self, h, SimLod.step_dt(h, dt))

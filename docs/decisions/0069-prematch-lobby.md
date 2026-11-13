@@ -1,4 +1,4 @@
-# 0019: Pre-match lobby
+# 0069: Pre-match lobby
 
 ## Problem
 Owner (Nov 7): before every match a lobby: pick your Hunter, meet your squad, plan by text and voice, then load. An admin setting skips it for a plain loading screen, which gets better too.

@@ -1,6 +1,6 @@
 class_name Fsm
 extends RefCounted
-## The explicit state machine pattern (docs/decisions/0022-one-movement-model.md): one state var, a transition table
+## The explicit state machine pattern (docs/decisions/0071-one-movement-model.md): one state var, a transition table
 ## (from -> the states it may go to), a guard per target state or per edge, enter/exit hooks, and a timed log of
 ## the last transitions and refusals, each with the caller's reason, for the F7 readout (FsmReadout) and the
 ## checks. A change the table or a guard does not allow is refused and counted, never applied: illegal combos

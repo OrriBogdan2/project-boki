@@ -1,5 +1,5 @@
 extends RefCounted
-## --hunter-unlock-check (alias --class-unlock-check): Hunter unlocks and mastery (docs/decisions/0005,
+## --hunter-unlock-check (alias --class-unlock-check): Hunter unlocks and mastery (docs/decisions/0066,
 ## content/rules/class_unlock.json, content/rules/hunter_viewer.json).
 ##   1. the data: Vex first (the one starter), a second Relic picked from Kael, Cinder or Meeko, one challenge per
 ##      other Hunter with its tier,

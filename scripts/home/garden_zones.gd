@@ -1,6 +1,6 @@
 class_name GardenZones
 extends RefCounted
-## The garden's zones (briefs/design/GARDEN.md 10, docs/decisions/0022-garden-zones.md): which are
+## The garden's zones (briefs/design/GARDEN.md 10, docs/decisions/0077-garden-zones.md): which are
 ## open, who lives where and the two keys a locked one needs. Data: content/rules/garden_zones.json.
 ## On the save: Save.d["zones"] = {id: {"open": bool}} and rec["zone"] (missing = the start zone); a woken
 ## zone also has "reveal" until the hub has shown its stone lighting (ZoneReveal).

@@ -1,4 +1,4 @@
-# 0022: Vision model (who sees whom)
+# 0074: Vision model (who sees whom)
 
 - **Status:** proposed
 - **Date:** 2026-11-09
@@ -19,7 +19,7 @@ the reference; any kit that reveals must write `reveal_t` and nothing else.
 
 ## Consequences
 No code and no Net.VERSION bump. Debt: our range, cone and grass rules stay unverified against the source.
-If option 3 is chosen, a new check is needed for the attacker reveal. Owner decides; renumber if 0022 is taken.
+If option 3 is chosen, a new check is needed for the attacker reveal. Owner decides.
 
 ## Addendum 2026-11-12: the owner's wedge
 The owner sent a reference with a wide lit wedge, so the numbers change, the model does not: the cone is 170 degrees

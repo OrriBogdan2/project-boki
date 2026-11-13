@@ -1,4 +1,4 @@
-# 0022: Garden zones and the hub
+# 0077: Garden zones and the hub
 
 - **Status:** accepted
 - **Date:** 2026-11-10

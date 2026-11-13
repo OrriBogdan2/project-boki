@@ -1,4 +1,4 @@
-# 0004: Shared aim modes and pooled telegraphs (AimKit)
+# 0065: Shared aim modes and pooled telegraphs (AimKit)
 
 - **Status:** accepted
 - **Date:** 2026-11-02

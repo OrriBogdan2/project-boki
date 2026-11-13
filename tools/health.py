@@ -3,8 +3,9 @@
 
 Usage: python3 tools/health.py [--strict]
 Prints file sizes, god-file budgets, duplicate content folders, dynamic calls, checks registered inline
-in main.gd, and docs/DEBT.md entries. Exit code 1 only when --strict and a god-file budget is exceeded
-(ship.sh runs it in strict mode so god files can't grow). Budgets ratchet: lower them as files get split.
+in main.gd, and docs/DEBT.md entries. Exit code 1 only when --strict and a god-file budget is exceeded,
+the style ratchet fails, or two docs/decisions notes share a number (ship.sh runs it in strict mode so god
+files can't grow). Budgets ratchet: lower them as files get split.
 """
 import os, re, subprocess, sys
 
@@ -43,6 +44,15 @@ def long_funcs(src):
                 n += 1
             start = i
     return n
+
+def decision_clashes():
+    """Numbers used by more than one docs/decisions/NNNN-*.md note: {number: [file, ...]}."""
+    seen = {}
+    for f in sorted(os.listdir(os.path.join(ROOT, "docs", "decisions"))):
+        m = re.match(r"(\d{4})-.+\.md$", f)
+        if m:
+            seen.setdefault(m.group(1), []).append(f)
+    return {n: fs for n, fs in seen.items() if len(fs) > 1}
 
 def main():
     strict = "--strict" in sys.argv
@@ -84,6 +94,11 @@ def main():
     print(style.rstrip())
     if "STYLE FAIL" in style:
         bad.append("style ratchet (docs/STYLE.md)")
+    clashes = decision_clashes()
+    for n, fs in clashes.items():
+        print(f"DECISION NUMBER CLASH {n}: {', '.join(fs)} (keep the oldest, give the rest the next free number)")
+    if clashes:
+        bad.append("decision numbers (docs/decisions/)")
     if bad:
         print("HEALTH FAIL: " + ", ".join(bad) + " (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)")
         if strict:

@@ -1,4 +1,4 @@
-# 0005: Hunter unlocks, mastery, the Hunter viewer and hold to unlock
+# 0066: Hunter unlocks, mastery, the Hunter viewer and hold to unlock
 
 - **Status:** accepted (owner answers 2026-11-03 01:55, 02:00, 04:25 and 04:30 UTC; replaces the 1-starter, free-pick and account-XP flow)
 - **Date:** 2026-11-03

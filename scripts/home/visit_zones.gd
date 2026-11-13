@@ -1,7 +1,7 @@
 class_name VisitZones
 extends RefCounted
 ## Visiting a friend whose garden has a hub and zones (briefs/design/GARDEN.md 10.7 step 10,
-## docs/decisions/0022-garden-zones.md). The profile doc carries "hub_layout" and "zones"
+## docs/decisions/0077-garden-zones.md). The profile doc carries "hub_layout" and "zones"
 ## ({zone id: layout} for each open zone that has a layout of its own), and each Boki its "zone". The
 ## visitor lands in the friend's hub and hops through the same Waystone (HubWaystone). A doc without them
 ## (an older one, or from a farm without the garden) is the single island it always was. Layouts in a doc

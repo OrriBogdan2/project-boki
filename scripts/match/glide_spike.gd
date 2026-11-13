@@ -1,6 +1,6 @@
 class_name GlideSpike
 extends RefCounted
-## A spiked glider (docs/decisions/0022): knocked out of the glide, plunging, and stunned when it lands.
+## A spiked glider (docs/decisions/0075): knocked out of the glide, plunging, and stunned when it lands.
 ## Two hit kinds spike, as the source has it (wiki Spike and Dunk, data SpikeSlamForce*):
 ##   heat  a player's hit that fills the glider's heat, or any player hit on an overheated glider
 ##         (Hunter._mitigate drains the heat and calls shoot_down)

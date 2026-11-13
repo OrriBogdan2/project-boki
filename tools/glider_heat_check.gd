@@ -2,7 +2,7 @@ extends "res://tools/abyss_check.gd"
 ## --glider-heat-check (item 63): the glide input opens the glider at ANY heat (full, nearly spent, overheated, right
 ## after an overheated one closed), an overheated glider lifts at half strength out of the abyss, the climb
 ## from deep down stays under the softened cap, and each hit kind spikes a gliding dummy or not (decision
-## 0022). Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
+## 0075). Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 ## Fastest climb and time to the lip when the glider opens `dp` m under the lip with `fuel` heat left.
 func _climb(e: Dictionary, dp: float, fuel: float) -> Array:

@@ -1,6 +1,6 @@
 class_name ZoneLayout
 extends RefCounted
-## A built garden zone's island (briefs/design/GARDEN.md 10.7 step 7, docs/decisions/0022-garden-zones.md).
+## A built garden zone's island (briefs/design/GARDEN.md 10.7 step 7, docs/decisions/0077-garden-zones.md).
 ## A zone with a "build" in content/rules/garden_zones.json is laid out from that data every time you
 ## arrive: its theme, its island seed, the toys and the snack patch it has. While its Home is open the
 ## layout stands in for Save.d["layout"] (HomeLayout.of answers with `live`), so every system that reads

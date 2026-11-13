@@ -1,4 +1,4 @@
-# 0022: Boki never move you; a big Boki guards at your side
+# 0072: Boki never move you; a big Boki guards at your side
 
 - **Status:** accepted
 - **Date:** 2026-11-09

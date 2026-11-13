@@ -214,7 +214,7 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - merged   ext/glide-no-hold faf4819d
 - merged*  ext/feed-kibble-fix 84c71973 (registry/credits/generated auto-resolved)
 - merged   ext/void-jester-dash a45fb9e9
-- SKIPPED  ext/farm-tut-batch-1108 1c2b08ca conflicts: docs/decisions/0011-farm-builder-tutorial.md scripts/home/farm_spotlight.gd tools/farm_tutorial_check.gd
+- SKIPPED  ext/farm-tut-batch-1108 1c2b08ca conflicts: docs/decisions/0067-farm-builder-tutorial.md scripts/home/farm_spotlight.gd tools/farm_tutorial_check.gd
 - merged   ext/neve-lmb-celeste 7e6a64d7
 - merged   ext/grimble-stretch d6e54648
 - already  ext/ui-void-masks-2
@@ -633,7 +633,7 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - merged*  ext/parity-strip 4c8c2de5 (registry/credits/generated auto-resolved)
 - SKIPPED  ext/snag-audit 0ea71735 conflicts: docs/MOVEMENT_FEEL.md
 - SKIPPED  ext/step-smooth 71b5ec0d conflicts: docs/MOVEMENT_FEEL.md
-- SKIPPED  ext/ult-ranks a48ec55a conflicts: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/gunslinger.json content/archetypes/juggernaut.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/thief.json docs/decisions/0022-ult-ranks.md scripts/core/net.gd
+- SKIPPED  ext/ult-ranks a48ec55a conflicts: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/gunslinger.json content/archetypes/juggernaut.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/thief.json docs/decisions/0073-ult-ranks.md scripts/core/net.gd
 - SKIPPED  ext/boki-react-clips 5aa0b8d7 conflicts: scripts/home/base_race.gd scripts/home/home.gd tools/race_check.gd
 - SKIPPED  ext/lace-hail-wisps d93205aa conflicts: docs/heroes/archer.md docs/specs/DOWNED_ABILITIES.md scripts/arch/kits/archer_kit.gd
 - SKIPPED  ext/boki-gait 7caa9f11 conflicts: scripts/match/boki_rig.gd
