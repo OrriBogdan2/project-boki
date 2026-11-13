@@ -304,7 +304,7 @@ var hip_y := 0.42              # the torso's rest height on the legs (longer leg
 var gait: EmptyGait = null     # the Empty's planted-foot legs on the move (scripts/match/empty_gait.gd)
 var legs_sway := 0.12          # rad: the hips' yaw with the stride (none for the Empty: its feet are solved in place)
 
-func _init(m: Node3D) -> void:
+func _init(m: Node3D, fixed_seed := -1) -> void:
 	model = m
 	hip_y = float(m.get_meta("hip_y", hip_y))
 	rig = m.get_node("Rig")
@@ -342,7 +342,7 @@ func _init(m: Node3D) -> void:
 		gait = EmptyGait.new(legs, st)
 		legs_sway = 0.0
 	ws = WardenStance.new(stance)
-	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
+	rng = int(m.get_meta("anim_seed", m.get_instance_id() if fixed_seed < 0 else fixed_seed)) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
 	weight_to = weight
@@ -354,11 +354,12 @@ func _init(m: Node3D) -> void:
 		gun = aim.get_node_or_null("Gun")
 	_setup_weapon(String(m.get_meta("wid", "")))
 
-## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits).
+## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits); the same pose on
+## every build (a fixed seed, not the instance id's: a Hero's root bone can follow this Rig, Ostra's rig_root).
 static func rest_pose(m: Node3D) -> void:
 	if not m.has_node("Rig/Torso/ArmLPivot"):
 		return
-	var a := HunterAnim.new(m)
+	var a := HunterAnim.new(m, 1)
 	a.snap = true
 	a.update(1.0 / 60.0, {"fired": 99.0})
 
