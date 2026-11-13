@@ -663,9 +663,9 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5)
 	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
 			chord > 0.3 and absf(chord - wave_w) < 0.35, "crescent %.2f wave %.2f" % [chord, wave_w])
-	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
-			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
-			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
+	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast, the full wave does not slow)",
+			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t <= 0.0 and K.res > 45.0,
+			"mid %.2f took %.0f rage %.0f slow %.2f" % [midk, A.dmg(T), K.res, T.slow_t])
 	moved = maxf(moved, T.flat_dist(home + Vector3(7.0, 0, 0)))
 	A.ok("juggernaut LMB: no knockback (slash, tip, Searing Wave)", moved < 0.01, "moved %.3fm" % moved)
 	K.res = 0.0
@@ -1124,10 +1124,10 @@ func combos(a) -> void:
 	var hp0 := A.dmg(T)
 	A.hold(m, P, 0.95)
 	A.step(m, 0.4)
-	A.ok("combo jug: E > hold RMB = Chain Lunge",
-			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
+	A.ok("combo jug: E > hold RMB = Chain Lunge (no stun)",
+			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t <= 0.0
 			and P.flat_dist(T) < 3.4,
-			"lunges %d dist %.1f took %.0f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0])
+			"lunges %d dist %.1f took %.0f stun %.2f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0, T.stun_t])
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
 	A.step(m, 1.0)
 	hook.call()
@@ -1138,8 +1138,8 @@ func combos(a) -> void:
 	P.ak.use_e()
 	P.inp["sec_hold"] = false
 	A.step(m, 0.45)
-	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival",
-			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
+	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival (no stun)",
+			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t <= 0.0 and K.chain_lunges == 1,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
 	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
 	A.step(m, 1.0)

@@ -246,8 +246,8 @@ Gilded Riposte's guard and cleave) is held for 0.12 s before it ends and goes of
 | In the air, the Meteor Drop resting | tap / hold | as on the ground: a Finishing Slam, or the Lunge charge (E while it charges: a Haul Slam); never a dead press | owner 11-10 (the combo below) |
 | Throwing (chain in flight) | any | as on the ground or in the air; the throw goes on | ours |
 | Hooked, on the ground | tap | Finishing Slam; the chain stays on | ours |
-| Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, a short stun on the foe), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
-| Hooked, RMB held (any time held) | E | Pulling, then a Haul Slam on arrival (2.8 m, stun 0.25 to 0.6 s) | ours |
+| Hooked | hold, release | Aimed within 30 deg of the chain (`lunge.chain_deg`; the lane snaps onto it): Chain Lunge along the chain to its anchor (x1.25, no stun: DECISIONS 2026-11-07), the chain spent. Aimed elsewhere: a plain Lunge along the aim, the chain kept; he faces and re-aims freely the whole hold (owner 0.24.4) | ours |
+| Hooked, RMB held (any time held) | E | Pulling, then a Haul Slam on arrival (2.8 m, 16 to 30, no stun: DECISIONS 2026-11-07) | ours |
 | Hooked, Slam wind-up, Lunge, Meteor Drop hang or dive | E | the pull is kept and goes the moment the Smash lands (the drop's recovery doesn't hold it: the pull ends it) | owner 11-10 |
 | Pulling | press | Cinder Spin at once (2.2 m, blights 4 s); the pull goes on | [D] "DURING Feysteel Chain pull" |
 | Arriving (0.25 s) | press | Cinder Spin | [F] 0333-0336 (RMB on arrival) |

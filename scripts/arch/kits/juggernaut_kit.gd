@@ -434,7 +434,6 @@ func _wave() -> void:
 	var effs: Array = [{"type": "damage", "amount": lerpf(float(ld["wave_dmg"][0]), float(ld["wave_dmg"][1]), k)}]
 	if full:
 		effs.append({"type": "damage", "amount": float(ld["wave_burn"]) * 2.0, "over": 2.0})
-		effs.append({"type": "slow", "duration": 1.0, "strength": float(ld["wave_slow"])})
 	var stg := StageSpec.parse(
 			{"delivery": {"type": "projectile", "speed": float(ld["wave_speed"]), "range": rng, "size": wave_size},
 					"effects": effs, "modifiers": [{"type": "pierce", "count": 6}]},
@@ -825,9 +824,8 @@ func _tick_lunge() -> void:
 			lunge = {}
 			h.roll_t = 0.0
 			h.vel = Vector3.ZERO
-			if was_chain and f.hittable():
-				f.hurt(1.0, h,
-						{"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
+			if was_chain:
+				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
 					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
@@ -856,7 +854,7 @@ func _aims_down_chain() -> bool:
 	return to.length() > 0.05 and off <= deg_to_rad(float(rmb_def()["lunge"]["chain_deg"]))
 
 ## Charged while tethered and let go: the Lunge runs along the chain to its end (the foe it holds, or
-## the wall), harder and with a short stun on the foe; the chain is spent.
+## the wall), harder; the chain is spent.
 func _chain_lunge(k: float) -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var f := warchain.target
@@ -911,11 +909,7 @@ func _haul_land(k: float) -> void:
 	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(hd["radius"])},
 		"effects": [{"type": "damage", "amount": lerpf(float(hd["dmg"][0]), float(hd["dmg"][1]), k) * smash_k()},
 				{"type": "push", "strength": float(hd["push"])}]})
-	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
-		if is_instance_valid(f) and not f.dead:
-			f.hurt(1.0, h,
-					{"src": "abil", "ab": "utility", "tags": ["utility", "haul_slam"],
-							"stun": lerpf(float(hd["stun"][0]), float(hd["stun"][1]), k), "dr": true})}))
+	run_own(stg, cx("rmb", "haul_slam", at, {"no_floor": true}))
 	play("jug_haulslam")
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
