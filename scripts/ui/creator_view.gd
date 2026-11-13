@@ -77,7 +77,9 @@ func surprise(look: Dictionary, seed_val: int) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_val
 	var out := look.duplicate(true)
+	var kept: Dictionary = look.get("features", {})     # the mastery features you keep (main's Random kept them too)
 	out.merge(Unmasked.random_look(rng), true)
+	out["features"] = kept.duplicate()
 	return out
 
 ## The look before the last Surprise me; one step only.
