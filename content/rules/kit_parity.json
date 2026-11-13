@@ -35,6 +35,8 @@
 		{"hero": "thief", "slot": "E", "field": "e.range", "value": 16.2, "tol": 0.9, "evidence": "F Phantom Dagger with no target landed about 9 bh out (hero-ref/dancer.md); 14 could not reach it"},
 		{"hero": "bulwark", "slot": "E", "field": "e.cooldown", "value": 12.0, "tol": 0.0, "evidence": "D Regen Field: 8s @IV and its tier III upgrade -4s, so 12s at tiers I-II (supervive_kits.md)"},
 		{"hero": "bulwark", "slot": "E", "field": "e.cooldown_rank3", "value": 8.0, "tol": 0.0, "evidence": "D Regen Field: 8s @IV (supervive_kits.md); our rank 3 folds tiers III and IV"},
-		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.72, "evidence": "F Rain of Arrows: pin clip frame 0498, wall centred on the cursor 6.0 +-0.4 bh from the hunter (1 bh = 1.8 m); a frame lower bound, the clamp was not reached (frame 0457: 4.9 bh)"}
+		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.72, "evidence": "F Rain of Arrows: pin clip frame 0498, wall centred on the cursor 6.0 +-0.4 bh from the hunter (1 bh = 1.8 m); a frame lower bound, the clamp was not reached (frame 0457: 4.9 bh)"},
+		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.5, "evidence": "F Rain of Arrows wall centred on the cursor 252 px out over a 42 px body = 6.0 bh = 10.8 m (hero-ref-footage pin 0493-0498); the cap is not seen, so this is the floor"},
+		{"hero": "archer", "slot": "R", "field": "x.width", "value": 0.5, "tol": 0.1, "evidence": "F Primal Forces beam 10-13 px wide over a 42 px body = 0.43-0.56 m (hero-ref-footage pin 0559, 0566, 0573)"}
 	]
 }

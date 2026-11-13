@@ -136,6 +136,10 @@ so nothing was built. In flight means extra polish on an unmerged branch; the ro
 | 11 | fuel | closed | no fuel, as in the source (f2478ab45); "lance audit: 10 s of roaring with no fuel ..." |
 | 12 | self-slow while flaming | closed | full walk while firing, 0.6 for 0.35 s after release (f2478ab45); "lance audit: ... at his full walk", "lance: letting go stops the fire at once" (`move_k` < 1 after) |
 
+## RMB range re-read frame by frame (2026-11-12, origin/ext/hero-ref-footage linwick, 1 bh = top of the health bar to the feet = 1.8 m)
+
+Cinder Shot range 14: **Not determinable**. Hits at 6.9 bh = 12.4 m (273 px over a 39-40 px body, 0102-0107) and close in (0073-0076). The one miss (0128-0135) ends on the cursor at 184 px over 28.5 px = 6.45 bh = 11.6 m, with the lane drawn to the cursor. So the source cap is at least 12.4 m; 14 stays. The full-14 m flight on a miss is OWNER_REVIEW_1103 item 19.
+
 ## Ultimate on X: Flue Flight
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the
 carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows the owner's data (more damage, speed and a shield).
