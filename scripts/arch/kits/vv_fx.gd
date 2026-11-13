@@ -204,7 +204,7 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 ## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
 ## `hollow` drops the dark fill and the veins for a glowing centre: a big range ring, not a dome. `hold` keeps it
 ## at full strength until the last fifth, for a countdown (it otherwise fades from the first frame).
-## Returns the node, so a long one can be ended early with cut().
+## Returns the node.
 func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE, hollow := false,
 		hold := false) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
@@ -214,6 +214,7 @@ func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_
 	n.global_position = at + Vector3(0, 0.08, 0)
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "disc", dur)
+	return n
 
 ## A camera-facing 4-point crackle.
 func star(at: Vector3, col: Color, col2: Color, across := 0.4, dur := 0.12) -> void:
