@@ -1,0 +1,12 @@
+Grimble (dredge) appeal3: before = the v95 model on origin/main 88b06b9e7e, after = ~/meshy/v95/Grimble/r2/appeal3/cand_b.glb swapped in.
+All shots from tools/warden_shots.gd (--warden-shots --wardens=dredge), same camera and light both times.
+before_after.jpg: the face from the front (before left, after right), then full length front and three-quarter (before top, after bottom)
+face_front.jpg: head and shoulders from the front, before | after
+face_34.jpg: head and shoulders, three-quarter front, before | after
+front_34.jpg: full length, front and three-quarter, before over after
+back_34.jpg: full length, back and three-quarter back, before over after
+turnaround_close.jpg: close, front, 3/4, side, back, 3/4 back, before over after
+turnaround_game.jpg: at the match camera (pitch 66, 23 m, fov 32), true pixels then x3, before over after
+poses_game.jpg: at the match camera in idle, run, attack, cast, ult, before over after
+moves_close_1.jpg: run, run, other foot, before over after
+The Meshy-side sheet (front, 3/4, side, back and head close-ups) is ~/meshy/v95/Grimble/r2/appeal3/cmp_current_vs_b.jpg.

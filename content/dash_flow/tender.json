@@ -17,7 +17,7 @@
 		}
 	},
 	"jump": {
-		"rmb": {"mode": "buffer", "reason": "Burrseed's fixed 1 s wind-up outlasts the hop, so the seed leaves after she lands", "source": "Ours: owner items 118 and 118b, the wind-up and snap release."}
+		"rmb": {"mode": "buffer", "reason": "Burrseed's wind-up is a planted throw (0.35 s), so the seed leaves after she lands", "source": "Ours: owner items 118 and 118b, the wind-up and snap release."}
 	},
 	"into_dash": {
 		"lmb": {"mode": "fire", "source": "Footage (716.3-717.6 s): she pushes embers while moving. Ours: Shift skips at once between embers."},
@@ -28,9 +28,9 @@
 	},
 	"hold": {
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/mooshmoosh.md:61-72, 386-388): Bound by Fate is held to aim on a lane, then released (0106, f105-113, f116-120); every dash comes at f35, f157, f181 or f227 (mooshmoosh.md:340), none inside an aim. Data (briefs/supervive-data/supervive_kits.md:9-11: Darkside Binding, Lunar Dash, Lunar Air Dash) silent. Ours: holding RMB does nothing past the fixed wind-up (content/archetypes/tender.json rmb.variants.tap). A clean ground dash is never shown (mooshmoosh.md:340). Kept: the hold carries through (owner item 51)."},
+			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/mooshmoosh.md:61-72, 386-388): Bound by Fate is held to aim on a lane, then released (0106, f105-113, f116-120); every dash comes at f35, f157, f181 or f227 (mooshmoosh.md:340), none inside an aim. Data (briefs/supervive-data/supervive_kits.md:9-11: Darkside Binding, Lunar Dash, Lunar Air Dash) silent. Ours: holding RMB does nothing past the fixed wind-up (content/archetypes/tender.json rmb.variants.tap). The dashes shown are air dashes after a jump (mooshmoosh.md:340-343). Kept: the hold carries through (owner item 51)."},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/mooshmoosh.md:61-72, 386-388): Bound by Fate is held to aim on a lane, then released (0106, f105-113, f116-120); every dash comes at f35, f157, f181 or f227 (mooshmoosh.md:340), none inside an aim. Data (briefs/supervive-data/supervive_kits.md:9-11: Darkside Binding, Lunar Dash, Lunar Air Dash) silent. Ours: holding RMB does nothing past the fixed wind-up (content/archetypes/tender.json rmb.variants.tap). The jumps shown (mooshmoosh.md:320, 340) are outside an aim. Kept: the hold carries through (owner item 51)."}
 		}
 	}
 }

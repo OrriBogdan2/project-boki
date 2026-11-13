@@ -40,14 +40,18 @@ static var FOLLOW: Dictionary = RULES["follow"]
 var follow_mode := "supervive"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
-## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
-## stops dead with you; softer while the view rises so lifts and glides don't jolt it, as tight as across
-## while you stand or come down, so a landing doesn't drift on. While gliding Match sets lead_vel (your flat
-## velocity) and the view leans a little ahead of you.
-const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
+## Follow across, the source's (content/rules/camera.json "trail" [footage]): tight at a run, trailing a
+## dash and easing in at a steady deceleration, cut on a teleport. Softer up and down (FOLLOW_Y) so falls and
+## glides don't jolt the view: soft only while the view rises, as tight as across while you stand or come down
+## (so a landing doesn't drift on). While gliding Match sets lead_vel (your flat velocity) and the view leans ahead.
+static var _trail: Dictionary = RULES["trail"]
+static var follow_rate: float = _trail["follow_rate"]   # 1/s, near you
+static var catch_decel: float = _trail["catch_decel"]   # m/s^2, the ease-in after a dash
+static var max_gap: float = _trail["max_gap"]           # m it may trail at most
+static var cut_speed: float = _trail["cut_speed"]       # m/s: faster than this is a teleport, and the view cuts
 const FOLLOW_Y := 3.5         # 1/s, the view rising while you're in the air
-const FOLLOW_Y_TIGHT := FOLLOW_XZ  # 1/s, the view's height while you stand or it comes down: a landing settles at once
 const STAND_TOL := 0.15       # m above the standing height that still counts as standing (a step down a flight)
+var last_want := Vector3.ZERO # the followed point last frame (the cut test)
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
 const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
@@ -107,6 +111,7 @@ func _ready() -> void:
 func snap(p: Vector3) -> void:
 	focus = p
 	base = p
+	last_want = p
 	pan = Vector3.ZERO
 	lead_off = Vector3.ZERO
 	_apply(Vector3.ZERO)
@@ -200,17 +205,21 @@ func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> voi
 	var want := Vector3(p.x, maxf(maxf(at_y * 0.6, at_y - 4.0), p.y - 4.0), p.z)
 	if p.y < 0.0:
 		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
-	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
-	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
-	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
-	# soft only while the view rises (a lift, an updraft): standing or coming down it stays on you, so a fall
+	# up and down follows softer, so falls and glides don't jolt the view; recording mode has its own rates.
+	# Soft only while the view rises (a lift, an updraft): standing or coming down it stays on you, so a fall
 	# never reads as sliding back on screen and a landing doesn't drift on
 	var tight := (is_finite(stand_y) and p.y <= stand_y + STAND_TOL) or want.y < base.y
-	var y_rate := FOLLOW_Y_TIGHT if tight else FOLLOW_Y
+	var y_rate := follow_rate if tight else FOLLOW_Y
 	if Record.clean():
 		y_rate = float(rr[1])
 	var ky := 1.0 - exp(-y_rate * delta)
-	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
+	var flat := Vector2(base.x, base.z)
+	if Record.clean():
+		flat = flat.lerp(Vector2(want.x, want.z), 1.0 - exp(-float(rr[0]) * delta))
+	else:
+		flat = _trail_xz(flat, Vector2(want.x, want.z), Vector2(want.x - last_want.x, want.z - last_want.z), delta)
+	last_want = want
+	base = Vector3(flat.x, lerpf(base.y, want.y, ky), flat.y)
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)
 	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
@@ -228,6 +237,15 @@ func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> voi
 			shake_amp = 0.0
 	_apply(shake)
 	Sfx.listener = focus
+
+## The view's ground point after a frame: it closes on `to` at min(follow_rate x gap, sqrt(2 x catch_decel x gap))
+## m/s, at most max_gap behind, and cuts straight there when `to` moved faster than cut_speed (`step` this frame).
+func _trail_xz(at: Vector2, to: Vector2, step: Vector2, delta: float) -> Vector2:
+	if step.length() > cut_speed * delta:
+		return to
+	var gap := at.distance_to(to)
+	var speed := minf(follow_rate * gap, sqrt(2.0 * catch_decel * gap))
+	return to + (at.move_toward(to, speed * delta) - to).limit_length(max_gap)
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
