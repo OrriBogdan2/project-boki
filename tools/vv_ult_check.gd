@@ -6,6 +6,7 @@ extends RefCounted
 
 const BURST := preload("res://tools/ult_burst.gd")
 const KIN := "pebbit"            # a Boki to bond with (the bond only fills while one is ready)
+const ZONE_TICK_S := 0.5         # s between Cinderfall burn ticks: the source's (briefs/hero-ref/venator.md, R)
 
 var hc: RefCounted                # tools/hero_combo_check.gd
 var ac: RefCounted                # tools/archetype_check.gd
@@ -519,18 +520,44 @@ func gunslinger() -> void:
 	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
 			"paid %.2f" % _paid(P, id))
 	var took: float = ac.dmg(T)
-	ac.step(m, 1.1)
+	var burn := _hurt_times(m, T, 1.1)
 	ok("Cinderfall: the patch burns and slows",
 			ac.dmg(T) > took and T.slow_t > 0.0 and U.zone_ticks >= 2 and AimKit.shown(P, "xz1"),
 			"+%.1f ticks %d" % [ac.dmg(T) - took, U.zone_ticks])
 	ok("Cinderfall: burn ticks pay no more bond", is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"])))
-	ac.step(m, float(xd["zone_t"]))
+	burn.append_array(_hurt_times(m, T, float(xd["zone_t"]) - 0.9))    # on to 0.2 s past the zone's end
+	_zone_cadence(burn, ac.dmg(T) - took, float(xd["tick_dmg"]) * U.power(), float(xd["zone_t"]))
 	ok("Cinderfall: the patch is gone after 3s", not U.running() and not AimKit.shown(P, "xz1"))
 	ok("Cinderfall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	T2.teleport(home + Vector3(-30, 0, 0))
 	await _gun_dodge(m, P, K, T, home)
 	await ac.done(m)
 	await _gun_burst()
+
+## Steps frame by frame for secs and returns the match times (s) at which T lost health.
+func _hurt_times(m: Match, T: Hunter, secs: float) -> Array:
+	var out := []
+	var end := m.time + secs
+	var hp := T.hp
+	while m.time < end:
+		ac.step(m, hc.DT)
+		if T.hp < hp - 0.01:
+			out.append(m.time)
+		hp = T.hp
+	return out
+
+## The burn's cadence: ZONE_TICK_S between ticks to within half a step, a full zone of them, each the same.
+func _zone_cadence(times: Array, burned: float, per: float, zone_t: float) -> void:
+	var lo := INF
+	var hi := 0.0
+	for i in range(1, times.size()):
+		lo = minf(lo, times[i] - times[i - 1])
+		hi = maxf(hi, times[i] - times[i - 1])
+	var half_step := float(hc.DT) * 0.5
+	var even := absf(lo - ZONE_TICK_S) < half_step and absf(hi - ZONE_TICK_S) < half_step
+	ok("Cinderfall: the patch ticks every 0.5s (the source's), 6 times in its 3s, each the same",
+			even and times.size() == roundi(zone_t / ZONE_TICK_S) and absf(burned - per * times.size()) < 0.5,
+			"%d ticks, gaps %.3f to %.3f s, burn %.1f (%.1f each)" % [times.size(), lo, hi, burned, per])
 
 ## Stepping off the disc before it lands: no damage, no bond; a cursor past the range is clamped.
 func _gun_dodge(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
