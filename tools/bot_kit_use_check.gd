@@ -155,7 +155,7 @@ func _lands(arch: String, sd: int, duel: Dictionary) -> void:
 	print("KITUSE lands %s seed %d by %ds: %s" % [arch, sd, int(LAND_T), duel])
 	for key in ["lmb hit"] + LANDS.get(arch, []):
 		if int(duel.get(key, 0)) <= 0:
-			var miss := "miss " + key
+			var miss: String = "miss " + key
 			misses[miss] = int(misses.get(miss, 0)) + 1
 			var over := int(misses[miss]) > MISS_OK
 			var tag := "FAIL" if over else "miss"
