@@ -90,6 +90,9 @@ func run(main_node: Node, mode := "check") -> void:
 		return
 	var p := start("plates")
 	await frames_until(1.0)
+	p.shield = 0.0      # the hudref demo hands you a heal shield (the vitals strip's check); this one starts bare
+	p.shield_t = 0.0
+	await frames_until(m.time + 0.2)
 	ok(hud != null and ids().is_empty() and hud.buffs.more == 0, "nothing on you: no icons")
 	var t0 := m.time
 	three(p, 3.0)
