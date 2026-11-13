@@ -25,6 +25,7 @@ var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var _hover: Dictionary = {}    # the spawn candidate under the cursor
+var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
 
 func _init(h, match_node: Match) -> void:
 	hud = h
@@ -38,18 +39,20 @@ func open(by_plan := false) -> void:
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
+	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
+	hot_line = ""
 	_press = Vector2.INF
 
 
 # ------------------------------------------------------------------ coordinates
 func _layout(sz: Vector2) -> void:
 	var top := 76.0
-	var s := minf(sz.y - top - 22.0, sz.x - SIDE_W * 2.0 - 56.0)
+	var s := minf(sz.y - top - (44.0 if hot_line != "" else 22.0), sz.x - SIDE_W * 2.0 - 56.0)
 	s = maxf(s, 300.0)
 	rect = Rect2(Vector2(roundf(sz.x * 0.5 - s * 0.5), top), Vector2(s, s))
 
@@ -198,8 +201,12 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
+	BokiHud.map_kin(c, m, to_screen, func(pv: Vector2, _pad: float) -> bool: return rect.has_point(pv))
+	MapKey.draw(self)
 	_legend(c, sz, team)
 	_side(c, sz)
+	if hot_line != "":
+		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
 	_cursor(c)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
@@ -643,7 +650,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		var row := Rect2(Vector2(r.position.x + 8, y), Vector2(wv - 16, 38))
 		var col := m.mate_col(h)
 		var lead: bool = m.skydrop != null and m.skydrop.is_lead(h)
-		var can_pass: bool = i_lead and h != p and in_drop and (h.riding if p.riding else (h.dropping and h.drop_follow == p))
+		var can_pass: bool = i_lead and h != p and in_drop and p.riding and h.riding and h.rocket == p.rocket
 		var hov := can_pass and row.has_point(c.get_local_mouse_position())
 		hud._rounded(row, Color(1, 1, 1, 0.1 if hov else 0.04), 8, Color(col, 0.5 if hov else 0.0), 1 if hov else 0)
 		c.draw_circle(row.position + Vector2(18, 19), 9.0, col)
@@ -653,8 +660,9 @@ func _side(c: Control, sz: Vector2) -> void:
 		if h.out: sub = "Out"
 		elif h.extracted: sub = "Extracted"
 		elif lead and in_drop: sub = "Drop leader"
-		elif h.drop_solo and (h.riding or h.dropping): sub = "Dropping solo"
-		elif h.riding or h.dropping: sub = "Following the leader"
+		elif h.rocket != null: sub = "Riding the rocket"
+		elif h.riding: sub = "Aboard the ship"
+		elif h.dropping: sub = "Falling" if h.diving else "Gliding"
 		var pg: Dictionary = {}
 		for q in m.pings:
 			if q.get("by") == h: pg = q
@@ -670,12 +678,14 @@ func _side(c: Control, sz: Vector2) -> void:
 	if in_drop and m.skydrop:
 		y += 6.0
 		var keys: Array = []
-		if i_lead:
-			keys = [["jump", "Jump (the squad jumps with you)" if p.riding else "Glider: you steer the squad"], ["pass_lead", "Pass the lead"]]
-		elif p.drop_solo:
-			keys = [["jump", "Jump" if p.riding else "Glide on your own"]]
-		else:
-			keys = [["separate", "Separate and drop solo"]]
+		if p.rocket != null:
+			keys = [["jump", "Jump out of the rocket"]]
+		elif p.riding and i_lead:
+			keys = [["jump", "Launch (the squad rides with you)"]]
+		elif p.diving:
+			keys = [["jump", "Open your glider"]]
+		if i_lead and p.riding:
+			keys.append(["pass_lead", "Pass the lead"])
 		for kk in keys:
 			var cap := Settings.key_cap(String(kk[0]))
 			var kr := Rect2(Vector2(r.position.x + 14, y), Vector2(maxf(28.0, hud.big.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0), 24))

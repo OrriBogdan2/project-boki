@@ -6,8 +6,8 @@ extends Node
 ##   --tour-part=front|home|exp|all  which part to play (default all; "home" and "exp" start from a
 ##                                   made-up save with one hatched Boki, so they can run on their own)
 ## Prints "TOUR ..." lines: each shot, what was on screen, and anything that went wrong ("TOUR BAD").
-## The player can't die (health refilled each frame) and a few slow waits are shortened (the uplink
-## comes online at once, levels 2-6 are granted after the first kills): it's a camera tour, not a test
+## The player can't die (health refilled each frame) and a few slow waits are shortened (the Heart's
+## final seat opens at once, levels 2-6 are granted after the first kills): it's a camera tour, not a test
 ## of balance. Never writes the save.
 
 var out := "/tmp/tour"
@@ -205,7 +205,7 @@ func _front() -> void:
 	await until(func(): return String(hx.stage) == "name", 20.0, "the naming card")
 	await wait(1.0)
 	await shot("name_boki")
-	press("Skip the tutorial")
+	press("Tend the garden")
 	await _wait_home()
 
 func _find_class(nd: Node, cname: String) -> Node:
@@ -702,48 +702,36 @@ func _lair(m) -> void:
 
 func _extract(m) -> void:
 	var P: Hunter = m.player
-	var ups: Array = m.exits.of_kind("outpost")
-	if ups.is_empty():
-		note_bad("no uplinks"); return
-	var best: Dictionary = ups[0]
-	for x in ups:
-		if P.flat_dist(x["pos"]) < P.flat_dist(best["pos"]): best = x
-	best["open_at"] = 0.0
-	var cp: Vector3 = best["pos"]
-	var at: Vector3 = m.world.free_spot_near(cp + Vector3(1.2, 0, 0.6), [], 0.6, 0.4, 3.0)
-	P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
-	m.cam.snap(P.pos)
+	var hs: Heart = m.heart
+	if hs == null or hs.site == Vector3.INF:
+		note_bad("no Heart in this match"); return
+	# (the Heart's final seat, opened at once: one squad holding the ring fills it and leaves, MAJOR)
+	hs.go(Heart.S.FINAL, "tour")
+	var cp: Vector3 = hs.site
+	var at: Vector3 = m.world.free_spot_near(cp + Vector3(2.0, 0, 1.0), [], 0.6, 0.4, 3.0)
+	var ring := func():
+		P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+		m.cam.snap(P.pos)
+	ring.call()
 	await mwait(1.0)
-	await shot("uplink")
-	Input.action_press("interact")
-	await mwait(2.0)
-	Input.action_release("interact")
-	print("TOUR uplink state %s" % best["state"])
-	if best["state"] != "charging": note_bad("the uplink didn't start (%s, '%s')" % [best["state"], String(m.interact.get("label", ""))])
+	await shot("heart_ring")
 	var i := 0
 	var ticks := 0
 	var w0 := Time.get_ticks_msec()
-	while is_instance_valid(m) and best["state"] in ["charging", "fizzling"] and Time.get_ticks_msec() - w0 < 600000:
-		# (rivals parked in the yard contest it and it never charges: send them elsewhere)
+	while is_instance_valid(m) and hs.state == Heart.S.FINAL and Time.get_ticks_msec() - w0 < 300000:
+		# (rivals in the ring stall it, and the monster waves knock the hunter out: send them elsewhere, step back in)
 		for o in m.hunters:
-			if is_instance_valid(o) and o != P and not o.out and o.team != P.team and o.flat_dist(cp) < 12.0:
+			if is_instance_valid(o) and o != P and not o.out and o.team != P.team and hs.in_ring(o):
 				o.teleport(m.world.spawns[(m.hunters.find(o) * 3) % m.world.spawns.size()])
-		# (the monster waves knock the hunter out of the 3.6 m yard, and an empty yard drains the charge: look every
-		# second and step back in, which is what a player does)
 		await mwait(1.0)
 		ticks += 1
-		if ticks % 8 == 0 and i < 3:
+		if ticks % 6 == 0 and i < 3:
 			i += 1
-			await shot("uplink_charging_%d" % i)
-		if not m.exits.in_yard(best, P):
-			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
-	print("TOUR uplink now %s" % best["state"])
-	await shot("uplink_open")
-	# step into the light
-	await mwait(1.0)
-	if is_instance_valid(m) and not P.extracted and not m.over:
-		P.teleport(Vector3(cp.x, m.world.ground_at(cp.x, cp.z), cp.z))
-		await until(func(): return not is_instance_valid(m) or P.extracted or m.over, 30.0, "extracting in the lift")
+			await shot("heart_filling_%d" % i)
+		if not hs.in_ring(P):
+			ring.call()
+	print("TOUR heart now %s (progress %.2f)" % [Heart.S.keys()[hs.state], hs.final_prog])
+	if hs.state != Heart.S.DONE: note_bad("the Heart's final seat didn't fire (%s)" % Heart.S.keys()[hs.state])
 	await wait(2.0)
 	await shot("extracted")
 	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("results.gd"), 300.0, "the results")
