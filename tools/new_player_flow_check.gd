@@ -182,6 +182,10 @@ func _relic(hx) -> void:
 	moment.go_button.pressed.emit()
 
 # ------------------------------------------------------------------ 3. the tutorial match
+## Called after every course step of the driven tutorial match (a subclass measures it; here nothing).
+func _course_tick(_m: Match) -> void:
+	pass
+
 func _tutorial_match():
 	_begin("tutorial match: load")
 	await _wait(_match_running, "'Head out together' opens the tutorial match")
@@ -196,6 +200,7 @@ func _tutorial_match():
 	while t < COURSE_S and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
+		_course_tick(m)
 		t += Match.DT
 		step_t += Match.DT
 		if m.tut.step != last:
