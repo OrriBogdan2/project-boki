@@ -1,5 +1,17 @@
 # Sable (thief): import note
 
+## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+`~/meshy/v95/Sable/r2/prop1111/cand_B.glb` (CURRENT_OVERRIDES 11-12: solid grey-black eyes, up-pitched moth wings) swapped onto the 11-12 owner-fix sable.glb below, so its narrower idle and stance clips stay. The fix's wing reweight is not re-run: it picks fur below the waist for the old hanging wings and would hang these wings on the thighs and shins; instead the spec's last region gives the wing films (x ±0.36, behind y -0.215, z 0.3-0.84) to the hips whole. 13.0k tris, one 2048 atlas, 47 clips.
+Spec `art/wardens/src/sable_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
+
+## Owner fix 2026-11-12: wings and stance (`tools/art1/warden_fix_1112.py sable`, on the 11-10 file)
+"Wings clip through her and her stance is weirdly wide." The moth wings (fur below the waist at the back, grown over the
+mesh) had hand and thigh weights from bone heat, so the arms dragged them through the legs. They now ride `hips` at the
+root and their own thigh below (both thighs blended across the middle), up to 75% of the shin under the knee, and sit
+2.5 cm further back. The `idle` and `stance` clips bring the knees under the hips (knees 0.27 -> 0.19 m apart in idle,
+0.32 -> 0.20 in stance; ankles 0.16-0.17 m), the feet kept as they were. Eyes untouched. Wing verts within 2 cm of a leg
+over idle, walk_f and run_f: 96 (was 1894). Stretch check worst 18.03 (unchanged).
+
 ## v95 swap, appeal3 body b with the bug eyes (2026-11-10, ext/sable-appeal-b): the current sable.glb
 
 The mesh is the owner's pick (11-10): Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes
