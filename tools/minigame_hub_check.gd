@@ -156,7 +156,7 @@ func _garden() -> void:
 	HomeLayout.ensure(Save.d)
 	rules["base_mode"] = true
 	var old: Node = main.screen_node()
-	main.show_screen("home", {"play_hub": true, "zone": GardenZones.start()})
+	main.show_screen("home", {"play_hub": true})
 	var home: Node = null
 	for f in SETTLE_FRAMES:
 		await main.get_tree().process_frame
