@@ -540,6 +540,8 @@ const CHECKS := {
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],
+	"--look-locker-check": ["res://tools/look_locker_check.gd", "look_locker_check", "check"],      # the look locker
+	"--look-tour": ["res://tools/look_locker_check.gd", "look_locker_check", "tour"],      # --shots-dir=<dir>, GPU
 	"--glider-skin-shots": ["res://tools/glider_skin_shots.gd", "glider_skin_shots", null],
 	"--shroud-check": ["res://tools/shroud_check.gd", "shroud_check", null],
 	"--weapon-audit": ["res://tools/weapon_audit.gd", "weapon_audit", null],

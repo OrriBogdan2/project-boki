@@ -65,10 +65,10 @@ func _creator(tree: SceneTree) -> void:
 	main.add_child(hx)
 	await _shot(tree, "creator_default", 2.0)
 	for file in LOOKS:
-		hx.look = Unmasked.default_look()
-		hx.look.merge(LOOKS[file], true)
-		hx.preview_yaw = PI
-		hx._show_create()
+		var lk := Unmasked.default_look()
+		lk.merge(LOOKS[file], true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(PI)
 		await _shot(tree, file, 0.8)
 	hx.queue_free()
 	await tree.process_frame
@@ -142,22 +142,22 @@ func _shroud(tree: SceneTree) -> void:
 	await _shot(tree, "creator_warmup", 2.5)
 	var views := {"front": PI, "side": PI * 0.5, "back": 0.0}
 	for view in views:
-		hx.look = Unmasked.default_look()
-		hx.look.merge({"hollow": 1, "glow": 2, "colour": 5, "aura": 1}, true)
-		hx._show_create()
-		hx.preview.rotation.y = views[view]
+		var lk := Unmasked.default_look()
+		lk.merge({"hollow": 1, "glow": 2, "colour": 5, "aura": 1}, true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(views[view])
 		await _shot(tree, "creator_shroud_" + view, 0.8)
 	for level in Unmasked.AURA.size():
-		hx.look = Unmasked.default_look()
-		hx.look.merge({"aura": level, "glow": 0, "colour": 10}, true)
-		hx._show_create()
-		hx.preview.rotation.y = PI * 0.8
+		var lk := Unmasked.default_look()
+		lk.merge({"aura": level, "glow": 0, "colour": 10}, true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(PI * 0.8)
 		await _shot(tree, "creator_aura_%d_%s" % [level, String(Unmasked.AURA[level]).to_lower()], 2.5)
 	for style in Unmasked.SHROUDS.size():
-		hx.look = Unmasked.default_look()
-		hx.look.merge({"shroud": style, "gender": style % 2, "colour": 2 + style * 3}, true)
-		hx._show_create()
-		hx.preview.rotation.y = PI * 0.8
+		var lk := Unmasked.default_look()
+		lk.merge({"shroud": style, "gender": style % 2, "colour": 2 + style * 3}, true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(PI * 0.8)
 		await _shot(tree, "creator_style_%s" % String(Unmasked.SHROUDS[style]).to_lower(), 0.8)
 	hx.queue_free()
 	await tree.process_frame

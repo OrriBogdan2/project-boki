@@ -118,6 +118,13 @@ What made the menus feel blocky, samey and hard to get through:
 - **Panels** open over a blurred, dimmed farm; clicking the dimmed area or pressing Esc closes them;
   Enter presses the panel's primary when nothing else has focus.
 
+- **Making yourself** (a new game, or the pause menu's Change your look) is the look locker
+  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a lit turntable (a carved Meshy dais,
+  `art/look/`), tabs Body / Hollow / Shroud / Glider each with its own camera shot, choices as tiles and swatches
+  that try themselves on while hovered, a pop on a pick, gliders in their rarity colour (`Gliders.rarity`). Drag
+  or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
+  GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`.
+
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
 
 Everything is static. The Theme is built by `UiTheme` (`scripts/ui/ui_theme.gd`) and `UI.install()`
