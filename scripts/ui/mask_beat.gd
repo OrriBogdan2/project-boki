@@ -200,6 +200,8 @@ func _process(dt: float) -> void:
 	t += dt
 	match phase:
 		"build":
+			if swap:
+				PreviewBuild.turn(id)      # (the Hunter's model is built off the main thread while the build-up plays)
 			_build_up(dt)
 		"rise":
 			_rise(dt)

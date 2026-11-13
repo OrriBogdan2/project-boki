@@ -2,8 +2,8 @@ extends RefCounted
 ## --mask-lag-check: frame times while Mask cards are on screen and while one is accepted (item 88). Each
 ## scenario opens a screen on the farm, times every frame for a few seconds and reports the slowest, the median
 ## and how many went over the budget:
-##   masks_first   the session's first Masks screen: reported, not judged (the first menu of a session pays
-##                 one-time costs: fonts, themes)
+##   masks_first   the session's first Masks screen, once MenuWarm drew the first menu's one-time costs (fonts,
+##                 themes, the first 3D draws) as the farm's covered build does
 ##   masks_open    the Masks screen (12 tiles, the viewer's turntable and its ability clips)
 ##   masks_switch  clicking another Mask on that screen
 ##   reveal        a new Mask's reveal (its splash and clips)
@@ -12,9 +12,11 @@ extends RefCounted
 ##   accept        picking one (Hob's answer types out)
 ##   put_on        the click after it: the short Mask moment starts
 ## Headless (nothing drawn) the time is the scripts' alone and a frame over BUDGET_MS fails, except a frame that
-## built a Mask's model (PreviewBuild allows one a frame; reported with its time). Every scenario also counts the
-## 3D previews rendering at once. Under xvfb with a software rasterizer every frame also pays the raster, so the
-## times are reported, not judged.
+## built a Mask's model on the main thread (nothing runs off it there; PreviewBuild allows one a frame, reported
+## with its time). On a real GPU the models are built on a worker thread and every frame is judged, builds
+## included; a slow frame names its script time and the pipelines compiled while drawing it. Every scenario also
+## counts the 3D previews rendering at once. Under xvfb with a software rasterizer every frame also pays the
+## raster, so the times are reported, not judged.
 ##   xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --mask-lag-check
 
 const BUDGET_MS := 33.0        # ms: two frames at 60 fps, the item's target
@@ -26,6 +28,7 @@ const MASKS_VIEWS := 2         # the Masks screen: the turntable and the ability
 var main: Node
 var bad := 0
 var headless := false
+var judging := false           # a real GPU or headless: the frame times mean something
 var home = null
 
 func ok(cond: bool, what: String) -> void:
@@ -37,18 +40,25 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	headless = DisplayServer.get_name() == "headless"
+	var adapter := RenderingServer.get_video_adapter_name().to_lower()
+	var software := adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader")
+	judging = headless or not software
 	if main.fade:
 		main.fade.reveal(0.05)
 	_new_save()
 	home = await main._hb_home()
 	var tree: SceneTree = main.get_tree()
+	await MenuWarm.draw(home.root_ui)      # what the farm's covered build does (no cover here)
+	await tree.process_frame
+	ok(home.root_ui.find_children("*", "HunterViewer", true, false).is_empty(), "MenuWarm's stand-in is gone")
 	for i in SETTLE_FRAMES:
 		await tree.process_frame
 	home._close_panel()
-	await _time("masks_first", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS, false)
+	await _time("masks_first", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS)
 	home._close_panel()
 	await _time("masks_open", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS)
 	await _time("masks_switch", func(): HomeClasses._show(home, "juggernaut"), MASKS_VIEWS)
+	ok(_turntables_built(), "masks_switch: the turntable has its model (built on its worker thread or its turn)")
 	home._close_panel()
 	await _time("reveal", func(): ClassReveal.show_for(home, "dolm"), 1)
 	for rv in home.find_children("*", "ClassReveal", false, false):
@@ -84,26 +94,30 @@ func _offer_scenarios(tree: SceneTree) -> void:
 	ok(ClassUnlock.is_open("tender"), "the pick opened Pip")
 	await tree.process_frame
 
-## Runs `act` at the start of a frame and times the frames that follow. A frame that built a Mask's model
-## (PreviewBuild: at most one a frame) is reported apart: tens of ms on this kind of machine, once per model.
-func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> void:
+## Runs `act` at the start of a frame and times the frames that follow. A frame that built a Mask's model on the
+## main thread (headless only; PreviewBuild: at most one a frame) is reported apart: tens of ms, once per model.
+func _time(scenario: String, act: Callable, max_views := -1) -> void:
 	var tree: SceneTree = main.get_tree()
 	await tree.process_frame
 	var plain: Array = []
 	var builds: Array = []
 	var views := 0
+	var pipes := _pipelines()
 	var last_us := Time.get_ticks_usec()
 	act.call()
 	var t0 := last_us
-	var secs := SECS if headless else DRAWN_SECS
+	var secs := SECS if judging else DRAWN_SECS
 	while Time.get_ticks_usec() - t0 < int(secs * 1000000.0):
 		await tree.process_frame
 		var now := Time.get_ticks_usec()
-		var built := PreviewBuild.last_frame == Engine.get_process_frames() - 1
+		var built := headless and PreviewBuild.last_frame == Engine.get_process_frames() - 1
 		(builds if built else plain).append((now - last_us) / 1000.0)
-		if not built and now - last_us > int(BUDGET_MS * 1000.0):
+		if not built and judging and now - last_us > int(BUDGET_MS * 1000.0):
 			var n := plain.size() + builds.size()
-			print("MASKLAG   %s: frame %d took %.1f ms" % [scenario, n, (now - last_us) / 1000.0])
+			var scripts_ms := Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+			print("MASKLAG   %s: frame %d took %.1f ms (scripts %.1f ms, %d pipelines compiled drawing)" % [
+					scenario, n, (now - last_us) / 1000.0, scripts_ms, _pipelines() - pipes])
+		pipes = _pipelines()
 		last_us = now
 		views = maxi(views, _live_views(home))
 	plain.sort()
@@ -112,11 +126,16 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 	print("MASKLAG %-13s frames=%3d  max=%7.1f ms  median=%6.1f ms  model builds=%d (max %.1f ms)  views=%d" % [
 			scenario, plain.size() + builds.size(), worst, float(plain[plain.size() / 2]), builds.size(), build_max,
 			views])
-	if headless and judged:
+	if judging:
 		var what := "%s: no frame over %d ms outside a model build (%.1f)" % [scenario, int(BUDGET_MS), worst]
 		ok(worst <= BUDGET_MS, what)
 	if max_views >= 0:
 		ok(views <= max_views, "%s: at most %d 3D previews render a frame (%d)" % [scenario, max_views, views])
+
+## Whether every turntable under `home` has its Mask's model.
+func _turntables_built() -> bool:
+	var found: Array = home.find_children("*", "HunterViewer", true, false)
+	return not found.is_empty() and found.all(func(v): return (v as HunterViewer).model != null)
 
 ## The SubViewports that render every frame under `n` (a still or an unbuilt clip doesn't).
 func _live_views(n: Node) -> int:
@@ -126,3 +145,9 @@ func _live_views(n: Node) -> int:
 		if mode == SubViewport.UPDATE_ALWAYS or mode == SubViewport.UPDATE_WHEN_VISIBLE:
 			live += 1
 	return live
+
+## Pipelines Forward+ compiled while drawing so far (2D, and 3D surfaces nobody built ahead): a frame that compiles
+## some waits on the driver. The Compatibility renderer counts none.
+func _pipelines() -> int:
+	return RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS) \
+		+ RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW)

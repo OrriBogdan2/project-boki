@@ -703,6 +703,7 @@ func _ready_rest() -> void:
 	_refresh_top()
 	if guide: guide.build_ui()
 	if building:
+		await MenuWarm.draw(root_ui)      # (behind the ink: the first menu's first draws)
 		building = false
 		set_process(true)
 		set_process_unhandled_input(true)

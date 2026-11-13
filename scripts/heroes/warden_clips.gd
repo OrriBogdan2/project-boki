@@ -47,6 +47,8 @@ const RECOIL_BONES := {"upper_arm.R": 1.0, "upper_arm.L": 0.7, "pauldron.R": 0.5
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 static var _data := {}       # art name -> its parsed file ({} when it has none)
+static var _trimmed := {}    # AnimationLibrary -> true once _trim() ran: every model of a .glb shares its clips
+static var _trim_lock := Mutex.new()     # (a preview model is built on a worker while other models play the clips)
 
 var root: Node3D
 var skel: Skeleton3D
@@ -114,11 +116,12 @@ var turn: WardenTurn         # turning on the spot (null: no legs, or the root b
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
-	if not _data.has(art_name):
-		var p := DIR + art_name + ".json"
-		var parsed = JSON.parse_string(FileAccess.get_file_as_string(p)) if FileAccess.file_exists(p) else null
-		_data[art_name] = parsed if typeof(parsed) == TYPE_DICTIONARY else {}
-	return _data[art_name]
+	var held = SharedCache.read(_data, art_name)
+	if held != null:
+		return held
+	var p := DIR + art_name + ".json"
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(p)) if FileAccess.file_exists(p) else null
+	return SharedCache.put(_data, art_name, parsed if typeof(parsed) == TYPE_DICTIONARY else {})
 
 ## Clips for this model, or null when the .glb brought none.
 ## A hunter just eliminated whose Hero has a death clip: it stays visible until the clip has played.
@@ -156,25 +159,16 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	if names.is_empty():
 		return false
 	lib = player.get_animation_library(names[0])
-	WardenDerive.add(lib, d.get("derive", {}))
-	var contract: Array = []
-	for b in WardenGlb.BONES:
-		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
-			contract.append(sk.get_bone_name(WardenSkeleton.find(sk, b)))
-	for nm in lib.get_animation_list():
-		var a := lib.get_animation(nm)
-		a.loop_mode = Animation.LOOP_LINEAR if _is_loop(String(nm)) else Animation.LOOP_NONE
-		# (rotations only on the contract bones: their offsets and scale are the player's sliders, Sync._look_pose)
-		for i in range(a.get_track_count() - 1, -1, -1):
-			var bone_name := String(a.track_get_path(i).get_concatenated_subnames())
-			# (data "offset_bones": a bone the clips do move and scale: Motley's hips ride his spring)
-			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
-					and not bone_name in d.get("offset_bones", []):
-				a.remove_track(i)
+	_trim_lock.lock()
+	if not _trimmed.has(lib):
+		WardenDerive.add(lib, d.get("derive", {}))
+		_trim(sk)
+		if (d["loco"] as Dictionary).has("run_cycle"):
+			_retime_run(float(d["loco"]["run_cycle"]))
+		WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
+		_trimmed[lib] = true
+	_trim_lock.unlock()
 	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
-	if (d["loco"] as Dictionary).has("run_cycle"):
-		_retime_run(float(d["loco"]["run_cycle"]))
-	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -192,8 +186,9 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 		turn = WardenTurn.make(model, sk)
 	return true
 
+
 ## "loco.run_cycle" (s): the four run loops are re-timed to this cycle, their keys' times scaled and the poses kept
-## (the clips are cached, so a second Warden of the Hero scales by 1).
+## (once a .glb, inside _setup's trim lock).
 func _retime_run(cycle: float) -> void:
 	for clip in (d["loco"]["run"] as Dictionary).values():
 		var a := lib.get_animation(String(clip))
@@ -202,6 +197,25 @@ func _retime_run(cycle: float) -> void:
 			for j in a.track_get_key_count(i):
 				a.track_set_key_time(i, j, a.track_get_key_time(i, j) * k)
 		a.length = cycle
+
+
+## Sets the shared clips' loop modes and keeps rotations only on the contract bones (their offsets and scale are the
+## player's sliders, Sync._look_pose). Once a .glb, before any model of it plays: a change to a clip another model is
+## playing, made from another thread, breaks that model's player.
+func _trim(sk: Skeleton3D) -> void:
+	var contract: Array = []
+	for b in WardenGlb.BONES:
+		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
+			contract.append(sk.get_bone_name(WardenSkeleton.find(sk, b)))
+	for nm in lib.get_animation_list():
+		var a := lib.get_animation(nm)
+		a.loop_mode = Animation.LOOP_LINEAR if _is_loop(String(nm)) else Animation.LOOP_NONE
+		for i in range(a.get_track_count() - 1, -1, -1):
+			var bone_name := String(a.track_get_path(i).get_concatenated_subnames())
+			# (data "offset_bones": a bone the clips do move and scale: Motley's hips ride his spring)
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
+					and not bone_name in d.get("offset_bones", []):
+				a.remove_track(i)
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
 ## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
