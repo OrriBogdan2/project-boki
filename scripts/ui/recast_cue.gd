@@ -34,6 +34,7 @@ static func track(k: ArchKit, dt: float) -> void:
 		# a window shorter than a tick's mark skips it: no tick on top of the opening chime
 		cue["tick"] = TICKS.filter(func(t): return float(t) >= left0).size()
 		Sfx.play("ab_ready", null, -3.0, 0.0, 1.35)
+		RecastHint.opened(k, w)
 	elif w.is_empty() and was != "":
 		if float(cue.get("last", 1.0)) < RAN_OUT:    # ran out unused, even one that then fires itself: never silent
 			cue["exp_slot"] = was
