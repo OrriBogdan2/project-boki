@@ -2,7 +2,8 @@ class_name BotKeys
 extends RefCounted
 ## What a bot does about chest keys (called from Bot's goal picking): with no key, fight for one
 ## (a carrier's glint, or a key lying on the ground); with a key, go and open a chest. A bot never
-## walks to a locked chest it cannot open, and never chases a Shrubling it cannot see.
+## walks to a locked chest it cannot open, never chases a Shrubling it cannot see, and leaves a
+## carrier alone for a while once it has given up on it.
 
 const SEE_CARRIER := 34.0      # m: a key carrier in this range is worth walking to
 const SEE_KEY := 30.0          # m: a dropped key
@@ -38,8 +39,11 @@ static func goal(m: Match, h: Hunter, cur: Vector3) -> Array:
 		if d < bd:
 			bd = d
 			best = p["pos"]
+	var carrier: Mob = null
 	for mb in m.mobs:
 		if mb.dead or not KeyCarry.carries(mb) or (mb is Shrubling and (mb as Shrubling).ss == "disguised"):
+			continue
+		if _gave_up(m, h.ai.get("ignore", {}), mb) or _gave_up(m, h.ai.get("key_skip", {}), mb):
 			continue
 		if m.lairs and m.lairs.walled_off(h, mb.pos):
 			continue
@@ -50,4 +54,16 @@ static func goal(m: Match, h: Hunter, cur: Vector3) -> Array:
 			bd = d2
 			best = mb.pos
 			kind = "keyhunt"
+			carrier = mb
+	h.ai["key_mob"] = carrier
 	return [best, kind] if best != Vector3.INF else []
+
+## Whether a give-up entry ({"e", "until"}) still holds for this carrier: the fight dropped it (no
+## clear shot), or the walk did (no way there, or no closer for a while). Walking on after a carrier
+## the fight had dropped had the bot circle it until the fight took it up again.
+static func _gave_up(m: Match, g: Dictionary, mb: Mob) -> bool:
+	return g.get("e") == mb and m.time < float(g.get("until", 0.0))
+
+## The bot stops walking after the carrier it was going for, until `until`.
+static func give_up(a: Dictionary, until: float) -> void:
+	a["key_skip"] = {"e": a.get("key_mob"), "until": until}
