@@ -720,7 +720,7 @@ Hob Brackenridge, the farm's builder (docs/decisions/0011-farm-builder-tutorial.
 | short | Hob |
 | stand | {"along": 2.4, "side": 4.2, "desc": "Metres in front of the house centre and to its right, so he never blocks the door (where he works while it is a site)."} |
 | stall_stand | {"out": 1.6, "side": 2.2, "desc": "Metres out in front of the market stall and to its side: where his home spot is first looked for (HobSpot)."} |
-| clear | {"m": 3.5, "desc": "Metres: the clear ring round Hob's home spot. No placed tile, door or other place you interact with comes closer, so his 2.4 m talk ring stays apart from the stall's and the talk camera has open ground; build mode refuses a piece inside it."} |
+| clear | {"m": 3.5, "reach_m": 1.9, "desc": "Metres: the clear ring round Hob's home spot. No placed tile, door or other place you interact with comes closer, and build mode refuses a piece inside it. When his spot is chosen, places you interact with are also kept talk_reach + reach_m (the usual 1.9 m interact reach) away, so his talk ring and theirs do not overlap and the talk camera has open ground."} |
 | walk_mps | 2.4 |
 | talk_reach | 2.4 |
 | hint_more | Talk to Hob for more |

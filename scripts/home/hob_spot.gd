@@ -15,6 +15,13 @@ static func clear_m() -> float:
 	return float(FarmBuilder.rules()["clear"]["m"])
 
 
+## How far a place you interact with stays from the spot he is given: his talk ring plus their usual reach,
+## so the two prompts never share ground (never less than the clear ring).
+static func apart_m() -> float:
+	var r: Dictionary = FarmBuilder.rules()
+	return maxf(clear_m(), float(r["talk_reach"]) + float(r["clear"]["reach_m"]))
+
+
 ## His home spot (a tile centre): the saved one while it stays clear, else the free tile nearest it (or nearest
 ## `wish` on the first look), saved. With no free tile anywhere he keeps the saved spot (or `wish`).
 static func home(h, wish: Vector3) -> Vector3:
@@ -42,8 +49,8 @@ static func near_tile(spot: Vector3, c: Vector2i) -> bool:
 	return Vector2(gx, gz).length() < clear_m()
 
 
-## 1 per tile he may stand on: open ground (and all round it) you can walk to, with nothing placed and no
-## place you interact with inside the clear ring.
+## 1 per tile he may stand on: open ground (and all round it) you can walk to, with nothing placed inside the
+## clear ring and no place you interact with inside apart_m().
 static func free_tiles(h) -> PackedByteArray:
 	var hb: HomeBuild = h.hb
 	var w: World = h.world
@@ -60,10 +67,12 @@ static func free_tiles(h) -> PackedByteArray:
 			for x in range(c.x - n, c.x + n + 1):
 				if w.inb(x, z) and near_tile(Vector3(x + 0.5, 0, z + 0.5), c):
 					free[w.idx(x, z)] = 0
+	var ra := apart_m()
+	var na := int(ceil(ra))
 	for p in hb._targets():
-		for z in range(int(floor(p.z)) - n, int(floor(p.z)) + n + 1):
-			for x in range(int(floor(p.x)) - n, int(floor(p.x)) + n + 1):
-				if w.inb(x, z) and Vector2(x + 0.5 - p.x, z + 0.5 - p.z).length() < r:
+		for z in range(int(floor(p.z)) - na, int(floor(p.z)) + na + 1):
+			for x in range(int(floor(p.x)) - na, int(floor(p.x)) + na + 1):
+				if w.inb(x, z) and Vector2(x + 0.5 - p.x, z + 0.5 - p.z).length() < ra:
 					free[w.idx(x, z)] = 0
 	return free
 
