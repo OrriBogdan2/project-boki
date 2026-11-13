@@ -386,6 +386,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	P.ctrl = "idle"
 	cam.cast_left = 0.0
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	K.use_e()
 	C.ac.step(m, 0.1)
 	var quiet := cam.cast_left <= 0.0 and not K.needle.is_empty()
