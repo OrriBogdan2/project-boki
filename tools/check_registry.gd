@@ -572,6 +572,7 @@ const CHECKS := {
 	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # drop and landing frames
 	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # the loading screen; =home|training
 	"--perk-orb-check": ["res://tools/perk_orb_check.gd", "perk_orb_check", null],      # orb perks vs the source's
+	"--swept-hit-check": ["res://tools/swept_hit_check.gd", "swept_hit_check", null],
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through

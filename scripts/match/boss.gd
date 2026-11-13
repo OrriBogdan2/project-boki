@@ -246,7 +246,7 @@ func sim(dt: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= dt
 		vel.x = dash_v.x; vel.z = dash_v.y
-		_dash_hits()
+		_dash_hits(dt)
 	else:
 		var hv := Vector2(vel.x, vel.z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * dt))
@@ -478,11 +478,12 @@ func _atk_dash() -> void:
 			dash_hit = {}
 			m.sfx("whoosh", pos, 2.0, 0.7))
 
-func _dash_hits() -> void:
+func _dash_hits(dt: float) -> void:
 	m.fx.burst(pos + Vector3(0, 1.0, 0), Color("bff8ff"), 3, 2.0, 0.3, 0.0, 0.8)
+	var end := pos + Vector3(dash_v.x, 0, dash_v.y) * dt
 	for f in m.foes_of(team):
 		if f is Mob or dash_hit.has(f.nid): continue
-		if flat_dist(f) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
+		if Swept.dist(f.pos, pos, end) < r + f.r + 0.4 and absf(f.pos.y - pos.y) < 2.0:
 			dash_hit[f.nid] = true
 			var d := dash_v.normalized()
 			var rel := Vector2(f.pos.x - pos.x, f.pos.z - pos.z)
