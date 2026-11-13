@@ -885,6 +885,9 @@ Result: 13 Hunters x 12 rows x 2 modes = 312 rows, 0 broken. No path converts fa
 
 The two rows that differ between the modes differ in the air, not at the landing: a match knock has its own window (`knock_t`: 6 m/s² drag, no idle drag) and a glider let go of in a match keeps glide drag for `FEATHER_KEEP`; the garden has neither (it has no knock at all: the row puts the same push on as `Hunter.impulse`). Filed in docs/DEBT.md; both still never carry fall speed.
 
+## One profile in every mode (`--move-feel-check`, `tools/move_one_profile_check.gd`; DECISIONS 11-11)
+The same hero (Oath/`bulwark`, a row of its own: 4.85 m/s, accel 47) runs the same scripted inputs in the Expedition solo and trio, the Arena, the Training Grounds, the duel ring and the garden avatar (Heart Raid: `ext/pve-raid-1111` is not on main, add it to `MODES` when it lands). Each mode must read `hunter_move.json` and `tuning.json`: the loaded tables equal the files, every hunter's run speed and accel are the file's row, and run, brake, air accel, jump, glide and dash measure the same as the Expedition solo (within 0.03). Run speed and the jump apex are also anchored to the file and to v^2/2g. Result: no mode overrides a number. The spots are flat open floor with biomes off (a map's ice is terrain, not a mode).
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
