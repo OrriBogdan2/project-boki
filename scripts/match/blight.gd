@@ -174,7 +174,7 @@ func sim(dt: float) -> void:
 	cd -= dt
 	st_t -= dt
 	shriek_cd -= dt
-	var spd: float = float(md["speed"]) * speed_k() * slow_mult(0.55)
+	var spd: float = float(md["speed"]) * speed_k() * slow_mult()
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
 		if stun_t > 0.0 and st == "windup":
@@ -234,7 +234,7 @@ func sim(dt: float) -> void:
 	var pre_v := pre_dir.length()
 	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		kb_time = -9.0
-		stun_t = maxf(stun_t, 1.0)
+		add_stun(1.0)
 		if st == "windup":
 			_cancel_tele()
 			st = "recover"

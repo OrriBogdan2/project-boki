@@ -187,7 +187,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		if o == null or o.out or not o.downed:
 			end_stomp(m, h, "gone")
 			continue
-		h.root_t = maxf(h.root_t, STOMP_ROOT)
+		h.add_root(STOMP_ROOT)
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
 		var t0 := float(h.stomp["t"])

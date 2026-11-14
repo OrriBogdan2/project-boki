@@ -541,8 +541,7 @@ func _tick(dt: float) -> void:
 		if float(pd["tick"]) <= 0.0:
 			pd["tick"] = 0.25
 			for f in foes_in(pd["at"], float(pd["r"])):
-				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
-				f.slow_t = maxf(f.slow_t, 0.35)
+				f.add_slow(0.35, float(pd["k"]))
 		if float(pd["left"]) <= 0.0:
 			(pd["node"] as Node3D).queue_free()
 			puddles.erase(pd)
