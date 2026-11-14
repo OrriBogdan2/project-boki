@@ -82,6 +82,7 @@ var hw: HomeWork = null            # kin at work: jobs, stations and the Job Boa
 var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
 var nap_sound := BokiNapSfx.new()     # the napping Boki breathe and yawn (boki_nap_sfx.gd)
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
+var item_fx: GardenItemFx          # the moment on a Boki given a shaping item (garden_item_fx.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
@@ -418,6 +419,8 @@ func _ready_rest() -> void:
 	await world.build_meshes()
 	world.stage_cb = Callable()
 	fx = Fx.new(); add_child(fx)
+	item_fx = GardenItemFx.new()
+	add_child(item_fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
 	_apply_cam_settings()
@@ -3787,7 +3790,6 @@ func _construct(b: String) -> void:
 	get_tree().create_timer(1.55).timeout.connect(func():
 		Sfx.play("unlock")
 		fx.burst(l["at"] + Vector3(0, 2.6, 0), UI.GOLD, 26, 6.0, 0.8, 8.0, 1.2)
-		fx.ring(l["at"], 4.0, Color(UI.GOLD, 0.9), 0.5)
 		l["built"] = true
 		building_now = false
 		if b == "greenhouse": _build_plots()
@@ -4356,6 +4358,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
 		if res["ok"]: GardenSfx.item(self, k["pos"], res["id"])
+		item_fx.play(k, res)
 		BowlSfx.taste(rec, k["pos"], res)
 		_toast(res["text"])
 		Save.save_game()
