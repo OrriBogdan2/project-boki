@@ -17,6 +17,7 @@ var tab := "ransom"
 var said := {}              # uid -> the last thing the seller said
 var bids := {}              # uid -> the offer you're making
 var messages := {}          # uid -> the message going with an offer to a captor
+var more := {}              # uid -> its card shows the haggling slider (and the message) under More
 
 func _init(home) -> void:
 	h = home
@@ -24,14 +25,15 @@ func _init(home) -> void:
 func open(which := "") -> void:
 	if which != "": tab = String(OLD_TABS.get(which, which))
 	if not TABS.has(tab): tab = "ransom"
-	var v: VBoxContainer = h._new_panel(PANEL, 860, true)
+	fill(h._new_panel(PANEL, 860, true))
+
+## The panel's contents (a separate step so --market-check can build it without a Home).
+func fill(v: VBoxContainer) -> void:
 	var lost: Array = Save.d.get("lost_kin", [])
 	var at_house: Array = lost.filter(func(L): return String(L["where"]) == "ransom")
 	var held: Array = lost.filter(func(L): return String(L["where"]) == "rival")
 	var offers: Array = Save.d.get("offers", [])
-	var holds := [Ransom.BROKER, Ransom.SELL_AFTER]
-	UI.subtitle(v, ("%s holds the Boki nobody came for (%d expeditions), carries word to whoever took yours, " % holds)
-		+ "and keeps a few rare things under the counter.")
+	UI.subtitle(v, "%s gets lost Boki back to you, and keeps a few rare things under the counter." % Ransom.BROKER)
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
 	var names: Array = TABS.values()
 	UI.shell_tabs(v, names, String(TABS[tab]), func(t): open(String(TABS.find_key(t))),
@@ -155,7 +157,9 @@ func _rare_card(e: Dictionary) -> Control:
 	hr.add_child(buy)
 	return card
 
-## One lost Boki: where it is, what's asked, and your offer (with a message for a captor).
+## One lost Boki on a card: its picture, name, time left and price on one line, what the seller
+## said, and one highlighted button. The haggling slider, the other button and the message to a
+## captor sit behind More.
 func _lost_card(L: Dictionary) -> Control:
 	var rec: Dictionary = L["rec"]
 	var uid := String(rec["uid"])
@@ -165,64 +169,93 @@ func _lost_card(L: Dictionary) -> Control:
 	UI.set_card_border(card, sp["color"])
 	var v := UI.vbox(6)
 	card.add_child(v)
-	var top := UI.hbox(10)
-	var title := Data.kin_title(String(rec["name"]), String(sp["name"]))
-	var nm := UI.label("%s  ·  level %d" % [title, int(rec.get("level", 1))], 18, sp["color"], UI.big)
-	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(nm)
-	top.add_child(UI.label("Asking %d" % int(L["ask"]), 16, UI.GOLD, UI.big))
-	v.add_child(top)
-	var selling_soon := not rival_side and int(L.get("waited", 0)) >= Ransom.SELL_AFTER - 1
-	var wl := UI.label(_where(L), 13, UI.BAD if selling_soon else UI.MUTED)
-	wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(wl)
+	v.add_child(_head(L, rec, sp, rival_side))
 	if said.has(uid):
 		var sl := UI.label("%s: \"%s\"" % [L["holder"] if rival_side else Ransom.BROKER, said[uid]], 14, UI.INK)
 		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(sl)
+	var pay_first := not rival_side and int(Save.d["gems"]) >= int(L["ask"])
+	var main_b := _pay_button(L) if pay_first else _offer_button(L)
+	var open_more := more.has(uid)
+	var row := UI.hbox(10)
+	row.add_child(UI.fill())
+	row.add_child(main_b)
+	row.add_child(UI.ghost("Less" if open_more else "More", func():
+		if open_more: more.erase(uid)
+		else: more[uid] = true
+		open(), 80))
+	v.add_child(row)
+	if open_more:
+		v.add_child(_more_box(L, main_b, pay_first, rival_side))
+	return card
+
+## Picture, name and level, time left (or who holds it) and the asking price, all on one line.
+func _head(L: Dictionary, rec: Dictionary, sp: Dictionary, rival_side: bool) -> HBoxContainer:
+	var top := UI.hbox(10)
+	var pic := KinPortrait.view(rec, Engine.get_main_loop() as SceneTree, 48.0)
+	pic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(pic)
+	var title := Data.kin_title(String(rec["name"]), String(sp["name"]))
+	var nm := UI.label("%s  ·  level %d" % [title, int(rec.get("level", 1))], 18, UI.INK, UI.big)
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	top.add_child(nm)
+	var tag := UI.tag("Held by %s" % L["holder"], UI.MUTED)
+	if not rival_side:
+		var left := Ransom.SELL_AFTER - int(L.get("waited", 0))
+		tag = UI.tag("Sold after your next expedition" if left <= 1 else "%d expeditions left" % left,
+			UI.BAD if left <= 1 else UI.MUTED)
+	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(tag)
+	var ask := UI.label("%d gems" % int(L["ask"]), 16, UI.GOLD, UI.big)
+	ask.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(ask)
+	return top
+
+## What shows under More: your offer, the button that isn't highlighted, and a message to a captor.
+func _more_box(L: Dictionary, main_b: Button, pay_first: bool, rival_side: bool) -> VBoxContainer:
+	var rec: Dictionary = L["rec"]
+	var uid := String(rec["uid"])
+	var other := _offer_button(L) if pay_first else _pay_button(L)
+	other.theme_type_variation = ""
+	var offer_b := other if pay_first else main_b
+	var box := UI.vbox(6)
+	var row := UI.hbox(10)
+	var sl := HSlider.new()
+	sl.min_value = 0
+	sl.max_value = maxi(int(L["ask"]), 1)
+	sl.step = 5
+	sl.value = clampi(_bid(L), 0, int(L["ask"]))
+	sl.custom_minimum_size = Vector2(240, 24)
+	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	sl.value_changed.connect(func(val):
+		bids[uid] = int(val)
+		offer_b.text = "Offer %d" % int(val))
+	row.add_child(sl)
+	row.add_child(other)
+	box.add_child(row)
 	if rival_side:
 		var msg := LineEdit.new()
 		msg.placeholder_text = "A message to %s with your offer (optional)" % L["holder"]
 		msg.max_length = 140
 		msg.text = String(messages.get(uid, ""))
 		msg.text_changed.connect(func(t): messages[uid] = t)
-		v.add_child(msg)
-	v.add_child(_offer_row(L))
-	return card
+		box.add_child(msg)
+		box.add_child(UI.label("You may meet them out there: your bond lets you sense it nearby.", 12, UI.MUTED))
+	return box
 
-func _where(L: Dictionary) -> String:
-	var waited := int(L.get("waited", 0))
-	var s := "" if waited == 1 else "s"
-	if String(L["where"]) == "rival":
-		return ("Held by %s for %d expedition%s. " % [L["holder"], waited, s]
-			+ "You may meet them out there: your bond lets you sense it nearby.")
-	var left := "Sold on after your next expedition!"
-	if waited < Ransom.SELL_AFTER:
-		left = "Sold on after %d more." % (Ransom.SELL_AFTER - waited)
-	return "Waiting here for %d expedition%s. %s" % [waited, s, left]
+func _bid(L: Dictionary) -> int:
+	return int(bids.get(String(L["rec"]["uid"]), int(round(float(L["ask"]) * 0.75))))
 
-func _offer_row(L: Dictionary) -> HBoxContainer:
+func _offer_button(L: Dictionary) -> Button:
 	var rec: Dictionary = L["rec"]
 	var uid := String(rec["uid"])
-	var row := UI.hbox(10)
-	var bid := int(bids.get(uid, int(round(float(L["ask"]) * 0.75))))
-	var sl := HSlider.new()
-	sl.min_value = 0
-	sl.max_value = maxi(int(L["ask"]), 1)
-	sl.step = 5
-	sl.value = clampi(bid, 0, int(L["ask"]))
-	sl.custom_minimum_size = Vector2(240, 24)
-	sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var bl := UI.label("Offer %d" % int(sl.value), 15, UI.INK)
-	bl.custom_minimum_size.x = 96
-	sl.value_changed.connect(func(val):
-		bids[uid] = int(val)
-		bl.text = "Offer %d" % int(val))
-	row.add_child(sl)
-	row.add_child(bl)
 	var patience := int(L.get("patience", 0))
-	var ob := UI.button("Make offer", func():
-		var res := Ransom.offer(L, int(bids.get(uid, int(sl.value))), String(messages.get(uid, "")))
+	var ob := UI.primary("Offer %d" % _bid(L), func():
+		var res := Ransom.offer(L, _bid(L), String(messages.get(uid, "")))
 		said[uid] = String(res["line"])
 		if res["result"] == "accept":
 			Sfx.play("unlock")
@@ -237,7 +270,11 @@ func _offer_row(L: Dictionary) -> HBoxContainer:
 	ob.tooltip_text = "%d more tries before they stop haggling" % patience
 	if patience <= 0:
 		ob.tooltip_text = "They've stopped haggling until after your next expedition."
-	row.add_child(ob)
+	return ob
+
+func _pay_button(L: Dictionary) -> Button:
+	var rec: Dictionary = L["rec"]
+	var uid := String(rec["uid"])
 	var pay := UI.primary("Pay %d" % int(L["ask"]), func():
 		if Ransom.pay(L):
 			Sfx.play("unlock")
@@ -248,5 +285,4 @@ func _offer_row(L: Dictionary) -> HBoxContainer:
 		else:
 			h._toast("You need %d gems" % int(L["ask"])), 130)
 	pay.disabled = int(Save.d["gems"]) < int(L["ask"])
-	row.add_child(pay)
-	return row
+	return pay

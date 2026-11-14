@@ -87,8 +87,6 @@ func press_ult() -> bool:
 	h.cast_at = m.time
 	h.cast_slot = "ult"
 	h.used["r"] = int(h.used.get("r", 0)) + 1
-	var col: Color = form["glow"]
-	m.fx.word(h.pos + Vector3(0, 3.0, 0), String(r["name"]).to_upper(), col, true)
 	m.sfx("charge", h.pos, 0.0, 0.6)
 	m.sfx("warn", h.pos, -4.0, 0.7)
 	play("mf_ult")
@@ -152,7 +150,6 @@ func _strike_all(b: Dictionary) -> void:
 			continue
 		m.fx.bolt(f.pos + Vector3(0, 8.0, 0), f.pos + Vector3(0, 0.8, 0), col)
 		m.fx.flash(f.pos + Vector3(0, 0.9, 0), Color.WHITE, 1.3, 0.12)
-		m.fx.ring(f.pos, 1.5, col, 0.3)
 		f.hurt(float(b.get("dmg", 40.0)) * m.dmg_mult(h), h, {"src": "abil", "ab": "ult", "tags": ["ult", "strike"], "stun": float(b.get("stun", 0.0)), "dr": true})
 	m.sfx("boom", h.pos, -1.0, 0.8)
 	m.sfx("zap", h.pos, 0.0, 0.7)

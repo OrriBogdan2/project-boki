@@ -28,7 +28,7 @@ func setup(arch: String, dist: float, abyss := 0, rank := 1) -> Array:
 	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
 	var hi: int = W.idx(hx, hz)
 	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
-	for dz in range(-7, 8):
+	for dz in range(-12, 13):
 		for dx in range(-8, 26):
 			if not W.inb(hx + dx, hz + dz): continue
 			var i: int = W.idx(hx + dx, hz + dz)
@@ -38,6 +38,7 @@ func setup(arch: String, dist: float, abyss := 0, rank := 1) -> Array:
 			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
 	P.teleport(home); P.vel = Vector3.ZERO
+	Sfx.listener = home          # (the camera focus the looks thin out from; no camera runs here)
 	P.set_arch(arch)
 	P.unlock_all()
 	P.lvl = 6

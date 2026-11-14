@@ -1,0 +1,4 @@
+{
+ "doc": "Truce offers (scripts/match/truce.gd). calm_s: seconds with no hit dealt or taken by either squad before a bot's offer is shown (a held key asked for mid-fight is a bad time).",
+ "calm_s": 4.0
+}

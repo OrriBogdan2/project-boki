@@ -272,6 +272,8 @@ static func status(id: String) -> String:
 static func requirement(id: String) -> String:
 	if is_open(id):
 		return ""
+	if needs_starters() and starters().has(id):
+		return "Pick it as your first Relic"
 	if (state().get("second", []) as Array).has(id):
 		var names := second_picks().map(func(a): return Arch.name_of(String(a), true))
 		return "One of %s opens after your first expedition" % ", ".join(names)

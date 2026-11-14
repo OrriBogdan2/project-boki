@@ -252,7 +252,7 @@ func skin(s: Dictionary, kind: String) -> Node3D:
 	var x: Dictionary = s["x"]
 	x["pin"] = kind
 	x["tracer"] = 0.0
-	s["vr"] = 0.001
+	Oomph.hide_orb(s)
 	for n in arrows:
 		if not (n as Node3D).visible:
 			_dress(n, kind)
