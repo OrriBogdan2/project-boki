@@ -12,8 +12,7 @@ const TURN_IN := 0.3         # rad each outer Hunter turns toward the middle
 const DRIFT_HZ := 0.12      # camera sway speed (cycles/s)
 const DRIFT_M := 0.5         # camera sway width (m)
 const WISP_HOVER := 1.0      # m a Wisp floats above the island
-const WISP_DIM_GLOW := 0.15  # a dimmed Wisp's core glow (the default look is 0.45)
-const WISP_DIM_HALO := 0.1   # ... and halo alpha (0.5)
+const WISP_DIM_GLOW := 0.15  # a dimmed Wisp's core glow (the default look is 1.3; the looks have no halo now)
 const WISP_TINT := Color("5f70b0")   # a dimmed Wisp is a cool, dim blue, whatever its team
 const LEFT_THIRD := 0.28     # the squad sits this far (of the window width) left of centre, beside the card
 
@@ -144,7 +143,6 @@ func _hunter(m: Dictionary, i: int) -> Node3D:
 func _wisp(m: Dictionary) -> Node3D:
 	var look: Dictionary = WispLook.get_look(WispLook.equipped() if bool(m["you"]) else "").duplicate(true)
 	look["core"]["glow"] = WISP_DIM_GLOW
-	look["halo"]["alpha"] = WISP_DIM_HALO
 	return WispLook.build(look, WISP_TINT)
 
 ## Holds the Hunter's pose; a model without clips (the procedural fallback) stands in its idle.
