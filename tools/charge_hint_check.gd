@@ -60,7 +60,7 @@ func run(main: Node) -> void:
 	_step(m, 5.0, up["pos"] + Vector3(20, 0, 0))
 	_step(m, 1.0, yard)
 	ok(_copies(m, P) == 0, "stepping back in a few seconds later does not show it again")
-	m.over = true
+	m.flow.finish("check done")
 	m.queue_free()
 	await main.get_tree().process_frame
 	print("CHARGE HINT CHECK DONE, failures: ", bad)

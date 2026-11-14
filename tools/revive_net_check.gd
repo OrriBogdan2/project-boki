@@ -235,7 +235,7 @@ func _say() -> void:
 	var b := Life.box_of(m, P)
 	Net.lobby_emit("rn_r", {
 		"out": P.out, "gone": P.gone, "hp": P.hp, "max": P.max_hp, "sick": P.sick_t, "keys": P.chest_keys,
-		"pos": [P.pos.x, P.pos.y, P.pos.z], "boxes": m.boxes.size(), "ended": m.result.get("ending", false),
+		"pos": [P.pos.x, P.pos.y, P.pos.z], "boxes": m.boxes.size(), "ended": m.flow.ending(),
 		"box": [b["pos"].x, b["pos"].y, b["pos"].z] if not b.is_empty() else [0, 0, 0],
 		"beacons": m.beacons.size(), "b0": [m.beacons[0]["pos"].x, m.beacons[0]["pos"].y, m.beacons[0]["pos"].z],
 		"used": m.beacons[0]["used"]})
