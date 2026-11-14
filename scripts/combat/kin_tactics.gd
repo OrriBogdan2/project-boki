@@ -159,7 +159,7 @@ func cue_aim(cue: PartSpec) -> Vector3:
 				if n >= int(p["count"]) and randf() < offensive_rate:
 					return k.target.pos
 		"owner_hurt":
-			if own.hp < own.max_hp * float(p["below"]) and own.regen_wait > 0.0 and randf() < 0.4 + loyalty * 0.6:
+			if own.hp < own.max_hp * float(p["below"]) and InCombat.is_in(own) and randf() < 0.4 + loyalty * 0.6:
 				return own.pos
 		"owner_under_fire":
 			# a rival is shooting you: put something between you and them

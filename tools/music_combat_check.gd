@@ -1,14 +1,13 @@
 extends RefCounted
 ## --music-combat-check: the score's drive layer follows your own fights (scripts/match/music_dir.gd).
-## A hit dealt brings drive in within 0.5 s, a hit taken keeps it, 8 s of calm fades it out, and
+## A hit dealt brings drive in within 0.5 s, a hit taken keeps it, a calm InCombat window fades it out, and
 ## across the whole run the drive goal changes at most once per 2 s (no flicker).
 
 var main: Node
 var fails := 0
 var n := 0
 var pl: Hunter
-var dealt := 0.0      # the trades the check scripts (the autoplay bot's own are overwritten)
-var hurt := -9.0
+var trade := -99.0    # when the check last traded a hit (the autoplay bot's own fights are overwritten)
 const DT := 1.0 / 60.0
 
 func ok(cond: bool, what: String) -> void:
@@ -35,7 +34,7 @@ func run(main_node: Node) -> void:
 	var changes: Array[float] = []
 	_run(m, 1.0, changes)
 	ok(md.heat == 0.0, "calm start: drive is out (%.2f)" % md.heat)
-	dealt += 20.0      # a hit dealt
+	trade = m.time      # a hit dealt
 	var hit_t := m.time
 	var rose := -1.0
 	while m.time - hit_t < 1.0:
@@ -43,12 +42,13 @@ func run(main_node: Node) -> void:
 		if rose < 0.0 and md.heat >= 0.99:
 			rose = m.time - hit_t
 	ok(rose >= 0.0 and rose <= 0.5, "a hit dealt sets drive within 0.5 s (took %.2f s)" % rose)
-	_run(m, 4.0, changes)
-	hurt = m.time      # a hit taken restarts the hold
-	_run(m, 7.0, changes)
-	ok(md.heat >= 0.99, "7 s after a hit taken the drive is still on (%.2f)" % md.heat)
-	_run(m, 2.0, changes)      # (a hit taken counts for 0.6 s: 8.6 s in all)
-	ok(md.goal == 0.0 and md.heat < 0.99, "8+ s of calm starts the fade (goal %.2f, drive %.2f)" % [md.goal, md.heat])
+	_run(m, InCombat.window() - 2.0, changes)      # (the hit dealt is still inside the window)
+	trade = m.time      # a hit taken restarts the hold
+	var hold := InCombat.window()
+	_run(m, hold - 1.0, changes)
+	ok(md.heat >= 0.99, "%.0f s after a hit taken the drive is still on (%.2f)" % [hold - 1.0, md.heat])
+	_run(m, 2.0, changes)
+	ok(md.goal == 0.0 and md.heat < 0.99, "a calm window starts the fade (goal %.2f, drive %.2f)" % [md.goal, md.heat])
 	_run(m, 4.5, changes)
 	ok(md.heat == 0.0, "...and the drive is out after the fade (%.2f)" % md.heat)
 	ok(changes.size() == 2, "the drive goal changed %d times: one up, one down" % changes.size())
@@ -68,8 +68,7 @@ func _run(m: Match, secs: float, changes: Array[float]) -> void:
 func _step(m: Match, changes: Array[float]) -> void:
 	var before := m.music_dir.goal
 	m.step(DT)
-	pl.dmg_done = dealt
-	pl.hurt_at = hurt
+	pl.combat_at = trade
 	m.music_dir.tick(m, DT)      # (Match._process ticks it; the check steps by hand)
 	if m.music_dir.goal != before:
 		changes.append(m.time)
