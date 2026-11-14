@@ -12,8 +12,9 @@ extends "res://tools/combo51_shots.gd"
 
 const HERO_PARTS := {
 	"juggernaut": ["lmb", "chain", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
-	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
+	"archer": ["string", "lmb", "far", "miss", "super", "heavy", "dash", "e", "r", "voice"],
+	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"],
+	"mage": ["lmb", "far", "hold", "rmb", "dash", "e", "r"]}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
@@ -118,6 +119,16 @@ func _part_lmb() -> void:
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
 	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", LMB_TIMES.get(who, LMB_TIMES_DEFAULT)), 1.5)
+	await _go(GAP)
+
+## Three LMB shots at a dummy 8 m out, the frames mid-flight: the shot's trail and head at match zoom.
+func _part_far() -> void:
+	await _reset(8.0)
+	var shoot := func(t: float):
+		P.inp["fire"] = fmod(t, 0.7) < DT * 2.0 and t < 1.5
+		_aim(T.pos)
+	await _go(1.9, shoot, _sheet("far", "LMB at a dummy 8 m out: the trail and its head in flight",
+			[0.05, 0.1, 0.16, 0.75, 0.8, 0.86, 1.45, 1.5, 1.56]), 1.5)
 	await _go(GAP)
 
 func _part_hold() -> void:

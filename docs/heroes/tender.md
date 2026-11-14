@@ -79,7 +79,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | Hearthlight self_k 0.33 (not in the data) | LOW | (c) | kept, noted: healing yourself fully would make her solo-unkillable |
 | Ember Cast magazine 18 and a 15% slow while firing | LOW | (b) | 99f79210: no magazine (99) and no firing slow; `mm LMB: Ember Cast has no magazine ...` |
 | Empowered as +40% range, double wind-back | LOW | (b) | removed: `emp_range`, `emp_refund`, the range bump and the refund branch are gone; Empowered is the idle-pause cue only (`mm LMB: Empowered adds nothing the source doesn't name`) |
-| Pickup ring (cosmetic) | LOW | (b) | 99f79210: removed (the CARRY word and the sound stay) |
+| Pickup ring (cosmetic) | LOW | (b) | 99f79210: removed (the sound stays; the CARRY word is cut) |
 | Self screen shake | MED | (c) | ext/no-shake owns it |
 | Dash -> ability rows | LOW | (c) | left as they are (a separate agent researches presses during a dash) |
 | RMB shape, E, R shape, Bearer, rank 3, dash VFX | ok | (a) | matched in the audit |
@@ -148,7 +148,7 @@ The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main 
 | 6 | Hearthlight cast and thrown look | closed | `cast_e` lantern plus and rising rays (`lk().burst("plus", ...)`), thrown disc `fill` 1.8, amber to teal rim, brighter than the carried ring (`_hearth_node`) |
 | 7 | Cooldowns | closed (data wins) | Burrseed 10.5 s, Hearthlight 11 s, dashes 7 / 14 s: the tooltip data over the blurry card (see the dash table's precedence); "mm RMB: Burrseed 10.5 s", "mm dashes: Elluna's cooldowns". Suggestion only: the footage card reads about 7.2 s for Bound by Fate |
 | 8 | Crook cast swirl | closed | a swirl, flash and sparks at the casting hand per ember (`_dress_ember`, `stats["swirls"]`); "mm LMB: each ember has its comet look, a swirl at the hand and the flick move" |
-| 9 | Ramp readability | closed (footage; ext/meeko-gap9) | the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`), "KINDLED" at 5, and the damage number is yellow (`HudStyle.CRIT`) on an ember into a foe at full Kindle, white before (`TenderKit.number_col`, the `ArchKit.number_col` hook, 2 wiring lines in `Match.on_damage`); `mm passive: the damage number is yellow at the plateau ...`. Numbers: see the table below |
+| 9 | Ramp readability | closed (footage; ext/meeko-gap9) | the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`), at 5 stacks, and the damage number is yellow (`HudStyle.CRIT`) on an ember into a foe at full Kindle, white before (`TenderKit.number_col`, the `ArchKit.number_col` hook, 2 wiring lines in `Match.on_damage`); `mm passive: the damage number is yellow at the plateau ...`. Numbers: see the table below |
 | 10 | Dash direction | closed | `on_dash` steers by `h.roll_dir` (movement); "mm Shift: Relay Step goes where you move" |
 | 11 | Sound | n/a | no audio in the footage |
 
@@ -176,7 +176,7 @@ Where the footage and the wiki are silent, this is the most likely behaviour, an
 - **Hearth Call and the bond:** a completed tether counts as a "hit" for `KinBond.from_ult` (with the cast's `HeroUlt.cast_id`), a rescue (a downed teammate stood up) as its top event ("kill"); a broken one pays nothing. The sheet's +0.2 on the teammate's own meter is not built (the amounts are the main session's, in boki_system.json).
 - **Body and movement** (owner study, 23:00): the scale, hitbox and cadence are from the study; the dashes are Elluna's (below).
 - Starts and stops use the shared acceleration (no per-hero change).
-- Kindle readability is a foot glow that warms from violet to ember per stack. Tinting damage numbers by stack (sheet gap 9, optional) is not done: the numbers come from the shared damage path.
+- Kindle readability is the HUD n/5 and "KINDLED" at 5 (the foot glow was cut, ext/vfx-gold-ground-rings). Tinting damage numbers by stack (sheet gap 9, optional) is not done: the numbers come from the shared damage path.
 
 ## Dashes: Elluna's numbers and ours (owner 18:20: "copy Elluna")
 Item 24's "air about 3x the ground" rule is dropped; both dashes copy the source, then the owner's playtest (11-11: "dashes are too fast, the air dash gives too much movement at the end, the ground dash goes a bit too far") slowed both, cut the ground one 12.5% and cut the glide's float-out: the "Ours" columns are below the source on purpose. Her cute moves stay (`mm_skip`, `mm_float`, retimed to the new lengths). Precedence: data, then footage (briefs/hero-ref/mooshmoosh.md section 4; 50 px = 1 m, 1 bh = 1.8 m).
@@ -356,7 +356,7 @@ Suggestions (ours, not built): a bigger RMB hop (taken up by ext/meeko-rmb-verif
 steps/s with longer strides; a quicker fade (0.05 s) on `mm_call` so the 0.1 s thrust lands at full weight.
 
 ## Look and sound
-- Pooled looks (`scripts/arch/kits/care_look.gd`, shaders `care_disc` and `care_glow`, both mixed rather than additive so the colours hold on bright grass): the 0.44 m amber ember comet with a 1.6 m tail and a violet-star impact, the burr orb, the leaf-green Burrseed root field (zone rule: lit rim, inside 0.25 alpha at most; numbers in tender.json `field`), the violet light column and root beams, the lantern plus and rising rays, the warm ring on her and the thrown disc (amber in the middle to teal at a bright rim, with a small caged lantern of light floating over it and drifting motes; no floor plus), the Kindle foot glow, and the dash's ember motes. Nothing is created per shot. Hearth Call's tether (a braid of warm light with two twisting strands) is pooled in `UltLook` (`ult_look.gd`, extends CareLook); its reach ring, pick ring and aim line are AimKit circles and a line. Each heal tick of the tether (0.5 s) two small mint pluses rise off the teammate (`call_plus` in content/vfx/tender.json, HeroVfx `plus` particles, so other players see them too), the footage's green plus sparkles on the ally [F 0249-0271].
+- Pooled looks (`scripts/arch/kits/care_look.gd`, shaders `care_disc` and `care_glow`, both mixed rather than additive so the colours hold on bright grass): the 0.44 m amber ember comet with a 1.6 m tail and a violet-star impact, the burr orb, the leaf-green Burrseed root field (zone rule: lit rim, inside 0.25 alpha at most; numbers in tender.json `field`), the violet light column and root beams, the lantern plus and rising rays, the leaf-green ring on her and the thrown disc (a bright rim, with a small caged lantern of light floating over it and drifting motes; no floor plus), and the dash's ember motes. Nothing is created per shot. Hearth Call's tether (a braid of warm light with two twisting strands) is pooled in `UltLook` (`ult_look.gd`, extends CareLook); its reach ring, pick ring and aim line are AimKit circles and a line.
 - Loudness (owner review item 23): the Hearthlight's closing chime plays at -8 dB, and the generic explosion sounds (`boom`, `ab_blast`, `ab_slam`: Boki bursts and riders, area hits) sit 7 dB under the rest of the mix (`Sfx.BLAST_DB`), so their peak stays under -6 dBFS (`Sfx.BLAST_PEAK_DB`, "audio: the explosion category peaks under the agreed level").
 - No weapon: an ember glow cupped in each palm; a small satchel and bedroll low on her back, and a long ember-tipped tail (`hero_gear_care.gd`). The character is due an original redesign; this pass only removed the tall pack-frame and the lantern above her head.
 - Sounds (`tools/gen_sfx_pip.py`, set `content/sfx/tender.json`, docs/AUDIO.md; light, warm and cute, never fiery): the
@@ -388,12 +388,12 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 | Burrseed burst, 2 s build | disc r 2.2 m filling under the foe while in her reach, a vine from her (4.4 m at rank 3) | burst 2.2 m (x2 at rank 3), `burst_radius()` | everyone | disc under the foe | ok, asserted |
 | Burst flare | flare r = burst radius | burst radius | everyone | grows to 1.8 body heights | fixed: was 1.5x radius. The source flare is wider than its root disc, so the hit radius wins |
 | Hearthlight (E) | disc r 2.6 m (2.9 m on a toss) | heal zone 2.6 m | everyone | lantern ring | ok, asserted |
-| Hearth Call (X) range | dashed ring r 12.6 m round her | pick range 12.6 m | her screen / everyone while linked | range ring | a range marker, not an area; ok |
+| Hearth Call (X) range | dashed ring r 12.6 m round her, her own green | pick range 12.6 m | her screen / everyone while linked | range ring | a range marker, not an area; ok |
 | Hearth Call pick | ring r 0.7-0.8 m on the teammate and a line | the chosen target | her screen / everyone | ring + line | a marker, kept |
-| Hearth Call arrival | heal word + ring pulse | single heal | everyone | - | fixed: removed the 2.4 m and 1.0 m rings and a 1.8 m flare (a heal marks no area) |
+| Hearth Call arrival | heal number + ring pulse | single heal | everyone | - | fixed: removed the 2.4 m and 1.0 m rings and a 1.8 m flare (a heal marks no area) |
 | Relay Step (dash) | none | none | - | none | ok |
 
-Suggestion (not built): the wind-up flare could be dropped too if the owner wants the wind-up to show only the lane.
+Ring table with what was cut and recoloured: docs/VFX_QUALITY.md (Meeko and Albert ground rings).
 
 ## Engine notes
 - Kit: `scripts/arch/kits/tender_kit.gd`, with helpers in `care_util.gd`. Data: `content/archetypes/tender.json`, `content/weapons/lantern_crook.json`.

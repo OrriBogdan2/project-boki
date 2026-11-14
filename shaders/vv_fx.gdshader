@@ -1,9 +1,8 @@
 shader_type spatial;
-// Sparkle's own effects (scripts/arch/kits/vv_fx.gd), one shader with a mode per look.
+// Vex's and Sparkle's leftover effects (scripts/arch/kits/vv_fx.gd), one shader with a mode per look.
 // `life` runs 0 -> 1 over the effect; `color` is the body, `color2` the hot core / accent, `color3` an
 // optional edge colour (its alpha says how much). Each mode writes a BODY, alpha-blended so it keeps its
 // colour and darkness on bright grass, and a GLOW added on top for the hot cores and sparks only.
-//   0 ARC     a ribbon along UV.x (0 head, 1 tail): a jagged lightning core that re-strikes, a tinted halo
 //   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
 //   2 RING    a flat quad: a cel shockwave ring with radial spark needles (arrival bursts, shock rings)
 //   3 DISC    a flat quad: a lit jagged crackling rim at 0.9, a soft dark falloff in from it down to `fill_a` at
@@ -46,17 +45,7 @@ void fragment() {
 	vec3 body = color.rgb;
 	float body_a = 0.0;
 	vec3 glow = vec3(0.0);
-	if (mode == 0) {
-		// jagged: the core's offset across the ribbon jumps every 1/18 s, with two octaves of zigzag
-		float t = floor(TIME * 18.0);
-		float zig = (vnoise(uv.x * 7.0 + t * 3.1) - 0.5) * 0.55 + (vnoise(uv.x * 23.0 + t * 7.7) - 0.5) * 0.25;
-		float d = abs(uv.y - 0.5 - zig * (0.3 + 0.7 * smoothstep(0.0, 0.25, uv.x)));
-		float core = 1.0 - smoothstep(0.03, 0.09, d);
-		float halo = 1.0 - smoothstep(0.06, 0.4, d);
-		float tail = 1.0 - smoothstep(0.55, 1.0, uv.x);
-		body_a = halo * 0.8 * tail;
-		glow = color2.rgb * core * 1.4 * tail;
-	} else if (mode == 1) {
+	if (mode == 1) {
 		float rim = pow(1.0 - abs(uv.x * 2.0 - 1.0), 0.6);
 		float bands = 0.65 + 0.35 * sin(uv.y * 26.0 - TIME * 14.0);
 		float ends = smoothstep(0.0, 0.08, uv.y) * (1.0 - smoothstep(0.75, 1.0, uv.y));

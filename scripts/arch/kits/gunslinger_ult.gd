@@ -58,7 +58,7 @@ func cast() -> bool:
 	kit.play("gunslinger_x")
 	kit.commit_end = float(kit.m.time) + COMMIT
 	# the countdown disc shows at once (_fall_tick); the shot leaves the raised barrel on the clip's kick (_fire)
-	kit.m.sfx("vn_nuke_fall", at, -2.0)
+	kit.m.sfx("vn_nuke_fall", at, -2.0)       # the whistle runs the whole fall, from the tap
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
 	return true
 

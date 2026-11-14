@@ -19,10 +19,11 @@ const LIME := Color("b8f03c")        # palette "main", her signature (Arch.color
 const HOT := Color("eaffa8")         # palette "hot"
 const DEEP := Color("4f8a12")        # palette "deep"
 const BRONZE := Color("b9732f")      # the Burr Charge's metal shell (a material, not an effect)
+const DUD_DUST := Color("6b4a2e")    # a dud Burr Charge's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")   # palette "daze": the Daze's own colour, so its bonus is not a plain crit
+const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
-const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const BURR_SAMPLE := 0.25            # m between the ground reads along the charge's flight (a tile is 1 m)
 const BURR_RIDE := 0.25              # m: the least height the charge keeps over the ground, so it rides up slopes
 const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
@@ -64,12 +65,10 @@ var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
-var hero_col: Color            # her signature lime (content "color"): the rifle rounds' body and muzzle star
 var commit_end := 0.0          # match time her committed recovery ends (E after the beam, X from the tap)
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
-	hero_col = Arch.color(id)
 
 ## The world direction that reads as up the screen, so a word rides above a head.
 func screen_up() -> Vector3:
@@ -588,7 +587,7 @@ func _dud(b: Dictionary, at: Vector3) -> void:
 	var n: Node3D = b["node"]
 	if is_instance_valid(n):
 		n.visible = false
-	m.fx.dust(at, 5)
+	m.fx.burst(at, DUD_DUST, 5, 1.5, 0.35, 2.0, 0.6)
 	m.sfx("gunslinger_grenade_thunk", at, -9.0, 0.6)
 
 func _detonate(b: Dictionary) -> void:
