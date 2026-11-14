@@ -465,7 +465,7 @@ func _start(o: Dictionary) -> void:
 		duel = Duel.new()
 		duel.setup(self)
 		duel.attach_keys()
-		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
+		hud.toast(duel.intro(), Color("f3eee2"))
 	if opts.get("duo_tut", false):
 		duo = DuoTutorial.new(self)
 	elif player and duel == null and not opts.get("tutorial", false) \
@@ -1114,7 +1114,7 @@ func _spawn_breakables() -> void:
 				q2.y = world.ground_at(q2.x, q2.z)
 				spawn_gear(gid, 2, q2)
 				break
-		# the way into the duel room: a glowing pad next to where you start
+		# the duel ring: a glowing pad next to where you start (scripts/match/duel_ring.gd)
 		if not opts.get("duel", false):
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
 				var dq: Vector3 = player.pos + off
@@ -1122,11 +1122,12 @@ func _spawn_breakables() -> void:
 					continue
 				dq.y = world.ground_at(dq.x, dq.z)
 				duel_pad = dq
+				duel_hint = DuelRingHint.make(self)
 				var pad := Models.jump_pad(Color("ff8a7a"))
 				pad.position = dq
 				add_child(pad)
 				var lbl := Label3D.new()
-				lbl.text = "DUEL ROOM\n%s to enter" % Settings.key_cap("interact")
+				lbl.text = "DUEL RING\n%s to fight" % Settings.key_cap("interact")
 				lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 				lbl.modulate = Color("ffb0a0"); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
 				# drawn after every other see-through thing (pad glow, pickup beams), so nothing covers it
@@ -2098,12 +2099,7 @@ func on_fell(e: Ent) -> void:
 		fx.burst(e.pos + Vector3(0, 0.8, 0), Color(0.92, 0.94, 1.0, 0.8), 18, 4.0, 0.6, -1.0, 1.2)
 		if e == player and hud:
 			hud.flash(Color(0.05, 0.04, 0.12), 0.6)
-		if duel and e == duel.bot:
-			# knocked off the island in the duel room: that's a knock, then a fresh round
-			duel.stats["knocks"] = int(duel.stats["knocks"]) + 1
-			duel.round_n += 1
-			hud.toast("Off the edge! Round to you", Color("8fe3c8"))
-			duel.reset()
+		if duel and duel.on_fell(e):
 			return
 		if e == player and S_dev_god():
 			var back: Vector3 = tut.respawn() if tut else e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
@@ -4421,6 +4417,7 @@ var train := {}
 var train_t := 0.0
 
 var duel_pad := Vector3.INF
+var duel_hint: DuelRingHint = null      # the first-visit hint (null when this save has had it)
 
 ## The Demo match's landing grace: for the first fresh_t seconds after you land (Bot.fresh), until you
 ## hurt something yourself, nothing targets you (bots, even ones your Boki picked a fight with, and
@@ -4447,16 +4444,18 @@ static func arena_opts(arch_id := "") -> Dictionary:
 		o["arch"] = arch_id; o["cls"] = Arch.weight(arch_id); o["weapon"] = Arch.signature(arch_id)
 	return o
 
-## The training pad that takes you to the duel room.
+## The duel room the duel ring's Fight a bot opens; the lobby's duel line adds its "net" roster.
 static func duel_opts() -> Dictionary:
 	return {"training": true, "duel": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 5151, "no_drop": true}
 
 func _update_training(dt: float) -> void:
 	if player == null:
 		return
+	if duel_hint and not duel_hint.tick():
+		duel_hint = null
 	if duel_pad != Vector3.INF and player.flat_dist(duel_pad) < 1.3 and not player.downed:
 		if Input.is_action_just_pressed("interact") and not paused:
-			Game.start_match(duel_opts())
+			DuelRing.open(self)
 			return
 	train_t += dt
 	if player.downed and train_t > 2.0:
