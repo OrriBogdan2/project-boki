@@ -44,6 +44,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `channel_bar.gd` (`ChannelBar`, drawn by `hud_panels.gd` right after `HudVitals`) | an ally's Meeko is channelling Hearth Call on you: a slim gold bar with her portrait under your vitals, draining over the 5 s, gone the frame it ends or breaks (she is knocked, stunned or out of reach). Her game reads her kit; every other game reads the target nid and seconds left from the hunter row's tail (`HunterNet`, Net 0.24.7). Checks: `--hudref-check`, `--displace-net-check` (online row) |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `self_cc_line.gd` (`SelfCcLine`) | crowd control on you: one line under your vitals (after the resource bar), each effect's word and a bar shrinking over its time in the plate's colour for it, worst first by the CC lockouts order (stun, Daze, root, Ground, Slow); the bar's full length is the longest time seen while it lasts. Check: `--clarity-check` section 5; shot: `--hudref-demo=busy` |
+| `knock_feed.gd` (`KnockFeed`, drawn by `hud_panels.gd` from `Match.feed`) | the kill feed, its own lane at the top right under the counters: a knock row is the knocker's name and face, the icon of the ability that landed it (the slot icon on the knocker's own bar, the weapon's for a plain hit, the Boki's ability; `knock` with nobody to credit), the knocked Hunter's face and name, a squad-colour bar at each end, and an outline in your side's colour when your squad is in it; other lines stay text plates. Up to 4 rows, 5 s each then a 0.5 s fade, none wider than 300 px (long names cut, long lines wrapped). Faces are the painted portraits, cut on a worker. Checks: `--knock-feed-check`, `--knock-feed-shots` (shots: `docs/shots/ui-knock-feed/`) |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:
@@ -128,6 +129,8 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 | Message lane (`toast`, `toast_small`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
 | Alive counter (`AliveCounter`) | top right, 78x44 px per counter, 26 px numbers | always | squad icon + squads left, person icon + players left (solos: players only); your kills / knocks / gems in a quieter row under it. Counts only, never names. The Ways Out strip no longer repeats squads left |
 | Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
+| Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
+| Kill feed (`KnockFeed`) | top right, its own lane under the counters, rows at most 300 px | 5 s and a 0.5 s fade, 4 rows | edge-anchored; knocks read as faces and an icon, not sentences |
 | Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
 | Level-up | was a lane line top centre (3.2 s) and a gold full-screen wash on even levels | was 3.2 s | **one moment, by you:** the chime, a gold column over your hero (0.8 s), a card over the vitals naming what improved (2.6 s); no lane line, no wash (`--level-hud-check`) |
 | Kill / knock flashes (`Juice.kill`, you knocked) | full screen, 14-30% | 0.2-0.3 s | unchanged: brief, and about you |
@@ -145,10 +148,11 @@ fight" (`Hud.in_fight`) is the player hit, or landing a hit, in the last `Hud.MS
 - The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
   the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
   margin (4% of the height) for the countdown banner.
-- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
-  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
+- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, a full kill feed
+  of knock rows and lines, and toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
   2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
-  --shots-dir=<dir>` takes the same screens with a real renderer.
+  --shots-dir=<dir>` takes the same screens with a real renderer. `--knock-feed-check` holds the kill feed's lane
+  to the same rule at the five sizes with its longest rows and the two widest message cards up.
 - The Ways Out widgets are checked the same way (`SafeArea.note_as` tags the ones drawn outside the panel pass), in
   nine states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
   uplink far off (edge marker), your squad on a quest (the quest tracker under the strip), the last way out (alive,

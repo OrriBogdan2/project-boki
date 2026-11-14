@@ -51,7 +51,7 @@ func _draw_panels() -> void:
 			hud._draw_boss_bar(sz, p)        # (these two push the feed down: before it)
 			hud._draw_lair_victory(sz, p)
 		SafeArea.begin("feed")
-		hud._draw_feed(sz)
+		KnockFeed.draw(hud, sz)
 		SafeArea.begin("minimap")
 		hud._draw_minimap(sz)
 		if p and not p.out and not p.extracted:
