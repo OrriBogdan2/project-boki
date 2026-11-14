@@ -611,6 +611,10 @@ func _exit_trial(frame: int, key: String) -> Dictionary:
 	seen["phase"] = String(U.st.get("phase", ""))
 	var y0 := P.pos.y
 	var d0 := P.dashes
+	# (the cleave's own lunge is the last dash TurnCost remembers: a dash turned square across it within 0.3 s
+	# starts slower, a rule of its own (--turn-cost-check). This trial asks only whether the recovery's walk
+	# cap leaks into the dash, so the dash starts clean.)
+	P.turn_cost.last_v = Vector2.ZERO
 	for i in TRACE:
 		var from := P.pos
 		P.inp[key] = key != "" and i == 0

@@ -387,6 +387,7 @@ func _archer_combos() -> void:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
 	P.reload_t = 0.0
+	aim_at(P, T.pos)     # (the 15-damage tap lands at the cursor, and the pin has carried him on from where it was last aimed)
 	for i in 6:          # a deliberate tap, past the bow's draw_min (a 20 Hz click looses nothing)
 		P.inp["fire"] = true
 		m.step(DT)
