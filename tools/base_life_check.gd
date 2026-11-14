@@ -6,28 +6,31 @@ extends RefCounted
 ## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map; the sleepers
 ## breathe and yawn (BokiNapSfx, _nap_sounds). Never touches the real save.
 
-const SIM_SECS := 600.0      # 10 simulated minutes
-const DT := 0.25             # s per farm step (the machines tick at 10 Hz inside it)
-const NIGHT_AT := 480.0      # s: the last two minutes are night
-const ARRIVE_AT := 20.0      # s: the fourth Boki comes out
-const LONGEST := 90.0        # s: no state but Nap may last longer
-const LET_GO_MS := 1500      # ms of real time a woken Boki's breathing loop may take to stop
+const SIM_SECS := 600.0  # 10 simulated minutes
+const DT := 0.25  # s per farm step (the machines tick at 10 Hz inside it)
+const NIGHT_AT := 480.0  # s: the last two minutes are night
+const ARRIVE_AT := 20.0  # s: the fourth Boki comes out
+const LONGEST := 90.0  # s: no state but Nap may last longer
+const LET_GO_MS := 1500  # ms of real time a woken Boki's breathing loop may take to stop
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("BASELIFE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _new_save() -> Array:
 	var d := Save.fresh()
 	var recs: Array = []
-	var hot := 0.95       # temper of the two that squabble
+	var hot := 0.95  # temper of the two that squabble
 	var calm := 0.1
-	var specs := [["cindle", "Ash", hot], ["basaltoad", "Crag", hot],
-		["burrlet", "Moss", calm], ["zapple", "Pip", calm]]
+	var specs := [
+		["cindle", "Ash", hot], ["basaltoad", "Crag", hot], ["burrlet", "Moss", calm], ["zapple", "Pip", calm]
+	]
 	for spec in specs:
 		var rec := Save.new_kin(spec[0], spec[1])
 		rec["traits"]["temper"] = spec[2]
@@ -35,15 +38,17 @@ func _new_save() -> Array:
 	recs[0]["starter"] = true
 	d["roster"] = recs.slice(0, 3)
 	d["active"] = recs[0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}  # no base tutorial (Lead)
 	Save.d = d
 	HomeLayout.ensure(d)
 	return recs
+
 
 func _gather(home, at: Vector3) -> void:
 	for k in home.kins:
 		k["pos"] = home.world.free_spot_near(at + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
+
 
 ## Two friends, the more outgoing one first: who starts, the cap, a swap, the 6-10 s length, the walkable ground
 ## all through, and both lying down side by side at the end. The other two Boki are parked asleep.
@@ -51,7 +56,7 @@ func _chase_rows(home, center: Vector3) -> void:
 	var rules: Dictionary = BaseChase.rules()
 	var life: BaseLife = home.life
 	home.day_t = 0.4
-	life.night = false      # the 10 minutes ended at night; the next tick would set it again
+	life.night = false  # the 10 minutes ended at night; the next tick would set it again
 	for k in home.kins:
 		k["nap_t"] = 0.0
 		life.machine(k).go(BaseLife.S.ROAM, "test")
@@ -65,15 +70,21 @@ func _chase_rows(home, center: Vector3) -> void:
 	BaseLife.add_bond(a["rec"], b["rec"], 2.0)
 	BaseLife.add_bond(c["rec"], d["rec"], 2.0)
 	_gather(home, center)
-	ok(BaseChase.pick(life, b, [a]).is_empty() and is_same(BaseChase.pick(life, a, [b]), b),
-		"friends: the more outgoing one (social 0.4 over 0.1) is the one that starts")
+	ok(
+		BaseChase.pick(life, b, [a]).is_empty() and is_same(BaseChase.pick(life, a, [b]), b),
+		"friends: the more outgoing one (social 0.4 over 0.1) is the one that starts"
+	)
 	var began := BaseChase.begin(life, a, b)
-	ok(began and a.has("life_it") and not b.has("life_it") and life.machine(b).is_in(BaseLife.S.PLAY_WITH),
-		"start: both friends are in PlayWith and the starter is the chaser")
+	ok(
+		began and a.has("life_it") and not b.has("life_it") and life.machine(b).is_in(BaseLife.S.PLAY_WITH),
+		"start: both friends are in PlayWith and the starter is the chaser"
+	)
 	var secs := float(a["life_for"])
 	ok(secs >= rules["secs"][0] and secs <= rules["secs"][1], "start: the chase is %.1f s (6 to 10)" % secs)
-	ok(BaseChase.pick(life, c, [d]).is_empty() and BaseChase.running(life) == 1,
-		"cap: a second pair in the zone does not start while one chase runs")
+	ok(
+		BaseChase.pick(life, c, [d]).is_empty() and BaseChase.running(life) == 1,
+		"cap: a second pair in the zone does not start while one chase runs"
+	)
 	var swaps := 0
 	var dry := true
 	var t := 0.0
@@ -92,8 +103,10 @@ func _chase_rows(home, center: Vector3) -> void:
 	ok(swaps >= 1, "swap: the tag landed and the roles swapped (%d swaps)" % swaps)
 	ok(dry, "nav: both stayed on the zone's ground, out of deep water")
 	ok(ended_at > 0.0 and absf(ended_at - secs) <= 1.0, "end: it stopped at %.1f s of the %.1f s" % [ended_at, secs])
-	ok(life.machine(a).is_in(BaseLife.S.NAP) and life.machine(b).is_in(BaseLife.S.NAP) and BaseLife._dist(a, b) < 2.5,
-		"end: both are resting together (%.1f m apart)" % BaseLife._dist(a, b))
+	ok(
+		life.machine(a).is_in(BaseLife.S.NAP) and life.machine(b).is_in(BaseLife.S.NAP) and BaseLife._dist(a, b) < 2.5,
+		"end: both are resting together (%.1f m apart)" % BaseLife._dist(a, b)
+	)
 	var marks: bool = a.has("life_chase") or b.has("life_chase") or a.has("tag_pace") or b.has("tag_pace")
 	ok(not marks, "end: the chase marks are gone")
 	var slow := {"stats": {"speed": 0}, "species": "cindle"}
@@ -101,6 +114,7 @@ func _chase_rows(home, center: Vector3) -> void:
 	var p_fast := BaseChase._pace(fast, 1.0)
 	var p_slow := BaseChase._pace(slow, 1.0)
 	ok(p_fast > p_slow, "pace: a higher Speed stat runs faster (%.2f over %.2f)" % [p_fast, p_slow])
+
 
 ## BokiNapSfx: of 30 Boki asleep around you only the nearest few breathe, within the loop's reach; a bigger
 ## Boki breathes lower; the night's sleepers breathe near you, and at dawn they yawn and the woken ones' loops let go.
@@ -111,8 +125,10 @@ func _nap_sounds(home) -> void:
 	var heard := BokiNapSfx.heard(pile, Vector3.ZERO)
 	var reach := float(Sfx.sound_reach.get(BokiNapSfx.LOOP, 0.0))
 	var inside := heard.all(func(k): return Vector2(k["pos"].x, k["pos"].z).length() < reach)
-	ok(heard.size() == BokiNapSfx.MAX_HEARD and inside and is_same(heard[0], pile[0]),
-		"of 30 asleep only the %d nearest breathe, all within %.0f m" % [heard.size(), reach])
+	ok(
+		heard.size() == BokiNapSfx.MAX_HEARD and inside and is_same(heard[0], pile[0]),
+		"of 30 asleep only the %d nearest breathe, all within %.0f m" % [heard.size(), reach]
+	)
 	var by_cm: Array = home.kins.map(func(k): return k["rec"])
 	by_cm.sort_custom(func(a, b): return float(Unique.size_info(a)["cm"]) < float(Unique.size_info(b)["cm"]))
 	var lower := true
@@ -123,8 +139,10 @@ func _nap_sounds(home) -> void:
 	Sfx.listener = sleeper["pos"]
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
-	ok(on.size() >= 1 and on.size() <= BokiNapSfx.MAX_HEARD,
-		"the night's sleepers near you breathe (%d loops)" % on.size())
+	ok(
+		on.size() >= 1 and on.size() <= BokiNapSfx.MAX_HEARD,
+		"the night's sleepers near you breathe (%d loops)" % on.size()
+	)
 	home.day_t = 0.3
 	Sfx.last_played.erase(BokiNapSfx.YAWN)
 	for i in int(10.0 / DT):
@@ -141,11 +159,17 @@ func _nap_sounds(home) -> void:
 		left = _awake_breaths(home)
 	ok(left.is_empty(), "an awake Boki's breath lets go within %d ms (%d still on)" % [LET_GO_MS, left.size()])
 
+
 ## The breathing loops still on for Boki that are awake.
 func _awake_breaths(home) -> Array:
-	var awake: Array = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) <= 0.0) \
-		.map(func(k): return "nap:" + String(k["rec"]["uid"]))
+	var awake: Array = (
+		home
+		. kins
+		. filter(func(k): return float(k.get("nap_t", 0.0)) <= 0.0)
+		. map(func(k): return "nap:" + String(k["rec"]["uid"]))
+	)
 	return Sfx.loops.keys().filter(func(key): return key in awake)
+
 
 func run(m: Node) -> void:
 	main = m
@@ -156,30 +180,33 @@ func run(m: Node) -> void:
 	old["roster"] = [{"uid": "old1", "species": "zapple", "name": "Old", "traits": {}, "trust": 35.0}]
 	var upgraded := Save.migrate(old) and int(old["v"]) == Save.VERSION
 	var bonds = old["roster"][0].get("bonds")
-	ok(upgraded and bonds is Dictionary and (bonds as Dictionary).is_empty(),
-		"a v11 save upgrades and its Boki gain an empty bonds map")
+	ok(
+		upgraded and bonds is Dictionary and (bonds as Dictionary).is_empty(),
+		"a v11 save upgrades and its Boki gain an empty bonds map"
+	)
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
 	var recs := _new_save()
 	var home = await main._hb_home()
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
 	home.day_t = 0.4
-	home.ppos = Vector3(-500, 0, -500)       # you are away: nobody clings to you
+	home.ppos = Vector3(-500, 0, -500)  # you are away: nobody clings to you
 	var center: Vector3 = home.world.random_ground(0)
 	Save.d["layout"]["deco"].append({"id": "toy_ball", "u": 990001, "px": center.x + 3.0, "pz": center.z})
 	ok(home.life.toy_spots().size() == 1, "the placed ball is the one toy the machine knows (HomeToys owns the toys)")
 	_gather(home, center)
-	var longest := {}         # state name -> longest s seen
+	var longest := {}  # state name -> longest s seen
 	var reacted := false
 	var night_frames := 0
 	var day_asleep := 0
 	var pip_awake := 0
 	var refused := 0
-	var chase_max := 0         # most friend chases running at once in the 10 minutes
+	var chase_max := 0  # most friend chases running at once in the 10 minutes
 	var t := 0.0
 	while t < SIM_SECS:
 		if t < ARRIVE_AT and t + DT >= ARRIVE_AT:
-			for kk in home.kins: refused += (kk["life"] as Fsm).refused
+			for kk in home.kins:
+				refused += (kk["life"] as Fsm).refused
 			Save.d["roster"].append(recs[3])
 			home._spawn_kin()
 			_gather(home, center)
@@ -201,7 +228,8 @@ func run(m: Node) -> void:
 				else:
 					day_asleep += 1 if fsm.is_in(BaseLife.S.NAP) else 0
 		night_frames += 1 if t >= NIGHT_AT + 15.0 else 0
-	for k in home.kins: refused += (k["life"] as Fsm).refused
+	for k in home.kins:
+		refused += (k["life"] as Fsm).refused
 	print(home.life.readout())
 	var friends := 0
 	var rivals := 0
@@ -218,14 +246,18 @@ func run(m: Node) -> void:
 	var over: Array = longest.keys().filter(func(s): return float(longest[s]) > LONGEST)
 	ok(over.is_empty(), "no state but Nap lasts over %.0f s (longest %s)" % [LONGEST, longest])
 	ok(reacted, "the fourth Boki's arrival brought the others over to look (React)")
-	ok(day_asleep >= night_frames * 3 * 0.8,
-		"at night the three day Boki nap (%d of %d frames)" % [day_asleep, night_frames * 3])
-	ok(pip_awake >= night_frames * 0.5,
-		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames])
+	ok(
+		day_asleep >= night_frames * 3 * 0.8,
+		"at night the three day Boki nap (%d of %d frames)" % [day_asleep, night_frames * 3]
+	)
+	ok(
+		pip_awake >= night_frames * 0.5,
+		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames]
+	)
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
 	var cap := int(BaseChase.rules()["per_zone"])
 	ok(chase_max <= cap, "never more than %d friend chase at once in the 10 minutes (most %d)" % [cap, chase_max])
-	await _nap_sounds(home)      # before the chase rows: they park and rest Boki their own way
+	await _nap_sounds(home)  # before the chase rows: they park and rest Boki their own way
 	_chase_rows(home, center)
 	rules["base_mode"] = false
 	home.queue_free()
