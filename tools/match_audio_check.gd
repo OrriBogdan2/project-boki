@@ -328,7 +328,7 @@ func _barks(m: Match, P: Hunter) -> void:
 	KinNet.on_event(m, ["kcmd", "down", P.kin.nid, P.pos.x, P.pos.y, P.pos.z, ""])
 	heard = Sfx.last_played.has(bark_of.call(P, "boki"))
 	ok(B.plays.back() == ["boki", P.nid] and heard, "your Boki down: you call it")
-	var voiced := func(x): return x != P and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
+	var voiced := func(x): return x.team != P.team and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
 	var other: Hunter = m.hunters.filter(voiced)[0]
 	var team := other.team
 	var theirs := Kin.new()
