@@ -39,5 +39,11 @@
 		"air": {"ours": "end", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Celeste): no jump shown (tamsin.md:298, :334).", "verdict": "[?]"},
 		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Celeste): no jump shown (tamsin.md:298, :334).", "verdict": "[?]"},
 		"same": {"ours": "both", "carry": 1.0, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Celeste): no jump shown (tamsin.md:298, :334). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:32); no cast from the air in the footage (hero-ref/tamsin.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:33); no cast from the air in the footage (hero-ref/tamsin.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:35); no cast from the air in the footage (hero-ref/tamsin.md)", "verdict": "[?]"},
+		"x": {"h": "zero", "v": "fall", "ours": "sealed in place (a standing cast roots; only a skate carries) and falls", "source": "Footage f25-f55: rooted for the whole ult (rimewright.md, owner items 64/65); data: Invulnerable (supervive_kits.md:36); a cast from the air not shown", "verdict": "h match, v [?]"}
 	}
 }

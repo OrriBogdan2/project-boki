@@ -39,5 +39,11 @@
 		"air": {"ours": "end", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323).", "verdict": "[?]"},
 		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323).", "verdict": "[?]"},
 		"same": {"ours": "cancel", "carry": 0.05, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"air_cast": {
+		"lmb": {"h": "slow", "v": "fall", "source": "Data silent on the air (supervive_kits.md:40); no cast from the air in the footage (hero-ref/linwick.md)", "verdict": "[?]", "ours": "pouring fire slows him after 0.35 s, lmb.slow_after"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:41); no cast from the air in the footage (hero-ref/linwick.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:43); no cast from the air in the footage (hero-ref/linwick.md)", "verdict": "[?]"},
+		"x": {"h": "push", "v": "slow", "ours": "the flight starts at once and holds the jump's height", "source": "Data: fly forward (supervive_kits.md:44); footage: lift-off instant, a low flight over ground; a cast from the air not shown (hero-ref/linwick.md:206, 230, 281)", "verdict": "[?]"}
 	}
 }

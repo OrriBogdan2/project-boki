@@ -31,5 +31,11 @@
 		"air": {"ours": "end", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358).", "verdict": "[?]"},
 		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358).", "verdict": "[?]"},
 		"same": {"ours": "cancel", "carry": 0.04, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Kingpin): no plain jump (dredge.md:315); the air dash not shown (:358). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:56); no cast from the air in the footage (hero-ref/dredge.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "hover", "ours": "the hand flies while his height holds and the jump's speed carries (a standstill drifts at 20%)", "source": "Footage f121-123: keeps moving, body planted (dredge.md 'Reel parity'); the air not shown. Owner playtest 11-10 (ext/dredge-rmb f9b5d2002): a jump back with the hand keeps its speed", "verdict": "owner 11-10"},
+		"e": {"h": "zero", "v": "drop", "ours": "the Anchor Drop drives him straight down", "source": "Data: slam fist down (supervive_kits.md:60); whether it drives him down from the air is not shown (hero-ref/dredge.md:244)", "verdict": "[?]"},
+		"x": {"h": "slow", "v": "fall", "ours": "the charge's 30% walk brakes the jump's speed (the kit steers as on the ground)", "source": "Data: two waves, no move speed (supervive_kits.md:61); footage: cast on the ground only", "verdict": "[?]"}
 	}
 }

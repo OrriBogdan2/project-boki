@@ -39,5 +39,11 @@
 		"air": {"ours": "end", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398).", "verdict": "[?]"},
 		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398).", "verdict": "[?]"},
 		"same": {"ours": "cancel", "carry": 0.03, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Oath): no jump shown (bjorn.md:366, :398). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:88); no cast from the air in the footage (hero-ref/bjorn.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:89); no cast from the air in the footage (hero-ref/bjorn.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:92); no cast from the air in the footage (hero-ref/bjorn.md)", "verdict": "[?]"},
+		"x": {"h": "zero", "v": "fall", "ours": "planted for Faultline: stops and falls", "source": "Data: a fissure from where he stands (supervive_kits.md:93); footage f25-f31: planted, on the ground; the air not shown", "verdict": "[?]"}
 	}
 }
