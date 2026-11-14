@@ -8,10 +8,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, msg: String) -> void:
 	print("IACHECK %s %s" % ["ok  " if cond else "FAIL", msg])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	_sized("gem", Models.gem(), 0.45, 0.75)
@@ -48,11 +50,13 @@ func run(main: Node) -> void:
 	print("IACHECK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _sized(id: String, n: Node3D, lo: float, hi: float) -> void:
 	ok(_textured(n) != null, "%s uses its sculpted model" % id)
 	var y := _aabb(n).size.y
 	ok(y > lo and y < hi, "%s is the primitive's size (%.2f m)" % [id, y])
 	n.free()
+
 
 ## The first mesh under `n` drawn with a textured toon material, or null.
 func _textured(n: Node) -> MeshInstance3D:
@@ -62,12 +66,14 @@ func _textured(n: Node) -> MeshInstance3D:
 				return mi
 	return null
 
+
 func _mats(mi: MeshInstance3D) -> Array:
 	var out: Array = []
 	for si in mi.mesh.get_surface_count():
 		if mi.get_surface_override_material(si):
 			out.append(mi.get_surface_override_material(si))
 	return out
+
 
 func _aabb(n: Node) -> AABB:
 	var b := AABB()
