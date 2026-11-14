@@ -7,7 +7,7 @@ extends "res://tools/cast_predict_check.gd"
 ## frame of the press; letting go of that tap must not send the Boki back.
 ## The cases: standing still, mid-dash, in a cast (Neve's Rime holds the cast pose), in a recast window
 ## (Meeko's Hearthlight, E again throws it) and in hit-stop. Hit-stop is offline only, since online the sim never
-## stops: the press waits out the freeze and must go within the shared buffer (DashFlow.BUFFER_S), not be dropped.
+## stops: the press waits out the freeze and must go within the shared buffer (Loco.buf_ability_hold), not be dropped.
 ## Online is never later than offline. Then G alone (offline): there is no separate summon action; a tap bursts
 ## and the Boki stays out, a tap again sends it back into the wisp, a hold on the wisp bursts and opens the
 ## order wheel without sending it back, a hold while out only opens the wheel, a wisp on cooldown stays one.
@@ -72,7 +72,7 @@ func _give_boki(m: Match) -> void:
 func _row(c: String, off: Array, on: Array) -> String:
 	var ok_: bool = bool(off[1]) and bool(on[1]) and bool(off[2]) and bool(on[2])
 	if c == "hitstop":
-		ok_ = ok_ and off[0] >= 0 and off[0] * DT <= DashFlow.BUFFER_S + 0.001
+		ok_ = ok_ and off[0] >= 0 and off[0] * DT <= Loco.buf_ability_hold + 0.001
 	else:
 		ok_ = ok_ and off[0] == 0 and _not_later(on[0], off[0])
 	return "%s %-8s burst tick off %2s (%3.0f ms) on %2s  in state off %s on %s  stays out off %s on %s  %s" % [tag, c,

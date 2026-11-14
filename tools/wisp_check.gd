@@ -302,7 +302,8 @@ func _boki_wisps() -> void:
 	var p: Hunter = m.player
 	var k: Kin = p.kin
 	var owned: Array = m.kins.filter(func(x: Kin): return x.owner_h != null)
-	var all_wisps: bool = owned.all(func(x: Kin): return x.wisp and x.state == "shoulder")
+	# (a second Boki rides in the satchel, "bench": carry two in, decision 0091)
+	var all_wisps: bool = owned.all(func(x: Kin): return x.state == "bench" or (x.wisp and x.state == "shoulder"))
 	ok(all_wisps and k.model.name == "BokiWisp", "Boki wisps on: every Boki rides as a critter wisp")
 	ok(k.carried() and p.kin_carry_on(), "...carried by order, so its carry passives are on")
 	ok(HunterWisp.node_of(p) == null, "...and it is not a Hunter Wisp (round = Hunter, critter = Boki)")
@@ -364,7 +365,12 @@ func _summon() -> void:
 	k.hurt(k.max_hp * 0.6, null)
 	_frames(0.2)
 	ok(s.left > 0.0 and not k.wisp, "...damage does not end it")
-	p.pos += Vector3(30, 0, 0)
+	var away := Vector3(30, 0, 0)
+	for d in [Vector3(30, 0, 0), Vector3(-30, 0, 0), Vector3(0, 0, 30), Vector3(0, 0, -30)]:
+		if not m.world.is_void(p.pos.x + d.x, p.pos.z + d.z):
+			away = d      # (30 m onto ground: over the abyss the hunter falls out and the Boki goes "away")
+			break
+	p.pos += away
 	p.prev = p.pos
 	_frames(0.1)
 	ok(k.flat_dist(p) < 6.0 and s.out(), "...left 30 m behind it re-blooms beside you")

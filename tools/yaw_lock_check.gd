@@ -29,7 +29,7 @@ const LOCK_DEG := 3.0  # a locked body moves no more than this (rounding, a knoc
 ## Where the rival stands from the Hunter: east (where every slot is aimed at the press) at FOE_DEFAULT m. Dredge's
 ## hand leaves after its 0.2 s coil-back along the aim then (the early sweep's north), and close enough that it
 ## lands before the late window, so his reel is hauling through it.
-const FOE_AT := {"dredge": Vector3(0, 0, -5.0)}
+const FOE_AT := {"dredge": Vector3(0, 0, -6.0)}
 const FOE_DEFAULT := Vector3(5.0, 0, 0)
 const SLOW_GAP := 3.0  # a capped turn: more than locked, no more than deg_s x window plus this
 
