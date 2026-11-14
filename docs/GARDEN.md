@@ -40,6 +40,15 @@ roughly 1.5x the XP above.
 
 `--base-breed-check` plays a fresh base_mode save that never leaves the base through every gate of the Nesting Nook (briefs/design/GARDEN.md 6) and prints the play minutes of each. Measured: hatch 0; friends 6 min (bond 0.52 after a ball and a nap, trust 65); egg ready 10 min after it is laid; a parent can lay again after 20 min. Both Grown takes about 11 h per Boki on farm XP (667 min) and 5.3 h with runs (319 min), ratio 2.09 against `pace.grown_max_ratio` 2.2 (main's halved level curve and once-a-day care XP made both faster but the ratio wider than the first-form `max_ratio` 2.0; the Grown limit is its own number, a default taken, the alternative is to raise garden XP), so the baby comes long after two sessions (`BREED OVER`). Fixed with data: the Nesting Nook and the Training post open from the start and cost gems only (45 and 30; they wanted farm level 3 and wood, fibre and stone that base_mode cannot get). Fixed in code: `NookRules.friends` read the -1..1 bond against 50, so no pair with a recorded bond could ever be friends. Still open: a second Boki and the Grown pace (docs/DEBT.md).
 
+## Expedition loot into the garden
+
+DECISIONS 2026-11-09: the garden and extraction feed each other. Before this no match drop was a garden item (drops were
+gear, treasure, the Rare Egg and Wayseeds). A boss's lair pile now also holds one of the four stat bites (Thumpnut, Shellbark
+Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items.json`. They ride the pack as treasure marked
+`bag` (`Loot.VALUABLES`, `Loot.is_bag_item`, like the Wayseeds), come home into the garden bag (`Econ._store`), and are eaten from
+the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
+"ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
+
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.
