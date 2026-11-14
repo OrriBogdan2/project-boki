@@ -9697,3 +9697,4 @@ READY ext/sfx-ui-controls 1c38dfea88 (bulk-rebase: origin/main merged in mechani
 READY ext/ui-match-phase 5ff431d1c9 (bulk-rebase: origin/main merged in mechanically, was 7f4cbd4df1; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-auto-mixed-1114 05f8d15a919892216bbb6c3688bf021b9debfa5b (merge-auto bundle 1/2: 18 auto-resolved vfx/ui/home/Boki/docs branches; GATE GREEN on main 296093c47d, NEW-RED 0, export 445 MB; PR body gh-outbox/new-pr.md)
 READY ext/merge-auto-hunters-1114 bf779836c4734fa6eac61cc7d481cb9d6c38b124 (merge-auto bundle 2/2: 5 hunter kit/parity branches; GATE GREEN on main 296093c47d, NEW-RED 0, export 445 MB; open after bundle 1 merges; gh-outbox/new-pr-2-hunters.md)
+READY ext/fix-audio-settings 02e69416c29b8b84ce1f162bf1329c8b368b3c38 (PR #51 merged with origin/main: volume curve now covers Voices/UI sliders, SLIDER_ALSO dropped; audio-settings 113/0, match-audio x5 green, health OK)
