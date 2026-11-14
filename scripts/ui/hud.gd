@@ -316,7 +316,7 @@ func _draw_all() -> void:
 		elif not map_open() and p.rocket == null:
 			_draw_ship_prompt(sz)
 		if (p.dropping or p.rocket != null) and not map_open():
-			_draw_drop_prompt(sz, p)
+			DropHud.draw(self, sz, p)
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
 		if not p.riding:
@@ -1577,20 +1577,6 @@ func _key_row(center: Vector2, keys: Array) -> void:
 		_ctext(kr.get_center() + Vector2(0, 5), pt[0], 13, INK, big)
 		_text(Vector2(kr.end.x + 6, center.y + 5), pt[2], 13, INK)
 		x = kr.end.x + 6 + float(pt[3]) + 22.0
-
-## On the way down: who steers the rocket, and what you can do.
-func _draw_drop_prompt(sz: Vector2, p: Hunter) -> void:
-	var y := 96.0
-	if p.rocket != null:
-		var l: Hunter = m.skydrop.leader(p.team)
-		var mine := l == null or l == p
-		var line := "Steering the rocket" if mine else "%s steers the rocket" % l.pname
-		_ctext(Vector2(sz.x * 0.5, y), line, 18, GOLD, big)
-		var keys: Array = [["jump", "Jump out"]]
-		if mine and p.rocket.riders.size() > 1: keys.append(["pass_lead", "Pass lead"])
-		_key_row(Vector2(sz.x * 0.5, y + 24), keys)
-	elif p.diving:
-		_key_row(Vector2(sz.x * 0.5, y + 24), [["jump", "Open glider"]])
 
 ## Squad pings out in the world: a marker over each with how far it is.
 func _draw_squad_pings(p: Hunter) -> void:
