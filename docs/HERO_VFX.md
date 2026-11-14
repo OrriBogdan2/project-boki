@@ -48,6 +48,7 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
 | `fist` | a translucent cel-shaded fist (a closed-fist mesh, knuckles down) falling onto the ground: it drops over `fall` of its `life` (a share, or an option), rests, then fades | `size` width, `drop` m it falls from, `fall`, `fwd`, `pitch` (deg, negative tips the wrist back so the knuckles face a top-down camera); `cut` (any surface): it goes if its hunter is stunned or downed before that share of its life |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` / `plus` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops, upright healing crosses | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
+| `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` / `splinter` / `sherd` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops, wood splinters (`c2` the split edge), clay sherds (`c2` the raw broken edge) | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
@@ -127,3 +128,10 @@ at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.
 `s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
 the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
 exactly that size and measures its own look, the core and the rim in pixels across the flight line.
+## Ultimate ready glow
+`UltGlow` (scripts/match/ult_glow.gd): a Hunter whose ultimate (X) is unlocked and off cooldown carries a quiet rim glow in
+their archetype colour (`Arch.color`), visible to everyone; on the cast it flashes to full and fades in ~0.3 s, on top of the
+existing cast cue. One shader value, `hero_toon.gdshader`'s `ult_glow` (+ `ult_color` set with it), written to the body's
+materials only when it changes. The ready state rides the "st" hunter flags (`UltGlow.READY_BIT`, bit 19; older clients ignore
+it); the flash on other clients is the flag dropping. Not shown while downed, out or merged. `--ult-glow-check`; stills with
+`--ult-glow-shots --shots-dir=<dir>`.

@@ -304,7 +304,7 @@ func _start(o: Dictionary) -> void:
 	_build_env()
 	music_dir = MusicDir.new()
 	music_dir.start(self)
-	Sfx.play_ambience("match")
+	Sfx.play_ambience("" if o.get("training", false) else "match")     # the grounds have their own beds (TrainingSfx)
 	world = World.new()
 	world.name = "World"
 	world.biome = T["biome"].duplicate()
@@ -2165,11 +2165,13 @@ func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
+	var top := KillCues.top_team(mb)
 	if net_on:
-		net_event(["mobdead", mb.nid, by.nid if by else ""])
+		net_event(["mobdead", mb.nid, by.nid if by else "", top])
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	KillCues.on_kill(self, mb, credit, top)
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
@@ -5088,6 +5090,7 @@ func _flags(h: Hunter) -> int:
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
 	if h.gliding: f |= GliderHeat.net_level(h) << 20      # the glider's heat, 4 bits (20-23), and whether it burns (24)
 	if GliderHeat.burning(h): f |= 1 << 24
+	if UltGlow.kit_ready(h): f |= UltGlow.READY_BIT
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
@@ -5249,6 +5252,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
 			h.glide_fuel = GliderHeat.fuel_of((f >> 20) & 15) if h.gliding else 1.0
 			h.below_lip = f & (1 << 24) != 0
+			h.ult_ready = f & UltGlow.READY_BIT != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
 			h.net_cc = (f >> StatusLooks.FLAG_SHIFT) & 7
@@ -5465,6 +5469,7 @@ func _net_ev(x, from: String) -> void:
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				MobSfx.death(self, who as Mob, false)
+				KillCues.on_kill(self, who, ents_by_id.get(String(x[2]), null), int(x[3]) if x.size() > 3 else -1)
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
