@@ -161,7 +161,7 @@ Other checks:
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
   - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
-  - Over the top with no jump: a small pop (3.2 m/s), carried toward your keys.
+  - Over the top with no jump: a small pop (`LRISE_POP` 2.6 m/s), carried toward your keys.
   - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you to 0.9m over the top at 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (just over the top, at run speed).
   - Never grabs you: walking, jumping along a wall, glancing it, or standing next to it with no keys. Gliding past a lip doesn't grab you either unless you steer into it.
   - Home uses the same rise (`Home._ledge_float`).
@@ -260,7 +260,7 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Fall cap** 10 → 12 m/s, easing to 10 m/s from 1m to 16.5m under the lip. **Point of no return** 13 → 17.5m under the lip: about 1.9s of falling to save yourself (was ~1.4s).
 - **Air control** (`Loco.air_step`, owner 11-08: the data's low AirControl is overruled): WASD adds 32 m/s^2 onto what you carry, 2.5x that against your drift (a 5 m/s backward drift turns forward in ~0.07 s), never past your run speed along the keys; speed above it (dash, knock) bleeds at 2/s. The farm uses the same step. Numbers in content/rules/tuning.json `air`.
 - **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s. The drop never becomes speed (owner 11-08 item 8).
-- **Mantle**: topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s). The no-jump pop is 2.6 m/s (was 3.2; lower gravity floated it twice as long).
+- **Mantle**: over the lip you keep max(0.6x the speed you came in with, 3.5 m/s), held 0.75 s in the air (`MantleCarry`, item 185b; `physics.mantle_launch_*`). The no-jump pop is 2.6 m/s (was 3.2; lower gravity floated it twice as long). Timing and reach per ledge height: "Ledge mantle timing" below.
 - **Holding Space never opens the glider** (owner 11-08, said twice). With a player's keys (`inp.glide_press_only`, set in `Match`) the glider opens only from a fresh press in the air: a second Space press (`Hunter.do_jump`) or the glide button's press, or a pad/updraft auto-glide. Opening the glider uses the press up (owner 11-09): once it folds (a heal, a dash, a knock, a kit's wind-down) it stays shut while Space is still held, until a new press. A press while a move or cast keeps the glider shut (`_glide_armed`) opens it as the move ends, if still held; letting go or landing clears it. Space held from the jump, or while LMB/RMB/abilities are held (Kael's RMB, Lace's and Albert's LMB; Albert's perfect launch no longer opens it by itself off a drop), never opens it. Every Hunter's air Shift takes a press during or after it, except Sparkle's wire (her keys do nothing while it holds). Scripted input (bots, checks, demos) keeps the old hold-to-open (`GLIDE_ENGAGE`). Home islands follow the same rule. Measured by `--glide-hold-check`. The earlier tap/hold split only added the second-press route next to the hold route and then shortened the hold wait (0.15 -> 0.1 s), so it never went away.
 - **Glider at any heat, softer deep lift** (owner item 63): the glide input opens the glider at every heat, overheated or not (no heat floor, no lockout after an overheated one closes); overheated it burns you and lifts at half strength. The deepest lift is 30% softer (climb cap 26 -> 18.2 m/s; speed per metre of depth 1.7 -> 1.1) at the same heat cost. Measured by `--glider-heat-check`.
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
@@ -307,6 +307,30 @@ Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6
 - **Fixed (gliding, decision 0055, stacked):** a knock carries an open glider instead of folding it for 0.4 s.
 - **Matches, not changed:** a stun shuts the glider and a fresh press opens it the step the stun ends (0.5 s stun: 0.53 s with the press). A shut glider waits out a shove over 4 m/s for 0.4 s ([est], kept: `--abyss-check` asserts it at the rim). A lighter knock (Lace and Vex, 2.6-3.1 m/s) keeps it shut for its 0.16-0.2 s slide. A nudge under 2.5 m/s (Kael and Albert, LMB) is not a knock: it neither ends a dash nor holds the glider.
 - **Not changed:** Kael's 0.57 s reopen after an air Rampage is AirLimits (the glider stays shut while his kit move runs, items 162). Ground dashes and kit rushes (move kind "rush") still ride through a knock: not asked here, not measured. An overheated glider still lifts you out of the abyss at half strength (`--glider-heat-check`).
+
+## Ledge mantle timing (`--move-feel-check` ledge rows)
+
+Settled against the source, PARITY FIRST (briefs/DECISIONS.md 2026-11-07): briefs/supervive-data/MANTLE_185b.md, supervive_physics.md and the owner's clips. [?] marks what neither the data nor the footage settles; nothing there is guessed.
+
+| Question | Source | Ours | Status |
+|---|---|---|---|
+| How long a climb takes | [footage] owner_mantle_clip 18.3 to 18.5 s (dash in from the abyss) and sv_joule_1v4 9.20 to 9.27 s (glide onto a low rim): rim to standing in ~0.1 to 0.2 s, no pause, no pose. [game data] MantleSuctionUpwardsForceZSpeedCap 2.5 m/s caps the suction's lift, not the pull-up: MantleZImpulseMin/Max and MantleLaunchDelay are C++ defaults the data doesn't store, so the rise per metre is [?] | the rise is the suction (`HunterMove.rise_vy`: gravity plus 175 m/s^2 while you rise slower than the 2.5 m/s cap), so a jump's momentum carries you over; catch to top 0.28 s (1.6 m) and 0.30 s (2.4 m) from a running jump, 0.18 s from a glide at every height | near the footage's ~0.2 s from a glide, jump-paced from a jump; the per-height curve is [?] in the data |
+| Highest rise from a walk | [game data] stores no MaxStepHeight for the hero (a C++ default) [?]; the 1.5 m bot nav step is the pathing agent, not the walk; bCanWalkOffLedges false only says you don't stroll off. No walk-up in the footage | one terrace (0.8 m) is a ramp (LAYOUT_RULES); 1.6 m and up never climb from a walk (`Hunter._try_ledge_grab`: walking into a wall doesn't climb it, jump and you mantle at the top) | source [?]; ours kept |
+| Highest rise from a jump | [game data] JumpZVelocity 7.5 m/s (apex 1.91 m) plus MantleSuctionUpwardsForceHeightMax 1.5 m: about 3.4 m | `JUMP_V` 6.8 (apex ~1.5 m) plus `MANTLE_REACH` 1.5: 1.6 and 2.4 m top, 3.2 m (four terraces, the wall tier) never; `--cliff-mantle-check` asserts the four-terrace miss | deliberately lower (the jump decision in the Physics pass; LAYOUT_RULES' wall tier) |
+| Highest rise from a glide | [game data] the same 1.5 m below the top from any glide height (the 8.5 m hold): faces to ~10 m | any airborne state catches a top within `MANTLE_REACH` 1.5 m; 3.2 m tops from a glide | match |
+| Speed you leave with | [game data] max(0.6x the approach, 3.5 m/s) (MiniMantleXYSpeedTargetCoefficient / Min), held 0.75 s (MiniMantlePostLaunchDuration); how firmly it's held (MiniMantleForwardForceSpeedDeltaMultiplier 8) is a force we don't model [?] | `MantleCarry.exit`: the same floor (`physics.mantle_launch_keep` 0.6, `mantle_launch_min` 3.5), held firm 0.75 s, never above the approach speed or run speed (that cap is ours [?]) | match |
+| Walking off ledges | bCanWalkOffLedges false | always allowed | owner rule, kept |
+| Ledges answer at once | [footage] no pause at the face | the catch is the first step you push into the face within reach | kept |
+
+Three ledge heights x walk / jump / glide, keys into the face (`_ledge_matrix`; one terrace is left out because it's walked up):
+
+| Ledge | Walk | Running jump | Glide in at 5 m/s |
+|---|---|---|---|
+| 1.6 m (two terraces) | never climbs | tops; catch to top 0.283 s; in 4.55, over the lip 4.55 m/s | tops; 0.183 s; in 5.00, over the lip 4.55 m/s |
+| 2.4 m (three) | never climbs | tops; 0.300 s; in 4.55, over the lip 4.55 m/s | tops; 0.183 s; in 5.00, over the lip 4.55 m/s |
+| 3.2 m (four, the wall tier) | never climbs | never (by design) | tops; 0.183 s; in 5.00, over the lip 4.55 m/s |
+
+Asserted: each cell tops or not as above; a caught ledge's catch-to-top <= 0.35 s ([footage] ~0.2 s rim to top); over the lip >= max(0.6x in, 3.5 m/s) ([game data]). Rows this pass fixed, each with its source: `hunter_move.json` now says mantle_launch_keep is a share of the approach speed, not the run speed (MANTLE_185b: "the approach speed was thrown away"); `MantleCarry` lost its own copy of that 0.6; this doc's no-jump pop read 3.2 m/s where `LRISE_POP` is 2.6; the Physics pass line and docs/SUPERVIVE_FEEL.md's Mantle row said the launch was 0.6x run speed.
 
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
