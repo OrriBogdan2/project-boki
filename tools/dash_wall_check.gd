@@ -77,21 +77,6 @@ func run(main: Node) -> void:
 				continue
 			for ang in DASH_ANGLES:
 				_dash_try(a, s, ang)
-	print("DWX tries done ", Time.get_ticks_msec(), " nodes ", Performance.get_monitor(Performance.OBJECT_NODE_COUNT), " objs ", Performance.get_monitor(Performance.OBJECT_COUNT))
-	for c in main.get_tree().root.get_children():
-		var t := Time.get_ticks_msec()
-		var nm := str(c.name)
-		if c == main:
-			continue
-		print("DWX free ", nm, " ", c.get_child_count())
-		c.free()
-		print("DWX freed ", nm, " ms ", Time.get_ticks_msec() - t)
-	for c in main.get_children():
-		var t := Time.get_ticks_msec()
-		var nm := str(c.name)
-		print("DWX mfree ", nm, " ", c.get_child_count())
-		c.free()
-		print("DWX mfreed ", nm, " ms ", Time.get_ticks_msec() - t)
 	print("DASH WALL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 

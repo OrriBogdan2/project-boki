@@ -267,6 +267,7 @@ const CHECKS := {
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
+	"--zz-rocket-probe": ["res://tools/zz_rocket_probe.gd", "zz_probe", null],
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],      # the rocket drop
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
 	"--squad-intro-check": ["res://tools/squad_intro_check.gd", "squad_intro_check", null],      # 0.24.4
