@@ -5,11 +5,12 @@ extends Node
 ## On desktop the same messages go through the Project Boki relay server instead (net_enet.gd,
 ## scripts/server/relay.gd). The launcher passes `-- --server=host:port --token=<discord token>`.
 
-const VERSION := "0.24.6"        # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch, 0.24.4: online deaths drop a deathbox: the "box", "brev", "back" and "lost" events; lobby pick turns: the "loaded" topic, "pick" carries "final"; the 2x Hollow Crown (a 305 m map every peer builds from its JSON, its winding sky train) and 30-hunter expeditions, 0.24.5: Limited Ways Out: the "ht" event carries the Heart state enum, early/final squads, ring progress, rush and "take"; the exit list (and its "xc" index) is outposts only, no "key" pickups or rift keys; "xc" "seat" mirrors the quest seats, 0.24.6: the "zone" "trade" and "tradego" events (Motley's Trade landing sigil on every game))
+const VERSION := "0.24.8"        # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch, 0.24.4: online deaths drop a deathbox: the "box", "brev", "back" and "lost" events; lobby pick turns: the "loaded" topic, "pick" carries "final"; the 2x Hollow Crown (a 305 m map every peer builds from its JSON, its winding sky train) and 30-hunter expeditions, 0.24.5: Limited Ways Out: the "ht" event carries the Heart state enum, early/final squads, ring progress, rush and "take"; the exit list (and its "xc" index) is outposts only, no "key" pickups or rift keys; "xc" "seat" mirrors the quest seats, 0.24.6: the "zone" "trade" and "tradego" events (Motley's Trade landing sigil on every game), 0.24.7: the "xp" event, a kill's XP for a remote Hunter, 0.24.7: the "cone" fx carries its hunter, length, width and seconds (Vex's stuck Burr Charge cone on every game)), 0.24.6: the "bat" event: a lair boss's attack, start time, phase, asleep and enraged, sent on change; a remote lair boss is a Boss), 0.24.6: the squad rocket drop: the "rkt" event replaces "dsep", 0.24.8: every body's snapshot carries its stun/root/slow bits (StatusLooks.net_bits: hunter flags 25-27, the last field of a Boki's and a monster's), 0.24.8: the "tele" event carries AimKit's "all" telegraphs, decision 0061)
 
 const SEND_EVERY := 0.1          # s between the snapshots of what this game owns
 const EARLY_GAP := 0.03          # s: the soonest a snapshot may follow the last one
 const EARLY_DV := 8.0            # m/s: a jump in your velocity this big (a dash starts) sends a snapshot at once
+const SEND_DUE := 0.001      # s: a send timer this close to 0 is due (0.1 s less six 1/60 s steps leaves 1e-17, not 0)
 
 signal peers_changed
 signal message(topic: String, data, from: String)
@@ -249,7 +250,7 @@ func tick(dt: float) -> void:
 	send_t -= dt
 	host_send_t -= dt
 	flush()        # hits and events leave this frame, not with the next snapshot
-	if send_t <= 0.0 or _cast_or_dash_started():
+	if send_t <= SEND_DUE or _cast_or_dash_started():
 		send_t = SEND_EVERY
 		var mine: Array = m.net_snapshot(true)
 		if mine.size() > 0:
@@ -257,7 +258,7 @@ func tick(dt: float) -> void:
 		if m.player:
 			sent_vel = m.player.vel
 			sent_move_at = m.player.ak.anim_at if m.player.ak else -9.0
-	if is_host() and host_send_t <= 0.0:
+	if is_host() and host_send_t <= SEND_DUE:
 		host_send_t = 0.15
 		var world_ents: Array = m.net_snapshot(false)
 		if world_ents.size() > 0:

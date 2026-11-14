@@ -29,6 +29,8 @@ const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
+const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
+                                       # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -252,6 +254,9 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
+func lock_left() -> float:
+	return riposte.lock_left()
+
 ## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits BUFFER for the
 ## cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:
@@ -266,6 +271,10 @@ func no_glide() -> bool:
 ## Haul Slam), never a dead press.
 func air_rmb() -> bool:
 	return super() and float(cd["air"]) <= 0.0
+
+## The guard stops pulls too (Blockers).
+func blocks_from(_by: Ent) -> bool:
+	return riposte.guarding()
 
 ## The guard takes every hit (no damage, no crowd control) and counts it.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -386,7 +395,7 @@ func _slash() -> void:
 	h.mel_hold = 0.0
 	h.fire_cd = float(ld["rate"])
 	# quick slashes, alternating right-to-left and back (no heavier third: each is the same cut)
-	if m.time - slash_at > 0.8: slash_n = 0
+	if m.time - slash_at > CHAIN_RESET: slash_n = 0
 	slash_at = m.time
 	h.combo_i = slash_n % 2 + 1
 	play("jug_slash_r" if slash_n % 2 == 0 else "jug_slash_l")
@@ -482,7 +491,10 @@ func on_dash(use_ex: bool) -> bool:
 	st["last_dash"] = "rampage"
 	# its wind-down: no glider straight out of the dash's end (a glide pressed during it opens at once, owner 11-08)
 	var dash_end := wind + float(dd["time"])
-	m.later(dash_end, func(): if is_instance_valid(h) and not h.gliding: h.glide_cd = maxf(h.glide_cd, 0.35))
+	var began: float = m.time
+	m.later(dash_end, func():
+		if is_instance_valid(h) and not h.gliding and h.jump_at < began:      # (a jump out of the dash ended it early)
+			h.glide_cd = maxf(h.glide_cd, 0.35))
 	if from_slam or in_hang:
 		_rampage(dir)                # the Slam's own keys run on: the overhead blade rides the drive in
 		return true
@@ -745,18 +757,18 @@ func _tick_slam(dt: float) -> void:
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
-	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "soft": true,
-			"all": true}
+	var lane := {"len": float(sl["len"]), "width": float(sl["width"]), "fill": wk, "soft": true, "all": true}
 	if pin != Vector2.ZERO:
-		cone["dir"] = pin
-	AimKit.cone(h, "slam", cone)
+		lane["dir"] = pin
+	AimKit.lane(h, "slam", lane)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
 		_slam(pin)
 
-## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
-## tip, dead ahead) is the payoff, and a knock on that foe within 2s makes the Gilded Riposte ready again.
+## The Finishing Slam: a heavy strike down a lane (Brall's Execution Slam, hero-ref 0157); the wounded
+## (under 35%) take +50%; a foe in the sweet spot (the far tip, dead ahead) is the payoff, and a knock on that
+## foe within 2s makes the Gilded Riposte ready again.
 func _slam(pin := Vector2.ZERO) -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
@@ -764,11 +776,12 @@ func _slam(pin := Vector2.ZERO) -> void:
 	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k()},
 			{"type": "push", "strength": float(sl["push"]), "from": "caster"}]
 	var stg := stage("rmb",
-			{"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
+			{"delivery": {"type": "cone", "radius": float(sl["len"])}, "effects": effs})
 	var from := h.pos
 	var paid := {}
-	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
-	run_own(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["len"])
+	var strike := {"no_floor": true, "lane_w": float(sl["width"])}       # KinExec's cone hits this lane
+	run_own(stg, cx("rmb", "finishing_slam", at, strike.merged({"on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
@@ -787,9 +800,9 @@ func _slam(pin := Vector2.ZERO) -> void:
 			sweet_spots += 1
 			payoff_fx(f.pos, res_col(), "pay_rage", dd, f)
 			vfx("slam_sweet", f.pos, dd)
-		slam_hit[f.get_instance_id()] = m.time}))
+		slam_hit[f.get_instance_id()] = m.time})))
 	AimKit.hide(h, "slam")
-	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"])})
+	vfx("slam_hit", h.pos, dd, {"len": float(sl["len"])})
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
 ## The Lunge let go at charge `k`; `perfect`: in a perfect window, it flings him lunge.perfect_k further.

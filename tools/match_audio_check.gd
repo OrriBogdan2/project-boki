@@ -7,7 +7,12 @@ extends RefCounted
 ## The ultimate-ready chime (UltReadyCue): once per R coming back, only for you (never a rival's or a
 ## teammate's R), never on a match's first look, held while you're down until you're up, and set lower
 ## under a kill callout.
+## And the abyss (tools/gen_sfx_abyss.py, AbyssSfx): a scripted walk off a Hollow Crown rim plays the whoosh
+## then, with the glider, the catch (and the strain loop while it is overheated), or, without it, the fall-out;
+## yours is 2D (heard with the listener 80 m away), a teammate's is positional (the fall-out carries further).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## And the mix (SfxMix): each kind of sound is on its own bus, a big event dips Music and Ambience about 6 dB
+## and they recover; then the autoplay match runs LOUD_S and each bus's peak meter is reported (MATCHAUDIO BUS).
 ## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
 ## teammate's quieter than a rival's, your own one level wherever the camera is.
 
@@ -15,6 +20,9 @@ var main: Node
 var fails := 0
 var n := 0
 const SETTLE := 4.0            # s: longer than the slowest match fade (the score's stems, 1.2s)
+const LOUD_S := 12.0           # s of autoplay match the bus meters are read over
+const WALK_S := 8.0            # s: the longest an abyss walk is run
+const ABYSS_NAMES := ["abyss_whoosh", "abyss_catch", "abyss_fallout"]
 
 func ok(cond: bool, what: String) -> void:
 	n += 1
@@ -24,6 +32,7 @@ func ok(cond: bool, what: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.d["music"] = Save.d.get("music", [])
+	await _abyss()
 	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
 		"demo_kin": "cindle"})
 	for i in 6:
@@ -57,6 +66,8 @@ func run(main_node: Node) -> void:
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
+	_buses()
+	await _big_event_duck(P)
 	_steps(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
@@ -64,6 +75,7 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
+	await _loudness(m)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -151,6 +163,61 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(P.ak)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+
+## Each kind of sound plays on its own bus, set up in one place (SfxMix.BUSES).
+func _buses() -> void:
+	for bn in SfxMix.BUSES:
+		var bi := AudioServer.get_bus_index(bn)
+		var to := StringName(SfxMix.BUSES[bn])
+		ok(bi > 0 and AudioServer.get_bus_send(bi) == to, "bus %s sends to %s" % [bn, to])
+	var want := {"kin_happy": "Boki", "click": "UI", "ashwick_hurt": "Voice", "v_brute": "Voice", "rifle": "SFX"}
+	for sname in want:
+		ok(Sfx.mix.bus_for(sname, false, false) == StringName(want[sname]), "%s plays on %s" % [sname, want[sname]])
+	ok(Sfx.mix.bus_for("kin_happy", false, true) == &"SFXFar", "a far sound of any kind is low-passed")
+	ok(Sfx.mix.bus_for("kin_happy", true, true) == &"SFXMuffled", "...and one behind terrain through the muffled one")
+
+## A rival's ult tag dips Music and Ambience together by about 6 dB, and they are back within the recovery;
+## your own team's tag does not dip them.
+func _big_event_duck(P: Hunter) -> void:
+	var r: Dictionary = Sfx.mix.rules["big_event"]
+	Sfx.last_played.clear()
+	Sfx.play("ult_tag_foe", P.pos)
+	await main.get_tree().create_timer(float(r["in_s"]) + 0.1).timeout
+	var amb_fx := AudioServer.get_bus_effect(AudioServer.get_bus_index("Ambience"), 0) as AudioEffectAmplify
+	var dip := Sfx.mix.event_db()
+	ok(dip <= -5.0 and dip >= -7.0 and is_equal_approx(amb_fx.volume_db, dip),
+			"a rival's ult dips Music and Ambience about 6 dB (%.1f / %.1f dB)" % [dip, amb_fx.volume_db])
+	await main.get_tree().create_timer(float(r["hold_s"]) + float(r["recover_s"]) + 0.1).timeout
+	var back := Sfx.mix.event_db()
+	ok(back > -0.2 and amb_fx.volume_db > -0.2, "...and they are back after %.1f s (%.2f dB)" % [r["recover_s"], back])
+	Sfx.play("ult_tag_ally", P.pos)
+	await main.get_tree().create_timer(0.2).timeout
+	ok(Sfx.mix.event_db() > -0.2, "your own team's ult tag does not dip them")
+
+## The match runs on its own for LOUD_S; each bus's peak meter (max and mean, dBFS) is reported. Only the
+## master limiter is asserted (nothing past its ceiling); the levels are for reading.
+func _loudness(m: Match) -> void:
+	var names: Array = ["Master"] + SfxMix.BUSES.keys()
+	var top := {}
+	var sum := {}
+	var frames := 0
+	m.set_process(true)
+	var until := Time.get_ticks_msec() + int(LOUD_S * 1000.0)
+	while Time.get_ticks_msec() < until:
+		await main.get_tree().process_frame
+		frames += 1
+		for bn in names:
+			var bi := AudioServer.get_bus_index(bn)
+			var pk := maxf(AudioServer.get_bus_peak_volume_left_db(bi, 0),
+					AudioServer.get_bus_peak_volume_right_db(bi, 0))
+			top[bn] = maxf(float(top.get(bn, -200.0)), pk)
+			sum[bn] = float(sum.get(bn, 0.0)) + db_to_linear(pk)
+	m.set_process(false)
+	for bn in names:
+		var mean := linear_to_db(maxf(sum[bn] / frames, 1e-10))
+		print("MATCHAUDIO BUS %-8s max %6.1f dBFS  mean %6.1f dBFS" % [bn, top[bn], mean])
+	var peak := float(top["Master"])
+	ok(peak <= 0.0, "a match capture (%.0f s) stays under full scale on the master (%.1f dBFS)" % [LOUD_S, peak])
 
 ## Footsteps by distance, both the foot's contact step and the surface step (Juice.footstep).
 func _steps(m: Match, P: Hunter) -> void:
@@ -275,3 +342,135 @@ func _step(m: Match, secs: float) -> void:
 func _on_farm() -> bool:
 	var sc: Script = main.current.get_script() if is_instance_valid(main.current) else null
 	return sc != null and sc.resource_path.ends_with("home/home.gd")
+
+# ---------------------------------------------------------------- the abyss
+func _abyss() -> void:
+	var am := Match.new()
+	main.add_child(am)
+	await am.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	am.set_process(false)
+	for i in 30:
+		am.step(Match.DT)
+	var P: Hunter = am.player
+	var other: Hunter = null
+	for o in am.hunters:
+		if o != P:
+			o.ctrl = "idle"
+			o.teleport(Vector3(-500, 50, -500))
+			other = o
+	for mb in am.mobs:
+		mb.queue_free()
+	am.mobs.clear()
+	var rim := _rim(am.world)
+	ok(am.map_name == "The Hollow Crown" and not rim.is_empty(), "abyss: a rim on %s" % am.map_name)
+	if not rim.is_empty():
+		var jump := _walk(am, P, rim, false, false)
+		ok(jump.find("abyss_whoosh") == 0 and jump.has("abyss_fallout") and not jump.has("abyss_catch"),
+			"a walk off the rim: whoosh, then the fall-out %s" % [jump])
+		var glide := _walk(am, P, rim, true, false)
+		ok(glide.find("abyss_whoosh") == 0 and glide.find("abyss_catch") == 1 and not glide.has("abyss_fallout"),
+			"...gliding: whoosh, then the catch %s" % [glide])
+		var hot := _walk(am, P, rim, true, true)
+		ok(hot.find("abyss_catch") == 1 and hot.has("strain"),
+			"...an overheated glider lifting: the catch and the strain loop %s" % [hot])
+		_teammate(am, other, rim)
+	am.queue_free()
+	for i in 3:
+		await main.get_tree().process_frame
+
+## The player on the island 2 m in from the lip, walking out and falling; scripts the glider when asked
+## (cold: overheated). Returns the abyss sounds in the order first heard ("strain" if its loop ran).
+## The listener is 80 m away, so only a 2D sound is heard.
+func _walk(am: Match, P: Hunter, rim: Dictionary, glide: bool, cold: bool) -> Array:
+	var dv: Vector2 = rim["dir"]
+	var start: Vector2 = rim["lip"] - dv * 2.0
+	P.out = false
+	P.teleport(Vector3(start.x, rim["y"], start.y))
+	P.grounded = true
+	P.vel = Vector3.ZERO
+	P.gliding = false
+	P.glide_fuel = 1.0
+	P.hp = P.max_hp
+	Sfx.listener = P.pos + Vector3(80, 0, 0)
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	am.opts["god"] = true          # a fall-out puts you back instead of ending the run
+	var heard := []
+	var key := "abyss_strain%d" % P.get_instance_id()
+	var t := 0.0
+	var done := func() -> bool:
+		return heard.has("abyss_fallout") or (heard.has("abyss_catch") and (not cold or heard.has("strain")))
+	while t < WALK_S and not done.call():
+		P.inp["move"] = dv
+		if glide and heard.has("abyss_whoosh"):
+			P.inp["glide"] = true
+			P.inp["glide_btn"] = true
+			if cold:
+				P.glide_fuel = 0.0
+		am.step(Match.DT)
+		t += Match.DT
+		for n in ABYSS_NAMES:
+			if Sfx.last_played.has(n) and not heard.has(n):
+				heard.append(n)
+		if Sfx.loop_on(key) and not heard.has("strain"):
+			heard.append("strain")
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
+	P.inp["move"] = Vector2.ZERO
+	Sfx.loop_stop(key)
+	return heard
+
+## A teammate (a remote hunter, its fall in the snapshots) falling past the lip: positional,
+## and the fall-out carries further.
+func _teammate(am: Match, o: Hunter, rim: Dictionary) -> void:
+	var out_at: Vector2 = rim["lip"] + Vector2(rim["dir"]) * 3.0
+	var heard := {}
+	for case in [["whoosh", 5.0], ["whoosh", 30.0], ["fallout", 30.0], ["fallout", 60.0]]:
+		o.remote = true
+		o.out = false
+		o.net_t = -1.0
+		o.pos = Vector3(out_at.x, rim["y"] - 3.0, out_at.y)
+		o.vel = Vector3(0, -8, 0)
+		o.grounded = false
+		o.update_lip()
+		o.abyss_sfx = AbyssSfx.new()
+		Sfx.listener = o.pos + Vector3(case[1], 0, 0)
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		o.abyss_sfx.tick(o, Match.DT)
+		if case[0] == "fallout":
+			o.out = true
+			o.below_lip = false
+			o.abyss_sfx.tick(o, Match.DT)
+		heard["%s %d" % case] = Sfx.last_played.has("abyss_" + String(case[0]))
+	o.remote = false
+	ok(heard["whoosh 5"] and not heard["whoosh 30"],
+		"a teammate's whoosh is positional: heard at 5 m, not at 30 m %s" % [heard])
+	ok(heard["fallout 30"] and not heard["fallout 60"],
+		"...their fall-out carries further: heard at 30 m, not at 60 m")
+
+## A lipped rim: {lip: the lip's edge (x, z), dir: out over the void, y: the island's height there};
+## a tile with void for two tiles beyond it and three tiles of flat ground behind it.
+func _rim(w: World) -> Dictionary:
+	for z in range(4, w.h - 4):
+		for x in range(4, w.w - 4):
+			for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				if _flat(w, x, z, d, -3, 0) and _void(w, x, z, d, 1, 2):
+					var lip := Vector2(x + 0.5 + 0.5 * d.x, z + 0.5 + 0.5 * d.y)
+					return {"lip": lip, "dir": Vector2(d), "y": w.ground_at(x + 0.5, z + 0.5)}
+	return {}
+
+func _flat(w: World, x: int, z: int, d: Vector2i, from: int, to: int) -> bool:
+	var y := w.ground_at(x + 0.5, z + 0.5)
+	for k in range(from, to + 1):
+		var i := w.idx(x + d.x * k, z + d.y * k)
+		var gy := w.ground_at(x + 0.5 + d.x * k, z + 0.5 + d.y * k)
+		if w.kind[i] != World.T_GROUND or w.sheer.has(i) or w.stairs.has(i) or absf(gy - y) > 0.01:
+			return false
+	return true
+
+func _void(w: World, x: int, z: int, d: Vector2i, from: int, to: int) -> bool:
+	for k in range(from, to + 1):
+		if w.kind[w.idx(x + d.x * k, z + d.y * k)] != World.T_VOID:
+			return false
+	return true

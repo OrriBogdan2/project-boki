@@ -43,6 +43,11 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - Re-render one: `jobq submit --needs gpu --tree <tree> --out shots -- --parity-reel --shots-dir=shots
   --reel-hero=<id>`, then `ffmpeg -framerate 30 -i shots/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p
   <id>.mp4` (`tools/parity_reel.gd`, built on `tools/hero_vfx_reel.gd`; `--reel-only=<part>` plays one part).
+- `thief_dash_lmb.mp4` (12 s): Sable's quick bolts after the Vault (docs/heroes/thief.md, Quick hands): LMB held at
+  0.45s, Shift then LMB held (the empowered bolt and three cyan-tailed bolts 0.27s apart), Shift then LMB 1.5s later
+  (the usual pace). `--reel-only=dash_lmb --reel-hero=thief`; not part of the shared timeline.
+- The R segment of each MP4 is spliced from a second render of just that part (the first render pressed R through
+  the wrong key path); the timeline above is unchanged.
 - The R segment of the first six MP4s is spliced from a second render of just that part (the first render pressed R
   through the wrong key path); the timeline above is unchanged. The four slice Wardens' reels and Meeko's and
   Tenzo's are one render each.
@@ -66,8 +71,8 @@ Still differs:
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
   Nov 7).
-- Anchor Drop: our brass fist and a teal cone shown to everyone while it fills; the source shows a giant translucent
-  fist and only a hit-box outline [F]. Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
+- Anchor Drop: a giant translucent cel-shaded fist falls into the cone while only a thin outline of the exact hit
+  cone shows to everyone (matches the source [F]). Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
 - The Barge has no red burst at its start point [F]; the owner forbids bursts on dashes.
 - Brass Broadside turns with his aim through the charge and the waves (owner item 36); the source locks the fan at
   the press [F]. He walks at 30% then 20% through it (owner).
@@ -195,6 +200,10 @@ shown. The rest of the "Seen in the reel" lines match the new renders.
   wall payoff (gap 6) is `wall_mult` 4.94. Lace, Cinder, Vex, Ryzz and Tarek's dash to LMB rows are `fire`; Kael's
   and Bjorn's ground and air rows still `buffer`. Meeko's Carrier shield is cut and Tenzo's allies hop his rocks
   (gap 14 closed).
+**KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
+  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
+  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's and Albert's ground and air rows
+  stay `buffer`: the source never shows an LMB press inside the dash, so each row now says "Not determinable" with what was checked.
 
 ## Vex the Hired Gun (`gunslinger`, source Ghost)
 [gunslinger.mp4](gunslinger.mp4)
@@ -233,9 +242,10 @@ Still differs:
 Seen in the reel: the LMB hold lays a long gold lane to the dummy (the source shows a white arc round him [F
 0087]); the tap slam is an orange ring; the chain is a thin dotted line and the dummy reads CHAINED, where the
 footage's is a thick wavy orange chain [F 0304]; Riposte's guard shows a gold strike rectangle like the footage's
-[F 0435]; the dummy's rifle shot lands in the guard and reads BLOCKED in gold (0:18.7, no damage); the cleave is an
-orange-gold arc up the strip into a gold impact cloud (0:19.1), where the footage's is a huge red vertical crescent
-and a white cloud [F 0430-0431, 0438-0439]; it hits the dummy for 52 and SLOWS it, and the heal shows as a green
+[F 0435]; the dummy's rifle shot lands in the guard and reads BLOCKED in gold (0:18.7, no damage); the cleave is a tall
+gold-and-white crescent standing at the strip's end, then a white cloud (`ext/kael-riposte-crescent`; before it an
+orange-gold arc into a gold cloud), where the footage's is a huge red vertical crescent and a white cloud
+[F 0430-0431, 0438-0439], the red being his gold here; it hits the dummy for 52 and SLOWS it, and the heal shows as a green
 +41 over him (116 to 158 hp, 0:19.2), with no green light-rain column (the footage's heal column is the knock heal
 [F 0455-0458], not the Retaliation's); the air dash puts a wide grey disc round him.
 
@@ -306,7 +316,8 @@ thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan d
 throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
 green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
 cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271 of the 5 fps set],
-ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
+ours showed no plus sparkles there (since the reel: two small mint pluses rise off the ally on each 0.5 s heal tick,
+HeroVfx `call_plus`, also on other players' screens); at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
 side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 
 ## Tenzo the Stone Seer (`dolm`, source Tetra)

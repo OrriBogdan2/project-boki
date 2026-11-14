@@ -92,7 +92,28 @@ is exempt), the ends agree (0.75 m) with the offline end and across games, no do
 
 `tc netem` needs root and is blocked on the worker, so `tools/udp_delay.py` sits between the games and the relay
 and holds every datagram 100 ms each way, as netem on loopback would (200 ms of round trip). Only these processes
-use it. `--online-displace-check=0` goes straight to the relay for a no-delay baseline.
+use it. `--online-displace-check=0` goes straight to the relay for a no-delay baseline. `--od-jitter=<ms>` adds a
+uniform plus-or-minus that many ms to each datagram (netem's `delay D J`; datagrams can overtake each other).
+
+## Clock: every game steps on real time (2026-11-11)
+
+These checks and `--displace-net-check` (whose harness they share) step each game's match from `_run`. It used
+to be one step per drawn frame, so a game that draws slower runs its match clock slower. Under xvfb at load ~365
+on 32 cores, the host (drawn, opengl3) ran at 11 fps and the headless guest at 52, so the host's clock ran at a
+fifth of the guest's. The guest's timers ran out while the host was still waiting, and both checks went red (the
+0.24.4 gate's `online-displace` and `displace-net` reds, "same on both trees"):
+
+- **Meeko Hearth Call pull, guest**: the guest bled out on its own game during the host's 5.4 s channel and got up
+  at its respawn, 52 m in one frame and 37 m from the offline end (x5.6, "double move").
+- **Kael's Warchain** (displace-net): he lands 3.6 m from the player (bar 2.6).
+- **A hit's burn** (displace-net): 3.0 s left on the player's game when the host asked (bar 3.3).
+- The other game also drew Kael's pull with 5 to 11 m steps a frame (NetSmooth with the owner's clock at a fifth
+  of ours). Nothing asserted on it, and it is not a NetSmooth fault: the real game cannot run that slow above
+  10 fps.
+
+The game itself never does this. `Match._process` steps on real time (up to 6 steps a frame, each frame capped at
+0.1 s), so its clock only falls behind below 10 fps. The harness now does the same (`_steps` in
+tools/displace_net_check.gd). Net, NetSmooth and `Ent.net_follow` are unchanged, so Net.VERSION stays.
 
 ## Measured (100 ms each way, 10 Hz snapshots, 60 fps)
 
@@ -103,15 +124,15 @@ last snapshot and the mover's own game (m); the net distance moved against the o
 
 | Move | Mover | Step/frame own (offline) | Step/frame other | Step/snapshot server | End: own vs offline | End: other vs own | End: server vs own | Moved vs offline | Note |
 |---|---|---|---|---|---|---|---|---|---|
-| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.56 | 0.22 | 0.00 | 0.00 | 5.0 vs 5.2 m (x0.96) |  |
-| Kael Warchain sling | caster | 0.43 (0.43) | 0.57 | 2.99 | 0.48 | 0.00 | 0.00 | 4.8 vs 5.3 m (x0.91) | speed away 4.6 m/s |
-| Grimble Abyssal Hand reel | moved Hunter | 0.18 (0.18) | 0.30 | 1.18 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Kael Warchain self-pull | caster | 0.37 (0.37) | 0.38 | 2.57 | 0.14 | 0.00 | 0.00 | 5.3 vs 5.4 m (x0.97) |  |
+| Kael Warchain sling | caster | 0.43 (0.43) | 0.43 | 2.99 | 0.01 | 0.00 | 0.00 | 5.6 vs 5.6 m (x1.00) | speed away 4.6 m/s |
+| Grimble Abyssal Hand reel | moved Hunter | 0.18 (0.18) | 0.26 | 1.22 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
 | Motley swap dash | moved Hunter | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Motley swap dash | caster | 8.00 (8.00) | 8.00 | 8.00 | 0.00 | 0.00 | 0.00 | 8.0 vs 8.0 m (x1.00) | a teleport |
 | Meeko Hearth Call pull | moved Hunter | 8.05 (8.05) | 8.05 | 8.05 | 0.00 | 0.00 | 0.00 | 8.1 vs 8.1 m (x1.00) | a teleport |
-| Sparkle Kitefall launch and crash | caster | 1.08 (1.06) | 0.76 | 3.61 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
-| Sparkle Kitefall launch and crash | moved Hunter | 0.13 (0.13) | 0.19 | 0.81 | 0.00 | 0.00 | 0.00 | 2.3 vs 2.3 m (x1.00) |  |
-| Knock into a wall | moved Hunter | 0.26 (0.26) | 0.38 | 1.75 | 0.00 | 0.00 | 0.00 | 3.9 vs 3.7 m (x1.07) |  |
+| Sparkle Kitefall launch and crash | caster | 1.08 (1.09) | 4.97 | 4.97 | 0.00 | 0.00 | 0.00 | 4.5 vs 4.5 m (x1.00) |  |
+| Sparkle Kitefall launch and crash | moved Hunter | 0.13 (0.13) | 0.13 | 0.88 | 0.00 | 0.00 | 0.00 | 2.5 vs 2.5 m (x1.00) |  |
+| Knock into a wall | moved Hunter | 0.26 (0.26) | 0.34 | 1.82 | 0.00 | 0.00 | 0.00 | 3.9 vs 3.7 m (x1.07) |  |
 
 The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows the same Sparkle crash step
 (4.98 m), so that step is not the delay's doing; with delay it was 0.76 to 5.71 m from run to run (see below).
@@ -122,14 +143,18 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   (`Displace`, docs/decisions/0016-displace.md); the other game and the server only follow its snapshots. The
   distances match offline (x0.90 to x1.07).
 - **Ends agree.** The other game and the server end exactly where the mover's own game ends (0.00 m). Against
-  offline: Kael's pull ends 0.2 to 0.5 m short of the offline run in some runs (the hooked player's body is
-  nudged by the arrival differently than the bot's; not traced), everything else 0.00 m.
+  offline: Kael's pull ends 0.0 to 0.3 m short, everything else 0.00 m. Kael's rows were red on main (0.77 to
+  0.84 m, 3 of 3 runs; the 0.24.4 gate triage put the 2 reds on Meeko's Hearth Call, which passes at 0.00 m) and
+  it was the check, not the game: the offline run leaves the bot right where the guest is placed next (Kael's
+  arrival shoves it to 48.75 m), and the guest's game still draws the bot's copy there for ~0.5 s (delay plus the
+  snapshot buffer), so the two bodies separate and the guest starts 0.55 m nearer Kael, who then stops 0.8 m
+  short. The check now waits SETTLE_VIEW after moving the bot away before placing the guest.
 - **Teleports are teleports, on every game.** Motley's swap and Meeko's Hearth Call pull are one 8 m jump by
   design (`Displace.teleport`, scripts/combat/displace.gd:44) and look the same on the other game and the server.
 - **Gap, not fixed: Sparkle's Kitefall crash steps 4 to 5.7 m in one frame on the other game** (4 of 5 runs,
   with and without delay; the own game's largest step is 1.06 m). Cause: the crash is a scripted 0.15 s lerp
   (`MageUlt._fall_tick`, scripts/arch/kits/mage_ult.gd:280, sets `h.vel = ZERO`), so the snapshot reports no
-  velocity; the owner sends 10 Hz (`send_t = 0.1`, scripts/core/net.gd:228), so the other game sees one or two
+  velocity; the owner sends 10 Hz (`send_t = 0.1`, scripts/core/net.gd:229), so the other game sees one or two
   snapshots of a 4.5 m fall, and `Ent.net_follow` (scripts/match/ent.gd:326) jumps when the gap is over 4 m
   (line 332). Raising that threshold with the owner's speed was tried and made it no better (the velocity is
   zero), so it was reverted. A fix needs the fall's velocity in the snapshot (the kit setting `h.vel` while the
@@ -168,3 +193,169 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   when that snapshot falls in the fall's last 0.03 s (not seen in the check's runs).
 - Not measured: a mover owned by the host with the caster on the guest (every row has the host casting, so
   the guest is the one moved); Kael's Warchain on a bot (that is the offline reference).
+
+## Remote smoothing: the 0.24.4 gate's 5 reds (`--remote-smooth-check`)
+
+docs/GATE_0244.md had `--remote-smooth-check` at 5 failures on both trees. Run on origin/main 88b06b9e7 on rpc7
+(32 cores, load ~35): `--headless` 0 failures in 2 of 2 runs; xvfb 4 failures (25 snaps, 158 jerks, 22 backsteps,
+0.97 m off the path). Not the 2x map, not a new move, not NetSmooth. Three causes, by weight:
+
+- **The check under xvfb (the gate's reds).** It stepped the host's match once per frame. Drawn on llvmpipe, the
+  host ran ~30 fps with frames over 0.1 s, so its match clock (the snapshots' time) ran at half the wall clock and
+  fell up to 0.6 s behind. The guest's buffer then ran past the newest snapshot and started over at its 0.5 s
+  resync. The game doesn't do this: `Match._process` steps on the wall clock. The check now steps both games the
+  same way (an accumulator, frames clamped to 0.1 s), stamps each step with the wall moment it stands for, and
+  stops the host drawing (`RenderingServer.render_loop_enabled = false`; only the headless guest is measured).
+  `RSMOOTH load` prints what frames over 0.1 s still cost each game's clock in the run, so a stall can be told
+  from a jerk. Moving the lag relay into its own process was tried and made no difference. After this: 0-2
+  failures a run in both modes (1 backstep, or one 0.3-0.7 m overshoot).
+- **The snapshot rate, in the game.** `Net.tick` sent a snapshot every 7th step (0.117 s, 8.6 a second), not
+  every 0.1 s: `send_t = 0.1` minus six 1/60 s steps leaves 1e-17, so `<= 0` waited one step more. This dates
+  from the first commit; host world snapshots went every 10th step (0.167 s) instead of 0.15 s. NetSmooth's
+  0.15 s delay assumes a 0.1 s gap plus 40 ms of jitter. 0.117 s plus 40 ms overran it: the body ran on past a
+  late snapshot and the next one pulled it back. Now a timer within 1 ms of 0 is due (`Net.SEND_DUE`): 10 and
+  6.7 snapshots a second, 17% and 11% more snapshot traffic. No shape change, so Net.VERSION stays.
+- **The lag relay's ordering (the check).** It gave every packet its own jitter and dropped a snapshot that a
+  newer one overtook (ENet's ordered rule). Snapshots are 0.1 s apart and the jitter is +-20 ms, so only packets
+  sent in the same step could swap: the host's hunter and world snapshots. With the 10 Hz fix they share a step
+  every 0.3 s, and half of those swaps dropped the hunter's snapshot (28 lost in a run, not ~7). That sometimes
+  turned the 5 m lift into a sweep under the 40 m/s snap speed. A real line queues packets in order, so the
+  relay now keeps send order per peer and the overtake rule is gone.
+
+Measured after all three: 4 runs at once at load ~35 (2 `--headless`, 2 xvfb), 0 failures each. 7 snapshots
+lost (the 2%), 1 snap (the lift), 3-7 jerks, 0 backsteps, 0 overshoot (max 0.03 m off the path), drawn 200-205 ms
+behind, 0 ms of either game's clock lost to stalls.
+Left: in 12 runs since all three fixes, one headless run had 1 backstep at the end of the knock slide. A snapshot
+was lost or late while the true body slowed, NetSmooth ran the body on at its last velocity (RUN_ON), and the next
+snapshot pulled it back 0.14 m. That is NetSmooth's own edge, not load (0 ms stalls in that run). It is in
+docs/DEBT.md: the fix (blend the correction instead of jumping back) touches the same code as ext/feel-online-150's
+jitter buffer, so it should come after that lands.
+
+## Cross-region: 150 ms each way, 20 ms jitter (2026-11-11)
+
+`XDG_DATA_HOME=<scratch> godot --headless -- --online-displace-check=150 --od-jitter=20`, for EU against US servers
+(DECISIONS Hosting: 75-90 ms each way plus jitter, so this is the bad end). Every game reaches the other through the
+relay, so a host-to-guest message crosses the proxy twice: 300 ms plus up to 40 ms of jitter. Added moves: Kael's
+Rampage and Grimble's Barge (dashes) and Neve's Skate (held 0.5 s; at 0.8 s she skates off the ledge 12 m west of
+home and falls). Added columns: **Rubber band**, the farthest the other game's copy strays off the path the mover's
+own game drew, whenever it drew it (lag along the path does not count), and **Late start**, how many ms after
+offline the move gets going (0.3 m) on the mover's own game and on the other game.
+
+Snapshot gaps at the relay were 110-150 ms with about 1 in 10 over 200 ms (three games on one worker hitch), so
+NetSmooth's fixed 0.15 s buffer (one 0.1 s gap plus 40 ms) ran dry and the body ran on along its last velocity
+(RUN_ON). The worst error was Kael's Rampage dash on the other game: it ran 1.33 m past the dash's end at dash
+speed, then snapped back 1.53 m in one frame. **Fixed:** NetSmooth's margin over one gap is now a jitter buffer, how
+late recent snapshots came against the quickest (peak held, 3% off per snapshot, 50 to 120 ms;
+scripts/match/net_smooth.gd). A steady line still draws 0.15 s behind. No sync shape change, so Net.VERSION stays.
+
+| Move | Mover | Step/frame other: before / after | Rubber band other (m): before / after | Late start own / other (ms), after | Moved vs offline, after |
+|---|---|---|---|---|---|
+| Kael Warchain self-pull | caster | 0.37 / 0.49 | 0.09 / 0.05 | -1 / 454 | x1.00 |
+| Kael Warchain sling | caster | 1.60 / 2.86 | 0.14 / 0.42 | 1 / 440 | x1.00 |
+| Grimble Abyssal Hand reel | moved Hunter | 0.40 / 0.26 | 0.00 / 0.00 | 355 / 816 | x1.00 |
+| Motley swap dash | moved Hunter | 8.00 / 0.90 | 0.00 / 0.00 | 401 / 768 | x1.00, a teleport |
+| Motley swap dash | caster | 8.00 / 8.00 | 0.00 / 0.00 | 0 / 411 | x1.00, a teleport |
+| Meeko Hearth Call pull | moved Hunter | 8.05 / 8.05 | 0.00 / 0.00 | 532 / 895 | x1.00, a teleport |
+| Sparkle Kitefall launch and crash | caster | 5.65 / 5.55 | 0.00 / 0.01 | 0 / 412 | x1.00 |
+| Sparkle Kitefall launch and crash | moved Hunter | 0.13 / 0.14 | 0.00 / 0.05 | 461 / 924 | x1.00 |
+| Knock into a wall | moved Hunter | 0.29 / 0.29 | 0.23 / 0.00 | 344 / 766 | x1.07 |
+| Kael Rampage dash | caster | 1.53 / 0.52 | **1.33 / 0.44** | 6 / 427 | x1.00 |
+| Grimble Barge dash | caster | 0.25 / 0.26 | 0.25 / 0.25 | 1 / 433 | x1.00 |
+| Neve Skate (held 0.5 s) | caster | - / 0.19 | - / 0.10 | -60 / 395 | x1.00 |
+
+Before is the fixed 0.15 s buffer (Neve's row was the 0.8 s skate off the ledge); after is the jitter buffer. One run
+each, so a few tenths of a metre is run-to-run noise. Ends agree everywhere (other vs own 0.00 m, own vs offline at
+most 0.29 m) and nothing moves twice (x0.95 to x1.07): the 52 checks pass. The self-dash late start on the other
+game went from about 418 to 427 ms with the bigger margin.
+
+### Follow-ups, worst first (not done here)
+
+1. **A hit on another Hunter shows on the caster's screen 0.77 to 0.92 s late** (Grimble's reel, Meeko's pull,
+   Sparkle's launch, a knock). The hit goes caster to relay to owner (300 ms), the owner moves its Hunter
+   (Displace, decision 0016), and the snapshots come back (300 ms) plus the buffer. The owner's own game starts
+   0.34 to 0.53 s late. Only prediction on the caster's copy (draw the pull at once, hand back to the owner's
+   snapshots) would cut it. That changes decision 0016 and needs a parity look at the source first.
+2. **Kael's Warchain sling steps 1.6 to 2.9 m in one frame on the other game** (0.57 at 100 ms, 0.43 on its own
+   game). Not traced. A lost or overtaken snapshot at the sling's speed probably clears the buffer. 0.47 m after
+   the eased clock below (one run).
+3. **Sparkle's Kitefall crash steps about 5.6 m on the other game**: the known gap above. The model is hidden from
+   30% of the fall (`MageUlt._fall_tick`), so it reads as the streak. The fix is still a cast event or the fall's
+   velocity in the snapshot (a Net shape change).
+4. **A teleport can be drawn as a glide** (Motley's 8 m swap, the moved Hunter on the host, 0.90 m a frame in the
+   second run). If the snapshot before it is lost or overtaken, 8 m over 0.2 s of owner time is right at
+   `NetSmooth.SNAP_SPEED` (40 m/s), so the buffer sweeps it. A teleport flag on the hunter snapshot would make
+   it exact (a Net shape change and a VERSION bump).
+5. **Dashes still run on 0.25 to 0.44 m** (Rampage, Barge) when a gap is over the margin cap (owner
+   hitches). A higher cap trades that for more lag on every Hunter. Now 0.29 / 0.25 m with the 100 ms cap below.
+
+### The margin eases in, capped at 100 ms (2026-11-11)
+
+The jitter buffer raised its margin the moment one snapshot came in late, so the drawn owner time went back by
+the rise (up to 70 ms) and the body stepped back along its path. That was the 1 to 2 new `--remote-smooth-check`
+reds against main (a backstep, the jerks). Under load, worker hitches read as lateness, the margin sat at the
+120 ms cap, and a 40 ms line drew 255 to 260 ms behind (the bar is 250). Now the drawn clock runs at most 10%
+fast or slow while the margin changes (`NetSmooth.SLEW`), so it never goes back, and the cap is 100 ms (240 ms
+behind on that line at worst). Side by side at load ~230 (two runs each), main / the jitter buffer / this:
+jerks 26, 11 / 35, 15 / 4, 4 (5, 2 with the 100 ms cap), drawn 175-185 / 235-255 / 205-235 ms. 150 ms each
+way with 20 ms of jitter still passes 52/0 (Rampage rubber band 0.29 m).
+## The squad rocket drop (`--online-rocket-check[=<ms>]`)
+
+`tools/online_rocket_check.gd` (the same three processes and 100 ms delay proxy) plays the drop with a host and a
+guest in one squad: the host leads and steers the rocket for the nearest island, the guest rides, jumps out 1.6 s
+after the launch, free-falls steering with the keys, pulls the glider with a fresh press 1.4 s later and glides to
+the island; the rocket lands on its own. The games run on real time (a step per 1/60 s of wall clock, caught up
+after a slow frame, as a real match does) so the two clocks do not drift apart on a loaded box; the guest's ship
+is 0.2 s ahead of the host's (two games never start together). Every frame each game records every remote body
+it knows and the largest step per 1/60 s (a catch-up frame is scaled back to one step) is flagged over 0.5 m.
+
+Largest step in one frame of a remote body (m, quiet-box run, 100 ms each way; "own body" is the real one on
+its own game, for reference; rival bots are the host's, seen on the guest):
+
+| Game | Body | Phase | Frames | Largest step per 1/60 s (m) | Frames over 0.5 m | Catch-up frames | Worst at (s after launch) |
+|---|---|---|---|---|---|---|---|
+| host | squadmate (the other player) | ride | 104 | 0.45 | 0 | 0 | 3.3 |
+| host | squadmate (the other player) | fall | 85 | 0.44 | 0 | 0 | 3.5 |
+| host | squadmate (the other player) | glide | 833 | 0.34 | 0 | 0 | 6.6 |
+| host | squadmate (the other player) | landing | 86 | 0.25 | 0 | 0 | 34.6 |
+| host | own body (this game) | ride | 104 | 0.46 | 0 | 0 | 2.4 |
+| host | own body (this game) | fall | 85 | 0.43 | 0 | 0 | 4.7 |
+| host | own body (this game) | glide | 833 | 0.60 | 1 | 0 | 9.3 |
+| host | own body (this game) | landing | 86 | 0.00 | 0 | 0 | 0.0 |
+| guest | squadmate (the other player) | ride | 104 | 0.45 | 0 | 1 | 2.8 |
+| guest | squadmate (the other player) | fall | 85 | 0.43 | 0 | 0 | 5.2 |
+| guest | squadmate (the other player) | glide | 92 | 0.40 | 0 | 0 | 6.3 |
+| guest | squadmate (the other player) | landing | 51 | 0.40 | 0 | 0 | 9.2 |
+| guest | rocket (follower copy) | ride | 95 | 0.45 | 0 | 1 | 2.8 |
+| guest | rocket (follower copy) | fall | 85 | 0.43 | 0 | 0 | 5.2 |
+| guest | rocket (follower copy) | glide | 92 | 0.40 | 0 | 0 | 6.3 |
+| guest | rocket (follower copy) | landing | 16 | 0.40 | 0 | 0 | 9.2 |
+| guest | own body (this game) | ride | 104 | 0.80 | 1 | 1 | 0.3 |
+| guest | own body (this game) | fall | 85 | 0.40 | 0 | 0 | 3.5 |
+| guest | own body (this game) | glide | 92 | 0.23 | 0 | 0 | 6.3 |
+| guest | own body (this game) | landing | 51 | 0.15 | 0 | 0 | 9.3 |
+| guest | rival bots | ride | 208 | 0.43 | 0 | 2 | 1.8 |
+| guest | rival bots | fall | 170 | 0.60 | 2 | 0 | 4.5 |
+| guest | rival bots | glide | 184 | 0.12 | 0 | 0 | 9.3 |
+| guest | rival bots | landing | 102 | 0.12 | 0 | 0 | 9.3 |
+
+What it showed:
+
+- **The follower's rocket snapped the rider.** A squadmate's rocket is made where their own ship is, then followed
+  the leader's synced position in one jump (`pos = l.pos`). With the ships 0.2 s apart (a ship moves ~30 m/s) the
+  guest's own body jumped 2.2 m in one frame at the launch (3.3 m with a 0.1 s clock error); the other game saw it
+  smeared over several frames. `DropRocket.tick` now closes the gap at the rocket's speed plus 8 m/s (`CATCH`),
+  and only jumps past 40 m (`FOLLOW_SNAP`): the guest's own launch step is 0.8 m (the 0.8 m seat drop from the ship
+  to the rocket, by design) with the skew, 0.45 to 0.8 across runs. Checked: the guest's own body on the rocket
+  stays under 1.0 m. No Net shape change (the "rkt" event is as in 0.24.6), so `Net.VERSION` stays.
+- **Free fall and glide are clean.** The other game sees the jumper at 0.25 to 0.45 m a frame all the way down
+  (the free fall steers with `Loco.air_step`, the glider opens on the fresh press); the follower copy of the
+  rocket (the leader) 0.40 to 0.45 at its 24 m/s top speed, the nominal 0.4.
+- **Both ends agree** to 0.01 m (the guest where it landed, the leader where the rocket set it down).
+- **Gap, not fixed: on a loaded box the host sees the guest's rider in the first second after the launch with
+  1 to 4 m steps** (about half the runs; the guest's own path is smooth, 0.45 to 0.8 m). The host's copy had snapshot
+  gaps (0.12 s, then 0.47 s) at 100 ms delay and none at 0 ms. Not traced: the guest builds the rocket's meshes
+  that frame (a hitch holds its 10 Hz snapshots), or the unreliable "st" packets over the 1392-byte MTU (Godot warns
+  at 1503 bytes on the host's) are lost. Those runs print `ODROCKET FLAG` lines and the check does not fail on them.
+- **Harness caveat found on the way:** one sim step a frame at less than 60 fps drifted the two games' clocks
+  apart by 0.2 s, which NetSmooth reads as lag and shows as a 1.3 m step every snapshot; the check steps on real
+  time for that reason (`--online-displace-check` still steps one a frame).

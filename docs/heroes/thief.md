@@ -13,7 +13,7 @@ The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twic
 | Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
 |---|---|---|---|
 | RMB Bola | +50% damage; +100 distance after the hit and -4s; tier IV: two foes caught pool their Marks | 6.3s / 5.6s, damage +15% / +30%; 1m further and pooling at 3 | 7s / 4.8s, damage +50% / +50%; 1m further and pooling at 3 |
-| Shift Vault | +20% empowered damage x2; tier IV: +50% speed boost | recharge 3.8s / 3.2s (shared -15%), empowered +20% / +40%, speed boost x1.5 at 3 | recharge 4.5s flat (the source has none), empowered +20% / +40%, speed boost x1.5 at 3 |
+| Shift Vault | +20% empowered damage x2; tier IV: +50% speed boost | recharge 3.8s / 3.2s (shared -15%), empowered +20% / +40%, speed boost x1.5 at 3 | recharge 5s flat (the source's, no cooldown upgrade), empowered +20% / +40%, speed boost x1.5 at 3 |
 | E Shadow Knife | -8s; refund 25% on terrain, doubled on foes; landing on a foe resets Quickflip | 13.5s / 12s, damage +15% / +30%; refund and reset at 3 | 10.7s / 10.7s, no damage step; refund and reset at 3 |
 
 ## Research summary
@@ -30,6 +30,9 @@ Ratios, not raw numbers: a bolt is 13 (the source basic attack, 137; raised from
 a Mark is a flat +1.3 (the data's +16 on its 160 bolt, on our 13), the Bola is 5 (74) and +13 for a pair (199), an Encore blade
 is 4 and +2 from the outer band (the source's 0.2s cadence, item 54: twice the blades of the old 8 and +4, the same
 40 and 60 over a cast; the old pair was about 0.9 of a bolt, 114-127 against 137, and the card's +50%, 36 + 19%
+a Mark is +10% of a bolt (the data's +16 on its 160 bolt), the Bola is 3 and +6.1 for a pair and an Encore blade
+4.5 and +3.1 from the outer band (the source's share of the target: Chain Bolas 46 and +94, Fusillade 69 and +48, of
+2364 at level 15, times our 154; pinned in content/rules/kit_parity.json; 10 blades at the 0.2s cadence of item 54 make 45 and 76 over a cast; the old pair was about 0.9 of a bolt, 114-127 against 137, and the card's +50%, 36 + 19%
 against +18 + 9.5%). Cooldown ratios: Vault 4.5s (Cartwheel 4.2), Bola 7s (Trickshot 6.7), Shadow Knife 15s (Phantom
 Dagger 15), Encore 24s (Death Blossom 23.1, about 3.5 Trickshots).
 
@@ -46,7 +49,7 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Ground Cartwheel time | 0.37-0.57s above run speed; crouch 0.05s, over the top by 0.3, landing crouch, upright by about 0.5s [footage] | 0.42s x 1.15 = 0.48s | 0.48s (the `thf_vault` keys: crouch 0.05, over the top 0.30, landing 0.36, up 0.48) |
 | Ground speed curve | peak 15-16.5 m/s at +0.1-0.27s, then a steady run-down into the faster run [footage] | the same curve, peak about 12.5 m/s | peak about 14.8 m/s at 0.14s |
 | Air Cartwheel | 225 px, about 8.4m over about 0.95s, about 2x run speed held until she lands [footage] | 8m x 0.85 = 6.8m over 1.09s | owner 11-09: too far. The ground Cartwheel (4.5m / 0.48s on its curve, item 183), then the air's drag to the landing: jump > Shift 11.9 -> 9.4 m (cast median 6.6, `--air-control-check`) |
-| Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | unchanged (between the two; landing the shot resets it anyway) |
+| Cooldown, charges | 5s at rank IV, 6 mana, 1 charge [game data]; the card in the footage says 4.2s [footage] | 4.5s, 1 charge | 5s, 1 charge (the data wins over the card, as for the LMB range; `--kit-parity-check` row `thief Shift dash.cd`; landing the shot resets it anyway) |
 | What empowers | the dash empowers the next Arcslinger [game data]; from a jump too (0129-0143) [footage] | the dash, ground and air (its dash -> LMB row) | unchanged |
 | How long it waits | not given; the gold aim line held about 0.8s before the shot (0139-0143) [footage] | 3s | unchanged (an assumption) |
 | Empowered damage | +214 on a 160 bolt, so 2.34x [game data]; 474 and 561 on a 137 bolt in the footage, which is 2.34x plus about 9 and 14 stacks of +17 [footage, derived] | 3.5x the bolt, Marks multiplying all of it | a bolt plus 1.34 bolts (2.34x); Marks add a flat 1.3 each, as the source's +16 a stack |
@@ -59,6 +62,23 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
+## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
+
+Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
+supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
+owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
+
+| What | Ours |
+|---|---|
+| Window | a bolt thrown within 1.2s of an empowering Vault (`quick_window`; the footage's slowest dash -> shot is about 1.2s, 0137 -> 0143) starts the run |
+| Speed | 0.6x the interval (`quick_k`): 0.27s instead of 0.45s, +67% rate |
+| How many | 3 quick intervals (`quick_n`): the empowered bolt and the next three leave 0.27s apart (4 bolts in about 0.8s instead of 1.35s), then 0.45s again |
+| Ends early | a bolt that doesn't follow within its interval + 0.2s ends the run; a bolt cooling as she flips is cut to 0.27s |
+| Tell | no UI: the three quick bolts carry the cartwheel's cyan, a cyan tail on the gold chakram and a cyan star at the throwing hand; the faster throws themselves. Effects are local like her other bolt looks; online viewers see the faster cadence |
+
+Asserted in `--dancer-combo-check` (`dancer quick: ...`).
+
 ## Footage gaps, Nov 9 re-check
 
 The 11 ranked rows of `briefs/hero-ref/dancer.md` section 5, marked on main d255acbee. Closed rows cite the code or commit; assert lines are in `--dancer-combo-check` (tools/dancer_jug_check.gd unless noted). Nothing was built in this pass: no row is open, and every file a build would touch (`thief_kit.gd`, `thief.json`, `dancer_jug_check.gd`) is changed by an in-flight Sable branch (ext/sable-bola-instant-rebased, ext/sable-lmb-range, ext/sable-dagger-barriers, ext/combo-marks-a, ext/recast-marker-a, ext/cooldown-parity-verify).
@@ -69,7 +89,7 @@ The 11 ranked rows of `briefs/hero-ref/dancer.md` section 5, marked on main d255
 | 2 | Aim line ends at the cursor, gold empowered line | closed | `ThiefKit._tick_aim_line`: pale lilac line to the cursor with an arrow tick; solid thick gold plus glow while `primed_t > 0`; "dancer LMB: the aim line ends at the cursor", "dancer dash: the aim line turns solid gold, thick, with a glow while empowered" |
 | 3 | Passive stacks visible, no cap | closed | Marks have no cap and no per-hit gap; eight gold diamonds over the target with a count; +10% of a bolt per Mark (the data's +16 on 160, over the footage's 12% estimate); "dancer passive: Marks have no cap (22 after 20 more), eight diamonds show" |
 | 4 | Empowered shot is the one big next bolt | closed | 2.34x on the bolt itself, not a second hit (f6bb27c3, feel pass above); "dancer empowered bolt: a big hit, 2 Marks" |
-| 5 | Dash and cooldown numbers | closed; pacing in flight | Vault 4.5 s, Bola 7 s, Knife 15 s (the footage cards). Cartwheel is 4.5 m in 0.48 s, the measured one, not the sheet's 2.4 m (owner review 1103 item 7, feel pass table). ext/cooldown-parity-verify 2be9877c2 moves them to the data's 5 / 13 / 28 s: an owner pacing call, not taken here |
+| 5 | Dash and cooldown numbers | closed; pacing in flight | Vault 5 s (was 4.5, ext/sable-vault-riders), Bola 7 s, Knife 15 s (the footage cards). Cartwheel is 4.5 m in 0.48 s, the measured one, not the sheet's 2.4 m (owner review 1103 item 7, feel pass table). ext/cooldown-parity-verify 2be9877c2 moves them to the data's 5 / 13 / 28 s: an owner pacing call, not taken here |
 | 6 | Vault is a sideways cartwheel with an arc | closed | `thf_vault_l/r` for every direction, cyan and lilac arc traced by hands and feet; no ring or burst on the dash (DECISIONS: no bursts or rings on dashes; OWNER_REVIEW_1103 item 8); "dancer dash (item 8): no ring on the cartwheel or its landing" |
 | 7 | Bola cast window and lane | closed | `bola.cast` 0.4, `range` 7, the lane follows the aim during the wind-up (`bola_cast`, `_tick_bola_cast`, `lane_len`); "dancer RMB: the lane shows through the 0.4s wind-up" |
 | 8 | Bola bounces off terrain | closed once; wall as second target in flight | `_tick_bola` reflects `dir` once and keeps `left`; "dancer Bola: bounces off a wall". Whether a wall after the first catch stuns: ext/sable-bola-instant-rebased 2024f0105 (yes) |
@@ -80,6 +100,23 @@ The 11 ranked rows of `briefs/hero-ref/dancer.md` section 5, marked on main d255
 Rows 12 and 13 (not in the top 11): knock feedback is closed (`KNOCK_STAR` crimson star on the knocked, green pillar on her, `on_knock`); no audio in the footage, n/a.
 
 Suggestions for the owner (not built): the pacing set in row 5 (4.5 / 7 / 15 s from the footage cards against 5 / 13 / 28 s from the data); and whether the Bola's bounce off a wall should be the second catch (row 8, in flight).
+## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
+
+Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
+supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
+owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
+
+| What | Ours |
+|---|---|
+| Window | a bolt thrown within 1.2s of an empowering Vault (`quick_window`; the footage's slowest dash -> shot is about 1.2s, 0137 -> 0143) starts the run |
+| Speed | 0.6x the interval (`quick_k`): 0.27s instead of 0.45s, +67% rate |
+| How many | 3 quick intervals (`quick_n`): the empowered bolt and the next three leave 0.27s apart (4 bolts in about 0.8s instead of 1.35s), then 0.45s again |
+| Ends early | a bolt that doesn't follow within its interval + 0.2s ends the run; a bolt cooling as she flips is cut to 0.27s |
+| Tell | no UI: the three quick bolts carry the cartwheel's cyan, a cyan tail on the gold chakram and a cyan star at the throwing hand; the faster throws themselves. Effects are local like her other bolt looks; online viewers see the faster cadence |
+
+Asserted in `--dancer-combo-check` (`dancer quick: ...`).
+
 ## LMB range, speed (parity pass, ext/sable-lmb-range)
 
 | What | Source | Ours before | Ours now |
@@ -128,7 +165,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Self shake on the empowered bolt, blink, Tangle (MED) | (a) / (c) | The empowered bolt's own `add_trauma` went in c7453578. `Feel.shake` and the punches belong to ext/no-shake (item 50); nothing added here |
 | Empowered extras: Shred, Marks, haste end (LOW) | (a) / (b) / (c) | Shred is gone (f6bb27c3). Marks: back to 2 on the empowered hit, the owner's spec (MAIN_TO_EXT 03:20, "keep 2 Marks"; the feel pass had made it 1). The speed boost ending on the empowered shot is the wiki's Quickflip rule (Small mechanics), kept. Assert `dancer empowered bolt: a big hit, 2 Marks ...` |
 | Bola's slow on Grounded (LOW) | (b) | Removed by the audit: the data's Ground is no dash or jump, no slow. Back by the owner's override (item 53): 30% for the Ground's 1.5s. Assert `dancer Bola: one foe caught is Grounded and slowed 30%` |
-| Bola cooldown 0.54x the data, pair stun 0.9s (LOW) | (c) | 7s follows the footage card (6.7s); the 1.8s is how long the STUNNED word showed, not a measured stun. The stun stays 0.9s: see "Pair stun length" below. Owner pacing call |
+| Bola cooldown 0.54x the data, pair stun 0.9s (LOW) | (c) | 7s follows the footage card (6.7s); the 1.8s is how long the old STUNNED word showed, not a measured stun. The stun stays 0.9s: see "Pair stun length" below. Owner pacing call |
 | Knife cooldown (LOW) | (c) | 15s is the footage card; the data's 28s base is level 1. Owner pacing call |
 | LMB range 12m vs "850 uu" (LOW) | (b) | Parity pass (ext/sable-lmb-range): set to 8.5m, 9.5m empowered, 37.5 m/s. See "LMB range, speed" below |
 | Other Vault resets: Encore, knife at rank 3 (LOW) | (c) | Both are in the data (Fusillade, Farstep IV). DECISIONS' "reset only on an empowered hit" is about the empowered bolt hitting vs missing |
@@ -167,7 +204,7 @@ pass above.
 | LMB | legs | wide low stance standing; running, "the torso snaps to the cursor while firing with either hand, and the legs keep running" [footage] | the throw's legs at full weight for 0.35s of every 0.45s, running or not (the feet froze mid-run) | the legs are a stance (`"stance": true`): full standing, none at a run, so the legs keep running |
 | LMB | tracking | the bolt flies to the cursor point; the body faces the cursor, yaw 1280 deg/s [footage, game data] | the same | unchanged; asserted: a bolt swung behind her leaves on the new cursor, the body turns 180 degrees in 0.13s |
 | LMB | cadence | 0.45s [footage card] | 0.45s | unchanged; asserted held (a bolt every 0.45s, hands alternating) |
-| LMB | move while firing | 77-86 px/s firing against 113 (unconfirmed) [footage] | 90% of the run | unchanged (90%); asserted she keeps 85% or more |
+| LMB | move while firing | 77-86 px/s firing against 113 in three stretches: 68-76% [footage] | 90% of the run | 72% (`fire_slow`, cast-move pass 2026-11-11, docs/KIT_PARITY.md); asserted 66-78% |
 | LMB | the empowered bolt's own kick | a big streak and a blade flash at her hands [footage 0143] | a screen shake on your own camera | no screen shake (owner rule 50); the streak, the flash and the sound carry it |
 | RMB | wind-up | the bolas whirled overhead through the 0.4-0.6s lane [footage 0100-0101] | the whirl, the legs locked through it | the legs are a stance (walking, she keeps walking) |
 | Shift, E, R | | see the feel pass, the per-slot table and the small mechanics | | unchanged (already at the source's beats) |
@@ -218,14 +255,17 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
 | R, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.8m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 5 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +13 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (16m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s), in a placed barrier it hits (riding it; on the ground under it if it breaks), or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
-| X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
+| X, Encore | tap (level 6) | A violet ring grows round her evenly from 0.3m to 5.4m (3 bh) over 0.4s (half-size at 0.2s, `hero_vfx_check` asserts it), everyone sees it, then rides with her, ring and blades centred on her through a Vault, for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
+| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s), in a placed barrier it hits (riding it; on the ground under it if it breaks), or lands where you aimed; RecastCue's E marker sits on it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
+| X, Encore | tap (level 6) | A violet ring grows round her evenly from 0.3m to 5.4m (3 bh) over 0.4s (half-size at 0.2s, `hero_vfx_check` asserts it), everyone sees it, then rides with her, ring and blades centred on her through a Vault, for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
+| RMB, Bola | tap | A 0.4s wind-up (whirled overhead) with a chevron lane showing (1.8m wide, 10.8m long) that follows your aim, then the Bola flies 7m: 3 and a Mark, the first foe Grounded and slowed 30% for 1.5s with yellow binding rings, and it flies on 3.8m; it bounces once off a wall; a second foe: both stunned 0.9 and +6.1 | Trickshot: the lane for 0.4-0.6s, Grounded on the first, Stunned on two, bounces off terrain | As the source |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 
 ## Body and movement (hero sheet "Body, scale and movement feel")
 
 - Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
-- Runs pitched far forward (about 0.57 rad at a run).
+- Runs pitched far forward (about 0.57 rad at a run), the stride at the sheet's ~2.3 Hz (Animation timing).
 - Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve (off the global dash feel). In the air it is the same
   Cartwheel on the same curve (item 183), out of charges the class's long dash, and the shared air drag carries her
   on to the landing (owner 11-09: the sheet's 8.4 m held flat over 0.95 s flew far past the cast). From a jump it
@@ -401,6 +441,65 @@ Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and s
 `thf_land` (touching down from it: a low crouch for 0.1s), `thf_bola` (whirl overhead through the 0.4s lane, sling at
 0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_encore` (R: blades raised as the
 ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats that loop, a fling on each: two side flings, a pirouette, two low sweeps, a twirl back with the crossbows overhead; the legs are a stance, so walking she keeps walking)
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+
+Every slot measured three ways: the source from briefs/hero-ref/dancer.md (one frame = 0.2 s, the ult strip 0.1 s), the
+kit's own release (the code and content/archetypes/thief.json, on the move clock `kmove_t`), and the v2 clip
+(art/wardens/sable/sable.glb, its clip map content/rules/warden_anim/sable.json) swept at 60 Hz: "strike" is its
+fastest hand frame, "end" its length, the moment it hands back to the legs. `--dancer-combo-check` asserts each
+release's strike within 0.05 s of the kit's (tools/clip_strike_check.gd, lines `thief clip timing ...`). The v2
+clips are keyed on KMovesDJ's beats, so no row needed a fix.
+
+| Slot | Source: wind-up / strike / active / recover | Ours: release / clip strike / end | Verdict |
+|---|---|---|---|
+| LMB tap (`thf_lmb_r`, `thf_lmb_l`) | one arm whipped out inside one frame, 2-3 frames a shot [0028-0039] | 0.00 / 0.03 / 0.70 (the other arm cocked by 0.45) | matches; asserted |
+| LMB hold | a hit every 2-3 frames, 0.45 s on the card, left then right [0001-0045] | every 0.45 s, hands alternating, each throw from the other's 0.45 pose | matches (`parity` rows) |
+| Empowered LMB (`thf_primed`) | a big streak and a blade flash at her hands, the same beat [0143] | 0.00 / 0.02 / 0.53 | matches; asserted |
+| RMB (`thf_bola`) | a 0.4-0.6 s lane with the bolas whirled overhead, slung with a lunge [0085-0087, 0100-0102] | 0.40 (data `cast`) / sling 0.38 / 0.73 | matches; asserted (the whirl's raise is skipped) |
+| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_OUT`) / 0.08 / 0.47 | matches; asserted |
+| E recast (`thf_arrive`) | a blink under one frame [0237-0238] | at the dagger at once / the pop 0.6 | matches |
+| Shift ground (`thf_vault_*`) | a 0.05 s crouch, over the top 0.25-0.3 s, up by about 0.5 s [0176-0178] | dash 0.48 (data) / hips over by 0.12-0.18 / 0.47 | matches |
+| Air dash (`thf_exdash`, `thf_land`) | over in about 0.25 s, landing crouch about 0.1 s, up by 0.15 [0129-0134] | turned over by 0.23, carried flat from 0.46 until she lands (0.95 s at most) / a 0.17 s landing | matches |
+| X (`thf_encore`, `thf_encore_dance`) | the ring grows 0.4 s with the blades raised, blades every 0.2-0.4 s for 2 s [f27-f50] | grows 0.4 (data), the spin ends 0.35 as it opens; 0.2 s fling beats for 2 s | matches |
+| R | the Boki Merge (`mf_xform`, ours) | 0.80 | no source |
+
+Suggestions (ours, not built): the release snaps (0.02-0.03 s) land inside the 0.1 s blend in, so a lone tap shows
+about half the whip; a per-move `"fade"` near 0.04 would show it whole (ext/anim-time-sable measured this on v1).
+
+## Animation timing, start / hit / end on the move clock (Nov 10, ext/anim-timing-thief)
+Measured through `WardenClips` (sable.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, out to
+locomotion 0.16 s) in `--thief-combo-check` (tools/thief_anim_time_check.gd, its `TIME` lines). "Hit" is the release
+key, "end" when the blend out is done. Source times from briefs/hero-ref/dancer.md (one frame = 0.2 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `thf_lmb_r` `thf_lmb_l` | one arm whip a shot, a hit every 2-3 frames against the 0.45 card | 0.02 / shot key 0 / settled 0.26; held: a bolt every 0.467 (frame steps of 0.45), hands alternating | same | matches |
+| `thf_primed` | one frame of the glint, nothing to time | V 0.04 / recoil 0.24 / 0.55 | same | no source |
+| `thf_bola` | lane 0.4-0.6 s, then a whirl overhead and a sling with a lunge | 0.00 / thrown 0.42 on the clip's sling key 0.42 / 0.90 | same | matches |
+| `thf_knife` | thrown within a frame (0222 -> 0223) | 0.00 / release 0.13 on the clip key / 0.63 | same | matches |
+| `thf_arrive` (recast) | blink inside one frame (< 0.2 s) | there after 0.02 s | same | matches |
+| `thf_arrive` (forced return) | no auto-teleport seen in 5 s | on the window's end, a cartwheel in flight cut | same | no source (asserted as built) |
+| `thf_vault_*` | crouch 0.05, over the top 0.25-0.3, landing crouch, up by 0.45-0.5; 3.9-5.4 m | dash 0.48, clip 0.48 on it (push-off 0.1, turn 0.3, land 0.36) / out 0.63; 4.5 m | same | matches |
+| `thf_exdash` (flip) | 304.0-304.25 (0.25 s) | tuck 0.05, flip 0.08 -> 0.34 (0.26 s), then held flat | same | matches |
+| Air Cartwheel (carry) | lands ~0.5 s after the jump; 8.4 m over ~0.95 s, no float | dashed 0.1 s after a jump: 5.8 m, touchdown 0.75 s after the press (the same Cartwheel on the ground curve, then the shared air drag; owner 11-09 chose this over the sheet's flat 8.4 m) | same | differs by decision (below) |
+| `thf_land` | crouch ~0.1, up in ~0.05 | on the touchdown frame (1.23 vs 1.22), crouch 0.1, up by 0.18 | same | matches |
+| `thf_encore` `thf_encore_dance` | ring grows ~0.4 s, a blade about every 0.2 s for 2 s | cast on the press; beats 10 from 0.42 every 0.200; dance from 0.42 on the beat's clock; over 2.42 | same | matches |
+| `mf_xform` | - | - | same | no source |
+| Run cadence | ~2.3 Hz (4.5 steps/s) | 1.63 Hz at 4.65 m/s (the 0.62 s run clip at rate 1, before WardenGait) | 2.21 Hz at 4.79 m/s (WardenGait: rate = speed / `loco.foot_mps` run 3.18, capped at 1.4) | fixed on main by the gait layer; asserted |
+
+The run cadence came with main's WardenGait (content/rules/warden_anim/sable.json `loco.foot_mps` and `stride`), so
+`loco.run_speed` stays 4.6 (it also sets the walk-run blend); this pass only asserts the cadence. The harness reads
+the rate from `WardenGait.plan`, so a later change to the gait data that moves the stride off ~2.3 Hz fails it.
+
+The air carry: main (owner 11-09) flies the air Cartwheel on the ground curve and lets the shared air drag carry her
+on, so she lands 0.75 s after the press and 5.8 m on, not the sheet's 8.4 m over 0.95 s. That is a decision, so the
+check asserts only the landing hand-off (the crouch on the touchdown frame) and prints the carry.
+
+Clip re-keys (tools/art1/sable_clips.py): none needed.
+
+Suggestions (ours, not built): the forced return is skipped when she is stunned or downed as the window ends, and the
+dagger is lost; holding the step until she is free would read better.
 
 ## Look and sound (all ours)
 

@@ -26,6 +26,7 @@ onto its side (`Kin.render`).
 | cinder | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | claire | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
+| emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | gil | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |
 | hem | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | kael | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
@@ -33,26 +34,26 @@ onto its side (`Kin.render`).
 | pip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | proc | clip | clip | clip |
 | ryzz | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | sable | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
-| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | proc |
+| tarek | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 | vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | proc | clip | clip | clip |
 
 ### Starter Boki
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | missing | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | missing | missing | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | missing | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | missing | proc | clip | missing |
 <!-- table:end -->
 
 ## Gaps, worst first
 
 1. **Gil has no authored clips** (empty `gil.glb` animation list): every state is `proc`, and the Hunter has no
    crouch, strafe or kit-move clips. Needs a Blender rig pass (days), same as the others got.
-2. **Boki glide, dash and stomp are `missing`**: the Boki is carried curled up through a glide, dashes as the run clip
-   and has no stomp (the Wisp stomp is the Hunter's). A dash lean needs `KinFlinch`-style spring on `kact`: next after
-   the landing (done here).
+2. **Boki glide and stomp are `missing`**: the Boki is carried curled up through a glide
+   and has no stomp (the Wisp stomp is the Hunter's). The dash is `proc` now: `KinFlinch.dash` leans the body into
+   the move and the landing squash settles it.
 3. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
    phase and charge poses stand in; only claire, kael, ryzz, sable, tarek and vex key a dash clip.
-4. **Tarek has no upper-body kit move**, so his attacks stop the legs.
+4. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
