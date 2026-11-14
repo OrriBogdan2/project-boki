@@ -165,7 +165,8 @@ static func hunter_stop(h: Hunter) -> String:
 		return "dash"
 	return "cc" if controlled(h) else ""
 
-## What stops a scan: "jump" or "dash" (your choice), crowd control, or the Boki gone. "" keeps it going.
+## What stops a scan: "jump" or "dash" (your choice), crowd control, "far" (out of range), or the Boki gone. "" keeps it
+## going.
 ## Plain damage is not on the list.
 static func interrupt_reason(h: Hunter, k: Kin) -> String:
 	if k == null or not is_instance_valid(k) or k.dead or k.state != "dazed":
@@ -176,7 +177,7 @@ static func interrupt_reason(h: Hunter, k: Kin) -> String:
 	if own != "":
 		return own
 	if h.flat_dist(k) > float(rules()["cancel_range"]):
-		return "cc"
+		return "far"
 	return ""
 
 static func cancel(m, h: Hunter, why: String) -> void:
@@ -192,10 +193,11 @@ static func cancel(m, h: Hunter, why: String) -> void:
 		(k as Kin).scan_by = null
 		_send(m, "scan_stop", h, k, 0.0)
 		_fizzle(m, k)
+	var told := FirstCapture.fail(m, h, why)     # (the first time it names the cause itself)
 	# (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
-	if why in ["jump", "dash", "cc"]:
-		if h.is_local() and m.hud:
-			var lead := "Scan interrupted" if why == "cc" else "Scan cancelled"
+	if why in ["jump", "dash", "cc", "far"]:
+		if h.is_local() and m.hud and not told:
+			var lead := "Scan interrupted" if why in ["cc", "far"] else "Scan cancelled"
 			m.hud.toast("%s: hold %s beside it to try again" % [lead, Settings.key_cap("interact")], Color("ffd89a"))
 		m.sfx("scan_fail", h.pos, 0.0)
 
