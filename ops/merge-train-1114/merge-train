@@ -1,0 +1,94 @@
+#!/bin/bash
+# merge-train [--group N] [--no-comment] PR... : a serial queue of gate-ready PRs, one gate at a time (gate-shard).
+# Each car = up to N PRs (default 1: the batch PRs are big already; pass N=3..5 for small ones) merged, in order, onto the
+# train's running base (origin/main to start) in a scratch worktree with ops/merge-rush-1113/merge_batch.sh's conflict policy.
+# - Green car: base moves to it, so the next car is gated on main + every green car before it (the coordinator merges in
+#   queue order and never re-gates). Each PR gets "GATE GREEN <head sha> <summary>" (gh when logged in, GH_TOKEN with curl,
+#   else the text is left in $OUT/comment-<pr>.md for `gh pr comment`) and a line in $MERGE_READY (default
+#   /home/boki/coord/MERGE_READY.md) with the one command that merges it.
+# - Red car of 2+ PRs: bisect, first half then second half (the second half is gated on the base the first half left). A single
+#   red PR is dropped with its NEW-RED list; the train goes on without it. A PR that cannot merge onto the base is dropped
+#   with the conflicting files ("needs rebase"). Nothing is merged, approved or bypassed here: the coordinator merges.
+# - Work dir $TRAIN_WORK (default ../train-work next to the repo, which jobq --tree wants inside /home/boki/cj/<id>/).
+#   Log: $OUT/train.log (default $TRAIN_WORK/out); per-gate output under $OUT/gate-<n>/. A stop file $TRAIN_WORK/STOP ends
+#   the train after the running gate.
+set -u
+GROUP=1 COMMENT=1
+while [[ ${1:-} == --* ]]; do
+	case $1 in --group) GROUP=$2; shift ;; --no-comment) COMMENT=0 ;; *) sed -n 2,14p "$0"; exit 2 ;; esac; shift
+done
+[ $# -ge 1 ] || { sed -n 2,14p "$0"; exit 2; }
+REPO=$(git rev-parse --show-toplevel) HERE=$(cd "$(dirname "$0")" && pwd)
+WORK=$(realpath -m "${TRAIN_WORK:-$REPO/../train-work}") OUT=${OUT:-$WORK/out}
+READY=${MERGE_READY:-/home/boki/coord/MERGE_READY.md}
+REPO_SLUG=${REPO_SLUG:-OrriBogdan2/project-boki}
+RUSH=$REPO/ops/merge-rush-1113/merge_batch.sh
+mkdir -p "$WORK" "$OUT"; N=0
+log() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/train.log"; }
+
+git -C "$REPO" fetch -q origin main
+MAIN=$(git -C "$REPO" rev-parse origin/main) BASE=$MAIN
+for pr in "$@"; do git -C "$REPO" fetch -q origin "refs/pull/$pr/head:refs/remotes/pr/$pr" || { log "PR #$pr: fetch failed"; exit 2; }; done
+
+fresh_tree() {  # fresh_tree DIR SHA : a detached worktree at SHA (reused dirs are reset, so .godot imports survive)
+	[ -d "$1/.git" ] || [ -f "$1/.git" ] || git -C "$REPO" worktree add -q --detach "$1" "$2"
+	git -C "$1" reset -q --hard "$2" && git -C "$1" clean -fdq -e .godot
+}
+
+post() {  # post PR TEXT
+	local pr=$1 text=$2
+	printf '%s\n' "$text" > "$OUT/comment-$pr.md"
+	[ "$COMMENT" = 1 ] || return 0
+	if command -v gh > /dev/null && gh auth status > /dev/null 2>&1; then gh pr comment "$pr" --repo "$REPO_SLUG" --body "$text" > /dev/null
+	elif [ -n "${GH_TOKEN:-}" ]; then
+		curl -sf -X POST -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$REPO_SLUG/issues/$pr/comments" \
+			-d "$(python3 -I -c 'import json,sys; print(json.dumps({"body": sys.argv[1]}))' "$text")" > /dev/null
+	else log "PR #$pr: no gh or GH_TOKEN here, comment text left in $OUT/comment-$pr.md"; fi
+}
+
+gate_car() {  # gate_car PR... : merge them onto $BASE, gate; 0 green (BASE moves), 1 red, 3 nothing left to gate
+	local prs=() pr sha list="$OUT/list-$N.txt" skips="$OUT/skips-$N.txt" cand="$WORK/cand" summary
+	: > "$list"; : > "$skips"
+	for pr in "$@"; do echo "pr/$pr $(git -C "$REPO" rev-parse "pr/$pr")" >> "$list"; done
+	fresh_tree "$cand" "$BASE"
+	(cd "$cand" && bash "$RUSH" "$list" "$skips" > /dev/null 2>&1)
+	while read -r b _ _ files; do
+		pr=${b#pr/}; log "PR #$pr: DROPPED needs rebase, conflict in: $files"; DROPPED+=("$pr conflict: $files")
+	done < "$skips"
+	for pr in "$@"; do grep -q "^pr/$pr " "$skips" || prs+=("$pr"); done
+	[ ${#prs[@]} -gt 0 ] || return 3
+	N=$((N + 1)); local out="$OUT/gate-$N"
+	log "gate $N: PRs ${prs[*]} on base ${BASE:0:10} (main ${MAIN:0:10})"
+	fresh_tree "$WORK/main" "$MAIN"
+	GS_TAG="mt$N" bash "$HERE/gate-shard" "$WORK/main" "$cand" "$out" > /dev/null 2>&1
+	local rc=$?; summary=$(head -1 "$out/summary.txt" 2>/dev/null)
+	[ $rc -eq 2 ] && { log "gate $N: usage or import failure, train stopped"; exit 2; }
+	log "gate $N rc=$rc: ${summary:-no summary (import failure?)}"
+	if [ $rc -eq 0 ]; then
+		BASE=$(git -C "$cand" rev-parse HEAD)
+		for pr in "${prs[@]}"; do
+			sha=$(git -C "$REPO" rev-parse "pr/$pr")
+			post "$pr" "GATE GREEN ${sha:0:10} ${summary#GATE GREEN } (candidate ${BASE:0:10}, train position $N)"
+			echo "- $(date -u +%F\ %H:%M) #$pr ${sha:0:10} train#$N after ${MAIN:0:10}: \`gh pr merge $pr --merge --match-head-commit $sha\` ($(grep -o 'checks=[0-9]* new_red=[0-9]*' <<< "$summary"))" >> "$READY"
+			GREEN+=("$pr")
+		done
+		return 0
+	fi
+	for pr in "${prs[@]}"; do LAST_RED[$pr]=$(grep -h '^NEW-RED' "$out/summary.txt" | head -1); done
+	return 1
+}
+
+car() {  # car PR... : gate, and on red bisect in halves
+	[ -f "$WORK/STOP" ] && { log "STOP file: leaving ${*}"; SKIPPED+=("$@"); return; }
+	gate_car "$@"; local rc=$?
+	[ $rc -eq 1 ] || return 0
+	if [ $# -eq 1 ]; then log "PR #$1: DROPPED red: ${LAST_RED[$1]:-export or import failure}"; DROPPED+=("$1 red: ${LAST_RED[$1]:-export/import}"); return; fi
+	local half=$(($# / 2)); car "${@:1:half}"; car "${@:half+1}"
+}
+
+GREEN=() DROPPED=() SKIPPED=(); declare -A LAST_RED
+T0=$(date +%s)
+queue=("$@")
+while [ ${#queue[@]} -gt 0 ]; do car "${queue[@]:0:GROUP}"; queue=("${queue[@]:GROUP}"); done
+log "train done in $(( ($(date +%s) - T0 + 59) / 60 )) min: green [${GREEN[*]}] dropped [${DROPPED[*]}] skipped [${SKIPPED[*]}] final base ${BASE:0:10}"
+[ ${#DROPPED[@]} -eq 0 ]

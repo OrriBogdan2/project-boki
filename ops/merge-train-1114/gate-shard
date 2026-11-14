@@ -1,0 +1,123 @@
+#!/bin/bash
+# gate-shard MAIN_TREE CAND_TREE OUT : the merge gate (every check flag on main and on the candidate side by side, plus
+# the export dry-run), with each check sent as its own `jobq submit --needs any` job. The idle CPU workers (rpc pods,
+# w2, hetzner) run the suite in parallel instead of one box running 12 at a time (ops/merge-rush-1113/suite.sh, the
+# same checks and the same 300 s cap).
+# - Flags: every "--*-check" key in tools/check_registry.gd plus the ones still wired inline in scripts/main.gd.
+#   FLAGS="--a-check --b-check" runs only those (merge-train's bisect re-runs just the new reds).
+# - Main-side greens are cached per main sha in $GS_CACHE (reds re-run every time), so the second PR gated on the same main submits half the jobs.
+# - A flag red on the candidate and green on main is re-run once on both sides; it is NEW-RED only if that repeats
+#   (the batch gates' flake rule). A job that never comes back is re-run too, then counts as red.
+# - Export: ~/bin/release-dryrun CAND when it exists (hetzner), else `--export-pack` of every preset; runs during the wait.
+# OUT gets main.txt / cand.txt ("<flag> <rc> <script_errors> <secs>"), jobs.tsv, export.txt and summary.txt, whose first
+# line is "GATE GREEN|RED ..." (exit 0 / 1; 2 = usage or import failure).
+set -u
+export LC_ALL=C  # sort and comm must agree
+[ $# -eq 3 ] || { sed -n 2,13p "$0"; exit 2; }
+MT=$(realpath "$1") CT=$(realpath "$2") OUT=$3
+CACHE=${GS_CACHE:-$HOME/.gate-shard-cache}
+TAG=${GS_TAG:-gs$$}
+CAP=${GS_CAP:-300}             # per-check timeout, s (suite.sh uses 300)
+SUBMIT_P=${GS_SUBMIT_P:-12}     # parallel submits (a w2 relay call takes ~4 s)
+MAX_WAIT=${GS_MAX_WAIT:-5400}  # s before unfinished jobs count as lost
+mkdir -p "$OUT" "$CACHE"; OUT=$(realpath "$OUT"); : > "$OUT/jobs.tsv"
+T0=$(date +%s)
+MSHA=$(git -C "$MT" rev-parse HEAD) CSHA=$(git -C "$CT" rev-parse HEAD)
+
+flags_of() {
+	{ grep -o '^\s*"--[a-z0-9-]*-check"' "$1/tools/check_registry.gd"; grep -o '"--[a-z0-9-]*-check"' "$1/scripts/main.gd"; } \
+		| tr -d ' \t"' | sort -u
+}
+
+pick() {  # pick TREE: the flags to run in TREE (FLAGS limits them to the ones TREE has)
+	if [ -n "${FLAGS:-}" ]; then tr ' ' '\n' <<< "$FLAGS" | sort -u | comm -12 - <(flags_of "$1"); else flags_of "$1"; fi
+}
+
+import_tree() {  # import_tree TREE NAME: refresh .godot (the workers get the tree with it); prints the parse-error count
+	XDG_DATA_HOME=$(mktemp -d) timeout 1800 godot --headless --path "$1" --import > "$OUT/import_$2.log" 2>&1
+	grep -cE 'Parse Error|SCRIPT ERROR' "$OUT/import_$2.log" > "$OUT/import_$2.n"
+}
+
+submit() {  # submit SIDE TREE < flags : one job per flag, SUBMIT_P at a time; appends "side flag id" to jobs.tsv
+	xargs -P "$SUBMIT_P" -I{} sh -c 'id=$(jobq submit --tree "$2" --needs any --label "$3-$1{}" --timeout "$4" -- {} \
+		2>/dev/null | tail -1); [ -n "$id" ] && echo "$1 {} $id"' _ "$1" "$2" "$TAG" "$CAP" >> "$OUT/jobs.tsv"
+}
+
+collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag> <rc> <errs> <secs>" to stdout
+	local left t1=$(date +%s) line id rc secs log errs
+	declare -A side flag
+	while read -r s f id; do side[$id]=$s; flag[$id]=$f; done < "$1"
+	left=" ${!side[*]} "
+	while [ -n "${left// /}" ] && [ $(( $(date +%s) - t1 )) -lt "$MAX_WAIT" ]; do
+		while read -r line; do
+			id=${line%% *}; [ -n "${side[$id]:-}" ] && [[ $left == *" $id "* ]] || continue
+			rc=$(grep -oP 'rc=\K-?[0-9]+' <<< "$line"); secs=$(grep -oP 'secs=\K[0-9]+' <<< "$line")
+			log=$(grep -oP 'log=\K\S+' <<< "$line"); errs=$(grep -c 'SCRIPT ERROR' "$log" 2>/dev/null)
+			echo "${side[$id]} ${flag[$id]} ${rc:-1} ${errs:-0} ${secs:-0}"; left=${left/ $id / }
+		done < <(jobq wait $left --max 300 2>/dev/null | grep ' rc=')
+	done
+	for id in $left; do echo "${side[$id]} ${flag[$id]} lost 0 0"; done
+}
+
+red() { awk '$2!="0" || $3>0 {print $1}' "$1" | sort -u; }
+
+# 1. import both trees (compile gate: the candidate may not add parse errors)
+import_tree "$MT" main & import_tree "$CT" cand &
+wait; PE_M=$(cat "$OUT/import_main.n") PE_C=$(cat "$OUT/import_cand.n")
+
+# 2. export dry-run in the background
+(
+	if [ -x ~/bin/release-dryrun ]; then ~/bin/release-dryrun "$CT"; exit; fi
+	x=$(mktemp -d)
+	grep -oP '^name="\K[^"]+' "$CT/export_presets.cfg" | while read -r p; do
+		XDG_DATA_HOME=$x timeout 1800 godot --headless --path "$CT" --export-pack "$p" "$x/out.pck" > "$x/log" 2>&1
+		echo "$p rc=$? $(du -m "$x/out.pck" 2>/dev/null | cut -f1) MB"; rm -f "$x/out.pck"
+	done
+	rm -rf "$x"
+) > "$OUT/export.txt" 2>&1 &
+EXPORT_PID=$!
+
+# 3. shards: candidate always; main only for flags not cached at this main sha
+pick "$CT" | submit c "$CT"
+: > "$OUT/main.txt"; touch "$CACHE/$MSHA.txt"
+pick "$MT" | while read -r f; do
+	grep -m1 "^$f " "$CACHE/$MSHA.txt" >> "$OUT/main.txt" || echo "$f"
+done | submit m "$MT"
+CACHED=$(wc -l < "$OUT/main.txt")
+collect "$OUT/jobs.tsv" > "$OUT/round1.txt"
+awk '$1=="c" {print $2, $3, $4, $5}' "$OUT/round1.txt" > "$OUT/cand.txt"
+awk '$1=="m" {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$OUT/main.txt"
+awk '$1=="m" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$MSHA.txt"  # greens only
+SUBMITTED=$(wc -l < "$OUT/jobs.tsv")
+
+# 4. re-run what is red only on the candidate (or lost) once on both sides
+SUSPECT=$(comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"))
+if [ -n "$SUSPECT" ]; then
+	: > "$OUT/jobs2.tsv"
+	echo "$SUSPECT" | submit c "$CT"
+	echo "$SUSPECT" | comm -12 - <(pick "$MT") | submit m "$MT"
+	tail -n +"$((SUBMITTED + 1))" "$OUT/jobs.tsv" > "$OUT/jobs2.tsv"
+	collect "$OUT/jobs2.tsv" > "$OUT/round2.txt"
+fi
+touch "$OUT/round2.txt"
+NEW_RED=$(comm -12 <(awk '$1=="c"' "$OUT/round2.txt" | cut -d' ' -f2- | red /dev/stdin) <(echo "$SUSPECT") \
+	| comm -23 - <(awk '$1=="m"' "$OUT/round2.txt" | cut -d' ' -f2- | red /dev/stdin))
+FLAKY=$(comm -23 <(echo "$SUSPECT") <(echo "$NEW_RED") | grep -c .)
+FIXED=$(comm -13 <(red "$OUT/cand.txt") <(red "$OUT/main.txt") | comm -12 - <(pick "$CT") | grep -c .)
+
+wait "$EXPORT_PID"
+EXPORT_BAD=$(grep -vc ' rc=0 ' "$OUT/export.txt")
+[ -x ~/bin/release-dryrun ] && EXPORT_BAD=$(grep -ciE 'fail|error' "$OUT/export.txt")
+N_NEW=$(echo "$NEW_RED" | grep -c .)
+VERDICT=GREEN
+N_RAN=$(wc -l < "$OUT/cand.txt")
+[ "$N_NEW" -gt 0 ] || [ "$EXPORT_BAD" -gt 0 ] || [ "$PE_C" -gt "$PE_M" ] || [ "$N_RAN" -eq 0 ] && VERDICT=RED
+{
+	echo "GATE $VERDICT checks=$N_RAN new_red=$N_NEW fixed=$FIXED flaky=$FLAKY" \
+		"parse_errors=$PE_C/$PE_M export_bad=$EXPORT_BAD wall=$(( ($(date +%s) - T0 + 59) / 60 ))m" \
+		"(cand ${CSHA:0:10} vs main ${MSHA:0:10}; jobs $SUBMITTED, main cached $CACHED)"
+	[ "$N_NEW" -gt 0 ] && echo "NEW-RED: $(echo $NEW_RED)"
+	echo "Export:"; sed 's/^/  /' "$OUT/export.txt"
+} > "$OUT/summary.txt"
+cat "$OUT/summary.txt"
+[ "$VERDICT" = GREEN ]
