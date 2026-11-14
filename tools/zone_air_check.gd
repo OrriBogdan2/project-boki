@@ -4,14 +4,16 @@ extends RefCounted
 ## none at the lowest quality preset, and fewer motes at Medium than at High. Then a real Home in each zone holds
 ## exactly one. Never touches the real save or the player's settings.
 
-const MOST := 64       # motes a layer may have at fx 1 (the GARDEN.md 10.6 budget counts emitters, keep each tiny)
+const MOST := 64  # motes a layer may have at fx 1 (the GARDEN.md 10.6 budget counts emitters, keep each tiny)
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("ZONEAIR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -44,6 +46,7 @@ func run(main: Node) -> void:
 	print("ZONEAIR DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## The layer's node on its own: looping, unshaded, no shadow, the count scaled by quality and off at the lowest.
 func _unit(zone: String, spec: Dictionary) -> void:
 	var holder := Node3D.new()
@@ -63,6 +66,7 @@ func _unit(zone: String, spec: Dictionary) -> void:
 	Settings.v["quality"] = "high"
 	ok(medium > 0 and medium < p.amount, "%s: %d motes at Medium, %d at High" % [zone, medium, p.amount])
 	holder.free()
+
 
 ## A Home opened in the zone builds exactly one layer.
 func _in_home(main: Node, zone: String) -> void:

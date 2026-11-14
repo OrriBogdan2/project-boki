@@ -90,8 +90,8 @@ func _fire(s: Dictionary) -> void:
 	s["fired"] = true
 	kit.vfx("x_cast", s["at"])
 
-## The disc fills toward the impact, its hot centre glows, a rivet ring closes in, and the shell drops for the
-## last part of the fall.
+## The disc fills toward the impact with its hot centre ring filling in step (both full on the impact), a
+## rivet ring closes in, and the shell drops for the last part of the fall.
 func _fall_tick(s: Dictionary) -> void:
 	var xd := data()
 	var at: Vector3 = s["at"]

@@ -674,7 +674,6 @@ func _revive(g: Dictionary) -> void:
 	h._refresh_top()
 	var at: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.ppos
 	h.fx.burst(at + Vector3(0, 1.4, 0), Color("bff8ec"), 40, 4.0, 1.2, -1.0)
-	h.fx.ring(at, 3.0, Color("9ff0e0"), 0.6)
 	Sfx.play("unlock")
 	var ke: Dictionary = h._kin_entry(rec)
 	if not ke.is_empty():
@@ -981,7 +980,7 @@ func loadout_rows(parent: VBoxContainer, reopen: Callable) -> void:
 		var row := UI.hbox(8); card.add_child(row)
 		var nm := UI.label("%s:  %s" % [Gear.WORN_NAMES[si], Loot.name_of(cur) if not cur.is_empty() else "none"], 14, Loot.col_of(cur) if not cur.is_empty() else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		nm.tooltip_text = Loot.sub_of(cur) if not cur.is_empty() else ""
 		nm.mouse_filter = Control.MOUSE_FILTER_PASS
 		row.add_child(nm)

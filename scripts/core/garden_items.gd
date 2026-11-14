@@ -99,7 +99,7 @@ static func _verb(id: String) -> String:
 	return String(it.get("verb", rules()["verbs"][it["use"]]))
 
 ## Takes one from the bag and applies it (a sweet with its pick): the result of apply() plus look
-## (the body colour changed).
+## (the body colour changed) and id (the item: its cue, and GardenItemFx plays the give from it).
 static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	var pv := apply(rec, id, pick) if Save.d["items"].get(id, 0) > 0 else _no("none left")
 	if pv["ok"]:
@@ -178,7 +178,18 @@ static func nudge(id: String) -> String:
 		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
 		"stay": return "no new forms while worn"
 		"rinse": return "clears the lean; the grown parts stay"
-		_: return "%d points of the top stat become loose points" % int(e["n"])
+		"loose": return "%d points of the top stat become loose points" % int(e["n"])
+		"stat_all": return "+%d to every stat, up to the limit for its level" % int(e["n"])
+		"nest": return "goes in the Nesting Nook with a pair"
+		"down": return "+%d trust" % int(e["trust"])
+		"sweet": return _sweet_words(e)
+		"trait": return "%s +%d%%" % [String(e["trait"]), roundi(100.0 * float(e["by"]))]
+		"aura": return String(e["text"])
+		_: return "%s +%d%%, bond +%d%%" % [e["trait"], roundi(100.0 * float(e["by"])), roundi(100.0 * e["bond"])]
+
+static func _sweet_words(e: Dictionary) -> String:
+	var share := roundi(100.0 * float(e["share"]))
+	return "lifts a %s lean to %d%% of full and holds it %d days" % [" / ".join(e["types"]), share, int(e["hold_days"])]
 
 ## Takes a worn item off and puts it back in the bag. False if the Boki isn't wearing it.
 static func take_off(rec: Dictionary, id: String) -> bool:
@@ -199,12 +210,13 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 	CareJournal.note(rec, "took off %s" % item_name(id))
 	return true
 
-## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it.
+## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it; id and
+## deltas (apply()'s) for GardenItemFx.
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
-	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "aura"]
+	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "sweet", "aura"]
 	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "", "id": id,
-			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw}
+			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw, "deltas": pv["deltas"]}
 
 static func _no(why: String) -> Dictionary:
 	return {"ok": false, "text": why, "deltas": {}, "look": false}

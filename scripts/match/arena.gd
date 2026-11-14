@@ -277,7 +277,6 @@ func set_arch(a: String, w := "") -> void:
 	_apply_ult()
 	for i in Gloves.SLOTS:
 		if gloves[i] != "": give_glove(String(gloves[i]), i)
-	m.fx.ring(P.pos, 1.8, Arch.color(a), 0.4)
 	m.fx.burst(P.pos + Vector3(0, 1.0, 0), Arch.color(a), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
 	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), String(Arch.def(a).get("card", {}).get("loop", ""))], Arch.color(a))
