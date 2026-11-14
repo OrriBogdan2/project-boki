@@ -11,21 +11,28 @@ extends "res://tools/move_feel_check.gd"
 ## Prints "MRATE <match|farm> <key> 30=.. 60=.. 144=.. ok|FAIL" and "MOVE RATE CHECK DONE, failures: N".
 
 const RATES := [30, 60, 144]
-const GRACE_STEPS := 12      # press delays tried for each jump grace, one sim step apart (to 0.2 s)
-const DROP_M := 1.0          # m: the buffer trial's fall (every press in its last 0.2 s counts as "about to land")
-const LIFT_M := 3.0          # m: how far the coyote trial's ground drops away
+const GRACE_STEPS := 12  # press delays tried for each jump grace, one sim step apart (to 0.2 s)
+const DROP_M := 1.0  # m: the buffer trial's fall (every press in its last 0.2 s counts as "about to land")
+const LIFT_M := 3.0  # m: how far the coyote trial's ground drops away
 ## key: [allowed difference from the 60 fps value, unit]. A drawn frame holds 2 steps at 30 fps, so whatever
 ## is read "after N seconds of frames" may be a step or two of running apart; the arcs themselves are exact.
 const TOL := {
-	"run_speed": [0.01, "m/s"], "run_1s": [0.2, "m"], "stop": [0.01, "m"], "jump_apex": [0.005, "m"],
-	"jump_air": [0.05, "s"], "dash": [0.2, "m"], "dash_time": [0.05, "s"], "coyote": [0.05, "s"],
+	"run_speed": [0.01, "m/s"],
+	"run_1s": [0.2, "m"],
+	"stop": [0.01, "m"],
+	"jump_apex": [0.005, "m"],
+	"jump_air": [0.05, "s"],
+	"dash": [0.2, "m"],
+	"dash_time": [0.05, "s"],
+	"coyote": [0.05, "s"],
 	"buffer": [0.05, "s"],
 }
 
 var tree: SceneTree
-var hm = null                # the farm (Home), once the match trials are done
+var hm = null  # the farm (Home), once the match trials are done
 var farm_at := Vector3.ZERO  # the start of the farm's clear lane
-var got := {}                # key -> {fps: value}
+var got := {}  # key -> {fps: value}
+
 
 ## One drawn frame of `delta` seconds.
 func _frame(delta: float) -> void:
@@ -35,9 +42,11 @@ func _frame(delta: float) -> void:
 		m._process(delta)
 	await tree.process_frame
 
+
 func _frames(secs: float, delta: float) -> void:
 	for i in int(round(secs / delta)):
 		await _frame(delta)
+
 
 ## A key pressed for one drawn frame.
 func _tap(action: String, delta: float) -> void:
@@ -45,23 +54,30 @@ func _tap(action: String, delta: float) -> void:
 	await _frame(delta)
 	Input.action_release(action)
 
+
 func _at() -> Vector3:
 	return Vector3(hm.ppos.x, hm.py, hm.ppos.z) if hm else P.pos
+
 
 func _vy() -> float:
 	return hm.pvy if hm else P.vel.y
 
+
 func _speed() -> float:
 	return Vector2(hm.pvel.x, hm.pvel.z).length() if hm else _hv(P).length()
+
 
 func _floor_y() -> float:
 	return hm._ground_h(hm.ppos.x, hm.ppos.z) if hm else P.ground()
 
+
 func _dashing() -> bool:
 	return hm.dash_t > 0.0 if hm else P.roll_t > 0.0
 
+
 func _in_air() -> bool:
 	return _at().y > _floor_y() + 0.001 or _vy() > 0.0
+
 
 ## Standing still at the trial's start, with a full dash.
 func _stand() -> void:
@@ -80,12 +96,14 @@ func _stand() -> void:
 	hm.lfl = {}
 	hm.mover = FarmStep.new()
 
+
 ## The ground gone from under the feet: `up` metres of air, no speed.
 func _lift(up: float) -> void:
 	if hm:
 		hm.py += up
 	else:
 		P.pos.y += up
+
 
 func _run_stop(fps: int) -> void:
 	var delta := 1.0 / fps
@@ -100,6 +118,7 @@ func _run_stop(fps: int) -> void:
 	var x1 := _at().x
 	await _frames(0.5, delta)
 	_put("stop", fps, _at().x - x1)
+
 
 ## Each Hunter's run speed let go after half a second: the slide, read as "stop_<speed>".
 func _hunter_stops(fps: int) -> void:
@@ -123,6 +142,7 @@ func _hunter_stops(fps: int) -> void:
 	else:
 		HunterMove.apply(P)
 
+
 func _jump_arc(fps: int) -> void:
 	var delta := 1.0 / fps
 	_stand()
@@ -138,6 +158,7 @@ func _jump_arc(fps: int) -> void:
 		await _frame(delta)
 	_put("jump_apex", fps, apex)
 	_put("jump_air", fps, air)
+
 
 func _dash(fps: int) -> void:
 	var delta := 1.0 / fps
@@ -155,6 +176,7 @@ func _dash(fps: int) -> void:
 	_put("dash_time", fps, secs)
 	Input.action_release("right")
 
+
 ## Whether a jump pressed `wait` frames after the ground goes still jumps.
 func _coyote_jumps(wait: int, delta: float) -> bool:
 	_stand()
@@ -165,6 +187,7 @@ func _coyote_jumps(wait: int, delta: float) -> bool:
 	await _tap("jump", delta)
 	await _frame(delta)
 	return _vy() > 1.0
+
 
 ## Whether a jump pressed `lead` frames before the landing (`fall` frames into the drop) jumps as you land.
 func _buffer_jumps(lead: int, fall: int, delta: float) -> bool:
@@ -180,6 +203,7 @@ func _buffer_jumps(lead: int, fall: int, delta: float) -> bool:
 		rose = rose or _vy() > 1.0
 	return rose
 
+
 ## Frames a DROP_M fall takes to land.
 func _fall_frames(delta: float) -> int:
 	_stand()
@@ -192,6 +216,7 @@ func _fall_frames(delta: float) -> int:
 		if not _in_air():
 			break
 	return n
+
 
 func _graces(fps: int) -> void:
 	var delta := 1.0 / fps
@@ -211,15 +236,18 @@ func _graces(fps: int) -> void:
 	_put("coyote", fps, coyote)
 	_put("buffer", fps, buffer)
 
+
 func _put(key: String, fps: int, v: float) -> void:
 	if not got.has(key):
 		got[key] = {}
 	got[key][fps] = v
 
+
 func _ok(cond: bool, what: String) -> void:
 	print("MRATE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _trials(where: String) -> void:
 	got = {}
@@ -235,8 +263,10 @@ func _trials(where: String) -> void:
 		var same := absf(v[30] - v[60]) <= tol and absf(v[144] - v[60]) <= tol
 		var line := "%s %s 30=%.3f 60=%.3f 144=%.3f %s" % [where, key, v[30], v[60], v[144], TOL[key][1]]
 		_ok(same, "%s (within %s of 60 fps)" % [line, tol])
-	_ok(float(got["run_speed"][60]) > 4.0 and float(got["jump_apex"][60]) > 1.0 and float(got["dash"][60]) > 2.5,
-		"%s: the trials ran, jumped and dashed" % where)
+	_ok(
+		float(got["run_speed"][60]) > 4.0 and float(got["jump_apex"][60]) > 1.0 and float(got["dash"][60]) > 2.5,
+		"%s: the trials ran, jumped and dashed" % where
+	)
 	var speeds := run_speeds()
 	for v in speeds:
 		var band := ue_band(v)
@@ -248,6 +278,7 @@ func _trials(where: String) -> void:
 		var v60: float = got[g[0]][60]
 		var what := "%s %s at 60 fps %.3f s is its data row %.2f s" % [where, g[0], v60, g[1]]
 		_ok(absf(v60 - float(g[1])) <= 2.0 * DT, what)
+
 
 ## A straight, level, open lane on the farm: the avatar can run `length` metres toward +x from it.
 func _farm_lane(length: float) -> Vector3:
@@ -265,6 +296,7 @@ func _farm_lane(length: float) -> Vector3:
 				return Vector3(c.x, 0, c.z)
 	return hm.ppos
 
+
 func _open_farm(main: Node) -> void:
 	var pk := Save.new_kin("zapple", "Pip")
 	Save.d["roster"].append(pk)
@@ -275,15 +307,16 @@ func _open_farm(main: Node) -> void:
 	hm = load("res://scripts/home/home.gd").new()
 	main.add_child(hm)
 	await tree.process_frame
-	while hm.building:      # with a display the farm builds under the ink wipe, over several frames
+	while hm.building:  # with a display the farm builds under the ink wipe, over several frames
 		await tree.process_frame
 	await tree.process_frame
 	hm.set_process(false)
 	farm_at = _farm_lane(12.0)
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
-	RenderingServer.render_loop_enabled = false      # thousands of frames, none looked at (a soft renderer is slow)
+	RenderingServer.render_loop_enabled = false  # thousands of frames, none looked at (a soft renderer is slow)
 	_begin(main)
 	m.paused = false
 	await _trials("match")

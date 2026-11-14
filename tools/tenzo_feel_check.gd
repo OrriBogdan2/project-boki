@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 ##     a body's width in one step, stops short at a body instead of shoving it; the air plunge hangs a beat and
 ##     then gathers speed.
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	await _floor()
@@ -17,7 +18,10 @@ func run(main_node: Node) -> void:
 	print("PAIRCHECK tenzo-feel DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-func fd() -> Dictionary: return Loco.T["tenzo"]["r_floor"]
+
+func fd() -> Dictionary:
+	return Loco.T["tenzo"]["r_floor"]
+
 
 ## R over the abyss strip (abyss from 4m to 12m ahead), Tenzo dropped in falling.
 func _floor() -> void:
@@ -37,8 +41,14 @@ func _floor() -> void:
 	var g := m.world.ground_at(P.pos.x, P.pos.z)
 	ok(
 		"R floor: the press turns the abyss under him to ground on the same frame, and he stands on its top",
-		K.spine.floors == 1 and g > World.VOID + 1.0 and not P.over_void() and absf(P.pos.y - g) < 0.01
-			and P.vel.y >= 0.0 and K.spine.running(),
+		(
+			K.spine.floors == 1
+			and g > World.VOID + 1.0
+			and not P.over_void()
+			and absf(P.pos.y - g) < 0.01
+			and P.vel.y >= 0.0
+			and K.spine.running()
+		),
 		"floors %d ground %.2f y %.2f void %s" % [K.spine.floors, g, P.pos.y, str(P.over_void())]
 	)
 	m.step(DT)
@@ -52,7 +62,8 @@ func _floor() -> void:
 	step(m, 0.4)
 	ok(
 		"R floor: walkable for everyone (a foe lands and stands on it, not over the abyss)",
-		T.grounded and not T.over_void() and absf(T.pos.y - g) < 0.05, "y %.2f g %.2f" % [T.pos.y, g]
+		T.grounded and not T.over_void() and absf(T.pos.y - g) < 0.05,
+		"y %.2f g %.2f" % [T.pos.y, g]
 	)
 	var tiles: Array = m.verbs.terrain[0]["tiles"]
 	var edge_z := -INF
@@ -70,7 +81,8 @@ func _floor() -> void:
 	T.inp["move"] = Vector2.ZERO
 	ok(
 		"R floor: a body below its edge, pushing in, mantles onto it",
-		T.grounded and absf(T.pos.y - g) < 0.05, "y %.2f g %.2f after %.2fs" % [T.pos.y, g, t]
+		T.grounded and absf(T.pos.y - g) < 0.05,
+		"y %.2f g %.2f after %.2fs" % [T.pos.y, g, t]
 	)
 	# the warning, then the crumble
 	var tz: Dictionary = m.verbs.terrain[0]
@@ -84,7 +96,8 @@ func _floor() -> void:
 	m.verbs.render(1.0)
 	ok(
 		"R floor: no warning early; in its last seconds it shows cracks and shakes",
-		calm and cracked and node.position.distance_to(p0) > 0.001, "calm %s cracked %s" % [str(calm), str(cracked)]
+		calm and cracked and node.position.distance_to(p0) > 0.001,
+		"calm %s cracked %s" % [str(calm), str(cracked)]
 	)
 	P.teleport(Vector3(P.pos.x, g, P.pos.z))
 	step(m, float(fd()["warn"]))
@@ -94,6 +107,7 @@ func _floor() -> void:
 		"terrain %d grounded %s" % [m.verbs.terrain.size(), str(P.grounded)]
 	)
 	await done(m)
+
 
 ## The floor goes out over Net and a second game lays the same ground; over solid ground nothing is laid.
 func _floor_net_and_ground() -> void:
@@ -108,7 +122,8 @@ func _floor_net_and_ground() -> void:
 	var tiles0 := m.verbs.terrain.size()
 	ok(
 		"R floor: over solid ground the press lays nothing and R is unchanged",
-		K.spine.floors == 0 and tiles0 == 0 and K.spine.running(), "floors %d" % K.spine.floors
+		K.spine.floors == 0 and tiles0 == 0 and K.spine.running(),
+		"floors %d" % K.spine.floors
 	)
 	await done(m)
 	r = setup("dolm", 9.0, 4)
@@ -126,7 +141,8 @@ func _floor_net_and_ground() -> void:
 	remote.nid = "p1"
 	m2.ents_by_id["p1"] = remote
 	remote.remote = true
-	for e in evs: HeroZones.net_in(m2, e)
+	for e in evs:
+		HeroZones.net_in(m2, e)
 	var a: Array = m.verbs.terrain[0]["tiles"] if not m.verbs.terrain.is_empty() else []
 	var b: Array = m2.verbs.terrain[0]["tiles"] if not m2.verbs.terrain.is_empty() else []
 	var same := a.size() > 0 and a.size() == b.size()
@@ -139,6 +155,7 @@ func _floor_net_and_ground() -> void:
 	)
 	await done(m2)
 	await done(m)
+
 
 ## The held hop from standing: wind-up, ease, landing on the circle, the harder fall, no big steps.
 func _hop() -> void:
@@ -164,7 +181,8 @@ func _hop() -> void:
 		still = still and P.grounded and Vector2(P.pos.x - start.x, P.pos.z - start.z).length() < 0.01
 	ok(
 		"RMB: the release winds up planted in a deep crouch before the hop (the tell)",
-		still and K.anim_id == "breah_windup" and K.slam.hops == 0, "anim %s hops %d" % [K.anim_id, K.slam.hops]
+		still and K.anim_id == "breah_windup" and K.slam.hops == 0,
+		"anim %s hops %d" % [K.anim_id, K.slam.hops]
 	)
 	var path: Array = []
 	var prev := P.pos
@@ -189,7 +207,8 @@ func _hop() -> void:
 		late += float(path[n_ - 2 - i])
 	ok(
 		"RMB: the hop's ground speed eases (fast off the ground, settling into the landing)",
-		early > late * 2.0, "first fifth %.2fm last fifth %.2fm" % [early, late]
+		early > late * 2.0,
+		"first fifth %.2fm last fifth %.2fm" % [early, late]
 	)
 	var off := Vector2(P.pos.x - aim_c.x, P.pos.z - aim_c.z).length()
 	ok(
@@ -199,6 +218,7 @@ func _hop() -> void:
 	)
 	ok("RMB: no step moves him more than 0.15m (no skipped frames or snaps)", big < 0.15, "biggest %.3fm" % big)
 	await done(m)
+
 
 ## A body in the hop's way: he comes down in front of it and slams it, never through it or shoving it along;
 ## then the same at a speed that would cross a body in a step without the swept test.
@@ -219,7 +239,7 @@ func _hop_body() -> void:
 		P.inp["sec_hold"] = false
 		m.step(DT)
 		if fast:
-			K.slam.wind_run = Vector2(60.0, 0.0)      # a 1m-per-step hop: only a swept test catches the body
+			K.slam.wind_run = Vector2(60.0, 0.0)  # a 1m-per-step hop: only a swept test catches the body
 		var s0 := K.slams
 		var shoved := 0.0
 		var t := 0.0
@@ -229,13 +249,15 @@ func _hop_body() -> void:
 			if K.slams == s0:
 				shoved = maxf(shoved, T.pos.distance_to(t0))
 		ok(
-			"RMB%s: a body in the way stops the hop short: he lands in front and slams it, no shove, no pass" % (
-				" (60 m/s)" if fast else ""
+			(
+				"RMB%s: a body in the way stops the hop short: he lands in front and slams it, no shove, no pass"
+				% (" (60 m/s)" if fast else "")
 			),
 			K.slam.stops > 0 and P.pos.x < T.pos.x and shoved < 0.1 and T.hp < hp0,
 			"stops %d his x %.2f its x %.2f shoved %.2f dmg %.0f" % [K.slam.stops, P.pos.x, T.pos.x, shoved, hp0 - T.hp]
 		)
 		await done(m)
+
 
 ## The air press: a beat hanging at the top, then the plunge gathers speed (no 26 m/s from the first frame).
 func _dive() -> void:
@@ -265,8 +287,7 @@ func _dive() -> void:
 	var ramps := vys.size() > 4 and float(vys[1]) < float(vys[3]) and float(vys[0]) < cap * 0.5
 	ok(
 		"RMB air: it hangs a beat, then the plunge gathers speed and slams where he lands",
-		hung and ramps and K.slams == s0 + 1, "hung %s ramps %s first %.1f m/s" % [
-			str(hung), str(ramps), float(vys[0]) if vys.size() > 0 else 0.0
-		]
+		hung and ramps and K.slams == s0 + 1,
+		"hung %s ramps %s first %.1f m/s" % [str(hung), str(ramps), float(vys[0]) if vys.size() > 0 else 0.0]
 	)
 	await done(m)

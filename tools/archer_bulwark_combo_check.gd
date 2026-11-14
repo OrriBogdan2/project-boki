@@ -717,8 +717,8 @@ func _archer_combos() -> void:
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
-	# ...also when the walk just runs out there (natural expiry, not an end() call from outside). The 3.375 m roll
-	# (owner 11-11) carries her spirit run through the column first, so her entry may be its far side: out of the rock
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside). Her roll can
+	# carry the spirit run through the column first, so the entry may be its far side: out of the rock either way
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.grounded = true

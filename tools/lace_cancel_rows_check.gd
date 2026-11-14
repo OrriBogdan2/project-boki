@@ -87,7 +87,7 @@ func _ult_then() -> void:
 	K.rmb_down = false
 	K.use_e()
 	var e := K.in_e()
-	# the X press is the first arrow (owner 11-08, PinUlt.cast), so the rest of the shots stay empowered
+	# the X press is the first arrow (PinUlt.cast), so the rest of the shots stay empowered
 	var rest := int(K.ult.xd().get("shots", 3)) - 1
 	C.ok("Lace cancel X window + RMB, E: both (rule), each goes and the shots after the first arrow stay",
 			window and rmb and e and K.ult.left == rest,

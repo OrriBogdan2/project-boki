@@ -8,12 +8,14 @@ extends "res://tools/pin_bjorn_owner_check.gd"
 ## velocity 0, stays grounded and takes no squash, hold or knock for the whole slow.
 ## Prints AKCHECK lines like --archetype-check.
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	main_node.set_meta("lace_playtest_check", self)
 	await lace()
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 func lace() -> void:
 	var r := setup("archer", 7.0, "", true)
@@ -32,6 +34,7 @@ func lace() -> void:
 	_slow_no_bounce(m, P, T, K, home)
 	await done(m)
 
+
 # ------------------------------------------------------------------ RMB leaves nothing behind
 func _heavy_leaves_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: Vector3, lv: int) -> void:
 	# a miss into open ground, then a wall pin: no spent arrow, no stake, no scorch and no lingering look either way
@@ -43,12 +46,14 @@ func _heavy_leaves_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: Archer
 	var shown := func() -> int:
 		var c := 0
 		for e in K.fx.spent:
-			if (e["node"] as Node3D).visible: c += 1
+			if (e["node"] as Node3D).visible:
+				c += 1
 		return c
 	var lingering := func() -> int:
 		var c := 0
 		for e in V.live:
-			if (e["node"] as Node3D).visible and float(e.get("dur", 0.0)) > 0.6: c += 1
+			if (e["node"] as Node3D).visible and float(e.get("dur", 0.0)) > 0.6:
+				c += 1
 		return c
 	var spent0: int = shown.call()
 	var live0: int = lingering.call()
@@ -59,10 +64,15 @@ func _heavy_leaves_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: Archer
 	step(m, 1.2, rmb_at.bind(P, far))
 	P.inp["sec_hold"] = false
 	step(m, 1.2)
-	ok("RMB miss: the Heavy Shot that lands on open ground leaves no arrow, prop or decal",
-		shown.call() == spent0 and lingering.call() == live0
-			and not K.fx.live.values().any(func(e): return e["kind"] == "heavy"),
-		"spent %d -> %d lingering %d -> %d" % [spent0, shown.call(), live0, lingering.call()])
+	ok(
+		"RMB miss: the Heavy Shot that lands on open ground leaves no arrow, prop or decal",
+		(
+			shown.call() == spent0
+			and lingering.call() == live0
+			and not K.fx.live.values().any(func(e): return e["kind"] == "heavy")
+		),
+		"spent %d -> %d lingering %d -> %d" % [spent0, shown.call(), live0, lingering.call()]
+	)
 	var moves: Dictionary = HeroVfx.data("archer")["moves"]
 	var decal := ""
 	for mv in ["heavy_go", "heavy_hit", "heavy_pin"]:
@@ -70,8 +80,14 @@ func _heavy_leaves_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: Archer
 			var life: Variant = layer.get("life", 0.0)
 			if String(layer["p"]) in ["scorch", "thread"] or (life is float and float(life) > 0.6):
 				decal = "%s %s" % [mv, layer["p"]]
-	ok("RMB data: none of the Heavy Shot's looks is a decal or a lingering mesh (over 0.6 s; the trail rides the shot)",
-		decal == "", decal)
+	ok(
+		(
+			"RMB data: none of the Heavy Shot's looks is a decal or a lingering mesh"
+			+ " (over 0.6 s; the trail rides the shot)"
+		),
+		decal == "",
+		decal
+	)
 	# the wall pin
 	fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
@@ -83,11 +99,14 @@ func _heavy_leaves_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: Archer
 	step(m, 1.2, rmb_at.bind(P, T.pos))
 	P.inp["sec_hold"] = false
 	step(m, 1.2)
-	ok("RMB wall pin: the pin lands and leaves nothing standing in the wall",
+	ok(
+		"RMB wall pin: the pin lands and leaves nothing standing in the wall",
 		K.pins == pins0 + 1 and shown.call() == spent0 and lingering.call() == live0,
-		"pins +%d spent %d -> %d lingering %d -> %d" % [K.pins - pins0, spent0, shown.call(), live0, lingering.call()])
+		"pins +%d spent %d -> %d lingering %d -> %d" % [K.pins - pins0, spent0, shown.call(), live0, lingering.call()]
+	)
 	_clear_wall(m, T.pos, lv, 2)
 	step(m, 0.5)
+
 
 # ------------------------------------------------------------------ 19: the ult fires on press
 func _ult_on_press(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) -> void:
@@ -104,15 +123,25 @@ func _ult_on_press(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) 
 	HunterKeys.ult_pressed(P)
 	var flying := m.shots.filter(func(sh): return sh["by"] == P and String(sh["x"].get("ab", "")) == "ultimate")
 	var to_cursor := Vector2(T.pos.x - bow.x, T.pos.z - bow.z).normalized()
-	ok("19 ult: the first arrow leaves the same frame X is pressed, before any step",
-		K.ult.fired == fired0 + 1 and flying.size() == 1, "fired +%d shots %d" % [K.ult.fired - fired0, flying.size()])
-	ok("19 ult: it leaves the bow's mouth toward the cursor",
-		flying.size() == 1 and (flying[0]["pos"] as Vector3).distance_to(bow) < 0.01
-			and (flying[0]["vel"] as Vector2).normalized().distance_to(to_cursor) < 0.02,
-		"at %s bow %s" % [str(flying[0]["pos"]) if flying.size() == 1 else "-", str(bow)])
-	ok("19 ult: the cast's look comes with the shot (played in the same frame, not before it)",
+	ok(
+		"19 ult: the first arrow leaves the same frame X is pressed, before any step",
+		K.ult.fired == fired0 + 1 and flying.size() == 1,
+		"fired +%d shots %d" % [K.ult.fired - fired0, flying.size()]
+	)
+	ok(
+		"19 ult: it leaves the bow's mouth toward the cursor",
+		(
+			flying.size() == 1
+			and (flying[0]["pos"] as Vector3).distance_to(bow) < 0.01
+			and (flying[0]["vel"] as Vector2).normalized().distance_to(to_cursor) < 0.02
+		),
+		"at %s bow %s" % [str(flying[0]["pos"]) if flying.size() == 1 else "-", str(bow)]
+	)
+	ok(
+		"19 ult: the cast's look comes with the shot (played in the same frame, not before it)",
 		int(V.plays.get("ult_cast", 0)) == cast0 + 1 and K.anim_id == "pin_ult_loose",
-		"cast %d anim %s" % [int(V.plays.get("ult_cast", 0)) - cast0, K.anim_id])
+		"cast %d anim %s" % [int(V.plays.get("ult_cast", 0)) - cast0, K.anim_id]
+	)
 	var pressed_at := m.time
 	# the next press goes the instant the recover is up: hold fire and time the second arrow
 	var t := 0.0
@@ -123,18 +152,25 @@ func _ult_on_press(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) 
 		t += DT
 	P.inp["fire"] = false
 	var recover := float(K.d["x"]["recover"])
-	ok("19 ult: the next arrow goes the instant the recover is up (no nock), %.1f s on" % recover,
-		K.ult.fired == fired0 + 2 and absf((m.time - pressed_at) - recover) < 0.04, "%.2f s" % (m.time - pressed_at))
+	ok(
+		"19 ult: the next arrow goes the instant the recover is up (no nock), %.1f s on" % recover,
+		K.ult.fired == fired0 + 2 and absf((m.time - pressed_at) - recover) < 0.04,
+		"%.2f s" % (m.time - pressed_at)
+	)
 	ok("19 data: no nock time left in the data", not (K.d["x"] as Dictionary).has("nock"))
 	K.ult.end()
 	step(m, 0.5)
+
 
 # ------------------------------------------------------------------ 20: the perfect window
 func _perfect_window(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	var lace: Dictionary = Loco.T["lace"]
 	var pt := K.draw.perfect_t()
-	ok("20 window: the perfect window is tuning.json lace.perfect_window_s, about 0.2 s longer than 0.15",
-		is_equal_approx(pt, float(lace["perfect_window_s"])) and pt >= 0.3 and pt <= 0.45, "%.2f s" % pt)
+	ok(
+		"20 window: the perfect window is tuning.json lace.perfect_window_s, about 0.2 s longer than 0.15",
+		is_equal_approx(pt, float(lace["perfect_window_s"])) and pt >= 0.3 and pt <= 0.45,
+		"%.2f s" % pt
+	)
 	var s1 := K.draw.stage_t().x
 	var body: ShaderMaterial = null
 	for mt in P.mats:
@@ -149,20 +185,33 @@ func _perfect_window(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	ready_bow(P)
 	K.draw.quick = false
 	step(m, s1 - 0.1, drawing)
-	ok("20 glow: before the stage comes up nothing glows", not K.draw.glow_on and body != null
-		and body.get_shader_parameter("rim_amount") == rim0, "glow %s" % K.draw.glow_on)
+	ok(
+		"20 glow: before the stage comes up nothing glows",
+		not K.draw.glow_on and body != null and body.get_shader_parameter("rim_amount") == rim0,
+		"glow %s" % K.draw.glow_on
+	)
 	step(m, 0.2, drawing)
 	var rim_on = body.get_shader_parameter("rim_amount") if body else null
 	var col_on: Color = body.get_shader_parameter("rim_color") if body else Color.BLACK
-	ok("20 glow: inside the window her body and bow carry the gold rim glow",
-		K.draw.glow_on and is_equal_approx(float(rim_on), float(lace["perfect_glow_rim"]))
-			and col_on.is_equal_approx(Color(String(lace["perfect_glow_col"]))),
-		"glow %s rim %s col %s" % [K.draw.glow_on, str(rim_on), str(col_on)])
+	ok(
+		"20 glow: inside the window her body and bow carry the gold rim glow",
+		(
+			K.draw.glow_on
+			and is_equal_approx(float(rim_on), float(lace["perfect_glow_rim"]))
+			and col_on.is_equal_approx(Color(String(lace["perfect_glow_col"])))
+		),
+		"glow %s rim %s col %s" % [K.draw.glow_on, str(rim_on), str(col_on)]
+	)
 	step(m, pt + 0.05, drawing)
-	ok("20 glow: past the window the glow is off and every material is back as it was",
-		not K.draw.glow_on and body.get_shader_parameter("rim_amount") == rim0
-			and body.get_shader_parameter("rim_color") == col0,
-		"glow %s rim %s" % [K.draw.glow_on, str(body.get_shader_parameter("rim_amount"))])
+	ok(
+		"20 glow: past the window the glow is off and every material is back as it was",
+		(
+			not K.draw.glow_on
+			and body.get_shader_parameter("rim_amount") == rim0
+			and body.get_shader_parameter("rim_color") == col0
+		),
+		"glow %s rim %s" % [K.draw.glow_on, str(body.get_shader_parameter("rim_amount"))]
+	)
 	P.inp["fire"] = false
 	step(m, 1.0)
 	# a perfect release: the payoff pulse, stronger than the window's glow, then off
@@ -173,15 +222,23 @@ func _perfect_window(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	P.inp["fire"] = false
 	m.step(DT)
 	var rim_pay = body.get_shader_parameter("rim_amount") if body else null
-	ok("20 payoff: a perfect release pulses the rim harder (a distinct flash)",
-		K.perfects == pf0 + 1 and K.draw.payoff_t > 0.0
-			and is_equal_approx(float(rim_pay), float(lace["perfect_payoff_rim"])),
-		"perfects +%d payoff_t %.2f rim %s" % [K.perfects - pf0, K.draw.payoff_t, str(rim_pay)])
+	ok(
+		"20 payoff: a perfect release pulses the rim harder (a distinct flash)",
+		(
+			K.perfects == pf0 + 1
+			and K.draw.payoff_t > 0.0
+			and is_equal_approx(float(rim_pay), float(lace["perfect_payoff_rim"]))
+		),
+		"perfects +%d payoff_t %.2f rim %s" % [K.perfects - pf0, K.draw.payoff_t, str(rim_pay)]
+	)
 	step(m, float(lace["perfect_payoff_s"]) + 0.05)
-	ok("20 payoff: the pulse is over and the materials are back",
+	ok(
+		"20 payoff: the pulse is over and the materials are back",
 		K.draw.payoff_t <= 0.0 and not K.draw.glow_on and body.get_shader_parameter("rim_amount") == rim0,
-		"payoff_t %.2f" % K.draw.payoff_t)
+		"payoff_t %.2f" % K.draw.payoff_t
+	)
 	step(m, 1.0)
+
 
 # ------------------------------------------------------------------ E: the slow takes speed, nothing else
 func _slow_no_bounce(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3) -> void:
@@ -189,7 +246,7 @@ func _slow_no_bounce(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3
 	T.teleport(home + Vector3(7.0, 0, 0))
 	step(m, 0.3, func(): aim_at(P, T.pos))
 	var y0 := T.pos.y
-	T.squash = 0.0          # (the drop's landing squash: nothing decays it headless, Ent.render does)
+	T.squash = 0.0  # (the drop's landing squash: nothing decays it headless, Ent.render does)
 	T.freeze_t = 0.0
 	cast_e_at(P, K, T.pos)
 	var ed: Dictionary = K.e_def()
@@ -208,22 +265,39 @@ func _slow_no_bounce(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3
 		aim_at(P, T.pos)
 		m.step(DT)
 		t += DT
-		if T.slow_t > 0.0: slowed += 1
+		if T.slow_t > 0.0:
+			slowed += 1
 		if T.hp < hp0:
 			ticks += 1
 			hp0 = T.hp
 		worst_vy = maxf(worst_vy, absf(T.vel.y))
 		worst_dy = maxf(worst_dy, absf(T.pos.y - y0))
-		if T.squash > 0.0: squashed += 1
-		if T.freeze_t > 0.0: held += 1
-		if T.knock_t > 0.0 or absf(T.vel.x) > 0.01 or absf(T.vel.z) > 0.01: knocked += 1
-		if not T.grounded: air += 1
-	ok("E slow: the foe is slowed and ticked for the rain", slowed > 60 and ticks >= 4,
-		"slowed %d steps ticks %d" % [slowed, ticks])
-	ok("E slow: no bounce: y velocity stays 0 and the foe never leaves the ground for the whole slow",
-		worst_vy == 0.0 and worst_dy < 0.001 and air == 0, "vy %.3f dy %.4f air %d" % [worst_vy, worst_dy, air])
+		if T.squash > 0.0:
+			squashed += 1
+		if T.freeze_t > 0.0:
+			held += 1
+		if T.knock_t > 0.0 or absf(T.vel.x) > 0.01 or absf(T.vel.z) > 0.01:
+			knocked += 1
+		if not T.grounded:
+			air += 1
+	ok(
+		"E slow: the foe is slowed and ticked for the rain",
+		slowed > 60 and ticks >= 4,
+		"slowed %d steps ticks %d" % [slowed, ticks]
+	)
+	ok(
+		"E slow: no bounce: y velocity stays 0 and the foe never leaves the ground for the whole slow",
+		worst_vy == 0.0 and worst_dy < 0.001 and air == 0,
+		"vy %.3f dy %.4f air %d" % [worst_vy, worst_dy, air]
+	)
 	ok("E slow: no knock, hop or sideways impulse from the slow", knocked == 0, "knocked %d steps" % knocked)
-	ok("E slow: the ticks carry no hit squash or hold (Ent.hurt tick, Oomph skips it)", squashed == 0 and held == 0,
-		"squash %d hold %d steps" % [squashed, held])
-	ok("E slow: the slow only scales speed (slow_mult < 1, strength from the data)",
-		is_equal_approx(T.slow_k, float(ed["slow"])) or T.slow_t <= 0.0, "slow_k %.2f" % T.slow_k)
+	ok(
+		"E slow: the ticks carry no hit squash or hold (Ent.hurt tick, Oomph skips it)",
+		squashed == 0 and held == 0,
+		"squash %d hold %d steps" % [squashed, held]
+	)
+	ok(
+		"E slow: the slow only scales speed (slow_mult < 1, strength from the data)",
+		is_equal_approx(T.slow_k, float(ed["slow"])) or T.slow_t <= 0.0,
+		"slow_k %.2f" % T.slow_k
+	)
