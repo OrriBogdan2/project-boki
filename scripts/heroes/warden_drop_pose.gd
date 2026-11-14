@@ -8,23 +8,25 @@ extends RefCounted
 ## so the same numbers fit every Hero. Runs after the clips (WardenGlb's Sync), before the hands and blade are read.
 
 const FILE := "res://content/rules/drop_poses.json"
-const LIMBS := ["upper_arm", "forearm", "thigh", "shin"]   # parents first
-const SIDES := {"L": -1.0, "R": 1.0}                        # which way "out" points along the body's right
-const LEAN_RATE := 5.0       # 1/s: the skydive's bank and tip follow the steer
+const LIMBS := ["upper_arm", "forearm", "thigh", "shin"]  # parents first
+const SIDES := {"L": -1.0, "R": 1.0}  # which way "out" points along the body's right
+const LEAN_RATE := 5.0  # 1/s: the skydive's bank and tip follow the steer
 static var _poses := {}
 
 var root: Node3D
 var skel: Skeleton3D
 var frame := Basis.IDENTITY  # skeleton space, from the rest: x the body's right, y up (hips to head), z back
-var aims := {}               # bone name -> [bone index, its limb axis in its own space]
+var aims := {}  # bone name -> [bone index, its limb axis in its own space]
 var ride_w := 0.0
 var dive_w := 0.0
-var steer := Vector2.ZERO    # the skydive's flat velocity over its top speed: x right, y ahead
+var steer := Vector2.ZERO  # the skydive's flat velocity over its top speed: x right, y ahead
+
 
 static func poses() -> Dictionary:
 	if _poses.is_empty():
 		_poses = JSON.parse_string(FileAccess.get_file_as_string(FILE))
 	return _poses
+
 
 ## Null when the armature lacks the bones the poses aim.
 static func make(model: Node3D, sk: Skeleton3D) -> WardenDropPose:
@@ -32,6 +34,7 @@ static func make(model: Node3D, sk: Skeleton3D) -> WardenDropPose:
 	p.root = model
 	p.skel = sk
 	return p if p._setup() else null
+
 
 func _setup() -> bool:
 	var rest := {}
@@ -56,12 +59,14 @@ func _setup() -> bool:
 	aims["head"][1] = ((rest["head"] as Transform3D).basis.inverse() * up).normalized()
 	return true
 
+
 func _limb_bones() -> Array:
 	var out: Array = []
 	for side in SIDES:
 		for l in LIMBS:
 			out.append(l + "." + side)
 	return out
+
 
 ## After the clips (or the rig) have posed the bones.
 func step(dt: float) -> void:
@@ -84,9 +89,12 @@ func step(dt: float) -> void:
 	var goal := Vector2(flat.dot(Vector2(cos(face), -sin(face))), flat.dot(Vector2(-sin(face), -cos(face))))
 	steer = steer.lerp(goal.limit_length(1.0), 1.0 - exp(-dt * LEAN_RATE))
 	var line := _dir(dive["body"])
-	var lean := Quaternion(line, deg_to_rad(float(dive["lean"])) * steer.x) \
-			* Quaternion(frame.x, -deg_to_rad(float(dive["pitch"])) * steer.y)
+	var lean := (
+		Quaternion(line, deg_to_rad(float(dive["lean"])) * steer.x)
+		* Quaternion(frame.x, -deg_to_rad(float(dive["pitch"])) * steer.y)
+	)
 	_apply(dive, dive_w, lean)
+
 
 ## Turns the body onto the pose's line (about the hips, `lean` on top), then aims each limb and the head along it.
 func _apply(p: Dictionary, w: float, lean: Quaternion) -> void:
@@ -105,9 +113,11 @@ func _apply(p: Dictionary, w: float, lean: Quaternion) -> void:
 			_aim(l + "." + side, body * (frame * v).normalized(), w)
 	_aim("head", body * _dir(p["head"]), w)
 
+
 ## A [up, front] line in the skeleton's space.
 func _dir(d: Array) -> Vector3:
 	return (frame * Vector3(0.0, float(d[0]), -float(d[1]))).normalized()
+
 
 ## Turns a bone (its children with it) so its limb axis heads `want`, `w` of the way.
 func _aim(b: String, want: Vector3, w: float) -> void:

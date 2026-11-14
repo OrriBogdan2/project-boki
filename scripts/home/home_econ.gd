@@ -674,7 +674,6 @@ func _revive(g: Dictionary) -> void:
 	h._refresh_top()
 	var at: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.ppos
 	h.fx.burst(at + Vector3(0, 1.4, 0), Color("bff8ec"), 40, 4.0, 1.2, -1.0)
-	h.fx.ring(at, 3.0, Color("9ff0e0"), 0.6)
 	Sfx.play("unlock")
 	var ke: Dictionary = h._kin_entry(rec)
 	if not ke.is_empty():

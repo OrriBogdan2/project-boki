@@ -4,6 +4,7 @@ extends RefCounted
 
 const CHECK := preload("res://tools/hud_groups_check.gd")
 
+
 func run(main: Node) -> void:
 	var dir := "/tmp/hud_groups"
 	var win := Vector2i(1280, 720)
@@ -27,7 +28,7 @@ func run(main: Node) -> void:
 			m.step(Match.DT)
 			m.cam.snap(m.player.pos)
 			await main.get_tree().process_frame
-		CHECK.set_moment(m, id)      # the settling steps ran the toasts down
+		CHECK.set_moment(m, id)  # the settling steps ran the toasts down
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s_%dx%d.png" % [id, win.x, win.y]))

@@ -1,5 +1,6 @@
 extends RefCounted
-## --sfx-set-check: the sound sets in content/sfx/*.json (docs/AUDIO.md).
+## --sfx-set-check: the sound sets in content/sfx/*.json (docs/AUDIO.md), and every menu control's sound
+## (_menus: Settings, the inventory and the Field Book).
 ##   1. every listed sound has a file (audio/<name>.wav or its takes <name>_1..4.wav)
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
@@ -37,7 +38,11 @@ extends RefCounted
 ##  11. the hit ticks by weapon family (content/sfx/hit.json): every Hunter's left-click weapon names one in "hit",
 ##      each family is used, and HeroSfx.hit_tick plays it for the weapon's own hits (a shot, a primary swing),
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
-##  12. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
+##  12. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
+##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
+##  13. one row per crowd-control kind (CcSfx): the Hunter it lands on hears its cue, a squadmate in reach a
+##      quieter one, a rival or a far squadmate nothing; stacked CC plays once
+##  14. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -65,6 +70,7 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	await _menus(main)
 	_dash_air()
 	_fallback()
 	_ult_cues()
@@ -80,6 +86,8 @@ func run(main: Node) -> void:
 	_level_cues()
 	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
 	_hit_ticks()
+	_boss_moves()
+	_cc_cues()
 	_inv_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -322,6 +330,71 @@ func _level_cues() -> void:
 	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
 	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
 			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
+## 14. Crowd control landing on a Hunter: who hears which cue, and stacked CC plays once (CcSfx).
+func _cc_cues() -> void:
+	var stub := GDScript.new()
+	stub.source_code = "extends Node\nvar player: Node\nvar time := 0.0\n"
+	stub.reload()
+	var m: Node = stub.new()
+	var me := _cc_body(m, 0, Vector3.ZERO)
+	var mate := _cc_body(m, 0, Vector3(6, 0, 0))
+	var far_mate := _cc_body(m, 0, Vector3(20, 0, 0))
+	var rival := _cc_body(m, 1, Vector3(3, 0, 0))
+	m.set("player", me)
+	Sfx.listener = me.pos
+	for kind: String in CcSfx.KINDS:
+		var own := "cc_" + kind
+		var quiet := own + "_mate"
+		var gap := _rms(own) - (_rms(quiet) + CcSfx.MATE_DB)
+		m.set("time", float(m.get("time")) + 1.0)
+		var heard := []
+		for h in [me, mate, rival, far_mate]:
+			heard.append(_cc_heard(h, kind))
+		var want := [[own], [quiet], [], []]
+		var who := "cc %s: you hear %s, a squadmate 6 m off %s (%.1f dB under), " % [kind, own, quiet, gap]
+		ok(heard == want and gap >= 6.0, who + "a rival and a squadmate 20 m off nothing (%s)" % [heard])
+	m.set("time", float(m.get("time")) + 1.0)
+	var first := _cc_heard(me, "stun")
+	m.set("time", float(m.get("time")) + 0.1)
+	var stacked := _cc_heard(me, "root")
+	m.set("time", float(m.get("time")) + CcSfx.CAP_S)
+	var later := _cc_heard(me, "slow")
+	ok(first.size() == 1 and stacked.is_empty() and later.size() == 1, "stacked CC plays once: a root 0.1 s after "
+			+ "a stun is silent, a slow %.1f s later plays (%s %s %s)" % [CcSfx.CAP_S, first, stacked, later])
+	var all := {"stun": 1.0, "root": 1.0, "slow": 1.0}
+	var pick := CcSfx.fresh_on_hit(me, all)
+	var nudge := CcSfx.fresh_on_hit(me, {"slow": 0.2})
+	me.stun_t = 1.0
+	var refresh := CcSfx.fresh_on_hit(me, {"stun": 1.0})
+	ok(pick == "stun" and nudge == "" and refresh == "", "a hit with stun, root and slow plays the stun; "
+			+ "a 0.2 s slow and a stun refresh play nothing (%s/%s/%s)" % [pick, nudge, refresh])
+	var ent := FileAccess.get_file_as_string("res://scripts/match/ent.gd")
+	var ks := FileAccess.get_file_as_string("res://scripts/arch/kit_status.gd")
+	ok(ent.count("CcSfx.") == 2 and ks.count("CcSfx.play(e, ") == 3,
+			"Ent.hurt and KitStatus.apply play the cues where the status lands")
+	for h in [me, mate, far_mate, rival]:
+		h.free()
+	m.free()
+
+func _cc_body(m: Node, team: int, at: Vector3) -> Hunter:
+	var h := Hunter.new()
+	h.m = m
+	h.team = team
+	h.pos = at
+	return h
+
+## The cc sounds that `kind` landing on `h` plays here (Sfx.last_played, cleared first).
+func _cc_heard(h: Hunter, kind: String) -> Array:
+	for k in Sfx.last_played.keys():
+		if String(k).begins_with("cc_"):
+			Sfx.last_played.erase(k)
+			Sfx.recent.erase(k)
+	CcSfx.play(h, kind)
+	return Sfx.last_played.keys().filter(func(k): return String(k).begins_with("cc_"))
+
+func _rms(sname: String) -> float:
+	var takes := _takes(sname)
+	return float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -635,3 +708,126 @@ func _hit_ticks() -> void:
 	var bare := [HeroSfx.hit_tick(h, {"src": "shot"}), HeroSfx.hit_tick(null, {})]
 	ok(bare == ["hit", "hit"], "hit ticks: no weapon tick or no Hunter, the shared one %s" % [bare])
 	h.free()
+## The menus (UiSfx, Ui.button), walked tab by tab: Settings, the inventory and the Field Book. Every
+## tab plays the tab sound; a slider ticks once for a burst of steps; a toggle sounds higher turning on
+## than off; a dropdown sounds; a Field Book tile sounds when pointed at and when picked, and its page's
+## way back sounds. Each control is put back as it was and the save is never written.
+func _menus(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	var spk := String(FieldBook.entries()[0])
+	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
+	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
+	var off := []
+	Overlay.open_settings()
+	for t in Overlay.SETTINGS_TABS:
+		await _settle(main)
+		if not _press_tab(t):
+			off.append("tab %s silent" % t)
+		await _settle(main)
+		_walk("settings > " + t, seen, off)
+	var said := "settings: all %d tabs sound, %d sliders tick once a burst, %d toggles sound higher on than off," % [
+		Overlay.SETTINGS_TABS.size(), seen["slider"], seen["toggle"]]
+	var all_found: bool = seen.values().all(func(n): return n > 0)
+	ok(off.is_empty() and all_found, "%s %d dropdowns sound %s" % [said, seen["dropdown"], off])
+	Overlay.close()
+	off.clear()
+	Overlay.inv_tab = "Items"
+	await _settle(main)
+	Overlay.open_inventory()
+	var inv_tabs := Overlay.root.find_children("*", "Button", true, false).map(func(b): return b.get_meta("tab", ""))
+	inv_tabs = inv_tabs.filter(func(t): return t != "")
+	for t in inv_tabs:
+		await _settle(main)
+		if not _press_tab(t):
+			off.append("tab %s silent" % t)
+		await _settle(main)
+		_walk("inventory > " + t, seen, off)
+	ok(off.is_empty() and inv_tabs.has("Field Book"), "inventory: all %d tabs sound %s" % [inv_tabs.size(), off])
+	await _field_book(main)
+	Overlay.close()
+
+## The Field Book tab is open: its met Boki's tile, then that Boki's page and the way back.
+func _field_book(main: Node) -> void:
+	var tile: Control = null
+	for g in Overlay.root.find_children("*", "GridContainer", true, false):
+		for t in g.get_children():
+			if tile == null and t is PanelContainer and t.focus_mode == Control.FOCUS_ALL:
+				tile = t
+	var pointed := tile != null and _heard("hover", tile.mouse_entered.emit) > 0.0
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	var picked := tile != null and _heard("click", func(): tile.gui_input.emit(click)) > 0.0
+	await _settle(main)
+	var opened := Overlay.page == "dex"
+	var back: Button = Overlay.root.find_child("Close", true, false)
+	var went_back := back != null and _heard("click", back.pressed.emit) > 0.0 and Overlay.page == "inventory"
+	ok(pointed and picked and opened and went_back,
+		"field book: a tile sounds pointed at (%s) and picked (%s), its page opens (%s), Back sounds and returns (%s)"
+		% [pointed, picked, opened, went_back])
+
+## Presses the tab named `t` in the open menu; true when it played the tab sound.
+func _press_tab(t: String) -> bool:
+	for b in Overlay.root.find_children("*", "Button", true, false):
+		if b.get_meta("tab", "") == t:
+			return _heard("ui_tab", b.pressed.emit) > 0.0
+	return false
+
+## One frame, so the page a menu just replaced is gone before the next look.
+func _settle(main: Node) -> void:
+	await main.get_tree().process_frame
+
+## Moves every slider, toggle and dropdown in the open menu and back, counting each in `seen`; what
+## stayed silent (or ticked twice in a burst, or sounded no higher on than off) goes in `off`.
+func _walk(where: String, seen: Dictionary, off: Array) -> void:
+	for c in Overlay.root.find_children("*", "Control", true, false):
+		if c is Slider:
+			var s: Slider = c
+			var was := s.value
+			var ticked := _heard("hover", func(): s.value = s.max_value if was < s.max_value else s.min_value) > 0.0
+			var again := _heard("hover", func(): s.value = was) > 0.0       # inside SLIDER_GAP_MS
+			seen["slider"] += 1
+			if not ticked or again:
+				off.append("%s: slider %s" % [where, "silent" if not ticked else "ticks every step"])
+		elif c is CheckButton or c is CheckBox:
+			var b: BaseButton = c
+			var was_on := b.button_pressed
+			var first := _heard("click", func(): b.button_pressed = not was_on)
+			var second := _heard("click", func(): b.button_pressed = was_on)
+			var on_pitch := second if was_on else first
+			var off_pitch := first if was_on else second
+			seen["toggle"] += 1
+			if off_pitch <= 0.0 or on_pitch <= off_pitch:
+				off.append("%s: toggle %s on %.2f off %.2f" % [where, b.text, on_pitch, off_pitch])
+		elif c is OptionButton and (c as OptionButton).selected >= 0:
+			var ob: OptionButton = c
+			seen["dropdown"] += 1
+			if _heard("ui_tab", func(): ob.item_selected.emit(ob.selected)) <= 0.0:
+				off.append("%s: dropdown silent" % where)
+
+## Runs `act` with every sound's repeat gap cleared: the pitch `sname` played at, or 0 when it was silent.
+func _heard(sname: String, act: Callable) -> float:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	act.call()
+	if not Sfx.last_played.has(sname):
+		return 0.0
+	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL].pitch_scale
+
+## 12. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
+func _boss_moves() -> void:
+	var boss: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boss.json"))["sounds"]
+	var missing := []
+	for kind in BossAnim.ATTACKS:
+		var cues := ["wake", "phase", "stagger", "fall", "defeat"]
+		for atk in BossAnim.ATTACKS[kind]:
+			cues += [atk + "_wind", atk + "_hit"]
+			if atk in ["boulders", "lob"]:
+				cues.append(atk + "_land")
+		for c in cues:
+			if not boss.has("boss_%s_%s" % [kind, c]):
+				missing.append("%s %s" % [kind, c])
+	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
+	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
+	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")

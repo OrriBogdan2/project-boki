@@ -5,7 +5,8 @@ extends RefCounted
 ## facing the way it faced, pushed away from the knocker, fading as the Wisp rises out of it, for its
 ## weight's time), then the hero model hides, the Wisp hums, it
 ## hangs back heavily when the hunter moves and settles once they stop, a revive brings the hero back
-## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out breaks it (mid-beat too). The
+## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out plays the elimination beat (once,
+## mid-beat too; ends with the deathbox, nothing left). The
 ## downed gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
 ## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
 ## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
@@ -14,6 +15,7 @@ extends RefCounted
 const DT := 1.0 / 60.0
 
 var bad := 0
+var _was_on := false
 var m: Match
 var main: Node
 var _spot: Vector3       # each hero cycle starts here: the drift rows walk the Wisp 1.4 m a cycle, toward the abyss
@@ -200,23 +202,70 @@ func _bleed_out() -> void:
 	m.knock(p, foe, {})
 	_frames(0.1)
 	var fall := HunterFall.of(p)
+	p.last_hit_by = foe
 	m.eliminate(p, foe, "finished")
 	_frames(DT)
 	var reset: bool = fall != null and HunterFall.of(p) == null and _faded(fall) == 0.0
-	ok(reset and is_zero_approx(p.model.position.x) and HunterWisp.node_of(p) == null,
-		"out mid-beat: the beat stops, the body is opaque and back on the hunter, the Wisp gone")
+	ok(reset and is_zero_approx(p.model.position.x),
+		"out mid-beat: the beat stops, the body is opaque and back on the hunter")
+	_frames(0.8)
+	ok(HunterWisp.node_of(p) == null, "...and the Wisp is gone once its elimination beat has played")
 	m.revive_hunter(p, null)
 	Life.bring_back(m, p, p.pos, 0.5, false)
 	_frames(0.1)
 	m.knock(p, foe, {})
+	p.last_hit_by = foe
 	_frames(0.4)
-	var burst0: int = m.fx.radial
+	var wisp := HunterWisp.node_of(p)
 	m.eliminate(p, foe, "finished")
-	_frames(0.1)
-	var gone: bool = HunterWisp.node_of(p) == null and HunterWisp.mode_of(p) == ""
-	ok(gone, "bleed-out or an execute breaks the Wisp (it is freed)")
-	ok(not Sfx.loop_on(WispHum.key(p)), "...and stops the hum")
-	ok(m.fx.radial > burst0, "...with a burst of sparks")
+	var sparks0: int = m.fx.radial
+	var sparks_after := sparks0
+	var box: Dictionary = Life.box_of(m, p)
+	var box_node := box["node"] as Node3D
+	var core_mat := wisp.get_meta("mat") as ShaderMaterial
+	var beats := 0
+	var was := false
+	var flickered := 0
+	var seen_kcol := false
+	var hero_hidden := true
+	var sank := false
+	var t := 0.0
+	var kcol := SideColor.of(m, foe)
+	while t < 0.9:
+		_frames(DT)
+		t += DT
+		if t < DT * 1.5:
+			sparks_after = m.fx.radial
+		var now := HunterWisp.mode_of(p) == HunterWisp.ELIM
+		beats += 1 if now and not was else 0
+		was = now
+		if now:
+			hero_hidden = hero_hidden and not p.model.visible and p.visible
+			var col: Color = core_mat.get_shader_parameter("core_col")
+			var on := absf(col.h - kcol.h) < 0.02       # the hue is the killer's whatever the dim
+			seen_kcol = seen_kcol or on
+			if t < 0.1:
+				var kept: bool = wisp.is_inside_tree() and wisp.get_parent() == p
+				ok(kept, "elimination: the Wisp stays on the hunter for the beat")
+			flickered += 1 if on and not _was_on else 0
+			_was_on = on
+		if t > 0.3 and not sank:
+			sank = true
+			ok(wisp.position.y < float(WispLook.get_look("")["hover"]) - 0.1, "elimination: the Wisp sinks")
+	ok(not Sfx.loop_on(WispHum.key(p)), "elimination: the hum stops")
+	ok(beats == 1, "elimination: the beat plays once (%d)" % beats)
+	ok(hero_hidden, "elimination: the Wisp shows, the hero model stays hidden")
+	ok(flickered == 1 and seen_kcol, "elimination: the core flickers in the killer's colour once (%d)" % flickered)
+	ok(sparks_after == sparks0, "elimination: no explosion (no burst as the beat starts)")
+	var left_over: bool = HunterWisp.node_of(p) != null or HunterWisp.mode_of(p) != ""
+	for c in p.get_children():
+		left_over = left_over or (c.name == "Wisp" and not c.is_queued_for_deletion())
+	ok(not left_over, "elimination: nothing is left behind after the beat")
+	ok(not p.visible and not p.model.visible, "elimination: the hunter is hidden at the end")
+	var box_ok: bool = box_node != null and is_instance_valid(box_node) and box_node.is_inside_tree()
+	var full: bool = box_ok and box_node.scale.is_equal_approx(Vector3.ONE)
+	ok(full, "elimination: the deathbox is there at full size at the end")
+	ok(Life.box_of(m, p).get("node") == box_node, "elimination: it is the box that holds their gear")
 	m.revive_hunter(p, null)
 	Life.bring_back(m, p, p.pos, 0.5, false)
 	_frames(0.1)

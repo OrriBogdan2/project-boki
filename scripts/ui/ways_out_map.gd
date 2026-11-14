@@ -3,28 +3,28 @@ extends RefCounted
 ## The four Ways Out seats on the minimap and the full map (briefs/specs/LIMITED_WAY_OUTS.md section 9), from 0:00:
 ## a badge on each site (a dark ring, a countdown arc in the seat's state colour) and, for the dead and the
 ## watching, one line: "Ways out left: N" and which seat your squad is nearest.
-## States come from WaysOutHud.seats; the dashed next Blight ring is HeartHud's. Until the quest seats are built
-## the Lair and Uplink badges sit on the quest seats (QuestSeats); QuestRace draws the progress pips under them.
+## States come from WaysOutHud.seats; the dashed next Blight ring is HeartHud's. The Lair and Uplink sites are the
+## quest seats' own (QuestSeats' seeded pick); QuestRace draws the progress pips under them.
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
 const LINE_FS := 13
 
 static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]    # reused every frame
 
-## Where each seat stands (Vector3.INF where the map has none): Lair, Heart Gate, Uplink, Heart ring.
+## Where each seat stands (Vector3.INF where the map has none): Sealed Lair, Heart Gate, Uplink, Heart ring.
 static func sites(m: Match) -> Array[Vector3]:
 	_sites.fill(Vector3.INF)
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return _sites
-	var seats: QuestSeats = m.exits.seats if m.exits else null
-	if seats != null:
-		seats.build()
-		if seats.lair:
-			_sites[0] = seats.lair.ref["c"]
-		if seats.uplink:
-			_sites[2] = seats.uplink.ref["pos"]
 	_sites[1] = m.heart.gate
 	_sites[3] = m.heart.site
+	var qs: QuestSeats = m.exits.seats if m.exits else null
+	if qs:
+		qs.build()
+		if qs.lair:
+			_sites[0] = qs.lair.ref["c"]
+		if qs.uplink:
+			_sites[2] = qs.uplink.ref["pos"]
 	return _sites
 
 ## A badge's colour: a state tone (SideColor: locked cool blue-grey, open cream, lost dim crimson), or the using
@@ -121,6 +121,8 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 			badge(hud.c, pv, 8.0, i, sd[i], m.time)
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
+	if m.heart_raid:
+		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 
 static func full_map(fm) -> void:
 	var m: Match = fm.m

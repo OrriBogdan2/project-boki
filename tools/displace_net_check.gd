@@ -34,6 +34,7 @@ var m: Match = null
 var home := Vector3.ZERO
 var replies: Array = []      # what the guest said back: {"c", "pos"}
 var stop := false
+var building := false        # the guest is building its match (the host says start until it hears from it)
 var stun_max := 0.0          # the longest stun seen on the watched body since its last place (guest: its own)
 var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
@@ -41,6 +42,7 @@ var seen := {}
 var paced_us := 0            # the wall clock (µs) the match clock has been stepped up to
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
+var guest_bin := GODOT       # what starts the guest (--tele-net-shots: the running binary, a GPU worker has no wrapper)
 var early := {}              # the guest's reply one snapshot after a Boki move on it
 
 func ok(cond: bool, what: String, info := "") -> void:
@@ -74,7 +76,7 @@ func _host_up() -> Hunter:
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
 	var cmd := "cd '%s' && timeout -k 5 300 %s --headless -- %s --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, guest_flag, port, dir.path_join("guest.log")]
+		ProjectSettings.globalize_path("res://"), guest_bin, guest_flag, port, dir.path_join("guest.log")]
 	OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
 	var t0 := Time.get_ticks_msec()
@@ -93,10 +95,14 @@ func _host_up() -> Hunter:
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := Time.get_ticks_msec()
+	var said := t1
 	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
+		if Time.get_ticks_msec() - said > 3000:      # a slow guest may not have heard the first start: say it again
+			said = Time.get_ticks_msec()
+			Net.lobby_emit("dn", {"c": "start", "d": d})
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
 	return G
 
 func _host() -> void:
@@ -485,6 +491,11 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
+	if m == null:        # what the guest lacked (a GPU worker's guest.log is all we see of it)
+		print("%s guest: no match after %.0f s: %s, peers seen %s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0,
+			"still building" if building else "no start heard", Net.peers.keys()])
+	else:
+		print("%s guest: match up after %.1f s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0])
 	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
 		await _run(0.1)
 	main.get_tree().quit(0)
@@ -498,7 +509,11 @@ func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "dn":
 		return
 	match String(data.get("c", "")):
-		"start": _build(data["d"])
+		"start":
+			if m == null and not building:
+				building = true
+				print("%s guest: start heard" % tag)
+				_build(data["d"])
 		"done": stop = true
 		"place":
 			if m and m.player:

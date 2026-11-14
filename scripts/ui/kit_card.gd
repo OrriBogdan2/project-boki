@@ -270,7 +270,6 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
 				]
-	out["icon"] = ICON_FIX.get(out["icon"], out["icon"])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row

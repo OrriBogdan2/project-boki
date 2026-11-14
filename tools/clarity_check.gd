@@ -89,14 +89,14 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	ok(HudPlate.statuses(a).is_empty() and HudPlate.statuses(b).is_empty(), "nothing active: no CC row")
 	a.stun_t = 2.0
 	b.slow_t = 3.0
-	var sa := _icon(a, "concussion")
-	var sb := _icon(b, "snare")
+	var sa := _icon(a, "status_stunned")
+	var sb := _icon(b, "status_slowed")
 	var stun_ok: bool = sa.size() == 1 and absf(float(sa[0][3]) - 2.0) < 0.01 and sa[0][2] == "STUNNED"
 	var slow_ok: bool = sb.size() == 1 and absf(float(sb[0][3]) - 3.0) < 0.01 and sb[0][2] == "SLOWED"
 	ok(stun_ok, "stunned dummy: one STUNNED icon, 2.0 s left")
 	ok(slow_ok, "slowed dummy: one SLOWED icon, 3.0 s left")
 	_run(m, 1.0)
-	var left := float(_icon(a, "concussion")[0][3])
+	var left := float(_icon(a, "status_stunned")[0][3])
 	ok(left > 0.9 and left < 1.1, "the stun timer shrinks (%.2f s left after 1 s)" % left)
 	a.root_t = 1.5
 	KitStatus.apply(a, "gnd", 4.0, 0.0, false, "check")
@@ -104,10 +104,11 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	KitStatus.apply(b, "rat", 2.5, 0.0, false)
 	b.remote = false
 	var kinds: Array = HudPlate.statuses(a).map(func(x): return x[0])
-	ok(kinds == ["concussion", "binding", "bolas"], "stun, root and Ground each get an icon, in order (%s)" % [kinds])
-	var g := float(_icon(a, "bolas")[0][3])
+	var in_order := kinds == ["status_stunned", "status_rooted", "status_grounded"]
+	ok(in_order, "stun, root and Ground each get an icon, in order (%s)" % [kinds])
+	var g := float(_icon(a, "status_grounded")[0][3])
 	ok(g > 3.9 and g <= 4.0, "Ground shows its time left (%.2f s)" % g)
-	var daze := _icon(b, "burst")
+	var daze := _icon(b, "status_dazed")
 	var daze_ok: bool = daze.size() == 1 and float(daze[0][3]) > 2.4 and HudPlate.statuses(b).size() == 2
 	ok(daze_ok, "a remote body's Daze and Slow: two icons, Daze 2.5 s left")
 	a.stun_t = 0.0
@@ -121,7 +122,7 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		mob = m.spawn_mob("skitter", a.pos + Vector3(4, 0, 0))
 	if mob:   # the monster plate draws the same row (hud._status_row)
 		mob.stun_t = 1.2
-		var ms := _icon(mob, "concussion")
+		var ms := _icon(mob, "status_stunned")
 		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
 		mob.stun_t = 0.0
 
@@ -137,29 +138,29 @@ func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var halo := SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))
 	ok(_same(look[2], halo), "a rival's shot carries the hostile halo")
 
-## Crowd control on a body, on the body: the props show while it lasts, the tint pulses its colour, all gone after;
+## Crowd control on a body, on the body: its look (StatusLooks) shows while it lasts, the tint pulses its colour, all
+## gone after;
 ## a cast glints the caster in their signature colour and fades.
 func _body_tell(m: Match, f: Hunter) -> void:
+	var looks := StatusLooks.of(m)
+	Sfx.listener = f.pos      # (StatusLooks draws near the camera focus only)
 	f.stun_t = 1.0
 	_run(m, 0.1)
-	var props := f.get_node_or_null("BodyTell") as Node3D
-	ok(props != null and (props.get_node("Stun") as Node3D).visible, "a stunned body spins the stars")
+	ok(looks.showing(f, "stun"), "a stunned body spins the stars")
 	ok(_same(BodyTell.tint_of(f), BodyTell.STUN_COL), "... and pulses the stun colour")
 	f.stun_t = 0.0
 	f.root_t = 1.0
 	_run(m, 0.3)
-	var r := props.get_node("Root") as Node3D if props else null
-	ok(r != null and r.visible and r.scale.y > 0.99, "a rooted body grows its tendrils")
+	ok(looks.showing(f, "root"), "a rooted body shows the stakes at its feet")
 	ok(_same(BodyTell.tint_of(f), BodyTell.ROOT_COL), "... and pulses the root colour")
 	f.root_t = 0.0
 	f.slow_t = 1.0
 	f.stagger_t = 0.0
 	_run(m, 0.05)
-	ok(props != null and (props.get_node("Slow") as Node3D).visible, "a slowed body drips frost")
+	ok(looks.showing(f, "slow"), "a slowed body shows the rings down its legs")
 	f.slow_t = 0.0
 	_run(m, 0.05)
-	var none := props != null and not ((props.get_node("Stun") as Node3D).visible
-			or (props.get_node("Root") as Node3D).visible or (props.get_node("Slow") as Node3D).visible)
+	var none := not (looks.showing(f, "stun") or looks.showing(f, "root") or looks.showing(f, "slow"))
 	ok(none and BodyTell.tint_of(f).a == 0.0, "nothing holding it: nothing on the body")
 	var rings0: int = m.fx.radial
 	f.cast_at = m.time
