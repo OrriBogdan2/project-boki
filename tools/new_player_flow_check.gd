@@ -156,8 +156,6 @@ func _hatch() -> void:
 	await _press(hx, String(hx.CARD_BUTTON))
 	await _wait(func(): return hx.stage == "create", "then you make yourself")
 	ok(_button(hx, "Random") != null, "with a Random button as well")
-	ok(not hx.looks_open and _button(hx, "More") != null,
-		"a new save's creator starts on its first rows, the rest under More")
 	await _press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")

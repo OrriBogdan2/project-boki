@@ -6,11 +6,12 @@ extends RefCounted
 ## shader, all the way round), no skin showing, an aura of big bright specks, no hair; its soles stay on the
 ## ground at every height and build, idle and walking; height visibly changes the body's height, build its
 ## mass, and a woman's silhouette and stance differ from a man's; it animates with HunterAnim and shows kept
-## mask marks; a match and the Hunter screens use the Hunter's look, never yours. The creator (UI_FIRST15 5.6):
-## a new save sees Sex, Height, Build and Shroud colour, every other row is under one More fold that scrolls
-## and fits 1280x720; the Mirror (Change your look) and a returning player open it.
+## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
 const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
+## [sex, height, build] of the bodies that stood highest (2.1 to 2.8 cm) while EmptyGait solved a woman's legs
+## (leg node z scale 0.9) as if they were unscaled: each is its own row.
+const WORST_FEET := [[0, 2, 1], [0, 2, 2], [0, 1, 0], [0, 1, 1]]
 
 var bad := 0
 
@@ -46,7 +47,6 @@ func run(main: Node) -> void:
 	await _feet(main)
 	_who_shows()
 	_blend(main)
-	await _creator_fold(main)
 	print("UNMASKED CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
@@ -239,6 +239,7 @@ func _feet(main: Node) -> void:
 	var worst := 0.0
 	var worst_body := ""
 	var cases := 0
+	var per := {}
 	var tree := main.get_tree()
 	for g in 2:
 		for h in Unmasked.HEIGHTS.size():
@@ -253,15 +254,21 @@ func _feet(main: Node) -> void:
 						"vel": Vector3(0, 0, -3.5) if walking else Vector3.ZERO})
 					if i == 59 or (walking and i % 4 == 0):
 						lows.append(_sole_y(m))
+				var body_worst := 0.0
 				for y in lows:
-					if absf(y) > worst:
-						worst = absf(y)
-						worst_body = "sex %d height %d build %d" % [g, h, b]
+					body_worst = maxf(body_worst, absf(y))
+				per[[g, h, b]] = body_worst
+				if body_worst > worst:
+					worst = body_worst
+					worst_body = "sex %d height %d build %d" % [g, h, b]
 				cases += 1
 				m.free()
 				await tree.process_frame
 	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
 		+ "walking (%d bodies, worst %.1f cm, %s)") % [cases, worst * 100.0, worst_body])
+	for body in WORST_FEET:
+		ok(float(per[body]) <= FOOT_TOLERANCE, "%s, %s, %s: feet on the ground (%.1f cm)" % [
+			Unmasked.SEXES[body[0]], Unmasked.HEIGHTS[body[1]], Unmasked.BUILDS[body[2]], float(per[body]) * 100.0])
 
 ## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
 func _shroud_migration() -> void:
@@ -341,59 +348,3 @@ func _aura() -> void:
 func _shape_of(m: Node3D) -> String:
 	var b := _bounds(m)
 	return "%d:%.3f:%.3f" % [_verts(m), b.size.x, b.size.z]
-
-## The creator's first rows and its More fold, on a new save, a returning one and the Mirror.
-func _creator_fold(main: Node) -> void:
-	var tree := main.get_tree()
-	tree.root.size = Vector2i(1280, 720)
-	var labels: Array = Unmasked.ROWS.map(func(r): return String(r[1]))
-	var first: Array = labels.filter(func(t): return Unmasked.FIRST_ROWS.has(_key_of(t)))
-	ok(first == ["Sex", "Height", "Build", "Shroud colour"], "the creator's first rows: %s" % str(first))
-	Save.d = Save.fresh()
-	var hx = await _creator(main, false)
-	var shown := _shown(hx, labels)
-	ok(shown == first and _btn(hx, "More") != null, "a new save sees only those, and More (%s)" % str(shown))
-	_btn(hx, "More").pressed.emit()
-	for i in 3: await tree.process_frame
-	ok(_shown(hx, labels) == labels and _btn(hx, "Fewer") != null, "More opens every row, Fewer folds them")
-	var fold: Control = hx.create_box.find_children("*", "ScrollContainer", true, false).front()
-	ok(fold != null and fold.find_children("*", "Label", true, false).any(func(l): return l.text == "Aura"),
-		"the fold's rows sit in a scroll box, so more rows scroll instead of growing the card")
-	var r: Rect2 = hx.create_box.get_global_rect()
-	ok(r.position.y >= 0.0 and r.end.y <= 720.0, "the open creator fits 1280x720 (y %d-%d)" % [r.position.y, r.end.y])
-	hx.queue_free()
-	Save.d = Save.fresh()
-	Save.d["tutorial"]["hatched"] = true
-	hx = await _creator(main, false)
-	ok(_shown(hx, labels) == labels, "a returning player (hatched, no look yet) opens every row")
-	hx.queue_free()
-	Save.d["look"] = Unmasked.default_look()
-	hx = await _creator(main, true)
-	ok(_shown(hx, labels) == labels and _btn(hx, "Fewer") != null, "the Mirror (Change your look) opens every row")
-	hx.queue_free()
-	await tree.process_frame
-
-func _creator(main: Node, mirror: bool):
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	hx.edit_only = mirror
-	main.add_child(hx)
-	for i in 3: await main.get_tree().process_frame
-	if not mirror:
-		hx._end_intro()
-	for i in 3: await main.get_tree().process_frame
-	return hx
-
-func _key_of(label: String) -> String:
-	for row in Unmasked.ROWS:
-		if row[1] == label: return row[0]
-	return ""
-
-## The creator's row labels on screen, in ROWS order.
-func _shown(hx, labels: Array) -> Array:
-	var on: Array = hx.create_box.find_children("*", "Label", true, false).map(func(l): return l.text)
-	return labels.filter(func(t): return on.has(t))
-
-func _btn(hx, text: String) -> Button:
-	for b in hx.create_box.find_children("*", "Button", true, false):
-		if b.text == text: return b
-	return null

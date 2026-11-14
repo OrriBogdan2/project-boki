@@ -316,7 +316,7 @@ func _tick_lmb() -> void:
 	var tip: Node3D = null
 	if h.model:
 		tip = WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle")
-	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos), tip)
+	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos), VVFx.NO_EDGE, tip)
 
 ## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
 func _fingertip(left: bool) -> void:
