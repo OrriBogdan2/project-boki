@@ -616,7 +616,7 @@ func _training() -> void:
 ## 6. Every sound UiSfx plays by name (Sfx.play) has a file, so a typo never plays silence.
 func _ui_cues() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
-	var re := RegEx.create_from_string('Sfx\.play\("([a-z_]+)"')
+	var re := RegEx.create_from_string('Sfx\\.play\\("([a-z_]+)"')
 	var names := {}
 	for hit in re.search_all(src):
 		names[hit.get_string(1)] = true
