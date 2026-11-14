@@ -8,10 +8,11 @@ extends ArchKit
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
 
+const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
+
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
 var spirit: PinSpirit          # Shift: Spirit Walk
-const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
 
 var fx: PinFx                  # Hem's pooled effects
 var ult: PinUlt                # X: Starpiercer

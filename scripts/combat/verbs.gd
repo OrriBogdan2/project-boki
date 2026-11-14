@@ -6,6 +6,16 @@ extends RefCounted
 ## Each one is plain data plus one scene node, so new abilities are new JSON, not new code.
 
 const DECOY_A := 0.28      # the decoy ghost's opacity (brighter blooms into a flash at every dash start)
+const WALL_TH := 0.32      # half thickness of a barrier
+const WALL_H := 2.3
+const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
+const BRIDGE_RISE_DROP := 0.6   # m below its place a rising span's slabs start (add_bridge e.rise)
+const BRIDGE_SHAKE := 0.14      # m: a crumble-warned span's shake at the very end
+const BRIDGE_CRACK_W := 0.11    # m: the width of its warning cracks
+const BRIDGE_PUFF_GAP := 0.3    # s between the grit puffs spilling off it while it warns
+const BRIDGE_SHAKE_HZ := 9.0    # its shake's speed (cycles per second)
+const BRIDGE_FALL := 3.0        # m the slabs drop as it crumbles
+const BRIDGE_FALL_T := 0.45     # s: ...over this long
 
 var m: Node = null
 var walls: Array = []     # {a, b: Vector2, y, hp, max_hp, t, team, by, block: "enemy"|"all", move, reflect, node, col, touch, follow, th}
@@ -19,16 +29,6 @@ var yanked: Array = []    # {hunter, to, t, dur}: a hunter in flight from a yank
 var decoys: Array = []    # {pos, team, t, node, owner}
 var ripple: BarrierRipple = null     # the hit ripple every barrier shares
 
-const WALL_TH := 0.32      # half thickness of a barrier
-const WALL_H := 2.3
-const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
-const BRIDGE_RISE_DROP := 0.6   # m below its place a rising span's slabs start (add_bridge e.rise)
-const BRIDGE_SHAKE := 0.14      # m: a crumble-warned span's shake at the very end
-const BRIDGE_CRACK_W := 0.11    # m: the width of its warning cracks
-const BRIDGE_PUFF_GAP := 0.3    # s between the grit puffs spilling off it while it warns
-const BRIDGE_SHAKE_HZ := 9.0    # its shake's speed (cycles per second)
-const BRIDGE_FALL := 3.0        # m the slabs drop as it crumbles
-const BRIDGE_FALL_T := 0.45     # s: ...over this long
 
 func _init(match_node: Node) -> void:
 	m = match_node
