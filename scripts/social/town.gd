@@ -38,7 +38,7 @@ var center := Vector2.ZERO
 var solids: Array = []         # Rect2 footprints of things built after the ground was laid
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	_build_env()
 	world = World.new(); add_child(world)
 	fx = Fx.new(); add_child(fx)

@@ -18,7 +18,7 @@ static func open(match_node: Match) -> DuelRing:
 
 func _build() -> void:
 	m.paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	layer = CanvasLayer.new()
 	layer.layer = 40
 	layer.set_meta("ring", self)  # the pad drops open()'s return; the layer keeps the ring alive

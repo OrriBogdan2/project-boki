@@ -60,7 +60,7 @@ var top_box: VBoxContainer    # the title and its line: centred, or over the pre
 var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	var env := WorldEnvironment.new()

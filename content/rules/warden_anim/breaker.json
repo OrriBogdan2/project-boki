@@ -59,6 +59,7 @@
 	"kmoves": {
 		"bul_throw": {
 			"clip": "lmb_throw",
+			"scale": 1.12,
 			"upper": "moving"
 		},
 		"bul_recall": {

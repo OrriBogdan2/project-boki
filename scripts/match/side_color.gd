@@ -14,6 +14,13 @@ const HOSTILE := Color("ff2d55")     # a rival's ability looks lean to this (doc
 const FX_FOE_K := 0.45               # share of HOSTILE in a rival's ground areas, telegraphs and shot halos
 const FX_ALLY_K := 0.3               # share of ALLY in a teammate's (yours stay as made)
 
+# One draw order for everything flat on the ground (a material's render_priority): ownership rings under every
+# cast, a teammate's under yours, a rival's telegraphs on top, so the thing that can hurt you is never buried.
+const ORDER_RING := -2
+const ORDER_ALLY := 0
+const ORDER_OWN := 1
+const ORDER_FOE := 3
+
 ## The colour of team `team` (and `is_you` for the viewer's own body) as seen by the viewer on `viewer_team`.
 static func of_team(viewer_team: int, team: int, is_you := false) -> Color:
 	if is_you:
@@ -42,3 +49,10 @@ static func fx(m: Node, by: Node, col: Color) -> Color:
 	if int(body.get("team")) == int(lp.get("team")):
 		return Color(col.lerp(ALLY, FX_ALLY_K), col.a)
 	return Color(col.lerp(HOSTILE, FX_FOE_K), col.a)
+
+## Where `by`'s ground look sits in the draw order (render_priority): a rival's on top, then yours, then a teammate's.
+static func order(m: Node, by: Node) -> int:
+	var c := of(m, by)
+	if c == FOE:
+		return ORDER_FOE
+	return ORDER_ALLY if c == ALLY else ORDER_OWN

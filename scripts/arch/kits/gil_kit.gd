@@ -332,17 +332,30 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
 		vfx("beached", f.pos)
+		ComboMark.payoff(m, h, f)        # the Beach payoff: the foe flashes
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)
 
+## The splash marks on `f`, for the ComboMark tag: a pip per different mark (three Beach it); the ring is the
+## time the oldest mark has left (when it runs out the count drops).
+func combo_read(f: Ent) -> Dictionary:
+	var pd: Dictionary = d.get("passive", {})
+	var win := float(pd.get("window", 5.0))
+	var n := 0
+	var left := win
+	for stamp: float in marks.get(f.get_instance_id(), {}).values():
+		var rest: float = win - (m.time - stamp)
+		if rest > 0.0:
+			n += 1
+			left = minf(left, rest)
+	if n == 0:
+		return {}
+	return {"icon": "tonic", "n": n, "max": int(pd.get("need", 3)), "left": left, "total": win}
+
 ## Different marks on a foe right now (tests and the HUD).
 func marks_on(f: Ent) -> int:
-	var pd: Dictionary = d.get("passive", {})
-	var n := 0
-	for k in marks.get(f.get_instance_id(), {}):
-		if m.time - float(marks[f.get_instance_id()][k]) <= float(pd.get("window", 5.0)): n += 1
-	return n
+	return int(combo_read(f).get("n", 0))
 
 # ------------------------------------------------------------------ dash: Ground Swim
 func on_dash(use_ex: bool) -> bool:

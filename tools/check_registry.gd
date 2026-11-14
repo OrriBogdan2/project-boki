@@ -101,6 +101,7 @@ const CHECKS := {
 	# movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md, and the no-fall-carry rows
 	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
+	"--ring-stack-shots": ["res://tools/ring_stack_shots.gd", "ring_stack_shots", null],      # GPU, --shots-dir=
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--owner-kit-rules-check": ["res://tools/owner_kit_rules_check.gd", "owner_kit_rules_check", null],
 	# the glider banks into its turns, the dive pitches nose-down, a rider keeps its seat: on every Hunter's rig
@@ -124,6 +125,8 @@ const CHECKS := {
 	"--move-drills-check": ["res://tools/move_drills_check.gd", "move_drills_check", null],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
+	"--grounds-check": ["res://tools/grounds_check.gd", "grounds_check", null],      # the Training Grounds
+	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
@@ -135,6 +138,7 @@ const CHECKS := {
 	# docs/heroes/deployables.md
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],
 	"--tenzo-edge-check": ["res://tools/tenzo_edge_check.gd", "hero_pair_check", null],
+	"--combo-payoff-check": ["res://tools/combo_payoff_check.gd", "combo_payoff_check", null],  # mark -> payoff
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # Gil, the Novice Mage
 	"--gil-kit-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],  # (the old name)
@@ -186,6 +190,7 @@ const CHECKS := {
 	"--minigame-hub-check": ["res://tools/minigame_hub_check.gd", "minigame_hub_check", null],  # title
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--summon-cc-check": ["res://tools/summon_cc_check.gd", "summon_cc_check", null],
+	"--in-combat-check": ["res://tools/in_combat_check.gd", "in_combat_check", null],
 	# Bokidex quirks, sex ratios
 	"--mode-boki-check": ["res://tools/mode_boki_check.gd", "mode_boki_check", null],  # MODE_BOKI.md
 	"--boki-quirks-check": ["res://tools/boki_quirks_check.gd", "boki_quirks_check", null],
@@ -292,6 +297,7 @@ const CHECKS := {
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
+	"--cursor-mode-check": ["res://tools/cursor_mode_check.gd", "cursor_mode_check", null],  # fight cursor
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--lace-1111-check": ["res://tools/lace_1111_check.gd", "lace_1111_check", null],      # Lace 11-11 notes
@@ -605,6 +611,7 @@ const CHECKS := {
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
 	"--anim-coverage-check": ["res://tools/anim_coverage_check.gd", "anim_coverage_check", null],
+	"--clip-cadence-check": ["res://tools/clip_cadence_check.gd", "clip_cadence_check", null],  # clip vs kit cadence
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],

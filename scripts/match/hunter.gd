@@ -176,7 +176,6 @@ var armor_kits: int:
 	set(v): UtilityBelt.set_count(self, "armor_kit", v)
 var ai: Dictionary = {}
 var muzzle_t := 0.0
-var regen_wait := 0.0
 var armor := 0.0
 var max_armor := 50.0
 var bloom := 0.0              # extra spread from moving, jumping and dashing
@@ -547,7 +546,6 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
-	regen_wait = float(KinRegen.rules()["owner_shield_delay_s"])
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
 		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
