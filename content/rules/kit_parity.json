@@ -671,6 +671,14 @@
 			"value": 2.062,
 			"tol": 0.247,
 			"evidence": "D Abyssalbreaker AoE series 396 vs throw 192 @15 (supervive_kits.md:93) = 396/192"
+		},
+		{
+			"hero": "mage",
+			"slot": "LMB",
+			"field": "weapon.primary.dmg",
+			"value": 8.74,
+			"tol": 0.3,
+			"evidence": "D Jolt 90 every 0.8s = 8.75% of the target a second (90 of 1285); at our 0.648s (owner items 70, 116) 8.74 of 154 a bolt; --ttk-check LMB 1.00"
 		}
 	]
 }

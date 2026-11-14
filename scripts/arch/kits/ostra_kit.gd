@@ -21,7 +21,7 @@ const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wi
 const TRADE_COL := Color("c65cff")         # the Trade's violet (his end, the lob; the dash slot's col)
 const TRADE_EDGE := Color("ff3fd0")        # its magenta edge (the landing end; the UI's Void & Masks neon)
 const SMOKE := Color(0.118, 0.078, 0.188, 0.85)   # the void smoke round the Trade (the UI's #1e1430)
-const TRADE_LOOK_K := 1.3     # the Trade's lantern, motes and flashes, times their old size (visual only:
+const TRADE_LOOK_K := 1.65    # the Trade's lantern, motes and flashes, times their old size (visual only:
                               # the circle's rings and sigils stay at dash.radius, the real catch)
 
 var swollen_t := 0.0
@@ -77,12 +77,14 @@ func can_shoot() -> bool: return not well.locked and super.can_shoot()
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
-## RecastCue: the seed is the marker; "WAIT" through the 0.3s minimum (a press there is buffered).
+## RecastCue: "WAIT" on the E slot through the 0.3s minimum (a press there is buffered).
+## No world marker (the owner wants less pop-up UI): the seed's own ring and the E slot carry it.
 func recast_window() -> Dictionary:
 	var w := super()
 	if not w.is_empty():
 		w["at"] = seed["pos"]
 		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
+		w["marker"] = false
 	return w
 
 func _hand(up := 1.15) -> Vector3:
@@ -337,18 +339,15 @@ func swap_move() -> String:
 	return "ostra_swap" if h.grounded else "ostra_swap_air"
 
 ## Where the lantern lands: the cursor if it is within reach, else the point at full reach along the cursor
-## direction. No ground, wall or abyss check limits it; over the abyss it keeps his current height.
+## direction, on the top surface there (OstraLand: a cursor on a cliff's face lands on its top, and the spot is
+## settled clear of walls, rocks and cliffs). Over the abyss it keeps his current height.
 func swap_spot() -> Vector3:
 	var reach := float(dash_def()["reach"])
 	var a := aim()
 	var dv := Vector2(a.x - h.pos.x, a.z - h.pos.z)
 	if dv.length() > reach:
 		dv = dv.normalized() * reach
-	var p := Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y)
-	var g: float = m.world.ground_at(p.x, p.z)
-	if g > World.VOID + 1.0:
-		p.y = g
-	return p
+	return OstraLand.spot(m, h.pos, Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y), h.r)
 
 func _tick_swap(dt: float) -> void:
 	var dd := dash_def()
@@ -402,8 +401,9 @@ func _drop_holds() -> void:
 
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()
-	var land: Vector3 = swap.get("land", h.pos)
 	var from: Vector3 = swap.get("from", h.pos)
+	# settled again on arrival: a wall raised on the spot during the flight never holds him
+	var land := OstraLand.settle(m, swap.get("land", h.pos), from, h.r)
 	var from_void := h.over_void()
 	swap = {}
 	AimKit.hide(h, "swap_fly")
@@ -463,7 +463,7 @@ func trade_bodies(land: Vector3, r: float) -> Array:
 ## at, if that is higher; landing over the abyss also keeps it), with an implosion and his appear pose.
 func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	var dd := dash_def()
-	var gy: float = m.world.ground_at(land.x, land.z)
+	var gy: float = land.y if not m.world.is_void(land.x, land.z) else World.VOID
 	var dy := clampf(from.y - h.ground(), 0.0, float(dd["keep_h"])) if not from_void else 0.0
 	var arrive_y := maxf(gy + dy, from.y) if from_void or gy <= World.VOID + 1.0 else gy + dy
 	h.teleport(Vector3(land.x, arrive_y, land.z))

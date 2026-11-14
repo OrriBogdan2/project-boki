@@ -83,6 +83,23 @@ The 11 ranked rows of `briefs/hero-ref/dancer.md` section 5, marked on main d255
 Rows 12 and 13 (not in the top 11): knock feedback is closed (`KNOCK_STAR` crimson star on the knocked, green pillar on her, `on_knock`); no audio in the footage, n/a.
 
 Suggestions for the owner (not built): the pacing set in row 5 (4.5 / 7 / 15 s from the footage cards against 5 / 13 / 28 s from the data); and whether the Bola's bounce off a wall should be the second catch (row 8, in flight).
+## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
+
+Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
+supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
+owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
+
+| What | Ours |
+|---|---|
+| Window | a bolt thrown within 1.2s of an empowering Vault (`quick_window`; the footage's slowest dash -> shot is about 1.2s, 0137 -> 0143) starts the run |
+| Speed | 0.6x the interval (`quick_k`): 0.27s instead of 0.45s, +67% rate |
+| How many | 3 quick intervals (`quick_n`): the empowered bolt and the next three leave 0.27s apart (4 bolts in about 0.8s instead of 1.35s), then 0.45s again |
+| Ends early | a bolt that doesn't follow within its interval + 0.2s ends the run; a bolt cooling as she flips is cut to 0.27s |
+| Tell | no UI: the three quick bolts carry the cartwheel's cyan, a cyan tail on the gold chakram and a cyan star at the throwing hand; the faster throws themselves. Effects are local like her other bolt looks; online viewers see the faster cadence |
+
+Asserted in `--dancer-combo-check` (`dancer quick: ...`).
+
 ## LMB range, speed (parity pass, ext/sable-lmb-range)
 
 | What | Source | Ours before | Ours now |
@@ -226,6 +243,7 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
 | E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s), in a placed barrier it hits (riding it; on the ground under it if it breaks), or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4.5, and 7.6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | E, Shadow Knife | tap, recast | A dagger to the cursor (16m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s), in a placed barrier it hits (riding it; on the ground under it if it breaks), or lands where you aimed; a white circle marks it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
+| E, Shadow Knife | tap, recast | A dagger to the cursor (14m at most): it sticks in the first foe on the way (8, slowed 50% for 2.5s), in a placed barrier it hits (riding it; on the ground under it if it breaks), or lands where you aimed; RecastCue's E marker sits on it; recast blinks you there through 5 cyan afterimages; after 6s you step anyway; rank 3: sticking in a foe gives the Vault back | Phantom Dagger: sticks or lands, recast teleports with a ghost chain | As the source |
 | X, Encore | tap (level 6) | A violet ring grows round her from 2.3m to 5.4m (3 bh) over 0.4s, everyone sees it, then rides with her for 2s: she dances, and every 0.2s a blade leaves her hand at each foe inside (10 at most each): 4, and 6 from the outer band (past 75% of the radius), which also blights 6s. She keeps walking, shooting and dashing; casting it gives the Vault back; every blade refreshes her Marks; three blades circle her while it runs; a plain fade at the end. 24s cooldown. A blade landing on a rival hunter fills the bond (the best event of the cast counts) | Death Blossom: the ring grows 1.3 to 3 bh in 0.4s, up to 5 shots at each enemy over 2s, the outer band hits harder and Anti-Heals 6s | As the source; the look (her violet ring with a gold outer band, violet blades) is ours |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 

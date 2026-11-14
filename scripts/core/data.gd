@@ -149,11 +149,16 @@ const PERKS := {
 ##   skill: aim lead/accuracy and how often they think   react: seconds before they fire on a new target
 ##   dmg: their damage   fire: how much of the time they keep the trigger down
 ##   abil: how readily they use abilities and kin   aggro: how far they chase and how hard they press
+##   ring: metres inside the Blight's next ring they aim for (BotRing)
 const BOT_DIFF := {
-	"easy": {"name": "Easy", "skill": 0.28, "react": 0.75, "dmg": 0.65, "fire": 0.5, "abil": 0.3, "aggro": 0.6},
-	"medium": {"name": "Medium", "skill": 0.5, "react": 0.45, "dmg": 0.82, "fire": 0.7, "abil": 0.55, "aggro": 0.8},
-	"hard": {"name": "Hard", "skill": 0.72, "react": 0.28, "dmg": 0.95, "fire": 0.85, "abil": 0.8, "aggro": 0.95},
-	"expert": {"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05, "fire": 1.0, "abil": 1.0, "aggro": 1.1},
+	"easy": {"name": "Easy", "skill": 0.28, "react": 0.75, "dmg": 0.65,
+		"fire": 0.5, "abil": 0.3, "aggro": 0.6, "ring": 2.0},
+	"medium": {"name": "Medium", "skill": 0.5, "react": 0.45, "dmg": 0.82,
+		"fire": 0.7, "abil": 0.55, "aggro": 0.8, "ring": 4.0},
+	"hard": {"name": "Hard", "skill": 0.72, "react": 0.28, "dmg": 0.95,
+		"fire": 0.85, "abil": 0.8, "aggro": 0.95, "ring": 6.0},
+	"expert": {"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05,
+		"fire": 1.0, "abil": 1.0, "aggro": 1.1, "ring": 8.0},
 }
 const BOT_ORDER := ["easy", "medium", "hard", "expert"]
 
@@ -289,6 +294,9 @@ const MOBS := {
 		"r": 0.4, "gems": 1, "color": Color("3e3634"), "attack": "lunge", "blight": true},
 	"bl_warden": {"name": "Blight Watcher", "hp": 150.0, "speed": 1.3, "dmg": 12.0, "range": 9.0, "windup": 1.1, "cd": 2.8,
 		"r": 0.8, "gems": 4, "color": Color("4a4240"), "attack": "spit", "blight": true},
+	# a Blight nest (BlightNests): a stone mound the Skitters climb out of; break it for gems and gear
+	"bl_nest": {"name": "Blight Nest", "hp": 120.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
+		"r": 0.9, "gems": 6, "color": Color("3a3230"), "attack": "none", "blight": true},
 	# a lair's ward stones: break all three (guards come out as you do) and its seal fails
 	"ward": {"name": "Ward Stone", "hp": 150.0, "speed": 0.0, "dmg": 0.0, "range": 0.0, "windup": 1.0, "cd": 999.0,
 		"r": 0.7, "gems": 3, "color": Color("8fd8ff"), "attack": "none", "ward": true},

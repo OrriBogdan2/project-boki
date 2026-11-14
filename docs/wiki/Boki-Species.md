@@ -15,7 +15,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Zippelith](#zippelith) | Caecilian + Giant zipper | Dark | medium | trickster | Wild, nest eggs |
 | [Cairnback](#cairnback) | Tortoise + Ibex | Titan | large | tank | Rare Egg from The Stone Colossus |
 | [Anchorbill](#anchorbill) | Hornbill + Ship's anchor | Gravity | medium | controller | Wild, nest eggs |
-| [Chandelapi](#chandelapi) | Tall okapi crowned | Shadow | medium | trickster | Wild, nest eggs |
+| [Chandelapi](#chandelapi) | Tall okapi crowned | Dark | medium | trickster | Wild, nest eggs |
 | [Chandelotl](#chandelotl) | Gills become a crystal chandel | Prism | medium | tank | Wild, nest eggs |
 | [Vespyx](#vespyx) | Fox + Scorpion | Venom | small | bruiser | Starter egg |
 | [Bellowary](#bellowary) | Cassowary + Forge bellows | Ember | large | bruiser | Wild, nest eggs |
@@ -38,7 +38,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Glassolotl](#glassolotl) | Glass-bodied axolotl | Prism | medium | tank | Wild, nest eggs |
 | [Glintmole](#glintmole) | Star-nosed mole + Quartz geode | Stone | small | controller | Wild, nest eggs |
 | [Gloamshell](#gloamshell) | Garden snail + Smoked obsidian | Dark | small | controller | Wild, nest eggs |
-| [Gloamspire](#gloamspire) | Evolution of Gloamshell. | Shadow | medium | trickster | Wild, nest eggs |
+| [Gloamspire](#gloamspire) | Evolution of Gloamshell. | Dark | medium | trickster | Wild, nest eggs |
 | [Glomwort](#glomwort) | Slime mold + Puffball | Spore | small | controller | Wild, nest eggs |
 | [Glomworth](#glomworth) | Evolution of Glomwort. | Spore | medium | controller | Wild, nest eggs |
 | [Effigeetle](#effigeetle) | Goliath beetle + Marble statue face | Stone | large | tank | Wild, nest eggs |
@@ -77,7 +77,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Ringrove](#ringrove) | Huge calm elder | Spore | medium | controller | Wild, nest eggs |
 | [Rippmink](#rippmink) | Otter-sleek | Prism | medium | tank | Wild, nest eggs |
 | [Chuggamus](#chuggamus) | Hippopotamus + Steam locomotive | Ember | large | tank | Wild, nest eggs |
-| [Seamwyrm](#seamwyrm) | Great dragon-worm | Shadow | medium | trickster | Wild, nest eggs |
+| [Seamwyrm](#seamwyrm) | Great dragon-worm | Dark | medium | trickster | Wild, nest eggs |
 | [Selenfin](#selenfin) | Hatchetfish + Moonstone | Lunar | small | support | Wild, nest eggs |
 | [Barokat](#barokat) | Meerkat + Brass barometer | Storm | medium | support | Wild, nest eggs |
 | [Skidlet](#skidlet) | Fluffy heron chick wobbling | Frost | small | skirmisher | Wild, nest eggs |
@@ -88,16 +88,16 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Thrumbird](#thrumbird) | Hummingbird + Tuning fork | Echo | small | support | Wild, nest eggs |
 | [Lockatara](#lockatara) | Tuatara + Iron padlock | Titan | medium | tank | Wild, nest eggs |
 | [Umbrathere](#umbrathere) | Giant ground sloth + Ragged black umbrella | Ghost | large | tank | Wild, nest eggs |
-| [Umbrink](#umbrink) | Soaked jet-black | Shadow | medium | trickster | Wild, nest eggs |
+| [Umbrink](#umbrink) | Soaked jet-black | Dark | medium | trickster | Wild, nest eggs |
 | [Pipewurm](#pipewurm) | Velvet worm + Piping bag | Venom | medium | controller | Wild, nest eggs |
 | [Vespox](#vespox) | Leaner fox | Venom | medium | controller | Wild, nest eggs |
 | [Voltmink](#voltmink) | Wire-bristle brush | Storm | medium | support | Wild, nest eggs |
-| [Wickapi](#wickapi) | Okapi fawn | Shadow | small | controller | Wild, nest eggs |
+| [Wickapi](#wickapi) | Okapi fawn | Dark | small | controller | Wild, nest eggs |
 | [Lunowl](#lunowl) | Owl + Luna moth | Lunar | small | trickster | Wild, nest eggs |
 | [Wyrmink](#wyrmink) | Long | Tempest | medium | tank | Wild, nest eggs |
 | [Echolop](#echolop) | Hare + Bat | Echo | small | skirmisher | Wild, nest eggs |
 | [Zephyrak](#zephyrak) | Moray eel + Swift | Tempest | small | skirmisher | Rare Egg from Stormcoil, the Sky Serpent |
-| [Zipling](#zipling) | Tiny worm | Shadow | small | controller | Wild, nest eggs |
+| [Zipling](#zipling) | Tiny worm | Dark | small | controller | Wild, nest eggs |
 
 ## Types
 
@@ -106,7 +106,7 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 | Type | Species |
 |---|---|
 | Bloom | Blossmink, Crofthollow, Ermink, Crofthorn, Soakybara, Moatpole, Mossgrade, Terrasloth |
-| Dark | Zippelith, Gloamshell |
+| Dark | Zippelith, Chandelapi, Gloamshell, Gloamspire, Seamwyrm, Umbrink, Wickapi, Zipling |
 | Echo | Gongibbon, Gongrowl, Howlop, Thrumbird, Echolop |
 | Ember | Bellowlet, Bellowary, Flarmink, Furnacowary, Anvilbrock, Kindlewren, Chuggamus |
 | Frost | Coolatee, Dreadnoyak, Frigatee, Glaciatee, Prowyak, Skateron, Kayak, Rimeshrew, Rimink, Skidlet |
@@ -114,7 +114,6 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 | Gravity | Anchorhorn, Anchorbill, Gravitank, Lodestick, Gravadillo |
 | Lunar | Eclipsowl, Lunink, Lanterloris, Mothlet, Selenfin, Lunowl |
 | Prism | Chandelotl, Glassolotl, Mirrolin, Bubblisk, Prismink, Prismander, Rippmink |
-| Shadow | Chandelapi, Gloamspire, Seamwyrm, Umbrink, Wickapi, Zipling |
 | Spore | Mycroll, Glomwort, Glomworth, Ringrove, Sporcupine, Knotwyrm |
 | Stone | Rampartoad, Druzemole, Effigoon, Geodemole, Glintmole, Effigeetle, Buckleron, Mortarfly |
 | Storm | Kestrike, Boltstrich, Barokat, Barrelmander, Voltmink |
@@ -290,7 +289,7 @@ _Tall okapi crowned_ (`chandelapi`). Tall okapi crowned with a great candle chan
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | medium, reach 1.4, mass 1.1; about 38 cm, 1.1 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.65, loyalty 0.51, temper 0.46, curiosity 0.84 |
@@ -750,7 +749,7 @@ _Evolution of Gloamshell._ (`gloamspire`). Evolution of Gloamshell.
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | medium, reach 1.4, mass 1.1; about 38 cm, 1.1 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.59, loyalty 0.5, temper 0.43, curiosity 0.92 |
@@ -1531,7 +1530,7 @@ _Great dragon-worm_ (`seamwyrm`). Great dragon-worm, zipper splits open as its j
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | medium, reach 1.4, mass 1.1; about 38 cm, 1.1 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.45, loyalty 0.36, temper 0.46, curiosity 0.83 |
@@ -1751,7 +1750,7 @@ _Soaked jet-black_ (`umbrink`). Soaked jet-black, smoking brush.
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | medium, reach 1.4, mass 1.1; about 38 cm, 1.1 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.6, loyalty 0.51, temper 0.4, curiosity 0.81 |
@@ -1831,7 +1830,7 @@ _Okapi fawn_ (`wickapi`). Okapi fawn with one candle wick.
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | small, reach 1.3, mass 0.8; about 24 cm, 0.7 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.28, loyalty 0.68, temper 0.39, curiosity 0.51 |
@@ -1932,7 +1931,7 @@ _Tiny worm_ (`zipling`). Tiny worm with a little zipper seam.
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | small, reach 1.3, mass 0.8; about 24 cm, 0.7 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.35, loyalty 0.67, temper 0.29, curiosity 0.59 |

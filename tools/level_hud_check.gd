@@ -104,7 +104,7 @@ func run(main: Node) -> void:
 	print("LEVEL HUD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## ---------------------------------------------------------------- 6. what each level gives
+## Level by level: the same share of the class's health and of ability power (LevelGrowth.rate, a straight line);
 ## Level by level: +6% of the class's health and +5% ability power (levels 2-6), half that from 7;
 ## the weapon and its upgrades never change; the tooltip and a class change agree with the totals.
 func _growth(main: Node, arch: String) -> void:
@@ -122,14 +122,15 @@ func _growth(main: Node, arch: String) -> void:
 		var hp0 := P.max_hp
 		var ap0 := LevelGrowth.ap(P)
 		P.gain_xp(float(Hunter.XP_TO[lvl - 1]) - P.xp + 0.5)
-		var k := 1.0 if lvl < 7 else 0.5
-		if absf((P.max_hp - hp0) - base_hp * 0.06 * k) > 0.05 or absf((LevelGrowth.ap(P) - ap0) - 0.05 * k) > 0.0001:
+		var hp_step := base_hp * LevelGrowth.rate("hp")
+		if absf((P.max_hp - hp0) - hp_step) > 0.05 or absf((LevelGrowth.ap(P) - ap0) - LevelGrowth.rate("ap")) > 0.0001:
 			step_ok = false
 			info += "L%d hp+%.2f ap+%.3f " % [lvl, P.max_hp - hp0, LevelGrowth.ap(P) - ap0]
 	var hp_up := P.max_hp / base_hp - 1.0
 	var tip := LevelGrowth.tip(P)
-	ok(step_ok and P.lvl == 10, "%s: levels 2-6 add 6%% health, 5%% ability power; 7-10 half %s" % [arch, info])
-	ok(absf(hp_up - 0.42) < 0.001 and absf(LevelGrowth.ap(P) - 1.35) < 0.0001,
+	ok(step_ok and P.lvl == 10, "%s: every level adds the same health and ability power share %s" % [arch, info])
+	var n := float(P.lvl - 1)
+	ok(absf(hp_up - LevelGrowth.rate("hp") * n) < 0.001 and absf(LevelGrowth.ap(P) - 1.0 - LevelGrowth.rate("ap") * n) < 0.0001,
 		"%s: by level 10: +%.0f%% health, ability power x%.2f" % [arch, hp_up * 100.0, LevelGrowth.ap(P)])
 	ok(P.perks.is_empty() and is_equal_approx(float(P.wpn["dmg"]), dmg0),
 		"%s: levels give no weapon bonus (no perks, damage unchanged)" % arch)

@@ -53,6 +53,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
 | `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
+| `--boss-parity-check` | Lair boss against docs/CAMP_PARITY.md: the empty-lair reset after `Boss.LEASH_T`, phases at `Boss.PHASE_HP`, a reset mid-roar leaves no armour, and a stolen kill pays the last hit's squad (XP, kill stat, perk orbs), not the squad that did the damage |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
 | `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges |
@@ -63,6 +64,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
+| `--bot-ring-check` | A 30-bot trios match through the whole Blight close (sped up): no bot goes down to the tide with no rival near, and every bot still up ends inside |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |
 | `--kinbox-check` | The farm cap and the Burrow: moving, sorting, releasing, overflow from old saves, mutation inheritance and odds |
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |

@@ -187,6 +187,7 @@
 		"late_k": 0.67,
 		"dmg": 18.0,
 		"stun": 0.75,
+		"recover": 0.4,
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,

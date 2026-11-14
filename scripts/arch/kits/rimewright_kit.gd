@@ -40,6 +40,8 @@ var stats := {      # counters for the checks
 var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
+var recover_until := 0.0       # match time the crash's recovery ends (0: not recovering)
+var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last DashFlow.BUFFER_S
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
@@ -53,6 +55,9 @@ const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the 
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
 const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
+## The presses the crash's recovery holds back, and the HUD slot each one's refusal pulses.
+const RECOVER_KEYS := {
+	"fire": "", "sec": "sec", "sig": "k1", "jump": "", "gear1": "gear0", "gear2": "gear1", "kin_ab": ""}
 const RINK_BAND := 0.25        # m: the width of the Rimelock ring, its outer edge on the hit radius
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
@@ -166,7 +171,9 @@ func _tick(dt: float) -> void:
 		if float(e2["left"]) <= 0.0 or not is_instance_valid(tv2):
 			fan_hits.erase(key)
 			continue
-		# the frost glow on the foe grows with each dart toward the Shatter
+		# the frost glow on the foe grows with each dart toward the Shatter (others see it; you, the FAN badge)
+		if h.is_local():
+			continue
 		var n := int(e2["n"])
 		lk().keep(
 				"frost%d" % key, "frost", (tv2 as Node3D).global_position,
@@ -358,9 +365,10 @@ func dash_vy(dt: float) -> float:
 func face_locked() -> bool:
 	return not rime.is_empty()
 
-## The statue takes no jump, glove or Boki ability either; only the recast and Shift out (item 65).
+## The statue takes no jump, glove or Boki ability either; only the recast and Shift out (item 65). Nor does
+## she while she settles after the crash.
 func cast_locked() -> bool:
-	return not rime.is_empty()
+	return not rime.is_empty() or recovering()
 
 ## Seconds left in the skate (the timer in_dash reads): to its full length while Shift is held, else to its
 ## shortest run.
@@ -397,6 +405,7 @@ func on_dash(_use_ex: bool) -> bool:
 
 ## The push-off: spends the charge and starts the skate along the move keys.
 func _begin_skate() -> void:
+	recover_until = 0.0        # Shift skates out of the crash's recovery (into_dash.x)
 	h.dashes -= 1.0
 	var dir := dash_dir()
 	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "slab": 0.0, "air": not h.grounded}
@@ -490,6 +499,8 @@ func _lay_ice(dir: Vector2, dt: float) -> void:
 func _drop_holds() -> void:
 	if not rime.is_empty():
 		_rime_clear()
+	recover_until = 0.0
+	recover_buf.clear()
 	if not rinkrun.is_empty():
 		_rinkrun_end()
 	if spear_aim or rmb_down:
@@ -909,6 +920,7 @@ func teardown() -> void:
 	rinkrun = {}
 	throw_t = -1.0
 	rime = {}
+	recover_until = 0.0
 	zones.clear()
 	if look != null:
 		look.teardown()
@@ -937,7 +949,7 @@ func ult_running() -> bool:
 	return not rime.is_empty()
 
 
-func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
+func cast_ult() -> bool: return not recovering() and HeroUlt.press(self, _start_rime)
 func has_ult() -> bool: return true
 
 
@@ -1115,6 +1127,38 @@ func _rime_crash(k: float) -> void:
 	m.sfx("rime_crash", at, 1.0, 1.0)
 	play("tm_rime_crash")
 	_rime_clear()
+	recover_until = m.time + float(xd["recover"])
+
+
+## After the burst she settles for x.recover s (footage f57 -> f61, the tm_rime_crash clip's length): no walking
+## or casts. A press in its last DashFlow.BUFFER_S goes as it ends; an earlier one is refused. Shift skates out.
+func recovering() -> bool:
+	return recover_until > 0.0 and m.time < recover_until
+
+
+func move_k() -> float:
+	return 0.0 if recovering() else 1.0
+
+
+func gate_inputs() -> void:
+	if recover_until <= 0.0:
+		return
+	if not recovering():
+		recover_until = 0.0
+		for key in recover_buf:
+			h.inp[key] = true
+		recover_buf.clear()
+		return
+	var buffering: bool = recover_until - m.time <= DashFlow.BUFFER_S
+	for key in RECOVER_KEYS:
+		if not h.inp.get(key, false):
+			continue
+		h.inp[key] = false
+		if buffering:
+			recover_buf[key] = true
+		elif RECOVER_KEYS[key] != "":
+			h._ab_feedback(RECOVER_KEYS[key], "deny")
+	h.inp["sec_hold"] = false
 
 
 func _rime_cancel() -> void:

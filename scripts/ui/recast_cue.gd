@@ -5,7 +5,8 @@ extends RefCounted
 ## mark/stack/Daze through ArchKit.combo_marks(); this module turns them into one visual language:
 ##   the ability slot pulses, shows a big "<KEY> AGAIN" and a shrinking timer ring, and "EXPIRED" if it ran out;
 ##   a world marker, a plain ring that empties with the window and pulses hot at the end, sits on the thing the
-##   recast triggers (the seed, the knife, the hammer): no key or word on world objects (DECISIONS 2026-11-11);
+##   recast triggers (the knife, the hammer), unless the window says "marker": false (Motley's seed: the owner
+##   wants less pop-up UI); no key or word on world objects (DECISIONS 2026-11-11);
 ##   a foe you marked shows a badge (its count, a ring for the time left) that flashes when the payoff lands;
 ##   sounds: a chime as the window opens, ticks before it closes, a low click when it runs out (the open chime and
 ##   the ticks are the hunter's own <arch>_recast_open / _recast_tick when its set has them, via HeroSfx).
@@ -136,7 +137,7 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 		return
 	var cue := p.ak.cue
 	var w: Dictionary = cue.get("w", {})
-	if not w.is_empty() and not cam.is_position_behind(w["at"]):
+	if not w.is_empty() and bool(w.get("marker", true)) and not cam.is_position_behind(w["at"]):
 		_marker(H, cam.unproject_position(w["at"] + Vector3(0, 1.1, 0)), w, cue.get("col", Color.WHITE))
 	var pop: Dictionary = cue.get("pop", {})
 	var seen := {}                 # foe -> badges already drawn on it (a second one sits beside the first)
