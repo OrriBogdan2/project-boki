@@ -159,7 +159,7 @@ func _cap() -> void:
 	m.on_damage(P, foe, 20.0, {})
 	var after := Sfx.spots.filter(func(p): return p.playing).size()
 	ok(full == Sfx.POOL and IncomingHitSfx.voice() != null and after <= Sfx.POOL,
-		"a full placed pool (%d of %d): the cue still plays (it takes a voice) and the pool stays full (%d)" % [full, Sfx.POOL, after])
+		"a full placed pool (%d of %d): the cue still plays, the pool stays full (%d)" % [full, Sfx.POOL, after])
 
 ## The GPU recording (the child under the movie writer): one real shot from each of the 8 directions.
 func _reel() -> void:

@@ -14,7 +14,7 @@ const PITCH := {"small": 1.3, "medium": 1.0, "large": 0.78}   # x pitch by speci
 
 var h                    # the Home screen
 var now := 0.0           # s since the home opened
-var _seen := {}          # uid -> [stats, lean flecks, level, evolve due, forms and parts, joy] last seen: only rises fire
+var _seen := {}          # uid -> [stats, lean flecks, level, evolve due, forms and parts, joy]: only rises fire
 var _last := {}          # uid -> now at its last chime
 
 func _init(home) -> void:

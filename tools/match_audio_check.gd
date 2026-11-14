@@ -217,10 +217,10 @@ func _tell_cues(m: Match, P: Hunter) -> void:
 			"...a bigger area is louder and lower (%.1f dB / %.2f vs %.1f dB / %.2f)" % [
 				big.volume_db, big.pitch_scale, small.volume_db, small.pitch_scale])
 	AimKit.clear(R)
-	ok(_tell(func(): AimKit.lane(R, "tell_lane", {"from": P.pos + Vector3(-30, 0, 0), "dir": Vector2(1, 0), "len": 60.0, "width": 2.0,
-			"all": true})), "a rival's lane is heard at its middle (starting 30 m off)")
-	ok(not _tell(func(): AimKit.lane(R, "tell_lane", {"from": P.pos + Vector3(-30, 0, 0), "dir": Vector2(1, 0), "len": 60.0, "width": 2.0,
-			"all": true})), "...and not again while the kit refreshes it")
+	ok(_tell(func(): AimKit.lane(R, "tell_lane", {"from": P.pos + Vector3(-30, 0, 0), "dir": Vector2(1, 0),
+			"len": 60.0, "width": 2.0, "all": true})), "a rival's lane is heard at its middle (starting 30 m off)")
+	ok(not _tell(func(): AimKit.lane(R, "tell_lane", {"from": P.pos + Vector3(-30, 0, 0), "dir": Vector2(1, 0),
+			"len": 60.0, "width": 2.0, "all": true})), "...and not again while the kit refreshes it")
 	ok(not _tell(func(): AimKit.lane(R, "tell_aim", {"from": spot, "len": 4.0})), "a rival's own-aim lane is silent")
 	ok(not _tell(func(): AimKit.circle(R, "x_check", {"at": spot, "r": 2.0, "all": true})),
 			"a rival's ultimate area is silent (UltCue has it)")

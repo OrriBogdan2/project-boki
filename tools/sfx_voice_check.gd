@@ -4,9 +4,10 @@ extends RefCounted
 ## nine rival squads, the 13 kit Hunters round the lobby), everyone within RING_M of you, for SECS of match time.
 ## Every frame counts the voices sounding (pool and loops, SfxVoices.sounding); every lost sound is tallied by
 ## whose it was (yours, your squad's, else the enemy's) and why (stolen, full, gap, stack: SfxVoices.cut).
-## Asserts: the voices never pass 2 * Sfx.POOL + SfxVoices.LOOP_CAP (the plain and the placed pool), the pool was full at times (enemy sounds were
-## cut), and none of your sounds lost its voice or was refused one. A "gap" or "stack" is the same sound again
-## inside Sfx.MIN_GAP or the stacking window (merged, by design): counted, not failed; so is a squad sound losing
+## Asserts: the voices never pass 2 * Sfx.POOL + SfxVoices.LOOP_CAP (the plain and the placed pool), the pool was
+## full at times (enemy sounds were cut), and none of your sounds lost its voice or was refused one. A "gap" or
+## "stack" is the same sound again inside Sfx.MIN_GAP or the stacking window (merged, by design): counted, not
+## failed; so is a squad sound losing
 ## its voice to yours, or refused one, with the pool full of the two of you (an enemy's never takes theirs).
 ## Then, the match stopped: one loop of yours and LOOP_CAP + 4 enemy ones; yours sounds and takes a place, the 5
 ## farthest pause, and once the 5 nearest stop the paused ones sound again.
