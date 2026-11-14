@@ -718,9 +718,6 @@ func combo_marks(out: Array) -> void:
 		var left: float = ttl - (m.time - float(c["t"]))
 		if left > 0.0 or lvl > 0:
 			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, lvl == 1))
-## X again lands the flight early (it lands by itself when it runs out).
-func recast_window() -> Dictionary:
-	return {"slot": "x", "left": float(jet.flight["t"])} if jet.running() else {}
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()

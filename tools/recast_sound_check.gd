@@ -54,7 +54,7 @@ func _window(hero: String, slot: String) -> void:
 	var opened := _open(m, P, slot)
 	m.step(DT)
 	var heard: Dictionary = P.ak.recast_heard
-	var waits := is_inf(float(P.ak.recast_window().get("left", 0.0)))
+	var left0 := float(P.ak.recast_window().get("left", 0.0))
 	var tick_t := -1.0
 	var t := 0.0
 	while t < RUN and String(P.ak.recast_window().get("slot", "")) == slot:
@@ -65,6 +65,7 @@ func _window(hero: String, slot: String) -> void:
 			tick_t = t
 	var closed := String(P.ak.recast_window().get("slot", "")) != slot
 	var lead := t - tick_t
+	var waits := is_inf(left0) or not closed      # a window with nothing counting down (Bulwark's hammer in flight) waits
 	if waits:
 		ok("%s %s: the window opens with one chime and waits, no tick" % [hero, slot],
 				opened and int(heard["recast_open"]) == 1 and int(heard["recast_tick"]) == 0, str(heard))
