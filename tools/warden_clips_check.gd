@@ -153,6 +153,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(sk.get_bone_pose_scale(wp).is_equal_approx(Vector3.ONE), "%s: and comes back" % art_name)
 	if art_name == "breaker":
 		_hammer_scale(w, sk)
+		_air_pick(m, an, sync, clips, st)
 	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
 	ok(tip != null, "%s: an FX anchor rides the weapon" % art_name)
 	var piece := WardenGlb.thrown_piece(m, "hammer")
@@ -284,6 +285,30 @@ func _head_on_weapon(m: Node3D, sk: Skeleton3D) -> Transform3D:
 
 func _smash_reach() -> float:
 	return float(Arch.def("bulwark")["lmb"]["smash_reach"])
+
+## Playtest 11-08 item 17: the out-of-charges dash (bul_lumber) looks like where it was pressed: the short ground
+## dash on the ground, the air lunge in the air; the air lunge gives way the moment he lands or opens the glider.
+func _air_pick(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, clips: WardenClips, st: Dictionary) -> void:
+	var s2: Dictionary = st.duplicate()
+	s2["kmove"] = "bul_lumber"
+	s2["kmove_t"] = 0.0
+	_play(m, an, sync, s2, 3)
+	ok(clips.cur == "dash_short", "breaker: a dash pressed on the ground plays the ground clip (%s)" % clips.cur)
+	s2["kmove_t"] = 0.15
+	_play(m, an, sync, s2, 1)
+	_play(m, an, sync, st, 20)
+	for ends in ["grounded", "gliding"]:
+		s2["grounded"] = false
+		s2["gliding"] = false
+		s2["kmove_t"] = 0.0
+		_play(m, an, sync, s2, 3)
+		ok(clips.cur == "dash_air", "breaker: a dash pressed in the air plays the air lunge (%s)" % clips.cur)
+		s2[ends] = true
+		s2["kmove_t"] = 0.15
+		_play(m, an, sync, s2, 1)
+		ok(clips._pick(m.get_meta(WardenClips.STATE), 0.0).get("clip", "") != "dash_air",
+				"breaker: the air lunge gives way once %s" % ends)
+		_play(m, an, sync, st, 20)
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
