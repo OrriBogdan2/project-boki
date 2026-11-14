@@ -1037,10 +1037,11 @@ func _plain_dash() -> void:
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
 	# the hold: the source gives no length; its longest footage slide is ~1.6x the tap (KIT_PARITY Vex hold row)
-	"gunslinger": {"ground": [4.8, 0.45], "hold": [7.0, 0.73], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
+	"gunslinger": {"ground": [4.8, 0.45], "air": [4.7, 0.33], "hold": [7.0, 0.73], "long": [4.6, 0.2],
+				"src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
 	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7;
 	# owner 11-11: 10-15% further in the same time, so the footage's 3 m x1.125
-	"archer": {"ground": [3.375, 0.386],
+	"archer": {"ground": [3.375, 0.386], "long": [5.0, 0.286],
 			"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
 	"tender": {"ground": [3.15, 0.23], "src": "[footage] Elluna 2 bh / 0.2 s, owner: shorter, slower (air: own check)"},
@@ -1052,7 +1053,8 @@ const KIT_DASH := {
 			"src": "owner 23:40: 3.2 m / 0.16 s x0.85 / x1.15, air x1.35"},
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
 	# owner playtest 11-11 (8f7f15198): the lane 7.5% longer, 6.02-10.48 m at 43 m/s, so 6.02 / 43 x1.15
-	"mage": {"ground": [6.02, 0.161], "src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
+	"mage": {"ground": [6.02, 0.161], "air": [6.02, 0.161], "long": [5.0, 0.2],
+				"src": "owner 11-11: shortest lane 6.02 m at 43 m/s, time x1.15"},
 	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)

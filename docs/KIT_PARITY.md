@@ -788,8 +788,8 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |
 | Claire | Skate 10.5 m/s, up to 1.6 s | same | F speed | none (not a travel) | as raw | as raw |
 | Ostra | lob 12 m, 1.8 s | same | F time | none (not a travel) | as raw | as raw |
-| Bjorn | 3.5 m/.17 s whirl | 4.2 m/.3 s lumber | F whirl | ×1 | 3.5 m/.17 s | 4.2 m/.3 s |
-| Ryzz | lane 6.02-10.48 m at 43 m/s | same | no (owner item 70, lane cut 11-10, +7.5% 11-11) | time ×1.15 | 5.6-9.75 m at ~35 m/s | same |
+| Bjorn | 3.5 m/.17 s whirl | 4.2 m/.3 s lumber | F whirl | ×1 | 3.5 m/.17 s | lumber 4.2 m/.21 s (class data, 20 m/s) |
+| Ryzz | lane 6.02-10.48 m at 43 m/s | same | no (owner item 70, lane cut 11-10, +7.5% 11-11) | time ×1.15 | 6.02-10.48 m at ~37 m/s (shortest measured 6.14 m/.164 s) | same; long dash 5.0 m/.2 s (class data) |
 | Sable | 4.5 m/.48 s | the ground one with a charge (item 183) | F | ×1 | 4.5 m/.48 s | 4.5 m/.48 s, then the air's drag |
 
 On a ×1 kit every Shift move runs its raw numbers, including the moves with no source figure: Bjorn's Shield Charge (4.2 m at 18 m/s), his short dash during the wind-up and his lumber, Vex's long dash and Hem's flick are now about 18% longer and 13% quicker than before.
