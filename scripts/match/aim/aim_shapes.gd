@@ -7,9 +7,9 @@ extends RefCounted
 const FILL_A := 0.18      # the fill's alpha: readable over grass and sand, never a solid sheet
 const RIM_A := 0.7        # the rim's alpha
 const LW := 0.06          # m: the rim's line width
+const LACE_P := 0.5       # m: one cross of a laced line's two strands ("lace", Lace's own look)
 const SOFT_A := 0.25      # "soft": the inside never passes this alpha (docs/VFX_QUALITY.md, the zone rule)
 const GLOW_W := 0.3       # m: "soft": how far the lit rim glows inward
-const LACE_P := 0.5       # m: one cross of a laced line's two strands ("lace", Lace's own look)
 
 static func build(g: AimGeo, e: Dictionary) -> void:
 	g.at_height(float(e["y"]))
@@ -54,12 +54,13 @@ static func _lane(g: AimGeo, e: Dictionary) -> void:
 	elif not e["rails"]:
 		g.band(o, end, w0, w1, _fill(e))
 	var f := float(e["fill"])
-	if f > 0.0 and e["lace"]:
-		_lace(g, o, o + u * l * f, lerpf(w0, w1, f * 0.5) * 0.5, lw, _rim(e))
-	elif f > 0.0:
-		if not soft:
-			g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
-		g.ribbon(o + u * l * f - n * lerpf(w0, w1, f) * 0.5, o + u * l * f + n * lerpf(w0, w1, f) * 0.5, lw, _hot(e, 0.7))
+	if f > 0.0:
+		if e["lace"]:
+			_lace(g, o, o + u * l * f, lerpf(w0, w1, f * 0.5) * 0.5, lw, _rim(e))
+		else:
+			if not soft:
+				g.band(o, o + u * l * f, w0, lerpf(w0, w1, f), _fill(e, 1.6), _fill(e, 2.6))
+			g.ribbon(o + u * l * f - n * lerpf(w0, w1, f) * 0.5, o + u * l * f + n * lerpf(w0, w1, f) * 0.5, lw, _hot(e, 0.7))
 	var tip := end + u * w1 * 0.55
 	for s in [-1.0, 1.0]:
 		g.ribbon(o + n * w0 * 0.5 * s, end + n * w1 * 0.5 * s, lw, _rim(e, 0.8), _rim(e))
@@ -189,7 +190,8 @@ static func _cone(g: AimGeo, e: Dictionary) -> void:
 	if bool(e.get("soft", false)):
 		_soft_cone(g, e, o, l, inner, a, h)
 	elif not e["edges"]:
-		g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
+		if not e["outline"]:
+			g.sector(o, inner, l, a - h, a + h, _fill(e, 0.6), _fill(e, 1.3))
 		g.ring(o, l, lw, _rim(e), a - h, a + h)
 		var f := float(e["fill"])
 		if f > 0.0:

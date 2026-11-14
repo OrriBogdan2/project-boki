@@ -202,7 +202,7 @@ Shares of the standard target against the source (docs/TTK.md, no LMB source num
 | Draw past Supercharged + 0.5 s | Overdrawn: half damage, the drooping release | same |
 | Empowered / tap with no target | Lands at the cursor; the spent arrow stays stuck there for 4 s | same |
 | Supercharged with a foe under the line | The foe ringed at its feet; a silver burst on the hit | same |
-| Heavy Shot into a wall | Wall hit, 1.2 s stun | same |
+| Heavy Shot into a wall | Wall hit, 1.2 s stun | same; crimson burst on the wall face, crimson-white stars over the foe for the stun (`heavy_pin`, `heavy_stun` in content/vfx/archer.json) |
 | Wall pin, then a shot | a plain arrow (no Deadeye) | same |
 | Hail Wall arc | A foe on the arc burns; one inside the arc's radius does not | same |
 | Spirit Walk into a rock column | Passes through; ending inside puts her back (no cost) | same |

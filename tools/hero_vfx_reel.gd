@@ -15,10 +15,14 @@ const HERO_PARTS := {
 	"archer": ["string", "lmb", "far", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"],
 	"mage": ["lmb", "far", "hold", "rmb", "dash", "e", "r"]}
-const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
+const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
+const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
+const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
+const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
 const FRAME_W := 960                      # px wide, each --reel-frames frame
 
 var only := ""
@@ -49,7 +53,7 @@ func run(main_node: Node) -> void:
 		await load(own).new().run(main_node)
 		return
 	hero_name = String(who)
-	if who == "archer":
+	if who == "archer" or LMB_RANGE.has(who):
 		crop_px = WIDE_CROP
 	DirAccess.make_dir_recursive_absolute(dir)
 	if frame_dir != "":
@@ -110,11 +114,11 @@ func _sheet(part: String, caption: String, times: Array, focus := Callable()) ->
 
 # ------------------------------------------------------------------ the generic parts
 func _part_lmb() -> void:
-	await _reset(3.3)
+	await _reset(LMB_RANGE.get(who, 3.3))
 	var shoot := func(t: float):
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
-	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]), 1.5)
+	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", LMB_TIMES.get(who, LMB_TIMES_DEFAULT)), 1.5)
 	await _go(GAP)
 
 ## Three LMB shots at a dummy 8 m out, the frames mid-flight: the shot's trail and head at match zoom.
@@ -128,7 +132,7 @@ func _part_far() -> void:
 	await _go(GAP)
 
 func _part_hold() -> void:
-	await _reset(3.3)
+	await _reset(LMB_RANGE.get(who, 3.3))
 	var hold := func(t: float):
 		P.inp["fire"] = t > 0.1 and t < 1.5
 		_aim(T.pos)
@@ -172,6 +176,20 @@ func _part_r() -> void:
 			P.ak.cast_ult()
 		_aim(T.pos)
 	await _go(2.8, cast, _sheet("r", "R, the ultimate", [0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.4, 1.9, 2.6]), 2.5)
+	await _go(GAP)
+
+## The armour tier-up sheen on a Hunter at match zoom: Rare (blue) at 0.2 s, then Legendary (gold) at 1.4 s.
+func _part_tierup() -> void:
+	await _reset(3.0)
+	var ups := func(t: float):
+		for up: Array in [[0.2, 2], [1.4, 4]]:
+			if _at(t, float(up[0])):
+				P.armor_gain(float(Hunter.ARMOR_TIERS[int(up[1])][2]) - P.armor_xp)
+				m._armor_up(P)
+		_aim(T.pos)
+	var marks := _sheet("tierup", "armour tier-up: Rare, then Legendary",
+		[0.22, 0.27, 0.32, 0.37, 0.42, 1.42, 1.47, 1.52, 1.57])
+	await _go(2.2, ups, marks, 1.5)
 	await _go(GAP)
 
 # ------------------------------------------------------------------ Kael

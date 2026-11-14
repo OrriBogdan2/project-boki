@@ -92,12 +92,14 @@ static func vee(h: Hunter, id: String, p := {}) -> void:
 	_ray(h, e, p)
 	_put(h, id, e)
 
-## A cone (wedge) from `from` along `dir`; "edges" draws only the two edge lines (a shotgun spread).
-## p: from, dir, len (4), deg (60), inner (0.3 m), edges (false), fill (0..1 radial front)
+## A cone (wedge) from `from` along `dir`; "edges" draws only the two edge lines (a shotgun spread), "outline"
+## the whole rim (both edges and the far arc) with no fill.
+## p: from, dir, len (4), deg (60), inner (0.3 m), edges (false), outline (false), fill (0..1 radial front)
 static func cone(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "cone", p)
 	e["len"] = float(p.get("len", 4.0)); e["deg"] = float(p.get("deg", 60.0)); e["inner"] = float(p.get("inner", 0.3))
-	e["edges"] = bool(p.get("edges", false)); e["fill"] = float(p.get("fill", -1.0))
+	e["edges"] = bool(p.get("edges", false)); e["outline"] = bool(p.get("outline", false))
+	e["fill"] = float(p.get("fill", -1.0))
 	_ray(h, e, p)
 	_put(h, id, e)
 

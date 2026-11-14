@@ -354,14 +354,16 @@ func _pin(a: Vector3, k: float) -> void:
 			vfx("cremate", f.pos, dir)
 		# driven into terrain within 3m: pinned (a stun)
 		if KnockWall.hit(m, f, dir, float(pd["wall"]), h):
+			var face := KnockWall.contact(m, f, dir, float(pd["wall"]))
 			pins += 1
-			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
+			vfx("heavy_pin", face + Vector3(0, 1.0, 0), dir, {"k": k})
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
 			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
 					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
+					vfx("heavy_stun", f.pos, dir, {"k": k})
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", bow, dir, {"k": k})

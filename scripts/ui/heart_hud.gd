@@ -29,7 +29,7 @@ static func world_labels(hud) -> void:
 		hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.GATE_COL)
 	elif ht.spark_live() and ht.state != Heart.S.FINAL:
 		hud._draw_waypoint(ht.spark_pos + Vector3(0, 1.0, 0), "Heartspark", Heart.COL)
-	elif ht.state in [Heart.S.CHARGING, Heart.S.FINAL]:
+	elif ht.state == Heart.S.CHARGING:      # (the open ring is WaysOutPins')
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), _word(ht), Heart.COL)
 	elif m.player.flat_dist(ht.site) < 40.0 and not cam.is_position_behind(ht.site):
 		var cp := cam.unproject_position(ht.site + Vector3(0, 3.8, 0))
