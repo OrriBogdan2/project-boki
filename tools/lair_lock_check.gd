@@ -42,7 +42,8 @@ func _gate_shut(L: Dictionary) -> bool:
 	return (L["gate_tiles"] as Array).all(func(q): return m.world.kind[m.world.idx(q.x, q.y)] == World.T_BLOCK)
 
 ## A boss in its lair, woken with P and C inside, then killed by P. Returns the kill time.
-const SPILL_WAIT := 0.7      # s: the boss dissolves, then its drops spill (MobDissolve)
+## s: the boss plays its death move, dissolves, then its drops spill (MobDissolve.begin), plus a frame or two
+const SPILL_WAIT := BossAnim.DEATH_S + MobDissolve.DUR_MAX * MobDissolve.SPILL_AT + 0.1
 
 func _kill(L: Dictionary, P: Hunter, C: Hunter) -> float:
 	for g in L["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
@@ -299,8 +300,9 @@ func _prize_lairs(main: Node, map_id: String) -> void:
 		var xp0 := [P.xp, C.xp, Q.xp]
 		_kill(L, P, C)
 		var gain := [P.xp - xp0[0], C.xp - xp0[1], Q.xp - xp0[2]]
-		# (the rival's gain is only the Hunter's slow time trickle over the half second around the kill)
-		var paid: bool = gain[0] >= KillXp.BOSS_XP and gain[1] >= KillXp.BOSS_XP and gain[2] < 2.0
+		# (the rival's gain is only the Hunter's slow time trickle over the kill window: the boss's death move and
+		# dissolve before its drops spill, SPILL_WAIT: about 9 XP, under a tenth of the boss's pay)
+		var paid: bool = gain[0] >= KillXp.BOSS_XP and gain[1] >= KillXp.BOSS_XP and gain[2] < KillXp.BOSS_XP * 0.1
 		var what := "%s: %s kill pays the last hit's squad, not the rival" % [map_id, L["name"]]
 		ok(paid, what + " (%.1f, %.1f, %.1f)" % gain)
 		ok(not dropped.is_empty(), "%s: and drops its pile" % L["name"])
