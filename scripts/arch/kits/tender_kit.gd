@@ -445,6 +445,7 @@ func _tick_burrs(dt: float) -> void:
 				{
 					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": SEED_FILL,
 					"rim_w": 0.14, "sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
+		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
 				key, "tether", h.pos + Vector3(0, 0.9, 0),
@@ -459,6 +460,7 @@ func _burr_off(b: Dictionary) -> void:
 	burrs.erase(b)
 	lk().drop(key)
 	ulk().drop(key)
+	AimKit.hide(h, key)
 
 func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
