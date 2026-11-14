@@ -674,14 +674,13 @@ func _revive(g: Dictionary) -> void:
 	h._refresh_top()
 	var at: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.ppos
 	h.fx.burst(at + Vector3(0, 1.4, 0), Color("bff8ec"), 40, 4.0, 1.2, -1.0)
-	h.fx.ring(at, 3.0, Color("9ff0e0"), 0.6)
 	Sfx.play("unlock")
 	var ke: Dictionary = h._kin_entry(rec)
 	if not ke.is_empty():
 		ke["pos"] = at + Vector3(0, 0, 2.0); (ke["node"] as Node3D).position = ke["pos"]; ke["hold_t"] = 3.0
 		h._emote(ke, "!", true)
-	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. It knows you, but it isn't quite the same." % rec["name"],
-		"Level %d now, and a %s nature. It'll have new favourite foods to find out." % [int(rec["level"]), Care.nature(rec).to_lower()]])
+	_notice("%s, %s" % [rec["name"], rec["title"]], ["%s is back. %s knows you, but isn't quite the same." % [rec["name"], KinSpeak.about(rec, "{He}")],
+		KinSpeak.about(rec, "Level %d now, and a %s nature. {He}'ll have new favourite foods to find out.") % [int(rec["level"]), Care.nature(rec).to_lower()]])
 
 # ------------------------------------------------------------------ the Soul Shrine
 func open_shrine() -> void:

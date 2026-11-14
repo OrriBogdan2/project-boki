@@ -19,6 +19,9 @@ class FakeGame:
 	func tick(_dt: float) -> void:
 		pass
 
+	func find(_p: Vector2) -> Dictionary:
+		return {}
+
 var bad := 0
 var main: Node
 var home

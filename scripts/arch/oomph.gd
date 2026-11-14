@@ -14,6 +14,8 @@ const STAGGER_FRAC := 0.12     # a hit of at least this share of max health stag
 const STAGGER_T := 0.28        # ... for this long
 const STAGGER_SLOW := 0.45     # ... slowed this much
 const HEAVY_FLINCH := 2.6      # the flinch of a stagger, relative to a chip hit
+const RULES := "res://content/rules/hit_flinch.json"
+static var _rules := {}
 static var legacy := false     # tooling (--legacy-shots): the old look, for before/after shots
 
 # ------------------------------------------------------------------ shooting
@@ -45,7 +47,7 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 	target.freeze_t = maxf(target.freeze_t, clampf(0.03 + frac * 0.35, 0.03, 0.09))
 	if target is Hunter:
 		var h := target as Hunter
-		h.hit_k = clampf(0.8 + frac * 9.0, 0.8, HEAVY_FLINCH) if not big else HEAVY_FLINCH
+		h.hit_k = HEAVY_FLINCH if big else hit_strength(frac, (o.get("kb", Vector2.ZERO) as Vector2).length())
 		h.hit_shake = maxf(h.hit_shake, clampf(frac * 1.6, 0.06, 0.22))
 		if by and is_instance_valid(by):
 			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()
@@ -63,6 +65,24 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 		var away := target.pos - by.pos if by and is_instance_valid(by) else Vector3.ZERO
 		KinFlinch.hit(target.model, away, frac, (target as Kin).mass())
 
+## How hard a hit flinches (hit_k, chip = rules chip_k up to HEAVY_FLINCH): its share of max health and its
+## knock (m/s), weighted by content/rules/hit_flinch.json. The anim scales its flinch by it.
+static func hit_strength(frac: float, knock: float) -> float:
+	var r := rules()
+	var k := float(r["chip_k"]) + frac * float(r["frac_k"]) + knock * float(r["knock_k"])
+	return clampf(k, float(r["chip_k"]), HEAVY_FLINCH)
+
+## How much of the additive flinch layer a hit of strength `hit_k` plays: the rules' light share on a chip hit,
+## all of it by a stagger (the stagger itself takes the whole-body hit clip).
+static func flinch_weight(hit_k: float) -> float:
+	var r := rules()
+	return lerpf(float(r["light"]), 1.0, clampf(inverse_lerp(float(r["chip_k"]), HEAVY_FLINCH, hit_k), 0.0, 1.0))
+
+static func rules() -> Dictionary:
+	if _rules.is_empty():
+		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES))
+	return _rules
+
 ## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
 ## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
 static func render_hit(h: Hunter, delta: float) -> void:
@@ -70,13 +90,15 @@ static func render_hit(h: Hunter, delta: float) -> void:
 	h.stagger_t = maxf(0.0, h.stagger_t - delta)
 
 # ------------------------------------------------------------------ how a shot looks
-## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the
-## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks).
+## The colour, size and halo colour of a shot as the local player sees it. What can hurt you stays the
+## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks). The core keeps
+## the shooter's colour, the halo leans to the side (SideColor.fx): a rival's hostile, a teammate's cool.
 static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
-		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), shot_size * 2.6, 0.0]
-		return [Color(col, 0.5), shot_size * 1.7, 0.0]
+		if p0 and by.team != p0.team:
+			return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), shot_size * 2.6, Color.TRANSPARENT]
+		return [Color(col, 0.5), shot_size * 1.7, Color.TRANSPARENT]
 	var vis_col := col
 	var vis_size := shot_size * 2.0
 	var halo := 0.28
@@ -91,7 +113,34 @@ static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 		if by != p:
 			vis_col.a = 0.7          # teammates' shots: a touch softer than yours
 			halo = 0.18
-	return [vis_col, vis_size, halo]
+	return [vis_col, vis_size, Color(SideColor.fx(m, by, vis_col.lightened(0.2)), halo)]
+
+## A kit draws this round itself (an arrow, a trail and its head): the stock orb shrinks away and stays so (the match
+## sizes it from "vr" every frame). Kits skin a round just before a draw, so the size is pushed through at once: a
+## transform set then waits for the next flush and the orb would show for a frame.
+static func hide_orb(s: Dictionary) -> void:
+	s["vr"] = 0.001
+	var orb := s.get("node") as Node3D
+	if orb == null or not is_instance_valid(orb):
+		return
+	orb.scale = Vector3.ONE * 0.001
+	orb.force_update_transform()
+	for halo: Node3D in orb.get_children():
+		halo.force_update_transform()
+
+## A shot's bolt this frame: between its last and current step (`alpha`), turned along its flight and stretched by
+## its tracer. Match draws every shot with it; tools that step the match by hand (the reels) call it too.
+static func place_shot(s: Dictionary, alpha: float) -> void:
+	var mi: MeshInstance3D = s["node"]
+	if mi == null:
+		return
+	mi.global_position = ShotOrigin.drawn(s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+	var v: Vector2 = s["vel"]
+	if v.length() > 1.0:
+		mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
+		var r: float = s.get("vr", s["r"])
+		var tracer := float((s["x"] as Dictionary).get("tracer", 1.0))
+		mi.scale = Vector3(r * 2.0, r * 2.0, tracer_len(r, v.length(), tracer))
 
 ## How long the streak behind a shot reads, from its speed (and the weapon's "tracer" scale).
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:

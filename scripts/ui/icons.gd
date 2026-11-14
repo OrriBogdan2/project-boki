@@ -1,11 +1,35 @@
 class_name Icons
-## Small vector icons for abilities, weapons and items, drawn straight onto a Control so they stay
-## crisp at any size. Coordinates are in a -1..1 box around the centre.
+## Icons for abilities, weapons, statuses and items, drawn straight onto a Control. An id with a painted
+## icon in art/icons/<id>.png draws that in its own colours (`col` gives only the alpha, or a near-black
+## `col` makes it a silhouette); every other id draws a small vector glyph in `col`, crisp at any size.
+## Coordinates are in a -1..1 box around the centre.
+
+const ART_DIR := "res://art/icons/"
+const SILHOUETTE_V := 0.2    # colour value (0-1): a darker `col` draws a painted icon as a silhouette (unowned items)
+static var _art := {}    # id -> CanvasTexture, or null when the id has no painted icon (looked up once per id)
+
+## The painted icon for `id`, or null when only the vector glyph exists. Mipmapped, so it stays smooth
+## when a 128 px icon is drawn at 14-20 px on a status tile.
+static func art(id: String) -> Texture2D:
+	if not _art.has(id):
+		var path := ART_DIR + id + ".png"
+		var tex: CanvasTexture = null
+		if ResourceLoader.exists(path):
+			tex = CanvasTexture.new()
+			tex.diffuse_texture = load(path)
+			tex.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		_art[id] = tex
+	return _art[id]
 
 static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> void:
 	if not (is_finite(at.x) and is_finite(at.y)) or absf(at.x) > 8000.0 or absf(at.y) > 8000.0:
 		# (way off screen, e.g. a status icon over someone far below the camera: at that size small polygons lose their
 		# area to float rounding and error "triangulation failed")
+		return
+	var tex := art(id)
+	if tex:
+		var tint := col if col.v < SILHOUETTE_V else Color(1, 1, 1, col.a)
+		c.draw_texture_rect(tex, Rect2(at - Vector2(s, s), Vector2(s, s) * 2.0), false, tint)
 		return
 	var w := maxf(2.0, s * 0.16)
 	var P := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * s
@@ -95,6 +119,17 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 		"heart":
 			F.call([[0.0, 0.7], [-0.65, 0.0], [-0.6, -0.45], [-0.3, -0.62], [0.0, -0.38], [0.3, -0.62], [0.6, -0.45],
 					[0.65, 0.0]])
+		"happy", "content", "sulky":     # a Boki's mood today (ZoneCards): a face, the mouth up, flat or down
+			O.call(0.0, 0.0, 0.85)
+			O.call(-0.3, -0.2, 0.13, Color(0, 0, 0, 0.8 * col.a))
+			O.call(0.3, -0.2, 0.13, Color(0, 0, 0, 0.8 * col.a))
+			var ink := Color(0, 0, 0, 0.8 * col.a)
+			if id == "content":
+				c.draw_line(P.call(-0.3, 0.3), P.call(0.3, 0.3), ink, w, true)
+			elif id == "happy":     # a smile: the lower arc of a circle above the mouth
+				c.draw_arc(P.call(0.0, 0.1), 0.35 * s, 0.15 * PI, 0.85 * PI, 12, ink, w, true)
+			else:                   # a frown: the upper arc of a circle below it
+				c.draw_arc(P.call(0.0, 0.6), 0.35 * s, 1.15 * PI, 1.85 * PI, 12, ink, w, true)
 		"dash":
 			L.call([[-0.7, -0.6], [-0.1, 0.0], [-0.7, 0.6]])
 			L.call([[0.0, -0.6], [0.6, 0.0], [0.0, 0.6]])
@@ -305,9 +340,6 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			O.call(0.0, -0.5, 0.22)
 			L.call([[-0.5, 0.4], [0.0, -0.1], [0.5, 0.4]])
 			L.call([[0.0, -0.1], [0.0, -0.5]])
-		"divehawk":
-			F.call([[0.0, 0.8], [-0.25, 0.1], [-0.85, -0.45], [-0.1, -0.2], [0.0, -0.7], [0.1, -0.2], [0.85, -0.45],
-					[0.25, 0.1]])
 		"breeze":
 			A.call(-0.1, 0.0, 0.55, -PI * 0.9, PI * 0.4)
 			L.call([[-0.85, 0.55], [0.4, 0.55]])
@@ -328,11 +360,6 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 		"cleave":
 			A.call(0.0, 0.3, 0.75, PI * 1.05, PI * 1.95)
 			F.call([[-0.15, 0.85], [0.15, 0.85], [0.15, -0.1], [-0.15, -0.1]])
-		"binding":
-			O.call(0.0, 0.0, 0.3)
-			for i in 4:
-				var a := TAU * i / 4.0 + 0.4
-				L.call([[cos(a) * 0.45, sin(a) * 0.45], [cos(a) * 0.85, sin(a) * 0.85]])
 		# ---- kin abilities, bond ultimates, gear
 		"charge":
 			F.call([[0.15, -0.85], [-0.45, 0.1], [-0.02, 0.1], [-0.2, 0.85], [0.45, -0.15], [0.02, -0.15]])

@@ -60,7 +60,7 @@ static func swap_held(m: Match, h: Hunter, b: Dictionary, held_i: int, mine_i: i
 	h.pack[mine_i] = held
 	Life._settle_box(b)
 	_told(m, h, "Swapped %s for %s" % [Loot.name_of(mine), Loot.name_of(held)], Loot.col_of(held))
-	m.sfx("pickup", h.pos, -2.0, 0.95)
+	InvSfx.swap()
 	return true
 
 ## A click on a box row. Fits: it is taken (gear that beats what you wear goes on, yours into the

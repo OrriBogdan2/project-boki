@@ -3,7 +3,12 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+const LACE_CANCEL_ROWS := preload("res://tools/lace_cancel_rows_check.gd")
 const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and Albert's holds end
+
+## degrees of hue a glow in Albert's swing crescent or Shield Slam fan may sit off his ivory (Arch.color): Kael's
+## orange is 24 off, his crimson 44
+const IVORY_HUE := 10.0
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -23,6 +28,7 @@ func run(main_node: Node) -> void:
 	bow.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		_wall_climb()
 		await HOLD.lace(self)
 		await ult.pin()
 		await own.pin()
@@ -39,6 +45,22 @@ func run(main_node: Node) -> void:
 	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## A 3 m rock column across the strip at x = `x` (`kind` T_BLOCK), or the ground back (T_GROUND).
+func _hawk_rock(m: Match, x: int, z: int, kind: int) -> void:
+	var wk: PackedByteArray = m.world.kind
+	for dz in range(-1, 2):
+		wk[m.world.idx(x, z + dz)] = kind
+	m.world.kind = wk
+
+## How many of `f`'s meshes wear Hawk Sense's through-cover outline.
+func _hawk_lines(f: Hunter) -> int:
+	if f.model == null:
+		return 0
+	var lines := f.model.find_children("*", "MeshInstance3D", true, false).filter(func(mi):
+		var o := (mi as MeshInstance3D).material_overlay as ShaderMaterial
+		return o != null and o.shader == HawkSense.XRAY)
+	return lines.size()
 
 ## A raised block of terrain `dx` east of `at` (so a knock east runs into it).
 func _wall_at(m: Match, at: Vector3, lv: int, dx0: int) -> void:
@@ -60,6 +82,71 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 		for dx in range(0, 3):
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
+
+## Lace's double-wall climb (Myth bCanWallJump): a jump into a 4-terrace wall (3.2 m, source 3 m) puts her
+## on top; with her back to it, or any other Hunter, it does not.
+func _wall_climb() -> void:
+	for H in [4, 5]:
+		_wall_climb_h(H)
+
+func _wall_climb_h(H: int) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
+	m.set_process(false)
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+	var P: Hunter = m.hunters[0]
+	for o in m.hunters:
+		o.ctrl = "idle"
+		if o != P:
+			o.teleport(Vector3(-500, 50, -500))
+			o.out = true
+	P.ctrl = "local"
+	var W: World = m.world
+	var g := W.random_ground()
+	var x0 := int(g.x) + 6
+	var z0 := int(g.z)
+	var lv := int(W.level[W.idx(x0, z0)])
+	var wl: PackedByteArray = W.level
+	var wk: PackedByteArray = W.kind
+	for dz in range(-4, 5):
+		for dx in range(-8, 5):
+			var i := W.idx(x0 + dx, z0 + dz)
+			wk[i] = World.T_GROUND
+			wl[i] = lv + H if dx >= 0 else lv
+	W.kind = wk
+	W.level = wl
+	var low := lv * World.LEVEL
+	var top := (lv + H) * World.LEVEL
+	var res := {}
+	for arch in ["archer", "gunslinger"]:
+		for dirn in [1.0, -1.0]:
+			P.arch = arch
+			P.teleport(Vector3(x0 - 1.2, low, z0 + 0.5))
+			P.grounded = true
+			P.vel = Vector3.ZERO
+			P.lfloat = {}
+			P.grap = {}
+			P.grap_cd = 0.0
+			P.last_gy = low
+			P.face = 0.0
+			m.step(DT)
+			var best := low
+			for i in 180:
+				P.inp["move"] = Vector2(dirn, 0.0)
+				P.inp["jump"] = i == 8
+				m.step(DT)
+				if P.grounded: best = maxf(best, P.pos.y)
+			res[arch + str(dirn)] = best
+	var info := "low %.2f top %.2f %s" % [low, top, res]
+	if H == 4:
+		ok("Lace climbs a double wall (4 terraces) facing it", absf(res["archer1.0"] - top) < 0.1, info)
+		ok("Lace does not climb it with her back to it", res["archer-1.0"] < low + 0.5, info)
+		ok("another Hunter does not climb a double wall", res["gunslinger1.0"] < low + 0.5, info)
+	else:
+		ok("Lace does not climb 5 terraces (past double-high)", res["archer1.0"] < low + 0.5, info)
+	m.queue_free()
 
 ## Seconds after a recall press until the hammer is back in his hand (gives up at 1 s).
 func _recall_caught(m: Match, K: BulwarkKit) -> float:
@@ -283,6 +370,7 @@ func _archer_combos() -> void:
 		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
 		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
+	_impact_looks(float(K.rmb_def()["pin"]["stun"]))
 	var pd: Dictionary = K.rmb_def()["pin"]
 	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
 	ok(
@@ -345,7 +433,7 @@ func _archer_combos() -> void:
 	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
-		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
+		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and (K.fx.laces[0]["node"] as Node3D).visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
@@ -478,7 +566,7 @@ func _archer_combos() -> void:
 		P.slot_lv["kin"] = rk
 		up.append([
 			K.power("sec") / p1, K.power("kin") / pk1,
-			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"),
+			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"), K.arc_deg(),
 		])
 	ok("upgrade parity: Heavy Shot damage +20% / +40%", near.call(up[1][0], 1.2) and near.call(up[2][0], 1.4), str(up))
 	ok("upgrade parity: Spirit Walk recharge 9.5 -> 8.5 -> 7.5",
@@ -486,6 +574,8 @@ func _archer_combos() -> void:
 	ok("upgrade parity: Hail Wall cooldown 15 -> 13 -> 9 and damage +30% / +60%",
 			near.call(up[1][3], 13.0) and near.call(up[2][3], 9.0)
 			and near.call(up[1][1], 1.3) and near.call(up[2][1], 1.6), str(up))
+	ok("upgrade parity: rank 3 (tier IV) Hail Wall arc 120 -> 156 degrees",
+			near.call(up[1][4], 120.0) and near.call(up[2][4], 156.0), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
@@ -500,19 +590,35 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
-	# Hawk Sense: a rival under half health is seen through cover
+	# Hawk Sense: a rival under the health line within 22 m is revealed and outlined through cover (HawkSense)
+	# (a rock between them: only Hawk Sense lets her side see past it)
+	var rock_x := int(home.x) + 4
+	_hawk_rock(m, rock_x, int(home.z), World.T_BLOCK)
 	fresh(T)
-	T.hp = T.max_hp
-	T.reveal_t = 0.0
-	step(m, 0.5)
-	var healthy_seen := T.reveal_t > 0.0
+	step(m, 0.5, func(): aim_at(P, T.pos))
+	var healthy_seen := T.reveal_t > 0.0 or K.sense.senses(T) or _hawk_lines(T) > 0 or m.can_see(P.team, T)
 	T.hp = T.max_hp * 0.4
-	step(m, 0.5)
+	step(m, 0.5, func(): aim_at(P, T.pos))
 	ok(
-		"combo archer: Hawk Sense shows only the injured",
-		not healthy_seen and T.reveal_t > 0.0,
-		"healthy %s injured %.2f" % [healthy_seen, T.reveal_t]
+		"combo archer: Hawk Sense: above the line hidden, below it seen past a rock and outlined",
+		not healthy_seen and T.reveal_t > 0.0 and m.can_see(P.team, T) and _hawk_lines(T) > 0,
+		"healthy %s injured %.2f seen %s, %d outlined meshes at %.1f m"
+			% [healthy_seen, T.reveal_t, m.can_see(P.team, T), _hawk_lines(T), P.flat_dist(T)]
 	)
+	T.hp = T.max_hp * 0.55
+	step(m, 0.5)
+	ok("combo archer: Hawk Sense: healed past the line, the reveal and outline go", T.reveal_t <= 0.0
+		and not m.can_see(P.team, T) and _hawk_lines(T) == 0, "reveal %.2f, %d outlined" % [T.reveal_t, _hawk_lines(T)])
+	_hawk_rock(m, rock_x, int(home.z), World.T_GROUND)
+	fresh(T)
+	T.hp = T.max_hp * 0.4
+	P.teleport(home - Vector3(7, 0, 0))
+	T.teleport(home + Vector3(18, 0, 0))
+	step(m, 0.5)
+	ok("combo archer: Hawk Sense: hurt but past 22 m stays hidden", T.reveal_t <= 0.0 and _hawk_lines(T) == 0,
+		"reveal %.2f at %.1f m" % [T.reveal_t, P.flat_dist(T)])
+	P.teleport(home)
+	T.teleport(home + Vector3(7, 0, 0))
 	T.hp = T.max_hp
 	# Spirit Walk: the roll plays pin_roll; then she walks through a rock column that stops anyone else
 	var W: World = m.world
@@ -604,6 +710,29 @@ func _archer_combos() -> void:
 		"combo pin: Spirit Walk ending inside a rock = back to the entry",
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
+	)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	var w0 := K.spirit.walks
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	step(m, 0.6, func(): P.inp["move"] = Vector2.ZERO)
+	# (her Shift, 12.5% longer since 11-11, can carry her past the rock by now: stand clear west of it first)
+	P.teleport(Vector3(bx - 1.0, home.y, home.z))
+	step(m, 0.05)
+	P.teleport(Vector3(bx + 0.5, home.y, home.z))
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
+	sn0 = K.spirit.snap_backs
+	step(m, K.spirit.t + 0.2)
+	ok(
+		"combo pin: Spirit Walk running out inside a rock = back to the entry",
+		K.spirit.walks == w0 + 1 and not K.spirit.active() and P.spirit_t <= 0.0 and K.spirit.snap_backs == sn0 + 1
+			and P.pos.x < bx,
+		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
@@ -751,6 +880,7 @@ func _archer_combos() -> void:
 		aim_at(P, P.pos + Vector3(8, 0, 0))
 		P.do_dash())
 	air_dash_is_ground(m, P, home)
+	LACE_CANCEL_ROWS.new(self).run(m, P, home)   # her Cancels table, row by row
 	await done(m)
 	var r2 := setup("archer", 7.0, "", true)
 	m = r2[0]
@@ -809,6 +939,38 @@ func _archer_combos() -> void:
 	)
 	await done(m)
 
+## The Heavy Shot's hit burst grows with its charge, the wall pin's is larger, both have a white core, and
+## neither leaves a ring on the ground (a flash only, not an explosion); the stunned foe wears a mark over its head
+## for the whole stun.
+func _impact_looks(stun_s: float) -> void:
+	var mv: Dictionary = HeroVfx.data("archer")["moves"]
+	var hit := _flare_reach(mv["heavy_hit"], 1.0)
+	var tap := _flare_reach(mv["heavy_hit"], 0.0)
+	var pin := _flare_reach(mv["heavy_pin"], 1.0)
+	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap], hit > 1.2 * tap)
+	ok("pin look: the wall pin burst %.1f m beats the plain hit %.1f m" % [pin, hit], pin > 1.3 * hit)
+	for move: String in ["heavy_hit", "heavy_pin"]:
+		var core := false
+		var ground := false
+		for layer: Dictionary in mv[move]["fx"]:
+			core = core or (layer["p"] == "flare" and layer["c"] == "white" and layer["c2"] == "white")
+			ground = ground or layer["p"] in ["ring", "vortex", "scorch", "skirt"]
+		ok("pin look: %s has a white-core flare and no ground ring" % move, core and not ground)
+	var stun_fx: Array = mv["heavy_stun"]["fx"]
+	var mark: Dictionary = stun_fx[1]
+	ok(
+		"pin look: the stun mark rides over the head for the whole stun",
+		mark["p"] == "star" and float(mark["y"]) >= 1.8 and float(mark["life"]) >= stun_s
+	)
+
+## The widest flare layer of a recipe at charge k (m across).
+func _flare_reach(rec: Dictionary, k: float) -> float:
+	var widest := 0.0
+	for layer: Dictionary in rec["fx"]:
+		if layer["p"] == "flare":
+			widest = maxf(widest, float(layer["size"]) * (1.0 + float(layer.get("size_k", 0.0)) * k))
+	return widest
+
 ## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
 func _spin(lvl: int) -> float:
 	var r := setup("bulwark", 2.2)
@@ -836,6 +998,22 @@ func _growth() -> void:
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01,
 		"L1 %.2f L10 %.2f" % [d1, d10]
 	)
+
+## The glows (sweep, ribbon, flare) of one of Albert's moves that leave his ivory: a sweep's body must be his
+## signature colour itself (Arch.color), and every tone a glow names within IVORY_HUE degrees of its hue.
+func _off_ivory(move: String) -> Array:
+	var d := HeroVfx.data("bulwark")
+	var sig := Arch.color("bulwark")
+	var off: Array = []
+	for l: Dictionary in d["moves"][move]["fx"]:
+		if l["p"] == "sweep" and not Color(String(d["palette"][l.get("c", "main")])).is_equal_approx(sig):
+			off.append("sweep body " + String(l.get("c", "main")))
+		for key in ["c", "c2", "c3"]:
+			if l["p"] in ["sweep", "ribbon", "flare"] and l.has(key):
+				var tone := Color(String(d["palette"][l[key]]))
+				if absf(wrapf(tone.h - sig.h, -0.5, 0.5)) * 360.0 > IVORY_HUE:
+					off.append("%s %s %s" % [l["p"], key, l[key]])
+	return off
 
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)
@@ -927,6 +1105,9 @@ func _bulwark_combos() -> void:
 		"bjorn E: the landing circle shows for everyone while it comes down",
 		AimKit.shown(P, "e") and bool(AimKit.entry(P, "e").get("all", false))
 	)
+	ok("bjorn E: the zone ring and the column are in his own colour, not a heal green",
+		AimKit.entry(P, "e").get("col") == AimKit.hero_col(P)
+		and (K.fx.disc.material_override as ShaderMaterial).get_shader_parameter("color") == AimKit.hero_col(P))
 	step(m, 5.0)
 	ok("bjorn E: the zone ends after the column (1s) and 4s of ticks", K.mend.is_empty())
 	P.fire_cd = 0.0
@@ -1005,6 +1186,7 @@ func _bulwark_combos() -> void:
 		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
+	ok("combo bjorn: a full slam only knocks, no stun (the source gives none)", T.stun_t <= 0.0, "stun %.2f" % T.stun_t)
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
 	var hv := HeroVfx.of(m)
 	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
@@ -1014,6 +1196,11 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("swing", 0)) == 1
 		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
 		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
+	ok("bjorn vfx: the swing's crescent and trail are his ivory, not Kael's orange", _off_ivory("swing").is_empty(),
+		str(_off_ivory("swing")))
+	var whirl_col: Color = (K.fx.orbit_trail.material_override as ShaderMaterial).get_shader_parameter("color")
+	ok("bjorn vfx: the held swing's whirl trail is his ivory too", whirl_col.is_equal_approx(Arch.color("bulwark")),
+		whirl_col.to_html(false))
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -1160,6 +1347,20 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
 		"cds %s shields %s" % [str(cds), str(shields)]
 	)
+	# the Spin Dash recharge takes the data's -1.5 s a rank; no slot gets a rank damage step (the data names none)
+	var regens: Array = []
+	var dmgs: Array = []
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		regens.append(P.dash_regen())
+		dmgs.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the aegis, Smash or field",
+		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01
+				and dmgs[2] == dmgs[0],
+		"recharge %s power %s" % [str(regens), str(dmgs)]
+	)
+	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 3
 	ok(
 		"combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait)",
@@ -1244,6 +1445,8 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
 		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
+	ok("bulwark vfx: the Shield Slam fan and its flare are his ivory, not Kael's orange", _off_ivory("slam").is_empty(),
+		str(_off_ivory("slam")))
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
@@ -1263,6 +1466,23 @@ func _bulwark_combos() -> void:
 		"combo bulwark: full Crushing Blow > wall = Crushed",
 		K.crushes == c0 + 1 and K.anim_id == "bul_smash",
 		"crushes %d anim %s" % [K.crushes - c0, K.anim_id]
+	)
+	# the same full blow in the open: damage and knockback, no stun of its own (data: "up to 522 dmg + Knockback")
+	step(m, 1.5)
+	reset.call()
+	_clear_wall(m, home, lv, 3)
+	c0 = K.crushes
+	var ox := T.pos.x
+	var hold := func():
+		P.inp["fire"] = true
+		aim_at(P, T.pos)
+	step(m, 1.55, hold)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"combo bulwark: a full Crushing Blow in the open knocks, no stun",
+		dmg(T) >= 30.0 and T.pos.x - ox > 1.0 and T.stun_t <= 0.0 and K.crushes == c0,
+		"took %.0f moved %.2f stun %.2f crushes %d" % [dmg(T), T.pos.x - ox, T.stun_t, K.crushes - c0]
 	)
 	# Shift while winding up the blow: a short plain dash on a full charge, the swing still charging (item 51)
 	step(m, 1.5)
