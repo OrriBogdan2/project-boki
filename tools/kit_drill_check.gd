@@ -23,6 +23,7 @@ func run(main: Node) -> void:
 	await _area(main, tree, true, "gunslinger")
 	await _area(main, tree, false, "archer")
 	await _area(main, tree, false, "juggernaut")
+	await _recast(main, tree)
 	print("KITDRILL %s" % ("FAIL %d" % bad if bad > 0 else "OK"))
 	tree.quit(1 if bad > 0 else 0)
 
@@ -145,3 +146,103 @@ func _swing(m: Match, kd: KitDrill) -> void:
 	kd.tick_swing(KitDrill.SWING_INTO)
 	var blocked := m.player.hp + m.player.armor == hp
 	ok(blocked and kd.step == at + 1, "the swing is blocked (no damage) and the step is done")
+## The recast drill station (RecastDrill) as Ostra (his E is a two-step: the seed, then E again) and as Vex (no
+## two-step ability). Ostra: three reps read hit, early, hit; a press inside the 0.15 s buffer before the window
+## arms is a hit; the slot's cooldown is reset after each rep. (His seed has no timer: _late covers a window that
+## runs out.)
+func _recast(main: Node, tree: SceneTree) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start(Match.arena_opts("ostra"))
+	m.set_process(false)
+	for i in 3: await tree.process_frame
+	var d := Practice.of(m).recast
+	ok(d != null and not d.is_open(), "recast: the Training Grounds bar has the station, closed")
+	d.toggle()
+	var k := m.player.ak as OstraKit
+	ok(d.plan == ["e"], "recast: Ostra has one two-step slot (E)")
+	var dt := 1.0 / 60.0
+	var rep := func(second_after: float):
+		# casts, presses again second_after s into the seed's life (-1: never), runs until the rep is graded
+		k.use_e()
+		d.on_press("e")
+		var t := 0.0
+		var pressed := false
+		while t < 20.0 and d.reps["e"]["ph"] != "cool":
+			if not pressed and second_after >= 0.0 and not k.seed.is_empty() and float(k.seed["t"]) >= second_after:
+				k.use_e()
+				d.on_press("e")
+				pressed = true
+			m.step(dt)
+			d.tick(dt)
+			t += dt
+	rep.call(0.45)
+	var res: Array = d.reps["e"]["res"]
+	ok(res == ["hit"], "recast: E again inside the window reads hit")
+	ok(k.seed.is_empty(), "recast: and the real recast went off")
+	ok(d._text.text.contains("HIT") and not d._text.text.contains("inf"), "recast: a timer-less window reads HIT only")
+	_settle(m, d, dt)
+	ok(String(d.reps["e"]["ph"]) == "idle" and float(k.cd["e"]) == 0.0, "recast: a finished rep resets the slot")
+	rep.call(0.04)
+	res = d.reps["e"]["res"]
+	ok(res == ["hit", "early"], "recast: E again well before the marker reads early")
+	ok(not k.seed.is_empty() and d.reps["e"]["ph"] == "cool", "recast: the seed is still out, the slot waits")
+	k.use_e()      # (the real recast pops it: the slot is free again)
+	_settle(m, d, dt)
+	rep.call(0.45)
+	res = d.reps["e"]["res"]
+	ok(res == ["hit", "early", "hit"], "recast: a second clean press reads hit again")
+	_settle(m, d, dt)
+	ok(int(d.reps["e"]["n"]) == RecastDrill.REPS and "done" in d._text.text, "recast: three reps finish the ability")
+	d.on_press("e")
+	ok(d.reps["e"]["ph"] == "idle" and d.reps["e"]["n"] == RecastDrill.REPS, "recast: a fourth rep is not counted")
+	d.start("ostra")
+	var gate := float(k.e_def()["min_recast"])
+	rep.call(gate - ArchKit.RECAST_BUFFER * 0.6)
+	res = d.reps["e"]["res"]
+	ok(res == ["hit"], "recast: a press inside the buffer before the window arms is a hit")
+	d.toggle()
+	m.queue_free()
+	await tree.process_frame
+	var g := Match.new()
+	main.add_child(g)
+	await g.start(Match.arena_opts("gunslinger"))
+	g.set_process(false)
+	for i in 3: await tree.process_frame
+	var gd := Practice.of(g).recast
+	gd.toggle()
+	ok(gd.plan.is_empty() and gd._text.text == "No two-step abilities", "recast: Vex sees 'No two-step abilities'")
+	gd.toggle()
+	g.queue_free()
+	await tree.process_frame
+	await _late(main, tree)
+
+## A two-step whose window runs out (Thief's E) unused reads late.
+func _late(main: Node, tree: SceneTree) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start(Match.arena_opts("thief"))
+	m.set_process(false)
+	for i in 3: await tree.process_frame
+	var d := Practice.of(m).recast
+	d.toggle()
+	ok(d.plan == ["e"], "recast late: the Thief has one two-step slot (E)")
+	m.player.ak.use_e()
+	d.on_press("e")
+	var t := 0.0
+	while t < RecastDrill.COOL_MAX and d.reps["e"]["ph"] != "cool":
+		m.step(1.0 / 60.0)
+		d.tick(1.0 / 60.0)
+		t += 1.0 / 60.0
+	ok(d.reps["e"]["res"] == ["late"], "recast late: a window that closes unused reads late")
+	d.toggle()
+	m.queue_free()
+	await tree.process_frame
+
+## Steps until the drill's slot is idle again (its window closed and the cooldown reset).
+func _settle(m: Match, d: RecastDrill, dt: float) -> void:
+	var t := 0.0
+	while String(d.reps["e"]["ph"]) != "idle" and t < RecastDrill.COOL_MAX + 1.0:
+		m.step(dt)
+		d.tick(dt)
+		t += dt
