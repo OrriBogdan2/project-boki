@@ -126,6 +126,7 @@ var box_rev_at := -9.0         # last time we were channelling a deathbox revive
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
 var react_at := -9.0           # last staggering hit (Oomph): the hit clip plays from it
+var stagger_t := 0.0           # staggered by a big hit (Oomph sets it, BodyTell counts it down and reads it)
 var extracted := false
 var extract_prog := 0.0
 ## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
@@ -3218,6 +3219,7 @@ func render(delta: float, alpha: float) -> void:
 	model.visible = see and not Hex.active(self) and not HunterWisp.hides(self)    # a critter or a Wisp stands in
 	ShieldLook.tick(self)
 	SideRings.tick(self)
+	BodyTell.tick(self, delta)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)

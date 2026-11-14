@@ -32,9 +32,12 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
-## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
+## docs/VFX_QUALITY.md backlog 9, the shot trails that were hairlines at match zoom: Lace's tap shots, Sparkle's bolts.
+const SHOT_TRAILS := {"archer": "fire_tap", "mage": "lmb_trail"}
+const TRAIL_MIN := 0.45        # m across at the head, so a shot trail reads at match zoom (the hairlines were 0.26)
+## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
-	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
+	"fire_super", "fire_over", "fire_heavy", "fire_ult", "rock_crumble"]
 ## The camera-facing effect shaders that soften where they meet the ground (shaders/soft_fade.gdshaderinc).
 ## (fx_dot has its own ground fade: FxDot, ground_y.)
 const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
@@ -52,6 +55,11 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	var gold: Array = []
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if f.ends_with(".gd") and FileAccess.get_file_as_string("res://scripts/arch/kits/" + f).contains("ffd25a"):
+			gold.append(f)
+	ok(gold.is_empty(), "no kit holds the shared gold ffd25a: a Hunter's flashes follow its colour %s" % [gold])
 	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
@@ -69,6 +77,7 @@ func run(main: Node) -> void:
 	_net(m, V, P)
 	_soft_edges(m)
 	await _core_kinds(main, m, V, P)
+	_shot_trails(m, V, P)
 	await _lisette(main, V)
 	await _vex_core(main)
 	await _scarf(main)
@@ -106,7 +115,8 @@ func _recipes(arch: String) -> void:
 	var missing := called.keys().filter(func(k): return not (moves.has(k) or String(k).ends_with("_")))
 	ok(not called.is_empty() and missing.is_empty(),
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
-	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
+	var ends := moves.values().map(func(rec): return String(rec.get("end", "")))     # a trail's end move
+	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE and not k in ends)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
 	var pal: Dictionary = d["palette"]
 	var bad_sound: Array = []
@@ -399,6 +409,77 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	shot.queue_free()
 	_clear(V)
 	HeroVfx.set_data(P.arch, {})
+
+## Lace's tap shots and Sparkle's finger bolts: thick at match zoom with a bright head, the body in the Hunter's colour;
+## Lace's short and sharp, Sparkle's soft, sparkly and longer; Lace's drawn arrows stay above the tap; a head fits the
+## circle its shot hits in (the hit sizes are the weapons'). Flying: the head is part of the trail's own mesh, a pooled
+## node keeps no look of the last Hunter's, and a volley makes no node once the pool is warm. The stock orb under such a
+## round stays hidden (Oomph.hide_orb).
+func _shot_trails(m: Match, V: HeroVfx, P: Hunter) -> void:
+	var reach := {}
+	for arch: String in SHOT_TRAILS:
+		var lay := _ribbon_of(arch, SHOT_TRAILS[arch])
+		var shot: Dictionary = Content.weapon(Arch.signature(arch)).primary
+		var col := Color(String(HeroVfx.data(arch)["palette"][lay["c"]]))
+		var head := float(lay.get("head", 0.0))
+		reach[arch] = float(lay["tail"]) * float(shot["speed"])          # m of trail behind the head
+		ok(float(lay["size"]) >= TRAIL_MIN and head > 0.0,
+				"%s %s: %.2f m across, a %.2f m head" % [arch, SHOT_TRAILS[arch], float(lay["size"]), head])
+		ok(col.is_equal_approx(Arch.color(arch)),
+				"%s: the trail is the Hunter's colour (#%s)" % [arch, col.to_html(false)])
+		ok(head * 0.5 <= float(shot["size"]) + P.hit_radius(), "%s: the head fits the circle its shot hits in" % arch)
+	var tap := _ribbon_of("archer", "fire_tap")
+	var bolt := _ribbon_of("mage", "lmb_trail")
+	ok(reach["archer"] < reach["mage"] and not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
+			"Lace's is short and sharp: %.1f m, a pointed head" % reach["archer"])
+	ok(bolt.get("soft", false) and float(bolt.get("head_len", 1.0)) <= 1.2,
+			"Sparkle's is soft and sparkly: %.1f m, a round head" % reach["mage"])
+	var sizes := ["fire_tap", "fire_arrow", "fire_super"].map(func(mv): return float(_ribbon_of("archer", mv)["size"]))
+	ok(sizes[0] < sizes[1] and sizes[1] < sizes[2], "Lace's drawn arrows stay thicker than the tap %s" % [sizes])
+	var shot := Node3D.new()
+	m.add_child(shot)
+	shot.global_position = P.pos + Vector3(0, 1, 0)
+	_clear(V)
+	_shoot(V, P, "mage", shot)
+	var node: Node3D = V.ribbons[0]["node"]
+	_clear(V)
+	_shoot(V, P, "archer", shot)
+	var e: Dictionary = V.ribbons[0]
+	ok(e["node"] == node and not (e["mat"] as ShaderMaterial).get_shader_parameter("soft"),
+			"a pooled trail Sparkle used comes back hard-edged for Lace")
+	for i in 4:      # (by hand, as above)
+		shot.global_position += Vector3(1.0, 0, 0)
+		V._tick_ribbon(e, 0.016)
+	var ahead := (e["node"] as MeshInstance3D).mesh.get_aabb().end.x - shot.global_position.x
+	var tip := float(tap["head"]) * float(tap["head_len"]) * 0.5
+	ok(absf(ahead - tip) < 0.01, "the head is in the trail's own mesh, its tip %.2f m ahead of the shot" % ahead)
+	for i in HeroVfx.POOL["ribbon"]:
+		_shoot(V, P, "archer", shot)
+	var made := V.made
+	for i in 24:
+		_shoot(V, P, "archer" if i % 2 == 0 else "mage", shot)
+	ok(V.made == made and V.ribbons.size() <= int(HeroVfx.POOL["ribbon"]),
+			"a volley of 24 draws on the ribbon pool: no new node (%d running)" % V.ribbons.size())
+	shot.queue_free()
+	_clear(V)
+	HeroVfx.set_data(P.arch, {})
+	m.spawn_shot(P, P.pos + Vector3(0, 1, 0), Vector2(30, 0), 0.0, 0.5, 0.18, Color.WHITE)
+	var drawn: Dictionary = m.shots[-1]
+	Oomph.hide_orb(drawn)
+	m.render_shots(1.0)
+	ok((drawn["node"] as Node3D).scale.x < 0.01 and is_equal_approx(float(drawn["r"]), 0.18),
+			"a round its kit draws keeps the stock orb shrunk through the match's frame; its hit size is kept")
+
+## One shot trail as `arch`'s (its recipes stand in for the test Hunter's own).
+func _shoot(V: HeroVfx, P: Hunter, arch: String, shot: Node3D) -> void:
+	HeroVfx.set_data(P.arch, HeroVfx.data(arch))
+	V.trail(P, SHOT_TRAILS[arch], shot)
+
+func _ribbon_of(arch: String, move: String) -> Dictionary:
+	for layer: Dictionary in HeroVfx.data(arch)["moves"][move]["fx"]:
+		if layer["p"] == "ribbon":
+			return layer
+	return {}
 
 func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	V.plays.clear()

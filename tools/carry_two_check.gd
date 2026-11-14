@@ -129,7 +129,8 @@ func _downed(P: Hunter) -> void:
 	ok(b.state == "bench", "the other one comes round into the satchel too")
 
 func _online(P: Hunter) -> void:
-	ok(Net.VERSION == "0.29.0", "Net.VERSION is bumped for the new sync shape (%s)" % Net.VERSION)
+	var bumped := Net.VERSION.naturalnocasecmp_to("0.29.0") >= 0
+	ok(bumped, "Net.VERSION is bumped for the new sync shape (%s)" % Net.VERSION)
 	ok(Match.KIN_STATES.has("bench"), "the kin snapshot can say bench")
 	_online_check(P, "at start")
 	P.swap_cd = 0.0

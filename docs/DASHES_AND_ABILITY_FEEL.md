@@ -453,6 +453,9 @@ effect category" made concrete.
 
 ### 5.2 Allegiance: whose is it
 
+Built (2026-11-11, docs/COMBAT_CLARITY.md): `SideColor.fx` leans other people's areas, telegraphs and shot halos to
+their side, `SideRings` edges other Hunters' bodies in the side colour, and `BodyTell` keeps crowd control on the body.
+
 | Viewer sees | Rim and pattern | Opacity | Sound |
 |---|---|---|---|
 | own casts | a thin white rim | fill 30% | normal |
