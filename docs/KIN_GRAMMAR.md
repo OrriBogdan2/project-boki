@@ -59,7 +59,9 @@ files (one per kind of mistake) and should always print errors. Phase 3 builds t
 
 ## The run model the grammar serves
 
-- **One kin per run** (the 2-kin swap stays retired).
+- **Two kin in, one extra out** (decision 0090): the lead you send out, and a second in the satchel whose
+  carry passives are on too (a stat both give counts once, at the stronger value); C swaps them. One
+  carry-out slot rides a Boki claimed in the run home (no passive, no summon), plus one stolen slot.
 - The weapon gives primary fire and the RMB utility. The class gives the Shift dodge (light phase
   step, medium roll, heavy shoulder charge); the kin adds a **dodge rider** to it.
 - The kin gives **1 player-cast active (E)**, optionally **1 auto active** it casts itself when it's

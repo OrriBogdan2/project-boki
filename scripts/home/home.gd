@@ -3608,7 +3608,7 @@ func _confirm_start() -> void:
 
 func _start_match() -> void:
 	# kin picked from the Kin Burrow come out to go with you
-	for kk in [Save.active_kin(), Save.second_kin() if Match.TWO_KIN else {}]:
+	for kk in [Save.active_kin(), Save.second_kin()]:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
