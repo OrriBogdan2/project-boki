@@ -23,7 +23,7 @@ static func opened(k: ArchKit, w: Dictionary) -> String:
 	seen[FLAG] = true
 	var text := line(k, String(w["slot"]))
 	if m.hud != null:
-		m.hud.tip(text, maxf(float(w["left"]), 1.0))
+		m.hud.tip(text, "", maxf(float(w["left"]), 1.0))
 	return text
 
 ## "<KEY> AGAIN to <verb>" for the kit's recast on `slot`.
