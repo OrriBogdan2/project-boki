@@ -5,7 +5,8 @@ extends RefCounted
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low. Each ability's emitter on the swapped
+## from their anchor, follow it, stream behind a run and are off at Low; her Rimelock breaks outward when she ends it and melts when it runs out.
+## Each ability's emitter on the swapped
 ## models stays on its bone (tools/hero_vfx_emit.gd). And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
 ## and a summoned Boki under crowd control wears the same looks as a Hunter, sized to its body.
@@ -22,6 +23,7 @@ const SETTLE_TOP_V := 5.0      # m/s: the landing dust is never faster than this
 const STREAK_PILE := 40        # streaks asked for at once: the pool still caps them
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const ZONE_CORE_A := 0.25      # alpha at most at the centre of a zone (docs/VFX_QUALITY.md)
+const END_MS := 1.0            # ms of CPU a Rimelock end look may take to spawn from a warm pool
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 const TRACER_FULL := 3         # steps (60/s) a round flies before its tracer must be drawn full length
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
@@ -100,6 +102,7 @@ func run(main: Node) -> void:
 	await _lisette(main, V)
 	await _vex_core(main)
 	await _scarf(main)
+	await _rime_ends(main)
 	_dots(m)
 	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
@@ -776,6 +779,50 @@ func _slam_fill(main: Node) -> void:
 		K.ult.phase = ""
 		K.ult._hide_lane()
 	xd["windup"] = windup0
+	m.queue_free()
+
+## Rimelock's ends read apart, each with its own look: X or Shift before the time is up (even the late crack) breaks
+## the shell outward with a flash, the time running out melts it off her. Warm, each look spawns in under END_MS.
+func _rime_ends(main: Node) -> void:
+	var m: Match = flow._match(main, "rimewright")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	var K: RimewrightKit = P.ak
+	var hold := float(K.x_def()["hold"])
+	var late := hold - float(K.x_def()["late"]) * 0.5
+	for path: Array in [["X early", 1.0, "x"], ["X late", late, "x"], ["Shift", 1.0, "dash"], ["time up", hold, ""]]:
+		V.plays.clear()
+		K._start_rime()
+		K.rime["t"] = float(path[1]) - 0.001
+		match String(path[2]):
+			"x":
+				K.ult_recast()
+			"dash":
+				P.inp["dash"] = true
+				K._tick_rime(0.01)
+				P.inp["dash"] = false
+			_:
+				K._tick_rime(0.01)
+		var want := "rime_melt" if path[2] == "" else "rime_break"
+		var not_want := "rime_break" if path[2] == "" else "rime_melt"
+		ok(K.rime.is_empty() and int(V.plays.get(want, 0)) == 1 and not V.plays.has(not_want),
+				"Rimelock ended by %s: %s, not %s" % [path[0], want, not_want])
+	for mv: String in ["rime_break", "rime_melt"]:
+		var best := INF
+		for i in 5:
+			var t0 := Time.get_ticks_usec()
+			V.play(P, mv, P.pos, Vector2.RIGHT)
+			best = minf(best, (Time.get_ticks_usec() - t0) / 1000.0)
+		ok(best < END_MS, "%s spawns in %.3f ms (< %.1f)" % [mv, best, END_MS])
+	for i in 20:
+		V.play(P, "rime_break", P.pos, Vector2.RIGHT)
+		V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
+	var made := V.made
+	V.play(P, "rime_break", P.pos, Vector2.RIGHT)
+	V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
+	ok(V.made == made and V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of ends stays pooled and capped (%d nodes)" % made)
+	_clear(V)
 	m.queue_free()
 
 ## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
