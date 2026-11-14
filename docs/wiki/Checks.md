@@ -49,6 +49,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--perch-check` | Each perch can be reached from its updraft chain |
 | `--mapcheck` | Generated maps: every island reachable from every other (200 small, 40 big) |
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
+| `--current-check` | Wind roads and updrafts: every entry in each authored map's data (and generated maps) gets a visual node placed where the data puts it, streaks capped and fewer on Low, a ring at each road end; `--shots-dir=` (*window*) |
 | `--biome-check` | An expedition on the authored map: what each biome spawned, rarities and hazards, then a minute of play |
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
 | `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |

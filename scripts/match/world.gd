@@ -824,9 +824,10 @@ func _wind_link(a: int, b: int, g: Array) -> void:
 	links.append({"from": b, "to": a, "take": pb, "land": land_a, "wind": true})
 	winds.append({"a": pa + Vector3(0, 1.6, 0), "b": pb + Vector3(0, 1.6, 0)})
 
-## Where wind carries a glider at p: {dir (along the road, either way), y (its height)} or {}.
+## Where wind carries a glider at p: {dir (along the road, either way), y (its height), i (the road)} or {}.
 func wind_at(p: Vector3) -> Dictionary:
-	for wd in winds:
+	for i in winds.size():
+		var wd: Dictionary = winds[i]
 		var a: Vector3 = wd["a"]; var b: Vector3 = wd["b"]
 		var ab := Vector2(b.x - a.x, b.z - a.z)
 		var l2 := ab.length_squared()
@@ -834,7 +835,7 @@ func wind_at(p: Vector3) -> Dictionary:
 		var t := clampf(Vector2(p.x - a.x, p.z - a.z).dot(ab) / l2, 0.0, 1.0)
 		var q := a.lerp(b, t)
 		if Vector2(p.x - q.x, p.z - q.z).length() < 1.9 and absf(p.y - q.y) < 3.0 and t > 0.0 and t < 1.0:
-			return {"dir": Vector3(ab.x, b.y - a.y, ab.y).normalized(), "y": q.y}
+			return {"dir": Vector3(ab.x, b.y - a.y, ab.y).normalized(), "y": q.y, "i": i}
 	return {}
 
 ## Rising air off island edges: glide into it to climb.
@@ -1219,7 +1220,10 @@ func build_meshes() -> void:
 		landmarks = Landmarks.new(self)
 		landmarks.build(_deco)
 	await _stage("world.landmarks")
-	_build_air()
+	var air := CurrentFx.new()     # the wind roads' and updrafts' look
+	air.name = "Air"
+	air.build(self, float(Settings.q("fx")))
+	add_child(air)
 	await _stage("world.air")
 
 ## Per tile, for the terrain shader's painted ground: the biome style (R, nearest) and the painted
@@ -1538,68 +1542,6 @@ func _bio_of_island(ii: int) -> Dictionary:
 func _bio(i: int) -> Dictionary:
 	var ii := island[i] if i >= 0 and i < island.size() else -1
 	return _isl_bio[ii] if ii >= 0 and ii < _isl_bio.size() else biome
-
-## Wind roads as ribbons of flowing streaks; updrafts as glowing columns of rising air.
-func _build_air() -> void:
-	var wsh: Shader = load("res://shaders/wind.gdshader")
-	for wd in winds:
-		var a: Vector3 = wd["a"]; var b: Vector3 = wd["b"]
-		var d := b - a
-		var len := d.length()
-		for k in 3:
-			var mi := MeshInstance3D.new()
-			var qm := QuadMesh.new(); qm.size = Vector2(len, 2.4 if k == 0 else 1.4)
-			mi.mesh = qm
-			var mat := ShaderMaterial.new(); mat.shader = wsh
-			mat.set_shader_parameter("color", Color(0.75, 0.95, 1.0, 0.32 if k == 0 else 0.22))
-			mat.set_shader_parameter("tiles", maxf(2.0, len / 3.0))
-			mat.set_shader_parameter("speed", 0.9 + 0.25 * k)
-			mi.material_override = mat
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			add_child(mi)
-			# lay the quad along the road: flat for the main ribbon, tilted for the two wisps
-			var fwd := d.normalized()
-			var side := fwd.cross(Vector3.UP).normalized()
-			var up := side.cross(fwd).normalized()
-			var roll: float = [0.0, 1.0, -1.0][k]
-			# QuadMesh faces +z; turn it so its width runs along the road and it lies flat
-			mi.basis = Basis(fwd, up.rotated(fwd, roll * 0.9), -side.rotated(fwd, roll * 0.9))
-			mi.position = (a + b) * 0.5 + Vector3(0, -0.2 + k * 0.25, 0)
-	for u in updrafts:
-		var c: Vector3 = u["pos"]
-		var air := updraft_visual(float(u["r"]), c.y - 6.0, float(u["top"]))
-		air.position = Vector3(c.x, 0.0, c.z)
-		add_child(air)
-
-## A column of rising air (the updraft shader, plus motes climbing it), from y0 up to y1 in the node's
-## own space. Island-edge updrafts and a lair's escape updraft both use it.
-static func updraft_visual(r: float, y0: float, y1: float, tint := Color(1.0, 0.95, 0.75, 0.35)) -> Node3D:
-	var root := Node3D.new()
-	var hgt: float = y1 - y0
-	var col := MeshInstance3D.new()
-	var cm := Models.plain_cyl(r, r * 1.15, hgt, 18)
-	cm.cap_top = false; cm.cap_bottom = false
-	col.mesh = cm
-	var mat := ShaderMaterial.new(); mat.shader = load("res://shaders/updraft.gdshader")
-	mat.set_shader_parameter("tiles", hgt / 4.0)
-	if tint != Color(1.0, 0.95, 0.75, 0.35):
-		mat.set_shader_parameter("color", Color(tint, 0.85))
-		mat.set_shader_parameter("speed", 1.1)
-	col.material_override = mat
-	col.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	col.position = Vector3(0, y0 + hgt * 0.5, 0)
-	col.name = "Column"
-	root.add_child(col)
-	var p := CPUParticles3D.new()
-	p.amount = 18; p.lifetime = 1.6; p.preprocess = 1.6
-	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = r * 0.8
-	p.direction = Vector3.UP; p.spread = 8.0; p.initial_velocity_min = 5.0; p.initial_velocity_max = 8.0
-	p.gravity = Vector3.ZERO
-	p.mesh = Models.sphere(0.06, 4)
-	p.material_override = Models.glow_mat(Color(1.0, 0.96, 0.8, 0.8) if tint == Color(1.0, 0.95, 0.75, 0.35) else Color(tint, 0.85))
-	p.position = Vector3(0, y0 + 3.0, 0)
-	root.add_child(p)
-	return root
 
 func _decorate() -> void:
 	var drng := RandomNumberGenerator.new(); drng.seed = rng.seed + 11

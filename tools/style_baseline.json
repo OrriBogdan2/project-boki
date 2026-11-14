@@ -361,7 +361,7 @@
 "scripts/match/arena.gd": {
 "long_line": 22,
 "nested_ternary": 2,
-"semicolon": 36
+"semicolon": 32
 },
 "scripts/match/arena_demo.gd": {
 "long_line": 2

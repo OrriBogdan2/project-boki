@@ -195,9 +195,10 @@ func ok(cond: bool, what: String) -> void:
 	print("MFEEL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func rec(key: String, v: float) -> void:
+## `table`: a section module's own targets (move_feel_knock.gd), shaped as T.
+func rec(key: String, v: float, table: Dictionary = T) -> void:
 	results[key] = v
-	var t: Array = T[key]
+	var t: Array = table[key]
 	var pass_ := false
 	var tgt := ""
 	match String(t[0]):
@@ -298,6 +299,7 @@ func run(main: Node) -> void:
 	_flue_flight()
 	_abyss_updraft()
 	_feather()
+	load("res://tools/move_feel_knock.gd").run(self)     # the knock arc (docs/MOVEMENT_FEEL.md "Knock arc")
 	_ledge()
 	_glide_wall()
 	_drop()
