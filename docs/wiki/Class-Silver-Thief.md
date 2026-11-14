@@ -72,7 +72,7 @@ What the in-game kit card (K) says.
 | Passive: Marks | Each hit on the same foe adds a Mark: +1.3 damage on your shots at them, with no cap. Knocks heal you. |
 | Dash: Vault | Cartwheel a short way (from a jump too, carried on to the landing). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. Shoot straight away and your next shots come quicker. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
-| E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
+| E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press it again to blink to it. |
 | Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
 | Weapon: Arc Shots | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
 

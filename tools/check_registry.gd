@@ -480,6 +480,7 @@ const CHECKS := {
 	"--farm-climb-blocks-check": ["res://tools/farm_climb_blocks_check.gd", "farm_climb_blocks_check", null],
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-climb-check": ["res://tools/farm_climb_check.gd", "farm_climb_check", null],      # farm ridges climb
+	"--key-text-check": ["res://tools/key_text_check.gd", "key_text_check", null],  # keys via key_cap
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--race-check": ["res://tools/race_check.gd", "race_check", null],  # the Dash, GARDEN.md 9.4
 	"--relay-cup-check": ["res://tools/relay_cup_check.gd", "relay_cup_check", null],  # GARDEN_MODERN 4.2
