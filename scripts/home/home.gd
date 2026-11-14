@@ -4447,6 +4447,9 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 	var k := _kin_entry(rec)
 	if k.is_empty():
 		return
+	if yard == null:      # the drill runs at the Training post's dummy
+		_toast("Build a Training post on the farm first, then train %s there" % rec["name"])
+		return
 	if Care.need(rec, "energy") < 20.0 or Care.need(rec, "food") < 12.0:
 		_close_panel()
 		var why := "energy" if Care.need(rec, "energy") < 20.0 else "food"

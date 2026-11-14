@@ -486,6 +486,7 @@ const CHECKS := {
 	# --home-verbs-check also takes --home-verbs-shots=<dir>
 	"--home-verbs-check": ["res://tools/home_verbs_check.gd", "home_verbs_check", null],
 	"--glider-rack-check": ["res://tools/glider_rack_check.gd", "glider_rack_check", null],      # rack, every skin
+	"--train-drill-check": ["res://tools/train_drill_check.gd", "train_drill_check", null],      # Train, no post
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],  # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],  # news at home
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],  # Boki talk (item 105)
