@@ -806,7 +806,6 @@ func _call_look(who: Hunter, dt: float) -> void:
 		hearth_call["fx"] = 0.22
 		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
 		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
-		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
 
 
 ## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;

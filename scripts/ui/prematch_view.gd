@@ -40,7 +40,7 @@ const HOWTO_W := 600.0      # px, the how-to block beside the title (one Hunter'
 const LOG_H := 64.0         # px, the most the chat log grows to (it scrolls past that)
 ## px, your pick's 3D stage beside the grid: no taller than 3 card rows, so the body keeps the 720 px budget
 ## (the camera keeps height: the same full-body framing, smaller; 0.81 wide per tall, roomier than 240x320)
-const STAGE_PX := Vector2(200, 248)
+const STAGE_PX := Vector2(168, 248)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
 class Padlock extends Control:
@@ -210,9 +210,9 @@ func _pulse(left: float) -> void:
 	timer_label.pivot_offset = timer_label.size * 0.5
 	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
 
-## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size;
+## Keeps the whole screen inside the HUD safe margin (HudStyle.safe_pad), so the countdown shows at every window size;
 ## smaller windows get smaller digits. The Hunter grid keeps COLUMNS at every size: 5 x CARD_MIN_W plus
-## the STAGE_PX stage beside it fit 1142 px (a 1240 px square window's inside; 1224 at 1280x720).
+## the STAGE_PX stage beside it fit 1110 px (a 1240 px square window's inside is 1116).
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var pad := HudStyle.safe_pad(win)

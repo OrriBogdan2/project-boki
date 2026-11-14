@@ -10,9 +10,9 @@ extends RefCounted
 
 ## Name -> the bus it sends to. In creation order: Godot only sends to a bus created before.
 ## SFXWorld sits between SFX and the world's sounds: the one bus Sfx.set_muffle dulls while you are downed or
-## under the low-health line (Sfx.CLEAR sounds go straight to SFX and stay as they are).
+## under the low-health line (Sfx.CLEAR sounds and the Boki bus go straight to SFX and stay as they are).
 const BUSES := {"Music": "Master", "SFX": "Master", "Ambience": "Master", "SFXWorld": "SFX", "SFXFar": "SFXWorld",
-	"SFXMuffled": "SFXWorld", "Voice": "SFXWorld", "Boki": "SFXWorld", "UI": "Master"}
+	"SFXMuffled": "SFXWorld", "Voice": "SFXWorld", "Boki": "SFX", "UI": "Master"}
 ## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
 const OCCLUDED_HZ := 700.0
 const OCCLUDED_DB := -4.0
@@ -52,20 +52,18 @@ func learn(sounds: Dictionary) -> void:
 			bus_of_sound[sname] = by_cat[sounds[sname]]
 
 ## The bus a sound plays on: behind terrain (muffled) is SFXMuffled, far (past Sfx.FAR from the listener)
-## is SFXFar, a CLEAR sound plays on SFX, else its kind's bus (SFXWorld for the rest).
+## is SFXFar, else its kind's bus; the rest play on SFXWorld, or on SFX when CLEAR.
 func bus_for(sname: String, muffled: bool, far: bool) -> StringName:
 	if muffled:
 		return &"SFXMuffled"
 	if far:
 		return &"SFXFar"
-	if sname in Sfx.CLEAR:
-		return &"SFX"
 	if bus_of_sound.has(sname):
 		return bus_of_sound[sname]
 	for pre in rules["voice_prefixes"]:
 		if sname.begins_with(pre):
 			return &"Voice"
-	return &"SFXWorld"
+	return &"SFX" if sname in Sfx.CLEAR else &"SFXWorld"
 
 ## SFX gets a soft compressor, a little room and a limiter; far sounds are low-passed on their way in;
 ## the master has a last safety limiter.

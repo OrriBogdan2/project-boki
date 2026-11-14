@@ -323,9 +323,7 @@ func _declutter(view: Control) -> void:
 		var role := String(Arch.def(ak)["card"]["role_word"])
 		var chip: Node = card.find_child("StartHere", false, false)
 		var labels: Array = card.find_children("*", "Label", true, false)
-		var howto: Node = card.get_meta("howto")   # its lines are not the card's name and role
-		var lines: Array = labels.filter(func(l): return not howto.is_ancestor_of(l))
-		lines = lines.filter(func(l): return chip == null or not chip.is_ancestor_of(l))
+		var lines: Array = labels.filter(func(l): return chip == null or not chip.is_ancestor_of(l))
 		var texts: Array = lines.map(func(l): return (l as Label).text)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)

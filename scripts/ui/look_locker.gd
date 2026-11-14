@@ -298,7 +298,7 @@ func _build_panel(ui_root: Control) -> void:
 	v.add_child(_name_row())
 	var foot := UI.hbox(10)
 	foot.alignment = BoxContainer.ALIGNMENT_END
-	foot.add_child(UI.ghost("Random", _random, 120, "swap"))
+	foot.add_child(UI.ghost("Surprise me", _random, 120, "swap"))
 	foot.add_child(UI.primary("Looks good", func(): finished.emit(), 200))
 	v.add_child(foot)
 	ui_root.add_child(card)
@@ -459,7 +459,9 @@ func _glider_how(gid: String) -> String:
 
 ## A random person, still on your glider.
 func _random() -> void:
-	var lk := Unmasked.random_look()
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var lk := Unmasked.random_look(rng)
 	lk["glider"] = look.get("glider", "classic")
 	lk["features"] = look.get("features", {})      # what your Relics left on you stays as you set it
 	set_look(lk)
