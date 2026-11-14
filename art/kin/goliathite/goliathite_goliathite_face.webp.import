@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmn26r684aolh"
-path.bptc="res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.bptc.ctex"
-path.astc="res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.astc.ctex"
+uid="uid://dm56kb3c7vmpt"
+path.bptc="res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.bptc.ctex"
+path.astc="res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "fde08f1fac7c586bcf64472072e83b41"
+"md5": "e4085baa07eda3b5a11cf771d11b7214"
 }
 
 [deps]
 
-source_file="res://art/wardens/gil/gil_Image_0.png"
-dest_files=["res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.bptc.ctex", "res://.godot/imported/gil_Image_0.png-d05ea1ee0c9292105cee5143ab259cfa.astc.ctex"]
+source_file="res://art/kin/goliathite/goliathite_goliathite_face.webp"
+dest_files=["res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.bptc.ctex", "res://.godot/imported/goliathite_goliathite_face.webp-eb0fa45fe97e6a6bab467fb466d67637.astc.ctex"]
 
 [params]
 
