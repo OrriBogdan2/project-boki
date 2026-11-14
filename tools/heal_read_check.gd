@@ -181,7 +181,8 @@ func _lifesteal_and_rules() -> void:
 	for i in int(ceil((Fx.GLOW_DUR + 0.05) / DT)):
 		fx._process(DT)
 	fx.healed(A, 5.0)
-	ok(_glows(fx, A) == 1 and _glow(fx, A).get("node") != g, "after it fades, the next heal pulses again")
+	# (the glow's node comes from Fx's pool, so it may be the same node: a fresh glow starts its clock again)
+	ok(_glows(fx, A) == 1 and float(_glow(fx, A).get("t", 1.0)) < DT, "after it fades, the next heal pulses again")
 	# nothing on a Hunter you can't see; nothing at full health
 	_clear(fx)
 	A.unseen = true

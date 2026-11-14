@@ -69,7 +69,7 @@ func _spot(m: Match, i: int) -> Vector3:
 
 func _kill_one(m: Match, k: String) -> void:
 	var mb := m.spawn_mob(k, _spot(m, 0))
-	var pk0 := m.pickups.size()
+	var pk0 := _loot(m)
 	var radial0 := m.fx.radial
 	Juice.mob_dead(m, mb, null, mb.r > 0.8)
 	ok(m.fx.radial == radial0, "%s: the kill feel adds no burst or ring" % k)
@@ -86,14 +86,14 @@ func _kill_one(m: Match, k: String) -> void:
 	_frames(m, dur * 0.5)
 	k_mid = float(mat.get_shader_parameter("k"))
 	ok(k_mid > 0.3 and k_mid < 0.8 and mb.visible, "%s: half way through the dissolve (k %.2f)" % [k, k_mid])
-	ok(m.pickups.size() == pk0, "%s: nothing spilled yet" % k)
+	ok(_loot(m) == pk0, "%s: nothing spilled yet" % k)
 	ok(m.fx.radial == radial0, "%s: no burst or ring while it dissolves" % k)
 	_frames(m, dur * 0.5 + 0.1)
 	ok(not mb.visible, "%s: gone within %.2f s" % [k, dur + 0.15])
 	_frames(m, 0.3)
-	ok(m.pickups.size() > pk0, "%s: the drops spilled after it (%d)" % [k, m.pickups.size() - pk0])
+	ok(_loot(m) > pk0, "%s: the drops spilled after it (+%d)" % [k, _loot(m) - pk0])
 
-## A lair boss goes the same way, over its 0.6 s.
+## A lair boss plays its keyed death move (BossAnim.DEATH_S) and then dissolves the same way, over its 0.6 s.
 func _boss(m: Match) -> void:
 	var L: Dictionary = m.lairs.list[0]
 	m.lairs.activate(L)
@@ -106,7 +106,9 @@ func _boss(m: Match) -> void:
 	if b.buried: b._surface()
 	b.hurt(b.hp + b.max_hp, m.player, {"src": "shot"})
 	_frames(m, 0.05)
-	ok(b.dead and b.visible and b.has_meta("dis_mat"), "%s boss: dies and dissolves" % b.mkind)
+	ok(b.dead and b.visible and not b.has_meta("dis_mat"), "%s boss: dies, its death move first" % b.mkind)
+	_frames(m, BossAnim.DEATH_S)
+	ok(b.visible and b.has_meta("dis_mat"), "%s boss: then dissolves" % b.mkind)
 	_frames(m, MobDissolve.DUR_MAX + 0.15)
 	ok(not b.visible, "%s boss: gone within %.2f s" % [b.mkind, MobDissolve.DUR_MAX + 0.2])
 
@@ -160,12 +162,20 @@ func _particles(m: Match) -> void:
 func _low(m: Match) -> void:
 	Settings.v["quality"] = "low"
 	var mb := m.spawn_mob("brute", _spot(m, 3))
-	var pk0 := m.pickups.size()
+	var pk0 := _loot(m)
 	mb.hurt(mb.hp + mb.max_hp, m.player, {"src": "shot"})
 	_frames(m, 0.05)
 	ok(not mb.has_meta("dis_mat") and mb.visible, "Low: no dissolve material, no ash, still fading")
 	var brute_s := MobDissolve.duration(mb.r)
 	ok(brute_s < 0.6 * MobDissolve.LOW_DUR_K + 0.001, "Low: the fade is shorter (%.2f s)" % brute_s)
 	_frames(m, 1.0)
-	ok(not mb.visible and m.pickups.size() > pk0, "Low: gone, and the drops spilled")
+	ok(not mb.visible and _loot(m) > pk0, "Low: gone, and the drops spilled")
 	Settings.v.erase("quality")
+
+## Everything lying on the ground, by value: gems stack onto a pile already there (DropMerge), so a spill can add
+## value without adding a pickup.
+func _loot(m: Match) -> int:
+	var v := 0
+	for p: Dictionary in m.pickups:
+		v += int(p["v"])
+	return v
