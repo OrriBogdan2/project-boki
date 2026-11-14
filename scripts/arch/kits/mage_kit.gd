@@ -102,11 +102,6 @@ func combo_marks(out: Array) -> void:
 		if is_instance_valid(sp["e"]):
 			var n := int(sp["n"])
 			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), n >= int(rd["max"])))
-## X again in the hang brings her down at the cursor (she comes down by herself when the hover runs out).
-func recast_window() -> Dictionary:
-	if ult.phase() != MageUlt.AIR:
-		return {}
-	return {"slot": "x", "left": float(ult.data()["hover"]) - float(ult.leap["t"])}
 
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).

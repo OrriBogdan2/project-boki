@@ -4,7 +4,7 @@ Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quie
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick, your
-ultimate back = a low fifth and one bell over it (UltReadyCue); a recast opening = a bright rising fifth with a glint, its warning before it closes = a dry wood tick (RecastSound pitches both by slot).
+ultimate back = a low fifth and one bell over it (UltReadyCue).
 Inventory (InvSfx): grab = a cloth lift under a tiny high tine, drop = a soft set-down into a slot,
 equip = a muted buckle clink over a leather thump, swap = a falling tick, a slide, a rising tick,
 take = a rustle and a short rising pair (quieter and duller than pickup).
@@ -181,17 +181,6 @@ def inv_take(i):
     j = jit(i, 0.03)
     return finish(room(mix(rustle(0.09, 1000, 4000, 0.25), at(0.6 * pluck(NOTE['D5'] * j, 0.1, 0.025, 0.5), 0.02),
                            at(0.5 * pluck(NOTE['G5'] * j, 0.14, 0.035, 0.5), 0.07)), 0.3), 3200)
-# ---------------------------------------------------------------- recasts (RecastSound, every Hunter)
-def recast_open(i):
-    """A recast is open: a quick rising fifth and a small glint on top, short enough to sit under combat."""
-    glint = at(S.chime(NOTE['G6'], 0.3, 0.09, ((1.0, 0.6), (2.76, 0.15))) * 0.2, 0.05)
-    return finish(room(mix(pluck(NOTE['C6'], 0.18, 0.04), at(pluck(NOTE['G6'], 0.3, 0.07, 0.6), 0.05), glint), 0.4), 5200)
-
-
-def recast_tick(i):
-    """It is about to close: one dry, bright wood tick with a low knock under it."""
-    knock = 0.5 * pluck(NOTE['E5'], 0.06, 0.012, 0.2)
-    return finish(mix(pluck(NOTE['E6'], 0.07, 0.01, 0.8), knock), 5600)
 # ---------------------------------------------------------------- garden reactions
 # The farm's own cues (what you hear most at home): short, warm, one per kind, so `unlock` stays for real unlocks.
 def feed(i):
@@ -262,6 +251,7 @@ def main():
     S.takes_cat('inv_equip', inv_equip, 2, 'ui')
     S.takes_cat('inv_swap', inv_swap, 2, 'ui')
     S.takes_cat('inv_take', inv_take, 3, 'ui')
+<<<<<<< HEAD
     S.save_cat('recast_open', recast_open(0), 'ui')
     S.save_cat('recast_tick', recast_tick(0), 'ui')
     S.takes_cat('garden_feed', feed, 2, 'ui')
@@ -270,6 +260,11 @@ def main():
     S.save_cat('garden_trait', trait(0), 'ui')
     S.save_cat('garden_egg', egg(0), 'ui')
     S.save_cat('garden_toy', toy(0), 'ui')
+||||||| 8abcad1685 (Merge ext/recast-sounds into merge-lane-vfx1-1114)
+    S.save_cat('recast_open', recast_open(0), 'ui')
+    S.save_cat('recast_tick', recast_tick(0), 'ui')
+=======
+>>>>>>> parent of 8abcad1685 (Merge ext/recast-sounds into merge-lane-vfx1-1114)
 
 
 if __name__ == '__main__':

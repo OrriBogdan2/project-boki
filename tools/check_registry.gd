@@ -225,7 +225,6 @@ const CHECKS := {
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
-	"--recast-sound-check": ["res://tools/recast_sound_check.gd", "recast_sound_check", null],  # recast open chime + closing tick
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	# seconds left and charges on the bar
