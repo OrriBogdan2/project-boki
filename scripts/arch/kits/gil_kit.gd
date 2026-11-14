@@ -435,7 +435,7 @@ func _release_spout() -> void:
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
 		"id": _tele_id(), "from": h.pos, "len": length,
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
-		"ab": "k1", "fx_t": 0.0})
+		"col": col_of(ed), "ab": "k1", "fx_t": 0.0})
 	play("gil_spout")
 	vfx("spout", h.pos, dir, {"len": length, "w": w, "k": k})
 
@@ -501,7 +501,7 @@ func _start_wave() -> bool:
 		"id": "x", "from": h.pos, "len": length,
 		"w": float(xd["width"]), "spd": length / t, "hit": {}, "lift": float(xd["lift"]), "stun": float(xd["knockup"]),
 		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
-		"dmg": float(xd["dmg"]) * power("ult"), "ab": "ult", "fx_t": 0.0}
+		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult", "fx_t": 0.0}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
 	# along the wave's own line: a bare dash steers by the move keys, so a moving cast surfed off the wave
 	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t, "dir": dir}], h, ctx)
