@@ -68,7 +68,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k._setup()
 	return k
 
-const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's delivery sounds (see run_own)
+const DELIVERY_SOUNDS := ["boom", "ping", "whoosh", "throw"]     # KinExec's shared ones, out of a kit's stage (run)
 
 # ------------------------------------------------------------------ data
 func rmb_def() -> Dictionary: return d.get("rmb", {})
@@ -668,16 +668,18 @@ func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
 		c[k] = extra[k]
 	return c
 
+## A kit's stage: the rules and the shared look run; the sound is the kit's own (it plays its cast sound itself),
+## so the shared cast tell and delivery sounds stay out.
 func run(st_: StageSpec, c: Dictionary) -> void:
-	KinExec.run_stage(st_, c)
-
-## A stage whose look and sound are the Hero's own (HeroVfx): the rules run, the shared cast language stays out.
-func run_own(st_: StageSpec, c: Dictionary) -> void:
 	c["silent"] = true
-	m.fx.own_look = true
-	Sfx.skip = OWN_LOOK_SKIP
+	Sfx.skip = DELIVERY_SOUNDS
 	KinExec.run_stage(st_, c)
 	Sfx.skip = []
+
+## A stage whose look is the Hero's own too (HeroVfx): the shared cast look stays out as well.
+func run_own(st_: StageSpec, c: Dictionary) -> void:
+	m.fx.own_look = true
+	run(st_, c)
 	m.fx.own_look = false
 
 # ------------------------------------------------------------------ helpers
@@ -726,7 +728,7 @@ func _tells(dt: float) -> void:
 	var f := res_frac()
 	var t := "full" if f >= 0.999 or full_ready() else ("half" if f >= 0.5 else "")
 	if t == "full" and tell != "full":
-		m.sfx("unlock", h.pos, -6.0 if h.is_local() else -3.0, 1.6)
+		m.sfx(id + "_tell", h.pos, -6.0 if h.is_local() else -3.0)
 		if not h.unseen and h.visible: m.fx.body_glow(h.pos, res_col())     # coming full: the body glow, no ground ring
 	tell = t
 	bonded_glow = int(h.slot_lv.get("ult", 0)) > 0 and h.ult >= 1.0 and h.kin != null and not (h.kin as Kin).dead
@@ -1017,10 +1019,12 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 		_pulse_t = 1.1
 		net_ring(h.pos, r, res_col())
 
-## The payoff becoming armed: the body glow, the ready ping (the owner's slot pings too).
-func armed_fx(slot := "sec") -> void:
-	m.fx.body_glow(h.pos, res_col())
-	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
+## The payoff becoming armed: the body glow, the kit's own ready sound
+## (the owner's slot pings too).
+func armed_fx(slot := "sec", snd := "ab_ready") -> void:
+	var rc := res_col()
+	m.fx.body_glow(h.pos, rc)
+	m.sfx(snd, h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
@@ -1030,8 +1034,7 @@ func armed_fx(slot := "sec") -> void:
 func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null) -> void:
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
-	if snd != "": m.sfx(snd, at, 0.0, 1.0)
-	m.sfx("crit", at, -7.0, 0.85)
+	m.sfx(snd, at, 0.0, 1.0)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, victim)
@@ -1099,11 +1102,6 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 # "full" tick (a ping, a flash, a ring), a Net fx ring when it starts and when it's full (so remote
 # players read it), and a release punch scaled by how far it got.
 
-## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
-const CHARGE_VOICE := {
-	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
-	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["thump", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
-}
 var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
 var charge_last := 0.0         # how far the last hold got when it was let go (tests)
 var charge_fulls := 0          # full ticks played (tests)
@@ -1191,9 +1189,8 @@ func _tick_charge(dt: float) -> void:
 	chg["tick"] = float(chg["tick"]) - dt
 	if float(chg["tick"]) <= 0.0 and not bool(chg["full"]):
 		chg["tick"] = lerpf(0.13, 0.05, k)
-		var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
 		var mine := h.is_local()
-		m.sfx(String(v[0]), h.pos, lerpf(-16.0, -6.0, k) - (0.0 if mine else 4.0), lerpf(float(v[1]), float(v[2]), k))
+		m.sfx(id + "_charge_tick", h.pos, lerpf(-16.0, -6.0, k) - (0.0 if mine else 4.0), lerpf(0.8, 1.8, k))
 		if randf() < 0.5: m.fx.burst(h.position + Vector3(randf_range(-0.6, 0.6), 0.4 + randf(), randf_range(-0.6, 0.6)), col, 2, 2.0 + 3.0 * k, 0.25, 0.0, 0.7, (h.pos + Vector3(0, 1.0, 0) - h.position).normalized(), 30.0)
 	if k >= 0.999 and not bool(chg["full"]):
 		chg["full"] = true
@@ -1202,9 +1199,7 @@ func _tick_charge(dt: float) -> void:
 
 ## Fully charged: a bright ping, a flash at the hand and the body glow.
 func _charge_full_tick(col: Color) -> void:
-	var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
-	m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, float(v[2]) * 0.6)
-	m.sfx(String(v[0]), h.pos, -4.0, float(v[2]) * 1.15)
+	m.sfx(id + "_charge_full", h.pos, -3.0 if h.is_local() else -7.0)
 	var d := h.aim_dir()
 	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
 	m.fx.body_glow(h.pos, col)

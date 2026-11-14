@@ -3,7 +3,9 @@ extends RefCounted
 ## --cam-framing-check, on a 1920x1080 view:
 ##   1. the Supervive style takes its numbers from content/rules/camera.json and sits inside the source's
 ##      bands there: pitch, lens, and your feet a little below the screen's centre
-##   2. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
+##   2. that style is the default, shows the source's ground across and draws Hunters bigger to match its
+##      Hunter size; the wheel runs from about the old 23 m view to well past the new one, and reach() follows
+##   3. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
 ##      directions, at the sneak, normal and close zooms) you stay on screen, feet and head
 ##   3. the garden's Boki framing (HomeKinFrame): eased in 30% nearer over 0.3 s, you and the Boki on screen
 ##      at every wheel zoom up to its reach, and eased back when you walk off, it's too far or the card closes
@@ -12,13 +14,13 @@ extends RefCounted
 
 const VIEW := Vector2i(1920, 1080)
 const HEAD := 2.0                    # m: the top of a medium hunter's head above its feet
-const ZOOMS := [0.6, 1.0, 1.45]      # a close-up, the usual view, sneaking (Match: 1.45 while crouched)
+const ZOOMS := [0.7, 1.0, 1.54, 1.7]  # the wheel's closest, the usual view, sneaking (the floor), wheel out + sneak
 const HOME_ZOOMS := [0.55, 1.2, 1.6]  # the farm: the wheel's closest, arriving home (HOME_ZOOM), the widest
 const HOME_STYLE := "classic"         # the style the farm's framing is measured in (home.gd HOME_ACROSS_REF)
 const SHOTS := [
 	["framing_default", 1.0, Vector2(0.5, 0.5)],
-	["framing_sneak_lean_up", 1.45, Vector2(0.5, 0.01)],
-	["framing_sneak_lean_down", 1.45, Vector2(0.5, 0.99)],
+	["framing_sneak_lean_up", 1.54, Vector2(0.5, 0.01)],
+	["framing_sneak_lean_down", 1.54, Vector2(0.5, 0.99)],
 ]
 
 var bad := 0
@@ -38,6 +40,7 @@ func run(main: Node, what: String) -> void:
 	var cam := CamRig.new()
 	vp.add_child(cam)
 	_style(cam)
+	_source_style(cam)
 	_lean(cam)
 	_garden(cam)
 	vp.queue_free()
@@ -131,6 +134,28 @@ func _pair_margin(cam: CamRig, fr: HomeKinFrame, z: float) -> float:
 		var s := cam.unproject_position(at)
 		worst = minf(worst, minf(minf(s.x, VIEW.x - s.x), minf(s.y, VIEW.y - s.y)))
 	return worst
+
+func _source_style(cam: CamRig) -> void:
+	var src: Dictionary = CamRig.RULES["source"]
+	ok(Settings.DEFAULTS["cam_style"] == "supervive", "the Supervive view is the default (the Settings camera is %s)"
+			% Settings.DEFAULTS["cam_style"])
+	var across := CamRig.style_across("supervive")
+	ok(_inside(across, src["across_m"]), "it shows %.1f m across, inside the source's %s"
+			% [across, str(src["across_m"])])
+	ok(cam.hunter_scale > 1.5, "it draws Hunters %.2fx bigger (the source's Hunter size)" % cam.hunter_scale)
+	var r: Dictionary = CamWheel.rules()["match"]
+	var old := CamRig.style_across("supervive_close")
+	var closest := across * float(r["min"])
+	ok(absf(closest - old) <= old * 0.12, "the wheel's closest view is %.1f m across, about the old %.1f m"
+			% [closest, old])
+	ok(float(r["max"]) >= 1.3, "its furthest is %.2fx the default, %.1f m across"
+			% [float(r["max"]), across * float(r["max"])])
+	cam.zoom = 1.0
+	var at_default := cam.reach()
+	cam.zoom = float(r["max"])
+	ok(at_default > 1.5 and cam.reach() > at_default * 1.3, "reach (draw, LOD, shadows) grows: %.2f, %.2f out"
+			% [at_default, cam.reach()])
+	cam.zoom = 1.0
 
 func _inside(v: float, band: Array) -> bool:
 	return v >= float(band[0]) - 0.001 and v <= float(band[1]) + 0.001

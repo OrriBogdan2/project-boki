@@ -4,8 +4,15 @@ extends RefCounted
 ## follows the area's drop lean and rarity bonus (BiomeRun) and the match difficulty tier
 ## (content/rules/keys.json "chest"; the gear table is "chest" in content/rules/gear.json).
 
+const CREAK_DB := -4.0      # dB: the lid's creak (its file is at cast level), under the fight's hits
+
 static func R() -> Dictionary:
 	return KeyRun.rules()["chest"]
+
+## The lid's sound for a chest of `tier` (its rarity bonus): rules chest.creak, the last one for anything richer.
+static func creak(tier: int) -> String:
+	var list: Array = R()["creak"]
+	return String(list[clampi(tier, 0, list.size() - 1)])
 
 ## How many rarity steps a chest at `at` adds: the region's bonus plus the match tier's.
 static func rarity_bonus(m: Match, at: Vector3) -> int:
@@ -25,7 +32,7 @@ static func open(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 	var beacon: Node3D = c["node"].get_node_or_null("Beacon")
 	if beacon: beacon.visible = false
 	KeyChest.unlock_fx(m, c)
-	m.sfx("pickup", c["pos"], 0.0, 0.8)
+	m.sfx(creak(rarity_bonus(m, c["pos"])), c["pos"], CREAK_DB)
 	m.fx.burst(c["pos"] + Vector3(0, 0.6, 0), Color("f2c84a"), 28, 4.5, 0.6)
 	if h == m.player and h.kin is Kin:
 		BokiChatter.say(m, h.kin, "loot")
@@ -63,6 +70,7 @@ static func drop(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 		KeyBonus.on_break(m, at, "train_crate")      # a sky-train crate: a rare chest key
 	if not from_net:
 		perk_hook(m, h, c)
+	m.loot_sfx.done(c, LootOpenSfx.picks_rar(m.wpicks, n_w))
 	if h and not h.remote and h.tonics < 5 and randf() < float(r["tonic_odds"]):
 		h.tonics += 1
 		if h == m.player: m.hud.toast("+1 tonic", Color("8ff0a0"))

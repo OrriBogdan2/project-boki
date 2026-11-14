@@ -14,15 +14,13 @@ const SOUND_RANGE_DB := 4.0     # the transformation is louder than a normal abi
 
 static func _snd(form: Dictionary) -> Dictionary:
 	var d: Dictionary = form["def"]
-	return d.get("sound", {"xform": "ult", "pitch": 1.0, "ult": "boom"})
+	return d.get("sound", {"xform": "ult", "pitch": 1.0})
 
 static func begin(h: Hunter, form: Dictionary) -> void:
 	var m := h.m
 	var col: Color = form["glow"]
-	var sn := _snd(form)
 	spiral(h, col, true)
-	m.sfx("charge", h.pos, SOUND_RANGE_DB - 6.0, 0.8)
-	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
+	m.sfx("boki_fuse_" + String(form["cue"]), h.pos, SOUND_RANGE_DB - 4.0)
 	if h.is_local():
 		m.freeze_frame(HITSTOP)
 	var k := MergeKit.of(h)
@@ -77,9 +75,13 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 			m.hud.toast_small("SHELL BROKEN", col)
 	else:
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 18, 5.0, 0.5)
-		m.sfx("recall", h.pos, -2.0, 1.3)
+		m.sfx(end_cue(why), h.pos, -2.0)
 	spiral(h, col, false)
 	KinNet.event(m, "merge_end", h, h.pos, why)
+
+## The sound of a Fusion ending: afterglow after a release, a tired sigh after a timeout, else a soft recall.
+static func end_cue(why: String) -> String:
+	return {"ult": "boki_fuse_end", "time": "boki_fuse_tired"}.get(why, "recall")
 
 ## The ultimate's cracking tell (Shatter): the shell splits along bright seams for `secs` before the burst.
 static func crack(h: Hunter, form: Dictionary, secs: float) -> void:
@@ -156,12 +158,10 @@ static func on_event(m: Match, at: Vector3, form: Dictionary, h: Hunter) -> void
 	if form.is_empty():
 		return
 	var col: Color = form["glow"]
-	var sn := _snd(form)
 	if h != null:
 		spiral(h, col, true)
 	m.fx.ring(at, 2.2, Color(col, 0.8), 0.45)
-	m.sfx("charge", at, SOUND_RANGE_DB - 6.0, 0.8)
-	m.sfx(String(sn["xform"]), at, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
+	m.sfx("boki_fuse_" + String(form["cue"]), at, SOUND_RANGE_DB - 4.0)
 
 ## The form appeared in a remote hunter's snapshot: the contact moment, here.
 static func on_remote_look(h: Hunter, form: Dictionary) -> void:
@@ -184,7 +184,8 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 	var secs := float(p[4])
 	match p[0]:
 		"ult":
-			m.sfx("warn", h.pos, -2.0, 0.7)
+			if not MergeSfx.play(h, "cast"):
+				m.sfx("warn", h.pos, -2.0, 0.7)
 			if rad > 0.5:
 				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9))
 				var tw := tele.create_tween()
@@ -195,6 +196,7 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 		"rmb":
 			m.fx.ring(h.pos, 1.4, Color(col, 0.7), 0.3)
 		"dash":
+			MergeSfx.play(h, "travel")
 			var look := h.get_node_or_null(MergeLook.NODE_NAME) as MergeLook
 			var d: Dictionary = MergeForm.aug_of(look.form).get("dash", {}) if look != null else {}
 			if String(d.get("kind", "")) == "reflect":

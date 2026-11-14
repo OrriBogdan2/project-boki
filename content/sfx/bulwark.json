@@ -3,6 +3,8 @@
 	"name": "Albert",
 	"script": "tools/gen_sfx_breaker.py",
 	"sounds": {
+		"bulwark_charge_tick": "cast",
+		"bulwark_charge_full": "cast",
 		"bjorn_throw": "fire",
 		"bulwark_hammer_clang": "signature",
 		"bulwark_hull_creak": "signature",
@@ -31,10 +33,13 @@
 		"bulwark_step_snow": "step",
 		"bulwark_hurt": "grunt",
 		"bulwark_down": "grunt",
-		"bulwark_death": "grunt"
+		"bulwark_death": "grunt",
+		"bulwark_ready": "cast",
+		"bulwark_interrupt": "impact",
+		"bulwark_crush": "impact"
 	},
 	"signature": ["bulwark_hammer_clang", "bulwark_hull_creak"],
-	"kit_files": ["bjorn_ult.gd"],
+	"kit_files": ["bjorn_ult.gd", "bjorn_boop.gd"],
 	"replaces": ["bjorn_throw", "bjorn_recall", "bjorn_catch", "bjorn_plant", "bjorn_spin", "bjorn_glint", "bjorn_slam",
 		"bjorn_shield_up", "bjorn_block", "bjorn_break", "bjorn_bash", "bjorn_whirl", "bjorn_purify",
 		"bjorn_purify_burst", "bjorn_ult_wind", "bjorn_ult_slam", "bjorn_ult_rumble", "bjorn_ult_crackle"]

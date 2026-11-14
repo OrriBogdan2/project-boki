@@ -34,6 +34,13 @@ Shaping items given to a Boki (GardenSfx.ITEM, one cue a family) and the held it
   garden_arrive_<zone>  the chime on landing in a zone, tuned to its bed: bramblebank birds, glasswater drops,
                   cinderstep embers, hushwood a muted minor bell, ridge wind and a high fifth
   garden_locked   a locked zone picked on the Waystone: a soft wooden thud and a lock click
+The garden's moments (SFX_AUDIT row 22), each its own cue instead of the stock unlock, in G like the home theme
+(compose.py home_day, G mixolydian), notes from G major pentatonic so they sit in either:
+  garden_egg       an egg laid in the Nook or ready in the Incubator: a soft shell tap and a warm low G-D-G
+  garden_friends   two Boki become friends (or one with you a bond rank): two chirps answering, a third apart
+  garden_chime_part  a new part or a lean's fleck shows on a Boki: a sparkle down onto a single plucked B
+  garden_cup       a cup won (the Crown): a wooden clack and a five-note G run up to a held bell
+  garden_evolve    the evolution scene's change: a rising shimmer swelling into a G major bell chord
 Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd, home_chimes.gd and hub_waystone.gd.
 """
 import numpy as np
@@ -474,6 +481,47 @@ def wake(i):
     return B.soft(B.room(mix(*bells, glow), 0.6), 5500)
 
 
+# ---------------------------------------------------------------- garden moments (G major pentatonic)
+def egg(i):
+    """A soft tap on a shell, then G3-D4-G4 plucked low and warm."""
+    tap = mix(wood_tick(900 * j(i, 0.03), 0.05), 0.5 * bpf(noise(0.03), 1500, 4000) * env(N(0.03), 0.001, 0.006))
+    notes = [at(pluck(f, 0.5 if k == 2 else 0.25, 0.25 if k == 2 else 0.1) * 0.8, 0.08 + 0.09 * k)
+             for k, f in enumerate([196, 294, 392 * j(i, 0.01)])]
+    return B.soft(B.room(mix(0.7 * tap, *notes), 0.4), 3800)
+
+
+def friends(i):
+    """Two Boki answer each other, B5 then D6, over a G4-B4 pluck pair: two voices settling into one."""
+    a = chirp(988 * j(i, 0.03), 0.12, i)
+    b = at(chirp(1175 * j(i + 1, 0.03), 0.14, i + 1), 0.13)
+    under = mix(at(pluck(392, 0.4, 0.18), 0.02), at(pluck(494, 0.5, 0.22), 0.15))
+    return B.soft(B.room(mix(0.5 * a, 0.5 * b, 0.7 * under), 0.45), 5200)
+
+
+def chime_part(i):
+    """Something new shows: three glints falling D7-B6-G6, landing on a plucked B5 with a small 'oh'."""
+    sparkle = [at(glint(f * j(i + k, 0.01), 0.12) * (0.5 - 0.1 * k), 0.05 * k) for k, f in enumerate([2349, 1976, 1568])]
+    ooh = at(B.vowel(520 * j(i, 0.03), 660, 0.3, 'oh', 1.3, breath=0.15) * 0.25, 0.14)
+    return B.soft(B.room(mix(*sparkle, at(pluck(988, 0.5, 0.25), 0.14), ooh), 0.45), 6200)
+
+
+def cup(i):
+    """A wooden clack, a quick G4-A4-B4-D5-G5 run and a held G6 bell on top."""
+    run = [at(pluck(f, 0.2 if k < 4 else 0.6, 0.08 if k < 4 else 0.3) * (0.6 + 0.08 * k), 0.06 + 0.07 * k)
+           for k, f in enumerate([392, 440, 494, 587, 784])]
+    bell = at(0.45 * S.chime(1568 * j(i, 0.005), 1.0, 0.45), 0.34)
+    return B.soft(B.room(mix(0.6 * wood_tick(640, 0.06), *run, bell), 0.5), 6500)
+
+
+def evolve(i):
+    """A shimmer rising D5 to G5 over 0.6 s, then G4-B4-D5-G5 rung together as one bell chord, and a glad chirp."""
+    d = 0.6
+    rise = S.sweep(587, 784, d) * S.shape(d, 0.5, 0.0, 0.1) * 0.3
+    air = hpf(noise(d), 3500) * S.shape(d, 0.55, 0.0, 0.05) * 0.18
+    chord = [at(S.chime(f, 1.3, 0.55) * (0.45 - 0.05 * k), d + 0.015 * k) for k, f in enumerate([392, 494, 587, 784])]
+    return B.soft(B.room(mix(rise, air, *chord, at(0.35 * chirp(1175 * j(i), 0.14, i), d + 0.2)), 0.6), 6000)
+
+
 def main():
     S.takes_cat('garden_count', count, 1, 'boki')
     S.takes_cat('garden_go', go, 1, 'boki')
@@ -520,6 +568,11 @@ def main():
                      ('cinderstep', arrive_cinderstep), ('hushwood', arrive_hushwood), ('ridge', arrive_ridge)):
         S.takes_cat('garden_arrive_' + zone, fn, 1, 'boki')
     S.takes_cat('garden_locked', locked, 1, 'step')
+    S.takes_cat('garden_egg', egg, 1, 'boki')
+    S.takes_cat('garden_friends', friends, 2, 'boki')
+    S.takes_cat('garden_chime_part', chime_part, 2, 'boki')
+    S.takes_cat('garden_cup', cup, 0, 'boki')
+    S.takes_cat('garden_evolve', evolve, 0, 'boki')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,8 @@
+{
+ "group": "incoming",
+ "name": "Incoming hit",
+ "script": "tools/gen_sfx_incoming.py",
+ "sounds": {
+  "hit_in": "impact"
+ }
+}

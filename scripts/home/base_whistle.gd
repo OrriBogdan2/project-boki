@@ -23,10 +23,16 @@ const SULK_TILT := 0.1        # rad, nose down
 const HEAD_LEAD := 0.45       # share of the turn to you the front takes ahead of the body (rad per rad, up to HEAD_MAX)
 const HEAD_MAX := 1.2         # rad
 
+const TAP := "garden_whistle_tap"
+const HOLD := "garden_whistle_hold"
+const ANSWER_DB := -12.0      # dB: a Boki's answer sits under the whistle
+
 func _init(home, rules: Dictionary) -> void:
 	h = home
 	R = rules["whistle"]
 	hint = WhistleHint.new(self)
+	Sfx.streams[TAP] = Synth.whistle()
+	Sfx.streams[HOLD] = Synth.whistle(true)
 
 ## How readily a Boki answers, 0 to 1: trust counts most, then its overall condition.
 func eagerness(rec: Dictionary) -> float:
@@ -40,6 +46,7 @@ func sulky(rec: Dictionary) -> bool:
 func press() -> void:
 	held = 0.0
 	hint.used()
+	GardenSfx.cue(TAP, h.ppos)
 	var mine := partner()
 	_call(mine, 0.4)
 	_other = _nearest(mine)
@@ -57,6 +64,7 @@ func step(d: float) -> void:
 	held += d
 	if held >= float(R["hold_s"]):
 		held = -1.0
+		GardenSfx.cue(HOLD, h.ppos)
 		_call(_other, 0.4 + PI)
 		_other = {}
 
@@ -86,6 +94,7 @@ func _call(k: Dictionary, angle: float) -> void:
 	if k.is_empty() or _busy(k):
 		return
 	var rec: Dictionary = k["rec"]
+	var asleep := HomeChimes.asleep(k)
 	var sulk := sulky(rec)
 	if sulk and (float(k.get("nap_t", 0.0)) > 0.0 or k.has("indoors")):
 		return
@@ -99,8 +108,8 @@ func _call(k: Dictionary, angle: float) -> void:
 		k.erase(key)
 	k["called_t"] = float(R["give_up_s"])
 	h._emote(k, "…" if sulk else "!")
-	if not sulk:
-		Sfx.play(KinVoice.cue(rec["species"], "alert"), k["pos"], -12.0, 0.15, Unique.voice(rec))
+	if not asleep:
+		_answer(k, _answer_cue(rec, sulk))
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
 	var mine: int = h.world.island_of(h.ppos.x, h.ppos.z)
 	if mine >= 0 and here != mine:
@@ -150,3 +159,13 @@ func _pose_answers(d: float) -> void:
 		var head := clampf(_turn_to_you(k) * HEAD_LEAD, -HEAD_MAX, HEAD_MAX)
 		body.rotation = Vector3(amp * (SULK_TILT if sulk else PERK_TILT), head, 0.0)
 		body.scale = Vector3(1.0, 1.0 + (0.0 if sulk else amp * PERK_TALL), 1.0)
+
+## Which voice answers: a grumble when sulky, else happy or unsure by eagerness.
+func _answer_cue(rec: Dictionary, sulk: bool) -> String:
+	if sulk:
+		return "garden_sulk_" + GardenSfx.size_word(rec)
+	return KinVoice.cue(rec["species"], "happy" if eagerness(rec) >= float(R["happy_at"]) else "unsure")
+
+## The called Boki's voice at its own spot, in its own pitch.
+func _answer(k: Dictionary, sname: String) -> void:
+	GardenSfx.cue(sname, k["pos"], Unique.voice(k["rec"]), ANSWER_DB)

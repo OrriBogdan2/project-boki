@@ -180,7 +180,7 @@ func _interrupt() -> void:
 	phase = ""
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
-	k.m.sfx("warn", h.pos, -4.0, 0.8)
+	k.m.sfx("bulwark_interrupt", h.pos, -4.0)
 	_hide_lane()
 
 ## A merge drops the wind-up with no slam; a fissure already running finishes (it's a cast).

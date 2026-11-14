@@ -134,6 +134,7 @@ var rain_k := 0.0
 var weather_t := 40.0
 var rain_next := randf() < 0.45     # what the coming weather turn brings, known ahead (FarmChatter's rain warnings)
 var ambience := HomeAmbience.new()
+var music := GardenMusic.new(self)
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
@@ -143,7 +144,6 @@ func _ready() -> void:
 	ZoneLayout.enter(GardenZones.here)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("")        # the beds of HomeAmbience take over
-	Sfx.new_track.connect(_on_new_track)
 	if not Game.last_result.is_empty():      # back from a run: the welcome-home sting, once
 		Sfx.sting("home")
 		Game.last_result = {}
@@ -1008,32 +1008,8 @@ func add_kin(rec: Dictionary, isl: int, slot := -1) -> Dictionary:
 
 # ------------------------------------------------------------------ loop
 ## Sun, sky, lamps and the occasional rain shower.
-var _music_t := 0.0
-var music_hold := 0.0
-## The music follows where you're standing: each island has its own theme, home changes at night.
-func _update_music(d: float) -> void:
-	_music_t -= d
-	music_hold -= d
-	if _music_t > 0.0 or music_hold > 0.0:
-		return
-	_music_t = 0.5
-	var isle := world.island_id(ppos.x, ppos.z)
-	var night := sin((day_t - 0.25) * TAU) < -0.15
-	var want := "home_night" if night else "home_day"
-	if isle in ["orchard", "meadow", "summit"]:
-		want = isle
-	want = Soundtrack.track("base", want)
-	if Sfx.music_lock != "":
-		want = Sfx.music_lock
-	Sfx.play_music(want, 2.5)
-
-func _on_new_track(name: String) -> void:
-	if not is_inside_tree() or root_ui == null:
-		return
-	pass     # tracks join the music list in the house quietly; no popup every time a new one plays
-
 func _update_sky(d: float) -> void:
-	_update_music(d)
+	music.tick(d)
 	day_t = fmod(day_t + d / DAY_LEN, 1.0)
 	var sun_h := sin((day_t - 0.25) * TAU)            # 1 at noon, -1 at midnight
 	var light := clampf(sun_h * 1.6 + 0.6, 0.0, 1.0)   # how much daylight (night is short and moonlit)
@@ -1868,11 +1844,11 @@ func _whistle() -> void:
 	if whistle_cd > 0.0:
 		return
 	whistle_cd = 1.6
-	_whistle_sound()
 	_whistle_ring()
 	if life:
 		life.whistle.press()      # the base: your partner comes, hold for the nearest other Boki
 		return
+	_whistle_sound()
 	var my_isle := world.island_of(ppos.x, ppos.z)
 	var n := kins.size()
 	var inside: Array = []
@@ -3656,9 +3632,8 @@ func _play_evolutions() -> void:
 	for e in evs:
 		if e["kind"] == "form": big = true
 	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
-	Sfx.play("skill")
-	music_hold = 25.0
-	Sfx.play_music("lullaby", 1.0)
+	Sfx.play("boki_evolve")
+	music.hold("lullaby", 25.0)
 	var tw := create_tween()
 	tw.tween_interval(0.4)
 	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -3671,7 +3646,7 @@ func _play_evolutions() -> void:
 		k["busy"] = false
 		k["t"] = 3.0
 		fx.body_glow(at, tint)
-		Sfx.play("unlock")
+		GardenSfx.cue("garden_evolve" if big else "garden_chime_part", at, HomeChimes.pitch(rec))
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")
 		building_now = false
@@ -3906,7 +3881,7 @@ func _open_music() -> void:
 		v.add_child(UI.button("Let the music follow where I am", func():
 			Sfx.music_lock = ""
 			Sfx.music_name = ""
-			_music_t = 0.0
+			music.retune()
 			_open_music(), 320))
 
 # ---- visiting and the ferry
@@ -4878,7 +4853,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	NestReveal.play(fx, nest, esp)
-	Sfx.play("unlock")
+	GardenSfx.cue("garden_egg", NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.

@@ -18,6 +18,12 @@ extends RefCounted
 ##  10. home chimes (home_chimes.gd): a stat, a level and a new form each chime once; a drill that lands a
 ##      stat and a level together (and one 0.3 s later) is one chime; nothing while the Boki sleeps; a
 ##      small Boki chimes higher than a large one
+##  11. Glint Fishing (glint_sfx.gd): a scripted five-cast session; one whip and one plop per cast, one bite tick per
+##      hook, the water bed once per wait on the Ambience bus and the reel loop on the SFX bus, both at the line,
+##      and one catch sting per landing in the catch's size; nothing keeps sounding once the session is stopped
+##  12. the garden whistle (base_whistle.gd): a tap is the short two-note whistle, a hold adds the longer rising one;
+##      the called Boki answers once in its own voice: happy when trusting and glad, unsure when lukewarm, a huff
+##      when sulky, nothing while it sleeps
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -38,6 +44,7 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	_names()
 	await _games()
+	await _fishing()
 	print("GARDENSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -61,15 +68,82 @@ func _names() -> void:
 			if not Sfx.ensure(p + tail):
 				silent.append(p + tail)
 	ok(silent.is_empty(), "every cheer, fanfare and huff sound exists (missing %s)" % [silent])
-	var cues: Array = ["tumble_push", "tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal",
-			"show_crowd", "relay_handoff", "relay_fumble", "relay_finish"]
+	var cues: Array = ["glint_cast", "glint_plop", "glint_water", "glint_bite", "glint_reel", "tumble_push",
+			"tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal", "show_crowd",
+			"relay_handoff", "relay_fumble", "relay_finish"]
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
 	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring and Relay cue exists (%d)"
 			% cues.size())
 
+func _fishing() -> void:
+	var rec := _kin("zapple", "Pip")
+	var run := GlintFishing.Run.new(rec, 3, _seeded(7))
+	var at := Vector3(48.0, 0.1, 31.0)
+	var bed_bus := ""
+	var reel_bus := ""
+	var line_at := true
+	var bites := 0
+	var was := run.state
+	var steps := 0
+	while not run.over() and steps < 20000:
+		var ears := run.ears()
+		var hold := false
+		match run.state:
+			GlintSfx.STATE.AIM:
+				hold = absf(run.reach() - float(run.glints[0]["d"])) > 0.1 or run.swing <= 0.0
+			GlintSfx.STATE.WAIT:
+				hold = ears
+			GlintSfx.STATE.REEL:
+				hold = run.tension < 0.5
+		run.step(1.0 / 30.0, hold)
+		bites += 1 if run.ears() and not ears else 0
+		GlintSfx.tick(main, run, was, ears, at)
+		was = run.state
+		for key in ["glint_water", "glint_reel"]:
+			if Sfx.loop_on(key):
+				line_at = line_at and Sfx.loops[key]["pos"] == at
+		bed_bus = String(Sfx.loops["glint_water"]["p"].bus) if Sfx.loop_on("glint_water") else bed_bus
+		reel_bus = String(Sfx.loops["glint_reel"]["p"].bus) if Sfx.loop_on("glint_reel") else reel_bus
+		steps += 1
+	GlintSfx.stop()
+	await _wait()
+	var landed := run.casts.filter(func(c): return c["how"] == "caught")
+	var hooked := run.casts.filter(func(c): return c["how"] in ["caught", "slip"])
+	var sizes := {"small": 0, "medium": 0, "large": 0}
+	for c in landed:
+		sizes[GlintSfx.size_of(c["catch"], c["rare"])] += 1
+	ok(run.casts.size() == 5, "fishing: the scripted session is five casts (%d)" % run.casts.size())
+	ok(GlintSfx.heard.get("glint_cast", 0) == 5 and GlintSfx.heard.get("glint_plop", 0) == 5,
+			"fishing: one whip and one plop per cast (%s)" % [GlintSfx.heard])
+	ok(bites == hooked.size() and GlintSfx.heard.get("glint_bite", 0) == bites,
+			"fishing: one bite tick per hook (%d)" % bites)
+	ok(GlintSfx.heard.get("glint_water", 0) == 5, "fishing: the water bed starts once per wait")
+	ok(GlintSfx.heard.get("glint_reel", 0) >= hooked.size() and not hooked.is_empty(),
+			"fishing: the reel loop runs on every reel")
+	var world_bus: bool = reel_bus in ["SFXWorld", "SFXFar", "SFXMuffled"]      # (a placed loop: Sfx._bus_for)
+	ok(bed_bus == GlintSfx.BED_BUS and world_bus,
+			"fishing: the bed is on %s, the ratchet on %s" % [bed_bus, reel_bus])
+	ok(line_at, "fishing: the loops sit at the line")
+	var stings := {}
+	for size in sizes:
+		stings[size] = int(GlintSfx.heard.get("glint_catch_" + size, 0))
+	ok(stings == sizes and not landed.is_empty(), "fishing: one catch sting per landing in its size %s" % [stings])
+	ok(not Sfx.loop_on("glint_water") and not Sfx.loop_on("glint_reel"), "fishing: stopping silences both loops")
+	var fast := Sfx.ensure("glint_bite") and Sfx.ensure("glint_catch_small") and Sfx.ensure("glint_catch_large")
+	ok(fast, "fishing: the bite and the catch stings exist")
+
+func _seeded(n: int) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = n
+	return r
+
 func _count(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
+
+## Boki voice sounds heard: the shared kin_* cues and the species' own bk_* voices (KinVoice).
+func _voiced() -> int:
+	return _total("kin_") + _total("bk_")
 
 func _total(prefix: String) -> int:
 	var n := 0
@@ -134,6 +208,8 @@ func _games() -> void:
 		await game.call(home)
 	GardenSfx.heard.clear()
 	_chimes(home)
+	GardenSfx.heard.clear()
+	_whistle(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -329,7 +405,7 @@ func _chimes(home) -> void:
 	var hc: HomeChimes = home.chimes
 	var k: Dictionary = {}
 	for kk in home.kins:
-		if not HomeChimes._asleep(kk):
+		if not HomeChimes.asleep(kk):
 			k = kk
 	var rec: Dictionary = k["rec"]
 	hc.tick(0.0)
@@ -361,3 +437,48 @@ func _chimes(home) -> void:
 	var p := HomeChimes.PITCH
 	ok(Sfx.ensure("garden_chime_stat") and Sfx.ensure("garden_chime_level") and Sfx.ensure("garden_chime_evolve")
 			and p["small"] > p["medium"] and p["medium"] > p["large"], "chimes: all three exist, small sings higher")
+
+## The partner stands in the open with this trust and joy, awake or asleep, and is called with a tap.
+func _answer(home, trust: float, joy: float, asleep: bool) -> Dictionary:
+	var k: Dictionary = home.kins[0]
+	for key in ["called_t", "call_slot", "call_pace", "hold_t", "indoors", "busy"]:
+		k.erase(key)
+	k["rec"]["trust"] = trust
+	for n in ["food", "energy", "clean"]:
+		k["rec"]["needs"][n] = 80.0
+	k["rec"]["needs"]["joy"] = joy
+	k["nap_t"] = 5.0 if asleep else 0.0
+	GardenSfx.heard.clear()
+	home.life.whistle.press()
+	home.life.whistle.release()
+	return k
+
+func _whistle(home) -> void:
+	var w: BaseWhistle = home.life.whistle
+	var tap: AudioStreamWAV = Sfx.streams[BaseWhistle.TAP]
+	var hold: AudioStreamWAV = Sfx.streams[BaseWhistle.HOLD]
+	ok(tap.data.size() < hold.data.size() and tap.data.size() > 0, "whistle: the hold whistle is longer than the tap")
+	_answer(home, 90.0, 80.0, false)
+	ok(_count(BaseWhistle.TAP) == 1 and _count(BaseWhistle.HOLD) == 0, "whistle: a tap is one short whistle (%s)"
+			% [GardenSfx.heard])
+	w.press()
+	w.step(float(w.R["hold_s"]) + 0.05)
+	w.release()
+	ok(_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1, "whistle: a hold adds one rising whistle (%s)"
+			% [GardenSfx.heard])
+	_answer(home, 90.0, 80.0, false)
+	var sp: String = home.kins[0]["rec"]["species"]
+	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "happy")) == 1
+			and _voiced() == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
+			% [GardenSfx.heard])
+	_answer(home, 25.0, 40.0, false)
+	ok(w.eagerness(home.kins[0]["rec"]) < float(w.R["happy_at"]) and _count(KinVoice.cue(sp, "unsure")) == 1
+			and _voiced() == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
+	var rec: Dictionary = _answer(home, 90.0, 5.0, false)["rec"]
+	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _voiced() == 0,
+			"whistle: a sulky Boki grumbles (%s)" % [GardenSfx.heard])
+	for joy in [80.0, 5.0]:
+		_answer(home, 90.0, joy, true)
+		ok(_voiced() == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
+				% [joy, GardenSfx.heard])
+	home.kins[0]["nap_t"] = 0.0

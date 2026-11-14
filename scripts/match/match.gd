@@ -87,6 +87,7 @@ var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var ult_cue := UltReadyCue.new()   # the chime when your R is back
+var barks := HunterBarks.new()     # your Hunter's voice callouts, and your squad's "Boki down"
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
 var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
@@ -248,7 +249,7 @@ func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 const RANGE_SMALL := 80.0
 const RANGE_BIG := 125.0
 static func _draw_range(root: Node) -> void:
-	var k := float(Settings.q("draw"))
+	var k := CamRig.draw_k()
 	var stack: Array = [root]
 	while not stack.is_empty():
 		var n: Node = stack.pop_back()
@@ -304,7 +305,7 @@ func _start(o: Dictionary) -> void:
 	_build_env()
 	music_dir = MusicDir.new()
 	music_dir.start(self)
-	Sfx.play_ambience("match")
+	Sfx.play_ambience("" if o.get("training", false) else "match")     # the grounds have their own beds (TrainingSfx)
 	world = World.new()
 	world.name = "World"
 	world.biome = T["biome"].duplicate()
@@ -353,6 +354,7 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
+	add_child(StatusSfx.new(self))        # status cues and loops
 	recap = DeathRecap.new(self)         # the down/death card
 	add_child(recap)
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
@@ -478,7 +480,7 @@ func _start(o: Dictionary) -> void:
 		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
 		arena = Arena.new()
 		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
-	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
+	Practice.attach(self)      # the practice areas' bottom bar and J hero picker
 	await _stage("build.hud")
 	_build_aim()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -499,7 +501,7 @@ func _build_env() -> void:
 	env.environment = Look.environment({"top": sky.darkened(0.2), "mid": sky.lerp(amb, 0.35), "horizon": (cl[1] as Color).lerp(T["sun"], 0.5).lightened(0.15),
 		"below": cl[0], "ambient": amb, "ambient_energy": 0.5, "fog": (cl[1] as Color).lightened(0.12).lerp(Color("4a5aa8"), 0.35), "sun_col": T["sun"]})
 	add_child(env)
-	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
+	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0 * CamRig.style_reach(cam_style))
 	sun.shadow_opacity = 0.8
 	# the raid condition: rolled from the seed on real expeditions, clear otherwise (scripts/match/raid_look.gd)
 	raid = RaidLook.pick(opts, seed_val)
@@ -1767,13 +1769,13 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
+		if not BokiImpact.play(self, by, target, o, crit, "you"): sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else Sfx.rng.randf_range(0.92, 1.08), true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
 		hud.dmg_dir.hit(self, by, target, d)
 	if target == player:
-		sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)
+		if src != "zone": sfx(HeroSfx.of(player, "hurt", "hurt"), null, -4.0)    # (the zone ticks instead: ZoneSfx)
 		if hud: hud.hurt_flash(d)
 	Juice.hit(self, target, by, d, o, crit, armor_hit)
 
@@ -1856,6 +1858,7 @@ func _reward_moment(at: Vector3) -> void:
 	fx.burst(at + Vector3(0, 1.0, 0), Color("ffd23f"), 26, 6.0, 0.6, 6.0, 1.2)
 	Sfx.duck(0.25)
 	sfx("kill", null, -2.0)
+	barks.knock_landed(self)
 
 func _slow(t: float, k: float) -> void:
 	if net_on:
@@ -2194,6 +2197,7 @@ func on_kin_down(k: Kin) -> void:
 	elif k.owner_h and k.owner_h.ctrl == "bot" and k.owner_h.kin == k and k.owner_h.kin2 and (k.owner_h.kin2 as Kin).hp > 0.0:
 		k.owner_h.get_tree().create_timer(0.6, false).timeout.connect(func(): if is_instance_valid(k.owner_h): k.owner_h.swap_kin())
 	KinNet.event(self, "down", k)
+	barks.boki_down(self, k)
 	_check_team(k.team)
 
 ## Its owner scooped it up, or it came round on its own.
@@ -2670,7 +2674,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 	if net_on and not extra.get("cos", false) and not extra.get("melee", false) and not by.remote:
 		var kind := 1 if extra.get("mob", false) else 0
 		if extra.get("pierce_terrain", false): kind = 2      # the copy has to fly through walls too
-		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind])
+		net_event(["s", _r(from.x), _r(from.y), _r(from.z), _r(v2.x), _r(v2.y), snappedf(life, 0.01), snappedf(size, 0.01), col.to_html(false), float(extra.get("boom", 0.0)), team, kind, String(extra.get("snd", ""))])
 	if by is Hunter and not extra.get("melee", false):
 		fx.flash(at, col.lightened(0.4), 0.22, 0.05)
 		note_sound(by, at, "shot")
@@ -2918,6 +2922,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var x: Dictionary = s["x"]
 	if e is Hunter:
 		(e as Hunter).marker_hit()      # hit through the balloon / ring: it flashes, so the rule is learned
+	if e and x.has("snd"): sfx(x["snd"], at, -4.0)      # a mob's own landing sound (mob.gd), on every peer
 	if x.get("cos", false):
 		if x.get("boom", 0.0) > 0.0:
 			fx.ring(at, x["boom"], Color("ffb070"), 0.3)
@@ -2974,7 +2979,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		var total: float = dmg * float(x["pn"])
 		dmg = total * float(x["pf"]) if n == 0 else total * (1.0 - float(x["pf"])) / maxf(1.0, float(x["pn"]) - 1.0)
 	var dir: Vector2 = (s["vel"] as Vector2).normalized()
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", "")}      # pg: the volley id (a kit reads it)
+	# pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx plays a hit on you from there)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "from": s["start"]}
 	if float(x.get("kb", 0.0)) > 0.0:
 		o["kb"] = dir * float(x["kb"])
 	if x.has("burn"): o["burn"] = x["burn"]
@@ -3154,7 +3160,7 @@ func _process(delta: float) -> void:
 	# the time it skipped); near ones every frame
 	_render_n += 1
 	var cf := cam.focus
-	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	var near2 := pow(34.0 * cam.reach(), 2.0)
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
@@ -3357,6 +3363,9 @@ func _gather_input() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if intro and intro.skip(event):
+		return
+	if CamWheel.input(self, event):
+		get_viewport().set_input_as_handled()
 		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
@@ -3881,6 +3890,7 @@ func step(dt: float) -> void:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
+	loot_sfx.sweep()
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
@@ -3895,6 +3905,7 @@ func step(dt: float) -> void:
 	if heart: heart.tick(dt)
 	if heart_raid: heart_raid.tick(dt)
 	if ways_vfx: ways_vfx.tick(dt)
+	barks.tick(self)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)
@@ -4094,6 +4105,7 @@ func _update_dex(dt: float) -> void:
 ## breaks or completes. Rivals who hear it get a sound ping on the minimap; bots come to look.
 const HUM_RANGE := 30.0
 const HUM_DB := 2.0
+var loot_sfx := LootOpenSfx.new()     # the sound of a chest or deathbox opening
 var box_hums := {}             # hum key -> its box, while that box's revive hum is playing
 var _hum_seq := 0
 func _update_box_hums() -> void:
@@ -4286,13 +4298,16 @@ func _update_interact(dt: float) -> void:
 						hud.close_loot()      # the second press always leaves the window, even with nothing taken
 					else:
 						hud.open_loot(b0)
+						loot_sfx.done(b0, LootOpenSfx.box_rar(b0))
 			"boxrev":
 				BoxRevive.hold(self, h, best["box"], dt)
 			"loot":
 				h.set_hold("loot")
+				loot_sfx.hold("box", best["box"])
 				h.box_t = 0.0 if time - h.hurt_at < 0.1 else h.box_t + dt     # a hit starts the loot over
 				if h.box_t >= Life.R["loot_time"]:
 					h.box_t = 0.0
+					loot_sfx.done(best["box"], LootOpenSfx.box_rar(best["box"]))
 					Life.loot_box(self, h, best["box"])
 			"catch":
 				Capture.hold(self, h, best["ent"], dt)
@@ -4300,6 +4315,7 @@ func _update_interact(dt: float) -> void:
 				var c: Dictionary = best["chest"]
 				if not KeyChest.keyed(h, c):
 					h.set_hold("chest")
+					loot_sfx.hold("chest", c)
 					c["prog"] += dt / float(ChestLoot.R()["hold_s"])
 				if c["prog"] >= 1.0 or KeyChest.keyed(h, c):      # a key opens it on the press
 					_open_chest(h, c)
@@ -5346,6 +5362,7 @@ func _net_ev(x, from: String) -> void:
 			if float(x[9]) > 0.0: ex["boom"] = float(x[9])
 			if int(x[11]) == 1: ex["mob"] = true
 			if int(x[11]) == 2: ex["pierce_terrain"] = true
+			if String(x[12]) != "": ex["snd"] = String(x[12])
 			var fake := Ent.new(); fake.team = int(x[10]); fake.remote = true
 			spawn_shot(fake, Vector3(x[1], x[2], x[3]), Vector2(x[4], x[5]), 0.0, float(x[6]), float(x[7]), col, ex)
 			fake.free()

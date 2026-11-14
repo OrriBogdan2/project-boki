@@ -4,7 +4,7 @@ extends RefCounted
 ## nine rival squads, the 13 kit Hunters round the lobby), everyone within RING_M of you, for SECS of match time.
 ## Every frame counts the voices sounding (pool and loops, SfxVoices.sounding); every lost sound is tallied by
 ## whose it was (yours, your squad's, else the enemy's) and why (stolen, full, gap, stack: SfxVoices.cut).
-## Asserts: the voices never pass Sfx.POOL + SfxVoices.LOOP_CAP, the pool was full at times (enemy sounds were
+## Asserts: the voices never pass 2 * Sfx.POOL + SfxVoices.LOOP_CAP (the plain and the placed pool), the pool was full at times (enemy sounds were
 ## cut), and none of your sounds lost its voice or was refused one. A "gap" or "stack" is the same sound again
 ## inside Sfx.MIN_GAP or the stacking window (merged, by design): counted, not failed; so is a squad sound losing
 ## its voice to yours, or refused one, with the pool full of the two of you (an enemy's never takes theirs).
@@ -52,10 +52,10 @@ func run(main_node: Node) -> void:
 		await main.get_tree().process_frame
 		frame_ms.append((Time.get_ticks_usec() - t) / 1000.0)
 		t = Time.get_ticks_usec()
-		var n := SfxVoices.sounding(Sfx.players, Sfx.loops)
+		var n := SfxVoices.sounding(Sfx.voice_all, Sfx.loops)
 		peak = maxi(peak, n)
 		sum += n
-	var cap := Sfx.POOL + SfxVoices.LOOP_CAP
+	var cap := 2 * Sfx.POOL + SfxVoices.LOOP_CAP
 	print(
 		(
 			"SFXVOICE %d Hunters, %d frames: voices peak %d, mean %.1f (cap %d), %d loops at the end"

@@ -39,7 +39,7 @@ const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
 const SKULL_TILT := 0.6                # rad the skull's front edge lifts toward the camera
 const NOZZLE := Vector3(1.3, 0.9, 0.15)  # where the rules start the fire, from the feet: fwd, up, right (m)
-const NOZZLE_REACH := 2.6                # m: a palm further off than this isn't posed yet: use NOZZLE
+const NOZZLE_REACH := 2.6                # m at the plain drawn size: a palm further off isn't posed yet: use NOZZLE
 # m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
 const PALM_AHEAD := 0.12
 
@@ -111,7 +111,8 @@ func tip() -> Vector3:
 		at = nozzle_at.global_position
 	elif h.anim != null and h.anim.hand_r != null and h.anim.hand_r.is_inside_tree():
 		at = h.anim.hand_r.global_position + _fwd() * PALM_AHEAD
-	return at if at.distance_to(h.pos) < NOZZLE_REACH else nozzle()
+	var reach := NOZZLE_REACH * h.vis_k / Hunter.VIS_SCALE      # (a match draws her up to 2.1x bigger)
+	return at if at.distance_to(h.pos) < reach else nozzle()
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
@@ -156,12 +157,12 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		f.burn_t = maxf(f.burn_t, float(rd()["ignite_t"]))
 		f.burn_dps = dps
 		f.burn_by = h
+	StatusSfx.ignite(f, h, float(rd()["ignite_t"]))
 	if lvl == 2 and was < 2:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
 		vfx("ablaze", f.pos)
-		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 
 ## The Flashover payoff: the word, a column of fire on the foe (content/vfx "flashover"), the blaze and the HUD
 ## flash; the shared payoff's rings stay out of Cinder's fire.
@@ -169,7 +170,7 @@ func _flashover_fx(f: Ent) -> void:
 	var col := Color("ffe0a0")
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
-	m.sfx("crit", f.pos, -7.0, 0.85)
+	m.sfx("ashwick_flashover", f.pos, -4.0)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, f)
@@ -188,7 +189,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
+		m.sfx("ashwick_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound and the tile)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
@@ -692,7 +693,7 @@ func _cloak_blast() -> void:
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
 		st["shield_foes"] = hit
-		m.sfx("shield", h.pos, -5.0, 0.9)
+		m.sfx("ashwick_cloak_shield", h.pos, -4.0)
 
 # ------------------------------------------------------------------ X: Flue Flight
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)

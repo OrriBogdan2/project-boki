@@ -25,8 +25,9 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
 - `HeroVfx.of(m).streak(node, col, width, tail)`: not a Hero's look but on the same ribbon pool: one colour (hot core
   and spent tail derived from it) behind any node until it is hidden or freed, a point every `STREAK_STEP` so it is as
   long at any frame rate. The drop rocket's exhaust trail (`DropRocket`, squad colour, none at Very Low).
-- `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
-  cones and delivery sounds) stays out, so only the Hero's own look shows.
+- `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast look (AbilityFx, KinExec's rings
+  and cones) stays out, so only the Hero's own look shows. `run` and `run_own` both leave the shared cast sounds (the Feel
+  tell and KinExec's delivery sounds) out: a kit plays its own cast sound.
 
 ## A recipe
 `"move": {"sfx": [...], "fx": [...]}`. Options the kit passes (`"r"`, `"len"`, `"w"`, `"k"` the charge, `"flip"`, or any flag

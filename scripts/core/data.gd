@@ -98,14 +98,17 @@ const MUSIC := {
 	"title": {"name": "Project Boki", "hint": "The title screen."},
 	"home_day": {"name": "Hearthwind", "hint": "Your home island by day."},
 	"home_night": {"name": "Hearthwind (Night)", "hint": "Your home island after dark."},
-	"orchard": {"name": "Orchard Light", "hint": "Cross the bridge to Orchard Isle."},
+	"orchard": {"name": "Orchard Light", "hint": "Cross the bridge to Orchard Isle, or walk Bramblebank."},
 	"meadow": {"name": "Tag in the Meadow", "hint": "Cross the bridge to Boki Meadow."},
-	"summit": {"name": "Lookout Wind", "hint": "Cross the bridge to Lookout Peak."},
+	"summit": {"name": "Lookout Wind", "hint": "Cross the bridge to Lookout Peak, or wake Kitewind Ridge."},
 	"match": {"name": "Into the Isles", "hint": "Head out on an expedition."},
 	"hollow": {"name": "The Hollow", "hint": "Brave the Hollow."},
 	"hub": {"name": "Market Square", "hint": "Visit the town."},
 	"guild": {"name": "Banners", "hint": "Visit a guild isle."},
 	"lullaby": {"name": "Boki Lullaby", "hint": "Watch a Boki evolve."},
+	"glasswater": {"name": "Glass Ripples", "hint": "Wake Glasswater Shallows."},
+	"cinderstep": {"name": "Ember Steps", "hint": "Wake Cinderstep."},
+	"hushwood": {"name": "Dusk Among the Ferns", "hint": "Wake Hushwood."},
 }
 
 ## One perk per loadout.

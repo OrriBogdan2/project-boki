@@ -76,7 +76,7 @@ func add_kindle(t: Ent, n := 1) -> void:
 	kind[key] = e
 	if int(e["n"]) >= int(res_def().get("max", 5)) and had < int(res_def().get("max", 5)):
 		vfx("kindled", t.pos)
-		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
+		m.sfx("tend_kindled", t.pos, -2.0, 1.0)
 		play_soft("mm_kindled")
 
 func best_kindle() -> int:
@@ -268,7 +268,7 @@ func drop_all(broken: bool) -> void:
 	lock_t = maxf(lock_t, 1.5)          # set down: not picked straight back up
 	if broken:
 		lock_t = float(d["passive"].get("lock", 4.0))
-		m.sfx("knock", h.pos, -4.0, 1.2)
+		m.sfx("tender_drop", h.pos, -4.0)
 
 # ------------------------------------------------------------------ dash: Relay Step
 func on_dash(use_ex: bool) -> bool:
@@ -657,7 +657,7 @@ func _hearth_end(flare: bool) -> void:
 			else:
 				_mend(o, amt)
 	else:
-		m.sfx("knock", c, -6.0, 1.4)
+		m.sfx("tender_hearth_snuff", c, -4.0)
 	lk().drop("hearth")
 	hearth = {}
 	e_t = 0.0
@@ -846,7 +846,7 @@ func _call_snap(who: Hunter) -> void:
 	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
 	if who != null:
 		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
-	m.sfx("knock", h.pos, -8.0, 1.5)
+	m.sfx("tender_tether_snap", h.pos, -5.0)
 
 
 ## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online

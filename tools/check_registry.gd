@@ -194,7 +194,6 @@ const CHECKS := {
 	"--last-alive-check": ["res://tools/last_alive_check.gd", "last_alive_check", null],
 	"--hp-regen-check": ["res://tools/hp_regen_check.gd", "hp_regen_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
-	"--knock-sfx-check": ["res://tools/knock_sfx_check.gd", "knock_sfx_check", null],      # squad knock / finish cues
 	"--kin-form-check": ["res://tools/kin_form_check.gd", "kin_form_check", null],
 	# level-up / ready: one body glow, no ring
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],
@@ -224,6 +223,14 @@ const CHECKS := {
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	# armour-break cues
 	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],
+	"--wheel-zoom-check": ["res://tools/wheel_zoom_check.gd", "wheel_zoom_check", null],  # the wheel zooms
+	"--wheel-zoom-shots": ["res://tools/wheel_zoom_shots.gd", "wheel_zoom_shots", null],  # GPU: the wheel zooming
+	"--match-cam-wide-shots": ["res://tools/match_cam_wide_shots.gd", "match_cam_wide_shots", null],  # GPU
+	"--loot-open-sfx-check": ["res://tools/loot_open_sfx_check.gd", "loot_open_sfx_check", null],
+	"--knock-sfx-check": ["res://tools/knock_sfx_check.gd", "knock_sfx_check", null],  # squad knock / finish cues
+	"--status-sfx-check": ["res://tools/status_sfx_check.gd", "status_sfx_check", null],  # status cues and loops
+	"--boki-steps-check": ["res://tools/boki_steps_check.gd", "boki_steps_check", null],  # Boki footsteps
+	"--incoming-hit-check": ["res://tools/incoming_hit_check.gd", "incoming_hit_check", null],  # [--shots-dir=] AVI
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	# seconds left and charges on the bar

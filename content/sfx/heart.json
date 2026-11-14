@@ -15,7 +15,13 @@
   "ways_taken_other": "ui",
   "ways_warn": "ui",
   "ways_last": "ui",
-  "ways_tick": "ui"
+  "ways_tick": "ui",
+  "uplink_start": "cast",
+  "uplink_steal": "cast",
+  "uplink_fizzle": "cast",
+  "uplink_sputter": "cast",
+  "uplink_shut": "cast",
+  "uplink_lift": "cast"
  },
  "reach": {
   "heart_charge": 70,

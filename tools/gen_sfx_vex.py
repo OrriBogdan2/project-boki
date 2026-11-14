@@ -288,6 +288,30 @@ def death():
     return pad(mix(fo(lpf(v, 5500), 0.4), exhale, fo(wind), sputter), 1.8)
 
 
+# ------------------------------------------------------------------ ion needle end
+def skewer():
+    """The ion needle pinning a target: a thin hard crack, a short metallic ring and a low thud."""
+    return mix(crack(0.04, 3000, 10000, 0.012) * 0.8, S.fm(1500, 2.3, 5.0, 0.3, 0.12) * 0.6,
+               kick(220, 70, 0.3, 0.03, 0.09) * 0.8)
+
+
+# ------------------------------------------------------------------ kit cues (a Longneedle charge strikes a foe)
+def crit():
+    """The hit marker for a charge that found its foe: a hard tick and a short bright ring."""
+    return mix(click(0.005, 2500, 9000) * 0.9, at(S.chime(1800, 0.3, 0.1, ((1.0, 1.0), (2.76, 0.3))), 0.01))
+
+
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """A ratchet clicking over as the weapon winds up: two dry clicks and a metal tick."""
+    return mix(click(0.004, 1800, 6000) * 0.8, at(click(0.004, 2200, 7000) * 0.6, 0.035), S.ring([2400, 3700], 0.08, [0.03, 0.02], [0.3, 0.2]))
+
+
+def charge_full():
+    """The bolt seating: a chunk of steel and a short ring."""
+    return mix(kick(190, 70, 0.14, 0.02, 0.07) * 0.9, crack(0.05, 1500, 7000, 0.02) * 0.7, at(S.ring([1900, 2850, 4100], 0.4, [0.12, 0.08, 0.05], [0.4, 0.3, 0.2]), 0.02))
+
+
 def build():
     S.takes_cat('vn_rifle', rifle, 3, 'fire')
     S.save_cat('gunslinger_grenade_thunk', grenade_thunk(), 'signature')
@@ -308,7 +332,10 @@ def build():
     S.takes_cat('gunslinger_hurt', hurt, 3, 'grunt')
     S.save_cat('gunslinger_down', down(), 'grunt')
     S.save_cat('gunslinger_death', death(), 'grunt')
-
+    S.save_cat('gunslinger_skewer', skewer(), 'impact')
+    S.save_cat('gunslinger_crit', crit(), 'impact')
+    S.save_cat('gunslinger_charge_tick', charge_tick(), 'cast')
+    S.save_cat('gunslinger_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

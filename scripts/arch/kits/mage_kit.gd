@@ -165,7 +165,8 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.sfx("vv_static_full", f.pos, -2.0)
 		if swing: play("mage_live")
 	elif int(s["n"]) > was:
-		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+		StatusSfx.cue(f, "static", h, float(rd["dur"]), int(s["n"]), true)     # the zap climbs with each stack
+	StatusSfx.loop_static(f, h, func() -> int: return spark_n(f))
 
 func combo_read(f: Ent) -> Dictionary:
 	var s = sparks.get(f.get_instance_id())
@@ -535,8 +536,7 @@ func _blowout(f: Ent) -> void:
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
 	vfx("blowout", f.position)
-	payoff_fx(f.pos, PINK, "", h.dir_to(f), f)    # no ground rings: the source shows a starburst
-	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
+	payoff_fx(f.pos, PINK, "hero_blowout", h.dir_to(f), f)    # no ground rings: the source shows a starburst
 	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
 	DashReset.cue(h)
 
@@ -685,7 +685,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
-		m.sfx("ab_wall", f.pos, -2.0, 1.3)
+		m.sfx("mage_rod_slam", f.pos, -2.0)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
 			add_spark(other)

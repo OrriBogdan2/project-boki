@@ -264,6 +264,10 @@ func use() -> void:
 	_place()
 	GardenSfx.countdown(h, log_node.position)
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
 ## A press: true when the match took it.
 func input(event: InputEvent) -> bool:
 	if run == null:

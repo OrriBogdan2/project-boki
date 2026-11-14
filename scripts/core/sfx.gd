@@ -55,6 +55,7 @@ const NAMES := [
 	"combo",
 	"swap",
 	"horn",
+	"rail",
 	"train_hit",
 	"revive_hum",
 	"revive_done",
@@ -63,12 +64,25 @@ const NAMES := [
 	"swipe",
 	"cleave",
 	"charge",
-	"k_venom",
+	"k_normal",
+	"k_fire",
+	"k_water",
+	"k_grass",
 	"k_spore",
-	"k_gravity",
-	"k_prism",
-	"k_lunar",
-	"k_echo",
+	"k_electric",
+	"k_ice",
+	"k_rock",
+	"k_psychic",
+	"k_flying",
+	"k_dragon",
+	"k_dark",
+	"k_ghost",
+	"k_poison",
+	"k_bug",
+	"k_steel",
+	"k_fairy",
+	"k_crystal",
+	"k_sound",
 	"shotgun",
 	"sniper",
 	"hit_heavy",
@@ -119,7 +133,8 @@ const NAMES := [
 	"break_wood",
 	"break_clay",
 	"break_metal",
-	"fuse_hiss"
+	"keg_fuse",
+	"keg_blast"
 ]
 const POOL := 24
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
@@ -135,12 +150,20 @@ const VOICES := [
 	"v_sentinel",
 	"v_glimmer",
 	"v_warden",
+	"v_bl_skitter",
+	"v_bl_warden",
 	"die_small",
 	"die_big",
 	"step_grass",
 	"step_stone",
 	"step_snow",
-	"step_wood"
+	"step_wood",
+	"step_water_light",
+	"step_water_medium",
+	"step_water_heavy",
+	"step_metal_light",
+	"step_metal_medium",
+	"step_metal_heavy"
 ]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
@@ -151,9 +174,11 @@ const MIN_GAP := {
 	"scan_call": 200,
 	"boki_yawn": 400,
 	"break_wood": 40,
+	"tell_foe": 120,
 	"break_clay": 40,
 	"break_metal": 40,
-	"fuse_hiss": 80,
+	"keg_fuse": 80,
+	"keg_blast": 100,
 	"reset_a": 120,
 	"reset_b": 120,
 	"reset_c": 120,
@@ -184,9 +209,14 @@ const MIN_GAP := {
 	"land": 80,
 	"step0": 60,
 	"step1": 60,
-	"step2": 60
+	"step2": 60,
+	"training_dummy_hit": 70
 }
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
+## A Boki type's impact ki_<type> is the take set of its cast cue k_<type> (BokiImpact), with its own gap and cap.
+const IMPACT_PREFIX := "ki_"
+const IMPACT_PREFIX_OF := "k_"
+const IMPACT_GAP := 90
 const STACK_MAX := 3
 const STACK_MS := 90
 const STACK_DB := 3.5
@@ -197,53 +227,69 @@ const STACK_DB := 3.5
 const BLAST := ["boom", "ab_blast", "ab_slam"]
 const BLAST_DB := -7.0
 const BLAST_PEAK_DB := -6.0
-## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
-const NEAR := 3.5
-const FAR := 9.0
+## Distance falloff, sized to the match view (the wide camera, ~37 m across, so ~18.5 m to the side edge): what you
+## can see you can hear. Full volume within NEAR metres, then a gentle roll-off (SPREAD is the metres per
+## doubling-ish step: 1 + (d - NEAR) / SPREAD); muffled beyond FAR (just past the side edge); silent past hear_range
+## (30 m: ~10 m off screen, fading from 0.7 of it). Docs: AUDIO.md "Falloff".
+const NEAR := 5.5
+const SPREAD := 8.0
+const FAR := 19.0
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus (SfxMix.OCCLUDED_HZ / OCCLUDED_DB).
 var occlusion := SfxOcclusion.new()
+## A positional one-shot plays from a 3D voice placed where it happens, so the camera pans it: you hear which
+## side a footstep or a landing is on. Its level stays this file's own falloff (_distance_db), so Godot's
+## attenuation and distance low-pass are off. PAN: how hard it pans (x the project's 3d_panning_strength, 0.5).
+const PAN := 2.0
+## While you are downed or out the world goes dull: the SFXWorld bus (everything but SfxMix.CLEAR, and the far
+## and occluded buses that feed it) is low-passed and ducked, ramped in and out (from SfxMix.MUFFLE_OPEN_HZ).
+const MUFFLE_HZ := 1200.0  # Hz: the low-pass cutoff while muffled
+const MUFFLE_DB := -6.0  # dB: the duck on the world bus while muffled
+const MUFFLE_S := 0.3  # s: ramp in / out
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}  # sound -> start times (ms) still inside the stacking window
 
 var streams := {}
-var players: Array[AudioStreamPlayer] = []
+var players: Array[AudioStreamPlayer] = []  # the one-shot voices with no position (UI)
+var spots: Array[AudioStreamPlayer3D] = []  # ...and the placed ones
+var voice_all: Array = []  # players then spots: the index SfxVoices rank and sound use
+var last_voice = null  # the one-shot voice started last (tooling reads its level)
 var next := 0
-var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loops are full
+var voices := SfxVoices.new(POOL * 2)  # who keeps a voice when the pool or the loops are full (plain, then placed)
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
-var hear_range := 22.0
+var hear_range := 30.0  # m: silent beyond this (a sound's own "reach" overrides it)
 var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
 var rng := RandomNumberGenerator.new()
 
-signal new_track(name: String)
 ## A one-shot started: where (null for UI), its dB before distance and pitch. SfxCast and the audio checks listen.
 signal played(sname: String, at: Variant, vol_db: float, pitch: float)
 var music: Array[AudioStreamPlayer] = []  # two players so tracks can crossfade
 var music_i := 0
 var music_name := ""
-var amb: AudioStreamPlayer
+var ambs: Array[AudioStreamPlayer] = []  # the main ambience bed: two players, so a new bed crossfades over the old
+var amb_i := 0  # which of the two is the current bed
 var amb_name := ""
+var _amb_rate := 1.0  # gain per second the beds move at, from the last play_ambience's fade
+const AMB_DB := -14.0  # dB: the main bed at full
+const AMB_DUCK_DB := -9.0  # dB the Ambience bus sinks by at the height of a fight
 var mix: SfxMix
+var cue_db := {}  # sound -> dB the mix pass adds (content/rules/sfx_cues.json, tools/loudness_report.py)
+var duck_rules := {}  # content/rules/sfx_mix.json "duck": depths, holds and the way back
+var _muffle_tw: Tween
+var _muffle_on := false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	mix = SfxMix.new(self)
 	for i in 2:
-		var mp := AudioStreamPlayer.new()
-		mp.bus = "Music"
-		mp.volume_db = -80.0
-		add_child(mp)
-		music.append(mp)
-	amb = AudioStreamPlayer.new()
-	amb.bus = "Ambience"
-	amb.volume_db = -80.0
-	add_child(amb)
+		music.append(_silent_player("Music"))
+		ambs.append(_silent_player("Ambience"))
 	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:  # (VVSfx: Sparkle and Vex)
 		var takes: Array = []
 		var s = load("res://audio/%s.wav" % n) if ResourceLoader.exists("res://audio/%s.wav" % n) else null
@@ -258,14 +304,34 @@ func _ready() -> void:
 		elif takes.size() > 1:
 			streams[n] = takes
 	_load_sets()
+	_load_mix()
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+		var s := AudioStreamPlayer3D.new()
+		s.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+		s.attenuation_filter_db = 0.0
+		s.max_db = 6.0
+		s.panning_strength = PAN
+		add_child(s)
+		spots.append(s)
+	voice_all.append_array(players)
+	voice_all.append_array(spots)
 	cue_voice = AudioStreamPlayer.new()
 	cue_voice.bus = "SFX"
 	add_child(cue_voice)
+
+
+## A player on `bus_name`, silent until something fades it up.
+func _silent_player(bus_name: String) -> AudioStreamPlayer:
+	var p := AudioStreamPlayer.new()
+	p.bus = bus_name
+	p.volume_db = -80.0
+	add_child(p)
+	return p
+
 
 ## Each sound set's categories (they pick the bus, SfxMix.learn) and its heavy sounds that carry further than
 ## hear_range (a gatling you hear coming), under "reach" (metres). Past FAR they still go through the muffled
@@ -279,6 +345,15 @@ func _load_sets() -> void:
 			mix.learn((d as Dictionary).get("sounds", {}))
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
+
+
+## The mix pass (docs/AUDIO.md): per-cue dB to land each category on its loudness target, and the ducking rules.
+func _load_mix() -> void:
+	var cues = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_cues.json"))
+	cue_db = (cues as Dictionary).get("cues", {})
+	var rules = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_mix.json"))
+	duck_rules = (rules as Dictionary).get("duck", {})
+
 
 func set_bus(bus_name: String, v: float) -> void:
 	var i := AudioServer.get_bus_index(bus_name)
@@ -329,7 +404,6 @@ func play_music(name: String, fade := 1.5) -> void:
 			Save.d["music"] = []
 		Save.d["music"].append(name)
 		Save.save_game()
-		new_track.emit(name)
 	var old := music[music_i]
 	music_i = 1 - music_i
 	var nw := music[music_i]
@@ -339,32 +413,86 @@ func play_music(name: String, fade := 1.5) -> void:
 	var tw := create_tween().set_parallel(true)
 	_music_tw = tw
 	tw.tween_property(old, "volume_db", -80.0, fade).set_trans(Tween.TRANS_SINE)
-	tw.chain().tween_callback(old.stop)
 	if name != "":
 		nw.stream = _loop_stream("res://audio/music_%s.ogg" % name)
 		nw.volume_db = -40.0
 		nw.play()
 		tw.tween_property(nw, "volume_db", -9.0, fade).set_trans(Tween.TRANS_SINE)
+	tw.chain().tween_callback(old.stop)  # after both fades: chained before the fade-in, it waited for the fade-out
 
 
-func play_ambience(name: String) -> void:
+## Crossfades the main ambience bed to audio/amb_<name>.ogg ("home", "match", a map region's bed), or to
+## silence with "", over `fade` seconds (_process moves both players). The new bed takes the quieter
+## player (a stopped one sits at -80 dB), so at most two beds ever sound, even when asked mid-fade.
+func play_ambience(name: String, fade := 2.0) -> void:
 	if name == amb_name:
 		return
-	if name != "match":
-		clear_amb_layers()
 	amb_name = name
+	_amb_rate = db_to_linear(AMB_DB) / fade
 	if name == "":
-		create_tween().tween_property(amb, "volume_db", -80.0, 1.0)
 		return
-	amb.stream = _loop_stream("res://audio/amb_%s.ogg" % name)
-	amb.volume_db = -40.0
-	amb.play()
-	create_tween().tween_property(amb, "volume_db", -14.0, 2.0)
+	var st := _loop_stream("res://audio/amb_%s.ogg" % name)
+	amb_i = 0 if ambs[0].volume_db <= ambs[1].volume_db else 1
+	for i in ambs.size():
+		if ambs[i].playing and ambs[i].stream == st:
+			amb_i = i  # back to a bed still fading out: it just turns round
+	var nw := ambs[amb_i]
+	if not nw.playing or nw.stream != st:
+		nw.stream = st
+		nw.volume_db = -80.0
+		nw.play()
 
 
-## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
+## Sinks the Ambience bus by k (0..1) of AMB_DUCK_DB; MusicDir passes how much of a fight is on.
+func duck_ambience(k: float) -> void:
+	mix.amb_duck.volume_db = AMB_DUCK_DB * clampf(k, 0.0, 1.0)
+
+
+## Softens the music and the ambience for a moment, e.g. under a big slow-motion beat or an enemy ult
+## (eased in fast, held for `seconds`, back in duck_rules["back_s"], never a sudden drop).
 func duck(seconds: float, depth_db := -8.0) -> void:
-	mix.duck(seconds, depth_db)
+	mix.duck(seconds, depth_db, float(duck_rules["attack_s"]), float(duck_rules["back_s"]))
+
+
+## A dip for something loud at pos (kind "ult" or "knock", the depth and hold in content/rules/sfx_mix.json),
+## only when it is within hearing of the camera.
+func duck_for(kind: String, pos: Vector3) -> void:
+	if Vector2(pos.x - listener.x, pos.z - listener.z).length() <= float(duck_rules["range_m"]):
+		duck(float(duck_rules[kind + "_hold_s"]), float(duck_rules[kind + "_db"]))
+
+
+## Switches the downed / out muffle on the world bus (SfxMix.muffle_fx plus a duck), eased over MUFFLE_S.
+## Off is also what a match leaving does (reset_scene_audio).
+func set_muffle(on: bool) -> void:
+	if on == _muffle_on:
+		return
+	_muffle_on = on
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	if _muffle_tw and _muffle_tw.is_valid():
+		_muffle_tw.kill()
+	if on:
+		AudioServer.set_bus_effect_enabled(bus, 0, true)
+	var tw := create_tween().set_parallel(true)
+	_muffle_tw = tw
+	tw.tween_property(mix.muffle_fx, "cutoff_hz", MUFFLE_HZ if on else SfxMix.MUFFLE_OPEN_HZ, MUFFLE_S)
+	tw.tween_method(
+		func(db: float): AudioServer.set_bus_volume_db(bus, db),
+		AudioServer.get_bus_volume_db(bus),
+		MUFFLE_DB if on else 0.0,
+		MUFFLE_S
+	)
+	if not on:
+		tw.chain().tween_callback(AudioServer.set_bus_effect_enabled.bind(bus, 0, false))
+
+
+## Tooling (--match-audio-check): the muffle as the bus has it right now.
+func muffle_state() -> Dictionary:
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	return {
+		"fx": AudioServer.is_bus_effect_enabled(bus, 0),
+		"db": AudioServer.get_bus_volume_db(bus),
+		"hz": mix.muffle_fx.cutoff_hz
+	}
 
 
 # ------------------------------------------------------------------ layered music
@@ -439,10 +567,9 @@ func set_layers(want: Dictionary) -> void:
 
 
 ## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
-## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
-## is already the current ambience, an early return, so it would never clear them), every keyed loop
-## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
-## next screen's play_music / play_ambience, which crossfade them.
+## stops. The layered score and the abyss / ruins beds fade out (play_ambience never clears them), the
+## fight ducking lets go, every keyed loop stops, and a pool voice still ringing is cut. The single tracks
+## and the main ambience bed are left to the next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	_cut_sting()
 	if not layers.is_empty():
@@ -450,9 +577,11 @@ func reset_scene_audio(fade := 1.2) -> void:
 		music_name = ""
 	if not amb_layers.is_empty():
 		clear_amb_layers(fade)
+	duck_ambience(0.0)
+	set_muffle(false)
 	for key in loops.keys():
 		loop_stop(key)
-	for p in players:
+	for p in voice_all:
 		p.stop()
 	voices.friends.resize(0)
 
@@ -462,7 +591,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 ## (--match-audio-check). A pool one-shot ends by itself, so a farm footstep doesn't count.
 func match_voices() -> int:
 	var n := 0
-	for p in players:
+	for p in voice_all:
 		if p.playing and loops_forever(p.stream):
 			n += 1
 	for key in loops:
@@ -473,7 +602,10 @@ func match_voices() -> int:
 		if not nm in MATCH_BEDS:
 			own.append(amb_layers[nm]["p"])
 	for c in get_children():
-		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb and not c in own:
+		if not c is AudioStreamPlayer:
+			continue  # (the placed voices are 3D: counted above)
+		var ours: bool = c in players or c in music or c in ambs or c in own
+		if c.playing and not ours:
 			n += 1  # also a stem or bed or loop still fading out
 	return n
 
@@ -530,6 +662,8 @@ func _process(delta: float) -> void:
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
 			amb_layers.erase(n)
+	for i in ambs.size():
+		_amb_ramp(ambs[i], i == amb_i and amb_name != "", delta)
 	if layers.is_empty():
 		return
 	for st in layers:
@@ -542,6 +676,17 @@ func _process(delta: float) -> void:
 		var rate := db_to_linear(LAYER_DB) * delta / secs
 		cur = move_toward(cur, tgt, rate)
 		p.volume_db = linear_to_db(maxf(cur, 0.0001))
+
+
+## Moves a main-bed player toward full (the current bed) or silence at the last crossfade's rate, in
+## linear gain; one that reaches silence stops, so only the beds still heard are playing.
+func _amb_ramp(ap: AudioStreamPlayer, on: bool, delta: float) -> void:
+	if not ap.playing:
+		return
+	var g := move_toward(db_to_linear(ap.volume_db), db_to_linear(AMB_DB) if on else 0.0, _amb_rate * delta)
+	ap.volume_db = linear_to_db(maxf(g, 0.0001))
+	if g <= 0.0:
+		ap.stop()
 
 
 var _step_i := 0
@@ -565,26 +710,42 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var dist := Vector2(pos.x - listener.x, pos.z - listener.z).length()
 	if dist > hr:
 		return NAN
-	# a soft inverse-distance roll-off (about -8 dB by 10 m), easing to silence at the edge of hearing
-	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / 5.0) / log(10.0)
+	# a soft inverse-distance roll-off (about -8 dB at the screen edge), easing to silence at the edge of hearing
+	var db := -20.0 * log(1.0 + maxf(0.0, dist - NEAR) / SPREAD) / log(10.0)
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
-## The pool voice for a sound of rank rk (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
-## null when it gets none.
-func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
-	var i := voices.pick(players, next, rk, sname)
+
+## The voice for a sound at pos, of rank rk (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
+## null when it gets none. A sound with a place and a camera to hear it from plays on a placed voice (it pans),
+## else on a plain one.
+func _voice(pos, rk: float, sname: String):
+	var placed: bool = pos != null and get_viewport().get_camera_3d() != null
+	var base := POOL if placed else 0
+	var i := voices.pick(spots if placed else players, base, next, rk, sname)
 	if i < 0:
 		return null
 	next = (i + 1) % POOL
-	voices.rank[i] = rk
-	voices.sound[i] = sname
-	var p := players[i]
+	voices.rank[base + i] = rk
+	voices.sound[base + i] = sname
+	var p = voice_all[base + i]  # the same fields on both kinds
 	p.bus = _bus_for(pos, sname)
+	if placed:
+		(p as AudioStreamPlayer3D).position = pos
 	return p
 
+
+func _start(p, st: AudioStream, vol_db: float, pitch: float) -> void:
+	last_voice = p
+	p.stream = st
+	p.volume_db = vol_db
+	p.pitch_scale = pitch
+	p.play()
+
+
 ## Which bus a sound at pos plays on: muffled behind terrain, low-passed when far, else its own kind's bus
-## (SfxMix.bus_for). No position (a cue for you alone): its kind's bus, never muffled.
+## (SfxMix.bus_for: the SFXWorld bus the downed muffle dulls, unless its kind or SfxMix.CLEAR keeps it clear).
+## No position (a cue for you alone): its kind's bus, never muffled.
 func _bus_for(pos, sname := "") -> StringName:
 	if pos == null:
 		return mix.bus_for(sname, false, false)
@@ -597,7 +758,7 @@ func _bus_for(pos, sname := "") -> StringName:
 func play_sample(bus_name: String) -> void:
 	if not streams.has(SAMPLE) and not _lazy(SAMPLE):
 		return
-	var p := _voice(null, voices.rank_of(null, listener), SAMPLE)
+	var p = _voice(null, voices.rank_of(null, listener), SAMPLE)
 	if p == null:
 		return
 	var st = streams[SAMPLE]
@@ -607,14 +768,17 @@ func play_sample(bus_name: String) -> void:
 	p.pitch_scale = 1.0
 	p.play()
 
+
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the sound's own
 ## "reach", else hear_range). mine: your own sound played away from you (a hit tick on the one you hit), so the pool
-## keeps it as it keeps your other sounds (SfxVoices).
+## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
+## round-robins them), else a random one that isn't the last.
 func play(
-	sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0, mine := false
+	sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0, mine := false, take := -1
 ) -> void:
-	if cue_log != null: cue_log.append([sname, pos, not sname in skip and ensure(sname)])
+	if cue_log != null:
+		cue_log.append([sname, pos, not sname in skip and ensure(sname)])
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	if sname in CUES:
@@ -626,6 +790,8 @@ func play(
 		return
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
+	if sname.begins_with(IMPACT_PREFIX):
+		gap = IMPACT_GAP
 	if sname.contains("step_"):
 		gap = 25  # footsteps: several people can walk at once
 	var rk := voices.rank_of(pos, listener, mine)
@@ -633,7 +799,7 @@ func play(
 		voices.cut.emit(sname, rk, &"gap")
 		return
 	var r := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	var v := vol_db + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
+	var v := vol_db + float(cue_db.get(sname, 0.0)) + _distance_db(pos, r) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -642,29 +808,44 @@ func play(
 	if times.size() >= STACK_MAX:
 		voices.cut.emit(sname, rk, &"stack")
 		return
+	var p = _voice(pos, rk, sname)
+	if p == null:
+		return
 	v -= STACK_DB * times.size()
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
 	if mix.big_sounds.has(sname):
 		mix.big_event()
-	var p := _voice(pos, rk, sname)
-	if p == null:
-		return
+	_start(p, _take(sname, take), v, pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var)))
+	played.emit(sname, pos, vol_db, pitch)
+
+
+## Starts sname on a voice at pos (placed, so it pans) at exactly vol_db and returns the voice, or null when
+## it gets none. No distance falloff and no repeat gap: the caller sets the level and keeps the one voice
+## (IncomingHitSfx: a flurry of hits on you is one voice). Yours (a hit on you): it ranks as your own sounds
+## do, and the bus (so the downed muffle) applies.
+func play_voice(sname: String, pos, vol_db: float, pitch := 1.0):
+	if not streams.has(sname) and not _lazy(sname):
+		return null
+	var p = _voice(pos, SfxVoices.YOU, sname)
+	if p != null:
+		_start(p, _take(sname), vol_db, pitch)
+	return p
+
+
+## The stream to play for sname: take `take` of a sound that has several (FireSfx), else a different one
+## from last time.
+func _take(sname: String, take := -1) -> AudioStream:
 	var st = streams[sname]
 	if st is Array:
-		# a different take from last time
 		var arr: Array = st
-		var i := rng.randi_range(0, arr.size() - 1)
-		if arr.size() > 1 and i == int(last_take.get(sname, -1)):
+		var i: int = take % arr.size() if take >= 0 else rng.randi_range(0, arr.size() - 1)
+		if take < 0 and arr.size() > 1 and i == int(last_take.get(sname, -1)):
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	p.stream = _once(st)
-	p.volume_db = v
-	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
-	p.play()
-	played.emit(sname, pos, vol_db, pitch)
+	return _once(st)
 
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
@@ -701,20 +882,24 @@ func play_reset_cue(vol_db := RESET_CUE_DB) -> void:
 ## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
 ## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
 ## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
-var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach, bus}
+var loops := {}  # key -> {p: AudioStreamPlayer, pos, vol, reach, bus}
+
 
 ## bus: "SFX", or "Music" for a bed that sits under the score and ducks with it (LastAlive).
 func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0, bus := "SFX") -> void:
 	if loops.has(key):
 		return
-	if cue_log != null: cue_log.append([sname, pos, ensure(sname)])
+	if cue_log != null:
+		cue_log.append([sname, pos, ensure(sname)])
 	var st = streams.get(sname) if ensure(sname) else null
-	if st is Array: st = (st as Array)[0]
+	if st is Array:
+		st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()
 	p.bus = bus
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry, "sound": sname, "bus": bus}
+	var vol := vol_db + float(cue_db.get(sname, 0.0))
+	loops[key] = {"p": p, "pos": pos, "vol": vol, "reach": carry, "sound": sname, "bus": bus}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
@@ -752,6 +937,8 @@ func loop_stop(key: String) -> void:
 ## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
 ## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
 const HOLD_MS := 250
+
+
 func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0, bus := "SFX") -> void:
 	loop_start(key, sname, pos, vol_db, 0.0, bus)
 	loops[key]["vol"] = vol_db
@@ -797,13 +984,10 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	if is_nan(v):
 		return
 	last_played[key] = now
-	var p := _voice(pos, voices.rank_of(pos, listener), key)
+	var p = _voice(pos, voices.rank_of(pos, listener), key)
 	if p == null:
 		return
-	p.stream = st
-	p.volume_db = v
-	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
-	p.play()
+	_start(p, st, v, 1.0 + rng.randf_range(-pitch_var, pitch_var))
 
 
 ## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
@@ -816,9 +1000,10 @@ func _lazy(sname: String) -> bool:
 	if _lazy_miss.has(sname):
 		return false
 	var takes: Array = []
-	var paths: Array = ["res://audio/%s.wav" % sname]
+	var file := IMPACT_PREFIX_OF + sname.trim_prefix(IMPACT_PREFIX) if sname.begins_with(IMPACT_PREFIX) else sname
+	var paths: Array = ["res://audio/%s.wav" % file]
 	for i in range(1, 5):
-		paths.append("res://audio/%s_%d.wav" % [sname, i])
+		paths.append("res://audio/%s_%d.wav" % [file, i])
 	for path in paths:
 		if ResourceLoader.exists(path):
 			takes.append(load(path))
@@ -827,6 +1012,22 @@ func _lazy(sname: String) -> bool:
 		return false
 	streams[sname] = takes[0] if takes.size() == 1 else takes
 	return true
+
+
+## How many takes a sound has (0 when it has no file).
+func take_count(sname: String) -> int:
+	if not ensure(sname):
+		return 0
+	var st = streams[sname]
+	return (st as Array).size() if st is Array else 1
+
+
+## Seconds one take of a sound sounds for.
+func take_len(sname: String, take: int) -> float:
+	var st = streams[sname]
+	if st is Array:
+		st = (st as Array)[take % (st as Array).size()]
+	return (st as AudioStream).get_length()
 
 
 ## Whether a sound exists (loading it on first ask, as play does).

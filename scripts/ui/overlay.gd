@@ -420,6 +420,7 @@ func _tab_audio(v: VBoxContainer) -> void:
 	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
 	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a kill resets your cooldowns")
 	_toggle(v, "Ultimate ready", "ult_ready_cue", "A chime when your ultimate (R) is back")
+	_toggle(v, "Hunter callouts", "hunter_barks", "Your Hunter calls ultimate ready, low health, knocks, Boki down")
 	_group(v, "Window")
 	_toggle(v, "Mute when the window isn't focused", "mute_unfocused")
 

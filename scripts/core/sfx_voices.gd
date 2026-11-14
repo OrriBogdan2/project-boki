@@ -50,22 +50,23 @@ func rank_of(pos, listener: Vector3, mine := false) -> float:
 	return Vector2(pos.x - listener.x, pos.z - listener.z).length()
 
 
-## The pool voice for a sound of rank `r` (-1: none, the sound is not played): a free one (from `next` round
-## the ring), else the farthest one ranked below it; yours with only yours playing takes `next`.
-func pick(players: Array[AudioStreamPlayer], next: int, r: float, sname: String) -> int:
-	var n := players.size()
+## The voice of `pool` for a sound of rank `r` (-1: none, the sound is not played): a free one (from `next` round
+## the ring), else the farthest one ranked below it; yours with only yours playing takes `next`. `base`: where the
+## pool starts in rank and sound (Sfx keeps the plain voices, then the placed ones, in one table).
+func pick(pool: Array, base: int, next: int, r: float, sname: String) -> int:
+	var n := pool.size()
 	var worst := -1
 	for k in n:
 		var i := (next + k) % n
-		if not players[i].playing:
+		if not pool[i].playing:
 			return i
-		if worst < 0 or rank[i] > rank[worst]:
+		if worst < 0 or rank[base + i] > rank[base + worst]:
 			worst = i
-	if rank[worst] > r:
-		cut.emit(sound[worst], rank[worst], &"stolen")
+	if rank[base + worst] > r:
+		cut.emit(sound[base + worst], rank[base + worst], &"stolen")
 		return worst
 	if r == YOU:
-		cut.emit(sound[next], YOU, &"stolen")
+		cut.emit(sound[base + next], YOU, &"stolen")
 		return next
 	cut.emit(sname, r, &"full")
 	return -1
@@ -89,7 +90,7 @@ func cull_loops(loops: Dictionary, listener: Vector3, now_too := false) -> void:
 
 
 ## Pool voices and loops sounding now (a paused loop is not).
-static func sounding(players: Array[AudioStreamPlayer], loops: Dictionary) -> int:
+static func sounding(players: Array, loops: Dictionary) -> int:
 	var n := 0
 	for p in players:
 		if p.playing:

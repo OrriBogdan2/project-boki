@@ -142,7 +142,7 @@ func combo_read(t: Ent) -> Dictionary:
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
 func _on_marks(t: Ent, had: int, c: int) -> void:
 	if had < pip_count() and c >= pip_count():
-		m.sfx("unlock", t.pos, -6.0, 1.7)
+		m.sfx("thief_pip_chime", t.pos, -6.0)
 
 func clear_marks(t: Ent) -> void:
 	var mk: Dictionary = t.get_meta("marks", {})
@@ -546,7 +546,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 		net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 		m.sfx("thief_cock", h.pos, -6.0 if h.is_local() else -10.0, 1.0))
 	if not was:
-		m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
+		m.sfx("thief_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 		if h.is_local(): h._ab_feedback("dash", "ready")
 
 # ------------------------------------------------------------------ passive hooks
@@ -595,7 +595,7 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
-	m.sfx("pay_cashin", at, -2.0, 1.0)
+	m.sfx("pay_cashin", at, -2.0, 1.0)      # the cash-in payoff's own sting (DECISIONS 2026-11-08)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	RecastCue.payoff(self, t)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
@@ -665,7 +665,6 @@ func _throw_bola() -> void:
 	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
 			"bounces": int(bd["bounces"]), "stg": stg}
 	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
-	Feel.cast_sound(m, "projectile", "control", h.pos, h)
 	# the yellow flash of the throw
 	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
 	net_bolt(h.pos + Vector3(0, 1.0, 0), h.pos + Vector3(dv.x, 0, dv.y) * lane_len() + Vector3(0, 1.0, 0),
@@ -693,7 +692,7 @@ func _tick_bola(dt: float) -> void:
 				bola["bounces"] = int(bola["bounces"]) - 1
 				bola_bounces += 1
 				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
-				m.sfx("click", p, -5.0, 1.4)
+				m.sfx("thief_bola_ricochet", p, -5.0)
 				continue
 			_end_bola(p)
 			return
@@ -961,7 +960,7 @@ func _shadow_step(tgt: Ent) -> void:
 	_blink(ground(at))
 	var dv := Vector2(tgt.pos.x - h.pos.x, tgt.pos.z - h.pos.z)
 	if dv.length() > 0.05: h.face = atan2(-dv.x, -dv.y)
-	m.sfx("swipe", h.pos, -4.0, 1.9)
+	m.sfx("thief_shadowstep", h.pos, -4.0)
 
 ## The blink: a near-instant jump with a chain of cyan afterimages from where she was to where she lands.
 func _blink(to: Vector3) -> void:

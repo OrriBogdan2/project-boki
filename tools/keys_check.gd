@@ -3,7 +3,8 @@ extends RefCounted
 ##   1. the carriers: per region the number of key carriers equals the number of chests (a quiet
 ##      region with too few monsters is carried for by its neighbours), they change between seeds,
 ##      and every carrier shows a key glint
-##   2. a chest will not open without a key, and opening one uses exactly one (a single press with a key)
+##   2. a chest will not open without a key, and opening one uses exactly one (a single press with a key);
+##      its lid creaks by the chest's tier
 ##   3. keys drop in a deathbox, can be looted from it, and lie on the ground to be picked up
 ##   4. a carrier drops its key when it dies
 ##   5. the Shrubling: disguised until approached, flees (faster than a hunter on foot, slower than a
@@ -159,8 +160,13 @@ func _chest_and_keys() -> void:
 			"with a key: the prompt offers to open it",
 			String(pr["kind"]) == "chest" and String(pr["label"]).contains("1 key"), String(pr["label"]))
 	var gems0 := m.pickups.size()
+	Sfx.listener = c["pos"]
+	Sfx.last_played.clear()
 	m._open_chest(P, c)
 	ok("opening uses exactly one key", c["open"] and P.chest_keys == 1, "keys %d" % P.chest_keys)
+	var lid := ChestLoot.creak(ChestLoot.rarity_bonus(m, c["pos"]))
+	ok("the lid creaks by the chest's tier, not the pickup sound", Sfx.last_played.has(lid) and not Sfx.last_played.has(
+			"pickup"), lid)
 	m._open_chest(P, c)
 	ok("an open chest costs nothing more", P.chest_keys == 1)
 	ok("the chest pays out", m.pickups.size() > gems0)

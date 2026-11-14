@@ -388,6 +388,10 @@ func tick(d: float) -> void:
 					card.queue_free()
 				go(S.IDLE)
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return state == S.PLAY
+
 ## Repaints the panel when the board changed or the clock ticked a second.
 func _show() -> void:
 	var secs := ceili(float(rules()["time_s"]) - board.t)

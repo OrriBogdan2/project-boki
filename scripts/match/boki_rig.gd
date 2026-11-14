@@ -8,6 +8,7 @@ extends Node
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. "kwater" (m) is the water over its feet
 ## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
 
+signal stepped(sound: String)           # a planted foot came down and this step sound was played (BokiSteps)
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
 ## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
@@ -253,6 +254,7 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _steps := BokiSteps.new()
 var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
 var _swimmer := false          # a Water type: swims level rather than paddling
 static var _shadow_mat: StandardMaterial3D
@@ -377,6 +379,7 @@ func _process(dt: float) -> void:
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
+	_steps.update(self, dt)
 	var t := pace.step(dt)
 	if t > 0.0:
 		_face_step(t)

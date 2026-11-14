@@ -52,6 +52,10 @@ func run(main: Node) -> void:
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
 	var home: Vector3 = r[4]
+	# the close view draws Hunters at their own size: the default wide view draws them 2.1x and shots still leave at
+	# the old height (docs/MOVEMENT_FEEL.md "Wide default view", what breaks (2)), so the fingertip rows read there
+	m.cam.use_style("supervive_close")
+	P.fit_scale()
 	var seen := {}
 	_run(m, P, 10, seen)
 	ok(_clips(P) != null, "Sparkle wears her clips in a match")

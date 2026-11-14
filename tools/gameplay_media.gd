@@ -2,7 +2,9 @@ extends RefCounted
 ## --gameplay-media --media-clip=<1-12> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
-## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
+## from the scene's best moment (<dir>/clip<N>.png). --media-zoom=<z> films at that camera zoom instead of the
+## clip's own (1: the gameplay view, for A/B stills of a camera style such as --cam-style=supervive_close).
+## Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off;
 ##                   --media-fight=<a,b,c/d,e,f> picks the archetypes (yours first), --media-zoom=<z> the camera
@@ -19,6 +21,7 @@ extends RefCounted
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
 ##  10 base to mate  B (BaseWheel, BaseRecall): hold for the wheel, point, let go, the 5.5 s channel lands beside
 ##                   the teammate; then a second channel that a rival's hit breaks (INTERRUPTED). Its own length.
+##  13 closing zone  a Hollow Crown match's zone (ShrinkZone) in time-lapse: the full map, then the minimap and wall
 ##   11 shift glide   Kingpin: jump, air Shift, Space mid-dash; again with Space just after the dash (decision 0061)
 ##   12 dive feather glide out over the abyss, let go and drop 1s under the lip, feather back up, twice (0061)
 ##                   (11 and 12 follow with the game's own camera, as a player sees it)
@@ -48,9 +51,9 @@ var frame := 0
 var still_at := -1.0             # s into the scene the still is saved (negative: not yet)
 var squad_a: Array = []
 var squad_b: Array = []
+var zoom_at := 0.0               # --media-zoom: the camera zoom every clip films at (0: each clip's own)
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 var fight := FIGHT               # --media-fight=
-var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -68,10 +71,10 @@ func run(main_node: Node) -> void:
 			clip = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
+		if arg.begins_with("--media-zoom="):
+			zoom_at = float(arg.substr(13))
 		if arg.begins_with("--media-fight="):
 			fight = arg.substr(14)
-		if arg.begins_with("--media-zoom="):
-			fight_zoom = float(arg.substr(13))
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -81,6 +84,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Record.set_level(1)
 	Settings.v["tips"] = false
+	if zoom_at > 0.0:
+		Settings.v["cam_follow"] = "locked"     # no cursor lean: the idle cursor sits on the HUD
 	match clip:
 		1: await _fight(secs)
 		2: await _boki_combat(secs)
@@ -94,6 +99,7 @@ func run(main_node: Node) -> void:
 		10: await _base_tp()
 		11: await _shift_glide(secs)
 		12: await _dive_feather(secs)
+		13: await _zone(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -155,6 +161,8 @@ func _hunter(id: String, team: int, arch: String, kin: String, at: Vector3) -> H
 
 ## Frames the shot at once (the camera would otherwise ease in from the default over several seconds).
 func _zoom(z: float) -> void:
+	if zoom_at > 0.0:
+		z = zoom_at
 	m.cam.zoom = z
 	m.cam.zoom_to = z
 
@@ -174,6 +182,8 @@ func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void
 	var t := 0.0
 	while t < secs:
 		_purge()
+		if Overlay.is_open():
+			Overlay.close()      # a key pressed on the worker's own screen (Esc) must not pause the take
 		each.call(t)
 		for _i in 2:
 			m.step(STEP)
@@ -244,7 +254,7 @@ func _fight(secs: float) -> void:
 			_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(fight_zoom)
+	_zoom(0.55)
 	still_at = 4.0
 	_mark("start")
 	await _go(secs, func(t: float):
@@ -571,3 +581,35 @@ func _wheel_take(me: Hunter, to: Hunter, hit_at: float, base: Vector3, foe: Hunt
 		if foe and t >= hit_at and me.base_t > 0.0:
 			me.hurt(6.0, foe, {"src": "media"}),
 		func(_t: float): return (me.pos + to.pos) * 0.5 if me.base_t > 0.0 else me.pos)
+
+# ------------------------------------------------------------------ 13: closing zone
+## From just before the first close to just after the last, sped up to fit `secs`. The player stands
+## inside the final circle, near its edge, so the wall comes past the camera; the full map shows the
+## first half, the minimap and the world the second.
+func _zone(secs: float) -> void:
+	Save.d["name"] = HeroTitle.base_name("ashwick")
+	m = Match.new()
+	main.add_child(m)
+	await m.start({"teams": 6, "squad": 3, "tier": 1, "seed": 3, "no_drop": true, "raid": "clear", "sim_keep": true})
+	m.set_process(false)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	m.hud.guide_hidden = true
+	Game.god = true
+	var z := m.zone
+	var fc := z.cs[z.last()]
+	var mid := Vector2(m.world.w, m.world.h) * 0.5
+	var at := fc + (mid - fc).normalized() * z.rs[z.last()] * 0.85
+	m.player.teleport(_ground(Vector3(at.x, 0, at.y)))
+	var from := z.t0[1] - 8.0
+	var warp := (z.t1[z.last()] + 4.0 - from) / secs
+	m.hud.full_map.open()
+	still_at = secs * 0.35
+	await _go(secs, func(t: float):
+		m.time = from + t * warp
+		m.player.inp["move"] = Vector2.ZERO
+		if t >= secs * 0.5:
+			m.hud.full_map.close(),
+		func(_t: float): return m.player.pos)
+	Game.god = false

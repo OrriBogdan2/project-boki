@@ -326,6 +326,32 @@ def death():
     return pad(mix(fo(lpf(v, 6000), 0.4), exhale, die, out_), 1.6)
 
 
+# ------------------------------------------------------------------ rod slam
+def rod_slam():
+    """A target slammed against the rod: a hard crack, a low thump and a buzz of static."""
+    return mix(crack(0.05, 2000, 9000, 0.015) * 0.9, kick(200, 55, 0.35, 0.04, 0.12) * 1.0,
+               S.fm(1800, 1.7, 6.0, 0.28, 0.1) * 0.5)
+
+
+# ------------------------------------------------------------------ kit cues (the Blowout payoff)
+def blowout():
+    """A dry thunder crack, a falling thump and a rising zap with a spark ring on top."""
+    return mix(crack(0.5, 2200, 9000, 0.07) * 0.5, kick(210, 48, 0.55, 0.05, 0.16),
+               at(S.sweep(500, 2400, 0.22, 'sin') * env(N(0.22), 0.01, 0.07) * 0.55, 0.05),
+               at(S.chime(2900, 0.45, 0.09, ((1.0, 1.0), (2.76, 0.4))) * 0.35, 0.1))
+
+
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """A static crackle that builds: a dry spark and a small rising buzz."""
+    return mix(crack(0.07, 3000, 9000, 0.025) * 0.6, S.sweep(900, 1800, 0.08, 'saw') * env(N(0.08), 0.004, 0.05) * 0.25)
+
+
+def charge_full():
+    """The charge topping out: a sharp discharge crack and a bright humming ring."""
+    return mix(crack(0.06, 2500, 9500, 0.03) * 0.8, S.fm(1100, 1.5, 3.0, 0.4, 0.18) * 0.45, S.ring([880, 1760], 0.45, [0.15, 0.1], [0.4, 0.3]))
+
+
 def build():
     S.takes_cat('vv_bolt', bolt, 3, 'fire')
     S.takes_cat('mage_zap', zap, 3, 'signature')
@@ -350,7 +376,10 @@ def build():
     S.takes_cat('mage_hurt', hurt, 3, 'grunt')
     S.save_cat('mage_down', down(), 'grunt')
     S.save_cat('mage_death', death(), 'grunt')
-
+    S.save_cat('mage_rod_slam', rod_slam(), 'impact')
+    S.save_cat('mage_blowout', blowout(), 'impact')
+    S.save_cat('mage_charge_tick', charge_tick(), 'cast')
+    S.save_cat('mage_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

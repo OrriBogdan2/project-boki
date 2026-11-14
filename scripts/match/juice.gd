@@ -63,6 +63,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		return
 	var src := String(o.get("src", ""))
 	var p: Hunter = m.player
+	# a Boki's ability hit has its type's impact wherever it lands (the sound culls by distance itself)
+	var typed := _credit(by) != p and BokiImpact.play(m, by, target, o, crit, "taken" if target == p else "other")
 	if p != null and p.flat_dist(target) > FAR:
 		return
 	var hp := _hit_point(target, by, o)
@@ -96,9 +98,12 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 			m.sfx("armor_hit", target.pos, -9.0, 1.0, true)
 		if d >= 28.0 and not melee:
 			m.sfx("hit_heavy", target.pos, -7.0, 1.0, true)
-	elif target == p and armor:
-		m.sfx("armor_hit", null, -12.0, 0.85)
-	elif target != p and credit != p:
+	elif target == p:
+		IncomingHitSfx.hit(m, by, d, o)      # from where it came, so you know which way to turn
+		if armor:
+			m.sfx("armor_hit", null, -12.0, 0.85)
+
+	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
 
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
@@ -138,6 +143,8 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
+	if h != m.player:
+		Sfx.duck_for("knock", h.pos)         # (your own knock ducks in Match.knock)
 
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
@@ -259,24 +266,27 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 			m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 
 
+## What a foot at `pos` lands on: planks, paved paths and stairs, snow, or grass and earth.
+static func ground_surface(w: World, pos: Vector3) -> String:
+	if w == null:
+		return "grass"
+	var ix := int(floorf(pos.x)); var iz := int(floorf(pos.z))
+	if not w.inb(ix, iz):
+		return "grass"
+	var i := w.idx(ix, iz)
+	if w.bridge.has(i):
+		return "wood"
+	if w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
+		return "stone"
+	return "snow" if w.style_at(i) == "frost" else "grass"
+
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
-## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). It carries as far
-## as StepReach says (less while sneaking), seen or not: a step behind a wall is how you hear a flank.
+## what's underfoot (StepSurface: grass, stone, wood, snow, the sky train's metal decks) and the
+## Hunter's weight. It carries as far as StepReach says (less while sneaking), seen or not: a step
+## behind a wall is how you hear a flank.
 static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
-	var w: World = m.world
-	var ix := int(floorf(h.pos.x))
-	var iz := int(floorf(h.pos.z))
-	if not w.inb(ix, iz):
-		return
-	var i := w.idx(ix, iz)
-	var surf := "grass"
-	if w.bridge.has(i):
-		surf = "wood"
-	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
-		surf = "stone"
-	elif w.style_at(i) == "frost":
-		surf = "snow"
-	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)
+	var surf := StepSurface.at(m, h.pos)
+	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))

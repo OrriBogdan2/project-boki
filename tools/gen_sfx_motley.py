@@ -371,6 +371,30 @@ def death():
     return pad(mix(hollow(fo(lpf(v, 4500), 0.4)), laugh, box, sink), 2.8)
 
 
+# ------------------------------------------------------------------ kit cues (swell armed, the collapse payoff)
+def swollen():
+    """Fully swollen: a bubble stretching up in pitch, a puff of air and a soft boing as it settles."""
+    up = S.sweep(180, 440, 0.3, 'sin') * env(N(0.3), 0.04, 0.14)
+    return mix(up * 0.8, S.hiss(0.3, 800, 3500, 0.04, 0.12) * 0.3, at(S.sweep(440, 300, 0.16, 'sin') * env(N(0.16), 0.005, 0.07) * 0.6, 0.26))
+
+
+def collapse():
+    """The caught foe folding in on itself: a low thud, a crack of air and a short fall of pops and rubble."""
+    return mix(kick(150, 40, 0.5, 0.05, 0.14) * 1.1, crack(0.08, 800, 5000, 0.03) * 0.8,
+               at(S.sweep(500, 120, 0.3, 'sin') * env(N(0.3), 0.005, 0.1) * 0.5, 0.05), tail(0.4, 1500, 0.12, 0.005, 0.06) * 0.5)
+
+
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """A bubble swelling: a short rising blip with a wet tick."""
+    return mix(S.sweep(320, 720, 0.08, 'sin') * env(N(0.08), 0.005, 0.05) * 0.6, click(0.003, 2000, 6000) * 0.3)
+
+
+def charge_full():
+    """The swelling reaching its limit: a long rising wobble, then a pop and a ring."""
+    return mix(S.sweep(250, 950, 0.22, 'sin') * env(N(0.22), 0.01, 0.1) * 0.6, at(click(0.004, 1800, 6000) * 0.6, 0.2), at(S.ring([660, 990], 0.3, [0.1, 0.07], [0.4, 0.3]), 0.2))
+
+
 def build():
     S.takes_cat('os_orb', orb, 3, 'fire')
     S.takes_cat('os_orb_hot', orb_hot, 3, 'fire')
@@ -393,7 +417,10 @@ def build():
     S.takes_cat('ostra_hurt', hurt, 3, 'grunt')
     S.save_cat('ostra_down', down(), 'grunt')
     S.save_cat('ostra_death', death(), 'grunt')
-
+    S.save_cat('ostra_swollen', swollen(), 'cast')
+    S.save_cat('ostra_collapse', collapse(), 'impact')
+    S.save_cat('ostra_charge_tick', charge_tick(), 'cast')
+    S.save_cat('ostra_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

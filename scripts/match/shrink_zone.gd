@@ -2,14 +2,15 @@ class_name ShrinkZone
 extends RefCounted
 ## The closing zone (docs/decisions/0060-shrinking-zone.md, the 11-11 order). Each expedition picks
 ## its final area from the shared match seed, the way HotZone picks its region, so every player gets
-## the same one: a dock or outpost, and the circle round it leaning into its island, so the last exits
-## are inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it
+## the same one: an outpost, and the circle round it leaning into its island, so that outpost is
+## inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it
 ## holds for a phase's wait, then closes to the phase's radius, each circle inside the one before.
 ## Outside the edge hurts, more each phase; when the last close ends, the islands wholly outside the
 ## final circle fall. The fall at the end of the clock (Match._update_rules) stays.
 ## Shown on the drop/full map, the minimap, a row under the match clock, and in the world as a glowing
-## wall; the kin warns before each close; bots keep inside (bot_goal). Nothing goes over Net: the
-## circles come from the seed and the match clock alone, and each game hurts only its own bodies.
+## wall; the kin warns before each close; bots keep inside (bot_goal); heard through ZoneSfx (audio).
+## Nothing goes over Net: the circles come from the seed and the match clock alone, and each game hurts
+## only its own bodies.
 
 const RULES_PATH := "res://content/rules/shrink_zone.json"
 const COL := Color("5cc8ff")  # the edge, on the maps and in the world
@@ -57,6 +58,7 @@ var cur_r := 0.0
 var fallen := false
 var told := 0  # the last close the feed and the kin warned of (the first-match guide reads it)
 var _owed := {}  # Hunter -> outside damage not landed yet
+var audio: ZoneSfx  # the warning, the wall's hum, the crossing and the damage tick
 var _wall: MeshInstance3D = null
 var _mat: ShaderMaterial = null
 
@@ -67,7 +69,7 @@ static func rules() -> Dictionary:
 	return _rules
 
 
-## The zone for a real fixed-length expedition with a dock or outpost to close on; null otherwise
+## The zone for a real fixed-length expedition with an outpost to close on; null otherwise
 ## (tutorial, training, duels, the arena, rolling sessions).
 static func make(match_node: Match) -> ShrinkZone:
 	var o := match_node.opts
@@ -75,7 +77,7 @@ static func make(match_node: Match) -> ShrinkZone:
 		return null
 	if ["tutorial", "training", "duel", "arena"].any(func(x): return o.get(x, false)):
 		return null
-	if not match_node.world.exit_defs.any(func(d): return String(d["kind"]) in ["dock", "outpost"]):
+	if not match_node.world.exit_defs.any(func(d): return String(d["kind"]) == "outpost"):
 		return null
 	return ShrinkZone.new(match_node)
 
@@ -89,7 +91,7 @@ func _init(match_node: Match) -> void:
 	var n := ph.size()
 	for arr in [cs, rs, t0, t1, dps]:
 		arr.resize(n + 1)
-	var picks := m.world.exit_defs.filter(func(d): return String(d["kind"]) in ["dock", "outpost"])
+	var picks := m.world.exit_defs.filter(func(d): return String(d["kind"]) == "outpost")
 	exit_at = picks[posmod(hash([m.seed_val, "shrink_zone"]), picks.size())]["at"]
 	rs[n] = float(ph[n - 1]["r"]) * mk
 	cs[n] = exit_at
@@ -123,6 +125,7 @@ func _init(match_node: Match) -> void:
 		dps[j] = float(ph[j - 1]["dps"])
 	cur_c = cs[0]
 	cur_r = rs[0]
+	audio = ZoneSfx.new(self)
 	_build_wall()
 
 
@@ -145,29 +148,6 @@ func outside(p: Vector3) -> bool:
 	return Vector2(p.x, p.z).distance_to(cur_c) > cur_r
 
 
-## When the closing edge has passed p for good (1e9: p is in the final area).
-func out_at(p: Vector3) -> float:
-	var q := Vector2(p.x, p.z)
-	for j in range(1, last() + 1):
-		if q.distance_to(cs[j]) > rs[j]:
-			return t1[j]
-	return 1e9
-
-
-## The docks close as the edge passes them (Exits.setup); the one nearest the final area is the last.
-func time_docks(docks: Array) -> void:
-	var best := -1
-	var bd := 1e9
-	for i in docks.size():
-		docks[i]["close_at"] = out_at(docks[i]["pos"])
-		var d := cs[last()].distance_to(Vector2(docks[i]["pos"].x, docks[i]["pos"].z))
-		if d < bd:
-			bd = d
-			best = i
-	if best >= 0 and float(docks[best]["close_at"]) >= 1e8:
-		docks[best]["last"] = true
-
-
 func tick(dt: float) -> void:
 	var e := edge_at(m.time)
 	cur_c = e[0]
@@ -175,6 +155,7 @@ func tick(dt: float) -> void:
 	while k < last() and m.time >= t0[k + 1]:
 		k += 1
 	_warn()
+	audio.update()
 	if k > 0:
 		_hurt_outside(dt)
 	if not fallen and m.time >= t1[last()]:
@@ -197,10 +178,11 @@ func _warn() -> void:
 		BokiChatter.say(m, m.player.kin, "zone")
 	if m.hud:
 		m.hud.toast_small("ZONE CLOSES IN %d s" % secs, COL)
-	m.sfx("warn", null, 0.0)
+	audio.warn()
 
 
-## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain).
+## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain; a tick, so no
+## flinch or hitstop either, and the player hears ZoneSfx's tick instead of a hurt voice).
 func _hurt_outside(dt: float) -> void:
 	var R := rules()
 	for h in m.hunters:
@@ -209,7 +191,8 @@ func _hurt_outside(dt: float) -> void:
 			continue
 		var owed: float = float(_owed.get(h, 0.0)) + dps[k] * h.max_hp * dt
 		if owed >= dps[k] * h.max_hp * float(R["tick_s"]):
-			h.hurt(owed, null, {"src": "zone"})
+			if h.hurt(owed, null, {"src": "zone", "tick": true}) > 0.0 and h == m.player:
+				audio.tick()
 			owed = 0.0
 		_owed[h] = owed
 

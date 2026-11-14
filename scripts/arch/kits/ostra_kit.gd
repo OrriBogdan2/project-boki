@@ -106,7 +106,7 @@ func add_swell(v: float) -> void:
 	if res >= res_max():
 		swollen_t = float(res_def()["swollen_t"])
 		swells += 1
-		armed_fx("")
+		armed_fx("", "ostra_swollen")
 		play("ostra_empower")
 		vfx("swell")
 
