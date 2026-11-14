@@ -5,12 +5,14 @@ extends RefCounted
 ## says to whistle. It goes when the whistle is used. Once per save: Save.d.tutorial.whistle_hint.
 ## Tuning and text: content/rules/base_life.json "whistle" (hint_*).
 
-var w: BaseWhistle         # the whistle this teaches
-var pill: PanelContainer   # the line on screen, null when there is none
-var _away := 0.0           # s the partner has been far or out of sight
+var w: BaseWhistle  # the whistle this teaches
+var pill: PanelContainer  # the line on screen, null when there is none
+var _away := 0.0  # s the partner has been far or out of sight
+
 
 func _init(whistle: BaseWhistle) -> void:
 	w = whistle
+
 
 ## Per frame: counts the time the partner is apart from you and shows the line once it is long enough.
 func tick(d: float) -> void:
@@ -20,6 +22,7 @@ func tick(d: float) -> void:
 	if _away >= float(w.R["hint_away_s"]):
 		_show()
 
+
 ## The whistle was used: the line goes and does not come back.
 func used() -> void:
 	Save.d["tutorial"]["whistle_hint"] = true
@@ -27,9 +30,16 @@ func used() -> void:
 		pill.queue_free()
 		pill = null
 
+
 func _eligible() -> bool:
-	return not bool(Save.d["tutorial"].get("whistle_hint", false)) and w.h.visit.is_empty() \
-			and not FarmTutorial.active() and Settings.get_v("tips") and not w.partner().is_empty()
+	return (
+		not bool(Save.d["tutorial"].get("whistle_hint", false))
+		and w.h.visit.is_empty()
+		and not FarmTutorial.active()
+		and Settings.get_v("tips")
+		and not w.partner().is_empty()
+	)
+
 
 func _apart() -> bool:
 	var k := w.partner()
@@ -41,6 +51,7 @@ func _apart() -> bool:
 	var spot := (k["node"] as Node3D).global_position + Vector3(0, 0.45, 0)
 	var screen: Rect2 = w.h.get_viewport().get_visible_rect()
 	return cam.is_position_behind(spot) or not screen.has_point(cam.unproject_position(spot))
+
 
 func _show() -> void:
 	Save.d["tutorial"]["whistle_hint"] = true
