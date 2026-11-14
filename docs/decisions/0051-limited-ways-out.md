@@ -110,6 +110,18 @@ to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBea
 rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
 outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
 
+**Colour vision (ext/ui-ways-out-colourblind).** Every Ways Out colour goes through `SideColor`: a squad's or a rival's seat
+is `SideColor.of_team(viewer, team)`, the neutral ones (Heart, Gate, calls, tide, seat states, beams) are `SideColor.tone(key)`
+rows of the palette table, the default row full and the others only where it would sit on their rival colour (tritan: magenta
+Heart and Gate). Squad and rival never read by hue alone: the beacon's text (`OURS` / `RIVAL`), the strip's word and pip
+(disc / diamond), the map badge's centre mark and the minimap banner (plain / swallow-tailed). Check: --colour-vision-check
+(rows 4a, 4b); shots per palette: --ways-out-palette-shots (GPU).
+
+Quest-race pips: under the Sealed Lair and Uplink badges (strip and full map) two rows of five pips, your squad's progress on
+top (discs) and the best rival's below (diamonds), in `SideColor` squad colours. Lair progress is its boss's damage, Uplink its
+charge, a taken seat is full for its squad; locked and shut seats show nothing. It reads the mirrored seat states and the
+boss and outpost the clients already have, so it needs no new Net message. No words or key letters. Check: --quest-race-check.
+
 ## First-time hints (a new player's first match)
 `WaysHints` (scripts/match/ways_hints.gd) gives the three moments that teach the mode one plain line each in the
 message lane, the shortened tutorials' hint pattern (Match._tip: once per save in Save.d["tutorial"] as

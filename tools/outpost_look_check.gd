@@ -93,7 +93,7 @@ func run(main_node: Node) -> void:
 	ok(o["state"] == "charging" and float(o["prog"]) > 0.05, "capturing: charge %d%%" % int(float(o["prog"]) * 100.0))
 	var want_glow: float = OutpostLook.CRYSTAL_GLOW * float(o["prog"])
 	ok(absf(g1 - want_glow) < 0.05, "the crystal glow follows the charge (%.2f)" % g1)
-	var team_col: Color = Data.TEAM_COLORS[P.team % Data.TEAM_COLORS.size()]
+	var team_col: Color = SideColor.ally()      # (the holder is the player: the squad colour)
 	var cloth_col: Color = _param(n, "Mast/Banner/Cloth", "albedo")
 	var raised := is_equal_approx(banner.position.y, OutpostLook.BANNER_HIGH)
 	ok(raised and cloth_col.is_equal_approx(team_col), "banner raised in the holder's team colour")

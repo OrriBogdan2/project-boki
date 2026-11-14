@@ -44,19 +44,20 @@ func _mapping() -> void:
 
 func _colors() -> void:
 	var up := _x("outpost", "charging", {"team": 1})
-	var idle := ExitSignal.colors(_x("outpost", "idle"), ExitSignal.IDLE, -1, 0.0)
+	var idle := ExitSignal.colors(_x("outpost", "idle"), ExitSignal.IDLE, -1, 0.0, 0)
 	ok(Color(idle[0], 1.0) == ExitModels.UPLINK and Color(idle[1], 1.0) == ExitModels.UPLINK,
 			"idle: the uplink's own colour")
-	var act := ExitSignal.colors(up, ExitSignal.ACTIVE, -1, 1.0)
-	ok(Color(act[0], 1.0) == ExitSignal.team_color(1), "active: the beam is the colour of the team that started it")
-	var used := ExitSignal.colors(up, ExitSignal.USED, 3, 0.0)
-	ok(Color(used[0], 1.0) == ExitSignal.team_color(3) and Color(used[1], 1.0) == ExitSignal.team_color(3),
+	var act := ExitSignal.colors(up, ExitSignal.ACTIVE, -1, 1.0, 0)
+	ok(Color(act[0], 1.0) == SideColor.foe(),
+		"active: the beam is the colour of the team that started it (a rival to viewer 0)")
+	var used := ExitSignal.colors(up, ExitSignal.USED, 3, 0.0, 0)
+	ok(Color(used[0], 1.0) == SideColor.foe() and Color(used[1], 1.0) == SideColor.foe(),
 			"used: beam and zone in the colour of whoever stands on it")
 	ok(idle[0].a < act[0].a and act[0].a < used[0].a and idle[1].a < act[1].a and act[1].a < used[1].a,
 			"the beam and the zone get stronger idle < active < used")
 	var held := _x("outpost", "charging", {"team": 0, "contested": true})
-	var fight := ExitSignal.colors(held, ExitSignal.ACTIVE, -1, 1.0)
-	ok(Color(fight[1], 1.0) == ExitSignal.CONTESTED, "a contested yard shows its zone in the contest colour")
+	var fight := ExitSignal.colors(held, ExitSignal.ACTIVE, -1, 1.0, 0)
+	ok(Color(fight[1], 1.0) == SideColor.foe(), "a contested yard shows its zone in the contest colour")
 
 func _step(m: Match, secs: float, pins: Dictionary) -> void:
 	var t := 0.0

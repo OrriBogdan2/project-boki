@@ -8,8 +8,6 @@ extends RefCounted
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 ##     (the first time the tide closes, also an edge arrow to the ring for a few seconds: WaysHints)
 
-const TIDE_COL := Color(0.75, 0.2, 0.35, 0.8)
-const NEXT_COL := Color(0.95, 0.55, 0.65, 0.7)    # the dashed ring the tide closes to next
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
 const DASHES := 48
@@ -128,9 +126,9 @@ static func _tide(c: Control, m: Match, to_map: Callable, on_map: Callable, widt
 	var tr := Heart.tide_r(m)
 	var nr := Heart.next_r(m)
 	if tr > 0.0:
-		_circle(c, m.heart.site, tr, to_map, on_map, TIDE_COL, width, false)
+		_circle(c, m.heart.site, tr, to_map, on_map, SideColor.tone("tide"), width, false)
 	if nr < tr - 0.5 or tr <= 0.0:
-		_circle(c, m.heart.site, nr, to_map, on_map, NEXT_COL, width, true)
+		_circle(c, m.heart.site, nr, to_map, on_map, SideColor.tone("tide_next"), width, true)
 
 static func _circle(c: Control, ctr: Vector3, radius: float, to_map: Callable, on_map: Callable,
 		col: Color, width: float, dashed: bool) -> void:

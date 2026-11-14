@@ -900,8 +900,8 @@ func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var st := String(x["state"])
 	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
 	var held := OutpostLook.held(x)
-	var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
-	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
+	var flag: Color = SideColor.of_team(SideColor.viewer(m), int(x["team"])) if held else Color(0.55, 0.58, 0.64, 0.9)
+	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x), held and int(x["team"]) != SideColor.viewer(m))
 	if st == "charging":
 		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
 	if st in ["charging", "open"]:
