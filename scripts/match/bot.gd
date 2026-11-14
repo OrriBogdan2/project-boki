@@ -36,13 +36,13 @@ static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
-const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
+const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_breach", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
 	"seat", "ring", "gate"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape",
 	"lair_lever", "lair_updraft", "retreat", "assist", "spark", "gate", "ring", "ring_in", "zone"]
 ## Goals a bot holds interact at on arrival, and goals it may stand and wait at (no give-up timer).
 const HOLD_GOALS := ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever", "spark", "gate"]
-const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp", "seat", "ring"]
+const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_breach", "lair_lever", "lair_camp", "seat", "ring"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
 func tick(m: Match, h: Hunter, dt: float) -> void:
@@ -744,6 +744,8 @@ func _choose(m: Match, h: Hunter) -> void:
 			if mb.dead or mb == ign_e or (mb is Shrubling and (mb as Shrubling).ss == "disguised"): continue
 			# a sleeping boss can't be hurt; an awake one is worth walking up to
 			if mb is Boss and (mb as Boss).dormant: continue
+			# a lair's Gate Seal only when we came to break it down (Lairs.bot_goal)
+			if mb.mkind == "gate" and a.get("goal_kind", "") != "lair_breach": continue
 			var d := h.flat_dist(mb)
 			var reach := 16.0 if mb is Boss else 8.0
 			if mb == fight_boss: reach = 1e9      # (wherever it is in the lair, it's the fight)
