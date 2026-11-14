@@ -31,6 +31,9 @@ func run(main: Node) -> void:
 		var firsts: Dictionary = DashFlow.file_of(hero).get("into_cast", {})
 		for first in firsts:
 			for second in firsts[first]:
+				# Tender's Hearth Call needs a teammate within reach (nobody: nothing happens), and a lone trial has none
+				if hero == "tender" and (first == "x" or second == "x"):
+					continue
 				if second != "at":
 					await _row(main, hero, first, second, firsts[first])
 	CombatBus.ability_used.disconnect(flow_check._on_used)

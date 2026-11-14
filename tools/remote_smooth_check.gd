@@ -32,32 +32,32 @@ const DN := preload("res://tools/displace_net_check.gd")
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
 class LagRelay extends RelayServer:
 	var rng := RandomNumberGenerator.new()
-	var held: Array = []          # [due msec, peer id, message, fast, seq]
+	var lag_held: Array = []          # [due msec, peer id, message, fast, seq]
 	var seq := 0
 	var last_fast := {}           # peer id -> seq of the newest snapshot it got
 	var last_due := {}            # peer id -> due msec of its last reliable message (they stay in order)
-	var lost := 0
+	var lag_lost := 0
 
 	func _send(id: int, d: Dictionary, fast := false) -> void:
 		seq += 1
 		if fast and rng.randf() < LOSS:
-			lost += 1
+			lag_lost += 1
 			return
 		var due := Time.get_ticks_msec() + ONE_WAY_MS + rng.randi_range(-JITTER_MS, JITTER_MS)
 		if not fast:
 			due = maxi(due, int(last_due.get(id, 0)))
 			last_due[id] = due
-		held.append([due, id, d, fast, seq])
+		lag_held.append([due, id, d, fast, seq])
 
 	func _process(dt: float) -> void:
 		super._process(dt)
 		var now := Time.get_ticks_msec()
-		held.sort_custom(func(a, b): return a[0] < b[0])
-		while not held.is_empty() and int(held[0][0]) <= now:
-			var x: Array = held.pop_front()
+		lag_held.sort_custom(func(a, b): return a[0] < b[0])
+		while not lag_held.is_empty() and int(lag_held[0][0]) <= now:
+			var x: Array = lag_held.pop_front()
 			if x[3]:
 				if int(x[4]) < int(last_fast.get(x[1], 0)):
-					lost += 1
+					lag_lost += 1
 					continue
 				last_fast[x[1]] = x[4]
 			super._send(x[1], x[2], x[3])
@@ -136,7 +136,7 @@ func _host() -> void:
 		await _host_run(0.1, "", [])
 	ok(dumped, "the guest wrote its record")
 	if dumped:
-		_report(truth, JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("drawn.json"))), relay.lost)
+		_report(truth, JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("drawn.json"))), relay.lag_lost)
 	_finish()
 
 ## The run the host's Hunter makes, recorded as [wall s, x, y, z, phase].

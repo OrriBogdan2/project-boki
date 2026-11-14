@@ -269,12 +269,12 @@ Other checks:
     maxzone, pan distance, quadratic easing; a Supervive guide recommends 0.5 / 0.8 / 100% on Fully dynamic).
   - Dashes: the view trails and eases, never cuts. In the 1v4 clip at 4.37-4.80 s the hunter crosses 105 px (11% of the width)
     while the ground moves at most 8.5 px per frame; the dredge sheet (frames 0187-0188, 493.2-493.8 s) saw ~0.5 s to catch up
-    on a blink dash. Ours trails a dash by ~0.55 m and is back to the running lag 0.5 s in (`--cam-lead-check`); a slower,
+    on a blink dash. Ours trails a dash by ~0.55 m and is back to the running lag 1.2 s in (the trail model of decision 0050 closes the last 0.4 m slowly) (`--cam-lead-check`); a slower,
     dash-only catch-up like the source's 0.4-0.5 s is not built (the tight 15/s follow is what keeps `cam_lag_m` under 0.4 m).
   - Knocks and glides: no clean sample in these clips. With no cursor lean there is nothing to hold or recentre.
   - `--cam-lead-check` asserts it in an expedition and in the Training Grounds: the lean with the cursor at the screen's edge is
     under 0.35 m (the footage's noise floor, 1.5% of the view), the view drifts under 5 cm in the second after a flick, and a dash
-    moves it under 0.5 m in any frame, trails, and is back within 0.5 s. `--cam-lead-shots` holds the cursor at the right edge for
+    moves it under 0.5 m in any frame, trails, and is back within 1.2 s. `--cam-lead-shots` holds the cursor at the right edge for
     a review frame (GPU).
 - **Settings:**
   - "Expedition camera" is now "Camera".
