@@ -415,9 +415,8 @@ func _find_interact() -> void:
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, vp.y - 110.0)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("menu") and not Overlay.is_open():
-		if panel_open != "": _close_panel()
-		else: Overlay.open_pause("town")
+	if event.is_action_pressed("menu") and not Overlay.is_open():      # (an open panel takes Esc first: PanelClose)
+		Overlay.open_pause("town")
 	if event is InputEventMouseButton and event.pressed and panel_open == "":
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.5)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.5)

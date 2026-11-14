@@ -908,6 +908,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	p.custom_minimum_size.x = width
 	# keyboard and pad users start on the first thing they can press
 	p.tree_entered.connect(func(): focus_first(p))
+	if on_close.is_valid():
+		PanelClose.attach(p, on_close)
 	return [p, body]
 
 static func _shell_of(body: Control) -> PanelContainer:
@@ -1059,6 +1061,7 @@ static func confirm(host: Control, head: String, text: String, yes_txt: String, 
 	row.add_child(danger(yes_txt, yes_cb) if dangerous else primary(yes_txt, yes_cb))
 	v.add_child(row)
 	layer.set_meta("modal", true)
+	PanelClose.attach(p, layer.queue_free)
 	host.add_child(layer)
 	pop_in(p)
 	no.grab_focus.call_deferred()
