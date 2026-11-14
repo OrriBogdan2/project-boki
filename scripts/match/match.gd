@@ -1748,6 +1748,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 			if lv >= 0:
 				_armor_up(credit)
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
+			ArmourHint.hit(self, credit, target)
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
 	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
@@ -5631,9 +5632,9 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 				bd = dd; best = Vector3(q.x, gy, q.z)
 	return best
 
-func _tip(key: String, text: String) -> void:
+func _tip(key: String, text: String, near := "") -> void:
 	if hud != null and tip_once(key):
-		hud.tip(text)
+		hud.tip(text, near)
 
 ## The first-time hints' once-per-save gate (Save.d.tutorial): true the one time key is asked for.
 func tip_once(key: String) -> bool:
