@@ -435,11 +435,17 @@ func _tick_wire(dt: float) -> void:
 func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	var dd := dash_def()
 	var time := run_time(L)
+<<<<<<< HEAD
 	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d})
+=======
+	var a := h.position + Vector3(0, 0.9, 0)
+	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d, "curved": true})
+>>>>>>> a7c33ffe99 (Dash curves c: Kingpin, Joule and Felix ground dash shapes fitted from 1/15 s tracks)
 	# momentum carries: the streak adds the drift you had
 	var v := d * (L / time) + drift
 	h.roll_dir = v.normalized()
 	h.roll_speed = v.length()
+	if not curved.is_empty(): curved["speed"] = h.roll_speed    # Joule's fitted curve on the drifted speed
 	h.phase_t = maxf(h.phase_t, time + 0.05)
 	run_t = time
 	run_exit = true
