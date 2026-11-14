@@ -98,7 +98,7 @@ func tender() -> void:
 	ok("mm carry: no re-pick for 4 s after a drop", locked, "lock %.2f" % K.lock_t)
 	A.down_hp = 60.0
 	A.revive = 0.0
-	T.teleport(P.pos + Vector3(14, 0, 0))     # (the rival has closed in by now: a foe on a downed ally stomps, nobody can scoop it up)
+	T.teleport(P.pos + Vector3(14, 0, 0))     # (a rival on a downed ally stomps it: nobody can scoop it up)
 	A.teleport(P.pos + Vector3(0.4, 0, 0))
 	sc.step(m, 0.8)
 	ok("mm carry: after the 4 s they can be scooped up again", CareUtil.is_carried(A), "lock %.2f" % K.lock_t)

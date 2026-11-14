@@ -95,7 +95,8 @@ func _steps() -> void:
 		_place(at + Vector3(-0.2, HeroZones.ROCK_TOP, 0))
 		var end := at.x + 5.0
 		_score("step up onto a rock %.2f m higher" % rise, Vector2(1, 0), SETTLE, func(): return P.pos.x > end, true)
-		_score("step down onto a rock %.2f m lower" % rise, Vector2(-1, 0), 0, func(): return P.pos.x < at.x, false, true)
+		var down := func(): return P.pos.x < at.x
+		_score("step down onto a rock %.2f m lower" % rise, Vector2(-1, 0), 0, down, false, true)
 
 ## Steps frames (after `settle` unscored), moving both along the move `how` gives (a Vector2, or a Callable
 ## returning one), until `stop` returns true (at most WALK_T), and asserts the weight-bearing foot's gap over the

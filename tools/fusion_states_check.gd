@@ -121,7 +121,8 @@ func _hero_states(hero: String, form: String) -> Dictionary:
 		out[st] = _watch(hp, WINDOW, 0.0, func(): hp.inp[key] = false)
 		hp.inp[key] = false
 		_settle(hp, 1.2)
-	var wait := 4.0      # (a form's shell soaks the chip hit, so a move still playing from the E probe would show instead of the hit)
+	# (a form's shell soaks the chip hit: a move still playing from the E probe would show instead of the hit)
+	var wait := 4.0
 	while wait > 0.0 and (String(hp.anim_s.get("kmove", "")) != "" or String(hp.anim_s.get("act", "")) != ""):
 		_settle(hp, 0.1)
 		wait -= 0.1
@@ -199,7 +200,7 @@ func _shown(hp: Hunter) -> String:
 		if r.get("proc", false):
 			return ("keyed " + km) if keyed else "FALLBACK " + km
 		if float(s.get("hit_t", 99.0)) < 0.3:
-			return "flinch"      # (a chip hit is the additive flinch layer over the loco clip: WardenClips flinch_w, no clip of its own)
+			return "flinch"      # (a chip hit is WardenClips' additive flinch over the loco clip, no clip of its own)
 	elif keyed:
 		return "keyed " + km
 	elif float(s.get("hit_t", 99.0)) < 0.3:
