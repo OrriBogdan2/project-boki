@@ -308,6 +308,8 @@ func _enter() -> void:
 		p.gear[0] = {"id": "grapple", "rar": 1}      # (skipped ahead past the glove: it is yours anyway)
 		p.refresh_gear()
 	_words()
+	if detail != "" and m.hud:
+		m.hud.tip(detail)       # (once a step: the strip is one line, the plain words wait in the message lane)
 
 ## A tutorial camp's monster: `hp` times the health (camp_hp, or the camp's own "hp"), so the kills that pay
 ## its XP come quickly; bigger, barely a scratch when it hits, slow telegraphed attacks (content/rules/tutorial.json
@@ -583,10 +585,7 @@ func _words() -> void:
 	elif sid == "shoot":
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
-	var was := detail
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
-	if detail != "" and detail != was and m.hud:
-		m.hud.tip(detail)       # once per new line (this runs every frame): the plain words go to the message lane
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()

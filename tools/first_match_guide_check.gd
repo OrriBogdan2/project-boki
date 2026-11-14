@@ -4,7 +4,8 @@ extends RefCounted
 ##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
 ##   3. the seat line: the squad took a Ways Out seat without you (OneSeat late_s)
-##   4. every line fits the banner lane in at most two lines at 1280x720
+##   4. in squads, the B line (base to a teammate) shows when they're all far off and clears on the wheel
+##   5. every line fits the banner lane in at most two lines at 1280x720
 var bad := 0
 var m: Match
 var main: Node
@@ -22,6 +23,7 @@ func run(mn: Node) -> void:
 	Save.no_write = true
 	_save_flag()
 	_walk()
+	_mates()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -161,12 +163,35 @@ func _seat(p: Hunter) -> void:
 	ok(g.id != "seat", "the seat line shows once a match")
 	os.late.erase(p)
 
+func _mates() -> void:
+	m.queue_free()
+	Save.d["first_guide"] = 0
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1000.0, "seed": 4243, "no_drop": true})
+	m.set_process(false)
+	g = m.guide
+	var p: Hunter = m.player
+	p.skill_pts = 0
+	p.dropping = false
+	m.chests.clear()
+	for h in m.hunters:
+		if h != p:
+			h.pos = p.pos + Vector3(300 if h.team != p.team else 60, 0, 0)
+	g.shown = {"land": true, "send": true}
+	_tick(1.6)
+	ok(g.id == "mates" and g.line.begins_with("Hold %s to pick a teammate" % Settings.key_cap("base")),
+			"squads, teammates far off: hold B to base to one (%s)" % g.line)
+	BaseWheel.open(p, Vector2(640, 360), BaseRecall.mates(m, p))
+	_tick(0.2)
+	p.inp.erase("bwheel")
+	ok(g.line == "", "opening the wheel clears it")
 
 func _fit() -> void:
 	var strip := TutorialStrip.rect(Vector2(1280, 720))
 	var w := strip.size.x - strip.size.y
 	for row: Array in FirstMatchGuide.rules()["lines"]:
-		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle")
+		var txt := TutorialText.fill(String(row[1]), m.player).replace("%s", "Cindle").replace("%B", "B")
 		var px := int(strip.size.y * 0.5)
 		while px > 12 and m.hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
 			px -= 1

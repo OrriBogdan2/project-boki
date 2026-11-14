@@ -1,6 +1,7 @@
 """Mossgrade's skeleton and the clips that are its own: eight legs in a slow wave, flowers that bud and bloom."""
 import mossgrade
 from boki_clips import LOOK_UP, SHARED, add, c, ear_pose, eat_ground, mouth_tool, part_bones, pet, s, seq
+from boki_gait import planted
 from mossgrade import FLOWERS, LEGS, SIDES, v3
 
 BUD = 0.6          # the flowers' size in everyday clips; 1 is the open bloom they are modelled as
@@ -46,6 +47,19 @@ def legs(p, t, rate, swing, lift, spread=0.0):
             add(p, "%s.%s" % (paw, sd), rx=-a * swing * 0.6 + up * lift * 1.2)
 
 
+def planted_leg(leg, paw, sd, sx):
+    """For boki_gait: `a` swings the leg forward, `b` lifts it out to its side; the toes stay flat."""
+    def put(p, a, b):
+        p["%s.%s" % (leg, sd)] = (a, 0.0, sx * LEG_OUT * b)
+        p["%s.%s" % (paw, sd)] = (-a, 0.0, 0.0)
+    return put
+
+
+# legs()'s wave for boki_gait.planted: the back pair first, the two sides half a step apart
+WAVE = [("%s.%s" % (paw, sd), (3 - k) * 0.22 + (0.5 if sd == "R" else 0.0), planted_leg(leg, paw, sd, sx))
+        for sd, sx in SIDES for k, (leg, paw, _, _) in enumerate(LEGS)]
+
+
 def buds(p, t, size=BUD, sway=0.08, rate=1.0):
     """Flowers nodding in the moss, each a little behind the one before."""
     for i in range(len(FLOWERS)):
@@ -86,7 +100,6 @@ def shuffle(t):
 def scurry(t):
     """Run: its idea of hurrying, the same wave at a bustle, the whole barrel jiggling on top of it."""
     p = {}
-    legs(p, t, 2, 0.55, 0.32)
     bounce = abs(s(t, 4))
     p["root_at"] = (0, 0.016 * bounce, 0)
     p["root_sc"] = (1 - 0.03 * bounce, 1 + 0.05 * bounce, 1 - 0.02 * bounce)
@@ -185,10 +198,13 @@ def mine(t):
     return mouth_tool(t, [(0, 0), (0.38, 1), (0.5, -1), (0.58, -0.7), (1, 0)], "prop_pick", 0.2, 0.3)
 
 
+BONES = _bones()
 CLIPS = {name: (secs * 1.15, loop, eight(fn)) for name, (secs, loop, fn) in SHARED.items()}
 CLIPS.update({
-    "walk": (1.3, True, shuffle),
-    "run": (0.7, True, scurry),
+    "walk": (1.3, True, planted(shuffle, BONES, WAVE, duty=0.3, reach=0.14, lift=0.04, drop=0.015,
+                                guess=(0.0, 0.0))),
+    "run": (1.4, True, planted(scurry, BONES, WAVE, duty=0.2, reach=0.14, lift=0.05, drop=0.015, steps=2,
+                               guess=(0.0, 0.0))),
     "carry": (1.3, True, lug),
     "pet": (2.6, True, eight(pet, size=0.9, sway=0.05)),     # petted, the flowers on its back open up
     "attack": (0.85, False, bump),
@@ -199,4 +215,3 @@ CLIPS.update({
     "mine": (1.1, True, eight(mine)),
 })
 HIDE_AT = {"prop_berry": (0, 0.14, 0.60)}
-BONES = _bones()
