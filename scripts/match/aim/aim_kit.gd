@@ -166,7 +166,8 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 ## A long placement line centred on `at`, along `dir` (default: across the aim), with chevrons pointing
 ## in toward a centre ring (a wall or a rift that closes on its middle).
 ## p: at (the cursor point, clamped to `range`), range, dir, len (8), chevrons (3), ring (true), bend (radians the
-## line turns end to end, 0 = straight) and bow (unit normal the middle bulges toward)
+## line turns end to end, 0 = straight), bow (unit normal the middle bulges toward) and width (m: a faint band
+## of the true area under the line, 0 = none)
 static func span(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "span", p)
 	var at: Vector3 = p.get("at", AimMode.place(h, float(p.get("range", 1e9))))
@@ -177,6 +178,7 @@ static func span(h: Hunter, id: String, p := {}) -> void:
 	e["len"] = float(p.get("len", 8.0)); e["chevrons"] = int(p.get("chevrons", 3)); e["ring"] = bool(p.get("ring", true))
 	e["bend"] = float(p.get("bend", 0.0))
 	e["bow"] = p.get("bow", Vector2.ZERO)
+	e["width"] = float(p.get("width", 0.0))
 	_put(h, id, e)
 
 ## A flat 4-point glint on the ground (a charge riding a line, a lock-on). p: at, size (0.4), rot
@@ -210,7 +212,8 @@ static func entry(h: Hunter, id: String) -> Dictionary:
 
 # ------------------------------------------------------------------ cursor states
 ## The charge ring on the cursor, k 0..1, called each step while charging. Crossing 1 fires the flare.
-## p: col (hero colour), flare (true: flare on reaching full)
+## p: col (hero colour), flare (true: flare on reaching full), at ("cursor", or "body": round the hunter, where a
+## source kit shows its charge arc on the hero, e.g. Kael's blast)
 static func charge(h: Hunter, k: float, p := {}) -> void:
 	if blocked(h):
 		return
@@ -218,6 +221,7 @@ static func charge(h: Hunter, k: float, p := {}) -> void:
 	var was := float(r["k"]) if float(h.m.time) - float(r["t"]) <= AimDraw.KEEP else -1.0
 	r["k"] = k; r["t"] = float(h.m.time)
 	r["col"] = p.get("col", hero_col(h))
+	r["at"] = String(p.get("at", "cursor"))
 	if k >= 1.0 and was < 1.0 and bool(p.get("flare", true)):
 		flare(h, p)
 
@@ -237,14 +241,15 @@ static func perfect(h: Hunter, p := {}) -> void:
 	r["perfect"] = AimReticle.PERFECT_T
 	r["pcol"] = p.get("col", Color("ffd25a"))
 
-## This hunter's cursor states now: {charge (-1 = none), flare (s left), perfect (s left)}.
+## This hunter's cursor states now: {charge (-1 = none), flare (s left), perfect (s left), at (cursor | body)}.
 static func reticle(h: Hunter) -> Dictionary:
 	var d := layer(h.m)
 	if not d.ret.has(h.get_instance_id()):
-		return {"charge": -1.0, "flare": 0.0, "perfect": 0.0}
+		return {"charge": -1.0, "flare": 0.0, "perfect": 0.0, "at": "cursor"}
 	var r: Dictionary = d.ret[h.get_instance_id()]
 	var live := float(h.m.time) - float(r["t"]) <= AimDraw.KEEP
-	return {"charge": float(r["k"]) if live else -1.0, "flare": float(r["flare"]), "perfect": float(r["perfect"])}
+	return {"charge": float(r["k"]) if live else -1.0, "flare": float(r["flare"]), "perfect": float(r["perfect"]),
+		"at": String(r.get("at", "cursor"))}
 
 # ------------------------------------------------------------------ helpers
 static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
