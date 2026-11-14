@@ -165,5 +165,13 @@
 	"clip": {"lines": {"lmb": "Hold to draw, then let go on the gold flash.", "rmb": "Hold to draw a Heavy Shot; a foe pinned to a wall takes it twice.", "dash": "Roll, then walk through rocks and trees for 2.8s."}, "holds": ["lmb"]},
 	"tells": {
 		"dash_spent": "a green spirit shell over her while it lasts; dash pip dark"
+	},
+	"src": {
+		"lmb": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] [O] (owner question open) (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }
