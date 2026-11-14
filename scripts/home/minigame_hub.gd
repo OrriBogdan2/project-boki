@@ -1,6 +1,6 @@
 class_name MinigameHub
 extends RefCounted
-## The title's "Play with your Boki": the garden opens straight into a picker of the minigames this
+## The title's "Play with Your Boki": the garden opens straight into a picker of the minigames this
 ## base has (the Dash, Stump Shove, Seek, Spark Volley), each with its one-line rule and best Boki.
 ## It needs no farm tutorial step and never touches tutorial state, so skipping the tutorial stays
 ## lossless. The list is content/rules/minigames.json; a game is listed only when Home holds it in
@@ -11,7 +11,7 @@ extends RefCounted
 ## Results: Save.d["game_board"] = {game id: {"last": name, "wins": {name: count}}}; older saves
 ## start with {}, so there is no migration.
 
-const TITLE := "Play with your Boki"
+const TITLE := "Play with Your Boki"
 
 static func rules() -> Dictionary:
 	return Content.rules("minigames")
