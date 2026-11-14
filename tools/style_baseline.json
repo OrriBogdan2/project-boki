@@ -204,7 +204,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 185,
+"long_line": 184,
 "nested_ternary": 26,
 "semicolon": 229
 },
@@ -857,9 +857,6 @@
 },
 "tools/check.gd": {
 "semicolon": 1
-},
-"tools/check_registry.gd": {
-"long_line": 4
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2

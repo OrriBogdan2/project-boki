@@ -97,7 +97,7 @@ func _host_up() -> Hunter:
 			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-		if CheckClock.own_msec(guest_pid) - said > 3000:      # a slow guest may not have heard the first start: say it again
+		if CheckClock.own_msec(guest_pid) - said > 3000:      # a slow guest may have missed it: say again
 			said = CheckClock.own_msec(guest_pid)
 			Net.lobby_emit("dn", {"c": "start", "d": d})
 	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")

@@ -6,14 +6,14 @@ extends RefCounted
 ## Checks that were once inline in main.gd live here too (docs/DEBT.md lists what is left).
 
 const CHECKS := {
-	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],      # loot, kin keeping, the Soul Shrine
-	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],      # each ability verb at a dummy rival
-	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],      # KIN_GRAMMAR phase 2
+	"--economy-check": ["res://tools/economy_check.gd", "economy_check", null],  # loot, kin keeping, the Soul Shrine
+	"--ability-check": ["res://tools/ability_check.gd", "ability_check", null],  # each ability verb at a dummy rival
+	"--grammar-runtime-check": ["res://tools/grammar_runtime_check.gd", "grammar_runtime_check", null],  # KIN_GRAMMAR 2
 	"--duel-check": ["res://tools/duel_check.gd", "duel_check", null],      # the duel room smoke test
 	"--extract-check": ["res://tools/extract_check.gd", "extract_check", null],
 	"--truce-check": ["res://tools/truce_check.gd", "truce_check", null],
 	"--bot-sanity-check": ["res://tools/bot_sanity_check.gd", "bot_sanity_check", null],
-	"--drop-check": ["res://tools/drop_plan_check.gd", "drop_plan_check", null],      # the drop: planning, pings, the squad
+	"--drop-check": ["res://tools/drop_plan_check.gd", "drop_plan_check", null],  # the drop: planning, pings, the squad
 	"--home-build-check": ["res://tools/home_build_check.gd", "home_build_check", null],      # build mode at home
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
@@ -103,7 +103,7 @@ const CHECKS := {
 	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],      # each zone's ambient layer
 	"--wade-check": ["res://tools/wade_check.gd", "wade_check", null],  # GARDEN.md 4 Boki wading
 	"--garden-day-check": ["res://tools/garden_day_check.gd", "garden_day_check", null],      # a 20-minute garden day
-	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],      # no natural death, the cures
+	"--sick-recover-check": ["res://tools/sick_recover_check.gd", "sick_recover_check", null],  # no natural death
 	"--garden-whistle-check": ["res://tools/garden_whistle_check.gd", "garden_whistle_check", null],
 	"--garden-whistle-shots": ["res://tools/garden_whistle_shots.gd", "garden_whistle_shots", null],
 	"--garden-daily-check": ["res://tools/garden_daily_check.gd", "garden_daily_check", null],  # wishes, away gifts
