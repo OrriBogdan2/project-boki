@@ -58,7 +58,7 @@ static func preview(look: Dictionary) -> SubViewportContainer:
 	vp.msaa_3d = Viewport.MSAA_4X
 	vp.size = PREVIEW
 	c.add_child(vp)
-	var wisp := WispLook.build(look, SideColor.YOU)
+	var wisp := WispLook.build(look, SideColor.you())
 	vp.add_child(wisp)
 	var cam := Camera3D.new()
 	cam.position = Vector3(0, 0.13, CAM_BACK)
