@@ -136,6 +136,7 @@ var rain_next := randf() < 0.45     # what the coming weather turn brings, known
 var ambience := HomeAmbience.new()
 
 func _ready() -> void:
+	drill = YardDrill.new(self)
 	if Game.modding(): Game.apply_mod()
 	if VisitZones.has(visit): visit = VisitZones.view(visit, zone)
 	elif zone == GardenZones.HUB: visit = HubLayout.island()
@@ -4058,7 +4059,7 @@ var care_save := 0.0
 var yard: Node3D = null
 var nest: Node3D = null
 var train := {}                 # the training session in progress
-var drill := YardDrill.new(self)   # the yard drill (yard_drill.gd)
+var drill: YardDrill            # the yard drill (yard_drill.gd), made in _ready
 
 ## Builds the yard and the nest, and catches every kin up on the time you were away.
 func _setup_care() -> void:
