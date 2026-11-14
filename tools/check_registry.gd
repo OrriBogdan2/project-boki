@@ -256,7 +256,7 @@ const CHECKS := {
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	"--hit-class-check": ["res://tools/hit_class_check.gd", "hit_class_check", null],      # hit looks by target
-	"--hit-class-shots": ["res://tools/hit_class_shots.gd", "hit_class_shots", null],      # --shots-dir=<dir>, needs a renderer
+	"--hit-class-shots": ["res://tools/hit_class_shots.gd", "hit_class_shots", null],      # needs a renderer
 	# clans slices 1-2: roster, join, leave, old saves, base
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
@@ -358,7 +358,7 @@ const CHECKS := {
 	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
 	"--boki-idle-check": ["res://tools/boki_idle_check.gd", "boki_idle_check", null],    # rigged Boki idles and fidgets
-	"--boki-idle-shots": ["res://tools/boki_idle_shots.gd", "boki_idle_shots", null],    # a strip of every idle and fidget
+	"--boki-idle-shots": ["res://tools/boki_idle_shots.gd", "boki_idle_shots", null],    # every idle and fidget
 	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],      # rigged Boki gait gate
 	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],      # rigged Boki gait strips
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],      # fliers hover, glide, flare

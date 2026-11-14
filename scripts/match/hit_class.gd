@@ -34,7 +34,8 @@ static func tint(target: Ent, cls: int, fallback: Color) -> Color:
 		ARMOUR:
 			return (target as Hunter).armor_col() if target is Hunter else ARMOUR_COL
 		BOKI:
-			return DexView.type_col(DexView.type_of((target as Kin).species))      # the Field Book's, as Juice.flash_col
+			# the Field Book's type colour, as Juice.flash_col
+			return DexView.type_col(DexView.type_of((target as Kin).species))
 		MONSTER:
 			return Data.MOBS.get((target as Mob).mkind, {}).get("color", fallback)
 	return fallback
