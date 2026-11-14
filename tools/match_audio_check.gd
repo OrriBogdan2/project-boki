@@ -130,7 +130,7 @@ func _ult_chime(m: Match, P: Hunter) -> void:
 	m.revive_hunter(P, mate)
 	_step(m, 0.1)
 	ok(cue.plays == before + 2, "...it plays once you're up (%d)" % (cue.plays - before))
-	await _wall_wait(Sfx.STACK_MS + 60)                  # (Sfx spaces and stacks repeats in real ms; a timer can run short)
+	await _wall_wait(Sfx.STACK_MS + 60)   # Sfx stacks repeats in real ms; an engine timer can run short
 	Sfx.play("kill")
 	P.ak.cd["x"] = 0.05
 	_step(m, 0.1)
