@@ -15,7 +15,7 @@ const SEXES := ["Female", "Male"]
 const SEX_FACE := [{"face_w": 0.3, "jaw": 0.4}, {"face_w": 0.7, "jaw": 0.65}]
 ## Per sex, in SEXES order: x the body's size (the model only; the ring, her hitbox, keeps its size). With her
 ## smaller head and torso she stands about 7 cm shorter.
-const SEX_HEIGHT := [0.985, 1.0]
+const SEX_HEIGHT := [0.965, 1.0]
 const HEIGHTS := ["Short", "Average", "Tall"]
 const HEIGHT_SCALE := [0.9, 1.0, 1.1]       # x the hunter's size: the whole body, its ring and the camera
 const BUILDS := ["Slight", "Average", "Sturdy"]
