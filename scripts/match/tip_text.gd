@@ -7,9 +7,9 @@ static func move() -> String:
 	var fire := Settings.key_cap("fire")
 	return "Hold %s to shoot  ·  %s dashes  ·  %s" % [fire, Settings.key_cap("dash"), glide_how()]
 
-## How to glide: jump, then press jump again in the air and hold.
+## How to glide: jump, then press jump again in the air.
 static func glide_how() -> String:
-	return "jump, then press %s again in the air and hold to glide" % Settings.key_cap("jump")
+	return "jump, then press %s again in the air to glide" % Settings.key_cap("jump")
 
 static func rings() -> String:
 	return ("Glowing rings in the air between islands: jump off the edge, then %s and fly through them for a burst "

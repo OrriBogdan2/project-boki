@@ -5635,8 +5635,7 @@ func _tips() -> void:
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
 	tips_live = true
-	var jk := Settings.key_cap("jump")
-	_tip("move", "Hold left click to shoot  ·  %s dashes  ·  %s, then %s again to glide" % [Settings.key_cap("dash"), jk, jk])
+	_tip("move", TipText.move())
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)

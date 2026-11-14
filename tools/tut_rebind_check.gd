@@ -5,7 +5,7 @@ extends RefCounted
 ## second line, key cap, scout hint, the Boki's lines), every garden tutorial hint, every first-time hint
 ## (TipText), the Training Area drill rows, the Relic pick words and the kit cards are read again.
 ## A default key that should have changed fails, and so does text built before the rebind that does not
-## refresh. The glide steps say: jump, then press again in the air and hold.
+## refresh. The glide steps say: jump, then press again in the air.
 
 var bad := 0
 var main: Node
@@ -161,7 +161,7 @@ func _tips() -> void:
 			"stagger": TipText.stagger("Brute")}
 	for k in lines:
 		_clean(lines[k], "first-time hint '%s'" % k)
-	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again in the air and hold"),
+	ok(TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again in the air"),
 			"the first move hint names the rebound attack key and the glide wording")
 
 func _garden() -> void:
@@ -181,7 +181,7 @@ func _drill(m: Match) -> void:
 	for t in m.train_rows():
 		_clean(t[1], "training drill '%s'" % t[0])
 	var glide: Array = m.train_rows().filter(func(t): return t[0] == "glide")[0]
-	ok(glide[1].contains("press again in the air and hold"), "the glide drill is jump, again, hold ('%s')" % glide[1])
+	ok(glide[1].contains("press again in the air"), "the glide drill is jump, again ('%s')" % glide[1])
 	var ult: Array = m.train_rows().filter(func(t): return t[0] == "ult")[0]
 	ok(ult[1].contains(Settings.key_cap("ultimate")), "the Fuse drill names the rebound key ('%s')" % ult[1])
 

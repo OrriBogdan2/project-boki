@@ -3,7 +3,7 @@
 	"rows": [
 		["move", "Walk around", "up"],
 		["dash", "Dash", "dash"],
-		["glide", "Jump, then press jump again in the air to glide", "jump"],
+		["glide", "Jump, then press again in the air to glide", "jump"],
 		["shoot", "Shoot a target dummy", "fire"],
 		["ability", "Use your ability", "signature"],
 		["ult", "Fuse with your Boki ({key}: open from the start here)", "ultimate"],
