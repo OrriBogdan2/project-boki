@@ -18,33 +18,53 @@ const ATTACKS := {
 	"serpent": ["dash", "storm", "static"],
 	"brood": ["spit", "lob", "brood", "burrow"],
 }
-const WAKE_S := 1.5               # s: Lairs.wake holds its first attack back 1.6 s
-const PHASE_S := 2.4              # s: the phase roar (Boss._phase_up)
-const DEATH_S := 1.1              # s: the death move, then the body is handed to the dissolve
-const DASH_GAP_S := 0.55          # s: the serpent's dash itself, before the next wind-up
-const BURROW_HIT_S := 2.1         # s into a burrow when the Brood Mother bursts up under you
-const BROOD_EGG_K := 0.5          # the egg sacs show at this share of the brood wind-up
+const WAKE_S := 1.5  # s: Lairs.wake holds its first attack back 1.6 s
+const PHASE_S := 2.4  # s: the phase roar (Boss._phase_up)
+const DEATH_S := 1.1  # s: the death move, then the body is handed to the dissolve
+const DASH_GAP_S := 0.55  # s: the serpent's dash itself, before the next wind-up
+const BURROW_HIT_S := 2.1  # s into a burrow when the Brood Mother bursts up under you
+const BROOD_EGG_K := 0.5  # the egg sacs show at this share of the brood wind-up
 ## s the strike move runs: the blow plus the follow-through (the attack's length minus its wind-up)
-const STRIKE_S := {"slam": 0.6, "boulders": 0.9, "fissure": 0.5, "dash": DASH_GAP_S, "storm": 0.5, "static": 0.6,
-	"spit": 0.5, "lob": 0.9, "brood": 0.8, "burrow": 0.6}
-const IDLE_S := {"colossus": 4.0, "serpent": 1.8, "brood": 2.4}      # s per idle loop
-const STAGGER_S := 1.2            # s per stagger loop
-const GAIT := {"colossus": 0.8, "serpent": 1.2, "brood": 1.4}        # walk cycles per radian of Boss.anim / TAU
-const LOOP_RATE := {"sleep": 0.6, "stagger": 0.3}      # Colossus clip speed for the loops that are not at full speed
-const WALK_MPS := 0.3             # m/s: above this the walk plays
-const RATE_FAST := 30.0           # 1/s: how tightly a pivot follows wind-ups, strikes and the death
-const RATE_SLOW := 8.0            # 1/s: for the loops and the wake
+const STRIKE_S := {
+	"slam": 0.6,
+	"boulders": 0.9,
+	"fissure": 0.5,
+	"dash": DASH_GAP_S,
+	"storm": 0.5,
+	"static": 0.6,
+	"spit": 0.5,
+	"lob": 0.9,
+	"brood": 0.8,
+	"burrow": 0.6
+}
+const IDLE_S := {"colossus": 4.0, "serpent": 1.8, "brood": 2.4}  # s per idle loop
+const STAGGER_S := 1.2  # s per stagger loop
+const GAIT := {"colossus": 0.8, "serpent": 1.2, "brood": 1.4}  # walk cycles per radian of Boss.anim / TAU
+const LOOP_RATE := {"sleep": 0.6, "stagger": 0.3}  # Colossus clip speed for the loops that are not at full speed
+const WALK_MPS := 0.3  # m/s: above this the walk plays
+const RATE_FAST := 30.0  # 1/s: how tightly a pivot follows wind-ups, strikes and the death
+const RATE_SLOW := 8.0  # 1/s: for the loops and the wake
 const CHANS := {"rx": 0, "ry": 1, "rz": 2, "px": 3, "py": 4, "pz": 5, "s": 6, "sy": 7}
 
 ## The Colossus clips (Assets.MOBS "colossus"): the spec key, and for a scrubbed move the stretch of the clip it plays.
 const CLIP := {
-	"sleep": ["idle"], "idle": ["idle"], "walk": ["walk"], "stagger": ["idle"],
-	"wake": ["roar", 0.0, 1.0], "phase": ["roar", 0.0, 1.0], "death": ["die", 0.0, 1.0],
-	"slam_windup": ["attack", 0.0, -1.0], "slam_strike": ["attack", -1.0, 1.0],
-	"fissure_windup": ["attack", 0.0, -1.0], "fissure_strike": ["attack", -1.0, 1.0],
-	"boulders_windup": ["throw", 0.0, -1.0], "boulders_strike": ["throw", -1.0, 1.0],
+	"sleep": ["idle"],
+	"idle": ["idle"],
+	"walk": ["walk"],
+	"stagger": ["idle"],
+	"wake": ["roar", 0.0, 1.0],
+	"phase": ["roar", 0.0, 1.0],
+	"death": ["die", 0.0, 1.0],
+	"slam_windup": ["attack", 0.0, -1.0],
+	"slam_strike": ["attack", -1.0, 1.0],
+	"fissure_windup": ["attack", 0.0, -1.0],
+	"fissure_strike": ["attack", -1.0, 1.0],
+	"boulders_windup": ["throw", 0.0, -1.0],
+	"boulders_strike": ["throw", -1.0, 1.0],
 }
 
+## Siegephant's legs in diagonal pairs (only its model has them: the primitive Colossus walks on its clip)
+const COL_LEGS := ["LegFL", "LegBR", "-LegFR", "-LegBL"]
 const SERP_WINGS := ["Head/WingL", "-Head/WingR"]
 const BR_JAWS := ["Head/JawL", "-Head/JawR"]
 const BR_LEGS := ["Legs/Leg01", "Legs/Leg11", "Legs/Leg21", "-Legs/Leg0-1", "-Legs/Leg1-1", "-Legs/Leg2-1"]
@@ -56,128 +76,301 @@ const SHIVER := [0.1, 0, 0.2, 0.15, 0.3, -0.15, 0.4, 0.15, 0.5, -0.15, 0.6, 0.1,
 # The match camera looks almost straight down, so the big moves also turn (ry), swell (s) and shift (pz): lean and
 # rise alone barely show from above.
 const SLAM_W := [
-	[B, "rx", [0, 0, 1, 0.4]], [B, "py", [0, 0, 1, 0.35]], [B, "ry", [0, 0, 1, 0.4]], [B, "s", [0, 0, 1, 0.1]],
+	[B, "rx", [0, 0, 1, 0.4]],
+	[B, "py", [0, 0, 1, 0.35]],
+	[B, "ry", [0, 0, 1, 0.4]],
+	[B, "s", [0, 0, 1, 0.1]],
 ]
 const SLAM_S := [
-	[B, "rx", [0, 0.4, 0.15, -0.45, 0.5, -0.2, 1, 0]], [B, "py", [0, 0.35, 0.15, -0.2, 0.5, -0.05, 1, 0]],
-	[B, "ry", [0, 0.4, 0.15, -0.5, 0.5, -0.15, 1, 0]], [B, "s", [0, 0.1, 0.15, -0.04, 0.5, 0, 1, 0]],
+	[B, "rx", [0, 0.4, 0.15, -0.45, 0.5, -0.2, 1, 0]],
+	[B, "py", [0, 0.35, 0.15, -0.2, 0.5, -0.05, 1, 0]],
+	[B, "ry", [0, 0.4, 0.15, -0.5, 0.5, -0.15, 1, 0]],
+	[B, "s", [0, 0.1, 0.15, -0.04, 0.5, 0, 1, 0]],
 ]
 
 const MOVES := {
-	"colossus": {
+	"colossus":
+	{
 		"sleep": [[B, "rx", [0, 0.25, 0.5, 0.27, 1, 0.25]], [B, "py", [0, -0.25, 0.5, -0.23, 1, -0.25]]],
-		"wake": [[B, "s", [0, 0, 0.4, 0.1, 1, 0]], [B, "rx", [0, 0.25, 0.3, 0.45, 0.7, 0.1, 1, 0]],
+		"wake":
+		[
+			[B, "s", [0, 0, 0.4, 0.1, 1, 0]],
+			[B, "rx", [0, 0.25, 0.3, 0.45, 0.7, 0.1, 1, 0]],
 			[B, "py", [0, -0.25, 0.3, -0.4, 0.6, 0.2, 0.85, 0.05, 1, 0]],
-			[B, "rz", [0.55, 0, 0.65, 0.06, 0.75, -0.06, 0.85, 0.04, 1, 0]]],
+			[B, "rz", [0.55, 0, 0.65, 0.06, 0.75, -0.06, 0.85, 0.04, 1, 0]]
+		],
 		"idle": [[B, "py", [0, 0, 0.5, 0.03, 1, 0]], [B, "rx", [0, 0, 0.5, -0.01, 1, 0]]],
-		"walk": [[B, "py", [0, 0, 0.25, 0.05, 0.5, 0, 0.75, 0.05, 1, 0]], [B, "rz", [0, 0.03, 0.5, -0.03, 1, 0.03]],
-			[B, "rx", [0, -0.05, 1, -0.05]]],
-		"stagger": [[B, "rx", [0, -0.35, 0.5, -0.4, 1, -0.35]], [B, "py", [0, -0.4, 0.5, -0.38, 1, -0.4]],
-			[B, "rz", [0, 0.1, 0.5, -0.1, 1, 0.1]]],
-		"phase": [[B, "s", [0, 0, 0.1, 0.12, 0.7, 0.12, 1, 0]], [B, "rx", [0, -0.3, 0.1, 0.55, 0.7, 0.55, 1, 0]],
+		"walk":
+		[
+			[B, "py", [0, 0, 0.25, 0.05, 0.5, 0, 0.75, 0.05, 1, 0]],
+			[B, "rz", [0, 0.03, 0.5, -0.03, 1, 0.03]],
+			[B, "rx", [0, -0.05, 1, -0.05]],
+			[COL_LEGS, "rx", [0, 0, 0.25, 0.35, 0.75, -0.35, 1, 0]]
+		],
+		"stagger":
+		[
+			[B, "rx", [0, -0.35, 0.5, -0.4, 1, -0.35]],
+			[B, "py", [0, -0.4, 0.5, -0.38, 1, -0.4]],
+			[B, "rz", [0, 0.1, 0.5, -0.1, 1, 0.1]]
+		],
+		"phase":
+		[
+			[B, "s", [0, 0, 0.1, 0.12, 0.7, 0.12, 1, 0]],
+			[B, "rx", [0, -0.3, 0.1, 0.55, 0.7, 0.55, 1, 0]],
 			[B, "py", [0, -0.2, 0.1, 0.4, 0.7, 0.4, 1, 0]],
-			[B, "rz", SHIVER]],
-		"death": [[B, "rx", [0, 0, 0.4, -0.35, 1, -0.9]], [B, "py", [0, 0, 0.4, -0.5, 1, -1.2]],
-			[B, "rz", [0, 0, 1, 0.3]]],
-		"slam_windup": SLAM_W, "slam_strike": SLAM_S, "fissure_windup": SLAM_W, "fissure_strike": SLAM_S,
-		"boulders_windup": [[B, "ry", [0, 0, 1, -0.35]], [B, "s", [0, 0, 1, 0.08]], [B, "rx", [0, 0, 1, 0.3]],
-			[B, "py", [0, 0, 1, 0.2]], [B, "rz", [0, 0, 1, -0.1]]],
-		"boulders_strike": [[B, "ry", [0, -0.35, 0.2, 0.4, 1, 0]], [B, "s", [0, 0.08, 0.2, -0.03, 1, 0]],
-			[B, "rx", [0, 0.3, 0.2, -0.3, 1, 0]], [B, "py", [0, 0.2, 0.2, -0.05, 1, 0]],
-			[B, "rz", [0, -0.1, 0.3, 0.05, 1, 0]]],
+			[B, "rz", SHIVER]
+		],
+		"death":
+		[[B, "rx", [0, 0, 0.4, -0.35, 1, -0.9]], [B, "py", [0, 0, 0.4, -0.5, 1, -1.2]], [B, "rz", [0, 0, 1, 0.3]]],
+		"slam_windup": SLAM_W,
+		"slam_strike": SLAM_S,
+		"fissure_windup": SLAM_W,
+		"fissure_strike": SLAM_S,
+		"boulders_windup":
+		[
+			[B, "ry", [0, 0, 1, -0.35]],
+			[B, "s", [0, 0, 1, 0.08]],
+			[B, "rx", [0, 0, 1, 0.3]],
+			[B, "py", [0, 0, 1, 0.2]],
+			[B, "rz", [0, 0, 1, -0.1]]
+		],
+		"boulders_strike":
+		[
+			[B, "ry", [0, -0.35, 0.2, 0.4, 1, 0]],
+			[B, "s", [0, 0.08, 0.2, -0.03, 1, 0]],
+			[B, "rx", [0, 0.3, 0.2, -0.3, 1, 0]],
+			[B, "py", [0, 0.2, 0.2, -0.05, 1, 0]],
+			[B, "rz", [0, -0.1, 0.3, 0.05, 1, 0]]
+		],
 	},
-	"serpent": {
-		"sleep": [[["Head"], "py", [0, -0.8, 0.5, -0.78, 1, -0.8]], [["Head"], "rx", [0, 0.3, 1, 0.3]],
-			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.1]]],
-		"wake": [[["Head"], "py", [0, -0.8, 0.35, 0.3, 0.6, 0.1, 1, 0.05]],
+	"serpent":
+	{
+		"sleep":
+		[
+			[["Head"], "py", [0, -0.8, 0.5, -0.78, 1, -0.8]],
+			[["Head"], "rx", [0, 0.3, 1, 0.3]],
+			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.1]]
+		],
+		"wake":
+		[
+			[["Head"], "py", [0, -0.8, 0.35, 0.3, 0.6, 0.1, 1, 0.05]],
 			[["Head"], "rx", [0, 0.3, 0.35, 0.7, 0.7, 0.3, 1, 0]],
 			[["Head/Jaw"], "rx", [0, 0.1, 0.4, 0.7, 0.7, 0.7, 1, 0.1]],
-				[SERP_WINGS, "rz", [0, 0, 0.4, 0.9, 0.7, 0.5, 1, 0]]],
-		"idle": [[["Head"], "py", [0, 0.05, 0.25, 0.23, 0.5, 0.05, 0.75, -0.13, 1, 0.05]],
+			[SERP_WINGS, "rz", [0, 0, 0.4, 0.9, 0.7, 0.5, 1, 0]]
+		],
+		"idle":
+		[
+			[["Head"], "py", [0, 0.05, 0.25, 0.23, 0.5, 0.05, 0.75, -0.13, 1, 0.05]],
 			[["Head/Jaw"], "rx", [0, 0.1, 0.5, 0.14, 1, 0.1]],
-				[SERP_WINGS, "rz", [0, 0, 0.25, 0.35, 0.5, 0, 0.75, -0.35, 1, 0]]],
-		"walk": [[["Head"], "py", [0, 0.05, 0.25, 0.23, 0.5, 0.05, 0.75, -0.13, 1, 0.05]],
+			[SERP_WINGS, "rz", [0, 0, 0.25, 0.35, 0.5, 0, 0.75, -0.35, 1, 0]]
+		],
+		"walk":
+		[
+			[["Head"], "py", [0, 0.05, 0.25, 0.23, 0.5, 0.05, 0.75, -0.13, 1, 0.05]],
 			[["Head"], "rx", [0, -0.12, 1, -0.12]],
-			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.1]], [SERP_WINGS, "rz", [0, 0, 0.25, 0.45, 0.5, 0, 0.75, -0.45, 1, 0]]],
-		"stagger": [[["Head"], "py", [0, -0.7, 0.5, -0.66, 1, -0.7]], [["Head"], "rx", [0, -0.6, 1, -0.6]],
-			[["Head"], "ry", [0, 0.2, 0.5, -0.2, 1, 0.2]], [["Head/Jaw"], "rx", [0, 0.5, 1, 0.5]],
-				[SERP_WINGS, "rz", [0, -0.5, 1, -0.5]]],
-		"phase": [[["Head"], "s", [0, 0, 0.1, 0.25, 0.7, 0.25, 1, 0]],
+			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.1]],
+			[SERP_WINGS, "rz", [0, 0, 0.25, 0.45, 0.5, 0, 0.75, -0.45, 1, 0]]
+		],
+		"stagger":
+		[
+			[["Head"], "py", [0, -0.7, 0.5, -0.66, 1, -0.7]],
+			[["Head"], "rx", [0, -0.6, 1, -0.6]],
+			[["Head"], "ry", [0, 0.2, 0.5, -0.2, 1, 0.2]],
+			[["Head/Jaw"], "rx", [0, 0.5, 1, 0.5]],
+			[SERP_WINGS, "rz", [0, -0.5, 1, -0.5]]
+		],
+		"phase":
+		[
+			[["Head"], "s", [0, 0, 0.1, 0.25, 0.7, 0.25, 1, 0]],
 			[["Head"], "py", [0, 0.1, 0.1, 0.9, 0.7, 0.9, 1, 0.05]],
 			[["Head"], "rx", [0, 0, 0.1, 0.8, 0.7, 0.7, 1, 0]],
-			[["Head"], "ry", SHIVER], [["Head/Jaw"], "rx", [0, 0.1, 0.1, 0.9, 0.7, 0.9, 1, 0.1]],
-			[SERP_WINGS, "rz", [0, 0, 0.1, 1.0, 0.7, 1.0, 1, 0]]],
-		"death": [[["Head"], "py", [0, 0, 0.5, -0.7, 1, -1.0]], [["Head"], "rx", [0, 0, 0.5, -0.7, 1, -0.9]],
-			[["Head/Jaw"], "rx", [0, 0.1, 0.3, 0.9, 1, 0.8]], [SERP_WINGS, "rz", [0, 0, 1, -0.8]]],
-		"dash_windup": [[["Head"], "s", [0, 0, 1, 0.15]], [["Head"], "pz", [0, 0, 1, 0.8]],
+			[["Head"], "ry", SHIVER],
+			[["Head/Jaw"], "rx", [0, 0.1, 0.1, 0.9, 0.7, 0.9, 1, 0.1]],
+			[SERP_WINGS, "rz", [0, 0, 0.1, 1.0, 0.7, 1.0, 1, 0]]
+		],
+		"death":
+		[
+			[["Head"], "py", [0, 0, 0.5, -0.7, 1, -1.0]],
+			[["Head"], "rx", [0, 0, 0.5, -0.7, 1, -0.9]],
+			[["Head/Jaw"], "rx", [0, 0.1, 0.3, 0.9, 1, 0.8]],
+			[SERP_WINGS, "rz", [0, 0, 1, -0.8]]
+		],
+		"dash_windup":
+		[
+			[["Head"], "s", [0, 0, 1, 0.15]],
+			[["Head"], "pz", [0, 0, 1, 0.8]],
 			[["Head"], "py", [0, 0.05, 1, -0.35]],
 			[["Head"], "rx", [0, 0, 1, 0.55]],
-			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.8]], [SERP_WINGS, "rz", [0, 0, 1, 0.9]]],
-		"dash_strike": [[["Head"], "s", [0, 0.15, 0.2, 0, 1, 0]], [["Head"], "pz", [0, 0.8, 0.2, -0.9, 1, 0]],
+			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.8]],
+			[SERP_WINGS, "rz", [0, 0, 1, 0.9]]
+		],
+		"dash_strike":
+		[
+			[["Head"], "s", [0, 0.15, 0.2, 0, 1, 0]],
+			[["Head"], "pz", [0, 0.8, 0.2, -0.9, 1, 0]],
 			[["Head"], "py", [0, -0.35, 0.2, -0.1, 1, 0.05]],
-			[["Head"], "rx", [0, 0.55, 0.2, -0.5, 0.6, -0.3, 1, 0]], [["Head/Jaw"], "rx", [0, 0.8, 0.5, 0.9, 1, 0.1]],
-			[SERP_WINGS, "rz", [0, 0.9, 0.2, 0.1, 1, 0]]],
-		"storm_windup": [[["Head"], "s", [0, 0, 1, 0.25]], [["Head"], "py", [0, 0.05, 1, 0.9]],
+			[["Head"], "rx", [0, 0.55, 0.2, -0.5, 0.6, -0.3, 1, 0]],
+			[["Head/Jaw"], "rx", [0, 0.8, 0.5, 0.9, 1, 0.1]],
+			[SERP_WINGS, "rz", [0, 0.9, 0.2, 0.1, 1, 0]]
+		],
+		"storm_windup":
+		[
+			[["Head"], "s", [0, 0, 1, 0.25]],
+			[["Head"], "py", [0, 0.05, 1, 0.9]],
 			[["Head"], "rx", [0, 0, 1, 0.75]],
-			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.9]], [SERP_WINGS, "rz", [0, 0, 1, 1.0]]],
-		"storm_strike": [[["Head"], "s", [0, 0.25, 0.25, 0, 1, 0]], [["Head"], "py", [0, 0.9, 0.25, 0.3, 1, 0.05]],
+			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.9]],
+			[SERP_WINGS, "rz", [0, 0, 1, 1.0]]
+		],
+		"storm_strike":
+		[
+			[["Head"], "s", [0, 0.25, 0.25, 0, 1, 0]],
+			[["Head"], "py", [0, 0.9, 0.25, 0.3, 1, 0.05]],
 			[["Head"], "rx", [0, 0.75, 0.25, -0.2, 1, 0]],
-			[["Head/Jaw"], "rx", [0, 0.9, 0.3, 0.2, 1, 0.1]], [SERP_WINGS, "rz", [0, 1.0, 0.3, 0.2, 1, 0]]],
-		"static_windup": [[["Head"], "py", [0, 0.05, 1, -0.45]], [["Head"], "pz", [0, 0, 1, 0.5]],
+			[["Head/Jaw"], "rx", [0, 0.9, 0.3, 0.2, 1, 0.1]],
+			[SERP_WINGS, "rz", [0, 1.0, 0.3, 0.2, 1, 0]]
+		],
+		"static_windup":
+		[
+			[["Head"], "py", [0, 0.05, 1, -0.45]],
+			[["Head"], "pz", [0, 0, 1, 0.5]],
 			[["Head"], "rx", [0, 0, 1, -0.35]],
-			[["Head"], "s", [0, 0, 1, -0.1]], [["Head/Jaw"], "rx", [0, 0.1, 1, 0.3]],
-				[SERP_WINGS, "rz", [0, 0, 1, -0.5]]],
-		"static_strike": [[["Head"], "py", [0, -0.45, 0.15, 0.3, 1, 0.05]], [["Head"], "pz", [0, 0.5, 0.15, 0, 1, 0]],
-			[["Head"], "rx", [0, -0.35, 0.15, 0.6, 1, 0]], [["Head"], "s", [0, -0.1, 0.15, 0.35, 1, 0]],
-			[["Head/Jaw"], "rx", [0, 0.3, 0.15, 1.0, 1, 0.1]], [SERP_WINGS, "rz", [0, -0.5, 0.15, 1.1, 1, 0]]],
+			[["Head"], "s", [0, 0, 1, -0.1]],
+			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.3]],
+			[SERP_WINGS, "rz", [0, 0, 1, -0.5]]
+		],
+		"static_strike":
+		[
+			[["Head"], "py", [0, -0.45, 0.15, 0.3, 1, 0.05]],
+			[["Head"], "pz", [0, 0.5, 0.15, 0, 1, 0]],
+			[["Head"], "rx", [0, -0.35, 0.15, 0.6, 1, 0]],
+			[["Head"], "s", [0, -0.1, 0.15, 0.35, 1, 0]],
+			[["Head/Jaw"], "rx", [0, 0.3, 0.15, 1.0, 1, 0.1]],
+			[SERP_WINGS, "rz", [0, -0.5, 0.15, 1.1, 1, 0]]
+		],
 	},
-	"brood": {
-		"sleep": [[B, "py", [0, -0.35, 1, -0.35]], [BR_LEGS, "rz", [0, -0.3, 1, -0.3]],
+	"brood":
+	{
+		"sleep":
+		[
+			[B, "py", [0, -0.35, 1, -0.35]],
+			[BR_LEGS, "rz", [0, -0.3, 1, -0.3]],
 			[["Sac"], "s", [0, -0.02, 0.5, 0.02, 1, -0.02]],
-			[BR_JAWS, "ry", [0, 0.15, 1, 0.15]]],
-		"wake": [[B, "py", [0, -0.35, 0.4, 0.25, 0.7, -0.05, 1, 0]], [B, "rx", [0, 0, 0.4, 0.3, 0.7, -0.1, 1, 0]],
-			[BR_LEGS, "rz", [0, -0.3, 0.4, 0.6, 1, 0]], [BR_JAWS, "ry", [0, 0.15, 0.4, 0.8, 0.8, 0.8, 1, 0.15]]],
+			[BR_JAWS, "ry", [0, 0.15, 1, 0.15]]
+		],
+		"wake":
+		[
+			[B, "py", [0, -0.35, 0.4, 0.25, 0.7, -0.05, 1, 0]],
+			[B, "rx", [0, 0, 0.4, 0.3, 0.7, -0.1, 1, 0]],
+			[BR_LEGS, "rz", [0, -0.3, 0.4, 0.6, 1, 0]],
+			[BR_JAWS, "ry", [0, 0.15, 0.4, 0.8, 0.8, 0.8, 1, 0.15]]
+		],
 		"idle": [[["Sac"], "s", [0, 0, 0.5, 0.04, 1, 0]], [BR_JAWS, "ry", [0, 0.15, 0.5, 0.2, 1, 0.15]]],
-		"walk": [[BR_TRI_A, "ry", [0, 0, 0.25, 0.35, 0.75, -0.35, 1, 0]],
+		"walk":
+		[
+			[BR_TRI_A, "ry", [0, 0, 0.25, 0.35, 0.75, -0.35, 1, 0]],
 			[BR_TRI_B, "ry", [0, 0, 0.25, -0.35, 0.75, 0.35, 1, 0]],
 			[BR_LEGS, "rz", [0, 0.2, 0.25, 0, 0.5, 0.2, 0.75, 0, 1, 0.2]],
-				[B, "py", [0, 0, 0.25, 0.06, 0.5, 0, 0.75, 0.06, 1, 0]],
-			[["Sac"], "s", [0, 0, 0.5, 0.04, 1, 0]]],
-		"stagger": [[B, "py", [0, -0.3, 0.5, -0.28, 1, -0.3]], [B, "rx", [0, -0.1, 1, -0.1]],
+			[B, "py", [0, 0, 0.25, 0.06, 0.5, 0, 0.75, 0.06, 1, 0]],
+			[["Sac"], "s", [0, 0, 0.5, 0.04, 1, 0]]
+		],
+		"stagger":
+		[
+			[B, "py", [0, -0.3, 0.5, -0.28, 1, -0.3]],
+			[B, "rx", [0, -0.1, 1, -0.1]],
 			[BR_LEGS, "rz", [0, -0.4, 0.5, -0.3, 1, -0.4]],
-			[BR_TRI_A, "ry", [0, 0.15, 0.5, -0.15, 1, 0.15]], [BR_JAWS, "ry", [0, 0.6, 1, 0.6]],
-				[["Sac"], "s", [0, -0.05, 0.5, 0, 1, -0.05]]],
-		"phase": [[B, "rx", [0, -0.1, 0.1, 0.6, 0.7, 0.6, 1, 0]], [B, "py", [0, 0, 0.1, 0.3, 0.7, 0.3, 1, 0]],
-			[B, "ry", SHIVER], [BR_LEGS, "rz", [0, 0, 0.2, 0.7, 0.7, 0.7, 1, 0]],
-				[["Head"], "rx", [0, 0, 0.1, 0.5, 0.7, 0.5, 1, 0]],
-			[BR_JAWS, "ry", [0, 0.15, 0.1, 0.8, 0.7, 0.8, 1, 0.15]], [["Sac"], "s", [0, 0, 0.2, 0.2, 0.7, 0.2, 1, 0]]],
-		"death": [[B, "py", [0, 0, 0.5, -0.5, 1, -0.85]], [B, "rx", [0, 0, 1, -0.1]], [BR_LEGS, "rz", [0, 0, 1, -0.9]],
-			[BR_JAWS, "ry", [0, 0.15, 0.3, 0.8, 1, 0.7]], [["Sac"], "s", [0, 0, 1, -0.25]]],
-		"spit_windup": [[B, "s", [0, 0, 1, 0.1]], [B, "rx", [0, 0, 1, 0.3]], [B, "py", [0, 0, 1, -0.2]],
+			[BR_TRI_A, "ry", [0, 0.15, 0.5, -0.15, 1, 0.15]],
+			[BR_JAWS, "ry", [0, 0.6, 1, 0.6]],
+			[["Sac"], "s", [0, -0.05, 0.5, 0, 1, -0.05]]
+		],
+		"phase":
+		[
+			[B, "rx", [0, -0.1, 0.1, 0.6, 0.7, 0.6, 1, 0]],
+			[B, "py", [0, 0, 0.1, 0.3, 0.7, 0.3, 1, 0]],
+			[B, "ry", SHIVER],
+			[BR_LEGS, "rz", [0, 0, 0.2, 0.7, 0.7, 0.7, 1, 0]],
+			[["Head"], "rx", [0, 0, 0.1, 0.5, 0.7, 0.5, 1, 0]],
+			[BR_JAWS, "ry", [0, 0.15, 0.1, 0.8, 0.7, 0.8, 1, 0.15]],
+			[["Sac"], "s", [0, 0, 0.2, 0.2, 0.7, 0.2, 1, 0]]
+		],
+		"death":
+		[
+			[B, "py", [0, 0, 0.5, -0.5, 1, -0.85]],
+			[B, "rx", [0, 0, 1, -0.1]],
+			[BR_LEGS, "rz", [0, 0, 1, -0.9]],
+			[BR_JAWS, "ry", [0, 0.15, 0.3, 0.8, 1, 0.7]],
+			[["Sac"], "s", [0, 0, 1, -0.25]]
+		],
+		"spit_windup":
+		[
+			[B, "s", [0, 0, 1, 0.1]],
+			[B, "rx", [0, 0, 1, 0.3]],
+			[B, "py", [0, 0, 1, -0.2]],
 			[["Head"], "rx", [0, 0, 1, 0.4]],
-			[BR_JAWS, "ry", [0, 0.15, 1, 0.75]], [BR_LEGS, "rz", [0, 0, 1, 0.3]]],
-		"spit_strike": [[B, "s", [0, 0.1, 0.2, -0.03, 1, 0]], [B, "rx", [0, 0.3, 0.2, -0.2, 1, 0]],
+			[BR_JAWS, "ry", [0, 0.15, 1, 0.75]],
+			[BR_LEGS, "rz", [0, 0, 1, 0.3]]
+		],
+		"spit_strike":
+		[
+			[B, "s", [0, 0.1, 0.2, -0.03, 1, 0]],
+			[B, "rx", [0, 0.3, 0.2, -0.2, 1, 0]],
 			[B, "py", [0, -0.2, 0.2, -0.05, 1, 0]],
-			[["Head"], "rx", [0, 0.4, 0.2, -0.2, 1, 0]], [BR_JAWS, "ry", [0, 0.75, 0.25, 0.1, 1, 0.15]],
-				[BR_LEGS, "rz", [0, 0.3, 1, 0]]],
-		"lob_windup": [[B, "s", [0, 0, 1, 0.12]], [B, "rx", [0, 0, 1, 0.5]], [B, "py", [0, 0, 1, 0.1]],
+			[["Head"], "rx", [0, 0.4, 0.2, -0.2, 1, 0]],
+			[BR_JAWS, "ry", [0, 0.75, 0.25, 0.1, 1, 0.15]],
+			[BR_LEGS, "rz", [0, 0.3, 1, 0]]
+		],
+		"lob_windup":
+		[
+			[B, "s", [0, 0, 1, 0.12]],
+			[B, "rx", [0, 0, 1, 0.5]],
+			[B, "py", [0, 0, 1, 0.1]],
 			[["Sac"], "s", [0, 0, 1, 0.18]],
-			[["Head"], "rx", [0, 0, 1, 0.6]], [BR_JAWS, "ry", [0, 0.15, 1, 0.8]], [BR_LEGS, "rz", [0, 0, 1, 0.4]]],
-		"lob_strike": [[B, "s", [0, 0.12, 0.25, -0.04, 1, 0]], [B, "rx", [0, 0.5, 0.25, -0.3, 1, 0]],
+			[["Head"], "rx", [0, 0, 1, 0.6]],
+			[BR_JAWS, "ry", [0, 0.15, 1, 0.8]],
+			[BR_LEGS, "rz", [0, 0, 1, 0.4]]
+		],
+		"lob_strike":
+		[
+			[B, "s", [0, 0.12, 0.25, -0.04, 1, 0]],
+			[B, "rx", [0, 0.5, 0.25, -0.3, 1, 0]],
 			[B, "py", [0, 0.1, 0.25, -0.1, 1, 0]],
-			[["Sac"], "s", [0, 0.18, 0.25, -0.1, 1, 0]], [["Head"], "rx", [0, 0.6, 0.25, -0.3, 1, 0]],
-			[BR_JAWS, "ry", [0, 0.8, 0.3, 0.1, 1, 0.15]], [BR_LEGS, "rz", [0, 0.4, 1, 0]]],
-		"brood_windup": [[B, "py", [0, 0, 1, -0.25]], [B, "rx", [0, 0, 1, -0.15]], [["Sac"], "s", [0, 0, 1, 0.25]],
-			[BR_LEGS, "rz", [0, 0, 1, 0.3]], [BR_JAWS, "ry", [0, 0.15, 1, 0.3]]],
-		"brood_strike": [[B, "py", [0, -0.25, 0.25, -0.1, 1, 0]], [B, "rx", [0, -0.15, 0.5, -0.05, 1, 0]],
-			[["Sac"], "s", [0, 0.25, 0.25, -0.1, 0.5, 0.2, 0.75, -0.05, 1, 0]], [BR_LEGS, "rz", [0, 0.3, 1, 0]],
-			[BR_JAWS, "ry", [0, 0.3, 1, 0.15]]],
-		"burrow_windup": [[B, "py", [0, 0, 0.19, -1.6, 1, -1.6]], [B, "rx", [0, 0, 0.19, -0.4, 1, -0.4]],
-			[BR_LEGS, "rz", [0, 0, 0.19, -0.5, 1, -0.5]], [BR_JAWS, "ry", [0, 0.15, 1, 0.15]]],
-		"burrow_strike": [[B, "py", [0, -1.6, 0.25, 0.5, 0.6, -0.05, 1, 0]], [B, "rx", [0, -0.4, 0.25, 0.35, 1, 0]],
-			[BR_LEGS, "rz", [0, -0.5, 0.25, 0.7, 1, 0]], [BR_JAWS, "ry", [0, 0.15, 0.2, 0.8, 0.6, 0.8, 1, 0.15]]],
+			[["Sac"], "s", [0, 0.18, 0.25, -0.1, 1, 0]],
+			[["Head"], "rx", [0, 0.6, 0.25, -0.3, 1, 0]],
+			[BR_JAWS, "ry", [0, 0.8, 0.3, 0.1, 1, 0.15]],
+			[BR_LEGS, "rz", [0, 0.4, 1, 0]]
+		],
+		"brood_windup":
+		[
+			[B, "py", [0, 0, 1, -0.25]],
+			[B, "rx", [0, 0, 1, -0.15]],
+			[["Sac"], "s", [0, 0, 1, 0.25]],
+			[BR_LEGS, "rz", [0, 0, 1, 0.3]],
+			[BR_JAWS, "ry", [0, 0.15, 1, 0.3]]
+		],
+		"brood_strike":
+		[
+			[B, "py", [0, -0.25, 0.25, -0.1, 1, 0]],
+			[B, "rx", [0, -0.15, 0.5, -0.05, 1, 0]],
+			[["Sac"], "s", [0, 0.25, 0.25, -0.1, 0.5, 0.2, 0.75, -0.05, 1, 0]],
+			[BR_LEGS, "rz", [0, 0.3, 1, 0]],
+			[BR_JAWS, "ry", [0, 0.3, 1, 0.15]]
+		],
+		"burrow_windup":
+		[
+			[B, "py", [0, 0, 0.19, -1.6, 1, -1.6]],
+			[B, "rx", [0, 0, 0.19, -0.4, 1, -0.4]],
+			[BR_LEGS, "rz", [0, 0, 0.19, -0.5, 1, -0.5]],
+			[BR_JAWS, "ry", [0, 0.15, 1, 0.15]]
+		],
+		"burrow_strike":
+		[
+			[B, "py", [0, -1.6, 0.25, 0.5, 0.6, -0.05, 1, 0]],
+			[B, "rx", [0, -0.4, 0.25, 0.35, 1, 0]],
+			[BR_LEGS, "rz", [0, -0.5, 0.25, 0.7, 1, 0]],
+			[BR_JAWS, "ry", [0, 0.15, 0.2, 0.8, 0.6, 0.8, 1, 0.15]]
+		],
 	},
 }
+
 
 ## Where one boss's posed pivots live: the nodes, their rest values, where each is now, where it is heading.
 class Rig:
@@ -188,9 +381,11 @@ class Rig:
 	var now := PackedFloat32Array()
 	var aim := PackedFloat32Array()
 
-static var _compiled := {}        # kind -> {"pairs": [[path, channel]], "moves": {move: [[idx, mirror, keys]]}}
-static var cur_move := ""         # pick()'s answer for the boss it was asked about: the move playing...
-static var cur_k := 0.0           # ...and how far through it (0..1)
+
+static var _compiled := {}  # kind -> {"pairs": [[path, channel]], "moves": {move: [[idx, mirror, keys]]}}
+static var cur_move := ""  # pick()'s answer for the boss it was asked about: the move playing...
+static var cur_k := 0.0  # ...and how far through it (0..1)
+
 
 ## Seconds into the attack at which the blow lands: the frame its ground tell fills.
 static func hit_t(b: Boss) -> float:
@@ -198,6 +393,7 @@ static func hit_t(b: Boss) -> float:
 		return BURROW_HIT_S
 	var w := float(b.md["windup"])
 	return w * BROOD_EGG_K if b.atk == "brood" else w
+
 
 ## Which move the boss is in, and how far through it. The loops run on the clock or the gait; the rest on the
 ## boss's own timers, so the body is always where the timers say.
@@ -227,6 +423,7 @@ static func pick(b: Boss) -> void:
 		cur_move = "idle"
 		cur_k = fposmod(b.m.time / float(IDLE_S[b.mkind]), 1.0)
 
+
 static func _pick_attack(b: Boss) -> void:
 	var hit := hit_t(b)
 	var t := b.atk_t
@@ -240,6 +437,7 @@ static func _pick_attack(b: Boss) -> void:
 		cur_move = b.atk + "_strike"
 		cur_k = clampf((t - hit) / float(STRIKE_S[b.atk]), 0.0, 1.0)
 
+
 ## Poses the boss's body for this frame.
 static func pose(b: Boss, delta: float) -> void:
 	pick(b)
@@ -251,33 +449,47 @@ static func pose(b: Boss, delta: float) -> void:
 	var follow := 1.0 - exp(-(RATE_FAST if _fast(cur_move) else RATE_SLOW) * delta)
 	for i in rig.nodes.size():
 		rig.now[i] += (rig.aim[i] - rig.now[i]) * follow
-		_write(rig.nodes[i], rig.chans[i], rig.base[i] + rig.now[i])
+		if rig.nodes[i]:
+			_write(rig.nodes[i], rig.chans[i], rig.base[i] + rig.now[i])
 	if b.mkind == "colossus":
 		_clip(b, cur_move, cur_k)
 	elif b.mkind == "serpent":
 		_coils(b, delta)
 
+
 static func _fast(move_name: String) -> bool:
 	return move_name == "death" or move_name.ends_with("_windup") or move_name.ends_with("_strike")
 
+
 static func _write(n: Node3D, chan: int, v: float) -> void:
 	match chan:
-		0: n.rotation.x = v
-		1: n.rotation.y = v
-		2: n.rotation.z = v
-		3: n.position.x = v
-		4: n.position.y = v
-		5: n.position.z = v
-		6: n.scale = Vector3.ONE * v
-		7: n.scale.y = v
+		0:
+			n.rotation.x = v
+		1:
+			n.rotation.y = v
+		2:
+			n.rotation.z = v
+		3:
+			n.position.x = v
+		4:
+			n.position.y = v
+		5:
+			n.position.z = v
+		6:
+			n.scale = Vector3.ONE * v
+		7:
+			n.scale.y = v
+
 
 ## The compiled tracks of one move: [indices into the rig, signs, keys] per track.
 static func tracks(kind: String, move_name: String) -> Array:
 	return (_tables(kind)["moves"] as Dictionary).get(move_name, [])
 
+
 ## Every [pivot path, channel] a kind ever poses, in rig order.
 static func pairs(kind: String) -> Array:
 	return _tables(kind)["pairs"]
+
 
 static func _tables(kind: String) -> Dictionary:
 	if _compiled.has(kind):
@@ -303,6 +515,7 @@ static func _tables(kind: String) -> Dictionary:
 	_compiled[kind] = {"pairs": pr, "moves": moves}
 	return _compiled[kind]
 
+
 ## One value on a key list at phase p (straight lines between keys).
 static func sample(keys: PackedFloat32Array, p: float) -> float:
 	var n := keys.size()
@@ -314,6 +527,7 @@ static func sample(keys: PackedFloat32Array, p: float) -> float:
 			return lerpf(keys[i - 1], keys[i + 1], (p - keys[i - 2]) / span)
 	return keys[n - 1]
 
+
 static func _aim(kind: String, move_name: String, p: float, rig: Rig) -> void:
 	rig.aim.fill(0.0)
 	for tr in tracks(kind, move_name):
@@ -323,6 +537,7 @@ static func _aim(kind: String, move_name: String, p: float, rig: Rig) -> void:
 		for j in idx.size():
 			rig.aim[idx[j]] = v * mirror[j]
 
+
 static func _rig_of(b: Boss) -> Rig:
 	if b.model.has_meta("boss_rig"):
 		return b.model.get_meta("boss_rig")
@@ -330,25 +545,35 @@ static func _rig_of(b: Boss) -> Rig:
 	var body: Node3D = b.model.get_node("Body")
 	for pc in pairs(b.mkind):
 		var path := String(pc[0])
-		var n: Node3D = body if path == "." else body.get_node(path)
+		# null: a pivot only the other body has (Siegephant's legs on the primitive Colossus); pose() skips it
+		var n: Node3D = body if path == "." else body.get_node_or_null(path)
 		rig.nodes.append(n)
 		rig.chans.append(CHANS[pc[1]])
-		rig.base.append(rest_of(n, CHANS[pc[1]]))
+		rig.base.append(rest_of(n, CHANS[pc[1]]) if n else 0.0)
 	rig.now.resize(rig.nodes.size())
 	rig.aim.resize(rig.nodes.size())
 	b.model.set_meta("boss_rig", rig)
 	return rig
 
+
 static func rest_of(n: Node3D, chan: int) -> float:
 	match chan:
-		0: return n.rotation.x
-		1: return n.rotation.y
-		2: return n.rotation.z
-		3: return n.position.x
-		4: return n.position.y
-		5: return n.position.z
-		6: return n.scale.x
+		0:
+			return n.rotation.x
+		1:
+			return n.rotation.y
+		2:
+			return n.rotation.z
+		3:
+			return n.position.x
+		4:
+			return n.position.y
+		5:
+			return n.position.z
+		6:
+			return n.scale.x
 	return n.scale.y
+
 
 ## The Colossus's rigged clip: loops play on; a scrubbed stretch is held to the move's phase (the wind-up stops on
 ## the clip's own hit frame; the strike plays on from it).
@@ -370,14 +595,17 @@ static func _clip(b: Boss, move_name: String, p: float) -> void:
 	ap.speed_scale = 0.0
 	ap.seek(ap.get_animation(clip_name).length * lerpf(from_k, to_k, p), true)
 
+
 static func _loop_rate(b: Boss, move_name: String) -> float:
 	if move_name == "walk":
 		return clampf(Vector2(b.vel.x, b.vel.z).length() / 1.6, 0.5, 1.4)
 	return float(LOOP_RATE.get(move_name, 1.0))
 
+
 ## Where in its clip the blow lands (0..1).
 static func _clip_hit(spec: Dictionary, which: String) -> float:
 	return float(spec["throw_hit"]) if which == "throw" else float(spec["hit"])
+
 
 ## The serpent's coils trail the head's path (Boss.trail); asleep they lie in a loose spiral; dying they sag.
 static func _coils(b: Boss, delta: float) -> void:
