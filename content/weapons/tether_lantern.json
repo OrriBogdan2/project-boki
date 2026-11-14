@@ -6,7 +6,7 @@
 	],
 	"hero_only": true,
 	"primary": {
-		"dmg": 9.0,
+		"dmg": 14.5,
 		"rate": 0.6,
 		"speed": 30,
 		"kb": 1.0,

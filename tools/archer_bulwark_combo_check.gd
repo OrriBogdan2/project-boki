@@ -1375,6 +1375,7 @@ func _bulwark_combos() -> void:
 	step(m, 1.0)
 	reset.call()
 	c0 = K.crushes
+	var wall_start := P.pos
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	step(m, 0.4)
@@ -1384,16 +1385,23 @@ func _bulwark_combos() -> void:
 		K.st.get("last_dash") == "whirl" and K.crushes == c0 + 1 and dmg(T) > 0.0 and T.stun_t > 0.0,
 		"crushes %d took %.0f stun %.2f" % [K.crushes - c0, dmg(T), T.stun_t]
 	)
-	# rank 3: a 360 Smash that hits refunds the Shield Charge
+	var d1 := P.pos.distance_to(wall_start)
+	# rank 3: a 360 Smash that hits refunds the Shield Charge (source Upg; the dash goes no further)
 	step(m, 1.0)
 	reset.call()
 	P.slot_lv["dash"] = 3
 	K.ch_rmb = 0.0
 	K.cd["rmb"] = 4.0
+	var p3 := P.pos
 	P.inp["move"] = Vector2(1, 0)
 	P.do_dash()
 	step(m, 0.4)
 	P.inp["move"] = Vector2.ZERO
+	ok(
+		"combo bulwark: rank 3 the 360 Smash goes no further than rank 1 (source Upg has no range)",
+		absf(P.pos.distance_to(p3) - d1) < 0.2,
+		"rank 1 %.2f rank 3 %.2f" % [d1, P.pos.distance_to(p3)]
+	)
 	ok(
 		"combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge",
 		K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,

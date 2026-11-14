@@ -103,14 +103,15 @@
 		"charge": 4.2,
 		"charge_speed": 18.0,
 		"charge_kb": 11.0,
-		"charge_dmg": 10.0,
-		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"charge_dmg": 12.0,
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 12 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
 		"short": 2.6,
 		"spin_r": 2.2
 	},
 	"rmb": {
 		"delivery": "cone",
 		"name": "Aegis",
+		"card_range": "slam.radius",
 		"short": "Aegis",
 		"icon": "bulwark_rmb",
 		"col": "#9ad8ff",
@@ -166,6 +167,7 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Mending Ground",
+		"card_range": "radius",
 		"short": "Mend",
 		"icon": "bulwark_e",
 		"col": "#8fe3c8",

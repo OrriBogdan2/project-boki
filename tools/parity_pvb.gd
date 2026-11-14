@@ -238,6 +238,9 @@ func _tarek_audit(m: Match, P: Hunter, K: DolmKit, home: Vector3) -> void:
 	var dv: Dictionary = (view.get("moves", view) as Dictionary).get("dolm", {})
 	ok("audit tarek: cooldowns from the data (Volcano Crusher 11s, Rockwave 12.5s)",
 		float(K.rmb_def()["cooldown"]) == 11.0 and float(K.e_def()["cooldown"]) == 12.5)
+	ok("verify Nov 9: LMB tap and punch both 0.6s (card), Shift 12s, X 45s (data)",
+		float(K.lmb_def()["boulder"]["rate"]) == 0.6 and float(K.lmb_def()["punch"]["rate"]) == 0.6
+		and float(K.dash_def()["cd"]) == 12.0 and float(K.x_def()["cooldown"]) == 45.0)
 	ok("audit tarek: the hunter viewer plays his own RMB and X moves",
 		dv.get("rmb", []) == ["breah_crouch", "breah_slam"] and dv.get("x", []) == ["breah_spine_aim", "breah_spine"],
 		str(dv))
