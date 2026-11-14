@@ -12,6 +12,8 @@ extends RefCounted
 
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
+const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
+const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
 const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
@@ -46,10 +48,12 @@ static func _hit_point(target: Ent, by: Ent, o: Dictionary) -> Array:
 	var at := Vector3(target.pos.x, y + hgt, target.pos.z) - dir * rad * 0.8
 	return [at, dir]
 
+
 static func _credit(by: Ent) -> Ent:
 	if by is Kin and (by as Kin).owner_h:
 		return (by as Kin).owner_h
 	return by
+
 
 ## Every hit that lands (Match.on_damage): an impact flash at the point it struck, sparks out the
 ## far side, more of everything the harder it hit; crits flash gold, armor sheds blue shards. Hits
@@ -75,7 +79,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		power *= 0.65
 	var col := flash_col(target, p)
 	var ability := o.has("ab") and src != "kin"
-	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
+	if ability:
+		power = maxf(power, 1.3)  # an ability hit always lands big
 	m.fx.impact(at, dir, col, power, crit, armor)
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
@@ -86,13 +91,20 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	if credit == p and target != p:
 		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
 		if melee:
-			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0)
+			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0, 1.0, true)
 		if armor:
-			m.sfx("armor_hit", target.pos, -9.0)
+			m.sfx("armor_hit", target.pos, -9.0, 1.0, true)
 		if d >= 28.0 and not melee:
-			m.sfx("hit_heavy", target.pos, -7.0)
+			m.sfx("hit_heavy", target.pos, -7.0, 1.0, true)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
+	elif target != p and credit != p:
+		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
+
+## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
+static func rival_pickup(m: Match, h: Hunter) -> void:
+	m.sfx("pickup", h.pos, RIVAL_PICKUP_DB)
+
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
@@ -108,6 +120,7 @@ static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 	var power := clampf(dmg / 16.0, 0.7, 3.0)
 	var col: Color = w.get("color", Color("ffd9a0"))
 	m.fx.muzzle(start + Vector3(dir2.x, 0, dir2.y) * 0.25, dir2, col, power)
+
 
 ## Someone knocked down (Match.knock): a burst of their team colour, a shockwave on the ground and a
 ## white flash, so the moment reads from anywhere on screen; a teammate down or a rival your squad
@@ -125,6 +138,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.8), 0.25)
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
+
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -156,8 +170,9 @@ static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.spark(c, Vector3.UP, Color("b8e6ff"), 20, 9.0, 100.0, 0.35, 16.0, 1.2)
 	m.sfx("armor_break", h.pos, ARMOR_BREAK_DB_VICTIM if h == m.player else ARMOR_BREAK_DB)
 	if credit == m.player and h != m.player:
-		m.sfx("click", null, ARMOR_TICK_DB, ARMOR_TICK_PITCH)     # the "push now" tick, only for whoever broke it
+		m.sfx("click", null, ARMOR_TICK_DB, ARMOR_TICK_PITCH)  # the "push now" tick, only for whoever broke it
 		m.freeze_frame(0.045)
+
 
 ## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
@@ -172,11 +187,22 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
 	m.fx.flash(c, col.lerp(Color.WHITE, 0.5), 0.6 if not big else 1.1, 0.12 if not big else 0.18)
-	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.3), 12 if not big else 22, 8.0 if not big else 11.0, 80.0, 0.3, 14.0, 1.0 if not big else 1.4)
+	m.fx.spark(
+		c,
+		Vector3.UP,
+		col.lerp(Color.WHITE, 0.3),
+		12 if not big else 22,
+		8.0 if not big else 11.0,
+		80.0,
+		0.3,
+		14.0,
+		1.0 if not big else 1.4
+	)
 	if big:
 		m.fx.dust(mb.pos, 12)
 		if credit == p:
 			m.freeze_frame(0.05)
+
 
 ## A boss going down: the biggest moment in a match short of extracting. A white-hot flash, two
 ## shockwaves, a fountain of sparks in its colour, a beat of slow motion and the music dipping.
@@ -195,10 +221,12 @@ static func boss_dead(m: Match, b: Mob, credit: Ent) -> void:
 	var p: Hunter = m.player
 	if p != null and p.flat_dist(b) < 22.0:
 		Sfx.duck(1.2)
-		if m.hud: m.hud.flash(Color(1, 0.95, 0.85), 0.3)
+		if m.hud:
+			m.hud.flash(Color(1, 0.95, 0.85), 0.3)
 		if credit == p or (credit is Hunter and (credit as Hunter).team == p.team):
 			m.sfx("kill", null, -2.0, 0.85)
 			m._slow(0.55, 0.3)
+
 
 ## A boss growing furious (Lairs.on_boss_phase): a flash and a ring of sparks off its body.
 static func boss_phase(m: Match, b: Mob) -> void:
@@ -210,7 +238,9 @@ static func boss_phase(m: Match, b: Mob) -> void:
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.2), 30, 12.0, 120.0, 0.5, 10.0, 1.6)
 	var p: Hunter = m.player
 	if p != null and p.flat_dist(b) < 20.0:
-		if m.hud: m.hud.flash(col, 0.18)
+		if m.hud:
+			m.hud.flash(col, 0.18)
+
 
 ## Getting out (Match._extract): a column of light where they stood. For you, the screen whites out
 ## a little and a rising chord plays over the portal.
@@ -225,7 +255,9 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 	if h == m.player:
 		m.sfx("extract_ok", null, -3.0)
 		Sfx.duck(1.6)
-		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
+		if m.hud:
+			m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
+
 
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
 ## what's underfoot (planks, paved paths and stairs, snow, or grass and earth). It carries as far
@@ -235,12 +267,16 @@ static func footstep(h: Hunter) -> void:
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
 	var w: World = m.world
-	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
+	var ix := int(floorf(h.pos.x))
+	var iz := int(floorf(h.pos.z))
 	if not w.inb(ix, iz):
 		return
 	var i := w.idx(ix, iz)
 	var surf := "grass"
-	if w.bridge.has(i): surf = "wood"
-	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
-	elif w.style_at(i) == "frost": surf = "snow"
+	if w.bridge.has(i):
+		surf = "wood"
+	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
+		surf = "stone"
+	elif w.style_at(i) == "frost":
+		surf = "snow"
 	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)

@@ -339,7 +339,6 @@ func _drag(rec: Dictionary, from: Control):
 	pv.position = Vector2(-28, -28)
 	from.set_drag_preview(holder)
 	sel = String(rec["uid"])
-	Sfx.play("pickup", null, -6.0)
 	return {"kin_uid": String(rec["uid"])}
 
 func _can_drop(_p, d) -> bool:
