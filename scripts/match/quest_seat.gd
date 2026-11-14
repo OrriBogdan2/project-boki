@@ -77,10 +77,6 @@ func _force(to: S, why: String, t := -1) -> void:
 		S.SHUT:
 			m.add_feed("%s has shut" % title().capitalize())
 
-## Where the seat is: the lair's centre or the outpost.
-func site() -> Vector3:
-	return ref.get("c", ref.get("pos", Vector3.ZERO))
-
 ## How far the squad on it is, 0 to 1: the uplink's charge, or the health taken off the lair's boss.
 func progress() -> float:
 	if kind == "uplink":
