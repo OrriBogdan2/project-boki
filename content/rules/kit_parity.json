@@ -60,6 +60,7 @@
 		{"hero": "archer", "slot": "X", "field": "x.final_dmg", "per": "x.dmg", "value": 1.2945, "tol": 0.01, "evidence": "D Virideth's Fury: third shot 422 vs the first two 326 = 1.29x"},
 		{"hero": "dolm", "slot": "R", "field": "x.len", "value": 21.6, "tol": 2.16, "evidence": "F Tetraform reticle about 12 bh = 21.6 m: 359 px at 30 px/bh (f0579), raised ridge 388 px (f0590) (hero-ref/breah.md)"},
 		{"hero": "mage", "slot": "E", "field": "e.radius", "value": 1.8, "tol": 0.18, "evidence": "F Lightning Javelin circle about 2 bh across = 1.8 m radius, placement 0184 and strike flash 0190 (hero-ref/vireo.md)"},
-		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.54, "evidence": "F Rain of Arrows wall centred on the cursor at about 6 bh = 10.8 m (hero-ref/pin.md 0498; 0457 at 4.5 bh); a floor, the cap is not seen; tol 0.3 bh read error"}
+		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.5, "evidence": "F Rain of Arrows wall centred on the cursor 252 px out over a 42 px body = 6.0 bh = 10.8 m (hero-ref-footage pin 0493-0498); the cap is not seen, so this is the floor"},
+		{"hero": "archer", "slot": "R", "field": "x.width", "value": 0.5, "tol": 0.1, "evidence": "F Primal Forces beam 10-13 px wide over a 42 px body = 0.43-0.56 m (hero-ref-footage pin 0559, 0566, 0573)"}
 	]
 }
