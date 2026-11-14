@@ -3662,6 +3662,7 @@ func _play_evolutions() -> void:
 		building_now = false
 		evolving = null
 		cam.zoom_to = HOME_ZOOM
+		fx.body_glow(at, Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"])      # the one level-up glow (--level-vfx-check)
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")
 		EvolveCard.show(self, rec, evs)

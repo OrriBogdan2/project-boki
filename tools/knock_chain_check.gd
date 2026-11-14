@@ -46,7 +46,9 @@ func run(main_node: Node) -> void:
 	var sparkle := float((Arch.def("mage")["rmb"]["coil"]["push"] as Array)[1])
 	var vex := float(Arch.def("gunslinger")["rmb"]["burr"]["push"])
 	var rd: Dictionary = Arch.def("dredge")["rmb"]
-	var reel := {"mode": "haul", "spd": float(rd["pull_speed"]), "gap": float(rd["gap"]), "dur": float(rd["pull_max"]),
+	# main's Abyssal Hand stops the body `stop_gap` m off him, the two bodies' radii (0.4 each) between them
+	var reel_gap := 0.8 + float(rd["stop_gap"])
+	var reel := {"mode": "haul", "spd": float(rd["pull_speed"]), "gap": reel_gap, "dur": float(rd["pull_max"]),
 		"swing": DredgeKit.SWING, "stun": 0.2}
 	var side := Vector2(0, 1)      # every second knock goes +z (toward the wall on the walled strip)
 	var pairs := [
