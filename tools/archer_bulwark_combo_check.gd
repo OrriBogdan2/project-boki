@@ -717,7 +717,8 @@ func _archer_combos() -> void:
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
-	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside). The 3.375 m roll
+	# (owner 11-11) carries her spirit run through the column first, so her entry may be its far side: out of the rock
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.grounded = true
@@ -734,8 +735,9 @@ func _archer_combos() -> void:
 	ok(
 		"combo pin: Spirit Walk running out inside a rock = back to the entry",
 		K.spirit.walks == w0 + 1 and not K.spirit.active() and P.spirit_t <= 0.0 and K.spirit.snap_backs == sn0 + 1
-			and P.pos.x < bx,
-		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
+			and P.pos.distance_to(K.spirit.entry) < 0.25 and (P.pos.x < bx or P.pos.x >= bx + 1),
+		"x %.1f (rock %d, entry %.1f) snaps %d walks %d"
+		% [P.pos.x, bx, K.spirit.entry.x, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor

@@ -87,8 +87,11 @@ func _ult_then() -> void:
 	K.rmb_down = false
 	K.use_e()
 	var e := K.in_e()
-	C.ok("Lace cancel X window + RMB, E: both (rule), each goes and the three shots stay",
-			window and rmb and e and K.ult.left == 3, "window %s RMB %s E %s left %d" % [window, rmb, e, K.ult.left])
+	# the X press is the first arrow (owner 11-08, PinUlt.cast), so the rest of the shots stay empowered
+	var rest := int(K.ult.xd().get("shots", 3)) - 1
+	C.ok("Lace cancel X window + RMB, E: both (rule), each goes and the shots after the first arrow stay",
+			window and rmb and e and K.ult.left == rest,
+			"window %s RMB %s E %s left %d of %d" % [window, rmb, e, K.ult.left, rest])
 
 
 func _glide_lmb() -> void:
