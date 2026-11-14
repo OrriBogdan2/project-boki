@@ -166,7 +166,8 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 ## A long placement line centred on `at`, along `dir` (default: across the aim), with chevrons pointing
 ## in toward a centre ring (a wall or a rift that closes on its middle).
 ## p: at (the cursor point, clamped to `range`), range, dir, len (8), chevrons (3), ring (true), bend (radians the
-## line turns end to end, 0 = straight) and bow (unit normal the middle bulges toward)
+## line turns end to end, 0 = straight), bow (unit normal the middle bulges toward) and width (m: a faint band
+## of the true area under the line, 0 = none)
 static func span(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "span", p)
 	var at: Vector3 = p.get("at", AimMode.place(h, float(p.get("range", 1e9))))
@@ -177,6 +178,7 @@ static func span(h: Hunter, id: String, p := {}) -> void:
 	e["len"] = float(p.get("len", 8.0)); e["chevrons"] = int(p.get("chevrons", 3)); e["ring"] = bool(p.get("ring", true))
 	e["bend"] = float(p.get("bend", 0.0))
 	e["bow"] = p.get("bow", Vector2.ZERO)
+	e["width"] = float(p.get("width", 0.0))
 	_put(h, id, e)
 
 ## A flat 4-point glint on the ground (a charge riding a line, a lock-on). p: at, size (0.4), rot
