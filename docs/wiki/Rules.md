@@ -705,6 +705,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | Setting | Value |
 |---|---|
 | natural_death | False |
+| ailing_pace | {"weak": 0.7, "sick": 0.5} |
+| ailing_pace_doc | Walk speed while weak or sick from hunger (Care.pace); KinAiling droops the body and damps the hop to match, and perks it up (heart, sparkle, toast) when it gets well. |
 | sulky | {"food": 8.0, "energy": 8.0, "joy": 12.0, "clean": 8.0} |
 | sulky_doc | base_mode only (GARDEN.md section 2): needs bottom out here, sulky, and the starve clock never builds, so a Boki left alone is never weak or sick. It gets hungry and glum, and feeds itself from a bowl or a snack (BaseFeed). Off base_mode the starve stages apply. |
 | care_day_s | 300 |
