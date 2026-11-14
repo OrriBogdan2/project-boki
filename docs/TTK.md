@@ -29,50 +29,48 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 |---|---|---|---|---|---|
 | gunslinger (Ghost) | LMB rank 0 | 2.18 | 2.00 | 1.09 | ok |
 | gunslinger (Ghost) | LMB rank max | 2.18 | 2.00 | 1.09 | ok |
-| gunslinger (Ghost) | combo rank 0 | 0.77 | 0.80 | 0.96 | ok |
-| gunslinger (Ghost) | combo rank max | 0.68 | 0.72 | 0.95 | ok |
-| juggernaut (Brall) | LMB rank 0 | 13.20 | 12.95 | 1.02 | ok |
-| juggernaut (Brall) | LMB rank max | 13.20 | 12.95 | 1.02 | ok |
-| juggernaut (Brall) | combo rank 0 | 7.88 | 7.70 | 1.02 | ok |
-| juggernaut (Brall) | combo rank max | 7.25 | 7.00 | 1.04 | ok |
+| gunslinger (Ghost) | combo rank 0 | 1.30 | 0.80 | 1.63 | FAIL |
+| gunslinger (Ghost) | combo rank max | 1.30 | 0.72 | 1.81 | FAIL |
+| juggernaut (Brall) | LMB rank 0 | 13.22 | 12.95 | 1.02 | ok |
+| juggernaut (Brall) | LMB rank max | 13.22 | 12.95 | 1.02 | ok |
+| juggernaut (Brall) | combo rank 0 | 12.35 | 7.70 | 1.60 | FAIL |
+| juggernaut (Brall) | combo rank max | 12.35 | 7.00 | 1.76 | FAIL |
 | ashwick (Felix) | LMB rank 0 | 5.72 | 6.20 | 0.92 | ok |
 | ashwick (Felix) | LMB rank max | 5.62 | 6.20 | 0.91 | ok |
-| ashwick (Felix) | combo rank 0 | 3.93 | 4.30 | 0.91 | ok |
-| ashwick (Felix) | combo rank max | 2.63 | 3.00 | 0.88 | ok |
-| mage (Joule) | LMB rank 0 | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | LMB rank max | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | combo rank 0 | 8.47 | 8.80 | 0.96 | ok |
-| mage (Joule) | combo rank max | 4.03 | 4.00 | 1.01 | ok |
+| ashwick (Felix) | combo rank 0 | 0.25 | 4.30 | 0.06 | FAIL |
+| ashwick (Felix) | combo rank max | 0.20 | 3.00 | 0.07 | FAIL |
+| mage (Joule) | LMB rank 0 | 13.68 | 13.60 | 1.01 | ok |
+| mage (Joule) | LMB rank max | 13.68 | 13.60 | 1.01 | ok |
+| mage (Joule) | combo rank 0 | 1.35 | 8.80 | 0.15 | FAIL |
+| mage (Joule) | combo rank max | 0.70 | 4.00 | 0.18 | FAIL |
 | bulwark (Oath) | LMB rank 0 | 6.88 | 6.75 | 1.02 | ok |
 | bulwark (Oath) | LMB rank max | 6.88 | 6.75 | 1.02 | ok |
-| bulwark (Oath) | combo rank 0 | 5.73 | 5.85 | 0.98 | ok |
-| bulwark (Oath) | combo rank max | 5.30 | 5.00 | 1.06 | ok |
-| thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
-| thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
-| thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
-| thief (Shiv) | combo rank max | 4.22 | 4.95 | 0.85 | ok |
-| ostra (Void) | LMB rank 0 | 7.22 | 6.60 | 1.09 | ok |
-| ostra (Void) | LMB rank max | 7.22 | 6.60 | 1.09 | ok |
-| ostra (Void) | combo rank 0 | 5.42 | 4.80 | 1.13 | ok |
-| ostra (Void) | combo rank max | 4.82 | 4.80 | 1.00 | ok |
-| archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | ok |
-| archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | ok |
-| tender (Elluna) | LMB rank 0 | 7.10 | 10.40 | 0.68 | FAIL |
-| tender (Elluna) | LMB rank max | 7.10 | 10.40 | 0.68 | FAIL |
-| dolm (Tetra) | LMB rank 0 | 13.30 | 11.40 | 1.17 | ok |
-| dolm (Tetra) | LMB rank max | 13.30 | 11.40 | 1.17 | ok |
-| dredge (Kingpin) | LMB rank 0 | 9.43 | 3.50 | 2.70 | FAIL |
-| dredge (Kingpin) | LMB rank max | 9.43 | 3.50 | 2.70 | FAIL |
-| rimewright (Celeste) | LMB rank 0 | 2.93 | 13.40 | 0.22 | FAIL |
-| rimewright (Celeste) | LMB rank max | 2.93 | 13.40 | 0.22 | FAIL |
-| rimewright (Celeste) | combo rank 0 | 2.93 | never | n/a | n/a |
-| rimewright (Celeste) | combo rank max | 2.22 | never | n/a | n/a |
-| gil (roster median) | LMB rank 0 | 7.58 | 7.16 | 1.06 | ok |
-| gil (roster median) | LMB rank max | 7.58 | 7.16 | 1.06 | ok |
-| gil (roster median) | combo rank 0 | 6.10 | 4.82 | 1.27 | FAIL |
-| gil (roster median) | combo rank max | 4.95 | 4.12 | 1.20 | FAIL |
-| mage (Joule) | combo + Blowout rank 0 | 2.68 | 8.80 | 0.30 | shown |
-| mage (Joule) | combo + Blowout rank max | 1.27 | 4.00 | 0.32 | shown |
+| bulwark (Oath) | combo rank 0 | 1.78 | 5.85 | 0.30 | FAIL |
+| bulwark (Oath) | combo rank max | 1.78 | 5.00 | 0.36 | FAIL |
+| thief (Shiv) | LMB rank 0 | 4.70 | 4.95 | 0.95 | ok |
+| thief (Shiv) | LMB rank max | 4.70 | 4.95 | 0.95 | ok |
+| thief (Shiv) | combo rank 0 | 4.23 | 4.95 | 0.86 | ok |
+| thief (Shiv) | combo rank max | 4.23 | 4.95 | 0.86 | ok |
+| ostra (Void) | LMB rank 0 | 7.23 | 6.60 | 1.10 | ok |
+| ostra (Void) | LMB rank max | 7.23 | 6.60 | 1.10 | ok |
+| ostra (Void) | combo rank 0 | 5.43 | 4.80 | 1.13 | ok |
+| ostra (Void) | combo rank max | 4.83 | 4.80 | 1.01 | ok |
+| archer (Myth) | LMB rank 0 | 7.83 | 6.80 | 1.15 | FAIL |
+| archer (Myth) | LMB rank max | 7.83 | 6.80 | 1.15 | FAIL |
+| tender (Elluna) | LMB rank 0 | 7.12 | 10.40 | 0.68 | FAIL |
+| tender (Elluna) | LMB rank max | 7.12 | 10.40 | 0.68 | FAIL |
+| dolm (Tetra) | LMB rank 0 | 13.33 | 11.40 | 1.17 | FAIL |
+| dolm (Tetra) | LMB rank max | 13.33 | 11.40 | 1.17 | FAIL |
+| dredge (Kingpin) | LMB rank 0 | 7.38 | 3.50 | 2.11 | FAIL |
+| dredge (Kingpin) | LMB rank max | 7.38 | 3.50 | 2.11 | FAIL |
+| rimewright (Celeste) | LMB rank 0 | 3.35 | 13.40 | 0.25 | FAIL |
+| rimewright (Celeste) | LMB rank max | 3.35 | 13.40 | 0.25 | FAIL |
+| gil (roster median) | LMB rank 0 | 6.43 | 6.78 | 0.95 | ok |
+| gil (roster median) | LMB rank max | 6.43 | 6.78 | 0.95 | ok |
+| gil (roster median) | combo rank 0 | 4.13 | 4.95 | 0.84 | FAIL |
+| gil (roster median) | combo rank max | 3.47 | 4.80 | 0.72 | FAIL |
+| mage (Joule) | combo + Blowout rank 0 | 1.02 | 8.80 | 0.12 | shown |
+| mage (Joule) | combo + Blowout rank max | 0.70 | 4.00 | 0.18 | shown |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
@@ -91,8 +89,7 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | thief (Shiv) | rmb | 0.019 | 0.019 | 1.00 |
 | ostra (Void) | rmb | 0.117 | 0.117 | 1.00 |
 | ostra (Void) | e | 0.172 | 0.154 | 1.11 |
-| rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
-| rimewright (Celeste) | x | 0.117 | 0.121 | 0.97 |
+| rimewright (Celeste) | x | 0.117 | 0.082 | 1.43 |
 <!-- ttk:table -->
 
 **1112 parity pass: before (main 0.24.5) and after, ours / source**
