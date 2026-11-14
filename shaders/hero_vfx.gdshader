@@ -177,11 +177,11 @@ vec4 sheen(vec2 uv) {
 	vec2 p = uv * 2.0 - 1.0;
 	float body = 1.0 - smoothstep(0.7, 1.0, length(vec2(p.x / 0.5, p.y)));   // the capsule the band is seen through
 	float d = (1.0 - uv.y) - (life * 1.25 - 0.1);                // the band climbs from below the feet to above the head
-	float band = exp(-d * d / 0.012);
+	float lit = exp(-d * d / 0.012);
 	float trail = (d < 0.0 ? exp(d * 7.0) : 0.0) * 0.3;          // a faint wash left behind it
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
-	float a = clamp(band + trail, 0.0, 1.0) * body * fade;
-	return vec4(mix(col.rgb, col2.rgb, band) * a, a);
+	float a = clamp(lit + trail, 0.0, 1.0) * body * fade;
+	return vec4(mix(col.rgb, col2.rgb, lit) * a, a);
 }
 
 vec4 flare(vec2 uv) {
@@ -242,9 +242,9 @@ vec4 swirl_rim(float d, float ang) {
 	float turn = ang / 6.2832 + TIME * spin + d * 0.4;
 	float arm = fract(turn * 3.0);                               // 0 at the tail, 1 at the head
 	float w = mix(0.012, 0.045, arm);
-	float band = (1.0 - smoothstep(w * 0.5, w, abs(d - 0.93))) * (1.0 - smoothstep(0.93, 1.0, arm)) * smoothstep(0.0, 0.1, arm);
-	band *= smoothstep(0.2, 0.45, fbm3(vec2(turn * 9.0 + seed, d * 4.0)));
-	float a = band * smoothstep(0.0, 0.1, life) * (1.0 - smoothstep(0.6, 1.0, life));
+	float arm_a = (1.0 - smoothstep(w * 0.5, w, abs(d - 0.93))) * (1.0 - smoothstep(0.93, 1.0, arm)) * smoothstep(0.0, 0.1, arm);
+	arm_a *= smoothstep(0.2, 0.45, fbm3(vec2(turn * 9.0 + seed, d * 4.0)));
+	float a = arm_a * smoothstep(0.0, 0.1, life) * (1.0 - smoothstep(0.6, 1.0, life));
 	return vec4(mix(col.rgb, col2.rgb, arm * arm) * a, a);
 }
 
