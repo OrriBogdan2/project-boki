@@ -82,7 +82,7 @@ func fresh() -> Dictionary:
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
+		"tutorial": {"gfd": {"did": {}, "paid": false}, "recast_seen": false},
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -464,6 +464,7 @@ func load_from(p: String) -> void:
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	BokiQuirks.migrate(parsed)      # a rare-trait kind with no trait roll yet rolls once
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
+	RecastHint.migrate(parsed)      # and this one
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:
