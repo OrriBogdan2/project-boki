@@ -46,3 +46,10 @@ hatch shield kept on `x_shield` (`keep`).
   (`python3 tools/art1/glb_add_clips.py breaker.glb <branch breaker.glb> shield_boop,x_wind,x_slam`), and their
   `spring_hangfish_0` translation set to this swap's constant (the fish moved to `x_fish`). breaker_anims.py holds the same
   keys, so a re-swap from a re-baked 11-08 build gives the same clips.
+- **Directional loops (ext/anim-dirloops-albert-neve):** `walk_*` and `run_*` (f, b, l, r, fl, fr, bl, br) are the clips of that branch, copied onto this
+  build with `glb_add_clips.py ... --skip=spring_hangfish,x_fish` (the rig is the 11-08 one; main's build moved the fish chain to the left mast, so the
+  old chain's keys are left out and the spring solver poses it). They were baked on the scan-and-sculpt model: walk_f/run_f with
+  tools/art1/breaker_gait.py (a generated giant stride, soles locked at 2.0 and 4.8 m/s, 2.7 and 3.2 steps/s, hammer carried clear of the floor), the
+  rest with `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- breaker.glb OUT.glb 2.0 4.8 b,l,r,fl,fr,bl,br 0 0 2.0 2,1 55`
+  in step with walk_f/run_f (the walks take two steps a side in walk_f's time, his legs can't reach one; docs/art/wardens/dirloops/JUDGE.md).
+  Re-run both on the v95 model in Blender when one is free; the legs and hips are the same rig, so the loops carry over as they are.

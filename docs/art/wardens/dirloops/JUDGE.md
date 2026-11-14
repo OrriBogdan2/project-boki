@@ -273,3 +273,58 @@ share the ring's length, and clip-check holds their pelvis in the band, but thei
 ring is in step only on the new loops. After the swap: `--clip-check` Lace and Kael 0 fail (the one FAIL is Ostra's
 mid-run hit, files not touched here), `--anim-audit` forward gate Lace 13%, Kael 12%, `--crouch-check` 0 fail.
 The per-direction table above was measured before the old loops went back in.
+## Albert and Neve (2026-11-11, ext/anim-dirloops-albert-neve)
+
+Their pilot walk_f/run_f (ext/anim-pilot-albert-neve c70b0f6a2) kept; walk and run b, l, r, fl, fr, bl, br re-baked by
+`tools/art1/hunter_dir_gait.py` on main's models (Albert v2, Neve appeal) in step with them: each ring one length
+(Albert walk 0.750 s, run 0.625 s; Neve walk 0.646 s, run 0.604 s), right strike on the forward loop's key,
+`loco.in_step`, diagonals on the ring. Albert's walk_f/run_f were baked again by `breaker_gait.py` on the v2 hull
+(sole 2.01 / 4.80 m/s). Neve's skate clips (skate*, tm_skate) untouched.
+
+Albert needs three inputs the Hunters don't: SIZE 2.0 (his GLB is half game size), CYCLES 2,1 and TURN 55. His legs
+are 14 cm (model) and walk_f covers 0.75 m a pair: one pair a loop leaves a 0.15 stance share (a hop). Two pairs in
+walk_f's 0.75 s halve the step (stance 0.27-0.30); every second strike still lands on walk_f's. The run keeps one pair
+(31 keys can't hold two). At TURN 40 run_l planted at 1.63 vs 2.4 m/s with a 13 cm (game) dip, run_r half its keys
+off speed; at 55 both hold.
+
+| loops | planted sole vs loco, median (keys within 5%) | stance share | pelvis vs forward band (clip-check) |
+|---|---|---|---|
+| Albert walk b / l, r / fl, fr / bl, br | 2.0 m/s (100 / 57, 71 / 71 / 80%) | 0.30 / 0.30 / 0.27 / 0.30 | 0.016 m under, 0.003 over |
+| Albert run b / l, r / fl, fr / bl, br | 4.8 m/s (71 / 100 / 100 / 80%) | 0.14 | 0 |
+| Neve walk x7 | 2.2 m/s (100%) | 0.40 | worst 0.003 m under |
+| Neve run x7 | 4.6 m/s (100%) | 0.20 | worst 0.001 m under |
+
+Was (current, one length each, no diagonals): Albert walk b/l/r 0.5 s, sole 1.13-1.22 vs 1.0 model m/s, hip 2 cm over
+walk_f's; run b/l/r 0.375 s, 2.8 vs 2.4; Neve walk b/l/r 1.5 s and run b/l/r 1.0 s, soles 0.2-0.6 m/s against
+2.2 / 4.6 (her old skate strokes, stance 0.6-0.94).
+
+### Blind Fable judge (Albert, Neve)
+
+Game renderer (`--clip-shots`, yaw 110, 16 fps; Albert `--dist=11 --at=1.4`), 8 frames a loop under the forward loop;
+current and new in a seeded random A/B order, the judge saw only the sheets. Scores slide / contact / weight / match /
+look, 1-5; pass = none under 3. Diagonals have no current loop (the ring blended two neighbours): judged alone.
+
+| loop | new | current | kept |
+|---|---|---|---|
+| Albert walk_b | 4 4 4 4 3 | 3 3 3 3 3 | new |
+| Albert walk_l | 4 4 4 4 3 | 3 3 3 3 3 | new |
+| Albert walk_r | 3 3 3 3 3 "dip f3-4" | 4 4 4 4 3 | new (see below) |
+| Albert run_b | 4 4 4 4 3 | 3 3 3 4 4 | new |
+| Albert run_l | 3 3 3 3 4 "f1-3 crouch, shield to ground" | 4 4 4 4 3 | new (see below) |
+| Albert run_r | 3 3 3 3 4 | 4 4 4 4 3 | new (see below) |
+| Albert walk fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 4 3 | - | new |
+| Albert run fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 4 3 | - | new |
+| Neve walk_b | 4 4 4 3 3 | 3 4 3 2 2 "near-idle shuffle" | new |
+| Neve walk_l, walk_r | 4 4 4 3 3 | 3 4 3 2 2 | new |
+| Neve run_b | 3 4 3 3 3 | 3 4 3 2 2 | new |
+| Neve run_l | 4 4 4 3 4 | 3 4 3 2 2 | new |
+| Neve run_r | 4 4 3 3 3 | 3 4 3 3 3 | new |
+| Neve walk fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 3 3 | - | new |
+| Neve run fl, fr / bl, br | 4 4 4 4 4 / 3 4 3 3 3 | - | new |
+
+New wins 9 of 12 pairs; every new loop passes. Albert's walk_r, run_l and run_r lost to current. Kept anyway: the
+current ones are 0.5 / 0.375 s against walk_f 0.75 and run_f 0.625, so with them the ring is not one length
+(`--clip-check` fails, `in_step` can't hold) and strafing stays out of step with the new gait, the break this pass
+is for. The low frames the judge marks are the forward loop's own hip dip at the same phase (run_f vaults low, then
+flies), which reads as a crouch on a side run. Next: a side-run hip curve of its own within the clip-check band, or
+the owner keeps current for those three and drops Albert's `in_step`.
