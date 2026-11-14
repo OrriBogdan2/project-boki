@@ -8,7 +8,8 @@ extends RefCounted
 ##      and its signature weapon's JSON names one of them (no stock sound)
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
-##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
+##   6. every sound named in UiSfx (capture, extraction, refusals) has its file
+##   7. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
@@ -87,6 +88,7 @@ func run(main: Node) -> void:
 	_inv_cues()
 	_training()
 	_boki_cues()
+	_ui_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -610,6 +612,19 @@ func _training() -> void:
 	h.free()
 	w.free()
 	Sfx.clear_amb_layers(0.0)
+
+## 6. Every sound UiSfx plays by name (Sfx.play) has a file, so a typo never plays silence.
+func _ui_cues() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
+	var re := RegEx.create_from_string('Sfx\.play\("([a-z_]+)"')
+	var names := {}
+	for hit in re.search_all(src):
+		names[hit.get_string(1)] = true
+	var missing := []
+	for n in names:
+		if _takes(String(n)).is_empty():
+			missing.append(n)
+	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
 
 func _takes(sname: String) -> Array:
 	var out := []
