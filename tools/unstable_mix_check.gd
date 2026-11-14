@@ -25,11 +25,10 @@ func _by_theme() -> Dictionary:
 	return out
 
 func _preview_text(a: Dictionary, b: Dictionary) -> String:
-	var dv := VBoxContainer.new()
-	NookRules.preview(dv, a, b)
+	var card := NookPreview.card(a, b, Engine.get_main_loop() as SceneTree)      # (the Nook's pair card)
 	var all := ""
-	for l in dv.get_children(): all += (l as Label).text + "\n"
-	dv.free()
+	for l in card.find_children("*", "Label", true, false): all += (l as Label).text + "\n"
+	card.free()
 	return all
 
 func run(m: Node) -> void:
