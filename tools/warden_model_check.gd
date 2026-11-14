@@ -123,7 +123,7 @@ func _anim(id: String) -> void:
 	var still: Array = []
 	var moves: Array = []
 	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
-			KMovesCare.MOVES, KMovesPair.MOVES]:
+			KMovesCare.MOVES, KMovesPair.MOVES, KMovesGil.MOVES]:
 		for mv in t:
 			if String(WARDENS[id]["moves"]) != "" and String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
 	for mv in moves:

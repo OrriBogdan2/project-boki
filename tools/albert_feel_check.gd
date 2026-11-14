@@ -4,7 +4,7 @@ extends "res://tools/bjorn_launch_check.gd"
 ## kept, the aegis boop, the Faultline hop and wider lane, the rope's auto-return and the swing lunges.
 ## Prints AKCHECK lines.
 
-const OLD_SIZE := 2.0          # the body size before the pass: he is 0.9 of it
+const SIZE := 1.39             # his body size (content/archetypes/bulwark.json, the owner's 11-11 sizes)
 const OLD_WIDTH := 4.5         # m: the Faultline lane before the pass
 const LUNGE_SLACK := 0.3       # m: a measured lunge may miss its data distance by this (step rounding, slide)
 
@@ -15,19 +15,19 @@ func albert() -> void:
 	await _rope()
 	await _lunges()
 
-## The body is 0.9 of the old one, the plate comes down with it, the hitbox stays.
+## The body is at its size, the plate comes down with it, the hitbox stays.
 func _size() -> void:
 	var r := setup("bulwark", 7.0)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var K: BulwarkKit = P.ak
 	var body := float(Arch.body("bulwark").size)
-	ok("albert size: the body is 0.9 of the old one", absf(body / OLD_SIZE - 0.9) < 0.001, "size %.2f" % body)
+	ok("albert size: the body is at the owner's 11-11 size", absf(body - SIZE) < 0.001, "size %.2f" % body)
 	ok("albert size: the hitbox keeps its 0.46 m (fairness, the hit radius is not the look)",
 		absf(P.r - 0.46) < 0.001, "r %.2f" % P.r)
 	ok("albert size: the nameplate comes down with him (about 0.9 of 2.6 m)",
 		absf(HudPlate.plate_offset(P) / m.cam.hunter_scale - 2.6 * 0.9) < 0.06, "plate %.2f" % HudPlate.plate_offset(P))
-	ok("albert size: the hand height (throw, FX) scales with him", absf(K.hand_at().y - P.pos.y - 0.9) < 0.001,
+	ok("albert size: the hand height (throw, FX) scales with him", absf(K.hand_at().y - P.pos.y - 0.5 * SIZE) < 0.01,
 		"hand %.2f" % (K.hand_at().y - P.pos.y))
 	await done(m)
 
