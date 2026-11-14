@@ -1791,10 +1791,10 @@ func sim(dt: float) -> void:
 		if remote:
 			net_follow(dt)
 		else:
-			pos = rocket.pos if rocket else m.ship_pos_of(m.ship_of(self)) + Vector3(0, -1.2, 0)
-			if rocket == null:
-				prev = pos
-				vel = Vector3.ZERO
+			if rocket:
+				pos = rocket.pos
+			else:
+				SkyDeck.hold(self)      # on the deck at your squad slot (still, facing the bow)
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
@@ -3095,7 +3095,7 @@ func render(delta: float, alpha: float) -> void:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
 	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) \
-			and not (riding and rocket == null) and not unseen
+			and SkyDeck.drawn(self) and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)

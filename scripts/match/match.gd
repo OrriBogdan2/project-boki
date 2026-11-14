@@ -453,7 +453,8 @@ func _start(o: Dictionary) -> void:
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
-	if skydrop.planning and player:
+	intro = SquadIntro.start(self)      # the squad on the deck first (0.24.4); it opens the map after
+	if skydrop.planning and player and intro == null:
 		hud.open_map(true)
 	if player:
 		cam.snap(player.pos)
@@ -829,6 +830,7 @@ const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship 
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
+var intro: SquadIntro = null    # the squad intro on the deck, while it plays (SquadIntro)
 var biomes: BiomeRun = null     # biome regions on an authored map (spawn tables, rarity, mutations, traps)
 
 func _setup_ship() -> void:
@@ -896,8 +898,7 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 	var n: Node3D = s["node"]
 	# drawn along the line past the end too, so it sails off over the clouds
 	n.position = (s["a"] as Vector3).lerp(s["b"], (time - st) / float(s["dur"])) + Vector3(0, 1.4 + sin(time * 1.3) * 0.25, 0)
-	for pn in ["PropL", "PropR"]:
-		(n.get_node(pn) as Node3D).rotation.z += dt * 14.0
+	SkyDeck.tick(self, s, dt)      # props, shadow, engine sound, the squad and their wisps on deck
 	var done := time >= st + float(s["ride"])
 	for h in hunters:
 		if h.riding and (h.rocket != null or not is_same(ship_of(h), s)):
@@ -3210,6 +3211,7 @@ func _process(delta: float) -> void:
 		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
 		var fp := ship_pos_of(ps) + sd * 3.0
 		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
+		if intro: intro.frame(delta)       # the squad intro takes the view, then hands it over
 	elif player and (player.rocket != null or player.dropping):
 		cam.skydive(player.render_pos(alpha), skydrop.drop_yaw(player), player_altitude(), delta)
 	elif player and not player.out and not player.downed:
@@ -3368,6 +3370,8 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if intro and intro.skip(event):
+		return
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
 		get_viewport().set_input_as_handled()
@@ -3417,6 +3421,7 @@ func step(dt: float) -> void:
 		# planning the drop: the ship waits at the edge of the map and the match clock waits with it
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
 		for k in pending_input: pending_input[k] = false
+		if intro: intro.tick(dt)
 		skydrop.tick_plan(dt)
 		if String(opts.get("map_demo", "")) == "plan" and player and skydrop.clock > 1.2 and not has_meta("map_demo_done"):
 			# test: your ping on a vault, beside the bots' picks
