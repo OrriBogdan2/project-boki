@@ -29,6 +29,7 @@
 		{"hero": "thief", "slot": "E", "field": "e.slow", "value": 0.5, "tol": 0.0, "evidence": "wiki Shiv Q: a dagger in an enemy slows 50%; card panel: Slows (docs/heroes/thief.md)"},
 		{"hero": "thief", "slot": "E", "field": "e.ghosts", "value": 4.5, "tol": 0.5, "evidence": "F 4 to 5 cyan ghost copies on the blink (hero-ref/dancer.md 0238, 0279)"},
 		{"hero": "rimewright", "slot": "RMB", "field": "rmb.charges", "value": 2, "tol": 0.0, "evidence": "D Cryo Spear: 2 charges"},
+		{"hero": "rimewright", "slot": "X", "field": "x.hold", "value": 3.3, "tol": 0.1, "evidence": "F Ice Crash: crystal to crash 3.2/3.4/3.4/3.2 s over four casts (docs/heroes/rimewright.md, Rimelock length)"},
 		{"hero": "dredge", "slot": "X", "field": "x.waves", "value": 2, "tol": 0.0, "evidence": "D Slugwave: two waves"},
 		{"hero": "juggernaut", "slot": "E", "field": "e.dmg", "per": "lmb.dmg", "value": 0.7, "tol": 0.1, "evidence": "D Feysteel Chain 30 dmg vs Caldera 43 = 0.70x"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.dmg", "per": "lmb.dmg", "value": 3.0, "tol": 0.35, "evidence": "D Execution Slam 130 vs Caldera 43 = 3.0x (audit: 26/8 fine)"},

@@ -53,10 +53,22 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Cele
 | RMB | lands at the cursor, slow zone, detonation 1.8-2s later [footage]; owner 19:50: a push, the spear emerges from her and travels out | an overhand throw from the raised hand | the two-palm push, travel time = distance / 18 m/s | `tm RMB: ...` (7 rows) |
 | E | wall: both hands pushed forward [footage] | the arms flung up and out | both palms shoved out low and wide as the ice erupts | (animation only; the tell timing is asserted) |
 | Shift | hold to skate, about 10-11 m/s, full speed in 0.2s, stop in 0.1-0.2s [footage] | 10.5 m/s (the footage mean, 5.83 body heights a second), 0.2s ramp | unchanged (at parity) | `tm Shift: ...` |
-| X | rooted and invulnerable 3.2-3.5s, then the crash [footage] | as the source, plus the owner's skate carry | unchanged | `tm X: ...` |
+| X | rooted and invulnerable about 3.3s (3.2-3.4 per cast), then the crash [footage] | as the source, plus the owner's skate carry; 3.5s hold | the 3.3s hold (Rimelock length, below) | `tm X: ...`; `--kit-parity-check` `x.hold` |
 | Shift | hold to skate, about 10-11 m/s, full speed in 0.2s, stop in 0.1-0.2s [footage] | 11.5 m/s, 0.2s ramp | unchanged (at parity) | `tm Shift: ...` |
 | R | rooted and invulnerable 3.2-3.5s, then the crash [footage] | as the source, plus the owner's skate carry | unchanged | `tm R: ...` |
 | X | rooted and invulnerable 3.2-3.5s, then the crash and 0.4s of recovery (f57 -> f61) [footage] | as the source, plus the owner's skate carry; free at the burst | the 0.4s recovery locked as the footage (Shift skates out) | `tm X: ...`, `anim rime: ...` |
+
+## Rimelock length: footage read, Nov 12
+The owner settled only that Shift breaks out of Rimelock (docs/heroes/ults.md), not how long it holds. Re-read of the Ultimate section of `briefs/hero-ref/tamsin.md` (items 1 and 4: "every cast waited the full about 3.2-3.4 s"; f25 crystal, f57 crash). Its 0.1 s strip (`/home/claude/svvid/ult/`) is not on this worker, so the four casts were read again on the 0.2 s strip of the same video (`footage/tamsin/frames/` on ext/hero-ref-footage, frame N = 1055 s + (N-1)/5), from the first frame with the star crystal and the rink edge to the first frame with the light pillar and shard burst:
+
+| Cast | Crystal | Last held | Crash | 0.2 s strip | 0.1 s strip (sheet) | Read |
+|---|---|---|---|---|---|---|
+| 1 | 0363 | 0378 | 0379 (607) | 16 frames = 3.2 s | f25 -> f57 = 3.2 s | 3.2 s |
+| 2 | 0391 | 0408 | 0409 (758) | 18 frames = 3.6 s | f83 -> f117 = 3.4 s | 3.4 s (the finer strip) |
+| 3 | 0420 | 0436 | 0437 | 17 frames = 3.4 s | "about" f155 -> f187; does not line up with the 0.2 s strip (0420 = f139) | 3.4 s |
+| 4 | 0448 (0447: cast flash) | 0463 | 0464 (758) | 16 frames = 3.2 s | f195 -> f227 = 3.2 s | 3.2 s |
+
+Each 0.2 s count is good to about one frame either way. The mean of the four reads is 3.3 s, inside the 3.0-3.4 s band, so the hold went from 3.5 s to 3.3 s (`x.hold` in rimewright.json, locked by `--kit-parity-check`, tolerance 0.1 s). The late-recast window keeps its 0.75 s and now opens at 2.55 s. The slow ramp (15% + 12%/s) now reaches 54.6% at the crash where it used to stop at the 55% cap; the cap and the wiki's "stacks for up to 3.5 s" stay as they were. The animation timing table below still shows the 3.52 s it measured on Nov 8; `rimewright_anim_check` accepts 3.2-3.55 s.
 
 ## Footage gaps, Nov 9 re-check
 The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255acbee. `--rimewright-combo-check` 90/0 on main. The asked rows 3, 4, 5 and 10 were already closed on main and asserted by the existing `tm` rows; the one open row (6) is in rimewright_kit.gd/rimewright.json, which in-flight Neve branches change, so nothing was built.
@@ -124,7 +136,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | R: allies are unaffected | footage, card | yes | yes (foes only) | (by construction: `foes_in`) |
 | X: invulnerable and rooted inside the shell | card, footage | yes | yes | "tm X: inside the shell she is invulnerable and rooted, and nothing fires" |
 | X: the zone's slow stacks for up to 3.5s | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (15% + 12%/s, cap 55%) | "tm X: the slow on a foe in the rink stacks the longer they stay" |
-| X: it goes off by itself at the end (about 3.5s) | footage (f25 -> f57) | yes | yes | "tm X: it cracks open by itself at 3.5 s" |
+| X: it goes off by itself at the end (about 3.3s) | footage (f25 -> f57; 0363 -> 0379) | yes | yes | "tm X: it cracks open by itself at 3.3 s" |
 | X: reactivating in the final 0.75s gives 67% of the effects (damage and stun) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes | "tm X: X in the last 0.75 s cracks it open early at two thirds" |
 | X: reactivating earlier cancels it, no stun | [wiki](https://supervive.wiki.gg/wiki/Celeste), sheet correction | no | yes | "tm X: X early ends it with no damage, no stun and no bond" |
 | X: the crash is blocked by line of sight | [wiki](https://supervive.wiki.gg/wiki/Celeste) | no | yes (from the rink's centre) | "tm X: a foe behind a rock is not hit (line of sight)" |
@@ -293,7 +305,7 @@ Source: `briefs/hero-ref/tamsin.md` (one frame 0.2 s; the ult strip 0.1 s), meas
 
 The run re-time is data: `loco.run_cycle` in `content/rules/warden_anim/claire.json` scales the key times of the four v95 `run_*` loops at load (`WardenClips._retime_run`), the poses stay ours (parity is timing and weight). Her legs are not gated by `--anim-audit` (`NO_LEGS`); its foot-slide line for her at 4.65 m/s reads 4.21 m/s (90%) before and 3.86 m/s (83%) after, the clip's own foot speed 0.44 -> 0.79 m/s (a skater's stroke, not gated; `--gait-speed-check` is on the unmerged ext/anim-gait-speed, so the audit line is the measure on 0.24.5).
 
-Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%, the ult holds 3.5 s.
+Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%. (The ult's 3.5 s hold listed here had no owner item behind it; it is the footage's 3.3 s since Nov 12, see Rimelock length.)
 
 Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption).
 

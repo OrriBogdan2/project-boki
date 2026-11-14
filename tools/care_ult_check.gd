@@ -342,8 +342,8 @@ func rimewright() -> void:
 	ok("tm X: the rink is a lit rim over a soft inside (no screen-wide cyan), even near the crash",
 			rink_max * 0.18 * 1.6 <= 0.25 and live <= rink_max + 0.001, "fill %.2f (max %.2f)" % [live, rink_max])
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
-	step(m, 1.3)
-	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
+	step(m, float(xd["hold"]) - 2.2)     # 2.35 s stepped so far: look 0.15 s after the crash
+	ok("tm X: it cracks open by itself at 3.3 s: damage and an ice-block stun", K.rime.is_empty()
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
 	ok("tm X: the crash plays its own move", K.anim_id == "tm_rime_crash", K.anim_id)
