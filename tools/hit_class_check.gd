@@ -8,10 +8,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("HITCLASS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	var hunter := Hunter.new()
@@ -42,6 +44,7 @@ func run(main: Node) -> void:
 		n.free()
 	print("HITCLASS DONE, failures: %d" % bad)
 	main.get_tree().quit()
+
 
 func _look(fx: Fx, cls: int) -> void:
 	var s0 := fx.si

@@ -4,10 +4,10 @@ extends RefCounted
 ## Run under xvfb with a renderer.
 
 const ARCH := "gunslinger"
-const RANGE := 6.0               # m from the Hunter to the target
-const AFTER_HIT := 3             # frames drawn after the shot ends, so the look is at its brightest
+const RANGE := 6.0  # m from the Hunter to the target
+const AFTER_HIT := 3  # frames drawn after the shot ends, so the look is at its brightest
 const MAX_STEPS := 90
-const CROP := Vector2i(300, 220) # px round the screen centre, shown 2x
+const CROP := Vector2i(300, 220)  # px round the screen centre, shown 2x
 const NAMES := ["armour", "body", "boki", "monster", "wall"]
 
 const AimkitShots := preload("res://tools/aimkit_shots.gd")
@@ -15,7 +15,8 @@ const AimkitShots := preload("res://tools/aimkit_shots.gd")
 var m: Match
 var main: Node
 var home := Vector3.ZERO
-var last: Ent                    # the previous target, moved out of the line of fire before the next
+var last: Ent  # the previous target, moved out of the line of fire before the next
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -49,12 +50,14 @@ func run(main_node: Node) -> void:
 	m.queue_free()
 	main.get_tree().quit()
 
+
 func _step(n: int) -> void:
 	for i in n:
 		m.step(Match.DT)
 		for h in m.hunters:
 			h.render(Match.DT, 1.0)
 		await main.get_tree().process_frame
+
 
 func _target(cls: String, spot: Vector3) -> Vector3:
 	var P := m.player
@@ -76,10 +79,11 @@ func _target(cls: String, spot: Vector3) -> Vector3:
 	t.max_hp = 1e6
 	t.armor = 80.0 if cls == "armour" else 0.0
 	last = t
-	await _step(40)           # (a Boki walks to its owner's side first)
+	await _step(40)  # (a Boki walks to its owner's side first)
 	if cls == "boki":
 		return t.kin.pos + Vector3(0, 0.7, 0)
 	return t.pos + Vector3(0, 0.95, 0)
+
 
 func _shot(cls: String) -> Image:
 	var P := m.player

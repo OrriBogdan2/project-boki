@@ -4,17 +4,19 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Rig := preload("res://tools/boki_rig_check.gd")
-const SEAM := 0.002            # rad / m: the loop's last key against its first
-const MOVES := 0.03            # rad: the least an idle's breath or a fidget must swing
+const SEAM := 0.002  # rad / m: the loop's last key against its first
+const MOVES := 0.03  # rad: the least an idle's breath or a fidget must swing
 const SIM_S := 60.0
 const ACTS := ["pet", "eat", "chop", "mine", "carry", "tend"]
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("BOKIIDLE %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	var rows := {}
@@ -27,6 +29,7 @@ func run(main: Node) -> void:
 		await _species(main, id)
 	print("BOKIIDLE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _species(main: Node, id: String) -> void:
 	var k := Shots.rigged_kin(id)
@@ -57,12 +60,14 @@ func _species(main: Node, id: String) -> void:
 	_acting(rig, k, id)
 	k.queue_free()
 
+
 ## Largest gap between the loop's end and its start, over every track (rad for turns, m for the rest).
 func _seam(a: Animation) -> float:
 	var worst := 0.0
 	for t in a.get_track_count():
 		worst = maxf(worst, _apart(a, t, a, t, 0.0, a.length))
 	return worst
+
 
 ## How far the fidget is from the idle at its first and last frame.
 func _ends(idle: Animation, fid: Animation) -> float:
@@ -72,6 +77,7 @@ func _ends(idle: Animation, fid: Animation) -> float:
 		if i >= 0:
 			worst = maxf(worst, maxf(_apart(fid, t, idle, i, 0.0, 0.0), _apart(fid, t, idle, i, fid.length, 0.0)))
 	return worst
+
 
 ## The most `a` strays from `base` (same track paths), or from its own first frame when base is itself.
 func _swing(a: Animation, base: Animation) -> float:
@@ -86,6 +92,7 @@ func _swing(a: Animation, base: Animation) -> float:
 				worst = maxf(worst, _apart(a, t, base, i, at, fposmod(at, base.length)))
 	return worst
 
+
 func _apart(a: Animation, ta: int, b: Animation, tb: int, at_a: float, at_b: float) -> float:
 	match a.track_get_type(ta):
 		Animation.TYPE_ROTATION_3D:
@@ -95,6 +102,7 @@ func _apart(a: Animation, ta: int, b: Animation, tb: int, at_a: float, at_b: flo
 		Animation.TYPE_SCALE_3D:
 			return a.scale_track_interpolate(ta, at_a).distance_to(b.scale_track_interpolate(tb, at_b))
 	return 0.0
+
 
 ## Standing still for a minute: a fidget every 4-9 s, none while it acts.
 func _schedule(rig: BokiRig, id: String) -> void:
@@ -116,13 +124,14 @@ func _schedule(rig: BokiRig, id: String) -> void:
 		gaps_ok = gaps_ok and gap >= 4.0 - dt and gap <= 9.0 + dt
 	ok(gaps_ok, "%s fidgets every 4-9 s (%d in %d s)" % [id, starts.size(), int(SIM_S)])
 
+
 func _acting(rig: BokiRig, k: Node3D, id: String) -> void:
 	var dt := 1.0 / 30.0
 	var fidgets := 0
 	var t := 0.0
 	while t < SIM_S:
 		var turn := int(t / 6.0)
-		var doing := turn % 2 == 1                 # six s still, six s busy
+		var doing := turn % 2 == 1  # six s still, six s busy
 		k.set_meta("kact", ACTS[turn % ACTS.size()] if doing else "")
 		rig._pick_clip(dt)
 		rig.player.advance(dt)
