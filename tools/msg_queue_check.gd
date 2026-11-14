@@ -4,9 +4,13 @@ extends RefCounted
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
 ##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
-##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to
+##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to;
+##      the match HUD counts a hit you land as a fight, not only one you take
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
+##   8. two world labels on one spot leave one drawn: the loot name waits, the nameplate stays (LabelClash);
+##      a plate or lair board under a damage number fades, the number stays (LabelSpacing)
+##   9. a HUD word first changing (armor tier, Fever, the Boki out) gets one hint, once per save (TermHints)
 ## Never touches the save.
 
 var bad := 0
@@ -31,6 +35,7 @@ func run(main_node: Node) -> void:
 	_fight(host)
 	await _wiring()
 	_yield()
+	_clash()
 	host.queue_free()
 	print("MSGQ DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -145,6 +150,38 @@ func _wiring() -> void:
 	m.hud.tip("Hold left click to shoot")
 	ok(lane.count() == 1, "a hint lands in the same lane")
 	ok(lane.get_parent() == m.hud, "the lane is part of the HUD")
+	var hud = m.hud
+	hud.kit_fade = 1.0
+	hud.hitmarker(false)
+	ok(hud.in_fight(), "a hit you land starts the fight budget")
+	var t0: float = hud.kit_t0
+	for i in 10:
+		hud._hud_tick(0.1)
+	ok(hud.kit_fade == 0.0, "the kit panel fades out while the fight budget is on (%.2f)" % hud.kit_fade)
+	ok(is_equal_approx(hud.kit_t0 - t0, 1.0), "its show timer waits the fight out")
+	Input.action_press("scores")
+	for i in 10:
+		hud._hud_tick(0.1)
+	ok(hud.kit_fade == 1.0, "Tab brings the kit panel back mid-fight")
+	Input.action_release("scores")
+	hud.dealt_at = -9.0
+	m.player.hurt_at = -9.0
+	for i in 10:
+		hud._hud_tick(0.1)
+	ok(not hud.in_fight() and hud.kit_fade == 1.0, "the kit panel returns when the fight ends")
+	m.hud._place_msgs()
+	ok(not lane.fight, "no hits yet: the HUD's lane keeps its full budget")
+	m.hud.hitmarker(false)
+	m.hud._place_msgs()
+	ok(lane.fight, "a hit you land puts the HUD's lane on its fight budget")
+	lane.clear()
+	m.player.armor_tier = 1
+	TermHints.watch(m.hud, m.player)
+	ok(lane.count() == 1 and Save.d["tutorial"].get("term_armor", false),
+		"the first armor tier-up says what tiers are (%s)" % str(lane.texts()))
+	lane.clear()
+	TermHints.watch(m.hud, m.player)
+	ok(lane.count() == 0, "and only once per save")
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)
@@ -171,5 +208,51 @@ func _yield() -> void:
 	for i in 30:
 		MsgLane.yield_label(lbl, cam, clear, 0.05)
 	ok(lbl.transparency < 0.05, "and comes back when the card goes")
+	_spacing(cam)
 	cam.queue_free()
 	lbl.queue_free()
+
+# ------------------------------------------------------------------ 8. two labels on one spot
+func _clash() -> void:
+	var plate := Vector2(640, 300)
+	var loot := Rect2(plate + Vector2(-40, -16), Vector2(80, 20))
+	LabelClash.begin()
+	ok(not LabelClash.blocked(loot), "no claimed box: the loot name draws")
+	LabelClash.claim(plate, LabelClash.PLATE)
+	ok(LabelClash.blocked(loot), "a nameplate over it: the loot name is skipped, one label is left")
+	ok(not LabelClash.blocked(Rect2(loot.position + Vector2(400, 0), loot.size)), "a loot name elsewhere still draws")
+	LabelClash.begin()
+	ok(not LabelClash.blocked(loot), "the next frame starts clear")
+	for i in LabelClash.CAP + 8:
+		LabelClash.claim(Vector2(i * 5, 0), LabelClash.NUM)
+	ok(LabelClash.boxes.size() == LabelClash.CAP, "claims stop at CAP, so a crowd never grows the array")
+	LabelClash.begin()
+
+# ------------------------------------------------------------------ 8b. label meets label
+func _spacing(cam: Camera3D) -> void:
+	var low := _label_at(Vector3(0, 0, 0), "Echo Loot")
+	var high := _label_at(Vector3(0.05, 0.02, 0), "-34")
+	var far := _label_at(Vector3(4, 0, 0), "Camp")
+	var group: Array[Label3D] = [low, far]
+	for i in 30:
+		var covers: Array[Rect2] = [MsgLane.label_rect(high, cam)]     # (rebuilt each frame, as the HUD does)
+		LabelSpacing.yield_group(group, cam, covers, 0.05)
+	ok(low.transparency > 0.8 and high.transparency == 0.0,
+		"a label under a damage number fades, the number stays (%.2f)" % low.transparency)
+	ok(far.transparency == 0.0, "a label that is clear of it is left alone")
+	var pair: Array[Label3D] = [low, _label_at(Vector3(0, 0.02, 0), "Chest")]
+	for i in 30:
+		var none: Array[Rect2] = []
+		LabelSpacing.yield_group(pair, cam, none, 0.05)
+	ok(low.transparency < 0.05 and pair[1].transparency > 0.8,
+		"of two in one group the first in the list stays, the second fades")
+	for l in [low, high, far, pair[1]]:
+		l.queue_free()
+
+func _label_at(pos: Vector3, text: String) -> Label3D:
+	var l := Label3D.new()
+	l.text = text
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	main.add_child(l)
+	l.global_position = pos
+	return l

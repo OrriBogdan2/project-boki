@@ -23,11 +23,15 @@ static func say(m: Match, k: Kin, trigger_id: String) -> void:
 	if txt != "":
 		m.kin_bark(k, txt, trigger_id)
 
+## Is the line over this Boki's head drawn? In a fight only your own Boki's are: the rest print over the fight.
+static func heard(m: Match, k: Kin) -> bool:
+	return k.owner_h == m.player or m.music_dir == null or not m.music_dir.fight_on(m)
+
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {
 	"land": ["That meadow looks nice and quiet!", "(peeks over your shoulder at the ground below)"],
 	"points": ["One point to start. Pick well!", "(holds up one paw, very serious)"],
-	"pick_sec": ["That one! Your right click!", "(points its nose at the glowing button)"],
+	"pick_sec": ["That one! Press %S!", "(points its nose at the glowing button)"],
 	"sec": ["Use your power on them!", "(watches your hands, tail going)"],
 	"shoot": ["Get them! They're worth XP!", "(growls at the monster)"],
 	"pick_dash": ["You leveled up! Take the dash!", "(zips off to the side and back, showing you)"],

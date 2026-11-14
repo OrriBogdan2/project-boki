@@ -12,6 +12,9 @@ cursor state plus `MANIFEST.txt`).
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
+| `aim_reach.gd` (`AimReach`) | The range preview of a ground-target slot: a faint max-range ring and the landing disc |
+
+Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
 
 Scale: 1 body height (bh) = 1.8 m (`AimKit.BH`). The hero sheets measure in bh.
 
@@ -43,6 +46,8 @@ Membership tests (flat XZ), so a kit's hit test matches what it draws:
 `in_arc(center, dir, radius, deg, thick, p)` and `in_circle(at, r, p)`. Each takes an optional `pad`
 (for example a target's radius).
 
+**Cursor on your own body:** `Hunter.aim_dir()` (the one direction every shot, cast and the facing read) ignores a cursor within two body radii (`AIM_MIN_BODIES`, a body width) and keeps the last good direction, so crossing the model never spins the body or sends rounds sideways. `--aim-near-check` sweeps the cursor across and around the body.
+
 ## 2. Telegraphs
 
 **Immediate style.** Call the shape every step while it should show, under an id of your own. The same
@@ -61,7 +66,7 @@ Common params (every shape):
 | `alpha` | 1.0 | overall strength. 1 is the quiet default; don't go above about 1.4 |
 | `hot` | 0 | 0..1, brightens toward white. Lanes, Vs and sweet circles go hot by themselves at `k >= 1` |
 | `lw` | 0.06 | rim width in m |
-| `all` | false | foes and allies see it too. A foe's is tinted toward the hostile rim colour. Default: only your own player sees it (aim reticles) |
+| `all` | false | foes and allies see it too, on their own games online as well (section 6). A foe's is tinted toward the hostile rim colour. Default: only your own player sees it (aim reticles) |
 | `dur` | 0.1 | seconds it stays without a refresh |
 
 Directions are flat `Vector2(x, z)`, the same as `h.aim_dir()`. Points are `Vector3`. Every shape sits
@@ -137,7 +142,8 @@ AimKit.arc_wall(h, "e", {"rmax": reach})       # Lace's Rain of Arrows: at the c
 var w := AimKit.entry(h, "e")                  # read the radius back for the cast
 ```
 Params: `center` (the hunter), `dir`, `radius` (the cursor distance clamped to `rmin`..`rmax`, 2..9),
-`deg` (120), `thick` (0.9), `panels` (7).
+`deg` (120), `thick` (0.9), `panels` (7). With `"lace": true` (Lace's Hail Wall) the band's fill is two
+strands criss-crossing between its rims instead.
 
 ### Two-end swap marker
 ```gdscript
@@ -151,13 +157,33 @@ AimKit.line(h, "aim")                                        # the thin aim line
 AimKit.line(h, "aim", {"col": Color("ffd25a"), "hot": 0.6})   # Sable's gold empowered line
 AimKit.line(h, "aim", {"len": 20.0})                          # past the cursor to max range (Lace stage 2)
 AimKit.span(h, "r", {"len": 21.6, "chevrons": 4})             # Tenzo Tetraform: a long line, inward chevrons, centre ring
+AimKit.span(h, "x", {"len": 12.0, "width": 3.2})              # Basalt Spine: the line over the band it slows
 AimKit.star(h, "lock", {"at": foe.pos, "size": 0.5})          # a glint on the ground
 ```
-The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
+`"lace": true` on a line or a lane (Lace's draw reticle and Heavy Shot bar, owner 11-11) draws two strands
+criss-crossing along it, one cross every 0.5 m, the one passing under darker: a laced cord, not a plain
+line or fill. The two parallel lines (Motley RMB) are `lane` with `"rails": true` and no chevrons. The Mossy R
 rectangle is a plain `lane`. The Juggernaut hold-blast arc round the body is `circle` with
 `"self": true`. A target highlight ring at someone's feet is a small `circle` at their position. Sparkle's E is a
 `circle` with `ticks` and `"pointer": drag_dir`, plus a `lane` with `"from": disc, "tip": true` for the
 drag arrow.
+
+### Range preview of a ground-target slot (`AimReach`)
+A slot that places a zone or strike at the cursor names its range and landing radius in data:
+`"ground": {"range": "reach", "r": "radius"}` (key paths in the slot def, e.g. `"lance.range"`; `"recast": true`
+when only the recast lands at the cursor, Meeko's Hearthlight throw). While it is aimed, AimKit shows a faint
+ring at that range round the caster (`<slot>_reach`) and the landing disc at the cursor, clamped to the range so
+it stops where the cast lands (`<slot>_spot`). Aimed means:
+- **Quick cast off**: E or R held (`Match.aim_hold`), cast on release. R holds only for a ground-target R that has
+  no aim hold of its own (`AimReach.holds`). With Quick cast on (the default) these cast on the press, as in the source.
+- **The kit's own aim hold**: Neve's Ice Spear (RMB held), Motley's Trade (Shift held), Tenzo's Basalt Spine (R held)
+  draw their own landing mark and add the ring with `AimReach.ring(kit, slot)`. Sparkle's Kitefall hang keeps its
+  own `x_ring` round the take-off spot.
+
+The ground-target slots: Vex R, Sparkle E and R, Meeko E (throw), Neve RMB, Motley E, R and Shift, Tenzo R.
+`--aimkit-check` aims each at twice its range and asserts the ring at the data range and the mark on it.
+Not ground-targeted here (a wall, lane or skillshot, no disc): Lace E, Neve E, Sable E; Kael's Meteor Drop lands
+`drop.ahead` in front of him, not at the cursor.
 
 ### Reading back, hiding, clearing
 - `AimKit.shown(h, id)`: is it up?
@@ -169,13 +195,18 @@ drag arrow.
 ```gdscript
 AimKit.charge(h, k)                  # every step while charging: a thin ring fills round the cursor
                                      # crossing k = 1 fires the flare once (pass "flare": false to skip)
+                                     # "at": "body" draws the same ring round the hunter instead (44 px),
+                                     # where the source shows its charge arc on the hero (Kael's blast)
 AimKit.flare(h)                      # the full-charge flare now: a ring snaps out, a glint (0.28 s)
 AimKit.perfect(h)                    # the perfect-window star: gold 4-point star and ring, 0.12 s
-AimKit.reticle(h)                    # {charge, flare, perfect}, for checks
+AimKit.reticle(h)                    # {charge, flare, perfect, at}, for checks
 ```
 Params: `col` (charge ring colour, default the hero colour), `col2` (flare colour), and `col` on
 `perfect` (gold by default). The states run on real time, so they show through hit stop. The ring sits
 at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
+
+## 3b. The body's aim across terraces (pose only)
+`inp["aim_y"]` is the height of what the cursor is on; the shot climbs or dips to it (`Match.AIM_DY_MAX`, rises under 0.3 m stay flat). The body now follows the same number: `AimPitch.of(h)` is `atan2(rise, max(1.5 m, distance))` clamped to +-20 degrees (`AimPitch.MAX`), 0 on flat ground and past `AIM_DY_MAX`. `HunterAnim` eases it (10/s) and weights it by the aim (LMB hold, casts, kit moves; not dashes, glides, dives, ledges, rolls or downed). The spine takes half (the Torso, or the hips bone on a .glb: the thighs do not follow, so the feet stay planted), the arms and weapon the other half (`WardenAim` after the clips, for the .glb; the procedural rig in `_upper`). Projectiles and telegraphs are unchanged: this is the pose, not the hit. The 20 degree clamp is ours: the briefs hold no footage measurement of the source's aim lean (open: measure it). Remote players show flat (`aim_y` is not synced, no Net change). Proof: `--aim-pitch-check`.
 
 ## 4. Guide for kit agents
 - **Call per step from your kit's tick or hold callbacks** (`rmb_hold_tick`, `lmb_override`, `_tick`).
@@ -192,9 +223,10 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - A kit that draws its own aim line returns true from `own_aim_line()`, so the shared weapon line hides
     (two lines read as two aims). The per-hero audit is docs/AIM_PREVIEWS.md.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
-  - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
-    runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
-    to see one (see Open questions in the branch report).
+  - Online, every `all` telegraph reaches the other games by itself (AimNet, section 6); aim reticles
+    and cursor states stay on your own screen. Nothing to add in the kit.
+  - Ground cones also have `ArchKit.net_cone`: `["fx", "cone", nid, at, dir, len, deg, dur, col]`, a static
+    `all` cone for `dur` s on the other games (no fill sweep). Vex's stuck Burr Charge uses it.
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
@@ -205,8 +237,13 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
-- **The old helpers.** `ArchKit.tele_circle` and `tele_lane` (one tweened node per telegraph) still work.
-  Move your kit's calls to AimKit as you touch them (docs/DEBT.md).
+- **Bots dodge them.** A shape shown with `all` (a circle, lane or cone) is a hostile area to the other
+  team's bots: `BotDodge` (scripts/match/bot_dodge.gd) walks a bot out of it, or dashes with a real charge,
+  after the difficulty's `react` time x 2. Check: `--bot-dodge-check` (normal out at least 70%, easy under 40%).
+- **Kit telegraphs go through AimKit only.** The old one-node-per-telegraph `ArchKit.tele_circle`/`tele_lane`
+  are gone (the R fuse circle and Gil were the last callers). For a one-off that fills over time (a thrown
+  potion's landing circle, a moving line), give it its own id and refresh it from the kit's tick with
+  `"fill": k`, as `GilKit` does.
 
 ## 5. Cursor past max range: source rule vs ours (parity audit, 2026-11-09)
 
@@ -265,3 +302,35 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
+
+## 6. Online: `all` telegraphs on other games (Net 0.24.6, docs/decisions/0061-telegraph-net.md)
+
+Remote hunters are puppets: their kits run only on their owner's game. `AimNet` (scripts/match/aim/aim_net.gd)
+sends every `all` entry AimDraw is given for a hunter this game runs (the player, the host's bots) as the
+Net event `["tele", nid, id, entry]`, the resolved entry AimShapes draws; `["tele", nid, id]` drops it.
+The other games put it under their copy of that hunter, so the shape, size, fill and colour are the
+caster's, tinted hostile for a foe by AimDraw. A refreshed telegraph goes out at most every 0.1 s
+(`SEND_GAP`) and lives 0.25 s (`LAG`) past its keep on the receiver; the caster's game sends the drop.
+
+Every `all` telegraph in the kits (the 2026-11-12 audit). "Before" is what another player's game got
+before 0.24.6: never the telegraph itself, at most a 0.35 s Net fx ring or bolt at the payoff.
+Now all of them arrive through "tele".
+
+| Hunter (kit) | `all` telegraphs (id: shape) | Before 0.24.6 on other games |
+|---|---|---|
+| Lace (archer) | E Hail Wall `e`: arc_wall | nothing |
+| Cinder (ashwick) | E cloak ring `e_ring`: circle | nothing |
+| Albert (bulwark, bjorn_*) | RMB push `aegis_push`: lane; E mend zone `e`: circle; R cells `x`: lane | a ring at the mend and per R cell |
+| Tenzo (dolm, breah_*) | RMB slam `rmb`: sweet circle; Shift hop `leap`: circle; E tells `e_tell<n>`: circle; X cracks `x_cracks`: span | a ring at the slam, the blast and the spine |
+| Grimble (dredge) | E `e_tell`, `e_hit`: cone; dive quake: circle; X fan `x_fan`: cone | a ring at the hit |
+| Vex (gunslinger) | RMB burr cone `burr<n>`: cone; E Longneedle `e`: lane; X nuke `x<n>`, `xr<n>`, `xz<n>`: circle | a bolt for the needle, a ring at the nuke |
+| Kael (juggernaut) | RMB slam `slam`: cone; Meteor Drop `drop`, `drop_core`: circle; R guard `ult`: lane | nothing |
+| Sparkle (mage) | Shift end `dash_end`: circle; E Skycall `e<n>`: circle; X `x_ring`, `x_land`: circle | a ring at the Skycall and the X |
+| Motley (ostra) | Shift Trade `swap_fly`: swap; E seed: circle; X Nightwell `x`: circle | a bolt and ring for the Trade, the seed node (HeroZones), a ring at the well |
+| Neve (rimewright) | spear zones: circle; E Rink Wall: lane; X rink `x`: circle | nothing |
+| Meeko (tender) | burr circles; X `x`, `x_me`, `x_pick`: circle | a bolt at the X pick |
+| Sable (thief) | Bola ground rings `gnd2<n>`: circle; X `ult`, `ult_rim`: circle | a ring at the X |
+
+`--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-check` asserts,
+per shape kind, that every `all` telegraph up 0.15 s or more in each kit's casts shows on the other game;
+`--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few (docs/shots/tele-net: Lace's Hail Wall arc, Tenzo's held slam and E tells, Albert's E zone, from a GPU worker).
