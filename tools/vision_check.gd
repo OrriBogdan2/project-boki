@@ -30,8 +30,7 @@ func run(main: Node) -> void:
 	_wedge_rule()
 	var m := Match.new()
 	main.add_child(m)
-	# seed 5102: the air-rings Hollow Crown left 5101's spawn without an open patch to probe from
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5102, "no_drop": true, "raid": "clear"})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5101, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
 	for h in m.hunters: h.ctrl = "idle"
 	# the player's teammate steps out while the wedge is probed (a team shares sight)
@@ -84,7 +83,7 @@ func _sight(m: Match) -> void:
 		ok(far_ok, "%.0f m ahead: seen standing, hidden crouched" % FAR_M)
 		ok(m.sees(P.team, s[4]), "%.1f m straight behind you: seen (the near circle)" % BEHIND_M)
 		return
-	ok(false, "an open spot for every probe round the spawn (seed 5102)")
+	ok(false, "an open spot for every probe round the spawn (seed 5101)")
 
 func _plates(m: Match) -> void:
 	var P := m.player
@@ -165,4 +164,4 @@ func _reveal(m: Match) -> void:
 			mate.reveal_t = SHOT_REVEAL
 			ok(_lit(m, mate) == 0.0, "a teammate who shoots gets no circle")
 		return
-	ok(false, "an open spot %.0f degrees off your aim (seed 5102)" % AWAY_DEG)
+	ok(false, "an open spot %.0f degrees off your aim (seed 5101)" % AWAY_DEG)
