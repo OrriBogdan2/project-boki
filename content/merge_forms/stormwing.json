@@ -14,14 +14,13 @@
 	"look": {
 		"scale": 1.25,
 		"part_k": 1.5,
-		"part_top": -2.15,
 		"ring": 4.6,
 		"parts": [
 			"storm_wings",
 			"storm_halo",
 			"spark_trail"
 		],
-		"why": "barely bigger: the wings carry the silhouette. part_top (m) puts the parts' origin that far under the hunter's own top, so on every rig the wings start just behind the head and the halo sits just over the hat"
+		"why": "barely bigger: the wings carry the silhouette"
 	},
 	"shell_k": 0.8,
 	"shell_why": "x0.8: the most fragile shell, it makes up for it with speed",

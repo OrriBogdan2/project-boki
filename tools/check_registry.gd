@@ -241,9 +241,6 @@ const CHECKS := {
 	# hit arcs round your Hunter
 	"--damage-dir-check": ["res://tools/damage_dir_check.gd", "damage_dir_check", null],
 	# --shots-dir=<dir> [--size=WxH] (GPU)
-	# --shots-dir=<dir> (GPU)
-	"--fusion-topdown-shots": ["res://tools/fusion_topdown_shots.gd", "fusion_topdown_shots", "shots"],
-	"--fusion-topdown-check": ["res://tools/fusion_topdown_shots.gd", "fusion_topdown_shots", "check"],
 	"--team-boki-shots": ["res://tools/team_boki_shots.gd", "team_boki_shots", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--mob-death-check": ["res://tools/mob_death_check.gd", "mob_death_check", null],  # dissolve, stagger, drops
