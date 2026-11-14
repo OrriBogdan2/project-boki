@@ -17,18 +17,34 @@ const MAST_Z := 1.3            # m: the mast stands behind the squad, out of the
 const TRAIL_AMOUNT := 40       # particles in the contrail (perf pass: a few dozen, shared quad)
 const SHADOW_SIZE := Vector2(12.0, 26.0)     # m: the soft blob the ship throws on the island under it
 
-static var _template: Node3D = null
+static var _template: PackedScene = null  # baked once; a packed scene, so no node lingers out of the tree
 static var _shadow_mat: StandardMaterial3D = null
 static var _trail_mat: StandardMaterial3D = null
 
 ## A new skyship node (a copy of the baked template: the meshes and materials are shared).
 static func build() -> Node3D:
 	if _template == null:
-		_template = _make()
-	var n := _template.duplicate() as Node3D
+		_template = _bake()
+	var n := _template.instantiate() as Node3D
 	n.add_child(_trail())
 	n.add_child(_shadow())
 	return n
+
+
+static func _bake() -> PackedScene:
+	var root := _make()
+	_own(root, root)
+	var scene := PackedScene.new()
+	scene.pack(root)
+	root.free()
+	return scene
+
+
+static func _own(n: Node, root: Node) -> void:
+	for c in n.get_children():
+		c.owner = root
+		_own(c, root)
+
 
 static func _make() -> Node3D:
 	var root := Node3D.new()
