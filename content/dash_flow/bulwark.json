@@ -33,40 +33,5 @@
 			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/bjorn.md:67-74): every charged-swing hold (frames 0101-0110, 0116-0128, 0132-0149, 0160-0172) is made standing; he never moves while charging (open question bjorn.md:271) and no jump is shown (bjorn.md:363-366). Data (briefs/supervive-data/supervive_kits.md:88: HOLD to charge a swing) silent on jumping. Kept: the charge carries through, as on the dash rows (owner item 51)."},
 			"mantle": {"mode": "cancel", "reason": "owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)", "source": "Owner item 30; the source has no mantle rule."}
 		}
-	},
-	"into_cast": {
-		"lmb": {
-			"at": [0.05, 0.6],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a shot in the clip (briefs/hero-ref/bjorn.md)."}
-		},
-		"lmb_hold": {
-			"at": [0.3, 0.95],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside a held shot in the clip (briefs/hero-ref/bjorn.md)."}
-		},
-		"rmb": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its RMB in the clip (briefs/hero-ref/bjorn.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "Barrier Shield to walk in, then Earthshatter is the source combo (briefs/hero-ref/bjorn.md:304): ours fires. Matches."}
-		},
-		"e": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."},
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Oath presses nothing else inside its E in the clip (briefs/hero-ref/bjorn.md)."}
-		},
-		"x": {
-			"at": [0.05, 0.75],
-			"lmb": {"windup": "drop", "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."},
-			"lmb_hold": {"windup": "queue", "windup_wait": 0.57, "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."},
-			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Oath stands planted through the 0.4 s wind-up and the slam and presses nothing else, nor after it (briefs/hero-ref/bjorn.md:287, f25-f31)."}
-		}
 	}
 }

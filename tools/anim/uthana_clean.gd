@@ -9,6 +9,9 @@ extends RefCounted
 ##            {at: src s, from?, to?, ours?: [clip, s]}: the line from bone `from` to bone `to` at `at` turned onto
 ##            -Z, or onto the same line in our clip (an archer aims side-on), else the shoulders at `at` (a swing is
 ##            aimed where it lands, not where it starts)
+##   pelvis   a Tar clip of the same take (the rig retarget drops the pelvis path): its pelvis travel, scaled by leg
+##            length, put on the hips, so falls and lunges keep their height and drift
+##            (pelvis_xz scales the drift: 0 stays put)
 ##   in_place the clip moved so the root starts over the rig's origin (travel inside the clip, a lunge, stays)
 ##   arm_fix  a rest-pose fix per bone (Albert's splayed shield arm): the turn that takes the bone's direction in a
 ##            calibration pose of the raw clip onto the same bone in our own clip, put on every frame
@@ -22,13 +25,16 @@ const IK_EASE := 0.08            ## s: an IK window blends in and out over this
 ## Bones the floor step ignores: props, springs and markers may dip under the floor (a bow tip on a fallen body)
 const NOT_BODY := ["spring_", "anchor_", "halo_", "bow", "arrow", "weapon_", "x_weapon", "x_shield", "x_fish", "cape"]
 
-## A motion-only Uthana GLB as an Animation on our Skeleton3D (Godot names node "thigh.L" "thigh_L").
+## A motion GLB as an Animation on our Skeleton3D (Godot names node "thigh.L" "thigh_L"). "file.glb#name" picks a
+## named clip of a multi-clip file (the other tools' retargets), else the first.
 static func load_motion(path: String) -> Animation:
-	var n: Node = load(path).instantiate()
+	var n: Node = load(path.get_slice("#", 0)).instantiate()
 	var ap: AnimationPlayer = n.find_children("*", "AnimationPlayer", true, false)[0]
-	var a: Animation = ap.get_animation(ap.get_animation_list()[0]).duplicate(true)
+	var clip_name: String = path.get_slice("#", 1) if "#" in path else ap.get_animation_list()[0]
+	var a: Animation = ap.get_animation(clip_name).duplicate(true)
 	for t in a.get_track_count():
-		var bone := String(a.track_get_path(t)).split(":")[0].get_file()
+		var tp := String(a.track_get_path(t))
+		var bone := tp.get_slice(":", 1) if ":" in tp else tp.get_file()   # skinned rigs: Skeleton3D:bone
 		if bone.ends_with("_L") or bone.ends_with("_R"):
 			bone = bone.left(-2) + "." + bone.right(1)
 		a.track_set_path(t, NodePath("Armature/Skeleton3D:" + bone))
@@ -193,6 +199,7 @@ static func clean(sk: Skeleton3D, ap: AnimationPlayer, raw: Animation, r: Dictio
 	var foot_y := INF
 	for f in feet: foot_y = minf(foot_y, rest_g[f].origin.y)
 	var carry := _carry_rel(sk, ap, r.get("carry", []))
+	var tar := _pelvis(sk, String(r.get("pelvis", "")), float(knots[0][0]), float(r.get("pelvis_xz", 1.0)))
 	var body_bones: Array[int] = []
 	for b in range(1, sk.get_bone_count()):
 		if not (b in feet or NOT_BODY.any(func(n: String) -> bool: return sk.get_bone_name(b).begins_with(n))):
@@ -205,6 +212,8 @@ static func clean(sk: Skeleton3D, ap: AnimationPlayer, raw: Animation, r: Dictio
 		if r.get("in_place", true):
 			loc[0].origin.x -= start.x
 			loc[0].origin.z -= start.z
+		if not tar.is_empty():
+			loc[0].origin += turn * _pelvis_at(tar, float(warp(knots, t)[0][0]))
 		_apply_fix(sk, loc, fix)
 		for k: Dictionary in r.get("ik", []):
 			_ik(sk, loc, k, t)
@@ -213,6 +222,21 @@ static func clean(sk: Skeleton3D, ap: AnimationPlayer, raw: Animation, r: Dictio
 			_carry(sk, loc, c, t)
 		frames.append(loc)
 	return _bake(sk, frames, tr, length, carry)
+
+## The Tar clip's pelvis track, its start pose and the metres-per-Tar-cm scale onto this rig's hips.
+static func _pelvis(sk: Skeleton3D, path: String, at: float, xz := 1.0) -> Dictionary:
+	if path.is_empty(): return {}
+	var a := load_motion(path)
+	for t in a.get_track_count():
+		if a.track_get_type(t) == Animation.TYPE_POSITION_3D and String(a.track_get_path(t)).ends_with(":pelvis"):
+			var p0: Vector3 = a.position_track_interpolate(t, at)
+			return {"a": a, "t": t, "p0": p0, "xz": xz, "k": globals(sk, _rests(sk))[0].origin.y / p0.y}
+	return {}
+
+static func _pelvis_at(tar: Dictionary, src: float) -> Vector3:
+	var a: Animation = tar["a"]
+	var d := (a.position_track_interpolate(int(tar["t"]), src) - (tar["p0"] as Vector3)) * float(tar["k"])
+	return Vector3(d.x * float(tar["xz"]), d.y, d.z * float(tar["xz"]))
 
 ## Window weight: 1 inside [from, to], easing to 0 over IK_EASE outside it.
 static func _win(k: Dictionary, t: float) -> float:

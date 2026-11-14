@@ -33,40 +33,5 @@
 			"air": {"mode": "keep", "source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Air dash not shown (tamsin.md:293-295). Kept: the hold carries through (owner item 51)."},
 			"jump": {"mode": "keep", "source": "Not determinable. The source spear is a tap (briefs/hero-ref/tamsin.md:18; briefs/supervive-data/supervive_kits.md:33, Celeste: Cryo Spear), and the RMB window (0094-0168, spear flights 0107-0108, 0129-0130; tamsin.md:48-53) does not overlap the Skate window (0169-0296, tamsin.md:66-79): no spear aim runs into a skate. Jump not shown (tamsin.md:297-298). Kept: the hold carries through (owner item 51)."}
 		}
-	},
-	"into_cast": {
-		"lmb": {
-			"at": [0.05, 0.6],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a shot in the clip (briefs/hero-ref/tamsin.md)."}
-		},
-		"lmb_hold": {
-			"at": [0.3, 0.95],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside a held shot in the clip (briefs/hero-ref/tamsin.md)."}
-		},
-		"rmb": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its RMB in the clip (briefs/hero-ref/tamsin.md)."}
-		},
-		"e": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."},
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Celeste presses nothing else inside its E in the clip (briefs/hero-ref/tamsin.md)."}
-		},
-		"x": {
-			"at": [0.05, 1.0],
-			"lmb": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches."},
-			"lmb_hold": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches."},
-			"rmb": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out (footage: no other press in the crystal, briefs/hero-ref/tamsin.md:218-227). Fixed: ours spent an RMB charge and dropped the spear; now refused like LMB and E."},
-			"e": {"windup": "drop", "recovery": "drop", "source": "Owner item 65: the statue takes only the recast and Shift out. Footage: rooted in the crystal, every cast held its full 3.2 s with no other press (briefs/hero-ref/tamsin.md:218-227). Matches."}
-		}
 	}
 }

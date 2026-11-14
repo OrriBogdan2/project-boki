@@ -34,40 +34,5 @@
 			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/breah.md:98-115): the Volcano Crusher is a hold-charge; she stood still through each charge except for jumps and punches (breah.md:357, open question 3); no Shift inside a charge, and the dash-into-dunk combo (0965-1010, breah.md:140-143) casts RMB after the dash, not before. Air dash 'not shown as a dash' (breah.md:443-445). Data: briefs/supervive-data/supervive_kits.md:106 has nothing on a charge through a dash. Kept: the hold carries through (owner item 51)."},
 			"jump": {"mode": "keep", "source": "Footage: 'When she jumps while charging, she leaps forward and the circle comes with her' (briefs/hero-ref/breah.md:114, key frame 0240, the card); data: 'Jump while charging to leap forward' (briefs/supervive-data/supervive_kits.md:106). The jump is the source's own move inside the charge, so the hold keeps through it."}
 		}
-	},
-	"into_cast": {
-		"lmb": {
-			"at": [0.05, 0.6],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a shot in the clip (briefs/hero-ref/breah.md)."}
-		},
-		"lmb_hold": {
-			"at": [0.3, 0.95],
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside a held shot in the clip (briefs/hero-ref/breah.md)."}
-		},
-		"rmb": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its RMB in the clip (briefs/hero-ref/breah.md)."}
-		},
-		"e": {
-			"at": [0.05, 0.6],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."},
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."},
-			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its E in the clip (briefs/hero-ref/breah.md)."}
-		},
-		"x": {
-			"at": [0.05, 0.8],
-			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."},
-			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "Tetraform wall, then a held Quake Punch through its rocks is the source combo (briefs/hero-ref/breah.md:401): ours fires. Matches."},
-			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."},
-			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Tetra presses nothing else inside its ult in the clip (briefs/hero-ref/breah.md)."}
-		}
 	}
 }

@@ -154,7 +154,7 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
 - **Gap, not fixed: Sparkle's Kitefall crash steps 4 to 5.7 m in one frame on the other game** (4 of 5 runs,
   with and without delay; the own game's largest step is 1.06 m). Cause: the crash is a scripted 0.15 s lerp
   (`MageUlt._fall_tick`, scripts/arch/kits/mage_ult.gd:280, sets `h.vel = ZERO`), so the snapshot reports no
-  velocity; the owner sends 10 Hz (`send_t = 0.1`, scripts/core/net.gd:228), so the other game sees one or two
+  velocity; the owner sends 10 Hz (`send_t = 0.1`, scripts/core/net.gd:229), so the other game sees one or two
   snapshots of a 4.5 m fall, and `Ent.net_follow` (scripts/match/ent.gd:326) jumps when the gap is over 4 m
   (line 332). Raising that threshold with the owner's speed was tried and made it no better (the velocity is
   zero), so it was reverted. A fix needs the fall's velocity in the snapshot (the kit setting `h.vel` while the
@@ -193,6 +193,43 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   when that snapshot falls in the fall's last 0.03 s (not seen in the check's runs).
 - Not measured: a mover owned by the host with the caster on the guest (every row has the host casting, so
   the guest is the one moved); Kael's Warchain on a bot (that is the offline reference).
+
+## Remote smoothing: the 0.24.4 gate's 5 reds (`--remote-smooth-check`)
+
+docs/GATE_0244.md had `--remote-smooth-check` at 5 failures on both trees. Run on origin/main 88b06b9e7 on rpc7
+(32 cores, load ~35): `--headless` 0 failures in 2 of 2 runs; xvfb 4 failures (25 snaps, 158 jerks, 22 backsteps,
+0.97 m off the path). Not the 2x map, not a new move, not NetSmooth. Three causes, by weight:
+
+- **The check under xvfb (the gate's reds).** It stepped the host's match once per frame. Drawn on llvmpipe, the
+  host ran ~30 fps with frames over 0.1 s, so its match clock (the snapshots' time) ran at half the wall clock and
+  fell up to 0.6 s behind. The guest's buffer then ran past the newest snapshot and started over at its 0.5 s
+  resync. The game doesn't do this: `Match._process` steps on the wall clock. The check now steps both games the
+  same way (an accumulator, frames clamped to 0.1 s), stamps each step with the wall moment it stands for, and
+  stops the host drawing (`RenderingServer.render_loop_enabled = false`; only the headless guest is measured).
+  `RSMOOTH load` prints what frames over 0.1 s still cost each game's clock in the run, so a stall can be told
+  from a jerk. Moving the lag relay into its own process was tried and made no difference. After this: 0-2
+  failures a run in both modes (1 backstep, or one 0.3-0.7 m overshoot).
+- **The snapshot rate, in the game.** `Net.tick` sent a snapshot every 7th step (0.117 s, 8.6 a second), not
+  every 0.1 s: `send_t = 0.1` minus six 1/60 s steps leaves 1e-17, so `<= 0` waited one step more. This dates
+  from the first commit; host world snapshots went every 10th step (0.167 s) instead of 0.15 s. NetSmooth's
+  0.15 s delay assumes a 0.1 s gap plus 40 ms of jitter. 0.117 s plus 40 ms overran it: the body ran on past a
+  late snapshot and the next one pulled it back. Now a timer within 1 ms of 0 is due (`Net.SEND_DUE`): 10 and
+  6.7 snapshots a second, 17% and 11% more snapshot traffic. No shape change, so Net.VERSION stays.
+- **The lag relay's ordering (the check).** It gave every packet its own jitter and dropped a snapshot that a
+  newer one overtook (ENet's ordered rule). Snapshots are 0.1 s apart and the jitter is +-20 ms, so only packets
+  sent in the same step could swap: the host's hunter and world snapshots. With the 10 Hz fix they share a step
+  every 0.3 s, and half of those swaps dropped the hunter's snapshot (28 lost in a run, not ~7). That sometimes
+  turned the 5 m lift into a sweep under the 40 m/s snap speed. A real line queues packets in order, so the
+  relay now keeps send order per peer and the overtake rule is gone.
+
+Measured after all three: 4 runs at once at load ~35 (2 `--headless`, 2 xvfb), 0 failures each. 7 snapshots
+lost (the 2%), 1 snap (the lift), 3-7 jerks, 0 backsteps, 0 overshoot (max 0.03 m off the path), drawn 200-205 ms
+behind, 0 ms of either game's clock lost to stalls.
+Left: in 12 runs since all three fixes, one headless run had 1 backstep at the end of the knock slide. A snapshot
+was lost or late while the true body slowed, NetSmooth ran the body on at its last velocity (RUN_ON), and the next
+snapshot pulled it back 0.14 m. That is NetSmooth's own edge, not load (0 ms stalls in that run). It is in
+docs/DEBT.md: the fix (blend the correction instead of jumping back) touches the same code as ext/feel-online-150's
+jitter buffer, so it should come after that lands.
 
 ## Cross-region: 150 ms each way, 20 ms jitter (2026-11-11)
 

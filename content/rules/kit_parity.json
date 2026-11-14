@@ -30,6 +30,7 @@
 		{"hero": "thief", "slot": "E", "field": "e.ghosts", "value": 4.5, "tol": 0.5, "evidence": "F 4 to 5 cyan ghost copies on the blink (hero-ref/dancer.md 0238, 0279)"},
 		{"hero": "rimewright", "slot": "RMB", "field": "rmb.charges", "value": 2, "tol": 0.0, "evidence": "D Cryo Spear: 2 charges"},
 		{"hero": "dredge", "slot": "X", "field": "x.waves", "value": 2, "tol": 0.0, "evidence": "D Slugwave: two waves"},
+		{"hero": "juggernaut", "slot": "E", "field": "e.dmg", "per": "lmb.dmg", "value": 0.7, "tol": 0.1, "evidence": "D Feysteel Chain 30 dmg vs Caldera 43 = 0.70x"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.dmg", "per": "lmb.dmg", "value": 3.0, "tol": 0.35, "evidence": "D Execution Slam 130 vs Caldera 43 = 3.0x (audit: 26/8 fine)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.4, "tol": 0.22, "evidence": "Owner 11-10 (ext/jugg-downslam): straight down slam, a 2.4 m circle hit 0.8 m ahead; beats F Obsidian Slam cursor disc 1.2 bh = 2.2 m"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"},

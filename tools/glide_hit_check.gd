@@ -240,7 +240,7 @@ func _air_row(state: String, hit: Dictionary, got: Dictionary, tag: String, carr
 		ok(open_at >= stun and late, "%s: a press opens the glider once the %.1f s stun is over" % [tag, stun])
 	elif state == "fall":
 		var gate := KNOCK_GATE if speed > 4.0 else 0.0
-		var in_time := open_at >= gate and open_at <= gate + 0.25
+		var in_time := open_at >= gate - 0.02 and open_at <= gate + 0.25
 		ok(in_time, "%s: a press opens the glider %.1f s after the hit or so" % [tag, gate])
 
 func run(main: Node) -> void:

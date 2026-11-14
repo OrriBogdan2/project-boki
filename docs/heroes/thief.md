@@ -62,23 +62,22 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
-## Vault riders against the source (ext/sable-vault-riders)
+## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
 
-Each number in the `dash` block of content/archetypes/thief.json against Shiv's Quickflip ([game data],
-briefs/supervive-data/supervive_kits.md) and the Cartwheel sheet ([footage], briefs/hero-ref/dancer.md). The numbers the
-source settles are rows in content/rules/kit_parity.json (`--kit-parity-check`); the rest is asserted in `--dancer-combo-check`.
+Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
+supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
+owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
 
-| Rider | Ours | Source | Call |
-|---|---|---|---|
-| Distance, time | 4.5m in 0.48s | 105-144 px, about 4.5m; upright by 0.45-0.5s [footage] | match; parity rows |
-| Cooldown | 5s | 5s at tier IV, no cooldown upgrade [game data]; the card in the footage 4.2s [footage] | was 4.5; set to the data's 5 |
-| Speed boost | +18%, x1.5 at rank 3, 2s counted from the cast (1.5s after landing) | +15-20% for about 1-1.5s after a Cartwheel [footage]; the tier IV upgrade is +50% [game data] | match; asserted (`dancer feel: +18% speed for 2s ...`) |
-| Empowered shot x1.34 | +214 on a 160 bolt, 2.34x in all | the same [game data] | match; parity row |
-| Empowered +20% / +40% | rank 2 / 3 on the bonus | +20% twice [game data] | match |
-| Marks on the empowered hit | 2 | an Arcslinger hit adds 1 stack [game data] | **owner note** (MAIN_TO_EXT 03:20, "keep 2 Marks"; see the audit row above); kept; asserted (`dancer empowered bolt: a big hit, 2 Marks`) |
-| I-frames | 0.12s | none in the data or the footage | **ours-only, not named in DECISIONS 11-07** ("Ours-only riders: keep NONE" names Chill, Shred and the carrier shield); kept, left for the owner |
-| Empowered window | 3s | none in the data; the gold line held about 0.8s before the shot [footage] | **ours-only** (an assumption); kept, left for the owner |
-| Haste ends on the empowered shot | yes | the wiki's Quickflip rule | match |
+| What | Ours |
+|---|---|
+| Window | a bolt thrown within 1.2s of an empowering Vault (`quick_window`; the footage's slowest dash -> shot is about 1.2s, 0137 -> 0143) starts the run |
+| Speed | 0.6x the interval (`quick_k`): 0.27s instead of 0.45s, +67% rate |
+| How many | 3 quick intervals (`quick_n`): the empowered bolt and the next three leave 0.27s apart (4 bolts in about 0.8s instead of 1.35s), then 0.45s again |
+| Ends early | a bolt that doesn't follow within its interval + 0.2s ends the run; a bolt cooling as she flips is cut to 0.27s |
+| Tell | no UI: the three quick bolts carry the cartwheel's cyan, a cyan tail on the gold chakram and a cyan star at the throwing hand; the faster throws themselves. Effects are local like her other bolt looks; online viewers see the faster cadence |
+
+Asserted in `--dancer-combo-check` (`dancer quick: ...`).
 
 ## Footage gaps, Nov 9 re-check
 

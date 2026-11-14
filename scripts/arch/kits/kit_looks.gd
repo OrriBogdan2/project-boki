@@ -23,6 +23,7 @@ extends Node3D
 
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
+const TINT_SH := preload("res://shaders/cel_tint.gdshader")
 const BASALT := Color("1f2633")         # Tenzo's rock: dark blue-grey basalt in the cracks and shadows
 const BASALT_HI := Color("4a566e")      # and on its faces
 const COBALT_HOT := Color("9ad0ff")     # the rim light: Tenzo's hot slot colour (docs/VFX_QUALITY.md)
@@ -74,13 +75,12 @@ static func glass_mat(core: Color, rim: Color, a := 1.0, body := 0.35) -> Shader
 	mt.set_shader_parameter("body", body)
 	return mt
 
-## Unlit and alpha-blended: a dark tint that stays dark on bright ground (additive glow would wash out).
-static func shade_mat(c: Color) -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = c
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+## Unlit, alpha-blended and cel-toned (shaders/cel_tint): a dark tint that stays dark on bright ground (additive
+## glow would wash out). Recolour it with set_shader_parameter("color", c).
+static func shade_mat(c: Color) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = TINT_SH
+	mat.set_shader_parameter("color", c)
 	return mat
 
 static func lump(r: float) -> SphereMesh:
@@ -548,18 +548,18 @@ func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
 				e2["t"] = e2["dur"]
 			_paint_sigil(n2, float(e2["r"]), u, e2["col"])
 
-## Every alpha-blended material of a pooled look at `k` of its built alpha (cached on the node at build).
+## Every tint material of a pooled look at `k` of its built alpha (cached on the node at build).
 func _fade(n: Node3D, k: float) -> void:
 	if not n.has_meta("fade"):
 		var mats: Array = []
 		for mi in n.find_children("*", "MeshInstance3D", true, false):
-			var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
-			if mat != null:
-				mats.append([mat, mat.albedo_color.a])
+			var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
+			if mat != null and mat.shader == TINT_SH:
+				mats.append([mat, mat.get_shader_parameter("color")])
 		n.set_meta("fade", mats)
 	for pair in n.get_meta("fade"):
-		var mat2: StandardMaterial3D = pair[0]
-		mat2.albedo_color.a = float(pair[1]) * k
+		var built: Color = pair[1]
+		(pair[0] as ShaderMaterial).set_shader_parameter("color", Color(built, built.a * k))
 
 func _timed(kind: String, at: Vector3, r: float, secs: float) -> Node3D:
 	var n := _take(kind)
@@ -583,7 +583,9 @@ func hold_on(key: String, kind: String, ent: Node3D, at: Vector3, scl := 1.0, co
 	n.global_position = at
 	n.scale = Vector3.ONE * scl
 	if kind == "mote":
-		((n.get_node("Halo") as MeshInstance3D).material_override as StandardMaterial3D).albedo_color = Color(col, 0.85)
+		((n.get_node("Halo") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter(
+			"color", Color(col, 0.85)
+		)
 		var core := (n.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
 		core.set_shader_parameter("color", Color(col.lightened(0.45), 0.9))
 	return n
@@ -657,8 +659,8 @@ func _paint_sigil(n: Node3D, r: float, fill: float, col: Color) -> void:
 	var lit := int(round(fill * SIGIL_SEGS))
 	for i in SIGIL_SEGS:
 		(segs.get_child(i) as Node3D).visible = i < maxi(1, lit)
-	(n.get_meta("seg_mat") as StandardMaterial3D).albedo_color = Color(col, 0.95)
-	(n.get_meta("star_mat") as StandardMaterial3D).albedo_color = Color(col, 0.3 + 0.65 * fill)
+	(n.get_meta("seg_mat") as ShaderMaterial).set_shader_parameter("color", Color(col, 0.95))
+	(n.get_meta("star_mat") as ShaderMaterial).set_shader_parameter("color", Color(col, 0.3 + 0.65 * fill))
 
 ## Something arriving out of nowhere at `at`: motes rushing in to a point, a dark core and a ring.
 func implode(at: Vector3, col: Color) -> void:

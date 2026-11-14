@@ -4,6 +4,7 @@ child anchors (FX points, the thrown frame) scale, so the hand keeps the grip an
 keeps its swing arc at the new size. The rig, weights, clips, normals (a uniform scale) and paint stay byte for byte. A
 prop at the length already keeps its size, so the step can run again on a .glb that has had it.
 Run: python3 tools/art1/glb_prop_scale.py <in.glb> <out.glb> <mesh> <bone> <length m>"""
+
 import sys
 
 import numpy as np
@@ -20,7 +21,7 @@ def scale(j, b, mesh_name, bone_name, length):
     joint = skin["joints"].index(bone)
     to_bone = get(j, b, skin["inverseBindMatrices"]).reshape(-1, 4, 4)[joint].T.astype(np.float64)  # (column-major)
     prims = j["meshes"][mesh]["primitives"]
-    for p in prims:      # (a vertex partly on another bone would tear away from it)
+    for p in prims:  # (a vertex partly on another bone would tear away from it)
         on = get(j, b, p["attributes"]["WEIGHTS_0"]) * (get(j, b, p["attributes"]["JOINTS_0"]) == joint)
         assert np.allclose(on.sum(1), 1.0, atol=1e-3), "%s is not skinned whole to %s" % (mesh_name, bone_name)
     pos = [get(j, b, p["attributes"]["POSITION"]).astype(np.float64) for p in prims]

@@ -50,6 +50,7 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
+var new_rec: Dictionary = {}  # the hatchling's record, made when the name card opens (so its sex mark shows there) and kept by _finish
 var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
 var mystery_found := false    # its card shows once you've hovered or picked the black egg
 var locker: LookLocker      # making yourself (stage "create")
@@ -290,7 +291,7 @@ func _build_ui() -> void:
 	title.add_theme_constant_override("outline_size", 12)
 	title.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.85))
 	top.add_child(title)
-	var sub := UI.label("Every Boki is different. It will remember how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
+	var sub := UI.label("Every Boki is different, and remembers how you treat them.", 16, Color(1, 0.95, 0.88, 0.9))
 	sub.add_theme_constant_override("outline_size", 6)
 	sub.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.8))
 	sub_lbl = sub
@@ -405,7 +406,7 @@ func _looks_good() -> void:
 	Save.save_game()
 	Sfx.play("click")
 	for e in eggs: (e["holder"] as Node3D).visible = true
-	if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
+	if sub_lbl: sub_lbl.text = "Every Boki is different, and remembers how you treat them."
 	_top_over(0.5)
 	if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
 		Game.goto("home")
@@ -619,6 +620,9 @@ func _show_name() -> void:
 	var card := UI.card(UI.CARD, 16, 18)
 	card.custom_minimum_size = Vector2(520, 0)
 	var v := UI.vbox(10); card.add_child(v)
+	if new_rec.is_empty() or String(new_rec.get("species", "")) != sp_id:
+		new_rec = Save.new_kin(sp_id)          # rolled now: its sex (and he/she) is known before it is named
+	var she: bool = Unique.sex(new_rec) == "f"
 	# (lifted like the egg names: a dark species colour, Vespyx's plum, vanished on the dark card)
 	var scol: Color = sp["color"]
 	while scol.get_luminance() < 0.55:
@@ -626,9 +630,14 @@ func _show_name() -> void:
 	v.add_child(UI.section("A new Boki", scol))
 	v.add_child(UI.title("Name your %s" % sp["name"], 34))
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
-	v.add_child(UI.label("It's %s, and it can only babble for now. Whatever you call it, it'll answer to." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
+	var sex_row := UI.hbox(8)
+	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
+	sex_row.add_child(UI.label("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
+		"A babbler for now; any name you give will stick."], 16, UI.MUTED))
+	v.add_child(sex_row)
+	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
 	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(ne)
@@ -677,7 +686,8 @@ func _path_card(label: String, line: String, go: Callable) -> Control:
 	return c
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
-	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
+	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else Save.new_kin(sp_id)
+	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
 	rec["trust"] = 55.0
 	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
 	if not muts.is_empty(): rec["mutations"] = muts
