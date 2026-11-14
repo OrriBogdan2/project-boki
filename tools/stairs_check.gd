@@ -101,15 +101,16 @@ func _cross(m: Match, P: Hunter, what: String, a: Vector3, b: Vector3) -> void:
 	P.teleport(a)
 	P.vel = Vector3.ZERO
 	P.grounded = true
-	P.step_vis = 0.0
+	P.drawn_y = INF      # (StepSmooth: a teleport is drawn at once)
 	var dir := Vector2(b.x - a.x, b.z - a.z).normalized()
 	var t := 0.0
 	var air := 0
 	var pop := 0.0
 	var pace := 0.0
 	var run_step := 0.0
-	var drawn := P.pos.y
 	P.render(DT, 1.0)
+	var drawn := P.position.y
+	var was := 0.0      # m the drawn body moved on the step before
 	while t < TIME_S and Vector2(b.x - P.pos.x, b.z - P.pos.z).dot(dir) > 0.3:
 		P.inp["move"] = dir
 		P.inp["aim"] = P.pos + Vector3(dir.x, 0, dir.y) * 6.0
@@ -127,8 +128,12 @@ func _cross(m: Match, P: Hunter, what: String, a: Vector3, b: Vector3) -> void:
 		if t >= 0.5:
 			pace = maxf(pace, flat / maxf(run_step, 0.001))
 		var slope := absf(m.world.ground_at(P.pos.x, P.pos.z) - g0)
-		pop = maxf(pop, absf(P.pos.y + P.step_vis - drawn) - slope)      # (the sim height, as eased for the model)
-		drawn = P.pos.y + P.step_vis
+		# the drawn height (StepSmooth): a pop is a step beyond both the ground's rise and the drawn body's
+		# last step, so its ease still finishing on the flat at the top or bottom is not one
+		var moved := absf(P.position.y - drawn)
+		pop = maxf(pop, moved - maxf(slope, was))
+		was = moved
+		drawn = P.position.y
 	P.inp["move"] = Vector2.ZERO
 	var info := "%.2fs, %d airborne steps, pop %.3fm, pace x%.2f, end y %.2f of %.2f" % [
 		t, air, pop, pace, P.pos.y, b.y]
