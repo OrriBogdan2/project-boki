@@ -90,13 +90,15 @@ static func render_hit(h: Hunter, delta: float) -> void:
 	h.stagger_t = maxf(0.0, h.stagger_t - delta)
 
 # ------------------------------------------------------------------ how a shot looks
-## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the
-## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks).
+## The colour, size and halo colour of a shot as the local player sees it. What can hurt you stays the
+## hottest thing on screen; your own shots are bright, solid bolts too (they used to be dim specks). The core keeps
+## the shooter's colour, the halo leans to the side (SideColor.fx): a rival's hostile, a teammate's cool.
 static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
-		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), shot_size * 2.6, 0.0]
-		return [Color(col, 0.5), shot_size * 1.7, 0.0]
+		if p0 and by.team != p0.team:
+			return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), shot_size * 2.6, Color.TRANSPARENT]
+		return [Color(col, 0.5), shot_size * 1.7, Color.TRANSPARENT]
 	var vis_col := col
 	var vis_size := shot_size * 2.0
 	var halo := 0.28
@@ -111,7 +113,20 @@ static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 		if by != p:
 			vis_col.a = 0.7          # teammates' shots: a touch softer than yours
 			halo = 0.18
-	return [vis_col, vis_size, halo]
+	return [vis_col, vis_size, Color(SideColor.fx(m, by, vis_col.lightened(0.2)), halo)]
+
+## A kit draws this round itself (an arrow, a trail and its head): the stock orb shrinks away and stays so (the match
+## sizes it from "vr" every frame). Kits skin a round just before a draw, so the size is pushed through at once: a
+## transform set then waits for the next flush and the orb would show for a frame.
+static func hide_orb(s: Dictionary) -> void:
+	s["vr"] = 0.001
+	var orb := s.get("node") as Node3D
+	if orb == null or not is_instance_valid(orb):
+		return
+	orb.scale = Vector3.ONE * 0.001
+	orb.force_update_transform()
+	for halo: Node3D in orb.get_children():
+		halo.force_update_transform()
 
 ## A shot's bolt this frame: between its last and current step (`alpha`), turned along its flight and stretched by
 ## its tracer. Match draws every shot with it; tools that step the match by hand (the reels) call it too.
