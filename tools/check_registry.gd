@@ -710,6 +710,7 @@ const CHECKS := {
 	"--status-look-check": ["res://tools/status_look_check.gd", "status_look_check", null],      # one look per CC
 	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving a moving car
 	"--belt-tips-check": ["res://tools/belt_tips_check.gd", "belt_tips_check", null],      # one-time belt item tips
+	"--tut-rebind-check": ["res://tools/tut_rebind_check.gd", "tut_rebind_check", null],      # text follows rebinds
 }
 
 ## The strict runs of the advisory timing checks: the gate sends each through
