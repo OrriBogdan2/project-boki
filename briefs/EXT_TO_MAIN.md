@@ -9696,3 +9696,4 @@ READY ext/stuck-integ-c2a69297 b19e256f4a (supersedes: ext/anim-start-gap-slice 
 READY ext/sfx-ui-controls 1c38dfea88 (bulk-rebase: origin/main merged in mechanically, was f79d99b876; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/ui-match-phase 5ff431d1c9 (bulk-rebase: origin/main merged in mechanically, was 7f4cbd4df1; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-auto-mixed-1114 05f8d15a919892216bbb6c3688bf021b9debfa5b (merge-auto bundle 1/2: 18 auto-resolved vfx/ui/home/Boki/docs branches; GATE GREEN on main 296093c47d, NEW-RED 0, export 445 MB; PR body gh-outbox/new-pr.md)
+READY ext/merge-auto-hunters-1114 bf779836c4734fa6eac61cc7d481cb9d6c38b124 (merge-auto bundle 2/2: 5 hunter kit/parity branches; GATE GREEN on main 296093c47d, NEW-RED 0, export 445 MB; open after bundle 1 merges; gh-outbox/new-pr-2-hunters.md)
