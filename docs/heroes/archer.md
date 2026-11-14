@@ -244,7 +244,7 @@ interaction is chainable", read through DashFlow's default (decision 0015: a mis
 goes and the first runs on) and AirLimits ("an open glider is never folded"). Each is one assert in
 `--archer-combo-check` ("Lace cancel ...", tools/lace_cancel_rows_check.gd). Any pair not in the table: both (ArchKit
 has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack
-key does nothing from a glide (`Hunter.can_fire`; the glide row below says that is a mismatch).
+key draws from an open glider (`ArcherKit.fires_in_glide`; the glide row below).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
@@ -258,7 +258,7 @@ key does nothing from a glide (`Hunter.can_fire`; the glide row below says that 
 | X window (3 shots, 6 s) | LMB | "empowered arrows need no charge"; the clip still shows a 0.4-0.8 s draw | a press nocks for 0.3 s, then the beam | match (no charge; the nock length is a timing note) | [F] ult; thebackdash |
 | X window | walk, Spirit Walk | "she can walk between shots" | shots kept through Spirit Walk; she walks between them | match | [F] ult |
 | X window | RMB, E | not shown (the card: "next 3 Bow shots", so RMB and E are not among them) | both: the Heavy Shot draw starts, the wall goes up, the three shots stay | both (match) | rule; [D] :77 |
-| Glide | LMB | not shown | ignored (`Hunter.can_fire` refuses while gliding) | both: the bow draws from the open glider, which stays open. **Mismatch, not fixed** (doc and assert only; the kit change is named in the pass report) | rule; AirLimits "an open glider is never folded" |
+| Glide | LMB | not shown | both: the bow draws from the open glider, which stays open (`ArcherKit.fires_in_glide`, as Vex and Cinder) | **fixed, rule ours** (was ignored: `Hunter.can_fire` refused while gliding) | rule; AirLimits "an open glider is never folded" |
 | Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) and the glider stays open | both (match) | rule |
 
 Fixes made: the draw-plus-Heavy-Shot pair (11-11, ext/lace-one-bow). Neither the data nor the frames show the
@@ -313,11 +313,11 @@ Release snap (anim-lace-release-snap): the three release moves blend in over 0.0
 
 ## In the air
 
-What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/archer.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/archer.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide draws the bow (`ArcherKit.fires_in_glide`, the Cancels glide row; the source is silent on it). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
 
 | Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
 |---|---|---|---|---|
-| LMB | the draw and shot, as on the ground (a draw carries through a jump, item 51) | blocked | stays open | silent |
+| LMB | the draw and shot, as on the ground (a draw carries through a jump, item 51) | the draw and shot (Cancels: Glide + LMB) | stays open | silent |
 | RMB tap | nothing, as on the ground (Heartpiercer is hold only; no air Plunge) | nothing | - | data: hold to charge |
 | RMB hold | the Heavy Shot, charged and loosed in the air | the same | stays open | data: Heartpiercer |
 | E | Rain of Arrows, as on the ground | the same | stays open | silent |
