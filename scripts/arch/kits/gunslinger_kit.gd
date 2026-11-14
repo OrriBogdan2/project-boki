@@ -611,12 +611,11 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	_confirm_hit(victim, at)
 
 ## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
-## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a gold hitmarker and a ping.
+## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a ping.
 func _confirm_hit(victim: Ent, at: Vector3) -> void:
 	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
 	m.fx.ring(victim.pos + Vector3(0, 0.1, 0), victim.r + 0.9, HOT, 0.3)
 	if h == m.player and m.hud:
-		m.hud.hitmarker(true)
 		m.sfx("crit", at, -2.0, 0.8)
 
 ## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).

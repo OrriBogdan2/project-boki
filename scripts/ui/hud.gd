@@ -8,10 +8,9 @@ var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
-var hit_t := 0.0
+var reticle: Reticle        # the hit tick round the cursor (the reticle itself draws statically)
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
-var hit_crit := false
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
@@ -40,6 +39,7 @@ const GOLD := Color("f2c84a")
 
 func setup(match_node: Match) -> void:
 	m = match_node
+	reticle = Reticle.new(m)
 	layer = 5
 	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
 	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
@@ -96,7 +96,7 @@ func _process(delta: float) -> void:
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
 		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
-	hit_t = maxf(0.0, hit_t - delta)
+	reticle.tick(delta)
 	_hud_tick(delta)
 	plates.tick(delta)
 	panels.tick(delta)
@@ -106,15 +106,6 @@ func _process(delta: float) -> void:
 	_clear_under_toasts(delta)
 	c.queue_redraw()
 	cursor.queue_redraw()
-
-var hit_armor := false
-var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the HUD fight budget (message lane, kit panel)
-
-func hitmarker(crit: bool, armor := false) -> void:
-	hit_t = 0.14
-	dealt_at = m.time
-	hit_crit = crit
-	hit_armor = armor
 
 var flash_t := 0.0
 var flash_col := Color.WHITE
@@ -160,7 +151,7 @@ const KIT_FADE_S := 0.35   # s the kit panel takes to fade out or back
 
 ## The fight budget is on (you took or landed a hit lately): the message lane shrinks, the kit panel hides.
 func in_fight() -> bool:
-	return m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
+	return m.player != null and m.time - maxf(m.player.hurt_at, reticle.dealt_at) < MSG_FIGHT_S
 
 func _build_minimap() -> void:
 	var w := m.world
@@ -1769,17 +1760,7 @@ func _draw_crosshair(p: Hunter) -> void:
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
 		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
 		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
-	if hit_t > 0.0:
-		var hc := Color("ffd23f") if hit_crit else Color.WHITE
-		if hit_armor: hc = ARMOR_COL if not hit_crit else Color("cfefff")
-		# a sharp X that snaps out and settles: bigger and bolder on crits, dark-edged so it reads
-		# over bright effects
-		var k := hit_t / 0.14
-		var s := (11.0 if not hit_crit else 15.0) + (1.0 - k) * 3.0 + k * k * 4.0
-		var w := 3.0 if not hit_crit else 4.0
-		for d in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
-			c.draw_line(mp + d * 5.0, mp + d * s, Color(0.05, 0.03, 0.08, 0.65 * minf(1.0, k * 2.0)), w + 2.0)
-			c.draw_line(mp + d * 5.0, mp + d * s, Color(hc, minf(1.0, k * 2.5)), w)
+	reticle.draw_tick(c, mp)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))

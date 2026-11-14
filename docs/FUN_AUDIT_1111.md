@@ -26,6 +26,6 @@ Not judged with real pacing: the tour shortens waits (instant uplink, granted le
 - `content/archetypes/gunslinger.json`: Longneedle dmg 36 to 24, Dazed `rattle_k` 0.9 to 0.76, texts.
 - `scripts/arch/kits/gunslinger_kit.gd`: the Dazed falloff pause removed (not in the source).
 - `tools/hero_combo_check.gd`, `tools/venator_parity_check.gd`: the asserted numbers follow (0.08 s rounds, +76%, Longneedle 24, the falloff keeps counting).
-- `scripts/ui/hud.gd`: `dealt_at`, set by `hitmarker`; the lane's fight budget uses the later of the last hit taken and dealt.
+- `scripts/ui/hud.gd`: `dealt_at`, set by the reticle (`Reticle._on_hit`); the lane's fight budget uses the later of the last hit taken and dealt.
 - `tools/msg_queue_check.gd`: asserts a landed hit starts the fight budget.
 - docs/KIT_PARITY.md Vex rows, docs/TTK.md table (`--ttk-check --write`; other rows moved since 11-09 on their own), docs/wiki (gen_wiki).

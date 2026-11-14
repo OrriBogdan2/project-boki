@@ -151,7 +151,7 @@ func _wiring() -> void:
 	ok(lane.get_parent() == m.hud, "the lane is part of the HUD")
 	var hud = m.hud
 	hud.kit_fade = 1.0
-	hud.hitmarker(false)
+	hud.reticle.dealt_at = m.time     # (a hit you land: Reticle._on_hit marks it)
 	ok(hud.in_fight(), "a hit you land starts the fight budget")
 	var t0: float = hud.kit_t0
 	for i in 10:
@@ -163,14 +163,15 @@ func _wiring() -> void:
 		hud._hud_tick(0.1)
 	ok(hud.kit_fade == 1.0, "Tab brings the kit panel back mid-fight")
 	Input.action_release("scores")
-	hud.dealt_at = -9.0
+	hud.reticle.dealt_at = -9.0
 	m.player.hurt_at = -9.0
 	for i in 10:
 		hud._hud_tick(0.1)
 	ok(not hud.in_fight() and hud.kit_fade == 1.0, "the kit panel returns when the fight ends")
 	m.hud._place_msgs()
 	ok(not lane.fight, "no hits yet: the HUD's lane keeps its full budget")
-	m.hud.hitmarker(false)
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
+	CombatBus.hit_landed.emit(m.player, foe, 1.0, ["primary"])
 	m.hud._place_msgs()
 	ok(lane.fight, "a hit you land puts the HUD's lane on its fight budget")
 	m.queue_free()

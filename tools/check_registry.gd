@@ -227,6 +227,7 @@ const CHECKS := {
 	"--charge-hint-shots": ["res://tools/charge_hint_shots.gd", "charge_hint_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
+	"--hit-marker-check": ["res://tools/hit_marker_check.gd", "hit_marker_check", null],
 	# frames the reticle and aim trail the cursor (GPU)
 	"--reticle-latency": ["res://tools/reticle_latency.gd", "reticle_latency", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
@@ -381,6 +382,7 @@ const CHECKS := {
 	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
 	"--ping-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "ping"],
+	"--hit-marker-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hit"],      # --shots-dir=<dir>
 	"--combo-mark-shots": ["res://tools/combo_mark_shots.gd", "combo_mark_shots", null],  # overhead combo tag strips
 	"--combo51-shots": ["res://tools/combo51_shots.gd", "combo51_shots", null],  # item 51 combo strips
 	"--dash-frames-check": ["res://tools/dash_frames.gd", "dash_frames", null],  # item 181
