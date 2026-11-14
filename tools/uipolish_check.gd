@@ -50,9 +50,11 @@ class ErrorCount extends Logger:
 func _theme_builds_clean() -> void:
 	var count := ErrorCount.new()
 	OS.add_logger(count)
-	UiTheme.build()
+	var t := UiTheme.build()
 	OS.remove_logger(count)
 	ok("theme builds without an engine error", count.errors.is_empty(), "; ".join(count.errors))
+	ok("OptionButton is styled as itself", t.has_stylebox("normal", "OptionButton"))
+	ok("custom button types still vary Button", t.get_type_variation_base("Primary") == &"Button")
 
 # ------------------------------------------------------------------ 1, 2: the settings
 ## path -> source text of every script under dir.
