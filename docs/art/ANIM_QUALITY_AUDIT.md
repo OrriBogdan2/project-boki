@@ -232,7 +232,7 @@ misread her rolling paws (docs/DEBT.md "Foot-slide readers"), so the gate is the
 2. The left arm hung nearly still against the legs (counter +0.17, now +0.68): the shield arm swings 0.5. The hammer arm
    keeps its authored carry: a 0.2 sway (tried, counter +0.80) swung the chained head back past his heels at floor level,
    a dragged flail, so the hammer rides low in front as keyed.
-3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
+3. lmb_throw and lmb_slam jumped the hand 0.5 and 0.64 body heights in one frame (fixed with `tools/art1/breaker_retime.sh`: 0.42 and 0.50, the travel now spread over 6 (throw) and 3 (slam) frames at 30 fps; the throw's release stays at 0.12 s and the slam's impact at 0.08 s).
 4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
    2.71 m/s (80 %); now 0.41 m/s (12 %, Nov 13) (see "The walk and run blend in step"; rows walk, jog, run, before then after, in
    the strip below). His loops share one `loco.cycle_s` (0.5 s); docs/art/FOOT_SLIDE.md has the whole blend sweep.
