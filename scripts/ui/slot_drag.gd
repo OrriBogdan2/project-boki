@@ -132,7 +132,6 @@ func _drop(to: Control) -> void:
 	if why != "":
 		_snap_back(from, why)
 	else:
-		Sfx.play("click", null, -3.0, 0.03, 0.9)      # the slot took it
 		if is_instance_valid(_preview):
 			_preview.queue_free()
 

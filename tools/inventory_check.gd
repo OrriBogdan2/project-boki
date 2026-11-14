@@ -139,14 +139,15 @@ func _drags(main: Node, m: Match, p: Hunter, lp: LoadoutPanel) -> void:
 	await _mouse_drag(main, _slot(lp, "pack", 0), _slot(lp, "worn", 2))
 	ok(p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
 		"mouse: press, move and release the vest on the armor slot wears it")
-	ok(Sfx.last_played.has("pickup") and Sfx.last_played.has("click"),
-		"the drag sounds: a pick-up as the vest lifts and a click when the armor slot takes it")
+	var heard := Sfx.last_played
+	ok(heard.has("inv_grab") and heard.has("inv_equip") and not heard.has("click"),
+		"the drag sounds: a grab as the vest lifts, one equip cue when the armor slot takes it (InvSfx)")
 	lp = await _reopen(main, m)
 	var idol := p.pack.find_custom(func(it): return it.get("id", "") == "kin_idol")
 	var before := str(p.pack) + str(p.gear)
 	Sfx.last_played.clear()
 	await _mouse_drag(main, _slot(lp, "pack", idol), _slot(lp, "worn", 0))
-	ok(not Sfx.last_played.has("click"), "a refused drop never sounds as taken")
+	ok(not Sfx.last_played.has("inv_drop") and not Sfx.last_played.has("inv_equip"), "a refused drop is silent")
 	var hints := lp.find_children("drag_hint", "", true, false)
 	ok(str(p.pack) + str(p.gear) == before and hints.size() == 1 and _texts(hints[0]).has("Only gear is worn"),
 		"treasure on a glove slot: nothing moves, it snaps back with a hint")
