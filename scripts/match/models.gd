@@ -2730,6 +2730,8 @@ static func revive_beacon() -> Node3D:
 			var a := TAU * i / 4.0 + 0.4
 			part(root, box(0.22, 1.5, 0.22), stone, Vector3(cos(a) * 1.0, 0.75, sin(a) * 1.0), Vector3.ONE, Vector3(0, -a, 0))
 			part(root, box(0.05, 0.9, 0.02), toon(glow, false, 0.9), Vector3(cos(a) * 0.88, 0.85, sin(a) * 0.88), Vector3.ONE, Vector3(0, -a, 0))
+	else:
+		ItemArt.beacon_strips(root, toon(glow, false, 0.9))
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
 	var cr := Node3D.new(); cr.position = Vector3(0, 1.7, 0); g.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.5, 0.7, 0.5)

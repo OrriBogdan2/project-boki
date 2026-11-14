@@ -2,8 +2,8 @@ extends RefCounted
 ## --item-art-check: the sculpted item models (art/items, ItemArt) are what the game builds. The gem,
 ## the tonic, the armor shard, the armor and boots drops, the Heart, the shrine and the revive beacon each
 ## load their GLB under the toon light with its painted texture, at the size of the primitive they replace;
-## gear drops take the drop's colour; the shrine and beacon keep their own animated crystal; a missing
-## model gives null so callers keep their primitive.
+## gear drops take the drop's colour; the shrine and beacon keep their own animated crystal (the beacon
+## also gets glow strips on its posts); a missing model gives null so callers keep their primitive.
 ## Prints "IACHECK ok|FAIL ..." lines and "IACHECK DONE, failures: N".
 
 var bad := 0
@@ -26,6 +26,8 @@ func run(main: Node) -> void:
 	var beacon := Models.revive_beacon()
 	ok(_textured(beacon) != null, "the revive beacon uses its sculpted dais and posts")
 	ok(beacon.get_node_or_null("Glow") != null, "the revive beacon keeps its own glowing crystal and beam")
+	var strips := beacon.get_children().filter(func(c: Node) -> bool: return c is MeshInstance3D)
+	ok(strips.size() == 4, "the sculpted beacon's four posts get glow strips (%d)" % strips.size())
 	beacon.free()
 	var col := Color("7ac8ff")
 	for slot in [2, 3]:
