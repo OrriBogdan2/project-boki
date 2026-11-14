@@ -51,8 +51,8 @@ static func draw(hud) -> void:
 		var side := Vector2(-wd.y, wd.x)
 		var w := lerpf(4.0, 12.0, 1.0 - gap / WALL_M)
 		c.draw_line(e - side * 36.0, e + side * 36.0, Color(0, 0, 0, 0.6), w + 4.0)
-		c.draw_line(e - side * 34.0, e + side * 34.0, HeartHud.TIDE_COL, w)
-		_label(c, e, wd, txt, HeartHud.NEXT_COL)
+		c.draw_line(e - side * 34.0, e + side * 34.0, SideColor.tone("tide"), w)
+		_label(c, e, wd, txt, SideColor.tone("tide_next"))
 
 ## The screen direction of seat `i`'s pin, or ZERO for none: the seat is gone (taken, lost), on screen, locked and
 ## farther than REACH_M, or it is the Heart ring still locked while the Gate is to be had. `sd` is WaysOutHud.seats.
