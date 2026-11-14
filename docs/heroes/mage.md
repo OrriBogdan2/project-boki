@@ -160,6 +160,7 @@ nothing from a glide (`Hunter.can_fire`).
 | Wirerun charge | jump | not shown | **ignored**: the walk and the jump are zeroed while she holds it | unsettled | [F] open question 5 |
 | Wirerun charge | stun, root, ground | "Stuns, Roots, Grounds, and Glider cancel the state" | the charge is cut and stays spent | match | [W] patch 05.03.25; `a stun mid-hold cancels Wirerun` |
 | Wirerun charge or run (in the air) | glide key (Space held never) | "Stuns, Roots, Grounds, and Glider cancel the state" | **cancels** as a stun does: the charge or streak ends and stays spent, the glider opens that step, no hit after it; a cut streak hands over at run speed, never lands (`MageKit._tick_glide_cancel`) | match (fixed, sparkle-glider-cancel 11-11) | [W] patch 05.03.25; `glider: the glide key mid-charge ...`, `... mid-streak ...`, `no hit ...` (main: wire on, glide shut; the streak landed) |
+| Wirerun charge or run | glide | "Glider cancel the state" (ignore projectiles) | the glider stays shut until the dash ends | **mismatch, not fixed**: the wiki says the glider ends the state, so a glide opens inside it; what the dash does then is not stated | [W] patch 05.03.25 |
 | Wirerun through a full-Static foe | Wirerun | "Surge is ready again at once"; "dashes straight back" | back at once | match | [F] 0133-0171; the dash rows |
 | E Skycall flick (held up to 1 s) | E release | "the video can't tell which" (release or second click) | the release commits; a tap commits away | match (the input is the data's "HOLD AND DRAG") | [D]; [F] 0184-0186 |
 | E flick or countdown (0.8 s) | any | not shown | free: LMB, RMB, X all go | unsettled | [F] 0181-0226 |
@@ -188,6 +189,14 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Shift Wirerun | the same Surge; with a charge it holds her height, with none it is the plain air dash (`mage_dash_ex`) | the glider folds for the dash; a held glide key reopens it as it ends | [D] Joule: no air rule; footage: air Surge not shown |
 | E Skycall | the same cast | the same cast, glider stays open | [D] Joule: no air rule |
 | X Kitefall | the same launch, from where she is; invulnerable in the air | the same, glider stays open | [D] "PRESS to launch into the air"; thebackdash list: invulnerable |
+
+| X hang | glide | "Glider cancel the state" | shut (`h.gliding` cleared) | **mismatch, not fixed**: same wiki line as the Wirerun row, what ends is not stated | [W] patch 05.03.25 |
+| X strike (0.5 s crackle) | any | not shown | free at once | unsettled | |
+
+Fixes made: none. Two rows are mismatches the wiki shows but doesn't finish (a glider ending Wirerun or Kitefall's
+invulnerable state): the wiki gives the state change, not what the dash or the hang does next, so no guess was built.
+Suggestions (not built): the LMB landing in Kitefall's hang is ours (the source names only the reactivate); if the
+owner wants strict parity, X would be the only landing key.
 
 ## Combinations
 | Combination | What fires | Check |

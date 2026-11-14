@@ -183,6 +183,41 @@ card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `le
 | End | the crash (or X early) frees her the same step, with no momentum; Shift out skates straight away at full speed | [F] f61 free; [O] item 27 |
 | Ledges | the carry slides off a terrace (never blocked) sinking at the skate's air fall (1.5 m/s), then she drops to the ground rooted | [O] items 62/64; DECISIONS "walking off ledges is always allowed" |
 | Abyss | the carry runs on over the void; sealed she cannot glide and falls; X (or Shift) frees her, and held glide opens 0.30 s later, the step her break move ends (the shared rule: no glider during an ability move) | [O] item 27, item 162b |
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen, and each ability's frames are a separate stretch of the clip, so no pair is shown back to back),
+[W] the wiki page linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours is
+origin/main d255acbee, read in the code (cancel-matrix-b pass, 11-09). **Unsettled** means no frame, card line or wiki
+line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both (ArchKit has no
+shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack key does
+nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB held (darts every 0.18 s) | RMB | not shown | both: the darts keep flying while the spear forms in her palms | unsettled | [F] LMB 0009-0090, RMB 0094-0168: separate stretches |
+| RMB held (spear aim) | LMB | not shown | both, as above | unsettled | |
+| RMB held (spear aim) | E | not shown | both: the wall's tell starts, the spear aim stays | unsettled | |
+| RMB held | X | not shown | the aim is dropped and the charge is **kept**; Rimelock goes | unsettled | `_start_rime` |
+| RMB let go (0.1 s push), spear in flight | any | not shown | both: LMB, E, X all go; a stun or the seal drops the push | unsettled | `_tick_throw` |
+| RMB, no charge left | RMB | "2 charges" | denied (deny buzz), no queue | match | [D] |
+| E Rink Wall tell (0.2 s) | E | "reactivate Frozen Barricade to freeze it" | the press is **swallowed** (neither freezes nor casts) until the wall is out and sliding | unsettled (the wiki gives no rule for a press in the cast) | [W] patch 22.01.25 |
+| E wall sliding | E | "can reactivate to freeze it in place, lasts 6 s when stopped" | freezes it; a press on a frozen wall is ignored | match | [W]; `tm E: E again freezes it ...` |
+| E (tell, wall) | LMB, RMB, X | not shown (the wall is cast standing, both hands pushed out) | both | unsettled | [F] 0297-0358 |
+| X Rimelock (3.5 s) | X | "Reactivate early to cancel" | before the last 0.75 s: the shell breaks, no damage, no stun, no bond | match | [D]; [F] ult; `tm X: X early ends it ...` |
+| X, last 0.75 s | X | "Reactivating early in the last 0.75 seconds ... 33% less damage and stuns for 33% less duration" | cracks open at 67% | match | [W] patch 05.03.25; `tm X: X in the last 0.75 s ...` |
+| X Rimelock | LMB, E | "rooted and invulnerable 3.2-3.5 s"; nothing else shown | **ignored**: no darts, E denied | owner | #65; `tm X: ... nothing fires` |
+| X Rimelock | RMB | as above | ignored (nothing fires) | owner | #65 |
+| X Rimelock | jump | rooted in the crystal | locked | owner | #65, content/dash_flow `into_jump.x` |
+| X Rimelock | glide | not shown | shut, the press is refused out loud ("NO GLIDE"); over the abyss she falls | owner | #27, #65 |
+| X Rimelock | Boki merge | not shown | ends it with no crash | ours | Assumptions above |
+
+Fixes made: none. Every source line above already matches or is an owner item; the rest is unsettled.
+Suggestions (not built): the swallowed E press inside the wall's 0.2 s tell is ours; a frame or a source line saying
+whether a second E there should buffer into the freeze would settle it.
 
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
