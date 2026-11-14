@@ -117,7 +117,7 @@ func _announce() -> void:
 		cls = Arch.weight(arch)
 		weapon = Arch.signature(arch)
 	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready,
-		line_key: 1,
+		line_key: 1, "look": PlayerLook.shared(),
 		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
 
 func _toggle_ready() -> void:
@@ -181,7 +181,7 @@ func _start() -> void:
 		var p: Dictionary = Net.peers.get(id, Net.my_presence)
 		if id == Net.me:
 			p = Net.my_presence
-		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {}), "look": p.get("look", {})})
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
 	if mode == "heart_raid":
 		teams = 1
@@ -211,7 +211,7 @@ static func duel_start(me: Dictionary, other: Dictionary) -> Dictionary:
 	var roster := []
 	for p in [me, other]:
 		roster.append({"peer": p["peer"], "team": roster.size(), "name": p.get("name", "Hunter"),
-			"arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+			"arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {}), "look": p.get("look", {})})
 	var o := Match.duel_opts()
 	return {"mid": "d%d" % (Time.get_ticks_msec() % 100000000), "seed": int(o["seed"]), "host": me["peer"],
 		"roster": roster, "teams": 2, "squad": 1, "tier": 0, "duel": true}

@@ -1586,9 +1586,9 @@ func _mouse_aim() -> Vector3:
 		aim_y = g
 	return Vector3(p.x, base_y, p.z)
 
-## How much grip the ground has here (ice patches in a frost region make it slippery).
-func ground_grip(p: Vector3) -> float:
-	return biomes.grip(p) if biomes else 1.0
+## How much grip the ground has here for h (ice in a frost region makes it slippery).
+func ground_grip(p: Vector3, h: Hunter = null) -> float:
+	return biomes.grip(p, h) if biomes else 1.0
 
 ## wilds: wild Boki count (every hit does, BokiHit); target picking and danger sensing pass false.
 func foes_of(team: int, wilds := true) -> Array:
@@ -1639,22 +1639,22 @@ func mate_col(h: Hunter) -> Color:
 	return MATE_COLS[i % MATE_COLS.size()]
 
 const SQUAD_PING_T := 45.0
-## A squad ping: one per hunter (a new one moves it), seen by their squad on the map, the minimap and
-## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" or "loot".
-func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "") -> void:
+## A squad ping: PingInput.CAP per hunter, seen by their squad on the map, the minimap and
+## as a marker in the world; it lasts a while or until its owner takes it down. `kind`: "", "enemy" (following `foe`) or "loot".
+func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunter = null) -> void:
 	if h == null or (from_net and MuteList.has(h.pname)):
 		return
 	if not world.is_void(p.x, p.z):
 		p.y = world.ground_at(p.x, p.z)
 	else:
 		p.y = 0.0
-	unping(h, true)
-	pings.append({"pos": p, "col": PingInput.color(self, h, kind), "t": 0.0, "by": h, "team": h.team,
-		"life": SQUAD_PING_T, "kind": kind})
+	PingInput.make_room(self, h)
+	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
+		"life": PingInput.life(kind), "kind": kind, "foe": foe})
 	if player and h.team == player.team:
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
-		net_event(["sping", h.nid, p.x, p.y, p.z, kind])
+		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
 	if skydrop:
 		skydrop.on_ping(h, p)
 	if not from_net:
@@ -1672,9 +1672,9 @@ func unping(h: Hunter, quiet := false, from_net := false) -> void:
 	if not quiet and net_on and not from_net:
 		net_event(["unping", h.nid])
 
-func my_ping() -> Dictionary:
-	for pg in pings:
-		if player and pg.get("by") == player: return pg
+func my_ping() -> Dictionary:     # (the newest)
+	for i in range(pings.size() - 1, -1, -1):
+		if player and pings[i].get("by") == player: return pings[i]
 	return {}
 
 func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
@@ -1687,7 +1687,7 @@ func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 	if k.owner_h == player:
 		var mood := "happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: mood = "unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover"]: mood = "alert"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover", "hazard_risk"]: mood = "alert"
 		sfx(KinVoice.cue(k.species, mood), null, -3.0, Unique.voice(k.rec))     # its own voice, over the fight
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
 		sfx(KinVoice.cue(k.species, "alert"), k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling out
@@ -3240,9 +3240,7 @@ func _process(delta: float) -> void:
 	for b in bubbles.duplicate():
 		b["t"] += delta
 		if b["t"] > float(b.get("life", 2.6)): bubbles.erase(b)
-	for p in pings.duplicate():
-		p["t"] += delta
-		if p["t"] > float(p.get("life", 4.0)): pings.erase(p)
+	PingInput.tick(self, delta)
 	for f in feed.duplicate():
 		f["t"] += delta
 		if f["t"] > 6.0: feed.erase(f)
@@ -5037,7 +5035,8 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 				_apply_treat(player.kin)
 			_start_drop(player, at)
 		else:
-			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", ""))})
+			var kit := {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", "")), "look": r.get("look", {})}
+			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, kit)
 			h.remote = true
 			if h.kin:
 				h.kin.remote = true
@@ -5416,7 +5415,8 @@ func _net_ev(x, from: String) -> void:
 		"sping":
 			var ph: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if ph:
-				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]) if x.size() > 5 else "")
+				var pfoe := ents_by_id.get(String(x[6]), null) as Hunter
+				squad_ping(ph, Vector3(x[2], x[3], x[4]), true, String(x[5]), pfoe)
 		"unping":
 			var uh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if uh: unping(uh, true, true)

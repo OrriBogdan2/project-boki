@@ -59,6 +59,11 @@ static func random(rng: RandomNumberGenerator = null) -> Dictionary:
 	out["sliders"] = sliders
 	return out
 
+## The parts of your look other players see online, sent in the join kit (lobby presence -> match
+## roster -> Hunter.bot_look): your glider skin and your Wisp.
+static func shared() -> Dictionary:
+	return {"glider": Gliders.equipped(), "wisp": WispLook.equipped()}
+
 ## A saved look with every pick inside its list and every slider in 0..1 (missing ones neutral).
 ## Older looks: a third gender option, hair indexed into the shared list (no "hair_v"), the Slim /
 ## Average / Sturdy "body" pick the build slider replaced.
