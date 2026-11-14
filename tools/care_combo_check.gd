@@ -5,7 +5,7 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
-const SHOT_OUT := 0.6          # m a shot starts ahead of her (Hunter.fire); it still ends at its range from her
+const SHOT_OUT := 0.6          # m a shot starts ahead of her (Hunter.fire); it ends at its range from her
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -961,7 +961,8 @@ func tender() -> void:
 		reaches.append(float(sh[-1]["life0"]) * (sh[-1]["vel"] as Vector2).length() if not sh.is_empty() else 0.0)
 	ok(
 			"mm LMB: the ember flies its full range past the cursor at 4, 8 and 14 m",
-			AimMode.mode_of(P) == AimMode.MAX and reaches.all(func(x: float) -> bool: return absf(x - SHOT_OUT - rng) < 0.05),
+			AimMode.mode_of(P) == AimMode.MAX
+			and reaches.all(func(x: float) -> bool: return absf(x - SHOT_OUT - rng) < 0.05),
 			"range %.1f reach %s" % [rng, reaches])
 	ok("mm LMB: the range is the footage's 7-8 bh (12.6-14.4 m)", rng >= 12.6 and rng <= 14.4, "%.1f m" % rng)
 	ok(
