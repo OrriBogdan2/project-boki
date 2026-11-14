@@ -2891,6 +2891,8 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 			Effects.run(fxx["fx_end"], s["by"], c2)
 	if s["node"]:
 		s["node"].visible = false
+	if e == null:
+		MissFx.shot_ended(self, s, at, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
