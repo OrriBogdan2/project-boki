@@ -1062,6 +1062,13 @@ only the hand-over changed (below).
   moves the machine GLIDING -> MANTLING (the farm avatar ranks it so too), and that edge folds the glider
   there, with its fold sound (the grab used to clear the flag silently), and no feathering after. A fresh glide press mid-rise still opens it again. A held key (bots, scripted input) can
   reopen it over the lip; a player's press-only keys never do.
+## Stairs: one smooth walk up and down (`--stairs-check`, decision 0060; owner 11-11)
+A flight's ground is a straight ramp, one terrace per tile. Walls (`World.occupy`), the non-local ledge lean
+(`Hunter._try_ledge_grab`) and the "left the ground" test now allow the rise or fall the slope gives over the
+distance (`World.stair_slope`, 0 off stairs), so a Hunter or bot walks a flight on the ground the whole way: no hop,
+no fall animation, no height pop, the same pace as on flat ground. Before: up a Hollow Crown flight 95 of 140 steps in
+the air (that walk took 2.38s, now 1.95s), down 55 steps; Skyreach 46 up, 20 down; heavy bots mantled up every flight in hops.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
