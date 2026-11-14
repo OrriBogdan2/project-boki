@@ -25,6 +25,7 @@ var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var _hover: Dictionary = {}    # the spawn candidate under the cursor
+var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
 
 func _init(h, match_node: Match) -> void:
 	hud = h
@@ -38,18 +39,20 @@ func open(by_plan := false) -> void:
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
+	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
+	hot_line = ""
 	_press = Vector2.INF
 
 
 # ------------------------------------------------------------------ coordinates
 func _layout(sz: Vector2) -> void:
 	var top := 76.0
-	var s := minf(sz.y - top - 22.0, sz.x - SIDE_W * 2.0 - 56.0)
+	var s := minf(sz.y - top - (44.0 if hot_line != "" else 22.0), sz.x - SIDE_W * 2.0 - 56.0)
 	s = maxf(s, 300.0)
 	rect = Rect2(Vector2(roundf(sz.x * 0.5 - s * 0.5), top), Vector2(s, s))
 
@@ -139,6 +142,18 @@ func ping_at(p: Vector3) -> void:
 	p.x = clampf(p.x, 0.5, m.world.w - 0.5); p.z = clampf(p.z, 0.5, m.world.h - 0.5)
 	m.squad_ping(m.player, p)
 
+## A save's first expedition, while the ship waits: the plan screen is only the map, the timer and the jump
+## prompt. Holding the scoreboard key brings back the squad, the legend and the ways out.
+func plain_plan() -> bool:
+	var planning: bool = m.skydrop != null and m.skydrop.planning
+	var first: bool = m.guide != null and int(Save.d.get("first_guide", 0)) <= 1
+	return planning and first and not Input.is_action_pressed("scores")
+
+## The groups on screen: the header, the map, and the three side panels unless the plan is plain.
+func groups() -> PackedStringArray:
+	var all := ["header", "map", "squad", "legend", "ways out"]
+	return PackedStringArray(all.slice(0, 2) if plain_plan() else all)
+
 # ------------------------------------------------------------------ drawing
 func draw(sz: Vector2) -> void:
 	var c: Control = hud.c
@@ -189,7 +204,10 @@ func draw(sz: Vector2) -> void:
 	if m.biomes:
 		m.biomes.hot.full_map(self, kk)
 	HeartHud.full_map(self)
+	NestMap.full_map(self)
 	WaysOutMap.full_map(self)
+	if m.zone:
+		m.zone.full_map(self, kk)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)
@@ -197,9 +215,26 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
-	_legend(c, sz, team)
-	_side(c, sz)
+	BokiHud.map_kin(c, m, to_screen, func(pv: Vector2, _pad: float) -> bool: return rect.has_point(pv))
+	_roster.clear()
+	if plain_plan():
+		_plain_hint(sz)
+	else:
+		MapKey.draw(self)
+		_legend(c, sz, team)
+		_side(c, sz)
+	if hot_line != "":
+		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
 	_cursor(c)
+
+## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
+func _plain_hint(sz: Vector2) -> void:
+	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
+	var line := "Press %s to jump  ·  hold %s for the legend and ways out" % keys
+	var w: float = hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
+	var pill := Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
+	hud._rounded(pill, Color(0.04, 0.05, 0.08, 0.88), 10)
+	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), line, 16, INK, hud.big)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:
@@ -573,7 +608,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var sp: SpawnPlan = m.spawn_plan
 	var cats: Array = sp.shown_cats() if sp else []
 	var rows := cats.size()
-	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 138))
+	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 94))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "THIS MATCH", 16, GOLD, hud.big)
 	hud._text(r.position + Vector2(14, 44), "Same map every time, different spawns", 11, MUTED)
@@ -597,7 +632,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	# what the marks mean
 	y += 4.0
 	c.draw_line(Vector2(r.position.x + 14, y - 14), Vector2(r.end.x - 14, y - 14), Color(1, 1, 1, 0.08), 1.0)
-	var keyrows := [["unknown", "Could be there: scout it"], ["active", "Here this match"], ["empty", "Empty this match"], ["taken", "Taken"]]
+	var keyrows := [["unknown", "Could be there: scout it"], ["active", "Here this match"]]
 	for kr in keyrows:
 		marker(c, "star", Vector2(r.position.x + 26, y), 6.0, Color("d8d4ff"), String(kr[0]))
 		hud._text(Vector2(r.position.x + 48, y + 4), String(kr[1]), 12, INK)
@@ -623,7 +658,6 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
-	_roster.clear()
 	var p: Hunter = m.player
 	if p == null:
 		return

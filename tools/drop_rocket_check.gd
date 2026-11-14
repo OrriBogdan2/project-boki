@@ -5,15 +5,21 @@ extends RefCounted
 ##  3. Jumping out and opening the glider at once goes further than jumping out and free-falling.
 ##  4. Nobody lands in a wall, under the ground or on top of a squadmate (several launches, steered ones too).
 ##  5. A bot leader flies the rocket to its landing spot (within BOT_SPOT_M).
-##  6. The hints, once per save each: the leader's "You steer the rocket" at launch, gone when they steer;
-##     a rider's "Ride along, or ... jump out", gone when they jump out; a solo sees only the leader line.
+##  6. Aboard, everyone is drawn clinging on outside the hull, each in their own seat; jumping out lets go of it.
+##  7. Its sounds (RocketSfx, docs/AUDIO.md): the ignition and the thrust loop aboard, the thrust swelling and
+##     rising while the leader turns, the jump-out cue with the canopy still folded, a free-fall wind that
+##     follows your speed and stops as the glider's snap plays, a small thud at landing, another squad's
+##     rocket and its thud heard HEAR_M away, and a solo's one-seat rocket playing the same set.
 
 const TOGETHER_M := 4.0          # m: the widest gap between two squadmates who rode it down
 const FAST_FALL := 8.0           # m/s: a free fall is still at least this fast
 const BOT_SPOT_M := 8.0          # m from a bot leader's landing spot
 const LAUNCHES := [2.0, 6.0, 10.0, 14.0]      # s into the ship's run, for check 4
 const STEER_S := 1.5             # s the leader holds the keys in check 4
+const HEAR_M := 45.0             # m: another squad's rocket is still heard this far off (past the usual 22 m)
 const STEERS := [Vector2.ZERO, Vector2(1, 0), Vector2(0, -1), Vector2(-0.7, 0.7)]
+const HULL_R := 0.75             # m: the rocket's body radius (DropRocket._model)
+const SEAT_GAP_M := 1.0          # m at least between two riders' feet
 
 var bad := 0
 var main: Node
@@ -24,8 +30,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-## A `squad`-a-side match (three by default), the planning phase skipped, everyone aboard, `ride` seconds
-## into the run.
+## A three-a-side squad match, the planning phase skipped, everyone aboard, `ride` seconds into the run.
 func _start(ride: float, squad := 3) -> void:
 	if m:
 		m.queue_free()
@@ -76,15 +81,31 @@ func _free_fall() -> void:
 	var r: DropRocket = m.player.rocket
 	for i in int(1.5 / Match.DT):
 		m.step(Match.DT)
+	_seats(r)
 	m.skydrop.detach(m.player)
 	for i in int(1.0 / Match.DT):
 		m.step(Match.DT)
 	var P: Hunter = m.player
+	P.render(Match.DT, 1.0)
+	ok(P.model.position == Vector3.ZERO, "jumping out lets go of the rocket (the body back on the hunter)")
 	ok(P.dropping and P.diving and P.rocket == null, "jumping out is a free fall")
 	var fall := -P.vel.y
 	var what := "the free fall (%.1f m/s) is slower than the rocket (%.1f m/s), still fast" % [fall, -r.vel.y]
 	ok(fall < -r.vel.y and fall > FAST_FALL, what)
 	ok(P.pos.y > r.pos.y + 5.0, "a second later you're above the rocket (%.1f m vs %.1f m)" % [P.pos.y, r.pos.y])
+
+func _seats(r: DropRocket) -> void:
+	var feet: Array = []
+	for h in r.riders:
+		(h as Hunter).render(Match.DT, 1.0)
+		var at: Vector3 = (h as Hunter).model.global_position - r.node.position
+		var out := (at - r.node.basis.y * at.dot(r.node.basis.y)).length()
+		ok(h.visible and out > HULL_R and out < HULL_R + 1.0,
+				"%s rides on show, clinging on %.2f m from the rocket's axis" % [h.pname, out])
+		for f in feet:
+			var gap := at.distance_to(f)
+			ok(gap > SEAT_GAP_M, "%s has a seat of their own (%.2f m to the next)" % [h.pname, gap])
+		feet.append(at)
 
 ## Flat distance from where you jump out to where you come down (or drop below the islands).
 func _jump_out_dist(glide: bool) -> float:
@@ -150,39 +171,100 @@ func _bot_leader() -> void:
 	ok(gap <= TOGETHER_M, "with the bot leading, the squad still lands together (%.1f m)" % gap)
 	_clean_landing("bot leader")
 
-## The lane's lines now, on show (the hint is the only line at launch, so it shows at once).
-func _lane() -> String:
-	return " | ".join(m.hud.msgs.texts()) if m.hud else ""
+## The squad's own rocket: launch, a hard turn, jumping out, the fall, the glider.
+func _own_sounds() -> void:
+	await _start(6.0)
+	Sfx.last_played.clear()
+	m.ship_jump(m.player)
+	var r: DropRocket = m.player.rocket
+	_steps(1.2, Vector2.ZERO)
+	var heard := Sfx.last_played.has("rocket_ignite") and not Sfx.last_played.has("whoosh")
+	ok(heard and Sfx.loop_on(r.snd.key), "launch: the rocket's ignition (not the stock whoosh) and its thrust loop")
+	var calm := _loop_now(r.snd.key)
+	# a hard turn across its course (not straight back: the rocket now dives, and braking flat out would
+	# take the speed, and so the pitch, down with it)
+	var fwd := Vector2(r.vel.x, r.vel.z).normalized() if Vector2(r.vel.x, r.vel.z).length() > 1.0 else Vector2(0, 1)
+	_steps(0.3, Vector2(-fwd.y, fwd.x))
+	var turned := _loop_now(r.snd.key)
+	# (+0.03 pitch: the launch already eases the swell part way up, and the dive keeps less flat speed)
+	var swell := turned.x > calm.x + 2.0 and turned.y > calm.y + 0.03
+	ok(swell, "the thrust follows the steering: a hard turn %.1f dB, pitch %.2f (flying on %.1f dB, %.2f)"
+			% [turned.x, turned.y, calm.x, calm.y])
+	var P: Hunter = m.player
+	var fall_key := "drop_fall%d" % P.get_instance_id()
+	Sfx.last_played.clear()
+	m.skydrop.detach(P)
+	_steps(Match.DT, Vector2.ZERO)
+	var cue := Sfx.last_played.has("rocket_jump") and not Sfx.last_played.has("glider_snap")
+	ok(cue, "jumping out plays the jump cue, no glider snap (the canopy is folded)")
+	var wind := Sfx.loop_on(fall_key) and not Sfx.loop_on("glider_wind%d" % P.get_instance_id())
+	ok(wind, "...and the free-fall wind, not the glider's")
+	var fast := Vector2(P.vel.length(), _loop_now(fall_key).x)
+	_steps(1.2, Vector2.ZERO)
+	var slow := Vector2(P.vel.length(), _loop_now(fall_key).x)
+	var follows := absf(fast.x - slow.x) > 2.0 and (fast.x - slow.x) * (fast.y - slow.y) > 0.0
+	ok(follows, "the wind follows your speed (%.0f m/s %.1f dB, %.0f m/s %.1f dB)" % [fast.x, fast.y, slow.x, slow.y])
+	Sfx.last_played.clear()
+	P.do_jump()
+	_steps(Match.DT, Vector2.ZERO)
+	var handed := not Sfx.loop_on(fall_key) and Sfx.last_played.has("glider_snap")
+	handed = handed and Sfx.loop_on("glider_wind%d" % P.get_instance_id())
+	ok(handed, "the glider opens: the fall wind hands into its snap and wind")
 
-func _hints() -> void:
-	Settings.v["tips"] = true
-	var seen: Dictionary = Save.d["tutorial"]
-	seen.erase("rocket_lead")
-	seen.erase("rocket_ride")
-	await _start(6.0)
-	m.ship_jump(m.player)
-	ok(_lane().contains("You steer the rocket: "), "the leader's hint at launch [%s]" % _lane())
-	ok(not _lane().contains("Ride along"), "the leader doesn't get the rider's hint")
-	_land(0.2, Vector2(1, 0))
-	ok(not _lane().contains("You steer"), "the leader's hint goes once they steer [%s]" % _lane())
-	await _start(6.0)
-	m.ship_jump(m.player)
-	ok(not _lane().contains("You steer"), "the leader's hint is once per save")
-	await _start(6.0)
-	m.skydrop.pass_lead(m.player, _squad().filter(func(h): return h.ctrl == "bot")[0])
-	m.ship_jump(m.skydrop.leader(m.player.team), true)
-	ok(_lane().contains("Ride along, or "), "a rider's hint at launch [%s]" % _lane())
-	m.step(Match.DT)
-	ok(_lane().contains("Ride along"), "the rider's hint stays while they ride")
-	m.skydrop.detach(m.player)
-	m.step(Match.DT)
-	ok(not _lane().contains("Ride along"), "the rider's hint goes once they jump out [%s]" % _lane())
-	seen.erase("rocket_lead")
-	seen.erase("rocket_ride")
+## Another squad's rocket HEAR_M away: its thrust and its thud carry; then a solo's one-seat rocket.
+func _far_sounds() -> void:
+	await _start(0.0)
+	var foe := 1 - m.player.team
+	# a bot leader jumps as the ship passes nearest its spot; at the latest the ship's run ends and forces it off
+	for i in int((float(m.ship["ride"]) + 1.0) / Match.DT):
+		if m.skydrop.rockets.has(foe):
+			break
+		m.step(Match.DT)
+	ok(m.skydrop.rockets.has(foe), "the rival squad's bots launch their rocket")
+	if not m.skydrop.rockets.has(foe):
+		return
+	var r: DropRocket = m.skydrop.rockets[foe]
+	# above its bot leader's own landing spot, so it comes down on ground (its own course can carry it out over the
+	# void, where it ejects its riders without a thud; the map's middle can sit at the abyss lip)
+	var w: World = m.world
+	var spot: Vector3 = m.skydrop.leader(foe).ai.get("land", Vector3(w.w * 0.5, 0.0, w.h * 0.5))
+	if not w.is_void(spot.x, spot.z):
+		r.pos = Vector3(spot.x, w.ground_at(spot.x, spot.z) + 40.0, spot.z)
+		r.vel = Vector3(0.0, r.vel.y, 0.0)
+	Sfx.last_played.clear()
+	var t := 0.0
+	var loud := -80.0
+	while t < 40.0 and not r.done:
+		m.step(Match.DT)
+		Sfx.listener = r.pos + Vector3(HEAR_M, 0, 0)
+		if Sfx.loop_on(r.snd.key):
+			Sfx.loop_set(r.snd.key, r.pos, 1.0)
+			loud = maxf(loud, (Sfx.loops[r.snd.key]["p"] as AudioStreamPlayer).volume_db)
+		t += Match.DT
+	ok(loud > -60.0, "another squad's rocket %.0f m away is heard (%.1f dB)" % [HEAR_M, loud])
+	ok(Sfx.last_played.has("rocket_land"), "...and so is its landing thud")
 	await _start(6.0, 1)
+	Sfx.last_played.clear()
 	m.ship_jump(m.player)
-	var solo := _lane().contains("You steer the rocket") and not _lane().contains("Ride along")
-	ok(solo and m.player.rocket.riders.size() == 1, "a solo (one seat) sees only the leader line [%s]" % _lane())
+	var solo: DropRocket = m.player.rocket
+	var seats := solo.riders.size() if solo else 0
+	_steps(0.5, Vector2.ZERO)
+	var riding := solo != null and Sfx.loop_on(solo.snd.key) and Sfx.last_played.has("rocket_ignite")
+	_land()
+	ok(seats == 1 and riding and Sfx.last_played.has("rocket_land"), "a solo's one-seat rocket plays the same set")
+
+func _steps(secs: float, steer: Vector2) -> void:
+	for i in maxi(1, int(secs / Match.DT)):
+		m.player.inp["move"] = steer
+		m.step(Match.DT)
+		Sfx.listener = m.player.pos
+
+## A held loop's level (dB) and pitch right now.
+func _loop_now(key: String) -> Vector2:
+	if not Sfx.loop_on(key):
+		return Vector2(-80.0, 0.0)
+	var L: Dictionary = Sfx.loops[key]
+	return Vector2(float(L["vol"]), (L["p"] as AudioStreamPlayer).pitch_scale)
 
 func run(mn: Node) -> void:
 	main = mn
@@ -192,7 +274,8 @@ func run(mn: Node) -> void:
 	await _glide_further()
 	await _no_clipping()
 	await _bot_leader()
-	await _hints()
+	await _own_sounds()
+	await _far_sounds()
 	if m:
 		m.queue_free()
 	print("ROCKET DONE, failures: %d" % bad)
