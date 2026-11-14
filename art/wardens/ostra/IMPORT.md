@@ -35,9 +35,3 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 - **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
   high quality, mipmaps (S1's budget).
-
-## Pilot loops (11-11, animation-quality lane)
-
-The 8 loco clips (`walk_*`, `run_*`) are float-drift loops (`drift()` in `ostra_clips.py`). He has no feet, so each cycle has two spring pulses. On each pulse the box gives under him and kicks him on: the body dips, rebounds past rest and lags a beat along the travel. The box and spine lean into the travel, and the arms paddle once a cycle. The base pose stays the cycle's mean, so the runtime hover bob still rides on top. Meshy can't rig a legless body, so these are hand-keyed. Blind Fable rubric (weight and readable direction in place of foot contact) over 6 pairs: walk 3.8 vs 2.8 for the old sway, run 4.1 vs 3.0.
-
-They were keyed on the pre-rework rig (ext/anim-pilot-loops-sm 01452d8fb). The v95 body moved the rest of the box lid, face and spring bones, so they went in as a delta instead of a copy. `tools/art1/glb_delta_clips.py ostra.glb <old ostra.glb> <pilot ostra.glb> out.glb walk_f,...` puts (pilot − old) per bone onto the shipped clips, which keeps the rework's spread arms and the v95 rest. Only the 8 loco clips change, and the glb keeps its size.

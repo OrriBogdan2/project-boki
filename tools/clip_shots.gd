@@ -6,8 +6,6 @@ extends RefCounted
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
-## --run-under=<m/s>: the loco runs forward at that speed and each clip plays as the upper layer over it, as a move
-## that keeps the legs running does (the layers' seam).
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 const ClipCheck := preload("res://tools/clip_check.gd")
@@ -29,7 +27,6 @@ func run(main: Node) -> void:
 	var game_cam := false
 	var true_cam := false
 	var dist := 5.2
-	var under := 0.0
 	var at_y := 0.82
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
@@ -40,7 +37,6 @@ func run(main: Node) -> void:
 		if a.begins_with("--yaw="): yaw = float(a.substr(6))
 		if a.begins_with("--dist="): dist = float(a.substr(7))
 		if a.begins_with("--at="): at_y = float(a.substr(5))
-		if a.begins_with("--run-under="): under = float(a.substr(12))
 		if a == "--turn": turn = true
 		if a == "--match": game_cam = true
 		if a == "--true-cam": true_cam = true      # (the game's own camera: 23 m out at 66 degrees, fov 32)
@@ -103,15 +99,13 @@ func run(main: Node) -> void:
 		var dir := out.path_join(anim_name)
 		DirAccess.make_dir_recursive_absolute(dir)
 		var length := clips.lib.get_animation(anim_name).length
-		if under > 0.0:
-			model.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -under), "face": 0.0, "grounded": true})
-		clips.force = {"clip": anim_name, "t": 0.0, "upper": under > 0.0}
+		clips.force = {"clip": anim_name, "t": 0.0}
 		for k in 8:
 			sync.call("_process", 1.0 / 30.0)
 		var n := int(ceil(length * fps)) + 1
 		for i in n:
 			var t := minf(float(i) / fps, length - 0.001)
-			clips.force = {"clip": anim_name, "t": t, "upper": under > 0.0}
+			clips.force = {"clip": anim_name, "t": t}
 			sync.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 	if OS.get_cmdline_user_args().has("--flinch"):
