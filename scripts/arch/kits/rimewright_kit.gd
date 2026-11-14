@@ -134,9 +134,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
-			var tid := t.get_instance_id()
-			var fan_r := float(pd["splinter_r"]) * 0.8
-			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
 
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
