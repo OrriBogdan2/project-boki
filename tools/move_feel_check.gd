@@ -80,6 +80,12 @@ const T := {
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
+	# Felix's three stages (hero-ref linwick.md section 4, 245.53-245.87 s, frames 0159-0160; 50 px = 1 m, 1 bh = 1.8 m)
+	"dash_curve_ashwick_burst":       ["~", [12.6, 15.4], "m/s", "[footage] Felix ~700 px/s = 14 m/s the first 0.1 s"],
+	"dash_curve_ashwick_cruise":      ["~", [8.1, 11.0], "m/s", "[footage] Felix then 450-500 px/s = 9-10 m/s"],
+	"dash_curve_ashwick_last":        ["<=", 3.0, "m/s", "[footage] Felix then stops dead"],
+	"dash_curve_ashwick_m":           ["~", [3.23, 3.57], "m", "[footage] Felix ram 170 px = 3.4 m"],
+	"dash_curve_ashwick_s":           ["~", [0.3, 0.36], "s", "[footage] Felix ram 0.33 s"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
@@ -1034,7 +1040,7 @@ func _cast_stop(cast: bool) -> Dictionary:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "ashwick"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
@@ -1058,8 +1064,11 @@ func _dash_curves() -> void:
 		var mean := 0.0
 		for v in speeds: mean += v / speeds.size()
 		var peak := speeds.max() as float
-		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
-		rec("dash_curve_%s_peak_k" % id, peak / mean)
+		if id == "ashwick":
+			_ashwick_stages(speeds)
+		else:
+			rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
+			rec("dash_curve_%s_peak_k" % id, peak / mean)
 		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
 		rec("dash_curve_dist", (P.pos.x - x0) / want)
 		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
@@ -1093,6 +1102,26 @@ func _tender_glide() -> void:
 	rec("dash_curve_tender_air_dist", (P.pos.x - x0) / float(air["dist"]))
 	rec("dash_curve_tender_air_time", speeds.size() * DT / float(air["time"]))
 	rec("dash_curve_tender_air_exit_k", float(speeds[-1]) / float(speeds.max()))
+
+## Cinder's Soot Ram stages, from the steps of her ground dash (u = middle of each step through it): the burst's
+## mean speed (before u 0.29), the cruise's (u 0.33-0.86), the last step's speed, and the ram's felt metres and time.
+func _ashwick_stages(speeds: Array[float]) -> void:
+	var burst: Array[float] = []
+	var cruise: Array[float] = []
+	for i in speeds.size():
+		var u := (i + 0.5) / speeds.size()
+		if u < 0.29: burst.append(speeds[i])
+		elif u > 0.33 and u < 0.86: cruise.append(speeds[i])
+	var mean_of := func(a: Array[float]) -> float:
+		var t := 0.0
+		for v in a: t += v / maxf(1.0, a.size())
+		return t
+	rec("dash_curve_ashwick_burst", mean_of.call(burst))
+	rec("dash_curve_ashwick_cruise", mean_of.call(cruise))
+	rec("dash_curve_ashwick_last", speeds[-1])
+	var felt := _felt_dash(false)
+	rec("dash_curve_ashwick_m", felt[0])
+	rec("dash_curve_ashwick_s", felt[1])
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
