@@ -26,9 +26,9 @@ func run(main: Node) -> void:
 	var knocked := _hit(m, target, by, mh * 0.03, {"kb": Vector2(9.0, 0.0)})
 	ok(chip < solid and solid < HEAVY, "chip %.2f < solid %.2f < stagger %.2f" % [chip, solid, HEAVY])
 	ok(knocked > chip, "knock makes the same damage flinch harder (%.2f > %.2f)" % [knocked, chip])
-	ok(target.stagger_t <= 0.0, "a hit under the stagger share does not stagger")
+	ok(target.react_at < 0.0, "a hit under the stagger share does not stagger (no hit clip, react_at)")
 	var big := _hit(m, target, by, mh * 0.20, {})
-	ok(is_equal_approx(big, HEAVY) and target.stagger_t > 0.0, "a big hit flinches the heaviest and staggers")
+	ok(is_equal_approx(big, HEAVY) and target.react_at >= 0.0, "a big hit flinches the heaviest and staggers")
 	var blow := _hit(m, target, by, mh * 0.03, {"heavy": true})
 	ok(is_equal_approx(blow, HEAVY), "a heavy blow staggers whatever its damage")
 	target.hit_k = 1.0
@@ -47,6 +47,6 @@ func run(main: Node) -> void:
 ## Lands a hit of `d` and returns the flinch strength it set.
 func _hit(m: Match, target: Hunter, by: Hunter, d: float, o: Dictionary) -> float:
 	target.hit_k = 0.0
-	target.stagger_t = 0.0
+	target.react_at = -9.0
 	Oomph.react(m, target, by, d, o)
 	return target.hit_k
