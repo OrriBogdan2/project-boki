@@ -48,6 +48,8 @@ static func on_screen(hud) -> Array:
 		out.append("squad")
 	if hud.msgs.count() > 0:
 		out.append("messages")
+	if not hud.loot.rows.is_empty():
+		out.append("loot")
 	if not m.interact.is_empty():
 		out.append("prompt")
 	if kit_wanted(hud, p) and not (p.dropping or p.riding) and m.time - hud.kit_t0 <= KIT_S:
