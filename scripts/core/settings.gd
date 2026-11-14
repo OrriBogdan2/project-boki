@@ -31,12 +31,15 @@ const DEFAULTS := {
 	# sounds
 	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
-	"screen_shake": 0.3, "reduce_flashes": false,
+	"screen_shake": 0.3, "reduce_flashes": false, "text_size": 1.0,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
 }
+## Text size choices (Settings > Accessibility): text is drawn at this multiple of its design size.
+const TEXT_SIZES := [1.0, 1.25, 1.5]
+
 ## The volume settings (Settings > Audio, in menu order) and the audio bus each one sets (Sfx._ready makes them).
 const BUSES := {
 	"master": "Master", "music": "Music", "sfx": "SFX", "voices": "Voice", "ambience": "Ambience", "ui_sounds": "UI",
@@ -156,8 +159,8 @@ const KEYS_V := 3
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
+	["fire", "Weapon attack"], ["secondary", "Hunter ability"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; at home it plays fetch)"], ["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["mate_look_1", "Look at teammate 1 (hold)"], ["mate_look_2", "Look at teammate 2 (hold)"],
@@ -166,7 +169,7 @@ const ACTIONS := [
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
-	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
+	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
@@ -223,6 +226,7 @@ func load_file() -> ConfigFile:
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
+	v["text_size"] = snap_text_size(v.get("text_size", 1.0))      # (a config from before the option has none: 100%)
 	_migrate_belt_keys()
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
@@ -243,6 +247,16 @@ func load_file() -> ConfigFile:
 		v["voices"] = v["sfx"]
 		v["ui_sounds"] = v["sfx"]
 	return cf
+
+## The Text size choice nearest `x` (anything unreadable or out of range lands on 100%).
+static func snap_text_size(x: Variant) -> float:
+	if not (x is float or x is int):
+		return 1.0
+	var best: float = TEXT_SIZES[0]
+	for s: float in TEXT_SIZES:
+		if absf(s - float(x)) < absf(best - float(x)):
+			best = s
+	return best
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -341,6 +355,7 @@ func apply(k: String) -> void:
 		"quality", "quality_found":
 			_apply_quality()
 		"ui_scale": _apply_ui_scale()
+		"text_size": UI.set_text_size(float(v[k]))
 		"rec_level":
 			# recording mode picked in Settings > Demo carries over to the next launch (--record overrides)
 			if not _started and not Array(OS.get_cmdline_user_args()).any(func(x): return String(x).begins_with("--record")):
@@ -605,6 +620,12 @@ func key_caps(action: String) -> String:
 		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
 		out.append(t.to_upper() if c.begins_with("key:") else t)
 	return " / ".join(out) if out.size() > 0 else "?"
+
+## Text with {action} tokens ("hold {interact} to scan") filled with those actions' key caps.
+func fill_keys(text: String) -> String:
+	for a in ACTIONS:
+		text = text.replace("{%s}" % a[0], key_cap(a[0]))
+	return text
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB").
 func key_cap(action: String) -> String:
