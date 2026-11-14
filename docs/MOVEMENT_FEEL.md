@@ -102,8 +102,10 @@ defaults aren't cited, since the data names no field for these windows.
 | dashglide_1s_speed | 5.7 m/s | 12.3 m/s | >= 10.5 | [wiki] preserved |
 | dashglide_2s_speed | 5.0 m/s | 10.8 m/s | >= 9 | [wiki] preserved |
 | feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
-| feather_m vs feather_hold_m (distance before overheating, over the abyss) | (no feathering) | 110.7m vs 90.1m | | |
-| feather_gain | n/a | 1.23x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
+| feather_m vs feather_hold_m (distance before overheating, over the abyss) | 113.8m vs 44.6m (11-11) | 165.6m vs 44.6m | | |
+| feather_gain | 2.55x (11-11) | 3.71x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
+| dive_feather_speed (1s drop under the lip, then the glider: speed 0.5s on) | 5.0 m/s | 8.2 m/s | >= 8 | owner 11-11: the fall goes on forward (decision 0061) |
+| dive_feather_m (the 1s after that open) | 4.9m | 8.3m | >= 7m | owner 11-11 |
 | land_carry_hop_held / drop4_held (1 m hop, 4-terrace drop, keys held: touchdown / run speed) | | 1.00x / 1.00x | 0.98–1.02 | [game data] landing keeps what you carried |
 | land_carry_glide_held (glider let go 2 m up, keys held) | 1.14x | 1.05x | 0.98–1.07 | the glide's extra bleeds at air.drag 2/s (decision 0052) |
 | ledge_rise_t (1.6m wall, jump and push in: contact to over the top) | (scripted mantle) | 0.33s (0.15s before the 11-09 suction) | <= 0.45s | [game data] jump-paced; suction cap 2.5 m/s (decision 0026) |
@@ -115,10 +117,12 @@ defaults aren't cited, since the data names no field for these windows.
 | ledge_fling_timed_up_m | n/a | 0.95m | >= 0.7m | [est] |
 | ledge_fling_gain (timed vs no jump, distance) | n/a | 3.4x (1.8x from a 1.35m rise) | >= 1.5x | [est] rewarding |
 | ledge_window_s | n/a | 0.117s (7 steps) | >= 0.08s | [est] readable |
-| abyss_lift_t (4m deep to balloon line) | 1.05s | 0.82s | <= 1.0s | [footage] ~1s |
+| abyss_lift_t (4m deep to balloon line) | 1.05s | 0.67s (0.70 before 0061) | <= 1.0s | [footage] ~1s |
 | abyss_kill_depth (point of no return under the lip) | 6.0m | 17.5m | 17–18m | [game data] AbyssHeight |
 | abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 18.5m | >= 15m | |
 | abyss_fall_t / abyss_fall_vy_deep (step off the lip) | n/a | 1.93s / 10.0 m/s | >= 1.8s / 10–10.8 | [game data] AbyssFallSlow 12 to 10 m/s |
+| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.59m (1.53 before 0061) | >= 1.5m | owner: bouncy |
+| glide_high_sink / glide_swoop_speed (gliding above 8.5m) | 1.4 / 6.5 m/s | 3.5 / <= cruise | 3.3–3.6 / <= 5.3 | [game data] GlideDownwardForce; the drop adds no speed (owner 11-08) |
 | abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.58m | >= 1.5m | owner: bouncy |
 | glide_high_sink / glide_high_swoop_x (gliding above 8.5m) | 1.4 / none | 3.5 m/s / 2.5x | 3.3–3.6 / 2.4–2.6 | [game data] GlideDownwardForce; the pull's extra sink, shed at 8.5m, becomes speed (decision 0095) |
 | dive_vy / dive_vy_t (hold Ctrl under the glider) | n/a | 32.5 m/s / 0.75s | 32–32.5 / 0.6–0.9s | [game data] GlideDiveZTargetSpeed -3250 uu/s, ZForceMax 350,000 / Mass 100 |
@@ -342,6 +346,11 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Heat on the canopy** (`GliderHeat`): the glider cloth warms toward ember with heat, an overheated glider trails a thin smoke, and one burning over the abyss at half strength flickers, so teammates and enemies read a gliding Hunter's heat from the world. Two toon-shader parameters (`canopy_heat`, `canopy_burn`) on the canopy's own material: no extra draw calls, no burst on open or close. The heat (4 bits, 15 = overheated) and the burn state ride the hunter flags (bits 19-23); no Net shape change. Measured by `--glider-canopy-check`; shots by `--glider-canopy-shots`.
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
+
+## Shift into the glider, and the dive into the feather (decision 0061, owner playtest 11-11)
+- **No cut at an air dash's end:** a kit that stops its air dash short (Shiv's slide, Kingpin's pounce, Felix's poof) now eases the cut out over `dash_glide.ease_t` (0.07 s) instead of one step, and a glider already open keeps the dash's whole speed (`DashGlide`).
+- **A press just after Shift counts as one in it:** within `dash_glide.grace` (0.15 s) the glider opens on the press, past the kit's wind-down (Brall keeps the source's wind-down). `--airdash-glide-check` presses mid-dash, the step after and 6 steps after for every hunter: opens on the press, no step changes speed by more than 4 m/s (the old cut lost 10-17), at least 70% of the dash's speed kept.
+- **The dive carries:** opening the glider under the lip turns 0.6 of the fall speed into forward speed (up to the glide max) and the deep spring adds 0.3 of it upward (`GlideLift.open_kick`); the high glide is unchanged (the drop there never turns into speed, 11-08).
 
 ## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
 

@@ -66,6 +66,8 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 	var frames := 0
 	var no_text := 0
 	var t := 0.0
+	var reset_t := 0.0  # s: the last time the stall clock restarted (a monster of the camp fell, as Boki fights on)
+	var stall := tu.stall_t
 	var has_place := tu.goal(sid) != Vector3.INF
 	while t < IDLE_S and tu.step == s0 and not p.extracted:
 		for k in ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw"]:
@@ -85,6 +87,9 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 			hint_t = t
 		if nag_t < 0.0 and tu.nag_t > 0.0:
 			nag_t = t
+		if tu.stall_t < stall:
+			reset_t = t
+		stall = tu.stall_t
 		if tu.text == "":
 			no_text += 1
 		if has_place and not (tu.target != Vector3.INF and tu.label != "" and tu.beams_on() > 0):
@@ -92,7 +97,11 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 	var early := tu.step != s0 or p.extracted
 	var note := "ends by itself at %.1f s" % t if early else ""
 	var hint_ok := (hint_t >= 0.0 and hint_t <= HINT_BY) or (early and t <= HINT_BY)
-	var nag_ok := early or (nag_t >= 0.0 and nag_t <= minf(IDLE_S, SILENT_MAX))
+	# Progress inside the window (the Boki felling a camp monster, as late as 9.8 s) restarts the stall clock and is
+	# itself a prompt: the nag is then due NAG_T after it, so the clock must be running and not yet due (NAG_T is
+	# held under SILENT_MAX by the first checks above).
+	var clock_runs := stall < Tutorial.NAG_T and stall >= t - reset_t - 2.0 * Match.DT
+	var nag_ok := early or (nag_t >= 0.0 and nag_t <= minf(IDLE_S, SILENT_MAX)) or (nag_t < 0.0 and clock_runs)
 	print("IDLE match | %s | hint %s | %s | nag %s | %s | %s" % [sid, _s(hint_t), boki if boki != "" else "-",
 			_s(nag_t), _marker_note(has_place, lost), note])
 	ok(hint_ok, "%s: a hint banner or the Boki lead is up within %.0f s (%s)" % [sid, HINT_BY, _s(hint_t)])
