@@ -41,11 +41,7 @@
 		"glide": "glide",
 		"dive": "dive"
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.42,
-		"min_fall": 0.5
-	},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"breah_throw": {
 			"clip": "lmb_throw",
