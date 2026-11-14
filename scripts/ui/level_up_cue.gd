@@ -23,8 +23,8 @@ func start(p: Hunter, lv: int, info: Dictionary) -> void:
 	t = LIFE
 
 static func text_for(p: Hunter, lv: int, info: Dictionary) -> Array:
-	var hp_gain := roundi(LevelGrowth.step("hp", lv) * 100.0)
-	var gains := "+%d%% health   +%d%% ability power" % [hp_gain, roundi(LevelGrowth.step("ap", lv) * 100.0)]
+	var hp_gain := roundi(LevelGrowth.rate("hp") * 100.0)
+	var gains := "+%d%% health   +%d%% ability power" % [hp_gain, roundi(LevelGrowth.rate("ap") * 100.0)]
 	var news: Array = []
 	if info.has("name"):
 		news.append("%s: %s" % [String(p.wpn["name"]), info["name"]])

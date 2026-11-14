@@ -16,6 +16,7 @@ signal done                    # the kin has hopped out and the shell is gone
 
 const STEP := TAU / 36.0       # spacing of the zigzag crack around the middle
 const DARK_SHELL := 0.3        # luminance (0..1): below it a dark crack would not show, so it glows
+const CHIP_COL := Color("f6f0e2")           # shell flakes and chips: pale shell white
 const REST_RIM := 0.35                            # the toon shader's own rim strength
 const REST_RIM_COL := Color(1.0, 0.96, 0.88)      # and its rim colour
 
@@ -212,7 +213,7 @@ func _shiver(tw: Tween, n: int, amp: float, step: float) -> void:
 
 func _chips(local: Vector3, n: int) -> void:
 	if fx:
-		fx.burst(_gp(local), Color("f6f0e2"), n, 1.6, 0.4, 7.0, 0.55)
+		fx.burst(_gp(local), CHIP_COL, n, 1.6, 0.4, 7.0, 0.55)
 
 func _open_peek() -> void:
 	var a := PI * 0.5
