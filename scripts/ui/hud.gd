@@ -134,18 +134,13 @@ func _place_msgs() -> void:
 	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
-## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
-## them, so two lines of text never overlap on screen; they come back as it goes.
+## World labels (damage numbers, monster plates, the lairs' name boards) never print over
+## each other or over a message card: the lower-priority one fades back and returns as it clears.
 func _clear_under_toasts(delta: float) -> void:
-	if m == null or m.lairs == null or m.cam == null:
+	if m == null or m.cam == null:
 		return
-	LabelClash.fade_orbs(m, delta)
-	var rects := msgs.rects()
-	for L in m.lairs.list:
-		var lnodes = L.get("nodes")
-		var lbl = lnodes.get("label") if lnodes is Dictionary else null
-		if lbl is Label3D and is_instance_valid(lbl):
-			MsgLane.yield_label(lbl, m.cam, rects, delta)
+	LabelClash.fade_orbs(m, delta)       # perk orb names yield to the claimed plates, bars and numbers
+	LabelSpacing.update(m, msgs.rects(), delta)
 
 ## A message in the lane (MsgLane).
 func toast(text: String, col: Color) -> void:
@@ -255,12 +250,8 @@ func _draw_all() -> void:
 	# (movefeel) measured against the real point of no return (Hunter.abyss_kill_y, via AbyssFx.danger)
 	# instead of a guess 14m down, and much stronger: the screen shader drains, darkens and reddens the
 	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
-	# warning near the end
+	# warning near the end (the falling wind and the warning sound are AbyssFallSfx)
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
-	if want_a <= 0.02:
-		abyss_cued = false
-	if want_a <= 0.7:
-		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
@@ -276,13 +267,6 @@ func _draw_all() -> void:
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
-		# (owner) an audio cue: a falling whoosh as the tint starts, a warning when it turns deep red
-		if p == m.player and abyss_a > 0.08 and not abyss_cued:
-			abyss_cued = true
-			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
-		if p == m.player and abyss_a > 0.85 and not abyss_warned:
-			abyss_warned = true
-			Sfx.play("warn", null, -4.0, 0.0, 0.8)
 		if abyss_a > 0.1 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
@@ -320,7 +304,7 @@ func _draw_all() -> void:
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
 		if not p.riding:
-			_draw_prompt(sz, p)
+			if TutorialHud.prompt_shows(m): _draw_prompt(sz, p)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
 			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
@@ -1725,7 +1709,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 		if not WaysOutHud.gate_prompt(self, sz, y, it):
 			var s: String = it["label"]
 			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-			if not (m.tut and m.tut.prompt_quiet()):      # (the tutorial card says it: only the bar stays)
+			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
 			if prog > 0.0:
@@ -1794,6 +1778,7 @@ func _draw_crosshair(p: Hunter) -> void:
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
+	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
 	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
@@ -1831,6 +1816,7 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
+	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
 	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
@@ -1857,8 +1843,6 @@ func _draw_scores(sz: Vector2) -> void:
 		score_mute.draw(self, h, r.position.x + 606, y)
 		y += 28
 
-var abyss_cued := false
-var abyss_warned := false
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null

@@ -403,9 +403,6 @@ func _ready() -> void:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
 		return
-	if "--move-feel-check" in args:
-		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
-		return
 	if "--wallhug-check" in args:
 		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
 		return
@@ -721,6 +718,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
+				opts["squad_intro"] = true      # a real start: the squad on the skyship deck first (SquadIntro)
 				ld.setup(opts)
 				add_child(ld)
 				_ld = ld
@@ -2223,10 +2221,10 @@ func _truce_check() -> void:
 	print("TCHECK attack: truce holds=%s announced=%s betrayer marked=%s revealed %.0fs, victims targeting the betrayer=%d" % [T.allied(0, 1), announced, T.is_marked(traitor), traitor.reveal_t, hits_back])
 	if T.allied(0, 1) or not announced or not T.is_marked(traitor) or hits_back == 0: ok = false; print("TCHECK FAIL breaking")
 	# sharing an uplink
-	T.marked.clear()
-	T.make(0, 1)
 	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)
+	T.marked.clear()     # (the pact after the clock jump to the uplink's opening: it lasts TRUCE_T from there)
+	T.make(0, 1)
 	m.exits.act(o, "start", A[0])
 	spots[A[0]] = o["pos"] + Vector3(1.0, 0, 0.8)
 	spots[B[0]] = o["pos"] + Vector3(-1.2, 0, -0.9)
