@@ -9738,3 +9738,4 @@ READY ext/merge-batch-15-1113 f2367140bd59c044a33fed38605563c49f618935 (supersed
 READY ext/stuck-integ-f11b417c 4a0be5c291 (re-merged origin/main 49021aadf5, quest_seat.gd conflict resolved: one site(); supersedes e88b64059d; checks after merge: juggernaut-combo, heart-raid, heart-raid-solo, ways-out-sfx, sfx-silence-audit, hero-vfx, base-life all 0 failures; health --strict OK)
 READY ext/merge-lane-d2art-1114 a5b988ec224e638a92336247446c408be33ab7ae (merge lane d2art bundle A: 16 art/content/docs branches, suite NEW-RED 0, export OK 444.3 MB)
 READY ext/merge-lane-hunters5-1114 505c63d8ca7d9ad1dc55f1867821c56adc24965c (merge lane hunters5: 6 branches, gate NEW-RED 0, export OK 445 MB)
+READY ext/fix-canary-glide-spike-1114 be3f340bfb82 (canary SCRIPT ERROR glide_spike static-init order fixed; 10/10 -> 1/10 red, rest is evo-check pre-existing)
