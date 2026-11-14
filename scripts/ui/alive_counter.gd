@@ -1,7 +1,8 @@
 class_name AliveCounter
 ## Top right of the match HUD: how many squads and how many players are still in the match (a squad
 ## icon and a number, a person icon and a number; solos show players only), and under it your own
-## kills, knocks and gems in a quieter row. Never who is left. Drawn by Hud; the kill feed hangs under it.
+## kills, knocks and gems in a quieter row (held back for a new player:
+## HudGroups.own_numbers_shown). Never who is left. Drawn by Hud; the kill feed hangs under it.
 
 const BIG_CELL := Vector2(78.0, 44.0)    # px, one big counter (icon + number)
 const BIG_PX := 26           # px, the big numbers
@@ -51,6 +52,8 @@ static func draw(c: Control, m: Match) -> float:
 		if i > 0:
 			c.draw_line(Vector2(x, r.position.y + 8), Vector2(x, r.end.y - 8), Color(1, 1, 1, 0.16), 1.0)
 	var p: Hunter = m.player
+	if not HudGroups.own_numbers_shown(p, MapDetail.holding()):
+		return r.end.y + 10.0      # a new player's zeros wait for the first kill, knock or gem (HudGroups)
 	var kills := p.kills if p else 0
 	var knocks := p.knocks if p else 0
 	var gems := p.gems if p else 0

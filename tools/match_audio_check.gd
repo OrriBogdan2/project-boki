@@ -8,6 +8,8 @@ extends RefCounted
 ## teammate's R), never on a match's first look, held while you're down until you're up, and set lower
 ## under a kill callout.
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## And the mix (SfxMix): each kind of sound is on its own bus, a big event dips Music and Ambience about 6 dB
+## and they recover; then the autoplay match runs LOUD_S and each bus's peak meter is reported (MATCHAUDIO BUS).
 ## Footsteps (StepReach): a rival's heard at 15 m, not at its reach + 5 m, a sneaking rival's carry less, a
 ## teammate's quieter than a rival's, your own one level wherever the camera is.
 
@@ -15,6 +17,7 @@ var main: Node
 var fails := 0
 var n := 0
 const SETTLE := 4.0            # s: longer than the slowest match fade (the score's stems, 1.2s)
+const LOUD_S := 12.0           # s of autoplay match the bus meters are read over
 
 func ok(cond: bool, what: String) -> void:
 	n += 1
@@ -57,6 +60,8 @@ func run(main_node: Node) -> void:
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
+	_buses()
+	await _big_event_duck(P)
 	_steps(m, P)
 	_shields(m, P)
 	await _glider(P, "yours")
@@ -65,6 +70,7 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
+	await _loudness(m)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -183,6 +189,61 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(P.ak)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+
+## Each kind of sound plays on its own bus, set up in one place (SfxMix.BUSES).
+func _buses() -> void:
+	for bn in SfxMix.BUSES:
+		var bi := AudioServer.get_bus_index(bn)
+		var to := StringName(SfxMix.BUSES[bn])
+		ok(bi > 0 and AudioServer.get_bus_send(bi) == to, "bus %s sends to %s" % [bn, to])
+	var want := {"kin_happy": "Boki", "click": "UI", "ashwick_hurt": "Voice", "v_brute": "Voice", "rifle": "SFX"}
+	for sname in want:
+		ok(Sfx.mix.bus_for(sname, false, false) == StringName(want[sname]), "%s plays on %s" % [sname, want[sname]])
+	ok(Sfx.mix.bus_for("kin_happy", false, true) == &"SFXFar", "a far sound of any kind is low-passed")
+	ok(Sfx.mix.bus_for("kin_happy", true, true) == &"SFXMuffled", "...and one behind terrain through the muffled one")
+
+## A rival's ult tag dips Music and Ambience together by about 6 dB, and they are back within the recovery;
+## your own team's tag does not dip them.
+func _big_event_duck(P: Hunter) -> void:
+	var r: Dictionary = Sfx.mix.rules["big_event"]
+	Sfx.last_played.clear()
+	Sfx.play("ult_tag_foe", P.pos)
+	await main.get_tree().create_timer(float(r["in_s"]) + 0.1).timeout
+	var amb_fx := AudioServer.get_bus_effect(AudioServer.get_bus_index("Ambience"), 0) as AudioEffectAmplify
+	var dip := Sfx.mix.event_db()
+	ok(dip <= -5.0 and dip >= -7.0 and is_equal_approx(amb_fx.volume_db, dip),
+			"a rival's ult dips Music and Ambience about 6 dB (%.1f / %.1f dB)" % [dip, amb_fx.volume_db])
+	await main.get_tree().create_timer(float(r["hold_s"]) + float(r["recover_s"]) + 0.1).timeout
+	var back := Sfx.mix.event_db()
+	ok(back > -0.2 and amb_fx.volume_db > -0.2, "...and they are back after %.1f s (%.2f dB)" % [r["recover_s"], back])
+	Sfx.play("ult_tag_ally", P.pos)
+	await main.get_tree().create_timer(0.2).timeout
+	ok(Sfx.mix.event_db() > -0.2, "your own team's ult tag does not dip them")
+
+## The match runs on its own for LOUD_S; each bus's peak meter (max and mean, dBFS) is reported. Only the
+## master limiter is asserted (nothing past its ceiling); the levels are for reading.
+func _loudness(m: Match) -> void:
+	var names: Array = ["Master"] + SfxMix.BUSES.keys()
+	var top := {}
+	var sum := {}
+	var frames := 0
+	m.set_process(true)
+	var until := Time.get_ticks_msec() + int(LOUD_S * 1000.0)
+	while Time.get_ticks_msec() < until:
+		await main.get_tree().process_frame
+		frames += 1
+		for bn in names:
+			var bi := AudioServer.get_bus_index(bn)
+			var pk := maxf(AudioServer.get_bus_peak_volume_left_db(bi, 0),
+					AudioServer.get_bus_peak_volume_right_db(bi, 0))
+			top[bn] = maxf(float(top.get(bn, -200.0)), pk)
+			sum[bn] = float(sum.get(bn, 0.0)) + db_to_linear(pk)
+	m.set_process(false)
+	for bn in names:
+		var mean := linear_to_db(maxf(sum[bn] / frames, 1e-10))
+		print("MATCHAUDIO BUS %-8s max %6.1f dBFS  mean %6.1f dBFS" % [bn, top[bn], mean])
+	var peak := float(top["Master"])
+	ok(peak <= 0.0, "a match capture (%.0f s) stays under full scale on the master (%.1f dBFS)" % [LOUD_S, peak])
 
 ## Footsteps by distance, both the foot's contact step and the surface step (Juice.footstep).
 func _steps(m: Match, P: Hunter) -> void:

@@ -205,7 +205,6 @@ func finish() -> int:
 	_fall(at, what)
 	if h.fx:
 		h.fx.dust(at, 14)
-		h.fx.word(at + Vector3(0, 1.4, 0), "+%d %s" % [n, td["mat"]], Color(td["col"]).lightened(0.3))
 	Sfx.play("tree_down" if what == "tree" else "rock_break", at, -4.0, 0.08)
 	Sfx.play("pickup", at, -8.0, 0.1, 1.1)
 	h._refresh_top()

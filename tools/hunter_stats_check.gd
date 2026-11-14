@@ -65,9 +65,10 @@ func _play() -> void:
 	ok(HunterStats.per_match(_row_of("ostra")) == "-", "an empty row shows a dash for damage per match")
 	ok(HunterStats.cells(t)[0] == "All Hunters" and HunterStats.cells(a)[0] == Arch.label("archer"), "row labels")
 
-## A v14 save: Hunters it counted get a match count (their escapes, at least 1); empty ones stay empty.
+## A v14 save (through every step to v20, HunterStats is 19 -> 20): Hunters it counted get a match count (their
+## escapes, at least 1); empty ones stay empty.
 func _migrate() -> void:
-	ok(Save.VERSION >= 15 and Save.MIGRATIONS.get(14, "") == "_migrate_14_to_15", "a 14 -> 15 step exists")
+	ok(Save.VERSION >= 20 and Save.MIGRATIONS.get(19, "") == "_migrate_19_to_20", "a 19 -> 20 step exists")
 	var data := Save.fresh()
 	data["v"] = 14
 	data["classes"]["hunters"] = {"archer": {"extracts": 4, "knocks": 9}, "juggernaut": {"knocks": 1}, "mage": {}}

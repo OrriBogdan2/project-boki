@@ -38,7 +38,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	H.armor_lerp = move_toward(H.armor_lerp, af, dt * (0.5 if H.armor_lerp > af else 4.0))
 	H.hover_spots.append([Rect2(Vector2(x0, y0 - 20), Vector2(w, 52)), "vitals"])
 	# the numbers: health big, max small; armour and its tier on the right
-	var hp_col := HudStyle.hp_fill(SideColor.you(), frac, H.m.time)
+	var hp_col := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
 	var hp_txt := str(int(ceil(p.hp)))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
 	var hw := HudStyle.BIG.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x
@@ -51,6 +51,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
 		var tw := HudStyle.BIG.get_string_size(tn, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 		HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
+	ArmorHud.note(H, Vector2(x0, y0 - 26))
 	# health: thick, segmented, the chip and flash shared with your overhead plate
 	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
 	H._rounded(hr.grow(2.0), HudStyle.SHADE, 4)

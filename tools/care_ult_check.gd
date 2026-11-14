@@ -65,7 +65,7 @@ func tender() -> void:
 	var ring: Dictionary = AimKit.entry(P, "x")
 	var aiming := K.hearth_call.is_empty() and AimKit.shown(P, "x_line") and AimKit.shown(P, "x_pick")
 	ok("mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them", aiming
-		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05)
+		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05 and ring.get("col") == AimKit.hero_col(P))
 	# --- X: the tether starts, cooldown runs, the cast move; no bond for the cast alone
 	var calls0 := int(K.stats["calls"])
 	_press(P, m)
@@ -78,6 +78,7 @@ func tender() -> void:
 	ok("mm X: no bond is paid for the cast alone", _bond_kind(K) == "", _bond_kind(K))
 	# --- the channel: she walks, the tether shows, the ring is shown to everyone, the teammate heals
 	var p0 := P.pos
+	var pluses0 := int(HeroVfx.of(m).plays.get("call_plus", 0))
 	P.inp["move"] = Vector2(-1, 0)
 	step(m, 1.5)
 	P.inp["move"] = Vector2.ZERO
@@ -89,6 +90,10 @@ func tender() -> void:
 	ok("mm X: the tether is an arc, its middle bowed well off the straight hand-to-ally line", _tether_bowed(K, A),
 		"bow %.1f m" % _tether_bow(K, A))
 	ok("mm X: the tether heals the teammate", A.hp > a_hp0 + 5.0, "%.0f -> %.0f" % [a_hp0, A.hp])
+	var pluses := int(HeroVfx.of(m).plays.get("call_plus", 0)) - pluses0
+	var rec: Dictionary = HeroVfx.data("tender")["moves"]["call_plus"]
+	ok("mm X: mint pluses rise off the teammate on each heal tick, sent to other games", pluses >= 2 and pluses <= 4
+		and bool(rec.get("net", true)) and String(rec["fx"][0]["c"]) == "mint", "%d in 1.5 s" % pluses)
 	# --- she can cast other things while it runs (wiki): Hearthlight goes up
 	P.inp["sig"] = true
 	step(m, 0.05)
@@ -175,7 +180,42 @@ func _tender_breaks() -> void:
 	ok("mm merge: drop_holds ends Hearth Call (no pull, no bond)", up and K.hearth_call.is_empty()
 		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and _bond_kind(K) == "")
 	await _free(m)
+	await _tender_needs_ally()
 	await _tender_cancels()
+
+
+## The source's channel needs an ally or ally Wisp: with nobody in reach X does nothing, the cooldown is
+## kept and the press is refused (the X tile's denied pulse), for a player and for a bot; with one it casts.
+func _tender_needs_ally() -> void:
+	var r: Array = sc.setup("tender", 14.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var K: TenderKit = P.ak
+	var calls0 := int(K.stats["calls"])
+	A.out = true
+	sc.aim_at(P, P.pos)
+	ok("mm X alone: no teammate in the match, no target (not herself)", K.call_target() == null)
+	ok("mm X alone: the press is refused, nothing runs, the cooldown is kept", not HunterKeys.ult_pressed(P)
+		and K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0 and int(K.stats["calls"]) == calls0)
+	K._bot_call()
+	ok("mm X alone: a bot does not try it", K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.out = false
+	A.teleport(P.pos + Vector3(-16.0, 0, 0))
+	sc.aim_at(P, A.pos)
+	step(m, 0.1)
+	ok("mm X ally out of range: no target, the press is refused, the cooldown is kept", K.call_target() == null
+		and not HunterKeys.ult_pressed(P) and K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.hp = A.max_hp * 0.2
+	K._bot_call()
+	ok("mm X ally out of range: a bot does not try it", K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.teleport(P.pos + Vector3(-6.0, 0, 2.0))
+	sc.aim_at(P, A.pos)
+	step(m, 0.1)
+	ok("mm X ally in range: the target is the teammate", K.call_target() == A)
+	ok("mm X ally in range: the press casts and the cooldown starts", HunterKeys.ult_pressed(P)
+		and not K.hearth_call.is_empty() and K.hearth_call["who"] == A and float(K.cd["x"]) > 40.0)
+	await _free(m)
 
 
 ## The source's cancels, one case each: she is stunned, she is knocked, she dies, the teammate dies cancel
@@ -261,8 +301,8 @@ func rimewright() -> void:
 		"rimes +%d" % (int(K.stats["rimes"]) - rimes0))
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
-	ok("tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone, the cast move",
-		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 8.3) < 0.05
+	ok("tm X: sealed in, the 7.47 m rink (4 bh + 15%, then -10% on owner 11-11) shown to everyone, the cast move",
+		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.47) < 0.05
 		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
 	_rime_ring_is_hit(K, T, ring, float(xd["radius"]))
 	var rink_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override

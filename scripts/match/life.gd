@@ -30,6 +30,7 @@ const R := {
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
 }
 
+const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map and its label
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
 const OWNER_TINT := 0.6               # how far the body leans to the owner's colour (0..1)
 const OWNER_RING_M := 2.4             # metres across the owner's ring round a box
@@ -149,9 +150,8 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
-	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"))
+		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
@@ -159,7 +159,6 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	trace(m, "stomp end %s (%s)" % [h.pname, why])
 	h.stomp = {}
 	if why == "broken":
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
 		m.sfx("whoosh", h.pos, -6.0, 1.3)
 
 ## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
@@ -283,7 +282,7 @@ static func owner_col(m: Match, b: Dictionary) -> Color:
 	var o: Hunter = b["owner"]
 	if m.player != null and o.team == m.player.team:
 		return m.mate_col(o)
-	return SideColor.foe()
+	return RIVAL_BOX
 
 ## The box's body takes its owner's colour and a ring round it, so whose box it is reads at a glance
 ## (the beam and trim keep the value colour).
@@ -354,6 +353,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 
 ## Takes one thing out of a box. Swapping gear leaves yours in the box in its place.
 static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> void:
+	var swapped := false      # something of yours went into the box in its place (the swap cue)
 	match String(it["key"]):
 		"gems":
 			h.gems += int(b["gems"]); b["gems"] = 0
@@ -401,6 +401,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				h.refresh_gear()
 				if not old.is_empty():
 					(b["gear"] as Array).append(old)
+					swapped = true
 		"pack":
 			# into your backpack; a full one swaps out its least valuable thing (that goes in the box)
 			var pi := int(it["i"])
@@ -415,9 +416,15 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					(b["pack"] as Array).append(h.pack[li])
 					h.pack.remove_at(li)
 					h.pack.append(pit)
+					swapped = true
 				elif h == m.player and m.hud:
 					m.hud.toast_small("Pack full", Color("ffb0a0"))
-	m.sfx("pickup", b["pos"], -4.0, 0.9)
+	if h != m.player:
+		m.sfx("pickup", b["pos"], -4.0, 0.9)
+	elif swapped:
+		InvSfx.swap()
+	else:
+		InvSfx.take()
 	_settle_box(b)
 
 ## Smart loot (press interact again with a box open): every gem, seed, kin and consumable, and the

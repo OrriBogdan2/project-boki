@@ -30,6 +30,10 @@ func _cases() -> Array:
 	var beside := func(P: Hunter, T: Hunter):
 		T.teleport(T.pos + Vector3(-1.0, 0, 1.5))
 		aim_at(P, P.pos + Vector3(9.0, 0, 0))
+		# a wall 10 m out on the cast line: the Burr only blasts where it sticks on one (vex-rmb-1111, else a dud)
+		var W: World = P.m.world
+		for dz in [-1, 0, 1]:
+			W.kind[W.idx(int(floor(P.pos.x + 10.0)), int(floor(P.pos.z)) + dz)] = World.T_BLOCK
 	var second_x := func(P: Hunter, t: float):
 		if t >= 0.9 and t < 0.95:
 			HunterKeys.ult_pressed(P)
@@ -125,7 +129,7 @@ func _case(c: Dictionary) -> void:
 
 ## How much nearer to the hostile rim colour the ground telegraphs draw for a rival of their owner than
 ## for an ally of theirs (mean over the vertices of what only `all` entries draw). AimDraw tints an `all`
-## entry toward Feel.RIM_ENEMY for the other team.
+## entry toward SideColor.HOSTILE for the other team.
 func _rival_gain(m: Match, P: Hunter, T: Hunter) -> float:
 	var d: AimDraw = AimKit.layer(m)
 	var team := T.team
@@ -133,7 +137,7 @@ func _rival_gain(m: Match, P: Hunter, T: Hunter) -> float:
 		d.rebuild()
 		var sum := 0.0
 		for c in d.geo.c:
-			sum += absf(c.r - Feel.RIM_ENEMY.r) + absf(c.g - Feel.RIM_ENEMY.g) + absf(c.b - Feel.RIM_ENEMY.b)
+			sum += absf(c.r - SideColor.HOSTILE.r) + absf(c.g - SideColor.HOSTILE.g) + absf(c.b - SideColor.HOSTILE.b)
 		return sum / maxf(1.0, d.geo.c.size())
 	m.player = T
 	T.team = P.team

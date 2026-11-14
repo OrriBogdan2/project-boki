@@ -14,6 +14,8 @@ extends RefCounted
 ##   9. every drawn HUD block, the tip card and the top strips sit inside the HudStyle safe margin
 ##   9. an ally's Hearth Call on you: a slim bar with Meeko's portrait under your vitals, draining over the
 ##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
+##   9. the squad frames (SquadFrames): a row each, you last; knocked shows its bleed-out and the ally
+##      ping pops in; dead shows no bars; a 2-player squad gets two rows; solo none
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -180,7 +182,7 @@ func run(main_node: Node) -> void:
 		"each of the %d teammates' squad rows draws its Boki icon" % mates.size())
 	if mates.size() >= 1:
 		var mate: Hunter = mates[0]
-		var chip: int = TeamBoki.levels.get(mate.nid, -1)
+		var chip: int = SquadFrames.levels.get(mate.nid, -1)
 		ok(chip == mate.lvl, "a squad row carries the teammate's level chip (%d vs %d)" % [chip, mate.lvl])
 		mate.downed = false        # (the demo downs one rival)
 		mate.kin.hp = mate.kin.max_hp * 0.5
@@ -213,6 +215,7 @@ func run(main_node: Node) -> void:
 	_check_deny(P)
 	await _check_ult(P)
 	_check_safe(hud)
+	await _frames(m, hud, P)
 	_done()
 
 ## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap
@@ -526,6 +529,43 @@ func _channel(m: Match, hud, P: Hunter) -> void:
 	ok(ChannelBar.shown.is_empty(), "Meeko knocked down mid-channel: gone that frame")
 	M.downed = false
 	M.remote = false
+
+## 9. The squad frames follow the match: knocked, dead, squad size, solo.
+func _frames(m: Match, hud, P: Hunter) -> void:
+	var mate: Hunter = m.hunters.filter(func(x): return x != P and x.team == P.team)[0]
+	mate.downed = false
+	m.knock(mate, m.hunters.filter(func(x): return x.team != P.team)[0], {})
+	await main.get_tree().process_frame
+	await hud.panels.draw
+	var squad: Array = m.hunters.filter(func(x): return x.team == P.team)
+	var mine: Dictionary = SquadFrames.shown.get(P.nid, {})
+	ok(SquadFrames.shown.size() == squad.size() and int(mine.get("row", -1)) == squad.size() - 1,
+		"a row per squad member (%d), you last (row %d)" % [SquadFrames.shown.size(), int(mine.get("row", -1))])
+	var row: Dictionary = SquadFrames.shown.get(mate.nid, {})
+	var knocked_for := m.time - float(hud.mates.since.get(mate.nid, -99.0))
+	ok(row.get("state", "") == "WISP" and float(row.get("bleed", 0.0)) > 0.0 and knocked_for < 5.0,
+		"the knocked teammate's row shows their bleed-out (%s) and the ping has its knock time" % str(row))
+	mate.out = true
+	mate.gone = true
+	await hud.panels.draw
+	row = SquadFrames.shown.get(mate.nid, {})
+	ok(row.get("state", "") == "DEAD" and float(row.get("hp", 1.0)) == 0.0 and float(row.get("bleed", 1.0)) == 0.0,
+		"a dead teammate's row shows DEAD and no bars (%s)" % str(row))
+	var teams := {}
+	for h in squad:
+		teams[h] = h.team
+	var others: Array = squad.filter(func(x): return x != P and x != mate)
+	for h in others:
+		h.team = 99
+	await hud.panels.draw
+	ok(SquadFrames.shown.size() == 2, "a 2-player squad gets two rows (%d)" % SquadFrames.shown.size())
+	mate.team = 99
+	await hud.panels.draw
+	ok(SquadFrames.shown.is_empty(), "solo: no squad frames (%d rows)" % SquadFrames.shown.size())
+	for h in squad:
+		h.team = teams[h]
+	mate.out = false
+	mate.gone = false
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

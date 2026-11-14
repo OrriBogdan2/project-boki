@@ -624,10 +624,8 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	ensure(baby)
 	baby["gifts"] = Parentage.gifts(a, b, baby, _inherit_habits(baby, a, b, rng))
 	if UnstableMix.unstable(a, b): UnstableMix.mark(baby)
-	var lean := stronger(a, b).get("lean", {}) as Dictionary
-	if not lean.is_empty():
-		baby["lean"] = {}
-		for el in lean: baby["lean"][el] = float(lean[el]) * LEAN_HEAD_START
+	var lean := head_start(a, b)
+	if not lean.is_empty(): baby["lean"] = lean
 	return baby
 
 ## How much a kin leans toward an element in all (rec["lean"]; older records have none: 0).

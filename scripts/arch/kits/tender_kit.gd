@@ -15,7 +15,13 @@ const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's 
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 const CALL_LOOP_DB := -2.0         # dB: the Hearth Call channel loop on her
 const CALL_LOOP_ALLY_DB := -7.0    # dB: the same loop on the ally, this much quieter
+# Zone discs are a lit rim and a soft inside (docs/VFX_QUALITY.md): the disc shader's centre alpha is fill * a * 0.29
+# (1 step of its 4 cel bands = 0.25), so these keep a foe standing in the middle readable.
+const SEED_FILL := 0.8        # the seed's burst disc, drawn at a 1.0 (centre 0.23)
+const THROWN_FILL := 0.75     # the thrown Hearthlight, drawn at up to 1.1
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
+const SEED_OUT := 0.8          # m ahead of her the Burrseed leaves: past her pushing hands, its halo clear of her body
+const SEED_UP := 0.72          # m up it leaves: hand height (as the embers), not her head
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
@@ -142,17 +148,6 @@ func _tick_look(dt: float) -> void:
 		var s := lk().last_shot()
 		if not s.is_empty() and String((s["x"] as Dictionary).get("src", "")) != "abil":
 			_dress_ember(s)
-	# Kindle reads on the foe: an ember-violet glow at the feet that grows per stack
-	for key in kind:
-		var e: Dictionary = kind[key]
-		var n := kindle_on(e["t"])
-		if n > 0:
-			var t: Ent = e["t"]
-			lk().keep(
-					"kin%d" % key, "kindle", t.pos,
-					{
-						"r": 0.55 + 0.12 * n, "col": Color("9a6aff").lerp(Color("ffb347"), float(n) / 5.0),
-						"a": 0.35 + 0.13 * n, "fill": 0.8, "pattern": 0.0})
 	_tick_dash_look(dt)
 	lk().tick(dt)
 	if ult_look != null:
@@ -216,7 +211,7 @@ func carrying() -> Array:
 	return CareUtil.carried_of(m, h)
 
 func can_pick() -> bool:
-	return lock_t <= 0.0 and h.stun_t <= 0.0 and h.root_t <= 0.0 and not busy() and not Hex.active(h)
+	return lock_t <= 0.0 and h.stun_t <= 0.0 and not busy()
 
 func _tick_carry(dt: float) -> void:
 	var pd: Dictionary = d["passive"]
@@ -247,7 +242,7 @@ func _tick_carry(dt: float) -> void:
 			break
 		pick_up(o)
 
-## Taking damage drops whoever you carry, with the lock.
+## Any damage drops whoever you carry, with the lock (data: "too much damage", no figure; the shield is cut).
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.0 and not carrying().is_empty():
 		drop_all(true)
@@ -338,8 +333,8 @@ func _tick_glide(dt: float) -> void:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
 
 # ------------------------------------------------------------------ RMB: Burrseed
-## Owner items 118 and 23 (11-08): a press starts a short fixed wind-up (`windup`, Darkside Binding's quick
-## cast) that nothing extends: she slows (`wind_move`) and a short dotted lane follows the aim. The seed then
+## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
+## (`wind_move`) and a short dotted lane follows the aim; nothing is drawn at her feet. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
 ## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
@@ -394,7 +389,7 @@ func _throw_seed() -> void:
 	play("mm_seed")
 	var sd: Dictionary = rmb_def()["seed"]
 	var dir := h.aim_dir()
-	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
+	var start := Vector3(h.pos.x + dir.x * SEED_OUT, h.pos.y + SEED_UP, h.pos.z + dir.y * SEED_OUT)
 	var life := AimMode.dist(h, float(sd["range"]), AimMode.MAX) / float(sd["speed"])
 	var on_hit := func(_s: Dictionary, _at: Vector3, e: Ent, _why: String):
 		if e != null and e.team != h.team and not e.dead:
@@ -407,7 +402,7 @@ func _throw_seed() -> void:
 	lk().skin(s, "burr")
 	if not s.is_empty():
 		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
-	vfx("seed_cast", null, dir)          # the cast flare from her lantern, riding her hop (footage: about 0.3 s up)
+	vfx("seed_cast", start, dir)         # the cast flare where the seed leaves her hands, not on her
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
@@ -415,6 +410,14 @@ func burst_radius() -> float:
 	var seed_def: Dictionary = rmb_def()["seed"]
 	var r3_k := float(seed_def.get("r3_k", 2.0))
 	return float(seed_def["burst_r"]) * (r3_k if rank("sec") >= 3 else 1.0)
+
+## Rank 3 (the source's tier IV): the burst takes "burst_ap_r3" times the ability power bonus the
+## hunter's level gives (1.0 at level 1, where there is none).
+func burst_ap_k() -> float:
+	var ap := LevelGrowth.ap(h)
+	if rank("sec") < 3:
+		return 1.0
+	return (1.0 + (ap - 1.0) * float(rmb_def()["seed"]["burst_ap_r3"])) / ap
 
 func _stick(e: Ent) -> void:
 	burr_n += 1
@@ -444,8 +447,8 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 2.2, "rim_w": 0.14,
-					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
+					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": SEED_FILL,
+					"rim_w": 0.14, "sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
 		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
 		ulk().keep(
@@ -474,7 +477,7 @@ func _burst(t: Ent) -> void:
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
 		f.hurt(
-				float(sd["burst_dmg"]) * power("sec"), h,
+				float(sd["burst_dmg"]) * power("sec") * burst_ap_k(), h,
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
@@ -572,11 +575,12 @@ func _tick_hearth(dt: float) -> void:
 	# on her: a filled warm disc with a wide bright edge (source: a big bright disc); thrown: warm amber in the
 	# middle shading to teal, a brighter fill, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
+	var own := AimKit.hero_col(h)
 	var look_p := {
-		"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
+		"r": hearth_r(), "col": own, "rim": own.lightened(0.3), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"fill": THROWN_FILL, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])
@@ -595,8 +599,10 @@ func _tick_hearth(dt: float) -> void:
 func throw_boost() -> float:
 	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
 
+## Hearthlight's healing: +15% a rank past the first, grown by the level's ability power (LevelGrowth.ap).
+## Healing by rank: the E row of rank_dmg (+22.5%, then +50%, the source's).
 func heal_k() -> float:
-	return 1.0 + 0.15 * float(maxi(0, rank("kin") - 1))
+	return rank_k("rank_dmg", "kin", 1.0) * LevelGrowth.ap(h)
 
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
@@ -688,12 +694,13 @@ func _call_preview() -> void:
 	if not hearth_call.is_empty() or not h.is_local() or not _x_ready():
 		return
 	var who := call_target()
-	if who == null or who == h:
+	if who == null:
 		return
 	var xd := x_def()
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 1.2})
-	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": Color("ffb347"), "lw": 0.1, "alpha": 1.8})
-	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true, "alpha": 1.6})
+	var own := AimKit.hero_col(h)
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": own, "dashed": true, "alpha": 1.2})
+	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": own, "lw": 0.1, "alpha": 1.8})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": own, "ticks": true, "alpha": 1.6})
 	# a faint tether already strung from her raised hand onto them: this is who X will reach
 	ulk().keep("tether_aim", "tether", h.pos + Vector3(0, 1.3, 0), {"b": who.pos + Vector3(0, 1.0, 0), "a": 0.45})
 
@@ -703,24 +710,20 @@ func _x_ready() -> bool:
 	return HeroUlt.ready(self) and not busy()
 
 
-## The teammate under the cursor within reach (standing or downed); with no teammate in the match at
-## all, herself (so the key is never dead in solo play).
+## The teammate (or downed teammate, the source's ally Wisp) under the cursor within reach; null when there
+## is none, and X then does nothing (CareUtil.mates leaves out herself).
 func call_target() -> Hunter:
 	var xd := x_def()
 	var aim_p: Vector3 = h.inp.get("aim", h.pos)
 	var best: Hunter = null
 	var best_d := float(xd["pick_r"])
-	var any_mate := false
 	for o in CareUtil.mates(m, h):
-		any_mate = true
 		if h.flat_dist(o) > float(xd["range"]):
 			continue
 		var dc := Vector2(o.pos.x - aim_p.x, o.pos.z - aim_p.z).length()
 		if dc < best_d:
 			best_d = dc
 			best = o
-	if best == null and not any_mate and bool(xd.get("self_when_solo", true)):
-		return h
 	return best
 
 
@@ -735,8 +738,6 @@ func _start_call() -> bool:
 		ult_look.drop("tether_aim")
 	var who := call_target()
 	if who == null:
-		if h.is_local() and m.hud:
-			m.hud.toast_small("No teammate there", Color("a2a8bb"))
 		return false
 	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
@@ -781,6 +782,7 @@ func _tick_call(dt: float) -> void:
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
+	vfx("call_plus", who.pos)           # a couple of mint pluses rise off whoever the tether heals
 	if who == h:
 		_mend(h, amt)
 	else:
@@ -789,18 +791,13 @@ func _call_heal(who: Hunter, amount: float) -> void:
 
 func _call_look(who: Hunter, dt: float) -> void:
 	var xd := x_def()
-	var gold := Color("ffd27a")
-	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
-	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
-	if who != h:
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
-		var hand := CareUtil.hand_at(h, false)
-		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
+	var own := AimKit.hero_col(h)
+	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": own, "all": true, "dashed": true})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": own, "all": true})
+	ulk().keep("tether", "tether", CareUtil.hand_at(h, false), {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
 	if float(hearth_call["fx"]) <= 0.0:
 		hearth_call["fx"] = 0.22
-		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
-		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
 
 
 ## The end: on time, a downed teammate is pulled to her side and stood up (a rescue), and the bond pays;
@@ -809,7 +806,7 @@ func _call_end(done: bool) -> void:
 	var who: Hunter = hearth_call["who"] if is_instance_valid(hearth_call.get("who")) else null
 	hearth_call = {}
 	_call_loops_stop()
-	for id_ in ["x", "x_me", "x_pick", "x_line"]:
+	for id_ in ["x", "x_pick", "x_line"]:
 		AimKit.hide(h, id_)
 	if ult_look != null:
 		ult_look.drop("tether")
@@ -819,7 +816,7 @@ func _call_end(done: bool) -> void:
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
-	var rescue := who != h and who.downed
+	var rescue := who.downed
 	if rescue:
 		_call_home(who)
 	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event

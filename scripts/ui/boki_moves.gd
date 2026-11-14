@@ -50,9 +50,9 @@ func _init(species: String, rec := {}) -> void:
 ## When it goes off: its first ability on its own once it is out, the others on their own cue.
 func _when(ad: AbilitySpec, slot: String) -> String:
 	if slot == "k1":
-		return "Uses it on its own once you send it out (%s)" % Settings.key_cap("throw")
+		return "The Boki uses it by choice once you send the Boki out (%s)" % Settings.key_cap("throw")
 	var w := KinText.when(ad)
-	return w if w != "" else "Uses it on its own"
+	return w if w != "" else "The Boki uses it by choice"
 
 func _add(nm: String, icon: String, col: Color, lines: Array, bond: bool) -> void:
 	var t := PanelContainer.new()

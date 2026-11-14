@@ -3,6 +3,9 @@ extends RefCounted
 ## What a shroud wears on top of its cut: the trim along its edges (geometry, so a pattern costs no texture) and the
 ## accessory. Both take the accent colour through the model's trim material.
 
+const LANTERN_CORE := 0.03     # m: the glow-coloured light inside the lantern's cage
+const LANTERN_MID := 0.11      # m: from the lantern's hook down to the middle of its cage
+
 ## Each cut's edges wear a band in the accent colour; the pattern adds small marks along it.
 static func trim(t: ShroudTailor, kind: int) -> void:
 	if t.cached:
@@ -106,9 +109,8 @@ static func _pouches(t: ShroudTailor, fit: Dictionary) -> void:
 static func _satchel(t: ShroudTailor, fit: Dictionary) -> void:
 	t.rigid(t.torso, _strap(t, "sat", fit, 1.0, 0.05), t.m["leather"])
 	var r := float(fit["waist"]) + 0.05
-	var at := Vector3(-r, -0.02, 0.05)
-	t.rigid(t.torso, Models.box(0.1, 0.2, 0.26), t.m["leather"], at)
-	t.rigid(t.torso, Models.box(0.11, 0.09, 0.27), t.m["trim"], at + Vector3(0, 0.07, 0))
+	var side := Vector3(0, -PI * 0.5, 0)      # the bag's face turned out from the hip
+	LookProps.wear(t.torso, "satchel", t.m["leather"], Vector3(-r, -0.02, 0.05), side)
 
 static func _charm(t: ShroudTailor, fit: Dictionary) -> void:
 	var cr := float(fit["chest"]) + 0.015
@@ -124,12 +126,10 @@ static func _lantern(t: ShroudTailor, fit: Dictionary) -> void:
 	_belt(t, fit)
 	var r := float(fit["waist"]) + 0.03
 	var skirt: Node3D = t.c["skirt"]
-	var at := Vector3(r + 0.05, -0.14, -0.04)
+	var hook := Vector3(r + 0.05, -0.03, -0.04)
 	t.rigid(skirt, Models.box(0.09, 0.03, 0.02), t.m["leather"], Vector3(r + 0.02, -0.02, -0.04))
-	t.rigid(skirt, Models.cyl(0.008, 0.008, 0.06, 5), t.m["leather"], at + Vector3(0, 0.09, 0))
-	t.rigid(skirt, Models.sphere(0.052, 8), t.m["glow"], at)
-	t.rigid(skirt, Models.cyl(0.05, 0.062, 0.024, 8), t.m["leather"], at + Vector3(0, 0.07, 0))
-	t.rigid(skirt, Models.cyl(0.062, 0.05, 0.018, 8), t.m["leather"], at + Vector3(0, -0.07, 0))
+	LookProps.wear(skirt, "lantern", t.m["leather"], hook, Vector3(0, PI, 0))
+	t.rigid(skirt, Models.sphere(LANTERN_CORE, 8), t.m["glow"], hook - Vector3(0, LANTERN_MID, 0))
 
 static func _bandolier(t: ShroudTailor, fit: Dictionary) -> void:
 	t.rigid(t.torso, _strap(t, "ban", fit, -1.0, 0.075), t.m["leather"])

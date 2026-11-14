@@ -10,8 +10,10 @@ const SPEED := 0.08          # +8% move speed (the Hunter "move_speed" buff)
 const MEND_PER_S := 1.0      # hp/s of self-heal once REGEN_WAIT has passed without a hit
 const BUFF_HOLD := 0.3       # s each tick's speed buff lasts (renewed every step, gone shortly after the end)
 const NODE := "LastAura"
-const SHELL_R := 0.95        # m, the soft body glow
-const SHELL_A := 0.2         # peak opacity of that glow
+const SHELL_R := 0.75        # m, the body-hugging rim (a capsule around the hunter)
+const SHELL_A := 0.95        # peak opacity of the rim at the silhouette
+const POOL_R := 1.3          # m, the lit pool and ring on the ground
+const AURA: Shader = preload("res://shaders/last_aura.gdshader")
 const PULSE_HZ := 0.8
 
 ## Is `h` the last one up on a squad that started with a teammate?
@@ -55,11 +57,14 @@ static func _glow(m: Match, h: Hunter, on: bool) -> bool:
 	if fresh:
 		n = Node3D.new()
 		n.name = NODE
-		var glow := Models.glow_mat(Color(col, SHELL_A))
-		var shell := Models.part(n, Models.sphere(SHELL_R, 12), glow, Vector3(0, 0.95, 0), Vector3(0.8, 1.2, 0.8))
+		var rim_mat := ShaderMaterial.new()
+		rim_mat.shader = AURA
+		rim_mat.set_shader_parameter("color", Color(col, SHELL_A))
+		var shell := Models.part(n, Models.capsule(SHELL_R, 2.2), rim_mat, Vector3(0, 1.05, 0))
 		shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var ring := Models.part(n, Models.flat_quad(2.2), Models.ring_mat(Color(col, 0.9), 0.07), Vector3(0, 0.06, 0))
-		ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var pool_mat := Models.ring_mat(Color(col, 0.9), 0.08)
+		var pool := Models.part(n, Models.flat_quad(POOL_R * 2.0), pool_mat, Vector3(0, 0.06, 0))
+		pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		h.add_child(n)
 	n.scale = Vector3.ONE * (1.0 + 0.06 * sin(m.time * TAU * PULSE_HZ))
 	return fresh

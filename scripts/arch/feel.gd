@@ -14,8 +14,7 @@ const CAT := {
 	"utility": Color("5fd8ff"),
 }
 const CAT_ORDER := ["control", "damage", "sustain", "utility"]
-## §5.2 allegiance: rim says whose it is (the hostile tint is SideColor.rim()).
-const RIM_OWN := Color(1, 1, 1, 0.9)
+## §5.2 allegiance (whose it is) is SideColor's: SideColor.fx leans a look, SideRings edges a body.
 
 static func cat_color(cat: String) -> Color:
 	return CAT.get(cat, Color("e8f4ff"))

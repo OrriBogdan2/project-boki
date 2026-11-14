@@ -5,6 +5,11 @@ extends Node
 signal changed(key: String)
 
 const PATH := "user://settings.cfg"
+## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
+## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
+## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
+const UI_SCALE_MIN := 0.75
+const UI_SCALE_MAX := 1.1
 const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
@@ -27,7 +32,6 @@ const DEFAULTS := {
 	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false,
-	"colour_vision": "default",      # SideColor.ORDER
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
@@ -213,8 +217,6 @@ func _ready() -> void:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
-	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
-		v[SideColor.KEY] = "default"      # missing in older files, or a palette that is gone
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
@@ -346,11 +348,8 @@ func _apply_ui_scale() -> void:
 	var win := Vector2(get_tree().root.size)
 	if win.x < 10.0 or win.y < 10.0:
 		return
-	var user := clampf(float(v.get("ui_scale", 1.0)), 0.75, 1.5)
-	var fit := minf(win.y / 720.0, win.x / 1240.0)
-	var f := user * fit
-	# never let the user's own size setting push the layout past the window either
-	f = minf(f, minf(win.y / 640.0, win.x / 1100.0))
+	var user := clampf(float(v.get("ui_scale", 1.0)), UI_SCALE_MIN, UI_SCALE_MAX)
+	var f := user * minf(win.y / 720.0, win.x / 1240.0)
 	if absf(get_tree().root.content_scale_factor - f) > 0.001:
 		get_tree().root.content_scale_factor = f
 
@@ -585,25 +584,24 @@ func binding_text(action: String) -> String:
 		if c != "": names.append(code_text(c))
 	return " / ".join(names) if names.size() > 0 else "unbound"
 
-## Short cap text for the mouse buttons (code_text has the long names for the Controls page). No spaces,
-## so a row of caps (UI.key_hints) never splits one into two.
-const MOUSE_CAPS := {1: "LMB", 2: "RMB", 3: "MMB", 4: "WHEEL-UP", 5: "WHEEL-DN", 8: "M4", 9: "M5"}
-
-## One saved binding ("key:70", "mouse:8") as a cap: "F", "SPACE", "M4", "WHEEL-UP".
-func cap_text(code: String) -> String:
-	var parts := code.split(":")
-	if parts.size() != 2: return "?"
-	if parts[0] == "key": return OS.get_keycode_string(int(parts[1])).to_upper().replace(" ", "")
-	return MOUSE_CAPS.get(int(parts[1]), "M%s" % parts[1])
-
 ## Both bindings, short ("R / X"), where a prompt has room for them.
 func key_caps(action: String) -> String:
 	var out: Array = []
 	for c in slots(action):
-		if c != "": out.append(cap_text(c))
+		if c == "": continue
+		var t := code_text(c)
+		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
+		out.append(t.to_upper() if c.begins_with("key:") else t)
 	return " / ".join(out) if out.size() > 0 else "?"
 
-## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
+## The first binding of an action, short, for HUD key caps ("E", "LMB").
 func key_cap(action: String) -> String:
 	var evs := InputMap.action_get_events(action)
-	return cap_text(ev_code(evs[0])) if not evs.is_empty() else "?"
+	if evs.is_empty():
+		return "?"
+	var e: InputEvent = evs[0]
+	if e is InputEventKey:
+		return OS.get_keycode_string((e as InputEventKey).physical_keycode).to_upper()
+	if e is InputEventMouseButton:
+		return {1: "LMB", 2: "RMB", 3: "MMB", 8: "M4", 9: "M5"}.get((e as InputEventMouseButton).button_index, "M%d" % (e as InputEventMouseButton).button_index)
+	return "?"
