@@ -2,7 +2,8 @@ extends RefCounted
 ## --xp-share-check: a monster's XP goes to the Hunter who lands the last hit and to their squadmates
 ## within KillXp.SHARE_R of the kill, nothing for damage alone. A squad that deals 95% of a lair boss
 ## and loses the last hit to a rival gets no XP; the kill's other rewards (stat and gear) go to the
-## killer too, so the rival squad takes both. Never touches the save.
+## killer too, so the rival squad takes both. The two LastHitHint lines each show once: the squad's
+## first kill, and the first monster the player hurt that a rival finished. Never writes the save.
 
 var bad := 0
 var m: Match
@@ -63,14 +64,17 @@ func run(main: Node) -> void:
 		_spot(h, m.world.spawns[-1])
 	# ---- 1. a monster: last hit and squadmates in range
 	var want := 10.0 * KillXp.XP_PER_HP
+	var seen: Dictionary = Save.d["tutorial"]
+	ok(not seen.has(LastHitHint.KILL_FLAG) and not seen.has(LastHitHint.STOLEN_FLAG),
+		"a fresh save has seen neither kill hint")
 	ok(is_equal_approx(KillXp.SHARE_R, 30.0), "the share radius is 30 m")
 	_spot(P, spot)
 	_spot(C, spot + Vector3(25, 0, 0))
 	_kill(spot, [[P, 10.0]])
-	ok(
-		is_equal_approx(P.xp, want) and is_equal_approx(C.xp, want),
-		"killer and a squadmate at 25 m get the monster's XP in full (%.1f, %.1f of %.1f)" % [P.xp, C.xp, want]
-	)
+	ok(is_equal_approx(P.xp, want) and is_equal_approx(C.xp, want),
+		"killer and a squadmate at 25 m get the monster's XP in full (%.1f, %.1f of %.1f)" % [P.xp, C.xp, want])
+	ok(seen.get(LastHitHint.KILL_FLAG, false) and not seen.has(LastHitHint.STOLEN_FLAG),
+		"the squad's first kill shows the last-hit hint, not the stolen one")
 	_zero_xp()
 	_spot(C, spot + Vector3(40, 0, 0))
 	_kill(spot, [[P, 10.0]])
@@ -82,6 +86,16 @@ func run(main: Node) -> void:
 	ok(not big.dead and P.xp == 0.0 and C.xp == 0.0, "damage without the kill pays nothing")
 	m.mobs.erase(big)
 	big.queue_free()
+	_kill(spot, [[Q, 10.0]])
+	ok(not seen.has(LastHitHint.STOLEN_FLAG), "a rival's kill of a monster the player never hurt shows no hint")
+	_kill(spot, [[P, 9.0], [Q, 1.0]])
+	ok(seen.get(LastHitHint.STOLEN_FLAG, false), "a monster the player hurt and a rival finished shows the stolen hint")
+	_kill(spot, [[P, 10.0]])
+	_kill(spot, [[P, 9.0], [Q, 1.0]])
+	var shown: Array = m.hud.msgs.texts()
+	ok(LastHitHint.KILL_TEXT in shown and LastHitHint.STOLEN_TEXT in shown,
+		"each hint shows once on the hint card, a second kill of each kind adds nothing (%s)" % str(shown))
+	_zero_xp()
 	# ---- 2. a stolen last hit
 	_spot(Q, spot)
 	_spot(Q2, spot + Vector3(5, 0, 0))

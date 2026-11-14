@@ -2180,6 +2180,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KillXp.pay(self, mb, credit)
+	LastHitHint.kill(self, mb, credit)
 	if lairs: lairs.on_mob_dead(mb, credit)
 	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
@@ -5472,6 +5473,7 @@ func _net_ev(x, from: String) -> void:
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Mob and not who.dead:
 				who.dead = true
+				LastHitHint.kill(self, who, ents_by_id.get(String(x[2]), null))
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				MobSfx.death(self, who as Mob, false)
