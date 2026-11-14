@@ -102,7 +102,7 @@ func _fight(arch: String, rank: int, armoured: bool) -> Array:
 	P.dashes = P.max_dashes()
 	T.max_hp = OUR_HP
 	T.hp = OUR_HP
-	T.max_armor = round(OUR_HP * Hunter.ARMOR_DUR) if armoured else 0.0
+	T.max_armor = float(Hunter.ARMOR_TIERS[0][4]) if armoured else 0.0      # Common tier durability
 	T.armor = T.max_armor
 	return [r[0], P, T, T.pos]
 

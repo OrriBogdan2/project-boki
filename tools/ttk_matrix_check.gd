@@ -21,7 +21,7 @@ func run(main_node: Node) -> void:
 	for d in order:
 		var h: Hunter = (probe[0] as Match).make_hunter("D", 5, Arch.weight(d), d, "idle", {}, probe[4], {"arch": d})
 		var hp := float(Data.CLASSES[Arch.weight(d)]["hp"])
-		var armour: float = round(hp * Hunter.ARMOR_DUR)
+		var armour := float(Hunter.ARMOR_TIERS[0][4])      # Common tier durability
 		var own: bool = h.max_hp == hp and h.max_armor == armour
 		var what: String = "%s dummy: base health %d and armour %d are the Hunter's own" % [d, hp, armour]
 		ok(what, own, "%s/%s" % [h.max_hp, h.max_armor])
@@ -66,7 +66,7 @@ func _row(a: String, order: Array, mode: String, dist: float) -> Array:
 	var rows: Array = []
 	for d in order:
 		var hp := float(Data.CLASSES[Arch.weight(d)]["hp"])
-		rows.append(_time_to_down(r[0], r[1], r[2], mode, dist, hp, round(hp * Hunter.ARMOR_DUR)))
+		rows.append(_time_to_down(r[0], r[1], r[2], mode, dist, hp, float(Hunter.ARMOR_TIERS[0][4])))
 		if rows[-1][0] == INF: break      # (a mode that misses one defender misses them all)
 	while rows.size() < order.size(): rows.append([INF, 0])
 	await done(r[0])
