@@ -31,7 +31,7 @@ func _watch(k: Dictionary) -> void:
 	var vals := _values(rec)
 	var was: Array = _seen.get(uid, vals)
 	_seen[uid] = vals
-	if rec.get("aura", "") == "chimegrass" and float(vals.back()) - float(was.back()) >= JOY_RISE and not _asleep(k):
+	if rec.get("aura", "") == "chimegrass" and float(vals.back()) - float(was.back()) >= JOY_RISE and not asleep(k):
 		GardenAura.chime(k["node"])
 		GardenSfx.cue("garden_chime_level", k["pos"], AURA_PITCH * PITCH[GardenSfx.SIZE[Unique.size_tag(rec)]])
 	var top := -1
