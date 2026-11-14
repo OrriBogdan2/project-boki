@@ -1124,7 +1124,7 @@ func render(delta: float, alpha: float) -> void:
 	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
 	model.set_meta("starry", state in ["downed", "dazed"])      # a stun's stars are the shared look (StatusLooks)
 	if state in ["downed", "dazed"]:
-		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
+		body.rotation.z = lerpf(body.rotation.z, KinDowned.LIE_ROLL if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
