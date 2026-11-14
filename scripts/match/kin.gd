@@ -168,7 +168,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
-	ring.material_override = Models.ring_mat(Color(tc, 0.85), 0.16)
+	ring.material_override = SideRings.mat(Color(tc, 0.85), 0.16)
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ring.top_level = true
 	add_child(ring)
@@ -754,6 +754,7 @@ func _sim_fly(dt: float) -> void:
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
+			KinFollow.land_cue(self)
 			KinStrike.land(self, hit_set, charged)       # a thrown Boki staggers what it lands on (a charging mount harder)
 		if not land.is_empty():
 			m.fx.dust(pos, 14)
@@ -796,6 +797,7 @@ func _sim_fly_home(dt: float) -> void:
 			return
 		var merge_now: bool = fly.get("merge", false)
 		_hop_on()
+		KinFollow.land_cue(self, true)
 		if merge_now and not KinMerge.cast(owner_h):
 			owner_h.m.fx.burst(pos, sp["color"], 8, 2.0)     # (the merge was lost on the way: it just lands)
 
@@ -1120,6 +1122,7 @@ func render(delta: float, alpha: float) -> void:
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
 	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("starry", state in ["downed", "dazed"])      # a stun's stars are the shared look (StatusLooks)
 	if state in ["downed", "dazed"]:
 		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)

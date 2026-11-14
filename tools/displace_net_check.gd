@@ -33,6 +33,7 @@ var m: Match = null
 var home := Vector3.ZERO
 var replies: Array = []      # what the guest said back: {"c", "pos"}
 var stop := false
+var building := false        # the guest is building its match (the host says start until it hears from it)
 var stun_max := 0.0          # the longest stun seen on the watched body since its last place (guest: its own)
 var stun_on: Ent = null
 var watch: Ent = null         # the first tow on this body, as the host's mirror of it (seen)
@@ -91,10 +92,14 @@ func _host_up() -> Hunter:
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := CheckClock.own_msec(guest_pid)
+	var said := t1
 	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
 			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
+		if CheckClock.own_msec(guest_pid) - said > 3000:      # a slow guest may not have heard the first start: say it again
+			said = CheckClock.own_msec(guest_pid)
+			Net.lobby_emit("dn", {"c": "start", "d": d})
 	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
 	return G if G != null and G.net_t >= 0.0 else null
 
@@ -122,6 +127,7 @@ func _host() -> void:
 	await _glide_spike(G, B, _boki_spike, "a Boki spike")
 	ok(bool(early.get("shot", false)), "a Boki spike: the player is spiked on their own game within one snapshot",
 		"vy %.1f" % float(early.get("vy", 0.0)))
+	await _ally_safe(G)
 	_finish()
 
 func _finish() -> void:
@@ -362,6 +368,31 @@ static func _glide(T: Hunter, at: Vector3) -> void:
 	T.glide_cd = 0.0
 	T.shot_down = false
 
+## The same moves aimed at a teammate (the host's view of the guest is moved to its own team): no move is sent
+## over the relay and the guest's own game leaves it standing.
+func _ally_safe(G: Hunter) -> void:
+	var P := m.player
+	G.team = P.team
+	var moves := [["ashwick", Vector3(3.8, 0, 0), _cinder, 1.0, "Cinder's cloak pull"],
+		["mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag"],
+		["bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Albert's shield push"]]
+	for c in moves:
+		_kit(c[0])
+		var start: Vector3 = home + c[1]
+		await _place(G, start)
+		Displace.capture = true
+		Displace.sent.clear()
+		await c[2].call(G)
+		await _run(float(c[3]) + 0.6)
+		Displace.capture = false
+		var sent := Displace.sent.filter(func(e): return String(e[2]) == G.nid).size()
+		var own: Vector3 = await _ask()
+		var moved := Vector2(own.x - start.x, own.z - start.z).length()
+		ok(sent == 0 and moved < 0.3, "%s: a teammate on the guest's game is left alone" % c[4],
+			"sent %d, moved %.1f m" % [sent, moved])
+		P.teleport(home)
+		await _place(G, home + PARK)
+
 func _kit(arch: String) -> void:
 	var P := m.player
 	if P.arch != arch:
@@ -420,8 +451,13 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
+	if m == null:        # what the guest lacked (a GPU worker's guest.log is all we see of it)
+		print("%s guest: no match after %.0f s: %s, peers seen %s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0,
+			"still building" if building else "no start heard", Net.peers.keys()])
+	else:
+		print("%s guest: match up after %.1f s" % [tag, (Time.get_ticks_msec() - t0) / 1000.0])
 	while m != null and not stop:
-		await _run(DT)
+		await _run(0.1)
 	main.get_tree().quit(0)
 
 func _on_msg(topic: String, data, _from: String) -> void:
@@ -433,7 +469,11 @@ func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "dn":
 		return
 	match String(data.get("c", "")):
-		"start": _build(data["d"])
+		"start":
+			if m == null and not building:
+				building = true
+				print("%s guest: start heard" % tag)
+				_build(data["d"])
 		"done": stop = true
 		"place":
 			if m and m.player:
@@ -538,10 +578,14 @@ func _run(secs: float) -> void:
 					mb.queue_free()
 					m.mobs.erase(mb)
 			m.step(DT)
-			if watch and seen.is_empty(): seen = m.displace.towing(watch)
-			var sb: Ent = stun_on if stun_on else m.player
-			if sb: stun_max = maxf(stun_max, sb.stun_t)
+			_stepped()
 		await main.get_tree().process_frame
+
+## After each match step: the host's mirror of the watched tow, and the longest stun seen.
+func _stepped() -> void:
+	if watch and seen.is_empty(): seen = m.displace.towing(watch)
+	var sb: Ent = stun_on if stun_on else m.player
+	if sb: stun_max = maxf(stun_max, sb.stun_t)
 
 ## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
 func _strike(at: Vector3) -> void:

@@ -16,6 +16,11 @@ static func ids() -> Array:
 		out.append(String(it["id"]))
 	return out
 
+## The stat bite a lair pile holds beside its gear, or "" when this pile has none (roll in 0..1).
+static func lair_drop(roll: float, pick: int) -> String:
+	var d: Dictionary = rules()["lair_drop"]
+	return String(d["ids"][pick % d["ids"].size()]) if roll < float(d["chance"]) else ""
+
 static func has(id: String) -> bool:
 	return not item(id).is_empty()
 
@@ -77,23 +82,30 @@ static func apply(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	_remember(rec, id, String(pv["text"]))
 	return pv
 
+## A copy of rec as it would be after the preview pv (for what the change leads to, as the path meter).
+static func after(rec: Dictionary, pv: Dictionary) -> Dictionary:
+	var then := rec.duplicate(true)
+	_write(then, pv["deltas"])
+	return then
+
 static func _write(rec: Dictionary, deltas: Dictionary) -> void:
 	for key in deltas:
-		var after: Variant = deltas[key][1]
-		if key.begins_with("stats."): rec["stats"][key.substr(6)] = after
-		else: rec[key] = after.duplicate(true) if typeof(after) in [TYPE_ARRAY, TYPE_DICTIONARY] else after
+		var to: Variant = deltas[key][1]
+		if key.begins_with("stats."): rec["stats"][key.substr(6)] = to
+		else: rec[key] = to.duplicate(true) if typeof(to) in [TYPE_ARRAY, TYPE_DICTIONARY] else to
 
 static func _verb(id: String) -> String:
 	var it := item(id)
 	return String(it.get("verb", rules()["verbs"][it["use"]]))
 
 ## Takes one from the bag and applies it (a sweet with its pick): the result of apply() plus look
-## (the body colour changed).
+## (the body colour changed) and id (the item: its cue, and GardenItemFx plays the give from it).
 static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	var pv := apply(rec, id, pick) if Save.d["items"].get(id, 0) > 0 else _no("none left")
 	if pv["ok"]:
 		Save.d["items"][id] = int(Save.d["items"][id]) - 1
 	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) in ["sweet", "aura"]
+	pv["id"] = id
 	pv["text"] = "%s: %s" % [item_name(id), pv["text"]] if pv["ok"] else pv["text"]
 	return pv
 
@@ -124,6 +136,8 @@ static func share(a: Dictionary, b: Dictionary, id: String) -> Dictionary:
 	CareJournal.note(a, "%s %s with %s" % [_verb(id), item_name(id), b["name"]])
 	CareJournal.note(b, "%s %s with %s" % [_verb(id), item_name(id), a["name"]])
 	pv["look"] = false
+	pv["id"] = id
+	pv["unstable"] = UnstableMix.unstable(a, b)
 	pv["text"] = "%s shared: %s" % [item_name(id), pv["text"]]
 	return pv
 
@@ -185,12 +199,13 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 	CareJournal.note(rec, "took off %s" % item_name(id))
 	return true
 
-## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it.
+## Care.feed for an item: the result the feed menu expects. look: its colour changed, redraw it; id and
+## deltas (apply()'s) for GardenItemFx.
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
-	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "aura"]
-	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "",
-			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw}
+	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "sweet", "aura"]
+	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "", "id": id,
+			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw, "deltas": pv["deltas"]}
 
 static func _no(why: String) -> Dictionary:
 	return {"ok": false, "text": why, "deltas": {}, "look": false}
@@ -304,7 +319,7 @@ static func fed(id: String) -> bool:
 ## The line the items list shows under an item in the bag.
 static func bag_hint(id: String) -> String:
 	if fed(id):
-		return "Shapes a Boki: feed it from its card."
+		return "Shapes a Boki: hold it near one to see the change, or feed it from its card."
 	return "Goes in the Nesting Nook with a pair."
 
 ## The path an item's token pushes toward ("" for other items).

@@ -833,7 +833,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		ShadowPolicy.judge(gmi)
 		glider.add_child(gmi)
 	var ring := MeshInstance3D.new(); ring.name = "TeamRing"; ring.mesh = flat_quad(1.0)
-	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
+	ring.material_override = SideRings.mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
 	# the head and everything on it turn and nod together from the neck
 	var head := Node3D.new(); head.name = "HeadPivot"
@@ -914,12 +914,12 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
 	var body := Arch.body(arch)
 	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
-	var bulk := float(body.get("bulk", 1.0))
+	var bulk := WardenBulk.apply(root, float(body.get("bulk", 1.0)))     # (a .glb Warden thins its skin instead)
 	var look_k := rs * ck * size_k * float(lk["height"])
-	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * look_k
+	root.scale = bulk * float(Data.CLASSES[cls]["scale"]) * look_k
 	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
 	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * look_k)
-	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * ring_k
+	ring.scale = Vector3.ONE / bulk * ring_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
@@ -1869,7 +1869,7 @@ static func kin_shell(c: Color) -> Node3D:
 	var root := Node3D.new()
 	var mi := part(root, capsule(0.62, 2.0), aura_mat(c, 0.75), Vector3(0, 1.0, 0))
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := part(root, flat_quad(2.6), ring_mat(Color(c, 0.9), 0.1), Vector3(0, 0.06, 0))
+	var ring := part(root, flat_quad(2.6), SideRings.mat(Color(c, 0.9), 0.1), Vector3(0, 0.06, 0))
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
 
@@ -2157,8 +2157,8 @@ static func air_ring() -> Node3D:
 static func training_yard() -> Node3D:
 	var root := Node3D.new()
 	var wood := toon(Color("8b6d52")); var straw := toon(Color("e2c47a")); var mat := toon(Color("c9604a"))
-	part(root, cyl(0.07, 0.08, 1.3, 8), wood, Vector3(1.0, 0.65, -0.6))
-	var dummy := Node3D.new(); dummy.name = "Dummy"; dummy.position = Vector3(1.0, 0.0, -0.6); root.add_child(dummy)
+	part(root, cyl(0.07, 0.08, 1.3, 8), wood, Vector3(0.45, 0.65, -0.55))
+	var dummy := Node3D.new(); dummy.name = "Dummy"; dummy.position = Vector3(0.45, 0.0, -0.55); root.add_child(dummy)
 	part(dummy, sphere(0.28, 12), straw, Vector3(0, 0.95, 0), Vector3(1, 1.3, 1))
 	part(dummy, sphere(0.16, 10), straw, Vector3(0, 1.45, 0))
 	part(dummy, box(0.7, 0.08, 0.08), wood, Vector3(0, 1.1, 0))
@@ -2170,8 +2170,8 @@ static func training_yard() -> Node3D:
 	var ring_m := toon(Color("f2c84a"))
 	for i in 2:
 		var t := TorusMesh.new(); t.inner_radius = 0.26; t.outer_radius = 0.32
-		part(root, t, ring_m, Vector3(-1.1 - i * 0.6, 0.34, 0.3 - i * 0.2), Vector3.ONE, Vector3(PI / 2, 0.3, 0))
-		part(root, cyl(0.025, 0.025, 0.34, 6), wood, Vector3(-1.1 - i * 0.6, 0.0, 0.3 - i * 0.2))
+		part(root, t, ring_m, Vector3(-0.95 + i * 0.45, 0.34, 0.45 + i * 0.35), Vector3.ONE, Vector3(PI / 2, 0.3, 0))
+		part(root, cyl(0.025, 0.025, 0.34, 6), wood, Vector3(-0.95 + i * 0.45, 0.0, 0.45 + i * 0.35))
 	return root
 
 ## The Nesting Nook at home: a flower arbor over a big straw nest with two cushions, where two kin
@@ -2723,12 +2723,15 @@ static func revive_beacon() -> Node3D:
 	var root := Node3D.new()
 	var stone := toon(Color("8f9aa0"))
 	var glow := Color("8fffc0")
-	part(root, cyl(1.2, 1.3, 0.16, 8), stone, Vector3(0, 0.08, 0))
-	part(root, cyl(0.9, 0.96, 0.12, 8), toon(Color("b8c2c6")), Vector3(0, 0.22, 0))
-	for i in 4:
-		var a := TAU * i / 4.0 + 0.4
-		part(root, box(0.22, 1.5, 0.22), stone, Vector3(cos(a) * 1.0, 0.75, sin(a) * 1.0), Vector3.ONE, Vector3(0, -a, 0))
-		part(root, box(0.05, 0.9, 0.02), toon(glow, false, 0.9), Vector3(cos(a) * 0.88, 0.85, sin(a) * 0.88), Vector3.ONE, Vector3(0, -a, 0))
+	if ItemArt.add(root, "revive_beacon") == null:    # the sculpted dais and posts; the crystal stays ours
+		part(root, cyl(1.2, 1.3, 0.16, 8), stone, Vector3(0, 0.08, 0))
+		part(root, cyl(0.9, 0.96, 0.12, 8), toon(Color("b8c2c6")), Vector3(0, 0.22, 0))
+		for i in 4:
+			var a := TAU * i / 4.0 + 0.4
+			part(root, box(0.22, 1.5, 0.22), stone, Vector3(cos(a) * 1.0, 0.75, sin(a) * 1.0), Vector3.ONE, Vector3(0, -a, 0))
+			part(root, box(0.05, 0.9, 0.02), toon(glow, false, 0.9), Vector3(cos(a) * 0.88, 0.85, sin(a) * 0.88), Vector3.ONE, Vector3(0, -a, 0))
+	else:
+		ItemArt.beacon_strips(root, toon(glow, false, 0.9))
 	var g := Node3D.new(); g.name = "Glow"; root.add_child(g)
 	var cr := Node3D.new(); cr.position = Vector3(0, 1.7, 0); g.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.5, 0.7, 0.5)
@@ -2750,26 +2753,28 @@ static func shrine() -> Node3D:
 	var stone_l := toon(Color("cfc8bb"))
 	var moss := toon(Color("7fa65a"), false)
 	var glow := Color("8fe3c8")
-	# a two-step hexagonal dais with a carved, glowing inlay
-	if Flora.v2():
-		# (cut stones laid in two rings, a glowing inlay, a carved round altar)
-		ExitModels._stone_ring(root, 1.15, 0.2, 9, Color("a39d92"), 0.62)
-		ExitModels._stone_ring(root, 0.84, 0.36, 7, Color("bdb6a8"), 0.0)
-		part(root, cyl(0.52, 0.52, 0.025, 24), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
-		part(root, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0), Vector2(0.42, 0), Vector2(0.4, 0.06), Vector2(0.33, 0.1), Vector2(0.31, 0.2), Vector2(0.38, 0.25), Vector2(0.36, 0.29), Vector2(0, 0.29)]), 2), 22, "shrine_altar"), stone, Vector3(0, 0.36, 0))
-	else:
-		part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
-		part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
-		part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
-		part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
-	# three leaning standing stones with moss on top
-	for i in 3:
-		var a := TAU * i / 3.0 + 0.5
-		var at := Vector3(cos(a) * 0.98, 0.0, sin(a) * 0.98)
-		var tilt := Vector3(sin(a) * 0.12, -a, -cos(a) * 0.12)
-		part(root, box(0.26, 1.0 - i * 0.12, 0.2), stone, at + Vector3(0, 0.5 - i * 0.06, 0), Vector3.ONE, tilt)
-		part(root, box(0.28, 0.06, 0.22), moss, at + Vector3(0, 1.0 - i * 0.12, 0), Vector3.ONE, tilt)
-		part(root, box(0.04, 0.3, 0.01), toon(glow, false, 0.9), at + Vector3(0, 0.55, 0) - Vector3(cos(a), 0, sin(a)) * 0.105, Vector3.ONE, tilt)
+	# a two-step hexagonal dais with a carved, glowing inlay and three leaning standing stones (sculpted when
+	# art/items/shrine.glb is there; the crystal stays ours: it turns, and hides once the shrine is used)
+	if ItemArt.add(root, "shrine") == null:
+		if Flora.v2():
+			# (cut stones laid in two rings, a glowing inlay, a carved round altar)
+			ExitModels._stone_ring(root, 1.15, 0.2, 9, Color("a39d92"), 0.62)
+			ExitModels._stone_ring(root, 0.84, 0.36, 7, Color("bdb6a8"), 0.0)
+			part(root, cyl(0.52, 0.52, 0.025, 24), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+			part(root, lathe(smooth_curve(PackedVector2Array([Vector2(0, 0), Vector2(0.42, 0), Vector2(0.4, 0.06), Vector2(0.33, 0.1), Vector2(0.31, 0.2), Vector2(0.38, 0.25), Vector2(0.36, 0.29), Vector2(0, 0.29)]), 2), 22, "shrine_altar"), stone, Vector3(0, 0.36, 0))
+		else:
+			part(root, cyl(1.05, 1.15, 0.18, 6), stone, Vector3(0, 0.09, 0))
+			part(root, cyl(0.78, 0.86, 0.18, 6), stone_l, Vector3(0, 0.27, 0))
+			part(root, cyl(0.5, 0.5, 0.02, 6), toon(glow, false, 0.8), Vector3(0, 0.37, 0))
+			part(root, cyl(0.35, 0.42, 0.22, 6), stone, Vector3(0, 0.47, 0))
+		# three leaning standing stones with moss on top
+		for i in 3:
+			var a := TAU * i / 3.0 + 0.5
+			var at := Vector3(cos(a) * 0.98, 0.0, sin(a) * 0.98)
+			var tilt := Vector3(sin(a) * 0.12, -a, -cos(a) * 0.12)
+			part(root, box(0.26, 1.0 - i * 0.12, 0.2), stone, at + Vector3(0, 0.5 - i * 0.06, 0), Vector3.ONE, tilt)
+			part(root, box(0.28, 0.06, 0.22), moss, at + Vector3(0, 1.0 - i * 0.12, 0), Vector3.ONE, tilt)
+			part(root, box(0.04, 0.3, 0.01), toon(glow, false, 0.9), at + Vector3(0, 0.55, 0) - Vector3(cos(a), 0, sin(a)) * 0.105, Vector3.ONE, tilt)
 	# the healing crystal floats and turns above the dais
 	var cr := Node3D.new(); cr.name = "Crystal"; cr.position = Vector3(0, 1.45, 0); root.add_child(cr)
 	var pm := PrismMesh.new(); pm.size = Vector3(0.42, 0.62, 0.42)
@@ -2846,6 +2851,9 @@ static func portal(c: Color) -> Node3D:
 	return root
 
 static func jump_pad(c: Color) -> Node3D:
+	var glb := PropGlb.build("jump_pad", c)      # the 3D model, its plate "Top" in c; else this primitive one
+	if glb:
+		return glb
 	var root := Node3D.new()
 	part(root, cyl(0.7, 0.8, 0.14, 20), toon(Color("3f4456")), Vector3(0, 0.07, 0))
 	var top := part(root, cyl(0.55, 0.55, 0.02, 20), toon(c.darkened(0.25), false, 0.45), Vector3(0, 0.15, 0), Vector3.ONE, Vector3.ZERO, "Top")
@@ -2858,6 +2866,8 @@ static func gem() -> Node3D:
 
 static func armor_shard() -> Node3D:
 	var root := Node3D.new()
+	if ItemArt.add(root, "armor_shard", -0.05, Color.WHITE, 0.3):
+		return root
 	var pm := PrismMesh.new(); pm.size = Vector3(0.22, 0.34, 0.08)
 	var m := toon(Color("7ac8ff"), false, 0.8)
 	part(root, pm, m, Vector3(0, 0.2, 0))
@@ -3329,7 +3339,6 @@ static func furniture(id: String) -> Node3D:
 	return root
 
 
-## The skyship that carries everyone over the islands at the start of an expedition.
 # ---------------------------------------------------------------- scenery islands
 ## A free-standing floating island for scenery (the title screen, distant backdrops): a grassy top
 ## with a wavy outline, a grass lip, cliffs with rock strata that taper into a jagged spike below.
@@ -3414,32 +3423,6 @@ static func waterfall(width: float, height: float) -> Node3D:
 	root.add_child(p)
 	return root
 
+## The skyship that carries everyone over the islands at the start of an expedition (SkyshipModel).
 static func skyship() -> Node3D:
-	var root := Node3D.new()
-	var wood := toon(Color("7a5236")); var dark := toon(Color("4e3424")); var cloth := toon(Color("f2e6cf"))
-	var stripe := toon(Color("d9604a")); var brass := toon(Color("e0b84a"), true, 0.3)
-	# the balloon
-	part(root, sphere(2.6, 22), cloth, Vector3(0, 4.2, 0), Vector3(1.0, 0.8, 1.9))
-	for i in 3:
-		part(root, cyl(2.08 * (1.0 - absf(i - 1) * 0.18), 2.08 * (1.0 - absf(i - 1) * 0.18), 0.32, 22), stripe, Vector3(0, 4.2, -2.2 + i * 2.2), Vector3(1, 1, 0.82), Vector3(PI / 2, 0, 0))
-	# ribbons running nose to tail over the top, so it reads from the bird's-eye camera too
-	for rz in [-0.42, 0.0, 0.42]:
-		part(root, sphere(2.63, 22), stripe if rz == 0.0 else toon(Color("f2c84a")), Vector3(0, 4.2, 0), Vector3(0.09, 0.84, 1.92), Vector3(0, 0, rz))
-	part(root, sphere(0.5, 12), brass, Vector3(0, 6.3, 0), Vector3(1.0, 0.4, 1.0))
-	# ropes
-	for x in [-1.0, 1.0]:
-		for z in [-1.6, 1.6]:
-			part(root, cyl(0.03, 0.03, 2.4, 6), dark, Vector3(x * 0.9, 2.0, z), Vector3.ONE, Vector3(0, 0, x * 0.25))
-	# the hull
-	part(root, box(2.0, 0.7, 4.4), wood, Vector3(0, 0.35, 0))
-	part(root, box(2.2, 0.18, 4.6), dark, Vector3(0, 0.75, 0))
-	part(root, cyl(0.6, 0.2, 2.0, 12), wood, Vector3(0, 0.35, -2.8), Vector3(1.6, 1, 0.5), Vector3(PI / 2, 0, 0))
-	# propellers at the back
-	for x in [-1.3, 1.3]:
-		var hub := Node3D.new(); hub.name = "Prop%s" % ("L" if x < 0 else "R"); hub.position = Vector3(x, 0.6, 2.4)
-		root.add_child(hub)
-		part(hub, cyl(0.12, 0.12, 0.3, 10), brass, Vector3.ZERO, Vector3.ONE, Vector3(PI / 2, 0, 0))
-		for b in 3:
-			part(hub, box(0.12, 1.1, 0.04), wood, Vector3.ZERO, Vector3.ONE, Vector3(0, 0, TAU * b / 3.0))
-	part(root, box(0.1, 1.2, 0.8), stripe, Vector3(0, 1.3, 2.3))
-	return root
+	return SkyshipModel.build()
