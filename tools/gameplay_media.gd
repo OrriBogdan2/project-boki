@@ -454,6 +454,7 @@ func _duo(secs: float) -> void:
 		await fade.reveal(0.01)
 	var tu := m.duo
 	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)
+
 # ------------------------------------------------------------------ 10: closing zone
 ## From just before the first close to just after the last, sped up to fit `secs`. The player stands
 ## inside the final circle, near its edge, so the wall comes past the camera; the full map shows the
