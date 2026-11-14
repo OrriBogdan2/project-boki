@@ -3,10 +3,11 @@
 Internal design note (may cite the source for traceability; nothing in the game does).
 Source behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (reference
 sheet: briefs/hero-ref/venator.md, from the source's real segment; owner notes override the footage).
-Our hero is an original character, the ember-rifle skirmisher: a visored cap, a cropped jacket, a long
+Our hero is an original character, the green-fire rifle skirmisher: a visored cap, a cropped jacket, a long
 streaming scarf, a bandolier of spiked charges, one bronze pauldron and a long-shrouded drum rifle.
-Palette: signature lime `#b8f03c` with pale-lime hot cores, deep green and white; the looks are HeroVfx data in
-`content/vfx/gunslinger.json` (docs/HERO_VFX.md). Payoff word: SKEWERED.
+Palette: her green fire (owner 11-08): signature lime `#b8f03c`, fire green, pale-lime hot cores, deep green and
+white; gold is the Coin Blast's coin, bronze only Cinderfall's shell. Every look is HeroVfx data in
+`content/vfx/gunslinger.json` (docs/HERO_VFX.md); the kit only says when. Payoff: the skewer (no word).
 
 ## Kit card (L picker)
 - Role: Mid-range rifleman: Daze a foe with the coin's cone, then shred them while it lasts.
@@ -54,10 +55,11 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Row (sev) | Call | What and where |
 |---|---|---|
 | RMB animation, side toss (HIGH) | (a) | 3ad081dd, 899102f9: held low and out wide at the hip, a sidearm flick at 0.05s, leaving 1.05m up. Assert `Vex parity RMB: a side toss ...` |
-| Slide scrape disc every 0.05s (HIGH) | (b) | Dropped from `_tick_echo`; the after-images, dust and skid streaks stay. Assert `Vex audit: no ground ring, disc or column on a slide, its rank-3 end or a knock` |
+| Slide scrape disc every 0.05s (HIGH) | (b) | Dropped; the slide is now the `slide` recipe's green streaks and dust (HeroVfx, ext/vfx-vex-data: the after-images and skid streaks went with VVFx). Assert `Vex audit: no ground ring, scorch or flame wall on a slide, its rank-3 end or a knock` |
 | Self shake on E, the blast and the throw (HIGH) | (a) / (c) | The direct `add_trauma` calls went in 3ad081dd. `Feel.shake`'s caster share and `Oomph.punch_dir` belong to ext/no-shake (item 50); nothing added here |
 | Rank-3 slide-end ring, knock ring and column (MED) | (b) | Removed; the knock keeps +KNOCK, its sound, the rifle flourish and the HUD reset cue. Same assert as the disc |
 | Palm Lance's ground smoke ring and cast ring (MED) | (b) | The recoil smoke now puffs up as a short column round her, and the cast's online ring is gone (everyone already sees the narrowing line) |
+| Palm Lance beam at match zoom (frames 0170/0182) | (b) | The fired beam was a thin line (every bolt layer drew the same thin core). Now three bolt layers with a `core` width (0.7 / 0.45 / 0.22 of the 1.8 m hit width) give a thick green body with a white-hot core, a smoke ring opens at the open palm of her cyborg left hand on release (the `palm` anchor, `hand.L`, as in ext/vex-coin-palm-1108), and the beam thins out over 0.8 s. The hit width in the archetype is unchanged. Asserts `Longneedle look: ...` |
 | LMB magazine and refill (MED) | (a) | 3ad081dd: 30 rounds, refilling at 40/s after 0.35s off the trigger. Assert `Vex parity LMB: a 30-round drum ...` |
 | Dazed's 35% slow (MED) | (b) | Removed from KitStatus "rat": the data's Daze is only extra rifle and Railgun damage. Assert `Vex audit: Dazed is a damage window only` |
 | Dash-flow sources and into_dash rows (MED) | (a) / (b) | Sources: 731ca7b9, from the dash-buffering finding. into_dash: all "fire" (item 51: every move combos with Shift), measured: Shift in the Palm Lance charge slides and the beam fires; Shift right after the tapped Coin Blast slides at once. Assert `Vex audit: Shift in the Palm Lance charge ...`. Jump rows: DashFlow has no jump rows; jumping already keeps every hold |
@@ -68,7 +70,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Dash -> E (LOW) | (c) | Kept "fire" (item 51); the footage's braced stand is the plain cast |
 | Passive, E numbers, R (-) | (c) | Match the data |
 | She/her in the shown text (LOW) | (b) | `gunslinger.json` fantasy ("her rifle"), this page and the kit comments |
-| Stale `dash_spent` tell (LOW) | (b) | "an ember afterimage and faint skid streaks" |
+| Stale `dash_spent` tell (LOW) | (b) | "green-fire streaks and a kick of dust" |
 
 ## Parity pass (LMB first)
 
@@ -293,7 +295,7 @@ Asserts named are in `--gunslinger-combo-check` (tools/hero_combo_check.gd, tool
 | 7 | Palm Lance timing, recoil | closed | 22ceca1e1: `charge` 0.6, `self_slow` 1.0, `recoil` 6.0, `linger` 0.75; `gunslinger_e` brace in kmoves_vv.gd. Asserts `Palm Lance: fires at 0.6s`, `Palm Lance: the recoil shoves you back`. In flight: ext/vex-e-turn (turn cap), ext/vex-coin-palm-1108 (from the palm) |
 | 8 | Palm Lance line narrows; muzzle orb | closed | 04648e2a0: `_tick_needle` `width_to` 12%; orb and flare in `_fire_needle`. Assert `Palm Lance: the line narrows over the cast (18m)` |
 | 9 | Cooldowns | open | Rank 1 RMB 6.5, Shift 8.5, E 11.5; footage (level 9) 5.4 / 7.5 / 10; data (level 1) 9 / 11.5 / 12. Which level "source values" means is the owner's call (DECISIONS 11-07 default 1.0x) |
-| 10 | Slide identity | afterimage closed; ring owner override | 596288ff1 `_tick_echo` afterimages. Rings cut by DECISIONS "no bursts, rings or discs on dashes" and 1d5cdfd46. Assert `Vex audit: no ground ring, disc or column on a slide ...` |
+| 10 | Slide identity | afterimage closed; ring owner override | 596288ff1 `_tick_echo` afterimages, replaced by the `slide` recipe's streaks (ext/vfx-vex-data). Rings cut by DECISIONS "no bursts, rings or discs on dashes" and 1d5cdfd46. Assert `Vex audit: no ground ring, scorch or flame wall on a slide ...` |
 | 11 | Dazed reads for the whole window | in flight | KitStatus `rat` on main; ext/combo-marks-a b7353ee3a adds the overhead Daze tag with a time ring |
 | 12 | Grenade throw animation | owner override; in flight | Item 112: no throw, a cannon kick. Assert `Vex item 112: no throw pose ...`. ext/vex-coin-palm-1108 (owner 11-08): a coin flick from the cyborg hand |
 | 13 | Mini Nuke | closed | 96831d533: Cinderfall, her ultimate (`gunslinger_ult.gd`) |

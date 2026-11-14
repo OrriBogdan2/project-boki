@@ -20,7 +20,12 @@
     "ui_capture": "ui",
     "ui_extract_start": "ui",
     "ui_extract_fail": "ui",
-    "ui_ult_ready": "ui"
+    "ui_ult_ready": "ui",
+    "inv_grab": "ui",
+    "inv_drop": "ui",
+    "inv_equip": "ui",
+    "inv_swap": "ui",
+    "inv_take": "ui"
   },
   "signature": [],
   "replaces": [

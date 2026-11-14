@@ -62,6 +62,7 @@ func start() -> bool:
 	phase = "aim"
 	phase_t = 0.0
 	floor_under()       # (the aim pose comes through the hold-clip rule, HOLD_POSE_T into the hold)
+	k.vfx("eye_flare")
 	return true
 
 ## Owner 11-08: the press raises a slab of rock ground under him on the same frame, so R saves him over the
@@ -151,16 +152,14 @@ func _erupt() -> void:
 	spots = _plan()
 	k.play("breah_spine")
 	k.m.sfx("br_crack", center, TELL_DB, 1.0)
-	for s in spots:
-		var p: Vector3 = s["at"]
-		k.m.fx.burst(p + Vector3(0, 0.2, 0), Color("3a7cff"), 5, 3.0, 0.3, 4.0, 0.9)
-		k.m.fx.spark(p, Vector3.UP, Color("9ad0ff"), 3, 3.0, 30.0, 0.2, 2.0, 0.8)
-	k.net_ring(center, 1.2, CRACK_COL)
+	k.vfx("spine_crack", Vector3(center.x, _base_y(), center.z), axis, {"len": float(xd()["len"])})
 
-## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him.
+## The ridge's line as an AimKit.span: the data's length and bend, bowing away from him, over the band the rise
+## slows (slow_r each side of the line).
 func _span_p(extra: Dictionary) -> Dictionary:
 	var side := _bow() if phase == "aim" else bow
 	extra.merge({"at": center, "dir": axis, "len": float(xd()["len"]), "bend": _bend(), "bow": side})
+	extra["width"] = float(xd()["slow_r"]) * 2.0
 	return extra
 
 func _bend() -> float: return deg_to_rad(float(xd()["bend"]))
@@ -207,8 +206,6 @@ func _tick_tell(dt: float) -> void:
 	phase_t += dt
 	var tell := float(xd()["tell"])
 	AimKit.span(k.h, "x_cracks", _span_p({"chevrons": 0, "col": CRACK_COL, "all": true, "lw": CRACK_LW, "alpha": 1.3}))
-	var puff: Dictionary = spots[int(phase_t / PUFF_GAP) % spots.size()]
-	k.m.fx.burst((puff["at"] as Vector3) + Vector3(0, 0.2, 0), Color("3a7cff"), 6, 3.5, 0.35, 4.0, 1.2)
 	if phase_t >= tell:
 		AimKit.hide(k.h, "x_cracks")
 		phase = "up"
@@ -261,8 +258,7 @@ func _raise(p: Vector3, along: Vector2) -> void:
 	if first_rise_t < 0.0:
 		first_rise_t = m.time
 	last_rise_t = m.time
-	m.fx.burst(p + Vector3(0, 0.5, 0), Color("3a7cff"), 10, 5.0, 0.35, 6.0, 1.1)
-	m.fx.flash(p + Vector3(0, 0.4, 0), Color("9ad0ff"), 0.8, 0.07)
+	k.vfx("spine_rock", p, along)
 	for f in k.foes_in(p, float(xd()["slow_r"])):
 		var o := {"src": "abil", "ab": "x", "slow": float(xd()["slow_t"]), "slow_k": float(xd()["slow_k"])}
 		f.hurt(float(xd()["rise_dmg"]) * k.power("x"), k.h, o)

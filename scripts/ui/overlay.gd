@@ -251,7 +251,7 @@ func open_pause(where: String) -> void:
 	item.call("Controls", "dash", open_controls)
 	item.call("Help", "info", open_words)
 	if where != "match":
-		item.call("Save files", "satchel", open_saves)
+		item.call("Save Files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)

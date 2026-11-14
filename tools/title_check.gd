@@ -1,7 +1,7 @@
 extends RefCounted
 ## --title-check: the title screen (painted splashes, logo and a torn-strip menu: briefs/UI_STYLE.md).
-## It builds; its menu has the items it should (Continue or New game, Training Grounds, Demo match and
-## Play with your Boki with a save, Play with friends when online play is there, Save files, Settings, Help, Quit off the web) and
+## It builds; its menu has the items it should (Continue or New Game, Training Grounds, Demo Match and
+## Play with Your Boki with a save, Play with Friends when online play is there, Save Files, Settings, Help, Quit off the web) and
 ## nothing called "The story so far"; the first button is the big one and holds focus, the rest are
 ## strips, and pointing at one focuses it; no subtext, tagline or currency under the logo; the logo,
 ## the painted backdrop and the build version are there; and the screen stays inside a frame budget
@@ -45,12 +45,13 @@ func _pass() -> void:
 		return
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
-	var want: Array = ["Continue" if has else "New game", "Training Grounds"]
-	if has: want.append_array(["Demo match", "Play with your Boki"])
-	if Net.available(): want.append("Play with friends")
-	want.append_array(["Save files", "Settings", "Help"])
+	var want: Array = ["Continue" if has else "New Game", "Training Grounds"]
+	if has: want.append_array(["Demo Match", "Play with Your Boki"])
+	if Net.available(): want.append("Play with Friends")
+	want.append_array(["Save Files", "Settings", "Help"])
 	if not OS.has_feature("web"): want.append("Quit")
 	ok(labels == want, "menu items %s" % [labels])
+	ok(labels.all(_title_case), "every menu item is in Title Case (playtest 11-13: \"New game\")")
 	var texts := _texts(ts)
 	ok(not texts.any(func(s): return String(s).to_lower().contains("story so far")), "no \"The story so far\" anywhere on the title")
 	ok(not texts.any(func(s): return String(s).to_lower().contains("gems")), "no currency on the title")
@@ -64,6 +65,9 @@ func _pass() -> void:
 	var focus: Control = ts.get_viewport().gui_get_focus_owner()
 	var big: bool = strips[0].theme_type_variation == "MenuMain"
 	ok(big and focus == strips[0], "the first button is the big one and holds focus")
+	var main_lit: bool = strips[0].get_theme_stylebox("normal") == strips[0].get_theme_stylebox("hover", "MenuMain")
+	var no_ring: bool = strips[0].get_theme_stylebox("focus") is StyleBoxEmpty
+	ok(main_lit and no_ring, "the focused big button wears its hover ticket, no pill focus ring (as the strips)")
 	ok(strips.slice(1).all(func(b): return b.theme_type_variation == "MenuItem"), "the other items are strips")
 	ok(not ts.menu_col.get_children().any(func(c): return c is Label), "no subtext or tagline in the menu column")
 	var lit: Button = strips[1]
@@ -88,6 +92,13 @@ func _pass() -> void:
 	if DisplayServer.get_name() == "headless":      # (with a window the number holds a software rasteriser's draw time)
 		ok(avg < BUDGET_MS, "frame budget: %.2f ms average, %.2f ms p95 (budget %.0f ms)" % [avg, p95, BUDGET_MS])
 	print("TITLE %d nodes" % _count(ts))
+
+## Every word capitalised but the short joining ones ("Play with Your Boki").
+func _title_case(label: String) -> bool:
+	for w in label.split(" ", false):
+		if not w in ["a", "an", "and", "of", "or", "the", "to", "with"] and w[0] != w[0].to_upper():
+			return false
+	return true
 
 func _menu_buttons(ts: Node) -> Array:
 	return ts.menu_col.get_children().filter(func(c): return c is Button)

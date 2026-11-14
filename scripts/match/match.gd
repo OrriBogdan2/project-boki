@@ -333,6 +333,7 @@ func _start(o: Dictionary) -> void:
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
 	GlideTrail.of(self)
+	ShieldBreak.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -466,7 +467,7 @@ func _start(o: Dictionary) -> void:
 		duel = Duel.new()
 		duel.setup(self)
 		duel.attach_keys()
-		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
+		hud.toast(duel.intro(), Color("f3eee2"))
 	if opts.get("duo_tut", false):
 		duo = DuoTutorial.new(self)
 	elif player and duel == null and not opts.get("tutorial", false) \
@@ -1116,7 +1117,7 @@ func _spawn_breakables() -> void:
 				q2.y = world.ground_at(q2.x, q2.z)
 				spawn_gear(gid, 2, q2)
 				break
-		# the way into the duel room: a glowing pad next to where you start
+		# the duel ring: a glowing pad next to where you start (scripts/match/duel_ring.gd)
 		if not opts.get("duel", false):
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
 				var dq: Vector3 = player.pos + off
@@ -1124,11 +1125,12 @@ func _spawn_breakables() -> void:
 					continue
 				dq.y = world.ground_at(dq.x, dq.z)
 				duel_pad = dq
+				duel_hint = DuelRingHint.make(self)
 				var pad := Models.jump_pad(Color("ff8a7a"))
 				pad.position = dq
 				add_child(pad)
 				var lbl := Label3D.new()
-				lbl.text = "DUEL ROOM\n%s to enter" % Settings.key_cap("interact")
+				lbl.text = "DUEL RING\n%s to fight" % Settings.key_cap("interact")
 				lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 				lbl.modulate = Color("ffb0a0"); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
 				# drawn after every other see-through thing (pad glow, pickup beams), so nothing covers it
@@ -2106,12 +2108,7 @@ func on_fell(e: Ent) -> void:
 		fx.burst(e.pos + Vector3(0, 0.8, 0), Color(0.92, 0.94, 1.0, 0.8), 18, 4.0, 0.6, -1.0, 1.2)
 		if e == player and hud:
 			hud.flash(Color(0.05, 0.04, 0.12), 0.6)
-		if duel and e == duel.bot:
-			# knocked off the island in the duel room: that's a knock, then a fresh round
-			duel.stats["knocks"] = int(duel.stats["knocks"]) + 1
-			duel.round_n += 1
-			hud.toast("Off the edge! Round to you", Color("8fe3c8"))
-			duel.reset()
+		if duel and duel.on_fell(e):
 			return
 		if e == player and S_dev_god():
 			var back: Vector3 = tut.respawn() if tut else e.ai.get("land", world.spawns[0] if world.spawns.size() > 0 else world.random_ground())
@@ -2236,13 +2233,13 @@ func on_kin_up(k: Kin, rescued: bool) -> void:
 	KinNet.event(self, "scoop" if rescued else "round", k)
 
 # ------------------------------------------------------------------ kin combat events
-## A kin used an ability: its name pops up over it so you can read the fight.
+## A kin used an ability: over your own Boki its name pops up (you learn its moves); others' read from their looks.
 func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 	kstat["kin_ab"] += 1
 	if auto: kstat["auto"] += 1
 	if k.owner_h == null or k.unseen:
 		return
-	if player and k.flat_dist(player) < 20.0:
+	if k.owner_h == player:
 		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 	if k.owner_h == player:
 		player.add_stat("kin_abilities")
@@ -2264,7 +2261,6 @@ func on_bond_ready(h: Hunter) -> void:
 	if h != player:
 		return
 	sfx("bond", null, -3.0)
-	fx.word(h.pos + Vector3(0, 2.3, 0), "BOND READY", Color("ffd23f"), true)
 	var ud := KinMerge.def_for(h.kin) if h.kin else null
 	if hud and ud:
 		hud.toast("Bond full!  %s: %s" % [Settings.key_cap("ultimate"), ud.display_name], Color("ffd23f"))
@@ -2287,7 +2283,6 @@ func on_merge_end(h: Hunter, why: String) -> void:
 func on_combo(target: Ent, own: Node, c: Dictionary) -> void:
 	kstat["combo"] += 1
 	var col := Color(String(c.get("color", "#ffd23f")))
-	fx.word(target.pos + Vector3(0, 1.9, 0), String(c.get("label", "COMBO")), col, true)
 	fx.ring(target.pos, 1.3, col, 0.3)
 	sfx("combo", target.pos, -2.0)
 	if own == player:
@@ -2673,7 +2668,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.material_override.set_shader_parameter("color", vis_col)
 		var halo := mi.get_node_or_null("Halo") as MeshInstance3D
 		if halo:
-			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
+			halo.material_override.set_shader_parameter("color", look[2])
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at
@@ -3137,6 +3132,15 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 			e.hurt(float(s["dmg"]) * f, by, o)
 
 # ------------------------------------------------------------------ main loop
+## The shots' frame (stock rounds between steps at `alpha`, deco, ability trails); the reels, stepping by hand, call it.
+func render_shots(alpha: float) -> void:
+	for s in shots:
+		if s.has("deco"):
+			_render_deco(s, alpha)
+		if String((s["x"] as Dictionary).get("src", "")) == "abil":
+			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+		Oomph.place_shot(s, alpha)
+
 func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
@@ -3199,12 +3203,7 @@ func _process(delta: float) -> void:
 			e.lod_dt += delta
 	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
-	for s in shots:
-		if s.has("deco"):
-			_render_deco(s, alpha)
-		if String((s["x"] as Dictionary).get("src", "")) == "abil":
-			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-		Oomph.place_shot(s, alpha)
+	render_shots(alpha)
 	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
@@ -4439,6 +4438,7 @@ var train := {}
 var train_t := 0.0
 
 var duel_pad := Vector3.INF
+var duel_hint: DuelRingHint = null      # the first-visit hint (null when this save has had it)
 
 ## The Demo match's landing grace: for the first fresh_t seconds after you land (Bot.fresh), until you
 ## hurt something yourself, nothing targets you (bots, even ones your Boki picked a fight with, and
@@ -4465,16 +4465,18 @@ static func arena_opts(arch_id := "") -> Dictionary:
 		o["arch"] = arch_id; o["cls"] = Arch.weight(arch_id); o["weapon"] = Arch.signature(arch_id)
 	return o
 
-## The training pad that takes you to the duel room.
+## The duel room the duel ring's Fight a bot opens; the lobby's duel line adds its "net" roster.
 static func duel_opts() -> Dictionary:
 	return {"training": true, "duel": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 5151, "no_drop": true}
 
 func _update_training(dt: float) -> void:
 	if player == null:
 		return
+	if duel_hint and not duel_hint.tick():
+		duel_hint = null
 	if duel_pad != Vector3.INF and player.flat_dist(duel_pad) < 1.3 and not player.downed:
 		if Input.is_action_just_pressed("interact") and not paused:
-			Game.start_match(duel_opts())
+			DuelRing.open(self)
 			return
 	train_t += dt
 	if player.downed and train_t > 2.0:
@@ -5380,6 +5382,7 @@ func _net_ev(x, from: String) -> void:
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": ArchKit.net_cone_in(self, x)
 				"hvfx": HeroVfx.of(self).net_in(x)
+				"sbrk": ShieldBreak.of(self).net_in(x)       # a shield broke in another game
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
