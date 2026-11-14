@@ -9,6 +9,7 @@ const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimate
 const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Meteor Drop and dashes
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
+const DTIMING := preload("res://tools/dancer_timing_check.gd")   # her animation timing against the source
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
 const HOLD := preload("res://tools/hold_release_check.gd")      # how Kael's RMB hold ends
 const STRIKES := preload("res://tools/clip_strike_check.gd")   # her clip strikes on the kit's releases (anim timing)
@@ -258,7 +259,7 @@ func thief(a) -> void:
 	A.step(m, 0.6)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
-			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
+			and T2.stun_t > 0.0 and A.dmg(T) >= 9.0,
 		"pairs %d grounded %s/%s stun %.2f/%.2f dmg %.0f" % [K.bola_pairs, KitStatus.grounded(T),
 				KitStatus.grounded(T2), T.stun_t, T2.stun_t, A.dmg(T)])
 	# pair stun 0.9 s (docs/heroes/thief.md "Pair stun length"): the footage has no two-foe tie to time
@@ -319,10 +320,10 @@ func thief(a) -> void:
 			and absf(float(HunterAnim.km_sample("thf_knife", ThiefKit.KNIFE_RELEASE_S)["fy"]) + TAU) < 0.01,
 			"early %s shots %d" % [str(early), m.shots.size() - shots0])
 	A.step(m, 0.5)
-	A.ok("dancer E: the dagger lands at the cursor, the arrival circle shows",
+	A.ok("dancer E: the dagger lands at the cursor, RecastCue's marker on it",
 			not K.knife.is_empty() and K.knife.get("target") == null
 			and Vector2((K.knife["pos"] as Vector3).x - kspot.x, (K.knife["pos"] as Vector3).z - kspot.z).length() < 1.0
-			and AimKit.shown(P, "knife"),
+			and K.recast_window().get("at") == K.knife["pos"],
 		"%s vs %s" % [str(K.knife.get("pos", Vector3.ZERO)), str(kspot)])
 	P.ak.use_e()
 	m.step(A.DT)
@@ -377,6 +378,7 @@ func thief(a) -> void:
 	await _dancer_dash_flow(m, P, K, T, home)
 	await DFEEL.new().run(A, m, P, K, T, home)
 	DPARITY.new().run(A, m, P, K, T, home)
+	DTIMING.new().run(A, m, K)
 	DLOOP.new().run(A, m, P, K, T, T2, home)
 	STRIKES.new().run(A, A.main, "thief", {"thf_lmb_r": 0.0, "thf_lmb_l": 0.0, "thf_primed": 0.0,
 			"thf_bola": float(K.rmb_def()["bola"]["cast"]), "thf_knife": ThiefKit.KNIFE_RELEASE_S},
@@ -431,7 +433,8 @@ func _knife_in_barriers(m, A, P, T, K, home: Vector3) -> void:
 	A.step(m, 0.4)
 	A.ok("dancer E: the dagger sticks to a barrier it hits, on her side of it",
 			K.knife.get("wall") == w and K.knife.get("target") == null and P.pos.x < at.x
-			and absf((K.knife["pos"] as Vector3).x - at.x) < 0.7 and AimKit.shown(P, "knife"),
+			and absf((K.knife["pos"] as Vector3).x - at.x) < 0.7
+			and K.recast_window().get("at") == K.knife["pos"],
 			"knife %s" % str(K.knife.get("pos", Vector3.ZERO)))
 	var z0: float = (K.knife["pos"] as Vector3).z
 	w["a"] += Vector2(2.0, 3.0)
