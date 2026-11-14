@@ -21,7 +21,8 @@ func run(host: Node) -> void:
 	var table: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/kit_parity.json"))
 	var rows: Array = table.get("rows", [])
 	for r in rows:
-		var hero := Arch.def(String(r["hero"]))
+		var hero := Arch.def(String(r["hero"])).duplicate()
+		hero["weapon"] = Content._load("weapons", String(hero.get("signature", "")))   # weapon.primary.dmg
 		var got := _num(hero, String(r["field"]))
 		var label := "%s %s %s" % [r["hero"], r["slot"], r["field"]]
 		if r.has("per"):

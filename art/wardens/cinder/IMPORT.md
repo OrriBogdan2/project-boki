@@ -62,14 +62,6 @@ Clips in 0.24.4: the swap ran on main's cinder.glb, before the docs/art/IDLE_AUD
 onto the swapped body by node name (same skeleton: no rest drift) and added `x_breath` with kael_retarget.py's
 `add_breath` at her own spot (0.283 m over hips) and chest band (1.0-1.32 m up, |x| under 0.17 m): 3363 vertices.
 
-Directional loops (2026-11-11 first/second pass, merged onto main's cand_5 body 11-12): only the four walk diagonals
-survive, `walk_fl/fr/bl/br` (blind-judged winners on `hunter_dir_gait.py ... 2.26 5.19 fl,fr,bl,br`, foot jets' bone
-scale keyed), copied onto main's glb by `glb_add_clips.py cinder.glb <branch glb> walk_fl,walk_fr,walk_bl,walk_br`
-(walk_f/b/l/r are byte-equal on both sides). The branch's run_b restride and run_fl/fr/bl were baked on the old 0.7 s
-run_f; main's re-key (below) replaced run_* with a 0.333 s scurry, so they are dropped, main's run_f/b/l/r and
-`foot_mps` 5.15 stay. Run diagonals on the new run_f need a Blender pass (hunter_dir_gait.py on the re-keyed loop).
-Judge: docs/art/wardens/dirloops/JUDGE.md. `in_step` is on so the walk ring keeps time.
-
 Appeal4 (cand_5, ext/cinder-bust 7efd99345) in 0.24.5: that branch swapped onto the appeal3 b glb from before the
 line's IDLE_AUDIT clips, so the 0.24.5 merge copied the line glb's 41 clips (spring tracks included) onto the cand_5
 body by node name (same skeleton, no rest drift) and added `x_breath` at the line's spot with the chest band
@@ -84,6 +76,7 @@ command (rest poses equal to 2e-6); every other clip, the garden set and `x_brea
 v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
 texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
 
-Merge of main's miss-fill re-bake (2026-11-13): `cinder.glb` = main's model and clips byte for byte, plus the branch's
-walk_fl/fr/bl/br by `glb_add_clips.py <main cinder.glb> <branch cinder.glb> walk_fl,walk_fr,walk_bl,walk_br` (same 58
-joints, rest pose equal; main's walk_f/b/l/r and run_* match the branch's within 0.3 degrees, so the diagonals stay in step).
+Cloak peak (ext/anim-cinder-cloak-peak, 11-13): `cloak` rebaked with cinder_clips.py (arms-wide peak 0.13 -> 0.03 s) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> cloak`. Bake source: the stage_p2 rig (a worker without
+stage_p2/cinder.blend used a prior bake's `*_anim.blend` of it with every action removed; the unchanged cloak baked from it matched this
+glb's to 1.5e-6, bone rests equal up to quaternion sign). All 43 other clips, nodes, meshes and images byte-equal.

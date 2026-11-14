@@ -347,7 +347,7 @@ const MOVES := {
 		]]},
 	# Rock Hop's crash: both fists smashed into the ground with a deep squash (0.05), held down through
 	# the crash (0.25), then she heaves upright
-	"breah_leap_land": {"keys": [
+	"breah_leap_land": {"land": true, "keys": [
 		[
 			0.00,
 			{
@@ -610,7 +610,7 @@ const MOVES := {
 		]]},
 	# arriving: she pops into being stretched tall with her arms up (0.0), squashes hard as she settles into
 	# the spot with the arms and hem flung wide (0.08), overshoots tall again (0.15, the pop) and floats down
-	"ostra_arrive": {"keys": [
+	"ostra_arrive": {"land": true, "keys": [
 		[
 			0.00,
 			{
