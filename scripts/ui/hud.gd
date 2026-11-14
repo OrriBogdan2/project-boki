@@ -11,7 +11,6 @@ var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
 var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
-var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
