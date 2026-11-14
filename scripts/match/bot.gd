@@ -36,9 +36,13 @@ static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
-const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
-const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft",
-	"retreat", "assist"]
+const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
+	"seat", "ring", "gate"]
+const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape",
+	"lair_lever", "lair_updraft", "retreat", "assist", "spark", "gate", "ring", "ring_in", "zone"]
+## Goals a bot holds interact at on arrival, and goals it may stand and wait at (no give-up timer).
+const HOLD_GOALS := ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever", "spark", "gate"]
+const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp", "seat", "ring"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
 func tick(m: Match, h: Hunter, dt: float) -> void:
@@ -269,10 +273,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				var ah: Vector2 = a["aim_hold"]
 				inp["aim"] = Vector3(h.pos.x + ah.x * AIM_AHEAD, h.pos.y + 0.9, h.pos.z + ah.y * AIM_AHEAD)
 			inp["aim_y"] = h.pos.y
-			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever"]:
+			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in HOLD_GOALS:
 				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp", "roam"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp", "roam", "seat", "ring"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
@@ -280,9 +284,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# beacon: basing away from a charging uplink left its yard empty to drain)
 		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 and not a.has("ping_goal") \
 				and not String(a.get("goal_kind", "")) in STAY_GOALS:
-			var mate := m.base_target(h)
+			var mate := BaseRecall.target(m, h)
 			if mate and h.flat_dist(mate) > 30.0:
-				h.start_base(mate)
+				BaseRecall.start(h, mate)
 		if h.base_t > 0.0:
 			move = Vector2.ZERO
 		# (heals fold the glider now, so a bot only drinks with ground under it, never over the void
@@ -299,7 +303,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if not rv.is_empty() and (not rv.has("danger") or h.flat_dist(rv["o"]) < 4.0):
 		move = _revive_move(m, h, rv, dt)
 		a.erase("dash_dir")
-		if h.base_t > 0.0: h.base_t = 0.0
+		BaseRecall.cancel(h)
 		if inp.get("interact", false) and not (tgt is Hunter and (tgt as Hunter).downed): inp["interact"] = false
 		if move == Vector2.ZERO and tgt == null:
 			var o: Hunter = rv["o"]
@@ -689,6 +693,13 @@ func _use_sig(m: Match, h: Hunter, tgt: Ent) -> void:
 
 func _choose(m: Match, h: Hunter) -> void:
 	var a := h.ai
+	# out at the tide ring's edge: walk back in before anything else (BotWays)
+	var back := BotWays.ring_back(m, h)
+	if back != Vector3.INF:
+		a["tgt"] = null
+		a["goal"] = back
+		a["goal_kind"] = "ring_in"
+		return
 	# fight: nearest rival hunter in sight, else monsters close by
 	var best: Ent = null; var bs := -1e9
 	var ign: Dictionary = a.get("ignore", {})
@@ -754,6 +765,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
+	if m.zone and m.zone.k > 0 and m.zone.outside(h.pos):
+		best = null      # outside the zone's edge: get inside before anything else
 	if best != a.get("tgt"):
 		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	if BotRing.must_run(m, h):
@@ -770,18 +783,12 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF:
 		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
 		if goal != Vector3.INF: gk = "boki"
-	# a dead teammate: their deathbox while the soul's there, else a revive beacon
+	# a dead teammate: their deathbox while the soul's there (a revive beacon comes after the seat below)
 	if goal == Vector3.INF:
 		for b in m.boxes:
 			var o: Hunter = b["owner"]
 			if o.team == h.team and o != h and Life.soul_here(m, b) and h.flat_dist(b["pos"]) < 45.0:
 				goal = b["pos"]; gk = "box"; break
-	if goal == Vector3.INF and m.hunters.any(func(x): return x.team == h.team and x.out and not x.gone):
-		var bd := 90.0
-		for bc in m.beacons:
-			if bc["used"]: continue
-			var d := h.flat_dist(bc["pos"])
-			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
 	# hurt with the Blight close: get away from it first
 	if goal == Vector3.INF and m.blight:
 		var fl := _blight_flee(m, h)
@@ -801,6 +808,20 @@ func _choose(m: Match, h: Hunter) -> void:
 		var yg: Array = m.exits.bot_goal(h, true)
 		if not yg.is_empty() and String(yg[1]) == "yard":
 			goal = yg[0]; gk = "yard"
+	# Limited Ways Out: the squad's seat (its plan, then the next open one, then the final)
+	var ways := BotWays.on(m)
+	if goal == Vector3.INF and ways:
+		var wg := BotWays.goal(m, h)
+		if not wg.is_empty():
+			goal = wg[0]
+			gk = String(wg[1])
+	# a revive beacon for a dead teammate (a seat in play comes first)
+	if goal == Vector3.INF and m.hunters.any(func(x): return x.team == h.team and x.out and not x.gone):
+		var bd := 90.0
+		for bc in m.beacons:
+			if bc["used"]: continue
+			var d := h.flat_dist(bc["pos"])
+			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
 	# a squadmate is in a fight within earshot: go and help
 	if goal == Vector3.INF:
 		goal = BotSquad.assist_goal(m, h, a, helping)
@@ -839,7 +860,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var pp: Vector3 = pg["pos"]
 		if m.time < float(pg["until"]) and h.flat_dist(pp) > 3.5 and not m.world.is_void(pp.x, pp.z):
 			goal = pp; gk = "ping"
-			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
+			BaseRecall.cancel(h)      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
 	# a knocked-out Boki within a few strides: scan it before any lair, seat or exit run
@@ -857,7 +878,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var lg: Array = m.lairs.bot_goal(h, lair_leave)
 		if not lg.is_empty():
 			goal = lg[0]; gk = String(lg[1])
-	if goal == Vector3.INF and m.exits and not m.exits.list.is_empty():
+	if goal == Vector3.INF and m.exits and not m.exits.list.is_empty() and not ways:
 		# heading home: late in the match, with a good haul, or just because
 		if not a.get("leave", false) and randf() < 0.0015:
 			BotSquad.agree(m, h, "leave", true)      # (the squad's bots leave together)
@@ -904,15 +925,17 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF:
 		# roam toward monsters or another island (where the squad's lead roams, if that isn't us)
 		var lead_to := BotSquad.roam_to(m, h, a)
+		var spent: bool = a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02
 		if lead_to != Vector3.INF:
 			a["wander"] = lead_to
-		elif a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02:
+		elif spent or not BotWays.inside(m, a["wander"]):
 			var alive_mobs := m.mobs.filter(func(x): return not x.dead and not (x is Blight))     # (camps level you; the Blight doesn't)
 			if alive_mobs.size() > 0 and randf() < 0.6:
 				a["wander"] = alive_mobs.pick_random().pos
 			else:
 				a["wander"] = m.world.random_ground()
 		goal = a["wander"]; gk = "roam"
+	goal = BotWays.keep_inside(m, goal)      # (never a goal out in the tide)
 	# a goal we gave up on for now: head for a detour instead, and keep it (re-rolling a fresh one
 	# every think left the bot dithering on the spot)
 	if _banned(m, a, goal):
@@ -921,6 +944,12 @@ func _choose(m: Match, h: Hunter) -> void:
 			dt = m.world.random_ground()
 			a["detour"] = dt
 		goal = dt; gk = "roam"
+	# outside the zone, or a goal outside it: head inside first
+	if m.zone:
+		var zg := m.zone.bot_goal(h, goal)
+		if zg != goal:
+			goal = zg
+			gk = "zone"
 	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
 	# for a while. Two goals pulling opposite ways had a bot turning round every think: it spun.
 	# (a goal that only moved a little is the same one, walking: a kin, a squadmate we follow)
@@ -940,7 +969,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		a["goal_since"] = m.time
 	elif goal != Vector3.INF:
 		var d := h.flat_dist(goal)
-		if d < 2.0 and String(a.get("goal_kind", "")) in ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp"]:
+		if d < 2.0 and String(a.get("goal_kind", "")) in WAIT_GOALS:
 			a["goal_since"] = m.time      # there and waiting (charging an uplink, working a dial) is fine
 		if d < float(a.get("goal_best", 1e9)) - 0.5:
 			a["goal_best"] = d

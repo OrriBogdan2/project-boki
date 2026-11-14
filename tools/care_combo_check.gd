@@ -864,6 +864,10 @@ func _spear_rank3() -> void:
 			absf(got - want) < 0.1 and float(rim[1]) == 0.0 and float(rim[3]) == 0.0,
 			"x%.2f want x%.2f, edge foe %.0f/%.0f" % [got, want, float(rim[1]), float(rim[3])])
 
+## No ground disc ("scorch" look) up in the Hero looks: a dash leaves a trail, never a disc.
+func _no_disc(m: Match) -> bool:
+	return HeroVfx.of(m).live.all(func(e): return String(e.get("kind", "")) != "scorch")
+
 func _free(m: Match) -> void:
 	m.queue_free()
 	await sc.main.get_tree().process_frame
@@ -962,7 +966,7 @@ func tender() -> void:
 			absf(tail_mesh.size.x - 0.8) < 0.01 and absf(tail_mesh.size.y - 3.4) < 0.01, str(tail_mesh.size))
 	step(m, 0.6)
 	_moon_shot_parity(m, P, K)
-	# --- Kindle ramp and its foot glow; nodes stay pooled while firing
+	# --- Kindle ramp; nodes stay pooled while firing
 	sc.aim_at(P, T.pos)
 	K.cd["e"] = 8.0
 	P.inp["fire"] = true
@@ -970,9 +974,9 @@ func tender() -> void:
 	var made0: int = K.lk().made
 	step(m, 1.8)
 	P.inp["fire"] = false
-	var shown_glow: bool = K.lk().showing("kin%d" % T.get_instance_id())
 	ok(
-			"mm passive: embers Kindle the foe and a foot glow grows on them", K.kindle_on(T) >= 3 and shown_glow,
+			"mm passive: embers Kindle the foe and no ring is drawn under them (a stack is not an area)",
+			K.kindle_on(T) >= 3 and not K.lk().showing("kin%d" % T.get_instance_id()),
 			"kindle %d" % K.kindle_on(T))
 	ok("mm passive: an ember into a Kindled foe winds Hearthlight back", K.cd["e"] < 7.0, "e %.2f" % K.cd["e"])
 	ok(
@@ -1019,14 +1023,18 @@ func tender() -> void:
 	K.cd["rmb"] = 0.0
 	var n0: int = _mine(m, P).size()
 	var wind := float(K.rmb_def()["windup"])
+	var glb_fit := float(WardenClips.data("pip")["kmoves"]["mm_seed_aim"].get("fit", 0.0))
 	ok(
-			"mm RMB: not a hold (no hold data), a quick wind-up (0.3-0.4 s, item 23), its clip as long",
-			not K.rmb_def().has("hold") and wind >= 0.3 and wind <= 0.4
+			"mm RMB: not a hold (no hold data), the wind-up is 0.5-0.65 s (the owner asked 0.2-0.5 s off 1 s; "
+			+ "the source's casts run 0.1-0.65 s), its clip and the model's clip as long",
+			not K.rmb_def().has("hold") and wind >= 0.5 and wind <= 0.65
 			and absf(KMovesCare.length("mm_seed_aim") - wind) < 0.01
-			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)))
+			and absf(glb_fit - wind) < 0.01
+			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)),
+			"wind %.2f kmove %.2f glb fit %.2f" % [wind, KMovesCare.length("mm_seed_aim"), glb_fit])
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
-	step(m, 0.12)
+	step(m, 0.15)
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
 			"mm RMB: winding up, a short dotted lane, the coiled pose, half speed",
@@ -1042,21 +1050,15 @@ func tender() -> void:
 	var sync: Node = P.model.get_node_or_null("Warden/Sync")
 	var clips: WardenClips = sync.get("clips") if sync else null
 	var lib: AnimationLibrary = clips.lib if clips else null
-	var aim_clip: Animation = lib.get_animation("seed_aim") if lib and lib.has_animation("seed_aim") else null
-	var fit = clips.d["kmoves"]["mm_seed_aim"].get("fit") if clips else null
 	ok(
-			"mm RMB: Pip's hand-keyed stretch-and-gather is played over exactly the wind-up (kmove fit)",
-			aim_clip != null and fit != null and absf(float(fit) - wind) <= 0.04,
-			"clip %.2f fit %s wind %.2f" % [aim_clip.length if aim_clip else -1.0, fit, wind])
-	ok(
-			"mm RMB: no circle under her during the wind-up (item 23)",
-			not K.lk().live.any(func(b): return String(b["fx"]) == "flare"))
+			"mm RMB: nothing drawn at her feet during the wind-up",
+			not K.lk().live.any(func(b): return P.flat_dist(b["at"]) < 1.0))
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.12)
+	step(m, 0.15)
 	ok("mm RMB: letting go early does not throw or cancel", K.seed_aim and _mine(m, P).size() == n0)
-	var tt := 0.24
+	var tt := 0.3
 	while _mine(m, P).size() == n0 and tt < 1.5:
 		if tt >= wind - 0.1:
 			sc.aim_at(P, T.pos)
@@ -1067,6 +1069,16 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	var from: Vector3 = _mine(m, P)[-1]["start"] if _mine(m, P).size() > n0 else P.pos
+	ok(
+			"mm RMB: the seed leaves from her hands, out in front at hand height, not on her",
+			P.flat_dist(from) >= 0.7 and from.y - P.pos.y < 0.8,
+			"%.2f m out, %.2f m up" % [P.flat_dist(from), from.y - P.pos.y])
+	var cast_fx: Array = HeroVfx.data("tender")["moves"]["seed_cast"]["fx"]
+	ok(
+			"mm RMB: the cast flare plays where the seed leaves (no body anchor), small",
+			cast_fx.all(func(l): return not l.has("at"))
+			and cast_fx.all(func(l): return String(l["p"]) != "flare" or float(l["size"]) <= 0.4))
 	ok(
 			"mm RMB: the seed leaves on the release clip's first frame (the snap, not after it)",
 			m.time - K.anim_at <= 1.5 / 60.0,
@@ -1090,6 +1102,7 @@ func tender() -> void:
 	var bid := "burr%d" % int(K.burrs[0]["id"]) if K.burrs.size() > 0 else ""
 	step(m, 0.1)
 	var tele: Dictionary = AimKit.entry(P, bid)
+	var field_n: Node3D = K.lk().held.get(bid, {}).get("n", null)
 	ok(
 			"mm RMB: the burst area shows under the foe at once, for everyone, filling",
 			AimKit.shown(P, bid)
@@ -1098,6 +1111,11 @@ func tender() -> void:
 			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
 			and K.lk().showing(bid),
 			"r %.2f" % float(tele.get("r", 0.0)))
+	ok(
+			"mm RMB: the field is a lit rim (a band, no flat fill) whose edge is the burst radius",
+			float(tele.get("band", 0.0)) > 0.0 and float(tele.get("fill", -1.0)) < 0.0 and field_n != null
+				and is_equal_approx(field_n.scale.x, K.burst_radius()),
+			"band %.2f disc r %.2f" % [float(tele.get("band", 0.0)), field_n.scale.x if field_n else 0.0])
 	await _burr_build(m, P, T, K, bid)
 	await _free(m)
 	# --- Hearthlight: on her a 2.6 m ring with its own cast move; E again throws it to the cursor at once
@@ -1488,12 +1506,16 @@ func _burr_build(m: Match, P: Hunter, T: Hunter, K: TenderKit, bid: String) -> v
 			T.root_t <= 0.0 and K.burrs.size() == 1 and K.ult_look.showing(bid) and a1 > a0 + 0.3,
 			"root %.2f vine %.2f -> %.2f" % [T.root_t, a0, a1])
 	var h1 := T.hp
+	var roots0 := int(HeroVfx.of(m).plays.get("seed_root", 0))
 	step(m, 0.25)
 	ok(
 			"mm RMB: it roots at about 2.0 s of contact (by 2.1 s), damages and Kindles, the vine gone",
 			T.root_t > 0.0 and h1 - T.hp > 25.0 and K.kindle_on(T) >= 1 and K.burrs.is_empty()
 			and not K.ult_look.showing(bid),
 			"root %.2f dmg %.0f" % [T.root_t, h1 - T.hp])
+	ok(
+			"mm RMB: the root moment plays on the foe it takes (one per rooted foe)",
+			int(HeroVfx.of(m).plays.get("seed_root", 0)) - roots0 == 1)
 	# breaking contact: 1 s built, then 0.3 s out of reach unwinds it 0.6 s; back in, it needs 1.6 s more
 	T.root_t = 0.0
 	var home := T.pos
@@ -1796,10 +1818,10 @@ func rimewright() -> void:
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
+			"tm Shift: full skating speed within about 0.2 s, a trail of ice plates, no ground disc",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
 				and K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time) >= 4
-				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
+				and _no_disc(m),
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",
@@ -1812,8 +1834,9 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
+			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
+			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
+				and _no_disc(m), "dashes %.2f" % P.dashes)
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()
@@ -1906,7 +1929,8 @@ func rimewright() -> void:
 		since += 1.0 / 60.0
 	ok(
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
-			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
+			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp >= float(ld["burst_dmg"]) * 0.9
+			and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor

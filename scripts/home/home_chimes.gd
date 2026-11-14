@@ -1,10 +1,9 @@
 class_name HomeChimes
 extends RefCounted
-## A Boki's own chime at home when it gains a stat, a level (garden_xp.json pays it in the garden), crosses its
-## evolve level (a brighter chime) or a new form or part (docs/AUDIO.md). It watches each Boki's record rather
-## than every place that raises them, so a new source needs no wiring. Events on one Boki that land within
-## MERGE_S share one chime: the biggest one. A sleeping Boki makes no sound (the card and the evolution scene
-## still show it).
+## A Boki's own chime at home when it gains a stat, a level (garden_xp.json pays it in the garden) or a new
+## form or part (docs/AUDIO.md). It watches each Boki's record rather than every place that raises them, so a
+## new source needs no wiring. Events on one Boki that land within MERGE_S share one chime: the biggest one.
+## A sleeping Boki makes no sound (the card and the evolution scene still show it).
 
 const KINDS := ["stat", "level", "ready", "evolve"]     # smallest first: a merged chime plays the last one here
 const MERGE_S := 0.5     # s: an event this soon after a Boki's chime joins it instead of playing again

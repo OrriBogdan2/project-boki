@@ -124,7 +124,7 @@ func run(main: Node) -> void:
 ## no input block, one line in the lane; hot over solid ground, or a second time, says nothing.
 func _burn_hint(e: Dictionary) -> void:
 	var stub := GDScript.new()
-	stub.source_code = "extends Node\nvar lines: Array = []\nfunc tip(t): lines.append(t)\n"
+	stub.source_code = "extends Node\nvar lines: Array = []\nfunc tip(t, _near = \"\"): lines.append(t)\n"
 	stub.reload()
 	var hud: Node = stub.new()
 	m.hud = hud

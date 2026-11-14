@@ -60,11 +60,13 @@ func _sliders(where: String) -> void:
 	Overlay.open_settings()
 	var sliders := Overlay.find_children("*", "HSlider", true, false)
 	ok(sliders.size() >= 4, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
-	for i in mini(4, sliders.size()):
-		var key: String = BUSES.keys()[i]
+	# the page lists one slider per Settings.BUSES entry, in that order (Voices and UI sit between the others)
+	for i in mini(Settings.BUSES.size(), sliders.size()):
+		var key: String = Settings.BUSES.keys()[i]
+		var bus: String = Settings.BUSES[key]
 		(sliders[i] as HSlider).value = 0.35
-		var moved := absf(_db(BUSES[key]) - linear_to_db(0.35)) < TOL
-		ok(moved, "%s: dragging the %s slider moves the %s bus (%.1f dB)" % [where, key, BUSES[key], _db(BUSES[key])])
+		var moved := absf(_db(bus) - linear_to_db(0.35)) < TOL
+		ok(moved, "%s: dragging the %s slider moves the %s bus (%.1f dB)" % [where, key, bus, _db(bus)])
 	await _mouse_drag(where, sliders)
 	Overlay.close()
 	# every other bus still sends where it should (Music/SFX/Ambience -> Master), so a slider reaches the speakers

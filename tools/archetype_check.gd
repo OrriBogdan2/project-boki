@@ -663,7 +663,7 @@ func _bulwark() -> void:
 	step(m, 1.3, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	P.inp["fire"] = false
 	step(m, 0.3)
-	ok("bulwark LMB hold: full Crushing Blow", dmg(T) >= 30.0 and T.stun_t > 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
+	ok("bulwark LMB hold: full Crushing Blow (damage, no stun of its own)", dmg(T) >= 30.0 and T.stun_t <= 0.0, "took %.0f stun %.2f" % [dmg(T), T.stun_t])
 	# dash: Whirl; with the shield up, a Shield Charge
 	P.teleport(home); P.dashes = P.max_dashes(); fresh(T); T.teleport(home + Vector3(6, 0, 0)); aim_at(P, T.pos)
 	P.inp["move"] = Vector2(1, 0)

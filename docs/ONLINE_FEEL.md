@@ -154,7 +154,7 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
 - **Gap, not fixed: Sparkle's Kitefall crash steps 4 to 5.7 m in one frame on the other game** (4 of 5 runs,
   with and without delay; the own game's largest step is 1.06 m). Cause: the crash is a scripted 0.15 s lerp
   (`MageUlt._fall_tick`, scripts/arch/kits/mage_ult.gd:280, sets `h.vel = ZERO`), so the snapshot reports no
-  velocity; the owner sends 10 Hz (`send_t = 0.1`, scripts/core/net.gd:228), so the other game sees one or two
+  velocity; the owner sends 10 Hz (`send_t = 0.1`, scripts/core/net.gd:229), so the other game sees one or two
   snapshots of a 4.5 m fall, and `Ent.net_follow` (scripts/match/ent.gd:326) jumps when the gap is over 4 m
   (line 332). Raising that threshold with the owner's speed was tried and made it no better (the velocity is
   zero), so it was reverted. A fix needs the fall's velocity in the snapshot (the kit setting `h.vel` while the
@@ -193,6 +193,43 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   when that snapshot falls in the fall's last 0.03 s (not seen in the check's runs).
 - Not measured: a mover owned by the host with the caster on the guest (every row has the host casting, so
   the guest is the one moved); Kael's Warchain on a bot (that is the offline reference).
+
+## Remote smoothing: the 0.24.4 gate's 5 reds (`--remote-smooth-check`)
+
+docs/GATE_0244.md had `--remote-smooth-check` at 5 failures on both trees. Run on origin/main 88b06b9e7 on rpc7
+(32 cores, load ~35): `--headless` 0 failures in 2 of 2 runs; xvfb 4 failures (25 snaps, 158 jerks, 22 backsteps,
+0.97 m off the path). Not the 2x map, not a new move, not NetSmooth. Three causes, by weight:
+
+- **The check under xvfb (the gate's reds).** It stepped the host's match once per frame. Drawn on llvmpipe, the
+  host ran ~30 fps with frames over 0.1 s, so its match clock (the snapshots' time) ran at half the wall clock and
+  fell up to 0.6 s behind. The guest's buffer then ran past the newest snapshot and started over at its 0.5 s
+  resync. The game doesn't do this: `Match._process` steps on the wall clock. The check now steps both games the
+  same way (an accumulator, frames clamped to 0.1 s), stamps each step with the wall moment it stands for, and
+  stops the host drawing (`RenderingServer.render_loop_enabled = false`; only the headless guest is measured).
+  `RSMOOTH load` prints what frames over 0.1 s still cost each game's clock in the run, so a stall can be told
+  from a jerk. Moving the lag relay into its own process was tried and made no difference. After this: 0-2
+  failures a run in both modes (1 backstep, or one 0.3-0.7 m overshoot).
+- **The snapshot rate, in the game.** `Net.tick` sent a snapshot every 7th step (0.117 s, 8.6 a second), not
+  every 0.1 s: `send_t = 0.1` minus six 1/60 s steps leaves 1e-17, so `<= 0` waited one step more. This dates
+  from the first commit; host world snapshots went every 10th step (0.167 s) instead of 0.15 s. NetSmooth's
+  0.15 s delay assumes a 0.1 s gap plus 40 ms of jitter. 0.117 s plus 40 ms overran it: the body ran on past a
+  late snapshot and the next one pulled it back. Now a timer within 1 ms of 0 is due (`Net.SEND_DUE`): 10 and
+  6.7 snapshots a second, 17% and 11% more snapshot traffic. No shape change, so Net.VERSION stays.
+- **The lag relay's ordering (the check).** It gave every packet its own jitter and dropped a snapshot that a
+  newer one overtook (ENet's ordered rule). Snapshots are 0.1 s apart and the jitter is +-20 ms, so only packets
+  sent in the same step could swap: the host's hunter and world snapshots. With the 10 Hz fix they share a step
+  every 0.3 s, and half of those swaps dropped the hunter's snapshot (28 lost in a run, not ~7). That sometimes
+  turned the 5 m lift into a sweep under the 40 m/s snap speed. A real line queues packets in order, so the
+  relay now keeps send order per peer and the overtake rule is gone.
+
+Measured after all three: 4 runs at once at load ~35 (2 `--headless`, 2 xvfb), 0 failures each. 7 snapshots
+lost (the 2%), 1 snap (the lift), 3-7 jerks, 0 backsteps, 0 overshoot (max 0.03 m off the path), drawn 200-205 ms
+behind, 0 ms of either game's clock lost to stalls.
+Left: in 12 runs since all three fixes, one headless run had 1 backstep at the end of the knock slide. A snapshot
+was lost or late while the true body slowed, NetSmooth ran the body on at its last velocity (RUN_ON), and the next
+snapshot pulled it back 0.14 m. That is NetSmooth's own edge, not load (0 ms stalls in that run). It is in
+docs/DEBT.md: the fix (blend the correction instead of jumping back) touches the same code as ext/feel-online-150's
+jitter buffer, so it should come after that lands.
 
 ## Cross-region: 150 ms each way, 20 ms jitter (2026-11-11)
 
@@ -261,3 +298,64 @@ fast or slow while the margin changes (`NetSmooth.SLEW`), so it never goes back,
 behind on that line at worst). Side by side at load ~230 (two runs each), main / the jitter buffer / this:
 jerks 26, 11 / 35, 15 / 4, 4 (5, 2 with the 100 ms cap), drawn 175-185 / 235-255 / 205-235 ms. 150 ms each
 way with 20 ms of jitter still passes 52/0 (Rampage rubber band 0.29 m).
+## The squad rocket drop (`--online-rocket-check[=<ms>]`)
+
+`tools/online_rocket_check.gd` (the same three processes and 100 ms delay proxy) plays the drop with a host and a
+guest in one squad: the host leads and steers the rocket for the nearest island, the guest rides, jumps out 1.6 s
+after the launch, free-falls steering with the keys, pulls the glider with a fresh press 1.4 s later and glides to
+the island; the rocket lands on its own. The games run on real time (a step per 1/60 s of wall clock, caught up
+after a slow frame, as a real match does) so the two clocks do not drift apart on a loaded box; the guest's ship
+is 0.2 s ahead of the host's (two games never start together). Every frame each game records every remote body
+it knows and the largest step per 1/60 s (a catch-up frame is scaled back to one step) is flagged over 0.5 m.
+
+Largest step in one frame of a remote body (m, quiet-box run, 100 ms each way; "own body" is the real one on
+its own game, for reference; rival bots are the host's, seen on the guest):
+
+| Game | Body | Phase | Frames | Largest step per 1/60 s (m) | Frames over 0.5 m | Catch-up frames | Worst at (s after launch) |
+|---|---|---|---|---|---|---|---|
+| host | squadmate (the other player) | ride | 104 | 0.45 | 0 | 0 | 3.3 |
+| host | squadmate (the other player) | fall | 85 | 0.44 | 0 | 0 | 3.5 |
+| host | squadmate (the other player) | glide | 833 | 0.34 | 0 | 0 | 6.6 |
+| host | squadmate (the other player) | landing | 86 | 0.25 | 0 | 0 | 34.6 |
+| host | own body (this game) | ride | 104 | 0.46 | 0 | 0 | 2.4 |
+| host | own body (this game) | fall | 85 | 0.43 | 0 | 0 | 4.7 |
+| host | own body (this game) | glide | 833 | 0.60 | 1 | 0 | 9.3 |
+| host | own body (this game) | landing | 86 | 0.00 | 0 | 0 | 0.0 |
+| guest | squadmate (the other player) | ride | 104 | 0.45 | 0 | 1 | 2.8 |
+| guest | squadmate (the other player) | fall | 85 | 0.43 | 0 | 0 | 5.2 |
+| guest | squadmate (the other player) | glide | 92 | 0.40 | 0 | 0 | 6.3 |
+| guest | squadmate (the other player) | landing | 51 | 0.40 | 0 | 0 | 9.2 |
+| guest | rocket (follower copy) | ride | 95 | 0.45 | 0 | 1 | 2.8 |
+| guest | rocket (follower copy) | fall | 85 | 0.43 | 0 | 0 | 5.2 |
+| guest | rocket (follower copy) | glide | 92 | 0.40 | 0 | 0 | 6.3 |
+| guest | rocket (follower copy) | landing | 16 | 0.40 | 0 | 0 | 9.2 |
+| guest | own body (this game) | ride | 104 | 0.80 | 1 | 1 | 0.3 |
+| guest | own body (this game) | fall | 85 | 0.40 | 0 | 0 | 3.5 |
+| guest | own body (this game) | glide | 92 | 0.23 | 0 | 0 | 6.3 |
+| guest | own body (this game) | landing | 51 | 0.15 | 0 | 0 | 9.3 |
+| guest | rival bots | ride | 208 | 0.43 | 0 | 2 | 1.8 |
+| guest | rival bots | fall | 170 | 0.60 | 2 | 0 | 4.5 |
+| guest | rival bots | glide | 184 | 0.12 | 0 | 0 | 9.3 |
+| guest | rival bots | landing | 102 | 0.12 | 0 | 0 | 9.3 |
+
+What it showed:
+
+- **The follower's rocket snapped the rider.** A squadmate's rocket is made where their own ship is, then followed
+  the leader's synced position in one jump (`pos = l.pos`). With the ships 0.2 s apart (a ship moves ~30 m/s) the
+  guest's own body jumped 2.2 m in one frame at the launch (3.3 m with a 0.1 s clock error); the other game saw it
+  smeared over several frames. `DropRocket.tick` now closes the gap at the rocket's speed plus 8 m/s (`CATCH`),
+  and only jumps past 40 m (`FOLLOW_SNAP`): the guest's own launch step is 0.8 m (the 0.8 m seat drop from the ship
+  to the rocket, by design) with the skew, 0.45 to 0.8 across runs. Checked: the guest's own body on the rocket
+  stays under 1.0 m. No Net shape change (the "rkt" event is as in 0.24.6), so `Net.VERSION` stays.
+- **Free fall and glide are clean.** The other game sees the jumper at 0.25 to 0.45 m a frame all the way down
+  (the free fall steers with `Loco.air_step`, the glider opens on the fresh press); the follower copy of the
+  rocket (the leader) 0.40 to 0.45 at its 24 m/s top speed, the nominal 0.4.
+- **Both ends agree** to 0.01 m (the guest where it landed, the leader where the rocket set it down).
+- **Gap, not fixed: on a loaded box the host sees the guest's rider in the first second after the launch with
+  1 to 4 m steps** (about half the runs; the guest's own path is smooth, 0.45 to 0.8 m). The host's copy had snapshot
+  gaps (0.12 s, then 0.47 s) at 100 ms delay and none at 0 ms. Not traced: the guest builds the rocket's meshes
+  that frame (a hitch holds its 10 Hz snapshots), or the unreliable "st" packets over the 1392-byte MTU (Godot warns
+  at 1503 bytes on the host's) are lost. Those runs print `ODROCKET FLAG` lines and the check does not fail on them.
+- **Harness caveat found on the way:** one sim step a frame at less than 60 fps drifted the two games' clocks
+  apart by 0.2 s, which NetSmooth reads as lag and shows as a 1.3 m step every snapshot; the check steps on real
+  time for that reason (`--online-displace-check` still steps one a frame).

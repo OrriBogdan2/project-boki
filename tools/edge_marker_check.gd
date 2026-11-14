@@ -6,15 +6,18 @@ extends RefCounted
 ##   3. a crowd of markers close together never overlaps on either rim
 ## Never touches the save.
 
-const ANGLES := [0.0, 0.7, -1.57, 2.3, 3.14, 3.9]      # rad: right, down-right, up, down-left, left, up-left
+const ANGLES := [0.0, 0.7, -1.57, 2.3, 3.14, 3.9]  # rad: right, down-right, up, down-left, left, up-left
 const MINI := Rect2(Vector2(10, 10), Vector2(180, 180))
-const MINI_R := 90.0      # px: the round minimap's rim
+const MINI_R := 90.0  # px: the round minimap's rim
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("EDGEMARK %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _overlaps(items: Array[Dictionary]) -> int:
 	var n := 0
@@ -24,6 +27,7 @@ func _overlaps(items: Array[Dictionary]) -> int:
 				n += 1
 	return n
 
+
 ## A rim to test: the world's (labelled markers, a radius of 0) or the minimap's (round, bare arrows).
 func _rim(e: EdgeMarker, world: bool) -> void:
 	if world:
@@ -31,11 +35,13 @@ func _rim(e: EdgeMarker, world: bool) -> void:
 	else:
 		e.begin(MINI, 4.0, MINI_R)
 
+
 func _add(e: EdgeMarker, world: bool, dir: Vector2, col: Color, prio: int, i: int) -> void:
 	if world:
 		e.add(dir, col, prio, "Marker %d" % i, 10.0 * i)
 	else:
 		e.add(dir, col, prio)
+
 
 func run(main: Node) -> void:
 	var e := EdgeMarker.new()

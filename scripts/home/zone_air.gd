@@ -6,10 +6,12 @@ extends RefCounted
 ## in content/rules/zone_air.json. Off at the lowest quality preset, the count scaled by Settings fx above it.
 
 const NAME := "ZoneAir"
-const PREWARM_MAX_S := 3.0     # s of motion run on arrival so the air is already full, capped to keep the load light
+const PREWARM_MAX_S := 3.0  # s of motion run on arrival so the air is already full, capped to keep the load light
+
 
 static func rules() -> Dictionary:
 	return Content.rules("zone_air")
+
 
 ## The layer for the zone the open garden shows, or {} (no base_mode, the hub, or a zone without one).
 static func layer() -> Dictionary:
@@ -17,11 +19,13 @@ static func layer() -> Dictionary:
 		return {}
 	return rules()["zones"].get(GardenZones.current(), {})
 
+
 ## How many motes the layer gets at the quality in effect (0 is none).
 static func count(spec: Dictionary) -> int:
 	if Settings.quality() == String(rules()["off_at"]):
 		return 0
 	return maxi(1, roundi(float(spec["count"]) * float(Settings.q("fx"))))
+
 
 ## Adds the zone's layer to Home `h` (once, from its build). Returns the node, or null when there is none.
 static func add(h: Node3D) -> GPUParticles3D:
@@ -33,6 +37,7 @@ static func add(h: Node3D) -> GPUParticles3D:
 	p.position = HomeLayout.LANDING + Vector3(0, float(spec["y"]), 0)
 	h.add_child(p)
 	return p
+
 
 static func _emitter(spec: Dictionary, n: int) -> GPUParticles3D:
 	var box := Vector3(rules()["box"][0], rules()["box"][1], rules()["box"][2])
@@ -62,6 +67,7 @@ static func _emitter(spec: Dictionary, n: int) -> GPUParticles3D:
 	p.draw_pass_1 = quad
 	return p
 
+
 ## Alpha 0 -> 1 over the first `share` of a mote's life and back to 0 over the last.
 static func _fade(share: float) -> GradientTexture1D:
 	var g := Gradient.new()
@@ -70,6 +76,7 @@ static func _fade(share: float) -> GradientTexture1D:
 	var tex := GradientTexture1D.new()
 	tex.gradient = g
 	return tex
+
 
 ## Unshaded, see-through, facing the camera, tinted by the fade ramp.
 static func _look(col: Color) -> StandardMaterial3D:
