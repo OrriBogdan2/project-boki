@@ -5,6 +5,11 @@ extends Node
 signal changed(key: String)
 
 const PATH := "user://settings.cfg"
+## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
+## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
+## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
+const UI_SCALE_MIN := 0.75
+const UI_SCALE_MAX := 1.1
 const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
@@ -343,11 +348,8 @@ func _apply_ui_scale() -> void:
 	var win := Vector2(get_tree().root.size)
 	if win.x < 10.0 or win.y < 10.0:
 		return
-	var user := clampf(float(v.get("ui_scale", 1.0)), 0.75, 1.5)
-	var fit := minf(win.y / 720.0, win.x / 1240.0)
-	var f := user * fit
-	# never let the user's own size setting push the layout past the window either
-	f = minf(f, minf(win.y / 640.0, win.x / 1100.0))
+	var user := clampf(float(v.get("ui_scale", 1.0)), UI_SCALE_MIN, UI_SCALE_MAX)
+	var f := user * minf(win.y / 720.0, win.x / 1240.0)
 	if absf(get_tree().root.content_scale_factor - f) > 0.001:
 		get_tree().root.content_scale_factor = f
 
@@ -520,27 +522,39 @@ func clear_bind(action: String, slot: int) -> void:
 	sl[slot] = ""
 	_set_slots(action, sl)
 
-## Other rebindable actions already using this key or button: [[action, slot], ...].
-func conflicts(ev: InputEvent, except := "") -> Array:
-	var s := ev_code(ev)
+## Actions already on this key or button code: [[action, slot], ...].
+func holders(code: String, except := "") -> Array:
 	var out: Array = []
-	if s == "":
+	if code == "":
 		return out
 	for a in ACTIONS:
 		if a[0] == except: continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+			if sl[i] == code: out.append([a[0], i])
 	return out
 
-## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
-		["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
+## Actions that only run at home (the garden) and ones that only run in a match.
+const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
+const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
+
+## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
+## training-only actions, the lobby's push to talk).
+const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
 		["goals", "throw"], ["fold_guide", "whistle"]]
-func _shared_ok(a: String, b: String) -> bool:
+
+## Two actions may share a key only when they never run in the same place: one at home, the other in a match
+## (or a pair listed in SHARED_OK).
+func can_share(a: String, b: String) -> bool:
+	if (a in HOME_ONLY and b in MATCH_ONLY) or (a in MATCH_ONLY and b in HOME_ONLY): return true
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
+
+## Other rebindable actions that would clash with this key or button: [[action, slot], ...] (the
+## ones that run somewhere else don't count).
+func conflicts(ev: InputEvent, except := "") -> Array:
+	return holders(ev_code(ev), except).filter(func(h): return not can_share(h[0], except))
 
 ## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
 ## what `action` had there instead, so none of them loses a key.

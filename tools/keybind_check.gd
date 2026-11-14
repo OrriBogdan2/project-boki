@@ -105,6 +105,8 @@ func run(main: Node) -> void:
 	S.swap_bind("ultimate", 0, _key(KEY_F), cf)
 	ok(S.slots("ultimate")[0] == "key:%d" % KEY_F and S.slots("interact")[0] == "key:%d" % KEY_X, "swapping gives Interact the ultimate's old key (ult %s, interact %s)" % [S.binding_text("ultimate"), S.binding_text("interact")])
 	S.reset_all()
+	var clash = load("res://tools/keybind_clash_check.gd").new()
+	bad += clash.rules(S)
 	_dash_on_r(S)
 	# (the move of old saves to the new defaults is --ultbond-check)
 	# the arena and duel resets are on Backspace now
@@ -129,6 +131,9 @@ func run(main: Node) -> void:
 	ok(Overlay.has_meta("bind_conflict") and is_instance_valid(Overlay.get_meta("bind_conflict")), "the binding page warns about the clash and offers a swap")
 	if shot != "":
 		tree.root.get_texture().get_image().save_png(shot + "/keybinds_conflict.png")
+	(Overlay.get_meta("bind_conflict") as Control).queue_free()
+	await tree.process_frame
+	bad += await clash.page(tree, S)
 	var stale: Array = S.ACTIONS.filter(func(x): return String(x[1]).containsn("archetype"))
 	ok(stale.is_empty(), "no Controls label says Archetype (the game says Hunter)")
 	S.reset_all()
