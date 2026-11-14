@@ -15,6 +15,7 @@ const NO_GROUND := -1000.0       # m: a ground height far below everything, so a
 ## WORD_HOLD s is dropped, so a fight never stacks a tower of names; what holds a body shows on it (BodyTell).
 const WORD_ROOM := 3.0
 const WORD_HOLD := 0.6
+const UNDER_A := 0.35          # share of its alpha a telegraph keeps when a higher one covers its centre
 var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 
 var bursts: Array[CPUParticles3D] = []
@@ -236,7 +237,6 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
-const UNDER_A := 0.35          # share of its alpha a telegraph keeps when a higher one covers its centre
 const PARTICLES := 0.6
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out

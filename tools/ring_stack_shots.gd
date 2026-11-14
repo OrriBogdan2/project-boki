@@ -77,6 +77,6 @@ func _stage() -> void:
 
 
 ## A ground circle cast by `by`, in the viewer's side lean and ground order (SideColor), part filled.
-func _circle(by: Hunter, at: Vector3, r: float, col: Color) -> void:
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, by, col), 0.9), SideColor.order(m, by))
+func _circle(by: Hunter, at: Vector3, r: float, tint: Color) -> void:
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, by, tint), 0.9), SideColor.order(m, by))
 	m.fx.telegraph_progress(tele, FILL)
