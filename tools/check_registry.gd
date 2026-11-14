@@ -430,6 +430,8 @@ const CHECKS := {
 	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
 	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
+	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
+	"--ui-sfx-check": ["res://tools/ui_sfx_check.gd", "ui_sfx_check", null],     # slider, toggle, tab sounds
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],
