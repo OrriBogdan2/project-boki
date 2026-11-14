@@ -15,6 +15,7 @@ extends RefCounted
 ##  10. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
 ## 11. an ally's Hearth Call on you: a slim bar with Meeko's portrait under your vitals, draining over the
 ##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
+## 12. the low-health wash grows with missing health and leans toward the side the last hits came from
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -214,6 +215,7 @@ func run(main_node: Node) -> void:
 	_check_deny(P)
 	await _frames(m, hud, P)
 	await _check_ult(P)
+	await _check_wash(P)
 	_done()
 
 ## 3. Your shield in the vitals: a heal shield lays a strip over the top of your health with the heal icon,
@@ -367,6 +369,36 @@ func _check_ult(P: Hunter) -> void:
 func _redraw(hud) -> void:
 	await hud.panels.draw
 	await main.get_tree().process_frame
+
+## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
+## Hud.hurt_from, the real path) weights the left edge, and a second later the wash is even again.
+func _check_wash(P: Hunter) -> void:
+	var hud = P.m.hud
+	var hp_was := P.hp
+	P.hp = P.max_hp * 0.5
+	var above := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.3
+	var high := HurtWash.strength(P)
+	P.hp = P.max_hp * 0.1
+	var low := HurtWash.strength(P)
+	ok(above == 0.0 and high > 0.0 and low > high, "the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)"
+		% [int(HurtWash.BELOW * 100.0), high, low])
+	hud.hurt_dirs.clear()
+	ok(HurtWash.weight_at(hud.hurt_dirs, PI) == 0.0, "no recent hits: the wash is even all round")
+	hud.hurt_from(P.pos + Vector3(-6.0, 0.0, 0.0))
+	var left := HurtWash.weight_at(hud.hurt_dirs, PI)
+	var right := HurtWash.weight_at(hud.hurt_dirs, 0.0)
+	var top := HurtWash.weight_at(hud.hurt_dirs, -PI * 0.5)
+	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
+	ok(left > 0.9 and right == 0.0 and top < left, said)
+	await frames_until(P.m, P.m.time + HurtWash.FADE + 0.05)
+	var eased := HurtWash.weight_at(hud.hurt_dirs, PI)
+	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
+	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
+	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
+	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
+	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)     # (the middle third stays clear)
+	P.hp = hp_was
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
