@@ -22,6 +22,8 @@ const CHECKS := {
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
 	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
 	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
+	"--cam-lead-check": ["res://tools/cam_lead_check.gd", "cam_lead_check", "check"],      # footage: no cursor lean
+	"--cam-lead-shots": ["res://tools/cam_lead_check.gd", "cam_lead_check", "shots"],      # --shots-dir=<dir>
 	"--place-clearance-check": ["res://tools/place_clearance_check.gd", "place_clearance_check", null],      # clearance
 	"--ways-out-map-check": ["res://tools/ways_out_map_check.gd", "ways_out_map_check", null],      # spec 8 sites
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
