@@ -1,10 +1,10 @@
 extends RefCounted
-## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels]: every screen of the first 15 minutes on a
+## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=front|match|panels]: every screen of the first 15 minutes on a
 ## fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
 ## panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per shot:
 ## the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
-## 5% margin. --part=match (first expedition and pause) or --part=panels (farm, expedition panel, Relics)
-## plays one part alone from a made-up save.
+## 5% margin. --part=front (title to the first Relic, from the fresh save), --part=match (first expedition and
+## pause) or --part=panels (farm, expedition panel, Relics) plays one part alone (the last two from a made-up save).
 ## Needs a real renderer (jobq submit --needs gpu).
 ## Never writes the save. The write-up is docs/UI_FIRST15.md.
 
@@ -37,6 +37,8 @@ func run(main_node: Node) -> void:
 	tree.root.size = win
 	await _wait(1.0)
 	match part:
+		"front":
+			await _front()
 		"match":
 			_made_up_save()
 			await _first_match()
@@ -97,6 +99,10 @@ func _front() -> void:
 	hx._end_intro()
 	await _wait(2.0)
 	await _shot("creator")
+	hx.looks_open = true
+	hx._show_create()
+	await _wait(0.8)
+	await _shot("creator_more", "b")
 	hx._looks_good()
 	await _wait(1.5)
 	await _shot("hatch_eggs")
@@ -108,7 +114,7 @@ func _front() -> void:
 	hx._show_name()
 	await _wait(1.0)
 	await _shot("hatch_name")
-	hx._finish(String(hx.egg_defs[0]["species"]), "", "", true)
+	hx._finish(String(hx.egg_defs[0]["species"]), "", true)
 	await _wait(2.5)
 	await _shot("first_mask")
 	hx.queue_free()
@@ -208,15 +214,18 @@ func _first_match() -> void:
 	await _shot("pause")
 
 # ------------------------------------------------------------------ shots and layout
-## Saves the window as <dir>/NN_<what>.jpg and appends what the layout scan found to the report.
-func _shot(what: String) -> void:
+## Saves the window as <dir>/NN_<what>.jpg and appends what the layout scan found to the report. A second view of
+## the same screen passes a letter and keeps its number (NNb_<what>), so the shots after it keep theirs.
+func _shot(what: String, extra := "") -> void:
 	await _frames(2)
 	await RenderingServer.frame_post_draw
-	n += 1
+	if extra == "":
+		n += 1
+	var file := "%02d%s_%s" % [n, extra, what]
 	var vp := main.get_viewport()
-	vp.get_texture().get_image().save_jpg(dir.path_join("%02d_%s.jpg" % [n, what]), 0.85)
+	vp.get_texture().get_image().save_jpg(dir.path_join(file + ".jpg"), 0.85)
 	var view := vp.get_visible_rect().size
-	lines.append("## %02d_%s (window %dx%d, laid out in %dx%d)" % [n, what, vp.size.x, vp.size.y, view.x, view.y])
+	lines.append("## %s (window %dx%d, laid out in %dx%d)" % [file, vp.size.x, vp.size.y, view.x, view.y])
 	_scan_controls(main, view, false)
 
 ## Visible controls that cross the window edge or sit inside the margin (ones inside a scroll area
