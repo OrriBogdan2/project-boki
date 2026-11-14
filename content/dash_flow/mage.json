@@ -31,5 +31,40 @@
 			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/vireo.md:80-94): the Lightning Spear is a hold (press 0043, 0057, 0078, throw 1.2 s later, frames 0044-0048); she stood still through every hold, and Surge was never pressed inside one (the spear is thrown first, then the dash: vireo.md:211-219, frames 0105, 0133-0135, 0161-0171). Open question vireo.md:386 'can she move while holding the spear or Surge'. Air Surge not shown (vireo.md:472-473, 503). Data: briefs/supervive-data/supervive_kits.md:66-67 (Joule: Voltaic Spear, Surge) have nothing on a spear hold through a dash. Kept: the hold carries through (owner item 51)."},
 			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/vireo.md:80-94): the Lightning Spear is a hold (press 0043, 0057, 0078, throw 1.2 s later, frames 0044-0048); she stood still through every hold, and Surge was never pressed inside one (the spear is thrown first, then the dash: vireo.md:211-219, frames 0105, 0133-0135, 0161-0171). Open question vireo.md:386 'can she move while holding the spear or Surge'. Jump not shown (vireo.md:475-476, 503). Data: briefs/supervive-data/supervive_kits.md:66-67 (Joule: Voltaic Spear, Surge) have nothing on a spear hold through a dash. Kept: the hold carries through (owner item 51)."}
 		}
+	},
+	"into_cast": {
+		"lmb": {
+			"at": [0.05, 0.6],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a shot in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"lmb_hold": {
+			"at": [0.3, 0.95],
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside a held shot in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"rmb": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."},
+			"e": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its RMB in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"e": {
+			"at": [0.05, 0.6],
+			"lmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."},
+			"lmb_hold": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."},
+			"rmb": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."},
+			"x": {"windup": "fire", "recovery": "fire", "source": "[?] Joule presses nothing else inside its E in the clip (briefs/hero-ref/vireo.md)."}
+		},
+		"x": {
+			"at": [0.05, 2.6],
+			"lmb": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."},
+			"lmb_hold": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."},
+			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."},
+			"e": {"windup": "drop", "recovery": "fire", "source": "[?] Eye of the Storm: the leap comes about 0.4 s after the press, and no other press is shown in that wind-up or after the landing (briefs/hero-ref/vireo.md:194-207)."}
+		}
 	}
 }
