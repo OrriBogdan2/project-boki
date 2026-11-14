@@ -197,8 +197,7 @@ func launch(l: Hunter, from_net := false) -> void:
 	if m.net_on and not from_net:
 		m.net_event(["rkt", l.nid])
 	if m.player and r.riders.has(m.player):
-		if m.hud:
-			m.hud.toast("%s to jump out  ·  then %s again for your glider" % [Settings.key_cap("jump"), Settings.key_cap("jump")], Color("cfeaff"))
+		_show_hint(r)
 
 ## The heading the skydive camera sits behind: the squad rocket's launch heading (north-up without one).
 func drop_yaw(h: Hunter) -> float:
@@ -275,7 +274,10 @@ func _show_hint(r: DropRocket) -> void:
 		text = "Ride along, or %s to jump out and fall; %s opens the glider" % [Settings.key_cap("jump"),
 			Settings.key_cap("glide")]
 		tip_key = "rocket_ride"
-	_hint = text if m.tip_once(tip_key, text) else ""
+	_hint = ""
+	if m.hud and m.tip_once(tip_key):
+		m.hud.tip(text)
+		_hint = text
 
 ## Hides the rocket hint once the player acts: steers (the leader), passes the lead, jumps out or lands.
 func _tick_hint() -> void:

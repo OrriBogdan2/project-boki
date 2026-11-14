@@ -1422,7 +1422,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				tip_once("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -5646,12 +5646,12 @@ func _tips() -> void:
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	if _tip_t > 14.0:
 		if player.ak:
-			tip_once("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
-			tip_once("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: tip_once("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
@@ -5667,18 +5667,17 @@ func _tips() -> void:
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			tip_once("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
+			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		tip_once("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		var scan := Settings.key_cap("interact")
-		tip_once("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % scan)
+		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		tip_once("exit_uplink", "Start the uplink, hold the yard, then take the lift")
+		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:
-		tip_once("down", "Down  ·  a trusting Boki may pick you up")
+		_tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands
