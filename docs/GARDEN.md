@@ -133,3 +133,14 @@ or rare (rare is gold). Each is one quad, one at a time, with no particles. `--g
 `--glint-fx-shots --shots-dir=<dir>` (through `jobq submit --needs gpu`) writes the sheet `looks.png`.
 Default taken: the rings' timing is tied to the ears, not to the hidden bite time, so they never warn earlier than Focus
 allows. The alternative (rings closing over the whole wait) would leak the bite to a player with no Focus.
+
+## Shaping items: the preview card
+
+Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
+`ItemPreviewCard` (scripts/ui/item_preview_card.gd) slides in with every change drawn as a ghost. It shows the stat
+bars with the real gain after caps, the budget and lean rings, and on a branching line the path meter (both finals
+as silhouettes, pips before and after, the verdict, and a Why? list of pip sources). For a second the Boki tries the
+change on: its new colour or the path token. Interact there gives the item; walking away from that Boki ends the
+hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
+`EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
+in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.

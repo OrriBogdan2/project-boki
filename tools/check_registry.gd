@@ -94,6 +94,8 @@ const CHECKS := {
 	"--evo-path-check": ["res://tools/evo_path_check.gd", "evo_path_check", null],      # GARDEN_MODERN.md 3
 	"--first-evolve-check": ["res://tools/first_evolve_check.gd", "first_evolve_check", null],      # first-evolve beat
 	"--base-breed-check": ["res://tools/base_breed_check.gd", "base_breed_check", null],      # GARDEN.md 6
+	"--item-card-check": ["res://tools/item_card_check.gd", "item_card_check", "check"],      # GARDEN_MODERN.md 1.3
+	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	"--base-stray-check": ["res://tools/base_stray_check.gd", "base_stray_check", null],
 	"--homecoming-react-check": ["res://tools/homecoming_react_check.gd", "homecoming_react_check", null],  # GARDEN 4
 	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],      # each zone's ambient layer
