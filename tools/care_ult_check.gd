@@ -130,6 +130,8 @@ func _tender_rescue() -> void:
 	sc.down(m, A)
 	step(m, 0.1)
 	P.hp = P.max_hp * 0.5
+	P.regen_wait = 10.0     # s, as if just hit: with her only teammate down she is the last one up, and LastAlive's
+	# self-mend (1 hp/s once regen_wait runs out) holds off, so any hp she gains below is the tether's
 	var p_hp0 := P.hp
 	A.down_hp = float(Data.MATCH["down_hp"]) * 0.4
 	var a_down0 := A.down_hp
