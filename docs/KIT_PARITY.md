@@ -792,6 +792,8 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Ryzz | lane 6.02-10.48 m at 43 m/s | same | no (owner item 70, lane cut 11-10, +7.5% 11-11) | time ×1.15 | 5.6-9.75 m at ~35 m/s | same |
 | Sable | 4.5 m/.48 s | the ground one with a charge (item 183) | F | ×1 | 4.5 m/.48 s | 4.5 m/.48 s, then the air's drag |
 
+Speed shape (docs/SUPERVIVE_FEEL.md "Dash speed curves", Nov 11, 1/15 s tracks): Grimble's ground Barge, Ryzz's Wirerun and Cinder's Soot Ram now run the source's fitted curve inside the felt distance and time above (Kingpin: full speed at once for a third, then a slowing tail; Joule: flat, easing over the last third; Felix: a burst at 0.1, a cruise, a dead stop, which replaces the kit's hand two-step). Tarek's Rock Hop is the owner's hop chain (item 111), so the source's Landslide push has no counterpart; every air dash of the four keeps a constant speed (none is in the footage).
+
 On a ×1 kit every Shift move runs its raw numbers, including the moves with no source figure: Bjorn's Shield Charge (4.2 m at 18 m/s), his short dash during the wind-up and his lumber, Vex's long dash and Hem's flick are now about 18% longer and 13% quicker than before.
 
 Those five, measured against the footage (`origin/ext/hero-ref-footage`, 5 fps; 1 bh = 1.8 m) and `briefs/supervive-data` on 2026-11-12: none shows the move, so none has a measure, no number moved and no `felt dash` row was added. DECISIONS has no owner line on any of them.

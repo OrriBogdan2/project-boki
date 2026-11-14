@@ -79,6 +79,12 @@ const T := {
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 10.5m, owner 11-11"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.05, 0.25], "x", "owner 11-11: little movement at the end (out_k 0.1)"],
+	"dash_curve_dredge_peak_u":       ["~", [0.0, 0.1], "", "[footage] Kingpin's push: full speed at once"],
+	"dash_curve_dredge_peak_k":       ["~", [1.3, 1.5], "x", "[footage] Kingpin 14.6 m/s, mean 9.8 (fit 1.42)"],
+	"dash_curve_mage_peak_u":         ["~", [0.0, 0.1], "", "[footage] Joule's Surge is flat from the start"],
+	"dash_curve_mage_peak_k":         ["~", [1.0, 1.12], "x", "[footage] Joule 33 m/s, mean 29.5 (fit 1.07)"],
+	"dash_curve_ashwick_peak_u":      ["~", [0.05, 0.18], "", "[footage] Felix's ram peaks 0.07s into 0.65s"],
+	"dash_curve_ashwick_peak_k":      ["~", [1.6, 1.95], "x", "[footage] Felix fit 1.88 (a step misses the tip)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
@@ -949,39 +955,40 @@ func _run_up() -> float:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
 		var speeds: Array[float] = []
-		var x0 := 0.0
-		for i in 90:
-			var x_was := P.pos.x
+		var p0 := Vector3.ZERO
+		var want := 0.0
+		for i in 120:
+			var pos_was := P.pos
 			var was_rolling := P.roll_t > 0.0
 			m.step(DT)
 			P.inp["dash"] = false
 			if P.ak.curved.is_empty() and speeds.is_empty():
 				continue
-			if speeds.is_empty(): x0 = x_was
+			if speeds.is_empty():
+				p0 = pos_was
+				want = _curve_dist(id)
 			speeds.append(P.roll_speed)
 			if was_rolling and P.roll_t <= 0.0:
 				break
 		print("MFEEL dash curve: %s, %d steps" % [id, speeds.size()])
-		var dd := P.ak.dash_def()
-		var feel := P.ak.dash_feel()
 		var mean := 0.0
 		for v in speeds: mean += v / speeds.size()
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
-		rec("dash_curve_dist", (P.pos.x - x0) / want)
+		rec("dash_curve_dist", Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / want)
 		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
 		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
+			var dd := P.ak.dash_def()
 			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
-			t *= float(feel["time"])
+			t *= float(P.ak.dash_feel()["time"])
 			rec("dash_curve_time", speeds.size() * DT / t)
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
 	_tender_glide()
@@ -1008,6 +1015,14 @@ func _tender_glide() -> void:
 	rec("dash_curve_tender_air_dist", (P.pos.x - x0) / float(air["dist"]))
 	rec("dash_curve_tender_air_time", speeds.size() * DT / float(air["time"]))
 	rec("dash_curve_tender_air_exit_k", float(speeds[-1]) / float(speeds.max()))
+
+## The metres a fitted hero's dash is set to cover: the kit's distance under the dash feel, or for Sparkle's
+## Wirerun (a lane length from the charge, along the aim) the length its run took.
+func _curve_dist(id: String) -> float:
+	if id == "mage":
+		return float(P.ak.curved["speed"]) * float(P.ak.curved["t0"])
+	var dd := P.ak.dash_def()
+	return float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(P.ak.dash_feel()["dist"])
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
