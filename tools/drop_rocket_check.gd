@@ -215,7 +215,8 @@ func _own_sounds() -> void:
 func _far_sounds() -> void:
 	await _start(0.0)
 	var foe := 1 - m.player.team
-	for i in int(10.0 / Match.DT):
+	# a bot leader jumps as the ship passes nearest its spot; at the latest the ship's run ends and forces it off
+	for i in int((float(m.ship["ride"]) + 1.0) / Match.DT):
 		if m.skydrop.rockets.has(foe):
 			break
 		m.step(Match.DT)
@@ -223,11 +224,12 @@ func _far_sounds() -> void:
 	if not m.skydrop.rockets.has(foe):
 		return
 	var r: DropRocket = m.skydrop.rockets[foe]
-	# over the middle of the map, so it comes down on ground (its own course can carry it out over the void,
-	# where it ejects its riders without a thud)
+	# above its bot leader's own landing spot, so it comes down on ground (its own course can carry it out over the
+	# void, where it ejects its riders without a thud; the map's middle can sit at the abyss lip)
 	var w: World = m.world
-	if not w.is_void(w.w * 0.5, w.h * 0.5):
-		r.pos = Vector3(w.w * 0.5, w.ground_at(w.w * 0.5, w.h * 0.5) + 40.0, w.h * 0.5)
+	var spot: Vector3 = m.skydrop.leader(foe).ai.get("land", Vector3(w.w * 0.5, 0.0, w.h * 0.5))
+	if not w.is_void(spot.x, spot.z):
+		r.pos = Vector3(spot.x, w.ground_at(spot.x, spot.z) + 40.0, spot.z)
 		r.vel = Vector3(0.0, r.vel.y, 0.0)
 	Sfx.last_played.clear()
 	var t := 0.0
