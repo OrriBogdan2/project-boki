@@ -390,6 +390,7 @@ func _lmb_numbers() -> void:
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
+	step(m, 0.1)      # a click's thrust goes on the release (a hold would be the Tide Lunge)
 	ok("numbers LMB: after 0.75 s idle the chain starts again at the first thrust", P.combo_i == 1, "i %d" % P.combo_i)
 
 ## Grab Bag: 2 charges, 5 s each, 8 m to the cursor, 0.35 s + 0.03 s a metre in the air.
