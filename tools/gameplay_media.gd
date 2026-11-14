@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-10> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-11> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -15,10 +15,13 @@ extends RefCounted
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
-##  10 stairs        a Hunter runs up the map's tallest flight of stairs and back down, then a bot (decision 0087)
+##  10 base to mate  B (BaseWheel, BaseRecall): hold for the wheel, point, let go, the 5.5 s channel lands beside
+##                   the teammate; then a second channel that a rival's hit breaks (INTERRUPTED). Its own length.
+##  11 stairs        a Hunter runs up the map's tallest flight of stairs and back down, then a bot (decision 0087)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
+const MATE_GAP := 13.0           # m from the player to each teammate (far enough that the teleport reads)
 const FRAME := 2.0 * STEP        # s per rendered frame
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
@@ -76,7 +79,8 @@ func run(main_node: Node) -> void:
 		7: await _show(secs)
 		8: await _relay(secs)
 		9: await _duo(secs)
-		10: await _stairs()
+		10: await _base_tp()
+		11: await _stairs()
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -444,7 +448,61 @@ func _duo(secs: float) -> void:
 	var tu := m.duo
 	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)
 
-# ------------------------------------------------------------------ 10: stairs
+# ------------------------------------------------------------------ 10: base to a teammate
+
+func _base_tp() -> void:
+	await _start("ashwick", "cindle")
+	var me := m.player
+	me.ctrl = "local"
+	var base := _ground(me.pos)
+	var mates := [_hunter("a1", me.team, "juggernaut", "pebbit", _ground(base + Vector3(MATE_GAP, 0, -3.0))),
+			_hunter("a2", me.team, "gunslinger", "zapple", _ground(base + Vector3(-3.0, 0, MATE_GAP)))]
+	for h in mates:
+		h.ctrl = "idle"
+		h.teleport(h.pos)
+	_zoom(0.75)
+	still_at = 4.5
+	_mark("take1")
+	await _wheel_take(me, mates[0], 1.0, base)
+	await _go(1.5, func(_t: float): me.inp["move"] = Vector2.ZERO, func(_t: float): return me.pos)
+	# take 2: back where we started, a rival close by, and its hit breaks the channel 2 s in
+	me.teleport(base)
+	me.base_cd = 0.0
+	me.weak_t = 0.0
+	var foe := _hunter("b0", 1 - me.team, "archer", "wisplet", _ground(base + Vector3(-4.0, 0, -5.0)))
+	foe.ctrl = "idle"
+	foe.teleport(foe.pos)
+	_mark("take2")
+	await _wheel_take(me, mates[1], 2.0, base, foe)
+	await _go(2.5, func(_t: float): me.inp["move"] = Vector2.ZERO, func(_t: float): return me.pos)
+
+## Opens the wheel, sweeps to `to`'s slice, lets go, then films the channel; with a `foe`, it shoots the
+## player `hit_at` s in (and a hit lands then for sure), else the channel runs to the end.
+func _wheel_take(me: Hunter, to: Hunter, hit_at: float, base: Vector3, foe: Hunter = null) -> void:
+	var o := main.get_viewport().get_visible_rect().size * 0.5 + Vector2(0, 40)
+	var mates := BaseRecall.mates(m, me)
+	var slice := BaseWheel.dir(mates.find(to), mates.size()) * 110.0
+	var still := func(_t: float): me.inp["move"] = Vector2.ZERO
+	await _go(0.6, still, func(_t: float): return base)
+	BaseWheel.open(me, o, mates)
+	await _go(1.2, func(t: float):
+		me.inp["move"] = Vector2.ZERO
+		BaseWheel.update(me, o + slice * clampf((t - 0.3) / 0.5, 0.0, 1.0), FRAME),
+		func(_t: float): return base)
+	me.inp["base_pick"] = BaseWheel.close(me)
+	var hit := [false]
+	var span := BaseRecall.CHANNEL_S + 0.2 if foe == null else hit_at + 0.1
+	await _go(span, func(t: float):
+		me.inp["move"] = Vector2.ZERO
+		if foe and t >= hit_at - 0.35 and not hit[0]:
+			hit[0] = true
+			foe.inp["aim"] = me.pos + Vector3(0, 0.9, 0)
+			foe.ak.press_rmb()
+		if foe and t >= hit_at and me.base_t > 0.0:
+			me.hurt(6.0, foe, {"src": "media"}),
+		func(_t: float): return (me.pos + to.pos) * 0.5 if me.base_t > 0.0 else me.pos)
+
+# ------------------------------------------------------------------ 11: stairs
 const STAIR_PAUSE := 0.5         # s standing at each end of the flight before turning round
 
 func _stairs() -> void:

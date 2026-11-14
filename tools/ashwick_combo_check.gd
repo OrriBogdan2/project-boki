@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	await _growth()
 	_timing()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	load("res://tools/ashwick_cancel_rows_check.gd").new(ak, ok).run()      # the Cancels table, row by row
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
@@ -150,7 +151,7 @@ func _timing() -> void:
 	if clips and clips.lib and lc.has("run"):
 		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
 		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
-		foot = cycle * 0.5 / clips.gait.plan(spd, lc)
+		foot = cycle * 0.5 / clips.gait.plan(spd, lc, Vector2(0, 1), 1.0)     # (full stick ahead: on the run ring)
 	ok(
 		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
 		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot

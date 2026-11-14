@@ -13,17 +13,23 @@ const COLUMNS := 2            # cards per row
 
 static var _grey: ShaderMaterial
 
-## Adds the section to `parent` and returns the Hunter you are taking.
-static func add(home: Node, parent: Control) -> String:
+## Adds the section to `parent` and returns the Hunter you are taking. `fold`: only that Hunter shows,
+## the rest sit behind "All Relics" (ExpFold).
+static func add(home: Node, parent: Control, fold := false) -> String:
 	var cur := Arch.of_save()
 	parent.add_child(UI.section("Hunter"))
 	var grid := GridContainer.new()
 	grid.columns = COLUMNS
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
+	var rest: Array = []
 	for a in Arch.ids():
-		grid.add_child(_card(home, String(a), cur))
+		var card := _card(home, String(a), cur)
+		grid.add_child(card)
+		if String(a) != cur: rest.append(card)
 	parent.add_child(grid)
+	if fold and not rest.is_empty():
+		ExpFold.add(parent, rest, "All Relics")
 	return cur
 
 static func _card(home: Node, id: String, cur: String) -> PanelContainer:

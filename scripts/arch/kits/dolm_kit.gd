@@ -361,7 +361,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		# a bot: punches up close, throws boulders from range
 		if held and h.fire_cd <= 0.0:
 			var tg := _bot_target()
-			if tg and h.flat_dist(tg) < 3.0: _punch(0.6)
+			if tg and (h.flat_dist(tg) < 3.0 or _row_between(tg)): _punch(0.6)
 			else: _boulder()
 		return true
 	if held:
@@ -495,6 +495,13 @@ func _punch(k: float) -> void:
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
+
+## A bot punches when its own rocks stand in line with the foe: the punch sends the row at them.
+func _row_between(tg: Ent) -> bool:
+	var dir := h.aim_dir()
+	var pd: Dictionary = lmb_def()["punch"]
+	var lane := AimMode.in_lane(h.pos, dir, float(pd["sweep_max"]), float(pd["width"]), tg.pos, tg.r)
+	return lane and not sweep_rocks(dir).is_empty()
 
 ## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a blue flash and a
 ## short spray of stone and sparks thrown on along the punch, sized by the lane's half width and the hold.
@@ -706,13 +713,18 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.5 and dist < 9.0 and los and randf() < 0.6:
+		var ed := e_def()
+		var span := float(ed["dist"]) + float(ed["row_gap"])
+		h.inp["aim"] = BotLead.point(h, tgt, float(ed["tell"]), 0.0, span) + Vector3(0, 0.9, 0)
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and dist < 3.4 and los:
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		var sd := slam_def()
+		var hold := float(rmb_def()["hold"]) + float(sd["time"]) * randf_range(0.3, 1.0)
+		BotLead.aim(self, tgt, hold, 0.0, float(sd["hop"]) + float(sd["radius"][0]))
 		h.inp["sec"] = true
-		bot_hold["rmb"] = float(rmb_def()["hold"]) + float(slam_def()["time"]) * randf_range(0.3, 1.0)
+		bot_hold["rmb"] = hold
 		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and dist > 2.5 and dist < 6.0 and los and randf() < 0.2:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)

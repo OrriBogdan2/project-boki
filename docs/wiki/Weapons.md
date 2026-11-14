@@ -66,6 +66,10 @@ No weapon is ever found or swapped: every hunter carries one signature weapon. I
 | Boki Idol | 58 | A little carved Boki. Collectors pay a lot. |
 | Crown Shard | 105 | A piece of an old crown. Worth a fortune. |
 | Soul Ember | 140 | A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back. |
+| Thumpnut | 40 | A hard sweet nut. At home a Boki eats it for Power. |
+| Shellbark Chew | 40 | A tough bark chew. At home a Boki eats it for Guard. |
+| Zipseed | 40 | A seed that rattles. At home a Boki eats it for Speed. |
+| Hushpearl | 40 | A calm little pearl. At home a Boki eats it for Focus. |
 | Glasswater Wayseed | 150 | A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal. |
 | Cinderstep Wayseed | 150 | A seed warm to hold. Carry it to the Waystone with a Boki leaning Fire, Rock, Steel or Dragon. |
 | Hushwood Wayseed | 150 | A seed that hums at dusk. Carry it to the Waystone with a Boki leaning Dark, Psychic or Poison. |

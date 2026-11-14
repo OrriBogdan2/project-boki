@@ -212,7 +212,6 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
-	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	if sync.wall:
 		sync.wall.heavy = Arch.weight(arch) == "heavy"
 	var mats: Array = root.get_meta("mats", [])
@@ -925,6 +924,7 @@ class Sync extends Node:
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 	var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
+	var head_look: WardenLookAt   # the head turns to the aim ahead of the body (WardenLookAt)
 	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 	var wall: WardenWall          # the plant and push of a wall kick or bounce over the clips, or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
@@ -941,7 +941,6 @@ class Sync extends Node:
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
-	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 	var pace: RigPace             # how often the bones are posed (every frame but on GL over Metal)
 	var leg_bones := PackedInt32Array()     # LEG_BONES' indices, for FootPlant.bones
 	var drop_pose: WardenDropPose  # the drop's shared ride and skydive poses over the clips or the rig, or null
@@ -958,6 +957,7 @@ class Sync extends Node:
 				continue
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
+		head_look = WardenLookAt.make(model, skeleton)
 		for b in LEG_BONES:
 			leg_bones.append(WardenSkeleton.find(skel, b))
 		springs.setup(skel)
@@ -1031,6 +1031,7 @@ class Sync extends Node:
 			if drop_pose:
 				drop_pose.step(dt)
 			apply_blade()
+		head_look.step(dt, clips)
 		FootPlant.bones(root, skel, leg_bones, dt)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
@@ -1136,8 +1137,6 @@ class Sync extends Node:
 	func apply_blade() -> void:
 		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
 			return
-		if square_blade:
-			_square_blade()
 		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
 		var a := skel.global_transform * skel.get_bone_global_pose(blade_root_bone) * blade_root.position
@@ -1148,16 +1147,6 @@ class Sync extends Node:
 		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
 		if muzzle:
 			muzzle.global_position = b
-
-	## A root scaled on x and z only (body "bulk": Mossy) shears a blade turning in the hand, which then stretches
-	## and shrinks. The blade bone's world basis is made square again at the skeleton's height scale (its size along
-	## the root's up axis, which the shear leaves alone), so it never builds on last frame's pose. A bone pose cannot
-	## hold a shear, so a little is left (under 2 cm on Mossy's blade, --clip-check).
-	func _square_blade() -> void:
-		var pose := skel.get_bone_global_pose(blade_bone)
-		var k := (skel.global_basis.transposed() * root.global_basis.y.normalized()).length()
-		pose.basis = skel.global_basis.inverse() * ((skel.global_basis * pose.basis).orthonormalized() * k)
-		skel.set_bone_global_pose(blade_bone, pose)
 
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its
