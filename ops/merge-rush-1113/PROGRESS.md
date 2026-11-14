@@ -66,3 +66,23 @@ the stored credential (merge commits, no bypass). The gap is counted by `merge_g
    ui-void-masks-v3, vex-daze-rebased, vex-rmb-terrain-rebased (+10 big old-base -rebased branches).
 - Final batch C gate (main ca96e707c5): full suite both trees, branch-only reds rerun at low load: race and
   drop-launch are red on main too; 10 checks fixed vs main; import 0 parse errors; health --strict OK.
+
+## Batch D (job 20261113-225134-a3, rpc7; 11-13 23:00 to 11-14)
+- Gap at start: **1124** (live unmerged READY 1374, 250 archive-tagged at head). Open PRs held 43 tips (left out);
+  lane C2 (PR #58) 15 more.
+- Candidates: the 186 gap tips that already contain main ca96e707c5 (the bulk-rebase lane merged main into them).
+  First pass on main 96d778d036: 90 clean, 96 conflict. Main moved (PR #58, C2) during the gate; rebuilt on
+  df5464db04 from the 88 kept: 81 clean, 7 now conflict (`skip_batchD.tsv`, 103 rows with conflicting files).
+- Dropped by the gate (reverted in the branch, reason):
+  - ext/feel-hold-stand: --ledge-walk-check (juggernaut and dolm LMB root the Hunter 15 s on the ledge)
+  - ext/ui-match-phase: --panel-input-check (Esc pause menu no longer opens) and --demo-check
+  - ext/sfx-mask-puton: deletes main's mask_moment_check.gd, registry keeps it (same as batch C)
+  - ext/parity-downed-numbers: --bulwark-combo-check (Mending Ground revive 0.24 in 5 s, needs 0.3)
+  - ext/feel-cast-into-cast-rest: its own --cast-into-cast-check, Tender rows, and over the 300 s cap
+  - ext/fold-sfx-boki-1112: its own --boki-steps-check (TOUCH table vs the Boki clips, 20 rows)
+  - lane D1 (PR #53) owns them: ext/ui-buff-stack, ext/ui-key-caps, ext/ui-quest-race-pips, ext/ui-wisp-picker
+- Fixes in the batch: registry dedupe; hero_vfx.gdshader `band` redefinition (red on main too, 31 checks logged
+  a shader error); SkyshipModel template as a PackedScene (15 orphan nodes, --match-repeat-check);
+  hero_cat_fence_check Fx stub signature; stat_up_vfx_check FakeGame.find(); heart/side colour API drift.
+- Archived (tag only): ext/vfx-cel-ring-bursts (head reverts its only commit).
+- Batch D ships 73 branches (+ ui-ways-out-colourblind already in main via C2).
