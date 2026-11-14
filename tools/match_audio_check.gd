@@ -76,6 +76,9 @@ func run(main_node: Node) -> void:
 	await _glider(other, "another player's")
 	other.remote = false
 	await _loudness(m)
+	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
+	m.music_dir.beds.tick(m, P)
+	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()

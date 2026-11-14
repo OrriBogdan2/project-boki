@@ -1,6 +1,7 @@
 # Audio: sound sets, loudness and buses
 
 How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py`, `tools/gen_ambience.py` and `tools/gen_garden_ambience.py`.
+How the game's sound effects are made, named, levelled and played. Music is in `tools/compose.py`; ambience beds in `tools/gen_ambience.py` (below).
 
 ## Making sounds
 - Sounds are **synthesised in code** (numpy/scipy, `pip install numpy scipy`), one script per group: `tools/gen_sfx_<group>.py` (e.g. `gen_sfx_vex.py`, `gen_sfx_boki.py`, `gen_sfx_ui.py`). Each one imports `tools/sfx_lib.py`, calls `S.reseed(<its own seed>)` and writes `audio/<name>.wav` (44.1 kHz mono 16-bit). Then `godot --headless --import`.
@@ -242,3 +243,14 @@ Follow-ups from the coverage passes, ranked most bad first, appended to the list
 - SFX: the player's Boki settling on the shoulder (`flying_home>shoulder [you]` 4 none of 4) and the recall order's start (`active>flying_home [you]` 4 none of 27; the other 23 have `recall`) make no sound; a short settle tick would do.
 - SFX: your own level-up (`level tender` 4 of 6 bad, `level gunslinger` 2 of 4 none) often makes no cue at the Hunter, only a toast. Rivals' stay silent by design; yours should chime.
 - SFX: picking something up as a Gunslinger (`pickup gunslinger` 1 of 3 none; the other two heard `pickup`) is intermittent (one silent of three); find which pickup kind does not reach `Juice.pickup`.
+
+## Ambience beds
+`Sfx.play_ambience` holds one main bed (`amb_match` wind in a match, `amb_title` on the title, `amb_home` on the farm); `Sfx.amb_layer` fades extra beds by place, 4 times a second (`MusicDir` -> `AmbBeds`, no allocation per tick). `tools/gen_ambience.py` writes them (seamless stereo Ogg loops, original synthesis; `amb_rain` is from `gen_music.py`):
+
+| bed | plays when |
+|---|---|
+| `amb_abyss`, `amb_ruins` | near a void edge or gliding; among walls (`MusicDir`) |
+| `amb_meadow`, `amb_cliffs` | on meadow/bloom islands; on frost/ember/storm/gloom rock. Nine samples round you vote, so the bed fades over the last metres of its island |
+| `amb_water` | on the shore islands (`AmbBeds.WATER_ISLANDS`: Saltmere), over that island's own bed |
+| `amb_gust`, `amb_rain` | the raid condition (`AmbBeds.GUST` / `RAIN`): ash storm is all gust, dusk and fog bring rain |
+| `amb_blight` | a low rumble that follows `BlightDir.level` where you stand (up toward the core, up with the session's age) and climbs in the last 90 s before the islands fall |
