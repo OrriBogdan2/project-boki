@@ -28,7 +28,7 @@ static func of(target: Ent, armor: bool) -> int:
 		return MONSTER
 	return BODY
 
-## The colour the class paints in: the armour tier, the Boki's type, the monster's hide.
+## The colour the class paints in: the armour tier, the monster's hide; a Boki keeps `fallback` (Juice.flash_col: its Field Book type colour).
 static func tint(target: Ent, cls: int, fallback: Color) -> Color:
 	match cls:
 		ARMOUR:
