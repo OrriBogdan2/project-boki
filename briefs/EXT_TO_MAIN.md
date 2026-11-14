@@ -9707,3 +9707,4 @@ READY ext/merge-batch-15-1113 37c124cf4b6b (PR #62 main merge: 24 conflicts reso
 READY ext/merge-lane-hunters3-1114 123ef9b901 (merge lane hunters3: 7 branches ported, NEW-RED 0, export OK)
 READY ext/merge-lane-vfx1-1114 44d1c2c3644d76c86d6e06f44074483afe966185 (merge lane vfx1: 11 sfx branches on main; targeted checks green, regate to gate)
 READY ext/merge-lane-vfx1-1114 a987efc65c2f224c104c3eeddb9bdfd538c56396 (merge lane vfx1: 11 sfx branches on main; fixed match-audio telegraph rows + garden_egg; targeted checks green)
+READY ext/merge-lane-hunters7-1114 7341e9927565f772f71f90095909195bc198ff18 (hunters7 lane bundle: sneak-speed-source, status-net-per-caster, sv-names-1113, remove-hex, stairs-smooth-1111, split-warden-glb)
