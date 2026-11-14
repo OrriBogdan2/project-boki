@@ -14,8 +14,8 @@ One table per area: the source's value, ours, where each comes from, and a statu
 | Run speed per class | MoveSpeed 445–485 uu/s | 4.45 (Neve's kit) to 4.85 (Oath's kit) m/s, a row per kit: 4.45 / 4.55 ×5 / 4.6 / 4.65 ×6 / 4.85 | [D]; `content/rules/hunter_move.json` | match |
 | Run speed, measured | – | 4.550 m/s at 30, 60 and 144 fps (default kit) | RATE | match |
 | Acceleration to run | MaxAcceleration 4700–5400 uu/s² | 47–54 m/s² per kit; 95% of run speed in 0.083 s | [D]; hunter_move.json; MFEEL `ground_t95` | match |
-| Braking (keys let go) | BrakingDecelerationWalking 2220, GroundFriction ×2 | brake 22.2 m/s², ground_friction 2.0 | [D]; hunter_move.json `physics` | match |
-| Time and slide to a stop | ~0.18 s, 0.38–0.49 m (computed from the rows) | 0.167 s, 0.31–0.33 m | MFEEL `ground_stop_t/dist`, RATE `stop` | off (small: stops ~0.1 m short) |
+| Braking (keys let go) | BrakingDecelerationWalking 2220, GroundFriction 1 × BrakingFrictionFactor 2, sub-steps of ≤ 1/33 s, stop under 10 uu/s (UE's ApplyVelocityBraking) | brake 22.2 m/s², ground_friction 1.0, braking_friction_factor 2.0, braking_substep 1/33 s, brake_stop_speed 0.1 m/s; `HunterMove.brake` equals UE's loop to 1e-4 m/s at 1/144–0.2 s steps | [D]; hunter_move.json `physics`; MFEEL `brake_vs_ue_err` | match |
+| Time and slide to a stop | ~0.17 s; per run speed 4.45 / 4.55 / 4.6 / 4.65 / 4.85 m/s: 0.275 / 0.286 / 0.292 / 0.302 / 0.329 m drawn at 30 fps, 0.336 / 0.350 / 0.357 / 0.364 / 0.393 m at 144 fps (UE's formula from the rows; UE moves at the braked speed, so its slide grows with the frame rate) | 0.167 s; 0.311 / 0.324 / 0.330 / 0.339 / 0.367 m at 30, 60 and 144 fps (our fixed 60 Hz step) | MFEEL `ground_stop_t/dist` and a stop per run speed, RATE `stop_<speed>` | match (inside the source's band for every Hunter) |
 | Turn rate (facing) | RotationRate 1280°/s | turn_rate 1280°/s | [D]; hunter_move.json | match |
 | 90° turn of the velocity | not documented | 0.117 s | MFEEL `ground_turn90_t` | unknown |
 | Sneak (crouch) speed | SneakSpeedMultiplier 0.5 | sneak_speed 0.5 (was 0.55 in two constants) | [D]; hunter_move.json | match (fixed here) |
@@ -108,7 +108,8 @@ Real frame loops at 30, 60 and 144 fps, keys pressed for one drawn frame. Values
 |---|---|---|---|
 | Run speed (m/s) | 4.550 / 4.550 / 4.550 | 4.550 / 4.550 / 4.550 | match |
 | Distance in the first second (m) | 4.396 ×3 | 4.429 ×3 | match |
-| Slide after letting go (m) | 0.325 ×3 | 0.325 ×3 | match |
+| Slide after letting go (m) | 0.324 ×3 | 0.324 ×3 | match |
+| Slide per Hunter's run speed (m) | 0.311 to 0.367 ×3, each inside the source's 30–144 fps band | the same | match |
 | Jump apex (m) | 1.516 / 1.517 / 1.517 | 1.515 / 1.516 / 1.516 | match (the farm was ~1.46 / 1.52 / 1.55) |
 | Jump airtime (s) | 0.900 / 0.900 / 0.903 | 0.900 / 0.900 / 0.903 | match |
 | Dash length (m) | 4.110 ×3 | 3.526 ×3 | match across rates (two different dashes, §4) |
@@ -124,14 +125,17 @@ The windows read one frame shorter at 30 fps only because a press can land on a 
 3. Sneak speed 0.55 → 0.5, one row (`sneak_speed`) for the match and the farm.
 4. A kit swap in the middle of Hem's Spirit Walk left walls and ledges switched off for the next kit (the ledge rise and fling failed in `--move-feel-check`).
 
+## Fixed on ext/feel-stop-slide
+
+1. **Stop slide**: the 0.38–0.49 m listed as the source's was not the engine's output but three guesses at its model for one run speed in continuous time (brake only 0.49, friction 1 0.43, friction 2 0.38; briefs/supervive-data/PHYSICS_PARITY.md). UE's ApplyVelocityBraking is friction (GroundFriction × BrakingFrictionFactor) × speed plus BrakingDecelerationWalking, in sub-steps of at most BrakingSubStepTime, never reversing, stopping dead under BRAKE_TO_STOP_VELOCITY; the walk then moves at the braked speed, so the slide depends on the frame rate: 0.28–0.33 m at 30 fps, 0.34–0.39 m at 144. `HunterMove.brake` is now that loop exactly (sub-steps and the stop speed were missing; GroundFriction and the factor are separate rows). Before → after on our 60 Hz step, by run speed: 4.45 (Neve's kit) 0.311 → 0.311, 4.55 ×5 0.325 → 0.324, 4.6 (Gil) 0.332 → 0.330, 4.65 ×6 0.339 → 0.339, 4.85 (Oath's kit) 0.367 → 0.367 m. Matching the source's longer 144 fps slide would mean stepping faster, not a new formula.
+
 ## Follow-ups (off / unknown, in the order a player would feel them)
 
 1. **Jump 6.8 vs 7.5 m/s** (owner call): the source's jump is 0.4 m higher and 0.12 s longer. Flipping it needs the terrace and mantle reach re-checked (jump + mantle would top four terraces).
-2. **Stop slide** 0.31–0.33 m vs the source's computed 0.38–0.49 m: the same rows, a different friction formula. Small; needs the UE braking formula reproduced exactly.
-3. **Farm dash** is the class dodge, not the kit's dash (3.5 m in 0.15 s against 4.1 m in 0.52 s for the same Hunter in a match).
-4. **Dash curves** for 9 kits are not decoded: they run on the global ×0.85 / ×1.15 (KIT_PARITY gap 4; also gaps 9, 11, 13).
-5. **Air control** (owner 11-08) and **no swoop** (owner 11-08) are rulings against the data; **walking off ledges** and **glider at any heat** too.
-6. **Unknown in the source**: glide sink and steering speeds, heat coefficients, jump hold, air-dash multipliers, knockback steering values, landing recovery, hit-stop, coyote and buffer. Footage frame counts could settle the first three.
-7. **Rail grinding** is not modelled. **Mini mantle** [?]: its 0.75 s post-launch hold is `MantleCarry`; a short mantle for low lips needs a height band the data does not have (MantleZDiffMax and the suction curves are named but not decoded), so none is modelled.
-8. The farm avatar's facing turns per step (not blended between steps); the interior and town movers still step on frame time.
-9. `--feel-golden-check`: the traces carry shoves from mobs and wild Boki that walk into the Hunter (`Match._separate`), so `crouch_walk` does not replay identically run to run (3–5 of 13 differ in position, never in velocity), and clearing mobs before each script shifts 45 traces. It needs mobs and wild Boki cleared and one full re-record, together with the 72 drifts the RC already carries.
+2. **Farm dash** is the class dodge, not the kit's dash (3.5 m in 0.15 s against 4.1 m in 0.52 s for the same Hunter in a match).
+3. **Dash curves** for 9 kits are not decoded: they run on the global ×0.85 / ×1.15 (KIT_PARITY gap 4; also gaps 9, 11, 13).
+4. **Air control** (owner 11-08) and **no swoop** (owner 11-08) are rulings against the data; **walking off ledges** and **glider at any heat** too.
+5. **Unknown in the source**: glide sink and steering speeds, heat coefficients, jump hold, air-dash multipliers, knockback steering values, landing recovery, hit-stop, coyote and buffer. Footage frame counts could settle the first three.
+6. **Rail grinding** is not modelled. **Mini mantle** [?]: its 0.75 s post-launch hold is `MantleCarry`; a short mantle for low lips needs a height band the data does not have (MantleZDiffMax and the suction curves are named but not decoded), so none is modelled.
+7. The farm avatar's facing turns per step (not blended between steps); the interior and town movers still step on frame time.
+8. `--feel-golden-check`: the traces carry shoves from mobs and wild Boki that walk into the Hunter (`Match._separate`), so `crouch_walk` does not replay identically run to run (3–5 of 13 differ in position, never in velocity), and clearing mobs before each script shifts 45 traces. It needs mobs and wild Boki cleared and one full re-record, together with the 72 drifts the RC already carries.

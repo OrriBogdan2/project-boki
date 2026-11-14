@@ -7,7 +7,11 @@ extends RefCounted
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
-static var ground_friction: float = _phys["ground_friction"]
+## 1/s: GroundFriction x BrakingFrictionFactor, the share of the speed the walking brake sheds per second
+static var brake_friction: float = _phys["ground_friction"] * _phys["braking_friction_factor"]
+static var braking_substep: float = _phys["braking_substep"]      # s, the longest sub-step of a brake
+static var brake_stop_speed: float = _phys["brake_stop_speed"]    # m/s, a brake leaving less stops dead
+static var min_tick: float = _phys["min_tick"]                    # s, the shortest sub-step braked
 static var dash_exit_run: float = _phys["dash_exit_run"]
 static var fall_max: float = _phys["fall_cap"]
 static var abyss_fall_max: float = _phys["abyss_fall_cap"]
@@ -53,15 +57,27 @@ static func apply(h: Hunter) -> void:
 static func climbs_tall(h: Hunter) -> bool:
 	return bool(of(h.arch).get("climb_tall", false))
 
-## The source's walking brake at `speed` (m/s^2): ground_friction's share of the speed plus brake_decel. UE
+## The source's walking brake at `speed` (m/s^2): brake_friction's share of the speed plus brake_decel. UE
 ## sheds any speed over the run this way, keys held or not, so a knock or a kit step slides out the same.
 static func brake_rate(speed: float) -> float:
-	return ground_friction * speed + brake_decel
+	return brake_friction * speed + brake_decel
 
-## Ground speed after a step with no keys: the walking brake, so a let-go from a run slides ~0.3 m and a
-## knock or kit step slides out under the same rule. grip < 1 on ice.
+## Ground speed after a step with no keys: UE's walking brake (ApplyVelocityBraking) exactly, so a let-go from a
+## run slides 0.31-0.37 m and a knock or kit step slides out under the same rule. A step longer than
+## braking_substep brakes in sub-steps (each at most that, and at most half of what is left); the brake never
+## turns the speed around, and under brake_stop_speed it stops. grip < 1 on ice.
 static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
-	return (hv * maxf(0.0, 1.0 - ground_friction * grip * dt)).move_toward(Vector2.ZERO, brake_decel * grip * dt)
+	var k := brake_friction * grip
+	var rev := hv.normalized() * brake_decel * grip
+	var v := hv
+	var left := dt
+	while left >= min_tick:
+		var sub := minf(braking_substep, left * 0.5) if left > braking_substep else left
+		left -= sub
+		v += (-k * v - rev) * sub
+		if v.dot(hv) <= 0.0:
+			return Vector2.ZERO
+	return Vector2.ZERO if v.length() <= brake_stop_speed else v
 
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
 ## faster than the dash), and the walk, brake or air carry takes it from there.
@@ -96,7 +112,7 @@ static func dash_k(curve: Array, u: float) -> float:
 ## Metres speed v0 slides on flat ground under brake_rate before it falls to `to_speed` m/s (0: a let-go; the run
 ## speed: keys held). A kit step with a measured total takes this off its dash so the slide doesn't add to it.
 static func slide(v0: float, to_speed := 0.0) -> float:
-	var k := ground_friction
+	var k := brake_friction
 	return (v0 - to_speed) / k - brake_decel / (k * k) * log((k * v0 + brake_decel) / (k * to_speed + brake_decel))
 
 ## The speed that slides `dist` metres before it falls to `to_speed` (the inverse of slide; a lunge's push).

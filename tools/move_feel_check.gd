@@ -28,7 +28,8 @@ const T := {
 	"ground_input_frames":     ["<=", 1.0, "frames", "press to velocity change, same sim step"],
 	"ground_t95":              ["<=", 0.10, "s", "[game data] MaxAcceleration 4700-5400 uu/s2: top speed in ~0.09s"],
 	"ground_stop_t":           ["~", [0.12, 0.25], "s", "[game data] braking 2220 uu/s2, friction 1 x2: SV ~0.18s"],
-	"ground_stop_dist":        ["~", [0.2, 0.5], "m", "[game data] SV slides ~0.38-0.49m"],
+	"ground_stop_dist":        ["~", [0.27, 0.4], "m", "[game data] UE's walking brake: 0.28-0.39m at 30-144 fps"],
+	"brake_vs_ue_err":         ["<=", 0.0001, "m/s", "HunterMove.brake against UE's ApplyVelocityBraking"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
@@ -290,6 +291,7 @@ func run(main: Node) -> void:
 	_dash_glide()
 	_airdash_fall()
 	_dash_exit()
+	_brake_exact()
 	_slow_ramp()
 	_dash_curves()
 	_plain_dash()
@@ -828,6 +830,74 @@ func _dash_glide() -> void:
 	rec("dashglide_2s_speed", v2)
 	P.set_arch(kit_was)
 
+# ---------------------------------------------------------------- the walking brake against UE's own
+## UE's ApplyVelocityBraking (CharacterMovementComponent.cpp) written out with the source's rows, as the oracle
+## HunterMove.brake must equal: friction 1/s (GroundFriction 1 x BrakingFrictionFactor 2), BrakingDeceleration-
+## Walking m/s2, BrakingSubStepTime s, BRAKE_TO_STOP_VELOCITY m/s. Speeds only: a let-go keeps its direction.
+const UE_FRICTION := 2.0
+const UE_BRAKE := 22.2
+const UE_SUBSTEP := 1.0 / 33.0
+const UE_STOP := 0.1
+
+static func ue_brake(v: float, dt: float) -> float:
+	var left := dt
+	while left >= 1e-6:
+		var sub := minf(UE_SUBSTEP, left * 0.5) if left > UE_SUBSTEP else left
+		left -= sub
+		v += (-UE_FRICTION * v - UE_BRAKE) * sub
+		if v <= 0.0:
+			return 0.0
+	return 0.0 if v <= UE_STOP else v
+
+## Metres the source slides from a run at v0 m/s drawn at `fps` (PhysWalking: brake the frame, move at what is left).
+static func ue_slide(v0: float, fps: float) -> float:
+	var x := 0.0
+	while v0 > 0.0:
+		v0 = ue_brake(v0, 1.0 / fps)
+		x += v0 / fps
+	return x
+
+## The source's slide band for a run at v0: drawn at 30 fps (shortest) to 144 fps (longest).
+static func ue_band(v0: float) -> Vector2:
+	return Vector2(ue_slide(v0, 30.0), ue_slide(v0, 144.0))
+
+## The run speed of every Hunter row in content/rules/hunter_move.json: speed -> its ids.
+static func run_speeds() -> Dictionary:
+	var out := {}
+	for id in HunterMove.rules():
+		var row = HunterMove.rules()[id]
+		if row is Dictionary and row.has("speed"):
+			var v := float(row["speed"])
+			out[v] = out.get(v, []) + [id]
+	return out
+
+## HunterMove.brake against the oracle at the source's frame times and longer (sub-steps), from a run and a knock,
+## then every Hunter's let-go on the real match step inside the source's band.
+func _brake_exact() -> void:
+	var err := 0.0
+	for dt in [1.0 / 144.0, DT, 1.0 / 30.0, 0.1, 0.2]:
+		for v0 in [4.45, 4.85, 10.0]:
+			var a := Vector2(v0, 0).rotated(0.7)
+			var b: float = v0
+			while b > 0.0:
+				a = HunterMove.brake(a, 1.0, dt)
+				b = ue_brake(b, dt)
+				err = maxf(err, absf(a.length() - b))
+	rec("brake_vs_ue_err", err)
+	var speeds := run_speeds()
+	for v in speeds:
+		_reset(flat + Vector3(-2.0, 0, 0))
+		P.base_speed = v
+		P.inp["move"] = Vector2(1, 0)
+		_steps(30)
+		var x0 := P.pos.x
+		P.inp["move"] = Vector2.ZERO
+		_steps(30)
+		var band := ue_band(v)
+		var got := P.pos.x - x0
+		var what := "stop slide %.3f m from %.2f m/s in the source's %.3f-%.3f m (%s)"
+		ok(got >= band.x and got <= band.y, what % [got, v, band.x, band.y, ", ".join(speeds[v])])
+
 # ---------------------------------------------------------------- air dash out of a fast fall
 ## The class dash pressed out of a 10 m free fall and out of a glide dive (keys let go): how much of the fall
 ## and forward speed it keeps, and the speed it ends on.
@@ -878,9 +948,9 @@ var _rim := {}
 ## starts: it hands over at run speed and the walking stop takes it from there.
 func _dash_exit() -> void:
 	var brake := HunterMove.brake_decel
-	var fric := HunterMove.ground_friction
-	ok(is_equal_approx(brake, 22.2), "brake = BrakingDecelerationWalking 2220 uu/s2 (%s)" % brake)
-	ok(is_equal_approx(fric, 2.0), "ground_friction = GroundFriction 1.0 x2 (%s)" % fric)
+	var fric := HunterMove.brake_friction
+	ok(is_equal_approx(brake, UE_BRAKE), "brake = BrakingDecelerationWalking 2220 uu/s2 (%s)" % brake)
+	ok(is_equal_approx(fric, UE_FRICTION), "brake_friction = GroundFriction 1.0 x BrakingFrictionFactor 2 (%s)" % fric)
 	var kit_was := P.arch
 	P.set_arch("")
 	_reset(flat + Vector3(-3.0, 0, 0))

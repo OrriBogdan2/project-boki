@@ -2,8 +2,9 @@ extends "res://tools/move_feel_check.gd"
 ## --move-rate-check (docs/MOVEMENT_PARITY.md, docs/decisions/0048): the Hunter moves the same whatever the
 ## display's frame rate, in a match and on the farm. Each trial runs drawn frames of 1/30, 1/60 and 1/144 s
 ## through the real frame loops (Match._process, the farm's FarmStep.run) with real key presses, and measures:
-## run speed and the distance of a 1 s run, the stop, the jump's apex and air time, a dash (press to its end,
-## run speed held), and the two jump
+## run speed and the distance of a 1 s run, the stop (and the stop from each Hunter's run speed, inside the
+## source's band: UE's walking brake drawn at 30 to 144 fps), the jump's apex and air time, a dash (press to its
+## end, run speed held), and the two jump
 ## graces (coyote: the latest press after the ground goes that still jumps; buffer: the earliest press before
 ## a landing that still jumps). Every number has to agree with its 60 fps value, and the graces with their
 ## data rows (content/rules/hunter_move.json).
@@ -99,6 +100,28 @@ func _run_stop(fps: int) -> void:
 	var x1 := _at().x
 	await _frames(0.5, delta)
 	_put("stop", fps, _at().x - x1)
+
+## Each Hunter's run speed let go after half a second: the slide, read as "stop_<speed>".
+func _hunter_stops(fps: int) -> void:
+	var delta := 1.0 / fps
+	var arch_was = Save.d.get("arch", "")
+	var speeds := run_speeds()
+	for v in speeds:
+		_stand()
+		if hm:
+			Save.d["arch"] = speeds[v][0]
+		else:
+			P.base_speed = v
+		Input.action_press("right")
+		await _frames(0.5, delta)
+		Input.action_release("right")
+		var x1 := _at().x
+		await _frames(0.5, delta)
+		_put("stop_%.2f" % v, fps, _at().x - x1)
+	if hm:
+		Save.d["arch"] = arch_was
+	else:
+		HunterMove.apply(P)
 
 func _jump_arc(fps: int) -> void:
 	var delta := 1.0 / fps
@@ -202,6 +225,7 @@ func _trials(where: String) -> void:
 	got = {}
 	for fps in RATES:
 		await _run_stop(fps)
+		await _hunter_stops(fps)
 		await _jump_arc(fps)
 		await _dash(fps)
 		await _graces(fps)
@@ -213,6 +237,13 @@ func _trials(where: String) -> void:
 		_ok(same, "%s (within %s of 60 fps)" % [line, tol])
 	_ok(float(got["run_speed"][60]) > 4.0 and float(got["jump_apex"][60]) > 1.0 and float(got["dash"][60]) > 2.5,
 		"%s: the trials ran, jumped and dashed" % where)
+	var speeds := run_speeds()
+	for v in speeds:
+		var band := ue_band(v)
+		var got_v: Dictionary = got["stop_%.2f" % v]
+		var inside := got_v.values().all(func(x: float) -> bool: return x >= band.x and x <= band.y)
+		var line := "%s stop from %.2f m/s 30=%.3f 60=%.3f 144=%.3f m in the source's %.3f-%.3f (%s)"
+		_ok(inside, line % [where, v, got_v[30], got_v[60], got_v[144], band.x, band.y, ", ".join(speeds[v])])
 	for g in [["coyote", HunterMove.coyote_s], ["buffer", HunterMove.jump_buffer_s]]:
 		var v60: float = got[g[0]][60]
 		var what := "%s %s at 60 fps %.3f s is its data row %.2f s" % [where, g[0], v60, g[1]]
