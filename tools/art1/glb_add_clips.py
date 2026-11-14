@@ -1,14 +1,8 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
-<<<<<<< HEAD
-with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
-Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb] [--skip=<bone-prefix>[,...]]
---skip leaves out the channels of bones whose name starts with a prefix (a chain the target moved: its tracks would pose the new place with the old one's keys)."""
-=======
 with no Blender (tracks match the target's nodes by name; both builds must share the rig: a translation track is moved by the difference of the two nodes' rest translations, so a source with
 only the bones, their directions right and a face bone parked elsewhere, works). A clip of the same name in the target is replaced.
 Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]
 A key is a prefix ("crouch" takes crouch_idle, crouch_f ...); "=swap" is that clip only (not swap_aim, swap_air)."""
->>>>>>> origin/main
 import json
 import struct
 import sys
@@ -37,7 +31,7 @@ def write(path, j, bin_):
         f.write(bin_)
 
 
-def add(tj, tb, sj, sb, wanted, skip=()):
+def add(tj, tb, sj, sb, wanted):
     names = {n.get("name"): i for i, n in enumerate(tj["nodes"])}
     tj["animations"] = [a for a in tj.get("animations", []) if not wanted(a["name"])]
     copied = {}
@@ -72,8 +66,6 @@ def add(tj, tb, sj, sb, wanted, skip=()):
             nm = sj["nodes"][ch["target"]["node"]].get("name")
             if nm not in names:
                 raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
-            if skip and nm.startswith(tuple(skip)):
-                continue
             sm = a["samplers"][ch["sampler"]]
             rest = [t - s for t, s in zip(tj["nodes"][names[nm]].get("translation", (0, 0, 0)), sj["nodes"][ch["target"]["node"]].get("translation", (0, 0, 0)))]
             shift = tuple(rest) if ch["target"]["path"] == "translation" and max(map(abs, rest)) > 1e-6 else (0.0, 0.0, 0.0)
@@ -86,18 +78,11 @@ def add(tj, tb, sj, sb, wanted, skip=()):
 
 
 if __name__ == "__main__":
-    skip = [a[7:] for a in sys.argv[1:] if a.startswith("--skip=")]
-    skip = skip[0].split(",") if skip else []
-    pos = [a for a in sys.argv[1:] if not a.startswith("--skip=")]
-    target, source, keys = pos[:3]
-    out = pos[3] if len(pos) > 3 else target
+    target, source, keys = sys.argv[1:4]
+    out = sys.argv[4] if len(sys.argv) > 4 else target
     keys = keys.split(",")
     tj, tb = read(target)
     sj, sb = read(source)
-<<<<<<< HEAD
-    done = add(tj, tb, sj, sb, lambda n: any(n == k or n.startswith(k) for k in keys), skip)
-=======
     done = add(tj, tb, sj, sb, lambda n: any(n == k[1:] if k[0] == "=" else n.startswith(k) for k in keys))
->>>>>>> origin/main
     write(out, tj, tb)
     print("added", len(done), done)
