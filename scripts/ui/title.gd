@@ -12,7 +12,6 @@ var stung := false
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
-	DemoQuick.restore()                 # back from a quick start: the real save again
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Feedback.flush(self)                # a rating that could not be sent last time

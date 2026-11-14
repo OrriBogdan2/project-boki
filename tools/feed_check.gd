@@ -24,10 +24,6 @@ func _feed_buttons(n: Node) -> Array:
 	for c in n.get_children(): out += _feed_buttons(c)
 	return out
 
-## The panel just opened: the one it replaced is only queue_free'd, so it is still a child until the frame ends.
-func _open(home: Node) -> Node:
-	return home.panel_host.get_child(-1)
-
 func _says_nothing(n: Node) -> bool:
 	if n is Label and (n as Label).text.begins_with("Nothing to feed"): return true
 	for c in n.get_children():
@@ -56,7 +52,7 @@ func _case(trough: bool) -> void:
 		await main.get_tree().process_frame
 	Save.d["items"]["kibble"] = 0
 	home._open_feed(k)
-	ok(_feed_buttons(_open(home)).is_empty() and _says_nothing(_open(home)), "%s: no food says so" % tag)
+	ok(_feed_buttons(home.panel_host).is_empty() and _says_nothing(home.panel_host), "%s: no food says so" % tag)
 	var ask := Exchange.best("kibble", "sell")
 	var r := Exchange.post("buy", "kibble", 2, ask)
 	ok(r["ok"] and int(r["filled"]) == 2 and Econ.pantry("kibble") == 2, "%s: bought 2 kibble from the market" % tag)
