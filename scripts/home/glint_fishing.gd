@@ -584,6 +584,7 @@ func _open_bar() -> void:
 	h.root_ui.add_child(bar)
 
 func _end(finished: bool) -> void:
+	var before := GameResultCard.snap([run.rec])
 	var res := settle(run) if finished else {}
 	who["busy"] = false
 	who["t"] = 1.5
@@ -601,18 +602,19 @@ func _end(finished: bool) -> void:
 	line.visible = false
 	fx.hide_all()
 	if finished:
-		_card(res)
+		_card(res, before)
 		Save.save_game()
 	run = null
 	who = {}
 
-func _card(res: Dictionary) -> void:
+func _card(res: Dictionary, before: Array) -> void:
 	if is_instance_valid(card):
 		card.queue_free()
-	var rows: Array = [["Glint Fishing: %d of %d landed" % [res["got"].size(), res["casts"]], 18, UI.ACCENT_HI]]
+	var prize: Array = []
 	for e in res["got"]:
-		rows.append([GardenPrizes.entry_name(e), 14, UI.GOLD if String(e["kind"]) == "item" else UI.INK])
-	if res["got"].is_empty():
-		rows.append(["Nothing this time. The glints come back tomorrow, and so does the sign.", 14, UI.MUTED])
-	card = BaseRace.result_card(h, rows)
+		prize.append([GardenPrizes.entry_name(e), UI.GOLD if String(e["kind"]) == "item" else UI.INK])
+	if prize.is_empty():
+		prize.append(["Nothing this time. The glints come back tomorrow.", UI.MUTED])
+	card = GameResultCard.open(h, {"game": "Glint Fishing", "before": before, "prize": prize,
+			"place": "%d of %d landed" % [res["got"].size(), res["casts"]]})
 	card_t = float(rules()["card_s"])
