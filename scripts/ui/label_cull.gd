@@ -29,6 +29,11 @@ static func at(H, wpos: Vector3, far := FAR_M) -> Vector2:
 		return Vector2.INF
 	return sp
 
+## Aboard the sky ship nobody has a plate (30 riders' plates stacked on one deck read as nothing and cost half
+## the ride's HUD frame): a hunter's plate and bars show once that hunter has jumped.
+static func ride_skip(h: Hunter) -> bool:
+	return h.riding
+
 ## A plate drawn for this entity this frame.
 static func mark(e: Ent) -> void:
 	laid[e.nid] = Engine.get_process_frames()

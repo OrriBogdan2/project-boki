@@ -155,6 +155,15 @@ const MOVES := {
 		[0.3, {"blade": Vector3(0.0, 1.6, 0.0), "bw": 0.8, "rad": 0.45, "p": -0.1, "sq": 0.12, "lw": 0.8,
 				"legs": [0.9, -0.8, -0.5, -0.4]}],
 		[0.45, {}]]},
+	# ... the walk out of the cleave (0.35s at half speed, the ult's recovery): the blade comes down and drags
+	# behind him, the shoulders drop and settle; a jump or Shift cuts it
+	"jug_ult_recover": {"keys": [
+		[0.0, {"blade": Vector3(0.0, 2.7, 0.0), "bw": 1.0, "rad": 0.5, "p": 0.2, "sq": -0.12, "lift": 0.04,
+				"lw": 1.0, "legs": [1.15, -0.65, -0.7, -0.3]}],
+		[0.14, {"blade": Vector3(-0.8, -0.1, 1.2), "bw": 1.0, "rad": 0.45, "p": -0.35, "sq": 0.3, "lift": -0.1,
+				"lw": 0.8, "legs": [0.9, -1.0, -0.5, -0.5]}],
+		[0.35, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 0.9, "rad": 0.4, "p": -0.25, "sq": 0.2, "lift": -0.06,
+				"lw": 0.6, "legs": [0.7, -0.9, -0.4, -0.5]}]]},
 	# ---------------------------------------------------------------- Sable (thief)
 	# Arc Bolts, one per hand (footage 0028-0039: 2-3 frames a shot, one arm whipped forward from a wide
 	# low stance, the torso turned about 30 degrees into it; running, the legs keep running). The body for
@@ -352,7 +361,7 @@ const MOVES := {
 	# ---------------------------------------------------------------- per-hero base dash (the long air dash)
 	# the air Cartwheel (sheet: 0129-0134, 303.8-304.5s): a tucked flick, the star turned over sideways (0.08 to
 	# 0.34), then carried flat and stretched on its speed, legs split and arms swept back, held until she lands
-	# (ThiefKit plays thf_land then); the whole air dash runs up to 1.09s, the keys end at 0.5
+	# (ThiefKit plays thf_land then); the keys end with the 0.48s dash (the ground Cartwheel's, item 183)
 	"thf_exdash": {"hold": true, "swing": 2, "keys": [
 		[0.0, {}],
 		[0.05, {"sq": 0.28, "lift": -0.04, "p": 0.25, "lw": 1.0, "legs": [1.1, -1.6, 0.9, -1.4],
@@ -361,7 +370,7 @@ const MOVES := {
 				"fl": Vector3(-0.58, 0.3, 0.0), "hw": 1.0, "fr": Vector3(0.58, 0.3, 0.0), "rw": 1.0}],
 		[0.34, {"fz": -6.283, "sq": -0.2, "lift": 0.22, "lw": 1.0, "legs": [1.25, -0.05, -1.25, -0.05],
 				"fl": Vector3(-0.58, 0.3, 0.0), "hw": 1.0, "fr": Vector3(0.58, 0.3, 0.0), "rw": 1.0}],
-		[0.5, {"fz": -6.283, "p": -0.75, "sq": -0.22, "lift": 0.12, "lw": 1.0, "legs": [1.0, -0.2, -1.0, -0.35],
+		[0.48, {"fz": -6.283, "p": -0.75, "sq": -0.22, "lift": 0.12, "lw": 1.0, "legs": [1.0, -0.2, -1.0, -0.35],
 				"fl": Vector3(-0.45, -0.05, 0.4), "hw": 1.0, "fr": Vector3(0.45, -0.05, 0.4), "rw": 1.0}]]},
 	# touching down from the air Cartwheel (sheet 6: a low crouch held ~0.1s, up in ~0.05s, no dust)
 	"thf_land": {"keys": [

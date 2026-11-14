@@ -16,6 +16,7 @@
   - [The Barnacle Knight](Class-Barnacle-Knight.md)
   - [The Storm Chaser](Class-Storm-Chaser.md)
   - [The Silver Thief](Class-Silver-Thief.md)
+  - [The Novice Mage](Class-Novice-Mage.md)
 - [Boki](Boki.md)
   - [Species](Boki-Species.md)
   - [Growth](Boki-Growth.md)

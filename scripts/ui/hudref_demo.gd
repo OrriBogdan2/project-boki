@@ -4,7 +4,7 @@ extends RefCounted
 ## known states so before/after pictures line up. Match calls tick() every step while the option is on.
 ##   plates: five rivals in a row in front of you, one per plate state (full; just hit, showing the
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
-##           cooling down. Everyone else stands still.
+##           cooling down, and a heal shield on you (the vitals' shield strip). Everyone else stands still.
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 ##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
 ##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
@@ -69,13 +69,20 @@ static func tick(m) -> void:
 			m.set_meta("hudref_up_done", true)
 			up.lvl += 1                            # someone levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
-		if st: st.slow_t = maxf(st.slow_t, 1.0)
+		if st:
+			st.stun_t = maxf(st.stun_t, 3.0)         # the whole CC row, timers held at a readable length
+			st.root_t = maxf(st.root_t, 2.5)
+			st.slow_t = maxf(st.slow_t, 2.0)
+			KitStatus.apply(st, "gnd", 1.5, 0.0, false, "demo")
+			KitStatus.apply(st, "rat", 2.2, 0.0, false)
 
 static func _stand(m, h: Hunter, at: Vector3) -> void:
 	var g: Vector3 = m.world.free_spot_near(at, [], 0.6, 0.5, 3.0)
 	for i in 8:
 		if not m.world.in_bush(g.x, g.z): break       # (in grass they'd be hidden, plate and all)
 		g = m.world.free_spot_near(at + Vector3(0, 0, 1.2 * float(i + 1)), [], 0.6, 0.5, 3.0)
+	if m.world.is_void(g.x, g.z):                         # (near an edge: look further out, not into the void)
+		g = m.world.free_spot_near(at, [], 0.6, 0.5, 12.0)
 	h.teleport(Vector3(g.x, m.world.ground_at(g.x, g.z), g.z))
 	h.ctrl = "idle"
 	h.vel = Vector3.ZERO
@@ -94,6 +101,8 @@ static func _plates(m, P: Hunter) -> void:
 		h.lvl = 3 + i
 	P.hp = P.max_hp * 0.62
 	P.armor = P.max_armor * 0.5
+	ShieldSrc.give(P, 40.0, ShieldSrc.HEAL)
+	P.shield_t = 30.0
 	if P.ak and P.ak.cd.has("e"): P.ak.cd["e"] = 6.4
 	if foes.size() < 5:
 		return

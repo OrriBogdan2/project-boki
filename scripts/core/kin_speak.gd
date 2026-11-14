@@ -7,40 +7,27 @@ class_name KinSpeak
 const SYL := {"cindle": ["Cin", "dle"], "puddlet": ["Pud", "let"], "burrlet": ["Burr", "let"],
 	"zapple": ["Zap", "ple"], "pebbit": ["Peb", "bit"], "wisplet": ["Wisp", "let"]}
 
-const FEEL := {
-	"happy": ["{A}! {A}-{a}!", "{F}! {F}!", "{A}-{a}! {F}!", "{F}♪"],
-	"excited": ["{F}!!", "{A}! {A}! {A}!", "{U}!!", "{A}-{A}-{A}!"],
-	"question": ["{A}?", "{F}?", "{a}... {A}?", "{A}-{a}?"],
-	"sad": ["{a}... {f}...", "{A}...", "{f}...", "{a}... {a}..."],
-	"angry": ["{U}!", "{A}! {A} {A}!!", "Grrr... {A}!", "{A}! {U}!"],
-	"sleepy": ["{f}... {b}...", "{A}... zzz...", "{a}-{a}... {f}..."],
-	"scared": ["{A}?! {A}!", "{F}...!", "Eep! {A}!", "{a}-{a}-{a}!"],
-	"love": ["{F}~ ♥", "{a}-{a}~", "{F}... ♥", "{A}~ {A}~"],
-	"content": ["{A}.", "{F}.", "{a}-{a}.", "{F}, {a}."],
-	"refuse": ["{A}. {A}.", "{A}! {A}!", "{U}. {A}."],
-}
-
 ## Little things it does that say what it means without saying it.
 const ACTS := {
-	"food": ["(eyes the cooking pot)", "(its tummy rumbles)", "(sniffs at your pockets)", "(nudges an empty bowl toward you)"],
-	"energy": ["(yawns so wide it wobbles)", "(looks over at its bed)", "(blinks very, very slowly)"],
+	"food": ["(eyes the cooking pot)", "({his} tummy rumbles)", "(sniffs at your pockets)", "(nudges an empty bowl toward you)"],
+	"energy": ["(yawns so wide {he} wobbles)", "(looks over at {his} bed)", "(blinks very, very slowly)"],
 	"clean": ["(shakes off a puff of dust)", "(scratches at a muddy patch)", "(looks at the pond, then at you)"],
 	"joy": ["(drops a ball at your feet)", "(tugs at your sleeve)", "(bounces in a little circle)"],
 	"hello": ["(hops over to you)", "(spins around once)", "(wiggles all over)"],
-	"cold": ["(keeps its distance)", "(watches you sideways)", "(doesn't come any closer)"],
-	"love": ["(rubs against your leg)", "(flops onto its back)", "(nuzzles your hand)"],
-	"mean": ["(turns its back on you)", "(flattens its ears)", "(stomps off a few steps)"],
+	"cold": ["(keeps {his} distance)", "(watches you sideways)", "(doesn't come any closer)"],
+	"love": ["(rubs against your leg)", "(flops onto {his} back)", "(nuzzles your hand)"],
+	"mean": ["(turns {his} back on you)", "(flattens {his} ears)", "(stomps off a few steps)"],
 	"sorry": ["(peeks back at you)", "(inches a little closer)"],
-	"full": ["(pats its round belly)", "(sits down with a happy sigh)"],
-	"brave": ["(swipes at the air)", "(puffs itself up)", "(paws the ground, ready)"],
+	"full": ["(pats {his} round belly)", "(sits down with a happy sigh)"],
+	"brave": ["(swipes at the air)", "(puffs {himself} up)", "(paws the ground, ready)"],
 	"timid": ["(hides behind your leg)", "(looks up at you, unsure)"],
-	"curious": ["(tilts its head)", "(stares at you, thinking hard)"],
-	"proud": ["(puffs up proudly)", "(stands as tall as it can)"],
+	"curious": ["(tilts {his} head)", "(stares at you, thinking hard)"],
+	"proud": ["(puffs up proudly)", "(stands as tall as {he} can)"],
 	"play": ["(darts off and looks back at you)", "(crouches low, tail going)"],
 	"bye": ["(watches you go)", "(waves a paw)", "(follows you a few steps)"],
 	"home": ["(rolls around in the grass)", "(sniffs a flower)"],
 	"friends": ["(looks over at the other Boki)", "(calls out to someone across the farm)"],
-	"listen": ["(listens with its ears up)", "(nods along)", "(sits right in front of you)"],
+	"listen": ["(listens with {his} ears up)", "(nods along)", "(sits right in front of you)"],
 }
 
 ## A few words it picks up first.
@@ -86,19 +73,31 @@ static func fill(species: String, pattern: String, rec := {}) -> String:
 	out = out.replace("{N}", String(rec.get("name", p["F"])))
 	return out.substr(0, 1).to_upper() + out.substr(1)
 
+## A line's {he} {his} {him} {himself} for a Boki's sex ("m", "f"; "" reads as they/their).
+static func pronouns(text: String, sex: String) -> String:
+	var p := {"m": ["he", "his", "him", "himself"], "f": ["she", "her", "her", "herself"]}.get(
+			sex, ["they", "their", "them", "themself"]) as Array
+	var out := text.replace("{he}", p[0]).replace("{He}", String(p[0]).capitalize())
+	return out.replace("{his}", p[1]).replace("{him}", p[2]).replace("{himself}", p[3])
+
+## The same for a save record, whose sex is read from its rolls.
+static func about(rec: Dictionary, text: String) -> String:
+	return pronouns(text, Unique.sex(rec))
+
 static func _pick(arr: Array, salt: int) -> String:
 	return String(arr[absi(salt) % arr.size()])
 
 static func babble(species: String, feel: String, salt := -1) -> String:
 	if salt < 0: salt = randi()
-	return fill(species, _pick(FEEL.get(feel, FEEL["content"]), salt))
+	var tones: Dictionary = BokiLines.rules()["tones"]
+	return fill(species, _pick(tones.get(feel, tones["content"]), salt))
 
 ## A line for a speech bubble at home, with no question asked: greetings and reactions.
 static func say(rec: Dictionary, feel: String, act_key := "", salt := -1) -> String:
 	if salt < 0: salt = randi()
 	var s := babble(rec["species"], feel, salt)
 	if act_key != "" and ACTS.has(act_key):
-		s += " " + _pick(ACTS[act_key], salt / 3)
+		s += " " + about(rec, _pick(ACTS[act_key], salt / 3))
 	return s
 
 ## Answers something you said, at the kin's level of speech. Fluent kin use KinBrain.
@@ -155,7 +154,7 @@ static func reply(rec: Dictionary, text: String) -> String:
 		var mem: Array = rec.get("memory", [])
 		var m := String(mem[-1]["text"]).trim_prefix("you ") if mem.size() > 0 else "farm"
 		var line := fill(rec["species"], _pick(SIMPLE.get(key, SIMPLE["chat"]), salt), rec).replace("{M}", " ".join(m.split(" ").slice(0, 4)))
-		return line + (" " + _pick(ACTS[act], salt / 7) if salt % 3 == 0 else "")
+		return line + (" " + about(rec, _pick(ACTS[act], salt / 7)) if salt % 3 == 0 else "")
 	var s := babble(rec["species"], feel, salt)
 	if stage == 1:
 		var w: String = WORDS.get(key, WORDS.get(intent, ""))
@@ -163,91 +162,4 @@ static func reply(rec: Dictionary, text: String) -> String:
 			var p := _parts(rec["species"])
 			var punct := "?" if feel == "question" else ("..." if feel in ["sad", "sleepy"] else "!")
 			s = "%s ...%s%s %s!" % [s, w, punct, p["A"]]
-	return s + " " + _pick(ACTS.get(act, ACTS["listen"]), salt / 5)
-
-## What a young kin shouts in a match.
-static func bark(rec: Dictionary, cat: String) -> String:
-	var sp: String = rec.get("species", "cindle")
-	var stage := Care.speech(rec)
-	var feel := "content"
-	var word := ""
-	match cat:
-		"throw": feel = "excited"; word = "Go"
-		"refuse": feel = "refuse"; word = "No"
-		"hesitate": feel = "question"; word = "Okay"
-		"scared": feel = "scared"; word = "Ow"
-		"revive": feel = "excited"; word = "Up"
-		"revive_low": feel = "sad"
-		"callout": feel = "excited"; word = "Look"
-		"wild": feel = "question"; word = "Friend"
-		"kill": feel = "happy"; word = "Yay"
-		"owner_down": feel = "scared"; word = "No"
-		"caught": feel = "happy"; word = "Friend"
-		"extract": feel = "love"; word = "Home"
-		# teammate callouts and reactions (KinCompanion)
-		"behind": feel = "scared"; word = "Behind"
-		"hunter": feel = "angry"; word = "Look"
-		"sniper": feel = "scared"; word = "Down"
-		"pack": feel = "angry"; word = "Many"
-		"boss": feel = "scared"; word = "Big"
-		"egg": feel = "excited"; word = "Egg"
-		"loot": feel = "excited"; word = "Shiny"
-		"exit", "collapse": feel = "excited"; word = "Home"
-		"low_hp": feel = "sad"; word = "Hurt"
-		"tonic": feel = "love"; word = "Drink"
-		"cover": feel = "angry"; word = "Mine"
-		"goad": feel = "excited"; word = "Go"
-		"yelp": feel = "scared"; word = "Ow"
-		"relief": feel = "love"; word = "Up"
-		"boss_kill": feel = "excited"; word = "Yay"
-		"comfort": feel = "love"; word = "Okay"
-		"tut": feel = "excited"; word = "Look"
-	var s := babble(sp, feel)
-	if stage >= 1 and word != "" and randf() < 0.6:
-		s = "%s! %s" % [word, s]
-	return s
-
-## The big moment of its last expedition, the way it brings it up back home (Game._kin_after keeps
-## it as rec.recall = {kind, text, place, boss}). Its talking level decides the words: a hatchling
-## acts it out, a grown Boki tells you.
-const RECALL := {
-	"carried_out": ["You carried me out of %P. I won't forget that.", "You carried me home from %P... thank you."],
-	"boss_kill": ["Did you see us beat %B? I keep thinking about it!", "We beat %B at %P! Nobody's going to believe it."],
-	"revived": ["Remember when I pulled you back up? Don't scare me like that again.", "I got you up last time. I'll always get you up."],
-	"stood_over": ["When you went down at %P... I wasn't going anywhere.", "I stood over you at %P. I'd do it again."],
-	"comforted": ["We lost at %P. I'm just glad you're okay.", "Next time at %P, we'll do better. Together."],
-	"knock_together": ["We were a good team at %P, weren't we?", "That hunter at %P never saw us coming!"],
-	"escaped": ["We made it out of %P together!", "That was scary at %P. But we got out!"],
-}
-const RECALL_SIMPLE := {
-	"carried_out": "You carry {A} out of %P. {A} not forget!", "boss_kill": "Big monster! We beat! {A}!",
-	"revived": "{A} help you up! You okay now?", "stood_over": "You fall down... {A} stay. {A} protect.",
-	"comforted": "We lose... but you okay. {A} happy.", "knock_together": "We team! Good team! {A}!",
-	"escaped": "We get out of %P! {A}!",
-}
-const RECALL_ACT := {
-	"carried_out": "(snuggles into your arms, the way you carried it home)", "boss_kill": "(stomps around like a huge monster, then flops over, beaten)",
-	"revived": "(pushes its head under your hand, like it's lifting you up)", "stood_over": "(plants itself in front of you, puffed up, remembering)",
-	"comforted": "(leans against you quietly)", "knock_together": "(pounces on a leaf, then looks at you, proud)",
-	"escaped": "(bounces in a circle, then looks off toward the islands)",
-}
-const RECALL_FEEL := {"carried_out": "love", "boss_kill": "excited", "revived": "love", "stood_over": "angry", "comforted": "sad", "knock_together": "happy", "escaped": "happy"}
-
-static func recall_line(rec: Dictionary, salt := -1) -> String:
-	var r: Dictionary = rec.get("recall", {})
-	var kind := String(r.get("kind", ""))
-	if not RECALL.has(kind):
-		return ""
-	if salt < 0: salt = randi()
-	var place := String(r.get("place", "the islands"))
-	var boss := String(r.get("boss", "the boss"))
-	var stage := Care.speech(rec)
-	var s := ""
-	if stage >= 3:
-		s = _pick(RECALL[kind], salt)
-	elif stage == 2:
-		s = fill(rec["species"], RECALL_SIMPLE[kind], rec)
-	else:
-		s = babble(rec["species"], RECALL_FEEL[kind], salt) + " " + RECALL_ACT[kind]
-	s = s.replace("%P", place).replace("%B", boss)
-	return s.substr(0, 1).to_upper() + s.substr(1)
+	return s + " " + about(rec, _pick(ACTS.get(act, ACTS["listen"]), salt / 5))
