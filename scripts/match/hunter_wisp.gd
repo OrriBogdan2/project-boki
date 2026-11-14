@@ -85,10 +85,8 @@ static func _advance(h: Hunter, st: Dictionary) -> void:
 	elif mode == OUT and float(st["t"]) >= float(look["pop_out"]["time"]):
 		_finish(h, st)
 
-## Your Wisp from your save; a remote player's from their join kit; a bot has none (an unknown or missing id
-## gives the default Wisp, WispLook.get_look).
 static func _look_id(h: Hunter) -> String:
-	return WispLook.equipped() if h.is_local() else String(h.bot_look.get("wisp", ""))
+	return WispLook.equipped() if h.is_local() else ""
 
 static func _team_col(h: Hunter) -> Color:
 	return SideColor.of(h.m, h)      # the colour of the hunter's ring and downed marker
