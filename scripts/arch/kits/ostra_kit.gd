@@ -92,6 +92,9 @@ func recast_window() -> Dictionary:
 		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
 		w["marker"] = false
 	return w
+## The recast opens once the seed may pop (a press inside min_recast is swallowed).
+func recast_window() -> Dictionary:
+	return super() if not seed.is_empty() and float(seed["t"]) >= float(e_def()["min_recast"]) else {}
 
 func _hand(up := 1.15) -> Vector3:
 	var d := h.aim_dir()

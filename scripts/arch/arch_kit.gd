@@ -160,6 +160,12 @@ func recast_now(slot_id: String) -> void:
 	match slot_id:
 		"e": use_e()
 		"x": cast_ult()
+## The open recast window, {} when none: {slot: e|x|dash|lmb, left: s until it closes (INF: it waits)}.
+## RecastSound reads it; the base reports E while it's up and e_recastable().
+func recast_window() -> Dictionary:
+	if e_t > 0.0 and e_recastable():
+		return {"slot": "e", "left": e_t}
+	return {}
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
 func gate_kin_tap() -> bool: return false           # G's tap runs outside inp (Match.pending_input): true = swallowed
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
@@ -266,10 +272,11 @@ func _tick_recast(dt: float) -> void:
 				if slot_id in ["e", "x"]: h._ab_feedback("k1" if slot_id == "e" else "x", "deny")     # it never opened
 	if h.is_local():
 		RecastCue.track(self, dt)
-		RecastSound.track(self)
 
 func buffer_recast(slot_id: String) -> void:
 	recast_buf[slot_id] = RECAST_BUFFER
+	if h.is_local():
+		RecastSound.track(self)
 
 func held(which: String) -> bool:
 	match which:
