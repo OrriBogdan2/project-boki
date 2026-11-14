@@ -783,7 +783,7 @@ func _call_look(who: Hunter, dt: float) -> void:
 	var own := AimKit.hero_col(h)
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": own, "all": true, "dashed": true})
 	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": own, "all": true})
-	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
+	ulk().keep("tether", "tether", CareUtil.hand_at(h, false), {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
 	if float(hearth_call["fx"]) <= 0.0:
 		hearth_call["fx"] = 0.22

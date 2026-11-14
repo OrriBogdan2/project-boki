@@ -111,7 +111,7 @@
 				"size": 0.06, "stretch": 0.04, "c": "fire", "c2": "hot", "c3": "deep"}
 		]},
 
-		"x_cast": {"sfx": [{"n": "vn_nuke_fire", "db": -1.0, "at": "h"}, {"n": "vn_nuke_fall", "db": -2.0}], "fx": [
+		"x_cast": {"sfx": [{"n": "vn_nuke_fire", "db": -1.0, "at": "h"}], "fx": [
 			{"p": "flare", "at": "h", "y": 2.4, "size": 1.4, "grow": 1.4, "life": 0.16, "c": "fire", "c2": "white", "c3": "deep"},
 			{"p": "ember", "at": "h", "y": 2.4, "n": 14, "way": "up", "speed": 30.0, "spread": 0.04, "life": 0.4,
 				"size": 0.12, "stretch": 0.06, "c": "fire", "c2": "white", "c3": "deep"},

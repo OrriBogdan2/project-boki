@@ -78,7 +78,7 @@ static func _show(props: Node3D, stun: bool, root: bool, slow: bool, h: Hunter, 
 		r.set_meta("at", h.m.time)
 	r.visible = root
 	if root:
-		r.scale.y = clampf((h.m.time - float(r.get_meta("at"))) / ROOT_GROW, 0.05, 1.0)
+		r.scale.y = clampf((h.m.time - float(r.get_meta("at", h.m.time))) / ROOT_GROW, 0.05, 1.0)
 	var w := props.get_node("Slow") as Node3D
 	w.visible = slow
 	if slow:

@@ -63,8 +63,6 @@ static func _glow(m: Match, h: Hunter, on: bool) -> bool:
 		var shell := Models.part(n, Models.capsule(SHELL_R, 2.2), rim_mat, Vector3(0, 1.05, 0))
 		shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var pool_mat := Models.ring_mat(Color(col, 0.9), 0.08)
-		pool_mat.set_shader_parameter("wash", 0.7)
-		pool_mat.set_shader_parameter("halo", 0.8)
 		var pool := Models.part(n, Models.flat_quad(POOL_R * 2.0), pool_mat, Vector3(0, 0.06, 0))
 		pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		h.add_child(n)
