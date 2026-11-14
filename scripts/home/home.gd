@@ -71,6 +71,7 @@ var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and 
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var photo: HomePhoto = null         # photo mode (home_photo.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
+var hold: ItemHold                    # an item in your hand and its preview card (item_hold.gd)
 var wade := BokiWade.new(self)        # Boki in the water: slower, ripples, paddling (boki_wade.gd)
 var fly := BokiFly.new(self)          # fliers over Kitewind Ridge and the gaps (boki_fly.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
@@ -1101,11 +1102,12 @@ func _process(delta: float) -> void:
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
-	if hb and hb.active:
+	var idle := panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()
+	if hold.tick(idle and not carry.carrying() and not (hb and hb.active)) or (hb and hb.active):
 		return
-	if carry.tick(d, interact, panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()):
+	if carry.tick(d, interact, idle):
 		return
-	if panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty() and not interact.is_empty():
+	if idle and not interact.is_empty():
 		if Input.is_action_just_pressed("interact"):
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
@@ -1822,6 +1824,8 @@ func _open_rack() -> void:
 			UI.footer_primary(v, "Equip", func(): _rack_equip(rack_pick), 140, "check")
 	elif g.has("unlock"):
 		var lk := UI.label(Gliders.how(rack_pick), UI.T_SMALL, UI.ACCENT_HI)
+		lk.custom_minimum_size.x = 440      # px: a long mastery goal wraps to two lines, not one word per line
+		lk.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		lk.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		UI.footer(v).add_child(lk)
 	else:
@@ -1984,7 +1988,7 @@ func _house_alert(inside: Array) -> void:
 	wt.tween_callback(who.queue_free)
 	Sfx.play("kin_alert", at, -6.0, 0.1, 1.15)
 	# the house might be off screen: say it on the HUD as well
-	_toast(who.text.replace("heard you!", "heard you from the house and are on their way") if names.size() > 1 else who.text.replace("heard you!", "heard you from the house and is on its way"))
+	_toast(who.text.replace("heard you!", "heard you from the house and are on their way") if names.size() > 1 else who.text.replace("heard you!", KinSpeak.about(inside[0]["rec"], "heard you from the house and is on {his} way")))
 	# the house rattles: little feet scurrying for the door
 	if is_instance_valid(house_node):
 		var base := house_node.scale
@@ -2074,8 +2078,8 @@ func _find_interact() -> void:
 		if d < bd: bd = d; best = {"kind": "plot", "arr": "gh_plots", "i": i}
 	if hob:
 		var near_hob := hob.find(p2)
-		if not near_hob.is_empty():
-			bd = 0.5
+		if not near_hob.is_empty() and (best.is_empty() or float(near_hob.get("d", 0.0)) < bd):
+			bd = float(near_hob.get("d", 0.5))
 			best = near_hob
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
 		if not spots.has(nm) or (nm == "rack" and _visiting()): continue
@@ -2084,19 +2088,19 @@ func _find_interact() -> void:
 		var reach := 2.6 if nm in ["house", "portal"] else 1.9
 		if nm == "house": sp = _house_door() - HomeLayout.facing(house_r) * 0.1
 		var d := p2.distance_to(Vector2(sp.x, sp.z))
-		if d < reach and d < bd + 0.6: bd = d; best = {"kind": nm}
+		if d < reach and d < bd + FarmHob.lead(best, 0.6): bd = d; best = {"kind": nm}
 	for b in lots:
 		var l: Dictionary = lots[b]
 		if not l["built"] and FarmSites.has_site(FarmLots.entry(b, _d())): continue      # FarmHob finds the site
 		var dp: Vector3 = l["door"] if l["built"] else l["at"]
 		var d := p2.distance_to(Vector2(dp.x, dp.z))
-		if d < (1.8 if l["built"] else 2.4) and d < bd + 0.4: bd = d; best = {"kind": "lot", "b": b}
+		if d < (1.8 if l["built"] else 2.4) and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "lot", "b": b}
 	for k in bridges:
 		if bridges[k]["built"] or FarmUnlocks.base_mode():
 			continue
 		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
-		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
+		if d < 2.4 and d < bd + FarmHob.lead(best, 0.4): bd = d; best = {"kind": "bridge", "isle": k}
 	var pet := {}      # a Boki only wins at the end, and never over work in reach
 	var pet_d := bd
 	for k in kins:
@@ -2106,7 +2110,7 @@ func _find_interact() -> void:
 	if not _visiting() and is_instance_valid(burrow_node):
 		var bdoor := BURROW_AT + _turn(Vector3(0, 0, 1.55), burrow_r)
 		var bdd := p2.distance_to(Vector2(bdoor.x, bdoor.z))
-		if bdd < 1.7 and bdd < bd + 0.4: bd = bdd; best = {"kind": "burrow"}
+		if bdd < 1.7 and bdd < bd + FarmHob.lead(best, 0.4): bd = bdd; best = {"kind": "burrow"}
 	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and not _visiting():
 		best = {"kind": "egg"} if is_instance_valid(nest) else {"kind": "nook"}
 	if hinc and p2.distance_to(Vector2(INCUB_AT.x, INCUB_AT.z)) < 1.6 and not _visiting():
@@ -2421,6 +2425,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ ui
 func _build_ui() -> void:
 	ui = CanvasLayer.new(); add_child(ui)
+	hold = ItemHold.new(self)
 	stat_glint = StatGlint.new(self); ui.add_child(stat_glint)
 	root_ui = Control.new()
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -4346,6 +4351,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var nm: String = rec["name"]
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
+		BowlSfx.taste(rec, k["pos"], res)
 		_toast(res["text"])
 		Save.save_game()
 		_refresh_top()
@@ -4362,7 +4368,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_swap_kin_model(k)      # its colour shifts toward the lean on the spot
 		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Lean.face(leaned)["tint"], 18, 2.4, 0.5)
 		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
-		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Lean.face(leaned)["name"], pct])
+		_toast(KinSpeak.about(rec, "%s leans %s: {his} colour shifts (%d%%)") % [nm, Lean.face(leaned)["name"], pct])
 	if f == String(rec["habit"]["food"]): _care_trust(rec, "food", f)
 	_garden_xp(rec, "feed")
 	if res["love"]:
@@ -4454,14 +4460,17 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 	var k := _kin_entry(rec)
 	if k.is_empty():
 		return
+	if yard == null:      # the drill runs at the Training post's dummy
+		_toast("Build a Training post on the farm first, then train %s there" % rec["name"])
+		return
 	if Care.need(rec, "energy") < 20.0 or Care.need(rec, "food") < 12.0:
 		_close_panel()
 		var why := "energy" if Care.need(rec, "energy") < 20.0 else "food"
 		_say(k, BokiLines.say(rec, "want_" + why))
-		_toast("%s is too %s to train. %s first" % [rec["name"], "tired" if why == "energy" else "hungry", "Let it nap" if why == "energy" else "Feed it"])
+		_toast(KinSpeak.about(rec, "%s is too %s to train. %s first") % [rec["name"], "tired" if why == "energy" else "hungry", "Let {him} nap" if why == "energy" else "Feed {him}"])
 		return
 	if int(rec["stats"][stat]) >= Care.stat_cap(rec):
-		_toast("%s can't train %s any further until it levels up" % [rec["name"], Care.STATS[stat]["name"]])
+		_toast(KinSpeak.about(rec, "%s can't train %s any further until {he} levels up") % [rec["name"], Care.STATS[stat]["name"]])
 		return
 	if not _care_start(k):
 		return
@@ -5138,7 +5147,8 @@ func _open_feed(rec: Dictionary) -> void:
 			row_for.call(f, n, aff + "Fills it up.")
 	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
 	var any := GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
-			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or not rows.is_empty()
+			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec),
+			func(id: String, pick: String): hold.peek(rec, id, pick)) or not rows.is_empty()
 	any = GardenItemRows.add_inks_and_worn(v, rec, func(): _open_feed(rec), [_close_panel, _play_evolutions]) or any
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
