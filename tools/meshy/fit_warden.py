@@ -3801,4 +3801,5 @@ def main():
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))
 
 
-main()
+if __name__ == "__main__":
+    main()

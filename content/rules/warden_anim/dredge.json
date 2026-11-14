@@ -1,5 +1,6 @@
 {
 	"doc": "Grimble's hand-keyed clips (art/wardens/dredge/dredge.glb; id and files stay dredge) and which game state plays which (scripts/heroes/warden_clips.gd).",
+	"blink": {"turn": {"lid": [0.0, -0.95, 0.0]}},
 	"skinned_weapon": true,
 	"extra_bones": {
 		"foot.L": "shin.L",
@@ -24,6 +25,7 @@
 	"hide_while_chain": [
 		"hook"
 	],
+	"free_arm": {"throw": "L", "shot": "R"},
 	"loco": {
 		"idle": "idle",
 		"stance": "stance",
@@ -41,7 +43,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.4, "stride": [1.3, 1.2], "foot_mps": [1.61, 5.01]
+		"run_speed": 4.4, "stride": [1.3, 1.2], "bob": [1.0, 0.55], "foot_mps": [1.61, 5.01], "start_phase": 0.7
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {
@@ -50,11 +52,7 @@
 		"glide": "glide",
 		"dive": "pounce"
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.4,
-		"min_fall": 0.25
-	},
+	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"dr_shot": {
 			"clip": "shot",
@@ -85,7 +83,11 @@
 			"clip": "quake"
 		},
 		"dr_lunge": {
-			"clip": "lunge"
+			"clip": "lunge",
+			"hold_from": 0.39
+		},
+		"dr_lunge_out": {
+			"clip": "lunge_out"
 		},
 		"dr_pounce": {
 			"clip": "pounce"
@@ -108,6 +110,7 @@
 			"clip": "fusion"
 		}
 	},
+	"lockin": {"clip": "emote", "dur": 1.45, "rate": 1.0},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -159,6 +162,9 @@
 			1.3
 		]
 	],
+	"carry_stow": ["gun"],
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "flex", "refuse": "g_cross"},
+	"cc": {"pull": 0.22, "tug_hz": 1.5, "twist": 0.14, "bow": 0.3},
 	"climb": {
 		"doc": "A ledge rise plays the mantle clip by how far up the face he is: clip second `rise` is the hands on the lip, so the motion cannot lag the body (hunter.gd lfloat progress). A ledge float (dash off an edge) hangs `rise` s, then pulls up. The clip runs on to its end after the state, then the legs take over. The procedural list below stays the fallback for a model without the clips.",
 		"mantle": {"clip": "mantle", "rise": 0.28},
@@ -171,6 +177,7 @@
 		"base",
 		"drink"
 	],
+	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [
 		"hips",
 		"head",
