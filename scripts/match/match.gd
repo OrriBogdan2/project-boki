@@ -5035,7 +5035,8 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 				_apply_treat(player.kin)
 			_start_drop(player, at)
 		else:
-			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", ""))})
+			var kit := {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", "")), "look": r.get("look", {})}
+			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, kit)
 			h.remote = true
 			if h.kin:
 				h.kin.remote = true
