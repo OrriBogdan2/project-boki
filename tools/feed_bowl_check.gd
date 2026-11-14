@@ -1,5 +1,5 @@
 extends RefCounted
-## --feed-bowl-check: the feeding bowl. It is a base-mode item (off the build menu until Save.d["base_mode"]);
+## --feed-bowl-check: the feeding bowl. It is a base-mode item (off the build menu with farm_build.json base_mode off);
 ## a snack dropped in it calls the hungry Boki nearby; with a bowl and 3 hungry Boki (a bold one, a
 ## greedy middle one and a timid one, the first two rivals) all eat within 30 s, the timid one last,
 ## the rivals huff at each other at the bowl, each gets the food's lean (Evo) like hand feeding, and a
@@ -32,8 +32,9 @@ func run(m: Node) -> void:
 	# ---------------------------------------------------------------- 1. base mode gates it
 	Save.d = Save.fresh()
 	var base_item: bool = HomeLayout.CATALOG["feed_bowl"].get("base", false)
+	FarmUnlocks.rules()["base_mode"] = false
 	ok(base_item and not FarmUnlocks.open("feed_bowl"), "the bowl is a base item: hidden outside base mode")
-	Save.d["base_mode"] = true
+	FarmUnlocks.rules()["base_mode"] = true
 	ok(FarmUnlocks.open("feed_bowl"), "in base mode it can be built")
 	# ---------------------------------------------------------------- 2. a bowl, three hungry Boki and a full one
 	Econ.ensure()

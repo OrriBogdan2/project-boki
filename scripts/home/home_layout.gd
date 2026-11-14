@@ -158,10 +158,6 @@ static func fresh() -> Dictionary:
 	return {"v": 1, "grow": 0, "theme": "meadow", "themes": ["meadow"], "b": {}, "deco": [], "paths": {}, "water": {}, "inv": {}, "uid": 0,
 		"seed": 0, "made": true, "cleared": {}, "fs": 0, "regrow": {}}
 
-## Base mode (Save.d["base_mode"], off unless set): only then can the catalog items marked "base" be built.
-static func base_mode(d: Dictionary = Save.d) -> bool:
-	return bool(d.get("base_mode", false))
-
 ## A farm-start island (new saves from the farm-start update on): it begins almost empty and you
 ## place the house, crop patch, pot and the rest yourself. Older islands keep their fixed farm.
 static func fs(d: Dictionary) -> bool:
