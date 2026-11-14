@@ -1,8 +1,8 @@
 class_name TellCue
 extends RefCounted
 ## You hear where a rival's ability will land before it lands (DECISIONS 11-11: clarity first). A ground telegraph a
-## rival Hunter shows everyone plays one short wind-up, tell_foe, at its centre when it starts: ArchKit.tele_circle
-## and tele_lane, and AimKit areas with "all" (AimDraw.put, the first step an entry shows). Bigger areas play it
+## rival Hunter shows everyone plays one short wind-up, tell_foe, at its centre when it starts: AimKit areas
+## with "all" (AimDraw.put, the first step an entry shows). Bigger areas play it
 ## lower and louder. Your own and your team's telegraphs play nothing, and ultimates are left to UltCue. It goes
 ## through Sfx.play, so its MIN_GAP, the stacking cap and the voice pool apply as to any sound.
 

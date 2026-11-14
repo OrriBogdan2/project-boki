@@ -229,30 +229,30 @@ func _tell_cues(m: Match, P: Hunter) -> void:
 	Sfx.listener = P.pos
 	R.pos = P.pos + Vector3(40, 0, 0)                 # past hearing: only a cue at the landing spot can be heard
 	var spot := P.pos + Vector3(3, 0, 0)
-	ok(_tell(func(): R.ak.tele_circle(spot, 1.0, Color.RED, 0.5)),
-			"a rival's circle 40 m off, landing 3 m from you, is heard where it lands")
+	var circle := func(who: Hunter, r: float) -> bool:
+		AimKit.clear(who)
+		return _tell(func(): AimKit.circle(who, "tell_check", {"at": spot, "r": r, "all": true}))
+	ok(circle.call(R, 1.0), "a rival's circle 40 m off, landing 3 m from you, is heard where it lands")
 	var small := _last_voice()
-	_tell(func(): R.ak.tele_circle(spot, 4.0, Color.RED, 0.5))
+	circle.call(R, 4.0)
 	var big := _last_voice()
 	ok(big.volume_db > small.volume_db + 3.0 and big.pitch_scale < small.pitch_scale,
 			"...a bigger area is louder and lower (%.1f dB / %.2f vs %.1f dB / %.2f)" % [
 				big.volume_db, big.pitch_scale, small.volume_db, small.pitch_scale])
-	ok(_tell(func(): R.ak.tele_lane(P.pos + Vector3(-30, 0, 0), Vector2(1, 0), 60.0, 2.0, Color.RED, 0.5)),
-			"a rival's lane is heard at its middle (starting 30 m off)")
-	ok(_tell(func(): AimKit.circle(R, "tell_check", {"at": spot, "r": 2.0, "all": true})),
-			"a rival's AimKit area everyone sees is heard when it starts")
+	AimKit.clear(R)
+	var lane := {"from": P.pos + Vector3(-30, 0, 0), "dir": Vector2(1, 0), "len": 60.0, "width": 2.0, "all": true}
+	ok(_tell(func(): AimKit.lane(R, "tell_lane", lane)), "a rival's lane is heard at its middle (starting 30 m off)")
+	AimKit.clear(R)
+	ok(circle.call(R, 2.0), "a rival's AimKit area everyone sees is heard when it starts")
 	ok(not _tell(func(): AimKit.circle(R, "tell_check", {"at": spot, "r": 2.0, "all": true})),
 			"...and not again while the kit refreshes it")
 	ok(not _tell(func(): AimKit.lane(R, "tell_aim", {"from": spot, "len": 4.0})), "a rival's own-aim lane is silent")
 	ok(not _tell(func(): AimKit.circle(R, "x_check", {"at": spot, "r": 2.0, "all": true})),
 			"a rival's ultimate area is silent (UltCue has it)")
-	R.ak.fuse = {"t": 1.0}
-	ok(not _tell(func(): R.ak.tele_circle(spot, 2.0, Color.RED, 0.5)), "...and so is the R fuse ring")
-	R.ak.fuse = {}
-	ok(not _tell(func(): P.ak.tele_circle(spot, 2.0, Color.RED, 0.5)), "your own telegraph is silent")
+	ok(not circle.call(P, 2.0), "your own telegraph is silent")
 	var team: int = R.team
 	R.team = P.team
-	ok(not _tell(func(): R.ak.tele_circle(spot, 2.0, Color.RED, 0.5)), "an ally's telegraph is silent")
+	ok(not circle.call(R, 2.0), "an ally's telegraph is silent")
 	R.team = team
 	AimKit.clear(R)
 
