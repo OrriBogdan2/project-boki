@@ -10,8 +10,8 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
 const CANONICAL_ORDER := [
-	"archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm",
-	"dredge", "rimewright", "mage", "thief", "ostra", "gil",
+	"archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm",
+	"mage", "dredge", "tender", "thief", "ostra", "gil",
 ]
 const RELIC_STATUS := ["locked", "proposed"]
 const GENDERS := ["male", "female", "robot"]
@@ -59,6 +59,7 @@ func run(main: Node) -> void:
 				"%s shows as '%s', with no gender line" % [id, shown_name])
 		_howto_check(id)
 	_lore_check()
+	_results_name_line(main)
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -122,3 +123,15 @@ func _old_name_in(text: String) -> String:
 
 func _all_titles() -> Array:
 	return Arch.ids().map(func(id): return HeroTitle.title(id))
+
+## The results headline carries the player name ("Hunter made it out"), never as a Relic title ("Hunter the Hired Gun").
+func _results_name_line(main: Node) -> void:
+	var screen: Control = load("res://scripts/ui/results.gd").new()
+	main.add_child(screen)
+	screen.show_result({"extracted": true, "knocks": 1, "time": 60.0})
+	var texts: Array = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	var player := String(Save.d.get("name", "Hunter"))
+	ok(texts.has("%s made it out" % player.substr(0, 16)), "results: the headline carries the name '%s'" % player)
+	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
+	ok(texts.has("HUNTERS DOWNED"), "results: the strip says Hunters downed (main's wording)")
+	screen.queue_free()

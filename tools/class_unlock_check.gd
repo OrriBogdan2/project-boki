@@ -36,9 +36,9 @@ const GOAL_KINDS := {
 ## Keys that would make a reward more than a look ("stat" in a goal is what it counts, not a reward).
 const POWER_KEYS := ["hp", "health", "dmg", "damage", "speed", "cooldown", "cd", "perk", "ability", "rank",
 		"armor", "power", "mult", "bonus", "level", "xp", "glide", "lift", "drag", "fall"]
-## The only ways gameplay code may touch a glider skin: draw it (mesh, or its merged sheet and paint), trail it,
+## The only ways gameplay code may touch a glider skin: draw it (its canopy and that canopy's material), trail it,
 ## play its sound.
-const GLIDER_CALLS := ["Gliders.mesh", "Gliders.sheet", "Gliders.paint", "Gliders.trail",
+const GLIDER_CALLS := ["Gliders.dress", "Gliders.canopy_material", "Gliders.canopy", "Gliders.trail",
 		"Gliders.sound", "Gliders.equipped", "Gliders.LIST"]
 
 var bad := 0
@@ -499,14 +499,14 @@ func _new_game_flow(tree: SceneTree) -> void:
 	enter.pressed = true
 	hx._unhandled_input(enter)
 	for i in 6: await tree.process_frame
-	ok(hx.stage == "create" and hx.create_box != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
+	ok(hx.stage == "create" and hx.locker != null, "Enter takes it to making yourself (stage %s)" % hx.stage)
 	hx._looks_good()
 	for i in 6: await tree.process_frame
 	ok(hx.stage == "pick" and ClassUnlock.needs_starters(),
 			"then straight to the egg pick, with no Relic pick before it (stage %s)" % hx.stage)
 	ok(_find_meta(hx, "starter_pick") == null and not _any_text(hx.root_ui, "Choose your first Relic"),
 			"there is no Relic pick screen at all")
-	ok(hx.create_box == null and hx.preview == null and Unmasked.is_look(Save.d["look"]),
+	ok(hx.locker == null and Unmasked.is_look(Save.d["look"]),
 			"the creator is behind us and the save holds your Empty look")
 	await shot(tree, "egg_pick", 30)
 	hx.queue_free()

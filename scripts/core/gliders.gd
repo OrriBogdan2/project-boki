@@ -93,6 +93,23 @@ static func how(id: String) -> String:
 	var p := String(g["unlock"]).split(":")
 	return "%s (%d/%s)" % [String(g.get("how", "")), mini(Progress.stat(p[0]), int(p[1])), p[1]]
 
+## Gems a bought skin costs from where it reads Rare, and Epic (below the first: Fine).
+const RARE_GEMS := 200
+const EPIC_GEMS := 400
+
+## A skin's rarity (a Data.RARITY index) from how it is got: the free wing Common, bought ones by price, earned
+## ones Epic and a Hunter's mastery gift Legendary.
+static func rarity(id: String) -> int:
+	var g := get_skin(id)
+	if g.has("unlock"):
+		return 4 if String(g["unlock"]) == "mastery" else 3
+	var cost := int(g.get("cost", 0))
+	if cost == 0:
+		return 0
+	if cost < RARE_GEMS:
+		return 1
+	return 2 if cost < EPIC_GEMS else 3
+
 ## Glide on an owned skin from now on. Returns false for one you don't own.
 static func equip(id: String) -> bool:
 	if not owned(id):
@@ -104,7 +121,7 @@ static func equip(id: String) -> bool:
 
 static func equipped() -> String:
 	var id := String(Save.d.get("look", {}).get("glider", "classic"))
-	return id if owned(id) else "classic"
+	return String(get_skin(id)["id"]) if owned(id) else "classic"      # a gone id falls back to the Field Wing
 
 static func col(spec: String, team: Color, hero: Color) -> Color:
 	match spec:
@@ -114,45 +131,43 @@ static func col(spec: String, team: Color, hero: Color) -> Color:
 
 ## The canopy mesh for a skin: a smooth, billowing sheet (arched across the span, cambered front to
 ## back like a real paraglider cell), two-sided, with normals from the curve so it shades softly.
-## The sheet is built once per skin with each vertex's colour as weights of the skin's three colours
-## (red = cloth, green = stripe, blue = edge: every pattern is a blend of them), and each Hunter's copy
-## only mixes its own colours in (a bot's random outfit made every canopy a fresh 12 ms build).
-static var _sheets := {}
-static func mesh(id: String, team: Color, hero: Color) -> ArrayMesh:
-	return paint(sheet(id), id, team, hero)
+## Built once per shape and shared by every Hunter on a skin of it: each vertex colour holds weights of
+## the skin's three colours (red = cloth, green = stripe, blue = edge: every pattern is a blend of them),
+## and canopy_material carries one Hunter's colours.
+static var _canopies := {}
+static func canopy(id: String) -> ArrayMesh:
+	var shape := String(get_skin(id)["shape"])
+	if not _canopies.has(shape):
+		_canopies[shape] = _build(shape)
+	return _canopies[shape]
 
-## The skin's canopy arrays with colour weights (see mesh), built once.
-static func sheet(id: String) -> Array:
-	if not _sheets.has(id):
-		_sheets[id] = _build(id).surface_get_arrays(0)
-	return _sheets[id]
+## The canopy's toon material in a skin's colours ("team" and "hero" are the Hunter's own).
+static func canopy_material(id: String, team: Color, hero: Color) -> ShaderMaterial:
+	var shader_mat := Models.vtoon_outlined()
+	shader_mat.set_shader_parameter("vertex_weights", true)
+	for w in WEIGHTS:
+		shader_mat.set_shader_parameter(w, weight(id, WEIGHTS[w], team, hero))
+	return shader_mat
 
-## A mesh of `arrs` (a sheet, or a sheet merged into a Hunter's glider) in the skin's colours.
-static func paint(arrs: Array, id: String, team: Color, hero: Color) -> ArrayMesh:
-	var g := get_skin(id)
-	var cloth := col(g["cloth"], team, hero)
-	var stripe := col(g["stripe"], team, hero)
-	var edge := col(g["edge"], team, hero)
-	var out := arrs.duplicate()
-	var w: PackedColorArray = arrs[Mesh.ARRAY_COLOR]
-	var cs := PackedColorArray()
-	cs.resize(w.size())
-	for i in w.size():
-		var k := w[i]
-		var c := cloth * k.r + stripe * k.g + edge * k.b
-		c.a = (cloth.a * k.r + stripe.a * k.g + edge.a * k.b) / maxf(k.r + k.g + k.b, 0.001)
-		cs[i] = c
-	out[Mesh.ARRAY_COLOR] = cs
-	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out)
-	return am
+## Shader uniform -> the skin's colour it carries (the vertex colour's red, green and blue weights).
+const WEIGHTS := {"weight_r": "cloth", "weight_g": "stripe", "weight_b": "edge"}
 
-static func _build(id: String) -> ArrayMesh:
-	var g := get_skin(id)
+## One of a skin's colours as its canopy material holds it: a Vector4, not a Color, because Forward+
+## turns a Color uniform from sRGB to linear (Compatibility does not) and a vertex colour is never
+## converted; a Vector4 reaches the shader as it is on both, so the canopy keeps its painted look.
+static func weight(id: String, part: String, team: Color, hero: Color) -> Vector4:
+	var c := col(String(get_skin(id)[part]), team, hero)
+	return Vector4(c.r, c.g, c.b, c.a)
+
+## Puts a skin's canopy on `mi` in these colours.
+static func dress(mi: MeshInstance3D, id: String, team: Color, hero: Color) -> void:
+	mi.mesh = canopy(id)
+	mi.material_override = canopy_material(id, team, hero)
+
+static func _build(shape: String) -> ArrayMesh:
 	var cloth := Color(1, 0, 0)
 	var stripe := Color(0, 1, 0)
 	var edge := Color(0, 0, 1)
-	var shape := String(g["shape"])
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var segs := 18       # pattern cells across the span

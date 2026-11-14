@@ -27,7 +27,6 @@ static func open(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 	KeyChest.unlock_fx(m, c)
 	m.sfx("pickup", c["pos"], 0.0, 0.8)
 	m.fx.burst(c["pos"] + Vector3(0, 0.6, 0), Color("f2c84a"), 28, 4.5, 0.6)
-	m.fx.ring(c["pos"], 2.4, Color("f2c84a", 0.9), 0.4)
 	if h == m.player and h.kin is Kin:
 		BokiChatter.say(m, h.kin, "loot")
 	drop(m, h, c, from_net)
@@ -58,12 +57,8 @@ static func drop(m: Match, h: Hunter, c: Dictionary, from_net: bool) -> void:
 			var a3 := randf() * TAU
 			m.spawn_val(
 					Loot.valuable(Loot.roll_valuable(rng, int(r["valuable_tier"]))), at + Vector3(cos(a3), 0, sin(a3)))
-			if bonus >= int(r["rift_key_min_bonus"]) and rng.randf() < float(r["soul_ember_odds"]):
+			if bonus >= int(r["soul_ember_min_bonus"]) and rng.randf() < float(r["soul_ember_odds"]):
 				m.spawn_val(Loot.valuable("soul_ember"), at + Vector3(-cos(a3), 0, -sin(a3)))
-		# a rich area's chest sometimes holds a Rift Key
-		if m.exits and not m.exits.list.is_empty() and bonus >= int(r["rift_key_min_bonus"]) \
-				and rng.randf() < float(r["rift_key_odds"]):
-			m.exits.drop_key(at)
 	if c.has("ride") and not from_net:
 		KeyBonus.on_break(m, at, "train_crate")      # a sky-train crate: a rare chest key
 	if not from_net:

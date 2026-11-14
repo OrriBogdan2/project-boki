@@ -3,9 +3,10 @@ extends ArchKit
 ## Claire, the Rimewright (light ice controller). docs/heroes/rimewright.md. Copies her source as it
 ## plays: ice damage, control and a wall, no healing or shields for the squad.
 ## Passive Hoarfrost: damage Chills; a knock on a Chilled foe, or 8 darts on one foe, Shatters them.
-## LMB Ice Dart: hold for a steady stream of slow homing shards that bow out and curve onto the foe
-## nearest the cursor; while skating they fly as thick beams that home the same way. RMB Ice Spear: hold to
-## see the landing ring, let go: it lands at the cursor, leaves a slow zone and detonates 1.8s later.
+## LMB Ice Dart: a hold is one burst, a steady stream of slow homing shards that ends on three large ones at
+## the let-go; they bow out and curve onto the foe nearest the cursor; while skating they fly as thick beams
+## that home the same way. RMB Ice Spear: hold to see the landing ring, let go: it lands at the
+## cursor, leaves a slow zone and detonates 1.8s later.
 ## Shift Skate (hold). E Rink Wall: a 0.2s tell, then a narrow block of ice that slides toward the
 ## cursor, widening, shoving foes; E again freezes it. X Rimelock (level 6): sealed in ice, invulnerable,
 ## inside a slowing rink that cracks open into a stun. R is the Boki Merge. Looks: content/vfx/rimewright.json
@@ -18,7 +19,9 @@ const FAN_HOLD := 3.0          # s a foe's Fan stacks last after its last fan hi
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
-var burst_i := 0               # darts so far in this hold: after wpn.burst plain ones come wpn.heavy.n large ones
+var burst_i := 0               # darts so far in this burst (one hold); the let-go ends it on wpn.heavy.n large ones
+var tail := 0                  # large darts still owed to the burst's end (they fly after the let-go)
+var burst_open := 0.0          # when the next burst may start (wpn.barrage_cd after the last large dart)
 var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
@@ -37,10 +40,12 @@ var stats := {      # counters for the checks
 var rime := {}                 # Rimelock running: {t, at, slow: {instance id: seconds in the rink}, creak}
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
+var recover_until := 0.0       # match time the crash's recovery ends (0: not recovering)
+var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last DashFlow.BUFFER_S
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
-const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
+const SLAB_CAP := 24           # plates the strip holds; the 25th reuses the oldest (the trail's length while skating)
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
@@ -49,6 +54,10 @@ const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the 
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
 const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
+## The presses the crash's recovery holds back, and the HUD slot each one's refusal pulses.
+const RECOVER_KEYS := {
+	"fire": "", "sec": "sec", "sig": "k1", "jump": "", "gear1": "gear0", "gear2": "gear1", "kin_ab": ""}
+const RINK_BAND := 0.25        # m: the width of the Rimelock ring, its outer edge on the hit radius
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
@@ -130,8 +139,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
-	CombatBus.tech.emit(h, "rimewright")
-	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
 	m.sfx("rime_splinter", at, 0.0, 1.0)
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)
@@ -155,6 +162,7 @@ func _tick(dt: float) -> void:
 		if float(e["left"]) <= 0.0 or t == null or t.dead:
 			chill.erase(key)
 			continue
+		StatusLooks.of(m).keep(t, "chill")
 	for key in fan_hits.keys():
 		var e2: Dictionary = fan_hits[key]
 		e2["left"] = float(e2["left"]) - dt
@@ -162,7 +170,9 @@ func _tick(dt: float) -> void:
 		if float(e2["left"]) <= 0.0 or not is_instance_valid(tv2):
 			fan_hits.erase(key)
 			continue
-		# the frost glow on the foe grows with each dart toward the Shatter
+		# the frost glow on the foe grows with each dart toward the Shatter (others see it; you, the FAN badge)
+		if h.is_local():
+			continue
 		var n := int(e2["n"])
 		lk().keep(
 				"frost%d" % key, "frost", (tv2 as Node3D).global_position,
@@ -188,28 +198,39 @@ func _tick(dt: float) -> void:
 func own_aim_line() -> bool:
 	return true
 
+## The source's burst (docs/heroes/rimewright.md, LMB): one hold is one burst, plain darts every wpn.rate for as
+## long as the button stays down; the let-go ends it on wpn.heavy.n larger darts (double damage, faster, longer
+## reach) at the same cadence, then wpn.barrage_cd before a fresh press (or the held button) starts the next.
+## A stun or the Rimelock drops the owed large darts and ends the burst.
 func lmb_override(held: bool, _dt: float) -> bool:
-	if not held:
-		burst_i = 0
 	if not h.can_fire() or not rime.is_empty():
+		if burst_i > 0:
+			_end_burst()
 		return true
-	if not held or h.fire_cd > 0.0 or m.time < seq_next:
+	if burst_i > 0 and not held and tail == 0:
+		tail = int((h.wpn.get("heavy", {}) as Dictionary).get("n", 0))
+		if tail == 0:
+			_end_burst()
+	if h.fire_cd > 0.0 or m.time < seq_next:
 		return true
-	_throw_dart()
+	if tail > 0:
+		_throw_dart(true)
+		tail -= 1
+		if tail == 0:
+			_end_burst()
+		return true
+	if held and m.time >= burst_open:
+		_throw_dart(false)
 	return true
 
-## The barrage's rhythm (the source's data): wpn.burst plain darts, then wpn.heavy.n larger ones (double damage,
-## faster, longer reach), then round again while the button stays down.
-func _heavy_now() -> bool:
-	var wd: Dictionary = h.wpn
-	var plain := int(wd.get("burst", 4))
-	var cycle := plain + int((wd.get("heavy", {}) as Dictionary).get("n", 0))
-	return cycle > plain and burst_i % cycle >= plain
+func _end_burst() -> void:
+	burst_i = 0
+	tail = 0
+	burst_open = m.time + float(h.wpn.get("barrage_cd", 0.5))
 
-func _throw_dart() -> void:
+func _throw_dart(heavy: bool) -> void:
 	var wd: Dictionary = h.wpn
 	var skating := in_dash() and String(flow.row("lmb")["variant"]) == "beam"
-	var heavy := _heavy_now()
 	var dir := h.aim_dir()
 	burst_i += 1
 	dart_n += 1
@@ -218,7 +239,9 @@ func _throw_dart() -> void:
 	var bow := 0.0 if skating else deg_to_rad(float(wd.get("bow_deg", 18.0))) * side
 	var v := dir.rotated(bow)
 	var start := Vector3(h.pos.x + v.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + v.y * 0.6)
-	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * _heavy_k("dmg_k", heavy)
+	# dash.skate_dart_dmg_k: damage multiplier (unitless, x plain) of a dart fired from the skate (wiki: 2x)
+	var skate_k := float(dash_def()["skate_dart_dmg_k"]) if skating else 1.0
+	var dmg: float = float(wd["dmg"]) * float(m.dmg_mult(h)) * _heavy_k("dmg_k", heavy) * skate_k
 	var spd := (float(wd.get("skate_speed", 30.0)) if skating else float(wd["speed"])) * _heavy_k("speed_k", heavy)
 	var rng := float(wd["range"]) * h.shot_range_k * _heavy_k("range_k", heavy)
 	h.shot_range_k = 1.0
@@ -341,9 +364,10 @@ func dash_vy(dt: float) -> float:
 func face_locked() -> bool:
 	return not rime.is_empty()
 
-## The statue takes no jump, glove or Boki ability either; only the recast and Shift out (item 65).
+## The statue takes no jump, glove or Boki ability either; only the recast and Shift out (item 65). Nor does
+## she while she settles after the crash.
 func cast_locked() -> bool:
-	return not rime.is_empty()
+	return not rime.is_empty() or recovering()
 
 ## Seconds left in the skate (the timer in_dash reads): to its full length while Shift is held, else to its
 ## shortest run.
@@ -380,6 +404,7 @@ func on_dash(_use_ex: bool) -> bool:
 
 ## The push-off: spends the charge and starts the skate along the move keys.
 func _begin_skate() -> void:
+	recover_until = 0.0        # Shift skates out of the crash's recovery (into_dash.x)
 	h.dashes -= 1.0
 	var dir := dash_dir()
 	rinkrun = {"t": 0.0, "dir": dir.normalized(), "loop": 0.16, "slab": 0.0, "air": not h.grounded}
@@ -473,6 +498,8 @@ func _lay_ice(dir: Vector2, dt: float) -> void:
 func _drop_holds() -> void:
 	if not rime.is_empty():
 		_rime_clear()
+	recover_until = 0.0
+	recover_buf.clear()
 	if not rinkrun.is_empty():
 		_rinkrun_end()
 	if spear_aim or rmb_down:
@@ -529,20 +556,17 @@ func _tick_trails(dt: float) -> void:
 		HeroVfx.of(m).hold(h, "skate")
 		_lay_slabs(dt)
 
-## Plates of ice that form under her blades as she skates and fade behind her, each with a frost sheen
-## where the blade bites.
+## Plates of ice that form under her blades as she skates and fade behind her (a trail: no ring or disc on a dash);
+## all of them one MultiMesh (IceStrip).
 func _lay_slabs(dt: float) -> void:
 	rinkrun["slab"] = float(rinkrun.get("slab", 0.0)) - dt
 	if float(rinkrun["slab"]) > 0.0:
 		return
 	rinkrun["slab"] = SLAB_GAP
-	var span := randf_range(0.9, 1.3)
 	# laid just under the leading blade, so the newest plate is always under her feet
 	var under := h.position + Vector3(h.roll_dir.x, 0.0, h.roll_dir.y) * SLAB_LEAD
-	lk().burst("slab", under, {"r": span, "dur": SLAB_LIFE, "dir": h.roll_dir.rotated(randf_range(-0.25, 0.25))})
-	rinkrun["frost"] = int(rinkrun.get("frost", 0)) + 1
-	if int(rinkrun["frost"]) % FROST_EVERY == 0:
-		vfx("skate_frost", h.position, h.roll_dir)       # a frost patch that lingers, then melts
+	lk().ice_strip(SLAB_CAP).lay(
+			under, randf_range(0.9, 1.3), h.roll_dir.rotated(randf_range(-0.25, 0.25)), m.time, SLAB_LIFE)
 
 # ------------------------------------------------------------------ RMB: Ice Spear
 func rmb_charge_full() -> float: return 0.0
@@ -558,10 +582,11 @@ func rmb_hold_tick(t: float) -> void:
 			{
 				"range": float(ld["range"]), "r": float(ld["zone_r"]), "ticks": true, "star": true,
 				"col": Color("dffcff")})
+	AimReach.ring(self, "rmb")
 	if not spear_aim:
 		spear_aim = true
-		play("tm_spear_aim")
 		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)
+	play_hold("tm_spear_aim", t)
 	HeroVfx.of(m).hold(h, "spear_aim")
 	_hold_spear(lerpf(0.45, 1.0, clampf(t / SPEAR_FORM_T, 0.0, 1.0)), -0.25)
 
@@ -619,7 +644,9 @@ func _release_spear() -> void:
 	var dir := h.aim_dir()
 	var start := _spear_at(0.0)
 	var spd := float(ld["speed"])
-	var dist := AimMode.dist(h, float(ld["range"]))
+	# from her palms to the held ring's centre: a far cursor lands on the range edge, not SPEAR_AHEAD past it
+	var to := AimMode.point(h, float(ld["range"]))
+	var dist := Vector2(to.x - start.x, to.z - start.z).length()
 	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
 	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "kx": on_land}
 	# the spear itself does no damage on the way: its hit is the landing's small area (_spear_land)
@@ -735,7 +762,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 	var g: float = m.world.ground_at(at.x, at.z)
 	if g <= World.VOID + 1.0 or m.world.is_block(at.x, at.z):
 		at = h.pos + Vector3(dir.x, 0, dir.y) * 1.0
-	var hp := float(ed["hp"]) + (40.0 if rank("kin") >= 3 else 0.0)
+	var hp := float(ed["hp"]) + (float(ed["hp_rank3"]) if rank("kin") >= 3 else 0.0)
 	var w: Dictionary = m.verbs.add_wall(
 			h, at, dir,
 			{
@@ -744,6 +771,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 				"touch": {"kb": float(ed["push"]), "dmg": 0.5, "slow": 1.0, "slow_k": 0.3}},
 			power("kin"))
 	w["y"] = at.y
+	w["ice"] = true          # (Blockers.kind_of)
 	# her own ice look instead (CareLook "wall")
 	if is_instance_valid(w["node"]): (w["node"] as Node3D).visible = false
 	wall = {
@@ -778,13 +806,13 @@ func combo_marks(out: Array) -> void:
 	for key in chill:
 		var c: Dictionary = chill[key]
 		if is_instance_valid(c["t"]):
-			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), "CHILL", true))
+			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), true))
 	for key in fan_hits:
 		var f: Dictionary = fan_hits[key]
 		if is_instance_valid(f["t"]):
 			var n := int(f["n"])
 			var full := n >= int(pd.get("fan_hits", 8)) - 1
-			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, "FAN", full))
+			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, full))
 
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
@@ -884,6 +912,7 @@ func teardown() -> void:
 	rinkrun = {}
 	throw_t = -1.0
 	rime = {}
+	recover_until = 0.0
 	zones.clear()
 	if look != null:
 		look.teardown()
@@ -912,13 +941,13 @@ func ult_running() -> bool:
 	return not rime.is_empty()
 
 
-func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
+func cast_ult() -> bool: return not recovering() and HeroUlt.press(self, _start_rime)
 func has_ult() -> bool: return true
 
 
 ## Sealed in: invulnerable and rooted, and the rink snaps out round her. Nothing else fires inside. Cast from
-## a skate, her momentum carries her on as the shell closes (x.carry_t, slowing evenly from the skate's speed
-## to a stop, so she travels speed * carry_t / 2), the rink riding with her; then she is rooted.
+## a skate, her momentum carries her on as the shell closes (x.carry_t, easing out as speed x (1 - (t/carry_t)^2),
+## so she travels speed * carry_t * 2/3), the rink riding with her; then she is rooted.
 func _start_rime() -> bool:
 	var carry := {}
 	if not rinkrun.is_empty():
@@ -934,7 +963,6 @@ func _start_rime() -> bool:
 	_rime_hold_body()
 	play("tm_rime" if carry.is_empty() else "tm_rime_carry")
 	m.sfx("rime_lock", h.pos, 0.0, 1.0)
-	m.fx.word(h.pos + Vector3(0, 3.0, 0), "RIMELOCK", col_of(x_def()), true)
 	vfx("rime")
 	return true
 
@@ -1009,7 +1037,6 @@ func _rime_no_glide() -> void:
 	var glide_now := bool(h.inp.get("glide", false))
 	if glide_now and not glide_held and not h.grounded:
 		h._ab_feedback("x", "deny")
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "NO GLIDE", Color("bff7ef"), false)
 	glide_held = glide_now
 
 
@@ -1044,13 +1071,16 @@ func rime_slow_of(f: Ent) -> float:
 	return float((rime["slow"] as Dictionary).get(f.get_instance_id(), 0.0))
 
 
-## The rink (snaps out in snap_t, its cracks brighter as it builds), the countdown fill everyone sees
-## and the creaks; her body is IceBody's.
+## The rink (snaps out in snap_t, its cracks brighter as it builds), the frost bud at her feet, the thin
+## lit ring at the hit radius everyone sees (brighter as it builds: the countdown) and the creaks; her
+## body is IceBody's.
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
-	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
-	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
+	var open := float(rime["t"]) - float(xd["snap_t"])          # s since it opened: the frost edge flashes
+	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k, "open": open})
+	ulk().keep("bud", "frostbud", at, {"grow": snap, "crack": k})
+	AimKit.circle(h, "x", {"at": at, "r": radius, "band": RINK_BAND, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt
 	if float(rime["creak"]) <= 0.0:
 		rime["creak"] = lerpf(0.8, 0.35, k)
@@ -1084,6 +1114,38 @@ func _rime_crash(k: float) -> void:
 	m.sfx("rime_crash", at, 1.0, 1.0)
 	play("tm_rime_crash")
 	_rime_clear()
+	recover_until = m.time + float(xd["recover"])
+
+
+## After the burst she settles for x.recover s (footage f57 -> f61, the tm_rime_crash clip's length): no walking
+## or casts. A press in its last DashFlow.BUFFER_S goes as it ends; an earlier one is refused. Shift skates out.
+func recovering() -> bool:
+	return recover_until > 0.0 and m.time < recover_until
+
+
+func move_k() -> float:
+	return 0.0 if recovering() else 1.0
+
+
+func gate_inputs() -> void:
+	if recover_until <= 0.0:
+		return
+	if not recovering():
+		recover_until = 0.0
+		for key in recover_buf:
+			h.inp[key] = true
+		recover_buf.clear()
+		return
+	var buffering: bool = recover_until - m.time <= DashFlow.BUFFER_S
+	for key in RECOVER_KEYS:
+		if not h.inp.get(key, false):
+			continue
+		h.inp[key] = false
+		if buffering:
+			recover_buf[key] = true
+		elif RECOVER_KEYS[key] != "":
+			h._ab_feedback(RECOVER_KEYS[key], "deny")
+	h.inp["sec_hold"] = false
 
 
 func _rime_cancel() -> void:
@@ -1104,6 +1166,7 @@ func _rime_clear() -> void:
 		ice.thaw()
 	if ult_look != null:
 		ult_look.drop("rink")
+		ult_look.drop("bud")
 		if anim_id == "tm_rime_hold":
 			anim_id = ""
 

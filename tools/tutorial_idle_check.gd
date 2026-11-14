@@ -38,8 +38,7 @@ func _match_course() -> void:
 	var tu: Tutorial = m.tut
 	ok(Tutorial.NAG_T < IDLE_S, "a nag comes inside the %.0f s window (NAG_T %.0f s)" % [IDLE_S, Tutorial.NAG_T])
 	ok(Tutorial.NAG_T < SILENT_MAX, "and a nag comes before %.0f s of silence" % SILENT_MAX)
-	var timed := {"RANK_WAIT_T": Tutorial.RANK_WAIT_T, "KEY_WAIT_T": Tutorial.KEY_WAIT_T,
-			"KIN_WATCH_T": Tutorial.KIN_WATCH_T}
+	var timed := {"RANK_WAIT_T": Tutorial.RANK_WAIT_T}
 	for k in timed:
 		ok(float(timed[k]) > Tutorial.NAG_T, "%s (%.0f s) outlasts a nag, so it never waits in silence" % [k, timed[k]])
 	print("IDLE match | step | hint s | Boki | nag s | marker | note")
@@ -67,6 +66,8 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 	var frames := 0
 	var no_text := 0
 	var t := 0.0
+	var reset_t := 0.0  # s: the last time the stall clock restarted (a monster of the camp fell, as Boki fights on)
+	var stall := tu.stall_t
 	var has_place := tu.goal(sid) != Vector3.INF
 	while t < IDLE_S and tu.step == s0 and not p.extracted:
 		for k in ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw"]:
@@ -86,6 +87,9 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 			hint_t = t
 		if nag_t < 0.0 and tu.nag_t > 0.0:
 			nag_t = t
+		if tu.stall_t < stall:
+			reset_t = t
+		stall = tu.stall_t
 		if tu.text == "":
 			no_text += 1
 		if has_place and not (tu.target != Vector3.INF and tu.label != "" and tu.beams_on() > 0):
@@ -93,7 +97,11 @@ func _idle_step(m: Match, tu: Tutorial) -> void:
 	var early := tu.step != s0 or p.extracted
 	var note := "ends by itself at %.1f s" % t if early else ""
 	var hint_ok := (hint_t >= 0.0 and hint_t <= HINT_BY) or (early and t <= HINT_BY)
-	var nag_ok := early or (nag_t >= 0.0 and nag_t <= minf(IDLE_S, SILENT_MAX))
+	# Progress inside the window (the Boki felling a camp monster, as late as 9.8 s) restarts the stall clock and is
+	# itself a prompt: the nag is then due NAG_T after it, so the clock must be running and not yet due (NAG_T is
+	# held under SILENT_MAX by the first checks above).
+	var clock_runs := stall < Tutorial.NAG_T and stall >= t - reset_t - 2.0 * Match.DT
+	var nag_ok := early or (nag_t >= 0.0 and nag_t <= minf(IDLE_S, SILENT_MAX)) or (nag_t < 0.0 and clock_runs)
 	print("IDLE match | %s | hint %s | %s | nag %s | %s | %s" % [sid, _s(hint_t), boki if boki != "" else "-",
 			_s(nag_t), _marker_note(has_place, lost), note])
 	ok(hint_ok, "%s: a hint banner or the Boki lead is up within %.0f s (%s)" % [sid, HINT_BY, _s(hint_t)])
@@ -156,7 +164,7 @@ func _idle_farm(g: FarmGuide, id: String) -> void:
 	while t < IDLE_S:
 		g.tick(0.1)
 		t += 0.1
-		if hint_t < 0.0 and g.hint_visible() and g.hint_lbl.text != "":
+		if hint_t < 0.0 and g.hint_visible() and g.hint_text() != "":
 			hint_t = t
 		if place and not (is_instance_valid(g.marker) and g.marker.visible and g.marker.text != ""):
 			lost += 1

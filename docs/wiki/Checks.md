@@ -37,9 +37,11 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--balloon-check` | The hit marker is the real hitbox, for every class, below a lip, gliding and mid-hop |
 | `--hold-check` | Hold animations keep their pose while refreshed, let go cleanly, and survive the network snapshot |
 | `--move-feel-check` | Movement, jump, glide, feathering, drop and camera timings match `docs/MOVEMENT_FEEL.md` |
+| `--step-smooth-check` | Vex, Albert and Sable on the Hollow Crown: up and down three terrace steps and a stair flight, the drawn body's y never jumps over 0.08 m a frame and the camera's never over 0.05 m (`--step-smooth-shots` takes the strips) |
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
+| `--lair-fall-check` | A jump dash anywhere in a boss lair, or a dash out of its escape updraft, never ends in "you fell"; nobody over solid ground is lost to the abyss |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
 | `--train-map-check` | The sky train on the maps: one halt icon per stop, the marker at the engine's arc position, the countdown to a halt, the minimap's range rule |
@@ -49,31 +51,40 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
 | `--biome-check` | An expedition on the authored map: what each biome spawned, rarities and hazards, then a minute of play |
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
-| `--extract-check` | Every way out: skiff (waves, rival boarding), rift hatch (keys, losing and looting a key), uplink (stalls, completes, the lift) |
+| `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
+| `--boss-parity-check` | Lair boss against docs/CAMP_PARITY.md: the empty-lair reset after `Boss.LEASH_T`, phases at `Boss.PHASE_HP`, a reset mid-roar leaves no armour, and a stolen kill pays the last hit's squad (XP, kill stat, perk orbs), not the squad that did the damage |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
 | `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges |
 | `--base-check` | Basing to a teammate: a clean channel arrives weakened; a hit interrupts it |
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
+| `--duel-ring-hint-check` | The duel ring's first-visit hint and beam, once per save; the pad opens the ring's two choices |
+| `--duel-online-check` | Two games over the relay: the lobby's duel line pairs them, both share the marks, falls and knocks count on both |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
+| `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
+| `--bot-ring-check` | A 30-bot trios match through the whole Blight close (sped up): no bot goes down to the tide with no rival near, and every bot still up ends inside |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |
 | `--kinbox-check` | The farm cap and the Burrow: moving, sorting, releasing, overflow from old saves, mutation inheritance and odds |
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |
 | `--iv-check` | IV rolls, stable IVs for old saves, breeding passes 3 of 5, the Rare Egg floor, caps, save round trip |
-| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent, unstable mixes |
+| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent |
+| `--breed-sim-check` | Breeding sim: 500 random pairs bred, sex split half and half (documented shares aside), traits from the parents' mean, IVs, habits and looks from one parent, no mutation outside the base-odds roll |
+| `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |
 | `--economy-check` | Full backpack swaps, smart loot, extracting fills the armory, feeders feed (also while away), starving to a grave, the Soul Shrine |
 | `--work-check` | Boki at work: knacks, mutation bonuses, old saves, jobs from the farm's state, priorities and pins, real output |
 | `--farm-start-check` | A new save's farm start: placing the essentials, chopping and mining, materials paying for buildings, assigned Boki working, old saves |
 | `--demo-check` | The recording presets (docs/DEMO_PRESETS.md): each `--demo=` name boots and runs a few seconds, the farm and care presets at home with six grown Boki, the match presets in a full bot lobby with the `--hunter` pick, the demo save never written and the player's save file untouched |
+| `--pitch-check` | The pitch reel's scripted shots (docs/PITCH_REEL.md) play through without the movie writer: the hatch reaches its reveal, the evolution plays or says why it cannot, the Hunter select lands on and saves the chosen Hunter with its screen up, the kit rota runs, the escape Hunter rides out; the save file is untouched |
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--mask-moment-check` | The put-on Mask moment (item 83, `MaskBeat`): every Hunter has a whisper and a sting key, the sounds exist, 4-6 s with 0.6-0.8 s of black; build-up camera, the Mask rising with the ghost face, black and silence on contact with the Hunter swapped in behind it, a memory frame and the whisper, the snap back with a ripple, the name and title, the scene camera back; skippable once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |
+| `--input-latency-check` | Press to first motion or shot: LMB, RMB, E, dash and jump for every Hunter through the real input path; the first tick the velocity, the animation state or a projectile changes must be the press's own tick or the next, unless a sourced wind-up applies. Table in docs/MOVEMENT_FEEL.md (`=<id>,<id>` for some Hunters) |
 | `--home-build-check` | Build mode: placing, turning, moving, storing, refusing bad spots, save and reload, migration, expanding |
 | `--pack-ui-check` | The backpack windows take real mouse clicks |
 | `--title-check` | The title screen builds with the right menu, tagline, key art and frame budget |
@@ -83,11 +94,16 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
+| `--mob-damage-check` | PvE: a level-1 and level-5 Hunter standing still in each monster, camp mix and lair, never fighting back. Prints the seconds to fall, damage per hit and per second (docs/EXPEDITION_SPEC.md section 13). Asserts that every damaging row fells them within 90 s over 3 or more hits, the Glimmerkin never hurts anyone, and a lone Puffbomb blows up once |
+
+The two timing checks are advisory: a fail prints `ADVISORY` and exits 0, unless `--timing-strict` is on the
+line (the gate's GPU-host run). See [CHECKS_TIMING](../CHECKS_TIMING.md).
 
 ## Tooling flags
 
 Not checks, but useful: `--loop-tour[=<class>]` (the core loop with a screenshot per step),
-`--perf-probe`, `--meshtime`, `--gentime`, `--map-bake=<png>`, `--grammar-vocab` (prints the grammar
+`--perf-probe`, `--match-profile` (a 30-hunter expedition timed per phase on a GPU worker, see
+`docs/MATCH_PERF.md`), `--meshtime`, `--gentime`, `--map-bake=<png>`, `--grammar-vocab` (prints the grammar
 vocabulary as Markdown), the galleries (`--arch-lineup`, `--mob-gallery`, `--prop-gallery`,
 `--flora-gallery`, `--pack-gallery`, `--hair-gallery`, `--map-overview`), and many `--*-demo` flags for
 screenshots. Start-up shortcuts: `--match`, `--arena`, `--training`, `--duel`, `--tutorial`,

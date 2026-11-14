@@ -12,7 +12,7 @@ extends Node3D
 ## feet while empowered, the cursor ring filling through each nock. Everyone sees three pips over her
 ## and her glowing bow, and hears the cast anywhere on the map (content/vfx/archer.json "ult_cast").
 ## Look: the empower burst, a flare at the bow per shot, the travelling arrow (PinFx kind "ult", sized to
-## the hit width, orchid thread trail), a white burst cloud and a star on each hit, a bigger burst on the last.
+## the hit width, red thread trail), a white burst cloud and a star on each hit, a bigger burst on the last.
 ## Bond: an arrow that hits a hunter goes to HeroUlt.landed once the hit has landed (a hit, or the knock or
 ## kill it caused); a miss pays nothing.
 
@@ -56,8 +56,7 @@ func cast() -> bool:
 	window = float(x.get("window", 6.0))
 	nock_t = -1.0
 	recover = 0.0
-	h.draw_t = -1.0
-	k.draw.drop()
+	k.drop_draw()
 	k.vfx("ult_cast")
 	k.play("pin_ult_cast")
 	return true
@@ -162,7 +161,7 @@ func _execute(foe: Ent) -> void:
 	foe.hurt(foe.hp * 4.0 + armor * 4.0, h, opts)
 	HeroUlt.landed(k, foe)
 	k.m.fx.own_look = true
-	k.payoff_fx(foe.pos, "EXECUTED", GOLD, "pay_deadeye", h.dir_to(foe), foe)
+	k.payoff_fx(foe.pos, GOLD, "pay_deadeye", h.dir_to(foe), foe)
 	k.m.fx.own_look = false
 
 ## The tells everyone sees: three pips over her head (one per shot left) and a glow on the bow.

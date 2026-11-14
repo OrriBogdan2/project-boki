@@ -45,6 +45,14 @@ func move_k() -> float:
 		"recover": return 0.5
 	return 1.0
 
+## Seconds until the cleave lands and frees him (0: not planted). A guard held for a hauled foe counts its own length.
+func lock_left() -> float:
+	var d := data()
+	match String(st.get("phase", "")):
+		"guard": return maxf(0.0, float(d["guard"]) - float(st["t"])) + float(d["strike_t"])
+		"strike": return float(d["strike_t"]) - float(st["t"])
+	return 0.0
+
 ## X pressed: the guard goes up at once.
 func start() -> void:
 	var h := k.h
@@ -52,7 +60,6 @@ func start() -> void:
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
 	k.play("jug_guard")
 	_show_glow(true)
-	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.vfx("guard_tell")
 
 ## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
@@ -66,6 +73,8 @@ func pull_through() -> void:
 
 ## A merge or a knock ends it at once, with no strike.
 func drop() -> void:
+	if String(st.get("phase", "")) == "recover":
+		k.play("")               # (a jump or Shift cuts the recovery clip on the press frame)
 	st = {}
 	_show_glow(false)
 	AimKit.hide(k.h, "ult")
@@ -90,7 +99,6 @@ func tick(dt: float) -> void:
 				drop()
 			elif not h.grounded:
 				drop()               # a jump moves him out of it (Shift drops it in JuggernautKit.on_dash)
-				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
 func _tick_guard(d: Dictionary) -> void:
@@ -137,6 +145,7 @@ func _land(d: Dictionary) -> void:
 	var from: Vector3 = h.pos if pulled else st["from"]
 	st["phase"] = "recover"
 	st["t"] = 0.0
+	k.play("jug_ult_recover")
 	if not pulled:
 		h.roll_t = 0.0
 	var blocks := int(st["blocks"])
@@ -177,7 +186,6 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 func _reset() -> void:
 	resets += 1
 	HeroUlt.reset(k)
-	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
 	k.vfx("riposte_reset")
 
 ## A hit arriving during the guard: blocked (no damage, no crowd control). A fall into the abyss still
@@ -195,7 +203,6 @@ func block(by: Ent, o: Dictionary) -> bool:
 		var to := Vector3(from.x - h.pos.x, 0.3, from.z - h.pos.z).normalized()
 		k.vfx("guard_block", h.pos + Vector3(0, 1.2, 0) + to * 0.5, Vector2(to.x, to.z).normalized(),
 				{"pitch": 0.08 * float(st["blocks"])})
-		k.m.fx.word(h.pos + Vector3(0, 2.3, 0), "BLOCKED", GOLD, false)
 	return true
 
 ## The gold shell over him while he guards (one node per hunter, shown and hidden).

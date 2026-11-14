@@ -8,7 +8,7 @@ extends RefCounted
 ##   smoke   a cloud that hides everyone in it
 ##   pad     a launch pad on the ground
 ##   scan    reveal rival hunters nearby
-##   key     a Rift Key or chest key: open the lock beside you, or ping the nearest one (BeltKeys)
+##   key     a chest key: open the locked chest beside you, or ping the nearest one (BeltKeys)
 ##   fx      run the item's "effects" list through Effects (haste, shield, ...)
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
@@ -17,6 +17,8 @@ const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
 const SCAN_RANGE := 26.0        # tiles
 const SCAN_TIME := 3.0          # seconds rivals stay revealed
+const PAD_VY := 17.0            # m/s up off a Spring pad: ~9.8 m apex, ~2.3 s aloft ([?] no source number)
+const PAD_MIN_HV := 6.0         # m/s: the least a pad sends you on with (toward your aim if you stood still)
 
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
 static func channel(id: String, key: String) -> float:
@@ -52,14 +54,12 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			h.drink_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("pickup", h.pos, -6.0, 0.7)
-			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"repair":
 			h._fold_for_action()
 			h.kit_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("build", h.pos, -6.0, 1.3)
-			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"mend":
 			h.heal(MEND_HP)
@@ -104,6 +104,18 @@ static func _pad(h: Hunter, col: Color) -> void:
 	m.gpads.append({"pos": at, "t": 20.0, "node": n, "cd": {}})
 	m.sfx("throw", h.pos, -2.0, 1.2)
 
+## Spring pad: up at PAD_VY, on with the speed you brought (at least PAD_MIN_HV). A dash ends here and
+## its speed carries ([wiki] dashing into a jump pad keeps the forward momentum); in the arc your keys steer
+## as in any jump (HunterMove.air_steer) and the glider stays shut until you open it.
+static func pad_launch(h: Hunter) -> void:
+	var hv := Vector2(h.vel.x, h.vel.z)
+	var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
+	hv = d * maxf(hv.length(), PAD_MIN_HV)
+	h.vel = Vector3(hv.x, PAD_VY, hv.y)
+	h.roll_t = 0.0
+	h.grounded = false
+	h.glide_cd = 0.0
+
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
 static func tick(h: Hunter, dt: float) -> void:
@@ -117,7 +129,6 @@ static func tick(h: Hunter, dt: float) -> void:
 				if UtilityBelt.take(h, "tonic", 1) > 0:
 					h.heal(channel("tonic", "heal") * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
 					h.m.sfx("heal", h.pos, -2.0)
-					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 	if h.kit_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.kit_t = 0.0

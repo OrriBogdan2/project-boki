@@ -5,7 +5,8 @@ extends RefCounted
 ## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her; she climbs a ledge face and
 ## drops off the far side (Hunter.spirit_t; data: Phase Walk rolls through the raised wall).
 ## Damage ends it. If it ends while she is inside a rock or barrier she is put back where she last stood clear;
-## in a ledge she is set on top of it. While she is inside something her own screen goes dark blue.
+## in a ledge she is set on top of it. While she is inside something her own screen goes dark blue; the whole
+## walk her body is darkened (PinFx wash) on every game.
 
 var k: ArcherKit
 var h: Hunter
@@ -27,6 +28,15 @@ func _init(kit: ArcherKit) -> void:
 
 func active() -> bool:
 	return t > 0.0
+
+## True from the roll until the walk is over, on every game: the owner's walk (spirit_t), or a remote copy's
+## kit move: pin_roll for the roll, pin_walk for the base walk (the wire carries the move, not the rank).
+func phasing() -> bool:
+	if h.spirit_t > 0.0:
+		return true
+	var dd := k.dash_def()
+	var span := float(dd.get("roll_t", 0.24)) if k.anim_id == "pin_roll" else float(dd.get("time", 2.8))
+	return k.anim_id in ["pin_roll", "pin_walk"] and k.m.time - k.anim_at < span
 
 func start() -> void:
 	var dd := k.dash_def()
@@ -116,8 +126,11 @@ func blocked_here(terrain := true) -> bool:
 func tick(dt: float) -> void:
 	if t <= 0.0:
 		return
+	if t <= dt:
+		end("time")             # before t reaches 0: end() skips a walk that is already over (natural expiry)
+		return
 	t -= dt
-	h.spirit_t = maxf(t, 0.0)
+	h.spirit_t = t
 	var was_in := inside
 	inside = blocked_here()
 	if inside and not was_in:
@@ -132,8 +145,6 @@ func tick(dt: float) -> void:
 		entry = h.pos
 	k.fx.tint_to(1.0 if inside else 0.0)
 	k.fx.aura_on(clampf(t / 0.3, 0.0, 1.0))
-	if t <= 0.0:
-		end("time")
 
 ## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:

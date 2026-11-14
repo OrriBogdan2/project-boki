@@ -427,7 +427,8 @@ def gen_boki():
     for sid, ln in ev.get("lines", {}).items():
         for o in ln.get("into", []):
             how = (o["item"].replace("ink_", "").title() + " Ink") if o.get("item") else ("trade" if o.get("trade") else "level %s" % ln.get("level"))
-            rows.append([nm(sid), nm(o["id"]), how, o.get("path", "").title()])
+            pth = o.get("path", "")      # one affinity, or a list of them (evolve.json "orbitle")
+            rows.append([nm(sid), nm(o["id"]), how, " or ".join(pth).title() if isinstance(pth, list) else pth.title()])
     b += table(["Boki", "Evolves into", "When", "Branch"], rows)
     b += "\n\n## Evolution nodes\n\nEvery Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have an extra node on one. Nodes are budget-neutral: they move points or trade one strength for another.\n\n"
     rows = []
@@ -545,9 +546,7 @@ def gen_maps():
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
-        if m.get("docks"): ex.append("%d skiff docks" % len(m["docks"]))
         if m.get("outposts"): ex.append("%d uplink outposts" % len(m["outposts"]))
-        if m.get("hatches"): ex.append("%d rift hatches" % len(m["hatches"]))
         if ex: body += "**Exits:** " + ", ".join(ex) + ".\n\n"
         trav = []
         for key, label in (("bridges", "bridges"), ("glides", "glide routes"), ("pads", "jump pads"), ("updrafts", "updrafts"), ("winds", "wind roads")):
@@ -680,6 +679,12 @@ INTO_MOVE_MODE = {"fire": "the move goes at once, the ability keeps running", "c
 HOLD_MODE = {"keep": "the hold carries through and lets go there", "cancel": "the move ends the hold"}
 HOLD_MOVES = [("ground", "a ground dash"), ("air", "an air dash"), ("jump", "a jump"), ("mantle", "a mantle")]
 
+def _src(row):
+    """The Source cell of a row. `[?]` marks a row that exists but no source or footage settles (docs/KIT_PARITY.md
+    item 20): no source field, or one that says "Not determinable". A pair with no row stays empty."""
+    src = (row or {}).get("source", "")
+    return "[?] " + src if row and (not src or src.startswith("Not determinable")) else src
+
 def _combo_ours(row, modes, default):
     """A combo row (docs/decisions/0015-combo-flow.md): its mode, and the reason when it's an exception (a mode
     that doesn't combine: anything but the default, or a cancel that moves you out at once)."""
@@ -693,18 +698,18 @@ def _combo_rows(hero, f):
     rows = []
     for slot, label in DASH_SLOTS:
         row = f.get("jump", {}).get(slot, {})
-        rows.append([hero, "jump -> %s" % label, row.get("source", ""), _combo_ours(row, JUMP_MODE, "fire")])
+        rows.append([hero, "jump -> %s" % label, _src(row), _combo_ours(row, JUMP_MODE, "fire")])
     for slot, label in DASH_SLOTS:
         row = f.get("into_jump", {}).get(slot, {})
-        rows.append([hero, "%s -> jump" % label, row.get("source", ""), _combo_ours(row, INTO_MOVE_MODE, "fire")])
+        rows.append([hero, "%s -> jump" % label, _src(row), _combo_ours(row, INTO_MOVE_MODE, "fire")])
         air = f.get("into_dash", {}).get(slot, {}).get("air")
         if air:
-            rows.append([hero, "%s -> air dash" % label, air.get("source", ""), _combo_ours(air, INTO_MOVE_MODE, "fire")])
+            rows.append([hero, "%s -> air dash" % label, _src(air), _combo_ours(air, INTO_MOVE_MODE, "fire")])
     for slot, label in DASH_SLOTS:
         held = f.get("hold", {}).get(slot)
         for move, name in HOLD_MOVES if held is not None else []:
             if move in held:
-                rows.append([hero, "hold %s through %s" % (label, name), held[move].get("source", ""),
+                rows.append([hero, "hold %s through %s" % (label, name), _src(held[move]),
                              _combo_ours(held[move], HOLD_MODE, "keep")])
     return rows
 
@@ -758,13 +763,31 @@ def _air_audit_table():
         rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
 
+DASH_JUMP_CASES = [("ground", "Space in a ground dash"), ("air", "Space in an air dash"),
+                   ("rise", "Shift in a jump's rise"), ("same", "Space and Shift on one step")]
+DASH_JUMP_MODE = {"cancel": "the jump goes at once and ends the dash", "both": "the jump goes and the dash runs on",
+                  "ignore": "the dash runs on; the press is dropped", "end": "the dash ends and the glider opens, no jump",
+                  "buffer": "the jump waits for the dash's end", "dash": "the air dash goes at once and ends the rise",
+                  "hop": "the air dash goes at once and arcs on as a hop, the rise kept"}
+
+def _dash_jump_rows(hero, f):
+    """Space in a dash, Shift in a jump's rise, both on one step (dash_jump rows, --dash-jump-check)."""
+    rows = []
+    for kind, label in DASH_JUMP_CASES:
+        row = f.get("dash_jump", {}).get(kind, {})
+        ours = DASH_JUMP_MODE.get(row.get("ours"), "no row")
+        if row.get("carry") is not None and row.get("ours") in ("cancel", "both"):
+            ours += ", keeping %d%% of its speed" % round(row["carry"] * 100)
+        rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
+    return rows
+
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
     rows = []
     for aid in ARCH_ORDER:
         f = flows.get(aid, {})
-        hero = ARCH.get(aid, {}).get("name", aid)
+        hero = "%s (%s)" % (ARCH[aid]["base_name"], aid) if aid in ARCH else aid
         for kind in ("ground", "air"):
             given = f.get("dash", {}).get(kind, {})
             for slot, label in DASH_SLOTS:
@@ -772,22 +795,29 @@ def gen_dash_flow():
                 ours = _dash_ours(row, DASH_MODE)
                 if kind in f.get("kit_owns", []):
                     ours = "the kit's own dash state: not routed yet"
-                rows.append([hero, "%s dash -> %s" % (kind, label), row.get("source", ""), ours])
+                rows.append([hero, "%s dash -> %s" % (kind, label), _src(row), ours])
         for slot, label in DASH_SLOTS:
             row = f.get("into_dash", {}).get(slot)
             ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
-            rows.append([hero, "%s -> dash" % label, (row or {}).get("source", ""), ours])
+            rows.append([hero, "%s -> dash" % label, _src(row), ours])
         rows += _combo_rows(hero, f)
     body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
             "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
             "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
             "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
-            "with no hold row keeps through every move.\n\n")
+            "with no hold row keeps through every move.\n\n"
+            "`[?]` in Source marks a row that exists but that no source or footage settles (no source, or \"Not "
+            "determinable\"): it runs as the kit's default and is not guessed (docs/KIT_PARITY.md, item 20).\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
              "\"special\" = a sourced difference.\n\n") + _air_audit_table()
+    body += ("\n\n## Space and Shift together\n\nOne row per hero and case, from `dash_jump` in the same files. \"Ours\" is "
+             "measured headless by `--dash-jump-check`, which fails when the game stops doing it. Verdict: match (the source "
+             "settles it and ours does the same) or [?] (the source doesn't settle it; ours is kept until it does).\n\n")
+    body += table(["Hero", "Case", "Source", "Ours", "Verdict"],
+                  [r for aid in ARCH_ORDER for r in _dash_jump_rows(ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}))])
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
