@@ -48,7 +48,7 @@ func _gather(home, at: Vector3) -> void:
 ## Two friends, the more outgoing one first: who starts, the cap, a swap, the 6-10 s length, the walkable ground
 ## all through, and both lying down side by side at the end. The other two Boki are parked asleep.
 func _chase_rows(home, center: Vector3) -> void:
-	var R: Dictionary = BaseChase.rules()
+	var rules: Dictionary = BaseChase.rules()
 	var life: BaseLife = home.life
 	home.day_t = 0.4
 	life.night = false      # the 10 minutes ended at night; the next tick would set it again
@@ -71,7 +71,7 @@ func _chase_rows(home, center: Vector3) -> void:
 	ok(began and a.has("life_it") and not b.has("life_it") and life.machine(b).is_in(BaseLife.S.PLAY_WITH),
 		"start: both friends are in PlayWith and the starter is the chaser")
 	var secs := float(a["life_for"])
-	ok(secs >= R["secs"][0] and secs <= R["secs"][1], "start: the chase is %.1f s (6 to 10)" % secs)
+	ok(secs >= rules["secs"][0] and secs <= rules["secs"][1], "start: the chase is %.1f s (6 to 10)" % secs)
 	ok(BaseChase.pick(life, c, [d]).is_empty() and BaseChase.running(life) == 1,
 		"cap: a second pair in the zone does not start while one chase runs")
 	var swaps := 0
