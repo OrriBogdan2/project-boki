@@ -1,5 +1,6 @@
 # batch E skip list (main 195166f4d8, job 20261114-025012-a3): branch	head	reason (conflicting files, first 6)
 ext/revive-source-numbers	e58937c843fc98b67f6773b5df6e7a8447805f1d	dropped: its own bulk-rebase merge of main (e58937c843) deletes 1008 .import files
+ext/farm-friend-chase	6ab7404f875cad750dd4945ae24ecb23195f331f	dropped: --boki-rig-check (fliers hover 0.05 m, band 0.5-1.5; passes on the merge before it, fails on its merge)
 ext/ui-match-phase	4277e9422dfe14c91b777b712f9d0fdf8f2756bf	dropped: --panel-input-check (Esc pause menu no longer opens), same as batch D
 ext/stuck-integ-b6204ee2	5a5ebc14b198388741ae91c6d56ce5372d375afa	dropped: relay.gd adds 'held'/'lost' that lagcomp_check and remote_smooth_check's RelayServer subclasses declare (parse error), same as batch C
 ext/sfx-mask-puton	245a37b1e3c172805663bae05f61ad1a4632c22a	dropped: registry gains --relic-puton-check but tools/relic_puton_check.gd is not in the tree
