@@ -2,7 +2,8 @@ extends RefCounted
 ## --kit-drill-check: the first-time kit drill (KitDrill). Every Hunter gets a line, key and call-out per slot
 ## from its own JSON, the slice Hunters their own text and the rest a generic one; a recast reads "<KEY> AGAIN"
 ## and a hold says so; the steps advance on the player's presses; in the Training Area the banner shows once
-## and a skip or a finished drill is saved so it never returns.
+## and a skip or a finished drill is saved so it never returns. Kael's own drill (clip.drill): combo, LMB hold,
+## RMB tap and hold, the chain and its pull, the Riposte guard against a dummy that swings, Rampage; one line each.
 
 const ONE_LINE := 72        # chars: a step line fits the banner on one line (DECISIONS 11-08, shorter tutorials)
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
@@ -29,10 +30,11 @@ func run(main: Node) -> void:
 func _text() -> void:
 	for id in Arch.ids():
 		var plan := KitDrill.steps(id)
-		var every := plan.size() == KitDrill.SLOTS.size()
+		var every := _slots(plan) == KitDrill.SLOTS
 		for st in plan:
 			every = every and String(st["line"]).length() > 3 and String(st["key"]) != "?"
-		ok(every, "%s: a line and a key for every slot" % id)
+			every = every and String(st["line"]).length() <= ONE_LINE and not "\n" in String(st["line"])
+		ok(every, "%s: a one-line line and a key for every slot" % id)
 		if id in KitDrill.SLICE:
 			for st in plan:
 				print("KITDRILL   [%s] %s  %s" % [st["key"], st["line"], KitDrill.callout(st, 0)])
@@ -48,8 +50,15 @@ func _text() -> void:
 	ok(wall.contains("hold") and wall.contains("wall"), "Lace's Heavy Shot line: hold, and the wall pin")
 	var cue := KitDrill.callout(KitDrill.steps("archer")[0], 0)
 	ok(cue == "HOLD %s, not just a tap" % Settings.key_cap("fire"), "Lace's draw call-out names the key")
-	var jug: Dictionary = KitDrill.steps("juggernaut")[2]
+	var kael := KitDrill.steps("juggernaut")
+	var jug: Dictionary = kael.filter(func(st): return st["slot"] == "e")[0]
 	ok(KitDrill.callout(jug, 1) == "%s AGAIN" % jug["key"], "after the first press the call-out is '<KEY> AGAIN'")
+	var hows := kael.map(func(st): return "%s.%s" % [st["slot"], st["how"]])
+	var want := ["lmb.combo", "lmb.hold", "rmb.tap", "rmb.hold", "e.again", "x.block", "dash."]
+	ok(hows == want, "Kael's drill: LMB combo and hold, RMB tap and hold, E and E again, R guard, Shift (%s)" % [hows])
+	var tap := "TAP %s, don't hold it" % Settings.key_cap("secondary")
+	ok(KitDrill.callout(kael[2], 0) == tap, "Kael's RMB tap call-out")
+	ok(String(kael[4]["key"]) == Settings.key_cap("signature"), "keys come from the bindings")
 	ok(not KitDrill.line("juggernaut", "e").begins_with("Try "), "a slice Hunter's line is its own text")
 	ok(KitDrill.line("tender", "e").begins_with("Try "), "a Hunter outside the slice gets the generic line")
 
@@ -84,16 +93,16 @@ func _walk(k: KitDrill, hunter: String) -> void:
 		k.on_press("fire")
 		ok(k.step == 0, "%s: a tap on LMB does not finish its hold" % hunter)
 	for st in k.plan:
-		var n := 2 if st["how"] == "again" else 1
+		var n: int = {"again": 2, "combo": KitDrill.COMBO_N}.get(st["how"], 1)
 		for i in n:
 			ok(k.step < k.plan.size() and k.plan[k.step]["slot"] == st["slot"], "step %s is open" % st["slot"])
 			if st["how"] == "hold":
 				k.on_held(st["action"], KitDrill.HOLD_S)
 			else:
 				k.on_press(st["action"])
-			if i == 0 and n == 2:
-				var open: bool = k.presses == 1 and k.plan[k.step]["slot"] == st["slot"]
-				ok(open, "%s: the first press of a recast does not finish it" % st["slot"])
+			if i < n - 1:
+				var open: bool = k.presses == i + 1 and k.plan[k.step]["slot"] == st["slot"]
+				ok(open, "%s %s: press %d does not finish it" % [st["slot"], st["how"], i + 1])
 	ok(k.step == k.plan.size() and k.done_t >= 0.0, "%s: the last step ends the drill" % hunter)
 
 func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
@@ -110,16 +119,16 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	for i in 3: await tree.process_frame
 	var kd := Practice.of(m).get_node_or_null(KitDrill.NAME) as KitDrill
 	var tag := "%s %s" % [hunter, "skip" if skip else "finish"]
-	ok(kd != null and kd.plan.size() == KitDrill.SLOTS.size(), "%s: the first visit gets the drill" % tag)
+	ok(kd != null and _slots(kd.plan) == KitDrill.SLOTS, "%s: the first visit gets the drill" % tag)
 	if kd != null:
 		if skip:
 			kd.finish()
 		else:
 			for st in kd.plan:
 				if st["how"] == "hold": kd.on_held(st["action"], KitDrill.HOLD_S)
+				elif st["how"] == "block": _swing(m, kd)
 				else:
-					kd.on_press(st["action"])
-					kd.on_press(st["action"])
+					for i in KitDrill.COMBO_N: kd.on_press(st["action"])
 		ok(bool(Save.d["tutorial"].get(KitDrill.SAVE_KEY, false)), "%s: the save key is set" % tag)
 	m.queue_free()
 	await tree.process_frame
@@ -130,6 +139,9 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	ok(Practice.of(again).get_node_or_null(KitDrill.NAME) == null, "%s: never shown again" % tag)
 	again.queue_free()
 
+## The slots a plan teaches, in SLOTS order.
+func _slots(plan: Array) -> Array:
+	return KitDrill.SLOTS.filter(func(sl): return plan.any(func(st): return st["slot"] == sl))
 
 ## The slots a plan teaches, in SLOTS order.
 func _slots(plan: Array) -> Array:
