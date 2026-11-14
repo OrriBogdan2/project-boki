@@ -9,15 +9,16 @@
 # - Red car of 2+ PRs: bisect, first half then second half (the second half is gated on the base the first half left). A single
 #   red PR is dropped with its NEW-RED list; the train goes on without it. A PR that cannot merge onto the base is dropped
 #   with the conflicting files ("needs rebase"). Nothing is merged, approved or bypassed here: the coordinator merges.
+# - GATE=/path/to/script replaces gate-shard (same arguments and exit codes) so the queue logic can be tested without the cluster.
 # - Work dir $TRAIN_WORK (default ../train-work next to the repo, which jobq --tree wants inside /home/boki/cj/<id>/).
 #   Log: $OUT/train.log (default $TRAIN_WORK/out); per-gate output under $OUT/gate-<n>/. A stop file $TRAIN_WORK/STOP ends
 #   the train after the running gate.
 set -u
 GROUP=1 COMMENT=1
 while [[ ${1:-} == --* ]]; do
-	case $1 in --group) GROUP=$2; shift ;; --no-comment) COMMENT=0 ;; *) sed -n 2,14p "$0"; exit 2 ;; esac; shift
+	case $1 in --group) GROUP=$2; shift ;; --no-comment) COMMENT=0 ;; *) sed -n 2,15p "$0"; exit 2 ;; esac; shift
 done
-[ $# -ge 1 ] || { sed -n 2,14p "$0"; exit 2; }
+[ $# -ge 1 ] || { sed -n 2,15p "$0"; exit 2; }
 REPO=$(git rev-parse --show-toplevel) HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$(realpath -m "${TRAIN_WORK:-$REPO/../train-work}") OUT=${OUT:-$WORK/out}
 READY=${MERGE_READY:-/home/boki/coord/MERGE_READY.md}
@@ -60,7 +61,7 @@ gate_car() {  # gate_car PR... : merge them onto $BASE, gate; 0 green (BASE move
 	N=$((N + 1)); local out="$OUT/gate-$N"
 	log "gate $N: PRs ${prs[*]} on base ${BASE:0:10} (main ${MAIN:0:10})"
 	fresh_tree "$WORK/main" "$MAIN"
-	GS_TAG="mt$N" bash "$HERE/gate-shard" "$WORK/main" "$cand" "$out" > /dev/null 2>&1
+	GS_TAG="mt$N" bash "${GATE:-$HERE/gate-shard}" "$WORK/main" "$cand" "$out" > /dev/null 2>&1
 	local rc=$?; summary=$(head -1 "$out/summary.txt" 2>/dev/null)
 	[ $rc -eq 2 ] && { log "gate $N: usage or import failure, train stopped"; exit 2; }
 	log "gate $N rc=$rc: ${summary:-no summary (import failure?)}"
@@ -68,8 +69,8 @@ gate_car() {  # gate_car PR... : merge them onto $BASE, gate; 0 green (BASE move
 		BASE=$(git -C "$cand" rev-parse HEAD)
 		for pr in "${prs[@]}"; do
 			sha=$(git -C "$REPO" rev-parse "pr/$pr")
-			post "$pr" "GATE GREEN ${sha:0:10} ${summary#GATE GREEN } (candidate ${BASE:0:10}, train position $N)"
-			echo "- $(date -u +%F\ %H:%M) #$pr ${sha:0:10} train#$N after ${MAIN:0:10}: \`gh pr merge $pr --merge --match-head-commit $sha\` ($(grep -o 'checks=[0-9]* new_red=[0-9]*' <<< "$summary"))" >> "$READY"
+			post "$pr" "GATE GREEN ${sha:0:10} ${summary#GATE GREEN } (candidate ${BASE:0:10}, gate #$N)"
+			echo "- $(date -u +%F\ %H:%M) #$pr ${sha:0:10} gate#$N after ${MAIN:0:10}: \`gh pr merge $pr --merge --match-head-commit $sha\` ($(grep -o 'checks=[0-9]* new_red=[0-9]*' <<< "$summary"))" >> "$READY"
 			GREEN+=("$pr")
 		done
 		return 0
