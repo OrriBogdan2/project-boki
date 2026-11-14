@@ -182,7 +182,7 @@ func _recast(main: Node, tree: SceneTree) -> void:
 	ok(d.reps["e"]["ph"] == "idle" and d.reps["e"]["n"] == RecastDrill.REPS, "recast: a fourth rep is not counted")
 	d.start("ostra")
 	var gate := float(k.e_def()["min_recast"])
-	rep.call(gate - ArchKit.RECAST_BUFFER * 0.6)
+	rep.call(gate - Loco.buf_recast * 0.6)
 	res = d.reps["e"]["res"]
 	ok(res == ["hit"], "recast: a press inside the buffer before the window arms is a hit")
 	d.toggle()

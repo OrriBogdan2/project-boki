@@ -4,7 +4,7 @@ extends Node
 ## obvious): a bar station that picks the current Hunter's recast abilities (the slots whose own text says
 ## "again", the way KitDrill reads them) and runs REPS short reps on each: cast it, wait for the recast marker
 ## (RecastCue's window), press again while it is open. Each rep reads out hit, late or early. A press just
-## before the window opens still counts (ArchKit.RECAST_BUFFER, the same buffer the kit applies). It watches
+## before the window opens still counts (Loco.buf_recast, the same buffer the kit applies). It watches
 ## the real kit (recast_window), so the cast and the recast are the real ones; after a rep the slot's cooldown
 ## is reset so the next rep needs no waiting.
 
@@ -119,13 +119,13 @@ func on_press(slot: String) -> void:
 			r["ph"] = "cast"
 			r["t"] = 0.0
 		"cast":
-			r["buf"] = ArchKit.RECAST_BUFFER  # before the marker: it may still open inside the buffer
+			r["buf"] = Loco.buf_recast  # before the marker: it may still open inside the buffer
 		"open":
 			var w := m.player.ak.recast_window()
 			if bool(w.get("armed", true)):
 				_grade(slot, "hit", float(w.get("left", 0.0)))
 			else:
-				r["buf"] = ArchKit.RECAST_BUFFER
+				r["buf"] = Loco.buf_recast
 	_refresh()
 
 
