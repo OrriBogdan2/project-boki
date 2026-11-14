@@ -864,6 +864,10 @@ func _spear_rank3() -> void:
 			absf(got - want) < 0.1 and float(rim[1]) == 0.0 and float(rim[3]) == 0.0,
 			"x%.2f want x%.2f, edge foe %.0f/%.0f" % [got, want, float(rim[1]), float(rim[3])])
 
+## No ground disc ("scorch" look) up in the Hero looks: a dash leaves a trail, never a disc.
+func _no_disc(m: Match) -> bool:
+	return HeroVfx.of(m).live.all(func(e): return String(e.get("kind", "")) != "scorch")
+
 func _free(m: Match) -> void:
 	m.queue_free()
 	await sc.main.get_tree().process_frame
@@ -962,7 +966,7 @@ func tender() -> void:
 			absf(tail_mesh.size.x - 0.8) < 0.01 and absf(tail_mesh.size.y - 3.4) < 0.01, str(tail_mesh.size))
 	step(m, 0.6)
 	_moon_shot_parity(m, P, K)
-	# --- Kindle ramp and its foot glow; nodes stay pooled while firing
+	# --- Kindle ramp; nodes stay pooled while firing
 	sc.aim_at(P, T.pos)
 	K.cd["e"] = 8.0
 	P.inp["fire"] = true
@@ -970,9 +974,9 @@ func tender() -> void:
 	var made0: int = K.lk().made
 	step(m, 1.8)
 	P.inp["fire"] = false
-	var shown_glow: bool = K.lk().showing("kin%d" % T.get_instance_id())
 	ok(
-			"mm passive: embers Kindle the foe and a foot glow grows on them", K.kindle_on(T) >= 3 and shown_glow,
+			"mm passive: embers Kindle the foe and no ring is drawn under them (a stack is not an area)",
+			K.kindle_on(T) >= 3 and not K.lk().showing("kin%d" % T.get_instance_id()),
 			"kindle %d" % K.kindle_on(T))
 	ok("mm passive: an ember into a Kindled foe winds Hearthlight back", K.cd["e"] < 7.0, "e %.2f" % K.cd["e"])
 	ok(
@@ -1804,10 +1808,10 @@ func rimewright() -> void:
 	step(m, 0.15)
 	var skate_v := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-			"tm Shift: full skating speed (dash.speed) within about 0.2 s, laying a frost trail (ice plates, frost)",
+			"tm Shift: full skating speed within about 0.2 s, a trail of ice plates, no ground disc",
 			absf(skate_v - float(K.dash_def()["speed"])) < 0.6
 				and K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time) >= 4
-				and int(HeroVfx.of(m).plays.get("skate_frost", 0)) >= 1,
+				and _no_disc(m),
 			"%.1f m/s" % skate_v)
 	step(m, 0.55)
 	ok("tm Shift: the stride move loops while skating (off the step she is on the air stride)",
@@ -1820,8 +1824,9 @@ func rimewright() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.1)
 	ok(
-			"tm Shift: letting go stops with a hockey stop and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
+			"tm Shift: letting go stops with a hockey stop (no ground disc) and refunds part of the charge",
+			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop"
+				and _no_disc(m), "dashes %.2f" % P.dashes)
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()

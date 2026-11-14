@@ -210,7 +210,7 @@ static func _front_menu(t: Theme) -> void:
 	var main_n := _menu_main(TICKET, 1.1, false)
 	var main_h := _menu_main(TICKET.lightened(0.08), 1.8, false)
 	_states(t, "MenuMain", main_n, main_h, _menu_main(TICKET.darkened(0.2), 1.4, true), main_n)
-	t.set_stylebox("focus", "MenuMain", ring(17))
+	t.set_stylebox("focus", "MenuMain", StyleBoxEmpty.new())      # lit by its hover ticket instead, as the items
 	t.set_font("font", "MenuMain", UI.big)
 	t.set_font_size("font_size", "MenuMain", 28)
 	_font_cols(t, "MenuMain", UI.ACCENT_HI, Color.WHITE, Color(UI.ACCENT_HI, 0.5))

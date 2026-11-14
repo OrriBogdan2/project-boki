@@ -5,6 +5,8 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const AimkitCheck := preload("res://tools/aimkit_check.gd")
+
 const EXIT := preload("res://tools/ult_exit.gd")
 const CLEAVE_TALL := 2.4        # m: the crescent tops a Hunter (about 1.9 m)
 
