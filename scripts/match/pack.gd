@@ -68,7 +68,7 @@ static func take_ground(m, h, wp: Dictionary) -> void:
 		var cur: Dictionary = h.gear[Gear.slot_on(h, String(it["id"]))]
 		if cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))) or not wants(h, it):
 			_off_ground(m, wp)
-			var old_g := _wear(m, h, it)
+			var old_g := _wear(m, h, it, -1, true)
 			if not old_g.is_empty():
 				_stash_new(m, h, old_g)
 			return
@@ -80,8 +80,8 @@ static func stash(m, h, wp: Dictionary) -> bool:
 	if room(h):
 		_off_ground(m, wp)
 		h.pack.append(it)
-		_told(m, h, "%s  ·  in your pack (%d/%d)" % [Loot.name_of(it), h.pack.size(), h.pack_cap], Loot.col_of(it))
-		m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
+		if not LootFeed.got_item(m, h, it):
+			m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
 		return true
 	if h == m.player and m.hud:
 		m.hud.open_swap(wp)
@@ -114,16 +114,18 @@ static func swap(m, h, i: int, wp: Dictionary) -> void:
 
 ## Puts a piece of gear on; returns the one it replaced as an item ({} if the slot was empty).
 ## `slot` -1 picks the slot (a glove: the same glove's slot, an empty one, or the weaker one: Gloves).
-static func _wear(m, h, it: Dictionary, slot := -1) -> Dictionary:
+## `from_ground`: picked up, so the local player gets a loot feed row (LootFeed) rather than a toast.
+static func _wear(m, h, it: Dictionary, slot := -1, from_ground := false) -> Dictionary:
 	if slot < 0:
 		slot = Gear.slot_on(h, String(it["id"]))
 	var old: Dictionary = h.gear[slot]
 	h.gear[slot] = {"id": it["id"], "rar": int(it["rar"])}
 	h.gear_cd[slot] = 0.0
 	h.refresh_gear()
-	if h == m.player and m.hud:
-		m.hud.toast("%s  ·  %s" % [Loot.name_of(it), Gear.stat_text(String(it["id"]), int(it["rar"]))], Gear.ALL[it["id"]]["col"])
-	m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
+	if not (from_ground and LootFeed.got_item(m, h, it)):
+		if h == m.player and m.hud:
+			m.hud.toast("%s  ·  %s" % [Loot.name_of(it), Gear.stat_text(String(it["id"]), int(it["rar"]))], Gear.ALL[it["id"]]["col"])
+		m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
 	if old.is_empty():
 		return {}
 	return Loot.gear(String(old["id"]), int(old["rar"]))
