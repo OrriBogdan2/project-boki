@@ -126,17 +126,19 @@ func _lmb(m: Match, P: Hunter, K: TenderKit, home: Vector3) -> void:
 	C.ok("mm timing LMB: no frame between two embers drops back to the legs", gaps == 0)
 	_settle(m, P, home, 0.8)
 
-## RMB: the seed_aim wind-up (1.0 s), then the hop and throw. No frame between them may lose the body.
+## RMB: the seed_aim wind-up (rmb.windup, the clip fitted to it), then the hop and throw. No gap in the body.
 func _rmb(m: Match, P: Hunter, K: TenderKit, home: Vector3) -> void:
 	C.sc.aim_at(P, home + Vector3(6.0, 0, 0))
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	K.press_rmb()
-	# the seed's move starts the frame the wind-up throws: 1.1 s in, play -0.1 means the throw at 1.0 s
-	var aim := _time(m, P, K, "mm_seed_aim", 1.1, func() -> bool: return not K.seed_aim)
+	# the seed's move starts the frame the wind-up throws: wind + 0.1 s in, play -0.1 = thrown at the end
+	var wind := float(K.rmb_def()["windup"])
+	var aim := _time(m, P, K, "mm_seed_aim", wind + 0.1, func() -> bool: return not K.seed_aim)
 	var hop := _time(m, P, K, "mm_seed", 0.6, func() -> bool: return false)
-	C.ok("mm timing RMB: the 1.0 s wind-up (the source's) throws on its clip's last frame, no gap into the hop",
-			absf(1.1 + float(hop["play"]) - 1.0) < DT * 1.5 and absf(float(aim["len"]) - 1.0) < DT
+	var fit := float(_clips(P).d["kmoves"]["mm_seed_aim"].get("fit", aim["len"]))
+	C.ok("mm timing RMB: the wind-up throws on its clip's last frame (fitted), no gap into the hop",
+			absf(wind + 0.1 + float(hop["play"]) - wind) < DT * 1.5 and absf(fit - wind) < DT
 			and int(aim["gaps"]) + int(hop["gaps"]) == 0)
 	_settle(m, P, home, 0.8)
 
