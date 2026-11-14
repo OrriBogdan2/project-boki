@@ -201,6 +201,9 @@ Params: `col` (charge ring colour, default the hero colour), `col2` (flare colou
 `perfect` (gold by default). The states run on real time, so they show through hit stop. The ring sits
 at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
 
+## 3b. The body's aim across terraces (pose only)
+`inp["aim_y"]` is the height of what the cursor is on; the shot climbs or dips to it (`Match.AIM_DY_MAX`, rises under 0.3 m stay flat). The body now follows the same number: `AimPitch.of(h)` is `atan2(rise, max(1.5 m, distance))` clamped to +-20 degrees (`AimPitch.MAX`), 0 on flat ground and past `AIM_DY_MAX`. `HunterAnim` eases it (10/s) and weights it by the aim (LMB hold, casts, kit moves; not dashes, glides, dives, ledges, rolls or downed). The spine takes half (the Torso, or the hips bone on a .glb: the thighs do not follow, so the feet stay planted), the arms and weapon the other half (`WardenAim` after the clips, for the .glb; the procedural rig in `_upper`). Projectiles and telegraphs are unchanged: this is the pose, not the hit. The 20 degree clamp is ours: the briefs hold no footage measurement of the source's aim lean (open: measure it). Remote players show flat (`aim_y` is not synced, no Net change). Proof: `--aim-pitch-check`.
+
 ## 4. Guide for kit agents
 - **Call per step from your kit's tick or hold callbacks** (`rmb_hold_tick`, `lmb_override`, `_tick`).
   Use a stable id per ability (`"rmb"`, `"e_drag"`). Don't call from `_process`.
@@ -218,7 +221,9 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
   - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
     runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
-    to see one (see Open questions in the branch report).
+    to see one (see Open questions in the branch report). Ground cones have one: `ArchKit.net_cone` sends
+    `["fx", "cone", nid, at, dir, len, deg, dur, col]` and other games draw the same `all` cone for `dur` s
+    (static: no fill sweep). Vex's stuck Burr Charge uses it.
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.

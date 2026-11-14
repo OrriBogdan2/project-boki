@@ -980,7 +980,7 @@ above is superseded by this:
 
 | Slot | What it does |
 |---|---|
-| LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
+| LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (no stun); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
 | RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
 | Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
@@ -1067,7 +1067,7 @@ ranks.)
 - Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks) resets Vault ->
   Vault again. Bola into two for the stun; the fifth Mark pays out Jackpot, which keeps every Mark alive
   and hands you a free Vault to carry on.
-- Tells: gold diamonds over the target (spinning faster as they stack, a jingle at 5); a gold glint and
+- Tells: gold diamonds over the target for everyone else (spinning faster as they stack, a jingle at 5; she reads her MARKS badge); a gold glint and
   light at the hand while Primed; crosshair "PRIMED · land it to reset Vault"; the dash slot's gold dot.
 - Retired: Cash In (Shiv has no 3-stack payoff: the Primed reset is the payoff), Flicker, the old Knife /
   Fan / Drop Knife, Smoke Veil, Heist, the from-behind Mark rule.
@@ -1214,6 +1214,8 @@ heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, C
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
 `--gunslinger-combo-check`. No kit applies `Hex` (scripts/arch/hex.gd) any more; only its `Hex.active` checks remain (hunter.gd, arch_kit.gd, kit guards), so the status is effectively unused.
+`docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` (its animation timing in tools/mage_anim_time_check.gd)
+and `--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
 
 ## Inspired by (per hero)
 

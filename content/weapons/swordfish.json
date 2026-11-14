@@ -6,11 +6,11 @@
  ],
  "primary": {
   "melee": true,
-  "dmg": 7.0,
+  "dmg": 9.2,
   "combo_dmg": [
-   7.0,
-   7.0,
-   11.0
+   9.2,
+   9.2,
+   14.5
   ],
   "rate": 0.32,
   "combo_reset": 0.75,

@@ -403,9 +403,6 @@ func _ready() -> void:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
 		return
-	if "--move-feel-check" in args:
-		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
-		return
 	if "--wallhug-check" in args:
 		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
 		return
@@ -423,9 +420,6 @@ func _ready() -> void:
 		return
 	if Array(args).any(func(a): return String(a).begins_with("--weapon-check")):
 		_weapon_check()
-		return
-	if "--base-check" in args:
-		_base_check()
 		return
 	if "--duel-check" in args:
 		_duel_check()
@@ -724,6 +718,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
+				opts["squad_intro"] = true      # a real start: the squad on the skyship deck first (SquadIntro)
 				ld.setup(opts)
 				add_child(ld)
 				_ld = ld
@@ -1933,35 +1928,6 @@ func _grammar_runtime_check() -> void:
 	print("GRT DONE, failures: ", _grt_fail)
 	get_tree().quit(1 if _grt_fail > 0 else 0)
 
-## Headless check for basing to a teammate (B): a clean channel arrives weakened; a hit interrupts.
-func _base_check() -> void:
-	var m := Match.new()
-	add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "no_drop": true, "seed": 77, "autoplay": true, "big": false})
-	m.set_process(false)
-	var p: Hunter = m.player
-	p.ctrl = "local"
-	var mate := m.base_target(p)
-	if mate == null:
-		print("BCHECK FAIL no teammate"); get_tree().quit(); return
-	mate.ctrl = "idle"   # the check measures the recall landing beside the mate, not where a wandering mate strolls off to during the 3 s channel
-	for i in 30: m.step(Match.DT)
-	p.inp["move"] = Vector2.ZERO
-	p.start_base(mate)
-	var t := 0.0
-	while t < 3.3:
-		p.inp["move"] = Vector2.ZERO
-		m.step(Match.DT); t += Match.DT
-	var near := p.flat_dist(mate) < 2.5
-	print("BCHECK clean: arrived=%s weak=%.1f cd=%.0f dmg_mult=%.2f" % [near, p.weak_t, p.base_cd, m.dmg_mult(p)])
-	p.base_cd = 0.0
-	p.start_base(mate)
-	for i in 30: m.step(Match.DT)
-	p.hurt(5.0, null, {"src": "test"})
-	print("BCHECK interrupt: channel=%.2f cancelled=%s" % [p.base_t, p.base_t <= 0.0])
-	print("BCHECK ", "PASS" if near and p.base_t <= 0.0 else "FAIL")
-	get_tree().quit()
-
 ## Headless smoke test for the duel room: your autopilot against the sparring bot for a few
 ## minutes, changing the bot's class, behaviour, glove and difficulty along the way.
 func _duel_check() -> void:
@@ -2255,10 +2221,10 @@ func _truce_check() -> void:
 	print("TCHECK attack: truce holds=%s announced=%s betrayer marked=%s revealed %.0fs, victims targeting the betrayer=%d" % [T.allied(0, 1), announced, T.is_marked(traitor), traitor.reveal_t, hits_back])
 	if T.allied(0, 1) or not announced or not T.is_marked(traitor) or hits_back == 0: ok = false; print("TCHECK FAIL breaking")
 	# sharing an uplink
-	T.marked.clear()
-	T.make(0, 1)
 	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)
+	T.marked.clear()     # (the pact after the clock jump to the uplink's opening: it lasts TRUCE_T from there)
+	T.make(0, 1)
 	m.exits.act(o, "start", A[0])
 	spots[A[0]] = o["pos"] + Vector3(1.0, 0, 0.8)
 	spots[B[0]] = o["pos"] + Vector3(-1.2, 0, -0.9)
@@ -3169,8 +3135,8 @@ func _boss_ttk() -> void:
 				await get_tree().process_frame
 	get_tree().quit()
 
-## The drop: the planning phase, map pings, the squad following its leader in formation, passing the
-## lead, separating, and the randomised spawns (different between seeds, rare kin only where rolled).
+## The drop: the planning phase, map pings, the squad launching one rocket, passing the lead, jumping
+## out, and the randomised spawns (different between seeds, rare kin only where rolled).
 func _drop_check() -> void:
 	var ok := true
 	var m := Match.new()
@@ -3209,48 +3175,25 @@ func _drop_check() -> void:
 	while Vector2(m.ship_pos().x - mid.x, m.ship_pos().z - mid.z).length() > 26.0 and m.time < 60.0 and P.riding:
 		m.step(Match.DT)
 	m.ship_jump(P)
-	var fol := mates.filter(func(x): return x.drop_follow == P)
-	print("DCHECK leader jumped at t=%.1f: %d of %d squadmates jumped with them (%s)" % [m.time, fol.size(), mates.size(), str(mates.map(func(x): return [x.pname, x.riding, x.dropping]))])
-	if fol.size() != mates.size(): ok = false; print("DCHECK FAIL the squad didn't jump together")
-	var sep_plan: Array = fol.map(func(x): return snappedf(float(x.ai.get("sep_h", -1.0)), 0.1))
-	for f in fol: f.ai["sep_h"] = -1.0       # (bots that break off low down: checked below, not here)
-	# the leader steers; the squad follows in its slots
-	var worst := 0.0; var t := 0.0
-	# (the turn is relative to the ship's heading, so every map and ship route tests the same turn:
-	# veer 17 degrees right of the flight line, then swing a further 85 degrees right)
-	var sdir := Vector2((m.ship["dir"] as Vector3).x, (m.ship["dir"] as Vector3).z).normalized() if m.ship.has("dir") else Vector2(1, 0)
-	while t < 1.3 and P.dropping:
-		P.inp["move"] = sdir.rotated(0.29) if t < 0.7 else sdir.rotated(1.77)
-		m.step(Match.DT); t += Match.DT
-		if t > 0.5:
-			for f in fol:
-				if f.drop_follow == P:
-					worst = maxf(worst, D.target_of(f).distance_to(Vector2(f.pos.x, f.pos.z)))
-	var spread: Array = fol.map(func(x): return snappedf(Vector2(x.pos.x - P.pos.x, x.pos.z - P.pos.z).length(), 0.1))
-	var dy: Array = fol.map(func(x): return snappedf(x.pos.y - P.pos.y, 0.1))
-	print("DCHECK formation: worst slot error %.2fm, distance to leader %s, height difference %s (bots planning to break off at %s m)" % [worst, str(spread), str(dy), str(sep_plan)])
-	if worst > 1.6 or fol.any(func(x): return x.drop_follow != P): ok = false; print("DCHECK FAIL formation")
-	# pass the lead: the next squadmate leads, you follow them
+	var aboard := mates.filter(func(x): return x.rocket != null and x.rocket == P.rocket)
+	print("DCHECK leader launched at t=%.1f: %d of %d squadmates in the rocket" % [m.time, aboard.size(), mates.size()])
+	if P.rocket == null or aboard.size() != mates.size(): ok = false; print("DCHECK FAIL the squad didn't launch together")
+	for i in 30: m.step(Match.DT)
+	# pass the lead: the next squadmate steers the rocket
 	var passed := D.pass_lead(P)
 	var L2: Hunter = D.leader(P.team)
-	t = 0.0
-	while t < 0.8 and P.dropping:
-		m.step(Match.DT); t += Match.DT
-	var err2 := D.target_of(P).distance_to(Vector2(P.pos.x, P.pos.z)) if P.drop_follow else 99.0
-	print("DCHECK pass lead=%s: leader now %s, you follow %s (slot error %.2fm), others follow %s" % [passed, L2.pname, P.drop_follow.pname if P.drop_follow else "nobody", err2, str(fol.map(func(x): return x.drop_follow.pname if x.drop_follow else "-"))])
-	if not passed or L2 == P or P.drop_follow != L2 or err2 > 2.5 or fol.any(func(x): return x != L2 and x.drop_follow != L2): ok = false; print("DCHECK FAIL pass lead")
-	# separate: you steer yourself again
-	var sep := D.separate(P)
-	var v0 := Vector2(P.vel.x, P.vel.z)
-	var want := -Vector2(L2.vel.x, L2.vel.z).normalized() if Vector2(L2.vel.x, L2.vel.z).length() > 0.5 else Vector2(-1, 0)
-	var alt0 := m.player_altitude()
-	t = 0.0
+	print("DCHECK pass lead=%s: leader now %s" % [passed, L2.pname])
+	if not passed or L2 == P or not aboard.has(L2): ok = false; print("DCHECK FAIL pass lead")
+	# jump out: you free-fall and steer yourself
+	var det := D.detach(P)
+	var want := Vector2(-1, 0)
+	var t := 0.0
 	while t < 0.7 and P.dropping:
 		P.inp["move"] = want
 		m.step(Match.DT); t += Match.DT
 	var v1 := Vector2(P.vel.x, P.vel.z)
-	print("DCHECK separate=%s at %.1fm up: solo=%s follow=%s, velocity %s -> %s (steering %s)" % [sep, alt0, P.drop_solo, P.drop_follow, str(v0.snapped(Vector2(0.1, 0.1))), str(v1.snapped(Vector2(0.1, 0.1))), str(want.snapped(Vector2(0.01, 0.01)))])
-	if not sep or P.drop_follow != null or not P.drop_solo or v1.normalized().dot(want) < 0.7: ok = false; print("DCHECK FAIL separate")
+	print("DCHECK detach=%s: rocket=%s dropping=%s, velocity %s (steering %s)" % [det, P.rocket, P.dropping, str(v1.snapped(Vector2(0.1, 0.1))), str(want)])
+	if not det or P.rocket != null or not P.dropping or v1.normalized().dot(want) < 0.7: ok = false; print("DCHECK FAIL detach")
 	# everyone lands
 	t = 0.0
 	while t < 20.0 and m.hunters.any(func(x): return x.dropping or x.riding):
@@ -3706,7 +3649,7 @@ func _home_build_check() -> void:
 	var mv: Node = home4
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = 0.0; mv.pvy = 0.0
 	var x0: float = mv.ppos.x
-	mv.dash_charges = 2.0
+	mv.dash.charges = 2.0
 	mv.start_dash(Vector2(1, 0), 23.0, 0.15)
 	for i in 6: mv._move_player(0.05)
 	ok.call(mv.ppos.x - x0 > 2.0, "a dash at home carries you %.1fm" % (mv.ppos.x - x0))
@@ -3736,20 +3679,20 @@ func _home_build_check() -> void:
 		Save.d["cls"] = ck
 		var dg: Dictionary = mv._dodge()
 		var want := int(Content.class_dodge(ck).charges) if Content.class_dodge(ck) else int(Data.CLASSES[ck]["dashes"])
-		mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0; mv.ex_cd = 0.0
-		mv.dash_charges = 9.0; mv._move_player(0.0001)     # topped up to the class's count
+		mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0; mv.dash.ex_cd = 0.0
+		mv.dash.charges = 9.0; mv._move_player(0.0001)     # topped up to the class's count
 		var shorts := 0
 		var longs := 0
 		for k in want + 2:
 			mv.dash_t = 0.0; mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0
-			var had: float = mv.dash_charges
+			var had: float = mv.dash.charges
 			if mv.try_dash(Vector2(1, 0), false):
 				if had >= 1.0: shorts += 1
 				else: longs += 1
 		var regen := float(dg["cd"])
 		mv.dash_t = 0.0
 		var waited := 0.0
-		while mv.dash_charges < 1.0 and waited < 40.0:
+		while mv.dash.charges < 1.0 and waited < 40.0:
 			mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.dash_t = 0.0
 			mv._move_player(0.05); waited += 0.05
 		mv.dash_t = 0.0

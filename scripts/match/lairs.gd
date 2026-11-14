@@ -185,8 +185,8 @@ func _tint_dormant(L: Dictionary, dormant: bool) -> void:
 	(L["nodes"]["dial"] as Node3D).get_node("Ring").visible = not dormant
 
 ## SpawnPlan decides which lairs are live this match: every lair is a "boss" candidate; the rolled ones
-## get their boss, guards and wards (see activate), the others stay dormant. Skyreach rolls 2 or 3 of its
-## 3 lairs (the layout's spawn_points.boss), generated maps 1 or 2 of theirs.
+## get their boss, guards and wards (see activate), the others stay dormant. Skyreach and the Hollow Crown
+## wake all 3 (the layout's spawn_points.boss: one Sealed Lair, two prize lairs), generated maps 1 or 2.
 func plug_into(plan: SpawnPlan) -> void:
 	if list.is_empty() or plan == null:
 		return
@@ -630,6 +630,8 @@ func reset_boss(b: Boss) -> void:
 	b.phase = 0
 	b.enraged = false
 	b.awake_t = 0.0
+	b.invul_t = 0.0      # (a reset during a phase roar must not carry its armour into the next fight)
+	b.empty_t = 0.0      # (nor the empty-lair clock: woken from outside again, it would sleep at once)
 	b.tgt = null
 	b.st = "idle"
 	b.stag_open = 0.0
@@ -720,6 +722,9 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	# (1.6 m out: at 0.9 their names ran into each other)
 	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "boss": b.mkind, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
+	var bite := GardenItems.lair_drop(m.rng.randf(), m.rng.randi())
+	if bite != "":
+		m.spawn_val(Loot.valuable(bite), at + Vector3(-1.1, 0, 0.2))
 	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
 	if zone != "" and not wayseed_given:
 		wayseed_given = true
@@ -740,12 +745,6 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var sp := String(b.md.get("egg", ""))
 	if Data.KIN.has(sp):
 		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
-	# XP for everyone who fought it: the most for the killer's squad
-	for h in m.hunters:
-		if h.out or h.extracted or not inside(L, h.pos, 4.0):
-			continue
-		var share := 1.0 if killer and h.team == killer.team else (0.5 if float(b.damage_by.get(h.team, 0.0)) > b.max_hp * 0.1 else 0.2)
-		h.gain_xp(260.0 * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
@@ -1350,6 +1349,8 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	var best := {}; var bd := 110.0
 	for L in list:
 		if L["state"] in ["cleared", "dormant"] or L.get("locked", false): continue
+		if L.get("seat", false) and not BotWays.may_start(m, h.team, "lair"):
+			continue      # (the Sealed Lair: the bots' 30 s delay and seat cap)
 		# a sealed gate bots can't work (runes, wards) isn't a goal: try the next lair instead of giving up
 		if L["state"] == "sealed" and not (L["entry"] as Array).has("dial"): continue
 		# (the lair we picked last time reaches a little further: at the edge of the range a bot
@@ -1360,14 +1361,18 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 		a.erase("lair_pick")
 		return []
 	a["lair_pick"] = String(best["id"])
-	if best["state"] == "sealed":
-		if not (best["entry"] as Array).has("dial"):
+	return bot_lair(best, h)
+
+## Into this lair: work its dial (or wait beside it while someone else does), or walk in and fight.
+func bot_lair(L: Dictionary, h: Hunter) -> Array:
+	if L["state"] == "sealed":
+		if not (L["entry"] as Array).has("dial"):
 			return []
-		var u = best["user"]
+		var u = L["user"]
 		if u != null and not is_same(u, h):
-			return [best["dial"] + Vector3(best["out"].x, 0, best["out"].y) * 3.0, "roam"]
-		return [best["dial"], "lair_dial"]
-	return [best["c"], "lair_fight"]
+			return [L["dial"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0, "roam"]
+		return [L["dial"], "lair_dial"]
+	return [L["c"], "lair_fight"]
 
 ## A bot sealed in after the kill: the egg if it's still lying here, then out. With rivals waiting at
 ## the gate (and the updraft blowing) it rides the updraft out the back; otherwise it pulls the lever.

@@ -149,6 +149,8 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		m.cam.snap(cam_at if cam_at != Vector3.ZERO else P.pos + Vector3(lead, 0, 0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
+		for s in m.shots:
+			Oomph.place_shot(s, 1.0)      # (the match's _process is off here, so its shots are drawn from this)
 		await main.get_tree().process_frame
 		while not todo.is_empty() and t0 >= float(todo[0][0]):
 			var mk: Array = todo.pop_front()
@@ -405,6 +407,26 @@ func _vireo_e() -> void:
 			_on_target])
 	await _go(1.6, flick, marks)
 
+## The animation-timing fixes (docs/heroes/mage.md 'Animation timing'): an RMB tap's throw lands on the bolt
+## (0.33 s), and a 1.0 s Skycall drag keeps the arm up through the 0.8 s count to the strike (1.8 s).
+func _vireo_timing() -> void:
+	var K = P.ak
+	await _reset(6.0)
+	K.press_rmb()
+	var tap := func(tt: float): P.inp["sec_hold"] = tt < 0.05
+	await _go(0.65, tap, _strip("timing_rmb_tap",
+			"RMB tap: held pose, the throw clip starts 0.27 s in so its release key is the bolt at 0.33 s, recover",
+			[0.1, 0.22, 0.3, 0.34, 0.45, 0.6]))
+	await _reset(7.0)
+	K.use_e()
+	var drag := func(tt: float):
+		P.inp["e_down"] = tt < 1.0
+		if tt > 0.05:
+			_aim(home + Vector3(4.0, 0, 0))
+	await _go(2.2, drag, _strip("timing_e_drag",
+			"E dragged 1.0 s: the arm stays up through the count and snaps at the strike (1.8 s)",
+			[0.3, 0.9, 1.3, 1.6, 1.78, 1.9, 2.15]))
+
 func _vireo_owner1103() -> void:
 	var K = P.ak
 	await _reset(7.0)
@@ -441,7 +463,7 @@ func _venator_lmb() -> void:
 	marks.append([0.31,
 			"full",
 			"lmb_aim",
-			"LMB: ember tracers through a near cursor out to full range, the bronze muzzle star, the firing brackets"])
+			"LMB: green-fire tracers through a near cursor out to full range, the muzzle star, the firing brackets"])
 	await _go(1.2, string, marks)
 	P.inp["fire"] = false
 	await _reset(8.0)

@@ -5,7 +5,9 @@ extends RefCounted
 ## full-health light hunter). Runs inside tools/hero_combo_check.gd and reports through its ok().
 
 const BURST := preload("res://tools/ult_burst.gd")
+const EXIT := preload("res://tools/ult_exit.gd")
 const KIN := "pebbit"            # a Boki to bond with (the bond only fills while one is ready)
+const ZONE_TICK_S := 0.5         # s between Cinderfall burn ticks: the source's (briefs/hero-ref/venator.md, R)
 
 var hc: RefCounted                # tools/hero_combo_check.gd
 var ac: RefCounted                # tools/archetype_check.gd
@@ -120,6 +122,9 @@ func mage() -> void:
 	await _mage_116(m, P, T, T2, K, home)
 	await ac.done(m)
 	await _mage_burst()
+	var got: Dictionary = await EXIT.run(ac, "mage")
+	ok("Kitefall exit: Shift, LMB and jump pressed 0.1s before the strike go on its first free step",
+		EXIT.on_time(got), EXIT.said(got))
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(hc.main, "mage")
 	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held on",
@@ -493,11 +498,13 @@ func gunslinger() -> void:
 	ac.step(m, 0.5)
 	var disc := AimKit.entry(P, "x1")
 	var disc_r := float(disc.get("r", 0))
-	var core_r := float(disc.get("core", 0))
+	var core := AimKit.entry(P, "xc1")
+	var core_r := float(core.get("r", 0))
 	var fill := float(disc.get("fill", 0))
-	ok("Cinderfall: the disc with its hot centre, seen by everyone, filling",
+	ok("Cinderfall: the disc and its hot centre ring, seen by everyone, filling together",
 			AimKit.shown(P, "x1") and bool(disc.get("all", false)) and absf(disc_r - float(xd["radius"])) < 0.05
-			and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2,
+			and bool(core.get("all", false)) and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2
+			and is_equal_approx(float(core.get("fill", 0)), fill),
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
 	# past the shot's commit (GunslingerUlt.COMMIT) she is free while it falls: she walks and the rifle works
 	ac.step(m, 0.3)
@@ -516,13 +523,15 @@ func gunslinger() -> void:
 	var hit_share := float(KinBond.rules()["hit"])
 	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
 			"paid %.2f" % _paid(P, id))
+	_gun_scorch(m, t_at, float(xd["radius"]))
 	var took: float = ac.dmg(T)
-	ac.step(m, 1.1)
+	var burn := _hurt_times(m, T, 1.1)
 	ok("Cinderfall: the patch burns and slows",
 			ac.dmg(T) > took and T.slow_t > 0.0 and U.zone_ticks >= 2 and AimKit.shown(P, "xz1"),
 			"+%.1f ticks %d" % [ac.dmg(T) - took, U.zone_ticks])
 	ok("Cinderfall: burn ticks pay no more bond", is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"])))
-	ac.step(m, float(xd["zone_t"]))
+	burn.append_array(_hurt_times(m, T, float(xd["zone_t"]) - 0.9))    # on to 0.2 s past the zone's end
+	_zone_cadence(burn, ac.dmg(T) - took, float(xd["tick_dmg"]) * U.power(), float(xd["zone_t"]))
 	ok("Cinderfall: the patch is gone after 3s", not U.running() and not AimKit.shown(P, "xz1"))
 	ok("Cinderfall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	T2.teleport(home + Vector3(-30, 0, 0))
@@ -530,7 +539,44 @@ func gunslinger() -> void:
 	await ac.done(m)
 	await _gun_burst()
 
+## Steps frame by frame for secs and returns the match times (s) at which T lost health.
+func _hurt_times(m: Match, T: Hunter, secs: float) -> Array:
+	var out := []
+	var end := m.time + secs
+	var hp := T.hp
+	while m.time < end:
+		ac.step(m, hc.DT)
+		if T.hp < hp - 0.01:
+			out.append(m.time)
+		hp = T.hp
+	return out
+
+## The burn's cadence: ZONE_TICK_S between ticks to within half a step, a full zone of them, each the same.
+func _zone_cadence(times: Array, burned: float, per: float, zone_t: float) -> void:
+	var lo := INF
+	var hi := 0.0
+	for i in range(1, times.size()):
+		lo = minf(lo, times[i] - times[i - 1])
+		hi = maxf(hi, times[i] - times[i - 1])
+	var half_step := float(hc.DT) * 0.5
+	var even := absf(lo - ZONE_TICK_S) < half_step and absf(hi - ZONE_TICK_S) < half_step
+	ok("Cinderfall: the patch ticks every 0.5s (the source's), 6 times in its 3s, each the same",
+			even and times.size() == roundi(zone_t / ZONE_TICK_S) and absf(burned - per * times.size()) < 0.5,
+			"%d ticks, gaps %.3f to %.3f s, burn %.1f (%.1f each)" % [times.size(), lo, hi, burned, per])
+
 ## Stepping off the disc before it lands: no damage, no bond; a cursor past the range is clamped.
+## The scorch the patch keeps (VVFx.disc): its lit rim on the hit radius, see-through at the centre (VFX_QUALITY.md
+## "Opaque zone fills": never a solid fill over the Hunters in it).
+func _gun_scorch(m: Match, at: Vector3, r: float) -> void:
+	var scorch: MeshInstance3D = null
+	for n: Node3D in VVFx.of(m).pools.get("disc", []):
+		if n.visible and hc._flat(n.global_position, at) < 0.1:
+			scorch = n
+	var rim_r := scorch.scale.x * VVFx.DISC_EDGE if scorch else 0.0
+	var fill_a := float((scorch.material_override as ShaderMaterial).get_shader_parameter("fill_a")) if scorch else 1.0
+	ok("Cinderfall: the scorch's lit rim is on the hit radius, its centre see-through (alpha <= 0.25)",
+			absf(rim_r - r) < 0.05 and fill_a <= 0.25, "rim %.2f m (r %.2f) centre alpha %.2f" % [rim_r, r, fill_a])
+
 func _gun_dodge(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
 	var U := K.ult
 	var xd := K.x_def()

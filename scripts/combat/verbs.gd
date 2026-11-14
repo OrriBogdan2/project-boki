@@ -98,22 +98,33 @@ func _break_wall(w: Dictionary) -> void:
 static func blocks_sight(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
-## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
-static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
+## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
+## crosser class (Blockers): "phase" for a Spirit Walk.
+static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls := "body") -> float:
 	for w in list:
-		if not w["move"]:
-			continue
-		if absf(y - float(w["y"])) > 1.9:
-			continue
-		# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
-		var top := StoneStand.top_for(w) if w.has("top") else 3.0
-		if y >= float(w["y"]) + top - World.STEP:
+		var top := wall_top(w, y)
+		if top <= 0.0 or not Blockers.wall_stops(w, cls):
 			continue
 		var p := Vector2(x, z)
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
-		if p.distance_to(c) < r * 0.8 + float(w["th"]):
-			return float(w["y"]) + top
+		if p.distance_to(c) < wall_reach(w, r):
+			return top
 	return 0.0
+
+## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
+## block movement, or the body is above or on it).
+static func wall_top(w: Dictionary, y: float) -> float:
+	if not w["move"] or absf(y - float(w["y"])) > 1.9:
+		return 0.0
+	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
+	var top := StoneStand.top_for(w) if w.has("top") else 3.0
+	if y >= float(w["y"]) + top - World.STEP:
+		return 0.0
+	return float(w["y"]) + top
+
+## How close the centre of a body of radius r may come to barrier w's line.
+static func wall_reach(w: Dictionary, r: float) -> float:
+	return r * 0.8 + float(w["th"])
 
 # ------------------------------------------------------------------ reflect windows
 ## A reflect window; returns it so a held one (a form dash's mirror, MergeAugment) can refresh and end it.
@@ -312,9 +323,10 @@ func decoy_of(h: Hunter) -> Dictionary:
 	return {}
 
 # ------------------------------------------------------------------ shots
-## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only.)
-func _stops(w: Dictionary, team: int, p: Vector3, r: float) -> bool:
-	if w["block"] != "all" and int(w["team"]) == team:
+## Does wall w stop a shot of `team` and radius r at p? (Its own team's shots pass a wall that blocks "enemy" only;
+## cls is the shot's crosser class, Blockers: a "pierce" shot passes rocks.)
+func _stops(w: Dictionary, team: int, p: Vector3, r: float, cls := "solid") -> bool:
+	if (w["block"] != "all" and int(w["team"]) == team) or not Blockers.wall_stops(w, cls):
 		return false
 	if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
 		return false
@@ -335,8 +347,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
+	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
-		if not _stops(w, int(s["team"]), p, float(s["r"])):
+		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):

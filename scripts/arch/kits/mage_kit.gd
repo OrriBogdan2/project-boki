@@ -19,6 +19,7 @@ const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the r
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
+const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
@@ -110,6 +111,9 @@ func busy() -> bool:
 func fire_ok() -> bool:
 	return not ult.busy()
 
+func lock_left() -> float:
+	return ult.lock_left()
+
 func full_ready() -> bool:
 	for k in sparks:
 		if int(sparks[k]["n"]) >= int(res_def()["max"]):
@@ -191,7 +195,7 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT)
+		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT, not h.is_local())     # yours: the badge
 		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
 			# Live: arcs crawl down the body from the marker to the ground
 			var foot := ground(f.pos) + Vector3(fx().rng.randf_range(-0.5, 0.5), 0.05, fx().rng.randf_range(-0.5, 0.5))
@@ -415,6 +419,9 @@ func _end_wire(refund: bool) -> void:
 	if wire.is_empty(): return
 	if refund: h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
 	wire = {}
+	if h.knock_t < 0.05 and h.loco.is_in(Loco.S.KNOCKED):
+		h.knock_t = 0.0         # the wire's own knocked state (a real knock lasts longer) ends with it, so the streak
+		h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)       # is a dash a glide press can cancel
 	AimKit.hide(h, "dash")
 	AimKit.hide(h, "dash_end")
 
@@ -670,8 +677,12 @@ func fire_rmb(c: Dictionary) -> void:
 	var min_t := float(sd["min_t"])
 	var k := clampf((held_t - min_t) / (float(sd["hold"]) - min_t), 0.0, 1.0)
 	last_variant = "hold" if k > 0.5 else "tap"
-	play("mage_rmb")
 	var wait := maxf(0.0, min_t - held_t)
+	var lead := maxf(0.0, wait - RMB_KEY)         # a quick tap: the throw clip starts so its release key is the bolt
+	if lead > 0.0:
+		m.later(lead, func(): if is_instance_valid(h) and not h.downed and anim_id == "mage_rmb_hold": play("mage_rmb"))
+	else:
+		play("mage_rmb")
 	if wait > 0.0:
 		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _coil(k))
 	else:

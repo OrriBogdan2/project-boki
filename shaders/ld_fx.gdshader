@@ -3,6 +3,7 @@ shader_type spatial;
 // so colour, dark rims and smoke hold on bright ground; LDFx chains ld_fx_glow.gdshader on as next_pass.
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_mix, cull_disabled, fog_disabled;
 #include "res://shaders/ld_fx.gdshaderinc"
+#include "res://shaders/soft_fade.gdshaderinc"
 
 void vertex() {
 	if (billboard) {
@@ -17,4 +18,7 @@ void fragment() {
 	ld_look(UV, body, alpha, glow);
 	ALBEDO = body;
 	ALPHA = clamp(alpha * color.a, 0.0, 1.0);
+	if (billboard) {     // upright looks soften into the ground; flat ones lie on it
+		ALPHA *= soft_fade(SCREEN_UV, VERTEX, INV_PROJECTION_MATRIX, INV_VIEW_MATRIX);
+	}
 }

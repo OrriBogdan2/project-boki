@@ -254,6 +254,9 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
+func lock_left() -> float:
+	return riposte.lock_left()
+
 ## Planted in the guard and the cleave: no other button acts then (a slash or Smash press waits BUFFER for the
 ## cleave to land; E on a held chain pulls, use_e).
 func busy() -> bool:
@@ -268,6 +271,10 @@ func no_glide() -> bool:
 ## Haul Slam), never a dead press.
 func air_rmb() -> bool:
 	return super() and float(cd["air"]) <= 0.0
+
+## The guard stops pulls too (Blockers).
+func blocks_from(_by: Ent) -> bool:
+	return riposte.guarding()
 
 ## The guard takes every hit (no damage, no crowd control) and counts it.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -484,7 +491,10 @@ func on_dash(use_ex: bool) -> bool:
 	st["last_dash"] = "rampage"
 	# its wind-down: no glider straight out of the dash's end (a glide pressed during it opens at once, owner 11-08)
 	var dash_end := wind + float(dd["time"])
-	m.later(dash_end, func(): if is_instance_valid(h) and not h.gliding: h.glide_cd = maxf(h.glide_cd, 0.35))
+	var began: float = m.time
+	m.later(dash_end, func():
+		if is_instance_valid(h) and not h.gliding and h.jump_at < began:      # (a jump out of the dash ended it early)
+			h.glide_cd = maxf(h.glide_cd, 0.35))
 	if from_slam or in_hang:
 		_rampage(dir)                # the Slam's own keys run on: the overhead blade rides the drive in
 		return true
