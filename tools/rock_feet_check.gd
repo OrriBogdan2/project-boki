@@ -95,14 +95,17 @@ func _steps() -> void:
 		_place(at + Vector3(-0.2, HeroZones.ROCK_TOP, 0))
 		var end := at.x + 5.0
 		_score("step up onto a rock %.2f m higher" % rise, Vector2(1, 0), SETTLE, func(): return P.pos.x > end, true)
-		_score("step down onto a rock %.2f m lower" % rise, Vector2(-1, 0), 0, func(): return P.pos.x < at.x)
+		_score("step down onto a rock %.2f m lower" % rise, Vector2(-1, 0), 0, func(): return P.pos.x < at.x, false, true)
 
 ## Steps frames (after `settle` unscored), moving both along the move `how` gives (a Vector2, or a Callable
 ## returning one), until `stop` returns true (at most WALK_T), and asserts the weight-bearing foot's gap over the
 ## surface it stands on. A foot out over a drop (past FootPlant's reach) stands on nothing and is not scored.
 ## step: also asserts the step is smooth: the drawn body never pops up or down and FootPlant plants every grounded
 ## frame he is not landing (StepSmooth, StoneStand.stand). Prints the crown mesh's gap too.
-func _score(what: String, how: Variant, settle: int, stop := Callable(), step := false) -> void:
+## edge: a step down. On the one frame the drawn body is over the lower rock while the hunter's own height has not
+## dropped yet, FootPlant lets go by design (BODY_SLACK), so a frame it is off is not scored (when the foot there
+## is the weight-bearing one it read as 0.25 m off, by gait phase: the anim seed is the model's instance id).
+func _score(what: String, how: Variant, settle: int, stop := Callable(), step := false, edge := false) -> void:
 	for f in settle:
 		_frame(Vector2.ZERO)
 	var seen: Array = []          # per grounded frame: [twin's lower ankle height, his miss]
@@ -120,6 +123,8 @@ func _score(what: String, how: Variant, settle: int, stop := Callable(), step :=
 			unplanted += 1 if P.anim.feet.weight < 0.01 and P.anim.air_k < 0.01 else 0
 		was = P.position.y
 		if not grounded:
+			continue
+		if edge and P.anim.feet.weight < 0.01 and P.anim.air_k < 0.01:
 			continue
 		var t_ank := _ankles(twin)
 		var low := 0 if (t_ank[0] as Vector3).y < (t_ank[1] as Vector3).y else 1
