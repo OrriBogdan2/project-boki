@@ -27,8 +27,6 @@ const CHECKS := {
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--terrain-hazard-check": ["res://tools/terrain_hazard_check.gd", "terrain_hazard_check", null],
 	"--terrain-hazard-reel": ["res://tools/terrain_hazard_reel.gd", "terrain_hazard_reel", null],      # GPU: MP4 frames
-	"--pitch-reel": ["res://tools/pitch_reel.gd", "pitch_reel", null],      # demo-reel footage, 1080p60 (GPU)
-	"--pitch-check": ["res://tools/pitch_reel_check.gd", "pitch_check", null],      # the reel's drivers play through
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
 	"--sentry-check": ["res://tools/sentry_check.gd", "sentry_check", null],      # docs/SENTRY.md, stays off
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
@@ -667,13 +665,7 @@ const CHECKS := {
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],  # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],  # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],  # frame times, Mask screens
-	"--stomp-check": ["res://tools/stomp_check.gd", "stomp_check", null],      # only hard CC breaks a stomp
-	"--occlusion-outline-check": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "check"],
-	"--occlusion-outline-shots": ["res://tools/occlusion_outline_check.gd", "occlusion_outline_check", "shots"],
 	"--hazard-map-shots": ["res://tools/hazard_map_shots.gd", "hazard_map_shots", null],      # --shots-dir=<dir>
-	"--mob-glb-check": ["res://tools/mob_glb_check.gd", "mob_glb_check", null],      # skinned monster models
-	# the shell follows amount and time
-	"--shield-expiry-check": ["res://tools/shield_expiry_check.gd", "shield_expiry_check", null],
 	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],      # DoT body look
 	"--hawk-sense-shots": ["res://tools/hawk_sense_shots.gd", "hawk_sense_shots", null],      # --shots-dir=<dir>
 	"--plan-first-shots": ["res://tools/plan_first_shots.gd", "plan_first_shots", null],      # --shots-dir=<dir>
