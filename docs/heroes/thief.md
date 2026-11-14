@@ -456,7 +456,7 @@ clips are keyed on KMovesDJ's beats, so no row needed a fix.
 | LMB hold | a hit every 2-3 frames, 0.45 s on the card, left then right [0001-0045] | every 0.45 s, hands alternating, each throw from the other's 0.45 pose | matches (`parity` rows) |
 | Empowered LMB (`thf_primed`) | a big streak and a blade flash at her hands, the same beat [0143] | 0.00 / 0.02 / 0.53 | matches; asserted |
 | RMB (`thf_bola`) | a 0.4-0.6 s lane with the bolas whirled overhead, slung with a lunge [0085-0087, 0100-0102] | 0.40 (data `cast`) / sling 0.38 / 0.73 | matches; asserted (the whirl's raise is skipped) |
-| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_OUT`) / 0.08 / 0.47 | matches; asserted |
+| E (`thf_knife`) | a spin into a side-arm throw, the dagger out within a frame [0222-0225] | 0.12 (`ThiefKit.KNIFE_RELEASE_S`) / 0.08 / 0.47 | matches; asserted |
 | E recast (`thf_arrive`) | a blink under one frame [0237-0238] | at the dagger at once / the pop 0.6 | matches |
 | Shift ground (`thf_vault_*`) | a 0.05 s crouch, over the top 0.25-0.3 s, up by about 0.5 s [0176-0178] | dash 0.48 (data) / hips over by 0.12-0.18 / 0.47 | matches |
 | Air dash (`thf_exdash`, `thf_land`) | over in about 0.25 s, landing crouch about 0.1 s, up by 0.15 [0129-0134] | turned over by 0.23, carried flat from 0.46 until she lands (0.95 s at most) / a 0.17 s landing | matches |

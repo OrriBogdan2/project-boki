@@ -371,7 +371,7 @@ clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers unt
 | LMB full charge (`ostra_orb_hot`) | the same flick, a long bolt [0034] | 0.00 / 0.08 / 0.50 | lead 0.06: 0.02 / end 0.50 (last frame held 0.06) | fixed; asserted |
 | RMB wind-up (`ostra_snap_wind`) | a black orb at the hand for one frame (about 0.2 s) [0115, 0138] | 0.32 (owner item 40), held from 0.3 | same | owner note wins (item 40) |
 | RMB release (`ostra_snap`) | the spear the next frame [0116, 0139] | 0.00 / 0.02 / 0.50, slowed 0.15 s after | same | matches; asserted |
-| Shift ground (`ostra_swap`) | an underhand lob, the star leaves with the arm [0158, 0184], 1.8 s flight | 0.00 / 0.12 / 0.85 | lead 0.10: 0.02 / end 0.85 (last frame held 0.10) | fixed; asserted |
+| Shift ground (`ostra_swap`) | an underhand lob, the star leaves with the arm [0158, 0184], 1.8 s flight | 0.00 / 0.12 / 0.85 | no lead: 0.03 / end 0.85 (the rig fix on main moved the strike from 0.12 to 0.03, so the 0.10 lead would fire it 0.07 s early) | matches; asserted |
 | Shift held (`ostra_swap_aim`) | - (a tap in the source) | the lob's wind-up pose, held from 0.16 | same | no source; the held pose is the lead's skipped wind-up |
 | Air dash (`ostra_swap_air`) | not in the footage (the Swap is his only mobility) | 0.00 / 0.08 / 1.27, the drift loops | lead 0.06: 0.02 | fixed on our own release; asserted |
 | Arrival (`ostra_arrive`) | a jump-cut, under one frame [0168] | the pop 0.08-0.15 / 0.60 | same | matches |
