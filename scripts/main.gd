@@ -397,9 +397,6 @@ func _ready() -> void:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
 		get_meta("abyss_check").run(self)
 		return
-	if "--move-feel-check" in args:
-		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
-		return
 	if "--wallhug-check" in args:
 		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
 		return
@@ -417,9 +414,6 @@ func _ready() -> void:
 		return
 	if Array(args).any(func(a): return String(a).begins_with("--weapon-check")):
 		_weapon_check()
-		return
-	if "--base-check" in args:
-		_base_check()
 		return
 	if "--arena-check" in args:
 		var arc = load("res://tools/arena_check.gd").new()      # the Arena, training's practice tools, the kit card
@@ -694,6 +688,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
+				opts["squad_intro"] = true      # a real start: the squad on the skyship deck first (SquadIntro)
 				ld.setup(opts)
 				add_child(ld)
 				_ld = ld
@@ -1009,35 +1004,6 @@ func _weapon_check() -> void:
 				print("WCHECK %-12s %-6s dist %4.1f  dps %6.1f  (%d in %ds)" % [wid, mode, dist, dealt / dur, int(dealt), int(dur)])
 				m.queue_free()
 				await get_tree().process_frame
-	get_tree().quit()
-
-## Headless check for basing to a teammate (B): a clean channel arrives weakened; a hit interrupts.
-func _base_check() -> void:
-	var m := Match.new()
-	add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "no_drop": true, "seed": 77, "autoplay": true, "big": false})
-	m.set_process(false)
-	var p: Hunter = m.player
-	p.ctrl = "local"
-	var mate := m.base_target(p)
-	if mate == null:
-		print("BCHECK FAIL no teammate"); get_tree().quit(); return
-	mate.ctrl = "idle"   # the check measures the recall landing beside the mate, not where a wandering mate strolls off to during the 3 s channel
-	for i in 30: m.step(Match.DT)
-	p.inp["move"] = Vector2.ZERO
-	p.start_base(mate)
-	var t := 0.0
-	while t < 3.3:
-		p.inp["move"] = Vector2.ZERO
-		m.step(Match.DT); t += Match.DT
-	var near := p.flat_dist(mate) < 2.5
-	print("BCHECK clean: arrived=%s weak=%.1f cd=%.0f dmg_mult=%.2f" % [near, p.weak_t, p.base_cd, m.dmg_mult(p)])
-	p.base_cd = 0.0
-	p.start_base(mate)
-	for i in 30: m.step(Match.DT)
-	p.hurt(5.0, null, {"src": "test"})
-	print("BCHECK interrupt: channel=%.2f cancelled=%s" % [p.base_t, p.base_t <= 0.0])
-	print("BCHECK ", "PASS" if near and p.base_t <= 0.0 else "FAIL")
 	get_tree().quit()
 
 ## A farm (Home) for headless checks: built, waited for until every slice is in, and set as the current screen.

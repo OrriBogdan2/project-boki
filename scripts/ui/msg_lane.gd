@@ -6,11 +6,12 @@ extends Control
 ## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once
 ## (FIGHT_SHOWN in a fight, see `fight`) and the rest wait, the most important first; each lives a
 ## short while (FIGHT_LIFE at most in a fight). A low-priority line that waits too long is dropped.
+## URGENT is for what a fight needs now (your Boki is down, you are being stomped): it alone passes `hold`.
 
-enum { LOW, NORMAL, HIGH }
+enum { LOW, NORMAL, HIGH, URGENT }
 const MAX_SHOWN := 3
-const LIFE := [1.8, 2.4, 3.2]   # s on show for LOW, NORMAL, HIGH, fades included
-const PX := [15, 17, 20]        # font px for LOW, NORMAL, HIGH
+const LIFE := [1.8, 2.4, 3.2, 3.2]   # s on show for LOW, NORMAL, HIGH, URGENT, fades included
+const PX := [15, 17, 20, 20]         # font px for LOW, NORMAL, HIGH, URGENT
 const STALE := 3.0              # s a LOW line may wait before it's dropped
 const WAIT_CAP := 6             # lines waiting at most: past it the oldest of the lowest priority goes
 const FADE_IN := 0.15           # s
@@ -24,7 +25,7 @@ const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
-var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
+var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
 		_promote()
@@ -143,13 +144,16 @@ func _process(delta: float) -> void:
 	_promote()
 	_layout(delta)
 
-## Moves waiting lines onto free rows, the most important first (oldest first within a priority).
+## Moves waiting lines onto free rows, the most important first (oldest first within a priority);
+## while `hold` is on only URGENT lines move.
 func _promote() -> void:
-	while not hold and not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
+	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
 		var best := 0
 		for i in _waiting.size():
 			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
 				best = i
+		if hold and int(_waiting[best]["prio"]) < URGENT:
+			return
 		var e: Dictionary = _waiting.pop_at(best)
 		e["box"] = _card(e)
 		add_child(e["box"])

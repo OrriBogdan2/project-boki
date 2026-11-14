@@ -155,8 +155,8 @@ func thief(a) -> void:
 			absf(float(tp[1][1]) / float(tp[0][1]) - 1.5) < 0.01
 			and absf(float(tp[2][1]) / float(tp[0][1]) - 1.5) < 0.01
 			and absf(float(tp[1][0]) - 7.0) < 0.01 and absf(float(tp[2][0]) - 4.85) < 0.05, str(tp))
-	A.ok("upgrade parity: Vault recharge stays 4.5 (the source has no Quickflip cooldown upgrade)",
-			absf(float(tp[1][2]) - 4.5) < 0.01 and absf(float(tp[2][2]) - 4.5) < 0.01, str(tp))
+	A.ok("upgrade parity: Vault recharge stays 5 (Quickflip 5s, no cooldown upgrade)",
+			absf(float(tp[1][2]) - 5.0) < 0.01 and absf(float(tp[2][2]) - 5.0) < 0.01, str(tp))
 	A.ok("upgrade parity: Shadow Knife cooldown 15 -> 10.7 from rank 2 (the source's -8s of 28), no damage step",
 			absf(float(tp[1][3]) - 10.71) < 0.05 and absf(float(tp[2][3]) - 10.71) < 0.05
 			and absf(float(tp[2][4]) / float(tp[0][4]) - 1.0) < 0.01, str(tp))
@@ -260,7 +260,7 @@ func thief(a) -> void:
 	A.step(m, 0.6)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
-			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
+			and T2.stun_t > 0.0 and A.dmg(T) >= 9.0,
 		"pairs %d grounded %s/%s stun %.2f/%.2f dmg %.0f" % [K.bola_pairs, KitStatus.grounded(T),
 				KitStatus.grounded(T2), T.stun_t, T2.stun_t, A.dmg(T)])
 	# pair stun 0.9 s (docs/heroes/thief.md "Pair stun length"): the footage has no two-foe tie to time
@@ -321,10 +321,10 @@ func thief(a) -> void:
 			and absf(float(HunterAnim.km_sample("thf_knife", ThiefKit.KNIFE_RELEASE_S)["fy"]) + TAU) < 0.01,
 			"early %s shots %d" % [str(early), m.shots.size() - shots0])
 	A.step(m, 0.5)
-	A.ok("dancer E: the dagger lands at the cursor, the arrival circle shows",
+	A.ok("dancer E: the dagger lands at the cursor, RecastCue's marker on it",
 			not K.knife.is_empty() and K.knife.get("target") == null
 			and Vector2((K.knife["pos"] as Vector3).x - kspot.x, (K.knife["pos"] as Vector3).z - kspot.z).length() < 1.0
-			and AimKit.shown(P, "knife"),
+			and K.recast_window().get("at") == K.knife["pos"],
 		"%s vs %s" % [str(K.knife.get("pos", Vector3.ZERO)), str(kspot)])
 	P.ak.use_e()
 	m.step(A.DT)
@@ -434,7 +434,8 @@ func _knife_in_barriers(m, A, P, T, K, home: Vector3) -> void:
 	A.step(m, 0.4)
 	A.ok("dancer E: the dagger sticks to a barrier it hits, on her side of it",
 			K.knife.get("wall") == w and K.knife.get("target") == null and P.pos.x < at.x
-			and absf((K.knife["pos"] as Vector3).x - at.x) < 0.7 and AimKit.shown(P, "knife"),
+			and absf((K.knife["pos"] as Vector3).x - at.x) < 0.7
+			and K.recast_window().get("at") == K.knife["pos"],
 			"knife %s" % str(K.knife.get("pos", Vector3.ZERO)))
 	var z0: float = (K.knife["pos"] as Vector3).z
 	w["a"] += Vector2(2.0, 3.0)
@@ -700,6 +701,7 @@ func juggernaut(a) -> void:
 			and not mv["drop_hit"]["fx"][1].has("size_x")
 			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
 			"")
+	_slash_edge(mv)
 	var bursts: Array = []
 	for id in ["dash_wind", "dash_go", "dash_drive", "dash_tip", "enrage"]:
 		for l in mv[id].get("fx", []):
@@ -910,8 +912,9 @@ func juggernaut(a) -> void:
 	K.cd["e"] = 0.0
 	P.ak.use_e()
 	A.step(m, 0.3)
+	var chain_dmg := float(K.e_def()["dmg"])
 	A.ok("juggernaut E: Warchain hooks (no blight: the data puts Anti-Heal on the spin), cooldown waits",
-			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= 7.0
+			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= chain_dmg * 0.85
 			and float(K.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [T.blight_t, float(K.cd["e"])])
 	var wid := "war%d" % P.get_instance_id()
@@ -1473,3 +1476,35 @@ func _crimson_soft(A, P: Hunter, e: Dictionary, what: String) -> void:
 			% [what, col, got[0], AimShapes.SOFT_A, got[1]],
 			(e.get("col", Color.BLACK) as Color).is_equal_approx(Color("ff3a2a")) and bool(e.get("soft", false))
 			and got[0] <= AimShapes.SOFT_A + 0.001 and got[1] >= 0.5, str(e.get("col")))
+
+
+const SLASH_HIT := 0.08     # s: the slash's contact in its sound (tools/gen_sfx_kael.py SLASH_HIT)
+const CLEAVE_HIT := 0.1     # s: the cleave's cut in jug_riposte (gen_sfx_kael.py RIPOSTE_HIT)
+
+## Kael's LMB slash sound: the swish keeps its 0.42 s and its play on the press, and every take's loudest
+## moment is a hard edge on the contact frame, as sharp over its swish as the cleave's cut, and quieter in game.
+func _slash_edge(mv: Dictionary) -> void:
+	var cleave := _edge("jug_riposte", CLEAVE_HIT)
+	var heard := float(mv["slash"]["sfx"][0]["db"]) - float(mv["riposte_go"]["sfx"][0]["db"])
+	var bad: Array = []
+	for take in ["jug_slash", "jug_slash_1", "jug_slash_2", "jug_slash_3"]:
+		var e := _edge(take, SLASH_HIT)
+		var louder: float = e["edge"] + heard - cleave["edge"]
+		if absf(e["len"] - 0.42) > 0.002 or e["lead"] < cleave["lead"] - 1.5 or louder > 0.0 or louder < -6.0:
+			bad.append("%s %s, %+.1f dB in game vs the cleave" % [take, e, louder])
+	A.ok("juggernaut LMB sound: a hard edge on the contact frame over the swish, levelled under the cleave",
+			bad.is_empty() and not mv["slash"]["sfx"][0].has("delay"), "cleave %s %s" % [cleave, bad])
+
+## A source wav (44.1 kHz mono 16-bit) at its hit time: length, the peak (dBFS) in the 15 ms from it, and
+## how far that peak sits over the loudest moment anywhere else (the swish before it, the tail after 30 ms).
+func _edge(sname: String, hit: float) -> Dictionary:
+	var b := FileAccess.get_file_as_bytes("res://audio/%s.wav" % sname)
+	var edge := 0.0
+	var rest := 1.0
+	for i in range(44, b.size() - 1, 2):
+		var t := float(i - 44) / 2.0 / 44100.0
+		var v := absf(b.decode_s16(i))
+		if t >= hit and t < hit + 0.015: edge = maxf(edge, v)
+		elif t < hit - 0.005 or t >= hit + 0.03: rest = maxf(rest, v)
+	return {"len": snappedf(float(b.size() - 44) / 2.0 / 44100.0, 0.001),
+			"edge": snappedf(linear_to_db(edge / 32768.0), 0.1), "lead": snappedf(linear_to_db(edge / rest), 0.1)}

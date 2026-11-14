@@ -120,6 +120,13 @@ What made the menus feel blocky, samey and hard to get through:
   closes them;
   Enter presses the panel's primary when nothing else has focus.
 
+- **Making yourself** (a new game, or the pause menu's Change your look) is the look locker
+  (`scripts/ui/look_locker.gd`, opened by `hatch.gd`): your model on a lit turntable (a carved Meshy dais,
+  `art/look/`), tabs Body / Hollow / Shroud / Glider each with its own camera shot, choices as tiles and swatches
+  that try themselves on while hovered, a pop on a pick, gliders in their rarity colour (`Gliders.rarity`). Drag
+  or A / D turns, the wheel zooms. `--look-locker-check` holds it; `--look-tour --shots-dir=<dir>` records it on a
+  GPU worker. Before / after of the Meshy dais, satchel and lantern: `docs/shots/customize-look-1/`.
+
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
 
 Everything is static. The Theme is built by `UiTheme` (`scripts/ui/ui_theme.gd`) and `UI.install()`
@@ -212,5 +219,5 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
 - Fit: the interface lays out in a 1240x720 space that `Settings._apply_ui_scale` scales to the window, so
   panels need no per-screen size rules. `--garden-fit-check` opens the garden's newer panels (zone cards,
   games board, wishes, games picker, Nook preview, Boki card Family tab) at 720p, 1080p, 2560x1080, a
-  960x540 window and Interface size 1.5, and fails on anything clipped or outside the window's safe margin.
+  960x540 window and Interface size at its top (1.1), and fails on anything clipped or outside the window's safe margin.
   Add a new garden panel to its `screens`.

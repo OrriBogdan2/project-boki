@@ -94,7 +94,7 @@ func run(main_node: Node) -> void:
 	print("TCHECK attack: truce holds=%s announced=%s betrayer marked=%s revealed %.0fs, victims targeting the betrayer=%d" % [T.allied(0, 1), announced, T.is_marked(traitor), traitor.reveal_t, hits_back])
 	if T.allied(0, 1) or not announced or not T.is_marked(traitor) or hits_back == 0: ok = false; print("TCHECK FAIL breaking")
 	# sharing an uplink
-	T.marked.clear()
+	T.marked.clear()     # (the pact after the clock jump to the uplink's opening: it lasts TRUCE_T from there)
 	T.make(0, 1)
 	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)

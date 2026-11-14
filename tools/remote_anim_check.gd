@@ -6,7 +6,10 @@ extends "res://tools/displace_net_check.gd"
 ## within LAG_TOL, and play nothing the host did not. R fuses (a full meter; the harness Hunters have no Boki, so
 ## a Surge) and the Fusion ends inside the cast: once on its own (the release, mf_release, is compared), once with
 ## a dash on the step it ends (the dash shows on both games, not the release). Both games log every change of the
-## move (the kit's id and HunterAnim's), compared per cast. Then the lair bosses (Net 0.24.6's "bat" event): the
+## move (the kit's id and HunterAnim's), compared per cast. Vex's tapped RMB also
+## compares the ground cone her Burr Charge shows stuck on a wall (a row of rock tiles 4 m out on the host only;
+## the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
+## Then the lair bosses (Net 0.24.6's "bat" event): the
 ## host wakes a Stone Colossus, a Stormcoil and a Brood Mother and has each play an attack, and the guest's copy (a
 ## Boss fed by the snapshots and the event) must play the same BossAnim moves (wake, wind-up, strike, phase) within
 ## LAG_TOL, its wind-up starting near its start (the progress counts on from the synced age).
@@ -40,6 +43,7 @@ var last_prev_t := 0.0
 var unlike := {}             # arch -> casts whose copy differs
 var played := {}             # arch -> casts that played any move
 var boss_nid := ""           # the boss both games log (the guest's copy of it)
+var cone_len := 0.0          # m: the longest ground cone the watched hunter showed since the mark
 var wash_rows: Array = []    # [unix ms, tint showing] at each change of the watched hunter's body tint
 var wash_host: Array = []    # Lace's tapped Shift: the host's rows
 var wash_guest: Array = []   # ... and the guest's copy's
@@ -158,13 +162,19 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	log_rows.clear()
 	wash_rows.clear()
 	last_row = ["?", "?"]
+	cone_len = 0.0
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
+	var rocks := what == "gunslinger rmb"      # only a wall gives the cone
+	if rocks:
+		_rocks(World.T_BLOCK)
 	await _press(key, held and key != "r")
 	var lace_walk: bool = what == "archer dash"
 	await _run(SETTLE + (WALK if lace_walk else 0.0))
 	if key == "r":
 		await _end_fusion(held)
+	if rocks:
+		_rocks(World.T_GROUND)
 	var mine := log_rows.duplicate()
 	if key == "r":
 		var shown := int(mine.any(func(r): return String(r[2]) == MergeMoves.RELEASE))
@@ -178,6 +188,11 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 		wash_host = wash_rows.duplicate()
 		wash_guest = replies[0].get("wash", []) if not replies.is_empty() else []
 	var cmp := _compare(mine, theirs)
+	if what == "gunslinger rmb":
+		var their_cone := float(replies[0].get("cone", 0.0)) if not replies.is_empty() else 0.0
+		ok(cone_len > 0.0 and absf(their_cone - cone_len) < 0.05,
+			"gunslinger rmb: the guest draws the Burr cone as long as the host",
+			"host %.2f m, guest %.2f m" % [cone_len, their_cone])
 	if cmp["moves"] > 0:
 		played[arch] = int(played.get(arch, 0)) + 1
 	if KNOWN.has(what):
@@ -198,6 +213,12 @@ func _end_fusion(dash: bool) -> void:
 	if dash:
 		m.player.do_dash()
 	await _run(SETTLE)
+
+## Three tiles 4 m out on the cast line (+x of the hunter), set to `kind`.
+func _rocks(kind: int) -> void:
+	var W := m.world
+	for dz in [-1, 0, 1]:
+		W.kind[W.idx(int(floor(m.player.pos.x + 4.0)), int(floor(m.player.pos.z)) + dz)] = kind
 
 ## One key for the kit: tapped (one step) or held for HOLD s, then let go. E gets a flick of the aim (Sparkle's drag).
 func _press(key: String, held: bool) -> void:
@@ -318,8 +339,10 @@ func _on_msg(topic: String, data, from: String) -> void:
 				retimes.clear()
 				wash_rows.clear()
 				last_row = ["?", "?"]
+				cone_len = 0.0
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes})
+				var reply := {"pos": [0, 0, 0], "log": log_rows, "wash": wash_rows, "rt": retimes, "cone": cone_len}
+				Net.lobby_emit("dn_r", reply)
 		return
 	super._on_msg(topic, data, from)
 
@@ -341,6 +364,10 @@ func _sample() -> void:
 		return
 	var H := _copy()
 	H.render(DT, 1.0)      # (Match's own render pass is off in the checks)
+	var aims := AimKit.layer(m)
+	for e: Dictionary in aims.entries.values():
+		if e["h"] == H and e["kind"] == "cone" and aims.live(e):
+			cone_len = maxf(cone_len, float(e["len"]))
 	if H.ak == null or H.anim == null:
 		return
 	var shown := H.wash > WASH_ON

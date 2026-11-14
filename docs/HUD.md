@@ -13,10 +13,13 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `team_boki.gd` (`TeamBoki`, drawn by `hud_panels.gd` right after `Hud._draw_squad`) | the squad rows' extras: a level chip on the portrait's lower-left (gold once the ultimate is open, the plate's own chip), and the teammate's small Boki icon with a thin health bar, tinted when it is down, resting or its owner is a wisp. The rest of a row (portrait, name, armour strip over segmented health, status icons, distance, KNOCKED / DEAD / EXTRACTED states) is `Hud._draw_squad`. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, the XP tracker on its top edge (level number, XP bar, gain pop, rank-ready pulse), big health number, thick segmented bar, armour strip, shell, resource bar |
 | `level_up_cue.gd` (`LevelUpCue`, one on `hud.lvl_cue`) | your level-up moment: a gold column with rising chevrons over your hero (0.8 s) and a card over the vitals saying what improved (health, ability power, the weapon step, the ultimate opening, points to spend), 2.6 s. Research and reasons: [LEVEL_UP.md](LEVEL_UP.md) |
+| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, your shield strip over it, armour strip, shell, resource bar |
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips (each fills as its charge recharges; a ready charge shows the next one's countdown small at the top), key pill, rank pips, lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
+| `squad_frames.gd` (`SquadFrames`, drawn by `hud_panels.gd`) | the squad frames down the left edge in team modes, one row per squad member, you last (none in solo): round portrait with the run level on its lower-left (gold once the ultimate is open), a state label over the name, a thin armour bar over the health bar in one slanted frame. KNOCKED: pink label, red-tinted portrait, the bleed-out in the health row, a marker beside the row whose tail points at them. DEAD: grey cracked portrait, no bars (with the deathbox timer while they can be saved). EXTRACTED and the drop's LEAD/SOLO use the same label. Sizes and colours are measured off the owner's reference: `scripts/ui/SQUAD_FRAMES_SPEC.md`. Check: `--hudref-check`; shots and film: `--team-boki-shots [--film]` |
+| `team_boki.gd` (`TeamBoki`, drawn right after `SquadFrames`) | a teammate's small Boki icon past the end of their row's bars, with a thin health bar, tinted when it is down, resting or its owner is a wisp. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash (its own countdown while airborne: Grimble's pounce); one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
@@ -29,6 +32,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it and their squad (side by side, each in their own colour) (Sable's Marks, Vex's Daze, Sparkle's Static, Cinder's Ignite levels, Neve's Chill, Meeko's Kindle stacks, Kael's Slam window and Warchain hold, Gil's splash marks toward a Beach). No state on a foe, no tag: Lace, Albert, Tenzo, Zed and Motley have none (their payoffs are instant hits or self buffs). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
+| `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost (and when they went down, for the ally ping): one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate's squad row while knocked (pink-red italic KNOCKED tag on the row's top edge, red X in a white arrow beside it) or dead (grey DEAD tag, grey X, greyed portrait); back up, eliminated or soul lost: one faint line beside the row (1.5 s) and a sound. Check: `--hudref-check` |
 | `knock_banner.gd` (`KnockBanner`, a Control on `hud.knocks`) | the knock banner top-centre (top at 13% of the screen, under any toasts): ALLY KNOCKED (cyan ring, white word with a blue edge, pink X) when a teammate goes down, KNOCK (pink-red ring and word, white edge and X) when your squad knocks a rival; round portrait over an ink slash, name pill. The slash and the pill are see-through (`back_alpha` 0.5, owner 11-12) and anti-aliased; the ring, portrait and words stay solid, the words drawn at their real pixel size through the pop and the banner placed on whole pixels, so nothing blurs at 1080p. Pops 1.25 -> 1.0 in 0.12 s, holds, fades and rises out at 1.25 s; a new knock replaces it, the same kind within 0.3 s counts x2. Sounds: `warn` low (teammate), `knock_confirm` (rival). Numbers: `content/rules/knock_banner.json`. Check: `--hudref-check`; film: `--knock-banner-clip` (GPU) |
@@ -47,8 +51,9 @@ Rules of the look:
 - Space kept free for other widgets: under each plate from `sp.y + HudStyle.PLATE_ICON_ROW` (loadout
   icons), and the right half of the bottom bar.
 
-- Crowd control on the plate: one status row (`HudPlate.statuses`, drawn by `icon_row` on hunter plates and
-  `Hud._status_row` on monsters) with one icon per kind, in order: stun, root, Ground, Daze, Slow, then burn,
+- Crowd control on the plate: one status row (`HudPlate.statuses`, drawn by `icon_row` on your own plate and
+  `Hud._status_row` on monsters; other Hunters' plates show only the word, their body shows the rest, BodyTell,
+  docs/COMBAT_CLARITY.md) with one icon per kind, in order: stun, root, Ground, Daze, Slow, then burn,
   weakened, shield, guard. Stun/root/slow read `Ent.stun_t/root_t/slow_t`; Ground and Daze read `KitStatus`
   (`grounded_left`, `rattled_left`). Each shows its time left, shrinking, in the icon's colour; no icons, no row.
   A remote body keeps the Net `kst` time (`KitStatus._note_remote`). Check: `--clarity-check` section 4.
@@ -143,7 +148,24 @@ nothing else on screen:
 - Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
 - A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, holds it (red outline, its button reads Cancel): the right column's title says "No room for X: swap one" and each of your backpack things gets Swap (yours goes into the box). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
+- Taking, swapping, dragging, dropping into a slot and wearing each play a short, quiet inventory cue (`InvSfx`, docs/AUDIO.md) from the inventory and loot code, in place of the generic click.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
+
+## Steal window (StealTell)
+
+DECISIONS 2026-11-10 "XP follows the source": kill XP and a lair boss's rewards go to the last hit (`KillXp`), so a
+rival can steal a boss. The counterplay needs a readable line, drawn by `scripts/ui/steal_tell.gd`:
+
+- **Line.** `content/rules/steal_window.json` `at` (0.25 of max health), the one number; the prize cry
+  (`StealSfx`, ext/sfx-steals) marks the same quarter.
+- **Bar.** At or under it a lair boss's health fill pulses gold (`StealTell.COL`, 2 Hz toward white) on the world bar
+  over its head and on the top boss bar the squad in its lair sees. Gold is apart from the bar's red, the stagger's
+  lilac and the chip's white; it wins over stagger and enrage colours while the window is open.
+- **Mark.** A gold diamond with a burst glyph and the word STEAL, right of the world bar (under the top bar's left
+  end), only while a Hunter of your squad still in the match is within `KillXp.SHARE_R` (30 m) of the boss: close
+  enough to be paid for the kill, so the squad that can steal (or must guard) sees it.
+- Read off the health every machine already sees: nothing synced, no stat or damage change. Camp Chiefs join when
+  the camps line lands (`StealTell.open` is lair bosses only here). `--steal-tell-check`; shots `--steal-tell-shots`.
 
 ## Two-step abilities (RecastCue)
 
@@ -164,16 +186,90 @@ no kit draws its own recast HUD.
   false). A badge over each marked foe (its count, a ring for the time left, gold when the payoff is ready), and a white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
+- **Owner and others.** On the owner's screen the cue is the only readout: a kit's world copy of the same state
+  hides there and stays for everyone else (Sable's Mark pips, Sparkle's Static marker and its Live pips, Neve's
+  frost glow; Sable's knife has no ring of its own). Zones and objects stay for everyone (Motley's seed, Meeko's
+  hearth, Tenzo's landing ring, Albert's hammer and beacon, Kael's chain). `--recast-cue-check` asserts the split;
+  `--recast-cue-shots` shoots every recast kit as its owner and as the foe (docs/shots/recast-art-dedupe/).
 - **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
-Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Badges:
-Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
+Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift), Gil Riptide (E).
+Badges: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
 
+## First real match: the HUD over time (DECISIONS 2026-11-08 "UI is too much")
+
+Rules: no more than about 5 HUD groups at once, one highlighted "what to do next" prompt, nothing before it matters,
+no jargon before it is explained. Origin/main (92df78ce4) played from a fresh save that has finished the tutorial and
+the first farm visit: land on the first spawn, stand there for 90 s. `--hud-timeline-shots --before --shots-dir=<dir>`
+(`tools/hud_timeline_shots.gd`) writes a 1280x720 jpg every 10 s; shots in [`hud_timeline/before/`](hud_timeline/before).
+Group = a separately placed block the player has to scan (as in `UI_FIRST15.md`).
+
+**How the shots were made, and what they miss.** The GPU queue lost the job five times ("worker rp2-N restarted",
+rc 125, before any shot), so these are software renders (Xvfb, `--rendering-driver opengl3`, llvmpipe); the world is black
+because the match is stepped by hand with its own processing off. Layout, text and groups are exact; the 3D picture is not.
+The hunter did not walk: two scripted walks fell off the island ("You fell"), so no loot, fight or door moments are here.
+The rival hover card at 10 s is a stray mouse over a hunter, not counted.
+
+Nine groups are on screen the whole time: **minimap, clock strip (clock, "docks in", level, Dusk, Sight), top-right
+counters, vitals, ability row (with the Boki and G tiles), gear row (4 dots), belt 1-4 plus the Boki's G, Q/V/X boxes,
+weapon card.** On top of them, per sample:
+
+| t (s) | Extra groups | Groups | Over 5 |
+|---|---|---|---|
+| 0 | "Your kit" card (8 rows), two toast cards (squad launch, map note) | 11 | yes |
+| 10 | "Your kit" card, the prompt "Rank up Longneedle: press Alt + E" | 11 | yes |
+| 20 | the prompt (same) | 10 | yes |
+| 30 | the prompt "Send Ember at a monster: tap G", kill feed (truce lines) | 11 | yes |
+| 40 | prompt (same), kill feed | 11 | yes |
+| 50 | prompt "Loot a chest: stand next to it and hold F", kill feed | 11 | yes |
+| 60 | the prompt, a "LEVEL 2 - Quick Feed" toast, kill feed, the perk line "Quick Feed" | 12 | yes |
+| 70 | kill feed, perk line | 11 | yes |
+| 80 | kill feed, perk line | 11 | yes |
+| 90 | kill feed, perk line | 11 | yes |
+
+Every sample is over 5. The rule "one prompt" held here: the prompt is always one card. The nine standing groups alone are
+nearly twice the budget.
+
+**Shown before it matters** (at 0-30 s of a fresh save): the four top-right counters (squads, kills, knocks, gems, all 0), the
+"Your kit" card, the gear row (four empty dots), Q/V "Glove (empty)", the locked X box (LV 6) and R tile, belt slots 3 and 4
+(empty), the "Quick Feed" perk line, the kill feed's truce and knock lines for fights far away, the minimap's "Next train"
+label.
+
+**Jargon before it is explained:** UNLOCK (on three ability slots), "Rank up" and "Alt + E", FEVER, COMMON 319 (armour tier),
+AUTO and "through you" / "from Boki", FOLLOW, CARRY OFF, DOCKS IN, SIGHT 85%, DUSK, "made a truce", "broke the truce", Quick
+Feed, "0 seeds · Box 0/3", the portrait caption "The Hired Gunslinger Medium", "went down / is out", the toast "Frostreach: ...
+hits slow you, and they shatter when they die".
+
+### The two fixed (`HudGroups`, `scripts/ui/hud_groups.gd`)
+
+Worst by groups removed and words shown with nothing to act on: **1. the top-right counters** (a whole group of four zeros plus a
+squads number; jargon icons "knock" and "burst"), **2. the "Your kit" card** (8 rows of ability names and words, "Ult level 6",
+"Sic", "Orders", "Glove (empty)" x2, during the first 14 s of every match, on top of the slots that already show the keys).
+For a save with fewer than `NEW_PLAYER_MATCHES` (3) expeditions:
+- the kit card does not appear (the slot hover cards still say what each ability does); the training room keeps it;
+- **merged with main (11-13):** main replaced the four counters with `AliveCounter` (squads and players left, big, plus your
+  own kills/knocks/gems in a quieter row under it, alive-counter-1111). The squads/players-left row is the match's
+  standing and always shows; only the quieter row of your own numbers waits, until the first kill, knock or gem or
+  while Tab or the map key is held (`HudGroups.own_numbers_shown`, `MapDetail.holding()`). So the counters are no
+  longer a group fewer, only four zeros and two jargon icons fewer. (Alternative, not taken: hide the whole block
+  as the branch first did; that would drop the alive count main added on purpose.)
+Saves with 3 or more expeditions see both as before. No save field, no Net change. The timeline numbers above
+(9 at 0-20 s, 10 at 30 s, 11 at 60 s on the branch) predate AliveCounter; with it the kit card alone is the group
+removed: `--hud-groups-check` pins the landing at 9 groups for a fresh save (main's pin was 10 with the kit card).
+[After shots](hud_timeline/after), 0-30 s only, taken before the merge (that run was stopped when the walk fell).
+Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh save in a real match, veterans unchanged).
+
+### Not fixed (suggestions, parity first)
+- A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
+  the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.
+- The tutorial and expedition HUD would want one staging table (`ext/ui-hud-reveal-1110` builds that: `HudReveal` and
+  `content/rules/hud_reveal.json`, not on main); `HudGroups`' reveal rules are to be folded into it when it lands.
+- Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
 ## Tutorial objective strip (one banner for both tutorials)
 - `TutorialStrip` (scripts/ui/tutorial_strip.gd) is the only objective banner: one line, top-centre, inside the
   title-safe margin (4% of the height, 24 px least), at most 6% of the height and 42% of the width. It glows and
@@ -183,10 +279,16 @@ badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU throu
   (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
 - The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
   Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
-  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+  message-lane tip when the step opens (once a step, not re-sent every frame), not a second line. The farm's Skip
+  sits just under the strip's right end.
 - The glide dive is taught in that strip: `FirstMatchGuide`'s "dive" line ("Gliding: hold <crouch key> to dive")
   shows once per save in any real Extraction, the first time the glider has been open for 1.5 s above 15 m (not
   in the opening drop). It clears at the first dive and never returns (`Save.d tutorial glide_dive`).
+- One prompt at a time (DECISIONS 2026-11-08): while a new step's strip is fresh (`Tutorial.card_up`, 1.5 s) the
+  message lane holds (`MsgLane.hold`), Boki bubbles and the scout hint wait, and the world's F prompt
+  (`TutorialHud.prompt_shows`) waits. Combat-critical things still show: `MsgLane.URGENT` lines (your Boki is down,
+  you are being stomped) and the revive / finish / stomp prompts (`TutorialHud.FIGHT_PROMPTS`).
+  `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive), `--tutorial-strip-shots`.
 
@@ -211,3 +313,4 @@ Glide keeps its rule: a fresh press in the air opens it, letting go shuts it. Th
 wall kick are never glide taps. Kin pick-up shows the ring but is never taught (a tap there is a pat).
 The tutorials say HOLD and wait for one: the match glide step needs 0.6 s of gliding in one go, the farm's
 chop step needs one held chop besides the wood. Check: `--hold-teach-check`.
+  never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
