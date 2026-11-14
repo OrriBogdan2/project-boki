@@ -38,7 +38,8 @@ func run(main: Node) -> void:
 	ok(F.fsm.is_in(S.DROP) and m.player.riding and F.word() == "DROPPING", "the ship sets off: DROP while aboard")
 	m.ship_jump(m.player, true)
 	m.step(Match.DT)
-	ok(F.fsm.is_in(S.DROP) and m.player.dropping, "jumped: still DROP in the air")
+	var flying := m.player.dropping or m.player.rocket != null      # (main: a jump boards the squad rocket first)
+	ok(F.fsm.is_in(S.DROP) and flying, "jumped: still DROP in the air (squad rocket or skydive)")
 	n = 0
 	while F.fsm.is_in(S.DROP) and n < 3600:
 		m.step(Match.DT)
