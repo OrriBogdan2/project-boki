@@ -314,6 +314,10 @@ Asserts named are in `--gunslinger-combo-check` (tools/hero_combo_check.gd, tool
 The per-slot table's "while held: a white lane" and the Shift "white ring" lines are stale (rows 4 and 10); they
 are left alone here because every in-flight Vex branch rewrites those rows.
 
+## X range re-read frame by frame (2026-11-12, origin/ext/hero-ref-footage venator_ghost, 1 bh = top of the health bar to the feet = 1.8 m)
+
+Cinderfall cast range 14: **Not determinable**. Frames 0190-0255 hold the only two casts. Both land on the cursor: on the dummy (0191-0195) and on empty ground 136 px over a 44 px body = 3.1 bh = 5.6 m (0226-0228). The reticle has no range ring and no clamp shows; 14 stays. Note: footage/venator is a different (sniper) hero; Ghost is footage/venator_ghost.
+
 ## Ultimate choice
 R is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
 reference sheet's "Ultimate (on R)" section. It was never folded into another slot during the kit pass, so no

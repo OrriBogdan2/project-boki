@@ -36,7 +36,7 @@ Every row below marked differ, missing or `[?]`, and the top-20 table, was re-re
 | Kael | Air RMB cd 7.2 vs 9, R cd 36 vs 45 (gap 10) | branch ready: ext/cooldown-parity-verify |
 | Kael | Warchain leash 24 m and slam angle 70 `[?]` (no data) | none |
 | Lace | 8 of 17 dash-flow rows unsourced `[?]` (6 hold rows `keep`, 2 Q rows ours) | none (no source) |
-| Lace | RMB range 14, E reach 9, R range 18 / width 0.5 `[?]` (not in the footage) | none |
+| Lace | RMB range 14, E reach 10.8 (fixed), R range 18 `[?]` (beam off screen past 12.2 m); width 0.5 locked | none |
 | Lace | Spirit Walk ending inside a ledge: the candidate sets her on top; the follow-up puts her back on last clear ground and fixes the expiry snap-back | branch ready: ext/combat-lace-spirit-ledges-rebased 40f7865d8 |
 | Cinder | RMB cd 7 vs 9, R cd 36 vs 45 (gap 10) | branch ready: ext/cooldown-parity-verify |
 | Cinder | RMB range 14 `[?]`; 3 dash-flow `keep` rows and `dash.ground.lmb` unsourced `[?]` | none |
@@ -105,6 +105,13 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Lace | RMB range | 14 | grows with the charge, max not seen | [?] · **open** |
 | Lace | E arc, reach | 120, 10.8 | 120, cursor seen to 6 bh (10.8) | **fixed** (see above) |
 | Lace | R range, width | 18, 0.5 | not in the footage | [?] · **open** |
+| Lace | RMB range | 14 (to 16.8 at full charge) | every Impaling Shot ends on a dummy 1-4 bh out (pin 0264-0273, 0281-0285, 0327-0331, 0494-0501); the 2 bh gold bar (0494) is the hold telegraph | **Not determinable**: no miss shows where the arrow stops |
+| Lace | E arc, reach | 120, **10.8** (was 9) | 120; the wall sits on the cursor at 4.5 bh (0457) and 252 px over a 42 px body = 6.0 bh = 10.8 m (0493-0498) | arc match; reach **fixed** to the 0493 floor (9 m could not place that wall; the cap is not seen), locked in kit_parity.json |
+| Lace | R range, width | 18, 0.5 | Primal Forces beams (pin 0559-0560, 0566, 0573, 0587-0593) run off the top edge past 6.8 bh (12.2 m); beam 10-13 px over a 42 px body = 0.43-0.56 m | width match, locked in kit_parity.json; range **Not determinable** (beam end off screen in every shot; 18 is above the 12.2 m floor) |
+| Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | **Not determinable**: the only miss (frame 0133) ended at 6.5 bh (11.7 m), short of 14 m, so a cursor clamp and a 14 m cap both fit; 14 stays |
+| Lace | RMB range | 14 | not determinable, see above | **Not determinable** · **open** |
+| Lace | E arc, reach | 120, 10.8 | see above | reach fixed, locked · **closed** |
+| Lace | R range, width | 18, 0.5 | see above | width locked; range **Not determinable** · **open** |
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] · **open** |
 | Lace | RMB range | 14 | farthest hit seen 4 bh (7.2 m, low charge, 0270-0273); charge bar 3.3 bh (0494); no full charge lands far | Not determinable. Clips checked: pin 0264-0275, 0490-0497 (the only Myth clip; no other hero-ref clip shows Myth firing); supervive_kits.md and supervive_physics.md give no range |
 | Lace | E arc, reach | 120, 9 -> 10.8 | 120, wall centred on the cursor at 6.0 +-0.4 bh = 10.8 m (0498; 0457: 4.9 bh) | arc match; reach was below the frame lower bound, now 10.8 and pinned in kit_parity.json (`e.reach`); the clamp above it is not determinable |
