@@ -1,0 +1,129 @@
+#!/bin/bash
+# regate-run PR BRANCH HEAD_SHA GATED_SHA OUT : re-gate one stale GATE GREEN PR on THIS box (a worker; regate-bot calls it
+# over ssh from hetzner, which keeps every gh call). No LLM, no gh, no force push, no rebase.
+#  1. Fresh scratch worktree at the PR head (must still be HEAD_SHA), `git merge --no-ff origin/main` INTO it (first parent =
+#     the PR). Conflicts use ops/merge-rush-1113/merge_batch.sh's policy (registry/docs union, generated files ours); any
+#     other conflict -> result "CONFLICT <files>", nothing pushed.
+#  2. godot --headless --import of the merged tree and of origin/main (one import at a time per box:
+#     /home/boki/cj/.godot-import.lock); a parse error the main tree does not have -> RED (compile gate).
+#  3. The gate: suite_speed.py (ops/suite-speed, the merge-candidate engine) merge side vs main side, NEW-RED rule,
+#     --select-base GATED_SHA (only checks whose inputs changed since the tree that was already gated green: main's new
+#     files), --main-lazy (main runs only for merge reds). REGATE_FULL=1 runs every check. Flaky guard: the NEW-RED
+#     flags are re-run once (both sides, no cache); only a repeat is NEW-RED.
+#  4. Export dry-run of the merged tree (~/bin/release-dryrun when present, else --export-pack of every preset).
+#  5. Green: push the merge commit to BRANCH (a fast-forward; refused if the branch moved -> "MOVED") and write
+#     OUT/comment.md "GATE GREEN <full sha>: ...". Red: OUT/comment.md "REGATE RED <flags>".
+# OUT/result's first word: GREEN | RED | CONFLICT | MOVED | ERROR (plus OUT/comment.md, OUT/run.log). Exit 0 GREEN, 1 otherwise.
+# Env: BOKI_REPO (default /home/boki/project-boki), REGATE_WORK (default /home/boki/cj/regate-bot/work),
+#      REGATE_JOBS (godot runs at once, default nproc/3), REGATE_PUSH=0 (gate only), SUITE_SPEED (path to suite_speed.py).
+set -u
+[ $# -eq 5 ] || { sed -n 2,19p "$0"; exit 2; }
+PR=$1 BRANCH=$2 HEAD_SHA=$3 GATED=$4 OUT=$(realpath -m "$5")
+REPO=${BOKI_REPO:-/home/boki/project-boki} WORK=${REGATE_WORK:-/home/boki/cj/regate-bot/work}
+JOBS=${REGATE_JOBS:-$(( $(nproc) / 3 > 2 ? $(nproc) / 3 : 2 ))}
+HERE=$(cd "$(dirname "$0")" && pwd)
+mkdir -p "$OUT" "$WORK"; : > "$OUT/run.log"; rm -f "$OUT/result" "$OUT/comment.md"
+T0=$(date +%s)
+log() { echo "$(date -u +%H:%M:%S) $*" >> "$OUT/run.log"; }
+finish() {  # finish WORD TEXT [COMMENT]
+	[ -n "${3:-}" ] && printf '%s\n' "$3" > "$OUT/comment.md"
+	echo "$1 $2" > "$OUT/result.tmp" && mv "$OUT/result.tmp" "$OUT/result"
+	log "result: $1 $2 ($(( ($(date +%s) - T0 + 59) / 60 )) min)"; [ "$1" = GREEN ]; exit $?
+}
+[[ $BRANCH == ext/* ]] || finish ERROR "branch $BRANCH is not ext/*"
+g() { git -C "$REPO" "$@"; }
+g fetch -q origin main "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" 2>> "$OUT/run.log" || finish ERROR "git fetch failed"
+MAIN=$(g rev-parse origin/main) NOW=$(g rev-parse "origin/$BRANCH")
+[ "$NOW" = "$HEAD_SHA" ] || finish MOVED "$BRANCH is at ${NOW:0:10}, not ${HEAD_SHA:0:10}: a live job pushed, left to it"
+g merge-base --is-ancestor "$MAIN" "$HEAD_SHA" && finish ERROR "already contains origin/main ${MAIN:0:10}: nothing to re-gate"
+log "PR #$PR $BRANCH ${HEAD_SHA:0:10} (gated ${GATED:0:10}) + main ${MAIN:0:10}, jobs=$JOBS"
+
+tree_at() {  # tree_at DIR SHA : reused detached worktree (keeps .godot so imports stay incremental)
+	[ -e "$1/.git" ] || g worktree add -q --detach "$1" "$2" 2>> "$OUT/run.log" || return 1
+	git -C "$1" merge --abort > /dev/null 2>&1
+	git -C "$1" reset -q --hard "$2" && git -C "$1" clean -fdq -e .godot
+}
+CT=$WORK/cand MT=$WORK/main
+tree_at "$CT" "$HEAD_SHA" && tree_at "$MT" "$MAIN" || finish ERROR "worktree setup failed"
+
+# 1. merge origin/main INTO the PR head
+POLICY=$OUT/merge_batch.sh; g show "$MAIN:ops/merge-rush-1113/merge_batch.sh" > "$POLICY" 2> /dev/null || POLICY=
+echo "origin/main $MAIN" > "$OUT/merge-list.txt"; : > "$OUT/merge-skips.txt"
+if [ -n "$POLICY" ]; then
+	(cd "$CT" && GIT_COMMITTER_NAME=regate-bot GIT_AUTHOR_NAME=regate-bot bash "$POLICY" "$OUT/merge-list.txt" "$OUT/merge-skips.txt" >> "$OUT/run.log" 2>&1)
+else
+	git -C "$CT" merge -q --no-ff -m x "$MAIN" >> "$OUT/run.log" 2>&1 || { git -C "$CT" diff --name-only --diff-filter=U | sed 's/^/x x conflict: /' > "$OUT/merge-skips.txt"; git -C "$CT" merge --abort; }
+fi
+if [ -s "$OUT/merge-skips.txt" ]; then
+	files=$(sed 's/.*conflict: //' "$OUT/merge-skips.txt" | tr '\n' ' ')
+	finish CONFLICT "$files" "REGATE CONFLICT ${HEAD_SHA}: merging origin/main ${MAIN:0:10} into $BRANCH conflicts in: $files
+Needs a person or an LLM merge job; regate-bot will not retry this head. [regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
+fi
+git -C "$CT" merge-base --is-ancestor "$MAIN" HEAD || finish ERROR "merge did not produce a commit containing main"
+git -C "$CT" commit -q --amend -m "Merge origin/main ${MAIN:0:10} into $BRANCH (regate-bot, PR #$PR)" || finish ERROR "amend failed"
+NEW=$(git -C "$CT" rev-parse HEAD)
+[ "$(git -C "$CT" rev-parse HEAD^1)" = "$HEAD_SHA" ] || finish ERROR "merge commit's first parent is not the PR head"
+log "merged: ${NEW:0:10}"
+
+# 2. import both trees (compile gate)
+imp() {  # imp TREE NAME : import, count parse errors
+	flock -w 1800 /home/boki/cj/.godot-import.lock timeout 1200 godot --headless --path "$1" --import > "$OUT/import_$2.log" 2>&1
+	grep -cE 'Parse Error|SCRIPT ERROR|Failed to load script' "$OUT/import_$2.log"
+}
+PE_M=$(imp "$MT" main) PE_C=$(imp "$CT" cand)
+log "import parse errors: main=$PE_M cand=$PE_C"
+[ "$PE_C" -le "$PE_M" ] || finish RED "compile: $PE_C parse/script errors on import vs $PE_M on main" \
+	"REGATE RED ${NEW} (not pushed): merging origin/main ${MAIN:0:10} into $BRANCH adds parse/script errors on import ($PE_C vs $PE_M on main), see the import log. [regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
+
+# 4 (background). export dry-run
+(
+	if [ -x ~/bin/release-dryrun ]; then ~/bin/release-dryrun "$CT"; exit; fi
+	x=$(mktemp -d)
+	grep -oP '^name="\K[^"]+' "$CT/export_presets.cfg" | while read -r p; do
+		XDG_DATA_HOME=$x timeout 1800 godot --headless --path "$CT" --export-pack "$p" "$x/out.pck" > "$x/log" 2>&1
+		echo "$p rc=$? $(du -m "$x/out.pck" 2> /dev/null | cut -f1) MB"; rm -f "$x/out.pck"
+	done
+	rm -rf "$x"
+) > "$OUT/export.txt" 2>&1 &
+EXP=$!
+
+# 3. the gate
+SS=${SUITE_SPEED:-}
+for c in "$SS" ~/bin/suite_speed.py /home/boki/coord/boki-tools/suite-speed/suite_speed.py "$CT/ops/suite-speed/suite_speed.py" "$HERE/suite_speed.py"; do
+	[ -n "$c" ] && [ -f "$c" ] && { SS=$c; break; }
+done
+[ -f "$SS" ] || finish ERROR "suite_speed.py not found"
+CAN=$(dirname "$SS")/canary.txt
+SEL=(--select-base "$GATED"); [ "${REGATE_FULL:-0}" = 1 ] && SEL=()
+python3 -I "$SS" gate --main "$MT" --merge "$CT" --out "$OUT/gate" --jobs "$JOBS" --main-lazy "${SEL[@]}" \
+	$([ -f "$CAN" ] && echo "--canary=$(paste -sd, "$CAN")" || echo --no-canary) \
+	--alert-file /home/boki/coord/SUITE_ALERT > "$OUT/gate.stdout" 2>&1
+GRC=$?
+log "gate rc=$GRC: $(grep -m1 '^gate ' "$OUT/gate/summary.txt" 2> /dev/null)"
+[ "$GRC" = 3 ] && { kill "$EXP" 2> /dev/null; finish ERROR "gate ENV-BROKEN: $(grep -m1 ENV-BROKEN "$OUT/gate/summary.txt")"; }
+reds() { sed -n "s/^NEW-RED[^:]*: //p" "$1" | tr ' ' '\n' | sed '/^$/d' | sort -u; }
+RED=$(reds "$OUT/gate/summary.txt")
+if [ -n "$RED" ]; then  # flaky guard: the red flags once more, both sides, no cache
+	echo "$RED" > "$OUT/rerun-flags.txt"
+	log "NEW-RED $(echo $RED), re-running once"
+	python3 -I "$SS" gate --main "$MT" --merge "$CT" --out "$OUT/rerun" --jobs "$JOBS" --flags "$OUT/rerun-flags.txt" \
+		--no-cache --no-canary > "$OUT/rerun.stdout" 2>&1
+	RED=$(reds "$OUT/rerun/summary.txt")
+	log "after re-run: NEW-RED $(echo $RED)"
+fi
+wait "$EXP"
+EXPORT_BAD=$(grep -vc ' rc=0 ' "$OUT/export.txt"); [ -x ~/bin/release-dryrun ] && EXPORT_BAD=$(grep -ciE 'fail|error' "$OUT/export.txt")
+EXPORT_MB=$(grep -oP '\d+(?= MB)' "$OUT/export.txt" | sort -n | tail -1)
+SUM=$(sed -n '1p' "$OUT/gate/summary.txt" | sed 's/, jobs=.*//')
+BOTH=$(grep -m1 '^red on both' "$OUT/gate/summary.txt" | cut -d: -f1)
+TAG="[regate-bot pr=$PR head=${HEAD_SHA:0:10} main=${MAIN:0:10}]"
+if [ -n "$RED" ] || [ "$EXPORT_BAD" != 0 ]; then
+	finish RED "$(echo $RED) export_bad=$EXPORT_BAD" "REGATE RED ${NEW} (not pushed): merging origin/main ${MAIN:0:10} into $BRANCH gives NEW-RED $(echo "$RED" | sed '/^$/d' | wc -l): $(echo $RED) (red twice, main green); export problems: $EXPORT_BAD.
+$SUM. Logs on the worker: $OUT. $TAG"
+fi
+[ "${REGATE_PUSH:-1}" = 1 ] || finish GREEN "$NEW (not pushed: REGATE_PUSH=0)" "GATE GREEN $NEW: (dry, not pushed) $SUM; $BOTH; NEW-RED 0; export ${EXPORT_MB:-?} MB. $TAG"
+g fetch -q origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+[ "$(g rev-parse "origin/$BRANCH")" = "$HEAD_SHA" ] || finish MOVED "$BRANCH moved during the gate: not pushed"
+git -C "$CT" push -q origin "$NEW:refs/heads/$BRANCH" 2>> "$OUT/run.log" || finish MOVED "push of ${NEW:0:10} to $BRANCH refused (moved?)"
+log "pushed ${NEW:0:10} to $BRANCH"
+finish GREEN "$NEW" "GATE GREEN $NEW: regate-bot merged origin/main ${MAIN:0:10} into ${HEAD_SHA:0:10} (already GATE GREEN at ${GATED:0:10}) with no hand conflict resolution, then re-ran the checks whose inputs changed since that green: $SUM; $BOTH (pre-existing on main); NEW-RED 0 (flaky reds re-run once); compile errors $PE_C vs $PE_M on main; export dry-run OK, ${EXPORT_MB:-?} MB. $TAG"

@@ -1,0 +1,294 @@
+#!/usr/bin/env python3
+"""regate-bot [--dry] [--pr N] [--ignore-owner] : auto re-gate for GATE GREEN PRs that main left behind (no LLM).
+
+Hetzner cron (gh lives there), flock'd, one PR at a time. Each run:
+ 1. In flight? Poll the worker's regate-run result. GREEN -> post its "GATE GREEN <full sha>: ..." (merge-ready-watch
+    merges it next run); RED -> "REGATE RED <flags>"; CONFLICT -> "REGATE CONFLICT <files>" (once per head); then wait
+    until that PR merged / moved / 30 min, so the next re-gate sees the new main.
+ 2. Else scan open ext/* PRs: a GATE GREEN comment by our gh user whose sha is the head (or the head adds only merge
+    commits on top of it) and whose head does not contain origin/main (+ PRs listed WAITING in ~/cj/merge-ready-state.txt).
+    Skip: activity (non-bot comment or head commit) < 20 min old; newest "<job> owns this PR until merged" from a job
+    still running; a REGATE RED/CONFLICT already posted for this head; ~/release-hold present (merges are exempt
+    from the build freeze, so only the release hold stops the bot).
+ 3. Pick the first by /home/boki/bin/merge-first.txt (PR numbers in file order), else oldest PR first, and start
+    regate-run on the least-loaded worker (~/cj/workers, ssh key boki_s2_deploy; REGATE_WORKER=name|local).
+--dry prints the per-PR decision and changes nothing. State: ~/cj/regate-bot/{state.json,log.tsv,regate-state.txt}.
+"""
+
+import argparse
+import fcntl
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from regate_common import (CJ, GATE_RE, HOME, MARK_RE, OWNER_RE, REGATE_RE, STATE_DIR, GH, git, iso, is_ancestor,  # noqa: E402
+                           job_running, load_json, now, parse_iso, run, save_json, ssh_cmd, workers)
+
+HERE = Path(__file__).resolve().parent
+QUIET_MIN = int(os.environ.get("REGATE_QUIET_MIN", 20))
+MERGE_WAIT_MIN = int(os.environ.get("REGATE_MERGE_WAIT_MIN", 30))
+GATE_MAX_MIN = int(os.environ.get("REGATE_GATE_MAX_MIN", 150))
+REMOTE_DIR = "/home/boki/regate-bot"
+RUNS = "/home/boki/cj/regate-bot/runs"
+STATE = STATE_DIR / "state.json"
+
+
+def log(event, pr="-", detail=""):
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    line = f"{iso(now())}\t{pr}\t{event}\t{detail}"
+    with open(STATE_DIR / "log.tsv", "a") as fh:
+        fh.write(line + "\n")
+    print(line.replace("\t", " "))
+
+
+def merge_first():
+    p = HOME / "bin/merge-first.txt"
+    if not p.exists():
+        return []
+    return [int(x) for x in re.findall(r"#?\b(\d{1,5})\b", re.sub(r"(?m)#[^\d].*$", "", p.read_text()))]
+
+
+def waiting_listed():
+    p = CJ / "merge-ready-state.txt"
+    out = set()
+    if p.exists():
+        for ln in p.read_text().splitlines():
+            if "WAITING" in ln:
+                m = re.search(r"#(\d+)|\bpr[ =:]?(\d+)", ln, re.I)
+                if m:
+                    out.add(int(m.group(1) or m.group(2)))
+    return out
+
+
+def scan(gh, st):
+    """-> (main sha, [row]) where row = dict(pr, branch, head, gated, verdict, why, created)."""
+    git("fetch", "-q", "origin", "main")
+    main = git("rev-parse", "origin/main")
+    me = gh.login()
+    waiting = waiting_listed()
+    rows = []
+    for p in gh.open_prs():
+        n, branch, head = p["number"], p["head"]["ref"], p["head"]["sha"]
+        row = dict(pr=n, branch=branch, head=head, gated="", created=p["created_at"], verdict="skip", why="")
+        rows.append(row)
+        if not branch.startswith("ext/") or (p["head"]["repo"] or {}).get("full_name") != p["base"]["repo"]["full_name"]:
+            row["why"] = "not an ext/* branch of this repo"
+            continue
+        if git("fetch", "-q", "origin", f"+refs/pull/{n}/head:refs/regate/pr/{n}") is None or git("rev-parse", f"refs/regate/pr/{n}") != head:
+            row["why"] = "fetch of the PR head failed"
+            continue
+        behind = not is_ancestor(main, head)
+        if not behind and n not in waiting:
+            row["why"] = "head contains origin/main (merge-ready-watch's case)"
+            continue
+        cs = gh.comments(n)
+        gates = [(c, m.group(1)) for c in cs if c["user"]["login"] == me for m in GATE_RE.finditer(c["body"])]
+        if not gates:
+            row["why"] = "no GATE GREEN by " + me
+            continue
+        gc, short = gates[-1]
+        gated = git("rev-parse", "--verify", "-q", f"{short}^{{commit}}") or ""
+        row["gated"] = gated
+        if not gated:
+            row["why"] = f"GATE GREEN {short} does not resolve"
+            continue
+        if gated != head and not (is_ancestor(gated, head) and not git("rev-list", "--no-merges", head, f"^{gated}", f"^{main}")):
+            row["why"] = f"head {head[:10]} has ungated commits after GATE GREEN {short}"
+            continue
+        if not behind:
+            row["why"] = f"WAITING in merge-ready-state but head contains main (gate {short}): not a re-gate case"
+            continue
+        red = [m for c in cs for m in REGATE_RE.finditer(c["body"]) if head.startswith(m.group(2)) or m.group(2).startswith(head[:10])]
+        red += [m for c in cs for m in MARK_RE.finditer(c["body"])
+                if head.startswith(m.group(2)) and re.search(r"REGATE (RED|CONFLICT)", c["body"])]
+        if red:
+            row["why"] = "REGATE RED/CONFLICT already posted for this head: needs a person or an LLM job"
+            continue
+        if n in st.get("cooldown", {}) and st["cooldown"][n] > now():
+            row["why"] = f"cooldown after an error until {iso(st['cooldown'][n])}"
+            continue
+        if not args.ignore_owner:
+            owners = [(c, m.group(1)) for c in cs for m in OWNER_RE.finditer(c["body"])]
+            if owners:
+                lab = owners[-1][1].strip("*`_")
+                live = job_running(lab)
+                if live or live is None and now() - parse_iso(owners[-1][0]["created_at"]) < 6 * 3600:
+                    row["why"] = f"owned by {lab} ({'running' if live else 'unknown job, <6 h old'})"
+                    continue
+        last = max([parse_iso(c["created_at"]) for c in cs if "[regate-bot " not in c["body"]] or [0])
+        ct = int(git("log", "-1", "--format=%ct", head) or 0)
+        quiet = (now() - max(last, ct)) / 60
+        if quiet < QUIET_MIN and not args.ignore_owner:
+            row["why"] = f"live: last push/comment {quiet:.0f} min ago (< {QUIET_MIN})"
+            continue
+        row["verdict"] = "regate"
+        row["why"] = f"GATE GREEN {gated[:10]}, head behind main {main[:10]}"
+    return main, rows
+
+
+def pick_worker():
+    want = os.environ.get("REGATE_WORKER", "")
+    if want == "local":
+        return "local", None
+    ws = workers()
+    if want:
+        return want, ws.get(want, want)
+    best = None
+    for name, ip in ws.items():
+        rc, out, _ = ssh_cmd(ip, "cat /proc/loadavg; nproc; command -v godot >/dev/null && echo godot-ok", timeout=20)
+        if rc or "godot-ok" not in out:
+            continue
+        lines = out.split()
+        load = float(lines[0]) / max(1, int(lines[5]))
+        if best is None or load < best[0]:
+            best = (load, name, ip)
+    return (best[1], best[2]) if best else (None, None)
+
+
+def start(row, main, st):
+    name, ip = pick_worker()
+    if not name:
+        log("no-worker", row["pr"], "no reachable worker with godot")
+        return
+    out = f"{RUNS}/pr{row['pr']}-{row['head'][:10]}-{int(now())}"
+    a = [str(row["pr"]), row["branch"], row["head"], row["gated"], out]
+    if ip is None:
+        Path(out).mkdir(parents=True, exist_ok=True)
+        subprocess.Popen([str(HERE / "regate-run"), *a], stdout=open(out + ".stdout", "w"), stderr=subprocess.STDOUT,
+                         stdin=subprocess.DEVNULL, start_new_session=True)
+    else:
+        rc, _, err = run(["rsync", "-a", "-e", f"ssh -i {os.environ.get('REGATE_SSH_KEY', HOME / '.ssh/boki_s2_deploy')} -o BatchMode=yes",
+                          f"{HERE}/regate-run", f"{HERE}/suite_speed.py", f"{HERE}/canary.txt", f"boki@{ip}:{REMOTE_DIR}/"], timeout=120)
+        q = " ".join(f"'{x}'" for x in a)
+        rc2, _, err2 = ssh_cmd(ip, f"mkdir -p {out} && nohup {REMOTE_DIR}/regate-run {q} > {out}.stdout 2>&1 < /dev/null &", timeout=60)
+        if rc or rc2:
+            log("start-failed", row["pr"], f"{name}: {(err or err2).strip()[-200:]}")
+            return
+    st["inflight"] = dict(pr=row["pr"], branch=row["branch"], head=row["head"], gated=row["gated"], main=main,
+                          worker=name, ip=ip, out=out, phase="gating", started=now(),
+                          main_time=int(git("log", "-1", "--format=%ct", main) or now()))
+    log("start", row["pr"], f"{row['branch']} {row['head'][:10]} + main {main[:10]} on {name}: {out}")
+
+
+def fetch_result(f):
+    if f["ip"] is None:
+        r, c = Path(f["out"], "result"), Path(f["out"], "comment.md")
+        return (r.read_text().strip() if r.exists() else ""), (c.read_text() if c.exists() else "")
+    rc, out, _ = ssh_cmd(f["ip"], f"cat {f['out']}/result 2>/dev/null && echo @@COMMENT@@ && cat {f['out']}/comment.md 2>/dev/null", timeout=60)
+    if rc or "@@COMMENT@@" not in out:
+        return "", ""
+    r, c = out.split("@@COMMENT@@\n", 1) if "@@COMMENT@@\n" in out else (out.split("@@COMMENT@@")[0], "")
+    return r.strip(), c
+
+
+def step_inflight(gh, st):
+    """Advance the in-flight PR; True while it still blocks the queue."""
+    f = st.get("inflight")
+    if not f:
+        return False
+    n, age = f["pr"], (now() - f["started"]) / 60
+    if f["phase"] == "gating":
+        res, comment = fetch_result(f)
+        if not res:
+            if age > GATE_MAX_MIN:
+                log("timeout", n, f"no result after {age:.0f} min on {f['worker']} ({f['out']}); released, 60 min cooldown")
+                st.setdefault("cooldown", {})[n] = now() + 3600
+                st.pop("inflight")
+                return False
+            print(f"#{n}: gating on {f['worker']} for {age:.0f} min")
+            return True
+        word = res.split()[0]
+        log("result", n, f"{res[:300]} ({age:.0f} min)")
+        if word in ("GREEN", "RED", "CONFLICT") and comment.strip():
+            if args.dry:
+                print(gh.post(n, comment, dry=True))
+            else:
+                log("comment", n, gh.post(n, comment.strip()))
+        if word == "GREEN":
+            log("lag", n, f"main {f['main'][:10]} landed -> GATE GREEN {res.split()[1][:10]}: {(now() - f['main_time']) / 60:.0f} min")
+            f.update(phase="awaiting_merge", posted=now(), new=res.split()[1])
+            return True
+        if word == "ERROR":
+            st.setdefault("cooldown", {})[n] = now() + 3600
+        st.pop("inflight")
+        return False
+    # awaiting_merge: one PR at a time, so wait for merge-ready-watch to take it before re-gating the next on new main
+    p = gh.pr(n)
+    wait = (now() - f["posted"]) / 60
+    if p.get("merged_at"):
+        log("merged", n, f"{wait:.0f} min after GATE GREEN, {(parse_iso(p['merged_at']) - f['main_time']) / 60:.0f} min after main moved")
+    elif p["state"] != "open" or p["head"]["sha"] != f["new"]:
+        log("released", n, f"PR {p['state']}, head {p['head']['sha'][:10]}")
+    elif wait > MERGE_WAIT_MIN:
+        log("not-merged", n, f"GATE GREEN posted {wait:.0f} min ago, merge-ready-watch has not merged it; moving on")
+    else:
+        print(f"#{n}: GATE GREEN {f['new'][:10]} posted {wait:.0f} min ago, waiting for merge-ready-watch")
+        return True
+    st.pop("inflight")
+    return False
+
+
+def write_state(rows, st):
+    """~/cj/regate-bot/regate-state.txt: one WAITING line per stale gated PR with first-seen time (regate-probe reads it)."""
+    seen = st.setdefault("seen", {})
+    cur = {}
+    lines = []
+    for r in rows:
+        if not r["gated"] or r["why"].startswith(("head contains", "not an ext", "no GATE")):
+            continue
+        k = f"{r['pr']}:{r['head'][:10]}"
+        cur[k] = seen.get(k, now())
+        lines.append(f"WAITING #{r['pr']} since {iso(cur[k])} {r['branch']} head {r['head'][:10]}: {r['verdict']} ({r['why']})")
+    st["seen"] = cur
+    st["gated_open"] = len(lines)
+    (STATE_DIR / "regate-state.txt").write_text(f"# regate-bot {iso(now())}\n" + "\n".join(lines) + "\n")
+
+
+def main():
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    lock = open(STATE_DIR / "lock", "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        print("regate-bot: another run holds the lock")
+        return 0
+    if (HOME / "release-hold").exists() and not os.environ.get("REGATE_IGNORE_HOLD"):
+        print("regate-bot: ~/release-hold present, nothing done")
+        return 0
+    st = load_json(STATE, {})
+    gh = GH()
+    if step_inflight(gh, st) and not args.dry:
+        save_json(STATE, st)
+        return 0
+    main_sha, rows = scan(gh, st)
+    order = merge_first()
+    rank = {n: i for i, n in enumerate(order)}
+    rows.sort(key=lambda r: (rank.get(r["pr"], len(order)), parse_iso(r["created"])))
+    todo = [r for r in rows if r["verdict"] == "regate" and (not args.pr or r["pr"] == args.pr)]
+    if args.dry or os.environ.get("REGATE_VERBOSE"):
+        print(f"main {main_sha[:10]}, gh {'live' if gh.live else 'public API (read-only)'}, merge-first: {order or 'none (oldest first)'}")
+        for r in rows:
+            if r["gated"] or r["verdict"] == "regate" or args.dry:
+                print(f"  #{r['pr']:<3} {r['branch']:<30} {r['head'][:10]} {r['verdict']:<6} {r['why']}")
+    if not args.dry:
+        write_state(rows, st)
+    if todo and not st.get("inflight"):
+        if args.dry:
+            print(f"would start: #{todo[0]['pr']} ({len(todo)} waiting: {' '.join('#%d' % r['pr'] for r in todo)})")
+        else:
+            start(todo[0], main_sha, st)
+    if not args.dry:
+        save_json(STATE, st)
+    return 0
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--pr", type=int, default=0, help="only this PR (still one at a time)")
+    ap.add_argument("--ignore-owner", action="store_true", help="manual runs: ignore 'owns this PR' and the 20 min quiet rule")
+    args = ap.parse_args()
+    sys.exit(main())
