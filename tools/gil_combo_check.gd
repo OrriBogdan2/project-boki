@@ -386,7 +386,7 @@ func _lmb_numbers() -> void:
 		absf(hit[0] - 7.0) < 0.2 and absf(hit[1] - 7.0) < 0.2 and absf(hit[2] - 11.1) < 0.2, str(hit))
 	ok("numbers LMB: 0.32 s between thrusts, 0.48 s after the lunge",
 		absf(float(cds.get(1, 0.0)) - 0.32) < 0.02 and absf(float(cds.get(3, 0.0)) - 0.48) < 0.02, str(cds))
-	step(m, 0.8)
+	step(m, 1.2)      # the last click's release can start one more thrust: 0.32 s cd + 0.75 s idle after it
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
