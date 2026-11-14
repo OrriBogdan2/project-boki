@@ -220,7 +220,7 @@ func load_file() -> ConfigFile:
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
 		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
-		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
+		v["keys"] = {}          # the kit changed (E utility, R hunter ultimate, X fuse, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
 	KeyMigrate.run(v)
 	_migrate_belt_keys()

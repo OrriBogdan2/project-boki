@@ -1,6 +1,6 @@
 class_name Blight
 extends Mob
-## The Blight (docs/TONE_AND_THREATS.md §1): the Wyrm's corruption, hunting by noise and light.
+## The Blight: the Wyrm's corruption, hunting by noise and light.
 ## A Mob with its own senses instead of a camp: it hears what BlightDir hears (gunfire, blasts,
 ## opened chests, dashing, running), sees short (shorter at night, further when you're lit up by a
 ## muzzle flash or a Warden's lamp), and never forgets where the noise was. It attacks every squad.

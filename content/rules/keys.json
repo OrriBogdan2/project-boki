@@ -1,5 +1,5 @@
 {
- "_doc": "Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add).",
+ "_doc": "Chests, keys and the bush mimic (docs/decisions/0009-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add).",
  "chest": {
   "keep": 0.6,
   "keep_doc": "Share of the map's chests and of the item caches a match places (owner 11-10: about 40% fewer). Vaults are not cut. KeyChest.thin drops the most crowded map chests first. Change it with the bonus key odds in chest_keys.json (the --keys-check surplus).",
