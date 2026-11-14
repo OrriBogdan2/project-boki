@@ -9719,3 +9719,4 @@ READY ext/merge-lane-tutorial-1114 1932dea4c7 (merge lane tutorial: 13 tutorial/
 READY ext/sfx-boki-landings e97e0fdcb1 (bulk-rebase: origin/main merged in mechanically, was e20ca3f62c; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/sfx-garden-items 218db70ce3 (bulk-rebase: origin/main merged in mechanically, was 8d7e66b1dc; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-lane-hunters6-1114 18519f6141f6e77842aa26372606fc116e79e278 (lane hunters6 bundle: vex coin-stick, load-map-stall, mantle-press-rules, meeko-crook-range, motley-hover-hum; NEW-RED 0 after fix, export OK, PR file in gh-outbox)
+READY ext/merge-lane-tutorial-1114 a262dc77a6 (merge lane tutorial: 13 tutorial/hint branches resolved against main; supersedes ae918ecac2; parse fixes in recast/tutorial-hud checks; export Web OK)
