@@ -1868,7 +1868,7 @@ func place_held() -> bool:
 		anchor = Vector2i(-999, -999)
 		if is_instance_valid(ghost_cells): ghost_cells.set_meta("sig", "")
 	apply(false)
-	if from < 0 and TOY_CATS.has(String(c["cat"])):
+	if from < 0 and (TOY_CATS.has(String(c["cat"])) or c.get("toy", false)):      # base toys too (GARDEN.md 4)
 		ComeLook.event(h, "toy", Vector3(at[0].x + 0.5, 0, at[0].y + 0.5), {}, String(c["name"]).to_lower())
 	var msg := ""
 	if not site.is_empty():
@@ -2091,7 +2091,7 @@ func _tab_items() -> Array:
 var make := {}                          # item -> [options]; options are Vector2i (feeder) or {x, z, r}
 var make_pick := {}
 var make_marks: Array = []
-## Catalog groups whose new pieces nearby Boki come to look at (ComeLook).
+## Catalog groups whose new pieces nearby Boki come to look at (ComeLook); a base toy ("toy": true) is news too.
 const TOY_CATS := ["Furniture", "Statues"]
 const MAKE_ITEMS := [["feeder", "First feeder", "f2c84a"], ["workshop", "Workshop lot", "5ab0f0"], ["cottage", "Boki Cottage lot", "ff9ac8"]]
 
