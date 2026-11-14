@@ -29,9 +29,9 @@ pictures.
 | 01 | Title ([01](ui_first15/1280x720/01_title.jpg)) | 4 | no | menu, playtest card, key hints, version |
 | 02-03 | Prologue ([02](ui_first15/1280x720/02_prologue_1.jpg)) | 5 | at the limit | progress pips, title, caption, skip, next |
 | 04 | Hatch card ([04](ui_first15/1280x720/04_hatch_card.jpg)) | 2 | no | one line, one button |
-| 05 | Creator ([05](ui_first15/1280x720/05_creator.jpg)) | 3 | no | **superseded:** main's LookLocker (ext/customize-look-1, tabs over a turntable) replaced this creator card, so ext/tut-creator-first-pass's first-rows + More fold was not ported (its one name box on the Boki name card stays); a first-pass tab on the locker is the open follow-up |
+| 05 | Creator ([05](ui_first15/1280x720/05_creator.jpg)) | 3 | no | but one panel has 10 option rows (Sex, Height, Build, Shroud, colour, Hollow, Glow, Ghost, Aura, name) |
 | 06-07 | Egg pick, knock ([06](ui_first15/1280x720/06_hatch_eggs.jpg)) | 2 | no | title, 4 cards |
-| 08 | Name your Boki ([08](ui_first15/1280x720/08_hatch_name.jpg)) | 1 card | no | **fixed:** one text box (the Boki's; yours is in the creator), 4 idea chips, More, 2 path cards (Tend the garden, Learn to fight); the subtitle is hidden once you knock. (The shot jumps from the knocks to this card, so its heading still reads the knock line and the egg is unhatched; in play the reveal comes first.) |
+| 08 | Name your Boki ([08](ui_first15/1280x720/08_hatch_name.jpg)) | 1 card | no | but 2 text boxes, 4 idea chips, More, 2 buttons; stale subtitle "Every Boki is different..." stays under "Knock on the shell" |
 | 09 | First Relic ([09](ui_first15/1280x720/09_first_mask.jpg)) | 1 | no | |
 | 10 | Tutorial intro ([10](ui_first15/1280x720/10_tutorial_intro.jpg)) | 2 | no | card, Relics/Leave bar |
 | 11 | Tutorial landing ([11](ui_first15/1280x720/11_tutorial_00_land.jpg)) | **9** | **yes** | minimap, vitals, ability row, glider strip, belt 1-4, Q/V/X, weapon, Relics/Leave, tip |
@@ -111,7 +111,7 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** done (ext/tut-drop-plan-first): a save's first expedition shows the map, the timer and the jump line; the legend, "Ways out" and squad return while the scoreboard key is held (`FullMap.plain_plan`). Shots: `docs/shots/tut-drop-plan-first/` (`--plan-first-shots`).
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit. **Done in ext/ui-relics-names:** tiles read the name with `the <Title>` smaller under it, the tile column is 38% of the window width (460-600 px), an unlocked tile drops the 'Unlocked' line, all 13 Hunters show without scrolling at 1280x720 and 1920x1080 ([shots](shots/ui-relics-names), software render: the GPU worker was lost 3x), `--hero-grid-check` asserts it. The right column and Mastery still scroll.
-6. **Creator and name card (done, `--unmasked-check` creator rows):** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More"); the name card keeps one name box.
+6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
 

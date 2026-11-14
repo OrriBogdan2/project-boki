@@ -67,7 +67,7 @@ static func rules() -> Dictionary:
 	return _rules
 
 
-## The zone for a real fixed-length expedition with an outpost to close on; null otherwise
+## The zone for a real fixed-length expedition with a dock or outpost to close on; null otherwise
 ## (tutorial, training, duels, the arena, rolling sessions).
 static func make(match_node: Match) -> ShrinkZone:
 	var o := match_node.opts
@@ -152,6 +152,20 @@ func out_at(p: Vector3) -> float:
 		if q.distance_to(cs[j]) > rs[j]:
 			return t1[j]
 	return 1e9
+
+
+## The docks close as the edge passes them (Exits.setup); the one nearest the final area is the last.
+func time_docks(docks: Array) -> void:
+	var best := -1
+	var bd := 1e9
+	for i in docks.size():
+		docks[i]["close_at"] = out_at(docks[i]["pos"])
+		var d := cs[last()].distance_to(Vector2(docks[i]["pos"].x, docks[i]["pos"].z))
+		if d < bd:
+			bd = d
+			best = i
+	if best >= 0 and float(docks[best]["close_at"]) >= 1e8:
+		docks[best]["last"] = true
 
 
 func tick(dt: float) -> void:
@@ -267,25 +281,20 @@ func _build_wall() -> void:
 	m.add_child(_wall)
 
 
-func _secs_text() -> String:
+## The zone line, timed with the HUD that draws it (m.hud may be gone while another one draws).
+func _secs_text(hud) -> String:
 	if k < last() and m.time < t0[k + 1]:
-		return "ZONE CLOSES  %s" % _mmss(t0[k + 1] - m.time)
+		return "ZONE CLOSES  %s" % hud._fmt(t0[k + 1] - m.time)
 	if k > 0 and m.time < t1[k]:
-		return "ZONE CLOSING  %s" % _mmss(t1[k] - m.time)
+		return "ZONE CLOSING  %s" % hud._fmt(t1[k] - m.time)
 	return "FINAL ZONE"
-
-
-## m:ss, as the match clock writes it (works without m.hud: a check may draw with its own).
-static func _mmss(t: float) -> String:
-	t = maxf(0.0, t)
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
 
 
 ## The row under the match clock: the next close, and a warning while you're outside. Its bottom.
 func hud_row(hud, r: Rect2) -> float:
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.7), 6)
 	hud.c.draw_circle(r.position + Vector2(11, 10), 4.0, COL)
-	hud._text(r.position + Vector2(21, 14), _secs_text(), 10, COL, hud.big)
+	hud._text(r.position + Vector2(21, 14), _secs_text(hud), 10, COL, hud.big)
 	if m.player and not m.player.out and k > 0 and outside(m.player.pos):
 		var t := "OUTSIDE  -%d%%/s" % int(round(dps[k] * 100.0))
 		var a := 0.6 + 0.4 * sin(m.time * 8.0)
@@ -324,4 +333,4 @@ func full_map(fm, kk: float) -> void:
 		var nv: Vector2 = fm.to_screen(Vector3(cs[k + 1].x, 0, cs[k + 1].y))
 		cv.draw_arc(nv, rs[k + 1] * kk, 0.0, TAU, MAP_SEGS, NEXT_COL, 2.0, true)
 	var top := Vector2(pv.x, maxf(pv.y - cur_r * kk - 10.0, fm.rect.position.y + 24.0))
-	fm.hud._ctext(top, _secs_text(), 13, COL, fm.hud.big)
+	fm.hud._ctext(top, _secs_text(fm.hud), 13, COL, fm.hud.big)

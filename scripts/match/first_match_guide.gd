@@ -121,6 +121,7 @@ func _exit_near(p: Hunter) -> bool:
 func _zone_told(lid: String) -> bool:
 	return bool(Save.d["tutorial"].get("guide_" + lid, false))
 
+
 ## B is worth knowing: a teammate can take you, and either a squad just came up or they're all far off.
 func _mates_due(p: Hunter) -> bool:
 	if BaseRecall.target(m, p) == null:

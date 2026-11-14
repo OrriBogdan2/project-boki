@@ -228,7 +228,7 @@ func _first_mask(tree: SceneTree) -> void:
 	hx.add_child(kin)
 	hx.kin_node = kin
 	hx.chosen = 0
-	hx._finish("cindle", "Ember", true)
+	hx._finish("cindle", "Ember", "Orri", true)
 	await tree.process_frame
 	var cards: Array = hx.ui.find_children("*", "PanelContainer", true, false).filter(
 			func(c): return c.has_meta("mask_card"))

@@ -73,6 +73,7 @@ func run(main: Node) -> void:
 	await _vex_core(main)
 	await _scarf(main)
 	_dots(m)
+	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	await _slam_fill(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
@@ -520,3 +521,35 @@ func _dots(m: Match) -> void:
 	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
 	var g: float = m.world.ground_at(at.x, at.z)
 	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)
+
+## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the
+## blade layer stay centred on her through a Vault, to within a hand's width.
+func _sable_ring(main: Node) -> void:
+	var m: Match = flow._match(main, "thief")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var U: ThiefUlt = (P.ak as ThiefKit).encore
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
+	P.ak.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	var reach := float(U.data()["reach"])
+	while float(U.st["t"]) < 0.2 - 0.5 * Match.DT:
+		m.step(Match.DT)
+	var half := float(AimKit.entry(P, "ult")["r"]) / reach
+	ok(absf(half - 0.5) < 0.05, "Sable's Encore ring is about half its full radius at 0.2s (%.2f)" % half)
+	m.step(0.3)
+	P.inp["move"] = Vector2(0, -1)
+	P.inp["dash"] = true
+	var worst := 0.0
+	var from := P.pos
+	for i in 40:
+		m.step(Match.DT)
+		var ring: Vector2 = AimKit.entry(P, "ult")["at"]
+		var orbit := Vector3.ZERO
+		for j in ThiefUlt.ORBITERS:
+			orbit += ((U.k.fx().placed["enc_orb%d" % j] as Dictionary)["node"] as Node3D).global_position
+		orbit /= float(ThiefUlt.ORBITERS)
+		worst = maxf(worst, maxf(ring.distance_to(Vector2(P.pos.x, P.pos.z)),
+				Vector2(orbit.x, orbit.z).distance_to(Vector2(P.pos.x, P.pos.z))))
+	ok(P.pos.distance_to(from) > 3.0 and worst < 0.1,
+			"Sable's ring and blades stay on her through a Vault (off by %.2f m)" % worst)

@@ -36,7 +36,7 @@ func run(main: Node) -> void:
 	main.get_tree().quit(0 if bad == 0 else 1)
 
 
-## Phases close in, nest, finish in time, end on an exit; same seed same zone.
+## Phases close in, nest, finish in time, end on an exit; same seed same zone; docks follow the edge.
 func _shape(main: Node) -> void:
 	var finals := {}
 	var outposts := 0
@@ -72,6 +72,7 @@ func _shape(main: Node) -> void:
 		m.free()
 	var varies := "the final area varies between matches (%d of %d outposts)" % [finals.size(), outposts]
 	ok(finals.size() >= outposts, varies)
+
 
 
 ## Outside hurts (by the close's share, through armor), inside doesn't; the outer islands fall.

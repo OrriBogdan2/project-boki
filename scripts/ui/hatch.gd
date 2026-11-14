@@ -516,7 +516,8 @@ func _start_hatch() -> void:
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Knock on the egg: click (or press %s). Every knock wakes it a little more, and it knocks back." % Settings.key_cap("jump"), 15)
+	var knock := "Knock on the egg: click (or press %s). Every knock wakes it a little more, and it knocks back."
+	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()
@@ -658,16 +659,23 @@ func _show_name() -> void:
 		picks.add_child(more)
 	fill_picks.call(fill_picks)
 	v.add_child(picks)
+	var you_row := UI.hbox(8)
+	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
+	you_row.add_child(yl)
+	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	you_row.add_child(ye)
+	v.add_child(you_row)
 	var btns := UI.hbox(14)
 	btns.add_child(_path_card("Tend the garden", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, ne.text, false)))
+			func(): _finish(sp_id, ne.text, ye.text, false)))
 	btns.add_child(_path_card("Learn to fight", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, ne.text, true)))
+			func(): _finish(sp_id, ne.text, ye.text, true)))
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
-	# Enter in the box is the same as "Tend the garden"
-	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, false))
+	# Enter in either box is the same as "Tend the garden"
+	ne.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
+	ye.text_submitted.connect(func(_t): _finish(sp_id, ne.text, ye.text, false))
 	ne.grab_focus()
 	ne.select_all()
 
@@ -679,7 +687,7 @@ func _path_card(label: String, line: String, go: Callable) -> Control:
 	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	return c
 
-func _finish(sp_id: String, kname: String, tutorial: bool) -> void:
+func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	var rec: Dictionary = new_rec if String(new_rec.get("species", "")) == sp_id else Save.new_kin(sp_id)
 	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
 	rec["trust"] = 55.0
@@ -690,6 +698,7 @@ func _finish(sp_id: String, kname: String, tutorial: bool) -> void:
 	rec["got_t"] = Time.get_unix_time_from_system()
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
+	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
 	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
@@ -727,7 +736,7 @@ func _put_on_first(first: String, then: Callable) -> void:
 
 func _head_out(tutorial: bool) -> void:
 	if tutorial:
-		Game.start_match({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
+		Game.start_match(TutorialResume.opts())
 	else:
 		Save.d["tutorial"]["match"] = true
 		Save.save_game()

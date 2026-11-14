@@ -25,11 +25,15 @@ func _by_theme() -> Dictionary:
 	return out
 
 func _preview_text(a: Dictionary, b: Dictionary) -> String:
-	var card := NookPreview.card(a, b, Engine.get_main_loop() as SceneTree)      # (the Nook's pair card)
-	var all := ""
-	for l in card.find_children("*", "Label", true, false): all += (l as Label).text + "\n"
+	var card := NookPreview.card(a, b, null)
+	var all := _labels(card)
 	card.free()
 	return all
+
+func _labels(n: Node) -> String:
+	var t := (n as Label).text + "\n" if n is Label else ""
+	for c in n.get_children(): t += _labels(c)
+	return t
 
 func run(m: Node) -> void:
 	Save.no_write = true
