@@ -89,6 +89,8 @@ func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
 ## The prologue is watched through (nobody knows yet that a key skips it): its shots' own durations.
 func _prologue_watched() -> void:
 	var s := 0.0
+	if not is_instance_valid(main.current) or not "shots" in main.current:
+		return      # (no prologue on screen: nothing to watch)
 	for shot in main.current.shots:
 		s += float(shot["dur"])
 	stage_read += s

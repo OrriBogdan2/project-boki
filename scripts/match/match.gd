@@ -5644,7 +5644,8 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 
 func _tip(key: String, text: String, near := "") -> void:
 	if hud != null and tip_once(key):
-		hud.tip(text, near)
+		if near == "": hud.tip(text)
+		else: hud.tip(text, near)
 
 ## The first-time hints' once-per-save gate (Save.d.tutorial): true the one time key is asked for.
 func tip_once(key: String) -> bool:
