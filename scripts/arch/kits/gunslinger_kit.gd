@@ -761,7 +761,9 @@ func _fire_needle() -> void:
 	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var L := float(ed["range"])
-	L = minf(L, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce"))   # placed walls stop it
+	# placed walls stop it
+	var wall := Blockers.first(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce")
+	L = minf(L, float(wall["d"]))
 	var b := a + Vector3(d.x, 0, d.y) * L
 	needle_dir = d
 	# an ember body, a hot core, a bronze shimmer down its edges; the ember muzzle orb and its flare
@@ -775,6 +777,8 @@ func _fire_needle() -> void:
 	commit_end = float(m.time) + E_RECOVER
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
+	if not (wall["w"] as Dictionary).is_empty():
+		m.verbs.absorb(wall["w"], dmg0, a)     # the wall that stops it takes the hit
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		var v := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)

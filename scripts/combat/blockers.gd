@@ -39,7 +39,12 @@ static func body_stops(f: Ent, by: Ent) -> bool:
 ## How far along a to b (m) the first Verbs wall that stops a crosser of class `cls` from team `team` is, at
 ## height y; INF when none does.
 static func cut(walls: Array, a: Vector3, b: Vector3, team: int, cls: String) -> float:
-	var best := INF
+	return float(first(walls, a, b, team, cls)["d"])
+
+## The first Verbs wall along a to b that stops a crosser of class `cls` from team `team`: {w, d} (d in m), or
+## {w: {}, d: INF} when none does. A beam that hits a wall asks this to hurt it (the Longneedle).
+static func first(walls: Array, a: Vector3, b: Vector3, team: int, cls: String) -> Dictionary:
+	var best := {"w": {}, "d": INF}
 	var a2 := Vector2(a.x, a.z)
 	for w in walls:
 		if (w["block"] != "all" and int(w["team"]) == team) or not wall_stops(w, cls):
@@ -47,6 +52,6 @@ static func cut(walls: Array, a: Vector3, b: Vector3, team: int, cls: String) ->
 		if a.y < float(w["y"]) - 0.3 or a.y > float(w["y"]) + float(w.get("top", Verbs.WALL_H)) + 0.3:
 			continue
 		var p = Geometry2D.segment_intersects_segment(a2, Vector2(b.x, b.z), w["a"], w["b"])
-		if p != null:
-			best = minf(best, a2.distance_to(p))
+		if p != null and a2.distance_to(p) < float(best["d"]):
+			best = {"w": w, "d": a2.distance_to(p)}
 	return best
