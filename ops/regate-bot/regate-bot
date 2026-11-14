@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from regate_common import (CJ, GATE_RE, HOME, MARK_RE, OWNER_RE, REGATE_RE, STATE_DIR, GH, git, iso, is_ancestor,  # noqa: E402
+from regate_common import (GATE_RE, HOME, MARK_RE, OWNER_RE, REGATE_RE, STATE_DIR, GH, git, iso, is_ancestor,  # noqa: E402
                            job_running, load_json, now, parse_iso, run, save_json, ssh_cmd, workers)
 
 HERE = Path(__file__).resolve().parent
