@@ -115,7 +115,8 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--mergeform-only="): only = a.substr(17)
-	for part in ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards", "read", "sounds"]:
+	var parts := ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards", "read"]
+	for part in parts + ["sounds"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.ability_used.disconnect(_on_used)

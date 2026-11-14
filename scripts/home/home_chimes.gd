@@ -1,8 +1,9 @@
 class_name HomeChimes
 extends RefCounted
-## A Boki's own chime at home when it gains a stat, a lean that shows one more fleck (Lean.flecks), a level (garden_xp.json pays it in the garden) or a new
-## form or part (docs/AUDIO.md). It watches each Boki's record rather than every place that raises them, so a
-## new source needs no wiring. Events on one Boki that land within MERGE_S share one chime: the biggest one.
+## A Boki's own chime at home when it gains a stat, a lean that shows one more fleck (Lean.flecks), a level
+## (garden_xp.json pays it in the garden) or a new form or part (docs/AUDIO.md). It watches each Boki's record
+## rather than every place that raises them, so a new source needs no wiring. Events on one Boki that land
+## within MERGE_S share one chime: the biggest one.
 ## A sleeping Boki makes no sound (the card and the evolution scene still show it).
 
 const KINDS := ["stat", "part", "level", "ready", "evolve"]     # smallest first: a merged chime plays the last one here
@@ -13,7 +14,7 @@ const PITCH := {"small": 1.3, "medium": 1.0, "large": 0.78}   # x pitch by speci
 
 var h                    # the Home screen
 var now := 0.0           # s since the home opened
-var _seen := {}          # uid -> [stat total, lean flecks, level, evolve due, forms and parts, joy] last seen: only rises fire
+var _seen := {}          # uid -> [stats, lean flecks, level, evolve due, forms and parts, joy] last seen: rises fire
 var _last := {}          # uid -> now at its last chime
 
 func _init(home) -> void:
