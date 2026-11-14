@@ -9670,3 +9670,4 @@ READY ext/items-3d-r2 a31c267936 (bulk-rebase: origin/main merged in mechanicall
 READY ext/ui-words-cut-match 13dca9c088 (bulk-rebase: origin/main merged in mechanically, was d381339e51; union 2 gen 0 files; the branch's own READY checks still apply)
 READY ext/duel-ring-port 979df59274 (bulk-rebase: origin/main merged in mechanically, was e62ed060d9; union 1 gen 1 files; the branch's own READY checks still apply)
 READY ext/vfx-telegraph-lead-rebased eb55fd2369 (bulk-rebase: origin/main merged in mechanically, was 11af18535d; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/merge-batch-6-1113 23073710516e9cb10cd4f355beb24716b57ccc17 (merge batch 6 feel lane: 13 branches, contains main e57fc84f00, suite NEW-RED 0, export 433.4 MB; PR not opened: no gh on rpc7, body in meshy/merge-prep-1113/batch-6-pr-body.md)
