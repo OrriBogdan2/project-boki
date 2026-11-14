@@ -62,6 +62,23 @@ briefs/hero-ref/dancer.md (5 fps, a frame is 0.2s; px at 1 px = 0.0375 m). Asser
 | Speed boost | Quickflip gives one (rank IV makes it +50% bigger) [game data]; +15-20% for about 1-1.5s after a Cartwheel [footage] | +18% for 2s at most, ended by firing the empowered bolt | unchanged |
 | Dash -> shot rhythm | 0193: the Cartwheel and the empowered shot leave on the same frame (mid-flip); 0137 -> 0143: up after the flip, the gold line, the shot about 1s later; the loop about 1.4s (0187 -> 0194) [footage] | fires mid-flip (row `fire`); a click while the last bolt still cooled was lost | the same, and a click while the bolt cools (mid-flip too) is kept for one bolt's interval and goes the moment it can; two empowered hits fit inside 1.4s with LMB held |
 
+## Quick hands after the Vault (owner playtest 11-11, ext/sable-dash-lmb-1111)
+
+Owner: "the shift lmb into faster lmb thing for sable too that shiv had". Neither source ref gives a number:
+supervive_kits.md (Quickflip) names only the empowered shot and the reset, and dancer.md's frames (5 fps) only
+show the reset loop (about 1.4s) and the dash and shot leaving on one frame. So the timing is ours, set to the
+owner's description; `ThiefQuick` (scripts/arch/kits/thief_quick.gd), numbers in the dash def.
+
+| What | Ours |
+|---|---|
+| Window | a bolt thrown within 1.2s of an empowering Vault (`quick_window`; the footage's slowest dash -> shot is about 1.2s, 0137 -> 0143) starts the run |
+| Speed | 0.6x the interval (`quick_k`): 0.27s instead of 0.45s, +67% rate |
+| How many | 3 quick intervals (`quick_n`): the empowered bolt and the next three leave 0.27s apart (4 bolts in about 0.8s instead of 1.35s), then 0.45s again |
+| Ends early | a bolt that doesn't follow within its interval + 0.2s ends the run; a bolt cooling as she flips is cut to 0.27s |
+| Tell | no UI: the three quick bolts carry the cartwheel's cyan, a cyan tail on the gold chakram and a cyan star at the throwing hand; the faster throws themselves. Effects are local like her other bolt looks; online viewers see the faster cadence |
+
+Asserted in `--dancer-combo-check` (`dancer quick: ...`).
+
 ## Footage gaps, Nov 9 re-check
 
 The 11 ranked rows of `briefs/hero-ref/dancer.md` section 5, marked on main d255acbee. Closed rows cite the code or commit; assert lines are in `--dancer-combo-check` (tools/dancer_jug_check.gd unless noted). Nothing was built in this pass: no row is open, and every file a build would touch (`thief_kit.gd`, `thief.json`, `dancer_jug_check.gd`) is changed by an in-flight Sable branch (ext/sable-bola-instant-rebased, ext/sable-lmb-range, ext/sable-dagger-barriers, ext/combo-marks-a, ext/recast-marker-a, ext/cooldown-parity-verify).

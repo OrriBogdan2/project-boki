@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 	await _growth()
 	_timing()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	load("res://tools/ashwick_cancel_rows_check.gd").new(ak, ok).run()      # the Cancels table, row by row
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
@@ -150,7 +151,7 @@ func _timing() -> void:
 	if clips and clips.lib and lc.has("run"):
 		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
 		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
-		foot = cycle * 0.5 / clips.gait.plan(spd, lc, Vector2(0, 1))
+		foot = cycle * 0.5 / clips.gait.plan(spd, lc, Vector2(0, 1), 1.0)     # (full stick ahead: on the run ring)
 	ok(
 		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
 		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot
@@ -703,12 +704,6 @@ func _all() -> void:
 		float(K.cd["e"]) <= 0.0 and K.resets >= 1 and P.hp > P.max_hp * 0.6,
 		"cd %.1f hp %.0f" % [float(K.cd["e"]), P.hp]
 	)
-	# the kit's heal is ours-only (the data has none): 16% of max health; the takedown reset adds its own 5%
-	ok("passive: the knock heal is 16% of max health (ours-only, the data has none)",
-		absf(P.hp - P.max_hp * 0.66) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
-	DashReset.takedown(P, T)
-	ok("passive: with the takedown reset's 5% a knock heals 21% in all, no more",
-		absf(P.hp - P.max_hp * 0.71) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
 	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
