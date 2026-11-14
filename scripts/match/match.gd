@@ -42,6 +42,7 @@ var meteor_next := 0.0
 var meteors: Array = []     # {at, t, tele}
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
@@ -285,6 +286,7 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -1792,7 +1794,9 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.downed = true
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
-	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+	if by is Blight:
+		kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
+		h.add_stat("blight_downs")      # (TipPick)
 	h.down_hp = Data.MATCH["down_hp"]
 	h.hp = 0.0
 	h.revive = 0.0
@@ -1920,7 +1924,9 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if h.out:
 		return
 	h.deaths += 1
-	if by is Blight: kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+	if by is Blight:
+		kstat["bl_out"] = int(kstat.get("bl_out", 0)) + 1
+		h.add_stat("blight_out")      # (TipPick)
 	if h.lives > 1 and not h.remote and not over and not final:
 		_lose_life(h, by, why)
 		return
@@ -2353,6 +2359,7 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	if player == null:
 		return
 	player.chase = thief
+	player.add_stat("wisp_stolen")      # (TipPick)
 	ping(thief.pos, Color("ffd23f"))
 	if hud:
 		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
@@ -3933,6 +3940,7 @@ func step(dt: float) -> void:
 		_update_training(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
+	if crouch_hint: crouch_hint.tick(dt)
 	_prof("rest")
 	if net_on:
 		_net_rev_t -= dt
@@ -4963,6 +4971,7 @@ func _finish() -> void:
 		r["backpack"] = Backpacks.home_tier(player, result.get("extracted", false))
 		r["stats"] = player.stats.duplicate()
 		r["squad"] = ResultsStage.roster(hunters, player)
+		r["used"] = player.used.duplicate()      # (TipPick: was E used)
 		r["lvl"] = player.lvl      # (class unlock goals: best level in a match)
 		# weapons, gloves and treasure: home to the armory if you made it out, else what stayed behind
 		if result.get("extracted", false):
