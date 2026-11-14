@@ -133,6 +133,15 @@ static func tick_wisps(m: Match, dt: float) -> void:
 			trace(m, "%s %s" % [o.pname, "bled out" if foes == 0 else "stomped out"])
 			m.eliminate(o, o.last_hit_by, "bled out" if foes == 0 else "finished")
 
+## A hit on a wisp. A wisp can't be shot: it's lost to stomps, an execute, bleeding out, and the few
+## abilities the source lets reach it (opts "src": "wisp", e.g. Hail Wall), which drain `down_hp` by `dmg`.
+## Always 0: the wisp has no health to take. It runs on the wisp's own game (remote hits arrive by "hit").
+static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
+	if opts.get("src", "") == "wisp":
+		o.down_hp = maxf(0.0, o.down_hp - dmg)
+		o.last_hit_by = by
+	return 0.0
+
 # ------------------------------------------------------------------ the stomp
 ## Holding interact on an enemy wisp commits you to stomping it out: a fixed animation you can't
 ## cancel or move out of. You can still be shot, and hard CC breaks it (cc_break; the wisp
@@ -143,7 +152,7 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"))
+		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
@@ -288,7 +297,7 @@ static func _mark_owner(m: Match, b: Dictionary) -> void:
 	var ring := MeshInstance3D.new()
 	ring.name = "OwnerRing"
 	ring.mesh = Models.flat_quad(OWNER_RING_M)
-	ring.material_override = Models.ring_mat(col, 0.12)
+	ring.material_override = SideRings.mat(col, 0.12)
 	ring.position.y = 0.05
 	n.add_child(ring)
 

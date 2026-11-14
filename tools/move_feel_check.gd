@@ -14,6 +14,7 @@ var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
 const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+const FALL_ROWS := preload("res://tools/fall_carry_rows.gd")
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
 const REF_WEAPON := "quill_rifle"
@@ -54,7 +55,7 @@ const T := {
 	"land_carry_glide_held":   ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
-	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],,,
+	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] cap steps; brake 22.2 m/s2 + 2/s x v: ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
 	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
 	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
@@ -106,13 +107,16 @@ const T := {
 	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
 	"glide_high_sink":         ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
-	"glide_swoop_speed":       ["<=", 5.3, "m/s", "[owner 11-08 item 8] a high glide's pull-down never turns into speed"],
+	"glide_high_swoop_x":      ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, the pull's sink"],
 	"dive_vy":                 ["~", [32.0, 32.5], "m/s", "[game data] GlideDiveZTargetSpeed -3250 uu/s, crouch held"],
 	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
 	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
 	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
-	"dive_swoop_speed":        ["<=", 6.0, "m/s", "[owner 11-08 item 8] pulling out of a dive adds no speed"],
+	"swoop_x":                 ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, a dive's sink"],
+	"swoop_fade_s":            ["~", [1.45, 1.55], "s", "[game data] SwoopSpeedFadeTime 1.5 s"],
+	"swoop_left":              ["<=", 0.05, "m/s", "over cruise 1.5 s after the level-out"],
+	"swoop_hot_x":             ["~", [1.2, 1.3], "x", "overheated: the swoop at half strength"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed":      ["<=", 9.0, "m/s", "[owner 11-08 item 9] glide drag: dash speed bleeds back toward cruise"],
 	"dashglide_2s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] ...within 1-2 s"],
@@ -160,6 +164,11 @@ const T := {
 	"cam_lag_m":               ["<=", 0.40, "m", "[footage] hunter stays roughly centred; [spec] follow 0.08-0.15s"],
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
+	"cam_glide_zoom_05":       ["~", [1.12, 1.25], "x", "[spec] glider opens the view +15..25%, mostly by +0.5 s"],
+	"cam_dive_zoom_hold":      [">=", 0.98, "x", "plunge keeps the view open (min / start zoom)"],
+	"cam_dive_land_view":      ["<=", 0.3, "x", "ground under a plunge, screens below centre"],
+	"cam_land_step":           ["<=", 0.1, "x", "zoom-out lost on landing's first step: no pop"],
+	"cam_land_left_05":        ["<=", 0.35, "x", "zoom-out left 0.5 s after landing: eased back"],
 	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
 	# (the reference body is the plain medium hunter since Vex took her own proportions: at the same camera it
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
@@ -212,7 +221,6 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
-	P.drop_follow = null
 	if "lfloat" in P: P.set("lfloat", {})
 	if "glide_off_t" in P: P.set("glide_off_t", 9.0)
 	_clear_inp()
@@ -281,7 +289,8 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
-	_aim_rel()          # last: its ~11 s of match time would move the abyss rows
+	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them
+	await _no_fall_carry(main)
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -645,22 +654,27 @@ func _glide() -> void:
 		if fr < 0 and P.gliding: fr = i + 1
 	rec("reglide_frames", fr)
 
-## Gliding high over flat ground: pulled down to the height target; the drop never becomes speed.
+## Gliding high over flat ground: pulled down to the height target, where the level-out sheds the pull's extra
+## sink as swoop speed.
 func _glide_high() -> void:
 	_reset(flat + Vector3(0, HunterMove.glide_height + 8.0, 0), false)
 	P.inp["jump"] = true
 	var sink := 0.0
-	var swoop := 0.0
+	var base := -1.0
+	var peak := 0.0
 	for i in 600:
 		P.inp["glide"] = true
 		P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
 		if i == 60: sink = -P.vel.y
-		if P.pos.y - flat.y <= HunterMove.glide_height:
-			swoop = _hv(P).length()
-			break
+		if base < 0.0 and P.pos.y - flat.y <= HunterMove.glide_height:
+			base = _hv(P).length()
+		elif base >= 0.0:
+			peak = maxf(peak, _hv(P).length())
+			if peak > _hv(P).length():
+				break
 	rec("glide_high_sink", sink)
-	rec("glide_swoop_speed", swoop)
+	rec("glide_high_swoop_x", (peak - base) / maxf(0.01, sink - Hunter.GLIDE_SINK))
 
 # ---------------------------------------------------------------- glide dive
 ## Crouch held under the glider plunges: its fall speed and ramp, the keys at a quarter of their force,
@@ -708,18 +722,12 @@ func _glide_dive() -> void:
 			m.step(DT)
 		side.append(_hv(P).length())
 	rec("dive_steer_ratio", float(side[0]) / maxf(0.01, float(side[1])))
-	# let go of crouch high up: the glide catches you and the drop becomes speed
-	_reset(flat + Vector3(0, 60.0, 0), false)
-	P.inp["jump"] = true
-	var swoop := 0.0
-	for i in 132:
-		P.inp["glide"] = true
-		P.inp["crouch"] = i < 72
-		P.inp["move"] = Vector2(1, 0)
-		m.step(DT)
-		if i >= 72:
-			swoop = maxf(swoop, _hv(P).length())
-	rec("dive_swoop_speed", swoop)
+	# a short dive, then let go: the glide catches you and the fall it shed becomes swoop speed, then fades
+	var r := _swoop(HunterMove.glide_height - 1.0, 60, 4, false)
+	rec("swoop_x", r[0])
+	rec("swoop_fade_s", r[1])
+	rec("swoop_left", r[2])
+	rec("swoop_hot_x", _swoop(40.0, 150, 6, true)[0])
 	# holding on: the plunge times out, and stays off until a fresh press
 	_reset(flat + Vector3(0, 360.0, 0), false)
 	P.inp["jump"] = true
@@ -735,6 +743,42 @@ func _glide_dive() -> void:
 	rec("dive_timeout_s", t_off)
 	ok(not P.glide_dive.on, "dive_timeout_holds: a timed-out plunge stays off while crouch stays held")
 	_clear_inp()
+
+## Glides forward at cruise from `h0` m up, dives `frames` steps from step `at` and lets go (overheated if `hot`).
+## Returns [speed gained per m/s of sink shed, s from the last swoop gain until it is gone, speed over cruise
+## left 1.5 s after that gain].
+func _swoop(h0: float, at: int, frames: int, hot: bool) -> Array:
+	_reset(flat + Vector3(0, h0, 0), false)
+	P.inp["jump"] = true
+	var base := 0.0
+	var fall := 0.0
+	var caught := 0.0
+	var peak := 0.0
+	var gained := -1
+	var gone := -1.0
+	var left := -1.0
+	var last := 0.0
+	for i in at + frames + 120:
+		P.inp["glide"] = true
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["crouch"] = i >= at and i < at + frames
+		if hot and P.gliding:
+			P.glide_fuel = 0.0
+		m.step(DT)
+		var sw: float = P.glide_lift.swoop
+		if sw > last:
+			gained = i
+		elif gained >= 0 and gone < 0.0 and sw <= 0.0:
+			gone = (i - gained) * DT
+		last = sw
+		if i == at - 1: base = _hv(P).length()
+		if i == at + frames - 1: fall = -P.vel.y
+		if i == at + frames + 15: caught = -P.vel.y     # back at the glide's sink
+		if i >= at + frames and i < at + frames + 20: peak = maxf(peak, _hv(P).length())
+		if gained >= 0 and i == gained + 91: left = _hv(P).length() - base     # speed shows a gain the step after
+	var shed := fall - caught
+	print("MFEEL swoop%s: cruise %.2f, dive fall %.2f, shed %.2f, peak %.2f" % [" (hot)" if hot else "", base, fall, shed, peak])
+	return [(peak - base) / maxf(0.01, shed), gone, left]
 
 # ---------------------------------------------------------------- dash into glide
 func _dash_glide() -> void:
@@ -953,7 +997,6 @@ func _plain_dash() -> void:
 	for airborne in [false, true]:
 		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
 		m.fields.clear()      # (a Boki's patch sparkles on its own clock)
-		P.xp = 0.0            # (the long glide-dive rows feed the xp trickle: no level-up ring mid-dash)
 		var radial0: int = m.fx.radial
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
@@ -1444,6 +1487,81 @@ func _camera() -> void:
 		if m.has_method("cam_lead_vel"): cam.set("lead_vel", m.call("cam_lead_vel"))
 		cam.follow(P.position, DT, false)
 	rec("cam_glide_lead_m", cam.focus.x - P.pos.x)
+	_glide_cam(cam)
+
+## One step of play with the camera driven the way Match drives it (zoom, glide lead, follow).
+func _cam_step(cam: CamRig) -> void:
+	m.step(DT)
+	P.render(DT, 0.0)
+	cam.zoom_to = cam.air_zoom(P, m.player_altitude())
+	cam.lead_vel = m.cam_lead_vel()
+	cam.follow(P.position, DT, false)
+
+## The view opens up under the glider, stays open through a plunge (so you see where you'll land), and
+## eases back on landing, with no shake and no change of lens.
+func _glide_cam(cam: CamRig) -> void:
+	var lens := cam.fov
+	cam.shake_left = 0.0
+	cam.pull = 0.0
+	# glide start: a jump from the ground, the glider opened at the top
+	_reset(flat)
+	cam.snap(P.pos)
+	cam.zoom = 1.0
+	P.inp["jump"] = true
+	_cam_step(cam)
+	P.inp["jump"] = false
+	for i in 20: _cam_step(cam)
+	var z0 := cam.zoom
+	for i in 30:
+		P.inp["glide"] = true
+		_cam_step(cam)
+	ok(P.gliding, "glide_cam: the glider is open")
+	rec("cam_glide_zoom_05", cam.zoom / z0)
+	# the plunge: steady glide high up, then crouch held to the cancel height
+	_reset(flat + Vector3(0, 20.0, 0), false)
+	P.inp["jump"] = true
+	cam.snap(P.pos)
+	for i in 90:
+		P.inp["glide"] = true
+		_cam_step(cam)
+	cam.zoom = cam.zoom_to
+	var z_dive := cam.zoom
+	var z_min := z_dive
+	var lead := 0.0
+	var n_on := 0
+	var land_y := -1.0
+	for i in 240:
+		P.inp["glide"] = true
+		P.inp["crouch"] = true
+		_cam_step(cam)
+		if not P.glide_dive.on:
+			break
+		n_on += 1
+		z_min = minf(z_min, cam.zoom)
+		lead = maxf(lead, Vector2(cam.focus.x - P.pos.x, cam.focus.z - P.pos.z).length())
+		var vh := cam.get_viewport().get_visible_rect().size.y
+		land_y = maxf(land_y, cam.unproject_position(Vector3(P.pos.x, P.ground(), P.pos.z)).y / vh - 0.5)
+	ok(n_on > 10, "glide_cam: the plunge ran (%d steps)" % n_on)
+	rec("cam_dive_zoom_hold", z_min / z_dive)
+	rec("cam_dive_land_view", land_y)
+	print("MFEEL glide_cam dive lead %.2fm, zoom at dive start %.2f" % [lead, z_dive])
+	# landing: let the glide set you down, then 0.5 s on the ground
+	P.inp["crouch"] = false
+	for i in 600:
+		P.inp["glide"] = true
+		_cam_step(cam)
+		if P.grounded: break
+	ok(P.grounded, "glide_cam: landed")
+	var z_land := cam.zoom
+	P.inp["glide"] = false
+	_cam_step(cam)
+	rec("cam_land_step", (z_land - cam.zoom) / maxf(0.001, z_land - 1.0))
+	for i in 29: _cam_step(cam)
+	rec("cam_land_left_05", (cam.zoom - 1.0) / maxf(0.001, z_land - 1.0))
+	print("MFEEL glide_cam zoom at landing %.2f, 0.5 s on %.2f" % [z_land, cam.zoom])
+	ok(cam.fov == lens, "glide_cam: no lens change (fov %.1f)" % cam.fov)
+	ok(cam.shake_left == 0.0 and cam.pull == 0.0, "glide_cam: no shake or pull-back")
+	_clear_inp()
 
 # ---------------------------------------------------------------- framing: how big you are on screen
 func _screen_scale() -> void:
@@ -1566,3 +1684,27 @@ func _e2e() -> void:
 	rec("render_lag_m", absf(P.pos.x - P.position.x))
 	Input.action_release("right")
 	for i in 10: m._process(DT)
+
+# ---------------------------------------------------------------- falling never becomes horizontal speed
+## The same rows for every Hunter in the match and in the garden (tools/fall_carry_rows.gd).
+func _no_fall_carry(main: Node) -> void:
+	var rows := FALL_ROWS.new()
+	var laid := rows.lay(w)
+	await rows.run_all("match", w, FALL_ROWS.MatchBody.new(m, P, _reset))
+	rows.lift(w, laid)
+	m.queue_free()
+	Save.d = Save.fresh()
+	Save.d["tutorial"]["home"] = true
+	Save.d["tutorial"]["day1_done"] = true
+	Econ.ensure()
+	var hm = load("res://scripts/home/home.gd").new()
+	main.add_child(hm)
+	await main.get_tree().process_frame
+	while hm.building:      # (the farm comes in slices)
+		await main.get_tree().process_frame
+	hm.set_process(false)
+	laid = rows.lay(hm.world)
+	await rows.run_all("home", hm.world, FALL_ROWS.HomeBody.new(hm))
+	rows.lift(hm.world, laid)
+	hm.queue_free()
+	bad += rows.bad

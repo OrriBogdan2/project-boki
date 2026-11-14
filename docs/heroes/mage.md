@@ -16,12 +16,25 @@ Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept agains
 bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
 source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
 bolts, ours 1.7); Wirerun pass 20 (1.7 bolts; was 10 before the audit), doubled through a full-Static foe, plus a Blowout of 16 + 18% of
+Damage is the source's share of the standard target (1285 source HP, 154 ours; docs/TTK.md, pinned in
+content/rules/kit_parity.json): bolt 9 every 0.648s (the cadence is owner items 70 and 116; 90 every 0.8 s is
+8.75% of the target a second, 9 every 0.648 s is 9.0%); Storm Rod 16 to 26.7 (Voltaic Spear 133, read as the
+uncharged throw; the full hold keeps our 5:3); Skycall 19.4 (Lightning Strike 162); Wirerun pass 18.3 (Surge 153),
+doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
 source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
 its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static. Its cooldown follows the
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 5.6 to 9.75 m (owner item 70, then a quarter off on 11-10; not scaled by the dash feel; it ends at run speed, in the air too, and carries at most a run's drift), Skycall circle 1.5 m radius.
+
+**Time to knock (docs/TTK.md, 11-12).** LMB 1.00 of the source; combo 0.30 at rank 0 and 0.20 at max, kept and
+not tuned. A traced rank-0 fight: the Rod's orb gives the Wirerun back at 1.17 s, and the run at 1.27 s goes through
+a full-Static target, so it hits double and Blowouts: 64 of the 154 health in one pass, 42% of the knock. With the
+orb off the combo is 0.90 / 1.03. The source has the same loop (an orb from the spear and a dash reset through a
+full-Static foe), but gives no number for its payoff, and the check's source side leaves the loop out. Each slot
+is at the source's share of the target, so the gap is that missing payoff number, not our data. Owner options: a
+number for the source payoff, or an override for the two combo rows.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
 Source: Joule, `Upg:` lines. Cooldown cuts keep the source's fraction of its own cooldown (ours stay as the owner set them);
@@ -115,6 +128,7 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | X | | | Fuse with your Boki (the Boki system's key, see below) | | | |
 | Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live); the data passive text says a knock heals 15%, but `on_knock` only blows gum: that heal is removed (audit) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
 | X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m (if any has Static, all take the highest count among them first); landing on an enemy hunter fills the Boki bond; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count to everyone else (she reads her SPARKS badge), with sparks on the body that grow per stack; the 4th calls a sky bolt (Live) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
 | R / T | | | the Boki Merge (the Boki system's key, see below) | | | |
 
 Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it, a Wirerun through it, or Skycall dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Skycall fling is 6 m.
@@ -243,6 +257,19 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
   ground. No cancel and no ally effect (the sources mention neither). The knock is a push away from the centre
   with a little lift (the sources say knockback, not knock-up). A Boki merge mid-cast drops her where she took
   off with no strike.
+
+## Kitefall movement, settled (Nov 10)
+Trust order: [O] owner > [D] data > [W] wiki > [F] footage (hero-ref/vireo.md, ult frames at 10 fps). The data says only
+"launch into the air ... reactivate to crash down at target location" [D]. Nothing changed: every number below matched.
+Asserted by the `Kitefall move` / `Kitefall end` / `Kitefall abyss` / `Kitefall ledge` rows of `--mage-combo-check`.
+
+| What | Ours | Source |
+|---|---|---|
+| Steering | none: WASD never moves her in the crouch or the hang (straight up over the take-off); the cursor only places the landing, clamped in the 14.4 m ring | [F] f28-f46, [D] "target location" |
+| Speed curve | 0.3 s crouch, 0.3 s eased rise to 5 m, a hang of up to 1.7 s, then a 0.2 s drop that speeds up (u^2) onto the spot | [F] f28-f31 crouch, airborne 1.6-2.0 s, f47-f49 marker to impact |
+| End | no momentum (planar speed 0 on the strike); she is free on the strike frame (walks, LMB) | [F] f51 a normal shot right after |
+| Ledges | a landing on a higher or lower terrace lands on its top (the cursor ray meets the ground) | ours |
+| Abyss | no cast over the void; a cursor over it (or in a wall) backs off toward the take-off to the nearest ground | ours ([F] silent) |
 
 ## Ultimate choice
 R is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the

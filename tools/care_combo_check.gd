@@ -4,6 +4,7 @@ extends RefCounted
 ## rimewright.md: where shots land, the telegraph shown while holding, the timings, the payoffs, the
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
+const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -531,12 +532,119 @@ func _rime_skate_in() -> void:
 			K.ult_running() and face_dev < 0.001 and yaw_dev < 0.01 and K.face_locked(),
 			"face off by %.4f rad, model %.4f rad" % [face_dev, yaw_dev])
 	HunterKeys.ult_pressed(P)
-	step(m, 0.4)
+	step(m, float(K.x_def()["recover"]) + 0.4)      # a late recast cracks it open: free after the crash's recovery
 	ok(
 			"tm X: an early recast frees her: she walks off",
 			not K.ult_running() and P.root_t <= 0.0 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.5,
 			"moved %.2f" % Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length())
 	P.inp["move"] = Vector2.ZERO
+	await _free(m)
+
+## Skates east for 0.4 s and casts Rimelock from it; returns the skate's speed at the cast.
+func _skate_into_rime(m: Match, P: Hunter) -> float:
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	step(m, 0.4)
+	var v := P.roll_speed
+	HunterKeys.ult_pressed(P)
+	P.inp["dash_down"] = false
+	return v
+
+## How Rimelock moves her (docs/heroes/rimewright.md "Movement settled"): WASD never steers the carry; after the
+## crash she has no momentum and the next step is hers; the carry slides off a terrace (never blocked) sinking
+## gently, then she drops rooted to the ground below; over the void it carries on, and X frees her glider.
+func _rime_move() -> void:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var W = m.world
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	var home := P.pos
+	_skate_into_rime(m, P)
+	var p0 := P.pos
+	var worst := 1.0
+	for i in int(round(float(K.x_def()["carry_t"]) * 60.0)):
+		P.inp["move"] = Vector2(0, 1)
+		var q := P.pos
+		step(m, 1.0 / 60.0)
+		var dv := Vector2(P.pos.x - q.x, P.pos.z - q.z)
+		if dv.length() > 0.001:
+			worst = minf(worst, dv.normalized().dot(Vector2.RIGHT))
+	ok("tm X move: WASD never steers the carry (held sideways, it runs on along the skate)",
+			worst > 0.99 and P.pos.x - p0.x > 2.0, "dot %.3f" % worst)
+	P.inp["move"] = Vector2.ZERO
+	while K.ult_running():
+		step(m, 1.0 / 60.0)
+	var still := Vector2(P.vel.x, P.vel.z).length()
+	var p1 := P.pos
+	P.inp["move"] = Vector2(0, 1)
+	step(m, float(K.x_def()["recover"]) + 0.15)      # the crash's recovery lock first (parity-neve-crash-recovery)
+	ok("tm X end: no momentum after the crash, and the next step is hers (she walks off)",
+			still < 0.01 and Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length() > 0.25,
+			"%.2f m/s then %.2f m" % [still, Vector2(P.pos.x - p1.x, P.pos.z - p1.z).length()])
+	P.inp["move"] = Vector2.ZERO
+	# a terrace: she starts two levels up, the edge 3 m ahead
+	var hx := int(floor(home.x))
+	var hz := int(floor(home.z))
+	for dz in range(-3, 4):
+		for dx in range(-6, 3):
+			W.level[W.idx(hx + dx, hz + dz)] += 2
+	P.teleport(home + Vector3(-3.0, 2.0 * World.LEVEL, 0))
+	step(m, 0.5)
+	K.cd["x"] = 0.0
+	_skate_into_rime(m, P)
+	var y_top := 2.0 * World.LEVEL + home.y
+	var off := false
+	var sink := 0.0
+	for i in int(round(float(K.x_def()["carry_t"]) * 60.0)):
+		step(m, 1.0 / 60.0)
+		if not off and P.pos.x > home.x + 3.0:
+			off = true
+		if off and K._rime_carrying():
+			sink = maxf(sink, y_top - P.pos.y)
+	step(m, 1.0)
+	var on_ground: bool = absf(P.pos.y - W.ground_at(P.pos.x, P.pos.z)) < 0.1
+	var sink_max := float(K.dash_def()["air_fall"]) * float(K.x_def()["carry_t"])
+	ok("tm X ledge: the carry slides off a terrace (never blocked), sinking at the skate's air fall, then drops rooted",
+			off and sink <= sink_max and on_ground and K.ult_running() and P.root_t > 0.0,
+			"off %s sank %.2f grounded %s" % [off, sink, on_ground])
+	HunterKeys.ult_pressed(P)
+	step(m, 0.2)
+	for dz in range(-3, 4):
+		for dx in range(-6, 3):
+			W.level[W.idx(hx + dx, hz + dz)] -= 2
+	# the abyss 2 m ahead: the carry runs on over it; X frees her and the glider opens
+	for dz in range(-4, 5):
+		for dx in range(2, 20):
+			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
+	P.teleport(home)
+	step(m, 0.5)
+	K.cd["x"] = 0.0
+	_skate_into_rime(m, P)
+	step(m, float(K.x_def()["carry_t"]))
+	var over: bool = W.is_void(P.pos.x, P.pos.z) and K.ult_running()
+	HunterKeys.ult_pressed(P)
+	var opened_t := -1.0
+	var t := 0.0
+	while t < 1.0 and opened_t < 0.0:
+		P.inp["glide"] = true
+		P.inp["glide_btn"] = true
+		step(m, 1.0 / 60.0)
+		t += 1.0 / 60.0
+		if P.gliding:
+			opened_t = t
+	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
+	var brk := KMovesCare.length("tm_rime_break")
+	ok("tm X abyss: the carry runs on over the void; X frees her and held glide opens the step the break move ends",
+			over and opened_t > 0.0 and opened_t <= brk + 0.05,
+			"over %s glider at %.2f s (break move %.2f s)" % [over, opened_t, brk])
 	await _free(m)
 
 ## Rank 3 Skate over the Abyss lays ice underfoot that holds a while and then goes; below rank 3 she gets none.
@@ -825,6 +933,7 @@ func tender() -> void:
 	var A: Hunter = r[2]
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
+	var home: Vector3 = r[4]
 	ok(
 			"mm: renamed Meeko, kit sounds load",
 			Arch.name_of("tender") == "The Dawnfox"
@@ -887,7 +996,6 @@ func tender() -> void:
 	K.kind.clear()
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
-	var res: Dictionary = Arch.def("tender")["resource"]
 	ok(
 			"mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider)",
 			P.shot_range_k == 1.0 and not res.has("emp_range") and not res.has("emp_refund"),
@@ -911,14 +1019,18 @@ func tender() -> void:
 	K.cd["rmb"] = 0.0
 	var n0: int = _mine(m, P).size()
 	var wind := float(K.rmb_def()["windup"])
+	var glb_fit := float(WardenClips.data("pip")["kmoves"]["mm_seed_aim"].get("fit", 0.0))
 	ok(
-			"mm RMB: not a hold (no hold data), a quick wind-up (0.3-0.4 s, item 23), its clip as long",
-			not K.rmb_def().has("hold") and wind >= 0.3 and wind <= 0.4
+			"mm RMB: not a hold (no hold data), the wind-up is 0.5-0.65 s (the owner asked 0.2-0.5 s off 1 s; "
+			+ "the source's casts run 0.1-0.65 s), its clip and the model's clip as long",
+			not K.rmb_def().has("hold") and wind >= 0.5 and wind <= 0.65
 			and absf(KMovesCare.length("mm_seed_aim") - wind) < 0.01
-			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)))
+			and absf(glb_fit - wind) < 0.01
+			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)),
+			"wind %.2f kmove %.2f glb fit %.2f" % [wind, KMovesCare.length("mm_seed_aim"), glb_fit])
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
-	step(m, 0.12)
+	step(m, 0.15)
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
 			"mm RMB: winding up, a short dotted lane, the coiled pose, half speed",
@@ -934,21 +1046,15 @@ func tender() -> void:
 	var sync: Node = P.model.get_node_or_null("Warden/Sync")
 	var clips: WardenClips = sync.get("clips") if sync else null
 	var lib: AnimationLibrary = clips.lib if clips else null
-	var aim_clip: Animation = lib.get_animation("seed_aim") if lib and lib.has_animation("seed_aim") else null
-	var fit = clips.d["kmoves"]["mm_seed_aim"].get("fit") if clips else null
 	ok(
-			"mm RMB: Pip's hand-keyed stretch-and-gather is played over exactly the wind-up (kmove fit)",
-			aim_clip != null and fit != null and absf(float(fit) - wind) <= 0.04,
-			"clip %.2f fit %s wind %.2f" % [aim_clip.length if aim_clip else -1.0, fit, wind])
-	ok(
-			"mm RMB: no circle under her during the wind-up (item 23)",
-			not K.lk().live.any(func(b): return String(b["fx"]) == "flare"))
+			"mm RMB: nothing drawn at her feet during the wind-up",
+			not K.lk().live.any(func(b): return P.flat_dist(b["at"]) < 1.0))
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.12)
+	step(m, 0.15)
 	ok("mm RMB: letting go early does not throw or cancel", K.seed_aim and _mine(m, P).size() == n0)
-	var tt := 0.24
+	var tt := 0.3
 	while _mine(m, P).size() == n0 and tt < 1.5:
 		if tt >= wind - 0.1:
 			sc.aim_at(P, T.pos)
@@ -959,6 +1065,16 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	var from: Vector3 = _mine(m, P)[-1]["start"] if _mine(m, P).size() > n0 else P.pos
+	ok(
+			"mm RMB: the seed leaves from her hands, out in front at hand height, not on her",
+			P.flat_dist(from) >= 0.7 and from.y - P.pos.y < 0.8,
+			"%.2f m out, %.2f m up" % [P.flat_dist(from), from.y - P.pos.y])
+	var cast_fx: Array = HeroVfx.data("tender")["moves"]["seed_cast"]["fx"]
+	ok(
+			"mm RMB: the cast flare plays where the seed leaves (no body anchor), small",
+			cast_fx.all(func(l): return not l.has("at"))
+			and cast_fx.all(func(l): return String(l["p"]) != "flare" or float(l["size"]) <= 0.4))
 	ok(
 			"mm RMB: the seed leaves on the release clip's first frame (the snap, not after it)",
 			m.time - K.anim_at <= 1.5 / 60.0,
@@ -1149,6 +1265,7 @@ func tender() -> void:
 	step(m, 1.2)
 	ok("mm RMB: a stun in the wind-up loses the throw, not the charge",
 			not K.seed_aim and K.ch_rmb >= 1.0 and _mine(m, P).size() == n3)
+	TTIME.new(self).run(m, P, K, A, home)
 	await _free(m)
 	await growth()
 	await burr_ranks()
@@ -1457,6 +1574,15 @@ func burr_ranks() -> void:
 	var wide3 := K.burst_radius()
 	ok("mm RMB: the burst is 2.2 m wide, 4.4 m at rank 3", absf(wide1 - 2.2) < 0.01 and absf(wide3 - 4.4) < 0.01,
 			"r1 %.2f r3 %.2f" % [wide1, wide3])
+	# rank 3 (the source's tier IV): the burst takes 1.5x the ability power bonus (none at level 1)
+	var ap3 := K.burst_ap_k()
+	P.set_meta("growth_lvl", 10)
+	var bonus := LevelGrowth.ap_pct(10)
+	var ap10 := K.burst_ap_k()
+	P.slot_lv["sec"] = 1
+	ok("mm RMB rank 3: the burst takes 1.5x the ability power bonus (x%.3f at level 10, x1 at level 1)" % ap10,
+			absf(ap3 - 1.0) < 0.001 and absf(ap10 - (1.0 + 1.5 * bonus) / (1.0 + bonus)) < 0.001
+			and bonus > 0.0 and K.burst_ap_k() == 1.0, "L1 %.3f L10 %.3f" % [ap3, ap10])
 	await _free(m)
 
 # ================================================================== Neve
@@ -1542,9 +1668,11 @@ func rimewright() -> void:
 			T.max_hp - T.hp >= thrown_dmg * 0.75,
 			"dealt %.0f of %.0f" % [T.max_hp - T.hp, thrown_dmg])
 	ok("tm LMB: darts alternate hands with their own flick moves", K.stats["darts"] >= 7)
+	# the badges carry no label (DECISIONS 11-11): the FAN badge is the mark on this foe
+	var fan: Array = (P.ak.cue.get("marks", []) as Array).filter(func(mk): return mk["e"] == T)
 	ok(
-			"tm passive: the frost glow on the foe shows the stacks",
-			K.lk().showing("frost%d" % T.get_instance_id()) or K.splinter_log > 0)
+			"tm passive: the stacks show on your FAN badge (the frost glow on the foe is for the others)",
+			(fan.size() == 1 and not K.lk().showing("frost%d" % T.get_instance_id())) or K.splinter_log > 0)
 	await _free(m)
 	await _late_homing()
 	# --- 8 darts on one foe Shatter them for about 15 darts' worth, with the spikes
@@ -1702,6 +1830,7 @@ func rimewright() -> void:
 	await _statue_locks()
 	await _rime_glide_skate()
 	await _rime_skate_in()
+	await _rime_move()
 	await _skate_ice()
 	await _spear_rank3()
 	await _spear_travel()

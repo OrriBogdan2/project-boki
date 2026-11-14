@@ -98,11 +98,15 @@ func _reach() -> Array:
 	var out: Array = []
 	var cl := cell_len()
 	var y0 := origin.y
-	for i in int(xd().get("cells", 4)):
+	var n := int(xd().get("cells", 4))
+	var lane := Vector3(dir.x * cl * n, 0.5, dir.y * cl * n)
+	# placed walls and rocks stop it as terrain does (Blockers)
+	var walled := Blockers.cut(k.m.verbs.walls, origin + Vector3(0, 0.5, 0), origin + lane, k.h.team, "solid")
+	for i in n:
 		var a := origin + Vector3(dir.x, 0, dir.y) * cl * i
 		var c := a + Vector3(dir.x, 0, dir.y) * cl * 0.5
 		var g: float = k.m.world.ground_at(c.x, c.z)
-		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2) and i > 0:
+		if (k.m.world.is_block(c.x, c.z) or g > y0 + 1.2 or cl * (i + 0.5) > walled) and i > 0:
 			break
 		out.append(Vector3(a.x, y0, a.z))
 	return out
@@ -152,10 +156,13 @@ func tick(dt: float) -> void:
 		var length := cell_len() * cells.size()
 		scar = {"t": float(x.get("scar_t", 10.0)), "a": origin, "len": length, "fx": 0.0}
 
-## The lane everyone sees: one outlined rectangle over the whole reach in his colour, its gold fill running
-## down it as the cells erupt.
+## The lane everyone sees: one outlined rectangle over the whole reach in his colour, its gold fill sweeping
+## down it over exactly the wind-up (full on the step the slam lands), then running down it again as the cells
+## erupt.
 func _telegraph() -> void:
 	var done := float(erupted) / cells.size()
+	if phase == "wind":
+		done = clampf(t / float(xd().get("windup", 0.4)), 0.0, 1.0)
 	AimKit.lane(h, "x", {"from": origin, "dir": dir, "len": trail_len(), "width": float(xd().get("width", 4.0)),
 		"all": true, "col2": GOLD, "fill": done, "hot": done * 0.6, "lw": 0.14, "alpha": 1.6, "dur": 0.15})
 	AimKit.entry(h, "x")["y"] = _trail_y(origin + Vector3(dir.x, 0, dir.y) * trail_len() * 0.5)

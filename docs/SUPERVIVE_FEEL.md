@@ -22,10 +22,31 @@ The owner read these straight from the installed game (config files, curve table
 | Turn rate | RotationRate yaw 1280°/s | | **Yes**: `physics.turn_rate`, a fixed rate to the cursor (a 180 in 0.14 s), match and farm (decision 0026) |
 | Tall-ledge climb | Myth and Brall only | | **Yes**: Archer and Juggernaut (+0.9 m reach) |
 | Abyss | death 1750 uu below; fall speed capped 1200 easing to 1000 uu/s between 100 and 1650 uu down; mantling out of the abyss allowed | 17.5 m; 12 to 10 m/s between 1 and 16.5 m | **Yes**: `Hunter.ABYSS_EXTRA` (17.5 m), `HunterMove.fall_cap` (12 m/s anywhere, easing to 10 in the abyss): ~1.9 s from the lip to the point of no return |
-| Glide | height hold toward 850 uu; min Z -350 uu/s; start fall -85; swoop converts 2.5x falling speed to forward speed over 1.5 s | 8.5 m; -3.5 m/s | **Yes**: above 8.5 m the glider sinks at 3.5 m/s and the drop past its usual sink becomes speed (2.5x, fading over 1.5 s; `GlideLift.sink`); the open clamps you to falling >= 0.85 m/s (`Loco.glide_start`) and the steer is the force over Mass 100, 16.25 m/s² (`HunterMove.glide_accel`; decision 0027) |
+| Glide | height hold toward 850 uu; min Z -350 uu/s; start fall -85; swoop converts 2.5x falling speed to forward speed over 1.5 s | 8.5 m; -3.5 m/s | **Yes**: above 8.5 m the glider sinks at 3.5 m/s and the drop past its usual sink becomes speed (2.5x, fading over 1.5 s; `GlideLift.fall_vy`, decision 0095); the open clamps you to falling >= 0.85 m/s (`Loco.glide_start`) and the steer is the force over Mass 100, 16.25 m/s² (`HunterMove.glide_accel`; decision 0027) |
 | Dive | Z target -3250 uu/s, ZForceMax 350,000 / Mass 100, XY force x0.25, cancel 350 uu up, 10 s timeout | -32.5 m/s at 35 m/s², steer 0.25, 3.5 m, 10 s | **Yes**: hold crouch under the glider (`GlideDive`, `HunterMove.dive_*`); the key is ours, the source names none |
 
-Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, glide braking, hoop boost, jump hold time, air-dash multipliers. Keep current tuning for those (TODO).
+Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, glide braking, hoop boost, jump hold time, air-dash multipliers. Footage pass (Nov 12 2026, hero-ref sheets on `ext/agent-briefs:briefs/hero-ref/`, 1 bh = 1.8 m) below: what it settles is set with its source, the rest stays ours and is marked **Not determinable** with the frames looked at. Owner rules stay over all of it: strong air control (decision 0022) and Space held from a jump never opens the glider (`glide_press_only`). The same notes sit in `content/rules/tuning.json` "sources".
+
+| Unknown | Settled? | Value used | Source / frames |
+|---|---|---|---|
+| Glide cruise speed | **Yes** | 5.0 m/s (`Hunter.GLIDE_SPEED`) | [game data] MaxGlide 500 uu/s, shared by all 12 (supervive_physics.md); [footage] ~5 m/s, run pace (Tom Kick and Zik clips, section below). They agree, no change |
+| Glide base speeds (GlideInitialMin/MaxXYSpeed, InitialSpeedDuration/Decay, TargetXYMin/Max) | Not determinable | ours (`tuning.json` glide.drag 2.0, drag_steer 1.4, max 15) | No player glide start in either hero-ref clip; the one dash into a glide (Elluna 706.8 s, mooshmoosh.md, last 0.3 s 59/50/42 px per 0.1 s ≈ 11 to 8 m/s) is still decaying from the dash when the track ends, so no settle point |
+| Glide gravity factor / sink | Not determinable | ours (`Hunter.GLIDE_SINK` 1.4 m/s; above 8.5 m the [game data] pull to -3.5 m/s) | Footage only shows the height hold (level ~14 s over the abyss, Tom Kick) and the lift (Zik: ~1 s drop, back at island level ~1 s later), both the hold system, not the base sink |
+| Glide braking (BrakingForce Min/Max/Delay/Ramp, keys released or pulled back) | Not determinable | ours (`tuning.json` glide.coast 1.4 m/s², brake 36 m/s² past brake_deg 115) | Tetra guide (300 s) and ability showcase (1174 s) frame-stepped by ext/feel-glide-entry-fit: no player let-go or back-key brake on a glider, only enemy gliders crossing fights |
+| Hoop / jetstream boost (GlideBoostBonusSpeed, Duration, Decay, ForceMul) | Not determinable | ours (wind roads and updrafts, `Hunter` glide step + `world.updraft_at`) | No hoop or jetstream in any hero-ref clip |
+| Jump hold time | Not determinable | none: fixed jump, no variable height (MOVEMENT_FEEL.md) | A key hold can't be seen on screen; the owner rule (Space held never glides) decides what a hold does |
+| Air-dash multipliers (AirDashSpeedMultiplier, AirDashSpeedClamp) | Per Hunter, below | | The game number is one per hero movement component; the footage gives the result per Hunter only where an air dash is shown |
+
+Air vs ground dash per Hunter (footage):
+
+| Hunter (ours) | Ground | Air | Air vs ground | Ours now |
+|---|---|---|---|---|
+| Shiv (thief) | ~2 bh cartwheel (dancer.md card, §4) | 225 px ≈ 8.4 m ≈ 4.7 bh over ~0.95 s, peak 496 px/s, then ~2x run held ~0.5 s to the landing (303.8-304.5 s, frames 0129-0134; again 0153-0156) | ~1.7x the distance, no extra hang: the speed just doesn't bleed until touchdown | Vault 4.5 m, carried on by the air to the landing (thief_kit.gd), as the source |
+| Elluna (tender) | never shown clean (every dash comes off a hop) | 0.1 s ramp, flat ≈19-22 m/s for 0.4-0.6 s, float-out at 40-65%, ≈11-15 m over 0.8-1.1 s (731.1 s, 706.8 s, 735.9 s, 745.1 s; frames f35, f157, f181, f227) | card: base "further in the air"; not measurable | dash.air 13.3 m / 0.95 s, ramp 0.1, burst 0.4 (tender.json), inside the measured band |
+| Kingpin (dredge) | Brute Dash (dredge.md) | not shown | card "further when airborne", no number | air_k 1.35 [est], kept |
+| Oath, Tetra, Felix, Brall, Myth, Ghost, Joule, Void, Celeste | measured where shown (Dash speed curves, below) | **Not determinable**: no air dash in the clip (bjorn.md, breah.md, linwick.md, juggernaut.md, pin.md, venator.md, vireo.md, ostra.md, tamsin.md §5) | | kits as they are; Myth 0051-0053 (588.1 s, 62 px over 0.37 s) is likely a hop, not counted |
+
+What would settle the rest: a 60 fps clip of one Hunter jumping off a ledge, opening the glider and letting go of the keys (base speeds, braking), one through a wind hoop (boost), and any listed Hunter dashing off a jump pad (air multiplier).
 
 Air-dash multipliers (`AirDashSpeedMultiplier`, `AirDashSpeedClamp`) [?]: no footage either (searched 11-11). None of the 13 hero-ref folders (`ext/hero-ref-footage`) shows an air dash taken out of a long fall or a glide dive; their §5 notes agree. The nearest are Elluna's dashes 0.1-0.3 s after a jump (mooshmoosh.md §4: flat through the burst, so the jump's rise is not kept), Shiv's Cartwheel from a jump (dancer.md §5) and Myth's likely hop (pin.md §5). The two match clips on hetzner (`refs/supervive-mantle/sv_joule_1v4.mp4`, 42 s, and `sv_tetra_guide.mp4`, 300 s, 2 fps sheets) show no dive or long fall into a dash either. The kit cards "dash forward, further if airborne" (Elluna Lunar Dash, Kingpin Brute Dash) suggest another reading: the two scale and cap the air dash's own speed, not the speed you carry in. Ours for now: the class air dash keeps none of the fall or of the forward speed and ends on its own speed (`--move-feel-check` airdash_* rows, reference only). To settle it: a 60 fps clip of two hunters dashing out of a 10 m drop and out of a glide dive, with the ground marker in view.
 
@@ -56,6 +77,21 @@ Air dashes of the starter Masks (checked Nov 11 2026): no hero-ref sheet holds a
 | Lace (archer, Myth) | with a charge the Spirit Walk (item 183), out of charges the 0.22 s flick | not clean: frames 0051-0053 (588.1 s) are a 62 px (~2.3 m) push over 0.37 s at ~2x run inside the pit ring, likely a hop (`pin.md` §5) | [?] |
 
 Settling clips: Ghost sliding off a ledge or a jump pad, Brall pressing Shift mid-jump, Myth rolling in the air onto a double ledge.
+
+### Dash tails against the over-run shed (Nov 11 2026)
+DEBT "Dash exit" asked whether the tracks give one shed rate for speed over the run. Each track's last ~30% (the samples still above run speed), converted with the row's own metres per pixel, against the over-run shed the game uses (the source's walking brake, `HunterMove.brake_rate`: 2/s x speed + 22.2 m/s², from content/rules/hunter_move.json) at the tail's mean speed, and against the old kit-tuned 110 m/s² (`GROUND_SHED`, deleted Nov 9 in decision 0026). Albert's 360 Smash (3 samples, the decay is only pinned by its total) and Meeko's glide (in the air: air drag, not the ground brake) have no measurable ground tail; Kingpin, Joule and Felix are from ext/dash-curves-c.
+
+| Track | Tail (m/s, 1/15 s) | Decel | Brake there | vs brake | vs 110 |
+|---|---|---|---|---|---|
+| Ghost Slipstep | 8.0 5.4 3.2 | 36 m/s² | 33 | +7% | -68% |
+| Brall Rampage | 10.0 7.1 4.2 | 43 m/s² | 36 | +19% | -61% |
+| Myth Spirit Walk roll | 9.7 4.7 | 75 m/s² | 37 | +105% | -32% |
+| Sable Cartwheel | 7.9 5.8 5.2 | 20 m/s² | 35 | -44% | -82% |
+| Kingpin Brute Dash | 7.8 7.7 6.7 6.2 4.6, then a dead stop in 1/30 s | 12 m/s² | 35 | -65% | -89% |
+| Joule Surge (0.58 s) | 27.8 24.6 12.3 | 116 m/s² | 62 | +87% | +6% |
+| Felix Soot Ram | 8.2 9.5 9.3 7.6, then a dead stop in 1/15 s | 3 m/s² | 38 | -92% | -97% |
+
+They do not agree within 20% (3 to 116 m/s²): a dash's tail is the dash's own curve (Kingpin and Felix hold their push, then stop dead; Myth's roll ends in a step), not a free slide, so the tracks set no single shed. The shed stays the source's brake, with no number of ours: the two clean free tails (Ghost, Brall) land within 20% of it, and all but Joule are 32-97% under the old 110. The dash exit does not use the shed: `HunterMove.dash_exit` caps the hand-over at run speed, so it only acts on knocks and on kit steps over the run (`HunterMove.slide`, `slide_speed`), which `--move-feel-check` (`ground_shed_*`) and `--archetype-check` measure.
 
 ## What's in it
 

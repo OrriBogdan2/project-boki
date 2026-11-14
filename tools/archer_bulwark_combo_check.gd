@@ -3,7 +3,9 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+const LACE_CANCEL_ROWS := preload("res://tools/lace_cancel_rows_check.gd")
 const HOLD := preload("res://tools/hold_release_check.gd")      # how Lace's and Albert's holds end
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -23,6 +25,7 @@ func run(main_node: Node) -> void:
 	bow.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		_wall_climb()
 		await HOLD.lace(self)
 		await ult.pin()
 		await own.pin()
@@ -60,6 +63,71 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 		for dx in range(0, 3):
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
+
+## Lace's double-wall climb (Myth bCanWallJump): a jump into a 4-terrace wall (3.2 m, source 3 m) puts her
+## on top; with her back to it, or any other Hunter, it does not.
+func _wall_climb() -> void:
+	for H in [4, 5]:
+		_wall_climb_h(H)
+
+func _wall_climb_h(H: int) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
+	m.set_process(false)
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+	var P: Hunter = m.hunters[0]
+	for o in m.hunters:
+		o.ctrl = "idle"
+		if o != P:
+			o.teleport(Vector3(-500, 50, -500))
+			o.out = true
+	P.ctrl = "local"
+	var W: World = m.world
+	var g := W.random_ground()
+	var x0 := int(g.x) + 6
+	var z0 := int(g.z)
+	var lv := int(W.level[W.idx(x0, z0)])
+	var wl: PackedByteArray = W.level
+	var wk: PackedByteArray = W.kind
+	for dz in range(-4, 5):
+		for dx in range(-8, 5):
+			var i := W.idx(x0 + dx, z0 + dz)
+			wk[i] = World.T_GROUND
+			wl[i] = lv + H if dx >= 0 else lv
+	W.kind = wk
+	W.level = wl
+	var low := lv * World.LEVEL
+	var top := (lv + H) * World.LEVEL
+	var res := {}
+	for arch in ["archer", "gunslinger"]:
+		for dirn in [1.0, -1.0]:
+			P.arch = arch
+			P.teleport(Vector3(x0 - 1.2, low, z0 + 0.5))
+			P.grounded = true
+			P.vel = Vector3.ZERO
+			P.lfloat = {}
+			P.grap = {}
+			P.grap_cd = 0.0
+			P.last_gy = low
+			P.face = 0.0
+			m.step(DT)
+			var best := low
+			for i in 180:
+				P.inp["move"] = Vector2(dirn, 0.0)
+				P.inp["jump"] = i == 8
+				m.step(DT)
+				if P.grounded: best = maxf(best, P.pos.y)
+			res[arch + str(dirn)] = best
+	var info := "low %.2f top %.2f %s" % [low, top, res]
+	if H == 4:
+		ok("Lace climbs a double wall (4 terraces) facing it", absf(res["archer1.0"] - top) < 0.1, info)
+		ok("Lace does not climb it with her back to it", res["archer-1.0"] < low + 0.5, info)
+		ok("another Hunter does not climb a double wall", res["gunslinger1.0"] < low + 0.5, info)
+	else:
+		ok("Lace does not climb 5 terraces (past double-high)", res["archer1.0"] < low + 0.5, info)
+	m.queue_free()
 
 ## Seconds after a recall press until the hammer is back in his hand (gives up at 1 s).
 func _recall_caught(m: Match, K: BulwarkKit) -> float:
@@ -364,6 +432,41 @@ func _archer_combos() -> void:
 		"cremations %d" % (K.cremations - cr0)
 	)
 	step(m, 3.5)
+	# Hail Wall vs Wisps (source parity): a rival Wisp on the arc loses down_hp per tick (no slow); an ally's does not
+	fresh(T)
+	fresh(T2)
+	K.cd["e"] = 0.0
+	P.teleport(home)
+	aim_at(P, home + Vector3(5.0, 0, 0))
+	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
+	T2.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(-45.0)))
+	var t2_team := T2.team
+	T2.team = P.team
+	for w in [T, T2]:
+		w.downed = true
+		w.hp = 0.0
+		w.down_hp = float(Data.MATCH["down_hp"])
+	var hp_foe := T.hp
+	P.ak.use_e()
+	step(m, 1.6)
+	var bled: float = float(Data.MATCH["down_hp"]) - T2.down_hp
+	var drained: float = float(Data.MATCH["down_hp"]) - T.down_hp
+	ok(
+		"pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds",
+		drained >= bled + 2.0 * float(K.e_def()["dmg"]) * ArcherKit.WISP_DRAIN_K and bled > 0.0,
+		"rival %.1f ally %.1f" % [drained, bled]
+	)
+	ok(
+		"pin E: the wall does not slow, burn or damage a Wisp",
+		T.slow_t <= 0.0 and T.blight_t <= 0.0 and T.hp == hp_foe and T.downed,
+		"slow %.2f hp %.1f" % [T.slow_t, T.hp]
+	)
+	for w in [T, T2]:
+		w.downed = false
+		w.hp = w.max_hp
+		w.down_hp = 0.0
+	T2.team = t2_team
+	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
 	K.ch_rmb = 1.0
@@ -443,7 +546,7 @@ func _archer_combos() -> void:
 		P.slot_lv["kin"] = rk
 		up.append([
 			K.power("sec") / p1, K.power("kin") / pk1,
-			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"),
+			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"), K.arc_deg(),
 		])
 	ok("upgrade parity: Heavy Shot damage +20% / +40%", near.call(up[1][0], 1.2) and near.call(up[2][0], 1.4), str(up))
 	ok("upgrade parity: Spirit Walk recharge 9.5 -> 8.5 -> 7.5",
@@ -451,6 +554,8 @@ func _archer_combos() -> void:
 	ok("upgrade parity: Hail Wall cooldown 15 -> 13 -> 9 and damage +30% / +60%",
 			near.call(up[1][3], 13.0) and near.call(up[2][3], 9.0)
 			and near.call(up[1][1], 1.3) and near.call(up[2][1], 1.6), str(up))
+	ok("upgrade parity: rank 3 (tier IV) Hail Wall arc 120 -> 156 degrees",
+			near.call(up[1][4], 120.0) and near.call(up[2][4], 156.0), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
@@ -569,6 +674,26 @@ func _archer_combos() -> void:
 		"combo pin: Spirit Walk ending inside a rock = back to the entry",
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
+	)
+	# ...also when the walk just runs out there (natural expiry, not an end() call from outside)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.grounded = true
+	var w0 := K.spirit.walks
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(1, 0)
+	P.do_dash()
+	step(m, 0.6, func(): P.inp["move"] = Vector2.ZERO)
+	P.teleport(Vector3(bx + 0.5, home.y, home.z))
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
+	sn0 = K.spirit.snap_backs
+	step(m, K.spirit.t + 0.2)
+	ok(
+		"combo pin: Spirit Walk running out inside a rock = back to the entry",
+		K.spirit.walks == w0 + 1 and not K.spirit.active() and P.spirit_t <= 0.0 and K.spirit.snap_backs == sn0 + 1
+			and P.pos.x < bx,
+		"x %.1f (rock %d) snaps %d walks %d" % [P.pos.x, bx, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
@@ -716,6 +841,7 @@ func _archer_combos() -> void:
 		aim_at(P, P.pos + Vector3(8, 0, 0))
 		P.do_dash())
 	air_dash_is_ground(m, P, home)
+	LACE_CANCEL_ROWS.new(self).run(m, P, home)   # her Cancels table, row by row
 	await done(m)
 	var r2 := setup("archer", 7.0, "", true)
 	m = r2[0]
@@ -970,6 +1096,7 @@ func _bulwark_combos() -> void:
 		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
+	ok("combo bjorn: a full slam only knocks, no stun (the source gives none)", T.stun_t <= 0.0, "stun %.2f" % T.stun_t)
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
 	var hv := HeroVfx.of(m)
 	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
@@ -1125,6 +1252,20 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
 		"cds %s shields %s" % [str(cds), str(shields)]
 	)
+	# the Spin Dash recharge takes the data's -1.5 s a rank; no slot gets a rank damage step (the data names none)
+	var regens: Array = []
+	var dmgs: Array = []
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		regens.append(P.dash_regen())
+		dmgs.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"combo bulwark: rank row, Spin Dash recharge 8 / 6.5 / 5 s, no rank damage on the aegis, Smash or field",
+		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01
+				and dmgs[2] == dmgs[0],
+		"recharge %s power %s" % [str(regens), str(dmgs)]
+	)
+	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 3
 	ok(
 		"combo bulwark: rank 3 repairs faster (regen 30/s, back in 2 s when broken, 1.4 s wait)",
