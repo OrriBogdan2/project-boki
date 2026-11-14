@@ -182,16 +182,16 @@ func _sexes(tree: SceneTree) -> void:
 	var views := {"front": PI, "three_quarter": PI * 0.78, "side": PI * 0.5}
 	for gender in Unmasked.SEXES.size():
 		for view in views:
-			hx.look = Unmasked.default_look()
-			hx.look["gender"] = gender
-			hx._show_create()
-			hx.preview.rotation.y = views[view]
+			var lk := Unmasked.default_look()
+			lk["gender"] = gender
+			hx.locker.set_look(lk)
+			hx.locker.set_yaw(views[view])
 			await _shot(tree, "sex_%s_%s" % [String(Unmasked.SEXES[gender]).to_lower(), view], 1.2)
 		for style in Unmasked.SHROUDS.size():
-			hx.look = Unmasked.default_look()
-			hx.look.merge({"gender": gender, "shroud": style}, true)
-			hx._show_create()
-			hx.preview.rotation.y = views["three_quarter"]
+			var lk := Unmasked.default_look()
+			lk.merge({"gender": gender, "shroud": style}, true)
+			hx.locker.set_look(lk)
+			hx.locker.set_yaw(views["three_quarter"])
 			await _shot(tree, "sex_%s_style_%d" % [String(Unmasked.SEXES[gender]).to_lower(), style], 0.8)
 	hx.queue_free()
 	await tree.process_frame
