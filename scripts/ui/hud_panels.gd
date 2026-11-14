@@ -52,6 +52,7 @@ func _draw_panels() -> void:
 		hud._draw_minimap(sz)
 		if p and not p.out and not p.extracted:
 			HudVitals.draw(hud, sz, p)
+			ChannelBar.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
 			hud._draw_weapon(sz, p)
 			GearPanel.draw(hud, sz, p)

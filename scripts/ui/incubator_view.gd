@@ -31,7 +31,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		var w := Incubator.stoke()
 		if w != "": home._toast(w)
 		else:
-			Sfx.play("unlock"); Save.save_game()
+			Sfx.play("garden_egg"); Save.save_game()
 			if home.hinc: home.fx.burst(home.INCUB_AT + Vector3(0, 1.0, -0.45), Color("ff9a3a"), 22, 2.6)
 		reopen.call(), 0, "dash")
 	st.disabled = coals <= 0 or not Incubator.any_warming()

@@ -14,6 +14,7 @@
 		"size": 0.22,
 		"color": "#ffbf5e",
 		"sfx": "tend_ember",
+		"hit": "hit_magic",
 		"fire_slow": 1.0,
 		"desc": "Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one is Empowered, with its own push and chime.",
 		"kick": 0.06,

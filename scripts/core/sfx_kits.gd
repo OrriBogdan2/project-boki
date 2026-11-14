@@ -9,12 +9,15 @@ const NAMES := [
 	"tend_land", "tend_flare", "tend_hop", "tend_pickup", "tend_kindled",
 	"rime_shard", "rime_beam", "rime_spear_aim", "rime_lance", "rime_zone", "rime_burst", "rime_splinter",
 	"rime_stop", "rime_wall_tell", "rime_wall", "rime_freeze",
-	"tend_call", "tend_call_hum", "tend_arrive", "rime_lock", "rime_creak", "rime_crash", "rime_crack",
+	"tend_call", "tend_call_loop", "tend_arrive", "rime_lock", "rime_creak", "rime_crash", "rime_crack",
 	# Tarek (dolm) and Motley (ostra): tools/gen_sfx_tarek.py, tools/gen_sfx_motley.py
 	"br_throw", "br_boulder_hit", "br_wind", "br_punch", "br_launch", "br_burst", "br_rise", "br_roll", "br_shove",
 	"br_leap", "br_slam", "br_crack", "br_raise", "br_sense",
 	"os_orb", "os_orb_hot", "os_prime", "os_snap_wind", "os_snap", "os_snap_hit", "os_swap_lob", "os_swap", "os_seed",
 	"os_pop", "os_empower", "br_rumble", "br_crumble", "os_well", "os_well_hum",
 ]
-## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP (Hero sound sets add theirs).
-const MIN_GAP := {}
+## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP (Hero sound sets add theirs):
+## the weapon-family hit ticks (content/sfx/hit.json) wait as long as the shared `hit` does.
+const MIN_GAP := {
+	"hit_gun": 45, "hit_bow": 45, "hit_blade": 45, "hit_blunt": 45, "hit_magic": 45, "hit_thrown": 45,
+}

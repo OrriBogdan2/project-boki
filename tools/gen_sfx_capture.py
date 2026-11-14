@@ -4,6 +4,8 @@
   scan_pop_rare  a rare catch (shimmer or a rare species): a rising four-note bell run with a sparkle tail
   scan_fail      the scan breaking off: a dry snap and a short falling tone
   scan_call      the Boki's own short call as it is taken: a chirp that scoops up and a soft vowel under it
+  rarity_rare / rarity_very_rare   the stings for a rare Boki coming into sight, being claimed or hatching
+                 (RaritySting): two soft bell notes rising a fifth; three rising and a glassy sparkle
 """
 import numpy as np
 import sfx_lib as S
@@ -47,8 +49,20 @@ def call(i):
     return mix(chirp, 0.5 * vowel[:n])
 
 
+def sting_rare():
+    return mix(bell(659, 0.7, 0.3), at(bell(988, 0.9, 0.4), 0.16) * 0.9)
+
+
+def sting_very_rare():
+    notes = [(659, 0.0), (988, 0.12), (1318, 0.24)]
+    glass = at(bpf(noise(0.6), 5000, 10000) * env(N(0.6), 0.02, 0.22), 0.3) * 0.18
+    return mix(*[at(bell(f, 1.0, 0.45), t) for f, t in notes], glass)
+
+
 S.save_cat('scan_pop_fine', lpf(pop_fine(), 5000), 'boki')
 S.save_cat('scan_pop_rare', lpf(pop_rare(), 7000), 'boki')
 S.save_cat('scan_fail', snap(), 'cast')
 S.takes_cat('scan_call', call, 3, 'boki')
+S.save_cat('rarity_rare', lpf(sting_rare(), 5000), 'boki')
+S.save_cat('rarity_very_rare', lpf(sting_very_rare(), 7000), 'boki')
 print('capture sounds written')

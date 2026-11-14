@@ -102,7 +102,7 @@ func _world() -> void:
 	var kind := PingInput.place_world(m, _screen(foe.pos + Vector3(0, 0.9, 0)))
 	var pg := _my_ping()
 	ok(kind == "enemy" and pg.get("kind") == "enemy", "on an enemy: an enemy ping (%s)" % kind)
-	ok((pg["col"] as Color).is_equal_approx(PingInput.ENEMY_COL), "it is red")
+	ok((pg["col"] as Color).is_equal_approx(SideColor.foe()), "it is red")
 	ok(PingInput.label(pg, P) == "Enemy", "one word over it: %s" % PingInput.label(pg, P))
 	ok(_goal_is(mate, pg), "the bot teammate takes it as its ping goal")
 	# loot: a deathbox, its owner moved away

@@ -130,7 +130,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 		m.hud.knocks.knocked(m.player, h, credit)
 	if m == null or m.fx == null:
 		return
-	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	var tc: Color = SideColor.of(m, h)
 	var c := h.pos + Vector3(0, 0.9, 0)
 	m.fx.flash(c, Color(1.0, 0.95, 0.85), 1.1, 0.16)
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.35), 22, 11.0, 75.0, 0.4, 14.0, 1.5)
@@ -144,7 +144,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	var tc: Color = SideColor.of(m, h)
 	var c := h.pos + Vector3(0, 0.6, 0)
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
 	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
@@ -173,6 +173,25 @@ static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 		m.sfx("click", null, ARMOR_TICK_DB, ARMOR_TICK_PITCH)  # the "push now" tick, only for whoever broke it
 		m.freeze_frame(0.045)
 
+const ARMOR_UP_PITCH := 0.1     # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)
+const ARMOR_UP_OWN_DB := -4.0   # dB: your own Hunter's tier-up (the fuller cue, no position)
+const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
+
+## The pitch of a tier's rise: higher tier, brighter.
+static func armor_up_pitch(tier: int) -> float:
+	return 0.8 + ARMOR_UP_PITCH * float(tier)
+
+## Armor went up a tier (Match._armor_up, never on a repair; HeroVfx.tier_up draws it): a metallic rise pitched by
+## tier. You hear the fuller cue; everyone nearby hears the short positional one, so a rival knows this Hunter
+## just got tougher.
+static func armor_up(m: Match, h: Hunter) -> void:
+	if m == null:
+		return
+	var pitch := armor_up_pitch(h.armor_tier)
+	if h == m.player:
+		Sfx.play("armor_up_own", null, ARMOR_UP_OWN_DB, 0.0, pitch)
+	else:
+		Sfx.play("armor_up", h.pos, ARMOR_UP_NEAR_DB, 0.0, pitch)
 
 ## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:

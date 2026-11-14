@@ -38,7 +38,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	H.armor_lerp = move_toward(H.armor_lerp, af, dt * (0.5 if H.armor_lerp > af else 4.0))
 	H.hover_spots.append([Rect2(Vector2(x0, y0 - 20), Vector2(w, 52)), "vitals"])
 	# the numbers: health big, max small; armour and its tier on the right
-	var hp_col := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
+	var hp_col := HudStyle.hp_fill(SideColor.you(), frac, H.m.time)
 	var hp_txt := str(int(ceil(p.hp)))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
 	var hw := HudStyle.BIG.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x
@@ -94,7 +94,7 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 		fg = Color("8fe0a0") if grass else Color("c9d2e0")
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := HudStyle.BIG.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
+	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, H._hud_origin(sz).y + 46.0), Vector2(tw + 24, 20))
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 

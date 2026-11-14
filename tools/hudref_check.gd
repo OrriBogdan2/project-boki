@@ -10,6 +10,10 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. knock banners (KnockBanner): a rival you knock shows KNOCK in the red ring (a second one at once
 ##      counts x2), a teammate going down ALLY KNOCKED in the cyan one; each is gone within 1.5 s
+##   9. the ultimate tile's states change at the right times (HunterUltTile: cooling, shine, ready, blocked)
+##   9. every drawn HUD block, the tip card and the top strips sit inside the HudStyle safe margin
+##   9. an ally's Hearth Call on you: a slim bar with Meeko's portrait under your vitals, draining over the
+##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
 ##   9. the squad frames (SquadFrames): a row each, you last; knocked shows its bleed-out and the ally
 ##      ping pops in; dead shows no bars; a 2-player squad gets two rows; solo none
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
@@ -132,6 +136,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
 	await _knock_banners(m, hud, P)
+	await _channel(m, hud, P)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -208,8 +213,35 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	await _check_ult(P)
+	_check_safe(hud)
 	await _frames(m, hud, P)
 	_done()
+
+## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap
+## and the tip card sit inside HudStyle.safe_rect, at the window size the run has and at 1280x720 / 1920x1080.
+func _check_safe(hud) -> void:
+	var sz: Vector2 = hud.c.size
+	var pad := HudStyle.safe_pad(sz)
+	var safe := HudStyle.safe_rect(sz).grow(0.5)
+	var out: Array = []
+	for spot in hud.hover_spots:
+		if not safe.encloses(spot[0]):
+			out.append("%s %s" % [spot[1], spot[0]])
+	ok(out.is_empty(), "every drawn HUD block is inside the %.0f x %.0f margin (%s)" % [pad.x, pad.y, out.slice(0, 3)])
+	ok(hud.mm_bottom - 196.0 >= pad.y - 0.5, "the minimap starts under the top margin")
+	for size: Vector2 in [Vector2(1280, 720), Vector2(1920, 1080)]:
+		var tag := "%dx%d" % [size.x, size.y]
+		var s := HudStyle.safe_rect(size)
+		var slot := Rect2(s.end - Vector2(20, 20), Vector2(20, 20))      # a slot in the safe corner
+		var tip := Rect2(HudTip.place(slot, Vector2(300, 120), size), Vector2(300, 120))
+		ok(s.encloses(tip), "%s: the tip card by a corner slot stays in the safe area" % tag)
+		var reach: float = hud.HUD_REACH
+		var origin: Vector2 = hud._hud_origin(size)
+		var vitals := Rect2(origin - Vector2(reach, 0.0), Vector2(HudVitals.BAR_W + 144.0 + reach, 132.0 + reach))
+		ok(s.encloses(vitals), "%s: the vitals block sits in the safe area" % tag)
+		var strips := minf(WaysOutHud.top_y(size), TutorialStrip.rect(size).position.y)
+		ok(strips >= s.position.y, "%s: the top strips start under it" % tag)
 
 ## 3. Your shield in the vitals: a heal shield lays a strip over the top of your health with the heal icon,
 ## a hit drains it before health, and it fades over its last ShieldStrip.FADE_S before it drops.
@@ -312,6 +344,57 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.0
 	flow.held.clear()
 
+## 9. The ultimate tile reads "ready" at a glance, one look for every hero: the cooldown running out starts the
+## shine at once, which settles into the steady lit frame; a stun puts the padlock over it and lifting it goes
+## back to ready with no second shine; reaching the unlock level shines too.
+func _check_ult(P: Hunter) -> void:
+	var hud = P.m.hud
+	var m: Match = P.m
+	var plain := Arch.ids().filter(func(id):
+		var xd: Dictionary = Arch.def(id)["x"]
+		return not (xd.has("col") and xd.has("icon")))
+	ok(plain.is_empty(),
+		"every hero's ultimate has its own ability colour and icon for the tile (missing: %s)" % [plain])
+	P.ak.cd["x"] = 0.4
+	await _redraw(hud)
+	ok(HunterUltTile.state == "cooling", "cooling: the tile is in its cooldown state (%s)" % HunterUltTile.state)
+	var guard := 0
+	while float(P.ak.cd["x"]) > 0.0 and guard < 600:
+		await main.get_tree().process_frame
+		guard += 1
+	var back_at := m.time
+	await _redraw(hud)
+	var lag := HunterUltTile.shine_from - back_at
+	var redraw_s := 1.0 / HudPanels.REDRAW_HZ
+	ok(HunterUltTile.state == "ready" and lag >= -0.05 and lag <= redraw_s + 0.05,
+		"the cooldown runs out: ready, and the shine starts on the next redraw (%.3fs after)" % lag)
+	ok(HunterUltTile.shine(m.time) > 0.0, "... the shine is playing (%.2f left)" % HunterUltTile.shine(m.time))
+	await frames_until(m, HunterUltTile.shine_from + HunterUltTile.SHINE_T + 0.05)
+	await _redraw(hud)
+	ok(HunterUltTile.state == "ready" and HunterUltTile.shine(m.time) == 0.0,
+		"%.1fs later: the steady lit frame, no shine" % HunterUltTile.SHINE_T)
+	var shone_at := HunterUltTile.shine_from
+	P.stun_t = 3.0
+	await _redraw(hud)
+	ok(HunterUltTile.state == "blocked" and not bool(P.slot_info("x")["ready"]),
+		"stunned with the ultimate off cooldown: the padlock over it, not ready")
+	P.stun_t = 0.0
+	await _redraw(hud)
+	ok(HunterUltTile.state == "ready" and HunterUltTile.shine_from == shone_at,
+		"the stun ends: ready again, steady, no second shine")
+	P.lvl = 1
+	await _redraw(hud)
+	ok(HunterUltTile.state == "locked", "below level %d: locked" % int(Hunter.ULT_AT[0]))
+	P.lvl = int(Hunter.ULT_AT[0])
+	await _redraw(hud)
+	ok(HunterUltTile.state == "ready" and HunterUltTile.shine_from > shone_at,
+		"reaching the unlock level: ready, with the shine")
+
+## Waits for the next HudPanels redraw (the slots are drawn there, REDRAW_HZ times a second).
+func _redraw(hud) -> void:
+	await hud.panels.draw
+	await main.get_tree().process_frame
+
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})
@@ -399,6 +482,53 @@ func _banner_closes(kb: KnockBanner) -> void:
 		guard += 1
 	ok(kb.word() == "" and shown_for >= 1.0 and shown_for <= 1.5,
 		"the banner held %.2fs (1-1.5 s) and is gone" % shown_for)
+
+## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
+func _channel(m: Match, hud, P: Hunter) -> void:
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.out)
+	ok(not mates.is_empty(), "an ally to be Meeko (%d)" % mates.size())
+	if mates.is_empty():
+		return
+	var M: Hunter = mates[0]
+	M.downed = false         # (section 7 knocked them)
+	M.reclass(Arch.weight("tender"), "tender")
+	var K: TenderKit = M.ak
+	var total := float(K.x_def()["time"])
+	await main.get_tree().process_frame
+	ok(ChannelBar.shown.is_empty(), "no channel, no bar")
+	K.hearth_call = {"who": P, "left": total, "tick": 0.0, "fx": 0.0}
+	await hud.panels.draw
+	# the match may tick a step before the HUD draws, so the bar is read against the seconds left at that draw
+	var bar: Dictionary = ChannelBar.shown.get(M.nid, {})
+	var live := float(K.hearth_call["left"]) / total
+	ok(not bar.is_empty() and absf(float(bar["frac"]) - live) < 0.01 and live > 0.95 and total == 5.0,
+		"her channel on you (%.1f s): the bar is up, full (%s)" % [total, bar])
+	K.hearth_call["left"] = total * 0.4
+	await hud.panels.draw
+	var drained := float(ChannelBar.shown.get(M.nid, {}).get("frac", -1.0))
+	live = float(K.hearth_call["left"]) / total
+	ok(absf(drained - live) < 0.01 and absf(live - 0.4) < 0.03,
+		"it drains with the seconds left (%.2f, want %.2f)" % [drained, live])
+	var row: Array = m._ser(M)
+	K.hearth_call = {}
+	M.remote = true
+	m._net_apply(M, row)
+	await hud.panels.draw
+	ok(ChannelBar.shown.has(M.nid), "another machine: the snapshot's target and seconds left bring it back")
+	m._net_apply(M, row.slice(0, row.size() - 2) + ["", 0.0])
+	await hud.panels.draw
+	ok(ChannelBar.shown.is_empty(), "a snapshot with no channel: the bar is gone")
+	ChannelBar.store(M, P.nid, 0.05)
+	await frames_until(m, m.time + 0.1)
+	await hud.panels.draw
+	ok(ChannelBar.shown.is_empty(), "the seconds run out: gone with no further snapshot")
+	ChannelBar.store(M, P.nid, 3.0)
+	await hud.panels.draw
+	M.downed = true
+	await hud.panels.draw
+	ok(ChannelBar.shown.is_empty(), "Meeko knocked down mid-channel: gone that frame")
+	M.downed = false
+	M.remote = false
 
 ## 9. The squad frames follow the match: knocked, dead, squad size, solo.
 func _frames(m: Match, hud, P: Hunter) -> void:

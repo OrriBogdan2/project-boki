@@ -14,16 +14,16 @@ const PORTRAIT := Vector2(76, 76)    # px: the Hunter's portrait in the header
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 ## The order the card lists them in: the kit as it is played, then the ultimate and the Fusion.
 const ROWS := ["passive", "lmb", "rmb", "e", "dash", "x", "r"]
-## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
-## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
-## ultimate on its "x" tile.
+## Icons the kits name that the icon set draws under another id (weapons and four stray names).
+const ICON_FIX := {"quill_rifle": "rifle", "coilcaster": "burst_rifle", "longbow": "sniper", "flamethrower": "fireball",
+	"tower_shield": "bulwark", "rubble_fists": "haymaker", "tether_lantern": "tether", "hoar_fan": "wave",
+	"lantern_crook": "mend", "earthshatter": "quake", "bolt": "fireball", "shield": "bulwark", "dash2": "dash"}
+## The Settings action behind each tile's key cap ("" = no key: the passive).
+const ACTION := {"dash": "dash", "lmb": "fire", "rmb": "secondary", "e": "signature", "r": "ultimate",
+	"x": "hunter_ult"}
+## The key cap on a slot's tile, read live from Settings so a rebind (a mouse button too) shows.
 static func _cap(slot: String) -> String:
-	if slot == "x":
-		return Settings.key_cap("hunter_ult")
-	if slot == "r":
-		return Settings.key_cap("ultimate")
-	return String(KEYS[slot])
+	return Settings.key_cap(String(ACTION[slot])) if ACTION.has(slot) else ""
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
 	"x": "Ultimate"}

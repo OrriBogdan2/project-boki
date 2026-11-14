@@ -344,7 +344,9 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 	elif x.get("draining", false) and x["state"] == "charging":
 		lit *= 0.45 + 0.35 * sin(m.time * 7.0)
 	var raised := OutpostLook.held(x)
-	var col: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if raised else OutpostLook.NEUTRAL
+	var col := OutpostLook.NEUTRAL
+	if raised:
+		col = SideColor.of_team(m.player.team if m.player else -1, int(x["team"]))
 	var key := [snappedf(lit, 0.01), raised, col]
 	if key != x.get("look"):
 		x["look"] = key
@@ -459,10 +461,11 @@ func _hunter_near(p: Vector3, r: float) -> bool:
 # ------------------------------------------------------------------ the match clock
 func tick(dt: float) -> void:
 	if seats: seats.tick(dt)
+	var viewer := SideColor.viewer(m)
 	for x in list:
 		_tick_outpost(x, dt)
 		var who := occupant(x) if ExitSignal.phase(x, -1) == ExitSignal.ACTIVE else -1
-		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time)
+		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time, viewer)
 
 ## The team of someone standing in a live outpost's yard, or -1.
 func occupant(x: Dictionary) -> int:

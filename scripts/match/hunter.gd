@@ -110,6 +110,7 @@ var haste_t := 0.0
 var fortify_t := 0.0
 var shield := 0.0
 var shield_t := 0.0
+var shield_kind := ""          # the material the shield sounds as (ShieldSfx); "" = the plain ward
 var shield_src := ""          # an Icons id: who gave the shield (ShieldSrc), for your vitals' strip
 var recoil := 0.0
 var walk_ph := 0.0
@@ -543,6 +544,8 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if shield > 0.0 and not shelled:
 		var a := minf(shield, d)
 		shield -= a; d -= a
+		ShieldSfx.hit(self, a)
+		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
@@ -608,10 +611,7 @@ func update_lip() -> void:
 ## it. The balloon glows purple once your glider is overheated, when the next hit spikes you.
 const MARKER_BALL_Y := 0.95       # balloon centre above the stance: where a level shot flies
 const MARKER_FLASH := 0.3
-const MARKER_FOE := Color("ff4a3a")
-# always cool blue, so an ally never reads like a foe (team 0 is orange); half see-through, since you
-# never shoot at it (at full strength it lit a bright blue hoop under every squadmate's hop)
-const MARKER_ALLY := Color(0.31, 0.85, 1.0, 0.5)
+const MARKER_ALLY_A := 0.5      # an ally's marker is half see-through, since you never shoot at it
 var balloon: Node3D               # the hit marker: Ring, Ball, Knot, Aura, String
 var _mk_ring: MeshInstance3D
 var _mk_ball: MeshInstance3D
@@ -667,14 +667,13 @@ static func _marker_mats(c: Color) -> Dictionary:
 ## The marker's colour as the local player sees it.
 func _marker_col() -> Color:
 	var lp: Ent = m.local_player()
-	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if lp == self:
-		return Color(tc.lerp(Color.WHITE, 0.45), 0.45)       # your own: faint
+		return Color(SideColor.you().lerp(Color.WHITE, 0.45), 0.45)       # your own: faint
 	if lp and lp.team != team:
-		return MARKER_FOE                                    # an enemy
+		return SideColor.foe()                       # an enemy
 	if lp:
-		return MARKER_ALLY                                   # an ally
-	return tc                                            # watching: team colours
+		return Color(SideColor.ally(), MARKER_ALLY_A)       # an ally
+	return Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]      # watching: team colours
 
 func _build_marker() -> void:
 	if _mk_quad == null:
@@ -1818,7 +1817,9 @@ func sim(dt: float) -> void:
 	HunterCooldowns.tick(self, dt)
 	if shield_t > 0.0:
 		shield_t -= dt
-		if shield_t <= 0.0: shield = 0.0
+		if shield_t <= 0.0:
+			shield = 0.0
+			shield_kind = ""
 	if reload_t > 0.0:
 		reload_t -= dt
 		if reload_t <= 0.0:
@@ -2763,8 +2764,7 @@ func gain_xp(x: float) -> void:
 			m.fx.body_glow(pos, Arch.color(arch) if Arch.exists(arch) else Color("ffd27a"))
 		if is_local() and m and m.hud:
 			m.hud.level_up(lvl, wstep)
-			# the level-up chime: its own rising bell run over a warm swell (tools/gen_sfx_ui.py)
-			m.sfx("level_up", null, -2.0, 1.0)
+			LevelSfx.level_up(m)      # the soft rising bell run (tools/gen_sfx_ui.py)
 			if kin is Kin: BokiChatter.say(m, kin, "level_up")
 			level_ups += 1
 	if not is_local():
@@ -2797,7 +2797,7 @@ func level_slot(slot: String) -> bool:
 		if m and m.has_method("on_bond_ready"): m.on_bond_ready(self)
 	if is_local() and m and m.hud:
 		m.hud.ability_feedback({"sec": "sec", "dash": "dash", "kin": "k1", "ult": "r"}[slot], "cast")
-		m.sfx("unlock", null, -8.0, 1.0 + 0.1 * float(slot_lv[slot]))
+		LevelSfx.rank(m, slot, int(slot_lv[slot]))
 	return true
 
 ## Bots (and anyone skipping the choice) spend points in a sensible order.
@@ -2969,6 +2969,7 @@ var cast_slot := ""
 func _on_ability_used(caster: Node, _id: String, slot: String) -> void:
 	if caster == self:
 		MergeAugment.on_used(self, slot)          # a merge form's add-ons on RMB, E and Shift
+		if m: HostileCue.on_used(self, slot)      # a rival's E or R sounds like a threat
 	if caster == self and slot != "dodge" and slot != "primary" and m:
 		cast_at = m.time
 		cast_slot = "ult" if slot in ["ult", "ultimate"] else slot

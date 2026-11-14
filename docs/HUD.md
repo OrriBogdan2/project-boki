@@ -14,6 +14,8 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `shield_strip.gd` (`ShieldStrip`, drawn by `HudVitals`) | your shield: one pale strip over the top of your health bar (a hit drains it first), the pools in drain order (Albert's raised aegis, the timed shield, the Boki owner shield) split by notches; the leading pool's source icon (`ShieldSrc`, set where a shield is given) and the total in the numbers row; a timed shield fades over its last `FADE_S` (1.5 s) since it drops whole. Overhead plates keep the pale fill past the end of health. Checks: `--hudref-check`, `--shield-check` |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, the quiet level-up beam and "+" while a point can go in (`RankMarks`), lock |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips (each fills as its charge recharges; a ready charge shows the next one's countdown small at the top), key pill, rank pips, lock; `--ability-bar-check` asserts the bar against each kit's charges and slot timers (Kael, Cinder, Neve, Grimble) |
+| `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
+| `hunter_ult_tile.gd` (`HunterUltTile`) | the hero ultimate (R) on the ability row, one look for every hero in its ability colour: locked (padlock, LV 6), cooling (dim icon, sweep, countdown), blocked (off cooldown but stunned, downed or merged: a padlock over the dim icon), ready (`HudSlot.lit`: a steady lit rim and halo; a 0.6 s shine, white edge and a band of light, the moment it comes back from cooling or the level lock). Shots: `--ult-ready-shots` (GPU) |
 | `squad_frames.gd` (`SquadFrames`, drawn by `hud_panels.gd`) | the squad frames down the left edge in team modes, one row per squad member, you last (none in solo): round portrait with the run level on its lower-left (gold once the ultimate is open), a state label over the name, a thin armour bar over the health bar in one slanted frame. KNOCKED: pink label, red-tinted portrait, the bleed-out in the health row, a marker beside the row whose tail points at them. DEAD: grey cracked portrait, no bars (with the deathbox timer while they can be saved). EXTRACTED and the drop's LEAD/SOLO use the same label. Sizes and colours are measured off the owner's reference: `scripts/ui/SQUAD_FRAMES_SPEC.md`. Check: `--hudref-check`; shots and film: `--team-boki-shots [--film]` |
 | `team_boki.gd` (`TeamBoki`, drawn right after `SquadFrames`) | a teammate's small Boki icon past the end of their row's bars, with a thin health bar, tinted when it is down, resting or its owner is a wisp. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
 | `portraits.gd` (`Portraits`) | every hunter's face, in the HUD (vitals, squad frames, ally popups) and the menus (`Portraits.Pic`, chip icons): the Warden's painted portrait from `art/portraits/<id>.jpg` (the splash, `<id>_splash.jpg`, in the bigger menu spots), cut to each frame around `content/rules/portraits.json`'s framing, with the frame and its hit, low-health, downed, dead and out states; the rendered model when a Warden has no painted art. New art: `tools/portrait_art.gd`. Check: `--portrait-check` |
@@ -29,6 +31,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate's squad row while knocked (pink-red italic KNOCKED tag on the row's top edge, red X in a white arrow beside it) or dead (grey DEAD tag, grey X, greyed portrait); back up, eliminated or soul lost: one faint line beside the row (1.5 s) and a sound. Check: `--hudref-check` |
 | `knock_banner.gd` (`KnockBanner`, a Control on `hud.knocks`) | the knock banner top-centre (top at 13% of the screen, under any toasts): ALLY KNOCKED (cyan ring, white word with a blue edge, pink X) when a teammate goes down, KNOCK (pink-red ring and word, white edge and X) when your squad knocks a rival; round portrait over an ink slash, name pill. The slash and the pill are see-through (`back_alpha` 0.5, owner 11-12) and anti-aliased; the ring, portrait and words stay solid, the words drawn at their real pixel size through the pop and the banner placed on whole pixels, so nothing blurs at 1080p. Pops 1.25 -> 1.0 in 0.12 s, holds, fades and rises out at 1.25 s; a new knock replaces it, the same kind within 0.3 s counts x2. Sounds: `warn` low (teammate), `knock_confirm` (rival). Numbers: `content/rules/knock_banner.json`. Check: `--hudref-check`; film: `--knock-banner-clip` (GPU) |
+| `channel_bar.gd` (`ChannelBar`, drawn by `hud_panels.gd` right after `HudVitals`) | an ally's Meeko is channelling Hearth Call on you: a slim gold bar with her portrait under your vitals, draining over the 5 s, gone the frame it ends or breaks (she is knocked, stunned or out of reach). Her game reads her kit; every other game reads the target nid and seconds left from the hunter row's tail (`HunterNet`, Net 0.24.6). Checks: `--hudref-check`, `--displace-net-check` (online row) |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:
@@ -52,7 +55,9 @@ Rules of the look:
   A remote body keeps the Net `kst` time (`KitStatus._note_remote`). Check: `--clarity-check` section 4.
 
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
-drawn, your shield strip drains first and fades, the downed plate and status words show, cooldown text appears).
+drawn, your shield strip drains first and fades, the downed plate and status words show, cooldown text appears,
+the ultimate tile goes cooling -> ready with the shine on the redraw it comes back, steady after, padlocked while stunned,
+no second shine).
 
 ## Boki HUD: decision, state, gaps
 
@@ -272,6 +277,18 @@ Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh sa
   (the zone clocks and their line, 8 px gap) and under the ship's countdown line while the drop is planned.
 - The match draws it on the HUD canvas (`TutorialHud`, also `FirstMatchGuide`); the farm adds a `StripView`
   Control (`FarmGuide.hint_box`). Both call `TutorialStrip.paint`. The match step's plain-words detail is a
+  message-lane tip when the step opens, not a second line. The farm's Skip sits just under the strip's right end.
+- The glide dive is taught in that strip: `FirstMatchGuide`'s "dive" line ("Gliding: hold <crouch key> to dive")
+  shows once per save in any real Extraction, the first time the glider has been open for 1.5 s above 15 m (not
+  in the opening drop). It clears at the first dive and never returns (`Save.d tutorial glide_dive`).
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
+  never again after a dive), `--tutorial-strip-shots`.
+- Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440), `--tutorial-strip-shots`.
+
+## Key caps
+- Every key the UI names comes from `Settings.key_cap(action)` (the live main key) or `key_caps(action)` (main / alternate), both built on `Settings.cap_text`: letters upper-case, mouse buttons `LMB RMB MMB M4 M5 WHEEL-UP WHEEL-DN`, no spaces inside a cap (`UI.key_hints` splits on spaces). Never type a key letter in a label, tooltip or kit text; ability descriptions in `content/` say "press the key again".
+- Fixed keys that are not in `Settings.ACTIONS` (arena Loadout L, duel setup B, Alt+key rank-up) may stay as text.
+- Check: `--key-caps-check` rebinds the ability actions to mouse buttons and reads the kit card, recast badge, class tooltip and Fusion form text.
   message-lane tip when the step opens (once a step, not re-sent every frame), not a second line. The farm's Skip
   sits just under the strip's right end.
 - The glide dive is taught in that strip: `FirstMatchGuide`'s "dive" line ("Gliding: hold <crouch key> to dive")
@@ -284,3 +301,9 @@ Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh sa
   `--tutorial-hud-check` fires a toast and a world prompt under a fresh strip and asserts one prompt shows.
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive; one prompt under a fresh strip), `--tutorial-strip-shots`.
+  never again after a dive), `--tutorial-strip-shots`.
+
+## Key caps
+- Every key the UI names comes from `Settings.key_cap(action)` (the live main key) or `key_caps(action)` (main / alternate), both built on `Settings.cap_text`: letters upper-case, mouse buttons `LMB RMB MMB M4 M5 WHEEL-UP WHEEL-DN`, no spaces inside a cap (`UI.key_hints` splits on spaces). Never type a key letter in a label, tooltip or kit text; ability descriptions in `content/` say "press the key again".
+- Fixed keys that are not in `Settings.ACTIONS` (arena Loadout L, duel setup B, Alt+key rank-up) may stay as text.
+- Check: `--key-caps-check` rebinds the ability actions to mouse buttons and reads the kit card, recast badge, class tooltip and Fusion form text.

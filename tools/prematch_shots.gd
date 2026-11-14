@@ -6,14 +6,12 @@ extends RefCounted
 
 const MOMENTS := [["full", 10.0], ["chat", 10.0], ["red", 2.0], ["locked", 0.0]]      # [name, s left on your turn]
 
-## The visible controls under `node` (not its frame) that stick out of `area` less the view's title-safe
-## margin, as "Class at rect". Inside a ScrollContainer a control is judged by that container's rect, so a
+## The visible controls under `node` (not its frame) that stick out of `area` less the HUD safe margin
+## (HudStyle.safe_pad), as "Class at rect". Inside a ScrollContainer a control is judged by that container's rect, so a
 ## row that has to scroll (or sits under the next widget) fails like one off the screen. The chat log
 ## scrolls by design and is not judged.
 func outside(node: Node, area: Rect2) -> Array:
-	var pv = load("res://scripts/ui/prematch_view.gd")
-	var margin := float(maxi(pv.SAFE_MIN, int(area.size.y * pv.SAFE_FRAC)))
-	var safe := area.grow(-margin + 1.0)
+	var safe := HudStyle.safe_rect(area.size).grow(1.0)
 	var bad: Array = []
 	for c in node.find_children("*", "Control", true, false):
 		var box := safe
@@ -26,7 +24,6 @@ func outside(node: Node, area: Rect2) -> Array:
 			bad.append("%s at %s" % [c.get_class(), c.get_global_rect()])
 	return bad
 
-## The ScrollContainer `c` sits in below `top`, or null.
 func _scroller(c: Node, top: Node) -> ScrollContainer:
 	var p := c.get_parent()
 	while p != null and p != top:
