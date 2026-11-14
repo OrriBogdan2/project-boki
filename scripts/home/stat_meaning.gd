@@ -23,8 +23,8 @@ static func rise(h, s: String) -> void:
 	lane.top = NOTICE_Y + (GUIDE_DROP if h.guide and h.guide.hint_visible() else 0.0)
 	lane.push(String(Care.STATS[s]["means"]), HubHints.TIP_COL, MsgLane.NORMAL, HubHints.TIP_LIFE)
 
-## Is a garden game (the Dash and its relay, Shove, Seek, Spark Volley, Tumble, Echo Steps, the show, fishing,
-## the lantern board) on? Seek and the lantern board keep a state, the rest a run.
+## Is a garden game (the Dash and its relay, Shove, Seek, Spark Volley, Tumble, Echo Steps, the show, fishing, the
+## lantern match: no `run`, its state says) on?
 static func in_game(h) -> bool:
 	for g in h.games:
 		if g is BaseSeek or g is LanternMatch:      # state machines: on unless IDLE
