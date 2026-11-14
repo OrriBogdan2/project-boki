@@ -64,7 +64,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
 | LMB | hold-auto / tap | hold-auto, alternating hands | match | S:mooshmoosh 25 |
-| RMB | footage: hold to aim with a telegraph, release fires | press, then a fixed 1 s wind-up with a short lane, throws by itself; not holdable (`rmb.hold` absent) | differ (owner #118) | O 118, 118b; S:mooshmoosh 62 |
+| RMB | footage: hold to aim with a telegraph, release fires | press, then a fixed 0.6 s wind-up with a short lane, throws by itself; not holdable (`rmb.hold` absent) | differ (owner #118) | O 118, 118b; S:mooshmoosh 62 |
 | E | press (ring on you), recast throws it to the cursor | press, E again throws to the cursor (up to 9 m) while the 2.5 s ring is up | match; window 2.5 s both | D "zone 2.5s ... reactivate to throw"; S:mooshmoosh 92 |
 | R | press with an ally under the cursor, ~5 s channel, walk freely, no recast | same, 5 s tether, press while it runs is swallowed (`ult_recast` true) | match | D; S:mooshmoosh 221 |
 | Shift | press, own air-dash slot | press hop, air press = long glide on its own 14 s cooldown | match | D |
@@ -97,7 +97,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | RMB | tap, lands at the cursor | tap fires at the cursor; holding past 0.2 s shows the landing ring and release throws | match+ | S:tamsin 18; W rimewright.md row RMB; json `rmb.hold` 0.2 |
 | E | press, recast freezes it | press, E again while it slides freezes it 6 s | match; window = the 4.5 s slide, source not read | D; W |
 | R | press; recast any time cancels, a late recast stuns | press; recast breaks the shell with no stun until the last 0.75 s of 3.5 s, then it cracks early at 0.67 damage | match in shape; window unsettled (ours last 0.75 s, footage "about 3.2-3.5 s") | D "Reactivate early to cancel"; S:tamsin 222 |
-| Shift | hold-drag skate, release stops; air press skates in the air | hold skate (11.5 m/s, 1.6 s cap), release stops, air press skates at once | match | D "HOLD to skate"; S:tamsin 19 |
+| Shift | hold-drag skate, release stops; air press skates in the air | hold skate (10.5 m/s, 1.6 s cap), release stops, air press skates at once | match | D "HOLD to skate"; S:tamsin 19 |
 
 ## Albert (`bulwark`, source Oath, sheet bjorn)
 

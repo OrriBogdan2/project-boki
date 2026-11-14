@@ -37,6 +37,51 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
+   A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
+   it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
+
+## Props on the masters (2026-11-13): the Model Room's v95.glb carries what the game model carries
+The owner (11-13): "should motley have his cards with him?" -> yes. `tools/art1/v95_props.py` puts a Hunter's game props
+on his v95 master: each prop is the game mesh itself (UVs, materials, textures kept), moved from the game's rest frame
+into the fit frame, scaled by the height ratio, under one `props_fit_to_master` empty; the master is untouched.
+Recipes: `ostra` (Motley: the Fan on his left palm, the 8 orbit cards on their two rings, one spin clip), `breaker` (Albert:
+the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fist shards, the ground rings). Outputs:
+`~/meshy/v95/<Name>/props/`, the per-Hunter table in `~/meshy/v95/PROPS_1113.md`. Gil, Kael, Lace, Meeko, Neve
+and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
+Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
+
+## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
+In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
+re-time: Vex's `x` and Meeko's `seed`/`seed_aim` (tools/art1/glb_add_clips.py). Sparkle is on her current master
+(`m4c_livehead`, the owner's chest fix under the live head): the bake_warden fix keeps her base colour in a server bake.
+Her stretch check is red on main too (worst 14.3 vs main's 13.1, 45 clips over on both). Not swapped:
+- Albert i1: without `emit` the master bakes no crack glow, the porthole `eyes-mood` disc shows blank glass with a dark
+  wedge, and the fish (no `move_bones`) stretches 16x (main 9.5). The porthole and fish need re-placing first.
+- Sable: as below. Gil: no swap spec yet.
+v95_swap.py now stops when `emit` is set but the master has no emission map (it used to bake the base colour as glow:
+Albert's solid cyan).
+
+## Status (2026-11-13, ext/showcase-1113): Vex, Kael, Tarek and Meeko on their current masters
+Swapped to each current.json master (face kept: the specs name the promoted master): Vex (tilt1112 cand_A2), Kael
+(tilt_A, sword stripped: `kael_tilt_A_body.glb`), Tarek (n95 c01, eye stones stripped: `tarek_c01_body.glb`), Meeko (n95
+best, sun and cloud stripped: `best_nocomp.glb`, then pip_companions.py). Already on their newest master: Cinder, Neve,
+Grimble, Motley, Lace. Not swapped:
+- Sable (r5 low4 tilt A): the new body's left hand stretches 6.0 -> 21.1x and 10 clips go over her 18.5 ceiling. Her joint
+  points need refitting to the new body first.
+- Sparkle and Albert i1: still as in the 11-12 evening section above (memory/base colour, solid cyan glow).
+Gil (later the same day): swapped to current.json r2/v95a/cand_B (`gil_v95.json`, art/wardens/gil/IMPORT.md). Two
+new swap keys came with him: `drop_meshes` (the game glb's own meshes the master replaces: his scripted Tail and
+Dorsal) and, for a game glb with no clips, skin_relax is skipped (nothing to sample).
+bake_warden.py now joins a multi-mesh master safely and bakes each material's own colour image (Meeko's wings are a
+separate Meshy part on their own texture).
+
+## Judge framing gotcha (2026-11-13, ext/low4-hunters)
+v95-promote's renderer (`_tools/r95_render.py`) turns the model about its glTF origin, not its bbox centre, and
+the side frame is only ~0.62 m either side of the origin (Grimble's height, 1.9 m). A hunched pose that pushes the head
+forward (Grimble hunch E: head at z 0.64) puts the face out of frame. The judge then reports "too upright, head tucked
+in". Moving the whole mesh 10 cm back (-Z, `_low4-1112/tools/shift_z.py`) gave 85/80/84/83 vs the live 79/79 with the
+same scorer. The face is unchanged, but the pose moves it, so promote such a pass with `--face`. The candidate and the
+command are in `/home/boki/meshy/v95/_low4-1112/PROMOTE_GRIMBLE.txt`. The swap then needs the feet re-centred.
 
 ## Status (2026-11-12 evening, ext/hunters-best-1112): the 11-12 evening promotions
 In game on top of the table below: Neve's chiffon skirt body under the live head (`claire_v95.json`, from
@@ -49,6 +94,13 @@ ext/neve-skirt-livehead). Not swapped yet, so the game keeps the table's model:
   breaker.glb as WORK/game.glb, `move_bones` dropped, since v95_swap.py now takes offsets and his spec has `to`/`chain`)
   rendered him solid cyan (the glow covered the whole body). His eyes-mood screen also needs re-placing on the porthole.
 - Gil (v95a cand_B, live 20:03Z) has no swap spec yet: a first `gil_v95.json` (joints, tail, fin, rapier).
+
+## Cinder 2026-11-13 (ext/cinder-ba-promote): B-A body live
+Owner pick B-A (`~/meshy/v95/Cinder/r2/ba1113/cand_BA2.glb`, CURRENT_OVERRIDES Cinder line): the curvy1113 B-A body (bust
+about two sizes up, waist and hips unchanged) under the live facekeep head, head_diff `[]`. The live hair is carried down
+past the neck cut at the back, and its dark locks are grown down from the cut at the front, so there is no hair ledge
+(no `--ramp`). Lava kept orange with glow (Meshy lavafix emission). Tail cut, swapped and checked as on 11-12; notes,
+sheets and the unpromoted B-A bust + S-B hips mix in `~/meshy/cinder-body-1113/`.
 
 ## Status (2026-11-12, ext/hunters-v95-ingame): every Hunter's LIVE v95 master is the game model
 The masters are the ones `~/meshy/v95/CURRENT_OVERRIDES.txt` and `current.json` name on 11-12. Re-swapped here:
@@ -117,3 +169,25 @@ be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's
 Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
+
+## Face lock (2026-11-12): a body pass never changes a hunter's face
+The /3d/v95 masters are promoted by `v95-promote` (boki-tools; model-room-sync runs `--auto`). It used to copy the
+whole GLB, so a body pass built on an older head put that head live: Cinder's body5/body6/prop1111 chain started from
+appeal4 cand_5 (rebuilt from appeal3 cand_b) and lost the owner's appeal4 cand_3 face. Now a promote keeps the head
+of the current v95.glb (top 13% of the Meshy body: positions, UVs, base-colour texture, plus the eye/head parts in
+that box) unless the pass is declared a face pass: `FACE: <what>` in its pick/applied file, the word `face` after
+the glb in CURRENT_OVERRIDES.txt, or `--face` by hand. An undeclared head change with the same topology and UVs is
+put back (`<stem>_keephead.glb`); anything else is refused. `v95-promote --check` fails if a lock-era promote changed
+a head without a face pass (`--selftest` covers the lock). Swap specs here should name the promoted master
+(`current.json` "glb"), not an r2 candidate, so the game gets the same face.
+
+## The hunters are counted from art/wardens (2026-11-12)
+v95-promote takes its hunters from `~/meshy/v95/_tools/v95_roster.py`: every `art/wardens/<id>/<id>.glb` on the
+game's origin/main (13 with Gil), not a fixed list. Its `KNOWN` table only maps an art id to its v95 folder and
+display name (owner room order 2026-11-08); a warden that is not in it still counts, named after its id. A hunter in
+art/wardens without a `v95.glb` yet shows in `--status` and is a WARN in `--check`. The Model Room's build3d.py on
+hetzner reads the same roster once `~/meshy/v95/_tools/model-room-roster-patch.py` has replaced its fixed 12-row
+list (it refuses unless that list is found exactly once).
+Gil's first v95 pass (no gil_v2 refs, so the approved 2D): `~/meshy/v95/Gil/r2/v95a/NOTES.txt` (cand_B, judge 85;
+the live 12 score 76-88), sheet `Gil/before_after.jpg`, `Gil/turntable.mp4`. Its promote is a face pass:
+`v95-promote Gil r2/v95a/cand_B.glb --face "first v95 face for Gil"`; his swap spec follows from the promoted master.
