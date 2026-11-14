@@ -33,7 +33,7 @@
 		"weapons": {
 			"hoar_fan": "Hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones, then a short pause."
 		},
-		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside an 8.3m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
+		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.47m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},
 	"signature": "hoar_fan",
 	"resource": {

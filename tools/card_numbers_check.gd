@@ -84,6 +84,9 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 			return {"nums": [float(dash["hold"]) * float(dash["reset_charge"])]}
 		"tender":       # the rank 3 burst is r3_k times the radius
 			return {"nums": [float(seed["burst_r"]) * float(seed["r3_k"])]}
+		"thief":        # after the Vault the bolts leave quick_k of the weapon's rate apart (main's card)
+			var bolts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/weapons/arc_bolts.json"))
+			return {"nums": [float(bolts["primary"]["rate"]) * float(dash["quick_k"])]}
 		"rimewright":   # SHATTER_R in rimewright_kit.gd (a code constant, not data)
 			return {"nums": [2.7]}
 	return {}

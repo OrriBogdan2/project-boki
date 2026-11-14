@@ -122,7 +122,7 @@ func _skips(tree: SceneTree) -> void:
 	await _wait(tree, 0.8)
 	ok(not pr.done, "0.8 s into holding A it is still playing")
 	var held := 0.8
-	while not pr.done and held < 3.0:
+	while is_instance_valid(pr) and not pr.done and held < 3.0:      # (a skip frees it)
 		await tree.process_frame
 		held += tree.root.get_process_delta_time()
 	for i in 300:
