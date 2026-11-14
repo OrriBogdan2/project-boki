@@ -193,6 +193,7 @@ func back() -> void:
 		match prev:
 			"pause": open_pause(ctx)
 			"controls": open_controls()
+			"more": open_more()
 			"settings": open_settings()
 			"saves": open_saves()
 			"inventory": open_inventory()
@@ -213,8 +214,8 @@ func close() -> void:
 	Sfx.play("ui_close", null, -14.0)
 	closed.emit()
 
-## The Esc menu: Resume on top, the places you go most next, the rare ones as quiet links, and
-## leaving at the bottom.
+## The Esc menu (DECISIONS 2026-11-08): four buttons, Resume, Settings, More and Leave. Everything else,
+## practice included, sits on the More page. --pause-menu-check holds the count and the reach.
 func open_pause(where: String) -> void:
 	ctx = where
 	Sfx.play("ui_open", null, -10.0)
@@ -222,53 +223,11 @@ func open_pause(where: String) -> void:
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
 	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
-	var bw := 388.0
-	var item := func(txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
-		var b := UI.button(txt, cb, bw, icon)
-		if tier != "": b.theme_type_variation = tier
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		if key != "": UI.with_key(b, key)
-		v.add_child(b)
-		return b
-	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
-	var psc = Game.main.screen_node() if where == "match" and Game.main else null
-	var practice: Practice = Practice.of(psc) if psc is Match else null
-	if practice:
-		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
-		item.call("Practice", "plus", open_practice.bind(practice.m.player))
-	if where != "match":
-		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
-	if where == "home" and Game.main:
-		item.call("Training Grounds", "jump", func():
-			close()
-			Game.main.screen_node()._start_training())
-	item.call("Settings", "gear", func():
+	var res: Button = _menu_item(v, "Resume", "next", close, "Esc", "Primary")
+	_menu_item(v, "Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
-	item.call("Controls", "dash", open_controls)
-	if where != "match":
-		item.call("Save files", "satchel", open_saves)
-	# the rarely used ones: quiet text links in a row
-	var minor := HFlowContainer.new()
-	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
-	if where == "home":
-		minor.add_child(UI.ghost("Change your look", func():
-			close()
-			Game.goto("hatch", {"create": true})))
-	var scr = Game.main.screen_node() if Game.main else null
-	if where == "home" and scr:
-		minor.add_child(UI.ghost("Photo mode", func():
-			close()
-			scr.photo.enter()))
-	if scr and scr.has_method("unstick"):
-		minor.add_child(UI.ghost("I'm stuck", func():
-			close()
-			scr.unstick()
-			Sfx.play("whoosh")))
-	if admin_allowed():
-		minor.add_child(UI.ghost("Admin tools  (`)", open_admin))
-	if minor.get_child_count() > 0:
-		v.add_child(minor)
+	_menu_item(v, "More", "satchel", open_more)
 	v.add_child(UI.spacer(2))
 	if where == "match":
 		var m = Game.main.screen_node()
@@ -277,21 +236,16 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
-			var lb: Button = item.call("Leave match", "back", func():
+			var lb: Button = _menu_item(v, "Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
-		item.call("Save and go to the main menu", "home", func():
+		_menu_item(v, "Save and leave", "home", func():
 			Save.save_game()
 			close()
 			RateCard.gate(root, func(): Game.goto("title")))
-	if not OS.has_feature("web"):
-		var q: Button = item.call("Save and quit the game", "close", func():
-			Save.save_game()
-			RateCard.gate(root, get_tree().quit), "", "Ghost")
-		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
 
 ## The quick-reference card under Esc; "Change keys" goes on to the rebinding list.
@@ -302,6 +256,51 @@ func open_controls() -> void:
 	ControlsCard.fill(v, hero)
 	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
+
+func _menu_item(v: VBoxContainer, txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
+	var b := UI.button(txt, cb, 388.0, icon)
+	if tier != "": b.theme_type_variation = tier
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	if key != "": UI.with_key(b, key)
+	v.add_child(b)
+	return b
+
+## The Esc menu's second page: practice first (where it applies), then what's used less often.
+## Back and Esc return to the menu.
+func open_more() -> void:
+	var v := _page("more", "More", 440)
+	var scr = Game.main.screen_node() if Game.main else null
+	var practice: Practice = Practice.of(scr) if ctx == "match" and scr is Match else null
+	if practice:
+		_menu_item(v, "Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+		_menu_item(v, "Practice", "plus", open_practice.bind(practice.m.player))
+	if ctx == "home" and scr and scr.has_method("_start_training"):
+		_menu_item(v, "Training Grounds", "jump", func():
+			close()
+			scr._start_training())
+	_menu_item(v, "Controls", "dash", open_controls)
+	if ctx != "match":
+		_menu_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
+		_menu_item(v, "Save files", "satchel", open_saves)
+	if ctx == "home":
+		_menu_item(v, "Change your look", "swap", func():
+			close()
+			Game.goto("hatch", {"create": true}))
+	if ctx == "home" and scr:
+		_menu_item(v, "Photo mode", "swap", func():
+			close()
+			scr.photo.enter())
+	if scr and scr.has_method("unstick"):
+		_menu_item(v, "I'm stuck", "jump", func():
+			close()
+			scr.unstick()
+			Sfx.play("whoosh"))
+	if admin_allowed():
+		_menu_item(v, "Admin tools", "gear", open_admin, "`")
+	if not OS.has_feature("web"):
+		_menu_item(v, "Quit game", "close", func():
+			Save.save_game()
+			RateCard.gate(root, get_tree().quit))
 
 # ------------------------------------------------------------------ settings
 ## The Training Grounds' Practice page: your ability ranks (PracticeRanks).

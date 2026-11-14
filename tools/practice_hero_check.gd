@@ -92,8 +92,10 @@ func _area(main: Node, m: Match, area: String) -> void:
 	main.set("current", m)         # (the Esc menu finds the match through the current screen)
 	Overlay.open_pause("match")
 	await tree.process_frame
+	Overlay.open_more()
+	await tree.process_frame
 	var labels: Array = Overlay.host.find_children("*", "Button", true, false).map(func(b): return String((b as Button).text))
-	ok(labels.any(func(t): return t.contains("Change Hunter")), "%s: the Esc menu has Change Hunter" % area)
+	ok(labels.any(func(t): return t.contains("Change Hunter")), "%s: the Esc menu's More page has Change Hunter" % area)
 	Overlay.close()
 	main.set("current", was)
 	await tree.process_frame
