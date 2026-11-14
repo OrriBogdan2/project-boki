@@ -7,20 +7,24 @@ extends RefCounted
 ## side by side. One chase at a time per zone (per_zone). k["life_chase"] marks a Boki in one, k["life_it"] the
 ## chaser, k["tag_pace"] its run scale (home.gd _move_kin), k["chase_leg"] s the chaser has been after the runner.
 
-const DIRS := [0.0, 0.785, -0.785, 1.571, -1.571, 2.356, -2.356, 3.1416]      # rad off "straight away"
-const STEP_M := 1.0      # m between ground samples along a flee line
+const DIRS := [0.0, 0.785, -0.785, 1.571, -1.571, 2.356, -2.356, 3.1416]  # rad off "straight away"
+const STEP_M := 1.0  # m between ground samples along a flee line
+
 
 static func rules() -> Dictionary:
 	return Content.rules("garden_sim")["chase"]
+
 
 ## Takes the chase marks off a Boki (BaseLife: leaving PLAY_WITH).
 static func clear(k: Dictionary) -> void:
 	for key in ["life_chase", "life_it", "tag_pace", "chase_leg", "chase_goal"]:
 		k.erase(key)
 
+
 ## Chases running in this zone (one chaser each).
 static func running(life: BaseLife) -> int:
 	return life.h.kins.filter(func(k): return k.has("life_chase") and k.has("life_it")).size()
+
 
 ## The friend `k` starts a chase with, or {} (none near that is free and less outgoing, or the zone is at its cap).
 static func pick(life: BaseLife, k: Dictionary, near: Array) -> Dictionary:
@@ -33,6 +37,7 @@ static func pick(life: BaseLife, k: Dictionary, near: Array) -> Dictionary:
 		if friends and loose and social >= float(o["pers"].get("social", 0.22)):
 			return o
 	return {}
+
 
 ## `k` starts chasing `o`: both go to PLAY_WITH for secs seconds. False when a machine refuses.
 static func begin(life: BaseLife, k: Dictionary, o: Dictionary) -> bool:
@@ -52,6 +57,7 @@ static func begin(life: BaseLife, k: Dictionary, o: Dictionary) -> bool:
 	life.h._emote(k, "★")
 	return true
 
+
 ## `k` is the chaser, `o` the runner: their paces (Speed stat; the runner is a little slower) and the leg clock.
 static func _roles(k: Dictionary, o: Dictionary) -> void:
 	k["life_it"] = true
@@ -61,10 +67,12 @@ static func _roles(k: Dictionary, o: Dictionary) -> void:
 	k["chase_leg"] = 0.0
 	o.erase("chase_leg")
 
+
 static func _pace(rec: Dictionary, share: float) -> float:
 	var R := rules()
 	var speed := clampf(float(rec["stats"]["speed"]) / float(maxi(Care.stat_cap(rec), 1)), 0.0, 1.0)
 	return float(R["run"]) * (1.0 + float(R["speed_gain"]) * speed) * share
+
 
 ## One 10 Hz step for `k`: the chaser runs at the runner and tags it on contact; the runner flees.
 static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
@@ -84,13 +92,15 @@ static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
 	else:
 		_flee(life, k, o)
 
+
 static func _swap(life: BaseLife, k: Dictionary, o: Dictionary) -> void:
 	_roles(o, k)
 	o["goal"] = o["pos"]
 	for who in [k, o]:
-		who["joy_t"] = float(rules()["hop_s"])      # the rig's hop: there is no tag clip
+		who["joy_t"] = float(rules()["hop_s"])  # the rig's hop: there is no tag clip
 		who.erase("chase_goal")
 	life.h._emote(o, "★")
+
 
 ## The runner heads for the first clear spot flee_m m off, turning from straight away from the chaser; it stops
 ## to be caught once the chaser has been after it for leg_s seconds.
@@ -112,6 +122,7 @@ static func _flee(life: BaseLife, k: Dictionary, it: Dictionary) -> void:
 			return
 	k["goal"] = k["pos"]
 
+
 ## Can `k` walk the straight line to `to` on this zone's ground: same island, no void, deep water only if it paddles.
 static func _clear(life: BaseLife, k: Dictionary, to: Vector3) -> bool:
 	var from: Vector3 = k["pos"]
@@ -120,10 +131,14 @@ static func _clear(life: BaseLife, k: Dictionary, to: Vector3) -> bool:
 	var steps := ceili(from.distance_to(to) / STEP_M)
 	for i in range(1, steps + 1):
 		var p := from.lerp(to, float(i) / float(steps))
-		if life.h.world.is_void(p.x, p.z) or life.h.world.island_of(p.x, p.z) != island \
-				or (not swims and life.h.water.depth(p.x, p.z) > 1):
+		if (
+			life.h.world.is_void(p.x, p.z)
+			or life.h.world.island_of(p.x, p.z) != island
+			or (not swims and life.h.water.depth(p.x, p.z) > 1)
+		):
 			return false
 	return true
+
 
 ## Time's up: the chaser lies down where it is and the runner comes to lie beside it.
 static func _rest(life: BaseLife, k: Dictionary, o: Dictionary) -> void:

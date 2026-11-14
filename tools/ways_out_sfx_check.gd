@@ -299,7 +299,6 @@ func _quest(main: Node) -> void:
 	Sfx.reset_scene_audio()      # the Heart matches above leave their seats' loops held (the check never idles)
 	var m := _match(main, 8308)
 	var Q: QuestSeats = m.exits.seats
-	var A: QuestSfx = Q.audio
 	var me: int = m.player.team
 	var U: QuestSeat = Q.uplink
 	var L: QuestSeat = Q.lair
