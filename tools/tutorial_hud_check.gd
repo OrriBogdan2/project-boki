@@ -5,11 +5,18 @@ extends RefCounted
 ##      toasts, intro) intersect, none sits in the middle
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
-##      hunter and the Boki are never under the banner
+##      hunter and the Boki are never under the banner; on a step whose card carries the interact key the
+##      world prompt label is held (the card says it)
+##   2b. one prompt: a fresh banner, a toast and a world prompt show as the banner alone; a fight's urgent
+##      line and its revive prompt still show; the step's plain words go to the lane once, not every frame
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
-##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
+##   5. the strip's new-objective chime: once per step, none on a re-pulse, ducked in a fight
+##   6. the course: every stop is walkable from the one before it on its island, and the lookout takes a
 ##      wall kick (taller than a jump, within a jump and a kick's climb)
+##   6. the glide dive line (FirstMatchGuide): shown once per save after the glider has been open for
+##      dive_open_s above dive_height, in the strip with the player's crouch key, gone at the dive and never
+##      again; a save that has dived never sees it
 
 var bad := 0
 var m: Match
@@ -27,6 +34,7 @@ func run(mn: Node) -> void:
 	_lanes()
 	_course()
 	_reach()
+	_dive_hint()
 	print("TUTHUD DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -57,7 +65,7 @@ func _lanes() -> void:
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
 		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
-		var wo_w := maxf(WaysOutHud.CELL.x * 4.0 + WaysOutHud.SQUADS_W, 240.0)
+		var wo_w := maxf(WaysOutHud.CELL.x * 4.0, 240.0)
 		var wo_b := WaysOutHud.TOP_Y + WaysOutHud.CELL.y + 31.0
 		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, WaysOutHud.TOP_Y), Vector2(wo_w, wo_b - WaysOutHud.TOP_Y))
 		var gb := TutorialStrip.rect(sz, wo_b)
@@ -82,20 +90,36 @@ func _course() -> void:
 	ok(closed, "the intro card closes by itself within %.1fs (%.2fs)" % [Tutorial.INTRO_T, held_at])
 	ok(bool(Save.d["tutorial"].get("tut_intro", false)), "and is remembered, so it only shows the first time")
 	_marker()
+	_one_prompt()
 	var t := 0.0
 	var last := -1
 	var step_t := 0.0
 	var worst := 0.0
 	var toast_in_card := 0
 	var bubble_in_card := 0
+	var prompt_in_card := 0
+	var words_seen := 0
 	var shown_after := 0
 	var asked := 0
 	var under := 0
+	var key_label := 0      # frames an interact step's card and a world prompt were both up
+	var key_loud := 0       # ... of those, frames the world label would still have drawn
 	var texts := {}
 	var counters := {}
+	var chimed := 0
+	var stray := 0
+	var changes := 0
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
+		var before := tu.step
+		Sfx.last_played.erase(TutorialStrip.CHIME)
+		Sfx.recent.clear()      # (headless steps outrun the wall clock the stacking limit counts in)
 		m.step(Match.DT)
+		if Sfx.last_played.has(TutorialStrip.CHIME):
+			if tu.step != before: chimed += 1
+			else: stray += 1
+		if tu.step != before:
+			changes += 1
 		t += Match.DT
 		if tu.step != last:
 			if last >= 0:
@@ -110,18 +134,35 @@ func _course() -> void:
 		step_t += Match.DT
 		if m.hud == null:
 			continue
+		if not m.interact.is_empty() and Tutorial.KEYS.get(tu.id(), "") == "interact":
+			key_label += 1
+			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
 			toast_in_card += m.hud.msgs.texts().size()
 			bubble_in_card += m.bubbles.size()
+			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()
 		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
+			words_seen += int(tu.detail != "" and m.hud.msgs.texts().has(tu.detail))
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
+	var once := changes > 3 and chimed == changes and stray == 0
+	ok(once, "one chime per new objective, none otherwise (%d steps, %d chimes, %d stray)" % [changes, chimed, stray])
+	var calm_db := TutorialStrip.chime_db(m)
+	m.player.hurt_at = m.time
+	var fight_db := TutorialStrip.chime_db(m)
+	var ducked := calm_db < -6.0 and fight_db <= calm_db - 6.0
+	ok(ducked, "the chime is quiet (%.0f dB), ducked in a fight (%.0f dB)" % [calm_db, fight_db])
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
+	var frames := "(%d frames over %d steps)" % [words_seen, last + 1]
+	ok(words_seen > 0 and words_seen <= last + 1, "the step's plain words come to the lane once a step " + frames)
+	ok(prompt_in_card == 0, "no world prompt shows while a banner is up (%d frames)" % prompt_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
 	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
+	var held := "(%d of %d frames drawn)" % [key_loud, key_label]
+	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
@@ -137,6 +178,34 @@ func _course() -> void:
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("gkey", "")).to_lower()
 	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+
+## A fresh banner with a toast and a world prompt fired under it: one prompt shows. A fight's urgent line
+## and revive prompt get through; when the banner settles the toast shows.
+func _one_prompt() -> void:
+	var tu: Tutorial = m.tut
+	var lane: MsgLane = m.hud.msgs
+	lane.clear()
+	tu.card_t = 0.0
+	m.step(Match.DT)        # (the tutorial puts the lane on hold for the fresh banner)
+	m.hud.toast("one prompt", Color.WHITE)
+	m.interact = {"kind": "chest", "label": "Press F to open"}
+	var n := _prompts()
+	ok(tu.card_up() and n == 1, "a fresh banner, a toast and a world prompt: one prompt shows (%d)" % n)
+	lane.push("Your Boki is down", Color.WHITE, MsgLane.URGENT)
+	m.interact = {"kind": "revive", "label": "Hold F to revive"}
+	n = _prompts()
+	ok(n == 3 and lane.waiting() == 1, "a fight's urgent line and revive prompt still show (%d)" % n)
+	m.interact = {}
+	tu.card_t = Tutorial.CARD_T
+	m.step(Match.DT)
+	ok(lane.texts().has("one prompt"), "when the banner settles the toast shows (%s)" % str(lane.texts()))
+	lane.clear()
+
+## What asks for the player's eye now: the banner, the lane's lines on show, the world prompt.
+func _prompts() -> int:
+	var n := 1 if m.tut.step >= 0 else 0
+	n += m.hud.msgs.texts().size()
+	return n + int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 
 ## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:
@@ -207,3 +276,50 @@ func _reach() -> void:
 	var cr := tu.stop("crouch")
 	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
 	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
+
+# ------------------------------------------------------------------ 6. the glide dive line
+func _glide_secs(g: FirstMatchGuide, p: Hunter, secs: float) -> void:
+	p.dropping = false
+	p.gliding = true
+	p.pos.y += float(FirstMatchGuide.rules()["dive_height"]) + 5.0 - GlideDive.height(p)
+	for i in int(secs * 10.0):
+		g.tick(0.1)
+
+func _dive_hint() -> void:
+	Save.d["tutorial"].erase("glide_dive")
+	Save.d["first_guide"] = int(FirstMatchGuide.rules()["matches"])      # past the first matches: dive line only
+	var dm := Match.new()
+	main.add_child(dm)
+	dm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
+	dm.set_process(false)
+	var g := dm.guide
+	var p: Hunter = dm.player
+	ok(g != null and g.dive_only, "after the first matches the guide stays, for the dive line only")
+	_glide_secs(g, p, float(FirstMatchGuide.rules()["dive_open_s"]) - 0.5)
+	ok(g.line == "", "the glider open for less than dive_open_s: no line")
+	_glide_secs(g, p, 0.6)
+	var cap := Settings.key_cap("crouch")
+	var says := "the dive line with the crouch key (%s)" % g.line
+	ok(g.id == "dive" and g.line.contains(cap), "glider open past dive_open_s: " + says)
+	var strip := TutorialStrip.rect(Vector2(1280, 720))
+	var px := int(strip.size.y * 0.5)
+	var wide: float = dm.hud.big.get_string_size(g.line, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	ok(wide <= strip.size.x - strip.size.y, "the dive line fits the one-line strip at %d px" % px)
+	p.glide_dive.on = true
+	g.tick(0.1)
+	ok(g.line == "" and FirstMatchGuide.dive_taught(), "the dive stops the line and counts as learnt")
+	p.glide_dive.on = false
+	g.shown.clear()
+	_glide_secs(g, p, 5.0)
+	ok(g.line == "", "never again after a dive")
+	ok(FirstMatchGuide.for_match(null, {}) == null, "the next Extraction gets no guide at all")
+	Save.d["tutorial"].erase("glide_dive")
+	var g2 := FirstMatchGuide.for_match(dm, {})
+	g2.shown.clear()
+	_glide_secs(g2, p, 2.0)
+	ok(g2.id == "dive" and FirstMatchGuide.dive_taught(), "the line itself counts as shown for the save")
+	g2.tick(20.0)
+	g2.shown.clear()
+	_glide_secs(g2, p, 5.0)
+	ok(g2.line == "", "shown once per save: not again after it ran out")
+	dm.queue_free()

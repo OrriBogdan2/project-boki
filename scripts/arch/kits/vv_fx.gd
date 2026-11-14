@@ -10,7 +10,7 @@ extends Node3D
 ##   smear    a fading hot-headed streak (the grenade's flight)
 ##   pillar   a column of light that narrows over its life (the drag disc's countdown, the refund column)
 ##   ring     an expanding ring with spark needles (arrivals, shock rings, the slide's start ring)
-##   disc     a dark filled disc with a crackling rim and veins (Skycall's area, the slide's scrape)
+##   disc     a lit crackling rim on the area's radius, a see-through dark falloff and veins (Skycall, Cinderfall)
 ##   star     a camera-facing 4-point crackle (fingertip, muzzle)
 ##   fan      a flat blast sector (the grenade's cone)
 ##   swirl    spinning comma arcs riding on a target (Dazed)
@@ -36,6 +36,8 @@ const ECHO_CAP := 10           # after-images per hunter at most (each copies th
 const KEEP := 0.12             # s a marker or a trail stays without a refresh
 const MARK_RAISE := 1.0        # m the marker rides up the screen past the HP bar
 const NO_EDGE := Color(0, 0, 0, 0)
+const DISC_EDGE := 0.9          # the disc shader's rim radius on its unit quad: disc() scales it so the rim is on r
+const DISC_FILL_A := 0.2        # alpha at a disc's centre: a zone never hides who stands in it (VFX_QUALITY.md)
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -252,13 +254,20 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "ring", dur)
 
-## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
+## An area on the ground, radius r: a jagged crackling rim on r in `rim`, lit with col2, and a soft falloff of col
+## in from it that is DISC_FILL_A at the centre; veins of col2 inside.
+## `hollow` drops the falloff and the veins for a glowing centre: a big range ring, not a dome. `hold` keeps it
+## at full strength until the last fifth, for a countdown (it otherwise fades from the first frame).
 ## Returns the node, so a long one can be ended early with cut().
-func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
+func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE, hollow := false,
+		hold := false) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
-	_look(n, col, col2, rim)
+	var mt := _look(n, col, col2, rim)
+	mt.set_shader_parameter("fill_a", DISC_FILL_A)
+	mt.set_shader_parameter("hollow", 1.0 if hollow else 0.0)
+	mt.set_shader_parameter("hold", 1.0 if hold else 0.0)
 	n.global_position = at + Vector3(0, 0.08, 0)
-	n.scale = Vector3(r, 1.0, r)
+	n.scale = Vector3(r / DISC_EDGE, 1.0, r / DISC_EDGE)
 	_play(n, "disc", dur)
 	return n
 
@@ -325,9 +334,12 @@ func echo(who: Hunter, col: Color, dur := 0.35, alpha := 0.75, back := 0.0) -> v
 	var soft := alpha < 0.5
 	var push := _push_back(who, shift) if soft else Transform3D.IDENTITY
 	for pair in n.get_meta("pairs") as Array:
-		var src: MeshInstance3D = pair[0]
 		var dst: MeshInstance3D = pair[1]
-		dst.visible = is_instance_valid(src) and _shown_under(src, model)
+		if not is_instance_valid(pair[0]):
+			dst.visible = false          # a mesh the model has since dropped (a muzzle flash, an old weapon)
+			continue
+		var src: MeshInstance3D = pair[0]
+		dst.visible = _shown_under(src, model)
 		if dst.visible:
 			dst.global_transform = push * src.global_transform.translated(shift)
 	var mat: StandardMaterial3D = n.get_meta("mat")
@@ -407,15 +419,16 @@ static func _shown_under(node: Node3D, model: Node3D) -> bool:
 
 # ------------------------------------------------------------------ riders
 ## A look riding on a match shot (the dictionary in m.shots) until it ends; then on_end(at, hit) runs.
-## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail).
+## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail; with an `edge` colour, a hot
+## core line down a body rimmed in it).
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+		on_end := Callable(), edge := NO_EDGE) -> void:
 	var n: Node3D
 	if kind == "tracer":
 		n = _take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER)))
 	else:
 		n = _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
-	_look(n, col, col2)
+	_look(n, col, col2, edge)
 	var mi := sd.get("node") as Node3D
 	if mi != null and is_instance_valid(mi):
 		mi.visible = false            # the stock orb goes: this look is the round
@@ -432,9 +445,10 @@ func _alive(sd: Dictionary) -> bool:
 
 # ------------------------------------------------------------------ marker (immediate style)
 ## Sparkle's Static marker at height `top` over `target`: `max_n` pips round a bold count on a dark
-## backing (lit pips in col, all of them in col2 when full), and sparks on the body, 2 per stack.
+## backing (lit pips in col, all of them in col2 when full), and sparks on the body, 2 per stack. `readout` false
+## leaves only the sparks (the owner reads the count off RecastCue's badge).
 ## Call every step while it should show; it goes KEEP s after the last call.
-func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color, top: float) -> void:
+func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color, top: float, readout := true) -> void:
 	var e: Dictionary = markers.get(id, {})
 	if e.is_empty() or not is_instance_valid(e.get("node")):
 		var node := _take("marker", _build_marker.bind(max_n))
@@ -443,12 +457,14 @@ func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color
 	e["t"] = 0.0
 	var nd: Node3D = e["node"]
 	nd.visible = target.visible
+	(nd.get_node("Back") as Node3D).visible = readout
 	var up := screen_up()
 	nd.global_position = target.position + Vector3(0, top, 0) + up * MARK_RAISE
 	var full := n >= max_n
 	var lit_col := col2 if full else col
 	var tm := float(Time.get_ticks_msec()) / 1000.0
 	var pips: Node3D = nd.get_node("Pips")
+	pips.visible = readout
 	for i in pips.get_child_count():
 		var p := pips.get_child(i) as MeshInstance3D
 		var on := i < n
@@ -458,6 +474,7 @@ func marker(id: String, target: Ent, n: int, max_n: int, col: Color, col2: Color
 		var pm := p.material_override as StandardMaterial3D
 		pm.albedo_color = lit_col if on else Color(0.12, 0.1, 0.2, 0.9)
 	var lbl: Label3D = nd.get_node("Count")
+	lbl.visible = readout
 	lbl.text = "%d" % n
 	lbl.modulate = lit_col
 	lbl.scale = Vector3.ONE * (1.3 if full else 1.0)

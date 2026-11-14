@@ -21,7 +21,7 @@
 				"c": "main", "c2": "hot"}
 		]},
 		"cast_trail": {"fx": [
-			{"p": "ribbon", "size": 0.28, "life": 2.0, "tail": 0.18, "c": "pink", "c2": "hot", "c3": "lilac"}
+			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.26, "c": "pink", "c2": "hot", "c3": "lilac"}
 		]},
 		"kindled": {"fx": [
 			{"p": "flare", "y": 1.0, "size": 1.3, "grow": 1.3, "life": 0.25, "c": "lilac", "c2": "hot", "c3": "char"},
@@ -45,8 +45,8 @@
 				"size": 0.08, "c": "lilac", "c2": "hot"}
 		]},
 		"seed_cast": {"fx": [
-			{"p": "flare", "at": "lantern", "size": 0.7, "grow": 1.2, "life": 0.18, "c": "lilac", "c2": "pink", "c3": "char"},
-			{"p": "star", "at": "lantern", "n": 8, "way": "fwd", "speed": 3.0, "spread": 0.5, "drag": 2.0, "life": 0.5,
+			{"p": "flare", "size": 0.35, "grow": 1.2, "life": 0.18, "c": "lilac", "c2": "pink", "c3": "char"},
+			{"p": "star", "n": 8, "way": "fwd", "speed": 3.0, "spread": 0.5, "drag": 2.0, "life": 0.5,
 				"size": 0.12, "c": "lilac", "c2": "hot"}
 		]},
 		"seed_trail": {"fx": [
@@ -95,6 +95,10 @@
 			{"p": "vortex", "size": 1.2, "spin": 0.5, "life": 1.0, "c": "main", "c2": "hot", "c3": "pink"},
 			{"p": "star", "y": 0.5, "n": 12, "shape": "disc", "radius": 0.7, "speed": 1.6, "spread": 0.3, "grav": -0.8,
 				"life": 1.0, "size": 0.14, "c": "pink", "c2": "hot"}
+		]},
+		"call_plus": {"fx": [
+			{"p": "plus", "y": 0.5, "n": 2, "shape": "disc", "radius": 0.4, "speed": 0.9, "spread": 0.15, "grav": -0.3,
+				"drag": 1.0, "curl": 0.4, "life": 1.0, "size": 0.13, "c": "mint", "c2": "hot"}
 		]},
 		"mended": {"fx": [
 			{"p": "flare", "y": 1.1, "size": 2.0, "grow": 1.3, "life": 0.35, "c": "main", "c2": "hot", "c3": "pink"},

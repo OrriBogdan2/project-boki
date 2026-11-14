@@ -28,13 +28,18 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
-			{"p": "drop", "n": 24}]},
+			{"p": "drop", "n": 24}, {"p": "plus", "n": 8}]},
+		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
+## The camera-facing effect shaders that soften where they meet the ground (shaders/soft_fade.gdshaderinc).
+## (fx_dot has its own ground fade: FxDot, ground_y.)
+const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
+const DT_FILL := 1.0 / 60.0   # s per step while timing the Faultline fill
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -58,13 +63,28 @@ func run(main: Node) -> void:
 	_budget(V, P)
 	await _holds(main, m, V, P)
 	_view(m, V, P)
+	_lean()
 	_kit(m, V, P)
+	_dolm_rocks(m)
 	_net(m, V, P)
+	_soft_edges(m)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
+	await _vex_core(main)
 	await _scarf(main)
+	_dots(m)
+	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
+	await _slam_fill(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Every camera-facing effect fades into the ground instead of cutting a line into it, on each renderer (one
+## include, picked by renderer); the Compatibility fallback's ground map comes with the match world.
+func _soft_edges(m: Match) -> void:
+	for sname: String in SOFT_SHADERS:
+		var code := (load("res://shaders/%s.gdshader" % sname) as Shader).code
+		ok(code.contains("soft_fade.gdshaderinc") and code.contains("soft_fade("), "%s softens into the ground" % sname)
+	ok(m.world.get_children().any(func(c: Node) -> bool: return c is FxGround), "the match world shares its ground map")
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
@@ -223,6 +243,23 @@ func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
 
+## A sweep stood up along the aim ("tilt" 90) turns up to its "lean" toward the match camera: no aim shows it
+## edge-on, and it never tips past the lean.
+func _lean() -> void:
+	var back := Vector3(0, sin(deg_to_rad(57.0)), cos(deg_to_rad(57.0)))
+	var layer := {"tilt": 90.0, "lean": 30.0}
+	var worst := 1.0
+	var within := true
+	for i in 8:
+		var b := Basis(Vector3.UP, TAU * i / 8.0)
+		var roll := HeroVfx.sweep_roll(layer, b, back)
+		var normal := b * Basis(Vector3(0, 0, 1), roll) * Vector3.UP
+		worst = minf(worst, absf(normal.dot(back)))
+		within = within and absf(roll - PI * 0.5) <= deg_to_rad(30.0) + 0.001
+	var stood := HeroVfx.sweep_roll({"tilt": 90.0}, Basis(), back)
+	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
+	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
+
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var K: JuggernautKit = P.ak
@@ -232,6 +269,30 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
+
+## Tenzo's thrown rocks are cold basalt with a cobalt rim (DECISIONS 11-08): no heat, no material warmer than blue.
+func _dolm_rocks(m: Match) -> void:
+	var warm: Array = []
+	for kind in ["boulder", "rock", "dashrock"]:
+		var n := KitLooks.of(m)._build(kind)
+		for mi: Node in n.find_children("*", "MeshInstance3D", true, false):
+			var mat: Material = (mi as MeshInstance3D).material_override
+			if mat is ShaderMaterial:
+				var sm := mat as ShaderMaterial
+				# the rock's own shader (glow, rim, heat) or a KitLooks.shade_mat haze (cel_tint's color)
+				var hot := false
+				for p: String in ["glow", "rim_col", "color"]:
+					var c: Variant = sm.get_shader_parameter(p)
+					hot = hot or (c is Color and (c as Color).r > (c as Color).b)
+				var heat: Variant = sm.get_shader_parameter("heat")
+				if hot or (heat != null and float(heat) > 0.0):
+					warm.append(kind)
+			elif mat is StandardMaterial3D:
+				var c := (mat as StandardMaterial3D).albedo_color
+				if c.r > c.b:
+					warm.append(kind)
+		n.free()
+	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
@@ -255,6 +316,27 @@ func _lisette(main: Node, V0: HeroVfx) -> void:
 	ok(hip.distance_to(K.hand_pos(true)) < 0.001 or WardenGlb.anchor(P.model, "anchor_nock") != null,
 			"nock: the model's anchor, else the drawing hand")
 
+## Cinderfall's hot centre ring: at every ult rank it sits at the radius the +core_k damage uses (the data's
+## core_r), everyone sees it (rivals in the hostile tint) and it fills toward the impact with the outer disc.
+func _vex_core(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var U: GunslingerUlt = (P.ak as GunslingerKit).ult
+	var want := float(P.ak.x_def()["core_r"])
+	for rank in range(1, int(Hunter.SLOT_MAX["ult"]) + 1):
+		P.lvl = int(Hunter.ULT_AT[rank - 1])
+		P.slot_lv["ult"] = rank
+		U.cast()
+		U.tick(0.4)
+		var ring := AimKit.entry(P, "xc%d" % U.casts)
+		var fill := float(AimKit.entry(P, "x%d" % U.casts).get("fill", -1.0))
+		ok(is_equal_approx(float(ring.get("r", 0.0)), want) and is_equal_approx(U.core_r(), want)
+				and bool(ring.get("all", false)) and fill > 0.0 and is_equal_approx(float(ring.get("fill", 0.0)), fill),
+				"Cinderfall rank %d: the centre ring is the damage core (%.2f m), seen by all, filling with the disc"
+				% [rank, want])
+		U.clear()
+
 ## The shared kinds on a synthetic recipe set (the real files are done with): every layer kind plays and a pile-up
 ## stays capped; a bone anchor follows the hand; prewarm builds one of every kind and hides them; a stream held along
 ## the aim turns with it; a projectile's trail follows its node and runs out when it is gone.
@@ -267,6 +349,16 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
+	_clear(V)
+	V.play(P, "ring", P.pos, Vector2.RIGHT)
+	V.play(P, "all", P.pos, Vector2.RIGHT)
+	var arcs := [V._arc(360.0), V._arc(120.0)]
+	var sweeps := V.live.filter(func(e): return (e["node"] as MeshInstance3D).mesh in arcs)
+	var got := sweeps.map(func(e): return [(e["mat"] as ShaderMaterial).get_shader_parameter("head_t"),
+		(e["mat"] as ShaderMaterial).get_shader_parameter("band")])
+	ok(sweeps.size() == 2 and is_equal_approx(got[0][0], 0.32) and is_equal_approx(got[0][1], 0.3)
+		and is_equal_approx(got[1][0], 0.28) and got[1][1] == 0.0,
+		"a sweep's even band runs round in its own turn (0.16 of 0.5 s); a plain one keeps the taper %s" % [got])
 	_clear(V)
 	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
 	var palm := V.anchor_pos(P, "palm")
@@ -374,3 +466,57 @@ func _scarf(main: Node) -> void:
 	S.prewarm(P.pos)
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
+
+## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
+## every rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the
+## time is read from data.
+func _slam_fill(main: Node) -> void:
+	var m: Match = flow._match(main, "bulwark")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var K: BulwarkKit = P.ak
+	var xd: Dictionary = K.d["x"]
+	var windup0: float = xd["windup"]
+	P.lvl = 6
+	for rank in [1, 2, 3, 0]:
+		xd["windup"] = 0.6 if rank == 0 else windup0
+		for slot: String in P.slot_lv:
+			P.slot_lv[slot] = maxi(rank, 1)
+		K.cd["x"] = 0.0
+		K.ult.cast()
+		var t_full := -1.0
+		var t_slam := -1.0
+		var t := 0.0
+		while K.ult.phase != "" and t < 2.0 and t_slam < 0.0:
+			m.step(DT_FILL)
+			t += DT_FILL
+			if t_full < 0.0 and float(AimKit.entry(P, "x").get("fill", 0.0)) >= 1.0:
+				t_full = t
+			if K.ult.slams > 0:
+				t_slam = t
+		var label := "rank %d windup %.2f: fill closed at %.3f s, slam at %.3f s" % [
+			maxi(rank, 1), xd["windup"], t_full, t_slam]
+		ok(absf(t_full - float(xd["windup"])) <= DT_FILL and t_full == t_slam, label)
+		K.ult.slams = 0
+		K.ult.phase = ""
+		K.ult._hide_lane()
+	xd["windup"] = windup0
+	m.queue_free()
+
+## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
+## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
+## tells the dots the ground under it.
+func _dots(m: Match) -> void:
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	var high := FxDot.material()
+	Settings.v["quality"] = "low"
+	var low := FxDot.material()
+	ok(low.shader != high.shader and low.shader.code.begins_with("#define DOT_HEIGHT_FADE"), "Low dots fade by height")
+	ok(not high.shader.code.begins_with("#define") and FxDot.material() == low, "one material per preset")
+	Settings.v["quality"] = was
+	var at := Vector3(m.player.pos.x, m.player.pos.y + 1.0, m.player.pos.z)
+	m.fx.burst(at, Color.WHITE)
+	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
+	var g: float = m.world.ground_at(at.x, at.z)
+	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)

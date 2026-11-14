@@ -4,18 +4,19 @@ extends RefCounted
 ## air and glide steps, the dash ease, and the locomotion state machine both own (docs/decisions/0022). Numbers
 ## come from content/rules/tuning.json, re-read live while the movement readout is open (MoveReadout).
 
-enum S {GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED, STUNNED}
-const NAMES: PackedStringArray = ["Grounded", "Airborne", "Gliding", "Dashing", "Mantling", "Knocked", "Stunned"]
+enum S {GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED}
+const NAMES: PackedStringArray = ["Grounded", "Airborne", "Gliding", "Dashing", "Mantling", "Knocked"]
 ## Where each state may go. Gliding is entered only from the air or a dash (never the ground: no hold-to-glide
-## off a jump), and entering a dash folds the glider (exit hook): never both at once.
+## off a jump), and entering a dash folds the glider (exit hook): never both at once. Mantling is the ledge rise
+## (and a jump pad's mantle). Any state may dash (a kit's rush or a pull moves a knocked hunter too); a stun is
+## a status, not a state: it stops your keys, and the glider's guard (HunterLoco) asks it.
 const TABLE := {
-	S.GROUNDED: [S.AIRBORNE, S.DASHING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.AIRBORNE: [S.GROUNDED, S.GLIDING, S.DASHING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.GLIDING: [S.AIRBORNE, S.GROUNDED, S.DASHING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.DASHING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.MANTLING, S.KNOCKED, S.STUNNED],
-	S.MANTLING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.KNOCKED, S.STUNNED],
-	S.KNOCKED: [S.GROUNDED, S.AIRBORNE, S.STUNNED],
-	S.STUNNED: [S.GROUNDED, S.AIRBORNE, S.KNOCKED],
+	S.GROUNDED: [S.AIRBORNE, S.DASHING, S.MANTLING, S.KNOCKED],
+	S.AIRBORNE: [S.GROUNDED, S.GLIDING, S.DASHING, S.MANTLING, S.KNOCKED],
+	S.GLIDING: [S.AIRBORNE, S.GROUNDED, S.DASHING, S.MANTLING, S.KNOCKED],
+	S.DASHING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.MANTLING, S.KNOCKED],
+	S.MANTLING: [S.GROUNDED, S.AIRBORNE, S.GLIDING, S.DASHING, S.KNOCKED],
+	S.KNOCKED: [S.GROUNDED, S.AIRBORNE, S.DASHING, S.MANTLING],
 }
 const PATH := "res://content/rules/tuning.json"
 
@@ -34,6 +35,8 @@ static var glide_drag_steer := 0.0
 static var glide_coast := 0.0
 static var glide_catch := 0.0
 static var glide_max := 0.0
+static var glide_swoop := 0.0
+static var glide_swoop_fade := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
 static var _mtime := 0
@@ -63,6 +66,8 @@ static func load_tuning() -> bool:
 	glide_coast = g["coast"]
 	glide_catch = g["catch"]
 	glide_max = g["max"]
+	glide_swoop = g["swoop"]
+	glide_swoop_fade = g["swoop_fade"]
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
 	return true

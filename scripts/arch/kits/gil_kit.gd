@@ -331,7 +331,7 @@ func _start_wave() -> bool:
 
 func _land_wave() -> void:
 	var xd := x_def()
-	h.shield = maxf(h.shield, float(xd["shield"]))
+	ShieldSrc.give(h, float(xd["shield"]), ShieldSrc.TIDE)
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
 	m.fx.ring(h.pos, 2.0, col_of(xd), 0.4)
 	m.fx.burst(h.pos + Vector3(0, 0.4, 0), col_of(xd), 24, 5.0, 0.5, 10.0)
@@ -390,6 +390,8 @@ func _drop_holds() -> void:
 	spin_t = -1.0
 
 # ------------------------------------------------------------------ bots
+const BOT_TAP := 0.1      # s a bot holds RMB for a tap (under the 0.25 s hold, so the bag still throws as a tap)
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
@@ -403,4 +405,5 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if float(cd["e"]) <= 0.0 and dist < 2.8:
 		use_e()
 	elif rmb_ready() and los and dist < float(rmb_def()["range"]) + 1.0:
+		bot_hold["rmb"] = BOT_TAP
 		press_rmb()

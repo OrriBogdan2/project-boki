@@ -120,6 +120,8 @@ That's 10 points for 14 possible ranks, so choices matter.
 - Generic rank effects stay (ABILITIES.md): +15% damage per rank, −10% cooldown (dash −15%
   recharge), the verb's own numbers grow (`Effects.RANK_GROW`). Dash distances never grow. R rank 2:
   +30% duration and +15% cast effects. Each archetype adds **one rank-3 special** per slot, listed below.
+  A kit's JSON overrides the damage and cooldown steps per slot with the source's numbers: `rank_dmg` / `rank_cd`
+  {slot: [rank 1, rank 2, rank 3]} multipliers (`ArchKit.rank_k`; `rank_cd.dash` is the dash recharge). No row = the shared step.
 
 ### 3.5 HUD: making the level obvious (SUPERVIVE-style portrait cluster)
 
@@ -847,7 +849,7 @@ Subsets and gaps:
   silent knife only drops its sound (the streak still shows), Shield Surf heats the glider but doesn't stop
   spikes from the front specifically, Last Round lock lines are drawn as flickering bolts (no thickening mesh).
 - Sounds are placeholders layered from the existing Sfx set (`Feel.DELIVERY_TELL`, `CATEGORY_IMPACT`,
-  `SWEETENER`, `DASH_SOUND`); the level-up chime is a three-note layer of existing sounds.
+  `SWEETENER`); the level-up chime is a three-note layer of existing sounds.
 
 ## Ult fuse and cooldowns (owner, Oct 31)
 
@@ -978,7 +980,7 @@ above is superseded by this:
 
 | Slot | What it does |
 |---|---|
-| LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
+| LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (no stun); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
 | RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
 | Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
@@ -1049,7 +1051,7 @@ step (cooldown -10%, damage +15%); rank 3 carries the wiki's level 3-4 specials.
 
 | Slot | Input | Shiv (wiki) | Ours |
 |---|---|---|---|
-| Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, one per Mark, up to 5; 4s, refreshed): +8% damage from your weapon hits per Mark. Primed hit +2, Bola +1. A knock heals 15% on top of the shared 10% knock heal (25%); an assist heals 25% |
+| Passive | none | **Malice & Resolve**: each consecutive basic-attack hit on a target adds a stack of bonus damage (LMB 1, empowered shot 2, Chain Bolas); a knock or an assist heals 25% max HP | **Marks**: every weapon hit stacks a Mark on the target (gold diamonds, eight shown, no cap; 4s, refreshed): a flat +1.3 on your weapon hits per Mark (the data's +16 on a 160 shot). Primed hit +2, Bola +1. A knock heals 20% on top of the takedown's 5% (25%); an assist heals 25% |
 | LMB | tap / hold | Arcslinger, one stack per hit | Twin Blades or SMG; every hit stacks |
 | Shift | tap | **Quickflip**: a short dash and a speed boost; the next LMB is empowered (damage, 2 stacks, armor shred); landing it resets the cooldown; the speed boost ends on the empowered attack | **Vault**: a 3.4m flip, +30% speed until the next hit (2s max); the next weapon hit within 3s is **Primed**: +10, 2 Marks, Shred (+15% damage taken, 3s); landing it resets Vault (the payoff: VAULT RESET, T4, `pay_cashin`) |
 | RMB | tap | **Chain Bolas**: grounds the first target, travels on after hitting; a second target hit stuns both and deals bonus damage | **Bola**: 10m, 6 and a Mark; the first foe is **Grounded** 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m past them; a second foe it touches: both stunned 0.9 and +13 (TANGLED) |
@@ -1065,7 +1067,7 @@ ranks.)
 - Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks) resets Vault ->
   Vault again. Bola into two for the stun; the fifth Mark pays out Jackpot, which keeps every Mark alive
   and hands you a free Vault to carry on.
-- Tells: gold diamonds over the target (spinning faster as they stack, a jingle at 5); a gold glint and
+- Tells: gold diamonds over the target for everyone else (spinning faster as they stack, a jingle at 5; she reads her MARKS badge); a gold glint and
   light at the hand while Primed; crosshair "PRIMED · land it to reset Vault"; the dash slot's gold dot.
 - Retired: Cash In (Shiv has no 3-stack payoff: the Primed reset is the payoff), Flicker, the old Knife /
   Fan / Drop Knife, Smoke Veil, Heist, the from-behind Mark rule.
@@ -1232,10 +1234,12 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
 | `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+| `gil` | Gil | none (ours, no reference hero) | `docs/heroes/gil.md` |
+| `gil` | Gil | none, our own Hunter (0.24.4) | `content/archetypes/gil.json` |
 
 ## Kit parity lock
 `content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
-- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (or a footage `F` / wiki read the hero doc settles, with the read's error as `tol`) (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
