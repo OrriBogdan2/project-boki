@@ -16,6 +16,8 @@ signal done                    # the kin has hopped out and the shell is gone
 
 const STEP := TAU / 36.0       # spacing of the zigzag crack around the middle
 const DARK_SHELL := 0.3        # luminance (0..1): below it a dark crack would not show, so it glows
+const REST_RIM := 0.35                            # the toon shader's own rim strength
+const REST_RIM_COL := Color(1.0, 0.96, 0.88)      # and its rim colour
 
 var species := "cindle"
 var rec: Dictionary = {}
@@ -112,6 +114,11 @@ func _seg(p0: Vector3, p1: Vector3) -> void:
 	m.scale = Vector3.ZERO
 	cracks.add_child(m)
 	create_tween().tween_property(m, "scale", Vector3.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+## The pointer's glow on the shell (EggHover): `k` 0 at rest .. 1 a lit rim `rim` stronger, in `rim_col`.
+func set_hover(k: float, rim: float, rim_col: Color) -> void:
+	shell_mat.set_shader_parameter("rim_amount", REST_RIM + rim * k)
+	shell_mat.set_shader_parameter("rim_color", REST_RIM_COL.lerp(rim_col, k))
 
 ## A gentle glow while it's kept warm (0..1).
 func set_warmth(w: float) -> void:
