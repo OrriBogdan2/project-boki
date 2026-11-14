@@ -1129,8 +1129,7 @@ func _abyss_updraft() -> void:
 		return
 	var u: Dictionary = w.updrafts[0]
 	var c: Vector3 = u["pos"]
-	# (an authored updraft's pos.y is 0, not its ground; start over the ground, above any lift ring on it)
-	_reset(Vector3(c.x, w.ground_at(c.x, c.z) + 3.0, c.z), false)
+	_reset(Vector3(c.x, c.y + 1.0, c.z), false)
 	P.inp["jump"] = true
 	for i in 2:
 		P.inp["glide"] = true; m.step(DT)
