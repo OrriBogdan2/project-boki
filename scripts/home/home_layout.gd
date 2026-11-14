@@ -90,6 +90,8 @@ const CATALOG := {
 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
 	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "top": 0.5, "toy": true,
 		"desc": "Fire Boki love to bask on it. Trains Guard."},
+	"feed_bowl": {"name": "Feeding bowl", "cat": "Base", "gems": 12,
+		"desc": "Drop a snack in: hungry Boki nearby come. Bold ones push in, timid ones wait."},
 	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
 		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
