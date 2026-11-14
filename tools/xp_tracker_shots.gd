@@ -50,6 +50,6 @@ func run(main_node: Node) -> void:
 	P.gain_xp(40.0)
 	P.skill_pts = 1
 	await _grab(m, "4_levelup_rank", 50)
-	m.over = true
+	m.flow.finish("check done")
 	m.queue_free()
 	main.get_tree().quit(0)
