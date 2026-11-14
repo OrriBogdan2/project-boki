@@ -102,7 +102,8 @@ func tick(d: float) -> void:
 	_walk(d)
 
 func _free(k: Dictionary) -> bool:
-	return not (k.get("busy", false) or k.has("indoors") or k.has("leap") or k.has("job") or k.has("fetch")
+	# (a chore is not a reason: the farm hands every idle Boki one, and the lead drops it for the walk)
+	return not (k.get("busy", false) or k.has("indoors") or k.has("leap") or k.has("fetch")
 			or k.has("bath") or float(k.get("nap_t", 0.0)) > 0.0 or k.has("called_t"))
 
 func _try_start() -> void:
@@ -132,6 +133,7 @@ func _walk(d: float) -> void:
 		return
 	lead["t"] = 3.0      # it keeps to this walk instead of picking its own goal
 	lead.erase("chase")      # and does not run off after a friend in a game of tag
+	lead.erase("job")        # or back to a chore
 	var pos: Vector3 = lead["pos"]
 	var spot: Vector3 = h.NEST_AT + FRONT
 	if Vector2(h.ppos.x - h.NEST_AT.x, h.ppos.z - h.NEST_AT.z).length() < NEAR_NOOK:
