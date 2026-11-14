@@ -158,8 +158,9 @@ func _stays(where: String) -> void:
 		Settings.set_v(key, 0.2, false)
 	await main.get_tree().create_timer(3.0).timeout
 	for key in Settings.BUSES:
-		var still := absf(_db(Settings.BUSES[key]) - Sfx.slider_db(0.2)) < TOL
-		ok(still, "%s: after a few seconds %s is still at %.1f dB" % [where, Settings.BUSES[key], _db(Settings.BUSES[key])])
+		var bus: String = Settings.BUSES[key]
+		var still := absf(_db(bus) - Sfx.slider_db(0.2)) < TOL
+		ok(still, "%s: after a while %s is still at %.1f dB" % [where, bus, _db(bus)])
 
 ## A real mouse press on the Music slider's track (not a script write), as a player does it.
 func _mouse_drag(where: String, sliders: Array) -> void:
