@@ -387,7 +387,7 @@ func _start_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String, wa
 	_pose_at(sync, clips, sk, walk, ph * clips.lib.get_animation(walk).length)
 	for i in held.size():
 		sk.set_bone_pose_rotation(clips.start_bones[i][0], held[i])
-	return _dist(p, _read(sk)) / hgt
+	return _dist(p, points(sk)) / hgt
 
 ## [phase, gap]: the start phase nearest the idle, in 24ths of the cycle (what "start_phase" should be).
 func _best_start(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String, walk: String, hgt: float) -> Array:
