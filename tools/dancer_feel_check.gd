@@ -1,16 +1,20 @@
 extends RefCounted
 ## Sable's feel pass (item 7 of the 1103 review), run inside --dancer-combo-check (tools/dancer_jug_check.gd): the
 ## Cartwheel's distance, time and speed curve against the source's measured one, the empowered bolt's damage and
-## window, the Vault back on the hit's own step, the reset loop's pace, and a click mid-flip kept until the bolt
-## can go. The source numbers are in docs/heroes/thief.md, "Feel pass (item 7)".
+## window, the Vault back on the hit's own step, the reset loop's pace, a click mid-flip kept until the bolt
+## can go, and the quick bolts after a Vault (ThiefQuick). The source numbers are in docs/heroes/thief.md,
+## "Feel pass (item 7)".
 
 const GROUND_M := 4.5        # m: the ground Cartwheel (sheet: 105-144 px, about 4.5m)
 const GROUND_S := 0.48       # s: start to upright (sheet: 0.45-0.5s)
-const PEAK_MS := [14.0, 17.0]        # m/s: the sheet's peak, 15-16.5 m/s ...
+# m/s: the fitted curve's peak (dash_feel.json "thief": 1.84 x the mean, about 17 m/s) ...
+const PEAK_MS := [14.0, 18.0]
 const PEAK_AT := [0.08, 0.27]        # s: ... at +0.1 to 0.27s
-const AIR_M := 8.4           # m: the air Cartwheel (sheet: 225 px over about 0.95s)
+const AIR_CARRY := 1.2       # m: from a jump, at most this past the ground Cartwheel (the air's drag to the landing)
 const EMP_K := 2.34          # the empowered bolt over a plain one (data: +214 on a 160 bolt)
 const LOOP_S := 1.4          # s: the footage's reset loop (0187 -> 0194); ours keeps up with it
+const QUICK_S := 0.27        # s: the quick bolts' interval after a Vault (0.45 x 0.6)
+const RATE_S := 0.45         # s: the usual bolt interval
 var A
 
 func run(a, m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
@@ -21,6 +25,7 @@ func run(a, m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	_window(m, P, K, home)
 	_loop(m, P, K, T, home)
 	_buffer(m, P, K, T, home)
+	_quick(m, P, K, T, home)
 	_calm(m, P, K)
 
 ## Nothing empowered or hasted, standing still, the Vault ready.
@@ -60,7 +65,7 @@ func _ground(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 			absf(float(s["dist"]) - GROUND_M) < 0.35 and absf(float(s["end"]) - GROUND_S) < 0.05
 			and K.dash_feel()["dist"] == 1.0,
 			"%.2f m in %.2f s" % [s["dist"], s["end"]])
-	A.ok("dancer feel: it bursts to about 15 m/s near 0.15s, then runs down into the hasted run",
+	A.ok("dancer feel: it bursts to about 17 m/s near 0.18s, then runs down into the hasted run",
 			float(s["peak"]) >= PEAK_MS[0] and float(s["peak"]) <= PEAK_MS[1]
 			and float(s["peak_at"]) >= PEAK_AT[0] and float(s["peak_at"]) <= PEAK_AT[1],
 			"peak %.1f m/s at %.2f s" % [s["peak"], s["peak_at"]])
@@ -74,8 +79,8 @@ func _air(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	P.do_dash()
 	P.inp["move"] = Vector2.ZERO
 	var s := _track(m, P, home, 1.6)
-	A.ok("dancer feel: from a jump it carries about 8.4m and ends as she lands (under the source's 0.95s)",
-			absf(float(s["dist"]) - AIR_M) < 1.2 and float(s["end"]) <= 1.0 and P.grounded,
+	A.ok("dancer feel: from a jump it is the ground Cartwheel, carried on by the air's drag to the landing",
+			float(s["dist"]) >= GROUND_M - 0.35 and float(s["dist"]) <= GROUND_M + AIR_CARRY and P.grounded,
 			"%.2f m in %.2f s" % [s["dist"], s["end"]])
 
 ## The empowered bolt: a plain bolt plus the source's bonus, ranks grow the bonus, Marks add flat; the Vault is
@@ -123,8 +128,8 @@ func _empowered(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> v
 	K.primed_on = T
 	var on_emp := K.outgoing(T, 10.0 * EMP_K, {"src": "shot"})
 	K.primed_on = null
-	A.ok("dancer feel: Marks add 10% of a bolt each, the empowered one too (flat, as the source's +16 a stack)",
-			absf(on_emp - (10.0 * EMP_K + 5.0)) < 0.01 and absf(K.outgoing(T, 10.0, {"src": "shot"}) - 15.0) < 0.01,
+	A.ok("dancer feel: Marks add a flat 1.3 each, the empowered bolt too (the source's +16 a stack on 160)",
+			absf(on_emp - (10.0 * EMP_K + 6.5)) < 0.01 and absf(K.outgoing(T, 10.0, {"src": "shot"}) - 16.5) < 0.01,
 			"%.2f" % on_emp)
 	A.fresh(T)
 
@@ -207,4 +212,64 @@ func _buffer(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void
 	A.ok("dancer feel: a click mid-flip while the bolt cools is kept and goes, empowered, before she is up",
 			cooling > 0.1 and K.bolts == b0 + 1 and bool(went["emp"]) and bool(went["mid_flip"]),
 			"cooling %.2f bolts +%d %s" % [cooling, K.bolts - b0, str(went)])
+	A.fresh(T)
+
+## Holds LMB on T for `secs`, noting the gaps between her bolts.
+func _gaps(m: Match, P: Hunter, K: ThiefKit, T: Hunter, secs: float) -> Array:
+	var g := {"t": 0.0, "last": -1.0, "n": K.bolts, "gaps": []}
+	A.step(m, secs, func():
+		A.aim_at(P, T.pos)
+		P.inp["fire"] = true
+		if K.bolts > int(g["n"]):
+			if float(g["last"]) >= 0.0:
+				(g["gaps"] as Array).append(snappedf(float(g["t"]) - float(g["last"]), 0.01))
+			g["last"] = g["t"]
+			g["n"] = K.bolts
+		g["t"] = float(g["t"]) + A.DT)
+	P.inp["fire"] = false
+	return g["gaps"]
+
+## Shift then LMB: the empowered bolt and the three after it leave 0.27s apart, then 0.45s again; a bolt still
+## cooling as she flips is cut to 0.27s; LMB more than 1.2s after the Vault, or a pause in the run, is plain pace.
+func _quick(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
+	_calm(m, P, K)
+	A.fresh(T)
+	P.teleport(home)
+	T.teleport(home + Vector3(6.0, 0, 0))
+	A.aim_at(P, T.pos)
+	P.inp["fire"] = true
+	m.step(A.DT)
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	P.inp["move"] = Vector2.ZERO
+	var cut := P.fire_cd
+	var q0 := K.quick.quick_bolts
+	var gaps := _gaps(m, P, K, T, 1.8)
+	var quick := gaps.size() >= 4 and gaps.slice(0, 3).all(func(x): return absf(x - QUICK_S) < 0.03)
+	A.ok("dancer quick: Shift then LMB, the empowered bolt and the next three leave 0.27s apart, then 0.45s",
+			cut <= QUICK_S + 0.001 and quick and absf(float(gaps[3]) - RATE_S) < 0.03
+			and K.quick.quick_bolts - q0 == 3,
+			"cooling cut to %.2f gaps %s quick %d" % [cut, str(gaps), K.quick.quick_bolts - q0])
+	_calm(m, P, K)
+	A.fresh(T)
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	P.inp["move"] = Vector2.ZERO
+	A.step(m, 1.3)
+	q0 = K.quick.quick_bolts
+	var late := _gaps(m, P, K, T, 1.0)
+	_calm(m, P, K)
+	A.fresh(T)
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	P.inp["move"] = Vector2.ZERO
+	_gaps(m, P, K, T, 0.05)
+	A.step(m, 0.6)
+	var paused := _gaps(m, P, K, T, 1.0)
+	A.ok("dancer quick: LMB 1.3s after the Vault, or after a pause in the run, keeps the usual 0.45s",
+			not late.is_empty() and late.all(func(x): return absf(x - RATE_S) < 0.03)
+			and not paused.is_empty() and paused.all(func(x): return absf(x - RATE_S) < 0.03)
+			and K.quick.quick_bolts == q0,
+			"late %s paused %s" % [str(late), str(paused)])
 	A.fresh(T)

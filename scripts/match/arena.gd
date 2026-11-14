@@ -1,12 +1,13 @@
 class_name Arena
 extends RefCounted
-## The Arena (opts "arena", map content/maps/arena.json) and the training area's practice tools
+## The Arena (opts "arena", map content/maps/arena.json) and the Training Grounds's practice tools
 ## (opts "training": the same controller in its "practice" layout, on the training island).
 ##
 ## What it gives you:
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
+## - the dodge drill: the strafer throws slow telegraphed shots until you dash clear of three (DodgeDrill)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
@@ -23,6 +24,7 @@ var m: Match
 var layout := "arena"          # "arena" (its own map) | "practice" (the training island)
 var home := Vector3.ZERO       # where you start (and reset to)
 var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
+var drill: DodgeDrill = null
 var bot: Hunter = null
 var bot_mode := "off"
 var bot_arch := "gunslinger"
@@ -60,6 +62,7 @@ func setup(match_node: Match, which: String) -> void:
 	for i in Gloves.SLOTS:
 		gloves[i] = String(P.gear[i].get("id", "")) if not (P.gear[i] as Dictionary).is_empty() else ""
 	_spawn_dummies()
+	drill = DodgeDrill.new(m, dummies.filter(func(x): return x["kind"] == "strafe")[0]["h"])
 	bot_at = _arena_point(Vector3(26.5, 0, 19.5)) if layout == "arena" else _free_near(home + Vector3(0, 0, -7.0))
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
@@ -69,7 +72,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
+		m.hud.toast("Training Grounds  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -221,6 +224,7 @@ func tick(dt: float) -> void:
 			P.remove_meta("arena_down")
 			m.revive_hunter(P, null)
 			P.hp = P.max_hp
+	drill.tick(dt)
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
@@ -261,7 +265,6 @@ func reset() -> void:
 		D.set_meta("marks", {})
 		dm["hits"] = []; dm["total"] = 0.0; dm["last"] = 0.0
 	hits_all.clear(); dealt = 0.0
-	m.fx.ring(home, 1.6, Color("8fe3c8"), 0.35)
 	m.sfx("revive", null, -8.0, 1.2)
 
 ## Become another archetype on the spot (its weight class comes with it); your Boki stays.
@@ -375,7 +378,7 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10 if layout == "arena" else 70     # (the training area's banner sits at the top)
+	hint.position.y = 10 if layout == "arena" else 70     # (the Training Grounds's banner sits at the top)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)
@@ -528,6 +531,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	cols.add_child(right)
 	var gl: Array = Gear.ALL.keys().filter(func(g): return Gear.is_glove(String(g)))
 	gl.sort_custom(func(x, y): return (1 if Gear.active(x) else 0) > (1 if Gear.active(y) else 0) or (Gear.active(x) == Gear.active(y) and String(x) < String(y)))
+	var drag := SlotDrag.attach(v, _glove_drop.bind(v))
 	for si in Gloves.SLOTS:
 		var slot: int = si
 		right.add_child(UI.section("Glove %d  (%s)" % [slot + 1, Gloves.key_cap(slot)]))
@@ -537,6 +541,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 		gg.add_theme_constant_override("v_separation", 4)
 		var nb := UI.choice("None", String(gloves[slot]) == "", func(): clear_glove(slot); _fill_menu(v), 60)
 		nb.add_theme_font_size_override("font_size", 12)
+		drag.add(nb, {"slot": slot, "id": ""})
 		gg.add_child(nb)
 		for g in gl:
 			var gid: String = g
@@ -544,6 +549,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 			var b := UI.choice(nm2.substr(0, 11), String(gloves[slot]) == gid, func(): give_glove(gid, slot); _fill_menu(v), 90, Gear.icon_of(gid))
 			b.tooltip_text = "%s%s  ·  %s\n%s" % [nm2, ("  ·  %ss" % KinText.n(Gear.cd_of(gid, 2))) if Gear.active(gid) else "  ·  passive", Gloves.key_cap(slot), Gear.desc_of(gid, 2)]
 			b.add_theme_font_size_override("font_size", 12)
+			drag.add(b, {"slot": slot, "id": gid}, nm2, UI.INK)
 			gg.add_child(b)
 		right.add_child(gg)
 		var gd := UI.label(_glove_line(slot), 13, UI.MUTED)
@@ -578,6 +584,22 @@ func _glove_line(slot: int) -> String:
 	if g == "" or not Gear.ALL.has(g):
 		return "%s: no glove. Pick any to wear it here." % Gloves.key_cap(slot)
 	return "%s: %s%s: %s" % [Gloves.key_cap(slot), String(Gear.ALL[g].get("name", g)), ("  ·  %ss" % KinText.n(Gear.cd_of(g, 2))) if Gear.active(g) else "  ·  passive", Gear.desc_of(g, 2)]
+
+## A glove held and dragged onto the other glove's row (SlotDrag) is worn there; dragging the one you wear
+## swaps the two gloves.
+func _glove_drop(from: Dictionary, to: Dictionary, v: VBoxContainer) -> String:
+	var a := int(from["slot"])
+	var b := int(to["slot"])
+	var gid := String(from["id"])
+	if a == b:
+		return ""
+	var was := String(gloves[b])
+	var swap := String(gloves[a]) == gid
+	give_glove(gid, b)
+	if swap and was != "":
+		give_glove(was, a)
+	_fill_menu(v)
+	return ""
 
 func _kin_choices() -> Array:
 	var out: Array = []

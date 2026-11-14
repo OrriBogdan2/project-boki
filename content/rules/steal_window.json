@@ -1,0 +1,4 @@
+{
+ "_doc": "The steal window (scripts/ui/steal_tell.gd, docs/HUD.md \"Steal window\"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes.",
+ "at": 0.25
+}

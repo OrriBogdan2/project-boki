@@ -50,7 +50,7 @@ func is_open() -> bool: return phase == "open"
 func start() -> bool:
 	if running():
 		return false
-	var pw := HeroZones.walk(k.m, k.h.pos, k.aim(), float(xd()["range"]))
+	var pw := HeroZones.walk(k.m, k.cast_from(), k.aim(), float(xd()["range"]))
 	if not pw["ok"]:
 		denied += 1
 		if k.h.is_local() and k.m.hud:
@@ -97,6 +97,10 @@ func _hand_looks() -> void:
 	var ahead := k.h.aim_dir() * 0.35
 	var over := k.h.pos + Vector3(ahead.x, GATHER_Y, ahead.y)
 	KitLooks.of(k.m).hold_on("os_well_gather", "dark", k.h, over, lerpf(0.5, 1.6, grown))
+
+## Seconds until the dome opens and frees him (0: not locked).
+func lock_left() -> float:
+	return float(xd()["tell"]) - phase_t if locked and phase == "tell" else 0.0
 
 ## Shift during the lock (content/dash_flow/ostra.json into_dash.x, "buffer"): held for the step the well
 ## opens and frees him.
@@ -161,6 +165,8 @@ func _tick_open(dt: float) -> void:
 func _tick_catch(left: float) -> void:
 	ticks += 1
 	var dmg := float(xd()["tick_dmg"]) * k.power("x")
+	if swollen:
+		k.m.brk.hit_around(center + Vector3(0, 0.4, 0), radius, k.h)    # Empowered ticks are Explosive
 	for f in k.foes_in(center, radius):
 		if not k.m.world.los(center + Vector3(0, 0.6, 0), f.pos + Vector3(0, 0.6, 0), center.y + 0.6):
 			continue

@@ -23,14 +23,13 @@ static func afterglow(h: Hunter) -> void:
 	var r := rules()
 	var secs := float(r.get("secs", 3.0))
 	h.add_buff("move_speed", float(r.get("move_speed", 0.15)), secs)
-	h.shield = maxf(h.shield, h.max_hp * float(r.get("shield_frac", 0.08)))
+	ShieldSrc.give(h, h.max_hp * float(r.get("shield_frac", 0.08)), ShieldSrc.FUSE)
 	h.shield_t = maxf(h.shield_t, secs)
 	h.set_meta("afterglow_t", secs)
 	var col := Color("ffd84a")
 	h.m.fx.ring(h.pos, 2.4, col, 0.45)
 	h.m.fx.burst(h.pos + Vector3(0, 1.1, 0), col, 20, 4.0)
 	if h.is_local():
-		h.m.fx.word(h.pos + Vector3(0, 2.6, 0), "AFTERGLOW", col, true)
 		h.m.sfx("unlock", h.pos, -3.0, 1.35)
 
 ## Every step: counts the afterglow down and sparkles while it lasts.

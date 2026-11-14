@@ -39,7 +39,7 @@ func _run(m: Match, P: Hunter, frames: int, seen: Dictionary) -> float:
 		var c := _clips(P)
 		seen[c.cur] = true
 		if c.up_w > 0.5:
-			seen[String(c._node("anim_u").animation)] = true
+			seen[c.cur_u] = true
 		top = maxf(top, _flare(P))
 	return top
 

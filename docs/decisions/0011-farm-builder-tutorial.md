@@ -26,9 +26,8 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - Main wiring left: none beyond the few lines already in home.gd.
 
 ## Round 3: Hob in person and the second Mask (items 87, 89; owner, Nov 4)
-- **Hob is a person** (`HobModel`: a stocky builder in the toon style, built from shapes: rolled sleeves, apron,
-  tool belt with a hammer, flat cap, pencil behind his ear, simple face marks like the rest of the Empty; poses
-  idle, wave, talk, point, hammer). He waits by the market stall (`farm_builder.json` "stall_stand") and walks to
+- **Hob is a person** (`HobModel`; since Nov 11 a rigged Meshy model, "Old Road Hob": patched ochre coat, goggled
+  hat, braided beard, mallet on his back, docs/art/npcs/PIPELINE.md; poses idle, wave, talk, point, hammer, walk). He waits by the market stall (`farm_builder.json` "stall_stand") and walks to
   the house while it is a site. His name shows over him until you have met him; a "!" while he has something.
 - **Face to face** (`HobTalk`, `TalkBox`, lines in `farm_builder.json` "talk"): interact opens a talk box with his
   portrait (rendered from the model) and name, one line at a time (click or the interact key), you stand still
@@ -60,8 +59,24 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 ## Playtest 1108 batch (items 27-31)
 - **Placing spotlight** (`FarmSpotlight`, modal): when a step asks you to place the house or the trough, everything is dimmed (soft-edged) except the target, and a `_Blocker` swallows clicks outside the cut-out until the step is done. Three phases, one after the other: the Build button, the tile in the bar (`BuildCatalog.turn_to` flips to its page), then the exact ground (`FarmGuide.place_cells`; the ghost is pinned there via `hb.debug_m`). Each has a pulsing ring and "Click here" (the rule's `spot.place` gives `hub`, `tile`, `click`). It fades out when the step is done and gives the ghost back. The goal line is click-through so the marked spot is never under a dead panel. The crop patch's spot stays the old non-modal ring.
 - **Enter on "Fill it up"**: the cause was focus. The trough tile you just clicked (a `UI.tile_card`, focusable) kept the keyboard focus, and a focused tile takes `ui_accept` before `Home._unhandled_input` can press the panel's primary. `Home._new_panel` now drops any stale focus. Also, Enter confirms like a click. The primary is "Done" (closes) when the trough is full, else "Fill it up", and the panel closes after a successful fill; no disabled primary is ever the Enter target.
-- **Hob's called-out line** has a dark outline and plate behind the light text (`HobModel`).
+- **Hob's called-out line** has a dark outline and plate behind the light text (`NpcModel`, so Pell's too).
 - **Hob's relic** (`HobTalk.offer_due`) waits for the whole tutorial (`not FarmTutorial.active()`), from the live state, so a save that quits mid-tutorial and reloads gets nothing early.
 - **Too hungry to go** (`HungerGate`): "NAME needs N more meals." with a hunger bar and the minimum line, a Feed button (kibble from the bag, data-level, no in-world animation) and Back. It polls every 0.4 s, so the count drops live and Go appears the moment the line is crossed; Enter takes Go, else Feed. `Care.MEAL_H` (4 h per meal) is the one source for the count.
 - Feel numbers for the placing spotlight and the hunger gate live in `content/rules/tuning.json` (new, the one shared feel file), read by `Tuning.of()`.
 - Check: `--farm-place-check` (new); `--hob-check` and `--farm-tutorial-check` updated.
+
+## Round 4 (owner, Nov 12): Hob's home spot and clear ring
+- **A fixed spot** (`HobSpot`, `scripts/home/hob_spot.gd`), saved as `layout.hob.spot = [x, z]` (optional field, no save bump: a save without it picks one on first look). The first pick is the free tile nearest his old place by the market stall (`stall_stand`). After that it stays put every visit.
+- **Clear ring**: `farm_builder.json` `clear.m` = 3.5 m from his spot to the nearest edge of any placed footprint tile and to any place you interact with (`HomeBuild._targets`: doors, the stall, pot, portal, plots, feeders, bridge signs...). A free tile is also reachable on foot (`HomeBuild._reach`), open ground on the tile and all eight neighbours, not kept clear for a fixture, and on an opened isle. When his spot is chosen, places you interact with are kept further: `talk_reach` + `clear.reach_m` = 2.4 + 1.9 = 4.3 m (`HobSpot.apart_m`), so his talk ring and the stall's 1.9 m reach really never overlap (3.5 m alone did not guarantee it). The 3.5 m ring is what build mode enforces afterwards.
+- **Build mode refuses** a piece, door, path tile or feeder inside the ring: the ghost goes red with "Too close to Hob" (`HomeBuild.cell_reason`, `fits`, `feeder_fits`, the usual invalid-placement path).
+- **Already blocked** (an older save, a moved fixture): on the next layout sync he walks to the nearest free tile (ties: lowest tile index, so it is deterministic). That becomes his spot, and it is logged once (`HobSpot: ... he moves to ...`). With no free tile anywhere he keeps the old spot.
+- **Interact**: Hob wins only when he is nearer than the best target found so far (`FarmHob.find` returns his distance). Before, he overrode anything in his ring. Round 4b (11-13): the stall, pot, portal, house, lots, bridge signs and burrow no longer get their 0.3-0.6 m head start over Hob (`FarmHob.lead`), so where rings do overlap (Hob walking past, a crowded layout) the nearer one wins.
+- Only Hob is covered: he is the only fixed farm NPC. Pell is the Black Market panel, not a person on the farm.
+- Checks: `--hob-spot-check` (new, `--shots-dir=`). `--hob-check` and `--farm-tutorial-check` now allow up to 9 m from the stall (the ring keeps him at least ~4.5 m from its centre).
+
+## Nov 11: Hob and Pell designed and modelled
+- Owner: "Hob and the future tutorial person need a design - and a Meshy design". Hob's shapes model is replaced by
+  a rigged Meshy model and Pell (LORE_MASKS round 5's tutorial guide) is designed, modelled and placed: Pell waits
+  beside each first-match tutorial stop as its step begins, talks, and waves when you come near (`TutorialPell`).
+  Both are `NpcModel`s (content/rules/npcs.json). Designs, picks and the pipeline: docs/art/npcs/PIPELINE.md.
+  Check: `--npc-check`.

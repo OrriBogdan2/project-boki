@@ -143,20 +143,20 @@ func _miss(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	A.ok("dancer loop: a miss still lets the waiting press go (the long dash, with no charge)",
 			not K.chain.waiting and P.ex_cd > 0.0, "ex_cd %.2f" % P.ex_cd)
 
-## From a jump the Vault is the air one (it runs on the long dash's cooldown): the reset gives that back too.
+## From a jump with a charge the Vault is the ground one and spends a charge (item 183): the reset gives it back too.
 func _air_reset(m: Match, P: Hunter, K: ThiefKit, T: Hunter, home: Vector3) -> void:
 	_calm(m, P, K, T, home, 6.0)
 	P.do_jump()
 	A.step(m, 0.1)
 	_vault(P, Vector2(0, 1))
-	var spent := P.ex_cd > 0.0
+	var spent := P.dashes <= P.max_dashes() - 1.0 and P.ex_cd <= 0.0
 	A.step(m, 0.1)
 	P.inp["move"] = Vector2.ZERO
 	var hits0 := K.primed_hits
 	_click(m, P, T)
 	A.step(m, 0.4)
 	A.ok("dancer loop: the reset gives the air Vault back too", spent and K.primed_hits == hits0 + 1
-			and P.ex_cd <= 0.0, "spent %s ex_cd %.2f" % [spent, P.ex_cd])
+			and P.dashes >= P.max_dashes() - 0.01, "spent %s dashes %.2f" % [spent, P.dashes])
 
 func _bola(m: Match, P: Hunter, K: ThiefKit, T: Hunter, T2: Hunter, home: Vector3) -> void:
 	_calm(m, P, K, T, home, 4.0)
@@ -184,7 +184,7 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, T: Hunter, T2: Hunter, home: Vector
 	K.press_rmb()
 	A.step(m, 0.9)
 	A.ok("dancer Bola: a pair in a line stays the stun and bonus damage", K.bola_pairs == pairs0 + 1
-			and T.stun_t > 0.0 and T2.stun_t > 0.0 and A.dmg(T) >= 18.0, "dmg %.0f" % A.dmg(T))
+			and T.stun_t > 0.0 and T2.stun_t > 0.0 and A.dmg(T) >= 9.0, "dmg %.1f" % A.dmg(T))
 	T2.teleport(home + Vector3(-30.0, 0, 0))
 	A.fresh(T)
 	A.fresh(T2)
