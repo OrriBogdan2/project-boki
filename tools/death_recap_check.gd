@@ -10,13 +10,17 @@ extends RefCounted
 var bad := 0
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("RECAP %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _run(sec: float) -> void:
 	for i in int(round(sec / Match.DT)):
 		m.step(Match.DT)
+
 
 func _calm(h: Hunter) -> void:
 	h.inv_t = 0.0
@@ -25,6 +29,7 @@ func _calm(h: Hunter) -> void:
 	h.kin_shield = 0.0
 	h.hp = h.max_hp
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -32,7 +37,8 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
 		h.ctrl = "idle"
@@ -55,27 +61,32 @@ func run(main: Node) -> void:
 	var knife_name := String(Arch.def("thief")["e"]["name"])
 	ok(hits[0]["how"] == knife_name, "an ability hit reads as its ability (%s)" % hits[0]["how"])
 	ok(hits[1]["how"] == "a weapon shot" and hits[2]["how"] == "a fall", "plain hits read in plain words")
-	ok(hits[0]["hunter"] == foe and SideColor.of(m, foe) == SideColor.FOE,
-		"the killer is the Hunter, drawn in the foe colour")
+	ok(
+		hits[0]["hunter"] == foe and SideColor.of(m, foe) == SideColor.FOE,
+		"the killer is the Hunter, drawn in the foe colour"
+	)
 	_run(DeathRecap.WINDOW_S + 1.0)
 	ok(m.recap.recent(P, m.time).is_empty(), "hits older than %d s fall off" % int(DeathRecap.WINDOW_S))
 	_calm(P)
 	P.hurt(P.max_hp * 2.0, foe, knife)
 	ok(P.downed, "a lethal hit with a teammate up downs you")
 	var down_hits := m.recap.recent(P, m.time)
-	ok(down_hits.back()["hunter"] == foe and down_hits.back()["how"] == knife_name,
-		"the card names the Hunter and ability that downed you")
+	ok(
+		down_hits.back()["hunter"] == foe and down_hits.back()["how"] == knife_name,
+		"the card names the Hunter and ability that downed you"
+	)
 	m.eliminate(P, foe, "finished")
 	var died := float(P.get_meta("died_at"))
 	_run(DeathRecap.WINDOW_S + 1.0)
-	ok(m.recap.recent(P, died).size() == down_hits.size(),
-		"out: the card stays fixed at the moment you went out")
+	ok(m.recap.recent(P, died).size() == down_hits.size(), "out: the card stays fixed at the moment you went out")
 	var cv := Control.new()
 	main.add_child(cv)
 	var drew := [false]
-	cv.draw.connect(func():
-		m.recap.draw(cv, Vector2(400, 100), P)
-		drew[0] = true)
+	cv.draw.connect(
+		func():
+			m.recap.draw(cv, Vector2(400, 100), P)
+			drew[0] = true
+	)
 	cv.queue_redraw()
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame

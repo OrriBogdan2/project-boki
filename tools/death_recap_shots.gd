@@ -13,6 +13,7 @@ var P: Hunter
 var dir := ""
 var lines: Array = []
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -57,6 +58,7 @@ func run(main_node: Node) -> void:
 	print("DEATHRECAPSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 func _go(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
@@ -65,6 +67,7 @@ func _go(secs: float) -> void:
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
+
 
 func _take(file: String, caption: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))

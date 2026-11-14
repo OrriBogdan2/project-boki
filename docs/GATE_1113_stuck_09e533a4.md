@@ -30,3 +30,12 @@ lanes own. Its merge with main belongs to the mc/lane jobs.
 
 These branches' older commits are partly in stuck-integ-606e9a98 too. Whichever lands second gets the same patches
 twice; they should merge clean.
+
+## Checks (rpc1, headless)
+- 0 failures: input-latency, step-smooth, death-recap, spectate, airdash-glide, vex-clip-live, dash-slot,
+  clip-live and clip-live-sable. `health --strict` is OK.
+- Red, but identical on origin/main df5464db04 (same rows): clip-check 4, warden-clips-check 2 (plus a script
+  error at `_mood`), hero-combo-check 3 (Lace hold draw) and rock-feet-check 1 (0.25 m step down).
+- ashwick-combo-check: 1 failure plus the `_handoff` script error. The READY note of heal-knock-source reports
+  both as already there on main.
+- The five new .gd files from these branches are now gdformat-clean.

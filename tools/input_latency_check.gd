@@ -8,18 +8,20 @@ extends RefCounted
 ## --input-latency-check=<id>,<id> runs only those heroes.
 
 const DT := Match.DT
-const WATCH := 45               # ticks after the press we watch (0.75 s)
-const TAP := 6                  # ticks a press is held: a quick real tap (0.1 s), so tap/hold kits see a tap
-const MAX_TICK := 1             # the same or the next physics tick
+const WATCH := 45  # ticks after the press we watch (0.75 s)
+const TAP := 6  # ticks a press is held: a quick real tap (0.1 s), so tap/hold kits see a tap
+const MAX_TICK := 1  # the same or the next physics tick
 const ACTION := {"lmb": "fire", "rmb": "secondary", "e": "signature", "dash": "dash", "jump": "jump"}
 ## hero -> slot -> [ticks allowed, source]: a wind-up the source has before the first motion or shot. A tap/hold
 ## RMB can't show which it is until the release (the tap) or the hold threshold: it acts on the tap's release.
 const WINDUP := {
-	"juggernaut": {
+	"juggernaut":
+	{
 		"rmb": [TAP + 1, "tap/hold, the tap's Finishing Slam starts on the release (heroes/juggernaut.md)"],
 		"lmb": [TAP + 1, "press = slash series, hold = blast: the tap acts on the release (MOVEMENT_FEEL lmb-spam)"],
 	},
-	"dolm": {
+	"dolm":
+	{
 		"rmb": [TAP + 1, "tap/hold, owner item 61: a tap shows nothing, lands on the release (heroes/dolm.md)"],
 		"lmb": [TAP + 1, "tap/hold, the hold punch: a tap acts on the release (docs/MOVEMENT_FEEL.md, lmb-spam)"],
 	},
@@ -33,13 +35,14 @@ const WINDUP := {
 }
 
 var bad := 0
-var flow                        # tools/dash_flow_check.gd: its training match, ready-up and press snapshot
+var flow  # tools/dash_flow_check.gd: its training match, ready-up and press snapshot
 var hunter: Hunter
 var rows: Array[String] = []
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
-	Settings.set_v("cast_on_press", true, false)    # the default: an ability goes off on the press
+	Settings.set_v("cast_on_press", true, false)  # the default: an ability goes off on the press
 	flow = load("res://tools/dash_flow_check.gd").new()
 	CombatBus.ability_used.connect(flow._on_used)
 	for hero in _heroes():
@@ -56,18 +59,20 @@ func run(main: Node) -> void:
 	print("INPUT LATENCY CHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+
 func _heroes() -> Array:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--input-latency-check=") and arg.length() > 22:
 			return arg.get_slice("=", 1).split(",")
 	return Arch.ORDER
 
+
 ## One press of `slot` from standing still, ready, on flat ground.
 func _trial(main: Node, m: Match, hero: String, slot: String) -> void:
 	flow._ready_up(m)
 	m.hitstop = 0.0
 	m.slowmo = 0.0
-	m.acc = DT * 0.5            # every _process runs exactly one step: frame n is tick n
+	m.acc = DT * 0.5  # every _process runs exactly one step: frame n is tick n
 	for i in 3:
 		await main.get_tree().process_frame
 		m._process(DT)
@@ -79,7 +84,7 @@ func _trial(main: Node, m: Match, hero: String, slot: String) -> void:
 	for tick in WATCH:
 		if tick == TAP:
 			Input.action_release(ACTION[slot])
-		m._process(DT)              # in the press's own frame, so the press is "just pressed" here
+		m._process(DT)  # in the press's own frame, so the press is "just pressed" here
 		_first(first, "vel", tick, hunter.vel.distance_to(vel0) > 0.05)
 		_first(first, "anim", tick, _anim_sig(m) != anim0)
 		_first(first, "shot", tick, flow._last_shot() > int(before["shots"]))
@@ -96,15 +101,22 @@ func _trial(main: Node, m: Match, hero: String, slot: String) -> void:
 	var pass_ := at >= 0 and at <= allowed
 	if not pass_:
 		bad += 1
-	var each := "vel %2s anim %2s shot %2s act %2s" % [
-			_t(first["vel"]), _t(first["anim"]), _t(first["shot"]), _t(first["act"])]
-	print("LATENCY %-10s %-4s first %2s (%s) target <= %d %s%s" % [hero, slot, _t(at), each, allowed,
-			"ok" if pass_ else "FAIL", why])
+	var each := (
+		"vel %2s anim %2s shot %2s act %2s" % [_t(first["vel"]), _t(first["anim"]), _t(first["shot"]), _t(first["act"])]
+	)
+	print(
+		(
+			"LATENCY %-10s %-4s first %2s (%s) target <= %d %s%s"
+			% [hero, slot, _t(at), each, allowed, "ok" if pass_ else "FAIL", why]
+		)
+	)
 	_cell(hero, slot, at, first)
+
 
 func _first(first: Dictionary, key: String, tick: int, changed: bool) -> void:
 	if changed and int(first[key]) < 0:
 		first[key] = tick
+
 
 ## The press registered at all (dash_flow's "went off"), or for the moves: rolling, left the ground.
 func _acted(before: Dictionary, slot: String) -> bool:
@@ -115,17 +127,29 @@ func _acted(before: Dictionary, slot: String) -> bool:
 			return not hunter.grounded
 	return flow._went_off(before, slot)
 
+
 ## What HunterAnim is told this frame that a press can change (Hunter._anim_state): times of the last cast,
 ## shot and kit move, the swing count, the dodge, leaving the ground, a charge and the muzzle flash.
 func _anim_sig(m: Match) -> Array:
 	var s: Dictionary = hunter.anim_s
-	return [s.get("rolling"), s.get("grounded"), s.get("gliding"), s.get("swing_n"), s.get("kmove", ""),
-			snappedf(m.time - float(s.get("kmove_t", 0.0)), 0.001), snappedf(m.time - float(s.get("cast", 0.0)), 0.001),
-			snappedf(m.time - float(s.get("fired", 0.0)), 0.001), float(s.get("charge", 0.0)) > 0.0,
-			float(s.get("flash", 0.0)) > 0.0, s.get("act")]
+	return [
+		s.get("rolling"),
+		s.get("grounded"),
+		s.get("gliding"),
+		s.get("swing_n"),
+		s.get("kmove", ""),
+		snappedf(m.time - float(s.get("kmove_t", 0.0)), 0.001),
+		snappedf(m.time - float(s.get("cast", 0.0)), 0.001),
+		snappedf(m.time - float(s.get("fired", 0.0)), 0.001),
+		float(s.get("charge", 0.0)) > 0.0,
+		float(s.get("flash", 0.0)) > 0.0,
+		s.get("act")
+	]
+
 
 func _t(tick: int) -> String:
 	return str(tick) if tick >= 0 else "-"
+
 
 func _cell(hero: String, slot: String, at: int, first: Dictionary) -> void:
 	if slot == "lmb":

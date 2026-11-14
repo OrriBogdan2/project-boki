@@ -6,35 +6,51 @@ extends Node
 ## Each Hunter's recent hits are kept here, from CombatBus.hit_landed alone (the hit event already carries
 ## the attacker, so nothing is added to Net). Added as a child of the match (Match.start).
 
-const WINDOW_S := 10.0            # s of damage the card adds up
-const SHOWN_SOURCES := 3          # sources named on the damage line; the rest fold into "others"
+const WINDOW_S := 10.0  # s of damage the card adds up
+const SHOWN_SOURCES := 3  # sources named on the damage line; the rest fold into "others"
 ## A hit's tag -> the key of the Hunter's own ability in its archetype file (its name is the label).
 const ABILITY_KEY := {
-	"rmb": "rmb", "secondary": "rmb", "utility": "e", "e": "e", "ult": "x", "ultimate": "x", "x": "x", "dodge": "dash"}
+	"rmb": "rmb", "secondary": "rmb", "utility": "e", "e": "e", "ult": "x", "ultimate": "x", "x": "x", "dodge": "dash"
+}
 ## A hit's tag -> plain words, for hits that are not a named ability.
-const TAG_WORDS := {"primary": "a weapon shot", "shot": "a weapon shot", "flame": "flames", "burn": "burning",
-	"mob": "a monster", "fall": "a fall", "boom": "an explosion", "wall": "a wall slam", "hazard": "a hazard",
-	"kin": "a Boki", "k1": "a Boki move", "k2": "a Boki move"}
-const PANEL_W := 460.0            # px
-const LINE_H := 22.0              # px between card lines
+const TAG_WORDS := {
+	"primary": "a weapon shot",
+	"shot": "a weapon shot",
+	"flame": "flames",
+	"burn": "burning",
+	"mob": "a monster",
+	"fall": "a fall",
+	"boom": "an explosion",
+	"wall": "a wall slam",
+	"hazard": "a hazard",
+	"kin": "a Boki",
+	"k1": "a Boki move",
+	"k2": "a Boki move"
+}
+const PANEL_W := 460.0  # px
+const LINE_H := 22.0  # px between card lines
 const INK := Color("e8eef5")
 const MUTED := Color("aab4c2")
 
 var m: Match
-var _hits := {}                   # Hunter id -> [{t, who: String, hunter: Hunter or null, amt, how: String}]
+var _hits := {}  # Hunter id -> [{t, who: String, hunter: Hunter or null, amt, how: String}]
 var _hit_cb: Callable
+
 
 func _init(match_node: Match) -> void:
 	m = match_node
 	name = "DeathRecap"
 
+
 func _ready() -> void:
 	_hit_cb = _on_hit
 	CombatBus.hit_landed.connect(_hit_cb)
 
+
 func _exit_tree() -> void:
 	if CombatBus.hit_landed.is_connected(_hit_cb):
 		CombatBus.hit_landed.disconnect(_hit_cb)
+
 
 func _on_hit(attacker: Node, target: Node, amount: float, tags: Array) -> void:
 	if not target is Hunter or amount <= 0.0:
@@ -47,6 +63,7 @@ func _on_hit(attacker: Node, target: Node, amount: float, tags: Array) -> void:
 	list.append(rec)
 	_hits[target.get_instance_id()] = list
 
+
 ## Who a hit's damage is counted under on the card.
 func _source(attacker: Node, by: Hunter, target: Node) -> String:
 	if by == target:
@@ -56,6 +73,7 @@ func _source(attacker: Node, by: Hunter, target: Node) -> String:
 	if attacker is Blight:
 		return "the Blight"
 	return "a monster" if attacker else "the world"
+
 
 ## What did it: the Hunter's own ability name when the hit's tags name one, else plain words.
 func _how(by: Hunter, tags: Array) -> String:
@@ -69,10 +87,12 @@ func _how(by: Hunter, tags: Array) -> String:
 			return TAG_WORDS[t]
 	return "an attack"
 
+
 ## The hits `h` took in the WINDOW_S seconds up to `until` (the match time, or the moment they went out).
 func recent(h: Hunter, until: float) -> Array:
 	var kept: Array = _hits.get(h.get_instance_id(), [])
 	return kept.filter(func(r): return float(r["t"]) <= until and until - float(r["t"]) <= WINDOW_S)
+
 
 ## "Rin 84, a monster 12": damage by source, biggest first.
 static func by_source(hits: Array) -> String:
@@ -92,6 +112,7 @@ static func by_source(hits: Array) -> String:
 		parts.append("others %d" % roundi(rest))
 	return ", ".join(parts)
 
+
 ## One short card centred on `at` (its top edge): who, how, the damage line.
 func draw(c: CanvasItem, at: Vector2, p: Hunter) -> void:
 	var hits := recent(p, float(p.get_meta("died_at", m.time)) if p.out else m.time)
@@ -105,6 +126,7 @@ func draw(c: CanvasItem, at: Vector2, p: Hunter) -> void:
 	else:
 		_who_line(c, at.x, y, verb, hits.back() as Dictionary)
 		HudStyle.ctext(c, Vector2(at.x, y + LINE_H), "Last %d s: %s" % [int(WINDOW_S), by_source(hits)], 14, MUTED)
+
 
 ## "Downed by Rin with Shadow Knife", the Hunter's name in their squad colour.
 func _who_line(c: CanvasItem, cx: float, y: float, verb: String, last: Dictionary) -> void:
