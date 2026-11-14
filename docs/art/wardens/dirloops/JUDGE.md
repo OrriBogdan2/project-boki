@@ -220,3 +220,56 @@ The next try is a crossover side step, with the trail foot passing in front, and
 Main re-keyed Cinder's run_* (ext/anim-cinder-rekey: a 0.333 s scurry, `foot_mps` 5.15). Only the four walk diagonals
 (walk_fl/fr/bl/br, judged above) stay on her; the run_b restride and run_fl/fr/bl were baked on the old 0.7 s run_f and
 are dropped. Run diagonals on the new run_f are open (needs Blender, not on this worker). Sable and Vex unchanged.
+## Lace and Kael (2026-11-11, ext/anim-dirloops-lace-kael)
+
+Same tool, both Masks' walk/run b, l, r, fl, fr, bl, br (14 clips each). Their walk_f/run_f are the old hand-keyed
+clips and stay (Lace's pilot walk_f/run_f is on unmerged ext/anim-pilot-slice3; Kael's pilot lost its judge). Those
+lean on `loco.stride`/`foot_mps` (the game plays them faster and strides the thighs further), so the new loops are
+baked at the forward loops' `foot_mps` (Lace 1.18 / 3.72, Kael 1.62 / 4.35 m/s) and the game lifts every direction to
+loco speed the way it lifts forward; the rings get the diagonals and `in_step`. Kael has no foot bones: the tool poses
+thigh+shin and takes the foot as the shin's verts under the ankle (the sole turns with the shin).
+
+| loops | planted sole vs bake speed | pelvis under forward, worst (clip-check) | duty | ankle miss |
+|---|---|---|---|---|
+| Lace walk x7 | 1.18, 100% within 5% | 0 (bake: l/r 0.007) | 0.52 | 0.0027 m |
+| Lace run x7 | 3.72, 100% within 5% | l 0.014, r 0.003, rest 0 | 0.31, r 0.27 | 0.0023 m |
+| Kael walk x7 | 1.62, 96-100% within 5% | 0 | 0.26 | 0 |
+| Kael run x7 | 4.32-4.34 vs 4.35, 100% | 0 | 0.22 | 0 |
+
+Every ring one length (Lace walk 1.033 s, run 0.667 s; Kael walk 1.100 s, run 0.667 s in game).
+
+In game, `--anim-audit` (forward gate, run at 4.65 m/s): Lace 14% -> 13%, Kael 12% -> 13% (limit 25%). The direction
+gate is not on main (ext/anim-strafe-back, unmerged); the same slide measure along each move direction, run with a
+throwaway patch of `tools/anim_audit.gd`, at 4.65 m/s, old -> new:
+
+| Hunter | f | b | l | r | fl | fr | bl | br |
+|---|---|---|---|---|---|---|---|---|
+| Lace | 13 -> 15% | 11 -> 22% | 10 -> 10% | 10 -> 10% | 75 -> 15% | 40 -> 15% | 43 -> 25% | 94 -> 26% |
+| Kael | 12 -> 11% | 13 -> 24% | 15 -> 16% | 14 -> 20% | 49 -> 31% | 57 -> 33% | 47 -> 23% | 121 -> 24% |
+
+(Old diagonals were the blend of two neighbours. The new b loops slide more than the old ones in game, still under
+the 25% limit; cause not isolated, the likeliest is the `stride` gain, which was tuned on the old clips.)
+
+### Blind Fable judge (Lace and Kael)
+
+Strips: 8 frames a loop, Blender Workbench, flat grey (back/diagonals side view, l/r front), the old and new clip of a
+slot as rows X/Y in shuffled order, the forward loop above as REF; `lace-kael/pairNN.jpg` (old vs new),
+`lace-kael/soloNN.jpg` (new diagonals; the old ring had none), key in `lace-kael/key.json`. The game-renderer strips
+(jobq 20261111-135432-15981, -135445-32458, -135501-03713, -135512-09902) were still queued behind 61 GPU jobs.
+Judge: Fable, blind, the rubric above. Pilot rule: only a win ships, a tie keeps the current clip.
+
+| slot | Lace | Kael |
+|---|---|---|
+| walk_b | **new** (3,3,4,3,4 vs 3,3,3,3,3) | old (3,4,3,3,4 vs 3,3,3,3,3): kept |
+| walk_l | **new** (more lateral weight) | **new** (swing foot lower) |
+| walk_r | tie: old kept | tie: old kept |
+| run_b | **new** (lean and flight, like run_f) | **new** (old overreaches, knee pop) |
+| run_l | tie: old kept | tie: old kept |
+| run_r | **new** (old: very wide straddle) | **new** (old: straddle and crouch) |
+| fl, fr, bl, br walk and run | **new**, 8/8 pass (all 3s, run_fl 4 look) | **new**, 8/8 pass (all 3s; run_bl/br borderline crouch at the seam) |
+
+Shipped: Lace 12 of 14 new (walk_r, run_l old), Kael 11 of 14 new (walk_b, walk_r, run_l old). The old loops kept
+share the ring's length, and clip-check holds their pelvis in the band, but their strike key is their own, so the
+ring is in step only on the new loops. After the swap: `--clip-check` Lace and Kael 0 fail (the one FAIL is Ostra's
+mid-run hit, files not touched here), `--anim-audit` forward gate Lace 13%, Kael 12%, `--crouch-check` 0 fail.
+The per-direction table above was measured before the old loops went back in.
