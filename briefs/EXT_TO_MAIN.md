@@ -9640,3 +9640,8 @@ READY ext/stuck-integ-f60f9dd7 b764e6e387 (supersedes: ext/aim-height 3e886ea08,
 READY ext/merge-train-1114 53ad0a9081 (gate-shard sharded gate + merge-train queue + stale-PR triage; ops/merge-train-1114 only, see meshy/merge-train-1114/RESULT.md)
 READY ext/merge-train-1114 2216ff1dca (supersedes the previous line: same ops/merge-train-1114 work, merged with main)
 READY ext/albert-i1-ingame a811f9786dd28834b67e93e326ba1e5a69f724f7 (Albert i1 master in game: v95_swap emit_paint fixes the cyan bake, screen_uvs restore the porthole, new i1 face shader; GATE GREEN-equivalent on rpc7: suite 426 flags NEW-RED 0 vs main ba6b62f7a1d5879f9213ffabf1f24dad68d826da after reruns, export dry-run 428.5 MB +0.1%; needs PR opened + GATE GREEN comment from hetzner, no gh here)
+READY ext/merge-batch-13-1113 7b42ea0ce3 (PR #65 batch 13, merge-driver-1114 GATE GREEN on main ba6b62f7a1: merge FIRST; comment text in the report)
+READY ext/merge-batch-14-1113 d187062f44 (PR #61 batch 14 audio, GATE GREEN on main ba6b62f7a1; completes main's reverts of fold-sfx-boki and air-ring-boost)
+READY ext/glide-smooth-1111 d147ee06ef (PR #59 Sparkle DashGlide, GATE GREEN on main ba6b62f7a1)
+READY ext/fix-audio-settings 067b6cfcd0 (PR #51 audio sliders, GATE GREEN on main ba6b62f7a1)
+READY ext/creator-sex-distinct 2183d5ae04 (PR #29 empty creator, GATE GREEN on main ba6b62f7a1; home-gait new-red fixed)
