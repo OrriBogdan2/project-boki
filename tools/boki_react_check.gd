@@ -122,6 +122,9 @@ func _case(main: Node, label: String, species: String, weight: String, mass: flo
 	var ctl := Subject.new(species, holder)       # the same Boki left alone: its idle motion is not the hit's
 	await main.get_tree().process_frame
 	ctl.pup.phase = a.pup.phase
+	if a.rig:  # the same fidget timing too (BokiIdle draws its gaps from the rig's rng)
+		ctl.rig._rng.state = a.rig._rng.state
+		ctl.rig._idle._gap = a.rig._idle._gap
 	ok((a.rig != null) == BokiRig.enabled, "%s: %s body" % [label, "rigged" if a.rig else "primitive"])
 	var box := a.box()
 	var chip := _hit(a, ctl, box, Vector3(0, 0, 1), CHIP, mass)
