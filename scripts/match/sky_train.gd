@@ -7,10 +7,11 @@ extends Node3D
 ## The cars are platforms you can stand on and ride; each carries a crate of early loot. Standing on a
 ## car you move freely in its frame: it carries you (a moving platform), and you walk, aim, dash and
 ## jump on top of that (Hunter._occ keeps you on the deck and lets you step off onto a pier or jump
-## off). The train itself is deadly while it's moving: its front, or any car that hits you while you
+## off). Leaving a car takes its speed with you, and landing on one takes it up: no jolt either
+## way. The train itself is deadly while it's moving: its front, or any car that hits you while you
 ## aren't on top of it, takes you straight out (Match.train_hit). It warns you: a headlight, a horn
-## about two seconds before it reaches you (and before it pulls out of a stop), and the rails ahead
-## of it pulsing.
+## about two seconds before it reaches you, and the rails ahead of it pulsing (also from the whistle
+## before it pulls out of a stop). Its halt and ride sounds are TrainSfx.
 
 const CAR_LEN := 4.6
 const CAR_GAP := 5.3          # centre to centre
@@ -22,6 +23,9 @@ const REACH_PAD := CAR_LEN + 1.0   # m: past the train's half-length nothing tou
                                    # is 2.6, the engine's front sweep reaches 3.6)
 const GAP_PAD := (CAR_GAP - CAR_LEN) * 0.5 + 0.05
 const HORN_LEAD := 2.2        # seconds of warning before the engine reaches someone in its path
+const DEPART_LEAD := 4.0      # s: the whistle before it pulls out of a stop, time to run for it (under the 6 s dwell)
+const AIR_CARRY := 1.2        # s: the car's speed stays your frame in the air this long (a jump's hang)
+const AIR_REACH := 4.0        # m above a deck: in the air this close over a car, its frame follows the car
 
 var m: Node = null
 var world: World = null
@@ -41,11 +45,11 @@ var glows: Array = []
 var light: SpotLight3D = null
 var halts: TrainHalts = null  # the beacons and pier glow
 var lamp: TrainLamp = null    # the headlight halo, beam and trail
+var sounds: TrainSfx = null   # brakes, bell, doors, whistle, ride and rumble
 var horn_cd := 0.0
-var rail_cd := 0.0
-var was_moving := false
 var ride_t := {}              # hunter -> match time they last stood on a car
 var carried := {}             # hunter -> how far the train carried them last step (world units)
+var off_car := {}             # hunter -> {v: the car's speed (m/s, world) they left it with, dash: dashed since}
 var depart_warned := false
 var hits: Array = []          # [{e, car, t}] for the checks: what the train hit, which car, and when
 
@@ -77,8 +81,11 @@ func setup(match_node: Node) -> void:
 	halts.setup(self, Settings.quality() == "low")
 	lamp = TrainLamp.new()
 	lamp.setup(self, car_nodes[0], light.position)
+	sounds = TrainSfx.new()
+	sounds.setup(self)
 	for i in cars_n:
-		cur.append(Transform3D()); old.append(Transform3D())
+		cur.append(Transform3D())
+		old.append(Transform3D())
 	_place(0.0)
 	old = cur.duplicate()
 	# the cars stand at their first stop from the start (not at the origin until the first tick), so
@@ -105,6 +112,10 @@ func halt_eta(station_s: float) -> float:
 			return fposmod(leg_start - now, period)
 		leg_start += dwell + float(L["t"])
 	return INF
+
+## m/s: how fast the train goes along the loop at match time t (0 while it stands at a stop).
+func speed_at(t: float) -> float:
+	return _schedule(t).y
 
 ## Where the engine is at a given match time, and how fast it's going.
 func _schedule(t: float) -> Vector2:
@@ -208,33 +219,58 @@ func tick(dt: float) -> void:
 	old = cur.duplicate()
 	_place(float(m.time))
 	var moving := head_v > 0.3
-	# riders: anyone standing on a car moves with it (and for a moment after a hop, so jumping on a
-	# moving train doesn't leave you behind). This is only the platform's motion: the rider's own
-	# walking, dashing and jumping happen on top of it in Hunter.sim, in the train's frame.
+	# riders: anyone standing on a car moves with it. This is only the platform's motion: the rider's
+	# own walking, dashing and jumping happen on top of it in Hunter.sim, in the car's frame. Leaving
+	# a car, its speed stays your frame for AIR_CARRY or until a dash ends (off_car): you move with it
+	# on top of your own air motion, so the air drag and steering work on your speed over the car
+	# alone and a jump comes down on it (a moving platform, as in the source). Then it joins your own
+	# speed and the drag takes it from there. Landing on a car takes its speed off yours: no jolt.
 	var was_carried := carried
 	carried = {}
 	for h in m.hunters:
-		if h.out or h.extracted or h.riding or h.remote:
+		if h.out or h.extracted or h.riding or h.remote or not h.grounded:
 			continue
-		var k := _car_under(h.pos, old, 0.25 if h.grounded else 4.0)
+		var k := _car_under(h.pos, old, 0.25)
 		if k < 0:
 			continue
-		if h.grounded:
-			ride_t[h] = m.time
-		elif m.time - float(ride_t.get(h, -9.0)) > 1.2:
-			continue
-		var np := _carry(k, h.pos)
-		carried[h] = np - h.pos
-		h.pos = np
-		h.prev += carried[h]
-	# off the train in mid-air (jumped or dashed off the side): you keep the train's speed, as off
-	# any moving platform, and the air steering eases it off
+		ride_t[h] = m.time
+		var dp: Vector3 = _carry(k, h.pos) - h.pos
+		carried[h] = dp
+		h.pos += dp
+		h.prev += dp
+		if dt > 0.0 and not was_carried.has(h):
+			var fr: Vector2 = off_car.get(h, {"v": Vector2.ZERO})["v"]
+			off_car.erase(h)
+			h.vel.x += fr.x - dp.x / dt     # stepped on: what's left is your speed over the deck
+			h.vel.z += fr.y - dp.z / dt
 	if dt > 0.0:
 		for h in was_carried:
-			if carried.has(h) or not is_instance_valid(h) or h.grounded or h.out:
-				continue
-			var dv: Vector3 = (was_carried[h] as Vector3) / dt
-			h.vel.x += dv.x; h.vel.z += dv.z
+			if not carried.has(h) and is_instance_valid(h) and not h.out:
+				var dv: Vector3 = (was_carried[h] as Vector3) / dt
+				off_car[h] = {"v": Vector2(dv.x, dv.z), "dash": false}     # (not the car's climb, as in the source)
+	for h in off_car.keys():
+		if not is_instance_valid(h) or h.out:
+			off_car.erase(h)
+			continue
+		var over := _car_under(h.pos, old, AIR_REACH)
+		if over > 0 and dt > 0.0:     # still over a car: its frame is the deck's motion under you (its curves)
+			var at: Vector3 = (old[over] as Transform3D).affine_inverse() * h.pos
+			at.y = 0.0     # (on the deck: a pitching car would swing a point up in the air about)
+			var dp: Vector3 = (cur[over] as Transform3D) * at - (old[over] as Transform3D) * at
+			off_car[h]["v"] = Vector2(dp.x, dp.z) / dt
+		var fr: Vector2 = off_car[h]["v"]
+		# a dash sets its own speed every step: the car's speed joins yours as it hands over, so a dash
+		# ends in world terms (the car's frame would pull a dash off the back forward again)
+		if h.roll_t > 0.0:
+			off_car[h]["dash"] = true
+		elif h.grounded or off_car[h]["dash"] or m.time - float(ride_t.get(h, -9.0)) > AIR_CARRY:
+			h.vel.x += fr.x
+			h.vel.z += fr.y
+			off_car.erase(h)
+			continue
+		var along := Vector3(fr.x, 0.0, fr.y) * dt
+		h.pos += along
+		h.prev += along
 	for p in m.pickups:
 		if p.has("ride"):
 			var k2 := int(p["ride"])
@@ -261,15 +297,13 @@ func tick(dt: float) -> void:
 			n.rotation.y = (cur[k5] as Transform3D).basis.get_euler().y + PI * 0.5
 	_kill_zone()
 	_visuals(dt, moving)
-	# all aboard: the horn goes a couple of seconds before it pulls out of a stop, so anyone on the
-	# rails ahead has time to step off
-	if not moving and not depart_warned and _schedule(float(m.time) + HORN_LEAD).y > 0.3:
+	# all aboard: DEPART_LEAD before it pulls out of a stop the whistle goes and the rails pulse, so
+	# you can run for it, and anyone on the rails ahead has time to step off
+	if not moving and not depart_warned and speed_at(float(m.time) + DEPART_LEAD) > 0.3:
 		depart_warned = true
-		horn_cd = HORN_LEAD + 0.5
-		m.sfx("horn", (cur[0] as Transform3D).origin, -1.0, 0.95)
 	if moving:
 		depart_warned = false
-	was_moving = moving
+	sounds.tick(moving)
 
 ## The train hits for good while it's moving: anything in front of the engine, or caught by the
 ## engine or a car while not standing on top of it (Match.train_hit: no wisp, straight out).
@@ -300,7 +334,8 @@ func _kill_zone() -> void:
 
 ## Which car hits a body at p right now (0 = the engine), or -1. The engine's front sweeps the
 ## track ahead; the engine's body and the cars' frames hit anything that isn't up on a deck. A rider
-## (on a car a moment ago) is never hit by the engine's body, only by its front.
+## (on a car a moment ago) is never hit by the engine's body or a car's frame, only by the engine's
+## front: a deck climbing out of a dip under someone who just jumped off it scoops them up instead.
 func hit_by(p: Vector3, rider := false) -> int:
 	if not _near_train(p, cur):
 		return -1
@@ -317,7 +352,7 @@ func hit_by(p: Vector3, rider := false) -> int:
 			continue
 		if k == 0 and not rider and lk.y > -1.8 and lk.y < 1.9:
 			return 0
-		if k > 0 and lk.y > -1.8 and lk.y < -0.45:
+		if k > 0 and not rider and lk.y > -1.8 and lk.y < -0.45:
 			return k
 	return -1
 
@@ -473,21 +508,11 @@ func _visuals(dt: float, moving: bool) -> void:
 		light.light_energy = 1.4 + heat * 2.6
 	halts.tick(dt)
 	lamp.tick(heat, moving)
-	# sound: the horn about two seconds before it reaches anyone in its path, the rails singing when
-	# it's close
-	horn_cd -= dt; rail_cd -= dt
+	# the horn about two seconds before it reaches anyone in its path
+	horn_cd -= dt
 	if moving and horn_cd <= 0.0 and in_path(HORN_LEAD) != null:
 		m.sfx("horn", (cur[0] as Transform3D).origin, 1.0)
 		horn_cd = 4.0
-	var pl = m.player
-	if pl and not pl.out and moving:
-		var t: Transform3D = cur[0]
-		var near := 1e9
-		for k in cars_n:
-			near = minf(near, ((cur[k] as Transform3D).origin - pl.pos).length())
-		if near < 16.0 and rail_cd <= 0.0:
-			m.sfx("rail", t.origin, -12.0 + (16.0 - near) * 0.5, 0.9 + heat * 0.2)
-			rail_cd = 0.8
 
 ## The first hunter (not riding it) the engine will reach within `secs` at its current speed, or
 ## null. Measured along the loop, so it works round the bends.

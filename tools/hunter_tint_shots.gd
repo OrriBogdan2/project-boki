@@ -7,14 +7,15 @@ extends RefCounted
 ## Hunter alone in the match's light, front 3/4, over its plain albedo: the .glb's paint, no light at all), printing
 ## each one's mean colour and red/blue ratio in both ("TINT"). Needs a renderer.
 
-const GAP := 1.7              # m between Hunters in a row
+const GAP := 1.7  # m between Hunters in a row
 const PER_ROW := 7
-const ROW_GAP := 3.2          # m between the two rows (match shots)
-const LIT_LAYER := 1 << 19   # the lit.png pass draws on this layer only
-const STAGE := Vector2(270, 520)   # px: one Hunters-screen stage in the select sheet
+const ROW_GAP := 3.2  # m between the two rows (match shots)
+const LIT_LAYER := 1 << 19  # the lit.png pass draws on this layer only
+const STAGE := Vector2(270, 520)  # px: one Hunters-screen stage in the select sheet
 
 var main: Node
 var dir := ""
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -41,17 +42,20 @@ func run(main_node: Node) -> void:
 	print("HUNTER-TINT-SHOTS done ", dir)
 	main.get_tree().quit()
 
+
 ## Where the i-th Hunter stands in the two-row lineup (row 0 behind, row 1 in front).
 func _spot(i: int, n: int) -> Vector3:
 	var row := i / PER_ROW
 	var in_row := mini(PER_ROW, n - row * PER_ROW)
 	return Vector3((i % PER_ROW - (in_row - 1) * 0.5) * GAP, 0.0, (row - 0.5) * ROW_GAP)
 
+
 func _grab(file: String, frames := 30) -> void:
 	for i in frames:
 		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
 	print("HUNTER-TINT-SHOT ", file)
+
 
 ## The .glb files on their own glTF materials: no toon pass, no look, no team.
 func _neutral() -> void:
@@ -84,6 +88,7 @@ func _neutral() -> void:
 	await _grab("neutral.png")
 	stage.queue_free()
 
+
 ## The Hunters screen's turntable stage (HunterViewer: its own light, the Hunter's rim colour), every Hunter's stage
 ## read off its SubViewport into one sheet.
 func _select() -> void:
@@ -97,7 +102,7 @@ func _select() -> void:
 	for i in 240:
 		await main.get_tree().process_frame
 	for v in views:
-		(v as HunterViewer).pivot.rotation.y = 0.0      # (face on, as the screen opens)
+		(v as HunterViewer).pivot.rotation.y = 0.0  # (face on, as the screen opens)
 	for i in 3:
 		await main.get_tree().process_frame
 	var px := Vector2i(1920, 1080)
@@ -116,6 +121,7 @@ func _select() -> void:
 	box.queue_free()
 	await main.get_tree().process_frame
 
+
 ## One of each Hunter in a real match (its world, light and post), at the match camera and closer.
 func _match() -> void:
 	var m := Match.new()
@@ -129,8 +135,9 @@ func _match() -> void:
 	var n := Arch.ORDER.size()
 	for i in n:
 		var id: String = Arch.ORDER[i]
-		var h := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[i % 4], Arch.signature(id), "",
-				PlayerLook.neutral(), id)
+		var h := Models.hunter(
+			Arch.weight(id), Data.TEAM_COLORS[i % 4], Arch.signature(id), "", PlayerLook.neutral(), id
+		)
 		m.add_child(h)
 		var p := c + _spot(i, n) + Vector3(0, 0, 4.0)
 		h.global_position = Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
@@ -142,6 +149,7 @@ func _match() -> void:
 	m.cam.snap(c + Vector3(0, 0, 4.0))
 	await _grab("match_close.png")
 	await _lit(m, c)
+
 
 ## Each Hunter in the match's own light (row 0) over the same .glb in its bare albedo, unlit (row 1), alone on
 ## LIT_LAYER through a camera with a cleared background, and the mean colour of each in both.
@@ -180,7 +188,7 @@ func _lit(m: Match, c: Vector3) -> void:
 			var nd: Node3D = h if k == 0 else raw
 			m.add_child(nd)
 			nd.global_position = c + Vector3((i - (n - 1) * 0.5) * gap, -2.6 * k, 0.0)
-			nd.rotation.y = PI + 0.5      # (front 3/4)
+			nd.rotation.y = PI + 0.5  # (front 3/4)
 			for vi in nd.find_children("*", "VisualInstance3D", true, false):
 				(vi as VisualInstance3D).layers = LIT_LAYER
 	cam.position = c + Vector3(0.0, 1.2, 27.0)
