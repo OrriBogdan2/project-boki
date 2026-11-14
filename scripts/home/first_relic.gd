@@ -2,8 +2,8 @@ class_name FirstRelic
 extends RefCounted
 ## Your first Relic (Lace, Kael or Vex). The fight path picks it on the hatch island (Hatch, MaskMoment); the
 ## garden path skips that and picks it here, the first time you step to the portal: the same three cards
-## (HobOffer), then the Relic drifts out of the portal to you and goes on (MaskBeat, the short one, as Hob's
-## second Relic does), and the expedition panel opens.
+## (HobOffer), then the Relic drifts out of the portal to you and goes on (MaskBeat, the put-on beat without the
+## swap, as Hob's second Relic does), and the expedition panel opens.
 
 const PANEL := "Relic"        # Home.panel_open while the pick and the put-on run (you stand still)
 const FROM_PORTAL := Vector3(0.0, 1.8, 0.0)      # m above the portal's spot: where the Relic leaves from
@@ -33,7 +33,7 @@ static func _put_on(h, id: String, then: Callable) -> void:
 	var relic := MaskRelic.make(id)
 	h.add_child(relic)
 	relic.global_position = h.spots["portal"] + FROM_PORTAL
-	MaskBeat.play(relic, h.player, func(_body): _done(h, then), false, true)
+	MaskBeat.play(relic, h.player, func(_body): _done(h, then), false)
 
 static func _done(h, then: Callable) -> void:
 	h.panel_open = ""

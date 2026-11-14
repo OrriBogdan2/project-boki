@@ -6,7 +6,7 @@ extends RefCounted
 ##   - the first time on a new farm: who he is, the stall, the house spot and the axe (the farm tutorial's start)
 ##   - while the tutorial runs: the step you're on, pointing at where it happens
 ##   - once the house is down and the second Mask is on offer (ClassUnlock.second_pending): "By the way..." and
-##     the pick of three (HobOffer); taking one plays the short Mask moment (MaskBeat)
+##     the pick of three (HobOffer); taking one plays the put-on beat (MaskBeat)
 ##   - otherwise: blueprints he drew up (FarmBuilder), then the build menu or goodbye
 ## When a line is about something (a "show"), he points at it and the camera looks there and stays (CamLook)
 ## until you click on to the next line. On the first arrival the camera also swings over to him while he waves
@@ -117,7 +117,7 @@ func _put_on(id: String) -> void:
 	var hands := hob.node.global_position - hob.node.global_basis.z * 0.5 + Vector3.UP * 1.2
 	relic.global_position = hands
 	hob.node.pose = "idle"
-	MaskBeat.play(relic, h.player, func(_body): _after_beat(id), false, true)
+	MaskBeat.play(relic, h.player, func(_body): _after_beat(id), false)
 
 func _after_beat(id: String) -> void:
 	ClassUnlock.reveal_done(id)      # (the beat was its reveal)
