@@ -1,13 +1,27 @@
 class_name BossModels
 ## The bodies of the three lair bosses, their ward stones, and the lair's own pieces: the gate, the
 ## sealing dome, the dial that opens it, rune pylons and the Rare Egg.
-##   Stone Colossus (colossus)  a KayKit warrior grown huge and turned to stone: moss, boulder pauldrons, gold rune eyes
-##   Stormcoil      (serpent)   a sky serpent: a long chain of storm-blue coils behind a horned head, swept wings
-##   Brood Mother   (brood)     a giant hive queen: a spider-legged thorax and a swollen, glowing egg sac
+## A lair boss is a legendary Boki: its skinned model (art/mobs/<kind>/<kind>.glb, the dex model, MobGlb) has a bone
+## per pivot BossAnim poses.
+##   colossus  Siegephant  a castle-tower elephant on four stone legs (slams, boulders, fissures)
+##   serpent   Sarcobra    a winged tomb cobra: the neck bends into the head, the hood-wings flap (lunges, storms)
+##   brood     Calderoise  a volcano-shelled tortoise: the volcano is the sac that swells (acid, eggs, burrows)
+## With --prim-art (or no model) the old primitive bodies below stand in:
+##   colossus  a KayKit warrior grown huge and turned to stone: moss, boulder pauldrons, gold rune eyes
+##   serpent   a sky serpent: a long chain of storm-blue coils behind a horned head, swept wings
+##   brood     a giant hive queen: a spider-legged thorax and a swollen, glowing egg sac
 ## Every model has root > "Body", like the other monsters, and lists its materials in meta "mats" so
 ## hits flash it.
 
 static func build(kind: String) -> Node3D:
+	if kind != "ward" and Assets.on() and MobGlb.has(kind):
+		var root := Node3D.new()
+		var body := Node3D.new()
+		body.name = "Body"
+		root.add_child(body)
+		root.set_meta("mats", [])
+		MobGlb.dress(root, kind)
+		return root
 	match kind:
 		"colossus": return colossus()
 		"serpent": return serpent()

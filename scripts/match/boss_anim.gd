@@ -45,6 +45,8 @@ const CLIP := {
 	"boulders_windup": ["throw", 0.0, -1.0], "boulders_strike": ["throw", -1.0, 1.0],
 }
 
+## Siegephant's legs in diagonal pairs (only its model has them: the primitive Colossus walks on its clip)
+const COL_LEGS := ["LegFL", "LegBR", "-LegFR", "-LegBL"]
 const SERP_WINGS := ["Head/WingL", "-Head/WingR"]
 const BR_JAWS := ["Head/JawL", "-Head/JawR"]
 const BR_LEGS := ["Legs/Leg01", "Legs/Leg11", "Legs/Leg21", "-Legs/Leg0-1", "-Legs/Leg1-1", "-Legs/Leg2-1"]
@@ -71,7 +73,7 @@ const MOVES := {
 			[B, "rz", [0.55, 0, 0.65, 0.06, 0.75, -0.06, 0.85, 0.04, 1, 0]]],
 		"idle": [[B, "py", [0, 0, 0.5, 0.03, 1, 0]], [B, "rx", [0, 0, 0.5, -0.01, 1, 0]]],
 		"walk": [[B, "py", [0, 0, 0.25, 0.05, 0.5, 0, 0.75, 0.05, 1, 0]], [B, "rz", [0, 0.03, 0.5, -0.03, 1, 0.03]],
-			[B, "rx", [0, -0.05, 1, -0.05]]],
+			[B, "rx", [0, -0.05, 1, -0.05]], [COL_LEGS, "rx", [0, 0, 0.25, 0.35, 0.75, -0.35, 1, 0]]],
 		"stagger": [[B, "rx", [0, -0.35, 0.5, -0.4, 1, -0.35]], [B, "py", [0, -0.4, 0.5, -0.38, 1, -0.4]],
 			[B, "rz", [0, 0.1, 0.5, -0.1, 1, 0.1]]],
 		"phase": [[B, "s", [0, 0, 0.1, 0.12, 0.7, 0.12, 1, 0]], [B, "rx", [0, -0.3, 0.1, 0.55, 0.7, 0.55, 1, 0]],
@@ -251,7 +253,8 @@ static func pose(b: Boss, delta: float) -> void:
 	var follow := 1.0 - exp(-(RATE_FAST if _fast(cur_move) else RATE_SLOW) * delta)
 	for i in rig.nodes.size():
 		rig.now[i] += (rig.aim[i] - rig.now[i]) * follow
-		_write(rig.nodes[i], rig.chans[i], rig.base[i] + rig.now[i])
+		if rig.nodes[i]:
+			_write(rig.nodes[i], rig.chans[i], rig.base[i] + rig.now[i])
 	if b.mkind == "colossus":
 		_clip(b, cur_move, cur_k)
 	elif b.mkind == "serpent":
@@ -330,10 +333,11 @@ static func _rig_of(b: Boss) -> Rig:
 	var body: Node3D = b.model.get_node("Body")
 	for pc in pairs(b.mkind):
 		var path := String(pc[0])
-		var n: Node3D = body if path == "." else body.get_node(path)
+		# null: a pivot only the other body has (Siegephant's legs on the primitive Colossus); pose() skips it
+		var n: Node3D = body if path == "." else body.get_node_or_null(path)
 		rig.nodes.append(n)
 		rig.chans.append(CHANS[pc[1]])
-		rig.base.append(rest_of(n, CHANS[pc[1]]))
+		rig.base.append(rest_of(n, CHANS[pc[1]]) if n else 0.0)
 	rig.now.resize(rig.nodes.size())
 	rig.aim.resize(rig.nodes.size())
 	b.model.set_meta("boss_rig", rig)

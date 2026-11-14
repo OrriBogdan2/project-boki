@@ -3,13 +3,20 @@ extends RefCounted
 ## boss_anim_<id>.png.
 ## Each row is a move cropped at the match camera, left to right at fixed times: the wake, every attack's
 ## wind-up into its strike (the fourth frame lands on the hit), the stagger, the phase change and the death.
+## --reel-frames also saves every other drawn frame, cropped round the boss at the match camera, as
+## <dir>/reel_<id>/NNNNN.jpg, for a clip made off the box: ffmpeg -framerate 30 -i <dir>/reel_<id>/%05d.jpg ...
 
 const CROP := 460                       # px, the square round the boss
 const SETTLE_S := 1.0                   # s the camera gets to settle
 const FOE_AWAY := 5.0                   # m the player stands from the boss
+const REEL := Vector2i(960, 640)        # px, each --reel-frames frame round the boss
 
 var main: Node
 var m: Match
+var reel := false                       # --reel-frames
+var reel_dir := ""                      # where the boss being filmed has its frames
+var reel_b: Boss
+var reel_n := 0
 
 func run(mn: Node) -> void:
 	main = mn
@@ -27,6 +34,8 @@ func run(mn: Node) -> void:
 			dir = String(a).substr(12)
 		if String(a).begins_with("--boss="):
 			only = String(a).substr(7)
+		if a == "--reel-frames":
+			reel = true
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
@@ -45,13 +54,25 @@ func run(mn: Node) -> void:
 
 func _frames(n: int) -> void:
 	for i in n:
-		await main.get_tree().process_frame
+		await _tick()
+
+## One frame; with --reel-frames every other one is kept, round the boss.
+func _tick() -> void:
+	await main.get_tree().process_frame
+	reel_n += 1
+	if reel_b == null or reel_n % 2 == 1:
+		return
+	var img := main.get_viewport().get_texture().get_image()
+	var c := Vector2i(m.cam.unproject_position(reel_b.pos + Vector3(0, 1.4, 0)))
+	var x := clampi(c.x - REEL.x / 2, 0, maxi(0, img.get_width() - REEL.x))
+	var y := clampi(c.y - REEL.y / 2, 0, maxi(0, img.get_height() - REEL.y))
+	img.get_region(Rect2i(x, y, REEL.x, REEL.y)).save_jpg(reel_dir.path_join("%05d.jpg" % (reel_n / 2)), 0.9)
 
 ## Waits until `secs` after `t0` on match time, then crops the boss out of the screen into column `col` of row `row`.
 func _grab(strip: Image, b: Boss, t0: float, secs: float, col: int, row: int) -> void:
 	while m.time - t0 < secs:
 		m.cam.focus = b.pos
-		await main.get_tree().process_frame
+		await _tick()
 	var img := main.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)
 	var c := Vector2i(m.cam.unproject_position(b.pos + Vector3(0, 1.4, 0)))
@@ -89,6 +110,11 @@ func _boss(dir: String, id: String) -> void:
 	if L["state"] == "sealed":
 		m.lairs.open(L, m.player, "dial")
 	var b: Boss = L["boss_mob"]
+	if reel:
+		reel_dir = dir.path_join("reel_" + id)
+		DirAccess.make_dir_recursive_absolute(reel_dir)
+		reel_b = b
+		reel_n = 0
 	var P: Hunter = m.player
 	P.teleport(b.pos + Vector3(FOE_AWAY, 0.5, 0))
 	m.cam.focus = b.pos

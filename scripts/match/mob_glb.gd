@@ -4,7 +4,8 @@ extends Node
 ## MobModels' primitives. The primitives' pivots stay, so mob.gd animates the monster as before; the primitives
 ## are hidden and this node, beside the model, copies each pivot's motion onto the bone of the same name every
 ## frame. The model's paint keeps the region's colour: its body hue band is repainted like a pack model's cloth
-## (BiomeRun.recolor_mats, meta "pack_part").
+## (BiomeRun.recolor_mats, meta "pack_part"). A lair boss is a legendary Boki and keeps its own paint; its body has
+## no primitives, so each bone gets a bare pivot where it rests (BossModels.build).
 
 const PATH := "res://art/mobs/%s/%s.glb"
 ## Primitive parts that stay drawn over the model, per kind: lights the model's paint can't give.
@@ -34,10 +35,13 @@ static func dress(root: Node3D, kind: String) -> void:
 	var glb := (_scenes[kind] as PackedScene).instantiate() as Node3D
 	body.add_child(glb)
 	(root.get_meta("mats") as Array).append(_paint(glb, Data.MOBS[kind]))
+	var skel := glb.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	var f := MobGlb.new()
 	f.name = "MobGlb"
 	root.add_child(f)
-	f._link(body, glb.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D)
+	f._body = body
+	f._add_pivots(skel)
+	f._link(body, skel)
 
 static func _hide_primitives(body: Node3D, keep: Array) -> void:
 	var stack: Array = [body]
@@ -59,7 +63,7 @@ static func _paint(glb: Node3D, md: Dictionary) -> ShaderMaterial:
 	m.set_shader_parameter("sss", 0.16)
 	m.set_shader_parameter("sheen", 0.08)
 	m.set_shader_parameter("use_tex", true)
-	m.set_shader_parameter("recolor", 0.0 if md.get("blight", false) else 1.0)
+	m.set_shader_parameter("recolor", 0.0 if md.get("blight", false) or md.get("boss", false) else 1.0)
 	m.set_shader_parameter("recolor_width", BAND_WIDTH)
 	m.set_shader_parameter("recolor_min_sat", BAND_MIN_SAT)
 	m.set_shader_parameter("recolor_to", base)
@@ -75,6 +79,24 @@ static func _paint(glb: Node3D, md: Dictionary) -> ShaderMaterial:
 			m.set_shader_parameter("albedo_tex", src.albedo_texture)
 		(mi as MeshInstance3D).material_override = m
 	return m
+
+## A bare pivot (Node3D, no turn) at the rest of each bone that has none, nested as the bones are; the root bone
+## named like the body is the body itself.
+func _add_pivots(skel: Skeleton3D) -> void:
+	var skel_rel := _rel(skel)
+	for bi in skel.get_bone_count():
+		var bone := skel.get_bone_name(bi)
+		if bone == _body.name or _body.find_child(bone, true, false):
+			continue
+		var up := skel.get_bone_parent(bi)
+		var parent: Node3D = _body
+		if up >= 0 and skel.get_bone_name(up) != _body.name:
+			parent = _body.find_child(skel.get_bone_name(up), true, false)
+		var pv := Node3D.new()
+		pv.name = bone
+		pv.position = _rel(parent).affine_inverse() * (skel_rel * skel.get_bone_global_rest(bi).origin)
+		parent.add_child(pv)
+
 
 func _link(body: Node3D, skel: Skeleton3D) -> void:
 	_body = body
