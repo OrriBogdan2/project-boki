@@ -92,13 +92,21 @@ static func move_to(h, k: Dictionary) -> void:
 static func lock_line(id: String) -> String:
 	var keys := GardenZones.keys_for(id)
 	var types: Array = GardenZones.info(id)["types"].map(func(t): return String(t).capitalize())
-	var food := "feed a Boki %s or %s meals" % [", ".join(types.slice(0, -1)), types[-1]]
+	var food := "feed a Boki %s or %s meals" % [", ".join(types.slice(0, -1)), types[-1]] + _closest_hint(id)
 	if keys["seed"] and keys["lean"]:
 		return "Ready to wake."
 	if keys["seed"]:
 		return food[0].to_upper() + food.substr(1) + "."
-	var seed := "Find its Wayseed in a run's lair or at the trader"
+	var seed := "Find its Wayseed in a run's lair or at Old Pell's (%d gems)" % int(BlackMarket.seed_terms()[1])
 	return seed + "." if keys["lean"] else seed + ", and " + food + "."
+
+## Which Boki is closest to the lean key, for the locked card: " (closest: Pip, Fire 3 of 8)", or "" with none.
+static func _closest_hint(id: String) -> String:
+	var best := GardenZones.closest(id)
+	if best.is_empty():
+		return ""
+	return " (closest: %s, %s %d of %d)" % [best["rec"]["name"], String(best["type"]).capitalize(), int(best["lean"]),
+			int(GardenZones.rules()["lean_key"])]
 
 ## An open zone's card body: its Boki with their moods, who woke it, today's game, its decor effects
 ## (DecorComfort) and your best at it.

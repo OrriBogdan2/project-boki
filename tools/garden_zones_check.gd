@@ -83,7 +83,9 @@ func _keys_part() -> void:
 	ok(GardenZones.keys_for("glasswater") == {"seed": false, "lean": false}, "no keys yet")
 	rec["lean"] = {"ice": float(GardenZones.rules()["lean_key"]) - 1.0}
 	ok(not GardenZones.keys_for("glasswater")["lean"], "a Boki just under the lean key is not enough")
-	var both := "Find its Wayseed in a run's lair or at the trader, and feed a Boki Water, Ice or Crystal meals."
+	var seed := "Find its Wayseed in a run's lair or at Old Pell's (%d gems)" % int(BlackMarket.seed_terms()[1])
+	var near := " (closest: %s, Ice %d of %d)" % [rec["name"], int(rec["lean"]["ice"]), int(GardenZones.rules()["lean_key"])]
+	var both := seed + ", and feed a Boki Water, Ice or Crystal meals" + near + "."
 	ok(ZoneCards.lock_line("glasswater") == both,
 		"with no key the locked card's one line names both: %s" % ZoneCards.lock_line("glasswater"))
 	rec["lean"]["ice"] = float(GardenZones.rules()["lean_key"])
@@ -92,7 +94,7 @@ func _keys_part() -> void:
 		"a Wayseed and a Boki leaning Ice tick both keys")
 	ok(ZoneCards.lock_line("glasswater") == "Ready to wake.", "with both keys its line says it is ready")
 	Save.d["items"].erase(GardenZones.wayseed("glasswater"))
-	ok(ZoneCards.lock_line("glasswater") == "Find its Wayseed in a run's lair or at the trader.",
+	ok(ZoneCards.lock_line("glasswater") == seed + ".",
 		"with the lean but no Wayseed it asks only for the Wayseed")
 
 ## The first day's tutorial runs in the start zone; once it is done or skipped, a plain goto lands in the hub.
@@ -255,6 +257,12 @@ func _cards_part(m: Node, hub) -> void:
 	var gw_lines: Array = gw.find_children("*", "Label", true, false).filter(func(l): return l.text != hint)
 	ok(gw_lines.size() == 2 and "Wayseed" in gw_lines[1].text,
 		"locked Glasswater: its name and one line (%s)" % gw_lines[-1].text)
+	var terms := BlackMarket.seed_terms()
+	var near := GardenZones.closest("glasswater")
+	var lock := String(gw_lines[-1].text)
+	ok(("%d gems" % terms[1]) in lock and "Old Pell" in lock, "the line names Old Pell and his %d gems" % terms[1])
+	ok(near.is_empty() or GardenZones.keys_for("glasswater")["lean"] or String(near["rec"]["name"]) in lock,
+		"the line names the closest Boki when the lean key is missing")
 	await _hub_shot(m, hub, "cards.png", SHOT_ZOOM)
 
 ## The text lines on an open zone's card.
@@ -423,6 +431,18 @@ func _texts(n: Node) -> String:
 	for c in n.get_children():
 		out += "\n" + _texts(c)
 	return out
+
+## The open panel as it shows now, saved in --shots-dir when one is given.
+func _grab(m: Node, file: String) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): dir = a.substr(12)
+	if dir == "" or DisplayServer.get_name() == "headless":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
+	m.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+	print("ZONES shot %s" % dir.path_join(file))
 
 ## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
 func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> void:
