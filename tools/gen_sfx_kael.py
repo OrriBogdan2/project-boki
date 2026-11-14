@@ -100,12 +100,31 @@ def stomp(g=1.0, f0=130):
 
 
 # ------------------------------------------------------------------ LMB: the greatsword
+SLASH_HIT = 0.08    # s: the blade's contact, after the press the sound plays on (the slash clips strike 50-100 ms in)
+EDGE_RNG = np.random.default_rng(4411)   # the edge's own noise, so adding it re-rolls no other sound of his
+
+
+def slash_edge(i):
+    """The blade meeting its mark: a near-instant bright snap, a short steel shing and a dull chop under it
+    (the cleave's cut, lighter: this is the quick swing)."""
+    n = N(0.15); t = np.arange(n) / S.SR
+    grit = EDGE_RNG.standard_normal(n)
+    snap = mix(bpf(grit, 3000, 9000) * env(n, 0.0002, 0.0012) * 2.6,
+               bpf(grit, 2400, 8000) * env(n, 0.0002, 0.007) * 1.3)
+    f = 2200 + 90 * i
+    shing = mix(np.sin(2 * np.pi * f * t) * env(n, 0.0002, 0.05) * 0.16,
+                np.sin(3 * np.pi * f * t) * env(n, 0.0002, 0.03) * 0.09)
+    chop = mix(kick(200, 70, 0.15, 0.006, 0.035, 2.6) * 0.65, bpf(grit, 320, 2600) * env(n, 0.0003, 0.02) * 1.2)
+    return mix(snap, shing, chop)
+
+
 def slash(i):
-    """A wide greatsword cut: heavy air moved, the hot edge hissing through it, the shackle's chain swinging."""
+    """A wide greatsword cut: heavy air moved, the hot edge hissing through it and biting on contact, the
+    shackle's chain swinging."""
     d = 0.42
     whum = S.sweep(95 + 6 * i, 60, d) * np.sin(np.pi * np.arange(N(d)) / N(d)) ** 2 * 0.35
     return mix(lpf(swish(d, 170 + 15 * i, 1300 + 120 * i, 3.5), 5000) * 1.3, whum,
-               at(sizzle(0.3, 0.03, 0.08) * 0.2, 0.05),
+               at(sizzle(0.3, 0.03, 0.08) * 0.2, 0.05), at(slash_edge(i), SLASH_HIT),
                at(links(0.2, (0.0, 0.03, 0.07), g=0.15), 0.12), at(lpf(noise(0.2), 300) * env(N(0.2), 0.03, 0.06), 0.06))
 
 

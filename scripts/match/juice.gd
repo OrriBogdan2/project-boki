@@ -12,13 +12,26 @@ extends RefCounted
 
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
+<<<<<<< ours
 const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
 const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
+||||||| base
+=======
+const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
+>>>>>>> theirs
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
 const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
 const ARMOR_TICK_DB := -4.0             # dB: the attacker's "push now" tick (a high, short click, not the crack)
 const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click's menu use
+
+## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
+## the damage category's), so a squad fight tells a Boki from its Hunter; a Hunter keeps the white
+## (or, on you, the hot) flash; mobs and the rest keep theirs.
+static func flash_col(target: Ent, p: Hunter) -> Color:
+	if target is Kin:
+		return DexView.type_col(DexView.type_of((target as Kin).species))
+	return HURT_COL if target == p else HIT_COL
 
 ## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
 ## sparks fly (on through it).
@@ -68,7 +81,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var power := clampf(d / 14.0, 0.35, 3.0)
 	if not mine:
 		power *= 0.65
-	var col := HURT_COL if target == p else HIT_COL
+	var col := flash_col(target, p)
 	var ability := o.has("ab") and src != "kin"
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
 	m.fx.impact(at, dir, col, power, crit, armor)
@@ -234,20 +247,6 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 
-## What a foot at `pos` lands on: planks, paved paths and stairs, snow, or grass and earth.
-static func ground_surface(w: World, pos: Vector3) -> String:
-	if w == null:
-		return "grass"
-	var ix := int(floorf(pos.x)); var iz := int(floorf(pos.z))
-	if not w.inb(ix, iz):
-		return "grass"
-	var i := w.idx(ix, iz)
-	if w.bridge.has(i):
-		return "wood"
-	if w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND:
-		return "stone"
-	return "snow" if w.style_at(i) == "frost" else "grass"
-
 ## A footstep while running (Hunter render, with its dust puff): what it sounds like depends on
 ## what's underfoot (StepSurface: grass, stone, wood, snow, the sky train's metal decks) and the
 ## Hunter's weight. It carries as far as StepReach says (less while sneaking), seen or not: a step
@@ -256,5 +255,45 @@ static func footstep(h: Hunter) -> void:
 	var m: Match = h.m
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
+<<<<<<< ours
 	var surf := StepSurface.at(m, h.pos)
 	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
+||||||| base
+<<<<<<<<< Temporary merge branch 1
+	var surf := ground_surface(m.world, h.pos)
+	Sfx.play(HeroSfx.of(h, "step_" + surf, "step_" + surf), h.pos, -13.0 if h == p else -17.0, 0.08)
+||||||||| merged common ancestors
+	var w: World = m.world
+	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
+	if not w.inb(ix, iz):
+		return
+	var i := w.idx(ix, iz)
+	var surf := "grass"
+	if w.bridge.has(i): surf = "wood"
+	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
+	elif w.style_at(i) == "frost": surf = "snow"
+	Sfx.play(HeroSfx.of(h, "step_" + surf, "step_" + surf), h.pos, -13.0 if h == p else -17.0, 0.08)
+=========
+	var w: World = m.world
+	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
+	if not w.inb(ix, iz):
+		return
+	var i := w.idx(ix, iz)
+	var surf := "grass"
+	if w.bridge.has(i): surf = "wood"
+	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
+	elif w.style_at(i) == "frost": surf = "snow"
+	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)
+>>>>>>>>> Temporary merge branch 2
+=======
+	var w: World = m.world
+	var ix := int(floorf(h.pos.x)); var iz := int(floorf(h.pos.z))
+	if not w.inb(ix, iz):
+		return
+	var i := w.idx(ix, iz)
+	var surf := "grass"
+	if w.bridge.has(i): surf = "wood"
+	elif w.stairs.has(i) or w.paint.has(i) or w.kind[i] != World.T_GROUND: surf = "stone"
+	elif w.style_at(i) == "frost": surf = "snow"
+	StepReach.play(h, HeroSfx.of(h, "step_" + surf, "step_" + surf), -13.0, -17.0)
+>>>>>>> theirs

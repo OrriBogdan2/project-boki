@@ -25,6 +25,10 @@ const SMOKE := Color(0.118, 0.078, 0.188, 0.85)   # the void smoke round the Tra
 const TRADE_LOOK_K := 1.65    # the Trade's lantern, motes and flashes, times their old size (visual only:
                               # the circle's rings and sigils stay at dash.radius, the real catch)
 
+const BOT_SEED_AHEAD := 0.5     # s past the plant the foe's path is read for: the seed goes where they will be
+const BOT_POP_MIN := 0.7        # m: a bot pops a young seed (a small circle) once its foe is this near the middle
+const BOT_POP_K := 0.5          # ...or within this share of the radius of a grown one
+
 var swollen_t := 0.0
 var last_shot_t := -99.0
 var shot_seen := 0
@@ -73,6 +77,7 @@ func ult_running() -> bool: return well.running()
 func cast_locked() -> bool: return well.locked
 func aim_lock() -> Vector2: return well.aim_lock
 func busy() -> bool: return super.busy() or well.locked
+func lock_left() -> float: return well.lock_left()
 func can_shoot() -> bool: return not well.locked and super.can_shoot()
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
@@ -610,6 +615,19 @@ func _tick_seed(dt: float) -> void:
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
 		_pop(false)
+	elif h.ctrl == "bot":
+		_bot_pop()
+
+## A bot pops the seed once its foe stands near the middle (a fizzled seed does nothing, so it waits for one).
+func _bot_pop() -> void:
+	if float(seed["t"]) < float(e_def()["min_recast"]):
+		return
+	var tgt := _bot_target()
+	var near := tgt != null and Vector2(
+		tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)
+	).length() < maxf(BOT_POP_MIN, seed_radius() * BOT_POP_K)
+	if near:
+		e_recast()
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't
 ## waste the seed).
@@ -679,18 +697,15 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():
-		var inside := Vector2(
-			tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)
-		).length() < seed_radius()
-		if inside or float(seed["t"]) > float(seed["grow"]) * 0.9:
-			h.inp["sig"] = true
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 8.0 and los and randf() < 0.3:
-		h.inp["aim"] = tgt.pos
+		var ed := e_def()
+		h.inp["aim"] = BotLead.point(h, tgt, float(ed["drop"]) + BOT_SEED_AHEAD, 0.0, float(ed["reach"]))
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 11.0 and randf() < 0.5:
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		var sn: Dictionary = rmb_def()["snap"]
+		BotLead.aim(self, tgt, float(sn["wind"]), float(sn["speed"]), float(sn["range"]))
 		h.inp["sec"] = true
 		return
 	if int(

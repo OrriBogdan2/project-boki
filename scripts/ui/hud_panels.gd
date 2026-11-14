@@ -57,7 +57,7 @@ func _draw_panels() -> void:
 			hud._draw_weapon(sz, p)
 			GearPanel.draw(hud, sz, p)
 			hud._draw_kin_card(sz, p)
-			hud._draw_squad(sz, p)
+			SquadFrames.draw(hud, sz, p)
 			TeamBoki.draw(hud, p)
 			hud._draw_perks(sz, p)
 		else:

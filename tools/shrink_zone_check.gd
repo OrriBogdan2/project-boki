@@ -10,9 +10,12 @@ const DT := 1.0 / 60.0
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SHRINKZONE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _match(main: Node, seed_v: int) -> Match:
 	var m := Match.new()
@@ -20,6 +23,7 @@ func _match(main: Node, seed_v: int) -> Match:
 	m.start({"teams": 6, "squad": 3, "tier": 0, "seed": seed_v, "no_drop": true, "sim_keep": true})
 	m.set_process(false)
 	return m
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -32,7 +36,14 @@ func run(main: Node) -> void:
 	print("SHRINKZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+<<<<<<< ours
 ## Phases close in, nest, finish in time, end on an exit; same seed same zone.
+||||||| base
+## Phases close in, nest, finish in time, end on an exit; same seed same zone; docks follow the edge.
+=======
+
+## Phases close in, nest, finish in time, end on an exit; same seed same zone; docks follow the edge.
+>>>>>>> theirs
 func _shape(main: Node) -> void:
 	var finals := {}
 	var picks := 0
@@ -69,6 +80,7 @@ func _shape(main: Node) -> void:
 	# the 0.24.5 Hollow Crown has two outposts and no docks: the seeds must reach every one (3 when there are more)
 	var want := mini(3, picks)
 	ok(finals.size() >= want, "the final area varies between matches (%d exits of %d)" % [finals.size(), picks])
+
 
 ## Outside hurts (by the close's share, through armor), inside doesn't; the outer islands fall.
 func _hurt(main: Node) -> void:
@@ -115,6 +127,7 @@ func _hurt(main: Node) -> void:
 	ok(z.fallen and b.out, "the last close: a hunter on an island outside the final circle falls")
 	m.free()
 
+<<<<<<< ours
 ## ZoneSfx. Standing well inside through every close: one warning each, at warn_s before it, and no other cue (no
 ## countdown: the Ways Out ticks stay the only one). The hum sits on the wall's nearest point, louder 12 m from it
 ## than 50 m, as loud just outside as just inside. Crossing out and back in sound once each; standing on the edge
@@ -186,11 +199,15 @@ func _audio(main: Node) -> void:
 	ok(Sfx.last_played.has(hurt) and a.cues.is_empty(), "a hit taken plays the hurt voice and no zone tick")
 	m.free()
 
+||||||| base
+=======
+
+>>>>>>> theirs
 ## Bots come into the circle and stay in: from just after close 2 to just after close 3.
 func _bots(main: Node) -> void:
 	var m := _match(main, 9)
 	var z := m.zone
-	Game.god = true      # (the local player stands idle: keep the match going)
+	Game.god = true  # (the local player stands idle: keep the match going)
 	m.time = z.t1[2]
 	z.tick(DT)
 	# five minutes in, the squads are inside close 2's circle: put each bot somewhere in it
@@ -202,7 +219,7 @@ func _bots(main: Node) -> void:
 			if Vector2(p.x, p.z).distance_to(z.cur_c) < z.cur_r - 4.0:
 				h.pos = p
 				break
-	var lost := {}      # bots knocked out since (a revive brings them back somewhere else: not counted)
+	var lost := {}  # bots knocked out since (a revive brings them back somewhere else: not counted)
 	var start := _share_in(m, z.cs[3], z.rs[3], lost)
 	var at_closed := -1.0
 	var inside := 0.0
@@ -226,8 +243,10 @@ func _bots(main: Node) -> void:
 	ok(inside >= 0.8, "bots keep inside the moving edge (%d%% of the time)" % int(inside * 100.0))
 	m.free()
 
+
 func _in_final(z: ShrinkZone, p: Vector3) -> bool:
 	return z.cs[z.last()].distance_to(Vector2(p.x, p.z)) <= z.rs[z.last()]
+
 
 func _share_in(m: Match, c: Vector2, r: float, lost: Dictionary) -> float:
 	var n := 0

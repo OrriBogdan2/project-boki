@@ -189,9 +189,16 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 	var secs := float(p[4])
 	match p[0]:
 		"ult":
+<<<<<<< ours
 			m.fx.word(h.pos + Vector3(0, 3.0, 0), "ULTIMATE", col, true)
 			if not MergeSfx.play(h, "cast"):
 				m.sfx("warn", h.pos, -2.0, 0.7)
+||||||| base
+			m.fx.word(h.pos + Vector3(0, 3.0, 0), "ULTIMATE", col, true)
+			m.sfx("warn", h.pos, -2.0, 0.7)
+=======
+			m.sfx("warn", h.pos, -2.0, 0.7)
+>>>>>>> theirs
 			if rad > 0.5:
 				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9))
 				var tw := tele.create_tween()
