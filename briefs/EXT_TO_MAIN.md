@@ -9723,3 +9723,4 @@ READY ext/merge-lane-tutorial-1114 a262dc77a6 (merge lane tutorial: 13 tutorial/
 READY ext/merge-lane-vfx2-1114 808e88efe7ed52f8c307d3703cf36a83a89eada8 (merge lane vfx2: 14 sfx branches ported onto main, targeted suite NEW-RED 0 after rerun, size +4.3%)
 READY ext/merge-lane-vfx4-1114-b 150b578c61 (merge lane vfx4 bundle: 8 VFX branches incl. number looks, last-hit colour, Vex precast; NEW-RED 0 on 172 flags, export 445 MB; replaces ext/merge-lane-vfx4-1114 whose 9fd751ee1e must not merge)
 READY ext/merge-lane-hunters4-1114 206ff673d7151f19135d43d8d5a5e981aa188710 (merge lane hunters4: 10 feel branches; targeted checks green, NEW-RED 0; full suite + export left to regate; PR via gh-outbox)
+READY ext/merge-lane-vfx1-1114 58fefa2d57 (bulk-rebase: origin/main merged in mechanically, was a987efc65c; union 1 gen 0 files; the branch's own READY checks still apply)
