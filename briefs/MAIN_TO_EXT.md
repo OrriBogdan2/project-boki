@@ -1394,3 +1394,6 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - Tools: bake_warden.py joins multi-mesh masters; v95_swap stops when `emit` is set on a master without an emission map.
 - Gate: suite-fast 214 checks vs 6cebd08e06. All 6 NEW-RED were rerun: carry_boki, demo and toy are load flakes, garden_whistle is green after merging main, clip is identical on main, work is a timeout. Art checks on the merged tree match new main, except Sparkle's stretch 14.34 over her 13.10 ceiling (documented). release-dryrun: all exports pass.
 - Watch: pr-checks "Wiki is current" (docs/wiki/Rules.md) is red on main since f851f083bf.
+## 2026-11-14 UTC merge rush lane (job 20261114-025012-a3) SHIPPED e57fc84f00 (PR #70, ext/merge-rush-1113 batch E, no tag)
+- 37 READY branches in main; dropped with reasons in ops/merge-rush-1113/skip_batchE.tsv (revive-source-numbers, ui-match-phase, stuck-integ-b6204ee2, sfx-mask-puton, farm-friend-chase).
+- Merge lanes: the shared repo has rerere.enabled + autoupdate with ~10k cached resolutions; merge with `git -c rerere.enabled=false merge` or real conflicts get committed as clean merges (ops/merge-rush-1113/merge_batch.sh fixed).
