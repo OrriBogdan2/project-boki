@@ -5,12 +5,13 @@ extends "res://tools/clip_shots.gd"
 ## --release: only the release strip, <dir>/<id>/release/fNNN.png: the kit's own hand-off from the held draw
 ## into arc_loose, one frame per 1/30 s from the arrow's spawn (the game's blend plays, so a snap eaten by it shows).
 ## --upper also shows each Hunter's atk2 on the upper body over the run (strip run_atk2: Tenzo's punch while running).
-## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
-## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
-## forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing.
+## <dir>/<id>/<strip>/fNNN.png, strips walk, jog, run (the game's own locomotion hand-off at WALK_MPS, JOG_MPS and
+## RUN_MPS, seen from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the
+## keyed clip, forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
+const JOG_MPS := 3.4       # m/s: between the walk and run rings, where the two clips blend
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
@@ -105,6 +106,7 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		model.queue_free()
 		return
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
+	await _loco(model, sync, dir.path_join("jog"), JOG_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	for off in aim_runs:
 		await _loco(model, sync, dir.path_join("run_aim%d" % int(off)), RUN_MPS, frames, null, "", deg_to_rad(off))

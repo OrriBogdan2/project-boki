@@ -7,7 +7,7 @@
 		"Praying mantis"
 	],
 	"theme": "swarm",
-	"flavor": "A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows it everywhere. Hatched from the egg Calderoise guards.",
+	"flavor": "A honeybee with a praying mantis's folded blades, wearing a crown of wax. A swarm of tiny bees follows Hivara everywhere. Hatched from the egg Calderoise guards.",
 	"colors": {
 		"body": "#d9a42a",
 		"belly": "#3b2a1c",
@@ -102,7 +102,7 @@
 		]
 	},
 	"voice": {
-		"line": "busy and bossy, always organising, hums when it's happy",
+		"line": "busy and bossy, always organising, hums when happy",
 		"syllables": [
 			"Hi",
 			"vara"
