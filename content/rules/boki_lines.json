@@ -91,6 +91,7 @@
 	"alias": {
 		"callout": "hunter",
 		"collapse": "storm",
+		"zone": "storm",
 		"relief": "revived",
 		"yelp": "hurt",
 		"low_hp": "hurt",
