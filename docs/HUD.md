@@ -192,7 +192,7 @@ Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB
 Badges: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
-badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+badges, the payoff sounds: docs/AUDIO.md); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
 
 ## First real match: the HUD over time (DECISIONS 2026-11-08 "UI is too much")
 
