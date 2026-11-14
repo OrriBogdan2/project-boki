@@ -763,7 +763,7 @@ func update(dt: float, s: Dictionary) -> void:
 	hr += spot.lift(1)
 	kr -= spot.lift(1) * TurnStep.FOLD
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
-	if gait != null:
+	if gait != null and gait.legs.is_inside_tree():      # rest_pose's model has no world yet
 		gait.crouch = crouch_k
 		gait.squat = act_k * HunterVerbs.squat(act_kind, act_t, act_need) if HunterVerbs.ACTS.has(act_kind) else 0.0
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
