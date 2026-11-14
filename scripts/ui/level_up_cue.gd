@@ -23,8 +23,9 @@ func start(p: Hunter, lv: int, info: Dictionary) -> void:
 	t = LIFE
 
 static func text_for(p: Hunter, lv: int, info: Dictionary) -> Array:
-	var hp_gain := roundi(LevelGrowth.step("hp", lv) * 100.0)
-	var gains := "+%d%% health   +%d%% ability power" % [hp_gain, roundi(LevelGrowth.step("ap", lv) * 100.0)]
+	var step := 1.0 if lv >= 2 else 0.0      # growth is the same share every level past the first (LevelGrowth.rate)
+	var hp_gain := roundi(LevelGrowth.rate("hp") * step * 100.0)
+	var gains := "+%d%% health   +%d%% ability power" % [hp_gain, roundi(LevelGrowth.rate("ap") * step * 100.0)]
 	var news: Array = []
 	if info.has("name"):
 		news.append("%s: %s" % [String(p.wpn["name"]), info["name"]])
