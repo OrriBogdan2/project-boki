@@ -40,6 +40,10 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
    it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
+## Sable 2026-11-14 (ext/ingame-sync-sable): tilt1112 master in game
+The 11-13 blocker below (left hand 6.0 -> 21.1x) was the new pistols fused to the thighs and coat, not the joint points:
+`detach` hand.L/hand.R from hips and their thigh brings the worst clip to 15.3 (bola; main 18.4), 0 clips over 18.5.
+
 ## Props on the masters (2026-11-13): the Model Room's v95.glb carries what the game model carries
 The owner (11-13): "should motley have his cards with him?" -> yes. `tools/art1/v95_props.py` puts a Hunter's game props
 on his v95 master: each prop is the game mesh itself (UVs, materials, textures kept), moved from the game's rest frame
