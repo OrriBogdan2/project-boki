@@ -33,19 +33,14 @@ func _host() -> void:
 		return _finish()
 	await _place(G, home + PARK)
 	var worst := {}
+	await _drop_once(G, "btn", 0)  # unmeasured: the host's first glider copy loads its canopy and trail
 	for mode in MODES:
 		var lags: Array = []
 		var frames: Array = []
 		for i in DROPS:
-			host_open_ms = 0
-			replies.clear()
-			Net.lobby_emit("gn", {"c": "drop", "mode": mode, "at": [home.x, home.y + HIGH, home.z], "wait": i * DT})
-			await _reply()
-			var g_ms := int(_got("open_ms"))
-			var lag := (host_open_ms - g_ms) / 1000.0 if host_open_ms > 0 and g_ms > 0 else 9.0
-			lags.append(snappedf(lag, 0.001))
-			frames.append(int(_got("frames")))
-			await _place(G, home + PARK)
+			var got := await _drop_once(G, mode, i)
+			lags.append(got[0])
+			frames.append(got[1])
 		worst[mode] = lags.max()
 		print("%s %s: guest open frames after the press %s; host copy lag (s) %s" % [tag, mode, frames, lags])
 		ok(frames.max() <= (1 if mode == "btn" else 99) and frames.min() >= 1,
@@ -56,6 +51,19 @@ func _host() -> void:
 	ok(worst["btn"] <= worst["space"] + DT, "the button's remote open is no later than Space's (no fallback)",
 		"worst btn %.3f s, space %.3f s" % [worst["btn"], worst["space"]])
 	_finish()
+
+## One drop on the guest, then the hunter back at the park: [the host copy's lag (s), the guest's open frames].
+func _drop_once(G: Node, mode: String, i: int) -> Array:
+	host_open_ms = 0
+	replies.clear()
+	Net.lobby_emit("gn", {"c": "drop", "mode": mode, "at": [home.x, home.y + HIGH, home.z], "wait": i * DT})
+	await _reply()
+	var g_ms := int(_got("open_ms"))
+	var lag := (host_open_ms - g_ms) / 1000.0 if host_open_ms > 0 and g_ms > 0 else 9.0
+	var frames := int(_got("frames"))
+	await _place(G, home + PARK)
+	return [snappedf(lag, 0.001), frames]
+
 
 # ------------------------------------------------------------------ the guest
 func _on_msg(topic: String, data, from: String) -> void:

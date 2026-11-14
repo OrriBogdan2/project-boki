@@ -172,6 +172,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		for st1 in ["stun", "root", "slow"]:
 			if float(opts.get(st1, 0.0)) > 0.0:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
+	var cc_cue := CcSfx.fresh_on_hit(self, opts)
 	if opts.get("burn", 0.0) > 0.0:
 		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
@@ -185,6 +186,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true
+	CcSfx.play(self, cc_cue)
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
 			CombatBus.status_applied.emit(self, st, by, float(opts[st]))

@@ -116,6 +116,8 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 			badge(hud.c, pv, 8.0, i, sd[i], m.time)
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
+	if m.heart_raid:
+		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 
 static func full_map(fm) -> void:
 	var m: Match = fm.m
@@ -184,5 +186,6 @@ static func draw_line(hud, mid: Vector2) -> void:
 		return
 	var w := TextCache.width(HudStyle.BIG, txt, LINE_FS) + 24.0
 	var pill := Rect2(mid + Vector2(-w * 0.5, -15), Vector2(w, 26))
+	SafeArea.note_as("ways_line", pill)
 	hud.c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, Color(1, 1, 1, 0.14), 1), pill)
 	HudStyle.ctext(hud.c, mid + Vector2(0, 3), txt, LINE_FS, HudStyle.INK, 3)
