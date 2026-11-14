@@ -3241,7 +3241,7 @@ func _process(delta: float) -> void:
 		if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
 		cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
-		var peek := mate_look.focus(player.render_pos(alpha), alpha)
+		var peek := mate_look.focus(StepSmooth.view(player, alpha), alpha)
 		cam.follow(peek, delta, mate_look.looking == null)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
