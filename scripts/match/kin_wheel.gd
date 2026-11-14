@@ -21,12 +21,17 @@ static func is_open(h: Hunter) -> bool:
 
 ## Which segment a flick of `delta` screen pixels points at (-1 inside the dead zone).
 static func pick(delta: Vector2) -> int:
-	if delta.length() < float(rules()["deadzone_px"]):
+	return nearest(delta, SEGMENTS.map(func(sg: Dictionary): return sg["dir"]))
+
+## The index of the direction in `dirs` closest to a flick of `delta` pixels (-1 inside the dead zone).
+## Shared with the B wheel (BaseWheel), so both wheels pick the same way.
+static func nearest(delta: Vector2, dirs: Array) -> int:
+	if delta.length() < float(rules()["deadzone_px"]) or dirs.is_empty():
 		return -1
 	var best := 0
 	var bd := -2.0
-	for i in SEGMENTS.size():
-		var d := delta.normalized().dot(SEGMENTS[i]["dir"] as Vector2)
+	for i in dirs.size():
+		var d := delta.normalized().dot(dirs[i] as Vector2)
 		if d > bd:
 			bd = d; best = i
 	return best
@@ -41,7 +46,11 @@ static func update(h: Hunter, mouse: Vector2, dt: float) -> void:
 
 ## 0..1 with an ease-out-back pop: how far open the drawn wheel is.
 static func pop(h: Hunter) -> float:
-	var x := clampf(float((h.inp.get("wheel", {}) as Dictionary).get("t", 0.0)) / float(rules()["pop_s"]), 0.0, 1.0)
+	return pop_at(float((h.inp.get("wheel", {}) as Dictionary).get("t", 0.0)))
+
+## The same pop for a wheel open `t` seconds (the B wheel too).
+static func pop_at(t: float) -> float:
+	var x := clampf(t / float(rules()["pop_s"]), 0.0, 1.0)
 	var c := 1.70158
 	return 1.0 + (c + 1.0) * pow(x - 1.0, 3.0) + c * pow(x - 1.0, 2.0)
 

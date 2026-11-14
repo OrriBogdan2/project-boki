@@ -126,8 +126,11 @@ func blocked_here(terrain := true) -> bool:
 func tick(dt: float) -> void:
 	if t <= 0.0:
 		return
+	if t <= dt:
+		end("time")             # before t reaches 0: end() skips a walk that is already over (natural expiry)
+		return
 	t -= dt
-	h.spirit_t = maxf(t, 0.0)
+	h.spirit_t = t
 	var was_in := inside
 	inside = blocked_here()
 	if inside and not was_in:
@@ -142,8 +145,6 @@ func tick(dt: float) -> void:
 		entry = h.pos
 	k.fx.tint_to(1.0 if inside else 0.0)
 	k.fx.aura_on(clampf(t / 0.3, 0.0, 1.0))
-	if t <= 0.0:
-		end("time")
 
 ## Ends the walk (time, damage, a merge). Inside something: back to the entry point.
 func end(why: String) -> void:
