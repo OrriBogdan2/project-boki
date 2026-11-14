@@ -83,7 +83,7 @@ func _key(m: Match) -> void:
 	ok(("hot" in all) == not m.biomes.hot.zone.is_empty(), "hot zone listed only when the map has one")
 	var halts: bool = m.skytrain != null and not tm.halts(m.skytrain).is_empty()
 	ok(("stop" in all) == halts, "train stops listed only when the map has them")
-	ok(all.all(func(k): return MapKey.KINDS.any(func(e): return e[0] == k)), "every listed kind has a word")
+	ok(all.all(func(k): return MapKey._word(k) != k), "every listed kind has a word")
 	mate.out = true
 	ok(not "squad" in MapKey.kinds(m, tm), "a squadmate who is out leaves the key")
 	mate.out = false

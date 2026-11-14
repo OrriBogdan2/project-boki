@@ -10,6 +10,8 @@ extends RefCounted
 ##     rising while the leader turns, the jump-out cue with the canopy still folded, a free-fall wind that
 ##     follows your speed and stops as the glider's snap plays, a small thud at landing, another squad's
 ##     rocket and its thud heard HEAR_M away, and a solo's one-seat rocket playing the same set.
+##  8. The HUD on the way down (DropHud): aboard, only the map (no bars) and the leader's steer line plus everyone's
+##     jump-out line; after jumping out, the glider line until it opens; nothing once it is open.
 
 const TOGETHER_M := 4.0          # m: the widest gap between two squadmates who rode it down
 const FAST_FALL := 8.0           # m/s: a free fall is still at least this fast
@@ -266,6 +268,26 @@ func _loop_now(key: String) -> Vector2:
 	var L: Dictionary = Sfx.loops[key]
 	return Vector2(float(L["vol"]), (L["p"] as AudioStreamPlayer).pitch_scale)
 
+func _hud_lines() -> void:
+	await _start(6.0)
+	var P: Hunter = m.player
+	var jump := Settings.key_cap("jump")
+	ok(not DropHud.aboard(P), "aboard the ship, before launch: the full HUD")
+	m.ship_jump(P)
+	var want := ["Steer with %s" % DropHud.move_keys(), "Jump out: %s" % jump]
+	ok(DropHud.aboard(P), "aboard the rocket: the HUD shows only the map (no health or ability bars)")
+	ok(DropHud.lines(m, P) == want, "the leader reads %s" % str(DropHud.lines(m, P)))
+	var bot: Hunter = _squad().filter(func(h): return h.ctrl == "bot")[0]
+	m.skydrop.pass_lead(P, bot)
+	ok(DropHud.lines(m, P) == ["Jump out: %s" % jump], "a rider reads %s" % str(DropHud.lines(m, P)))
+	m.skydrop.detach(P)
+	m.step(Match.DT)
+	ok(not DropHud.aboard(P), "jumped out: the bars come back")
+	ok(DropHud.lines(m, P) == ["Glider: %s again" % jump], "free-falling reads %s" % str(DropHud.lines(m, P)))
+	P.do_jump()
+	m.step(Match.DT)
+	ok(not P.diving and DropHud.lines(m, P).is_empty(), "the glider open: no drop line (%s)" % str(DropHud.lines(m, P)))
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
@@ -276,6 +298,7 @@ func run(mn: Node) -> void:
 	await _bot_leader()
 	await _own_sounds()
 	await _far_sounds()
+	await _hud_lines()
 	if m:
 		m.queue_free()
 	print("ROCKET DONE, failures: %d" % bad)

@@ -168,12 +168,10 @@ func _tick_acks() -> void:
 				m.truce.emote(bh, String(a["id"]))
 				events.append("reply %s %s" % [bh.pname, a["id"]])
 
-func _ping_of(h: Hunter) -> Vector3:
-	if h == null:
-		return Vector3.INF
-	for p in m.pings:
-		if p.get("by") == h:
-			return p["pos"]
+func _ping_of(h: Hunter) -> Vector3:     # (their newest)
+	for i in range(m.pings.size() - 1, -1, -1):
+		if h and m.pings[i].get("by") == h:
+			return m.pings[i]["pos"]
 	return Vector3.INF
 
 func _human_ping(team: int) -> Vector3:
@@ -194,9 +192,6 @@ func launch(l: Hunter, from_net := false) -> void:
 	events.append("launch %s +%d" % [l.pname, r.riders.size() - 1])
 	if m.net_on and not from_net:
 		m.net_event(["rkt", l.nid])
-	if m.player and r.riders.has(m.player):
-		if m.hud:
-			m.hud.toast("%s to jump out  ·  then %s again for your glider" % [Settings.key_cap("jump"), Settings.key_cap("jump")], Color("cfeaff"))
 
 ## The heading the skydive camera sits behind: the squad rocket's launch heading (north-up without one).
 func drop_yaw(h: Hunter) -> float:

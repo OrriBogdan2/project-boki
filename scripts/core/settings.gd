@@ -166,7 +166,7 @@ const ACTIONS := [
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
-	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
+	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["goals", "Goals list: open and close (at home)"], ["fold_guide", "Fold the training guide away (training, duel)"],
