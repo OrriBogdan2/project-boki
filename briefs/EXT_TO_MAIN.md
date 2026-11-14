@@ -9704,3 +9704,4 @@ READY ext/stuck-integ-c2a69297 bdf4194b4b (supersedes: ext/anim-pilot-idle-slice
 READY ext/merge-batch-f1-1114 cfdddafe738fdbebee14cae4470caa846b1ed865 (11-14 merge batch F1/D1: 15 branches, full gate GREEN NEW-RED 0, export OK 450 MB; 5 dropped; PR to open from RESULT.md)
 READY ext/sfx-voice-priority ecf4bbcf1c (bulk-rebase: origin/main merged in mechanically, was 77101f7e4a; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/merge-batch-15-1113 37c124cf4b6b (PR #62 main merge: 24 conflicts resolved, 5 of 7 NEW-RED fixed, tutorial-dead-air open)
+READY ext/merge-lane-hunters3-1114 123ef9b901 (merge lane hunters3: 7 branches ported, NEW-RED 0, export OK)
