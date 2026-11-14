@@ -3,7 +3,7 @@ extends RefCounted
 ## What a hit landed on. One place decides the class (HitClass.of), so everything that varies by target
 ## (the sound under the weapon's hit, the short pooled look) reads the same answer:
 ##   ARMOUR  bright chips in the armour colour      BODY   the Hunter's hit flash only
-##   BOKI    a soft puff in its type colour         MONSTER sparks in the monster's colour
+##   BOKI    a flash and a soft puff in its type colour   MONSTER the plain flash, sparks in its colour
 ##   WALL    dust (a shot stopped by a wall or terrain)
 ## Each look draws at most one flash and one pooled spray (Fx pools), never a ring. A Hunter's own
 ## ability impact (AbilityFx.hit) draws on top of this shared layer in its own colour.
@@ -28,11 +28,13 @@ static func of(target: Ent, armor: bool) -> int:
 		return MONSTER
 	return BODY
 
-## The colour the class paints in: the armour tier, the monster's hide; a Boki keeps `fallback` (Juice.flash_col: its Field Book type colour).
+## The colour the class paints in: the armour tier, the Boki's Field Book type, the monster's hide.
 static func tint(target: Ent, cls: int, fallback: Color) -> Color:
 	match cls:
 		ARMOUR:
 			return (target as Hunter).armor_col() if target is Hunter else ARMOUR_COL
+		BOKI:
+			return DexView.type_col(DexView.type_of((target as Kin).species))      # the Field Book's, as Juice.flash_col
 		MONSTER:
 			return Data.MOBS.get((target as Mob).mkind, {}).get("color", fallback)
 	return fallback
@@ -49,9 +51,10 @@ static func draw(fx: Fx, cls: int, at: Vector3, dir: Vector3, col: Color, power:
 			fx.flash(at, fcol.lerp(Color.WHITE, 0.4), flash_sz * 0.8, 0.06)
 			fx.spark(at, out, fcol.lerp(Color.WHITE, 0.3), int(5 + 3 * power), 8.0 + 2.0 * power, 55.0, 0.24, 16.0, 1.1)
 		BOKI:
+			fx.flash(at, fcol, flash_sz * 0.8, 0.07 + 0.02 * power)      # its type colour: not a Hunter's white
 			fx.burst(at, Color(fcol, 0.75), int(5 + 2 * power), 1.6, 0.4, -0.5, 1.3, Vector3.UP, 120.0)
 		MONSTER:
-			fx.flash(at, fcol.lerp(Color.WHITE, 0.5), flash_sz * 0.7, 0.06)
+			fx.flash(at, CRIT_COL if crit else Juice.HIT_COL, flash_sz * 0.7, 0.06)      # a mob keeps the plain flash
 			var hot := fcol.lerp(Color.WHITE, 0.25)
 			fx.spark(at, out, hot, int(4 + 3 * power), 6.0 + 2.0 * power, 45.0, 0.22, 12.0, 1.0)
 		WALL:
