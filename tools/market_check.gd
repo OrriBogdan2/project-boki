@@ -358,7 +358,7 @@ func _transfer() -> void:
 func _round_trip(bun: Dictionary, g0: int) -> void:
 	var store := preload("res://tools/mem_store.gd").new()
 	store.docs["profiles/moss"] = JSON.stringify({"name": "Moss", "updated": 1})
-	Social.fake_store = store.reply
+	Social.store_stub = func(m: String, a: Array, cb: Callable): cb.call(store.reply(m, a))
 	Social.ok = true
 	var tarn := Save.d
 	tarn["name"] = "Tarn"
@@ -399,7 +399,7 @@ func _round_trip(bun: Dictionary, g0: int) -> void:
 		and String(rec["origin"]["how"]) == "transfer" and (rec["raised_by"] as Array).has("Tarn")
 		and int(moss["gems"]) == 0,
 		"Moss accepts: the same Boki, 'raised by' its old keeper, and no gems change hands")
-	Social.fake_store = Callable()
+	Social.store_stub = Callable()
 	Social.ok = false
 	Social.me = ""
 
