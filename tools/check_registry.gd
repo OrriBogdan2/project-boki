@@ -279,6 +279,7 @@ const CHECKS := {
 	"--squad-intro-shots": ["res://tools/squad_intro_shots.gd", "squad_intro_shots", null],      # 0.24.4 (GPU)
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--kit-sweep-check": ["res://tools/kit_sweep_check.gd", "kit_sweep_check", null],      # every slot, every Hunter: no log errors
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	# hit arcs round your Hunter
 	"--damage-dir-check": ["res://tools/damage_dir_check.gd", "damage_dir_check", null],

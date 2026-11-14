@@ -110,7 +110,9 @@ func _run_later() -> void:
 	for it in due:
 		_later.erase(it)
 		SfxCast.scope(it[2])
-		(it[1] as Callable).call()
+		var cb: Callable = it[1]
+		if cb.is_valid():      # (a bound object freed since is skipped, not called)
+			cb.call()
 	SfxCast.scope(null)
 var _bond_cb: Callable
 var _combo_cb: Callable
