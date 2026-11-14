@@ -12,9 +12,9 @@ extends RefCounted
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
 const MINT := Color("8fe3c8")
-# what to say first when two lines are due
-const ORDER := ["land", "dive", "zone", "wall", "squad", "blight", "exit", "rank", "send", "chest"]
-# the closing zone's two lines: taught once, then the save remembers
+## What to say first when two lines are due.
+const ORDER := ["land", "dive", "zone", "wall", "squad", "mates", "blight", "exit", "rank", "send", "chest"]
+## The closing zone's two lines: taught once, then the save remembers.
 const ONCE_PER_PROFILE := ["zone", "wall"]
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 
@@ -102,7 +102,7 @@ func _start(lid: String, p: Hunter) -> void:
 	if lid == "dive":
 		Save.d["tutorial"]["glide_dive"] = true      # shown once: a missed line is not repeated
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
-	line = TutorialText.fill(txt, p).replace("%s", who)
+	line = TutorialText.fill(txt, p).replace("%s", who).replace("%B", Settings.key_cap("base"))
 	TutorialStrip.chime(m)
 
 func _left() -> float:
@@ -121,6 +121,14 @@ func _exit_near(p: Hunter) -> bool:
 func _zone_told(lid: String) -> bool:
 	return bool(Save.d["tutorial"].get("guide_" + lid, false))
 
+
+## B is worth knowing: a teammate can take you, and either a squad just came up or they're all far off.
+func _mates_due(p: Hunter) -> bool:
+	if BaseRecall.target(m, p) == null:
+		return false
+	return shown.has("squad") or BaseRecall.mates(m, p).all(
+			func(o: Hunter): return o.pos.distance_to(p.pos) > float(rules()["mates_far"]))
+
 func _kin_ready(p: Hunter) -> bool:
 	return p.kin != null and p.kin.state != "downed"
 
@@ -137,6 +145,7 @@ func _due(lid: String, p: Hunter) -> bool:
 		"zone": return m.zone.told >= 1
 		"wall": return m.zone.k >= 1 and m.zone.outside(p.pos)
 		"squad": return _enemy_near(p)
+		"mates": return _mates_due(p)
 		"blight": return _left() <= float(rules()["close_at"])
 		"exit": return shown.has("blight")
 		"rank": return p.ak != null and p.skill_pts > 0
@@ -151,6 +160,7 @@ func _done(lid: String, p: Hunter) -> bool:
 		"land": return not p.dropping
 		"wall": return not m.zone.outside(p.pos)
 		"squad": return not _enemy_near(p)
+		"mates": return BaseWheel.is_open(p) or p.base_t > 0.0
 		"exit": return _exit_near(p)
 		"rank": return p.skill_pts == 0
 		"send": return not _kin_ready(p) or p.kin.st_throws > _throws0
