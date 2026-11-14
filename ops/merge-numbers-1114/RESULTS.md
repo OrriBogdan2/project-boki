@@ -27,17 +27,42 @@ Per UTC day (branch counted once: first READY post day; landed = first main firs
 
 1. **"Merged today" counts READY posts, not branches.** READY lines whose sha landed in the 24 h window PR #49..#68 = **1314** (760 distinct branches); the page said 1303 a few minutes earlier. Every retry / bulk-rebase re-post of the same branch (4474 posts for 2560 branches; 1499 posts on 11-12 alone, mostly `bulk-rebase`) counts again. It is also a rolling 24 h, not the UTC day.
 2. **The gap stayed ~900-1000 because new READY branches really did arrive that fast**: 2344 new READY branches 11-09..11-12 (855 on 11-11), vs 1204 landed all week. Landing caught up only on 11-13 (611). merge-gap is not badly miscounting landed batch branches: of 1204 landed branches, 1203 landed with a READY sha in main; only 1 landed by tip only. It does overcount a little: 59 landed branches got new commits after landing (head not in main) and still count as waiting.
-3. **History dates**: briefs/EXT_TO_MAIN.md was gutted and restored on 11-09 17:19 (5d0edcd40e). A tool that dates READY lines with git blame sees all ~720 older lines as posted 11-09; true_numbers.py re-dates them from the blame of f2bbcb34f9^.
-4. "~85 a day" and "+124" could not be traced: merge_tracker.py, merge-gap and master-page are only on hetzner, which rpc1 cannot reach (no ssh, jobq runs only godot/blender jobs, no copy in git).
+3. **History dates**: briefs/EXT_TO_MAIN.md was gutted and restored on 11-09 17:19 (5d0edcd40e). A tool that dates READY lines with git blame sees all ~720 older lines as posted 11-09; merge_numbers.py re-dates them from the blame of f2bbcb34f9^.
+4. "~85 a day" and "+124" could not be traced: the hetzner source is not reachable (see Fix). Guesses only: 85 ~= 1204 landed / 14 days, +124 ~= (900 - ~30 waiting on 11-07) / 7.
 
 ## Waiting branches already in main by content
 
 Of 963 waiting tips: **2** are in main by patch-id (`git cherry` shows no new commit: garden-balance-apply, garden-nook-preview); **0** have every changed file identical in main; 23 have 90-99 % of their changed files equal to main, 51 have 50-89 %, 352 have 1-49 % and 537 have 0 %. So ~961 really still have unmerged content (many carry stale integration trains: 311 tips have >10 commits not in main). List: waiting_1114.txt (name tip first-READY-day files same cherry+ cherry-).
 
-## Fix (NOT installed: hetzner tools not reachable from rpc1)
+## Re-run 11-14 04:38 UTC (job 20261114-043010-a3, rpc5, deep): `merge_numbers.py` (replaces true_numbers.py)
 
-ops/merge-numbers-1114/true_numbers.py on ext/merge-numbers-fix-1114 prints the right numbers (`--json` gives waiting, merged_today, merged_per_day_7d, new_ready_per_day_7d, gap_per_day_7d, per_day). For the coordinator on hetzner:
-- merge_tracker.py: count `set(branch)` not READY lines; "merged today" = branches whose first landing (READY sha OR tip in main, first-parent merge time) is in the UTC day; "a day this week" = that over 7 days / 7.
-- "gap per day" = (waiting now - waiting 7 days ago) / 7, from stored waiting snapshots, not new-posts minus merged.
-- merge-gap: a branch whose READY sha is in main is landed even if its head moved later (59 now).
-- Or call `true_numbers.py BLAME --pre BLAME_PRE --json` from master-page (30 s, git only). Backup *.bak-1114, then `boki-install boki-tools/<name>`, rebuild master-page, check against the table above.
+Self-contained (own fetch + blames, also reads briefs/archive/EXT_TO_MAIN-*.md like merge_gap.py), 21 s:
+
+    Waiting 964 (shrinking, 1000 at end of yesterday) | merged today 146 (24 h: 757; READY posts of those: 1395)
+    | 172.0 a day this week | new READY 362.4/day | gap per day +137.7 (reconstructed), today -36
+
+Same as the table above (one new READY since). The 7-day gap is truly positive (the 11-09..11-12 flood), but the page must
+not call it "growing": waiting fell 1444 -> 1000 -> 964 over the last two days. The page should show both numbers.
+
+## Fix (NOT installed: merge_tracker.py, merge-gap and master-page exist only on hetzner)
+
+Neither rpc1 nor rpc5 can reach hetzner (no ssh/DNS; the jobq relay runs only Godot/Blender jobs on rpc workers), and
+no copy of those three files is in git, so they could not be patched here. Install on hetzner (coordinator, ~5 min):
+
+    cd /home/boki/coord
+    git -C /home/boki/project-boki fetch -q origin ext/merge-numbers-fix-1114
+    git -C /home/boki/project-boki show origin/ext/merge-numbers-fix-1114:ops/merge-numbers-1114/merge_numbers.py > boki-tools/merge_numbers.py
+    for f in merge_tracker.py merge-gap master-page; do cp -p boki-tools/$f boki-tools/$f.bak-1114; done
+    boki-install boki-tools/merge_numbers.py
+    # in master-page (or merge_tracker.py, wherever the 4 numbers are made), replace them with:
+    #   j=$(merge_numbers.py --repo /home/boki/project-boki --json --history /home/boki/coord/merge-week/waiting_history.json | sed -n 's/^JSON //p')
+    #   Waiting to merge      = .waiting            (+ "(.gap_today today)")
+    #   Merged today          = .merged_today       (UTC day, branches; .merged_24h for rolling)
+    #   ~N a day this week    = .merged_per_day_7d
+    #   Gap per day           = .gap_per_day_7d, word from .trend (last day), not from the 7-day sign
+    #   and in merge-gap: a branch whose READY sha is in main is landed even if its head moved later (46 now)
+    boki-install boki-tools/master-page; boki-install boki-tools/merge-gap; master-page
+    # check: page shows 964 +- new posts, 146 + today's landings, ~172/day, +138 (falls as the history file fills)
+
+Fallback if the page code is hard to patch: call `merge_numbers.py --json` and render only its JSON line; the tool is the
+single source for all four numbers, so merge_tracker.py's READY-post counting can be retired.
