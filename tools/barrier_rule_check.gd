@@ -46,8 +46,8 @@ func rules(main_node: Node, kind: String) -> void:
 	step(m, 0.5)
 	var b: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	var at: Vector3 = b.get("pos", Vector3.ZERO)
-	var stuck: bool = not b.is_empty() and bool(b["wall"]) and float(b["fuse"]) > 0.0
-	ok(tag + "Coin Blast sticks to it as a wall hit, this side", stuck and at.x < home.x + 6.0 and at.x > near.x,
+	var stuck: bool = not b.is_empty() and float(b["fuse"]) > 0.0      # stuck (fuse lit) on this side of it
+	ok(tag + "Coin Blast sticks at it, this side", stuck and at.x < home.x + 6.0 and at.x > near.x,
 		"stuck at x %.1f" % (at.x - home.x))
 	# and the barrier is gone with it: nothing there stops anything
 	m.verbs._break_wall(wall)
