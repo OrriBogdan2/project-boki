@@ -1923,6 +1923,15 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
 | toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "crystal", "prism", "frost"], "doc": "splashed by Water, Ice and Crystal leans, the Glasswater types (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
 
+## training_drill (`content/rules/training_drill.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The Training Area checklist (Match.train_rows, scripts/match/train_drill.gd): [id, what to do, the action whose key cap the HUD shows beside it ("" for none)]. Never write a key in the text: the HUD prints the live cap in front of each line; {key} puts that same cap inside a line. |
+| rows | [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press again in the air and hold to glide", "jump"], ["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your ability", "signature"], ["ult", "Fuse with your Boki ({key}: open from the start here)", "ultimate"], ["secondary", "Use your weapon's ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"], ["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"], ["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"], ["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"], ["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"], ["ledge", "Dash off an edge and float back up", ""], ["dodge", "Dodge the Strafer's red shot 3 times: dash through it or out of it", "dash"]] |
+
 ## truce (`content/rules/truce.json`)
 
 
