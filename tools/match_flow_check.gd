@@ -1,7 +1,7 @@
 extends RefCounted
 ## --match-flow-check: the match phase machine (scripts/match/match_flow.gd, docs/decisions/0061).
 ##   1. the table: every target is a state, every state is reachable from LOADING, no self-edges, names match
-##   2. a real expedition: LOADING (no Esc menu) > PLANNING > DROP (on the ship, through the jump) > PLAY, in that
+##   2. a real expedition: LOADING (no Esc menu) > PLANNING > DROP (on the ship, in the rocket) > PLAY, in that
 ##      order, with the HUD word PLANNING / DROPPING / none, and the Esc menu allowed in each
 ##   3. Ways Out: PLAY until the Heart's final seat, then CLOSING ("FINAL SEAT"); the last FALLING_S on the clock
 ##      say ISLANDS FALLING and turn the clock red
@@ -38,7 +38,8 @@ func run(main: Node) -> void:
 	ok(F.fsm.is_in(S.DROP) and m.player.riding and F.word() == "DROPPING", "the ship sets off: DROP while aboard")
 	m.ship_jump(m.player, true)
 	m.step(Match.DT)
-	ok(F.fsm.is_in(S.DROP) and m.player.dropping, "jumped: still DROP in the air")
+	# the jump launches the squad rocket: aboard it `rocket` is set; `dropping` starts at the jump-out
+	ok(F.fsm.is_in(S.DROP) and (m.player.rocket != null or m.player.dropping), "jumped: still DROP in the rocket")
 	n = 0
 	while F.fsm.is_in(S.DROP) and n < 3600:
 		m.step(Match.DT)

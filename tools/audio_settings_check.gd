@@ -95,8 +95,8 @@ func _routes(where: String) -> void:
 			off.append("%s on %s" % [p.get_path(), p.get("bus")])
 	ok(count > 0 and off.is_empty(), "%s: all %d players are on a slider's bus %s" % [where, count, off])
 
-## True if a bus is levelled by Music, Sound effects or Ambience: it is one of them, sends into one of them
-## (SFXFar, Boki -> SFX), or has its own slider (Settings.BUSES: Voice, UI). Master alone is not.
+## True if a bus is levelled by a slider other than Master: it is one of Settings.BUSES, or sends into one
+## (SFXFar, Boki -> SFX). Master alone is not.
 func _on_slider(bus: String) -> bool:
 	for hop in 8:
 		if AudioServer.get_bus_index(bus) < 1:

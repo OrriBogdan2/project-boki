@@ -281,8 +281,7 @@ func _load_sets() -> void:
 				sound_reach[sname] = float(d["reach"][sname])
 
 
-## Sets a bus (a Settings.BUSES value) from its Settings > Audio slider (0-1). UI has its own slider
-## (Settings "ui_sounds"), so no slider levels a second bus.
+## Sets a bus (one of Settings.BUSES) from its Settings > Audio slider (0-1).
 func set_bus(bus_name: String, v: float) -> void:
 	var i := AudioServer.get_bus_index(bus_name)
 	if i >= 0:
