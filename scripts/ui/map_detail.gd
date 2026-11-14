@@ -10,7 +10,7 @@ const ICON_R := 5.5           # px: the one size rule, the outer radius of every
 const DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
 const DETAIL := [
 	"place", "hazard", "train", "hot_zone", "far_exit", "lair", "cache", "beacon", "rival_box", "ship", "bounty",
-	"ally",
+	"ally", "nest",
 ]
 
 ## Holding Tab (the scoreboard key) or the map key.

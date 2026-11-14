@@ -258,8 +258,54 @@ func run(main: Node) -> void:
 			var resealed: bool = L2["state"] == "sealed" and _gate_shut(L2)
 			ok(K2.state == QuestSeat.S.SHUT and was != "sealed" and resealed and K2.refused == 0,
 				"unused at 5:30 it's SHUT and its gate seals again; trail %s" % str(K2.trail))
+	for map_id in ["hollowcrown", "skyreach"]:
+		await _prize_lairs(main, map_id)
 	print("LAIR LOCK CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## ---------------------------------------------------------------- 6. one exit lair, two prize lairs per map
+## All three lairs are live every match. The seed's Sealed Lair is the exit and only that; a boss kill in
+## either other lair pays the last hit's squad inside 30 m its XP and drops, and nobody leaves the match.
+func _prize_lairs(main: Node, map_id: String) -> void:
+	m.over = true
+	m.queue_free()
+	await main.get_tree().process_frame
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 720.0, "seed": 21, "no_drop": true, "map": map_id})
+	m.set_process(false)
+	var P: Hunter = m.player
+	P.set_arch("")
+	var C: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
+	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	keep = [P, C, Q]
+	for h in m.hunters:
+		h.ctrl = "idle" if h != P else "local"
+	m.time = 10.0
+	_run(0.1)
+	var live: Array = m.lairs.list.filter(func(L): return L["active"] and L["boss_mob"] != null)
+	var exits: Array = live.filter(func(L): return L.get("seat", false))
+	var prizes: Array = live.filter(func(L): return not L.get("seat", false))
+	ok(live.size() == 3 and exits.size() == 1 and prizes.size() == 2,
+		"%s: %d lairs live, %d exit (Sealed Lair) and %d prize" % [map_id, live.size(), exits.size(), prizes.size()])
+	if prizes.size() != 2:
+		return
+	var seat: QuestSeat = m.exits.seats.lair
+	for L in prizes:
+		_spot(Q, L["gate_c"] + Vector3(L["out"].x, 0, L["out"].y) * 40.0)
+		var xp0 := [P.xp, C.xp, Q.xp]
+		_kill(L, P, C)
+		var gain := [P.xp - xp0[0], C.xp - xp0[1], Q.xp - xp0[2]]
+		# (the rival's gain is only the Hunter's slow time trickle over the half second around the kill)
+		var paid: bool = gain[0] >= KillXp.BOSS_XP and gain[1] >= KillXp.BOSS_XP and gain[2] < 2.0
+		var what := "%s: %s kill pays the last hit's squad, not the rival" % [map_id, L["name"]]
+		ok(paid, what + " (%.1f, %.1f, %.1f)" % gain)
+		ok(not dropped.is_empty(), "%s: and drops its pile" % L["name"])
+		_run(Lairs.VICTORY_T + 1.0)
+		_spot(P, L["up"])
+		_run(0.5)
+		ok(not P.extracted and not C.extracted and seat.state != QuestSeat.S.TAKEN and not m.over,
+			"%s: standing in its updraft leaves nobody out of the match (seat %d)" % [L["name"], seat.state])
 
 ## Gems, keys and utility items are loot from a boss table, not stray junk.
 func _is_loot_kind(kind: String) -> bool:

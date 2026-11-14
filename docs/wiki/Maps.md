@@ -158,7 +158,7 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Rare Boki | 3 | Lantern Hollow, Gullcrest, Mossmere, Stillwater, Petal Hollow, Icewing Roost, Cinder Steps, Rainbreak |
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
-| Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+| Live boss lairs | 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
 
 
 ## First Flight

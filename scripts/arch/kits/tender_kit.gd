@@ -216,7 +216,7 @@ func carrying() -> Array:
 	return CareUtil.carried_of(m, h)
 
 func can_pick() -> bool:
-	return lock_t <= 0.0 and h.stun_t <= 0.0 and h.root_t <= 0.0 and not busy() and not Hex.active(h)
+	return lock_t <= 0.0 and h.stun_t <= 0.0 and not busy()
 
 func _tick_carry(dt: float) -> void:
 	var pd: Dictionary = d["passive"]
@@ -247,7 +247,7 @@ func _tick_carry(dt: float) -> void:
 			break
 		pick_up(o)
 
-## Taking damage drops whoever you carry, with the lock.
+## Any damage drops whoever you carry, with the lock (data: "too much damage", no figure; the shield is cut).
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.0 and not carrying().is_empty():
 		drop_all(true)
@@ -416,6 +416,14 @@ func burst_radius() -> float:
 	var r3_k := float(seed_def.get("r3_k", 2.0))
 	return float(seed_def["burst_r"]) * (r3_k if rank("sec") >= 3 else 1.0)
 
+## Rank 3 (the source's tier IV): the burst takes "burst_ap_r3" times the ability power bonus the
+## hunter's level gives (1.0 at level 1, where there is none).
+func burst_ap_k() -> float:
+	var ap := LevelGrowth.ap(h)
+	if rank("sec") < 3:
+		return 1.0
+	return (1.0 + (ap - 1.0) * float(rmb_def()["seed"]["burst_ap_r3"])) / ap
+
 func _stick(e: Ent) -> void:
 	burr_n += 1
 	burrs.append({"t": e, "build": 0.0, "id": burr_n})
@@ -474,7 +482,7 @@ func _burst(t: Ent) -> void:
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
 		f.hurt(
-				float(sd["burst_dmg"]) * power("sec"), h,
+				float(sd["burst_dmg"]) * power("sec") * burst_ap_k(), h,
 				{
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
@@ -595,8 +603,10 @@ func _tick_hearth(dt: float) -> void:
 func throw_boost() -> float:
 	return float(e_def().get("boost", 0.5)) * (2.0 if rank("kin") >= 3 else 1.0)
 
+## Hearthlight's healing: +15% a rank past the first, grown by the level's ability power (LevelGrowth.ap).
+## Healing by rank: the E row of rank_dmg (+22.5%, then +50%, the source's).
 func heal_k() -> float:
-	return 1.0 + 0.15 * float(maxi(0, rank("kin") - 1))
+	return rank_k("rank_dmg", "kin", 1.0) * LevelGrowth.ap(h)
 
 func _pulse(c: Vector3, per: float) -> void:
 	var ed := e_def()
@@ -688,7 +698,7 @@ func _call_preview() -> void:
 	if not hearth_call.is_empty() or not h.is_local() or not _x_ready():
 		return
 	var who := call_target()
-	if who == null or who == h:
+	if who == null:
 		return
 	var xd := x_def()
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": Color("ffd27a"), "dashed": true, "alpha": 1.2})
@@ -703,24 +713,20 @@ func _x_ready() -> bool:
 	return HeroUlt.ready(self) and not busy()
 
 
-## The teammate under the cursor within reach (standing or downed); with no teammate in the match at
-## all, herself (so the key is never dead in solo play).
+## The teammate (or downed teammate, the source's ally Wisp) under the cursor within reach; null when there
+## is none, and X then does nothing (CareUtil.mates leaves out herself).
 func call_target() -> Hunter:
 	var xd := x_def()
 	var aim_p: Vector3 = h.inp.get("aim", h.pos)
 	var best: Hunter = null
 	var best_d := float(xd["pick_r"])
-	var any_mate := false
 	for o in CareUtil.mates(m, h):
-		any_mate = true
 		if h.flat_dist(o) > float(xd["range"]):
 			continue
 		var dc := Vector2(o.pos.x - aim_p.x, o.pos.z - aim_p.z).length()
 		if dc < best_d:
 			best_d = dc
 			best = o
-	if best == null and not any_mate and bool(xd.get("self_when_solo", true)):
-		return h
 	return best
 
 
@@ -735,8 +741,6 @@ func _start_call() -> bool:
 		ult_look.drop("tether_aim")
 	var who := call_target()
 	if who == null:
-		if h.is_local() and m.hud:
-			m.hud.toast_small("No teammate there", Color("a2a8bb"))
 		return false
 	hearth_call = {"who": who, "left": float(x_def()["time"]), "tick": 0.0, "fx": 0.0}
 	stats["calls"] += 1
@@ -792,10 +796,8 @@ func _call_look(who: Hunter, dt: float) -> void:
 	var gold := Color("ffd27a")
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": gold, "all": true, "dashed": true})
 	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": Color("ffc46a"), "all": true})
-	if who != h:
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
-		var hand := CareUtil.hand_at(h, false)
-		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
+	ulk().keep("tether", "tether", CareUtil.hand_at(h, false), {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
 	if float(hearth_call["fx"]) <= 0.0:
 		hearth_call["fx"] = 0.22
@@ -819,7 +821,7 @@ func _call_end(done: bool) -> void:
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
-	var rescue := who != h and who.downed
+	var rescue := who.downed
 	if rescue:
 		_call_home(who)
 	# a support ult lands on a teammate: a completed tether counts as a hit, a rescue as the top event

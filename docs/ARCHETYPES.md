@@ -1068,7 +1068,7 @@ ranks.)
 - Loop: shoot one target (Marks stack) -> Vault -> the Primed hit (+2 Marks) resets Vault ->
   Vault again. Bola into two for the stun; the fifth Mark pays out Jackpot, which keeps every Mark alive
   and hands you a free Vault to carry on.
-- Tells: gold diamonds over the target (spinning faster as they stack, a jingle at 5); a gold glint and
+- Tells: gold diamonds over the target for everyone else (spinning faster as they stack, a jingle at 5; she reads her MARKS badge); a gold glint and
   light at the hand while Primed; crosshair "PRIMED · land it to reset Vault"; the dash slot's gold dot.
 - Retired: Cash In (Shiv has no 3-stack payoff: the Primed reset is the payoff), Flicker, the old Knife /
   Fan / Drop Knife, Smoke Veil, Heist, the from-behind Mark rule.
