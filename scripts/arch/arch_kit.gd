@@ -281,6 +281,9 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
+## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+func lock_left() -> float: return 0.0
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
@@ -527,22 +530,20 @@ func _bond_tell() -> void:
 ## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
+	return float(air.get("cd", DashState.long_cd(h.cdat))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
 	if use_ex:
-		if h.ex_cd > 0.0:
+		if not h.dash.spend_long(long_dash_cd()):
 			h._ab_feedback("dash", "deny")
 			return false
-		h.ex_cd = long_dash_cd()
 		h.ex_next = true
 		h.gliding = false
 	else:
-		if h.dashes < 1.0:
+		if not h.dash.spend_short():
 			h._ab_feedback("dash", "deny")
 			return false
-		h.dashes -= 1.0
 	return true
 
 ## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
@@ -717,13 +718,9 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
+## A filling ground circle everyone sees, in the viewer's side lean (SideColor.fx). Returns the node.
 func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
+	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, h, col), 0.9))
 	var tw := tele.create_tween()
 	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
 	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
@@ -731,11 +728,7 @@ func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
 
 ## A filling lane (dash arrows, beams, charge lines).
 func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
+	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(SideColor.fx(m, h, col), 0.9))
 	if t > 0.0:
 		var tw := tele.create_tween()
 		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
@@ -1206,9 +1199,7 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var rc := col
-		var p = m.get("player")
-		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
+		var rc := SideColor.fx(m, h, col)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
 		if charge_orb():

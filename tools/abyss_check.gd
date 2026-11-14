@@ -546,6 +546,23 @@ func _home(main: Node) -> void:
 	var seen := "%d %s" % [trap.count, trap.first]
 	ok(trap.count == 0, "home: building under the wipe, playing on and leaving it logs no script error (%s)" % seen)
 
+## A ground tile with `reach` m of flat, open ground east of it (no wall to stop a run, a dash or a glide).
+const LANE := 26
+func _open_lane(reach := LANE) -> Vector3:
+	for z in range(4, w.h - 4):
+		for x in range(4, w.w - reach - 4):
+			var lv := w.level[w.idx(x, z)]
+			var clear := true
+			for i in reach:
+				var j := w.idx(x + i, z)
+				clear = clear and w.kind[j] == World.T_GROUND and w.level[j] == lv
+				clear = clear and not w.is_block(x + i + 0.5, z + 0.5)
+				if not clear: break
+			if clear:
+				return Vector3(x + 0.5, lv * World.LEVEL, z + 0.5)
+	return Vector3.INF
+
+
 # ---------------------------------------------------------------- 9. the fall's sounds
 ## Steps off a rim with no keys, then opens the glider (cool, or overheated at half lift) once the warning
 ## plays. Logs the first step each cue comes on and the wind's level and pitch each step of the drop.
