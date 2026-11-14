@@ -93,6 +93,23 @@ static func how(id: String) -> String:
 	var p := String(g["unlock"]).split(":")
 	return "%s (%d/%s)" % [String(g.get("how", "")), mini(Progress.stat(p[0]), int(p[1])), p[1]]
 
+## Gems a bought skin costs from where it reads Rare, and Epic (below the first: Fine).
+const RARE_GEMS := 200
+const EPIC_GEMS := 400
+
+## A skin's rarity (a Data.RARITY index) from how it is got: the free wing Common, bought ones by price, earned
+## ones Epic and a Hunter's mastery gift Legendary.
+static func rarity(id: String) -> int:
+	var g := get_skin(id)
+	if g.has("unlock"):
+		return 4 if String(g["unlock"]) == "mastery" else 3
+	var cost := int(g.get("cost", 0))
+	if cost == 0:
+		return 0
+	if cost < RARE_GEMS:
+		return 1
+	return 2 if cost < EPIC_GEMS else 3
+
 ## Glide on an owned skin from now on. Returns false for one you don't own.
 static func equip(id: String) -> bool:
 	if not owned(id):
@@ -104,7 +121,7 @@ static func equip(id: String) -> bool:
 
 static func equipped() -> String:
 	var id := String(Save.d.get("look", {}).get("glider", "classic"))
-	return id if owned(id) else "classic"
+	return String(get_skin(id)["id"]) if owned(id) else "classic"      # a gone id falls back to the Field Wing
 
 static func col(spec: String, team: Color, hero: Color) -> Color:
 	match spec:
