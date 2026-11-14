@@ -1,9 +1,9 @@
 {
-	"_doc": "The garden minigames the title's 'Play with your Boki' picker can list (MinigameHub). member = the Home variable holding the game (unset on a base that doesn't have it, so it is not listed); node = the game's fixture on it (post, stump, basket, log), placed only beside a Training post, so a game without one is not listed either; rule = the one line shown under the name. Each game exposes use().",
+	"_doc": "The garden minigames the title's 'Play with your Boki' picker can list (MinigameHub). member = the Home variable holding the game (unset on a base that doesn't have it, so it is not listed); node = the game's fixture on it (post, stump, basket, log), placed beside a Training post, so a game without one is not listed either; own = [rules file, key] of the zones where it stands without a Training post (a stump spot, a court); a game is listed once for every open zone it stands in (a Training post in the zone, or an own entry), whichever zone the garden shows; rule = the one line shown under the name. Each game exposes use().",
 	"games": [
 		{"id": "race", "name": "The Dash", "member": "hrace", "node": "post", "rule": "Cheer your Boki on with three timed presses; the fastest one home wins."},
-		{"id": "shove", "name": "Stump Shove", "member": "hshove", "node": "stump", "rule": "Two Boki push a stump; Power against Guard decides who tips it."},
+		{"id": "shove", "name": "Stump Shove", "member": "hshove", "node": "stump", "own": ["base_shove", "spots"], "rule": "Two Boki push a stump; Power against Guard decides who tips it."},
 		{"id": "seek", "name": "Seek", "member": "hseek", "node": "basket", "rule": "Sniff the scent basket, then follow your Boki's nose to the hidden find."},
-		{"id": "volley", "name": "Spark Volley", "member": "hvolley", "node": "log_node", "rule": "Bat a spark across the log; Speed and Focus win the point."}
+		{"id": "volley", "name": "Spark Volley", "member": "hvolley", "node": "log_node", "own": ["base_volley", "courts"], "rule": "Bat a spark across the log; Speed and Focus win the point."}
 	]
 }
