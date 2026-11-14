@@ -14,7 +14,7 @@ extends RefCounted
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts;
 ##      the rival telegraph wind-up (TellCue, tell_foe) exists, has a repeat gap, sits under the ult cues and is
 ##      wired into the telegraph systems (ArchKit.tele_circle/tele_lane, AimDraw.put)
-##   8. dash_air per Hunter and the no-charge tick
+##   8. dash_air per Hunter (listed in dash.json and picked in the air) and the no-charge tick
 ##   9. the garden's ambience (HomeAmbience): every bed has its file, the parts of the day and the rain each
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
@@ -57,6 +57,8 @@ extends RefCounted
 ##      Crown cup on the result card, an evolution; the evolution scene, the Nook egg and the incubator name theirs
 ##  25. each of the 12 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
 ##      HeroSfx picks them, the Boki-down call carries past hearing range, and the match and KinNet report to it
+##  26. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
+##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -74,6 +76,7 @@ const TELL_REACH_MAX := 34.0  # m: the resource-full tell is for foes nearby (ju
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const UNDER_COMBAT_DB := 10.0  # dB: a rank cue as played sits at least this far under a weapon shot ("fire")
 const READY_SECS := 0.5        # s: the new-point chime's audible length at most
+const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
 
 var bad := 0
 var walked := {}               # kit file -> true once item 4 has read it
@@ -118,6 +121,7 @@ func run(main: Node) -> void:
 	_training()
 	_garden_moments()
 	_barks()
+	_inv_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -496,8 +500,12 @@ func _fallback() -> void:
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
 
-## 7. Every Hunter's dash has an air variant that HeroSfx picks with no floor under it, and the no-charge tick exists.
+## 7. Every Hunter's dash has an air variant listed in dash.json that HeroSfx picks with no floor under it, and the
+## no-charge tick exists.
 func _dash_air() -> void:
+	var listed: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/dash.json"))["sounds"]
+	var unlisted := Arch.ids().filter(func(a): return not listed.has("%s_dash_air" % a))
+	ok(unlisted.is_empty(), "every roster Hunter has a <arch>_dash_air in dash.json (missing: %s)" % [unlisted])
 	var h := Hunter.new()
 	var picked := {}
 	for arch in Arch.ids():
@@ -507,8 +515,8 @@ func _dash_air() -> void:
 		h.grounded = true
 		picked[arch] += " " + HeroSfx.dash_name(h)
 	h.free()
-	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
-	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
+	# (a Hunter with no ground dash of its own, as Gil, plays the shared dash on the ground: item 5's fallback)
+	var want := func(a): return "%s_dash_air %s" % [a, "%s_dash" % a if Sfx.ensure("%s_dash" % a) else "dash"]
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
@@ -777,6 +785,31 @@ func _garden_moments() -> void:
 		if body.contains("\"unlock\""):
 			off.append(fn)
 	ok(off.is_empty(), "moments: every site names its cue and none plays unlock %s" % [off])
+
+## 26. The inventory cues.
+func _inv_cues() -> void:
+	var cues := {"inv_grab": InvSfx.grab, "inv_drop": InvSfx.drop, "inv_equip": InvSfx.equip,
+			"inv_swap": InvSfx.swap, "inv_take": InvSfx.take}
+	var silent := cues.keys().filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty(), "inventory cues: %d sounds exist (silent: %s)" % [cues.size(), silent])
+	var mute := cues.keys().filter(func(n): return not _plays(n, cues[n]))
+	ok(mute.is_empty(), "inventory cues: each plays its own sound (not: %s)" % [mute])
+	var cats: Dictionary = levels["cats"]
+	var cue_db := float(cats["ui"]) + InvSfx.CUE_DB
+	var fight_db := minf(float(cats["fire"]), float(cats["impact"]))
+	ok(cue_db <= fight_db - INV_UNDER_DB, "inventory cues: %.0f dB, under a hit or shot (%.0f dB)" % [cue_db, fight_db])
+	var wiring := {"scripts/ui/loadout_panel.gd": ["drop()", "equip()"], "scripts/ui/slot_drag.gd": ["grab()"],
+			"scripts/match/loot_full.gd": ["swap()"], "scripts/match/life.gd": ["swap()", "take()"]}
+	var missing := []
+	for f in wiring:
+		var src := FileAccess.get_file_as_string("res://" + f)
+		for cue in wiring[f]:
+			if not src.contains("InvSfx." + cue):
+				missing.append("%s InvSfx.%s" % [f.get_file(), cue])
+	ok(missing.is_empty(), "inventory cues: the inventory and loot code plays them (missing %s)" % [missing])
+	var hud := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
+	var in_hud := cues.values().filter(func(c): return hud.contains("InvSfx.%s(" % (c as Callable).get_method()))
+	ok(in_hud.is_empty(), "inventory cues: none played from hud.gd")
 
 func _takes(sname: String) -> Array:
 	var out := []

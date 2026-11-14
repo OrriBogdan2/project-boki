@@ -6,6 +6,7 @@ What a Boki says out loud, at home and in a match. All of it is data in `content
 
 - **Short.** At most `max_words` (6) words in a bubble, one sentence. Aim for 2-4. Punctuation and symbols (♥, ♪, ...) don't count as words.
 - **Quick.** A bubble stays up for `bubble_s` (2 s), at home (`Home._say`) and in a match (`Match.kin_bark`).
+- **Quiet over a fight.** While you are in a fight (`MusicDir.fight_on`: a shot traded in the last 7 s), only your own Boki's bubble is drawn; other Boki's lines are still said (and their callout sound plays) but not printed over the fight (`BokiChatter.heard`). A Boki's ability name floats only over your own Boki.
 - **Never the same line twice in a row.** Each Boki remembers its last `no_repeat` (10) lines and never says one of them again. If it has said every line it has for that moment, it says the one it said longest ago.
 - **Not all the time.** After a line, a Boki waits `cooldown_s` (6 s) before it speaks up again. A trigger marked `direct` (it's answering something you did, or a warning you need) skips the wait.
 - **The speech stages stay** (`Care.speech`). Below `grown_stage` (2), a Boki only says its name in a tone, plus a little action: "Cin-cin~ (purrs softly)". At stage 1 it sometimes adds the trigger's one word: "More! Cin-cin~ (purrs softly)". From stage 2 it says real lines.
@@ -14,6 +15,7 @@ What a Boki says out loud, at home and in a match. All of it is data in `content
 ## The file
 
 - `tuning`: the numbers above, plus `act_words` (an action is at most 4 words; a tone and an action that run over the cap together are never paired) and `min_lines` (the fewest general lines a trigger may have).
+- Actions and lines never say "it" or "its" of a Boki: they use `{he}` `{He}` `{his}` `{him}` `{himself}`, filled from the Boki's sex (`KinSpeak.pronouns`; "they" if the sex is unknown). `--boki-lines-check` fails on it/its/itself.
 - `tones`: how a young Boki says its name, by feeling. `{A}` is the first syllable, `{a}` the same in lower case, `{b}` the second syllable, `{F}` / `{f}` / `{U}` the full name as written, lower and upper case (`KinSpeak.fill`).
 - `sounds`: noises a tone may use besides the name (grrr, zzz...).
 - `alias`: old trigger names that share another trigger's lines (`yelp` and `low_hp` say `hurt` lines).

@@ -189,7 +189,6 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 	var secs := float(p[4])
 	match p[0]:
 		"ult":
-			m.fx.word(h.pos + Vector3(0, 3.0, 0), "ULTIMATE", col, true)
 			if not MergeSfx.play(h, "cast"):
 				m.sfx("warn", h.pos, -2.0, 0.7)
 			if rad > 0.5:

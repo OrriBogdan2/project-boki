@@ -887,7 +887,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		var fit := func() -> void:
 			if is_instance_valid(sc) and sc.is_inside_tree():
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
-				sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 110.0 - chrome)
+				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))      # held: the same on every tab
+				sc.custom_minimum_size.y = minf(want, sc.get_viewport_rect().size.y - 110.0 - chrome)
 		body.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
 		foot.visibility_changed.connect(func(): fit.call_deferred())

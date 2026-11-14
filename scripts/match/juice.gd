@@ -14,11 +14,20 @@ const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
 const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
 const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
+const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
 const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
 const ARMOR_TICK_DB := -4.0             # dB: the attacker's "push now" tick (a high, short click, not the crack)
 const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click's menu use
+
+## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
+## the damage category's), so a squad fight tells a Boki from its Hunter; a Hunter keeps the white
+## (or, on you, the hot) flash; mobs and the rest keep theirs.
+static func flash_col(target: Ent, p: Hunter) -> Color:
+	if target is Kin:
+		return DexView.type_col(DexView.type_of((target as Kin).species))
+	return HURT_COL if target == p else HIT_COL
 
 ## Where on the target a hit from `by` lands (its near side, about chest high) and which way the
 ## sparks fly (on through it).
@@ -68,7 +77,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var power := clampf(d / 14.0, 0.35, 3.0)
 	if not mine:
 		power *= 0.65
-	var col := HURT_COL if target == p else HIT_COL
+	var col := flash_col(target, p)
 	var ability := o.has("ab") and src != "kin"
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
 	m.fx.impact(at, dir, col, power, crit, armor)

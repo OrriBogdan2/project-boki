@@ -8,7 +8,8 @@ extends "res://tools/hit_shape_check.gd"
 ## foe's hit circle (0.48 m) nearer, and a bullet adds its radius. Prints HFROW lines (archetype, input,
 ## hold, side, near, far, width, arc). A row's 4th number is a side offset in metres the
 ## radial scan runs along (a cone's flank), 0 on the aim line; a 5th, true, marks an area move
-## (--hit-shape-shots puts a foe on the aim line for it).
+## (--hit-shape-shots puts a foe on the aim line for it); a 6th, true, a move that hurts no foe (a wall, a heal,
+## a seed): only the strip is shot.
 
 const HEROES := {
 	"gunslinger": [
@@ -23,6 +24,23 @@ const HEROES := {
 	"ashwick": [
 		["lmb_hold", 0.5, 0.8, 0.0, true], ["rmb", 0.0, 1.8], ["e", 0.0, 1.0, 0.0, true],
 		["x", 0.0, 2.6, 0.0, true]],
+	"bulwark": [
+		["lmb", 0.0, 1.0], ["lmb_hold", 1.3, 1.6], ["rmb", 0.0, 1.0, 0.0, true, true],
+		["rmb_hold", 0.6, 1.2, 0.0, true, true],
+		["x", 0.0, 2.0, 0.0, true]],
+	"rimewright": [
+		["lmb_hold", 0.5, 1.0], ["rmb", 0.0, 1.2], ["e", 0.0, 1.5, 0.0, true], ["x", 0.0, 4.5, 0.0, true]],
+	"dolm": [
+		["lmb", 0.0, 0.8], ["lmb_hold", 1.15, 1.5], ["rmb", 0.0, 1.2, 0.0, true], ["e", 0.0, 2.5, 0.0, true, true],
+		["x", 0.0, 2.0, 0.0, true]],
+	"mage": [
+		["lmb", 0.0, 0.8], ["rmb_hold", 1.1, 1.6], ["e", 0.0, 2.0, 0.0, true], ["x", 0.0, 3.0, 0.0, true]],
+	"dredge": [
+		["lmb", 0.0, 0.8], ["rmb", 0.0, 1.2], ["e", 0.0, 2.0, 0.0, true], ["x", 0.0, 2.5, 0.0, true]],
+	"tender": [["lmb", 0.0, 0.8], ["rmb", 0.0, 1.5], ["e", 0.0, 3.0, 0.0, true, true]],
+	"thief": [
+		["lmb", 0.0, 0.8], ["rmb", 0.0, 1.5], ["e", 0.0, 1.5], ["x", 0.0, 2.0, 0.0, true]],
+	"ostra": [["lmb", 0.0, 0.8], ["rmb", 0.0, 1.0], ["e", 0.0, 7.5, 0.0, true, true], ["x", 0.0, 2.0, 0.0, true]],
 }
 const SCAN := 1.0                # m between the first radial probes
 const FAR := 22.0                # m, last radial probe
@@ -114,6 +132,26 @@ func _vs_content(meas: Dictionary) -> void:
 			_close("E wall arc", float(meas["arc"]), float(P.ak.e_def()["deg"]), 8.0)
 		["ashwick", "e", 0.0]:
 			_close("E ring radius", float(meas["far"]) - rd, float(P.ak.e_def()["radius"]), 0.15)
+		["bulwark", "lmb", 0.0]:
+			_close("hammer reach (+ its 0.9 m sweep)", float(meas["far"]) - rd - 0.9,
+				float(P.ak.lmb_def()["throw_range"]), 0.3)
+		["bulwark", "lmb_hold", 0.0]:
+			# the swing's rays start at the body centre since ShotOrigin (main, 11-13) and 60 Hz steps carry
+			# a ray up to 0.67 m: the game reads about 0.8 m past the content number
+			_close("Crushing Blow reach (+ ray ~0.8)", float(meas["far"]) - rd - 0.8,
+				float(P.ak.lmb_def()["smash_reach"]), 0.25)
+		["bulwark", "x", 0.0]:
+			var fl: Dictionary = P.ak.x_def()
+			_close("R lane length", float(meas["far"]) - rd, float(fl["cells"]) * float(fl["cell_len"]), 0.3)
+			_close("R lane half width", float(meas["width"]) * 0.5 - rd, float(fl["width"]) * 0.5, 0.2)
+		["mage", "e", 0.0]:
+			_close("E circle centre", mid, float(P.ak.e_def()["reach"]), 0.2)
+			_close("E circle radius", (float(meas["far"]) - float(meas["near"])) * 0.5 - rd,
+				float(P.ak.e_def()["radius"]), 0.2)
+		["mage", "x", 0.0]:
+			_close("R circle centre", mid, float(P.ak.x_def()["range"]), 0.2)
+			_close("R circle radius", (float(meas["far"]) - float(meas["near"])) * 0.5 - rd,
+				float(P.ak.x_def()["radius"]), 0.2)
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -132,6 +170,7 @@ func run(main: Node) -> void:
 			hold = row[1]
 			secs = row[2]
 			side = row[3] if row.size() > 3 else 0.0
+			if row.size() > 5: continue
 			var meas := _measure_fine()
 			print("HFROW|%s|%s|%.2f|%.1f|%.1f|%.1f|%.1f|%.0f" % [a, kind, hold, side, meas["near"], meas["far"],
 					meas["width"], meas["arc"]])

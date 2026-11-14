@@ -14,8 +14,8 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 ## Tetra's moves the source plays while moving (briefs/hero-ref/breah.md: the tap hurl, the fist recovering as she
-## walks off, the X aim) ride the upper body over the walk. Every other dolm move owns the body.
-const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim"]
+## walks off, the X aim and spine roll) ride the upper body over the walk. Every other dolm move owns the body.
+const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim", "breah_spine"]
 const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
@@ -749,6 +749,7 @@ func _cc(id: String, dd: Dictionary) -> void:
 func _cc_run(id: String, key: String) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
+	HunterAnim.rest_pose(m)      # (the same seeded Rig pose in every run: Ostra stands on the Rig, as in _run_hit)
 	holder.add_child(m)
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
