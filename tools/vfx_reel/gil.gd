@@ -1,6 +1,6 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Gil's reel (tools/hero_vfx_reel.gd): the generic thrusts, Tide Lunge (hold) and Ground Swim (dash); the bag's
-## potions in a fixed order (Thunder held, then Slime, Air, Fire and a Geyser tapped onto one dummy: three
+## potions in a fixed order (Thunder held, then Slime, Air, Fire and a Super Zeep tapped onto one dummy: three
 ## different marks Beach it); the slime's puddle to its end; the Riptide spin sent off as a spout; the Tidal Wave
 ## followed down its line.
 
@@ -36,7 +36,7 @@ func _part_bag() -> void:
 	var marks: Array = []
 	for i in BAG.size():
 		var at := 0.1 + BAG_EVERY * i + BREAK_AT
-		marks.append_array(_sheet("bag", "RMB taps: Slime, Air, Fire (Beached), Geyser", [at, at + 0.15, at + 0.8]))
+		marks.append_array(_sheet("bag", "RMB taps: Slime, Air, Fire (Beached), Super Zeep", [at, at + 0.15, at + 0.8]))
 	var throw := func(t: float):
 		P.inp["sec"] = false
 		for i in BAG.size():
