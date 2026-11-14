@@ -25,7 +25,7 @@ func run(main_node: Node) -> void:
 	Save.d["gems"] = 5000; Save.d["scrap"] = 100
 	Save.d["buildings"].append_array(["workshop", "board", "ransom"])
 	Econ.ensure()
-	var home = await _hb_home()
+	var home = await main._hb_home()
 	var hb: HomeBuild = home.hb
 	ok.call(hb != null and (HomeLayout.of(Save.d)["deco"] as Array).size() == HomeLayout.STOCK.size(), "a new save's layout starts with the farm's lamps and flower beds as decorations")
 	hb.toggle()
@@ -142,7 +142,7 @@ func run(main_node: Node) -> void:
 	home.queue_free()
 	await main.get_tree().process_frame
 	Save.d = JSON.parse_string(js)
-	var home2 = await _hb_home()
+	var home2 = await main._hb_home()
 	ok.call(home2.lots["workshop"]["at"].distance_to(ws_at) < 0.01 and (HomeLayout.of(Save.d)["deco"] as Array).size() == deco_n and home2.hb.nodes.size() > 0 and home2.world.is_block(fx + 0.5, fz + 0.5), "after a save and reload the Workshop, %d decorations and the fence are where they were" % deco_n)
 	ok.call(home2.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and home2.world.paint.has(home2.world.idx(pt.x, pt.y)), "the pond tile and the path come back too")
 	# expanding
@@ -150,7 +150,7 @@ func run(main_node: Node) -> void:
 	ok.call(home2.hb.expand() and int(HomeLayout.of(Save.d)["grow"]) == gl + 1, "Expand pays and grows the island a step (now %d)" % (gl + 1))
 	home2.queue_free()
 	await main.get_tree().process_frame
-	var home3 = await _hb_home()
+	var home3 = await main._hb_home()
 	var n3 := 0
 	for i in home3.world.kind.size():
 		if home3.world.island[i] == 0 and home3.world.kind[i] != World.T_VOID: n3 += 1
@@ -168,7 +168,7 @@ func run(main_node: Node) -> void:
 	od.erase("layout")
 	Save.d = JSON.parse_string(JSON.stringify(od))
 	Econ.ensure()
-	var home4 = await _hb_home()
+	var home4 = await main._hb_home()
 	var f1: Dictionary = Econ.feeders()[0]
 	ok.call(typeof(Save.d.get("layout")) == TYPE_DICTIONARY and (Save.d["layout"]["deco"] as Array).size() == HomeLayout.STOCK.size(), "an old save gets a layout (the farm's lamps and flower beds)")
 	ok.call(home4.world.island_id(home4.lots["greenhouse"]["at"].x, home4.lots["greenhouse"]["at"].z) == "orchard" and home4.world.is_block(home4.lots["greenhouse"]["at"].x, home4.lots["greenhouse"]["at"].z), "its greenhouse stands on the (moved) Orchard Isle")
@@ -247,7 +247,7 @@ func run(main_node: Node) -> void:
 		Save.d["layout"]["seed"] = sd; Save.d["layout"]["made"] = false
 		HomeLayout.ensure(Save.d)
 		Econ.ensure()
-		var hp = await _hb_home()
+		var hp = await main._hb_home()
 		var vr: Dictionary = hp.hb.validate()
 		ok.call(vr["ok"], "seed %d: %d open tiles, all %d reachable, %d places missed, %d wild tiles" % [sd, vr["open"], vr["reached"], (vr["missing"] as Array).size(), hp.hb.wild_t.size()])
 		var sg := ""
@@ -264,13 +264,3 @@ func run(main_node: Node) -> void:
 	print("HOMEBUILD done, failures: %d" % bad[0])
 	main.get_tree().quit(1 if bad[0] > 0 else 0)
 
-func _hb_home():
-	var H = load("res://scripts/home/home.gd")
-	var hm = H.new()
-	main.add_child(hm)
-	main.current = hm
-	await main.get_tree().process_frame
-	await main.get_tree().process_frame
-	while hm.building:      # a farm built under a still-covered fade comes in slices: wait for all of it
-		await main.get_tree().process_frame
-	return hm

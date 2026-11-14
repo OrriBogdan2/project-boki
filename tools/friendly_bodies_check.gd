@@ -177,7 +177,7 @@ func _hook(species: String, ang: float, boki_in_path: bool) -> Dictionary:
 		dev = maxf(dev, absf(rel.cross(line)))
 		if K.pull.is_empty() and not K.flying and t > 0.5:
 			break
-	var front := start + Vector3(line.x, 0, line.y) * float(K.rmb_def()["gap"])
+	var front := start + Vector3(line.x, 0, line.y) * float(K.rmb_def()["stop_gap"])
 	out["dev"] = dev
 	out["end_dist"] = Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).length()
 	out["front_miss"] = Vector2(T.pos.x - front.x, T.pos.z - front.z).length()

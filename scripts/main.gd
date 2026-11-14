@@ -1040,6 +1040,18 @@ func _base_check() -> void:
 	print("BCHECK ", "PASS" if near and p.base_t <= 0.0 else "FAIL")
 	get_tree().quit()
 
+## A farm (Home) for headless checks: built, waited for until every slice is in, and set as the current screen.
+func _hb_home():
+	var H = load("res://scripts/home/home.gd")
+	var hm = H.new()
+	add_child(hm)
+	current = hm
+	await get_tree().process_frame
+	await get_tree().process_frame
+	while hm.building:      # a farm built under a still-covered fade comes in slices: wait for all of it
+		await get_tree().process_frame
+	return hm
+
 ## Headless check for boss lairs: every map has them; the dial opens a gate when every arc is hit and
 ## a miss resets the lock, chimes and calls guards; runes and ward stones open theirs; the ward keeps
 ## people out until then; each boss wakes, changes phase at 66% and 33%, enrages, and drops a Rare Egg;

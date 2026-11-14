@@ -128,7 +128,8 @@ func _migration() -> void:
 	Save.d["look"] = {"unmasked": true, "height": 2, "marks": []}      # a look from before features
 	_master("gunslinger", 4)
 	ok(Save.d["look"]["features"] == {"vex_glow": true}, "an old look gains the key and any feature it had earned")
-	ok(Save.d["look"]["height"] == 2, "and keeps what it had")
+	ok(Save.d["look"]["frame"] == EmptyFrame.clean(EmptyFrame.from_steps(2, 1)),
+		"and keeps what it had (its old height is the creator's frame now)")
 	for junk in ["no", 5, [1], null]:
 		var cleaned := Unmasked.clean({"unmasked": true, "features": junk})
 		ok(cleaned["features"] == {}, "a junk features value (%s) cleans to none" % str(junk))
