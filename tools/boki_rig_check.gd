@@ -10,7 +10,7 @@ const Fly := preload("res://tools/boki_rig_fly.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
 	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird", "gibbelle", "caecilith", "goliathite", "hoarheron", "floenatee"]
+	"nettlynx", "thrumbird", "gibbelle", "caecilith", "goliathite", "hoarheron", "floenatee", "lilybara"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
 	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "swim", "paddle", "rush", "brace", "dodge",
