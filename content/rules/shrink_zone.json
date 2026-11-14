@@ -1,0 +1,17 @@
+{
+	"_doc": "The closing zone (scripts/match/shrink_zone.gd, docs/decisions/0060-shrinking-zone.md). Times in seconds for a match length_ref s long (they scale with the match's own length); radii in m for a map map_ref m across (they scale with the map's size). final_lean: how far (share of the final radius) the final circle leans from its exit into the exit's island. start_pad: m the first circle reaches past the farthest map corner. drift: each earlier circle's centre moves this share (min, max) of its room toward the map's middle. warn_s: the kin and the feed warn this long before each close. bot_lead_s: bots head inside the next circle this long before it starts closing. tick_s: outside damage lands in ticks this long. Each phase: hold for wait, then close to r over shrink; from that close on, standing outside costs dps (share of your max health a second).",
+	"length_ref": 612.0,
+	"map_ref": 305.0,
+	"final_lean": 0.55,
+	"start_pad": 12.0,
+	"drift": [0.55, 1.0],
+	"warn_s": 20.0,
+	"bot_lead_s": 60.0,
+	"tick_s": 1.0,
+	"phases": [
+		{"wait": 150.0, "shrink": 50.0, "r": 150.0, "dps": 0.01},
+		{"wait": 80.0, "shrink": 45.0, "r": 95.0, "dps": 0.02},
+		{"wait": 70.0, "shrink": 40.0, "r": 58.0, "dps": 0.04},
+		{"wait": 55.0, "shrink": 30.0, "r": 32.0, "dps": 0.07}
+	]
+}
