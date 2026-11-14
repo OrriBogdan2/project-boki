@@ -54,7 +54,7 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in (parts() if only == "" else Array(only.split(","))):
+	for part: String in (SEQUENCE if only == "" else Array(only.split(","))):
 		print("REEL_MARK %d %s" % [frames, part])
 		await Callable(self, "_p_" + part).call()
 	print("REEL_DONE %d frames in %s" % [frames, frame_dir])
