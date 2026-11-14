@@ -105,6 +105,8 @@ func _hand_cases() -> void:
 		Save.d["active"] = k["uid"]
 		Save.d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
 		HomeLayout.ensure(Save.d)
+		for f in Care.FOODS:      # a fresh save starts with kibble now: Q must land on the snack first
+			Save.d["items"].erase(f)
 		Save.d["items"][SNACK] = 2
 		var home = await main._hb_home()
 		home.day_t = 0.4
