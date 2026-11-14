@@ -3655,6 +3655,7 @@ func _play_evolutions() -> void:
 		building_now = false
 		evolving = null
 		cam.zoom_to = HOME_ZOOM
+		fx.body_glow(at, DexView.type_col(DexView.type_of(rec["species"])))      # (the new form settles: one glow)
 		Sfx.play("unlock")
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")

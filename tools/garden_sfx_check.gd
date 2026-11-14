@@ -211,6 +211,7 @@ func _volley(home) -> void:
 func _tumble(home) -> void:
 	var tb: BaseTumble = home.htumble
 	var moves: Array = BaseTumble.rules()["moves"].keys()
+	TumbleTeach.mark()      # (past the first-time practice: the bout's own cues)
 	tb.use()
 	var want := {}                # move -> exchanges it should decide
 	var pushes := 0
