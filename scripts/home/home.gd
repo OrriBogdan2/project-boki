@@ -1868,11 +1868,11 @@ func _whistle() -> void:
 	if whistle_cd > 0.0:
 		return
 	whistle_cd = 1.6
-	_whistle_sound()
 	_whistle_ring()
 	if life:
 		life.whistle.press()      # the base: your partner comes, hold for the nearest other Boki
 		return
+	_whistle_sound()
 	var my_isle := world.island_of(ppos.x, ppos.z)
 	var n := kins.size()
 	var inside: Array = []
