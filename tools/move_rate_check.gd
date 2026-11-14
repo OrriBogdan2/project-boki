@@ -76,7 +76,7 @@ func _stand() -> void:
 	hm.pvel = Vector3.ZERO
 	hm.gliding = false
 	hm.dash_t = 0.0
-	hm.dash_charges = float(hm._dodge()["charges"])
+	hm.dash.charges = float(hm._dodge()["charges"])
 	hm.lfl = {}
 	hm.mover = FarmStep.new()
 
