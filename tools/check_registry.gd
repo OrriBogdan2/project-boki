@@ -146,10 +146,10 @@ const CHECKS := {
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--music-combat-check": ["res://tools/music_combat_check.gd", "music_combat_check", null],
 	"--soundtrack-check": ["res://tools/soundtrack_check.gd", "soundtrack_check", null],      # Settings > Audio > Music
+	"--farm-clip-check": ["res://tools/farm_clip_check.gd", "farm_clip_check", null],
 	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],      # the closing zone
 	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],  # map regions, hot drop zone
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],  # --shots-dir=<dir>, GPU
-	"--farm-clip-check": ["res://tools/farm_clip_check.gd", "farm_clip_check", null],
 	"--match-repeat-check": ["res://tools/match_repeat_check.gd", "match_repeat_check", null],      # leaks
 	# merged props hold their draws; --shots-dir=<dir> saves a lineup
 	"--prop-draws-check": ["res://tools/prop_draws_check.gd", "prop_draws_check", null],
