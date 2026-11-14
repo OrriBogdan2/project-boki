@@ -3141,9 +3141,6 @@ func _process(delta: float) -> void:
 	if slowmo > 0.0:
 		slowmo -= d
 		d *= slow_k
-	_vprof("pre")
-	MatchCam.update(self, delta, acc / DT)      # before the cursor is read: shots leave on the drawn reticle
-	_vprof("camera")
 	_gather_input()
 	acc += d
 	var steps := 0
@@ -3198,6 +3195,8 @@ func _process(delta: float) -> void:
 		Oomph.place_shot(s, alpha)
 	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
+	MatchCam.update(self, delta, alpha)
+	_vprof("camera")
 	_update_aim(alpha)
 	_vprof("aim")
 	for pd in world.pads:

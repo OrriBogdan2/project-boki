@@ -198,13 +198,13 @@ func _max_gap() -> float:
 ## With the view trailing: the cursor over a ground point beside you must aim at that point.
 func _aim_err() -> float:
 	var spot := P.pos + Vector3(2.5, 0, 2.0)
-	spot.y = m.world.ground_at(spot.x, spot.z) + 0.95
+	spot.y = m.world.ground_at(spot.x, spot.z)  # the cursor aims at the ground its ray meets (AimMode.ray_ground)
 	var ev := InputEventMouseMotion.new()
 	ev.position = cam.unproject_position(spot)
 	ev.global_position = main.get_viewport().get_screen_transform() * ev.position     # (window pixels)
 	Input.parse_input_event(ev)
 	Input.flush_buffered_events()
-	var aim: Vector3 = m._mouse_aim()
+	var aim: Vector3 = m._mouse_aim(ev.position)
 	return Vector2(aim.x - spot.x, aim.z - spot.z).length()
 
 func _judge(key: String, okk: bool, what: String) -> void:

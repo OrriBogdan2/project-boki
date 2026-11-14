@@ -1,10 +1,8 @@
 class_name MatchCam
 extends RefCounted
 ## The match's view for this frame: the ride, the launch, you, or the death camera, each with its zoom, pitch and
-## follow. It runs before the frame reads the cursor (Match._process), so the aim ray a shot leaves on is cut by the
-## camera the frame is drawn with: while the view moves (a dash, a knock, the skyship) rounds go to the reticle, as
-## in the source, not a frame's camera step behind it (--dash-aim-check, steady part). `alpha` is where the last
-## frame drew the bodies, so the view follows what is on screen.
+## follow. It runs after the sim steps (Match._process), on `alpha`, where this frame draws the bodies, so the view
+## follows what is on screen (--camera-follow-check).
 
 
 static func update(m: Match, delta: float, alpha: float) -> void:
