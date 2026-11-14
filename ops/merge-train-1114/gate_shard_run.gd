@@ -9,6 +9,7 @@ var _flags: PackedStringArray
 var _next := 0
 var _mutex := Mutex.new()
 var _cap := "300"
+var _wrapper := ""
 
 
 func run(main: Node) -> void:
@@ -25,6 +26,11 @@ func run(main: Node) -> void:
 			print("GS %s lost 0 0" % f)
 		main.get_tree().quit(0)
 		return
+	# a wrapper file, since OS.execute re-parses an `sh -c` string ("redirection unexpected")
+	_wrapper = "/tmp/gs_run_%d.sh" % OS.get_process_id()
+	var w := FileAccess.open(_wrapper, FileAccess.WRITE)
+	w.store_string('XDG_DATA_HOME="$1" timeout -k 10 "$2" "$3" --headless --path "$4" -- "$5" > "$6" 2>&1\n')
+	w.close()
 	var threads: Array[Thread] = []
 	for i in par:
 		var t := Thread.new()
@@ -32,6 +38,7 @@ func run(main: Node) -> void:
 		threads.append(t)
 	for t in threads:
 		t.wait_to_finish()
+	DirAccess.remove_absolute(_wrapper)
 	main.get_tree().quit(0)
 
 
@@ -45,11 +52,13 @@ func _work() -> void:
 		if idx >= _flags.size():
 			return
 		var home := "/tmp/gs_%d_%d" % [OS.get_process_id(), idx]
-		var args := ["XDG_DATA_HOME=" + home, "timeout", _cap, OS.get_executable_path()]
-		args.append_array(["--headless", "--path", tree, "--", _flags[idx]])
-		var out: Array = []
+		var log_path := home + ".log"
+		# output goes to a file, not a pipe: a check that leaves a child behind (--online-feel-check's udp_delay.py) kept the
+		# pipe open, so a piped execute never returned and the whole shard hung until its job cap
+		var args := [_wrapper, home, _cap, OS.get_executable_path(), tree, _flags[idx], log_path]
 		var t0 := Time.get_ticks_msec()
-		var rc := OS.execute("env", args, out, true)
-		OS.execute("rm", ["-rf", home])
+		var rc := OS.execute("sh", args)
 		var secs := (Time.get_ticks_msec() - t0) / 1000
-		print("GS %s %d %d %d" % [_flags[idx], rc, "".join(out).count("SCRIPT ERROR"), secs])
+		var errs := FileAccess.get_file_as_string(log_path).count("SCRIPT ERROR")
+		OS.execute("rm", ["-rf", home, log_path])
+		print("GS %s %d %d %d" % [_flags[idx], rc, errs, secs])
