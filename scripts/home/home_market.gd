@@ -3,8 +3,8 @@ extends RefCounted
 ## The market stall's panel (docs/decisions/0013-market.md): one panel, its tabs by the stall's
 ## level (Stalls.level). L1: the Vendor (goods for Boki and the Hunter, seeds, farm, house, selling
 ## crops), the Relics (which Hunters are yours and how to open the rest: MarketRelics) and the
-## Tradewind Exchange (materials, Exchange). L2 adds the Shelter (it shows up earlier while a Boki handed to you waits), your own stall and market search;
-## L3 the Auction House (those four tabs are HomeTrade). Opened from the stall, the hub bar's Market
+## Tradewind Exchange (materials, Exchange). L2 adds the Shelter (it shows up earlier while a Boki
+## handed to you waits), your own stall and market search; L3 the Auction House (those four tabs are HomeTrade). Opened from the stall, the hub bar's Market
 ## button and --open=shop[:boki|hunter|seeds|farm|home|sell] / relics / exchange[:item] / shelter /
 ## stall / search / auctions.
 
