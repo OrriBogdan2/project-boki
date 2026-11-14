@@ -34,6 +34,10 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 	spawn_kin = spawn_kin_cb
 	trade = HomeTrade.new(self)
 
+## The stall level a tab opens at.
+static func tab_level(tab_name: String) -> int:
+	return int(TABS.filter(func(t): return t[0] == tab_name)[0][1])
+
 ## The tabs this stall's level opens.
 func tabs() -> Array:
 	var lv := Stalls.level()
