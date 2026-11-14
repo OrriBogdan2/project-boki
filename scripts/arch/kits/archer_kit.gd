@@ -17,9 +17,9 @@ var perfects: int:
 	get: return draw.perfects if draw else 0
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
+var sense: HawkSense         # the passive: hurt rivals revealed and outlined through cover
 var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
 var lmb_was := false           # LMB was held last frame (a fresh press drops a held Heavy Shot)
-var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
 var cremations := 0            # Heavy Shots that knocked a foe burning in the Hail Wall (tests)
@@ -36,12 +36,15 @@ func _setup() -> void:
 	h.add_child(ult)
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
+	sense = HawkSense.new(self)
 
 ## Swapped off her mid Phase Walk (Training Grounds, a hero swap): the walk ends with her kit, else
 ## Hunter.spirit_t would never tick down and the next hunter would ghost through terrain for good.
 func teardown() -> void:
 	if spirit:
 		spirit.end("merge")
+	if sense:
+		sense.clear()
 	super()
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
@@ -49,10 +52,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		_arrow_hit(t)
 
 func _tick(dt: float) -> void:
-	sense_t -= dt
-	if sense_t <= 0.0:
-		sense_t = 0.3
-		_sense_injured()
+	sense.tick(dt)
 	if pin_aim and rmb_down:
 		_heavy_tele()
 	if pin_aim and rmb_down and tells_visible():
@@ -161,14 +161,6 @@ func _tag_shots() -> void:
 			vfx("fire_" + kind, s["pos"], h.aim_dir(), {"follow": arrow})
 	draw.pending = ""
 
-## Passive, Hawk Sense: rivals under half health are seen through cover and fog within 22m.
-func _sense_injured() -> void:
-	var rd := res_def()
-	for f in m.foes_of(h.team):
-		var hurt_enough: bool = f.hp < f.max_hp * float(rd.get("sense_hp", 0.5))
-		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
-			f.reveal_t = maxf(f.reveal_t, 0.4)
-
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():
 		spirit.end("hit")
@@ -231,6 +223,7 @@ func press_rmb() -> void:
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
+	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check)
 
 func rmb_hold_tick(t: float) -> void:
 	# the Heavy Shot's draw, from the press (the source's charge shows at once; the hold threshold only decides

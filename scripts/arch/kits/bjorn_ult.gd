@@ -70,6 +70,15 @@ func xd() -> Dictionary:
 func planted() -> bool:
 	return phase == "wind" or (phase == "erupt" and t < float(xd().get("plant", 0.2)))
 
+## Seconds of the plant left (0: free): the wind-up's rest and the slam's beat.
+func lock_left() -> float:
+	if not planted():
+		return 0.0
+	var plant := float(xd().get("plant", 0.2))
+	if phase == "wind":
+		return float(xd().get("windup", 0.4)) - t + plant
+	return plant - t
+
 ## X pressed: plant, raise the hammer, lock the lane toward the cursor.
 func cast() -> bool:
 	dir = h.aim_dir().normalized()
@@ -156,10 +165,13 @@ func tick(dt: float) -> void:
 		var length := cell_len() * cells.size()
 		scar = {"t": float(x.get("scar_t", 10.0)), "a": origin, "len": length, "fx": 0.0}
 
-## The lane everyone sees: one outlined rectangle over the whole reach in his colour, its gold fill running
-## down it as the cells erupt.
+## The lane everyone sees: one outlined rectangle over the whole reach in his colour, its gold fill sweeping
+## down it over exactly the wind-up (full on the step the slam lands), then running down it again as the cells
+## erupt.
 func _telegraph() -> void:
 	var done := float(erupted) / cells.size()
+	if phase == "wind":
+		done = clampf(t / float(xd().get("windup", 0.4)), 0.0, 1.0)
 	AimKit.lane(h, "x", {"from": origin, "dir": dir, "len": trail_len(), "width": float(xd().get("width", 4.0)),
 		"all": true, "col2": GOLD, "fill": done, "hot": done * 0.6, "lw": 0.14, "alpha": 1.6, "dur": 0.15})
 	AimKit.entry(h, "x")["y"] = _trail_y(origin + Vector3(dir.x, 0, dir.y) * trail_len() * 0.5)

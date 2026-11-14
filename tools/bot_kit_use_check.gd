@@ -11,7 +11,8 @@ const MUST := {
 	"juggernaut": ["rmb hold", "lunge perfect", "chain reel"],
 	"bulwark": ["rmb hold", "hammer throw", "hammer recall", "shield charge"],
 	"rimewright": ["skate", "rink freeze"],
-	"dolm": ["hop recast"],
+	"dolm": ["hop recast", "ab:rmb", "rocks raised", "rocks launched", "ab:rock"],      # Quakefall, Stone Row rocks
+	"ostra": ["snaps", "ab:rmb", "pops", "ab:e"],      # Shard Snap and its hits, Brimseed pops and their hits
 	"ashwick": ["cloak pull"],
 }
 const ALWAYS := ["lmb hit", "rmb press", "e", "ultimate", "dash", "glide"]       # every Hunter, every duel
@@ -83,6 +84,8 @@ func _use(n: Dictionary, id: String, slot: String, instant: bool) -> void:
 func _hit(n: Dictionary, tags: Array) -> void:
 	var t := String(tags[0]) if not tags.is_empty() else ""
 	_add(n, "hit")
+	for tag in tags:
+		if String(tag).begins_with("ab:"): _add(n, String(tag))
 	if "shot" in tags or "flame" in tags or t == "primary": _add(n, "lmb hit")
 	elif t == "utility": _add(n, "rmb hit")
 	elif t == "k1": _add(n, "e hit")
@@ -120,6 +123,11 @@ func _totals(n: Dictionary, k: ArchKit) -> void:
 		_add(n, "shield slam", k.shield_slams)
 	elif k is DolmKit:
 		_add(n, "hops", k.hop.hops)
+		_add(n, "rocks raised", k.rocks_made)
+		_add(n, "rocks launched", k.launches)
+	elif k is OstraKit:
+		_add(n, "snaps", k.snaps)
+		_add(n, "pops", k.pops)
 	elif k is AshwickKit:
 		_add(n, "cloak pull", k.pulled)
 		_add(n, "lmb hit", k.hose_hits)     # (the stream's hits are tagged "flame", not "primary")

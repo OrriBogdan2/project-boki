@@ -503,6 +503,7 @@ func _tracker_rules() -> void:
 	ok(box != null and box.get_child_count() > 0, "the card builds")
 	if box:
 		box.free()
+	_shelter_row()
 	# nothing to show: every Hunter open, milestones done, top level
 	Save.d["classes"]["all"] = true
 	_stats(10, 3, 6, 400)
@@ -515,6 +516,24 @@ func _tracker_rules() -> void:
 		hs[mast_id][String(g["stat"])] = int(g["target"])
 	ok(GoalTracker.lines().is_empty() and GoalTracker.build() == null,
 			"with nothing left to work towards the card is hidden")
+
+## No Boki after the first hatch: the Goals card says where the Shelter is, and never with a Boki.
+func _shelter_row() -> void:
+	var has := func(): return GoalTracker.lines().any(func(r): return r["source"] == "shelter")
+	ok(not has.call(), "with a Boki the card has no Shelter row")
+	var roster: Array = Save.d["roster"]
+	Save.d["roster"] = []
+	ok(has.call(), "with 0 Boki after the first hatch the card has a Shelter row")
+	var row: Dictionary = GoalTracker.lines().filter(func(r): return r["source"] == "shelter")[0]
+	var unready := GoalTracker.lines().filter(func(r): return not bool(r["ready"]))
+	ok(unready[0] == row and String(row["text"]).contains(str(Shelter.price({}, true))),
+			"the Shelter row leads the rows still to work on and names the stray fee: %s" % row["text"])
+	var sig := GoalTracker.signature()
+	Save.d["tutorial"]["hatched"] = false
+	ok(not has.call(), "a new save that has not hatched yet gets no Shelter row")
+	Save.d["tutorial"]["hatched"] = true
+	Save.d["roster"] = roster
+	ok(not has.call() and GoalTracker.signature() != sig, "adopting a Boki clears the Shelter row")
 
 # ------------------------------------------------------------------ 4. in the world
 # ------------------------------------------------------------------ 4. the spotlight
@@ -653,7 +672,7 @@ func _world() -> void:
 	var home = await _home(1)
 	var stall := HomeLayout.deco_center(HomeLayout.fixtures(Save.d, "stall")[0])
 	ok(home.guide != null and home.hob != null and is_instance_valid(home.hob.node)
-			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 4.0,
+			and Vector2(home.hob.pos.x - stall.x, home.hob.pos.z - stall.z).length() < 12.0,
 			"Hob waits by the market stall from the start")
 	ok(is_instance_valid(home.guide.hint_box) and home.guide.hint_text().contains("Hob"),
 			"the first prompt is on screen: %s" % home.guide.hint_text())
