@@ -42,6 +42,7 @@ const CHECKS := {
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],  # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],  # lifting a Boki
 	"--photo-mode-check": ["res://tools/photo_mode_check.gd", "photo_mode_check", null],  # farm photo mode (GPU: PNG)
+	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],  # last-hit XP, 30 m share
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
 	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries

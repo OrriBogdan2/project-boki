@@ -18,6 +18,7 @@ var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
 var noticed_at := -INF     # match time of this monster's last notice cue (MobNotice)
+var player_hurt := false     # the local player or their Boki has damaged it (LastHitHint)
 var death_t := 0.0
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
@@ -85,6 +86,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			_stagger(by, opts)
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0: calm_t = 0.0
+	if dealt > 0.0 and by and (by == m.player or by is Kin and by.owner_h == m.player):
+		player_hurt = true
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:
