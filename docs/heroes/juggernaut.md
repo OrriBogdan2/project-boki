@@ -201,7 +201,7 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Ready | E | Throwing: the hook flies toward the cursor (13 m) | [D] [F] |
 | Ready | E while rooted, Grounded, stunned or on cooldown | stays Ready, the deny buzz | [W] 05.02.25 |
 | Ready | E with the Lunge charging (RMB held) | Throwing; the charge is kept (release once hooked = Chain Lunge) | ours |
-| Throwing | hits a foe (hunter, monster or foe Boki) | Hooked to a foe: 8 damage, blighted while tethered (healing barely takes) | [D] [W] anti-heal |
+| Throwing | hits a foe (hunter, monster or foe Boki) | Hooked to a foe: 6 damage (the data's Feysteel 30 : Caldera 43 against our 8 slash; was 8, fixed 11-11 in docs/BALANCE_1111.md), blighted while tethered (healing barely takes) | [D] [W] anti-heal |
 | Throwing | hits a wall or a block | Hooked to a wall | [D] |
 | Throwing | passes an ally or your own Boki | keeps flying (it only bites foes and walls) | [D] "enemies or walls" |
 | Throwing | reaches 13 m, or drops into the abyss | Missed: "MISS", the cooldown starts | [W] 07.01.25 |
