@@ -18,6 +18,8 @@ const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well u
 const SEED_FILL := 0.8        # the seed's burst disc, drawn at a 1.0 (centre 0.23)
 const THROWN_FILL := 0.75     # the thrown Hearthlight, drawn at up to 1.1
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
+const SEED_OUT := 0.8          # m ahead of her the Burrseed leaves: past her pushing hands, its halo clear of her body
+const SEED_UP := 0.72          # m up it leaves: hand height (as the embers), not her head
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
@@ -329,8 +331,8 @@ func _tick_glide(dt: float) -> void:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
 
 # ------------------------------------------------------------------ RMB: Burrseed
-## Owner items 118 and 23 (11-08): a press starts a short fixed wind-up (`windup`, Darkside Binding's quick
-## cast) that nothing extends: she slows (`wind_move`) and a short dotted lane follows the aim. The seed then
+## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
+## (`wind_move`) and a short dotted lane follows the aim; nothing is drawn at her feet. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
 ## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
@@ -385,7 +387,7 @@ func _throw_seed() -> void:
 	play("mm_seed")
 	var sd: Dictionary = rmb_def()["seed"]
 	var dir := h.aim_dir()
-	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
+	var start := Vector3(h.pos.x + dir.x * SEED_OUT, h.pos.y + SEED_UP, h.pos.z + dir.y * SEED_OUT)
 	var life := AimMode.dist(h, float(sd["range"]), AimMode.MAX) / float(sd["speed"])
 	var on_hit := func(_s: Dictionary, _at: Vector3, e: Ent, _why: String):
 		if e != null and e.team != h.team and not e.dead:
@@ -398,7 +400,7 @@ func _throw_seed() -> void:
 	lk().skin(s, "burr")
 	if not s.is_empty():
 		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
-	vfx("seed_cast", null, dir)          # the cast flare from her lantern, riding her hop (footage: about 0.3 s up)
+	vfx("seed_cast", start, dir)         # the cast flare where the seed leaves her hands, not on her
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
@@ -774,6 +776,7 @@ func _tick_call(dt: float) -> void:
 func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
+	vfx("call_plus", who.pos)           # a couple of mint pluses rise off whoever the tether heals
 	if who == h:
 		_mend(h, amt)
 	else:
@@ -789,8 +792,6 @@ func _call_look(who: Hunter, dt: float) -> void:
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
 	if float(hearth_call["fx"]) <= 0.0:
 		hearth_call["fx"] = 0.22
-		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
-		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
 		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
 
 

@@ -8,7 +8,7 @@ extends Node3D
 ##   ride     a tracer riding on a match shot until it ends, then its impact (the rifle round)
 ##   smear    a fading hot-headed streak (the grenade's flight)
 ##   pillar   a column of light that narrows over its life (the drag disc's countdown, the refund column)
-##   disc     a dark filled disc with a crackling rim and veins (Skycall's area, the slide's scrape)
+##   disc     a lit crackling rim on the area's radius, a see-through dark falloff and veins (Skycall, the slide's scrape)
 ##   ring     an expanding ring with spark needles (the slide's start ring, the Cinderfall impact)
 ##   star     a camera-facing 4-point crackle (fingertip, muzzle)
 ##   trail    immediate style: a swoosh following a moving point (a hand through its move)
@@ -28,6 +28,8 @@ const ECHO_CAP := 10           # after-images per hunter at most (each copies th
 const KEEP := 0.12             # s a marker or a trail stays without a refresh
 const MARK_RAISE := 1.0        # m the marker rides up the screen past the HP bar
 const NO_EDGE := Color(0, 0, 0, 0)
+const DISC_EDGE := 0.9          # the disc shader's rim radius on its unit quad: disc() scales it so the rim is on r
+const DISC_FILL_A := 0.2        # alpha at a disc's centre: a zone never hides who stands in it (VFX_QUALITY.md)
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -201,18 +203,20 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "ring", dur)
 
-## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
-## `hollow` drops the dark fill and the veins for a glowing centre: a big range ring, not a dome. `hold` keeps it
+## An area on the ground, radius r: a jagged crackling rim on r in `rim`, lit with col2, and a soft falloff of col
+## in from it that is DISC_FILL_A at the centre; veins of col2 inside.
+## `hollow` drops the falloff and the veins for a glowing centre: a big range ring, not a dome. `hold` keeps it
 ## at full strength until the last fifth, for a countdown (it otherwise fades from the first frame).
 ## Returns the node.
 func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE, hollow := false,
 		hold := false) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
 	var mt := _look(n, col, col2, rim)
+	mt.set_shader_parameter("fill_a", DISC_FILL_A)
 	mt.set_shader_parameter("hollow", 1.0 if hollow else 0.0)
 	mt.set_shader_parameter("hold", 1.0 if hold else 0.0)
 	n.global_position = at + Vector3(0, 0.08, 0)
-	n.scale = Vector3(r, 1.0, r)
+	n.scale = Vector3(r / DISC_EDGE, 1.0, r / DISC_EDGE)
 	_play(n, "disc", dur)
 	return n
 

@@ -30,6 +30,8 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 |---|---|---|
 | `sweep` | an arc of flame, burning away; its head runs the arc in `turn` s (default 0.28 of the life); `band` (0..1 of its depth) draws an even blade, not tapered (a 360 ring) | `size` outer radius, `arc` deg, `tilt`, `yaw`, `flip`, `turn`, `band` |
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches; `pool` is a still dark disc in `c3` under a cast (no fire), dark at once, gone in its last 15% | `shape` disc / lane / cone / pool, `size` or `len` + `w`, `arc`, `band` (pool: share of the radius in from the edge, 1 = all) |
+| `sweep` | an arc of flame, burning away; its head runs the arc in `turn` s (default 0.28 of the life); `band` (0..1 of its depth) draws an even blade, not tapered (a 360 ring) | `size` outer radius, `arc` deg, `tilt`, `lean` (deg it turns toward the camera about the aim, so a stood-up arc never shows edge-on), `yaw`, `flip`, `turn`, `band` |
+| `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread), `head` m across a bright tip on the newest point (`head_len` times as long: a pointed diamond; drawn in the trail's own mesh), `soft` a feathered glow strewn with twinkling glints and a round twinkling head instead of the hard edge |
@@ -38,7 +40,7 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor; `"here"`: the move's point `to_y` m up, a bolt out of the sky with `y`), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`); with `"thin": true` only three lit comet arcs on its rim (no fill, no core), which `grow` < 1 draws in toward the centre | `size` radius, `spin` turns/s (negative: the other way), `grow`, `thin` |
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
-| `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
+| `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` / `plus` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops, upright healing crosses | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
@@ -55,6 +57,9 @@ opaque, so a recipe needs fewer, smaller puffs than a soft smoke did.
 
 Who includes it: the data looks here (`hero_vfx.gdshader`, `hero_vfx_mote.gdshader`, ring layer `"p": "ring"`), the
 kit shaders (`ld_fx` Ashwick / Dredge, `dj_fx` Kael / Sable, `vv_fx` Sparkle, `KitShaders` Hem / Breaker,
+kit shaders (`ld_fx` Ashwick / Dredge, `dj_fx` Kael / Sable, `vv_fx` Sparkle / Vex, `KitShaders` Hem / Breaker,
+`care_disc` / `care_glow` / `care_ice` Pip / Claire, `cel_tint` (`KitLooks.shade_mat`: the flat two-tone tints of Tarek's and Ostra's looks and the seed's ring), `molten_rock` Tarek's hard cel cracks, `void_glass` Ostra's banded rim) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
+tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) and the shared `Fx.ring` burst (`fx_ring`) draw `cel_ring()`. A ground ring means gameplay (the area something hits or marks): no bursts on dashes, landings or resets. A new effect shader
 `care_disc` / `care_glow` Pip / Claire, `molten_rock` Tarek's hard cel cracks, `void_glass` Ostra's banded rim) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
 tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) and the shared `Fx.ring` burst (`fx_ring`) draw `cel_ring()`. A ground ring means gameplay (the area something hits or marks): no bursts on dashes, landings or resets. The team markers (the TeamRing under every Hunter, a Boki's ring, the hit-marker ring, the deathbox owner ring) draw
 `marker_ring.gdshader` (`SideRings.mat`): a hard band, edges ragged by the noise, a lighter outer rim; its `color` is the side

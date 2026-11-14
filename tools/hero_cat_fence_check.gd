@@ -33,7 +33,7 @@ class CatSpy extends Fx:
 		seen.append(col)
 	func body_glow(_at: Vector3, col: Color) -> void:
 		seen.append(col)
-	func number(_at: Vector3, _v: float, col: Color, _crit: bool, _prefix := "", _key := "") -> void:
+	func number(_at: Vector3, _v: float, col: Color, _crit: bool, _prefix := "", _key := "", _small := false) -> void:
 		seen.append(col)
 	func word(_at: Vector3, _txt: String, col: Color, _big := false) -> void:
 		seen.append(col)

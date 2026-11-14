@@ -812,7 +812,7 @@ func _gunslinger() -> void:
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
 	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
-	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +76% (the source's +39 on 51), a gold crit number
+	# 1. LMB: to full range past the cursor, a green-fire tracer; Dazed = +76% (source +39 on 51), a gold crit number
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))
 	ac.step(m, 0.1)

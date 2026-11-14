@@ -88,6 +88,7 @@ var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not y
 var fx_clock := 0.0            # the match time effects last advanced to
 
 var own_piece: Node3D         # the model's own hammer, when it has a skinned one (WardenGlb.thrown_piece)
+var own_reach := 0.0          # m from its grip to its head's far end (neutral): it stands on that, planted
 var chain: Array = []         # the links to the thrown hammer (_build_chain)
 
 func _init(hunter: Hunter) -> void:
@@ -131,6 +132,8 @@ func _own_hammer() -> bool:
 		c.queue_free()
 	hammer.add_child(own_piece)
 	own_piece.scale = Vector3.ONE * h.model.scale.x
+	var mi := own_piece.get_child(0) as MeshInstance3D
+	own_reach = -(mi.transform * mi.get_aabb()).position.z
 	_build_chain()
 	return true
 
@@ -230,7 +233,7 @@ func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.scale = Vector3.ONE if own_piece else Vector3.ONE * PLANT_SCALE / 1.25
 	# the head points down (-Z turned to -Y), leaning PLANT_LEAN off vertical
 	hammer.rotation = Vector3(-PI * 0.5 - PLANT_LEAN, yaw, 0.0)
-	var head_drop := 0.62 * plant_k * cos(PLANT_LEAN)
+	var head_drop := (own_reach if own_piece else 0.62) * plant_k * cos(PLANT_LEAN)
 	hammer.global_position = p + Vector3(0, head_drop - 0.2, 0)
 	beacon.visible = true
 	beacon.global_position = p

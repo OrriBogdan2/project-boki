@@ -21,6 +21,7 @@ const DEEP := Color("4f8a12")        # palette "deep"
 const BRONZE := Color("b9732f")      # the Burr Charge's metal shell (a material, not an effect)
 const DUD_DUST := Color("6b4a2e")    # a dud Burr Charge's dull dust puff where its lane ended
 const DAZE_PINK := Color("ff4fb0")   # palette "daze": the Daze's own colour, so its bonus is not a plain crit
+const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const BURR_SAMPLE := 0.25            # m between the ground reads along the charge's flight (a tile is 1 m)
@@ -35,7 +36,9 @@ const TUBE_BELL := "launcher_muzzle" # on the swinging launcher: over and forwar
 const TUBE_SWING := 0.1              # s from the press to the bell coming forward
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
-const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
+## The drum's reload cue, once as it runs dry. A stand-in for now: the rifle-cock take from her set; a library
+## reload sound (sfx-lib-1113) swaps in here.
+const RELOAD_SFX := "vn_cock"
 const E_RECOVER := 0.6               # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
                                      # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
                                      # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
@@ -121,8 +124,8 @@ func fires_in_glide() -> bool:
 func shows_charge_ball() -> bool:
 	return false                   # the Longneedle charges an ember orb at the muzzle instead
 
-const SLIDE_KEY := 0.45              # s: the dash clip's last slide key (vex.json "dash", low from 0.08): a held slide
-                                     # keeps the clip there, so she stands up as the skid ends, not mid-skid
+const SLIDE_LOOP_FROM := 0.367       # s: the dash clip's slide loop (three keys): a held slide replays it from here,
+const SLIDE_LOOP_T := 0.133          # s: one period at a time, so she stands up as the skid ends
 const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
                                      # is over to the clips (the kit's anim_id is read as long as it is set)
 
@@ -222,8 +225,6 @@ func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
 	last_shot = h.shot_n
-	if m.time - round_at > SPIN_REST:
-		m.sfx("gunslinger_spinup", h.pos, -6.0)      # the shoulder cannon winds up as a string starts
 	round_at = m.time
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
@@ -256,8 +257,9 @@ func _tick_mag(dt: float) -> void:
 		dry = false
 		return
 	var mag := int(h.wpn["mag"])
-	if h.ammo <= 0:
+	if h.ammo <= 0 and not dry:
 		dry = true
+		m.sfx(RELOAD_SFX, h.pos, -4.0)
 	if h.ammo >= mag or h.idle_fire < float(h.wpn["refill_after"]):
 		refill_part = 0.0
 		if h.ammo >= mag:
@@ -358,7 +360,9 @@ func _tick_slide(dt: float) -> void:
 	var k := 1.0 - st_t / dur
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
 	if anim_id == "gunslinger_dash":
-		anim_at = maxf(anim_at, float(m.time) - SLIDE_KEY)   # the clip stays low on its slide key while she slides
+		var into := float(m.time) - anim_at           # the clip's clock: past the loop's end it goes round again
+		if into > SLIDE_LOOP_FROM + SLIDE_LOOP_T:
+			anim_at = float(m.time) - SLIDE_LOOP_FROM - fposmod(into - SLIDE_LOOP_FROM, SLIDE_LOOP_T)
 	h.roll_speed = float(slide["left"]) / dur * (0.5 + k)
 	h.inv_t = 0.0
 
@@ -395,8 +399,12 @@ func _launcher_at(d: Vector2) -> Vector3:
 	var spot := WardenGlb.anchor(h.model, TUBE_FIRE)
 	if spot != null:
 		return spot.global_position
-	var muzzle := h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D if h.model else null
+	var muzzle := _gun_muzzle()
 	return (muzzle.global_position if muzzle else _muzzle(d)) + Vector3.UP * TUBE_UP
+
+## The Gun's Muzzle on her model (the rifle's mouth), or null with no model.
+func _gun_muzzle() -> Node3D:
+	return h.model.get_node_or_null(GUN_MUZZLE) as Node3D if h.model else null
 
 ## The launcher's puff: at the bell once it has swung forward, or at once where there is no swinging bell.
 func _launcher_puff(at: Vector3, d: Vector2) -> void:

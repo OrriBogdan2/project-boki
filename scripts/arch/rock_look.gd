@@ -126,8 +126,8 @@ static func cool(n: Node3D) -> void:
 		return
 	var tw := n.create_tween().set_parallel()
 	for mi in cracks.get_children():
-		var mat := (mi as MeshInstance3D).material_override as StandardMaterial3D
-		tw.tween_property(mat, "albedo_color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
+		var mat := (mi as MeshInstance3D).material_override as ShaderMaterial
+		tw.tween_property(mat, "shader_parameter/color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
 ## For the next `secs` rocks rising make no rumble of their own (the caster plays one for all of them).

@@ -117,4 +117,5 @@ onto its side (`Kin.render`).
    `hop` while `fly` is set would use the existing clip.
 4. **Hunter dash is `proc` for 7 Hunters** (breaker, cinder, dredge, hem, ostra, pip, and gil): the procedural roll,
    phase and charge poses stand in; only claire, kael, ryzz, sable, tarek and vex key a dash clip.
+4. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).

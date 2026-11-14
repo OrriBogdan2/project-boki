@@ -28,7 +28,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
-			{"p": "drop", "n": 24}]},
+			{"p": "drop", "n": 24}, {"p": "plus", "n": 8}]},
 		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
@@ -38,6 +38,9 @@ const TRAIL_MIN := 0.45        # m across at the head, so a shot trail reads at 
 ## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult", "rock_crumble"]
+## The camera-facing effect shaders that soften where they meet the ground (shaders/soft_fade.gdshaderinc).
+## (fx_dot has its own ground fade: FxDot, ground_y.)
+const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
 const DT_FILL := 1.0 / 60.0   # s per step while timing the Faultline fill
 var bad := 0
@@ -68,9 +71,11 @@ func run(main: Node) -> void:
 	_budget(V, P)
 	await _holds(main, m, V, P)
 	_view(m, V, P)
+	_lean()
 	_kit(m, V, P)
 	_dolm_rocks(m)
 	_net(m, V, P)
+	_soft_edges(m)
 	await _core_kinds(main, m, V, P)
 	_shot_trails(m, V, P)
 	await _lisette(main, V)
@@ -82,6 +87,14 @@ func run(main: Node) -> void:
 	await _slam_fill(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Every camera-facing effect fades into the ground instead of cutting a line into it, on each renderer (one
+## include, picked by renderer); the Compatibility fallback's ground map comes with the match world.
+func _soft_edges(m: Match) -> void:
+	for sname: String in SOFT_SHADERS:
+		var code := (load("res://shaders/%s.gdshader" % sname) as Shader).code
+		ok(code.contains("soft_fade.gdshaderinc") and code.contains("soft_fade("), "%s softens into the ground" % sname)
+	ok(m.world.get_children().any(func(c: Node) -> bool: return c is FxGround), "the match world shares its ground map")
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
@@ -241,6 +254,23 @@ func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
 
+## A sweep stood up along the aim ("tilt" 90) turns up to its "lean" toward the match camera: no aim shows it
+## edge-on, and it never tips past the lean.
+func _lean() -> void:
+	var back := Vector3(0, sin(deg_to_rad(57.0)), cos(deg_to_rad(57.0)))
+	var layer := {"tilt": 90.0, "lean": 30.0}
+	var worst := 1.0
+	var within := true
+	for i in 8:
+		var b := Basis(Vector3.UP, TAU * i / 8.0)
+		var roll := HeroVfx.sweep_roll(layer, b, back)
+		var normal := b * Basis(Vector3(0, 0, 1), roll) * Vector3.UP
+		worst = minf(worst, absf(normal.dot(back)))
+		within = within and absf(roll - PI * 0.5) <= deg_to_rad(30.0) + 0.001
+	var stood := HeroVfx.sweep_roll({"tilt": 90.0}, Basis(), back)
+	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
+	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
+
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var K: JuggernautKit = P.ak
@@ -260,8 +290,13 @@ func _dolm_rocks(m: Match) -> void:
 			var mat: Material = (mi as MeshInstance3D).material_override
 			if mat is ShaderMaterial:
 				var sm := mat as ShaderMaterial
-				var hues: Array = [sm.get_shader_parameter("glow"), sm.get_shader_parameter("rim_col")]
-				if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r > c.b):
+				# the rock's own shader (glow, rim, heat) or a KitLooks.shade_mat haze (cel_tint's color)
+				var hot := false
+				for p: String in ["glow", "rim_col", "color"]:
+					var c: Variant = sm.get_shader_parameter(p)
+					hot = hot or (c is Color and (c as Color).r > (c as Color).b)
+				var heat: Variant = sm.get_shader_parameter("heat")
+				if hot or (heat != null and float(heat) > 0.0):
 					warm.append(kind)
 			elif mat is StandardMaterial3D:
 				var c := (mat as StandardMaterial3D).albedo_color

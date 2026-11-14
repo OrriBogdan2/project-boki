@@ -238,6 +238,7 @@ func press_rmb() -> void:
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
+	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check)
 
 func rmb_hold_tick(t: float) -> void:
 	# the Heavy Shot's draw, from the press (the source's charge shows at once; the hold threshold only decides
