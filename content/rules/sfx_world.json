@@ -28,11 +28,11 @@
     "scripts/match/key_chest.gd"
    ],
    "holes": [
-    "loot_full swap_held:pickup",
     "loot_full denied:lock_rattle",
     "pack stash:pickup",
     "pack swap:pickup",
-    "pack _wear:pickup",
+    "pack take_ground:pickup",
+    "pack wear_from_box:pickup",
     "life take_item:pickup",
     "life loot_box:pickup",
     "key_run on_pickup:key_get",
