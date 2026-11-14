@@ -20,7 +20,7 @@
 	},
 	"plate_offset": 2.75,
 	"body": {
-		"size": 1.004,
+		"size": 0.96,
 		"head": 0.48,
 		"legs": 2.05,
 		"neck": -0.012,

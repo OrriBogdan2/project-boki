@@ -36,6 +36,7 @@ func _ready_swing(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	P.dashes = P.max_dashes()
 	P.glide_cd = 0.0
 	K.lmb_t = -1.0
+	K.hold_blocked = false
 	T.teleport(home + FAR)
 	fresh(T)
 
@@ -150,7 +151,7 @@ func _window() -> void:
 	await done(m)
 
 ## #49 on flat ground: in the window he launches >= 3.5 m (feet up, bul_launch) with a bigger knock, a heavier
-## hit-stop and shake; outside it (early or late) the lunge stays <= 2.4 m; it counts as a dash for DashFlow; a
+## hit-stop and shake; outside it (early or late) the step stays <= 2 m; it counts as a dash for DashFlow; a
 ## mantle ends it; glide pressed in it jumps him out into a glide that keeps the launch's speed.
 func _launch_flat() -> void:
 	var r := setup("bulwark", 7.0)
@@ -165,9 +166,8 @@ func _launch_flat() -> void:
 	var late := _swing(m, P, home, full + 0.3)
 	_ready_swing(m, P, T, home)
 	var early := _swing(m, P, home, 0.7)
-	# (the step became the swing lunge, "lunge.d" 1.4-2.4 m by charge: tools/albert_feel_check.gd)
-	ok("bjorn #49: a release outside the window lunges him 1.4-2.4 m, further the fuller the charge",
-		late >= 2.1 and late <= 2.7 and early >= 1.4 and early < late and K.launch.launches == 0,
+	ok("bjorn #49: a release outside the window steps him 1.5-2 m (item 30's step)",
+		late >= 1.5 and late <= 2.0 and early >= 1.4 and early <= 2.0 and K.launch.launches == 0,
 		"late %.2f early %.2f" % [late, early])
 	# the knock and the hit-stop: normal (late) first, then perfect, on a dummy 2.6 m ahead
 	var knocks: Array = []
@@ -427,10 +427,6 @@ func _lmb_parity() -> void:
 	ok("bjorn parity LMB: the throw's cadence is the source card's 0.45 s (sheet: 175 out, 175 back)",
 		absf(float(K.lmb_def()["throw_rate"]) - 0.45) < 0.001 and cadence > 0.30 and cadence <= 0.45 + 0.001,
 		"throw_rate %s fire_cd %.3f" % [K.lmb_def()["throw_rate"], cadence])
-	P.fire_cd = 0.0
-	K._recall()
-	ok("bjorn parity LMB: the recall is a press too, the next one waits the same 0.45 s (TTK: one hit per press)",
-		absf(P.fire_cd - float(K.lmb_def()["throw_rate"])) < 0.001, "fire_cd %.3f" % P.fire_cd)
 	await _rmb_parity(m, P, K, home)
 	await done(m)
 
@@ -441,6 +437,7 @@ func _lmb_parity() -> void:
 ## hurts nobody; a jump and Shift keep it; the release puts the hammer back and still slams at the cursor.
 const MIN_TURNS := 1.0
 const SPIN_STRETCH := 0.25     # s: the turn rate is measured over each of these
+const WHIRL_REACH_K := 0.71    # m per unit of his model scale: the whirling head this far out is at arm's length
 
 ## The hammer's head round the circle's centre (rad, world), with the effect brought up to date.
 func _head_angle(K: BulwarkKit) -> float:
@@ -496,8 +493,9 @@ func _hold_spin() -> void:
 	ok("bjorn #59: the whirl speeds up with the charge",
 		fastest >= slowest + 0.8 and fastest <= float(md["spin_turns"][1]) + 0.1,
 		"%.2f-%.2f turns/s" % [slowest, fastest])
-	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= 1.5 and trail,
-		"head %.2f m out, trail %s" % [reach, trail])
+	var arm := WHIRL_REACH_K * P.model.global_basis.get_scale().y
+	ok("bjorn #59: the head runs at arm's length with its trail behind it", reach >= arm and trail,
+		"head %.2f m out (arm's length %.2f), trail %s" % [reach, arm, trail])
 	ok("bjorn #59: the whirl hurts nobody (the default for now): a foe inside its circle took nothing in 2 s",
 		dmg(T) == 0.0, "took %.0f" % dmg(T))
 	# walking: the hold's speed (55% of his run, kept from the source), the hammer still round

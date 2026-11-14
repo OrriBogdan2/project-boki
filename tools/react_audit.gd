@@ -152,7 +152,7 @@ func _want(id: String, test: String, good: bool, what: String) -> void:
 ## One frame of the live hand-off: the pose, plus the grip and T-pose tallies.
 func _frame(sync: Node, sk: Skeleton3D, dt: float) -> Dictionary:
 	sync.call("_process", dt)
-	var p := _read(sk)
+	var p := points(sk)
 	frames += 1
 	if _t_posed(p, "L") and _t_posed(p, "R") and _straight(p, "L") and _straight(p, "R"):
 		t_frames += 1
@@ -190,7 +190,7 @@ func _hit(m: Node3D, sync: Node, sk: Skeleton3D, hit_dir: Vector2, dur: float, h
 	m.set_meta(WardenClips.STATE, s)
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
-	var pre := _read(sk)
+	var pre := points(sk)
 	var disp: Array = []
 	var away := 0.0
 	var t := 0.0

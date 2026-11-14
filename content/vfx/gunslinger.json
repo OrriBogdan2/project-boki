@@ -24,7 +24,7 @@
 			{"p": "ember", "n": 5, "speed": 5.0, "spread": 0.7, "grav": 6.0, "drag": 1.5, "life": 0.25, "size": 0.05,
 				"size_k": -0.6, "stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
-		"reload": {"net": false, "sfx": [{"n": "vn_cock", "db": -6.0, "at": "h"}], "fx": [
+		"reload": {"net": false, "fx": [
 			{"p": "coin", "at": "drum", "n": 5, "way": "up", "speed": 2.6, "spread": 0.7, "grav": 9.0, "life": 0.55,
 				"size": 0.05, "c": "brass", "c2": "white", "c3": "soot"},
 			{"p": "star", "at": "muzzle", "n": 3, "speed": 0.4, "spread": 1.0, "life": 0.25, "size": 0.09,
