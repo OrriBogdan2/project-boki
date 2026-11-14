@@ -80,3 +80,4 @@ func tick() -> void:
 func _air_exit(cap: float) -> void:
 	var hv := Vector2(h.vel.x, h.vel.z).limit_length(cap)
 	h.vel = Vector3(hv.x, h.vel.y, hv.y)
+	h.dash_glide.keep(hv)      # the cap is the exit: DashGlide must not ease the cut back in

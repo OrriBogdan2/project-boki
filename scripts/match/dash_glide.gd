@@ -51,6 +51,12 @@ func step(h: Hunter, v0: Vector2, hv: Vector2, dt: float) -> Vector2:
 	return hv
 
 
+## A kit that sets the air exit speed on purpose (Albert's air lunge: the speed he came in with) keeps it: no ease.
+func keep(v: Vector2) -> void:
+	last = v
+	carry = Vector2.ZERO
+
+
 ## Lets `carry` go at the ease rate. A wall (or keys turning the hunter) that already took some of it off
 ## shrinks it first, so the ease never pushes back the other way.
 func _ease(hv: Vector2, dt: float) -> Vector2:
