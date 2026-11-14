@@ -191,7 +191,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	var cycle := float(lc.get("cycle_s", 0.0))
 	gait = WardenGait.new(sk, lc.get("arm_swing", {}),
 			cycle if cycle > 0.0 else lib.get_animation(String(lc["walk"]["f"])).length,
-			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length, "hips" in d.get("offset_bones", []))
+			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length,
+			"hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	_setup_out()
