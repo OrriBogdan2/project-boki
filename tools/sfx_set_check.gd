@@ -48,7 +48,7 @@ const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far und
 ## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
 const WIRED := {
 	"warn_heartbeat": ["match/warn_sfx.gd"], "warn_tick": ["match/warn_sfx.gd"],
-	"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"],
+	"blight_rumble": ["match/blight.gd", "match/blight_nests.gd"],
 	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
 	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
 	"boki_fuse": ["match/merge_xform.gd"], "boki_unfuse": ["match/merge_xform.gd", "match/kin_net.gd"],

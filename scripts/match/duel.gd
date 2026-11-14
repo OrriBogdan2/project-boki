@@ -163,7 +163,6 @@ func reset() -> void:
 		if h.kin and (h.kin as Kin).state != "shoulder":
 			(h.kin as Kin).recall()
 	_near.clear()
-	m.sfx("revive", null, -8.0, 1.2)
 	count_t = TrainingSfx.COUNT_S
 	TrainingSfx.count_start()
 
