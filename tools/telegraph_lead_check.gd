@@ -129,15 +129,16 @@ func _case(c: Dictionary) -> void:
 
 ## How much nearer to the hostile rim colour the ground telegraphs draw for a rival of their owner than
 ## for an ally of theirs (mean over the vertices of what only `all` entries draw). AimDraw tints an `all`
-## entry toward Feel.RIM_ENEMY for the other team.
+## entry toward SideColor.rim() for the other team.
 func _rival_gain(m: Match, P: Hunter, T: Hunter) -> float:
 	var d: AimDraw = AimKit.layer(m)
 	var team := T.team
 	var mean_gap := func() -> float:
 		d.rebuild()
 		var sum := 0.0
+		var rim := SideColor.rim()
 		for c in d.geo.c:
-			sum += absf(c.r - Feel.RIM_ENEMY.r) + absf(c.g - Feel.RIM_ENEMY.g) + absf(c.b - Feel.RIM_ENEMY.b)
+			sum += absf(c.r - rim.r) + absf(c.g - rim.g) + absf(c.b - rim.b)
 		return sum / maxf(1.0, d.geo.c.size())
 	m.player = T
 	T.team = P.team
