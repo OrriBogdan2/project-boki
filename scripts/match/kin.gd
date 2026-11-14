@@ -495,6 +495,7 @@ func start_leap(to: Vector3, e: Dictionary, ctx: Dictionary) -> void:
 # ------------------------------------------------------------------ the merge (bond ultimate)
 ## KinMerge starts it: a mount grows giant under you; any other kin fuses onto you as armor.
 func merge_in(giant_form: bool) -> void:
+	m.sfx("boki_fuse", pos, -4.0)
 	fly = {}
 	target = null
 	pend_skill = Vector3.INF
@@ -526,6 +527,8 @@ func merge_leap() -> bool:
 
 ## KinMerge ends it: back to riding with you, ready to throw again straight away.
 func merge_out() -> void:
+	if state == "fused":
+		m.sfx("boki_unfuse", pos, -4.0)
 	if not giant.is_empty():
 		giant = {}
 		m.fx.burst(pos + Vector3(0, 0.6, 0), sp["color"], 20, 4.0)
@@ -555,6 +558,7 @@ func land_pumped(secs: float) -> void:
 func merge_pop() -> void:
 	if state != "fused" or owner_h == null or dead:
 		return
+	m.sfx("boki_unfuse", owner_h.pos, -4.0)
 	teleport(owner_h.pos + Vector3(0, 1.0, 0))
 	cmd = "follow"
 	hold_at = Vector3.INF

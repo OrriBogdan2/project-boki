@@ -56,6 +56,7 @@ func run(main: Node) -> void:
 	_garden()
 	_build_cues()
 	_strip_chime()
+	_boki_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -375,6 +376,14 @@ func _strip_chime() -> void:
 	ok(cue.has("objective") and cue.has("objective_fight") and float(cue["objective_fight"]) < float(cue["objective"]),
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
+## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
+func _boki_cues() -> void:
+	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
+		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
+		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/home/home.gd"}
+	for cue in wired:
+		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
+		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
 
 func _takes(sname: String) -> Array:
 	var out := []
