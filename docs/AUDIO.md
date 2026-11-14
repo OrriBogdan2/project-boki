@@ -220,7 +220,6 @@ Result (the audit's "check by ear" item): **neither is an outlier, so no generat
 | Neve | impact | rime_crash | 1.37 | 1.31 | 15.4 |
 | Tender | cast | tend_call | 1.19 | 1.02 | 13.2 |
 | Tender | impact | tend_arrive | 0.84 | 0.63 | 12.8 |
-| Tender | loop | tend_call_hum | 0.66 | 0.41 | 11.5 |
 | Sable | cast | dj_encore | 0.90 | 0.43 | 17.7 |
 | Sable | impact | dj_encore_hit | 0.10 | 0.10 | 15.2 |
 | Sable | loop | dj_encore_whirr | 1.96 | 0.77 | 16.8 |

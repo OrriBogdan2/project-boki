@@ -9,7 +9,7 @@ const NAMES := [
 	"tend_land", "tend_flare", "tend_hop", "tend_pickup", "tend_kindled",
 	"rime_shard", "rime_beam", "rime_spear_aim", "rime_lance", "rime_zone", "rime_burst", "rime_splinter",
 	"rime_stop", "rime_wall_tell", "rime_wall", "rime_freeze",
-	"tend_call", "tend_call_hum", "tend_arrive", "rime_lock", "rime_creak", "rime_crash", "rime_crack",
+	"tend_call", "tend_call_loop", "tend_arrive", "rime_lock", "rime_creak", "rime_crash", "rime_crack",
 	# Tarek (dolm) and Motley (ostra): tools/gen_sfx_tarek.py, tools/gen_sfx_motley.py
 	"br_throw", "br_boulder_hit", "br_wind", "br_punch", "br_launch", "br_burst", "br_rise", "br_roll", "br_shove",
 	"br_leap", "br_slam", "br_crack", "br_raise", "br_sense",
