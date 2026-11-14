@@ -3,6 +3,7 @@ extends RefCounted
 ## Each flag runs as its own godot process (temp XDG_DATA_HOME, `timeout` cap), `par` at a time, and prints
 ## "GS <flag> <rc> <script_errors> <secs>". gate-shard injects this file and its registry line into the trees it
 ## gates (the jobq app can only start the game, so a shard has to start inside it); it is never committed to a tree.
+## On a non-Linux worker every flag prints "lost" (gate-shard re-runs it).
 
 var _flags: PackedStringArray
 var _next := 0
@@ -19,6 +20,11 @@ func run(main: Node) -> void:
 			par = int(a.trim_prefix("--par="))
 		elif a.begins_with("--cap="):
 			_cap = a.trim_prefix("--cap=")
+	if OS.get_name() != "Linux":  # mac/Windows workers take --needs any jobs too, but have no `timeout` or XDG isolation
+		for f in _flags:
+			print("GS %s lost 0 0" % f)
+		main.get_tree().quit(0)
+		return
 	var threads: Array[Thread] = []
 	for i in par:
 		var t := Thread.new()

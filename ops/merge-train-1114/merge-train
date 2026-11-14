@@ -30,7 +30,9 @@ WORK=$(realpath -m "${TRAIN_WORK:-$REPO/../train-work}") OUT=${OUT:-$WORK/out}
 READY=${MERGE_READY:-/home/boki/coord/MERGE_READY.md}
 REPO_SLUG=${REPO_SLUG:-OrriBogdan2/project-boki}
 RUSH=$REPO/ops/merge-rush-1113/merge_batch.sh
-mkdir -p "$WORK" "$OUT"; N=0
+mkdir -p "$WORK/bin" "$OUT"; N=0
+# run a private copy: bash reads a script as it goes, so editing gate-shard mid-gate would corrupt the running gate
+cp "$HERE/gate-shard" "$HERE/gate_shard_run.gd" "$WORK/bin/"
 log() { echo "$(date -u +%H:%M:%S) $*" | tee -a "$OUT/train.log"; }
 
 git -C "$REPO" fetch -q origin main
@@ -109,7 +111,7 @@ gate_car() {  # gate_car PR... : merge them onto $BASE, gate; 0 green (BASE move
 	N=$((N + 1)); local out="$OUT/gate-$N"
 	log "gate $N: PRs ${prs[*]} on base ${BASE:0:10} (main ${MAIN:0:10})"
 	fresh_tree "$WORK/main" "$MAIN"
-	GS_TAG="mt$N" bash "${GATE:-$HERE/gate-shard}" "$WORK/main" "$cand" "$out" > /dev/null 2>&1
+	GS_TAG="mt$N" bash "${GATE:-$WORK/bin/gate-shard}" "$WORK/main" "$cand" "$out" > /dev/null 2>&1
 	local rc=$?; summary=$(head -1 "$out/summary.txt" 2>/dev/null)
 	[ $rc -eq 2 ] && { log "gate $N: usage or import failure, train stopped"; exit 2; }
 	log "gate $N rc=$rc: ${summary:-no summary (import failure?)}"

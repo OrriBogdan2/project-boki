@@ -64,7 +64,7 @@ submit() {  # submit SIDE TREE < flags : the flags dealt round-robin (slowest fi
 	k=$(( n < SHARDS ? n : SHARDS ))
 	awk -v k="$k" '{ s[(NR - 1) % k] = s[(NR - 1) % k] "," $1 } END { for (i = 0; i < k; i++) print substr(s[i], 2) }' <<< "$flags" \
 		| xargs -P "$SUBMIT_P" -I{} sh -c 'for try in 1 2 3; do id=$(timeout 60 jobq submit --tree "$2" --needs any --label "$3-$1" --timeout "$4" \
-			-- --gate-shard-run={} --par="$5" --cap="$6" 2>/dev/null | tail -1 | grep -E "^[0-9]{8}-[0-9]{6}-[0-9]+$"); [ -n "$id" ] && break; sleep $((try * 5)); done
+			-- --gate-shard-run={} --par="$5" --cap="$6" 2>/dev/null | tail -1 | grep -E "^[A-Za-z0-9-]+$"); [ -n "$id" ] && break; sleep $((try * 5)); done
 			[ -n "$id" ] || id=NOID$$; echo "$1 $id {}"' _ "$1" "$2" "$TAG" "$JOB_CAP" "$PAR" "$CAP" >> "$OUT/jobs.tsv"
 }
 
@@ -82,7 +82,8 @@ collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag
 		while read -r line; do  # `jobq result ID` for every id still open (`jobq wait` prints nothing until all are done, `status` only lists the latest)
 			id=${line%% *}; [ -n "${side[$id]:-}" ] && [[ $left == *" $id "* ]] || continue
 			log=$(grep -oP 'log=\K\S+' <<< "$line"); got=$(grep '^GS ' "$log" 2>/dev/null)
-			awk -v s="${side[$id]}" '{ print s, $2, $3, $4, $5 }' <<< "$got" | grep .
+			# rc 126/127 (no timeout/env binary) or a cut-off line means the check never ran: lost, not red
+			awk -v s="${side[$id]}" 'NF < 5 || $3 == 126 || $3 == 127 { print s, $2, "lost", 0, 0; next } { print s, $2, $3, $4, $5 }' <<< "$got" | grep .
 			for f in ${flags[$id]//,/ }; do grep -q "^GS $f " <<< "$got" || echo "${side[$id]} $f lost 0 0"; done
 			left=${left/ $id / }
 		done < <(printf '%s\n' $left | xargs -P 8 -n1 timeout 120 jobq result 2>/dev/null | grep " rc=")
@@ -141,6 +142,20 @@ if [ -n "$SUSPECT" ]; then
 		awk -v s=$side 'NR == FNR { if ($1 == s) redone[$2] = 1; next } !($1 in redone)' "$OUT/round2.txt" "$f" > "$f.new"
 		awk -v s=$side '$1 == s {print $2, $3, $4, $5}' "$OUT/round2.txt" >> "$f.new"; mv "$f.new" "$f"
 	done
+	# 5. a flag still lost (a worker that could not run it) gets one more try; this changes no red/green that did run
+	STILL=$({ lost "$OUT/cand.txt"; lost "$OUT/main.txt"; } | sort -u | grep .)
+	if [ -n "$STILL" ]; then
+		N2=$(wc -l < "$OUT/jobs.tsv")
+		lost "$OUT/cand.txt" | PAR=${GS_PAR2:-2} submit c "$CT"
+		lost "$OUT/main.txt" | PAR=${GS_PAR2:-2} submit m "$MT"
+		tail -n +"$((N2 + 1))" "$OUT/jobs.tsv" > "$OUT/jobs3.tsv"
+		collect "$OUT/jobs3.tsv" > "$OUT/round3.txt"
+		for side in c m; do
+			f=$OUT/$([ $side = c ] && echo cand || echo main).txt
+			awk -v s=$side 'NR == FNR { if ($1 == s && $3 != "lost") redone[$2] = 1; next } !($1 in redone)' "$OUT/round3.txt" "$f" > "$f.new"
+			awk -v s=$side '$1 == s && $3 != "lost" {print $2, $3, $4, $5}' "$OUT/round3.txt" >> "$f.new"; mv "$f.new" "$f"
+		done
+	fi
 fi
 # red on main only excuses a candidate red when main really ran it (a flag lost on main says nothing); still lost on the candidate is never a pass
 NEW_RED=$({ comm -23 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")); lost "$OUT/cand.txt"; } | sort -u | grep .)
