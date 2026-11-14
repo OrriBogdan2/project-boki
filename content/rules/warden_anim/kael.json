@@ -58,6 +58,7 @@
 	"kmoves": {
 		"jug_slash_r": {
 			"clip": "slash_r",
+			"upper": "moving",
 			"fade_out": 0.4
 		},
 		"jug_slash_l": {
@@ -108,10 +109,12 @@
 		},
 		"jug_chain": {
 			"clip": "chain",
+			"upper": "moving",
 			"fade_out": 0.4
 		},
 		"jug_reel": {
 			"clip": "reel",
+			"fade": 0.2,
 			"hold_from": 0.25,
 			"heading": true,
 			"fade_out": 0.4
