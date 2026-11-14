@@ -54,7 +54,7 @@ void vertex() {
 		vec2 qq = q;
 		if (look == 4 || look == 5) { qq.x *= cos(age * 14.0 + pick * 9.0); }   // flipping over as it tumbles
 		if (look == 4) { qq.y *= 1.4; }
-		if (look == 8) { qq *= vec2(0.3, 1.7 * abs(cos(age * 11.0 + pick * 7.0))); }   // end over end
+		if (look == 9) { qq *= vec2(0.3, 1.7 * abs(cos(age * 11.0 + pick * 7.0))); }   // end over end
 		vec2 off = vec2(qq.x * ca - qq.y * sa, qq.x * sa + qq.y * ca) * grow;
 		world = center + right * off.x + up * off.y;
 	}
