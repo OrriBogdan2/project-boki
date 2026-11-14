@@ -22,6 +22,7 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
+##  12. every hit class (HitClass) names a sound of the "targets" set that exists and fits under a weapon hit
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -57,6 +58,7 @@ func run(main: Node) -> void:
 	_build_cues()
 	_strip_chime()
 	_boki_cues()
+	_hit_targets()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -239,6 +241,20 @@ func _nuke_fall() -> void:
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
 	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
 	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
+## 7. Each target class has its own short layer (Juice plays HitClass.SOUND[class] under the weapon's hit).
+func _hit_targets() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/targets.json"))
+	var sounds: Dictionary = set_d.get("sounds", {}) if set_d is Dictionary else {}
+	var names := HitClass.SOUND.values()
+	var missing := names.filter(func(n): return not sounds.has(n) or not Sfx.ensure(n))
+	var all := names.size() == HitClass.WALL + 1 and missing.is_empty()
+	ok(all, "hit targets: all %d classes have a sound (missing %s)" % [names.size(), missing])
+	var long := []
+	for n in names:
+		for t in _takes(n):
+			if _data(t).size() / 2 > 0.25 * 44100:
+				long.append(t.get_file())
+	ok(long.is_empty(), "hit targets: every take is under 0.25 s, a layer not a hit (long: %s)" % [long])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

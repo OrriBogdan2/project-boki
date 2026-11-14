@@ -245,6 +245,8 @@ const CHECKS := {
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
+	"--hit-class-check": ["res://tools/hit_class_check.gd", "hit_class_check", null],      # hit looks by target
+	"--hit-class-shots": ["res://tools/hit_class_shots.gd", "hit_class_shots", null],      # --shots-dir=<dir>, needs a renderer
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
 	"--drop-clean-check": ["res://tools/drop_clean_check.gd", "drop_clean_check", null],

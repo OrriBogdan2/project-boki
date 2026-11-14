@@ -1,0 +1,9 @@
+{
+ "group": "targets",
+ "name": "Hit targets",
+ "script": "tools/gen_sfx_targets.py",
+ "sounds": {
+  "hit_armour": "impact", "hit_body": "impact", "hit_boki": "boki", "hit_monster": "impact", "hit_wall": "impact"
+ },
+ "signature": []
+}

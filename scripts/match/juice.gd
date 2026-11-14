@@ -13,6 +13,7 @@ extends RefCounted
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
 const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
+const TARGET_DB := -9.0                 # dB: the target layer sits quietly under the weapon's own hit sound
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
 const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
@@ -51,8 +52,8 @@ static func _credit(by: Ent) -> Ent:
 		return (by as Kin).owner_h
 	return by
 
-## Every hit that lands (Match.on_damage): an impact flash at the point it struck, sparks out the
-## far side, more of everything the harder it hit; crits flash gold, armor sheds blue shards. Hits
+## Every hit that lands (Match.on_damage): the look for what it struck (HitClass: armour chips, a body
+## flash, a Boki puff, monster sparks), more of it the harder it hit; crits flash gold. Hits
 ## that involve you are full size, other fights nearby are smaller, far ones draw nothing.
 static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: bool, armor: bool) -> void:
 	if m == null or m.fx == null or target == null:
@@ -76,23 +77,32 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var col := flash_col(target, p)
 	var ability := o.has("ab") and src != "kin"
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
-	m.fx.impact(at, dir, col, power, crit, armor)
+	var cls := HitClass.of(target, armor)
+	HitClass.draw(m.fx, cls, at, dir, HitClass.tint(target, cls, col), power, crit)
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	# sound layers on top of the hit tick Match plays: armor rings, heavy hits thud, blades bite
+	# sound layers on top of the hit tick Match plays: the target answers, heavy hits thud, blades bite
 	if credit == p and target != p:
 		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
 		if melee:
 			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0)
-		if armor:
-			m.sfx("armor_hit", target.pos, -9.0)
+		m.sfx(HitClass.SOUND[HitClass.of(target, armor)], target.pos, TARGET_DB)
 		if d >= 28.0 and not melee:
 			m.sfx("hit_heavy", target.pos, -7.0)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
+
+## A shot stopped by a wall or terrain (Match._shot_end): a puff of dust where it struck, and the
+## dull thud of it if you fired.
+static func wall(m: Match, at: Vector3, by: Ent) -> void:
+	var p: Hunter = m.player
+	if m.fx != null and (p == null or p.pos.distance_to(at) <= FAR):
+		HitClass.draw(m.fx, HitClass.WALL, at, Vector3.UP, Color.WHITE, 1.0, false)
+	if _credit(by) == p:
+		m.sfx(HitClass.SOUND[HitClass.WALL], at, TARGET_DB)
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
