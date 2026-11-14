@@ -8,7 +8,6 @@ extends RefCounted
 ## reports the bus volumes it ends up with), one from before the perceptual curve (audio_v 2) sounding as it
 ## did, and an unfocused window is muted only when asked to. The player's own settings.cfg is put back.
 
-const BUSES := {"master": "Master", "music": "Music", "sfx": "SFX", "ambience": "Ambience"}
 const PROBE := "--audio-boot-probe"
 const SAVED := {"master": 0.3, "music": 0.4, "sfx": 0.5, "ambience": 0.6}
 const TOL := 0.05      # dB
@@ -57,25 +56,25 @@ func _db(bus: String) -> float:
 	return AudioServer.get_bus_volume_db(AudioServer.get_bus_index(bus))
 
 func _sliders(where: String) -> void:
-	for key in BUSES:
+	for key in Settings.BUSES:
 		for lin in [0.25, 1.0, 0.5]:
 			Settings.set_v(key, lin, false)
 			var want := Sfx.slider_db(lin)
-			var got := _db(BUSES[key])
-			var what := "%s: %s slider %.2f -> %s bus" % [where, key, lin, BUSES[key]]
+			var got := _db(Settings.BUSES[key])
+			var what := "%s: %s slider %.2f -> %s bus" % [where, key, lin, Settings.BUSES[key]]
 			ok(absf(got - want) < TOL, "%s %.1f dB (want %.1f)" % [what, got, want])
-			for b in Sfx.SLIDER_ALSO.get(BUSES[key], []):
-				ok(absf(_db(b) - want) < TOL, "%s: %s slider %.2f -> %s bus too %.1f dB" % [where, key, lin, b, _db(b)])
 	# the same through the Settings > Audio page's own sliders (the order they are listed in)
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
 	var sliders := Overlay.find_children("*", "HSlider", true, false)
 	ok(sliders.size() >= 4, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
-	for i in mini(4, sliders.size()):
-		var key: String = BUSES.keys()[i]
+	# the page lists one slider per Settings.BUSES entry, in that order (Voices and UI sit between the others)
+	for i in mini(Settings.BUSES.size(), sliders.size()):
+		var key: String = Settings.BUSES.keys()[i]
+		var bus: String = Settings.Settings.BUSES[key]
 		(sliders[i] as HSlider).value = 0.35
-		var moved := absf(_db(BUSES[key]) - Sfx.slider_db(0.35)) < TOL
-		ok(moved, "%s: dragging the %s slider moves the %s bus (%.1f dB)" % [where, key, BUSES[key], _db(BUSES[key])])
+		var moved := absf(_db(bus) - Sfx.slider_db(0.35)) < TOL
+		ok(moved, "%s: dragging the %s slider moves the %s bus (%.1f dB)" % [where, key, bus, _db(bus)])
 	await _mouse_drag(where, sliders)
 	Overlay.close()
 	# every other bus still sends where it should (Music/SFX/Ambience -> Master), so a slider reaches the speakers
@@ -97,16 +96,13 @@ func _routes(where: String) -> void:
 	ok(count > 0 and off.is_empty(), "%s: all %d players are on a slider's bus %s" % [where, count, off])
 
 ## True if a bus is levelled by Music, Sound effects or Ambience: it is one of them, sends into one of them
-## (SFXFar, Voice, Boki -> SFX), or one of them sets it as well (Sfx.SLIDER_ALSO: UI). Master alone is not.
+## (SFXFar, Boki -> SFX), or has its own slider (Settings.BUSES: Voice, UI). Master alone is not.
 func _on_slider(bus: String) -> bool:
 	for hop in 8:
 		if AudioServer.get_bus_index(bus) < 1:
 			return false
-		if bus in ["Music", "SFX", "Ambience"]:
+		if bus != "Master" and bus in Settings.BUSES.values():
 			return true
-		for s in Sfx.SLIDER_ALSO:
-			if bus in Sfx.SLIDER_ALSO[s]:
-				return true
 		bus = String(AudioServer.get_bus_send(AudioServer.get_bus_index(bus)))
 	return false
 
@@ -119,12 +115,12 @@ func _heard() -> void:
 	var wav := Synth.to_wav(tone, -18.0)
 	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	wav.loop_end = Synth.RATE
-	for key in BUSES:
+	for key in Settings.BUSES:
 		var p := AudioStreamPlayer.new()
 		p.stream = wav
-		p.bus = "Music" if key == "master" else BUSES[key]
+		p.bus = "Music" if key == "master" else Settings.BUSES[key]
 		main.add_child(p)
-		for k in BUSES:
+		for k in Settings.BUSES:
 			Settings.set_v(k, 1.0, false)
 		var silent := main.get_tree().root.find_children("*", "AudioStreamPlayer", true, false).filter(
 			func(q): return q.playing and not q.stream_paused)
@@ -141,7 +137,7 @@ func _heard() -> void:
 			q.stream_paused = false
 		var what := "heard: %s slider 1 / 0.5 / 0 -> Master peak %.1f / %.1f / %.1f dB" % [key, full, half, off]
 		ok(full > -40.0 and absf(full - half - 12.0) < 2.5 and off < -70.0, what)
-	for k in BUSES:
+	for k in Settings.BUSES:
 		Settings.set_v(k, 1.0, false)
 
 ## The Master bus's loudest moment over 0.3 s, after 0.25 s for the mixer to take a change.
@@ -158,12 +154,12 @@ func _peak() -> float:
 ## Nothing writes a bus back later: with the screen running for a few seconds (music and ambience fading in)
 ## the levels the sliders set are still the ones on the buses.
 func _stays(where: String) -> void:
-	for key in BUSES:
+	for key in Settings.BUSES:
 		Settings.set_v(key, 0.2, false)
 	await main.get_tree().create_timer(3.0).timeout
-	for key in BUSES:
-		var still := absf(_db(BUSES[key]) - Sfx.slider_db(0.2)) < TOL
-		ok(still, "%s: after a few seconds %s is still at %.1f dB" % [where, BUSES[key], _db(BUSES[key])])
+	for key in Settings.BUSES:
+		var still := absf(_db(Settings.BUSES[key]) - Sfx.slider_db(0.2)) < TOL
+		ok(still, "%s: after a few seconds %s is still at %.1f dB" % [where, Settings.BUSES[key], _db(Settings.BUSES[key])])
 
 ## A real mouse press on the Music slider's track (not a script write), as a player does it.
 func _mouse_drag(where: String, sliders: Array) -> void:
@@ -210,11 +206,11 @@ func _boot_with_saved_cfg(current: bool) -> void:
 	var code := OS.execute(OS.get_executable_path(), args, out, true)
 	var text := "".join(out)
 	ok(code == 0, "boot probe ran (exit %d)" % code)
-	for key in BUSES:
+	for key in Settings.BUSES:
 		var want := Sfx.slider_db(SAVED[key]) if current else linear_to_db(SAVED[key])
-		var got := _parse(text, BUSES[key])
+		var got := _parse(text, Settings.BUSES[key])
 		var kind := "saved" if current else "pre-curve"
-		var what := "%s cfg: %s=%.1f boots with %s bus" % [kind, key, SAVED[key], BUSES[key]]
+		var what := "%s cfg: %s=%.1f boots with %s bus" % [kind, key, SAVED[key], Settings.BUSES[key]]
 		ok(absf(got - want) < TOL, "%s %.1f dB (want %.1f)" % [what, got, want])
 
 func _put_back(keep: String) -> void:
@@ -234,6 +230,6 @@ func _parse(text: String, bus: String) -> float:
 func _probe() -> void:
 	for f in 20:
 		await main.get_tree().process_frame
-	for b in BUSES.values():
+	for b in Settings.BUSES.values():
 		print("AUDIOBOOT %s %.3f" % [b, _db(b)])
 	main.get_tree().quit()

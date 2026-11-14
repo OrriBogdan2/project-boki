@@ -3466,12 +3466,14 @@ func _send_chat() -> void:
 var exp_cls := ""
 var exp_tier := 0
 var exp_seed := 0          # the next expedition's seed, rolled when the panel opens: its raid condition shows as a forecast
+var raid_squad := 0        # Heart Raid: the squad size picked in HeartRaidPick (0: an Expedition)
 
 func _weapon() -> String:
 	return Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", "")))
 
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
+	raid_squad = 0
 	if ClassUnlock.needs_starters():
 		FirstRelic.offer(self, _open_expedition)      # (the garden path's first Relic waits for the portal)
 		return
@@ -3554,6 +3556,7 @@ func _open_expedition() -> void:
 	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+	fl.add_child(UI.ghost("Heart Raid (prototype)", func(): HeartRaidPick.open(self), 0, "heart"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 
@@ -3617,6 +3620,8 @@ func _start_match() -> void:
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
 	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
 	o["total"] = Data.MATCH_PLAYERS
+	if raid_squad > 0:
+		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
@@ -4357,6 +4362,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var nm: String = rec["name"]
 	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
 		if res["look"]: _swap_kin_model(k)
+		if res["ok"]: GardenSfx.item(self, k["pos"], res["id"])
 		item_fx.play(k, res)
 		BowlSfx.taste(rec, k["pos"], res)
 		_toast(res["text"])
