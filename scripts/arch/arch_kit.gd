@@ -290,7 +290,7 @@ func no_glide() -> bool: return false
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
+	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
