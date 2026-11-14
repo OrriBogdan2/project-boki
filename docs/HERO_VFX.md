@@ -127,3 +127,10 @@ at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.
 `s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
 the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
 exactly that size and measures its own look, the core and the rim in pixels across the flight line.
+## Ultimate ready glow
+`UltGlow` (scripts/match/ult_glow.gd): a Hunter whose ultimate (X) is unlocked and off cooldown carries a quiet rim glow in
+their archetype colour (`Arch.color`), visible to everyone; on the cast it flashes to full and fades in ~0.3 s, on top of the
+existing cast cue. One shader value, `hero_toon.gdshader`'s `ult_glow` (+ `ult_color` set with it), written to the body's
+materials only when it changes. The ready state rides the "st" hunter flags (`UltGlow.READY_BIT`, bit 19; older clients ignore
+it); the flash on other clients is the flag dropping. Not shown while downed, out or merged. `--ult-glow-check`; stills with
+`--ult-glow-shots --shots-dir=<dir>`.
