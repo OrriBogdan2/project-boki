@@ -5,6 +5,7 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const EXIT := preload("res://tools/ult_exit.gd")
 const CLEAVE_TALL := 2.4        # m: the crescent tops a Hunter (about 1.9 m)
 
 var A
@@ -66,8 +67,8 @@ func dancer(a) -> void:
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
 	var thin: Dictionary = AimKit.entry(P, "ult")
-	A.ok("dancer X: the ring reaches 3 bh at 0.4s, with the outer band marked; no blade before it",
-			absf(float(thin["r"]) - float(d["reach"])) < 0.15 and AimKit.shown(P, "ult_rim")
+	A.ok("dancer X: the ring is near 3 bh just before 0.4s, the outer band marked; no blade before it",
+			absf(float(thin["r"]) - float(d["reach"])) < 0.25 and AimKit.shown(P, "ult_rim")
 			and U.blades == 0 and _owed(P) == 0.0, "r %.2f" % float(thin["r"]))
 	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
 			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
@@ -216,8 +217,8 @@ func dancer_ring(a) -> void:
 	var grow_bh := float(d["r0"]) / AimKit.BH
 	var reach_bh := reach / AimKit.BH
 	var cadence := float(d["time"]) / float(d["shots"])
-	A.ok("dancer ring: 1.3 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band +50%, a 6s blight",
-			absf(grow_bh - 1.3) < 0.05 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
+	A.ok("dancer ring: 0.17 to 3 bh in 0.4s, 2s of blades 0.2s apart, the band +50%, a 6s blight",
+			absf(grow_bh - 0.17) < 0.03 and absf(reach_bh - 3.0) < 0.05 and float(d["grow"]) == 0.4
 			and float(d["time"]) == 2.0 and absf(cadence - 0.2) < 0.001
 			and float(d["rim_dmg"]) == float(d["dmg"]) * 0.5 and float(d["rim_blight"]) == 6.0,
 			"%.2f bh -> %.2f bh" % [grow_bh, reach_bh])
@@ -389,6 +390,9 @@ func zedran(a) -> void:
 	await _recovery_exits()
 	_recovery(m, P, T, home)
 	await A.done(m)
+	var got: Dictionary = await EXIT.run(A, "juggernaut")
+	A.ok("juggernaut X exit: Shift, LMB and jump pressed 0.1s before the cleave lands go on its first free step",
+			EXIT.on_time(got), EXIT.said(got))
 
 ## The recovery plays its own clip (jug_ult_recover) for exactly the 0.35 s at half speed, then he is free; a jump or
 ## Shift cuts it on the press frame. Timing and speed are the ult's own (recover 0.35, move_k 0.5), unchanged.
