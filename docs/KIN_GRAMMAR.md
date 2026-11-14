@@ -323,7 +323,7 @@ you separate), or when the shell breaks; then a short cooldown before it can go 
 **With archetypes (docs/ARCHETYPES.md §5, option C, built):** R is the archetype's ultimate. When the
 bond meter is full the next R is *Bonded*: the ult casts with its own tell, its kin sockets run at
 the bonded budget (x1.3, `KinParts.MERGED_SCALE`), and 0.2 s later `KinMerge.cast` starts the merge
-as above (one T5 hitstop for the caster, a column tell and BONDED on the R slot while the bond is
+as above (one T5 hitstop for the caster, a column tell and the bonded rim on the R slot while the bond is
 full). The bond is spent and the ult goes on its own cooldown. While merged, every archetype socket
 the kin fills runs at x1.3 (`ArchKit.budget_k`) and the merge's shot riders, passives and pulses run
 as before; the `merged` patch on `active` now applies to the kin's own ability on C (the kin still
