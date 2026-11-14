@@ -1,7 +1,8 @@
 class_name GardenSeasons
 extends RefCounted
 ## Garden seasons (content/rules/garden_seasons.json, GARDEN_MODERN.md 5 rank 9). Every couple of weeks one zone
-## is in season, on the weekly-event clock (BaseRace.week_now). Its game plays the season twist and that game's Crown adds the season keepsake. Lazy state: rec.keepsakes
+## is in season, on the weekly-event clock (BaseRace.week_now). Its game plays the season twist and that game's Crown
+## adds the season keepsake. Lazy state: rec.keepsakes
 ## ({keepsake id: season number it was won in}), no migration.
 
 static func rules() -> Dictionary:
