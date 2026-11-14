@@ -11,12 +11,16 @@ const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "
 const CONFINED := Input.MOUSE_MODE_CONFINED_HIDDEN
 const SHOWN := Input.MOUSE_MODE_VISIBLE
 
+
 func ok(cond: bool, what: String) -> void:
 	print("CURSOR %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _is(want: int, what: String) -> void:
 	ok(CursorMode.current == want, "%s: mode %d (want %d)" % [what, CursorMode.current, want])
+
 
 func _start(main: Node, extra: Dictionary) -> Match:
 	var o: Dictionary = OPTS.duplicate()
@@ -27,6 +31,7 @@ func _start(main: Node, extra: Dictionary) -> Match:
 	m.set_process(false)
 	await main.get_tree().process_frame
 	return m
+
 
 func run(main: Node) -> void:
 	var tree := main.get_tree()
@@ -53,7 +58,7 @@ func run(main: Node) -> void:
 	PracticeHero.close(pr)
 	_is(CONFINED, "Training Area, picker closed")
 	var was: Node = main.get("current")
-	main.set("current", m)         # (the Esc menu finds the match through the current screen)
+	main.set("current", m)  # (the Esc menu finds the match through the current screen)
 	Overlay.open_pause("match")
 	_is(SHOWN, "Training Area, pause menu")
 	Overlay.open_settings()

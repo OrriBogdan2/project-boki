@@ -6,41 +6,56 @@ extends RefCounted
 ## Cheap by design: every pedestal shares one mesh and a few materials, a label only shows when you are close,
 ## and nothing here runs per-pedestal physics.
 
-const ACT_R := 1.5            # [m] how close you stand to use a pedestal
-const SHOW_R := 6.5           # [m] a pedestal's name is drawn inside this
-const PED_GLOW := 0.3          # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
-const FALL_Y := -12.0         # [m] below this you fell off the map: back to the start (the abyss kills at -17)
+const ACT_R := 1.5  # [m] how close you stand to use a pedestal
+const SHOW_R := 6.5  # [m] a pedestal's name is drawn inside this
+const PED_GLOW := 0.3  # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
+const FALL_Y := -12.0  # [m] below this you fell off the map: back to the start (the abyss kills at -17)
 const KIND_COL := {
-	"arch": "ffb454", "kin": "8fe3c8", "gear": "c9a0ff", "item": "ff8a7a", "bot": "ff6a6a", "clear": "9aa0b4",
-	"duel": "ffb0a0"}
+	"arch": "ffb454",
+	"kin": "8fe3c8",
+	"gear": "c9a0ff",
+	"item": "ff8a7a",
+	"bot": "ff6a6a",
+	"clear": "9aa0b4",
+	"duel": "ffb0a0"
+}
 
 static var _ped_mesh: CylinderMesh = null
 static var _mats := {}
 
 var a: Arena
 var m: Match
-var stations: Array = []       # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
+var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
 var near_i := -1
-var _belt_turn := 0            # which belt slot a full belt gives up next
 var prompt: Label = null
+var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
+
 
 ## The map's "grounds" block ({} when this isn't the Training Grounds).
 static func data() -> Dictionary:
 	return World.load_layout("arena").get("grounds", {})
 
+
 static func v3(p: Array, y := 0.0) -> Vector3:
 	return Vector3(float(p[0]), y, float(p[1]))
+
 
 ## The ids a station kind offers, in pedestal order.
 static func ids_for(kind: String) -> Array:
 	match kind:
-		"arch": return Arch.ids()
-		"kin": return KinLib.kin_ids()
-		"gear": return _gear_ids()
-		"item": return UtilityBelt.stock_ids()
-		"bot": return Arch.ids() + ["clear"]
+		"arch":
+			return Arch.ids()
+		"kin":
+			return KinLib.kin_ids()
+		"gear":
+			return _gear_ids()
+		"item":
+			return UtilityBelt.stock_ids()
+		"bot":
+			return Arch.ids() + ["clear"]
 	return []
+
 
 ## Gloves first (actives, then passives), then armor, then boots.
 static func _gear_ids() -> Array:
@@ -49,25 +64,36 @@ static func _gear_ids() -> Array:
 		out.append_array(Gear.ids_for(slot))
 	return out
 
+
 static func name_of(kind: String, id: String) -> String:
 	match kind:
-		"arch": return Arch.name_of(id)
-		"kin": return String(Data.KIN.get(id, {}).get("name", id))
-		"gear": return String(Gear.ALL.get(id, {}).get("name", id))
-		"item": return UtilityBelt.name_of(id)
-		"bot": return "Clear bots" if id == "clear" else "Bot: " + Arch.name_of(id)
+		"arch":
+			return Arch.name_of(id)
+		"kin":
+			return String(Data.KIN.get(id, {}).get("name", id))
+		"gear":
+			return String(Gear.ALL.get(id, {}).get("name", id))
+		"item":
+			return UtilityBelt.name_of(id)
+		"bot":
+			return "Clear bots" if id == "clear" else "Bot: " + Arch.name_of(id)
 	return id
+
 
 static func color_of(kind: String, id: String) -> Color:
 	match kind:
 		"arch", "bot":
-			if id != "clear": return Arch.color(id)
-		"item": return UtilityBelt.col_of(id)
+			if id != "clear":
+				return Arch.color(id)
+		"item":
+			return UtilityBelt.col_of(id)
 	return Color(String(KIND_COL.get(kind if id != "clear" else "clear", "ffffff")))
+
 
 func _init(arena: Arena) -> void:
 	a = arena
 	m = arena.m
+
 
 func build() -> void:
 	var g := data()
@@ -92,6 +118,7 @@ func build() -> void:
 	_layer.add_child(prompt)
 	m.add_child(_layer)
 
+
 ## One ring of pedestals round a perch's middle, one per id of the kind.
 func _ring(kind: String, c: Vector3, r: float) -> void:
 	var ids := ids_for(kind)
@@ -101,6 +128,7 @@ func _ring(kind: String, c: Vector3, r: float) -> void:
 		var p := c + Vector3(cos(ang), 0, sin(ang)) * r
 		p.y = m.world.ground_at(p.x, p.z)
 		_pedestal(kind, String(ids[i]), p, c)
+
 
 func _mat(col: Color) -> StandardMaterial3D:
 	var key := col.to_html()
@@ -112,6 +140,7 @@ func _mat(col: Color) -> StandardMaterial3D:
 		sm.emission_energy_multiplier = PED_GLOW
 		_mats[key] = sm
 	return _mats[key]
+
 
 func _pedestal(kind: String, id: String, p: Vector3, c: Vector3) -> void:
 	if _ped_mesh == null:
@@ -134,6 +163,7 @@ func _pedestal(kind: String, id: String, p: Vector3, c: Vector3) -> void:
 	m.add_child(lb)
 	stations.append({"kind": kind, "id": id, "at": p, "c": c, "label": lb})
 
+
 static func label(text: String, col: Color, scale_k := 1.0) -> Label3D:
 	var lb := Label3D.new()
 	lb.text = text
@@ -148,6 +178,7 @@ static func label(text: String, col: Color, scale_k := 1.0) -> Label3D:
 	lb.outline_render_priority = 99
 	return lb
 
+
 ## The duel ring: the old training pad, inside a walled ring east of the Training Room.
 func _duel(at: Vector3) -> void:
 	at.y = m.world.ground_at(at.x, at.z)
@@ -159,23 +190,25 @@ func _duel(at: Vector3) -> void:
 	m.add_child(lb)
 	m.duel_pad = at
 
+
 ## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home.
 func tick() -> void:
-	var P: Hunter = m.player
-	if P == null or prompt == null:
+	var p: Hunter = m.player
+	if p == null or prompt == null:
 		return
-	if P.pos.y < FALL_Y and not P.downed:
-		P.teleport(a.home)
-		P.vel = Vector3.ZERO
-		if m.hud: m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
+	if p.pos.y < FALL_Y and not p.downed:
+		p.teleport(a.home)
+		p.vel = Vector3.ZERO
+		if m.hud:
+			m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
 	var best := -1
 	var bd := ACT_R
 	for i in stations.size():
 		var s: Dictionary = stations[i]
 		var at: Vector3 = s["at"]
-		var d := P.flat_dist(at)
-		var near := d < SHOW_R and absf(P.pos.y - at.y) < 4.0
+		var d := p.flat_dist(at)
+		var near := d < SHOW_R and absf(p.pos.y - at.y) < 4.0
 		var lb: Label3D = s["label"]
 		if lb.visible != near:
 			lb.visible = near
@@ -189,39 +222,48 @@ func tick() -> void:
 			var sd: Dictionary = stations[best]
 			prompt.text = "%s   ·   %s" % [name_of(String(sd["kind"]), String(sd["id"])), Settings.key_cap("interact")]
 			prompt.add_theme_color_override("font_color", color_of(String(sd["kind"]), String(sd["id"])).lightened(0.3))
-	if best >= 0 and Input.is_action_just_pressed("interact") and not m.paused and not P.downed:
+	if best >= 0 and Input.is_action_just_pressed("interact") and not m.paused and not p.downed:
 		use(best)
+
 
 ## Try a pedestal's thing.
 func use(i: int) -> void:
 	var s: Dictionary = stations[i]
 	var id := String(s["id"])
 	match String(s["kind"]):
-		"arch": a.set_arch(id)
-		"kin": a.set_kin(id)
-		"gear": _wear(id)
-		"item": _stock(id)
-		"bot": _spawn(id, s["c"])
+		"arch":
+			a.set_arch(id)
+		"kin":
+			a.set_kin(id)
+		"gear":
+			_wear(id)
+		"item":
+			_stock(id)
+		"bot":
+			_spawn(id, s["c"])
 	m.fx.ring(s["at"], 1.2, color_of(String(s["kind"]), id), 0.3)
+
 
 ## Fill this item's stack. The belt has four slots: when they are all taken, the next one in turn is emptied.
 func _stock(id: String) -> void:
-	var P: Hunter = m.player
-	if UtilityBelt.room_for(P, id) <= 0 and UtilityBelt.count(P, id) <= 0:
-		P.belt[_belt_turn % UtilityBelt.SLOTS] = {}
+	var p: Hunter = m.player
+	if UtilityBelt.room_for(p, id) <= 0 and UtilityBelt.count(p, id) <= 0:
+		p.belt[_belt_turn % UtilityBelt.SLOTS] = {}
 		_belt_turn += 1
-	UtilityBelt.grant(P, id, UtilityBelt.room_for(P, id))
+	UtilityBelt.grant(p, id, UtilityBelt.room_for(p, id))
+
 
 ## Gloves go where Gloves.slot_for puts them; armor and boots in their own slot (Rare).
 func _wear(id: String) -> void:
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	if Gear.is_glove(id):
 		a.give_glove(id)
 		return
 	var slot := Gear.slot_of(id)
-	P.gear[slot] = {"id": id, "rar": 2}
-	P.refresh_gear()
-	P.armor = P.max_armor
+	p.gear[slot] = {"id": id, "rar": 2}
+	p.refresh_gear()
+	p.armor = p.max_armor
+
 
 ## A sparring bot of this Hunter, in the middle of the perch you are on ("clear": none).
 func _spawn(id: String, c: Vector3) -> void:

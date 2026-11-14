@@ -4,17 +4,18 @@ extends RefCounted
 ## along the long dash lanes, so a dash or glide can be measured, and a scatter of pebbles on the open field
 ## for a sense of speed. Each is one MultiMesh with one shared material, no collision, no shadows.
 
-const TICK_EVERY := 5.0         # [m] a small tick
-const LABEL_EVERY := 25.0       # [m] a big tick with a distance label
-const TICK_LEN := 6.4           # [m] across the lane (a lane is 7 m wide)
-const TICK_SMALL := 0.18        # [m] a small tick's thickness
-const TICK_BIG := 0.4           # [m] a big tick's thickness
-const LIFT := 0.04              # [m] above the ground, so the tick doesn't z-fight it
-const PEBBLE_R := 0.22          # [m]
-const PEBBLE_FLAT := 0.5        # a pebble's height as a share of its width
+const TICK_EVERY := 5.0  # [m] a small tick
+const LABEL_EVERY := 25.0  # [m] a big tick with a distance label
+const TICK_LEN := 6.4  # [m] across the lane (a lane is 7 m wide)
+const TICK_SMALL := 0.18  # [m] a small tick's thickness
+const TICK_BIG := 0.4  # [m] a big tick's thickness
+const LIFT := 0.04  # [m] above the ground, so the tick doesn't z-fight it
+const PEBBLE_R := 0.22  # [m]
+const PEBBLE_FLAT := 0.5  # a pebble's height as a share of its width
 
 static var _tick_mat: StandardMaterial3D = null
 static var _pebble_mat: StandardMaterial3D = null
+
 
 ## Adds the ticks and the pebbles of this "grounds" block to the match.
 static func build(m: Match, g: Dictionary) -> void:
@@ -28,6 +29,7 @@ static func build(m: Match, g: Dictionary) -> void:
 	if not sc.is_empty():
 		_pebbles(m, sc["rect"], int(sc["n"]))
 
+
 static func _tick_material() -> StandardMaterial3D:
 	if _tick_mat == null:
 		_tick_mat = StandardMaterial3D.new()
@@ -36,10 +38,12 @@ static func _tick_material() -> StandardMaterial3D:
 		_tick_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	return _tick_mat
 
+
 static func _tick_mesh() -> BoxMesh:
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(TICK_LEN, 0.02, 1.0)
 	return mesh
+
 
 ## One tick every TICK_EVERY along a lane [x0, z0, x1, z1], across it; a label at each big one.
 static func _ticks(m: Match, lane: Array, xforms: Array, big: Array) -> void:
@@ -60,6 +64,7 @@ static func _ticks(m: Match, lane: Array, xforms: Array, big: Array) -> void:
 			lb.position = at + Vector3(0, 1.4, 0)
 			m.add_child(lb)
 
+
 static func _multimesh(m: Match, mesh: Mesh, mat: Material, xforms: Array, big: Array) -> void:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
@@ -74,6 +79,7 @@ static func _multimesh(m: Match, mesh: Mesh, mat: Material, xforms: Array, big: 
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(mi)
+
 
 ## n pebbles on the open ground inside `rect` [x0, z0, x1, z1] (level ground only, never on a cliff block).
 static func _pebbles(m: Match, rect: Array, n: int) -> void:
