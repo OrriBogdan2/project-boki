@@ -380,6 +380,7 @@ const CHECKS := {
 	# --shots-dir=<dir> --res=WxH
 	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
+	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--ping-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "ping"],
 	"--combo-mark-shots": ["res://tools/combo_mark_shots.gd", "combo_mark_shots", null],  # overhead combo tag strips
 	"--combo51-shots": ["res://tools/combo51_shots.gd", "combo51_shots", null],  # item 51 combo strips
