@@ -11,7 +11,7 @@
 		"fin_slap": {"name": "Fin Slap", "hunter": "gil", "foot": "l", "lift": 1.6, "knee": -0.5, "lean": -0.1, "arms": "up"},
 		"boot_heel": {"name": "Boot Heel", "hunter": "gunslinger", "lift": 1.3, "knee": -1.7, "lean": 0.28, "arms": "weapon",
 			"swing": {"top": -0.7, "hit": -1.15, "yaw": 0.1, "reach": 0.3}},
-		"arena_slam": {"name": "Arena Slam", "hunter": "juggernaut", "foot": "none", "crouch": 0.55, "lean": 0.4, "lean_up": 0.0,
+		"arena_slam": {"name": "Shackle Slam", "hunter": "juggernaut", "foot": "none", "crouch": 0.55, "lean": 0.4, "lean_up": 0.0,
 			"arms": "weapon", "swing": {"top": 1.3, "hit": -1.25, "yaw": -0.15, "reach": 0.28, "two": true}},
 		"spark_hop": {"name": "Spark Hop", "hunter": "mage", "foot": "l", "lift": 1.1, "hop": 0.18, "twist": -0.45, "arms": "up"},
 		"jester_jig": {"name": "Lid Slam", "hunter": "ostra", "foot": "none", "hop": 0.45, "crouch": 0.2, "lean": 0.25, "lean_up": -0.1, "arms": "cast"},

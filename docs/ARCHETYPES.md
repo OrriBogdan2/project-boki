@@ -1260,7 +1260,7 @@ Each hero's height and breadth against the source hero's footage sheet (`briefs/
 | ostra | Void (ostra) | 1.0 with hover / 1.0 | 1.18 | 0.412 | 0.412 | within 0.012; model 1.18 is owner's "bigger, menacing" (size 0.9, Nov 4) |
 | mage | Joule (vireo) | 0.96 / 1.15 (shoulders) | 1.04 | 0.400 | 0.400 | model 8% over: art follow-up (Ryzz) |
 | archer | Myth (pin) | 0.98 / 1.0 | 0.98 | 0.392 | 0.392 | matches |
-| dolm | Tetra (breah) | 0.97 / 1.2 (fists excluded) | 1.19 | 0.388 | **0.412** | model is lean and 1.19 tall vs short and blocky: art follow-up (Tarek) |
+| dolm | Tetra (breah) | 0.97 / 1.2 (fists excluded) | 1.19 | 0.388 | 0.388 (source 0.412) | held at 0.388: at 0.412 walking over his own rock (item 25, --dolm-combo-check) takes 0.60 s, bar 0.6; model is lean and 1.19 tall vs short and blocky: art follow-up (Tarek) |
 | thief | Shiv (dancer) | 0.96 / 0.9 | 0.95 | 0.384 | 0.384 | matches |
 | rimewright | Celeste (tamsin) | 1.15 / 0.5 | 1.08 | 0.380 | **0.362** | tall but half a medium wide; size 1.15 already matches (Neve) |
 | ashwick | Felix (linwick) | 0.90 / 1.0 (pack) | 1.02 | 0.376 | 0.376 | model 13% over: art follow-up (Cinder; flame excluded) |

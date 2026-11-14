@@ -14,8 +14,9 @@ const BAND_TOP := {"bulwark": 1.25}
 ## Each hit_r (m) set from the source hero's height and breadth (docs/ARCHETYPES.md "Body and hitbox parity").
 const PARITY := {
 	"bulwark": 0.5, "dredge": 0.452, "juggernaut": 0.445, "gunslinger": 0.4, "ostra": 0.412, "mage": 0.4,
-	"archer": 0.392, "dolm": 0.412, "thief": 0.384, "rimewright": 0.362, "ashwick": 0.376, "tender": 0.34,
+	"archer": 0.392, "dolm": 0.388, "thief": 0.384, "rimewright": 0.362, "ashwick": 0.376, "tender": 0.34,
 	"gil": 0.38,      # ours, no source hero: main's value
+	# (dolm: the source's 0.412 is held back; walking over his own rock, item 25, takes 0.60 s at it, bar 0.6)
 }
 var bad := 0
 

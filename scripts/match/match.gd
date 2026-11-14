@@ -2183,6 +2183,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		BokiChatter.say(self, player.kin, "kill")
 
 func on_kin_down(k: Kin) -> void:
+	if k.owner_h == player: print("KDOWNDBG t=%.2f void=%s lead=%s second=%s kpos=%s ppos=%s hp=%.1f st=%s last=%s" % [time, k.down_void, k == player.kin, k == player.kin2, k.pos, player.pos, k.hp, k.state, k.last_hit_by])
 	if k.owner_h == player:
 		add_feed("%s is down" % k.rec.get("name", "Your Boki"))
 		if hud:
