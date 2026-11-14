@@ -12,6 +12,8 @@ extends RefCounted
 ## waiting, shows a small "Press any key" pill after 1.5 s, and saves the same Boki. A pair's egg appearing in
 ## the Nesting Nook (NestReveal) gets one ring, one small sparkle in its type colour and one wobble.
 ## Never touches the real save.
+## Every moment here runs on tweens and timers, so its times are game time (the frame deltas summed): a slow,
+## loaded machine stretches the wall clock, not the beat. The real time is printed beside it.
 
 const MAX_FRAMES := 6000      # (a hang guard counted in frames, not seconds)
 var bad := 0
@@ -49,34 +51,40 @@ func run(m: Node) -> void:
 	var sp := "cindle"
 	var egg := EggHatch.new(sp, spy, 0.32, 0.42, 1.0, {"species": sp})
 	holder.add_child(egg)
-	var seen := {"t_pop": -1.0, "t_shell": -1.0, "t_done": -1.0, "ymin": 1e9, "ymax": -1e9, "popped": false, "done": false, "clock": 0.0, "face_err": 9.0, "looked_away": false}
+	var seen := {"sim": 0.0, "dt_max": 0.0, "t_pop": -1.0, "t_shell": -1.0, "t_done": -1.0,
+			"ymin": 1e9, "ymax": -1e9, "popped": false, "done": false, "face_err": 9.0, "looked_away": false}
 	egg.popped.connect(func(k: Node3D):
 		seen["popped"] = true
 		var want := EggHatch._yaw_to(k.global_position, cam.global_position)
 		seen["face_err"] = absf(wrapf(k.rotation.y - want, -PI, PI)))
 	egg.done.connect(func():
 		seen["done"] = true
-		seen["t_done"] = float(seen["clock"]))
+		seen["t_done"] = seen["sim"])
 	egg.start()
+	var t0 := Time.get_ticks_msec()
 	var frames := 0
 	while not seen["done"] and frames < MAX_FRAMES:
 		await tree.process_frame
-		frames += 1
-		seen["clock"] = float(seen["clock"]) + tree.root.get_process_delta_time()
+		var dt := main.get_process_delta_time()
 		if is_instance_valid(egg.kin_node):
-			if seen["t_pop"] < 0.0: seen["t_pop"] = float(seen["clock"])
+			if seen["t_pop"] < 0.0: seen["t_pop"] = seen["sim"]
+			else: seen["dt_max"] = maxf(float(seen["dt_max"]), dt)
 			seen["ymin"] = minf(float(seen["ymin"]), egg.kin_node.global_position.y)
 			seen["ymax"] = maxf(float(seen["ymax"]), egg.kin_node.global_position.y)
 			if seen["t_shell"] < 0.0 and egg.cap.scale.x < 0.02 and egg.cup.scale.x < 0.02:
-				seen["t_shell"] = float(seen["clock"])
+				seen["t_shell"] = seen["sim"]
 			if not seen["popped"]:
 				var want2 := EggHatch._yaw_to(egg.kin_node.global_position, cam.global_position)
 				if absf(wrapf(egg.kin_node.rotation.y - want2, -PI, PI)) > 0.8: seen["looked_away"] = true
-	ok(seen["done"], "the egg hatches all the way through (%.1f s)" % float(seen["clock"]))
+		seen["sim"] = float(seen["sim"]) + dt
+		frames += 1
+	var real_s := (Time.get_ticks_msec() - t0) / 1000.0
+	ok(seen["done"], "the egg hatches all the way through (%.1f s, %.1f s real)" % [seen["sim"], real_s])
 	var shell_s: float = float(seen["t_shell"]) - float(seen["t_pop"])
 	ok(seen["t_shell"] > 0.0 and shell_s < 1.0, "the shell is gone %.2f s after the pop (want under 1 s)" % shell_s)
-	var beat_s: float = (float(seen["t_done"]) - float(seen["t_pop"])) / 1000.0
-	ok(beat_s > 0.0 and beat_s < 2.5, "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s)" % beat_s)
+	var beat_s: float = float(seen["t_done"]) - float(seen["t_pop"])
+	var beat := "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s; longest frame %.0f ms)"
+	ok(beat_s > 0.0 and beat_s < 2.5, beat % [beat_s, float(seen["dt_max"]) * 1000.0])
 	ok(float(seen["ymax"]) - float(seen["ymin"]) > 0.15, "the Boki hops (%.2f m of height)" % (float(seen["ymax"]) - float(seen["ymin"])))
 	ok(seen["looked_away"], "it looks around before it finds you")
 	ok(seen["popped"] and float(seen["face_err"]) < 0.25, "then it looks right at you (off by %.2f rad)" % float(seen["face_err"]))
@@ -103,11 +111,10 @@ func run(m: Node) -> void:
 		var c := (n as ColorRect).color
 		if c.a > 0.7 and c.get_luminance() > 0.5: hot.append(n.name)
 	ok(hot.is_empty(), "nothing flashes white (%s)" % [hot])
-	frames = 0
-	while not rv.met and frames < MAX_FRAMES:
-		await tree.process_frame
-		frames += 1
-	ok(rv.met and not rv.name_btn.disabled, "after it looks at you, you can name it (%d frames)" % frames)
+	t0 = Time.get_ticks_msec()
+	var met_s: float = await _wait_for(tree, func(): return rv.met, 15.0)
+	real_s = (Time.get_ticks_msec() - t0) / 1000.0
+	ok(rv.met and not rv.name_btn.disabled, "after it looks at you, you can name it (%.1f s, %.1f s real)" % [met_s, real_s])
 	var face := wrapf(rv.kin.rotation.y + rv.turn.rotation.y - PI, -PI, PI)
 	ok(absf(face) < 0.2, "it faces you (off by %.2f rad)" % face)
 	ok(rv.sub_lbl.text.to_lower().contains("looking at you") and not rv.title_lbl.text.contains("!") and not rv.title_lbl.text.contains("RARE"),
@@ -120,10 +127,7 @@ func run(m: Node) -> void:
 	ok(labels.any(func(l): return (l as Label).text.contains("Its egg was guarded by")), "a rare one gets a line of provenance")
 	var waited := _end_state(rv)
 	rv._go()
-	frames = 0
-	while not named["go"] and frames < MAX_FRAMES:
-		await tree.process_frame
-		frames += 1
+	await _wait_for(tree, func(): return named["go"], 3.0)
 	ok(named["go"], "Name it hands over to naming")
 	await _skip_row(tree, waited)
 	await _first_mask(tree)
@@ -256,10 +260,7 @@ func _first_mask(tree: SceneTree) -> void:
 	var moment: MaskMoment = moments[0]
 	ok(Arch.of_save() == "gunslinger" and ClassUnlock.open_ids() == ["gunslinger"] and Save.d["roster"].size() == 1,
 		"your first Relic is Vex, with your new Boki (%s)" % Arch.of_save())
-	var frames := 0
-	while moment.phase != "wait" and frames < MAX_FRAMES:
-		await tree.process_frame
-		frames += 1
+	await _wait_for(tree, func(): return moment.phase == "wait", 10.0)
 	var head := (moment.you.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
 	ok(moment.phase == "wait" and moment.relic.global_position.distance_to(head) < 1.5,
 		"Vex's Relic drifts in from the crystal and waits by your face")
@@ -272,10 +273,7 @@ func _first_mask(tree: SceneTree) -> void:
 	press.action = "interact"
 	press.pressed = true
 	moment._unhandled_input(press)
-	frames = 0
-	while moment.phase != "intro" and frames < MAX_FRAMES:
-		await tree.process_frame
-		frames += 1
+	await _wait_for(tree, func(): return moment.phase == "intro", 12.0)
 	for i in 6: await tree.process_frame
 	ok(moment.phase == "intro" and String(moment.you.get_meta("arch")) == "gunslinger",
 		"the Relic goes on and you become Vex")
@@ -350,3 +348,11 @@ func _parents_row(tree: SceneTree) -> void:
 	rare["rare"] = true
 	var none := not HatchParents.has_row(starter) and not HatchParents.has_row(rare)
 	ok(none, "starter and Rare Egg Boki get no parents row")
+
+## Waits frames until `cond` holds or `limit_s` of game time has passed; returns the game time waited.
+func _wait_for(tree: SceneTree, cond: Callable, limit_s: float) -> float:
+	var waited := 0.0
+	while not cond.call() and waited < limit_s:
+		await tree.process_frame
+		waited += main.get_process_delta_time()
+	return waited

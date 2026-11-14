@@ -906,8 +906,9 @@
 "semicolon": 7
 },
 "tools/hatch_check.gd": {
-"long_line": 10,
-"semicolon": 1
+"long_line": 9,
+"semicolon": 1,
+"shadow": 1
 },
 "tools/hero_check.gd": {
 "long_line": 3,
