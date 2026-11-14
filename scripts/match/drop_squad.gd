@@ -192,8 +192,6 @@ func launch(l: Hunter, from_net := false) -> void:
 	events.append("launch %s +%d" % [l.pname, r.riders.size() - 1])
 	if m.net_on and not from_net:
 		m.net_event(["rkt", l.nid])
-	if m.player and r.riders.has(m.player):
-		m.sfx("whoosh", null, -2.0)      # (the keys are DropHud's lines while aboard)
 
 ## The heading the skydive camera sits behind: the squad rocket's launch heading (north-up without one).
 func drop_yaw(h: Hunter) -> float:
