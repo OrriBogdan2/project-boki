@@ -15,6 +15,7 @@ var hit_crit := false
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
+var loot := LootFeed.new()     # what you just picked up, bottom right
 var knocks := KnockBanner.new()  # ALLY KNOCKED / KNOCK top-centre
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
@@ -50,6 +51,7 @@ func setup(match_node: Match) -> void:
 	add_child(c)
 	c.draw.connect(_draw_all)
 	add_child(msgs)
+	add_child(loot)
 	add_child(knocks)
 	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
 	add_child(abyss_fx)
@@ -131,6 +133,8 @@ func hurt_flash(d: float) -> void:
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
 	msgs.fight = in_fight()
+	loot.fight = msgs.fight
+	loot.visible = msgs.visible
 	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
@@ -200,6 +204,7 @@ func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBox
 	return sb
 
 func _panel(r: Rect2, col := PANEL, rad := 10) -> void:
+	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, EDGE, 1, true), r)
 
 func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> void:
@@ -282,11 +287,7 @@ func _draw_all() -> void:
 			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
 			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
-	if p and not p.downed and not p.out and p.hp < p.max_hp * 0.35:
-		var pulse := 0.5 + 0.5 * sin(m.time * 6.0)
-		for i in 5:
-			var inset := i * 16.0
-			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.75, 0.05, 0.05, (0.09 - i * 0.016) * (0.6 + pulse * 0.4)), false, 16.0)
+	HurtWash.draw(c, sz, p, hurt_dirs, m.time)      # low health: the red edge, heavier where the hits came from
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
@@ -365,6 +366,7 @@ func _draw_world_labels() -> void:
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
 		BokiHud.form_overhead(self, cam.unproject_position(own_head), m.player)
+		lvl_cue.body(self, cam, m.player)
 	BaseHud.draw(self)       # basing rings (anyone) and your B wheel
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
@@ -596,37 +598,15 @@ func _draw_duel(sz: Vector2) -> void:
 	var keys_at := Vector2(box.position.x + 14, box.end.y - 12)
 	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
-var feed_top := 18.0
-## The kill feed under the counters: each line a banner plate, red when it's about an enemy squad's
-## loss you caused, blue for your own side, gold for everything else.
-func _draw_feed(sz: Vector2) -> void:
-	var y := feed_top
-	var mine: Array = []
-	if m.player:
-		for h in m.hunters:
-			if h.team == m.player.team: mine.append(h.pname)
-	for f in m.feed:
-		var a := clampf(6.0 - f["t"], 0.0, 1.0)
-		var s: String = f["text"]
-		var w := big.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		var ours := false; var first := ""
-		for nm in mine:
-			var at := s.find(String(nm))
-			if at >= 0 and (first == "" or at < s.find(first)): first = String(nm)
-		ours = first != "" and s.begins_with(first)
-		var col := Color("5fb6ff") if ours else (Color("ff6a5a") if first != "" else GOLD)
-		var br := Rect2(Vector2(sz.x - 18 - w - 26, y), Vector2(w + 26, 24))
-		_rounded(br, Color(0.04, 0.05, 0.08, 0.82 * a), 6)
-		c.draw_rect(Rect2(br.position, Vector2(4, br.size.y)), Color(col, a))
-		_text(br.position + Vector2(14, 17), s, 13, Color(INK, a), big)
-		y += 28
+var feed_top := 18.0        # px: where the kill feed (KnockFeed) starts, under the counters and any boss bar
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
 	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
-	var s := 340.0 if riding else 196.0
+	var s := minf(340.0, sz.y * 0.44) if riding else 196.0      # (the big drop map leaves room under it for the squad)
 	var r := Rect2(Vector2(18, 18), Vector2(s, s))
 	mm_bottom = r.end.y
+	SafeArea.note(r)
 	var w := m.world
 	var inner := Rect2(r.position + Vector2(8, 8), r.size - Vector2(16, 16))
 	if riding:
@@ -828,9 +808,6 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 	_text(Vector2(r.get_center().x - pw * 0.5 + 6, r.position.y + 19), phase, 11, pc, big)
-	if m.player:
-		var lt := "LV %d" % m.player.lvl
-		_text(Vector2(r.end.x - 10 - big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x, r.position.y + 19), lt, 12, Color("ffd27a"), big)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
@@ -960,6 +937,7 @@ func toast_small(text: String, col: Color) -> void:
 	msgs.push(text, col, MsgLane.LOW)
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
+	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, border, bw, true), r)
 
 ## The key label under a slot (HudStyle.key_pill).
@@ -1007,18 +985,15 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
+var lvl_cue := LevelUpCue.new()      # the level-up moment over your hero and over the vitals
 var xp_seen := -1.0      # the last XP the tracker saw (HudVitals.xp_step)
 var xp_shown := -1.0     # the XP the bar has filled to
 var xp_pop := 0.0        # s left of the pop after XP landed
-## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
-## weapon's step on even levels, which also get a gold wash).
+## A level just went up (Hunter.gain_xp; `info` is the weapon's step on even levels): the level number
+## goes gold and LevelUpCue says what improved.
 func level_up(lv: int, info := {}) -> void:
-	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
-	var line := "LEVEL %d  ·  +1 skill point" % lv
-	if lv % 2 == 0:
-		flash(Color("ffd27a"), 0.16)
-		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
-	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
+	lvl_pop = HudVitals.LVL_POP
+	lvl_cue.start(m.player, lv, info)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1192,8 +1167,10 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var kc: Color = Data.KIN[k.species]["color"]
 	var glow: Color = Data.KIN[k.species].get("glow", kc)
-	var pc := o + Vector2(6, 6)
 	var rr := 20.0
+	var ring := Vector2(rr + 4.0, rr + 4.0)
+	var pc := SafeArea.keep(Rect2(o + Vector2(6, 6) - ring, ring * 2.0), sz).get_center()      # (the corner of the portrait, kept on screen)
+	SafeArea.note(Rect2(pc - ring, ring * 2.0))
 	c.draw_circle(pc, rr + 4, Color(0.03, 0.03, 0.05, 0.95))
 	c.draw_arc(pc, rr + 1.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
 	c.draw_arc(pc, rr + 1.5, -PI / 2, -PI / 2 + TAU * clampf(k.hp / k.max_hp, 0.0, 1.0), 40, kc, 3.0, true)
@@ -1220,7 +1197,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 		"fused": st = "merged"
 	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := big.get_string_size(st.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		var sr := Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14))
+		var sr := SafeArea.keep(Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14)), sz)
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
 		_ctext(sr.get_center() + Vector2(0, 3.5), st.to_upper(), 9, Color(kc.lerp(INK, 0.3), 0.95), big)
 
@@ -1654,10 +1631,13 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
-		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
-		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
+		var sy := maxf(sz.y * 0.2, msgs.bottom() + 30.0)      # (under the message lane, like the killcam line)
+		var sw := TextCache.width(big, String(st["text"]), 24)
+		SafeArea.note_as("exit_status", Rect2(Vector2(sz.x * 0.5 - sw * 0.5, sy - 22.0), Vector2(sw, 42.0)))
+		_ctext(Vector2(sz.x * 0.5, sy), String(st["text"]), 24, st["col"], big)
+		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sy + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 		if st.has("hint"):
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.2 + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
+			_ctext(Vector2(sz.x * 0.5, sy + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()
@@ -2426,9 +2406,6 @@ func _build_pack() -> void:
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
 	if not p.caught.is_empty():
 		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.para(LoadoutPanel.HINT, 12)
-	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
-	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc
 	_fit_panel(pc, sl[0], sl[1])

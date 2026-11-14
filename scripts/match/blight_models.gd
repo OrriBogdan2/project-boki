@@ -1,5 +1,5 @@
 class_name BlightModels
-## Bodies for the Blight (docs/TONE_AND_THREATS.md): half creature, half petrified wreck. Stone and
+## Bodies for the Blight: half creature, half petrified wreck. Stone and
 ## bone shells, ember light leaking through cracks, no faces, too many legs. Each has one shape you
 ## can read from the top-down camera at a glance. All original designs:
 ##   bl_skitter  a cinder tick: a low six-sided stone shell split by glowing seams, carried on eight

@@ -41,6 +41,10 @@ func _init(match_node: Match, k: String, r: Dictionary, o: float, s: float) -> v
 func title() -> String:
 	return "the Sealed Lair" if kind == "lair" else "the Uplink"
 
+## Where the seat stands: the lair's middle, or the outpost.
+func site() -> Vector3:
+	return ref.get("c", ref.get("pos", Vector3.ZERO))
+
 func go(to: S, why: String, t := -1) -> bool:
 	if not (to in NEXT[state]):
 		refused += 1
@@ -54,7 +58,7 @@ func _force(to: S, why: String, t := -1) -> void:
 	trail.append("%7.2f %s>%s %s" % [m.time, S.keys()[state], S.keys()[to], why])
 	state = to
 	team = t if to in [S.IN_USE, S.TAKEN] else -1
-	var at: Vector3 = ref.get("c", ref.get("pos", Vector3.ZERO))
+	var at := site()
 	var col: Color = Lairs.color_of(ref) if kind == "lair" else ExitModels.UPLINK
 	match to:
 		S.OPEN:

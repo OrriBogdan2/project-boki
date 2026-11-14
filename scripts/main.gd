@@ -371,9 +371,6 @@ func _ready() -> void:
 	if "--lair-lock-check" in args:
 		load("res://tools/lair_lock_check.gd").new().run(self)      # boss loot and the egg's own spot; locked in 20 s after the kill
 		return
-	if "--level-hud-check" in args:
-		load("res://tools/level_hud_check.gd").new().run(self)      # the portrait's level and XP ring, the level-up flash and sound, R locked to 6
-		return
 	if "--pack-ui-check" in args:
 		var puc = load("res://tools/pack_ui_check.gd").new()      # the backpack windows take real mouse clicks
 		set_meta("pack_ui_check", puc)
@@ -614,8 +611,6 @@ func _ready() -> void:
 		show_screen("town", {"mode": town_arg, "gid": "test"})
 	elif "--visit-test" in args:
 		show_screen("home", {"visit": Social.clean_island(Social.profile_doc()), "visit_id": "test"})    # test: visiting an island
-	elif "--feel-lab" in args:
-		get_tree().change_scene_to_file.call_deferred("res://tests/feel_test.tscn")    # the Supervive feel playground
 	elif "--prologue" in args:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:

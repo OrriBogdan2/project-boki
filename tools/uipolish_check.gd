@@ -10,6 +10,8 @@ extends RefCounted
 ##   5. no floating callout words in the world: fx.word is called only for Gil's n/need count
 ##   6. building the theme logs no engine error (every startup logged one, so it was the last line
 ##      of each GPU bench crash and read as its cause)
+##   7. closing (PanelClose): Esc closes the top panel only, a right click outside closes it, and the
+##      game never sees the click that closed it (real key and mouse events through Input)
 
 ## Files that may still build their own boxes: the HUD (ext/hudref owns its look), its item rows
 ## (LootHold, split out of hud.gd) and reserved files.
@@ -42,6 +44,7 @@ func run(main_node: Node) -> void:
 	_static_styles(src)
 	_theme_builds_clean()
 	await _screens()
+	await _closing(main.current)
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -291,3 +294,86 @@ func _screens() -> void:
 	for i in 30:
 		await main.get_tree().process_frame
 	ok("farm: every box is the menu look", _off_look(home, ours).is_empty(), str(_off_look(home, ours)))
+
+# ------------------------------------------------------------------ 5: closing
+func _frames(k: int) -> void:
+	for i in k:
+		await main.get_tree().process_frame
+
+func _esc() -> void:
+	for down in [true, false]:
+		var e := InputEventKey.new()
+		e.keycode = KEY_ESCAPE
+		e.physical_keycode = KEY_ESCAPE
+		e.pressed = down
+		Input.parse_input_event(e)
+		await _frames(2)
+
+## A right click pressed in the top-left corner (outside every centred panel); true if the game
+## still sees the button held afterwards (the press would cast). Then it's let go.
+func _right_click() -> bool:
+	var at := Vector2(4, 4)
+	var mv := InputEventMouseMotion.new()
+	mv.position = at
+	mv.global_position = at
+	Input.parse_input_event(mv)
+	await _frames(2)
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_RIGHT
+	e.position = at
+	e.global_position = at
+	e.pressed = true
+	Input.parse_input_event(e)
+	await _frames(2)
+	var held := Input.is_action_pressed("secondary")
+	var up := e.duplicate() as InputEventMouseButton
+	up.pressed = false
+	Input.parse_input_event(up)
+	await _frames(2)
+	return held
+
+func _closing(home: Node) -> void:
+	Overlay.open_pause("home")
+	Overlay.open_settings()
+	await _frames(2)
+	await _esc()
+	ok("Esc on Settings goes back to the Esc menu only", Overlay.page == "pause", Overlay.page)
+	var held := await _right_click()
+	ok("a right click outside closes the Esc menu", not Overlay.is_open(), Overlay.page)
+	ok("...and the game never sees that click", not held)
+	Overlay.open_inventory()
+	Overlay.open_dex("cindle")
+	await _frames(2)
+	await _esc()
+	ok("Esc on the Field Book goes back to the inventory only", Overlay.page == "inventory", Overlay.page)
+	await _esc()
+	ok("Esc again closes the inventory", not Overlay.is_open(), Overlay.page)
+	home._new_panel("Close test", 420)
+	UI.confirm(home.root_ui, "Sure?", "A test question.", "Yes", func(): pass)
+	await _frames(2)
+	await _esc()
+	var boxes: Array = home.root_ui.find_children("*", "Modal", true, false)
+	var box_gone: bool = boxes.all(func(c): return c.is_queued_for_deletion())
+	ok("Esc on a confirm box over a farm panel closes the box only", home.panel_open == "Close test" and box_gone)
+	Overlay.open_pause("home")
+	await _frames(2)
+	await _right_click()
+	var only_menu: bool = not Overlay.is_open() and home.panel_open == "Close test"
+	ok("a right click outside the Esc menu over a farm panel closes the menu only", only_menu)
+	held = await _right_click()
+	ok("a right click outside a farm panel closes it, unseen", home.panel_open == "" and not held, home.panel_open)
+	home._new_panel("Close test", 420)
+	await _frames(2)
+	await _esc()
+	ok("Esc closes a farm panel and doesn't open the Esc menu", home.panel_open == "" and not Overlay.is_open())
+	var recs: Array = Save.d["roster"]
+	var res := {"order": [recs[0], recs[0]], "gems": 3, "memory": "A test race."}
+	home.race._show_card(res)
+	await _frames(2)
+	await _esc()
+	var card_gone: bool = home.race.card == null and not Overlay.is_open()
+	ok("Esc closes the Dash's result card and doesn't open the Esc menu", card_gone)
+	home.race._show_card(res)
+	await _frames(2)
+	await _right_click()
+	ok("a right click outside the Dash's result card closes it", home.race.card == null)

@@ -32,15 +32,15 @@ own when you send it out (G), and adds a little of its type to your kit: each cl
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
 
-**R is the Merge** for every class. When your **bond meter** is full, press it and you and your Boki
+**X is Fuse** for every class. When your **bond meter** is full, press it and you and your Boki
 become one for a while: you wear its look, and your abilities change by its type and power (its merge
-form, see [Boki species](Boki-Species.md)). The class's own ultimate is held back for now.
+form, see [Boki species](Boki-Species.md)). The class's own ultimate (R) is held back for now.
 
 ## Choosing
 
 Each weight class has a default: Sable (light), Vex (medium) and Kael (heavy). You pick
 your class in the Expedition menu, and you can try every class against dummies in the
-[Arena](Arena-and-Training.md) at any time.
+[Training Grounds](Arena-and-Training.md) at any time.
 
 ## At a glance
 
@@ -64,6 +64,19 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 | [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 | [the Novice Mage](Class-Novice-Mage.md) | 124 / 1 | Swordfish | Fish Out of Water | Ground Swim | Grab Bag | Riptide | none (Boki Fusion) |
+| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Hawk Sense | Spirit Walk | Heavy Shot | Hail Wall | none yet |
+| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none yet |
+| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none yet |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none yet |
+| [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none yet |
+| [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none yet |
+| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none yet |
+| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none yet |
+| [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none yet |
+| [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none yet |
+| [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none yet |
+| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none yet |
+| [the Novice Mage](Class-Novice-Mage.md) | 124 / 1 | Swordfish | Fish Out of Water | Ground Swim | Grab Bag | Riptide | none yet |
 
 ### How Hunters unlock
 

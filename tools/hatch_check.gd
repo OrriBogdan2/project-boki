@@ -1,5 +1,5 @@
 extends RefCounted
-## --hatch-check: hatching is a small, personal moment (docs/POSITIONING.md). An egg (EggHatch)
+## --hatch-check: hatching is a small, personal moment. An egg (EggHatch)
 ## cracks; the shell shrinks away within a second of the top coming off, and the Boki hops out, looks
 ## around, turns to look at you and bounces, all inside 2.5 s after the pop, and the shell throws no bursts, rings or flashes. The closer look after
 ## it (KinReveal) has no flash, rays, fanfare or rarity colours: the Boki finds you and calls to you,

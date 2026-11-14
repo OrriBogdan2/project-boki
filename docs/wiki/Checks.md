@@ -38,6 +38,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--hold-check` | Hold animations keep their pose while refreshed, let go cleanly, and survive the network snapshot |
 | `--move-feel-check` | Movement, jump, glide, feathering, drop and camera timings match `docs/MOVEMENT_FEEL.md` |
 | `--step-smooth-check` | Vex, Albert and Sable on the Hollow Crown: up and down three terrace steps and a stair flight, the drawn body's y never jumps over 0.08 m a frame and the camera's never over 0.05 m (`--step-smooth-shots` takes the strips) |
+| `--fsm-check` | Every explicit state machine (`Fsm`) built from its table: names match the enum, every target a state, no self-edges, all reachable; guards, reasons and the log work |
 | `--mantle-check` | Ledges you mean to climb, you climb; ledges you don't, never grab you |
 | `--wallhug-check` | Pressed against an island's side from the abyss, you're caught instead of sinking |
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |

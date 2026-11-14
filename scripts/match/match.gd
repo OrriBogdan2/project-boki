@@ -58,7 +58,7 @@ var over := false
 var result := {}
 var shot_pool: Array[MeshInstance3D] = []
 var nid_n := 0
-var feed: Array = []        # kill feed lines {text, t}
+var feed: Array = []        # kill feed rows (KnockFeed) {text, t}; a knock adds by, who, icon
 var pings: Array = []       # {pos, col, t}
 var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
@@ -1234,10 +1234,9 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
 	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
-	sfx("pickup", h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
-	if h == player and hud:
-		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
+	if not LootFeed.got_item(self, h, Loot.gear(String(wp["gear"]), int(wp["rar"]))):
+		sfx("pickup", h.pos, 0.0, 0.9)
 
 ## Walking over a tuning applies it (to bots too); one you've maxed stays on the ground.
 func _take_tune(h: Hunter, wp: Dictionary, from_net := false) -> void:
@@ -1709,7 +1708,7 @@ var feed_all: Array = []
 func add_feed(t: String) -> void:
 	feed_all.append("%d %s" % [int(time), t])
 	feed.append({"text": t, "t": 0.0})
-	if feed.size() > 5:
+	if feed.size() > KnockFeed.ROWS:
 		feed.pop_front()
 
 # ------------------------------------------------------------------ events
@@ -1784,7 +1783,7 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
@@ -1802,6 +1801,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	var icon := KnockFeed.icon_of(by, credit, o)
 	if h == player:
 		# getting knocked: no slow-mo, no full-screen flash (the source confirms it with sound and the feed;
 		# docs/DASHES_AND_ABILITY_FEEL.md §5.4 knock moment)
@@ -1814,7 +1814,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [credit.pname, h.pname])
+		KnockFeed.add(self, credit as Hunter, h, icon)
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
@@ -1822,14 +1822,14 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
 	else:
-		add_feed("%s went down" % h.pname)
+		KnockFeed.add(self, null, h, icon)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
-		net_event(["knock", h.nid, credit.nid if credit else ""])
+		net_event(["knock", h.nid, credit.nid if credit else "", icon])
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
@@ -2604,17 +2604,15 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 	pickups.erase(p)
 	if net_on:
 		net_event(["take", p["id"]])
+	var gems0 := h.gems
 	match p["kind"]:
 		"gem": h.gems += int(round(float(p["v"]) * PerkOrbs.gem_mult(h)))
 		"seed": h.seeds[p["key"]] = int(h.seeds.get(p["key"], 0)) + int(p["v"])
 		"tonic", "armor": UtilityBelt.pickup(h, UtilityBelt.item_of(p["kind"]), 1)
 		"ckey": KeyRun.on_pickup(self, h)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
-	if h == player:
-		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
-		if p["kind"] == "seed":
-			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
-	else:
+	LootFeed.ground(self, h, p, h.gems - gems0)
+	if h != player:
 		Juice.rival_pickup(self, h)
 
 # ------------------------------------------------------------------ shots
@@ -3245,7 +3243,7 @@ func _process(delta: float) -> void:
 		if p["t"] > float(p.get("life", 4.0)): pings.erase(p)
 	for f in feed.duplicate():
 		f["t"] += delta
-		if f["t"] > 6.0: feed.erase(f)
+		if f["t"] > KnockFeed.LIFE_S: feed.erase(f)
 
 ## (movefeel) The camera leans a little ahead of a glide so you see where you're going (CamRig.lead_vel).
 func cam_lead_vel() -> Vector3:
@@ -5368,7 +5366,7 @@ func _net_ev(x, from: String) -> void:
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
-				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				KnockFeed.add(self, by as Hunter, who, String(x[3]) if x.size() > 3 else "")
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if hud: hud.knocks.knocked(player, who, by)
 				if by == player:

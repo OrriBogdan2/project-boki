@@ -286,7 +286,9 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	perk = ""
 	pname = name_txt
 	ctrl = control
-	if control != "local":
+	if control == "local":
+		loco = Loco.machine("loco")      # the F7 readout lists the local player's machines
+	else:
 		bot_look = PlayerLook.random()
 	max_hp = cdat["hp"]; hp = max_hp
 	max_armor = round(max_hp * ARMOR_DUR); armor = max_armor; base_armor = max_armor
