@@ -162,12 +162,18 @@ func _knife(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 			and float(r["in"]) <= BLEND_IN, "released %.2f clip %.2f in %.2f" % [r["hit"], r["at"], r["in"]])
 	var stuck := not K.knife.is_empty()
 	var at: Vector3 = K.knife["pos"] if stuck else home
+	# a dagger in a foe steps her to their far side (_shadow_step), else onto the dagger
+	var in_foe = K.knife.get("target") if stuck else null
+	var near := 0.8
+	if in_foe != null and is_instance_valid(in_foe):
+		at = (in_foe as Ent).pos
+		near = (in_foe as Ent).r + P.r + 0.6
 	P.ak.use_e()
 	var t0 := m.time
 	var blink := -1.0
 	for f in 12:
 		_frame(m, P)
-		if blink < 0.0 and P.flat_dist(at) < 0.8:
+		if blink < 0.0 and P.flat_dist(at) < near:
 			blink = m.time - t0
 	print("TIME thf_arrive recast: dagger %s, there after %.2f s, anim %s"
 			% ["stuck" if stuck else "missing", blink, K.anim_id])

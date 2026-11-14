@@ -792,7 +792,7 @@ func _gunslinger() -> void:
 	ac.tap(m, P)
 	ac.step(m, 0.4)
 	ok("RMB air cast 2 m up: a foe 8 m down the lane is still struck and Dazed",
-			ac.dmg(T) >= 20.0 and KitStatus.rattled(T), "took %.1f" % ac.dmg(T))
+			ac.dmg(T) >= float(K.rmb_def()["burr"]["hit_dmg"]) - 0.01 and KitStatus.rattled(T), "took %.1f" % ac.dmg(T))
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
 	ac.step(m, 0.3)
