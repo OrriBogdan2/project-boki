@@ -132,6 +132,7 @@ const CHECKS := {
 	"--gil-combo-check": ["res://tools/gil_combo_check.gd", "hero_pair_check", null],      # Gil, the Novice Mage
 	"--gil-kit-check": ["res://tools/gil_kit_check.gd", "hero_pair_check", null],  # Gil, the Novice Mage
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
+	"--knock-chain-check": ["res://tools/knock_chain_check.gd", "knock_chain_check", null],      # docs/decisions/0022
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],
 	"--zone-bounce-check": ["res://tools/zone_bounce_check.gd", "zone_bounce_check", null],      # STATE_MACHINES 3.5
 	"--archer-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
