@@ -9685,3 +9685,4 @@ READY ext/fix-audio-settings 22c71a4064 (PR #51 reds fixed, please regate: main 
 READY ext/glide-smooth-1111 07d41bf650 (PR #59 merged with origin/main 26901f08a7, clean; glide checks pass; glide-net-check 2/11 red also on main)
 READY ext/vfx-telegraph-lead-rebased 08771e2b25 (bulk-rebase: origin/main merged in mechanically, was eb55fd2369; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/hero-portraits-a-1114 1a57fe460e00f254cef9f1ea18f3c619c369e5e4 (13 hunters' A-pick portraits in art/portraits + turnaround/expressions in art-refs/<hunter>_hero_1114; art only; open the PR, gh missing on w2)
+NOTE ext/hero-portraits-a-1114 1a57fe460e: --portrait-check 116/0 fail; PR still unopened (no gh on w2): body at hetzner:/home/boki/meshy/hero-sheets-push-1114/PR_BODY.md; site set + RESULT.md in that folder, move to /home/boki/cj/hero-sheets-push-1114/
