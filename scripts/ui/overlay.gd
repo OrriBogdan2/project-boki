@@ -249,6 +249,7 @@ func open_pause(where: String) -> void:
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
 	item.call("Controls", "dash", open_controls)
+	item.call("Help", "info", open_words)
 	if where != "match":
 		item.call("Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
@@ -305,6 +306,10 @@ func open_controls() -> void:
 	ControlsCard.fill(v, hero)
 	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
+
+## Help: the Words page (WordsView): what the game's terms mean, for the ones you have met.
+func open_words() -> void:
+	WordsView.fill(_page("words", "Help: words", 560, true))
 
 # ------------------------------------------------------------------ settings
 ## The Training Grounds' Practice page: your ability ranks (PracticeRanks).
