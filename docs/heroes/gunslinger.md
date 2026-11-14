@@ -110,7 +110,7 @@ FADE_LOCO): both under one footage frame. Seconds from the press.
 Both holds are the source's (PARITY FIRST, briefs/DECISIONS.md 2026-11-07; no owner note on a Vex E or X recovery):
 the frames are briefs/hero-ref/venator.md E 4 and section 7 (fire, then the shove 556.6-556.8 s at 0170, recovery
 ~0.4 s) and R 4 (raised 561.8-562.0 s, fired 562.2-562.4 s, ~0.8 s committed, no move seen). The presses wait as
-after crowd control: DashFlow's 0.15 s exit buffer (docs/decisions/0022-cc-exit-buffer.md) reads the kit's
+after crowd control: DashFlow's 0.15 s exit buffer (docs/decisions/0076-cc-exit-buffer.md) reads the kit's
 `commit_left()`. Q's glove and the Boki's C still go in a hold, as through a stun. Asserted in
 --gunslinger-combo-check (`Vex timing E/R: held ...`, `... goes as it lifts`, `... after the hold she walks`).
 
