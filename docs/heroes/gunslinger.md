@@ -97,9 +97,9 @@ FADE_LOCO): both under one footage frame. Seconds from the press.
 | Move | Source (s) | Ours before | Ours after |
 |---|---|---|---|
 | LMB | a round every ~0.12, recoil in the gun only | round and move on the press's frame, clip 0.53, re-played each round (0.12) | unchanged |
-| RMB (launcher tap, owner item 112) | throw commit ~0.2 (superseded: a tap) | Burr at 0.02, clip 0.50, legs back 0.67; walking: the legs walk | unchanged |
+| RMB (launcher tap, owner item 112) | throw commit ~0.2 (superseded: a tap) | Burr at 0.02, clip 0.50, legs back 0.67; walking: the legs walk | clip 0.30 (the swing is home by 0.3), legs back 0.47; walking: the legs walk |
 | Shift tap | skid ~0.45, upright by 0.55-0.6 | skid ends 0.53 (dash feel's time scale), clip 0.87 (stand-up key 0.62), legs back 1.03; walking off: the clip's standing legs stayed on her (full 1.00) to 0.75 and past | walking off the skid, the legs are hers from the skid's end (loco blends in by 0.68) |
-| Shift held | the slide holds, she stands as it ends | the clip stood up at 0.62 mid-slide (skid ends 0.73) | the clip holds its slide key (0.45) while she slides; stand-up 0.73, legs back 1.30 |
+| Shift held | the slide holds, she stands as it ends | the clip stood up at 0.62 mid-slide (skid ends 0.73) | the clip loops its slide window (0.37-0.50, three keys) while she slides; stand-up 0.73, legs back 1.28 |
 | Shift in the air / dash_ex | not in the footage | 0.87 clip at the air hop, 0.6 travel | unchanged |
 | E Longneedle | cast bar 0.6, shove 0.2, recovery ~0.4 (settled ~1.2) | beam 0.63 on the clip's fire key (0.65), clip 1.07, legs back 1.23; walking after the shove: the clip's standing legs stayed on her to 1.05 and past | beam 0.63; then held 0.6 s (`GunslingerKit.E_RECOVER`: the 0.2 s shove, which still carries her back, and the ~0.4 s recovery): no walk, jump, Shift, LMB, RMB, E or X until 1.23, the frame the clip hands the body back (1.07 + the 0.16 fade); a press in the last 0.15 s goes then, an earlier one is dropped |
 | X Cinderfall | raise then fire ~0.2, ~0.8 committed, no move seen | star, column and shot sfx on the press (0.02); clip 0.60, arm down 0.77; walking: frozen legs (full 1.00) | the shot leaves on the clip's kick key (0.14: the barrel is up at 0.1); held 0.76 s from the tap (`GunslingerUlt.COMMIT`, the source's ~0.8 s within a frame): no walk, jump, Shift or ability until the clip hands the body back on that frame (0.60 + the 0.16 fade; the clip is full body again, no upper-body walk); a press in the last 0.15 s goes then; the disc and column still show at the press |
@@ -113,13 +113,14 @@ after crowd control: DashFlow's 0.15 s exit buffer (docs/decisions/0022-cc-exit-
 `commit_left()`. Q's glove and the Boki's C still go in a hold, as through a stun. Asserted in
 --gunslinger-combo-check (`Vex timing E/R: held ...`, `... goes as it lifts`, `... after the hold she walks`).
 
-Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 are that branch's):
+Clip re-keys (ext/anim-vex-rekeys, on the current vex.glb; `tools/art1/vex_clips.py` baked on `vex_rig_only.py`'s bare rig,
+put on the GLB with `glb_add_clips.py`):
 
 | Clip | Re-key |
 |---|---|
-| x | hold the barrel up from 0.1 to ~0.3 (the source's raise then fire); the clip's end + fade must stay on GunslingerUlt.COMMIT (0.76) and the kick key at 0.14 (GunslingerUlt.FIRE_T) |
-| rmb | the swing could return by ~0.3 (a tap, item 112); 0.5 now |
-| dash | a loopable slide window around 0.45 (the held slide holds that key; a 2-3 key loop would read better than a still) |
+| x | already as asked: the barrel is up from 0.1 to 0.3 (kick key 0.14) and down by 0.6; unchanged. Its end + fade stay on `GunslingerUlt.COMMIT` (0.76) |
+| rmb | the swing returns by 0.3 (a tap, item 112); was 0.5 (KMovesVV keys and `flow` follow) |
+| dash | a slide loop sl, sl-with-lean, sl at 0.367 / 0.433 / 0.5; `GunslingerKit.SLIDE_LOOP_*` replays it while she slides (was a still on 0.45); the stand-up key stays 0.62 |
 | lmb | none: 0.53 at a 0.12 cadence re-plays from its kick each round |
 
 ## Per-slot table
