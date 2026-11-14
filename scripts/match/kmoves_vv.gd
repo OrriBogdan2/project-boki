@@ -75,7 +75,7 @@ const MOVES := {
 			"fl": Vector3(-0.3, -0.12, 0.5), "hw": 1.0, "wo": Vector3(0.12, -0.2, 0.45), "gp": -0.8}],
 		[0.5, {}]]},
 	# Wirerun arrival: she re-forms in a crouch (squash), springs up past standing, settles (~0.4 s)
-	"mage_dash_land": {"keys": [
+	"mage_dash_land": {"land": true, "keys": [
 		[0.00, {"p": -0.35, "lift": -0.18, "sq": 0.55, "legs": [1.0, -1.6, 0.8, -1.4], "lw": 1.0,
 			"fl": Vector3(-0.35, 0.1, 0.0), "hw": 1.0}],
 		[0.14, {"p": 0.12, "lift": 0.06, "sq": -0.2, "fl": Vector3(-0.3, 0.2, 0.0), "hw": 0.6}],
@@ -164,9 +164,8 @@ const MOVES := {
 		[0.00, SHOULDER],
 		[0.04, {"p": 0.1, "y": 0.1, "lift": -0.06, "sq": 0.1, "gp": 0.55, "wo": Vector3(0.0, 0.05, 0.18),
 			"legs": AIM_CROUCH, "lw": 0.7}],
-		[0.18, SHOULDER],
-		[0.3, SHOULDER],
-		[0.5, {}]]},
+		[0.12, SHOULDER],
+		[0.3, {}]]},
 	# Combat Slide: dropped feet-first, leaning back (no further than 0.45, so she stays upright enough to
 	# aim), both hands left on the rifle so it stays up and aimed; a scrape squash, then the stand-up
 	"gunslinger_dash": {"keys": [

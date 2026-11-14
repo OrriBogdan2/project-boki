@@ -114,7 +114,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--mergeform-only="): only = a.substr(17)
-	for part in ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards"]:
+	for part in ["data", "xform", "aug", "ult", "ends", "shell", "tiers", "warn", "net", "bots", "guards", "read"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.ability_used.disconnect(_on_used)
@@ -135,6 +135,20 @@ func _data() -> void:
 	ok(not FileAccess.file_exists("res://scripts/kin/merge_holds.gd"), "MergeHolds (boulder, hover, prism) is gone")
 	var rules := MergeForm.data()
 	ok(not rules.has("tiers") and not rules.has("forms_bonus"), "no tiers or forms_bonus in the merge rules")
+	var no_style: Array = []
+	for id in Data.KIN:
+		if not (rules["types"] as Dictionary).has(DexView.type_of(id)):
+			no_style.append(id)
+	ok(no_style.is_empty(), "every Boki's type has a merge style: %s" % [no_style])
+	var split_ok := true
+	for id in ["duskapi", "umbrathere"]:
+		split_ok = split_ok and DexView.type_of(id) == "ghost"
+	for id in ["gloamshell", "caecilith"]:
+		split_ok = split_ok and DexView.type_of(id) == "dark"
+	ok(split_ok, "Shadow is split: Snuffapi, Umbrathere Ghost; Gloamshell, Zippelith Dark")
+	var named: bool = DexView.type_name("ghost") == "Ghost" and DexView.type_name("dark") == "Dark"
+	var tints: bool = DexView.type_col("ghost") != DexView.type_col("dark")
+	ok(named and tints, "Ghost and Dark each have a name and a colour")
 	var tiered := false
 	for f in DirAccess.get_files_at("res://content/merges_v2"):
 		var txt := FileAccess.get_file_as_string("res://content/merges_v2/" + f)
@@ -211,7 +225,7 @@ func _xform() -> void:
 	P.ult = 1.0
 	var pressed := KinMerge.press(P)
 	ok(not pressed and not KinMerge.active(P) and is_equal_approx(P.ult, 1.0), "R with the Boki downed does nothing and keeps the full meter")
-	ok(KinMerge.deny_text(P) == "Rescue %s to merge" % String(k.rec.get("name", "your Boki")), "...and says '%s'" % KinMerge.deny_text(P))
+	ok(KinMerge.deny_text(P) == KinMerge.rescue_text(P) and KinMerge.deny_text(P).begins_with("Rescue "), "...and says '%s'" % KinMerge.deny_text(P))
 	P.ult = 0.5
 	Bond.add(P, 0.1)
 	ok(P.ult > 0.5 or before > 0.0, "the bond meter keeps filling while the Boki is down")
@@ -914,9 +928,8 @@ func _guards() -> void:
 	ok(KinMerge.active(P) and P.merge_st["form"]["id"] == "titan", "G and orders mid-transformation do nothing (the merge goes on)")
 	# the Boki does not speak while it is inside you
 	var bubbles0: int = m.bubbles.size()
-	P.kin.bark_cd = 0.0
 	P.kin.bark("revive")
-	P.kin.bark("callout", "x")
+	P.kin.bark("callout")
 	ok(m.bubbles.size() == bubbles0, "the Boki says nothing while it is inside you")
 	# eliminated mid-merge: everything goes
 	P = merged("pebbit")
@@ -1072,3 +1085,57 @@ func _bots() -> void:
 	foe(P.pos + Vector3(30.0, 0, 0))
 	MergeKit.bot_use(P)
 	ok(not k.ulting(), "...and holds it with no foe near and time left")
+
+# ---------------------------------------------------- 11. read from the gameplay camera
+
+## The snapshot items of a hunter wearing a species' form, as another game receives them.
+func _worn_items(species: String) -> Array:
+	var it: Array = []
+	it.resize(KinNet.HUNTER_AT)
+	it.append_array(KinNet.hunter_extra(merged(species)))
+	return it
+
+func _read() -> void:
+	# Stormwing: the wings join above the hat brim, so the top-down camera sees the whole fan
+	var P := merged("zephyrak")
+	var look := P.get_node_or_null(MergeLook.NODE_NAME) as MergeLook
+	ok(look != null and (look.rec["wings"] as Array).size() == 2, "Stormwing: two wings on the torso")
+	var hat := 0.0          # the top of the body (the hat) with the form's scale on
+	var parts := P.model.get_node("Rig/Torso/" + MergeLook.PARTS_NAME)
+	for mi in P.model.find_children("*", "MeshInstance3D", true, false):
+		if not parts.is_ancestor_of(mi) and (mi as MeshInstance3D).visible:
+			hat = maxf(hat, ((mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()).end.y)
+	for w in look.rec["wings"]:
+		var wy := (w as Node3D).global_position.y
+		ok(wy >= hat - 0.15 and wy < hat + 0.6, "...a wing joins at %.2f m, at the hat top (%.2f)" % [wy, hat])
+	# the colour wash: one overlay layer on each body mesh and none on the form's parts (the overdraw budget)
+	var washed := 0
+	var on_parts := 0
+	for mi in P.model.find_children("*", "MeshInstance3D", true, false):
+		var wash := (mi as MeshInstance3D).material_overlay as ShaderMaterial
+		if wash != null and wash.shader == MergeLook.WASH:
+			washed += 1
+			on_parts += 1 if parts.is_ancestor_of(mi) else 0
+	var one_layer := washed == look._wash.size() and washed > 0 and on_parts == 0
+	ok(one_layer, "the colour wash is one layer per body mesh (%d), none on the parts" % washed)
+	# Prism Shell: another game opens the same Mirror Step window (and its fan) when the dash is announced
+	var prism := _worn_items("puddlet")
+	var storm := _worn_items("zephyrak")
+	_fresh("pebbit")
+	m.net_on = false
+	var R := foe(m.player.pos + Vector3(0, 0, 8.0))
+	var dash := "dash|%.1f|%.1f|2.1|0.50" % [R.pos.x, R.pos.z - 4.0]
+	var cast := ["kcmd", "mcast", R.nid, R.pos.x, R.pos.y, R.pos.z, dash]
+	KinNet.apply_hunter(R, storm)
+	KinNet.on_event(m, cast)
+	ok(m.verbs.mirrors.is_empty(), "a dash cast of a form without a mirror opens nothing")
+	_fresh("pebbit")
+	m.net_on = false
+	R = foe(m.player.pos + Vector3(0, 0, 8.0))
+	cast[2] = R.nid
+	KinNet.apply_hunter(R, prism)
+	ok(String(R.get_meta("mf_id")) == "tidal_shell", "setup: the other game sees a Prism Shell wearer")
+	KinNet.on_event(m, cast)
+	ok(m.verbs.mirrors.size() == 1, "a remote Mirror Step opens the reflect window and its fan on this side")
+	run_for(0.7)
+	ok(m.verbs.mirrors.is_empty(), "...and it closes with the window")

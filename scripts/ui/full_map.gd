@@ -25,6 +25,7 @@ var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var _hover: Dictionary = {}    # the spawn candidate under the cursor
+var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
 
 func _init(h, match_node: Match) -> void:
 	hud = h
@@ -38,18 +39,20 @@ func open(by_plan := false) -> void:
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
+	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
+	hot_line = ""
 	_press = Vector2.INF
 
 
 # ------------------------------------------------------------------ coordinates
 func _layout(sz: Vector2) -> void:
 	var top := 76.0
-	var s := minf(sz.y - top - 22.0, sz.x - SIDE_W * 2.0 - 56.0)
+	var s := minf(sz.y - top - (44.0 if hot_line != "" else 22.0), sz.x - SIDE_W * 2.0 - 56.0)
 	s = maxf(s, 300.0)
 	rect = Rect2(Vector2(roundf(sz.x * 0.5 - s * 0.5), top), Vector2(s, s))
 
@@ -139,6 +142,18 @@ func ping_at(p: Vector3) -> void:
 	p.x = clampf(p.x, 0.5, m.world.w - 0.5); p.z = clampf(p.z, 0.5, m.world.h - 0.5)
 	m.squad_ping(m.player, p)
 
+## A save's first expedition, while the ship waits: the plan screen is only the map, the timer and the jump
+## prompt. Holding the scoreboard key brings back the squad, the legend and the ways out.
+func plain_plan() -> bool:
+	var planning: bool = m.skydrop != null and m.skydrop.planning
+	var first: bool = m.guide != null and int(Save.d.get("first_guide", 0)) <= 1
+	return planning and first and not Input.is_action_pressed("scores")
+
+## The groups on screen: the header, the map, and the three side panels unless the plan is plain.
+func groups() -> PackedStringArray:
+	var all := ["header", "map", "squad", "legend", "ways out"]
+	return PackedStringArray(all.slice(0, 2) if plain_plan() else all)
+
 # ------------------------------------------------------------------ drawing
 func draw(sz: Vector2) -> void:
 	var c: Control = hud.c
@@ -173,11 +188,11 @@ func draw(sz: Vector2) -> void:
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
 	if m.skytrain:
-		hud._draw_map_train(rect, v, kk)
+		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
 	if m.exits:
 		var ek := clampf(0.9 + kk * 0.12, 1.0, 1.8)
 		for x in m.exits.list:
-			var pv := to_screen(x.get("berth", x["pos"]))
+			var pv := to_screen(x["pos"])
 			if rect.grow(-4.0).has_point(pv):
 				hud._draw_exit_icon(pv, x, ek)
 				var st := _exit_word(x)
@@ -186,6 +201,13 @@ func draw(sz: Vector2) -> void:
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
+	if m.biomes:
+		m.biomes.hot.full_map(self, kk)
+	HeartHud.full_map(self)
+	NestMap.full_map(self)
+	WaysOutMap.full_map(self)
+	if m.zone:
+		m.zone.full_map(self, kk)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)
@@ -193,9 +215,26 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
-	_legend(c, sz, team)
-	_side(c, sz)
+	BokiHud.map_kin(c, m, to_screen, func(pv: Vector2, _pad: float) -> bool: return rect.has_point(pv))
+	_roster.clear()
+	if plain_plan():
+		_plain_hint(sz)
+	else:
+		MapKey.draw(self)
+		_legend(c, sz, team)
+		_side(c, sz)
+	if hot_line != "":
+		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
 	_cursor(c)
+
+## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
+func _plain_hint(sz: Vector2) -> void:
+	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
+	var line := "Press %s to jump  ·  hold %s for the legend and ways out" % keys
+	var w: float = hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
+	var pill := Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
+	hud._rounded(pill, Color(0.04, 0.05, 0.08, 0.88), 10)
+	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), line, 16, INK, hud.big)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:
@@ -220,11 +259,8 @@ func _map_title() -> String:
 
 func _exit_word(x: Dictionary) -> String:
 	match String(x["state"]):
-		"called": return "Skiff %s" % hud._fmt(float(x["t"]))
-		"boarding": return "BOARDING"
 		"charging": return "Uplink %d%%" % int(float(x["prog"]) * 100.0)
 		"open": return "OPEN"
-		"closed": return "Closed"
 	return ""
 
 ## A faint grid with letters and numbers along the edges, for callouts ("dropping C4").
@@ -281,10 +317,7 @@ func _labels(c: Control, kk: float) -> void:
 				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
 					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
 			"rail":
-				c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-				c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-				if zoomed:
-					_name(nm, pv + Vector2(0, 15), 10, Color("ffe2b0"), taken)
+				pass      # (the halts are TrainMap's)
 			"choke":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
@@ -575,7 +608,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var sp: SpawnPlan = m.spawn_plan
 	var cats: Array = sp.shown_cats() if sp else []
 	var rows := cats.size()
-	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 138))
+	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 94))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "THIS MATCH", 16, GOLD, hud.big)
 	hud._text(r.position + Vector2(14, 44), "Same map every time, different spawns", 11, MUTED)
@@ -599,7 +632,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	# what the marks mean
 	y += 4.0
 	c.draw_line(Vector2(r.position.x + 14, y - 14), Vector2(r.end.x - 14, y - 14), Color(1, 1, 1, 0.08), 1.0)
-	var keyrows := [["unknown", "Could be there: scout it"], ["active", "Here this match"], ["empty", "Empty this match"], ["taken", "Taken"]]
+	var keyrows := [["unknown", "Could be there: scout it"], ["active", "Here this match"]]
 	for kr in keyrows:
 		marker(c, "star", Vector2(r.position.x + 26, y), 6.0, Color("d8d4ff"), String(kr[0]))
 		hud._text(Vector2(r.position.x + 48, y + 4), String(kr[1]), 12, INK)
@@ -607,18 +640,14 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
 	# exits, under the spawns
-	var exit_rows := 3 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
+	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
 	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
-		var ex := [["dock", "Skiff dock (loud)"], ["outpost", "Uplink outpost"], ["hatch", "Rift hatch (needs a key)"]]
-		for i in ex.size():
-			var fake := {"kind": ex[i][0], "state": "idle", "prog": 0.0}
-			var col := Exits.color_of(fake)
-			_exit_glyph(c, String(ex[i][0]), Vector2(r2.position.x + 26, r2.position.y + 42 + i * 22), col)
-			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + i * 22), String(ex[i][1]), 12, INK)
-		var row_y := r2.position.y + 42 + 3 * 22
+		OutpostGlyph.draw(c, Vector2(r2.position.x + 26, r2.position.y + 42), 1.0, ExitModels.UPLINK, Color(0.55, 0.58, 0.64, 0.9), 0.0)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Uplink outpost", 12, INK)
+		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
@@ -627,19 +656,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
-func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
-	match kind:
-		"dock":
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-6, 1), pv + Vector2(6, 1), pv + Vector2(4, 5), pv + Vector2(-4, 5)]), col)
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 0), pv + Vector2(0, 0)]), col)
-		"hatch":
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), col)
-		"outpost":
-			OutpostGlyph.draw(c, pv, 1.0, col, Color(0.55, 0.58, 0.64, 0.9), 0.0)
-
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
-	_roster.clear()
 	var p: Hunter = m.player
 	if p == null:
 		return
@@ -658,7 +676,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		var row := Rect2(Vector2(r.position.x + 8, y), Vector2(wv - 16, 38))
 		var col := m.mate_col(h)
 		var lead: bool = m.skydrop != null and m.skydrop.is_lead(h)
-		var can_pass: bool = i_lead and h != p and in_drop and (h.riding if p.riding else (h.dropping and h.drop_follow == p))
+		var can_pass: bool = i_lead and h != p and in_drop and p.riding and h.riding and h.rocket == p.rocket
 		var hov := can_pass and row.has_point(c.get_local_mouse_position())
 		hud._rounded(row, Color(1, 1, 1, 0.1 if hov else 0.04), 8, Color(col, 0.5 if hov else 0.0), 1 if hov else 0)
 		c.draw_circle(row.position + Vector2(18, 19), 9.0, col)
@@ -668,8 +686,9 @@ func _side(c: Control, sz: Vector2) -> void:
 		if h.out: sub = "Out"
 		elif h.extracted: sub = "Extracted"
 		elif lead and in_drop: sub = "Drop leader"
-		elif h.drop_solo and (h.riding or h.dropping): sub = "Dropping solo"
-		elif h.riding or h.dropping: sub = "Following the leader"
+		elif h.rocket != null: sub = "Riding the rocket"
+		elif h.riding: sub = "Aboard the ship"
+		elif h.dropping: sub = "Falling" if h.diving else "Gliding"
 		var pg: Dictionary = {}
 		for q in m.pings:
 			if q.get("by") == h: pg = q
@@ -685,12 +704,14 @@ func _side(c: Control, sz: Vector2) -> void:
 	if in_drop and m.skydrop:
 		y += 6.0
 		var keys: Array = []
-		if i_lead:
-			keys = [["jump", "Jump (the squad jumps with you)" if p.riding else "Glider: you steer the squad"], ["pass_lead", "Pass the lead"]]
-		elif p.drop_solo:
-			keys = [["jump", "Jump" if p.riding else "Glide on your own"]]
-		else:
-			keys = [["separate", "Separate and drop solo"]]
+		if p.rocket != null:
+			keys = [["jump", "Jump out of the rocket"]]
+		elif p.riding and i_lead:
+			keys = [["jump", "Launch (the squad rides with you)"]]
+		elif p.diving:
+			keys = [["jump", "Open your glider"]]
+		if i_lead and p.riding:
+			keys.append(["pass_lead", "Pass the lead"])
 		for kk in keys:
 			var cap := Settings.key_cap(String(kk[0]))
 			var kr := Rect2(Vector2(r.position.x + 14, y), Vector2(maxf(28.0, hud.big.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0), 24))

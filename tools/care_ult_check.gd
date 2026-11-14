@@ -65,7 +65,7 @@ func tender() -> void:
 	var ring: Dictionary = AimKit.entry(P, "x")
 	var aiming := K.hearth_call.is_empty() and AimKit.shown(P, "x_line") and AimKit.shown(P, "x_pick")
 	ok("mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them", aiming
-		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05)
+		and absf(float(ring.get("r", 0.0)) - 12.6) < 0.05 and ring.get("col") == AimKit.hero_col(P))
 	# --- X: the tether starts, cooldown runs, the cast move; no bond for the cast alone
 	var calls0 := int(K.stats["calls"])
 	_press(P, m)
@@ -78,6 +78,7 @@ func tender() -> void:
 	ok("mm X: no bond is paid for the cast alone", _bond_kind(K) == "", _bond_kind(K))
 	# --- the channel: she walks, the tether shows, the ring is shown to everyone, the teammate heals
 	var p0 := P.pos
+	var pluses0 := int(HeroVfx.of(m).plays.get("call_plus", 0))
 	P.inp["move"] = Vector2(-1, 0)
 	step(m, 1.5)
 	P.inp["move"] = Vector2.ZERO
@@ -86,7 +87,13 @@ func tender() -> void:
 		"%.1f m" % walked)
 	ok("mm X: the tether and the reach ring show for everyone", K.ulk().showing("tether")
 		and bool(AimKit.entry(P, "x").get("all", false)) and K.anim_id == "mm_call_hold", K.anim_id)
+	ok("mm X: the tether is an arc, its middle bowed well off the straight hand-to-ally line", _tether_bowed(K, A),
+		"bow %.1f m" % _tether_bow(K, A))
 	ok("mm X: the tether heals the teammate", A.hp > a_hp0 + 5.0, "%.0f -> %.0f" % [a_hp0, A.hp])
+	var pluses := int(HeroVfx.of(m).plays.get("call_plus", 0)) - pluses0
+	var rec: Dictionary = HeroVfx.data("tender")["moves"]["call_plus"]
+	ok("mm X: mint pluses rise off the teammate on each heal tick, sent to other games", pluses >= 2 and pluses <= 4
+		and bool(rec.get("net", true)) and String(rec["fx"][0]["c"]) == "mint", "%d in 1.5 s" % pluses)
 	# --- she can cast other things while it runs (wiki): Hearthlight goes up
 	P.inp["sig"] = true
 	step(m, 0.05)
@@ -123,6 +130,8 @@ func _tender_rescue() -> void:
 	sc.down(m, A)
 	step(m, 0.1)
 	P.hp = P.max_hp * 0.5
+	P.regen_wait = 10.0     # s, as if just hit: with her only teammate down she is the last one up, and LastAlive's
+	# self-mend (1 hp/s once regen_wait runs out) holds off, so any hp she gains below is the tether's
 	var p_hp0 := P.hp
 	A.down_hp = float(Data.MATCH["down_hp"]) * 0.4
 	var a_down0 := A.down_hp
@@ -173,6 +182,103 @@ func _tender_breaks() -> void:
 	ok("mm merge: drop_holds ends Hearth Call (no pull, no bond)", up and K.hearth_call.is_empty()
 		and not K.ulk().showing("tether") and not AimKit.shown(P, "x") and _bond_kind(K) == "")
 	await _free(m)
+	await _tender_needs_ally()
+	await _tender_cancels()
+
+
+## The source's channel needs an ally or ally Wisp: with nobody in reach X does nothing, the cooldown is
+## kept and the press is refused (the X tile's denied pulse), for a player and for a bot; with one it casts.
+func _tender_needs_ally() -> void:
+	var r: Array = sc.setup("tender", 14.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var K: TenderKit = P.ak
+	var calls0 := int(K.stats["calls"])
+	A.out = true
+	sc.aim_at(P, P.pos)
+	ok("mm X alone: no teammate in the match, no target (not herself)", K.call_target() == null)
+	ok("mm X alone: the press is refused, nothing runs, the cooldown is kept", not HunterKeys.ult_pressed(P)
+		and K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0 and int(K.stats["calls"]) == calls0)
+	K._bot_call()
+	ok("mm X alone: a bot does not try it", K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.out = false
+	A.teleport(P.pos + Vector3(-16.0, 0, 0))
+	sc.aim_at(P, A.pos)
+	step(m, 0.1)
+	ok("mm X ally out of range: no target, the press is refused, the cooldown is kept", K.call_target() == null
+		and not HunterKeys.ult_pressed(P) and K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.hp = A.max_hp * 0.2
+	K._bot_call()
+	ok("mm X ally out of range: a bot does not try it", K.hearth_call.is_empty() and float(K.cd["x"]) <= 0.0)
+	A.teleport(P.pos + Vector3(-6.0, 0, 2.0))
+	sc.aim_at(P, A.pos)
+	step(m, 0.1)
+	ok("mm X ally in range: the target is the teammate", K.call_target() == A)
+	ok("mm X ally in range: the press casts and the cooldown starts", HunterKeys.ult_pressed(P)
+		and not K.hearth_call.is_empty() and K.hearth_call["who"] == A and float(K.cd["x"]) > 40.0)
+	await _free(m)
+
+
+## The source's cancels, one case each: she is stunned, she is knocked, she dies, the teammate dies cancel
+## it (and pay nothing, with the tether snapping); the teammate being knocked, her own dash and a hit do not.
+func _tender_cancels() -> void:
+	for which in ["stun", "knock", "dead", "mate_dead"]:
+		var r: Array = sc.setup("tender", 14.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var A: Hunter = r[2]
+		var K: TenderKit = P.ak
+		sc.aim_at(P, A.pos)
+		_press(P, m)
+		step(m, 0.5)
+		var up := not K.hearth_call.is_empty() and K.ulk().showing("tether")
+		var snaps := int(K.stats["broken"])
+		match which:
+			"stun": P.stun_t = 0.5
+			"knock": m.knock(P, null, {})
+			"dead": m.eliminate(P, null, "test", true)
+			"mate_dead": A.out = true
+		step(m, 0.1)
+		ok("mm X cancel (%s): the tether ends, snaps once, and pays nothing" % which, up
+			and K.hearth_call.is_empty() and not K.ulk().showing("tether")
+			and int(K.stats["broken"]) == snaps + 1 and _bond_kind(K) == "")
+		await _free(m)
+	await _tender_keeps_going()
+
+
+## No cancel: the teammate is knocked mid-channel (it carries on, heals them and stands them up at the end),
+## and a dash and plain damage on her (the source lists neither; nothing like silence exists to test).
+func _tender_keeps_going() -> void:
+	var r: Array = sc.setup("tender", 14.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var K: TenderKit = P.ak
+	A.teleport(P.pos + Vector3(-4.0, 0, 2.0))
+	sc.aim_at(P, A.pos)
+	_press(P, m)
+	step(m, 0.5)
+	P.hurt(20.0, null, {"src": "shot"})
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	step(m, 0.1)
+	P.inp["dash"] = false
+	P.inp["move"] = Vector2.ZERO
+	var dashed := P.roll_t > 0.0 or P.move_kind == "dash"
+	step(m, 0.3)
+	ok("mm X: plain damage and her own dash do not end it", dashed and not K.hearth_call.is_empty()
+		and int(K.stats["broken"]) == 0, "dashed %s" % str(dashed))
+	sc.down(m, A)
+	step(m, 0.5)
+	var down_hp0 := A.down_hp
+	step(m, 1.0)
+	ok("mm X: the teammate being knocked mid-channel does not end it, and it heals them", A.downed
+		and not K.hearth_call.is_empty() and A.down_hp > down_hp0 + 3.0, "%.0f -> %.0f" % [down_hp0, A.down_hp])
+	step(m, 3.5)
+	ok("mm X: ... and at the end they are pulled to her and revived", not A.downed and P.flat_dist(A) < 1.6
+		and int(K.stats["rescues"]) == 1 and _bond_kind(K) == "kill")
+	await _free(m)
 
 
 # ================================================================== Claire: Rimelock
@@ -197,9 +303,13 @@ func rimewright() -> void:
 		"rimes +%d" % (int(K.stats["rimes"]) - rimes0))
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
-	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
-		and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.2) < 0.05
-		and K.ulk().showing("rink") and K.ulk().showing("bud") and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	ok("tm X: sealed in, the 7.47 m rink (4 bh + 15%, then -10% on owner 11-11) shown to everyone, the cast move",
+		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.47) < 0.05
+		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	_rime_ring_is_hit(K, T, ring, float(xd["radius"]))
+	var rink_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
+	var flash0 := float((rink_sm as ShaderMaterial).get_shader_parameter("flash"))
+	ok("tm X: the frost edge flashes as the rink opens", flash0 > 0.5, "flash %.2f" % flash0)
 	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
 		absf(float(K.cd["x"]) - 80.0) < 0.5
 		and _bond_kind(K) == "")
@@ -215,13 +325,16 @@ func rimewright() -> void:
 	ok("tm X: inside the shell she is invulnerable and rooted, and nothing fires", P.hp >= php - 0.01
 		and _moved(P, p0) < 0.2 and m.shots.size() == n_shots, "hp %.0f moved %.2f" % [P.hp - php, _moved(P, p0)])
 	var slow1 := T.slow_k
-	var fill1 := float(AimKit.entry(P, "x").get("fill", 0.0))
+	var hot1 := float(AimKit.entry(P, "x").get("hot", 0.0))
 	step(m, 1.6)
 	ok("tm X: the slow on a foe in the rink stacks the longer they stay (small mechanic)", T.slow_k > slow1 + 0.15
 		and T.slow_k <= float(xd["slow_max"]) + 0.001 and K.chilled(T), "%.2f -> %.2f" % [slow1, T.slow_k])
 	ok(
-			"tm X: the countdown fill (and the cracks) brighten as it builds",
-			float(AimKit.entry(P, "x").get("fill", 0.0)) > fill1 + 0.3)
+			"tm X: the ring (and the cracks) brighten as it builds: the countdown",
+			float(AimKit.entry(P, "x").get("hot", 0.0)) > hot1 + 0.3)
+	var disc_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
+	var flash1 := float((disc_sm as ShaderMaterial).get_shader_parameter("flash"))
+	ok("tm X: the opening flash is short (gone by %.1f s)" % UltLook.RINK_PULSE_T, flash1 < 0.01, "%.2f" % flash1)
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
 	step(m, 1.3)
 	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()
@@ -236,9 +349,63 @@ func rimewright() -> void:
 	await _free(m)
 	await _rime_recasts()
 	await _rime_sight_and_cap()
+	await _rime_ice_body()
+
+
+## Her body becomes ice while sealed: the model's own materials trade for the ice shader, a frost front
+## climbing from the feet over snap_t; ending it thaws the front back down and gives the materials back.
+func _rime_ice_body() -> void:
+	var r: Array = sc.setup("rimewright", 4.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: RimewrightKit = P.ak
+	var parts: Array = P.model.find_children("*", "MeshInstance3D", true, false)
+	var body: MeshInstance3D = null
+	for n in parts:
+		if IceBody.is_body(n as MeshInstance3D):
+			body = n
+			break
+	var was: Material = body.material_override if body.material_override else body.get_surface_override_material(0)
+	var skin: Material = body.get_active_material(0)
+	_press(P, m)
+	step(m, 0.05)
+	var ice := K.icb()
+	var now: Material = body.get_active_material(0)
+	ok("tm X: on the cast her body's materials trade for the ice shader (no shell), the front still climbing",
+		ice.active() and ice.k < 0.9 and now is ShaderMaterial and (now as ShaderMaterial).shader == IceBody.SHADER
+		and (now as ShaderMaterial).next_pass == (skin as ShaderMaterial).next_pass,
+		"k %.2f, %d surfaces" % [ice.k, ice.mats.size()])
+	step(m, 0.3)
+	ok("tm X: all ice within snap_t, every surface of the model", ice.frozen() and ice.mats.size() == ice.swaps.size()
+		and ice.mats.size() >= 1, "%d surfaces" % ice.mats.size())
+	_press(P, m)
+	step(m, 0.05)
+	ok("tm X: ending it thaws the front back down", ice.active() and ice.thawing and ice.k < 0.95, "k %.2f" % ice.k)
+	step(m, 0.3)
+	ok("tm X: thawed, her own materials are back on every surface", not ice.active()
+		and body.get_active_material(0) == skin
+		and (body.material_override if body.material_override else body.get_surface_override_material(0)) == was)
+	await _free(m)
 
 
 ## X again: early (before the last 0.75 s) just breaks the shell; late cracks it open at two thirds.
+## The rink as drawn is the rink that hits: a thin lit ring (no filled disc) whose outer edge is the data
+## radius, a foe whose body reaches inside it is in, one just past it is out; the centre is the frost bud.
+func _rime_ring_is_hit(K: RimewrightKit, T: Ent, ring: Dictionary, radius: float) -> void:
+	var at: Vector3 = K.rime["at"]
+	var band := float(ring.get("band", 0.0))
+	ok("tm X: the rink is a thin ring at the hit radius, no countdown fill, the frost bud at its centre",
+		band > 0.0 and band <= 0.3 and float(ring.get("fill", -1.0)) < 0.0
+		and absf(float(ring.get("r", 0.0)) - radius) < 0.01 and K.ulk().showing("bud"), "band %.2f" % band)
+	var was := T.pos
+	T.pos = at + Vector3(radius + T.r - 0.05, 0.0, 0.0)
+	var edge_in: bool = T in K.foes_in(at, radius)
+	T.pos = at + Vector3(radius + T.r + 0.05, 0.0, 0.0)
+	var edge_out: bool = not T in K.foes_in(at, radius)
+	T.pos = was
+	ok("tm X: drawn == hit: a body touching the ring is in the rink, one just past it is out", edge_in and edge_out)
+
+
 func _rime_recasts() -> void:
 	var r: Array = sc.setup("rimewright", 4.0)
 	var m: Match = r[0]
@@ -356,3 +523,17 @@ func _merge_ult_ready(P: Hunter) -> bool:
 		return false
 	var mk: MergeKit = P.merge_st["kit"]
 	return mk.live and mk.lock_left() <= 0.0
+
+
+## How far the tether's middle segment sits from the straight line between her hand and the ally (m).
+func _tether_bow(K: Object, ally: Hunter) -> float:
+	var held: Dictionary = K.ulk().held["tether"]
+	var mid := (held["n"] as Node3D).get_node("Seg5") as Node3D
+	var a: Vector3 = CareUtil.hand_at(K.h, false)
+	var b: Vector3 = ally.pos + Vector3(0, 1.1, 0)
+	var line_pt := a.lerp(b, 0.5)
+	return mid.global_position.distance_to(line_pt)
+
+
+func _tether_bowed(K: Object, ally: Hunter) -> bool:
+	return _tether_bow(K, ally) > 0.5
