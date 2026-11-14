@@ -32,6 +32,7 @@ var pending: Array = []             # delayed effects {t, fn}
 var hz_ent: Ent = null              # stands in for "the environment" as a damage source (never credited)
 var player_biome := ""
 var hot: HotZone = null             # the regions' own loot and this match's hot drop zone
+var terrain: TerrainHazards = null  # the map's lava, deep water, ice, static and bramble areas
 var rng := RandomNumberGenerator.new()
 
 func _init(match_node: Node) -> void:
@@ -326,6 +327,7 @@ func tick(dt: float) -> void:
 		if muts.has("void") and mb.tgt and mb.st == "chase" and mb.flat_dist(mb.tgt) > 3.5:
 			_blink(mb)
 	_tick_hazards(dt)
+	terrain.tick(dt)
 	_tick_region_banner()
 
 ## A void monster marks where it's going, then blinks there.
@@ -349,6 +351,7 @@ func _blink(mb: Mob) -> void:
 # ------------------------------------------------------------------ traps and hazards
 ## Places each region's traps on its islands, away from exits, points of interest and the edges.
 func place_hazards() -> void:
+	terrain = TerrainHazards.new(m)
 	var taken: Array = []
 	for p in w.portal_spots: taken.append(p)
 	for c in w.chest_spots: taken.append(c["pos"])
@@ -439,12 +442,15 @@ func _add_hazard(kind: String, p: Vector3) -> void:
 			n.add_child(rim)
 	hazards.append(hz)
 
-## How much grip the ground has at p (1 normal, low on ice), for the hunter's footing.
-func grip(p: Vector3) -> float:
+## How much grip the ground has at p for h (1 normal, low on ice; a frost Boki keeps its hunter's
+## footing on ice sheets and patches alike).
+func grip(p: Vector3, h: Hunter = null) -> float:
+	if h != null and terrain.guards(h, "ice"):
+		return 1.0
 	for hz in hazards:
 		if hz["kind"] == "ice_patch" and Vector2(p.x - hz["pos"].x, p.z - hz["pos"].z).length() < float(hz["r"]) and absf(p.y - hz["pos"].y) < 0.3:
-			return 0.12
-	return 1.0
+			return float(TerrainHazards.kind_def("ice")["effect"]["grip"])
+	return terrain.grip(p, h)
 
 func _near_hunter(p: Vector3, d: float) -> Hunter:
 	var best: Hunter = null; var bd := d
