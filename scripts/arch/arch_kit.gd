@@ -30,6 +30,7 @@ var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
 var bot_hold := {"rmb": 0.0, "dash": 0.0}
+var bot_lead := {}             # a bot's delayed cast still being aimed (BotLead)
 var last_variant := ""         # the RMB variant that last fired (HUD, tests)
 var last_e := ""
 var st := {}                   # the subclass's own state
@@ -221,6 +222,7 @@ func tick(dt: float) -> void:
 			cd["rmb"] = float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")
 	for k in bot_hold.keys():
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
+	if not bot_lead.is_empty(): BotLead.hold(self, dt)
 	if rmb_down:
 		if h.downed or h.stun_t > 0.0:
 			_drop_rmb()
@@ -279,6 +281,9 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## Seconds until the kit's own cast lock lets Shift, LMB and a jump go (0: none). DashFlow holds a press made in
+## its last BUFFER_S for the first free step, as a CC's end (docs/heroes/ults.md: Albert, Kael, Motley, Sparkle).
+func lock_left() -> float: return 0.0
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
@@ -401,7 +406,8 @@ func use_r() -> void:
 		return
 	# the fuse: a readable wind-up (pose, energy gathering, a sting, a ring enemies can see), then the
 	# effect fires with a big impact. The cooldown starts now, so the slot reads as spent.
-	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": String(r_def().get("fuse_guard", "none")), "fx": 0.0}
+	var guard := String(r_def().get("fuse_guard", "none"))
+	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": guard, "fx": 0.0, "at": h.pos}
 	cd["r"] = r_cooldown()
 	h._ab_feedback("r", "cast")
 	_fuse_start(will_bond)
@@ -426,8 +432,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	tele_circle(h.pos, 2.4, col, T)
-	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
 	if bond:
@@ -456,6 +460,7 @@ func _tick_fuse(dt: float) -> void:
 		return
 	# energy gathers inward, faster and brighter toward the end
 	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	AimKit.circle(h, "r_fuse", {"at": fuse["at"], "r": 2.4, "col": col, "fill": k, "all": true})
 	fuse["fx"] = float(fuse["fx"]) - dt
 	if float(fuse["fx"]) <= 0.0:
 		fuse["fx"] = 0.05
@@ -498,24 +503,19 @@ func _fire_r(will_bond: bool) -> void:
 			if h.is_local() and m.hud: m.hud.flash(Feel.cat_color("control"), 0.25)
 			Sfx.duck(0.3)
 
-## The ult going off: a burst, a ring, a flash and a camera punch (the payoff of the fuse).
+## The ult going off: a burst, a flash and a camera punch (the payoff of the fuse).
 func _r_impact() -> void:
 	var col := col_of(r_def())
-	m.fx.ring(h.pos, 3.6, Color(col, 0.95), 0.4)
-	m.fx.ring(h.pos, 1.8, Color(1, 1, 1, 0.9), 0.25)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
 	Shake.incoming_big(m, h.pos, 0.6, h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
-	if m.net_on and not h.remote:
-		m.net_fx(["ring", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 3.6, col.to_html(false)])
 
 ## The 0.35s transform tell of a Bonded R: a column in the kin's colour visible within 25m.
 func _bond_tell() -> void:
 	var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE) if h.kin else Color.WHITE
-	m.fx.ring(h.pos, 2.6, Color(kc, 0.95), 0.35)
 	for i in 6:
 		m.later(0.05 * i, func(): if is_instance_valid(h): m.fx.burst(h.pos + Vector3(0, 0.4 + 0.5 * i, 0), kc, 10, 2.5, 0.35, -2.0, 1.1))
 	m.sfx("bond", h.pos, -2.0, 1.2)
@@ -525,22 +525,20 @@ func _bond_tell() -> void:
 ## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
+	return float(air.get("cd", DashState.long_cd(h.cdat))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
 	if use_ex:
-		if h.ex_cd > 0.0:
+		if not h.dash.spend_long(long_dash_cd()):
 			h._ab_feedback("dash", "deny")
 			return false
-		h.ex_cd = long_dash_cd()
 		h.ex_next = true
 		h.gliding = false
 	else:
-		if h.dashes < 1.0:
+		if not h.dash.spend_short():
 			h._ab_feedback("dash", "deny")
 			return false
-		h.dashes -= 1.0
 	return true
 
 ## The way a plain dash goes: where you're moving (WASD), or the cursor when you stand still or turn on
@@ -715,31 +713,6 @@ func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
 
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
-func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
-	var tw := tele.create_tween()
-	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
-## A filling lane (dash arrows, beams, charge lines).
-func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
-	if t > 0.0:
-		var tw := tele.create_tween()
-		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-		tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
 ## The out-of-combat clock: building or spending the resource keeps it from decaying.
 func touch_res(wait := -1.0) -> void:
 	res_wait = maxf(res_wait, float(res_def().get("wait", 3.0)) if wait < 0.0 else wait)
@@ -763,8 +736,6 @@ func _tells(dt: float) -> void:
 		if tell != "":
 			var rc := res_col()
 			m.fx.burst(h.pos + Vector3(randf_range(-0.3, 0.3), 1.0 + randf() * 0.6, randf_range(-0.3, 0.3)), rc, 2 if tell == "half" else 5, 1.0, 0.45, -1.5, 0.7 if tell == "half" else 1.0)
-			if tell == "full" and int(m.time * 5.0) % 3 == 0:
-				m.fx.ring(h.pos, 0.9, Color(rc, 0.7), 0.25)
 		if bonded_glow and h.kin and (h.kin as Kin).visible:
 			var kc: Color = Data.KIN.get((h.kin as Kin).species, {}).get("color", Color.WHITE)
 			var kp: Vector3 = (h.kin as Kin).position
@@ -1021,6 +992,20 @@ static func net_vel(h: Hunter) -> Vector3:
 func move_vel() -> Vector3:
 	return h.vel
 
+## A ground cone everyone must dodge (Net 0.24.6): other players' games don't run this kit, so they get its
+## true length and width and draw the same AimKit cone for `dur` s (net_cone_in).
+func net_cone(at: Vector3, dir: Vector2, length: float, deg: float, dur: float, col: Color) -> void:
+	if m.net_on and not h.remote:
+		m.net_fx(["cone", h.nid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.01), snappedf(dir.y, 0.01),
+				m._r(length), m._r(deg), m._r(dur), col.to_html(false)])
+
+static func net_cone_in(match_node: Node, x: Array) -> void:
+	var who: Variant = match_node.ents_by_id.get(String(x[2]), null)
+	if who is Hunter and not (who as Hunter).is_local():
+		var p := {"from": Vector3(x[3], x[4], x[5]), "dir": Vector2(x[6], x[7]), "len": float(x[8]), "deg": float(x[9])}
+		p.merge({"dur": float(x[10]), "all": true, "col": Color.html(String(x[11]))})
+		AimKit.cone(who as Hunter, "net_cone", p)
+
 ## Other players' games don't run this kit: while the payoff is armed a ring in the resource colour
 ## pulses under the hunter for them every 1.1s (the existing Net fx ring; the protocol is unchanged).
 func net_pulse(dt: float, on: bool, r := 1.1) -> void:
@@ -1040,13 +1025,9 @@ func armed_fx(slot := "sec") -> void:
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
-## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
+## flash for whoever landed it; everyone online gets a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
-		rings := true) -> void:
-	if rings:
-		m.fx.ring(at, 2.4, col, 0.38)
-		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null) -> void:
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
@@ -1054,8 +1035,6 @@ func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, victim)
-	if rings:
-		net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
@@ -1190,9 +1169,7 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var rc := col
-		var p = m.get("player")
-		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
+		var rc := SideColor.fx(m, h, col)
 		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
 		chg["ring"] = ring
 		if charge_orb():

@@ -27,14 +27,14 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.55, "stride": [2.0, 1.9], "foot_mps": [0.93, 3.08], "arm_swing": {"L": 0.7, "R": 0.7}
+		"walk_speed": 2.2, "run_speed": 4.55, "cycle_s": 0.34, "foot_mps": [2.2, 4.55], "arm_swing": {"L": 0.7, "R": 0.7}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.36},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "float"},
-	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"mm_shot_r": {"clip": "shot_r", "lead": 0.06, "upper": "moving"}, "mm_shot_l": {"clip": "shot_l", "lead": 0.06, "upper": "moving"}, "mm_shot_emp": {"clip": "shot_emp", "lead": 0.1, "upper": "moving"},
-		"mm_seed_aim": {"clip": "seed_aim", "fit": 0.35, "upper": "moving"}, "mm_seed": {"clip": "seed", "lead": 0.06, "upper": "moving"},
+		"mm_seed_aim": {"clip": "seed_aim", "fit": 0.6, "upper": "moving"}, "mm_seed": {"clip": "seed", "lead": 0.06, "upper": "moving"},
 		"mm_hearth": {"clip": "hearth", "lead": 0.15, "upper": "moving"}, "mm_toss": {"clip": "toss", "upper": "moving"},
 		"mm_skip": {"clip": "skip", "heading": true}, "mm_float": {"clip": "float", "heading": true},
 		"mm_pickup": {"clip": "pickup"}, "mm_flare": {"clip": "flare", "upper": "moving"},
@@ -44,7 +44,7 @@
 	},
 	"lockin": {"clip": "emote", "from": 0.3, "dur": 1.45, "rate": 1.3},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
-	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 0.35], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
+	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 0.6], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_bow", "refuse": "g_wag"},
 	"cc": {"pull": 0.26, "tug_hz": 2.6, "twist": 0.15, "bow": 0.3},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],

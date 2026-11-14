@@ -89,6 +89,7 @@ defaults aren't cited, since the data names no field for these windows.
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |
 | glide_open_hold_s (scripted input only: a player's Space held from the jump never opens it, glide_press_only) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
 | glide_open_button_frames (glide button) | 6 | 1 | <= 1 | no tap ambiguity |
+| glide_remote_open_lag (the other game's copy of a glide-button open mid-fall) | 0–5 steps / 8–74 ms | the same | <= 1 Net tick (0.1 s) | the owner's game opens it; the copy mirrors its snapshot (`--glide-hold-check`, `--glide-net-check`) |
 | glide_catch_t (terminal fall to sink rate) | 0.383s | 0.183s | <= 0.2s | [guide] opens "instantly"; the catch rate is ours, the source's fastest-fall clamp at the open is locked |
 | glide_start_vy (opened from a rising jump: the first glide step's fall) | rising on | 1.08 m/s | 0.85–1.4 | [game data] GlideStartFallSpeedMin -85 uu/s: the open cuts the rise, never adds speed |
 | glide_speed | 6.5 m/s | 5.0 m/s | 4.5–5.5 | [game data] MaxGlide 500 uu/s (item 163: ours was "too fast and controllable") |
@@ -101,8 +102,10 @@ defaults aren't cited, since the data names no field for these windows.
 | dashglide_1s_speed | 5.7 m/s | 12.3 m/s | >= 10.5 | [wiki] preserved |
 | dashglide_2s_speed | 5.0 m/s | 10.8 m/s | >= 9 | [wiki] preserved |
 | feather_toggle_frames (let go, press again) | 1 | 1 | <= 1 | no toggle penalty |
-| feather_m vs feather_hold_m (distance before overheating, over the abyss) | (no feathering) | 110.7m vs 90.1m | | |
-| feather_gain | n/a | 1.23x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
+| feather_m vs feather_hold_m (distance before overheating, over the abyss) | 113.8m vs 44.6m (11-11) | 165.6m vs 44.6m | | |
+| feather_gain | 2.55x (11-11) | 3.71x | >= 1.15x | [est] skilled taps beat holding when heat is the limit |
+| dive_feather_speed (1s drop under the lip, then the glider: speed 0.5s on) | 5.0 m/s | 8.2 m/s | >= 8 | owner 11-11: the fall goes on forward (decision 0061) |
+| dive_feather_m (the 1s after that open) | 4.9m | 8.3m | >= 7m | owner 11-11 |
 | land_carry_hop_held / drop4_held (1 m hop, 4-terrace drop, keys held: touchdown / run speed) | | 1.00x / 1.00x | 0.98–1.02 | [game data] landing keeps what you carried |
 | land_carry_glide_held (glider let go 2 m up, keys held) | 1.14x | 1.05x | 0.98–1.07 | the glide's extra bleeds at air.drag 2/s (decision 0052) |
 | ledge_rise_t (1.6m wall, jump and push in: contact to over the top) | (scripted mantle) | 0.33s (0.15s before the 11-09 suction) | <= 0.45s | [game data] jump-paced; suction cap 2.5 m/s (decision 0026) |
@@ -114,22 +117,24 @@ defaults aren't cited, since the data names no field for these windows.
 | ledge_fling_timed_up_m | n/a | 0.95m | >= 0.7m | [est] |
 | ledge_fling_gain (timed vs no jump, distance) | n/a | 3.4x (1.8x from a 1.35m rise) | >= 1.5x | [est] rewarding |
 | ledge_window_s | n/a | 0.117s (7 steps) | >= 0.08s | [est] readable |
-| abyss_lift_t (4m deep to balloon line) | 1.05s | 0.82s | <= 1.0s | [footage] ~1s |
+| abyss_lift_t (4m deep to balloon line) | 1.05s | 0.67s (0.70 before 0061) | <= 1.0s | [footage] ~1s |
 | abyss_kill_depth (point of no return under the lip) | 6.0m | 17.5m | 17–18m | [game data] AbyssHeight |
 | abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 18.5m | >= 15m | |
 | abyss_fall_t / abyss_fall_vy_deep (step off the lip) | n/a | 1.93s / 10.0 m/s | >= 1.8s / 10–10.8 | [game data] AbyssFallSlow 12 to 10 m/s |
-| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.58m | >= 1.5m | owner: bouncy |
+| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.59m (1.53 before 0061) | >= 1.5m | owner: bouncy |
 | glide_high_sink / glide_swoop_speed (gliding above 8.5m) | 1.4 / 6.5 m/s | 3.5 / <= cruise | 3.3–3.6 / <= 5.3 | [game data] GlideDownwardForce; the drop adds no speed (owner 11-08) |
+| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.58m | >= 1.5m | owner: bouncy |
+| glide_high_sink / glide_high_swoop_x (gliding above 8.5m) | 1.4 / none | 3.5 m/s / 2.5x | 3.3–3.6 / 2.4–2.6 | [game data] GlideDownwardForce; the pull's extra sink, shed at 8.5m, becomes speed (decision 0095) |
 | dive_vy / dive_vy_t (hold Ctrl under the glider) | n/a | 32.5 m/s / 0.75s | 32–32.5 / 0.6–0.9s | [game data] GlideDiveZTargetSpeed -3250 uu/s, ZForceMax 350,000 / Mass 100 |
 | dive_steer_ratio (the keys in the dive vs under the glider) | n/a | 0.25x | 0.2–0.3 | [game data] GlideDiveXYForceMultiplier |
 | dive_cancel_h / dive_timeout_s | n/a | 3.27m / 9.98s | 2.9–3.5 / 9.9–10.1 | [game data] GlideDiveCancelDistance 350 uu, GlideDiveTimeout 10 s |
-| dive_swoop_speed (let go of Ctrl high up) | n/a | <= cruise | <= 6 | owner 11-08: pulling out of a dive adds no speed |
+| swoop_x / swoop_fade_s / swoop_left / swoop_hot_x (short dive, let go) | none | 2.5x / 1.5 s / 0 / 1.25x | 2.4–2.6 / 1.45–1.55 / <= 0.05 / 1.2–1.3 | [game data] SwoopSpeedTransferRatio, SwoopSpeedFadeTime; half strength overheated (decision 0095) |
 | airdash_fall_vy_keep / airdash_fall_speed (class air dash out of a 10 m fall, 12 m/s) | n/a | 0.00x / 23.0 m/s | 0–1 / reference | [?] AirDashSpeedMultiplier / AirDashSpeedClamp not decoded, not filmed (docs/SUPERVIVE_FEEL.md) |
 | airdash_dive_vy_keep / _hv_keep / _speed (out of a glide dive, 32.5 m/s down) | n/a | 0.00x / 0.00x / 23.0 m/s | 0–1 / 0–1 / reference | [?] the same: ours drops the fall and the forward speed |
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
-| drop_dive_steer_t (90% of commanded) | 0.783s | 0.233s | <= 0.3s | [est] responsive |
+| drop_dive_steer_t (90% of commanded) | 0.783s | 0.4s | <= 0.42s | the dive steers with every jump's air control (Loco.air_step, owner 11-08 one model; was 0.233s on its own 45 m/s² ramp) |
 | drop_deploy_frames | 1 | 1 | <= 1 | |
 | drop_deploy_settle_t | 0.267s | 0.217s | <= 0.3s | [est] |
 | drop_glide_steer_t | 0.583s | 0.217s | <= 0.3s | [est] |
@@ -155,6 +160,8 @@ Other checks:
   - Main caught 2141 of 2400 (89.2%).
   - Movefeel catches 1578 of 1600 (98.6%) with the keys pushing in (0/45 degrees), target 95%.
   - Steering mostly along the wall (65 degrees) it catches 691 of 800 (86.4%), target 70%. The ledge rise follows your keys, so sliding along a short rim can carry you off its end. Before the rise reworked the mantle, the scripted mantle caught all 2400.
+- `--wall-slide-check` (tools/wall_slide_check.gd, decision 0022): Sable, Vex and Kael run at 15, 45 and 75 degrees into a straight Hollow Crown cliff, three prop corners (a rock, a built wall, a camp crate) and a placed Tenzo rock off the grid, and ground-dash into the cliff, 1 s each against the same run on open ground. Targets [source]: the speed along the wall never under 90% of the reference's, and never more than 2 still steps in a row. Main failed 11 of 54 (every Tenzo-rock run: stopped 44-51 steps at 45/75 degrees; Sable's 45/75-degree dashes at 88%); now 0 of 54. In the air a dash into a wall is the wall bounce's, not this check's.
+- `--dash-wall-check` (tools/dash_wall_check.gd, decision 0047): all 12 Hunters ground-dash from touching a straight Hollow Crown cliff, a Tenzo rock, a full-width Neve wall and a prop face at 20, 45 and 80 degrees to it. Target [game data, Unreal's slide along a surface]: the distance along the wall is cos(angle) of the same dash's length on open ground (94%, 71%, 17%), within 10%. Before, cliff dashes at 80 degrees kept 16-19% (the corner slip pushed them on; Dredge failed at 19%). Now all 132 shared-dash tries pass; Tenzo's Rock Hop (12 tries) lands short of a wall by design and only must not end in it. In the air the wall bounce still applies.
 - `--mantle-check` (tools/mantle_check.gd): checks the ledge rise, steering and the fling, plus that ledges you don't push into never grab you (see below).
 - `--mantle-fling-check` (tools/mantle_fling_check.gd, owner bug 11-11): running jumps, ground and air dashes, glides and fast launches (6-19 m/s, also with a jump in the fling window) into a long ledge one and two terraces high, 0 to 80 degrees off the face. Over the lip you leave at most `MantleCarry.exit_cap` (1.2x run speed, ~5.5 m/s; a fling at most `Hunter.FLING_SPEED`), the rise carries you at most 2.5 m along the face (speed over the cap bleeds at `MantleCarry.RISE_BLEED`), and the wall never pushes you.
   - Before (main 88b06b9): a 19 m/s launch glancing in at 65 degrees kept its speed along the face, slid 4.3 m up the rise and left the top at 13.9 m/s, flying 8.3 m; a fling in the window kept it too (14.2 m/s). 103 of 187 tops over the cap, 19 rises over 2.5 m.
@@ -178,7 +185,7 @@ Other checks:
     - Steering more than 115° against your heading brakes at 36 m/s². Letting go drifts.
   - Cruise 5.0 → 6.5 m/s and sink 2.2 → 1.4 m/s. The owner found the glide "falls a bit faster and feels weaker than SUPERVIVE".
   - The glider opens falling at least 0.85 m/s ([game data] GlideStartFallSpeedMin, `Loco.glide_start`, match and farm): a rising jump is cut at the open, no float-up, and the jump pad's own 2 m/s cap went with it. The canopy then catches a fall at 60 m/s² (ours: the source's matching fastest-fall clamp is locked; [guide] it opens "instantly").
-  - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only).
+  - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only). Online that holds too: each game decides its own hunter's glider and the others mirror the snapshot's gliding bit, so a client's button open shows on the host on the next snapshot, the same as a Space open (`--glide-net-check`).
   - **Dive** (`GlideDive`, `HunterMove.dive_*`, all [game data]): hold crouch (Ctrl) under an open glider and the canopy folds into a plunge toward 32.5 m/s at 35 m/s², the keys steering at a quarter of their glide force. Let go, come within 3.5 m of the ground (or the island's lip over the abyss) or hold for 10 s and the glide catches you again; the drop you pull out of becomes speed, capped at the glide's 15 m/s max. The key is ours: the source names no dive input, and Space is the glider itself. The folded pose is local-only (the dive isn't in the net snapshot).
   - **Dive camera** (`CamRig.air_zoom`): the plunge holds the view at least as open as it was, where height alone would close it in as you drop (1.82 → 1.70 mid-plunge before). Landing eases back as from any glide (2.5/s; 1.65 → 1.18 at +0.5 s → 1.01 at +1.5 s). Strip: `--glide-cam-shots`.
   - The abyss lift's brake zone rises at 3.5 m/s per metre left (was 2). Updrafts grab at 45 m/s² (was 30).
@@ -190,7 +197,7 @@ Other checks:
   - The first 0.3s of an abyss lift (the "rapid upward impulse" [wiki]) heats at 0.4x a level glide (was 1x; lowered with the shorter glider so feathering still beats holding). Holding the lift past that costs the full 4x. So short lift taps that coast on the impulse are the skilled, efficient way across.
   - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
 - **Jump out of a dash** (`Loco.dash_jump_keep`, tuning.json `dash.jump_keep`, 0.75): the dash ends and the jump carries 75% of its speed, the rest is air drag's; the farm does the same (it used to keep the whole dash, the match 55%: a one-step 45% stop). A Shift's speed is `Loco.dash_hv` in both places (the per-hunter ease too).
-- **Dash into glide** (owner 11-08, `Hunter._dash_into_glide`, docs/decisions/0022): a fresh glide press (second Space, or the glide button) at any moment of an air Shift dash ends the dash that step and the glide carries the dash's velocity exactly. No handoff boost: the glide's drag (`Loco.glide_step`) bleeds it back toward cruise within ~1.5 s, faster above the hunter's `glide_carry` cap (content/rules/tuning.json). A kit's rush or special movement (`move_kind` other than "dash") is not cancelled; `--air-control-check` tries every Hunter's own air Shift and FLAGS the ones a press doesn't cancel (Motley's). A kit that ends its dash with a stop skips it when the glide took over (Vex's air slide). The boost trail and whoosh still play when the glide starts well above cruise.
+- **Dash into glide** (owner 11-08, `Hunter._dash_into_glide`, docs/decisions/0022): a fresh glide press (second Space, or the glide button) at any moment of an air Shift dash ends the dash that step and the glide carries the dash's velocity exactly. No handoff boost: the glide's drag (`Loco.glide_step`) bleeds it back toward cruise within ~1.5 s, faster above the hunter's `glide_carry` cap (content/rules/tuning.json). A kit's rush or special movement (`move_kind` other than "dash") is not cancelled, but its own Shift move is (`ArchKit.in_dash`: Tenzo's hops end on a press, Neve's skate and Sparkle's streak too); the dash's wind-down (`glide_cd`, set at its start by Grimble and Cinder or left by the dash before in a chain) goes with it, and a press the locomotion state refuses stays armed; `--air-control-check` tries every Hunter's own air Shift and FLAGS the ones a press doesn't cancel (Motley's). A kit that ends its dash with a stop skips it when the glide took over (Vex's air slide). The boost trail and whoosh still play when the glide starts well above cruise.
 - **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
@@ -204,7 +211,7 @@ Other checks:
 - **Rocks, trees and walls are walls** (item 151): a jump into one never lifts you over it (the old rock hop did, and dropped you into one-tile holes inside rock clumps). The generator never leaves ground sealed in by blockers (BlockPrune.fill_pockets), so nothing can land you in a hole you can't walk out of. Terrain ledges are the ledge rise's.
 - **Abyss:**
   - Hunters' point of no return is `World.ABYSS_DEPTH` + 7m: about 13m under the lip (was 6m). Monsters and the home keep the old depth.
-  - As you sink, the local player's screen drains of colour, darkens, goes deep crimson and closes in with a vignette that beats with a heartbeat (`scripts/match/abyss_fx.gd`, a screen shader under the HUD). The HUD adds a heartbeat and a low rumble, and near the end a pulsing "HOLD GLIDE TO LIFT" / "CLIMB OUT".
+  - As you sink, the local player's screen drains of colour, darkens, goes deep crimson and closes in with a vignette that beats with a heartbeat (`scripts/match/abyss_fx.gd`, a screen shader under the HUD). The HUD adds a heartbeat and a low rumble, and near the end a pulsing "HOLD GLIDE TO LIFT" / "CLIMB OUT". The fall itself sounds out the depth (`AbyssFallSfx`, docs/AUDIO.md): a wind rush rising in pitch and level through the slow band, a short warning before the point of no return, a lift cue when you are carried back up.
 - **Drop:**
   - Dive fall 11 → 13 m/s, reached in about 0.3s.
   - Steering 3/4 → 10/11 per second.
@@ -256,7 +263,8 @@ Other checks:
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
 - **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the SUPERVIVE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends.
-- **Wall bounce** (`WallMoves`): an airborne dash, glide or boosted jump that hits a wall more than 20 degrees off its normal and at least 4 m/s into it reflects about the normal, keeping 85% of the speed. Your keys steer the rebound for 0.25s at 25 m/s^2. Head-on it stops as before. Ground dashes, shoves and charges, walls low enough to mantle, knockbacks and slow jumps don't bounce. Dust, a spark and the landing thud mark it.
+- **Wall bounce** (`WallMoves`): an airborne dash or boosted jump that hits a wall more than 20 degrees off its normal and at least 4 m/s into it reflects about the normal, keeping 85% of the speed. Your keys steer the rebound for 0.25s at 25 m/s^2. Head-on it stops as before. Ground dashes, shoves and charges, walls low enough to mantle, knockbacks and slow jumps don't bounce. Dust, a spark and the landing thud mark it.
+- **Glider on a wall** (`WallMoves.stopped`, decision 0023): a glider never bounces or stops dead on a cliff face, a ruin wall or a Tenzo rock. [game data] SUPERVIVE glides on UE's CharacterMovementComponent, whose wall hit slides: the part of the speed into the wall is dropped, the part along it kept, and the canopy stays open; the glide force then holds the slide at cruise x sin(angle off the normal) while your keys push into it (0, 30, 60 degrees in `--move-feel-check`, rows `glide_wall_*`). [?] No glide-wall row in the physics dump and no footage of one.
 - **Ledges:** the rise no longer waits for the apex of a jump. Any airborne state (rising, falling, gliding, just after releasing the glider, after a dash) catches a ledge top within `MANTLE_REACH` above you when you press into it, or when glide momentum carries you into it. A ledge higher than where you last stood counts once you have been in the air 0.5s (`GlideLift.LEDGE_AIR_T`), are gliding, or let go of the glider within the last 0.6s (`FEATHER_KEEP`); before, launching from a higher place meant the ledge never caught you. Stunned or rooted players never grab a ledge. Only a tile sharing an edge with yours counts, so sliding along a wall never pulls you up it.
 - **Abyss (SUPERVIVE-like float):**
 
@@ -290,6 +298,15 @@ DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyo
 
 **Not a skate (fixed in the check):** the old open row, "Claire's rink skate (E held, X) meets the wall head-on (within 16 degrees of the normal)", was the check's own ice. In those cases no skate runs (`rinkrun` empty); she hit a 45-degree face 0.7-1.8 m short of the wall: her Rink Wall, cast toward the wall by the held E case (only the tapped E was aimed back) and left standing 6 s into the cases after it, met within 15 degrees of its face. The check now aims the held E back too (`CAST_BACK`) and clears placed walls between cases (`m.verbs.clear()` in `_fresh`); `COMMITS` is empty and all her cases bounce. Source for her real skate at a wall: none. `briefs/hero-ref/tamsin.md` (Shift window f169-f296; key frames 0195, 0241, 0243) and `briefs/supervive-data` show no skate meeting a wall. The one skate line, "Follows the movement input; the cursor is elsewhere" (f193-f199), is already ours: `_tick_rinkrun` steers toward the move keys. So nothing in the skate changed.
 
+**Wall bounce gates: no source number (checked 2026-11-11).** `WallMoves.BOUNCE_MIN_INTO` (4 m/s into the wall) and `BOUNCE_HEAD_ON_DEG` (20 degrees off the normal) stay our estimates. The source's movement data (briefs/supervive-data/supervive_physics.md) has no wall bounce field: its only wall setting is bCanWallJump, the tall-ledge climb for Myth and Brall. briefs/hero-ref has no wall-kick or wall-bounce clip, and the footage pass in ext/wall-bounce-walk found no run- or walk-jump bounce with a speed or angle you could measure. A run is 4.4-4.9 m/s, so a plain run-and-jump bounces between 20 and about 26-35 degrees off the normal. The `runin@` rows in `--wallmove-check` measure Tenzo and Neve, the two slowest in the air:
+
+| Run in | Tenzo (run 4.65) | Neve (run 4.45) |
+|---|---|---|
+| 25 degrees | 4.21 m/s into the wall: bounces | 4.03 m/s: bounces |
+| 40 degrees | 3.56 m/s: stops | 3.41 m/s: stops |
+
+A row fails when the bounce disagrees with the two gates. Neve's 25-degree hit clears `BOUNCE_MIN_INTO` by only 0.03 m/s, so any cut to her run speed ends that bounce. If source footage ever shows a walking jump bouncing, drop `BOUNCE_MIN_INTO` to about 3 m/s.
+
 **Walking jump into a wall (`walkjump@` rows, footage pass 11-11).** The question: does the source bounce a plain jump off the walk, so `BOUNCE_MIN_INTO` (4 m/s) and `BOUNCE_HEAD_ON_DEG` (20) should come down? Frames read on `ext/hero-ref-footage` (1 bh = 1.8 m), 5 fps unless noted:
 - Shiv `dancer` 0124-0135 (the jump at 303.8 s) and Brall `juggernaut` 0249-0268 (jumps and the Air Slam at 410-412.85 s): practice range, every jump starts and lands in the open, clear of the pillars and ledges. No wall contact.
 - Tetra `breah` 0869-0917 ("Wall Stacking", 4 fps, real terrain): rock walls raised against a cliff; nobody jumps into a wall.
@@ -314,13 +331,19 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Gravity** 30 (x1.2 falling) → 14.7 m/s², one gravity. **Jump** 9 → 6.8 m/s (the data's 7.5 would let jump + mantle top four terraces). **Wall kick** rise 0.9 → 0.8m, so jump + kick + mantle still tops 4 terraces and not 5.
 - **Fall cap** 10 → 12 m/s, easing to 10 m/s from 1m to 16.5m under the lip. **Point of no return** 13 → 17.5m under the lip: about 1.9s of falling to save yourself (was ~1.4s).
 - **Air control** (`Loco.air_step`, owner 11-08: the data's low AirControl is overruled): WASD adds 32 m/s^2 onto what you carry, 2.5x that against your drift (a 5 m/s backward drift turns forward in ~0.07 s), never past your run speed along the keys; speed above it (dash, knock) bleeds at 2/s. The farm uses the same step. Numbers in content/rules/tuning.json `air`.
-- **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s. The drop never becomes speed (owner 11-08 item 8).
+- **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s.
+- **Swoop** (`GlideLift.fall_vy`, decision 0095): fall the glider's own pull or dive built becomes 2.5x forward speed as the canopy sheds it on a level-out (half overheated), gone 1.5 s later (`tuning.json` `glide.swoop`, `glide.swoop_fade`). Opening the glider never swoops (owner 11-08 item 8): a fall you open it in is absorbed.
 - **Mantle**: topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s). The no-jump pop is 2.6 m/s (was 3.2; lower gravity floated it twice as long).
-- **Holding Space never opens the glider** (owner 11-08, said twice). With a player's keys (`inp.glide_press_only`, set in `Match`) the glider opens only from a fresh press in the air: a second Space press (`Hunter.do_jump`) or the glide button's press, or a pad/updraft auto-glide. Opening the glider uses the press up (owner 11-09): once it folds (a heal, a dash, a knock, a kit's wind-down) it stays shut while Space is still held, until a new press. A press while a move or cast keeps the glider shut (`_glide_armed`) opens it as the move ends, if still held; letting go or landing clears it. Space held from the jump, or while LMB/RMB/abilities are held (Kael's RMB, Lace's and Albert's LMB; Albert's perfect launch no longer opens it by itself off a drop), never opens it. Every Hunter's air Shift takes a press during or after it, except Sparkle's wire (her keys do nothing while it holds). Scripted input (bots, checks, demos) keeps the old hold-to-open (`GLIDE_ENGAGE`). Home islands follow the same rule. Measured by `--glide-hold-check`, which also holds every Hunter to "glide start adds no speed" (owner 11-08): opened from a run-speed jump, at an air Shift's end and in a fall, the horizontal speed over the next 8 steps never passes the step before it (0.15 m/s slack; the stick lets go at the press). All 13 pass; no engage-path or kit fix was needed. The earlier tap/hold split only added the second-press route next to the hold route and then shortened the hold wait (0.15 -> 0.1 s), so it never went away.
+- **Holding Space never opens the glider** (owner 11-08, said twice). With a player's keys (`inp.glide_press_only`, set in `Match`) the glider opens only from a fresh press in the air: a second Space press (`Hunter.do_jump`) or the glide button's press, or a pad/updraft auto-glide. Opening the glider uses the press up (owner 11-09): once it folds (a heal, a dash, a knock, a kit's wind-down) it stays shut while Space is still held, until a new press. A press while a move or cast keeps the glider shut (`_glide_armed`) opens it as the move ends, if still held; letting go or landing clears it. Space held from the jump, or while LMB/RMB/abilities are held (Kael's RMB, Lace's and Albert's LMB; Albert's perfect launch no longer opens it by itself off a drop), never opens it. Every Hunter's Shift move takes a press during or after it, except Sparkle's held wire (her keys do nothing while she holds Shift; the press waits for the streak). `--glide-hold-check` sweeps all 13 kits: ground dash (jump out, then a fresh press), air dash, chained barges, Rock Hops, the skate, the lob and sling, the wire, each pressed at 25, 50 and 75% of the move, and wants the glider open within 1 frame and still open 8 steps later (Albert's ground dash is allowed his 360 Smash wind-down). Scripted input (bots, checks, demos) keeps the old hold-to-open (`GLIDE_ENGAGE`). Home islands follow the same rule. Measured by `--glide-hold-check` which also holds every Hunter to "glide start adds no speed" (owner 11-08): opened from a run-speed jump, at an air Shift's end and in a fall, the horizontal speed over the next 8 steps never passes the step before it (0.15 m/s slack; the stick lets go at the press). All 13 pass; no engage-path or kit fix was needed. The earlier tap/hold split only added the second-press route next to the hold route and then shortened the hold wait (0.15 -> 0.1 s), so it never went away.
 - **Glider at any heat, softer deep lift** (owner item 63): the glide input opens the glider at every heat, overheated or not (no heat floor, no lockout after an overheated one closes); overheated it burns you and lifts at half strength. The deepest lift is 30% softer (climb cap 26 -> 18.2 m/s; speed per metre of depth 1.7 -> 1.1) at the same heat cost. Measured by `--glider-heat-check`.
 - **Heat on the canopy** (`GliderHeat`): the glider cloth warms toward ember with heat, an overheated glider trails a thin smoke, and one burning over the abyss at half strength flickers, so teammates and enemies read a gliding Hunter's heat from the world. Two toon-shader parameters (`canopy_heat`, `canopy_burn`) on the canopy's own material: no extra draw calls, no burst on open or close. The heat (4 bits, 15 = overheated) and the burn state ride the hunter flags (bits 19-23); no Net shape change. Measured by `--glider-canopy-check`; shots by `--glider-canopy-shots`.
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
+
+## Shift into the glider, and the dive into the feather (decision 0061, owner playtest 11-11)
+- **No cut at an air dash's end:** a kit that stops its air dash short (Shiv's slide, Kingpin's pounce, Felix's poof) now eases the cut out over `dash_glide.ease_t` (0.07 s) instead of one step, and a glider already open keeps the dash's whole speed (`DashGlide`).
+- **A press just after Shift counts as one in it:** within `dash_glide.grace` (0.15 s) the glider opens on the press, past the kit's wind-down (Brall keeps the source's wind-down). `--airdash-glide-check` presses mid-dash, the step after and 6 steps after for every hunter: opens on the press, no step changes speed by more than 4 m/s (the old cut lost 10-17), at least 70% of the dash's speed kept.
+- **The dive carries:** opening the glider under the lip turns 0.6 of the fall speed into forward speed (up to the glide max) and the deep spring adds 0.3 of it upward (`GlideLift.open_kick`); the high glide is unchanged (the drop there never turns into speed, 11-08).
 
 ## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
 
@@ -404,10 +427,66 @@ Hits (from the content): light = Kael LMB, kb 2.6; heavy = Kael RMB Smash push 6
 - **Matches, not changed:** a stun shuts the glider and a fresh press opens it the step the stun ends (0.5 s stun: 0.53 s with the press). A shut glider waits out a shove over 4 m/s for 0.4 s ([est], kept: `--abyss-check` asserts it at the rim). A lighter knock (Lace and Vex, 2.6-3.1 m/s) keeps it shut for its 0.16-0.2 s slide. A nudge under 2.5 m/s (Kael and Albert, LMB) is not a knock: it neither ends a dash nor holds the glider.
 - **Not changed:** Kael's 0.57 s reopen after an air Rampage is AirLimits (the glider stays shut while his kit move runs, items 162). Ground dashes and kit rushes (move kind "rush") still ride through a knock: not asked here, not measured. An overheated glider still lifts you out of the abyss at half strength (`--glider-heat-check`).
 
+## Glide entry and brake: the undecoded source values (2026-11-11)
+The data names `GlideInitialMin/MaxXYSpeed`, `GlideInitialSpeedDuration` / `DecayDuration` and
+`GlideBrakingForceMin/Max`, `GlideBrakingForceDelay` / `RampDuration`, with no values
+(briefs/supervive-data/supervive_physics.md, "not decoded yet"). The footage was frame-stepped for them and
+settles none, so every row keeps ours, marked `[?]`. Nothing in `tuning.json` changed.
+| Source value | Ours (`tuning.json` / code) | Status |
+|---|---|---|
+| Initial XY speed (min) | the open keeps your speed exactly (the hunter's glide step skips the step it opens; `Loco.glide_start` only cuts the fall) | `[?]`; a floor that adds speed is out anyway: owner 11-08 "glide start adds no speed" |
+| Initial XY speed (max) | no cap at the open; above `glide_carry` (12 m/s, Lace 9) the excess bleeds at `carry_drag` 3/s more | `[?]` |
+| Initial speed hold (InitialSpeedDuration) | none: the bleed starts the step the glider opens | `[?]` |
+| Decay to cruise (DecayDuration) | exponential: `glide.drag_steer` 1.4/s with keys, `glide.drag` 2/s without; a 10 m/s open is back to 5.5 m/s in 1.64 s / 1.15 s | `[?]` |
+| Brake delay (GlideBrakingForceDelay) | 0 s: the step the keys point more than `glide.brake_deg` 115° off your heading | `[?]` |
+| Brake ramp (GlideBrakingRampDuration) | 0 s: the full `glide.brake` 36 m/s² at once, only above cruise (at cruise the 16.25 m/s² glide force turns you, a reversal in ~0.6 s) | `[?]` |
+What was frame-stepped (both clips are 1080p at 60 fps, read from 480p full-rate proxies; every hero-ref folder on
+`ext/hero-ref-footage` is a slice of one of them):
+- **Tetra guide** (300 s, folder `breah`): every second at 1 fps, then 13-19, 40.5-48.5, 69-75, 120.5-124.5 and
+  243-249 s at 5 fps. The player never opens the glider: abilities on the ground, and at 121.7-124.3 s Tetra runs
+  on her own rock over the void. Enemy gliders cross the fights at 13.6-18.8, 72.4-74.8 and 245.6-246.8 s, already
+  open or being dunked, behind effects, with unknown keys and a camera that follows Tetra: no start, no brake.
+- **Ability showcase** (1174 s, the other folders): a 4 fps scan for open sky under the hunter flagged 207.5, 418,
+  508-512, 740, 1048 and 1127-1170 s. At 5 fps they are a camera pan over cliffs, a dunk at a cliff, a fight at
+  the edge, a heal disc, Void's ultimate and Celeste's blue ice ultimate: no glide. Elluna's air dashes (706.8,
+  731.1, 735.9, 745.1 s, mooshmoosh.md) are her kit's float; 706-712 and 729-747 s show no glider.
+Settling them needs a 60 fps clip of glides by the player: three opens (off a ledge at run speed, out of a dash,
+from a fall) and three back-key brakes from cruise and from a dash speed, on a view with ground at glider height.
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
-- **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
+- **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, a landing or arrival pose (`"land": true` in the move's keys: Sparkle's streak arrival, Motley's Trade arrival, Tenzo's crash) never holds the glider, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
+
+## Input latency: press to first motion or shot (`--input-latency-check`)
+Source feel is instant: the first frame of motion, or the shot, follows the press. `tools/input_latency_check.gd` presses LMB, RMB, E, dash and jump for every Hunter through the real input path (Input actions, `Match._process`: gather, pending input, the step, the render). It holds each press for 6 ticks (a quick 0.1 s tap) and records the first tick on which the Hunter's velocity, its animation state (what `HunterAnim` is told: the kit move, the cast, the shot, the swing, the dodge, leaving the ground) or a projectile of theirs changes. Tick 0 is the step run in the frame of the press. Target: tick 0 or 1, unless a sourced wind-up applies (the check's `WINDUP` table cites it).
+
+| Hunter | LMB | RMB | E | Dash | Jump |
+|---|---|---|---|---|---|
+| Vex | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Kael | 0 anim | 6 anim (release) | 0 anim, shot | 0 anim | 0 vel, anim |
+| Cinder | 0 anim | 1 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Meeko | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Tenzo | 0 anim | 6 anim (release) | 0 anim | 0 anim | 0 vel, anim |
+| Lace | 0 anim | 0 anim (was none) | 0 anim, shot | 0 vel, anim | 0 vel, anim |
+| Grimble | 0 vel, anim, shot | 0 anim, shot | 0 anim | 0 vel, anim | 0 vel, anim |
+| Neve | 0 anim, shot | 1 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Motley | 0 anim, shot | 1 anim | 0 anim | 0 anim | 0 vel, anim |
+| Mossy | 0 anim | 0 anim (was none) | 0 anim | 0 vel, anim | 0 vel, anim |
+| Sparkle | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Sable | 0 anim, shot | 0 anim | 0 anim | 0 anim | 0 vel, anim |
+
+No double buffering: a press is gathered, queued and applied in the same frame's step, and the local Hunter is drawn at the present. What was later, and what changed:
+- **Lace RMB (Heavy Shot): an animation gate.** The draw pose waited for the 0.15 s tap guard, so a tap showed nothing and a hold showed nothing for 9 ticks. The draw clip now starts on the press. It already ran on the hold's clock, so the full-draw key still lands at full charge. A tap still looses nothing and costs nothing, and its release puts the bow down.
+- **Mossy RMB (Aegis): an animation gate.** The guard pose waited for the aegis, 0.1 s into the hold. The arm now comes up on the press. The aegis still rises 0.1 s in (source: 0.2 s, docs/heroes/bulwark.md), and a tap lowers the arm again.
+- **A cleared kit move froze its pose.** When a kit cleared its move (a cancelled draw, the lowered aegis), `Hunter.anim_s` kept the old move with its clock stopped, so the body held that frame. The move now ends.
+- **Kael and Tenzo RMB: tap/hold splits, kept.** The press can't show which one it is until the release (the tap) or the hold threshold, so both act on the tap's release (tick 6 here, tick 0 from the release). Tenzo's is owner item 61 ("a tap shows nothing, it lands on the release"). Alternative not built: start Kael's Finishing Slam wind-up on the press, which would bring its strike up to 0.3 s earlier (a balance change).
+- **Cinder, Neve and Motley RMB: tick 1** (within target). The aim pose starts on the kit's first hold tick, which runs the step after the press.
+- **Since the branch was cut (11-13), main's kits act on the release for a tap/hold split** (the check's `WINDUP` rows carry it, tick 6 = the release): Kael and Tarek's LMB, Bjorn's LMB, Claire's, Cinder's, Ryzz's and Gil's RMB. Open, not built: start each hold pose on the press, as Lace's and Mossy's now do. Gil is new in the roster since the table above.
+## Steps: the drawn body and the camera never jolt (`StepSmooth`, `--step-smooth-check`)
+- Stepping onto a one-terrace lip snaps the body up (`Hunter` step_up, 0.8 m in one step), and a run down a flight of stairs is a fall. Both stay exactly as they were for hit boxes and ledge rules: only the drawn node eases.
+- `StepSmooth.ease` chases the body's y at most `step_max_speed` 4.4 m/s (0.073 m a frame), never further than `step_lag_up` / `step_lag_down` behind. Higher than a step above the ground (`step_free_from` 0.9 to `step_free_to` 1.5 m: a jump, a glide, a fall) the body is drawn where it is. The camera follows the drawn y. All in `FeelConfig` ("Steps").
+- Feet: `FootPlant` (ext/anim-foot-plant) reads the drawn body and leaves a body more than its 0.08 m slack off the ground alone, so it plants once the ease has settled and the two never stack.
+- The check runs Vex, Albert and Sable on the Hollow Crown through the real frame: up and back down three raised terraces (laid on open ground, as the map joins its terraces with stairs) and a four-step flight. No frame-to-frame drawn y jump over 0.08 m, camera y over 0.05 m. Before: 0.80 m (drawn, the collision snap), and 0.18 m once eased at the old rate.
 
 ## Air velocity: kit casts add to it, never overwrite it (DECISIONS 11-08; the eight kits outside the slice)
 ## Snag audit (`--snag-check`, decision 0022)
@@ -532,6 +611,47 @@ Ours below are the farm's constants (run `SPEED` 5.0 m/s, `JUMP_V` 6.8 m/s, `H_G
 
 What to do when the source gets a value: put it in `hunter_move.json` as a named const, read it from `HomeWater`, and add a `--move-feel-check` row for it.
 12 Hunters x 50 seeded paths (run, dash, glide, on The Hollow Crown); a stall is horizontal speed under half the wanted speed for over 0.15 s with the keys held, grounded for runs, gliding for glides, in a dash for dashes, and no wall straight on that a perfect slide could not pass at half speed (a prop whose top is over the feet by `World.STEP`, or terrain over mantle reach). Slowed by design (stun, ledge rise, a kit pace under 1, e.g. Motley's Trade in flight) is not counted. Before: 32 stalls (top spots: prop row at (116.8, 5.6, 90.4), a glide into a terrace face at (50.0, 3.7, 61.7), a run at a wall corner at (167.7, 1.6, 128.3), a glide that sank into a prop row at (123.9, 4.0, 165.6), a drop past a lip into the cliff column at (97.1, 3.2, 100.0)). After: 2 (a Tenzo and a Meeko glide, (41.7, 3.4, 62.0) terrace face 1.4 m up and (116.2, 5.6, 125.8) prop corner).
+
+## 8 directions: W up the screen, no diagonal bonus (`tools/move_feel_dirs.gd`)
+
+The keys become a world direction in one place for the match (`Match._gather_input`) and one for the
+garden (`Home._move_player`), the same way: `Vector2(get_axis(left, right), get_axis(up, down))`,
+normalised only when longer than 1 (so a stick's partial push keeps its length, and a key diagonal is
+exactly 1), then rotated by the camera's yaw, which only the skyship ride and the drop turn (the match
+camera and the garden camera sit at yaw 0, looking north). There is no deadzone on keys. World north
+(-z) is straight up the screen because `CamRig` places the camera on +z at its pitch; no roll, no twist.
+The glide steers toward `move x glide speed`, the class dash takes `move.normalized()` (`ArchKit.dash_dir`),
+so every consumer of the keys sees the same unit vector.
+
+Measured on the match camera (style supervive, pitch 66, cursor pan off so the hunter is on the screen's
+centre line), medium class, through the real keyboard path (`Match._process`), 2026-11-11, origin/main
+d255acbee. Nothing needed fixing: there was no skew and no speed bonus before this pass; the rows pin it.
+
+| Key | Screen heading (deg, 0 = right, 90 = up) | Ideal (the projected world line) | World off (deg) | Ground speed (m/s) | Glide speed (m/s) | Dash speed (m/s) |
+|---|---|---|---|---|---|---|
+| W | 90.0 | 90.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S | -90.0 | -90.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| A | 180.0 | 180.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| D | 0.0 | 0.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| W+D | 42.5 | 42.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| W+A | 137.5 | 137.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S+D | -42.5 | -42.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S+A | -137.5 | -137.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+
+A diagonal reads 42.5 degrees on screen, not 45, because the pitched camera foreshortens the up-down
+axis (atan(sin 66) = 42.4; the glide at 25 m reads 42.2 for the same reason). The source's angled camera
+does the same: a 45-degree world diagonal is a flatter diagonal on screen. The check rows (`--move-feel-check`):
+
+| Key | Target | Source |
+|---|---|---|
+| dir_ground / dir_glide _screen_err_deg | <= 1 deg, worst of 8 | [footage] W runs straight up the screen |
+| dir_ground / dir_glide / dir_dash _world_err_deg | <= 1 deg, worst of 8 | keys -> world: no skew from the yaw or the axes |
+| dir_ground / dir_glide / dir_dash _speed_spread | <= 1% (fastest vs slowest) | [game data] normalised input, a diagonal is no faster |
+
+The dash row fires the press as one sim step: while the check drives frames by hand inside one engine
+frame, a key's "just pressed" never clears, so a real Shift would stay pressed into every later run and
+dash before the keys are read (toward the cursor). The garden has no separate row: it is the same
+expression and the same camera class at yaw 0.
 ## Walking while attacking (fire-move parity, 2026-11-09)
 Share of the plain run while LMB is held, during each charge or hold, and just after release. Measured in the
 real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sources: `[data]` = the tooltips in
@@ -877,6 +997,71 @@ rest of the dash and resume it on top (more than the source's 0.6x would come ov
 
 The check asserts: a rim in reach is topped with at most 0.1 s stood at the face; a rim beyond reach never is.
 
+## Dash direction with no keys (`--move-feel-check` "standing dash" rows)
+The shared rule (`ArchKit.dash_dir`, `Hunter.dash_with`): the move keys held on the press tick, else the cursor (`aim_dir`; the body's facing only if the cursor sits on the hunter). Keys released a tick before Shift count as no keys. Mid-turn the dash takes the keys held on that tick. The "Dash toward the cursor" setting always uses the cursor. Moving = WASD is DECISIONS ("Dashes follow WASD by default"). Sources: briefs/hero-ref/<hero>.md, briefs/supervive-data/supervive_kits.md. [?] = the footage doesn't show it.
+| Hunter (source) | Source dash aim | Standing: ours / source | Moving: ours | Just released: ours / source |
+| Bjorn (Oath) | aim (bjorn.md:25) | cursor / cursor | WASD (Shield Charge: cursor) | cursor / [?] |
+| Breah (Tetra) | cursor (breah.md:156) | cursor / cursor | cursor (the hop aims) | cursor / cursor |
+| Dancer (Shiv) | "looks like" movement (dancer.md:116) | cursor / [?] | WASD | cursor / [?] |
+| Dredge (Kingpin) | cursor (dredge.md:103) | cursor / cursor | WASD (clamped after the Anchor) | cursor / [?] |
+| Juggernaut (Brall) | facing/aim (juggernaut.md:20) | cursor / cursor | WASD (after a Slam: cursor) | cursor / [?] |
+| Linwick (Felix) | cursor (linwick.md:75) | cursor / cursor | WASD | cursor / [?] |
+| Moosh Moosh (Elluna) | movement (mooshmoosh.md:85) | cursor / [?] | WASD | cursor / [?] |
+| Ostra (Void) | lands at the cursor (ostra.md:18) | cursor / cursor | cursor | cursor / cursor |
+| Pin (Myth) | movement (pin.md:22) vs cursor (supervive_kits.md:78, tested) | cursor / cursor | WASD [?] | cursor / [?] |
+| Tamsin (Celeste) | movement (tamsin.md:70) | cursor / [?] | WASD | cursor / [?] |
+| Venator (Ghost) | movement, "slide forward" (venator.md:89) | cursor / [?] | WASD | cursor / [?] |
+| Vireo (Joule) | cursor (vireo.md:28) | cursor / cursor | cursor | cursor / cursor |
+No row contradicts a source, so no code changed. The [?] rows keep the shared rule until footage shows a standing dash or a dash pressed right after letting go of the keys.
+## Falling never becomes horizontal speed (`--move-feel-check` "carry" rows, owner DECISIONS 2026-11-11)
+
+Asked: one shared movement profile for all modes, and falling never converts into horizontal momentum. `tools/fall_carry_rows.gd` runs the same 12 rows for every Hunter in `Arch.ORDER` (each made that Hunter with `Hunter.reclass`, its own class and run speed), first in the match (`Match.step`) and then in the garden (`Home._move_player`), on one test lane (`tools/fall_course.gd`: the live world with a straight strip laid over open sky, flat terraces stamped as real tiles so the match's ledge rise reads them, no wind or updraft in it). "Before" is the horizontal speed the step the last fall began (leaving the ground, the top of a rise, or the glider shutting); "after" is the most horizontal speed from the landing step to 0.5 s on. After may never pass before by more than 0.05 m/s.
+
+| Row | What | Match (before > after, m/s) | Garden |
+|---|---|---|---|
+| ledge | walk off 2.4 m at run speed, keys held | run > run (each Hunter its hunter_move.json speed, 4.45-4.85) | same |
+| fall_6 / fall_15 | walk off into a 6 m / 15 m fall, keys held | run > run | same |
+| slope_10 / 25 / 40 | dropped 6 m from rest onto a slope falling away at 10/25/40 degrees, no keys | 0 > 0 | same |
+| slope_N_run | run off a 2.4 m ledge onto each slope, downhill, keys held | run > run | same |
+| mantle | jump into a wall three terraces up, rise onto its 1 m top, go over it into an 8 m fall (keys let go as the fall begins) | run > 2.87-3.12 | same |
+| knock | 10 m/s push with 4 m/s lift at the edge of a 6 m drop | 8.30 > 4.17-4.42 | 6.89-7.05 > 3.90-4.15 |
+| glide_close | glide 0.6 s at 12 m with keys, let go of glider and keys | 5.00 > 3.47 | 5.00 > 2.98-3.05 |
+
+Result: 13 Hunters x 12 rows x 2 modes = 312 rows, 0 broken. No path converts fall speed: the landing in both modes sets the vertical speed to 0 and leaves the horizontal speed alone (`Hunter._physics` landing block, `Home._move_player`), the ground is a height under the body with no slope term (no projection on landing, so the slope rows land at 0 and stay at 0), and the run speed after any landing comes from the ground step toward the keys, capped at the Hunter's run speed (content/rules/hunter_move.json, unchanged). Nothing in the movement code changed.
+
+The two rows that differ between the modes differ in the air, not at the landing: a match knock has its own window (`knock_t`: 6 m/s² drag, no idle drag) and a glider let go of in a match keeps glide drag for `FEATHER_KEEP`; the garden has neither (it has no knock at all: the row puts the same push on as `Hunter.impulse`). Filed in docs/DEBT.md; both still never carry fall speed.
+## One profile in every mode (`--move-feel-check`, `tools/move_one_profile_check.gd`; DECISIONS 11-11)
+The same hero (Oath/`bulwark`, a row of its own: 4.85 m/s, accel 47) runs the same scripted inputs in the Expedition solo and trio, the Arena, the Training Grounds, the duel ring and the garden avatar (Heart Raid: `ext/pve-raid-1111` is not on main, add it to `MODES` when it lands). Each mode must read `hunter_move.json` and `tuning.json`: the loaded tables equal the files, every hunter's run speed and accel are the file's row, and run, brake, air accel, jump, glide and dash measure the same as the Expedition solo (within 0.03). Run speed and the jump apex are also anchored to the file and to v^2/2g. Result: no mode overrides a number. The spots are flat open floor with biomes off (a map's ice is terrain, not a mode).
+## Run start and stop poses (`WardenStride`, `--stride-check`, `--stride-shots`)
+Decision 0020 gave every Hunter the source's acceleration and a 0.3-0.5 m stop slide; the clips still snapped from idle to a run and back. `WardenStride` (scripts/heroes, called at the end of `WardenClips.step`, nothing in hunter.gd) adds both on top of the walk/run loops, from the speed and the brake state, never a timer:
+- **Start:** the hips lean along the way he goes by `lean_deg`, scaled by how far the *shown* speed (it climbs to the real one over 0.3 s) still lags it, so the lean settles as speed builds and is gone at a steady run.
+- **Stop:** a let-go (speed falling under its peak from a walk or run) shifts the weight back by `settle_deg` over the slide (`HunterMove.slide`). Two-bone foot pins: the trailing foot swings to its idle spot as the body halts, the leading foot stays where it was planted, then steps in over `step_s`, then the idle loop. The planted foot slides 0.7-1.8 cm in the stop (the loops alone: 20-90 cm; limit 3 cm). The idle spots are read off the standing pose; the drawn body's lead over the physics is learned off each stop.
+- **Skips:** a dash, a cast or keyed move, a hit or stun, the air, a crouch dip, a knock or kit step (speed over 1.15x run that nothing keyed) show neither, in that frame, with no ease-out.
+- **Per Hero** (content/rules/warden_stride.json): Kael, Albert and Tenzo lean less, settle 9-10 degrees and step in over 0.28-0.3 s; Vex, Neve, Sable and Pip lean 10-12 degrees, settle 3.5-4 and step in over 0.16-0.17 s.
+- `--stride-check` covers all 12 Hunters; `--stride-shots` films a stop from a run with the stride on and off (docs/shots/anim-run-start-stop/).
+
+## A glide into a rim (`--mantle-check` glide-rim rows; DECISIONS: ledges always responsive)
+A glider flying head-on into a terrace face, keys pushing in, the glider opened by a press as a player's keys do.
+"Rim" is how far the top is above the glider as it comes in reach of the face (the probe starts it higher by the
+glider's sink on the way in). Full is cruise (5 m/s), slow is overheated (half). "t" runs from reach to over the
+top. The same on origin/main 272368589 before this change and after it: the outcomes were already the source's,
+only the hand-over changed (below).
+| Hunter | rim 0.5m full / slow | rim 1.0m full / slow | rim 1.8m full / slow | glider |
+| Lace (archer, tall climb) | mantle 0.32s / 0.42s | mantle 0.53s / 0.62s | mantle 0.48s / 0.50s | folds at the catch, stays shut |
+| Kael (juggernaut, tall climb) | mantle 0.33s / 0.42s | mantle 0.53s / 0.62s | mantle 0.48s / 0.50s | folds at the catch, stays shut |
+| Vex (gunslinger) | mantle 0.33s / 0.42s | mantle 0.53s / 0.62s | fall / fall | in reach: folds; 1.8m: stays open |
+| Albert (bulwark) | mantle 0.33s / 0.42s | mantle 0.53s / 0.62s | fall / fall | in reach: folds; 1.8m: stays open |
+- Over the top at 4.6-4.8 m/s from either glide speed (the mini-mantle's max(0.6x run, 3.5 m/s) with your keys
+  in). No bump and no slide head-on: a rim in reach (`MANTLE_REACH` 1.5m, +0.9m for the tall climbers) always
+  catches; above it the glider stays open and sinks down the face ("fall").
+- Source: the suction reaches 1.5m (MantleSuctionUpwardsForceHeightMax) and lifts at 2.5 m/s (its Z speed cap),
+  so a glider's rise is slower than a jump's, which brings its own up speed; bCanWallJump is the tall climb.
+  The footage (briefs/supervive-data/MANTLE_185b.md) has a glide up onto a low rim with no climb pose, rim to top
+  ~0.2s; briefs/hero-ref has no glide-to-ledge frames.
+- **The hand-over is a Locomotion edge** (`HunterLoco._glide_folded`, the GLIDING exit hook): a caught ledge
+  moves the machine GLIDING -> MANTLING (the farm avatar ranks it so too), and that edge folds the glider
+  there, with its fold sound (the grab used to clear the flag silently), and no feathering after. A fresh glide press mid-rise still opens it again. A held key (bots, scripted input) can
+  reopen it over the lip; a player's press-only keys never do.
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
@@ -1020,3 +1205,7 @@ Every failing row, with the drift `--feel-golden-check` printed on main before t
 | crouch_walk | ostra | 3.017, 0.000 | shove | A |
 | crouch_walk | tender | 1.089, 0.000 | shove | A |
 | crouch_walk | thief | 2.964, 0.000 | shove | A |
+
+## Movement drills (Training Area)
+
+The Drills button on the Training Area's bar (`scripts/match/move_drills.gd`) runs five timed drills, one banner line each, pass or fail: dash through three hoops; tap jump, let go, press jump again and hold it to glide 4 m; glide and dive onto a mat; wall kick up a four-terrace wall; mantle a two-terrace ledge. The best pass time per drill is kept in `Save.d["drills"]` (save v15). Pressing the button again skips to the next drill. `--move-drills-check` passes each drill with a bot input script and fails the wrong plays.

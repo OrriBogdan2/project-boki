@@ -5,6 +5,9 @@ extends CanvasLayer
 
 signal closed
 
+## The settings body's held height: as tall as the window allows on every tab (most tabs need more than a
+## 720p window has, and scroll), so switching tabs never resizes the panel.
+const SETTINGS_H := INF
 const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 
 var root: Control
@@ -247,7 +250,7 @@ func open_pause(where: String) -> void:
 		open_settings())
 	item.call("Controls", "dash", open_controls)
 	if where != "match":
-		item.call("Save files", "satchel", open_saves)
+		item.call("Save Files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
@@ -313,6 +316,7 @@ func open_settings() -> void:
 
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
+	UI.hold(v, SETTINGS_H)
 	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
 		tab = t
 		_show_settings())
@@ -401,8 +405,10 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Volume")
 	_slider(v, "Master", "master", 0.0, 1.0)
 	_slider(v, "Music", "music", 0.0, 1.0)
-	_slider(v, "Sound effects", "sfx", 0.0, 1.0)
+	_slider(v, "Effects", "sfx", 0.0, 1.0, 0.05, "Shots, hits, steps and abilities")
+	_slider(v, "Voices", "voices", 0.0, 1.0, 0.05, "Hunters, Boki and monsters calling out")
 	_slider(v, "Ambience", "ambience", 0.0, 1.0, 0.05, "Wind, rain and the sea")
+	_slider(v, "UI", "ui_sounds", 0.0, 1.0, 0.05, "Menu clicks, tabs and pop-ups")
 	_group(v, "Music")
 	var styles: Array = Soundtrack.styles().keys().map(func(k): return [k, Soundtrack.styles()[k]["name"]])
 	_choice(v, "Soundtrack", "soundtrack", styles, Soundtrack.replay, "The music everywhere; a track picked below wins")
@@ -438,7 +444,7 @@ func _tab_video(v: VBoxContainer) -> void:
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
-	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
+	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05, "Menus and the HUD, on top of fitting your window")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
@@ -510,7 +516,9 @@ func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	lc.add_child(UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi))
+	var head := UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi)
+	head.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long action name wraps, never widens the panel
+	lc.add_child(head)
 	if hint != "":
 		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))
 	r.add_child(lc)
@@ -583,7 +591,10 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 		sl.value_changed.connect(func(val):
 			pct.text = "%d%%" % int(round(val * 100.0))
 			Settings.set_v(key, val, false))
-		sl.drag_ended.connect(func(_c): Settings.save())
+		sl.drag_ended.connect(func(_c):
+			Settings.save()
+			if Settings.BUSES.has(key):
+				Sfx.play_sample(Settings.BUSES[key]))
 	r.add_child(sl)
 	r.add_child(pct)
 
@@ -715,14 +726,20 @@ func open_inventory() -> void:
 		"Items":
 			empty = false
 			cell.call("Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
-			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
+			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40%% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
 				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
 			for id in GardenItems.ids():
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
-					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
+					var take := Callable()
+					if GardenItems.fed(id) and GardenItems.item(id)["effect"]["kind"] != "twin":
+						take = func():
+							ItemHold.want(id)
+							close()
+					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD,
+							"Hold" if take.is_valid() else "", take)
 			if FarmUnlocks.base_mode():
 				cell.call("Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
 						"Open", open_bowl)

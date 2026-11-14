@@ -6,16 +6,29 @@ extends RefCounted
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
 ## from their anchor, follow it, stream behind a run and are off at Low. Each ability's emitter on the swapped
-## models stays on its bone (tools/hero_vfx_emit.gd).
+## models stays on its bone (tools/hero_vfx_emit.gd). And the status looks
+## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
+## and a summoned Boki under crowd control wears the same looks as a Hunter, sized to its body.
+## The drop rocket's looks (DropRocket): its trail, the puff where a Hunter jumps out and the dust where it lands.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
+const ROCKET_AT := 6.0         # s into the ship's run when the squad launches: over the islands on ROCKET_SEED
+const ROCKET_SEED := 4242
+const ROCKET_RIDE := 1.5       # s ridden before the trail is measured: past the rocket's speed-up
+const ROCKET_TRAIL_M := 10.0   # m of trail at least behind the dive by then, so it reaches up the skydive view
+const ROCKET_ALONE_M := 3.0    # m over the ground from where only the rocket steps (the landing's count is its own)
+const ROCKET_CAP_S := 20.0     # s a ride may take at most
+const SETTLE_TOP_V := 5.0      # m/s: the landing dust is never faster than this (it settles, it does not blast)
+const STREAK_PILE := 40        # streaks asked for at once: the pool still caps them
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
+const ZONE_CORE_A := 0.25      # alpha at most at the centre of a zone (docs/VFX_QUALITY.md)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
+const TRACER_FULL := 3         # steps (60/s) a round flies before its tracer must be drawn full length
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
-	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
+	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gil": ["gil_"], "gunslinger": ["gunslinger_"],
 	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_"],
 	"tender": ["tender_"], "thief": ["thief_"]}
 ## The synthetic recipes the runtime parts play: one layer of every kind.
@@ -26,16 +39,24 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
-			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
+			{"p": "vortex", "size": 2.0}, {"p": "ring", "size": 2.0}, {"p": "fist", "size": 2.0, "drop": 3.0},
+			{"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
-			{"p": "drop", "n": 24}]},
+			{"p": "drop", "n": 24}, {"p": "plus", "n": 8}]},
 		"ring": {"fx": [{"p": "sweep", "size": 2.0, "arc": 360, "band": 0.3, "turn": 0.16, "life": 0.5}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
-## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
+## docs/VFX_QUALITY.md backlog 9, the shot trails that were hairlines at match zoom: Lace's tap shots, Sparkle's bolts.
+const SHOT_TRAILS := {"archer": "fire_tap", "mage": "lmb_trail"}
+const TRAIL_MIN := 0.45        # m across at the head, so a shot trail reads at match zoom (the hairlines were 0.26)
+## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
-	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
+	"fire_super", "fire_over", "fire_heavy", "fire_ult", "rock_crumble"]
+## The camera-facing effect shaders that soften where they meet the ground (shaders/soft_fade.gdshaderinc).
+## (fx_dot has its own ground fade: FxDot, ground_y.)
+const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
+const DT_FILL := 1.0 / 60.0   # s per step while timing the Faultline fill
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -48,6 +69,11 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	var gold: Array = []
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if f.ends_with(".gd") and FileAccess.get_file_as_string("res://scripts/arch/kits/" + f).contains("ffd25a"):
+			gold.append(f)
+	ok(gold.is_empty(), "no kit holds the shared gold ffd25a: a Hunter's flashes follow its colour %s" % [gold])
 	await preload("res://tools/hero_vfx_emit.gd").new().run(main, self)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
@@ -59,17 +85,37 @@ func run(main: Node) -> void:
 	_budget(V, P)
 	await _holds(main, m, V, P)
 	_view(m, V, P)
+	_lean()
 	_kit(m, V, P)
+	_motley_trade(m, P)
 	_dolm_rocks(m)
 	_net(m, V, P)
+	_statuses(m, P)
+	_boki_statuses(m, P)
+	_tier_up(m, V, P)
+	_zones(main)
+	_soft_edges(m)
 	await _core_kinds(main, m, V, P)
+	_shot_trails(m, V, P)
 	await _lisette(main, V)
 	await _vex_core(main)
 	await _scarf(main)
 	_dots(m)
+	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
+	await _rocket(main)
+	await _vex_tracer(main)
+	await _slam_fill(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Every camera-facing effect fades into the ground instead of cutting a line into it, on each renderer (one
+## include, picked by renderer); the Compatibility fallback's ground map comes with the match world.
+func _soft_edges(m: Match) -> void:
+	for sname: String in SOFT_SHADERS:
+		var code := (load("res://shaders/%s.gdshader" % sname) as Shader).code
+		ok(code.contains("soft_fade.gdshaderinc") and code.contains("soft_fade("), "%s softens into the ground" % sname)
+	ok(m.world.get_children().any(func(c: Node) -> bool: return c is FxGround), "the match world shares its ground map")
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:
@@ -90,7 +136,8 @@ func _recipes(arch: String) -> void:
 	var missing := called.keys().filter(func(k): return not (moves.has(k) or String(k).ends_with("_")))
 	ok(not called.is_empty() and missing.is_empty(),
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
-	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
+	var ends := moves.values().map(func(rec): return String(rec.get("end", "")))     # a trail's end move
+	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE and not k in ends)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
 	var pal: Dictionary = d["palette"]
 	var bad_sound: Array = []
@@ -228,6 +275,23 @@ func _view(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(is_equal_approx(V.view_k(foe), 1.0), "an enemy's effects at full")
 	ok(keep == m.player, "the viewer is unchanged")
 
+## A sweep stood up along the aim ("tilt" 90) turns up to its "lean" toward the match camera: no aim shows it
+## edge-on, and it never tips past the lean.
+func _lean() -> void:
+	var back := Vector3(0, sin(deg_to_rad(57.0)), cos(deg_to_rad(57.0)))
+	var layer := {"tilt": 90.0, "lean": 30.0}
+	var worst := 1.0
+	var within := true
+	for i in 8:
+		var b := Basis(Vector3.UP, TAU * i / 8.0)
+		var roll := HeroVfx.sweep_roll(layer, b, back)
+		var normal := b * Basis(Vector3(0, 0, 1), roll) * Vector3.UP
+		worst = minf(worst, absf(normal.dot(back)))
+		within = within and absf(roll - PI * 0.5) <= deg_to_rad(30.0) + 0.001
+	var stood := HeroVfx.sweep_roll({"tilt": 90.0}, Basis(), back)
+	var edge := absf((Basis(Vector3(0, 0, 1), stood) * Vector3.UP).dot(back))
+	ok(worst > 0.4 and within and edge < 0.01, "a stood-up sweep leans to the camera at every aim (%.2f)" % worst)
+
 ## The kit really goes through the shared helper, and with the own look the shared cast language stays out.
 func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var K: JuggernautKit = P.ak
@@ -238,6 +302,50 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
 
+## Motley's Trade in his sea teal (VFX_QUALITY 11-12 rescore, DECISIONS 11-08: every Hunter's abilities in their
+## colour): the landing end and the lobbed lantern are teal, the hot core a lighter teal, and no ostra recipe, palette
+## entry or Swollen look is magenta or pink, and his own end (TRADE_COL, the dash slot col) is teal too.
+func _teal(c: Color) -> bool:
+	return c.s < 0.25 or c.v < 0.15 or (c.h > 0.40 and c.h < 0.55)
+
+func _mat_cols(n: Node, out: Array) -> void:
+	if n is MeshInstance3D:
+		var mt: Material = (n as MeshInstance3D).material_override
+		if mt is StandardMaterial3D:
+			out.append((mt as StandardMaterial3D).albedo_color)
+		elif mt is ShaderMaterial:
+			for u: Dictionary in (mt as ShaderMaterial).shader.get_shader_uniform_list():
+				var v: Variant = (mt as ShaderMaterial).get_shader_parameter(u["name"])
+				if v is Color:
+					out.append(v)
+	for c in n.get_children():
+		_mat_cols(c, out)
+
+func _motley_trade(m: Match, P: Hunter) -> void:
+	var sea := Color("2ee6c0")
+	ok(OstraKit.TRADE_EDGE.is_equal_approx(sea),
+			"Motley Trade: the landing end is his sea teal #%s" % OstraKit.TRADE_EDGE.to_html(false))
+	ok(_teal(OstraKit.TRADE_COL) and _teal(Color(String(Arch.def("ostra")["dash"]["col"]))),
+			"Motley Trade: his own end and the dash slot col are teal #%s" % OstraKit.TRADE_COL.to_html(false))
+	var hot := OstraKit.HOT
+	ok(_teal(hot) and hot.s > 0.1 and hot.v >= sea.v and hot.s < sea.s,
+			"Motley Trade: the hot core is a lighter teal #%s" % hot.to_html(false))
+	var d := HeroVfx.data("ostra")
+	var off: Array = []
+	for k: String in d["palette"]:
+		if k == "pink" or not _teal(Color(String(d["palette"][k]))):
+			off.append(k)
+	ok(off.is_empty(), "Motley: every ostra palette colour is teal or neutral, none pink %s" % [off])
+	var looks := KitLooks.of(m)
+	for kind: String in ["star", "aura"]:
+		var cols: Array = []
+		_mat_cols(looks.hold_on("chk_" + kind, kind, P, P.pos), cols)
+		looks.release("chk_" + kind)
+		var bad: Array = cols.filter(func(c: Color): return not _teal(c)).map(func(c: Color): return c.to_html(false))
+		ok(cols.size() >= 3 and bad.is_empty(), "Motley %s: every colour is teal or neutral (%d, off %s)" % [
+				"Trade lantern" if kind == "star" else "Swollen sphere", cols.size(), bad])
+	ok(_teal(OstraWell.SWOLLEN_COL), "Motley Nightwell: the Swollen core is teal, not pink")
+
 ## Tenzo's thrown rocks are cold basalt with a cobalt rim (DECISIONS 11-08): no heat, no material warmer than blue.
 func _dolm_rocks(m: Match) -> void:
 	var warm: Array = []
@@ -247,8 +355,13 @@ func _dolm_rocks(m: Match) -> void:
 			var mat: Material = (mi as MeshInstance3D).material_override
 			if mat is ShaderMaterial:
 				var sm := mat as ShaderMaterial
-				var hues: Array = [sm.get_shader_parameter("glow"), sm.get_shader_parameter("rim_col")]
-				if float(sm.get_shader_parameter("heat")) > 0.0 or hues.any(func(c: Color) -> bool: return c.r > c.b):
+				# the rock's own shader (glow, rim, heat) or a KitLooks.shade_mat haze (cel_tint's color)
+				var hot := false
+				for p: String in ["glow", "rim_col", "color"]:
+					var c: Variant = sm.get_shader_parameter(p)
+					hot = hot or (c is Color and (c as Color).r > (c as Color).b)
+				var heat: Variant = sm.get_shader_parameter("heat")
+				if hot or (heat != null and float(heat) > 0.0):
 					warm.append(kind)
 			elif mat is StandardMaterial3D:
 				var c := (mat as StandardMaterial3D).albedo_color
@@ -256,6 +369,103 @@ func _dolm_rocks(m: Match) -> void:
 					warm.append(kind)
 		n.free()
 	ok(warm.is_empty(), "Tenzo's rocks: no heat, no rock or haze material warmer than the cobalt palette %s" % [warm])
+
+## Vex's rifle rounds are HeroVfx data (content/vfx/gunslinger.json): through a held string every live round of hers
+## carries a tracer riding it, drawn 2-4.5 m long once the round has flown a few steps at the weapon's speed and wide
+## enough to follow at match zoom, the stock round glow dark under it, with a flash at the gun for each round and a
+## spark where one lands. The round nodes and the looks are stepped with the match here, as a 60 fps frame draws them.
+func _vex_tracer(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	V.plays.clear()
+	P.inp["aim"] = P.pos + Vector3(8.0, 0.9, 0.0)
+	P.inp["aim_y"] = P.pos.y
+	P.inp["fire"] = true
+	var bare := 0                  # steps a live round had no full tracer riding it
+	var born := {}                 # round sid -> the step it was first seen
+	var thin := 0.0
+	var lit := 0                   # steps a tracer rode a round whose stock glow still showed
+	var spd := float(P.wpn["speed"])
+	for i in 150:
+		m.step(1.0 / 60.0)
+		m.render_shots(1.0)
+		V._process(1.0 / 60.0)
+		for sd: Dictionary in m.get("shots"):
+			if sd["by"] != P or (sd["x"] as Dictionary).has("src") or not is_instance_valid(sd["node"]):
+				continue
+			var mine: Array = V.ribbons.filter(func(e: Dictionary): return e["follow"] == sd["node"])
+			if not born.has(sd["sid"]):
+				born[sd["sid"]] = i
+				if born.size() == 1:
+					var fly := (sd["vel"] as Vector2).length()
+					ok(absf(fly - spd) < 0.5, "a round flies at the weapon's speed (%.0f m/s)" % spd)
+			var drawn := 0.0           # the longest layer, head to tail, riding the round
+			for e: Dictionary in mine:
+				thin = maxf(thin, float(e["width"]))
+				var pts: Array = e["pts"]
+				if pts.size() > 1 and HeroVfx._at(pts[0]).distance_to((sd["node"] as Node3D).global_position) < 0.1:
+					drawn = maxf(drawn, HeroVfx._at(pts[0]).distance_to(HeroVfx._at(pts[-1])))
+			var age := i - int(born[sd["sid"]])          # steps since it was fired (the kit picks it up a step on)
+			if (mine.is_empty() and age > 0) or (age >= TRACER_FULL and (drawn < 2.0 or drawn > 4.5)):
+				bare += 1
+			var orb := (sd["node"] as MeshInstance3D).material_override as ShaderMaterial
+			if not mine.is_empty() and (orb.get_shader_parameter("color") as Color).a > 0.0:
+				lit += 1
+	P.inp["fire"] = false
+	ok(born.size() >= 15, "a held string fires its rounds (%d)" % born.size())
+	ok(bare == 0, "every live round has a tracer riding it, drawn 2-4.5 m long (%d bare)" % bare)
+	ok(thin >= 0.3, "the tracer is wide enough for the match camera (%.2f m)" % thin)
+	ok(lit == 0, "the tracer is the whole round: the stock glow is dark under it (%d lit)" % lit)
+	var flashes := int(V.plays.get("shot", 0))
+	var tracers := int(V.plays.get("shot_trail", 0))
+	ok(flashes >= born.size(), "a muzzle flash for every round (%d of %d)" % [flashes, born.size()])
+	ok(tracers >= born.size(), "a tracer for every round (%d of %d)" % [tracers, born.size()])
+	var spark: Array = (V._rec(P, "shot_hit").get("fx", []) as Array).map(func(l: Dictionary): return String(l["p"]))
+	ok(spark.has("flare") and spark.has("ember"), "a round that lands has a flash and sparks")
+
+## docs/VFX_QUALITY.md: a zone is a lit rim and a soft inside, 0.25 alpha at most at the centre. Vex's X discs, Motley's
+## well (floor and dome), Meeko's seed and Hearthlight discs and Sable's X ring, from the values the kits draw with.
+func _zones(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	# VVFx.disc (Sparkle's Skycall; Vex's discs are HeroVfx data since ext/vfx-vex-data)
+	var vex: Node3D = VVFx.of(m).disc(Vector3.ZERO, 3.4, Color("2a1018"), Color("c43a2a"), 1.0, Color("ff9a5c"))
+	var vm := (vex as MeshInstance3D).material_override as ShaderMaterial
+	ok(float(vm.get_shader_parameter("fill_a")) <= ZONE_CORE_A and (vm.get_shader_parameter("color3") as Color).a > 0.0,
+			"VVFx disc: centre alpha at most %.2f and a lit rim" % ZONE_CORE_A)
+	ok(is_equal_approx(vex.scale.x * VVFx.DISC_EDGE, 3.4), "VVFx disc: its rim on the hitbox radius")
+	var looks := KitLooks.of(m)
+	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 4.5)
+	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
+	var floor_a := float(fm.get_shader_parameter("fill")) * (fm.get_shader_parameter("color") as Color).a
+	ok(floor_a <= ZONE_CORE_A and float(fm.get_shader_parameter("thickness")) > 0.0,
+			"Motley's well: no solid floor (centre alpha 0), a lit rim")
+	var dome := looks.hold_on("zone_dome", "well_dome", m, Vector3.ZERO, 4.5)
+	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
+	var dome_a := float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1)
+	ok(dome_a <= ZONE_CORE_A, "Motley's well dome: centre alpha at most %.2f, the rim carries it" % ZONE_CORE_A)
+	# care_disc: body * 1.6 at the centre, cel steps of 0.25
+	var hearth_a := TenderKit.THROWN_FILL * 0.18 * 1.6 * 1.1
+	ok(roundf((hearth_a + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A,
+			"Meeko's Hearthlight disc: centre alpha at most %.2f" % ZONE_CORE_A)
+	_meeko_field()
+	var sable_a: float = AimShapes.FILL_A * 0.2 * 2.0     # the band's tint inside, at the ult's brightest beat
+	ok(sable_a <= ZONE_CORE_A and ThiefUlt.RING_W > 0.0, "Sable's X: a ring band with a faint tint inside")
+
+## Meeko's Burrseed root field (tender.json "field"): leaf green, the whole inside up to the rim (care_disc's body
+## grows as 0.18 + 0.22 r^2 to r 0.89, where its rim starts) at most 0.25, and the burst's ring lands on its rim
+## (the ring shader's band ends at 0.9 of its size).
+func _meeko_field() -> void:
+	var d := HeroVfx.data("tender")
+	var fd: Dictionary = d["field"]
+	var pal: Dictionary = d["palette"]
+	var inner_a := float(fd["fill"]) * (0.18 + 0.22 * 0.89 * 0.89) * 1.6 * float(fd["a"])
+	ok(inner_a <= ZONE_CORE_A and Color(String(pal[fd["col"]])).is_equal_approx(Arch.color("tender")),
+			"Meeko's root field: leaf green, inside alpha at most %.2f to the rim (%.2f)" % [ZONE_CORE_A, inner_a])
+	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
+			"Meeko's root field: the burst's ring lands on the burst radius")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
@@ -308,6 +518,7 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	V._anchors.clear()
 	_clear(V)
 	V.play(P, "all", P.pos, Vector2.RIGHT)
+	# (- 1: the tier-up sheen is drawn by HeroVfx.tier_up, never by a recipe layer)
 	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
@@ -362,11 +573,112 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	_clear(V)
 	HeroVfx.set_data(P.arch, {})
 
+## Lace's tap shots and Sparkle's finger bolts: thick at match zoom with a bright head, the body in the Hunter's colour;
+## Lace's short and sharp, Sparkle's soft, sparkly and longer; Lace's drawn arrows stay above the tap; a head fits the
+## circle its shot hits in (the hit sizes are the weapons'). Flying: the head is part of the trail's own mesh, a pooled
+## node keeps no look of the last Hunter's, and a volley makes no node once the pool is warm. The stock orb under such a
+## round stays hidden (Oomph.hide_orb).
+func _shot_trails(m: Match, V: HeroVfx, P: Hunter) -> void:
+	var reach := {}
+	for arch: String in SHOT_TRAILS:
+		var lay := _ribbon_of(arch, SHOT_TRAILS[arch])
+		var shot: Dictionary = Content.weapon(Arch.signature(arch)).primary
+		var col := Color(String(HeroVfx.data(arch)["palette"][lay["c"]]))
+		var head := float(lay.get("head", 0.0))
+		reach[arch] = float(lay["tail"]) * float(shot["speed"])          # m of trail behind the head
+		ok(float(lay["size"]) >= TRAIL_MIN and head > 0.0,
+				"%s %s: %.2f m across, a %.2f m head" % [arch, SHOT_TRAILS[arch], float(lay["size"]), head])
+		ok(col.is_equal_approx(Arch.color(arch)),
+				"%s: the trail is the Hunter's colour (#%s)" % [arch, col.to_html(false)])
+		ok(head * 0.5 <= float(shot["size"]) + P.hit_radius(), "%s: the head fits the circle its shot hits in" % arch)
+	var tap := _ribbon_of("archer", "fire_tap")
+	var bolt := _ribbon_of("mage", "lmb_trail")
+	ok(reach["archer"] < reach["mage"] and not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
+			"Lace's is short and sharp: %.1f m, a pointed head" % reach["archer"])
+	ok(bolt.get("soft", false) and float(bolt.get("head_len", 1.0)) <= 1.2,
+			"Sparkle's is soft and sparkly: %.1f m, a round head" % reach["mage"])
+	var sizes := ["fire_tap", "fire_arrow", "fire_super"].map(func(mv): return float(_ribbon_of("archer", mv)["size"]))
+	ok(sizes[0] < sizes[1] and sizes[1] < sizes[2], "Lace's drawn arrows stay thicker than the tap %s" % [sizes])
+	var shot := Node3D.new()
+	m.add_child(shot)
+	shot.global_position = P.pos + Vector3(0, 1, 0)
+	_clear(V)
+	_shoot(V, P, "mage", shot)
+	var node: Node3D = V.ribbons[0]["node"]
+	_clear(V)
+	_shoot(V, P, "archer", shot)
+	var e: Dictionary = V.ribbons[0]
+	ok(e["node"] == node and not (e["mat"] as ShaderMaterial).get_shader_parameter("soft"),
+			"a pooled trail Sparkle used comes back hard-edged for Lace")
+	for i in 4:      # (by hand, as above)
+		shot.global_position += Vector3(1.0, 0, 0)
+		V._tick_ribbon(e, 0.016)
+	var ahead := (e["node"] as MeshInstance3D).mesh.get_aabb().end.x - shot.global_position.x
+	var tip := float(tap["head"]) * float(tap["head_len"]) * 0.5
+	ok(absf(ahead - tip) < 0.01, "the head is in the trail's own mesh, its tip %.2f m ahead of the shot" % ahead)
+	for i in HeroVfx.POOL["ribbon"]:
+		_shoot(V, P, "archer", shot)
+	var made := V.made
+	for i in 24:
+		_shoot(V, P, "archer" if i % 2 == 0 else "mage", shot)
+	ok(V.made == made and V.ribbons.size() <= int(HeroVfx.POOL["ribbon"]),
+			"a volley of 24 draws on the ribbon pool: no new node (%d running)" % V.ribbons.size())
+	shot.queue_free()
+	_clear(V)
+	HeroVfx.set_data(P.arch, {})
+	m.spawn_shot(P, P.pos + Vector3(0, 1, 0), Vector2(30, 0), 0.0, 0.5, 0.18, Color.WHITE)
+	var drawn: Dictionary = m.shots[-1]
+	Oomph.hide_orb(drawn)
+	m.render_shots(1.0)
+	ok((drawn["node"] as Node3D).scale.x < 0.01 and is_equal_approx(float(drawn["r"]), 0.18),
+			"a round its kit draws keeps the stock orb shrunk through the match's frame; its hit size is kept")
+
+## One shot trail as `arch`'s (its recipes stand in for the test Hunter's own).
+func _shoot(V: HeroVfx, P: Hunter, arch: String, shot: Node3D) -> void:
+	HeroVfx.set_data(P.arch, HeroVfx.data(arch))
+	V.trail(P, SHOT_TRAILS[arch], shot)
+
+func _ribbon_of(arch: String, move: String) -> Dictionary:
+	for layer: Dictionary in HeroVfx.data(arch)["moves"][move]["fx"]:
+		if layer["p"] == "ribbon":
+			return layer
+	return {}
+
 func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	V.plays.clear()
 	m.ents_by_id[P.nid] = P
 	V.net_in(["fx", "hvfx", P.nid, "spin", P.pos.x, P.pos.y, P.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
 	ok(int(V.plays.get("spin", 0)) == 1, "a move arrives from another game")
+
+## The armour tier-up sheen: one per tier-up (the real path, Match._armor_up), coloured by the new tier, climbing the
+## body for SHEEN_LIFE; a break and a gain that stays inside the tier draw none; another game's tier-up arrives too.
+func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
+	_clear(V)
+	V.plays.clear()
+	var sheens := func() -> Array:
+		return (V.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
+	P.armor_xp = 0.0
+	P.armor_tier = 0
+	ok(P.armor_gain(10.0) < 0, "a gain inside the tier is no tier-up")
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen without a tier-up")
+	for tier in range(1, Hunter.ARMOR_TIERS.size()):
+		_clear(V)
+		V.plays.clear()
+		P.armor_gain(float(Hunter.ARMOR_TIERS[tier][2]) - P.armor_xp)
+		m._armor_up(P)
+		var made: Array = sheens.call()
+		ok(made.size() == 1 and int(V.plays.get("armor_up", 0)) == 1, "tier %d: one sheen" % tier)
+		var col := Color.BLACK
+		if made.size() == 1:
+			col = (made[0].material_override as ShaderMaterial).get_shader_parameter("col")
+		ok(col.is_equal_approx(Hunter.ARMOR_TIERS[tier][1]), "tier %d: the new tier's colour" % tier)
+	ok(V.live.size() == 1 and is_equal_approx(float(V.live[0]["dur"]), 0.4), "the sheen sweeps in 0.4 s")
+	_clear(V)
+	V.plays.clear()
+	m.on_armor_break(P, null)
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen on an armour break")
+	V.net_in(["fx", "hvfx", P.nid, "armor_up", P.pos.x, P.pos.y, P.pos.z, 0.0, 0.0, 2.0, 0.0, 0.0])
+	ok(sheens.call().size() == 1, "a rival's tier-up arrives from another game")
 
 ## Claire's two scarf tails (HeroScarf): one ribbon each pinned beside the neck anchor, which follows the neck bone;
 ## at rest they hang down behind her, running they stream back against the motion; a new frame after she moves, the
@@ -430,6 +742,42 @@ func _scarf(main: Node) -> void:
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
 
+## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
+## every rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the
+## time is read from data.
+func _slam_fill(main: Node) -> void:
+	var m: Match = flow._match(main, "bulwark")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var K: BulwarkKit = P.ak
+	var xd: Dictionary = K.d["x"]
+	var windup0: float = xd["windup"]
+	P.lvl = 6
+	for rank in [1, 2, 3, 0]:
+		xd["windup"] = 0.6 if rank == 0 else windup0
+		for slot: String in P.slot_lv:
+			P.slot_lv[slot] = maxi(rank, 1)
+		K.cd["x"] = 0.0
+		K.ult.cast()
+		var t_full := -1.0
+		var t_slam := -1.0
+		var t := 0.0
+		while K.ult.phase != "" and t < 2.0 and t_slam < 0.0:
+			m.step(DT_FILL)
+			t += DT_FILL
+			if t_full < 0.0 and float(AimKit.entry(P, "x").get("fill", 0.0)) >= 1.0:
+				t_full = t
+			if K.ult.slams > 0:
+				t_slam = t
+		var label := "rank %d windup %.2f: fill closed at %.3f s, slam at %.3f s" % [
+			maxi(rank, 1), xd["windup"], t_full, t_slam]
+		ok(absf(t_full - float(xd["windup"])) <= DT_FILL and t_full == t_slam, label)
+		K.ult.slams = 0
+		K.ult.phase = ""
+		K.ult._hide_lane()
+	xd["windup"] = windup0
+	m.queue_free()
+
 ## The soft dots: every burst and wisp sparkle shares the one FxDot material; Low and Very Low take the height-fade
 ## variant (no depth read, so no depth copy) and the other presets the shader's own pick per renderer; a burst
 ## tells the dots the ground under it.
@@ -447,3 +795,339 @@ func _dots(m: Match) -> void:
 	var p: CPUParticles3D = m.fx.bursts[(m.fx.bi + m.fx.bursts.size() - 1) % m.fx.bursts.size()]
 	var g: float = m.world.ground_at(at.x, at.z)
 	ok(is_equal_approx(float(p.get_instance_shader_parameter("ground_y")), g), "a burst gives its ground (%.2f)" % g)
+
+# ------------------------------------------------------------------ status looks
+## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
+const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
+const RIG_PARTS := 16          # meshes one status look may use (30 Hunters each with a few stay cheap)
+
+## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
+func _set_status(m: Match, F: Hunter, st: String, on: bool) -> void:
+	var t := 1.5 if on else 0.0
+	match st:
+		"stun": F.stun_t = t
+		"root": F.root_t = t
+		"slow": F.slow_t = t
+		"burn": F.burn_t = t
+		"antiheal": F.blight_t = t
+		"sick": F.sick_t = t
+		"gnd": F.set_meta("gnd_until", m.time + t)
+		"daze": F.set_meta("rat_until", m.time + t)
+		"chill", "static":
+			if on: StatusLooks.of(m).keep(F, st)
+			else: m.time += StatusLooks.KEEP + 0.01
+
+func _statuses(m: Match, P: Hunter) -> void:
+	var L := StatusLooks.of(m)
+	var rules := StatusLooks.rules()
+	var F: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P: F = h
+	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	Sfx.listener = P.pos
+	ok(STATUSES.all(func(st): return rules.has(st)), "status looks: every plain status has data")
+	var looks := {}
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+		var up := L.showing(F, st)
+		var rig: Node3D = (L.rigs.get("%d/%s" % [F.get_instance_id(), st], {}) as Dictionary).get("n")
+		var parts := rig.find_children("*", "MeshInstance3D", true, false).size() if rig else 0
+		ok(up and not L.showing(P, st), "status %s: its look comes up on that body only" % st)
+		ok(parts > 0 and parts <= RIG_PARTS, "status %s: %d meshes (at most %d)" % [st, parts, RIG_PARTS])
+		if st == "gnd":
+			ok(rig.find_child("Arrow", true, false) != null, "status gnd: a down arrow over the head")
+		looks[String(rules[st]["look"])] = true
+		_set_status(m, F, st, false)
+		ok(not L.showing(F, st), "status %s: the look goes when it ends" % st)
+	ok(looks.size() == STATUSES.size(), "status looks: each status has a look of its own (%d)" % looks.size())
+	var made := L.made
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+	ok(STATUSES.all(func(st): return L.showing(F, st)) and L.made == made,
+		"status looks: all at once on one body, from the pool (built %d)" % L.made)
+	for st: String in STATUSES:
+		_set_status(m, F, st, false)
+	L.from_hit(F, {"stun": 0.5, "burn": 4.0, "burn_for": 2.0, "blight": 1.0})
+	ok(L.showing(F, "stun") and L.showing(F, "burn") and L.showing(F, "antiheal"),
+		"status looks: a hit sent to another game's body shows what it carries here")
+	m.time += 2.1
+	ok(not L.showing(F, "stun") and not L.showing(F, "burn"), "status looks: ... until that status would end")
+	F.stun_t = 1.0
+	F.teleport(P.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
+	ok(not L.showing(F, "stun"), "status looks: nothing draws past LOD_FAR")
+	F.stun_t = 0.0
+
+## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
+## pace, sized to the Boki (over its head, round its body), from the pool; Grounded never lands so shows nothing.
+const BOKI_CC := ["stun", "root", "slow", "daze"]
+
+func _boki_statuses(m: Match, P: Hunter) -> void:
+	var L := StatusLooks.of(m)
+	var F: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P: F = h
+	var k := m.give_kin(F, Save.new_kin("zapple", "Pip"))
+	k.state = "active"
+	k.set_meta("summoned", true)
+	k.teleport(P.pos + Vector3(-3.0, 0, 0))
+	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	k.render(1.0 / 60.0, 1.0)
+	var kk := StatusLooks.body_k(k)
+	ok(kk.y < kk.x and kk.x < 1.0, "boki status: a look's size comes from the Boki's body (%.2f across, %.2f up)"
+		% [kk.x, kk.y])
+	for st: String in BOKI_CC:
+		_put_cc(m, k, st, true)
+		_put_cc(m, F, st, true)
+		L.tick(0.0)
+		var kr: Dictionary = L.rigs.get("%d/%s" % [k.get_instance_id(), st], {})
+		var fr: Dictionary = L.rigs.get("%d/%s" % [F.get_instance_id(), st], {})
+		ok(L.showing(k, st) and L.showing(F, st), "boki status %s: the look comes up on the summoned Boki" % st)
+		if kr.is_empty() or fr.is_empty():
+			continue
+		ok(_mats(kr["n"]) == _mats(fr["n"]), "boki status %s: in the Hunter's colours" % st)
+		for i in 3:
+			L.tick(0.25)
+		ok(is_equal_approx(float(kr["t"]), float(fr["t"])), "boki status %s: at the Hunter's pace" % st)
+		var y := float(StatusLooks.rules()[st].get("y", 0.0))
+		var body: Node3D = (kr["n"] as Node3D).get_child(0)
+		if y > 0.0:
+			var up := body.global_position.y - k.pos.y
+			var head := k.model.scale.y * StatusLooks.KIN_TALL       # (a Boki's size varies: measured from its head)
+			var hunter_up: float = (fr["n"] as Node3D).get_child(0).global_position.y - F.pos.y
+			ok(up > head and up < head + 0.6,
+				"boki status %s: over the Boki's head (%.2f m up, its head %.2f, a Hunter's %.2f)"
+				% [st, up, head, hunter_up])
+		else:
+			var n: Node3D = kr["n"]
+			ok(n.scale.y < n.scale.x and n.scale.x < (fr["n"] as Node3D).scale.x,
+				"boki status %s: round its squat body (%.2f across, %.2f up)" % [st, n.scale.x, n.scale.y])
+		_put_cc(m, k, st, false)
+		_put_cc(m, F, st, false)
+		ok(not L.showing(k, st), "boki status %s: the look goes when it ends" % st)
+	k.stun_t = 1.0
+	k.render(1.0 / 60.0, 1.0)
+	ok(k.model.get_meta("dazed") and not k.model.get_meta("starry"),
+		"boki status: a stunned Boki squints but its own stars stay off (one ring of stars, the shared one)")
+	k.stun_t = 0.0
+	KitStatus.apply(k, "gnd", 3.0)
+	ok(not L.showing(k, "gnd"), "boki status: Grounded does not land on a summoned Boki, so no cords")
+	k.remote = true
+	L.from_hit(k, {"stun": 0.5, "root": 0.5})
+	KitStatus.apply(k, "rat", 1.0, 0.0, false)
+	ok(L.showing(k, "stun") and L.showing(k, "root") and L.showing(k, "daze"),
+		"boki status: another game's summoned Boki shows the CC it is sent")
+	m.time += 1.1
+	ok(not L.showing(k, "stun") and not L.showing(k, "daze"), "boki status: ... until it would end")
+	k.remote = false
+	m.kins.erase(k)
+	m.ents_by_id.erase(k.nid)
+	F.kin = null
+	k.queue_free()
+
+## Puts a crowd control kind on `e` the way the game does, or takes it off.
+func _put_cc(m: Match, e: Ent, st: String, on: bool) -> void:
+	var t := 1.5 if on else 0.0
+	match st:
+		"stun": e.stun_t = t
+		"root": e.root_t = t
+		"slow": e.slow_t = t
+		"daze":
+			if on: KitStatus.apply(e, "rat", t)
+			else: m.time += 1.51       # (a Boki's Daze is shown for its length: StatusLooks.put)
+
+## The materials a rig draws with (by colour), to compare two rigs of one status.
+func _mats(n: Node3D) -> Array:
+	var out := {}
+	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+		var mat := mi.material_override
+		if mat is StandardMaterial3D: out[(mat as StandardMaterial3D).albedo_color.to_html()] = true
+		elif mat is ShaderMaterial: out[Color((mat as ShaderMaterial).get_shader_parameter("albedo")).to_html()] = true
+	var keys := out.keys()
+	keys.sort()
+	return keys
+
+## The drop rocket (DropRocket): a thin trail in the squad colour from the nozzle that runs out after the landing, from
+## the shared ribbon pool, as long at any frame rate, none at the very-low preset; a puff where a Hunter jumps out and
+## dust settling where it lands, on Fx's dust pool, no ring or burst, also when another game's flags say so.
+func _rocket(main: Node) -> void:
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	var m := _rocket_match(main)
+	var V := HeroVfx.of(m)
+	var P: Hunter = m.player
+	m.ship_jump(P)
+	var r: DropRocket = P.rocket
+	var e: Dictionary = V.ribbons[-1] if not V.ribbons.is_empty() else {}
+	var nozzle: Node3D = e.get("follow")
+	ok(r != null and nozzle != null and nozzle.get_parent() == r.node, "the launch starts a trail from the nozzle")
+	if nozzle == null:
+		return
+	var col: Color = Data.TEAM_COLORS[P.team % Data.TEAM_COLORS.size()]
+	ok((e["mat"] as ShaderMaterial).get_shader_parameter("col") == col and float(e["width"]) <= DropRocket.TRAIL_W,
+			"the trail is in the squad colour and thin (%.2f m)" % float(e["width"]))
+	_ride(m, V, ROCKET_RIDE)
+	var pts: Array = e["pts"]
+	var up: Vector3 = HeroVfx._at(pts[-1]) - HeroVfx._at(pts[0])
+	ok(HeroVfx._at(pts[0]).distance_to(nozzle.global_position) < 0.01, "its head rides the nozzle")
+	ok(up.y > 0.0 and up.length() >= ROCKET_TRAIL_M, "it streams up behind the dive (%.1f m)" % up.length())
+	_rocket_out(m, r)
+	var high_dots := _rocket_land(m, V, r)
+	await main.get_tree().process_frame
+	_ride(m, V, DropRocket.TRAIL_S + 0.1)
+	ok(not (e["node"] as Node3D).visible, "the trail runs out after the landing, back to the pool")
+	_streaks(V)
+	m.queue_free()
+	Settings.v["quality"] = DropRocket.TRAIL_OFF
+	m = _rocket_match(main)
+	V = HeroVfx.of(m)
+	m.ship_jump(m.player)
+	r = m.player.rocket
+	ok(r != null and V.ribbons.is_empty(), "no trail at the very-low preset")
+	for h: Hunter in r.riders:
+		h.remote = true          # another game flew it down: its riders' flags say they landed with it
+		h.riding = false
+		h.grounded = true
+	var radial0: int = m.fx.radial
+	var riders: Array = r.riders.duplicate()
+	r.tick(Match.DT)
+	for h: Hunter in riders:
+		h.remote = false
+	var dust := _settles(m.fx)
+	ok(r.done and dust.size() == 1 and m.fx.radial == radial0, "the flags say they landed: the same dust here")
+	if dust.size() == 1:
+		ok((dust[0] as CPUParticles3D).amount < high_dots, "fewer dots at very low (%d, %d at high)"
+				% [(dust[0] as CPUParticles3D).amount, high_dots])
+	m.queue_free()
+	Settings.v["quality"] = was
+
+## A three-a-side squad match, everyone aboard the skyship ROCKET_AT seconds into its run.
+func _rocket_match(main: Node) -> Match:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": ROCKET_SEED})
+	m.set_process(false)
+	m.skydrop.planning = false
+	for i in int(ROCKET_AT / Match.DT):
+		m.step(Match.DT)
+	return m
+
+## Match steps with the looks' frames between them (the tree isn't running frames here).
+func _ride(m: Match, V: HeroVfx, secs: float) -> void:
+	for i in maxi(1, int(round(secs / Match.DT))):
+		m.step(Match.DT)
+		V._process(Match.DT)
+
+## Jumping out, here and as another game's flags: a small puff where they let go, no ring and no burst.
+func _rocket_out(m: Match, r: DropRocket) -> void:
+	var mates: Array = r.riders.filter(func(x: Hunter): return x != m.player)
+	var radial0 := m.fx.radial
+	var puff: CPUParticles3D = m.fx.bursts[m.fx.bi]
+	var at := r.exit_at()
+	m.skydrop.detach(mates[0])
+	var beside := Vector2(at.x - r.pos.x, at.z - r.pos.z).length()
+	ok(puff.color == Fx.AIR and puff.global_position.distance_to(at) < 0.01 and beside > DropRocket.BODY_R,
+			"jumping out leaves a small puff where they let go, beside the body (%d dots)" % puff.amount)
+	var far: Hunter = mates[1]
+	far.remote = true
+	far.riding = false
+	far.dropping = true
+	puff = m.fx.bursts[m.fx.bi]
+	at = r.exit_at()
+	r.tick(Match.DT)
+	far.remote = false
+	ok(not r.riders.has(far) and puff.color == Fx.AIR and puff.global_position.distance_to(at) < 0.01,
+			"another game's flags say one jumped out: the same puff here")
+	ok(m.fx.radial == radial0, "no ring and no burst on jumping out")
+
+## The rocket comes down: dust settles round it, low and slow, and no ring or burst from it or the riders'
+## touchdowns. Returns the dust's dots.
+func _rocket_land(m: Match, V: HeroVfx, r: DropRocket) -> int:
+	var t := 0.0
+	while t < ROCKET_CAP_S and r.pos.y - m.world.ground_at(r.pos.x, r.pos.z) > ROCKET_ALONE_M:
+		_ride(m, V, Match.DT)
+		t += Match.DT
+	var radial0 := m.fx.radial
+	while t < ROCKET_CAP_S and not r.done:
+		r.tick(Match.DT)          # (the rocket alone: no one else's touchdown lands in the count)
+		t += Match.DT
+	ok(r.done and m.fx.radial == radial0, "the landing adds no ring or burst, nor do the riders' touchdowns")
+	var dust := _settles(m.fx).filter(func(p: CPUParticles3D): return m.player.flat_dist(p.global_position) < 8.0)
+	ok(dust.size() == 1, "dust settles where it lands, round the squad that stepped out")
+	if dust.size() != 1:
+		return 0
+	var p: CPUParticles3D = dust[0]
+	var ground := m.world.ground_at(p.global_position.x, p.global_position.z)
+	ok(p.initial_velocity_max <= SETTLE_TOP_V and p.gravity.y > -2.0 and p.global_position.y - ground < 0.5,
+			"low and slow, sinking back: not a blast (%.1f m/s, %d dots)" % [p.initial_velocity_max, p.amount])
+	return p.amount
+
+## Fx's dust emitters running a landing's settle.
+func _settles(fx: Fx) -> Array:
+	return fx.bursts.filter(func(p: CPUParticles3D): return p.color == Fx.HEAVY_DUST and p.emitting)
+
+## A streak keeps a point a step, not a frame, so it is as long at 30 fps as at 144; a later one reuses a pooled
+## ribbon; a pile of them stays within the pool.
+func _streaks(V: HeroVfx) -> void:
+	var made := V.made
+	var slow := _streak_span(V, 30.0)
+	ok(V.made == made, "a later trail reuses the pooled ribbon (no new node)")
+	var fast := _streak_span(V, 144.0)
+	ok(absf(fast - slow) < slow * 0.15, "as long at 144 fps as at 30 (%.1f m, %.1f m)" % [fast, slow])
+	var dots: Array = []
+	for i in STREAK_PILE:
+		var dot := Node3D.new()
+		V.add_child(dot)
+		dots.append(dot)
+		V.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
+	ok((V.pools["ribbon"] as Array).size() <= int(HeroVfx.POOL["ribbon"]), "%d trails at once stay in the pool (%d)"
+			% [STREAK_PILE, (V.pools["ribbon"] as Array).size()])
+	for dot: Node3D in dots:
+		dot.queue_free()
+	_clear(V)
+
+## How long a streak behind a node diving at the rocket's speed is after a second at `fps`.
+func _streak_span(V: HeroVfx, fps: float) -> float:
+	var dot := Node3D.new()
+	V.add_child(dot)
+	V.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
+	var e: Dictionary = V.ribbons[-1]
+	for i in int(fps):
+		dot.global_position += Vector3.DOWN * DropRocket.FALL / fps
+		V._process(1.0 / fps)
+	var pts: Array = e["pts"]
+	var span := HeroVfx._at(pts[-1]).distance_to(HeroVfx._at(pts[0]))
+	dot.queue_free()
+	_clear(V)
+	return span
+
+## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the
+## blade layer stay centred on her through a Vault, to within a hand's width.
+func _sable_ring(main: Node) -> void:
+	var m: Match = flow._match(main, "thief")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var U: ThiefUlt = (P.ak as ThiefKit).encore
+	P.lvl = maxi(P.lvl, int(Hunter.ULT_AT[0]))
+	P.ak.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	var reach := float(U.data()["reach"])
+	while float(U.st["t"]) < 0.2 - 0.5 * Match.DT:
+		m.step(Match.DT)
+	var half := float(AimKit.entry(P, "ult")["r"]) / reach
+	ok(absf(half - 0.5) < 0.05, "Sable's Encore ring is about half its full radius at 0.2s (%.2f)" % half)
+	m.step(0.3)
+	P.inp["move"] = Vector2(0, -1)
+	P.inp["dash"] = true
+	var worst := 0.0
+	var from := P.pos
+	for i in 40:
+		m.step(Match.DT)
+		var ring: Vector2 = AimKit.entry(P, "ult")["at"]
+		var orbit := Vector3.ZERO
+		for j in ThiefUlt.ORBITERS:
+			orbit += ((U.k.fx().placed["enc_orb%d" % j] as Dictionary)["node"] as Node3D).global_position
+		orbit /= float(ThiefUlt.ORBITERS)
+		worst = maxf(worst, maxf(ring.distance_to(Vector2(P.pos.x, P.pos.z)),
+				Vector2(orbit.x, orbit.z).distance_to(Vector2(P.pos.x, P.pos.z))))
+	ok(P.pos.distance_to(from) > 3.0 and worst < 0.1,
+			"Sable's ring and blades stay on her through a Vault (off by %.2f m)" % worst)
