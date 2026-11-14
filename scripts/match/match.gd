@@ -1431,7 +1431,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				_tip("rings", TipText.rings())
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -2431,7 +2431,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
+		_tip("stagger", TipText.stagger(String(mb.md["name"])))
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -4442,17 +4442,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 		PerkOrbs.drop(self, "shrine", sh["pos"], 0, h)      # one or two perk orbs by the shrine
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
-# ---- Training Grounds
-## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press %s again in the air and hold to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your %s ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your %s ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
-	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
-	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
-	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
-	["ledge", "Dash off an edge and float back up", ""],
-	["dodge", "Dodge the Strafer's red shot 3 times: dash (%s) through it or out of it", "dash"]]
+# ---- training area
 var train := {}
 var train_t := 0.0
 
@@ -4536,7 +4526,7 @@ func _update_training(dt: float) -> void:
 			train[k] = true
 			Sfx.play("unlock", null, -8.0)
 			var left := train_rows().filter(func(t): return not train.has(t[0])).size()
-			if hud: hud.toast(("Done: %s" % _train_label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
+			if hud: hud.toast(("Done: %s" % TrainDrill.label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
 			if left == 0:
 				Save.d["tutorial"]["training"] = true
 	# keep a few target dummies around you
@@ -4548,16 +4538,8 @@ func _update_training(dt: float) -> void:
 
 ## The checklist for this hero: the secondary step only shows for heroes that have one.
 func train_rows() -> Array:
-	var rows := TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
-	return rows.map(func(t): return [t[0], _train_text(t), t[2]])
-
-func _train_text(t: Array) -> String:
-	return String(t[1]) % Settings.key_cap(String(t[2])) if String(t[1]).contains("%s") else String(t[1])
-
-func _train_label(k: String) -> String:
-	for t in TRAIN:
-		if t[0] == k: return _train_text(t)
-	return k
+	var rows := TrainDrill.rows().filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
+	return rows.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
 
 ## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
 ## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
@@ -5680,22 +5662,21 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
-	var caps := [Settings.key_cap("fire"), Settings.key_cap("dash"), Settings.key_cap("jump")]
-	_tip("move", "Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide" % caps)
+	_tip("move", TipText.move())
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			_tip("ability", TipText.ability(true))
 		else:
-			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+			_tip("ability", TipText.ability(false))
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+			_tip("ult", TipText.bond_full(ud.display_name, true))
 	if _tip_t > VisionHint.AFTER_S and not Save.d["tutorial"].has(VisionHint.KEY) and vision_hint.due(self):
 		_tip(VisionHint.KEY, VisionHint.TEXT)
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
@@ -5711,7 +5692,7 @@ func _tips() -> void:
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
+			_tip("throw", TipText.send(String(k.rec.get("name", "your Boki"))))
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
