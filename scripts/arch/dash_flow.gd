@@ -5,9 +5,9 @@ extends RefCounted
 ## dash to end ("buffer", the default for a missing row) or cancels the dash. A press is never dropped.
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
-## A press that crowd control still forbids, made in its last Loco.buf_ability_hold, is held the same way and goes on the first
-## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
-## own cast lock (ArchKit.lock_left: an ult that plants its caster).
+## A press that crowd control still forbids, made in its last Loco.buf_ability_hold, is held the same way and goes on
+## the first step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is a Shift, LMB, RMB, E or jump at
+## the end of a kit's own cast lock (ArchKit.lock_left: an ult that plants its caster).
 
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
@@ -15,7 +15,7 @@ const MODES := ["fire", "buffer", "cancel"]
 const KEY_OF := {"rmb": "sec", "e": "sig", "q": "gear1"}
 ## The one-step Hunter.inp press per slot a CC can forbid (LMB and X as above; Q's glove goes through a stun).
 const CC_KEY_OF := {"rmb": "sec", "e": "sig", "dash": "dash", "jump": "jump"}
-const LOCK_SLOTS := ["lmb", "dash", "jump"]        # the presses a kit's cast lock holds at its end
+const LOCK_SLOTS := ["lmb", "rmb", "e", "dash", "jump"]     # the presses a kit's cast lock holds at its end
 const DEFAULT_ROW := {"mode": "buffer", "carry": false, "variant": "", "source": ""}
 ## The moves an ability combines with (docs/decisions/0015-combo-flow.md): a ground dash, an air dash, a jump.
 const MOVES := ["ground", "air", "jump"]
@@ -216,8 +216,8 @@ func cc_left(slot: String) -> float:
 		return maxf(stop, KitStatus.grounded_left(h))
 	return stop
 
-## Presses the CC forbids now, in its last Loco.buf_ability_hold: held for the first step it allows them; true when an LMB tap
-## was. A held LMB is left alone (it fires on its own once allowed); a tap is replayed. A cast that holds the
+## Presses the CC forbids now, in its last Loco.buf_ability_hold: held for the first step it allows them; true when
+## an LMB tap was. A held LMB is left alone (it fires on its own once allowed); a tap is replayed. A cast that holds the
 ## hunter still with no end in sight (Rimelock's statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> bool:
 	var h := kit.h
