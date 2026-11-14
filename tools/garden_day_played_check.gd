@@ -5,40 +5,45 @@ extends RefCounted
 ## is a dead end or a confusing screen worth listing. With --shots-dir (needs a renderer) it saves a frame per beat.
 ## Never touches the real save.
 
-const WAIT_S := 30.0         # s to wait for a home to finish building
-const GAME_S := 90.0         # s (real time) one Dash or shove may take before the beat gives up
-const MAX_RACES := 12        # Dash races tried for the Crown
-const TIME_SCALE := 4.0      # game seconds per real second while a race or a walk runs
-const AWAY_S := 28800.0      # s: the simulated gap (8 hours)
-const FOE_RATIO := 1.15      # the rivals' trained stats, over the partner's (a cup round needs 1.1)
-const PAIR_LEVEL := 8        # Grown: the level a Boki needs to pair
+const WAIT_S := 30.0  # s to wait for a home to finish building
+const GAME_S := 90.0  # s (real time) one Dash or shove may take before the beat gives up
+const MAX_RACES := 12  # Dash races tried for the Crown
+const TIME_SCALE := 4.0  # game seconds per real second while a race or a walk runs
+const AWAY_S := 28800.0  # s: the simulated gap (8 hours)
+const FOE_RATIO := 1.15  # the rivals' trained stats, over the partner's (a cup round needs 1.1)
+const PAIR_LEVEL := 8  # Grown: the level a Boki needs to pair
 
 var bad := 0
 var main: Node
 var dir := ""
 var shot_n := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("GDAY %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func note(what: String) -> void:
 	print("GDAY NOTE %s" % what)
+
 
 ## Seconds of wall time: a renderer runs slow frames, so the waits count real time.
 func _now() -> float:
 	return Time.get_ticks_msec() / 1000.0
 
+
 func _grab(label: String) -> void:
 	if dir == "":
 		return
-	main.fade.reveal(0.01)      # the boot logo and the ink wipe stay up until asked
+	main.fade.reveal(0.01)  # the boot logo and the ink wipe stay up until asked
 	await _wait(1.5)
 	await main.get_tree().process_frame
 	shot_n += 1
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("%02d_%s.png" % [shot_n, label]))
 	print("GDAY shot %02d_%s" % [shot_n, label])
+
 
 func _wait(secs: float) -> void:
 	var t0 := _now()
@@ -46,6 +51,7 @@ func _wait(secs: float) -> void:
 	while t < secs:
 		await main.get_tree().process_frame
 		t = _now() - t0
+
 
 ## The home a goto started, once it is built and revealed; null on a timeout.
 func _arrived(was: Node):
@@ -55,16 +61,26 @@ func _arrived(was: Node):
 		await main.get_tree().process_frame
 		t = _now() - t0
 		var cur = Game.main.current
-		if cur != was and is_instance_valid(cur) and cur.get("hway") != null and cur.get("player") != null \
-				and cur.get("building") != true and cur.get("root_ui") != null and not Game.main.fade.covered:
+		if (
+			cur != was
+			and is_instance_valid(cur)
+			and cur.get("hway") != null
+			and cur.get("player") != null
+			and cur.get("building") != true
+			and cur.get("root_ui") != null
+			and not Game.main.fade.covered
+		):
 			return cur
 	return null
+
 
 func _snap(rec: Dictionary) -> String:
 	return JSON.stringify([rec["stats"], rec.get("lean"), rec["needs"], rec["level"]])
 
+
 func _rec(nm: String) -> Dictionary:
 	return (Save.d["roster"] as Array).filter(func(r): return String(r["name"]) == nm)[0]
+
 
 func _labels(n: Node) -> String:
 	var out := ""
@@ -76,16 +92,19 @@ func _labels(n: Node) -> String:
 		out += _labels(c)
 	return out
 
+
 func _rest_all() -> void:
 	for r in Save.d["roster"]:
 		r["needs"]["energy"] = 100.0
 		r["needs"]["food"] = 95.0
+
 
 func _press(game) -> void:
 	var ev := InputEventAction.new()
 	ev.action = "interact"
 	ev.pressed = true
 	game.input(ev)
+
 
 func run(m: Node) -> void:
 	main = m
@@ -96,7 +115,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	seed(5)
 	var d := BaseDemo.save()
-	d["zones"]["cinderstep"] = {"open": true}      # the second zone the day plays in
+	d["zones"]["cinderstep"] = {"open": true}  # the second zone the day plays in
 	var real := Save.path_for(Save.slot)
 	var before := FileAccess.get_md5(real)
 	Game.goto("home", {"zone": "bramblebank"})
@@ -114,6 +133,7 @@ func run(m: Node) -> void:
 	Engine.time_scale = 1.0
 	print("GDAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## Arrival, the feed menu's preview, feeding an item.
 func _morning(bb) -> void:
@@ -150,13 +170,14 @@ func _morning(bb) -> void:
 	await _grab("fed")
 	bb._close_panel()
 
+
 ## The Dash until the backed Boki takes the Crown (three wins in a row against stronger rivals).
 func _dash_and_cup(bb) -> void:
 	var pip := _rec("Pip")
 	# the cup compares stat totals, the race runs on Speed: Pip is fast, the rivals have the bigger total
 	pip["stats"] = {"power": 10, "guard": 10, "speed": 70, "focus": 10}
 	for nm in ["Moss", "Ash", "Rocky"]:
-		pip["bonds"].erase(_rec(nm)["uid"])      # friends run together (a pull): the cup run is against strangers
+		pip["bonds"].erase(_rec(nm)["uid"])  # friends run together (a pull): the cup run is against strangers
 		_rec(nm)["bonds"].erase(pip["uid"])
 	var foe_each := ceili(float(GardenPrizes.strength(pip)) * FOE_RATIO - 8.0) / 3
 	for nm in ["Moss", "Ash", "Rocky"]:
@@ -201,6 +222,7 @@ func _dash_and_cup(bb) -> void:
 		note("no Crown in %d races (Pip fast, rivals %.2fx the total): Pip won %d" % [races, FOE_RATIO, wins])
 	await _grab("after_dash")
 
+
 ## Two Boki in the Nook: the gate a fresh Boki hits, then the pair.
 func _nook(bb) -> void:
 	var a := _rec("Pip")
@@ -231,6 +253,7 @@ func _nook(bb) -> void:
 	await _wait(0.5)
 	await _grab("egg_in_nest")
 
+
 ## Moss walks to the pad and goes to live in Cinderstep.
 func _zone_move(bb) -> void:
 	var moss := _rec("Moss")
@@ -252,6 +275,7 @@ func _zone_move(bb) -> void:
 	Engine.time_scale = 1.0
 	ok(not bb.kins.has(k) and GardenZones.zone_of(moss) == "cinderstep", "it walks to the pad and goes (%.1f s)" % t)
 	await _grab("moss_leaving")
+
 
 ## Hop to Cinderstep with the partner; Pip and Moss play Stump Shove there. Returns the Cinderstep home.
 func _second_game(bb):
@@ -298,6 +322,7 @@ func _second_game(bb):
 		ok(int(Save.d["gems"]) > gems, "gems paid (%d to %d)" % [gems, int(Save.d["gems"])])
 		cs._close_panel()
 	return cs
+
 
 ## Back after eight hours: the card, the gifts, nobody lost.
 func _away(cs) -> void:

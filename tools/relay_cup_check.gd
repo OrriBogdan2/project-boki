@@ -255,8 +255,8 @@ func _on_base() -> void:
 			acted = acted or runners.any(func(n): return n.has_meta("kact"))
 			burst = burst or runners.any(func(n): return float(n.get_meta("kburst", 1.0)) > 1.0)
 			finished = finished or relay.finish_left >= 0.0
-		ok(relay.run == null and is_instance_valid(home.hrace.card),
-				"on: the relay ends with a result card (%.1f s)" % t)
+		ok(relay.run == null and is_instance_valid(home.hrace.card) and home.hrace.card.name == "GameResultCard",
+				"on: the relay ends with the shared result card (%.1f s)" % t)
 		await main.get_tree().process_frame
 		ok(acted and burst, "on: the runners play contact reacts and burst off the baton")
 		ok(finished and runners.all(func(n): return not is_instance_valid(n) or not n.has_meta("kact")),

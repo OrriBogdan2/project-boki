@@ -14,12 +14,14 @@ const MATCH_SOURCES := ["unlock", "mastery"]
 const ALLOWED_NAGS := ["Goals row (unlock)", "head out, or press Stay"]
 
 var nag_rx := RegEx.create_from_string("(?i)" + NAG)
-var goals_seen := {}      # Goals row text -> source, every row the card showed
-var nags := {}      # line -> [first second it showed, where]
+var goals_seen := {}  # Goals row text -> source, every row the card showed
+var nags := {}  # line -> [first second it showed, where]
+
 
 func run(m: Node) -> void:
 	sim_s = 1800.0
 	await super.run(m)
+
 
 func guidance() -> Array:
 	_note(home.guide.hint_lbl.text if is_instance_valid(home.guide.hint_box) else "", "tutorial line")
@@ -31,14 +33,17 @@ func guidance() -> Array:
 			_note((k["say"] as Label3D).text, "speech")
 	return super.guidance()
 
+
 func _note(text: String, where: String, always := false) -> void:
 	if text != "" and not nags.has(text) and (always or nag_rx.search(text) != null):
 		nags[text] = [clock, where]
 		print("G30 nag at %4.0f s (%s): %s" % [clock, where, text])
 
+
 func _allowed(line: String) -> bool:
 	var full: String = nags[line][1] + ": " + line
 	return ALLOWED_NAGS.any(func(a): return full.contains(a))
+
 
 func _verdicts() -> void:
 	super._verdicts()
@@ -48,5 +53,9 @@ func _verdicts() -> void:
 	var what := "no line sends a garden-only player on an expedition (%d: %s)"
 	ok(loose.is_empty(), what % [loose.size(), "; ".join(loose)])
 	var open_n := GardenZones.ids().filter(func(z): return GardenZones.is_open(z)).size()
-	print("G30 gate: Black Market placed %s, zones open %d of %d, matches %d" % [HomeLayout.placed("ransom", Save.d),
-			open_n, GardenZones.ids().size(), int(Save.d["matches"])])
+	print(
+		(
+			"G30 gate: Black Market placed %s, zones open %d of %d, matches %d"
+			% [HomeLayout.placed("ransom", Save.d), open_n, GardenZones.ids().size(), int(Save.d["matches"])]
+		)
+	)
