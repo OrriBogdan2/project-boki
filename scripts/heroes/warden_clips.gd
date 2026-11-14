@@ -322,12 +322,19 @@ func _build() -> AnimationNodeBlendTree:
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	var cycle := float(lc.get("cycle_s", 0.0))
 	var phase := float(lc.get("start_phase", 0.0))
-	for k in dirs:
-		var run := String(lc["run"][k])
-		var walk_len := cycle if cycle > 0.0 else lib.get_animation(run).length
-		for ring in [[String(lc["walk"][k]), walk_len, _walk_ring()], [run, cycle, 1.0]]:
+	for k in dirs.keys() + ["fl", "fr", "bl", "br"]:
+		if not lc["walk"].has(k):     # (a Hero with its own diagonal loops: no half-speed blend of two)
+			continue
+		var at: Vector2 = dirs[k] if dirs.has(k) else (dirs[k[0]] + dirs[k[1]]).normalized()
+		var run := String(lc["run"].get(k, ""))
+		var long_clip := run if run != "" else String(lc["walk"][k])
+		var walk_len := cycle if cycle > 0.0 else lib.get_animation(long_clip).length
+		var rings: Array = [[String(lc["walk"][k]), walk_len, _walk_ring()]]
+		if run != "":
+			rings.append([run, cycle, 1.0])
+		for ring in rings:
 			var len_s: float = ring[1] if float(ring[1]) > 0.0 else lib.get_animation(String(ring[0])).length
-			bs.add_blend_point(_seekable(_gait_loop(String(ring[0]), float(ring[1]))), dirs[k] * float(ring[2]))
+			bs.add_blend_point(_seekable(_gait_loop(String(ring[0]), float(ring[1]))), at * float(ring[2]))
 			ring_starts.append([StringName("parameters/loco/%d/seek/seek_request" % (bs.get_blend_point_count() - 1)),
 					phase * len_s])
 	var t := AnimationNodeBlendTree.new()
