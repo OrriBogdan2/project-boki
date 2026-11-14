@@ -402,7 +402,8 @@ func _keep_flex() -> void:
 	var afloat := _float_lift()
 	model.position.y = 0.0
 	if clip in OWN_HEIGHT or afloat > 0.0:
-		model.position.y = afloat / flex.global_basis.y.length() - body.position.y     # the clip hops or floats, not home
+		# the clip hops or floats, not home
+		model.position.y = afloat / flex.global_basis.y.length() - body.position.y
 	if _shadow:
 		_shadow.global_position.y = root.global_position.y - lift + _water + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig

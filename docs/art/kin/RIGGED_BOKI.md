@@ -128,8 +128,9 @@ for 1/30 s and every loop stopped a frame at its wrap (and ran a frame long). `b
 `export_anim_slide_to_zero`, and `tools/art1/glb_clip_start.py` slid the glbs already in `art/kin` without a
 rebake (only the key times change; `--check` lists any glb that still starts late). That took most seams from
 1.1-1.9 to under 1.0. What is left over 1.0 is a real break: a bone turns or changes speed at the loop point
-(kestrike walk 2.4 and run 1.9, gloamshell walk 2.0, zapple run 1.5, caecilith walk 1.4, mossgrade run 1.3, puddlet
-walk 1.15, burrlet walk 1.03; `SEAM_OVER`, `docs/DEBT.md`).
+(on the 11-14 merge with main's planted-paw and scan glbs: gloamshell walk 2.0, cairnback walk 1.6, the
+three glomwort-rig scans 1.0-1.4, caecilith walk 1.4, kestrike walk 1.3, puddlet, lodestick, mossgrade,
+burrlet and kindlewren walk 1.0-1.15; `SEAM_OVER`, `docs/DEBT.md`).
 
 A seam counts the wrap's jump, so a quick beat that runs up to the loop's end reads as a hitch: wisplet's idle wing
 shuffle now settles by 0.94 of the clip, and kindlewren's walk loop starts at the bottom of a landing's crouch

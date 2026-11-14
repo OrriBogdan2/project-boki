@@ -142,7 +142,8 @@ func _rmb(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 			_walk_probe(P, 0.1, 0.29, walk))
 	C.ok("Vex timing RMB: fired on the press, the swing on within a frame, the arm back by 0.3 s + the fade",
 			float(r["hit"]) <= DT and float(r["in"]) <= BLEND_IN and absf(float(r["len"]) - 0.3) < CLIP_TOL
-			and float(r["out"]) < 0.3 + _back(P, "gunslinger_rmb"), "in %.2f len %.2f out %.2f" % [r["in"], r["len"], r["out"]])
+			and float(r["out"]) < 0.3 + _back(P, "gunslinger_rmb"),
+			"in %.2f len %.2f out %.2f" % [r["in"], r["len"], r["out"]])
 	C.ok("Vex timing RMB: walking through it, the legs walk (the swing is upper body)",
 			_legs_walk(walk),
 			_walk_line("at 0.29", walk))
