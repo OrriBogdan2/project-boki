@@ -96,7 +96,7 @@ func _levels() -> void:
 	var e := {"u": 900, "id": "market_stall", "x": 30, "z": 30, "r": 0, "t": 1}
 	(lay["deco"] as Array).append(e)
 	var hm := HomeMarket.new(null, Callable())
-	ok(FarmUnlocks.gated() and Stalls.level() == 1 and hm.tabs() == ["Vendor", "Exchange"],
+	ok(FarmUnlocks.gated() and Stalls.level() == 1 and hm.tabs() == ["Vendor", "Relics", "Exchange"],
 		"L1: the vendor (and the Exchange) only: %s" % str(hm.tabs()))
 	var keys := func(tab: String) -> Array:
 		hm.vendor_tab = tab
@@ -125,7 +125,7 @@ func _levels() -> void:
 	ok(Stalls.level() == 1, "while the Boki build it, it still works at L1")
 	while FarmSites.has_site(e): FarmSites.add_swing(e)
 	ok(int(Save.d["gems"]) == g0 - int(cost["gems"]), "and the gems were spent by the time it was built")
-	ok(Stalls.level() == 2 and hm.tabs() == ["Vendor", "Exchange", "Shelter", "My stall", "Search"],
+	ok(Stalls.level() == 2 and hm.tabs() == ["Vendor", "Relics", "Exchange", "Shelter", "My stall", "Search"],
 		"L2 adds the Shelter, your stall and search: %s" % str(hm.tabs()))
 	e["t"] = 3
 	ok(Stalls.level() == 3 and hm.tabs().has("Auctions"), "L3 adds the Auction House")
@@ -350,18 +350,59 @@ func _transfer() -> void:
 	var back := Transfer.recall(String(r["id"]))
 	ok(back["ok"] and Save.d["roster"].has(bun) and int(Save.d["gems"]) == g0 and Transfer.wait_s() == 0,
 		"called back before they accept: the Boki, the fee and the week come back")
-	r = Transfer.send(String(bun["uid"]), "Moss")
-	var packet: Dictionary = r["packet"]
-	Transfer.delivered(String(r["id"]))
-	ok(Transfer.outbox().is_empty() and int(Save.d["gems"]) == g0 - Transfer.fee(),
-		"they accepted: it's theirs, and nobody paid gems for it")
-	# the other side
+	_round_trip(bun, g0)
+
+
+## Through the carrier (TransferPost over Social's store, here in memory): Tarn sends Bun to Moss, who
+## refuses it once and accepts it the second time. The Boki stays in Tarn's save until Moss says yes.
+func _round_trip(bun: Dictionary, g0: int) -> void:
+	var store := preload("res://tools/mem_store.gd").new()
+	store.docs["profiles/moss"] = JSON.stringify({"name": "Moss", "updated": 1})
+	Social.store_stub = func(m: String, a: Array, cb: Callable): cb.call(store.reply(m, a))
+	Social.ok = true
+	var tarn := Save.d
+	tarn["name"] = "Tarn"
 	_save(0)
-	var got := Transfer.accept(packet)
-	var same: bool = got["ok"] and String(got["rec"]["species"]) == String(bun["species"])
-	ok(same and String(got["rec"]["origin"]["how"]) == "transfer"
-		and (got["rec"]["raised_by"] as Array).has(String(packet["from_name"])) and int(Save.d["gems"]) == 0,
-		"the receiver accepts: the same Boki, 'raised by' its old keeper, and no gems change hands")
+	var moss := Save.d
+	moss["name"] = "Moss"
+	var said: Array = []
+	var as_who := func(d: Dictionary, me: String) -> void:
+		Save.d = d
+		Social.me = me
+	var sync := func() -> void: TransferPost.sync(func(lines: Array): said.append_array(lines))
+	var packets := func() -> int: return store.docs.keys().filter(func(k): return k.begins_with("transfers/")).size()
+	var got: Array = []
+	for yes in [false, true]:
+		as_who.call(tarn, "tarn")
+		var id := String(Transfer.send(String(bun["uid"]), "Moss")["id"])
+		sync.call()
+		ok(packets.call() == 1 and Transfer.outbox().size() == 1 and Save.kin(String(bun["uid"])).is_empty(),
+			"sent: the packet is on the store for Moss, the Boki waits in Tarn's outbox")
+		as_who.call(moss, "moss")
+		sync.call()
+		ok(TransferPost.inbox.size() == 1 and String(said[-1]).contains("Tarn wants to hand you Bun"),
+			"Moss's game sees the incoming Boki (%s)" % [said[-1] if said else "nothing"])
+		TransferPost.answer(String(TransferPost.inbox[0]["doc"]), yes, func(r: Dictionary): got.append(r))
+		ok(got[-1]["ok"] and packets.call() == 0 and TransferPost.inbox.is_empty(),
+			"Moss %s it" % ("accepts" if yes else "refuses"))
+		as_who.call(tarn, "tarn")
+		if yes:
+			TransferPost.recall(id, func(r: Dictionary): got.append(r))
+			ok(not got[-1]["ok"] and Transfer.outbox().size() == 1, "an accepted Boki can't be called back")
+		sync.call()
+	ok(Transfer.outbox().is_empty() and Save.kin(String(bun["uid"])).is_empty()
+		and int(tarn["gems"]) == g0 - Transfer.fee()
+		and not store.docs.keys().any(func(k): return k.begins_with("transfer")),
+		"refused, it came home with the fee; accepted, it left Tarn's save and the store is empty (%s)" % said[-1])
+	var rec: Dictionary = got[1].get("rec", {})
+	ok(moss["roster"].has(rec) and String(rec.get("species")) == String(bun["species"])
+		and String(rec["origin"]["how"]) == "transfer" and (rec["raised_by"] as Array).has("Tarn")
+		and int(moss["gems"]) == 0,
+		"Moss accepts: the same Boki, 'raised by' its old keeper, and no gems change hands")
+	Social.store_stub = Callable()
+	Social.ok = false
+	Social.me = ""
+
 
 # ------------------------------------------------------------------ your stall
 func _stalls() -> void:
