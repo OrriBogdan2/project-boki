@@ -102,6 +102,9 @@ const CHECKS := {
 	# first press after a panel closes
 	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],  # backpack tiers, at risk
+	"--wheel-zoom-check": ["res://tools/wheel_zoom_check.gd", "wheel_zoom_check", null],      # the wheel zooms
+	"--wheel-zoom-shots": ["res://tools/wheel_zoom_shots.gd", "wheel_zoom_shots", null],      # GPU: the wheel zooming
+	"--match-cam-wide-shots": ["res://tools/match_cam_wide_shots.gd", "match_cam_wide_shots", null],      # GPU
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
@@ -284,6 +287,8 @@ const CHECKS := {
 	"--shader-check": ["res://tools/shader_check.gd", "shader_check", null],      # compile + uniform names
 	"--unref-check": ["res://tools/unref_check.gd", "unref_check", null],      # every .gd/.tscn is named somewhere
 	"--cinder-art-check": ["res://tools/cinder_art_check.gd", "cinder_art_check", null],
+	"--muzzle-live-check": ["res://tools/muzzle_live_check.gd", "muzzle_live_check", null],
+	"--muzzle-shots": ["res://tools/muzzle_shots.gd", "muzzle_shots", null],      # each Hunter firing
 	"--ryzz-live-check": ["res://tools/ryzz_live_check.gd", "ryzz_live_check", null],
 	"--clip-live-claire-check": ["res://tools/clip_live_claire_check.gd", "clip_live_claire_check", null],
 	"--claire-skate-shots": ["res://tools/claire_skate_shots.gd", "claire_skate_shots", null],

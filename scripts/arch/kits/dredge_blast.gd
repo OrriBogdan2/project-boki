@@ -143,7 +143,7 @@ func _wave(i: int) -> void:
 			var edge := at + Vector3(d.x, 0, d.y) * speed * life
 			k.fx.volley(at, edge, WAVE_COL[i % 2], WAVE_DARK[i % 2], life, SLUG_HOLD)
 		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(i, e, why, dmg)
-		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb})
+		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb, "muz": "x"})
 	_wave_fx(i, at, dir)
 
 func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
