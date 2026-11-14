@@ -121,7 +121,7 @@ static func equip(id: String) -> bool:
 
 static func equipped() -> String:
 	var id := String(Save.d.get("look", {}).get("glider", "classic"))
-	return id if owned(id) else "classic"
+	return String(get_skin(id)["id"]) if owned(id) else "classic"      # a gone id falls back to the Field Wing
 
 static func col(spec: String, team: Color, hero: Color) -> Color:
 	match spec:
