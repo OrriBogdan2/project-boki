@@ -137,9 +137,9 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 ## 5. For the declutter jobs (not done here)
 
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
-2. **One prompt** (match tutorial: one strip, `TutorialStrip`; toasts wait while it is fresh, then carry the step's detail; the world prompt label waits while the card carries the interact key, `Tutorial.prompt_quiet`, `--tutorial-hud-check`). Still open outside the tutorial.
+2. **One prompt** (match tutorial: one strip, `TutorialStrip`; toasts wait while it is fresh, then carry the step's detail once a step; the world prompt label waits while the card carries the interact key, `Tutorial.prompt_quiet`, and the whole F prompt waits under a fresh strip, `TutorialHud.prompt_shows`; URGENT lines and revive / stomp prompts still show; `--tutorial-hud-check`). The old card's faded copy went with the one-line strip (not in fresh `--tutorial-hud-shots` renders). Still open outside the tutorial.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
-4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
+4. **Plan your drop:** done (ext/tut-drop-plan-first): a save's first expedition shows the map, the timer and the jump line; the legend, "Ways out" and squad return while the scoreboard key is held (`FullMap.plain_plan`). Shots: `docs/shots/tut-drop-plan-first/` (`--plan-first-shots`).
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit. **Done in ext/ui-relics-names:** tiles read the name with `the <Title>` smaller under it, the tile column is 38% of the window width (460-600 px), an unlocked tile drops the 'Unlocked' line, all 13 Hunters show without scrolling at 1280x720 and 1920x1080 ([shots](shots/ui-relics-names), software render: the GPU worker was lost 3x), `--hero-grid-check` asserts it. The right column and Mastery still scroll.
 4. **Plan your drop (done, ext/ui-drop-plan-first: `PlanQuiet`, matches 1-3 show map, timer, hot zone and the jump key; L brings the legend and Ways out back):** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
@@ -149,6 +149,33 @@ Names the owner set stay (Relic, Training Grounds, Fusion, trios only, Mastery a
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words. Done for the expedition panel, Relics page, the drop and the title (section 4 table).
+
+## 6. Rerun on the 0.24.5 line (ext/ui-first15-0245)
+
+Same tool, same fresh save, same counting rule as section 1, on origin/main + ext/release-integ-0245 (272368589). The new save lands on the garden, so the
+tour is: title, prologue, hatch (card, creator, eggs, name), first Relic, tutorial, results, **farm (garden) arrival**, expedition panel, Plan your drop, ship,
+landed, 15 s, pause (36 shots). `layout.txt`: 0 controls CLIPPED before and after. Shots: before [`11`](ui_first15_0245/before_11_tutorial_00_land.jpg),
+[`32`](ui_first15_0245/before_32_expedition_plan.jpg), [`35`](ui_first15_0245/before_35_expedition_15s.jpg); after (`after_` files, same folder).
+**Renderer: software (llvmpipe, `--rendering-driver opengl3` under Xvfb), 1280x720.** The GPU queue held 75 jobs, so the two `jobq submit --needs gpu` runs
+(before 20261111-162418-27399, after 20261111-163153-00469; `--first15-shots --size=1280x720`) had not started when this was written; the UI is 2D, positions match.
+Another branch (ext/tut-first15-reshoot) re-measured on a GPU and changed no code; its ranking (gear strip, Ways Out strip, legend) is what was fixed here.
+
+Counted worst spots on the 0.24.5 line, and what changed (no new features: three things drawn later, or shorter):
+
+| # | Spot | Before | Fix | After |
+|---|---|---|---|---|
+| 1 | Gear panel: four empty frames (two gloves, armor, boots) right of the belt, from the first frame of every match and tutorial step | one group on every match screen | `GearPanel` draws the frames once any slot holds gear | gone until the first glove or armor piece |
+| 2 | Q and V: two empty glove boxes with key caps beside the weapon card | one group (Q/V/X) | `GripHud._glove` skips an empty glove slot; the X (Boki ult) box stays | only X; Q/V appear with the first glove (tutorial "Grab the glove") |
+| 3 | Ways Out strip on the first expedition: Lair/Heart/Uplink/Final timers, top centre, from the ship on | 11 groups on the ship, landed and 15 s screens | Done on main by `HudGroups.ways_out_shown` (`ways_out_lead_s`, 30 s before the first seat opens; section 8); this branch's own 60 s gate and its "Squads left" cell were dropped in the merge (main's AliveCounter shows squads) | 9 on those screens |
+| 3b | Plan your drop legend: 4 kinds, 4 mark states, 2 note lines, subtitle (11 text lines) | 11 lines | `FullMap._legend` keeps the two marks a first-timer needs (could be there / here this match); empty and taken marks explain themselves once seen | 9 lines, card 44 px shorter |
+
+Groups per frame (same rule as section 1; by eye on the pictures): tutorial landing 9 to **7** ([11](ui_first15_0245/after_11_tutorial_00_land.jpg)),
+glove step 9-10 to 8, first expedition landed/15 s 11 to **9** ([35](ui_first15_0245/after_35_expedition_15s.jpg)), ship 11 to 9, Plan your drop 7 (the legend is shorter, not fewer blocks;
+[32](ui_first15_0245/after_32_expedition_plan.jpg)). Stacked lines: legend 11 to 9. Still over 5 everywhere in a match: the staged HUD (section 5, item 1)
+is not done here; the second tip (the hover card in shot 35 sits on the tip card; it follows the crosshair, so that is the shot tool's cursor on a rival) is left.
+Not changed: the farm arrival (5 groups) and the garden first-day screens; the hatch screens' long cards (section 4).
+Checks: `--ways-out-hud-check` 0 fail, `--msg-queue-check` 0 fail, `--tutorial-hud-check` 0 fail (1 fail once in 4 runs, flaky, passed 3 reruns).
+`--hud-budget-check` is not on this line (it exists only on ext/ui-hud-budget, not merged), so it was not run.
 
 ## 6. Rerun on the 0.24.5 line (ext/ui-first15-0245)
 
@@ -214,3 +241,16 @@ What changed (all first-time rules, no settings; base_mode, the garden, only):
 
 GPU shots at 1280x720 (`--garden-hud-groups`, jobq gd-before4 20261112-013050-17843 on 0.24.5 272368589 plus the tool, gd-after4 20261112-013005-02702 on this branch; the counts above are their GARDENHUD lines). Before: [hub_day1](shots/ui-garden-declutter/before_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/before_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/before_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/before_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/before_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/before_cinderstep_day5.jpg). After: [hub_day1](shots/ui-garden-declutter/after_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/after_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/after_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/after_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/after_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/after_cinderstep_day5.jpg).
 Not changed (still on screen, each one group): the key row (folds after 3 uses of each key), the hub bar, the F prompt, the one Next line.
+
+## 8. Expedition panel and Relics page on a first visit (ext/ui-relics-grid)
+
+`ExpFold.first_visit()` (`scripts/home/exp_fold.gd`): true while the first Where is the only one open (`extracts` below the second Where's unlock).
+Then the **expedition panel** shows the picked Relic, the open Where and Start; "All Relics (n)", "Locked drops (n)" and "More: Boki, match and modes"
+fold the other Relics, the locked Wheres, and Boki you bring, loadout, Match, Conditions and the Training Grounds / Play online links (the links
+move from the footer into that fold). The **Relics page** shows the picked and the open or ready Relics; "Locked Relics (n)" folds the rest. With a
+second Where open nothing is folded. The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
+fits on one line. `--relics-fold-check` asserts the folds and that no Relic name is cut or wrapped at 1280x720 on either screen.
+
+Shots (1280x720, software renderer on rpc4, the same save as section 1): [expedition before](shots/ui-relics-grid/before_expedition.jpg) /
+[after](shots/ui-relics-grid/after_expedition.jpg); [Relics before](shots/ui-relics-grid/before_relics.jpg) /
+[after](shots/ui-relics-grid/after_relics.jpg) / [after, locked Relics unfolded](shots/ui-relics-grid/after_relics_all.jpg).

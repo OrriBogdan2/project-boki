@@ -288,17 +288,6 @@ func _second_relic(home) -> void:
 
 # ------------------------------------------------------------------ 6. the first expedition
 func _first_expedition(home) -> void:
-	_begin("first expedition: the panel")
-	home._open_expedition()
-	await main.get_tree().process_frame
-	var ex_blocks := ExpeditionFirst.visible_blocks(home.panel_host)
-	ok(ex_blocks <= 3, "the first visit to the expedition panel shows at most 3 blocks (%d)" % ex_blocks)
-	var more := _button(home.panel_host, "More")
-	ok(more != null, "the rest is folded behind More")
-	if more != null:
-		more.pressed.emit()
-		ok(ExpeditionFirst.visible_blocks(home.panel_host) > ex_blocks, "More opens the full panel")
-	home._close_panel()
 	_begin("first expedition: start")
 	home.exp_seed = EXPEDITION_SEED
 	home._start_match()

@@ -168,7 +168,7 @@
 			"feel": "sad",
 			"word": "Hi",
 			"acts": [
-				"(keeps its distance)",
+				"(keeps {his} distance)",
 				"(watches you sideways)",
 				"(doesn't come closer)",
 				"(looks away)",
@@ -197,7 +197,7 @@
 			"word": "More",
 			"acts": [
 				"(rubs against your leg)",
-				"(flops onto its back)",
+				"(flops onto {his} back)",
 				"(nuzzles your hand)",
 				"(leans into it)",
 				"(purrs softly)"
@@ -262,8 +262,8 @@
 			"word": "Yum",
 			"acts": [
 				"(munches happily)",
-				"(licks its lips)",
-				"(pats its belly)",
+				"(licks {his} lips)",
+				"(pats {his} belly)",
 				"(crunches loudly)"
 			],
 			"lines": {
@@ -316,9 +316,9 @@
 			"feel": "angry",
 			"word": "No",
 			"acts": [
-				"(turns its nose up)",
+				"(turns {his} nose up)",
 				"(pushes it away)",
-				"(sticks out its tongue)",
+				"(sticks out {his} tongue)",
 				"(backs away)"
 			],
 			"lines": {
@@ -343,10 +343,10 @@
 			"feel": "content",
 			"word": "Full",
 			"acts": [
-				"(pats its round belly)",
+				"(pats {his} round belly)",
 				"(sighs, very full)",
 				"(lies down, stuffed)",
-				"(shakes its head)"
+				"(shakes {his} head)"
 			],
 			"lines": {
 				"_": [
@@ -371,9 +371,9 @@
 			"word": "Nice",
 			"acts": [
 				"(fluffs up)",
-				"(shakes out its fur)",
+				"(shakes out {his} fur)",
 				"(stretches long)",
-				"(closes its eyes)"
+				"(closes {his} eyes)"
 			],
 			"lines": {
 				"_": [
@@ -479,8 +479,8 @@
 			"word": "Strong",
 			"acts": [
 				"(flexes proudly)",
-				"(puffs itself up)",
-				"(bounces on its toes)",
+				"(puffs {himself} up)",
+				"(bounces on {his} toes)",
 				"(stands tall)"
 			],
 			"lines": {
@@ -505,7 +505,7 @@
 			"feel": "sad",
 			"word": "Again",
 			"acts": [
-				"(hangs its head)",
+				"(hangs {his} head)",
 				"(scuffs the ground)",
 				"(sighs)",
 				"(tries again)"
@@ -534,7 +534,7 @@
 				"(tummy rumbles)",
 				"(sniffs your pockets)",
 				"(eyes the pot)",
-				"(nudges its bowl)"
+				"(nudges {his} bowl)"
 			],
 			"lines": {
 				"_": [
@@ -558,7 +558,7 @@
 			"word": "Sleepy",
 			"acts": [
 				"(yawns wide)",
-				"(looks at its bed)",
+				"(looks at {his} bed)",
 				"(blinks slowly)",
 				"(wobbles a bit)"
 			],
@@ -739,7 +739,7 @@
 			"acts": [
 				"(works away)",
 				"(hums while working)",
-				"(wipes its brow)",
+				"(wipes {his} brow)",
 				"(keeps at it)"
 			],
 			"lines": {
@@ -924,7 +924,7 @@
 			"acts": [
 				"(chats with a friend)",
 				"(sniffs a buddy)",
-				"(nudges its friend)",
+				"(nudges {his} friend)",
 				"(whispers something)"
 			],
 			"lines": {
@@ -1255,7 +1255,7 @@
 			"feel": "angry",
 			"word": "Mine",
 			"acts": [
-				"(plants itself in front)",
+				"(plants {himself} in front)",
 				"(puffs up, remembering)",
 				"(growls at nothing)",
 				"(stands guard)"
@@ -1284,7 +1284,7 @@
 			"acts": [
 				"(leans against you)",
 				"(sits close, quiet)",
-				"(rests its head)",
+				"(rests {his} head)",
 				"(sighs softly)"
 			],
 			"lines": {
@@ -1399,8 +1399,8 @@
 			"word": "No",
 			"acts": [
 				"(clings to your shoulder)",
-				"(shakes its head)",
-				"(digs in its claws)",
+				"(shakes {his} head)",
+				"(digs in {his} claws)",
 				"(won't budge)"
 			],
 			"lines": {
@@ -1533,7 +1533,7 @@
 			"acts": [
 				"(sits, unsure)",
 				"(looks away)",
-				"(drags its paws)",
+				"(drags {his} paws)",
 				"(sighs heavily)"
 			],
 			"lines": {
@@ -1699,7 +1699,7 @@
 			"word": "Home",
 			"acts": [
 				"(trots toward the exit)",
-				"(points its nose)",
+				"(points {his} nose)",
 				"(runs ahead, looks back)",
 				"(paws at the path)"
 			],
@@ -1753,9 +1753,9 @@
 			"word": "Look",
 			"acts": [
 				"(growls at a Hunter)",
-				"(points its nose)",
+				"(points {his} nose)",
 				"(crouches, ready)",
-				"(bares its teeth)"
+				"(bares {his} teeth)"
 			],
 			"lines": {
 				"_": [
@@ -1789,7 +1789,7 @@
 			"acts": [
 				"(ducks low)",
 				"(stares far away)",
-				"(flattens itself)",
+				"(flattens {himself})",
 				"(hides behind you)"
 			],
 			"lines": {
@@ -1816,7 +1816,7 @@
 			"acts": [
 				"(bristles at the monsters)",
 				"(growls low)",
-				"(counts on its claws)",
+				"(counts on {his} claws)",
 				"(backs up a step)"
 			],
 			"lines": {
@@ -1844,7 +1844,7 @@
 				"(ears flat, staring)",
 				"(trembles a little)",
 				"(stares at the fight)",
-				"(hides its eyes)"
+				"(hides {his} eyes)"
 			],
 			"lines": {
 				"_": [
@@ -1928,7 +1928,7 @@
 			"feel": "angry",
 			"word": "Mine",
 			"acts": [
-				"(plants itself in front)",
+				"(plants {himself} in front)",
 				"(stands guard)",
 				"(snarls at them)",
 				"(spreads out wide)"
@@ -2175,10 +2175,10 @@
 			"feel": "excited",
 			"word": "Watch",
 			"acts": [
-				"(winds up its power)",
+				"(winds up {his} power)",
 				"(glows, ready)",
 				"(lets loose)",
-				"(braces itself)"
+				"(braces {himself})"
 			],
 			"lines": {
 				"_": [

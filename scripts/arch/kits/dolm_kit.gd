@@ -161,7 +161,9 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
 	net_ring(at, blast, Color("3a7cff"))
-	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
+	var slow := {}
+	if src == "dash":
+		slow = {"slow": float(dash_def()["slow_t"]), "slow_k": float(dash_def()["slow_k"])}
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
 	if e != null and is_instance_valid(e) and e.team != h.team:
@@ -170,8 +172,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		if ult_cast > 0:
 			s["dmg"] = spine.capped(e, float(s["dmg"]))
 			_ult_rock_landed(e, ult_cast)
-		x["slow"] = slow_t
-		x["slow_k"] = float(rd["slow_k"])
+		x.merge(slow)
 		if e is Hunter:
 			launch_pay += 1
 			payoff_fx(e.pos, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
@@ -181,13 +182,9 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		if ult_cast > 0:
 			f_dmg = spine.capped(f, f_dmg)
 			_ult_rock_landed(f, ult_cast)
-		f.hurt(
-			f_dmg, h,
-			{
-				"src": "abil", "ab": "rock", "slow": slow_t, "slow_k": float(rd["slow_k"]),
-				"kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0
-			}
-		)
+		var splash := {"src": "abil", "ab": "rock", "kb": Vector2(f.pos.x - at.x, f.pos.z - at.z).normalized() * 4.0}
+		splash.merge(slow)
+		f.hurt(f_dmg, h, splash)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
 
 ## A Basalt Spine rock that reached a hunter inside the bond window fills the bond (judged a beat later, so
@@ -364,7 +361,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		# a bot: punches up close, throws boulders from range
 		if held and h.fire_cd <= 0.0:
 			var tg := _bot_target()
-			if tg and h.flat_dist(tg) < 3.0: _punch(0.6)
+			if tg and (h.flat_dist(tg) < 3.0 or _row_between(tg)): _punch(0.6)
 			else: _boulder()
 		return true
 	if held:
@@ -498,6 +495,13 @@ func _punch(k: float) -> void:
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
+
+## A bot punches when its own rocks stand in line with the foe: the punch sends the row at them.
+func _row_between(tg: Ent) -> bool:
+	var dir := h.aim_dir()
+	var pd: Dictionary = lmb_def()["punch"]
+	var lane := AimMode.in_lane(h.pos, dir, float(pd["sweep_max"]), float(pd["width"]), tg.pos, tg.r)
+	return lane and not sweep_rocks(dir).is_empty()
 
 ## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a blue flash and a
 ## short spray of stone and sparks thrown on along the punch, sized by the lane's half width and the hold.
@@ -710,13 +714,18 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.5 and dist < 9.0 and los and randf() < 0.6:
+		var ed := e_def()
+		var span := float(ed["dist"]) + float(ed["row_gap"])
+		h.inp["aim"] = BotLead.point(h, tgt, float(ed["tell"]), 0.0, span) + Vector3(0, 0.9, 0)
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and dist < 3.4 and los:
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		var sd := slam_def()
+		var hold := float(rmb_def()["hold"]) + float(sd["time"]) * randf_range(0.3, 1.0)
+		BotLead.aim(self, tgt, hold, 0.0, float(sd["hop"]) + float(sd["radius"][0]))
 		h.inp["sec"] = true
-		bot_hold["rmb"] = float(rmb_def()["hold"]) + float(slam_def()["time"]) * randf_range(0.3, 1.0)
+		bot_hold["rmb"] = hold
 		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and dist > 2.5 and dist < 6.0 and los and randf() < 0.2:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)

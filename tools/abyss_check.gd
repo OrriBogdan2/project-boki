@@ -9,6 +9,10 @@ extends RefCounted
 ##   5. sheer cliffs still don't catch you as you fall past them
 ##   6. a bot knocked off beside a ledge climbs back the same way
 ##   7. monsters knocked at an island from below are blocked, and fall out promptly
+##   8. at home: the same ledges, lift and fall-out
+##   9. the fall's sounds in order (AbyssFallSfx): wind under the lip, rising with depth, one warning
+##      before the point of no return, the lift as the glider (cool or overheated) carries you up;
+##      another hunter dropping off cries once
 ## Prints "ACHECK ok|FAIL ..." lines and "ACHECK DONE, failures: N".
 
 var bad := 0
@@ -272,6 +276,7 @@ func run(main: Node) -> void:
 				print("ACHECK   sheer rim %s caught onto %s (sheer=%s)" % [str(at), str(h.pos), w.sheer.has(w.idx(lx, lz))])
 				if w.sheer.has(w.idx(lx, lz)) or Vector2(lx + 0.5 - at.x, lz + 0.5 - at.z).length() < 1.2: caught += 1
 		ok(caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [caught, sh.size()])
+	_fall_cues(edges[0])
 	# ---------------------------------------------------------------- 6. a bot knocked off a ledge
 	m.opts["god"] = false
 	var b: Hunter = m.hunters[1]
@@ -540,3 +545,92 @@ func _home(main: Node) -> void:
 	OS.remove_logger(trap)
 	var seen := "%d %s" % [trap.count, trap.first]
 	ok(trap.count == 0, "home: building under the wipe, playing on and leaving it logs no script error (%s)" % seen)
+
+# ---------------------------------------------------------------- 9. the fall's sounds
+## Steps off a rim with no keys, then opens the glider (cool, or overheated at half lift) once the warning
+## plays. Logs the first step each cue comes on and the wind's level and pitch each step of the drop.
+func _fall_cues(e: Dictionary) -> void:
+	var dir: Vector2 = e["dir"]
+	var top: float = e["top"]
+	var off: Vector3 = Vector3(dir.x, 0.0, dir.y) * (h.r + 2.0)
+	for hot in [false, true]:
+		_reset(Vector3(e["ex"], top - 0.2, e["ez"]) + off, Vector3.ZERO)
+		h.last_gy = top
+		h.air_t = 1.0
+		h.abyss_snd = AbyssFallSfx.new()
+		var cues: Array = []          # "wind", "warn", "lift" in the order they come on
+		var winds: Array = []         # the wind's (dB, pitch) each step of the drop, up to the warning
+		var at := {"warn_left": 0.0, "wind_on_lift": true, "loop": false}
+		var r := _run(5.0, func(_t): _log_cue(cues, winds, at, hot))
+		var rising := winds.size() > 4
+		for i in range(1, winds.size()):
+			if winds[i].x < winds[i - 1].x - 0.01 or winds[i].y < winds[i - 1].y - 0.001:
+				rising = false
+		var lo: Vector2 = winds[0] if winds.size() > 0 else Vector2.ZERO
+		var hi: Vector2 = winds[-1] if winds.size() > 0 else Vector2.ZERO
+		var tag := "overheated" if hot else "cool"
+		ok(cues == ["wind", "warn", "lift"], "%s glider: the fall's cues in order %s" % [tag, str(cues)])
+		ok(at["loop"] and rising and hi.x - lo.x > 6.0 and hi.y - lo.y > 0.3,
+			"%s: the wind plays and climbs as you sink (%.1f dB at %.2fx to %.1f dB at %.2fx over %d steps)"
+			% [tag, lo.x, lo.y, hi.x, hi.y, winds.size()])
+		ok(float(at["warn_left"]) > 0.5,
+			"%s: the warning comes %.1fm above the point of no return" % [tag, at["warn_left"]])
+		ok(not r["fell"] and not at["wind_on_lift"] and not h.abyss_snd.warned,
+			"%s: lifted out (fell %s), the wind off as it lifts, the warning re-armed" % [tag, str(r["fell"])])
+	h.inp["glide"] = false
+	_other_cry(e, off)
+
+## One step of _fall_cues' drop: logs what came on, and opens the glider once the warning has played.
+func _log_cue(cues: Array, winds: Array, at: Dictionary, hot: bool) -> void:
+	var s := h.abyss_snd
+	if s.falling and not "warn" in cues:
+		winds.append(AbyssFallSfx.wind_mix(h.lip_y - h.pos.y))
+		at["loop"] = at["loop"] or Sfx.loop_on(AbyssFallSfx.WIND_KEY)
+		if not "wind" in cues:
+			cues.append("wind")
+	if s.warned and not "warn" in cues:
+		cues.append("warn")
+		at["warn_left"] = h.pos.y - h.abyss_kill_y()
+	if s.lifted and not "lift" in cues:
+		cues.append("lift")
+		at["wind_on_lift"] = s.falling
+	if s.warned:
+		h.inp["glide"] = true
+		if hot:
+			h.glide_fuel = 0.0
+
+## Another hunter (not you) dropping off the same rim: one cry, re-armed once it's back in play.
+func _other_cry(e: Dictionary, off: Vector3) -> void:
+	var o: Hunter = m.hunters[1]
+	o.out = false
+	o.gone = false
+	o.downed = false
+	o.hp = o.max_hp
+	o.gliding = false
+	o.teleport(Vector3(e["ex"], float(e["top"]) - 0.2, e["ez"]) + off)
+	o.grounded = false
+	o.vel = Vector3.ZERO
+	o.last_gy = e["top"]
+	o.abyss_snd = AbyssFallSfx.new()
+	var cried_at := -1.0
+	var cries := 0
+	var was := false
+	var t := 0.0
+	while t < 4.0 and not o.out:
+		m.step(Match.DT)
+		t += Match.DT
+		if o.abyss_snd.cried and not was:
+			cries += 1
+			if cried_at < 0.0:
+				cried_at = t
+		was = o.abyss_snd.cried
+	ok(cries == 1 and cried_at < 0.6 and not o.abyss_snd.falling and o.out,
+		"another hunter off the edge cries %d time(s), %.2fs in, falls out (no wind for it)" % [cries, cried_at])
+	o.out = false
+	o.gone = false
+	o.hp = o.max_hp
+	o.teleport(e["at"])
+	o.vel = Vector3.ZERO
+	for i in 3:
+		m.step(Match.DT)
+	ok(not o.abyss_snd.cried, "...and the cry re-arms once it's back in play")

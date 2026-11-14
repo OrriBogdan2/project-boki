@@ -26,6 +26,13 @@ static func worn_any(p: Hunter) -> bool:
 			return true
 	return false
 
+## True once any of the four slots holds gear: until then the row of empty frames stays off the HUD.
+static func worn_any(p: Hunter) -> bool:
+	for g in p.gear:
+		if not (g as Dictionary).is_empty():
+			return true
+	return false
+
 static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	if worn_any(p):
 		_draw_slots(hud, sz, p)

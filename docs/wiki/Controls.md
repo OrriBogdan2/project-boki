@@ -26,7 +26,7 @@ is your hunter's ultimate in a match (the emote wheel is **Y**).
 | 1 / 2 | Tonic (heal) / armor kit. With full health, 1 uses an armor kit. |
 | Alt + an ability key | Put a skill point into that ability (pressing a locked ability unlocks it) |
 | Ctrl | Sneak: slower and quieter, steadier aim, harder to spot |
-| B | Base to a teammate (squads): a 3s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
+| B | Base to a teammate (squads): hold for a wheel of teammates, point at one and let go (let go in the middle to cancel); a 5.5s channel; moving, attacking or any hit breaks it; you arrive weakened for 3s; 40s cooldown |
 | Y (hold) | Emote wheel, including the truce offer |
 | M | Full map; click to ping |
 | P / Z | During the drop: pass the drop lead / separate from your squad |
@@ -75,7 +75,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | G | Boki: tap to send out or call back, hold for the order wheel | `throw` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
-| C | Swap your lead and second Boki (in a match) | `swap_kin` | yes |
 | Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 | Glide (hold in the air) | `glide` | yes |
@@ -97,7 +96,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | X / Delete | Put a piece away (build mode) | `store` | yes |
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
-| L | Map legend and ways out (first 3 matches) | `map_info` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
 | Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
 | Shift | Hold to keep placing (build mode) | `keep_placing` | yes |

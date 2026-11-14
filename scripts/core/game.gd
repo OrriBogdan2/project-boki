@@ -80,8 +80,8 @@ func _setup_input() -> void:
 	for a in KinKeys.ids():
 		_key(a, [])      # Boki quick keys: unbound until picked
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
-	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
-	_key("swap_kin", [KEY_C])                 # in a match: swap your lead and second Boki (C is Details at home)
+	_key("base", [KEY_B])                     # base to a teammate: hold for the wheel, a 5.5s channel (squads only)
+	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
 	_key("dash", [KEY_SHIFT])
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
@@ -103,7 +103,6 @@ func _setup_input() -> void:
 	_key("store", [KEY_X, KEY_DELETE])        # build mode: put the piece away
 	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
-	_key("map_info", [KEY_L])                 # the full map: the legend and the ways out (hidden for a new player)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("undo", [KEY_Z])                     # build mode: undo the last piece (with Ctrl)
 	_key("keep_placing", [KEY_SHIFT])         # build mode: hold while placing to keep placing more

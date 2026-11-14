@@ -10,6 +10,7 @@ const VERSION := "0.24.9"        # online play only matches players on the same 
 const SEND_EVERY := 0.1          # s between the snapshots of what this game owns
 const EARLY_GAP := 0.03          # s: the soonest a snapshot may follow the last one
 const EARLY_DV := 8.0            # m/s: a jump in your velocity this big (a dash starts) sends a snapshot at once
+const SEND_DUE := 0.001      # s: a send timer this close to 0 is due (0.1 s less six 1/60 s steps leaves 1e-17, not 0)
 
 signal peers_changed
 signal message(topic: String, data, from: String)
@@ -249,7 +250,7 @@ func tick(dt: float) -> void:
 	send_t -= dt
 	host_send_t -= dt
 	flush()        # hits and events leave this frame, not with the next snapshot
-	if send_t <= 0.0 or _cast_or_dash_started():
+	if send_t <= SEND_DUE or _cast_or_dash_started():
 		send_t = SEND_EVERY
 		var mine: Array = m.net_snapshot(true)
 		if mine.size() > 0:
@@ -257,7 +258,7 @@ func tick(dt: float) -> void:
 		if m.player:
 			sent_vel = m.player.vel
 			sent_move_at = m.player.ak.anim_at if m.player.ak else -9.0
-	if is_host() and host_send_t <= 0.0:
+	if is_host() and host_send_t <= SEND_DUE:
 		host_send_t = 0.15
 		var world_ents: Array = m.net_snapshot(false)
 		if world_ents.size() > 0:

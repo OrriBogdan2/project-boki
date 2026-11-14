@@ -27,14 +27,12 @@ Desktop builds use Forward+; the web and mobile builds use the Compatibility ren
 | Shift | Dash (in the air it's the long dash; your class decides distance and charges) |
 | Space | Jump; hold it in the air to glide |
 | Mouse 5 | Glide (hold in the air; never jumps) |
-| Q / V | Your two gloves (found on the run) |
-| E | Your class's utility |
-| R | Your hunter's ultimate (from level 6) |
-| X | Fuse with your Boki, once the bond meter is full (X again releases) |
-| G | Tap: send your Boki out, or call it back. Hold: the order wheel (Chase, Guard, Return, Follow) |
-| Middle mouse | Ping for your squad |
-| B | Base to a teammate (squads): a 3s channel, broken by moving, attacking or any hit; you arrive weakened for 3s (half damage, CC, healing and shields); 40s cooldown |
-| 1-4 | Utility belt (a tonic and an armor kit to start) |
+| Q | Your active glove (gloves are found on the run) |
+| E | Your Boki's ability (thrown out first if it's on your shoulder) |
+| C or middle mouse | Throw your Boki at the cursor, or recall it |
+| R | Bond ultimate, once the bond meter is full |
+| B | Base to a teammate (squads): hold for a wheel of teammates, let go on one; a 5.5s channel, broken by moving, attacking or any hit; you arrive weakened for 3s (half damage, CC, healing and shields); 40s cooldown |
+| 1 | Heal: a tonic when you're hurt, an armor kit when your health is full |
 | F | Catch a dazed Boki, revive a teammate, open a chest, take a found weapon or glove |
 | Ctrl | Sneak (hold; tap to toggle on the web version, since Ctrl+W closes browser tabs) |
 | Tab | Scoreboard |

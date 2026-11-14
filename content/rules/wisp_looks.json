@@ -13,7 +13,6 @@
 			"drag": 0.45,
 			"settle": 0.5,
 			"lean": 0.35,
-			"hum": {"sfx": "wisp_hum", "db": -14.0},
 			"pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"},
 			"pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25},
 			"snuff": {"burst": 24, "sfx": "hit"}

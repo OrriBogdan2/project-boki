@@ -14,6 +14,7 @@ What a Boki says out loud, at home and in a match. All of it is data in `content
 ## The file
 
 - `tuning`: the numbers above, plus `act_words` (an action is at most 4 words; a tone and an action that run over the cap together are never paired) and `min_lines` (the fewest general lines a trigger may have).
+- Actions and lines never say "it" or "its" of a Boki: they use `{he}` `{He}` `{his}` `{him}` `{himself}`, filled from the Boki's sex (`KinSpeak.pronouns`; "they" if the sex is unknown). `--boki-lines-check` fails on it/its/itself.
 - `tones`: how a young Boki says its name, by feeling. `{A}` is the first syllable, `{a}` the same in lower case, `{b}` the second syllable, `{F}` / `{f}` / `{U}` the full name as written, lower and upper case (`KinSpeak.fill`).
 - `sounds`: noises a tone may use besides the name (grrr, zzz...).
 - `alias`: old trigger names that share another trigger's lines (`yelp` and `low_hp` say `hurt` lines).

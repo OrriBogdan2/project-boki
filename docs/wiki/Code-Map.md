@@ -59,7 +59,9 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
 | `spawn_plan.gd` | What's live on a fixed map each match |
-| `drop_squad.gd`, `drop_rocket.gd` | Planning phase, drop leaders, the squad mini rocket (its HUD: `scripts/ui/drop_hud.gd`) |
+| `drop_squad.gd`, `drop_rocket.gd` | Planning phase, drop leaders, the squad mini rocket |
+| `squad_intro.gd` | The squad intro on the skyship deck before the planning map |
+| `skyship_model.gd`, `sky_deck.gd` | The skyship's look; the squad, wisps, shadow and engine sound aboard |
 | `raid_look.gd` | Raid conditions: light, weather, sight |
 | `truce.gd` | Emotes and truces |
 | `pack.gd` | The backpack |
@@ -130,7 +132,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `ui.gd` | The menu kit every screen builds from |
 | `hud.gd` (3.7k lines) | The in-match HUD |
 | `overlay.gd` | Esc menu, settings, save files, admin panel |
-| `title.gd`, `prologue.gd`, `hold_skip.gd`, `hatch.gd`, `wyrm.gd`, `scenery.gd` | Title, story (click for next, hold to skip), first egg |
+| `title.gd`, `prologue.gd`, `hatch.gd`, `wyrm.gd`, `scenery.gd` | Title, story, first egg |
 | `kit_card.gd` | A class's whole kit on one page (K) |
 | `full_map.gd`, `map_paint.gd` | The M map and its baked painting |
 | `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd` | Between screens |
