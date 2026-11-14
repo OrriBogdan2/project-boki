@@ -7,6 +7,7 @@ extends RefCounted
 ## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default;
 ## sex: both bodies from the front, three-quarter and side, and in every shroud).
 
+const HATCH := "res://scripts/ui/hatch.gd"  # the creator scene script every group builds
 const LOOKS := {
 	"creator_female": {"gender": 0},
 	"creator_male_short": {"height": 0}, "creator_male_tall": {"height": 2},
@@ -70,7 +71,7 @@ func _fresh() -> void:
 
 func _creator(tree: SceneTree) -> void:
 	_fresh()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	hx.edit_only = true
 	main.add_child(hx)
 	await _shot(tree, "creator_default", 2.0)
@@ -86,7 +87,7 @@ func _creator(tree: SceneTree) -> void:
 func _eggs(tree: SceneTree) -> void:
 	_fresh()
 	Save.d["look"] = Unmasked.default_look()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	main.add_child(hx)
 	await tree.process_frame
 	hx._looks_good()
@@ -121,7 +122,7 @@ func _mask(tree: SceneTree) -> void:
 	_fresh()
 	Save.d["look"] = Unmasked.default_look()
 	Save.d["look"].merge({"gender": 0, "glow": 0, "ghost": 1}, true)
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	main.add_child(hx)
 	await tree.process_frame
 	hx._looks_good()
@@ -146,7 +147,7 @@ func _mask(tree: SceneTree) -> void:
 
 func _shroud(tree: SceneTree) -> void:
 	_fresh()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	hx.edit_only = true
 	main.add_child(hx)
 	await _shot(tree, "creator_warmup", 2.5)
@@ -175,7 +176,7 @@ func _shroud(tree: SceneTree) -> void:
 ## Each body in the creator from CREATE_CAM: the default look front, three-quarter and side, then every shroud.
 func _sexes(tree: SceneTree) -> void:
 	_fresh()
-	var hx = load("res://scripts/ui/hatch.gd").new()
+	var hx = load(HATCH).new()
 	hx.edit_only = true
 	main.add_child(hx)
 	await _shot(tree, "creator_warmup", 2.5)
