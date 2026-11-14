@@ -128,6 +128,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 - During Spirit Walk she can still shoot and cast, and moves 10% faster (the sheet measures +5-10% outside); at rank 3, 33% more inside something, fading over the walk.
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
+- Double-wall climb: built on main (hunter_move.json `archer.climb_tall`, Hunter reach +0.9 m): a jump into a 4-terrace wall (3.2 m, two single 1.6 m climbs, source 3 m) puts her on top; 5 terraces and her back to the wall do not, and every Hunter but Brall (the other `climb_tall` hero) tops out at 3 terraces. Facing is the keys pushed into the wall, as for every ledge. Proven in --archer-combo-check (`_wall_climb`) and tools/tall_climb_check.gd.
 - Not built, waits on rule 2 decision: Hail Wall on wisps (proposal: bleed x2 and slow 35% inside the wall, no hit on the pool; docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
