@@ -110,7 +110,7 @@ func _hint() -> void:
 		var P: Hunter = s[1]
 		m.opts["training"] = not real
 		aim_at(P, s[2].pos)
-		_first(m, P, "e")
+		first(m, P, "e")
 		_open(m, P, "e")
 		m.step(DT)
 		ok("ostra e: the hint is %s" % ("marked seen in a real match" if real else "held back in training"),
