@@ -191,7 +191,7 @@ Steps are how you hear a flank. Both layers of a Hunter's step (the plain contac
 A weapon under 0.15 s a round (`FireSfx.HELD_RATE`: the Quill Rifle, rifle, SMG, minigun, flamethrower's weapon row, and Neve's darts once they run that fast) plays its shot through `FireSfx.shot`, not one sample per round. At 0.08 s (about 12 rounds a second) the old path stacked 4 to 10 pool voices per Hunter.
 - **First shot of a burst** (a gap over 0.3 s): the base take, no pitch jitter, full level. **The rest**: the other three takes in turn (never the same twice running), pitch +-3%, volume +-1 dB, `Sfx.STACK_DB` under the first, which is the level the stacking rule gave them already.
 - **Cap**: one emitter keeps at most 3 takes sounding (`FireSfx.VOICES`); a round that would be the 4th sounds nothing (the shot itself still fires). Four Hunters holding fire cost 12 pool voices, the SFX bus budget of `ext/sfx-voice-cap`. Neve's heavy darts and skating beams, and Cinder's hose (its roar already plays one breath a 0.4 s), keep their own path.
-- **`--sfx-set-check` section 11**: 3 s of fire every 80 ms per held-fire sound, plain path vs `FireSfx`; fails over 3 voices, a first shot that is not the base take, a repeated take, or fewer than 3 other takes.
+- **`--sfx-set-check` section 18**: 3 s of fire every 80 ms per held-fire sound, plain path vs `FireSfx`; fails over 3 voices, a first shot that is not the base take, a repeated take, or fewer than 3 other takes.
 
 | 3 s at 80 ms (pool voices sounding at most; sustained peak / RMS, 20-seed offline mix of the takes) | before | after |
 |---|---|---|
