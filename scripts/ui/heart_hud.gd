@@ -26,7 +26,8 @@ static func world_labels(hud) -> void:
 		var who := "%s has the Heartspark" % ht.carrier.pname
 		hud._draw_waypoint(ht.carrier.pos + Vector3(0, 1.0, 0), who, Heart.COL)
 	elif ht.carrier == m.player:
-		hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.GATE_COL)
+		if not WaysOutHud.is_gate_prompt(m.interact):      # (it names the Gate)
+			hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.GATE_COL)
 	elif ht.spark_live() and ht.state != Heart.S.FINAL:
 		hud._draw_waypoint(ht.spark_pos + Vector3(0, 1.0, 0), "Heartspark", Heart.COL)
 	elif ht.state == Heart.S.CHARGING:      # (the open ring is WaysOutPins')
@@ -63,7 +64,13 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	if WaysHints.arrow_due(m):
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.COL)
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
-	hud._ctext(Vector2(sz.x * 0.5, sz.y * 0.8), line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
+	var at := Vector2(sz.x * 0.5, sz.y * 0.8)
+	var lw := TextCache.width(hud.big, line, 18)
+	var vc := HudVitals.corner(hud, sz)
+	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it)
+		at.y = minf(at.y, vc.y - 12.0)
+	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
+	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
