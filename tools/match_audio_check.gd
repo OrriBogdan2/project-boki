@@ -88,8 +88,8 @@ func run(main_node: Node) -> void:
 	ok(dull.fx and is_equal_approx(dull.db, Sfx.MUFFLE_DB) and is_equal_approx(dull.hz, Sfx.MUFFLE_HZ),
 		"downed: the world bus is low-passed and ducked (%s)" % dull)
 	var bus := AudioServer.get_bus_index("SFXWorld")
-	ok(Sfx._bus_for(null, "wisp_hum") == &"SFX" and Sfx._bus_for(null, "ping") == &"UI" and Sfx._bus_for(null, "kin_happy") == &"Boki"
-		and Sfx._bus_for(null, "rifle") == &"SFXWorld",
+	var clear_kinds: bool = Sfx._bus_for(null, "wisp_hum") == &"SFX" and Sfx._bus_for(null, "ping") == &"UI"
+	ok(clear_kinds and Sfx._bus_for(null, "kin_happy") == &"Boki" and Sfx._bus_for(null, "rifle") == &"SFXWorld",
 		"the Wisp hum, pings and Boki voices skip the world bus")
 	await _muffle_step(m, false)
 	var clear := Sfx.muffle_state()
@@ -445,9 +445,11 @@ func _region_beds(m: Match, P: Hunter) -> void:
 			h.pos = P.pos + Vector3(60, 0, 0)       # no rival in sight: only the fight moves the beds
 	P.hurt_at = m.time
 	_tick(m, 1.0)
-	ok(Sfx.mix.amb_duck.volume_db <= Sfx.AMB_DUCK_DB + 0.5, "a fight sinks the beds (%.1f dB)" % Sfx.mix.amb_duck.volume_db)
+	var sink: float = Sfx.mix.amb_duck.volume_db
+	ok(sink <= Sfx.AMB_DUCK_DB + 0.5, "a fight sinks the beds (%.1f dB)" % sink)
 	_tick(m, MusicDir.FIGHT_HOLD + 5.0)
-	ok(Sfx.mix.amb_duck.volume_db > -0.5, "...and they come back once it is over (%.1f dB)" % Sfx.mix.amb_duck.volume_db)
+	var up: float = Sfx.mix.amb_duck.volume_db
+	ok(up > -0.5, "...and they come back once it is over (%.1f dB)" % up)
 	P.hurt_at = m.time
 	_tick(m, 1.0)      # left sunk on purpose: the match leaving must let go of it (checked on the farm)
 	for i in m.hunters.size():
