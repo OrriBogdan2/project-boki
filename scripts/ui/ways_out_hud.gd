@@ -90,6 +90,9 @@ static func draw(hud) -> void:
 	var m: Match = hud.m
 	if m.heart == null or m.heart.site == Vector3.INF or not HudGroups.ways_out_shown(m):
 		return
+	if m.heart_raid:
+		HeartRaidHud.draw(hud)      # a raid has one way out, the Heart ring: its own strip
+		return
 	var c: Control = hud.c
 	var sd := seats(m)
 	var w := CELL.x * 4.0
