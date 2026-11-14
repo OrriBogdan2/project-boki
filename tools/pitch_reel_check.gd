@@ -6,19 +6,22 @@ extends RefCounted
 ## island, and the escape Hunter gets out. The take watchdog kills a child that writes no frames and passes one that
 ## ends, and a take that crashes only on its way out keeps its movie. The save file is never written.
 
-const CHOSEN := "mage"       # the Hunter shot 6 is asked to land on (not the default, so the pick is seen)
+const CHOSEN := "mage"  # the Hunter shot 6 is asked to land on (not the default, so the pick is seen)
+const REEL_PATH := "res://tools/pitch_reel.gd"
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("PITCHCHECK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main: Node) -> void:
 	var real := FileAccess.get_file_as_string(Save.path_for(Save.slot))
 	_watchdog()
-	var rig = load("res://tools/pitch_reel.gd").new()
+	var rig = load(REEL_PATH).new()
 	rig.main = main
 	for s in [2, 3, 6, 7, 10]:
 		rig.shot = s
@@ -26,14 +29,20 @@ func run(main: Node) -> void:
 		rig.set_up_take()
 		await rig.play()
 		match s:
-			2: ok(rig.marks.has("reveal") and not rig.failed, "shot 2: the egg cracks and the Boki is revealed")
-			3: ok(rig.marks.has("evolve") != rig.failed, "shot 3: the evolution plays, or fails saying why")
-			6: ok(_select_landed(main), "shot 6: lands on %s, saves the pick, the screen stays up" % CHOSEN)
-			7: ok(rig.marks.has("kit") and not rig.failed and _kit_standing(rig), "shot 7: the rota runs, both up")
-			10: ok(rig.marks.has("escape") and not rig.failed, "shot 10: the Hunter rides out of the uplink")
+			2:
+				ok(rig.marks.has("reveal") and not rig.failed, "shot 2: the egg cracks and the Boki is revealed")
+			3:
+				ok(rig.marks.has("evolve") != rig.failed, "shot 3: the evolution plays, or fails saying why")
+			6:
+				ok(_select_landed(main), "shot 6: lands on %s, saves the pick, the screen stays up" % CHOSEN)
+			7:
+				ok(rig.marks.has("kit") and not rig.failed and _kit_standing(rig), "shot 7: the rota runs, both up")
+			10:
+				ok(rig.marks.has("escape") and not rig.failed, "shot 10: the Hunter rides out of the uplink")
 	ok(FileAccess.get_file_as_string(Save.path_for(Save.slot)) == real, "the player's own save file is untouched")
 	print("PITCH REEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## tools/pitch_take_filter.sh on a child that hangs (sleep, no movie) and one that ends at once.
 func _watchdog() -> void:
@@ -48,14 +57,22 @@ func _watchdog() -> void:
 	rc = OS.execute("bash", [filter, movie, "2", "10", "echo", "PITCH_DONE"], out)
 	ok(rc == 0 and String(out[0]).contains("PITCH_DONE"), "watchdog: a take that ends passes its rc and lines")
 	OS.unset_environment("PITCH_POLL_S")
-	var rig = load("res://tools/pitch_reel.gd")
-	ok(rig.keeps_movie(134, "PITCH_DONE shot=7\nhandle_crash: signal 11") and not rig.keeps_movie(134, "handle_crash")
-		and not rig.keeps_movie(124, "PITCH_DONE") and not rig.keeps_movie(1, "PITCH_FAIL x\nPITCH_DONE"),
-		"watchdog: a take that crashes only after PITCH_DONE keeps its movie, a killed or failed one does not")
+	var rig = load(REEL_PATH)
+	ok(
+		(
+			rig.keeps_movie(134, "PITCH_DONE shot=7\nhandle_crash: signal 11")
+			and not rig.keeps_movie(134, "handle_crash")
+			and not rig.keeps_movie(124, "PITCH_DONE")
+			and not rig.keeps_movie(1, "PITCH_FAIL x\nPITCH_DONE")
+		),
+		"watchdog: a take that crashes only after PITCH_DONE keeps its movie, a killed or failed one does not"
+	)
+
 
 func _select_landed(main: Node) -> bool:
 	var grid = main.current.get_meta("classes_grid", null)
 	return String(Save.d.get("arch", "")) == CHOSEN and is_instance_valid(grid) and grid.is_inside_tree()
+
 
 func _kit_standing(rig) -> bool:
 	for h in rig.squad_a + rig.squad_b:

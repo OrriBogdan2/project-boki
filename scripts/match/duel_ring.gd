@@ -7,6 +7,7 @@ extends RefCounted
 var m: Match
 var layer: CanvasLayer = null
 
+
 ## Opens the ring's choices over the match and pauses it.
 static func open(match_node: Match) -> DuelRing:
 	var ring := DuelRing.new()
@@ -14,12 +15,13 @@ static func open(match_node: Match) -> DuelRing:
 	ring._build()
 	return ring
 
+
 func _build() -> void:
 	m.paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	layer = CanvasLayer.new()
 	layer.layer = 40
-	layer.set_meta("ring", self)      # the pad drops open()'s return; the layer keeps the ring alive
+	layer.set_meta("ring", self)  # the pad drops open()'s return; the layer keeps the ring alive
 	m.add_child(layer)
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -41,11 +43,13 @@ func _build() -> void:
 	online += " is your rival."
 	_choice(body, "Duel online", online, duel_online, "bond")
 
+
 ## Leaves the ring and gives the match back.
 func close() -> void:
 	layer.queue_free()
 	m.paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+
 
 func _choice(body: VBoxContainer, title: String, blurb: String, cb: Callable, icon: String) -> void:
 	var row := UI.card(UI.CARD, 10, 12)
@@ -61,8 +65,10 @@ func _choice(body: VBoxContainer, title: String, blurb: String, cb: Callable, ic
 	h.add_child(UI.button("Go", cb, 90, icon))
 	body.add_child(row)
 
+
 func fight_bot() -> void:
 	Game.start_match(Match.duel_opts())
+
 
 func duel_online() -> void:
 	Game.goto("lobby", {"duel": true})

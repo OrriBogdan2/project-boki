@@ -4,13 +4,14 @@ extends RefCounted
 ## leads to, and a tall beam over the pad until you stand on it, so there is always a next step. Once per save.
 
 const SAVE_KEY := "duel_ring"
-const NEAR_M := 8.0           # m from the pad that counts as walking into the ring area
-const STAND_M := 1.3          # m from the pad centre where interact opens the ring (Match._update_training)
-const BEAM_H := 60.0          # m tall: seen from across the island
-const BEAM_COL := Color("ffb0a0", 0.32)   # the pad label's colour
+const NEAR_M := 8.0  # m from the pad that counts as walking into the ring area
+const STAND_M := 1.3  # m from the pad centre where interact opens the ring (Match._update_training)
+const BEAM_H := 60.0  # m tall: seen from across the island
+const BEAM_COL := Color("ffb0a0", 0.32)  # the pad label's colour
 
 var m: Match
 var beam: MeshInstance3D = null
+
 
 ## The hint for this match, or null once this save has had it.
 static func make(match_node: Match) -> DuelRingHint:
@@ -20,10 +21,12 @@ static func make(match_node: Match) -> DuelRingHint:
 	hint.m = match_node
 	return hint
 
+
 ## What the hint says: the pad key, then the ring's two ways to fight (scripts/match/duel_ring.gd).
 static func line() -> String:
 	var key := Settings.key_cap("interact")
 	return "Duel ring: stand on the pad and press %s to Fight a bot or Duel online, one on one." % key
+
 
 ## Per frame while the hint is live. Returns false once it is finished (the player reached the pad).
 func tick() -> bool:
@@ -34,11 +37,12 @@ func tick() -> bool:
 		if m.hud:
 			m.hud.tip(line())
 		beam = _make_beam()
-	if m.player.flat_dist(m.duel_pad) < STAND_M:        # on the pad: its label says to press the key
+	if m.player.flat_dist(m.duel_pad) < STAND_M:  # on the pad: its label says to press the key
 		beam.queue_free()
 		return false
 	beam.position = m.duel_pad + Vector3(0, BEAM_H * 0.5, 0)
 	return true
+
 
 func _make_beam() -> MeshInstance3D:
 	var n := MeshInstance3D.new()
