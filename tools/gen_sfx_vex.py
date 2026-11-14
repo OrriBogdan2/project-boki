@@ -7,9 +7,8 @@ oiled steel, servo motors and ember-hot rounds. Her voice is an adult woman's, l
 under fire), with a faint servo under the bad moments.
 
   vn_rifle (fire, 3 takes)   the rotary cannon's round: crack, punch, bolt clack, brass
-  gunslinger_spinup          SIGNATURE: the barrels winding up as a string starts
   gunslinger_grenade_thunk   SIGNATURE: the Coin Blast biting into a wall or the ground, its fuse armed
-  vn_cock / vn_throw         Coin Blast armed in the hand / the side toss
+  vn_cock / vn_throw         the drum running dry (reload stand-in) / the Coin Blast's side toss
   vn_blast (3 takes)         the charge's blast (direct hit and the cone)
   vn_slide, gunslinger_dash  Slipstep: the boot scrape / the body's whoosh and servo
   vn_stim                    Hot Streak: a knock gives Slipstep back
@@ -87,24 +86,6 @@ def rifle(i):
     if i in (1, 3):
         out = mix(out, at(brass(0.22, 2900 + 300 * i, 0.07), 0.09))
     return lpf(out, 9000)
-
-
-def spinup():
-    """The barrels winding up: a motor whine climbing, the barrel teeth rattling faster, a clunk to engage."""
-    d = 0.6; n = N(d); t = T(d)
-    whine = S.sweep(110, 720, d, 'saw', curve=0.6)
-    whine = lpf(whine, 3200) * np.minimum(1.0, t / 0.08) * np.exp(-np.maximum(0, t - 0.45) / 0.06)
-    # the barrel cluster's teeth: clicks whose rate climbs from 12 to 90 per second
-    rate = 12 * (90 / 12) ** (t / d) ** 0.7
-    ph = np.cumsum(rate) / S.SR
-    ticks = (np.diff(np.floor(ph), prepend=0) > 0).astype(float)
-    teeth = bpf(ticks, 900, 4200) * 3.0 * np.exp(-np.maximum(0, t - 0.48) / 0.05)
-    teeth = mix(teeth, lpf(ticks, 600) * 2.0 * np.exp(-np.maximum(0, t - 0.48) / 0.05))
-    hum = S.sweep(55, 110, d) * env(n, 0.05, 0.4) * 0.4
-    engage = mix(kick(180, 90, 0.12, 0.01, 0.03, 2.0) * 0.6, crack(0.08, 600, 2600, 0.01) * 0.8,
-                 ring((1240, 1980), 0.1, (0.03, 0.02), (0.25, 0.12)))
-    air = bpf(noise(d), 1500, 5000) * np.minimum(1, t / 0.4) * np.exp(-np.maximum(0, t - 0.48) / 0.05) * 0.15
-    return mix(soft(engage, 1.5), whine * 0.5, teeth * 0.45, hum, air)
 
 
 # ------------------------------------------------------------------ RMB: Coin Blast
@@ -309,7 +290,6 @@ def death():
 
 def build():
     S.takes_cat('vn_rifle', rifle, 3, 'fire')
-    S.save_cat('gunslinger_spinup', spinup(), 'signature')
     S.save_cat('gunslinger_grenade_thunk', grenade_thunk(), 'signature')
     S.save_cat('vn_cock', cock(), 'cast')
     S.save_cat('vn_throw', throw(), 'cast')

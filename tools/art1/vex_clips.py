@@ -204,10 +204,12 @@ def clips():
     out.append(C("rmb", 0.5, [(0.0, r0), (0.07, r1, "out"), (0.2, dict(r1, LP=(-0.12, 0.5, 1.22), LQ=(-1.5, 0, 0), fing=0.05)), (0.5, READY)]))
 
     # ---- Slipstep: her slide. On the legs' own heading (runtime: legs_heading) she drops feet first, the lead leg out, the back knee folded under, the left hand trailing on the ground; the torso
-    # stays up and the cannon stays on the aim
+    # stays up and the cannon stays on the aim. A held slide loops 0.3667-0.5 (sl_a, sl_b, sl_a: GunslingerKit.SLIDE_LOOP_*), the stand-up from 0.62
     sl = dict(ON_AIM, pel=(0.0, -0.12, -0.52), prt=(-0.42, 0.0, 0.0), tor=(0.3, 0.0, 0.0), hed=(0.2, 0.0, 0.0), FR=(0.1, 0.62, A_Z + 0.02), FL=(-0.16, 0.08, A_Z + 0.02), FRp=0.5, FLp=0.9, FRy=0.0, FLy=0.5,
               LP=(-0.36, -0.28, 0.2), LQ=(-0.3, 0, 0), brow=0.3, lid=0.1, fing=0.0)
-    out.append(C("dash", 0.85, [(0.0, dict(READY, **ON_AIM, pel=(0, 0, 0.01))), (0.08, sl, "out"), (0.45, dict(sl, pel=(0.0, -0.12, -0.5))), (0.62, dict(READY, **ON_AIM, pel=(0, 0.04, -0.12), prt=(0.2, 0, 0), FR=(0.12, 0.3, A_Z), FL=(-0.14, -0.1, A_Z))), (0.85, READY)]))
+    sl_a = dict(sl, pel=(0.0, -0.12, -0.5))
+    sl_b = dict(sl_a, pel=(0.0, -0.12, -0.46), tor=(0.25, 0.0, 0.0), hed=(0.16, 0.0, 0.0), FR=(0.1, 0.68, A_Z + 0.02), FL=(-0.16, 0.14, A_Z + 0.02), LP=(-0.36, -0.3, 0.17))
+    out.append(C("dash", 26 / FPS, [(0.0, dict(READY, **ON_AIM, pel=(0, 0, 0.01))), (0.08, sl, "out"), (0.3667, sl_a), (0.4333, sl_b), (0.5, sl_a), (0.62, dict(READY, **ON_AIM, pel=(0, 0.04, -0.12), prt=(0.2, 0, 0), FR=(0.12, 0.3, A_Z), FL=(-0.14, -0.1, A_Z))), (0.85, READY)]))
     # the air tap's barrel roll, the cannon held on the aim through it
     t0 = dict(ON_AIM, prt=(0.0, 0.0, 0.0), FL=(-0.1, 0.0, A_Z + 0.35), FR=(0.12, 0.05, A_Z + 0.42), FLp=-0.8, FRp=-0.8, LP=(-0.18, 0.1, 1.2), pel=(0, 0, 0.1))
     out.append(C("dash_ex", 0.5, [(0.0, dict(READY, **ON_AIM)), (0.05, t0), (0.22, dict(t0, prt=(0.0, 0.0, 6.283))), (0.36, dict(READY, **ON_AIM, prt=(0, 0, 6.283), pel=(0, 0, -0.14))), (0.5, dict(READY, prt=(0, 0, 6.283)))]))

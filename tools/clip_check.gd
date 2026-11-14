@@ -14,8 +14,8 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael", "gil": "gil"}
 ## Tetra's moves the source plays while moving (briefs/hero-ref/breah.md: the tap hurl, the fist recovering as she
-## walks off, the X aim) ride the upper body over the walk. Every other dolm move owns the body.
-const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim"]
+## walks off, the X aim and spine roll) ride the upper body over the walk. Every other dolm move owns the body.
+const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim", "breah_spine"]
 const DT := 1.0 / 30.0
 const KEY_FRAME := 1.0 / 30.0  # s: one frame of a baked clip (tools/art1 bakes at 30 fps)
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run

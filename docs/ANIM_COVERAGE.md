@@ -117,4 +117,5 @@ onto its side (`Kin.render`).
 4. **Hunter dash is `proc` for 5 Hunters** (breaker, dredge, ostra, pip, and gil): the procedural roll,
    phase and charge poses stand in; Cinder's ram and poof and Lace's roll and flick are clips re-keyed to their felt
    dashes (KIT_PARITY 'Felt dash per kit'), as are claire, kael, ryzz, sable, tarek and vex.
+4. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).

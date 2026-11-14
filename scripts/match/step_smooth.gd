@@ -7,9 +7,11 @@ extends RefCounted
 
 static var cfg := FeelConfig.new()
 
+
 ## After h's render has put its node on the body's y: eases the node's y behind it, never further than the
 ## lags allow (a mantle or a fall outruns the ease and is drawn where it is). The higher the body is above the
-## ground, the less it is eased (a jump or a glide is drawn where it is); a teleport is drawn at once.
+## ground (a rock he stands on counts, Ent.ground), the less it is eased (a jump or a glide is drawn where it
+## is); a teleport is drawn at once.
 static func ease(h: Hunter, dt: float) -> void:
 	var want := h.position.y
 	var gap := want - h.drawn_y
@@ -22,6 +24,7 @@ static func ease(h: Hunter, dt: float) -> void:
 		var air: float = h.pos.y - h.ground()      # (a rock or a car under him is ground too)
 		h.drawn_y = lerpf(eased, want, smoothstep(cfg.step_free_from, cfg.step_free_to, air))
 	h.position.y = h.drawn_y
+
 
 ## Where the camera follows h: its drawn spot, so the view rises with the body and not ahead of it.
 static func view(h: Hunter, alpha: float) -> Vector3:

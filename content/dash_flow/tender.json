@@ -49,7 +49,7 @@
 	"jump": {
 		"rmb": {
 			"mode": "buffer",
-			"reason": "Burrseed's wind-up is a planted throw (0.35 s), so the seed leaves after she lands",
+			"reason": "Burrseed's fixed 0.6 s wind-up outlasts the hop, so the seed leaves after she lands",
 			"source": "Ours: owner items 118 and 118b, the wind-up and snap release."
 		}
 	},

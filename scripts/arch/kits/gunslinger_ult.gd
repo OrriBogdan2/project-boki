@@ -187,7 +187,8 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 	_flames(at, r, dt)
 	s["tick"] = float(s["tick"]) + dt
 	if float(s["tick"]) >= float(xd["tick"]):
-		s["tick"] = 0.0
+		# keep the overshoot: a reset to 0 runs each tick a step late
+		s["tick"] = float(s["tick"]) - float(xd["tick"])
 		_zone_hit(at, r, xd)
 	if float(s["t"]) >= float(xd["zone_t"]):
 		AimKit.hide(kit.h, "xz%d" % int(s["n"]))

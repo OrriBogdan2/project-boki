@@ -184,9 +184,13 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
-	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
-	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
-	free_arm = WardenFreeArm.new(sk, lib, String(d.get("free_pose", d["loco"]["idle"])), d.get("free_arm", {}))
+	var lc: Dictionary = d["loco"]
+	twist_on = bool(lc.get("aim_twist", false))
+	var cycle := float(lc.get("cycle_s", 0.0))
+	gait = WardenGait.new(sk, lc.get("arm_swing", {}),
+			cycle if cycle > 0.0 else lib.get_animation(String(lc["walk"]["f"])).length,
+			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length)
+	free_arm = WardenFreeArm.new(sk, lib, String(d.get("free_pose", lc["idle"])), d.get("free_arm", {}))
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	_setup_out()
 	if not bool(d.get("rig_root", false)):
@@ -258,9 +262,16 @@ func _anim(nm: String) -> AnimationNodeAnimation:
 	n.animation = nm
 	return n
 
-## A walk or run loop of the loco space. "loco.cycle_s" (s, optional): every one is stretched to this one cycle and
-## the space keeps them all advancing, so walk and run stay in step where they blend (keyed at unequal lengths,
-## their planted feet drift out of phase and cancel: docs/art/FOOT_SLIDE.md). "foot_mps" is then at that cycle.
+## Where the walk ring sits in the loco space (the run ring is at 1): its "walk_speed" over its "run_speed".
+func _walk_ring() -> float:
+	var lc: Dictionary = d["loco"]
+	return float(lc.get("walk_speed", 2.2)) / float(lc.get("run_speed", 4.6))
+
+## A walk or run loop of the loco space, stretched to the cycle `cycle` (s) when it is over 0. The space keeps them
+## all advancing (sync), so walk and run stay in step where they blend (keyed at unequal lengths, their planted feet
+## drift out of phase and cancel: docs/art/FOOT_SLIDE.md). "loco.cycle_s" (s, optional) is that one cycle for every
+## loop, and "foot_mps" is then at it; without it each walk plays stretched to its own run's cycle, its "foot_mps"
+## is at its keyed length, and WardenGait.plan's rate restores its cadence.
 func _gait_loop(nm: String, cycle: float) -> AnimationNodeAnimation:
 	var n := _anim(nm)
 	if cycle > 0.0:
@@ -276,13 +287,15 @@ func _build() -> AnimationNodeBlendTree:
 	bs.min_space = Vector2(-1, -1)
 	bs.max_space = Vector2(1, 1)
 	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
+	bs.sync = true     # (a clip out of the blend keeps stepping, so it comes back in step)
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	var cycle := float(lc.get("cycle_s", 0.0))
-	bs.sync = cycle > 0.0
 	for k in dirs:
-		bs.add_blend_point(_gait_loop(String(lc["walk"][k]), cycle), dirs[k] * 0.45)
-		bs.add_blend_point(_gait_loop(String(lc["run"][k]), cycle), dirs[k])
+		var run := String(lc["run"][k])
+		bs.add_blend_point(_gait_loop(String(lc["walk"][k]), cycle if cycle > 0.0 else lib.get_animation(run).length),
+				dirs[k] * _walk_ring())
+		bs.add_blend_point(_gait_loop(run, cycle), dirs[k])
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
@@ -742,7 +755,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 		goal = _aim_twist(flat, face, k)
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc, loco_pos)
+	var ring := _walk_ring()
+	var rate := gait.plan(spd, lc, loco_pos, clampf((loco_pos.length() - ring) / (1.0 - ring), 0.0, 1.0))
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)

@@ -241,6 +241,7 @@ func _screen(main: Node) -> void:
 	ok(view.note_label.text.contains("before 0:00"), "first lobby: the note teaches the countdown")
 	ok(not Prematch.first_lobby(), "opening the first lobby marks it seen in the save")
 	_declutter(view)
+	await _howto(view)
 	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
 	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
 	view._show_chat_line(true)
@@ -269,6 +270,10 @@ func _screen(main: Node) -> void:
 	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
 	var log_open: bool = view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible
 	ok(log_open, "the first message opens the log and the input folds back")
+	for i in 4:
+		await view._add_chat("Ember", "line %d" % i, UI.INK)
+	var crowded: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
+	ok(crowded.is_empty(), "with the chat log full every Hunter row still shows (%s)" % [crowded.slice(0, 2)])
 	view._choose("bulwark")
 	await main.get_tree().process_frame
 	var staged: bool = view.stage != null and view.stage.id == "bulwark" and view.stage.lockin_t >= 0.0
@@ -348,6 +353,25 @@ func _cues(main: Node) -> void:
 	t.pm.turn_left = 2.5
 	ok(_heard(t._tick_label).is_empty(), "no ticks on a teammate's turn")
 	t.queue_free()
+## One how-to block beside the title, not one per card (13 cards keep 3 rows at 720): it shows your pick's
+## three lines, the hovered card's while the mouse is on it, and your pick's again after.
+func _howto(view: Control) -> void:
+	var shown := func() -> String:
+		var kids: Array = view.howto_slot.get_children().filter(func(c): return not c.is_queued_for_deletion())
+		return String(kids[0].get_meta("howto")) if kids.size() == 1 else ""
+	var per_card: bool = view.grid.get_children().any(
+			func(c): return c.find_children("*", "VBoxContainer", true, false).any(func(v): return v.has_meta("howto")))
+	var pick: String = view.pm.pick
+	var other := String(Arch.ids()[0]) if String(Arch.ids()[0]) != pick else String(Arch.ids()[1])
+	var start: String = shown.call()
+	var card: Control = view.grid.get_children().filter(func(c): return c.get_meta("arch") == other)[0]
+	card.mouse_entered.emit()
+	var hovered: String = shown.call()
+	card.mouse_exited.emit()
+	var back: String = shown.call()
+	ok(not per_card and start == pick and hovered == other and back == pick,
+			"one how-to block: your pick's lines, the hovered card's on hover (%s, %s, %s)" % [start, hovered, back])
+	await view.get_tree().process_frame
 
 ## Cards are portrait + name + role word (stats and quests on hover); shut ones are dim with a padlock; the
 ## voice button waits for a human squadmate.
@@ -371,6 +395,12 @@ func _declutter(view: Control) -> void:
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
+	var win := view.get_viewport_rect().size
+	var timer_box: Rect2 = view.timer_label.get_global_rect()
+	var up_top := timer_box.end.y < win.y * 0.4 and absf(timer_box.get_center().x - win.x * 0.5) < 2.0
+	var big: bool = view.timer_label.get_theme_font_size("font_size") >= view.DIGITS_MIN
+	ok(view.grid.get_child_count() >= 13 and up_top and big,
+			"13+ Hunter cards fit and the countdown stays big, top centre (%s)" % [timer_box])
 
 ## The lock-in pose: every Hunter whose model has clips names one of them, it runs 1-1.5 s once and the Hunter is back
 ## on its idle, and choosing again mid-pose restarts it from the top.

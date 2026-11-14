@@ -702,7 +702,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 29,
+"long_line": 28,
 "nested_ternary": 2,
 "semicolon": 65
 },

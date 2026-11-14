@@ -9,6 +9,9 @@ extends RefCounted
 ## mask marks; a match and the Hunter screens use the Hunter's look, never yours.
 
 const FOOT_TOLERANCE := 0.02     # m: how far the lowest foot point may sit above or below the ground
+## [sex, height, build] of the bodies that stood highest (2.1 to 2.8 cm) while EmptyGait solved a woman's legs
+## (leg node z scale 0.9) as if they were unscaled: each is its own row.
+const WORST_FEET := [[0, 2, 1], [0, 2, 2], [0, 1, 0], [0, 1, 1]]
 
 var bad := 0
 
@@ -236,6 +239,7 @@ func _feet(main: Node) -> void:
 	var worst := 0.0
 	var worst_body := ""
 	var cases := 0
+	var per := {}
 	var tree := main.get_tree()
 	for g in 2:
 		for h in Unmasked.HEIGHTS.size():
@@ -250,15 +254,21 @@ func _feet(main: Node) -> void:
 						"vel": Vector3(0, 0, -3.5) if walking else Vector3.ZERO})
 					if i == 59 or (walking and i % 4 == 0):
 						lows.append(_sole_y(m))
+				var body_worst := 0.0
 				for y in lows:
-					if absf(y) > worst:
-						worst = absf(y)
-						worst_body = "sex %d height %d build %d" % [g, h, b]
+					body_worst = maxf(body_worst, absf(y))
+				per[[g, h, b]] = body_worst
+				if body_worst > worst:
+					worst = body_worst
+					worst_body = "sex %d height %d build %d" % [g, h, b]
 				cases += 1
 				m.free()
 				await tree.process_frame
 	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
 		+ "walking (%d bodies, worst %.1f cm, %s)") % [cases, worst * 100.0, worst_body])
+	for body in WORST_FEET:
+		ok(float(per[body]) <= FOOT_TOLERANCE, "%s, %s, %s: feet on the ground (%.1f cm)" % [
+			Unmasked.SEXES[body[0]], Unmasked.HEIGHTS[body[1]], Unmasked.BUILDS[body[2]], float(per[body]) * 100.0])
 
 ## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
 func _shroud_migration() -> void:

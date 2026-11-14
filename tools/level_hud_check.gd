@@ -130,7 +130,8 @@ func _growth(main: Node, arch: String) -> void:
 	var tip := LevelGrowth.tip(P)
 	ok(step_ok and P.lvl == 10, "%s: every level adds the same health and ability power share %s" % [arch, info])
 	var n := float(P.lvl - 1)
-	ok(absf(hp_up - LevelGrowth.rate("hp") * n) < 0.001 and absf(LevelGrowth.ap(P) - 1.0 - LevelGrowth.rate("ap") * n) < 0.0001,
+	var ap_off := absf(LevelGrowth.ap(P) - 1.0 - LevelGrowth.rate("ap") * n)
+	ok(absf(hp_up - LevelGrowth.rate("hp") * n) < 0.001 and ap_off < 0.0001,
 		"%s: by level 10: +%.0f%% health, ability power x%.2f" % [arch, hp_up * 100.0, LevelGrowth.ap(P)])
 	ok(P.perks.is_empty() and is_equal_approx(float(P.wpn["dmg"]), dmg0),
 		"%s: levels give no weapon bonus (no perks, damage unchanged)" % arch)

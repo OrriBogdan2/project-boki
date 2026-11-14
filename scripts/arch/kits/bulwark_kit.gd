@@ -452,7 +452,6 @@ func _smash() -> void:
 	h.mel_hold = 0.0
 	fx.hold_end()
 	flared = false
-	var full := k >= 0.99
 	var dmg := lerpf(float(md["smash_dmg"][0]), float(md["smash_dmg"][1]), k) * _wk()
 	var kb := lerpf(float(md["smash_kb"][0]), float(md["smash_kb"][1]), k)
 	if perfect:
@@ -462,7 +461,7 @@ func _smash() -> void:
 	slam_k = k
 	knock_until = m.time + 0.25
 	h._strike(dmg / m.dmg_mult(h), float(md["smash_reach"]), float(md["smash_arc"]), kb,
-		{"heavy": true, "charged": true, "stun": float(md["smash_stun"]) if full else 0.0})
+		{"heavy": true, "charged": true})
 	var dv := h.aim_dir()
 	if perfect:
 		CombatBus.tech.emit(h, "bulwark")
@@ -494,6 +493,8 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 ## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
 ## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
 const THROW_WIND := 0.08
+## m round the flying hammer, out and back, that it hits (its sides stay inside it: --warden-clips-check)
+const MACE_HIT_R := 0.9
 
 ## How far a tap throws the hammer: to the cursor, clamped to its range (m).
 func throw_dist() -> float:
@@ -604,7 +605,7 @@ func _tick_mace(dt: float) -> void:
 			var g: float = m.world.ground_at(q.x, q.z)
 			var blocked: bool = m.world.is_block(q.x, q.z) or g > p.y - 0.2
 			if not blocked: p = q
-			for f in foes_in(p, 0.9, 1.8):
+			for f in foes_in(p, MACE_HIT_R, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
 					_mace_hit(f, float(md["throw_dmg"]), dir)
@@ -644,7 +645,7 @@ func _tick_mace(dt: float) -> void:
 			var to := hand_at() - p
 			var dir2 := Vector2(to.x, to.z).normalized()
 			p += to * minf(1.0, dt / left)
-			for f in foes_in(p, 0.9, 1.8):
+			for f in foes_in(p, MACE_HIT_R, 1.8):
 				if not (mace["hit"] as Dictionary).has(f.get_instance_id()):
 					mace["hit"][f.get_instance_id()] = true
 					_mace_hit(f, float(md["recall_dmg"]), dir2)

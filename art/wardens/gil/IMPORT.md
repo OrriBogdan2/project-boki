@@ -41,3 +41,17 @@ ART-1 pipeline (docs/art/wardens/PIPELINE.md steps 5-9). Raw files in ~/meshy/gi
   `draw`, `--clip-check` row), then a settle to 0.4 s. Baked with pip `bpy` 4.5 (no Blender on the worker) and copied
   on with `glb_add_clips.py toss`, so the rest of the file is byte for byte the same.
 - **Import:** `meshes/generate_lods=false`, `force_disable_compression=true` in gil.glb.import.
+
+## v95 swap (2026-11-13, ext/showcase-1113)
+`gil.glb` is now his v95 master (`~/meshy/v95/Gil/r2/v95a/cand_B.glb`, current.json, the first v95 face; its own
+swordfish rapier left out: `gil_v95_B_body.glb`) on this file's skeleton and anchors, by `tools/art1/v95_swap.py` with
+`art/wardens/src/gil_v95.json` (the game .glb before the swap is origin/main's v1):
+
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/gil_v95.json WORK art/wardens/gil/gil.glb
+
+The master's real fish tail (on the `tail` bone) and dorsal fin replace the scripted stand-ins (`drop_meshes`: Tail,
+Dorsal; their textures gil_Image_0.png and gil_gil_fin.png went with them). The skinned Swordfish mesh stays, its
+texture now `gil_Image_0.jpg`. The satchel rides the hips (bone heat had put it on the right hand). 12.5k body
+triangles, 2048 atlas. gil.glb carries no clips (the game keys his moves), so skin_relax is skipped and
+`--stretch-check --wardens=gil` reports "no clips", as on the base. warden_model_check's `height_3d` is 0.9 (the
+v95 hat stands lower than the v1 floppy one).

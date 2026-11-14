@@ -23,8 +23,9 @@ flat +39 on its opening round 102 (a Dazed string holds its opening, no decay). 
 damage in rifle rounds of 51 times our 6: Coin Blast hit 19.5 (165), Palm Lance 24 (202), the Cinderfall patch
 3.5 a tick (59/s). Grenade cone 16. All pinned in content/rules/kit_parity.json. Cooldowns follow the source ratio 5.4 : 7.5 : 10 at our pace 6.5 : 8.5 : 11.5. Cinderfall: the source's impact read 931 on a
 centred dummy (620 + 50%), about 62 at our scale; ours is 24 (36 in the centre) so that the ult straight into
-a merge cannot one-shot a full-health Light even at level 10 (growth +35%). The patch is 3.5 every 0.5 s for 3 s (the data's 59 a
-second; the footage build's 144 a tick would be about 14) and slows 30%. Its cooldown follows the source's 37.5 s at our pace,
+a merge cannot one-shot a full-health Light even at level 10 (growth +35%). The patch is 3.5 every 0.5 s for 3 s,
+6 ticks, 21 in all: a 0.5 s tick of the tooltip's 59/s is 0.145 of its 203 impact, ours (3.5 on 24) is 0.146
+(the footage's 144 on 931 is 0.155), and the burst cap still holds. It slows 30%. Its cooldown follows the source's 37.5 s at our pace,
 42 s. Ranges use
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Palm Lance 18 m (10 bh),
 slide tap 4.6 m and hold 7 m (the whole hold from the press: the skid, then the slide covers the rest).
@@ -105,7 +106,7 @@ FADE_LOCO): both under one footage frame. Seconds from the press.
 | LMB | a round every ~0.12, recoil in the gun only | round and move on the press's frame, clip 0.53, re-played each round (0.08 since ext/parity-ttk-vex) | unchanged |
 | RMB (launcher tap, owner item 112) | throw commit ~0.2 (superseded: a tap) | Burr at 0.02, clip 0.50, legs back 0.67; walking: the legs walk | unchanged |
 | Shift tap | skid ~0.45, upright by 0.55-0.6 | skid ends 0.53 (dash feel's time scale), clip 0.87 (stand-up key 0.62), legs back 1.03; walking off: the clip's standing legs stayed on her (full 1.00) to 0.75 and past | walking off the skid, the legs are hers from the skid's end (loco blends in by 0.68) |
-| Shift held | the slide holds, she stands as it ends | the clip stood up at 0.62 mid-slide (skid ends 0.73) | the clip holds its slide key (0.45) while she slides; stand-up 0.73, legs back 1.30 |
+| Shift held | the slide holds, she stands as it ends | the clip stood up at 0.62 mid-slide (skid ends 0.73) | the clip loops its slide window (0.37-0.50, three keys) while she slides; stand-up 0.73, legs back 1.28 |
 | Shift in the air / dash_ex | not in the footage | 0.87 clip at the air hop, 0.6 travel | unchanged |
 | E Palm Lance | cast bar 0.6, shove 0.2, recovery ~0.4 (settled ~1.2) | beam 0.63 on the clip's fire key (0.65), clip 1.07, legs back 1.23; walking after the shove: the clip's standing legs stayed on her to 1.05 and past | beam 0.63; then held 0.6 s (`GunslingerKit.E_RECOVER`: the 0.2 s shove, which still carries her back, and the ~0.4 s recovery): no walk, jump, Shift, LMB, RMB, E or X until 1.23, the frame the clip hands the body back (1.07 + the 0.16 fade); a press in the last 0.15 s goes then, an earlier one is dropped |
 | X Cinderfall | raise then fire ~0.2, ~0.8 committed, no move seen | star, column and shot sfx on the press (0.02); clip 0.60, arm down 0.77; walking: frozen legs (full 1.00) | the shot leaves on the clip's kick key (0.14: the barrel is up at 0.1); held 0.76 s from the tap (`GunslingerUlt.COMMIT`, the source's ~0.8 s within a frame): no walk, jump, Shift or ability until the clip hands the body back on that frame (0.60 + the 0.16 fade; the clip is full body again, no upper-body walk); a press in the last 0.15 s goes then; the disc and column still show at the press |
@@ -119,13 +120,14 @@ after crowd control: DashFlow's 0.15 s exit buffer (docs/decisions/0022-cc-exit-
 `commit_left()`. Q's glove and the Boki's C still go in a hold, as through a stun. Asserted in
 --gunslinger-combo-check (`Vex timing E/R: held ...`, `... goes as it lifts`, `... after the hold she walks`).
 
-Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 are that branch's):
+Clip re-keys (ext/anim-vex-rekeys, on the current vex.glb; `tools/art1/vex_clips.py` baked on `vex_rig_only.py`'s bare rig,
+put on the GLB with `glb_add_clips.py`):
 
 | Clip | Re-key |
 |---|---|
-| x | hold the barrel up from 0.1 to ~0.3 (the source's raise then fire); the clip's end + fade must stay on GunslingerUlt.COMMIT (0.76) and the kick key at 0.14 (GunslingerUlt.FIRE_T) |
-| rmb | the swing could return by ~0.3 (a tap, item 112); 0.5 now |
-| dash | a loopable slide window around 0.45 (the held slide holds that key; a 2-3 key loop would read better than a still) |
+| x | already as asked: the barrel is up from 0.1 to 0.3 (kick key 0.14) and down by 0.6; unchanged. Its end + fade stay on `GunslingerUlt.COMMIT` (0.76) |
+| rmb | superseded by the Coin Blast flick (11-08): `vex_clips.py` keys it 0.5 (flick out by 0.07, home by 0.5) and that clip is the one on vex.glb; the launcher swing's 0.3 re-key (item 112) no longer applies |
+| dash | a slide loop sl, sl-with-lean, sl at 0.367 / 0.433 / 0.5; `GunslingerKit.SLIDE_LOOP_*` replays it while she slides (was a still on 0.45); the stand-up key stays 0.62 |
 | lmb | none: 0.53 at a 0.08 cadence re-plays from its kick each round |
 
 ## Per-slot table
@@ -148,7 +150,7 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 | X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she stands 0.76 s for the shot, then moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red 1.2 m centre ring filling with it (the +50% core) and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | R / T | | | the Boki Merge (the Boki system's key) | | | |
-| R Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
+| R Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3.5 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | X | | | Fuse with your Boki (the Boki system's key) | | | |
 
 ## Combinations
@@ -233,7 +235,7 @@ rifle fires from an open glider (`GunslingerKit.fires_in_glide`). Timing note (n
 | The grenade sticks to dynamic objects (shields, barricades) | [wiki](https://supervive.wiki.gg/wiki/Ghost) patch 20.11.24 | not shown | partly: it sticks to terrain blocks; other heroes' walls that are blocks count |
 | Mini Nuke: lands where the cursor was at cast, 1.6 s after, no tracking | reference sheet (both casts) | f29 to f45 | yes: "it lands exactly at the cursor", "nothing lands before 1.6s" |
 | Mini Nuke: +50% damage in the centre | [thebackdash hunter list](https://thebackdash.com) (older "arcane napalm" wording) | red-orange core (f41) | yes: "+50% in the centre" |
-| Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
+| Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", "ticks every 0.5s (the source's), 6 times in its 3s", gone after 3 s |
 | The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Vex moves and can shoot while it falls" |
 
 ## Move speed while casting (PARITY FIRST, Nov 9)
@@ -269,7 +271,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 - The Palm Lance has no movement while charging (self_slow 1.0) and its recoil is a short shove.
 - A slide in the air spends a charge and stops short instead of carrying.
 - Cinderfall: the range is 14 m (the footage only shows 5 bh in range); the disc is 3.4 m (about 1.9 bh) with a
-  1.2 m centre; the zone ticks every 0.5 s (the footage; the older wording says per second) for 3 and slows 30%
+  1.2 m centre; the zone ticks every 0.5 s (the footage; the older wording says per second) for 3.5 and slows 30%
   for 0.6 s per tick. Allies are untouched (no friendly fire is mentioned). A cursor over the abyss still drops it
   there. A Boki merge does not cancel a shell already fired (it is not a hold). Only the impact pays the bond;
   the sheet's 0.8 for a centre hit or two hunters is not one of the bond kinds (hit, knock, kill), so every hit

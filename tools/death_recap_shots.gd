@@ -2,7 +2,7 @@ extends RefCounted
 ## --death-recap-shots --shots-dir=<dir>: review screenshots of the down/death card (scripts/ui/death_recap.gd),
 ## in a live match under xvfb with a renderer:
 ##   recap_downed   knocked by a foe's ability, a teammate still up: who, the ability, the last 10 s
-##   recap_out      out, a teammate still up: the card plus "Watching <teammate> (LMB: next teammate)"
+##   recap_out      out, a teammate still up: the card, with the Spectate strip below
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -49,7 +49,7 @@ func run(main_node: Node) -> void:
 	_take("recap_downed", "Downed by a foe's ability: the Hunter in their colour, the ability, damage by source")
 	m.eliminate(P, foe, "finished")
 	await _go(3.0)
-	_take("recap_out", "Out with a teammate up: the same card and the camera key to watch the next teammate")
+	_take("recap_out", "Out with a teammate up: the same card above the Spectate strip")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)

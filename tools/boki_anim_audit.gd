@@ -19,21 +19,21 @@ const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not st
 const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
-	"gloamshell": "blob (snail foot)"}
+	"gloamshell": "blob (snail foot)", "gibbelle": "blob"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
-## re-keyed or planted (docs/DEBT.md).
+## re-keyed with boki_gait.planted (docs/DEBT.md). Six rose 2-5 points once the clips lost the frame each loop held
+## at its start (glb_clip_start.py): that frame let the rig play them faster under MAX_CADENCE, and slid itself.
 const OVER := {
-	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
-	"glintmole walk": 0.35, "glintmole run": 0.70, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.68,
-	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
-	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
-	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
-	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
+	"burrlet walk": 0.30, "burrlet run": 0.75, "cairnback run": 0.60,
+	"glintmole walk": 0.35, "glintmole run": 0.75, "hivara run": 0.70, "kestrike walk": 0.40, "kestrike run": 0.65,
+	"marchleaf walk": 0.50,
+	"marchleaf run": 0.65, "nettlynx run": 0.80, "pebbit walk": 0.30, "pebbit run": 0.70, "puddlet run": 0.70,
+	"rimeshrew run": 0.50, "wisplet run": 0.30, "caecilith walk": 0.70, "caecilith run": 0.90,
 }
 const SAMPLES := 48           # poses per loop
+const HELD := 0.1             # a walk or run whose first sample moves less than this of the median one holds still
 const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground
 const DT := 1.0 / 60.0        # s per frame when the rig is driven live (the idle-to-walk pop)
 ## Bones that are not limbs when a Boki has no paws and its lowest limb stands in for a foot.
@@ -67,6 +67,9 @@ func _species(main: Node, id: String) -> void:
 	for clip in ["walk", "run"]:
 		steps[clip] = contact_steps(rig, clip)
 		measured.append(stride(steps[clip], rig.player.get_animation(clip).length))
+	for clip in ["walk", "run"]:
+		var even := start(rig, clip)
+		ok(even > HELD, "%s %s sets off at once (first sample %.2f of the median)" % [id, clip, even])
 	var seams := "seam idle %.1f walk %.1f run %.1f" % [seam(rig, "idle"), seam(rig, "walk"), seam(rig, "run")]
 	print("BOKIGAIT %s measured walk %.2f run %.2f m/s, %s, pop %.1f" % [id, measured[0], measured[1], seams,
 			pop(k, rig)])
@@ -230,9 +233,30 @@ static func slip(steps: Array, length: float, v: float, rate: float) -> float:
 		worst = maxf(worst, slid / maxi(n, 1))
 	return worst
 
+## How far the bones move in a loop's first sample, over the median sample: near 0 the clip holds its first pose a
+## while (Blender keys from frame 1 and Godot fills the gap before it with that pose; boki_rig.export slides clips to
+## 0 s, glb_clip_start.py the glbs baked before that). 1 is an even start.
+static func start(rig: BokiRig, clip: String) -> float:
+	var poses := _loop(rig, clip)
+	var jumps: Array = []
+	for i in SAMPLES - 1:
+		jumps.append(_jump(poses[i], poses[i + 1]))
+	var first: float = jumps[0]
+	jumps.sort()
+	return first / maxf(jumps[jumps.size() / 2], 0.0001)
+
 ## The loop seam: the bones' jump from the clip's last sample back to its first, over the median jump between the
 ## other samples. 1 is seamless; past 2 the wrap shows as a hitch.
 static func seam(rig: BokiRig, clip: String) -> float:
+	var poses := _loop(rig, clip)
+	var jumps: Array = []
+	for i in SAMPLES - 1:
+		jumps.append(_jump(poses[i], poses[i + 1]))
+	jumps.sort()
+	return _jump(poses[SAMPLES - 1], poses[0]) / maxf(jumps[jumps.size() / 2], 0.0001)
+
+## The bones' places at SAMPLES even steps round a clip.
+static func _loop(rig: BokiRig, clip: String) -> Array:
 	rig.set_clip(clip, 0.0)
 	var anim := rig.player.get_animation(clip)
 	var poses: Array = []
@@ -240,11 +264,7 @@ static func seam(rig: BokiRig, clip: String) -> float:
 		rig.player.seek(anim.length * i / SAMPLES, true)
 		rig.advance(0.0)
 		poses.append(_bones(rig.skeleton()))
-	var jumps: Array = []
-	for i in SAMPLES - 1:
-		jumps.append(_jump(poses[i], poses[i + 1]))
-	jumps.sort()
-	return _jump(poses[SAMPLES - 1], poses[0]) / maxf(jumps[jumps.size() / 2], 0.0001)
+	return poses
 
 ## The idle-to-walk pop, driven live: the Boki stands, then sets off at HOME_SPEEDS[0]; the biggest one-frame jump
 ## of any bone while the rig hands the idle over to the walk, over the biggest in the steady walk after it.

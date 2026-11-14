@@ -35,6 +35,8 @@ static var glide_drag_steer := 0.0
 static var glide_coast := 0.0
 static var glide_catch := 0.0
 static var glide_max := 0.0
+static var glide_swoop := 0.0
+static var glide_swoop_fade := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
 static var press_buffer := 0.0   # s an early press waits to be allowed: a dash's end, a recast window, a CC's end
@@ -65,6 +67,8 @@ static func load_tuning() -> bool:
 	glide_coast = g["coast"]
 	glide_catch = g["catch"]
 	glide_max = g["max"]
+	glide_swoop = g["swoop"]
+	glide_swoop_fade = g["swoop_fade"]
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
 	press_buffer = T["press_buffer"]

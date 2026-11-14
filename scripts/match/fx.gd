@@ -318,12 +318,12 @@ func body_glow(at: Vector3, col: Color) -> void:
 ## single label that counts up while they keep landing (a burn, a zone, a minigun), then floats off;
 ## a crit never rolls into the count. Without a key, nearby numbers of the same kind merge.
 ## Numbers stay out of the screen area round the reticle.
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "") -> void:
+func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := "", small := false) -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
 	at = _off_reticle(at)
 	for n in nums:
-		if n.has("val") and _rolls_into(n, at, prefix, crit, key):
+		if n.has("val") and _rolls_into(n, at, prefix, crit, key, small):
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -336,7 +336,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 			elif not n.get("crit", false):
 				ln.modulate = col
 			_num_look(ln, bool(n.get("crit", false)))
-			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)), bool(n["small"]))
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
@@ -348,17 +348,17 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", key := 
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
 	_num_look(l, crit)
-	l.font_size = _num_size(v, crit)
+	l.font_size = _num_size(v, crit, small)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key, "small": small})
 
 ## Does a new hit join this number? Keyed hits join the same key's number (ticks, so a long window;
 ## a crit only within MERGE_T and never into a number past ROLL_MAX_T); unkeyed ones join any nearby one.
-func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String) -> bool:
-	if String(n["pre"]) != prefix:
+func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: String, small: bool) -> bool:
+	if String(n["pre"]) != prefix or bool(n["small"]) != small:
 		return false
 	if key == "":
 		return String(n["key"]) == "" and float(n["last"]) < MERGE_T and (n["base"] as Vector3).distance_to(at) < 1.6
@@ -370,7 +370,7 @@ func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: St
 
 ## A hit on `target` from `src`, over its head; one source's hits on one target roll together.
 func hit_number(target: Ent, src: Ent, v: float, col: Color, crit: bool) -> void:
-	number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), v, col, crit, "", roll_key(src, target))
+	number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), v, col, crit, "", roll_key(src, target), target is Kin)
 
 ## The roll key for damage from `src` onto `target`.
 static func roll_key(src: Ent, target: Ent) -> String:
@@ -419,12 +419,13 @@ func _num_look(l: Label3D, crit: bool) -> void:
 	l.outline_size = 20 if crit else 14
 
 ## Big hits read big: the size steps up with the damage tier, a crit is larger again.
-static func _num_size(v: float, crit: bool) -> int:
+static func _num_size(v: float, crit: bool, small := false) -> int:
 	var px := 0
 	for t in SIZE_TIERS:
 		if v >= float(t[0]):
 			px = int(t[1])
-	return px + (CRIT_SIZE if crit else 0)
+	px += CRIT_SIZE if crit else 0
+	return int(px * Juice.BOKI_NUM_K) if small else px
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
