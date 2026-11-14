@@ -5,6 +5,7 @@ extends RefCounted
 ##   Relic -> the tutorial match (TutorialDrive) -> results -> the farm (its tutorial walked step by step)
 ##   -> Hob's second Relic -> the first expedition, played out through the Ways Out Uplink.
 ## Also the skip paths: "Skip the tutorial" on the naming card, and skipping the farm tutorial.
+## The first Mask is Lace, Kael or Vex: `-- --starter=archer|juggernaut|gunslinger` picks whose (default Vex).
 ## Every wait has a limit: a step that does not move on in time is a stall and fails the check. Each stage
 ## prints how long it took. Never touches the real save.
 
@@ -21,6 +22,7 @@ var main: Node
 var tree: SceneTree
 var stage_name := ""
 var stage_start := 0
+var starter := "gunslinger"      # the Hunter taken on the starter pick
 var timings: Array = []
 
 func ok(cond: bool, what: String) -> void:
@@ -33,6 +35,9 @@ func run(m: Node) -> void:
 	tree = main.get_tree()
 	Save.no_write = true
 	Save.d = Save.fresh()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--starter="): starter = a.substr(10)
+	ok(starter in ["archer", "juggernaut", "gunslinger"], "the starter is Lace, Kael or Vex (%s)" % starter)
 	main.get_window().size = Vector2i(1280, 720)
 	await _prologue()
 	await _hatch()
@@ -164,19 +169,19 @@ func _hatch() -> void:
 	_press(hx, "Learn to fight")
 	await _relic(hx)
 
-## Vex's card on the starter pick (HobOffer), or null before it shows.
-func _vex_card(hx) -> Control:
+## The starter's card on the starter pick (HobOffer), or null before it shows.
+func _starter_card(hx) -> Control:
 	for c in hx.ui.find_children("*", "PanelContainer", true, false):
-		if String(c.get_meta("mask_card", "")) == "gunslinger":
+		if String(c.get_meta("mask_card", "")) == starter:
 			return c
 	return null
 
 ## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
 	_begin("first Relic")
-	await _wait(func(): return hx.stage == "mask" and _vex_card(hx) != null, "naming leads into the starter pick")
-	_vex_card(hx).mouse_entered.emit()      # (Vex in focus: the Take button takes him, as the tutorial always did)
-	_press(hx, "Take Vex")
+	await _wait(func(): return hx.stage == "mask" and _starter_card(hx) != null, "naming leads into the starter pick")
+	_starter_card(hx).mouse_entered.emit()      # (in focus: the Take button takes it)
+	_press(hx, "Take " + HeroTitle.base_name(starter))
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -201,6 +206,7 @@ func _tutorial_match():
 	var step_t := 0.0
 	var last := -1
 	var worst := 0.0
+	var seen := {}
 	while t < COURSE_S and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -209,9 +215,14 @@ func _tutorial_match():
 		step_t += Match.DT
 		if m.tut.step != last:
 			last = m.tut.step
+			seen[m.tut.id()] = true
 			step_t = 0.0
 		worst = maxf(worst, step_t)
 	ok(m.player.extracted, "the driver finishes the course and extracts (%.0f s of play)" % t)
+	ok(m.player.arch == starter, "the course is played as the starter (%s)" % m.player.arch)
+	var missed: Array = Tutorial.steps().map(func(row): return String(row[0])).filter(
+			func(sid: String): return not seen.has(sid) and m.tut.applies(sid))
+	ok(missed.is_empty(), "every step the kit has was taught: %d of them (missed: %s)" % [seen.size(), missed])
 	ok(worst < SIM_STALL_S, "no step took more than %.0f s of play (%.0f s)" % [SIM_STALL_S, worst])
 	_begin("results")
 	await _wait(func(): return main.current is CanvasLayer, "the course ends on the results")
@@ -282,7 +293,8 @@ func _second_relic(home) -> void:
 		await tree.process_frame
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
-	ok(offer.ids.size() == 3 and offer.take_button != null, "three to choose from, with a Take button")
+	var want := ClassUnlock.second_picks().filter(func(a): return a != starter).size()      # (Kael first leaves two)
+	ok(offer.ids.size() == want and offer.take_button != null, "%d to choose from, with a Take button" % want)
 	var pick := String(offer.ids[0])
 	offer.take_button.pressed.emit()
 	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
