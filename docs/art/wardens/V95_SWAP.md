@@ -37,6 +37,8 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
+   A kept prop the new body outgrows: `tools/art1/glb_prop_scale.py OUT_GLB OUT_GLB <mesh> <bone> <length m>` scales
+   it about its bone, before the import (Albert's hammer: art/wardens/breaker/IMPORT.md).
 
 ## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
 In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
