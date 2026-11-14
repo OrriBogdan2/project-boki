@@ -179,6 +179,9 @@ no kit draws its own recast HUD.
   false). A badge over each marked foe (its count, a ring for the time left, gold when the payoff is ready), and a white burst on the foe when the payoff lands
   (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
+- **First-time hint.** The first time a Hunter's window opens in a real match (not training, tutorial, arena),
+  `RecastCue._first_hint` shows one hint "<KEY> again to <verb>" through `Hud.tip`, once per Hunter
+  (`tutorial.recast_<id>`). The verb is the archetype's own `recast_hint` per slot, in that Hunter's words.
 - **Owner and others.** On the owner's screen the cue is the only readout: a kit's world copy of the same state
   hides there and stays for everyone else (Sable's Mark pips, Sparkle's Static marker and its Live pips, Neve's
   frost glow; Sable's knife has no ring of its own). Zones and objects stay for everyone (Motley's seed, Meeko's

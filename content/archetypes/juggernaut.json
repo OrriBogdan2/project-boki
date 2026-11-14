@@ -1,5 +1,6 @@
 {
 	"id": "juggernaut",
+	"recast_hint": {"e": "haul yourself to the chain"},
 	"title": "Unbroken",
 	"base_name": "Kael",
 	"gender": "male",
