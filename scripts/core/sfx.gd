@@ -162,6 +162,7 @@ const MIN_GAP := {
 	"break_wood": 40,
 	"break_clay": 40,
 	"break_metal": 40,
+	"tell_foe": 120,
 	"keg_fuse": 80,
 	"keg_blast": 100,
 	"reset_a": 120,

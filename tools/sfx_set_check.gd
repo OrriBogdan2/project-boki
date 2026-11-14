@@ -250,6 +250,11 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+	var arch_src := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
+	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
+	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
+	tell_ok = tell_ok and arch_src.count("TellCue.start(") == 2 and draw_src.contains("TellCue.aim(")
+	ok(tell_ok, "the rival telegraph wind-up exists, has a gap, sits under the ult cues, wired to both systems")
 
 ## Cinderfall's whistle runs the whole fall: its length matches x.delay from the archetype data within FALL_TOL_S,
 ## it carries past hearing range, and the kit plays it where the shell will land.
