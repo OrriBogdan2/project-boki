@@ -157,6 +157,9 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 | R | ok | (c) | matches |
 | R stop refund | LOW | (c) | ours, noted |
 | Dash -> ability rows | LOW | (a) | item 51 (2f302eba): E and R combine; the ground LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
+| X | ok | (c) | matches |
+| X stop refund | LOW | (c) | ours, noted |
+| Dash -> ability rows | LOW | (a) | item 51 (2f302eba): E and X combine; the ground LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
 ## Ultimate on R: Brass Broadside
 Built as its own ultimate on R (owner decision, SERVER_UPDATE6). It was never folded into another slot, so nothing is unfolded.
@@ -215,6 +218,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - "Through terrain" means rocks, trees, props and cliff faces: the hook flies through them and the body is hauled up and over
   (lifted onto a cliff face, carried to the first clear spot past a rock). A placed ability wall still stops the hook and the reel
   (dust where it snags a wall). The abyss is not special: a body dragged over it falls (the knock rules).
+  (the hook sound and the stop). The abyss is not special: a body dragged over it falls (the knock rules).
 - The reel can't be cancelled by the caster; he can shuffle (20%) and barge during it (the shuffle is what swings the body).
 - Hook hold (owner item 31): the source data has no number for walking while the arm is out, so the out-flight walk is the owner's default band (20%). During the reel he stands braced (the footage: side-on through the pull) and shuffles at the same 20%, between the owner's fallback of rooting him and the wiki's physics pull (the shuffle still swings the body). His height is held only while he is off the ground (on the ground there is nothing to hold); only his vertical speed is held, so a mid-air drift is the same 20% walk and knocks still shove him.
 - The grab's hitbox is the hook's own size; with no target it flies its full 11.5m.

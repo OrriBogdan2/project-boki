@@ -96,6 +96,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 |---|---|---|---|
 | E pull online (`remote`) | HIGH | (c) | owned by ext/online-displace (all kits); not touched here |
 | Knock reset ring | MED | (b) | the reset keeps its sound and HUD ready flash (no word); no ground ring, no net ring |
+| Knock reset ring | MED | (b) | the cloak reset keeps its sound and HUD ready flash; no ground ring, no net ring |
 | LMB fuel (8 s, 1.6 s refill) | MED | (b) | no fuel: the data's Flamethrower is a plain hold. "lance audit: 10 s of roaring with no fuel to run out ..." |
 | LMB self-slow while firing | MED | (b) | full walk while firing; only the wiki's 0.6 for 0.35 s after release. Same assert |
 | RMB cooldown, input | LOW / ok | (c) | fine per the audit (0.78x, the kit's scale) |

@@ -8,6 +8,7 @@ streaming scarf, a bandolier of spiked charges, one bronze pauldron and a long-s
 Palette: her green fire (owner 11-08): signature lime `#b8f03c`, fire green, pale-lime hot cores, deep green and
 white; bronze is only the charge's metal. Every look is HeroVfx data in `content/vfx/gunslinger.json`
 (docs/HERO_VFX.md); the kit only says when. Payoff: the skewer (no word).
+Palette: ember orange, bronze and hot white.
 
 ## Kit card (L picker)
 - Role: Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.
