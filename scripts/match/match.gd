@@ -1769,7 +1769,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if src != "burn":
 		var tier := Feel.hitstop(self, by, target, d, o)
 	if credit == player and target != player and src != "burn":
-		if not BokiImpact.play(self, by, target, o, crit, "you"): sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else Sfx.rng.randf_range(0.92, 1.08), true)
+		var pitch := 1.25 if armor_hit else randf_range(0.92, 1.08)      # drawn even when BokiImpact plays: seeded runs keep their course
+		if not BokiImpact.play(self, by, target, o, crit, "you"): sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, pitch, true)
 		if hud: hud.hitmarker(crit, armor_hit)
 		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and hud:
