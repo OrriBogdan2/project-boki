@@ -9,20 +9,7 @@
 	"fantasy": "The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in.",
 	"howto": ["Play: floating mid-range; pull the fight in with seeds.", "Combo: {secondary} stuns, drop a {signature} seed on them.", "Avoid: spamming {dash}; with no charge it does nothing."],
 	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
-	"card": {
-		"role_word": "Controller",
-		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
-		"lmb": "Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows.",
-		"rmb": "Shard Snap: a short wind-up, then a bundle of shards that stuns the first foe, longer the further it flew.",
-		"e": "Brimseed: drop a bomb at the cursor that grows for 6.5s; press again to pop it, harder the bigger it grew.",
-		"dash": "Lantern Trade: lob a lantern to the cursor and hover where you are; when it lands, everyone in its circle goes to your spot and you go to theirs.",
-		"passive": "Swell: your hits fill Swell (much faster on hunters); full, you are Swollen for 9s and everything grows. You float, so ground hazards pass you by.",
-		"weapons": {
-			"tether_lantern": "Quick orbs to full range through walls; the longer you wait between shots (up to 1.4s) the bigger, faster and harder the next one, and a full orb slows."
-		},
-		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
-	},
+	"card": {"role_word": "Controller", "loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.", "role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.", "dash": "Lob a lantern; foes in its circle swap places with you.", "passive": "Hits fill Swell; full, you are Swollen 9s and everything grows.", "rmb": "Shard bundle that stuns the first foe, longer the further it flew.", "e": "Plant a bomb that grows for 6.5s; press again to pop it.", "x": "Open a well that stuns and pulls in everything for 3.5s.", "weapons": {"tether_lantern": "Quick orbs through walls; wait longer between shots for bigger ones."}, "chips": {"rmb": ["9.5 dmg"], "e": ["12.5 dmg"]}},
 	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.412},
 	"signature": "tether_lantern",
 	"no_hold": true,

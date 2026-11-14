@@ -12,18 +12,7 @@
 	"fantasy": "The green-fire rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"howto": ["Play: mid-range rifle; slide with {dash} while shooting.", "Combo: {secondary} past a foe to shove them back, then shoot.", "Avoid: standing still, except to charge {signature}."],
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
-	"card": {
-		"role_word": "Rifleman",
-		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",
-		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
-		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
-		"rmb": "Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall it blasts a cone back at you, hurting and Dazing everyone in it. Anything else is a miss.",
-		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
-		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
-		"weapons": {
-			"quill_rifle": "Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 76% more (big gold numbers)."
-		}
-	},
+	"card": {"role_word": "Rifleman", "loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.", "dash": "Tap to skid, hold to slide further; keep shooting throughout.", "passive": "Knocking a hunter down returns Slipstep; landed abilities give lifesteal.", "rmb": "Shoot a charge that Dazes; hitting a wall blasts a cone back.", "e": "Stand still 0.6s, then fire a beam through walls and everything.", "x": "A shell lands at your cursor after 1.6s, then burns the patch.", "weapons": {"quill_rifle": "Full-auto rifle; Dazed foes take 90% more."}, "chips": {"rmb": ["22 hit", "16 cone"], "e": ["36 dmg"], "x": ["24 dmg"]}},
 	"signature": "quill_rifle",
 	"resource": {
 		"id": "fever",

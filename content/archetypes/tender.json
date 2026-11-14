@@ -26,20 +26,7 @@
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"howto": ["Play: support; heal with {signature}, carry the downed.", "Combo: {secondary} pins a chaser, then {dash} away.", "Avoid: duels; heal from behind your squad."],
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
-	"card": {
-		"role_word": "Medic",
-		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
-		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
-		"lmb": "Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle.",
-		"rmb": "Burrseed: a 0.6s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; 2s in your reach roots them.",
-		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
-		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
-		"passive": "Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them.",
-		"weapons": {
-			"lantern_crook": "Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle."
-		},
-		"x": "Hearth Call (hunter ultimate, level 6): tether a teammate within 12.6m for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. Nobody in reach: nothing happens."
-	},
+	"card": {"role_word": "Medic", "loop": "Support medic: heals and carries the downed, roots whoever chases them.", "role": "Support medic: heals and carries the downed, roots whoever chases them.", "dash": "Quick hop where you move; a long floaty glide in the air.", "passive": "Run into a downed teammate to carry up to 2.", "rmb": "Seed sticks to a foe; after 2s in reach it roots them.", "e": "Healing ring on you; press again to throw it to the cursor.", "x": "Tether a teammate for 5s of healing; a downed one stands up.", "weapons": {"lantern_crook": "Hold to push embers past the cursor; hits add Kindle."}, "chips": {"rmb": ["9 hit", "32 burst"]}},
 	"signature": "lantern_crook",
 	"resource": {
 		"id": "kindle",

@@ -21,20 +21,8 @@
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
 	"howto": ["Play: mid-range ice; darts Chill, hold {dash} to skate.", "Combo: land 8 darts on one foe to Shatter their Chill.", "Avoid: standing still in the open; keep skating."],
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
-	"card": {
-		"role_word": "Controller",
-		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
-		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
-		"lmb": "Ice Dart: hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones.",
-		"rmb": "Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
-		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
-		"dash": "Skate: hold the dash key to skate where you move; your darts fly as fast, thick beams that still curve onto your target, and hit twice as hard.",
-		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
-		"weapons": {
-			"hoar_fan": "Hold for a stream of slow darts that curve onto the foe at your cursor; let go and the burst ends on three large ones, then a short pause."
-		},
-		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.3s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
-	},
+
+	"card": {"role_word": "Controller", "loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.", "dash": "Hold to skate; darts fly straight and hit twice as hard.", "passive": "Hits Chill; 8 darts or a knock on a Chilled foe Shatters.", "rmb": "Ice spear: hits and slows where it lands, then bursts after 1.8s.", "e": "An ice wall slides to the cursor, shoving foes; E freezes it.", "x": "Sealed, invulnerable, rooted; cracks open at 3.5s to stun.", "weapons": {"hoar_fan": "Hold for slow homing darts; big ones every few shots."}, "chips": {"rmb": ["18 hit", "60 burst"], "x": ["40 dmg"]}},
 	"signature": "hoar_fan",
 	"resource": {
 		"id": "chill",

@@ -16,20 +16,7 @@
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"howto": ["Play: long-range bow; hold {fire} to draw, release to loose.", "Combo: {secondary} into a wall pins and stuns the foe.", "Avoid: overdrawing; past full draw the damage halves."],
 	"silhouette": "the long weapon over the shoulder",
-	"card": {
-		"role_word": "Marksman",
-		"loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",
-		"role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",
-		"lmb": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw.",
-		"rmb": "Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls.",
-		"e": "Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing.",
-		"dash": "Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers.",
-		"passive": "Hawk Sense: rivals under half health show through cover.",
-		"x": "Starpiercer (level 6): your next 3 shots need no draw and fly as big piercing arrows; the third can finish a foe.",
-		"weapons": {
-			"longbow": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw."
-		}
-	},
+	"card": {"role_word": "Marksman", "loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.", "role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.", "dash": "Roll, then 2.8s walking through rocks, trees and barriers.", "passive": "Rivals under half health show through cover.", "rmb": "Hold, release: a heavy arrow that knocks back and pins to walls.", "e": "Rain arrows on a wall at the cursor: damage, slow, anti-heal burn.", "x": "Your next 3 shots skip the draw and pierce; the third finishes.", "weapons": {"longbow": "Hold to draw; release on the flash for a faster next draw."}, "chips": {"rmb": ["16-30 dmg"], "e": ["5 per tick"], "x": ["18-25 dmg"]}},
 	"signature": "longbow",
 	"resource": {
 		"id": "hawk",

@@ -12,18 +12,7 @@
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
 	"howto": ["Play: mid-range lightning; stack Static, then run through.", "Combo: 3 bolts plus {secondary}, then {dash} through them.", "Avoid: dashing through a foe under 4 Static."],
 	"silhouette": "the copper rod mast and kite pennant on the back",
-	"card": {
-		"role_word": "Skirmisher",
-		"loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.",
-		"dash": "Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster.",
-		"passive": "Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live.",
-		"rmb": "Storm Rod: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back.",
-		"e": "Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them.",
-		"x": "Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits.",
-		"weapons": {
-			"coilcaster": "Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static."
-		}
-	},
+	"card": {"role_word": "Skirmisher", "loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.", "dash": "Tap for a short zap, hold to charge a longer streak.", "passive": "Hits stack Static; the 4th calls a sky bolt.", "rmb": "Throw a copper rod: knocks back, adds Static, stuns on walls.", "e": "Drop a circle; 0.8s later lightning drags foes inside and grounds them.", "x": "Launch up, then strike down at your cursor, knocking everyone back.", "weapons": {"coilcaster": "Finger bolts every 0.65s; each hit adds 1 Static."}, "chips": {"dash": ["20 dmg"], "rmb": ["18-30 dmg"], "e": ["20 dmg"], "x": ["22 dmg"]}},
 	"signature": "coilcaster",
 	"resource": {
 		"id": "sparks",

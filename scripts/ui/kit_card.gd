@@ -2,14 +2,15 @@ class_name KitCard
 extends PanelContainer
 ## One archetype's whole kit on one page (docs/ARCHETYPES.md), simple and visual: a header (portrait,
 ## name, weight), then one row per ability (Passive, LMB, RMB, E, Dash, the hunter's ultimate, the Boki
-## Fusion), each with its key cap, a big icon, its name and one short line. A row's "Details" opens that
-## ability's page (preview, every rule) in the same frame (no scroll, no resizing: the card is always
-## SIZE). Used in the Arena / training (K). KitCard.strip is a compact row that opens the full card.
+## Fusion), each with its key cap, a big icon, its name, key numbers as chips (damage, cooldown, charges)
+## and ONE line of at most MAX_WORDS words (content/archetypes `card`). Hovering a row shows the rules; its
+## "Details" opens that ability's page (preview, every rule) in the same frame (no scroll, no resizing:
+## the card is always SIZE). Used in the Arena / training (K). KitCard.strip is a compact row that opens the full card.
 
 const SIZE := Vector2(800, 620)
 const BODY_H := 468.0
 const ROW_H := 54.0
-const MAX_LINE := 74    # chars: a row's one line
+const MAX_WORDS := 12    # words: a row's one line (tools/arena_check.gd holds every hunter to it)
 const PORTRAIT := Vector2(76, 76)    # px: the Hunter's portrait in the header
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 ## The order the card lists them in: the kit as it is played, then the ultimate and the Fusion.
@@ -115,6 +116,7 @@ func _row(slot: String) -> Control:
 	p.custom_minimum_size = Vector2(0, ROW_H)
 	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.3), 1, 12, 3))
 	p.set_meta("slot", slot)
+	p.tooltip_text = "\n".join((info["detail"] as Array).map(_para_text))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	p.add_child(row)
@@ -132,22 +134,25 @@ func _row(slot: String) -> Control:
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var top := HBoxContainer.new()
 	top.add_child(UI.label(String(info["name"]), 18, UI.INK, UI.big))
-	if String(info.get("how", "")) != "":
-		var hw := UI.label("   " + String(info["how"]), 13, Color(col.lightened(0.2), 0.95), UI.big)
-		hw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		top.add_child(hw)
+	top.add_child(UI.fill())
+	for c in info["chips"]:
+		top.add_child(UI.chip("", String(c), col.lightened(0.2), "", 12))
 	tv.add_child(top)
 	var line := String(info["line"])
 	if slot == "r" and kin_sp != "":
 		var bn := String(Data.KIN.get(kin_sp, {}).get("name", kin_sp))
 		line = "Fuse with your %s: its colour and type change your abilities." % bn
-	var ln := UI.label(short_line(line, String(info["name"])), 13, UI.MUTED)
+	var ln := UI.label(line, 13, UI.MUTED)
 	tv.add_child(ln)
 	row.add_child(tv)
 	var db := UI.ghost("Details", func(): _show_detail(slot), 84)
 	db.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(db)
 	return p
+
+## One detail paragraph as a line ("Tap:  ..."), for the row's hover text.
+static func _para_text(para: Array) -> String:
+	return String(para[1]) if para[0] == "" else "%s: %s" % [para[0], para[1]]
 
 ## An ability's page: everything about it, in the same frame as the grid.
 func _show_detail(slot: String) -> void:
@@ -203,7 +208,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
 	var cd: Dictionary = d.get("card", {})
 	var col := Arch.color(a)
-	var out := {"name": "", "icon": "dash", "col": col, "tag": "", "line": "", "detail": []}
+	var out := {"name": "", "icon": "dash", "col": col, "tag": "", "line": "", "chips": _chips(a, slot), "detail": []}
 	match slot:
 		"dash":
 			var sd: Dictionary = d["dash"]
@@ -238,8 +243,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): keys.append({"tap": "tap", "hold": "hold", "air": "air", "during_e": "in E", "full": "full"}[v])
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "%ss · %s" % [KinText.n(float(sd.get("cooldown", 8.0))), " / ".join(keys)], "line": String(cd.get("rmb", "")),
-				"how": _how(keys)}, true)
+				"tag": "%ss · %s" % [KinText.n(float(sd.get("cooldown", 8.0))), " / ".join(keys)], "line": String(cd.get("rmb", ""))}, true)
 			var det: Array = []
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): det.append([{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During E", "full": "Resource full"}[v], String(vs[v])])
@@ -265,7 +269,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Fusion. Your Boki fuses with you and its kind sets the Fusion form." % Settings.key_cap("ultimate")]]
 		"r":
 			# the Merge key is the Merge for every class
-			out.merge({"name": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "level 6 · full bond meter", "line": "You and your Boki become one: its colour, its type, your abilities changed."}, true)
+			out.merge({"name": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "level 6 · full bond meter", "line": "Become one with your Boki: its colour and type change your abilities."}, true)
 			out["detail"] = [["Fusion", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the Fusion by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
@@ -306,29 +310,31 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 		out.append("%s: %s" % [String(sd.get("name", slot)), txt])
 	return out
 
-## One short line from a card text: the first sentence, without a leading "Name: ", cut at a clause
-## so it fits a row.
-static func short_line(t: String, nm := "") -> String:
-	var s := t.strip_edges()
-	var colon := s.find(": ")
-	if nm != "" and s.begins_with(nm) and colon > 0 and colon < 46:
-		s = s.substr(colon + 2).strip_edges()
-	for sep in [". ", "; "]:
-		var i := s.find(sep)
-		if i >= 24:
-			s = s.substr(0, i)
-	s = s.trim_suffix(".")
-	if s.length() > MAX_LINE:
-		var cut := s.rfind(", ", MAX_LINE)
-		if cut < 28:
-			cut = s.rfind(" ", MAX_LINE)
-		s = s.substr(0, cut)
-	return s.substr(0, 1).to_upper() + s.substr(1) + "."
+## The key numbers on a row's chips: what it deals (the weapon's own stats, or `card.chips` in the kit's
+## data, which arena_check holds to the kit's numbers), then its charges, level and cooldown.
+static func _chips(a: String, slot: String) -> Array:
+	var d := Arch.def(a)
+	var sd: Dictionary = d.get(slot, {})
+	var out: Array = []
+	if slot == "r":
+		return ["Lv 6", "full bond"]
+	if slot == "lmb":
+		return _weapon_chips(Data.weapon_stats(String(Arch.weapons(a)[0])))
+	out.append_array(d.get("card", {}).get("chips", {}).get(slot, []))
+	if slot == "dash":
+		out.append("%s charge%s" % [_charges(a), "" if _charges(a) == "1" else "s"])
+	if slot == "x":
+		out.push_front("Lv %d" % int(sd.get("unlock", 6)))
+	if sd.has("cooldown") or sd.has("cd"):
+		out.append("%ss" % KinText.n(float(sd.get("cooldown", sd.get("cd", 0.0)))))
+	return out
 
-## How a right click is pressed, from its variants: "Tap only", "Hold only", "Tap / Hold / Air".
-static func _how(variants: Array) -> String:
-	var ways := variants.filter(func(k): return k in ["tap", "hold", "air"]).map(func(k): return String(k).capitalize())
-	return " / ".join(ways) + (" only" if ways.size() == 1 else "")
+static func _weapon_chips(st: Dictionary) -> Array:
+	if st.get("melee", false):
+		return ["%s per hit" % KinText.n(float(st["dmg"])), "reach %sm" % KinText.n(float(st["range"]))]
+	var pellets := (" x%d" % int(st["pellets"])) if st.has("pellets") else ""
+	var per_s := snappedf(1.0 / maxf(0.05, float(st["rate"])), 0.1)
+	return ["%s%s dmg" % [KinText.n(float(st["dmg"])), pellets], "%s/s" % KinText.n(per_s)]
 
 static func _charges(a: String) -> String:
 	return str(int(Data.CLASSES.get(Arch.weight(a), {}).get("dashes", 1)))
@@ -338,10 +344,6 @@ static func _wstat(st: Dictionary) -> String:
 		return "(%s per hit, reach %sm)" % [KinText.n(float(st["dmg"])), KinText.n(float(st["range"]))]
 	var per := 1.0 / maxf(0.05, float(st["rate"]))
 	return "(%s%s damage, %s shots/s, %sm)" % [KinText.n(float(st["dmg"])), (" x%d" % int(st["pellets"])) if st.has("pellets") else "", KinText.n(snappedf(per, 0.1)), KinText.n(float(st["range"]))]
-
-static func _first(t: String, n: int) -> String:
-	var s := t.split(". ")[0]
-	return s if s.length() <= n else s.substr(0, n - 1) + "…"
 
 # ------------------------------------------------------------------ the compact row (loadout)
 ## A one-row summary for the expedition loadout: six small tiles (icon, key, name) and the kit's
