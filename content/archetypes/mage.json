@@ -34,7 +34,7 @@
 		"gap": 0.15,
 		"blow_dmg": 16.0,
 		"blow_pct": 0.18,
-		"col": "#c6fff2"
+		"col": "#ffd2ec"
 	},
 	"passive": {
 		"name": "Static",
@@ -44,7 +44,7 @@
 		"id": "wirerun",
 		"name": "Wirerun",
 		"icon": "mage_dash",
-		"col": "#9ff5e0",
+		"col": "#ff9ad0",
 		"cd": 8.0,
 		"reset_mult": 1.5,
 		"reset_charge": 0.75,
@@ -69,7 +69,7 @@
 		"name": "Storm Rod",
 		"short": "Rod",
 		"icon": "mage_rmb",
-		"col": "#7dffd8",
+		"col": "#ff7ac4",
 		"cooldown": 8.0,
 		"charges": 1,
 		"hold": 1.0,
@@ -109,7 +109,7 @@
 		"name": "Skycall",
 		"short": "Sky",
 		"icon": "mage_e",
-		"col": "#b8f7ff",
+		"col": "#ffc6e6",
 		"cooldown": 10.5,
 		"reach": 11.0,
 		"delay": 0.8,
