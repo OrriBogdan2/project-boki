@@ -179,3 +179,16 @@ What changed (all first-time rules, no settings; base_mode, the garden, only):
 
 GPU shots at 1280x720 (`--garden-hud-groups`, jobq gd-before4 20261112-013050-17843 on 0.24.5 272368589 plus the tool, gd-after4 20261112-013005-02702 on this branch; the counts above are their GARDENHUD lines). Before: [hub_day1](shots/ui-garden-declutter/before_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/before_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/before_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/before_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/before_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/before_cinderstep_day5.jpg). After: [hub_day1](shots/ui-garden-declutter/after_hub_day1.jpg), [glasswater_day1](shots/ui-garden-declutter/after_glasswater_day1.jpg), [cinderstep_day1](shots/ui-garden-declutter/after_cinderstep_day1.jpg), [hub_day5](shots/ui-garden-declutter/after_hub_day5.jpg), [glasswater_day5](shots/ui-garden-declutter/after_glasswater_day5.jpg), [cinderstep_day5](shots/ui-garden-declutter/after_cinderstep_day5.jpg).
 Not changed (still on screen, each one group): the key row (folds after 3 uses of each key), the hub bar, the F prompt, the one Next line.
+
+## 8. Expedition panel and Relics page on a first visit (ext/ui-relics-grid)
+
+`ExpFold.first_visit()` (`scripts/home/exp_fold.gd`): true while the first Where is the only one open (`extracts` below the second Where's unlock).
+Then the **expedition panel** shows the picked Relic, the open Where and Start; "All Relics (n)", "Locked drops (n)" and "More: Boki, match and modes"
+fold the other Relics, the locked Wheres, and Boki you bring, loadout, Match, Conditions and the Training Grounds / Play online links (the links
+move from the footer into that fold). The **Relics page** shows the picked and the open or ready Relics; "Locked Relics (n)" folds the rest. With a
+second Where open nothing is folded. The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
+fits on one line. `--relics-fold-check` asserts the folds and that no Relic name is cut or wrapped at 1280x720 on either screen.
+
+Shots (1280x720, software renderer on rpc4, the same save as section 1): [expedition before](shots/ui-relics-grid/before_expedition.jpg) /
+[after](shots/ui-relics-grid/after_expedition.jpg); [Relics before](shots/ui-relics-grid/before_relics.jpg) /
+[after](shots/ui-relics-grid/after_relics.jpg) / [after, locked Relics unfolded](shots/ui-relics-grid/after_relics_all.jpg).

@@ -3476,27 +3476,34 @@ func _open_expedition() -> void:
 	UI.subtitle(v, "Pick your Hunter and where to drop.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)
 	v.add_child(cols)
+	var first := ExpFold.first_visit()      # (then Boki, match and mode links sit in `more`, folded)
+	var more := UI.vbox(10)
 	# left: who you are (your Hunter, its weapon, your Boki); locked Hunters are greyed (HunterPickRow)
 	var left := UI.vbox(10); left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(left)
-	HunterPickRow.add(self, left)
+	HunterPickRow.add(self, left, first)
+	if first:
+		ExpFold.add(v, [more], "More: Boki, match and modes")
+		v.add_child(more)
+	var lx: Control = more if first else left
 	var ak := Save.active_kin()
 	if not ak.is_empty():
-		left.add_child(UI.spacer(2))
-		left.add_child(UI.section("Boki you bring"))
-		CarryPick.add_cards(left, _open_expedition)
-		left.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
+		lx.add_child(UI.spacer(2))
+		lx.add_child(UI.section("Boki you bring"))
+		CarryPick.add_cards(lx, _open_expedition)
+		lx.add_child(UI.para(Care.care_line(ak), UI.T_SMALL, UI.MUTED))
 		if float(ak["trust"]) < 30.0:
-			left.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
+			lx.add_child(UI.para("%s doesn't trust you much yet and may refuse risky throws." % ak["name"], UI.T_SMALL, UI.BAD))
 	if Save.d.get("treat", "") != "":
-		left.add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0")))
-	hecon.loadout_rows(left, _open_expedition)
+		lx.add_child(UI.chip("heart", "Treat: " + _treat_name(Save.d["treat"]), Color("ffb0d0")))
+	hecon.loadout_rows(lx, _open_expedition)
 	# right: where you're going and how
 	var right := UI.vbox(10); right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(right)
 	right.add_child(UI.section("Where"))
 	var ex := int(Save.d.get("extracts", 0))
 	if exp_tier >= Data.TIERS.size() or ex < int(Data.TIERS[exp_tier]["unlock"]): exp_tier = 0
+	var locked_tiles: Array = []
 	for i in Data.TIERS.size():
 		var td: Dictionary = Data.TIERS[i]
 		var locked := ex < int(td["unlock"])
@@ -3521,21 +3528,26 @@ func _open_expedition() -> void:
 		elif exp_tier == i:
 			tv.add_child(UI.para(String(td["desc"]), UI.T_SMALL, Color("ffb3a8") if KinLoss.at_risk(i) else UI.MUTED))
 		right.add_child(tc)
-	right.add_child(UI.spacer(2))
-	right.add_child(UI.section("Match"))
-	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
-	right.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
+		if locked: locked_tiles.append(tc)
+	if first and not locked_tiles.is_empty():
+		ExpFold.add(right, locked_tiles, "Locked drops")
+	var rx: Control = more if first else right
+	rx.add_child(UI.spacer(2))
+	rx.add_child(UI.section("Match"))
+	rx.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
+	rx.add_child(UI.label("Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
-	right.add_child(UI.spacer(2))
-	right.add_child(UI.section("Conditions"))
-	right.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
-	right.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
+	rx.add_child(UI.spacer(2))
+	rx.add_child(UI.section("Conditions"))
+	rx.add_child(UI.chip("clock", String(RaidLook.NAMES.get(rc, rc)), RaidLook.COLORS.get(rc, UI.INK), String(RaidLook.BLURBS.get(rc, ""))))
+	rx.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
 	if not ak.is_empty():
-		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
+		rx.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
-	var fl := UI.footer_left(v)
+	var fl: Container = UI.hbox(10) if first else UI.footer_left(v)
+	if first: more.add_child(fl)
 	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
