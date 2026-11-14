@@ -134,7 +134,7 @@ static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 	out["crown"] = true
 	out["ribbon"] = true
 	var prizes: Array = [{"kind": "item", "id": g["cup_prize"]}]
-	if out["ribbon"] and g.has("first_crown"):
+	if int(have["n"]) == 1 and g.has("first_crown"):
 		prizes.append({"kind": "item", "id": g["first_crown"]})
 	for prize in prizes:
 		bank(prize)

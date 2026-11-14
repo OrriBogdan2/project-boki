@@ -102,8 +102,7 @@ func _echo_crown(rng: RandomNumberGenerator, t: float) -> void:
 		for foe_power in [19, 21, 23]:
 			GardenPrizes.settle("echo", me, _boki(foe_power), true, t + week * WEEK, rng)
 		ok(int(Save.d["items"].get("chimegrass", 0)) == 1, "Echo Steps Crown %d: Chimegrass once in all" % (week + 1))
-	var week_two := int(me["ribbons"]["echo"]["week"]) == GardenPrizes.week_of(t + WEEK)
-	ok(GardenPrizes.has_ribbon(me, "echo") and week_two, "...and it wears the Echo Steps Cup Ribbon, both weeks")
+	ok(GardenPrizes.ribbon_count(me, "echo") == 2, "...and the Echo Steps Cup Ribbon each time")
 
 func _loss_and_games(rng: RandomNumberGenerator, t: float) -> void:
 	var me := _boki(20)
