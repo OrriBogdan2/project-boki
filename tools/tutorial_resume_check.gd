@@ -112,7 +112,7 @@ func _resume_each() -> void:
 		ok(tu.step == want, "%s: carries on at '%s' (is '%s')" % [tag, String(steps[want][0]), tu.id()])
 		var stop := tu.respawn()
 		var far: bool = m.player.pos.distance_to(stop) > 6.0
-		ok(not far or tu.id() in ["chest", "goexit", "key", "gkey"], "%s: back at the last stop" % tag)
+		ok(not far or tu.id() in ["chest", "wayout", "key", "gkey"], "%s: back at the last stop" % tag)
 		ok(m.player.kin != null, "%s: your Boki is with you" % tag)
 		if tu.id() == "chest":
 			ok(m.player.chest_keys > 0, "%s: the chest key is in hand" % tag)

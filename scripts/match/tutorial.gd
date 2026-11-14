@@ -213,9 +213,10 @@ func _finish(sid: String) -> void:
 	if STOP_AFTER.has(sid):
 		last_stop = stop(STOP_AFTER[sid])
 	step += 1
-	var resumed := sid == "land" and TutorialResume.last_beat() != ""
+	var resume_to := TutorialResume.step_after(TutorialResume.last_beat()) if sid == "land" else 0
+	var resumed := resume_to > 0      # (an unknown beat carries on from the start, never back to the landing)
 	if resumed:
-		step = TutorialResume.step_after(TutorialResume.last_beat())
+		step = resume_to
 	else:
 		TutorialResume.remember(sid)
 	if step == 1:

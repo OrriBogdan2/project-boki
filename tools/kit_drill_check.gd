@@ -143,10 +143,6 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 func _slots(plan: Array) -> Array:
 	return KitDrill.SLOTS.filter(func(sl): return plan.any(func(st): return st["slot"] == sl))
 
-## The slots a plan teaches, in SLOTS order.
-func _slots(plan: Array) -> Array:
-	return KitDrill.SLOTS.filter(func(sl): return plan.any(func(st): return st["slot"] == sl))
-
 ## Kael's guard step in the Training Grounds: a dummy in reach swings; unguarded it hurts and the step stays,
 ## the Riposte pressed (the real guard up) and its swing lands into the guard, blocked: the step is done.
 func _swing(m: Match, kd: KitDrill) -> void:

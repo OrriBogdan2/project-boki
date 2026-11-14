@@ -30,6 +30,7 @@ func run(main: Node) -> void:
 
 func _play(main: Node, id: String) -> void:
 	seed(11)       # (the same run each time)
+	Save.d["tutorial"].erase("tut_beat")      # (a fresh course: not resumed from the last run's beat)
 	var m := Match.new()
 	main.add_child(m)
 	m.start({
