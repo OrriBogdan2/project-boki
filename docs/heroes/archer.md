@@ -46,6 +46,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 | RMB self-recoil (LOW) | (b) | removed |
 | E cooldown 9 vs 15, DPS (MED) | (b) cd, (c) DPS | 15 s (data). DPS kept: 10/s is 8% of a light's HP a second, the source's 61/s is 5.5% of Myth's |
 | R cooldown 36 vs 60, beam damage (MED) | (b) cd, (c) damage | 60 s (data). Beams stay 18/25: the burst cap (the ult then the merge never one-shots a full-health light) |
+| X cooldown 36 vs 60, beam damage (MED) | (b) cd, (c) damage | 60 s (data). Beams 18/23.3 (the third keeps the source's 422 : 326 = 1.29x): the burst cap (the ult then the merge never one-shots a full-health light) |
 | Self-shake (MED) | (c) | ext/no-shake owns item 50 |
 
 ## Footage gaps, Nov 9 re-check
@@ -127,6 +128,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 - During Spirit Walk she can still shoot and cast, and moves 10% faster (the sheet measures +5-10% outside); at rank 3, 33% more inside something, fading over the walk.
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
+- Double-wall climb: built on main (hunter_move.json `archer.climb_tall`, Hunter reach +0.9 m): a jump into a 4-terrace wall (3.2 m, two single 1.6 m climbs, source 3 m) puts her on top; 5 terraces and her back to the wall do not, and every Hunter but Brall (the other `climb_tall` hero) tops out at 3 terraces. Facing is the keys pushed into the wall, as for every ledge. Proven in --archer-combo-check (`_wall_climb`) and tools/tall_climb_check.gd.
 - Not built, waits on rule 2 decision: Hail Wall on wisps (proposal: bleed x2 and slow 35% inside the wall, no hit on the pool; docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
@@ -160,7 +162,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 | Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
 | Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
 | Ult: pierces enemies, longer range, knocks back | [wiki](https://supervive.wiki.gg/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
-| Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
+| Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 23.3 vs 18 (422 : 326), execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
 | Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built, waits on rule 2 decision (docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098) | - |
@@ -181,18 +183,29 @@ Rank paths that do not fit our system: the data's tiers II/III/IV fold into our 
 Skipped, with reasons: the tall-ledge climb has no heightmap equivalent (main's movement work); the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on R) untouched.
 Skipped, with reasons: the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on X) untouched.
 
-## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
-Source: Myth, `Upg:` lines. Rank cooldown and damage now come from `rank_cd` / `rank_dmg` (the old `cd_per_rank` and the
-shared dash step are gone).
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
+(briefs/supervive-data/supervive_kits.md, Myth `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
+archer.json (the old `cd_per_rank` and the shared steps are gone); cooldowns match the data directly (Heavy Shot 16s,
+Spirit Walk 9.5s, Hail Wall 15s). LMB and Hawk Sense have no tiers in the data and do not rank; R (Starpiercer on X) is
+decision 0022's.
 
-| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
-|---|---|---|---|
-| RMB Heavy Shot | -3s cooldown x2 (flat), +20% damage x2, tier IV: +3m range, wall stun gives a dash charge | 13s / 10s, damage +15% / +30% | 13s / 10s, damage +20% / +40%; range and charge at 3 |
-| Space Spirit Walk | -1s recharge x2, tier IV: lasts 0.5s longer, faster inside something, allies in 6m walk too | 8.1s / 6.7s | 8.5s / 7.5s; tier IV riders at 3 |
-| E Hail Wall | -2s cooldown x2, +30% damage x2, tier IV: -2s more, 30% wider | 13.5s / 12s, damage +15% / +30% | 13s / 9s, damage +30% / +60%; 30% wider at 3 |
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--archer-combo-check` |
+|---|---|---|---|---|
+| LMB bow | none [D] | - | - | - |
+| RMB Heavy Shot | +20% dmg, -3s / +20% dmg, -3s / more range, a wall stun gives a dash charge [D] | 13s, damage +20% | 10s, damage +40%; flies 3m farther; a wall stun gives a dash charge | `upgrade parity: Heavy Shot ...`, `Heavy Shot ranks cut 3 s ...`, `pin rank 3: a Heavy Shot wall stun ...` |
+| Shift Spirit Walk | -1s / -1s / +0.5s, +150 decaying speed inside terrain, allies get it too [D] | recharge 8.5s | 7.5s; 3.3s long, +33% inside something (fading), allies within 6m walk too | `upgrade parity: Spirit Walk ...`, `pin rank 3: Spirit Walk lasts 0.5 s longer ...`, `pin rank 3: +33% inside ...` |
+| E Hail Wall | +30% dmg, -2s / +30% dmg, -2s / -2s, +30% arc [D] | 13s, damage +30% | 9s, damage +60%; arc 120 -> 156 degrees (`e.deg_r3_k`) | `upgrade parity: Hail Wall ...`, `upgrade parity: rank 3 (tier IV) Hail Wall arc ...` |
+| Passive Hawk Sense | none [D] | - | - | - |
+
+Before the source pass: Heavy Shot 13s / 10s with +15% / +30% (shared), Spirit Walk 8.1s / 6.7s (shared -15%), Hail Wall
+13.5s / 12s with +15% / +30%. This pass moved the Hail Wall's rank 3 width (1.3) from an inline number into the data and
+asserts it.
 
 ## Scaling
 Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full Heavy Shot 30 (+148 wall hit, 4.94x), Hail Wall 5 per 0.5 s, Starpiercer 18 / 18 / 25 per beam (60 s cooldown, 4x the E cooldown of 15 s as in the source). Source numbers were used only as ratios (overdraw half of Supercharged, E cooldown about RMB's).
+Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full Heavy Shot 30 (+148 wall hit, 4.94x), Hail Wall 5 per 0.5 s, Starpiercer 18 / 18 / 23.3 per beam (36 s cooldown, 4x the E cooldown as in the source). Source numbers were used only as ratios (overdraw half of Supercharged, E cooldown about RMB's).
+Shares of the standard target against the source (docs/TTK.md, no LMB source number so no check row; not tuned): Heavy Shot 3.8 to 7.1x (Heartpiercer 35 = 2.7%), its wall hit the same, Hail Wall 1.37x (Rain of Arrows 61 a second = 4.7%), Starpiercer 0.46x (326 / 422 = 25.4 / 32.8%).
 
 ## Cross-ability interactions (combos)
 | Combination | Result | Check |
@@ -217,30 +230,35 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 
 ## Cancels (ability to ability)
 
-What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
-ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
-Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first ends),
+**both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**. Dash rows
+(Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
 briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
 that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
-line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
-(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). The 11-12 pass settled 4 of the rows it
+left unsettled (LMB draw + X stays unsettled). None of [D] (the Myth card, supervive_kits.md:71-79), [F]
+(briefs/hero-ref/pin.md: no frame presses a second key in a draw, in the ult window or from a glider) or [W] (the Myth
+page and its patch notes, as cited above) shows those pairs, so each follows **rule**: DECISIONS 11-07 "every
+interaction is chainable", read through DashFlow's default (decision 0015: a missing row combines, the second press
+goes and the first runs on) and AirLimits ("an open glider is never folded"). Each is one assert in
+`--archer-combo-check` ("Lace cancel ...", tools/lace_cancel_rows_check.gd). Any pair not in the table: both (ArchKit
+has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack
+key does nothing from a glide (`Hunter.can_fire`; the glide row below says that is a mismatch).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
 | LMB draw (held) | RMB | not shown: [D] has no ability tags or block lists for Myth (hold to charge, release to fire, nothing on the other button); [F] shows one reticle at a time (the gold V in place of the green one, f264-269) and no press mid-draw | cancels: the RMB press drops the draw with no arrow (its pose and reticle go); a still-held LMB stays idle until the Heavy Shot looses, then draws again | **fixed, rule ours** (one bow holds one arrow; the newer press wins, the same rule as LMB -> X). Not chosen, as nothing shows them: the press ignored while drawing, or waiting for the arrow to loose | [D] supervive_kits.md Myth; [F] 0264-0269, 0494; `--archer-combo-check` (`one bow LMB>RMB: ...`, tools/pin_one_bow_check.gd) |
 | RMB held (Heavy Shot) | LMB | not shown (as above) | cancels: the LMB press drops the hold with no shot and no charge spent (bar, needle and pose go) and the bow draws; the still-held RMB starts nothing until pressed again | **fixed, rule ours** (same row; not chosen: LMB ignored while the Heavy Shot is held) | `--archer-combo-check` (`one bow RMB>LMB: ...`) |
-| LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | unsettled | [F] 0457, 0498 |
+| LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | both (match) | rule; [F] 0457, 0498 show no draw under the cast |
 | LMB draw, RMB held | jump | not shown | the draw carries through the jump | owner | item 51 (content/dash_flow `hold`) |
 | LMB draw | X | "a self-buff with no cast lock" | the draw is dropped with no arrow; a still-held LMB nocks the first empowered shot at once (0.3 s) | unsettled (the clip's cast at f33 isn't mid-draw) | [F] ult f33 |
 | RMB held | its own end | "Max hold duration after cast increased from 1.5 >>> 3.0 seconds" | 3.0 s, then it looses by itself | match (what the source does at 3 s isn't stated) | [W] |
 | E (instant) | any | instant: no wind-up, no lock | instant: everything goes at once | match | [F] 0457 |
 | X window (3 shots, 6 s) | LMB | "empowered arrows need no charge"; the clip still shows a 0.4-0.8 s draw | a press nocks for 0.3 s, then the beam | match (no charge; the nock length is a timing note) | [F] ult; thebackdash |
 | X window | walk, Spirit Walk | "she can walk between shots" | shots kept through Spirit Walk; she walks between them | match | [F] ult |
-| X window | RMB, E | not shown | both | unsettled | |
-| Glide | LMB | not shown | ignored | unsettled | |
-| Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) | unsettled | |
+| X window | RMB, E | not shown (the card: "next 3 Bow shots", so RMB and E are not among them) | both: the Heavy Shot draw starts, the wall goes up, the three shots stay | both (match) | rule; [D] :77 |
+| Glide | LMB | not shown | ignored (`Hunter.can_fire` refuses while gliding) | both: the bow draws from the open glider, which stays open. **Mismatch, not fixed** (doc and assert only; the kit change is named in the pass report) | rule; AirLimits "an open glider is never folded" |
+| Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) and the glider stays open | both (match) | rule |
 
 Fixes made: the draw-plus-Heavy-Shot pair (11-11, ext/lace-one-bow). Neither the data nor the frames show the
 source's answer, so the newer press cancels the held draw with no shot, the rule the LMB -> X row already follows
