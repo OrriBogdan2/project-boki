@@ -16,7 +16,7 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 | Setting | Value | Meaning |
 |---|---|---|
 | players | 30 | hunters in an expedition (solos, duos or trios) |
-| down_hp | 100 | so about 40 seconds downed before you bleed out |
+| down_hp | 100 | the pool a downed hunter bleeds out of (it drains over 15 seconds) |
 
 ## Down, death and revive
 
@@ -720,7 +720,7 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 
 | Setting | Value |
 |---|---|
-| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0007-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Scaled x1.2 when the Hollow Crown went from 25 to 30 chests, to keep the share, then x0.6 with rules/keys.json chest.keep. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. The odds follow rules/keys.json chest.keep, so spare keys stay 20-30% of the chests (the --keys-check surplus). |
+| _doc | Bonus chest keys on top of the carrier quota (docs/decisions/0009-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Scaled x1.2 when the Hollow Crown went from 25 to 30 chests, to keep the share, then x0.6 with rules/keys.json chest.keep. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops. The odds follow rules/keys.json chest.keep, so spare keys stay 20-30% of the chests (the --keys-check surplus). |
 | seed_add | 977 |
 | boss | {"odds": 0.288, "two": 0.25} |
 | elite | {"odds": 0.18, "two": 0.15} |
@@ -1431,7 +1431,7 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 
 | Setting | Value |
 |---|---|
-| _doc | Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
+| _doc | Chests, keys and the bush mimic (docs/decisions/0009-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
 | chest | {"keep": 0.6, "keep_doc": "Share of the map's chests and of the item caches a match places (owner 11-10: about 40% fewer). Vaults are not cut. KeyChest.thin drops the most crowded map chests first. Change it with the bonus key odds in chest_keys.json (the --keys-check surplus).", "hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "soul_ember_min_bonus": 2, "soul_ember_odds": 0.3} |
 | keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "cap": 3, "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."} |
 | shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "relax_r": 7.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "expose_s": 1.2, "tell_s": [5.0, 10.0], "grounded_speed": 0.55, "gems": 6} |

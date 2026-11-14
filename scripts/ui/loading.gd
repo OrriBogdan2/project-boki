@@ -7,12 +7,14 @@ extends CanvasLayer
 
 signal shown
 
+## A tip's {action} marks are replaced by that action's current key (Settings.key_cap).
+const TIP_KEYS := ["throw", "util1", "util2", "ultimate", "gear1", "gear2", "base", "interact"]
 const TIPS := [
 	"Press Space again in the air (or Mouse 5) and hold to glide. You can open your glider off any booster too.",
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
-	"Your Boki key (or middle mouse) sends your Boki out. It stuns what it hits; press again to call it back.",
+	"{throw} sends your Boki out. It stuns what it hits; press again to call it back.",
 	"Left and right click both belong to your weapon: every weapon has its own right-click ability. Try them in Training.",
 	"You only see what's in front of you. Rivals behind you or past a wall stay hidden, and so do you.",
 	"Tall grass hides you from anyone outside it. Shooting gives you away for a moment.",
@@ -22,20 +24,20 @@ const TIPS := [
 	"Jump at a wall in the air to kick off it. Light hunters get two kicks.",
 	"One hit breaks a crate, pot or barrel. A red powder keg lights a fuse, then blows: get clear.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
-	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
-	"Fight alongside your Boki to fill the bond meter, then your Fuse key calls its bond ultimate.",
-	"Every Boki has a different ability, and it uses it by itself. Q fires the active glove you found out here.",
+	"Health and armor don't come back on their own. {util1} drinks a tonic, {util2} repairs your armor with a kit. You take more damage while you do either.",
+	"Fight alongside your Boki to fill the bond meter, then {ultimate} fuses you with it.",
+	"Every Boki has its own ability and uses it by itself. {gear1} and {gear2} fire the gloves you find.",
 	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
-	"In a squad, B bases you to the teammate nearest your cursor: 3s standing still, broken by any hit, and you arrive weakened for 3s.",
-	"Gloves drop from chests, vaults and bosses. One active glove (Q) and one passive glove at a time; a new one replaces the old.",
+	"In a squad, {base} bases you to the teammate nearest your cursor: 3s standing still, broken by any hit, and you arrive weakened for 3s.",
+	"Gloves drop from chests, vaults and bosses. You carry two at a time ({gear1} and {gear2}); a new one replaces the one in its slot.",
 	"Go down for good and the Boki you brought are left behind. Old Pell's Black Market sells back the ones nobody claims.",
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
 	"Falling all the way into the abyss is death. Glide (press Space again in the air, or Mouse 5, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
-	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
+	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold {interact} to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
-	"Shrines on the islands give a short power-up. Stand by one and hold F.",
+	"Shrines on the islands give a short power-up. Stand by one and hold {interact}.",
 	"The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking doesn't.",
 	"A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
 	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
@@ -121,6 +123,8 @@ func setup(opts: Dictionary) -> void:
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
 	tip = tips[randi() % tips.size()]
+	for a in TIP_KEYS:
+		tip = tip.replace("{%s}" % a, Settings.key_cap(a))
 	lore = LORE[randi() % LORE.size()]
 	arch = String(opts.get("arch", Arch.of_save()))
 	splash_path = Portraits.art_path(arch, true)

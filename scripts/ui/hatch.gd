@@ -476,7 +476,7 @@ func _pick(i: int) -> void:
 
 ## Hatching by knocks: each tap is a gentle knock on the shell, and something knocks back. The
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
-## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
+## inside get stronger. No flashes or bursts: it's a small, close moment.
 const TAPS := 7
 var taps := 0
 func _tap_egg() -> void:
