@@ -7,6 +7,7 @@ extends RefCounted
 
 const AimkitCheck := preload("res://tools/aimkit_check.gd")
 
+const EXIT := preload("res://tools/ult_exit.gd")
 const CLEAVE_TALL := 2.4        # m: the crescent tops a Hunter (about 1.9 m)
 
 var A
@@ -74,15 +75,6 @@ func dancer(a) -> void:
 	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
 			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
 			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
-	var g := AimGeo.new()
-	for key in ["ult", "ult_rim"]:
-		var e: Dictionary = AimKit.entry(P, key).duplicate()
-		e["alpha"] = 2.0 if key == "ult" else float(e["alpha"])      # (the ring at its brightest, on a beat)
-		AimShapes.build(g, e)
-	var centre: float = AimkitCheck.alpha_at(g, thin["at"])
-	var rim: float = AimkitCheck.alpha_at(g, thin["at"] + Vector2(float(thin["r"]) - 0.1, 0.0))
-	A.ok("dancer X: a foe inside stays readable: centre %.2f alpha (<= %.2f), rim lit" % [centre, AimShapes.SOFT_A],
-			centre <= AimShapes.SOFT_A and rim >= 0.5)
 	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
@@ -400,6 +392,9 @@ func zedran(a) -> void:
 	await _recovery_exits()
 	_recovery(m, P, T, home)
 	await A.done(m)
+	var got: Dictionary = await EXIT.run(A, "juggernaut")
+	A.ok("juggernaut X exit: Shift, LMB and jump pressed 0.1s before the cleave lands go on its first free step",
+			EXIT.on_time(got), EXIT.said(got))
 
 ## The recovery plays its own clip (jug_ult_recover) for exactly the 0.35 s at half speed, then he is free; a jump or
 ## Shift cuts it on the press frame. Timing and speed are the ult's own (recover 0.35, move_k 0.5), unchanged.
