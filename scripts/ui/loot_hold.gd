@@ -15,7 +15,8 @@ static func mark_full(row: PanelContainer) -> void:
 	rs.border_width_left = 4
 	row.add_theme_stylebox_override("panel", rs)
 
-## One item as a row: icon, name, what it does, its worth, and buttons [[text, callable, primary]].
+## One item as a row: icon, name, what it does, its worth, and buttons [[text, callable, primary, own_cue]]
+## (own_cue: the action plays its inventory cue, InvSfx, so the button itself is silent).
 ## The backpack and swap windows use it too.
 static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContainer:
 	var rp := PanelContainer.new()
@@ -47,6 +48,8 @@ static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContain
 		var is_primary: bool = bt.size() > 2 and bt[2]
 		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if is_primary else UI.button(String(bt[0]), bt[1], 70)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if bt.size() > 3 and bt[3]:
+			b.set_meta("snd", InvSfx.SILENT)
 		row.add_child(b)
 	return rp
 
@@ -63,8 +66,9 @@ static func row_box(col: Color, pad_v: int) -> StyleBoxFlat:
 	rs.content_margin_bottom = pad_v
 	return rs
 
-## Makes a whole item row clickable (as well as its buttons): hovering lights it up.
-static func row_click(rp: Control, cb: Callable) -> void:
+## Makes a whole item row clickable (as well as its buttons): hovering lights it up. `quiet`: the action
+## plays its own inventory cue (InvSfx), so the click itself makes no sound.
+static func row_click(rp: Control, cb: Callable, quiet := false) -> void:
 	rp.mouse_filter = Control.MOUSE_FILTER_STOP
 	rp.mouse_entered.connect(func(): rp.modulate = Color(1.12, 1.12, 1.12))
 	rp.mouse_exited.connect(func(): rp.modulate = Color.WHITE)
@@ -72,5 +76,6 @@ static func row_click(rp: Control, cb: Callable) -> void:
 		var mb := ev as InputEventMouseButton
 		if mb and mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
 			rp.accept_event()
-			Sfx.play("click")
+			if not quiet:
+				Sfx.play("click")
 			cb.call())

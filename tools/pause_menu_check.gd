@@ -37,11 +37,11 @@ func run(mn: Node) -> void:
 	var always: Array = ["Resume", "Settings", "Controls"] + (["Admin tools"] if Overlay.admin_allowed() else []) \
 		+ ([] if OS.has_feature("web") else ["Quit game"])
 	var home := await _go("home")
-	var farm: Array = ["Save and leave", "Inventory", "Save files", "Change your look", "Training Grounds"]
+	var farm: Array = ["Save and leave", "Inventory", "Save Files", "Change your look", "Training Grounds"]
 	await _place("farm", "home", always + farm + (["I'm stuck"] if home.has_method("unstick") else []))
 	await _fit()
 	for p in ["town", "interior"]:
-		await _place(p, p, always + ["Save and leave", "Inventory", "Save files"])
+		await _place(p, p, always + ["Save and leave", "Inventory", "Save Files"])
 	var matches := {
 		"training": [{"training": true, "practice": true}, ["Leave", "Change Hunter"]],
 		"tutorial": [{"tutorial": true}, ["Skip the tutorial", "Change Hunter"]],

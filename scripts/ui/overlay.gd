@@ -284,7 +284,7 @@ func open_more() -> void:
 	_menu_item(v, "Controls", "dash", open_controls)
 	if ctx != "match":
 		_menu_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
-		_menu_item(v, "Save files", "satchel", open_saves)
+		_menu_item(v, "Save Files", "satchel", open_saves)
 	if ctx == "home":
 		_menu_item(v, "Change your look", "swap", func():
 			close()
