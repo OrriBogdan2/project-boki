@@ -133,8 +133,9 @@ func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 				if st["how"] == "tech":
 					SignatureDrill.rig(m, kd.arch)
 					var dummy: Hunter = m.arena.dummies[0]["h"]
-					var rigged := dummy.has_meta(SignatureDrill.META) and dummy.hp <= 20.0
-					ok(rigged, "%s: Vex's dummy is rigged weak and left alone" % tag)
+					if String(SignatureDrill.def(kd.arch).get("rig", "")) == "low":      # Vex's drill only
+						var rigged := dummy.has_meta(SignatureDrill.META) and dummy.hp <= 20.0
+						ok(rigged, "%s: Vex's dummy is rigged weak and left alone" % tag)
 					kd.tech_done(st["id"])
 					ok(not dummy.has_meta(SignatureDrill.META), "%s: the drill gives the dummy back" % tag)
 				elif st["how"] == "hold": kd.on_held(st["action"], KitDrill.HOLD_S)
@@ -204,7 +205,7 @@ func _recast(main: Node, tree: SceneTree) -> void:
 	ok(d.reps["e"]["ph"] == "idle" and d.reps["e"]["n"] == RecastDrill.REPS, "recast: a fourth rep is not counted")
 	d.start("ostra")
 	var gate := float(k.e_def()["min_recast"])
-	rep.call(gate - ArchKit.RECAST_BUFFER * 0.6)
+	rep.call(gate - Loco.press_buffer * 0.6)
 	res = d.reps["e"]["res"]
 	ok(res == ["hit"], "recast: a press inside the buffer before the window arms is a hit")
 	d.toggle()

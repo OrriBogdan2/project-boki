@@ -39,7 +39,7 @@ func _scene(stage: Dictionary, a_at: Vector3, b_at: Vector3) -> Dictionary:
 		node.position = at
 		host.add_child(node)
 		kins.append({"rec": rec, "node": node, "pos": at, "vel": Vector3.ZERO, "goal": at})
-	var nest := Models.nest_egg(Color("ff9a6a"), Color("fff6c0"))
+	var nest := Models.nest_egg("ember", 0.35, Color("fff6c0"))
 	host.add_child(nest)
 	return {"kins": kins, "nest": nest, "uids": [kins[0]["rec"]["uid"], kins[1]["rec"]["uid"]]}
 

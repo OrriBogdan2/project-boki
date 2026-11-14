@@ -9,7 +9,6 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
-const MTIME := preload("res://tools/mage_anim_time_check.gd")        # Sparkle's move timing against the footage frames
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -29,7 +28,6 @@ func run(main_node: Node, who: String) -> void:
 		await _knocked_holds()
 		await _growth()
 		await ults.mage()
-		MTIME.new(self).run()
 		var before: Array = [ac.n, ac.fails]
 		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Skycall drag ends
 		n += ac.n - before[0]

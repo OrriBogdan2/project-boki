@@ -38,29 +38,29 @@ const DN := preload("res://tools/displace_net_check.gd")
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
 class LagRelay extends RelayServer:
 	var rng := RandomNumberGenerator.new()
-	var held: Array = []          # [due msec, peer id, message, fast]
+	var lag_held: Array = []      # [due msec, peer id, message, fast]
 	var last_due := {}            # peer id -> due msec of the last message sent to it (they stay in order)
-	var lost := 0
+	var lag_lost := 0
 
 	func _send(id: int, d: Dictionary, fast := false) -> void:
 		if fast and rng.randf() < LOSS:
-			lost += 1
+			lag_lost += 1
 			return
 		var due := Time.get_ticks_msec() + ONE_WAY_MS + rng.randi_range(-JITTER_MS, JITTER_MS)
 		due = maxi(due, int(last_due.get(id, 0)))
 		last_due[id] = due
-		held.append([due, id, d, fast])
+		lag_held.append([due, id, d, fast])
 
 	func _process(dt: float) -> void:
 		super._process(dt)
 		var now := Time.get_ticks_msec()
 		var later: Array = []
-		for x in held:              # in send order: each peer's due times never go down
+		for x in lag_held:              # in send order: each peer's due times never go down
 			if int(x[0]) <= now:
 				super._send(x[1], x[2], x[3])
 			else:
 				later.append(x)
-		held = later
+		lag_held = later
 
 var main: Node
 var bad := 0
@@ -144,7 +144,7 @@ func _host() -> void:
 		var got = JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("drawn.json")))
 		if typeof(got) == TYPE_DICTIONARY:
 			guest_stalls = got["stalls"]
-			_report(truth, got["drawn"], relay.lost)
+			_report(truth, got["drawn"], relay.lag_lost)
 		else:
 			ok(false, "the guest's record reads")
 	_finish()

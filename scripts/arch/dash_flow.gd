@@ -6,9 +6,9 @@ extends RefCounted
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 ## A press that crowd control still forbids, made in its last Loco.press_buffer (tuning.json), is held the same way
-## and goes on the first step the CC allows it (docs/decisions/0022-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
-## own cast lock (ArchKit.lock_left: an ult that plants its caster), and an RMB or E pressed while the kit's own cast
-## lock holds the body (Motley's Nightwell, Kael's Riposte, Vex's Kitefall).
+## and goes on the first step the CC allows it (docs/decisions/0022-cc-exit-buffer.md); so is a Shift, LMB or jump at
+## the end of a kit's own cast lock (ArchKit.lock_left: an ult that plants its caster), and an RMB or E pressed while
+## the kit's own cast lock holds the body (Motley's Nightwell, Kael's Riposte, Vex's Kitefall).
 
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
@@ -220,8 +220,8 @@ func cc_left(slot: String) -> float:
 		return maxf(stop, KitStatus.grounded_left(h))
 	return stop
 
-## Presses the CC forbids now, in its last Loco.press_buffer: held for the first step it allows them; true when an LMB tap
-## was. A held LMB is left alone (it fires on its own once allowed); a tap is replayed. A cast that holds the
+## Presses the CC forbids now, in its last Loco.press_buffer: held for the first step it allows them; true when an
+## LMB tap was. A held LMB is left alone (it fires on its own once allowed); a tap is replayed. A cast that holds the
 ## hunter still with no end in sight (Rimelock's statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> bool:
 	var h := kit.h

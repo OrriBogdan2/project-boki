@@ -55,7 +55,7 @@ var vp: RID
 func run(main_node: Node) -> void:
 	setup(main_node)
 	if "--bench-fight" in OS.get_cmdline_user_args():
-		summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
+		_summary("fight", await load("res://tools/perf_fight.gd").new(self).run())
 		_finish()
 		return
 	await _match()
@@ -159,7 +159,7 @@ func _match() -> Array:
 		if trios > 0 and fl.size() % POSE_SAMPLE == 0:
 			_pose_sample(m)
 			last = Time.get_ticks_usec()      # (the timed poses stay out of the frame times)
-	summary("match", fl)
+	_summary("match", fl)
 	_pose_lines(m, fl.size())
 	_emitters()
 	var ks := Match.prof.keys()
