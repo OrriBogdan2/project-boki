@@ -82,7 +82,6 @@ var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked
 var land_t := LAND_DONE
 var hit_seen := 99.0
 var last_emote := ""
-var upper_move := false      # the move is an upper-body one (keyed "upper"), even standing: the aim lead stays on
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
 var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
 var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
@@ -489,7 +488,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
 		# ("upper": true, or "moving": the legs keep walking only while he walks)
 		var up = mv.get("upper", false)
-		var keeps_lead: bool = up is String or bool(up)
 		if planted(s):
 			up = true      # rooted: the legs stay on the standing layer, only the body plays the move
 		elif up is String:
@@ -497,7 +495,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 				"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
-				"legs_heading": bool(mv.get("legs_heading", false)), "lead": keeps_lead,
+				"legs_heading": bool(mv.get("legs_heading", false)),
 				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	if km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
@@ -564,7 +562,6 @@ func step(dt: float) -> void:
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
-	upper_move = bool(want.get("lead", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	var flinching := not proc and bool(want.get("flinch", false))
 	if flinching:

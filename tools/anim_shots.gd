@@ -2,6 +2,11 @@ extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
 ## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
 ## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+<<<<<<< HEAD
+## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
+## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
+## forced).
+=======
 ## --release: only the release strip, <dir>/<id>/release/fNNN.png: the kit's own hand-off from the held draw
 ## into arc_loose, one frame per 1/30 s from the arrow's spawn (the game's blend plays, so a snap eaten by it shows).
 ## --upper also shows each Hunter's atk2 on the upper body over the run (strip run_atk2: Tenzo's punch while running).
@@ -9,6 +14,7 @@ extends "res://tools/clip_shots.gd"
 ## game's own locomotion hand-off at WALK_MPS, JOG_MPS and RUN_MPS, seen from the side with a scrolling floor, so a
 ## sliding foot slides against it), idle and atk1, atk2 (the keyed clip, forced); --aim-runs=60,130 adds run_aimN
 ## strips, running N degrees off the facing.
+>>>>>>> origin/main
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk

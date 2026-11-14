@@ -112,11 +112,3 @@ While you carry your downed Boki (pose id `rs_carry`, KinDowned) the legs stay o
 
 ## The Heartspark carry (WardenCarry.hold_mote)
 While you hold the Heartspark (`Heart.carrying`, state key `heart`) `WardenClips._heart` lays a second, lighter layer over the same contract bones: only the off arm (side `"heart_hand"`, default L; Lace's bow is in her left, so hers is R) lifts to the rescue carry's cradle height and holds the mote at the chest, and the Heart's spark rides that hand (`heart_mote` model meta, drawn at half size; a Hero without the layer keeps the spark floating over the head). The legs, torso and main arm stay on the clips, so the run plays and LMB fires and casts as usual; while a clip plays (a shot, a cast, a hit, Lace's draw) or the rescue carry owns both arms, the layer fades out and it eases back in on plain locomotion. It drops when the Heart is dropped, handed on, or the carrier is knocked, out or extracted. Everything is in arm lengths of the Hero's own skeleton (and the same `"carry_fwd"` for broad bodies), so one layer fits all 12 heights. `--carry-pose-check` asserts it per Hero in a real match; `--clip-shots --warden=<id> --clips=idle --carry --heart` renders the strip; docs/art/anim_audit/heartspark_carry.jpg (Lace, Kael, Albert, Meeko; the blue ball is the held mote).
-
-## The aim lead
-`WardenAimLead` (scripts/heroes/warden_aim_lead.gd) runs in `WardenGlb.Sync` after the clips. The model already faces
-the cursor, so the layer turns the parts back: the leg line (bone `root`) lags the cursor, the chest (`hips`) leads it
-by up to 30 degrees and the head (`head`) by up to 60, each a damped follower (rates are consts in the file). It is
-off under a full-body clip (`act_w`), a procedural pose (mantle, ledge: `proc_w`), dead and downed; a move keyed
-`"upper"` (even standing: Vex's LMB) keeps it on. `--aim-lead-check` measures the splits and checks clamp, jitter at
-30 fps and the off cases; `--shots-dir=<dir>` draws the sweep strips (GPU).
