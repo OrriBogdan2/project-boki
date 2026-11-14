@@ -163,8 +163,8 @@ func _growth() -> void:
 			"L1 %.2f L10 %.2f" % [d1, d10])
 
 # ------------------------------------------------------------------ Sparkle
-## The next puff of Static sparks on `T` (content/vfx/mage.json "static", every MageKit.STATIC_GAP): its particles.
-func _static_puff(m: Match, T: Ent) -> int:
+## The next puff of Static sparks on the target (content/vfx/mage.json "static", every MageKit.STATIC_GAP): the sparks.
+func _static_puff(m: Match, _target: Ent) -> int:
 	var V := HeroVfx.of(m)
 	var was := int(V.plays.get("static", 0))
 	var made := V.motes.size()
