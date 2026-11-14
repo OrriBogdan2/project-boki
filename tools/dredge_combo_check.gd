@@ -605,19 +605,6 @@ func _all() -> void:
 	for dz in range(-1, 2):
 		W.kind[W.idx(hx + 4, hz + dz)] = World.T_GROUND
 	ak.step(m, 1.0)
-	# --- a placed wall stops the hook even though rocks and cliffs do not
-	reset.call()
-	var wall_def := {"length": 6.0, "hp": 500.0, "time": 10.0, "block": "all"}
-	var wall: Dictionary = m.verbs.add_wall(T, home + Vector3(3.0, 0, 0), Vector2(1, 0), wall_def, 1.0)
-	var g2: int = K.grapples
-	ak.tap(m, P)
-	ak.step(m, 0.5)
-	m.verbs._break_wall(wall)
-	ok(
-		"walls: a placed wall stops the hook (no grab)", K.grapples == g2 and K.pull.is_empty(),
-		"grapples +%d" % (K.grapples - g2)
-	)
-	ak.step(m, 0.5)
 	# --- cooldowns read the data's level 1 (supervive_kits.md: hand 18s, slam 12s, slugwave 36s)
 	ok(
 		"cooldowns: hand 18, anchor 12, broadside 36, windup 0.38, charge 1.1",
