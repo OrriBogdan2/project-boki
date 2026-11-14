@@ -6,9 +6,10 @@ extends RefCounted
 ## Adds a row for each shaping item in the bag. feed(id) gives the item to the Boki. A sweet gets a row per
 ## lean type it can be eaten for and a Twinbun one for the Boki's closest friend of `mates` (other Boki's
 ## records); both are used directly and used(result) runs after. peek(id, pick) runs when a row is hovered or
-## focused (the preview card; not for the Twinbun, which needs a pair).
+## focused (the preview card; not for the Twinbun, which needs a pair). Unwind Tea gets a row per stat with
+## points, each asking first on a confirm box over host (v when none is given).
 static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Callable, used: Callable,
-		peek := Callable()) -> bool:
+		peek := Callable(), host: Control = null) -> bool:
 	var any := false
 	for id in GardenItems.ids():
 		var n := int(Save.d["items"].get(id, 0))
@@ -24,6 +25,8 @@ static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Calla
 				_row(v, head, line, "Feed", func(): used.call(GardenItems.use(rec, id, t)), null, peek.bind(id, t))
 		elif e["kind"] == "twin":
 			_twin(v, rec, id, title, mates, used)
+		elif e["kind"] == "loose":
+			_tea(v, host if host != null else v, rec, id, title, used, peek)
 		else:
 			_row(v, title, String(GardenItems.preview(rec, id)["text"]), "Feed", feed.bind(id), null, peek.bind(id, ""))
 	return any
@@ -73,6 +76,20 @@ static func add_inks_and_worn(v: VBoxContainer, rec: Dictionary, changed: Callab
 	var any := add_inks(v, rec, after_ink)
 	add_worn(v, rec, changed)
 	return any
+
+## Unwind Tea: a row per stat it can loosen; Feed asks on a confirm box over host first.
+static func _tea(v: VBoxContainer, host: Control, rec: Dictionary, id: String, title: String, used: Callable,
+		peek: Callable) -> void:
+	for s in Care.STATS:
+		var pv := GardenItems.preview(rec, id, s)
+		if not pv["ok"]:
+			continue
+		var nm: String = Care.STATS[s]["name"]
+		var ask := func():
+			var line := "%s %s. Its IVs, species and form stay as they are." % [rec["name"], pv["text"]]
+			var drink := func(): used.call(GardenItems.use(rec, id, s))
+			UI.confirm(host, "Unwind %s's %s?" % [rec["name"], nm], line, "Drink", drink, false)
+		_row(v, "%s: %s" % [title, nm], String(pv["text"]), "Feed", ask, null, peek.bind(id, s))
 
 ## Adds a row for each token and Stayleaf the Boki wears. changed() runs after one comes off.
 static func add_worn(v: VBoxContainer, rec: Dictionary, changed: Callable) -> void:
