@@ -16,6 +16,10 @@ extends RefCounted
 ##      gates tick in the last RaidSfx.TICK_S s, the Nightmare boss's rockfall warns and a phase change cues;
 ##      every cue has its sound file and Normal's boss has no rockfall warn.
 ## --heart-raid-check=sim runs only part 3 (and --seed=N picks the raids' seed).
+## Each whole raid is 1.5-3 min of wall time, so the suite runs part 3's four raids as their own flags
+## (--heart-raid-solo-check, -squad-, -hard-, -nightmare-; the registry passes the SIMS index) and
+## --heart-raid-check runs the rest, with part 3's cross-raid rows (wave 1's size and gates) on short
+## runs of the same four raids to their first wave.
 
 const SIMS := [[1, "normal"], [4, "normal"], [4, "hard"], [4, "nightmare"]]
 const NEAR_GATE := 3.5  # m: a wave monster comes out this close to its marked gate (spread + clear spot)
@@ -31,7 +35,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func run(main: Node) -> void:
+## part: -1 runs parts 1, 2, 4, 5 and part 3's cross-raid rows; 0-3 runs that one of SIMS whole.
+func run(main: Node, part := -1) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
@@ -40,12 +45,20 @@ func run(main: Node) -> void:
 	for a in args:
 		if String(a).begins_with("--seed="):
 			seed_v = int(String(a).substr(7))
+	if part >= 0:
+		await _sim(main, SIMS[part][0], SIMS[part][1], seed_v)
+		print("HRAID %s" % ("PASS" if bad == 0 else "FAIL %d" % bad))
+		main.get_tree().quit(0 if bad == 0 else 1)
+		return
 	var sim_only := args.has("--heart-raid-check=sim")
 	if not sim_only:
 		_tables()
 		await _expedition(main)
 	for sim in SIMS:
-		await _sim(main, sim[0], sim[1], seed_v)
+		if sim_only:
+			await _sim(main, sim[0], sim[1], seed_v)
+		else:
+			await _first_wave(main, sim[0], sim[1], seed_v)
 	if first_wave.size() == SIMS.size():
 		var w: Array = SIMS.map(func(x): return int(first_wave["%d %s" % x]))
 		ok(w[1] > w[0], "a squad of 4 meets a bigger first wave (%d) than a solo (%d)" % [w[1], w[0]])
@@ -116,10 +129,36 @@ func _expedition(main: Node) -> void:
 
 
 # ------------------------------------------------------------------ 3. whole raids
-func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
-	var tag := "%d %s" % [sq, diff]
+func _sim_opts(sq: int, diff: String, seed_v: int) -> Dictionary:
 	var o := HeartRaid.opts(sq, diff)
 	o.merge({"seed": seed_v, "tier": 0, "autoplay": true, "no_drop": true, "sim_keep": true})
+	return o
+
+
+## The same raid as _sim, run only until its first wave is out: wave 1's size and its marked gates.
+func _first_wave(main: Node, sq: int, diff: String, seed_v: int) -> void:
+	var tag := "%d %s" % [sq, diff]
+	var m := _match(main, _sim_opts(sq, diff, seed_v))
+	var rd: HeartRaid = m.heart_raid
+	var cap := HeartRaid.r("first_wave_s") + 5.0
+	var n_step := 0
+	while rd != null and rd.wave < 1 and m.sess_time() < cap:
+		m.step(Match.DT)
+		n_step += 1
+		if n_step % 120 == 0:
+			await main.get_tree().process_frame
+		if rd.gates.marked_wave == 0 and not gates_seen.has(tag):
+			gates_seen[tag] = rd.gates.marks.map(func(mk): return mk["at"].round())
+	var w1: Array = rd.trail.filter(func(l): return String(l).contains("wave 1:")) if rd else []
+	if not w1.is_empty():
+		first_wave[tag] = int(String(w1[0]).split(":")[1].split(" ", false)[0])
+	print("HRAID squad %s: wave 1 %s, gates %s" % [tag, str(first_wave.get(tag, "not out")), str(gates_seen.get(tag))])
+	await _drop(main, m)
+
+
+func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
+	var tag := "%d %s" % [sq, diff]
+	var o := _sim_opts(sq, diff, seed_v)
 	var tb := Time.get_ticks_msec()
 	var m := _match(main, o)
 	var rd: HeartRaid = m.heart_raid

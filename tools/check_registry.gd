@@ -30,6 +30,10 @@ const CHECKS := {
 	"--mate-look-check": ["res://tools/mate_look_check.gd", "mate_look_check", null],      # F1-F3 look at a teammate
 	"--mate-look-shots": ["res://tools/mate_look_shots.gd", "mate_look_shots", null],      # GPU, --shots-dir=
 	"--heart-raid-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", null],      # the PvE mode
+	"--heart-raid-solo-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 0],      # a whole solo raid
+	"--heart-raid-squad-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 1],      # 4, Normal
+	"--heart-raid-hard-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 2],      # 4, Hard
+	"--heart-raid-nightmare-check": ["res://tools/heart_raid_check.gd", "heart_raid_check", 3],      # 4, Nightmare
 	"--ways-out-sim": ["res://tools/ways_out_sim.gd", "ways_out_sim", null],      # LIMITED_WAY_OUTS task 7, bots
 	"--bot-ways-check": ["res://tools/bot_ways_check.gd", "bot_ways_check", null],      # bot plans, cap, delay, ring
 	"--quest-race-sim": ["res://tools/quest_race_sim.gd", "quest_race_sim", null],
@@ -267,7 +271,6 @@ const CHECKS := {
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],      # (GPU)
-	"--zz-rocket-probe": ["res://tools/zz_rocket_probe.gd", "zz_probe", null],
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],      # the rocket drop
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
 	"--squad-intro-check": ["res://tools/squad_intro_check.gd", "squad_intro_check", null],      # 0.24.4

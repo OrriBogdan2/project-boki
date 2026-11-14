@@ -3,7 +3,8 @@
 Owner ask (11-11, 7 PM EST): a PvE mode next to Expeditions, solo or up to 4. It stays inside "every expedition
 is a fight over the Heart": same map, Heart, Blight tide, monsters, bots, loot, Relics and Boki. The opposition is
 waves and one boss, not other squads. Code: `scripts/match/heart_raid.gd`, numbers: `content/rules/heart_raid.json`,
-check: `--heart-raid-check` (a sim per difficulty). Decision note: docs/decisions/0061-heart-raid-prototype.md.
+check: `--heart-raid-check`, with its whole-raid sims as their own suite flags (`--heart-raid-solo-check`,
+`-squad-`, `-hard-`, `-nightmare-`: each fits the suite's 300 s slot). Decision note: docs/decisions/0061-heart-raid-prototype.md.
 
 ## Loop
 Drop as one squad (1-4 Hunters; offline a squad of 4 has bots in the empty seats). Loot and level on the camps while
