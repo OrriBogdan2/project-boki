@@ -60,8 +60,26 @@ func run(m: Node) -> void:
 	ok(took == 20, "20 of 20 babies take the stronger parent's lean as a head start (%d)" % took)
 	ok(habits == 20, "20 of 20 babies take the food from one parent and the play from the other (%d)" % habits)
 	ok(kind, "a baby never hates its own favourite food")
+	_preview(a, b, rng)
 	a.erase("lean")
 	b.erase("lean")
 	ok(not Care.breed(a, b, rng).has("lean"), "parents with no lean (older saves) breed a baby with none")
 	print("NOOK done, %d failed" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
+
+## The Nook's preview card against the eggs it promises: its species and lean match 20 of 20 hatchlings
+## (each egg's kind picked the way the Nook lays it, one parent's at random).
+func _preview(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
+	var f := NookPreview.facts(a, b)
+	ok((f["species"] as Array).size() == 2, "the preview names both kinds for a mixed pair")
+	ok(f["lean_from"] == a["name"], "the preview credits the stronger parent's lean (%s)" % f["lean_from"])
+	ok(f["unstable"] == UnstableMix.unstable(a, b), "the preview card notes an unstable mix when there is one")
+	var same := 0
+	for i in 20:
+		var egg_sp: String = a["species"] if rng.randf() < 0.5 else b["species"]
+		var kid := Care.breed(a, b, rng, egg_sp)
+		if (f["species"] as Array).has(kid["species"]) and kid.get("lean", {}) == f["lean"]: same += 1
+	ok(same == 20, "the preview's species and lean match 20 of 20 hatched babies (%d)" % same)
+	var c := NookPreview.card(a, b, null)
+	ok(c.get_child_count() == 1, "the preview card builds")
+	c.free()
