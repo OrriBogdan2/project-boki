@@ -1,0 +1,48 @@
+{
+	"desc": "Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in Care.FOODS). Care.FOODS adds these to the stall foods at load (Care._foods): name, desc, the numbers of a meal (food, joy) and price. The icon colour is the type's tint in lean.json (types[type].tint) and the type itself is lean.json foods[id], so a meal leans a Boki exactly as the existing type snacks do (Evo.eat: one FOOD_AFF for every food).",
+	"food": 16.0,
+	"joy": 8.0,
+	"price": 16,
+	"foods": {
+		"frostdrop": {
+			"name": "Frost drop",
+			"type": "ice",
+			"desc": "A drop of cold that stays cold."
+		},
+		"pebblenut": {
+			"name": "Pebble nut",
+			"type": "rock",
+			"desc": "Hard shell, sweet middle."
+		},
+		"scalepepper": {
+			"name": "Scale pepper",
+			"type": "dragon",
+			"desc": "Hot enough to make a Boki roar."
+		},
+		"duskplum": {
+			"name": "Dusk plum",
+			"type": "dark",
+			"desc": "Ripens after the sun is gone."
+		},
+		"pricklepear": {
+			"name": "Prickle pear",
+			"type": "poison",
+			"desc": "Sharp outside, tangy in."
+		},
+		"sapjelly": {
+			"name": "Sap jelly",
+			"type": "bug",
+			"desc": "Sticky, sweet, buzzing."
+		},
+		"ironcrisp": {
+			"name": "Iron crisp",
+			"type": "steel",
+			"desc": "Snaps loud and shines."
+		},
+		"geodecandy": {
+			"name": "Geode candy",
+			"type": "crystal",
+			"desc": "Sparkles when it cracks."
+		}
+	}
+}

@@ -2,26 +2,26 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://baabhdq2fec4k"
-path.s3tc="res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.s3tc.ctex"
-path.etc2="res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.etc2.ctex"
+uid="uid://ce804a3sm8507"
+path.bptc="res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.bptc.ctex"
+path.astc="res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "bc6590df7dee75f9cb3238ce2cf5bce7"
+"md5": "29e1493a4d86e2920d4ea0e2a7ac69c6"
 }
 
 [deps]
 
 source_file="res://art/wardens/vex/vex_atlas.jpg"
-dest_files=["res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.s3tc.ctex", "res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.etc2.ctex"]
+dest_files=["res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.bptc.ctex", "res://.godot/imported/vex_atlas.jpg-c2a49001a3a216cf14b3bb1b746f1797.astc.ctex"]
 
 [params]
 
 compress/mode=2
-compress/high_quality=false
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

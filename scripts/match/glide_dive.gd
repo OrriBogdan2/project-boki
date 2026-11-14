@@ -20,8 +20,11 @@ func tick(h: Hunter, dt: float) -> void:
 		held_t = 0.0
 		return
 	held_t += dt
-	var under := h.lip_y if h.over_void() else h.ground()
-	on = h.pos.y - under > HunterMove.dive_cancel_h and held_t <= HunterMove.dive_timeout
+	on = height(h) > HunterMove.dive_cancel_h and held_t <= HunterMove.dive_timeout
+
+## Metres between the hunter and the ground, or the island's lip over the abyss.
+static func height(h: Hunter) -> float:
+	return h.pos.y - (h.lip_y if h.over_void() else h.ground())
 
 ## The fall speed after a step of the plunge.
 func fall_vy(vy: float, dt: float) -> float:
@@ -29,4 +32,4 @@ func fall_vy(vy: float, dt: float) -> float:
 
 ## Horizontal steering in the plunge: the glide's own steering at dive_steer of its force.
 func steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vector2:
-	return hv.lerp(Hunter.glide_steer(hv, wish, gs, dt), HunterMove.dive_steer)
+	return hv.lerp(Loco.glide_step(hv, wish, gs, Loco.glide_max, dt), HunterMove.dive_steer)
