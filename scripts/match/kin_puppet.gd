@@ -10,12 +10,14 @@ extends Node
 ## lunge for attacks, a wiggle of joy, a crouch before a jump and a stretch in the air.
 ##
 ## It reads a few metas on the kin root, all optional:
-##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
+##   "dazed" (bool) "starry" (bool: the circling stars; when unset, while dazed) "happy" (bool)
+##   "pulse" (set to Time msec when an ability goes off)
 ##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
 ##   "guard", "alert" (tall, ears up), "point" (leaning in, a paw up), "whine" (ears and tail down),
 ##   "nudge"/"comfort" (leaning in, soft), "flinch" (a jolt); "" for none
+##   "hit" (written by KinFlinch.hit when it takes damage: a jolt along the hit, per body plan)
 ## Only Flex and the limbs are posed here; Body stays free for whoever moves the kin (hops,
 ## home quirks and work poses, match lunges).
 
@@ -69,6 +71,8 @@ var girth := 1.0
 var quirk_t := 3.0     # until the next time it does its habit
 var quirk_k := 0.0     # 1 at the start of one, down to 0
 var pose_last := ""
+var fl := KinFlinch.new()
+var rot_base := Vector3.ZERO     # the lean before the hit jolt is added
 var pz := {"sy": 1.0, "sz": 1.0, "rx": 0.0, "rz": 0.0, "ear": 0.0, "tail": 0.0, "leg": 0.0, "shiver": 0.0}
 const POSE_T := {
 	"growl": {"sy": 0.86, "rx": 0.2, "ear": 0.45, "tail": -0.6, "shiver": 1.0},
@@ -110,6 +114,7 @@ func _ready() -> void:
 	pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	blink_t = randf_range(0.8, 3.5)
 	plan = String(BODY.get(species, "blob"))
+	fl.plan = plan
 	flex_base = flex.position
 	quirk = String(root.get_meta("quirk", ""))
 	girth = float(root.get_meta("girth", 1.0))
@@ -170,6 +175,7 @@ func _process(dt: float) -> void:
 		ear_v += 4.0
 	pulse_k = maxf(0.0, pulse_k - dt * 4.0)
 	var swell := sin(pulse_k * PI) * 0.16
+	fl.update(root, dt)
 	var ks := String(root.get_meta("kstate", ""))
 	var ek := 1.0 - exp(-8.0 * dt)
 	att_k = lerpf(att_k, 1.0 if ks == "attack" else 0.0, 1.0 - exp(-18.0 * dt))
@@ -270,15 +276,18 @@ func _process(dt: float) -> void:
 	rz += sleep_k * 0.25
 	rx += sleep_k * 0.1
 	off.y -= sleep_k * 0.03
+	sx *= fl.wide
+	sy *= fl.tall
 	flex.scale = Vector3(sx * girth, sy, sx * sz * lerpf(1.0, girth, 0.5))
-	flex.position = flex_base + off
+	flex.position = flex_base + off + fl.shove
 	# a lean into a dizzy wobble
 	if dazed:
 		rz += sin(t * 5.0) * 0.16
 		rx += cos(t * 5.0) * 0.08
-	flex.rotation.z = lerpf(flex.rotation.z, rz, ek)
-	flex.rotation.x = lerpf(flex.rotation.x, rx, ek)
-	flex.rotation.y = lerp_angle(flex.rotation.y, ry, ek)
+	rot_base.z = lerpf(rot_base.z, rz, ek)
+	rot_base.x = lerpf(rot_base.x, rx, ek)
+	rot_base.y = lerp_angle(rot_base.y, ry, ek)
+	flex.rotation = rot_base + fl.rot
 	# blinking, and a squint when dazed
 	blink_t -= dt
 	if blink_t <= 0.0:
@@ -349,11 +358,12 @@ func _process(dt: float) -> void:
 	if spin:
 		spin.rotation.y += dt * (1.2 + move_k * 2.0)
 	# stars circling the head while dazed
-	if dazed and stars == null:
+	var starry: bool = root.get_meta("starry", dazed)
+	if starry and stars == null:
 		_make_stars()
 	if stars:
-		stars.visible = dazed
-		if dazed:
+		stars.visible = starry
+		if starry:
 			stars.rotation.y += dt * 4.0
 
 func _make_stars() -> void:

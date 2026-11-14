@@ -9,7 +9,7 @@ const BUTTON := Vector2(62, 58)      # px, one entry
 ## 1-based position (the farm opens them with the number keys); pass "" for none. `go` is called as
 ## go.call(open, id) when one is clicked. `btns` (if given) is filled id -> Button.
 static func build(items: Array, go: Callable, btns := {}) -> PanelContainer:
-	var bar := UI.glass(6, 16)
+	var bar := UI.glass(6, 16, 0.5)
 	bar.mouse_filter = Control.MOUSE_FILTER_STOP
 	var row := UI.hbox(4); bar.add_child(row)
 	for i in items.size():

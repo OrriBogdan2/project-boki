@@ -80,7 +80,7 @@ static func _loot_at(m: Match, sp: Vector2) -> Vector3:
 		if not bool(b.get("empty", false)) and b.get("node") != null:
 			spots.append(b["pos"])
 	for c in m.chests:
-		if not bool(c["open"]):
+		if not bool(c["open"]) and (c["node"] as Node3D).visible:      # (hidden on the drop: KeyChest.show_all)
 			spots.append(c["pos"])
 	for br in m.breaks:
 		if not bool(br["dead"]):
