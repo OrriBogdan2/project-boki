@@ -4,6 +4,7 @@ import math
 import boki_clips
 import echolop
 from boki_clips import LOOK_UP, add, s, seq
+from boki_gait import four_legs, planted
 from echolop import EAR_PTS, SIDES, TAIL_PTS, WING_UV, mirror, wing_at
 
 boki_clips.TAIL_N = 2
@@ -147,16 +148,20 @@ def bound(t, height, reach, stretch):
     return p
 
 
-def walk(t):
+def hops(t):
     """Little hops, two to a cycle."""
     return bound((t * 2) % 1.0, 0.04, 0.55, 0.2)
 
 
-def run(t):
+def leaps(t):
     """Bounding leaps: long and low, the body stretched out in the air and bunched on landing, ears streaming."""
     p = bound(t, 0.1, 1.45, 1.0)
     ears(p, back=0.2, curl=0.15)
     return p
+
+
+# a bound lands on both forepaws (0.72 of a leap), then the hind feet come down past them and push off
+LANDING = four_legs(0.72, 0.88, 0.0)
 
 
 def carry(t):
@@ -347,10 +352,12 @@ def tend(t):
 
 
 CLIPS = {
-    "idle": (2.8, True, idle), "walk": (0.7, True, walk), "run": (0.44, True, run), "attack": (0.8, False, attack),
-    "ability": (1.1, False, ability), "hop": (0.95, True, hop), "sleep": (3.4, True, sleep), "eat": (2.0, True, eat),
-    "pet": (2.2, True, pet), "chop": (1.1, True, chop), "mine": (1.0, True, mine), "carry": (0.8, True, carry),
-    "tend": (1.3, True, tend),
+    "idle": (2.8, True, idle),
+    "walk": (0.7, True, planted(hops, BONES, LANDING, duty=0.3, reach=0.1, lift=0.04, steps=2)),
+    "run": (0.88, True, planted(leaps, BONES, LANDING, duty=0.14, reach=0.22, lift=0.1, drop=0.07)),
+    "attack": (0.8, False, attack), "ability": (1.1, False, ability), "hop": (0.95, True, hop),
+    "sleep": (3.4, True, sleep), "eat": (2.0, True, eat), "pet": (2.2, True, pet), "chop": (1.1, True, chop),
+    "mine": (1.0, True, mine), "carry": (0.8, True, carry), "tend": (1.3, True, tend),
 }
 # unused props tucked inside the right foreleg they ride (m from their rest place), so no pose shows their ink
 HIDE_AT = {"prop_axe": (0.079, 0.04, 0.05), "prop_pick": (0.079, 0.04, 0.05), "prop_berry": (0.079, 0.01, 0.08)}

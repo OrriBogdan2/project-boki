@@ -54,6 +54,35 @@ table's after column rounded up to 0.05), or when a Hunter with stepping legs ha
 `cycle_s` would likely help the others too: Cinder at `cycle_s` 0.7 measured 2.40 to 1.16 m/s in one trial. This
 branch doesn't change them.
 
+## Every walk on its run's timeline (Nov 13, ext/anim-albert-jog-blend)
+
+Without `loco.cycle_s` each walk loop now plays stretched to its own run loop's length (WardenClips._gait_loop), the
+space is synced for every Hunter, the walk ring sits at `walk_speed` / `run_speed`, and WardenGait.plan solves the
+rate for the blended cycle and stride. With `cycle_s` (Albert, Tenzo) it is the same as before. Albert's `foot_mps`
+was stale after his 0.9 size model (data 3.1 / 5.43, the clips step 2.1 / 3.65 at his 0.5 s cycle): re-measured.
+
+Worst slip per Hunter, origin/main ca96e707c5 (with the anim_audit `soles` compile fix) -> this branch, m/s:
+
+| Hunter | main | after | Bar |
+|---|---|---|---|
+| Kael (`juggernaut`) | 1.89 (back 3.0) | 0.97 (back 3.5) | 1.00 |
+| Vex (`gunslinger`) | 2.03 (left 3.0) | 1.20 (left 4.0) | 1.20 |
+| Albert (`bulwark`) | 1.97 (right 4.0) | 1.34 (right 4.0) | 1.35 |
+| Cinder (`ashwick`) | 2.33 (left 3.5) | 1.40 (left 3.5) | 1.40 |
+| Tenzo (`dolm`) | 2.65 (left run) | 2.70 (right run) | 2.70 |
+| Sparkle (`mage`) | 2.08 (back 3.5) | 1.53 (back run) | 1.55 |
+| Grimble (`dredge`) | 1.72 (back 3.5) | 0.92 (back 3.5) | 0.95 |
+| Meeko (`tender`) | 2.46 (back 3.5) | 1.04 (left 3.5) | 1.05 |
+| Sable (`thief`) | 1.85 (fwd 3.0) | 1.48 (right run) | 1.50 |
+| Lace (`archer`) | 4.38 (fwd 4.5) | 4.51 (fwd 4.0) | 1.75, fails |
+| Neve (`rimewright`) | 2.23 (left 4.45) | 2.31 (right 4.45) | none, fails |
+
+Open (both fail on main too): Lace's forward loops slide at every speed from 1.5 m/s (her forward walk and run were
+re-keyed to 0.667 and 0.583 s, the other directions are 1.033 and 0.667; `foot_mps` [1.18, 3.72] no longer matches
+them), and Neve steps since ext/anim-neve-stride but has no bar. Albert's right strafe between the rings
+(1.08 to 1.34 m/s at 3.0 to 4.0) is the walk_r and run_r loops out of phase; his other directions stay under 0.8.
+The table below is the Nov 11 sweep.
+
 ## The sweep, m/s of planted-foot slip
 
 Speed columns are m/s; "run" is the Hunter's game run speed. **before → after** marks a changed cell (Albert and Tenzo).
