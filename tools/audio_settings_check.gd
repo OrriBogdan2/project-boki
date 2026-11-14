@@ -57,25 +57,25 @@ func _db(bus: String) -> float:
 	return AudioServer.get_bus_volume_db(AudioServer.get_bus_index(bus))
 
 func _sliders(where: String) -> void:
-	for key in BUSES:
+	for key in Settings.BUSES:
 		for lin in [0.25, 1.0, 0.5]:
 			Settings.set_v(key, lin, false)
 			var want := Sfx.slider_db(lin)
-			var got := _db(BUSES[key])
-			var what := "%s: %s slider %.2f -> %s bus" % [where, key, lin, BUSES[key]]
+			var got := _db(Settings.BUSES[key])
+			var what := "%s: %s slider %.2f -> %s bus" % [where, key, lin, Settings.BUSES[key]]
 			ok(absf(got - want) < TOL, "%s %.1f dB (want %.1f)" % [what, got, want])
-			for b in Sfx.SLIDER_ALSO.get(BUSES[key], []):
-				ok(absf(_db(b) - want) < TOL, "%s: %s slider %.2f -> %s bus too %.1f dB" % [where, key, lin, b, _db(b)])
 	# the same through the Settings > Audio page's own sliders (the order they are listed in)
 	Overlay.tab = "Audio"
 	Overlay.open_settings()
 	var sliders := Overlay.find_children("*", "HSlider", true, false)
 	ok(sliders.size() >= 4, "%s: the Audio page has its volume sliders (%d)" % [where, sliders.size()])
-	for i in mini(4, sliders.size()):
-		var key: String = BUSES.keys()[i]
+	# the page lists one slider per Settings.BUSES entry, in that order (Voices and UI sit between the others)
+	for i in mini(Settings.BUSES.size(), sliders.size()):
+		var key: String = Settings.BUSES.keys()[i]
+		var bus: String = Settings.BUSES[key]
 		(sliders[i] as HSlider).value = 0.35
-		var moved := absf(_db(BUSES[key]) - Sfx.slider_db(0.35)) < TOL
-		ok(moved, "%s: dragging the %s slider moves the %s bus (%.1f dB)" % [where, key, BUSES[key], _db(BUSES[key])])
+		var moved := absf(_db(bus) - Sfx.slider_db(0.35)) < TOL
+		ok(moved, "%s: dragging the %s slider moves the %s bus (%.1f dB)" % [where, key, bus, _db(bus)])
 	await _mouse_drag(where, sliders)
 	Overlay.close()
 	# every other bus still sends where it should (Music/SFX/Ambience -> Master), so a slider reaches the speakers
@@ -96,17 +96,14 @@ func _routes(where: String) -> void:
 			off.append("%s on %s" % [p.get_path(), p.get("bus")])
 	ok(count > 0 and off.is_empty(), "%s: all %d players are on a slider's bus %s" % [where, count, off])
 
-## True if a bus is levelled by Music, Sound effects or Ambience: it is one of them, sends into one of them
-## (SFXFar, Voice, Boki -> SFX), or one of them sets it as well (Sfx.SLIDER_ALSO: UI). Master alone is not.
+## True if a bus is levelled by a slider other than Master: it is one of Settings.BUSES, or sends into one
+## (SFXFar, Boki -> SFX). Master alone is not.
 func _on_slider(bus: String) -> bool:
 	for hop in 8:
 		if AudioServer.get_bus_index(bus) < 1:
 			return false
-		if bus in ["Music", "SFX", "Ambience"]:
+		if bus != "Master" and bus in Settings.BUSES.values():
 			return true
-		for s in Sfx.SLIDER_ALSO:
-			if bus in Sfx.SLIDER_ALSO[s]:
-				return true
 		bus = String(AudioServer.get_bus_send(AudioServer.get_bus_index(bus)))
 	return false
 

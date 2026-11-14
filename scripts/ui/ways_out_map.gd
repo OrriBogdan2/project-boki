@@ -116,6 +116,8 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 			badge(hud.c, pv, 8.0, i, sd[i], m.time)
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
+	if m.heart_raid:
+		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 
 static func full_map(fm) -> void:
 	var m: Match = fm.m
