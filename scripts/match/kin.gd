@@ -58,8 +58,6 @@ var down_t := 0.0                 # downed: seconds until it comes round on its 
 var down_total := 0.0
 var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it and carry it; a drop loses it)
 var rescue_on := false            # downed: its owner is carrying it in their arms right now
-var regen_quiet := 0.0             # seconds since it last lost health (KinRegen)
-var regen_hp := 0.0               # its health at the end of the last step (KinRegen)
 var regen_fx := 0.0               # countdown to the next healing mote (KinRegen)
 var mending := false              # KinRegen is healing it right now (the HUD pulses its bar)
 var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a drop)
@@ -70,7 +68,7 @@ var hesitate_t := 0.0
 var hesitate_to := Vector3.INF
 var revive_wait := 0.0
 var callout_seen := {}
-var think_t := 0.0
+var think_t := 0.0                 # out of combat: seconds until it looks for a fight again (_may_think)
 var hop_ph := 0.0
 var home := Vector3.ZERO          # wild kin wander around here
 var wander_to := Vector3.INF
@@ -835,8 +833,7 @@ func _sim_active(dt: float) -> void:
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
-		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) \
-				or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
+		elif _target_stale(dt) and _may_think():
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
@@ -891,6 +888,23 @@ func _land_strike() -> void:
 	m.sfx("kinhit", pos, -6.0, 1.0)
 	melee_n += 1
 	fire_trigger("on_hit", {"at": tp})
+
+## Its target is gone, out of reach, or it fancies a change (a few times a minute).
+func _target_stale(dt: float) -> bool:
+	if target == null or target.dead or not target.hittable() or (target is Hunter and target.downed):
+		return true
+	return flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5
+
+## In combat (its own or its owner's, InCombat) a Boki looks for a fight every step; out of it, at
+## InCombat.CALM_HZ only (the perf pass: companion AI ticks slower when nothing is happening).
+func _may_think() -> bool:
+	if InCombat.is_in(self) or (owner_h != null and InCombat.is_in(owner_h)):
+		think_t = 0.0
+		return true
+	if think_t > 0.0:
+		return false
+	think_t = 1.0 / InCombat.CALM_HZ
+	return true
 
 func _ground_move(wish: Vector2, dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)

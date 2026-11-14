@@ -178,12 +178,12 @@ func _boki_text(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	ok(ally.kin != null and foe.kin != null, "your ally and the rival each have a Boki")
 	if ally.kin == null or foe.kin == null:
 		return
-	m.music_dir.last_fight = -99.0
+	P.combat_at = -99.0
 	ok(BokiChatter.heard(m, foe.kin) and BokiChatter.heard(m, ally.kin), "no fight: every Boki's line is drawn")
-	m.music_dir.last_fight = m.time
+	P.combat_at = m.time
 	ok(BokiChatter.heard(m, mine), "in a fight: your own Boki's line is drawn")
 	ok(not BokiChatter.heard(m, foe.kin) and not BokiChatter.heard(m, ally.kin), "... the others' are not")
-	m.music_dir.last_fight = -99.0
+	P.combat_at = -99.0
 	for k: Kin in [mine, foe.kin]:
 		k.unseen = false
 		k.teleport(P.pos + Vector3(6.0 if k == mine else -6.0, 0, 0))

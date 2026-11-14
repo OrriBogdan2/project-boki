@@ -186,6 +186,7 @@ const CHECKS := {
 	"--minigame-hub-check": ["res://tools/minigame_hub_check.gd", "minigame_hub_check", null],  # title
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--summon-cc-check": ["res://tools/summon_cc_check.gd", "summon_cc_check", null],
+	"--in-combat-check": ["res://tools/in_combat_check.gd", "in_combat_check", null],
 	# Bokidex quirks, sex ratios
 	"--mode-boki-check": ["res://tools/mode_boki_check.gd", "mode_boki_check", null],  # MODE_BOKI.md
 	"--boki-quirks-check": ["res://tools/boki_quirks_check.gd", "boki_quirks_check", null],
@@ -606,6 +607,7 @@ const CHECKS := {
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
 	"--anim-coverage-check": ["res://tools/anim_coverage_check.gd", "anim_coverage_check", null],
+	"--clip-cadence-check": ["res://tools/clip_cadence_check.gd", "clip_cadence_check", null],      # clip vs kit cadence
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],
