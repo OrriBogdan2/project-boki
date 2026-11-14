@@ -42,6 +42,17 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## audio_mix (`content/rules/audio_mix.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The audio buses and the big-event duck (scripts/core/sfx_mix.gd, docs/AUDIO.md). bus_of_category: a sound's category in its set (content/sfx/<group>.json) picks its bus; anything else plays on SFX. voice_prefixes: sounds outside the sets that are voices (monster cries). big_event: these sounds, when heard, dip Music and Ambience by dip_db (dB), reached in in_s, held hold_s, back in recover_s (seconds). |
+| bus_of_category | {"boki": "Boki", "ui": "UI", "grunt": "Voice"} |
+| voice_prefixes | ["v_"] |
+| big_event | {"sounds": ["ult_tag_foe", "heart_reveal", "heart_gate_open", "steal_won", "steal_lost"], "dip_db": -6.0, "in_s": 0.12, "hold_s": 0.3, "recover_s": 1.0} |
+
 ## base_drift (`content/rules/base_drift.json`)
 
 Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with farm_build.json base_mode on, once per in-game day at home each Boki's four traits (0..1) move a small step toward the average of its friends (base life bonds at or above base_life friend_at). Rivals do not pull.
