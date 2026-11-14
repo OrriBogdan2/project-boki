@@ -39,7 +39,7 @@ static func fresh(m: Match, o: Ent) -> bool:
 const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
 	"seat", "ring", "gate"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape",
-	"lair_lever", "lair_updraft", "retreat", "assist", "spark", "gate", "ring", "ring_in"]
+	"lair_lever", "lair_updraft", "retreat", "assist", "spark", "gate", "ring", "ring_in", "zone"]
 ## Goals a bot holds interact at on arrival, and goals it may stand and wait at (no give-up timer).
 const HOLD_GOALS := ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever", "spark", "gate"]
 const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp", "seat", "ring"]
@@ -93,8 +93,6 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if a["think"] <= 0.0:
 		a["think"] = randf_range(0.12, 0.3) / (0.6 + a["skill"]) * SimLod.think_k(m, h)
 		_choose(m, h)
-	if BotRoute.fly_lift(m, h, inp):
-		return
 	# crossing to another island on a glide route: run off the edge, jump, open the glider at the
 	# top of the jump and steer for the landing (through any rings on the way)
 	if a.has("cross"):
@@ -767,6 +765,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
+	if m.zone and m.zone.k > 0 and m.zone.outside(h.pos):
+		best = null      # outside the zone's edge: get inside before anything else
 	if best != a.get("tgt"):
 		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	if BotRing.must_run(m, h):
@@ -944,6 +944,12 @@ func _choose(m: Match, h: Hunter) -> void:
 			dt = m.world.random_ground()
 			a["detour"] = dt
 		goal = dt; gk = "roam"
+	# outside the zone, or a goal outside it: head inside first
+	if m.zone:
+		var zg := m.zone.bot_goal(h, goal)
+		if zg != goal:
+			goal = zg
+			gk = "zone"
 	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
 	# for a while. Two goals pulling opposite ways had a bot turning round every think: it spun.
 	# (a goal that only moved a little is the same one, walking: a kin, a squadmate we follow)
@@ -996,35 +1002,47 @@ func _blight_flee(m: Match, h: Hunter) -> Vector3:
 			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 	return Vector3.INF
 
-## Direction to walk toward a goal: across to other islands by the quickest pads and links, and up to
-## high ground by a lift ring when that beats the walk (BotRoute).
+## Direction to walk toward a goal, using jump pads to cross to other islands.
 const TAKE_ON := 0.6           # m from a glide crossing's take-off spot: there (the jump needs it within 0.9)
 func _path_dir(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var here := m.world.island_of(h.pos.x, h.pos.z)
 	var there := m.world.island_of(goal.x, goal.z)
 	if here < 0 or there < 0 or here == there:
 		if here >= 0 and h.grounded: h.ai.erase("cross")
-		var gt := Vector2i(floori(goal.x), floori(goal.z))
-		var walk := func(): return float(_grid_path(m, Vector2i(floori(h.pos.x), floori(h.pos.z)), gt).size())
-		var lift := BotRoute.lift_aim(m, h, goal, walk) if here >= 0 else Vector3.INF
-		return _steer(m, h, goal if lift == Vector3.INF else lift)
-	h.ai.erase("lift")
-	var hop := BotRoute.next_hop(m, h, here, there)
-	if hop.is_empty():
+		return _steer(m, h, goal)
+	# breadth-first search over the island graph
+	var prev := {here: -1}
+	var q := [here]
+	while q.size() > 0:
+		var cur: int = q.pop_front()
+		if cur == there:
+			break
+		for pd in m.world.pads + m.world.links:
+			if pd["from"] == cur and not prev.has(pd["to"]):
+				prev[pd["to"]] = cur
+				q.append(pd["to"])
+	if not prev.has(there):
 		return h.dir_to(goal)
-	if hop.has("pos"):
-		h.ai["pad_at"] = hop["pos"]
-		h.ai.erase("cross")
-		return _steer(m, h, hop["pos"])
-	if not h.ai.has("cross") or h.ai["cross"] != hop:
-		h.ai["cross"] = hop
-		h.ai["cross_t"] = 14.0
-	# on the take-off spot: run on for the landing. Steering for the spot underfoot flipped the keys
-	# every think, and where a raised block crowds the spot half the flips walked into its face (ledge
-	# rise, pop, drop): never grounded to take off, the bot bobbed there until the crossing timed out
-	if h.flat_dist(hop["take"]) < TAKE_ON:
-		return Vector2(hop["land"].x - h.pos.x, hop["land"].z - h.pos.z).normalized()
-	return _steer(m, h, hop["take"])
+	var nxt := there
+	while prev[nxt] != here and prev[nxt] != -1:
+		nxt = prev[nxt]
+	for pd in m.world.pads:
+		if pd["from"] == here and pd["to"] == nxt:
+			h.ai["pad_at"] = pd["pos"]
+			h.ai.erase("cross")
+			return _steer(m, h, pd["pos"])
+	for lk in m.world.links:
+		if lk["from"] == here and lk["to"] == nxt:
+			if not h.ai.has("cross") or h.ai["cross"] != lk:
+				h.ai["cross"] = lk
+				h.ai["cross_t"] = 14.0
+			# on the take-off spot: run on for the landing. Steering for the spot underfoot flipped the keys
+			# every think, and where a raised block crowds the spot half the flips walked into its face (ledge
+			# rise, pop, drop): never grounded to take off, the bot bobbed there until the crossing timed out
+			if h.flat_dist(lk["take"]) < TAKE_ON:
+				return Vector2(lk["land"].x - h.pos.x, lk["land"].z - h.pos.z).normalized()
+			return _steer(m, h, lk["take"])
+	return h.dir_to(goal)
 
 ## Heads for a spot on this island, finding a way around walls when they're in the way.
 ## The plan (straight line or tile path) is cached per goal tile: walls don't move, so the
@@ -1093,7 +1111,6 @@ func _no_path(m: Match, h: Hunter) -> void:
 		_give_up(m, a, g, String(a["goal_kind"]))
 		a.erase("nopath")
 
-const STEP_MAX := 1.7     # m: the highest rise from one tile to the next a bot walks up (higher is a cliff)
 const TAKE_R := 2.5              # m: "at the take-off spot" for the stall clock
 const TAKE_STALL_S := 3.0      # s at the take-off spot without jumping before its goal is given up
 
@@ -1129,7 +1146,6 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
-	var y := m.world.ground_at(a.x, a.y)
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		if m.world.is_block(p.x, p.y) or m.world.is_block(p.x + side.x, p.y + side.y) or m.world.is_block(p.x - side.x, p.y - side.y):
@@ -1138,11 +1154,6 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
 		if m.world.is_void(p.x, p.y):
 			return false
-		# and so does a cliff up: straight at high ground, a bot ran into its foot and never took the stairs
-		var py := m.world.ground_at(p.x, p.y)
-		if py - y > STEP_MAX:
-			return false
-		y = py
 	return true
 
 ## Breadth-first search over walkable tiles (a window around the trip), returning tile centres.
@@ -1168,7 +1179,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
 			var i := W.idx(nx.x, nx.y)
 			if W.kind[i] != World.T_GROUND:
 				continue
-			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > STEP_MAX:
+			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
 				continue
 			prev[nx] = cur
 			q.append(nx)

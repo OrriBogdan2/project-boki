@@ -187,7 +187,6 @@ func draw(sz: Vector2) -> void:
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
-	AirMap.full_map(self)
 	if m.skytrain:
 		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
 	if m.exits:
@@ -207,6 +206,8 @@ func draw(sz: Vector2) -> void:
 	HeartHud.full_map(self)
 	NestMap.full_map(self)
 	WaysOutMap.full_map(self)
+	if m.zone:
+		m.zone.full_map(self, kk)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)

@@ -16,6 +16,8 @@ const ACCEL := 20.0            # m/s^2, how fast it answers the leader's keys
 const VOID_EJECT_Y := 7.0      # m: still over the abyss at island level, everyone is thrown out with the glider open
 const SEAT_GAP := 1.3          # m between the squad as it steps out where the rocket hit
 const BOT_LEAD_T := 0.5        # s: a bot leader aims to be over its spot this long before the rocket hits
+const CATCH := 8.0             # m/s a follower copy closes on the leader (a rider's ship clock differs)
+const FOLLOW_SNAP := 40.0      # m: further off than this the copy jumps to the leader (reconnect)
 const STEP := 0.1              # s, projection step for the landing marker
 const SEAT_OUT := 1.0          # m from the rocket's axis to a rider's feet: they cling on outside the hull (0.75)
 const SEAT_DOWN := 1.0         # m from the rocket's middle down to a rider's feet, so their heads stay under the fins
@@ -69,7 +71,10 @@ func tick(dt: float) -> void:
 	var l: Hunter = m.skydrop.leader(team)
 	if l != null and l.remote and l.rocket == self and l.riding:
 		vel = l.vel
-		pos = l.pos
+		# (not `pos = l.pos`: a squadmate's ship is on their own clock, so the first frames of the copy would jump
+		# them metres and the other game sees that jump: close the gap at the rocket's speed plus CATCH instead)
+		var gap := pos.distance_to(l.pos)
+		pos = l.pos if gap > FOLLOW_SNAP else pos.move_toward(l.pos, (vel.length() + CATCH) * dt)
 	else:
 		var hv := Vector2(vel.x, vel.z).move_toward(_steer(l) * SPEED, ACCEL * dt)
 		vel = Vector3(hv.x, move_toward(vel.y, -FALL, FALL_ACCEL * dt), hv.y)
