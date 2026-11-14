@@ -172,6 +172,8 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	ring.top_level = true
 	add_child(ring)
+	if owner_h == null:
+		WildTypeCue.paint(self)
 
 func t(k: String) -> float:
 	return float(traits.get(k, 0.5))
@@ -1039,7 +1041,8 @@ func render(delta: float, alpha: float) -> void:
 	hop_ph += delta * (9.0 if Vector2(vel.x, vel.z).length() > 0.5 else 3.0)
 	var out_now := state in ["active", "flying", "returning", "flying_home", "downed"]
 	if ring:
-		ring.visible = visible and (out_now or has_meta("lineup")) and not unseen
+		var cue := WildTypeCue.tick(self, delta) if owner_h == null else false
+		ring.visible = visible and (out_now or has_meta("lineup") or cue) and not unseen
 		if ring.visible:
 			var rs := r * 2.6 + 0.3
 			ring.global_position = Vector3(global_position.x, m.world.ground_at(global_position.x, global_position.z) + 0.06, global_position.z)
