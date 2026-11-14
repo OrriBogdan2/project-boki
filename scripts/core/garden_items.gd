@@ -170,6 +170,7 @@ static func nudge(id: String) -> String:
 		"down": return "+%d trust" % int(e["trust"])
 		"sweet": return _sweet_words(e)
 		"trait": return "%s +%d%%" % [String(e["trait"]), roundi(100.0 * float(e["by"]))]
+		"aura": return String(e["text"])
 		_: return "%s +%d%%, bond +%d%%" % [e["trait"], roundi(100.0 * float(e["by"])), roundi(100.0 * e["bond"])]
 
 static func _sweet_words(e: Dictionary) -> String:

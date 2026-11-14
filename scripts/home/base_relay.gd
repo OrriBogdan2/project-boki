@@ -401,5 +401,6 @@ func _card(res: Dictionary, before: Array) -> void:
 	var winner := "Your team wins" if res["won"] else "The %s win" % rules()["rival_team"]
 	race.card = GameResultCard.open(h, {"game": "Relay Cup", "before": before,
 			"place": "%s by %.1f s" % [winner, res["gap"]],
-			"prize": [["Hand-offs: %s" % hand.strip_edges(), UI.MUTED], ["+%d gems" % res["gems"], UI.GOLD]] + GardenPrizes.rows(res["prize"])})
+			"prize": [["Hand-offs: %s" % hand.strip_edges(), UI.MUTED],
+				["+%d gems" % res["gems"], UI.GOLD]] + GardenPrizes.rows(res["prize"])})
 	race.card_t = float(BaseRace.rules()["card_s"])
