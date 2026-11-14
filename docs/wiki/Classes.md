@@ -57,9 +57,9 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
-| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
+| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Shardskin | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
-| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
+| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Deep Reach | Anchor Drop | none (Boki Fusion) |
 | [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 | [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |

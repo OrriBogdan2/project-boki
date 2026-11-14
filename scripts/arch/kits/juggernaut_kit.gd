@@ -750,7 +750,7 @@ func fire_rmb(c: Dictionary) -> void:
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
-	if h.stun_t > 0.0 or h.downed or Hex.active(h):
+	if h.stun_t > 0.0 or h.downed:
 		slam_w = {}          # interrupted
 		return
 	# the short crimson strike cone ahead of him, filling as the wind-up runs (everyone sees it)

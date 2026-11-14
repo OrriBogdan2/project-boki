@@ -217,10 +217,6 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# holding our uplink's yard: fight from in it, don't chase the waves out (an empty yard drains)
 		if String(a.get("goal_kind", "")) == "yard" and a["goal"] != Vector3.INF and h.flat_dist(a["goal"]) > 2.4:
 			move = (_path_dir(m, h, a["goal"]) + move * 0.3).normalized()
-		# hexed into a critter: no fighting, just scurry away until it wears off
-		if Hex.active(h):
-			move = -to
-			inp["fire"] = false
 		move = BotRetreat.move(m, h, a, tgt, move, inp)      # losing: back out of it (bot_retreat.gd)
 		# defensive moves
 		if h.hp < a["hurt_hp"] - 12.0 and a["dash_cd"] <= 0.0 and randf() < 0.35 + abil * 0.65:

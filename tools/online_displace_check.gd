@@ -164,7 +164,7 @@ func _scenario(G: Hunter) -> void:
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + BOT_AT, {"arch": "none"})
 	await _move("Kael Warchain self-pull", "juggernaut", Vector3(6, 0, 0), _kael, 1.8, G, B, ["self"])
 	await _move("Kael Warchain sling", "juggernaut", Vector3(6, 0, 0), _sling, 1.8, G, B, ["self"])
-	await _move("Grimble Abyssal Hand reel", "dredge", Vector3(6, 0, 0), _dredge, 2.0, G, B, ["guest"])
+	await _move("Grimble Deep Reach reel", "dredge", Vector3(6, 0, 0), _dredge, 2.0, G, B, ["guest"])
 	await _move("Motley swap dash", "ostra", Vector3(8, 0, 0), _ostra, 2.2, G, B, ["guest", "self"], {"tp": true})
 	await _move("Meeko Hearth Call pull", "tender", Vector3(8, 0, 0), _meeko, 5.4, G, B, ["guest"],
 		{"mates": true, "tp": true})

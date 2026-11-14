@@ -423,7 +423,7 @@ const BUILDINGS := {
 		"desc": "Old Pell's place. Boki left behind on expeditions end up here (Ransom), you deal with rivals who took yours, and he sells rare pieces at a steep price."},
 	"hall": {"name": "Trophy Hall", "isle": "summit", "cost": 120, "rect": [47, 6, 49, 8],
 		"desc": "Keeps your records and every Boki you've brought home."},
-	"armory": {"name": "Armory", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
+	"armory": {"name": "Gear Shed", "isle": "main", "cost": 40, "rect": [45, 25, 47, 26],
 		"desc": "Stores the weapons and gloves you bring home. Pick what you take on your next expedition, sell or salvage the rest, and get a bigger backpack."},
 	"shrine": {"name": "Soul Shrine", "isle": "main", "cost": 150, "rect": [49, 35, 50, 36], "needs_ember": true,
 		"desc": "Lit by a Soul Ember. Keeps the souls of Boki buried in the graveyard, and can bring one back (a little different)."},
