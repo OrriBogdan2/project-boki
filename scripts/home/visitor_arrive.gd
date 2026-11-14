@@ -5,15 +5,18 @@ extends RefCounted
 ## egg it leaves in the Incubator until the egg is hatched. Flat cel colour, no rings (ground rings mean
 ## gameplay). Tuning: content/rules/garden_visitor.json "arrive".
 
-const SHIMMER_STEP := 0.1      # s: GardenVisitor.step's tick, so one mote burst per mote_s
+const SHIMMER_STEP := 0.1  # s: GardenVisitor.step's tick, so one mote burst per mote_s
 
 static var _glint_t := 0.0
+
 
 static func rules() -> Dictionary:
 	return GardenVisitor.rules()["arrive"]
 
+
 static func type_col(species: String) -> Color:
 	return DexView.type_col(GardenVisitor.theme_of(species))
+
 
 ## Footprints from the island edge towards `to` (where the visitor stands), in its type colour: they fade in
 ## over fade_in_s, hold, then fade out and the node frees itself.
@@ -55,6 +58,7 @@ static func trail(h, to: Vector3, species: String) -> void:
 	tw.tween_property(mat, "albedo_color:a", 0.0, float(a["fade_out_s"]))
 	tw.tween_callback(root.queue_free)
 
+
 ## Called at 10 Hz while the visitor `r` stands as `k`: for its first shimmer_s, a few motes of its type
 ## colour every mote_s (placed by its age, so the global random stream is left alone).
 static func shimmer(h, k: Dictionary, r: Dictionary, age: float) -> void:
@@ -64,6 +68,7 @@ static func shimmer(h, k: Dictionary, r: Dictionary, age: float) -> void:
 	var drift := Vector3(sin(age * 7.0) * 0.3, 0.4 + fmod(age * 1.7, 0.6), cos(age * 5.0) * 0.3)
 	var at: Vector3 = (k["node"] as Node3D).position + drift
 	h.fx.burst(at, type_col(String(r["species"])), int(a["motes"]), 0.6, 0.7, -0.6, 0.6)
+
 
 ## Every glint_s: one glint on each egg a visitor left that is still in the Incubator (hinc `inc`).
 static func glint(inc: HomeIncubator, d: float) -> void:
@@ -79,6 +84,7 @@ static func glint(inc: HomeIncubator, d: float) -> void:
 		var en: Node3D = inc.egg_nodes.get(String(e["id"]), null)
 		if e.has("visitor") and is_instance_valid(en):
 			_sparkle(inc, en, e)
+
 
 static func _sparkle(inc: HomeIncubator, egg: Node3D, e: Dictionary) -> void:
 	inc.h.fx.flash(egg.global_position + Vector3(0.12, 0.35, 0.1), type_col(String(e["sp"])).lightened(0.5), 0.3, 0.25)
