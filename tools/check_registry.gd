@@ -613,6 +613,7 @@ const CHECKS := {
 	"--wheel-zoom-shots": ["res://tools/wheel_zoom_shots.gd", "wheel_zoom_shots", null],      # GPU: the wheel zooming
 	"--match-cam-wide-shots": ["res://tools/match_cam_wide_shots.gd", "match_cam_wide_shots", null],      # GPU
 	"--tenzo-feel-check": ["res://tools/tenzo_feel_check.gd", "tenzo_feel_check", null],      # owner 11-08 items 21, 22
+	"--air-rings-check": ["res://tools/air_rings_check.gd", "air_rings_check", null],      # lanes, lifts, bots
 	# SFX audit row 3
 	"--weapon-fire-sfx-check": ["res://tools/weapon_fire_sfx_check.gd", "weapon_fire_sfx_check", null],
 	"--levelup-check": ["res://tools/levelup_check.gd", "levelup_check", null],
@@ -633,7 +634,9 @@ const CHECKS := {
 	"--cast-predict-check": ["res://tools/cast_predict_check.gd", "cast_predict_check", null],
 	# spring chains settle (secondary_motion)
 	"--spring-settle-check": ["res://tools/spring_settle_check.gd", "spring_settle_check", null],
+	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],      # --shots-dir=<dir>
 	# down/death card, spectate cycle
+	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],
 	"--receiver-cue-check": ["res://tools/receiver_cue_check.gd", "receiver_cue_check", null],  # heal, shield cue
 	# terrace steps never jolt the view
 	"--step-smooth-check": ["res://tools/step_smooth_check.gd", "step_smooth_check", "check"],
@@ -669,7 +672,6 @@ const CHECKS := {
 	"--camera-follow-check": ["res://tools/camera_follow_check.gd", "camera_follow_check", "check"],      # dash trail
 	"--camera-follow-shots": ["res://tools/camera_follow_check.gd", "camera_follow_check", "shots"],  # GPU
 	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],
-	"--zone-pool-check": ["res://tools/zone_pool_check.gd", "zone_pool_check", null],      # early zones need 3D models
 	"--kit-panel-fight-shots": ["res://tools/kit_panel_fight_shots.gd", "kit_panel_fight_shots", null],
 	"--telegraph-lead-check": ["res://tools/telegraph_lead_check.gd", "hero_pair_check", null],
 	"--ring-shots": ["res://tools/ring_shots.gd", "ring_shots", null],      # Fx.ring bursts and team markers

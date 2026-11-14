@@ -241,8 +241,7 @@ func run(m: Node) -> void:
 	ok(absf(r_big - Unique.height_k(kb)) < 0.001 and msm.scale.x < mmid.scale.x, "the model is the size it rolled (x%.3f)" % r_big)
 	var mats: Array = mb.get_meta("mats", [])
 	var spotted := base.duplicate(true); spotted["dna"]["mark"] = "spots"; spotted["dna"]["ears"] = "tufted"; spotted["dna"]["tailv"] = "tufted"; spotted["dna"]["birth"] = ["star", "left flank"]
-	var drawn := Data.KIN.keys().filter(func(k): return not (BokiRig.has(k) or MeshyKin.has(k)))
-	var ms_m := Models.kin(String(drawn[0]), spotted)      # (a modelled Boki wears no mutation or marking parts)
+	var ms_m := Models.kin("cindle", spotted)
 	var m0: ShaderMaterial = (ms_m.get_meta("mats", []) as Array)[0]
 	ok(int(m0.get_shader_parameter("mark_kind")) == 1, "a spotted kin wears spots")
 	ok(ms_m.find_child("Tuft", true, false) != null and ms_m.find_child("TailTuft", true, false) != null and ms_m.find_child("Birthmark", true, false) != null, "tufted ears and tail and a birthmark are on the model")
