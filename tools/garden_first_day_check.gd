@@ -14,6 +14,7 @@ const HudGroups := preload("res://tools/garden_hud_groups.gd")
 const STEP_S := 0.05      # s of farm time per step
 const MAX_STEPS := 4800   # a toy is picked up within 60 s of farm time (toy_check)
 const RACE_MAX_S := 120.0
+const RESULT_STEPS := 100   # 0.1 s steps that let the race's results card close
 
 var bad := 0
 var main: Node
@@ -161,6 +162,8 @@ func _race(home) -> void:
 		race.tick(0.1)                                                       # their finish clips
 		t += 0.1
 	ok(GardenFirstDay.did("race"), "bot: a finished race ticks 'race' (%.0f s)" % t)
+	for i in RESULT_STEPS:      # the results card holds the runners till it closes; then they are free to nap
+		race.tick(0.1)
 
 ## Two Boki asleep side by side: the pile.
 func _nap(home, a: Dictionary, b: Dictionary) -> void:

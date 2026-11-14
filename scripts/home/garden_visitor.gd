@@ -33,7 +33,8 @@ static func group(zone: String) -> Array:
 	return rules()["groups"].get(zone, [])
 
 ## True when `zone` suits a wild `species`: its theme is one of the zone's group, one of `toy_ids` (what stands
-## in the zone) is a toy it likes, and the zone has enough residents of the group.
+## in the zone) is a toy it likes, and the zone has enough residents of the group (none while you have
+## one Boki: the first friend must be able to come).
 static func suits(zone: String, species: String, toy_ids: Array) -> bool:
 	var theme := theme_of(species)
 	var themes := group(zone)
@@ -42,8 +43,9 @@ static func suits(zone: String, species: String, toy_ids: Array) -> bool:
 	var toys: Dictionary = Content.rules("toys")["toys"]
 	if not toy_ids.any(func(id): return (toys.get(String(id), {}).get("likes", []) as Array).has(theme)):
 		return false
+	var need := int(rules()["lone_residents"]) if (Save.d["roster"] as Array).size() <= 1 else int(rules()["residents"])
 	var kin := GardenZones.residents(zone).filter(func(r): return themes.has(theme_of(String(r["species"]))))
-	return kin.size() >= int(rules()["residents"])
+	return kin.size() >= need
 
 ## A species that could visit `zone` now and has a rigged model, or "".
 static func pick(zone: String, toy_ids: Array) -> String:
