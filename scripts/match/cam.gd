@@ -1,6 +1,7 @@
 class_name CamRig
 extends Camera3D
-## Supervive-style camera: high, far and narrow, leaning toward the cursor so you see where you aim.
+## Supervive-style camera: high, far and narrow, centred on you (the footage shows no cursor lean: docs/MOVEMENT_FEEL.md
+## "Camera lead"). Only the Standard and Dynamic follow presets lean toward the cursor.
 
 const HEIGHT := 27.0
 const BACK := 17.5
@@ -198,27 +199,34 @@ func skydive(p: Vector3, heading: float, alt: float, delta: float) -> void:
 	zoom_to = lerpf(SKYDIVE_ZOOM.x, SKYDIVE_ZOOM.y, clampf(alt / SKYDIVE_HIGH, 0.0, 1.0))
 	follow(p, delta, false)
 
+## The view's lean for a cursor at `at` (viewport px) with you at `p`, in world metres: the Supervive follow reads the
+## cursor's ground distance from you (lean_to, none at the shipped numbers: the footage shows no lean), the others its
+## distance from the screen's centre.
+func cursor_pan(at: Vector2, p: Vector3) -> Vector3:
+	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
+	if follow_mode == "supervive":
+		var cur := _plane_at(at, p.y)      # where the cursor points on the ground at your height
+		return lean_to(Vector3(cur.x - p.x, 0, cur.z - p.z))
+	if float(fm[2]) <= 0.0:
+		return Vector3.ZERO
+	var half := get_viewport().get_visible_rect().size * 0.5
+	var rel := (at - half) / half       # -1..1 on each axis
+	var l := rel.length()
+	if l <= float(fm[0]) or float(fm[1]) <= float(fm[0]):
+		return Vector3.ZERO
+	var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
+	if fm[4]:
+		f *= f
+	return Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
+
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
 	var lean_k := float(rr[2])
-	var want_pan := Vector3.ZERO
 	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
+	var want_pan := cursor_pan(get_viewport().get_mouse_position(), p) if mouse_lead else Vector3.ZERO
 	if follow_mode == "supervive" and mouse_lead:
-		# where the cursor points on the ground at your height, relative to you
-		var cur := mouse_on_plane(p.y)
-		want_pan = lean_to(Vector3(cur.x - p.x, 0, cur.z - p.z))
 		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
-	elif mouse_lead and float(fm[2]) > 0.0:
-		var vp := get_viewport()
-		var sz := vp.get_visible_rect().size
-		var half := sz * 0.5
-		var rel := (vp.get_mouse_position() - half) / half       # -1..1 on each axis
-		var l := rel.length()
-		if l > float(fm[0]) and float(fm[1]) > float(fm[0]):
-			var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
-			if fm[4]: f *= f
-			want_pan = Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
 	if follow_mode == "supervive" and mouse_lead:
 		pass        # (eased above)
 	elif not mouse_lead or float(fm[3]) <= 0.0:
@@ -312,7 +320,9 @@ func mouse_ray() -> Array:
 
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:
-	var mp := get_viewport().get_mouse_position()
+	return _plane_at(get_viewport().get_mouse_position(), y)
+
+func _plane_at(mp: Vector2, y: float) -> Vector3:
 	var o := project_ray_origin(mp)
 	var d := project_ray_normal(mp)
 	if absf(d.y) < 0.0001:
