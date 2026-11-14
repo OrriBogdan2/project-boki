@@ -8,7 +8,8 @@
 #   FLAGS="--a-check --b-check" runs only those (merge-train's bisect re-runs just the new reds).
 # - Main-side greens are cached per main sha in $GS_CACHE (reds re-run every time), so the second PR gated on the same main submits half the jobs.
 # - A flag red on the candidate and green on main is re-run once on both sides; it is NEW-RED only if that repeats
-#   (the batch gates' flake rule). A job that never comes back is re-run too, then counts as red.
+#   (the batch gates' flake rule). A flag lost on either side (a job that never came back, a failed submit) is re-run too;
+#   still lost on the candidate it counts as NEW-RED.
 # - Export: ~/bin/release-dryrun CAND when it exists (hetzner), else `--export-pack` of every preset; runs during the wait.
 # OUT gets main.txt / cand.txt ("<flag> <rc> <script_errors> <secs>"), jobs.tsv, export.txt and summary.txt, whose first
 # line is "GATE GREEN|RED ..." (exit 0 / 1; 2 = usage or import failure).
@@ -77,7 +78,7 @@ collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag
 			awk -v s="${side[$id]}" '{ print s, $2, $3, $4, $5 }' <<< "$got" | grep .
 			for f in ${flags[$id]//,/ }; do grep -q "^GS $f " <<< "$got" || echo "${side[$id]} $f lost 0 0"; done
 			left=${left/ $id / }
-		done < <(printf '%s\n' $left | xargs -P 8 -n1 jobq result 2>/dev/null | grep " rc=")
+		done < <(printf '%s\n' $left | xargs -P 8 -n1 timeout 120 jobq result 2>/dev/null | grep " rc=")
 	done
 	for id in $left; do for f in ${flags[$id]//,/ }; do echo "${side[$id]} $f lost 0 0"; done; done
 }
@@ -117,20 +118,25 @@ cat "$CACHE/secs.txt" <(awk '$2 != "lost" {print $1, $4}' "$OUT/cand.txt") | awk
 awk '$1=="m" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$MSHA.txt"  # greens only
 SUBMITTED=$(wc -l < "$OUT/jobs.tsv")
 
-# 4. re-run what is red only on the candidate (or lost) once on both sides
-SUSPECT=$(comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"))
+# 4. re-run once, one flag per job, on both sides: every flag that is lost on either side (a relay failure says nothing) and
+#    every flag red only on the candidate; the re-run result replaces the first one
+lost() { awk '$2=="lost" {print $1}' "$1" | sort -u; }
+SUSPECT=$({ comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"); lost "$OUT/cand.txt"; lost "$OUT/main.txt"; } | sort -u | grep .)
+: > "$OUT/round2.txt"
 if [ -n "$SUSPECT" ]; then
-	: > "$OUT/jobs2.tsv"
 	echo "$SUSPECT" | SHARDS=999 PAR=1 submit c "$CT"
 	echo "$SUSPECT" | comm -12 - <(pick "$MT") | SHARDS=999 PAR=1 submit m "$MT"
 	tail -n +"$((SUBMITTED + 1))" "$OUT/jobs.tsv" > "$OUT/jobs2.tsv"
 	collect "$OUT/jobs2.tsv" > "$OUT/round2.txt"
+	for side in c m; do
+		f=$OUT/$([ $side = c ] && echo cand || echo main).txt
+		awk -v s=$side 'NR == FNR { if ($1 == s) redone[$2] = 1; next } !($1 in redone)' "$OUT/round2.txt" "$f" > "$f.new"
+		awk -v s=$side '$1 == s {print $2, $3, $4, $5}' "$OUT/round2.txt" >> "$f.new"; mv "$f.new" "$f"
+	done
 fi
-touch "$OUT/round2.txt"
-NEW_RED=$(comm -12 <(awk '$1=="c"' "$OUT/round2.txt" | cut -d' ' -f2- | red /dev/stdin) <(echo "$SUSPECT") \
-	| comm -23 - <(awk '$1=="m"' "$OUT/round2.txt" | cut -d' ' -f2- | red /dev/stdin))
+NEW_RED=$({ comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"); lost "$OUT/cand.txt"; } | sort -u | grep .)  # a flag still lost on the candidate is never a pass
 FLAKY=$(comm -23 <(echo "$SUSPECT") <(echo "$NEW_RED") | grep -c .)
-FIXED=$(comm -13 <(red "$OUT/cand.txt") <(red "$OUT/main.txt") | comm -12 - <(pick "$CT") | grep -c .)
+FIXED=$(comm -13 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")) | comm -12 - <(pick "$CT") | grep -c .)
 
 wait "$EXPORT_PID"
 EXPORT_BAD=$(grep -vc ' rc=0 ' "$OUT/export.txt")
