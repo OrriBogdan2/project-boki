@@ -256,6 +256,7 @@ const CHECKS := {
 	"--glide-trail-shots": ["res://tools/glide_trail_shots.gd", "glide_trail_shots", null],
 	# cast at a jump's top: momentum per slot
 	"--air-cast-check": ["res://tools/air_cast_check.gd", "air_cast_check", null],
+	"--held-fire-resume-check": ["res://tools/held_fire_resume_check.gd", "held_fire_resume_check", null],      # LMB held through a slot
 	# docs/decisions/0022
 	"--cc-exit-buffer-check": ["res://tools/cc_exit_buffer_check.gd", "cc_exit_buffer_check", null],
 	# Space in a dash, Shift in a jump
