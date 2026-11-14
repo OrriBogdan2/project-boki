@@ -10,6 +10,12 @@ extends RefCounted
 # "mask" in code = "Relic" in game, owner 2026-11-07 (Unmasked = the Empty, you before a Relic)
 
 const SEXES := ["Female", "Male"]
+## Per sex, in SEXES order: the face sliders (MantleLook "face_w" and "jaw", 0.5 neutral) that give her a narrower,
+## shorter face and him a wider, longer jaw.
+const SEX_FACE := [{"face_w": 0.3, "jaw": 0.4}, {"face_w": 0.7, "jaw": 0.65}]
+## Per sex, in SEXES order: x the body's size (the model only; the ring, her hitbox, keeps its size). With her
+## smaller head and torso she stands about 7 cm shorter.
+const SEX_HEIGHT := [0.965, 1.0]
 const HEIGHTS := ["Short", "Average", "Tall"]
 const HEIGHT_SCALE := [0.9, 1.0, 1.1]       # x the hunter's size: the whole body, its ring and the camera
 const BUILDS := ["Slight", "Average", "Sturdy"]
@@ -49,7 +55,7 @@ const EYES_FROM_FACE := [0, 1, 2, 3, 4, 3, 5, 4, 1]
 
 static func default_look() -> Dictionary:
 	return {"unmasked": true, "gender": 1, "height": 1, "build": 1, "hollow": 0, "glow": 0, "ghost": 1, "aura": 1,
-		"shroud": 0, "colour": 1, "marks": []}
+		"shroud": 0, "colour": 1, "marks": [], "features": {}}
 
 static func random_look() -> Dictionary:
 	var out := default_look()
@@ -72,6 +78,7 @@ static func clean(lk: Dictionary) -> Dictionary:
 		out[row[0]] = clampi(_i(out[row[0]], 0), 0, (row[2] as Array).size() - 1)
 	if not out["marks"] is Array:
 		out["marks"] = []
+	out["features"] = out["features"].duplicate() if out["features"] is Dictionary else {}
 	return out
 
 ## A look from the face-marks creator (eyes, brows, blush, no hollow yet): the closest hollow, ghost and glow.
@@ -138,6 +145,7 @@ static func _brows_for(face: int, gender: int) -> int:
 static func migrate(data: Dictionary) -> void:
 	if data.has("look") and data["look"] is Dictionary:
 		data["look"] = clean(data["look"])
+		MasteryLook.refresh(data["look"])
 
 ## The look the farm, town and house wear: yours, as the Unmasked.
 static func worn() -> Dictionary:
@@ -173,21 +181,23 @@ static func legacy(lk: Dictionary) -> Dictionary:
 	var u := clean(lk)
 	return {
 		"race": 0, "body": u["build"], "gender": u["gender"], "face": 1, "skin": 0, "hair": 13, "hair_v": 2,
-		"hair_col": 0, "detail": 0, "outfit": 0, "glider": u.get("glider", "classic"),
+		"hair_col": 0, "detail": 0, "outfit": 0, "glider": u.get("glider", "classic"), "sliders": SEX_FACE[u["gender"]],
 	}
 
 ## The race entry Models.hunter reads: always human, sized by height.
 static func race(lk: Dictionary) -> Dictionary:
 	var u := clean(lk)
-	return {"id": "human", "name": "Human", "scale": HEIGHT_SCALE[u["height"]],
-		"head": 0.93 if int(u["gender"]) == 0 else 1.0, "bulk": BUILD_BULK[u["build"]], "skin": 1, "desc": ""}
+	var size_k := float(HEIGHT_SCALE[u["height"]]) * float(SEX_HEIGHT[u["gender"]])
+	return {"id": "human", "name": "Human", "scale": size_k,
+		"head": 0.95 if int(u["gender"]) == 0 else 1.0, "bulk": BUILD_BULK[u["build"]], "skin": 1, "desc": ""}
 
 static func colour(lk: Dictionary) -> Color:
 	return COLOURS[clean(lk)["colour"]]
 
 # ------------------------------------------------------------------------------------------ the hollow
 ## The void head: a shell of the head (Head's own mesh, a hair larger) that is void all the way round, with the
-## hollow's socket, rim and ghost features floating on it; the aura drifting round you; any kept Relic marks.
+## hollow's socket, rim and ghost features floating on it; the aura drifting round you; any kept Relic marks
+## and the mastery features you keep (MasteryLook).
 static func face(torso: Node3D, lk: Dictionary) -> void:
 	var u := clean(lk)
 	var head := torso.get_node("Head") as MeshInstance3D
@@ -205,6 +215,7 @@ static func face(torso: Node3D, lk: Dictionary) -> void:
 		var col := Models.toon(Color(String(md.get("col", "#ffffff"))), false)
 		var at := Vector3(float(md.get("x", 0.0)), float(md.get("y", 0.85)), -0.215)
 		Models.part(torso, Models.sphere(float(md.get("size", 0.02)), 10), col, at, Vector3(1.0, 1.0, 0.3))
+	MasteryLook.draw(torso, u)
 
 ## The void material for a head with a hollow of this shape (see shaders/void_face.gdshader), its ghost
 ## features and glow.
@@ -274,8 +285,8 @@ static func _shape(c: Dictionary, fem: bool) -> void:
 	for ch in torso.get_children():
 		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh == HeroKit.torso(fem):
 			(ch as MeshInstance3D).mesh = figure(fem)
-	var shoulder := 0.88 if fem else 1.06
-	var limb := Vector3(0.8, 1.0, 0.8) if fem else Vector3.ONE
+	var shoulder := 0.85 if fem else 1.1
+	var limb := Vector3(0.8, 1.0, 0.8) if fem else Vector3(1.08, 1.0, 1.08)
 	for sd in ["L", "R"]:
 		var piv := (c["arms"][sd] as Array)[0] as Node3D
 		piv.position.x *= shoulder
@@ -297,12 +308,12 @@ static func figure(fem: bool) -> ArrayMesh:
 		var front := clampf(-sin(u * TAU), 0.0, 1.0)
 		var k := 1.0
 		if fem:
-			k -= 0.17 * exp(-pow((p.y + 0.07) / 0.1, 2.0))
-			k += 0.1 * smoothstep(-0.16, -0.3, p.y)
+			k -= 0.21 * exp(-pow((p.y + 0.07) / 0.1, 2.0))
+			k += 0.13 * smoothstep(-0.16, -0.3, p.y)
 			for sx in [-1.0, 1.0]:
 				var d := Vector2(p.x - 0.08 * sx, (p.y - 0.08) * 1.1)
 				p.z -= 0.04 * exp(-d.length_squared() / 0.004) * front
 		else:
-			k += 0.07 * smoothstep(-0.05, 0.22, p.y) - 0.03 * exp(-pow((p.y + 0.1) / 0.12, 2.0))
+			k += 0.1 * smoothstep(-0.05, 0.22, p.y) - 0.04 * exp(-pow((p.y + 0.1) / 0.12, 2.0))
 		return Vector3(p.x * k, p.y, p.z * lerpf(1.0, k, 0.6))
 	return HeroKit.surf("empty_torso|%s" % fem, fn, 48, 26)

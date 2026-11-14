@@ -126,6 +126,14 @@ func _match_items() -> void:
 	h.dash_with({"speed": 19.0, "time": 0.3, "dir": Vector2(1, 0)})
 	m.step(Match.DT)
 	ok(h.roll_t > 0.0 and not h.gliding and h.loco.is_in(Loco.S.DASHING), "FSM: a dash from a glide folds the glider")
+	h.knock_t = 0.2
+	m.step(Match.DT)
+	var under := h.loco.is_in(Loco.S.DASHING) and not h.loco.can(Loco.S.GLIDING)
+	while h.roll_t > 0.0:
+		m.step(Match.DT)
+	m.step(Match.DT)
+	ok(under and h.loco.is_in(Loco.S.KNOCKED) and h.knock_t > 0.0 and not h.loco.can(Loco.S.GLIDING),
+		"FSM owns it: a knock mid-dash waits under the dash, then KNOCKED (%s)" % " ".join(h.loco.history))
 	_air_at(8.0, Vector3(-4, 0, 0))
 	h.inp["move"] = Vector2(1, 0)
 	var t := 0.0
@@ -133,22 +141,6 @@ func _match_items() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 	ok(t <= 0.2, "item 6: falling backward, holding W carries you forward in %.2fs" % t)
-
-## A ground tile with LANE m of flat, open ground east of it (no wall to stop a run, a dash or a glide).
-const LANE := 26
-func _open_lane() -> Vector3:
-	for z in range(4, w.h - 4):
-		for x in range(4, w.w - LANE - 4):
-			var lv := w.level[w.idx(x, z)]
-			var clear := true
-			for i in LANE:
-				var j := w.idx(x + i, z)
-				clear = clear and w.kind[j] == World.T_GROUND and w.level[j] == lv
-				clear = clear and not w.is_block(x + i + 0.5, z + 0.5)
-				if not clear: break
-			if clear:
-				return Vector3(x + 0.5, lv * World.LEVEL, z + 0.5)
-	return Vector3.INF
 
 ## Items 6/7: one chain holding D: run, Shift, jump out of it, a glide press, let go, land. The h-speed never
 ## drops more than 30% in one step (no sudden stop), never jumps up except as a dash starts (no spike),
