@@ -159,10 +159,10 @@ if [ -n "$SUSPECT" ]; then
 	echo "$SUSPECT" | comm -12 - <(pick "$MT") > "$OUT/suspect_both.txt"
 	comm -23 <(echo "$SUSPECT") "$OUT/suspect_both.txt" > "$OUT/suspect_cand_only.txt"
 	export SLOTS_FILE=$OUT/slots2.txt
-	SHARDS=${GS_SHARDS2:-24} PER=${GS_PER2:-4} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_both.txt"
-	SHARDS=${GS_SHARDS2:-24} PER=${GS_PER2:-4} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit m "$MT" < "$OUT/suspect_both.txt"
+	SHARDS=${GS_SHARDS2:-24} PER=${GS_PER2:-1} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_both.txt"
+	SHARDS=${GS_SHARDS2:-24} PER=${GS_PER2:-1} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit m "$MT" < "$OUT/suspect_both.txt"
 	unset SLOTS_FILE
-	PER=${GS_PER2:-4} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_cand_only.txt"
+	PER=${GS_PER2:-1} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_cand_only.txt"
 	tail -n +"$((SUBMITTED + 1))" "$OUT/jobs.tsv" > "$OUT/jobs2.tsv"
 	collect "$OUT/jobs2.tsv" > "$OUT/round2.txt"
 	for side in c m; do
