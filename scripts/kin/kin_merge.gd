@@ -5,7 +5,7 @@ extends RefCounted
 ##   - R needs the bond meter full (fighting together fills it, Bond) and the ult slot, which opens at
 ##     run level Hunter.ULT_AT[0] (6); the first unlock fills the meter once, free
 ##   - Boki on your shoulder: you merge at once. Boki out in the field: it leaps back and merges mid-air
-##     (Kin.merge_leap, hitting what is in its way). Boki DOWNED: R does nothing ("Rescue it to merge") and the
+##     (Kin.merge_leap, hitting what is in its way). Boki DOWNED: R does nothing ("Rescue it to fuse") and the
 ##     full meter is kept. No Boki at all (none brought, lost, dead, benched): a weak surge
 ##     (MergeForm.surge_spec), so a full meter is never wasted
 ##   - phase "xform": ~0.7s, invulnerable, the Boki leaps into you and the form pops in (MergeXform)
