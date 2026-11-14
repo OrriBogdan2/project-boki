@@ -1,5 +1,9 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
+the facekeep body `~/meshy/v95/Cinder/r2/ingame1112/cinder_v95_facekeep_body.glb`: body6 cand_B's shape on the cut `cinder_v95_body6_body` (every vertex matched) with the cand_A face3 face image. Was appeal4 cand_5 below. 13.7k tris, 2048 atlas + 2048 emit, 44 clips (pet/give/cheer gain sampled channels, same timing).
+Spec `art/wardens/src/cinder_v95.json`; proof sheet ~/meshy/v95/_closeups/ingame-1112/sheet.jpg.
+
 `cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads
@@ -68,3 +72,11 @@ Re-key (ext/anim-cinder-rekey, 11-12): `run_f/b/l/r` and `jet_land` rebaked with
 `python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> run_f,run_b,run_l,run_r,jet_land`.
 On the 0.24.5 merge the five clips were copied again, from the re-key glb (6f4b8f0fe) onto main's cand_5 glb by the same
 command (rest poses equal to 2e-6); every other clip, the garden set and `x_breath` are main's.
+
+v95 swap 11-12 (ext/hunters-v95-ingame): re-baked with `fill_misses` (docs/art/wardens/V95_SWAP.md), which fills the
+texels the bake missed (exact black where the decimation folded a triangle under) from their neighbours.
+
+Cloak peak (ext/anim-cinder-cloak-peak, 11-13): `cloak` rebaked with cinder_clips.py (arms-wide peak 0.13 -> 0.03 s) and copied on by
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb <bake.glb> cloak`. Bake source: the stage_p2 rig (a worker without
+stage_p2/cinder.blend used a prior bake's `*_anim.blend` of it with every action removed; the unchanged cloak baked from it matched this
+glb's to 1.5e-6, bone rests equal up to quaternion sign). All 43 other clips, nodes, meshes and images byte-equal.

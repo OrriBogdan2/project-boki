@@ -3,11 +3,11 @@ extends RefCounted
 ## Sparkle's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
 ## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
-## launches straight up and hangs there invulnerable while a pink range ring and its dark interior show round
-## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
-## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
-## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink lightning
-## crackles at her feet for a moment after.
+## launches straight up and hangs there invulnerable while a pink range ring on a dark band shows round the
+## take-off spot, a gold crown at the cursor, and the camera pulls back. Press again (X or the attack key) to
+## come down as a bolt at the cursor, clamped inside the ring; with no second press she comes down there by
+## herself when the hover runs out. The strike hurts, knocks back and adds Static to everyone round the landing
+## spot, and pink lightning crackles at her feet for a moment after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -53,6 +53,12 @@ func airborne() -> bool:
 func busy() -> bool:
 	return running() and phase() != AFTER
 
+## Seconds until the strike frees her (0: free): the drop's rest, and at least the whole drop before it.
+func lock_left() -> float:
+	if phase() == FALL:
+		return float(data()["drop"]) - float(leap["t"])
+	return float(data()["drop"]) if busy() else 0.0
+
 # ------------------------------------------------------------------ the press
 ## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
 func cast() -> bool:
@@ -67,11 +73,9 @@ func cast() -> bool:
 	leap["fire_free"] = not bool(h.inp.get("fire", false))
 	casts += 1
 	kit.play("mage_x")
-	# the range ring snaps out round her at once; a bolt drops onto her as she gathers
-	kit.fx().ring(from, float(data()["range"]), MageKit.PINK, MageKit.TEAL, 0.3)
-	kit.fx().arc(h.position + Vector3(0, 7.0, 0), h.position + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.PINK, 0.7, 0.2)
+	# a bolt drops onto her as she gathers (the range ring shows from this step on)
+	kit.vfx("x", from)
 	kit.m.sfx("vv_ult_rise", h.pos, -2.0)
-	kit.net_ring(from, float(data()["range"]), MageKit.PINK)
 	return true
 
 ## RecastCue: X again during the hang brings her down at the marker (she comes down by herself when it ends).
@@ -113,6 +117,7 @@ func tick(dt: float) -> void:
 				_hold_still()
 				if t >= float(xd["windup"]):
 					_take_off()
+			_range_ring()                 # (after a take-off: where she launched from)
 		RISE:
 			_hold_air(smoothstep(0.0, 1.0, t / float(xd["rise"])))
 			_aim_tick()
@@ -181,22 +186,15 @@ func _untouchable(secs: float) -> void:
 ## abyss), and the climb starts at her height, so nothing snaps.
 func _take_off() -> void:
 	var h := kit.h
-	var r := float(data()["range"])
 	var was: Vector3 = leap["from"]
 	if Vector2(h.pos.x - was.x, h.pos.z - was.z).length() > 0.5 and not kit.m.world.is_void(h.pos.x, h.pos.z):
 		leap["from"] = kit.ground(h.pos)
-		kit.fx().ring(leap["from"], r, MageKit.PINK, MageKit.TEAL, 0.3)
-		kit.net_ring(leap["from"], r, MageKit.PINK)
 	var from: Vector3 = leap["from"]
 	leap["base"] = h.pos.y
 	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
 	_next(RISE)
 	kit.play("mage_x_air")
-	kit.m.fx.dust(from, 6)
-	var top := from + Vector3(0, float(data()["height"]), 0)
-	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
-	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
-	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK)
+	kit.vfx("x_air", from, null, {"len": float(data()["height"])})
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
@@ -241,17 +239,21 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
-## The range ring with its gold rim (everyone sees where she can come down), the dark inside, and the gold
-## crown at the cursor (her own).
+## The pink range ring round the take-off: everyone sees where she can come down, from the press on.
+func _range_ring() -> void:
+	var ring := {"at": leap["from"], "r": float(data()["range"]), "ticks": true, "col": MageKit.PINK}
+	ring.merge({"col2": MageKit.PINK, "all": true, "lw": 0.1})
+	AimKit.circle(kit.h, "x_ring", ring)
+
+## Up there: the range ring on a dark band (once she is off the ground, the spot is fixed) and the gold crown at
+## the cursor (her own), as big as the strike's hit area.
 func _aim_tick() -> void:
 	var h := kit.h
-	var from: Vector3 = leap["from"]
-	var r := float(data()["range"])
+	_range_ring()
+	HeroVfx.of(kit.m).hold(h, "x_ring", 0.0, {"at": leap["from"], "r": float(data()["range"])})
 	leap["land"] = land_point()
-	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.PINK, "col2": MageKit.PINK, "all": true, "lw": 0.1}
-	AimKit.circle(h, "x_ring", ring)
-	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
-	crown.merge({"col": MageKit.PINK, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
+	var crown := {"at": leap["land"], "r": float(data()["radius"]), "ticks": true, "star": true}
+	crown.merge({"col": MageKit.DEEP_GOLD, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 
 ## Gold crackle along the rim and round her body while she hangs.
@@ -263,10 +265,9 @@ func _air_fx(dt: float) -> void:
 		var a := rng.randf() * TAU
 		var p := from + Vector3(cos(a) * r, 0.15, sin(a) * r)
 		var q := from + Vector3(cos(a + 0.12) * r, 0.25, sin(a + 0.12) * r)
-		kit.fx().arc(p, q, MageKit.PINK, MageKit.PINK.lightened(0.5), 0.35, 0.12)
+		kit.vfx("x_rim", p, null, {"to": q})
 	if rng.randf() < 6.0 * dt:
-		var c := kit.h.position + Vector3(0, 1.0, 0)
-		kit.fx().crackle(c, MageKit.TEAL, MageKit.PINK, 0.9, 3, 0.1)
+		kit.vfx("x_crackle", kit.h.position)
 
 # ------------------------------------------------------------------ the strike
 func _slam() -> void:
@@ -280,8 +281,7 @@ func _slam() -> void:
 	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "dur": float(data()["drop"]), "fill": 1.0}
 	mark.merge({"col": MageKit.PINK, "col2": MageKit.PINK, "hot": 0.6})
 	AimKit.circle(kit.h, "x_land", mark)
-	kit.fx().ring(land, float(data()["radius"]), MageKit.PINK, MageKit.TEAL, 0.15)
-	kit.net_ring(land, float(data()["radius"]), MageKit.PINK)
+	kit.vfx("x_dive", land, null, {"r": float(data()["radius"])})
 
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
 func _fall_tick(u: float) -> void:
@@ -291,11 +291,16 @@ func _fall_tick(u: float) -> void:
 	h.vel = Vector3.ZERO
 	h.inp["move"] = Vector2.ZERO
 	h.pos = a.lerp(b, u * u)
+	leap["vel"] = (b - a) * (2.0 * u / float(data()["drop"]))     # d/dt of the lerp, for the snapshot
 	_untouchable(0.1)
 	if h.model:
 		h.model.visible = u < 0.3
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL)
+
+## The snapshot's velocity: the fall's own while she comes down (vel is held at zero), else the body's.
+func move_vel() -> Vector3:
+	return leap.get("vel", Vector3.ZERO) if phase() == FALL else kit.h.vel
 
 func _strike() -> void:
 	var h := kit.h
@@ -306,7 +311,6 @@ func _strike() -> void:
 	h.vel = Vector3.ZERO
 	if h.model:
 		h.model.visible = true
-	kit.fx().cut(leap.get("disc"))
 	_next(AFTER)
 	kit.play("mage_x_land")
 	kit.m.later(0.55, kit.gum.blow)      # (once she is back on her feet)
@@ -349,20 +353,12 @@ func _share_static(f: Ent, shared: int, source: Ent) -> void:
 	kit.add_spark(f, shared - have)
 	spreads += 1
 	var chest := Vector3(0, 1.0, 0)
-	kit.fx().arc(source.position + chest, f.position + chest, MageKit.TEAL, MageKit.PINK, 0.6, 0.2)
+	kit.vfx("x_spread", source.position + chest, null, {"to": f.position + chest})
 
-## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.
+## A pillar of gold light slams onto the spot out of the sky, a shock ring, a scorched storm on the hit area and a
+## spray of sparks.
 func _strike_fx(at: Vector3, r: float) -> void:
-	var fx := kit.fx()
-	fx.pillar(at, Color(MageKit.PINK, 0.9), Color.WHITE, 14.0, 1.2, 0.35, true)
-	for i in 3:
-		var sky := at + Vector3(0, 12.0, 0) + kit._jitter(0.8, 0.0, 0.0)
-		fx.arc(sky, at + kit._jitter(0.5, 0.1, 0.1), MageKit.TEAL, MageKit.PINK, 1.3 - 0.3 * i, 0.25)
-	fx.ring(at, r, MageKit.PINK, MageKit.TEAL, 0.35)
-	fx.disc(at, r * 0.8, Color("1a1420"), MageKit.PINK, 0.4, MageKit.COPPER)
-	kit.m.fx.spark(at + Vector3(0, 0.3, 0), Vector3.UP, MageKit.PINK, 26, 11.0, 75.0, 0.4, 8.0, 1.3)
-	kit.m.fx.flash(at + Vector3(0, 1.2, 0), MageKit.PINK, 2.4, 0.12)
-	kit.net_bolt(at + Vector3(0, 12.0, 0), at, MageKit.PINK)
+	kit.vfx("x_strike", at, null, {"r": r})
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
@@ -375,7 +371,7 @@ func _after_fx(dt: float) -> void:
 	var a := rng.randf() * TAU
 	var p := foot + Vector3(cos(a) * 0.3, 0.05, sin(a) * 0.3)
 	var q := foot + Vector3(cos(a) * rng.randf_range(0.8, 1.6), 0.05, sin(a) * rng.randf_range(0.8, 1.6))
-	kit.fx().arc(p, q, MageKit.COPPER, MageKit.PINK, 0.3, 0.12)
+	kit.vfx("x_after", p, null, {"to": q})
 
 # ------------------------------------------------------------------ ends
 ## A Boki merge (or a kit swap) mid-cast: she drops straight down where she took off, nothing strikes; the
@@ -383,13 +379,23 @@ func _after_fx(dt: float) -> void:
 func drop() -> void:
 	if leap.is_empty():
 		return
-	var h := kit.h
 	if AIRBORNE.has(phase()):
-		h.teleport(leap["from"])
-		h.vel = Vector3.ZERO
+		kit.h.teleport(leap["from"])
+		kit.h.vel = Vector3.ZERO
+	_clear()
+
+## The glider opened in the climb or the hang (MageKit._tick_glide_cancel): she stays where she is, nothing
+## strikes, the cooldown stays spent. False when she isn't up there.
+func glide_out() -> bool:
+	if phase() != RISE and phase() != AIR:
+		return false
+	_clear()
+	return true
+
+func _clear() -> void:
+	var h := kit.h
 	if h.model:
 		h.model.visible = true
-	kit.fx().cut(leap.get("disc"))
 	for id in ["x_ring", "x_aim", "x_land"]:
 		AimKit.hide(h, id)
 	leap = {}

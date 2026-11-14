@@ -1,93 +1,17 @@
 extends "res://tools/bjorn_launch_check.gd"
 ## Breaker's feel pass (docs/decisions/0061-breaker-swing-lunge.md, docs/heroes/bulwark.md), run from
-## --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds the counts): the 0.9 body with its hitbox
-## kept, the aegis boop, the Faultline hop and wider lane, the rope's auto-return and the swing lunges.
+## --bulwark-combo-check (tools/archer_bulwark_combo_check.gd adds the counts): the Faultline hop and wider lane,
+## the rope's auto-return and the swing lunges (his size and the aegis boop are main's: warden_model_check and
+## pin_bjorn_owner_check hold them).
 ## Prints AKCHECK lines.
 
-const OLD_SIZE := 2.0          # the body size before the pass: he is 0.9 of it
 const OLD_WIDTH := 4.5         # m: the Faultline lane before the pass
 const LUNGE_SLACK := 0.3       # m: a measured lunge may miss its data distance by this (step rounding, slide)
 
 func albert() -> void:
-	await _size()
-	await _boop()
 	await _ult_hop()
 	await _rope()
 	await _lunges()
-
-## The body is 0.9 of the old one, the plate comes down with it, the hitbox stays.
-func _size() -> void:
-	var r := setup("bulwark", 7.0)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: BulwarkKit = P.ak
-	var body := float(Arch.body("bulwark").size)
-	ok("albert size: the body is 0.9 of the old one", absf(body / OLD_SIZE - 0.9) < 0.001, "size %.2f" % body)
-	ok("albert size: the hitbox keeps its 0.46 m (fairness, the hit radius is not the look)",
-		absf(P.r - 0.46) < 0.001, "r %.2f" % P.r)
-	ok("albert size: the nameplate comes down with him (about 0.9 of 2.6 m)",
-		absf(HudPlate.plate_offset(P) - 2.6 * 0.9) < 0.06, "plate %.2f" % HudPlate.plate_offset(P))
-	ok("albert size: the hand height (throw, FX) scales with him", absf(K.hand_at().y - P.pos.y - 0.9) < 0.001,
-		"hand %.2f" % (K.hand_at().y - P.pos.y))
-	await done(m)
-
-## LMB behind the raised aegis: a thrust that shoves a foe in front, no damage, the wall back home after it.
-func _boop() -> void:
-	var r := setup("bulwark", 7.0)
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var home: Vector3 = r[4]
-	var K: BulwarkKit = P.ak
-	var bd := K.boop.bd()
-	var east := home + Vector3(6.0, 0, 0)
-	step(m, 0.3)
-	P.teleport(home)
-	P.vel = Vector3.ZERO
-	K.lock_t = 0.0
-	K.cd["rmb"] = 0.0
-	K.shield_hp = K.shield_max()
-	T.teleport(home + FAR)
-	fresh(T)
-	P.inp["sec_hold"] = true
-	P.ak.press_rmb()
-	step(m, 0.4, rmb_at.bind(P, east))
-	var rest := float(K.wall["dist"])
-	T.teleport(home + Vector3(2.3, 0, 0))
-	fresh(T)
-	var x0 := T.pos.x
-	var s0 := K.slams
-	var t0 := K.throws
-	P.inp["fire"] = true
-	rmb_at(P, east)
-	m.step(DT)
-	var anim := K.anim_id
-	var peak := 0.0
-	var t := 0.0
-	while t < 0.4:
-		rmb_at(P, east)
-		m.step(DT)
-		t += DT
-		peak = maxf(peak, float(K.wall.get("dist", 0.0)) - rest)
-	P.inp["fire"] = false
-	step(m, 0.3, rmb_at.bind(P, east))
-	var span := float(bd["wind"]) + float(bd["snap"]) + float(bd["settle"])
-	ok("albert boop: the thrust is 0.25-0.35 s (bul_boop)", span >= 0.25 and span <= 0.35 and anim == "bul_boop",
-		"%.2f s anim %s" % [span, anim])
-	ok("albert boop: the aegis snaps out and comes home", peak >= float(bd["thrust"]) * 0.9
-		and absf(float(K.wall["dist"]) - rest) < 0.001, "peak +%.2f rest %.2f" % [peak, float(K.wall["dist"])])
-	ok("albert boop: a foe in front is shoved back, no damage, no swing or throw",
-		K.boop.booped == 1 and T.pos.x - x0 >= float(bd["push"]) * 0.8 and dmg(T) == 0.0 and K.slams == s0
-		and K.throws == t0, "booped %d moved %.2f dmg %.1f" % [K.boop.booped, T.pos.x - x0, dmg(T)])
-	var b0 := K.boop.boops
-	for i in 6:
-		P.inp["fire"] = i % 2 == 0
-		step(m, 0.05, rmb_at.bind(P, east))
-	P.inp["fire"] = false
-	ok("albert boop: mashing waits out its cooldown", K.boop.boops - b0 == 1, "thrusts %d" % (K.boop.boops - b0))
-	P.inp["sec_hold"] = false
-	step(m, 0.4)
-	await done(m)
 
 ## R: a 1-1.5 m hop with the hammer up, the slam on the old 0.4 s, back on the ground; a 22% wider lane.
 func _ult_hop() -> void:

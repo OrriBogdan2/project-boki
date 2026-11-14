@@ -112,13 +112,12 @@ static func _addon(h: Hunter, key: String) -> void:
 		elif h.runner != null and h.runner.slots.has("utility") and key == "rmb":
 			h.runner.slots["utility"]["cd"] = float(h.runner.slots["utility"]["cd"]) * k
 	var col: Color = form["glow"]
-	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(a.get("name", "")).to_upper(), col)
 	h.m.fx.ring(h.pos, 1.4, Color(col, 0.8), 0.3)
 	_announce(h, key, 1.4)
 
-static func _announce(h: Hunter, slot: String, radius: float) -> void:
+static func _announce(h: Hunter, slot: String, radius: float, secs := 0.0) -> void:
 	var t: Vector3 = h.inp.get("aim", h.pos)
-	KinNet.event(h.m, "mcast", h, h.pos, "%s|%.1f|%.1f|%.1f|%.2f" % [slot, t.x, t.z, radius, 0.0])
+	KinNet.event(h.m, "mcast", h, h.pos, "%s|%.1f|%.1f|%.1f|%.2f" % [slot, t.x, t.z, radius, secs])
 
 static func _dash(h: Hunter) -> void:
 	var d: Dictionary = (aug(h).get("dash", {}) as Dictionary)
@@ -133,7 +132,6 @@ static func _dash(h: Hunter) -> void:
 		h.haste_t = maxf(h.haste_t, float(d["haste_s"]))
 		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
 		return
-	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(d.get("name", "")).to_upper(), col)
 	match kind:
 		"sweep":
 			h.m.sfx("zap", h.pos, -3.0, 1.5)
@@ -142,7 +140,12 @@ static func _dash(h: Hunter) -> void:
 			h.m.sfx("ab_slam", h.pos, -4.0, 0.8)
 			h.m.fx.dust(h.pos, 8)
 		"reflect":
-			st["dash"]["mirror"] = h.m.verbs.add_mirror(h, {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": float(d["window"]), "dmg_k": float(d["dmg_k"]), "color": col.to_html(false)})
+			st["dash"]["mirror"] = h.m.verbs.add_mirror(h, mirror_spec(d, col))
+			_announce(h, "dash", float(d["radius"]), float(d["window"]))     # (the other games open the same window)
+
+## The reflect window a Prism-style form dash opens (here and, from the "dash" cast, in the other games).
+static func mirror_spec(d: Dictionary, col: Color) -> Dictionary:
+	return {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": float(d["window"]), "dmg_k": float(d["dmg_k"]), "color": col.to_html(false)}
 
 static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):

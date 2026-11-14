@@ -5,24 +5,21 @@ extends Node3D
 ## colour on bright grass.
 ## - the thrown hammer (tumbling; trail, plant and catch: content/vfx/bulwark.json), planted head-down in the
 ##   ground under an upright gold beacon with rising chevrons
-## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a
-##   gold-orange trail behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while the
-##   perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the release
-## - the 360 Smash's red-orange-gold spiral ring at its hit radius, the dash's gold chevron wake (his own after-image)
+## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a trail in
+##   his ivory (Arch.color) behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while
+##   the perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the
+##   release
+## - the dash's gold chevron wake (his own after-image); the 360 Smash's ring is HeroVfx's ("spin")
 ##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
 ##   toward the camera, rising out of the ground in a puff of dust, flashing on a block, darkening as it
 ##   weakens and breaking into chunks (the verbs wall underneath keeps the blocking; its plain slab is
-##   hidden), with a pulsing double chevron in front of it showing its push
+##   hidden)
 ## - Purify: the green light column coming down over the 1 s delay, then the rings
 
 const GOLD := Color("ffc94a")
 const EMBER := Color("ff8a2a")
-const AEGIS := Color("ffcb4f")
 const GREEN := Color("7dffb0")
-const STAR_GOLD := Color("ffd25a")
-const SWIRL_T := 0.45
-const SWIRL_IN := 0.55         # the spin ring's inner edge as a share of the hit radius (its outer edge is the radius)
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
 const WAKE_T := 0.28
@@ -42,12 +39,11 @@ const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
 ## the whirl's trail ribbon: inner and outer radius (m at scale 1), how far past the head's circle its outer
 ## edge runs, how far it reaches back behind the head (rad; the arc runs from there to the head, so the streak's
-## bright end rides the hammer), its colour, and its strength at the slowest turn rate and how much the fastest adds
+## bright end rides the hammer), and its strength at the slowest turn rate and how much the fastest adds
 const ORBIT_IN := 0.3
 const ORBIT_OUT := 1.35
 const ORBIT_PAST := 1.25
 const ORBIT_ARC := 3.4
-const ORBIT_COL := Color(1.0, 0.56, 0.1)
 const ORBIT_POWER := 3.4
 const ORBIT_FAST := 1.4
 ## the planted hammer's size, and its lean off vertical (rad)
@@ -64,23 +60,18 @@ const PLATE_COL := Color("c9953a")
 const PLATE_EDGE := Color("8a6428")
 const RIVET_COL := Color("f0d27a")
 const BROKEN_COL := Color("4a3a30")
-## s the wall takes to rise out of the ground, and how long a push flashes its chevron
+## s the wall takes to rise out of the ground
 const RISE_T := 0.2
-const PUSH_FLASH_T := 0.2
 
 var h: Hunter
 var hammer: Node3D            # the thrown hammer
 var beacon: MeshInstance3D
 var glint: MeshInstance3D
 var orbit_trail: MeshInstance3D
-var swirl: MeshInstance3D
-var swirl_t := 0.0
-var swirl_r := 1.0             # m, the hit radius the spin ring was drawn at
 var aegis: Node3D              # the plated wall
 var plate_mats: Array = []     # [plate, edge] materials (flash and crack)
 var aegis_hit := 0.0
 var rise_t := 0.0
-var push_flash := 0.0
 var wakes: Array[MeshInstance3D] = []
 var wake_life: Array[float] = []
 var wake_next := 0
@@ -98,6 +89,7 @@ var glint_k := -1.0            # the glint's size 0..1 while it shows (-1: not y
 var fx_clock := 0.0            # the match time effects last advanced to
 
 var own_piece: Node3D         # the model's own hammer, when it has a skinned one (WardenGlb.thrown_piece)
+var own_reach := 0.0          # m from its grip to its head's far end (neutral): it stands on that, planted
 var chain: Array = []         # the links to the thrown hammer (_build_chain)
 
 func _init(hunter: Hunter) -> void:
@@ -114,15 +106,10 @@ func _ready() -> void:
 	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
-	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
+	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", AimKit.hero_col(h), true))
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
-	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
-	var swirl_mesh := KitMeshes.band(SWIRL_IN, 1.0, 0.0, TAU, 48)
-	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
-	KitShaders.param(swirl, "color2", Color("ffc93a"))
-	KitShaders.param(swirl, "twist", 2.2)
-	KitShaders.param(swirl, "spin", 5.0)
+	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", Arch.color(h.arch), true))
 	_build_aegis()
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
@@ -131,10 +118,9 @@ func _ready() -> void:
 		KitShaders.param(wake, "twist", 0.0)
 		wakes.append(wake)
 		wake_life.append(0.0)
-	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GREEN))
+	column = KitMeshes.inst(self, KitMeshes.pillar(0.9, 1.4, 9.0), KitShaders.mat("beam", GOLD))
 	column.material_override.set_shader_parameter("speed", -1.2)
-	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GREEN))
-	disc.material_override.set_shader_parameter("color2", Color("e8fff0"))
+	disc = KitMeshes.inst(self, KitMeshes.band(0.2, 1.0, 0.0, TAU, 48), KitShaders.mat("swirl", GOLD))
 
 ## The model's own hammer on the thrown piece, once the model wears it (an Arena swap dresses him after the kit starts).
 func _own_hammer() -> bool:
@@ -147,6 +133,8 @@ func _own_hammer() -> bool:
 		c.queue_free()
 	hammer.add_child(own_piece)
 	own_piece.scale = Vector3.ONE * h.model.scale.x
+	var mi := own_piece.get_child(0) as MeshInstance3D
+	own_reach = -(mi.transform * mi.get_aabb()).position.z
 	_build_chain()
 	return true
 
@@ -246,7 +234,7 @@ func hammer_plant(p: Vector3, yaw: float) -> void:
 	hammer.scale = Vector3.ONE if own_piece else Vector3.ONE * PLANT_SCALE / 1.25
 	# the head points down (-Z turned to -Y), leaning PLANT_LEAN off vertical
 	hammer.rotation = Vector3(-PI * 0.5 - PLANT_LEAN, yaw, 0.0)
-	var head_drop := 0.62 * plant_k * cos(PLANT_LEAN)
+	var head_drop := (own_reach if own_piece else 0.62) * plant_k * cos(PLANT_LEAN)
 	hammer.global_position = p + Vector3(0, head_drop - 0.2, 0)
 	beacon.visible = true
 	beacon.global_position = p
@@ -347,14 +335,6 @@ func _place_glint(pv: Node3D) -> void:
 	KitShaders.param(glint, "power", lerpf(0.8, 1.5, glint_k) * (1.4 if hot else 1.0))
 	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
 
-# ------------------------------------------------------------------ the 360 Smash ring
-## The 360 Smash's spin ring: a red-gold band out to the spin's hit radius `r`, sweeping out to it with the hit.
-func smash_ring(at: Vector3, r: float) -> void:
-	swirl.visible = true
-	swirl.global_position = at + Vector3(0, 0.3, 0)
-	swirl_r = r
-	swirl_t = SWIRL_T
-
 ## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
 ## WAKE_EVERY s).
 func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
@@ -392,7 +372,6 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 
 func aegis_hide() -> void:
 	aegis.visible = false
-	AimKit.hide(h, "aegis_push")
 
 ## The wall comes up: it rises out of the ground in a puff of dust.
 func aegis_rise(at: Vector3) -> void:
@@ -406,37 +385,24 @@ func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
 	WardenMood.poke(h.model)
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
-	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
+	h.m.fx.spark(at, out, AimKit.hero_col(h), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
 	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
 
-## Broken: the plates crumble into chunks and dust.
+## Broken: the shared shield break (ShieldBreak) across the wall, like every other shield.
 func aegis_break(at: Vector3) -> void:
 	aegis.visible = false
 	AimKit.hide(h, "aegis_push")
-	h.m.fx.burst(at + Vector3(0, 1.0, 0), PLATE_COL, 22, 7.0, 0.9, 16.0, 2.4)
-	h.m.fx.burst(at + Vector3(0, 0.8, 0), PLATE_EDGE, 16, 5.0, 1.0, 18.0, 2.0)
-	h.m.fx.dust(at, 16)
-	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color("ffd25a"), 14, 11.0, 160.0, 0.4, 14.0, 1.4)
-
-## The push the raised wall gives, shown in front of it to everyone: a double chevron pointing outward that
-## pulses along its reach (a gameplay area: foes that touch the wall are pushed this far); `flash` on a push.
-func push_hint(w: Dictionary, n: Vector2, push: float, flash: bool) -> void:
-	if flash:
-		push_flash = PUSH_FLASH_T
-		aegis_hit = 1.0
-	var a: Vector2 = w["a"]
-	var b: Vector2 = w["b"]
-	var mid := (a + b) * 0.5
-	var t := float(h.m.time)
-	var hot := clampf(push_flash / PUSH_FLASH_T, 0.0, 1.0)
-	AimKit.lane(h, "aegis_push", {
-		"from": Vector3(mid.x + n.x * 0.5, h.pos.y, mid.y + n.y * 0.5), "dir": n, "len": push,
-		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
-		"alpha": 1.1 + 0.4 * (0.5 + 0.5 * sin(t * 7.0)) + hot, "hot": 0.3 + hot, "lw": 0.1, "all": true})
+	var half := Vector2(AEGIS_R * sin(AEGIS_HALF), AEGIS_H * 0.5)
+	ShieldBreak.of(h.m).play(at + Vector3(0, half.y, 0), half, Arch.color(h.arch))
 
 # ------------------------------------------------------------------ Purify
 ## The column coming down over the delay (u 0 -> 1), then the disc's rings.
 func purify(at: Vector3, r: float, u: float) -> void:
+	if u <= 0.0:
+		var own := AimKit.hero_col(h)
+		KitShaders.param(column, "color", own)
+		KitShaders.param(disc, "color", own)
+		KitShaders.param(disc, "color2", own.lightened(0.5))
 	column.visible = u < 1.0
 	if column.visible:
 		var g := AimMode.ground(h.m, at)
@@ -469,10 +435,8 @@ func _process(_delta: float) -> void:
 	_tick_hold(delta)
 	if not chain.is_empty():
 		_tick_chain()
-	_tick_slam(delta)
 	if aegis_hit > 0.0:
 		aegis_hit = maxf(0.0, aegis_hit - delta * 5.0)
-	push_flash = maxf(0.0, push_flash - delta)
 	if rise_t > 0.0:
 		rise_t = maxf(0.0, rise_t - delta)
 		var u := 1.0 - rise_t / RISE_T
@@ -505,15 +469,6 @@ func _tick_hold(delta: float) -> void:
 		_whirl(pv, delta)
 	elif pv.transform != Transform3D.IDENTITY:
 		pv.transform = Transform3D.IDENTITY
-
-func _tick_slam(delta: float) -> void:
-	if swirl_t > 0.0:
-		swirl_t -= delta
-		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)
-		swirl.rotation.y += delta * 12.0
-		KitShaders.param(swirl, "life", minf(1.0, life * 1.6))
-		swirl.scale = Vector3.ONE * swirl_r * lerpf(1.0, 0.8, life)
-		swirl.visible = swirl_t > 0.0
 
 ## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and
 ## pulses.

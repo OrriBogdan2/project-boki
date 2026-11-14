@@ -10,9 +10,11 @@ extends "res://tools/combo51_shots.gd"
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
-const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
-	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
+const HERO_PARTS := {
+	"juggernaut": ["lmb", "chain", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
+	"archer": ["string", "lmb", "far", "miss", "super", "heavy", "dash", "e", "r", "voice"],
+	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"],
+	"mage": ["lmb", "far", "hold", "rmb", "dash", "e", "r"]}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
@@ -115,6 +117,16 @@ func _part_lmb() -> void:
 	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]), 1.5)
 	await _go(GAP)
 
+## Three LMB shots at a dummy 8 m out, the frames mid-flight: the shot's trail and head at match zoom.
+func _part_far() -> void:
+	await _reset(8.0)
+	var shoot := func(t: float):
+		P.inp["fire"] = fmod(t, 0.7) < DT * 2.0 and t < 1.5
+		_aim(T.pos)
+	await _go(1.9, shoot, _sheet("far", "LMB at a dummy 8 m out: the trail and its head in flight",
+			[0.05, 0.1, 0.16, 0.75, 0.8, 0.86, 1.45, 1.5, 1.56]), 1.5)
+	await _go(GAP)
+
 func _part_hold() -> void:
 	await _reset(3.3)
 	var hold := func(t: float):
@@ -172,6 +184,21 @@ func _juggernaut_lmb() -> void:
 			"LMB Greatsword: a slash, the arc burning away, tip burst on the dummy; the next slash "
 			+ "back the other way",
 			[0.04, 0.09, 0.15, 0.22, 0.3, 0.54, 0.6, 0.68, 0.8]), 1.5)
+	await _go(GAP)
+
+## The slash chain at the footage's own taps (hero-ref 0023-0034 at 5 fps: swings on 0026, 0029, 0033), a frame
+## every 0.2 s to lay beside those frames.
+func _juggernaut_chain() -> void:
+	await _reset(3.3)
+	var taps := func(t: float):
+		P.inp["fire"] = [0.5, 1.1, 1.9].any(func(at: float) -> bool:
+			return t >= at and t < at + DT * 2.0)
+		_aim(T.pos)
+	var times: Array = []
+	for i in 12:
+		times.append(i * 0.2)
+	await _go(2.4, taps, _sheet("chain", "LMB chain at the footage's taps (0023-0034 at 5 fps, swings on 0026, 0029, "
+			+ "0033): no step into a swing, the sides alternate, the blade back between swings", times), 1.5)
 	await _go(GAP)
 
 func _juggernaut_wave() -> void:
