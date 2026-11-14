@@ -3,12 +3,13 @@ frame 1, so one exported without export_anim_slide_to_zero has no key before 1/3
 the last key into the first, and a loop whose last key is its first holds still for a frame each time round (a planted
 paw stops while the body goes on, so it slides). A clip that already starts at 0 is left as it is.
 Run: python3 tools/art1/glb_clip_start.py <file.glb>..."""
+
 import struct
 import sys
 
 from glb_add_clips import read, write
 
-FLOAT = 5126   # glTF componentType of a float32
+FLOAT = 5126  # glTF componentType of a float32
 
 
 def slide(j, bin_):

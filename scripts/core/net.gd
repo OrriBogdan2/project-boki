@@ -10,6 +10,7 @@ const VERSION := "0.24.7"        # online play only matches players on the same 
 const SEND_EVERY := 0.1          # s between the snapshots of what this game owns
 const EARLY_GAP := 0.03          # s: the soonest a snapshot may follow the last one
 const EARLY_DV := 8.0            # m/s: a jump in your velocity this big (a dash starts) sends a snapshot at once
+const SEND_DUE := 0.001      # s: a send timer this close to 0 is due (0.1 s less six 1/60 s steps leaves 1e-17, not 0)
 
 signal peers_changed
 signal message(topic: String, data, from: String)
@@ -24,7 +25,6 @@ var match_name := ""
 var m: Node = null            # the Match while online
 var out_hits: Array = []
 var out_events: Array = []
-const SEND_DUE := 0.001      # s: a send timer this close to 0 is due (0.1 s less six 1/60 s steps leaves 1e-17, not 0)
 var sent_vel := Vector3.ZERO     # your velocity in the last snapshot
 var sent_move_at := -9.0         # the start time of your kit move in the last snapshot
 var send_t := 0.0

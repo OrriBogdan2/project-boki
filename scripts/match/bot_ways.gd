@@ -10,23 +10,27 @@ extends RefCounted
 
 const PLANS := ["raider", "runner", "holder", "stayer"]
 ## The early seats each plan tries, its own first, in the order they open; every plan ends on the final.
-const ORDER := {"raider": ["lair", "spark", "uplink"], "runner": ["spark", "uplink"], "holder": ["uplink"],
-	"stayer": []}
-const RUN_LEAD := 45.0      # s: a runner heads for the Heart this long before runner_at_s ("at the Heart by 5:15")
-const FINAL_LEAD := 20.0    # s: squads with no other seat head for the Heart ring this long before it opens
-const RING_LOOK := 20.0     # s: a goal must still be inside the tide ring this far ahead
-const RING_KEEP := 4.0      # m (design map): and this far inside it
-const RING_EDGE := 2.0      # m: a bot this close to the ring's edge (or past it) drops everything and walks in
-const WAIT_R := 5.0         # m from the Heart a runner waits for the spark
-const ESCORT_R := 3.0       # m from the Gate the carrier's squadmates stand (the Gate takes them within gate_take_r)
+const ORDER := {
+	"raider": ["lair", "spark", "uplink"], "runner": ["spark", "uplink"], "holder": ["uplink"], "stayer": []
+}
+const RUN_LEAD := 45.0  # s: a runner heads for the Heart this long before runner_at_s ("at the Heart by 5:15")
+const FINAL_LEAD := 20.0  # s: squads with no other seat head for the Heart ring this long before it opens
+const RING_LOOK := 20.0  # s: a goal must still be inside the tide ring this far ahead
+const RING_KEEP := 4.0  # m (design map): and this far inside it
+const RING_EDGE := 2.0  # m: a bot this close to the ring's edge (or past it) drops everything and walks in
+const WAIT_R := 5.0  # m from the Heart a runner waits for the spark
+const ESCORT_R := 3.0  # m from the Gate the carrier's squadmates stand (the Gate takes them within gate_take_r)
 const GROUND_STEPS := [1.0, 0.85, 0.7, 0.5, 0.3]
+
 
 ## The Ways Out mode with both kinds of seat in this match.
 static func on(m: Match) -> bool:
 	return m.heart != null and m.heart.site != Vector3.INF and m.exits != null and m.exits.seats != null
 
+
 static func knob(k: String) -> float:
 	return float((Heart.rules()["bots"] as Dictionary)[k])
+
 
 ## The squad's plan, by the match seed (every game picks the same one).
 static func plan(m: Match, team: int) -> String:
@@ -40,12 +44,14 @@ static func plan(m: Match, team: int) -> String:
 			return p
 	return PLANS[-1]
 
+
 ## No human plays in this squad (the local player counts as one, on --autoplay too).
 static func bot_squad(m: Match, team: int) -> bool:
 	for o in m.hunters:
 		if o.team == team and (o == m.player or o.ctrl != "bot"):
 			return false
 	return true
+
 
 ## How many of the three early seats bot squads may take this match.
 static func cap(m: Match) -> int:
@@ -54,6 +60,7 @@ static func cap(m: Match) -> int:
 		teams[o.team] = true
 	var bots := teams.keys().filter(func(t): return bot_squad(m, t)).size()
 	return mini(int(knob("early_seats_cap_max")), bots / int(knob("early_seats_cap_per_bot_squads")))
+
 
 ## The squad on (or out by) each early seat, -1 for none: [lair, spark, uplink].
 static func early_teams(m: Match) -> Array:
@@ -65,20 +72,27 @@ static func early_teams(m: Match) -> Array:
 		spark = m.heart.carrier.team
 	return [on_seat.call(sq.lair), spark, on_seat.call(sq.uplink)]
 
+
 ## When a bot squad may start a seat: seat_delay_s after it opens (the spark: after it is charged).
 static func start_t(seat: String) -> float:
 	match seat:
-		"lair": return QuestSeats.q("lair_open_s") + knob("seat_delay_s")
-		"spark": return Heart.r("wake_s") + Heart.r("charge_s") + knob("seat_delay_s")
-		"uplink": return QuestSeats.q("uplink_open_s") + knob("seat_delay_s")
+		"lair":
+			return QuestSeats.q("lair_open_s") + knob("seat_delay_s")
+		"spark":
+			return Heart.r("wake_s") + Heart.r("charge_s") + knob("seat_delay_s")
+		"uplink":
+			return QuestSeats.q("uplink_open_s") + knob("seat_delay_s")
 	return 0.0
+
 
 ## This squad may start that early seat now: past the delay and under the cap (bot squads only).
 static func may_start(m: Match, team: int, seat: String) -> bool:
 	return not _delayed(m, team, seat) and not _capped(m, team)
 
+
 static func _delayed(m: Match, team: int, seat: String) -> bool:
 	return on(m) and bot_squad(m, team) and m.sess_time() < start_t(seat)
+
 
 ## Bot squads already hold or took as many early seats as bots may (this squad's own count too: one of
 ## it left behind after its squad took a seat does not start a second).
@@ -87,6 +101,7 @@ static func _capped(m: Match, team: int) -> bool:
 		return false
 	var taken := early_teams(m).filter(func(t): return t >= 0 and bot_squad(m, t)).size()
 	return taken >= cap(m)
+
 
 ## [goal, kind] for the squad's seat now, or [] (nothing to do yet: loot). Sealed in a lair, or riding
 ## its updraft out, Lairs.bot_goal leads.
@@ -104,18 +119,23 @@ static func goal(m: Match, h: Hunter) -> Array:
 			return []
 	return []
 
+
 ## One seat: [goal, kind], "wait" (not yet: loot meanwhile) or "gone" (taken, shut, capped: the next).
 static func _seat_goal(m: Match, h: Hunter, seat: String, own: bool) -> Variant:
 	var t := m.sess_time()
 	match seat:
-		"lair": return _lair(m, h, t)
-		"spark": return _spark(m, h, t, own)
-		"uplink": return _uplink(m, h, t, own)
+		"lair":
+			return _lair(m, h, t)
+		"spark":
+			return _spark(m, h, t, own)
+		"uplink":
+			return _uplink(m, h, t, own)
 	if m.heart.state == Heart.S.DONE:
 		return "gone"
 	if m.heart.state == Heart.S.FINAL or t >= Heart.r("final_s") - FINAL_LEAD:
 		return [_around(m, m.heart.site, h, Heart.r("final_r") * 0.5), "ring"]
 	return "wait"
+
 
 static func _lair(m: Match, h: Hunter, t: float) -> Variant:
 	var s: QuestSeat = m.exits.seats.lair
@@ -127,6 +147,7 @@ static func _lair(m: Match, h: Hunter, t: float) -> Variant:
 		return "gone"
 	var g: Array = m.lairs.bot_lair(s.ref, h)
 	return g if not g.is_empty() else "gone"
+
 
 static func _spark(m: Match, h: Hunter, t: float, own: bool) -> Variant:
 	var hr: Heart = m.heart
@@ -144,31 +165,34 @@ static func _spark(m: Match, h: Hunter, t: float, own: bool) -> Variant:
 	var no_rival := not _rival_near(m, h, hr.spark_pos, knob("runner_rival_r"))
 	if hr.spark_live() and not _delayed(m, h.team, "spark") and no_rival:
 		return [hr.spark_pos, "spark"]
-	return [_around(m, hr.site, h, WAIT_R), "seat"]      # charging, the delay, or a rival on it: wait by the Heart
+	return [_around(m, hr.site, h, WAIT_R), "seat"]  # charging, the delay, or a rival on it: wait by the Heart
+
 
 static func _uplink(m: Match, h: Hunter, t: float, own: bool) -> Variant:
 	var s: QuestSeat = m.exits.seats.uplink
 	if s == null:
 		return "gone"
 	if not m.exits.active_for(h.team).is_empty():
-		var g: Array = m.exits.bot_goal(h, true)      # ours charging (hold the yard) or its lift open
+		var g: Array = m.exits.bot_goal(h, true)  # ours charging (hold the yard) or its lift open
 		if not g.is_empty():
 			return g
 	if s.state in [QuestSeat.S.TAKEN, QuestSeat.S.SHUT]:
 		return "gone"
 	if s.state == QuestSeat.S.IN_USE:
-		return [m.exits.yard_spot(s.ref, h), "yard"] if own else "gone"      # a rival's: stand in it, it stalls
+		return [m.exits.yard_spot(s.ref, h), "yard"] if own else "gone"  # a rival's: stand in it, it stalls
 	if s.state == QuestSeat.S.LOCKED or t < knob("holder_at_s") or _delayed(m, h.team, "uplink"):
 		return "wait"
 	if _capped(m, h.team):
 		return "gone"
 	return [s.ref["pos"], "uplink"] if m.exits.startable(s.ref) else "wait"
 
+
 static func _rival_near(m: Match, h: Hunter, p: Vector3, r: float) -> bool:
 	for o in m.hunters:
 		if o.team != h.team and not o.out and not o.extracted and not o.downed and o.flat_dist(p) < r:
 			return true
 	return false
+
 
 ## Each bot its own spot r metres round a point (on ground), so a squad spreads out.
 static func _around(m: Match, c: Vector3, h: Hunter, r: float) -> Vector3:
@@ -178,6 +202,7 @@ static func _around(m: Match, c: Vector3, h: Hunter, r: float) -> Vector3:
 		return c
 	return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
 
+
 # ------------------------------------------------------------------ the tide ring
 ## How far from the Heart a goal may lie: the ring RING_LOOK seconds on, less RING_KEEP (INF: no ring yet).
 static func safe_r(m: Match) -> float:
@@ -186,9 +211,11 @@ static func safe_r(m: Match) -> float:
 	var k: float = m.heart.ways_scale
 	return Heart.ring_at(m.sess_time() + RING_LOOK, k) - RING_KEEP * k
 
+
 static func inside(m: Match, p: Vector3) -> bool:
 	var c: Vector3 = m.heart.site if m.heart else Vector3.ZERO
 	return Vector2(p.x - c.x, p.z - c.z).length() <= safe_r(m)
+
 
 ## The goal itself when it is inside the ring, else the nearest ground on the way from it to the Heart.
 static func keep_inside(m: Match, p: Vector3) -> Vector3:
@@ -201,6 +228,7 @@ static func keep_inside(m: Match, p: Vector3) -> Vector3:
 		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
 	return c
+
 
 ## Near the ring's edge or out in the tide: the spot to walk back in to (INF: fine where it is). Not
 ## while sealed in a lair (its walls hold the bot in; Lairs.bot_goal leads).

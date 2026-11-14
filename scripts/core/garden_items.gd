@@ -90,9 +90,9 @@ static func after(rec: Dictionary, pv: Dictionary) -> Dictionary:
 
 static func _write(rec: Dictionary, deltas: Dictionary) -> void:
 	for key in deltas:
-		var after: Variant = deltas[key][1]
-		if key.begins_with("stats."): rec["stats"][key.substr(6)] = after
-		else: rec[key] = after.duplicate(true) if typeof(after) in [TYPE_ARRAY, TYPE_DICTIONARY] else after
+		var to: Variant = deltas[key][1]
+		if key.begins_with("stats."): rec["stats"][key.substr(6)] = to
+		else: rec[key] = to.duplicate(true) if typeof(to) in [TYPE_ARRAY, TYPE_DICTIONARY] else to
 
 static func _verb(id: String) -> String:
 	var it := item(id)

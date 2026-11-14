@@ -4,6 +4,7 @@ extends RefCounted
 ## It uses the ability's own delay and travel speed from its archetype json and the foe's velocity, and
 ## never aims past the ability's own range, so a bot gets no reach or damage a player has not.
 
+
 ## The foe's ground spot `delay` s from now plus the shot's flight at `speed` m/s (0: no travel), kept
 ## within `rng` m of the caster.
 static func point(h: Hunter, tgt: Ent, delay: float, speed: float, rng: float) -> Vector3:
@@ -18,10 +19,12 @@ static func point(h: Hunter, tgt: Ent, delay: float, speed: float, rng: float) -
 	p.y = tgt.pos.y
 	return p
 
+
 ## Aim there now, and keep re-aiming each step for `delay` s (a wind-up reads the aim when it lets go).
 static func aim(k: ArchKit, tgt: Ent, delay: float, speed: float, rng: float, up := 0.9) -> void:
 	k.bot_lead = {"tgt": tgt, "t": delay, "speed": speed, "rng": rng, "up": up}
 	k.h.inp["aim"] = point(k.h, tgt, delay, speed, rng) + Vector3(0, up, 0)
+
 
 ## One step of the re-aim (ArchKit.tick).
 static func hold(k: ArchKit, dt: float) -> void:
