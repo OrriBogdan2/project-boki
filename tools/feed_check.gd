@@ -105,6 +105,7 @@ func _hand_cases() -> void:
 		Save.d["active"] = k["uid"]
 		Save.d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
 		HomeLayout.ensure(Save.d)
+		Save.d["items"].clear()      # a fresh save stocks kibble: the snack must be the only one to cycle to
 		Save.d["items"][SNACK] = 2
 		var home = await main._hb_home()
 		home.day_t = 0.4
