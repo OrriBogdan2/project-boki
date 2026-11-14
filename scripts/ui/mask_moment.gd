@@ -1,10 +1,10 @@
 class_name MaskMoment
 extends Node
-## Your first Relic, after you name your Boki and before the tutorial (no pick: Vex is the only one). An
+## Your first Relic, after you pick it (Lace, Kael or Vex: Hatch, HobOffer) and before the tutorial. An
 ## in-world beat on the hatch island: the camera frames you, one of the Empty, with your new Boki; the light
-## goes down and Vex's Relic drifts out of the heart-crystal toward you, glowing and trailing motes; your Boki
+## goes down and the Relic drifts out of the heart-crystal toward you, glowing and trailing motes; your Boki
 ## hops and looks up at it. "Put on the Relic" (the interact key) plays the put-on beat (MaskBeat), and you are
-## mostly Vex (Unmasked.blend). Then a short look at what Vex does (HunterViewer: her ability clips) and
+## mostly that Hunter (Unmasked.blend). Then a short look at what they do (HunterViewer: ability clips) and
 ## `finished` sends you on to the tutorial.
 # "mask" in code = "Relic" in game, owner 2026-11-07
 
@@ -26,7 +26,7 @@ const TEXT := "This Relic is the mask of a fallen Hunter. Put it on, and their s
 const BUTTON := "Put on the Relic"
 const GO := "Into the portal"
 
-var hunter_id := "gunslinger"
+var hunter_id := ""
 var host: Node3D                                 # the island scene (the hatch)
 var cam: Camera3D
 var kin: Node3D                                  # your new Boki
@@ -46,7 +46,7 @@ var _env: Environment
 var _env_energy := Vector2.ONE                   # the island's ambient and sky energy before the dim
 var _t := 0.0
 
-static func make(scene: Node3D, camera: Camera3D, boki: Node3D, id := "gunslinger") -> MaskMoment:
+static func make(scene: Node3D, camera: Camera3D, boki: Node3D, id: String) -> MaskMoment:
 	var m := MaskMoment.new()
 	m.host = scene
 	m.cam = camera
@@ -144,7 +144,7 @@ func put_on() -> void:
 		_anim = HunterAnim.new(you)
 		get_tree().create_timer(0.4).timeout.connect(_show_intro))
 
-## What Vex does: her ability clips beside her, and on to the tutorial.
+## What the Hunter does: their ability clips beside you, and on to the tutorial.
 func _show_intro() -> void:
 	phase = "intro"
 	_cam_to = CAM_INTRO
@@ -189,8 +189,10 @@ func _process(dt: float) -> void:
 	cam.look_at(_look)
 	var dim := lerpf(1.0, DIM, clampf(_t / 1.5, 0.0, 1.0))
 	for pair in _lights:
+		if not is_instance_valid(pair[0]):      # (the island may free its lights before the beat ends)
+			continue
 		var light := pair[0] as Light3D
-		if is_instance_valid(light) and not light.get_parent() is MaskRelic:
+		if not light.get_parent() is MaskRelic:
 			light.light_energy = float(pair[1]) * dim
 	if _env:
 		_env.ambient_light_energy = _env_energy.x * dim

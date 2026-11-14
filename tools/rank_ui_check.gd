@@ -5,7 +5,8 @@ extends RefCounted
 ##   3. bots still spend their points on their own
 ##   4. the bar shows tier pips and a gold "+" on every slot that can rank, with a click target over it;
 ##      clicking the "+" spends the point; with no points left the "+" and its click target go away
-##   5. a new point shows the ALT+key hint for a few seconds
+##   5. a quiet beam shows over each slot that can rank, and clears after the pick
+##   6. a new point shows the ALT+key hint for a few seconds
 ## Runs a real match headless with the real HUD. Never touches the save.
 
 var bad := 0
@@ -54,7 +55,10 @@ func _max_e_first(P: Hunter) -> void:
 	ok(not P.can_level("kin"), "E can't rank past its max")
 	ok(P.ak.rank("kin") == e_max, "the kit reads E at rank %d" % P.ak.rank("kin"))
 	ok(pow1 < 0.0 or P.ak.power("kin") > pow1, "E hits harder at max rank (%.2f -> %.2f)" % [pow1, P.ak.power("kin")])
-	ok(P.ak.cd_k("kin") < cd1, "E recharges faster at max rank (%.2f -> %.2f)" % [cd1, P.ak.cd_k("kin")])
+	var cuts: bool = P.ak.rank_k("rank_cd", "kin", 0.0) < 1.0      # the source's E upgrade cuts it (Vex's doesn't)
+	var cd_max: float = P.ak.cd_k("kin")
+	ok(cd_max < cd1 if cuts else is_equal_approx(cd_max, cd1),
+		"E recharges faster at max rank where its rank_cd row cuts it, else the same (%.2f -> %.2f)" % [cd1, cd_max])
 
 ## 3: a bot's points are spent the moment it levels.
 func _bot_ranks(bot: Hunter) -> void:
@@ -82,6 +86,8 @@ func _bar(m: Match, P: Hunter) -> void:
 	ok(RankMarks.spot("sec").has_area() and RankMarks.spot("dash").has_area(),
 		"locked RMB and rank-1 dash both take a click")
 	ok(not RankMarks.spot("kin").has_area(), "maxed E shows no +")
+	ok(RankMarks.beam_on("sec") and RankMarks.beam_on("dash"), "the level-up beam shows over each slot that can rank")
+	ok(not RankMarks.beam_on("kin"), "maxed E has no beam")
 	ok(RankMarks._hint_until > m.time, "the new point shows the ALT+key hint for a while")
 	var rc: RankClick = null
 	for n in clicks:
@@ -99,6 +105,7 @@ func _bar(m: Match, P: Hunter) -> void:
 	await m.hud.panels.draw
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
+	ok(not RankMarks.beam_on("sec") and not RankMarks.beam_on("dash"), "after the pick the beam is cleared")
 
 func _frames(n: int) -> void:
 	for i in n:

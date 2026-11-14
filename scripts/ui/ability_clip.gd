@@ -95,7 +95,7 @@ func _ready() -> void:
 	fx = fx_for(id, slot)
 	_melee = bool(Data.weapon_stats(Arch.signature(id)).get("melee", false))
 	_moves = HunterViewer.moves_for(id, slot)
-	add_theme_stylebox_override("panel", UI.frame(Color(0.04, 0.035, 0.07, 0.96), 10, Color(col, 0.35), 1, 6, 6))
+	add_theme_stylebox_override("panel", UI.frame(Color(UI.NIGHT, 0.96), 10, Color(col, 0.35), 1, 6, 6))
 	set_meta("slot", slot)
 	var v := UI.vbox(4)
 	add_child(v)
@@ -145,6 +145,11 @@ func play(on: bool) -> void:
 	playing = on
 	if model:
 		vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE if on else SubViewport.UPDATE_ONCE
+
+## Starts the loop over from its first frame.
+func restart() -> void:
+	t = 0.0
+	_hit_i = 0
 
 ## Builds the clip's scene now (the playing clip does it on its own turn; checks call it to step a clip by hand).
 func build() -> void:
@@ -287,7 +292,7 @@ func _effects() -> void:
 	_number.outline_size = 14
 	_number.pixel_size = 0.006
 	_number.modulate = col.lightened(0.5)
-	_number.outline_modulate = Color(0.05, 0.03, 0.08, 0.9)
+	_number.outline_modulate = Color(UI.NIGHT, 0.9)
 	_number.no_depth_test = true
 	_number.render_priority = 10
 	_number.visible = false

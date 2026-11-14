@@ -4,8 +4,7 @@ extends PanelContainer
 ## name, weight), then one row per ability (Passive, LMB, RMB, E, Dash, the hunter's ultimate, the Boki
 ## Fusion), each with its key cap, a big icon, its name and one short line. A row's "Details" opens that
 ## ability's page (preview, every rule) in the same frame (no scroll, no resizing: the card is always
-## SIZE). Used in the Arena / training (K) and on the expedition loadout (KitCard.strip, a compact row
-## that opens the full card).
+## SIZE). Used in the Arena / training (K). KitCard.strip is a compact row that opens the full card.
 
 const SIZE := Vector2(800, 620)
 const BODY_H := 468.0
@@ -15,10 +14,6 @@ const PORTRAIT := Vector2(76, 76)    # px: the Hunter's portrait in the header
 const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
 ## The order the card lists them in: the kit as it is played, then the ultimate and the Fusion.
 const ROWS := ["passive", "lmb", "rmb", "e", "dash", "x", "r"]
-## Icons the kits name that the icon set draws under another id (weapons and four stray names).
-const ICON_FIX := {"quill_rifle": "rifle", "coilcaster": "burst_rifle", "longbow": "sniper", "flamethrower": "fireball",
-	"tower_shield": "bulwark", "rubble_fists": "haymaker", "tether_lantern": "tether", "hoar_fan": "wave",
-	"lantern_crook": "mend", "earthshatter": "quake", "bolt": "fireball", "shield": "bulwark", "dash2": "dash"}
 ## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
 const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
 ## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
@@ -27,7 +22,7 @@ static func _cap(slot: String) -> String:
 	if slot == "x":
 		return Settings.key_cap("hunter_ult")
 	if slot == "r":
-		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
+		return Settings.key_cap("ultimate")
 	return String(KEYS[slot])
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
@@ -35,6 +30,7 @@ const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "R
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
 	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "x": "lines"},
+	"gil": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "lines", "x": "lines"},
 	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "x": "arrows3"},
 	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone", "x": "leap"},
 	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines", "x": "zone"},
@@ -142,7 +138,7 @@ func _row(slot: String) -> Control:
 		top.add_child(hw)
 	tv.add_child(top)
 	var line := String(info["line"])
-	if slot == "r" and kin_sp != "" and not KinCommand.class_ults():
+	if slot == "r" and kin_sp != "":
 		var bn := String(Data.KIN.get(kin_sp, {}).get("name", kin_sp))
 		line = "Fuse with your %s: its colour and type change your abilities." % bn
 	var ln := UI.label(short_line(line, String(info["name"])), 13, UI.MUTED)
@@ -268,17 +264,12 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": "Boki Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
 			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Fusion. Your Boki fuses with you and its kind sets the Fusion form." % Settings.key_cap("ultimate")]]
 		"r":
-			# the Merge key is the Merge for every class; the class's own ultimate is held back behind
-			# boki_system.json class_ults until the hero-port work folds it into the kits
-			var sd: Dictionary = d.get("r", {})        # (a hero with no class R: only the Merge shows)
-			var on := KinCommand.class_ults() and not sd.is_empty()
-			out.merge({"name": String(sd["name"]) if on else "Fusion", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
-				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
+			# the Merge key is the Merge for every class
+			out.merge({"name": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "level 6 · full bond meter", "line": "You and your Boki become one: its colour, its type, your abilities changed."}, true)
 			out["detail"] = [["Fusion", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the Fusion by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				] + ([["Held back", "%s: %s (the Hunter's own ultimate, off while the Fusion is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
-	out["icon"] = ICON_FIX.get(out["icon"], out["icon"])
+				]
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
