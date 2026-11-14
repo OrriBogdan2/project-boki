@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""regate-probe : stall alarm for the merge queue; prints ALERT lines (fleet-watch shows them), nothing when healthy.
+
+ - regate.lag: a WAITING line (~/cj/regate-bot/regate-state.txt or ~/cj/merge-ready-state.txt) for the same PR seen
+   for > REGATE_LAG_MIN (60) min in a row. The first-seen time is kept by this probe, so any line format works.
+ - merge.stall: no "Merge pull request #" on origin/main for > 120 min while gated PRs are open (regate-bot's last
+   scan counted them), i.e. merge-ready-watch merged 0 for 2 h.
+ - regate-bot itself silent: state.json older than 30 min (cron dead).
+Exit 0 always; `regate-probe --status` also prints an OK line.
+"""
+
+import os
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from regate_common import CJ, STATE_DIR, git, iso, load_json, now, save_json  # noqa: E402
+
+LAG = int(os.environ.get("REGATE_LAG_MIN", 60))
+SEEN = STATE_DIR / "probe-seen.json"
+
+
+def main():
+    alerts = []
+    seen = load_json(SEEN, {})
+    cur = {}
+    for src in (STATE_DIR / "regate-state.txt", CJ / "merge-ready-state.txt"):
+        if not src.exists():
+            continue
+        for ln in src.read_text().splitlines():
+            m = re.search(r"#(\d+)", ln) if "WAITING" in ln else None
+            if not m:
+                continue
+            k = f"{src.name}:{m.group(1)}"
+            cur[k] = seen.get(k, now())
+            age = (now() - cur[k]) / 60
+            if age > LAG:
+                alerts.append(f"ALERT regate.lag: PR #{m.group(1)} WAITING {age:.0f} min (> {LAG}) in {src}: {ln.strip()[:160]}")
+    save_json(SEEN, cur)
+    st = load_json(STATE_DIR / "state.json", {})
+    last = git("log", "-1", "--format=%ct", "--grep=^Merge pull request #", "origin/main")
+    if last and st.get("gated_open", 0) > 0 and (now() - int(last)) / 60 > 120:
+        alerts.append(f"ALERT merge.stall: no PR merged since {iso(int(last))} ({(now() - int(last)) / 60:.0f} min)"
+                      f" while {st['gated_open']} gated PRs are open")
+    sp = STATE_DIR / "state.json"
+    if sp.exists() and (now() - sp.stat().st_mtime) / 60 > 30:
+        alerts.append(f"ALERT regate.dead: regate-bot state not updated for {(now() - sp.stat().st_mtime) / 60:.0f} min (cron?)")
+    for a in alerts:
+        print(a)
+    if not alerts and "--status" in sys.argv:
+        print(f"OK regate: {len(cur)} WAITING lines tracked, none > {LAG} min")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

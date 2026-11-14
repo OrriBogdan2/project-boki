@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""gh-outbox-relay [--dry] [--hours H] : post the PR comments that worker jobs could not (no gh on workers). Hetzner cron.
+
+Worker jobs write a comment as ~/cj/<id>/gh-outbox/pr<N>[-anything].md (merge-driver-1114 used ~/cj/<id>/comments/pr<N>*.md;
+both are read). Every few minutes this pulls those *.md files from each worker (~/cj/workers, ssh key boki_s2_deploy;
+rsync of only the two folders, for jobs of the last H hours, default 48) into the same paths on hetzner, then posts with gh:
+ - a file whose text has a line "GATE GREEN <sha>": only when <sha> is the PR's current head (a stale gate is never posted),
+ - "REGATE RED|CONFLICT <sha>" and "<job> owns this PR until merged" lines: as they are.
+Other files (drafts, notes) are ignored. Dedupe by PR + kind + sha: ~/cj/gh-outbox-posted.txt, and a GATE GREEN for that sha
+already on the PR (e.g. posted by hand) counts as posted. No GitHub token ever leaves hetzner.
+"""
+
+import argparse
+import fcntl
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from regate_common import CJ, GATE_RE, OWNER_RE, REGATE_RE, SSH_KEY, GH, iso, now, run, workers  # noqa: E402
+
+POSTED = CJ / "gh-outbox-posted.txt"
+PR_RE = re.compile(r"pr[-_#]?(\d+)", re.I)
+
+
+def recent_jobs(hours):
+    t = now() - hours * 3600
+    return [d for d in CJ.glob("2026*-*") if d.is_dir() and d.stat().st_mtime > t]
+
+
+def job_worker(d):
+    p = d / "prompt"
+    if not p.exists():
+        return None
+    m = re.search(r"started on worker (\S+?)[\s(,;]", p.read_text(errors="replace")[:600])
+    return m.group(1) if m else None
+
+
+def pull(jobs, dry):
+    """rsync the comments/ and gh-outbox/ folders of each worker job back to the same path here."""
+    ws = workers()
+    by_w = {}
+    for d in jobs:
+        w = job_worker(d)
+        if w and w in ws:
+            by_w.setdefault(w, []).append(d.name)
+    for w, ids in by_w.items():
+        rules = []
+        for i in ids:
+            rules += [f"--include=/{i}/", f"--include=/{i}/comments/", f"--include=/{i}/gh-outbox/",
+                      f"--include=/{i}/comments/*.md", f"--include=/{i}/gh-outbox/*.md"]
+        cmd = ["rsync", "-a", "-m", *rules, "--exclude=*", "-e", f"ssh -i {SSH_KEY} -o BatchMode=yes -o ConnectTimeout=10",
+               f"boki@{ws[w]}:/home/boki/cj/", f"{CJ}/"]
+        if dry:
+            cmd.insert(1, "-n")
+        rc, _, err = run(cmd, timeout=180)
+        if rc not in (0, 23, 24):  # 23/24: some dirs missing on the worker, fine
+            print(f"pull {w}: rsync rc={rc} {err.strip()[-200:]}")
+
+
+def items(jobs):
+    for d in jobs:
+        for sub in ("gh-outbox", "comments"):
+            for f in sorted((d / sub).glob("*.md")):
+                m = PR_RE.search(f.name)
+                body = f.read_text(errors="replace").strip()
+                if not m or not body:
+                    continue
+                g, r, o = GATE_RE.search(body), REGATE_RE.search(body), OWNER_RE.search(body)
+                if g:
+                    yield int(m.group(1)), "GATE", g.group(1), body, f
+                elif r:
+                    yield int(m.group(1)), "REGATE-" + r.group(1), r.group(2), body, f
+                elif o:
+                    yield int(m.group(1)), "OWNER", o.group(1), body, f
+
+
+def main(a):
+    lock = open(CJ / ".gh-outbox-relay.lock", "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return 0
+    jobs = recent_jobs(a.hours)
+    pull(jobs, a.dry)
+    done = set()
+    if POSTED.exists():
+        done = {" ".join(ln.split()[1:4]) for ln in POSTED.read_text().splitlines() if ln.strip()}
+    gh = GH()
+    if not gh.live and not a.dry:
+        print("gh-outbox-relay: gh is not logged in here; run it on hetzner (or with --dry)")
+        return 1
+    heads, comments = {}, {}
+    for n, kind, key, body, f in items(jobs):
+        k = f"{n} {kind} {key[:10]}"
+        if k in done:
+            continue
+        if n not in heads:
+            p = gh.pr(n)
+            heads[n] = p["head"]["sha"] if p["state"] == "open" else None
+            comments[n] = gh.comments(n) if heads[n] else []
+        verdict = None
+        if heads[n] is None:
+            verdict = "skip-closed"
+        elif kind == "GATE" and not heads[n].startswith(key):
+            verdict = f"skip-stale (head {heads[n][:10]})"
+        elif kind == "GATE" and any(re.search(rf"^\W*GATE GREEN\s+{key[:10]}", c["body"], re.M) for c in comments[n]):
+            verdict = "already-on-github"
+        elif any(body[:200] == c["body"][:200] for c in comments[n]):
+            verdict = "already-on-github"
+        if verdict is None:
+            src = f"{f.parent.parent.name}/{f.parent.name}/{f.name}"
+            verdict = gh.post(n, f"{body}\n\n<sub>relayed by gh-outbox-relay from {src} (worker job without gh)</sub>", dry=a.dry)
+        print(f"#{n} {kind} {key[:10]} {f}: {verdict}")
+        if not a.dry:  # stale heads never come back (no force push), so they are recorded too
+            with open(POSTED, "a") as fh:
+                fh.write(f"{iso(now())} {k} {verdict.split(' ')[0]} {f}\n")
+            done.add(k)
+    return 0
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--hours", type=float, default=48)
+    sys.exit(main(ap.parse_args()))
