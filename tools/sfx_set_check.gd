@@ -43,6 +43,8 @@ extends RefCounted
 ##      the shared `hit` for an ability's hit and a Hunter with no weapon tick
 ##  20. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
 ##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
+##  21. Sparkle's Kitefall: a cue on every beat (crouch, lift-off, hover hum loop, drop, strike) within 50 ms of the
+##      state change, the hum off by the drop (tools/ult_beat_sfx_check.gd; runs one short training match)
 ## Reads the files (and, for 15 and 16, one short training match); never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -91,6 +93,7 @@ func run(main: Node) -> void:
 	await _held_fire(main)
 	_hit_ticks()
 	_hostile()
+	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
