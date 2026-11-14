@@ -60,6 +60,8 @@
 		{"hero": "dolm", "slot": "R", "field": "x.len", "value": 21.6, "tol": 2.16, "evidence": "F Tetraform reticle about 12 bh = 21.6 m: 359 px at 30 px/bh (f0579), raised ridge 388 px (f0590) (hero-ref/breah.md)"},
 		{"hero": "mage", "slot": "E", "field": "e.radius", "value": 1.8, "tol": 0.18, "evidence": "F Lightning Javelin circle about 2 bh across = 1.8 m radius, placement 0184 and strike flash 0190 (hero-ref/vireo.md)"},
 		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.54, "evidence": "F Rain of Arrows wall centred on the cursor at about 6 bh = 10.8 m (hero-ref/pin.md 0498; 0457 at 4.5 bh); a floor, the cap is not seen; tol 0.3 bh read error"},
-		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.72, "evidence": "F Rain of Arrows: pin clip frame 0498, wall centred on the cursor 6.0 +-0.4 bh from the hunter (1 bh = 1.8 m); a frame lower bound, the clamp was not reached (frame 0457: 4.9 bh)"}
+		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.72, "evidence": "F Rain of Arrows: pin clip frame 0498, wall centred on the cursor 6.0 +-0.4 bh from the hunter (1 bh = 1.8 m); a frame lower bound, the clamp was not reached (frame 0457: 4.9 bh)"},
+		{"hero": "bulwark", "slot": "E", "field": "e.cooldown", "value": 12.0, "tol": 0.0, "evidence": "D Regen Field: 8s @IV and its tier III upgrade -4s, so 12s at tiers I-II (supervive_kits.md)"},
+		{"hero": "bulwark", "slot": "E", "field": "e.cooldown_rank3", "value": 8.0, "tol": 0.0, "evidence": "D Regen Field: 8s @IV (supervive_kits.md); our rank 3 folds tiers III and IV"}
 	]
 }

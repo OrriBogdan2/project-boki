@@ -247,7 +247,7 @@ should block the recall.
 | Item | Before | After | Conversion |
 |---|---|---|---|
 | E zone | one burst 1 s after the cast, 26 heal, foes slowed 25%, cooldown 11 s | a column for 1 s, then a 4 s zone round the hammer (wherever it is, following it): 2 every 0.5 s, ending in a burst of 18 (the aegis mend 60 and the revive start on the burst); no foe slow | the 4 s zone length, the 2-per-tick and the burst 18 are our picks (the data gives no duration or numbers): a full zone gives 34 against the old 26 |
-| E cooldown | 11 s | 12 s (rank 3: 8 s) | seconds taken from the data directly (12 s base, -4 s at the third upgrade) |
+| E cooldown | 11 s | 12 s (rank 3: 8 s) | seconds taken from the data directly (12 s base, -4 s at the third upgrade); `--kit-parity-check` pins both |
 | E ranks | rank 2 healing +25%, rank 3 +25% and +0.5 m, +10 heal | rank 2 healing +25%, rank 3 the cooldown to 8 s and healing +50% in all | source II +25% heal, III -4 s, IV +25% heal; our rank 3 folds III and IV |
 | Passive | heal 24 on a Crush; only a Bash, Shield Charge or full Crushing Blow could Crush | no heal; any Crushing Blow, the 360 Smash, the Shield Charge and the Shield Slam Crush | stun 0.5 and 8 damage kept (our numbers) |
 | Bash | RMB tap or release after a block, plus Shift behind the aegis | Shift behind the aegis only; an RMB tap does nothing | none |
