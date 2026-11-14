@@ -7,7 +7,8 @@
 		"foot.R": "shin.R",
 		"jaw": "head",
 		"lip.L": "head",
-		"lip.R": "head"
+		"lip.R": "head",
+		"x_breath": "hips"
 	},
 	"blade": {
 		"root": "anchor_wrist_R",
@@ -30,34 +31,30 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 5.0
+		"run_speed": 4.65, "cycle_s": 0.55, "stride": [1.5, 1.2], "foot_mps": [2.65, 5.0],
+		"side_foot_mps": [1.0, 2.0], "arm_swing": {"L": 0.5, "R": 0.5}
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
 		"dive": "dive"
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.42,
-		"min_fall": 0.5
-	},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"breah_throw": {
 			"clip": "lmb_throw",
-			"air_legs": true
-		},
+			"upper": "moving"
+		, "air_legs": true},
 		"breah_wind": {
 			"clip": "lmb_wind",
-			"hold_from": 0.24,
-			"air_legs": true
-		},
+			"hold_from": 0.24
+		, "air_legs": true},
 		"breah_punch": {
 			"clip": "lmb_punch",
-			"air_legs": true
-		},
+			"upper": "moving"
+		, "air_legs": true},
 		"breah_crouch": {
 			"clip": "rmb_gather",
 			"hold_from": 0.16
@@ -83,21 +80,24 @@
 			"clip": "dash_land"
 		},
 		"breah_exdash": {
-			"clip": "dash_air"
+			"clip": "dash_air",
+			"heading": true,
+			"turn_max": 3.2
 		},
 		"breah_raise": {
-			"clip": "e_row",
-			"air_legs": true
-		},
+			"clip": "e_row"
+		, "air_legs": true},
 		"breah_sense": {
 			"clip": "sense"
 		},
 		"breah_spine_aim": {
 			"clip": "x_aim",
-			"hold_from": 0.12
+			"hold_from": 0.12,
+			"upper": "moving"
 		},
 		"breah_spine": {
-			"clip": "x_spine"
+			"clip": "x_spine",
+			"upper": "moving"
 		},
 		"mf_xform": {
 			"clip": "fuse"
@@ -110,6 +110,7 @@
 			"hold_from": 0.22
 		}
 	},
+	"lockin": {"clip": "emote_toss", "from": 0.15, "dur": 1.45, "rate": 1.0},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
@@ -123,6 +124,9 @@
 			"dur": 0.4
 		}
 	},
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_bow", "refuse": "g_wag"},
+	"turn": {"dur": 0.34, "lift": 0.36},
+	"cc": {"pull": 0.18, "tug_hz": 1.3, "twist": 0.06, "bow": 0.05},
 	"procedural": [
 		"ledge",
 		"mantle",

@@ -8,12 +8,13 @@ the bells on his cap (which ring only when he swaps) and the Void under it all (
 low drone). His voice is a man's behind a mask: hollow, eerie, playful, a giggle where a groan should be.
 
   os_orb (fire, 3 takes)       a violet orb flicked out: a soft void puff and a music-box tine
-  os_orb_hot (fire, 3 takes)   the full orb: a deeper puff and a two-tine flourish
+  os_orb_hot (fire, 3 takes)   the charged void orb: a deeper puff, a two-tine flourish, a low gulp
   os_prime                     the orb at full: a quiet tine trill
   ostra_music_box              SIGNATURE: the crank's eerie tune, when Brimseed is nearly ripe (its column)
   ostra_spring_boing           SIGNATURE: the jack springing out as Brimseed pops
   os_snap_wind / os_snap / os_snap_hit   Snap: the crank ratcheting / the spring-loaded spear / the crown stun
-  os_swap_lob / os_swap        Trade: the toss (a rising slide whistle) / the arrival, cap bells ringing
+  os_swap_lob / os_swap        Trade: the toss (a low void whoosh, a whisper and a glass sting) / the
+                               arrival, cap bells ringing
   os_seed / os_pop             Brimseed planted / popped
   os_empower                   Swollen: the Void inflating round him, a giggle
   os_well / os_well_hum        Nightwell: the gathering implosion / the well opening
@@ -146,14 +147,17 @@ def orb(i):
 
 
 def orb_hot(i):
-    """The full orb: a deeper whoomp from the Void and a two-tine flourish."""
-    d = 0.75
+    """The charged void orb: a deeper whoomp from the Void, a two-tine flourish, then a low gulp and a
+    faint glass ring trailing it (heavier and longer than the quick shard's flick)."""
+    d = 0.9
     whoomp = mix(kick(160, 55, 0.35, 0.02, 0.06, 2.2) * 0.75, lpf(noise(0.3), 700) * env(N(0.3), 0.003, 0.06) * 1.0,
                  sub(70, 45, 0.3, 0.06) * 0.35)
     air = lpf(swoosh(0.36, 450, 1800, 2.0, 0.8, 1.3), 4000) * 0.3
     a, b = SCALE[(i + 2) % len(SCALE)], SCALE[(i + 4) % len(SCALE)]
     notes = mix(tine(hz(a), 0.6, 0.2) * 0.4, at(tine(hz(b), 0.6, 0.22) * 0.45, 0.06))
-    return pad(lpf(mix(soft(whoomp, 1.0), fo(air), notes), 8000), d)
+    gulp = at(fo(void(0.45, 240, 0.15) * 0.5, 0.6), 0.08)
+    glass = at(S.chime(1318.5 * (1 + 0.03 * i), 0.6, 0.25, ((1.0, 1.0), (2.32, 0.35))) * 0.12, 0.1)
+    return pad(lpf(mix(soft(whoomp, 1.0), fo(air), notes, gulp, glass), 8000), d)
 
 
 def prime():
@@ -228,12 +232,18 @@ def snap_hit():
 
 # ------------------------------------------------------------------ Shift: Trade
 def swap_lob():
-    """The toss: a quick whoosh up and a slide whistle rising (the joke before the trick)."""
-    d = 0.55; t = T(d)
-    air = lpf(swoosh(0.4, 400, 1600, 1.8, 0.8, 1.4), 4000) * 0.35
-    f = 520 * (1500 / 520) ** ((t / d) ** 0.8) * (1 + 0.01 * np.sin(2 * np.pi * 6 * t))
-    whistle = (np.sin(2 * np.pi * np.cumsum(f) / S.SR) + 0.1 * bpf(noise(d), 800, 3000)) * np.sin(np.pi * t / d) ** 1.2
-    return mix(fo(air), whistle * 0.35)
+    """The toss: the Void opening under him (a low whoosh over a beating sub swell), a reversed whisper
+    rushing in, then a glassy sting of two near notes rubbing (ominous) and one low tine from the box."""
+    d = 1.1
+    low = lpf(swoosh(0.75, 90, 560, 1.6, 0.7, 1.2), 1400) * 0.9
+    drone = fo(void(0.7, 260, 0.35) * 0.55, 0.5)
+    gulp = at(sub(70, 38, 0.5, 0.12) * 0.5, 0.16)
+    hush = S.voice(0.32, 150, 120, 'ah', breath=0.95, scale=0.9, a=0.01, decay=0.08)[::-1]
+    whisper = hollow(hpf(lpf(soft(hush, 30), 7000), 900)) * 0.5
+    glass = mix(S.chime(1318.5, 0.85, 0.3, ((1.0, 1.0), (2.32, 0.4), (4.25, 0.18))) * 0.3,
+                S.chime(1396.9, 0.85, 0.26, ((1.0, 0.8), (2.32, 0.3))) * 0.25)
+    sting = at(mix(glass, tine(hz(69), 0.7, 0.3) * 0.25), 0.2)
+    return pad(lpf(mix(soft(low, 20), drone, gulp, whisper, sting), 9000), d)
 
 
 def swap():
@@ -370,7 +380,7 @@ def build():
     S.save_cat('os_snap_wind', snap_wind(), 'cast')
     S.save_cat('os_snap', snap(), 'cast')
     S.save_cat('os_snap_hit', snap_hit(), 'impact')
-    S.save_cat('os_swap_lob', swap_lob(), 'cast')
+    S.save_cat('os_swap_lob', swap_lob(), 'dash')
     S.save_cat('os_swap', swap(), 'impact')
     S.save_cat('os_seed', seed(), 'cast')
     S.save_cat('os_pop', pop(), 'impact')

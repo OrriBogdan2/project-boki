@@ -21,7 +21,7 @@ straight through them is a Blowout that gives your dash back at once.
 3. **Wirerun** (Shift): hold to stretch the lane from 4 to 7m, let go to streak. Shots pass through you and every foe you cross takes a hit. Through a Live foe it is a **Blowout** and the dash resets.
 4. **Coilshot** (RMB): hold to charge a heavy round that throws the first foe back. Into a wall or another foe, they are stunned. A hit on a hunter drops a charge mote; pick it up for your dash back.
 5. **Skycall** (E): mark a spot, and a moment later lightning flings everyone there along your aim and grounds them (no dashing). It steals a rival's mote too.
-6. A knock heals you for 15% of your health. There is no R: the Boki Merge takes that key.
+6. There is no R: the Boki Merge takes that key.
 
 ## Combos and interactions
 
@@ -69,16 +69,16 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Static (passive).** Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back. Knocking a hunter down heals you for 15% of your health.
+**Static (passive).** Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back.
 
-**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.
+**Wirerun (dash, Shift, 8s cooldown).** Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 6.02 to 10.48m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 43m/s (shots pass through you), carrying that drift (at most a run's speed), and come out of it at a run, in the air too. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.
 
 **Storm Rod (RMB, 8s cooldown).**
 
-- *Tap:* Let go early (it still takes 0.3s to summon): 18 damage and a short knock, flying the full 13m lane.
-- *Hold:* Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 30 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static.
+- *Tap:* Let go early (it still takes 0.3s to summon): 16 damage and a short knock, flying the full 13m lane.
+- *Hold:* Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 26.7 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static.
 
-**Skycall (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.
+**Skycall (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 19.4 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.
 
 **Kitefall (hunter ultimate, from level 6, 42s cooldown).** Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond.
 
@@ -88,9 +88,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; +50% damage on top. |
-| Dash (Shift) | recharge 8s -> 7.2s. | recharge 8s -> 6.4s; the run's own hit deals double. |
-| E | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 5.4s (3s off), damage +30%. |
+| RMB | cooldown 8s -> 7.2s, damage +20%. | cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top). |
+| Dash (Shift) | recharge 8s -> 7.3s. | recharge 8s -> 6.7s; the run's own hit deals double. |
+| E | damage +25%. | cooldown 10.5s -> 7.9s (a quarter off), damage +50%. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 

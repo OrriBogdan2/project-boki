@@ -200,12 +200,12 @@ for i, t_ in enumerate(tpar):
     q = x - b_
     wt[tn[b_]][i] += (1 - q) * tw_[i]
     wt[tn[min(b_ + 1, K.TAIL_N - 2)]][i] += q * tw_[i]
-wb_ = {k_: x.copy() for k_, x in Wb.items() if k_ not in ("tailw", "capew", "kill", "green", "brown", "cream")}
+wb_ = {k_: x.copy() for k_, x in Wb.items() if k_ not in ("tailw", "capew", "kill", "cape", "brown", "cream")}
 wb_.update(wt)
-CAPE_PTS = [(0.0, -0.17, 1.0), (0.0, -0.22, 0.86), (0.0, -0.25, 0.72), (0.0, -0.26, 0.58)]
+CAPE_PTS = [(0.0, -0.10, 1.02), (0.0, -0.14, 0.92), (0.0, -0.17, 0.84), (0.0, -0.18, 0.76)]   # the capelet's back hem
 cn = ["spring_capeback_%d" % i for i in range(4)]
 cw_ = Wb.get("capew", np.zeros(len(body.v)))
-dz = np.clip((1.0 - body.v[:, 2]) / 0.42, 0, 0.999) * 3
+dz = np.clip((1.02 - body.v[:, 2]) / 0.26, 0, 0.999) * 3
 for n_ in cn[:3]:
     wb_[n_] = np.zeros(len(body.v))
 for i, x in enumerate(dz):
@@ -387,8 +387,8 @@ for pid_all, p in enumerate(pieces):
             FV.append([i + base for i in q])
             cl = p.mat
             if p is body:
-                gw, bw, cw = [np.mean(Wb.get(c_, np.zeros(len(body.v)))[q]) for c_ in ("green", "brown", "cream")]
-                cl = "leather" if bw > 0.5 else ("cloth" if gw > 0.5 or cw > 0.5 else "skin")
+                gw, bw = [np.mean(Wb.get(c_, np.zeros(len(body.v)))[q]) for c_ in ("cape", "brown")]
+                cl = "leather" if bw > 0.5 else ("cloth" if gw > 0.5 else "skin")
             FM.append(ORDER.index("face" if p is head else cl))
             FP.append(pid_all)
             u0, v0, u1, v1 = (0, 0, 1, 1) if p.mat == "eyes" else (0, 0, 1, 1)
