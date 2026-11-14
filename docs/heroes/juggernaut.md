@@ -157,7 +157,7 @@ maximum tether length, and the footage never shows one: **not determinable** (fr
 length" below): in no clip does he back off past the point where the hook bit, so the chain is never longer than
 its throw and no limit (break, drag or hold) is ever reached. Ours: the chain pays out to **24 m** (about
 1.8x the 13 m throw, so backing off is a real choice) and holds there (no break: [W] breaks it only on a stun or
-the 5 s). The 24 m is our pick; the owner can set it. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
+the 5 s). The 24 m is our pick; the owner can set it. **Re-read 2026-11-12 (ext/parity-kael-chain-states)** for the states the owner's note names (briefs/DECISIONS.md:73): facing away or aside at the recast, pulling while backing away and pulling in the air are **Not determinable**: the one pull (0333-0336) is straight, facing the dummy, from a standstill, and no chain shows in the air (0251-0300, 0301-0366). What the frames do settle: the pull about 5 bh in 0.4 s (22.5 m/s; ours 22) and the throw 7 bh in 0.4 s (31.5 m/s; ours 32), both parity rows now. Each state's source string is `e.sources` in the JSON; docs/KIT_PARITY.md "Warchain states" has the table. [W] makes the pull an impulse (1900 uu/s), not a winch, so his own motion and input shape it:
 the pull starts at the reel speed plus his motion along the chain (moving in adds all of it, as an impulse adds to
 the velocity; backing away is the owner's slingshot, 0.8 of it; up to +10 m/s), his sideways speed carries in, and
 he flies a circular arc (at most 6 rad/s) to a point beside the anchor.
@@ -211,20 +211,21 @@ The numbers live in `e` in content/archetypes/juggernaut.json; the code is `Jugg
 | Hooked | he backs away (or the foe walks off) | the chain pays out; the links pull straight and glow hotter past 85% of its length, a creak as it tightens | [F] 0305-0317 tension |
 | Hooked | at its full length (24 m) | it holds: whoever is moving away (him, or a hooked foe) is stopped at the end of it, with a hard creak; it never breaks for length | [O] 23:00; [W] breaks only on a stun or the time; the length is ours (no data, no footage) |
 | Hooked | E | Pulling (the cooldown starts): an impulse toward the anchor at 22 m/s | [D] [W] impulse; [F] 0333 22.5 m/s |
+| Hooked, in the air | E | Pulling as on the ground; the pull holds his height to the anchor | ours; [F] no airborne chain (0251-0300, 0301-0366) |
 | Hooked | E while walking at the anchor | Pulling, his speed added (about 26.5 m/s at a walk; up to +10 m/s) | [W] an impulse adds to his motion |
 | Hooked | E while moving away from the anchor | Pulling, slingshot: +0.8 of his speed away (up to +10 m/s) | [O] 23:00 "slingshot" (a plain impulse would be slower here: the owner wins) |
 | Hooked | E while strafing | Pulling, swung out that way: his sideways speed carries into the start | [O] 23:00; [W] impulse |
 | Hooked | looks aside (no E) | nothing moves; the chain bows and the predicted arc shows | [O] item 57 |
 | Hooked | E with the Lunge charging | Pulling with a Haul Slam armed for the arrival | ours |
 | Hooked | he holds aside | the chain bows that way and his screen shows the predicted arc | [O] item 57 |
-| Hooked | stunned, or the foe is downed or gone | Broken: "CHAIN BROKE", the cooldown starts | [W] 05.02.25 |
+| Hooked | stunned, or the foe is downed or gone | Broken (no word), the cooldown starts | [W] 05.02.25 |
 | Hooked | a Boki merge starts | Broken | ours |
 | Pulling | each step, nothing held, the cursor on the line | a straight line at the pull's speed to the anchor (a hooked foe is followed as it moves), height held, across gaps | [W] impulse; [F] 0333 (all pulls straight) |
-| Pulling | facing aside (the cursor off the chain's line) | you swing out that way along a circular arc (turning at most 6 rad/s, ours), 36% of the chain's length at 90 deg (up to 6 m): a ~40 deg arc that lands beside or past the anchor, no speed lost | [O] item 57 |
+| Pulling | facing aside (the cursor off the chain's line) | you swing out that way along a circular arc (turning at most 6 rad/s, ours), 36% of the chain's length at 90 deg (up to 6 m): a ~40 deg arc that lands beside or past the anchor, no speed lost | [O] item 57; [F] 0333-0336 the one pull is straight, facing the anchor (facing straight away, aside or backing: not shown) |
 | Pulling | A or D (across the chain) held | the same swing, stacked with the facing (still up to 6 m); against the facing it cancels | [O] 14:07 note, 23:00, item 57 |
 | Pulling | W or S (along the chain) held | nothing: the same line, the same speed | [D] AirControl 0.015 |
 | Pulling | Shift | the pull ends and the Rampage goes the way you dash (exit) | ours (no source footage) |
-| Pulling | jump | the pull ends in a jump that keeps 70% of its speed (slingshot included) along the heading (a chain launch); the glider takes it too | ours |
+| Pulling | jump | the pull ends in a jump that keeps 70% of its speed (slingshot included) along the heading (a chain launch); the glider takes it too | ours; [F] no airborne chain (0251-0300, 0301-0366) |
 | Pulling | E | ignored (no second pull, no stop) | ours |
 | Pulling | stunned or rooted | the pull stops dead | [W] a stun breaks it; the dead stop is ours |
 | Pulling | knocked | the pull ends and the knock's shove carries him (it was added to the pull's speed) | [D] a knock sets the velocity |
