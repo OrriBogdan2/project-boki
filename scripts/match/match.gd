@@ -2632,6 +2632,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi = null          # a melee strike is invisible; the swing has its own effect
 	if mi:
 		mi.visible = true
+		HeroVfx.of(self).reused(mi)      # a landed round's tracer lets go of the node before the new round shows
 		# readability: what can hurt you is the brightest, hottest thing on screen; your own and your
 		# team's shots are smaller and dimmer so they never hide an incoming one
 		var look: Array = Oomph.shot_look(self, by, col, size)

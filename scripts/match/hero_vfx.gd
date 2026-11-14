@@ -586,6 +586,14 @@ func _unlit_round(node: Node3D) -> void:
 		if mt:
 			mt.set_shader_parameter("color", Color(0, 0, 0, 0))
 
+## A pooled shot node handed to a new round (spawn_shot) in the step the last one landed in, so it never showed
+## hidden: the trails following it end here, or they would ride the new round from the old one's landing spot.
+func reused(node: Node3D) -> void:
+	for e: Dictionary in ribbons:
+		if e.get("follow") == node:
+			e["dur"] = minf(float(e["dur"]), float(e["t"]))      # (no new points: the tail runs out where it is)
+			e["follow"] = null
+
 ## A trail in one colour behind something that is not a Hero's (the drop rocket's exhaust): a ribbon from the same
 ## pool, `width` m at its head, each point lasting `tail` s, following `follow` until it is hidden or freed.
 func streak(follow: Node3D, col: Color, width: float, tail: float) -> void:
