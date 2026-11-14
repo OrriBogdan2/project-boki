@@ -71,7 +71,7 @@ func _sliders(where: String) -> void:
 	# the page lists one slider per Settings.BUSES entry, in that order (Voices and UI sit between the others)
 	for i in mini(Settings.BUSES.size(), sliders.size()):
 		var key: String = Settings.BUSES.keys()[i]
-		var bus: String = Settings.Settings.BUSES[key]
+		var bus: String = Settings.BUSES[key]
 		(sliders[i] as HSlider).value = 0.35
 		var moved := absf(_db(bus) - Sfx.slider_db(0.35)) < TOL
 		ok(moved, "%s: dragging the %s slider moves the %s bus (%.1f dB)" % [where, key, bus, _db(bus)])
@@ -107,7 +107,8 @@ func _on_slider(bus: String) -> bool:
 	return false
 
 ## What reaches the speakers: a steady tone on each slider's bus, the Master bus's peak at full, half and 0.
-## Half is about half as loud (-12 dB, give or take the peak meter's 2 dB); 0 is silence.
+## Half is about half as loud (-12 dB, give or take the peak meter's 2 dB); 0 is silence. Only the buses that
+## feed Master straight: Voice goes through SFX's compressor, which squeezes its steps (its level is the rows above).
 func _heard() -> void:
 	var tone := PackedFloat32Array()
 	for i in Synth.RATE:
@@ -116,6 +117,9 @@ func _heard() -> void:
 	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
 	wav.loop_end = Synth.RATE
 	for key in Settings.BUSES:
+		var bi := AudioServer.get_bus_index(Settings.BUSES[key])
+		if bi > 0 and AudioServer.get_bus_send(bi) != &"Master":
+			continue
 		var p := AudioStreamPlayer.new()
 		p.stream = wav
 		p.bus = "Music" if key == "master" else Settings.BUSES[key]
@@ -207,7 +211,7 @@ func _boot_with_saved_cfg(current: bool) -> void:
 	var code := OS.execute(OS.get_executable_path(), args, out, true)
 	var text := "".join(out)
 	ok(code == 0, "boot probe ran (exit %d)" % code)
-	for key in Settings.BUSES:
+	for key in SAVED:
 		var want := Sfx.slider_db(SAVED[key]) if current else linear_to_db(SAVED[key])
 		var got := _parse(text, Settings.BUSES[key])
 		var kind := "saved" if current else "pre-curve"

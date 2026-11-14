@@ -139,9 +139,8 @@ func _stay_part() -> void:
 func _arrive_part(k: Dictionary) -> void:
 	var a: Dictionary = Content.rules("garden_visitor")["arrive"]
 	var prints: Array = []
-	for c in home.get_children():
-		var first = c.get_child(0) if c.get_child_count() > 0 else null
-		if first is MeshInstance3D and (first as MeshInstance3D).mesh is SphereMesh:
+	for c in home.get_children():      # the arrival's own group (a garden prop of spheres looked the same)
+		if String(c.name).begins_with("VisitorPrints"):
 			prints = c.get_children()
 	ok(not prints.is_empty() and prints.size() <= int(a["prints"]), "footprints were laid (%d)" % prints.size())
 	ok(prints.all(func(p): return p.scale.y < 0.2 and p.scale.x < 2.0), "the prints are flat, not rings")

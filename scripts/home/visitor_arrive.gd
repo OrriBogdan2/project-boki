@@ -38,7 +38,8 @@ static func trail(h, to: Vector3, species: String) -> void:
 	mesh.material = mat
 	var side := Vector2(-dir.y, dir.x)
 	var root := Node3D.new()
-	h.add_child(root)
+	root.name = "VisitorPrints"
+	h.add_child(root, true)
 	for i in int(a["prints"]):
 		var d := step_m * (i + 1)
 		if d > edge_m:
