@@ -10,6 +10,9 @@ extends RefCounted
 ##      share of exchanges (about 900 each, so the test is not noise) and none wins most bouts
 ##   5. a settled bout: joy, trust (plus what following earned) and memories for your Boki, a visitor untouched
 ##   6. on the base: a ring by the stump; one rested Boki refuses, two start a bout that ends in a card
+##   7. the first-time teach: the first Tumble runs one slow, honest practice exchange (triangle, the 'probably'
+##      tell, pick and press keys from Settings, a slower bar), no prize, then the bout with the same pair; never
+##      again after that; skip (the menu key) goes straight to the bout
 ## Never touches the real save.
 
 const BOUTS := 200
@@ -297,21 +300,89 @@ func _on_base() -> void:
 		ok(tb.run == null and tb.find(at) == {}, "no ring: use() and find() do nothing, no script error")
 		tb.ring = kept
 		lone.erase("indoors")
+		await _teach(tb, home)
 		tb.use()
-		ok(tb.run != null and not tb.run.visitor and tb.pair.size() == 2, "on: two rested Boki start a bout")
-		var t := 0.0
-		while tb.run != null and tb.run.state != "resolve" and t < 200.0:
-			tb.tick(0.1)
-			t += 0.1
-		var moves: Dictionary = BaseTumble.rules()["moves"]
-		var clips: Array = [String(moves[tb.run.pick]["clip"]), String(moves[tb.run.plan]["clip"])]
-		var shown: Array = tb.pair.map(func(k: Dictionary) -> String: return String(k["node"].get_meta("kact", "")))
-		ok(shown == clips, "on: in the charge each Boki plays its move's clip %s" % str(shown))
-		while tb.run != null and t < 200.0:
-			tb.tick(0.1)
-			t += 0.1
-		await main.get_tree().process_frame
-		ok(tb.run == null and is_instance_valid(tb.card), "on: the bout ends in a result card (%.1f s)" % t)
+		ok(tb.teach == null and _bout_start(tb), "teach: never repeats, the second Tumble is the bout")
+		tb._end(false)
+		Save.d["tutorial"].erase("first_tumble")
+		tb.use()
+		tb.input(_menu())
+		ok(tb.teach == null and _bout_start(tb) and not TumbleTeach.due(),
+				"teach: skip (menu key) goes straight to the bout and is not offered again")
+		tb._end(false)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## A real bout has just started: a run in its intro with the bout's own exchange count.
+func _bout_start(tb: BaseTumble) -> bool:
+	var n := int(BaseTumble.rules()["exchanges"])
+	return tb.run != null and tb.run.state == "intro" and int(tb.run.R["exchanges"]) == n
+
+func _menu() -> InputEventAction:
+	var e := InputEventAction.new()
+	e.action = "menu"
+	e.pressed = true
+	return e
+
+## The first Tumble: one slow practice exchange (triangle, the 'probably' tell, keys from Settings, the press),
+## no prize, then the bout with the same pair ending in its card.
+func _teach(tb: BaseTumble, home) -> void:
+	var gems := int(Save.d["gems"])
+	var rec: Dictionary = home.kins[0]["rec"] if not home.kins.is_empty() else {}
+	var joy := float(rec.get("needs", {}).get("joy", 0.0))
+	var mems := (rec.get("memories", []) as Array).size()
+	ok(TumbleTeach.due(), "teach: due on a save that never played a Tumble")
+	tb.use()
+	ok(tb.teach != null and is_instance_valid(tb.teach.card) and not TumbleTeach.due(),
+			"teach: the first Tumble opens the practice card, marked seen at once")
+	ok(tb.run != null and not tb.run.visitor and tb.pair.size() == 2, "on: two rested Boki start a bout")
+	var second: Node3D = tb.pair[1]["node"] if tb.pair.size() == 2 else null
+	var tri := tb.teach.card.find_children("*", "Control", true, false).filter(
+			func(c): return c is TumbleTeach.Triangle) if tb.teach != null else []
+	ok(tri.size() == 1, "teach: the card draws the Rush/Brace/Dodge triangle")
+	var R := BaseTumble.rules()
+	ok(tb.run != null and int(tb.run.R["exchanges"]) == 1 and float(tb.run.R["pick_s"]) > float(R["pick_s"]),
+			"teach: practice is one exchange with a longer pick window")
+	var lines := {}
+	var bar_speed := 0.0
+	var honest := false
+	var t := 0.0
+	while tb.teach != null and t < 60.0:
+		tb.tick(0.1)
+		t += 0.1
+		if tb.teach != null and tb.run != null:
+			lines[tb.run.state] = tb.teach.line.text
+			if tb.run.state == "tell":
+				honest = tb.run.tell == tb.run.plan
+			if tb.run.state == "resolve" and tb.bar != null:
+				bar_speed = maxf(bar_speed, tb.bar.speed)
+				if tb.run.grade == "":
+					tb.run.press("good")
+	ok(honest, "teach: the practice tell is honest")
+	var tell: String = lines.get("tell", "")
+	ok(tell.contains("probably") and tell.contains(TumbleTeach.pick_key(0)) and tell.contains(TumbleTeach.pick_key(2)),
+			"teach: the tell line names the rival's 'probably' move and the pick keys from Settings (%s)" % tell)
+	ok(String(lines.get("resolve", "")).contains(Settings.key_cap("interact")),
+			"teach: the press line names %s" % Settings.key_cap("interact"))
+	ok(bar_speed > 0.0 and bar_speed < TimingBar.START_SPEED,
+			"teach: the practice bar sweeps slower (%.2f)" % bar_speed)
+	ok(lines.has("push"), "teach: the practice exchange plays out to the push")
+	ok(tb.teach == null and _bout_start(tb),
+			"teach: practice runs once, then the bout starts (%.1f s)" % t)
+	ok(int(Save.d["gems"]) == gems and float(rec.get("needs", {}).get("joy", 0.0)) == joy
+			and (rec.get("memories", []) as Array).size() == mems, "teach: no prize, joy or memory from the practice")
+	ok(tb.pair.size() == 2 and tb.pair[1]["node"] == second, "teach: the bout keeps the same pair")
+	t = 0.0
+	while tb.run != null and tb.run.state != "resolve" and t < 200.0:
+		tb.tick(0.1)
+		t += 0.1
+	var moves: Dictionary = BaseTumble.rules()["moves"]
+	var clips: Array = [String(moves[tb.run.pick]["clip"]), String(moves[tb.run.plan]["clip"])]
+	var shown: Array = tb.pair.map(func(k: Dictionary) -> String: return String(k["node"].get_meta("kact", "")))
+	ok(shown == clips, "on: in the charge each Boki plays its move's clip %s" % str(shown))
+	while tb.run != null and t < 200.0:
+		tb.tick(0.1)
+		t += 0.1
+	await main.get_tree().process_frame
+	ok(tb.run == null and is_instance_valid(tb.card), "on: the bout ends in a result card (%.1f s)" % t)
