@@ -289,8 +289,7 @@ def clips():
     p2 = dict(p1, pel=(0, -0.02, -0.07), prt=(-0.12, 0, 0), tor=(-0.08, 0, 0), G=(0.18, 0.36, 1.32), BE=PR(-9, 40), GL=(-0.18, 0.36, 1.32), BL=PR(9, 40), hed=(0.04, 0, 0), FL=(-0.12, 0.2, A_Z), FR=(0.13, -0.14, A_Z), FRp=0.0)
     out.append(C("primed", 0.55, [(0.0, p0), (0.04, p1, "out"), (0.12, dict(p1, pel=(0, 0.12, -0.1)), "out"), (0.24, p2), (0.38, dict(p2, G=(0.21, 0.26, 1.14), GL=(-0.21, 0.26, 1.14), BE=PR(-12, 10), BL=PR(12, 10))), (0.55, END)]))
 
-    # (the shipped glb re-keys the vault_r/vault_l arm bones after the bake, see art/wardens/sable/IMPORT.md)
-    # the Vault, 0.48 s: 0.05 a crouch with the arms swung up, 0.1 the push-off, the pistols crossed on her chest, one aerial turn to 0.3, a low landing at 0.36, up by 0.48
+    # the Vault, 0.48 s: the crouch with the arms swung up from the first frame (the blend in is the wind-up) held to 0.05, 0.1 the push-off, the pistols crossed on her chest, one aerial turn to 0.3, a low landing at 0.36, up by 0.48
     TUCK = {"G": (0.08, 0.2, 1.24), "BE": PR(38, 56, (0, -1, 0.2)), "GL": (-0.08, 0.2, 1.24), "BL": PR(-38, 56, (0, -1, 0.2))}
     UP = {"G": (0.25, 0.1, 1.56), "BE": PR(-6, 74, (0, -1, 0.2)), "GL": (-0.25, 0.1, 1.56), "BL": PR(6, 74, (0, -1, 0.2))}
     LAND = {"pel": (0, 0, -0.24), "prt": (0.3, 0, 0), "tor": (0.14, 0, 0), "hed": (-0.34, 0, 0), "G": (0.34, 0.14, 0.86), "BE": PR(-32, -6), "GL": (-0.34, 0.14, 0.86), "BL": PR(32, -6), "FL": (-0.15, 0.17, A_Z), "FR": (0.17, -0.13, A_Z), "FRy": -0.5, "FRp": 0.25, "smile": 1.0, "cock": 0.7}
@@ -376,9 +375,9 @@ def clips():
 
     # hit reacts: a flinch that stays pretty, the smile gone for a moment, the pistols pulled in
     fl = {"pel": (0, -0.05, -0.07), "prt": (-0.14, 0, 0), "tor": (-0.18, 0.12, 0), "hed": (0.14, 0.2, 0.06), "brow": -0.8, "cock": 0.0, "lid": 0.5, "smile": -0.4, "G": (0.24, 0.1, 1.02), "GL": (-0.22, 0.1, 1.08), "BL": PR(30, 20)}
-    out.append(C("hit_f", 0.42, [(0.0, END), (0.07, fl, "out"), (0.133, dict(fl, pel=(0, -0.02, -0.05))), (0.24, END), (0.42, END)]))
+    out.append(C("hit_f", 0.42, [(0.0, END), (0.07, fl, "out"), (0.2, dict(fl, pel=(0, -0.02, -0.05))), (0.42, END)]))
     fb = dict(fl, pel=(0, 0.05, -0.07), prt=(0.22, 0, 0), tor=(0.14, -0.1, 0), hed=(-0.18, -0.2, 0.05))
-    out.append(C("hit_b", 0.42, [(0.0, END), (0.07, fb, "out"), (0.133, dict(fb, pel=(0, 0.02, -0.05))), (0.24, END), (0.42, END)]))
+    out.append(C("hit_b", 0.42, [(0.0, END), (0.07, fb, "out"), (0.2, dict(fb, pel=(0, 0.02, -0.05))), (0.42, END)]))
     daz = {"pel": (0.0, 0, -0.1), "prt": (0.06, 0, 0.05), "tor": (0.12, 0, -0.1), "hed": (0.3, 0, -0.14), "lid": 0.55, "brow": -0.8, "cock": 0.0, "smile": -0.3, "G": (0.27, 0.14, 0.88), "GL": (-0.27, 0.1, 0.86), "BE": PR(-14, -60), "BL": PR(14, -60)}
     out.append(C("stun", 1.2, [(0.0, daz), (0.6, dict(daz, hed=(0.3, 0, 0.14), tor=(0.12, 0, 0.1), prt=(0.06, 0, -0.05))), (1.2, daz)]))
 

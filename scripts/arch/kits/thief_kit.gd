@@ -135,7 +135,8 @@ func combo_read(t: Ent) -> Dictionary:
 	var n := marks_on(t)
 	if n <= 0:
 		return {}
-	return {"icon": "gem", "n": n, "max": pip_count(), "left": float((t.get_meta("marks") as Dictionary)[h.nid][1]),
+	var left := float((t.get_meta("marks") as Dictionary)[h.nid][1])
+	return {"icon": "mark_thief", "n": n, "max": pip_count(), "left": left,
 			"total": float(res_def()["dur"])}
 
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
@@ -575,7 +576,6 @@ func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
 	if marks_on(t) > 0:
 		ComboMark.payoff(m, h, t)
-	CombatBus.tech.emit(h, "thief")
 	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0
@@ -695,7 +695,6 @@ func _tick_bola(dt: float) -> void:
 				m.fx.spark(p, Vector3.UP, col_of(rmb_def()), 8, 6.0, 70.0)
 				m.sfx("click", p, -5.0, 1.4)
 				continue
-			MissFx.puff(m, MissFx.colour_of(h), p, true)
 			_end_bola(p)
 			return
 		p = q
@@ -723,8 +722,6 @@ func _tick_bola(dt: float) -> void:
 					_end_bola(p)
 					return
 		if float(bola["left"]) <= 0.0:
-			if bola["first"] == null:
-				MissFx.puff(m, MissFx.colour_of(h), p, false)
 			_end_bola(p)
 			return
 	bola["pos"] = p

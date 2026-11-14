@@ -63,7 +63,7 @@ static func top_under(list: Array, p: Vector3, r: float, g: float) -> float:
 ## popping, and FootPlant keeps the feet on the top meanwhile.
 static func stand(h: Hunter, g: float) -> void:
 	if g - h.pos.y > POP:
-		h.prev.y = g      # StepSmooth eases the drawn body up the step, no render lead
+		h.prev.y = g
 	h.pos.y = g
 
 ## The standable wall a body at p is pressing into at height `blk` (occupy's answer), or {}.

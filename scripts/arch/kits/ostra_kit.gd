@@ -14,6 +14,7 @@ extends ArchKit
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
+const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
 const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
@@ -121,14 +122,10 @@ func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
 ## He floats: the ground hazards (lava vents and their pools, spore pods, puddles, the pit's pull) never
 ## touch him. A sky strike (the lightning rod) still does.
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
-	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in float_tags()):
+	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in GROUND_HAZARDS):
 		hazards_dodged += 1
 		return [0.0, o]
 	return [dmg, o]
-
-## The damage tags of ground hazards he floats over (passive.float_tags): the data's "avoids ground hazards".
-func float_tags() -> Array:
-	return (d["passive"] as Dictionary)["float_tags"]
 
 func hovering() -> bool:
 	return not swap.is_empty()
@@ -424,12 +421,11 @@ func _swap_end(go: bool) -> void:
 	_trade_bodies(land, from, float(dd["radius"]))
 	_arrive(land, from, from_void)
 
-## Rank 3 (the source's tier IV): allies in his ring as he leaves get a shield, a share of his health, with the
-## receiver's cue (ReceiverCue).
+## Rank 3 (the source's tier IV): allies in his ring as he leaves get a shield, a share of his health.
 func _shield_allies(from: Vector3, dd: Dictionary) -> void:
 	for o2 in m.hunters:
 		if o2 != h and o2.team == h.team and not o2.downed and o2.flat_dist(from) < float(dd["radius"]):
-			ReceiverCue.shield(o2, h.max_hp * float(dd["ally_shield"]), Color.TRANSPARENT, ShieldSrc.SWAP)
+			ShieldSrc.give(o2, h.max_hp * float(dd["ally_shield"]), ShieldSrc.SWAP)
 			o2.shield_t = maxf(o2.shield_t, float(dd["ally_shield_t"]))
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
@@ -689,7 +685,6 @@ func _pop(hit: bool) -> void:
 		if f is Hunter: caught_hunter = f
 	if caught_hunter != null and k >= 0.99:
 		collapses += 1
-		CombatBus.tech.emit(h, "ostra")
 		payoff_fx(caught_hunter.pos, TEAL, "pay_collapse", h.dir_to(caught_hunter), caught_hunter)
 
 # ------------------------------------------------------------------ bots

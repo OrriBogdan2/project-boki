@@ -117,8 +117,8 @@ static func albert(A) -> void:
 				d["slams"] == 0 and not d["whirling"] and d["anim"] != "bul_smash_wind", str(d))
 	for which in ["rmb", "e"]:
 		var k := await _whirl(A, "key", which)
-		A.ok("hold albert whirl: %s mid-hold [?] ends it; LMB still down (a held input) starts a fresh hold" % which,
-				k["slams"] == 1 and k["whirling"] and k["anim"] == "bul_smash_wind", str(k))
+		A.ok("hold albert whirl: %s mid-hold [?] ends it, no swing" % which,
+				k["slams"] == 0 and not k["whirling"] and k["anim"] != "bul_smash_wind", str(k))
 
 ## Sparkle's Skycall (E held to drag): the drag phase right after the ending, and what the strike did to the dummy.
 static func _skycall(A, ev: String, which := "") -> Dictionary:

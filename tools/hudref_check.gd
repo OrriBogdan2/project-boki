@@ -165,13 +165,10 @@ func run(main_node: Node) -> void:
 	var arch_was := P.arch
 	P.arch = "gunslinger"
 	var no_offset := not Arch.def(P.arch).has("plate_offset")
-	var drawn: float = P.m.cam.hunter_scale      # (the plate clears a Hunter drawn bigger)
-	var fallback: float = HudPlate.PLATE_OFFSET * drawn
-	ok(no_offset and is_equal_approx(HudPlate.plate_offset(P), fallback) and HudPlate.PLATE_OFFSET == 2.35,
-		"an archetype without plate_offset puts the plate at the 2.35 m fallback x%.2f, the drawn size (%.2f)"
-		% [drawn, HudPlate.plate_offset(P)])
+	ok(no_offset and HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET and HudPlate.PLATE_OFFSET == 2.35,
+		"an archetype without plate_offset puts the plate at the 2.35 m fallback (%.2f)" % HudPlate.plate_offset(P))
 	P.arch = ""
-	ok(is_equal_approx(HudPlate.plate_offset(P), fallback), "a hunter with no archetype falls back too")
+	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
 	P.arch = arch_was
 	# ---------------------------------------------------------------- 4d. each squad row wears its Boki's icon
 	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and x.kin != null)
@@ -282,7 +279,7 @@ func _check_keys(P: Hunter) -> void:
 
 ## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
 ## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
-## DashFlow and raises nothing, nor while it waits out Loco.press_buffer past the dash's end. Runs in one frame.
+## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
 func _check_deny(P: Hunter) -> void:
 	var hud = P.m.hud
 	PressDeny.last.clear()
@@ -311,7 +308,7 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
 	flow.route(Match.DT)
 	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
-		"E on cooldown pressed mid-dash stays buffered through Loco.press_buffer and raises no deny")
+		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
 

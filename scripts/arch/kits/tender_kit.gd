@@ -167,7 +167,6 @@ func _dress_ember(s: Dictionary) -> void:
 	stats["swirls"] += 1
 	if emp:
 		stats["emp"] += 1
-		CombatBus.tech.emit(h, "tender")
 		play("mm_shot_emp")
 		m.sfx("tend_ember_emp", h.pos, -3.0, 1.0)
 	elif not seed_aim:
@@ -618,7 +617,7 @@ func _pulse(c: Vector3, per: float) -> void:
 ## A heal from her light: CareUtil.heal, and twinkling stars rising off whoever it mends (content/vfx
 ## "heal_stars").
 func _mend(o: Hunter, amt: float, wisp_k := 5.0) -> void:
-	CareUtil.heal(m, o, amt, wisp_k, h.accent())
+	CareUtil.heal(m, o, amt, wisp_k)
 	vfx("heal_stars", o.pos)
 
 func _hearth_end(flare: bool) -> void:

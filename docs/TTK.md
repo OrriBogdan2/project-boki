@@ -23,31 +23,9 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 
 Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15) and the LMB is level 9 (Tetra about 18), so no combo row mixes the two.
 
-**Gil (ours, no source Hunter).** His rows are `gil (roster median)`: his LMB and combo (Grab Bag, Riptide, Ground Swim, no ult) against the median of the 12 Hunters' own times for the same row, with the same 0.85-1.15 bar. His combo moves run to run (the bag draws its potion at random: combo rank 0 5.7-7.7 s, rank max 5.0-7.2 s over 3 runs), so judge it by the range. Fix if out: `content/archetypes/gil.json` `lmb.rate` 0.32 -> 0.23 puts all four rows inside (LMB 0.87, combo 1.11 / 1.07 in the run measured); nothing else was touched.
-
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
 |---|---|---|---|---|---|
-| gunslinger (Ghost) | LMB rank 0 | 2.18 | 2.00 | 1.09 | ok |
-| gunslinger (Ghost) | LMB rank max | 2.18 | 2.00 | 1.09 | ok |
-| gunslinger (Ghost) | combo rank 0 | 0.77 | 0.80 | 0.96 | ok |
-| gunslinger (Ghost) | combo rank max | 0.68 | 0.72 | 0.95 | ok |
-| juggernaut (Brall) | LMB rank 0 | 13.20 | 12.95 | 1.02 | ok |
-| juggernaut (Brall) | LMB rank max | 13.20 | 12.95 | 1.02 | ok |
-| juggernaut (Brall) | combo rank 0 | 7.88 | 7.70 | 1.02 | ok |
-| juggernaut (Brall) | combo rank max | 7.25 | 7.00 | 1.04 | ok |
-| ashwick (Felix) | LMB rank 0 | 5.72 | 6.20 | 0.92 | ok |
-| ashwick (Felix) | LMB rank max | 5.62 | 6.20 | 0.91 | ok |
-| ashwick (Felix) | combo rank 0 | 3.93 | 4.30 | 0.91 | ok |
-| ashwick (Felix) | combo rank max | 2.63 | 3.00 | 0.88 | ok |
-| mage (Joule) | LMB rank 0 | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | LMB rank max | 13.67 | 13.60 | 1.00 | ok |
-| mage (Joule) | combo rank 0 | 8.47 | 8.80 | 0.96 | ok |
-| mage (Joule) | combo rank max | 4.03 | 4.00 | 1.01 | ok |
-| bulwark (Oath) | LMB rank 0 | 6.88 | 6.75 | 1.02 | ok |
-| bulwark (Oath) | LMB rank max | 6.88 | 6.75 | 1.02 | ok |
-| bulwark (Oath) | combo rank 0 | 5.73 | 5.85 | 0.98 | ok |
-| bulwark (Oath) | combo rank max | 5.30 | 5.00 | 1.06 | ok |
 | gunslinger (Ghost) | LMB rank 0 | 5.47 | 2.48 | 2.20 | FAIL |
 | gunslinger (Ghost) | LMB rank max | 5.47 | 2.48 | 2.20 | FAIL |
 | gunslinger (Ghost) | combo rank 0 | 2.72 | 1.92 | 1.41 | FAIL |
@@ -109,29 +87,12 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 | mage (Joule) | e | 0.126 | 0.126 | 1.00 |
 | bulwark (Oath) | dash | 0.156 | 0.154 | 1.01 |
 | thief (Shiv) | rmb | 0.019 | 0.019 | 1.00 |
-| ostra (Void) | rmb | 0.117 | 0.117 | 1.00 |
-| ostra (Void) | e | 0.172 | 0.154 | 1.11 |
+| ostra (Void) | rmb | 0.062 | 0.117 | 0.53 |
+| ostra (Void) | e | 0.091 | 0.154 | 0.59 |
 | rimewright (Celeste) | rmb | 0.260 | 0.269 | 0.96 |
 | rimewright (Celeste) | x | 0.117 | 0.121 | 0.97 |
 <!-- ttk:table -->
 
-**1112 parity pass: before (main 0.24.5) and after, ours / source**
-
-| Hunter | LMB 0, LMB max, combo 0, combo max before | After |
-|---|---|---|
-| Vex (Ghost) | 3.25, 3.25, 0.92, 0.78 | 1.09, 1.09, 0.96, 0.95 |
-| Kael (Brall) | 0.65, 0.65, 0.45, 0.16 | 1.02, 1.02, 1.02, 1.04 |
-| Cinder (Felix) | 0.78, 0.76, 0.76, 0.61 | 0.92, 0.91, 0.91, 0.88 |
-| Sparkle (Joule) | 0.77, 0.77, 0.81, 0.64 | 1.00, 1.00, 0.96, 1.01 |
-| Albert (Oath) | 0.72, 0.72, 0.70, 0.73 | 1.02, 1.02, 0.98, 1.06 |
-| Sable (Shiv) | 0.95, 0.95, 0.85, 0.85 | 0.95, 0.95, 0.85, 0.85 |
-| Motley (Void) | 1.91, 1.91, 2.15, 1.74 | 1.09, 1.09, 1.13, 1.00 |
-
-What moved each row is in the hero's doc (docs/heroes/) and the kit_parity rows. Sable's combo sits on the bar's edge (0.853).
-
-**Open: Sparkle's Blowout.** With it live her combo knocks in 2.68 s and 1.27 s (0.30 and 0.32 of the source without it; the owner digest's "6x fast" is this, on 0.24.6 combat-a where the old check counted it). The source calls its bonus "massive" with no number, so no row can judge it. Its size is not the lever: `blow_pct` 0.18 -> 0.09 gives 0.45 and 0.32, -> 0 gives 0.53 and 0.32 (measured). At max rank the chain decides it (each Blowout hands Wirerun back and the run through a Live foe hits double), so taming it is a design call for the owner (fewer resets, or no double), not a number to tune here.
-
-**Not done here:** the five Hunters with no LMB number (and their combos) need the source's LMB damage, which no file in briefs has.
 **11-11 slice (ext/ttk-slice-1111, run 2026-11-11 on worker rpc1).** The owner-direct 11-11 kit branches were run one by one and merged together (scratch: origin/main 88b06b9e7 + ext/kael-owner-1111 4cb48148d + ext/lace-1111 cf1adae16 + ext/vex-rmb-1111 a796f3a38 + ext/albert-hold-cinder-orb 4cf2f22b4; the first two carry ext/release-integ-0245 272368589, also run on its own). All seven runs print the same 54 lines: **none of the four branches moves a TTK row.** They change shapes, timing and visuals but no damage, cooldown or cadence the idle-target fight reads (Kael: slam lane 4.3 x 0.72 m instead of the 70 deg cone, the Chain Lunge and its 1.25x chain Smash removed; Lace: Heavy Shot from the bow mouth, roll 3.0 -> 3.375; Vex: Burr Charge no longer procs in the air; Cinder: the pilot flame only while the lance spools up). The table above is therefore what origin/main writes today; the rows that differ from 11-09 are main drift (Kael, Sparkle and Albert combos, Cinder LMB max), not these branches.
 
 | Hunter (source) | Branch | Row | 11-09 doc | origin/main | branch alone | all four merged | Source s (supervive_kits.md) |

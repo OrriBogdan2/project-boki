@@ -41,7 +41,7 @@ var rime := {}                 # Rimelock running: {t, at, slow: {instance id: s
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var recover_until := 0.0       # match time the crash's recovery ends (0: not recovering)
-var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last Loco.press_buffer
+var recover_buf := {}          # Hunter.inp key -> true: pressed in the recovery's last DashFlow.BUFFER_S
 var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
@@ -139,7 +139,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
-	CombatBus.tech.emit(h, "rimewright")
 	m.sfx("rime_splinter", at, 0.0, 1.0)
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)
@@ -749,10 +748,6 @@ func cast_e() -> bool:
 func _tick_wall_cast(dt: float) -> void:
 	if wall_cast.is_empty():
 		return
-	if h.downed:
-		wall_cast = {}                 # knocked in the tell: no wall (docs/heroes/rimewright.md "Interrupts")
-		AimKit.hide(h, "e")
-		return
 	wall_cast["t"] = float(wall_cast["t"]) - dt
 	if float(wall_cast["t"]) <= 0.0:
 		var wc := wall_cast
@@ -1093,9 +1088,8 @@ func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 		vfx("rime_creak", at + Vector3(cos(a) * radius * 0.6, 0.0, sin(a) * radius * 0.6))
 
 
-## The crash: a light pillar comes down on her, the rink bursts into shards, and every foe in the rink
-## she can see takes the damage and an ice-block stun (k < 1: an early crack). Her own shell tells rivals how
-## it ended: it breaks outward when she chose to come out, it melts off her when the time ran out.
+## The crash: a light pillar comes down on her, the shell bursts into shards, and every foe in the rink
+## she can see takes the damage and an ice-block stun (k < 1: an early crack).
 func _rime_crash(k: float) -> void:
 	var xd := x_def()
 	var at: Vector3 = rime["at"]
@@ -1113,13 +1107,9 @@ func _rime_crash(k: float) -> void:
 		HeroUlt.landed(self, f)      # the cast's best event (hit, knock, kill) pays the bond once
 	last_stunned = stunned
 	stats["crashes"] += 1
-	ulk().burst("pillar", h.pos, {"r": 1.3, "dur": 0.8})
-	ulk().burst("lances", h.pos + Vector3(0, 0.3, 0), {"r": 5.0, "dur": 0.75})
+	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
+	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
 	vfx("rime_crash", h.pos, null, {"r": radius})
-	if k < 1.0:
-		vfx("rime_break")
-	else:
-		vfx("rime_melt")
 	m.sfx("rime_crash", at, 1.0, 1.0)
 	play("tm_rime_crash")
 	_rime_clear()
@@ -1127,7 +1117,7 @@ func _rime_crash(k: float) -> void:
 
 
 ## After the burst she settles for x.recover s (footage f57 -> f61, the tm_rime_crash clip's length): no walking
-## or casts. A press in its last Loco.press_buffer goes as it ends; an earlier one is refused. Shift skates out.
+## or casts. A press in its last DashFlow.BUFFER_S goes as it ends; an earlier one is refused. Shift skates out.
 func recovering() -> bool:
 	return recover_until > 0.0 and m.time < recover_until
 
@@ -1145,7 +1135,7 @@ func gate_inputs() -> void:
 			h.inp[key] = true
 		recover_buf.clear()
 		return
-	var buffering: bool = recover_until - m.time <= Loco.press_buffer
+	var buffering: bool = recover_until - m.time <= DashFlow.BUFFER_S
 	for key in RECOVER_KEYS:
 		if not h.inp.get(key, false):
 			continue
@@ -1160,7 +1150,7 @@ func gate_inputs() -> void:
 func _rime_cancel() -> void:
 	stats["cancels"] += 1
 	ulk().burst("spikes", h.pos, {"r": 1.6, "dur": 0.35})
-	vfx("rime_break")
+	vfx("rime_cancel")
 	m.sfx("rime_crack", h.pos, -3.0, 1.0)
 	play("tm_rime_break")
 	_rime_clear()

@@ -52,11 +52,6 @@ def C(name, dur, keys, loop=False, base=READY):
     return Clip(name, dur, keys, base, loop)
 
 
-def amp(pose, k):
-    """The pose's travel from READY scaled by k (numbers and vectors alike)."""
-    return {c: (READY[c] + k * (v - READY[c]) if isinstance(v, float) else tuple(r + k * (x - r) for r, x in zip(READY[c], v))) for c, v in pose.items()}
-
-
 class HemSolver(Solver):
     """posekit's Solver, with the weapon in the LEFT hand: G the fist, BA the bow's long axis, BS the side its string lies on.
     Rw 1: the right hand on the string's nock, drawn dr (0..1) from its rest to the anchor at her jaw; Rw 0: free at RF."""
@@ -298,15 +293,10 @@ def clips():
     out.append(C("hail", 0.6, [(0.0, dict(HIP)), (0.12, H0, "out"), (0.3, dict(H0, dr=1.0)), (0.36, H1, "out"), (0.42, H1), (0.6, dict(HIP))]))
     # --- Shift: the dodge roll, a low tuck through her left shoulder with the bow held out of the way, up onto her toes
     T = {"prt": (0.4, 0, 0), "tor": (0.5, 0, 0), "hed": (0.4, 0, 0), "pel": (0, 0.1, -0.28), "G": (-0.2, 0.12, 0.72), "BA": n3((0.0, 0.9, 0.4)), "BS": n3((0.0, -0.4, 0.9)), "RF": (0.2, 0.24, 0.72), "RD": n3((0, 0.3, -1)), "RP": (-1, 0, 0), "Rpole": (0.8, -0.5, 0.0)}
-    # timed to her felt roll (3.0 m in 0.386 s, KIT_PARITY gap 4): the turn follows the dash's speed curve (dash_feel
-    # archer: eases in, fastest at 44%, skids out), so she loads the shoulder, whips over and comes up low and crouched as
-    # the travel ends (0.386 s), where the walk takes over; the standing tail after it only closes the clip
-    out.append(C("roll", 0.52, [(0.0, dict(READY)), (0.08, dict(T, prt=(0.9, 0.0, 0.15), pel=(0, 0.14, -0.38), FL=(-0.12, 0.28, 0.24), FR=(0.12, 0.0, 0.26), FLp=1.0, FRp=1.0), "out"),
-                                (0.17, dict(T, prt=(2.6, 0.0, 0.3), pel=(0, 0.24, -0.34), tor=(0.8, 0, 0), FL=(-0.12, 0.3, 0.5), FR=(0.12, 0.2, 0.56), FLp=1.6, FRp=1.6), "lin"),
-                                (0.25, dict(T, prt=(4.6, 0.0, 0.25), pel=(0, 0.28, -0.31), tor=(0.8, 0, 0), FL=(-0.12, 0.34, 0.62), FR=(0.12, 0.3, 0.64), FLp=2.0, FRp=2.0), "lin"),
-                                (0.33, dict(T, prt=(5.9, 0.0, 0.1), pel=(0, 0.28, -0.3), FL=(-0.12, 0.3, 0.2), FR=(0.12, -0.05, 0.3), FLp=0.7, FRp=1.0), "out"),
-                                (0.39, dict(T, prt=(6.283 + 0.3, 0.0, 0.0), pel=(0, 0.12, -0.24), tor=(0.3, 0, 0), hed=(0.1, 0, 0), FL=(-0.12, 0.16, A_Z), FR=(0.12, -0.12, A_Z), brow=0.5, lid=0.1)),
-                                (0.52, dict(READY, prt=(6.283 + 0.08, 0.0, 0.0), pel=(0, 0.04, -0.09), brow=0.5, lid=0.1))]))
+    out.append(C("roll", 0.36, [(0.0, dict(READY)), (0.07, dict(T, prt=(1.4, 0.0, 0.2), pel=(0, 0.2, -0.36), FL=(-0.12, 0.3, 0.3), FR=(0.12, 0.05, 0.28), FLp=1.0, FRp=1.0), "out"),
+                                (0.17, dict(T, prt=(3.3, 0.0, 0.3), pel=(0, 0.26, -0.33), tor=(0.8, 0, 0), FL=(-0.12, 0.3, 0.6), FR=(0.12, 0.34, 0.66), FLp=2.0, FRp=2.0), "lin"),
+                                (0.24, dict(T, prt=(5.2, 0.0, 0.1), pel=(0, 0.28, -0.3), FL=(-0.12, 0.3, 0.2), FR=(0.12, -0.05, 0.3), FLp=0.7, FRp=1.0), "lin"),
+                                (0.36, dict(READY, prt=(6.283 + 0.08, 0.0, 0.0), pel=(0, 0.04, -0.09), brow=0.5, lid=0.1), "lin")]))
     # Spirit Walk: light on the toes, leaning in, the arms trailing like a ghost (upper body, the legs keep running)
     SW = {"tor": (0.26, 0.0, 0.0), "hed": (-0.24, 0.0, 0.0), "G": (-0.28, -0.20, 0.92), "BA": n3((0.05, 0.86, 0.5)), "BS": n3((0.0, -0.5, 0.86)), "RF": (0.28, -0.22, 0.92), "RD": n3((0.3, -0.75, -0.55)), "RP": (-0.7, -0.6, 0.3), "Rpole": (0.6, 0.2, -0.8), "Lpole": (-0.6, 0.2, -0.8), "brow": -0.3, "lid": 0.3, "fing": 0.1}
     out.append(C("spirit", 1.0, [(0.0, dict(HIP)), (0.2, SW), (0.6, dict(SW, tor=(0.3, 0.05, 0.03), G=(-0.28, -0.22, 0.90), RF=(0.28, -0.25, 0.95))), (1.0, SW)]))
@@ -326,11 +316,8 @@ def clips():
     ufin = dict(urel, tor=(-0.12, AIM_Y - 0.5, -0.1), RF=(0.17, -0.22, 1.36), G=(-0.05, 0.57, 1.36), BA=n3((0.1, -0.2, 0.96)))
     out.append(C("ult_final", 0.65, [(0.0, UN), (0.1, ufin, "out"), (0.25, dict(ufin, tor=(-0.08, AIM_Y - 0.4, -0.06))), (0.65, dict(HIP))]))
     # --- reactions
-    # hits: the peak at 0.07 s, back in her stance by 0.24 s (a light body snaps back; docs/art/REACT_AUDIT.md); the back hit 1.8x
-    hf = {"tor": (-0.22, 0.14, 0.1), "hed": (-0.3, -0.25, 0.14), "G": (-0.27, 0.05, 0.84), "RF": (0.24, 0.04, 1.02), "brow": -0.7, "lid": 0.45}
-    hb = amp({"tor": (0.26, -0.05, -0.08), "hed": (0.18, 0.2, -0.1), "G": (-0.24, 0.2, 0.83), "RF": (0.24, 0.1, 1.02), "brow": -0.7, "lid": 0.45}, 1.8)
-    out.append(C("hit_f", 0.42, [(0.0, dict(READY)), (0.07, hf, "out"), (0.24, dict(READY)), (0.42, dict(READY))]))
-    out.append(C("hit_b", 0.42, [(0.0, dict(READY)), (0.07, hb, "out"), (0.24, dict(READY)), (0.42, dict(READY))]))
+    out.append(C("hit_f", 0.42, [(0.0, dict(READY)), (0.07, {"tor": (-0.22, 0.14, 0.1), "hed": (-0.3, -0.25, 0.14), "G": (-0.27, 0.05, 0.84), "RF": (0.24, 0.04, 1.02), "brow": -0.7, "lid": 0.45}, "out"), (0.42, dict(READY))]))
+    out.append(C("hit_b", 0.42, [(0.0, dict(READY)), (0.07, {"tor": (0.26, -0.05, -0.08), "hed": (0.18, 0.2, -0.1), "G": (-0.24, 0.2, 0.83), "RF": (0.24, 0.1, 1.02), "brow": -0.7, "lid": 0.45}, "out"), (0.42, dict(READY))]))
     STUN = {"pel": (0, -0.02, -0.08), "prt": (0.05, 0, 0.05), "tor": (0.32, 0.1, 0.1), "hed": (0.35, 0.2, 0.2), "G": (-0.235, 0.12, 0.60), "BA": n3((0.0, 0.78, 0.62)), "BS": n3((0.0, -0.62, 0.78)), "RF": (0.2, 0.1, 0.8), "RD": (0, 0.1, -1), "RP": (-1, 0, 0), "Rpole": (0.8, -0.5, 0), "brow": -0.8, "lid": 0.55, "fing": 0.1}
     out.append(C("stun", 1.2, [(0.0, STUN), (0.6, dict(STUN, tor=(0.3, -0.1, -0.06), hed=(0.3, -0.2, -0.16), pel=(0, -0.02, -0.09))), (1.2, STUN)], True))
     DN = {"pel": (0.0, -0.1, -0.44), "prt": (0.45, 0.0, -0.1), "tor": (0.3, 0.1, 0.08), "hed": (-0.3, -0.08, 0.05), "FL": (-0.17, 0.18, A_Z), "FR": (0.14, -0.34, 0.12), "FRp": 1.15, "FLy": 0.2, "FRy": -0.1,

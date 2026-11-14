@@ -29,11 +29,9 @@ var _prune_at := 0.0
 var shown := {}
 
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
-## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET; times the
-## camera's hunter_scale, so the plate clears a Hunter drawn bigger.
+## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
 static func plate_offset(h: Hunter) -> float:
-	var drawn: float = h.m.cam.hunter_scale if h.m and h.m.cam else 1.0
-	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET)) * drawn
+	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 ## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
 ## body, not who it is or how hurt. Teammates, the downed and the revealed (Hunter.reveal_t) always show.
@@ -109,16 +107,17 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 ## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", BodyTell.STUN_COL, "STUNNED", e.stun_t])
-	if e.root_t > 0.0: out.append(["binding", BodyTell.ROOT_COL, "ROOTED", e.root_t])
-	if KitStatus.grounded(e): out.append(["bolas", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
-	if KitStatus.rattled(e): out.append(["burst", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
-	if e.slow_t > 0.0: out.append(["snare", BodyTell.SLOW_COL, "SLOWED", e.slow_t])
-	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
+	if e.stun_t > 0.0: out.append(["status_stunned", BodyTell.STUN_COL, "STUNNED", e.stun_t])
+	if e.root_t > 0.0: out.append(["status_rooted", BodyTell.ROOT_COL, "ROOTED", e.root_t])
+	if KitStatus.grounded(e):
+		out.append(["status_grounded", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
+	if KitStatus.rattled(e): out.append(["status_dazed", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
+	if e.slow_t > 0.0: out.append(["status_slowed", BodyTell.SLOW_COL, "SLOWED", e.slow_t])
+	if e.burn_t > 0.0: out.append(["status_burning", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
-	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
-	if hunter and hunter.shield > 0.0: out.append(["brightshield", Color("d8ecff"), "", -1.0])
-	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
+	if hunter and hunter.weak_t > 0.0: out.append(["status_weakened", Color("ffb36a"), "WEAKENED", hunter.weak_t])
+	if hunter and hunter.shield > 0.0: out.append(["status_shielded", Color("d8ecff"), "", -1.0])
+	if e.guard_t > 0.0: out.append(["status_guarded", Color("f2e6cf"), "", -1.0])
 	return out
 
 ## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with

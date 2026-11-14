@@ -8,8 +8,7 @@ extends RefCounted
 ##   recast triggers (the knife, the hammer), unless the window says "marker": false (Motley's seed: the owner
 ##   wants less pop-up UI); no key or word on world objects (DECISIONS 2026-11-11);
 ##   a foe you marked shows a badge (its count, a ring for the time left) that flashes when the payoff lands;
-##   sounds: a chime as the window opens, ticks before it closes, a low click when it runs out (the open chime and
-##   the ticks are the hunter's own <arch>_recast_open / _recast_tick when its set has them, via HeroSfx).
+##   sounds: a chime as the window opens, ticks before it closes, a low click when it runs out.
 ## Only the local player's own cues show (track runs for the local hunter); key names come from the live InputMap.
 
 const KEYS := {"e": "signature", "x": "hunter_ult", "dash": "dash", "lmb": "fire", "sec": "secondary"}
@@ -35,7 +34,7 @@ static func track(k: ArchKit, dt: float) -> void:
 		var left0 := float(w["left"])
 		# a window shorter than a tick's mark skips it: no tick on top of the opening chime
 		cue["tick"] = TICKS.filter(func(t): return float(t) >= left0).size()
-		_play(k, "recast_open", "ab_ready", -3.0, 1.0, 1.35)
+		Sfx.play("ab_ready", null, -3.0, 0.0, 1.35)
 	elif w.is_empty() and was != "":
 		if float(cue.get("last", 1.0)) < RAN_OUT:    # ran out unused, even one that then fires itself: never silent
 			cue["exp_slot"] = was
@@ -46,7 +45,7 @@ static func track(k: ArchKit, dt: float) -> void:
 		var n := int(cue.get("tick", 0))
 		if n < TICKS.size() and left <= float(TICKS[n]):
 			cue["tick"] = n + 1
-			_play(k, "recast_tick", "click", -4.0, 1.0 + 0.12 * n, 1.5 + 0.2 * n)
+			Sfx.play("click", null, -4.0, 0.0, 1.5 + 0.2 * n)
 		cue["last"] = left
 	cue["slot"] = String(w.get("slot", ""))
 	cue["w"] = w
@@ -59,14 +58,6 @@ static func track(k: ArchKit, dt: float) -> void:
 	if not pop.is_empty():
 		pop["t"] = float(pop["t"]) - dt
 		if float(pop["t"]) <= 0.0: cue["pop"] = {}
-
-## A cue in the hunter's own voice at its own pitch, else the shared `stock` at the pitch tuned for it.
-static func _play(k: ArchKit, kind: String, stock: String, db: float, own_pitch: float, stock_pitch: float) -> void:
-	var own := HeroSfx.of(k.h, kind, "")
-	if own != "":
-		Sfx.play(own, null, db, 0.0, own_pitch)
-	else:
-		Sfx.play(stock, null, db, 0.0, stock_pitch)
 
 ## The payoff landed on `victim`: its badge bursts (ArchKit.payoff_fx and the payoffs that don't go through it).
 static func payoff(k: ArchKit, victim: Ent) -> void:
@@ -142,10 +133,8 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 	var pop: Dictionary = cue.get("pop", {})
 	var seen := {}                 # foe -> badges already drawn on it (a second one sits beside the first)
 	for mk in cue.get("marks", []):
-		if not is_instance_valid(mk["e"]):
-			continue       # (a freed foe cannot even be assigned to a typed Ent)
 		var e: Ent = mk["e"]
-		if e.visible and not cam.is_position_behind(e.position):
+		if is_instance_valid(e) and e.visible and not cam.is_position_behind(e.position):
 			var n := int(seen.get(e, 0))
 			seen[e] = n + 1
 			var sp := cam.unproject_position(e.position + Vector3(0, BADGE_UP, 0)) + Vector2(BADGE_GAP * n, 0)

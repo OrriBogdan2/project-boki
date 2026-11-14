@@ -536,8 +536,6 @@ func gunslinger() -> void:
 			and bool(core.get("all", false)) and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2
 			and is_equal_approx(float(core.get("fill", 0)), fill),
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
-	ok("Cinderfall: the disc is a lit rim over a see-through centre, not a solid sheet (docs/VFX_QUALITY.md)",
-			float(disc.get("alpha", 1.0)) <= 0.5 and int(HeroVfx.of(m).plays.get("x_cast", 0)) >= 1)
 	# past the shot's commit (GunslingerUlt.COMMIT) she is free while it falls: she walks and the rifle works
 	ac.step(m, 0.3)
 	var p0 := P.pos
@@ -552,11 +550,10 @@ func gunslinger() -> void:
 			absf(ac.dmg(T) - base * (1.0 + float(xd["core_k"]))) < 0.5 and absf(ac.dmg(T2) - base) < 0.5
 			and U.last.get("centre", 0) == 1,
 			"centre %.1f edge %.1f (base %.1f)" % [ac.dmg(T), ac.dmg(T2), base])
-	ok("Cinderfall: the shell streaks down and lands as its own look (HeroVfx x_shell, x_impact)",
-			int(HeroVfx.of(m).plays.get("x_shell", 0)) >= 1 and int(HeroVfx.of(m).plays.get("x_impact", 0)) >= 1)
 	var hit_share := float(KinBond.rules()["hit"])
 	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
 			"paid %.2f" % _paid(P, id))
+	_gun_scorch(m, t_at, float(xd["radius"]))
 	var took: float = ac.dmg(T)
 	var burn := _hurt_times(m, T, 1.1)
 	ok("Cinderfall: the patch burns and slows",
@@ -598,6 +595,18 @@ func _zone_cadence(times: Array, burned: float, per: float, zone_t: float) -> vo
 			"%d ticks, gaps %.3f to %.3f s, burn %.1f (%.1f each)" % [times.size(), lo, hi, burned, per])
 
 ## Stepping off the disc before it lands: no damage, no bond; a cursor past the range is clamped.
+## The scorch the patch keeps (VVFx.disc): its lit rim on the hit radius, see-through at the centre (VFX_QUALITY.md
+## "Opaque zone fills": never a solid fill over the Hunters in it).
+func _gun_scorch(m: Match, at: Vector3, r: float) -> void:
+	var scorch: MeshInstance3D = null
+	for n: Node3D in VVFx.of(m).pools.get("disc", []):
+		if n.visible and hc._flat(n.global_position, at) < 0.1:
+			scorch = n
+	var rim_r := scorch.scale.x * VVFx.DISC_EDGE if scorch else 0.0
+	var fill_a := float((scorch.material_override as ShaderMaterial).get_shader_parameter("fill_a")) if scorch else 1.0
+	ok("Cinderfall: the scorch's lit rim is on the hit radius, its centre see-through (alpha <= 0.25)",
+			absf(rim_r - r) < 0.05 and fill_a <= 0.25, "rim %.2f m (r %.2f) centre alpha %.2f" % [rim_r, r, fill_a])
+
 func _gun_dodge(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
 	var U := K.ult
 	var xd := K.x_def()

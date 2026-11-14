@@ -2,8 +2,8 @@ extends RefCounted
 ## --kin-indoors-check: a new player's second Boki comes out onto the farm (a repeat only goes to the
 ## Burrow once one is built), a Boki only goes indoors when there is a house and never for long
 ## while you are around, with no house it naps outside, and every Boki that isn't visible says where
-## it is. Also the wants display: the mood icon, the interact prompt naming the want, and a happy
-## answer when it is met (icons: --mood-icon-check). Never touches the real save.
+## it is. Also the wants display: one bubble per Boki with its icon, the most urgent first, the
+## interact prompt naming the want, and a happy answer when it is met. Never touches the real save.
 
 var bad := 0
 var main: Node
@@ -118,21 +118,23 @@ func _wants() -> void:
 	for k in home.kins:
 		k["pos"] = home.ppos + Vector3(2.0, 0, 0)
 		for n in Care.NEEDS:
-			k["rec"]["needs"][n] = 60.0
+			k["rec"]["needs"][n] = 80.0
 		k["rec"]["needs_t"] = Time.get_unix_time_from_system() + 9999.0
 	home._update_bubbles(0.5)
-	ok(home.kins.all(func(k): return not k["bubble"].visible), "nothing needed: no icons")
+	ok(home.kins.all(func(k): return not k["bubble"].visible), "nothing needed: no bubbles")
 	a["rec"]["needs"]["food"] = 10.0
 	b["rec"]["needs"]["energy"] = 30.0
 	b["pos"] = a["pos"] + Vector3(0.6, 0, 0)
 	c["rec"]["needs"]["clean"] = 5.0
 	c["pos"] = home.ppos + Vector3(-3.0, 0, 0)
-	for i in 10:
+	for i in 30:
 		home._update_bubbles(0.1)
 	ok(a["bubble"].visible and a["bubble"].get_node("bowl").visible and not a["bubble"].get_node("zzz").visible,
 		"a hungry Boki shows a food bowl, and only that")
-	ok(b["bubble"].visible and b["bubble"].get_node("zzz").visible, "a sleepy one beside it shows its own Zzz")
-	ok(not c["bubble"].visible, "a dirty Boki has no mood icon (the prompt names it)")
+	ok(not b["bubble"].visible, "a second want right beside it adds no second bubble")
+	ok(c["bubble"].visible and c["bubble"].get_node("bath").visible, "a dirty Boki further away shows a bath")
+	ok(c["bubble"].scale.x > b["bubble"].scale.x and KinWants.urgency(c["rec"]) > KinWants.urgency(a["rec"]) - 0.5,
+		"the more urgent want is bigger (%.2f)" % c["bubble"].scale.x)
 	ok(KinWants.line(a["rec"], true).contains("hungry"), "the prompt names it: \"%s\"" % KinWants.line(a["rec"], true))
 	a["rec"]["likes"]["food"] = "kibble"
 	Save.d["items"]["kibble"] = 2

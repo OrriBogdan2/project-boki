@@ -55,11 +55,7 @@
 		"glide": "glide",
 		"dive": "dive"
 	},
-	"land": {
-		"clip": "land",
-		"dur": 0.36,
-		"min_fall": 0.25
-	},
+	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
 		"bul_throw": {
 			"clip": "lmb_throw",
@@ -112,10 +108,6 @@
 		"bul_slamshield": {
 			"clip": "shield_slam",
 			"lead": 0.25
-		},
-		"bul_boop": {
-			"clip": "shield_boop",
-			"upper": "moving"
 		},
 		"bul_mend": {
 			"clip": "e_mend",
@@ -199,7 +191,6 @@
 			"bul_whirl": "angry",
 			"bul_charge": "determined",
 			"bul_slamshield": "angry",
-			"bul_boop": "angry",
 			"bul_mend": "happy",
 			"bul_ult_wind": "angry",
 			"bul_ult_slam": "angry",

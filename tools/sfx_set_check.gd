@@ -22,8 +22,7 @@ extends RefCounted
 ##  11. boki_voices: every species the game can show (Data.KIN: the wild, the starters, the mystery egg's pool,
 ##      the rare boss kin) has all five moods with two takes and KinVoice.cue picks them (a shown species on a
 ##      shared cue fails), an unknown species falls back to the shared cues, and no two species share a happy take
-##  12. every sound named in UiSfx (menus, pickup, capture, extraction, the lobby) has its file
-##  13. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
+##  12. the inventory cues (InvSfx): grab, drop, equip, swap and take exist and each plays its own sound,
 ##      at least INV_UNDER_DB under a hit or a shot; the inventory and loot code plays them, never hud.gd
 ## Reads the files only; never touches the save.
 
@@ -59,7 +58,6 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
-	_ui_cues()
 	_strip_chime()
 	_inv_cues()
 	print("SFXSET DONE, failures: %d" % bad)
@@ -242,8 +240,8 @@ func _nuke_fall() -> void:
 	var what := "vn_nuke_fall is %.3f s, the fall is %.2f s (within %.0f ms)"
 	ok(absf(secs - delay) <= FALL_TOL_S, what % [secs, delay, FALL_TOL_S * 1000.0])
 	ok(float(Sfx.sound_reach.get("vn_nuke_fall", 0.0)) > Sfx.hear_range, "vn_nuke_fall carries past hearing range")
-	var looks := FileAccess.get_file_as_string("res://content/vfx/gunslinger.json")
-	ok(looks.contains("\"n\": \"vn_nuke_fall\""), "the cast's HeroVfx look plays vn_nuke_fall (at the landing point)")
+	var ult := FileAccess.get_file_as_string("res://scripts/arch/kits/gunslinger_ult.gd")
+	ok(ult.contains("m.sfx(\"vn_nuke_fall\", at"), "the kit plays vn_nuke_fall at the landing point on the cast")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -386,22 +384,7 @@ func _strip_chime() -> void:
 			"strip chime: sfx_levels has the calm and the ducked level %s" % [cue])
 	ok(_plays(TutorialStrip.CHIME, TutorialStrip.chime), "strip chime: plays through Sfx")
 
-## 12. Every sound UiSfx plays by name has a file, so a typo never plays silence.
-func _ui_cues() -> void:
-	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
-	var re := RegEx.create_from_string('"([a-z_]+)"')
-	var names := {}
-	for hit in re.search_all(src):
-		var line_at := src.rfind("\n", hit.get_start()) + 1
-		if not src.substr(line_at, src.find("\n", line_at) - line_at).to_lower().contains("meta"):
-			names[hit.get_string(1)] = true
-	var missing := []
-	for n in names:
-		if _takes(String(n)).is_empty():
-			missing.append(n)
-	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
-
-## 13. The inventory cues.
+## 12. The inventory cues.
 func _inv_cues() -> void:
 	var cues := {"inv_grab": InvSfx.grab, "inv_drop": InvSfx.drop, "inv_equip": InvSfx.equip,
 			"inv_swap": InvSfx.swap, "inv_take": InvSfx.take}

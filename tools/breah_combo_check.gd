@@ -327,12 +327,6 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	m.step(DT)
 	var first := K.launches - l0
-	var recovery := P.fire_cd
-	ok(
-		"cancel: the punch's recovery is the card's 0.6 s, the boulder's",
-		recovery > 0.5 and recovery <= 0.6 and float(ld["punch"]["rate"]) == float(ld["boulder"]["rate"]),
-		"fire_cd %.2f punch %.2f boulder %.2f" % [recovery, float(ld["punch"]["rate"]), float(ld["boulder"]["rate"])]
-	)
 	step(m, 0.3)
 	ok(
 		"combo: a punch along a row launches every rock in a stream",
@@ -405,11 +399,8 @@ func _breah() -> void:
 		longest[0] = maxf(longest[0], K.rmb_t))
 	ok(
 		"item 61: the charge never passes the cap (0.4-0.5s); at the cap it goes by itself, still held",
-		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down
-			and (K.slam.hops == 1 or K.slam.wind_t >= 0.0),
-		"cap %.2f longest %.2f down %s hops %d winding %s" % [
-			cap_t, longest[0], str(K.rmb_down), K.slam.hops, str(K.slam.wind_t >= 0.0)
-		]
+		cap_t >= 0.4 and cap_t <= 0.5 and longest[0] <= cap_t + DT * 1.5 and not K.rmb_down and K.slam.hops == 1,
+		"cap %.2f longest %.2f down %s hops %d" % [cap_t, longest[0], str(K.rmb_down), K.slam.hops]
 	)
 	ok(
 		"item 61: a slam at the cap is the full circle and centre",
@@ -434,8 +425,8 @@ func _breah() -> void:
 			hit_key = float(key[0])
 	ok(
 		"anim (item 14): breah_slam smashes down (its deepest squash) on the hop's landing frame",
-		absf(hit_key - K.slam.flight()) < 0.05,
-		"key %.2f landing %.2f" % [hit_key, K.slam.flight()]
+		absf(hit_key - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.05,
+		"key %.2f landing %.2f" % [hit_key, K.slam._flight(float(K.slam_def()["hop_up"]))]
 	)
 	ok(
 		"rmb (item 14): no rock comes from Quakefall (rocks come from E, the dash and X)",
@@ -540,7 +531,7 @@ func _breah() -> void:
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	hold(m, P, 0.5)
-	step(m, 1.0)
+	step(m, 0.6)
 	ok("combo: Stone Row > slam launches the rocks", K.launches > l1, "launches %d -> %d" % [l1, K.launches])
 	# quiet level growth: ability damage scales with LevelGrowth.ap (through power())
 	var lv0 := P.lvl
@@ -871,9 +862,9 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 	aim_at(P, home + Vector3(10, 0, 0))
 	var plain := _hop_run(m, P, K, Vector2.ZERO, Vector2.ZERO)
 	ok(
-		"item 61: after its wind-up the hold carries him at least 2m forward with a rise, then slams on landing",
-		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.3
-			and absf(float(plain["t"]) - float(K.slam.feel()["windup"]) - K.slam.flight()) < 0.07,
+		"item 61: the hold carries him at least 2m forward with a rise, then slams on landing",
+		float(plain["x"]) >= 2.0 and float(plain["up"]) >= 0.4 and float(plain["up"]) <= 1.0
+			and absf(float(plain["t"]) - K.slam._flight(float(K.slam_def()["hop_up"]))) < 0.07,
 		"forward %.2f up %.2f in %.2fs" % [float(plain["x"]), float(plain["up"]), float(plain["t"])]
 	)
 	reset.call()
@@ -900,7 +891,6 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		var z0 := P.pos.y
 		if mode == "hop":
 			hold(m, P, 0.25)
-			step(m, float(K.slam.feel()["windup"]))       # (the wind-up: the hop leaves after it)
 		elif mode == "leap":
 			P.inp["sec_hold"] = true
 			P.ak.press_rmb()

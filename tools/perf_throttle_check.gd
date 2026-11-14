@@ -329,7 +329,7 @@ func _place(b: Hunter, at: Vector3) -> void:
 	b.teleport(at)
 	b.grounded = true
 	b.vel = Vector3.ZERO
-	b.drawn_y = INF      # (StepSmooth draws the body where it is on its next frame)
+	b.step_vis = 0.0
 	b.ai["lod_dt"] = 0.0
 
 ## Plans n sim steps; returns [steps the bot ran, sim steps of time it was given].

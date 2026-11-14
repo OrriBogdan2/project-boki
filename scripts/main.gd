@@ -165,6 +165,16 @@ func _ready() -> void:
 		if a.begins_with("--raid-demo="): opts["raid"] = a.substr(12); opts["raid_demo"] = true; opts["no_drop"] = true    # a raid condition's look (RaidLook)
 		if a == "--blight-demo": opts["blight_demo"] = "all"; opts["no_drop"] = true      # a Warden's light and a Skitter pack (BlightDir.demo)
 		if a.begins_with("--blight-demo="): opts["blight_demo"] = a.substr(14); opts["no_drop"] = true
+	if "--check" in args:
+		var CheckT = load("res://tools/check.gd")
+		var bad := 0
+		for f in CheckT.new()._scan("res://scripts"):
+			var sc = load(f)
+			if sc == null or not sc.can_instantiate():
+				print("FAIL ", f); bad += 1
+		print("CHECK DONE, failures: ", bad)
+		get_tree().quit()
+		return
 	if Array(args).any(func(a): return String(a).begins_with("--grammar-check")):
 		# tooling: parse every kin grammar file (docs/KIN_GRAMMAR.md) and print structural errors;
 		# --grammar-check=<root> checks another folder (e.g. res://tests/grammar_fixtures/broken)
@@ -224,6 +234,30 @@ func _ready() -> void:
 				if o != sm.player:
 					o.teleport(sm.world.spawns[-1]); o.ctrl = "idle"
 			return
+	if "--biome-check" in args:
+		# tooling: an expedition on the authored map; what each biome spawned, then a minute of play
+		var bm := Match.new()
+		add_child(bm)
+		bm.start({"teams": 4, "squad": 1, "tier": int(opts.get("tier", 1)), "seed": int(opts.get("seed", 9)), "no_drop": true, "autoplay": true})
+		bm.set_process(false)
+		var by := {}
+		var rar := [0, 0, 0, 0]; var nm := 0
+		for mb in bm.mobs:
+			var b := bm.world.biome_at(mb.pos.x, mb.pos.z)
+			if not by.has(b): by[b] = []
+			by[b].append(String(mb.md["name"]))
+			rar[int(mb.get_meta("rarity", 0))] += 1
+			if not (mb.get_meta("muts", []) as Array).is_empty(): nm += 1
+		for b in by:
+			print("BIOME %s: %d mobs, e.g. %s" % [b, by[b].size(), ", ".join((by[b] as Array).slice(0, 6))])
+		var hk := {}
+		for hz in bm.biomes.hazards: hk[hz["kind"]] = int(hk.get(hz["kind"], 0)) + 1
+		print("BIOME rarity common/uncommon/rare/elite %s, mutated %d of %d; hazards %s" % [str(rar), nm, bm.mobs.size(), str(hk)])
+		for i in int(60.0 / Match.DT):
+			bm.step(Match.DT)
+		print("BIOME sim ok, time %.0f, mobs left %d, fields %d" % [bm.time, bm.mobs.filter(func(x): return not x.dead).size(), bm.fields.list.size()])
+		get_tree().quit()
+		return
 	if "--arch-lineup" in args or "--showcase" in args or "--arch-matrix" in args or "--arch-heads" in args:
 		add_child(load("res://tests/arch_gallery.gd").new())
 		return
@@ -232,6 +266,11 @@ func _ready() -> void:
 		return
 	if "--art-stats" in args:
 		load("res://tests/art_stats.gd").stats()
+		get_tree().quit()
+		return
+	if "--hair-check" in args:
+		var hb: int = load("res://tests/hair_gallery.gd").check()
+		print("HAIR CHECK DONE, failures: ", hb)
 		get_tree().quit()
 		return
 	if "--pack-gallery" in args:
@@ -266,7 +305,47 @@ func _ready() -> void:
 		load("res://tools/speaktest.gd").new().run()
 		get_tree().quit()
 		return
+	if "--kinbox-check" in args:
+		var kbc = load("res://tools/kinbox_check.gd").new()      # the farm cap, the Kin Burrow and rare mutations
+		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
+		kbc.run(self)
+		return
 	if CheckRegistry.run(self, args):      # registered checks (tools/check_registry.gd)
+		return
+	if "--revive-check" in args:
+		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
+		set_meta("revive_check", rvc)
+		rvc.run(self)
+		return
+	if "--weapon-clip-check" in args:
+		var wcc = load("res://tools/weapon_clip_check.gd").new()      # no held weapon ever dips into the ground
+		set_meta("weapon_clip_check", wcc)
+		wcc.run(self)
+		return
+	if "--farm-start-check" in args:
+		set_meta("farm_start_check", load("res://tools/farm_start_check.gd").new()); get_meta("farm_start_check").run(self); return      # a new farm: empty island, placing, chopping, stations, old saves (kept in meta: the check awaits, so it must stay referenced)
+	if "--work-check" in args:
+		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
+		set_meta("work_check", wkc)
+		wkc.run(self)
+		return
+	if "--polish-check" in args:
+		load("res://tools/polish_check.gd").new().run(self)      # polish pass: drop families, stair flights, chest look, see-through
+		return
+	if "--boki-system-check" in args:
+		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
+		return
+	if "--merge-form-check" in args:
+		load("res://tools/merge_form_check.gd").new().run(self)      # merge forms: transformation, kit swap, ultimates, shell, no tiers, net, bots
+		return
+	if "--boki-follow-check" in args:
+		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
+		return
+	if "--capture-check" in args:
+		load("res://tools/capture_check.gd").new().run(self)      # capture by scan, the box, the Field Book, the net events
+		return
+	if "--teammate-check" in args:
+		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return
 	if "--unique-check" in args:
 		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size

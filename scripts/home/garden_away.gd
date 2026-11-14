@@ -67,13 +67,13 @@ static func _toys(gone_s: float, now: float) -> Array:
 ## what does not fit stays in the pantry, so nothing is lost.
 static func _patch_overflow(now: float) -> Array:
 	var e := SnackPatch.entry(Save.d)
-	if e.is_empty() or not e.has(SnackPatch.RIPE_KEY):
+	if e.is_empty() or not e.has("t"):
 		return []
 	var grow := float(SnackPatch.rules()["grow_secs"])
-	var batches := mini(floori((now - float(e[SnackPatch.RIPE_KEY])) / grow) - 1, int(rules()["patch_overflow_max"]))
+	var batches := mini(floori((now - float(e["t"])) / grow) - 1, int(rules()["patch_overflow_max"]))
 	if batches <= 0:
 		return []
-	e[SnackPatch.RIPE_KEY] = now - grow
+	e["t"] = now - grow
 	var bowl := 0
 	for snack in SnackPatch.rules()["snacks"]:
 		Save.d["crops"][snack] = int(Save.d["crops"].get(snack, 0)) + batches

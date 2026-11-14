@@ -25,12 +25,13 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## reads bouncy at match zoom).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
-const MAX_FREE := 0.1        # a move with data "free_arm" keeps that arm out for at most this share of the clip
-const MAX_STRIKE_MOVE := 0.005  # m: the free_arm layer may move the casting hand at its strike frame this little
-const SAME_AS_IDLE := 0.26   # rad (15 deg): an elbow this close to the idle's is the idle's own hold, not the move's
 const MAX_BOB_CM := 11.0
 const NO_LEGS := ["ostra"]     # ostra hovers: a backlog item
 const JOG_OPEN := ["tender"]     # the clips' stride caps the jog too (RATE_MAX): the "stride cap" backlog item
+## The start gate: the idle's first pose to the first walk pose played when he sets off (loco "start_phase", the
+## "start_blend" bones still in the idle) at most this many body heights apart for these Hunters.
+const MAX_START_GAP := 0.25
+const START_GATE := ["gunslinger", "juggernaut", "archer", "ashwick", "dredge", "mage"]
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -64,6 +65,9 @@ func _hero(main: Node, id: String) -> void:
 	for k in 5:
 		await main.get_tree().process_frame
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:     # (no hand-keyed clips yet: nothing to audit)
+		m.free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
 	soles = _soles(sk)
@@ -84,21 +88,18 @@ func _hero(main: Node, id: String) -> void:
 	row["seam"] = {}
 	for nm in [walk, run, String(lc["idle"])]:
 		row["seam"][nm] = _seam(sync, clips, sk, nm, hgt)
-	row["pop"] = {"idle_walk": _first_pose_gap(sync, clips, sk, String(lc["idle"]), walk, hgt),
-			"walk_run": _first_pose_gap(sync, clips, sk, walk, run, hgt),
+	var ph := float(lc.get("start_phase", 0.0))
+	row["pop"] = {"idle_walk": _start_gap(sync, clips, sk, String(lc["idle"]), walk, ph, hgt),
+			"walk_run": _first_pose_gap(sync, clips, sk, walk, ph, run, ph, hgt),
+			"idle_walk_best": _best_start(sync, clips, sk, String(lc["idle"]), walk, hgt),
 			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run)}
 	var weapon := ""
 	row["attacks"] = {}
 	for nm in ATTACKS[id]:
-		row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt, rest)
+		row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt)
 		if weapon == "":
 			weapon = row["attacks"][nm]["weapon_hand"]
 	row["weapon_hand"] = weapon
-	for nm in clips.d.get("free_arm", {}):
-		if not row["attacks"].has(nm):
-			row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt, rest)
-		var spec: Variant = clips.d["free_arm"][nm]
-		_gate_free(id, String(nm), row["attacks"][nm], _aim_hold(clips, String(nm)), spec is Dictionary)
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	var jog: Dictionary = live[str(SPEEDS[1])]
@@ -109,30 +110,18 @@ func _hero(main: Node, id: String) -> void:
 			top["peaks"], round(100.0 * jog["slide"] / SPEEDS[1])])
 	if not id in NO_LEGS:
 		_gate(id, live)
+	row["set_off_at"] = _set_off_at(m, sync, clips)
+	var want := ph * float(row["cfg"]["walk_len"])
+	if absf(float(row["set_off_at"]) - want) > 2.0 * DT:
+		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"],
+				want])
+		bad += 1
+	if id in START_GATE and row["pop"]["idle_walk"] > MAX_START_GAP:
+		print("FAIL %s: the walk starts %.2f body heights from the idle (limit %.2f; nearest phase %.2f: %.2f)" % [id,
+				row["pop"]["idle_walk"], MAX_START_GAP, row["pop"]["idle_walk_best"][0],
+				row["pop"]["idle_walk_best"][1]])
+		bad += 1
 	m.free()
-
-## A move with data "free_arm": the loose arm hangs, the casting hand's strike pose is the clip's own, and the casting
-## arm does not stand out after its strike (its wind-up may: that is the throw; an aim hold is all wind-up). That last
-## fails only where the data lets the casting arm go too ({side: seconds}); elsewhere it is a NOTE (a backlog item).
-func _gate_free(id: String, nm: String, atk: Dictionary, aim: bool, releases: bool) -> void:
-	if atk["t_free"] > MAX_FREE:
-		print("FAIL %s %s: the free arm stands out for %d%% of the clip (limit %d%%)" % [id, nm,
-				round(100.0 * atk["t_free"]), round(100.0 * MAX_FREE)])
-		bad += 1
-	if atk["strike_moved"] > MAX_STRIKE_MOVE:
-		print("FAIL %s %s: the casting hand is %.0f mm off its strike pose" % [id, nm, 1000.0 * atk["strike_moved"]])
-		bad += 1
-	if atk["t_recover"] > 0.0 and not aim:
-		print("%s %s %s: the casting arm stands out for %d%% of the clip after its strike" % [
-				"FAIL" if releases else "NOTE", id, nm, round(100.0 * atk["t_recover"])])
-		bad += int(releases)
-
-## A clip some move holds while aiming (data "hold_from"): a draw-back, its throw is another clip.
-func _aim_hold(clips: WardenClips, nm: String) -> bool:
-	for k in clips.d.get("kmoves", {}).values():
-		if k is Dictionary and String(k.get("clip", "")) == nm and k.has("hold_from"):
-			return true
-	return false
 
 func _gate(id: String, live: Dictionary) -> void:
 	for s in [SPEEDS[2]] if id in JOG_OPEN else [SPEEDS[1], SPEEDS[2]]:
@@ -256,6 +245,16 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 	clips.force = {}
 	return out
 
+## s into the walk clip on the first frame he moves after standing (WardenClips._set_off), as the game plays it.
+func _set_off_at(m: Node3D, sync: Node, clips: WardenClips) -> float:
+	m.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true})
+	for k in 20:
+		sync.call("_process", DT)
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -2.2), "face": 0.0, "grounded": true})
+	sync.call("_process", DT)
+	m.set_meta(WardenClips.STATE, {})
+	return float(clips.tree.get("parameters/loco/1/clip/current_position"))     # (blend point 1: walk f)
+
 ## A gait at speed s, as the game plays it: the state carries the velocity, facing -Z.
 func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) -> Dictionary:
 	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -s), "face": 0.0, "grounded": true})
@@ -373,8 +372,31 @@ func _seam(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: fl
 	var length := clips.lib.get_animation(clip).length
 	return _dist(_pose_at(sync, clips, sk, clip, 0.0), _pose_at(sync, clips, sk, clip, length - 0.001)) / hgt
 
-func _first_pose_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, a: String, b: String, hgt: float) -> float:
-	return _dist(_pose_at(sync, clips, sk, a, 0.0), _pose_at(sync, clips, sk, b, 0.0)) / hgt
+## Clip a at phase pa (0..1 of its length) against clip b at phase pb, as a fraction of the Hunter's height.
+func _first_pose_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, a: String, pa: float, b: String, pb: float,
+		hgt: float) -> float:
+	var ta := pa * clips.lib.get_animation(a).length
+	var tb := pb * clips.lib.get_animation(b).length
+	return _dist(_pose_at(sync, clips, sk, a, ta), _pose_at(sync, clips, sk, b, tb)) / hgt
+
+## The idle's first pose against the walk at phase ph with the "start_blend" bones held in the idle's pose.
+func _start_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String, walk: String, ph: float,
+		hgt: float) -> float:
+	var p := _pose_at(sync, clips, sk, idle, 0.0)
+	var held: Array = clips.start_bones.map(func(b: Array) -> Quaternion: return sk.get_bone_pose_rotation(b[0]))
+	_pose_at(sync, clips, sk, walk, ph * clips.lib.get_animation(walk).length)
+	for i in held.size():
+		sk.set_bone_pose_rotation(clips.start_bones[i][0], held[i])
+	return _dist(p, _read(sk)) / hgt
+
+## [phase, gap]: the start phase nearest the idle, in 24ths of the cycle (what "start_phase" should be).
+func _best_start(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String, walk: String, hgt: float) -> Array:
+	var best := [0.0, INF]
+	for i in 24:
+		var gap := _start_gap(sync, clips, sk, idle, walk, i / 24.0, hgt)
+		if gap < best[1]:
+			best = [i / 24.0, gap]
+	return best
 
 ## 0..0.5 of a cycle: how far apart the two loops put the left foot's touchdown (a blend between them crosses the legs).
 func _contact_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, a: String, b: String) -> float:
@@ -388,7 +410,7 @@ func _touch(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> flo
 			best = i
 	return float(best) / (fr.size() - 1)
 
-func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float, rest: Dictionary) -> Dictionary:
+func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
 	var fr := _clip_frames(sync, clips, sk, clip, 24).map(_upright)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
@@ -407,41 +429,10 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 	var weapon := "R" if path["R"] >= path["L"] else "L"
 	var loose: String = "L" if weapon == "R" else "R"
 	var length := clips.lib.get_animation(clip).length
-	var out := {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
+	return {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
 			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"t_free": float(out_side[loose]) / fr.size(),
 			"jump": jump / hgt}
-	out.merge(_strike(sync, clips, sk, clip, fr, weapon, rest))
-	return out
-
-## The strike frame is where the casting hand moves fastest in the clip as authored (free_arm off). Reports how far the
-## layer moves that hand there, the strike's time, and the share of frames after it where the casting arm stands out
-## (not counting its idle's own hold, which the clip blends back to).
-func _strike(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, fr: Array, weapon: String,
-		rest: Dictionary) -> Dictionary:
-	var keep := clips.free_arm.clips
-	clips.free_arm.clips = {}
-	var raw := _clip_frames(sync, clips, sk, clip, fr.size())
-	clips.free_arm.clips = keep
-	var hand := "hand." + weapon
-	var strike := 0
-	var fastest := -1.0
-	for i in range(1, raw.size()):
-		var step := ((raw[i][hand] as Vector3) - (raw[i - 1][hand] as Vector3)).length()
-		if step > fastest:
-			fastest = step
-			strike = i
-	var idle_elbow := _elbow(rest, weapon)
-	var after := 0
-	for i in range(strike + 1, fr.size()):
-		if _t_posed(fr[i], weapon) and _elbow(fr[i], weapon).angle_to(idle_elbow) > SAME_AS_IDLE:
-			after += 1
-	return {"strike_t": clips.lib.get_animation(clip).length * strike / (fr.size() - 1),
-			"strike_moved": ((fr[strike][hand] as Vector3) - (raw[strike][hand] as Vector3)).length(),
-			"t_recover": float(after) / fr.size()}
-
-func _elbow(p: Dictionary, side: String) -> Vector3:
-	return (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
 
 ## The points about the hips with the hips' tilt taken out, so a whole-body roll or flip (Sable's cartwheel) does not
 ## count as an arm flung or raised. A turn about the vertical (a twisted stance) is kept: the arm is read as before.
@@ -453,14 +444,6 @@ func _upright(p: Dictionary) -> Dictionary:
 			out[k] = tilt * ((p[k] as Vector3) - (p["hips"] as Vector3))
 	return out
 
-## The arm bones as seen from the hips, so a cartwheel's whole-body turn is not counted as the arm flinging.
-func _turn_with_hips(p: Dictionary) -> void:
-	var inv: Basis = (p["turn"] as Basis).inverse()
-	for k in p:
-		if p[k] is Vector3 and k != "hips":
-			p[k] = inv * ((p[k] as Vector3) - (p["hips"] as Vector3))
-	p["hips"] = Vector3.ZERO
-
 func _t_posed(p: Dictionary, side: String) -> bool:
-	var d := _elbow(p, side)
+	var d: Vector3 = (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
 	return d.angle_to(Vector3.DOWN) > T_ELEV and absf(d.x) > SIDEWAYS * absf(d.z)

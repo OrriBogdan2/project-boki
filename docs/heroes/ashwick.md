@@ -111,7 +111,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 | R lift-off ring | LOW | (b) | the ember puffs and wave stay (footage f25); the AimKit disc shown to everyone is gone (it hit nothing). "ult cast: lifts off in its ember puffs, no aim disc" |
 | R aim / recast | ok | (c) | matches |
 | Passive Flashover | ok | (c) | matches |
-| Passive knock heal and ram charge | LOW | (c) | the data has no knock heal (Felix's card; the one ram charge back is sourced, SERVER_UPDATE6 patch note); the 16% heal is ours-only, kept, listed on the owner card, see "Assumptions" |
+| Passive knock heal and ram charge | LOW | (c) | wiki-only (no tooltip line); kept, flagged as ours in "Assumptions" |
 | Dash -> ability rows | MED | (a) | the hose keeps its hold through the ram (item 51, 15ca4857); the ground dash -> LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
 ## Ultimate on R: Flue Flight
@@ -215,8 +215,6 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The ram can't be steered once it starts and has no wind-up; it goes toward the cursor (the footage shows the cursor side).
 - The pull of the cloak reaches the whole 4.5m ring and needs line of sight; dragged foes stop at walls.
 - The shield's size follows the wiki numbers (the footage doesn't show them); it lasts 3s.
-- The knock heal (16% of his max health) is ours-only: the data's Felix passive has no heal. It stacks on purpose with the shared
-  takedown reset (DashReset, 5%), 21% in all; "passive: the knock heal is 16%..." and "...21% in all" assert both.
 - Ablaze lasts 3s on its own; a fresh stoke refreshes it.
 - The hose has no fuel and nothing reloads (the source shows no fuel bar; no reload exists in the game). The 0.35s relight gap and the self-slow after release are the only limits.
 - The pilot flame is gold in her own fire palette and shows only in the lance's 0.2s spool-up (owner 11-11: the source's cyan idle pilot sat on a nozzle; on her bare palm it read as a stray blue orb); the burn pips use our own flame shape.
@@ -468,6 +466,31 @@ Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`,
 - Idle to walk first-pose gap 0.38 body heights, unchanged (blend-covered).
 - Timing: Cinder's move timing table is on the unmerged `ext/anim-time-cinder*` branches (it conflicts with this one in `warden_clips.gd` and `cinder.json`, so it was not re-run here); `--ashwick-combo-check` on the v2 clips passes (119 checks, 0 failures).
 
+## Cast pops (PRIORITIES area 4, blends and gaps; Nov 12)
+Measured by `--cast-pop-check` on the live AnimationTree: for each move, the farthest any hand, foot or the weapon tip sits
+between the locomotion pose and the clip's first frame (in) and between its last frame and the locomotion he returns to (out),
+standing (idle and the 6 s rest stance) and walking (worst phase of a stride). An upper-body move leaves the legs on the walk,
+so its feet do not count. Over 0.08 m is bold with the point. Blend-in `fade` grows toward gap / 0.8 m/s but never past the
+kit move's first key (the strike lands on its beat) or 0.3 s; blend-out `fade_out` toward the same, capped at 0.4 s
+(content/rules/warden_anim/cinder.json). A gap the capped blend cannot cover at 0.8 m/s is pose work, not a blend.
+
+No weapon: her casting hands are the points (0.37 to 0.53 m standing: the idle holds the arms low, the lance and shot start with the palm out; walking the free foot is 0.46 to 0.83 m off a planted clip start, and `as_aim`/`as_shot` reach 0.84 to 0.87 m at the nozzle). `as_aim` and `mf_xform` start slower; every move eases back over 0.40 s.
+
+| Move | Stand in | Stand out | Walk in | Walk out | Fade in / out before | after |
+|---|---|---|---|---|---|---|
+| `as_lance` | **0.37** hand.L | **0.47** hand.R | **0.39** hand.L | **0.77** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_stoke_lance` | **0.47** hand.R | **0.47** hand.R | **0.76** weapon | **0.83** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_lance_end` | **0.47** hand.R | **0.40** hand.L | **0.81** weapon | **0.23** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_aim` | **0.40** hand.L | **0.53** hand.R | **0.22** hand.L | **0.87** weapon | 0.10 / 0.16 | 0.12 / 0.40 |
+| `as_shot` | **0.52** hand.R | **0.37** hand.L | **0.84** weapon | **0.45** hand.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_leap` | **0.40** hand.L | **0.40** hand.L | **0.46** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_hop` | **0.40** hand.L | **0.40** hand.L | **0.55** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `as_cloak` | **0.25** hand.L | **0.40** hand.L | **0.46** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_stoke` | **0.47** hand.L | **0.49** hand.L | **0.22** weapon | **0.23** hand.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_jet` | **0.40** hand.L | **0.60** foot.R | **0.46** foot.R | **0.83** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_land` | **0.54** weapon | **0.40** hand.L | **0.52** weapon | **0.46** foot.R | 0.10 / 0.16 | 0.10 / 0.40 |
+| `lw_jump` | **0.40** hand.L | **0.35** weapon | **0.46** foot.R | **0.52** foot.L | 0.10 / 0.16 | 0.10 / 0.40 |
+| `mf_xform` | **0.40** hand.L | **0.40** hand.L | **0.46** foot.R | **0.46** foot.R | 0.10 / 0.16 | 0.18 / 0.40 |
 Flue Flight clips still wanted (Blender host; the game plays `jet` 1.0 s, hold from 0.22, and `jet_land` 0.2 s today):
 - `jet_up` 0.22 s: the take-off hover with both palms turned down and out, fingers spread, the fire gathering (the shipped `jet` keeps
   the hands at her sides, so only the new palm embers show it). The map takes one clip per kit move, so the kit would need a `lw_jet_up` move for it.

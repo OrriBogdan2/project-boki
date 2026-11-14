@@ -542,7 +542,7 @@ func _bolt(layer: Dictionary, h: Hunter, a: Vector3, b: Vector3, o: Dictionary) 
 ## A mesh trail that follows a projectile (its node) until it is gone, hidden, or TRAIL_MAX runs out: tracers,
 ## needles, thrown charges. The move's "ribbon" layers give its look; nothing else of the move plays. Its "end" names
 ## a move played where the trail stopped.
-func trail(h: Hunter, move: String, follow: Node3D, o := {}) -> void:
+func trail(h: Hunter, move: String, follow: Node3D) -> void:
 	var rec := _rec(h, move)
 	if rec.is_empty() or follow == null or lod_at(follow.global_position) <= 0.0:
 		return
@@ -553,7 +553,7 @@ func trail(h: Hunter, move: String, follow: Node3D, o := {}) -> void:
 	for layer: Dictionary in rec.get("fx", []):
 		if String(layer.get("p", "")) != "ribbon":
 			continue
-		_ribbon(layer, h, o)
+		_ribbon(layer, h, {})
 		var e: Dictionary = ribbons[-1]
 		e["follow"] = follow
 		e["dur"] = minf(float(layer.get("life", TRAIL_MAX)), TRAIL_MAX)

@@ -2,7 +2,8 @@ extends RefCounted
 ## --boki-anim-audit: every rigged Boki's walk and run, driven through the live BokiRig at the speeds Boki move at
 ## (HOME_SPEEDS and the species' own match speed, KinLib kin_speed), unscaled and at the size roll's ends. Per gait:
 ## the planted feet's slide as a share of the move speed, steps per second, then the loop seams and the idle-to-walk
-## pop. Fails a slide over MAX_SLIDE (except the OVER ceilings); Boki with no stepping feet are EXEMPT and listed.
+## pop. Fails a slide over MAX_SLIDE (except the OVER ceilings), an idle, walk or run seam over MAX_SEAM (except the
+## SEAM_OVER ceilings) and a pop over MAX_POP; Boki with no stepping feet are EXEMPT from the slide and listed.
 ## BokiRig.STRIDE must also match what the clips measure, and so must BokiRig.CONTACT (the starter lines' attack
 ## contact), each to a frame; driven live, the contact must land within a frame of the hit (Kin.STRIKE_WINDUP).
 ## Tables: docs/art/kin/RIGGED_BOKI.md "Gait audit" and "Attack contact".
@@ -32,6 +33,17 @@ const OVER := {
 	"marchleaf run": 0.65, "nettlynx run": 0.80, "pebbit walk": 0.30, "pebbit run": 0.70, "puddlet run": 0.70,
 	"rimeshrew run": 0.50, "wisplet run": 0.30, "caecilith walk": 0.70, "caecilith run": 0.90,
 }
+## A loop's wrap may be no rougher than the roughest moment inside the clip (seam()).
+const MAX_SEAM := 1.0
+## Ratchet: clips whose motion breaks at the loop point (a bone turns or changes speed at the wrap: the first and last
+## keys match in pose, not in speed), with the most their seam may read. Lower or drop a row when the clip is re-keyed
+## so its ends match in speed too (docs/DEBT.md).
+const SEAM_OVER := {
+	"puddlet walk": 1.20, "burrlet walk": 1.05, "gloamshell walk": 2.05, "zapple run": 1.50, "kestrike walk": 2.45,
+	"kestrike run": 1.90, "mossgrade run": 1.35, "caecilith walk": 1.40,
+	"kindlewren run": 1.10,
+}
+const MAX_POP := 3.0          # the idle-to-walk hand-over's biggest bone jump over the steady walk's (pop())
 const SAMPLES := 48           # poses per loop
 const HELD := 0.1             # a walk or run whose first sample moves less than this of the median one holds still
 const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground
@@ -70,9 +82,16 @@ func _species(main: Node, id: String) -> void:
 	for clip in ["walk", "run"]:
 		var even := start(rig, clip)
 		ok(even > HELD, "%s %s sets off at once (first sample %.2f of the median)" % [id, clip, even])
-	var seams := "seam idle %.1f walk %.1f run %.1f" % [seam(rig, "idle"), seam(rig, "walk"), seam(rig, "run")]
-	print("BOKIGAIT %s measured walk %.2f run %.2f m/s, %s, pop %.1f" % [id, measured[0], measured[1], seams,
-			pop(k, rig)])
+	var loops: Array = []
+	for clip in ["idle", "walk", "run"]:
+		var sm := seam(rig, clip)
+		var most: float = SEAM_OVER.get("%s %s" % [id, clip], MAX_SEAM)
+		ok(sm <= most, "%s %s loop seam %.2f, under %.2f" % [id, clip, sm, most])
+		loops.append(sm)
+	var popped := pop(k, rig)
+	ok(popped <= MAX_POP, "%s idle-to-walk pop %.1f, under %.1f" % [id, popped, MAX_POP])
+	var seams := "seam idle %.2f walk %.2f run %.2f" % loops
+	print("BOKIGAIT %s measured walk %.2f run %.2f m/s, %s, pop %.1f" % [id, measured[0], measured[1], seams, popped])
 	if id in BokiRig.CONTACT:
 		_contact(k, rig, id)
 	var feetless: bool = measured.min() < FEETLESS
@@ -245,15 +264,16 @@ static func start(rig: BokiRig, clip: String) -> float:
 	jumps.sort()
 	return first / maxf(jumps[jumps.size() / 2], 0.0001)
 
-## The loop seam: the bones' jump from the clip's last sample back to its first, over the median jump between the
-## other samples. 1 is seamless; past 2 the wrap shows as a hitch.
+## The loop seam: the sharpest change in any bone's motion (its step's change from one sample to the next: a jump, a
+## stop or a turn) across the wrap, over the sharpest inside the clip. At most 1 the loop point is no rougher than
+## the clip itself; over 1 the wrap is its roughest moment (a held frame, a pose jump, a break in speed).
 static func seam(rig: BokiRig, clip: String) -> float:
 	var poses := _loop(rig, clip)
-	var jumps: Array = []
-	for i in SAMPLES - 1:
-		jumps.append(_jump(poses[i], poses[i + 1]))
-	jumps.sort()
-	return _jump(poses[SAMPLES - 1], poses[0]) / maxf(jumps[jumps.size() / 2], 0.0001)
+	var kinks: Array = []
+	for i in SAMPLES:
+		kinks.append(_kink(poses[(i + SAMPLES - 1) % SAMPLES], poses[i], poses[(i + 1) % SAMPLES]))
+	var inside: Array = kinks.slice(1, SAMPLES - 1)
+	return maxf(kinks[0], kinks[SAMPLES - 1]) / maxf(inside.max(), 0.0001)
 
 ## The bones' places at SAMPLES even steps round a clip.
 static func _loop(rig: BokiRig, clip: String) -> Array:
@@ -268,7 +288,7 @@ static func _loop(rig: BokiRig, clip: String) -> Array:
 
 ## The idle-to-walk pop, driven live: the Boki stands, then sets off at HOME_SPEEDS[0]; the biggest one-frame jump
 ## of any bone while the rig hands the idle over to the walk, over the biggest in the steady walk after it.
-## 1 is a smooth start; past 2 the body snaps into the walk.
+## 1 is a smooth start; past MAX_POP the body snaps into the walk.
 static func pop(k: Node3D, rig: BokiRig) -> float:
 	k.position = Vector3.ZERO
 	rig.set_clip("idle", 0.0)
@@ -308,6 +328,13 @@ static func _jump(a: Array, b: Array) -> float:
 	var worst := 0.0
 	for i in a.size():
 		worst = maxf(worst, (a[i] as Vector3).distance_to(b[i]))
+	return worst
+
+## The most any bone's step changes over three poses in a row.
+static func _kink(a: Array, b: Array, c: Array) -> float:
+	var worst := 0.0
+	for i in a.size():
+		worst = maxf(worst, ((a[i] as Vector3) - 2.0 * (b[i] as Vector3) + (c[i] as Vector3)).length())
 	return worst
 
 ## The paws, or the lowest limb bones of a Boki without any.

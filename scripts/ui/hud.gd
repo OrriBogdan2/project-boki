@@ -1180,10 +1180,7 @@ func r_lock_text(p: Hunter) -> String:
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(
-	slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool,
-	ch := -1.0, mx := 0
-) -> void:
+func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready: bool, ch := -1.0, mx := 0) -> void:
 	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
@@ -1735,9 +1732,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.32 + 58), Vector2(280, 8)), p.revive, GOOD)
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%  ·  %.1fs" % [(revs[0] as Hunter).pname, int(p.revive * 100.0), Life.revive_secs(p)], 15, GOOD, big)
-	if Settings.get_v("tips") and not Record.clean():
-		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + TipPick.for_downed(p, m.time, m.opts.get("blight", true)), HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
@@ -1798,7 +1793,7 @@ func _head(h: Node3D, up: float) -> Vector3:
 ## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := _head(p, 2.7 * float(p.cdat["scale"]) * cam.hunter_scale)
+	var at := _head(p, 2.7 * float(p.cdat["scale"]))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)
