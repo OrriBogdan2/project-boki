@@ -195,7 +195,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 ## burst add up on it) and a pink flare on the body. Only the shooter's screen gets the number.
 func _daze_bonus_fx(t: Ent, bonus: float) -> void:
 	vfx("daze_hit", t.pos, h.dir_to(t))
-	if h.is_local() and Settings.get_v("damage_numbers"):
+	if h.is_local():
 		m.fx.number(t.pos + Vector3(0, DAZE_NUM_LIFT, 0), bonus, DAZE_PINK, true, "+")
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
@@ -216,11 +216,13 @@ func _on_knock(t: Ent) -> void:
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
+	m.sfx("vn_stim", h.pos, -3.0)
 	vfx("knock")                   # the rifle hand's swoosh and a lift of green fire
 	play("gunslinger_knock")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
-## Each round: a muzzle flash, a thin lime tracer riding the round (its hit is on_deal's), the shoulder kick.
+## Each round: a muzzle flash on the rifle's mouth, a lime tracer riding the round (its hit is on_deal's), the
+## shoulder kick.
 func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
@@ -230,7 +232,8 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			vfx("shot", sd["start"], sd["vel"] as Vector2)
+			var mouth := _gun_muzzle()
+			vfx("shot", mouth.global_position if mouth else sd["start"], sd["vel"] as Vector2)
 			HeroVfx.of(m).trail(h, "shot_trail", sd["node"])
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
@@ -574,7 +577,7 @@ func _stick(b: Dictionary, at: Vector3) -> void:
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
 	net_cone(at, b["out"], float(bd["cone_len"]), float(bd["cone_deg"]), float(bd["fuse"]), LIME)
-	vfx("rmb_stick", at, b["out"])       # the miss: a small flare and a dull dust puff, nothing on a foe
+	vfx("rmb_stick", at, b["out"])       # stuck: a small flare and a dull dust puff, nothing on a foe
 
 ## The lane's end with no foe and no wall, wherever the charge is (ground or air): a miss is a miss. A small
 ## puff and a dull low thunk, no damage, no Daze, no cone.

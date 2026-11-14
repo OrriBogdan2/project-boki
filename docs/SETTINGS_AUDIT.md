@@ -32,7 +32,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
-| `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (buses) | |
+| `master`, `music`, `sfx`, `voices`, `ambience`, `ui_sounds` | Audio > Volume | `settings.gd` (`Settings.BUSES`) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
 | `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
@@ -41,6 +41,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
 | `show_fps` | Video > Quality | `overlay.gd` | |
 | `ui_scale` | Accessibility > Readability | `settings.gd` | |
+| `text_size` | Accessibility > Readability | `settings.gd` (UI.set_text_size) | 100/125/150%; old configs load at 100% |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
 | `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
 

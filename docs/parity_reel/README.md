@@ -71,8 +71,8 @@ Still differs:
   short fast dashes). The air pounce has the source's own 12.5 s slot.
 - The Hand is a bruised-purple bone-hook arm; the source's is a twisting double strand with a claw [F] (owner,
   Nov 7).
-- Anchor Drop: our brass fist and a teal cone shown to everyone while it fills; the source shows a giant translucent
-  fist and only a hit-box outline [F]. Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
+- Anchor Drop: a giant translucent cel-shaded fist falls into the cone while only a thin outline of the exact hit
+  cone shows to everyone (matches the source [F]). Stun 1.1 s vs 1.2 to 1.4 s [F]. The foe is Grounded 1 s after the stun (ours).
 - The Barge has no red burst at its start point [F]; the owner forbids bursts on dashes.
 - Brass Broadside turns with his aim through the charge and the waves (owner item 36); the source locks the fan at
   the press [F]. He walks at 30% then 20% through it (owner).

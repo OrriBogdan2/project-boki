@@ -70,7 +70,7 @@ void fragment() {
 		float tick = floor(TIME * 14.0);
 		float crackle = vnoise(ang * 11.0 + tick * 2.3);
 		float edge_r = 0.9 + (crackle - 0.5) * 0.08;
-		float rim = 1.0 - smoothstep(0.0, 0.035 + 0.04 * crackle, abs(r - edge_r));
+		float rim = 1.0 - smoothstep(0.0, 0.035 + 0.04 * crackle, abs(r - edge_r));     // edge_r 0.9 = VVFx.DISC_EDGE
 		float inside = 1.0 - smoothstep(edge_r - 0.02, edge_r, r);
 		float falloff = mix(fill_a, 0.45, smoothstep(0.55, 1.0, r / edge_r));
 		float spoke = fract((ang + vnoise(r * 6.0 + tick) * 0.5) * 6.0 / 6.2832);
