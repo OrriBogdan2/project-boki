@@ -333,6 +333,7 @@ func _start(o: Dictionary) -> void:
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
 	GlideTrail.of(self)
+	ShieldBreak.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -2227,13 +2228,13 @@ func on_kin_up(k: Kin, rescued: bool) -> void:
 	KinNet.event(self, "scoop" if rescued else "round", k)
 
 # ------------------------------------------------------------------ kin combat events
-## A kin used an ability: its name pops up over it so you can read the fight.
+## A kin used an ability: over your own Boki its name pops up (you learn its moves); others' read from their looks.
 func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 	kstat["kin_ab"] += 1
 	if auto: kstat["auto"] += 1
 	if k.owner_h == null or k.unseen:
 		return
-	if player and k.flat_dist(player) < 20.0:
+	if k.owner_h == player:
 		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 	if k.owner_h == player:
 		player.add_stat("kin_abilities")
@@ -2663,7 +2664,7 @@ func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size
 		mi.material_override.set_shader_parameter("color", vis_col)
 		var halo := mi.get_node_or_null("Halo") as MeshInstance3D
 		if halo:
-			halo.material_override.set_shader_parameter("color", Color(vis_col.lightened(0.2), float(look[2])))
+			halo.material_override.set_shader_parameter("color", look[2])
 		mi.scale = Vector3.ONE * vis_size
 		if not Oomph.legacy: vr = vis_size * 0.5
 		mi.global_position = at
@@ -3126,6 +3127,15 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 			e.hurt(float(s["dmg"]) * f, by, o)
 
 # ------------------------------------------------------------------ main loop
+## The shots' frame (stock rounds between steps at `alpha`, deco, ability trails); the reels, stepping by hand, call it.
+func render_shots(alpha: float) -> void:
+	for s in shots:
+		if s.has("deco"):
+			_render_deco(s, alpha)
+		if String((s["x"] as Dictionary).get("src", "")) == "abil":
+			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
+		Oomph.place_shot(s, alpha)
+
 func _process(delta: float) -> void:
 	if paused and not net_on:
 		return
@@ -3187,12 +3197,7 @@ func _process(delta: float) -> void:
 			e.lod_dt += delta
 	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
-	for s in shots:
-		if s.has("deco"):
-			_render_deco(s, alpha)
-		if String((s["x"] as Dictionary).get("src", "")) == "abil":
-			AbilityFx.trail(self, s, (s["prev"] as Vector3).lerp(s["pos"], alpha))
-		Oomph.place_shot(s, alpha)
+	render_shots(alpha)
 	shot_floor.sync(alpha)
 	_vprof("verbs_shots")
 	MatchCam.update(self, delta, alpha)
@@ -5312,6 +5317,7 @@ func _net_ev(x, from: String) -> void:
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
 				"cone": ArchKit.net_cone_in(self, x)
 				"hvfx": HeroVfx.of(self).net_in(x)
+				"sbrk": ShieldBreak.of(self).net_in(x)       # a shield broke in another game
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
