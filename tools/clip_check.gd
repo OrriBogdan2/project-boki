@@ -583,6 +583,36 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	for k in 12:
 		sync.call("_process", DT)
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+	_landing(id, m, sync, clips, dd)
+
+## A move keyed "owns_land" is the landing (Cinder's `lw_land`): once it has played, the generic land clip must not
+## play after it, so the settle ends when the move does and control is back. As in the flight: a long time airborne,
+## the move starts in the air, she touches down just after it ends (AshwickJet lands 0.45 m up: 0.25 s down).
+func _landing(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var moves: Dictionary = dd.get("kmoves", {})
+	var land: Dictionary = dd.get("land", {})
+	for km in moves:
+		if not bool(moves[km].get("owns_land", false)) or land.is_empty():
+			continue
+		var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false}
+		m.set_meta(WardenClips.STATE, s)
+		for i in 60:
+			sync.call("_process", DT)
+		var t := 0.0
+		var end_t := float(HunterAnim.km_def(String(km))["keys"][-1][0])
+		while t < end_t:
+			s["kmove"] = km
+			s["kmove_t"] = t
+			sync.call("_process", DT)
+			t += DT
+		s.erase("kmove")
+		for i in 3:
+			sync.call("_process", DT)
+		s["grounded"] = true
+		for i in 3:
+			sync.call("_process", DT)
+		ok(clips.land_t >= WardenClips.LAND_DONE,
+				"%s: touching down just after %s (the landing), no generic land clip follows" % [id, km])
 
 ## The bow's release: the string hand's snap is shown in full, not eaten by the blend-in. From the held draw, the
 ## move's blend is over (the pose is the clip's own) SNAP_BY s after the arrow's spawn (kmove_t 0), by the earliest

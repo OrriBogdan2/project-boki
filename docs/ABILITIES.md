@@ -111,6 +111,46 @@ An ability JSON can override any of these with `"per_level": {"key": flat amount
 
 In the Training Grounds the Esc menu's **Practice** page (`PracticeRanks`) sets your own ranks to try them: Max all, Pick your max (one ability at its top rank with its rank-3 data bonus, shown as the button's tooltip; the rest at rank 1) and Reset to rank 1 ([shot, 1280x720](shots/ui-train-rank-port/practice_page.jpg)). Bots and dummies keep their own ranks and spend by their kit's `order`.
 
+## Level growth (run levels)
+
+Every level past the first adds the same share of a Hunter's level-1 numbers (`content/rules/level_growth.json`, `scripts/match/level_growth.gd`), as in the source. Asserted by `--level-growth-check`.
+
+**What the source does** (settled from briefs/supervive-data):
+- **Ability damage** grows in a straight line, about **+3.9% of the level-1 number a level**. The source adds +5 Power a level (docs/SUPERVIVE_DATA.md section 7) and each ability has an AP ratio on it (supervive_kits.md: Elluna's Darkside Binding "+50% AP ratio", Brall's Volcanic Rebuke "+5% AP ratio"). Myth's tooltips at level 1 and 15 measure it (supervive_kits.md, Myth "TESTED (lvl 15)"): Heartpiercer 35 to 54 (+3.88% a level), its wall-stun bonus 173 to 270 (+4.01%), Rain of Arrows 61 to 151 at rank III (with the two +30% ranks: 97.6 to 151, +3.91%). The mean is 3.9%.
+- **Ability healing** is on the same Power (no heal lists a max-health ratio; heal upgrades are flat percentages: Elluna's Moonlight Blessing, Oath's Regen Field, Brall's Rebuke).
+- **Max health** grows ~6% of base a level, a straight line (docs/SUPERVIVE_DATA.md section 6, all 24 hunters' stats).
+- **Shields**: Oath's Brightshield scales with max health (supervive_kits.md: "+25% max-HP scaling on shield"). Felix's, Tetra's and Void's shields give no scaling in the data.
+- **Weapon (LMB) damage** and knock heals: the data has no level-1/level-15 pair, so it settles nothing. Ours stays flat (weapon) or a share of max health (knock heals).
+
+**The curves** (multiplier on the level-1 number; ratio = ours now / source):
+
+| Curve | Source L1 / L5 / L10 | Ours before | Ours now | Ratio now |
+|---|---|---|---|---|
+| AP: ability damage, ability heals and shields | 1.000 / 1.156 / 1.351 | 1.000 / 1.200 / 1.350 (+5% to L6, half from L7) | 1.000 / 1.156 / 1.351 | 1.00 / 1.00 / 1.00 |
+| HP: max health, max-health shields | 1.000 / 1.240 / 1.540 | 1.000 / 1.240 / 1.420 (+6% to L6, half from L7) | 1.000 / 1.240 / 1.540 | 1.00 / 1.00 / 1.00 |
+| Flat | 1 / 1 / 1 | | | |
+
+Before this change the ratio was 1.04 at L5 on AP (front-loaded) and 0.92 at L10 on HP. Fixes: `level_growth.json` (`ap` 0.05 to 0.039; the half rate from level 7, which the source does not have, is gone), Albert's Aegis now grows with max health (`BulwarkKit.shield_max`, `LevelGrowth.hp`), and Mending Ground's and Hearthlight's heals now grow with AP (their `heal_k`), as the source's heals do.
+
+**Every slot** (number: what grows; "AP", "HP" and "flat" are the curves above; ours is now, before only where it changed):
+
+| Hunter (source) | LMB | RMB | Shift | E | X | Passive |
+|---|---|---|---|---|---|---|
+| gunslinger, Vex (Ghost) | weapon: flat | Burr Charge dmg: AP = AP | Slipstep: no number | Longneedle dmg: AP = AP | Cinderfall dmg: AP = AP | Hot Streak heal: a share of damage dealt |
+| juggernaut, Kael (Brall) | weapon: flat | Smash dmg: AP = AP | Rampage dmg: AP = AP | Warchain dmg: AP = AP | Gilded Riposte dmg: AP = AP; heal: share of that damage = source's % of damage | Rage knock heal: HP (source: not in data) |
+| ashwick, Cinder (Felix) | weapon: flat | Cinder Shot dmg: AP = AP | Soot Ram dmg: AP = AP; rank-3 shield: HP (source: not in data) | Furnace Cloak dmg: AP = AP; shield: HP (source: not in data) | Flue Flight dmg: AP = AP | Flashover knock heal: HP (source: not in data) |
+| tender, Meeko (Elluna) | weapon: flat | Burrseed dmg: AP = AP | Relay Step: no number | Hearthlight heal: AP = AP (before flat: 0.87 at L5, 0.74 at L10) | Hearth Call heal: AP = AP | Carrier: no number |
+| dolm, Tenzo (Tetra) | weapon: flat | Quakefall dmg: AP = AP | Rock Hop dmg: AP = AP | Stone Row wall: flat (ranks only) | Basalt Spine dmg: AP = AP | Molten Guard shield: flat (source: not in data) |
+| archer, Lace (Myth) | weapon: flat | Heavy Shot dmg: AP = AP (measured source line) | Spirit Walk: no number | Hail Wall dmg: AP = AP (measured source line) | Starpiercer dmg: AP = AP | Hawk Sense: no number |
+| dredge, Grimble (Kingpin) | weapon: flat | Abyssal Hand dmg: AP = AP | Barge: no number | Anchor Drop dmg: AP = AP | Brass Broadside dmg: AP = AP | Salvage knock heal: HP (source: not in data) |
+| rimewright, Neve (Celeste) | weapon: flat | Ice Spear dmg: AP = AP | Skate: no number | Rink Wall: flat (ranks only) | Rimelock dmg: AP = AP | Hoarfrost splinters: AP = AP |
+| mage, Sparkle (Joule) | weapon: flat | Storm Rod dmg: AP = AP | Wirerun dmg: AP = AP | Skycall dmg: AP = AP | Kitefall dmg: AP = AP | Static: no number |
+| bulwark, Albert (Oath) | weapon (hammer): flat; source 192 @15 only | Aegis shield: HP = HP (before flat: 0.81 at L5, 0.65 at L10); bash dmg: AP = AP | 360 Smash dmg: AP = AP | Mending Ground heal: AP = AP (before flat: 0.87 / 0.74) | Faultline dmg: AP = AP | Guard: no number |
+| thief, Sable (Shiv) | weapon: flat; source 160 @15 only | Bola dmg: AP = AP | Vault: no number | Shadow Knife dmg: AP = AP | Encore dmg: AP = AP | Marks knock heal: HP (source: not in data) |
+| ostra, Motley (Void) | weapon: flat; source 263 @15 only | Shard Snap dmg: AP = AP | Lantern Trade ally shield: flat (source 375 at rank IV @15, scaling not in data) | Brimseed dmg: AP = AP | Nightwell dmg: AP = AP | Swell: no number |
+
+Heals and shields a Hunter's abilities give through the effect verbs (a Boki's typing riding a slot, `Effects._heal_k`) are on AP too.
+
 ## Shift: class dashes
 
 Each class has its own dodge verb. Grounded with a charge, Shift does the class dodge; in the air or out of charges it does the class's long dash (its own cooldown). Both chain straight into a jump or the glider.
