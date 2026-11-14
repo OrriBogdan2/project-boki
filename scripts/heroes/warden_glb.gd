@@ -928,6 +928,7 @@ class Sync extends Node:
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 	var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
+	var head_look: WardenLookAt   # the head turns to the aim ahead of the body (WardenLookAt)
 	var flinch: WardenFlinch      # the hit flinch over the clips (WardenFlinch), or null
 	var wall: WardenWall          # the plant and push of a wall kick or bounce over the clips, or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
@@ -960,6 +961,7 @@ class Sync extends Node:
 				continue
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
+		head_look = WardenLookAt.make(model, skeleton)
 		for b in LEG_BONES:
 			leg_bones.append(WardenSkeleton.find(skel, b))
 		springs.setup(skel)
@@ -1033,6 +1035,7 @@ class Sync extends Node:
 			if drop_pose:
 				drop_pose.step(dt)
 			apply_blade()
+		head_look.step(dt, clips)
 		FootPlant.bones(root, skel, leg_bones, dt)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
