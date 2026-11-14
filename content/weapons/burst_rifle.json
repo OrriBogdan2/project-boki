@@ -17,7 +17,7 @@
 		"range": 10.5,
 		"size": 0.15,
 		"color": "#80ccff",
-		"sfx": "rifle",
+		"sfx": "gun_burst",
 		"desc": "Three rounds per pull. Accurate at range.",
 		"kick": 0.07,
 		"tracer": 1.2
