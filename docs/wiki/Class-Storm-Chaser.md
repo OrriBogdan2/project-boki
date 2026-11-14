@@ -60,12 +60,12 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them. |
-| Passive: Static | Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live. |
-| Dash: Wirerun | Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster. |
-| RMB: Storm Rod | Storm Rod: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back. |
-| E: Skycall | Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them. |
-| Hunter ultimate: Kitefall | Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits. |
-| Weapon: Coilcaster | Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static. |
+| Passive: Static | Hits stack Static; the 4th calls a sky bolt. |
+| Dash: Wirerun | Tap for a short zap, hold to charge a longer streak. |
+| RMB: Storm Rod | Throw a copper rod: knocks back, adds Static, stuns on walls. |
+| E: Skycall | Drop a circle; 0.8s later lightning drags foes inside and grounds them. |
+| Hunter ultimate: Kitefall | Launch up, then strike down at your cursor, knocking everyone back. |
+| Weapon: Coilcaster | Finger bolts every 0.65s; each hit adds 1 Static. |
 
 ### Abilities in full
 
@@ -75,7 +75,7 @@ What the in-game kit card (K) says.
 
 **Storm Rod (RMB, 8s cooldown).**
 
-- *Tap:* Let go early (it still takes 0.3s to summon): 16 damage and a short knock, flying the full 13m lane.
+- *Tap:* Let go early (it still takes 0.33s to summon): 16 damage and a short knock, flying the full 13m lane.
 - *Hold:* Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 26.7 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static.
 
 **Skycall (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 19.4 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.

@@ -73,6 +73,12 @@ with the commit or code and the assert in `--archer-combo-check`; owner override
 No open row is left, so nothing was built here. In flight on her files (not re-checked here): ext/lace-playtest-1108, ext/lace-dash-charges,
 ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 
+## Ranges re-read frame by frame (2026-11-12, origin/ext/hero-ref-footage pin, 1 bh = top of the health bar to the feet = 1.8 m)
+
+- E Hail Wall reach 9 -> **10.8 m**: the wall sits on the cursor at 252 px over a 42 px body = 6.0 bh (0493-0498; also 4.5 bh at 0457). The cap is never reached, so 10.8 is the floor; locked in kit_parity.json.
+- RMB Heavy Shot range 14: **Not determinable**. Every Impaling Shot ends on a dummy 1-4 bh out (0264-0273, 0281-0285, 0327-0331, 0494-0501); the 2 bh gold bar (0494) is the hold telegraph.
+- X Starpiercer width 0.5: matches the beam, 10-13 px over a 42 px body = 0.43-0.56 m (0559, 0566, 0573); locked. Range 18: **Not determinable**, every beam runs off the top edge past 6.8 bh = 12.2 m (0559-0560, 0566, 0573, 0587-0593).
+
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|

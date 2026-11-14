@@ -19,7 +19,7 @@ const RANK_KEYS := {"sec": "rmb", "kin": "e", "dash": "dash"}
 const NUM := "(\\d+(?:\\.\\d+)?)"
 const KEYS := {
 	"cooldown": "^(cooldown|cd|recharge|rank_cut)",
-	"range": "(^|_)(range|reach|radius|dist|rmin|rmax|width|wall|gap|len|core)$|_(r|w)$",
+	"range": "(^|_)(range|reach|radius|dist|rmin|rmax|width|wall|gap|len|core|push|leash|travel|travel_min)$|_(r|w)$",
 	"duration": "(^|_)(t|time|tell|window|every|tick|delay|linger|stun|hold|full|nock|recover|duration|rate"
 		+ "|wind|windup|rise|grounded|drag_max|fuse|dur|grow|root|daze|recast)$|_(t|time|for)$",
 	"damage": "(^|_)(dmg|dps|damage)(_|$)",
@@ -78,6 +78,9 @@ func _data(d: Dictionary, slot: String) -> Array:
 		if FileAccess.file_exists(wp):
 			_flatten(JSON.parse_string(FileAccess.get_file_as_string(wp)).get("primary", {}), "", out)
 	if slot == "passive": _flatten(d.get("resource", {}), "", out)
+	for key in RANK_KEYS:      # rank_cd: the cooldown multipliers per rank
+		if RANK_KEYS[key] == slot and d.get("rank_cd", {}).has(key):
+			for k in d["rank_cd"][key]: out.append(["cooldown", float(d[slot].get("cooldown", 0.0)) * float(k)])
 	if slot == "dash":      # Bulwark's Shield Charge runs on the RMB's cooldown
 		_flatten({"cooldown": d.get("rmb", {}).get("cooldown", 0.0)}, "", out)
 	return out
