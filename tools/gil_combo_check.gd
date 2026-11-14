@@ -413,7 +413,7 @@ func _lmb_numbers() -> void:
 	var cds := {}
 	var t := 0.0
 	while t < 1.1:
-		P.inp["fire"] = true
+		P.inp["fire"] = t < 0.9 and fmod(t, 0.12) < 0.05      # clicking (holding is the Tide Lunge), one chain
 		var was := K.combo_n
 		m.step(DT)
 		t += DT
@@ -566,7 +566,10 @@ func _spin_cancels() -> void:
 	_reset(1.6)
 	_press("sig")
 	step(m, 0.3)
-	step(m, 0.4, func(): P.inp["fire"] = true)
+	var held := {"t": 0.0}
+	step(m, 0.4, func():
+		held["t"] += DT
+		P.inp["fire"] = fmod(held["t"], 0.12) < 0.05)      # clicking (held, it is a Tide Lunge on release)
 	P.inp["fire"] = false
 	ok("cancel E spin + LMB: both (the thrusts land, the spin goes on)", K.combo_n >= 1 and K.spin_t >= 0.0,
 		"thrusts %d" % K.combo_n)
@@ -575,7 +578,8 @@ func _spin_cancels() -> void:
 	var d0 := P.dashes
 	_press("dash")
 	ok("cancel E spin + Shift: locked (no dash, no charge spent, the spin goes on)",
-		P.dashes == d0 and K.swim_t <= 0.0 and P.roll_t <= 0.0 and K.spin_t >= 0.0)
+		P.dashes == d0 and K.swim_t <= 0.0 and P.roll_t <= 0.0 and K.spin_t >= 0.0,
+		"dashes %d->%d roll %.2f" % [d0, P.dashes, P.roll_t])
 	var y0 := P.pos.y
 	_press("jump")
 	step(m, 0.15)
