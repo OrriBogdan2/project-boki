@@ -1127,7 +1127,7 @@ func _process(delta: float) -> void:
 # py is your feet's height (terraces are 0.8 each). Off the edge you can glide over to another isle;
 # drop into the sky and the wind sets you back down where you last stood.
 var gliding := false
-var loco := Loco.machine()       # the avatar's locomotion state, the same machine a match hunter has
+var loco := Loco.machine("loco")   # the avatar's locomotion state, the same machine a match hunter has
 var dash_t := 0.0
 var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv scales it)
 var dash := DashState.new()    # the dash charges and the long dash cooldown, the same object a match hunter owns
