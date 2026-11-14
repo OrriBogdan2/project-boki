@@ -105,6 +105,7 @@ static func use(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	if pv["ok"]:
 		Save.d["items"][id] = int(Save.d["items"][id]) - 1
 	pv["look"] = pv["ok"] and String(item(id)["effect"]["kind"]) in ["sweet", "aura"]
+	pv["id"] = id
 	pv["text"] = "%s: %s" % [item_name(id), pv["text"]] if pv["ok"] else pv["text"]
 	return pv
 
@@ -135,6 +136,8 @@ static func share(a: Dictionary, b: Dictionary, id: String) -> Dictionary:
 	CareJournal.note(a, "%s %s with %s" % [_verb(id), item_name(id), b["name"]])
 	CareJournal.note(b, "%s %s with %s" % [_verb(id), item_name(id), a["name"]])
 	pv["look"] = false
+	pv["id"] = id
+	pv["unstable"] = UnstableMix.unstable(a, b)
 	pv["text"] = "%s shared: %s" % [item_name(id), pv["text"]]
 	return pv
 
@@ -200,7 +203,7 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
 	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "aura"]
-	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "",
+	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "", "id": id,
 			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": redraw}
 
 static func _no(why: String) -> Dictionary:
