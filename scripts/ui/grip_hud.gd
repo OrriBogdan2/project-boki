@@ -38,11 +38,7 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	var key := Gloves.key_cap(i)
 	var id := "gear%d" % i
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
-		hud.hover_spots.append([r, id])
-		HudStyle.slot_frame(hud.c, r, HudStyle.MUTED, "off")
-		Icons.draw(hud.c, "glove", r.get_center() + Vector2(0, -3), BOX * 0.2, Color(HudStyle.MUTED, 0.35))
-		HudStyle.key_pill(hud.c, Vector2(r.get_center().x, r.end.y), key, HudStyle.MUTED)
-		return
+		return      # an empty glove slot is not drawn: the frame appears with the first glove
 	var gid := String(g["id"])
 	var gd: Dictionary = Gear.ALL[gid]
 	var cd := float(p.gear_cd[i])

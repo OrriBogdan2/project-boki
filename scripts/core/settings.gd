@@ -5,9 +5,14 @@ extends Node
 signal changed(key: String)
 
 const PATH := "user://settings.cfg"
+## The Interface size slider's range. The layout needs at least a 1100x640 space, 1/1.125 of the 1240x720
+## it fits to the window, so the top stays under 1.125: a bigger setting could not grow the menus without
+## pushing them off screen (playtest 11-13: the old 1.5 top did nothing past 115%).
+const UI_SCALE_MIN := 0.75
+const UI_SCALE_MAX := 1.1
 const DEFAULTS := {
 	# audio
-	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
+	"master": 0.8, "music": 0.7, "sfx": 1.0, "voices": 1.0, "ambience": 0.8, "ui_sounds": 1.0, "mute_unfocused": false,
 	# music (Soundtrack): the style, Shuffle, and a hand-picked track id per place ("" = the style's)
 	"soundtrack": "classic", "music_shuffle": false, "track_menu": "", "track_base": "", "track_calm": "",
 	"track_tense": "", "track_final": "", "track_boss": "", "track_victory": "", "track_training": "",
@@ -31,6 +36,10 @@ const DEFAULTS := {
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
 	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
+}
+## The volume settings (Settings > Audio, in menu order) and the audio bus each one sets (Sfx._ready makes them).
+const BUSES := {
+	"master": "Master", "music": "Music", "sfx": "SFX", "voices": "Voice", "ambience": "Ambience", "ui_sounds": "UI",
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
@@ -181,6 +190,22 @@ var _quality_basics := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var cf := load_file()
+	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
+	_quality_basics = not cf.has_section_key("s", "quality")
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--quality="):
+			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
+		save.call_deferred()
+	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
+		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
+	get_tree().node_added.connect(_on_node_added)
+	get_tree().root.size_changed.connect(_apply_ui_scale)
+	get_tree().root.size_changed.connect(_apply_render_scale)
+
+## Reads the settings file over the defaults, bringing an older file up to date. Returns the file as read.
+func load_file() -> ConfigFile:
 	v = DEFAULTS.duplicate(true)
 	var cf := ConfigFile.new()
 	if cf.load(PATH) == OK:
@@ -213,18 +238,11 @@ func _ready() -> void:
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
-	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
-	_quality_basics = not cf.has_section_key("s", "quality")
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--quality="):
-			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
-	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
-		save.call_deferred()
-	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
-		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
-	get_tree().node_added.connect(_on_node_added)
-	get_tree().root.size_changed.connect(_apply_ui_scale)
-	get_tree().root.size_changed.connect(_apply_render_scale)
+	if not cf.has_section_key("s", "voices"):
+		# voices and menu sounds came off the Effects bus onto their own: they start where Effects was
+		v["voices"] = v["sfx"]
+		v["ui_sounds"] = v["sfx"]
+	return cf
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -296,11 +314,10 @@ func reset_all() -> void:
 	changed.emit("")
 
 func apply(k: String) -> void:
+	if BUSES.has(k):
+		Sfx.set_bus(BUSES[k], float(v[k]))
+		return
 	match k:
-		"master": AudioServer.set_bus_volume_db(0, linear_to_db(maxf(float(v[k]), 0.0001)))
-		"music": Sfx.set_bus("Music", float(v[k]))
-		"sfx": Sfx.set_bus("SFX", float(v[k]))
-		"ambience": Sfx.set_bus("Ambience", float(v[k]))
 		"fullscreen":
 			# browsers only allow fullscreen from a click, so the web build doesn't restore it at startup
 			if OS.has_feature("web") and not _started:
@@ -343,11 +360,8 @@ func _apply_ui_scale() -> void:
 	var win := Vector2(get_tree().root.size)
 	if win.x < 10.0 or win.y < 10.0:
 		return
-	var user := clampf(float(v.get("ui_scale", 1.0)), 0.75, 1.5)
-	var fit := minf(win.y / 720.0, win.x / 1240.0)
-	var f := user * fit
-	# never let the user's own size setting push the layout past the window either
-	f = minf(f, minf(win.y / 640.0, win.x / 1100.0))
+	var user := clampf(float(v.get("ui_scale", 1.0)), UI_SCALE_MIN, UI_SCALE_MAX)
+	var f := user * minf(win.y / 720.0, win.x / 1240.0)
 	if absf(get_tree().root.content_scale_factor - f) > 0.001:
 		get_tree().root.content_scale_factor = f
 
@@ -520,27 +534,39 @@ func clear_bind(action: String, slot: int) -> void:
 	sl[slot] = ""
 	_set_slots(action, sl)
 
-## Other rebindable actions already using this key or button: [[action, slot], ...].
-func conflicts(ev: InputEvent, except := "") -> Array:
-	var s := ev_code(ev)
+## Actions already on this key or button code: [[action, slot], ...].
+func holders(code: String, except := "") -> Array:
 	var out: Array = []
-	if s == "":
+	if code == "":
 		return out
 	for a in ACTIONS:
 		if a[0] == except: continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+			if sl[i] == code: out.append([a[0], i])
 	return out
 
-## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
-		["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
+## Actions that only run at home (the garden) and ones that only run in a match.
+const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
+const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
+
+## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
+## training-only actions, the lobby's push to talk).
+const SHARED_OK := [["undo", "separate"], ["push_to_talk", "gear2"], ["push_to_talk", "play"], ["keep_placing", "dash"],
 		["goals", "throw"], ["fold_guide", "whistle"]]
-func _shared_ok(a: String, b: String) -> bool:
+
+## Two actions may share a key only when they never run in the same place: one at home, the other in a match
+## (or a pair listed in SHARED_OK).
+func can_share(a: String, b: String) -> bool:
+	if (a in HOME_ONLY and b in MATCH_ONLY) or (a in MATCH_ONLY and b in HOME_ONLY): return true
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
+
+## Other rebindable actions that would clash with this key or button: [[action, slot], ...] (the
+## ones that run somewhere else don't count).
+func conflicts(ev: InputEvent, except := "") -> Array:
+	return holders(ev_code(ev), except).filter(func(h): return not can_share(h[0], except))
 
 ## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
 ## what `action` had there instead, so none of them loses a key.

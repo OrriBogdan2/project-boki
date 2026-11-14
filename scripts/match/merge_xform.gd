@@ -21,7 +21,6 @@ static func begin(h: Hunter, form: Dictionary) -> void:
 	var col: Color = form["glow"]
 	var sn := _snd(form)
 	spiral(h, col, true)
-	m.fx.ring(h.pos, 2.2, Color(col, 0.8), 0.45)
 	m.sfx("charge", h.pos, SOUND_RANGE_DB - 6.0, 0.8)
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
 	if h.is_local():
@@ -46,12 +45,10 @@ static func contact(h: Hunter, form: Dictionary) -> void:
 			m.hud.flash(col, 0.25)
 	h.squash = 0.35
 
-## The look of the moment, for everyone: white flash, shockwave rings, shards in the form's colours.
+## The look of the moment, for everyone: white flash, shards in the form's colours.
 static func pop_fx(m: Match, at: Vector3, form: Dictionary) -> void:
 	var col: Color = form["glow"]
 	m.fx.flash(at + Vector3(0, 1.0, 0), Color.WHITE, 2.6, 0.12)
-	m.fx.ring(at, 3.4 * float(form["size"]), Color(Color.WHITE, 0.9), 0.35)
-	m.fx.ring(at, 5.0 * float(form["size"]), Color(col, 0.8), 0.5)
 	m.fx.burst(at + Vector3(0, 1.0, 0), col, 26, 6.0, 0.55)
 	m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color(col).lerp(Color.WHITE, 0.5), 18, 8.0, 180.0, 0.4, 6.0, 1.2)
 	m.fx.dust(at, 10)
@@ -60,7 +57,6 @@ static func pop_fx(m: Match, at: Vector3, form: Dictionary) -> void:
 static func flash_only(m: Match, at: Vector3, form: Dictionary) -> void:
 	var col: Color = form["glow"]
 	m.fx.flash(at + Vector3(0, 1.0, 0), Color.WHITE, 1.8, 0.1)
-	m.fx.ring(at, 3.0, Color(col, 0.8), 0.4)
 	m.fx.burst(at + Vector3(0, 1.0, 0), col, 14, 4.0, 0.4)
 
 ## The merge is over: the shell peels (backwards pop), shards fly, the Boki springs out (KinMerge calls merge_pop).
@@ -80,7 +76,6 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 		if h.is_local() and m.hud:
 			m.hud.toast_small("SHELL BROKEN", col)
 	else:
-		m.fx.ring(h.pos, 3.0, Color(col, 0.8), 0.35)
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 18, 5.0, 0.5)
 		m.sfx("recall", h.pos, -2.0, 1.3)
 	spiral(h, col, false)
@@ -189,7 +184,6 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 	var secs := float(p[4])
 	match p[0]:
 		"ult":
-			m.fx.word(h.pos + Vector3(0, 3.0, 0), "ULTIMATE", col, true)
 			m.sfx("warn", h.pos, -2.0, 0.7)
 			if rad > 0.5:
 				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9))

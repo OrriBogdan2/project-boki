@@ -206,6 +206,11 @@ func _finish(sid: String) -> void:
 	if STOP_AFTER.has(sid):
 		last_stop = stop(STOP_AFTER[sid])
 	step += 1
+	var resumed := sid == "land" and TutorialResume.last_beat() != ""
+	if resumed:
+		step = TutorialResume.step_after(TutorialResume.last_beat())
+	else:
+		TutorialResume.remember(sid)
 	if step == 1:
 		for a in OS.get_cmdline_user_args():
 			if a.begins_with("--tut-from="): _skip_to(int(a.substr(11)))     # test: skip ahead after landing
@@ -215,6 +220,8 @@ func _finish(sid: String) -> void:
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
+	if resumed:
+		_restore()
 	_enter()
 
 ## Test: jump to a step, with the picks of the steps skipped made as if you had (--tut-from).
@@ -257,6 +264,18 @@ func _runners(p: Hunter) -> Array:
 	for k in [p.kin, p.kin2]:
 		if k: out.append((k as Kin).runner)
 	return out
+## Carrying on from a saved beat: back at the last stop it left you at, with what the next one needs.
+func _restore() -> void:
+	for i in step:
+		if STOP_AFTER.has(String(steps()[i][0])):
+			last_stop = stop(STOP_AFTER[String(steps()[i][0])])
+	m.player.teleport(respawn())
+	if id() == "chest" and m.player.chest_keys == 0:
+		m.player.chest_keys = 1
+	if id() == "shoot":
+		camps.spawn("sec")      # (shoot fights what is left of the sec camp, which a resume skips)
+	if m.hud:
+		m.hud.toast("Back where you left off. Skip any time from the menu", MINT)
 
 func _enter() -> void:
 	var p := m.player
@@ -304,6 +323,8 @@ func _enter() -> void:
 		p.gear[0] = {"id": "grapple", "rar": 1}      # (skipped ahead past the glove: it is yours anyway)
 		p.refresh_gear()
 	_words()
+	if detail != "" and m.hud:
+		m.hud.tip(detail)       # (once a step: the strip is one line, the plain words wait in the message lane)
 
 ## A tutorial camp's monster: `hp` times the health (camp_hp, or the camp's own "hp"), so the kills that pay
 ## its XP come quickly; bigger, barely a scratch when it hits, slow telegraphed attacks (content/rules/tutorial.json
@@ -580,8 +601,6 @@ func _words() -> void:
 		need = camps.count
 	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
 	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
-	if detail != "" and m.hud:
-		m.hud.tip(detail)       # (the strip is one line: the plain words go to the message lane, which waits for it)
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()

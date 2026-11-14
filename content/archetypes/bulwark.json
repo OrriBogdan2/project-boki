@@ -76,7 +76,6 @@
 		],
 		"smash_reach": 2.8,
 		"smash_arc": 180.0,
-		"smash_stun": 0.4,
 		"smash_rate": 0.61,
 		"carry": [
 			1.5,
@@ -94,7 +93,7 @@
 	"dash": {
 		"id": "smash360",
 		"name": "360 Smash",
-		"icon": "cleave",
+		"icon": "bulwark_dash",
 		"col": "#cfe8ff",
 		"cd": 8.0,
 		"whirl": 3.5,
@@ -113,7 +112,7 @@
 		"delivery": "cone",
 		"name": "Aegis",
 		"short": "Aegis",
-		"icon": "wall",
+		"icon": "bulwark_rmb",
 		"col": "#9ad8ff",
 		"cooldown": 6.0,
 		"cd_per_rank": 1.5,
@@ -131,9 +130,16 @@
 			"len": 4.2,
 			"arc": 140.0,
 			"slow": 0.6,
-			"push": 2.0,
-			"push_gap": 0.6,
-			"push_speed": 14.0
+			"boop": {
+				"cd": 0.55,
+				"wind": 0.07,
+				"snap": 0.06,
+				"settle": 0.17,
+				"thrust": 0.7,
+				"reach": 1.3,
+				"push": 2.8,
+				"push_speed": 18.0
+			}
 		},
 		"slam": {
 			"radius": 2.6,
@@ -144,7 +150,7 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
+			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
@@ -161,7 +167,7 @@
 		"delivery": "burst",
 		"name": "Mending Ground",
 		"short": "Mend",
-		"icon": "dome",
+		"icon": "bulwark_e",
 		"col": "#8fe3c8",
 		"cooldown": 12.0,
 		"cooldown_rank3": 8.0,
@@ -186,7 +192,7 @@
 	"x": {
 		"name": "Faultline",
 		"short": "Fault",
-		"icon": "quake",
+		"icon": "bulwark_x",
 		"col": "#ff9a3a",
 		"unlock": 6,
 		"cooldown": 40.0,
@@ -221,9 +227,21 @@
 	],
 	"rank_cd": {"dash": [1, 0.8125, 0.625]},
 	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1, 1]},
-	"rank3": {"sec": "shield HP +50% in all and it repairs and regenerates faster", "dash": "the 360 Smash refunds the Shield Charge when it hits", "kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"},
-	"rank2": {"sec": "Rank 2: shield HP +25% (160 -> 200).", "dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.", "kin": "Rank 2: healing +25% (burst 18 -> 22)."},
-	"rank_next": {"sec": "Rank 3: shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken.", "kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.", "dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further."},
+	"rank3": {
+		"sec": "shield HP +50% in all and it repairs and regenerates faster",
+		"dash": "the 360 Smash refunds the Shield Charge when it hits",
+		"kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"
+	},
+	"rank2": {
+		"sec": "Rank 2: shield HP +25% (160 -> 200).",
+		"dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.",
+		"kin": "Rank 2: healing +25% (burst 18 -> 22)."
+	},
+	"rank_next": {
+		"sec": "Rank 3: shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken.",
+		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
+		"dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
+	},
 	"tells": {
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
 		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",

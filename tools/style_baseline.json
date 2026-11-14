@@ -220,7 +220,8 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 70
+"semicolon": 70,
+"shadow": 1
 },
 "scripts/home/home_econ.gd": {
 "long_line": 40,
@@ -440,7 +441,7 @@
 "semicolon": 54
 },
 "scripts/match/fx.gd": {
-"long_line": 12,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 25
 },
@@ -482,7 +483,7 @@
 "scripts/match/hunter_anim.gd": {
 "long_line": 40,
 "nested_ternary": 5,
-"semicolon": 100
+"semicolon": 98
 },
 "scripts/match/juice.gd": {
 "long_line": 1,
@@ -565,7 +566,7 @@
 "long_line": 5
 },
 "scripts/match/mob.gd": {
-"long_line": 12,
+"long_line": 9,
 "nested_ternary": 1,
 "semicolon": 19
 },
@@ -708,9 +709,9 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 29,
+"long_line": 28,
 "nested_ternary": 2,
-"semicolon": 66
+"semicolon": 59
 },
 "scripts/ui/hero_grid.gd": {
 "long_line": 2,
@@ -724,7 +725,7 @@
 "history_comment": 2,
 "long_line": 190,
 "nested_ternary": 33,
-"semicolon": 43
+"semicolon": 40
 },
 "scripts/ui/incubator_view.gd": {
 "long_line": 15,

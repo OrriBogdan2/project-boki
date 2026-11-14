@@ -10,11 +10,11 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.8, "stride": [1.5, 1.5], "foot_mps": [1.51, 4.19]
+		"walk_speed": 2.2, "run_speed": 4.8, "stride": [1.5, 1.5], "foot_mps": [1.51, 4.19], "start_phase": 0.72
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.65},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "fall"},
-	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"land": {"clip": "land", "hop": {"w": 0.5, "rate": 1.5, "dur": 0.2, "moving": 0.08}, "drop": {"rate": 1.2, "dur": 0.33, "moving": 0.12}},
 	"free_arm": {"rmb": "L"},
 	"kmoves": {
 		"mage_lmb_l": {"clip": "lmb_l", "upper": true}, "mage_lmb_r": {"clip": "lmb_r", "upper": true},
@@ -24,8 +24,11 @@
 		"mage_x": {"clip": "ult", "hold_from": 0.1}, "mage_x_air": {"clip": "ult_air", "hold_from": 0.2}, "mage_x_dive": {"clip": "ult_dive", "hold_from": 0.05}, "mage_x_land": {"clip": "ult_land", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"lockin": {"clip": "emote", "dur": 1.45, "rate": 1.2},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["mage_lmb_l", 0.35], ["mage_lmb_r", 0.35], ["mage_dash", 0.3], ["mage_dash_go", 0.3], ["mage_dash_land", 0.42], ["mage_lmb_r", 0.3], ["mage_rmb_hold", 0.5], ["mage_rmb", 0.7], ["mage_e", 1.1], ["mage_e_snap", 0.55]],
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "gum", "gg": "g_bow", "refuse": "g_wag"},
+	"cc": {"pull": 0.22, "tug_hz": 2.0, "twist": 0.18, "bow": 0.2},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "index.L", "index2.L", "curl.L", "curl2.L", "thumb.L", "index.R", "index2.R", "curl.R", "curl2.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R", "gum", "rod.0", "rod.1", "rod.2", "rod.3", "rodlit.0", "rodlit.1", "rodlit.2", "rodlit.3"]
 }
