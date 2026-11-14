@@ -43,10 +43,11 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	Overlay.ctx = "home"
 	Overlay.open_pause("home")
+	Overlay.open_more()
 	var pause_help := false
 	for b in Overlay.host.find_children("*", "Button", true, false):
 		if (b as Button).text.contains("Help"): pause_help = true
-	ok(pause_help, "the pause menu has Help")
+	ok(pause_help, "the More page has Help")
 	Overlay.open_words()
 	var shown := 0
 	for l in Overlay.host.find_children("*", "Label", true, false):
