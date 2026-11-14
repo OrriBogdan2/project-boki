@@ -6,7 +6,9 @@
 # so one job per flag (840 submits) took as long as the old single-box gate.
 # - Flags: every "--*-check" key in tools/check_registry.gd plus the ones still wired inline in scripts/main.gd.
 #   FLAGS="--a-check --b-check" runs only those (merge-train's bisect re-runs just the new reds).
-# - Main-side greens are cached per main sha in $GS_CACHE (reds re-run every time), so the second PR gated on the same main submits half the jobs.
+# - Greens are cached per git TREE hash in $GS_CACHE (reds re-run every time), main side and candidate side: once the
+#   coordinator merges a gated candidate, the new main has the same tree, so the next PR's main side is all cache hits.
+#   A GREEN verdict is kept as $GS_CACHE/green-<cand tree>.txt (merge-train re-uses it when a re-merge gives the same tree).
 # - A flag red on the candidate and green on main is re-run once on both sides; it is NEW-RED only if that repeats
 #   (the batch gates' flake rule). A flag lost on either side (a job that never came back, a failed submit) is re-run too;
 #   still lost on the candidate it counts as NEW-RED.
@@ -29,6 +31,10 @@ MAX_WAIT=${GS_MAX_WAIT:-900}   # s a round waits for its shards; the unfinished 
 mkdir -p "$OUT" "$CACHE"; OUT=$(realpath "$OUT"); : > "$OUT/jobs.tsv"
 T0=$(date +%s)
 MSHA=$(git -C "$MT" rev-parse HEAD) CSHA=$(git -C "$CT" rev-parse HEAD)
+MTREE=$(git -C "$MT" rev-parse "HEAD^{tree}") CTREE=$(git -C "$CT" rev-parse "HEAD^{tree}")
+# the cache is only valid for a clean tree (inject() adds its two files after this point)
+[ -z "$(git -C "$MT" status --porcelain --untracked-files=no)" ] || MTREE=dirty$$
+[ -z "$(git -C "$CT" status --porcelain --untracked-files=no)" ] || CTREE=dirty$$
 
 flags_of() {
 	{ grep -o '^\s*"--[a-z0-9-]*-check"' "$1/tools/check_registry.gd"; grep -o '"--[a-z0-9-]*-check"' "$1/scripts/main.gd"; } \
@@ -104,9 +110,9 @@ EXPORT_PID=$!
 
 # 3. shards: candidate always; main only for flags not cached at this main sha
 pick "$CT" | submit c "$CT"
-: > "$OUT/main.txt"; touch "$CACHE/$MSHA.txt"
+: > "$OUT/main.txt"; touch "$CACHE/$MTREE.txt"
 pick "$MT" | while read -r f; do
-	grep -m1 "^$f " "$CACHE/$MSHA.txt" >> "$OUT/main.txt" || echo "$f"
+	grep -m1 "^$f " "$CACHE/$MTREE.txt" >> "$OUT/main.txt" || echo "$f"
 done | submit m "$MT"
 CACHED=$(wc -l < "$OUT/main.txt")
 collect "$OUT/jobs.tsv" > "$OUT/round1.txt"
@@ -115,7 +121,8 @@ awk '$1=="m" {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$OUT/main.txt"
 touch "$CACHE/secs.txt"  # last run time per flag: the next run deals the slow ones first
 cat "$CACHE/secs.txt" <(awk '$2 != "lost" {print $1, $4}' "$OUT/cand.txt") | awk '{t[$1] = $2} END {for (k in t) print k, t[k]}' > "$CACHE/secs.new" \
 	&& mv "$CACHE/secs.new" "$CACHE/secs.txt"
-awk '$1=="m" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$MSHA.txt"  # greens only
+awk '$1=="m" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$MTREE.txt"  # greens only
+[ "$CTREE" = "$MTREE" ] || awk '$1=="c" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$CTREE.txt"
 SUBMITTED=$(wc -l < "$OUT/jobs.tsv")
 
 # 4. re-run once, one flag per job, on both sides: every flag that is lost on either side (a relay failure says nothing) and
@@ -134,7 +141,8 @@ if [ -n "$SUSPECT" ]; then
 		awk -v s=$side '$1 == s {print $2, $3, $4, $5}' "$OUT/round2.txt" >> "$f.new"; mv "$f.new" "$f"
 	done
 fi
-NEW_RED=$({ comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"); lost "$OUT/cand.txt"; } | sort -u | grep .)  # a flag still lost on the candidate is never a pass
+# red on main only excuses a candidate red when main really ran it (a flag lost on main says nothing); still lost on the candidate is never a pass
+NEW_RED=$({ comm -23 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")); lost "$OUT/cand.txt"; } | sort -u | grep .)
 FLAKY=$(comm -23 <(echo "$SUSPECT") <(echo "$NEW_RED") | grep -c .)
 FIXED=$(comm -13 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")) | comm -12 - <(pick "$CT") | grep -c .)
 
@@ -153,4 +161,5 @@ N_RAN=$(wc -l < "$OUT/cand.txt") N_WANT=$(pick "$CT" | grep -c .)
 	echo "Export:"; sed 's/^/  /' "$OUT/export.txt"
 } > "$OUT/summary.txt"
 cat "$OUT/summary.txt"
+[ "$VERDICT" = GREEN ] && [ -z "${FLAGS:-}" ] && [[ $CTREE != dirty* ]] && cp "$OUT/summary.txt" "$CACHE/green-$CTREE.txt"
 [ "$VERDICT" = GREEN ]
