@@ -40,7 +40,7 @@ func _good_card(key: String, payload: Dictionary, sub: String, right: Control, w
 	card.tooltip_text = Goods.desc_of(key, payload)
 	var hr := UI.hbox(10)
 	card.add_child(hr)
-	var b := UI.badge(Goods.icon_of(key, payload), Goods.col_of(key, payload), 32.0, UI.R_CTRL)
+	var b := UI.badge(Goods.icon_of(key, payload), Goods.col_of(key, payload), 32.0)
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(b)
 	var nv := UI.vbox(0)
@@ -144,7 +144,7 @@ func _shelter_card(c: Dictionary) -> Control:
 	var b := UI.button("Adopt  ·  %d" % int(c["price"]), func():
 		var r := Shelter.adopt(cid)
 		if r["ok"]: m.spawn_kin.call()
-		_done(r, "%s is coming home with you" % rec["name"]), 0, "gem")
+		_done(r, Shelter.arrival_line(r["rec"]) if r["ok"] else ""), 0, "gem")
 	b.disabled = int(Save.d["gems"]) < int(c["price"]) or Shelter.gave(String(rec.get("uid", "")))
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(b)

@@ -57,7 +57,10 @@ static func mastery_list(id: String, width := 330.0) -> VBoxContainer:
 	v.set_meta("mastery_list", id)
 	v.set_meta("level", ClassUnlock.mastery_level(id))
 	var head := UI.hbox(8)
-	head.add_child(UI.label("Mastery", 12, UI.MUTED, UI.caps))
+	var mt := UI.label("Goals: each earns a look", 12, UI.MUTED, UI.caps)
+	mt.tooltip_text = "Mastery: finish goals with this Relic to earn colours, gliders and emotes (looks only)."
+	mt.mouse_filter = Control.MOUSE_FILTER_PASS
+	head.add_child(mt)
 	head.add_child(UI.label("level %d / %d" % [ClassUnlock.mastery_level(id), goals.size()], 12, GOAL_COL, UI.semi))
 	v.add_child(head)
 	for i in goals.size():
@@ -94,20 +97,46 @@ static func kit_tip(id: String) -> String:
 	names.append(Settings.key_cap("ultimate"))
 	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Fusion" % names
 
+## How the Hunter plays, three short lines (what you do, the combo to learn first, what to avoid) from the
+## Hunter's "howto" data. `{action}` is that action's key cap (Settings.key_cap), so rebinds show.
+static func howto_lines(id: String) -> Array:
+	var out: Array = []
+	for line in Arch.def(id).get("howto", []):
+		var text := String(line)
+		for action in ["fire", "secondary", "dash", "signature", "hunter_ult"]:
+			text = text.replace("{%s}" % action, Settings.key_cap(action))
+		out.append(text)
+	return out
+
+## The three how-to lines as a small block, `width` px wide (tagged meta "howto").
+static func howto_box(id: String, width: float, font := UI.T_SMALL) -> VBoxContainer:
+	var v := UI.vbox(1)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.set_meta("howto", id)
+	for line in howto_lines(id):
+		var l := UI.para(String(line), font, UI.MUTED)
+		l.custom_minimum_size.x = width
+		v.add_child(l)
+	return v
+
 ## The results screen's Hunter line: mastery goals this expedition finished, and a Hunter unlock that
 ## became ready.
 static func results_strip(s: Dictionary) -> Control:
 	var cu: Dictionary = s.get("class_unlock", {})
-	var v := UI.vbox(4)
+	var v := UI.vbox(0)
+	var news: Array = []
 	for m in cu.get("mastered", []):
 		var rw: Dictionary = m["reward"]
-		var ml := UI.label("%s mastery: %s  ·  %s %s" % [Arch.name_of(String(m["id"])), String(m["text"]),
-				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])], UI.T_SMALL, GOAL_COL, UI.semi)
-		ml.set_meta("mastery_done", String(m["id"]))
-		v.add_child(ml)
+		news.append("%s mastery: %s (%s %s)" % [Arch.name_of(String(m["id"])), String(m["text"]),
+				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])])
 	if int(cu.get("new", 0)) > 0:
-		var nl := UI.label("Relic challenge done! Hold to unlock it on the Relics screen at home.", UI.T_SMALL,
-				GOAL_COL, UI.semi)
+		news.append("Relic challenge done: hold to unlock it on the Relics screen at home")
+	if news.is_empty():
+		return v
+	var nl := UI.para("New: " + "  ·  ".join(news), UI.T_SMALL, GOAL_COL)
+	if not (cu.get("mastered", []) as Array).is_empty():
+		nl.set_meta("mastery_done", String(cu["mastered"][0]["id"]))
+	if int(cu.get("new", 0)) > 0:
 		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
-		v.add_child(nl)
+	v.add_child(nl)
 	return v

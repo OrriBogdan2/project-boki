@@ -22,7 +22,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `bridge.gd` | Web build only: talks to the page (Claude-written Boki lines, the room, shared storage) |
 | `social.gd` | Shared things: island snapshots, gifts, guilds, the town market (web build) |
 | `care.gd` | Raising: needs, likes, natures, trained stats, bond ranks, life stages, IVs, breeding |
-| `evo.gd` | Evolution by affinity, forms every 4 levels, body parts |
+| `evo.gd` | Evolution by species line (level, Ink, trade; content/rules/evolve.json), level cap, art gate, body parts |
 | `unique.gd` | Inborn rolls that make each Boki itself (size, coat, eyes, voice...) |
 | `mutations.gd`, `shiny.gd` | Rare mutations and shimmers: odds, inheritance, looks, perks |
 | `kin_speak.gd` | How young Boki talk, from their name only up to full sentences |
@@ -52,21 +52,24 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `bot.gd` | Bot hunters: fight, farm, loot, catch, revive, extract |
 | `kin.gd` | A Boki in a match: shoulder, thrown, fighting, dazed, fused |
 | `kin_companion.gd` | A Boki as a teammate: callouts, caring, keeping close |
-| `kin_voice.gd` | What a Boki says in a match |
+| `boki_chatter.gd` | What a Boki says in a match (BokiLines) |
 | `life.gd` | Down, death, deathboxes, revives and beacons |
-| `exits.gd`, `exit_models.gd` | Skiff docks, rift hatches, uplink outposts and their props |
+| `exits.gd`, `exit_models.gd` | Uplink outposts and their props (the Heart is `heart.gd`) |
 | `lairs.gd`, `boss.gd`, `boss_models.gd` | Boss lairs, their locks and seals; the three bosses |
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
 | `spawn_plan.gd` | What's live on a fixed map each match |
-| `drop_squad.gd` | Planning phase, the skyship, squad drop formation |
+| `drop_squad.gd`, `drop_rocket.gd` | Planning phase, drop leaders, the squad mini rocket |
+| `squad_intro.gd` | The squad intro on the skyship deck before the planning map |
+| `skyship_model.gd`, `sky_deck.gd` | The skyship's look; the squad, wisps, shadow and engine sound aboard |
 | `raid_look.gd` | Raid conditions: light, weather, sight |
 | `truce.gd` | Emotes and truces |
 | `pack.gd` | The backpack |
 | `gear.gd` | Gloves (loaded from `content/gloves`) |
 | `biome_run.gd` | Regional monsters and hazards on authored maps |
 | `sky_train.gd` | The sky train |
-| `arena.gd`, `duel.gd` | The Arena's practice tools; the duel room |
+| `train_halts.gd`, `train_lamp.gd` | The sky train's halt beacons and pier glow; its headlight, beam and trail |
+| `arena.gd`, `duel.gd`, `duel_ring.gd`, `duel_ring_hint.gd` | The Arena's practice tools; the duel room (bot or online rival); the duel ring panel and its first-visit hint |
 | `cam.gd` | The match camera |
 | `fx.gd`, `juice.gd`, `abyss_fx.gd` | Pooled effects; hit feel; the abyss tint |
 | `models.gd`, `kin_models.gd`, `hero_kit.gd`, `hero_gear.gd`, `hero_hair.gd`, `props_sculpt.gd`, `flora.gd` | Characters and props built in code |
@@ -132,7 +135,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `title.gd`, `prologue.gd`, `hatch.gd`, `wyrm.gd`, `scenery.gd` | Title, story, first egg |
 | `kit_card.gd` | A class's whole kit on one page (K) |
 | `full_map.gd`, `map_paint.gd` | The M map and its baked painting |
-| `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd`, `hold_skip.gd` | Between screens |
+| `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd` | Between screens |
 | `dex_view.gd`, `about_view.gd`, `iv_view.gd`, `kinbox_view.gd`, `incubator_view.gd`, `work_view.gd` | Boki menus |
 | `egg_hatch.gd`, `kin_reveal.gd`, `kin_portrait.gd`, `portraits.gd`, `icons.gd` | Hatching, portraits, icons |
 

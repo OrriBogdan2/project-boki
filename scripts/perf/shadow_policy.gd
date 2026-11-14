@@ -11,7 +11,7 @@ extends RefCounted
 ## The smallest caster per quality preset, in metres along a mesh's longest side (after its own
 ## scale). Every preset uses this table; none turns the small parts back on. Low starts with
 ## shadows off, but a player can switch them on by hand, and then this applies too.
-const MIN_SIZE := {"low": 2.0, "medium": 1.6, "high": 1.3, "ultra": 1.0}
+const MIN_SIZE := {"very_low": 2.5, "low": 2.0, "medium": 1.6, "high": 1.3, "ultra": 1.0}
 
 ## > 0 while a Hunter is being built (Models.hunter): its parts cast at any size.
 static var keep := 0

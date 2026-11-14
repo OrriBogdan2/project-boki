@@ -1,6 +1,6 @@
 extends RefCounted
 ## --motley-live-check: Motley's jack-in-the-box through the real match code (Match, Hunter.render, HunterAnim, Sync).
-## He wears his clips; he floats a hand's width off the ground; running tilts the box, sways the body and never steps;
+## He wears his clips; he floats at his hover height; running tilts the box, sways the body and never steps;
 ## the dash compresses the spring (the hips come down) and arriving starts inside the box; a knock-out plays the death
 ## clip on screen. Never touches the save.
 
@@ -51,7 +51,8 @@ func run(main: Node) -> void:
 	var hips := sk.find_bone("hips")
 	var box := WardenSkeleton.find(sk, "x_box")
 	var root_y := sk.get_bone_global_pose(sk.find_bone("root")).origin.y
-	ok(root_y > 0.08 and root_y < 0.25, "the box floats a hand's width off the ground (%.3f model m)" % root_y)
+	var hover_off := absf(root_y - KMovesStone.HOVER_H)
+	ok(hover_off <= 2.0 * KMovesStone.HOVER_BOB, "the box floats at his hover height (%.3f model m)" % root_y)
 	var hips_y := sk.get_bone_global_pose(hips).origin.y - root_y
 	var idle_box := sk.get_bone_pose_rotation(box)
 	# running: the box tilts, the body lags, no foot ever comes down

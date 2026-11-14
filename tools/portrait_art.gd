@@ -5,7 +5,8 @@ extends SceneTree
 ## writes art/portraits/<archetype>.jpg (PORTRAIT_PX square) and <archetype>_splash.jpg (SPLASH_W wide).
 ## Re-run it when the art pass updates a Warden:
 ##   godot --headless --script tools/portrait_art.gd -- --src=<dir with the wardens' PNGs>
-## --only=archer,ostra writes just those archetypes (the others' files stay byte-identical). A source may be
+## --only=archer,ostra writes just those archetypes (the others' files stay byte-identical). A missing portrait or
+## splash leaves that file alone, and a source that is not the target's shape is cut from its centre. A source may be
 ## <name>_portrait.webp or .png and <name>_splash.webp or .png (the owner-made art is PNG, 16:9 splashes).
 
 const OUT := "res://art/portraits/"
@@ -39,7 +40,8 @@ func _init() -> void:
 		var portrait := src.path_join(art + "_portrait.webp")
 		if not FileAccess.file_exists(portrait):
 			portrait = src.path_join(art + "_portrait.png")
-		_write(portrait, OUT + ak + ".jpg", Vector2i(PORTRAIT_PX, PORTRAIT_PX))
+		if FileAccess.file_exists(portrait):
+			_write(portrait, OUT + ak + ".jpg", Vector2i(PORTRAIT_PX, PORTRAIT_PX))
 		var splash := src.path_join(art + "_splash.webp")
 		if not FileAccess.file_exists(splash):
 			splash = src.path_join(art + "_splash.png")
@@ -53,6 +55,9 @@ func _write(from: String, to: String, px: Vector2i) -> void:
 		printerr("portrait_art: can't read %s" % from)
 		return
 	img.convert(Image.FORMAT_RGB8)
+	var keep := Vector2i(mini(img.get_width(), img.get_height() * px.x / px.y),
+			mini(img.get_height(), img.get_width() * px.y / px.x))
+	img = img.get_region(Rect2i((img.get_size() - keep) / 2, keep))   # centre-cut, never stretched
 	img.resize(px.x, px.y, Image.INTERPOLATE_LANCZOS)
 	img.save_jpg(ProjectSettings.globalize_path(to), QUALITY)
 	print("portrait_art: %s -> %s" % [from.get_file(), to])
