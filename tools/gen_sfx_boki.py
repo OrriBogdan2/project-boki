@@ -19,14 +19,8 @@ alert, unsure, sleepy, hurt; 2 takes each): base pitch from its weight, timbre f
 (SPECIES_VOICE below), and a 3-note signature motif that every mood bends (happy as is, alert
 clipped and high, unsure ending on a question, sleepy a sigh, hurt a yelp). KinVoice.cue picks the set; kin_happy/alert/unsure stay the fallback.
 Existing names are regenerated (kin_happy/unsure/alert, kinhit, recall, throw, catch, bond, skill,
-<<<<<<< ours
 k_<type>, boki_step_<size>_<surface>: the walk and run, four size families on four grounds); new ones
 (boki_*) are lazy-loaded, so each needs its call site listed in the report.
-||||||| base
-k_<element>, boki_step_<size>_<surface>: the walk and run, four size families on four grounds); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
-=======
-k_<element>); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
->>>>>>> theirs
 """
 import json, os
 import numpy as np
@@ -402,74 +396,6 @@ def work(i):
     return soft(room(mix(h(620, 0.0), h(700, 0.13), scuff), 0.3), 4000)
 
 
-<<<<<<< ours
-||||||| base
-def fuse(i):
-    """Fusion: the Boki leaps in. A rising sparkle spiral, a warm swell and a bright pop with a bell."""
-    d = 0.9; n = N(d); u = np.arange(n) / n
-    spiral = S.sweep(300, 1800, d, curve=1.6) * np.sin(np.pi * u ** 0.6) * 0.5
-    swell_t = S.sweep(180, 360, d) * np.sin(np.pi * u ** 1.2) * 0.45
-    grain = S.grains(d, 90, 3000, 8500, 0.002, 0.005, fall=0.4) * 0.3 * u
-    bell = at(mix(S.chime(1047, 1.2, 0.5, ((1.0, 1.0), (2.76, 0.3))), S.chime(1568, 1.2, 0.5, ((1.0, 0.7),))) * 0.4, 0.78)
-    pop = at(mix(bubble(400, 0.1, 2.5), S.kick(150, 60, 0.3, 0.02, 0.1, 2.0) * 0.5), 0.76)
-    return soft(room(mix(spiral, swell_t, grain, bell, pop), 0.9), 5400)
-
-
-def unfuse(i):
-    d = 0.5; n = N(d); u = np.arange(n) / n
-    fall = S.sweep(1400, 380, d) * np.sin(np.pi * u ** 0.4) * (1 - u) * 0.6
-    return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
-
-
-<<<<<<<<< Temporary merge branch 1
-## The four size families of a footfall (BokiSteps): the thump's pitch (Hz) and weight, how long the ground's
-## texture lasts (s) and how bright it is (Hz).
-FEET = {
-    'tiny':   {'thump': 260, 'weight': 0.25, 'len': 0.05, 'bright': 6500},
-    'small':  {'thump': 170, 'weight': 0.5, 'len': 0.08, 'bright': 5200},
-    'medium': {'thump': 115, 'weight': 0.9, 'len': 0.12, 'bright': 4200},
-    'heavy':  {'thump': 62, 'weight': 1.5, 'len': 0.2, 'bright': 2800},
-}
-
-
-def step(fam, surface, i):
-    """One paw or hoof down: a soft thump for the body, a little texture of the ground on top."""
-    f = FEET[fam]; d = f['len']
-    thump = S.kick(f['thump'] * (1 + 0.05 * i), f['thump'] * 0.5, d * 2.2, 0.012, d * 0.5, 1.5) * f['weight']
-    if surface == 'grass':
-        tex = lpf(S.grains(d * 1.6, 220, 700, f['bright'], fall=d * 0.4) * 0.5, f['bright'])
-    elif surface == 'stone':
-        tex = mix(S.click(0.003, 1400, f['bright']) * 0.8, S.crack(d, 500, f['bright'], d * 0.25) * 0.5)
-    elif surface == 'wood':
-        tex = mix(S.ring((f['thump'] * 1.9, f['thump'] * 4.3), d * 3, (d * 0.7, d * 0.4), (0.4, 0.2)),
-                  S.crack(d, 300, f['bright'] * 0.6, d * 0.3) * 0.5)
-    else:
-        tex = lpf(mix(S.grains(d * 2, 260, 900, f['bright'] * 0.7, fall=d * 0.7) * 0.7,
-                      noise(d * 1.5) * env(N(d * 1.5), 0.006, d * 0.5) * 0.35), f['bright'])
-    return soft(mix(thump, tex), f['bright'] * 1.1)
-
-
-||||||||| merged common ancestors
-=========
-=======
-def fuse(i):
-    """Fusion: the Boki leaps in. A rising sparkle spiral, a warm swell and a bright pop with a bell."""
-    d = 0.9; n = N(d); u = np.arange(n) / n
-    spiral = S.sweep(300, 1800, d, curve=1.6) * np.sin(np.pi * u ** 0.6) * 0.5
-    swell_t = S.sweep(180, 360, d) * np.sin(np.pi * u ** 1.2) * 0.45
-    grain = S.grains(d, 90, 3000, 8500, 0.002, 0.005, fall=0.4) * 0.3 * u
-    bell = at(mix(S.chime(1047, 1.2, 0.5, ((1.0, 1.0), (2.76, 0.3))), S.chime(1568, 1.2, 0.5, ((1.0, 0.7),))) * 0.4, 0.78)
-    pop = at(mix(bubble(400, 0.1, 2.5), S.kick(150, 60, 0.3, 0.02, 0.1, 2.0) * 0.5), 0.76)
-    return soft(room(mix(spiral, swell_t, grain, bell, pop), 0.9), 5400)
-
-
-def unfuse(i):
-    d = 0.5; n = N(d); u = np.arange(n) / n
-    fall = S.sweep(1400, 380, d) * np.sin(np.pi * u ** 0.4) * (1 - u) * 0.6
-    return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
-
-
->>>>>>> theirs
 # ---------------------------------------------------------------- per-species voices
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 MOODS = ['happy', 'alert', 'unsure', 'sleepy', 'hurt']
@@ -600,7 +526,6 @@ def voice_sets():
             S.takes_cat('bk_%s_%s' % (sp, mood), lambda i, sp=sp, mood=mood: species_voice(sp, mood, i), 1, 'boki')
 
 
-<<<<<<< ours
 TYPES = [
     'normal', 'fire', 'water', 'grass', 'spore', 'electric', 'ice', 'rock', 'psychic',
     'flying', 'dragon', 'dark', 'ghost', 'poison', 'bug', 'steel', 'fairy', 'crystal', 'sound']
@@ -633,10 +558,6 @@ def step(fam, surface, i):
     return soft(mix(thump, tex), f['bright'] * 1.1)
 
 
-||||||| base
->>>>>>>>> Temporary merge branch 2
-=======
->>>>>>> theirs
 def main():
     S.takes_cat('kin_happy', happy, 3, 'boki')
     S.takes_cat('kin_unsure', unsure, 3, 'boki')
@@ -655,27 +576,10 @@ def main():
     S.save_loop('boki_sleep', sleep_loop(), 'loop')
     S.takes_cat('boki_yawn', yawn, 1, 'boki')
     S.takes_cat('boki_work', work, 3, 'boki')
-<<<<<<< ours
     voice_sets()
     for fam in FEET:
         for surface in ('grass', 'stone', 'wood', 'snow'):
             S.takes_cat('boki_step_%s_%s' % (fam, surface), lambda i, fam=fam, surface=surface: step(fam, surface, i), 2, 'step')
-||||||| base
-    S.takes_cat('boki_fuse', fuse, 0, 'boki')
-    S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
-<<<<<<<<< Temporary merge branch 1
-    for fam in FEET:
-        for surface in ('grass', 'stone', 'wood', 'snow'):
-            S.takes_cat('boki_step_%s_%s' % (fam, surface), lambda i, fam=fam, surface=surface: step(fam, surface, i), 2, 'step')
-||||||||| merged common ancestors
-=========
-    voice_sets()
->>>>>>>>> Temporary merge branch 2
-=======
-    S.takes_cat('boki_fuse', fuse, 0, 'boki')
-    S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
-    voice_sets()
->>>>>>> theirs
 
 
 if __name__ == '__main__':

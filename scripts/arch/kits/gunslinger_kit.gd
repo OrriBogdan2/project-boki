@@ -739,16 +739,7 @@ func _fire_needle() -> void:
 			hits += 1
 			if rat:
 				skewers += 1
-<<<<<<< ours
-				# the word rides up the screen, clear of the damage number on the body
-				payoff_fx(f.pos, EMBER, "gunslinger_skewer", h.dir_to(f), f)
-||||||| base
-				payoff_fx(f.pos, EMBER, "", h.dir_to(f), f)
-				m.sfx("hero_skewer", f.pos, 0.0)
-=======
-				payoff_fx(f.pos, LIME, "", h.dir_to(f), f)
-				m.sfx("hero_skewer", f.pos, 0.0)
->>>>>>> theirs
+				payoff_fx(f.pos, LIME, "gunslinger_skewer", h.dir_to(f), f)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
 		var cut := float(ed["shave"])

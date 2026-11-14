@@ -3,16 +3,10 @@ extends RefCounted
 ## The duel room, next to the Training Grounds: you against one sparring bot hunter on an empty
 ## island. Pick its Hunter, glove, difficulty and behaviour (fight / dodge only / stand
 ## still), reset whenever you like, and watch your numbers: damage dealt and taken, how many of your
-<<<<<<< ours
 ## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round,
 ## and every round is counted in (TrainingSfx: 3-2-1 and a horn, no damage before it).
-||||||| base
-## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.
-=======
-## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.
 ## Online (a "net" match from the lobby's duel line) the bot's seat is the other player's hunter, the rival:
 ## no setup menu, and each game puts its own hunter back on its mark when a round ends.
->>>>>>> theirs
 
 const MODES := ["fight", "dodge", "still"]
 const MODE_NAMES := {"fight": "Fights back", "dodge": "Only dodges", "still": "Stands still"}
@@ -186,15 +180,9 @@ func tick(dt: float) -> void:
 	# otherwise leave two hunters standing back to back, neither ever spotting the other)
 	foe.reveal_t = maxf(foe.reveal_t, 0.3)
 	m.player.reveal_t = maxf(m.player.reveal_t, 0.3)
-<<<<<<< ours
 	TrainingSfx.count_in(count_t, count_t - dt)
 	count_t = maxf(count_t - dt, 0.0)
-	if _test_cast > 0.0 and m.time >= _test_cast:
-||||||| base
-	if _test_cast > 0.0 and m.time >= _test_cast:
-=======
 	if bot and _test_cast > 0.0 and m.time >= _test_cast:
->>>>>>> theirs
 		_test_cast = -1.0
 		bot.inp["aim"] = m.player.pos
 		m.use_gear(bot, 0)

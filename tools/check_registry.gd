@@ -142,31 +142,10 @@ const CHECKS := {
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--music-combat-check": ["res://tools/music_combat_check.gd", "music_combat_check", null],
 	"--soundtrack-check": ["res://tools/soundtrack_check.gd", "soundtrack_check", null],      # Settings > Audio > Music
-<<<<<<< ours
-||||||| base
-<<<<<<<<< Temporary merge branch 1
-<<<<<<<<< Temporary merge branch 1
-	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],      # map regions, hot drop zone
 	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],      # the closing zone
-	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
-||||||||| ca96e707c5
-	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],      # map regions, hot drop zone
-	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
-=========
->>>>>>>>> Temporary merge branch 2
-||||||||| 96d778d036
-=========
-=======
-	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],      # the closing zone
->>>>>>> theirs
 	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],  # map regions, hot drop zone
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],  # --shots-dir=<dir>, GPU
-<<<<<<< ours
-||||||| base
->>>>>>>>> Temporary merge branch 2
-=======
 	"--farm-clip-check": ["res://tools/farm_clip_check.gd", "farm_clip_check", null],
->>>>>>> theirs
 	"--match-repeat-check": ["res://tools/match_repeat_check.gd", "match_repeat_check", null],      # leaks
 	# merged props hold their draws; --shots-dir=<dir> saves a lineup
 	"--prop-draws-check": ["res://tools/prop_draws_check.gd", "prop_draws_check", null],
@@ -237,7 +216,6 @@ const CHECKS := {
 	"--wheel-zoom-check": ["res://tools/wheel_zoom_check.gd", "wheel_zoom_check", null],  # the wheel zooms
 	"--wheel-zoom-shots": ["res://tools/wheel_zoom_shots.gd", "wheel_zoom_shots", null],  # GPU: the wheel zooming
 	"--match-cam-wide-shots": ["res://tools/match_cam_wide_shots.gd", "match_cam_wide_shots", null],  # GPU
-	"--shrink-zone-check": ["res://tools/shrink_zone_check.gd", "shrink_zone_check", null],  # the closing zone
 	"--loot-open-sfx-check": ["res://tools/loot_open_sfx_check.gd", "loot_open_sfx_check", null],
 	"--sfx-fight-bench": ["res://tools/sfx_fight_bench.gd", "sfx_fight_bench", null],  # voices, audio cpu
 	"--knock-sfx-check": ["res://tools/knock_sfx_check.gd", "knock_sfx_check", null],  # squad knock / finish cues
@@ -245,7 +223,6 @@ const CHECKS := {
 	"--status-sfx-check": ["res://tools/status_sfx_check.gd", "status_sfx_check", null],  # status cues and loops
 	"--boki-steps-check": ["res://tools/boki_steps_check.gd", "boki_steps_check", null],  # Boki footsteps
 	"--incoming-hit-check": ["res://tools/incoming_hit_check.gd", "incoming_hit_check", null],  # [--shots-dir=] AVI
-	"--bowl-sfx-check": ["res://tools/bowl_sfx_check.gd", "bowl_sfx_check", null],  # Mixing Bowl sounds
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	# seconds left and charges on the bar
@@ -576,12 +553,7 @@ const CHECKS := {
 	"--glint-fishing-check": ["res://tools/glint_fishing_check.gd", "glint_fishing_check", null],  # 4.2 game 4
 	"--glint-fx-shots": ["res://tools/glint_fx_shots.gd", "glint_fx_shots", null],  # the looks sheet (GPU)
 	"--garden-sfx-check": ["res://tools/garden_sfx_check.gd", "garden_sfx_check", null],  # garden minigame sounds
-<<<<<<< ours
-||||||| base
->>>>>>>>> Temporary merge branch 2
-=======
 	"--bowl-sfx-check": ["res://tools/bowl_sfx_check.gd", "bowl_sfx_check", null],      # Mixing Bowl sounds
->>>>>>> theirs
 	"--echo-steps-check": ["res://tools/echo_steps_check.gd", "echo_steps_check", null],  # GARDEN_MODERN 4.2
 	"--echo-steps-clip": ["res://tools/echo_steps_clip.gd", "echo_steps_clip", null],  # --shots-dir=<dir>
 	"--show-ring-check": ["res://tools/show_ring_check.gd", "show_ring_check", null],  # GARDEN_MODERN 4.2 game 3

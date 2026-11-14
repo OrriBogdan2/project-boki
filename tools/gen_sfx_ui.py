@@ -4,18 +4,12 @@ Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quie
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick, your
-<<<<<<< ours
 ultimate back = a low fifth and one bell over it (UltReadyCue). Ranks
 (RankSfx): a point ready = two small rising bells, ranking a slot = a rising fifth, its top rank = that
 fifth with a soft bloom.
-||||||| base
-ultimate back = a low fifth and one bell over it (UltReadyCue).
-=======
-ultimate back = a low fifth and one bell over it (UltReadyCue).
 Inventory (InvSfx): grab = a cloth lift under a tiny high tine, drop = a soft set-down into a slot,
 equip = a muted buckle clink over a leather thump, swap = a falling tick, a slide, a rising tick,
 take = a rustle and a short rising pair (quieter and duller than pickup).
->>>>>>> theirs
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
@@ -235,18 +229,14 @@ def main():
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
     S.save_cat('ui_ult_ready', ult_ready(0), 'ui')
-<<<<<<< ours
-    S.save_cat('rank_ready', rank_ready(0), 'ui')      # (last, so the random draws above stay the same)
-    S.save_cat('rank_up', rank_up(0), 'ui')
-    S.save_cat('rank_max', rank_max(0), 'ui')
-||||||| base
-=======
     S.takes_cat('inv_grab', inv_grab, 3, 'ui')
     S.takes_cat('inv_drop', inv_drop, 3, 'ui')
     S.takes_cat('inv_equip', inv_equip, 2, 'ui')
     S.takes_cat('inv_swap', inv_swap, 2, 'ui')
     S.takes_cat('inv_take', inv_take, 3, 'ui')
->>>>>>> theirs
+    S.save_cat('rank_ready', rank_ready(0), 'ui')      # (last, so the random draws above stay the same)
+    S.save_cat('rank_up', rank_up(0), 'ui')
+    S.save_cat('rank_max', rank_max(0), 'ui')
 
 
 if __name__ == '__main__':

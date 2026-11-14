@@ -19,14 +19,9 @@ extends RefCounted
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
 ##   9 2v2 tutorial  the 2v2 tutorial (duo_tutorial.gd) played by its test driver from the first beat to the end
 ##                   card, on the match's own clock and camera (give --media-secs=150 for the whole run)
-<<<<<<< ours
-##  10 closing zone  a Hollow Crown match's zone (ShrinkZone) in time-lapse: the full map, then the minimap and wall
-||||||| base
->>>>>>>>> Temporary merge branch 2
-=======
 ##  10 base to mate  B (BaseWheel, BaseRecall): hold for the wheel, point, let go, the 5.5 s channel lands beside
 ##                   the teammate; then a second channel that a rival's hit breaks (INTERRUPTED). Its own length.
->>>>>>> theirs
+##  11 closing zone  a Hollow Crown match's zone (ShrinkZone) in time-lapse: the full map, then the minimap and wall
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -56,7 +51,6 @@ var squad_b: Array = []
 var zoom_at := 0.0               # --media-zoom: the camera zoom every clip films at (0: each clip's own)
 var mobs_on := false             # wild monsters stay (clip 2 spawns its own); otherwise any that appear are removed
 var fight := FIGHT               # --media-fight=
-var fight_zoom := 0.55           # --media-zoom=: clip 1's camera zoom
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -74,16 +68,10 @@ func run(main_node: Node) -> void:
 			clip = int(arg.substr(13))
 		if arg.begins_with("--media-secs="):
 			secs = float(arg.substr(13))
-<<<<<<< ours
 		if arg.begins_with("--media-zoom="):
 			zoom_at = float(arg.substr(13))
-||||||| base
-=======
 		if arg.begins_with("--media-fight="):
 			fight = arg.substr(14)
-		if arg.begins_with("--media-zoom="):
-			fight_zoom = float(arg.substr(13))
->>>>>>> theirs
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -105,13 +93,8 @@ func run(main_node: Node) -> void:
 		7: await _show(secs)
 		8: await _relay(secs)
 		9: await _duo(secs)
-<<<<<<< ours
-		10: await _zone(secs)
-||||||| base
->>>>>>>>> Temporary merge branch 2
-=======
 		10: await _base_tp()
->>>>>>> theirs
+		11: await _zone(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -263,7 +246,7 @@ func _fight(secs: float) -> void:
 			_hunter("b2", 1, b[2], FIGHT_KIN[5], _ground(foe_at + Vector3(1.4, 0, -1.6)))]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(fight_zoom)
+	_zoom(0.55)
 	still_at = 4.0
 	_mark("start")
 	await _go(secs, func(t: float):
@@ -473,102 +456,6 @@ func _relay(secs: float) -> void:
 		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
 			_press(rc)
 	await _film(secs, each, func(): return rc.run == null)
-<<<<<<< ours
-
-func _duo(secs: float) -> void:
-	Save.d["name"] = HeroTitle.base_name("gunslinger")
-	m = Match.new()
-	main.add_child(m)
-	m.start(DuoTutorial.opts("gunslinger", true))
-	var fade = main.get("fade")
-	if fade != null:
-		await fade.reveal(0.01)
-	var tu := m.duo
-	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)
-
-# ------------------------------------------------------------------ 10: closing zone
-## From just before the first close to just after the last, sped up to fit `secs`. The player stands
-## inside the final circle, near its edge, so the wall comes past the camera; the full map shows the
-## first half, the minimap and the world the second.
-func _zone(secs: float) -> void:
-	Save.d["name"] = HeroTitle.base_name("ashwick")
-	m = Match.new()
-	main.add_child(m)
-	await m.start({"teams": 6, "squad": 3, "tier": 1, "seed": 3, "no_drop": true, "raid": "clear", "sim_keep": true})
-	m.set_process(false)
-	var fade = main.get("fade")
-	if fade != null:
-		await fade.reveal(0.01)
-	m.hud.guide_hidden = true
-	Game.god = true
-	var z := m.zone
-	var fc := z.cs[z.last()]
-	var mid := Vector2(m.world.w, m.world.h) * 0.5
-	var at := fc + (mid - fc).normalized() * z.rs[z.last()] * 0.85
-	m.player.teleport(_ground(Vector3(at.x, 0, at.y)))
-	var from := z.t0[1] - 8.0
-	var warp := (z.t1[z.last()] + 4.0 - from) / secs
-	m.hud.full_map.open()
-	still_at = secs * 0.35
-	await _go(secs, func(t: float):
-		m.time = from + t * warp
-		m.player.inp["move"] = Vector2.ZERO
-		if t >= secs * 0.5:
-			m.hud.full_map.close(),
-		func(_t: float): return m.player.pos)
-	Game.god = false
-||||||| base
-<<<<<<<<< Temporary merge branch 1
-||||||||| 23cc281bd6
-=========
-
-# ------------------------------------------------------------------ 5: closing zone
-## From just before the first close to just after the last, sped up to fit `secs`. The player stands
-## inside the final circle, near its edge, so the wall comes past the camera; the full map shows the
-## first half, the minimap and the world the second.
-func _zone(secs: float) -> void:
-	Save.d["name"] = HeroTitle.base_name("ashwick")
-	m = Match.new()
-	main.add_child(m)
-	await m.start({"teams": 6, "squad": 3, "tier": 1, "seed": 3, "no_drop": true, "raid": "clear", "sim_keep": true})
-	m.set_process(false)
-	var fade = main.get("fade")
-	if fade != null:
-		await fade.reveal(0.01)
-	m.hud.guide_hidden = true
-	Game.god = true
-	var z := m.zone
-	var fc := z.cs[z.last()]
-	var mid := Vector2(m.world.w, m.world.h) * 0.5
-	var at := fc + (mid - fc).normalized() * z.rs[z.last()] * 0.85
-	m.player.teleport(_ground(Vector3(at.x, 0, at.y)))
-	var from := z.t0[1] - 8.0
-	var warp := (z.t1[z.last()] + 4.0 - from) / secs
-	m.hud.full_map.open()
-	still_at = secs * 0.35
-	await _go(secs, func(t: float):
-		m.time = from + t * warp
-		m.player.inp["move"] = Vector2.ZERO
-		if t >= secs * 0.5:
-			m.hud.full_map.close(),
-		func(_t: float): return m.player.pos)
-	Game.god = false
->>>>>>>>> Temporary merge branch 2
-||||||||| merged common ancestors
-=========
-
-func _duo(secs: float) -> void:
-	Save.d["name"] = HeroTitle.base_name("gunslinger")
-	m = Match.new()
-	main.add_child(m)
-	m.start(DuoTutorial.opts("gunslinger", true))
-	var fade = main.get("fade")
-	if fade != null:
-		await fade.reveal(0.01)
-	var tu := m.duo
-	await _film(secs, func(_t: float) -> void: pass, func(): return tu.finished and tu.end_t > DUO_TAIL)
->>>>>>>>> Temporary merge branch 2
-=======
 
 func _duo(secs: float) -> void:
 	Save.d["name"] = HeroTitle.base_name("gunslinger")
@@ -634,4 +521,35 @@ func _wheel_take(me: Hunter, to: Hunter, hit_at: float, base: Vector3, foe: Hunt
 		if foe and t >= hit_at and me.base_t > 0.0:
 			me.hurt(6.0, foe, {"src": "media"}),
 		func(_t: float): return (me.pos + to.pos) * 0.5 if me.base_t > 0.0 else me.pos)
->>>>>>> theirs
+
+# ------------------------------------------------------------------ 11: closing zone
+## From just before the first close to just after the last, sped up to fit `secs`. The player stands
+## inside the final circle, near its edge, so the wall comes past the camera; the full map shows the
+## first half, the minimap and the world the second.
+func _zone(secs: float) -> void:
+	Save.d["name"] = HeroTitle.base_name("ashwick")
+	m = Match.new()
+	main.add_child(m)
+	await m.start({"teams": 6, "squad": 3, "tier": 1, "seed": 3, "no_drop": true, "raid": "clear", "sim_keep": true})
+	m.set_process(false)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	m.hud.guide_hidden = true
+	Game.god = true
+	var z := m.zone
+	var fc := z.cs[z.last()]
+	var mid := Vector2(m.world.w, m.world.h) * 0.5
+	var at := fc + (mid - fc).normalized() * z.rs[z.last()] * 0.85
+	m.player.teleport(_ground(Vector3(at.x, 0, at.y)))
+	var from := z.t0[1] - 8.0
+	var warp := (z.t1[z.last()] + 4.0 - from) / secs
+	m.hud.full_map.open()
+	still_at = secs * 0.35
+	await _go(secs, func(t: float):
+		m.time = from + t * warp
+		m.player.inp["move"] = Vector2.ZERO
+		if t >= secs * 0.5:
+			m.hud.full_map.close(),
+		func(_t: float): return m.player.pos)
+	Game.god = false

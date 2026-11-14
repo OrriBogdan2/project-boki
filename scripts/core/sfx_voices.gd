@@ -21,10 +21,10 @@ static func rules() -> Dictionary:
 static func cap(lane_name: String) -> int:
 	return int((rules()["cap"] as Dictionary)[lane_name])
 
-## The cap lane a bus is in: near ("SFX": the clear SFX bus and the SFXWorld bus the downed muffle dulls),
-## far ("SFXFar") or behind terrain ("SFXMuffled").
+## The cap lane a bus is in: far ("SFXFar"), behind terrain ("SFXMuffled"), else near ("SFX": the clear SFX
+## bus, the SFXWorld bus the downed muffle dulls, and the kind buses of SfxMix: Voice, Boki, UI).
 static func lane(bus: String) -> String:
-	return "SFX" if bus == "SFXWorld" else bus
+	return bus if bus in ["SFXFar", "SFXMuffled"] else "SFX"
 
 ## dist: metres from the listener, or -1 for a sound with no place (a UI sound).
 static func priority(sname: String, dist: float, far_m: float) -> int:

@@ -350,34 +350,7 @@ func _end_intro() -> void:
 	else:
 		_after_create()
 
-<<<<<<< ours
-var turning := false
-var zoom := ViewZoom.new()      # the wheel (or the pad) while you make yourself
-||||||| base
-var turning := false
-=======
->>>>>>> theirs
 func _unhandled_input(event: InputEvent) -> void:
-<<<<<<< ours
-	if stage == "create" and zoom.wheel(event):
-		return
-	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn yourself round
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-			turning = event.pressed
-		elif event is InputEventMouseMotion and turning:
-			preview.rotation.y += event.relative.x * 0.012
-			return
-||||||| base
-	if stage == "create" and preview:
-		# drag with the mouse (or hold A / D) to turn yourself round
-		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-			turning = event.pressed
-		elif event is InputEventMouseMotion and turning:
-			preview.rotation.y += event.relative.x * 0.012
-			return
-=======
->>>>>>> theirs
 	if stage == "warm" and ((event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump")):
 		_tap_egg()
 		return
@@ -564,17 +537,8 @@ func _start_hatch() -> void:
 
 func _process(delta: float) -> void:
 	t += delta
-<<<<<<< ours
-	if stage != "mask":
-		var to := look_at_t + (cam_to - look_at_t) * zoom.k if stage == "create" else cam_to
-		cam.position = cam.position.lerp(to, minf(1.0, delta * 2.0))
-||||||| base
-	if stage != "mask":
-		cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
-=======
 	if stage != "mask" and stage != "create":
 		cam.position = cam.position.lerp(cam_to, minf(1.0, delta * 2.0))
->>>>>>> theirs
 		# a slow breathing drift so the shot is never quite still
 		cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
 	for rn in runes:
@@ -586,33 +550,8 @@ func _process(delta: float) -> void:
 	if ship:
 		ship.position.x += delta * 1.6
 		if ship.position.x > 60.0: ship.position.x = -60.0
-<<<<<<< ours
-	if stage == "mask":
-		pass       # (MaskMoment moves the camera)
-	elif stage == "create":
-		zoom.tick(delta)
-		cam.look_at(look_at_t)
-		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
-			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
-		# the preview stands at ease (breathing, shifting its weight, glancing round); drag it to turn
-		# it (see _unhandled_input)
-		if preview and preview_anim:
-			preview_anim.update(delta, {"fired": 99.0, "face": preview.rotation.y})
-||||||| base
-	if stage == "mask":
-		pass       # (MaskMoment moves the camera)
-	elif stage == "create":
-		cam.look_at(look_at_t)
-		if preview and not (get_viewport().gui_get_focus_owner() is LineEdit):
-			preview.rotation.y += (Input.get_axis("left", "right")) * delta * 2.5
-		# the preview stands at ease (breathing, shifting its weight, glancing round); drag it to turn
-		# it (see _unhandled_input)
-		if preview and preview_anim:
-			preview_anim.update(delta, {"fired": 99.0, "face": preview.rotation.y})
-=======
 	if stage == "mask" or stage == "create":
 		pass       # (MaskMoment, or the LookLocker, moves the camera)
->>>>>>> theirs
 	else:
 		cam.look_at(Vector3(0, (0.25 if stage != "pick" else 0.55) if stage != "name" else -0.55, 0.5))
 	if stage == "pick":

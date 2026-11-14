@@ -352,13 +352,9 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
-<<<<<<< ours
 	add_child(StatusSfx.new(self))        # status cues and loops
-||||||| base
-=======
 	recap = DeathRecap.new(self)         # the down/death card
 	add_child(recap)
->>>>>>> theirs
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -3389,15 +3385,11 @@ func _gather_input() -> void:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:
-<<<<<<< ours
+	if intro and intro.skip(event):
+		return
 	if CamWheel.input(self, event):
 		get_viewport().set_input_as_handled()
 		return
-||||||| base
-=======
-	if intro and intro.skip(event):
-		return
->>>>>>> theirs
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):
 		tut.ack()
 		get_viewport().set_input_as_handled()

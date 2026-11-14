@@ -147,11 +147,12 @@ func _music_travel(m: Node, bb: Node) -> void:
 	bb.games.append(game)
 	var duck_db := float(GardenZones.rules()["music_duck_db"])
 	await m.get_tree().create_timer(GardenMusic.LOOK_S * 2.0).timeout
-	var ducked: float = Sfx._duck_fx[0].volume_db
+	var ducked: float = Sfx.mix._duck_fx[0].volume_db
 	ok(ducked <= duck_db + 0.5, "a garden game ducks the music (%.1f dB)" % ducked)
 	bb.games.erase(game)
 	await m.get_tree().create_timer(GardenMusic.LOOK_S * 2.0 + 1.5).timeout
-	ok(Sfx._duck_fx[0].volume_db > -0.5, "the music comes back once it ends (%.1f dB)" % Sfx._duck_fx[0].volume_db)
+	var back: float = Sfx.mix._duck_fx[0].volume_db
+	ok(back > -0.5, "the music comes back once it ends (%.1f dB)" % back)
 
 ## Waits for the home a goto started to be built and revealed, with a few ambience steps; null on a timeout.
 func _arrived(m: Node, was: Node):

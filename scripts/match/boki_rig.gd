@@ -7,6 +7,7 @@ extends Node
 ## coming down), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
+signal stepped(sound: String)           # a planted foot came down and this step sound was played (BokiSteps)
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
 ## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
@@ -249,6 +250,7 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _steps := BokiSteps.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -363,17 +365,7 @@ func _process(dt: float) -> void:
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
-<<<<<<< ours
 	_steps.update(self, dt)
-||||||| base
-<<<<<<<<< Temporary merge branch 1
-	_steps.update(self, dt)
-	_face_step(dt)
-||||||||| merged common ancestors
-	_face_step(dt)
-=========
-=======
->>>>>>> theirs
 	var t := pace.step(dt)
 	if t > 0.0:
 		_face_step(t)

@@ -533,30 +533,9 @@ func _blowout(f: Ent) -> void:
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
-<<<<<<< ours
-	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
-	# no ground rings: the source shows a starburst
-	payoff_fx(f.pos, PINK, "hero_blowout", h.dir_to(f), f, false)
-	# the refund tell on her: copper coil columns and a starburst (our own look)
-	var me := ground(h.pos)
-	for i in 3:
-		var a := TAU * i / 3.0
-		fx().pillar(me + Vector3(cos(a) * 0.55, 0, sin(a) * 0.55), COPPER, PINK, 3.2, 0.22, 1.2, false)
-||||||| base
-	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
-	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
-	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
-	# the refund tell on her: copper coil columns and a starburst (our own look)
-	var me := ground(h.pos)
-	for i in 3:
-		var a := TAU * i / 3.0
-		fx().pillar(me + Vector3(cos(a) * 0.55, 0, sin(a) * 0.55), COPPER, PINK, 3.2, 0.22, 1.2, false)
-=======
 	vfx("blowout", f.position)
-	payoff_fx(f.pos, PINK, "", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
-	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
+	payoff_fx(f.pos, PINK, "hero_blowout", h.dir_to(f), f, false)    # no ground rings: the source shows a starburst
 	vfx("refund", ground(h.pos))     # the refund tell on her: a copper coil column (our own look)
->>>>>>> theirs
 	DashReset.cue(h)
 
 # ------------------------------------------------------------------ RMB: Storm Rod

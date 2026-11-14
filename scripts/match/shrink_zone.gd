@@ -56,17 +56,9 @@ var k := 0  # closes begun so far (0 = none yet)
 var cur_c := Vector2.ZERO  # the edge right now
 var cur_r := 0.0
 var fallen := false
-<<<<<<< ours
-var _told := 0                   # the last close the feed and the kin warned of
-var _owed := {}                  # Hunter -> outside damage not landed yet
-var audio: ZoneSfx                # the warning, the wall's hum, the crossing and the damage tick
-||||||| base
-var _told := 0                   # the last close the feed and the kin warned of
-var _owed := {}                  # Hunter -> outside damage not landed yet
-=======
 var told := 0  # the last close the feed and the kin warned of (the first-match guide reads it)
 var _owed := {}  # Hunter -> outside damage not landed yet
->>>>>>> theirs
+var audio: ZoneSfx  # the warning, the wall's hum, the crossing and the damage tick
 var _wall: MeshInstance3D = null
 var _mat: ShaderMaterial = null
 
@@ -76,14 +68,8 @@ static func rules() -> Dictionary:
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 	return _rules
 
-<<<<<<< ours
-## The zone for a real fixed-length expedition with an outpost to close on; null otherwise
-||||||| base
-## The zone for a real fixed-length expedition with a dock or outpost to close on; null otherwise
-=======
 
-## The zone for a real fixed-length expedition with a dock or outpost to close on; null otherwise
->>>>>>> theirs
+## The zone for a real fixed-length expedition with an outpost to close on; null otherwise
 ## (tutorial, training, duels, the arena, rolling sessions).
 static func make(match_node: Match) -> ShrinkZone:
 	var o := match_node.opts
@@ -161,55 +147,7 @@ func edge_at(t: float) -> Array:
 func outside(p: Vector3) -> bool:
 	return Vector2(p.x, p.z).distance_to(cur_c) > cur_r
 
-<<<<<<< ours
-||||||| base
-## When the closing edge has passed p for good (1e9: p is in the final area).
-func out_at(p: Vector3) -> float:
-	var q := Vector2(p.x, p.z)
-	for j in range(1, last() + 1):
-		if q.distance_to(cs[j]) > rs[j]:
-			return t1[j]
-	return 1e9
 
-## The docks close as the edge passes them (Exits.setup); the one nearest the final area is the last.
-func time_docks(docks: Array) -> void:
-	var best := -1
-	var bd := 1e9
-	for i in docks.size():
-		docks[i]["close_at"] = out_at(docks[i]["pos"])
-		var d := cs[last()].distance_to(Vector2(docks[i]["pos"].x, docks[i]["pos"].z))
-		if d < bd:
-			bd = d
-			best = i
-	if best >= 0 and float(docks[best]["close_at"]) >= 1e8:
-		docks[best]["last"] = true
-
-=======
-
-## When the closing edge has passed p for good (1e9: p is in the final area).
-func out_at(p: Vector3) -> float:
-	var q := Vector2(p.x, p.z)
-	for j in range(1, last() + 1):
-		if q.distance_to(cs[j]) > rs[j]:
-			return t1[j]
-	return 1e9
-
-
-## The docks close as the edge passes them (Exits.setup); the one nearest the final area is the last.
-func time_docks(docks: Array) -> void:
-	var best := -1
-	var bd := 1e9
-	for i in docks.size():
-		docks[i]["close_at"] = out_at(docks[i]["pos"])
-		var d := cs[last()].distance_to(Vector2(docks[i]["pos"].x, docks[i]["pos"].z))
-		if d < bd:
-			bd = d
-			best = i
-	if best >= 0 and float(docks[best]["close_at"]) >= 1e8:
-		docks[best]["last"] = true
-
-
->>>>>>> theirs
 func tick(dt: float) -> void:
 	var e := edge_at(m.time)
 	cur_c = e[0]
@@ -236,31 +174,15 @@ func _warn() -> void:
 	var secs := int(ceil(t0[nx] - m.time))
 	var tail := ": the islands outside the last circle will fall!" if nx == last() else ". Get inside the ring!"
 	m.add_feed("The zone closes in %d s%s" % [secs, tail])
-<<<<<<< ours
-	if m.player and m.player.kin: BokiChatter.say(m, m.player.kin, "zone")
-	if m.hud: m.hud.toast_small("ZONE CLOSES IN %d s" % secs, COL)
-	audio.warn()
-||||||| base
-	if m.player and m.player.kin: BokiChatter.say(m, m.player.kin, "zone")
-	if m.hud: m.hud.toast_small("ZONE CLOSES IN %d s" % secs, COL)
-	m.sfx("warn", null, 0.0)
-=======
 	if m.player and m.player.kin:
 		BokiChatter.say(m, m.player.kin, "zone")
 	if m.hud:
 		m.hud.toast_small("ZONE CLOSES IN %d s" % secs, COL)
-	m.sfx("warn", null, 0.0)
->>>>>>> theirs
+	audio.warn()
 
-<<<<<<< ours
+
 ## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain; a tick, so no
 ## flinch or hitstop either, and the player hears ZoneSfx's tick instead of a hurt voice).
-||||||| base
-## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain).
-=======
-
-## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain).
->>>>>>> theirs
 func _hurt_outside(dt: float) -> void:
 	var R := rules()
 	for h in m.hunters:
@@ -341,15 +263,9 @@ func _build_wall() -> void:
 	_wall.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(_wall)
 
-<<<<<<< ours
-func _secs_text(hud) -> String:
-||||||| base
-func _secs_text() -> String:
-=======
 
 ## The zone line, timed with the HUD that draws it (m.hud may be gone while another one draws).
 func _secs_text(hud) -> String:
->>>>>>> theirs
 	if k < last() and m.time < t0[k + 1]:
 		return "ZONE CLOSES  %s" % hud._fmt(t0[k + 1] - m.time)
 	if k > 0 and m.time < t1[k]:

@@ -36,14 +36,8 @@ func run(main: Node) -> void:
 	print("SHRINKZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
-<<<<<<< ours
-## Phases close in, nest, finish in time, end on an exit; same seed same zone.
-||||||| base
-## Phases close in, nest, finish in time, end on an exit; same seed same zone; docks follow the edge.
-=======
 
-## Phases close in, nest, finish in time, end on an exit; same seed same zone; docks follow the edge.
->>>>>>> theirs
+## Phases close in, nest, finish in time, end on an exit; same seed same zone.
 func _shape(main: Node) -> void:
 	var finals := {}
 	var picks := 0
@@ -127,7 +121,7 @@ func _hurt(main: Node) -> void:
 	ok(z.fallen and b.out, "the last close: a hunter on an island outside the final circle falls")
 	m.free()
 
-<<<<<<< ours
+
 ## ZoneSfx. Standing well inside through every close: one warning each, at warn_s before it, and no other cue (no
 ## countdown: the Ways Out ticks stay the only one). The hum sits on the wall's nearest point, louder 12 m from it
 ## than 50 m, as loud just outside as just inside. Crossing out and back in sound once each; standing on the edge
@@ -199,10 +193,7 @@ func _audio(main: Node) -> void:
 	ok(Sfx.last_played.has(hurt) and a.cues.is_empty(), "a hit taken plays the hurt voice and no zone tick")
 	m.free()
 
-||||||| base
-=======
 
->>>>>>> theirs
 ## Bots come into the circle and stay in: from just after close 2 to just after close 3.
 func _bots(main: Node) -> void:
 	var m := _match(main, 9)
