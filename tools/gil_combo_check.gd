@@ -373,7 +373,7 @@ func _lmb_numbers() -> void:
 	var cds := {}
 	var t := 0.0
 	while t < 1.1:
-		P.inp["fire"] = true
+		P.inp["fire"] = fmod(t, 0.12) < 0.05      # clicking (holding is the Tide Lunge)
 		var was := K.combo_n
 		m.step(DT)
 		t += DT
@@ -526,7 +526,10 @@ func _spin_cancels() -> void:
 	_reset(1.6)
 	_press("sig")
 	step(m, 0.3)
-	step(m, 0.4, func(): P.inp["fire"] = true)
+	var clk := {"t": 0.0}
+	step(m, 0.4, func():
+		clk["t"] += DT
+		P.inp["fire"] = fmod(clk["t"], 0.12) < 0.05)      # clicking (holding is the Tide Lunge)
 	P.inp["fire"] = false
 	ok("cancel E spin + LMB: both (the thrusts land, the spin goes on)", K.combo_n >= 1 and K.spin_t >= 0.0,
 		"thrusts %d" % K.combo_n)

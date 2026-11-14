@@ -16,8 +16,8 @@ another team that would stop on terrain. Its own team's things pass it unless it
 |---|---|---|---|
 | Foe's projectile (every kit's shots, launched rocks, Heavy Shot, Spear, Hand) | stopped, wall takes the damage | stopped, wall takes the damage | S "blocks projectiles" |
 | Own team's projectile | passes | passes | I (flag "enemy") |
-| Foe's beam (Longneedle, goes through terrain) | cut at the barrier, it takes the hit | same | S footage 0334/0352, I Hand row; **fixed** |
-| Abyssal Hand (pierces terrain) and its reel | stopped; the reel stops at it | same | S DECISIONS; already so |
+| Foe's beam (Longneedle, goes through terrain) | passes (content/rules/blockers.json: a rock is terrain to a piercer; owner call vs the footage read) | cut at the barrier, it takes the hit | S footage 0334/0352, I Hand row; **fixed** |
+| Abyssal Hand (pierces terrain) and its reel | passes (blockers.json, as the Longneedle) | stopped; the reel stops at it | S DECISIONS; already so |
 | Sable's dagger | queued separately (ext/sable-dagger-barriers) | same | left |
 | Coin Blast / Spike Grenade | sticks to it, wall blast; **fixed** | same | S wiki patch 20.11.24 (sticks to dynamic objects) |
 | Bola (Sable) | passes (only terrain stops it) | same | left: belongs to the dagger work |
@@ -34,7 +34,7 @@ another team that would stop on terrain. Its own team's things pass it unless it
 1. `KnockWall.hit` (Punch, Storm Rod, grenade cone, Crushing Blow): a rock or Rink Wall behind a knocked foe stuns it.
 2. `ArcherKit._wall_behind` (Heavy Shot's wall pin): the same.
 3. Coin Blast sticks to an enemy barrier instead of flying through it.
-4. The Longneedle stops at the first enemy barrier and damages it.
+4. The Longneedle stops at the first enemy barrier that blockers.json says stops a piercer (a Rink Wall, not a rock) and damages it.
 (Not changed on purpose: a thrown Bulwark hammer, Sable's bola, Displace `_push`: no source row.)
 
 ## Ideas of ours, not built

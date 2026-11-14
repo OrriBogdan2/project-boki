@@ -25,14 +25,20 @@ func rules(main_node: Node, kind: String) -> void:
 		_stops(m, mid, P.team) and not _stops(m, mid, T.team))
 	ok(tag + "a body in front is pinned, one in the open is not",
 		KnockWall.behind(m, D, Vector2.RIGHT, 3.2) and not KnockWall.behind(m, D, Vector2.LEFT, 2.0))
-	# the Longneedle goes through terrain, not a barrier: the foe behind it is untouched
+	# the Longneedle goes through terrain; content/rules/blockers.json says which placed walls cut it (a Rink Wall
+	# does; Tenzo's rocks are terrain to it, so it passes them)
 	aim_at(P, T.pos)
 	K.cd["e"] = 0.0
 	var hp0: float = wall["hp"]
 	K._fire_needle()
-	var shot_ok: bool = D.hp < D.max_hp and T.hp >= T.max_hp and float(wall["hp"]) < hp0
-	ok(tag + "Longneedle cut by it: front foe hit, rear foe not, wall hit", shot_ok,
-		"D %.0f T %.0f wall %.0f" % [D.hp, T.hp, wall["hp"]])
+	if Blockers.wall_stops(wall, "pierce"):
+		ok(tag + "Longneedle cut by it: front foe hit, rear foe not, wall hit",
+			D.hp < D.max_hp and T.hp >= T.max_hp and float(wall["hp"]) < hp0,
+			"D %.0f T %.0f wall %.0f" % [D.hp, T.hp, wall["hp"]])
+	else:
+		ok(tag + "Longneedle passes it (terrain to a piercer): both foes hit, wall untouched",
+			D.hp < D.max_hp and T.hp < T.max_hp and float(wall["hp"]) >= hp0,
+			"D %.0f T %.0f wall %.0f" % [D.hp, T.hp, wall["hp"]])
 	# a Coin Blast sticks to it instead of flying through (the fuse is 0.9 s, so it is still there to read)
 	D.teleport(home + Vector3(-6.0, 0, 6.0))
 	K.burrs.clear()
