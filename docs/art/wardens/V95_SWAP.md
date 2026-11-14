@@ -50,6 +50,12 @@ the hammer in his right fist, tipped up onto the floor) and `tarek` (the five fi
 and Tarek's eye stones are separate parts of their masters already; Vex, Sable and Grimble's are in the Meshy mesh;
 Sparkle and Cinder carry none. Promoting a props GLB is a body pass (no face change).
 
+## Status (2026-11-14, ext/albert-i1-ingame): Albert i1 in game
+Albert is on his live i1 master (art/wardens/breaker/IMPORT.md). Two swap keys came with him: `emit_paint` (a master that paints its
+glow: the emissive texture is the baked atlas's texels in a hue/sat/value range) and `screen` again (`screen_uvs`, lost in a merge
+before 11-11: Albert's porthole showed blank glass from the clean1 swap on). The fish has `move_bones` with `to` and the game glb is
+main's (absolute points only), which closes the 16x stretch: worst 5.24, 0 clips over 9.5.
+
 ## Status (2026-11-13 noon, ext/hunters-best-1113): the showcase four plus Sparkle
 In game: the four swaps below (from ext/showcase-1113), with main's own clips put back where that branch carried an unmerged
 re-time: Vex's `x` and Meeko's `seed`/`seed_aim` (tools/art1/glb_add_clips.py). Sparkle is on her current master
