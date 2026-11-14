@@ -64,12 +64,12 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	_shields(m, P)
 	await _ult_chime(m, P)
 	_ult_cues(m, P)
 	_buses()
 	await _big_event_duck(P)
 	_steps(m, P)
-	_shields(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
 	other.remote = true
