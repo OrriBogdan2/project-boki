@@ -32,7 +32,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
-| `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (buses) | |
+| `master`, `music`, `sfx`, `voices`, `ambience`, `ui_sounds` | Audio > Volume | `settings.gd` (`Settings.BUSES`) | |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
 | `ult_ready_cue` | Audio > Sounds | `ult_ready_cue.gd` | the chime when your R is back (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
