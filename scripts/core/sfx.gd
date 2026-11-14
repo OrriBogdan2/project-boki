@@ -16,6 +16,9 @@ const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit"
 	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
 	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
+## Buses a slider sets as well as its own: UI (menu and HUD cues) sends straight to the master so it stays
+## dry (SfxMix), but it is still sound effects to the player, so the Sound effects slider levels it too.
+const SLIDER_ALSO := {"SFX": ["UI"]}
 ## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
 ## the combat crowd never steal it, and no gap or stack cap thins it.
 const CUES := ["knock_confirm", "elim_confirm"]
@@ -110,10 +113,19 @@ func _load_sets() -> void:
 			for sname in (d as Dictionary).get("reach", {}):
 				sound_reach[sname] = float(d["reach"][sname])
 
+
+## Sets a bus ("Master", "Music", "SFX", "Ambience") from its Settings > Audio slider (0-1).
 func set_bus(bus_name: String, v: float) -> void:
-	var i := AudioServer.get_bus_index(bus_name)
-	if i >= 0:
-		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(v, 0.0001)))
+	for b in [bus_name] + SLIDER_ALSO.get(bus_name, []):
+		var i := AudioServer.get_bus_index(b)
+		if i >= 0:
+			AudioServer.set_bus_volume_db(i, slider_db(v))
+
+## A volume slider's bus level. The gain is the slider squared, so the slider follows loudness: 50% is
+## about half as loud (-12 dB) and 0 is silent. (Gain = slider made 50% only -6 dB, and a slider seemed
+## to do nothing until it was nearly at 0.)
+static func slider_db(v: float) -> float:
+	return linear_to_db(maxf(v * v, 0.0001))
 
 ## Starts loading tracks on a worker thread ("music_match", "amb_match"), e.g. while a loading
 ## screen comes up, so starting them later doesn't read and parse the file on the main thread.

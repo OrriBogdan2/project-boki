@@ -385,7 +385,7 @@ func _restore_ambience() -> void:
 	var amb := AudioServer.get_bus_index("Ambience")
 	if amb >= 0:
 		var from := AudioServer.get_bus_volume_db(amb)
-		var back := linear_to_db(maxf(float(Settings.get_v("ambience")), 0.0001))      # (the slider's level now)
+		var back := Sfx.slider_db(float(Settings.get_v("ambience")))      # (the slider's level now)
 		create_tween().tween_method(func(v: float): AudioServer.set_bus_volume_db(amb, v), from, back, 1.0)
 
 func _unhandled_input(event: InputEvent) -> void:
