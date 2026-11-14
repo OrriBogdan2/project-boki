@@ -2,8 +2,9 @@ class_name HunterStats
 extends RefCounted
 ## The Stats tab beside the Relics screen: one row per open Hunter (matches, knocks, revives, damage per
 ## match, times you got out) and a totals row, most played first, unplayed Hunters greyed. The numbers are
-## Save.d["classes"]["hunters"][id] (ClassUnlock.after_match counts them; "matches" and "damage" are optional keys, read as 0 on a save that never counted
-## them: no save version bump). No graphs: one table.
+## Save.d["classes"]["hunters"][id] (ClassUnlock.after_match counts them; "matches" and "damage" are
+## optional keys, read as 0 on a save that never counted them: no save version bump). No graphs: one
+## table.
 
 const TITLE := "Hunter stats"
 const TABS := ["Relics", "Stats"]
