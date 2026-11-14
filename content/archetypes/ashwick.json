@@ -39,7 +39,7 @@
 	"rank2": {"sec": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.25s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.9s, damage and shield +25%."},
 	"rank_next": {"sec": "Rank 3: cooldown 7s -> 4.7s, damage +50%; a second charge.", "dash": "Rank 3: recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s.", "kin": "Rank 3: cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%)."},
 	"turn": {
-		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) lags like a hose (:15)"},
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:264 'square and planted, facing the aim' while firing; the stream (not the body) trails behind the aim (:15)"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:16 a lane shows, then the bolt; no turn limit shown"},
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown"},
 		"x": {"early": 90.0, "late": 90.0, "source": "briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 90 deg/s)"},

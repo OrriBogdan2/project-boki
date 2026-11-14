@@ -72,7 +72,12 @@ func _walks(m: Match, P: Hunter, arch: String, edge_kind: String, top: float, ed
 			step(m, DT)
 			seen = seen or _engaged(P, st, arch)
 		var info := "x=%.2f y=%.2f of %.2f, %.1fs walking, %.1fs rooted by the kit" % [P.pos.x, P.pos.y, top, t, rooted]
-		ok("%s: %s leaves the %s" % [arch, st, edge_kind], P.pos.y <= top - 0.5, info)
+		# (a hold planted by the kit's data, lmb.walk_k 0: Kael's charge, Tenzo's punch, can't walk off: not a gate)
+		var planted: bool = st == "lmb" and float(Arch.def(arch).get("lmb", {}).get("walk_k", 1.0)) <= 0.0
+		if planted and rooted >= MAX_ROOT_S:
+			ok("%s: %s is planted while held (lmb.walk_k 0), n/a on the %s" % [arch, st, edge_kind], true, info)
+		else:
+			ok("%s: %s leaves the %s" % [arch, st, edge_kind], P.pos.y <= top - 0.5, info)
 		ok("%s: %s took hold on the %s" % [arch, st, edge_kind], seen)
 		_end(P)
 
