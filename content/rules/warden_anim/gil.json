@@ -1,0 +1,5 @@
+{
+	"doc": "Gil's model file (art/wardens/gil/gil.glb). The .glb carries no clips yet, so the rig's HunterAnim poses drive it (WardenClips.make returns null without an AnimationPlayer). The swordfish is skinned to hand.R in the .glb: the procedural swordfish (HeroArmsGil) hides and the Gun node is only the invisible aim and FX reference, kept on the blade empties (anchor_blade_root on hand.R, weapon_muzzle at the bill tip) so thrusts, potions and the spout leave the weapon you see.",
+	"skinned_weapon": true,
+	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle", "bone": "hand.R"}
+}

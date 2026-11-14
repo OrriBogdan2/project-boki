@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ys7twcmjqq6i"
-path="res://.godot/imported/kestrike_kestrike_eye.webp-c6cce13974bd2c0adf3120d9e02eb56d.ctex"
+path.bptc="res://.godot/imported/kestrike_kestrike_eye.webp-c6cce13974bd2c0adf3120d9e02eb56d.bptc.ctex"
+path.astc="res://.godot/imported/kestrike_kestrike_eye.webp-c6cce13974bd2c0adf3120d9e02eb56d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "64651ff14602c56b7e87d04d2c3adef7"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/kestrike/kestrike_kestrike_eye.webp"
-dest_files=["res://.godot/imported/kestrike_kestrike_eye.webp-c6cce13974bd2c0adf3120d9e02eb56d.ctex"]
+dest_files=["res://.godot/imported/kestrike_kestrike_eye.webp-c6cce13974bd2c0adf3120d9e02eb56d.bptc.ctex", "res://.godot/imported/kestrike_kestrike_eye.webp-c6cce13974bd2c0adf3120d9e02eb56d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

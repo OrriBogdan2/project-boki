@@ -143,7 +143,7 @@ The shared painted look (WardenGlb.PAINTED) does two things for every model, so 
 Per model, in `content/rules/warden_look.json` under the art name, start from Vex's:
 - `painted`: `rim_far` 0.25-0.35 and `rim_far_color` the signature colour, saturated (Vex [0.35, 1.0, 0.45]): a
   rim at the match camera so the silhouette holds (0.9 turned every edge pale);
-- `skin`: shade 0.9, top_light 0.35, fres 0.45, far_lift 0.12 (no shadow_tint: the shared one is warm);
+- `skin`: shade 0.9, top_light 0.35, fres 0.45, far_lift 0.12 (no shadow_tint: the shared one is near white);
 - `metal`: top_light 0.15, fres 0.15, fres_tint 0.6, far_lift 0, sheen 0, rim_far 0, light_neutral_warm 0.6 (no
   silvered gunmetal, no highlighter brass: the warm light and top light push saturated gold to yellow; keep brass
   ramps dull, sat <= 0.6, top value <= 0.65, Vex 2e2214..8a7048);
@@ -152,8 +152,9 @@ Per model, in `content/rules/warden_look.json` under the art name, start from Ve
 - `cloth` and `leather` when they are black (r3e, ORCH 14:10 "muddy khaki at match zoom"): far_lift 0, fres 0.25,
   rim_far 0, top_light 0.3, light_neutral_warm 0.75. The Arena sun is orange (ffb27a): with the fresnel lift and the
   green signature rim, black trousers read #433d29..#5b5532 (khaki) at the match camera; with these, #171419..#3a3431
-  (black). `light_neutral_warm` (hero_toon, default 0) takes the hue out of warm lights on those slots only, so
-  skin and hair keep the warm sun;
+  (black). `light_neutral_warm` (hero_toon) takes the hue out of warm lights; since 11-11 every painted slot has
+  0.8 (WardenGlb.PAINTED: with the cool ambient cut and the blue fill neutral, the full amber sun turned every
+  Hunter red), so a slot needs its own value only to go above it (1: no warmth at all);
 - `hair`: far_lift 0.5, fres 0.3, glow 0.12, rim_far 0 (r3f, ORCH 15:10: far_lift 0.7, fres 0.6 and the mint
   signature rim turned the hair pale cyan at the match camera: #45a861..#84cf99; now #337c4c..#80b569); a
   `hair-braid` entry (the loader takes "<slot>-<tag>" after its slot) calms woven braids: fres 0.15, far_lift

@@ -1,0 +1,323 @@
+{
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): LIVE 11-12 (current.json prop1111/cand_B: body5/cand_3's head, the solid grey/black moth eyes, with the bust trim and the two moth-wing films pitched 40 deg up/back behind the coat; the films are rigid on the hips by the last region). Earlier: Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes (owner pick 11-10), ~/meshy/v95/Sable/r2/appeal3/cand_b_bugeye.glb, onto sable.glb's skeleton, clips and anchors. Her pistols are fused to her hands in the master: rigid on hand.R/hand.L. The long moth/bunny ears, braid, coat tails and tail feathers are rigid on the head/hips (the old spring chains stay in the rig, unweighted). Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres) read on tools/art1/v95_grid.py's renders.",
+ "master": "~/meshy/v95/Sable/r2/prop1111/cand_B.glb",
+ "game": "art/wardens/sable/sable.glb",
+ "tris": 13000,
+ "head": {
+  "centre": [
+   0.0,
+   0.02,
+   1.58
+  ],
+  "r": 0.15
+ },
+ "head_tris": 2600,
+ "head_uv": 2.0,
+ "tex": 2048,
+ "uv_margin": 0.002,
+ "keep": [],
+ "joints": {
+  "pelvis": [
+   0.0,
+   0.02,
+   0.94
+  ],
+  "neck": [
+   0.0,
+   0.0,
+   1.44
+  ],
+  "crown": [
+   0.0,
+   0.0,
+   1.72
+  ],
+  "shoulder.R": [
+   0.17,
+   0.0,
+   1.34
+  ],
+  "elbow.R": [
+   0.28,
+   0.0,
+   1.11
+  ],
+  "wrist.R": [
+   0.35,
+   0.0,
+   0.9
+  ],
+  "shoulder.L": [
+   -0.17,
+   0.0,
+   1.34
+  ],
+  "elbow.L": [
+   -0.29,
+   0.0,
+   1.11
+  ],
+  "wrist.L": [
+   -0.36,
+   0.0,
+   0.9
+  ],
+  "hip.R": [
+   0.09,
+   0.03,
+   0.92
+  ],
+  "knee.R": [
+   0.12,
+   0.04,
+   0.55
+  ],
+  "ankle.R": [
+   0.145,
+   0.02,
+   0.13
+  ],
+  "hip.L": [
+   -0.09,
+   0.03,
+   0.92
+  ],
+  "knee.L": [
+   -0.12,
+   0.04,
+   0.55
+  ],
+  "ankle.L": [
+   -0.145,
+   0.02,
+   0.13
+  ]
+ },
+ "relax": {
+  "CUTS": 0
+ },
+ "past_wrist": {
+  "R": "hand.R",
+  "L": "hand.L"
+ },
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [
+  {
+   "bone": "head",
+   "box": [
+    -0.3,
+    0.3,
+    -0.45,
+    0.3,
+    1.45,
+    9
+   ]
+  },
+  {
+   "bone": "head",
+   "box": [
+    -0.14,
+    0.14,
+    -0.5,
+    -0.02,
+    1.2,
+    1.45
+   ]
+  },
+  {"bone": "hips", "box": [-0.36, 0.36, -0.7, -0.215, 0.3, 0.84]}
+ ],
+ "slots": [
+  {
+   "slot": "metal",
+   "s": [
+    0,
+    0.25
+   ],
+   "v": [
+    0.55,
+    1
+   ],
+   "box": [
+    0.3,
+    0.6,
+    0.0,
+    0.4,
+    0.5,
+    0.95
+   ]
+  },
+  {
+   "slot": "metal",
+   "s": [
+    0,
+    0.25
+   ],
+   "v": [
+    0.55,
+    1
+   ],
+   "box": [
+    -0.6,
+    -0.3,
+    0.0,
+    0.4,
+    0.5,
+    0.95
+   ]
+  },
+  {
+   "slot": "hair",
+   "s": [
+    0,
+    0.22
+   ],
+   "v": [
+    0.84,
+    1
+   ],
+   "box": [
+    -0.25,
+    0.25,
+    -0.5,
+    0.2,
+    0.9,
+    9
+   ]
+  },
+  {
+   "slot": "fur",
+   "box": [
+    -0.3,
+    0.3,
+    -0.25,
+    0.15,
+    1.7,
+    9
+   ]
+  },
+  {
+   "slot": "fur",
+   "s": [
+    0,
+    0.4
+   ],
+   "v": [
+    0.65,
+    1
+   ],
+   "box": [
+    -0.35,
+    0.35,
+    -0.4,
+    -0.04,
+    0.0,
+    0.95
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -0.3,
+    0.3,
+    -0.45,
+    0.3,
+    1.44,
+    9
+   ]
+  },
+  {
+   "slot": "glow",
+   "h": [
+    0.75,
+    0.85
+   ],
+   "s": [
+    0.6,
+    1
+   ],
+   "v": [
+    0.7,
+    1
+   ]
+  },
+  {
+   "slot": "leather",
+   "box": [
+    -0.4,
+    0.4,
+    -0.4,
+    0.4,
+    0.0,
+    0.45
+   ]
+  },
+  {
+   "slot": "leather",
+   "h": [
+    0,
+    0.12
+   ],
+   "s": [
+    0.3,
+    1
+   ]
+  },
+  {
+   "slot": "cloth",
+   "h": [
+    0.7,
+    0.9
+   ],
+   "s": [
+    0.3,
+    1
+   ],
+   "v": [
+    0.1,
+    0.6
+   ]
+  }
+ ],
+ "slot_default": "skin",
+ "room": {
+  "*": 0.5
+ },
+ "anchors": {
+  "anchor_head_top": [
+   0.0,
+   0.0,
+   1.74
+  ],
+  "anchor_eye_r": [
+   0.04,
+   0.12,
+   1.57
+  ],
+  "anchor_eye_l": [
+   -0.04,
+   0.12,
+   1.57
+  ],
+  "anchor_gem": [
+   0.0,
+   0.13,
+   1.25
+  ],
+  "anchor_chest": [
+   0.0,
+   0.13,
+   1.25
+  ],
+  "weapon_muzzle": [
+   0.47,
+   0.21,
+   0.58
+  ],
+  "weapon_muzzle_l": [
+   -0.48,
+   0.2,
+   0.58
+  ]
+ }
+}

@@ -1,11 +1,12 @@
 class_name FarmCropGuide
 extends RefCounted
 ## The tutorial's first crop: it ripens fast (options.crop_stage_s per growth stage) and the patch
-## shows a growth bar with a countdown, so waiting is never a dead end.
+## shows a growth bar with a countdown, so waiting is never a dead end. Retired with base_mode on (the base
+## tutorial has no crop step); delete with the farm steps (docs/DEBT.md).
 
 ## Seconds one growth stage takes: the tutorial's first crop is quick, everything else keeps `normal`.
 static func stage_time(normal: float) -> float:
-	if FarmTutorial.active() and not FarmTutorial.did("crop"):
+	if FarmTutorial.active() and not FarmTutorial.base() and not FarmTutorial.did("crop"):
 		return minf(normal, float(FarmTutorial.option("crop_stage_s")))
 	return normal
 
@@ -21,7 +22,7 @@ static func growing() -> Dictionary:
 		var stage := int(d["stage"])
 		if stage >= grow:
 			continue
-		var per := stage_time(Data.WATER_TIME)
+		var per := FarmWater.stage_s(Save.d, "plots", i)
 		var wt := float(d.get("wt", 0.0))
 		var into := clampf(now - wt, 0.0, per) if wt > 0.0 else 0.0
 		var left := float(grow - stage) * per - into
