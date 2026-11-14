@@ -1187,6 +1187,10 @@ func _keep_off_hub(c) -> void:
 	var room_l := hr.end.x + 12.0
 	var centred := (vw - cr.size.x) * 0.5
 	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	# too wide to sit beside the hub (big text): centred over it, not pushed off the screen
+	if room_l + cr.size.x > vw - SafeArea.MARGIN and cr.end.y > hr.position.y - 4.0:
+		want = centred
+		cc.global_position.y = hr.position.y - cr.size.y - 6.0
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
 		cc.global_position.x = want
 
