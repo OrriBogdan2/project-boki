@@ -135,6 +135,7 @@ func _hud() -> void:
 		var sz := await _resize(win)
 		m.skydrop.planning = true
 		m.skydrop.plan_t = 20.0
+		m.player.riding = true      # (the last size's "hud" state set it down; the drop map grows only while riding)
 		m.hud.open_map(true)
 		await _hud_at(win, sz, "drop")
 		m.skydrop.planning = false      # the ship has gone: the map steps aside and the HUD you play with shows
