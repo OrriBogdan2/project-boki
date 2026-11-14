@@ -152,7 +152,7 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"))
+		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
@@ -297,7 +297,7 @@ static func _mark_owner(m: Match, b: Dictionary) -> void:
 	var ring := MeshInstance3D.new()
 	ring.name = "OwnerRing"
 	ring.mesh = Models.flat_quad(OWNER_RING_M)
-	ring.material_override = Models.ring_mat(col, 0.12)
+	ring.material_override = SideRings.mat(col, 0.12)
 	ring.position.y = 0.05
 	n.add_child(ring)
 

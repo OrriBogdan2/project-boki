@@ -20,6 +20,10 @@ func run(main_node: Node) -> void:
 	var bad: int = await flow.combos_of(main, "dolm")
 	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",
 		bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	# the one footage-sourced hold row (KIT_PARITY item 20): the RMB charge outlives a jump (card 0240)
+	var hj := DashFlow.hold_row_of("dolm", "rmb", "jump")
+	ok("hold.rmb.jump is keep, sourced to the footage (card 0240)",
+		hj["mode"] == "keep" and String(hj["source"]).contains("0240"), String(hj["mode"]))
 	var parity = load("res://tools/parity_pvb.gd").new()
 	parity.main = main
 	await parity.breah()
@@ -333,10 +337,14 @@ func _breah() -> void:
 		"combo: launched rocks are flaming boulder shots (Match shots in the rock skin)",
 		KitLooks.of(m).skins_live("rock") >= 1 or K.launches - l0 == 3
 	)
+	ok(
+		"data: rocks carry no slow, only the Rock Hop's rolling rock does",
+		not K.rock_def().has("slow_t") and float(K.dash_def()["slow_t"]) > 0.0
+	)
 	step(m, 0.6)
 	ok(
-		"combo: launched rocks burst on the foe, shred and slow it (ROCKFALL)",
-		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0 and K.launch_pay >= 1,
+		"combo: launched rocks burst on the foe and shred it, no slow (ROCKFALL)",
+		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t <= 0.0 and K.launch_pay >= 1,
 		"took %.1f vuln %.1f slow %.2f pay %d" % [dmg(T), T.vuln_t, T.slow_t, K.launch_pay]
 	)
 	ok(
@@ -598,9 +606,11 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"data: punching your own rocks gives a Molten Guard shield (one stack of 18 per punch, rank 1)",
-		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
-		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
+		"data: punching your own rocks gives a Molten Guard shield (one 18 stack a punch, rank 1), named",
+		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2
+			and P.shield_src == ShieldSrc.MOLTEN,
+		"punches %d stacks %d shield %.1f swept %d src %s" % [K.guard_punches - gp0, K.shield_stacks, P.shield,
+			K.last_sweep, P.shield_src]
 	)
 	# PARITY: the same punch at the lowest charge (released just past the 0.28 s tap) gives the same flat shield
 	var full_shield := P.shield

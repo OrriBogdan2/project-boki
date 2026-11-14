@@ -22,8 +22,12 @@ const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wi
 const TRADE_COL := Color("c65cff")         # the Trade's violet (his end, the lob; the dash slot's col)
 const TRADE_EDGE := Color("ff3fd0")        # its magenta edge (the landing end; the UI's Void & Masks neon)
 const SMOKE := Color(0.118, 0.078, 0.188, 0.85)   # the void smoke round the Trade (the UI's #1e1430)
-const TRADE_LOOK_K := 1.3     # the Trade's lantern, motes and flashes, times their old size (visual only:
+const TRADE_LOOK_K := 1.65    # the Trade's lantern, motes and flashes, times their old size (visual only:
                               # the circle's rings and sigils stay at dash.radius, the real catch)
+
+const BOT_SEED_AHEAD := 0.5     # s past the plant the foe's path is read for: the seed goes where they will be
+const BOT_POP_MIN := 0.7        # m: a bot pops a young seed (a small circle) once its foe is this near the middle
+const BOT_POP_K := 0.5          # ...or within this share of the radius of a grown one
 
 var swollen_t := 0.0
 var last_shot_t := -99.0
@@ -78,12 +82,14 @@ func can_shoot() -> bool: return not well.locked and super.can_shoot()
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
-## RecastCue: the seed is the marker; "WAIT" through the 0.3s minimum (a press there is buffered).
+## RecastCue: "WAIT" on the E slot through the 0.3s minimum (a press there is buffered).
+## No world marker (the owner wants less pop-up UI): the seed's own ring and the E slot carry it.
 func recast_window() -> Dictionary:
 	var w := super()
 	if not w.is_empty():
 		w["at"] = seed["pos"]
 		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
+		w["marker"] = false
 	return w
 
 func _hand(up := 1.15) -> Vector3:
@@ -334,18 +340,15 @@ func swap_move() -> String:
 	return "ostra_swap" if h.grounded else "ostra_swap_air"
 
 ## Where the lantern lands: the cursor if it is within reach, else the point at full reach along the cursor
-## direction. No ground, wall or abyss check limits it; over the abyss it keeps his current height.
+## direction, on the top surface there (OstraLand: a cursor on a cliff's face lands on its top, and the spot is
+## settled clear of walls, rocks and cliffs). Over the abyss it keeps his current height.
 func swap_spot() -> Vector3:
 	var reach := float(dash_def()["reach"])
 	var a := aim()
 	var dv := Vector2(a.x - h.pos.x, a.z - h.pos.z)
 	if dv.length() > reach:
 		dv = dv.normalized() * reach
-	var p := Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y)
-	var g: float = m.world.ground_at(p.x, p.z)
-	if g > World.VOID + 1.0:
-		p.y = g
-	return p
+	return OstraLand.spot(m, h.pos, Vector3(h.pos.x + dv.x, h.pos.y, h.pos.z + dv.y), h.r)
 
 func _tick_swap(dt: float) -> void:
 	var dd := dash_def()
@@ -399,8 +402,9 @@ func _drop_holds() -> void:
 
 func _swap_end(go: bool) -> void:
 	var dd := dash_def()
-	var land: Vector3 = swap.get("land", h.pos)
 	var from: Vector3 = swap.get("from", h.pos)
+	# settled again on arrival: a wall raised on the spot during the flight never holds him
+	var land := OstraLand.settle(m, swap.get("land", h.pos), from, h.r)
 	var from_void := h.over_void()
 	swap = {}
 	AimKit.hide(h, "swap_fly")
@@ -420,7 +424,7 @@ func _swap_end(go: bool) -> void:
 func _shield_allies(from: Vector3, dd: Dictionary) -> void:
 	for o2 in m.hunters:
 		if o2 != h and o2.team == h.team and not o2.downed and o2.flat_dist(from) < float(dd["radius"]):
-			o2.shield = maxf(o2.shield, h.max_hp * float(dd["ally_shield"]))
+			ShieldSrc.give(o2, h.max_hp * float(dd["ally_shield"]), ShieldSrc.SWAP)
 			o2.shield_t = maxf(o2.shield_t, float(dd["ally_shield_t"]))
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
@@ -459,7 +463,7 @@ func trade_bodies(land: Vector3, r: float) -> Array:
 ## at, if that is higher; landing over the abyss also keeps it), with an implosion and his appear pose.
 func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	var dd := dash_def()
-	var gy: float = m.world.ground_at(land.x, land.z)
+	var gy: float = land.y if not m.world.is_void(land.x, land.z) else World.VOID
 	var dy := clampf(from.y - h.ground(), 0.0, float(dd["keep_h"])) if not from_void else 0.0
 	var arrive_y := maxf(gy + dy, from.y) if from_void or gy <= World.VOID + 1.0 else gy + dy
 	h.teleport(Vector3(land.x, arrive_y, land.z))
@@ -610,6 +614,19 @@ func _tick_seed(dt: float) -> void:
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
 		_pop(false)
+	elif h.ctrl == "bot":
+		_bot_pop()
+
+## A bot pops the seed once its foe stands near the middle (a fizzled seed does nothing, so it waits for one).
+func _bot_pop() -> void:
+	if float(seed["t"]) < float(e_def()["min_recast"]):
+		return
+	var tgt := _bot_target()
+	var near := tgt != null and Vector2(
+		tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)
+	).length() < maxf(BOT_POP_MIN, seed_radius() * BOT_POP_K)
+	if near:
+		e_recast()
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't
 ## waste the seed).
@@ -679,18 +696,15 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		HunterKeys.ult_pressed(h)
 		return
 	if not seed.is_empty():
-		var inside := Vector2(
-			tgt.pos.x - float(seed["pos"].x), tgt.pos.z - float(seed["pos"].z)
-		).length() < seed_radius()
-		if inside or float(seed["t"]) > float(seed["grow"]) * 0.9:
-			h.inp["sig"] = true
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < 8.0 and los and randf() < 0.3:
-		h.inp["aim"] = tgt.pos
+		var ed := e_def()
+		h.inp["aim"] = BotLead.point(h, tgt, float(ed["drop"]) + BOT_SEED_AHEAD, 0.0, float(ed["reach"]))
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 11.0 and randf() < 0.5:
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		var sn: Dictionary = rmb_def()["snap"]
+		BotLead.aim(self, tgt, float(sn["wind"]), float(sn["speed"]), float(sn["range"]))
 		h.inp["sec"] = true
 		return
 	if int(

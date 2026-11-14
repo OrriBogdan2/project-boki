@@ -28,6 +28,7 @@ func map_region(tiles: Rect2) -> Rect2:
 	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
 	return Rect2(tiles.position * k, tiles.size * k)
 var kit_t0 := 0.0
+var kit_fade := 1.0       # 0 while the fight budget hides the kit panel, 1 when it shows
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
@@ -107,7 +108,7 @@ func _process(delta: float) -> void:
 	cursor.queue_redraw()
 
 var hit_armor := false
-var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the message lane's fight budget
+var dealt_at := -9.0      # last time a hit of yours (or your Boki's) landed: the HUD fight budget (message lane, kit panel)
 
 func hitmarker(crit: bool, armor := false) -> void:
 	hit_t = 0.14
@@ -129,22 +130,17 @@ func hurt_flash(d: float) -> void:
 ## holds it while its banner is up). In a fight (hit, or landing hits) it shows fewer, shorter lines (MsgLane.fight).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-	msgs.fight = m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
+	msgs.fight = in_fight()
 	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
-## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
-## them, so two lines of text never overlap on screen; they come back as it goes.
+## World labels (damage numbers, monster plates, the lairs' name boards) never print over
+## each other or over a message card: the lower-priority one fades back and returns as it clears.
 func _clear_under_toasts(delta: float) -> void:
-	if m == null or m.lairs == null or m.cam == null:
+	if m == null or m.cam == null:
 		return
-	LabelClash.fade_orbs(m, delta)
-	var rects := msgs.rects()
-	for L in m.lairs.list:
-		var lnodes = L.get("nodes")
-		var lbl = lnodes.get("label") if lnodes is Dictionary else null
-		if lbl is Label3D and is_instance_valid(lbl):
-			MsgLane.yield_label(lbl, m.cam, rects, delta)
+	LabelClash.fade_orbs(m, delta)       # perk orb names yield to the claimed plates, bars and numbers
+	LabelSpacing.update(m, msgs.rects(), delta)
 
 ## A message in the lane (MsgLane).
 func toast(text: String, col: Color) -> void:
@@ -156,7 +152,12 @@ func tip(text: String) -> void:
 		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
-const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the message lane keeps to its fight budget
+const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
+const KIT_FADE_S := 0.35   # s the kit panel takes to fade out or back
+
+## The fight budget is on (you took or landed a hit lately): the message lane shrinks, the kit panel hides.
+func in_fight() -> bool:
+	return m.player != null and m.time - maxf(m.player.hurt_at, dealt_at) < MSG_FIGHT_S
 
 func _build_minimap() -> void:
 	var w := m.world
@@ -249,12 +250,8 @@ func _draw_all() -> void:
 	# (movefeel) measured against the real point of no return (Hunter.abyss_kill_y, via AbyssFx.danger)
 	# instead of a guess 14m down, and much stronger: the screen shader drains, darkens and reddens the
 	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
-	# warning near the end
+	# warning near the end (the falling wind and the warning sound are AbyssFallSfx)
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
-	if want_a <= 0.02:
-		abyss_cued = false
-	if want_a <= 0.7:
-		abyss_warned = false
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
 		abyss_fx.show_danger(abyss_a, pow(0.5 + 0.5 * sin(abyss_pulse * TAU), 3.0) if abyss_a > 0.005 else 0.0)
@@ -270,13 +267,6 @@ func _draw_all() -> void:
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
 			if a <= 0.0: break
 			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
-		# (owner) an audio cue: a falling whoosh as the tint starts, a warning when it turns deep red
-		if p == m.player and abyss_a > 0.08 and not abyss_cued:
-			abyss_cued = true
-			Sfx.play("whoosh", null, -6.0, 0.0, 0.55)
-		if p == m.player and abyss_a > 0.85 and not abyss_warned:
-			abyss_warned = true
-			Sfx.play("warn", null, -4.0, 0.0, 0.8)
 		if abyss_a > 0.1 and p == m.player:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
@@ -314,7 +304,7 @@ func _draw_all() -> void:
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
 		if not p.riding:
-			_draw_prompt(sz, p)
+			if TutorialHud.prompt_shows(m): _draw_prompt(sz, p)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
 			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
@@ -371,20 +361,7 @@ func _draw_world_labels() -> void:
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
 		BokiHud.form_overhead(self, cam.unproject_position(own_head), m.player)
-	# someone basing to a teammate: a ring filling round them, and a marker on where they'll appear
-	for h in m.hunters:
-		if h.base_t <= 0.0 or h.out or (h.unseen and h != m.player) or cam.is_position_behind(h.position):
-			continue
-		var bsp: Vector2 = cam.unproject_position(h.position + Vector3(0, 0.2, 0))
-		var bf: float = 1.0 - h.base_t / Hunter.BASE_TIME
-		c.draw_arc(bsp, 26.0, 0, TAU, 40, Color(0.56, 0.89, 0.78, 0.25), 3.0, true)
-		_arc(bsp, 26.0, bf, Color("8fe3c8"), 4.0)
-		_ctext(bsp + Vector2(0, 44), "BASING  %.1f" % h.base_t, 12, Color("8fe3c8"), big)
-		var to: Hunter = h.base_to
-		if to and is_instance_valid(to) and not cam.is_position_behind(to.position):
-			var tsp := cam.unproject_position(to.position + Vector3(0, 3.0, 0))
-			_ctext(tsp, "%s incoming" % h.pname.substr(0, 14), 12, Color("8fe3c8"), big)
-			c.draw_arc(cam.unproject_position(to.position + Vector3(0, 0.1, 0)), 22.0, 0, TAU, 32, Color(0.56, 0.89, 0.78, 0.4 + 0.3 * sin(m.time * 8.0)), 2.0, true)
+	BaseHud.draw(self)       # basing rings (anyone) and your B wheel
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
 			continue
@@ -410,7 +387,9 @@ func _draw_world_labels() -> void:
 		if mb is Boss:
 			if not (mb as Boss).dormant and m.lairs.boss_for(m.player) != mb:
 				_ctext(sp + Vector2(0, -26), String(mb.md["name"]), 15, Lairs.color_of((mb as Boss).lair), big)
-				_bar(Rect2(sp + Vector2(-50, -18), Vector2(100, 7)), clampf(mb.hp / mb.max_hp, 0.0, 1.0), Color("ff6a5a"))
+				var lr := Rect2(sp + Vector2(-50, -18), Vector2(100, 7))
+				_bar(lr, clampf(mb.hp / mb.max_hp, 0.0, 1.0), StealTell.fill(mb, Color("ff6a5a"), m.time))
+				StealTell.mark(self, Vector2(lr.end.x + 14, lr.get_center().y), mb)
 			continue
 		if mb.hp < mb.max_hp or rare:
 			var bw := 64.0 if mb.mkind in ["brute", "warden"] else 48.0
@@ -713,6 +692,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
+	NestMap.minimap(self, to_map, on_map, hold)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
@@ -1007,6 +987,11 @@ func _hud_tick(delta: float) -> void:
 		guide_hidden = not guide_hidden
 	_h_down = hd
 	HudSlot.decay(self, delta)
+	# the kit panel fades out in a fight (Tab holds it up) and its show timer waits the fight out
+	var fight := in_fight()
+	if fight: kit_t0 += delta
+	var hide_kit := fight and not Input.is_action_pressed("scores")
+	kit_fade = move_toward(kit_fade, 0.0 if hide_kit else 1.0, delta / KIT_FADE_S)
 	dmg_dir.tick(delta)
 
 ## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
@@ -1127,7 +1112,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
+		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
 ## The archetype row: RMB, Shift dash, E utility, X the hero's ultimate (locked until level 6), then the
 ## kin's own ability (C) and send/recall (G) as small badges. The Merge is the Boki box on the right (GripHud).
@@ -1176,7 +1161,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
+		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
 ## What the R slot says about its lock: "LV 6" until then, "UNLOCK" with a point to spend on it,
 ## "" once it's unlocked.
@@ -1607,7 +1592,9 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		return
 	if t > show_t:
 		return
-	var a := clampf(show_t - t, 0.0, 1.0)
+	var a := clampf(show_t - t, 0.0, 1.0) * kit_fade
+	if a <= 0.0:
+		return
 	var lines: Array = []
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner and p.ak == null else null
 	if util:
@@ -1722,7 +1709,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 		if not WaysOutHud.gate_prompt(self, sz, y, it):
 			var s: String = it["label"]
 			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-			if not (m.tut and m.tut.prompt_quiet()):      # (the tutorial card says it: only the bar stays)
+			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
 			if prog > 0.0:
@@ -1791,6 +1778,7 @@ func _draw_crosshair(p: Hunter) -> void:
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
+	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
 	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
@@ -1828,6 +1816,7 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if not b.is_empty() and Life.soul_here(m, b):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
+	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
 	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
@@ -1854,8 +1843,6 @@ func _draw_scores(sz: Vector2) -> void:
 		score_mute.draw(self, h, r.position.x + 606, y)
 		y += 28
 
-var abyss_cued := false
-var abyss_warned := false
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
@@ -2080,8 +2067,8 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])
 			out.append(["Squads  ·  %s" % Settings.key_cap("base"), MUTED, 12])
-			out.append(["A 3s channel to the teammate nearest your cursor. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for 3s: half damage, and your crowd control, healing and shields are halved.", INK, 14])
-			out.append(["Cooldown %ds%s" % [int(Hunter.BASE_CD), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
+			out.append(["Hold to pick a teammate on the wheel, let go to channel for %ss. Stand still: moving, attacking or any damage interrupts it. You arrive weakened for %ds: half damage, and your crowd control, healing and shields are halved." % [str(BaseRecall.CHANNEL_S), int(BaseRecall.WEAK_S)], INK, 14])
+			out.append(["Cooldown %ds%s" % [int(BaseRecall.CD_S), ("  ·  ready in %ds" % int(ceil(p.base_cd))) if p.base_cd > 0.0 else "  ·  ready"], MUTED, 13])
 		"pack":
 			var pack_tip := Backpacks.tip(p)
 			out.append(pack_tip[0])
@@ -2860,7 +2847,8 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	if ct > frac:
 		c.draw_rect(Rect2(r.position + Vector2(w * frac, 0), Vector2(w * (ct - frac), r.size.y)), Color(1.0, 0.95, 0.88, 0.8))
 	var hc := Color("ff5a4a") if b.enraged else (Color("e0b0ff") if b.stagger_t > 0.0 else Color("ff8a5a"))
-	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), hc)
+	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), StealTell.fill(b, hc, m.time))
+	StealTell.mark(self, Vector2(r.position.x + 9, r.end.y + 16), b)
 	for mk in [0.66, 0.33]:
 		c.draw_line(r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0)
 	_ctext(r.get_center() + Vector2(0, 5), "%d / %d" % [int(ceil(b.hp)), int(b.max_hp)], 12, INK, big)
