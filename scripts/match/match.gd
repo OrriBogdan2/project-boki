@@ -3828,6 +3828,7 @@ func step(dt: float) -> void:
 	_prof("mobs")
 	_separate()
 	_collide_breaks()
+	if duo: duo.cast.keep_all()
 	brk.tick(dt)
 	_prof("separate")
 	_update_rings(dt)

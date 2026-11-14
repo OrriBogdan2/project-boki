@@ -72,12 +72,15 @@ func tick(dt: float) -> void:
 	for i in tu.foes.size():
 		_foe(tu.foes[i], i, dt)
 	_guide()
-	for h in [m.player, tu.guide] + tu.foes:
-		_keep_in(h)
 	if m.truce:
 		m.truce.offers.clear()      # (sparring partners don't offer a truce)
 
-## The ring is closed: a hunter knocked into or over the wall lands back on the floor beside it.
+## The ring is closed: a hunter knocked into or over the wall lands back on the floor beside it. Match.step calls
+## it once the step has moved everyone, so no dash or knock ends a step outside.
+func keep_all() -> void:
+	for h in [m.player, tu.guide] + tu.foes:
+		_keep_in(h)
+
 func _keep_in(h: Hunter) -> void:
 	var off := Vector2(h.pos.x, h.pos.z) - DuoTutorial.RING_C
 	if off.length() <= KEEP_R:
