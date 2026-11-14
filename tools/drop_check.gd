@@ -11,7 +11,7 @@ const FAST_FALL := 8.0          # m/s: the free fall is still at least this fast
 const PULL_HEIGHTS := [90.0, 50.0, 20.0, 9.0]     # m above the ground the glider is pulled at in part 5
 const SOFT_LAND := 3.0          # m/s: the most you hit the ground at, free fall or glider
 
-##   6. the plan screen: a fresh save's first expedition shows only the header and the map (the legend, the
+##   5. the plan screen: a fresh save's first expedition shows only the header and the map (the legend, the
 ##      ways out and the squad return on the held key); a later match keeps all five groups
 var bad := 0
 var m: Match

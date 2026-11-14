@@ -39,7 +39,7 @@ static func fresh(m: Match, o: Ent) -> bool:
 const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon",
 	"seat", "ring", "gate"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape",
-	"lair_lever", "lair_updraft", "retreat", "assist", "spark", "gate", "ring", "ring_in"]
+	"lair_lever", "lair_updraft", "retreat", "assist", "spark", "gate", "ring", "ring_in", "zone"]
 ## Goals a bot holds interact at on arrival, and goals it may stand and wait at (no give-up timer).
 const HOLD_GOALS := ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever", "spark", "gate"]
 const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_lever", "lair_camp", "seat", "ring"]
@@ -767,6 +767,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or (randf() < 0.5 and not scan_near)):
 				best = k; break
+	if m.zone and m.zone.k > 0 and m.zone.outside(h.pos):
+		best = null      # outside the zone's edge: get inside before anything else
 	if best != a.get("tgt"):
 		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	if BotRing.must_run(m, h):
@@ -944,6 +946,12 @@ func _choose(m: Match, h: Hunter) -> void:
 			dt = m.world.random_ground()
 			a["detour"] = dt
 		goal = dt; gk = "roam"
+	# outside the zone, or a goal outside it: head inside first
+	if m.zone:
+		var zg := m.zone.bot_goal(h, goal)
+		if zg != goal:
+			goal = zg
+			gk = "zone"
 	# flip-flopping between two goals (A, B, A again within a few seconds): stay on the one we're on
 	# for a while. Two goals pulling opposite ways had a bot turning round every think: it spun.
 	# (a goal that only moved a little is the same one, walking: a kin, a squadmate we follow)

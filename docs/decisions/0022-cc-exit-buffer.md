@@ -27,6 +27,14 @@ and is never held. An earlier press is refused as before. A held press that is s
 (the juggernaut's chain throw on E) is not held: only the slots above. Check `--cc-exit-buffer-check`. No Net
 or save change.
 
+## Addendum (2026-11-12): the end of an ult's cast lock
+The same hold covers a kit's own cast lock (docs/heroes/ults.md: in the source a Shift, LMB or jump pressed in the
+lock's last part comes out on the first free frame). `ArchKit.lock_left()` gives the seconds left (Albert's plant,
+Kael's guard and cleave, Motley's dome, Sparkle until her strike; 0 for every other kit) and `cc_left` counts it for
+`DashFlow.LOCK_SLOTS` (Shift, LMB, jump). A lock with an end is routed even while the kit's cast holds the hunter
+(`cast_locked`, Motley) or moves him in a dash (Kael's cleave lunge). No new timer. Rows in each hero's ult check
+(`tools/ult_exit.gd`).
+
 Addendum (11-11, ext/parity-vex-recovery): a kit's committed recovery counts as a stun here.
 `ArchKit.commit_left()` (0 by default) is read by `cc_left` for every slot but Q and an ult's recast, so a press
 in a commit's last 0.15 s waits for its end; the kit drops earlier presses (busy() for the abilities, its

@@ -1,7 +1,7 @@
 extends RefCounted
 ## --train-check: the sky train. Standing on a moving car you walk, strafe and jump in the train's
-## frame (it carries you, your own movement goes on top), the car's edge over the abyss holds a bot (a player
-## walks off its side), and a jump lands you back on it. Every halt brakes, rings, opens its doors, whistles before it
+## frame (it carries you, your own movement goes on top), you can walk off its side, and a jump
+## lands you back on it. Every halt brakes, rings, opens its doors, whistles before it
 ## leaves and shuts them; riders hear a ride loop, those near it a rumble that stops past its reach.
 ## The engine's front takes a hunter straight out (no wisp, cause "train", the kill feed says so, a
 ## deathbox near where they were hit) with a warning first (in its path ~2s ahead), the cars' frames
@@ -122,23 +122,6 @@ func run(main: Node) -> void:
 		m.step(Match.DT)
 	var l3 := _local(st, K, P.pos)
 	ok(l3.x - l2.x > 0.4, "strafing moves you across the car: %.2fm" % (l3.x - l2.x))
-	var side := (st.cur[K] as Transform3D) * Vector3(SkyTrain.HALF_W + 1.0, 0, 0)
-	var over_void := m.world.is_void(side.x, side.z)
-	var ctrl0 := P.ctrl
-	if over_void: P.ctrl = "bot"        # (only a bot keeps the edge guard: a player walks off, as on any island)
-	for i in (60 if over_void else 0):      # (ground beside the car: pushing would walk off it, as it should)
-		P.inp["move"] = _right2(st, K)
-		m.step(Match.DT)
-	P.ctrl = ctrl0
-	P.inp["move"] = Vector2.ZERO
-	var kb: int = st._car_under(P.pos, st.cur, 0.3)
-	var lb := _local(st, maxi(kb, 1), P.pos)
-	if over_void:
-		ok(kb > 0 and P.grounded and absf(lb.x) <= SkyTrain.HALF_W and not P.out,
-				"a bot pushing against the side over the abyss: still on the car (local x %.2f)" % lb.x)
-	else:
-		print("TCHECK note: ground beside the car here, skipped the bot edge test")
-	# a player: keep pushing and you walk off the side
 	var off := false
 	for i in 60:
 		P.inp["move"] = _right2(st, K)

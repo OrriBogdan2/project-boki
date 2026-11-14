@@ -146,10 +146,13 @@ func _clear_under_toasts(delta: float) -> void:
 func toast(text: String, col: Color) -> void:
 	msgs.push(text, col)
 
-## A first-time hint, in the lane for longer (Match._tip says each once).
-func tip(text: String) -> void:
-	if not Record.clean():
-		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
+## A first-time hint, in the lane for longer (Match._tip says each once); `near` "armor" puts it
+## next to the armour readout instead (ArmorHud.note).
+func tip(text: String, near := "") -> void:
+	if Record.clean():
+		return
+	if near == "armor": set_meta("armor_note", [text, m.time + TIP_LIFE])
+	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
 const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
@@ -695,6 +698,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
+	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -833,6 +837,7 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	# the raid condition (RaidLook), and how far you see under it
 	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
 	mm_bottom = rr.end.y
+	if m.zone: mm_bottom = m.zone.hud_row(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 20)))
 	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
 	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
 	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)

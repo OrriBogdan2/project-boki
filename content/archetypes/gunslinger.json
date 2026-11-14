@@ -7,7 +7,7 @@
 	"weight": "medium",
 	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
-	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 76% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
+	"clip": {"lines": {"dash": "Tap to skid, hold to slide; you keep firing through both.", "lmb": "Hold to fire. No reload: let go and the drum refills itself. Dazed foes take 76% more.", "rmb": "Launcher shot: a hit Dazes; on a wall or the ground it blasts a cone that knocks foes back.", "e": "Stand still 0.6s, then a beam fires through walls; its recoil shoves you back.", "x": "Mark a zone at the cursor: a shell lands there 1.6s later and burns.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}, "holds": ["lmb"]},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"howto": ["Play: mid-range rifle; slide with {dash} while shooting.", "Combo: {secondary} past a foe to shove them back, then shoot.", "Avoid: standing still, except to charge {signature}."],

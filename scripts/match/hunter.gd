@@ -84,7 +84,10 @@ var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
 var ammo := 12
 var reload_t := 0.0
 var fire_cd := 0.0
-var dashes := 2.0
+var dash := DashState.new()    # charges and the long dash cooldown, the garden avatar's too
+var dashes: float:
+	get: return dash.charges
+	set(v): dash.charges = v
 var roll_dir := Vector2.ZERO
 var inv_t := 0.0
 var coyote := 0.0
@@ -371,12 +374,11 @@ func accent() -> Color:
 	return cdat.get("color", Color.WHITE) if not cdat.is_empty() else Color.WHITE
 
 func max_dashes() -> float:
-	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	return DashState.base_charges(dodge_def, cdat) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
-	var base := float(ak.dash_def().get("cd", 9.0)) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN)
+	var base := float(ak.dash_def().get("cd", 9.0)) if ak else DashState.base_regen(dodge_def)
 	return base * (ak.dash_k() if ak else 1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
 
 ## Right click is always your weapon's ability, as left click is its attack.
@@ -502,7 +504,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	# when the glider runs dry are you spiked (stunned, plummeting, a 0.7s stun when you land; over
 	# the abyss that's a fall). Monsters drain it but can't spike you.
 	var spiked := false
-	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
+	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat", "zone"]:
 		var was := glide_fuel
 		glide_fuel = maxf(0.0, glide_fuel - dmg * GLIDER_HIT_HEAT / float(cdat.get("glide_cap", 1.0)))
 		hit_heat_t = 1.0
@@ -541,7 +543,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
-	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
+	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat", "zone"]:
 		d *= 1.0 - ARMOR_DR
 		# your kin's armor stats make it wear more slowly
 		armor = maxf(0.0, armor - d * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
@@ -803,6 +805,7 @@ func do_jump() -> void:
 		if not inp.get("glide", false):
 			keep = HunterMove.dash_exit(keep, run_speed)
 		roll_t = 0.0
+		glide_cd = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
 		vel.y = JUMP_V * (float((kin as Kin).ks.mount.get("jump", 1.0)) if mounted() else 1.0)
@@ -827,7 +830,8 @@ func do_jump() -> void:
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
-		return
+		if gliding:
+			return          # (refused by the locomotion state, e.g. a wire's knocked tail: the press stays armed below)
 	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
 	jump_buf = Loco.buf_jump
 
@@ -874,11 +878,13 @@ func can_glide() -> bool:
 
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
-## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled.
+## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled. The
+## dash's own wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 func _dash_into_glide() -> bool:
-	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or glide_cd > 0.0 or downed or shot_down:
+	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or downed or shot_down:
 		return false
 	roll_t = 0.0
+	glide_cd = 0.0
 	shove = {}
 	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
 		_glide_boost_fx()
@@ -912,11 +918,10 @@ func glider_sfx(which: String) -> void:
 	var vol := (-3.0 if is_local() else -9.0) if which == "open" else (-8.0 if is_local() else -14.0)
 	Sfx.play_stream(Gliders.sound(skin, which), pos, vol)
 
-## The class's dodge (Shift), as described by its ability data: a dash, plus anything else in its
-## effect list (the heavy class's charge shoves people).
-## Shift, as in Supervive: a short dash, and a long one (its own, longer cooldown) when you're in
-## the air or the short one is still recharging.
-var ex_cd := 0.0
+## Shift, as in Supervive: the long dash (its own cooldown) in the air or with no short one ready.
+var ex_cd: float:
+	get: return dash.ex_cd
+	set(v): dash.ex_cd = v
 var used := {}                  # slot -> times you pressed it and it went off (the tutorial reads this)
 var hit_heat_t := 0.0           # a moment after being hit while gliding, the glider heats twice as fast
 var ex_next := false
@@ -967,7 +972,7 @@ func do_dash() -> void:
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
 		dash_buf = Loco.buf_shift  # pressed a hair early: fire it as soon as this movement ends
 		return
-	var use_ex := not grounded or dashes < 1.0
+	var use_ex := dash.wants_long(grounded)
 	if not grounded and dashes >= 1.0 and not air_dashed and int(owner_stat("air_dashes")) > 0:
 		use_ex = false           # a merge's dodge in the air: a normal dodge, once per airtime
 		air_dashed = true
@@ -979,14 +984,13 @@ func do_dash() -> void:
 		ak.on_dash(use_ex)
 		return
 	if use_ex:
-		if ex_cd > 0.0:
+		if not dash.spend_long(DashState.long_cd(cdat)):
 			_ab_feedback("dash", "deny")
 			return
-		ex_cd = float(cdat.get("ex_cd", EX_DASH_CD))
 		ex_next = true
 		gliding = false
 	else:
-		dashes -= 1.0
+		dash.spend_short()
 	var effs: Array = dodge_def.effects if dodge_def else [{"type": "dash", "speed": DASH_SPEED, "time": DASH_TIME, "invuln": 0.14}]
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
@@ -1809,8 +1813,7 @@ func sim(dt: float) -> void:
 		reload_t -= dt
 		if reload_t <= 0.0:
 			ammo = wpn["mag"]
-	if dashes < max_dashes():
-		dashes = minf(max_dashes(), dashes + dt / dash_regen())
+	dash.tick(dt, max_dashes(), dash_regen() if dash.charges < max_dashes() else 1.0)
 	_refresh_kin_stats()
 	var regen := owner_stat("regen") + kin_pt("owner_regen")
 	if regen > 0.0 and not downed and hp < max_hp:
@@ -2013,6 +2016,7 @@ func _physics(dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
+	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
@@ -2066,8 +2070,9 @@ func _physics(dt: float) -> void:
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				var wish := HunterMove.along_wall(mv * spd, slide_n)
-				hv = Loco.accel_to(hv, wish, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
+				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
+				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
+				hv = Loco.accel_to(bv, wv, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif not lfloat.is_empty():
@@ -2162,7 +2167,7 @@ func _physics(dt: float) -> void:
 		var fw := mv.normalized() * spd * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
-	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and (hv.length() > 1.0 or mv.length() > 0.3):
+	elif step_up == 0.0 and HunterMove.caught(in_dash, b1, b2) and (hv.length() > 1.0 or mv.length() > 0.3):
 		# caught on a corner: slip sideways around it rather than sticking (the keys' own pull counts
 		# when the corner has already eaten the speed: running at a wall corner used to crawl past it)
 		var moved := Vector2(pos.x - x0, pos.z - z0).length()
@@ -2662,6 +2667,7 @@ func _face_near(lip: float) -> bool:
 func teleport(p: Vector3) -> void:
 	super(p)
 	MantleCarry.forget(self)
+	slide_n = Vector2.ZERO      # (the wall the last step pressed is not here)
 
 ## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
 ## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).

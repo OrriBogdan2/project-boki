@@ -18,7 +18,8 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	_save_flag()
-	_walk()
+	for id in ["archer", "juggernaut", "gunslinger"]:      # Lace, Kael, Vex: the guide is the same for all
+		_walk(id)
 	_mates()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -57,13 +58,15 @@ func _tick(secs: float) -> void:
 		g.tick(0.1)
 		t += 0.1
 
-func _walk() -> void:
+func _walk(hunter: String) -> void:
 	Save.d["first_guide"] = 0
 	m = Match.new()
 	main.add_child(m)
-	var o := {"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"}
+	var o := {"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle",
+			"arch": hunter, "cls": Arch.weight(hunter)}
 	m.start(o)
 	m.set_process(false)
+	print("FMGUIDE hunter ", hunter)
 	g = m.guide
 	var p: Hunter = m.player
 	ok(g != null and int(Save.d["first_guide"]) == 1, "a real Extraction gets the guide and is counted")
@@ -134,6 +137,7 @@ func _walk() -> void:
 	m.step(Match.DT)
 	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
 	_fit()
+	m.queue_free()
 
 func _mates() -> void:
 	m.queue_free()
