@@ -5,7 +5,7 @@
 	"animals": [
 		"Tiny worm"
 	],
-	"theme": "shadow",
+	"theme": "dark",
 	"flavor": "Tiny worm with a little zipper seam.",
 	"colors": {
 		"body": "#a091a3",
