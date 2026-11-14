@@ -30,7 +30,9 @@ JOB_CAP=${GS_JOB_CAP:-2400}    # s a whole shard job may run
 MAX_WAIT=${GS_MAX_WAIT:-900}
 # Linux hosts the shards are pinned to (jobq --only HOST, exact host name). With --needs any a mac worker took 17 of 32 shards
 # (no `timeout` there: every flag rc=127 in 8 s, then it claims the next). GS_HOSTS="" goes back to --needs any.
-HOSTS=${GS_HOSTS-rp1 rpc1 rpc3 rpc4 rpc5 rpc6 rpc7 w2 hetzner}   # s a round waits for its shards; the unfinished ones count as lost and are re-run singly
+# rp1 (700-890 s a shard) and hetzner (400-620 s, the coordinator box) are left out: their shards were the stragglers that
+# hit MAX_WAIT; rpc*/w2 shards finish in <= 320 s.
+HOSTS=${GS_HOSTS-rpc1 rpc3 rpc4 rpc5 rpc6 rpc7 w2}   # s a round waits for its shards; the unfinished ones count as lost and are re-run singly
 mkdir -p "$OUT" "$CACHE"; OUT=$(realpath "$OUT"); : > "$OUT/jobs.tsv"
 T0=$(date +%s)
 MSHA=$(git -C "$MT" rev-parse HEAD) CSHA=$(git -C "$CT" rev-parse HEAD)
