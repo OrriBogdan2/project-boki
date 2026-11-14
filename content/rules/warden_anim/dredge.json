@@ -88,7 +88,8 @@
 		},
 		"dr_lunge": {
 			"clip": "lunge",
-			"hold_from": 0.39
+			"hold_from": 0.39,
+			"rate": 1.1
 		},
 		"dr_lunge_out": {
 			"clip": "lunge_out"

@@ -18,7 +18,7 @@
 	"kmoves": {
 		"gunslinger_lmb": {"clip": "lmb", "upper": "moving", "fade_out": 0.4, "air_legs": true},
 		"gunslinger_rmb": {"clip": "rmb", "upper": "moving", "fade_out": 0.4, "air_legs": true},
-		"gunslinger_dash": {"clip": "dash", "legs_heading": true, "fade_out": 0.4},
+		"gunslinger_dash": {"clip": "dash", "legs_heading": true, "fade_out": 0.4, "rate": 1.25},
 		"gunslinger_dash_ex": {"clip": "dash_ex", "fade_out": 0.4},
 		"gunslinger_e": {"clip": "e", "fade": 0.15, "air_legs": true},
 		"gunslinger_x": {"clip": "x"},
