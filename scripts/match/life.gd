@@ -151,7 +151,7 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"))
+		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
