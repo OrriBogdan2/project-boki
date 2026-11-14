@@ -291,6 +291,15 @@ DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyo
 
 **Not a skate (fixed in the check):** the old open row, "Claire's rink skate (E held, X) meets the wall head-on (within 16 degrees of the normal)", was the check's own ice. In those cases no skate runs (`rinkrun` empty); she hit a 45-degree face 0.7-1.8 m short of the wall: her Rink Wall, cast toward the wall by the held E case (only the tapped E was aimed back) and left standing 6 s into the cases after it, met within 15 degrees of its face. The check now aims the held E back too (`CAST_BACK`) and clears placed walls between cases (`m.verbs.clear()` in `_fresh`); `COMMITS` is empty and all her cases bounce. Source for her real skate at a wall: none. `briefs/hero-ref/tamsin.md` (Shift window f169-f296; key frames 0195, 0241, 0243) and `briefs/supervive-data` show no skate meeting a wall. The one skate line, "Follows the movement input; the cursor is elsewhere" (f193-f199), is already ours: `_tick_rinkrun` steers toward the move keys. So nothing in the skate changed.
 
+**Wall bounce gates: no source number (checked 2026-11-11).** `WallMoves.BOUNCE_MIN_INTO` (4 m/s into the wall) and `BOUNCE_HEAD_ON_DEG` (20 degrees off the normal) stay our estimates. The source's movement data (briefs/supervive-data/supervive_physics.md) has no wall bounce field: its only wall setting is bCanWallJump, the tall-ledge climb for Myth and Brall. briefs/hero-ref has no wall-kick or wall-bounce clip, and the footage pass in ext/wall-bounce-walk found no run- or walk-jump bounce with a speed or angle you could measure. A run is 4.4-4.9 m/s, so a plain run-and-jump bounces between 20 and about 26-35 degrees off the normal. The `runin@` rows in `--wallmove-check` measure Tenzo and Neve, the two slowest in the air:
+
+| Run in | Tenzo (run 4.65) | Neve (run 4.45) |
+|---|---|---|
+| 25 degrees | 4.21 m/s into the wall: bounces | 4.03 m/s: bounces |
+| 40 degrees | 3.56 m/s: stops | 3.41 m/s: stops |
+
+A row fails when the bounce disagrees with the two gates. Neve's 25-degree hit clears `BOUNCE_MIN_INTO` by only 0.03 m/s, so any cut to her run speed ends that bounce. If source footage ever shows a walking jump bouncing, drop `BOUNCE_MIN_INTO` to about 3 m/s.
+
 **Walking jump into a wall (`walkjump@` rows, footage pass 11-11).** The question: does the source bounce a plain jump off the walk, so `BOUNCE_MIN_INTO` (4 m/s) and `BOUNCE_HEAD_ON_DEG` (20) should come down? Frames read on `ext/hero-ref-footage` (1 bh = 1.8 m), 5 fps unless noted:
 - Shiv `dancer` 0124-0135 (the jump at 303.8 s) and Brall `juggernaut` 0249-0268 (jumps and the Air Slam at 410-412.85 s): practice range, every jump starts and lands in the open, clear of the pillars and ledges. No wall contact.
 - Tetra `breah` 0869-0917 ("Wall Stacking", 4 fps, real terrain): rock walls raised against a cliff; nobody jumps into a wall.
