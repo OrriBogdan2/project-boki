@@ -23,7 +23,7 @@ const ELIM_DIM := 0.2         # fraction of its colour the core keeps at the end
 const ELIM_FLICKER := Vector2(0.2, 0.4)   # the beat's span (0..1) in which the core shows the killer's colour
 const ELIM_SHRINK := 0.5      # fraction of its size the Wisp has left as it reaches the box
 const ELIM_BOX_FROM := 0.4    # fraction of its size the deathbox grows in from during the beat
-const BOX_TOP := 0.35         # m above the box's spot the Wisp sinks to
+const BOX_TOP := 0.1          # m above the box's spot the Wisp sinks to (into it: the Wisp hovers low)
 
 ## Runs every render frame, before the hero's own basis is built: advances the state and poses the hero's
 ## size (a pop-out) and the Wisp.
@@ -144,6 +144,8 @@ static func _elim_start(h: Hunter, st: Dictionary) -> void:
 	h.m.sfx(String(spec["sfx"]), h.position, -8.0)
 	Sfx.loop_stop(hum_key(h))
 	HunterFall.stop(h)
+	if h.model:
+		h.model.visible = false       # (out mid-fall: the hunter stops updating it, and the Wisp is the death)
 
 ## The beat's end (or a revive in the middle of it): the Wisp is freed, the box stands at full size.
 static func _elim_end(h: Hunter, st: Dictionary) -> void:
@@ -263,7 +265,7 @@ static func _pose_elim(h: Hunter, st: Dictionary) -> void:
 	var floor_y := float(look["hover"]) - 1.0
 	if box.has("pos") and box["pos"] != Vector3.INF:
 		floor_y = (box["pos"] as Vector3).y - h.position.y
-	node.position.y = lerpf(float(look["hover"]), floor_y + BOX_TOP, k * k)
+	node.position.y = lerpf(float(look["hover"]), floor_y + BOX_TOP, k * (2.0 - k))
 	node.scale = Vector3.ONE * lerpf(1.0, ELIM_SHRINK, k)
 	var blink: bool = k >= ELIM_FLICKER.x and k < ELIM_FLICKER.y
 	var tint: Color = st["kcol"] if blink else WispLook.colour(String(look["core"]["color"]), _team_col(h))
