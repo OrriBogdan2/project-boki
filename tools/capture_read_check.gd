@@ -11,22 +11,29 @@ var bad := 0
 var base: RefCounted
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("CAPTURE-READ %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _last_ring_col() -> Color:
 	return m.fx.rings[-1]["col"] if not m.fx.rings.is_empty() else Color.BLACK
 
+
 func _same_rgb(a: Color, b: Color) -> bool:
 	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) < 0.02
+
 
 func _fill_col(k: Kin) -> Color:
 	var f := CaptureHud.scan_fill(m, k)
 	return f[1] if not f.is_empty() else Color.BLACK
 
+
 func _gone(n) -> bool:
 	return not is_instance_valid(n) or n.is_queued_for_deletion()
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -39,7 +46,7 @@ func run(main: Node) -> void:
 		if h.team != P.team:
 			rival = h
 			break
-	rival.teleport(P.pos + Vector3(20.0, 0, 0))      # the distance the beam has to read from
+	rival.teleport(P.pos + Vector3(20.0, 0, 0))  # the distance the beam has to read from
 	var k: Kin = base.wild()
 	var col := Capture.beam_col(rival)
 	ok(not col.is_equal_approx(Color.WHITE), "the rival's ability colour is a real colour (%s)" % col.to_html(false))
@@ -53,9 +60,9 @@ func run(main: Node) -> void:
 	ok(_same_rgb(mat.get_shader_parameter("color"), col), "...in the rival's ability colour")
 	var fill := CaptureHud.scan_fill(m, k)
 	ok(not fill.is_empty() and absf(float(fill[0]) - 0.5) < 0.1, "...the fill on the Boki follows their progress")
-	ok(_fill_col(k).is_equal_approx(SideColor.FOE), "...in the foe colour")
+	ok(_fill_col(k).is_equal_approx(SideColor.foe()), "...in the foe colour")
 	rival.team = P.team
-	ok(_fill_col(k).is_equal_approx(SideColor.ALLY), "a teammate's scan fills in the ally colour")
+	ok(_fill_col(k).is_equal_approx(SideColor.ally()), "a teammate's scan fills in the ally colour")
 	rival.team = P.team + 1
 
 	Capture.on_net(m, rival, "scan_stop", "%s|0.00" % k.nid)
@@ -79,7 +86,7 @@ func run(main: Node) -> void:
 
 	rival.teleport(P.pos + Vector3(30.0, 0, 0))
 	base.begin(P)
-	ok(Capture.active(P) and _fill_col(k).is_equal_approx(SideColor.YOU), "your own scan fills in your colour")
+	ok(Capture.active(P) and _fill_col(k).is_equal_approx(SideColor.you()), "your own scan fills in your colour")
 	var mine = Capture.state(P).get("beam")
 	P.inp["dash"] = true
 	base.run_for(0.2)
@@ -93,6 +100,7 @@ func run(main: Node) -> void:
 	print("CAPTURE-READ DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## The four moments, framed on the scanner with you standing 20 m away.
 func _shots(main: Node, dir: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -104,7 +112,8 @@ func _shots(main: Node, dir: String) -> void:
 	var k: Kin = base.wild()
 	k.teleport(at + Vector3(2.5, 0, 1.0))
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	var id := "%s|0.55" % k.nid
 	Capture.on_net(m, rival, "scan_start", id)
 	await _frames(main, at, 0.5)
@@ -121,14 +130,17 @@ func _shots(main: Node, dir: String) -> void:
 	await _frames(main, at, 0.2)
 	await _snap(main, dir, "pop")
 
+
 func _frames(main: Node, focus: Vector3, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(Match.DT)
 		t += Match.DT
 		m.cam.snap(focus)
-		for h in m.hunters: h.render(Match.DT, 1.0)
+		for h in m.hunters:
+			h.render(Match.DT, 1.0)
 		await main.get_tree().process_frame
+
 
 func _snap(main: Node, dir: String, file: String) -> void:
 	await RenderingServer.frame_post_draw

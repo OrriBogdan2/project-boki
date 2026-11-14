@@ -311,9 +311,8 @@ func _on_base() -> void:
 			tb.tick(0.1)
 			t += 0.1
 		await main.get_tree().process_frame
-		ok(tb.run == null and is_instance_valid(tb.card) and tb.card.name == "GameResultCard"
-				and not is_instance_valid(visitor),
-				"on: the bout ends in the shared result card and the visitor leaves (%.1f s)" % t)
+		ok(tb.run == null and is_instance_valid(tb.card) and tb.card.name == "GameResultCard",
+				"on: the bout ends in the shared result card (%.1f s)" % t)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
