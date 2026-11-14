@@ -1,8 +1,9 @@
 extends CanvasLayer
-## The screen between home and an expedition: the tier's sky with islands drifting past and the
-## skyship crossing, the tier name, what you're heading into, a tip, and a spinner with the stage
-## being worked on over a progress bar. The match builds in short slices between frames (see
-## Match._slice and World._slice), so the spinner keeps turning the whole way.
+## The screen between home and an expedition: your Hunter's painted splash under the tier's sky tint,
+## the tier name, the map, what you're heading into, a tip, and a spinner with the stage being worked
+## on over a progress bar. The bar follows the real load stages (the build, then the shader warm-up)
+## and only ever moves forward. The match builds in short slices between frames (see Match._slice and
+## World._slice), so the spinner keeps turning the whole way.
 
 signal shown
 
@@ -26,6 +27,10 @@ const COVER_T := 0.1        # s the ink takes to cover it once the match is read
 const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
+const SKY_TINT := 0.45     # how much of the tier's sky gradient lies over the splash (0..1)
+const BAR_MIN_SPEED := 0.9  # bar share per second, at least, so it never sits still while the load works
+const BAR_CATCH_UP := 6.0   # the bar closes this many times its gap per second (eases out into each stage)
+
 var c: Control
 var t := 0.0
 var prog := 0.0          # what the bar shows
@@ -42,25 +47,21 @@ var tip := ""
 var lore := ""
 var map_name := ""       # the map this expedition is on ("" when unknown)
 var party: Array = []    # your squad, [{name, arch, you}] (Prematch.squad_of)
-var islands: Array = []  # [x (0..1), y (0..1), size, depth, seed]
-var stars: Array = []
+var arch := ""           # the Hunter whose splash fills the screen
+var splash_path := ""    # that splash's file ("" when the Hunter has none)
+var splash: Texture2D
 var sky_tex: GradientTexture2D
 var shade_tex: GradientTexture2D
-var puff: GradientTexture2D
 var _glass_at := {}      # fade step -> the tip card's glass box
 var stage_label := "Building the map"
 var spin_draws := 0      # frames the spinner has drawn (--load-check: one per frame means it never stalled)
 
-func _grad(cols: Array, offs: Array, radial := false) -> GradientTexture2D:
+func _grad(cols: Array, offs: Array) -> GradientTexture2D:
 	var g := Gradient.new()
 	g.colors = PackedColorArray(cols); g.offsets = PackedFloat32Array(offs)
 	var gt := GradientTexture2D.new()
 	gt.gradient = g; gt.width = 128; gt.height = 128
-	if radial:
-		gt.fill = GradientTexture2D.FILL_RADIAL
-		gt.fill_from = Vector2(0.5, 0.5); gt.fill_to = Vector2(1.0, 0.5)
-	else:
-		gt.fill_from = Vector2(0, 0); gt.fill_to = Vector2(0, 1)
+	gt.fill_from = Vector2(0, 0); gt.fill_to = Vector2(0, 1)
 	return gt
 
 func setup(opts: Dictionary) -> void:
@@ -87,17 +88,14 @@ func setup(opts: Dictionary) -> void:
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	tip = TipPick.for_loading(opts.get("blight", true))
 	lore = LORE[randi() % LORE.size()]
-	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
-	for i in 9:
-		islands.append([float(i) / 9.0 + r.randf_range(-0.04, 0.04), r.randf_range(0.14, 0.62), r.randf_range(0.7, 1.3), r.randf_range(0.2, 1.0), r.randi()])
-	islands.sort_custom(func(a, b): return a[3] < b[3])
-	for i in 90:
-		stars.append(Vector3(r.randf(), r.randf() * 0.7, r.randf()))
+	arch = String(opts.get("arch", Arch.of_save()))
+	splash_path = Portraits.art_path(arch, true)
+	if splash_path != "":
+		splash = load(splash_path)
 	var sky: Color = T["sky"]
 	var cl: Array = T["clouds"]
 	sky_tex = _grad([sky.darkened(0.3), sky.lerp(cl[1], 0.35), (cl[1] as Color).lerp(sky, 0.1)], [0.0, 0.6, 1.0])
 	shade_tex = _grad([Color(0, 0, 0, 0), Color(0, 0, 0, 0.55), Color(0, 0, 0, 0.8)], [0.0, 0.55, 1.0])
-	puff = _grad([Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.5), Color(1, 1, 1, 0)], [0.0, 0.45, 1.0], true)
 	c = Control.new()
 	c.set_anchors_preset(Control.PRESET_FULL_RECT)
 	c.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -115,8 +113,19 @@ func _process(delta: float) -> void:
 		fade = minf(1.0, fade + delta / FADE_IN_T)
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
-	prog = move_toward(prog, want, delta * maxf(0.9, (want - prog) * 6.0))
+	prog = move_toward(prog, want, delta * maxf(BAR_MIN_SPEED, (want - prog) * BAR_CATCH_UP))
 	c.queue_redraw()
+
+## A real load stage reached (0..1 of the whole load): the bar's target only ever moves forward, so a
+## stage reporting less than an earlier one changes nothing.
+func advance(frac: float) -> void:
+	want = maxf(want, clampf(frac, 0.0, 1.0))
+
+## Move the bar to a stage (0..1) and wait until it gets there.
+func step(frac: float) -> void:
+	advance(frac)
+	while prog < want - 0.01 and is_inside_tree():
+		await get_tree().process_frame
 
 ## The match is built and drawn: the bar fills at once and the screen goes, with nothing to wait out
 ## (playtest 11-09: players were held on a full bar). The ink covers it, then sweeps off the match.
@@ -140,57 +149,43 @@ func set_stage(key: String) -> void:
 func _draw() -> void:
 	var sz := c.size
 	var a := fade
-	var sky: Color = T["sky"]
-	var cl: Array = T["clouds"]
-	var biome: Dictionary = T["biome"]
-	# sky: dark at the top, the tier's cloud colour near the horizon
-	c.draw_texture_rect(sky_tex, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a))
-	for s in stars:
-		var tw := 0.5 + 0.5 * sin(t * 1.7 + s.z * 30.0)
-		c.draw_circle(Vector2(s.x * sz.x, s.y * sz.y), 1.0 + s.z, Color(1, 1, 1, a * (0.15 + 0.35 * tw) * (1.0 - s.y)))
-	# far cloud bank
-	for i in 16:
-		var x := fposmod(i * 130.0 - t * 8.0, sz.x + 400.0) - 200.0
-		var r := 150.0 + (i % 3) * 40.0
-		c.draw_texture_rect(puff, Rect2(Vector2(x, sz.y * 0.8 + sin(i * 1.3) * 30.0) - Vector2(r, r * 0.6), Vector2(r * 2, r * 1.2)), false, Color((cl[1] as Color).lightened(0.12), a * 0.6))
-	# islands drifting past, nearer ones bigger and faster
-	for isl in islands:
-		var d: float = isl[3]
-		var x := fposmod(float(isl[0]) * (sz.x + 400.0) - t * 22.0 * d, sz.x + 400.0) - 200.0
-		var y: float = float(isl[1]) * sz.y + sin(t * 0.8 + float(isl[4] % 100)) * 6.0
-		_island(Vector2(x, y), float(isl[2]) * (70.0 + 170.0 * d), d, biome, a, int(isl[4]))
-	# the skyship sailing across
-	var sx := fposmod(t * 70.0 + sz.x * 0.35, sz.x + 500.0) - 250.0
-	_ship(Vector2(sx, sz.y * 0.2 + sin(t * 1.3) * 5.0), a)
-	# near cloud wisps over the bottom
-	for i in 12:
-		var x := fposmod(i * 170.0 - t * 30.0, sz.x + 500.0) - 250.0
-		c.draw_texture_rect(puff, Rect2(Vector2(x - 200, sz.y - 90.0 + sin(i * 2.1) * 25.0), Vector2(400, 220)), false, Color((cl[1] as Color).lightened(0.25), a * 0.5))
+	# the Hunter's splash filling the screen (its framing point stays in view), the tier's sky tinted over it
+	if splash:
+		c.draw_texture_rect_region(splash, Rect2(Vector2.ZERO, sz), Portraits.region(arch, splash_path, splash.get_size(), sz), Color(1, 1, 1, a))
+	c.draw_texture_rect(sky_tex, Rect2(Vector2.ZERO, sz), false, Color(1, 1, 1, a * (SKY_TINT if splash else 1.0)))
 	# a soft shade behind the text
 	c.draw_texture_rect(shade_tex, Rect2(0, sz.y * 0.42, sz.x, sz.y * 0.58), false, Color(1, 1, 1, a))
-	# text
+	# progress and the tip card sit at the bottom; the text block above them moves up when it would reach the bar
 	var cx := sz.x * 0.5
-	var base := sz.y * 0.47
-	var kick := "GETTING READY"
-	if mode_line != "":
-		kick = "EXPEDITION  ·  " + map_name.to_upper() if map_name != "" else "EXPEDITION"
-	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.GOLD, a), 3)
-	_text(Vector2(cx, base + 62), title, UI.big, 58, Color(UI.INK, a))
-	_wrap(Vector2(cx, base + 96), sub, 17, minf(620.0, sz.x - 60.0), Color(UI.MUTED, a))
-	if mode_line != "":
-		_text(Vector2(cx, base + 176), mode_line, UI.semi, 15, Color(UI.TEAL, a))
-	if raid != "":
-		# the raid condition, shown before you drop
-		var rc: Color = RaidLook.COLORS.get(raid, UI.INK)
-		_text(Vector2(cx, base + 204), "CONDITIONS  ·  " + String(RaidLook.NAMES.get(raid, raid)).to_upper(), UI.caps, 13, Color(rc, a), 2)
-		_wrap(Vector2(cx, base + 210), String(RaidLook.BLURBS.get(raid, "")), 14, minf(560.0, sz.x - 60.0), Color(UI.MUTED, a * 0.9))
-	# progress
 	var tw_ := minf(660.0, sz.x - 60.0)
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
 	var lore_h := UI.body.get_multiline_string_size(lore, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 14, 3).y + 12.0
 	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines + lore_h), tw_, 40.0 + lines + lore_h)
 	var bw := minf(480.0, sz.x - 80.0)
 	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 6)
+	# text: the block's height from its first line, so a short window lifts it clear of the bar
+	var tw_w := minf(620.0, sz.x - 60.0)
+	var blurb := String(RaidLook.BLURBS.get(raid, "")) if raid != "" else ""
+	var blurb_w := minf(560.0, sz.x - 60.0)
+	var block := 96.0 + UI.body.get_multiline_string_size(sub, HORIZONTAL_ALIGNMENT_CENTER, tw_w, 17, 3).y
+	if mode_line != "":
+		block = maxf(block, 182.0)
+	if raid != "":
+		block = 214.0 + UI.body.get_multiline_string_size(blurb, HORIZONTAL_ALIGNMENT_CENTER, blurb_w, 14, 3).y
+	var base := minf(sz.y * 0.47, br.position.y - 44.0 - block)
+	var kick := "GETTING READY"
+	if mode_line != "":
+		kick = "EXPEDITION  ·  " + map_name.to_upper() if map_name != "" else "EXPEDITION"
+	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.GOLD, a), 3)
+	_text(Vector2(cx, base + 62), title, UI.big, 58, Color(UI.INK, a))
+	_wrap(Vector2(cx, base + 96), sub, 17, tw_w, Color(UI.MUTED, a))
+	if mode_line != "":
+		_text(Vector2(cx, base + 176), mode_line, UI.semi, 15, Color(UI.TEAL, a))
+	if raid != "":
+		# the raid condition, shown before you drop
+		var rc: Color = RaidLook.COLORS.get(raid, UI.INK)
+		_text(Vector2(cx, base + 204), "CONDITIONS  ·  " + String(RaidLook.NAMES.get(raid, raid)).to_upper(), UI.caps, 13, Color(rc, a), 2)
+		_wrap(Vector2(cx, base + 210), blurb, 14, blurb_w, Color(UI.MUTED, a * 0.9))
 	var af := snappedf(a, 0.1)
 	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
 	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
@@ -235,50 +230,6 @@ func _spinner(p: Vector2, a: float) -> void:
 	var head := t * TAU * 1.15
 	var span := lerpf(0.5, 3.6, 0.5 + 0.5 * sin(t * 2.6))
 	c.draw_arc(p, r, head - span, head, 24, Color(UI.ACCENT, a), 2.5, true)
-
-func _island(p: Vector2, w: float, d: float, biome: Dictionary, a: float, sd: int) -> void:
-	var r := RandomNumberGenerator.new(); r.seed = sd
-	var shade := lerpf(0.45, 0.0, d)   # far islands fade into the sky
-	var topc: Color = (biome["top"] as Color).darkened(shade)
-	var sidec: Color = (biome["side"] as Color).darkened(shade)
-	var deepc: Color = (biome["deep"] as Color).darkened(shade)
-	var h := w * 0.28
-	# the rocky underside, a jagged point
-	var under := PackedVector2Array([p + Vector2(-w * 0.5, 0), p + Vector2(w * 0.5, 0)])
-	var n := 6
-	for i in n + 1:
-		var f := 1.0 - float(i) / n
-		var depth := h * (1.0 + 1.6 * sin(PI * f)) * r.randf_range(0.75, 1.1)
-		under.append(p + Vector2(-w * 0.5 + w * f, depth))
-	c.draw_colored_polygon(under, Color(deepc, a))
-	c.draw_colored_polygon(PackedVector2Array([p + Vector2(-w * 0.5, 0), p + Vector2(w * 0.5, 0), p + Vector2(w * 0.46, h * 0.7), p + Vector2(-w * 0.46, h * 0.7)]), Color(sidec, a))
-	# grass top as a flat ellipse
-	var top := PackedVector2Array()
-	for i in 24:
-		var ang := TAU * i / 24.0
-		top.append(p + Vector2(cos(ang) * w * 0.5, sin(ang) * h * 0.45))
-	c.draw_colored_polygon(top, Color(topc, a))
-	# a couple of trees
-	for i in r.randi_range(1, 3):
-		var tp := p + Vector2(r.randf_range(-w * 0.3, w * 0.3), r.randf_range(-h * 0.2, h * 0.05))
-		var ts := w * r.randf_range(0.06, 0.1)
-		c.draw_rect(Rect2(tp + Vector2(-ts * 0.12, -ts * 0.6), Vector2(ts * 0.24, ts * 0.6)), Color(sidec.darkened(0.2), a))
-		c.draw_circle(tp + Vector2(0, -ts * 0.9), ts * 0.55, Color((biome["leaf"] as Color).darkened(shade), a))
-
-func _ship(p: Vector2, a: float) -> void:
-	var bal := PackedVector2Array()
-	for i in 28:
-		var ang := TAU * i / 28.0
-		bal.append(p + Vector2(cos(ang) * 58.0, sin(ang) * 26.0))
-	c.draw_colored_polygon(bal, Color(Color("f2e6cf"), a))
-	for k in [-24.0, 0.0, 24.0]:
-		var hh := 26.0 * sqrt(maxf(0.0, 1.0 - pow(k / 58.0, 2)))
-		c.draw_line(p + Vector2(k, -hh), p + Vector2(k, hh), Color(Color("d9604a"), a), 5.0)
-	for x in [-30.0, 30.0]:
-		c.draw_line(p + Vector2(x, 20), p + Vector2(x * 0.7, 46), Color(Color("4e3424"), a), 1.5)
-	c.draw_colored_polygon(PackedVector2Array([p + Vector2(-36, 44), p + Vector2(36, 44), p + Vector2(28, 58), p + Vector2(-30, 58)]), Color(Color("7a5236"), a))
-	var spin := t * 18.0
-	c.draw_line(p + Vector2(-40, 50) + Vector2(0, cos(spin) * 9), p + Vector2(-40, 50) - Vector2(0, cos(spin) * 9), Color(Color("e0b84a"), a), 3.0)
 
 func _text(pos: Vector2, s: String, f: Font, size: int, col: Color, spacing := 0, al := HORIZONTAL_ALIGNMENT_CENTER) -> void:
 	var w := 900.0

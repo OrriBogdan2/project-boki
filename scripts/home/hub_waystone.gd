@@ -19,6 +19,7 @@ var h                          # the Home screen
 var node: Node3D = null        # the Waystone or the return pad
 var board: Node3D = null       # the hub's games board
 var aim := ""                  # "board" while the games board is what E would use (set by find)
+var picker_after := false     # the hop came from the minigame picker: open it on arrival
 var hopping := ""              # the zone being travelled to, during the light-up
 var pad := {}                  # the stone as something a Boki can look at: {"pos"}
 
@@ -56,9 +57,14 @@ func place() -> void:
 		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)
 	node.name = "Waystone"
 	h.add_child(node)
+	if here() == GardenZones.HUB and not VisitZones.has(h.visit):
+		ZoneReveal.play_owed(h, node)
 	pad = {"pos": node.position}
+	if h.zone != "" and here() != GardenZones.HUB:
+		Sfx.play("garden_arrive_" + here())     # the landing chime, tuned to the zone's bed
 
-## Wakes a locked zone with both keys: the Boki plants the Wayseed, the stone lights up (toast, sound, burst).
+## Wakes a locked zone with both keys: the Boki plants the Wayseed (toast, sound, burst); at the hub its stone
+## lights up (ZoneReveal), elsewhere it does when you next come to the hub.
 func attune(id: String) -> void:
 	var r := GardenZones.attune(id)
 	if not r["ok"]:
@@ -103,13 +109,15 @@ func use() -> void:
 		ZoneCards.open(h, here())
 
 ## Travel to a zone (or the hub). Returns false, with a toast, for a locked zone or where you are.
-func hop(id: String) -> bool:
+func hop(id: String, to_picker := false) -> bool:
 	if hopping != "" or id == here():
 		return false
 	if id != GardenZones.HUB and not is_open(id):
+		Sfx.play("garden_locked")
 		h._toast("%s is still asleep: it needs both keys" % GardenZones.info(id).get("name", id))
 		return false
 	hopping = id
+	picker_after = to_picker
 	h._close_panel()
 	var col := Color(String(GardenZones.info(id).get("colour", "c9c2b2")))
 	h.fx.burst(node.position + Vector3(0, 0.4, 0), col, 24, 3.0, 0.6, -2.0)
@@ -118,9 +126,10 @@ func hop(id: String) -> bool:
 	return true
 
 func _go() -> void:
-	var opts := {"zone": hopping}
+	var opts := {"zone": hopping, "play_hub": picker_after}
 	if VisitZones.has(h.visit):
 		opts.merge({"visit": h.visit["all"], "visit_id": h.visit_id})      # a friend's garden: still theirs
+	Sfx.play("garden_depart")     # the whoosh as the screen goes
 	Game.goto("home", opts)
 
 # ------------------------------------------------------------------ moving a Boki to another zone

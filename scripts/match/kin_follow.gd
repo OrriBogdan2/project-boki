@@ -15,6 +15,7 @@ extends RefCounted
 
 const CMD_IDS := ["guard", "follow", "chase", "return"]       # the index is what goes over the network (KinNet)
 const NAMES := {"guard": "Guard", "follow": "Follow", "chase": "Chase", "return": "Return"}
+const HOP_DB := -8.0        # dB: the leap back to its owner (the recall cue, under the ordered recall)
 const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place Boki closes on its side spot, on top of your pace
 const GUARD_PULL := 14.0   # 1/s: how fast a big Boki on the Return order closes on its guard spot beside you
 
@@ -169,6 +170,8 @@ static func leap(k: Kin, to: Vector3, dest: String, cmd_hit := false) -> void:
 	k.vel = Vector3.ZERO
 	k.stuck_t = 0.0
 	k.m.fx.ring(k.pos, 0.9, Color(k.sp["color"], 0.7), 0.2)
+	if not cmd_hit:
+		k.m.sfx("recall", k.pos, HOP_DB)       # (an ordered recall plays its own, louder)
 	KinNet.event(k.m, "hop", k, to)
 
 ## Back to your side: stuck, or beyond the leash.
@@ -196,6 +199,20 @@ static func land_side(k: Kin) -> void:
 	k.vel = Vector3.ZERO
 	k.state = "active"
 	k.m.fx.dust(k.pos, 8)
+
+## The sound of it coming down: a thrown Boki by its weight class (a light patter, a heavy thump), or the soft
+## settle of one landing back on your shoulder. A rival's is quieter. Cues and sizes: boki_system.json "follow".
+static func land_cue(k: Kin, settle := false) -> void:
+	var kgs: Array = rules()["land_kg"]
+	var kg := float(Unique.size_info(k.rec)["kg"])
+	var kind := "settle"
+	if not settle:
+		kind = "heavy" if kg > float(kgs[1]) else "medium"
+		if kg < float(kgs[0]):
+			kind = "light"
+	var c: Array = rules()["land_cues"][kind]
+	var quiet := 0.0 if k.owner_h != null and k.owner_h.is_local() else _r("land_rival_db")
+	k.m.sfx(String(c[0]), k.pos, float(c[2]) + quiet, float(c[1]))
 
 ## Off you at once, onto your side spot (a carried Boki's own dash or leap starts from there).
 static func drop_beside(k: Kin) -> void:
@@ -236,8 +253,7 @@ static func guard_spot(k: Kin) -> Vector3:
 		if W.is_void(p.x, p.z) or W.is_block(p.x, p.z) or absf(W.ground_at(p.x, p.z) - y0) > KinPath.STEP:
 			continue
 		k.guard_side = s
-		# it hops with your jumps: never below your feet
-		return Vector3(p.x, maxf(W.ground_at(p.x, p.z), o.pos.y), p.z)
+		return Vector3(p.x, W.ground_at(p.x, p.z), p.z)
 	return Vector3.INF
 
 ## One step of a big Boki on the Return order, beside you. False: it curls up on your back
@@ -255,7 +271,6 @@ static func guard_tick(k: Kin, dt: float) -> bool:
 			rel = Vector2(want.x - o.pos.x, want.z - o.pos.z)
 		rel = rel.normalized() * near
 		p = Vector3(o.pos.x + rel.x, p.y, o.pos.z + rel.y)
-	p.y = maxf(p.y, o.pos.y)
 	k.vel = (p - k.pos) / maxf(dt, 0.001)
 	k.pos = p
 	return true

@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 13
+const VERSION := 19
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
@@ -16,7 +16,8 @@ const LOG_CAP := 200
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
-		11: "_migrate_11_to_12", 12: "_migrate_12_to_13"}
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
+		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -35,12 +36,8 @@ static func path_for(n: int) -> String:
 func slot_info(n: int) -> Dictionary:
 	var out := {"exists": false}
 	var p := path_for(n)
-	if not FileAccess.file_exists(p):
-		return out
-	var f := FileAccess.open(p, FileAccess.READ)
-	if f == null:
-		return out
-	var parsed = JSON.parse_string(f.get_as_text())
+	var text := _whole_text(p)
+	var parsed = JSON.parse_string(text) if text != "" else null
 	if typeof(parsed) != TYPE_DICTIONARY or (parsed.get("roster", []) as Array).is_empty():
 		return out
 	var when := Time.get_datetime_dict_from_unix_time(int(FileAccess.get_modified_time(p)))
@@ -58,8 +55,9 @@ func use_slot(n: int) -> void:
 	cf.save("user://settings.cfg")
 
 func delete_slot(n: int) -> void:
-	if FileAccess.file_exists(path_for(n)):
-		DirAccess.remove_absolute(path_for(n))
+	for q in _copies(path_for(n)):
+		if FileAccess.file_exists(q):
+			DirAccess.remove_absolute(q)
 	if n == slot:
 		d = fresh()
 		newer = false
@@ -74,10 +72,12 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t}, + clan on a loan (Sleepover)
+		"drills": {},         # best pass time in seconds per movement drill (MoveDrills)
 		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
-		"items": {"tonic": 1},
+		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),   # plus the first-day kibble
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
@@ -91,6 +91,7 @@ func fresh() -> Dictionary:
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
+		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
@@ -147,7 +148,12 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
 		"edition": null,      # reserved for limited editions (see docs/BOKI_IDENTITY.md)
 	}
+	if seed >= 0:       # seeded: IVs from the seed, not the clock-based uid, so every run matches
+		var ivr := RandomNumberGenerator.new()
+		ivr.seed = hash("%d|ivs" % seed)
+		rec["ivs"] = Care.roll_ivs(ivr)
 	BokiQuirks.set_sex(rec)
+	BokiQuirks.set_rare_trait(rec)
 	Care.ensure(rec)
 	return rec
 
@@ -315,6 +321,45 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		Care.ensure(r)
 
+## v13 -> v14: carry 2 in (docs/decisions/0061-carry-pick.md). The lead is the current partner ("active"), the
+## second starts empty: a save that auto-picked or once chose a second no longer brings one until you pick.
+func _migrate_13_to_14(data: Dictionary) -> void:
+	data["active2"] = ""
+
+## v14 -> v15: the movement drills keep a best time per drill (MoveDrills). The 12 -> 13 step runs again
+## first: a dev save from the line that used v13 for first-time hints gets the garden half it skipped.
+## The order from here on is docs/SAVE_CHAIN_0245.md (main took v14 for carry 2, so that chain moved up by
+## one: drills v15 .. sleepovers v19); every step only adds what is missing.
+func _migrate_14_to_15(data: Dictionary) -> void:
+	_migrate_12_to_13(data)
+	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
+		data["drills"] = {}
+
+## v15 -> v16: the combat tutorial resumes (TutorialResume); a save that is past it is marked finished.
+func _migrate_15_to_16(data: Dictionary) -> void:
+	TutorialResume.migrate(data)
+
+## v16 -> v17: clans grow out of guilds. A save already in a guild becomes a plain member of the clan
+## with the same id; everyone else gets the empty dict (Social.clan_for). A clan it already has stays.
+func _migrate_16_to_17(data: Dictionary) -> void:
+	if typeof(data.get("clan", null)) == TYPE_DICTIONARY:
+		return
+	var gid := String(data.get("guild_id", ""))
+	var who := String(data.get("profile", {}).get("id", ""))
+	data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
+
+## v17 -> v18: the XP first-time lines have their "seen" flags (XpHints).
+func _migrate_17_to_18(data: Dictionary) -> void:
+	XpHints.migrate(data)
+
+## v18 -> v19: sleepovers. No Boki is away: d["sleepovers"] = [] (Sleepover). A dev save from the save chain
+## line (v14-v18 there, before main took v14 for carry 2) skipped the carry step: it gets an empty second here.
+func _migrate_18_to_19(data: Dictionary) -> void:
+	if not data.has("sleepovers"):
+		data["sleepovers"] = []
+	if not data.has("active2"):
+		data["active2"] = ""
+
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
 ## and a one-time notice lists it all (EqualMigrate).
@@ -438,16 +483,10 @@ func load_game() -> void:
 func load_from(p: String) -> void:
 	d = fresh()
 	newer = false
-	if not FileAccess.file_exists(p):
+	var text := _whole_text(p)
+	if text == "":
 		return
-	var f := FileAccess.open(p, FileAccess.READ)
-	if f == null:
-		return
-	var text := f.get_as_text()
-	f.close()
 	var parsed = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return
 	var v := int(parsed.get("v", 0))
 	if v > VERSION:
 		# from a newer game: leave it alone, and never write over it
@@ -461,6 +500,7 @@ func load_from(p: String) -> void:
 		if not migrate(parsed):
 			return
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
+	BokiQuirks.migrate(parsed)      # a rare-trait kind with no trait roll yet rolls once
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
@@ -488,9 +528,28 @@ func save_game() -> void:
 	register_all()
 	if no_write or newer:
 		return
-	var f := FileAccess.open(path_for(slot), FileAccess.WRITE)
-	if f:
-		f.store_string(JSON.stringify(d))
+	# write a new copy, then swap it in: a game that dies at any point leaves one whole copy (0061)
+	var full := ProjectSettings.globalize_path(path_for(slot))
+	var f := FileAccess.open(full + ".tmp", FileAccess.WRITE)
+	if f == null or not f.store_string(JSON.stringify(d)):
+		return
+	f.close()
+	if FileAccess.file_exists(full):
+		DirAccess.remove_absolute(full + ".prev")
+		DirAccess.rename_absolute(full, full + ".prev")
+	DirAccess.rename_absolute(full + ".tmp", full)
+
+## A save file and the two copies a save leaves beside it while swapping (newest first).
+static func _copies(p: String) -> Array:
+	return [p, p + ".tmp", p + ".prev"]
+
+## The newest whole save among a file's copies, "" if none (docs/decisions/0061).
+static func _whole_text(p: String) -> String:
+	for q in _copies(p):
+		var text := FileAccess.get_file_as_string(q) if FileAccess.file_exists(q) else ""
+		if text != "" and typeof(JSON.parse_string(text)) == TYPE_DICTIONARY:
+			return text
+	return ""
 
 func reset() -> void:
 	d = fresh()
@@ -515,27 +574,13 @@ func active_kin() -> Dictionary:
 				break
 	return k
 
-## The kin you bring as your second (benched, swapped in with X). "none" means bring only one.
-## If you haven't picked, your most trusted other kin comes along.
+## The second Boki you carry, or {} when you picked none (or the pick is gone, held or the lead). CarryPick sets it.
 func second_kin() -> Dictionary:
-	var a := str(d.get("active", ""))
 	var b := str(d.get("active2", ""))
-	if b == "none":
-		return {}
 	var k := kin(b)
-	if not k.is_empty() and b != a and KinLoss.selectable(k):
-		return k
-	var best: Dictionary = {}
-	for r in d["roster"]:
-		if r["uid"] == a or not KinLoss.selectable(r): continue
-		# kin out on the farm first; one asleep in the Kin Burrow only if nobody else is around
-		var better: bool = best.is_empty() or (best.get("boxed", false) and not r.get("boxed", false)) \
-			or (best.get("boxed", false) == r.get("boxed", false) and float(r.get("trust", 0.0)) > float(best.get("trust", 0.0)))
-		if better:
-			best = r
-	if not best.is_empty():
-		d["active2"] = best["uid"]
-	return best
+	if k.is_empty() or b == str(d.get("active", "")) or not KinLoss.selectable(k):
+		return {}
+	return k
 
 func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> void:
 	if k.is_empty():
