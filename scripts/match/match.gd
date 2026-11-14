@@ -5359,6 +5359,7 @@ func _net_ev(x, from: String) -> void:
 				"sbrk": ShieldBreak.of(self).net_in(x)       # a shield broke in another game
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
+				"hcast": HostileCue.net_in(self, x)   # a rival's E or R went off in another game
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
 		"knock":
