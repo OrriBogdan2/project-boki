@@ -36,6 +36,9 @@ func _setup() -> void:
 	h.add_child(ult)
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
+	# her arrows are loosed after this kit's tick, so each one's stock tracer would draw one frame as a white streak at
+	# the bow before _tag_shots skins it: skin it just before that frame is drawn
+	RenderingServer.frame_pre_draw.connect(_tag_shots)
 	sense = HawkSense.new(self)
 
 ## Swapped off her mid Phase Walk (Training Grounds, a hero swap): the walk ends with her kit, else
@@ -43,6 +46,8 @@ func _setup() -> void:
 func teardown() -> void:
 	if spirit:
 		spirit.end("merge")
+	if RenderingServer.frame_pre_draw.is_connected(_tag_shots):
+		RenderingServer.frame_pre_draw.disconnect(_tag_shots)
 	if sense:
 		sense.clear()
 	super()
@@ -143,6 +148,8 @@ func draw_bonus(t: float) -> float:
 ## Our shots the match just spawned get Hem's own look (PinFx): the bow's arrows by the kind PinDraw
 ## loosed, the Heavy Shot's big orchid arrow.
 func _tag_shots() -> void:
+	if not is_instance_valid(h):
+		return
 	for s in m.shots:
 		if s["by"] != h or (s["x"] as Dictionary).has("pin"):
 			continue
