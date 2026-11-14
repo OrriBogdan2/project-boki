@@ -1,8 +1,7 @@
 extends RefCounted
 ## --pip-live-check: Meeko's clips through the real match code: a Match, her Hunter, the kit's own
 ## presses and the render path (Hunter.render, HunterAnim, Sync). E plays its clip, the lantern
-## hangs under her right hand, the gold constellations brighten while she heals and fall back.
-## A knock-out plays the death clip on screen.
+## hangs under her right hand. A knock-out plays the death clip on screen.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -23,12 +22,6 @@ func _frame(m: Match, h: Hunter) -> void:
 	if h.visible or h.out:
 		sync.call("_process", DT)
 
-func _emit(h: Hunter) -> float:
-	for x in h.model.get_meta("mats", []):
-		if x is ShaderMaterial and (x as ShaderMaterial).get_shader_parameter("use_emit") == true:
-			return float((x as ShaderMaterial).get_shader_parameter("emit"))
-	return -1.0
-
 func run(main: Node) -> void:
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
@@ -47,17 +40,14 @@ func run(main: Node) -> void:
 	T.teleport(home + Vector3(6.0, 0, 0))
 	A.aim_at(P, T.pos)
 	var seen := {}
-	var rest := _emit(P)
 	K.cast_e()
-	var peak := rest
 	for f in 90:
 		_frame(m, P)
 		seen[clips.cur] = true
-		peak = maxf(peak, _emit(P))
 		await main.get_tree().process_frame
 	ok(seen.has("hearth"), "Hearthlight plays its clip (%s)" % str(seen.keys()))
-	ok(rest > 0.0 and peak > rest * 1.5,
-			"the constellations brighten while she heals (%.2f -> %.2f)" % [rest, peak])
+	# No "constellations brighten" row: the owner-approved appeal3 look (2e0c6ac47) painted the
+	# constellations into the atlas, so Meeko has no emission layer and PipStars.pulse finds none.
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var bi := sk.find_bone("spring_hanglantern_0")
 	var a := sk.get_bone_global_pose(bi).origin

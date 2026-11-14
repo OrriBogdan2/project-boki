@@ -18,18 +18,19 @@ import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
+J = H.joints(RIG)
 WORK = os.path.dirname(os.path.abspath(OUT))
 ATLAS = 2048
 CARDS = 512
 UNIQ_W = 0.94                        # the scan's islands' share of the atlas width; the flat cells sit to its right
 CELL = {H.SKIN: "#ded3d1", H.LID: "#bfaab8", H.THREAD: "#7a1230", H.BOW: "#2b2129", H.BOW_HI: "#4a3a48", H.STEEL: "#b4b3bd", H.STEEL_DK: "#5d5b66",
-        H.PIN: "#cfcdd5", "leather-vane": "#a5835c"}
+        H.PIN: "#cfcdd5", H.GLOWT: "#ff2a50", "leather-vane": "#a5835c"}
 HEM_C, SMOKE_C = (0.0, 0.0, 0.62, 1.0), (0.64, 0.0, 1.0, 1.0)    # card cells (u0, v0, u1, v1)
 SLOTS = ["skin", "hair", "cloth", "leather", "metal"]
 MATS = [s + "-hem" for s in SLOTS] + list(CELL) + ["card-hem"]
-BELT_Z = 0.965                       # the spool belt's height on the fitted scan
+BELT_Z = J["hips"][2] + 0.104       # the spool belt's height on the fitted scan (the sheet's: 10 cm over the hips joint)
 SPOOL_X = (-0.15, -0.105, -0.06, 0.06, 0.105, 0.15)
-HEM_TOP = 0.56                       # z: the cards start tucked up inside the skirt's hem
+HEM_TOP = J["shin.R"][2] + 0.068    # z: the cards start tucked up inside the skirt's hem (just over the knee)
 HEM_N = 46                           # hanging strips round the skirt
 SLIT = 0.36                          # rad either side of the front: the slit, no fringe
 SKIRT_Z = (HEM_TOP - 0.04, BELT_Z - 0.06)    # z: the scan's skirt, between its hem and the belt
@@ -42,7 +43,6 @@ bpy.ops.wm.open_mainfile(filepath=SRC)
 sc = bpy.context.scene
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
 META = json.loads(sc["hem"])
-J = H.joints(RIG)
 
 gn = {g.index: g.name for g in low.vertex_groups}
 lo_co = np.array([v.co[:] for v in low.data.vertices])
@@ -68,7 +68,7 @@ def belt_at(x):
     return p, np.array((p[0], p[1] * 2.0, 0.0)) / max(np.hypot(p[0], p[1] * 2.0), 1e-6)
 
 
-pieces = H.fist(J) + H.rigid(H.spools(belt_at, SPOOL_X), "hips") + H.rigid(H.back_needle(1) + H.back_needle(-1) + H.lash() + H.strings(), "hips") + H.rigid(H.bun_pins(BUN), "head") + H.rigid(H.shoulder_mask(J), "upper_arm.L")
+pieces = H.fist(J) + H.rigid(H.spools(belt_at, SPOOL_X), "hips") + H.rigid(H.back_needle(1) + H.back_needle(-1) + H.lash() + H.strings(), "hips") + H.rigid(H.bun_pins(BUN), "head") + H.rigid(H.hand_strings(J), "hand.R") + H.rigid(H.shoulder_mask(J), "upper_arm.L")
 pieces += H.rigid(H.eyelids(EYE_C["R"]), "lid.R") + H.rigid(H.eyelids(EYE_C["L"]), "lid.L")
 verts, faces, fsrc, vw, rooms = [], [], [], [], []
 for co, d in zip(lo_co, lo_w):
@@ -178,9 +178,12 @@ slot = np.full(len(faces), "cloth", dtype=object)
 slot[(sat < 0.3) & (mx > 0.42)] = "skin"
 slot[(sat < 0.22) & (mx > 0.3) & (mx <= 0.42)] = "metal"
 slot[(mx > 0.45) & (sat < 0.5) & np.array([str(b).startswith(("thigh", "shin")) for b in dom])] = "skin"
-slot[dark & (legs | (fc[:, 2] < 0.98))] = "leather"              # the boots, the skirt and the belt: one plum look
+slot[dark & (legs | (fc[:, 2] < BELT_Z + 0.015))] = "leather"              # the boots, the skirt and the belt: one plum look
 slot[dark & on_head] = "hair"
 slot[(slot == "cloth") & np.array([str(b).startswith(("thigh", "shin")) for b in dom])] = "skin"    # the legs at the slit: no corset there
+# the scan's own painted shoulder mask (red seams read as cloth): plain porcelain under the 3D one
+under_mask = (dom == "upper_arm.L") & (np.linalg.norm(fc - (J["upper_arm.L"] + H.MASK_OUT), axis=1) < 0.12) & np.isin(slot, ("skin", "cloth"))
+slot[under_mask] = "skin"
 for i, p in enumerate(me.polygons):
     p.material_index = MATS.index(fsrc[i]) if i >= N_LOW else MATS.index(slot[i] + "-hem")
 print("slots", {s: int((slot[:N_LOW] == s).sum()) for s in SLOTS})
@@ -209,8 +212,7 @@ def class_bake():
     0.5 the rest, 0 no island), G its height / 2."""
     skirt = (slot == "leather") & ~legs & (fc[:, 2] > SKIRT_Z[0]) & (fc[:, 2] < SKIRT_Z[1])
     cls = np.where((slot == "skin") & ~on_head, 1.0, np.where(skirt, 0.75, 0.5))
-    under_mask = (slot == "skin") & (dom == "upper_arm.L") & (np.linalg.norm(fc - (J["upper_arm.L"] + H.MASK_OUT), axis=1) < 0.1)
-    cls[under_mask] = 0.9                                            # the scan's own painted mask: splotches
+    cls[under_mask] = 0.9
     cls[N_LOW:] = 0.5
     lv = np.zeros(len(me.loops), int)
     me.loops.foreach_get("vertex_index", lv)

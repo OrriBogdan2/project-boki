@@ -1,0 +1,193 @@
+{
+	"palette": {
+		"main": "#ff5ab4", "core": "#ff3fb4", "hot": "#ffc4ea", "white": "#ffffff", "deep": "#3a1440",
+		"char": "#1a1420", "copper": "#e08a46", "violet": "#3a1c8c", "dusk": "#20104d", "dust": "#d1ccb8",
+		"soot": "#8a8478", "gold": "#ffc23a"
+	},
+	"anchors": {
+		"hand_l": {"bone": "hand.L", "hand": "l", "body": [-0.25, 1.1, 0.3]},
+		"hand_r": {"bone": "hand.R", "hand": "r", "body": [0.25, 1.1, 0.3]},
+		"finger_l": {"nodes": ["anchor_finger_L"], "bone": "hand.L", "off": [0.0, 0.12, 0.0], "body": [-0.11, 1.25, 0.45]},
+		"finger_r": {"nodes": ["weapon_muzzle"], "bone": "hand.R", "off": [0.0, 0.12, 0.0], "body": [0.11, 1.25, 0.45]},
+		"shoulder_l": {"body": [-0.2, 1.25, 0.0]},
+		"shoulder_r": {"body": [0.2, 1.25, 0.0]}
+	},
+	"moves": {
+		"lmb": {"net": false, "fx": [
+			{"p": "bolt", "at": "shoulder_l", "len": 0.9, "size": 0.3, "life": 0.12, "when": "left", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "bolt", "at": "shoulder_r", "len": 0.9, "size": 0.3, "life": 0.12, "unless": "left", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ribbon", "at": "hand_l", "life": 0.12, "tail": 0.12, "size": 0.24, "when": "left", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ribbon", "at": "hand_r", "life": 0.12, "tail": 0.12, "size": 0.24, "unless": "left", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ember", "at": "finger_l", "delay": 0.06, "n": 4, "speed": 7.0, "spread": 1.0, "drag": 1.0, "life": 0.08,
+				"size": 0.05, "stretch": 0.05, "when": "left", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ember", "at": "finger_r", "delay": 0.06, "n": 4, "speed": 7.0, "spread": 1.0, "drag": 1.0, "life": 0.08,
+				"size": 0.05, "stretch": 0.05, "unless": "left", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "flare", "at": "finger_l", "delay": 0.06, "size": 0.75, "life": 0.08, "when": "left", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "flare", "at": "finger_r", "delay": 0.06, "size": 0.75, "life": 0.08, "unless": "left", "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"lmb_trail": {"net": false, "end": "lmb_end", "fx": [
+			{"p": "ribbon", "size": 1.0, "life": 2.0, "tail": 0.14, "wave": 0.1, "soft": true, "head": 0.7, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"lmb_end": {"net": false, "fx": [
+			{"p": "ember", "n": 4, "way": "back", "lift": 0.3, "speed": 6.0, "spread": 0.45, "drag": 2.0, "life": 0.12,
+				"size": 0.06, "stretch": 0.06, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "flare", "size": 0.6, "life": 0.12, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+
+		"static": {"net": false, "fx": [
+			{"p": "star", "y": 1.0, "n": "n", "speed": "v", "radius": "rad", "spread": 1.0, "burst": 0.0, "life": 0.35,
+				"size": "s", "unless": "full", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "star", "y": 1.0, "n": "n", "speed": "v", "radius": "rad", "spread": 1.0, "burst": 0.0, "life": 0.35,
+				"size": "s", "when": "full", "c": "hot", "c2": "white", "c3": "core"}
+		]},
+		"live": {"fx": [
+			{"p": "bolt", "y": 9.0, "to": "here", "to_y": 0.2, "jag": 0.5, "size": 0.9, "life": 0.28, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ribbon", "at": "hand_l", "life": 0.12, "tail": 0.12, "size": 0.24, "when": "swing", "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"live_crawl": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.5, "size": 0.35, "life": 0.12, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+
+		"dash": {"net": false, "fx": [
+			{"p": "bolt", "y": 8.0, "to": "here", "to_y": 0.3, "jag": 0.5, "size": 0.8, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"dash_ex": {"net": false, "fx": [
+			{"p": "bolt", "y": 0.9, "len": "len", "jag": 0.5, "size": 0.45, "life": 0.3, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"wire_tick": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.5, "size": 0.18, "life": 0.08, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"dash_go": {"fx": [
+			{"p": "bolt", "y": 0.9, "len": "len", "jag": 0.5, "size": 1.1, "life": "t1", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "bolt", "y": 1.2, "len": "len", "jag": 0.5, "size": 0.5, "life": "t2", "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"dash_land": {"net": false, "fx": [
+			{"p": "smoke", "y": 0.1, "n": 5, "way": "up", "speed": 2.2, "spread": 0.9, "grav": 2.0, "life": 0.45, "size": 0.16,
+				"c": "dust", "c3": "soot", "near": true}
+		]},
+		"wire_hit": {"net": false, "fx": [
+			{"p": "ember", "y": 0.9, "n": 3, "speed": 6.5, "spread": 1.0, "drag": 1.0, "life": 0.12, "size": 0.06,
+				"stretch": 0.06, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"blowout": {"net": false, "fx": [
+			{"p": "bolt", "y": 6.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.0, "life": 0.3, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"refund": {"net": false, "fx": [
+			{"p": "skirt", "size": 0.77, "from": 1.0, "tall": 3.2, "life": 1.2, "c": "copper", "c2": "core", "c3": "deep"}
+		]},
+
+		"rod_summon": {"net": false, "fx": [
+			{"p": "flare", "at": "hand_r", "size": 1.0, "life": 0.08, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "ember", "n": 5, "speed": 6.0, "spread": 1.0, "drag": 1.0, "life": 0.16, "size": 0.06, "stretch": 0.06,
+				"c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "flare", "size": 1.0, "life": 0.14, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"rod_tick": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.5, "size": 0.22, "life": 0.08, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"rod_full": {"net": false, "fx": [
+			{"p": "flare", "y": 1.0, "size": 1.6, "life": 0.1, "c": "white", "c2": "white", "c3": "hot"},
+			{"p": "flare", "y": 1.6, "size": 0.9, "life": 0.08, "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"rmb_swing": {"net": false, "fx": [
+			{"p": "ribbon", "at": "hand_r", "life": 0.2, "tail": 0.12, "size": 0.24, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"rmb": {"net": false, "fx": [
+			{"p": "flare", "size": 0.9, "life": 0.08, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "bolt", "len": "len", "jag": 0.5, "size": 0.7, "life": 0.2, "when": "loose", "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"rmb_trail": {"net": false, "end": "rmb_end", "fx": [
+			{"p": "ribbon", "size": 0.7, "life": 2.0, "tail": 0.058, "wave": 0.08, "head": 0.6, "head_len": 1.5, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"rmb_end": {"net": false, "fx": [
+			{"p": "flare", "size": 1.0, "life": 0.16, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"rmb_hit": {"net": false, "fx": [
+			{"p": "flare", "y": 1.0, "size": 1.6, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "ember", "y": 1.0, "n": 5, "speed": 8.0, "spread": 1.0, "drag": 1.0, "life": 0.18, "size": 0.06,
+				"stretch": 0.06, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ring", "size": 2.2, "life": 0.35, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+
+		"orb_drop": {"fx": [
+			{"p": "ring", "size": "r", "life": 0.3, "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"orb_crackle": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.5, "size": 0.28, "life": 0.1, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"orb_grab": {"net": false, "fx": [
+			{"p": "flare", "y": 1.0, "size": 2.4, "life": 0.16, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "flare", "y": 1.6, "size": 0.9, "life": 0.08, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"orb_fizzle": {"net": false, "fx": [
+			{"p": "star", "n": 6, "speed": 1.5, "spread": 1.0, "life": 0.3, "size": 0.09, "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"orb_fling": {"net": false, "fx": [
+			{"p": "bolt", "y": 0.55, "jag": 0.5, "size": 0.6, "life": 0.25, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+
+		"e": {"net": false, "fx": [
+			{"p": "flare", "y": 0.3, "size": 0.8, "life": 0.12, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ribbon", "at": "hand_l", "life": 0.34, "tail": 0.12, "size": 0.24, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"e_chevron": {"net": false, "fx": [
+			{"p": "bolt", "size": 0.2, "life": 0.05, "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"e_count": {"fx": [
+			{"p": "scorch", "shape": "pool", "size": "r", "life": "t", "c": "core", "c2": "hot", "c3": "dusk"},
+			{"p": "skirt", "size": 0.4, "from": 3.0, "tall": 3.5, "life": "t2", "c": "hot", "c2": "white", "c3": "main"}
+		]},
+		"e_strike": {"fx": [
+			{"p": "bolt", "y": 9.0, "fwd": 0.3, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.0, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "bolt", "y": 9.0, "fwd": -0.4, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.75, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "bolt", "y": 9.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.5, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ring", "size": "r", "life": 0.35, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.9, "life": 0.45, "c": "char", "c2": "core", "c3": "copper"},
+			{"p": "flare", "y": 1.0, "size": 1.8, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "ribbon", "at": "hand_l", "life": 0.12, "tail": 0.12, "size": 0.24, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"grounded": {"net": false, "fx": [
+			{"p": "ring", "y": 0.5, "size": 0.6, "life": "t", "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ring", "y": 1.1, "size": 0.6, "life": "t", "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+
+		"x": {"fx": [
+			{"p": "bolt", "y": 7.0, "to": "here", "to_y": 0.3, "jag": 0.5, "size": 0.7, "life": 0.2, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"x_air": {"fx": [
+			{"p": "smoke", "y": 0.1, "n": 6, "way": "up", "speed": 2.2, "spread": 0.9, "grav": 2.0, "life": 0.45, "size": 0.16,
+				"c": "dust", "c3": "soot", "near": true},
+			{"p": "bolt", "y": 0.2, "to": "here", "to_y": "len", "jag": 0.5, "size": 0.9, "life": 0.25, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"x_ring": {"fx": [
+			{"p": "scorch", "shape": "pool", "band": 0.1, "size": "r", "life": 0.5, "c": "core", "c2": "hot", "c3": "dusk"}
+		]},
+		"x_rim": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.5, "size": 0.35, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"x_crackle": {"net": false, "fx": [
+			{"p": "ember", "y": 1.0, "n": 3, "speed": 9.0, "spread": 1.0, "drag": 1.0, "life": 0.1, "size": 0.06,
+				"stretch": 0.06, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"x_dive": {"fx": [
+			{"p": "ring", "size": "r", "life": 0.15, "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"x_strike": {"fx": [
+			{"p": "skirt", "size": 1.2, "from": 1.0, "tall": 14.0, "life": 0.35, "c": "core", "c2": "white", "c3": "deep"},
+			{"p": "bolt", "y": 12.0, "fwd": 0.4, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.3, "life": 0.25, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "bolt", "y": 12.0, "fwd": -0.5, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.0, "life": 0.25, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "bolt", "y": 12.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.7, "life": 0.25, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ring", "size": "r", "life": 0.35, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.8, "life": 0.4, "c": "char", "c2": "core", "c3": "copper"},
+			{"p": "ember", "y": 0.3, "n": 26, "way": "up", "speed": 11.0, "spread": 0.8, "grav": 8.0, "life": 0.4, "size": 0.08,
+				"stretch": 0.06, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "flare", "y": 1.2, "size": 2.4, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"}
+		]},
+		"x_spread": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.5, "size": 0.6, "life": 0.2, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"x_after": {"net": false, "fx": [
+			{"p": "bolt", "jag": 0.5, "size": 0.3, "life": 0.12, "c": "copper", "c2": "core", "c3": "deep"}
+		]}
+	}
+}
