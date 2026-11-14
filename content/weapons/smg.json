@@ -15,7 +15,7 @@
 		"range": 7.0,
 		"size": 0.13,
 		"color": "#99ffff",
-		"sfx": "smg",
+		"sfx": "gun_smg",
 		"bloom_deg": 1.0,
 		"bloom_max_deg": 6.0,
 		"bloom_recover": 20.0,
