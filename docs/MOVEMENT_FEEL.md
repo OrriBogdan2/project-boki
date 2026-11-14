@@ -940,6 +940,22 @@ The last ones (ext/feel-snag-last-two, 2026-11-11). The Hollow Crown was rebuilt
 - **Not a snag:** the other Tenzo stall was a sealed lair's ward bouncing the glider back out (`Lairs._push_out`, 2 m/s away from it) while the keys held into it. That is the ward working; the check now treats a sealed or dormant lair within 2 m as a wall by design.
 
 After: 0 stalls on the same seeds (13 Hunters x 50 paths); `MAX_STALLS` is now 0.
+## Dash direction with no keys (`--move-feel-check` "standing dash" rows)
+The shared rule (`ArchKit.dash_dir`, `Hunter.dash_with`): the move keys held on the press tick, else the cursor (`aim_dir`; the body's facing only if the cursor sits on the hunter). Keys released a tick before Shift count as no keys. Mid-turn the dash takes the keys held on that tick. The "Dash toward the cursor" setting always uses the cursor. Moving = WASD is DECISIONS ("Dashes follow WASD by default"). Sources: briefs/hero-ref/<hero>.md, briefs/supervive-data/supervive_kits.md. [?] = the footage doesn't show it.
+| Hunter (source) | Source dash aim | Standing: ours / source | Moving: ours | Just released: ours / source |
+| Bjorn (Oath) | aim (bjorn.md:25) | cursor / cursor | WASD (Shield Charge: cursor) | cursor / [?] |
+| Breah (Tetra) | cursor (breah.md:156) | cursor / cursor | cursor (the hop aims) | cursor / cursor |
+| Dancer (Shiv) | "looks like" movement (dancer.md:116) | cursor / [?] | WASD | cursor / [?] |
+| Dredge (Kingpin) | cursor (dredge.md:103) | cursor / cursor | WASD (clamped after the Anchor) | cursor / [?] |
+| Juggernaut (Brall) | facing/aim (juggernaut.md:20) | cursor / cursor | WASD (after a Slam: cursor) | cursor / [?] |
+| Linwick (Felix) | cursor (linwick.md:75) | cursor / cursor | WASD | cursor / [?] |
+| Moosh Moosh (Elluna) | movement (mooshmoosh.md:85) | cursor / [?] | WASD | cursor / [?] |
+| Ostra (Void) | lands at the cursor (ostra.md:18) | cursor / cursor | cursor | cursor / cursor |
+| Pin (Myth) | movement (pin.md:22) vs cursor (supervive_kits.md:78, tested) | cursor / cursor | WASD [?] | cursor / [?] |
+| Tamsin (Celeste) | movement (tamsin.md:70) | cursor / [?] | WASD | cursor / [?] |
+| Venator (Ghost) | movement, "slide forward" (venator.md:89) | cursor / [?] | WASD | cursor / [?] |
+| Vireo (Joule) | cursor (vireo.md:28) | cursor / cursor | cursor | cursor / cursor |
+No row contradicts a source, so no code changed. The [?] rows keep the shared rule until footage shows a standing dash or a dash pressed right after letting go of the keys.
 ## A dash into a rim (`--mantle-check` section 7, `MantleCarry.dash_rise`)
 
 Nobody had measured what a dash does when it meets a rim. Each starter presses Shift straight at a rim with the keys held
