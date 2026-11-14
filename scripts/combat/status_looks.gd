@@ -80,7 +80,10 @@ static func carries(e: Ent, st: String) -> bool:
 
 ## A slow, not a big hit's stagger (Oomph: a short slow that is the hit's own feel, no status look of its own).
 static func slowed(e: Ent) -> bool:
-	return e.slow_t > 0.0 and not (e is Hunter and (e as Hunter).stagger_t >= e.slow_t - SLOW_EPS)
+	if e.slow_t <= 0.0:
+		return false
+	var stagger := (e as Hunter).stagger_t if e is Hunter else 0.0
+	return not (stagger > 0.0 and stagger >= e.slow_t - SLOW_EPS)
 
 ## Whether the body carries any status at all (the cheap test before asking for each one).
 static func _any(e: Ent) -> bool:
