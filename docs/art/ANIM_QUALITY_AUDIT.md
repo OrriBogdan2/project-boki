@@ -383,6 +383,23 @@ right arm is the hook, Neve's skates trail). The rig still has no Blender-baked 
 (top to bottom Tenzo, Lace, Grimble, Neve; --clip-shots, yaw 90):
 
 ![mantle clips](anim_audit/climb_mantle.jpg)
+## Mantle and ledge clips
+
+A ledge rise (`Hunter.lfloat`) now feeds the anim state `mantle` = how far up the face the body is (`MantleCarry.rise_k`,
+0 at the foot, 1 at the lip), so a keyed mantle clip is read at that phase and cannot lag the body; `ledge` (the float
+back up from the abyss) plays on its own clock and holds its last pose. `mage` (Sparkle), `bulwark` (Albert), `thief`
+(Sable) and `ostra` (Motley) have both clips (0.8 s mantle, 1.0 s ledge), keyed with `tools/art1/climb_clips.py` and the
+poses in `tools/art1/climb_data.py` (two-bone IK onto the rig's own bones, no Blender; rerun it after any rebuild of the
+`.glb`: `python3 tools/art1/climb_clips.py <ryzz|sable|breaker|ostra>`). Sparkle scrambles with one knee up; Sable
+kips over the lip with her legs kicked up behind; Albert plants the shield, heaves and drags the hammer; Motley has no
+legs, so he rises on his hover and settles. Every other Hunter keeps the procedural pose (data `procedural`).
+`--anim-shots` adds mantle and ledge strips for a Hunter that has the clips.
+Motley's root stays on his hover (data `rig_root`), so his lift and lean are keyed on the hips instead (his
+`offset_bones`): the spring stretches and he rises out of the box. `--close` backs the camera off for a tall Hunter.
+Rows below are mantle then ledge for Sparkle, Sable, Albert and Motley, 8 frames each (software GL; after changing a
+`.glb`, run `godot --headless --path . --import` first or the strip shows the old clip).
+
+![mantle and ledge strips: Sparkle, Sable, Albert, Motley](anim_audit/climb_mantle3.jpg)
 
 ## What is left
 
