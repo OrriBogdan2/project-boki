@@ -74,8 +74,10 @@ func _first_arrival() -> void:
 	await _new_farm()
 	var hob: FarmHob = home.hob
 	var stall := HomeLayout.deco_center(HomeLayout.fixtures(Save.d, "stall")[0])
-	ok(hob.node is HobModel and Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length() < 4.0,
-			"Hob is a person standing by the market stall")
+	# 12 m: the nearest free tile depends on the new farm's random wild trees and rocks (hob-spot-check tests the rule)
+	var off := Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length()
+	ok(hob.node is HobModel and off < 12.0,
+			"Hob is a person standing by the market stall (at his spot, his clear ring apart from it) %.1f m" % off)
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
 	ok(FarmTutorial.current() == "hob" and home.guide.hint_text().contains("Hob")
 			and not home.guide.hint_text().contains("Hob:"),
@@ -239,11 +241,10 @@ func _offer() -> void:
 	await _advance(box)
 	await _frames(3)
 	var beats: Array = home.find_children("*", "MaskBeat", true, false)
-	ok(beats.size() == 1 and not (beats[0] as MaskBeat).swap and home.panel_open == HobTalk.TALK,
-			"the put-on beat plays without the swap (you stand still)")
+	ok(beats.size() == 1 and (beats[0] as MaskBeat).short and home.panel_open == HobTalk.TALK,
+			"the short Mask moment plays (you stand still)")
 	await _shot("hob_7_mask_moment", 1.0)
-	await _wait(func(): return not home.get_tree().root.find_children("*", "VBoxContainer", true, false).filter(
-			func(n): return n.has_meta("mask_name")).is_empty(), 6.0)
+	await _wait(func(): return (beats[0] as MaskBeat).name_box != null, 6.0)
 	await _shot("hob_8_mask_name", 0.3)
 	await _wait(func(): return home.find_children("*", "MaskBeat", true, false).is_empty(), 10.0)
 	await _frames(5)
@@ -252,8 +253,6 @@ func _offer() -> void:
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
 	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
-	await _wait(func(): return not hob.node.bubble.visible, 8.0)      # (a shout from before the beat may still be up)
-	await _frames(2)
 	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
 	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")

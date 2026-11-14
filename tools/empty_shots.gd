@@ -3,7 +3,7 @@ extends RefCounted
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
 ## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs to take one group (eggs: the egg pick, then the black
 ## mystery egg picked; shroud: the creator from front, side and back,
-## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
+## the aura levels and shroud styles; feet: the soles of three extreme bodies, standing and walking;
 ## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default).
 
 const LOOKS := {
@@ -16,6 +16,13 @@ const LOOKS := {
 	"void_crescent_gold": {"hollow": 3, "glow": 4, "ghost": 1, "colour": 7},
 }
 
+## [sex, height, build] of the feet strip: the smallest woman, the tallest sturdiest woman (the body whose feet stood
+## highest) and the tallest sturdiest man.
+const FEET_BODIES := [[0, 0, 0], [0, 2, 2], [1, 2, 2]]
+const FEET_WALK := 2.2       # m/s: their walk, the farm's half stick (home_gait_check SPEEDS)
+const FEET_WARM := 90        # frames (60 fps) of walking before the first walking shot: the gait settles into step
+const FEET_WALK_SHOTS := 3   # walking shots...
+const FEET_EVERY := 7        # ...this many frames apart: about a third of a step each at FEET_WALK
 const GAIT_SHOTS := 8        # frames of the gait strip
 const GAIT_EVERY := 4        # frames (60 fps) between its shots: 8 x 4 = half a second, about two strides
 
@@ -65,10 +72,10 @@ func _creator(tree: SceneTree) -> void:
 	main.add_child(hx)
 	await _shot(tree, "creator_default", 2.0)
 	for file in LOOKS:
-		hx.look = Unmasked.default_look()
-		hx.look.merge(LOOKS[file], true)
-		hx.preview_yaw = PI
-		hx._show_create()
+		var lk := Unmasked.default_look()
+		lk.merge(LOOKS[file], true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(PI)
 		await _shot(tree, file, 0.8)
 	hx.queue_free()
 	await tree.process_frame
@@ -127,9 +134,9 @@ func _mask(tree: SceneTree) -> void:
 	await _shot(tree, "mask_2_boki_looks", 1.6)
 	await _shot(tree, "mask_3_put_on_prompt", 1.6)
 	moment.put_on()
-	await _shot(tree, "mask_4_reach", 0.25)
-	await _shot(tree, "mask_5_ghost_face", 0.35)
-	await _shot(tree, "mask_6_you_as_vex", 0.9)
+	await _shot(tree, "mask_4_lifting", 0.35)
+	await _shot(tree, "mask_5_flash", 0.4)
+	await _shot(tree, "mask_6_you_as_vex", 0.6)
 	await _shot(tree, "mask_7_vex_intro", 2.2)
 	hx.queue_free()
 	await tree.process_frame
@@ -142,27 +149,28 @@ func _shroud(tree: SceneTree) -> void:
 	await _shot(tree, "creator_warmup", 2.5)
 	var views := {"front": PI, "side": PI * 0.5, "back": 0.0}
 	for view in views:
-		hx.look = Unmasked.default_look()
-		hx.look.merge({"hollow": 1, "glow": 2, "colour": 5, "aura": 1}, true)
-		hx._show_create()
-		hx.preview.rotation.y = views[view]
+		var lk := Unmasked.default_look()
+		lk.merge({"hollow": 1, "glow": 2, "colour": 5, "aura": 1}, true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(views[view])
 		await _shot(tree, "creator_shroud_" + view, 0.8)
 	for level in Unmasked.AURA.size():
-		hx.look = Unmasked.default_look()
-		hx.look.merge({"aura": level, "glow": 0, "colour": 10}, true)
-		hx._show_create()
-		hx.preview.rotation.y = PI * 0.8
+		var lk := Unmasked.default_look()
+		lk.merge({"aura": level, "glow": 0, "colour": 10}, true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(PI * 0.8)
 		await _shot(tree, "creator_aura_%d_%s" % [level, String(Unmasked.AURA[level]).to_lower()], 2.5)
 	for style in Unmasked.SHROUDS.size():
-		hx.look = Unmasked.default_look()
-		hx.look.merge({"shroud": style, "gender": style % 2, "colour": 2 + style * 3}, true)
-		hx._show_create()
-		hx.preview.rotation.y = PI * 0.8
+		var lk := Unmasked.default_look()
+		lk.merge({"shroud": style, "gender": style % 2, "colour": 2 + style * 3}, true)
+		hx.locker.set_look(lk)
+		hx.locker.set_yaw(PI * 0.8)
 		await _shot(tree, "creator_style_%s" % String(Unmasked.SHROUDS[style]).to_lower(), 0.8)
 	hx.queue_free()
 	await tree.process_frame
 
-## The soles on a floor at the shortest and tallest height, standing and mid-stride, close and low.
+## The soles on a floor of the three FEET_BODIES, close and low: standing, then FEET_WALK_SHOTS shots across a step
+## of their walk.
 func _feet(tree: SceneTree) -> void:
 	_fresh()
 	var stage := Node3D.new()
@@ -186,22 +194,37 @@ func _feet(tree: SceneTree) -> void:
 	cam.make_current()
 	var models := []
 	var anims := []
-	for h in [0, 2]:
-		var look := Unmasked.clean({"unmasked": true, "height": h, "build": h})
+	for k in FEET_BODIES.size():
+		var body: Array = FEET_BODIES[k]
+		var look := Unmasked.clean({"unmasked": true, "gender": body[0], "height": body[1], "build": body[2],
+			"shroud": 1})
 		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look)
 		m.get_node("Rig/Torso/Aim/Gun").free()
-		m.position = Vector3(-0.55 + 1.1 * (h / 2), 0, 0)
+		m.position = Vector3(-1.0 + 1.0 * k, 0, 0)
 		m.rotation.y = -PI * 0.5
 		stage.add_child(m)
 		models.append(m)
 		anims.append(HunterAnim.new(m))
-	for step in 2:
-		var vel := Vector3(0, 0, 0) if step == 0 else Vector3(3.5, 0, 0)
-		for i in 75:
-			for a in anims:
-				(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
-			await tree.process_frame
-		await _shot(tree, "feet_%s_short_tall" % ("idle" if step == 0 else "walking"), 0.0)
+	for i in 75:
+		for a in anims:
+			(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": Vector3.ZERO})
+		await tree.process_frame
+	await _shot(tree, "feet_idle_extremes", 0.0)
+	# walking: a planted foot only steps as the hips pass over it, so each body walks in from behind and reaches its
+	# spot at the last shot
+	var vel := Vector3(FEET_WALK, 0, 0)
+	var frames := FEET_WARM + (FEET_WALK_SHOTS - 1) * FEET_EVERY
+	for m in models:
+		(m as Node3D).position -= vel * frames / 60.0
+	var shot := 0
+	for i in range(1, frames + 1):
+		for k in models.size():
+			(models[k] as Node3D).position += vel / 60.0
+			(anims[k] as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
+		await tree.process_frame
+		if i >= FEET_WARM and (i - FEET_WARM) % FEET_EVERY == 0:
+			await _shot(tree, "feet_walking_extremes_%d" % shot, 0.0)
+			shot += 1
 	stage.queue_free()
 	await tree.process_frame
 
