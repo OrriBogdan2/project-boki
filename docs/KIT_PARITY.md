@@ -261,7 +261,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Input | Ours (content) | In game | Source | Verdict |
 |---|---|---|---|---|
 | LMB shotgun | stop at 6.3, 7 slugs, first volley on the aim line | reach 8.8 (7.8 + 0.6 + 0.4: the probe's weapon reads 7.8); lane 1.2 | slugs stop about 3.5 bh out (6.3) | match (6.3 asserted by --dredge-combo-check) |
-| RMB Abyssal Hand | range 11.5 | reach 12.9 (11.5 + 0.6 + 0.4 + step), lane 1.4 | 6-7 bh (10.8-12.6) | match |
+| RMB Deep Reach | range 11.5 | reach 12.9 (11.5 + 0.6 + 0.4 + step), lane 1.4 | 6-7 bh (10.8-12.6) | match |
 | E Anchor Drop | hop 1.8, radius 3.0, 110 deg | far 5.2 = 1.8 + 3.0 + 0.4, near 0.5 | 1.5 bh deep x 2 bh wide (2.7 x 3.6) | match (+11% depth, inside footage error) |
 | R Brass Broadside | 6 orbs x 2 waves, fan 105, range 5.9 | far 5.9 (5.5 net), arc of centres 112 | fan 100-110, 3.3 bh (5.9) | match (-7%) |
 
