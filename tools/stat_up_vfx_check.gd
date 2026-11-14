@@ -19,6 +19,9 @@ class FakeGame:
 	func tick(_dt: float) -> void:
 		pass
 
+	func find(_p2: Vector2) -> Dictionary:      # (Home._find_interact asks every garden game)
+		return {}
+
 var bad := 0
 var main: Node
 var home
