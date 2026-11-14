@@ -308,6 +308,13 @@ func run(main: Node) -> void:
 	_standing_dash()          # late: it swaps the kit and model the framing rows measure
 	_aim_rel()          # after the abyss rows: its ~11 s of match time would move them (and Rimewright's standing dash)
 	bad += DIRS.new(m, flat, _reset).run()      # after _aim_rel: its rows disturb the aim_back state
+	# the swoop rows go after the aim rows: a swoop run leaves the body turning slower
+	# a short dive, then let go: the glide catches you and the fall it shed becomes swoop speed, then fades
+	var r := _swoop(HunterMove.glide_height - 1.0, 60, 4, false)
+	rec("swoop_x", r[0])
+	rec("swoop_fade_s", r[1])
+	rec("swoop_left", r[2])
+	rec("swoop_hot_x", _swoop(40.0, 150, 6, true)[0])
 	await _no_fall_carry(main)      # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()      # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
@@ -404,6 +411,8 @@ func _aim_rel() -> void:
 			P.wpn = wpn0.duplicate()
 			P.wpn["fire_slow"] = 0.8
 		for dir in [Vector2(1, 0), Vector2(0, 1), Vector2(-1, 0), Vector2(-1, 1).normalized()]:
+			for mb in m.mobs: mb.queue_free()     # (a mob spawned in the match time so far would block the run)
+			m.mobs.clear()
 			_reset(flat - Vector3(dir.x, 0, dir.y) * 3.0)
 			_clear_mobs()                   # (mobs spawned in the match time so far would knock these rows)
 			P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
@@ -742,12 +751,6 @@ func _glide_dive() -> void:
 			m.step(DT)
 		side.append(_hv(P).length())
 	rec("dive_steer_ratio", float(side[0]) / maxf(0.01, float(side[1])))
-	# a short dive, then let go: the glide catches you and the fall it shed becomes swoop speed, then fades
-	var r := _swoop(HunterMove.glide_height - 1.0, 60, 4, false)
-	rec("swoop_x", r[0])
-	rec("swoop_fade_s", r[1])
-	rec("swoop_left", r[2])
-	rec("swoop_hot_x", _swoop(40.0, 150, 6, true)[0])
 	# holding on: the plunge times out, and stays off until a fresh press
 	_reset(flat + Vector3(0, 360.0, 0), false)
 	P.inp["jump"] = true
