@@ -243,7 +243,7 @@ whether a second E there should buffer into the freeze would settle it.
 | Rink Wall: the tell, erupts narrow ahead in her look, widens while sliding, shoves, stops at the cursor, freezes on E, stops shots | the seven "tm E" rows (the slab row checks the solid sheet) |
 | The wall gives teammates nothing | `--support-check` "Rink Wall: no squad shield or heal" |
 | A merge start ends the skate, the spear aim and a wall still in its tell | "drop_holds ends the skate, the spear aim and the wall's tell" |
-| Rimelock: sealed, rink for everyone, stacking slow, countdown, crash with the ice-block stun, late and early recasts, line of sight | the "tm X" rows |
+| Rimelock: sealed, rink for everyone, flat 35% slow, countdown, crash with the ice-block stun, late and early recasts, line of sight | the "tm X" rows |
 | Rink Wall shoves foes into the rink, then the crash stuns them (the sheet's combo) | the wall's carry plus `foes_in` at the crash (the two run independently) |
 | Rimelock pays the bond only when the crash stuns someone | "tm R: ... no bond for the cast", "the crash pays the bond as a hit", "three hunters stunned pay one event for the cast" |
 | Burst: Rimelock straight into a merge and its ultimate does not knock a full-health hunter | "burst: Rimelock straight into a merge ..." |
