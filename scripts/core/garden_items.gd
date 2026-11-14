@@ -178,7 +178,18 @@ static func nudge(id: String) -> String:
 		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
 		"stay": return "no new forms while worn"
 		"rinse": return "clears the lean; the grown parts stay"
-		_: return "%d points of the top stat become loose points" % int(e["n"])
+		"loose": return "%d points of the top stat become loose points" % int(e["n"])
+		"stat_all": return "+%d to every stat, up to the limit for its level" % int(e["n"])
+		"nest": return "goes in the Nesting Nook with a pair"
+		"down": return "+%d trust" % int(e["trust"])
+		"sweet": return _sweet_words(e)
+		"trait": return "%s +%d%%" % [String(e["trait"]), roundi(100.0 * float(e["by"]))]
+		"aura": return String(e["text"])
+		_: return "%s +%d%%, bond +%d%%" % [e["trait"], roundi(100.0 * float(e["by"])), roundi(100.0 * e["bond"])]
+
+static func _sweet_words(e: Dictionary) -> String:
+	var share := roundi(100.0 * float(e["share"]))
+	return "lifts a %s lean to %d%% of full and holds it %d days" % [" / ".join(e["types"]), share, int(e["hold_days"])]
 
 ## Takes a worn item off and puts it back in the bag. False if the Boki isn't wearing it.
 static func take_off(rec: Dictionary, id: String) -> bool:
