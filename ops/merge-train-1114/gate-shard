@@ -1,8 +1,9 @@
 #!/bin/bash
 # gate-shard MAIN_TREE CAND_TREE OUT : the merge gate (every check flag on main and on the candidate side by side, plus
-# the export dry-run), with each check sent as its own `jobq submit --needs any` job. The idle CPU workers (rpc pods,
-# w2, hetzner) run the suite in parallel instead of one box running 12 at a time (ops/merge-rush-1113/suite.sh, the
-# same checks and the same 300 s cap).
+# the export dry-run), sent to the idle CPU workers (rpc pods, w2, hetzner) as ~32 shard jobs per side instead of one
+# box running 12 at a time (ops/merge-rush-1113/suite.sh: same checks, same 300 s cap). A shard is one jobq job that runs
+# its flags 4 at a time through tools/gate_shard_run.gd (injected into both trees): the jobq relay costs ~2.5 s a submit,
+# so one job per flag (840 submits) took as long as the old single-box gate.
 # - Flags: every "--*-check" key in tools/check_registry.gd plus the ones still wired inline in scripts/main.gd.
 #   FLAGS="--a-check --b-check" runs only those (merge-train's bisect re-runs just the new reds).
 # - Main-side greens are cached per main sha in $GS_CACHE (reds re-run every time), so the second PR gated on the same main submits half the jobs.
@@ -18,8 +19,12 @@ MT=$(realpath "$1") CT=$(realpath "$2") OUT=$3
 CACHE=${GS_CACHE:-$HOME/.gate-shard-cache}
 TAG=${GS_TAG:-gs$$}
 CAP=${GS_CAP:-300}             # per-check timeout, s (suite.sh uses 300)
-SUBMIT_P=${GS_SUBMIT_P:-12}     # parallel submits (a w2 relay call takes ~4 s)
-MAX_WAIT=${GS_MAX_WAIT:-5400}  # s before unfinished jobs count as lost
+SUBMIT_P=${GS_SUBMIT_P:-8}      # parallel submits (every jobq call goes through a slow relay)
+SHARDS=${GS_SHARDS:-32}         # jobs per side; each runs its flags PAR at a time
+PAR=${GS_PAR:-4}
+HERE=$(cd "$(dirname "$0")" && pwd)
+JOB_CAP=${GS_JOB_CAP:-2400}    # s a whole shard job may run
+MAX_WAIT=${GS_MAX_WAIT:-900}   # s a round waits for its shards; the unfinished ones count as lost and are re-run singly
 mkdir -p "$OUT" "$CACHE"; OUT=$(realpath "$OUT"); : > "$OUT/jobs.tsv"
 T0=$(date +%s)
 MSHA=$(git -C "$MT" rev-parse HEAD) CSHA=$(git -C "$CT" rev-parse HEAD)
@@ -38,30 +43,45 @@ import_tree() {  # import_tree TREE NAME: refresh .godot (the workers get the tr
 	grep -cE 'Parse Error|SCRIPT ERROR' "$OUT/import_$2.log" > "$OUT/import_$2.n"
 }
 
-submit() {  # submit SIDE TREE < flags : one job per flag, SUBMIT_P at a time; appends "side flag id" to jobs.tsv
-	xargs -P "$SUBMIT_P" -I{} sh -c 'id=$(jobq submit --tree "$2" --needs any --label "$3-$1{}" --timeout "$4" -- {} \
-		2>/dev/null | tail -1); [ -n "$id" ] && echo "$1 {} $id"' _ "$1" "$2" "$TAG" "$CAP" >> "$OUT/jobs.tsv"
+inject() {  # inject TREE : the shard runner and its registry line (see gate_shard_run.gd); an untracked/dirty file in a scratch tree
+	cp "$HERE/gate_shard_run.gd" "$1/tools/gate_shard_run.gd"
+	grep -q 'gate-shard-run' "$1/tools/check_registry.gd" \
+		|| sed -i 's|^const CHECKS := {$|&\n\t"--gate-shard-run": ["res://tools/gate_shard_run.gd", "gate_shard_run", null],|' "$1/tools/check_registry.gd"
 }
 
-collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag> <rc> <errs> <secs>" to stdout
-	local left t1=$(date +%s) line id rc secs log errs
-	declare -A side flag
-	while read -r s f id; do side[$id]=$s; flag[$id]=$f; done < "$1"
+submit() {  # submit SIDE TREE < flags : the flags dealt round-robin (slowest first) into SHARDS jobs; appends "side id flags" to jobs.tsv
+	local flags n k i=0
+	flags=$(awk -v H="$CACHE/secs.txt" 'BEGIN { while ((getline l < H) > 0) { split(l, a, " "); t[a[1]] = a[2] } }
+		{ print (($1 in t) ? t[$1] : 30), $1 }' | sort -k1,1nr -k2 | cut -d' ' -f2)  # no history: 30 s
+	n=$(grep -c . <<< "$flags"); [ "$n" -gt 0 ] || return 0
+	k=$(( n < SHARDS ? n : SHARDS ))
+	awk -v k="$k" '{ s[(NR - 1) % k] = s[(NR - 1) % k] "," $1 } END { for (i = 0; i < k; i++) print substr(s[i], 2) }' <<< "$flags" \
+		| xargs -P "$SUBMIT_P" -I{} sh -c 'id=$(jobq submit --tree "$2" --needs any --label "$3-$1" --timeout "$4" \
+			-- --gate-shard-run={} --par="$5" --cap="$6" 2>/dev/null | tail -1); [ -n "$id" ] && echo "$1 $id {}"' _ "$1" "$2" "$TAG" "$JOB_CAP" "$PAR" "$CAP" >> "$OUT/jobs.tsv"
+}
+
+collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag> <rc> <errs> <secs>" per flag to stdout
+	local left t1=$(date +%s) line id rc log got f
+	declare -A side flags
+	while read -r s id fl; do side[$id]=$s; flags[$id]=$fl; done < "$1"
 	left=" ${!side[*]} "
 	while [ -n "${left// /}" ] && [ $(( $(date +%s) - t1 )) -lt "$MAX_WAIT" ]; do
-		while read -r line; do
+		sleep 30
+		while read -r line; do  # `jobq result ID` for every id still open (`jobq wait` prints nothing until all are done, `status` only lists the latest)
 			id=${line%% *}; [ -n "${side[$id]:-}" ] && [[ $left == *" $id "* ]] || continue
-			rc=$(grep -oP 'rc=\K-?[0-9]+' <<< "$line"); secs=$(grep -oP 'secs=\K[0-9]+' <<< "$line")
-			log=$(grep -oP 'log=\K\S+' <<< "$line"); errs=$(grep -c 'SCRIPT ERROR' "$log" 2>/dev/null)
-			echo "${side[$id]} ${flag[$id]} ${rc:-1} ${errs:-0} ${secs:-0}"; left=${left/ $id / }
-		done < <(jobq wait $left --max 300 2>/dev/null | grep ' rc=')
+			log=$(grep -oP 'log=\K\S+' <<< "$line"); got=$(grep '^GS ' "$log" 2>/dev/null)
+			awk -v s="${side[$id]}" '{ print s, $2, $3, $4, $5 }' <<< "$got" | grep .
+			for f in ${flags[$id]//,/ }; do grep -q "^GS $f " <<< "$got" || echo "${side[$id]} $f lost 0 0"; done
+			left=${left/ $id / }
+		done < <(printf '%s\n' $left | xargs -P 8 -n1 jobq result 2>/dev/null | grep " rc=")
 	done
-	for id in $left; do echo "${side[$id]} ${flag[$id]} lost 0 0"; done
+	for id in $left; do for f in ${flags[$id]//,/ }; do echo "${side[$id]} $f lost 0 0"; done; done
 }
 
 red() { awk '$2!="0" || $3>0 {print $1}' "$1" | sort -u; }
 
 # 1. import both trees (compile gate: the candidate may not add parse errors)
+inject "$MT"; inject "$CT"
 import_tree "$MT" main & import_tree "$CT" cand &
 wait; PE_M=$(cat "$OUT/import_main.n") PE_C=$(cat "$OUT/import_cand.n")
 
@@ -87,6 +107,9 @@ CACHED=$(wc -l < "$OUT/main.txt")
 collect "$OUT/jobs.tsv" > "$OUT/round1.txt"
 awk '$1=="c" {print $2, $3, $4, $5}' "$OUT/round1.txt" > "$OUT/cand.txt"
 awk '$1=="m" {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$OUT/main.txt"
+touch "$CACHE/secs.txt"  # last run time per flag: the next run deals the slow ones first
+cat "$CACHE/secs.txt" <(awk '$2 != "lost" {print $1, $4}' "$OUT/cand.txt") | awk '{t[$1] = $2} END {for (k in t) print k, t[k]}' > "$CACHE/secs.new" \
+	&& mv "$CACHE/secs.new" "$CACHE/secs.txt"
 awk '$1=="m" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$MSHA.txt"  # greens only
 SUBMITTED=$(wc -l < "$OUT/jobs.tsv")
 
@@ -94,8 +117,8 @@ SUBMITTED=$(wc -l < "$OUT/jobs.tsv")
 SUSPECT=$(comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"))
 if [ -n "$SUSPECT" ]; then
 	: > "$OUT/jobs2.tsv"
-	echo "$SUSPECT" | submit c "$CT"
-	echo "$SUSPECT" | comm -12 - <(pick "$MT") | submit m "$MT"
+	echo "$SUSPECT" | SHARDS=999 PAR=1 submit c "$CT"
+	echo "$SUSPECT" | comm -12 - <(pick "$MT") | SHARDS=999 PAR=1 submit m "$MT"
 	tail -n +"$((SUBMITTED + 1))" "$OUT/jobs.tsv" > "$OUT/jobs2.tsv"
 	collect "$OUT/jobs2.tsv" > "$OUT/round2.txt"
 fi
