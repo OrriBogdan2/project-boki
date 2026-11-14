@@ -113,6 +113,10 @@
 			"clip": "shield_slam",
 			"lead": 0.25
 		},
+		"bul_boop": {
+			"clip": "shield_boop",
+			"upper": "moving"
+		},
 		"bul_mend": {
 			"clip": "e_mend",
 			"upper": "moving"
@@ -195,6 +199,7 @@
 			"bul_whirl": "angry",
 			"bul_charge": "determined",
 			"bul_slamshield": "angry",
+			"bul_boop": "angry",
 			"bul_mend": "happy",
 			"bul_ult_wind": "angry",
 			"bul_ult_slam": "angry",

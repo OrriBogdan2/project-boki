@@ -3,12 +3,13 @@ extends RefCounted
 ## Quiet growth: every level a hunter reaches makes them a little tougher (max health) and their
 ## abilities a little stronger (ability power), with no banner. Both grow in a straight line, the same
 ## share every level, as in the source (content/rules/level_growth.json, docs/ABILITIES.md). The level
-## badge flashes and its tooltip shows the totals (LevelGrowth.tip). Weapon growth is separate:
-## WeaponPath on even levels.
+## badge flashes and its tooltip shows the totals (LevelGrowth.tip). Levels grow nothing else: no weapon
+## bonuses, only ability ranks.
 ##
 ##   LevelGrowth.hp_pct(lvl) / ap_pct(lvl)   the total share gained by that level (0 at level 1)
 ##   LevelGrowth.apply(h)                    brings a hunter's max health up to their level's growth
 ##   LevelGrowth.ap(h)                       the ability power multiplier (1.0 at level 1)
+##   LevelGrowth.xp(k)                       an XP gain from the file's "xp" block (docs/LEVEL_PACE.md)
 ##   LevelGrowth.hp(h)                       the max health multiplier, for shields that scale with it
 
 static var _rules: Dictionary = {}
@@ -18,6 +19,10 @@ static func rules() -> Dictionary:
 		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/level_growth.json"))
 		_rules = d if d is Dictionary else {}
 	return _rules
+
+## How much XP one source gives (k: a key of the "xp" block, e.g. "knock").
+static func xp(k: String) -> float:
+	return float((rules().get("xp", {}) as Dictionary).get(k, 0.0))
 
 ## The share one level adds (k = "hp" or "ap"), the same for every level past the first.
 static func rate(k: String) -> float:

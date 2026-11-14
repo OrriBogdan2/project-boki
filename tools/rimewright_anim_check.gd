@@ -174,7 +174,7 @@ func _rime() -> void:
 	_recover(m, P, K)
 	_recover_dash()
 
-## In the recovery she walks and casts nothing; an E pressed in its last DashFlow.BUFFER_S goes as it ends.
+## In the recovery she walks and casts nothing; an E pressed in its last Loco.press_buffer goes as it ends.
 func _recover(m: Match, P: Hunter, K: RimewrightKit) -> void:
 	var end: float = K.recover_until
 	var at := P.pos
@@ -184,7 +184,7 @@ func _recover(m: Match, P: Hunter, K: RimewrightKit) -> void:
 	_step_firing(m, P)
 	P.inp["sig"] = false
 	var early_e := float(K.cd["e"]) > 0.0
-	while m.time < end - DashFlow.BUFFER_S + DT:
+	while m.time < end - Loco.press_buffer + DT:
 		_step_firing(m, P)
 	P.inp["sig"] = true
 	_step_firing(m, P)

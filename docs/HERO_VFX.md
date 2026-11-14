@@ -14,9 +14,9 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   games as the `["fx", "hvfx", ...]` event, since they don't run the kit. Set `"net": false` on a recipe to keep it local.
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
+- `HeroVfx.of(m).trail(h, "move", node, o)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   ended. Local. Particle layers, `string`, and surface layers: a surface (a cast's dark ring) stays at 85% of its
   `life` while asked and runs out the rest when the asks stop.
-- `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges. The recipe's `"end"` names a move
   played where the trail stopped, facing the way it flew (Sparkle's bolt splinters).
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
@@ -24,6 +24,7 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
 
 ## A recipe
 `"move": {"sfx": [...], "fx": [...]}`. Options the kit passes (`"r"`, `"len"`, `"w"`, `"k"` the charge, `"flip"`, or any flag
+named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_x"` to scale it, `"size_k"` to grow with `k` (negative shrinks: Vex's rifle passes its decay as `k`).
 named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground and shell looks ride, local only) fill sizes: `"size": "r"` with `"size_x"` to scale it, `"size_k"` to grow with `k`.
 
 | layer `p` | what | key fields |
@@ -108,6 +109,19 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+- **Receiving a heal or a shield:** one shared cue on the body (`ReceiverCue`), whoever gives it: a soft rise of light
+  for a heal, a thin shell flash for a shield, tinted by the giver's ability colour, plus a `+N` in the heal or shield
+  colour through `Fx.number`. No particles, bursts or rings (a ground ring means gameplay): the cue is a pooled body-sized
+  shell (`POOL` of them, 0 particles; `shaders/receiver_cue.gdshader`, mix-blended so the tint reads on bright
+  ground, where an additive glow washes out), so it reads at every quality. Sources call `Hunter.heal`, `Effects._heal` or
+  `ReceiverCue.shield`; a zone ticking again inside `GAP_S` is one rise. Checked by `--receiver-cue-check`.
+
+## Missed shots
+A projectile that ends on nothing says where: `MissFx` (called from `Match._shot_end`, and by Sable's Bola) draws one pooled
+puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, wider and fainter where the shot ran out of
+range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
+oldest is taken back), nothing past `AbilityFx.FAR` from the player, nothing under a stage's own look. `--miss-fx-check`
+asserts it for all 12 kits; `--miss-shots --shots-dir=<dir>` takes the Vex, Lace and Sparkle strips (`jobq submit --needs gpu`).
 
 ## Shot floor (LMB projectiles)
 Every LMB projectile (not a swing, decoy, mob shot or ability, which have their own tells) carries `ShotFloor`'s

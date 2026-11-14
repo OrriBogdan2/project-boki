@@ -3,9 +3,10 @@ extends RefCounted
 ## The garden's one snack patch (briefs/design/GARDEN.md section 10 question 1, default). With base_mode on, a save has
 ## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens four element snacks
 ## on a timer (content/rules/snack_patch.json) and walking over it picks them up for the pantry, to feed the lean
-## foods. Never sold, no seeds, no watering. The timer is the deco entry's "t" (unix seconds of the last pick).
+## foods. Never sold, no seeds, no watering. The timer is the deco entry's RIPE_KEY (unix seconds of the last pick).
 
 const ID := "snack_patch"
+const RIPE_KEY := "ripe_t"      # the deco entry's pick time (a deco "t" is a building tier, clamped to 1..3 on load)
 
 var h                                    # the Home screen
 var _look_t := 0.0
@@ -46,14 +47,14 @@ static func entry(d: Dictionary) -> Dictionary:
 	return {}
 
 static func ripe(e: Dictionary, now: float) -> bool:
-	return not e.is_empty() and now - float(e.get("t", now)) >= float(rules()["grow_secs"])
+	return not e.is_empty() and now - float(e.get(RIPE_KEY, now)) >= float(rules()["grow_secs"])
 
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
 	var e := entry(d)
 	if not ripe(e, now):
 		return []
-	e["t"] = now
+	e[RIPE_KEY] = now
 	var got: Array = snacks(d).duplicate()
 	var more := extra(d, e)
 	if more != "":
@@ -93,8 +94,8 @@ func tick(d: float) -> void:
 	_look_t = 0.2
 	var now := Time.get_unix_time_from_system()
 	var e := entry(Save.d)
-	if not e.is_empty() and not e.has("t"):
-		e["t"] = now          # the timer starts when it is put down
+	if not e.is_empty() and not e.has(RIPE_KEY):
+		e[RIPE_KEY] = now          # the timer starts when it is put down
 	var now_ripe := ripe(e, now)
 	if now_ripe != _ripe:
 		_ripe = now_ripe

@@ -529,6 +529,7 @@ func _blowout(f: Ent) -> void:
 	clear_sparks(f)
 	blowouts += 1
 	ComboMark.payoff(m, h, f)
+	CombatBus.tech.emit(h, "mage")
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
@@ -618,7 +619,7 @@ func fire_rmb(c: Dictionary) -> void:
 	if rod != null and is_instance_valid(rod):
 		rod.visible = false
 	var sd := rmb_def()
-	if not spend_rmb():
+	if h.downed or not spend_rmb():          # knocked mid-hold: nothing thrown (mage.md "Interrupts")
 		return
 	var held_t := float(c["t"])
 	var min_t := float(sd["min_t"])

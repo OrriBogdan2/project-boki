@@ -18,10 +18,12 @@ const NEEDS_ALLY := ["tender"]  # heroes whose X is refused with nobody to cast 
 const ALLY_AT := Vector3(5, 0, -3)      # m from home: the teammate stands beside the dash lane, inside X's 12.6 m
 
 ## The source's dash -> LMB / X rows (docs/heroes/dash_interactions.md): [hero, dash, slot, mode]. Silent source:
-## the press goes mid-dash; Kael and Albert dash AS the attack (no slash or swing inside it:
-## buffer), and their ult plants them, as Cinder's flight takes over (cancel).
+## the press goes mid-dash; Vex's rifle fires in the air slide too (the card's rule plus the wiki's air tap);
+## Kael and Albert dash AS the attack (no slash or swing inside it: buffer), and their ult plants them, as
+## Cinder's flight takes over (cancel).
 const SOURCE_ROWS := [
 	["archer", "ground", "lmb", "fire"], ["archer", "air", "lmb", "fire"],
+	["gunslinger", "air", "lmb", "fire"],
 	["mage", "ground", "lmb", "fire"], ["mage", "air", "lmb", "fire"],
 	["ashwick", "ground", "lmb", "fire"], ["ashwick", "air", "lmb", "fire"],
 	["dolm", "air", "lmb", "fire"],
@@ -51,6 +53,7 @@ func run(main: Node) -> void:
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
 	for hero in _heroes():
 		await check_hero(main, hero)
+	await _one_window(main)
 	_print_exceptions()
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
@@ -313,6 +316,82 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 			return up.call("gear")
 	return false
 
+# ------------------------------------------------------------------ the one press window (tuning.json press_buffer)
+const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes
+const FAR_S := 0.2              # s early: outside it, so the press is dropped
+
+## Loco.press_buffer by its three uses: Gil's E held past a dash's end while a stun still runs, Gil's E made before
+## a stun ends, and Ostra's early recast before her seed arms. NEAR_S early goes, FAR_S early doesn't.
+func _one_window(main: Node) -> void:
+	CombatBus.ability_used.connect(_on_used)
+	var went := {}
+	var m := _match(main, "dolm")     # (his Shift -> E row is "buffer": Gil's is "fire", so no E waits out his dash)
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "dolm e held past a dash's end"]] = _past_dash(m, lead)
+	m.queue_free()
+	m = _match(main, "gil")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "gil e before a stun ends"]] = _before_stun(m, lead)
+	m.queue_free()
+	m = _match(main, "ostra")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ostra e before the recast arms"]] = _before_recast(m, lead)
+	m.queue_free()
+	await main.get_tree().process_frame
+	CombatBus.ability_used.disconnect(_on_used)
+	for key in went:
+		ok(went[key] == (float(key[0]) < Loco.press_buffer), "one window %.2fs: %s, pressed %.2fs early: %s" % [
+				Loco.press_buffer, key[1], key[0], "went off" if went[key] else "dropped"])
+
+## E pressed as a dash sets off (held for its end), then a stun running `lead` s past that end.
+func _past_dash(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.inp["move"] = Vector2(0, -1)
+	hunter.inp["dash"] = true
+	for i in DASH_WAIT:
+		if hunter.ak.in_dash():
+			break
+		m.step(Match.DT)
+	hunter.inp["dash"] = false
+	var before := _snap()
+	_press("e")
+	while hunter.ak.dash_left() > Match.DT * 1.5:
+		m.step(Match.DT)
+	if _went_off(before, "e") or not hunter.ak.in_dash():
+		return true           # (not held to the dash's end: both leads read "went off" and one fails)
+	hunter.stun_t = lead + hunter.ak.dash_left()
+	return _goes_off(m, before, "e")
+
+func _before_stun(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.stun_t = lead
+	var before := _snap()
+	_press("e")
+	return _goes_off(m, before, "e")
+
+## Ostra's E plants the seed; E again `lead` s before it arms pops it (or not) within NEAR_S of arming.
+func _before_recast(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	var k := hunter.ak as OstraKit
+	k.use_e()
+	for i in WATCH:
+		if not k.seed.is_empty():
+			break
+		m.step(Match.DT)
+	var min_t := float(k.e_def()["min_recast"])
+	while not k.seed.is_empty() and float(k.seed["t"]) < min_t - lead:
+		m.step(Match.DT)
+	_press("e")
+	_steps(m, ceili((lead + NEAR_S) / Match.DT))
+	return k.seed.is_empty()
+
+func _goes_off(m: Match, before: Dictionary, slot: String) -> bool:
+	for i in WATCH:
+		m.step(Match.DT)
+		if _went_off(before, slot):
+			return true
+	return false
+
 # ------------------------------------------------------------------ combos with Shift and jump (item 51)
 const ACT_S := 0.1              # s: owner rule, a jump or Shift out of an ability's recovery acts within this
 const HOLD_PAST := 0.1          # s: a hold charges this long past the kit's tap/hold threshold before the move
@@ -560,7 +639,7 @@ const SPACE_FRACS := [0.25, 0.5, 0.75]
 ## Space in `slot`'s recovery, on the ground (a jump) or in the air (the glider, Space held from the press): the
 ## window after the cast in which a press does not act at once (its lock), and what a press at 25, 50 and 75
 ## percent of it does: at once, at the end (how long after the press) or never. Unless the hero's into_jump row
-## is a lock, a press in the window's last DashFlow.BUFFER_S must act by its end (every interaction is chainable).
+## is a lock, a press in the window's last Loco.press_buffer must act by its end (every interaction is chainable).
 func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 	var where := "air" if in_air else "ground"
 	var first := _space_at(m, slot, in_air, 0)
@@ -576,7 +655,7 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 		var at := int(round(absi(lock) * frac))
 		var got := first if lock == 0 else _space_at(m, slot, in_air, at)
 		cells.append(got)
-		var in_buffer := lock > 0 and float(lock - at) * Match.DT <= DashFlow.BUFFER_S + 0.001
+		var in_buffer: bool = lock > 0 and float(lock - at) * Match.DT <= Loco.press_buffer + 0.001
 		if not locked and in_buffer and got == "never":
 			right = false
 	var span := "lock %s%.2fs" % ["> " if lock < 0 else "", absi(lock) * Match.DT]

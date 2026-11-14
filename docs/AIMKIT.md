@@ -235,6 +235,10 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - For kit-spawned shots, use `AimMode.dist` and `AimMode.point` so the telegraph and the shot agree.
 - **Checks.** In combo checks, assert `AimKit.shown(h, id)` while aiming or holding, and read
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
+- **Kit telegraphs go through AimKit only.** The old one-node-per-telegraph `ArchKit.tele_circle`/`tele_lane`
+  are gone (the R fuse circle and Gil were the last callers). For a one-off that fills over time (a thrown
+  potion's landing circle, a moving line), give it its own id and refresh it from the kit's tick with
+  `"fill": k`, as `GilKit` does.
 - **Bots dodge them.** A shape shown with `all` (a circle, lane or cone) is a hostile area to the other
   team's bots: `BotDodge` (scripts/match/bot_dodge.gd) walks a bot out of it, or dashes with a real charge,
   after the difficulty's `react` time x 2. Check: `--bot-dodge-check` (normal out at least 70%, easy under 40%).
@@ -274,7 +278,7 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 | | R | cone, fixed | fixed | match |
 | Vex (venator) | LMB | full, past the cursor | full | match |
 | | RMB Burr | along the aim to max range, not the cursor | full, 10.5 m | match |
-| | E Longneedle | fixed long lane | full, 18 m | match |
+| | E Palm Lance | fixed long lane | full, 18 m | match |
 | | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
 | Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
 | | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |

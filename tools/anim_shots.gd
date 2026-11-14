@@ -1,13 +1,15 @@
 extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
-## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
-## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## attacks at the match camera (--close: a side view at hip height, to read the arms and feet; --fov=<deg> widens or
+## tightens the close view), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
 ## --release: only the release strip, <dir>/<id>/release/fNNN.png: the kit's own hand-off from the held draw
 ## into arc_loose, one frame per 1/30 s from the arrow's spawn (the game's blend plays, so a snap eaten by it shows).
 ## --upper also shows each Hunter's atk2 on the upper body over the run (strip run_atk2: Tenzo's punch while running).
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, jog, run (the game's own locomotion hand-off at WALK_MPS, JOG_MPS and
 ## RUN_MPS, seen from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the
-## keyed clip, forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing.
+## keyed clip, forced); --aim-runs=60,130 adds run_aimN strips, running N degrees off the facing. --react instead
+## strips how he takes a hit (docs/art/REACT_AUDIT.md): hit_f and hit_b as the game hands them off (f000 the hit
+## frame, then one frame per DT), and the stun loop, the fall loop and the landing, keyed.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
@@ -28,19 +30,24 @@ var aim_runs: Array = []    # --aim-runs=60,130: extra run strips with the run t
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
-	"dolm": ["lmb_throw", "lmb_punch"], "dredge": ["shot", "throw"], "gunslinger": ["lmb", "rmb"],
+	"dolm": ["lmb_throw", "lmb_punch"], "dredge": ["shot", "throw"], "gil": ["thrust_a", "lunge"],
+	"gunslinger": ["lmb", "rmb"],
 	"juggernaut": ["slash_r", "slam"], "mage": ["lmb_l", "rmb"], "ostra": ["orb", "snap"],
 	"rimewright": ["dart_r", "dart_heavy"], "tender": ["shot_r", "seed"], "thief": ["lmb_r", "vault_r"],
 }
 
 var posts: Array = []
+var react := false
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
 	var ids: Array = Arch.ORDER.duplicate()
 	var frames := 8
+	var close_fov := 14.0
 	for a in OS.get_cmdline_user_args():
+		if a == "--react": react = true
+		if a.begins_with("--fov="): close_fov = float(a.substr(6))
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--frames="): frames = int(a.substr(9))
@@ -57,7 +64,7 @@ func run(main: Node) -> void:
 	cam.fov = 8.0
 	cam.position = Vector3(0, 21.0, 9.4)
 	if close:
-		cam.fov = 14.0
+		cam.fov = close_fov
 		cam.position = Vector3(0, 1.0, 12.0)
 	cam.look_at(Vector3(0, 0.8 if not close else 1.0, 0))
 	_posts()
@@ -99,6 +106,10 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
+	if react:
+		await _react(model, sync, clips, dir, frames)
+		model.queue_free()
+		return
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
 	if release:
@@ -119,6 +130,30 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	if over != "":
 		await _loco(model, sync, dir.path_join("run_atk2"), RUN_MPS, frames, clips, over)
 	model.queue_free()
+
+func _react(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
+	var st: Dictionary = clips.d["states"]
+	var behind := Vector2(sin(SIDE_YAW), cos(SIDE_YAW))     # hit_dir runs from the attacker to him (hunter.gd)
+	await _hit(model, sync, dir.path_join("hit_f"), behind, frames)
+	await _hit(model, sync, dir.path_join("hit_b"), -behind, frames)
+	await _keyed(model, sync, clips, dir.path_join("stun"), String(st["stun"]), frames)
+	await _keyed(model, sync, clips, dir.path_join("fall"), String(clips.d["air"]["fall"]), frames)
+	await _keyed(model, sync, clips, dir.path_join("land"), String(clips.d["land"]["clip"]), frames)
+
+## The game's own hit hand-off while he stands: hit_t counts up from the hit, a frame every DT.
+func _hit(model: Node3D, sync: Node, dir: String, hit_dir: Vector2, frames: int) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var s := {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": true}
+	model.set_meta(WardenClips.STATE, s)
+	for k in int(WARM_S / DT):
+		sync.call("_process", DT)
+	for i in frames:
+		s["hit_t"] = i * DT
+		s["hit_dir"] = hit_dir
+		model.set_meta(WardenClips.STATE, s)
+		sync.call("_process", DT)
+		await _grab(dir.path_join("f%03d.png" % i))
+	model.set_meta(WardenClips.STATE, {})
 
 ## The side view at the Hunter's own scale: the head's height over CLOSE_REF_H scales the camera out and up.
 func _close_cam(sk: Skeleton3D) -> void:

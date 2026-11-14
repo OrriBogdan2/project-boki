@@ -21,7 +21,7 @@ var shake_left := 0.0
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
-var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
+var user_zoom := 1.0           # the mouse wheel (CamWheel); multiplies the match's own zoom
 var lead := 1.0
 var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
@@ -56,21 +56,18 @@ const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of pop
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
 
-## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
-## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
+## The view in play. Gliding and sneaking widen it (CamWheel), height pulls it back further, so you see where
+## you'll land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
 ## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
-const GLIDE_ZOOM := 1.25      # x the distance under the glider [spec] +15..25% boom in the air
-const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [Supervive]
 const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
 const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
 const ALT_ZOOM_MAX := 0.7     # ...up to +70%
+## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
+## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
+## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
 func air_zoom(h: Hunter, alt: float) -> float:
-	var z := 1.0
-	if h.gliding:
-		z = GLIDE_ZOOM
-	elif h.crouch and h.grounded:
-		z = SNEAK_ZOOM
-	z *= user_zoom * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX))
+	var z := CamWheel.final(CamWheel.widen(h), user_zoom, h)
+	z *= 1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX)
 	return maxf(z, zoom) if h.glide_dive.on else z
 
 ## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
@@ -85,10 +82,34 @@ var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
 var cast_left := 0.0
 var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cursor pan
 
+## The camera abyss zoom [game data names it; its size is ours]: under an island's lip over the abyss the view
+## pulls out with your depth (HunterMove.abyss_band of the slow-fall band, abyss_cam_zoom at its bottom), so
+## the rim you need to get back to stays on screen, and eases back as the lift returns you. Match sets
+## abyss_depth every frame (0 on land); on top of the match's own zoom, like a cast's wider view.
+var abyss_depth := 0.0        # m under the lip over the abyss
+var abyss_k := 0.0            # 0 = the usual view, 1 = the full pull-out
+
 var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
 var dist_mul := 1.0
+## Match Hunters are drawn this many times bigger (the style's "hunter_scale"; 1 but for the source_scale test
+## style, see Hunter.fit_scale).
+var hunter_scale := 1.0
+
+## How much more ground the view shows now than at the distance the draw, LOD and shadow distances were tuned for
+## (camera.json "reach_ref_m"), never under 1. Those distances scale by it, so nothing pops in at the view's edge.
+func reach() -> float:
+	return maxf(1.0, dist * dist_mul * zoom / float(RULES["reach_ref_m"]))
+
+## The same for a style's own framing, for the distances fixed when the match is built (draw ranges, shadows).
+static func style_reach(id: String) -> float:
+	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	return maxf(1.0, float(st["dist"]) / float(RULES["reach_ref_m"]))
+
+## Settings "draw" (how far small parts are drawn) grown with the style's view.
+static func draw_k() -> float:
+	return float(Settings.q("draw")) * style_reach(String(Settings.get_v("cam_style")))
 
 static func _load_rules() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/camera.json"))
@@ -103,6 +124,7 @@ func use_style(id: String) -> void:
 	dist = float(st["dist"])
 	fov = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
+	hunter_scale = float(st.get("hunter_scale", 1.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
 ## Training Grounds. Cheap enough to call every frame.
@@ -119,6 +141,7 @@ static func style_across(id: String) -> float:
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
 func _ready() -> void:
+	user_zoom = CamWheel.saved()
 	fov = 28.0
 	near = 1.0
 	far = 120.0
@@ -168,6 +191,10 @@ func _tick_cast(delta: float) -> void:
 ## The zoom an aimed cast adds right now.
 func cast_wide() -> float:
 	return 1.0 + cast_zoom * cast_k
+
+## The zoom the abyss adds right now.
+func abyss_wide() -> float:
+	return 1.0 + HunterMove.abyss_cam_zoom * abyss_k
 
 func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
@@ -243,6 +270,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	base = Vector3(flat.x, lerpf(base.y, want.y, ky), flat.y)
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)
+	abyss_k = lerpf(abyss_k, HunterMove.abyss_band(abyss_depth), 1.0 - exp(-HunterMove.abyss_cam_ease * delta))
 	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
 	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
@@ -270,7 +298,7 @@ func _trail_xz(at: Vector2, to: Vector2, step: Vector2, delta: float) -> Vector2
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 + pull) * cast_wide()
+	var z := zoom * (1.0 + pull) * cast_wide() * abyss_wide()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)

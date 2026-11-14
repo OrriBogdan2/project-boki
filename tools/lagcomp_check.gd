@@ -32,7 +32,7 @@ const CASES := [["Vex LMB", "gunslinger"], ["Lace Heavy Shot", "archer"], ["Spar
 ## The relay on a slow line: each peer's packets wait half its added round trip in, and half out.
 class LagRelay extends RelayServer:
 	var rtt := {}                 # peer id -> added round trip (ms), the first peer is the shooter
-	var held: Array = []          # [due msec, peer id, bytes or message, inbound, fast]
+	var lag_held: Array = []       # [due msec, peer id, bytes or message, inbound, fast]
 	var due_last := {}            # [peer id, inbound, fast] -> due of its last held packet (order kept)
 
 	func _half(id: int) -> int:
@@ -44,7 +44,7 @@ class LagRelay extends RelayServer:
 		var key := [id, inbound, fast]
 		var due := maxi(Time.get_ticks_msec() + _half(id), int(due_last.get(key, 0)))
 		due_last[key] = due
-		held.append([due, id, x, inbound, fast])
+		lag_held.append([due, id, x, inbound, fast])
 
 	func _on_packet(id: int, bytes: PackedByteArray) -> void:
 		_hold(id, bytes, true, false)
@@ -56,14 +56,14 @@ class LagRelay extends RelayServer:
 		super._process(dt)
 		var now := Time.get_ticks_msec()
 		var keep: Array = []
-		for x in held:
+		for x in lag_held:
 			if int(x[0]) > now:
 				keep.append(x)
 			elif x[3]:
 				super._on_packet(x[1], x[2])
 			elif clients.has(x[1]):
 				super._send(x[1], x[2], x[4])
-		held = keep
+		lag_held = keep
 
 var main: Node
 var bad := 0

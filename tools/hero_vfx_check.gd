@@ -5,17 +5,18 @@ extends RefCounted
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low. Each ability's emitter on the swapped
-## models stays on its bone (tools/hero_vfx_emit.gd).
+## from their anchor, follow it, stream behind a run and are off at Low; her Rimelock breaks outward when she ends it
+## and melts when it runs out. Each ability's emitter on the swapped models stays on its bone (tools/hero_vfx_emit.gd).
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
+const END_MS := 1.0            # ms of CPU a Rimelock end look may take to spawn from a warm pool
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
-	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
+	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gil": ["gil_"], "gunslinger": ["gunslinger_"],
 	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_"],
 	"tender": ["tender_"], "thief": ["thief_"]}
 ## The synthetic recipes the runtime parts play: one layer of every kind.
@@ -80,7 +81,10 @@ func run(main: Node) -> void:
 	_shot_trails(m, V, P)
 	await _lisette(main, V)
 	await _vex_core(main)
-	await _scarf(main)
+	var mr: Match = flow._match(main, "rimewright")
+	await main.get_tree().process_frame
+	_scarf(mr)
+	_rime_ends(mr)
 	_dots(m)
 	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
@@ -490,9 +494,7 @@ func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 ## Claire's two scarf tails (HeroScarf): one ribbon each pinned beside the neck anchor, which follows the neck bone;
 ## at rest they hang down behind her, running they stream back against the motion; a new frame after she moves, the
 ## roots are where the anchor went; off at the Low preset, back on without new meshes.
-func _scarf(main: Node) -> void:
-	var m: Match = flow._match(main, "rimewright")
-	await main.get_tree().process_frame
+func _scarf(m: Match) -> void:
 	var P: Hunter = m.player
 	var V := HeroVfx.of(m)
 	Sfx.listener = P.pos
@@ -509,8 +511,8 @@ func _scarf(main: Node) -> void:
 		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, String(a["bone"])))
 		var off := Vector3(a["off"][0], a["off"][1], a["off"][2])
 		ok(neck.distance_to(sk.global_transform * (pose * off)) < 0.001, "the scarf anchor rides the neck bone")
-	ok(neck.y > P.pos.y + 1.0 and neck.y < P.pos.y + 1.8, "the scarf anchor sits at her neck (%.2f m up)"
-			% (neck.y - P.pos.y))
+	var up := (neck.y - P.pos.y) * Hunter.VIS_SCALE / P.vis_k      # (at the plain drawn size: a match draws her bigger)
+	ok(up > 1.0 and up < 1.8, "the scarf anchor sits at her neck (%.2f m up at the plain size)" % up)
 	for i in 90:
 		S.tick(1.0 / 60.0)
 	var ln := float(w.cfg["len"])
@@ -549,6 +551,47 @@ func _scarf(main: Node) -> void:
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
 
+
+## Rimelock's ends read apart, each with its own look: X or Shift before the time is up (even the late crack) breaks
+## the shell outward with a flash, the time running out melts it off her. Warm, each look spawns in under END_MS.
+func _rime_ends(m: Match) -> void:
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	var K: RimewrightKit = P.ak
+	var hold := float(K.x_def()["hold"])
+	var late := hold - float(K.x_def()["late"]) * 0.5
+	for path: Array in [["X early", 1.0, "x"], ["X late", late, "x"], ["Shift", 1.0, "dash"], ["time up", hold, ""]]:
+		V.plays.clear()
+		K._start_rime()
+		K.rime["t"] = float(path[1]) - 0.001
+		match String(path[2]):
+			"x":
+				K.ult_recast()
+			"dash":
+				P.inp["dash"] = true
+				K._tick_rime(0.01)
+				P.inp["dash"] = false
+			_:
+				K._tick_rime(0.01)
+		var want := "rime_melt" if path[2] == "" else "rime_break"
+		var not_want := "rime_break" if path[2] == "" else "rime_melt"
+		ok(K.rime.is_empty() and int(V.plays.get(want, 0)) == 1 and not V.plays.has(not_want),
+				"Rimelock ended by %s: %s, not %s" % [path[0], want, not_want])
+	for mv: String in ["rime_break", "rime_melt"]:
+		var best := INF
+		for i in 5:
+			var t0 := Time.get_ticks_usec()
+			V.play(P, mv, P.pos, Vector2.RIGHT)
+			best = minf(best, (Time.get_ticks_usec() - t0) / 1000.0)
+		ok(best < END_MS, "%s spawns in %.3f ms (< %.1f)" % [mv, best, END_MS])
+	for i in 20:
+		V.play(P, "rime_break", P.pos, Vector2.RIGHT)
+		V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
+	var made := V.made
+	V.play(P, "rime_break", P.pos, Vector2.RIGHT)
+	V.play(P, "rime_melt", P.pos, Vector2.RIGHT)
+	ok(V.made == made and V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of ends stays pooled and capped (%d nodes)" % made)
+	_clear(V)
 ## Albert's Faultline tell (BjornUlt): the lane's fill sweeps out over exactly the wind-up from the data, at
 ## every rank, and the slam lands on the very step it closes (fill 1.0). Also with a changed windup, so the
 ## time is read from data.

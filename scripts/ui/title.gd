@@ -99,6 +99,7 @@ func _build_ui() -> void:
 		items.append(["Party", func(): Game.goto("party", {}), "bond"])
 	items.append(["Save Files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
+	items.append(["Help", _open_help, "info"])
 	if not OS.has_feature("web"):
 		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
@@ -202,3 +203,9 @@ func _lit_on_focus(b: Button, kind: String) -> void:
 		b.remove_theme_stylebox_override("normal")
 		b.remove_theme_color_override("font_color")
 		b.queue_redraw())
+
+
+## The help words, opened from the title (Overlay reads its ctx for which page).
+func _open_help() -> void:
+	Overlay.ctx = "title"
+	Overlay.open_words()

@@ -24,6 +24,8 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var feel = load("res://tools/albert_feel_check.gd").new()
+	feel.main = main_node
 	var bow = load("res://tools/pin_one_bow_check.gd").new()
 	bow.main = main_node
 	if both or "--archer-combo-check" in args:
@@ -41,8 +43,9 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n + bow.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails
+		await feel.albert()
+	n += ult.n + own.n + launch.n + tall.n + bow.n + feel.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + bow.fails + feel.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -1037,9 +1040,10 @@ func _bulwark_combos() -> void:
 		) == "ground" and absf(K.throw_d - 5.0) < 0.7 and K.fx.beacon.visible and not AimKit.shown(P, "aim"),
 		"throws %d st %s d %.1f beacon %s" % [K.throws - thr0, str(K.mace.get("st")), K.throw_d, K.fx.beacon.visible]
 	)
-	step(m, 7.0)
+	# (past "rope.max_t" s the rope reels it home: tools/albert_feel_check.gd)
+	step(m, float(K.lmb_def()["rope"]["max_t"]) - 1.5)
 	ok(
-		"bjorn: the planted hammer never comes back by itself",
+		"bjorn: the planted hammer stays planted until the rope's time runs out",
 		String(K.mace.get("st", "")) == "ground",
 		str(K.mace.get("st"))
 	)
@@ -1554,7 +1558,7 @@ func _bulwark_combos() -> void:
 	ok("bjorn small: Mending Ground doesn't repair a broken aegis", K.shield_hp < 1.0, "shield %.0f" % K.shield_hp)
 	ok(
 		"bjorn small: a downed teammate inside Mending Ground starts reviving",
-		K.kickstarts == ks0 + 1 and A.revive >= 0.3,
+		K.kickstarts == ks0 + 1 and A.revive >= 0.15,   # 0.35 at the burst, then the source decay (revive_decay)
 		"revive %.2f" % A.revive
 	)
 	A.downed = false

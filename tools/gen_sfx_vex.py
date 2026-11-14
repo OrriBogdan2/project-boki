@@ -7,12 +7,12 @@ oiled steel, servo motors and ember-hot rounds. Her voice is an adult woman's, l
 under fire), with a faint servo under the bad moments.
 
   vn_rifle (fire, 3 takes)   the rotary cannon's round: crack, punch, bolt clack, brass
-  gunslinger_grenade_thunk   SIGNATURE: the Burr Charge biting into a wall or the ground, its fuse armed
-  vn_cock / vn_throw         the drum running dry (reload stand-in) / the Burr Charge's side toss
+  gunslinger_grenade_thunk   SIGNATURE: the Coin Blast biting into a wall or the ground, its fuse armed
+  vn_cock / vn_throw         the drum running dry (reload stand-in) / the Coin Blast's side toss
   vn_blast (3 takes)         the charge's blast (direct hit and the cone)
   vn_slide, gunslinger_dash  Slipstep: the boot scrape / the body's whoosh and servo
   vn_stim                    Hot Streak: a knock gives Slipstep back
-  vn_ion_charge / _fire      Longneedle: the capacitor whine / the beam
+  vn_ion_charge / _fire      Palm Lance: the capacitor whine / the beam
   vn_nuke_fire/_fall/_boom/_burn   Cinderfall: mortar thunk, whistle, impact, the burning patch
   gunslinger_step_<surface>  boots with a bandolier's jingle (3 takes each)
   gunslinger_hurt/down/death wordless voice
@@ -88,7 +88,7 @@ def rifle(i):
     return lpf(out, 9000)
 
 
-# ------------------------------------------------------------------ RMB: Burr Charge
+# ------------------------------------------------------------------ RMB: Coin Blast
 def grenade_thunk():
     """The spiked charge bites into a wall: a hollow steel thunk, the spikes' tick, then the fuse arms."""
     d = 0.85
@@ -164,7 +164,7 @@ def stim():
     return pad(mix(clack, whirr, n1, n2), d)
 
 
-# ------------------------------------------------------------------ E: Longneedle
+# ------------------------------------------------------------------ E: Palm Lance
 def ion_charge():
     """The beam's capacitor: a whine climbing to a held edge, a hum, crackle thickening."""
     d = 0.68; n = N(d); t = T(d)
@@ -177,7 +177,7 @@ def ion_charge():
 
 
 def ion_fire():
-    """The Longneedle lets go: a hard crack, a deep kick and recoil, a beam that roars and thins."""
+    """The Palm Lance lets go: a hard crack, a deep kick and recoil, a beam that roars and thins."""
     d = 1.15
     crk = mix(click(0.004, 2500, 8500) * 1.8, crack(d, 900, 6000, 0.012) * 2.4)
     body = kick(190, 48, d, 0.02, 0.11, 3.0) * 0.8

@@ -4,7 +4,7 @@ extends RefCounted
 ## Used by the hero ult checks (Albert, Kael, Motley, Sparkle). A press is timed in steps from the last step that
 ## forbade it (or from the press, with no lock): 1 is the next step. Kael's LMB, say, goes on its release, a step on.
 
-const PRESS_S := 0.1  # s of lock left when the press is made (inside DashFlow.BUFFER_S)
+const PRESS_S := 0.1  # s of lock left when the press is made (inside Loco.press_buffer)
 const SLOTS := ["dash", "lmb", "jump"]
 const LOCK_MAX := 240  # steps an ult may lock its caster in these trials (Sparkle's hover is the longest)
 const WATCH := 60  # steps after the press we watch for it

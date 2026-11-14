@@ -21,7 +21,6 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
-const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
 const HOLD_POSE_T := 0.1       # s a key is down before a hold clip shows (a tap of up to 4 steps never shows one)
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
@@ -174,7 +173,7 @@ func number_col(_t: Ent, col: Color, _o: Dictionary) -> Color: return col
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array: return [dmg, o]
 func blocks_from(_by: Ent) -> bool: return false     # a body blocker up against `by` (Blockers.body_stops)
 func move_k() -> float: return 1.0
-## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last BUFFER_S.
+## s left in a move's committed recovery (no walk, jump, Shift or ability); DashFlow buffers its last Loco.press_buffer.
 func commit_left() -> float: return 0.0
 func hovering() -> bool: return false         # a CastHold holds him aloft: the walk steers as on the ground
 func dive_speed() -> float: return 0.0          # m/s: a kit's plunge that outruns the fall cap (0: none)
@@ -182,6 +181,9 @@ func draw_rate() -> float: return 1.0               # a bow's draw speed (Hem's 
 func fire_ok() -> bool: return true
 ## The attack key, if this kit runs the weapon's attack itself (true = handled; Hunter.trigger stops).
 func lmb_override(_held: bool, _dt: float) -> bool: return false
+## Whether the attack key is holding now (a draw, a charge, a hose): the held-fire checks read it,
+## kits with their own hold set it.
+func lmb_holding() -> bool: return h.draw_t >= 0.0 or h.mel_hold > 0.0
 ## The kit's own pace times the R fuse's plant (you stand and gather while it winds up).
 func pace() -> float: return move_k() * (0.35 if not fuse.is_empty() else 1.0)
 func can_shoot() -> bool: return fire_ok() and fuse.is_empty()
@@ -251,7 +253,7 @@ func tick(dt: float) -> void:
 	_tick_charge(dt)
 	_tick_recast(dt)
 
-## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+## An early recast press waits Loco.press_buffer for its window to open (armed), then goes; the local hunter's cues.
 func _tick_recast(dt: float) -> void:
 	if not recast_buf.is_empty():
 		var w := recast_window()
@@ -267,7 +269,7 @@ func _tick_recast(dt: float) -> void:
 		RecastCue.track(self, dt)
 
 func buffer_recast(slot_id: String) -> void:
-	recast_buf[slot_id] = RECAST_BUFFER
+	recast_buf[slot_id] = Loco.press_buffer
 
 func held(which: String) -> bool:
 	match which:
@@ -289,8 +291,17 @@ func no_glide() -> bool: return false
 ## An RMB press now is the airborne variant (it goes on the press).
 func air_rmb() -> bool: return not h.grounded or h.gliding
 
-func busy() -> bool:
+## The body can't act at all (down, out, stunned, hexed...). A kit's busy() beyond this is its own cast lock.
+func disabled() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
+
+func busy() -> bool:
+	return disabled()
+
+## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
+## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+func lock_refuses(_slot: String) -> bool:
+	return busy() and not disabled()
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -406,7 +417,8 @@ func use_r() -> void:
 		return
 	# the fuse: a readable wind-up (pose, energy gathering, a sting, a ring enemies can see), then the
 	# effect fires with a big impact. The cooldown starts now, so the slot reads as spent.
-	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": String(r_def().get("fuse_guard", "none")), "fx": 0.0}
+	var guard := String(r_def().get("fuse_guard", "none"))
+	fuse = {"t": ft, "T": ft, "bond": will_bond, "guard": guard, "fx": 0.0, "at": h.pos}
 	cd["r"] = r_cooldown()
 	h._ab_feedback("r", "cast")
 	_fuse_start(will_bond)
@@ -431,7 +443,6 @@ func _fuse_start(bond: bool) -> void:
 	var col := col_of(rd)
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
-	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
@@ -461,6 +472,7 @@ func _tick_fuse(dt: float) -> void:
 		return
 	# energy gathers inward, faster and brighter toward the end
 	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	AimKit.circle(h, "r_fuse", {"at": fuse["at"], "r": 2.4, "col": col, "fill": k, "all": true})
 	fuse["fx"] = float(fuse["fx"]) - dt
 	if float(fuse["fx"]) <= 0.0:
 		fuse["fx"] = 0.05
@@ -717,23 +729,6 @@ static func behind(t: Ent, attacker: Ent, rear_deg := 120.0) -> bool:
 func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
-
-## A filling ground circle everyone sees, in the viewer's side lean (SideColor.fx). Returns the node.
-func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(SideColor.fx(m, h, col), 0.9))
-	var tw := tele.create_tween()
-	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
-## A filling lane (dash arrows, beams, charge lines).
-func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(SideColor.fx(m, h, col), 0.9))
-	if t > 0.0:
-		var tw := tele.create_tween()
-		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-		tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
 
 ## The out-of-combat clock: building or spending the resource keeps it from decaying.
 func touch_res(wait := -1.0) -> void:
@@ -1132,7 +1127,7 @@ static func solid_mat(c: Color) -> StandardMaterial3D:
 ## [sound, pitch at 0, pitch at full] of each archetype's wind-up.
 const CHARGE_VOICE := {
 	"thief": ["swipe", 1.3, 2.3], "archer": ["click", 0.8, 2.0], "mage": ["zap", 0.7, 1.9],
-	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["thump", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["thump", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
+	"gunslinger": ["reload", 0.8, 1.8], "juggernaut": ["jug_ting", 0.55, 1.3], "bulwark": ["shield", 0.55, 1.2], "dolm": ["dolm_rock_crunch", 0.5, 1.2], "ostra": ["hover", 0.8, 1.9],
 }
 var chg := {}                  # the hold being charged: {src, k, full, tick, ring, glow}
 var charge_last := 0.0         # how far the last hold got when it was let go (tests)

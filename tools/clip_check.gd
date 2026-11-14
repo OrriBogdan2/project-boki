@@ -12,11 +12,12 @@ extends RefCounted
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
-	"ostra": "ostra", "juggernaut": "kael"}
+	"ostra": "ostra", "juggernaut": "kael", "gil": "gil"}
 ## Tetra's moves the source plays while moving (briefs/hero-ref/breah.md: the tap hurl, the fist recovering as she
 ## walks off, the X aim and spine roll) ride the upper body over the walk. Every other dolm move owns the body.
 const TENZO_UPPER := ["breah_throw", "breah_punch", "breah_spine_aim", "breah_spine"]
 const DT := 1.0 / 30.0
+const KEY_FRAME := 1.0 / 30.0  # s: one frame of a baked clip (tools/art1 bakes at 30 fps)
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const CC_ON := 0.2             # s: the crowd control lands this far into the run
@@ -33,6 +34,13 @@ const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this
 const SEAM_M := 0.01           # and move it this far
 const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+## A move whose item appears on the clip's key: Hero -> [clip, the hand that brings it out, the kit slot and the key
+## of its spawn time in s]. The key is where that hand's yank tops out: its highest frame in the clip.
+const SPAWN_KEY := {"gil": ["toss", "hand.L", "rmb", "draw"]}
+const JL_READ_DEG := 15.0      # deg: a take-off or an apex turns some bone at least this far (it reads on screen)
+const JL_AGAIN_DEG := 3.0      # deg: the second jump's rise pose may differ from the first by this much
+const JL_DIP_M := 0.03         # m: the hips drop at least this far on touchdown
+const JL_BACK_MAX := 0.6       # s: the longest a plain landing may own the body (dur 0.4 + the loco fade)
 ## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
 ## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
 const END_OFF := DT / 2.0 + 0.001
@@ -69,7 +77,7 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if not WardenClips.data(art_name).has("loco"):      # (no clips yet, as Gil: the rig's poses drive it)
+		if not WardenClips.data(art_name).has("loco"):      # (no clips yet: the rig's poses drive it)
 			continue
 		n += 1
 		await _hero(main, String(id), art_name)
@@ -184,6 +192,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_timings(id, dd, clips)
 	_upper(id, dd, clips)
 	_standing(id, dd, clips)
+	_jump_land(id, m, sync, clips, dd)
 	_emotes(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
@@ -199,6 +208,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_sliders(id, sync)
 	_sway(id, m, sync, dd)
 	await _on_blade(id, m, sync, clips)
+	if SPAWN_KEY.has(id):
+		await _spawn_key(id, m, sync, clips)
 	# "bone_scale" (item 137): the size holds over every clip that keys the bone
 	for nm in dd.get("bone_scale", {}):
 		var sk := WardenGlb.skeleton(m.get_node("Warden"))
@@ -302,6 +313,31 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+
+## The plain jump, running and standing (tools/jump_land_check.gd), printed as "JL" rows. Asserted: the take-off and the
+## apex read (the pose turns), every jump reads like the first (the rise clip starts over), the landing dips at once
+## (Motley's hips ride his spring: no dip to read), and the body is back on the run or the stand within the data's
+## promise: "moving" (or "dur") plus the loco fade, never longer than JL_BACK_MAX.
+func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var jl := preload("res://tools/jump_land_check.gd")
+	var ld: Dictionary = dd.get("land", {})
+	for running: bool in [true, false]:
+		var r: Dictionary = jl.measure(m, sync, clips, running)
+		var way := "run" if running else "still"
+		print("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f dip_t=%.2f legs=%.2f back=%.2f settle=%.2f" % [id,
+				way, r["off"], r["again"], r["apex"], r["dip"], r["dip_t"], r["legs"], r["back"], r["settle"]])
+		ok(r["off"] >= JL_READ_DEG and r["apex"] >= JL_READ_DEG, "%s %s: take-off (%.0f deg) and apex (%.0f deg) read"
+				% [id, way, r["off"], r["apex"]])
+		ok(r["again"] <= JL_AGAIN_DEG, "%s %s: the next jump takes off like the first (%.1f deg off)"
+				% [id, way, r["again"]])
+		if not dd.has("sway"):
+			ok(r["dip"] <= -JL_DIP_M and r["dip_t"] <= jl.DIP_WINDOW, "%s %s: the landing dips %.2f m, lowest at %.2f s"
+					% [id, way, -r["dip"], r["dip_t"]])
+		var hold := float(ld.get("moving", ld.get("dur", 0.0))) if running else float(ld.get("dur", 0.0))
+		var promise := hold + WardenClips.FADE_LOCO + jl.DT
+		ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
+				"%s %s: the body is back %.2f s after touchdown (data %.2f, max %.2f)"
+				% [id, way, r["back"], promise, JL_BACK_MAX])
 
 ## The emote wheel (Truce.EMOTES): every emote names a different clip of this Hunter that ends before its bubble does.
 ## A "g_" gesture keys only bones of the data's "upper" list and always plays on the upper layer; a .glb clip does when
@@ -433,6 +469,27 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
 	ok(drift <= 0.02, "%s: the blade never leaves the hand (worst drift %.3f m)" % [id, drift])
+
+## The item appears on the frame the clip's key lands (within one frame): the top of the hand's yank, sampled at the
+## clips' 30 frames a second.
+func _spawn_key(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
+	var row: Array = SPAWN_KEY[id]
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var bone := WardenSkeleton.find(sk, String(row[1]))
+	var anim := clips.lib.get_animation(String(row[0]))
+	var ys: Array = []
+	for f in int(round(anim.length / KEY_FRAME)) + 1:
+		clips.force = {"clip": String(row[0]), "t": minf(f * KEY_FRAME, anim.length - 0.001)}
+		for k in 3:
+			sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		ys.append((sk.global_transform * sk.get_bone_global_pose(bone)).origin.y)
+	clips.force = {}
+	var key_t := ys.find(ys.max()) * KEY_FRAME
+	var spawn := float(Arch.def(id)[row[2]][row[3]])
+	ok(absf(key_t - spawn) <= KEY_FRAME + 0.001,
+			"%s: the %s clip's key lands on the item's spawn (key %.3f s, spawn %.3f s, within a frame)" % [
+			id, row[0], key_t, spawn])
 
 ## The clips keep rotations only on the contract bones, so MantleLook's sliders (bone offsets) stay on under them; and
 ## the death state has its time on screen.

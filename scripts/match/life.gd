@@ -14,14 +14,14 @@ const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
 	"revive_radius": 1.6,       # [est] a teammate this close revives you
 	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
-	"revive_hp": 0.25,          # [design] a quarter of your health (a per-tick heal scaled to ours gives 12-35%)
-	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
+	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
+	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] speed each 1st..4th+ person on a wisp adds (revive, stomp)
+	"revive_decay": 0.5,        # [design] revive bar lost per second when nobody revives (the wiki)
 	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
-	"execute_time": 3.0,        # [footage] (old: hold interact on an enemy wisp; now the stomp below)
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
-	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
-	"stomp_cycle": 0.7,         # one foot-lift-and-slam
+	"stomp_time": 2.8,          # [footage] ...then you're locked in: about 3 s in all
+	"stomp_cycle": 0.8,         # seconds per foot-lift-and-slam: three stomps fit in stomp_time
 	"kin_revive_time": 8.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
@@ -68,11 +68,33 @@ static func box_rarity(b: Dictionary) -> int:
 	return best
 
 ## Is anyone on this team still in the fight (standing or a wisp)?
+## Speed factor for n people on one wisp: each adds less than the one before (R.crowd).
+static func crowd(n: int) -> float:
+	var curve: Array = R["crowd"]
+	var k := 0.0
+	for i in n:
+		k += float(curve[mini(i, curve.size() - 1)])
+	return k
+
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
 
 static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
+
+# ------------------------------------------------------------------ the revive/stomp curve
+## Speed factor for this Hunter's next revive ("revived_n": wisp or box) or finish ("stomped_n"):
+## the source's one curve slows the 1st..4th+ of each for the match (content/rules/revive.json).
+static func diminish(o: Hunter, key: String) -> float:
+	var curve: Array = BoxRevive.rules()["diminish"]
+	return float(curve[mini(int(o.get_meta(key, 0)), curve.size() - 1)])
+
+static func tally(o: Hunter, key: String) -> void:
+	o.set_meta(key, int(o.get_meta(key, 0)) + 1)
+
+## Seconds one teammate needs to bring this wisp back, as the revive prompt and bar show it.
+static func revive_secs(o: Hunter) -> float:
+	return float(R["revive_time"]) / diminish(o, "revived_n")
 
 # ------------------------------------------------------------------ wisps
 ## Every frame, for each wisp: teammates on it revive it, enemies on it stomp it, otherwise it
@@ -118,10 +140,10 @@ static func tick_wisps(m: Match, dt: float) -> void:
 		o.set_meta("stomped", foes > 0)
 		if foes > 0:
 			# stomped: drains fast and nobody can pick you up
-			o.down_hp -= base * R["stomp_mult"] * dt
-			o.revive = maxf(0.0, o.revive - dt * 0.5)
+			o.down_hp -= base * R["stomp_mult"] * crowd(foes) * diminish(o, "stomped_n") * dt
+			o.revive = maxf(0.0, o.revive - dt * R["revive_decay"])
 		elif allies > 0:
-			o.revive += dt / R["revive_time"] * (1.0 + R["extra_reviver"] * (allies - 1))
+			o.revive += dt / R["revive_time"] * diminish(o, "revived_n") * crowd(allies)
 			if o.revive >= 1.0:
 				trace(m, "wisp revive %s" % o.pname)
 				for rv in revivers: (rv as Hunter).revives += 1
@@ -129,8 +151,10 @@ static func tick_wisps(m: Match, dt: float) -> void:
 				continue
 		elif not kin_on:
 			o.down_hp -= base * dt
+			o.revive = maxf(0.0, o.revive - dt * R["revive_decay"])
 		if o.down_hp <= 0.0:
 			trace(m, "%s %s" % [o.pname, "bled out" if foes == 0 else "stomped out"])
+			if foes > 0: tally(o, "stomped_n")
 			m.eliminate(o, o.last_hit_by, "bled out" if foes == 0 else "finished")
 
 ## A hit on a wisp. A wisp can't be shot: it's lost to stomps, an execute, bleeding out, and the few
@@ -191,7 +215,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
 		var t0 := float(h.stomp["t"])
-		var t1 := t0 + dt
+		var t1 := t0 + dt * diminish(o, "stomped_n")
 		h.stomp["t"] = t1
 		var cyc: float = R["stomp_cycle"]
 		var hit_at := cyc * 0.7
@@ -208,6 +232,7 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		if t1 >= float(R["stomp_time"]):
 			if near:
 				end_stomp(m, h, "done")
+				tally(o, "stomped_n")
 				m.eliminate(o, h, "executed")
 				m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
 				m.sfx("crit", o.pos, -2.0, 0.7)

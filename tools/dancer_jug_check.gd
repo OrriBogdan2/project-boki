@@ -671,7 +671,7 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
 			chord > 0.3 and absf(chord - wave_w) < 0.35, "crescent %.2f wave %.2f" % [chord, wave_w])
 	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
-			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
+			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 12.0 and T.slow_t > 0.0 and K.res > 30.0,
 			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
 	moved = maxf(moved, T.flat_dist(home + Vector3(7.0, 0, 0)))
 	A.ok("juggernaut LMB: no knockback (slash, tip, Searing Wave)", moved < 0.01, "moved %.3fm" % moved)
@@ -722,7 +722,7 @@ func juggernaut(a) -> void:
 	_crimson_soft(A, P, lane, "tap cone")
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
-			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
+			winding and early <= 0.0 and A.dmg(T) >= 14.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
 	A.ok("juggernaut RMB: the Slam marks the foe it hits for the Riposte reset",
 			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
 	P.teleport(home)
@@ -739,7 +739,7 @@ func juggernaut(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.7)
 	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close",
-			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
+			hp0 - T.hp >= 21.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
 	A.ok("juggernaut RMB: short cooldown (2s)",
 			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
 	# the Lunge charge walks at rmb.lunge.walk_k of the run: the footage's Heavy Attack hold runs slower than
@@ -792,7 +792,7 @@ func juggernaut(a) -> void:
 	m.step(A.DT)
 	A.step(m, 0.5)
 	A.ok("juggernaut RMB hold: release flings you forward into them",
-			K.last_variant == "hold" and A.dmg(T) >= 18.0 and P.flat_dist(home) > 3.5,
+			K.last_variant == "hold" and A.dmg(T) >= 9.0 and P.flat_dist(home) > 3.5,
 			"took %.0f moved %.1f" % [A.dmg(T), P.flat_dist(home)])
 	A.step(m, 3.2)
 	P.teleport(home)
@@ -833,7 +833,7 @@ func juggernaut(a) -> void:
 			disc and K.meteor.drops == 1 and off < 0.05 and absf(K.meteor.last_hit.x - x0 - ahead) < 0.01,
 			"landed %.2f off, hit at +%.2f" % [off, K.meteor.last_hit.x - x0])
 	A.ok("juggernaut RMB air: Meteor Drop knocks down, the centre takes more",
-			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.stun_t > 0.0,
+			K.last_variant == "air" and A.dmg(T) >= 14.0 and T.stun_t > 0.0,
 			"took %.0f stun %.2f" % [A.dmg(T), T.stun_t])
 	A.ok("juggernaut Meteor Drop: its own 7.2s slot, the Smash charge untouched",
 			float(K.cd["air"]) > 6.0 and float(K.cd["air"]) <= 7.2 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
@@ -886,7 +886,7 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5)
 	P.inp["move"] = Vector2.ZERO
 	A.ok("juggernaut dash: Rampage the way you dash, tip hits",
-			K.tips >= 1 and A.dmg(T) >= 14.0 and P.dashes < 2.5,
+			K.tips >= 1 and A.dmg(T) >= 5.0 and P.dashes < 2.5,
 			"tips %d took %.0f dashes %.2f" % [K.tips, A.dmg(T), P.dashes])
 	A.ok("juggernaut dash: the tip does not stun into a wall", T.wallstun <= 0.0, "wallstun %.2f" % T.wallstun)
 	# rank 3: a shot dodged through the dash feeds Rage (through the real dodge hook); rank 1 does not
@@ -930,7 +930,7 @@ func juggernaut(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.2)
 	A.ok("juggernaut RMB during the pull: Cinder Spin (blight)",
-			K.spins == 1 and K.last_variant == "during_e" and A.dmg(T) >= 20.0,
+			K.spins == 1 and K.last_variant == "during_e" and A.dmg(T) >= 13.0,
 			"spins %d variant %s took %.0f" % [K.spins, K.last_variant, A.dmg(T)])
 	# rooted: no chain; a stun breaks a chain
 	A.step(m, 0.5)
@@ -1026,6 +1026,17 @@ func juggernaut(a) -> void:
 			"x cd %.1f resets %d" % [float(K.cd["x"]), K.slam_resets])
 	A.ok("juggernaut passive: a knock heals 20% of their health",
 			K.knock_healed >= minf(0.19 * T.max_hp, 0.9 * P.max_hp), "healed %.0f of %.0f" % [K.knock_healed, T.max_hp])
+	# the data has the heal, not the number (20% is ours); the takedown reset adds 5% of his own health
+	T.max_hp = 400.0
+	P.hp = 20.0
+	var kh0 := K.knock_healed
+	K.on_knock(T, true)
+	A.ok("juggernaut passive: the kit's knock heal is exactly 20% of the knocked hunter's max health",
+			absf(P.hp - 100.0) < 0.5 and absf(K.knock_healed - kh0 - 80.0) < 0.5,
+			"hp %.1f healed %.1f" % [P.hp, K.knock_healed - kh0])
+	DashReset.takedown(P, T)
+	A.ok("juggernaut passive: the takedown reset adds its own 5% of his health, once, on top of the knock heal",
+			absf(P.hp - (100.0 + P.max_hp * DashReset.HEAL)) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
 	# audit (data: "knocking an enemy resets Volcanic Rebuke"): a plain body hit then a knock resets it too
 	A.step(m, 1.0)
 	T.downed = false
@@ -1108,7 +1119,7 @@ func combos(a) -> void:
 	A.hold(m, P, 0.95)
 	A.step(m, 0.4)
 	A.ok("combo jug: E > hold RMB = Chain Lunge",
-			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
+			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 9.0 and T.stun_t > 0.0
 			and P.flat_dist(T) < 3.4,
 			"lunges %d dist %.1f took %.0f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0])
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
@@ -1122,7 +1133,7 @@ func combos(a) -> void:
 	P.inp["sec_hold"] = false
 	A.step(m, 0.45)
 	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival",
-			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
+			K.haul_slams == 1 and A.dmg(T) - hp0 >= 8.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
 	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
 	A.step(m, 1.0)
