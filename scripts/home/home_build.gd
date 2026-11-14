@@ -51,6 +51,7 @@ var popped := -1                       # uid of the deco just placed (its node g
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
 
 const CUT_WIDTH := 0.5    # m: clear room either side of a corner-cutting shortcut, so a Boki never clips a corner
+const POND_Y := 0.05       # m: the ponds' water surface above the ground
 const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")}
 
 func _init(home) -> void:
@@ -534,7 +535,7 @@ func _make_base(e: Dictionary) -> Node3D:
 			var sp := String(e.get("sp", "zapple"))
 			if not Data.KIN.has(sp): sp = Data.KIN.keys()[0]
 			var k := Models.kin(sp, {})
-			k.position = Vector3(0, 0.58, 0); k.scale = Vector3.ONE * 1.25
+			k.position = Vector3(0, 0.58, 0); k.scale = Vector3.ONE
 			for mi in k.find_children("*", "MeshInstance3D", true, false):
 				(mi as MeshInstance3D).material_override = stone
 			for gp in k.find_children("*", "GPUParticles3D", true, false): gp.queue_free()
@@ -682,7 +683,7 @@ func _sync_water() -> void:
 	var stones: Array = []
 	for k in wt:
 		var c := HomeLayout.unkey(k)
-		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, 0.05, c.y + 0.5)))
+		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, POND_Y, c.y + 0.5)))
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			if wt.has(HomeLayout.key(c.x + dv.x, c.y + dv.y)): continue
 			# foam along the bank (the strip's UV.y runs from the bank out onto the water)
@@ -817,6 +818,8 @@ func cell_reason(c: Vector2i, self_tag := "") -> String:
 		return "Something's in the way"
 	if reserved.has(i) or _near_feeder(c) or _near_plot(c):
 		return "That spot is kept clear"
+	if h.hob != null and h.hob.crowds(c):
+		return HobSpot.REASON
 	return ""
 
 ## Tiles flooded from the house door, with free_cells opened up and solid_cells shut. Packed bytes, 1 = reached.
@@ -941,6 +944,9 @@ func fits(item: Dictionary, at: Array) -> bool:
 			if not w.inb(dt.x, dt.y) or w.kind[w.idx(dt.x, dt.y)] != World.T_GROUND or occ.has(w.idx(dt.x, dt.y)):
 				why = "Its door would face something"
 				return false
+	if door != Vector3.INF and h.hob != null and h.hob.crowds_point(door):
+		why = HobSpot.REASON
+		return false
 	if solid or door != Vector3.INF:
 		if not keeps_paths(free_cells, at if solid else [], skip_b, door):
 			why = PlaceClearance.why(trapped)
@@ -1382,6 +1388,9 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 		return false
 	if w.kind[i] != World.T_GROUND and o != tag: why = "Something's in the way"; return false
 	if reserved.has(i) or _near_plot(t): why = "That spot is kept clear"; return false
+	if h.hob != null and h.hob.crowds(t):
+		why = HobSpot.REASON
+		return false
 	var p := Vector3(t.x + 0.5, 0, t.y + 0.5)
 	for f in Econ.feeders():
 		if String(f["id"]) == from: continue

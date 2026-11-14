@@ -12,29 +12,46 @@ extends RefCounted
 ##   4. the boss: Nightmare's has one more attack (the Colossus's rockfall, telegraphed), Normal's not.
 ##   5. the win: the boss down opens the Heart's final seat, the squad holds the ring and leaves with the
 ##      raid's reward (an egg of the raid's Boki at its difficulty), and the results line says so.
-##   6. first-time hints (HeartRaidHints): the raid-only Boki line, the first wave's marks, the boss rising and
+##   7. first-time hints (HeartRaidHints): the raid-only Boki line, the first wave's marks, the boss rising and
 ##      the Heart's final seat each show once and are saved as seen; the difficulty pick's is seen once too.
-## --heart-raid-check=hints runs only part 6, =sim only part 3 (and --seed=N picks the raids' seed).
+##   6. its sounds (scripts/match/raid_sfx.gd): a wave opens once per wave sent, the boss rises once, each wave's
+##      gates tick in the last RaidSfx.TICK_S s, the Nightmare boss's rockfall warns and a phase change cues;
+##      every cue has its sound file and Normal's boss has no rockfall warn.
+## --heart-raid-check=sim runs only part 3, =hints only part 7 (and --seed=N picks the raids' seed).
+## Each whole raid is 1.5-3 min of wall time, so the suite runs part 3's four raids as their own flags
+## (--heart-raid-solo-check, -squad-, -hard-, -nightmare-; the registry passes the SIMS index) and
+## --heart-raid-check runs the rest, with part 3's cross-raid rows (wave 1's size and gates) on short
+## runs of the same four raids to their first wave.
 
 const SIMS := [[1, "normal"], [4, "normal"], [4, "hard"], [4, "nightmare"]]
-const NEAR_GATE := 3.5        # m: a wave monster comes out this close to its marked gate (spread + clear spot)
+const NEAR_GATE := 3.5  # m: a wave monster comes out this close to its marked gate (spread + clear spot)
 
 var bad := 0
-var first_wave := {}           # "squad difficulty" -> monsters in wave 1
-var gates_seen := {}           # "squad difficulty" -> wave 1's marked gate spots
+var first_wave := {}  # "squad difficulty" -> monsters in wave 1
+var gates_seen := {}  # "squad difficulty" -> wave 1's marked gate spots
+
 
 func ok(cond: bool, what: String) -> void:
 	print("HRAID %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
 
-func run(main: Node) -> void:
+
+## part: -1 runs parts 1, 2, 4, 5 and part 3's cross-raid rows; 0-3 runs that one of SIMS whole.
+func run(main: Node, part := -1) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
 	var args := Array(OS.get_cmdline_user_args())
 	var seed_v := 11
 	for a in args:
-		if String(a).begins_with("--seed="): seed_v = int(String(a).substr(7))
+		if String(a).begins_with("--seed="):
+			seed_v = int(String(a).substr(7))
+	if part >= 0:
+		await _sim(main, SIMS[part][0], SIMS[part][1], seed_v)
+		print("HRAID %s" % ("PASS" if bad == 0 else "FAIL %d" % bad))
+		main.get_tree().quit(0 if bad == 0 else 1)
+		return
 	var sim_only := args.has("--heart-raid-check=sim")
 	if args.has("--heart-raid-check=hints"):
 		await _hints(main)
@@ -45,7 +62,10 @@ func run(main: Node) -> void:
 		_tables()
 		await _expedition(main)
 	for sim in SIMS:
-		await _sim(main, sim[0], sim[1], seed_v)
+		if sim_only:
+			await _sim(main, sim[0], sim[1], seed_v)
+		else:
+			await _first_wave(main, sim[0], sim[1], seed_v)
 	if first_wave.size() == SIMS.size():
 		var w: Array = SIMS.map(func(x): return int(first_wave["%d %s" % x]))
 		ok(w[1] > w[0], "a squad of 4 meets a bigger first wave (%d) than a solo (%d)" % [w[1], w[0]])
@@ -59,6 +79,7 @@ func run(main: Node) -> void:
 	print("HRAID %s" % ("PASS" if bad == 0 else "FAIL %d" % bad))
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+
 func _match(main: Node, o: Dictionary) -> Match:
 	var m := Match.new()
 	main.add_child(m)
@@ -66,9 +87,11 @@ func _match(main: Node, o: Dictionary) -> Match:
 	m.set_process(false)
 	return m
 
+
 func _drop(main: Node, m: Match) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 # ------------------------------------------------------------------ 1. the raid's Boki
 func _tables() -> void:
@@ -85,26 +108,65 @@ func _tables() -> void:
 	ok(tiers["nightmare"].size() == 3, "Nightmare: + very rares %s" % str(tiers["nightmare"]))
 	var lines: Dictionary = BokiModes.rules()["lines"]
 	var stand: Dictionary = HeartRaid.rules()["stand_ins"]
-	var off: Array = stand.keys().filter(func(l): return not l.begins_with("_") and (
-		lines[l]["mode"] != HeartRaid.MODE or lines[l]["rarity"] != BokiModes.of(String(stand[l]))["rarity"]))
+	var off: Array = stand.keys().filter(
+		func(l):
+			return (
+				not l.begins_with("_")
+				and (
+					lines[l]["mode"] != HeartRaid.MODE or lines[l]["rarity"] != BokiModes.of(String(stand[l]))["rarity"]
+				)
+			)
+	)
 	ok(off.is_empty(), "each stand-in has its raid line's rarity %s" % str(off))
-	ok(HeartRaid.boki_for(HeartRaid.opts(1, "hard")) == HeartRaid.boki("hard"),
-		"a raid's wild spots draw the raid's Boki at its difficulty")
+	ok(
+		HeartRaid.boki_for(HeartRaid.opts(1, "hard")) == HeartRaid.boki("hard"),
+		"a raid's wild spots draw the raid's Boki at its difficulty"
+	)
+
 
 # ------------------------------------------------------------------ 2. an Expedition is untouched
 func _expedition(main: Node) -> void:
 	var m := _match(main, {"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true, "heart": true})
-	ok(m.heart_raid == null and m.heart != null and not m.heart.locked,
-		"an Expedition: no raid, the Heart not held shut")
+	ok(
+		m.heart_raid == null and m.heart != null and not m.heart.locked,
+		"an Expedition: no raid, the Heart not held shut"
+	)
 	ok(m.hunters.any(func(h): return h.team != 0), "an Expedition still has rival squads")
 	ok(not m.exits.list.is_empty() and not m.lairs.list.is_empty(), "an Expedition still has its outposts and lairs")
 	await _drop(main, m)
 
+
 # ------------------------------------------------------------------ 3. whole raids
-func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
-	var tag := "%d %s" % [sq, diff]
+func _sim_opts(sq: int, diff: String, seed_v: int) -> Dictionary:
 	var o := HeartRaid.opts(sq, diff)
 	o.merge({"seed": seed_v, "tier": 0, "autoplay": true, "no_drop": true, "sim_keep": true})
+	return o
+
+
+## The same raid as _sim, run only until its first wave is out: wave 1's size and its marked gates.
+func _first_wave(main: Node, sq: int, diff: String, seed_v: int) -> void:
+	var tag := "%d %s" % [sq, diff]
+	var m := _match(main, _sim_opts(sq, diff, seed_v))
+	var rd: HeartRaid = m.heart_raid
+	var cap := HeartRaid.r("first_wave_s") + 5.0
+	var n_step := 0
+	while rd != null and rd.wave < 1 and m.sess_time() < cap:
+		m.step(Match.DT)
+		n_step += 1
+		if n_step % 120 == 0:
+			await main.get_tree().process_frame
+		if rd.gates.marked_wave == 0 and not gates_seen.has(tag):
+			gates_seen[tag] = rd.gates.marks.map(func(mk): return mk["at"].round())
+	var w1: Array = rd.trail.filter(func(l): return String(l).contains("wave 1:")) if rd else []
+	if not w1.is_empty():
+		first_wave[tag] = int(String(w1[0]).split(":")[1].split(" ", false)[0])
+	print("HRAID squad %s: wave 1 %s, gates %s" % [tag, str(first_wave.get(tag, "not out")), str(gates_seen.get(tag))])
+	await _drop(main, m)
+
+
+func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
+	var tag := "%d %s" % [sq, diff]
+	var o := _sim_opts(sq, diff, seed_v)
 	var tb := Time.get_ticks_msec()
 	var m := _match(main, o)
 	var rd: HeartRaid = m.heart_raid
@@ -115,8 +177,10 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
 	var ours := m.hunters.all(func(h): return h.team == 0)
 	ok(m.hunters.size() == sq and ours, "squad %s: one squad of %d, no rivals" % [tag, sq])
 	ok(m.lairs.list.is_empty() and m.exits.list.is_empty(), "squad %s: no lairs, no outposts" % tag)
-	ok(m.heart.locked and rd.squad_n == sq and rd.difficulty == diff,
-		"squad %s: the Heart held shut, scaled for %d at %s" % [tag, sq, diff])
+	ok(
+		m.heart.locked and rd.squad_n == sq and rd.difficulty == diff,
+		"squad %s: the Heart held shut, scaled for %d at %s" % [tag, sq, diff]
+	)
 	print("HRAID squad %s built in %d ms, Heart at %s" % [tag, Time.get_ticks_msec() - tb, str(m.heart.site.round())])
 	var next_log := 60.0
 	var cap_hit := 0
@@ -125,8 +189,8 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
 	var n_step := 0
 	var t_wall := Time.get_ticks_msec()
 	var ended_at := -1.0
-	var marked_at := {}          # wave index -> session time its gates were marked
-	var late: Array = []         # "wave: what" for a wave that broke the clarity rule
+	var marked_at := {}  # wave index -> session time its gates were marked
+	var late: Array = []  # "wave: what" for a wave that broke the clarity rule
 	var sent_n := 0
 	while m.time < m.length + 2.0 and (ended_at < 0.0 or m.time < ended_at + 1.5):
 		m.step(Match.DT)
@@ -151,34 +215,75 @@ func _sim(main: Node, sq: int, diff: String, seed_v: int) -> void:
 			max_mobs = maxi(max_mobs, alive)
 			var up := m.hunters.filter(func(h): return not h.out and not h.extracted and not h.downed).size()
 			var fmt := "HRAID squad %s %s %s wave %d foes %d mobs %d up %d/%d you %d hp %d m to the Heart, tide %d m"
-			print(fmt % [
-				tag,
-				_clock(m.time), HeartRaid.P.keys()[rd.phase], rd.wave, rd.foes.size(), alive, up, sq, int(m.player.hp),
-				int(m.player.flat_dist(m.heart.site)), int(Heart.tide_r(m))])
+			print(
+				(
+					fmt
+					% [
+						tag,
+						_clock(m.time),
+						HeartRaid.P.keys()[rd.phase],
+						rd.wave,
+						rd.foes.size(),
+						alive,
+						up,
+						sq,
+						int(m.player.hp),
+						int(m.player.flat_dist(m.heart.site)),
+						int(Heart.tide_r(m))
+					]
+				)
+			)
 	var wall_s := (Time.get_ticks_msec() - t_wall) / 1000.0
 	for line in rd.trail:
 		print("HRAID squad %s   %s" % [tag, line])
 	var w1: Array = rd.trail.filter(func(l): return String(l).contains("wave 1:"))
 	var w1_t := float(String(w1[0]).split(" ", false)[0]) if not w1.is_empty() else -1.0
-	ok(absf(w1_t - HeartRaid.r("first_wave_s")) <= HeartRaid.THINK_S + 0.05,
-		"squad %s: the first wave at %ds" % [tag, int(HeartRaid.r("first_wave_s"))])
+	ok(
+		absf(w1_t - HeartRaid.r("first_wave_s")) <= HeartRaid.THINK_S + 0.05,
+		"squad %s: the first wave at %ds" % [tag, int(HeartRaid.r("first_wave_s"))]
+	)
 	if not w1.is_empty():
 		first_wave[tag] = int(String(w1[0]).split(":")[1].split(" ", false)[0])
-	ok(late.is_empty() and sent_n > 0, "squad %s: %d waves on the clock, marked %ds before, out of their gates %s" % [
-		tag, sent_n, int(HeartRaid.r("warn_s")), str(late)])
-	ok(cap_hit == 0, "squad %s: wave monsters never over the cap of %d (most at once %d)" % [
-		tag, int(rd.scale("cap")), max_foes])
-	ok(ended_at >= 0.0, "squad %s: the raid ended with a result (%s at %s)" % [
-		tag, str(m.result.get("why", "?")), _clock(ended_at)])
+	ok(
+		late.is_empty() and sent_n > 0,
+		(
+			"squad %s: %d waves on the clock, marked %ds before, out of their gates %s"
+			% [tag, sent_n, int(HeartRaid.r("warn_s")), str(late)]
+		)
+	)
+	ok(
+		cap_hit == 0,
+		"squad %s: wave monsters never over the cap of %d (most at once %d)" % [tag, int(rd.scale("cap")), max_foes]
+	)
+	ok(
+		ended_at >= 0.0,
+		"squad %s: the raid ended with a result (%s at %s)" % [tag, str(m.result.get("why", "?")), _clock(ended_at)]
+	)
 	var ended := rd.phase in [HeartRaid.P.WON, HeartRaid.P.LOST]
 	ok(ended, "squad %s: the raid is %s" % [tag, HeartRaid.P.keys()[rd.phase]])
+	_sounds(rd, tag)
 	var sm := rd.summary()
-	ok(bool(sm["won"]) == (rd.phase == HeartRaid.P.WON),
-		"squad %s: the summary agrees: %s" % [tag, HeartRaid.result_line(sm)])
-	print("HRAID squad %s: %s, %d waves, %d wave monsters, most mobs alive %d; %.1f s wall for %s (%.2f ms a step)" % [
-		tag, HeartRaid.P.keys()[rd.phase], rd.wave, rd.sent, max_mobs, wall_s, _clock(m.time),
-		wall_s * 1000.0 / maxf(1.0, n_step)])
+	ok(
+		bool(sm["won"]) == (rd.phase == HeartRaid.P.WON),
+		"squad %s: the summary agrees: %s" % [tag, HeartRaid.result_line(sm)]
+	)
+	print(
+		(
+			"HRAID squad %s: %s, %d waves, %d wave monsters, most mobs alive %d; %.1f s wall for %s (%.2f ms a step)"
+			% [
+				tag,
+				HeartRaid.P.keys()[rd.phase],
+				rd.wave,
+				rd.sent,
+				max_mobs,
+				wall_s,
+				_clock(m.time),
+				wall_s * 1000.0 / maxf(1.0, n_step)
+			]
+		)
+	)
 	await _drop(main, m)
+
 
 ## The wave just sent: on its fixed time, marked warn_s before, and every monster of it out of a marked gate.
 func _wave_out(rd: HeartRaid, marked_at: Dictionary, late: Array) -> void:
@@ -199,6 +304,29 @@ func _wave_out(rd: HeartRaid, marked_at: Dictionary, late: Array) -> void:
 		if not near:
 			late.append("%d: a %s out at %s, off its gates" % [i + 1, mb.mkind, str(mb.pos.round())])
 
+
+## Part 6, for one finished raid: the cues it played (RaidSfx.cues) against what the director did.
+func _sounds(rd: HeartRaid, tag: String) -> void:
+	var cues: Array = rd.audio.cues
+	var ticks := 0
+	for i in rd.wave:
+		ticks += (HeartRaid.rules()["waves"][i] as Array).size() * RaidSfx.TICK_S
+	var boss := 1 if rd.boss != null else 0
+	ok(
+		(
+			cues.count("raid_wave_open") == rd.wave
+			and cues.count("raid_boss_rise") == boss
+			and cues.count("raid_gate_tick") >= ticks
+			and (rd.difficulty == "nightmare" or not cues.has("raid_rockfall_warn"))
+		),
+		(
+			"squad %s: sounds: %d waves, %d boss rise, %d gate ticks (>= %d)"
+			% [tag, cues.count("raid_wave_open"), cues.count("raid_boss_rise"), cues.count("raid_gate_tick"), ticks]
+		)
+	)
+	ok(cues.all(func(n): return Sfx.ensure(n)), "squad %s: every raid cue has its sound file" % tag)
+
+
 # ------------------------------------------------------------------ 4. the boss's extra attack
 func _boss_extra(main: Node) -> void:
 	for diff in ["normal", "nightmare"]:
@@ -213,10 +341,16 @@ func _boss_extra(main: Node) -> void:
 		if diff == "nightmare":
 			b._atk_rockfall()
 			ok(b.teles.size() >= 4, "Nightmare's rockfall marks its circles first (%d)" % b.teles.size())
+			ok(rd.audio.cues == ["raid_rockfall_warn"], "Nightmare's rockfall warns: %s" % str(rd.audio.cues))
+			b._phase_up(1)
+			ok(rd.audio.cues.back() == "raid_phase", "a boss phase change cues: %s" % str(rd.audio.cues))
 			var k := float(HeartRaid.rules()["difficulty"][diff]["dmg"])
-			ok(is_equal_approx(b.dmg_mult, k * (1.0 + (float(m.T.get("mob", 1.0)) - 1.0) * 0.6)),
-				"Nightmare's boss hits %.2fx" % k)
+			ok(
+				is_equal_approx(b.dmg_mult, k * (1.0 + (float(m.T.get("mob", 1.0)) - 1.0) * 0.6)),
+				"Nightmare's boss hits %.2fx" % k
+			)
 		await _drop(main, m)
+
 
 # ------------------------------------------------------------------ 5. the win
 func _win(main: Node) -> void:
@@ -259,7 +393,7 @@ func _win(main: Node) -> void:
 	ok(said.begins_with("Heart Raid (Normal) won"), "the results line: %s" % said)
 	await _drop(main, m)
 
-## 6. Each hint is unseen until its moment, shown once at it (the lane gets the line), then seen in the save.
+## 7. Each hint is unseen until its moment, shown once at it (the lane gets the line), then seen in the save.
 func _hints(main: Node) -> void:
 	Save.d = Save.fresh()
 	Settings.set_v("tips", true, false)

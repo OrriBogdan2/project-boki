@@ -484,6 +484,7 @@ func on_last_team() -> void:
 func admin_ready() -> void:
 	for x in list:
 		if x.has("open_at"): x["open_at"] = minf(float(x["open_at"]), m.time)
+		if seats: seats.open_now(x)      # (the Uplink seat's own window too, or the prompt offers a start it refuses)
 		if x["state"] == "charging": x["prog"] = maxf(float(x["prog"]), 0.95)
 
 # ------------------------------------------------------------------ for the HUD

@@ -13,11 +13,12 @@ const TOP_Y := 8.0
 const TITLE_FS := 11
 const LINE_FS := 14
 
+
 static func draw(hud) -> void:
 	var m: Match = hud.m
 	var rd: HeartRaid = m.heart_raid
 	if rd.phase == HeartRaid.P.BOSS and m.lairs.boss_for(m.player) != null:
-		return      # the boss bar has the top of the screen
+		return  # the boss bar has the top of the screen
 	var c: Control = hud.c
 	var r := Rect2(Vector2(c.size.x * 0.5 - SIZE.x * 0.5, TOP_Y), SIZE)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(HeartRaid.COL, 0.45), 1), r)
@@ -27,6 +28,7 @@ static func draw(hud) -> void:
 	var bar := Rect2(Vector2(r.position.x + 12, r.end.y - 5), Vector2(r.size.x - 24, 3))
 	c.draw_rect(bar, Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(bar.position, Vector2(bar.size.x * fill(rd), bar.size.y)), HeartRaid.COL)
+
 
 static func line(rd: HeartRaid) -> String:
 	match rd.phase:
@@ -47,6 +49,7 @@ static func line(rd: HeartRaid) -> String:
 			return "The Heart is held"
 	return "The raid has fallen"
 
+
 static func fill(rd: HeartRaid) -> float:
 	match rd.phase:
 		HeartRaid.P.WAVES:
@@ -57,13 +60,16 @@ static func fill(rd: HeartRaid) -> float:
 			return rd.m.heart.final_prog
 	return 1.0
 
+
 static func _clock(t: float) -> String:
 	var s := maxi(0, int(ceil(t)))
 	return "%d:%02d" % [s / 60, s % 60]
 
+
 ## The coming wave's gates are marked (its countdown is on).
 static func _marked(rd: HeartRaid) -> bool:
 	return rd.phase == HeartRaid.P.WAVES and rd.gates.marked_wave == rd.wave and rd.gates.left() > 0.0
+
 
 ## The coming wave's gates on the minimap: a ring with the countdown's arc filling to the wave.
 static func minimap(hud, to_map: Callable, on_map: Callable) -> void:

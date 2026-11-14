@@ -17,6 +17,7 @@ var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
+var team_hit := {}          # team -> match time of its latest hit that left this alive (XpHints: who was fighting it)
 var noticed_at := -INF     # match time of this monster's last notice cue (MobNotice)
 var death_t := 0.0
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
@@ -91,6 +92,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		var real: Ent = by
 		if by is Kin and by.state != "active" and by.owner_h:
 			real = by.owner_h
+		team_hit[real.team] = m.time
 		if tgt == null or randf() < 0.4:
 			tgt = real
 			if st == "idle":
@@ -351,7 +353,8 @@ func _begin_attack() -> void:
 		"volley":
 			tele = m.fx.telegraph_rect(pos, atk_dir, 10.0, 1.1, Color("6ad8ff"))
 	# each kind has its own call as it winds up, instead of the same alarm for everyone
-	m.sfx("v_" + mkind, pos, -9.0 if mkind != "warden" else -3.0, randf_range(0.9, 1.12))
+	var voice := mkind.trim_prefix("bl_")       # a Blight skitter or watcher calls like its plain cousin
+	m.sfx("v_" + voice, pos, -9.0 if voice != "warden" else -3.0, randf_range(0.9, 1.12))
 
 func _strike() -> void:
 	_cancel_tele()
@@ -408,17 +411,9 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	if dead:
-		# a death pop: swell, flatten and blink out
-		death_t += delta
-		visible = death_t < MobAnim.DEATH_S
+		visible = MobDissolve.step(self, delta)
 		if visible:
-			var dk := death_t / MobAnim.DEATH_S
-			var bd: Node3D = model.get_node("Body")
-			MobAnim.pose(self, delta)
-			var w := 1.0 + sin(minf(dk * 1.6, 1.0) * PI) * 0.35
-			bd.scale = Vector3(w + dk * 0.3, maxf(0.05, 1.0 - dk * dk), w + dk * 0.3)
-			for mt in mats:
-				mt.set_shader_parameter("flash", 1.0 - dk * 0.5)
+			MobAnim.pose(self, delta)      # the keyed death move plays under the dissolve
 		return
 	model.rotation.y = face
 	var spd := Vector2(vel.x, vel.z).length()

@@ -6,19 +6,21 @@ extends RefCounted
 ## and a badge on the minimap (HeartRaidHud.minimap). Host and clients work the marks out alike from the
 ## wave number, so nothing new goes over the net.
 
-const EDGE_IN := 4.0           # m: an outer gate stays at least this far inside the tide ring at its wave's time
-const RING_R := 2.6            # m, the ground ring's radius
-const GLYPH_Y := 4.0           # m, the countdown's height over the gate
-const GLYPH_PX := 0.0016       # fixed-size glyph: share of the screen height per font pixel
+const EDGE_IN := 4.0  # m: an outer gate stays at least this far inside the tide ring at its wave's time
+const RING_R := 2.6  # m, the ground ring's radius
+const GLYPH_Y := 4.0  # m, the countdown's height over the gate
+const GLYPH_PX := 0.0016  # fixed-size glyph: share of the screen height per font pixel
 
 var rd: HeartRaid
-var marks: Array = []          # the coming (or just sent) wave's groups: {gate, at, guard, mobs}
-var marked_wave := -1          # the wave index the marks are for
+var marks: Array = []  # the coming (or just sent) wave's groups: {gate, at, guard, mobs}
+var marked_wave := -1  # the wave index the marks are for
 var _root: Node3D
-var _markers := {}             # gate id -> {node, glyph, clock}
+var _markers := {}  # gate id -> {node, glyph, clock}
+
 
 func _init(raid: HeartRaid) -> void:
 	rd = raid
+
 
 ## Where a gate stands for a wave that comes out at wave_t (session seconds): its bearing and distance from
 ## the Heart, an outer gate pulled inside the tide ring the tide has then.
@@ -32,6 +34,7 @@ func spot(gate: String, wave_t: float) -> Vector3:
 	var p := m.heart.site + Vector3(sin(a), 0.0, -cos(a)) * dist
 	return m.world.free_spot_near(p, [], 1.0, 0.45, 6.0)
 
+
 ## Marks wave `i` (coming out at wave_t) once; the marks stay until the next wave is marked.
 func mark(i: int, wave_t: float) -> void:
 	if i == marked_wave or i >= rd.waves_n():
@@ -43,9 +46,11 @@ func mark(i: int, wave_t: float) -> void:
 		var g: Dictionary = HeartRaid.rules()["gates"][gate]
 		marks.append({"gate": gate, "at": spot(gate, wave_t), "guard": bool(g["guard"]), "mobs": grp["mobs"]})
 
+
 ## The countdown to the marked wave (seconds; negative once it is out).
 func left() -> float:
 	return rd.next_wave_t - rd.m.sess_time()
+
 
 ## Shown while the marked wave is still to come: the rings and their countdowns. Cheap per tick: the glyph
 ## text is only set when the whole second changes.
@@ -58,7 +63,8 @@ func show_marks() -> void:
 		(_markers[gate]["node"] as Node3D).visible = false
 	if not up:
 		return
-	for mk in marks:
+	for i in marks.size():
+		var mk: Dictionary = marks[i]
 		var mr: Dictionary = _markers[mk["gate"]]
 		var n: Node3D = mr["node"]
 		n.visible = true
@@ -66,6 +72,9 @@ func show_marks() -> void:
 		if int(mr["clock"]) != s:
 			mr["clock"] = s
 			(mr["glyph"] as Label3D).text = str(s)
+			if s <= RaidSfx.TICK_S:
+				rd.audio.gate_tick(mk["at"], i)
+
 
 func _build() -> void:
 	_root = Node3D.new()
