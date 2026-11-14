@@ -28,6 +28,10 @@ const MIN_COUNTER := 0.3
 const MAX_BOB_CM := 11.0
 const NO_LEGS := ["ostra"]     # ostra hovers: a backlog item
 const JOG_OPEN := ["tender"]     # the clips' stride caps the jog too (RATE_MAX): the "stride cap" backlog item
+## The start gate: the idle's first pose to the first walk pose played when he sets off (loco "start_phase", the
+## "start_blend" bones still in the idle) at most this many body heights apart for these Hunters.
+const MAX_START_GAP := 0.25
+const START_GATE := ["gunslinger", "juggernaut", "archer", "ashwick", "dredge", "mage"]
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -61,6 +65,9 @@ func _hero(main: Node, id: String) -> void:
 	for k in 5:
 		await main.get_tree().process_frame
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:     # (no hand-keyed clips yet: nothing to audit)
+		m.free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
 	soles = _soles(sk)
@@ -81,8 +88,10 @@ func _hero(main: Node, id: String) -> void:
 	row["seam"] = {}
 	for nm in [walk, run, String(lc["idle"])]:
 		row["seam"][nm] = _seam(sync, clips, sk, nm, hgt)
-	row["pop"] = {"idle_walk": _first_pose_gap(sync, clips, sk, String(lc["idle"]), walk, hgt),
-			"walk_run": _first_pose_gap(sync, clips, sk, walk, run, hgt),
+	var ph := float(lc.get("start_phase", 0.0))
+	row["pop"] = {"idle_walk": _start_gap(sync, clips, sk, String(lc["idle"]), walk, ph, hgt),
+			"walk_run": _first_pose_gap(sync, clips, sk, walk, ph, run, ph, hgt),
+			"idle_walk_best": _best_start(sync, clips, sk, String(lc["idle"]), walk, hgt),
 			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run)}
 	var weapon := ""
 	row["attacks"] = {}
@@ -101,6 +110,17 @@ func _hero(main: Node, id: String) -> void:
 			top["peaks"], round(100.0 * jog["slide"] / SPEEDS[1])])
 	if not id in NO_LEGS:
 		_gate(id, live)
+	row["set_off_at"] = _set_off_at(m, sync, clips)
+	var want := ph * float(row["cfg"]["walk_len"])
+	if absf(float(row["set_off_at"]) - want) > 2.0 * DT:
+		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"],
+				want])
+		bad += 1
+	if id in START_GATE and row["pop"]["idle_walk"] > MAX_START_GAP:
+		print("FAIL %s: the walk starts %.2f body heights from the idle (limit %.2f; nearest phase %.2f: %.2f)" % [id,
+				row["pop"]["idle_walk"], MAX_START_GAP, row["pop"]["idle_walk_best"][0],
+				row["pop"]["idle_walk_best"][1]])
+		bad += 1
 	m.free()
 
 func _gate(id: String, live: Dictionary) -> void:
@@ -225,6 +245,16 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 	clips.force = {}
 	return out
 
+## s into the walk clip on the first frame he moves after standing (WardenClips._set_off), as the game plays it.
+func _set_off_at(m: Node3D, sync: Node, clips: WardenClips) -> float:
+	m.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true})
+	for k in 20:
+		sync.call("_process", DT)
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -2.2), "face": 0.0, "grounded": true})
+	sync.call("_process", DT)
+	m.set_meta(WardenClips.STATE, {})
+	return float(clips.tree.get("parameters/loco/1/clip/current_position"))     # (blend point 1: walk f)
+
 ## A gait at speed s, as the game plays it: the state carries the velocity, facing -Z.
 func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) -> Dictionary:
 	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -s), "face": 0.0, "grounded": true})
@@ -342,8 +372,31 @@ func _seam(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: fl
 	var length := clips.lib.get_animation(clip).length
 	return _dist(_pose_at(sync, clips, sk, clip, 0.0), _pose_at(sync, clips, sk, clip, length - 0.001)) / hgt
 
-func _first_pose_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, a: String, b: String, hgt: float) -> float:
-	return _dist(_pose_at(sync, clips, sk, a, 0.0), _pose_at(sync, clips, sk, b, 0.0)) / hgt
+## Clip a at phase pa (0..1 of its length) against clip b at phase pb, as a fraction of the Hunter's height.
+func _first_pose_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, a: String, pa: float, b: String, pb: float,
+		hgt: float) -> float:
+	var ta := pa * clips.lib.get_animation(a).length
+	var tb := pb * clips.lib.get_animation(b).length
+	return _dist(_pose_at(sync, clips, sk, a, ta), _pose_at(sync, clips, sk, b, tb)) / hgt
+
+## The idle's first pose against the walk at phase ph with the "start_blend" bones held in the idle's pose.
+func _start_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String, walk: String, ph: float,
+		hgt: float) -> float:
+	var p := _pose_at(sync, clips, sk, idle, 0.0)
+	var held: Array = clips.start_bones.map(func(b: Array) -> Quaternion: return sk.get_bone_pose_rotation(b[0]))
+	_pose_at(sync, clips, sk, walk, ph * clips.lib.get_animation(walk).length)
+	for i in held.size():
+		sk.set_bone_pose_rotation(clips.start_bones[i][0], held[i])
+	return _dist(p, _read(sk)) / hgt
+
+## [phase, gap]: the start phase nearest the idle, in 24ths of the cycle (what "start_phase" should be).
+func _best_start(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String, walk: String, hgt: float) -> Array:
+	var best := [0.0, INF]
+	for i in 24:
+		var gap := _start_gap(sync, clips, sk, idle, walk, i / 24.0, hgt)
+		if gap < best[1]:
+			best = [i / 24.0, gap]
+	return best
 
 ## 0..0.5 of a cycle: how far apart the two loops put the left foot's touchdown (a blend between them crosses the legs).
 func _contact_gap(sync: Node, clips: WardenClips, sk: Skeleton3D, a: String, b: String) -> float:
