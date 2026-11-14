@@ -26,7 +26,7 @@
   "grunt": ["hurt", "v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big"],
   "dash": ["dash", "jump", "land", "fall", "glide"],
   "step": ["step0", "step1", "step2", "step_grass", "step_snow", "step_stone", "step_wood", "swim", "drip"],
-  "ui": ["ab_ready", "knock_confirm", "extract_ok", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c", "build", "kill", "reload"],
+  "ui": ["ab_ready", "knock_confirm", "elim_confirm", "extract_ok", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c", "build", "kill", "reload"],
   "boki": ["grab", "plant", "harvest", "rustle", "squeak", "scan_pop"],
   "loop": ["revive_hum", "wisp_hum"]
  },
@@ -46,6 +46,7 @@
   "ab_slam": "the blast category: Sfx.BLAST_DB keeps it under the mix (Moosh Moosh item 23)",
   "kill": "a confirm sting, meant to cut through the fight above the menu sounds",
   "knock_confirm": "a confirm sting, meant to cut through the fight above the menu sounds",
+  "elim_confirm": "a confirm sting, meant to cut through the fight above the menu sounds",
   "extract_ok": "a confirm sting, meant to cut through the fight above the menu sounds",
   "revive_hum": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "swap": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",

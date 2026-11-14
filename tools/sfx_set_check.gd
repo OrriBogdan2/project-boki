@@ -48,6 +48,10 @@ extends RefCounted
 ##  22. footsteps: a Hunter walked over every surface of the Hollow Crown (the sky train's car deck; a plank
 ##      bridge tile laid on it) plays the cue for it: its own set on grass, stone, wood and snow, the
 ##      weight class's steps on metal, a little louder the heavier it is; farm wading has a set per class
+##  23. the rank HUD's cues (RankSfx) are in the ui set, play at least UNDER_COMBAT_DB under a weapon shot,
+##      and the new-point chime is short
+##  24. each of the 12 Hunters with its own voice has every callout (HunterBarks.KINDS, content/sfx/barks.json),
+##      HeroSfx picks them, the Boki-down call carries past hearing range, and the match and KinNet report to it
 ## Reads the files (and, for 15 and 16, one short training match); never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -60,6 +64,8 @@ const HELD_S := 3.0            # s of held fire per sound
 const HELD_STEP_MS := 80       # ms a round: the source cadence of Vex's rifle
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const INV_UNDER_DB := 10.0     # dB: an inventory cue sits at least this far under the quietest hit or shot
+const UNDER_COMBAT_DB := 10.0  # dB: a rank cue as played sits at least this far under a weapon shot ("fire")
+const READY_SECS := 0.5        # s: the new-point chime's audible length at most
 
 var bad := 0
 var levels := {}
@@ -100,6 +106,9 @@ func run(main: Node) -> void:
 	_hostile()
 	load("res://tools/ult_beat_sfx_check.gd").new().run(main, ok)
 	await _steps(main)
+	_rank_cues()
+	_barks()
+
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -391,6 +400,30 @@ func _hostile() -> void:
 	var x := cue_src.contains("HostileCue.play(m.player, h)")
 	var net := match_src.contains("\"hcast\": HostileCue.net_in")
 	ok(used and x and net, "E and R (ability_used), X (UltCue) and other games' casts (hcast) play it")
+## 24. Hunter callouts: every Hunter with its own voice has every bark, and the game reports what it barks on.
+func _barks() -> void:
+	var h := Hunter.new()
+	var voiced := []
+	var missing := []
+	for arch in Arch.ids():
+		h.arch = arch
+		if HeroSfx.of(h, "hurt", "") == "":
+			continue
+		voiced.append(arch)
+		for kind in HunterBarks.KINDS:
+			if HeroSfx.of(h, "call_" + kind, "") != "%s_call_%s" % [arch, kind]:
+				missing.append("%s_call_%s" % [arch, kind])
+	h.free()
+	ok(voiced.size() == 12 and missing.is_empty(), "%d Hunters with a voice have all %d callouts (missing %s)" % [
+			voiced.size(), HunterBarks.KINDS.size(), missing])
+	var far := voiced.filter(func(a): return float(Sfx.sound_reach.get("%s_call_boki" % a, 0.0)) <= Sfx.hear_range)
+	ok(far.is_empty(), "the squad's Boki-down call carries past %d m (short: %s)" % [int(Sfx.hear_range), far])
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var net_src := FileAccess.get_file_as_string("res://scripts/match/kin_net.gd")
+	var wired := match_src.contains("barks.tick(self)") and match_src.contains("barks.knock_landed(self)")
+	wired = wired and match_src.contains("barks.boki_down(self, k)")
+	wired = wired and net_src.contains("m.barks.boki_down(m, e as Kin)")
+	ok(wired, "the match ticks the callouts and reports knocks and Boki downs, here and from other games")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -618,6 +651,17 @@ func _rarity_stings() -> void:
 	var unwired := src.keys().filter(func(f): return not FileAccess.get_file_as_string("res://" + f).contains(src[f]))
 	ok(unwired.is_empty(), "rarity stings: first sight, claim and hatch play them (unwired %s)" % [unwired])
 	ok(RaritySting.SIGHT_M == 30.0 and RaritySting.LOUD_HEAT < 1.0, "rarity stings: within 30 m, held in a loud fight")
+## 23. The rank HUD's three cues, as RankSfx plays them.
+func _rank_cues() -> void:
+	var ui: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/ui.json"))["sounds"]
+	var fire := float(levels["cats"]["fire"])
+	for cue in RankSfx.DB:
+		var takes := _takes(cue)
+		var played := float(RankSfx.DB[cue]) + (float(_measure(takes[0])["rms"]) if not takes.is_empty() else 0.0)
+		ok(ui.has(cue) and not takes.is_empty() and played <= fire - UNDER_COMBAT_DB,
+			"%s is a ui sound playing at %.1f dBFS, %.1f dB under a weapon shot" % [cue, played, fire - played])
+	var secs := _audible_secs("res://audio/rank_ready.wav")
+	ok(secs > 0.0 and secs <= READY_SECS, "the new-point chime is short (%.2f s)" % secs)
 
 func _takes(sname: String) -> Array:
 	var out := []
@@ -645,6 +689,19 @@ func _measure(path: String) -> Dictionary:
 			cnt += 1
 	var rms := sqrt(sum / maxf(1.0, cnt))
 	return {"peak": linear_to_db(maxf(pk, 1e-6)), "rms": linear_to_db(maxf(rms, 1e-6))}
+
+## Seconds to the last sample above 2% of the peak, in a mono 44.1 kHz wav (as tools/sfx_lib.py writes them).
+func _audible_secs(path: String) -> float:
+	var data := _data(path)
+	var n := data.size() / 2
+	var pk := 0.0
+	for k in n:
+		pk = maxf(pk, absf(data.decode_s16(k * 2)))
+	var last := 0
+	for k in n:
+		if absf(data.decode_s16(k * 2)) > pk * 0.02:
+			last = k
+	return last / 44100.0
 
 ## The 16-bit PCM samples of a wav file (its "data" chunk).
 func _data(path: String) -> PackedByteArray:
@@ -859,6 +916,8 @@ func _distinct(a: Array) -> int:
 ## Fires `sname` every HELD_STEP_MS for HELD_S s; {peak: most pool voices sounding at once, takes: the take of each
 ## shot that sounded (FireSfx drops some), shots: rounds fired}.
 func _hold(main: Node, sname: String, held: bool) -> Dictionary:
+	for voice in Sfx.players:
+		voice.stop()          # the earlier sections' sounds are still ringing in the shared pool
 	var peak := 0
 	var shots := 0
 	var takes := []
