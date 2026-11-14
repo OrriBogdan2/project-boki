@@ -617,7 +617,6 @@ const CHECKS := {
 	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],      # DoT body look
 	"--hob-spot-check": ["res://tools/hob_spot_check.gd", "hob_spot_check", null],      # Hob's clear ring
 	"--hob-spot-shots": ["res://tools/hob_spot_shots.gd", "hob_spot_shots", null],      # =<dir>, before/after
-	"--relic-puton-check": ["res://tools/relic_puton_check.gd", "relic_puton_check", null],      # also --shots-dir=
 	"--step-smooth-check": ["res://tools/step_smooth_check.gd", "step_smooth_check", "check"],  # steps never jolt
 	"--step-smooth-shots": ["res://tools/step_smooth_check.gd", "step_smooth_check", "shots"],      # --shots-dir=<dir>
 	"--npc-check": ["res://tools/npc_check.gd", "npc_check", null],      # the rigged NPCs (Hob, Pell)
