@@ -520,7 +520,9 @@ func _point(sid: String) -> void:
 ## more. No card comes back and nothing pauses.
 func _stall(dt: float) -> void:
 	stall_t += dt
-	var progress := got + camps.killed()      # (a monster of the step's camp falling is progress too)
+	# (your hits on a monster are progress too; a camp monster falling is not, as the Boki clears camps
+	# on its own and a slow trickle of its kills kept the nag away from a player who was doing nothing)
+	var progress := got + hits
 	if progress != stall_got:
 		stall_got = progress
 		stall_t = 0.0
