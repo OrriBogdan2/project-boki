@@ -327,6 +327,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		elif pressed:
 			lmb_was = false    # a fresh press while he's busy waits: still held when he's free, it goes then
 		return true
+	if not wall.is_empty():
+		if pressed: boop.press()      # behind the raised aegis LMB is the boop, never a swing or a throw
+		return true
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
 	if not rides_dash and (not h.can_fire() or h.fire_cd > 0.0):

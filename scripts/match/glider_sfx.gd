@@ -26,7 +26,6 @@ const FALL_QUIET_DB := -20.0    # dB, the free-fall wind loop slow...
 const FALL_LOUD_DB := -6.0      # ...and at the rocket's own dive speed (DropRocket.FALL)
 const FALL_LOW := 0.75          # its pitch slow...
 const FALL_HIGH := 1.3          # ...and at that speed
-const DIVE_VY_MIN := 18.0       # m/s of fall that counts as the plunge for another player (no dive flag is sent)
 
 var fell := false               # in the drop's free fall last tick
 var open := false               # the glider was open last tick
@@ -41,7 +40,7 @@ func tick(h: Hunter) -> void:
 	var v := h.net_vel if h.remote else h.vel
 	var trim := 0.0 if h.is_local() else OTHERS_DB
 	var burning := gliding and not h.dropping and (net_hot if h.remote else h.glide_fuel <= 0.001)
-	var plunging := gliding and not h.dropping and (-v.y > DIVE_VY_MIN if h.remote else h.glide_dive.on)
+	var plunging := gliding and not h.dropping and h.glide_dive.on
 	if gliding and not open:
 		Sfx.play("glider_snap", h.pos, SNAP_DB + trim)
 	elif open and not gliding:
