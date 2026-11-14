@@ -82,6 +82,7 @@ var life: BaseLife = null          # base_mode only: each Boki's own life and bo
 var nap_sound := BokiNapSfx.new()     # the napping Boki breathe and yawn (boki_nap_sfx.gd)
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+var hbreed: FirstBreed = null      # the first-breeding prompt: a Boki leads you to the Nook (first_breed.gd)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
 ## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
@@ -1092,6 +1093,7 @@ func _process(delta: float) -> void:
 	GardenWishes.tick(self, d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
+	if hbreed: hbreed.tick(d)
 	_apply_cam_settings()
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
@@ -4064,6 +4066,7 @@ func _setup_care() -> void:
 	if not _visiting():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
+		hbreed = FirstBreed.new(self)
 	if not visit.is_empty():
 		_refresh_nest()
 		if HubLayout.is_hub(visit): ZoneAway.card(self)      # the hub: nobody lives there; the card covers every zone
@@ -4804,7 +4807,6 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 			h.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			top.add_child(h)
 	dv.add_child(top)
-	dv.add_child(NookPreview.card(a, b, get_tree()))
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
@@ -4820,6 +4822,8 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
 	else:
 		dv.add_child(UI.para("Pick two Boki who are ready: Grown, friends, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+		var gate := FirstBreed.missing_line(Save.d["roster"])
+		if gate != "": dv.add_child(UI.para(gate, UI.T_SMALL, UI.GOLD))
 	dv.add_child(UI.spacer(4))
 	dv.add_child(IvView.heading())
 	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))

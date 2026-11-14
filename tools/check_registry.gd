@@ -628,6 +628,7 @@ const CHECKS := {
 const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
+	"--tut-first-breed-check": ["res://tools/tut_first_breed_check.gd", "tut_first_breed_check", null],  # first-breed
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
