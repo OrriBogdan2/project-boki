@@ -105,11 +105,18 @@ log "import parse errors: main=$PE_M cand=$PE_C"
 EXP=$!
 
 # 3. the gate
-SS=${SUITE_SPEED:-}
-for c in "$SS" ~/bin/suite_speed.py /home/boki/coord/boki-tools/suite-speed/suite_speed.py "$CT/ops/suite-speed/suite_speed.py" "$HERE/suite_speed.py"; do
-	[ -n "$c" ] && [ -f "$c" ] && { SS=$c; break; }
+# 11-14: first the copy that has the stall watchdog (--stall-min): a worker whose ~/bin copy predates the fix still
+# gets it from $HERE (regate-bot rsyncs its own suite_speed.py here on every start); else the first that exists.
+SS=
+for pass in watchdog any; do
+	for c in "${SUITE_SPEED:-}" ~/bin/suite_speed.py /home/boki/coord/boki-tools/suite-speed/suite_speed.py "$CT/ops/suite-speed/suite_speed.py" "$HERE/suite_speed.py"; do
+		[ -n "$c" ] && [ -f "$c" ] || continue
+		[ "$pass" = any ] || grep -q -- '--stall-min' "$c" || continue
+		SS=$c; break 2
+	done
 done
 [ -f "$SS" ] || finish ERROR "suite_speed.py not found"
+grep -q -- '--stall-min' "$SS" && log "suite_speed: $SS (stall watchdog on)" || log "suite_speed: $SS (OLD copy, no stall watchdog)"
 CAN=$(dirname "$SS")/canary.txt
 SEL=(--select-base "$GATED"); [ "${REGATE_FULL:-0}" = 1 ] && SEL=()
 python3 -I "$SS" gate --main "$MT" --merge "$CT" --out "$OUT/gate" --jobs "$JOBS" --main-lazy "${SEL[@]}" \
