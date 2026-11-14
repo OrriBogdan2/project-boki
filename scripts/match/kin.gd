@@ -1077,7 +1077,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = 0.0
 		return
 	var on_you := state == "shoulder" and not beside
-	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 or strike_t > 0.0 else ""))
+	model.set_meta("kstate", _puppet_state(on_you))
 	var airborne: bool = state == "flying" and not fly.get("rush", false)      # a leap, a throw or a dive; a rush runs
 	model.set_meta("kact", "hop" if airborne else "")      # BokiRig: the hop clip in the air, not the run
 	# body language (KinPuppet): growl, point, whine, cheer...
@@ -1126,10 +1126,10 @@ func render(delta: float, alpha: float) -> void:
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
-	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("dazed", state == "dazed" or stun_t > 0.0)      # downed is "faint" (KinPuppet, BokiRig), not dazed
 	model.set_meta("starry", state in ["downed", "dazed"])      # a stun's stars are the shared look (StatusLooks)
 	if state in ["downed", "dazed"]:
-		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
+		body.rotation.z = lerpf(body.rotation.z, KinDowned.LIE_ROLL if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
@@ -1148,6 +1148,14 @@ func render(delta: float, alpha: float) -> void:
 func _ride_basis() -> Basis:
 	var tilt: Quaternion = owner_h.model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
 	return Basis(Vector3.UP, owner_h.face) * Basis(tilt)
+
+## The "kstate" meta the puppets read (KinPuppet, BokiRig).
+func _puppet_state(on_you: bool) -> String:
+	if on_you:
+		return "perch"
+	if state == "downed":
+		return "faint"
+	return "attack" if lunge_t > 0.0 or strike_t > 0.0 else ""
 
 ## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
 func _render_demo() -> void:

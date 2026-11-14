@@ -187,6 +187,8 @@ const CHECKS := {
 	"--ttk-matrix-check": ["res://tools/ttk_matrix_check.gd", "ttk_matrix_check", null],
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--minigame-hub-check": ["res://tools/minigame_hub_check.gd", "minigame_hub_check", null],  # title
+	"--kin-downed-check": ["res://tools/kin_downed_check.gd", "kin_downed_check", null],      # downed pose in and out
+	"--kin-downed-shots": ["res://tools/kin_downed_shots.gd", "kin_downed_shots", null],      # GPU, --shots-dir=
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--summon-cc-check": ["res://tools/summon_cc_check.gd", "summon_cc_check", null],
 	# Bokidex quirks, sex ratios

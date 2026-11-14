@@ -8,7 +8,9 @@ extends Node
 ## Match body language (the "pose" meta, KinWildPose and KinCompanion) is a layer on Flex over whatever clip runs:
 ## a startle, a charge, a cower, a knocked-out sway, a lift into the scan beam; BODY_FEEL bends it per body plan.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. "kwater" (m) is the water over its feet
-## this frame: deeper than half its height it floats and swims. See docs/art/kin/RIGGED_BOKI.md.
+## this frame: deeper than half its height it floats and swims. A downed Boki (kstate "faint") lies in the nap clip at
+## DOWN_SPEED with its eyes shut, then springs up with the hop clip for GETUP_S when it comes round (no clip of its own
+## is baked). See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
@@ -125,6 +127,8 @@ const FRAME := {
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
 }
+const DOWN_SPEED := 0.6       # x: the nap clip's pace while knocked out, a slow breath
+const GETUP_S := 0.3          # s: the hop it springs up with when it comes round
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
 	"cindle": [0.81, 1.48],
@@ -263,6 +267,7 @@ var _shot := ""
 var _shot_rate := 1.0          # the speed the shot plays at
 var _attacking := false
 var _asleep := false
+var _was_down := false          # knocked out (kstate "faint") last frame
 var _aloft := false             # a flier in the air (BokiFly's "aloft" meta)
 var _layer := {"lean": 0.0, "squat": 0.0, "sway": 0.0, "shiver": 0.0}
 var _layer_t := 0.0
@@ -469,6 +474,12 @@ func _pick_clip(dt: float) -> void:
 		_asleep = asleep
 		if _speed < WALK_SPEED:
 			_start_shot("settle" if asleep else "wake")
+	var down := String(root.get_meta("kstate", "")) == "faint"
+	if _was_down and not down and player.has_animation("hop"):
+		_shot = "hop"
+		_shot_rate = 1.0
+		_shot_left = GETUP_S
+	_was_down = down
 	var aloft := bool(root.get_meta("aloft", false))
 	if aloft != _aloft:
 		_aloft = aloft
@@ -483,6 +494,9 @@ func _pick_clip(dt: float) -> void:
 		want = feel["clip"]
 	set_clip(want, gait_fade() if want in GAITS and clip in GAITS else FADE)
 	player.speed_scale = _shot_rate if want == _shot and _shot_left > 0.0 else 1.0
+	if down:
+		player.speed_scale = DOWN_SPEED
+		return
 	if feel.has("rate"):
 		player.speed_scale = float(feel["rate"])
 		return
@@ -545,6 +559,8 @@ func _state_clip() -> String:
 		return swim
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
+	if String(root.get_meta("kstate", "")) == "faint":
+		return "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work
@@ -581,6 +597,8 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	if String(root.get_meta("kstate", "")) == "faint":
+		return "asleep"
 	var pf := String(POSE_FACE.get(String(root.get_meta("pose", "")), ""))
 	if pf != "":
 		return pf
