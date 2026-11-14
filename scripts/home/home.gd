@@ -1383,6 +1383,7 @@ func _move_player(d: float) -> void:
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
+	ps["idle_break"] = true
 	ps.merge(verbs.step(d))
 	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	ps.merge(carry.anim_state())
