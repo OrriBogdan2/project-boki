@@ -146,6 +146,7 @@ static func _elim_start(h: Hunter, st: Dictionary) -> void:
 	HunterFall.stop(h)
 	if h.model:
 		h.model.visible = false       # (out mid-fall: the hunter stops updating it, and the Wisp is the death)
+	h.visible = true                  # (render() ran before this switch: the node holds the Wisp from this frame)
 
 ## The beat's end (or a revive in the middle of it): the Wisp is freed, the box stands at full size.
 static func _elim_end(h: Hunter, st: Dictionary) -> void:
