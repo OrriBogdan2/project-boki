@@ -100,8 +100,13 @@ func run(main: Node) -> void:
 	K.warchain.state = "ready"
 	K.anim_id = ""
 	P.inp["move"] = Vector2.ZERO
-	for f in 60:
+	# (the haul can carry him off an edge: he falls, respawns and lands, and the land clip would cover the root's
+	# strain, so wait until he stands and his landing is over)
+	var land_dur := float((_clips(P).d.get("land", {}) as Dictionary).get("dur", 0.0))
+	for f in 300:
 		_frame(m, [P])
+		if f >= 60 and bool(P.anim_s.get("grounded", false)) and _clips(P).land_t > land_dur + WardenClips.FADE:
+			break
 	P.stun_t = 0.5
 	for f in 12:
 		_frame(m, [P])
