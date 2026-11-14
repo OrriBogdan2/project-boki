@@ -210,6 +210,9 @@ func _first_match() -> void:
 	Overlay.open_pause("match")
 	await _wait(1.0)
 	await _shot("pause")
+	Overlay.open_more()
+	await _wait(1.0)
+	await _shot("pause_more")
 
 # ------------------------------------------------------------------ shots and layout
 ## Saves the window as <dir>/NN_<what>.jpg and appends what the layout scan found to the report.
