@@ -162,6 +162,7 @@ Other checks:
 - `--mantle-fling-check` (tools/mantle_fling_check.gd, owner bug 11-11): running jumps, ground and air dashes, glides and fast launches (6-19 m/s, also with a jump in the fling window) into a long ledge one and two terraces high, 0 to 80 degrees off the face. Over the lip you leave at most `MantleCarry.exit_cap` (1.2x run speed, ~5.5 m/s; a fling at most `Hunter.FLING_SPEED`), the rise carries you at most 2.5 m along the face (speed over the cap bleeds at `MantleCarry.RISE_BLEED`), and the wall never pushes you.
   - Before (main 88b06b9): a 19 m/s launch glancing in at 65 degrees kept its speed along the face, slid 4.3 m up the rise and left the top at 13.9 m/s, flying 8.3 m; a fling in the window kept it too (14.2 m/s). 103 of 187 tops over the cap, 19 rises over 2.5 m.
   - After: fastest exit 5.5 m/s (a fling 7.4), longest slide 2.4 m, longest flight 4.6 m (a fling), 181 tops.
+- `--aim-latency-check` (tools/aim_latency_check.gd): a scripted mouse move, then the frames until the reticle and the aim point sit under the cursor, at 60 and 144 Hz, at 720p and at 4K with a UI scale (see "Aim: the raw cursor").
 - `--obstacle-check` (tools/obstacle_slide_check.gd, from branch `stuckfix`): walks round, away from and past every tree and rock cluster on the training map and an expedition island.
   - Main 3b800a0: a hunter hugging a 3-tile rock cluster on the expedition island is pinned on a corner for 823 steps (13.7s).
   - Movefeel (and `stuckfix`):
@@ -1054,6 +1055,30 @@ only the hand-over changed (below).
   moves the machine GLIDING -> MANTLING (the farm avatar ranks it so too), and that edge folds the glider
   there, with its fold sound (the grab used to clear the flag silently), and no feathering after. A fresh glide press mid-rise still opens it again. A held key (bots, scripted input) can
   reopen it over the lip; a player's press-only keys never do.
+## Aim: the raw cursor (`--aim-latency-check`)
+
+The owner's note (Nov 10 2026): aim must feel crisp. The in-match cursor sits exactly where the OS mouse is, with no smoothing, acceleration or a frame of lag added by us. This is the audit of the path from the mouse event to the aim point, and what `--aim-latency-check` holds.
+
+**The path, event to aim point.** The OS event lands in Godot's `Input`, which accumulates motion (`Input.use_accumulated_input`, left at its default) and flushes it once at the start of the frame: the position every reader sees that frame is the latest one, with nothing averaged. `Match._process` then moves the view (`MatchCam.update`), reads the cursor (`_gather_input` → `_mouse_aim`, which casts `CamRig.mouse_on_plane` straight through `get_viewport().get_mouse_position()`), steps the sim and draws. The HUD's crosshair (`Reticle.draw`) and the AimKit cursor states (`AimReticle`) draw at that same mouse position the same frame. Nothing on this path interpolates, eases, accelerates or dead-zones the cursor: the only lerps near it are the camera's own lean and follow, which move the world under a raw cursor, not the cursor. The one snap in `_mouse_aim` (a foe within 52 px lends its height) changes the plane the ray is cut at, never where the cursor sits.
+
+**What was adding a frame.** Before this pass the cursor was read before the view moved, so while the view leans after the cursor (every big mouse move, dash and knock) the aim point was one frame old in camera terms: on the move's frame it sat 13.6 px off the cursor at 60 Hz and 5.9 px at 144 Hz. The camera-first order from `ext/feel-aim-steady` (merged here, see "Camera before the cursor" above) removes it: 0.0 px on every case. No other smoothing was found, so nothing else was removed; the reticle art is unchanged.
+
+**Measured** (`AIMLAG` lines; "frames" is rendered frames after the event's own, so 0 is the same frame; allowed is one physics tick, 1 frame at 60 Hz and 2 at 144 Hz):
+
+| Case | Reticle under cursor | Aim under cursor (view still) | Aim stale while the view leans | Before this pass |
+|---|---|---|---|---|
+| 60 Hz, 720p | 0 | 0 | 0 | 1 frame stale (13.6 px) |
+| 144 Hz, 720p | 0 | 0 | 0 | 1 frame stale (5.8 px) |
+| 60 Hz, 4K, UI scale 1.5 (canvas 1137.8x640 at 3.375) | 0 | 0 | 0 | 1 frame stale (13.9 px) |
+| 144 Hz, 4K, UI scale 1.5 | 0 | 0 | 0 | 1 frame stale (6.0 px) |
+
+The check drives `Match._process` one call per frame at the case's rate (not wall-clock), pushes the move through `Input` and flushes it as the engine would, and measures the aim point against the cursor's own projection through the camera as drawn that frame. The 4K cases set the window and the user's UI scale, so the content scale (`Settings._apply_ui_scale`) is on the path: the mouse position and the camera's ray share the scaled canvas, and the aim lands under the cursor at the same 0 frames.
+
+**Not ours, and not changed.**
+- The OS cursor is hidden in a match (`MOUSE_MODE_HIDDEN`) and the reticle is drawn in the frame, so it appears one presentation after a hardware cursor would. That is the engine's frame, not smoothing; a hardware cursor could not carry the bloom, charge, ammo and kit arcs, so the drawn one stays.
+- Vsync is on by default (`display/window/vsync/vsync_mode=1`, Settings > Video), which adds up to one display refresh of presentation latency on every platform, and the frame rate limit is off (`max_fps` 0). Both are the player's call in Settings and were left alone.
+- The display's own queue and compositor sit outside what a headless check can see.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
