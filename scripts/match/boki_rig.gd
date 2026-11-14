@@ -199,6 +199,8 @@ const CLIP_FACE := {
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
 
+signal stepped(sound: String)           # a planted foot came down and this step sound was played (BokiSteps)
+
 static var enabled := true
 ## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
 static var normal_k := 1.0
@@ -237,6 +239,7 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _steps := BokiSteps.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -355,6 +358,7 @@ func _process(dt: float) -> void:
 	if t > 0.0:
 		_face_step(t)
 		advance(t)
+	_steps.update(self, dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
 ## the jolt of a hit (KinFlinch) stay.
