@@ -891,7 +891,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 				var chrome := top.get_combined_minimum_size().y + (foot.get_combined_minimum_size().y + GAP_BIG if foot.visible else 0.0)
 				var vp := sc.get_viewport_rect().size
 				var room := vp.y - MENU_CHROME - HudStyle.safe_pad(vp).y * 2.0 - chrome
-				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))      # held: the same on every tab
+				# held: the same on every tab
+				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))
 				sc.custom_minimum_size.y = minf(want, room)
 		body.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
