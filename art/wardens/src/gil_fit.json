@@ -1,0 +1,248 @@
+{
+ "body_glb": "~/meshy/gill/bake/low.glb",
+ "rig": "art/wardens/src/gil_rig.json",
+ "out": "~/meshy/gill/fit/fit.glb",
+ "blend": "~/meshy/gill/fit.blend",
+ "turn": 180,
+ "max_tris": 14000,
+ "floater_verts": 30,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   0,
+   0.0,
+   0.57
+  ],
+  "neck": [
+   0,
+   0.0,
+   0.2
+  ],
+  "shoulder.L": [
+   0.29,
+   0.0,
+   0.22
+  ],
+  "shoulder.R": [
+   -0.29,
+   0.0,
+   0.22
+  ],
+  "elbow.L": [
+   0.47,
+   0.0,
+   0.0
+  ],
+  "elbow.R": [
+   -0.47,
+   0.0,
+   0.0
+  ],
+  "hand.L": [
+   0.57,
+   -0.04,
+   -0.2
+  ],
+  "hand.R": [
+   -0.57,
+   -0.04,
+   -0.2
+  ],
+  "fingers.L": [
+   0.64,
+   -0.05,
+   -0.36
+  ],
+  "fingers.R": [
+   -0.64,
+   -0.05,
+   -0.36
+  ],
+  "hip.L": [
+   0.11,
+   0.0,
+   -0.38
+  ],
+  "hip.R": [
+   -0.1,
+   0.0,
+   -0.38
+  ],
+  "knee.L": [
+   0.11,
+   0.0,
+   -0.68
+  ],
+  "knee.R": [
+   -0.11,
+   0.0,
+   -0.68
+  ],
+  "ankle.L": [
+   0.11,
+   0.0,
+   -0.86
+  ],
+  "ankle.R": [
+   -0.11,
+   0.0,
+   -0.86
+  ]
+ },
+ "chunk": {
+  "head": 1.0,
+  "hand": 1.1,
+  "girth": 1.0,
+  "feet": 1.0
+ },
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "lift": [
+  0.88,
+  1.05,
+  1.1
+ ],
+ "normal_smooth": 8,
+ "pad": 6,
+ "cap_holes": true,
+ "ink_room": 0.02,
+ "slot_rules": [
+  {
+   "slot": "leather",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    -0.75,
+    0.3
+   ],
+   "hsv": [
+    0.0,
+    0.12,
+    0.25,
+    0.8,
+    0.08,
+    0.5
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -0.34,
+    0.34,
+    null,
+    null,
+    0.1,
+    0.62
+   ],
+   "hsv": [
+    0.45,
+    0.72,
+    0.2,
+    1.0,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -0.34,
+    0.34,
+    null,
+    0.0,
+    0.1,
+    0.62
+   ],
+   "hsv": [
+    null,
+    null,
+    0.0,
+    0.25,
+    0.5,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    0.5,
+    null,
+    null,
+    null,
+    null,
+    -0.08
+   ],
+   "hsv": [
+    0.45,
+    0.72,
+    0.2,
+    1.0,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    null,
+    -0.5,
+    null,
+    null,
+    null,
+    -0.08
+   ],
+   "hsv": [
+    0.45,
+    0.72,
+    0.2,
+    1.0,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -0.3,
+    0.3,
+    null,
+    null,
+    -0.85,
+    -0.62
+   ],
+   "hsv": [
+    0.45,
+    0.72,
+    0.2,
+    1.0,
+    0.35,
+    1.0
+   ]
+  },
+  {
+   "slot": "cloth"
+  }
+ ],
+ "slot_vote": 4,
+ "fit_weights": true,
+ "snap_y": false,
+ "cap_flat": true,
+ "atlas_px": 2048,
+ "smooth": {
+  "iterations": 1,
+  "sigma_s": 2.0,
+  "sigma_r": 0.05
+ },
+ "despeckle": 1,
+ "ramps": [],
+ "weapon_empty": true
+}

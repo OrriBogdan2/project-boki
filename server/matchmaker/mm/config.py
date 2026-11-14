@@ -23,9 +23,13 @@ class Config:
     port_min: int = 7777
     port_max: int = 7799
     fill_timeout: dict = field(default_factory=lambda: {"duel": 20.0, "arena": 30.0, "trio": 20.0})  # s
-    trio_slots: int = 12                  # players in an extraction match (4 trios); the server fills with bots
+    trio_slots: int = 18                  # players in an extraction match (6 trios: 2x Hollow Crown at 30 hunters); the server fills with bots
     token_ttl_s: float = 60.0             # a handed-out token nobody used is dropped after this
     ready_timeout_s: float = 30.0         # the server must print its ready line within this or is killed
+    party_max: int = 3                    # members in a party
+    party_idle_s: float = 20.0            # a member who has not polled for this long is dropped
+    party_after_match_s: float = 120.0    # grace for a party to come back to its card after a match
+    party_bad_codes_per_min: int = 10     # wrong codes or secrets one client address may try per minute
     tokens_dir: str = "/run/boki"
     tick_s: float = 0.5
     feedback_path: str = "/var/lib/boki/feedback.jsonl"   # POST /feedback appends JSONL here
@@ -68,6 +72,10 @@ def load(env_file: str = ENV_FILE, environ: dict = None) -> Config:
     cfg.trio_slots = int(values.get("TRIO_SLOTS", cfg.trio_slots))
     cfg.token_ttl_s = float(values.get("TOKEN_TTL_S", cfg.token_ttl_s))
     cfg.ready_timeout_s = float(values.get("READY_TIMEOUT_S", cfg.ready_timeout_s))
+    cfg.party_max = int(values.get("PARTY_MAX", cfg.party_max))
+    cfg.party_idle_s = float(values.get("PARTY_IDLE_S", cfg.party_idle_s))
+    cfg.party_after_match_s = float(values.get("PARTY_AFTER_MATCH_S", cfg.party_after_match_s))
+    cfg.party_bad_codes_per_min = int(values.get("PARTY_BAD_CODES_PER_MIN", cfg.party_bad_codes_per_min))
     cfg.tokens_dir = values.get("TOKENS_DIR", cfg.tokens_dir)
     cfg.feedback_path = values.get("FEEDBACK_PATH", cfg.feedback_path)
     return cfg

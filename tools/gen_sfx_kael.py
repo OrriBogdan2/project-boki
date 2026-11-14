@@ -100,12 +100,31 @@ def stomp(g=1.0, f0=130):
 
 
 # ------------------------------------------------------------------ LMB: the greatsword
+SLASH_HIT = 0.08    # s: the blade's contact, after the press the sound plays on (the slash clips strike 50-100 ms in)
+EDGE_RNG = np.random.default_rng(4411)   # the edge's own noise, so adding it re-rolls no other sound of his
+
+
+def slash_edge(i):
+    """The blade meeting its mark: a near-instant bright snap, a short steel shing and a dull chop under it
+    (the cleave's cut, lighter: this is the quick swing)."""
+    n = N(0.15); t = np.arange(n) / S.SR
+    grit = EDGE_RNG.standard_normal(n)
+    snap = mix(bpf(grit, 3000, 9000) * env(n, 0.0002, 0.0012) * 2.6,
+               bpf(grit, 2400, 8000) * env(n, 0.0002, 0.007) * 1.3)
+    f = 2200 + 90 * i
+    shing = mix(np.sin(2 * np.pi * f * t) * env(n, 0.0002, 0.05) * 0.16,
+                np.sin(3 * np.pi * f * t) * env(n, 0.0002, 0.03) * 0.09)
+    chop = mix(kick(200, 70, 0.15, 0.006, 0.035, 2.6) * 0.65, bpf(grit, 320, 2600) * env(n, 0.0003, 0.02) * 1.2)
+    return mix(snap, shing, chop)
+
+
 def slash(i):
-    """A wide greatsword cut: heavy air moved, the hot edge hissing through it, the shackle's chain swinging."""
+    """A wide greatsword cut: heavy air moved, the hot edge hissing through it and biting on contact, the
+    shackle's chain swinging."""
     d = 0.42
     whum = S.sweep(95 + 6 * i, 60, d) * np.sin(np.pi * np.arange(N(d)) / N(d)) ** 2 * 0.35
     return mix(lpf(swish(d, 170 + 15 * i, 1300 + 120 * i, 3.5), 5000) * 1.3, whum,
-               at(sizzle(0.3, 0.03, 0.08) * 0.2, 0.05),
+               at(sizzle(0.3, 0.03, 0.08) * 0.2, 0.05), at(slash_edge(i), SLASH_HIT),
                at(links(0.2, (0.0, 0.03, 0.07), g=0.15), 0.12), at(lpf(noise(0.2), 300) * env(N(0.2), 0.03, 0.06), 0.06))
 
 
@@ -242,13 +261,17 @@ def ting(i):
                crack(0.15, 500, 3000, 0.01) * 1.2, kick(400, 200, 0.12, 0.004, 0.015, 1.8) * 0.3)
 
 
+RIPOSTE_HIT = 0.1   # s: the cut lands with the cleave (content/archetypes/juggernaut.json x.strike_t)
+
+
 def riposte(i):
-    """The lunging upward cleave: a rising heave, the cut, the hot edge hissing after it."""
-    d = 0.8
-    cut = mix(click(0.003, 2000, 6000) * 1.1, kick(190, 65, 0.5, 0.012, 0.06, 2.8) * 0.7,
-              crack(0.5, 300, 2600, 0.035) * 1.8)
-    return mix(swish(0.3, 150, 2000, 2.0) * 1.0, at(cut, 0.17), at(sizzle(0.55, 0.01, 0.18) * 0.45, 0.18),
-               at(bell(784, 0.5, 0.2) * 0.15, 0.18))
+    """The lunging upward cleave: a short rising heave, then the cut on the strike: a hard bright edge (a
+    near-instant click and a steel shing) over the chop, the hot edge hissing after it."""
+    edge = mix(click(0.002, 3000, 9000, 0.0008) * 2.2, crack(0.12, 2500, 8000, 0.008, 0.0002) * 1.6,
+               ring((2350, 3530), 0.3, (0.06, 0.035), (0.14, 0.08), 0.0002))
+    cut = mix(edge, kick(190, 65, 0.5, 0.006, 0.05, 2.8) * 0.7, crack(0.5, 300, 2600, 0.03, 0.0003) * 1.5)
+    return mix(swish(RIPOSTE_HIT + 0.02, 150, 2000, 2.0) * 0.6, at(cut, RIPOSTE_HIT),
+               at(sizzle(0.55, 0.01, 0.18) * 0.45, RIPOSTE_HIT + 0.01), at(bell(784, 0.5, 0.2) * 0.15, RIPOSTE_HIT))
 
 
 def heal(i):

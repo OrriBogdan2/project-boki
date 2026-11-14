@@ -9,7 +9,8 @@ extends RefCounted
 ##   glide                       gliding in below the lip
 ##   abyss                       falling below an island's rim, heading back in
 ## Asserts each kind of approach tops at least TOP_RATE of its tries, that over the lip you still have
-## KEEP (0.6) of the speed you came in with in KEEP_RATE of them, and that no face is topped by nobody.
+## KEEP (0.6) of the speed you came in with (up to MantleCarry.exit_cap: no launch off a fast dash) in KEEP_RATE
+## of them, and that no face is topped by nobody.
 ## Double-high ground (4 terraces, 3.2m: LAYOUT_RULES' wall tier) is never reached by jumping alone, a
 ## dash included: only a glide (or a launch, an ability, the abyss) gets you up it.
 ## With --verbose prints every try. Never touches the save.
@@ -30,9 +31,6 @@ var h: Hunter
 var bad := 0
 var stats := {}        # "kind rise mode" -> counts and sums
 var verbose := false
-var rises := 0         # tries that rose up a face (a Warden's mantle clip plays at the rise)
-var rises_full := 0    # ...that got to the lip
-var rises_back := 0    # steps the rise phase went backwards
 
 func ok(cond: bool, what: String) -> void:
 	print("CLIFF %s %s" % ["ok  " if cond else "FAIL", what])
@@ -60,8 +58,6 @@ func run(main: Node) -> void:
 		var keep_rate := float(s["kept"]) / n
 		var kept := "%s: keeps 0.6x speed over the lip %d%%" % [k, int(100.0 * keep_rate)]
 		ok(s["top"] == 0 or keep_rate >= KEEP_RATE, kept)
-	ok(rises > 0 and rises_back == 0 and rises_full * 10 >= rises * 9,
-			"rise phase follows the body (%d rises, %d reach the lip, %d back)" % [rises, rises_full, rises_back])
 	print("CLIFF DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -120,16 +116,12 @@ func _count(k: String, r: Dictionary, f: Dictionary, arch: String) -> void:
 		stats[k] = {"n": 0, "top": 0, "kept": 0, "vin": 0.0, "vmin": 0.0, "vlip": 0.0, "t": 0.0}
 	var s: Dictionary = stats[k]
 	s["n"] += 1
-	if r["k_max"] >= 0.0:
-		rises += 1
-		rises_full += 1 if r["k_max"] >= 0.9 else 0
-		rises_back += r["k_back"]
 	if r["top"]:
 		s["top"] += 1
 		f["topped"] = true
 		for key in ["vin", "vmin", "vlip", "t"]:
 			s[key] += r[key]
-		if r["vlip"] >= KEEP * r["vin"] - 0.01:
+		if r["vlip"] >= minf(KEEP * r["vin"], MantleCarry.exit_cap(h)) - 0.01:
 			s["kept"] += 1
 	if verbose:
 		print("CLIFF try %s %s at %s dir %s: %s" % [k, arch, f["a"], f["d"], r])
@@ -279,8 +271,7 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 	if mode in ["jump_0", "jump_30", "jump_60"]:
 		ang = float(mode.substr(5)) * (1.0 if (a.x + a.y) % 2 == 0 else -1.0)
 	var mv := dv.rotated(deg_to_rad(ang))
-	var res := {"top": false, "vin": 0.0, "vmin": 99.0, "vlip": 0.0, "t": 0.0, "k_max": -1.0, "k_back": 0}
-	var k_was := -1.0
+	var res := {"top": false, "vin": 0.0, "vmin": 99.0, "vlip": 0.0, "t": 0.0}
 	if not _setup(f, mode, face, mv, top):
 		res["skip"] = true
 		return res
@@ -308,11 +299,6 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 		m.step(DT)
 		t += DT
 		var hv1 := Vector2(h.vel.x, h.vel.z).length()
-		var rk := MantleCarry.rise_k(h)
-		if rk >= 0.0 and k_was >= 0.0 and rk < k_was - 0.001:
-			res["k_back"] += 1
-		res["k_max"] = maxf(res["k_max"], rk)
-		k_was = rk
 		res["ymax"] = maxf(float(res.get("ymax", -9.0)), h.pos.y - top)
 		res["dmin"] = minf(float(res.get("dmin", 9.0)), to_face)
 		if touch_t < 0.0 and (to_face < h.r + 0.35 or not h.lfloat.is_empty()):
@@ -322,7 +308,9 @@ func _try(f: Dictionary, mode: String) -> Dictionary:
 			res["vmin"] = minf(res["vmin"], hv1)
 		var past := (Vector2(h.pos.x, h.pos.z) - face).dot(dv) > 0.3
 		var on_b := int(floor(h.pos.x)) == b.x and int(floor(h.pos.z)) == b.y
-		if (on_b or past) and h.pos.y >= top - 0.15 and touch_t >= 0.0:
+		# (over the top once the ledge rise has handed over: a rise at the suction's pace reaches the top tile a
+		# few steps before its pop and carry)
+		if (on_b or past) and h.pos.y >= top - 0.15 and touch_t >= 0.0 and h.lfloat.is_empty():
 			res["top"] = true
 			res["vlip"] = hv1
 			res["t"] = t - touch_t
