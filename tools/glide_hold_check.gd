@@ -3,7 +3,8 @@ extends "res://tools/abyss_check.gd"
 ## (inp glide_press_only) the glider opens only from a fresh press in the air; Space held from the jump, or
 ## held while LMB/RMB are used, never opens it; a folded glider stays shut while still held, until a new press.
 ## Every Hunter: a fresh Space press during and after its air Shift glides (by the move's end at the latest),
-## except a Shift in SWALLOWS.
+## except a Shift in SWALLOWS. Online, the other games' copy of a glide button's mid-fall open opens on the first
+## snapshot after it: at most one Net tick (SNAP_S) behind, whatever the press's phase on the snapshot clock.
 ## Every Hunter, DECISIONS 11-08 "glide start adds no speed": from a run-speed jump, an air dash's end and a fall,
 ## the horizontal speed on the opening steps never passes the speed just before (SPEED_SLACK).
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
@@ -13,6 +14,7 @@ const RUN_MIN := 4.0    # m/s: the slowest speed that counts as the run in the j
 const SPEED_SLACK := 0.15       # m/s: float noise in the per-step position delta
 const SECS := 2.0       # how long each scenario runs
 const HIGH := 12.0      # m: a start in the air, well above the ground, for the in-air presses
+const SNAP_S := 0.1     # s between a player's snapshots (Net.tick's send_t)
 const BUTTONS := {"juggernaut": "RMB", "archer": "LMB", "bulwark": "LMB"}      # Kael, Lace, Albert
 ## Air Shifts that drop a Space press by design (MOVEMENT_FEEL "Dash into glide": a kit's own move is not cancelled)
 const SWALLOWS := {"mage": "Sparkle's wire: her keys do nothing while it holds (mage_kit _tick_wire)"}
@@ -124,6 +126,40 @@ func _base_cases() -> void:
 			h.roll_speed = 14.0
 	ok(_scenario(dash_hold)["t"] == 0.0, "Space held since the jump, an air dash ending: still no glider")
 
+## A glide button press 0.5s into a fall, at each phase of the snapshot clock: a remote copy fed only by the
+## snapshots (Match._ser -> _net_apply, as Net.tick sends them) opens on the first one after the local open.
+func _remote_case() -> void:
+	var snap := roundi(SNAP_S / Match.DT)
+	var s: Array = m._ser(h)
+	s[1] = "Pmirror"
+	var R: Hunter = m._net_make(s)
+	var lags: Array = []
+	for phase in snap:
+		_reset(w.random_ground() + Vector3(0, HIGH, 0), Vector3.ZERO)
+		h.coyote = 0.0
+		h.inp["glide_press_only"] = true
+		var press := 30 + phase
+		var local := -1
+		var remote := -1
+		for i in 60:
+			h.inp["glide"] = i >= press
+			h.inp["glide_btn"] = i >= press
+			m.step(Match.DT)
+			if i % snap == 0:
+				s = m._ser(h)
+				s[1] = R.nid
+				m._net_apply(R, s, m.time)
+			if h.gliding and local < 0: local = i
+			if R.gliding and remote < 0: remote = i
+		lags.append(remote - local if local >= 0 and remote >= 0 else 99)
+		ok(local == press, "glide button 0.5s into a fall (phase %d): opens on the press step" % phase)
+	var worst: int = lags.max()
+	ok(worst < snap, "the remote copy opens <= 1 Net tick (%d steps) behind the local open: %s steps" % [snap, lags])
+	for k in ["glide", "glide_btn"]: h.inp[k] = false
+	m.hunters.erase(R)
+	m.ents_by_id.erase(R.nid)
+	R.queue_free()
+
 ## Kael's RMB, Lace's and Albert's LMB held never become a glide.
 func _button_cases(arch: String) -> void:
 	var b: String = BUTTONS[arch]
@@ -212,6 +248,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_start(main, "")
 	_base_cases()
+	_remote_case()
 	m.queue_free()
 	for arch in Arch.ORDER:
 		await main.get_tree().process_frame

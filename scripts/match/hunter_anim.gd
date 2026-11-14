@@ -314,7 +314,7 @@ var hip_y := 0.42              # the torso's rest height on the legs (longer leg
 var gait: EmptyGait = null     # the Empty's planted-foot legs on the move (scripts/match/empty_gait.gd)
 var legs_sway := 0.12          # rad: the hips' yaw with the stride (none for the Empty: its feet are solved in place)
 
-func _init(m: Node3D) -> void:
+func _init(m: Node3D, fixed_seed := -1) -> void:
 	model = m
 	hip_y = float(m.get_meta("hip_y", hip_y))
 	rig = m.get_node("Rig")
@@ -353,7 +353,7 @@ func _init(m: Node3D) -> void:
 		gait = EmptyGait.new(legs, st)
 		legs_sway = 0.0
 	ws = WardenStance.new(stance)
-	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
+	rng = int(m.get_meta("anim_seed", m.get_instance_id() if fixed_seed < 0 else fixed_seed)) & 0x7fffffff
 	seed_ph = _rand() * TAU
 	weight = 1.0 if _rand() < 0.5 else -1.0
 	weight_to = weight
@@ -367,11 +367,12 @@ func _init(m: Node3D) -> void:
 		gun = aim.get_node_or_null("Gun")
 	_setup_weapon(String(m.get_meta("wid", "")))
 
-## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits).
+## The arms on the weapon in a relaxed carry, for a model nothing animates (galleries, portraits); the same pose on
+## every build (a fixed seed, not the instance id's: a Hero's root bone can follow this Rig, Ostra's rig_root).
 static func rest_pose(m: Node3D) -> void:
 	if not m.has_node("Rig/Torso/ArmLPivot"):
 		return
-	var a := HunterAnim.new(m)
+	var a := HunterAnim.new(m, 1)
 	a.snap = true
 	a.update(1.0 / 60.0, {"fired": 99.0})
 
@@ -763,7 +764,7 @@ func update(dt: float, s: Dictionary) -> void:
 	hr += spot.lift(1)
 	kr -= spot.lift(1) * TurnStep.FOLD
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
-	if gait != null:
+	if gait != null and gait.legs.is_inside_tree():      # rest_pose's model has no world yet
 		gait.crouch = crouch_k
 		gait.squat = act_k * HunterVerbs.squat(act_kind, act_t, act_need) if HunterVerbs.ACTS.has(act_kind) else 0.0
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
@@ -1043,8 +1044,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var leg_ref := LEG
 	if gait != null:      # the Empty's soles, not a point foot, meet the ground; its planted feet carry the hips
-		var sole_l := FootPlant.reach(hl, kl, wl)
-		var sole_r := FootPlant.reach(hr, kr, wr)
+		var sole_l := FootPlant.reach(hl, kl, wl, leg_l.scale.z)
+		var sole_r := FootPlant.reach(hr, kr, wr, leg_r.scale.z)
 		dl2 = gait.hip_reach(sole_l, sole_r, maxf(sole_l, sole_r))
 		dr2 = dl2
 		leg_ref = FootPlant.HIP
