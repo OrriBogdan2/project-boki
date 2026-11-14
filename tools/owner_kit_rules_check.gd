@@ -216,7 +216,7 @@ func _vex() -> void:
 		on_press and not lane and not held, "on press %s lane %s held %s" % [on_press, lane, held])
 	await done(m)
 
-## DECISIONS:82 "Abyssal Hand ... goes through walls and cliffs (placed walls still stop it)".
+## DECISIONS:82 "Deep Reach ... goes through walls and cliffs (placed walls still stop it)".
 func _grimble(placed: bool) -> void:
 	var r := setup("dredge", 8.0)
 	var m: Match = r[0]
@@ -239,10 +239,10 @@ func _grimble(placed: bool) -> void:
 		t += DT
 	drive(m, P, 0.1, func(_i): pass)
 	if placed:
-		ok("Grimble (DECISIONS:82): a placed wall stops the Abyssal Hand", K.grapples == grapples and K.pull.is_empty(),
+		ok("Grimble (DECISIONS:82): a placed wall stops the Deep Reach", K.grapples == grapples and K.pull.is_empty(),
 			"grapples +%d" % (K.grapples - grapples))
 	else:
-		ok("Grimble (DECISIONS:82): the Abyssal Hand passes a cliff face and hooks the foe behind it",
+		ok("Grimble (DECISIONS:82): the Deep Reach passes a cliff face and hooks the foe behind it",
 			K.grapples == grapples + 1, "grapples +%d" % (K.grapples - grapples))
 	await done(m)
 

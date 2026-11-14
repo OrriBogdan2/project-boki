@@ -1,5 +1,5 @@
 extends RefCounted
-## The Abyssal Hand reel against the source, for --dredge-combo-check (docs/heroes/dredge.md, "Reel parity"):
+## The Deep Reach reel against the source, for --dredge-combo-check (docs/heroes/dredge.md, "Reel parity"):
 ## the arm's reach, the reel's speed curve, where the body stops, what the reeled foe can do,
 ## what Grimble can do while he reels, and what a miss costs. One row of the doc's table per assert.
 

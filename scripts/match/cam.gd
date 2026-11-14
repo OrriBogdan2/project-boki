@@ -1,13 +1,13 @@
 class_name CamRig
 extends Camera3D
-## Supervive-style camera: high, far and narrow, leaning toward the cursor so you see where you aim.
+## The match camera: high, far and narrow, leaning toward the cursor so you see where you aim.
 
 const HEIGHT := 27.0
 const BACK := 17.5
 const LEAD_X := 4.2
 const LEAD_Z := 5.4
 ## The numbers (Settings "Camera" presets, "Camera follow" cursor lean, the edge kept) are in content/rules/camera.json.
-## The Supervive preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
+## The default preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
 ## "Camera framing vs the source".
 static var RULES: Dictionary = _load_rules()
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
@@ -33,11 +33,11 @@ var yaw := 0.0                # turned around the focus (0 = looking north); onl
 var yaw_to := 0.0
 var chase := 0.0              # 0 = the usual angle, 1 = low behind-the-ship view
 var chase_to := 0.0
-## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Supervive (the default)
+## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Lean (the default)
 ## leans toward the cursor in proportion to how far it is from YOU, past a deadzone, eased, and capped so you
 ## never leave the screen (lean_to). Locked stays centred on you.
 static var FOLLOW: Dictionary = RULES["follow"]
-var follow_mode := "supervive"
+var follow_mode := "lean"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
 ## Follow across, the source's (content/rules/camera.json "trail" [footage]): tight at a run, trailing a
@@ -60,7 +60,7 @@ var lead_off := Vector3.ZERO
 ## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
 ## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
 const GLIDE_ZOOM := 1.25      # x the distance under the glider [spec] +15..25% boom in the air
-const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [Supervive]
+const SNEAK_ZOOM := 1.45      # x the distance sneaking (Ctrl) on the ground, a wide look around [source]
 const ALT_ZOOM_FROM := 4.0    # m above the ground where height starts pulling the view back...
 const ALT_ZOOM_SPAN := 24.0   # ...m more for each +100%...
 const ALT_ZOOM_MAX := 0.7     # ...up to +70%
@@ -97,8 +97,8 @@ static func _load_rules() -> Dictionary:
 
 ## Picks one of STYLES (Settings "Camera").
 func use_style(id: String) -> void:
-	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
-	style_id = id if STYLES.has(id) else "supervive"
+	var st: Dictionary = STYLES.get(id, STYLES["default"])
+	style_id = id if STYLES.has(id) else "default"
 	pitch = deg_to_rad(float(st["pitch"]))
 	dist = float(st["dist"])
 	fov = float(st["fov"])
@@ -114,7 +114,7 @@ func apply_settings() -> void:
 
 ## Metres of ground across a 16:9 screen at the focus, for a style at zoom 1.
 static func style_across(id: String) -> float:
-	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
+	var st: Dictionary = STYLES.get(id, STYLES["default"])
 	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * 16.0 / 9.0)
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
@@ -173,10 +173,10 @@ func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
 	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
 
-## The Supervive cursor lean for a cursor `rel` metres from you on the ground: a share of the distance past the
+## The cursor lean for a cursor `rel` metres from you on the ground: a share of the distance past the
 ## deadzone, capped, and never more than the screen has room for along that way (you stay EDGE inside it).
 func lean_to(rel: Vector3) -> Vector3:
-	var fm: Array = FOLLOW["supervive"]
+	var fm: Array = FOLLOW["lean"]
 	var l := rel.length()
 	if l <= float(fm[0]):
 		return Vector3.ZERO
@@ -203,8 +203,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var rr: Array = Record.cam_rates()
 	var lean_k := float(rr[2])
 	var want_pan := Vector3.ZERO
-	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
-	if follow_mode == "supervive" and mouse_lead:
+	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["lean"])
+	if follow_mode == "lean" and mouse_lead:
 		# where the cursor points on the ground at your height, relative to you
 		var cur := mouse_on_plane(p.y)
 		want_pan = lean_to(Vector3(cur.x - p.x, 0, cur.z - p.z))
@@ -219,7 +219,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 			var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
 			if fm[4]: f *= f
 			want_pan = Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
-	if follow_mode == "supervive" and mouse_lead:
+	if follow_mode == "lean" and mouse_lead:
 		pass        # (eased above)
 	elif not mouse_lead or float(fm[3]) <= 0.0:
 		pan = want_pan if mouse_lead else pan.lerp(Vector3.ZERO, minf(1.0, delta * 6.0))

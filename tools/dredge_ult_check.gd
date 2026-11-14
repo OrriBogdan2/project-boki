@@ -182,7 +182,7 @@ func _props() -> void:
 	)
 	await ak.done(m)
 
-## Abyssal Hand, the foe hauled to your feet stunned, then the Broadside: every slug lands.
+## Deep Reach, the foe hauled to your feet stunned, then the Broadside: every slug lands.
 func _reel_combo(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var K: DredgeKit = P.ak
 	ak.fresh(T)
