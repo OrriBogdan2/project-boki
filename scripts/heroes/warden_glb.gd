@@ -213,7 +213,6 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
 	sync.idle_break = WardenBreak.make(root, skel, arch)
-	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	if sync.wall:
 		sync.wall.heavy = Arch.weight(arch) == "heavy"
 	var mats: Array = root.get_meta("mats", [])
