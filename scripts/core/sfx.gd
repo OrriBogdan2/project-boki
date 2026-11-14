@@ -773,9 +773,15 @@ func loop_on(key: String) -> bool:
 func _loop_level(L: Dictionary) -> void:
 	var p: AudioStreamPlayer = L["p"]
 	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
-	p.volume_db = -80.0 if is_nan(v) else v
+	v = -80.0 if is_nan(v) else v
+	# Set only on a change: each set on a playing voice queues new bus details in the AudioServer, and a
+	# loop held every step (LastAlive's bed) piled up enough to stall a headless check's exit for minutes.
+	if absf(p.volume_db - v) > 0.01:
+		p.volume_db = v
 	# A bed on another bus (LastAlive's on Music) stays there so it ducks with the score.
-	p.bus = _bus_for(L["pos"], L["sound"]) if String(L["bus"]) == "SFX" else StringName(L["bus"])
+	var bus: StringName = _bus_for(L["pos"], L["sound"]) if String(L["bus"]) == "SFX" else StringName(L["bus"])
+	if p.bus != bus:
+		p.bus = bus
 
 
 ## Plays a ready-made stream (a glider skin's sound, say) with the same distance falloff as play().
