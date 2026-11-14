@@ -361,8 +361,8 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 
 | Setting | Value |
 |---|---|
-| moves | {"rush": {"stat": "power", "beats": "dodge", "trait": "temper", "name": "Rush", "clip": "rush"}, "brace": {"stat": "guard", "beats": "rush", "trait": "loyalty", "name": "Brace", "clip": "brace"}, "dodge": {"stat": "speed", "beats": "brace", "trait": "curiosity", "name": "Dodge", "clip": "dodge"}} |
-| moves_doc | Keys 1, 2, 3 in this order. Each move pushes with its stat and beats one other; 'trait' is the personality that leans a Boki toward it, 'clip' its rig clip (BokiHomeClips, as long as impact_s; Brace adds the 'guard' pose for bodies without a rig). |
+| moves | {"rush": {"stat": "power", "beats": "dodge", "trait": "temper", "name": "Rush", "clip": "rush", "icon": "ram"}, "brace": {"stat": "guard", "beats": "rush", "trait": "loyalty", "name": "Brace", "clip": "brace", "icon": "fortify"}, "dodge": {"stat": "speed", "beats": "brace", "trait": "curiosity", "name": "Dodge", "clip": "dodge", "icon": "jump"}} |
+| moves_doc | Belt keys util1-3 (Settings > Controls, 1, 2, 3 by default) in this order. Each move pushes with its stat and beats one other; 'trait' is the personality that leans a Boki toward it, 'clip' its rig clip (BokiHomeClips, as long as impact_s; Brace adds the 'guard' pose for bodies without a rig), 'icon' its scripts/ui/icons.gd icon on the first-time teach's triangle. |
 | exchanges | 5 |
 | extra_max | 2 |
 | exchanges_doc | A bout is five exchanges; a dead level after five plays up to extra_max more, then goes to whoever won more exchanges (the rival on a full tie). |
@@ -413,6 +413,8 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 | gems_ran | 1 |
 | gems_doc | Gems to you when your Boki wins, or for any other bout (as the Stump Shove). |
 | card_s | 6 |
+| teach | {"rules": {"exchanges": 1, "extra_max": 0, "honest": [1.0, 1.0], "tell_s": 3.0, "pick_s": 8.0, "impact_s": 5.0, "push_s": 5.0, "result_s": 0.5}, "bar_speed": 0.45} |
+| teach_doc | The first time a player starts a Tumble, one practice exchange runs first (scripts/home/tumble_teach.gd): 'rules' replace the keys above for it (one exchange, no extras, the tell always honest, seconds to read, pick, charge and watch the push); bar_speed is the drill bar's first sweep (bar widths a second, the bout's is TimingBar.START_SPEED). No prize, energy or memory. |
 
 ## base_volley (`content/rules/base_volley.json`)
 
