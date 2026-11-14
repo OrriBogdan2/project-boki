@@ -19,7 +19,7 @@ var pats := {}          # action -> RegEx for those caps in a line
 const ODD_KEYS := [KEY_F13, KEY_F14, KEY_F15, KEY_F16, KEY_F17, KEY_F18, KEY_F19, KEY_F20, KEY_F21, KEY_F22,
 	KEY_F23, KEY_F24, KEY_F25, KEY_F26, KEY_F27, KEY_F28, KEY_F29, KEY_F30, KEY_F31, KEY_F32, KEY_F33, KEY_F34,
 	KEY_F35, KEY_KP_0, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9,
-	KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE, KEY_KP_PERIOD, KEY_KP_ENTER, KEY_INSERT,
+	KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE, KEY_KP_PERIOD, KEY_F10, KEY_INSERT,
 	KEY_HOME, KEY_END, KEY_PAGEUP, KEY_PAGEDOWN, KEY_SCROLLLOCK, KEY_PAUSE, KEY_NUMLOCK, KEY_BACKSLASH,
 	KEY_SEMICOLON, KEY_BRACKETLEFT, KEY_BRACKETRIGHT, KEY_APOSTROPHE, KEY_QUOTELEFT, KEY_MINUS, KEY_EQUAL,
 	KEY_SLASH, KEY_COMMA, KEY_PERIOD, KEY_F12, KEY_F11]
@@ -127,8 +127,8 @@ func _training() -> void:
 	var rows := m.train_rows()
 	for r: Array in rows: _line("training " + String(r[0]), String(r[1]))
 	var glide := rows.filter(func(r): return r[0] == "glide")
-	ok(not glide.is_empty() and String(glide[0][1]).contains(Settings.key_cap("jump")),
-			"the Training Grounds glide row names the rebound jump key")
+	ok(not glide.is_empty() and not String(glide[0][1]).contains("Space"),
+			"the Training Grounds glide row names no fixed key (TrainDrill: the slot shows the live one)")
 
 ## The first-time hints a fresh save sees at the start of a match.
 func _tips() -> void:
@@ -155,7 +155,7 @@ func _source_tips() -> void:
 		if hit != null:
 			_line("match.gd _tip", hit.get_string(1))
 			n += 1
-	ok(n > 10, "match.gd _tip lines read (%d)" % n)
+	ok(n > 2, "match.gd _tip lines read (%d; the rest are TipText's, --live-key-check)" % n)
 
 func _farm() -> void:
 	var n := _walk("farm tutorial", FarmTutorial.rules(), FarmTutorial.fill)

@@ -252,10 +252,15 @@ func _build_wall() -> void:
 
 func _secs_text() -> String:
 	if k < last() and m.time < t0[k + 1]:
-		return "ZONE CLOSES  %s" % m.hud._fmt(t0[k + 1] - m.time)
+		return "ZONE CLOSES  %s" % _mmss(t0[k + 1] - m.time)
 	if k > 0 and m.time < t1[k]:
-		return "ZONE CLOSING  %s" % m.hud._fmt(t1[k] - m.time)
+		return "ZONE CLOSING  %s" % _mmss(t1[k] - m.time)
 	return "FINAL ZONE"
+
+## m:ss, as the match clock writes it (works without m.hud: a check may draw with its own).
+static func _mmss(t: float) -> String:
+	t = maxf(0.0, t)
+	return "%d:%02d" % [int(t) / 60, int(t) % 60]
 
 ## The row under the match clock: the next close, and a warning while you're outside. Its bottom.
 func hud_row(hud, r: Rect2) -> float:
