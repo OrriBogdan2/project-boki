@@ -9,26 +9,11 @@
    ],
    "mob_voices": true,
    "holes": [
-    "mob _strike/spit:k_spore",
-    "mob _strike/volley:throw",
-    "mob _strike/fuse:boom",
-    "mob _strike/slam:k_gravity",
-    "boss _begin:v_warden",
-    "boss _atk_slam:k_gravity",
-    "boss _throw:throw",
-    "boss _tick_flying:boom",
-    "boss _tick_flying:k_spore",
-    "boss _atk_fissure:k_gravity",
     "boss _atk_dash:zap",
     "boss _atk_dash:whoosh",
     "boss _atk_storm:zap",
     "boss _atk_static:zap",
-    "boss _atk_spit:k_spore",
-    "boss _atk_brood:die_small",
-    "boss _atk_burrow:k_gravity",
-    "boss _atk_burrow:boom",
-    "boss _phase_up:v_warden",
-    "boss _phase_up:boom"
+    "boss _atk_brood:die_small"
    ]
   },
   "pickups": {
@@ -43,9 +28,7 @@
     "scripts/match/key_chest.gd"
    ],
    "holes": [
-    "chest_loot open:pickup",
     "loot_full swap_held:pickup",
-    "loot_full drop_for_held:pickup",
     "loot_full denied:lock_rattle",
     "pack stash:pickup",
     "pack swap:pickup",

@@ -70,7 +70,7 @@ const HELD_STEP_MS := 80       # ms a round: the source cadence of Vex's rifle (
 const CUE_CALLS := "(?:\\.sfx\\(|armed_fx\\([^,)]*,[^,)]*,\\s*|payoff_fx\\([^,]+,[^,]+,[^,]+,\\s*)\"([a-z0-9_]*)\""
 # the Hunters whose weapon or kit winds up a charge: ArchKit plays <arch>_charge_tick and <arch>_charge_full
 const CHARGERS := ["archer", "mage", "gunslinger", "juggernaut", "bulwark", "dolm", "ostra", "thief"]
-const TELL_REACH_MAX := 30.0  # m: the resource-full tell is for foes nearby (12-25 m), not across the island
+const TELL_REACH_MAX := 34.0  # m: the resource-full tell is for foes nearby (just past the 30 m hearing), not across
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 const UNDER_COMBAT_DB := 10.0  # dB: a rank cue as played sits at least this far under a weapon shot ("fire")
 const READY_SECS := 0.5        # s: the new-point chime's audible length at most

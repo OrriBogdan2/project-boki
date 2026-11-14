@@ -179,7 +179,7 @@ func _note() -> void:
 		_before[k] = Sfx.last_played[k]
 		var st = Sfx.streams.get(k)
 		var db := -99.0
-		for p in Sfx.players:
+		for p in Sfx.voice_all:      # (placed sounds play on the 3D spots)
 			if p.playing and ((st is Array and p.stream in st) or (not st is Array and p.stream == st)):
 				db = maxf(db, p.volume_db)
 		var e: Dictionary = _heard.get(k, {"n": 0, "db": db})

@@ -53,8 +53,9 @@ func _step(m: Match, secs: float) -> void:
 func _chests(m: Match) -> void:
 	var P: Hunter = m.player
 	var list: Array = m.chests.filter(func(x): return not x.get("ride", false) and not x["open"])
-	P.chest_keys = 0      # (a key opens a chest on the press, KeyChest: the hold channel is a keyless one)
+	P.chest_keys = 0
 	var c: Dictionary = list[0]
+	c["free"] = true      # (a key opens a locked chest on the press, KeyChest: only a free one is held open)
 	P.teleport(c["pos"] + Vector3(0.8, 0, 0))
 	P.vel = Vector3.ZERO
 	Sfx.listener = P.pos

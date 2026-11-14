@@ -584,7 +584,7 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
-	m.sfx("thief_reset_chime", at, -2.0)
+	m.sfx("pay_cashin", at, -2.0, 1.0)      # the cash-in payoff's own sting (DECISIONS 2026-11-08)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	RecastCue.payoff(self, t)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")

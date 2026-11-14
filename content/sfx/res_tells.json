@@ -17,17 +17,17 @@
   "thief_tell": "cast"
  },
  "reach": {
-  "ashwick_tell": 25,
-  "bulwark_tell": 25,
-  "dolm_tell": 25,
-  "dredge_tell": 25,
-  "gil_tell": 25,
-  "gunslinger_tell": 25,
-  "juggernaut_tell": 25,
-  "mage_tell": 25,
-  "ostra_tell": 25,
-  "rimewright_tell": 25,
-  "tender_tell": 25,
-  "thief_tell": 25
+  "ashwick_tell": 32,
+  "bulwark_tell": 32,
+  "dolm_tell": 32,
+  "dredge_tell": 32,
+  "gil_tell": 32,
+  "gunslinger_tell": 32,
+  "juggernaut_tell": 32,
+  "mage_tell": 32,
+  "ostra_tell": 32,
+  "rimewright_tell": 32,
+  "tender_tell": 32,
+  "thief_tell": 32
  }
 }

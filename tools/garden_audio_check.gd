@@ -95,6 +95,8 @@ func _cue_part() -> void:
 	ok(int(Sfx.last_played["garden_wake"]) == at, "a zone that is already awake gives no second sting")
 
 func _travel_part(m: Node) -> void:
+	Settings.v["soundtrack"] = Soundtrack.OWN_STYLE      # (the zones' own tracks; another style plays its own)
+	Settings.v["track_base"] = ""
 	Content.rules("farm_build")["base_mode"] = true
 	var d := Save.fresh()
 	d["roster"].append(Save.new_kin("zapple", "Pip"))
