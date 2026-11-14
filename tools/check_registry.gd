@@ -280,6 +280,7 @@ const CHECKS := {
 	"--xp-rules-check": ["res://tools/xp_rules_check.gd", "xp_rules_check", null],      # XP rules
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
+	"--number-looks-check": ["res://tools/number_looks_check.gd", "number_looks_check", null],      # by source
 	# hit arcs round your Hunter
 	"--damage-dir-check": ["res://tools/damage_dir_check.gd", "damage_dir_check", null],
 	# --shots-dir=<dir> [--size=WxH] (GPU)
@@ -655,6 +656,8 @@ const CHECKS := {
 	"--scan-prompt-shots": ["res://tools/scan_prompt_shots.gd", "scan_prompt_shots", null],      # --shots-dir=<dir>
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],  # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],  # colour rule, downed, Boki
+	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
+	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],  # docs/boki/ROSTER_50.md stubs
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],  # evolution rules, Inks, bred sex
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],  # the 50 lined up

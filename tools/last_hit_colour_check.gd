@@ -1,0 +1,79 @@
+extends RefCounted
+## --last-hit-colour-check: a monster's death flashes in the colour of the side that got the kill.
+##   1. a kill by you, your squad-mate or a rival makes one flash: your squad's colour or the rival colour
+##      (SideColor.ALLY / FOE), never the monster's own
+##   2. a lair boss's death (Juice.boss_dead) flashes the same way, once
+##   3. a death with no Hunter behind it (a fall, the Blight) keeps the monster's own colour
+## Never touches the save.
+
+var bad := 0
+var last_mob: Mob
+
+
+func ok(what: String, cond: bool, extra := "") -> void:
+	print("LASTHIT %s %s %s" % ["ok  " if cond else "FAIL", what, extra])
+	if not cond:
+		bad += 1
+
+
+func run(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.set_process(false)
+	for mb in m.mobs:
+		mb.dead = true
+		mb.visible = false
+	var me: Hunter = m.player
+	var mate: Hunter = null
+	var foe: Hunter = null
+	for h in m.hunters:
+		if h != me and h.team == me.team:
+			mate = h
+		elif h.team != me.team:
+			foe = h
+	for boss in [false, true]:
+		var tag := "[boss] " if boss else ""
+		var by_you := _kill(m, me.pos, me, boss)
+		var by_mate := _kill(m, me.pos, mate, boss)
+		var by_foe := _kill(m, me.pos, foe, boss)
+		ok(tag + "your kill: one squad-colour flash", by_you.size() == 1 and _same(by_you[0], SideColor.ALLY))
+		ok(tag + "your mate's kill: one squad-colour flash", by_mate.size() == 1 and _same(by_mate[0], SideColor.ALLY))
+		ok(tag + "a rival's kill: one rival-colour flash", by_foe.size() == 1 and _same(by_foe[0], SideColor.FOE))
+		var apart := by_you.size() == 1 and by_foe.size() == 1 and not _same(by_you[0], by_foe[0])
+		ok(tag + "the two sides differ", apart)
+		ok(tag + "the dissolving body glows in the rival colour", _body_glow(last_mob, SideColor.FOE))
+	var own := _kill(m, me.pos, null, false)
+	var plain := own.size() == 1 and not _same(own[0], SideColor.ALLY) and not _same(own[0], SideColor.FOE)
+	ok("no Hunter behind it: one flash in the monster's own colour", plain)
+	print("LASTHIT DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+func _body_glow(mb: Mob, col: Color) -> bool:
+	for mt in mb.mats:
+		if mt is ShaderMaterial and _same(mt.get_shader_parameter("flash_color"), col):
+			return true
+	return false
+
+
+func _same(a: Color, b: Color) -> bool:
+	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length() < 0.02
+
+
+## Kills a fresh monster beside `at` for `by` (the path that pays the kill); returns the colours of the flashes.
+func _kill(m: Match, at: Vector3, by: Hunter, boss: bool) -> Array:
+	var mb := m.spawn_mob("skitter", at + Vector3(2, 0, 0))
+	last_mob = mb
+	m.fx.flashes.clear()
+	if boss:
+		Juice.boss_dead(m, mb, by)  # (a lair boss's death; Boss needs a lair, so the bare Juice call stands in)
+	else:
+		mb.hp = 0.0
+		mb._on_zero(by, {})
+	var cols: Array = []
+	for f in m.fx.flashes:
+		cols.append(((f["node"] as MeshInstance3D).material_override as ShaderMaterial).get_shader_parameter("color"))
+	return cols
