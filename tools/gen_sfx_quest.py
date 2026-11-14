@@ -8,6 +8,7 @@ warm crimson), so a quest cue never reads as a Heart one:
   quest_lose        ui    the quest your squad was on is lost: a muffled thud and a slow falling minor pair
   quest_site        loop  the active quest site's quiet hum (positional, carries 30 m)
 """
+
 import numpy as np
 import sfx_lib as S
 from sfx_lib import T, mix, at, lpf, bpf
@@ -27,7 +28,7 @@ def take():
 def rival_rise():
     d = 1.6
     t = T(d)
-    trem = 0.55 + 0.45 * np.sin(2 * np.pi * (6.0 + 6.0 * t / d) * t)       # the flutter quickens as it climbs
+    trem = 0.55 + 0.45 * np.sin(2 * np.pi * (6.0 + 6.0 * t / d) * t)  # the flutter quickens as it climbs
     pair = (S.sweep(330.0, 494.0, d, curve=1.6) + 0.8 * S.sweep(349.0, 523.0, d, curve=1.6)) * trem
     swell = S.shape(d, 1.35, 0.15, 0.1)
     grit = bpf(S.noise(d), 1500, 5000) * swell * 0.12
@@ -46,7 +47,7 @@ def lose():
 
 
 def site():
-    d = 3.0                                # whole cycles in 3 s, so the loop is seamless
+    d = 3.0  # whole cycles in 3 s, so the loop is seamless
     t = T(d)
     hum = sum(g * np.sin(2 * np.pi * f * t) for f, g in [(98.0, 1.0), (147.0, 0.5), (196.0, 0.3), (293.0, 0.12)])
     breathe = 0.8 + 0.2 * np.sin(2 * np.pi * (1.0 / 3.0) * t)
@@ -55,12 +56,12 @@ def site():
 
 
 def main():
-    S.save_cat('quest_take', take(), 'ui')
-    S.save_cat('quest_rival_rise', rival_rise(), 'ui')
-    S.save_cat('quest_win', win(), 'ui')
-    S.save_cat('quest_lose', lose(), 'ui')
-    S.save_loop('quest_site', site(), 'loop')
+    S.save_cat("quest_take", take(), "ui")
+    S.save_cat("quest_rival_rise", rival_rise(), "ui")
+    S.save_cat("quest_win", win(), "ui")
+    S.save_cat("quest_lose", lose(), "ui")
+    S.save_loop("quest_site", site(), "loop")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

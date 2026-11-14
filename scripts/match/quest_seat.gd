@@ -11,7 +11,7 @@ extends RefCounted
 ##   TAKEN   a squad finished it (`team`); `out` once that squad has left by it. One use: final
 ##   SHUT    its window ran out unused (final). "Lost to the Blight" is a look of this, not a state
 
-enum S {LOCKED, OPEN, IN_USE, TAKEN, SHUT}
+enum S { LOCKED, OPEN, IN_USE, TAKEN, SHUT }
 const NEXT := {
 	S.LOCKED: [S.OPEN, S.SHUT],
 	S.OPEN: [S.IN_USE, S.TAKEN, S.SHUT],
@@ -21,15 +21,16 @@ const NEXT := {
 }
 
 var m: Match
-var kind := ""                 # "lair" or "uplink"
-var ref := {}                  # the lair (Lairs.list) or the outpost (Exits.list) it runs on
-var open_s := 0.0              # session seconds (content/rules/heart.json "quest")
+var kind := ""  # "lair" or "uplink"
+var ref := {}  # the lair (Lairs.list) or the outpost (Exits.list) it runs on
+var open_s := 0.0  # session seconds (content/rules/heart.json "quest")
 var shut_s := 0.0
 var state := S.LOCKED
-var team := -1                 # the squad on it (IN_USE) or that took it (TAKEN)
-var out := false               # TAKEN, and that squad has left by it
+var team := -1  # the squad on it (IN_USE) or that took it (TAKEN)
+var out := false  # TAKEN, and that squad has left by it
 var trail: Array[String] = []  # "time from>to why", every move (the checks read it)
-var refused := 0               # edges NEXT turned down: always 0 in a sane run
+var refused := 0  # edges NEXT turned down: always 0 in a sane run
+
 
 func _init(match_node: Match, k: String, r: Dictionary, o: float, s: float) -> void:
 	m = match_node
@@ -38,8 +39,10 @@ func _init(match_node: Match, k: String, r: Dictionary, o: float, s: float) -> v
 	open_s = o
 	shut_s = s
 
+
 func title() -> String:
 	return "the Sealed Lair" if kind == "lair" else "the Uplink"
+
 
 func go(to: S, why: String, t := -1) -> bool:
 	if not (to in NEXT[state]):
@@ -48,6 +51,7 @@ func go(to: S, why: String, t := -1) -> bool:
 		return false
 	_force(to, why, t)
 	return true
+
 
 ## Sets the state without the table. The calls (feed, toast, ping) are each game's own.
 func _force(to: S, why: String, t := -1) -> void:
@@ -73,9 +77,11 @@ func _force(to: S, why: String, t := -1) -> void:
 		S.SHUT:
 			m.add_feed("%s has shut" % title().capitalize())
 
+
 ## Where the seat is: the lair's centre or the outpost.
 func site() -> Vector3:
 	return ref.get("c", ref.get("pos", Vector3.ZERO))
+
 
 ## How far the squad on it is, 0 to 1: the uplink's charge, or the health taken off the lair's boss.
 func progress() -> float:
@@ -85,6 +91,7 @@ func progress() -> float:
 	if b == null or b.max_hp <= 0.0:
 		return 0.0
 	return clampf(1.0 - b.hp / b.max_hp, 0.0, 1.0)
+
 
 ## "Amber squad" style words for a squad (the name of one of its hunters when that's all we have).
 func squad(t: int) -> String:
