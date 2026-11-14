@@ -57,7 +57,7 @@ submit() {  # submit SIDE TREE < flags : the flags dealt round-robin (slowest fi
 	k=$(( n < SHARDS ? n : SHARDS ))
 	awk -v k="$k" '{ s[(NR - 1) % k] = s[(NR - 1) % k] "," $1 } END { for (i = 0; i < k; i++) print substr(s[i], 2) }' <<< "$flags" \
 		| xargs -P "$SUBMIT_P" -I{} sh -c 'id=$(jobq submit --tree "$2" --needs any --label "$3-$1" --timeout "$4" \
-			-- --gate-shard-run={} --par="$5" --cap="$6" 2>/dev/null | tail -1); [ -n "$id" ] && echo "$1 $id {}"' _ "$1" "$2" "$TAG" "$JOB_CAP" "$PAR" "$CAP" >> "$OUT/jobs.tsv"
+			-- --gate-shard-run={} --par="$5" --cap="$6" 2>/dev/null | tail -1); [ -n "$id" ] || id=NOID$$; echo "$1 $id {}"' _ "$1" "$2" "$TAG" "$JOB_CAP" "$PAR" "$CAP" >> "$OUT/jobs.tsv"
 }
 
 collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag> <rc> <errs> <secs>" per flag to stdout
@@ -65,6 +65,10 @@ collect() {  # collect JOBS_FILE : wait for every job in it, write "<side> <flag
 	declare -A side flags
 	while read -r s id fl; do side[$id]=$s; flags[$id]=$fl; done < "$1"
 	left=" ${!side[*]} "
+	for id in ${!side[*]}; do  # a submit that failed twice: its flags are lost now and get the single re-run
+		[[ $id == NOID* ]] || continue
+		for f in ${flags[$id]//,/ }; do echo "${side[$id]} $f lost 0 0"; done; left=${left/ $id / }
+	done
 	while [ -n "${left// /}" ] && [ $(( $(date +%s) - t1 )) -lt "$MAX_WAIT" ]; do
 		sleep 30
 		while read -r line; do  # `jobq result ID` for every id still open (`jobq wait` prints nothing until all are done, `status` only lists the latest)

@@ -34,6 +34,8 @@ def in_main(patch: str, env: dict) -> bool:
 def conflicts(base: str, main: str, head: str, tmp: str) -> set[str]:
     """Paths a merge of head into main cannot resolve by itself."""
     env = {**os.environ, "GIT_INDEX_FILE": os.path.join(tmp, "merge-idx")}
+    if os.path.exists(env["GIT_INDEX_FILE"]):
+        os.remove(env["GIT_INDEX_FILE"])  # read-tree -m refuses to merge into an index that still holds stages
     git("read-tree", "-m", "--aggressive", base, main, head, env=env)
     bad = set()
     for line in git("ls-files", "-u", env=env).stdout.splitlines():
