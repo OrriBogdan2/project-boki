@@ -723,7 +723,8 @@ func _vex_rounds(m: Match, P: Hunter, sd: Dictionary) -> void:
 	ok("LMB: each round is a muzzle flash and a lime tracer riding it (HeroVfx data)",
 			int(V.plays.get("shot", 0)) >= 1 and traced)
 	var mouth := P.model.get_node_or_null(GunslingerKit.GUN_MUZZLE) as Node3D if P.model else null
-	var flares: Array = V.live.filter(func(e: Dictionary) -> bool: return String(e["kind"]) == "flare")
+	var flare_pool: Array = V.pools.get("flare", [])
+	var flares: Array = V.live.filter(func(e: Dictionary) -> bool: return e["node"] in flare_pool)
 	var off := INF
 	if mouth and not flares.is_empty():
 		off = (flares[-1]["node"] as Node3D).global_position.distance_to(mouth.global_position)
