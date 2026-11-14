@@ -6,10 +6,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SLEEPOVER %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
@@ -34,8 +36,9 @@ func run(m: Node) -> void:
 	ok(early.is_empty() and Sleepover.due(t0 + Sleepover.DAY_SECS).size() == 1, "it is due after a day, not before")
 	var crop: String = Data.CROPS.keys()[0]
 	var wick := {"uid": "h", "species": "cindle", "name": "Wick", "level": 3}
-	var host := Social.clean_island({"name": "Pia", "roster": [wick],
-		"plots": [{"crop": "", "stage": 0}, {"crop": crop, "stage": 3}]})
+	var host := Social.clean_island(
+		{"name": "Pia", "roster": [wick], "plots": [{"crop": "", "stage": 0}, {"crop": crop, "stage": 3}]}
+	)
 	host["roster"][0]["traits"]["bravery"] = 0.9
 	var seeds_before := int(Save.d["seeds"].get(crop, 0))
 	var res := Sleepover.come_home(Sleepover.list()[0], host)

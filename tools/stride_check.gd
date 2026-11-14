@@ -5,21 +5,23 @@ extends RefCounted
 ## move show none of it. Never touches the save.
 
 const DT := 1.0 / 60.0
-const SLIDE_MIN := 0.30        # m: the stop slide (decision 0020's 0.3-0.5 m, a little over for the heavy)
+const SLIDE_MIN := 0.30  # m: the stop slide (decision 0020's 0.3-0.5 m, a little over for the heavy)
 const SLIDE_MAX := 0.55
-const FOOT_MAX := 0.03         # m: a planted foot may stray this far from where its contact began
-const PLANT_Y := 0.015         # m: a foot this near its standing sole height is planted
-const RUN_UP := 40             # frames: a run-up reaches the Hero's run speed in 6 and the strip is 10 m either way
+const FOOT_MAX := 0.03  # m: a planted foot may stray this far from where its contact began
+const PLANT_Y := 0.015  # m: a foot this near its standing sole height is planted
+const RUN_UP := 40  # frames: a run-up reaches the Hero's run speed in 6 and the strip is 10 m either way
 const HEROES := ["gunslinger", "juggernaut", "bulwark", "dolm", "rimewright"]
 
 var A
 var bad := 0
-var sole := [0.0, 0.0]         # m: each foot's height over the ground while he stands
+var sole := [0.0, 0.0]  # m: each foot's height over the ground while he stands
+
 
 func ok(cond: bool, what: String) -> void:
 	print("STRIDE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _frame(m: Match, P: Hunter) -> void:
 	m.step(DT)
@@ -28,8 +30,10 @@ func _frame(m: Match, P: Hunter) -> void:
 	sync.set_process(false)
 	sync.call("_process", DT)
 
+
 func _stride(P: Hunter) -> WardenStride:
 	return (P.model.get_node("Warden/Sync").get("clips") as WardenClips).stride
+
 
 func _feet(P: Hunter) -> Array:
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
@@ -41,6 +45,7 @@ func _feet(P: Hunter) -> Array:
 		out.append(sk.global_transform * (knee.origin + shin))
 	return out
 
+
 ## Back to the start of the strip, standing and settled.
 func _home(m: Match, P: Hunter, home: Vector3) -> void:
 	P.inp["move"] = Vector2.ZERO
@@ -48,13 +53,16 @@ func _home(m: Match, P: Hunter, home: Vector3) -> void:
 	P.vel = Vector3.ZERO
 	_frames(m, P, 90)
 
+
 func _frames(m: Match, P: Hunter, n: int) -> void:
 	for f in n:
 		_frame(m, P)
 
+
 func _shown(P: Hunter) -> bool:
 	var st := _stride(P)
 	return st.phase != 0 or st.stop_w > 0.0 or st.lean_w > 0.0 or st.pin_w > 0.0
+
 
 ## Lets go of a run and follows the planted feet to a stop: [slide m, worst planted-foot slide m, peak weight].
 ## A foot is planted while it sits within PLANT_Y of its standing sole height; its slide is how far it strays from where
@@ -81,6 +89,7 @@ func _stop(m: Match, P: Hunter) -> Array:
 		peak = maxf(peak, _stride(P).stop_w)
 	return [from.distance_to(P.pos), worst, peak]
 
+
 ## A run-up's first frames: how far the start lean got, and whether any is left at the steady run.
 func _start(m: Match, P: Hunter) -> Array:
 	P.inp["move"] = Vector2(0.0, -1.0)
@@ -89,6 +98,7 @@ func _start(m: Match, P: Hunter) -> Array:
 		_frame(m, P)
 		lean = maxf(lean, _stride(P).lean_w)
 	return [lean, _stride(P).lean_w]
+
 
 func _skips(id: String, m: Match, P: Hunter, home: Vector3) -> void:
 	P.inp["move"] = Vector2(0.0, -1.0)
@@ -116,6 +126,7 @@ func _skips(id: String, m: Match, P: Hunter, home: Vector3) -> void:
 	_frame(m, P)
 	ok(not _shown(P), "%s: a keyed move the frame after shows no stop pose" % id)
 	P.ak.anim_id = ""
+
 
 func run(main: Node) -> void:
 	Save.no_write = true

@@ -8,17 +8,17 @@ extends RefCounted
 ## Runs after WardenClips posed the bones.
 
 const RULES := "res://content/rules/warden_stride.json"
-const BRAKE_DROP := 0.25     # m/s under the peak speed: a let-go has started
-const BRAKE_REGAIN := 0.4    # m/s over the slowest speed of the slide: the keys are down again
-const CARRY := 1.15          # of the run speed: faster than this, nothing keyed it (a knock, a kit step)
-const LEAN_RAMP := 0.3       # s a start takes to build the run speed on screen
-const EASE := 12.0           # 1/s: the weight shift and the lean ease in and out
-const RELEASE := 12.0        # 1/s: the foot pins let go of the legs
-const REACH_AT := 0.85       # of the slide: the swinging foot is over its spot, and comes down in place from there
-const FLIGHT_FROM := 0.12   # of a foot's way: it lifts before it travels (the sole is off the floor by then)
-const FLIGHT_TO := 0.88     # and has landed before the last of it
-const FREEZE_AT := 0.96      # of the slide: its spot stops following the body (the drawn body lags its speed a little)
-const CROUCH_MAX := 0.3      # a sneak or slide dip is not a stop
+const BRAKE_DROP := 0.25  # m/s under the peak speed: a let-go has started
+const BRAKE_REGAIN := 0.4  # m/s over the slowest speed of the slide: the keys are down again
+const CARRY := 1.15  # of the run speed: faster than this, nothing keyed it (a knock, a kit step)
+const LEAN_RAMP := 0.3  # s a start takes to build the run speed on screen
+const EASE := 12.0  # 1/s: the weight shift and the lean ease in and out
+const RELEASE := 12.0  # 1/s: the foot pins let go of the legs
+const REACH_AT := 0.85  # of the slide: the swinging foot is over its spot, and comes down in place from there
+const FLIGHT_FROM := 0.12  # of a foot's way: it lifts before it travels (the sole is off the floor by then)
+const FLIGHT_TO := 0.88  # and has landed before the last of it
+const FREEZE_AT := 0.96  # of the slide: its spot stops following the body (the drawn body lags its speed a little)
+const CROUCH_MAX := 0.3  # a sneak or slide dip is not a stop
 
 static var _rules = null
 # (loaded when first used, not named as a type: a type reference would compile HunterMove ahead of Hunter and
@@ -30,28 +30,29 @@ var skel: Skeleton3D
 var cfg: Dictionary
 var hips := -1
 var head := -1
-var legs: Array = []         # [thigh bone, shin bone] per side
-var idle_feet: Array = [Vector3.ZERO, Vector3.ZERO]   # model frame, off the last standing pose
+var legs: Array = []  # [thigh bone, shin bone] per side
+var idle_feet: Array = [Vector3.ZERO, Vector3.ZERO]  # model frame, off the last standing pose
 var idle_known := false
-var shown := 0.0             # m/s: the speed the start's lean has caught up with
-var peak := 0.0              # m/s: the fastest of this run
-var low := 0.0               # m/s: the slowest of this slide
+var shown := 0.0  # m/s: the speed the start's lean has caught up with
+var peak := 0.0  # m/s: the fastest of this run
+var low := 0.0  # m/s: the slowest of this slide
 var last_spd := 0.0
 var carried := false
-var phase := 0               # 0: none, 1: the slide, 2: the planted foot steps in, 3: letting go
-var u := 0.0                 # 0..1 along the slide
-var step_p := 0.0            # 0..1 of the second step
-var from_pos := Vector3.ZERO     # world: where the let-go began
-var lead := -1.0 / 60.0      # s: the drawn body is this much of its speed ahead of the physics (learned off each stop)
-var aimed: Array = [Vector3.ZERO, 0.0]   # the last end spot guessed before the foot's spot froze, and the speed then
-var dir := Vector3.ZERO      # world, flat: where the slide goes
+var phase := 0  # 0: none, 1: the slide, 2: the planted foot steps in, 3: letting go
+var u := 0.0  # 0..1 along the slide
+var step_p := 0.0  # 0..1 of the second step
+var from_pos := Vector3.ZERO  # world: where the let-go began
+var lead := -1.0 / 60.0  # s: the drawn body is this much of its speed ahead of the physics (learned off each stop)
+var aimed: Array = [Vector3.ZERO, 0.0]  # the last end spot guessed before the foot's spot froze, and the speed then
+var dir := Vector3.ZERO  # world, flat: where the slide goes
 var slide_m := 0.0
-var feet0: Array = [Vector3.ZERO, Vector3.ZERO]       # world feet when the let-go began
-var feet_to: Array = [Vector3.ZERO, Vector3.ZERO]     # world idle spots at the end of the slide
-var swing := 0               # which foot swings in the slide; the other stays planted
+var feet0: Array = [Vector3.ZERO, Vector3.ZERO]  # world feet when the let-go began
+var feet_to: Array = [Vector3.ZERO, Vector3.ZERO]  # world idle spots at the end of the slide
+var swing := 0  # which foot swings in the slide; the other stays planted
 var pin_w := 0.0
-var stop_w := 0.0            # 0..1: the weight shifted back
-var lean_w := 0.0            # 0..1 of the start lean
+var stop_w := 0.0  # 0..1: the weight shifted back
+var lean_w := 0.0  # 0..1 of the start lean
+
 
 static func make(model: Node3D, sk: Skeleton3D, art_name: String) -> WardenStride:
 	if _move == null:
@@ -67,6 +68,7 @@ static func make(model: Node3D, sk: Skeleton3D, art_name: String) -> WardenStrid
 	for sd in ["L", "R"]:
 		st.legs.append([WardenSkeleton.find(sk, "thigh." + sd), WardenSkeleton.find(sk, "shin." + sd)])
 	return st
+
 
 ## One frame, after the clips posed the bones. `clips` says whether the legs are the loop's to move.
 func step(dt: float, s: Dictionary, clips: WardenClips) -> void:
@@ -99,11 +101,20 @@ func step(dt: float, s: Dictionary, clips: WardenClips) -> void:
 		_stop(dt, spd)
 	_pose()
 
+
 ## Nothing but the loops moves him: no action, no air, no dash, no crouch, nothing keyed.
 func _owns_body(s: Dictionary, clips: WardenClips) -> bool:
-	return clips.act_w < 0.05 and clips.up_w < 0.05 and clips.proc_w < 0.05 and clips.air_w < 0.05 \
-			and not bool(s.get("rolling", false)) and String(s.get("kmove", "")) == "" \
-			and float(s.get("crouch", 0.0)) < CROUCH_MAX and not bool(s.get("dead", false))
+	return (
+		clips.act_w < 0.05
+		and clips.up_w < 0.05
+		and clips.proc_w < 0.05
+		and clips.air_w < 0.05
+		and not bool(s.get("rolling", false))
+		and String(s.get("kmove", "")) == ""
+		and float(s.get("crouch", 0.0)) < CROUCH_MAX
+		and not bool(s.get("dead", false))
+	)
+
 
 ## Everything off in this frame (a dash a frame after a stop shows nothing of it).
 func _reset(spd: float) -> void:
@@ -115,6 +126,7 @@ func _reset(spd: float) -> void:
 	peak = spd
 	last_spd = spd
 
+
 func _record_idle(clips: WardenClips) -> void:
 	if clips.loco_pos.length() > 0.05 or clips.stance_w > 0.05:
 		return
@@ -122,6 +134,7 @@ func _record_idle(clips: WardenClips) -> void:
 	var f := _feet()
 	idle_feet = [inv * f[0], inv * f[1]]
 	idle_known = true
+
 
 func _begin(vel: Vector3, spd: float) -> void:
 	phase = 1
@@ -136,6 +149,7 @@ func _begin(vel: Vector3, spd: float) -> void:
 	swing = 0 if _ahead(feet0[0]) < _ahead(feet0[1]) else 1
 	_aim(spd)
 
+
 ## The idle spots at the end of what is left of the slide (HunterMove.slide of the speed now).
 func _aim(spd: float) -> void:
 	var end := root.global_transform
@@ -145,10 +159,12 @@ func _aim(spd: float) -> void:
 	var kept: Vector3 = feet_to[swing]
 	feet_to = [end * idle_feet[0], end * idle_feet[1]]
 	if u >= FREEZE_AT:
-		feet_to[swing] = kept        # (down: it stays where it landed)
+		feet_to[swing] = kept  # (down: it stays where it landed)
+
 
 func _ahead(p: Vector3) -> float:
 	return (p - from_pos).dot(dir)
+
 
 ## The start: leans along the way he goes, less as the shown speed catches up.
 func _lean(dt: float, spd: float, run: float, walk: float, vel: Vector3) -> void:
@@ -159,6 +175,7 @@ func _lean(dt: float, spd: float, run: float, walk: float, vel: Vector3) -> void
 	pin_w = move_toward(pin_w, 0.0, RELEASE * dt)
 	if lean_w > 0.001:
 		_tilt(Vector3(vel.x, 0.0, vel.z), deg_to_rad(float(cfg["lean_deg"])) * lean_w)
+
 
 func _stop(dt: float, spd: float) -> void:
 	lean_w = 0.0
@@ -188,6 +205,7 @@ func _stop(dt: float, spd: float) -> void:
 	stop_w = move_toward(stop_w, want, EASE * dt)
 	_tilt(dir, -deg_to_rad(float(cfg["settle_deg"])) * stop_w)
 
+
 ## Leans the hips along a world direction by `ang` radians (+ forward), the head keeping half of it level.
 func _tilt(world_dir: Vector3, ang: float) -> void:
 	var d := root.global_basis.inverse().orthonormalized() * world_dir
@@ -200,6 +218,7 @@ func _tilt(world_dir: Vector3, ang: float) -> void:
 	if head >= 0:
 		skel.set_bone_pose_rotation(head, Quaternion(axis, -ang * 0.5) * skel.get_bone_pose_rotation(head))
 
+
 ## Pins the feet of the slide and the step on top of the loops' legs: the swinging foot flies to its idle spot while
 ## the other stays where it was; once the body halts the planted foot steps in.
 func _pose() -> void:
@@ -209,7 +228,7 @@ func _pose() -> void:
 	for i in 2:
 		var at: Vector3 = feet_to[i]
 		var from: Vector3 = feet0[i]
-		var reach := 1.0       # how far this foot is along its way to `at`, and how far through its arc
+		var reach := 1.0  # how far this foot is along its way to `at`, and how far through its arc
 		var arc_p := 0.5
 		if i == swing:
 			reach = clampf(u / REACH_AT, 0.0, 1.0) if phase == 1 else 1.0
@@ -221,6 +240,7 @@ func _pose() -> void:
 		var goal := from.lerp(at, smoothstep(FLIGHT_FROM, FLIGHT_TO, reach)) + Vector3.UP * (arc * sin(PI * arc_p))
 		_plant(i, goal, pin_w)
 
+
 func _feet() -> Array:
 	var out := []
 	for lg in legs:
@@ -228,11 +248,13 @@ func _feet() -> Array:
 		out.append(skel.global_transform * ends[2])
 	return out
 
+
 ## [hip, knee, foot] in skeleton space (the shin's Y runs along the limb; its length is the thigh's).
 func _leg_ends(lg: Array) -> Array:
 	var th := skel.get_bone_global_pose(int(lg[0]))
 	var kn := skel.get_bone_global_pose(int(lg[1]))
 	return [th.origin, kn.origin, kn.origin + kn.basis.y.normalized() * kn.origin.distance_to(th.origin)]
+
 
 ## Two-bone leg to a world point, the knee bending the way it already does; w blends from the loop's foot.
 func _plant(i: int, world_goal: Vector3, w: float) -> void:

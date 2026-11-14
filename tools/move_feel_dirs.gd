@@ -6,8 +6,8 @@ extends RefCounted
 ## The garden shares this pipeline (home.gd _move_player, the same CamRig at yaw 0), so it needs no row.
 
 const DT := 1.0 / 60.0
-const ANGLE_TOL_DEG := 1.0      # degrees: measured on-screen (or world) heading vs its ideal
-const SPEED_TOL := 0.01         # share: fastest vs slowest of the 8 directions
+const ANGLE_TOL_DEG := 1.0  # degrees: measured on-screen (or world) heading vs its ideal
+const SPEED_TOL := 0.01  # share: fastest vs slowest of the 8 directions
 ## key name -> [actions held, ideal world direction (x east, z south; W = north = screen up)]
 const DIRS := {
 	"W": [["up"], Vector2(0, -1)],
@@ -25,7 +25,8 @@ var m: Match
 var P: Hunter
 var cam: CamRig
 var flat: Vector3
-var reset: Callable          # the check's _reset(pos, grounded)
+var reset: Callable  # the check's _reset(pos, grounded)
+
 
 func _init(match_: Match, flat_: Vector3, reset_: Callable) -> void:
 	m = match_
@@ -34,13 +35,14 @@ func _init(match_: Match, flat_: Vector3, reset_: Callable) -> void:
 	flat = flat_
 	reset = reset_
 
+
 ## Runs the three modes and returns the failure count.
 func run() -> int:
 	if cam == null:
 		print("MFEEL (no camera, 8-direction rows skipped)")
 		return 0
 	var lead0: float = cam.lead
-	cam.lead = 0.0            # the cursor pan off: the hunter sits on the screen's vertical centre line
+	cam.lead = 0.0  # the cursor pan off: the hunter sits on the screen's vertical centre line
 	m.paused = false
 	_mode("ground", 45, false)
 	_mode("glide", 150, true)
@@ -48,6 +50,7 @@ func run() -> int:
 	cam.lead = lead0
 	Input.action_release("glide")
 	return bad
+
 
 ## One mode, every direction: holds the keys `frames` steps through Match._process, then reads the
 ## heading (on screen and in the world) and the ground speed.
@@ -71,8 +74,12 @@ func _mode(mode: String, frames: int, glide: bool) -> void:
 		var e_screen := absf(rad_to_deg(angle_difference(deg_to_rad(got), deg_to_rad(want))))
 		var e_world := absf(rad_to_deg(hv.angle_to(ideal)))
 		var state := "  gliding" if P.gliding else ""
-		print("MFEEL dir %-6s %-2s screen %6.1f deg (ideal %6.1f) world off %4.2f deg  speed %5.3f m/s%s" % [
-			mode, key, got, want, e_world, hv.length(), state])
+		print(
+			(
+				"MFEEL dir %-6s %-2s screen %6.1f deg (ideal %6.1f) world off %4.2f deg  speed %5.3f m/s%s"
+				% [mode, key, got, want, e_world, hv.length(), state]
+			)
+		)
 		worst_screen = maxf(worst_screen, e_screen)
 		worst_world = maxf(worst_world, e_world)
 		lo = minf(lo, hv.length())
@@ -82,12 +89,28 @@ func _mode(mode: String, frames: int, glide: bool) -> void:
 		Input.action_release("glide")
 		for i in 3:
 			m._process(DT)
-	_row("dir_%s_screen_err_deg" % mode, worst_screen, "deg", ANGLE_TOL_DEG,
-		"[footage] W runs straight up the screen; each key direction lands on its line")
-	_row("dir_%s_world_err_deg" % mode, worst_world, "deg", ANGLE_TOL_DEG,
-		"keys -> world: no skew from the camera yaw or the axes")
-	_row("dir_%s_speed_spread" % mode, (hi - lo) / maxf(lo, 0.001), "x", SPEED_TOL,
-		"[game data] input normalised: a diagonal is no faster than a cardinal")
+	_row(
+		"dir_%s_screen_err_deg" % mode,
+		worst_screen,
+		"deg",
+		ANGLE_TOL_DEG,
+		"[footage] W runs straight up the screen; each key direction lands on its line"
+	)
+	_row(
+		"dir_%s_world_err_deg" % mode,
+		worst_world,
+		"deg",
+		ANGLE_TOL_DEG,
+		"keys -> world: no skew from the camera yaw or the axes"
+	)
+	_row(
+		"dir_%s_speed_spread" % mode,
+		(hi - lo) / maxf(lo, 0.001),
+		"x",
+		SPEED_TOL,
+		"[game data] input normalised: a diagonal is no faster than a cardinal"
+	)
+
 
 ## The class dash: the burst goes where the keys point, at one speed, for all 8 directions.
 func _dash() -> void:
@@ -95,7 +118,7 @@ func _dash() -> void:
 	var lo := 1e9
 	var hi := 0.0
 	var kit_was := P.arch
-	P.set_arch("")      # the class dash: core physics (a kit's own dash shape is its combo check's job)
+	P.set_arch("")  # the class dash: core physics (a kit's own dash shape is its combo check's job)
 	for key in DIRS:
 		var ideal: Vector2 = (DIRS[key][1] as Vector2).normalized()
 		_start(false)
@@ -122,10 +145,11 @@ func _dash() -> void:
 		for a in DIRS[key][0]:
 			Input.action_release(a)
 		for i in 40:
-			m._process(DT)      # the dash runs out and the brake stops you before the next
+			m._process(DT)  # the dash runs out and the brake stops you before the next
 	P.set_arch(kit_was)
 	_row("dir_dash_world_err_deg", worst, "deg", ANGLE_TOL_DEG, "a dash goes where the keys point, diagonals too")
 	_row("dir_dash_speed_spread", (hi - lo) / maxf(lo, 0.001), "x", SPEED_TOL, "one dash speed for all 8 directions")
+
 
 func _start(glide: bool) -> void:
 	var up := HunterMove.glide_height - 0.3 if glide else 0.0
@@ -137,6 +161,7 @@ func _start(glide: bool) -> void:
 	for i in 3:
 		m._process(DT)
 
+
 ## Screen heading in degrees (0 = right, 90 = up) of a world ground direction from where the hunter stands.
 func _screen_deg(dir: Vector2) -> float:
 	if dir.length() < 0.001:
@@ -145,6 +170,7 @@ func _screen_deg(dir: Vector2) -> float:
 	var a := cam.unproject_position(P.pos)
 	var b := cam.unproject_position(P.pos + Vector3(d.x, 0, d.y))
 	return rad_to_deg(atan2(-(b.y - a.y), b.x - a.x))
+
 
 func _row(key: String, v: float, unit: String, cap: float, note: String) -> void:
 	var pass_ := v <= cap + 1e-6

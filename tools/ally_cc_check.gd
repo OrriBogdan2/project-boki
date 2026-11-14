@@ -11,15 +11,25 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const HEROES := [
-	"gunslinger", "juggernaut", "ashwick", "bulwark", "dolm", "mage",
-	"ostra", "dredge", "thief", "rimewright", "tender", "archer",
+	"gunslinger",
+	"juggernaut",
+	"ashwick",
+	"bulwark",
+	"dolm",
+	"mage",
+	"ostra",
+	"dredge",
+	"thief",
+	"rimewright",
+	"tender",
+	"archer",
 ]
 const SLOTS := ["lmb", "rmb", "rmb_hold", "e", "x", "dash"]
-const SPOTS_M := [2.0, 3.5, 6.0, 9.0]     # m ahead of the caster, along the aim line
-const WATCH_S := 3.0                      # s each press is watched
-const MOVED_M := 0.1                      # m: an ally that drifted this far was moved
-const TOUCH_M := 0.3                      # m: closer than the two radii plus this counts as touching
-const AIR_M := 3.0                        # m above the floor for the in-the-air presses
+const SPOTS_M := [2.0, 3.5, 6.0, 9.0]  # m ahead of the caster, along the aim line
+const WATCH_S := 3.0  # s each press is watched
+const MOVED_M := 0.1  # m: an ally that drifted this far was moved
+const TOUCH_M := 0.3  # m: closer than the two radii plus this counts as touching
+const AIR_M := 3.0  # m above the floor for the in-the-air presses
 ## The source's ally rules: "hero slot" -> [what the move may do to an ally, true when only a move is excused].
 const EXCEPTIONS := {
 	"dredge rmb": ["pulls the first target hit, enemy or ally", false],
@@ -32,11 +42,13 @@ var main: Node
 var fails := 0
 var n := 0
 
+
 func ok(what: String, cond: bool, info := "") -> void:
 	n += 1
 	print("ALLYCC %-34s %s  %s" % [what, "PASS" if cond else "FAIL", info])
 	if not cond:
 		fails += 1
+
 
 ## A status or move on `a`, as words ("" when it is untouched). `from` is where the ally stood. When a body
 ## ran into it (`bumped`: a dash or lunge through it), the sideways shove of Match._separate is no ability and
@@ -45,7 +57,7 @@ static func touched(m: Match, a: Hunter, from: Vector3, bumped: bool) -> String:
 	var bad: Array = []
 	var sideways := Vector2(a.pos.x - from.x, a.pos.z - from.z).length() > MOVED_M and not bumped
 	if sideways or absf(a.pos.y - from.y) > MOVED_M:
-		var d := a.pos - from      # no commas: _excused reads ", " as a second problem
+		var d := a.pos - from  # no commas: _excused reads ", " as a second problem
 		bad.append("moved %.2f m by (%.2f %.2f %.2f)" % [a.pos.distance_to(from), d.x, d.y, d.z])
 	for k in ["stun_t", "root_t", "slow_t", "knock_t", "vuln_t", "blight_t", "burn_t"]:
 		if float(a.get(k)) > 0.0:
@@ -56,6 +68,7 @@ static func touched(m: Match, a: Hunter, from: Vector3, bumped: bool) -> String:
 	if not m.displace.towing(a).is_empty():
 		bad.append("towed")
 	return ", ".join(bad)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -69,6 +82,7 @@ func run(main_node: Node) -> void:
 			await _hero(hero)
 	print("ALLYCC DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
 
 func _hero(hero: String) -> void:
 	var ak := AKCheck.new()
@@ -87,15 +101,17 @@ func _hero(hero: String) -> void:
 	var note := " [source exception used x%d]" % held if held else ""
 	ok("%s: allies left alone" % hero, leaks.is_empty(), "; ".join(leaks) + note)
 
+
 func _excused(key: String, bad: String) -> bool:
 	return EXCEPTIONS.has(key) and (not EXCEPTIONS[key][1] or (", " not in bad and "moved" in bad))
+
 
 ## One press: returns what the allies suffered ("" when none).
 func _press(ak: AKCheck, hero: String, slot: String, air: bool) -> String:
 	var r: Array = ak.setup(hero, 9.0)
 	var m: Match = r[0]
 	var p: Hunter = r[1]
-	r[2].teleport(r[4] + Vector3(0, 0, -9.5))      # the setup's rival dummy steps out of the line
+	r[2].teleport(r[4] + Vector3(0, 0, -9.5))  # the setup's rival dummy steps out of the line
 	var allies: Array = []
 	var from: Array = []
 	for d in SPOTS_M:
@@ -115,7 +131,7 @@ func _press(ak: AKCheck, hero: String, slot: String, air: bool) -> String:
 		p.teleport(p.pos + Vector3(0, AIR_M, 0))
 	_start(ak, m, p, slot)
 	var bad := ""
-	var bumped: Array = [false, false, false, false]      # a body ran into this ally
+	var bumped: Array = [false, false, false, false]  # a body ran into this ally
 	var t := 0.0
 	while t < WATCH_S and bad == "":
 		_hold(p, slot, t)
@@ -132,18 +148,24 @@ func _press(ak: AKCheck, hero: String, slot: String, air: bool) -> String:
 	await ak.done(m)
 	return bad
 
+
 func _start(ak: AKCheck, m: Match, p: Hunter, slot: String) -> void:
 	match slot:
-		"lmb": p.inp["fire"] = true
-		"rmb": ak.tap(m, p)
+		"lmb":
+			p.inp["fire"] = true
+		"rmb":
+			ak.tap(m, p)
 		"rmb_hold":
 			p.inp["sec_hold"] = true
 			p.ak.press_rmb()
-		"e": p.ak.use_e()
+		"e":
+			p.ak.use_e()
 		"x":
 			p.ult = 1.0
 			HunterKeys.ult_pressed(p)
-		"dash": p.inp["dash"] = true
+		"dash":
+			p.inp["dash"] = true
+
 
 ## The key stays down for a while (LMB 1 s, RMB hold 0.9 s) and the dash key for one step.
 func _hold(p: Hunter, slot: String, t: float) -> void:

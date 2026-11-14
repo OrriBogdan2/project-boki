@@ -4,12 +4,13 @@ extends RefCounted
 ## Used by the hero ult checks (Albert, Kael, Motley, Sparkle). A press is timed in steps from the last step that
 ## forbade it (or from the press, with no lock): 1 is the next step. Kael's LMB, say, goes on its release, a step on.
 
-const PRESS_S := 0.1           # s of lock left when the press is made (inside DashFlow.BUFFER_S)
+const PRESS_S := 0.1  # s of lock left when the press is made (inside DashFlow.BUFFER_S)
 const SLOTS := ["dash", "lmb", "jump"]
-const LOCK_MAX := 240          # steps an ult may lock its caster in these trials (Sparkle's hover is the longest)
-const WATCH := 60              # steps after the press we watch for it
-const LOST := -1               # never went off
-const EARLY := -2              # went off while the lock still held
+const LOCK_MAX := 240  # steps an ult may lock its caster in these trials (Sparkle's hover is the longest)
+const WATCH := 60  # steps after the press we watch for it
+const LOST := -1  # never went off
+const EARLY := -2  # went off while the lock still held
+
 
 ## Plays the ult of `arch` once per slot with the press made PRESS_S before the lock lifts; returns
 ## {slot: [steps to go off at the lock's end (or LOST / EARLY), steps with no lock]}.
@@ -32,9 +33,11 @@ static func run(ak, arch: String) -> Dictionary:
 	await ak.done(m)
 	return out
 
+
 ## Whether the ult still holds its caster: no other key, or no walking.
 static func locked(P: Hunter) -> bool:
 	return P.ak.busy() or P.ak.move_k() <= 0.0
+
 
 ## Readies the hunter, casts the ult (unless not `ult`) and plays `n` steps of it (fewer if the lock ends first);
 ## the steps.
@@ -59,6 +62,7 @@ static func _cast(m: Match, P: Hunter, n: int, ult := true) -> int:
 		steps += 1
 	return steps
 
+
 static func _press(m: Match, P: Hunter, flow, slot: String) -> int:
 	var before: Dictionary = flow._snap().merged({"dashes": P.dashes, "jump_at": P.jump_at})
 	if slot == "lmb":
@@ -70,20 +74,22 @@ static func _press(m: Match, P: Hunter, flow, slot: String) -> int:
 	for i in WATCH:
 		var was_locked := locked(P)
 		m.step(Match.DT)
-		P.inp["fire"] = false          # a tap
+		P.inp["fire"] = false  # a tap
 		if lock_end < 0 and was_locked and not locked(P):
 			lock_end = i
 		if _went_off(P, flow, before, slot):
 			return EARLY if held and lock_end < 0 else i - lock_end
 	return LOST
 
+
 static func _went_off(P: Hunter, flow, before: Dictionary, slot: String) -> bool:
 	match slot:
 		"dash":
-			return P.dashes < float(before["dashes"])       # (Kael's cleave lunges as a dash: not a Shift)
+			return P.dashes < float(before["dashes"])  # (Kael's cleave lunges as a dash: not a Shift)
 		"jump":
 			return P.jump_at > float(before["jump_at"])
 	return flow._went_off(before, slot)
+
 
 ## One line of the result for a check's info.
 static func said(got: Dictionary) -> String:
@@ -93,6 +99,7 @@ static func said(got: Dictionary) -> String:
 		var at: String = {LOST: "lost", EARLY: "early"}.get(n, "+%d" % n)
 		parts.append("%s %s (no lock +%d)" % [slot, at, int(got[slot][1])])
 	return ", ".join(parts)
+
 
 ## Every press went off, after the lock and no later than the same press with no lock.
 static func on_time(got: Dictionary) -> bool:

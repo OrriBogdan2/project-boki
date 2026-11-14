@@ -9,8 +9,10 @@ extends RefCounted
 const OUTPOST_RUN := ["uplink", "defend", "extract"]
 const OUTPOST_START := "goexit"
 
+
 static func opts() -> Dictionary:
 	return {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0}
+
 
 ## Hatched but the tutorial was never finished or skipped (and the farm was never reached).
 static func pending() -> bool:
@@ -20,13 +22,16 @@ static func pending() -> bool:
 	var over: bool = t.get("match", false) or t.get("home", false) or t.get("day1_done", false)
 	return bool(t.get("hatched", false)) and not over
 
+
 static func last_beat() -> String:
 	return String(Save.d["tutorial"].get("tut_beat", ""))
+
 
 ## A beat was finished: remember it. (Extracting, the last beat, ends the match and sets tutorial.match.)
 static func remember(beat: String) -> void:
 	Save.d["tutorial"]["tut_beat"] = beat
 	Save.save_game()
+
 
 ## The step index to carry on at after a finished beat (0 when none, or the beat is unknown).
 static func step_after(beat: String) -> int:
@@ -38,12 +43,14 @@ static func step_after(beat: String) -> int:
 			return i + 1
 	return 0
 
+
 static func _index(beat: String) -> int:
 	var list := Tutorial.steps()
 	for i in list.size():
 		if String(list[i][0]) == beat:
 			return i
 	return 0
+
 
 ## v11 -> v12: a save that got past the tutorial (played, or reached the farm) has finished it.
 static func migrate(data: Dictionary) -> void:

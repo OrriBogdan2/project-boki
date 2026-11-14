@@ -11,13 +11,17 @@ var P: Hunter
 var dr: MoveDrills
 const DT := Match.DT
 const MAX_STEPS := 1200
-const DIVE_AT := 5.0   # m from the mat the dive bot crouches: with Loco.glide_step steering (0.24.5) 6-9 m lands short
-const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"training": true, "practice": true}
+const DIVE_AT := 5.0  # m from the mat the dive bot crouches: with Loco.glide_step steering (0.24.5) 6-9 m lands short
+const OPTS := {
+	"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "training": true, "practice": true
+}
+
 
 func ok(cond: bool, what: String) -> void:
 	print("MOVEDRILLS %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -28,7 +32,8 @@ func run(main: Node) -> void:
 	await m.start(OPTS.duplicate())
 	m.set_process(false)
 	P = m.player
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var pr := Practice.of(m)
 	dr = pr.drills
@@ -42,12 +47,15 @@ func run(main: Node) -> void:
 	print("MOVEDRILLS DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 # ---------------------------------------------------------------- stepping
 func _begin(i: int) -> void:
 	dr.origin = P.pos if dr.origin == Vector3.INF else dr.origin
 	dr._begin(i)
 	P.inp["move"] = Vector2.ZERO
-	for k in ["jump", "glide", "crouch", "dash"]: P.inp[k] = false
+	for k in ["jump", "glide", "crouch", "dash"]:
+		P.inp[k] = false
+
 
 ## Steps until the drill is decided; `bot` sets the inputs for step f. Returns the steps taken.
 func _play(bot: Callable) -> int:
@@ -59,11 +67,14 @@ func _play(bot: Callable) -> int:
 		f += 1
 	return f
 
+
 func _passed(id: String, bot: Callable) -> void:
 	_begin(MoveDrills.IDS.find(id))
 	var f := _play(bot)
 	ok(dr.passed.has(id), "%s: the bot passes in %d steps (%.1f s)" % [id, f, dr.t])
-	if not dr.passed.has(id): print("MOVEDRILLS    banner: ", dr._label.text)
+	if not dr.passed.has(id):
+		print("MOVEDRILLS    banner: ", dr._label.text)
+
 
 func _failed(id: String, bot: Callable, why: String) -> void:
 	dr.passed.erase(id)
@@ -72,20 +83,24 @@ func _failed(id: String, bot: Callable, why: String) -> void:
 	var failed := dr.state == MoveDrills.State.RESULT and not dr.passed.has(id) and dr._label.text.contains(why)
 	ok(failed, "%s: fails with '%s' (%s)" % [id, why, dr._label.text])
 
+
 # ---------------------------------------------------------------- the bots
 func _gates_bot(f: int) -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = P.roll_t <= 0.0 and f % 15 == 0
 
+
 func _glide_bot(f: int) -> void:
 	P.inp["move"] = Vector2(1, 0)
-	P.inp["jump"] = f == 20 or f == 31       # a tap, let go, then press again and hold
+	P.inp["jump"] = f == 20 or f == 31  # a tap, let go, then press again and hold
 	P.inp["glide"] = f in [20, 21, 22] or f >= 31
+
 
 func _glide_held_bot(f: int) -> void:
 	P.inp["move"] = Vector2(1, 0)
-	P.inp["jump"] = f == 20                  # Space held from the take-off
+	P.inp["jump"] = f == 20  # Space held from the take-off
 	P.inp["glide"] = f >= 20
+
 
 func _dive_bot(f: int) -> void:
 	var to := dr.target - P.pos
@@ -95,8 +110,10 @@ func _dive_bot(f: int) -> void:
 	P.inp["move"] = flat.normalized() if flat.length() > 0.5 else Vector2.ZERO
 	P.inp["crouch"] = flat.length() < DIVE_AT
 
+
 func _dive_idle_bot(_f: int) -> void:
 	P.inp["glide"] = false
+
 
 func _climb_bot(f: int) -> void:
 	P.inp["move"] = Vector2(1, 0)
@@ -104,12 +121,14 @@ func _climb_bot(f: int) -> void:
 	P.inp["jump"] = to_wall > -0.3 and ((to_wall > 0.0 and to_wall < 1.0 and f % 2 == 0) if P.grounded else f % 6 == 0)
 	P.inp["glide"] = P.inp["jump"]
 
+
 func _passes() -> void:
 	_passed("gates", _gates_bot)
 	_passed("glide", _glide_bot)
 	_passed("dive", _dive_bot)
 	_passed("wall", _climb_bot)
 	_passed("mantle", _climb_bot)
+
 
 func _fails() -> void:
 	_failed("glide", _glide_held_bot, "Space held")
@@ -120,6 +139,7 @@ func _fails() -> void:
 	dr.tick(DT)
 	ok(dr._label.text.contains("Out of time") and not dr.passed.has("gates"), "a drill that runs out of time fails")
 
+
 func _best() -> void:
 	var d := {}
 	ok(MoveDrills.record(d, "gates", 5.0) and float(d["drills"]["gates"]) == 5.0, "the first pass is the best")
@@ -127,6 +147,7 @@ func _best() -> void:
 	ok(MoveDrills.record(d, "gates", 4.25) and float(d["drills"]["gates"]) == 4.25, "a faster pass replaces it")
 	var saved: bool = Save.d["drills"].has("wall") and float(Save.d["drills"]["wall"]) > 0.0
 	ok(saved, "the bot's passes were saved in the profile")
+
 
 func _other_areas(main: Node) -> void:
 	var before := m.world.level.duplicate()
@@ -144,6 +165,7 @@ func _other_areas(main: Node) -> void:
 		ok(p != null and p.drills == null and not p.bar_btns.has("drills"), "no Drills button in %s" % o.keys()[0])
 		mm.queue_free()
 		await main.get_tree().process_frame
+
 
 func _save() -> void:
 	var old := {"v": 11, "roster": []}

@@ -7,14 +7,16 @@ extends RefCounted
 ## refused. Never touches the real save.
 
 const DOC := "res://docs/SAVE_CHAIN_0245.md"
-const FIRST := 11       # the last released save version (v0.24.3); the doc's chain starts here
+const FIRST := 11  # the last released save version (v0.24.3); the doc's chain starts here
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SAVE-CHAIN %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
@@ -27,6 +29,7 @@ func run(m: Node) -> void:
 	print("SAVE-CHAIN DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## One step per version, named for its numbers, each one listed in the doc.
 func _steps() -> void:
 	var keys := Save.MIGRATIONS.keys()
@@ -38,8 +41,10 @@ func _steps() -> void:
 	var doc := FileAccess.get_file_as_string(DOC)
 	var missing: Array = []
 	for v in range(FIRST, Save.VERSION):
-		if not doc.contains("| v%d -> v%d |" % [v, v + 1]): missing.append(v)
+		if not doc.contains("| v%d -> v%d |" % [v, v + 1]):
+			missing.append(v)
 	ok(not doc.is_empty() and missing.is_empty(), "the doc lists every step from v%d (missing %s)" % [FIRST, missing])
+
 
 ## A played v11 save: a Boki past the level cap, a guild, a played tutorial, nothing a later step adds.
 func _v11() -> Dictionary:
@@ -57,6 +62,7 @@ func _v11() -> Dictionary:
 	data["matches"] = 3
 	data["tutorial"] = {"hatched": true}
 	return data
+
 
 func _from_v11() -> void:
 	var data: Dictionary = JSON.parse_string(JSON.stringify(_v11()))
@@ -83,6 +89,7 @@ func _from_v11() -> void:
 	var same := Save.migrate(data) and JSON.stringify(data) == once
 	ok(same, "the chain again from v11 changes nothing (the clan role stays)")
 
+
 ## A dev save from this chain before main took v14 (drills v14 .. sleepovers v18, no carry 2) gets its empty second.
 func _chain_v18() -> void:
 	var data: Dictionary = JSON.parse_string(JSON.stringify(_v11()))
@@ -90,11 +97,14 @@ func _chain_v18() -> void:
 	data["v"] = 18
 	ok(Save.migrate(data) and data.get("active2", null) == "", "a v18 dev save from the old chain gets carry 2")
 
+
 ## The other line's v13: Evo and first-time hints, no base life or zones. It must still get them.
 func _clash_v13() -> void:
 	var data: Dictionary = JSON.parse_string(JSON.stringify(_v11()))
 	Evo.migrate(data)
 	data["v"] = 13
 	var rec: Dictionary = data["roster"][0]
-	ok(Save.migrate(data) and rec["bonds"] == {} and rec.has("zone") and data["zones"] is Dictionary,
-		"a first-time-hints v13 dev save still gets base life and zones")
+	ok(
+		Save.migrate(data) and rec["bonds"] == {} and rec.has("zone") and data["zones"] is Dictionary,
+		"a first-time-hints v13 dev save still gets base life and zones"
+	)
