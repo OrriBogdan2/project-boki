@@ -59,7 +59,8 @@ inject() {  # inject TREE : the shard runner and its registry line (see gate_sha
 		|| sed -i 's|^const CHECKS := {$|&\n\t"--gate-shard-run": ["res://tools/gate_shard_run.gd", "gate_shard_run", null],|' "$1/tools/check_registry.gd"
 }
 
-slots() {  # one line per job slot to deal shards onto: free slots first (4 per host minus its running jobs), then every host again
+slots() {  # SLOTS_FILE set: its lines (round 2 deals both sides onto the same hosts); else one line per job slot to deal shards onto: free slots first (4 per host minus its running jobs), then every host again
+	[ -n "${SLOTS_FILE:-}" ] && { cat "$SLOTS_FILE"; return; }
 	[ -n "$HOSTS" ] || { yes any | head -64; return; }
 	local busy; busy=$(timeout 60 jobq status 2>/dev/null | grep -oP 'worker=\K\S+(?= age=)' | sed -E 's/-[0-9]+$//')
 	for h in $HOSTS; do n=$(( 4 - $(grep -cx "$h" <<< "$busy") )); for ((i = 0; i < n; i++)); do echo "$h"; done; done
@@ -115,8 +116,11 @@ wait; PE_M=$(cat "$OUT/import_main.n") PE_C=$(cat "$OUT/import_cand.n")
 	if [ -x ~/bin/release-dryrun ]; then ~/bin/release-dryrun "$CT"; exit; fi
 	x=$(mktemp -d)
 	grep -oP '^name="\K[^"]+' "$CT/export_presets.cfg" | while read -r p; do
-		XDG_DATA_HOME=$x timeout 1800 godot --headless --path "$CT" --export-pack "$p" "$x/out.pck" > "$x/log" 2>&1
-		echo "$p rc=$? $(du -m "$x/out.pck" 2>/dev/null | cut -f1) MB"; rm -f "$x/out.pck"
+		for try in 1 2; do  # rc 137 = the OOM killer on a loaded box (3 of 5 presets in one run): one retry
+			XDG_DATA_HOME=$x timeout 1800 nice godot --headless --path "$CT" --export-pack "$p" "$x/out.pck" > "$x/log" 2>&1
+			rc=$?; [ $rc -eq 137 ] || break
+		done 2> /dev/null
+		echo "$p rc=$rc $(du -m "$x/out.pck" 2>/dev/null | cut -f1) MB"; rm -f "$x/out.pck"
 	done
 	rm -rf "$x"
 ) > "$OUT/export.txt" 2>&1 &
@@ -139,14 +143,22 @@ awk '$1=="m" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$
 [ "$CTREE" = "$MTREE" ] || awk '$1=="c" && $3=="0" && $4==0 {print $2, $3, $4, $5}' "$OUT/round1.txt" >> "$CACHE/$CTREE.txt"
 SUBMITTED=$(wc -l < "$OUT/jobs.tsv")
 
-# 4. re-run once, on both sides, sharded again but GS_PAR2 (2) at a time so CPU contention flakes clear: every flag that is lost on either side (a relay failure says nothing) and
+# 4. re-run once, on both sides, sharded again, GS_PAR2 (1) at a time with GS_CAP2 (2 x cap) on both sides, so contention flakes clear: every flag that is lost on either side (a relay failure says nothing) and
 #    every flag red only on the candidate; the re-run result replaces the first one
 lost() { awk '$2=="lost" {print $1}' "$1" | sort -u; }
 SUSPECT=$({ comm -23 <(red "$OUT/cand.txt") <(red "$OUT/main.txt"); lost "$OUT/cand.txt"; lost "$OUT/main.txt"; } | sort -u | grep .)
 : > "$OUT/round2.txt"
 if [ -n "$SUSPECT" ]; then
-	echo "$SUSPECT" | PAR=${GS_PAR2:-2} submit c "$CT"
-	echo "$SUSPECT" | comm -12 - <(pick "$MT") | PAR=${GS_PAR2:-2} submit m "$MT"
+	# the same flag lands on the same host on both sides (shards are dealt from the same sorted list onto one slot list):
+	# hetzner/rp1 timed out checks that rpc1/5/6 passed in 130-240 s, so cross-host red-vs-green is not evidence
+	slots > "$OUT/slots2.txt"
+	echo "$SUSPECT" | comm -12 - <(pick "$MT") > "$OUT/suspect_both.txt"
+	comm -23 <(echo "$SUSPECT") "$OUT/suspect_both.txt" > "$OUT/suspect_cand_only.txt"
+	export SLOTS_FILE=$OUT/slots2.txt
+	SHARDS=${GS_SHARDS2:-24} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_both.txt"
+	SHARDS=${GS_SHARDS2:-24} PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit m "$MT" < "$OUT/suspect_both.txt"
+	unset SLOTS_FILE
+	PAR=${GS_PAR2:-1} CAP=${GS_CAP2:-$((CAP * 2))} submit c "$CT" < "$OUT/suspect_cand_only.txt"
 	tail -n +"$((SUBMITTED + 1))" "$OUT/jobs.tsv" > "$OUT/jobs2.tsv"
 	collect "$OUT/jobs2.tsv" > "$OUT/round2.txt"
 	for side in c m; do
@@ -170,22 +182,25 @@ if [ -n "$SUSPECT" ]; then
 	fi
 fi
 # red on main only excuses a candidate red when main really ran it (a flag lost on main says nothing); still lost on the candidate is never a pass
-NEW_RED=$({ comm -23 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")); lost "$OUT/cand.txt"; } | sort -u | grep .)
-FLAKY=$(comm -23 <(echo "$SUSPECT") <(echo "$NEW_RED") | grep -c .)
+# lost on both sides after 3 tries: this check cannot run on the workers at all (main says nothing either); listed as UNRUN
+UNRUN=$(comm -12 <(lost "$OUT/cand.txt") <(lost "$OUT/main.txt") | grep .)
+NEW_RED=$({ comm -23 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")); lost "$OUT/cand.txt"; } | sort -u | comm -23 - <(echo "$UNRUN") | grep .)
+FLAKY=$(comm -23 <(echo "$SUSPECT") <(echo "$NEW_RED") | comm -23 - <(echo "$UNRUN") | grep -c .)
 FIXED=$(comm -13 <(red "$OUT/cand.txt") <(comm -23 <(red "$OUT/main.txt") <(lost "$OUT/main.txt")) | comm -12 - <(pick "$CT") | grep -c .)
 
 wait "$EXPORT_PID"
-EXPORT_BAD=$(grep -vc ' rc=0 ' "$OUT/export.txt")
+EXPORT_BAD=$(grep ' rc=' "$OUT/export.txt" | grep -vc ' rc=0 ')
 [ -x ~/bin/release-dryrun ] && EXPORT_BAD=$(grep -ciE 'fail|error' "$OUT/export.txt")
 N_NEW=$(echo "$NEW_RED" | grep -c .)
 VERDICT=GREEN
 N_RAN=$(wc -l < "$OUT/cand.txt") N_WANT=$(pick "$CT" | grep -c .)
 [ "$N_NEW" -gt 0 ] || [ "$EXPORT_BAD" -gt 0 ] || [ "$PE_C" -gt "$PE_M" ] || [ "$N_RAN" -ne "$N_WANT" ] && VERDICT=RED
 {
-	echo "GATE $VERDICT checks=$N_RAN new_red=$N_NEW fixed=$FIXED flaky=$FLAKY" \
+	echo "GATE $VERDICT checks=$N_RAN new_red=$N_NEW fixed=$FIXED flaky=$FLAKY unrun=$(echo "$UNRUN" | grep -c .)" \
 		"parse_errors=$PE_C/$PE_M export_bad=$EXPORT_BAD wall=$(( ($(date +%s) - T0 + 59) / 60 ))m" \
 		"(cand ${CSHA:0:10} vs main ${MSHA:0:10}; jobs $SUBMITTED, main cached $CACHED)"
 	[ "$N_NEW" -gt 0 ] && echo "NEW-RED: $(echo $NEW_RED)"
+	[ -n "$UNRUN" ] && echo "UNRUN (lost on main and candidate): $(echo $UNRUN)"
 	echo "Export:"; sed 's/^/  /' "$OUT/export.txt"
 } > "$OUT/summary.txt"
 cat "$OUT/summary.txt"

@@ -36,6 +36,7 @@ submit)
 			candlost:c:--d-check) rc=127;;     # the candidate never gets d run
 			newred:c:--e-check) rc=1;;
 			flaky:c:--e-check) [ \$k = 1 ] && rc=1;;
+			unrun:*:--c-check) rc=127;;        # nobody can run c: listed, not a new red
 		esac
 		echo "GS \$f \$rc 0 1" >> \$R/\$id
 	done
@@ -57,4 +58,6 @@ check mac1 GREEN
 check candlost RED --d-check
 check newred RED --e-check
 check flaky GREEN
+check unrun GREEN
+grep -q 'unrun=1' $T/out/summary.txt || { echo 'FAIL unrun count'; fails=$((fails+1)); }
 exit $fails
