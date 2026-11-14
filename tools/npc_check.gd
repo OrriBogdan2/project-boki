@@ -108,11 +108,13 @@ func _tutorial() -> void:
 	ok((-pell.global_transform.basis.z).dot(Vector3(to_you.x, 0.0, to_you.z).normalized()) > 0.5, "and faces you")
 	m.queue_free()
 
-## The NPC's mesh bounds in the world, at rest.
+## The NPC's mesh bounds in the world, at rest (the body: the dark plate under a called-out line is overhead text).
 static func _world_aabb(n: Node3D) -> AABB:
 	var out := AABB()
 	var first := true
 	for mi in n.find_children("*", "MeshInstance3D", true, false):
+		if mi.get_parent() is Label3D:
+			continue
 		var ab: AABB = (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
 		out = ab if first else out.merge(ab)
 		first = false

@@ -12,6 +12,10 @@ const SHOUT_S := 2.6           # s a called-out line stays over the head
 const BLEND_S := 0.25          # s a pose change cross-fades
 const INK_WIDTH := 0.0011      # the outline per metre of camera distance (as a rigged Boki's)
 const INK_FAR_THIN := 0.5
+const OUTLINE_PX := 8          # px of the dark edge round the overhead text (a thick one swallowed the letters)
+const OUTLINE_COLOUR := Color(0.06, 0.05, 0.09, 0.95)
+const PLATE_COLOUR := Color(0.07, 0.06, 0.1, 0.8)
+const PLATE_PAD_M := 0.22      # m of dark plate round a called-out line
 
 var id := ""
 var pose := "idle"
@@ -20,6 +24,7 @@ var face_to := Vector3.INF     # world point the NPC turns to face (INF: keeps t
 var tag: Label3D
 var mark: Label3D
 var bubble: Label3D
+var _plate: MeshInstance3D   # the dark plate behind a called-out line
 var anim: AnimationPlayer = null
 var _spec: Dictionary = {}
 var _t := 0.0
@@ -42,6 +47,9 @@ func _init(npc_id: String, shown_name := "") -> void:
 ## Calls a line out over the head for a moment ("Hey! Over here!").
 func shout(line: String) -> void:
 	bubble.text = line
+	var text_px := ThemeDB.fallback_font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, bubble.font_size)
+	var text_m := text_px * bubble.pixel_size
+	_plate.scale = Vector3(text_m.x + PLATE_PAD_M * 2.0, text_m.y + PLATE_PAD_M, 1.0)
 	bubble.visible = true
 	_shout_t = SHOUT_S
 
@@ -59,7 +67,8 @@ func _process(dt: float) -> void:
 	if _shout_t > 0.0:
 		_shout_t -= dt
 		bubble.visible = _shout_t > 0.0
-		tag.modulate.a = 0.0 if bubble.visible else 1.0      # (one line over the head at a time)
+		tag.modulate.a = 0.0 if bubble.visible else 1.0      # one line over the head at a time
+		tag.outline_modulate.a = tag.modulate.a              # (the outline too, or its dark ghost stays)
 
 func _turn(dt: float) -> void:
 	var at := point_at if pose == "point" and point_at.x != INF else face_to
@@ -150,13 +159,27 @@ func _labels(shown_name: String) -> void:
 	bubble = _label("", 44, Color("fff4d8"))
 	bubble.position = Vector3(0.0, h + 0.95, 0.0)
 	bubble.visible = false
+	_plate = MeshInstance3D.new()
+	_plate.mesh = QuadMesh.new()
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = PLATE_COLOUR
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.billboard_keep_scale = true      # (without it the plate stays a 1 m square behind the line)
+	mat.no_depth_test = true
+	mat.render_priority = -2      # under the outline and the letters
+	_plate.material_override = mat
+	_plate.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	bubble.add_child(_plate)
 
 func _label(text: String, px: int, col: Color) -> Label3D:
 	var l := Label3D.new()
 	l.text = text
 	l.font_size = px
 	l.pixel_size = 0.0085
-	l.outline_size = 14
+	l.outline_size = OUTLINE_PX
+	l.outline_modulate = OUTLINE_COLOUR
 	l.modulate = col
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
