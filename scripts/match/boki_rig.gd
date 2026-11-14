@@ -177,6 +177,7 @@ const SHADOW_LIFT := 0.012
 ## Share of its height under the water when it floats: water deeper than that at its feet lifts it off the bed and it
 ## swims (a Water type) or paddles (the rest). One that hovers stays over the water as over the ground.
 const SWIM_LINE := 0.5
+const PLANT_GAITS := ["walk", "run"]      # the clips whose paws BokiPlant keeps planted
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
 	"swim", "paddle", "rush", "brace", "dodge", "stonehop", "spin", "strut", "pose", "bow", "hover", "glide", "flare"]
 ## Clips that carry the body themselves: home's walking bounce of Body is taken back out under them.
@@ -255,6 +256,11 @@ var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
 var _water := 0.0              # m of water over its feet this frame (the root's "kwater", taken each frame)
 var _swimmer := false          # a Water type: swims level rather than paddling
+var _plants := {}              # gait clip -> BokiPlant
+var _gait := ""                # the gait whose paws are planted: it eases out after the clip moves on
+var _gait_at := 0.0            # s into it
+var _gait_rate := 1.0
+var _gait_w := 0.0             # how far the planted timing is blended in
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -331,11 +337,15 @@ func _ready() -> void:
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_swimmer = swimmer(species)
 	_copy_coat()
+	_skel = skeleton()
+	for g in PLANT_GAITS:
+		_plants[g] = BokiPlant.of(species, model, _skel, g)
 	set_clip("idle")
 
 ## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
 func advance(dt: float) -> void:
 	player.advance(dt)
+	_plant_feet(dt)
 	_skel.advance(dt)
 
 ## The model's skeleton.
@@ -453,6 +463,24 @@ func _pick_clip(dt: float) -> void:
 ## s the rig takes to hand one gait over to another.
 func gait_fade() -> float:
 	return GAIT_FADE.get(species, FADE)
+
+## Plants the walk's or run's paws (BokiPlant), easing in after the clip starts and out after it ends.
+func _plant_feet(dt: float) -> void:
+	if clip == _gait:
+		_gait_at = player.current_animation_position
+		_gait_rate = player.speed_scale
+		_gait_w = move_toward(_gait_w, 1.0, dt / FADE)
+	else:
+		_gait_at += dt * _gait_rate
+		_gait_w = move_toward(_gait_w, 0.0, dt / FADE)
+		if _gait_w == 0.0:
+			_gait = clip if clip in PLANT_GAITS else ""
+	if _gait_w > 0.0:
+		plant(_gait, _gait_at, _gait_rate, _gait_w)
+
+## Poses `gait`'s legs at `at` s into it, playing at `rate` x, with the paws planted at this Boki's speed and size.
+func plant(gait: String, at: float, rate: float, weight := 1.0) -> void:
+	(_plants[gait] as BokiPlant).pose(_skel, at, rate, _speed, model.global_basis.z.length(), weight)
 
 ## Plays a one-off clip, at `rate` times its speed.
 func _start_shot(which: String, rate := 1.0) -> void:
